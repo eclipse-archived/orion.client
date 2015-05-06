@@ -297,13 +297,22 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			}
 		},
 		
+		getCachedPlan : function(){
+			return this._cachedPlan;
+		},
+		
 		getPlan : function(){
 			if(this.getManifestPath() != this._initManifestPath){
 				var deferred = new Deferred();
 				var relativeFilePath = this._filePath + this.getManifestPath();
 				this._cfService.getDeploymentPlans(relativeFilePath).then(function(resp) {
 					var plans = resp.Children;
-					plan = deferred.resolve(plans[0]);
+					var selectedPlan;
+					plans.forEach(function(plan) {
+						if (!selectedPlan && plan.ApplicationType != "generic")
+							selectedPlan = plan;
+					});
+					plan = deferred.resolve(selectedPlan || plans[0]);
 					return plan;
 				});
 				this._initManifestPath = this.getManifestPath();
@@ -472,24 +481,25 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 											if(self.getManifestPath().substring(self.getManifestPath().lastIndexOf("/")+1) == ""){
 												self._manifestInput.value = self.getManifestPath() + "manifest.yml";
 											}
-
-											var selection = self._selection.getSelection();
-											self.getPlan().then(function(result){
-												self._manifestApplication = result.Manifest.applications[0];
-												self._appsInput.value = self._manifestApplication.name;
-												self._hostInput.value = self._manifestApplication.host;
-
-												for(var i = 0; self._domainsDropdown.length > i; i++){
-													if(self._domainsDropdown[i].value === (self._manifestApplication.domain || self._manifestInstrumentation.domain)){
-														self._domainsDropdown[i].selected = "selected";
-													}
-												}
-											});
 											self.setManifestPathMessage(true);
 										}
 										else{
 											self.setManifestPathMessage(false);
 										}
+										
+										var selection = self._selection.getSelection();
+										self.getPlan().then(function(result){
+											self._cachedPlan = result;
+											self._manifestApplication = result.Manifest.applications[0];
+											self._appsInput.value = self._manifestApplication.name;
+											self._hostInput.value = self._manifestApplication.host;
+
+											for(var i = 0; self._domainsDropdown.length > i; i++){
+												if(self._domainsDropdown[i].value === (self._manifestApplication.domain || self._manifestInstrumentation.domain)){
+													self._domainsDropdown[i].selected = "selected";
+												}
+											}
+										});
 									});
 								}
 								if(self.getManifestPath() == self._initManifestPath){
