@@ -42,13 +42,13 @@ define([
 ], function(PluginProvider, Bootstrap, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, 
 			EslintValidator, Occurrences, Hover, Outliner,	Util, Logger, GenerateDocCommand, OpenDeclCommand, RenameCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
-    Bootstrap.startup().then(function(core) {
+    var provider = new PluginProvider({
+		name: javascriptMessages['pluginName'], //$NON-NLS-0$
+		version: "1.0", //$NON-NLS-0$
+		description: javascriptMessages['pluginDescription'] //$NON-NLS-0$
+	});
 
-        var provider = new PluginProvider({
-    		name: javascriptMessages['pluginName'], //$NON-NLS-0$
-    		version: "1.0", //$NON-NLS-0$
-    		description: javascriptMessages['pluginDescription'] //$NON-NLS-0$
-    	});
+    Bootstrap.startup().then(function(core) {
     	
     	/**
     	 * Register the JavaScript content types
