@@ -734,7 +734,7 @@ a.breadcrumb.currentLocation {
 }
 .tooltip {
 	color: #fafafa;
-	background-color: #555;
+	background-color: #325C80;
 	border-radius: 3px;
 	padding: 8px;
 	clear: both;
@@ -764,7 +764,7 @@ a.breadcrumb.currentLocation {
 	position: absolute;
 	display: inline-block;
 	border: 8px solid;
-	border-color: transparent transparent transparent #555;
+	border-color: transparent transparent transparent #325C80;
 	top: 4px;
 	content: '';
 	z-index: 201;
@@ -774,7 +774,7 @@ a.breadcrumb.currentLocation {
 	position: absolute;
 	display: inline-block;
 	border: 10px solid;
-	border-color: transparent transparent transparent #555;
+	border-color: transparent transparent transparent #325C80;
 	top: 2px;
 	right: -17px;
 	content: '';
@@ -784,7 +784,7 @@ a.breadcrumb.currentLocation {
 	position: absolute;
 	display: inline-block;
 	border: 8px solid;
-	border-color: transparent #555 transparent transparent;
+	border-color: transparent #325C80 transparent transparent;
 	left: -15px;
 	top: 4px;
 	content: '';
@@ -795,7 +795,7 @@ a.breadcrumb.currentLocation {
 	position: absolute;
 	display: inline-block;
 	border: 10px solid;
-	border-color: transparent #555 transparent transparent;
+	border-color: transparent #325C80 transparent transparent;
 	left: -17px;
 	top: 2px;
 	content: '';
@@ -805,7 +805,7 @@ a.breadcrumb.currentLocation {
 	position: absolute;
 	display: block;
 	border: 8px solid;
-	border-color: transparent transparent #555 transparent;
+	border-color: transparent transparent #325C80 transparent;
 	left: 16px;
 	top: -15px;
 	content: '';
@@ -816,7 +816,7 @@ a.breadcrumb.currentLocation {
 	position: absolute;
 	display: block;
 	border: 10px solid;
-	border-color: transparent transparent #555 transparent;
+	border-color: transparent transparent #325C80 transparent;
 	left: 14px;
 	top: -17px;
 	content: '';
@@ -826,7 +826,7 @@ a.breadcrumb.currentLocation {
 	position: absolute;
 	display: block;
 	border: 8px solid;
-	border-color: #555 transparent transparent;
+	border-color: #325C80 transparent transparent;
 	left: 16px;
 	content: '';
 	bottom: -15px;
@@ -837,7 +837,7 @@ a.breadcrumb.currentLocation {
 	position: absolute;
 	display: block;
 	border: 10px solid;
-	border-color: #555 transparent transparent;
+	border-color: #325C80 transparent transparent;
 	left: 14px;
 	bottom: -17px;
 	content: '';
