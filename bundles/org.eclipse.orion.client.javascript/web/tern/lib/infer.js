@@ -1158,6 +1158,13 @@
     if (arr) for (var i = 0; i < arr.length; ++i) arr[i].apply(null, args);
   }
 
+  var emptyAST = Object.create(null);
+	emptyAST.type = "Program"; //$NON-NLS-0$
+	emptyAST.body = [];
+	emptyAST.comments = [];
+	emptyAST.tokens = [];
+	emptyAST.range = [0, 0];
+
   var parse = exports.parse = function(text, passes, options) {
     var ast;
     try {
@@ -1174,10 +1181,48 @@
         ast.sourceFile.name = ast.fileLocation;
     }
     //ORION
-    catch(e) { /*ast = acorn_loose.parse_dammit(text, options);*/ }
+    catch(e) {
+    	ast = emptyAST;
+		ast.range[1] = (text && typeof text.length === "number") ? text.length : 0;  //$NON-NLS-0$
+		ast.errors = [e];
+    }
+    if (ast.errors) {
+		_computeErrorTypes(ast.errors);
+		ast.errors = ast.errors.map(serializeError);
+	}
     runPasses(passes, "postParse", ast, text);
     return ast;
   };
+
+  //ORION
+  function serializeError(error) {
+	var result = error ? JSON.parse(JSON.stringify(error)) : error; // sanitizing Error object
+	if (error instanceof Error) {
+		result.__isError = true;
+		result.lineNumber = typeof(result.lineNumber) === 'number' ? result.lineNumber : error.lineNumber; //FF fails to include the line number from JSON.stringify
+		result.message = result.message || error.message;
+		result.name = result.name || error.name;
+		result.stack = result.stack || error.stack;
+	}
+	return result;
+}
+
+  //ORION
+  function _computeErrorTypes(errors) {
+	if(errors && Array.isArray(errors)) {
+		errors.forEach(function(error) {
+			var msg = error.message;
+			//first sanitize it
+			error.message = msg = msg.replace(/^Line \d+: /, '');
+			if(/^Unexpected/.test(msg)) {
+				error.type = 1;
+				if(/end of input$/.test(msg)) {
+					error.type = 2;
+				}
+			}
+		});
+	}
+}
 
   // ANALYSIS INTERFACE
 

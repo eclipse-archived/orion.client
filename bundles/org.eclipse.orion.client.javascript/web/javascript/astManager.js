@@ -49,7 +49,7 @@ define([
 		this.parser = esprima;
 		this.cache = new LRU.LRU(10);
 		if (!this.parser) {
-			throw new Error("Missing parser");
+			throw new Error("Missing parser"); //$NON-NLS-1$
 		}
 	}
 	
@@ -67,7 +67,7 @@ define([
 					return new Deferred().resolve(ast);
 				}
 				return editorContext.getText().then(function(text) {
-					ast = _self.parse(text, metadata ? metadata.location : 'unknown');
+					ast = _self.parse(text, metadata ? metadata.location : 'unknown'); //$NON-NLS-1$
 					_self.cache.put(loc, ast);
 					return ast;
 				});
@@ -80,7 +80,7 @@ define([
 		 */
 		_getKey: function _getKey(metadata) {
 		      if(!metadata || !metadata.location) {
-		          return 'unknown';
+		          return 'unknown'; //$NON-NLS-1$
 		      }    
 		      return metadata.location;
 		},
@@ -108,7 +108,7 @@ define([
 				ast.errors = [e];
 			}
 			var end = Date.now() - start;
-			Metrics.logTiming('language tools', 'parse', end, 'application/javascript');
+			Metrics.logTiming('language tools', 'parse', end, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			if (ast.errors) {
 				this._computeErrorTypes(ast.errors);
 				ast.errors = ast.errors.map(Serialize.serializeError);

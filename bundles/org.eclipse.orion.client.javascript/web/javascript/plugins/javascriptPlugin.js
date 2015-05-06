@@ -42,13 +42,13 @@ define([
 ], function(PluginProvider, Bootstrap, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, 
 			EslintValidator, Occurrences, Hover, Outliner,	Util, Logger, GenerateDocCommand, OpenDeclCommand, RenameCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
-    Bootstrap.startup().then(function(core) {
+    var provider = new PluginProvider({
+		name: javascriptMessages['pluginName'], //$NON-NLS-0$
+		version: "1.0", //$NON-NLS-0$
+		description: javascriptMessages['pluginDescription'] //$NON-NLS-0$
+	});
 
-        var provider = new PluginProvider({
-    		name: javascriptMessages['pluginName'], //$NON-NLS-0$
-    		version: "1.0", //$NON-NLS-0$
-    		description: javascriptMessages['pluginDescription'] //$NON-NLS-0$
-    	});
+    Bootstrap.startup().then(function(core) {
     	
     	/**
     	 * Register the JavaScript content types
@@ -63,7 +63,7 @@ define([
     		               }, {id: "application/json", //$NON-NLS-0$
     		            	   "extends": "text/plain", //$NON-NLS-0$ //$NON-NLS-1$
     		            	   name: "JSON", //$NON-NLS-0$
-    		            	   extension: ["json", "pref"], //$NON-NLS-0$ //$NON-NLS-1$
+    		            	   extension: ["json", "pref"], //$NON-NLS-1$ //$NON-NLS-2$
     		            	   imageClass: "file-sprite-javascript modelDecorationSprite" //$NON-NLS-0$
     		               }, {id: "application/x-ejs", //$NON-NLS-0$
     		            	   "extends": "text/plain", //$NON-NLS-0$ //$NON-NLS-1$
@@ -166,7 +166,7 @@ define([
     	
     	provider.registerService("orion.edit.contentassist", new TernAssist.TernContentAssist(astManager, ternWorker),  //$NON-NLS-0$
     			{
-    				contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$
+    				contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$ //$NON-NLS-2$
     				nls: 'javascript/nls/messages',  //$NON-NLS-0$
     				name: 'ternContentAssist',  //$NON-NLS-0$
     				id: "orion.edit.contentassist.javascript.tern",  //$NON-NLS-0$
@@ -189,7 +189,7 @@ define([
     	 */
     	provider.registerService("orion.edit.occurrences", new Occurrences.JavaScriptOccurrences(astManager),  //$NON-NLS-0$
     			{
-    		contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
+    		contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-2$
     			});
     	
     	/**
@@ -198,7 +198,7 @@ define([
     	provider.registerService("orion.edit.hover", new Hover.JavaScriptHover(astManager, scriptresolver, ternWorker),  //$NON-NLS-0$
     			{
     		name: javascriptMessages['jsHover'],
-    		contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
+    		contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-2$
     			});
 
     	var validator = new EslintValidator(astManager);
@@ -206,9 +206,9 @@ define([
     	/**
     	 * Register the ESLint validator
     	 */
-    	provider.registerService("orion.edit.validator", validator,  //$NON-NLS-0$  //$NON-NLS-1$
+    	provider.registerService("orion.edit.validator", validator,  //$NON-NLS-0$  //$NON-NLS-2$
     			{
-    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$ //$NON-NLS-1$
+    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$ //$NON-NLS-2$
     		pid: 'eslint.config'  //$NON-NLS-0$
     			});
     			
@@ -220,8 +220,8 @@ define([
     		onInputChanged: astManager.onInputChanged.bind(astManager)
     	},
     	{
-    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$
-    		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-0$  //$NON-NLS-1$
+    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$ //$NON-NLS-2$
+    		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     	});
     	
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
@@ -231,7 +231,7 @@ define([
     		tooltip : javascriptMessages['generateDocTooltip'],  //$NON-NLS-0$
     		id : "generate.js.doc.comment",  //$NON-NLS-0$
     		key : [ "j", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
-    		contentType: ['application/javascript', 'text/html']  //$NON-NLS-0$
+    		contentType: ['application/javascript', 'text/html']  //$NON-NLS-0$ //$NON-NLS-2$
     			}
     	);
     	
@@ -263,12 +263,11 @@ define([
     			quickFixComputer, 
     			{
         			name: javascriptMessages["removeExtraSemiFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages['removeExtraSemiFixTooltip'],  //$NON-NLS-0$
-        			scopeId: "orion.edit.quickfix",
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "rm.extra.semi.fix",  //$NON-NLS-0$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "no-extra-semi"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:no-extra-semi)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -277,12 +276,11 @@ define([
     			quickFixComputer, 
     			{
         			name: javascriptMessages["addFallthroughCommentFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages['addFallthroughCommentFixTooltip'],  //$NON-NLS-0$
-        			scopeId: "orion.edit.quickfix",
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "add.fallthrough.comment.fix",  //$NON-NLS-0$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-fallthrough)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:no-fallthrough)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -291,19 +289,18 @@ define([
     			{
         			execute: function(editorContext, context) {
         				if(context.annotation.id === 'no-fallthrough') {
-        				    context.annotation.fixid = 'no-fallthrough-break';
+        				    context.annotation.fixid = 'no-fallthrough-break'; //$NON-NLS-1$
         				}
         				return quickFixComputer.execute(editorContext, context);
         			} 
     		    },
     			{
         			name: javascriptMessages["addBBreakFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages['addBreakFixTooltip'],  //$NON-NLS-0$
-        			scopeId: "orion.edit.quickfix",
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "add.fallthrough.break.fix",  //$NON-NLS-0$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-fallthrough)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:no-fallthrough)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -312,12 +309,11 @@ define([
     			quickFixComputer, 
     			{
         			name: javascriptMessages["addEmptyCommentFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages['addEmptyCommentFixTooltip'],  //$NON-NLS-0$
-        			scopeId: "orion.edit.quickfix",
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "add.empty.comment.fix",  //$NON-NLS-0$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-empty-block)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:no-empty-block)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -326,12 +322,11 @@ define([
     			quickFixComputer, 
     			{
         			name: javascriptMessages["addESLintEnvFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages['addESLintEnvFixTooltip'],  //$NON-NLS-0$
-        			scopeId: "orion.edit.quickfix",
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "add.eslint-env.fix",  //$NON-NLS-0$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-undef-defined-inenv)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:no-undef-defined-inenv)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -340,12 +335,11 @@ define([
     			quickFixComputer, 
     			{
         			name: javascriptMessages["addESLintGlobalFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages['addESLintGlobalFixTooltip'],  //$NON-NLS-0$
-        			scopeId: "orion.edit.quickfix",
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "add.eslint-global.fix",  //$NON-NLS-0$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-undef-defined)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:no-undef-defined)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -354,7 +348,7 @@ define([
     			{
     		execute: function(editorContext, context) {
     			if(context.annotation.id === 'no-unused-params-expr') {
-    			    context.annotation.fixid = 'no-unused-params';
+    			    context.annotation.fixid = 'no-unused-params'; //$NON-NLS-1$
                     //return quickFixComputer['no-unused-params'](editorContext, context.annotation, astManager);
     			}
     			return quickFixComputer.execute(editorContext, context);
@@ -362,12 +356,11 @@ define([
     			}, 
     			{
     				name: javascriptMessages["removeUnusedParamsFixName"],  //$NON-NLS-0$
-    				tooltip : javascriptMessages['removeUnusedParamsFixTooltip'],  //$NON-NLS-0$
-    				scopeId: "orion.edit.quickfix",
+    				scopeId: "orion.edit.quickfix", //$NON-NLS-1$
     				id : "remove.unused.param.fix",  //$NON-NLS-0$
-    				contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+    				contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
     				validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-unused-params|no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:no-unused-params|no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -376,12 +369,11 @@ define([
     			quickFixComputer, 
     			{
         			name: javascriptMessages["commentCallbackFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages['commentCallbackFixTooltip'],  //$NON-NLS-0$
-        			scopeId: "orion.edit.quickfix",
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "comment.callback.fix",  //$NON-NLS-0$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -390,12 +382,11 @@ define([
     			quickFixComputer, 
     			{
         			name: javascriptMessages["eqeqeqFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages['eqeqeqFixTooltip'],  //$NON-NLS-0$
-        			scopeId: "orion.edit.quickfix",
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "eqeqeq.fix",  //$NON-NLS-0$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:eqeqeq)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:eqeqeq)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -404,12 +395,11 @@ define([
     			quickFixComputer, 
     			{
         			name: javascriptMessages["unreachableFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages['unreachableFixTooltip'],  //$NON-NLS-0$
-        			scopeId: "orion.edit.quickfix",
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "remove.unreachable.fix",  //$NON-NLS-0$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-unreachable)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:no-unreachable)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -418,12 +408,11 @@ define([
     			quickFixComputer, 
     			{
         			name: javascriptMessages["sparseArrayFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages['sparseArrayFixTooltip'],  //$NON-NLS-0$
-        			scopeId: "orion.edit.quickfix",
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "sparse.array.fix",  //$NON-NLS-0$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-sparse-arrays)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:no-sparse-arrays)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -432,12 +421,11 @@ define([
     			quickFixComputer, 
     			{
         			name: javascriptMessages["semiFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages['semiFixTooltip'],  //$NON-NLS-0$
-        			scopeId: "orion.edit.quickfix",
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "semi.fix",  //$NON-NLS-0$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:semi)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:semi)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -446,12 +434,11 @@ define([
     			quickFixComputer, 
     			{
         			name: javascriptMessages["unusedVarsUnusedFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages['unusedVarsUnusedFixTooltip'],  //$NON-NLS-0$
-        			scopeId: "orion.edit.quickfix",
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "unused.var.fix",  //$NON-NLS-0$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-unused-vars-unused)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:no-unused-vars-unused)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -460,12 +447,11 @@ define([
     			quickFixComputer, 
     			{
         			name: javascriptMessages["unusedFuncDeclFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages['unusedFuncDeclFixTooltip'],  //$NON-NLS-0$
-        			scopeId: "orion.edit.quickfix",
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "unused.func.decl.fix",  //$NON-NLS-0$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-unused-vars-unused-funcdecl)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:no-unused-vars-unused-funcdecl)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -474,12 +460,11 @@ define([
     			quickFixComputer, 
     			{
         			name: javascriptMessages["noCommaDangleFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages['noCommaDangleFixTooltip'],  //$NON-NLS-0$
-        			scopeId: "orion.edit.quickfix",
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "no.comma.dangle.fix",  //$NON-NLS-0$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-comma-dangle)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:no-comma-dangle)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -488,12 +473,11 @@ define([
                 quickFixComputer,
                 {
                     name: javascriptMessages["noThrowLiteralFixName"],  //$NON-NLS-0$
-                    tooltip : javascriptMessages['noThrowLiteralFixTooltip'],  //$NON-NLS-0$
-                    scopeId: "orion.edit.quickfix",
+                    scopeId: "orion.edit.quickfix", //$NON-NLS-1$
                     id : "no.throw.literal.fix",  //$NON-NLS-0$
-                    contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+                    contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
                     validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-throw-literal)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:no-throw-literal)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
                 }
         );
@@ -503,10 +487,10 @@ define([
                 {
                     name: javascriptMessages["missingNlsFixName"],  //$NON-NLS-0$
                     scopeId: "orion.edit.quickfix", //$NON-NLS-0$
-                    id : "no.throw.literal.fix",  //$NON-NLS-0$
-                    contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-1$
+                    id : "missing.nls.fix",  //$NON-NLS-0$
+                    contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
                     validationProperties: [
-                        {source: "annotation:id", match: "^(?:missing-nls)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:missing-nls)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
                 }
         );
@@ -514,13 +498,13 @@ define([
     	/**
     	 * legacy pref id
     	 */
-    	provider.registerService("orion.cm.managedservice", validator, {pid: "eslint.config"});
+    	provider.registerService("orion.cm.managedservice", validator, {pid: "eslint.config"}); //$NON-NLS-1$ //$NON-NLS-2$
     	/**
     	 * new sectioned pref block ids
     	 */
-    	provider.registerService("orion.cm.managedservice", validator, {pid: "eslint.config.potential"});
-    	provider.registerService("orion.cm.managedservice", validator, {pid: "eslint.config.practices"});
-    	provider.registerService("orion.cm.managedservice", validator, {pid: "eslint.config.codestyle"});
+    	provider.registerService("orion.cm.managedservice", validator, {pid: "eslint.config.potential"}); //$NON-NLS-1$ //$NON-NLS-2$
+    	provider.registerService("orion.cm.managedservice", validator, {pid: "eslint.config.practices"}); //$NON-NLS-1$ //$NON-NLS-2$
+    	provider.registerService("orion.cm.managedservice", validator, {pid: "eslint.config.codestyle"}); //$NON-NLS-1$ //$NON-NLS-2$
     	
     	/**
     	 * ESLint settings
@@ -586,13 +570,13 @@ define([
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "no-reserved-keys",
+				 	        	                {	id: "no-reserved-keys", //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noReservedKeys"], //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: error, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
-				 	        	                {	id: "no-sparse-arrays",
+				 	        	                {	id: "no-sparse-arrays", //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noSparseArrays"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
@@ -753,7 +737,7 @@ define([
 				 	        	   name: javascriptMessages['prefCodeStyle'],  //$NON-NLS-0$
 				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
 				 	        	   category: "javascript",  //$NON-NLS-0$
-				 	        	   properties: [{	id: "missing-doc",
+				 	        	   properties: [{	id: "missing-doc", //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["missingDoc"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: ignore,
@@ -804,7 +788,7 @@ define([
     	});
     	for (var current in newGrammars) {
     		if (newGrammars.hasOwnProperty(current)) {
-    			provider.registerService("orion.edit.highlighter", {}, newGrammars[current]);
+    			provider.registerService("orion.edit.highlighter", {}, newGrammars[current]); //$NON-NLS-1$
     		}
     	}
     	provider.connect();

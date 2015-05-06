@@ -31,16 +31,17 @@ define(['orion/plugin',
 ], function(PluginProvider, Bootstrap, FileClient, Metrics, HtmlAstManager, htmlHover, ScriptResolver, htmlContentAssist, htmlOutliner, 
             mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, messages) {
 	
+	/**
+	 * Plug-in headers
+	 */
+	var headers = {
+		name: messages["pluginName"], //$NON-NLS-0$
+		version: "1.0", //$NON-NLS-0$
+		description: messages["pluginDescription"] //$NON-NLS-0$
+	};
+	var provider = new PluginProvider(headers);
+
 	Bootstrap.startup().then(function(core) { 
-    	/**
-    	 * Plug-in headers
-    	 */
-    	var headers = {
-    		name: messages["pluginName"], //$NON-NLS-0$
-    		version: "1.0", //$NON-NLS-0$
-    		description: messages["pluginDescription"] //$NON-NLS-0$
-    	};
-    	var provider = new PluginProvider(headers);
     
     	/**
     	 * Register the content types: HTML, CSS

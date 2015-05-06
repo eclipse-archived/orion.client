@@ -66,38 +66,23 @@ define({//Default message bundle
 	'noSparseArrays': 'Sparse array declarations', //$NON-NLS-0$ //$NON-NLS-1$
 	'jsHover': 'JavaScript Hover Provider', //$NON-NLS-0$ //$NON-NLS-1$
 	'removeExtraSemiFixName': 'Remove extra semicolon', //$NON-NLS-0$ //$NON-NLS-1$
-	'removeExtraSemiFixTooltip': 'Removes the extra semicolon', //$NON-NLS-0$ //$NON-NLS-1$
 	'addFallthroughCommentFixName': 'Add $FALLTHROUGH$ comment', //$NON-NLS-0$ //$NON-NLS-1$
-	'addFallthroughCommentFixTooltip': 'Add the $FALLTHROUGH$ line comment', //$NON-NLS-0$ //$NON-NLS-1$
 	'addEmptyCommentFixName': 'Comment empty block', //$NON-NLS-0$ //$NON-NLS-1$
-	'addEmptyCommentFixTooltip': 'Add a TODO comment to the empty block', //$NON-NLS-0$ //$NON-NLS-1$
 	'addESLintEnvFixName': 'Add to eslint-env directive', //$NON-NLS-0$ //$NON-NLS-1$
-	'addESLintEnvFixTooltip': 'Add to eslint-env directive to filter the known member', //$NON-NLS-0$ //$NON-NLS-1$
 	'addESLintGlobalFixName': 'Add to globals directive', //$NON-NLS-0$ //$NON-NLS-1$
-	'addESLintGlobalFixTooltip': 'Add to globals directive to filter the unknown member', //$NON-NLS-0$ //$NON-NLS-1$
 	'removeUnusedParamsFixName': 'Remove parameter', //$NON-NLS-0$ //$NON-NLS-1$
-	'removeUnusedParamsFixTooltip': 'Remove the unused parameter, keeping side effects', //$NON-NLS-0$ //$NON-NLS-1$
 	'commentCallbackFixName': 'Add @callback to function', //$NON-NLS-0$ //$NON-NLS-1$
-	'commentCallbackFixTooltip': 'Document the function with @callback, ignoring unused parameters', //$NON-NLS-0$ //$NON-NLS-1$
 	'eqeqeqFixName': 'Update operator', //$NON-NLS-0$ //$NON-NLS-1$
-	'eqeqeqFixTooltip': 'Update the operator to the expected one', //$NON-NLS-0$ //$NON-NLS-1$
 	'unreachableFixName': 'Remove unreachable code', //$NON-NLS-0$ //$NON-NLS-1$
-	'unreachableFixTooltip': 'Remove the unreachable code', //$NON-NLS-0$ //$NON-NLS-1$
 	'sparseArrayFixName': 'Convert to normal array', //$NON-NLS-0$ //$NON-NLS-1$
-	'sparseArrayFixTooltip': 'Remove sparse entries and convert to normal array', //$NON-NLS-0$ //$NON-NLS-1$
 	'semiFixName': 'Add missing \';\'', //$NON-NLS-0$ //$NON-NLS-1$
-	'semiFixTooltip': 'Add the missing \';\'', //$NON-NLS-0$ //$NON-NLS-1$
 	'radix': 'Missing radix parameter to parseInt()', //$NON-NLS-0$ //$NON-NLS-1$
 	'unusedVarsUnusedFixName': 'Remove unused variable', //$NON-NLS-0$ //$NON-NLS-1$
-	'unusedVarsUnusedFixTooltip': 'Remove the unused variable, keeping side effects', //$NON-NLS-0$ //$NON-NLS-1$
 	'unusedFuncDeclFixName': 'Remove unused function', //$NON-NLS-0$ //$NON-NLS-1$
-	'unusedFuncDeclFixTooltip': 'Remove the unused function, keeping side effects', //$NON-NLS-0$ //$NON-NLS-1$
 	'noCommaDangleFixName': 'Remove extra \',\'', //$NON-NLS-0$ //$NON-NLS-1$
-	'noCommaDangleFixTooltip': 'Remove the extra comma', //$NON-NLS-0$ //$NON-NLS-1$
 	'addBBreakFixName': 'Add break statement', //$NON-NLS-0$ //$NON-NLS-1$
 	'addBBreakFixTooltip': 'Add a break statement to the proceeding line', //$NON-NLS-0$ //$NON-NLS-1$
 	'noShadowGlobals': 'Global shadowing:', //$NON-NLS-0$ //$NON-NLS-1$
 	'noThrowLiteralFixName': 'Change to Error' , //$NON-NLS-0$ //$NON-NLS-1$
-	'noThrowLiteralFixTooltip': 'Change the literal to an Error', //$NON-NLS-0$ //$NON-NLS-1$
 	'missingNlsFixName': 'Add missing $NON-NLS$ tag' //$NON-NLS-0$ //$NON-NLS-1$
 });

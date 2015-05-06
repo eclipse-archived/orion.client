@@ -24,7 +24,7 @@
         this.__objectId = objectId;
         this.__methods = methods;
     }
-
+    
     function PluginProvider(headers) {
         var _headers = headers;
         var _connected = false;
@@ -60,9 +60,23 @@
             }
         }
         var _notify = _publish;
-	    _publish({
-	    	method: "loading", //$NON-NLS-0$
-	    });
+        
+        var lastHeartbeat;
+        var startTime = new Date().getTime();
+        function log(state) {
+            if (localStorage.pluginLogging) console.log(state + "(" + (new Date().getTime() - startTime) + "ms)=" + window.location); //$NON-NLS-1$ //$NON-NLS-0$
+        }
+        function heartbeat() {
+            var time = new Date().getTime();
+            // This timeout depends on the handshake timeout of the plugin registry. Update both accordingly.
+            if (lastHeartbeat  && time - lastHeartbeat < 4000) return;
+            lastHeartbeat = time;
+            _publish({
+                method: "loading", //$NON-NLS-0$
+            });
+            log("heartbeat"); //$NON-NLS-0$
+        }
+        heartbeat();
 
         function _getPluginData() {
             var services = [];
@@ -314,6 +328,7 @@
                 properties: properties || {},
                 listeners: {}
             };
+            heartbeat();
         };
         this.registerServiceProvider = this.registerService;
 

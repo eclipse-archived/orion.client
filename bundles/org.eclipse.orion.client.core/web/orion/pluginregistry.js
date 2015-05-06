@@ -13,7 +13,7 @@
 /*eslint-env browser, amd*/
 /*global URL*/
 define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Deferred, EventTarget) {
-
+	
     function _equal(obj1, obj2) {
         var keys1 = Object.keys(obj1);
         var keys2 = Object.keys(obj2);
@@ -940,7 +940,12 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                     url: url
                 };
 
+                function log(state) {
+                    if (localStorage.pluginLogging) console.log(state + "(" + (new Date().getTime() - channel._startTime) + "ms)=" + url); //$NON-NLS-1$ //$NON-NLS-0$
+                }
+
                 function sendTimeout(message) {
+                    log("timeout"); //$NON-NLS-0$
                     var error = new Error(message);
                     error.name = "timeout";
                     handler({
@@ -950,33 +955,63 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                 }
                 
                 timeout = timeout || _defaultTimeout;
+                
+                channel._updateTimeout = function() {
+                    var message, newTimeout;
+                    if (!this._connected && !this._closed) {
+                        if (this._handshake) {
+                            // For each plugin being loaded add 1000 ms extra time to the handshake timeout
+                            var extraTimeout = 0;
+                            _channels.forEach(function(c) {
+                                if (!c._connected && !c._closed) {
+                                    extraTimeout += 1000;
+                                }
+                            });
+                            message = "Plugin handshake timeout for: " + url;
+                            newTimeout = (this._loading ? 60000 : timeout || 5000) + extraTimeout;
+                        } else {
+                            message = "Plugin load timeout for: " + url;
+                            newTimeout = timeout || 15000;
+                        }
+                    }
+                    if (this._loadTimeout) clearTimeout(this._loadTimeout);
+                    this._loadTimeout = 0;
+                    if (newTimeout) this._loadTimeout = setTimeout(sendTimeout.bind(null, message), newTimeout);
+                };
 
-                var loadTimeout = setTimeout(sendTimeout.bind(null, "Load timeout for: " + url), timeout || 15000);
+                channel._updateTimeout();
+                channel._startTime = new Date().getTime();
                 var iframe = document.createElement("iframe"); //$NON-NLS-0$
-                iframe.name = url + "_" + new Date().getTime();
+                iframe.name = url + "_" + channel._startTime;
                 iframe.src = url;
                 iframe.onload = function() {
-                    clearTimeout(loadTimeout);
-                    loadTimeout = setTimeout(sendTimeout.bind(null, "Plugin handshake timeout for: " + url), timeout || 5000);
+                    log("handshake"); //$NON-NLS-0$
+                    channel._handshake = true;
+                    channel._updateTimeout();
                 };
                 iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
-        		iframe.style.width = iframe.style.height = "100%"; //$NON-NLS-0$
-	        	iframe.frameBorder = 0;
+                iframe.style.width = iframe.style.height = "100%"; //$NON-NLS-0$
+                iframe.frameBorder = 0;
                 (parent || _parent).appendChild(iframe);
                 channel.target = iframe.contentWindow;
                 channel.connected = function() {
-                	clearTimeout(loadTimeout);
+                    log("connected"); //$NON-NLS-0$
+                    this._connected = true;
+                    this._updateTimeout();
                 };
                 channel.loading = function() {
-                	clearTimeout(loadTimeout);
-                	loadTimeout = setTimeout(sendTimeout.bind(null, "Plugin handshake timeout for: " + url), 60000);
+                    log("loading"); //$NON-NLS-0$
+                    this._loading = true;
+                    this._updateTimeout();
                 };
                 channel.close = function() {
-                    clearTimeout(loadTimeout);
+                    log("closed"); //$NON-NLS-0$
+                    this._closed = true;
+                    this._updateTimeout();
                     if (iframe) {
-                    	var parent = iframe.parentNode;
-                        if (parent) {
-                        	parent.removeChild(iframe);
+                        var frameParent = iframe.parentNode;
+                        if (frameParent) {
+                            frameParent.removeChild(iframe);
                         }
                         iframe = null;
                     }
@@ -1036,6 +1071,8 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                         internalRegistry.disconnect(channel);
                         channel = null;
                         d.reject(message.error);
+                    } else if ("loading" === message.method) {
+                        channel.loading();
                     }
                 });
                 return d.promise;

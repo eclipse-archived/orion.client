@@ -198,8 +198,7 @@ require({
         if(typeof(read) === 'function') {
             read(err, contents);
         }
-        file = args.logical;
-        read = pendingReads[file];
+        read = pendingReads[args.logical];
         if(typeof(read) === 'function') {
             read(err, {contents: contents, file:file, logical:args.logical});
         }
