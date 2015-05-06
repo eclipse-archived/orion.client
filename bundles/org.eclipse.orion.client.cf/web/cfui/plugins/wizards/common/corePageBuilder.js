@@ -297,10 +297,6 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			}
 		},
 		
-		getCachedPlan : function(){
-			return this._cachedPlan;
-		},
-		
 		getPlan : function(){
 			if(this.getManifestPath() != this._initManifestPath){
 				var deferred = new Deferred();
@@ -489,7 +485,6 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 										
 										var selection = self._selection.getSelection();
 										self.getPlan().then(function(result){
-											self._cachedPlan = result;
 											self._manifestApplication = result.Manifest.applications[0];
 											self._appsInput.value = self._manifestApplication.name;
 											self._hostInput.value = self._manifestApplication.host;

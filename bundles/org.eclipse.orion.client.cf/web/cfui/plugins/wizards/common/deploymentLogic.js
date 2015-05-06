@@ -107,7 +107,6 @@ define([
 			disableUI();
 
 			var instrumentation = _getManifestInstrumentation(userManifest, results);
-			var devMode = options.getDevMode ? options.getDevMode() : null;
 			
 			var appName = results.name;
 			var target = selection;
@@ -123,7 +122,7 @@ define([
 				}
 
 				showMessage(messages["saving..."]); //$NON-NLS-0$
-				return mCfUtil.prepareLaunchConfigurationContent(confName, target, appName, appPath, instrumentation, devMode).then(
+				return mCfUtil.prepareLaunchConfigurationContent(confName, target, appName, appPath, instrumentation).then(
 					function(launchConfigurationContent){
 						postMsg(launchConfigurationContent);
 					});

@@ -726,7 +726,32 @@ define([
 					function(result){
 						launchConfigurationEntry.File = result;
 						launchConfigurationEntry.File.parent = launchConfDir;
-						deferred.resolve(launchConfigurationEntry);
+						
+						
+						
+						// check if the deploy service supports DevMode and 
+						// modify the launch configuration object accordingly
+						var deployService = this.getProjectDeployService(launchConfigurationEntry.ServiceId, launchConfigurationEntry.Type);
+						
+						if (deployService.logLocationTemplate) {
+							launchConfigurationEntry.Params.LogLocationTemplate = deployService.logLocationTemplate;
+						}
+						
+						if(deployService && deployService.getDevMode){
+							deployService.getDevMode(projectMetadata.ContentLocation + launchConfigurationEntry.Path).then(function(devModeParam){
+								if (devModeParam) {
+									launchConfigurationEntry.Params.DevMode = devModeParam;
+								}
+								
+								deferred.resolve(launchConfigurationEntry);
+							}, function(){
+								deferred.resolve(launchConfigurationEntry);
+							});
+						} else {
+							deferred.resolve(launchConfigurationEntry);
+						}
+						
+						
 
 					}.bind(this), deferred.reject
 				);
