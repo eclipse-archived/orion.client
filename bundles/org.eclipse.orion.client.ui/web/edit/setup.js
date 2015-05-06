@@ -58,7 +58,7 @@ define([
 
 var exports = {};
 
-var enableSplitEditor = false;
+var enableSplitEditor = true;
 
 var MODE_SINGLE = 0;
 var MODE_VERTICAL = 1;
@@ -948,7 +948,7 @@ objects.mixin(EditorSetup.prototype, {
 });
 
 exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, readonly) {
-	enableSplitEditor = localStorage.enableSplitEditor === "true"; //$NON-NLS-0$
+	enableSplitEditor = localStorage.enableSplitEditor !== "false"; //$NON-NLS-0$
 	
 	var setup = new EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly);
 	Deferred.when(setup.createBanner(), function() {
