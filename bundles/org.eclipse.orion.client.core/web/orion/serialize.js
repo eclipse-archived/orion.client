@@ -21,6 +21,7 @@ define([], function() {
 		var result = error ? JSON.parse(JSON.stringify(error)) : error; // sanitizing Error object
 		if (error instanceof Error) {
 			result.__isError = true;
+			result.lineNumber = typeof(result.lineNumber) === 'number' ? result.lineNumber : error.lineNumber; //FF fails to include the line number from JSON.stringify
 			result.message = result.message || error.message;
 			result.name = result.name || error.name;
 			result.stack = result.stack || error.stack;
