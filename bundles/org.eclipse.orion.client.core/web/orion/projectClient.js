@@ -580,7 +580,7 @@ define([
 							}
 							
 							if(deployService && deployService.getDevMode){
-								deployService.getDevMode(projectMetadata.ContentLocation).then(function(devModeParam){
+								deployService.getDevMode(projectMetadata.ContentLocation + launchConf.Path).then(function(devModeParam){
 									if (devModeParam) {
 										launchConf.Params.DevMode = devModeParam;
 									}
