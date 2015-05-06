@@ -267,7 +267,7 @@ define([
         			id : "rm.extra.semi.fix",  //$NON-NLS-0$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "no-extra-semi"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-extra-semi)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -487,7 +487,7 @@ define([
                 {
                     name: javascriptMessages["missingNlsFixName"],  //$NON-NLS-0$
                     scopeId: "orion.edit.quickfix", //$NON-NLS-0$
-                    id : "no.throw.literal.fix",  //$NON-NLS-0$
+                    id : "missing.nls.fix",  //$NON-NLS-0$
                     contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
                     validationProperties: [
                         {source: "annotation:id", match: "^(?:missing-nls)$"} //$NON-NLS-1$ //$NON-NLS-2$
