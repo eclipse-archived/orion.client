@@ -750,12 +750,21 @@ function Tooltip (view) {
 		 * @returns returns document node containing rendered tooltip content
 		 */
 		_getAnnotationContents: function(annotations, context) {
+			var self = this;
+			var inEditor = self.hover ? true : false;
+			if (inEditor && context && context.source && context.source.indexOf('ruler') >= 0){ //$NON-NLS-0$
+				inEditor = false;
+			}
+			
 			var annotation;
 			var newAnnotations = [];
 			for (var j = 0; j < annotations.length; j++) {
 				annotation = annotations[j];
-				if (annotation.title !== "" && !annotation.groupAnnotation) { 
-					newAnnotations.push(annotation); 
+				if (annotation.title !== "" && !annotation.groupAnnotation) {
+					// Don't display untitled annotations in the editor such as occurrences as the code is already visible
+					if (!inEditor || annotation.title){
+						newAnnotations.push(annotation); 
+					}
 				}
 			}
 			annotations = newAnnotations;
@@ -763,19 +772,12 @@ function Tooltip (view) {
 				return null;
 			}
 			
-			var self = this;
+			
 			var html;
 			var document = this._tooltipDiv.ownerDocument;
 			var view = this._view;
 			var model = view.getModel();
 			var baseModel = model.getBaseModel ? model.getBaseModel() : model;
-			
-			
-			// Don't show quickfixes for ruler annotations (left or right side)
-			var inEditor = self.hover ? true : false;
-			if (inEditor && context && context.source && context.source.indexOf('ruler') >= 0){ //$NON-NLS-0$
-				inEditor = false;
-			}
 			
 			// If this is a code folding annotation, display code projection
 			if (annotations.length === 1 && annotations[0].type === "orion.annotation.folding") {
@@ -815,11 +817,6 @@ function Tooltip (view) {
 			}
 			
 			function getAnnotationHTML(annotation, inEditor) {
-				// Don't display untitle annotations in the editor such as occurrences as the code is already visible
-				if (inEditor && !annotation.title){
-					return null;
-				}
-				
 				var title = annotation.title;
 				var result = util.createElement(document, "div"); //$NON-NLS-0$
 				result.className = "tooltipRow"; //$NON-NLS-0$
