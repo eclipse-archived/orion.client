@@ -80,12 +80,17 @@ select {
 }
 
 .comboTextInputWrapper {
-	height: 26px;
+	height: 24px;
+	width: 289px;
 	border: 1px solid #bbb;
 }
 
-.comboTextInputWrapper input {
-	font-size: inherit;
+.comboTextInputWrapperFocussed {
+	outline: -webkit-focus-ring-color auto 5px;
+}
+
+.comboTextInputWrapperFocussed input:focus{
+	outline:none !important;
 }
 
 .comboTextInputField {
@@ -285,29 +290,46 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 	bottom: 75px;
 	width: calc(100% - 24px);
 }
-
+td#host::before,
 td#manifest::before{
-	  position: absolute;
-	  left: 32%;
-	  margin-top: 3px;
-	  content: "";
-	  height: 16px;
-	  width: 16px;
+	position: absolute;
+	left: 32%;
+	margin-top: 3px;
+	content: "";
+	height: 16px;
+	width: 16px;
+}
+
+td#host::before{
+	margin-top: 5px;
+}
+
+.error::before{
+	background: url(../../../../images/error.png) scroll no-repeat; 
 }
 
 .wrongPath::before{
-	  background: url(../../../../images/warning.gif) scroll no-repeat;
+	background: url(../../../../images/warning.gif) scroll no-repeat;  
 }
 
 .correctPath::before{
 	background: url(../../../../images/success.png) scroll no-repeat;
 }
 
+.errorBorder{
+	border: red 2px solid;
+}
 .wrongPath input{
 	border: #FFA60C 2px solid;
 }
 .correctPath input{
 	border: #609B60 2px solid;
+}
+
+.errorBorder,
+.wrongPath input,
+.correctPath input{
+	border-radius: 2px;
 }
 
 span.tooltipContainer{
