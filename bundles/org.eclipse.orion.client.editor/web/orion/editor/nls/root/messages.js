@@ -19,7 +19,6 @@ define({//Default message bundle
 	"task": "Task", //$NON-NLS-1$ //$NON-NLS-0$
 	"error": "Error", //$NON-NLS-1$ //$NON-NLS-0$
 	"warning": "Warning", //$NON-NLS-1$ //$NON-NLS-0$
-	"matchingSearch": "Matching Search", //$NON-NLS-1$ //$NON-NLS-0$
 	"currentSearch": "Current Search", //$NON-NLS-1$ //$NON-NLS-0$
 	"currentLine": "Current Line", //$NON-NLS-1$ //$NON-NLS-0$
 	"matchingBracket": "Matching Bracket", //$NON-NLS-1$ //$NON-NLS-0$
