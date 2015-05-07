@@ -2,7 +2,7 @@
 .textviewTooltip {
 	font-family: "Consolas", "Monaco", "Vera Mono", monospace;
 	font-size: 12px;
-	background-color: #4A4A4A;
+	background-color: rgb(38, 50, 56);
 	color: #DADADA;
 	padding: 8px;
 	border-radius: 3px;
@@ -63,7 +63,7 @@
 .textviewTooltip .commandButton { /* Styling quickfixes */
 	border: 0;
 	background-color: inherit;
-	color: rgb(187, 187, 187);
+	color: white;
 }
 .textviewTooltip .commandButton:not(.dropdownTrigger){ /* In certain themes command buttons are set to all caps */
   text-transform: initial; 
