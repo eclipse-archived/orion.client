@@ -402,8 +402,14 @@ define(['i18n!orion/settings/nls/messages', 'orion/i18nUtil', 'require', 'orion/
 		reloadPlugin: function(url) {
 			var plugin = this.settings.pluginRegistry.getPlugin(url);
 			if (plugin) {
-				plugin.update().then(this.render.bind(this));
-				this.statusService.setMessage( i18nUtil.formatMessage(messages["Reloaded"], url), 5000, true);
+				var deferred = new Deferred();
+				this.progressService.progress(deferred, messages.ReloadingPlugin);
+				deferred.progress({type: "progress"});
+				plugin.update().then(function() {
+					this.render();
+					this.statusService.setMessage( i18nUtil.formatMessage(messages["Reloaded"], url), 5000, true);
+					deferred.resolve();
+				}.bind(this), deferred.reject, deferred.progress);
 			}
 		},
 		
@@ -440,12 +446,18 @@ define(['i18n!orion/settings/nls/messages', 'orion/i18nUtil', 'require', 'orion/
 		/* reloads all of the plugins - sometimes useful for reaffirming plugin initialization */
 
 		reloadPlugins: function(){
+			var deferred = new Deferred();
+			this.progressService.progress(deferred, messages.ReloadingAllPlugins);
+			deferred.progress({type: "progress"});
 			var plugins = this.settings.pluginRegistry.getPlugins();
 			var updates = [];
 			plugins.forEach(function(plugin){
 				updates.push(plugin.update());
 			});
-			Deferred.all(updates, function(){}).then(this.reloaded.bind(this));
+			Deferred.all(updates, function(){}).then(function() {
+				this.reloaded();
+				deferred.resolve();
+			}.bind(this), deferred.reject, deferred.progress);
 		},
 		
 		forceRemove: function(url){

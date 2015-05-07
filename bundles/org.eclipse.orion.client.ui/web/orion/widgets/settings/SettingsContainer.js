@@ -309,6 +309,7 @@ define([
 				settings: this.settingsCore,
 				preferences: this.preferences,
 				statusService: this.preferencesStatusService,
+				progressService: this.progressService,
 				dialogService: this.preferenceDialogService,
 				commandService: this.commandService,
 				registry: this.registry,

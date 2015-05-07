@@ -108,6 +108,8 @@ define({//Default message bundle
 	"Get Plugins": "Get Plugins",
 	"Reload": "Reload",
 	"ReloadPlug": "Reload the plugin",
+	"ReloadingPlugin": "Realoading plugin",
+	"ReloadingAllPlugins": "Realoading all plugins",
 	"Delete": "Delete",
 	"DeletePlugFromConfig": "Delete this plugin from the configuration",
 	"DeleteUser" : "Delete User Profile as well as workspaces and projects",

@@ -25,7 +25,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', '
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		var preferencesStatusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		var commandRegistry = new mCommandRegistry.CommandRegistry({ });
-		new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
+		var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({
@@ -63,6 +63,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', '
 		var containerParameters = { preferences: preferences, 
 									registry: serviceRegistry,
 									preferencesStatusService: preferencesStatusService,
+									progressService: progressService,
 									commandService: commandRegistry,
 									preferenceDialogService: preferenceDialogService,
 									settingsCore: core,
