@@ -567,6 +567,19 @@ define([
 	 * @param {Boolean} closeSplitter true to make the splitter's initial state "closed".
 	 */
 	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, closeSplitter, fileClient) {
+		if (localStorage.consoleMetrics) {
+			serviceRegistry.registerService("orion.metrics", {
+				/** @callback */
+				logEvent: function(category, action, label, value) {
+				},
+				logTiming: function(timingCategory, timingVar, timingValue, timingLabel) {
+					window.console.log(timingCategory + " " + timingVar + " " + timingValue + " " + timingLabel);
+				},
+				/** @callback */
+				pageLoad: function(href, page, title, args) {
+				}
+			}, {});
+		}
 		mMetrics.initFromRegistry(serviceRegistry);
 		prefsService.addChangeListener(function(name, value) {
 			if (value.length < METRICS_MAXLENGTH && name.indexOf("/git/credentials/")) { //$NON-NLS-0$
