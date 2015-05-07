@@ -72,8 +72,7 @@ define(['i18n!cfui/nls/messages',
 			});
 			
 			mGlobalCommands.setPageTarget({
-				task: messages["cloudFoundryLogs"],
-//				target: log,
+				task: this.applicationInfo.Application + " - Logs",
 				breadcrumbTarget: logName,
 				serviceRegistry: this.serviceRegistry,
 				commandService: this.commandRegistry});
