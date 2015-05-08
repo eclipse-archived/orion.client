@@ -42,7 +42,7 @@ define({
 	'no-sparse-arrays': 'Sparse array declarations should be avoided.',  //$NON-NLS-0$ //$NON-NLS-1$
 	'no-throw-literal': 'Throw an Error instead.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-undef-defined' : '\'${0}\' is undefined.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-undef-readonly': '\'${0}\' is readonly.',  //$NON-NLS-0$  //$NON-NLS-1$
+	'no-undef-readonly': '\'${0}\' is read-only.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'no-unreachable' : 'Unreachable code.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-unused-params' : 'Parameter \'${0}\' is never used.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-unused-vars-unused' : '\'${0}\' is unused.', //$NON-NLS-0$  //$NON-NLS-1$

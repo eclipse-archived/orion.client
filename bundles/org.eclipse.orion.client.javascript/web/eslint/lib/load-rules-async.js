@@ -1039,7 +1039,7 @@ define([
             	                    var nls = 'no-undef-defined';
             	                    context.report(ref.identifier, "'${0}' is not defined.", {0:name, nls: nls, pid: nls+inenv});
             	                } else if (ref.isWrite() && variable.writeable === false) {
-            	                    context.report(ref.identifier, "'${0}' is read only.", {0:name, nls: 'no-undef-readonly'});
+            	                    context.report(ref.identifier, "'${0}' is read-only.", {0:name, nls: 'no-undef-readonly'});
             	                }
             	            });
                     	}
