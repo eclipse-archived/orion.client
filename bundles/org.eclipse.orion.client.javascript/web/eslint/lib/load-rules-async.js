@@ -610,6 +610,25 @@ define([
                 };
             }
         },
+        "no-proto": {
+            description: "Warn when the __proto__ property is used",
+            url: 'http://eslint.org/docs/rules/no-proto.html',
+            rule: function(context) {
+                return {
+                    'MemberExpression': function(node) {
+                        if(node.property != null) {
+                            if(node.computed) {
+                                if(node.property.value === '__proto__') {
+                                    context.report(node.property, 'Discouraged __proto__ property use.');
+                                }
+                            } else if(node.property.name === '__proto__') {
+                                context.report(node.property, 'Discouraged __proto__ property use.');    
+                            }
+                        }
+                    }
+                };
+            }
+        },
 		'no-jslint': {
 		    description: 'Warn when the jslint/jshint directive is used',
 		    rule: function(context) {

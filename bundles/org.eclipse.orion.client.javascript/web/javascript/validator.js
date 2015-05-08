@@ -38,6 +38,7 @@ define([
 			"no-eval" : 0, //$NON-NLS-0$
 			"no-extra-semi": 1, //$NON-NLS-0$
 			"no-iterator": 2,  //$NON-NLS-0$
+			"no-proto": 2,  //$NON-NLS-0$
 			'no-jslint' : 1,  //$NON-NLS-0$
 			"no-new-array": 1, //$NON-NLS-0$
 			"no-new-func": 1, //$NON-NLS-0$

@@ -663,6 +663,12 @@ define([
     			 	        	                	defaultValue: warning, //$NON-NLS-0$
     			 	        	                	options: severities //$NON-NLS-0$
     			 	        	                },
+    			 	        	                {	id: "no-proto",  //$NON-NLS-0$
+    			 	        	                	name: javascriptMessages["noProto"], //$NON-NLS-0$
+    			 	        	                	type: "number", //$NON-NLS-0$
+    			 	        	                	defaultValue: error, //$NON-NLS-0$
+    			 	        	                	options: severities //$NON-NLS-0$
+    			 	        	                },
     			 	        	                {
     			 	        	                	id: "no-with", //$NON-NLS-0$
     			 	        	                	name: javascriptMessages["noWith"], //$NON-NLS-0$

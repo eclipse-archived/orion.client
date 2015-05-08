@@ -36,6 +36,7 @@ define({//Default message bundle
 	'noEval' : 'Discouraged \'eval()\' use:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noDupeKeys' : 'Duplicate object keys:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noIterator': 'Discouraged __iterator__ property use:', //$NON-NLS-0$  //$NON-NLS-1$
+	'noProto': 'Discouraged __proto__ property use:', //$NON-NLS-0$  //$NON-NLS-1$
 	'useIsNaN' : 'NaN not compared with isNaN():', //$NON-NLS-0$  //$NON-NLS-1$
 	'missingDoc' : 'Missing JSDoc:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noUnreachable' : 'Unreachable code:', //$NON-NLS-0$  //$NON-NLS-1$

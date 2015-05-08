@@ -2460,7 +2460,87 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 0);
     		});
-        });    	
+        }); 
+//NO-PROTO ----------------------------------------------------
+        describe('no-proto', function() {
+    	    var RULE_ID = "no-proto";
+    		it("should flag __proto__ 1", function() {
+    			var topic = "a.__proto__ = function() {};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged __proto__ property use.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		it("should flag __proto__ 2", function() {
+    			var topic = "a.b.c.__proto__ = function() {};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged __proto__ property use.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		it("should flag __proto__ 3", function() {
+    			var topic = "a['__proto__'] = function() {};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged __proto__ property use.");
+    			assert.equal(messages[0].node.type, "Literal");
+    		});
+    		it("should flag __proto__ 4", function() {
+    			var topic = "a.b[\"__proto__\"] = function() {};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged __proto__ property use.");
+    			assert.equal(messages[0].node.type, "Literal");
+    		});
+    		
+    		it("should not flag __proto__ 1", function() {
+    			var topic = "var __proto__ = function() {};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag __proto__ 2", function() {
+    			var topic = "var a = __proto__ = function() {};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag __proto__ 3", function() {
+    			var topic = "var a = __proto__;";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+        }); 
 //NO-JSLINT ------------------------------------------------------    	
     	describe('no-jslint', function() {
     	    var RULE_ID = "no-jslint";
