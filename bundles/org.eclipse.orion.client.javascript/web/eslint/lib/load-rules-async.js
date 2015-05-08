@@ -689,6 +689,8 @@ define([
         			context.report(node, "Non-externalized string literal \'${0}\'.", {0:node.value, data: data});
         		}
         		
+        		var callees = ['require', 'requirejs', 'importScripts', 'define', 'Worker', 'SharedWorker'];
+        		
         		return {
                     'Literal': function(node) {
         				// Create a map of line numbers to a list of literal nodes
@@ -697,32 +699,45 @@ define([
                     			return;
                     		}
                     		if (node.parent){
-	                    		if (node.parent.type === 'UnaryExpression' || node.parent.type === 'MemberExpression'){
-	                    			return;
-	                    		}
-	                    		if (node.parent.type === 'BinaryExpression' && node.parent.operator !== '+'){
-	                    			return;
-	                    		}
-	                    		if (node.parent.type === 'Property' && node.parent.key === node){
-	                    			return;
-	                    		}
-	                    		if (node.parent.type === 'CallExpression' && node.parent.callee && node.parent.callee.name === 'require'){
-	                    			return;
-	                    		}
-                    			// Don't consider strings in the define statement (both property keys and values)
-                    			if (node.parent.parent){
-                    				var callExpression;
-                    				if (node.parent.parent.type === 'CallExpression'){
-                    					callExpression = node.parent.parent;
-                    				} else if (node.parent.parent.parent && node.parent.parent.parent.type === 'CallExpression'){
-                    					callExpression = node.parent.parent.parent;
+                    			switch(node.parent.type) {
+                    				case 'UnaryExpression':
+                    				case 'MemberExpression':
+                    				case 'SwitchCase': {
+                    					return;
                     				}
-                    				if (callExpression && callExpression.callee && callExpression.callee.name === 'define'){
-		                    			return;
-	                    			}
-	                    		}
+                    				case 'BinaryExpression': {
+                    					if(node.parent.operator !== '+') {
+                    						return;
+                    					}
+                    					break;
+                    				}
+                    				case 'Property': {
+                    					if(node.parent.key === node) {
+                    						return;
+                    					}
+                						var _p = node.parent.parent.parent;
+                						if(_p && _p.type === 'CallExpression' && _p.callee && _p.callee.name === 'define') {
+                							return;
+                						}
+                    					break;
+                    				}
+                    				case 'CallExpression': {
+                    					var callee = node.parent.callee;
+                    					if(callee && callees.indexOf(callee.name) > -1) {
+                    						return;
+                    					}
+                    					break;
+                    				}
+                    				case 'ArrayExpression': {
+                    					var _p = node.parent.parent;
+                    					if(_p.type === 'CallExpression' && (_p.callee.name === 'define' || _p.callee.name === 'require' || _p.callee.name === 'requirejs')) {
+                    						return;
+                    					}
+                    					break;
+                    				}
+                    			}
                     		}
-                    		lineNum = node.loc.end.line-1;
+                    		var lineNum = node.loc.end.line-1;
                     		if (!context._linesWithStringLiterals[lineNum]){
                     			context._linesWithStringLiterals[lineNum] = [];
                     		}

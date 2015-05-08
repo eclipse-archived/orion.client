@@ -2978,6 +2978,60 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 0);
     		});
+    		it("Ignore define id", function() {
+    			var topic = "define('myid', ['define', 'define2', 'define3'])";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("Ignore importScripts 1", function() {
+    			var topic = "importScripts('myscript.js');";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("Ignore importScripts 1", function() {
+    			var topic = "importScripts('myscript.js', 'myscript2.js');";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("Ignore require array", function() {
+    			var topic = "require(['myscript.js', 'myscript2.js']);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("Ignore requirejs array 1", function() {
+    			var topic = "requirejs(['myscript.js', 'myscript2.js']);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("Ignore requirejs array 2", function() {
+    			var topic = "requirejs({}, ['myscript.js', 'myscript2.js'], function(){});";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
     		it("Ignore member expression keys", function() {
     			var topic = "i18n.replace(messages['nlsKey'], 'a');";
     	
