@@ -11,71 +11,50 @@
  *******************************************************************************/
 /*globals importScripts onmessage:true doctrine onconnect:true*/
 /*eslint-env node, browser*/
-importScripts('../../requirejs/require.js'); // synchronous
+importScripts('../../requirejs/require.js'); // synchronous //$NON-NLS-1$
 require({
-	baseUrl: "../../",
+	baseUrl: "../../", //$NON-NLS-1$
 	paths: {
-		text: "requirejs/text",
-		esprima: "esprima/esprima",
-		estraverse: "estraverse/estraverse",
-		escope: "escope/escope",
-		logger: "javascript/logger",
-		doctrine: 'doctrine/doctrine'
+		text: "requirejs/text", //$NON-NLS-1$
+		esprima: "esprima/esprima", //$NON-NLS-1$
+		estraverse: "estraverse/estraverse", //$NON-NLS-1$
+		escope: "escope/escope", //$NON-NLS-1$
+		logger: "javascript/logger", //$NON-NLS-1$
+		doctrine: 'doctrine/doctrine' //$NON-NLS-1$
 	},
 	packages: [
 		{
-			name: "eslint/conf",
-			location: "eslint/conf"
+			name: "eslint/conf", //$NON-NLS-1$
+			location: "eslint/conf" //$NON-NLS-1$
 		},
 		{
-			name: "eslint",
-			location: "eslint/lib",
-			main: "eslint"
+			name: "eslint", //$NON-NLS-1$
+			location: "eslint/lib", //$NON-NLS-1$
+			main: "eslint" //$NON-NLS-1$
 		},
 	]
 },
 [
-	'tern/lib/tern',
-	'tern/plugin/doc_comment',
+	'tern/lib/tern', //$NON-NLS-1$
+	'tern/plugin/doc_comment', //$NON-NLS-1$
+	//'tern/plugin/dependencies', //$NON-NLS-1$
 	//TODO Load these on the fly
 	//'tern/plugin/requirejs',
-	//'tern/plugin/orion_requirejs',
 	//'tern/plugin/mongodb2_0_27',
 	//'tern/plugin/node',
-	'tern/defs/ecma5',
-	'tern/defs/browser',
-	'javascript/handlers/ternAssistHandler',
-	'javascript/handlers/ternDeclarationHandler',
-	'javascript/handlers/ternHoverHandler',
-	'javascript/handlers/ternOccurrencesHandler',
-	'javascript/handlers/ternRenameHandler',
-	'doctrine'  //stays last - exports into global
+	'tern/defs/ecma5', //$NON-NLS-1$
+	'tern/defs/browser', //$NON-NLS-1$
+	'javascript/handlers/ternAssistHandler', //$NON-NLS-1$
+	'javascript/handlers/ternDeclarationHandler', //$NON-NLS-1$
+	'javascript/handlers/ternHoverHandler', //$NON-NLS-1$
+	'javascript/handlers/ternOccurrencesHandler', //$NON-NLS-1$
+	'javascript/handlers/ternRenameHandler', //$NON-NLS-1$
+	'doctrine'  //stays last - exports into global //$NON-NLS-1$
 ],
-/* @callback */ function(Tern, docPlugin, /*requirePlugin, orionRequirePlugin, mongodbPlugin, nodePlugin,*/ ecma5, browser, 
+/* @callback */ function(Tern, docPlugin, /*dependenciesPlugin, requirePlugin, mongodbPlugin, nodePlugin,*/ ecma5, browser, 
 							AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler) {
     
     var ternserver, pendingReads = Object.create(null);
-    
-    function warmUp() {
-    	if(ternserver) {
-    		ternserver.request({
-	           query: {
-	           type: "completions", 
-	           file: 'warmup',
-	           types: true, 
-	           origins: true,
-	           urls: true,
-	           docs: true,
-	           end: 0,
-	           sort:true
-	           },
-	           files: [{type:'full', name: 'warmup', text: ''}]}, 
-	           /* @callback */ function(error, comps) {
-	               //do nothing
-	           });
-	      }
-	      ternserver.delFile('warmup'); //don't leave it in there
-    }
     
     /**
      * @description Start up the Tern server, send a message after trying
@@ -85,14 +64,16 @@ require({
                 async: true,
                 debug:true,
                 defs: [ecma5, browser],
-                projectDir: '/',
+                projectDir: '/', //$NON-NLS-1$
                 plugins: {
                     doc_comment: {
                         fullDocs: true
                     }
+                   // dependencies: {
+                    	//depth: 1
+                    //}
                     //mongodb2_0_27:{},
                     //node: {}
-                    //orion_requirejs: {}
                 },
                 getFile: _getFile
             };
@@ -110,35 +91,35 @@ require({
             var _d = evnt.data;
             if(typeof(_d.request) === 'string') {
                 switch(_d.request) {
-                    case 'completions': {
+                    case 'completions': { //$NON-NLS-1$
                         AssistHandler.computeProposals(ternserver, _d.args, post);
                         break;
                     }
-                    case 'occurrences': {
+                    case 'occurrences': { //$NON-NLS-1$
                         OccurrencesHandler.computeOccurrences(ternserver, _d.args, post);
                         break;
                     }
-                    case 'definition': {
+                    case 'definition': { //$NON-NLS-1$
                         DeclarationHandler.computeDeclaration(ternserver, _d.args, post);
                         break;
                     }
-                    case 'documentation': {
+                    case 'documentation': { //$NON-NLS-1$
                         HoverHandler.computeHover(ternserver, _d.args, post);
                         break;
                     }
-                    case 'rename': {
+                    case 'rename': { //$NON-NLS-1$
                         RenameHandler.computeRename(ternserver, _d.args, post);
                         break;
                     }
-                    case 'addFile': {
+                    case 'addFile': { //$NON-NLS-1$
                     	ternserver.addFile(_d.args.file, _d.args.source);
                     	break;
                     }
-                    case 'delfile': {
+                    case 'delfile': { //$NON-NLS-1$
                         _deleteFile(_d.args);
                         break;
                     }
-                    case 'read': {
+                    case 'read': { //$NON-NLS-1$
                         _contents(_d.args);
                         break;
                     }
@@ -165,9 +146,7 @@ require({
     	this.port.start();
     };
     
-    post('server_ready');
-    //Warm up after we have finished attaching all our listeners
-    //warmUp();
+    post('server_ready'); //$NON-NLS-1$
     
     /**
      * @description Sends the given message back to the client. If the msg is null, send an Error
@@ -177,7 +156,7 @@ require({
      */
     function post(msg, errormsg) {
     	if(!msg) {
-    		msg = new Error(errormsg ? errormsg : 'An unknown error occurred.');
+    		msg = new Error(errormsg ? errormsg : 'An unknown error occurred.'); //$NON-NLS-1$
     	}
     	if(this.port) {
     		this.port.postMessage(msg);
@@ -213,7 +192,7 @@ require({
         if(ternserver && typeof(args.file) === 'string') {
             ternserver.delFile(args.file);
         } else {
-            post('Failed to delete file from Tern: '+args.file);
+            post('Failed to delete file from Tern: '+args.file); //$NON-NLS-1$
         }
     }
     
@@ -232,9 +211,9 @@ require({
            		_f = file.logical;
            }
            pendingReads[_f] = callback;
-           post({request: 'read', args: {file:file}});
+           post({request: 'read', args: {file:file}}); //$NON-NLS-1$
 	    } else {
-	       post('Failed to read file into Tern: '+_f);
+	       post('Failed to read file into Tern: '+_f); //$NON-NLS-1$
 	    }
     }
 });

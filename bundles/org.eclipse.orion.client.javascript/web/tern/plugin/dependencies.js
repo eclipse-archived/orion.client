@@ -11,10 +11,14 @@
 
   function getRequire(data) {
     if (!data.require) {
-      data.require = new infer.Fn("require", infer.ANull, [infer.cx().str], ["module"], new infer.AVal);
+      data.require = new infer.Fn("require", infer.ANull, [infer.cx().str], ["module"], new infer.AVal); //$NON-NLS-1$ //$NON-NLS-2$
       data.require.computeRet = /* @callback */ function(_self, _args, argNodes) {
-        if (argNodes.length && argNodes[0].type === "Literal" && typeof argNodes[0].value === "string")
-          return getInterface(argNodes[0].value, data);
+        if (argNodes.length && argNodes[0].type === "Literal" && typeof argNodes[0].value === "string") {
+        	var inter = getInterface(argNodes[0].value, data);
+        	if(inter) {
+        		return inter;
+        	}
+        }
         return infer.ANull;
       };
     }
@@ -22,6 +26,7 @@
   }
 
   function getInterface(name, data) {
+  	//add caching checks
     if (name === "require") {
     	return getRequire(data);
     }
@@ -46,15 +51,32 @@
     }
 	known = getModule(name, data);
 	if (known) {
-      data.server.addFile(known.origin, known.contents, data.currentFile);
+      data.server.addFile(known.origin, null, data.currentFile);
     }
 	return known;
   }
   
+  /**
+   * @description Do a quick check to see if we have loaded this dep already.
+   * Originally from Tern's built-in requirejs plugin
+   * @param {String} name The name of the dependency
+   * @param {Object} data The context data object used
+   * @returns returns
+   */
   function getKnownModule(name, data) {
-    return data.interfaces[stripJSExt(name)];
+  	var val = data.server._requireJS.resolved[name];
+  	if(val) {
+    	return data.interfaces[stripJSExt(val.file)];
+    }
+    return null;
   }
 
+  /**
+   * @description description
+   * @param name
+   * @param data
+   * @returns returns
+   */
   function getModule(name, data) {
     var known = getKnownModule(name, data);
     if (!known) {
@@ -62,7 +84,6 @@
       if(val) {
 	      known = data.interfaces[stripJSExt(val.file)] = new infer.AVal;
 	      known.origin = val.file;
-	      known.contents = val.contents;
       }
     }
     return known;
@@ -74,13 +95,15 @@
     return f.replace(/\.js$/, '');
   }
 
-  infer.registerFunction("requireJS", function(_self, args, argNodes) {
+  infer.registerFunction("requireJS", function(_self, args, argNodes) { //$NON-NLS-1$
     var server = infer.cx().parent, data = server && server._requireJS;
     if (!data || !args.length) return infer.ANull;
 
     var name = data.currentFile;
-    var out = getModule(name, data);
-
+    var out = data.interfaces[stripJSExt(name)] = new infer.AVal;
+    out.origin = name;
+    
+	//TODO add caching checks
     var deps = [], fn;
     if (argNodes && args.length > 1) {
       var node = argNodes[args.length === 2 ? 0 : 1];
@@ -89,25 +112,27 @@
       	if(inter) {
         	deps.push(inter);
         }
-      } else if (node.type === "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
-        var elt = node.elements[i];
-        if (elt.type === "Literal" && typeof elt.value === "string") {
-          if (elt.value === "exports") {
-            var exports = new infer.Obj(true);
-            deps.push(exports);
-            out.addType(exports, EXPORT_OBJ_WEIGHT);
-          } else {
-          	inter = getInterface(elt.value, data);
-          	if(inter) {
-            	deps.push(inter);
-            }
-          }
+      } else if (node.type === "ArrayExpression") {
+      	for (var i = 0; i < node.elements.length; ++i) {
+	        var elt = node.elements[i];
+	        if (elt.type === "Literal" && typeof elt.value === "string") {
+	          if (elt.value === "exports") {
+	            var exports = new infer.Obj(true);
+	            deps.push(exports);
+	            out.addType(exports, EXPORT_OBJ_WEIGHT);
+	          } else {
+	          	inter = getInterface(elt.value, data);
+	          	if(inter) {
+	            	deps.push(inter);
+	            }
+	          }
+	        }
         }
       }
     } else if (argNodes && args.length === 1 && argNodes[0].type === "FunctionExpression" && argNodes[0].params.length) {
       // Simplified CommonJS call
       var exports = new infer.Obj(true);
-      inter = getInterface("require", data);
+      inter = getInterface("require", data); //$NON-NLS-1$
       if(inter) {
       	deps.push(inter, exports);
       }
@@ -129,11 +154,11 @@
   // Parse simple ObjectExpression AST nodes to their corresponding JavaScript objects.
   function parseExprNode(node) {
     switch (node.type) {
-    case "ArrayExpression":
+    case "ArrayExpression": //$NON-NLS-1$
       return node.elements.map(parseExprNode);
-    case "Literal":
+    case "Literal": //$NON-NLS-1$
       return node.value;
-    case "ObjectExpression":
+    case "ObjectExpression": //$NON-NLS-1$
       var obj = {};
       node.properties.forEach(function(prop) {
         var key = prop.key.name || prop.key.value;
@@ -143,7 +168,7 @@
     }
   }
 
-  infer.registerFunction("requireJSConfig", /* @callback */ function(_self, _args, argNodes) {
+  infer.registerFunction("requireJSConfig", /* @callback */ function(_self, _args, argNodes) { //$NON-NLS-1$
     var server = infer.cx().parent, data = server && server._requireJS;
     if (data && argNodes && argNodes.length && argNodes[0].type === "ObjectExpression") {
       var config = parseExprNode(argNodes[0]);
@@ -165,7 +190,7 @@
     var interfaces = infer.cx().parent._requireJS.interfaces;
     var rjs = state.roots["!requirejs"] = new infer.Obj(null);
     for (var name in interfaces) {
-      var prop = rjs.defProp(name.replace(/\./g, "`"));
+      var prop = rjs.defProp(name.replace(/\./g, "`")); //$NON-NLS-1$
       interfaces[name].propagate(prop);
       prop.origin = interfaces[name].origin;
     }
@@ -197,11 +222,11 @@
 
   function waitOnResolve(server) {
     var done = function() {
-      server.off("everythingFetched", done);
+      //server.off("everythingFetched", done); //$NON-NLS-1$
       clearTimeout(timeout);
       doPreInfer(server);
     };
-    server.on("everythingFetched", done);
+    //server.on("everythingFetched", done); //$NON-NLS-1$
     var timeout = setTimeout(done, server.options.fetchTimeout);
   }
 
@@ -222,7 +247,7 @@
 		return waitOnResolve(server);
 	}
   }
-  tern.registerPlugin("orion_requirejs", function(server, options) {
+  tern.registerPlugin("dependencies", function(server, options) { //$NON-NLS-1$
     server._requireJS = {
       interfaces: Object.create(null),
       options: options || {},
@@ -231,10 +256,10 @@
       resolved: Object.create(null)
     };
 
-    server.on("beforeLoad", function(file) {
+    server.on("beforeLoad", function(file) { //$NON-NLS-1$
       this._requireJS.currentFile = file.name;
     });
-    server.on("reset", function() {
+    server.on("reset", function() { //$NON-NLS-1$
       this._requireJS.interfaces = Object.create(null);
       this._requireJS.require = null;
       this._requireJS.fileMap = Object.create(null);
@@ -279,28 +304,28 @@
   });
 
   var defs = {
-    "!name": "requirejs",
+    "!name": "requirejs", //$NON-NLS-1$
     "!define": {
       module: {
-        id: "string",
-        uri: "string",
-        config: "fn() -> ?",
-        exports: "?"
+        id: "string", //$NON-NLS-1$
+        uri: "string", //$NON-NLS-1$
+        config: "fn() -> ?", //$NON-NLS-1$
+        exports: "?" //$NON-NLS-1$
       }
     },
     requirejs: {
-      "!type": "fn(deps: [string], callback: fn(), errback: fn()) -> !custom:requireJS",
-      onError: "fn(err: +Error)",
-      load: "fn(context: ?, moduleName: string, url: string)",
-      config: "fn(config: ?) -> !custom:requireJSConfig",
-      version: "string",
-      isBrowser: "bool"
+      "!type": "fn(deps: [string], callback: fn(), errback: fn()) -> !custom:requireJS", //$NON-NLS-1$
+      onError: "fn(err: +Error)", //$NON-NLS-1$
+      load: "fn(context: ?, moduleName: string, url: string)", //$NON-NLS-1$
+      config: "fn(config: ?) -> !custom:requireJSConfig", //$NON-NLS-1$
+      version: "string", //$NON-NLS-1$
+      isBrowser: "bool" //$NON-NLS-1$
     },
-    require: "requirejs",
+    require: "requirejs", //$NON-NLS-1$
     define: {
-      "!type": "fn(deps: [string], callback: fn()) -> !custom:requireJS",
+      "!type": "fn(deps: [string], callback: fn()) -> !custom:requireJS", //$NON-NLS-1$
       amd: {
-        jQuery: "bool"
+        jQuery: "bool" //$NON-NLS-1$
       }
     }
   };
