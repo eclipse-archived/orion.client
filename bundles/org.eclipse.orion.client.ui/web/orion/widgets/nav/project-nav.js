@@ -470,7 +470,20 @@ define([
 				metadata = metadata.parent;
 			}
 			if (metadata.Parents && metadata.Parents.length > 0) {
-				return this.fileClient.read(metadata.Parents[metadata.Parents.length - 1].Location, true);
+				var topParent = metadata.Parents[metadata.Parents.length - 1];
+				if (topParent.Children) {
+					for (var i=metadata.Parents.length - 1; i>0; i--) {
+						var temp = metadata.Parents[i];
+						var child = metadata.Parents[i-1];
+						for (var k=0; k<temp.Children.length; k++) {
+							if (temp.Children[k].Location === child.Location) {
+								temp.Children[k] = child;
+							}
+						}
+					}
+					return new Deferred().resolve(topParent);
+				}
+				return this.fileClient.read(topParent.Location, true);
 			}
 			return new Deferred().resolve(metadata);
 		},
