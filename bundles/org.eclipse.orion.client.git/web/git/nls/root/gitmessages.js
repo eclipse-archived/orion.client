@@ -29,7 +29,6 @@ define({//Default message bundle
 	"authored by 0 (1) on 2": "authored by ${0} <${1}> on ${2}", //$NON-NLS-0$  //$NON-NLS-1$
 	"committed by 0 (1)": "committed by ${0} <${1}>", //$NON-NLS-0$  //$NON-NLS-1$
 	"committedby": "committed by ", //$NON-NLS-0$  //$NON-NLS-1$
-	"authoredby": "authored by ", //$NON-NLS-0$  //$NON-NLS-1$
 	"on": " on ", //$NON-NLS-0$  //$NON-NLS-1$ //Used for the format as "authorName on date"
 	"nameEmail": "${0} <${1}>", //$NON-NLS-0$  //$NON-NLS-1$
 	"Tags:": "Tags:", //$NON-NLS-0$  //$NON-NLS-1$
