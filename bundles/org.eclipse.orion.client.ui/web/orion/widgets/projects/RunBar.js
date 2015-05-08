@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -139,14 +139,18 @@ define([
 					this._menuItemsCache = []; // clear launch configurations menu items cache
 					var dropdown = this._launchConfigurationsDropdown.getDropdown();
 					var hash, launchConfiguration, menuItem, domNodeWrapperList;
-					
-					for (hash in this._cachedLaunchConfigurations) {
+
+					this._sortedLaunchConfHashes.forEach( function(hash) {
 						if (this._cachedLaunchConfigurations.hasOwnProperty(hash)) {
 							launchConfiguration = this._cachedLaunchConfigurations[hash];
 							menuItem = dropdown.appendMenuItem(this._getDisplayName(launchConfiguration));
 							menuItem.classList.add("launchConfigurationMenuItem"); //$NON-NLS-0$
 							menuItem.id = launchConfiguration.Name + "_RunBarMenuItem"; //$NON-NLS-0$
-							
+
+							if (launchConfiguration === this.getSelectedLaunchConfiguration()) {
+								menuItem.classList.add("dropdownMenuItemActive"); //$NON-NLS-0$
+							}
+
 							menuItem.addEventListener("click", function(currentHash, event){ //$NON-NLS-0$
 								// Use currentHash to get cached launch config again because it will be updated 
 								// by the listener as events occur. Using currentHash directly here to avoid 
@@ -159,7 +163,7 @@ define([
 								}
 								this.selectLaunchConfiguration(cachedConfig, checkStatus);
 							}.bind(this, hash)); // passing in hash here because using it directly in function only creates a reference which ends up with the last value of hash
-							
+
 							this._commandRegistry.registerCommandContribution(menuItem.id, "orion.launchConfiguration.edit", 1); //$NON-NLS-0$
 							this._commandRegistry.registerCommandContribution(menuItem.id, "orion.launchConfiguration.delete", 2); //$NON-NLS-0$
 							domNodeWrapperList = [];
@@ -177,7 +181,7 @@ define([
 							separator = dropdown.appendSeparator();
 							this._menuItemsCache.push(separator);
 						}
-					}
+					}.bind(this));
 					
 					separator = dropdown.appendSeparator();
 					this._menuItemsCache.push(separator);
@@ -289,7 +293,8 @@ define([
 				
 				if((event.type === "create") && newConfig){ //$NON-NLS-0$
 					// cache and select new launch config
-					this._putInLaunchConfigurationsCache(newConfig);					
+					this._putInLaunchConfigurationsCache(newConfig);
+					this._sortLaunchConfigurationsCache();
 					this.selectLaunchConfiguration(newConfig, true); //check the status of newly created configs
 				} else if(event.type === "delete"){ //$NON-NLS-0$
 					var deletedFile = event.oldValue.File;
@@ -365,6 +370,7 @@ define([
 				this._setLaunchConfigurationsLabel(null);
 				this.setStatus({});
 			}
+			this._menuItemsCache = [];
 		},
 
 		_displayStatusCheck: function(launchConfiguration) {
@@ -391,6 +397,7 @@ define([
 			
 			// replace cached launch config
 			this._putInLaunchConfigurationsCache(launchConfiguration);
+			this._sortLaunchConfigurationsCache();
 		},
 					
 		_checkLaunchConfigurationStatus: function(launchConfiguration) {
@@ -560,6 +567,11 @@ define([
 		_setLaunchConfigurations: function(launchConfigurations) {
 			this._enableLaunchConfigurationsDropdown();
 			this._menuItemsCache = []; //reset the cached launch configuration dropdown menu items
+
+			launchConfigurations.sort(function(launchConf1, launchConf2) {
+				return launchConf1.Name.localeCompare(launchConf2.Name);
+			});
+
 			this._cacheLaunchConfigurations(launchConfigurations);
 			
 			if (launchConfigurations && launchConfigurations[0]) {
@@ -577,6 +589,7 @@ define([
 			launchConfigurations.forEach(function(launchConfig){
 				this._putInLaunchConfigurationsCache(launchConfig);
 			}, this);
+			this._sortLaunchConfigurationsCache();
 		},
 		
 		_getHash: function(launchConfiguration) {
@@ -599,8 +612,27 @@ define([
 		_removeFromLaunchConfigurationsCache: function(launchConfiguration) {
 			var hash = this._getHash(launchConfiguration);
 			delete this._cachedLaunchConfigurations[hash];
+
+			var index = this._sortedLaunchConfHashes.indexOf(hash);
+			if (index > -1) {
+				this._sortedLaunchConfHashes.splice(index, 1);
+			}
 		},
-		
+
+		_sortLaunchConfigurationsCache: function() {
+			this._sortedLaunchConfHashes = [];
+			for (hash in this._cachedLaunchConfigurations) {
+				if (this._cachedLaunchConfigurations.hasOwnProperty(hash)) {
+					this._sortedLaunchConfHashes.push(hash);
+				}
+			}
+
+			this._sortedLaunchConfHashes.sort(function(hash1, hash2) {
+				return this._cachedLaunchConfigurations[hash1].Name
+						.localeCompare(this._cachedLaunchConfigurations[hash2].Name);
+			}.bind(this));
+		},
+
 		/**
 		 * Implements a generic button listener which executes the specified
 		 * command when it is invoked and collects metrics
