@@ -76,6 +76,10 @@
 	padding: 9px 3px 9px 5px;
 }
 
+.launchConfigurationMenuItem.dropdownMenuItemActive {
+	background-color: #DEF7D9;
+}
+
 .dropdownMenu.dropdownMenuOpen > li > .addNewMenuItem {
 	background-color: whitesmoke;
 	border-left-color: transparent;
