@@ -3879,7 +3879,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'b' is read only.");
+    			assert.equal(messages[0].message, "'b' is read-only.");
     			assert.include(messages[0].node.type, "Identifier");
     		});
     
@@ -3892,7 +3892,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'b' is read only.");
+    			assert.equal(messages[0].message, "'b' is read-only.");
     			assert.include(messages[0].node.type, "Identifier");
     		});
     
@@ -3905,7 +3905,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'b' is read only.");
+    			assert.equal(messages[0].message, "'b' is read-only.");
     			assert.include(messages[0].node.type, "Identifier");
     		});
     
@@ -3918,7 +3918,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'b' is read only.");
+    			assert.equal(messages[0].message, "'b' is read-only.");
     			assert.include(messages[0].node.type, "Identifier");
     		});
     
@@ -4035,7 +4035,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'Array' is read only.");
+    			assert.equal(messages[0].message, "'Array' is read-only.");
     			assert.include(messages[0].node.type, "Identifier");
     		});
     
