@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -140,13 +140,24 @@ define([
 					var dropdown = this._launchConfigurationsDropdown.getDropdown();
 					var hash, launchConfiguration, menuItem, domNodeWrapperList;
 					
-					for (hash in this._cachedLaunchConfigurations) {
+					var sortedHashes = Object.keys(this._cachedLaunchConfigurations);
+
+					sortedHashes.sort(function(hash1, hash2) {
+						return this._cachedLaunchConfigurations[hash1].Name
+								.localeCompare(this._cachedLaunchConfigurations[hash2].Name);
+					}.bind(this));
+
+					sortedHashes.forEach( function(hash) {
 						if (this._cachedLaunchConfigurations.hasOwnProperty(hash)) {
 							launchConfiguration = this._cachedLaunchConfigurations[hash];
 							menuItem = dropdown.appendMenuItem(this._getDisplayName(launchConfiguration));
 							menuItem.classList.add("launchConfigurationMenuItem"); //$NON-NLS-0$
 							menuItem.id = launchConfiguration.Name + "_RunBarMenuItem"; //$NON-NLS-0$
-							
+
+							if (launchConfiguration === this.getSelectedLaunchConfiguration()) {
+								menuItem.classList.add("dropdownMenuItemActive"); //$NON-NLS-0$
+							}
+
 							menuItem.addEventListener("click", function(currentHash, event){ //$NON-NLS-0$
 								// Use currentHash to get cached launch config again because it will be updated 
 								// by the listener as events occur. Using currentHash directly here to avoid 
@@ -177,7 +188,7 @@ define([
 							separator = dropdown.appendSeparator();
 							this._menuItemsCache.push(separator);
 						}
-					}
+					}.bind(this));
 					
 					separator = dropdown.appendSeparator();
 					this._menuItemsCache.push(separator);
@@ -365,6 +376,7 @@ define([
 				this._setLaunchConfigurationsLabel(null);
 				this.setStatus({});
 			}
+			this._menuItemsCache = [];
 		},
 
 		_displayStatusCheck: function(launchConfiguration) {
@@ -559,7 +571,11 @@ define([
 		 */
 		_setLaunchConfigurations: function(launchConfigurations) {
 			this._enableLaunchConfigurationsDropdown();
-			this._menuItemsCache = []; //reset the cached launch configuration dropdown menu items
+
+			launchConfigurations.sort(function(launchConf1, launchConf2) {
+				return launchConf1.Name.localeCompare(launchConf2.Name);
+			});
+
 			this._cacheLaunchConfigurations(launchConfigurations);
 			
 			if (launchConfigurations && launchConfigurations[0]) {
