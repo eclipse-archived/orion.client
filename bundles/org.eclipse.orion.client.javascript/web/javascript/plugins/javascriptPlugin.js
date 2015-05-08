@@ -664,6 +664,13 @@ define([
     			 	        	                	options: severities //$NON-NLS-0$
     			 	        	                },
     			 	        	                {
+    			 	        	                	id: "no-with", //$NON-NLS-0$
+    			 	        	                	name: javascriptMessages["noWith"], //$NON-NLS-0$
+    			 	        	                	type: "number", //$NON-NLS-0$
+    			 	        	                	defaultValue: warning, //$NON-NLS-0$
+    			 	        	                	options: severities //$NON-NLS-0$
+    			 	        	                },
+    			 	        	                {
     			 	        	                	id: "no-new-wrappers", //$NON-NLS-0$
     			 	        	                	name: javascriptMessages["noNewWrappers"], //$NON-NLS-0$
     			 	        	                	type: "number", //$NON-NLS-0$

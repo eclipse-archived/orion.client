@@ -18,6 +18,7 @@ define({
 	'missing-doc' : 'Missing documentation for function \'${0}\'.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'missing-nls' : 'Non-externalized string literal \'${0}\'.', //$NON-NLS-0$  //$NON-NLS-1$
 	'new-parens' : 'Missing parentheses invoking constructor.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-with': 'Discouraged use of \'with\' statement.',  //$NON-NLS-1$ //$NON-NLS-2$
 	'no-caller': '\'arguments.${0}\' is deprecated.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-comma-dangle': 'Trailing commas in object expressions are discouraged.',  //$NON-NLS-0$ //$NON-NLS-1$
 	'no-cond-assign': 'Expected a conditional expression and instead saw an assignment.',  //$NON-NLS-0$ //$NON-NLS-1$

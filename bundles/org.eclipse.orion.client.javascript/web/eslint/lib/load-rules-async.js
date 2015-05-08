@@ -671,6 +671,15 @@ define([
         		}, context);
         	}
         },
+        "no-with": {
+        	description: "Warn when the with statement is used",
+        	rule: function(context) {
+        		return {'WithStatement': function(node) {
+	        			context.report(node, 'Discouraged use of the \'with\' statement.', null, context.getFirstToken(node));
+	        		}
+        		}
+        	}
+        },
         "missing-nls": {
         	description: 'Disallow non-externalized string literals',
         	rule: function(context){

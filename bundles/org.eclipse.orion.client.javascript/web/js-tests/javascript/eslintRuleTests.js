@@ -4934,7 +4934,31 @@ define([
     			assert.equal(messages[0].node.type, "Identifier");
     		});
     	});
-    	
+//no-with ------------------------------------------------
+        describe('no-with', function() {
+            var RULE_ID = "no-with";
+            var MESSAGE = "Discouraged use of the 'with' statement.";
+            it("should flag with 1", function() {
+                var topic = "var a = 'a'; with(a) {}";
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 1);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, MESSAGE);
+                assert.equal(messages[0].node.type, "WithStatement");
+            });
+            it("should flag with 2", function() {
+                var topic = "if(true) {var a = 'a'; with(a) {}}";
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 1);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, MESSAGE);
+                assert.equal(messages[0].node.type, "WithStatement");
+            });
+        }); 
 //RADIX ------------------------------------------------
         describe('radix', function() {
             var RULE_ID = "radix";

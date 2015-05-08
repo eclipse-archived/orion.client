@@ -60,7 +60,8 @@ define([
 			'no-fallthrough' : 2,  //$NON-NLS-0$
 			'no-empty-block' : 0,  //$NON-NLS-0$
 			'valid-typeof': 2,  //$NON-NLS-0$
-			'no-sparse-arrays': 1  //$NON-NLS-0$
+			'no-sparse-arrays': 1,  //$NON-NLS-0$
+			'no-with': 1  //$NON-NLS-1$
 		},
 		
 		/**
@@ -245,7 +246,7 @@ define([
 						}
 					} else if(!error.token) {
 					    //an untyped error with no tokens, report the failure
-					    error.args = {0: error.message, nls: 'esprimaParseFailure'};
+					    error.args = {0: error.message, nls: 'esprimaParseFailure'}; //$NON-NLS-1$
 					    error.message = error.args.nls;
 					    //use the line number / column
 				       delete error.start;
@@ -317,7 +318,7 @@ define([
 				}
 			}
 			var end = Date.now() - start;
-			Metrics.logTiming('language tools', 'validation', end, 'application/javascript');
+			Metrics.logTiming('language tools', 'validation', end, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			return { problems: this._filterProblems(parseErrors, eslintErrors).map(toProblem) };
 		},
 		
@@ -412,38 +413,38 @@ define([
 		 * @since 8.0
 		 */
 		_legacy: {
-		    'throw-error': 'no-throw-literal',
-		    validate_no_cond_assign: 'no-cond-assign',
-		    validate_no_constant_condition: 'no-constant-condition',
-		    validate_no_caller: 'no-caller',
-		    validate_eqeqeq: 'eqeqeq',
-		    validate_no_console: 'no-console',
-		    validate_debugger: 'no-debugger',
-		    validate_eval: 'no-eval',
-		    validate_no_iterator:'no-iterator',
-		    validate_dupe_obj_keys: 'no-dupe-keys',
-		    validate_typeof: 'valid-typeof',
-		    validate_use_before_define: 'no-use-before-define',
-		    validate_new_parens: 'new-parens',
-		    validate_radix: 'radix',
-		    validate_missing_semi: 'semi',
-		    validate_no_regex_spaces: 'no-spaces-regex',
-		    validate_use_isnan: 'use-isnan',
-		    validate_throw_error: 'no-throw-literal',
-		    validate_no_reserved_keys: 'no-reserved-keys',
-		    validate_no_sparse_arrays: 'no-sparse-arrays',
-		    validate_curly: 'curly',
-		    validate_no_fallthrough: 'no-fallthrough',
-		    validate_no_comma_dangle: 'no-comma-dangle',
-		    validate_no_undef: 'no-undef',
-		    validate_no_empty_block: 'no-empty-block',
-		    validate_unnecessary_semi: 'no-extra-semi',
-		    validate_no_jslint: 'no-jslint',
-		    validate_unused_params: 'no-unused-params',
-		    validate_no_unused_vars: 'no-unused-vars',
-		    validate_no_unreachable: 'no-unreachable',
-		    validate_no_redeclare: 'no-redeclare',
-		    validate_no_shadow: 'no-shadow'
+		    'throw-error': 'no-throw-literal', //$NON-NLS-1$
+		    validate_no_cond_assign: 'no-cond-assign', //$NON-NLS-1$
+		    validate_no_constant_condition: 'no-constant-condition', //$NON-NLS-1$
+		    validate_no_caller: 'no-caller', //$NON-NLS-1$
+		    validate_eqeqeq: 'eqeqeq', //$NON-NLS-1$
+		    validate_no_console: 'no-console', //$NON-NLS-1$
+		    validate_debugger: 'no-debugger', //$NON-NLS-1$
+		    validate_eval: 'no-eval', //$NON-NLS-1$
+		    validate_no_iterator:'no-iterator', //$NON-NLS-1$
+		    validate_dupe_obj_keys: 'no-dupe-keys', //$NON-NLS-1$
+		    validate_typeof: 'valid-typeof', //$NON-NLS-1$
+		    validate_use_before_define: 'no-use-before-define', //$NON-NLS-1$
+		    validate_new_parens: 'new-parens', //$NON-NLS-1$
+		    validate_radix: 'radix', //$NON-NLS-1$
+		    validate_missing_semi: 'semi', //$NON-NLS-1$
+		    validate_no_regex_spaces: 'no-spaces-regex', //$NON-NLS-1$
+		    validate_use_isnan: 'use-isnan', //$NON-NLS-1$
+		    validate_throw_error: 'no-throw-literal', //$NON-NLS-1$
+		    validate_no_reserved_keys: 'no-reserved-keys', //$NON-NLS-1$
+		    validate_no_sparse_arrays: 'no-sparse-arrays', //$NON-NLS-1$
+		    validate_curly: 'curly', //$NON-NLS-1$
+		    validate_no_fallthrough: 'no-fallthrough', //$NON-NLS-1$
+		    validate_no_comma_dangle: 'no-comma-dangle', //$NON-NLS-1$
+		    validate_no_undef: 'no-undef', //$NON-NLS-1$
+		    validate_no_empty_block: 'no-empty-block', //$NON-NLS-1$
+		    validate_unnecessary_semi: 'no-extra-semi', //$NON-NLS-1$
+		    validate_no_jslint: 'no-jslint', //$NON-NLS-1$
+		    validate_unused_params: 'no-unused-params', //$NON-NLS-1$
+		    validate_no_unused_vars: 'no-unused-vars', //$NON-NLS-1$
+		    validate_no_unreachable: 'no-unreachable', //$NON-NLS-1$
+		    validate_no_redeclare: 'no-redeclare', //$NON-NLS-1$
+		    validate_no_shadow: 'no-shadow' //$NON-NLS-1$
 		}
 		
 	});

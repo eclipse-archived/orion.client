@@ -32,6 +32,7 @@ define({//Default message bundle
     'noReservedKeys' : 'Reserved words used as property keys:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noEqeqeq' : 'Discouraged \'==\' use:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noDebugger' : 'Discouraged \'debugger\' statement use:', //$NON-NLS-0$  //$NON-NLS-1$
+	'noWith': 'Discouraged \'with\' statement use:',  //$NON-NLS-1$ //$NON-NLS-2$
 	'noEval' : 'Discouraged \'eval()\' use:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noDupeKeys' : 'Duplicate object keys:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noIterator': 'Discouraged __iterator__ property use:', //$NON-NLS-0$  //$NON-NLS-1$
