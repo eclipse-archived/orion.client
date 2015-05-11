@@ -707,7 +707,7 @@ define([
     	        if(_o === args.meta.location) {
     	            locals.push(_formatTernProposal(_c, args));
     	        } else {
-    	        	if(!envs[_o]) {
+    	        	if(_o.indexOf('/') < 0 && !envs[_o]) {
 	    	        	continue;
 	    	        }
     	           if(!Array.isArray(_p[_o])) {
