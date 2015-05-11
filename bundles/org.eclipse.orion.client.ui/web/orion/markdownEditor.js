@@ -187,34 +187,8 @@ define([
 					contentToken = tokens[i];
 					index = end;
 				} else if (tokens[i].type === "paragraph" || tokens[i].type === "text") { //$NON-NLS-1$ //$NON-NLS-0$
-					var newlineCount = 0;
-
-					/*
-					 * marked's sanitizing of html produces paragraph tokens with trailing newline
-					 * characters, which is inconsistent with normal paragraph tokens. If this paragraph
-					 * is detected to be sanitized html (check for a 'pre' property) then do not consider
-					 * trailing newline characters when computing the end bound.
-					 */
-					if (tokens[i].pre !== undefined) {
-						var lastIndex = 0;
-						while (true) {
-							this._htmlNewlineRegex.lastIndex = lastIndex;
-							match = this._htmlNewlineRegex.exec(tokens[i].text);
-							if (match) {
-								newlineCount++;
-								lastIndex = match.index + 1;
-							} else {
-								break;
-							}
-						}
-					} else {
-						match = tokens[i].text.match(this._newlineRegex);
-						if (match) {
-							newlineCount = match.length;
-						}
-					}
-
-					end = this._getLineEnd(text, index, model, newlineCount);
+					end = this._advanceIndex(text, tokens[i], index);
+					end = this._getLineEnd(text, end, model);
 
 					if (!this._isTop(block)) {
 						tokens[i].type = "text"; //$NON-NLS-0$
@@ -231,7 +205,7 @@ define([
 					name = tokens[i].isHTML ? "markup.raw.html.markdown" : this._TYPEID_PARAGRAPH; //$NON-NLS-0$
 					index = end;
 				} else if (tokens[i].type === "def") { //$NON-NLS-0$
-					newlineCount = 0;
+					var newlineCount = 0;
 					if (tokens[i].title) {
 						var titleIndex = text.indexOf(tokens[i].title, index + 1);
 						var substring = text.substring(index, titleIndex);
