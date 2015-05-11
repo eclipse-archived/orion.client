@@ -116,7 +116,7 @@ define([
 	// type, we want to use the orion.editor to open it
 	provider.registerService("orion.navigate.openWith", {}, {
 		editor: "orion.editor",
-		excludedContentTypes: ["image/*", "application/zip", "application/octet-stream"]});
+		excludedContentTypes: ["image/*", "application/zip"]});
 
 	var MARKDOWN_VIEWER_ID = "orion.viewer.markdown";
 	provider.registerService("orion.edit.editor", {}, {
