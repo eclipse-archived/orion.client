@@ -906,6 +906,9 @@ define([
 		expandItem: function(item, reroot) {
 			var deferred = new Deferred();
 			this.showItem(item, reroot).then(function(result) {
+				if (item.Children && !result.Children) {
+					result.Children = item.Children;
+				}
 				if (this.myTree.isExpanded(result)) {
 					deferred.resolve(result);
 				} else {
