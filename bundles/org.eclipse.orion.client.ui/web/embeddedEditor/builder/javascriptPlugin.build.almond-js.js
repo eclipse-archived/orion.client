@@ -24,6 +24,11 @@
         almond: 'requirejs/almond',
         i18n: 'requirejs/i18n',
         text: 'requirejs/text',
+		esprima: "esprima/esprima",
+		estraverse: "estraverse/estraverse",
+		escope: "escope/escope",
+		logger: "javascript/logger",
+		doctrine: 'doctrine/doctrine',
         'orion/bootstrap': 'embeddedEditor/builder/buildFrom/bootstrap'
 	},
 	name: "almond",
