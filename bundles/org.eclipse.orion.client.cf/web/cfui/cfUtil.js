@@ -49,7 +49,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 			return messages["deploy.enterCredentials"];
 		},
 		
-		prepareLaunchConfigurationContent : function(configName, target, appName, appPath, instrumentation, devMode){
+		prepareLaunchConfigurationContent : function(configName, target, appName, appPath, instrumentation){
 			var deferred = new Deferred();
 
 			var launchConf = {
@@ -73,10 +73,6 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 			/* additional configuration */
 			if(instrumentation){
 				launchConf.ToSave.Parameters.Instrumentation = instrumentation;
-			}
-
-			if(devMode){
-				launchConf.ToSave.Parameters.DevMode = devMode;
 			}
 
 			deferred.resolve(launchConf);
