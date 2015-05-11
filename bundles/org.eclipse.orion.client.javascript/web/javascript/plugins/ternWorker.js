@@ -37,7 +37,7 @@ require({
 [
 	'tern/lib/tern', //$NON-NLS-1$
 	'tern/plugin/doc_comment', //$NON-NLS-1$
-	//'tern/plugin/dependencies', //$NON-NLS-1$
+	'tern/plugin/dependencies', //$NON-NLS-1$
 	//TODO Load these on the fly
 	//'tern/plugin/requirejs',
 	//'tern/plugin/mongodb2_0_27',
@@ -51,7 +51,7 @@ require({
 	'javascript/handlers/ternRenameHandler', //$NON-NLS-1$
 	'doctrine'  //stays last - exports into global //$NON-NLS-1$
 ],
-/* @callback */ function(Tern, docPlugin, /*dependenciesPlugin, requirePlugin, mongodbPlugin, nodePlugin,*/ ecma5, browser, 
+/* @callback */ function(Tern, docPlugin, dependenciesPlugin, /*requirePlugin, mongodbPlugin, nodePlugin,*/ ecma5, browser, 
 							AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler) {
     
     var ternserver, pendingReads = Object.create(null);
@@ -68,10 +68,10 @@ require({
                 plugins: {
                     doc_comment: {
                         fullDocs: true
-                    }
-                   // dependencies: {
+                    },
+                    dependencies: {
                     	//depth: 1
-                    //}
+                    }
                     //mongodb2_0_27:{},
                     //node: {}
                 },
@@ -176,12 +176,13 @@ require({
         var read = pendingReads[file];
         if(typeof(read) === 'function') {
             read(err, contents);
+             delete pendingReads[file];
         }
         read = pendingReads[args.logical];
         if(typeof(read) === 'function') {
             read(err, {contents: contents, file:file, logical:args.logical});
+            delete pendingReads[args.logical];
         }
-        delete pendingReads[file];
     }
     
     /**

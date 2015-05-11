@@ -280,6 +280,9 @@
 		 * @callback
 		 */
 		postParse: function postParse(ast, text) {
+			if(server._requireJS && Object.keys(server._requireJS.resolved).length > 0) {
+				return;
+			}
 			if(Array.isArray(ast.dependencies) && ast.dependencies.length > 0) {
 				for(var i = 0; i < ast.dependencies.length; i++) {
 					var _d = ast.dependencies[i].value;
