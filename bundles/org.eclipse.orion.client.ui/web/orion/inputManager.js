@@ -200,7 +200,22 @@ define([
 				progress(this._read(resource + (localStorage.useFull ? "?full=true" : ""), true), messages.ReadingMetadata, resource).then(function(metadata) {
 					if(!metadata) {
 						errorHandler({responseText: i18nUtil.formatMessage(messages.ReadingMetadataError, resource)});
-					} else if (metadata.Directory) {
+						return;
+					}
+					var topParent = metadata.Parents[metadata.Parents.length - 1];
+					// Children is only available if full=true
+					if (topParent && topParent.Children) {
+						for (var i=metadata.Parents.length - 1; i>0; i--) {
+							var temp = metadata.Parents[i];
+							var child = metadata.Parents[i-1];
+							for (var k=0; k<temp.Children.length; k++) {
+								if (temp.Children[k].Location === child.Location) {
+									temp.Children[k] = child;
+								}
+							}
+						}
+					}
+					if (metadata.Directory) {
 						// Fetch children
 						Deferred.when(metadata.Children || progress(fileClient.fetchChildren(metadata.ChildrenLocation), messages.Reading, fileURI), function(contents) {
 							clearTimeout();

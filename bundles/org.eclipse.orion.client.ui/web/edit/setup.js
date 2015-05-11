@@ -803,6 +803,9 @@ objects.mixin(EditorSetup.prototype, {
 				if (metadata && metadata.parent) {
 					return metadata.parent;
 				} else if (metadata && metadata.Parents && metadata.Parents.length > 0) {
+					if (metadata.Parents[0].Children) {
+						return metadata.Parents[0];
+					}
 					// The mini-nav in sidebar wants to do the same work, can we share it?
 					return this.progressService.progress(this.fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages.ReadingMetadata, metadata.Parents[0].Location));
 				}
