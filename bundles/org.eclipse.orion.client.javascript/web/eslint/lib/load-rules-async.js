@@ -1094,6 +1094,19 @@ define([
             
             }
         },
+        'no-undef-init': {
+        	description: 'Warn when variables are explicitly initialized to undefined',
+        	url: 'http://eslint.org/docs/rules/no-undef-init.html',
+        	rule: function(context) {
+        		return {
+        			'VariableDeclarator': function(node) {
+        				if(node.init && node.init.type === 'Identifier' && node.init.name === 'undefined') {
+    						context.report(node.init, 'Avoid explicitly initializing variables to \'undefined\'.');
+        				}
+        			}
+        		}
+        	}
+        },
 		'no-unreachable' : {
 		    description: 'Warn when code is not reachable',
 		    rule: function(context) {

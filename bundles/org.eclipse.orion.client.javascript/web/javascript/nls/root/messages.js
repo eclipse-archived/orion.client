@@ -37,6 +37,7 @@ define({//Default message bundle
 	'noDupeKeys' : 'Duplicate object keys:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noIterator': 'Discouraged __iterator__ property use:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noProto': 'Discouraged __proto__ property use:', //$NON-NLS-0$  //$NON-NLS-1$
+	'noUndefInit': 'Explicitly initializing variables to undefined:',  //$NON-NLS-1$ //$NON-NLS-2$
 	'useIsNaN' : 'NaN not compared with isNaN():', //$NON-NLS-0$  //$NON-NLS-1$
 	'missingDoc' : 'Missing JSDoc:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noUnreachable' : 'Unreachable code:', //$NON-NLS-0$  //$NON-NLS-1$

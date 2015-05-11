@@ -51,6 +51,7 @@ define([
 			"no-shadow-global": 1, //$NON-NLS-0$
 			"no-throw-literal": 1, //$NON-NLS-0$
 			"no-undef": 2, //$NON-NLS-0$
+			"no-undef-init": 1,  //$NON-NLS-1$
 			"no-unused-params": 1, //$NON-NLS-0$
 			"no-unused-vars": 1, //$NON-NLS-0$
 			"no-use-before-define": 1, //$NON-NLS-0$

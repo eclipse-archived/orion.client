@@ -618,7 +618,8 @@ define([
 				 	        	   name: javascriptMessages['prefBestPractices'],  //$NON-NLS-0$
 				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
 				 	        	   category: "javascript",  //$NON-NLS-0$
-				 	        	   properties: [{	id: "no-caller",  //$NON-NLS-0$
+				 	        	   properties: [
+				 	        	   				{	id: "no-caller",  //$NON-NLS-0$
 				 	        	                	name: javascriptMessages["noCaller"], //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: warning, //$NON-NLS-0$
@@ -683,6 +684,12 @@ define([
     			 	        	                	defaultValue: warning, //$NON-NLS-0$
     			 	        	                	options: severities //$NON-NLS-0$
     			 	        	                },
+    			 	        	                {	id: "no-undef-init",  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noUndefInit"], //$NON-NLS-0$
+				 	        	                	type: "number", //$NON-NLS-0$
+				 	        	                	defaultValue: warning, //$NON-NLS-0$
+				 	        	                	options: severities //$NON-NLS-0$
+				 	        	                },
  				 	        	                {
  				 	        	                	id: "no-shadow-global", //$NON-NLS-0$
  				 	        	                	name: javascriptMessages["noShadowGlobals"], //$NON-NLS-0$

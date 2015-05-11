@@ -4192,7 +4192,67 @@ define([
                 assert.equal(messages.length, 0);
             });
     	});
+//NO-UNDEF-INIT -------------------------------------------------
+		describe('no-unreachable', function() {
+    	    var RULE_ID = "no-undef-init";
+    		it("should flag var decl undefined 1", function() {
+    			var topic = "var foo = undefined;";
     	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Avoid explicitly initializing variables to \'undefined\'.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		it("should flag var decl undefined 2", function() {
+    			var topic = "var foo = 1, bar = undefined;";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Avoid explicitly initializing variables to \'undefined\'.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		it("should flag var decl undefined 3", function() {
+    			var topic = "function f() {var foo = undefined;}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Avoid explicitly initializing variables to \'undefined\'.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		it("should flag var decl undefined 4", function() {
+    			var topic = "with(foo) {var bar = undefined;}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Avoid explicitly initializing variables to \'undefined\'.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		it("should not flag var decl undefined literal", function() {
+    			var topic = "var foo = 'undefined';";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    	});
 //NO-UNREACHABLE ------------------------------------------------    	
     	describe('no-unreachable', function() {
     	    var RULE_ID = "no-unreachable";
