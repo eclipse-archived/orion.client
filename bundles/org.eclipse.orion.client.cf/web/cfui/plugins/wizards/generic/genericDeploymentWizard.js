@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -10,12 +10,12 @@
  ******************************************************************************/
 /*global parent window document define orion setTimeout URL*/
 
-define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfui/cFClient', 'orion/PageUtil',
+define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection',
 	'orion/PageLinks', 'orion/preferences', 'orion/fileClient', 'cfui/cfUtil', 'cfui/plugins/wizards/common/wizardUtils',
 	'orion/webui/Wizard', 'cfui/plugins/wizards/common/deploymentLogic', 'cfui/plugins/wizards/common/corePageBuilder',
-	'cfui/plugins/wizards/common/servicesPageBuilder', 'cfui/plugins/wizards/common/additionalParamPageBuilder', 'orion/Deferred'],
-		function(messages, mBootstrap, objects, CFClient, PageUtil, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, Wizard,
-				mDeploymentLogic, mCorePageBuilder, mServicesPageBuilder, mAdditionalParamPageBuilder, Deferred) {
+	'cfui/plugins/wizards/common/servicesPageBuilder', 'cfui/plugins/wizards/common/additionalParamPageBuilder'],
+		function(messages, mBootstrap, Deferred, CFClient, PageUtil, mSelection, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, Wizard,
+				mDeploymentLogic, mCorePageBuilder, mServicesPageBuilder, mAdditionalParamPageBuilder) {
 
 	/* plugin-host communication */
 	var postMsg = mWizardUtils.defaultPostMsg;
@@ -31,13 +31,16 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 	mBootstrap.startup().then(function(core) {
 
 		/* set up initial message */
-		document.getElementById('title').appendChild(document.createTextNode(messages["configureApplicationDeployment"])); //$NON-NLS-0$
+		document.getElementById('title').appendChild(document.createTextNode(messages["configureApplicationDeployment"])); //$NON-NLS-1$//$NON-NLS-0$
 
 		/* allow the frame to be closed */
 		document.getElementById('closeDialog').addEventListener('click', closeFrame); //$NON-NLS-1$ //$NON-NLS-0$
 
 		/* allow frame to be dragged by title bar */
 		mWizardUtils.makeDraggable(this);
+
+		/* TODO workaround for no wildcards in cf-launcher cors */
+		var wizardOrigin = window.location.origin;
 
 		var pageParams = PageUtil.matchResourceParameters();
 		var resourceString = decodeURIComponent(pageParams.resource);
@@ -97,7 +100,12 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 
 			cfService.getDeploymentPlans(relativeFilePath).then(function(resp) {
 				var plans = resp.Children;
-				deferred.resolve(plans[0]);
+				var selectedPlan;
+				plans.forEach(function(plan) {
+					if (!selectedPlan && plan.ApplicationType != "generic")
+						selectedPlan = plan;
+			});
+				deferred.resolve(selectedPlan || plans[0]);
 			});
 			
 			return deferred;
@@ -187,7 +195,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 						parent: "wizard", //$NON-NLS-0$
 						pages: [page1, page2, page3],
 						onCancel: closeFrame,
-						buttonNames: { ok: messages["save"] },
+						buttonNames: { ok: messages["save"] }, //$NON-NLS-0$
 						size: { width: "calc(100% - 24px)", height: "370px" }, //$NON-NLS-0$//$NON-NLS-1$
 						onSubmit: mDeploymentLogic.buildDeploymentTrigger({
 							ConfName : launchConfName,
@@ -203,12 +211,16 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 							CFService : cfService,
 		
 							getTargetSelection : function(){
-					    		return corePageBuilder.getSelection();
+								var selection = corePageBuilder.getSelection();
+								if(typeof selection === "undefined" && defaultSelection) //$NON-NLS-0$
+									return defaultSelection;
+		
+					    		return selection;
 					    	},
 					    	getManifestPath : function(){
 					    		return corePageBuilder.getManifestPath();
 					    	},
-
+					    	Manifest : plan.Manifest,
 					    	ContentLocation : resource.ContentLocation,
 					    	AppPath : resource.AppPath
 						})
