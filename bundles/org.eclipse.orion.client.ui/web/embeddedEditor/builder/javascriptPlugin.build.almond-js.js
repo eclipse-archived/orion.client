@@ -31,6 +31,17 @@
 		doctrine: 'doctrine/doctrine',
         'orion/bootstrap': 'embeddedEditor/builder/buildFrom/bootstrap'
 	},
+	packages: [
+		{
+			name: "eslint/conf",
+			location: "eslint/conf"
+		},
+		{
+			name: "eslint",
+			location: "eslint/lib",
+			main: "eslint"
+		},
+	],
 	name: "almond",
 	//locales: ["ja", "zh", "zh-tw", "fr", "de", "it", "es", "pt-br"],						
 	include: "javascript/plugins/javascriptPlugin",
@@ -39,10 +50,20 @@
 		ascii_only: true
 	},
 	wrap: {
-		start: "/* orion javascriptPlugin */ ", //start cannot be empty
+		start: "\
+			(function (root, factory) {\
+				if (typeof define === 'function' && define.amd) {\
+					define([], factory);\
+				} else {\
+					root.orion = root.orion || {};\
+					root.orion.webtools = root.orion.webtools || {};\
+					root.orion.webtools.javascript = factory();\
+				}\
+			}(this, function () {\
+		",
 		end: "\
-		orion = this.orion || (this.orion = {});\n\
-		var javascriptPlugin = orion.javascriptPlugin || (orion.javascriptPlugin = {});\n\
-		javascriptPlugin.javascriptPlugin = require('javascript/plugins/javascriptPlugin');"
+				return require('javascript/plugins/javascriptPlugin');\
+			}));\
+		"
 	}
 })
