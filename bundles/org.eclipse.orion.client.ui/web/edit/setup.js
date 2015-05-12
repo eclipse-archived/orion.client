@@ -355,7 +355,7 @@ objects.mixin(EditorViewer.prototype, {
 			this.activateContext.setActiveEditorViewer(this);
 			this.commandRegistry.processURL(href);
 			if (this.curFileNode) {
-				this.curFileNode.innerHTML = evt.name;
+				this.curFileNode.innerHTML = evt.name || "";
 			}
 		}.bind(this));
 		inputManager.addEventListener("InputChanging", function(e) { //$NON-NLS-0$
