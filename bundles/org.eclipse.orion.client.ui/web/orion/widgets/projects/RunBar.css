@@ -10,11 +10,11 @@
 }
 
 .runBarWrapper .disabled {
-	opacity: 0.30;
+	opacity: 0.10;
 }
 
 .runBarWrapper .disabled:hover {
-	opacity: 0.30;
+	opacity: 0.10;
 	cursor: default;
 }
 
