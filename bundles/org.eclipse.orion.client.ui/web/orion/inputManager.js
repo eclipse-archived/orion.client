@@ -199,7 +199,8 @@ define([
 				}.bind(this);
 				this._acceptPatch = null;
 				// Read metadata
-				progress(this._read(resource + (localStorage.useFull ? "?full=true" : ""), true), messages.ReadingMetadata, resource).then(function(metadata) {
+				var full = localStorage.useFull ? "?full=true" : localStorage.useFullDecorate ? "?full=decorate" : "";
+				progress(this._read(resource + full, true), messages.ReadingMetadata, resource).then(function(metadata) {
 					if(!metadata) {
 						errorHandler({responseText: i18nUtil.formatMessage(messages.ReadingMetadataError, resource)});
 					} else if (metadata.Directory) {
