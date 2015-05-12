@@ -239,7 +239,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 			var appName = launchConfParams.Name;
 			var appPath = launchConf.Path;
 			var launchConfName = launchConf.ConfigurationName;
-			
+
 			if (target && appName) {
 				var errorHandler = function(error) {
 					/* default cf error message decoration */
@@ -249,60 +249,71 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 				};
 
 				var self = this;
-				this._getAdditionalLaunchConfigurations(launchConf, project).then(function performPush(manifest) {
-					if (manifest === null) {
-						/* could not find the launch configuration manifest, get the main manifest.yml if present */
-						self._findManifest(project.ContentLocation + appPath).then(function(manifest) {
 
-							if (manifest === null) {
-								if (appName) {
-									// a minimal manifest contains just the application name
-									performPush({
-										applications: [{
-											"name": appName
-										}]
-									});
-								} else {
-									/* the deployment will not succeed anyway */								
-									deferred.reject({
-										State: "NOT_DEPLOYED", //$NON-NLS-0$
-										Severity: "Error", //$NON-NLS-0$
-										Message: messages["Could not find the launch configuration manifest"]
-									});									
-								}
-								
-							} else {
-								cFService.getManifestInfo(manifest.Location, true).then(function(manifest) {
-									performPush(manifest.Contents);
-								}, deferred.reject);
-							}
-						}.bind(this), errorHandler);
-					} else {
-						var devMode = launchConfParams.DevMode;
-						var appPackager;
-						
-						var instrumentation = launchConfParams.Instrumentation || {};
-						var mergedInstrumentation = objects.clone(instrumentation);
-						if (devMode && devMode.On) {
-							appPackager = devMode.Packager;
-							var devInstrumentation = devMode.Instrumentation;
-							
-							/* Manifest instrumentation contains only simple key, value entries */
-							objects.mixin(mergedInstrumentation, devInstrumentation);
+				var getTargets = this._getTargets();
+				getTargets.then(function(targets){
+
+					targets.forEach(function(result){
+						if(result.Url === target.Url && result.ManageUrl){
+							target.ManageUrl = result.ManageUrl;
 						}
+					});
 
-						cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath), manifest, appPackager, mergedInstrumentation).then(function(result) {
-							var expandedURL = new URITemplate("{+OrionHome}/edit/edit.html#{,ContentLocation}").expand({ //$NON-NLS-0$
-								OrionHome: PageLinks.getOrionHome(),
-								ContentLocation: project.ContentLocation,
-							});
+					self._getAdditionalLaunchConfigurations(launchConf, project).then(function performPush(manifest) {
+						if (manifest === null) {
+							/* could not find the launch configuration manifest, get the main manifest.yml if present */
+							self._findManifest(project.ContentLocation + appPath).then(function(manifest) {
 
-							var appName = result.App.name || result.App.entity.name;
-							mCfUtil.prepareLaunchConfigurationContent(launchConfName, target, appName, appPath, instrumentation, devMode).then(
-							deferred.resolve, deferred.reject);
-						}, errorHandler);
-					}
-				}, errorHandler);
+								if (manifest === null) {
+									if (appName) {
+										// a minimal manifest contains just the application name
+										performPush({
+											applications: [{
+												"name": appName
+											}]
+										});
+									} else {
+										/* the deployment will not succeed anyway */								
+										deferred.reject({
+											State: "NOT_DEPLOYED", //$NON-NLS-0$
+											Severity: "Error", //$NON-NLS-0$
+											Message: messages["Could not find the launch configuration manifest"]
+										});									
+									}
+									
+								} else {
+									cFService.getManifestInfo(manifest.Location, true).then(function(manifest) {
+										performPush(manifest.Contents);
+									}, deferred.reject);
+								}
+							}.bind(self), errorHandler);
+						} else {
+							var devMode = launchConfParams.DevMode;
+							var appPackager;
+							
+							var instrumentation = launchConfParams.Instrumentation || {};
+							var mergedInstrumentation = objects.clone(instrumentation);
+							if (devMode && devMode.On) {
+								appPackager = devMode.Packager;
+								var devInstrumentation = devMode.Instrumentation;
+								
+								/* Manifest instrumentation contains only simple key, value entries */
+								objects.mixin(mergedInstrumentation, devInstrumentation);
+							}
+	
+							cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath), manifest, appPackager, mergedInstrumentation).then(function(result) {
+								var expandedURL = new URITemplate("{+OrionHome}/edit/edit.html#{,ContentLocation}").expand({ //$NON-NLS-0$
+									OrionHome: PageLinks.getOrionHome(),
+									ContentLocation: project.ContentLocation,
+								});
+	
+								var appName = result.App.name || result.App.entity.name;
+								mCfUtil.prepareLaunchConfigurationContent(launchConfName, target, appName, appPath, instrumentation, devMode).then(
+								deferred.resolve, deferred.reject);
+							}, errorHandler);
+						}
+					}, errorHandler);
+				}, errorhandler);
 
 			} else {
 				var wizardReferences = serviceRegistry.getServiceReferences("orion.project.deploy.wizard"); //$NON-NLS-0$
