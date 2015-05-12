@@ -61,11 +61,11 @@
    * Originally from Tern's built-in requirejs plugin
    * @param {String} name The name of the dependency
    * @param {Object} data The context data object used
-   * @returns returns
+   * @returns {Object} The mapped dependency or null if it could not be found
    */
   function getKnownModule(name, data) {
   	var val = data.server._requireJS.resolved[name];
-  	if(val) {
+  	if(val && val.file) {
     	return data.interfaces[stripJSExt(val.file)];
     }
     return null;
@@ -81,7 +81,7 @@
     var known = getKnownModule(name, data);
     if (!known) {
       var val = data.server._requireJS.resolved[name];
-      if(val) {
+      if(val && val.file) {
 	      known = data.interfaces[stripJSExt(val.file)] = new infer.AVal;
 	      known.origin = val.file;
       }
