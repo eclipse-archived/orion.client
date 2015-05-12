@@ -122,8 +122,10 @@ define([
 		_maybeLoadWorkspace: function(resource) {
 			var fileClient = this.fileClient;
 			// If it appears to be a workspaceRootURL we cannot load it directly, have to get the workspace first
-			if (resource === fileClient.fileServiceRootURL(resource)) {
-				return fileClient.loadWorkspace(resource).then(function(workspace) {
+			var root = resource;
+			if (root.indexOf("?")) root = root.split("?")[0];
+			if (root === fileClient.fileServiceRootURL(root)) {
+				return fileClient.loadWorkspace(root).then(function(workspace) {
 					return workspace.Location;
 				});
 			}
@@ -200,22 +202,7 @@ define([
 				progress(this._read(resource + (localStorage.useFull ? "?full=true" : ""), true), messages.ReadingMetadata, resource).then(function(metadata) {
 					if(!metadata) {
 						errorHandler({responseText: i18nUtil.formatMessage(messages.ReadingMetadataError, resource)});
-						return;
-					}
-					var topParent = metadata.Parents && metadata.Parents.length > 0 ? metadata.Parents[metadata.Parents.length - 1] : null;
-					// Children is only available if full=true
-					if (topParent && topParent.Children) {
-						for (var i=metadata.Parents.length - 1; i>0; i--) {
-							var temp = metadata.Parents[i];
-							var child = metadata.Parents[i-1];
-							for (var k=0; k<temp.Children.length; k++) {
-								if (temp.Children[k].Location === child.Location) {
-									temp.Children[k] = child;
-								}
-							}
-						}
-					}
-					if (metadata.Directory) {
+					} else if (metadata.Directory) {
 						// Fetch children
 						Deferred.when(metadata.Children || progress(fileClient.fetchChildren(metadata.ChildrenLocation), messages.Reading, fileURI), function(contents) {
 							clearTimeout();
