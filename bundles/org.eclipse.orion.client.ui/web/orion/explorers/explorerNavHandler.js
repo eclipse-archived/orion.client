@@ -461,7 +461,8 @@ exports.ExplorerNavHandler = (function() {
 						}
 					}
 					if(!visible){
-						currentRowDiv.scrollIntoView(!next);
+						offsetParent.scrollTop = currentRowDiv.offsetTop - (next ? offsetParent.clientHeight * 3 / 4: offsetParent.clientHeight / 4); 
+						//currentRowDiv.scrollIntoView(!next);
 					}
 				}
 			}
