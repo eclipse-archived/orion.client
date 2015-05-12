@@ -7193,8 +7193,14 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_startIME: function () {
 			if (this._imeOffset !== -1) { return; }
+			var selected = false;
 			var selections = this._getSelections();
-			this._modifyContent({text: "", selection: selections}, true);
+			for (var i=0; i<selections.length && !selected; i++) {
+				selected = !selections[i].isEmpty();
+			}
+			if (selected) {
+				this._modifyContent({text: "", selection: selections}, true);
+			}
 			this._imeOffset = selections[0].start;
 		},
 		_unhookEvents: function() {
