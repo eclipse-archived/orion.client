@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -123,6 +123,13 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 				} else if (err.error_code === "CF-TargetNotSet"){ //$NON-NLS-0$
 					var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=cloud").expand({OrionHome : PageLinks.getOrionHome()}); //$NON-NLS-0$
 					error.Message = i18Util.formatMessage(messages["setUpYourCloud.Go"], cloudSettingsPageUrl);
+
+				} else if (err.error_code === "ServiceNotFound"){
+					if(target.ManageUrl){
+						var redirectToDashboard = target.ManageUrl;
+						var serviceName = err.metadata.service;
+						error.Message = i18Util.formatMessage(messages["service${0}NotFoundsetUpYourService.Go${1}"], serviceName, redirectToDashboard);
+					}
 				}
 			}
 
