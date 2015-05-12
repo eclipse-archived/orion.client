@@ -176,6 +176,10 @@ div.currentLocation {
 	margin: 0;
 }
 
+.tooltipContainer .currentLocation {
+	color: white;
+}
+
 .tooltipContainer .breadcrumb {
 	color: white;
 }
