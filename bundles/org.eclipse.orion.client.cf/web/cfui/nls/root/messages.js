@@ -57,6 +57,7 @@ define({//Default message bundle
 	"Would you like to use the top-level project manifest": "Could not find the launch configuration manifest. Would you like to use the top-level project manifest instead and bind it to the launch configuration?",
 	"iD:": "ID:",
 	"setUpYourCloud.Go": "Set up your Cloud. Go to [Settings](${0}).",
+	"service${0}NotFoundsetUpYourService.Go${1}" : "Service instance ${0} cannot be found in target space. Go to [Dashboard](${1}) and create the service.",
 	"loggingInTo${0}...": "Logging in to ${0}...",
 	"submit": "Submit",
 	"cloudApplications": "Cloud Applications",
