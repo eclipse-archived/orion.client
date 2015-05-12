@@ -202,7 +202,7 @@ define([
 						errorHandler({responseText: i18nUtil.formatMessage(messages.ReadingMetadataError, resource)});
 						return;
 					}
-					var topParent = metadata.Parents[metadata.Parents.length - 1];
+					var topParent = metadata.Parents && metadata.Parents.length > 0 ? metadata.Parents[metadata.Parents.length - 1] : null;
 					// Children is only available if full=true
 					if (topParent && topParent.Children) {
 						for (var i=metadata.Parents.length - 1; i>0; i--) {
