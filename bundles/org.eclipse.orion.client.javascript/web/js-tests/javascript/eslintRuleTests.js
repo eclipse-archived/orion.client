@@ -3040,6 +3040,116 @@ define([
     			assert.equal(messages[1].message, "Non-externalized string literal 'bb'.");
     			assert.equal(messages[1].node.type, "Literal");
     		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=467125
+    		 */
+    		it("Ignore RegExp", function() {
+    			var topic = "var reg = new RegExp('/[f]/');";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=467125
+    		 */
+    		it("Ignore addEventListener", function() {
+    			var topic = "var worker = new Worker('a.hs'); worker.addEventListener('onmessage', function() {});";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=467125
+    		 */
+    		it("Ignore operator 1", function() {
+    			var topic = "var op = '==';";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=467125
+    		 */
+    		it("Ignore operator 2", function() {
+    			var topic = "var op = '===';";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=467125
+    		 */
+    		it("Ignore operator 3", function() {
+    			var topic = "var op = '!==';";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=467125
+    		 */
+    		it("Mark operator 1", function() {
+    			var topic = "var punc = '==hello';";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].message, "Non-externalized string literal '==hello'.");
+    			assert.equal(messages[0].node.type, "Literal");
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=467125
+    		 */
+    		it("Ignore punc 1", function() {
+    			var topic = "var punc = ';';";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=467125
+    		 */
+    		it("Ignore punc 2", function() {
+    			var topic = "var punc = '?';";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=467125
+    		 */
+    		it("Mark punc 1", function() {
+    			var topic = "var punc = ';hello';";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].message, "Non-externalized string literal ';hello'.");
+    			assert.equal(messages[0].node.type, "Literal");
+    		});
     		it("Ignore define", function() {
     			var topic = "define(['define', 'define2', 'define3'])";
     	

@@ -708,7 +708,14 @@ define([
         			context.report(node, "Non-externalized string literal \'${0}\'.", {0:node.value, data: data});
         		}
         		
-        		var callees = ['require', 'requirejs', 'importScripts', 'define', 'Worker', 'SharedWorker'];
+        		function mapCallees(arr, obj) {
+        			for(var i = 0; i < arr.length; i++) {
+        				obj[arr[i]] = true;
+        			}
+        		}
+        		
+        		var callees = Object.create(null);
+        		mapCallees(['require', 'requirejs', 'importScripts', 'define', 'Worker', 'SharedWorker', 'addEventListener', 'RegExp'], callees);
         		
         		return {
                     'Literal': function(node) {
@@ -716,6 +723,11 @@ define([
                     	if (typeof node.value === 'string' && node.value.length > 0){
                     		if (node.value.toLowerCase() === 'use strict'){
                     			return;
+                    		}
+                    		if(/^(?:[\.,-\/#!$%\^&\*;:{}=\-_`~()@\+\?><\[\]\+])$/.test(node.value)) {
+                    			return; //don't nag about punctuation
+                    		} else if(/^(?:==|!=|===|!==|=>)$/.test(node.value)) {
+                    			return; //don't nag about operators
                     		}
                     		if (node.parent){
                     			switch(node.parent.type) {
@@ -740,10 +752,15 @@ define([
                 						}
                     					break;
                     				}
+                    				case 'NewExpression':
                     				case 'CallExpression': {
                     					var callee = node.parent.callee;
-                    					if(callee && callees.indexOf(callee.name) > -1) {
-                    						return;
+                    					if(callee) {
+                    						if(callee.type === 'MemberExpression' && callee.property && callees[callee.property.name]) {
+                    							return;
+                    						} else if(callees[callee.name]) {
+                    							return;
+                    						}
                     					}
                     					break;
                     				}
