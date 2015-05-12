@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 /*global escape*/
-define([], function() {
+define(['orion/Deferred'], function(Deferred) {
     var codeMap = {
         "androidapp": {source: "org.eclipse.orion.client.ui/web/androidapp"},
         "auth"		: {source: "org.eclipse.orion.client.ui/web/auth"},
@@ -181,6 +181,35 @@ define([], function() {
 		return {candidate: newPathname, trimmed: trimmedPath};
 	}
 	
+	/**
+	 * @description Computes the file prefix for the current file service root URL
+	 * @param [orion.FileClient] fileClient The file client to use to resolve the prefix
+	 * @returns [orion.Deferred] returns a deferred that will resolve the prefix or return null
+	 * @since 9.0
+	 */
+	function getFilePrefix(fileClient) {
+		if (!this.filePrefix) {
+           return fileClient.search(
+                {
+                    'resource': fileClient.fileServiceRootURL(),
+                    'keyword': "fileMap.js",
+                    'nameSearch': true,
+                    'fileType': "js",
+                }
+           ).then(function(res) {
+				var loc = res.response.docs[0].Location;
+				var pathSegs = loc.split('/');
+				if (pathSegs.length > 4) {
+					this.filePrefix = '/' + pathSegs[1] + '/' + pathSegs[2] + '/' + pathSegs[3] + '/' + pathSegs[4] + '/';
+					return this.filePrefix;
+				}
+				return null;
+			}.bind(this));
+		} else {
+			return new Deferred().resolve(this.filePrefix);
+		}
+	}
+	
 	function getWSPath(deployedPath) {
 		var match = codeMap[deployedPath]; //fast hash lookup
 		if(!match) {
@@ -194,7 +223,7 @@ define([], function() {
     		}
 		}
 		if (match) {
-			match = "bundles/" + match.source;
+			match = this.filePrefix + match.source;
 			if(splitPath) {
 			    match += splitPath.trimmed;
 			}
@@ -203,5 +232,5 @@ define([], function() {
 		return match;
 	}
 	
-	return {getWSPath: getWSPath};
+	return {getWSPath: getWSPath, getFilePrefix: getFilePrefix};
 });

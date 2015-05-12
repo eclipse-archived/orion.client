@@ -65,55 +65,54 @@ define([
            var type = opts.type ? opts.type : 'JavaScript';
            var dotext = '.'+ext;
            //first check the file map
-           var file = FileMap.getWSPath(name);
-           if(!file) {
-               file = FileMap.getWSPath(name+dotext);
-           }
-           if(file && file.indexOf(dotext) > -1) {
-               return this.fileclient.loadWorkspace().then(function(workspace) {
-                   //TODO hack - right now we know the index always is talking about the orion client,could differ later
-                   files = [that._newFileObj(name, '/file/'+workspace.Id+'/org.eclipse.orion.client/'+file, that._trimName(file), icon, type, this.fileclient)];
-                   that.cache.put(name, files);
-                   return files;
-               });
-           }
-           var filename = name.replace(/^i18n!/, '');
-           var idx = filename.lastIndexOf('/');
-           var searchname = filename.slice(idx+1);
-           //fall back to looking for it
-           return this.fileclient.search(
-                {
-                    'resource': this.fileclient.fileServiceRootURL(),
-                    'keyword': searchname,
-                    'sort': 'Name asc',
-                    'nameSearch': true,
-                    'fileType': ext,
-                    'start': 0,
-                    'rows': 30
-                }
-           ).then(function(res) {
-               var r = res.response;
-               var len = r.docs.length;
-               if(r.numFound > 0) {
-                   files = [];
-                   var testname = filename.replace(/(?:\.?\.\/)*/, '');
-                   testname = testname.replace(new RegExp("\\"+dotext+"$"), '');
-                   testname = testname.replace(/\//g, "\\/");
-                   for(var i = 0; i < len; i++) {
-                       file = r.docs[i];
-                       //TODO haxxor - only keep ones that end in the logical name or the mapped logical name
-                       var regex = ".*(?:"+testname+")$";
-                       if(new RegExp(regex).test(file.Location.slice(0, file.Location.length-dotext.length))) {
-                           files.push(that._newFileObj(file.Name, file.Location, that._trimName(file.Path), icon, type));
-                       }
-                   }
-                   if(files.length > 0) {
-                       that.cache.put(filename, files);
-                       return files;
-                   }
-               }
-               return null;
-           });
+           return FileMap.getFilePrefix(this.fileclient).then(function(prefix) {
+           	   var file = FileMap.getWSPath(name);
+	           if(!file) {
+	               file = FileMap.getWSPath(name+dotext);
+	           }
+	           if(file && file.indexOf(dotext) > -1) {
+	               files = [that._newFileObj(name, file, that._trimName(file), icon, type, this.fileclient)];
+	               that.cache.put(name, files);
+	               return files;
+	           }
+	           var filename = name.replace(/^i18n!/, '');
+	           var idx = filename.lastIndexOf('/');
+	           var searchname = filename.slice(idx+1);
+	           //fall back to looking for it
+	           return this.fileclient.search(
+	                {
+	                    'resource': this.fileclient.fileServiceRootURL(),
+	                    'keyword': searchname,
+	                    'sort': 'Name asc',
+	                    'nameSearch': true,
+	                    'fileType': ext,
+	                    'start': 0,
+	                    'rows': 30
+	                }
+	           ).then(function(res) {
+	               var r = res.response;
+	               var len = r.docs.length;
+	               if(r.numFound > 0) {
+	                   files = [];
+	                   var testname = filename.replace(/(?:\.?\.\/)*/, '');
+	                   testname = testname.replace(new RegExp("\\"+dotext+"$"), '');
+	                   testname = testname.replace(/\//g, "\\/");
+	                   for(var i = 0; i < len; i++) {
+	                       file = r.docs[i];
+	                       //TODO haxxor - only keep ones that end in the logical name or the mapped logical name
+	                       var regex = ".*(?:"+testname+")$";
+	                       if(new RegExp(regex).test(file.Location.slice(0, file.Location.length-dotext.length))) {
+	                           files.push(that._newFileObj(file.Name, file.Location, that._trimName(file.Path), icon, type));
+	                       }
+	                   }
+	                   if(files.length > 0) {
+	                       that.cache.put(filename, files);
+	                       return files;
+	                   }
+	               }
+	               return null;
+	           });
+           }.bind(this));
        },
        
        /**
