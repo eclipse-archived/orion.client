@@ -123,6 +123,13 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 				} else if (err.error_code === "CF-TargetNotSet"){ //$NON-NLS-0$
 					var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=cloud").expand({OrionHome : PageLinks.getOrionHome()}); //$NON-NLS-0$
 					error.Message = i18Util.formatMessage(messages["setUpYourCloud.Go"], cloudSettingsPageUrl);
+
+				} else if (err.error_code === "ServiceNotFound"){
+					if(target.ManageUrl){
+						var redirectToDashboard = target.ManageUrl + "/?ace_base=true/#/resources";
+						var serviceName = error.JsonData.service;
+						error.Message = i18Util.formatMessage(messages["service${0}NotFoundsetUpYourService.Go${1}"], serviceName, redirectToDashboard);
+					}
 				}
 			}
 
