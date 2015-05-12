@@ -239,7 +239,16 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 			var appName = launchConfParams.Name;
 			var appPath = launchConf.Path;
 			var launchConfName = launchConf.ConfigurationName;
-			
+
+			var getTargets = this._getTargets();
+			getTargets.then(function(targets){
+				targets.forEach(function(result){
+					if(result.Url === target.Url && result.ManageUrl){
+						target.ManageUrl = result.ManageUrl;
+					}
+				});
+			});
+
 			if (target && appName) {
 				var errorHandler = function(error) {
 					/* default cf error message decoration */
