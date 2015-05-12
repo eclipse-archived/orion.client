@@ -346,7 +346,11 @@ objects.mixin(EditorViewer.prototype, {
 		});
 		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 			var metadata = evt.metadata;
-			sessionStorage.lastFile = metadata ? PageUtil.hash() : null;
+			if (metadata) {
+				sessionStorage.lastFile = PageUtil.hash();
+			} else {
+				delete sessionStorage.lastFile;
+			}
 			var view = this.getEditorView(evt.input, metadata);
 			this.setEditor(view ? view.editor : null);
 			evt.editor = this.editor;
