@@ -420,6 +420,10 @@ define([
 			}
 			this.commandRegistry.renderCommands(this.contextMenuActionsScope, contextMenuNode, items, this, "menu");  //$NON-NLS-0$	
 		},
+		
+		refreshSelection: function() {
+			//Do nothing
+		},
 			
 		_createContextMenu: function() {
 			//function called when the context menu is triggered to set the nav selection properly
