@@ -313,7 +313,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 							}, errorHandler);
 						}
 					}, errorHandler);
-				}, errorhandler);
+				}, errorHandler);
 
 			} else {
 				var wizardReferences = serviceRegistry.getServiceReferences("orion.project.deploy.wizard"); //$NON-NLS-0$
