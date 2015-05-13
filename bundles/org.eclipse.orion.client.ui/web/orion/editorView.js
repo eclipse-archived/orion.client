@@ -94,11 +94,11 @@ define([
 		this.editContextServiceID = options.editContextServiceID || "orion.edit.context"; //$NON-NLS-0$
 		this.syntaxHighlighter = new Highlight.SyntaxHighlighter(this.serviceRegistry);
 		this.typeDefRegistry = new TypeDefRegistry(this.serviceRegistry);
-		var keyAssist = mGlobalCommands.getKeyAssist();
+		var keyAssist = mGlobalCommands.getKeyAssist ? mGlobalCommands.getKeyAssist() : null;
 		if(keyAssist) {
 			keyAssist.addProvider(this.editorCommands);
 		}
-		var mainSplitter = mGlobalCommands.getMainSplitter();
+		var mainSplitter = mGlobalCommands.getMainSplitter ? mGlobalCommands.getMainSplitter() : null;
 		if(mainSplitter) {
 			mainSplitter.splitter.addEventListener("resize", function (evt) { //$NON-NLS-0$
 				if (this.editor && evt.node === mainSplitter.main) {
@@ -106,11 +106,13 @@ define([
 				}
 			}.bind(this));
 		}
-		mGlobalCommands.getGlobalEventTarget().addEventListener("toggleTrim", function() { //$NON-NLS-0$
-			if (this.editor) {
-				this.editor.resize();
-			}
-		}.bind(this));
+		if(mGlobalCommands.getGlobalEventTarget) {
+			mGlobalCommands.getGlobalEventTarget().addEventListener("toggleTrim", function() { //$NON-NLS-0$
+				if (this.editor) {
+					this.editor.resize();
+				}
+			}.bind(this));
+		}
 		this.settings = {};
 		this._init();
 	}

@@ -40,9 +40,9 @@
 			main: "eslint" //$NON-NLS-1$
 		},
 	],
-	name: "javascript/plugins/ternWorker",
+	name: "javascript/plugins/ternWorkerCore",
 	wrap: {
-		start: "importScripts('../../requirejs/require.js');\n",
+		start: "importScripts('../../requirejs/require.min.js');\n",
 		end: ""
 	}
 })

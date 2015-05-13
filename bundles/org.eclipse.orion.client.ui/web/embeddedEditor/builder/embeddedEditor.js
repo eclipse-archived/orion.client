@@ -57,9 +57,8 @@ define([
 	var pluginURLs = [
 		"../plugins/webToolsPlugin_stand_alone.html",
 		"../plugins/javascriptPlugin_stand_alone.html",
-		"../../plugins/jslintPlugin.html",
-		"../../plugins/webEditingPlugin.html",
-		"../../plugins/languageToolsPlugin.html"
+		"../plugins/webEditingPlugin.html",
+		"../plugins/languageToolsPlugin.html"
 	];
 	function Editor(params) { // parentId, repo, base
 		if (typeof params === "string") {

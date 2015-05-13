@@ -12,7 +12,7 @@
 // optimization script to concat/minify the Orion editor javascript code
  
 ({
-    baseUrl: '../../',
+    baseUrl: '.',
 	closure: {
 		CompilerOptions: {
 			languageIn: Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.valueOf(Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode, "ECMASCRIPT5")
@@ -22,29 +22,17 @@
 	},
 	paths: {
         almond: 'requirejs/almond',
-        i18n: 'requirejs/i18n',
-        text: 'requirejs/text',
-		esprima: "esprima/esprima",
-		estraverse: "estraverse/estraverse",
-		escope: "escope/escope",
-		logger: "javascript/logger",
-		doctrine: 'doctrine/doctrine',
-        'orion/bootstrap': 'embeddedEditor/builder/buildFrom/bootstrap'
+		text: 'requirejs/text',
+		i18n: 'requirejs/i18n',
+		domReady: 'requirejs/domReady',
+		csslint: 'csslint/csslint',
+		'orion/bootstrap': 'embeddedEditor/builder/buildFrom/bootstrap'
 	},
 	packages: [
-		{
-			name: "eslint/conf",
-			location: "eslint/conf"
-		},
-		{
-			name: "eslint",
-			location: "eslint/lib",
-			main: "eslint"
-		},
 	],
 	name: "almond",
 	//locales: ["ja", "zh", "zh-tw", "fr", "de", "it", "es", "pt-br"],						
-	include: "javascript/plugins/javascriptPlugin",
+	include: "webtools/plugins/webToolsPlugin",
 	preserveLicenseComments: false,
 	uglify: {
 		ascii_only: true
@@ -57,12 +45,12 @@
 				} else {\
 					root.orion = root.orion || {};\
 					root.orion.webtools = root.orion.webtools || {};\
-					root.orion.webtools.javascript = factory();\
+					root.orion.webtools.webtools = factory();\
 				}\
 			}(this, function () {\
 		",
 		end: "\
-				return require('javascript/plugins/javascriptPlugin');\
+				return require('webtools/plugins/webToolsPlugin');\
 			}));\
 		"
 	}

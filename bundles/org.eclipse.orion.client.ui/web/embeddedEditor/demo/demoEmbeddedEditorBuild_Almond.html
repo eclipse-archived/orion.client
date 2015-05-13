@@ -11,7 +11,7 @@
 		<script src="../built/built-embeddedEditor.js"></script>
 		<script>
 		window.onload=function(){
-			var embeddedEditor = new orion.embeddedEditor.javascript("embeddedEditor");
+			var embeddedEditor = new orion.embeddedEditor.editor("embeddedEditor");
 			embeddedEditor.startup().then(function() {
 				document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 				embeddedEditor.initEditor();

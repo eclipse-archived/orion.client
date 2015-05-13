@@ -12,7 +12,7 @@
 // optimization script to concat/minify the Orion editor javascript code
  
 ({
-    baseUrl: '../../',
+    baseUrl: '.',
 	closure: {
 		CompilerOptions: {
 			languageIn: Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.valueOf(Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode, "ECMASCRIPT5")
@@ -24,22 +24,46 @@
         almond: 'requirejs/almond',
         i18n: 'requirejs/i18n',
         text: 'requirejs/text',
-        "orion/extensionCommands": "gitWidgets/builder/buildFrom/emptyExtensionCommands",
-        "orion/globalCommands": "gitWidgets/builder/buildFrom/emptyGlobalCommands",
-        "orion/editorCommands": "gitWidgets/builder/buildFrom/emptyEditorCommands"
+		esprima: "esprima/esprima",
+		estraverse: "estraverse/estraverse",
+		escope: "escope/escope",
+		logger: "javascript/logger",
+		doctrine: 'doctrine/doctrine',
+        'orion/bootstrap': 'embeddedEditor/builder/buildFrom/bootstrap'
 	},
+	packages: [
+		{
+			name: "eslint/conf",
+			location: "eslint/conf"
+		},
+		{
+			name: "eslint",
+			location: "eslint/lib",
+			main: "eslint"
+		},
+	],
 	name: "almond",
 	//locales: ["ja", "zh", "zh-tw", "fr", "de", "it", "es", "pt-br"],						
-	include: "embeddedEditor/builder/embeddedEditor",
+	include: "javascript/plugins/javascriptPlugin",
 	preserveLicenseComments: false,
 	uglify: {
 		ascii_only: true
 	},
 	wrap: {
-		start: "/* orion embeddedEditor */ ", //start cannot be empty
+		start: "\
+			(function (root, factory) {\
+				if (typeof define === 'function' && define.amd) {\
+					define([], factory);\
+				} else {\
+					root.orion = root.orion || {};\
+					root.orion.webtools = root.orion.webtools || {};\
+					root.orion.webtools.javascript = factory();\
+				}\
+			}(this, function () {\
+		",
 		end: "\
-		orion = this.orion || (this.orion = {});\n\
-		var editor = orion.editor || (orion.editor = {});\n\
-		editor.embeddedEditor = require('embeddedEditor/builder/embeddedEditor');"
+				return require('javascript/plugins/javascriptPlugin');\
+			}));\
+		"
 	}
 })
