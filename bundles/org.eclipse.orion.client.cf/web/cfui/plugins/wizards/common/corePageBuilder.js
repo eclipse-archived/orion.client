@@ -253,7 +253,15 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 		
 		validateManifestPath : function(){
 
-			var location = this._projectLocation + this.getManifestPath();
+			var manifestPath = this.getManifestPath();
+
+			if(manifestPath.charAt(0) == "/")
+				manifestPath = manifestPath.substring(1, manifestPath.length);
+
+			if(manifestPath.charAt(manifestPath.length-1) != "/" && manifestPath.lastIndexOf(".yml") === -1)
+				manifestPath = manifestPath + "/";
+
+			var location = this._projectLocation + manifestPath;
 			var manifestFile = location.substring(location.lastIndexOf("/") + 1);
 			var pathToFile = location.substring(0, location.lastIndexOf("/") + 1);
 
@@ -281,8 +289,16 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 		setManifestPathMessage : function(result){
 
 			var self = this;
+			var manifestPath = self.getManifestPath();
 
 			if(result === true){
+
+				if(manifestPath.charAt(manifestPath.length-1) != "/" && manifestPath.lastIndexOf(".yml") === -1)
+					self._manifestInput.value = manifestPath + "/manifest.yml";
+
+				if(manifestPath.charAt(manifestPath.length-1) === "/")
+					self._manifestInput.value = manifestPath + "manifest.yml";
+
 				if(self._manifestInputWrapper.classList.contains("wrongPath"))
 					self._manifestInputWrapper.classList.remove("wrongPath");
 
@@ -310,7 +326,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 		validateHostInputValue : function(){
 
 			var self = this;
-
+			self._setSelection();
 			if(self._hostInput.value.indexOf("_") > -1 && !self._hostDropdown._parentNode.classList.contains("error")){
 					self._hostDropdown._parentNode.classList.add("error");
 					self._hostDropdown._domNode.classList.add("errorBorder");
@@ -329,9 +345,14 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 		},
 		
 		getPlan : function(){
-			if(this.getManifestPath() != this._initManifestPath){
+			var manifestPath = this.getManifestPath();
+
+			if(manifestPath != this._initManifestPath){
+				if(manifestPath.charAt(0) == "/")
+					manifestPath = manifestPath.substring(1, manifestPath.length);
+
 				var deferred = new Deferred();
-				var relativeFilePath = this._filePath + this.getManifestPath();
+				var relativeFilePath = this._filePath + manifestPath;
 				this._cfService.getDeploymentPlans(relativeFilePath).then(function(resp) {
 					var plans = resp.Children;
 					var selectedPlan;
@@ -342,7 +363,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					plan = deferred.resolve(selectedPlan || plans[0]);
 					return plan;
 				});
-				this._initManifestPath = this.getManifestPath();
+				this._initManifestPath = manifestPath;
 				return deferred;
 			}
 			return plan;
@@ -505,9 +526,6 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 									var check = self.validateManifestPath();
 									check.then(function(result){
 										if(result === true){
-											if(self.getManifestPath().substring(self.getManifestPath().lastIndexOf("/")+1) == ""){
-												self._manifestInput.value = self.getManifestPath() + "manifest.yml";
-											}
 											self.setManifestPathMessage(true);
 										}
 										else{
@@ -519,6 +537,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 											self._manifestApplication = result.Manifest.applications[0];
 											self._appsInput.value = self._manifestApplication.name;
 											self._hostInput.value = self._manifestApplication.host;
+											self.validateHostInputValue();
 
 											for(var i = 0; self._domainsDropdown.length > i; i++){
 												if(self._domainsDropdown[i].value === (self._manifestApplication.domain || self._manifestInstrumentation.domain)){
@@ -628,7 +647,6 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 				    	self._hostInput.onfocus = function(){
 							self._hostCheck = setInterval(function(){
 								self.validateHostInputValue();
-								self._setSelection();
 							},1000);
 						};
 
