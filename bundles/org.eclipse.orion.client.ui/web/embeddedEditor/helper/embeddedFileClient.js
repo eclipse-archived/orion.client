@@ -114,6 +114,11 @@ define(["orion/Deferred"], function(Deferred){
 			return new Deferred().resolve(readmeContents);
 		},
 		
+		search: function() {
+			console.log("searching!!!!!!!!!!!!!");
+			return new Deferred().resolve(null);
+		},
+		
 		/**
 		 * Loads the workspace with the given id and sets it to be the current
 		 * workspace for the IDE. The workspace is created if none already exists.

@@ -55,9 +55,9 @@ define([
 	Deferred
 ) {
 	var pluginURLs = [
+		"../plugins/webToolsPlugin_stand_alone.html",
+		"../plugins/javascriptPlugin_stand_alone.html",
 		"../../plugins/jslintPlugin.html",
-		"../../webtools/plugins/webToolsPlugin.html",
-		"../../javascript/plugins/javascriptPlugin.html",
 		"../../plugins/webEditingPlugin.html",
 		"../../plugins/languageToolsPlugin.html"
 	];
@@ -77,7 +77,7 @@ define([
 		var plugins = {};
 		pluginURLs.forEach(function(pluginURLString){
 			var pluginURL = new URL(pluginURLString, _editor_script_source);
-			plugins[pluginURL.href] = {autostart: "started", lastModified: -1};
+			plugins[pluginURL.href] = {autostart: "lazy"};
 		});
 		this.pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {
 			storage: {},
