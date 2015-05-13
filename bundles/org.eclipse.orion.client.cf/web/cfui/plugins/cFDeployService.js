@@ -153,6 +153,8 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 
 		_findManifest: function(location){
 			
+			location = location.replace("//", "/");
+			
 			var manifestFile = location.substring(location.lastIndexOf("/") + 1);
 			var pathToFile = location.substring(0, location.lastIndexOf("/") + 1);
 			
