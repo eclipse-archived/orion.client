@@ -1,7 +1,7 @@
 /*******************************************************************************
  * @license
  * Licensed Materials - Property of IBM
- * (c) Copyright IBM Corporation 2014. All Rights Reserved. 
+ * (c) Copyright IBM Corporation 2014, 2015. All Rights Reserved. 
  * 
  * Note to U.S. Government Users Restricted Rights:  Use, 
  * duplication or disclosure restricted by GSA ADP Schedule 
@@ -11,10 +11,10 @@
 
 define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',  'orion/keyBinding', 'orion/dialogs', 'orion/selection',
 	'orion/contentTypes','orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/editorCommands', 'orion/links', 'orion/cfui/cFClient',
-	'orion/PageUtil', 'orion/cfui/logView', 'orion/section', 'orion/metrics', 'orion/cfui/widgets/CfLoginDialog', 'orion/i18nUtil'], 
+	'orion/PageUtil', 'orion/cfui/logView', 'orion/section', 'orion/metrics', 'orion/cfui/widgets/CfLoginDialog', 'orion/i18nUtil', 'orion/projectClient'], 
 	function(messages, lib, mBootstrap, mStatus, mProgress, CommandRegistry, KeyBinding, mDialogs, mSelection,
 	mContentTypes, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mEditorCommands, mLinks,
-	mCFClient, PageUtil, mLogView, mSection, mMetrics, CfLoginDialog, i18Util) {
+	mCFClient, PageUtil, mLogView, mSection, mMetrics, CfLoginDialog, i18Util, mProjectClient) {
 	mBootstrap.startup().then(
 		function(core) {
 			var serviceRegistry = core.serviceRegistry;
@@ -34,6 +34,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 			var cFClient = new mCFClient.CFService(serviceRegistry);
 			var contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
+			var projectClient = new mProjectClient.ProjectClient(serviceRegistry, fileClient);
 			var editorCommands = new mEditorCommands.EditorCommandFactory({
 				serviceRegistry: serviceRegistry,
 				commandRegistry: commandRegistry,
@@ -192,13 +193,64 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 					}
 				);
 			}
-			
-			this.lastLogsInfo = {};
-			loadLogs(PageUtil.matchResourceParameters());
-			
+
+			function setPageTarget(target) {
+				var appName = target.Params.Name;
+				var launchConfName;
+
+				function setTargetOnRepo(repoMeta) {
+					mGlobalCommands.setPageTarget({
+						name: launchConfName,
+						task: appName + " - Logs",
+						target: repoMeta,
+						serviceRegistry: serviceRegistry,
+						commandService: commandRegistry
+					});
+				}
+
+				fileClient.read(target.filePath, true).then(
+					function(launchConfMeta) {
+						var repoDir = launchConfMeta.Parents[launchConfMeta.Parents.length - 1];
+						launchConfName = launchConfMeta.Name.replace(".launch", "");
+						fileClient.read(repoDir.Location, true).then(setTargetOnRepo);
+					}, function(error) {
+						handleError(error);
+					}
+				);
+			}
+
+			function getParamsAndLoadLogs() {
+				var params = PageUtil.matchResourceParameters();
+
+				if (params.launchConfLocation) {
+					progressService.showWhile(fileClient.read(params.launchConfLocation), messages["gettingLogs"]).then(
+						function(launchConf) {
+							launchConf = JSON.parse(launchConf);
+							launchConf.filePath = params.launchConfLocation;
+							setPageTarget(launchConf);
+
+							var target = launchConf.Params.Target;
+							target.resource = launchConf.Params.Name;
+							loadLogs(target);
+						}, function(error) {
+							handleError(error);
+						}
+					);
+				} else {
+					mGlobalCommands.setPageTarget({
+						task: params.resource + " - Logs",
+						serviceRegistry: serviceRegistry,
+						commandService: commandRegistry
+					});
+					loadLogs(params);
+				}
+			}
+
 			window.addEventListener("hashchange", function() {
-				loadLogs(PageUtil.matchResourceParameters());
+				getParamsAndLoadLogs();
 			}.bind(this));
-			
+
+			this.lastLogsInfo = {};
+			getParamsAndLoadLogs();
 		});
 	});

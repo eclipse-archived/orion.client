@@ -71,12 +71,6 @@ define(['i18n!cfui/nls/messages',
 				fullLog += line + "\n";
 			});
 			
-			mGlobalCommands.setPageTarget({
-				task: this.applicationInfo.Application + " - Logs",
-				breadcrumbTarget: logName,
-				serviceRegistry: this.serviceRegistry,
-				commandService: this.commandRegistry});
-			
 			this._setInputContents(this._parsedLocation, logName, fullLog, {Name: logName});
 			this.editor.setSelection(fullLog.length, fullLog.length);
 		},

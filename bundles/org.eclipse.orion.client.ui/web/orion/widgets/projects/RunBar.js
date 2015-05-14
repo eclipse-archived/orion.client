@@ -515,8 +515,13 @@ define([
 			
 			if (logLocationTemplate) {
 				uriTemplate = new URITemplate(logLocationTemplate);
-				uriParams = objects.clone(this._selectedLaunchConfiguration.Params);
-				objects.mixin(uriParams, {OrionHome : PageLinks.getOrionHome()});
+				uriParams = {
+					OrionHome: PageLinks.getOrionHome(),
+					Name: "",
+					Target: {
+						launchConfLocation: this._selectedLaunchConfiguration.File.Location
+					}
+				};
 				this._enableLink(this._logsLink, uriTemplate.expand(uriParams));
 			}
 		},
