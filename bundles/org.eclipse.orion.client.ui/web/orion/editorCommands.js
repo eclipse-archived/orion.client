@@ -168,9 +168,7 @@ define([
 			this._createSettingsCommand();
 			this._createSearchFilesCommand();
 			this._createGotoLineCommnand();
-			if(this.textSearcher) {
-				this._createFindCommnand();
-			}
+			this._createFindCommnand();
 			this._createBlameCommand();
 			this._createDiffCommand();
 			this._createShowTooltipCommand();
