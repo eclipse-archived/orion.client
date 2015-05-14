@@ -78,8 +78,7 @@ comment.ensureCommentsBefore(text, node); }
         type = null;
     }
 
-    var first = comments[comments.length-1], dot = first.search(/\.\s/); //TODO ORION
-    if (dot > 5) first = first.slice(0, dot + 1);
+    var first = comments[comments.length-1]; //TODO ORION
     first = first.trim(); //.replace(/\s*\n\s*\*\s*|\s{1,}/g, " "); //TODO ORION
     if (aval instanceof infer.AVal) aval.doc = first;
     if (type) type.doc = first;
