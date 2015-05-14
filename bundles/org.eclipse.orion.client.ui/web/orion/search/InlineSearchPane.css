@@ -5,7 +5,6 @@
 @import "../widgets/input/ComboTextInput.css";
 
 .searchResultsWrapperDiv .treeTableRow > td {
-	padding: 0 3px;
 	overflow: hidden;
 }
 
@@ -166,7 +165,7 @@
 }
 
 .searchCheckbox {
-	margin: 0 0 0 5px;
+	margin: 4px 0 0 5px;
 	vertical-align: middle;
 }
 
@@ -238,7 +237,7 @@
 	display: inline-flex;
 	display: -webkit-inline-flex;		/* Safari */
 	outline: none;
-	padding: 0 2px;
+	padding: 3px 0;
 	vertical-align: middle;
 	white-space: nowrap;
 	width: 100%;
@@ -262,7 +261,7 @@
 	-webkit-flex-shrink: 2;		/* Safari */
 	font-size: 8pt; 
 	font-weight: normal;
-	overflow: hidden;
+	/*overflow: hidden;*/
 	text-overflow: ellipsis;
 }
 
