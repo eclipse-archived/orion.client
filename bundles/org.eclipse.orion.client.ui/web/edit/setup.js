@@ -110,8 +110,8 @@ objects.mixin(MenuBar.prototype, {
 		
 		commandRegistry.addCommandGroup(fileActionsScope, "orion.menuBarFileGroup", 1000, messages["File"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.addCommandGroup(editActionsScope, "orion.menuBarEditGroup", 100, messages["Edit"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup(viewActionsScope, "orion.menuBarViewGroup", 100, messages["View"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-0$	
-		commandRegistry.addCommandGroup(toolsActionsScope, "orion.menuBarToolsGroup", 100, messages["Tools"], null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup(viewActionsScope, "orion.menuBarViewGroup", 100, messages["View"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$	
+		commandRegistry.addCommandGroup(toolsActionsScope, "orion.menuBarToolsGroup", 100, messages["Tools"], null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		commandRegistry.addCommandGroup(fileActionsScope, "orion.newContentGroup", 0, messages["New"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.addCommandGroup(fileActionsScope, "orion.importGroup", 100, messages["Import"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -245,7 +245,7 @@ function EditorViewer(options) {
 	this.fileNodeTooltip = new mTooltip.Tooltip({
 		node: this.curFileNode,
 //		text: "Test Tooltip",
-		position: ["below", "above", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		position: ["below", "above", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
 	});
 
 	// Create search and filefields
@@ -395,7 +395,11 @@ objects.mixin(EditorViewer.prototype, {
 	},
 
 	defaultOptions: function() {
+		//Don't forward the complete activate context, only specify the things we want to see
+		var context = Object.create(null);
+		context.openEditor = this.activateContext.openEditor.bind(this.activateContext);
 		return {
+			activateContext: context,
 			parent: this.contentNode,
 			model: this.pool.model,
 			undoStack: this.pool.undoStack,
@@ -446,7 +450,7 @@ objects.mixin(EditorViewer.prototype, {
 		if (metadata && input) {
 			var options = objects.mixin({
 				input: input,
-				metadata: metadata,
+				metadata: metadata
 			}, this.defaultOptions());
 			//TODO better way of registering built-in editors
 			if (metadata.Directory) {
@@ -508,7 +512,7 @@ objects.mixin(EditorViewer.prototype, {
 	
 	setInput: function(hash) {
 		this.inputManager.setInput(hash);
-	},
+	}
 });
 
 function EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly) {
@@ -534,7 +538,7 @@ objects.mixin(EditorSetup.prototype, {
 		var serviceRegistry = this.serviceRegistry;
 		this.selection = new mSelection.Selection(serviceRegistry);
 		this.operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-		this.statusService = new mStatus.StatusReportingService(serviceRegistry, this.operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this.statusService = new mStatus.StatusReportingService(serviceRegistry, this.operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$
 		this.dialogService = new mDialogs.DialogService(serviceRegistry);
 		this.commandRegistry = new mCommandRegistry.CommandRegistry({selection: this.selection});
 		this.progressService = new mProgress.ProgressService(serviceRegistry, this.operationsClient, this.commandRegistry);
@@ -555,7 +559,7 @@ objects.mixin(EditorSetup.prototype, {
 			toolbarId: "toolsActions", //$NON-NLS-0$
 			saveToolbarId: "fileActions", //$NON-NLS-0$
 			editToolbarId: "editActions", //$NON-NLS-0$
-			navToolbarId: "pageNavigationActions", //$NON-NLS-0$
+			navToolbarId: "pageNavigationActions" //$NON-NLS-0$
 		});
 	},
 	
@@ -647,18 +651,55 @@ objects.mixin(EditorSetup.prototype, {
 		this.sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput); //$NON-NLS-0$
 		this.sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
 			if (evt.newValue && !evt.ignoreRedirect) {
-				var item = evt.newValue;
-				var openWithCommand = mExtensionCommands.getOpenWithCommand(commandRegistry, evt.newValue);
-				if (openWithCommand) {
-					var href = openWithCommand.hrefCallback({items: item});
-				} else {
-					href = uriTemplate.expand({resource: evt.newValue.Location});
-				}
-				window.location = href;
+				window.location = this.computeNavigationHref(evt.newValue);
 			}
-		});
+		}.bind(this));
 	},
 
+	/**
+	 * @description Creates a URL ref from the give location and options to be opened by the browser
+	 * @function
+	 * @param {String} loc The location string to create the HREF to
+	 * @param {Object} options The map of options
+	 * @returns {String} The computed URL to navigate to
+	 * @since 9.0
+	 */
+	computeNavigationHref: function(loc, options) {
+		var openWithCommand = mExtensionCommands.getOpenWithCommand(this.commandRegistry, loc);
+		if (openWithCommand) {
+			return openWithCommand.hrefCallback({items: {Location: loc, params: options}});
+		}
+		if(options) {
+			return uriTemplate.expand({resource: loc, params: options});
+		}
+		return uriTemplate.expand({resource: loc});
+	},
+
+	/**
+	 * @description Opens the given location
+	 * @function
+	 * @param {String} fileurl The URL to open
+	 * @param {Object} options The map of options. 
+	 * 
+	 * Current set of understood options include:
+	 *   start - (number) The start range to select when opening an editor
+	 *   end - (number) The end range to select when opening an editor
+	 *   newwindow - (boolean) If we should open the URL in a new tab
+	 * 
+	 * @since 9.0
+	 */
+	openEditor: function(loc, options) {
+		var opts = options;
+		var _new = typeof(opts.newwindow) === 'boolean' ? opts.newwindow : false;
+		delete opts.newwindow; // don't add it to the URL
+		var _url = this.computeNavigationHref(loc, opts);
+		if(_new) {
+			window.open(_url, '_blank'); //$NON-NLS-1$
+		} else {
+			window.open(_url);
+		}
+	},
+	
 	createEditorViewer: function(id) {
 		var editorViewer = new EditorViewer({
 			id: id,
@@ -718,7 +759,7 @@ objects.mixin(EditorSetup.prototype, {
 		this.activeEditorViewer.setInput(hash);
 		this.sidebarNavInputManager.processHash(hash);
 	},
-
+	
 	load: function() {
 		var lastEditedFile = sessionStorage.lastFile;
 		var currentHash = PageUtil.hash();
@@ -754,7 +795,7 @@ objects.mixin(EditorSetup.prototype, {
 		var commandRegistry = this.commandRegistry;
 		var editor = this.activeEditorViewer.editor;
 		menuBar.updateCommands();
-		["pageActions", "pageNavigationActions", "settingsActions"].forEach(function(id) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		["pageActions", "pageNavigationActions", "settingsActions"].forEach(function(id) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$
 			var toolbar = lib.node(id);
 			if (toolbar) {
 				commandRegistry.destroy(toolbar);
@@ -848,7 +889,7 @@ objects.mixin(EditorSetup.prototype, {
 				contentType: this.editorInputManager.getContentType(),
 				metadata: metadata,
 				editor: editor,
-				location: window.location,
+				location: window.location
 			});
 		}
 	},
@@ -873,7 +914,7 @@ objects.mixin(EditorSetup.prototype, {
 			splitEditorViewerNode.classList.remove("editorViewerPicInPic"); //$NON-NLS-0$
 			splitEditorViewerNode.style.display = "block"; //$NON-NLS-0$
 			splitEditorViewerNode.style.width = splitEditorViewerNode.style.height = "100%"; //$NON-NLS-0$
-			["top", "left", "right", "bottom", "width", "height"].forEach(function(p) { //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			["top", "left", "right", "bottom", "width", "height"].forEach(function(p) { //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-6$
 				splitEditorViewerNode.style[p] = ""; //$NON-NLS-0$
 			});
 			splitterNode.style.display = "block"; //$NON-NLS-0$
@@ -917,7 +958,7 @@ objects.mixin(EditorSetup.prototype, {
 	createSplitMenu: function() {
 		var that = this;
 		var currentChoice;
-		var toolbar = "settingsActions";
+		var toolbar = "settingsActions"; //$NON-NLS-1$
 		var changeSplitModeCommand;
 		function callback() {
 			this.checked = true;
