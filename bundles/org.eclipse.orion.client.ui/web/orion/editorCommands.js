@@ -168,7 +168,9 @@ define([
 			this._createSettingsCommand();
 			this._createSearchFilesCommand();
 			this._createGotoLineCommnand();
-			this._createFindCommnand();
+			if(this.textSearcher) {
+				this._createFindCommnand();
+			}
 			this._createBlameCommand();
 			this._createDiffCommand();
 			this._createShowTooltipCommand();
@@ -258,17 +260,19 @@ define([
 					that.commandService.runCommand("orion.edit.gotoLine"); //$NON-NLS-0$
 					return true;
 				}, that.commandService.findCommand("orion.edit.gotoLine")); //$NON-NLS-0$
-
-				textView.setAction("find", function (data) { //$NON-NLS-0$
-					if (data) {
-						that.textSearcher.show(data);
+				
+				if(this.textSearcher) {
+					textView.setAction("find", function (data) { //$NON-NLS-0$
+						if (data) {
+							that.textSearcher.show(data);
+							return true;
+						}
+						that.commandService.runCommand("orion.edit.find", null, null, new mCommandRegistry.ParametersDescription( //$NON-NLS-0$
+							[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							{clientCollect: true}));
 						return true;
-					}
-					that.commandService.runCommand("orion.edit.find", null, null, new mCommandRegistry.ParametersDescription( //$NON-NLS-0$
-						[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						{clientCollect: true}));
-					return true;
-				}, that.commandService.findCommand("orion.edit.find")); //$NON-NLS-0$
+					}, that.commandService.findCommand("orion.edit.find")); //$NON-NLS-0$
+				}
 			}
 		},
 		showKeyBindings: function(keyAssist) {
