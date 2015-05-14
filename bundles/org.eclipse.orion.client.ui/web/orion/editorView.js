@@ -297,7 +297,7 @@ define([
 
 			var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 
-				var localSearcher = that.textSearcher = new mSearcher.TextSearcher(editor, serviceRegistry, commandRegistry, undoStack);
+				var localSearcher = that.textSearcher = (mSearcher.TextSearcher ? new mSearcher.TextSearcher(editor, serviceRegistry, commandRegistry, undoStack) : null);
 
 				var keyBindings = new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
 				that.updateSourceCodeActions(that.settings, keyBindings.sourceCodeActions);
