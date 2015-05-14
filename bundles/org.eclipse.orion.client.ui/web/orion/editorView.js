@@ -75,6 +75,7 @@ define([
 	 */
 	function EditorView(options) {
 		this._parent = options.parent;
+		this.activateContext = options.activateContext;
 		this.renderToolbars = options.renderToolbars;
 		this.serviceRegistry = options.serviceRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
@@ -231,7 +232,7 @@ define([
 					session[metadata.Location] = {
 						ETag: metadata.ETag,
 						topIndex: textView.getTopIndex(),
-						selections: selections,
+						selections: selections
 					};
 					sessionStorage.editorViewSection = JSON.stringify(session);
 				}
@@ -279,6 +280,7 @@ define([
 			var readonly = this.readonly;
 			var commandRegistry = this.commandRegistry;
 			var serviceRegistry = this.serviceRegistry;
+			var activateContext = this.activateContext;
 			var inputManager = this.inputManager;
 			var progress = this.progress;
 			var contentTypeRegistry = this.contentTypeRegistry;
@@ -320,7 +322,7 @@ define([
 					return true;
 				});
 
-				textView.setKeyBinding(new mKeyBinding.KeyStroke('z', true, false, true), "toggleZoomRuler"); //$NON-NLS-1$ //$NON-NLS-0$
+				textView.setKeyBinding(new mKeyBinding.KeyStroke('z', true, false, true), "toggleZoomRuler"); //$NON-NLS-1$ //$NON-NLS-2$
 				textView.setAction("toggleZoomRuler", function() { //$NON-NLS-0$
 					if (!that.settings.zoomRulerVisible) return false;
 					that.settings.zoomRuler = !that.settings.zoomRuler;
@@ -341,7 +343,7 @@ define([
 				// Content assist is about to be activated; set its providers.
 				var fileContentType = inputManager.getContentType();
 				var fileName = editor.getTitle();
-				var serviceRefs = serviceRegistry.getServiceReferences("orion.edit.contentAssist").concat(serviceRegistry.getServiceReferences("orion.edit.contentassist")); //$NON-NLS-1$ //$NON-NLS-0$
+				var serviceRefs = serviceRegistry.getServiceReferences("orion.edit.contentAssist").concat(serviceRegistry.getServiceReferences("orion.edit.contentassist")); //$NON-NLS-1$ //$NON-NLS-2$
 				var providerInfoArray = event && event.providers;
 				if (!providerInfoArray) {
 					providerInfoArray = serviceRefs.map(function(serviceRef) {
@@ -420,7 +422,7 @@ define([
 			});
 			editor.id = "orion.editor"; //$NON-NLS-0$
 			editor.processParameters = function(params) {
-				parseNumericParams(params, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				parseNumericParams(params, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 				this.showSelection(params.start, params.end, params.line, params.offset, params.length);
 			};
 			editor.getEditorContext = function() {
@@ -495,10 +497,10 @@ define([
 
 			var contextImpl = Object.create(null);
 			[
-				"getCaretOffset", "setCaretOffset", //$NON-NLS-1$ //$NON-NLS-0$
-				"getSelection", "setSelection", //$NON-NLS-1$ //$NON-NLS-0$
-				"getSelections", "setSelections", //$NON-NLS-1$ //$NON-NLS-0$
-				"getText", "setText", //$NON-NLS-1$ //$NON-NLS-0$
+				"getCaretOffset", "setCaretOffset", //$NON-NLS-1$ //$NON-NLS-2$
+				"getSelection", "setSelection", //$NON-NLS-1$ //$NON-NLS-2$
+				"getSelections", "setSelections", //$NON-NLS-1$ //$NON-NLS-2$
+				"getText", "setText", //$NON-NLS-1$ //$NON-NLS-2$
 				"getLineAtOffset", //$NON-NLS-0$
 				"getLineStart", //$NON-NLS-0$
 				"isDirty", //$NON-NLS-0$.
@@ -512,6 +514,23 @@ define([
 			contextImpl.enterLinkedMode = function(linkedModeModel) {
 				editor.getLinkedMode().enterLinkedMode(linkedModeModel);
 			};
+			/**
+			 * @description Opens the given location
+			 * @function
+			 * @param {String} fileurl The URL to open
+			 * @param {Object} options The map of options. 
+			 * 
+			 * Current set of understood options include:
+			 *   start - (number) The start range to select when opening an editor
+			 *   end - (number) The end range to select when opening an editor
+			 *   newwindow - (boolean) If we should open the URL in a new tab
+			 * 
+			 * @since 9.0
+			 */
+			contextImpl.openEditor = function(fileurl, options) {
+				activateContext.openEditor(fileurl, options);
+			};
+			
 			/**
 			 * @since 7.0
 			 */
