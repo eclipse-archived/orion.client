@@ -75,6 +75,7 @@ define([
 	 */
 	function EditorView(options) {
 		this._parent = options.parent;
+		this.activateContext = options.activateContext;
 		this.renderToolbars = options.renderToolbars;
 		this.serviceRegistry = options.serviceRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
@@ -279,6 +280,7 @@ define([
 			var readonly = this.readonly;
 			var commandRegistry = this.commandRegistry;
 			var serviceRegistry = this.serviceRegistry;
+			var activateContext = this.activateContext;
 			var inputManager = this.inputManager;
 			var progress = this.progress;
 			var contentTypeRegistry = this.contentTypeRegistry;
@@ -512,6 +514,31 @@ define([
 			contextImpl.enterLinkedMode = function(linkedModeModel) {
 				editor.getLinkedMode().enterLinkedMode(linkedModeModel);
 			};
+			/**
+			 * @description Opens the given location
+			 * @function
+			 * @param {String} fileurl The URL to open
+			 * @param {Object} options The map of options. 
+			 * 
+			 * Current set of understood options include:
+			 *   start - (number) The start range to select when opening an editor
+			 *   end - (number) The end range to select when opening an editor
+			 *   newwindow - (boolean) If we should open the URL in a new tab
+			 * 
+			 * @since 9.0
+			 */
+			contextImpl.openEditor = function(fileurl, options) {
+				var opts = options;
+				var _new = typeof(opts.newwindow) === 'boolean' ? opts.newwindow : false;
+				delete opts.newwindow; // don't add it to the URL
+				var _url = activateContext.computeNavigationHref(fileurl, opts);
+				if(_new) {
+					window.open(_url, '_blank'); //$NON-NLS-1$
+				} else {
+					window.open(_url);
+				}
+			};
+			
 			/**
 			 * @since 7.0
 			 */

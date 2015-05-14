@@ -395,7 +395,12 @@ objects.mixin(EditorViewer.prototype, {
 	},
 
 	defaultOptions: function() {
+		//Don't forward the complete activate context, only specify the things we want to see
+		var context = Object.create(null);
+		context.computeNavigationHref = this.activateContext.computeNavigationHref;
+		context.commandRegistry = this.activateContext.commandRegistry;
 		return {
+			activateContext: context,
 			parent: this.contentNode,
 			model: this.pool.model,
 			undoStack: this.pool.undoStack,
@@ -657,6 +662,24 @@ objects.mixin(EditorSetup.prototype, {
 				window.location = href;
 			}
 		});
+	},
+
+	/**
+	 * @description Creates a URL ref from the give location and options to be opened by the browser
+	 * @function
+	 * @param {String} loc The location string to create the HREF to
+	 * @param {Object} options The map of options
+	 * @returns {String} The computed URL to navigate to
+	 */
+	computeNavigationHref: function(loc, options) {
+		var openWithCommand = mExtensionCommands.getOpenWithCommand(this.commandRegistry, loc);
+		if (openWithCommand) {
+			return openWithCommand.hrefCallback({items: {Location: loc, params: options}});
+		}
+		if(options) {
+			return uriTemplate.expand({resource: loc, params: options});
+		}
+		return uriTemplate.expand({resource: loc});
 	},
 
 	createEditorViewer: function(id) {
