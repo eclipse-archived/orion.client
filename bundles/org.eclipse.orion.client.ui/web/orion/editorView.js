@@ -429,7 +429,7 @@ define([
 
 			this.dispatcher = new Dispatcher(this.serviceRegistry, this.contentTypeRegistry, editor, inputManager);
 			if(this.themePreferences && this.editorPreferences){
-				this.localSettings = new EditorSettings({local: true, editor: editor, themePreferences: this.themePreferences, preferences: this.editorPreferences});
+				this.localSettings = EditorSettings ? new EditorSettings({local: true, editor: editor, themePreferences: this.themePreferences, preferences: this.editorPreferences}) : null;
 			}
 			var liveEditSession = new LiveEditSession(serviceRegistry, editor);
 			var recordListener = function() {

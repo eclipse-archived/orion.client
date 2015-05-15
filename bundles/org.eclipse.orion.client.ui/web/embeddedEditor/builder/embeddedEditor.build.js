@@ -26,7 +26,14 @@
         text: 'requirejs/text',
         //"orion/extensionCommands": "embeddedEditor/builder/buildFrom/emptyExtensionCommands",
         "orion/globalCommands": "embeddedEditor/builder/buildFrom/emptyGlobalCommands",
-        'orion/webui/dialogs/OpenResourceDialog': 'embeddedEditor/builder/buildFrom/OpenResourceDialog'
+        'orion/webui/dialogs/OpenResourceDialog': 'embeddedEditor/builder/buildFrom/OpenResourceDialog',
+        'orion/explorers/navigatorRenderer': 'embeddedEditor/builder/buildFrom/navigatorRenderer',
+        'examples/editor/textStyler': 'embeddedEditor/builder/buildFrom/emptyTextStyler',
+        'orion/widgets/settings/EditorSettings': 'embeddedEditor/builder/buildFrom/EditorSettings',
+        'orion/searchAndReplace/textSearcher': 'embeddedEditor/builder/buildFrom/textSearcher',
+		'orion/editorPreferences': 'embeddedEditor/builder/buildFrom/editorPreferences',
+		'orion/widgets/themes/ThemePreferences': 'embeddedEditor/builder/buildFrom/ThemePreferences',
+		'orion/widgets/themes/editor/ThemeData': 'embeddedEditor/builder/buildFrom/ThemeData'
         //"orion/editorCommands": "embeddedEditor/builder/buildFrom/emptyEditorCommands"
 	},
 	name: "almond",
