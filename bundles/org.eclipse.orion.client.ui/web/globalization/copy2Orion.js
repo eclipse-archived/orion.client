@@ -22,7 +22,7 @@ var IS_WINDOWS = process.platform === 'win32';
 
 var pathToTranslationRoot = 'C:/IDSDev/translations/';
 var pathToDestBundle = 'C:/IDSDev/OrionSource/org.eclipse.orion.client/bundles/';
-var configFile = 'C:/temp/config.js';
+var configFile = 'C:/IDSDev/translations/configOrion.js';
 var pathToCWDDir = path.resolve(__dirname, './');
 /**
  * Pass varargs to get numbered parameters, or a single object for named parameters.
@@ -71,7 +71,7 @@ function getCopyFileCmd(src, dest) {
 }
 
 function section(name) {
-	console.log('-------------------------------------------------------\n' + name + '\n');
+	console.log('-------------------------------------------------------\n' + name + '...\n');
 }
 
 function copySingleFile(copyEntry) {
@@ -137,7 +137,12 @@ var allLanguages = [
 	{name: "German", locale: "de", prefix: "de"},
 	{name: "Spanish", locale: "es", prefix: "es"},
 	{name: "Italian", locale: "it", prefix: "it"},
-	{name: "Portuguese (Brazilian)", locale: "pt-br", prefix: "pt_BR"}
+	{name: "Korean", locale: "ko", prefix: "ko"},
+	{name: "Portuguese (Brazilian)", locale: "pt-br", prefix: "pt_BR"},
+	{name: "en_AA", locale: "en_AA", prefix: "en_AA"},
+	{name: "en_RR", locale: "en_RR", prefix: "en_RR"},
+	{name: "en_ZZ", locale: "en_ZZ", prefix: "en_ZZ"}
+	
 ];
 
 function generateCopyArray(sourceRoot, destRoot) {
@@ -159,9 +164,6 @@ function generateCopyArray(sourceRoot, destRoot) {
 	return copyArray;
 }
 
-/**
- * @returns {Promise}
- */
 function processFile() {
 	var result =  generateCopyArray(pathToTranslationRoot, pathToDestBundle);
 	var buildPromise = new Deferred();
