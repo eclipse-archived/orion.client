@@ -23,7 +23,8 @@ define([
 	
     var rules = {
         "curly" : {
-            description: 'Require curly braces for all control statements',
+            description: 'Require curly braces for all control statements.',
+            url: 'http://eslint.org/docs/rules/curly', //$NON-NLS-1$
             rule: function(context) {
         		/**
         		 * Checks the following AST element for a BlockStatement
@@ -71,7 +72,8 @@ define([
         	}
         },
 		"eqeqeq": {
-		    description: 'Require the use of === and !==',
+		    description: 'Require the use of === and !==.',
+		    url: "http://eslint.org/docs/rules/eqeqeq", //$NON-NLS-1$
 		    rule: function(context) {
 		        function getOperatorToken(context, node) {
             		var tokens = context.getTokens(node), len = tokens.length, operator = node.operator;
@@ -113,7 +115,8 @@ define([
         	} 
         },
 		"missing-doc" : {
-		    description: 'Require JSDoc for all functions',
+		    description: 'Require JSDoc for all functions.',
+		    url: 'http://eslint.org/docs/rules/valid-jsdoc', //$NON-NLS-1$
 		    rule: function(context) {
                 function validComment(comments) {
                     if(comments && comments.leading) {
@@ -189,7 +192,8 @@ define([
         	}
         },
 		"new-parens" : {
-		    description: 'Require parenthesis for constructors',
+		    description: 'Require parenthesis for constructors.',
+		    url: 'http://eslint.org/docs/rules/new-parens', //$NON-NLS-1$
 		    rule: function(context) {
         		return {
         			'NewExpression' : function(node) {
@@ -213,7 +217,8 @@ define([
         	}
         },
         "no-caller": {
-            description: "Warn on use of arguments.callee or arguments.caller",
+            description: "Warn on use of arguments.callee or arguments.caller.",
+            url: 'http://eslint.org/docs/rules/no-caller', //$NON-NLS-1$
             rule: function(context) {
                 return {
                     "MemberExpression": function(node) { //$NON-NLS-0$
@@ -234,7 +239,8 @@ define([
             }
         },
         "no-comma-dangle": {
-            description: 'Report extra trailing comma in object expressions',
+            description: 'Report extra trailing comma in object expressions.',
+            url: 'http://eslint.org/docs/rules/no-comma-dangle', //$NON-NLS-1$
             rule: function(context) {
                 return {
                     'ObjectExpression': function(node) {
@@ -247,7 +253,8 @@ define([
             }
         },
         "no-cond-assign": {
-            description: 'Disallow assignment statements in control statements like if-else, do-while, while and for statements',
+            description: 'Disallow assignment statements in control statements like if-else, do-while, while and for statements.',
+            url: 'http://eslint.org/docs/rules/no-cond-assign', //$NON-NLS-1$
             rule: function(context) {
                 
                 var statements = {
@@ -322,7 +329,8 @@ define([
             }
         },
         "no-console": {
-            description: 'Disallow the use of \'console\' in browser-run code',
+            description: 'Disallow the use of \'console\' in browser-run code.',
+            url: 'http://eslint.org/docs/rules/no-console', //$NON-NLS-1$
             rule: function(context) {
                 return {
                     'MemberExpression': function(node) {
@@ -337,7 +345,8 @@ define([
             }
         },
         "no-constant-condition": {
-            description: 'Disallow use of a constant value as a conditional expression',
+            description: 'Disallow use of a constant value as a conditional expression.',
+            url: 'http://eslint.org/docs/rules/no-constant-condition', //$NON-NLS-1$
             rule: function(context) {
                 /**
                  * @param {Object} node The AST node
@@ -377,7 +386,8 @@ define([
             }
         },
 		"no-debugger" : {
-		    description: 'Disallow use of the debugger keyword',
+		    description: 'Disallow use of the debugger keyword.',
+		    url: 'http://eslint.org/docs/rules/no-debugger', //$NON-NLS-1$
 		    rule: function(context) {
         		return {
         			"DebuggerStatement": function(node) {
@@ -392,7 +402,8 @@ define([
         	}
         },
 		"no-dupe-keys" : {
-		    description: 'Warn when object contains duplicate keys',
+		    description: 'Warn when object contains duplicate keys.',
+		    url: 'http://eslint.org/docs/rules/no-dupe-keys', //$NON-NLS-1$
 		    rule: function(context) {
         		return {
         			"ObjectExpression": function(node) {
@@ -426,7 +437,8 @@ define([
         	}
         },
 		'no-empty-block' : {
-		    description: 'Warn when a code block is empty',
+		    description: 'Warn when a code block is empty.',
+		    url: 'http://eslint.org/docs/rules/no-empty', //$NON-NLS-1$
 		    rule: function(context) {
         		var comments;
         		
@@ -455,7 +467,8 @@ define([
         	}
         },
 		"no-eval" : {
-		    description: 'Disallow use of eval function',
+		    description: 'Disallow use of eval function.',
+		    url: 'http://eslint.org/docs/rules/no-eval', //$NON-NLS-1$
 		    rule: function(context) {
         		return {
         			"CallExpression": function(node) {
@@ -465,7 +478,7 @@ define([
         						return;
         					}
         					if('eval' === name) {
-        						context.report(node.callee, "${0} function calls are discouraged.", {0:'\'eval\''}, context.getTokens(node.callee)[0]);
+        						context.report(node.callee, "${0} function calls are discouraged.", {0:'\'eval\''}, context.getTokens(node.callee)[0]); //$NON-NLS-2$
         					}
         				}
         				catch(ex) {
@@ -476,7 +489,8 @@ define([
         	}
         },
 		"no-extra-semi": {
-		    description: 'Warn about extraneous semi colons',
+		    description: 'Warn about extraneous semi colons.',
+		    url: 'http://eslint.org/docs/rules/no-extra-semi', //$NON-NLS-1$
 		    rule: function(context) {
         		return {
         			"EmptyStatement": function(node) {  //$NON-NLS-0$
@@ -495,7 +509,8 @@ define([
         	}
         },
 		'no-fallthrough' : {
-		    description: 'Warn when a switch case falls through',
+		    description: 'Warn when a switch case falls through.',
+		    url: 'http://eslint.org/docs/rules/no-fallthrough', //$NON-NLS-1$
 		    rule: function(context) {
         		function fallsthrough(node) {
         		    // cases with no statements or only a single case are implicitly fall-through
@@ -572,7 +587,8 @@ define([
         	}
         },
         "no-implied-eval" : {
-        	description: 'Disallow use of implied eval function',
+        	description: 'Disallow use of implied eval function.',
+        	url: 'http://eslint.org/docs/rules/no-implied-eval', //$NON-NLS-1$
         	rule: function(context) {
         		return {
         			"CallExpression": function(node) {
@@ -611,7 +627,8 @@ define([
         	}
         },
         "no-iterator": {
-            description: "Warn when the __iterator__ property is used",
+            description: "Warn when the __iterator__ property is used.",
+            url: 'http://eslint.org/docs/rules/no-iterator', //$NON-NLS-1$
             rule: function(context) {
                 return {
                     'MemberExpression': function(node) {
@@ -629,8 +646,8 @@ define([
             }
         },
         "no-proto": {
-            description: "Warn when the __proto__ property is used",
-            url: 'http://eslint.org/docs/rules/no-proto.html',
+            description: "Warn when the __proto__ property is used.",
+            url: 'http://eslint.org/docs/rules/no-proto.html', //$NON-NLS-1$
             rule: function(context) {
                 return {
                     'MemberExpression': function(node) {
@@ -648,7 +665,7 @@ define([
             }
         },
 		'no-jslint': {
-		    description: 'Warn when the jslint/jshint directive is used',
+		    description: 'Warn when the jslint/jshint directive is used.',
 		    rule: function(context) {
         		return {
         			'Program' : function(node) {
@@ -667,7 +684,7 @@ define([
             			                    }
             			                    var start = 2 + comment.value.indexOf(jslint) + comment.range[0];
             			                    var end = start + jslint.length;
-            			                    context.report({type:'BlockComment', range:[start, end], loc: comment.loc}, 'The \'${0}\' directive is unsupported, please use eslint-env.', {0:jslint});
+            			                    context.report({type:'BlockComment', range:[start, end], loc: comment.loc}, 'The \'${0}\' directive is unsupported, please use eslint-env.', {0:jslint}); //$NON-NLS-1$
             			                }
             			            }
             			        }
@@ -681,27 +698,30 @@ define([
         	}
         },
 		"no-new-array": {
-		    description: 'Disallow use of the Array constructor',
+		    description: 'Disallow use of the Array constructor.',
 		    rule: function(context) {
         		return util.createNewBuiltinRule("Array", "Use the array literal notation '[]'.", context); //$NON-NLS-0$
         	}
         },
 		"no-new-func": {
-		    description: 'Disallow use of the Function constructor',
+		    description: 'Disallow use of the Function constructor.',
+		    url: 'http://eslint.org/docs/rules/no-new-func', //$NON-NLS-1$
 		    rule: function(context) {
-        		return util.createNewBuiltinRule("Function", "The Function constructor is eval.", context);
+        		return util.createNewBuiltinRule("Function", "The Function constructor is eval.", context); //$NON-NLS-1$
         	}
         },
 		"no-new-object": {
-		    description: 'Disallow use of the Object constructor',
+		    description: 'Disallow use of the Object constructor.',
+		    url: 'http://eslint.org/docs/rules/no-new-object', //$NON-NLS-1$
 		    rule: function(context) {
         		return util.createNewBuiltinRule("Object", "Use the object literal notation '{}' or Object.create(null).", context); //$NON-NLS-0$
         	}
         },
 		"no-new-wrappers": {
-		    description: 'Disallow creating new String, Number or Boolean via their constructor',
+		    description: 'Disallow creating new String, Number or Boolean via their constructor.',
+		    url: 'http://eslint.org/docs/rules/no-new-wrappers', //$NON-NLS-1$
 		    rule: function(context) {
-        		var wrappers = ["String", "Number", "Math", "Boolean", "JSON"]; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        		var wrappers = ["String", "Number", "Math", "Boolean", "JSON"]; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-5$
         
         		return util.createNewBuiltinRule(wrappers, function(context, node, symbol) {
         			context.report(node, "Do not use '${0}' as a constructor.", [symbol]); //$NON-NLS-1$
@@ -709,7 +729,8 @@ define([
         	}
         },
         "no-with": {
-        	description: "Warn when the with statement is used",
+        	description: "Warn when the with statement is used.",
+        	url: 'http://eslint.org/docs/rules/no-with', //$NON-NLS-1$
         	rule: function(context) {
         		return {'WithStatement': function(node) {
 	        			context.report(node, 'Discouraged use of the \'with\' statement.', null, context.getFirstToken(node));
@@ -718,7 +739,7 @@ define([
         	}
         },
         "missing-nls": {
-        	description: 'Disallow non-externalized string literals',
+        	description: 'Disallow non-externalized string literals.',
         	rule: function(context){
         		function reportNonNLS(node, index){
         			var data = Object.create(null);
@@ -733,7 +754,7 @@ define([
         		}
         		
         		var callees = Object.create(null);
-        		mapCallees(['require', 'requirejs', 'importScripts', 'define', 'Worker', 'SharedWorker', 'addEventListener', 'RegExp'], callees);
+        		mapCallees(['require', 'requirejs', 'importScripts', 'define', 'Worker', 'SharedWorker', 'addEventListener', 'RegExp'], callees); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
         		
         		return {
                     'Literal': function(node) {
@@ -847,7 +868,8 @@ define([
         	}
         },
 		"no-redeclare": {
-		    description: 'Warn when variable or function is redeclared',
+		    description: 'Warn when variable or function is redeclared.',
+		    url: 'http://eslint.org/docs/rules/no-redeclare', //$NON-NLS-1$
 		    rule: function(context) {
                 function reportRedeclaration(node, name) {
                     context.report(node, "'${0}' is already defined.", {0:name});
@@ -880,7 +902,8 @@ define([
         	}
         },
         "no-regex-spaces": {
-            description: "Warn when multiple spaces are used in regular expressions",
+            description: "Warn when multiple spaces are used in regular expressions.",
+            url: 'http://eslint.org/docs/rules/no-regex-spaces', //$NON-NLS-1$
             rule: function(context) {
                 
                 function reportSpaces(node) {
@@ -889,7 +912,7 @@ define([
                     while((val = regex.exec(node.raw)) != null) {
                         var start = node.range[0]+val.index;
                         var len = val[0].length;
-                        context.report({type: 'Literal', range:[start, start+len], loc: node.loc}, 
+                        context.report({type: 'Literal', range:[start, start+len], loc: node.loc},  //$NON-NLS-1$
                                         'Avoid multiple spaces in regular expressions. Use \' {${0}}\' instead.', {0:len});
                     }
                 }
@@ -910,7 +933,8 @@ define([
             }
         },
         "no-reserved-keys": {
-            description: "Warn when a reserved word is used as a property key",
+            description: "Warn when a reserved word is used as a property key.",
+            url: 'http://eslint.org/docs/rules/no-reserved-keys', //$NON-NLS-1$
             rule: function(context) {
                 return {
                     'ObjectExpression': function(node) {
@@ -927,7 +951,8 @@ define([
             }
         },
         "no-shadow": {
-            description: "Warn when shadowing variable from upper scope",
+            description: "Warn when shadowing variable from upper scope.",
+            url: 'http://eslint.org/docs/rules/no-shadow', //$NON-NLS-1$
             rule: function(context) {
                 var hasOwnProperty = Object.prototype.hasOwnProperty;
                 function addVariables(map, scope) {
@@ -1008,7 +1033,7 @@ define([
             }
         },
         "no-shadow-global": {
-            description: 'Warn when a variable or parameter shadows a member from the global environment',
+            description: 'Warn when a variable or parameter shadows a member from the global environment.',
             rule: function(context) {
                 
                 function checkShadow(node) {
@@ -1041,7 +1066,8 @@ define([
             }
         },
 		'no-sparse-arrays': {
-		    description: 'Warn when sparse arrays are defined',
+		    description: 'Warn when sparse arrays are defined.',
+		    url: 'http://eslint.org/docs/rules/no-sparse-arrays', //$NON-NLS-1$
 		    rule: function(context) {
         		return {
         			'ArrayExpression' : function(node){
@@ -1053,7 +1079,8 @@ define([
         	}
         },
         "no-throw-literal": {
-            description: 'Warn when a Literal is used in a throw statement',
+            description: 'Warn when a Literal is used in a throw statement.',
+            url: 'http://eslint.org/docs/rules/no-throw-literal', //$NON-NLS-1$
             rule: function(context) {
                 return {
                     "ThrowStatement": function(node) {
@@ -1080,7 +1107,8 @@ define([
            }
         },
 		"no-undef": {
-		    description: 'Warn when used variable or function has not been defined',
+		    description: 'Warn when used variable or function has not been defined.',
+		    url: 'http://eslint.org/docs/rules/no-undef', //$NON-NLS-1$
 		    rule: function(context) {
                 function isImplicitGlobal(variable) {
                     return variable.defs.every(function(def) {
@@ -1113,11 +1141,11 @@ define([
             	                    name = ref.identifier.name;
             	                if (!variable) {
             	                    var env = Finder.findESLintEnvForMember(name);
-            	                    var inenv = env ? '-inenv' : '';
-            	                    var nls = 'no-undef-defined';
+            	                    var inenv = env ? '-inenv' : ''; //$NON-NLS-1$
+            	                    var nls = 'no-undef-defined'; //$NON-NLS-1$
             	                    context.report(ref.identifier, "'${0}' is not defined.", {0:name, nls: nls, pid: nls+inenv});
             	                } else if (ref.isWrite() && variable.writeable === false) {
-            	                    context.report(ref.identifier, "'${0}' is read-only.", {0:name, nls: 'no-undef-readonly'});
+            	                    context.report(ref.identifier, "'${0}' is read-only.", {0:name, nls: 'no-undef-readonly'}); //$NON-NLS-2$
             	                }
             	            });
                     	}
@@ -1130,8 +1158,8 @@ define([
             }
         },
         'no-undef-init': {
-        	description: 'Warn when variables are explicitly initialized to undefined',
-        	url: 'http://eslint.org/docs/rules/no-undef-init.html',
+        	description: 'Warn when variables are explicitly initialized to undefined.',
+        	url: 'http://eslint.org/docs/rules/no-undef-init.html', //$NON-NLS-1$
         	rule: function(context) {
         		return {
         			'VariableDeclarator': function(node) {
@@ -1143,7 +1171,8 @@ define([
         	}
         },
 		'no-unreachable' : {
-		    description: 'Warn when code is not reachable',
+		    description: 'Warn when code is not reachable.',
+		    url: 'http://eslint.org/docs/rules/no-unreachable', //$NON-NLS-1$
 		    rule: function(context) {
                 /**
                  * @description Returns if the statement is 'hoisted'
@@ -1198,7 +1227,7 @@ define([
         	}
         },
 		"no-unused-params" : {
-		    description: 'Warn when function parameters are not used',
+		    description: 'Warn when function parameters are not used.',
 		    rule: function(context) {
                 function hasCallbackComment(node) {
                     if(node && node.leadingComments) {
@@ -1226,9 +1255,9 @@ define([
         					}
         					var defnode = variable.defs[0].name;
         					if (!variable.references.length) {
-        					    var pid = 'no-unused-params';
+        					    var pid = 'no-unused-params'; //$NON-NLS-1$
         					    if(node.type === 'FunctionExpression') {
-        					        pid += '-expr';
+        					        pid += '-expr'; //$NON-NLS-1$
         					        if(hasCallbackComment(node) || (node.params && node.params.length > 0 && hasCallbackComment(node.params[0]))) { 
         					            return;
         					        }
@@ -1262,7 +1291,8 @@ define([
         	}
         },
 		"no-unused-vars": {
-		    description: 'Warn when declared variables are not used',
+		    description: 'Warn when declared variables are not used.',
+		    url: 'http://eslint.org/docs/rules/no-unused-vars', //$NON-NLS-1$
 		    rule: function(context) {
         		function isRead(ref) {
         			return ref.isRead();
@@ -1291,12 +1321,12 @@ define([
         					var references = getReferences(scope, variable), id = node.id;
         					if (!references.length) {
         					    if(node.type === 'FunctionDeclaration') {
-        					       context.report(id, "Function '${0}' is never used.", {0:id.name, nls: 'no-unused-vars-unused-funcdecl'});
+        					       context.report(id, "Function '${0}' is never used.", {0:id.name, nls: 'no-unused-vars-unused-funcdecl'}); //$NON-NLS-2$
         					    } else {
-        						   context.report(id, "'${0}' is never used.", {0:id.name, nls: 'no-unused-vars-unused'});
+        						   context.report(id, "'${0}' is never used.", {0:id.name, nls: 'no-unused-vars-unused'}); //$NON-NLS-2$
         						}
         					} else if (!references.some(isRead)) {
-        						context.report(id, "'${0}' is never read.", {0:id.name, nls: 'no-unused-vars-unread'});
+        						context.report(id, "'${0}' is never read.", {0:id.name, nls: 'no-unused-vars-unread'}); //$NON-NLS-2$
         					}
         				});
         			}
@@ -1313,7 +1343,8 @@ define([
         	}
         },
 		"no-use-before-define": {
-		    description: 'Warn when a variable or function is used before it is defined',
+		    description: 'Warn when a variable or function is used before it is defined.',
+		    url: 'http://eslint.org/docs/rules/no-use-before-define', //$NON-NLS-1$
 		    rule: function(context) {
                 function booleanOption(b, defaultValue) {
             		return typeof b === "boolean" ? b : defaultValue;  //$NON-NLS-0$
@@ -1351,6 +1382,7 @@ define([
         },
         "radix": {
             description: "Warn when parseInt() is called without the 'radix' parameter.",
+            url: 'http://eslint.org/docs/rules/radix', //$NON-NLS-1$
             rule: function(context) {
                 function checkParseInt(call) {
                     var callee = call.callee;
@@ -1377,7 +1409,8 @@ define([
             }
         },
 		"semi": {
-		    description: 'Warn about missing semicolons',
+		    description: 'Warn about missing semicolons.',
+		    url: 'http://eslint.org/docs/rules/semi', //$NON-NLS-1$
 		    rule: function(context) {
         		function checkForSemicolon(node) {
         			try {
@@ -1423,7 +1456,8 @@ define([
         	}
         },
 		"use-isnan" : {
-		    description: 'Disallow comparison to the value NaN',
+		    description: 'Disallow comparison to the value NaN.',
+		    url: 'http://eslint.org/docs/rules/use-isnan', //$NON-NLS-1$
 		    rule: function(context) {
         		return {
         			'BinaryExpression' : function(node) {
@@ -1442,10 +1476,11 @@ define([
         	}
         },
 		'valid-typeof' : {
-		    description: 'Warn when incorrectly comparing the result of a typeof expression',
+		    description: 'Warn when incorrectly comparing the result of a typeof expression.',
+		    url: 'http://eslint.org/docs/rules/valid-typeof', //$NON-NLS-1$
 		    rule: function(context) {
         		//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof
-        		var symbols = ['undefined', 'object', 'function', 'boolean', 'number', 'string', 'symbol'];
+        		var symbols = ['undefined', 'object', 'function', 'boolean', 'number', 'string', 'symbol']; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
         		var ops = ['==', '===', '!=', '!=='];
         		
         		return {
