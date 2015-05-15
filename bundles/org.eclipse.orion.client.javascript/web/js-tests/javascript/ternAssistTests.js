@@ -50,6 +50,9 @@ define([
 			else {
 				state.callback(new Error('Got message I don\'t know'));
 			}
+		} else if(typeof(ev.data) === 'string' && ev.data === 'server_ready' && state.warmup) {
+			delete state.warmup;
+			state.callback();
 		}
 	};
 	ternworker.onerror = function(err) {
@@ -179,12 +182,23 @@ define([
 		});
 	}
 
-	before('Message the server', function() {
-		ternworker.postMessage('before_all');
+	before('Message the server for warm up', function(callback) {
+		this.timeout(10000);
+		var options = {
+			buffer: "xx",
+			prefix: "xx",
+			offset: 1,
+			callback: callback
+		};
+		var _p = setup(options);
+		state.warmup = true;
+		ternAssist.computeContentAssist(_p.editorContext, _p.params).then(function (actualProposals) {
+			//do noting, warm up
+		});
 	});
 
 	describe('Tern Content Assist Tests', function() {
-		this.timeout(20000);
+		this.timeout(10000);
 		describe('Complete Syntax', function() {
 			it("test no dupe 1", function(done) {
 				var options = {
