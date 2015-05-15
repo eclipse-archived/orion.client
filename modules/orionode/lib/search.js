@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -35,7 +35,7 @@ module.exports = function(options) {
 		return fileUtil.getContextPath(req) + workspaceRoot;
 	}
 
-	function searchOptions(req, res){
+	function SearchOptions(req, res){
 		this.defaultLocation = null;
 		this.fileContentSearch = false;
 		this.filenamePattern = null;
@@ -61,7 +61,7 @@ module.exports = function(options) {
 			var queryObject = url.parse(req.url, true).query;
 			var terms = queryObject.q.split(" ");
 			for (var i = 0; i < terms.length; i++) {
-				term = terms[i];
+				var term = terms[i];
 				if (this.isSearchField(term)) {
 					if (term.lastIndexOf("NameLower:", 0) === 0) {
 						this.filenamePatternCaseSensitive = false;
@@ -156,7 +156,7 @@ module.exports = function(options) {
 			})
 		} else {
 			var file = fs.readFileSync(location, 'utf8');
-			if (file.match(searchPattern) && fileLocation.match(filenamePattern)){
+			if (fileLocation.match(filenamePattern) && file.match(searchPattern)){
 				results.push({
 					"Directory": stats.isDirectory(),
 					"LastModified": stats.mtime.getTime(),
@@ -176,7 +176,7 @@ module.exports = function(options) {
 		GET: function(req, res, next, rest) {
 			var workspaceRootUrl = originalWorkspaceRoot(req);
 
-			var searchOpt = new searchOptions(req, res);
+			var searchOpt = new SearchOptions(req, res);
 			searchOpt.buildOptions();
 
 			var searchPattern = buildSearchPattern(searchOpt);
