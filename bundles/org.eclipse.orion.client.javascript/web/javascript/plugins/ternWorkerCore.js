@@ -14,7 +14,7 @@
 require({
 	baseUrl: "../../", //$NON-NLS-1$
 	paths: {
-		text: "requirejs/text", //$NON-NLS-1$
+		i18n: 'requirejs/i18n', //$NON-NLS-1$
 		esprima: "esprima/esprima", //$NON-NLS-1$
 		estraverse: "estraverse/estraverse", //$NON-NLS-1$
 		escope: "escope/escope", //$NON-NLS-1$
@@ -37,10 +37,6 @@ require({
 	'tern/lib/tern', //$NON-NLS-1$
 	'tern/plugin/doc_comment', //$NON-NLS-1$
 	//'tern/plugin/dependencies', //$NON-NLS-1$
-	//TODO Load these on the fly
-	//'tern/plugin/requirejs',
-	//'tern/plugin/mongodb2_0_27',
-	//'tern/plugin/node',
 	'tern/defs/ecma5', //$NON-NLS-1$
 	'tern/defs/browser', //$NON-NLS-1$
 	'javascript/handlers/ternAssistHandler', //$NON-NLS-1$
@@ -50,7 +46,7 @@ require({
 	'javascript/handlers/ternRenameHandler', //$NON-NLS-1$
 	'doctrine'  //stays last - exports into global //$NON-NLS-1$
 ],
-/* @callback */ function(Tern, docPlugin, /*dependenciesPlugin, requirePlugin, mongodbPlugin, nodePlugin,*/ ecma5, browser, 
+/* @callback */ function(Tern, docPlugin, /*dependenciesPlugin,*/ ecma5, browser, 
 							AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler) {
     
     var ternserver, pendingReads = Object.create(null);
@@ -68,7 +64,7 @@ require({
                     doc_comment: {
                         fullDocs: true
                     }
-                   // dependencies: {
+                    //dependencies: {
                     	//depth: 1
                     //}
                     //mongodb2_0_27:{},

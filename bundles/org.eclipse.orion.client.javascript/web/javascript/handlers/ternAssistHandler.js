@@ -48,11 +48,11 @@ define([
 				if (this.templateMatches(template, prefix, kind, context)) {
 					var proposal = template.getProposal(prefix, offset, context);
 					var obj = Object.create(null);
-			        obj.type = 'markdown';
-			        obj.content = 'Template source code:\n\n';
+			        obj.type = 'markdown'; //$NON-NLS-1$
+			        obj.content = 'Template source code:\n\n'; //$NON-NLS-1$
 			        obj.content += Hover.formatMarkdownHover(proposal.proposal).content;
 			        proposal.hover = obj;
-			        proposal.style = 'emphasis';
+			        proposal.style = 'emphasis'; //$NON-NLS-1$
 					this.removePrefix(prefix, proposal);
 					proposals.push(proposal);
 				}
@@ -204,7 +204,7 @@ define([
 	    		var parent = node.parents.pop();
 	    		switch(parent.type) {
 						case 'MemberExpression': 
-							return { kind : 'member'};
+							return { kind : 'member'}; //$NON-NLS-1$
 						case 'Program':
 						case 'BlockStatement':
 							break;
@@ -221,15 +221,15 @@ define([
 							break;
 						case 'Property':
 							if(offset-1 >= parent.value.range[0] && offset-1 <= parent.value.range[1]) {
-								return { kind : 'prop'};
+								return { kind : 'prop'}; //$NON-NLS-1$
 							}
 							return null;
 						case 'SwitchStatement':
-							return {kind: 'swtch'};
+							return {kind: 'swtch'}; //$NON-NLS-1$
 					}
 			}
     	}
-		return {kind:'top'};
+		return {kind:'top'}; //$NON-NLS-1$
 	}
     
     /**
@@ -277,7 +277,7 @@ define([
             								relevance: 100,
             								name: name,
             								description: ' - The name of the function',
-            								style: 'emphasis',
+            								style: 'emphasis', //$NON-NLS-1$
             								overwrite: true
         							    });
     							}
@@ -293,7 +293,7 @@ define([
                         								relevance: 100,
                         								name: name,
                         								description: ' - Function parameter',
-                        								style: 'emphasis',
+                        								style: 'emphasis', //$NON-NLS-1$
                         								overwrite: true
                     							    });
                 							    }
@@ -316,15 +316,21 @@ define([
 	                    var rulekey = rulekeys[i];
                         if(looselyMatches(params.prefix, rulekey)) {
                             var rule = rules[rulekey];
-                            proposals.push({
+                            var _p = {
 								proposal: rulekey,
 								relevance: 100,
 								name: rulekey,
-								description: ' - '+(rule.description ? rule.description : 'ESLint rule name'),
+								description: ' - ESLint rule',
 								prefix: params.prefix,
-								style: 'emphasis',
+								style: 'emphasis', //$NON-NLS-1$
 								overwrite: true
-						    });
+						    };
+						    var hover = rule.description ? rule.description : '';
+						    if(rule.url) {
+						    	hover += '\n\n[Online documentation]('+rule.url+')';
+						    }
+						    _p.hover = {content: hover, type: 'markdown'}; //$NON-NLS-1$
+                            proposals.push(_p);
 					    }
 	                }
 	            } else if(/^(?:\/\*)?\s*eslint-env\s+/gi.test(params.line)) {
@@ -338,7 +344,7 @@ define([
 								relevance: 100,
 								name: key,
 								description: ' - ESLint environment name',
-								style: 'emphasis',
+								style: 'emphasis', //$NON-NLS-1$
 								overwrite: true
 						    });
 	                    }
@@ -360,7 +366,7 @@ define([
         if(ternserver) {
 	       ternserver.request({
 	           query: {
-	           type: "completions", 
+	           type: "completions",  //$NON-NLS-1$
 	           file: args.meta.location,
 	           types: true, 
 	           origins: true,
@@ -373,26 +379,26 @@ define([
 	           files: args.files}, 
 	           function(error, comps) {
 	               if(error) {
-	               		callback({request: 'completions', error: error.message, message: 'Failed to compute proposals'});
+	               		callback({request: 'completions', error: error.message, message: 'Failed to compute proposals'}); //$NON-NLS-1$
 	               } else if(comps && comps.completions) {
 	               		var file = ternserver.fileMap[args.meta.location];
 	               		var kind = getKind(file.ast, args.params.offset, file.text);
 	               		args.params.prefix = getPrefix(args.params, kind, file.text);
 	               		if(kind && (kind.kind === 'jsdoc' || kind.kind === 'doc')) {
-	               			callback({request: 'completions', proposals:[].concat(createDocProposals(args.params, kind, file.ast, file.text),
+	               			callback({request: 'completions', proposals:[].concat(createDocProposals(args.params, kind, file.ast, file.text), //$NON-NLS-1$
 	               								  createTemplateProposals(args.params, kind, file.text))});
 	               		} else {
-	               			callback({request: 'completions', proposals:[].concat(sortProposals(comps.completions, args),
+	               			callback({request: 'completions', proposals:[].concat(sortProposals(comps.completions, args), //$NON-NLS-1$
 	               								  createDocProposals(args.params, kind, file.ast, file.text),
 	               								  createTemplateProposals(args.params, kind, file.text))});
                			}
 	               } else {
-	               		callback({request: 'completions', proposals:[]});
+	               		callback({request: 'completions', proposals:[]}); //$NON-NLS-1$
 	               }
 	           });
 	       
 	   } else {
-	       callback({request: 'completions', message: 'Failed to compute proposals, server not started'});
+	       callback({request: 'completions', message: 'Failed to compute proposals, server not started'}); //$NON-NLS-1$
 	   }
     }
     
@@ -441,11 +447,11 @@ define([
     		}
     	}
     	if(operators[keyword]) {
-    		return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/'+key;
+    		return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/'+key; //$NON-NLS-1$
     	} else if(keyword === 'extends') {
-    		return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/'+key;
+    		return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/'+key; //$NON-NLS-1$
     	}
-    	return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/'+key;
+    	return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/'+key; //$NON-NLS-1$
     }
     
     /**
@@ -460,7 +466,7 @@ define([
 	function _formatTernProposal(completion, args) {
 	    var proposal = {
             relevance: 100,
-            style: 'emphasis',
+            style: 'emphasis', //$NON-NLS-1$
             overwrite: true
         };
         proposal.name = proposal.proposal = completion.name;
@@ -479,7 +485,7 @@ define([
 		    }
         }
         var obj = Object.create(null);
-        obj.type = 'markdown';
+        obj.type = 'markdown'; //$NON-NLS-1$
         obj.content = '';
         if(!completion.doc) {
             obj.content += proposal.name;
@@ -506,7 +512,7 @@ define([
 		var type = completion.type.slice(2);
 		var ret = /\s*->\s*(\w*|\d*|(?:fn\(.*\))|(?:\[.*\]))$/.exec(type);
 		if(ret) {
-			proposal.description = ' : ' + convertTypes(ret[1]);
+			proposal.description = ' : ' + convertTypes(ret[1]); //$NON-NLS-1$
 			type = type.slice(0, ret.index);
 		}
 		var _p = completion.name + '(';
@@ -516,7 +522,7 @@ define([
 				positions.push({offset: (args.params.offset+_p.length)-args.params.prefix.length, length: params[i].length});
 				_p += params[i];
 				if(i < params.length-1) {
-					_p += ', ';
+					_p += ', '; //$NON-NLS-1$
 				}
 			}
 		}
@@ -566,10 +572,10 @@ define([
 	 */
 	function convertTypes(type) {
 		//TODO do we want to convert all types? make arrays pretty?
-		type = type.replace(/:\s*\?/g, ': Any');
-		type = type.replace(/:\s*bool/g, ': Boolean');
-		type = type.replace(/:\s*number/g, ': Number');
-		type = type.replace(/:\s*string/g, ': String');
+		type = type.replace(/:\s*\?/g, ': Any'); //$NON-NLS-1$
+		type = type.replace(/:\s*bool/g, ': Boolean'); //$NON-NLS-1$
+		type = type.replace(/:\s*number/g, ': Number'); //$NON-NLS-1$
+		type = type.replace(/:\s*string/g, ': String'); //$NON-NLS-1$
 		return type;
 	}
 

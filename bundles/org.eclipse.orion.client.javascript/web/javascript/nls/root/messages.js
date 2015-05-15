@@ -11,82 +11,82 @@
 define({//Default message bundle
     'pluginName': 'Orion JavaScript Tool Support',
     'pluginDescription': 'This plugin provides JavaScript tools support for Orion, like editing, search, navigation, validation, and code completion.',
-	'error': 'Error',  //$NON-NLS-0$  //$NON-NLS-1$
-	'warning' : 'Warning',  //$NON-NLS-0$  //$NON-NLS-1$
-	'ignore' : 'Ignore',  //$NON-NLS-0$  //$NON-NLS-1$
-	'ternContentAssist' : 'Tern JavaScript content assist',  //$NON-NLS-0$  //$NON-NLS-1$
+	'error': 'Error',
+	'warning' : 'Warning',
+	'ignore' : 'Ignore',
+	'ternContentAssist' : 'Tern JavaScript content assist',
 	'prefCodeStyle':'Code Style',
 	'prefBestPractices':'Best Practices',
 	'prefPotentialProblems':'Potential Programming Problems',
-	'sourceOutline' : 'Source Outline', //$NON-NLS-0$  //$NON-NLS-1$
-	'sourceOutlineTitle': 'JavaScript source outline',  //$NON-NLS-0$  //$NON-NLS-1$
-	'contentAssist' : 'JavaScript content assist', //$NON-NLS-0$  //$NON-NLS-1$
-	'eslintValidator' : 'JavaScript Validator', //$NON-NLS-0$  //$NON-NLS-1$
-	'missingCurly' : 'Statements not enclosed in braces:', //$NON-NLS-0$  //$NON-NLS-1$
-	'noCaller' : 'Discouraged \'arguments.caller\' or \'arguments.callee\' use:', //$NON-NLS-0$  //$NON-NLS-1$
-	'noCommaDangle' : 'Trailing commas in object expressions:', //$NON-NLS-0$  //$NON-NLS-1$
-    'noCondAssign' : 'Assignments in conditional expressions:', //$NON-NLS-0$  //$NON-NLS-1$
-    'noConsole' : 'Discouraged console use in browser code:', //$NON-NLS-0$  //$NON-NLS-1$
-    'noConstantCondition' : 'Constant as conditional expression:', //$NON-NLS-0$  //$NON-NLS-1$
-    'noRegexSpaces' : 'Multiple spaces in regular expressions:', //$NON-NLS-0$  //$NON-NLS-1$
-    'noReservedKeys' : 'Reserved words used as property keys:', //$NON-NLS-0$  //$NON-NLS-1$
-	'noEqeqeq' : 'Discouraged \'==\' use:', //$NON-NLS-0$  //$NON-NLS-1$
-	'noDebugger' : 'Discouraged \'debugger\' statement use:', //$NON-NLS-0$  //$NON-NLS-1$
-	'noWith': 'Discouraged \'with\' statement use:',  //$NON-NLS-1$ //$NON-NLS-2$
-	'noEval' : 'Discouraged \'eval()\' use:', //$NON-NLS-0$  //$NON-NLS-1$
-	'noImpliedEval' : 'Discouraged implied \'eval()\' use:', //$NON-NLS-0$  //$NON-NLS-1$
-	'noDupeKeys' : 'Duplicate object keys:', //$NON-NLS-0$  //$NON-NLS-1$
-	'noIterator': 'Discouraged __iterator__ property use:', //$NON-NLS-0$  //$NON-NLS-1$
-	'noProto': 'Discouraged __proto__ property use:', //$NON-NLS-0$  //$NON-NLS-1$
-	'noUndefInit': 'Explicitly initializing variables to undefined:',  //$NON-NLS-1$ //$NON-NLS-2$
-	'useIsNaN' : 'NaN not compared with isNaN():', //$NON-NLS-0$  //$NON-NLS-1$
-	'missingDoc' : 'Missing JSDoc:', //$NON-NLS-0$  //$NON-NLS-1$
-	'noUnreachable' : 'Unreachable code:', //$NON-NLS-0$  //$NON-NLS-1$
-	'noFallthrough' : 'Switch case fall-through:', //$NON-NLS-0$  //$NON-NLS-1$
-	'useBeforeDefine' : 'Member used before definition:', //$NON-NLS-0$  //$NON-NLS-1$
-	'noEmptyBlock' : 'Undocumented empty block:', //$NON-NLS-0$  //$NON-NLS-1$
-	'newParens' : 'Missing parentheses in constructor call:', //$NON-NLS-0$  //$NON-NLS-1$
-	'noNewArray': 'Discouraged \'new Array()\':', //$NON-NLS-0$  //$NON-NLS-1$
-	'noNewFunc': 'Discouraged \'new Function()\':', //$NON-NLS-0$  //$NON-NLS-1$
-	'noNewObject': 'Discouraged \'new Object()\':', //$NON-NLS-0$  //$NON-NLS-1$
-	'noNewWrappers': 'Discouraged wrapper objects:', //$NON-NLS-0$  //$NON-NLS-1$
-	'missingSemi' : 'Missing semicolons:', //$NON-NLS-0$  //$NON-NLS-1$
-	'unusedVars' : 'Unused variables:', //$NON-NLS-0$  //$NON-NLS-1$
-	'varRedecl' : 'Variable re-declarations:', //$NON-NLS-0$  //$NON-NLS-1$
-	'varShadow': 'Variable shadowing:', //$NON-NLS-0$  //$NON-NLS-1$
-	'undefMember' : 'Undeclared global reference:', //$NON-NLS-0$  //$NON-NLS-1$
-	'unnecessarySemis' : 'Unnecessary semicolons:', //$NON-NLS-0$  //$NON-NLS-1$
-	'unusedParams' : 'Unused parameters:', //$NON-NLS-0$  //$NON-NLS-1$
-	'unsupportedJSLint' : 'Unsupported environment directive:',  //$NON-NLS-0$  //$NON-NLS-1$
-	'noThrowLiteral': 'Literal used in \'throw\':',  //$NON-NLS-0$  //$NON-NLS-1$
-	'missingNls': 'Non-externalized string literals (missing $NON-NLS$ tag):', //$NON-NLS-0$ //$NON-NLS-1$
-	'generateDocName' : 'Generate Element Comment',  //$NON-NLS-0$  //$NON-NLS-1$
-	'generateDocTooltip' : 'Generate a JSDoc-like comment for the selected JavaScript element',  //$NON-NLS-0$  //$NON-NLS-1$
-	'renameElement' : 'Rename Element',  //$NON-NLS-0$  //$NON-NLS-1$
-	'renameElementTooltip' : 'Rename the selected JavaScript element',  //$NON-NLS-0$  //$NON-NLS-1$
-	'openDeclName' : 'Open Declaration',  //$NON-NLS-0$  //$NON-NLS-1$
-	'openDeclTooltip' : 'Open the declaration of the selected element',  //$NON-NLS-0$  //$NON-NLS-1$
-	'validTypeof': 'Invalid \'typeof\' comparison',  //$NON-NLS-0$ //$NON-NLS-1$
-	'noSparseArrays': 'Sparse array declarations', //$NON-NLS-0$ //$NON-NLS-1$
-	'jsHover': 'JavaScript Hover Provider', //$NON-NLS-0$ //$NON-NLS-1$
-	'removeExtraSemiFixName': 'Remove extra semicolon', //$NON-NLS-0$ //$NON-NLS-1$
-	'addFallthroughCommentFixName': 'Add $FALLTHROUGH$ comment', //$NON-NLS-0$ //$NON-NLS-1$
-	'addEmptyCommentFixName': 'Comment empty block', //$NON-NLS-0$ //$NON-NLS-1$
-	'addESLintEnvFixName': 'Add to eslint-env directive', //$NON-NLS-0$ //$NON-NLS-1$
-	'addESLintGlobalFixName': 'Add to globals directive', //$NON-NLS-0$ //$NON-NLS-1$
-	'removeUnusedParamsFixName': 'Remove parameter', //$NON-NLS-0$ //$NON-NLS-1$
-	'commentCallbackFixName': 'Add @callback to function', //$NON-NLS-0$ //$NON-NLS-1$
-	'eqeqeqFixName': 'Update operator', //$NON-NLS-0$ //$NON-NLS-1$
-	'unreachableFixName': 'Remove unreachable code', //$NON-NLS-0$ //$NON-NLS-1$
-	'sparseArrayFixName': 'Convert to normal array', //$NON-NLS-0$ //$NON-NLS-1$
-	'semiFixName': 'Add missing \';\'', //$NON-NLS-0$ //$NON-NLS-1$
-	'radix': 'Missing radix parameter to parseInt()', //$NON-NLS-0$ //$NON-NLS-1$
-	'unusedVarsUnusedFixName': 'Remove unused variable', //$NON-NLS-0$ //$NON-NLS-1$
-	'unusedFuncDeclFixName': 'Remove unused function', //$NON-NLS-0$ //$NON-NLS-1$
-	'noCommaDangleFixName': 'Remove extra \',\'', //$NON-NLS-0$ //$NON-NLS-1$
-	'addBBreakFixName': 'Add break statement', //$NON-NLS-0$ //$NON-NLS-1$
-	'addBBreakFixTooltip': 'Add a break statement to the proceeding line', //$NON-NLS-0$ //$NON-NLS-1$
-	'noShadowGlobals': 'Global shadowing:', //$NON-NLS-0$ //$NON-NLS-1$
-	'noThrowLiteralFixName': 'Change to Error' , //$NON-NLS-0$ //$NON-NLS-1$
-	'missingNlsFixName': 'Add missing $NON-NLS$ tag' //$NON-NLS-0$ //$NON-NLS-1$
+	'sourceOutline' : 'Source Outline',
+	'sourceOutlineTitle': 'JavaScript source outline',
+	'contentAssist' : 'JavaScript content assist',
+	'eslintValidator' : 'JavaScript Validator',
+	'missingCurly' : 'Statements not enclosed in braces:',
+	'noCaller' : 'Discouraged \'arguments.caller\' or \'arguments.callee\' use:',
+	'noCommaDangle' : 'Trailing commas in object expressions:',
+    'noCondAssign' : 'Assignments in conditional expressions:',
+    'noConsole' : 'Discouraged console use in browser code:',
+    'noConstantCondition' : 'Constant as conditional expression:',
+    'noRegexSpaces' : 'Multiple spaces in regular expressions:',
+    'noReservedKeys' : 'Reserved words used as property keys:',
+	'noEqeqeq' : 'Discouraged \'==\' use:',
+	'noDebugger' : 'Discouraged \'debugger\' statement use:',
+	'noWith': 'Discouraged \'with\' statement use:',
+	'noEval' : 'Discouraged \'eval()\' use:',
+	'noImpliedEval' : 'Discouraged implied \'eval()\' use:',
+	'noDupeKeys' : 'Duplicate object keys:',
+	'noIterator': 'Discouraged __iterator__ property use:',
+	'noProto': 'Discouraged __proto__ property use:',
+	'noUndefInit': 'Explicitly initializing variables to undefined:',
+	'useIsNaN' : 'NaN not compared with isNaN():',
+	'missingDoc' : 'Missing JSDoc:',
+	'noUnreachable' : 'Unreachable code:',
+	'noFallthrough' : 'Switch case fall-through:',
+	'useBeforeDefine' : 'Member used before definition:',
+	'noEmptyBlock' : 'Undocumented empty block:',
+	'newParens' : 'Missing parentheses in constructor call:',
+	'noNewArray': 'Discouraged \'new Array()\':',
+	'noNewFunc': 'Discouraged \'new Function()\':',
+	'noNewObject': 'Discouraged \'new Object()\':',
+	'noNewWrappers': 'Discouraged wrapper objects:',
+	'missingSemi' : 'Missing semicolons:',
+	'unusedVars' : 'Unused variables:',
+	'varRedecl' : 'Variable re-declarations:',
+	'varShadow': 'Variable shadowing:',
+	'undefMember' : 'Undeclared global reference:',
+	'unnecessarySemis' : 'Unnecessary semicolons:',
+	'unusedParams' : 'Unused parameters:',
+	'unsupportedJSLint' : 'Unsupported environment directive:',
+	'noThrowLiteral': 'Literal used in \'throw\':',
+	'missingNls': 'Non-externalized string literals (missing $NON-NLS$ tag):',
+	'generateDocName' : 'Generate Element Comment',
+	'generateDocTooltip' : 'Generate a JSDoc-like comment for the selected JavaScript element',
+	'renameElement' : 'Rename Element',
+	'renameElementTooltip' : 'Rename the selected JavaScript element',
+	'openDeclName' : 'Open Declaration',
+	'openDeclTooltip' : 'Open the declaration of the selected element',
+	'validTypeof': 'Invalid \'typeof\' comparison',
+	'noSparseArrays': 'Sparse array declarations',
+	'jsHover': 'JavaScript Hover Provider',
+	'removeExtraSemiFixName': 'Remove extra semicolon',
+	'addFallthroughCommentFixName': 'Add $FALLTHROUGH$ comment',
+	'addEmptyCommentFixName': 'Comment empty block',
+	'addESLintEnvFixName': 'Add to eslint-env directive',
+	'addESLintGlobalFixName': 'Add to globals directive',
+	'removeUnusedParamsFixName': 'Remove parameter',
+	'commentCallbackFixName': 'Add @callback to function',
+	'eqeqeqFixName': 'Update operator',
+	'unreachableFixName': 'Remove unreachable code',
+	'sparseArrayFixName': 'Convert to normal array',
+	'semiFixName': 'Add missing \';\'',
+	'radix': 'Missing radix parameter to parseInt()',
+	'unusedVarsUnusedFixName': 'Remove unused variable',
+	'unusedFuncDeclFixName': 'Remove unused function',
+	'noCommaDangleFixName': 'Remove extra \',\'',
+	'addBBreakFixName': 'Add break statement',
+	'addBBreakFixTooltip': 'Add a break statement to the proceeding line',
+	'noShadowGlobals': 'Global shadowing:',
+	'noThrowLiteralFixName': 'Change to Error' ,
+	'missingNlsFixName': 'Add missing $NON-NLS$ tag'
 });

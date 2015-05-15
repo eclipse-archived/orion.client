@@ -9,54 +9,96 @@
  ******************************************************************************/
 /* eslint-env amd */
 define({
-    'syntaxErrorIncomplete': 'Syntax error, incomplete statement.',  //$NON-NLS-0$  //$NON-NLS-1$
-    'syntaxErrorBadToken': 'Syntax error on token \'${0}\', delete this token.',  //$NON-NLS-0$  //$NON-NLS-1$
-    'esprimaParseFailure': 'Esprima failed to parse this file because an error occurred: ${0}',  //$NON-NLS-0$ //$NON-NLS-1$
-    'eslintValidationFailure': 'ESLint failed to validate this file because an error occurred: ${0}',  //$NON-NLS-0$  //$NON-NLS-1$
-	'curly': 'Statement should be enclosed in braces.',  //$NON-NLS-0$  //$NON-NLS-1$
-	'eqeqeq' : 'Expected \'${0}\' and instead saw \'${1}\'.',  //$NON-NLS-0$  //$NON-NLS-1$
-	'missing-doc' : 'Missing documentation for function \'${0}\'.',  //$NON-NLS-0$  //$NON-NLS-1$
-	'missing-nls' : 'Non-externalized string literal \'${0}\'.', //$NON-NLS-0$  //$NON-NLS-1$
-	'new-parens' : 'Missing parentheses invoking constructor.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-with': 'Discouraged use of \'with\' statement.',  //$NON-NLS-1$ //$NON-NLS-2$
-	'no-caller': '\'arguments.${0}\' is deprecated.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-comma-dangle': 'Trailing commas in object expressions are discouraged.',  //$NON-NLS-0$ //$NON-NLS-1$
-	'no-cond-assign': 'Expected a conditional expression and instead saw an assignment.',  //$NON-NLS-0$ //$NON-NLS-1$
-	'no-console': 'Discouraged use of console in browser-based code.', //$NON-NLS-0$ //$NON-NLS-1$
-	'no-constant-condition': 'Discouraged use of constant as a conditional expression.', //$NON-NLS-0$ //$NON-NLS-1$
-	'no-debugger': '\'debugger\' statement use is discouraged.',  //$NON-NLS-0$  //$NON-NLS-1$
-	'no-dupe-keys' : 'Duplicate object key \'${0}\'.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-empty-block' : 'Empty block should be removed or commented.',  //$NON-NLS-0$ //$NON-NLS-1$
-	'no-eval' : '${0} function calls are discouraged.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-extra-semi' : 'Unnecessary semicolon.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-fallthrough' : 'Switch case may be entered by falling through the previous case.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-implied-eval' : '${0} function calls are discouraged.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-iterator' : 'Discouraged __iterator__ property use.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-proto' : 'Discouraged __proto__ property use.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-jslint' : 'The \'${0}\' directive is unsupported, please use eslint-env.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-new-array' : 'Use the array literal notation \'[]\'.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-new-func' : 'The Function constructor is eval.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-new-object' : 'Use the object literal notation \'{}\' or Object.create(null).', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-new-wrappers' : 'Do not use \'${0}\' as a constructor.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-redeclare' : '\'${0}\' is already defined.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-regex-spaces' : 'Avoid multiple spaces in regular expressions. Use \' {${0}}\' instead.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-reserved-keys' : 'Reserved words should not be used as property keys.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-shadow' : '\'${0}\' is already declared in the upper scope.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-sparse-arrays': 'Sparse array declarations should be avoided.',  //$NON-NLS-0$ //$NON-NLS-1$
-	'no-throw-literal': 'Throw an Error instead.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-undef-defined' : '\'${0}\' is undefined.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-undef-init': 'Avoid explicitly initializing variables to \'undefined\'.',  //$NON-NLS-1$ //$NON-NLS-2$
-	'no-undef-readonly': '\'${0}\' is read-only.',  //$NON-NLS-0$  //$NON-NLS-1$
-	'no-unreachable' : 'Unreachable code.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-unused-params' : 'Parameter \'${0}\' is never used.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-unused-vars-unused' : '\'${0}\' is unused.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-unused-vars-unused-funcdecl' : 'Function \'${0}\' is unused.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-unused-vars-unread' : '\'${0}\' is unread.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-use-before-define': '\'${0}\' was used before it was defined.', //$NON-NLS-0$  //$NON-NLS-1$
-	'radix': 'Missing radix parameter.', //$NON-NLS-0$  //$NON-NLS-1$
-	'semi': 'Missing semicolon.', //$NON-NLS-0$  //$NON-NLS-1$
-	'use-isnan': 'Use the isNaN function to compare with NaN.', //$NON-NLS-0$  //$NON-NLS-1$
-	'valid-typeof' : 'Invalid typeof comparison.',  //$NON-NLS-0$ //$NON-NLS-1$
-	'no-shadow-global' : 'Variable \'${0}\' shadows a global member.',  //$NON-NLS-0$ //$NON-NLS-1$
-	'no-shadow-global-param' : 'Parameter \'${0}\' shadows a global member.'  //$NON-NLS-0$ //$NON-NLS-1$
+    'syntaxErrorIncomplete': 'Syntax error, incomplete statement.',
+    'syntaxErrorBadToken': 'Syntax error on token \'${0}\', delete this token.',
+    'esprimaParseFailure': 'Esprima failed to parse this file because an error occurred: ${0}',
+    'eslintValidationFailure': 'ESLint failed to validate this file because an error occurred: ${0}',
+	'curly': 'Statement should be enclosed in braces.',
+	'curly-description': 'Require curly braces for all control statements.',
+	'eqeqeq' : 'Expected \'${0}\' and instead saw \'${1}\'.',
+	'eqeqeq-description': 'Require the use of === and !==.',
+	'missing-doc' : 'Missing documentation for function \'${0}\'.',
+	'missing-doc-description': 'Require JSDoc for all functions.',
+	'missing-nls' : 'Non-externalized string literal \'${0}\'.',
+	'missing-nls-description': 'Disallow non-externalized string literals.',
+	'new-parens' : 'Missing parentheses invoking constructor.',
+	'new-parens-description': 'Require parenthesis for constructors.',
+	'no-caller': '\'arguments.${0}\' is deprecated.',
+	'no-caller-description': 'Warn on use of arguments.callee or arguments.caller.',
+	'no-comma-dangle': 'Trailing commas in object expressions are discouraged.',
+	'no-comma-dangle-description': 'Report extra trailing comma in object expressions.',
+	'no-cond-assign': 'Expected a conditional expression and instead saw an assignment.',
+	'no-cond-assign-description': 'Disallow assignment statements in control statements like if-else, do-while, while and for statements.',
+	'no-console': 'Discouraged use of console in browser-based code.',
+	'no-console-description': 'Disallow the use of \'console\' in browser-run code.',
+	'no-constant-condition': 'Discouraged use of constant as a conditional expression.',
+	'no-constant-condition-description': 'Disallow use of a constant value as a conditional expression.',
+	'no-debugger': '\'debugger\' statement use is discouraged.',
+	'no-debugger-description': 'Disallow use of the debugger keyword.',
+	'no-dupe-keys' : 'Duplicate object key \'${0}\'.',
+	'no-dupe-keys-description': 'Warn when object contains duplicate keys.',
+	'no-empty-block' : 'Empty block should be removed or commented.',
+	'no-empty-block-description': 'Warn when a code block is empty.',
+	'no-eval' : '${0} function calls are discouraged.',
+	'no-eval-description': 'Disallow use of eval function.',
+	'no-extra-semi' : 'Unnecessary semicolon.',
+	'no-extra-semi-description': 'Warn about extraneous semi colons.',
+	'no-fallthrough' : 'Switch case may be entered by falling through the previous case.',
+	'no-fallthrough-description': 'Warn when a switch case falls through.',
+	'no-implied-eval' : '${0} function calls are discouraged.',
+	'no-implied-eval-description': 'Disallow use of implied eval function.',
+	'no-iterator' : 'Discouraged __iterator__ property use.',
+	'no-iterator-description': 'Warn when the __iterator__ property is used.',
+	'no-proto' : 'Discouraged __proto__ property use.',
+	'no-proto-description': 'Warn when the __proto__ property is used.',
+	'no-jslint' : 'The \'${0}\' directive is unsupported, please use eslint-env.',
+	'no-jslint-description': 'Warn when the jslint/jshint directive is used.',
+	'no-new-array' : 'Use the array literal notation \'[]\'.',
+	'no-new-array-description': 'Disallow use of the Array constructor.',
+	'no-new-func' : 'The Function constructor is eval.',
+	'no-new-func-description': 'Disallow use of the Function constructor.',
+	'no-new-object' : 'Use the object literal notation \'{}\' or Object.create(null).',
+	'no-new-object-description': 'Disallow use of the Object constructor.',
+	'no-new-wrappers' : 'Do not use \'${0}\' as a constructor.',
+	'no-new-wrappers-description': 'Disallow creating new String, Number or Boolean via their constructor.',
+	'no-redeclare' : '\'${0}\' is already defined.',
+	'no-redeclare-description': 'Warn when variable or function is redeclared.',
+	'no-regex-spaces' : 'Avoid multiple spaces in regular expressions. Use \' {${0}}\' instead.',
+	'no-regex-spaces-description': 'Warn when multiple spaces are used in regular expressions.',
+	'no-reserved-keys' : 'Reserved words should not be used as property keys.',
+	'no-reserved-keys-description': 'Warn when a reserved word is used as a property key.',
+	'no-shadow' : '\'${0}\' is already declared in the upper scope.',
+	'no-shadow-description': 'Warn when shadowing variable from upper scope.',
+	'no-shadow-global' : 'Variable \'${0}\' shadows a global member.',
+	'no-shadow-global-description': 'Warn when a variable or parameter shadows a member from the global environment.',
+	'no-shadow-global-param' : 'Parameter \'${0}\' shadows a global member.',
+	'no-sparse-arrays': 'Sparse array declarations should be avoided.',
+	'no-sparse-arrays-description': 'Warn when sparse arrays are defined.',
+	'no-throw-literal': 'Throw an Error instead.',
+	'no-throw-literal-description': 'Warn when a Literal is used in a throw statement.',
+	'no-undef-defined' : '\'${0}\' is undefined.',
+	'no-undef-init': 'Avoid explicitly initializing variables to \'undefined\'.',
+	'no-undef-init-description': 'Warn when variables are explicitly initialized to undefined.',
+	'no-undef-readonly': '\'${0}\' is read-only.',
+	'no-undef-description': 'Warn when used variable or function has not been defined.',
+	'no-unreachable' : 'Unreachable code.',
+	'no-unreachable-description': 'Warn when code is not reachable.',
+	'no-unused-params' : 'Parameter \'${0}\' is never used.',
+	'no-unused-params-description': 'Warn when function parameters are not used.',
+	'no-unused-vars-unused' : '\'${0}\' is unused.',
+	'no-unused-vars-unused-funcdecl' : 'Function \'${0}\' is unused.',
+	'no-unused-vars-unread' : '\'${0}\' is unread.',
+	'no-unused-vars-description': 'Warn when declared variables are not used.',
+	'no-use-before-define': '\'${0}\' was used before it was defined.',
+	'no-use-before-define-description': 'Warn when a variable or function is used before it is defined.',
+	'no-with': 'Discouraged use of \'with\' statement.',
+	'no-with-description': 'Warn when the with statement is used.',
+	'radix': 'Missing radix parameter.',
+	'radix-description': 'Warn when parseInt() is called without the \'radix\' parameter.',
+	'semi': 'Missing semicolon.',
+	'semi-description': 'Warn about missing semicolons.',
+	'use-isnan': 'Use the isNaN function to compare with NaN.',
+	'use-isnan-description': 'Disallow comparison to the value NaN.',
+	'valid-typeof' : 'Invalid typeof comparison.',
+	'valid-typeof-description': 'Warn when incorrectly comparing the result of a typeof expression.'
 });

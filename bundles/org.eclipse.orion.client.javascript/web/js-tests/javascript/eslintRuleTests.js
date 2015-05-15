@@ -3738,7 +3738,7 @@ define([
                var messages = eslint.verify(topic, config);
 			   assert.equal(messages.length, 1);
 			   assert.equal(messages[0].ruleId, RULE_ID);
-			   assert.equal(messages[0].message, "Variable 'name' shadows a global member");
+			   assert.equal(messages[0].message, "Variable 'name' shadows a global member.");
            });
            it("should flag browser use 2", function() {
                var topic = "/*eslint-env browser*/ function f(name){}";
@@ -3748,7 +3748,7 @@ define([
                var messages = eslint.verify(topic, config);
 			   assert.equal(messages.length, 1);
 			   assert.equal(messages[0].ruleId, RULE_ID);
-			   assert.equal(messages[0].message, "Parameter 'name' shadows a global member");
+			   assert.equal(messages[0].message, "Parameter 'name' shadows a global member.");
            });
            it("should flag node use 1", function() {
                var topic = "/*eslint-env node*/ var require = {};";
@@ -3758,7 +3758,7 @@ define([
                var messages = eslint.verify(topic, config);
 			   assert.equal(messages.length, 1);
 			   assert.equal(messages[0].ruleId, RULE_ID);
-			   assert.equal(messages[0].message, "Variable 'require' shadows a global member");
+			   assert.equal(messages[0].message, "Variable 'require' shadows a global member.");
            });
            it("should flag node use 2", function() {
                var topic = "/*eslint-env node*/ function f(module){}";
@@ -3768,7 +3768,7 @@ define([
                var messages = eslint.verify(topic, config);
 			   assert.equal(messages.length, 1);
 			   assert.equal(messages[0].ruleId, RULE_ID);
-			   assert.equal(messages[0].message, "Parameter 'module' shadows a global member");
+			   assert.equal(messages[0].message, "Parameter 'module' shadows a global member.");
            });
            /**
             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461321
@@ -3781,7 +3781,7 @@ define([
                var messages = eslint.verify(topic, config);
 			   assert.equal(messages.length, 1);
 			   assert.equal(messages[0].ruleId, RULE_ID);
-			   assert.equal(messages[0].message, "Parameter 'Math' shadows a global member");
+			   assert.equal(messages[0].message, "Parameter 'Math' shadows a global member.");
            });
            /**
             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461321
@@ -3794,7 +3794,7 @@ define([
                var messages = eslint.verify(topic, config);
 			   assert.equal(messages.length, 1);
 			   assert.equal(messages[0].ruleId, RULE_ID);
-			   assert.equal(messages[0].message, "Variable 'Object' shadows a global member");
+			   assert.equal(messages[0].message, "Variable 'Object' shadows a global member.");
            });
             it("should not flag browser use wih no env set 1", function() {
                var topic = "var name = 'me';";
@@ -3996,7 +3996,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'a' is not defined.");
+    			assert.equal(messages[0].message, "'a' is undefined.");
     			assert.include(messages[0].node.type, "Identifier");
     		});
     
@@ -4009,7 +4009,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'b' is not defined.");
+    			assert.equal(messages[0].message, "'b' is undefined.");
     			assert.include(messages[0].node.type, "Identifier");
     		});
     
@@ -4032,7 +4032,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'b' is not defined.");
+    			assert.equal(messages[0].message, "'b' is undefined.");
     			assert.include(messages[0].node.type, "Identifier");
     		});
     
@@ -4184,7 +4184,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'window' is not defined.");
+    			assert.equal(messages[0].message, "'window' is undefined.");
     			assert.include(messages[0].node.type, "Identifier");
     		});
     
@@ -4219,7 +4219,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'window' is not defined.");
+    			assert.equal(messages[0].message, "'window' is undefined.");
     			assert.include(messages[0].node.type, "Identifier");
     		});
     
@@ -4235,7 +4235,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'require' is not defined.");
+    			assert.equal(messages[0].message, "'require' is undefined.");
     			assert.include(messages[0].node.type, "Identifier");
     		});
     
@@ -4259,7 +4259,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'require' is not defined.");
+    			assert.equal(messages[0].message, "'require' is undefined.");
     			assert.include(messages[0].node.type, "Identifier");
     		});
     
@@ -4992,7 +4992,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'a' is never used.");
+    			assert.equal(messages[0].message, "'a' is unused.");
     			assert.equal(messages[0].node.type, "Identifier");
     		});
     		it("flag unused var in FunctionExpression", function() {
@@ -5004,7 +5004,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'a' is never used.");
+    			assert.equal(messages[0].message, "'a' is unused.");
     			assert.equal(messages[0].node.type, "Identifier");
     		});
     		it("flag unused var in FunctionDeclaration", function() {
@@ -5017,7 +5017,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'b' is never used.");
+    			assert.equal(messages[0].message, "'b' is unused.");
     			assert.equal(messages[0].node.type, "Identifier");
     		});
     		it("flag var that is written but never read", function() {
@@ -5029,7 +5029,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'a' is never read.");
+    			assert.equal(messages[0].message, "'a' is unread.");
     			assert.equal(messages[0].node.type, "Identifier");
     		});
     		it("flag function that is never called", function() {
@@ -5041,7 +5041,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Function 'f' is never used.");
+    			assert.equal(messages[0].message, "Function 'f' is unused.");
     			assert.equal(messages[0].node.type, "Identifier");
     		});
     
@@ -5247,7 +5247,7 @@ define([
 //no-with ------------------------------------------------
         describe('no-with', function() {
             var RULE_ID = "no-with";
-            var MESSAGE = "Discouraged use of the 'with' statement.";
+            var MESSAGE = "Discouraged use of 'with' statement.";
             it("should flag with 1", function() {
                 var topic = "var a = 'a'; with(a) {}";
                 var config = { rules: {} };
