@@ -36,6 +36,24 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		return data;
 	}
 	
+	function expandLocations(metadata) {
+		var dir = metadata.Directory;
+		var location = metadata.Location;
+		metadata.Parents.forEach(function(parent) {
+			location = location.substring(0, location.lastIndexOf("/", dir ? location.length - 2 : location.length - 1) + 1);
+			dir = true;
+			parent.Location = location;
+			parent.ChildrenLocation = location + "?depth=1";
+			parent.Children.forEach(function(child) {
+				child.Location = location + child.Name;
+				if (child.Directory) {
+					child.Location += "/";
+					child.ChildrenLocation = child.Location + "?depth=1";
+				}
+			});
+		});
+	}
+	
 	// java servers are semi-colon challenged
 	function cleanseUrl(path) {
 		if (path) {
@@ -445,7 +463,11 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				log: false
 			}).then(function(result) {
 				if (isMetadata) {
-					return result.response ? JSON.parse(result.response) : null;
+					var r = result.response ? JSON.parse(result.response) : null;
+					if (url.query.get("full") === "compressed") {
+						expandLocations(r)
+					}
+					return r;
 				} else {
 					if (acceptPatch) {
 						return {result: result.response, acceptPatch: result.xhr.getResponseHeader("Accept-Patch")};
