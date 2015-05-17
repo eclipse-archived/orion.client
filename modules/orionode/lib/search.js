@@ -162,8 +162,8 @@ module.exports = function(options) {
 					"LastModified": stats.mtime.getTime(),
 					"Length": stats.size,
 					"Location": "/file" + location.substring(workspaceDir.length),
-					"Name:": fileLocation,
-					"Path:": location
+					"Name": fileLocation,
+					"Path": workspaceName + location.substring(workspaceDir.length)
 				});
 			}
 		}
