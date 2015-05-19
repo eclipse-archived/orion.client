@@ -1,0 +1,74 @@
+<h1 id="orion-tvt-test-plan">Orion TVT Test Plan</h1>
+<h2 id="author-libing-wang-libing_wang-ca-ibm-com-">Author: Libing wang (libing_wang@ca.ibm.com)</h2>
+<h2 id="revision-1-0">Revision: 1.0</h2>
+<h2 id="date-may-19th-2015">Date: May 19th, 2015</h2>
+<h1 id="overview">Overview</h1>
+<p>This test plan covers how to log into Orion as a specific TVT Tester (per language) and how to walk through the OrionUser Interface and pages checking for string translations and to see if those translations are accurate. 
+While the common parts such as edit, setting and shell pages were already covered by the Orion TVT test plan 6.0, this version of the test plan only covers the git repository page and the global search panel as there are a lot of changes since the Orion 6.0 release.</p>
+<h1 id="part-1-global-search">Part 1  Global Search</h1>
+<h2 id="gvt00010-verify-the-display-strings-in-the-global-search-panel">GVT00010  Verify the display strings in the global search panel</h2>
+<p>In the editor page, press CTRL+SHIFT+H to bring up the global search panel. Verify the display strings as below.</p>
+<p><img src="images/search01.png" alt="image"></p>
+<h2 id="gvt00020-verify-the-display-strings-in-the-search-result-panel">GVT00020  Verify the display strings in the search result panel</h2>
+<p>In the search panel, type something to search so that it gives back some results. Verify display strings as below.</p>
+<p><img src="images/search02.png" alt="image"></p>
+<h2 id="gvt00030-verify-the-tool-tips-in-the-search-result-panel">GVT00030  Verify the tool tips in the search result panel</h2>
+<p>In the search panel, verify the tool tips stings as below.</p>
+<p><img src="images/search03.png" alt="image"></p>
+<h2 id="gvt00040-verify-the-display-strings-and-tool-tips-in-the-replace-mode">GVT00040  Verify the display strings and tool tips in the replace mode</h2>
+<p>In the search result panel, click on &quot;Edit Search&quot; and then click on &quot;Switch to Replace Mode&quot;. Verify the display strings and tool tips as below.</p>
+<p><img src="images/search04.png" alt="image"></p>
+<h2 id="gvt00050-verify-the-display-strings-and-tool-tips-in-the-replace-preview-panel">GVT00050  Verify the display strings and tool tips in the replace preview panel</h2>
+<p>Type something to replace so that it gives back some results to preview. Verify the display strings and tool tips as below.</p>
+<p><img src="images/search05.png" alt="image"></p>
+<h2 id="gvt00060-verify-the-display-strings-and-tool-tips-in-the-replace-result-panel">GVT00060  Verify the display strings and tool tips in the replace result panel</h2>
+<p>In the preview mode panel, cleck on &quot;Replace Selected&quot;. Verify the display strings and tool tips as below.</p>
+<p><img src="images/search06.png" alt="image"></p>
+<h1 id="part-2-use-git-repository-page-to-commit-changes-and-test-all-the-tooltips-of-the-buttons-">part 2 - use git repository page to commit changes and test all the tooltips of the buttons.</h1>
+<h3 id="2-1-modify-some-files-in-the-project-and-save-them-click-on-the-git-repository-button-on-the-side-bar-of-the-page-">2.1 Modify some files in the project and save them. Click on the &quot;Git repository&quot; button on the side bar of the page.</h3>
+<p><img src="images/git-open-page.png" alt="git_open_page"></p>
+<h3 id="2-2-the-git-repository-page-is-opened-as-below-the-left-hand-side-of-the-page-shows-the-project-revision-history-while-the-right-hand-side-shows-the-current-changes-">2.2 The Git Repository page is opened as below. The left hand side of the page shows the project revision history while the right hand side shows the current changes.</h3>
+<p><img src="images/git-open-page2.png" alt="git_open_page2"></p>
+<h2 id="tvt00080-verify-the-display-strings-on-the-left-hand-side-of-the-page">TVT00080 - Verify the display strings on the left hand side of the page</h2>
+<p><img src="images/git-lhs01.png" alt="git_lhs_01"></p>
+<h2 id="tvt00090-verify-the-strings-in-the-repository-dropdown-panel">TVT00090 - Verify the strings in the Repository dropdown panel</h2>
+<p>Click on the dropdown arrow on the right of the &quot;Repository&quot; label.</p>
+<p><img src="images/git-lhs02.png" alt="git_lhs_02"></p>
+<h2 id="tvt00100-verify-the-strings-in-the-reference-dropdown-panel">TVT00100 - Verify the strings in the Reference dropdown panel</h2>
+<p>Click on the dropdown arrow on the right of the &quot;Reference&quot; label.</p>
+<p><img src="images/git-lhs03.png" alt="git_lhs_03"></p>
+<h2 id="tvt00100-01-verify-the-strings-in-the-chekcout-button-from-the-reference-dropdown-panel">TVT00100.01 - Verify the strings in the chekcout button from the reference dropdown panel</h2>
+<p>Click on the twistie on the local branch and hover on the checkot button.</p>
+<p><img src="images/git-lhs03-01.png" alt="git_lhs_03_01"></p>
+<h2 id="tvt00110-verify-the-strings-of-the-tooltips-on-the-left-hand-side-of-the-page">TVT00110 - Verify the strings of the tooltips on the left hand side of the page</h2>
+<p>Hover on buttons on the left hand side of the page</p>
+<p><img src="images/git-lhs04.png" alt="git_lhs_04"></p>
+<h2 id="tvt00110-01-verify-the-strings-of-the-tooltips-on-the-history-button-on-the-left-hand-side-of-the-page">TVT00110.01 - Verify the strings of the tooltips on the history button on the left hand side of the page</h2>
+<p>Click on the history button on the left hand side of the page. Hover on the history button again.</p>
+<p><img src="images/git-lhs04-01.png" alt="git_lhs_04_01"></p>
+<h2 id="tvt00120-verify-the-strings-in-the-push-dropdown-panel">TVT00120 - Verify the strings in the Push dropdown panel</h2>
+<p>Click on the dropdown arrow on the right of the &quot;Push&quot; button and hover on the 4 items in the dropdown list</p>
+<p><img src="images/git-lhs05.png" alt="git_lhs_05"></p>
+<h2 id="tvt00130-verify-the-strings-in-the-fetch-dropdown-panel">TVT00130 - Verify the strings in the Fetch dropdown panel</h2>
+<p>Click on the dropdown arrow on the right of the &quot;Fetch&quot; button and hover on the 2 items in the dropdown list</p>
+<p><img src="images/git-lhs06.png" alt="git_lhs_06"></p>
+<h2 id="tvt00140-verify-the-display-strings-on-the-right-hand-side-of-the-page">TVT00140 - Verify the display strings on the right hand side of the page</h2>
+<p><img src="images/git-rhs01.png" alt="git_rhs_01"></p>
+<h2 id="tvt00140-01-verify-the-display-strings-and-tooltips-on-the-git-configuration-setting-panel">TVT00140.01 - Verify the display strings and tooltips on the Git Configuration setting panel</h2>
+<p>Click on the wrench button on the right of the tool bar.</p>
+<p><img src="images/git-rhs01-01.png" alt="git_rhs_01"></p>
+<h2 id="tvt00150-verify-the-strings-of-the-tooltips-on-the-right-hand-side-of-the-page">TVT00150 - Verify the strings of the tooltips on the right hand side of the page</h2>
+<p>Hover on buttons on the right hand side of the page</p>
+<p><img src="images/git-rhs02.png" alt="git_rhs_02"></p>
+<h2 id="tvt00150-01-verify-the-strings-of-the-tooltips-on-the-right-hand-side-of-the-page-when-a-commit-on-the-left-hand-side-is-selected">TVT00150.01 - Verify the strings of the tooltips on the right hand side of the page when a commit on the left hand side is selected</h2>
+<p>Click on a commit on the left hand side. Hover on buttons on the right hand side of the page</p>
+<p><img src="images/git-rhs02-01.png" alt="git_rhs_02-01"></p>
+<h2 id="tvt00150-02-verify-the-strings-on-the-right-hand-side-of-the-page-when-two-commits-on-the-left-hand-side-are-selected">TVT00150.02 - Verify the strings on the right hand side of the page when two commits on the left hand side are selected</h2>
+<p>Click on a commit on the left hand side. Then press CTRL key and click on the second commit.</p>
+<p><img src="images/git-rhs02-02.png" alt="git_rhs_02-2"></p>
+<h2 id="tvt00160-verify-the-strings-of-the-tooltips-on-the-compare-section">TVT00160 - Verify the strings of the tooltips on the compare section</h2>
+<p>Hover on buttons on the compare section of the page</p>
+<p><img src="images/git-rhs03.png" alt="git_rhs_03"></p>
+<h2 id="tvt00170-verify-the-strings-of-the-tooltips-on-the-compare-section-in-side-by-side-mode">TVT00170 - Verify the strings of the tooltips on the compare section in side by side mode</h2>
+<p>Click on the &quot;Switch to side by side&quot; button. Hover on buttons on the compare section of the page</p>
+<p><img src="images/git-rhs04.png" alt="git_rhs_04"></p>
