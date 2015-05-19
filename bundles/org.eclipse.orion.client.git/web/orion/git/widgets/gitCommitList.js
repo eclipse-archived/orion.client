@@ -199,7 +199,7 @@ define([
 							return;
 						}
 						if (!that.currentBranch) {
-							if (section) section.setTitle(messages["NoBranch"]);
+							if (section) section.setTitle(messages["NoActiveBranch"]);
 							onComplete(that.processChildren(parentItem, []));
 							if (progress) progress.done();
 							return;

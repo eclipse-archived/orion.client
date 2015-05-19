@@ -590,7 +590,7 @@ define([
 			var targetName =  util.shortenRefName(targetRef);
 			title = activeBranch.Name + " => " + targetName;  //$NON-NLS-0$
 		} else if (!activeBranch && !targetRef) {
-			title = messages["NoActiveBranch"] + " => " + messages["NoRef"];  //$NON-NLS-0$
+			title = messages["NoActiveBranch"];
 		} else if (!activeBranch && targetRef) {
 			title = messages["NoActiveBranch"] + " => " +  util.shortenRefName(targetRef);  //$NON-NLS-0$
 		} else {
