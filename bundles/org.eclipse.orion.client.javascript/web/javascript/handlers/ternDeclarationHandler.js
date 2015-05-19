@@ -34,9 +34,8 @@ define([
 	               if(error) {
 	                   callback({request: 'definition', error: error.message, message: 'Failed to compute declaration'});
 	               }
-	               if(decl && typeof(decl.start) === 'number' && typeof(decl.end) === "number" &&
-	               		decl.file === args.meta.location) { //TODO only work on local decls
-       			   		callback({request: 'definition', declaration:decl});
+	               if(decl && typeof(decl.start) === 'number' && typeof(decl.end) === "number") {
+	               		callback({request: 'definition', declaration:decl});
        			   } else {
        			   		callback({request: 'definition', declaration: null});
        			   }

@@ -19,6 +19,7 @@ define([
 	
 	var cachedContext;
 	var deferred;
+	var origin;
 	
 	/**
 	 * @description Creates a new open declaration command
@@ -39,7 +40,11 @@ define([
 				var _d = evnt.data;
 				if(_d.request === 'definition') {
 					if(_d.declaration && (typeof(_d.declaration.start) === 'number' && typeof(_d.declaration.end) === 'number')) {
-						deferred.resolve(cachedContext.setSelection(_d.declaration.start, _d.declaration.end, true));
+						if(origin !== _d.declaration.file) {
+							deferred.resolve(cachedContext.openEditor(_d.declaration.file, {start: _d.declaration.start, end: _d.declaration.end, newwindow: true}));
+						} else {
+							deferred.resolve(cachedContext.setSelection(_d.declaration.start, _d.declaration.end, true));
+						}
 					} else {
 						deferred.resolve();
 					}
@@ -75,6 +80,7 @@ define([
 		_findDecl: function(editorContext, options, ast) {
 			cachedContext = editorContext;
 			deferred = new Deferred();
+			origin = options.input;
 			var files = [{type: 'full', name: options.input, text: ast.source}];
 			this.ternworker.postMessage({request:'definition', args:{params:{offset: options.offset}, files: files, meta:{location: options.input}}});
 			return deferred;
