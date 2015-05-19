@@ -402,7 +402,9 @@ define([
 	GitChangeListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitChangeListExplorer.prototype, /** @lends orion.git.GitChangeListExplorer.prototype */ {
 		changedItem: function(items) {
-			this.model.repository.status = "";
+			if(this.model && this.model.repository) {
+				this.model.repository.status = "";
+			}
 			var deferred = new Deferred();
 			var that = this;
 			if (this.prefix === "all") { //$NON-NLS-0$
