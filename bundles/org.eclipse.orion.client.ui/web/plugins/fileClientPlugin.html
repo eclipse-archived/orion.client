@@ -17,7 +17,9 @@
 			  domReady: 'requirejs/domReady'
 		  }
 		});	
-		require(["plugins/fileClientPlugin"]);
+		require(["plugins/fileClientPlugin"], function(plugin) {
+			plugin.connect();
+		});
 		</script>
 </head>
 <body>

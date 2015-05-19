@@ -51,39 +51,49 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", 'i18n!o
 		return location;
 	}
 
-	var temp = document.createElement('a');
-	temp.href = "../mixloginstatic/LoginWindow.html";
-	var login = temp.href;
-	var headers = {
-		name: "Orion File Service",
-		version: "1.0",
-		description: "This plugin provides file access to a user's workspace.",
-		login: login
+	function connect() {
+		var temp = document.createElement('a');
+		temp.href = "../mixloginstatic/LoginWindow.html";
+		var login = temp.href;
+		var headers = {
+			name: "Orion File Service",
+			version: "1.0",
+			description: "This plugin provides file access to a user's workspace.",
+			login: login
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(provider) {
+		var temp = document.createElement('a');
+		temp.href = "../file";
+		// note global
+		var fileBase = makeParentRelative(temp.href);
+	
+		temp.href = "../workspace";
+		// note global
+		var workspaceBase = makeParentRelative(temp.href);
+	
+		temp.href = "../xfer";
+		// note global
+		var importBase = makeParentRelative(temp.href);
+	
+		var service = new FileServiceImpl(fileBase, workspaceBase);
+		//provider.registerService("orion.core.file", trace(service), {
+		provider.registerService("orion.core.file", service, {
+			//Name: 'Orion Content',  // HACK  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386509
+			Name: messages['Orion Content'],
+			nls: 'orion/navigate/nls/messages',
+			top: fileBase,
+			ranking: -1,
+			pattern: [fileBase, workspaceBase, importBase]
+		});
+	}
+
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
 	};
-
-	var provider = new PluginProvider(headers);
-
-	temp.href = "../file";
-	// note global
-	var fileBase = makeParentRelative(temp.href);
-
-	temp.href = "../workspace";
-	// note global
-	var workspaceBase = makeParentRelative(temp.href);
-
-	temp.href = "../xfer";
-	// note global
-	var importBase = makeParentRelative(temp.href);
-
-	var service = new FileServiceImpl(fileBase, workspaceBase);
-	//provider.registerService("orion.core.file", trace(service), {Name:'Orion Content', top:fileBase, pattern:patternBase});
-	provider.registerService("orion.core.file", service, {
-		//Name: 'Orion Content',  // HACK  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386509
-		Name: messages['Orion Content'],
-		nls: 'orion/navigate/nls/messages',
-		top: fileBase,
-		ranking: -1,
-		pattern: [fileBase, workspaceBase, importBase]
-	});
-	provider.connect();
 });

@@ -1,0 +1,20 @@
+{
+	"/plugins":{
+		"plugins/orionPlugin.html": true,
+		"plugins/jslintPlugin.html":true,
+		"git/plugins/gitPlugin.html":true,
+		"webtools/plugins/webToolsPlugin.html":true,
+		"javascript/plugins/javascriptPlugin.html":true,
+		"profile/userservicePlugin.html":true,
+		"edit/content/imageViewerPlugin.html":true,
+		"edit/content/jsonEditorPlugin.html":true,
+		"plugins/helpPlugin.html": true,
+		"plugins/taskPlugin.html": true,
+		"plugins/site/sitePlugin.html": true,
+		"shell/plugins/shellPagePlugin.html":true,
+		"plugins/gitBlamePlugin.html" :true,
+		"cfui/plugins/cFPlugin.html":true,
+		"cfui/plugins/cFDeployPlugin.html":true,
+		"cfui/plugins/wizards/genericDeploymentWizardPlugin.html":true
+	}
+}

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,14 +8,27 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+
 /*eslint-env browser, amd*/
-/*global URL*/
-define(["orion/plugin", "plugins/metrics/googleAnalyticsImpl"], function(PluginProvider, GoogleAnalyticsImpl) {
+define([
+	"orion/plugin",
+	"plugins/fileClientPlugin",
+	"plugins/authenticationPlugin",
+	"plugins/metrics/googleAnalyticsPlugin",
+	"plugins/languageToolsPlugin",
+	"plugins/preferencesPlugin",
+	"plugins/pageLinksPlugin",
+	"plugins/webEditingPlugin"
+], function(PluginProvider) {
+	
+	var plugins = Array.prototype.slice.call(arguments);
+	plugins.shift();
+
 	function connect() {
 		var headers = {
-			name: "Google Analytics Plugin",
+			name: "Orion Support",
 			version: "1.0",
-			description: "Google Analytics Plugin"
+			description: "This plugin provides the core Orion support."
 		};
 		var pluginProvider = new PluginProvider(headers);
 		registerServiceProviders(pluginProvider);
@@ -23,9 +36,9 @@ define(["orion/plugin", "plugins/metrics/googleAnalyticsImpl"], function(PluginP
 	}
 
 	function registerServiceProviders(provider) {
-		var servletPath = new URL("../../metrics", window.location).href; //$NON-NLS-0$
-		var service = new GoogleAnalyticsImpl(servletPath); //$NON-NLS-0$
-		provider.registerService("orion.metrics", service, {}); //$NON-NLS-0$
+		plugins.forEach(function(plugin) {
+			plugin.registerServiceProviders(provider);
+		});
 	}
 
 	return {

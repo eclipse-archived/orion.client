@@ -11,7 +11,9 @@
 			  domReady: 'requirejs/domReady'
 		  }
 		});
-		require(["plugins/preferencesPlugin"]);
+		require(["plugins/preferencesPlugin"], function(plugin) {
+			plugin.connect();
+		});
 	</script>
 </head>
 <body>

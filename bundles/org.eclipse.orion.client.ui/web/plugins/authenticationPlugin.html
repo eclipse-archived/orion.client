@@ -11,7 +11,9 @@
 			  domReady: 'requirejs/domReady'
 		  }
 		});
-		require(["plugins/authenticationPlugin"]);
+		require(["plugins/authenticationPlugin"], function(plugin) {
+			plugin.connect();
+		});
 	</script>
 </head>
 <body>

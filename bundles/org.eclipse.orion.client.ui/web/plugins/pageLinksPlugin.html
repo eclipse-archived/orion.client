@@ -15,7 +15,9 @@
 		  }
 		});
 
-		require(["plugins/pageLinksPlugin"]);
+		require(["plugins/pageLinksPlugin"], function(plugin) {
+			plugin.connect();
+		});
 	</script>
 </head>
 <body>

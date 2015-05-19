@@ -18,189 +18,198 @@ define([
 	'i18n!orion/widgets/nls/messages',
 	'orion/plugin'
 ], function(PageLinks, PluginProvider, URITemplate, messages, widgetMessages) {
-	var serviceImpl = { /* All data is in properties */ };
+	
+	function connect() {
+		var headers = {
+			name: "Orion Page Links",
+			version: "1.0",
+			description: "This plugin provides the top-level page links for Orion."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
 
-	var headers = {
-		name: "Orion Page Links",
-		version: "1.0",
-		description: "This plugin provides the top-level page links for Orion."
+	function registerServiceProviders(provider) {
+		var serviceImpl = { /* All data is in properties */ };
+	
+		// Categories for primary nav and related links
+		provider.registerService("orion.page.link.category", null, {
+			id: "edit",
+			name: messages["Editor"],
+			nls: "orion/nls/messages",
+			imageClass: "core-sprite-edit",
+			order: 10
+		});
+		provider.registerService("orion.page.link.category", null, {
+			id: "shell",
+			name: messages["Shell"],
+			nls: "orion/nls/messages",
+			imageClass: "core-sprite-shell",
+			order: 40
+		});
+		
+		provider.registerService("orion.page.link.category", null, {
+			id: "settings",
+			name: widgetMessages["Settings"],
+			nls: "orion/widgets/nls/messages",
+			imageClass: "core-sprite-gear",
+			order: 60
+		});
+	
+		// Primary navigation links
+		provider.registerService("orion.page.link", null, {
+			name: messages["EditorLinkWorkspace"],
+			nls: "orion/nls/messages",
+			tooltip: "Edit code",
+			category: "edit",
+			order: 1000, // low priority
+			uriTemplate: "{+OrionHome}/edit/edit.html"
+		});
+		provider.registerService("orion.page.link", serviceImpl, {
+			name: messages["ShellLinkWorkspace"],
+			id: "orion.shell",
+			nls: "orion/nls/messages",
+			category: "shell",
+			order: 1000, // low priority
+			uriTemplate: "{+OrionHome}/shell/shellPage.html"
+		});
+	
+		provider.registerService("orion.page.link", null, {
+			name: widgetMessages["Settings"],
+			id: "orion.settings",
+			nls: "orion/widgets/nls/messages",
+			category: "settings",
+			order: 1000, // low priority
+			uriTemplate: "{+OrionHome}/settings/settings.html"
+		});
+	
+		// Links to an Editor view of current folder. This is only useful from non-Editor pages (eg Shell)
+		provider.registerService("orion.page.link.related", null, {
+			id: "orion.editFromMetadata",
+			name: messages["EditorRelatedLink"],
+			nls: "orion/nls/messages",
+			tooltip: "Open Editor page",
+			category: "edit",
+			order: 1, // First link in edit category on Shell
+			validationProperties: [{
+				source: "ChildrenLocation|ContentLocation",
+				variableName: "EditorLocation",
+				replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
+			}],
+			uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation}"
+			// use this uri if we ever want to drill the LHS nav into the EditorLocation
+			// uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation},navigate={,EditorLocation}?depth=1"
+		});
+	
+		// Links to an Editor view of the parent folder (Enclosing Folder)
+		provider.registerService("orion.page.link.related", null, {
+			id: "orion.editParent",
+			name: messages["EditorRelatedLinkParent"],
+			nls: "orion/nls/messages",
+			category: "edit",
+			order: 3,
+			validationProperties: [{
+				source: "Parents[0]:Location",
+				variableName: "EditorLocation",
+				replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
+			}],
+			uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation}"
+		});
+	
+		// Links to an Editor view of the topmost parent folder (Project Root)
+		provider.registerService("orion.page.link.related", null, {
+			id: "orion.editProjectRoot",
+			name: messages["EditorRelatedLinkProj"],
+			nls: "orion/nls/messages",
+			category: "edit",
+			order: 5,
+			validationProperties: [{
+				source: "Parents[-1]:Location",
+				variableName: "EditorLocation",
+				replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
+			}],
+			uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation}"
+		});
+	
+		// Uncomment this if we ever want "Project Root" to be the 1st link in the "edit" slot when you're already viewing a project.
+		// (Encourages users to stay within their current project rather than ascend to workspace)
+//		provider.registerService("orion.page.link.related", null, {
+//			id: "orion.editProjectRootNoOp",
+//			name: messages["EditorRelatedLinkProj"],
+//			nls: "orion/nls/messages",
+//			category: "edit",
+//			order: 5,
+//			validationProperties: [{
+//				source: "Parents:length",
+//				match: 0
+//			}],
+//			uriTemplate: "{+OrionHome}/edit/edit.html#{,Location}"
+//		});
+	
+//		// Removed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427617
+//		provider.registerService("orion.page.link.related", null, {
+//			id: "orion.editFromMetadataAlways",
+//			name: messages["EditorLinkWorkspace"],
+//			nls: "orion/nls/messages",
+//			tooltip: "Open Editor page",
+//			category: "edit",
+//			order: 10, // Make it first link in edit category
+//			validationProperties: [{
+//				source: "NoTarget"
+//			}],
+//			uriTemplate: "{+OrionHome}/edit/edit.html#"
+//		});
+	
+		provider.registerService("orion.page.link.user", null, {
+			id: "orion.help",
+			name: widgetMessages["Help"],
+			nls: "orion/widgets/nls/messages",
+			uriTemplate: "{+OrionHome}/help/help.html",
+			category: "user.0"
+		});
+		
+		provider.registerService("orion.page.link.user", null, {
+			id: "orion.report.bug",
+			name: widgetMessages["Report a Bug"],
+			nls: "orion/widgets/nls/messages",
+			uriTemplate: "https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&component=Client&version=8.0",
+			category: "user.0"
+		});
+		
+		var htmlHelloWorld = document.createElement('a');
+		htmlHelloWorld.href = "./contentTemplates/helloWorld.zip";
+		var pluginHelloWorld = document.createElement('a');
+		pluginHelloWorld.href = "./contentTemplates/pluginHelloWorld.zip";
+	
+		provider.registerService("orion.core.content", null, {
+			id: "orion.content.html5",
+			name: messages["Sample HTML5 Site"],
+			nls: "orion/nls/messages",
+			description: messages["Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files."],
+			contentURITemplate: htmlHelloWorld.href
+		});
+	
+		provider.registerService("orion.core.content", null, {
+			id: "orion.content.plugin",
+			name: messages["Sample Orion Plugin"],
+			nls: "orion/nls/messages",
+			description: messages["Generate a sample plugin for integrating with Orion."],
+			contentURITemplate: pluginHelloWorld.href
+		});
+	
+		var getPluginsTemplate = "https://orion-plugins.github.io#?target={InstallTarget}&version={Version}&OrionHome={OrionHome}";
+		provider.registerService("orion.core.getplugins", null, {
+			uri: decodeURIComponent(new URITemplate(getPluginsTemplate).expand({
+				Version: "5.0",
+				InstallTarget: PageLinks.getOrionHome() + "/settings/settings.html",
+				OrionHome: PageLinks.getOrionHome()
+			}))
+		});
+	}
+
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
 	};
-
-	var provider = new PluginProvider(headers);
-
-	// Categories for primary nav and related links
-	provider.registerService("orion.page.link.category", null, {
-		id: "edit",
-		name: messages["Editor"],
-		nls: "orion/nls/messages",
-		imageClass: "core-sprite-edit",
-		order: 10
-	});
-	provider.registerService("orion.page.link.category", null, {
-		id: "shell",
-		name: messages["Shell"],
-		nls: "orion/nls/messages",
-		imageClass: "core-sprite-shell",
-		order: 40
-	});
-	
-	provider.registerService("orion.page.link.category", null, {
-		id: "settings",
-		name: widgetMessages["Settings"],
-		nls: "orion/widgets/nls/messages",
-		imageClass: "core-sprite-gear",
-		order: 60
-	});
-
-	// Primary navigation links
-	provider.registerService("orion.page.link", null, {
-		name: messages["EditorLinkWorkspace"],
-		nls: "orion/nls/messages",
-		tooltip: "Edit code",
-		category: "edit",
-		order: 1000, // low priority
-		uriTemplate: "{+OrionHome}/edit/edit.html"
-	});
-	provider.registerService("orion.page.link", serviceImpl, {
-		name: messages["ShellLinkWorkspace"],
-		id: "orion.shell",
-		nls: "orion/nls/messages",
-		category: "shell",
-		order: 1000, // low priority
-		uriTemplate: "{+OrionHome}/shell/shellPage.html"
-	});
-
-	provider.registerService("orion.page.link", null, {
-		name: widgetMessages["Settings"],
-		id: "orion.settings",
-		nls: "orion/widgets/nls/messages",
-		category: "settings",
-		order: 1000, // low priority
-		uriTemplate: "{+OrionHome}/settings/settings.html"
-	});
-
-	// Links to an Editor view of current folder. This is only useful from non-Editor pages (eg Shell)
-	provider.registerService("orion.page.link.related", null, {
-		id: "orion.editFromMetadata",
-		name: messages["EditorRelatedLink"],
-		nls: "orion/nls/messages",
-		tooltip: "Open Editor page",
-		category: "edit",
-		order: 1, // First link in edit category on Shell
-		validationProperties: [{
-			source: "ChildrenLocation|ContentLocation",
-			variableName: "EditorLocation",
-			replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
-		}],
-		uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation}"
-		// use this uri if we ever want to drill the LHS nav into the EditorLocation
-		// uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation},navigate={,EditorLocation}?depth=1"
-	});
-
-	// Links to an Editor view of the parent folder (Enclosing Folder)
-	provider.registerService("orion.page.link.related", null, {
-		id: "orion.editParent",
-		name: messages["EditorRelatedLinkParent"],
-		nls: "orion/nls/messages",
-		category: "edit",
-		order: 3,
-		validationProperties: [{
-			source: "Parents[0]:Location",
-			variableName: "EditorLocation",
-			replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
-		}],
-		uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation}"
-	});
-
-	// Links to an Editor view of the topmost parent folder (Project Root)
-	provider.registerService("orion.page.link.related", null, {
-		id: "orion.editProjectRoot",
-		name: messages["EditorRelatedLinkProj"],
-		nls: "orion/nls/messages",
-		category: "edit",
-		order: 5,
-		validationProperties: [{
-			source: "Parents[-1]:Location",
-			variableName: "EditorLocation",
-			replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
-		}],
-		uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation}"
-	});
-
-	// Uncomment this if we ever want "Project Root" to be the 1st link in the "edit" slot when you're already viewing a project.
-	// (Encourages users to stay within their current project rather than ascend to workspace)
-//	provider.registerService("orion.page.link.related", null, {
-//		id: "orion.editProjectRootNoOp",
-//		name: messages["EditorRelatedLinkProj"],
-//		nls: "orion/nls/messages",
-//		category: "edit",
-//		order: 5,
-//		validationProperties: [{
-//			source: "Parents:length",
-//			match: 0
-//		}],
-//		uriTemplate: "{+OrionHome}/edit/edit.html#{,Location}"
-//	});
-
-//	// Removed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427617
-//	provider.registerService("orion.page.link.related", null, {
-//		id: "orion.editFromMetadataAlways",
-//		name: messages["EditorLinkWorkspace"],
-//		nls: "orion/nls/messages",
-//		tooltip: "Open Editor page",
-//		category: "edit",
-//		order: 10, // Make it first link in edit category
-//		validationProperties: [{
-//			source: "NoTarget"
-//		}],
-//		uriTemplate: "{+OrionHome}/edit/edit.html#"
-//	});
-
-	provider.registerService("orion.page.link.user", null, {
-		id: "orion.help",
-		name: widgetMessages["Help"],
-		nls: "orion/widgets/nls/messages",
-		uriTemplate: "{+OrionHome}/help/help.html",
-		category: "user.0"
-	});
-	
-	provider.registerService("orion.page.link.user", null, {
-		id: "orion.report.bug",
-		name: widgetMessages["Report a Bug"],
-		nls: "orion/widgets/nls/messages",
-		uriTemplate: "https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&component=Client&version=8.0",
-		category: "user.0"
-	});
-	
-	var htmlHelloWorld = document.createElement('a');
-	htmlHelloWorld.href = "./contentTemplates/helloWorld.zip";
-	var pluginHelloWorld = document.createElement('a');
-	pluginHelloWorld.href = "./contentTemplates/pluginHelloWorld.zip";
-
-	provider.registerService("orion.core.content", null, {
-		id: "orion.content.html5",
-		name: messages["Sample HTML5 Site"],
-		nls: "orion/nls/messages",
-		description: messages["Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files."],
-		contentURITemplate: htmlHelloWorld.href
-	});
-
-	provider.registerService("orion.core.content", null, {
-		id: "orion.content.plugin",
-		name: messages["Sample Orion Plugin"],
-		nls: "orion/nls/messages",
-		description: messages["Generate a sample plugin for integrating with Orion."],
-		contentURITemplate: pluginHelloWorld.href
-	});
-
-	var getPluginsTemplate = "https://orion-plugins.github.io#?target={InstallTarget}&version={Version}&OrionHome={OrionHome}";
-	provider.registerService("orion.core.getplugins", null, {
-		uri: decodeURIComponent(new URITemplate(getPluginsTemplate).expand({
-			Version: "5.0",
-			InstallTarget: PageLinks.getOrionHome() + "/settings/settings.html",
-			OrionHome: PageLinks.getOrionHome()
-		}))
-	});
-
-	provider.connect();
 });

@@ -17,7 +17,9 @@
 			  domReady: 'requirejs/domReady'
 		  }
 		});	
-		require(["plugins/metrics/googleAnalyticsPlugin"]);
+		require(["plugins/metrics/googleAnalyticsPlugin"], function(plugin) {
+			plugin.connect();
+		});
 		</script>
 </head>
 <body>

@@ -37,6 +37,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 	}
 	
 	function expandLocations(metadata) {
+		if (!metadata.Parents) return;
 		var dir = metadata.Directory;
 		var location = metadata.Location;
 		metadata.Parents.forEach(function(parent) {

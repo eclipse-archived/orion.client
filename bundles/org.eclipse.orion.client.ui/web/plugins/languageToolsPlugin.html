@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languageToolsPlugin"]);
+		require(["plugins/languageToolsPlugin"], function(plugin) {
+			plugin.connect();
+		});
 	</script>
 </head>
 

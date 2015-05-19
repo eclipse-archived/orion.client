@@ -105,6 +105,7 @@
             { name: "mixloginstatic/javascript/ServerStatus" },
             { name: "mixloginstatic/javascript/manageExternalIds" },
             { name: "operations/list" },
+            { name: "plugins/orionPlugin" },
             { name: "plugins/GerritFilePlugin" },
             { name: "plugins/GitHubFilePlugin" },
             { name: "plugins/authenticationPlugin" },

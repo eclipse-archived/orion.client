@@ -51,22 +51,31 @@ define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider)
 		}
 	};
 
-	var temp = document.createElement('a');
-	temp.href = "../prefs/user";
-	var location = temp.href;
-	
-	temp.href = "../mixloginstatic/LoginWindow.html";
-	var login = temp.href;
-	var headers = {
-		name: "Orion Preferences",
-		version: "1.0",
-		description: "This plugin provides access to user preferences.",
-		login: login
+	function connect() {
+		var temp = document.createElement('a');
+		temp.href = "../mixloginstatic/LoginWindow.html";
+		var login = temp.href;
+		var headers = {
+			name: "Orion Preferences",
+			version: "1.0",
+			description: "This plugin provides access to user preferences.",
+			login: login
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(provider) {
+		var temp = document.createElement('a');
+		temp.href = "../prefs/user";
+		var location = temp.href;
+		var service = new PreferencesProvider(location);
+		provider.registerService("orion.core.preference.provider", service, {});
+	}
+
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
 	};
-
-	var provider = new PluginProvider(headers);
-
-	var service = new PreferencesProvider(location);
-	provider.registerService("orion.core.preference.provider", service, {});
-	provider.connect();
 });

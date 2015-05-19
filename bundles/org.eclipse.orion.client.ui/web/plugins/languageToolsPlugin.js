@@ -33,23 +33,31 @@ define([
 	'plugins/languages/vb/vbPlugin',
 	'plugins/languages/xml/xmlPlugin',
 	'plugins/languages/xquery/xqueryPlugin',
-	'plugins/languages/yaml/yamlPlugin'], function(
-		PluginProvider, mArduinoPlugin, mCPlugin, mCppPlugin, mCSharpPlugin, mDockerfilePlugin, mErlangPlugin, mGoPlugin, mHamlPlugin, mJadePlugin, mJavaPlugin, mLaunch,
-		mLuaPlugin, mMarkdownPlugin, mObjectiveCPlugin, mPhpPlugin, mPythonPlugin, mRubyPlugin, mSwiftPlugin, mVbPlugin, mXmlPlugin, mXQueryPlugin, mYamlPlugin) {
+	'plugins/languages/yaml/yamlPlugin'
+], function(PluginProvider) {
 
-	var languagePlugins = [
-		mArduinoPlugin, mCPlugin, mCppPlugin, mCSharpPlugin, mDockerfilePlugin, mErlangPlugin, mGoPlugin, mHamlPlugin, mJadePlugin, mJavaPlugin, mLaunch,
-		mLuaPlugin, mMarkdownPlugin, mObjectiveCPlugin, mPhpPlugin, mPythonPlugin, mRubyPlugin, mSwiftPlugin, mVbPlugin, mXmlPlugin, mXQueryPlugin, mYamlPlugin
-	];
+	var plugins = Array.prototype.slice.call(arguments);
+	plugins.shift();
 
-	var headers = {
-		name: "Orion Languages Tool Support",
-		version: "1.0",
-		description: "This plugin provides tooling for languages that are not included in other core Orion plugins."
+	function connect() {
+		var headers = {
+			name: "Orion Languages Tool Support",
+			version: "1.0",
+			description: "This plugin provides tooling for languages that are not included in other core Orion plugins."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(provider) {
+		plugins.forEach(function(plugin) {
+			plugin.registerServiceProviders(provider);
+		});
+	}
+
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
 	};
-	var pluginProvider = new PluginProvider(headers);
-	languagePlugins.forEach(function(plugin) {
-		plugin.registerServiceProviders(pluginProvider);
-	});
-	pluginProvider.connect();
 });
