@@ -20,7 +20,7 @@ define({
 	"es": true,
 	"pt-br": true,
 	"ko": true,
-	"en_AA": true,
-	"en_RR": true,
-	"en_ZZ": true
+	"en-aa": true,
+	"en-rr": true,
+	"en-zz": true
 });

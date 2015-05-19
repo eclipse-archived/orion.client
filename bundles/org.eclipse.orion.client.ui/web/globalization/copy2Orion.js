@@ -139,9 +139,9 @@ var allLanguages = [
 	{name: "Italian", locale: "it", prefix: "it"},
 	{name: "Korean", locale: "ko", prefix: "ko"},
 	{name: "Portuguese (Brazilian)", locale: "pt-br", prefix: "pt_BR"},
-	{name: "en_AA", locale: "en_AA", prefix: "en_AA"},
-	{name: "en_RR", locale: "en_RR", prefix: "en_RR"},
-	{name: "en_ZZ", locale: "en_ZZ", prefix: "en_ZZ"}
+	{name: "en_AA", locale: "en-aa", prefix: "en_AA"},
+	{name: "en_RR", locale: "en-rr", prefix: "en_RR"},
+	{name: "en_ZZ", locale: "en-zz", prefix: "en_ZZ"}
 	
 ];
 
