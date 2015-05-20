@@ -755,7 +755,8 @@ define([
         		}
         		
         		var callees = Object.create(null);
-        		mapCallees(['require', 'requirejs', 'importScripts', 'define', 'Worker', 'SharedWorker', 'addEventListener', 'RegExp'], callees); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+        		mapCallees(['require', 'requirejs', 'importScripts', 'define', 'Worker', 'SharedWorker', 'addEventListener', 'RegExp', //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+        		'removeEventListener'], callees);  //$NON-NLS-1$
         		
         		return {
                     'Literal': function(node) {
