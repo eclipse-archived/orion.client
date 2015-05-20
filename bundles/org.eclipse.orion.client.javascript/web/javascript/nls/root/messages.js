@@ -88,5 +88,12 @@ define({//Default message bundle
 	'addBBreakFixTooltip': 'Add a break statement to the proceeding line',
 	'noShadowGlobals': 'Global shadowing:',
 	'noThrowLiteralFixName': 'Change to Error' ,
-	'missingNlsFixName': 'Add missing $NON-NLS$ tag'
+	'missingNlsFixName': 'Add missing $NON-NLS$ tag',
+	'funcProposalDescription': ' - The name of the function',
+	'funcParamProposalDescription': ' - Function parameter',
+	'eslintRuleProposalDescripton': ' - ESLint rule',
+	'eslintEnvProposalDescription': ' - ESLint environment name',
+	'onlineDocumentationProposalEntry': '\n\n[Online documentation](${0})',
+	'keywordProposalDescription': ' - Keyword',
+	'keywordHoverProposal': 'ECMAScript reserved keyword'
 });

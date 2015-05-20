@@ -11,6 +11,7 @@
  ******************************************************************************/
 /*eslint-env amd */
 define([
+	'i18n!javascript/nls/messages',
     'orion/Deferred',
 	'orion/objects',
 	'javascript/finder',
@@ -22,8 +23,9 @@ define([
 	'eslint/conf/environments',
 	'javascript/signatures',
 	'javascript/util',
-	'orion/editor/stylers/application_javascript/syntax'
-], function(Deferred, Objects, Finder, CU, mTemplates, Templates, Hover, Rules, ESLintEnv, Signatures, Util, JsSyntax) {
+	'orion/editor/stylers/application_javascript/syntax',
+	'orion/i18nUtil',
+], function(Messages, Deferred, Objects, Finder, CU, mTemplates, Templates, Hover, Rules, ESLintEnv, Signatures, Util, JsSyntax, i18nUtil) {
 
 	/**
 	 * @description Creates a new delegate to create keyword and template proposals
@@ -245,12 +247,12 @@ define([
 		    var offset = params.offset > params.prefix.length ? params.offset-params.prefix.length-1 : 0;
 		    switch(buffer.charAt(offset)) {
 		        case '{': {
-		            proposals = []; //TODO have to delegate to the worker
+		        	//TODO @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=465029
+		            proposals = [];
 		            break;
 		        }
 		        case '.': {
-		            //TODO re-write the inferencing code to only pick out 'typed' proposals - we 
-		            //only want non-functions here
+		        	//TODO @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=465029
 		            return [];
 		        }
 		        case '*':
@@ -279,7 +281,7 @@ define([
             								proposal: name,
             								relevance: 100,
             								name: name,
-            								description: ' - The name of the function',
+            								description: Messages['funcProposalDescription'],
             								style: 'emphasis', //$NON-NLS-1$
             								overwrite: true
         							    });
@@ -295,7 +297,7 @@ define([
                         								proposal: name,
                         								relevance: 100,
                         								name: name,
-                        								description: ' - Function parameter',
+                        								description: Messages['funcParamProposalDescription'],
                         								style: 'emphasis', //$NON-NLS-1$
                         								overwrite: true
                     							    });
@@ -323,14 +325,14 @@ define([
 								proposal: rulekey,
 								relevance: 100,
 								name: rulekey,
-								description: ' - ESLint rule',
+								description: Messages['eslintRuleProposalDescripton'],
 								prefix: params.prefix,
 								style: 'emphasis', //$NON-NLS-1$
 								overwrite: true
 						    };
 						    var hover = rule.description ? rule.description : '';
 						    if(rule.url) {
-						    	hover += '\n\n[Online documentation]('+rule.url+')';
+						    	hover += i18nUtil.formatMessage.call(null, Messages['onlineDocumentationProposalEntry'], rule.url);
 						    }
 						    _p.hover = {content: hover, type: 'markdown'}; //$NON-NLS-1$
                             proposals.push(_p);
@@ -346,7 +348,7 @@ define([
 								proposal: key,
 								relevance: 100,
 								name: key,
-								description: ' - ESLint environment name',
+								description: Messages['eslintEnvProposalDescription'],
 								style: 'emphasis', //$NON-NLS-1$
 								overwrite: true
 						    });
@@ -554,11 +556,11 @@ define([
             	//keyword
             	proposal.relevance -= 2; //103
             	//proposal.style = 'noemphasis_keyword';//$NON-NLS-1$
-            	proposal.description = ' - Keyword';
-            	completion.doc = 'ECMAScript reserved keyword';
+            	proposal.description = Messages['keywordProposalDescription'];
+            	completion.doc = Messages['keywordHoverProposal'];
             	completion.url = getKeywordLink(proposal.name);
             } else {
-    		    proposal.description = convertTypes(' : ' + completion.type);
+    		    proposal.description = convertTypes(' : ' + completion.type); //$NON-NLS-1$
 		    }
         }
         var obj = Object.create(null);
@@ -570,7 +572,7 @@ define([
             obj.content += Hover.formatMarkdownHover(completion.doc).content;
         }
         if(completion.url) {
-            obj.content += '\n\n[Online documentation]('+completion.url+')';
+            obj.content += i18nUtil.formatMessage.call(null, Messages['onlineDocumentationProposalEntry'], completion.url);
         }
         proposal.hover = obj;
         return proposal;
