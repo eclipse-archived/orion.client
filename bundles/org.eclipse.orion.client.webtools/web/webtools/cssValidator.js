@@ -12,7 +12,7 @@
 /*eslint-env amd*/
 define("webtools/cssValidator", [ //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
-	'javascript/compilationUnit',
+	'webtools/compilationUnit',
 	'webtools/util'
 ], function(Objects, CU, Util) {
 
@@ -120,6 +120,10 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 			var that = this;
 			return editorContext.getFileMetadata().then(function(meta) {
 			    if(meta && meta.contentType.id === 'text/html') {
+			    	// Only run the validator if we have line information because cssLint uses line num and column, not offsets
+			    	if (!editorContext.getLineAtOffset){
+			    		return null;
+			    	}
 			        return editorContext.getText().then(function(text) {
     			         var blocks = Util.findStyleBlocks(text, context.offset);
     			         if(blocks && blocks.length > 0) {
