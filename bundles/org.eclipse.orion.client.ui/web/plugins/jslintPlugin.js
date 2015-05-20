@@ -154,17 +154,25 @@ define([
 		}
 	};
 
-	var headers = {
-		name: "Orion JSLint Service",
-		version: "1.0",
-		description: "This plugin provides JSLint functionality for validating JSON."
+	function connect() {
+		var headers = {
+			name: "Orion JSLint Service",
+			version: "1.0",
+			description: "This plugin provides JSLint functionality for validating JSON."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(provider) {
+		provider.registerService(["orion.edit.validator"], validationService, {
+			contentType: ["application/json"],
+		});
+	}
+
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
 	};
-
-	var provider = new PluginProvider(headers);
-	provider.registerService(["orion.edit.validator"], validationService, {
-		contentType: ["application/json"],
-	});
-	
-	provider.connect();
-
 });

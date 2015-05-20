@@ -1,7 +1,6 @@
 {
 	"/plugins":{
 		"plugins/orionPlugin.html": true,
-		"plugins/jslintPlugin.html":true,
 		"git/plugins/gitPlugin.html":true,
 		"webtools/plugins/webToolsPlugin.html":true,
 		"javascript/plugins/javascriptPlugin.html":true,
@@ -9,7 +8,6 @@
 		"edit/content/imageViewerPlugin.html":true,
 		"edit/content/jsonEditorPlugin.html":true,
 		"plugins/helpPlugin.html": true,
-		"plugins/taskPlugin.html": true,
 		"plugins/site/sitePlugin.html": true,
 		"shell/plugins/shellPagePlugin.html":true,
 		"plugins/gitBlamePlugin.html" :true,

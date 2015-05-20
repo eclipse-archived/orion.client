@@ -14,10 +14,12 @@ define([
 	"orion/plugin",
 	"plugins/fileClientPlugin",
 	"plugins/authenticationPlugin",
+	"plugins/jslintPlugin",
 	"plugins/metrics/googleAnalyticsPlugin",
 	"plugins/languageToolsPlugin",
 	"plugins/preferencesPlugin",
 	"plugins/pageLinksPlugin",
+	"plugins/taskPlugin",
 	"plugins/webEditingPlugin"
 ], function(PluginProvider) {
 	
@@ -26,7 +28,7 @@ define([
 
 	function connect() {
 		var headers = {
-			name: "Orion Support",
+			name: "Orion Core Support",
 			version: "1.0",
 			description: "This plugin provides the core Orion support."
 		};
