@@ -24,7 +24,7 @@ define([
         if(ternserver) {
 	       ternserver.request({
 	           query: {
-		           type: "rename", 
+		           type: "rename",  //$NON-NLS-1$
 		           file: args.meta.location,
 		           end: args.params.offset,
 		           newName: args.newname
@@ -32,15 +32,15 @@ define([
 	           files: args.files}, 
 	           function(error, changes) {
 	               if(error) {
-	                   callback({request: 'rename', error: error.message, message: 'Failed to rename changes'});
+	                   callback({request: 'rename', error: error.message, message: 'Failed to rename changes'}); //$NON-NLS-1$
 	               } else if(changes && Array.isArray(changes.changes)) {
-        			   callback({request: 'rename', changes:changes});
+        			   callback({request: 'rename', changes:changes}); //$NON-NLS-1$
 	               } else {
-	               		callback({request: 'rename', changes:[]});
+	               		callback({request: 'rename', changes:[]}); //$NON-NLS-1$
 	               }
 	           });
 	   } else {
-	       callback({request: 'rename', message: 'failed to rename, server not started'});
+	       callback({request: 'rename', message: 'failed to rename, server not started'}); //$NON-NLS-1$
 	   }
    }
    

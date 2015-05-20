@@ -25,23 +25,23 @@ define([
        if(ternserver) {
 	       ternserver.request({
 	           query: {
-		           type: "definition", 
+		           type: "definition",  //$NON-NLS-1$
 		           file: args.meta.location,
 		           end: args.params.offset
 	           },
 	           files: args.files}, 
 	           function(error, decl) {
 	               if(error) {
-	                   callback({request: 'definition', error: error.message, message: 'Failed to compute declaration'});
+	                   callback({request: 'definition', error: error.message, message: 'Failed to compute declaration'}); //$NON-NLS-1$
 	               }
 	               if(decl && typeof(decl.start) === 'number' && typeof(decl.end) === "number") {
-	               		callback({request: 'definition', declaration:decl});
+	               		callback({request: 'definition', declaration:decl}); //$NON-NLS-1$
        			   } else {
-       			   		callback({request: 'definition', declaration: null});
+       			   		callback({request: 'definition', declaration: null}); //$NON-NLS-1$
        			   }
 	           });
 	   } else {
-	       callback({request: 'definition', message: 'Failed to compute declaration, server not started'});
+	       callback({request: 'definition', message: 'Failed to compute declaration, server not started'}); //$NON-NLS-1$
 	   }
    }
    

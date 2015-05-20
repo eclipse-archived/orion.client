@@ -24,22 +24,22 @@ define([
         if(ternserver) {
 	       ternserver.request({
 	           query: {
-		           type: "documentation", 
+		           type: "documentation",  //$NON-NLS-1$
 		           file: args.meta.location,
 		           end: args.params.offset
 	           },
 	           files: args.files}, 
 	           function(error, doc) {
 	               if(error) {
-	                   callback({request: 'documentation', error: error.message, message: 'Failed to compute documentation'});
+	                   callback({request: 'documentation', error: error.message, message: 'Failed to compute documentation'}); //$NON-NLS-1$
 	               } else if(doc && doc.doc) {
-        			   callback({request: 'documentation', doc:doc});
+        			   callback({request: 'documentation', doc:doc}); //$NON-NLS-1$
 	               } else {
-						callback({request: 'documentation', doc: null});
+						callback({request: 'documentation', doc: null}); //$NON-NLS-1$
 	               }
 	           });
 	   } else {
-	       callback({request: 'documentation', message: 'Failed to compute documentation, server not started'});
+	       callback({request: 'documentation', message: 'Failed to compute documentation, server not started'}); //$NON-NLS-1$
 	   }
     }
     

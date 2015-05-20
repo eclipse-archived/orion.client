@@ -30,15 +30,15 @@ define([
 	           }}, 
 	           function(error, refs) {
 	               if(error) {
-	                   callback({request: 'occurrences', error: error.message, message: 'Failed to compute occurrences'});
+	                   callback({request: 'occurrences', error: error.message, message: 'Failed to compute occurrences'}); //$NON-NLS-1$
 	               } else if(refs && Array.isArray(refs)) {
-        			   callback({request: 'occurrences', refs:refs});
+        			   callback({request: 'occurrences', refs:refs}); //$NON-NLS-1$
 	               } else {
-	               		callback({request: 'occurrences', refs:[]});
+	               		callback({request: 'occurrences', refs:[]}); //$NON-NLS-1$
 	               }
 	           });
 	   } else {
-	       callback({request: 'occurrences', message: 'failed to compute occurrences, server not started'});
+	       callback({request: 'occurrences', message: 'failed to compute occurrences, server not started'}); //$NON-NLS-1$
 	   }
     }
     
