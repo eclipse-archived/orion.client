@@ -12,7 +12,7 @@
 		"plugins/webEditingPlugin.html":true,
 		"plugins/helpPlugin.html": true,
 		"plugins/languageToolsPlugin.html":true,
-		"plugins/metrics/googleAnalyticsPlugin.html": true,
+		"plugins/googleAnalyticsPlugin.html": true,
 		"plugins/pageLinksPlugin.html":true,
 		"plugins/preferencesPlugin.html":true,
 		"plugins/taskPlugin.html": true,

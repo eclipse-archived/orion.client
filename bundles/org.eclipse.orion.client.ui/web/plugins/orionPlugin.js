@@ -15,7 +15,7 @@ define([
 	"plugins/fileClientPlugin",
 	"plugins/authenticationPlugin",
 	"plugins/jslintPlugin",
-	"plugins/metrics/googleAnalyticsPlugin",
+	"plugins/googleAnalyticsPlugin",
 	"plugins/languageToolsPlugin",
 	"plugins/preferencesPlugin",
 	"plugins/pageLinksPlugin",

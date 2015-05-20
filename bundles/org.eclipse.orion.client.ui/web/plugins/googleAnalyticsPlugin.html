@@ -3,11 +3,11 @@
 <head>
 	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2014." >
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<script src="../../requirejs/require.js"></script>
+		<script src="../requirejs/require.js"></script>
 		<script>
 		/*eslint-env browser, amd*/
 		require({
-		  baseUrl: '../..',
+		  baseUrl: '..',
 
 		  // set the paths to our library packages
 		  packages: [],
@@ -17,7 +17,7 @@
 			  domReady: 'requirejs/domReady'
 		  }
 		});	
-		require(["plugins/metrics/googleAnalyticsPlugin"], function(plugin) {
+		require(["plugins/googleAnalyticsPlugin"], function(plugin) {
 			plugin.connect();
 		});
 		</script>

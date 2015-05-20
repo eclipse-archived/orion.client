@@ -134,7 +134,7 @@ define(['orion/Deferred'], function(Deferred) {
         "plugins/gitBlamePlugin.js"	: {source: "org.eclipse.orion.client.ui/web/plugins/gitBlamePlugin.js"},
         "plugins/GitHubFilePlugin.html"	: {source: "org.eclipse.orion.client.ui/web/plugins/GitHubFilePlugin.html"},
         "plugins/GitHubFilePlugin.js"	: {source: "org.eclipse.orion.client.ui/web/plugins/GitHubFilePlugin.js"},
-        "plugins/metrics/googleAnalyticsPlugin.js"	: {source: "org.eclipse.orion.client.ui/web/plugins/metrics/googleAnalyticsPlugin.js"},
+        "plugins/googleAnalyticsPlugin.js"	: {source: "org.eclipse.orion.client.ui/web/plugins/googleAnalyticsPlugin.js"},
         "plugins/HTML5LocalFilePlugin.html": {source: "org.eclipse.orion.client.ui/web/plugins/HTML5LocalFilePlugin.html"},
         "plugins/jslintPlugin.html"	: {source: "org.eclipse.orion.client.ui/web/plugins/jslintPlugin.html"},
         "plugins/jslintPlugin.js"		: {source: "org.eclipse.orion.client.ui/web/plugins/jslintPlugin.js"},
