@@ -11,10 +11,12 @@
 
 define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',  'orion/keyBinding', 'orion/dialogs', 'orion/selection',
 	'orion/contentTypes','orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/editorCommands', 'orion/links', 'orion/cfui/cFClient',
-	'orion/PageUtil', 'orion/cfui/logView', 'orion/section', 'orion/metrics', 'orion/cfui/widgets/CfLoginDialog', 'orion/i18nUtil', 'orion/projectClient'], 
+	'orion/PageUtil', 'orion/cfui/logView', 'orion/section', 'orion/metrics', 'orion/cfui/widgets/CfLoginDialog', 'orion/i18nUtil', 'orion/projectClient', 'orion/webui/RichDropdown',
+	'orion/PageLinks', 'orion/URITemplate'], 
 	function(messages, lib, mBootstrap, mStatus, mProgress, CommandRegistry, KeyBinding, mDialogs, mSelection,
 	mContentTypes, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mEditorCommands, mLinks,
-	mCFClient, PageUtil, mLogView, mSection, mMetrics, CfLoginDialog, i18Util, mProjectClient) {
+	mCFClient, PageUtil, mLogView, mSection, mMetrics, CfLoginDialog, i18Util, mProjectClient, mRichDropdown,
+	PageLinks, URITemplate) {
 	mBootstrap.startup().then(
 		function(core) {
 			var serviceRegistry = core.serviceRegistry;
@@ -144,12 +146,13 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 			function loadLogs(logParams){
 				var target;
 				if(logParams.Url || logParams.Org || logParams.Space){
-					target = {Url: logParams.Url, Org: logParams.Org, Space:logParams.Space}
+					target = {Url: logParams.Url, Org: logParams.Org, Space:logParams.Space};
 					logParams.target = target;
 				}
 
-				logEditorView.create();
-				
+				logEditorView.destroy();
+				statusService.setMessage("");
+
 				var startTime = Date.now();
 				progressService.showWhile(cFClient.getLogz(target, logParams.resource), messages["gettingLogs"]).then(
 					function(logs){
@@ -164,11 +167,11 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 							logsTimestamp: logs.Timestamp
 						};
 						this.lastLogsInfo = logsInfo;
+						logEditorView.create();
 						logEditorView.inputManager.setApplicationInfo(logsInfo);
 
-						mainLogView.classList.add("toolbarTarget");
 						logEditorView.inputManager.setInput("logs for " + logParams.resource);
-						
+
 						reloadLogs(logsInfo);
 					}, function(e){
 						var interval = Date.now() - startTime;
@@ -198,7 +201,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 				var appName = target.Params.Name;
 				var launchConfName;
 
-				function setTargetOnRepo(repoMeta) {
+				function setTargetOnProject(repoMeta) {
 					mGlobalCommands.setPageTarget({
 						name: launchConfName,
 						task: appName + " - Logs",
@@ -210,13 +213,73 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 
 				fileClient.read(target.filePath, true).then(
 					function(launchConfMeta) {
-						var repoDir = launchConfMeta.Parents[launchConfMeta.Parents.length - 1];
-						launchConfName = launchConfMeta.Name.replace(".launch", "");
-						fileClient.read(repoDir.Location, true).then(setTargetOnRepo);
+						var projectDir = launchConfMeta.Parents[launchConfMeta.Parents.length - 1];
+						launchConfName = getLaunchConfName(launchConfMeta);
+						fileClient.read(projectDir.Location, true).then(setTargetOnProject);
+
+						if (!launchConfDropdown) {
+							projectClient.getProjectLaunchConfigurations({ ContentLocation : projectDir.Location }).then(
+								function (launchConfs) {
+									addLaunchConfDropdown(launchConfs, launchConfMeta);
+								}
+							);
+						}
 					}, function(error) {
 						handleError(error);
 					}
 				);
+			}
+
+			function addLaunchConfDropdown(launchConfs, currentLaunchConf) {
+				var logsUriTemplate = new URITemplate("{+OrionHome}/cfui/logs.html#{Name,Target*}");
+				var toolbarNode = lib.node('pageToolbar');
+				var actionsNode = lib.node('pageActions');
+
+				launchConfs.sort(function(launchConf1, launchConf2) {
+					return launchConf1.Name.localeCompare(launchConf2.Name);
+				});
+
+				var label = document.createElement("div");
+				label.className = "launchConfsLabel";
+				label.textContent = messages["launchConfDropdownLabel"];
+				toolbarNode.insertBefore(label, actionsNode);
+
+				var dropdownContainer = document.createElement("div");
+				dropdownContainer.className = "launchConfsDropdown";
+				toolbarNode.insertBefore(dropdownContainer, actionsNode);
+
+				var populateFunction = function(parent) {
+					var dropdown = launchConfDropdown.getDropdown();
+					for (var i = 0; i < launchConfs.length; i++) {
+						var item = dropdown.appendMenuItem(launchConfs[i].Name);
+						item.addEventListener("click", selectLaunchConf.bind(this, launchConfs[i]));
+						if (i < launchConfs.length - 1) { //if not last
+							dropdown.appendSeparator();
+						}
+					}
+				};
+
+				function selectLaunchConf(launchConf) {
+					var newUrl = logsUriTemplate.expand({
+						OrionHome: PageLinks.getOrionHome(),
+						Name: "",
+						Target: {
+							launchConfLocation: launchConf.File.Location
+						}
+					});
+					window.location.href = newUrl;
+					launchConfDropdown.setDropdownTriggerButtonName(getLaunchConfName(launchConf));
+				}
+
+				launchConfDropdown = new mRichDropdown.RichDropdown({
+					parentNode: dropdownContainer,
+					populateFunction: populateFunction,
+					buttonName: getLaunchConfName(currentLaunchConf)
+				});
+			}
+
+			function getLaunchConfName(launchConfMeta) {
+				return launchConfMeta.Name.replace(".launch", "");
 			}
 
 			function getParamsAndLoadLogs() {
@@ -251,6 +314,9 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 			}.bind(this));
 
 			this.lastLogsInfo = {};
+			launchConfDropdown = null;
+			mainLogView.classList.add("toolbarTarget");
+
 			getParamsAndLoadLogs();
 		});
 	});

@@ -26,5 +26,39 @@
 }
 
 .toolbarTarget {
-    bottom: 0px;
+    bottom: 0;
+}
+
+.launchConfsLabel {
+    color: #fff;
+    background-color: #3b4b54;
+    padding: 7px;
+    margin-right: 1px;
+}
+
+.dropdownTriggerButtonLabel {
+    display: inline;
+    line-height: normal;
+}
+
+.commandButton {
+    color: #fff;
+    background-color: #3b4b54;
+    padding: 7px;
+    border: none;
+    border-radius: 0;
+    opacity: 0.9;
+}
+
+.orionButton.commandButton:hover {
+    background-color: #3b4b54;
+    border: none;
+    outline: none;
+    opacity: 1;
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
+    transition: all 0.1s;
+}
+
+.dropdownArrowDown {
+    color: #e6e6e6;
 }
