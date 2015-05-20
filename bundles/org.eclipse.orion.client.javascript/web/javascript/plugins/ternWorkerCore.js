@@ -36,7 +36,7 @@ require({
 [
 	'tern/lib/tern', //$NON-NLS-1$
 	'tern/plugin/doc_comment', //$NON-NLS-1$
-	'tern/plugin/dependencies', //$NON-NLS-1$
+	'tern/plugin/orionRequire', //$NON-NLS-1$
 	'tern/defs/ecma5', //$NON-NLS-1$
 	'tern/defs/browser', //$NON-NLS-1$
 	'javascript/handlers/ternAssistHandler', //$NON-NLS-1$
@@ -46,7 +46,7 @@ require({
 	'javascript/handlers/ternRenameHandler', //$NON-NLS-1$
 	'doctrine'  //stays last - exports into global //$NON-NLS-1$
 ],
-/* @callback */ function(Tern, docPlugin, dependenciesPlugin, ecma5, browser, 
+/* @callback */ function(Tern, docPlugin, orionRequirePlugin, ecma5, browser, 
 							AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler) {
     
     var ternserver, pendingReads = Object.create(null);
@@ -64,7 +64,7 @@ require({
                     doc_comment: {
                         fullDocs: true
                     },
-                    dependencies: {
+                    orionRequire: {
                     	//depth: 1
                     }
                 },

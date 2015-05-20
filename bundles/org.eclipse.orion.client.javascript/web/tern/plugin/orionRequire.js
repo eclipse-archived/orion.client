@@ -72,10 +72,10 @@
   }
 
   /**
-   * @description description
-   * @param name
-   * @param data
-   * @returns returns
+   * @description Collects the referenced name from the resolved listing (if present)
+   * @param {String} name The logical name
+   * @param {Object} data The data context for the plugin
+   * @returns {Object} The module (file context) if known
    */
   function getModule(name, data) {
     var known = getKnownModule(name, data);
@@ -95,7 +95,7 @@
     return f.replace(/\.js$/, '');
   }
 
-  infer.registerFunction("requireJS", function(_self, args, argNodes) { //$NON-NLS-1$
+  infer.registerFunction("requireJS", /* @callback */ function(_self, args, argNodes) { //$NON-NLS-1$
     var server = infer.cx().parent, data = server && server._requireJS;
     if (!data || !args.length) return infer.ANull;
 
@@ -196,6 +196,11 @@
     }
   }
 
+  /**
+   * @description Rsolves the computed dependencies
+   * @param {TernServer} server The Tern server
+   * @since 9.0
+   */
   function resolveDependencies(server) {
     var keys = Object.keys(server._requireJS.resolved);
     for (var i = 0; i < keys.length; i++) {
@@ -208,6 +213,13 @@
     }
   }
 
+  /**
+   * @description Resolves the given key (logical name) via the server. This function starts an asynchronous job to resolve the
+   * script via the scriptResolver in the client
+   * @param {TernServer} server The server
+   * @param {String} key The logcial name to resolve
+   * @since 9.0
+   */
   function resolve(server, key) {
   	server.startAsyncAction();
 	server.options.getFile({logical: key}, function(err, _file) {
@@ -220,6 +232,10 @@
 	});
   }
 
+  /**
+   * @description Callback to cycle waiting for async jobs to finish
+   * @param {TernServer} server The server
+   */
   function waitOnResolve(server) {
     var done = function() {
       //server.off("everythingFetched", done); //$NON-NLS-1$
@@ -247,7 +263,7 @@
 		return waitOnResolve(server);
 	}
   }
-  tern.registerPlugin("dependencies", function(server, options) { //$NON-NLS-1$
+  tern.registerPlugin("orionRequire", function(server, options) { //$NON-NLS-1$
     server._requireJS = {
       interfaces: Object.create(null),
       options: options || {},
