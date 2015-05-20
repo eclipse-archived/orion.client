@@ -117,6 +117,11 @@
 				<arg value="dir=${out}" />
 			</java>
 
+			<!-- Tern worker -->
+			<widgetOptimizeFile out="${out}/javascript/plugins/ternWorker.js"
+				buildfile="${staging}/ternWorker.build.js"
+				optimize="closure"
+				staging="${staging}" />
 			<copyBackBundles buildfile="${buildfile}" out="${out}" />
 			<updateRequire buildfile="${buildfile}" />
 		</sequential>
@@ -142,14 +147,7 @@
 			relative to the build file location, and having build file location == ${staging} is easier.
 		-->
 		<copy todir="${staging}" overwrite="true">
-			<fileset dir="${builder}/scripts">
-				<include name="editor.build*" />
-				<include name="compare.build*" />
-				<include name="commitBrowser.build-css.js" />
-				<include name="commitBrowser.build.almond-js.js" />
-				<include name="contentassist*" />
-				<include name="editor.build.stylers-js.js" />
-			</fileset>
+			<fileset dir="${builder}/scripts" includes="*build*.js" />
 		</copy>
 	</target>
 	
