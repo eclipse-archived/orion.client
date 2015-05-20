@@ -15,23 +15,8 @@ require({
 	baseUrl: "../../", //$NON-NLS-1$
 	paths: {
 		i18n: 'requirejs/i18n', //$NON-NLS-1$
-		esprima: "esprima/esprima", //$NON-NLS-1$
-		estraverse: "estraverse/estraverse", //$NON-NLS-1$
-		escope: "escope/escope", //$NON-NLS-1$
-		logger: "javascript/logger", //$NON-NLS-1$
-		doctrine: 'doctrine/doctrine' //$NON-NLS-1$
-	},
-	packages: [
-		{
-			name: "eslint/conf", //$NON-NLS-1$
-			location: "eslint/conf" //$NON-NLS-1$
-		},
-		{
-			name: "eslint", //$NON-NLS-1$
-			location: "eslint/lib", //$NON-NLS-1$
-			main: "eslint" //$NON-NLS-1$
-		},
-	]
+		esprima: "esprima/esprima" //$NON-NLS-1$
+	}
 },
 [
 	'tern/lib/tern', //$NON-NLS-1$
@@ -43,11 +28,9 @@ require({
 	'javascript/handlers/ternDeclarationHandler', //$NON-NLS-1$
 	'javascript/handlers/ternHoverHandler', //$NON-NLS-1$
 	'javascript/handlers/ternOccurrencesHandler', //$NON-NLS-1$
-	'javascript/handlers/ternRenameHandler', //$NON-NLS-1$
-	'doctrine'  //stays last - exports into global //$NON-NLS-1$
+	'javascript/handlers/ternRenameHandler' //$NON-NLS-1$
 ],
-/* @callback */ function(Tern, docPlugin, orionRequirePlugin, ecma5, browser, 
-							AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler) {
+/* @callback */ function(Tern, docPlugin, orionRequirePlugin, ecma5, browser, AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler) {
     
     var ternserver, pendingReads = Object.create(null);
     
@@ -183,7 +166,6 @@ require({
      * @param {Object} args the request args
      */
     function _deleteFile(args) {
-    	
         if(ternserver && typeof(args.file) === 'string') {
             ternserver.delFile(args.file);
         } else {
