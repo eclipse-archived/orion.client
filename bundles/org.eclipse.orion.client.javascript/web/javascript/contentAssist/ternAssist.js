@@ -71,12 +71,12 @@ define([
         			            	env.ecma5 = true;
         			            	env.browser = true;
         			            	var files = [
-			        			    	{type:'full', name: meta.location, text: ast.source}
+			        			    	{type:'full', name: meta.location, text: ast.source} //$NON-NLS-1$
 			        			    ];
 			        			    if(typeof(params.keywords) === 'undefined') {
 			        			    	params.keywords = true;
 			        			    }
-        			            	self.ternworker.postMessage({request: 'completions', args: {params: params, meta: meta, envs:env, files: files}});
+        			            	self.ternworker.postMessage({request: 'completions', args: {params: params, meta: meta, envs:env, files: files}}); //$NON-NLS-1$
         			            	deferred = new Deferred();
                     				return deferred;
                     			});
@@ -88,12 +88,12 @@ define([
 			        	var env = self.getActiveEnvironments(ast);
         			    env.ecma5 = true;
         			    var files = [
-        			    	{type:'full', name: meta.location, text: ast.source}
+        			    	{type:'full', name: meta.location, text: ast.source} //$NON-NLS-1$
         			    ];
         			    if(typeof(params.keywords) === 'undefined') {
         			    	params.keywords = true;
         			    }
-			        	self.ternworker.postMessage({request: 'completions', args: {params: params, meta: meta, envs:env, files: files}});
+			        	self.ternworker.postMessage({request: 'completions', args: {params: params, meta: meta, envs:env, files: files}}); //$NON-NLS-1$
 			        	deferred = new Deferred();
                     	return deferred;
         			});
