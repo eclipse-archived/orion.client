@@ -22,7 +22,7 @@ define([
      * @constructor 
      * @param {Array.<String>} sourceblocks The blocks of source to combine into one unit
      * @param {Object} metadata The metadata describing the file this unit represents
-     * @param {Object} editorContext The original editor context that can be delegated to for setting the text 
+     * @param {Object} editorContext Optional editor context for the source file. Delegated to for setText and to get line information
      * @returns {CompilationUnit} The new CompiationUnit instance
      * @since 8.0
      */
@@ -35,32 +35,54 @@ define([
     Objects.mixin(CompilationUnit.prototype, {
         
         /**
+         * 
          * @description Builds the backing source for the compilation unit
          * @function
          * @private
          */
-        _init: function _init() {
-            var _cursor = 0;
-            this._source = '';
-            for(var i = 0; i < this._blocks.length; i++) {
-                var block = this._blocks[i];
-                var pad = block.offset - _cursor;
-                while(pad > 0) {
-                    this._source += ' ';
-                    pad--;
-                }
-                this._source += block.text;
-                _cursor = this._source.length;
-            }
-        },
-        
         /**
-         * @description Returns the source of this compilation unit
+         * @name _getSource
+         * @description Returns a promise to build the backing source text for the compilation unit, padding the blocks with spaces and newlines
          * @function
-         * @returns {String} The source of the compilation unit
+         * @private
+         * @returns returns a promise that resolves to the source
          */
-        getSource: function getSource() {
-            return this._source;
+        _getSource: function _getSource() {
+        	var promises = [];
+        	if (this._ec && this._ec.getLineAtOffset){  // Tests use a fake editorContext with no line/offset functions
+	            for (var i=0; i<this._blocks.length; i++) {
+	            	var offset = this._blocks[i].offset;
+	            	var length = this._blocks[i].text.length;
+	            	promises.push(this._ec.getLineAtOffset(offset));
+	            	promises.push(this._ec.getLineAtOffset(offset+length));
+	            }
+            }
+            
+        	var self = this;
+            return Deferred.all(promises).then(function (lines){
+            	var totalLength = 0;
+            	var totalLines = 0;
+            	var source = "";
+            	for(var i = 0; i < self._blocks.length; i++) {
+	                var block = self._blocks[i];
+	    	        var pad = block.offset - totalLength;
+	                var linePad = lines && lines.length > (i*2) ? lines[i*2] : 0;
+	                linePad -= totalLines;
+	    	        while(pad > 0 && linePad > 0){
+	    	        	source += '\n'; //$NON-NLS-1$
+	    	        	pad--;
+	    	        	linePad --;
+	    	        }
+	                while(pad > 0) {
+	                    source += ' '; //$NON-NLS-1$
+	                    pad--;
+	                }
+	                source += block.text;
+	                totalLength = source.length;
+	                totalLines = lines && lines.length > (i*2) ? lines[(i*2)+1] : 0;
+	            }
+	            return source;
+            });
         },
         
         /**
@@ -85,7 +107,7 @@ define([
         },    
     
         /**
-         * @description Returns an EditorContext-like object tat can resolve promises for <code>getText</code> and <code>getFileMetadata</code>
+         * @description Returns an EditorContext-like object tat can resolve promises for <code>getText</code>, <code>setText</code> and <code>getFileMetadata</code>
          * @function
          * @returns {Object} The EditorContext object to use when parsing
          */
@@ -93,16 +115,13 @@ define([
             var proxy = Object.create(null);
             var that = this;
             proxy.getText = function() {
-                if(!that._source) {
-                    that._init();
-                }
-                return new Deferred().resolve(that._source);
+                return new Deferred().resolve(that._getSource());
             };
             proxy.getFileMetadata = function() {
                 return new Deferred().resolve(that._metadata);
             };
             proxy.setText = function(text, start, end) {
-                if(that._ec) {
+                if(that._ec && that._ec.setText) {
                     return that._ec.setText(text, start, end);
                 } else {
                     return new Deferred().resolve(null);

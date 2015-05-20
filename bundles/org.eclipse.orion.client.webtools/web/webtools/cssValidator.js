@@ -123,7 +123,7 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 			        return editorContext.getText().then(function(text) {
     			         var blocks = Util.findStyleBlocks(text, context.offset);
     			         if(blocks && blocks.length > 0) {
-    			             var cu = new CU(blocks, meta);
+    			             var cu = new CU(blocks, meta, editorContext);
     			             return that.cssResultManager.getResult(cu.getEditorContext(), config).then(function(results) {
                 			    if(results) {
                 			         return that._computeProblems(results);

@@ -106,9 +106,9 @@ define(['orion/plugin',
     	/**
     	 * Register validators
     	 */
-    	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new mCssValidator(cssResultMgr), //$NON-NLS-0$  //$NON-NLS-1$
+    	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new mCssValidator(cssResultMgr), //$NON-NLS-1$ //$NON-NLS-2$
     		{
-    			contentType: ["text/css" /*, "text/html"*/], //$NON-NLS-0$
+    			contentType: ["text/css", "text/html"], //$NON-NLS-1$ //$NON-NLS-2$
     			pid: 'csslint.config'  //$NON-NLS-0$
     		});
     		
