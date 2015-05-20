@@ -438,6 +438,14 @@ function Tooltip (view) {
 			var viewportTop = viewBounds.top;
 			var viewportWidth = viewBounds.width;
 			var viewportHeight = viewBounds.height;
+			
+			//ensure sizes are sane
+			if(tipRect.width > viewportWidth/2) {
+				tipRect.width = viewportWidth/2;
+			}
+			if(tipRect.height > viewportHeight/2) {
+				tipRect.height = viewportHeight/2;
+			}
 
 			var spaceBelow = viewportHeight - (anchorArea.top + anchorArea.height - viewportTop);
 			var spaceAbove = anchorArea.top - viewportTop;
@@ -452,7 +460,7 @@ function Tooltip (view) {
 			
 			var offsetX = info.tooltipOffsetX ? info.tooltipOffsetX : 0;
 			var offsetY = info.tooltipOffsetY ? info.tooltipOffsetY : 0;
-
+			
 			// Attempt to line up tooltip with the anchor area
 			// If not enough space, shift the tooltip horiz (above/below) or vert (left/right) until it fits
 			// Force the tooltip to start within the viewport area
@@ -500,8 +508,8 @@ function Tooltip (view) {
 				break;
 			}
 			
-			tipRect.maxWidth = Math.min(viewportWidth + viewportLeft - tipRect.left, viewportWidth);
-			tipRect.maxHeight = Math.min(viewportHeight + viewportTop - tipRect.top, viewportHeight);
+			tipRect.maxWidth = Math.min(viewportWidth + viewportLeft - tipRect.left, viewportWidth/2);
+			tipRect.maxHeight = Math.min(viewportHeight + viewportTop - tipRect.top, viewportHeight/2);
 			
 			// Adjust max sizes for the border and padding
 			tipRect.maxWidth -= 16;
