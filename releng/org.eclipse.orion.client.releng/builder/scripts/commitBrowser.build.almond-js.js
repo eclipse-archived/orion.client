@@ -29,7 +29,7 @@
         "orion/editorCommands": "gitWidgets/builder/buildFrom/emptyEditorCommands"
 	},
 	name: "almond",
-	locales: ["ja", "zh", "zh-tw", "fr", "de", "it", "es", "pt-br"],						
+	locales: ["ja", "zh", "zh-tw", "fr", "de", "it", "es", "pt-br", "ko"],						
 	include: "gitWidgets/builder/commitBrowser",
 	preserveLicenseComments: false,
 	uglify: {
