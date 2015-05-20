@@ -676,6 +676,18 @@ define([
 		return 0;
 	};
 	
+	function formatOrigin(origin) {
+		var match = /([^/.]+\/[^\/]+)$/g.exec(origin);
+		if(match) {
+			return match[1];
+		}
+		match = /\/([^\/]+)$/g.exec(origin);
+		if(match) {
+			return match[1];
+		}
+		return origin;
+	}
+	
 	function sortProposals(completions, args) {
 		var envs = args.envs ? args.envs : {};
 	    var _p = Object.create(null);
@@ -696,10 +708,11 @@ define([
     	        	if(_o.indexOf('/') < 0 && !envs[_o]) {
 	    	        	continue;
 	    	        }
-    	           if(!Array.isArray(_p[_o])) {
-    	           		_p[_o] = [];
+	    	       var orig = formatOrigin(_o);
+    	           if(!Array.isArray(_p[orig])) {
+    	           		_p[orig] = [];
     	           }
-    	           _p[_o].push(_formatTernProposal(_c, args));
+    	           _p[orig].push(_formatTernProposal(_c, args));
     	        }
 	        }
 	    }
