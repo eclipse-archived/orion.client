@@ -19,18 +19,19 @@ require({
 	}
 },
 [
-	'tern/lib/tern', //$NON-NLS-1$
-	'tern/plugin/doc_comment', //$NON-NLS-1$
-	'tern/plugin/orionRequire', //$NON-NLS-1$
-	'tern/defs/ecma5', //$NON-NLS-1$
-	'tern/defs/browser', //$NON-NLS-1$
-	'javascript/handlers/ternAssistHandler', //$NON-NLS-1$
-	'javascript/handlers/ternDeclarationHandler', //$NON-NLS-1$
-	'javascript/handlers/ternHoverHandler', //$NON-NLS-1$
-	'javascript/handlers/ternOccurrencesHandler', //$NON-NLS-1$
-	'javascript/handlers/ternRenameHandler' //$NON-NLS-1$
+	'tern/lib/tern',
+	'tern/plugin/doc_comment',
+	'tern/plugin/orionRequire',
+	//'tern/plugin/ternAccess',
+	'tern/defs/ecma5',
+	'tern/defs/browser',
+	'javascript/handlers/ternAssistHandler',
+	'javascript/handlers/ternDeclarationHandler',
+	'javascript/handlers/ternHoverHandler',
+	'javascript/handlers/ternOccurrencesHandler',
+	'javascript/handlers/ternRenameHandler'
 ],
-/* @callback */ function(Tern, docPlugin, orionRequirePlugin, ecma5, browser, AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler) {
+/* @callback */ function(Tern, docPlugin, orionRequirePlugin, /*ternAccessPlugin,*/ ecma5, browser, AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler) {
     
     var ternserver, pendingReads = Object.create(null);
     
@@ -50,6 +51,7 @@ require({
                     orionRequire: {
                     	//depth: 1
                     }
+                    //ternAccess: {}
                 },
                 getFile: _getFile
             };
