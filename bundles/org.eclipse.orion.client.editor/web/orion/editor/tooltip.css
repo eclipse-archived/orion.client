@@ -3,7 +3,7 @@
 	font-family: "Consolas", "Monaco", "Vera Mono", monospace;
 	font-size: 12px;
 	background-color: #325C80;
-	color: #DADADA;
+	color: #FAFAFA;
 	padding: 8px;
 	border-radius: 3px;
 	z-index: 100;
@@ -34,7 +34,7 @@
 
 /* Modify the html elements that the markdown renderer creates */
 .textviewTooltip a {
-	color: rgb(187, 187, 187);
+	color: #7CC7FF;
 }
 .textviewTooltip h3 {
 	-webkit-margin-before: 0;
