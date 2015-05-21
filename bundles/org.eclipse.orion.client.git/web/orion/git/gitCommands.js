@@ -945,15 +945,18 @@ var exports = {};
 //			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.sync", //$NON-NLS-0$
 			callback: function(data) {
+				var item = data.items;
+				var done = function() {
+					dispatchModelEventOn({type: "modelChanged", action: "sync", item: item}); //$NON-NLS-1$ //$NON-NLS-0$
+				};
+				if (item.Remote.Type === "RemoteTrackingBranch" && !item.Remote.Id) {
+					return pushCallbackTags(data).then(done);
+				}
 				return fetchCallback(data).then(function() {
 					return rebaseCallback(data).then(function() {
 						var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 						var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
-						var item = data.items;
-						progressService.progress(service.getLog(item.Remote.CommitLocation, item.LocalBranch.Name), messages['Getting outgoing commits']).then(function(resp) {
-							var done = function() {
-								dispatchModelEventOn({type: "modelChanged", action: "sync", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
-							};
+						return progressService.progress(service.getLog(item.Remote.CommitLocation, item.LocalBranch.Name), messages['Getting outgoing commits']).then(function(resp) {
 							if (resp.Children.length > 0) {
 								return pushCallbackTags(data).then(done);
 							} else {
@@ -961,7 +964,7 @@ var exports = {};
 							}
 						});
 					}, function() {
-						dispatchModelEventOn({type: "modelChanged", action: "rebase", item: data.items, failed: true}); //$NON-NLS-1$ //$NON-NLS-0$
+						dispatchModelEventOn({type: "modelChanged", action: "rebase", item: item, failed: true}); //$NON-NLS-1$ //$NON-NLS-0$
 					});
 				});
 			},
