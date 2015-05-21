@@ -27,10 +27,14 @@ define([
 	plugins.shift();
 
 	function connect() {
+		var temp = document.createElement('a');
+		temp.href = "../mixloginstatic/LoginWindow.html";
+		var login = temp.href;
 		var headers = {
 			name: "Orion Core Support",
 			version: "1.0",
-			description: "This plugin provides the core Orion support."
+			description: "This plugin provides the core Orion support.",
+			login: login
 		};
 		var pluginProvider = new PluginProvider(headers);
 		registerServiceProviders(pluginProvider);
