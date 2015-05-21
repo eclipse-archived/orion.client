@@ -46,7 +46,7 @@ define([
                 var block = this._blocks[i];
                 var pad = block.offset - _cursor;
                 while(pad > 0) {
-                    this._source += ' ';
+                    this._source += ' '; //$NON-NLS-1$
                     pad--;
                 }
                 this._source += block.text;

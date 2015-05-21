@@ -22,16 +22,18 @@ require({
 	'tern/lib/tern',
 	'tern/plugin/doc_comment',
 	'tern/plugin/orionRequire',
-	//'tern/plugin/ternAccess',
+	'tern/plugin/plugins',
 	'tern/defs/ecma5',
 	'tern/defs/browser',
 	'javascript/handlers/ternAssistHandler',
 	'javascript/handlers/ternDeclarationHandler',
 	'javascript/handlers/ternHoverHandler',
 	'javascript/handlers/ternOccurrencesHandler',
-	'javascript/handlers/ternRenameHandler'
+	'javascript/handlers/ternRenameHandler',
+	'javascript/handlers/ternPluginsHandler'
 ],
-/* @callback */ function(Tern, docPlugin, orionRequirePlugin, /*ternAccessPlugin,*/ ecma5, browser, AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler) {
+/* @callback */ function(Tern, docPlugin, orionRequirePlugin, ternPluginsPlugin, ecma5, browser, AssistHandler, DeclarationHandler, HoverHandler, 
+						OccurrencesHandler, RenameHandler, PluginsHandler) {
     
     var ternserver, pendingReads = Object.create(null);
     
@@ -46,17 +48,25 @@ require({
                 projectDir: '/', //$NON-NLS-1$
                 plugins: {
                     doc_comment: {
+                    	name: 'Doc Comments',
+                    	description: 'Tern plugin to parse and use JSDoc-like comments for inferencing',
                         fullDocs: true
                     },
                     orionRequire: {
+                    	name: 'Orion Requirejs',
+                    	description: 'Plugin that allows Orion to resolve requirejs dependencies'
                     	//depth: 1
+                    },
+                    plugins: {
+                    	name: 'Orion Tern Plug-in Support',
+                    	description: 'Plug-in taht allows Orion to inspect and modify plug-ins running in Tern without restarting the server'
                     }
-                    //ternAccess: {}
                 },
                 getFile: _getFile
             };
         
         ternserver = new Tern.Server(options);
+        post('server_ready'); //$NON-NLS-1$
     }
     startServer();
     
@@ -69,37 +79,53 @@ require({
             var _d = evnt.data;
             if(typeof(_d.request) === 'string') {
                 switch(_d.request) {
-                    case 'completions': { //$NON-NLS-1$
+                    case 'completions': {
                         AssistHandler.computeProposals(ternserver, _d.args, post);
                         break;
                     }
-                    case 'occurrences': { //$NON-NLS-1$
+                    case 'occurrences': {
                         OccurrencesHandler.computeOccurrences(ternserver, _d.args, post);
                         break;
                     }
-                    case 'definition': { //$NON-NLS-1$
+                    case 'definition': {
                         DeclarationHandler.computeDeclaration(ternserver, _d.args, post);
                         break;
                     }
-                    case 'documentation': { //$NON-NLS-1$
+                    case 'documentation': {
                         HoverHandler.computeHover(ternserver, _d.args, post);
                         break;
                     }
-                    case 'rename': { //$NON-NLS-1$
+                    case 'rename': {
                         RenameHandler.computeRename(ternserver, _d.args, post);
                         break;
                     }
-                    case 'addFile': { //$NON-NLS-1$
+                    case 'addFile': {
                     	ternserver.addFile(_d.args.file, _d.args.source);
                     	break;
                     }
-                    case 'delfile': { //$NON-NLS-1$
+                    case 'delfile': {
                         _deleteFile(_d.args);
                         break;
                     }
-                    case 'read': { //$NON-NLS-1$
+                    case 'read': {
                         _contents(_d.args);
                         break;
+                    }
+                    case 'installed_plugins': {
+                    	PluginsHandler.getInstalledPlugins(ternserver, _d.args, post);
+                    	break;
+                    }
+                    case 'install_plugins': {
+                    	PluginsHandler.installPlugins(ternserver, _d.args, post);
+                    	break;
+                    }
+                    case 'remove_plugins': {
+                    	PluginsHandler.removePlugins(ternserver, _d.args, post);
+                    	break;
+                    }
+                    case 'plugin_enablement': {
+                    	PluginsHandler.setPluginEnablement(ternserver, _d.args, post);
+                    	break;
                     }
                 }
             }
@@ -123,8 +149,6 @@ require({
     	this.port.onmessage = onmessage;
     	this.port.start();
     };
-    
-    post('server_ready'); //$NON-NLS-1$
     
     /**
      * @description Sends the given message back to the client. If the msg is null, send an Error

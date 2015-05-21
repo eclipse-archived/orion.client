@@ -129,7 +129,7 @@ define([
     	};
     	
     	// Start the worker
-    	var ternWorker = new WrappedWorker("ternWorker.js", 
+    	var ternWorker = new WrappedWorker("ternWorker.js",  //$NON-NLS-1$
 		    	function(evnt) {
 		    		if(typeof(evnt.data) === 'object') {
 		    			var _d  = evnt.data;
@@ -140,19 +140,19 @@ define([
 		    						scriptresolver.getWorkspaceFile(_l).then(function(files) {
 		    							if(files && files.length > 0) {
 		    								return fileClient.read(files[0].location).then(function(contents) {
-		    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:files[0].location, logical:_l, path:files[0].path}});	
+		    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:files[0].location, logical:_l, path:files[0].path}});	 //$NON-NLS-1$
 		    								});
 		    							} else {
-		    								ternWorker.postMessage({request: 'read', args: {logical:_l, error: 'Failed to read file '+_l}});
+		    								ternWorker.postMessage({request: 'read', args: {logical:_l, error: 'Failed to read file '+_l}}); //$NON-NLS-1$
 		    							}
 		    						},
 		    						function(err) {
-		    							ternWorker.postMessage({request: 'read', args: {logical: _l, message: err.toString(), error: 'Failed to read file '+_l}});
+		    							ternWorker.postMessage({request: 'read', args: {logical: _l, message: err.toString(), error: 'Failed to read file '+_l}}); //$NON-NLS-1$
 		    						});	
 		    					} else {
 		    						var file = _d.args.file;
 		    						return fileClient.read(file).then(function(contents) {
-		    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:file}});	
+		    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:file}});	 //$NON-NLS-1$
 		    								});
 		    					}
 		    					break;
@@ -163,6 +163,24 @@ define([
 		    	function(err) {
 		    		Logger.log(err);	
 		    	});
+    	
+    	//this handler is for ferrying preferences to and from the Tern server
+    	ternWorker.addEventListener('message', function(evnt) {
+			if(typeof(evnt.data) === 'object') {
+    			var _d  = evnt.data;
+    			switch(_d.request) {
+    				case 'installed_plugins': {
+    					//TODO forward to prefs
+    					var plugins = _d.plugins;
+    					break;
+    				}
+    			}
+	    	} else if(typeof(evnt.data) === 'string') {
+	    		if(evnt.data === 'server_ready') {
+	    			ternWorker.postMessage({request: 'installed_plugins'}); //$NON-NLS-1$
+	    		}
+	    	}
+    	}, false);
     	
     	provider.registerService("orion.edit.contentassist", new TernAssist.TernContentAssist(astManager, ternWorker),  //$NON-NLS-0$
     			{
