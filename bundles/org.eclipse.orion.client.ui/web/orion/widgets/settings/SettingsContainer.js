@@ -28,17 +28,16 @@ define([
 	'orion/widgets/themes/ThemeImporter',
 	'orion/widgets/settings/SplitSelectionLayout',
 	'orion/widgets/plugin/PluginList',
-	'orion/widgets/settings/UserSettings',
 	'orion/widgets/settings/GitSettings',
 	'orion/widgets/settings/EditorSettings',
+	'orion/widgets/settings/TernSettings',
 	'orion/widgets/settings/ThemeSettings',
+	'orion/widgets/settings/UserSettings',
 	'orion/editorPreferences',
 	'orion/metrics'
 ], function(messages, Deferred, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
-		ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, editorThemeImporter, SplitSelectionLayout, PluginList, UserSettings,
-		GitSettings,
-		EditorSettings, ThemeSettings, mEditorPreferences,
-		mMetrics) {
+		ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, editorThemeImporter, SplitSelectionLayout, PluginList, 
+		GitSettings, EditorSettings, TernSettings, ThemeSettings, UserSettings, mEditorPreferences, mMetrics) {
 
 	/**
 	 * @param {Object} options
@@ -101,6 +100,16 @@ define([
 						id: "plugins", //$NON-NLS-0$
 						textContent: messages["Plugins"],
 						show: _self.showPlugins
+					});
+				}
+				
+				// TODO Disable tern settings until we have valid data
+				categories.showTernSettings = false;
+				if (categories.showTernSettings === undefined || categories.showTernSettings) {
+					_self.settingsCategories.push({
+						id: "ternSettings", //$NON-NLS-0$
+						textContent: messages["Tern"],
+						show: _self.showTernSettings
 					});
 				}
 
@@ -293,6 +302,34 @@ define([
 			}, themeSettingsNode);
 
 			this.themeSettings.show();
+		},
+		
+		showTernSettings: function(id){
+		
+			this.selectCategory(id);
+
+			lib.empty(this.table);
+
+			if (this.ternWidget) {
+				this.ternWidget.destroy();
+			}
+
+			this.updateToolbar(id);
+			
+			var userNode = document.createElement('div'); //$NON-NLS-0$
+			this.table.appendChild(userNode);
+
+			this.ternWidget = new TernSettings({
+				registry: this.registry,
+				settings: this.settingsCore,
+				preferences: this.preferences,
+				statusService: this.preferencesStatusService,
+				dialogService: this.preferenceDialogService,
+				commandService: this.commandService,
+				userClient: this.userClient
+			}, userNode);
+			
+			this.ternWidget.show();
 		},
 		
 		initPlugins: function(id){
