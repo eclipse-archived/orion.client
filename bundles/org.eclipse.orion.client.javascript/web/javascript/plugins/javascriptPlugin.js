@@ -128,6 +128,8 @@ define([
     		this.worker.addEventListener(msg, handler);	
     	};
     	
+    	var prefService = core.serviceRegistry.getService("orion.core.preference");
+    	
     	// Start the worker
     	var ternWorker = new WrappedWorker("ternWorker.js",  //$NON-NLS-1$
 		    	function(evnt) {
@@ -172,7 +174,16 @@ define([
     				case 'installed_plugins': {
     					//TODO forward to prefs
     					var plugins = _d.plugins;
-    					break;
+    					
+    					return prefService.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
+							var props = prefs.get("tern"); //$NON-NLS-1$
+							// Check if props is an object
+							if (!props){
+								props = {};
+							}
+							props["plugins"] = plugins;
+							prefs.put("tern", props); //$NON-NLS-1$
+						});
     				}
     			}
 	    	} else if(typeof(evnt.data) === 'string') {

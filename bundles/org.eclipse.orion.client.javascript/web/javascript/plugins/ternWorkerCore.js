@@ -59,7 +59,7 @@ require({
                     },
                     plugins: {
                     	name: 'Orion Tern Plug-in Support',
-                    	description: 'Plug-in taht allows Orion to inspect and modify plug-ins running in Tern without restarting the server'
+                    	description: 'Plug-in that allows Orion to inspect and modify plug-ins running in Tern without restarting the server'
                     }
                 },
                 getFile: _getFile

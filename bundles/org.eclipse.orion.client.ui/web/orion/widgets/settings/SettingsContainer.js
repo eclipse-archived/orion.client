@@ -30,7 +30,7 @@ define([
 	'orion/widgets/plugin/PluginList',
 	'orion/widgets/settings/GitSettings',
 	'orion/widgets/settings/EditorSettings',
-	'orion/widgets/settings/TernSettings',
+	'javascript/ternSettings',
 	'orion/widgets/settings/ThemeSettings',
 	'orion/widgets/settings/UserSettings',
 	'orion/editorPreferences',
@@ -103,8 +103,6 @@ define([
 					});
 				}
 				
-				// TODO Disable tern settings until we have valid data
-				categories.showTernSettings = false;
 				if (categories.showTernSettings === undefined || categories.showTernSettings) {
 					_self.settingsCategories.push({
 						id: "ternSettings", //$NON-NLS-0$
