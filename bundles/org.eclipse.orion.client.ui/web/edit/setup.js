@@ -506,6 +506,18 @@ objects.mixin(EditorViewer.prototype, {
 		if (this.editor) {
 			this.editor.addEventListener("DirtyChanged", this.editorDirtyListener = function() { //$NON-NLS-0$
 				mGlobalCommands.setDirtyIndicator(this.editor.isDirty());
+				
+				// Update the viewer's header
+				if (this.curFileNode) {
+					var curText = this.curFileNode.innerHTML;
+					if (curText.slice(-1) === '*') {
+						curText = curText.slice(0, -1); // Trim the *
+					}	
+					if (this.editor.isDirty()) {
+						curText += '*';  // Add it back if dirty
+					}
+					this.curFileNode.innerHTML = curText;
+				}
 			}.bind(this));
 		}
 	},
