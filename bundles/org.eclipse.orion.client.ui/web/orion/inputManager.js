@@ -235,8 +235,9 @@ define([
 		processParameters: function(input) {
 			var editor = this.getEditor();
 			if (editor && editor.processParameters) {
-				editor.processParameters(input);
+				return editor.processParameters(input);
 			}
+			return false;
 		},
 		getAutoLoadEnabled: function() {
 			return this._autoLoadEnabled;
@@ -597,10 +598,11 @@ define([
 					textView.addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
 				}
 				this._clearUnsavedChanges();
-				this.processParameters(input);
-			}
-			if (evt.session) {
-				evt.session.apply();
+				if (!this.processParameters(input)) {
+					if (evt.session) {
+						evt.session.apply();
+					}
+				}
 			}
 
 			this._saveEventLogged = false;

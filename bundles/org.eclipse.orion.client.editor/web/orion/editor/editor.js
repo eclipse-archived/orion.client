@@ -1239,6 +1239,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					end = start;
 				}
 				this.moveSelection(start, end);
+				return true;
 			} else if (typeof(line) === "number") { //$NON-NLS-0$
 				var model = this.getModel();
 				var pos = model.getLineStart(line-1);
@@ -1249,7 +1250,9 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					length = 0;
 				}
 				this.moveSelection(pos, pos+length);
+				return true;
 			}
+			return false;
 		},
 
 		/**

@@ -423,7 +423,7 @@ define([
 			editor.id = "orion.editor"; //$NON-NLS-0$
 			editor.processParameters = function(params) {
 				parseNumericParams(params, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
-				this.showSelection(params.start, params.end, params.line, params.offset, params.length);
+				return this.showSelection(params.start, params.end, params.line, params.offset, params.length);
 			};
 			editor.getEditorContext = function() {
 				return EditorContext.getEditorContext(serviceRegistry, that.editContextServiceID);

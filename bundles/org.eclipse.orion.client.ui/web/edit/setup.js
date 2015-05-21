@@ -684,19 +684,42 @@ objects.mixin(EditorSetup.prototype, {
 	 * Current set of understood options include:
 	 *   start - (number) The start range to select when opening an editor
 	 *   end - (number) The end range to select when opening an editor
-	 *   newwindow - (boolean) If we should open the URL in a new tab
+	 *   mode - (string) Determines where the new file should open:
+	 * 			'replace': replaces the current editor's content
+	 * 			    'tab': opens the file in a new tab
+	 * 			  'split': Splits the editor (if needed) and shows the new content in the non-active editor
+	 * splitHint - (string) If the mode is 'split' and the editor has not yet been split this determines the
+	 *             initial splitter mode. Can be one of 'horizontal', 'vertical' or 'picInPic'.
 	 * 
 	 * @since 9.0
 	 */
 	openEditor: function(loc, options) {
-		var opts = options;
-		var _new = typeof(opts.newwindow) === 'boolean' ? opts.newwindow : false;
-		delete opts.newwindow; // don't add it to the URL
-		var _url = this.computeNavigationHref(loc, opts);
-		if(_new) {
-			window.open(_url, '_blank'); //$NON-NLS-1$
-		} else {
-			window.open(_url);
+		var href = this.computeNavigationHref(loc, {start: options.start, end: options.end});
+		if (!href)
+			return;
+			
+		var mode = typeof(options.mode) === 'string' ? options.mode : 'replace';
+		switch (mode) {
+			case 'replace':
+				window.location = href;
+				break;
+			case 'tab':
+				window.open(href);
+				break;
+			case 'split':
+				var locWithParams = href.split('#')[1];
+				if (!this.splitterMode || this.splitterMode === MODE_SINGLE) {
+					var splitHint = typeof(options.splitHint) === 'string' ? options.splitHint : 'vertical';
+					if (splitHint === 'horizontal') 
+						this.setSplitterMode(MODE_HORIZONTAL, locWithParams);
+					else if (splitHint === 'vertical') 
+						this.setSplitterMode(MODE_VERTICAL, locWithParams);
+					else if (splitHint === 'picInPic') 
+						this.setSplitterMode(MODE_PIP, locWithParams);
+				} else {
+					this.editorViewers[1].inputManager.setInput(locWithParams);
+				}				
+				break;
 		}
 	},
 	
@@ -894,7 +917,7 @@ objects.mixin(EditorSetup.prototype, {
 		}
 	},
 
-	setSplitterMode: function(mode) {
+	setSplitterMode: function(mode, href) {
 		var oldSplitterMode = this.splitterMode;
 		if (this.splitterMode === mode) return;
 		this.splitterMode = mode;
@@ -952,7 +975,11 @@ objects.mixin(EditorSetup.prototype, {
 		
 		if (oldSplitterMode === MODE_SINGLE && mode !== MODE_SINGLE) {
 			this.lastTarget = null;
-			this.editorViewers[1].inputManager.setInput(PageUtil.hash());
+			if (href) {
+				this.editorViewers[1].inputManager.setInput(href);
+			} else {
+				this.editorViewers[1].inputManager.setInput(PageUtil.hash());
+			}
 		}
 	},
 	createSplitMenu: function() {

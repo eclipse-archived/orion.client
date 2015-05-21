@@ -41,7 +41,11 @@ define([
 				if(_d.request === 'definition') {
 					if(_d.declaration && (typeof(_d.declaration.start) === 'number' && typeof(_d.declaration.end) === 'number')) {
 						if(origin !== _d.declaration.file) {
-							deferred.resolve(cachedContext.openEditor(_d.declaration.file, {start: _d.declaration.start, end: _d.declaration.end, newwindow: true}));
+							var options = {start: _d.declaration.start,
+											end: _d.declaration.end,
+											mode: 'split',
+											splitHint: 'vertical'};
+							deferred.resolve(cachedContext.openEditor(_d.declaration.file, options));
 						} else {
 							deferred.resolve(cachedContext.setSelection(_d.declaration.start, _d.declaration.end, true));
 						}
