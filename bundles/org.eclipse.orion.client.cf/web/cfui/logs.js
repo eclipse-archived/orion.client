@@ -109,6 +109,9 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 			function reloadLogs(applicationInfo){
 				var that = this;
 				setTimeout(function(){
+					if (lastLogsInfo !== applicationInfo) {
+						return;
+					}
 					if (document.visibilityState === 'visible'){
 						progressService.showWhile(cFClient.getLogz(applicationInfo.Target, applicationInfo.Application, applicationInfo.logsTimestamp)).then(
 							function(newLogs){
@@ -117,14 +120,18 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 									currentLogs = currentLogs.concat(newLogs.Messages);
 									applicationInfo.logs = currentLogs;
 									applicationInfo.logsTimestamp = newLogs.Timestamp;
-									
+
+									if (lastLogsInfo !== applicationInfo) {
+										return;
+									}
+
 									logEditorView.inputManager.setApplicationInfo(applicationInfo);
 	
 									logEditorView.inputManager.setInput("logs for " + applicationInfo.Application);
 									logEditorView.inputManager.load();
 								}
 								reloadLogs(applicationInfo);
-							}, function(error){
+							}, function(error) {
 								var oldLogs = applicationInfo.logs;
 								oldLogs.push("");
 								oldLogs.push(messages["refreshLogsPage"]);
@@ -166,7 +173,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 							logs: logs.Messages,
 							logsTimestamp: logs.Timestamp
 						};
-						this.lastLogsInfo = logsInfo;
+						lastLogsInfo = logsInfo;
 						logEditorView.create();
 						logEditorView.inputManager.setApplicationInfo(logsInfo);
 
@@ -313,8 +320,8 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 				getParamsAndLoadLogs();
 			}.bind(this));
 
-			this.lastLogsInfo = {};
-			launchConfDropdown = null;
+			var lastLogsInfo = {};
+			var launchConfDropdown = null;
 			mainLogView.classList.add("toolbarTarget");
 
 			getParamsAndLoadLogs();
