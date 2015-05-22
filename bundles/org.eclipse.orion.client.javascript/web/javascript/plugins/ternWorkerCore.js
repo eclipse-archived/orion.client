@@ -30,10 +30,12 @@ require({
 	'javascript/handlers/ternHoverHandler',
 	'javascript/handlers/ternOccurrencesHandler',
 	'javascript/handlers/ternRenameHandler',
-	'javascript/handlers/ternPluginsHandler'
+	'javascript/handlers/ternPluginsHandler',
+	'i18n!javascript/nls/workermessages',
+	'orion/i18nUtil'
 ],
 /* @callback */ function(Tern, docPlugin, orionRequirePlugin, ternPluginsPlugin, ecma5, browser, AssistHandler, DeclarationHandler, HoverHandler, 
-						OccurrencesHandler, RenameHandler, PluginsHandler) {
+						OccurrencesHandler, RenameHandler, PluginsHandler, Messages, i18nUtil) {
     
     var ternserver, pendingReads = Object.create(null);
     
@@ -48,18 +50,18 @@ require({
                 projectDir: '/', //$NON-NLS-1$
                 plugins: {
                     doc_comment: {
-                    	name: 'Doc Comments',
-                    	description: 'Tern plugin to parse and use JSDoc-like comments for inferencing',
+                    	name: Messages['ternDocPluginName'],
+                    	description: Messages['ternDocPluginDescription'],
                         fullDocs: true
                     },
                     orionRequire: {
-                    	name: 'Orion Requirejs',
-                    	description: 'Plugin that allows Orion to resolve requirejs dependencies'
+                    	name: Messages['orionRequirePluginName'],
+                    	description: Messages['orionRequirePluginDescription']
                     	//depth: 1
                     },
                     plugins: {
-                    	name: 'Orion Tern Plug-in Support',
-                    	description: 'Plug-in that allows Orion to inspect and modify plug-ins running in Tern without restarting the server'
+                    	name: Messages['ternPluginsPluginName'],
+                    	description: Messages['ternPluginsPluginDescription']
                     }
                 },
                 getFile: _getFile
@@ -158,7 +160,7 @@ require({
      */
     function post(msg, errormsg) {
     	if(!msg) {
-    		msg = new Error(errormsg ? errormsg : 'An unknown error occurred.'); //$NON-NLS-1$
+    		msg = new Error(errormsg ? errormsg : Messages['unknownError']);
     	}
     	if(this.port) {
     		this.port.postMessage(msg);
@@ -195,7 +197,7 @@ require({
         if(ternserver && typeof(args.file) === 'string') {
             ternserver.delFile(args.file);
         } else {
-            post('Failed to delete file from Tern: '+args.file); //$NON-NLS-1$
+            post(i18nUtil.formatMessage(Messages['failedDeleteRequest'], args.file)); 
         }
     }
     
@@ -216,7 +218,7 @@ require({
            pendingReads[_f] = callback;
            post({request: 'read', args: {file:file}}); //$NON-NLS-1$
 	    } else {
-	       post('Failed to read file into Tern: '+_f); //$NON-NLS-1$
+	       post(i18nUtil.formatMessage(Messages['failedReadRequest'], _f)); //$NON-NLS-1$
 	    }
     }
 });
