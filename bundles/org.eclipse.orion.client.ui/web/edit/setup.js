@@ -509,14 +509,13 @@ objects.mixin(EditorViewer.prototype, {
 				
 				// Update the viewer's header
 				if (this.curFileNode) {
-					var curText = this.curFileNode.innerHTML;
-					if (curText.slice(-1) === '*') {
-						curText = curText.slice(0, -1); // Trim the *
-					}	
-					if (this.editor.isDirty()) {
-						curText += '*';  // Add it back if dirty
+					if (!this.dirtyIndicator) {
+						this.dirtyIndicator = document.createElement("span");
+						this.dirtyIndicator.classList.add("editorViewerHeaderTitle");
+						this.dirtyIndicator.innerHTML = "*";
+						this.curFileNode.parentNode.insertBefore(this.dirtyIndicator, this.curFileNode);
 					}
-					this.curFileNode.innerHTML = curText;
+					this.dirtyIndicator.style.display = this.editor.isDirty() ? "block" : "none";
 				}
 			}.bind(this));
 		}
