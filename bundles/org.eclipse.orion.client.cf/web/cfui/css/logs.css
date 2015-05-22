@@ -62,3 +62,30 @@
 .dropdownArrowDown {
     color: #e6e6e6;
 }
+
+#scrollLockWrapper {
+    margin-right: 10px;
+}
+
+.scrollLockLabel {
+    color: #fff;
+    margin-left: 4px;
+    font-size: 8pt;
+    padding-right: 4px;
+}
+
+.orionSwitchLabel {
+    border: none;
+    border-radius: 10px;
+    height: 16px;
+    width: 36px;
+}
+
+.orionSwitchSwitch {
+    background: whitesmoke;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 0 2px 1px rgba(0,0,0,0.2);
+    margin: 1px;
+    right: 50%;
+}

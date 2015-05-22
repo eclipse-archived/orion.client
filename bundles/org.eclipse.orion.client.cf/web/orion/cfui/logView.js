@@ -62,6 +62,10 @@ define(['i18n!cfui/nls/messages',
 		getApplicationInfo: function(){
 			return this.applicationInfo;	
 		},
+		_scrollLock: false,
+		setScrollLock: function (lock) {
+			this._scrollLock = lock;
+		},
 		load: function(){
 			var logName = this.getInput();
 			this._acceptPatch = null;
@@ -72,7 +76,9 @@ define(['i18n!cfui/nls/messages',
 			});
 			
 			this._setInputContents(this._parsedLocation, logName, fullLog, {Name: logName});
-			this.editor.setSelection(fullLog.length, fullLog.length);
+			if (!this._scrollLock) {
+				this.editor.setSelection(fullLog.length, fullLog.length);
+			}
 		},
 		constructor: LogInputManager
 	});
