@@ -863,8 +863,11 @@ define([
 		 */
 		showItem: function(item, reroot) {
 			var deferred = new Deferred();
-			if (!item || !this.model || !this.myTree || (!this.myTree.showRoot && item.Location === this.treeRoot.Location)) {
+			if (!item || !this.model || !this.myTree) {
 				return deferred.reject();
+			}
+			if (!this.myTree.showRoot && item.Location === this.treeRoot.Location) {
+				return deferred.resolve(this.treeRoot);
 			}
 			var row = this.getRow(item);
 			if (row) {
