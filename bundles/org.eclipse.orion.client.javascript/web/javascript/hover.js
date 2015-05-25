@@ -1,6 +1,6 @@
  /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -14,30 +14,25 @@
 define([
 'orion/objects', 
 'javascript/finder', 
-'javascript/signatures',
 'javascript/compilationUnit',  
 'orion/URITemplate',
 'orion/Deferred',
 'doctrine' //last, exports into global
-], function(Objects, Finder, Signatures, CU, URITemplate, Deferred) {
+], function(Objects, Finder, CU, URITemplate, Deferred) {
 	
 	/**
 	 * @description Formats the hover info as markdown text
-	 * @param {Object} node The AST node or {@link Definition}
+	 * @param {String} node The AST node or {@link Definition}
 	 * @returns returns
 	 */
-	function formatMarkdownHover(node, offsetRange) {
-	    if(!node) {
+	function formatMarkdownHover(comment, offsetRange) {
+	    if(!comment) {
 	        return null;
 	    }
 	    try {
 	        var format = Object.create(null);
-	        var comment = Finder.findCommentForNode(node);
-	        if(typeof node === "string") {
-	           comment.value = node;
-	        }
 	        if(comment) {
-		        var doc = doctrine.parse(comment.value, {recoverable:true, unwrap : true});
+		        var doc = doctrine.parse(comment, {recoverable:true, unwrap : true});
 		        format.params = [];
 		        format.desc = (doc.description ? doc.description : '');
 		        if(doc.tags) {
@@ -75,48 +70,39 @@ define([
 		                        }
 		                        break;
 		                    }
-		                    case 'function': {
-		                        format.isfunc = true;
-		                        break;
+		                    case 'callback': {
+		                    	if(tag.description) {
+		                          format.callback = tag.description;
+		                        } else {
+		                        	format.callback = 'This function is used as a callback';
+		                        }
+		                    	break;
 		                    }
-		                    case 'constructor': {
-		                        format.iscon = true;
-		                        break;
-		                    }
-		                    case 'private': {
-		                        format.isprivate = true;
-		                        break; 
-		                    }
-	                }
+	                	}
 		            }
 		        }
 	        }
-	        if(comment.node && typeof(comment.node) !== 'string') {
-    	        var name = Signatures.computeSignature(comment.node);
-    	        var title = '###';
-    	        if(format.isprivate) {
-    	            title += 'private ';
-    	        }
-    	        if(format.iscon) {
-    	            title += 'constructor ';
-    	        }
-    	        title += name.sig+'###';
-	        }
 	        var hover = '';
 	        if(format.desc !== '') {
-	            hover += format.desc+'\n\n';
+	            hover += format.desc+'\n\n'; //$NON-NLS-1$
 	        }
 	        if(format.params.length > 0) {
-	            hover += '__Parameters:__\n\n';
+	            hover += '__Parameters:__\n\n'; //$NON-NLS-1$
 	            for(i = 0; i < format.params.length; i++) {
-	                hover += '>'+format.params[i] + '\n\n';
+	                hover += '>'+format.params[i] + '\n\n'; //$NON-NLS-1$
 	            }
 	        }
 	        if(format.returns) {
-	            hover += '__Returns:__\n\n>' + format.returns + '\n\n';
+	            hover += '__Returns:__\n\n>' + format.returns + '\n\n'; //$NON-NLS-2$ //$NON-NLS-1$
+	        }
+	        if(format.callback) {
+				hover += '__Callback:__\n\n' + format.callback + '\n\n';	        	 //$NON-NLS-1$ //$NON-NLS-2$
 	        }
 	        if(format.since) {
-	            hover += '__Since:__\n\n>'+format.since;
+	            hover += '__Since:__\n\n>'+format.since; //$NON-NLS-1$
+	        }
+	        if(hover === '') {
+	        	return null;
 	        }
 	        //TODO scope this to not show when you are on a decl
 	        /**var href = new URITemplate("#{,resource,params*}").expand(
@@ -129,7 +115,7 @@ define([
 	    catch(e) {
 	        //do nothing, show what we have
 	    }
-	    var result = {content: hover, title: title, type:'markdown'};
+	    var result = {content: hover, type:'markdown'}; //$NON-NLS-1$
 	    if (offsetRange){
 	    	result.offsetStart = offsetRange[0];
 	    	result.offsetEnd = offsetRange[1];
@@ -305,7 +291,7 @@ define([
                             var path = node.value;
 	                        return that.resolver.getWorkspaceFile(path).then(function(files) {
 	                            if(!/\.js$/.test(path)) {
-	                                path += '.js';
+	                                path += '.js'; //$NON-NLS-1$
 	                            }
 	                            var rels = that.resolver.resolveRelativeFiles(path, files, meta);
 	                            if(rels && rels.length > 0) {
@@ -318,8 +304,8 @@ define([
                 return null;
 		    } 
 			deferred = new Deferred();
-			var files = [{type: 'full', name: meta.location, text: ast.source}];
-			this.ternworker.postMessage({request:'documentation', args:{params:{offset: ctxt.offset}, files: files, meta:{location: meta.location}}});
+			var files = [{type: 'full', name: meta.location, text: ast.source}]; //$NON-NLS-1$
+			this.ternworker.postMessage({request:'documentation', args:{params:{offset: ctxt.offset}, files: files, meta:{location: meta.location}}}); //$NON-NLS-1$
 			return deferred;
 		},
 		
@@ -343,9 +329,9 @@ define([
 		            if(file.name && file.path && file.contentType) {
 		                hover += '[';
 		                if(file.contentType.icon) {
-		                    hover += '!['+file.contentType.name+']('+file.contentType.icon+')';
+		                    hover += '!['+file.contentType.name+']('+file.contentType.icon+')'; //$NON-NLS-1$ //$NON-NLS-2$
 		                }
-		                var href = new URITemplate("#{,resource,params*}").expand(
+		                var href = new URITemplate("#{,resource,params*}").expand( //$NON-NLS-1$
     		                      {
     		                      resource: file.location, 
     		                      params: {}
@@ -354,7 +340,7 @@ define([
 		            }
 		            
 		        }
-		        return {title: title, content: hover, type:'markdown'};
+		        return {title: title, content: hover, type:'markdown'}; //$NON-NLS-1$
 		    }
 		    return null;
 		}
