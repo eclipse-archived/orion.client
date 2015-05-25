@@ -224,7 +224,7 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 				for (i = sortedPositions.length - 1; i >= 0; i--) {
 					pos = sortedPositions[i];
 					if (pos.model === model && pos.group === changed.group) {
-						editor.setText(event.text, pos.oldOffset + deltaStart , pos.oldOffset + deltaEnd);
+						editor.setText(event.text, pos.oldOffset + deltaStart , pos.oldOffset + deltaEnd, false);
 					}
 				}
 				this.ignoreVerify = false;
