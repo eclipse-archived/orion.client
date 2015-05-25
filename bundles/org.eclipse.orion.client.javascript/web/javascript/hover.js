@@ -85,13 +85,20 @@ define([
 		                    	break;
 		                    }
 		                    case 'see': {
+		                    	format.see.push(_convertTagType(tag.type) + (tag.description ? tag.description+'\n' : '')); //$NON-NLS-1$
 		                    	break;
+		                    }
+		                    case 'deprecated': {
+		                    	format.deprecated = tag.description ? tag.description+'\n' : ''; //$NON-NLS-1$
 		                    }
 	                	}
 		            }
 		        }
 	        }
 	        var hover = '';
+	        if(format.deprecated !== '') {
+	        	hover += '__Deprecated.__ '+format.deprecated+'\n\n'; //$NON-NLS-2$
+	        }
 	        if(format.desc !== '') {
 	            hover += format.desc+'\n\n'; //$NON-NLS-1$
 	        }
@@ -114,7 +121,16 @@ define([
 				hover += '__Callback:__\n\n>' + format.callback + '\n\n'; //$NON-NLS-2$
 	        }
 	        if(format.since) {
-	            hover += '__Since:__\n\n>'+format.since;
+	            hover += '__Since:__\n\n>'+format.since+'\n\n'; //$NON-NLS-2$
+	        }
+	        if(format.see.length > 0) {
+	        	hover += '__See Also:__\n\n';
+	        	for(i = 0; i < format.see.length; i++) {
+	        		hover += '>'+format.see[i]; //$NON-NLS-1$
+	        		if(i < format.see.length-1) {
+	        			hover += '\n\n'; //$NON-NLS-1$
+	        		}
+	        	}
 	        }
 	        if(hover === '') {
 	        	return null;
