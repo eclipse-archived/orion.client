@@ -790,7 +790,10 @@ define([
 				onComplete: function() {
 					that.status = model.status;
 					var fetched = function(result) {
-						if (result) return; // fetching already expanded sections in #changedItem
+						if (result) {
+							deferred.resolve(model.log);
+							return; // fetching already expanded sections in #changedItem
+						}
 						var children = [];
 						that.model.getRoot(function(root) {
 							that.model.getChildren(root, function(c) {
