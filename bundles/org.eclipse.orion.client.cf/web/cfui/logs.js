@@ -12,11 +12,11 @@
 define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',  'orion/keyBinding', 'orion/dialogs', 'orion/selection',
 	'orion/contentTypes','orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/editorCommands', 'orion/links', 'orion/cfui/cFClient',
 	'orion/PageUtil', 'orion/cfui/logView', 'orion/section', 'orion/metrics', 'orion/cfui/widgets/CfLoginDialog', 'orion/i18nUtil', 'orion/projectClient', 'orion/webui/RichDropdown',
-	'orion/PageLinks', 'orion/URITemplate'], 
+	'orion/PageLinks', 'orion/URITemplate', 'orion/commands'],
 	function(messages, lib, mBootstrap, mStatus, mProgress, CommandRegistry, KeyBinding, mDialogs, mSelection,
 	mContentTypes, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mEditorCommands, mLinks,
 	mCFClient, PageUtil, mLogView, mSection, mMetrics, CfLoginDialog, i18Util, mProjectClient, mRichDropdown,
-	PageLinks, URITemplate) {
+	PageLinks, URITemplate, mCommands) {
 	mBootstrap.startup().then(
 		function(core) {
 			var serviceRegistry = core.serviceRegistry;
@@ -316,12 +316,41 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 				}
 			}
 
+			function addScrollLockSwitch() {
+				var toolbarNode = lib.node('pageToolbar');
+				var actionsNode = lib.node('statusPane');
+				var scrollLockLabel = document.createElement("div");
+				scrollLockLabel.className = "scrollLockLabel";
+				scrollLockLabel.textContent = messages["scrollLockLabel"];
+				toolbarNode.insertBefore(scrollLockLabel, actionsNode);
+
+				var scrollLockWrapper = document.createElement("div");
+				scrollLockWrapper.id = "scrollLockWrapper";
+				toolbarNode.insertBefore(scrollLockWrapper, actionsNode);
+
+				var switchScrollLockCommand = new mCommands.Command({
+					id: "orion.projects.switchScrollLock",
+					imageClass : "sprite-switch-liveUpdate",
+					type: "switch",
+					visibleWhen: function() {
+						return true;
+					},
+					callback: function(data) {
+						logEditorView.inputManager.setScrollLock(data.command.checked);
+					}
+				});
+				commandRegistry.addCommand(switchScrollLockCommand);
+				commandRegistry.registerCommandContribution("scrollLockWrapper", "orion.projects.switchScrollLock", 0);
+				commandRegistry.renderCommands("scrollLockWrapper", "scrollLockWrapper");
+			}
+
 			window.addEventListener("hashchange", function() {
 				getParamsAndLoadLogs();
 			}.bind(this));
 
 			var lastLogsInfo = {};
 			var launchConfDropdown = null;
+			addScrollLockSwitch();
 			mainLogView.classList.add("toolbarTarget");
 
 			getParamsAndLoadLogs();
