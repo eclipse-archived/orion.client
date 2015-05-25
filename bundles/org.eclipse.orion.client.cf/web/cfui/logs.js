@@ -343,6 +343,30 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 				commandRegistry.registerCommandContribution("scrollLockWrapper", "orion.projects.switchScrollLock", 0);
 				commandRegistry.renderCommands("scrollLockWrapper", "scrollLockWrapper");
 			}
+			
+			function addClearLogsButton() {
+				var toolbarNode = lib.node('pageToolbar');
+				var actionsNode = lib.node('statusPane');
+				var clearLogsWrapper = document.createElement("div");
+				
+				clearLogsWrapper.id = "clearLogsWrapper";
+				toolbarNode.insertBefore(clearLogsWrapper, actionsNode);
+				
+				var clearLogsCommand = new mCommands.Command({
+					name:  messages["clearLogs"],
+					id: "orion.projects.clearLogs",
+					visibleWhen: function() {
+						return true;
+					},
+					callback: function(data) {
+						this.lastLogsInfo.logs = [];
+						logEditorView.inputManager.load();
+					}
+				});
+				commandRegistry.addCommand(clearLogsCommand);
+				commandRegistry.registerCommandContribution("clearLogsWrapper", "orion.projects.clearLogs", 0);
+				commandRegistry.renderCommands("clearLogsWrapper", "clearLogsWrapper");
+			}
 
 			window.addEventListener("hashchange", function() {
 				getParamsAndLoadLogs();
@@ -351,6 +375,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 			var lastLogsInfo = {};
 			var launchConfDropdown = null;
 			addScrollLockSwitch();
+			addClearLogsButton();
 			mainLogView.classList.add("toolbarTarget");
 
 			getParamsAndLoadLogs();
