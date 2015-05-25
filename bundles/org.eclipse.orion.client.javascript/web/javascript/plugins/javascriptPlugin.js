@@ -128,7 +128,7 @@ define([
     		this.worker.addEventListener(msg, handler);	
     	};
     	
-    	var prefService = core.serviceRegistry.getService("orion.core.preference");
+    	var prefService = core.serviceRegistry.getService("orion.core.preference"); //$NON-NLS-1$
     	
     	// Start the worker
     	var ternWorker = new WrappedWorker("ternWorker.js",  //$NON-NLS-1$

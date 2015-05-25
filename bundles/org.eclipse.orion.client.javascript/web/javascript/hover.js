@@ -34,6 +34,8 @@ define([
 	        if(comment) {
 		        var doc = doctrine.parse(comment, {recoverable:true, unwrap : true});
 		        format.params = [];
+		        format.throws = [];
+		        format.see = [];
 		        format.desc = (doc.description ? doc.description : '');
 		        if(doc.tags) {
 		            var len = doc.tags.length;
@@ -78,6 +80,13 @@ define([
 		                        }
 		                    	break;
 		                    }
+		                    case 'throws': {
+		                    	format.throws.push(_convertTagType(tag.type) + (tag.description ? tag.description+'\n' : '')); //$NON-NLS-1$
+		                    	break;
+		                    }
+		                    case 'see': {
+		                    	break;
+		                    }
 	                	}
 		            }
 		        }
@@ -87,19 +96,25 @@ define([
 	            hover += format.desc+'\n\n'; //$NON-NLS-1$
 	        }
 	        if(format.params.length > 0) {
-	            hover += '__Parameters:__\n\n'; //$NON-NLS-1$
+	            hover += '__Parameters:__\n\n';
 	            for(i = 0; i < format.params.length; i++) {
 	                hover += '>'+format.params[i] + '\n\n'; //$NON-NLS-1$
 	            }
 	        }
 	        if(format.returns) {
-	            hover += '__Returns:__\n\n>' + format.returns + '\n\n'; //$NON-NLS-2$ //$NON-NLS-1$
+	            hover += '__Returns:__\n\n>' + format.returns + '\n\n'; //$NON-NLS-2$
+	        }
+	        if(format.throws.length > 0) {
+	        	hover += '__Throws:__\n\n';
+	        	for(i = 0; i < format.throws.length; i++) {
+	        		hover += '>'+format.throws[i]+'\n\n'; //$NON-NLS-1$
+	        	}
 	        }
 	        if(format.callback) {
-				hover += '__Callback:__\n\n' + format.callback + '\n\n';	        	 //$NON-NLS-1$ //$NON-NLS-2$
+				hover += '__Callback:__\n\n>' + format.callback + '\n\n'; //$NON-NLS-2$
 	        }
 	        if(format.since) {
-	            hover += '__Since:__\n\n>'+format.since; //$NON-NLS-1$
+	            hover += '__Since:__\n\n>'+format.since;
 	        }
 	        if(hover === '') {
 	        	return null;
@@ -336,7 +351,7 @@ define([
     		                      resource: file.location, 
     		                      params: {}
     		                      }); //$NON-NLS-0$
-		                hover += file.name + ']('+href+') - '+file.path+'\n\n';
+		                hover += file.name + ']('+href+') - '+file.path+'\n\n'; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		            }
 		            
 		        }
