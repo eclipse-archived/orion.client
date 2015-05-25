@@ -279,9 +279,9 @@
 	margin-left: 0;
 	margin-right: 0;
 	margin-bottom: 0;
-	flex: 1 0;
-	-ms-flex: 1 0;
-	-webkit-flex: 1 0;
+	flex: 1 1 auto;
+	-ms-flex: 1 1 auto;
+	-webkit-flex: 1 1 auto;
 	overflow: auto;
 }
 
