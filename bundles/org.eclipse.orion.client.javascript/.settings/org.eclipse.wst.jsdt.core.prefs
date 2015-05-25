@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+org.eclipse.wst.jsdt.core.compiler.maxProblemPerUnit=100
 org.eclipse.wst.jsdt.core.compiler.problem.deprecation=warning
 org.eclipse.wst.jsdt.core.compiler.problem.deprecationInDeprecatedCode=disabled
 org.eclipse.wst.jsdt.core.compiler.problem.deprecationWhenOverridingDeprecatedMethod=disabled
@@ -24,7 +25,7 @@ org.eclipse.wst.jsdt.core.compiler.problem.redundantNullCheck=ignore
 org.eclipse.wst.jsdt.core.compiler.problem.undefinedField=warning
 org.eclipse.wst.jsdt.core.compiler.problem.undocumentedEmptyBlock=ignore
 org.eclipse.wst.jsdt.core.compiler.problem.uninitializedGlobalVariable=ignore
-org.eclipse.wst.jsdt.core.compiler.problem.uninitializedLocalVariable=ignore
+org.eclipse.wst.jsdt.core.compiler.problem.uninitializedLocalVariable=warning
 org.eclipse.wst.jsdt.core.compiler.problem.unnecessaryElse=ignore
 org.eclipse.wst.jsdt.core.compiler.problem.unresolvedFieldReference=error
 org.eclipse.wst.jsdt.core.compiler.problem.unresolvedMethodReference=error
@@ -37,3 +38,4 @@ org.eclipse.wst.jsdt.core.compiler.problem.unusedParameterIncludeDocCommentRefer
 org.eclipse.wst.jsdt.core.compiler.problem.unusedParameterWhenImplementingAbstract=disabled
 org.eclipse.wst.jsdt.core.compiler.problem.unusedPrivateMember=warning
 semanticValidation=disabled
+strictOnKeywordUsage=disabled

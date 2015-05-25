@@ -36,4 +36,5 @@ org.eclipse.wst.jsdt.core.compiler.problem.unusedParameter=ignore
 org.eclipse.wst.jsdt.core.compiler.problem.unusedParameterIncludeDocCommentReference=enabled
 org.eclipse.wst.jsdt.core.compiler.problem.unusedParameterWhenImplementingAbstract=disabled
 org.eclipse.wst.jsdt.core.compiler.problem.unusedPrivateMember=warning
-semanticValidation=enabled
+semanticValidation=disabled
+strictOnKeywordUsage=disabled
