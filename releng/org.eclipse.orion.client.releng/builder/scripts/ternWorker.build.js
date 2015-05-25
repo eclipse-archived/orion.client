@@ -29,7 +29,8 @@
 		estraverse: "estraverse/estraverse", //$NON-NLS-1$
 		escope: "escope/escope", //$NON-NLS-1$
 		logger: "javascript/logger", //$NON-NLS-1$
-		doctrine: 'doctrine/doctrine' //$NON-NLS-1$
+		doctrine: 'doctrine/doctrine', //$NON-NLS-1$
+		i18n: "requirejs/i18n" //$NON-NLS-1$
 	},
 	packages: [
 		{
