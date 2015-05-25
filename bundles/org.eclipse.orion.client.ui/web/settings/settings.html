@@ -46,5 +46,17 @@
 		</div>
 		<div class="footer-fixed-bottom footer" id="footer"></div>
 		</div>
+		<div id="splash" class="splash">
+			<div class="splashProgress">
+				<span class="core-sprite-progress">
+				</span>
+				<span id="splashProgress" class="splashProgressLabel">Loading...</span>
+			</div>
+		</div>
+		<script type="text/javascript">
+			if (localStorage.showSplash) {
+				document.getElementById("splash").classList.add("splashShown");
+			}
+		</script>
 	</body>
 </html>

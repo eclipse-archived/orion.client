@@ -835,3 +835,41 @@ and (max-device-width : 1024px)  {
 
 .userMenu {
 }
+
+.splash {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: #37474F;
+	z-index: 1000;
+	display: none;
+	align-items: center;
+}
+
+.splashShown {
+	display: flex;
+}
+
+.splashProgress {
+	font-size: 20px;
+	width: 100%;
+	text-align: center;
+	margin-top: -20px;
+	color: white;
+	vertical-align: middle;
+}
+
+.splashProgress .core-sprite-progress {
+	display:inline-block;
+	border-color:white;
+	width:20px;
+	height:20px;
+}
+
+.splashProgressLabel {
+	position:relative;
+	top:-6px;
+}
+

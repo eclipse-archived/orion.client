@@ -12,7 +12,7 @@
 
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Deferred, EventTarget) {
+define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"], function(Deferred, EventTarget, splash) {
 	
     function _equal(obj1, obj2) {
         var keys1 = Object.keys(obj1);
@@ -981,23 +981,25 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 
                 channel._updateTimeout();
                 channel._startTime = new Date().getTime();
-                var iframe = document.createElement("iframe"); //$NON-NLS-0$
-                iframe.name = url + "_" + channel._startTime;
-                iframe.src = url;
-                iframe.onload = function() {
-                    log("handshake"); //$NON-NLS-0$
-                    channel._handshake = true;
-                    channel._updateTimeout();
-                };
-                iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
-                iframe.style.width = iframe.style.height = "100%"; //$NON-NLS-0$
-                iframe.frameBorder = 0;
-                (parent || _parent).appendChild(iframe);
-                channel.target = iframe.contentWindow;
+	                var iframe = document.createElement("iframe"); //$NON-NLS-0$
+	                iframe.name = url + "_" + channel._startTime;
+	                iframe.src = url;
+	                iframe.onload = function() {
+	                	splash.progress("Loading " + url);
+	                    log("handshake"); //$NON-NLS-0$
+	                    channel._handshake = true;
+	                    channel._updateTimeout();
+	                };
+	                iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
+	                iframe.style.width = iframe.style.height = "100%"; //$NON-NLS-0$
+	                iframe.frameBorder = 0;
+	                (parent || _parent).appendChild(iframe);
+	                channel.target = iframe.contentWindow;
                 channel.connected = function() {
                     log("connected"); //$NON-NLS-0$
                     this._connected = true;
                     this._updateTimeout();
+                	splash.progress("Loaded " + url);
                 };
                 channel.loading = function() {
                     log("loading"); //$NON-NLS-0$
