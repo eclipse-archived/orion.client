@@ -423,7 +423,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 		},
 
 		getState: function(launchConf) {
-			var params = launchConf.Params || {};
+			var params = launchConf.Params || launchConf.Parameters || {};
 			return this._retryWithLogin(params, this._getStateCF.bind(this));
 		},
 
