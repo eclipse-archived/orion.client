@@ -410,6 +410,9 @@ function Tooltip (view) {
 		_computeTooltipArea: function _computeTooltipArea(info, anchorArea, tooltipDiv){
 			var documentElement = tooltipDiv.ownerDocument.documentElement;
 			
+			// TODO This padding must match what is in tooltip.css
+			var padding = 16;
+			
 			// Callers can specify the exact placement of the tooltip
 			if (info.tooltipArea && info.tooltipArea.top && info.tooltipArea.left && info.tooltipArea.height && info.tooltipArea.width){										 
 					tooltipDiv.style.overflowY = "auto"; //$NON-NLS-0$ // If caller specifies a height, allow scrolling
@@ -426,11 +429,7 @@ function Tooltip (view) {
 				width: divBounds.width,
 				height: divBounds.height
 			};
-			
-			// Adjust the tooltip size for the default padding
-			tipRect.width += 16;
-			tipRect.height += 16;
-			
+					
 			var position = info.position ? info.position : "below"; //$NON-NLS-0$
 			
 			var viewBounds = (this._view._rootDiv ? this._view._rootDiv : documentElement).getBoundingClientRect();
@@ -439,13 +438,11 @@ function Tooltip (view) {
 			var viewportWidth = viewBounds.width;
 			var viewportHeight = viewBounds.height;
 			
-			//ensure sizes are sane
-			if(tipRect.width > viewportWidth/2) {
-				tipRect.width = viewportWidth/2;
-			}
-			if(tipRect.height > viewportHeight/2) {
-				tipRect.height = viewportHeight/2;
-			}
+			// Set a default size for the tooltip
+			var defWidth = Math.min(viewportWidth/2, 600);
+			var defHeight = Math.min(viewportHeight/2, 250);
+			tipRect.width = Math.min(tipRect.width, defWidth);
+			tipRect.height = Math.min(tipRect.height, defHeight);
 
 			var spaceBelow = viewportHeight - (anchorArea.top + anchorArea.height - viewportTop);
 			var spaceAbove = anchorArea.top - viewportTop;
@@ -508,15 +505,19 @@ function Tooltip (view) {
 				break;
 			}
 			
-			tipRect.maxWidth = Math.min(viewportWidth + viewportLeft - tipRect.left, viewportWidth/2);
-			tipRect.maxHeight = Math.min(viewportHeight + viewportTop - tipRect.top, viewportHeight/2);
+			tipRect.maxWidth = Math.min(viewportWidth + viewportLeft - tipRect.left, viewportWidth);
+			tipRect.maxHeight = Math.min(viewportHeight + viewportTop - tipRect.top, viewportHeight);
 			
 			// Adjust max sizes for the border and padding
-			tipRect.maxWidth -= 16;
-			tipRect.maxHeight -= 16;
+			tipRect.width -= padding;
+			tipRect.height -= padding;
+			tipRect.maxWidth -= padding;
+			tipRect.maxHeight -= padding;
 			
 			tooltipDiv.style.maxWidth = tipRect.maxWidth + "px"; //$NON-NLS-0$
 			tooltipDiv.style.maxHeight = tipRect.maxHeight + "px"; //$NON-NLS-0$
+			tooltipDiv.style.width = tipRect.width + "px"; //$NON-NLS-1$
+			tooltipDiv.style.height = tipRect.height + "px"; //$NON-NLS-1$
 			tooltipDiv.style.left = tipRect.left + "px"; //$NON-NLS-0$
 			tooltipDiv.style.top = tipRect.top + "px"; //$NON-NLS-0$
 			return tipRect;
