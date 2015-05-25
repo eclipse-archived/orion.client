@@ -11,7 +11,7 @@
 /*eslint-env browser, amd*/
 /* This widget provides a list of Tern plug-in entries */
 
-define(['i18n!orion/settings/nls/messages',
+define(['i18n!javascript/nls/messages',
 		'javascript/handlers/ternPluginsHandler',
 		'orion/commands', 
 		'orion/commandRegistry',
@@ -36,25 +36,28 @@ define(['i18n!orion/settings/nls/messages',
 		if (col_no === 0) {
 			
 //			var pluginEntry = new PluginEntry( {plugin: item, commandService: this.commandService}  );
-			var node = document.createElement("div");
-			
-			
-			// TODO Remove when we are no longer showing Orion plug-ins
-			if (item.getHeaders){
-				item = item.getHeaders();
-			}
+			var node = document.createElement("div"); //$NON-NLS-1$
+			var entryNode = document.createElement("div");
+			entryNode.classList.add("plugin-entry"); //$NON-NLS-1$
+			node.appendChild(entryNode);
 			
 			if (item.name){
-				var nameNode = document.createElement("h2");
+				var nameNode = document.createElement("div"); //$NON-NLS-1$
+				nameNode.classList.add("plugin-title"); //$NON-NLS-1$
 				nameNode.textContent = item.name;
-				node.appendChild(nameNode);
+				entryNode.appendChild(nameNode);
 			}
 			
 			if (item.description){
-				var descNode = document.createElement("div");
+				var descNode = document.createElement("div"); //$NON-NLS-1$
+//				descNode.classList.add("plugin-description"); //$NON-NLS-1$
 				descNode.textContent = item.description;
-				node.appendChild(descNode);
+				entryNode.appendChild(descNode);
 			}
+			
+//			var cmdNode = document.createElement("span");
+//			entryNode.appendChild(cmdNode);
+//			this.commandService.renderCommands("pluginCommand", entryNode, null, this, "tool"); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			return node;
 		}
@@ -160,22 +163,25 @@ define(['i18n!orion/settings/nls/messages',
 		},
 	
 		render: function(referenceplugin){
-		
-//			// Declare row-level commands so they will be rendered when the rows are added.
-//			var reloadPluginCommand = new mCommands.Command({
-//				name: messages["Reload"],
-//				tooltip: messages["ReloadPlug"],
-//				id: "orion.reloadPlugin", //$NON-NLS-0$
-//				imageClass: "core-sprite-refresh", //$NON-NLS-0$
-//				visibleWhen: function(items) {  // we expect a URL
+		 
+			// Declare row-level commands so they will be rendered when the rows are added.
+			var reloadPluginCommand = new mCommands.Command({
+				name: messages["reloadPluginCmd"],
+				tooltip: messages["reloadPluginCmdTooltip"],
+				id: "javascript.reloadTernPlugin", //$NON-NLS-0$
+				imageClass: "core-sprite-refresh", //$NON-NLS-0$
+				visibleWhen: function(items) {
+					// TODO Fix reload command
 //					return typeof items === "string"; //$NON-NLS-0$
-//				},
-//				callback: function(data) {
+					return true;
+				},
+				callback: function(data) {
 //					this.reloadPlugin(data.items);
-//				}.bind(this)
-//			});			
-//			this.commandService.addCommand(reloadPluginCommand);
-//			this.commandService.registerCommandContribution("pluginCommand", "orion.reloadPlugin", 1); //$NON-NLS-1$ //$NON-NLS-0$
+					console.log("Reloading plug-in");
+				}.bind(this)
+			});			
+			this.commandService.addCommand(reloadPluginCommand);
+			this.commandService.registerCommandContribution("ternPluginCommand", "javascript.reloadTernPlugin", 1); //$NON-NLS-1$ //$NON-NLS-2$
 
 			var self = this;
 			return this.preferences.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
@@ -195,7 +201,7 @@ define(['i18n!orion/settings/nls/messages',
 					}	
 					
 					// TODO NLS
-					self.pluginTitle.textContent = "Tern Plugins";/*messages['Plugins'];*/
+					self.pluginTitle.textContent = "Content Assist Plugins";
 					self.pluginCount.textContent = pluginArray.length;
 					
 					// TODO Mark some as default?
