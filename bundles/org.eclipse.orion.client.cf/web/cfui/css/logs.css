@@ -64,7 +64,7 @@
 }
 
 #scrollLockWrapper {
-    margin-right: 10px;
+    margin-right: 5px;
 }
 
 .scrollLockLabel {
@@ -88,4 +88,8 @@
     box-shadow: 0 0 2px 1px rgba(0,0,0,0.2);
     margin: 1px;
     right: 50%;
+}
+
+#clearLogsWrapper {
+    margin-right: 10px;
 }
