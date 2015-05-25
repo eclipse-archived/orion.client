@@ -236,6 +236,7 @@ define(['orion/plugin',
     					name: messages["csslintValidator"],  //$NON-NLS-0$
     					tags: "validation webtools css csslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
     					category: "css",  //$NON-NLS-0$
+    					categoryLabel: messages["css"],
     					properties: [
     						{
     							id: "validate_adjoining_classes", //$NON-NLS-0$

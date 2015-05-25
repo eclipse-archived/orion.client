@@ -11,8 +11,9 @@
 define({//Default message bundle
 	'htmlOutline' : 'HTML Outline', //$NON-NLS-0$  //$NON-NLS-1$
 	'htmlHover' : 'HTML Hover', //$NON-NLS-0$  //$NON-NLS-1$
-	'cssOutline' : 'CSS Rule Outline', //$NON-NLS-0$  //$NON-NLS-1$
 	'htmlContentAssist' : 'HTML Content Assist', //$NON-NLS-0$  //$NON-NLS-1$
+	'css' : 'CSS',
+	'cssOutline' : 'CSS Rule Outline', //$NON-NLS-0$  //$NON-NLS-1$
 	'cssContentAssist' : 'CSS Content Assist', //$NON-NLS-0$  //$NON-NLS-1$
 	'cssHover' : 'CSS Hover', //$NON-NLS-0$  //$NON-NLS-1$
 	'csslintValidator' : 'CSS Validator', //$NON-NLS-0$  //$NON-NLS-1$

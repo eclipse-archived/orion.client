@@ -68,6 +68,7 @@ define({//Default message bundle
 	'openDeclTooltip' : 'Open the declaration of the selected element',
 	'validTypeof': 'Invalid \'typeof\' comparison',
 	'noSparseArrays': 'Sparse array declarations',
+	'javascriptValidation': 'Javascript Validation',
 	'jsHover': 'JavaScript Hover Provider',
 	'removeExtraSemiFixName': 'Remove extra semicolon',
 	'addFallthroughCommentFixName': 'Add $FALLTHROUGH$ comment',
@@ -95,5 +96,7 @@ define({//Default message bundle
 	'eslintEnvProposalDescription': ' - ESLint environment name',
 	'onlineDocumentationProposalEntry': '\n\n[Online documentation](${0})',
 	'keywordProposalDescription': ' - Keyword',
-	'keywordHoverProposal': 'ECMAScript reserved keyword'
+	'keywordHoverProposal': 'ECMAScript reserved keyword',
+	'reloadPluginCmd': 'Reload',
+	'reloadPluginCmdTooltip': 'Reload content assist plug-in'
 });

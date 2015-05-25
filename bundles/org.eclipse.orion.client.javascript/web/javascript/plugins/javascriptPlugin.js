@@ -548,11 +548,12 @@ define([
     			{	settings: [
     			 	           {   pid: "eslint.config.potential",  //$NON-NLS-0$
     			 	           	   order: 1,
-				 	        	   name: javascriptMessages['prefPotentialProblems'],  //$NON-NLS-0$
+				 	        	   name: javascriptMessages['prefPotentialProblems'],
  				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
- 				 	        	   category: "javascript",  //$NON-NLS-0$
+ 				 	        	   category: 'javascript', //$NON-NLS-1$
+ 				 	        	   categoryLabel: javascriptMessages['javascriptValidation'],
  				 	        	   properties: [{	id: "no-cond-assign",  //$NON-NLS-0$ 
-    			 	        	                	name: javascriptMessages["noCondAssign"], //$NON-NLS-0$
+    			 	        	                	name: javascriptMessages["noCondAssign"],
     			 	        	                	type: "number", //$NON-NLS-0$
     			 	        	                	defaultValue: error, //$NON-NLS-0$
     			 	        	                	options: severities //$NON-NLS-0$
@@ -646,7 +647,8 @@ define([
 				 	        	   order: 2,
 				 	        	   name: javascriptMessages['prefBestPractices'],  //$NON-NLS-0$
 				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
-				 	        	   category: "javascript",  //$NON-NLS-0$
+				 	        	   category: 'javascript', //$NON-NLS-1$
+ 				 	        	   categoryLabel: javascriptMessages['javascriptValidation'],
 				 	        	   properties: [
 				 	        	   				{	id: "no-caller",  //$NON-NLS-0$
 				 	        	                	name: javascriptMessages["noCaller"], //$NON-NLS-0$
@@ -791,7 +793,8 @@ define([
 				 	        	   order: 3,
 				 	        	   name: javascriptMessages['prefCodeStyle'],  //$NON-NLS-0$
 				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
-				 	        	   category: "javascript",  //$NON-NLS-0$
+				 	        	   category: 'javascript', //$NON-NLS-1$
+ 				 	        	   categoryLabel: javascriptMessages['javascriptValidation'],
 				 	        	   properties: [{	id: "missing-doc", //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["missingDoc"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$

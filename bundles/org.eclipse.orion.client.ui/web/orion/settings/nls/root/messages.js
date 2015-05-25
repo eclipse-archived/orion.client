@@ -18,7 +18,7 @@ define({//Default message bundle
 	"User Profile": "User Profile",
 	"Git": "Git",
 	"Git Settings": "Git Settings",
-	"Tern": "Tern",
+	"JavascriptAssist": "Javascript Content Assist",
 	"Theme":"Editor Styles",
 	"Editor Theme":"Editor Styles:",
 	"Theme Settings": "Theme Settings",
