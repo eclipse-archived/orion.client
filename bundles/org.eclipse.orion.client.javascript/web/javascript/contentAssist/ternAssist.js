@@ -54,8 +54,8 @@ define([
 					var proposal = template.getProposal(prefix, offset, context);
 					var obj = Object.create(null);
 			        obj.type = 'markdown'; //$NON-NLS-1$
-			        obj.content = 'Template source code:\n\n'; //$NON-NLS-1$
-			        obj.content += Hover.formatMarkdownHover(proposal.proposal).content;
+			        obj.content = 'Template source code:\n\n';
+			        obj.content += proposal.proposal;
 			        proposal.hover = obj;
 			        proposal.style = 'emphasis'; //$NON-NLS-1$
 					this.removePrefix(prefix, proposal);
@@ -569,7 +569,10 @@ define([
         if(!completion.doc) {
             obj.content += proposal.name;
         } else {
-            obj.content += Hover.formatMarkdownHover(completion.doc).content;
+        	var _h = Hover.formatMarkdownHover(completion.doc);
+        	if(_h) {
+        		obj.content += _h.content;	
+        	}
         }
         if(completion.url) {
             obj.content += i18nUtil.formatMessage.call(null, Messages['onlineDocumentationProposalEntry'], completion.url);

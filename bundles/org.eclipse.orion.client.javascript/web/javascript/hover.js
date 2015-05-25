@@ -22,7 +22,7 @@ define([
 	
 	/**
 	 * @description Formats the hover info as markdown text
-	 * @param {String} node The AST node or {@link Definition}
+	 * @param {String} node The text to format
 	 * @returns returns
 	 */
 	function formatMarkdownHover(comment, offsetRange) {
