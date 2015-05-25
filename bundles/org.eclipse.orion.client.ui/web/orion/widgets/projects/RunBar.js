@@ -771,7 +771,11 @@ define([
 			this._preferences.getPreferences("/RunBar").then(function(prefs) { //$NON-NLS-0$
 				var redeployWithoutConfirming = prefs.get(REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING);
 				if (redeployWithoutConfirming) {
-					deployFunction(); //user does not want a confirmation dialog, just deploy again
+					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(status) {
+						if(status.Environment.ENABLE_BLUEMIX_DEV_MODE && status.Environment.ENABLE_BLUEMIX_DEV_MODE === "true")
+							launchConfiguration.Params.DevMode.On = true;
+						deployFunction(); //user does not want a confirmation dialog, just deploy again
+					});
 				} else {
 					// need to confirm with user before redeploying over a running app
 					// get the latest app status
@@ -786,7 +790,10 @@ define([
 						var confirmMessage = i18nUtil.formatMessage(messages["redeployConfirmationDialogMessage"], appName); //$NON-NLS-0$
 						
 						launchConfiguration.status = status;
-						
+
+						if(status.Environment.ENABLE_BLUEMIX_DEV_MODE && status.Environment.ENABLE_BLUEMIX_DEV_MODE === "true")
+							launchConfiguration.Params.DevMode.On = true;
+
 						if (status && ("STARTED" === status.State)) { //$NON-NLS-0$
 							this._confirmBeforeRedeploy(prefs, dialogTitle, confirmMessage, REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING, deployFunction, cancelFunction);
 						} else {
