@@ -670,20 +670,20 @@ objects.mixin(EditorSetup.prototype, {
 	/**
 	 * @description Creates a URL ref from the give location and options to be opened by the browser
 	 * @function
-	 * @param {String} loc The location string to create the HREF to
+	 * @param {Object} item The file metadata object which has at least a <code>Location</code> property
 	 * @param {Object} options The map of options
 	 * @returns {String} The computed URL to navigate to
 	 * @since 9.0
 	 */
-	computeNavigationHref: function(loc, options) {
-		var openWithCommand = mExtensionCommands.getOpenWithCommand(this.commandRegistry, loc);
+	computeNavigationHref: function(item, options) {
+		var openWithCommand = mExtensionCommands.getOpenWithCommand(this.commandRegistry, item);
 		if (openWithCommand) {
-			return openWithCommand.hrefCallback({items: {Location: loc, params: options}});
+			return openWithCommand.hrefCallback({items: objects.mixin({}, item, {params: options})});
 		}
 		if(options) {
-			return uriTemplate.expand({resource: loc, params: options});
+			return uriTemplate.expand({resource: item.Location, params: options});
 		}
-		return uriTemplate.expand({resource: loc});
+		return uriTemplate.expand({resource: item.Location});
 	},
 
 	/**
@@ -705,7 +705,7 @@ objects.mixin(EditorSetup.prototype, {
 	 * @since 9.0
 	 */
 	openEditor: function(loc, options) {
-		var href = this.computeNavigationHref(loc, {start: options.start, end: options.end});
+		var href = this.computeNavigationHref({Location: loc}, {start: options.start, end: options.end});
 		if (!href)
 			return;
 			
