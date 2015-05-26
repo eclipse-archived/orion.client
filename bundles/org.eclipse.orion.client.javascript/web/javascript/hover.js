@@ -96,7 +96,7 @@ define([
 		        }
 	        }
 	        var hover = '';
-	        if(format.deprecated !== '') {
+	        if(typeof(format.deprecated) !== 'undefined') {
 	        	hover += '__Deprecated.__ '+format.deprecated+'\n\n'; //$NON-NLS-2$
 	        }
 	        if(format.desc !== '') {
