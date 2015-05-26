@@ -300,7 +300,7 @@ define([
                 var that = this;
                 if(parent.type === 'ArrayExpression') {
                     parent = parents.pop();
-                    if(parent.type === 'CallExpression' && parent.callee.name === 'define') {
+                    if(parent.type === 'CallExpression' && (parent.callee.name === 'define' || parent.callee.name === 'require')) {
                         var path = node.value;
 	                    return that.resolver.getWorkspaceFile(path).then(function(files) {
 		                    return that._formatFilesHover(path, files);
