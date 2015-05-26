@@ -951,7 +951,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var target = {
 				getTooltipInfo: function() {
 					var bounds = self.widget.parentNode.getBoundingClientRect();
-					var tipArea = {width: 350, height: bounds.height - 10, top: bounds.top};
+					var tipArea = {width: 350, height: bounds.height, top: bounds.top};
 					if ((bounds.left + bounds.width) >= document.documentElement.clientWidth){
 						tipArea.left = bounds.left - tipArea.width;
 						tipArea.left -= 10;
