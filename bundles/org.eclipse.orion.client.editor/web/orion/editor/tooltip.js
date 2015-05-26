@@ -86,6 +86,14 @@ function Tooltip (view) {
 			textUtil.addEventListener(tooltipDiv, "blur", /* @callback */ function(event) { //$NON-NLS-0$
 				self._tooltipDiv.classList.remove('textViewTooltipAllowResize'); //$NON-NLS-0$
 			}, false);
+//			textUtil.addEventListener(tooltipDiv, "mouseover", /* @callback */ function(event) { //$NON-NLS-0$
+//				if (!self._locked){
+//					self._tooltipDiv.classList.add('textViewTooltipAllowResize'); //$NON-NLS-0$
+//				}
+//			}, false);
+//			textUtil.addEventListener(tooltipDiv, "mouseout", /* @callback */ function(event) { //$NON-NLS-0$
+//				self._tooltipDiv.classList.remove('textViewTooltipAllowResize'); //$NON-NLS-0$
+//			}, false);
 			textUtil.addEventListener(tooltipDiv, "keydown", function(event) { //$NON-NLS-0$
 				if (event.keyCode === 27) {
 					if (!self._locked){
@@ -429,7 +437,7 @@ function Tooltip (view) {
 				width: divBounds.width,
 				height: divBounds.height
 			};
-					
+			
 			var position = info.position ? info.position : "below"; //$NON-NLS-0$
 			
 			var viewBounds = (this._view._rootDiv ? this._view._rootDiv : documentElement).getBoundingClientRect();
@@ -443,6 +451,10 @@ function Tooltip (view) {
 			var defHeight = Math.min(viewportHeight/2, 250);
 			tipRect.width = Math.min(tipRect.width, defWidth);
 			tipRect.height = Math.min(tipRect.height, defHeight);
+			// Hack for single line tooltips that wrap, set a minimum height to make them show 2 lines without scrolling
+			if ((20+padding) > tipRect.height && tipRect.width > (defWidth-padding)){
+				tipRect.height = 50;
+			}
 
 			var spaceBelow = viewportHeight - (anchorArea.top + anchorArea.height - viewportTop);
 			var spaceAbove = anchorArea.top - viewportTop;

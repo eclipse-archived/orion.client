@@ -37,7 +37,17 @@
 	color: #7CC7FF;
 }
 .textviewTooltip h3 {
-	-webkit-margin-before: 0;
+	-webkit-margin-before: 0; /* MarkD renderer uses webkit specific tags */
+	margin-top: 0;
+}
+.textviewTooltip p:first-of-type {
+	-webkit-margin-before: 0; /* MarkD renderer uses webkit specific tags */
+	margin-top: 0;
+	-webkit-margin-after: 0; /* MarkD renderer uses webkit specific tags */
+	margin-bottom: 0;
+}
+.textviewTooltip p {
+	word-wrap: break-word;
 }
 .textviewTooltip em {
 	font-style: normal;
