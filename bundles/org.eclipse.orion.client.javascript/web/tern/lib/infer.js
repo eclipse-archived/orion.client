@@ -14,6 +14,7 @@
 
 /*eslint-env node, amd, browser*/
 /*globals acorn tern acorn_loose*/
+/* eslint-disable */
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(exports, require("esprima"), require("acorn/util/walk"),
@@ -1096,7 +1097,11 @@
   };
 
   function infer(node, scope, c, out, name) {
-    return inferExprVisitor[node.type](node, scope, c, out, name);
+  	var _f = inferExprVisitor[node.type]; //ORION
+  	if(_f) {
+    	return _f(node, scope, c, out, name);
+    } 
+   	return null;
   }
 
   var inferWrapper = walk.make({
@@ -1418,8 +1423,11 @@
   };
 
   function findType(node, scope) {
-    var found = typeFinder[node.type](node, scope);
-    return found;
+  	var _f = typeFinder[node.type]; //ORION
+  	if(_f) {
+      return _f(node, scope);
+  	}
+  	return null;
   }
 
   var searchVisitor = exports.searchVisitor = walk.make({
