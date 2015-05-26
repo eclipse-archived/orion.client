@@ -981,25 +981,52 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
 
                 channel._updateTimeout();
                 channel._startTime = new Date().getTime();
-	                var iframe = document.createElement("iframe"); //$NON-NLS-0$
-	                iframe.name = url + "_" + channel._startTime;
-	                iframe.src = url;
-	                iframe.onload = function() {
-	                	splash.progress("Loading " + url);
-	                    log("handshake"); //$NON-NLS-0$
-	                    channel._handshake = true;
-	                    channel._updateTimeout();
-	                };
-	                iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
-	                iframe.style.width = iframe.style.height = "100%"; //$NON-NLS-0$
-	                iframe.frameBorder = 0;
-	                (parent || _parent).appendChild(iframe);
-	                channel.target = iframe.contentWindow;
+                if (url.match(/\.js$/) && typeof(Worker) !== "undefined") {
+//                    var worker = new SharedWorker(url);
+//                    worker.port.start();
+//                    channel.target = worker.port;
+                    var worker = new Worker(url);
+                    channel.target = worker;
+                    worker.onmessage = _messageHandler;
+                    channel.postMessage = function(message) {
+                        this.target.postMessage([(this.useStructuredClone ? message : JSON.stringify(message))]);
+                    };
+                    channel._close = function() {
+                    	worker.terminate();
+                    };
+                } else {
+                    var iframe = document.createElement("iframe"); //$NON-NLS-0$
+                    iframe.name = url + "_" + channel._startTime;
+                    iframe.src = url;
+                    iframe.onload = function() {
+                        splash.progress("Loading " + url);
+                        log("handshake"); //$NON-NLS-0$
+                        channel._handshake = true;
+                        channel._updateTimeout();
+                    };
+                    iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
+                    iframe.style.width = iframe.style.height = "100%"; //$NON-NLS-0$
+                    iframe.frameBorder = 0;
+                    (parent || _parent).appendChild(iframe);
+                    channel.target = iframe.contentWindow;
+                    channel.postMessage = function(message) {
+                        this.target.postMessage((this.useStructuredClone ? message : JSON.stringify(message)), this.url);
+                    };
+                    channel._close = function() {
+                        if (iframe) {
+                            var frameParent = iframe.parentNode;
+                            if (frameParent) {
+                                frameParent.removeChild(iframe);
+                            }
+                            iframe = null;
+                        }
+                    };
+                }
                 channel.connected = function() {
                     log("connected"); //$NON-NLS-0$
                     this._connected = true;
                     this._updateTimeout();
-                	splash.progress("Loaded " + url);
+                    splash.progress("Loaded " + url);
                 };
                 channel.loading = function() {
                     log("loading"); //$NON-NLS-0$
@@ -1010,13 +1037,7 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                     log("closed"); //$NON-NLS-0$
                     this._closed = true;
                     this._updateTimeout();
-                    if (iframe) {
-                        var frameParent = iframe.parentNode;
-                        if (frameParent) {
-                            frameParent.removeChild(iframe);
-                        }
-                        iframe = null;
-                    }
+                    this._close();
                 };
                 _channels.push(channel);
                 return channel;
@@ -1047,7 +1068,7 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                 _storage.setItem("plugin." + url, JSON.stringify(manifest)); //$NON-NLS-0$
             },
             postMessage: function(message, channel) {
-                channel.target.postMessage((channel.useStructuredClone ? message : JSON.stringify(message)), channel.url);
+                channel.postMessage(message);
             },
             dispatchEvent: function(event) {
                 try {
@@ -1144,7 +1165,7 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
 
 
         function _messageHandler(event) { //$NON-NLS-0$
-            var source = event.source;
+            var source = event.source || event.srcElement;
             _channels.some(function(channel) {
                 if (source === channel.target) {
                     try {

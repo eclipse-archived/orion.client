@@ -177,17 +177,12 @@ define([
 			category: "user.0"
 		});
 		
-		var htmlHelloWorld = document.createElement('a');
-		htmlHelloWorld.href = "./contentTemplates/helloWorld.zip";
-		var pluginHelloWorld = document.createElement('a');
-		pluginHelloWorld.href = "./contentTemplates/pluginHelloWorld.zip";
-	
 		provider.registerService("orion.core.content", null, {
 			id: "orion.content.html5",
 			name: messages["Sample HTML5 Site"],
 			nls: "orion/nls/messages",
 			description: messages["Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files."],
-			contentURITemplate: htmlHelloWorld.href
+			contentURITemplate: new URL("./contentTemplates/helloWorld.zip", self.location.href).href
 		});
 	
 		provider.registerService("orion.core.content", null, {
@@ -195,7 +190,7 @@ define([
 			name: messages["Sample Orion Plugin"],
 			nls: "orion/nls/messages",
 			description: messages["Generate a sample plugin for integrating with Orion."],
-			contentURITemplate: pluginHelloWorld.href
+			contentURITemplate: new URL("./contentTemplates/pluginHelloWorld.zip", self.location.href).href
 		});
 	
 		var getPluginsTemplate = "https://orion-plugins.github.io#?target={InstallTarget}&version={Version}&OrionHome={OrionHome}";

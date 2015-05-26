@@ -64,7 +64,7 @@
         var lastHeartbeat;
         var startTime = new Date().getTime();
         function log(state) {
-            if (localStorage.pluginLogging) console.log(state + "(" + (new Date().getTime() - startTime) + "ms)=" + window.location); //$NON-NLS-1$ //$NON-NLS-0$
+            if (typeof(localStorage) !== "undefined" && localStorage.pluginLogging) console.log(state + "(" + (new Date().getTime() - startTime) + "ms)=" + self.location); //$NON-NLS-1$ //$NON-NLS-0$
         }
         function heartbeat() {
             var time = new Date().getTime();
@@ -243,7 +243,9 @@
             if (event.source !== _target && typeof window !== "undefined") {
                 return;
             }
-            var message = (typeof event.data !== "string" ? event.data : JSON.parse(event.data)); //$NON-NLS-0$
+            var data = event.data;
+            if (Array.isArray(data)) data = data[0];
+            var message = (typeof data !== "string" ? data : JSON.parse(data)); //$NON-NLS-0$
             try {
                 if (message.method) { // request
                     var method = message.method,

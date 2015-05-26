@@ -15,6 +15,7 @@ define([],function(){
 	 * extracts value of xsrf cookie if available
 	 */
 	function getCSRFToken() {
+		if (typeof document === "undefined") return null;
 		var cookies = document.cookie.split(";");//$NON-NLS-0$
 
 		var i,n,v;

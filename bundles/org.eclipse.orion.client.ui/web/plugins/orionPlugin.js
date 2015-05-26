@@ -27,9 +27,7 @@ define([
 	plugins.shift();
 
 	function connect() {
-		var temp = document.createElement('a');
-		temp.href = "../mixloginstatic/LoginWindow.html";
-		var login = temp.href;
+		var login = new URL("../mixloginstatic/LoginWindow.html", self.location.href).href;
 		var headers = {
 			name: "Orion Core Support",
 			version: "1.0",

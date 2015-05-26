@@ -12,10 +12,11 @@
 /*global URL*/
 define(["orion/xhr", "orion/plugin", "orion/operation", "orion/Deferred", "orion/URL-shim", "domReady!"], function(xhr, PluginProvider, operation, Deferred) {
 
-	var temp = document.createElement('a');
-		
 	function makeParentRelative(location) {
 		try {
+			if (typeof window === "undefined") {
+				return location.substring(self.location.href.indexOf(self.location.host) + self.location.host.length);
+			}
 			if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
 				return location.substring(parent.location.href.indexOf(parent.location.host) + parent.location.host.length);
 			}
@@ -25,9 +26,8 @@ define(["orion/xhr", "orion/plugin", "orion/operation", "orion/Deferred", "orion
 		return location;
 	}
 	
-	function makeAbsolute(location) {
-		temp.href = location;
-		return temp.href;
+	function makeAbsolute(loc) {
+		return new URL(loc, self.location.href).href;
 	}
 	
 	function _normalizeLocations(data) {
@@ -45,8 +45,7 @@ define(["orion/xhr", "orion/plugin", "orion/operation", "orion/Deferred", "orion
 	}
 	
 	function connect() {
-		temp.href = "../mixloginstatic/LoginWindow.html";
-		var login = temp.href;
+		var login = new URL("../mixloginstatic/LoginWindow.html", self.location.href).href;
 		var headers = {
 			name: "Orion Task Management Service",
 			version: "1.0",
@@ -59,8 +58,7 @@ define(["orion/xhr", "orion/plugin", "orion/operation", "orion/Deferred", "orion
 	}
 
 	function registerServiceProviders(provider) {
-		temp.href = "../task";
-		var base = makeParentRelative(temp.href);
+		var base = makeParentRelative(new URL("../task", self.location.href).href);
 	
 		// testing that command service handles image-less actions properly
 		provider.registerService("orion.core.operation", {

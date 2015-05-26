@@ -23,7 +23,7 @@ define(["orion/plugin", "plugins/metrics/googleAnalyticsImpl"], function(PluginP
 	}
 
 	function registerServiceProviders(provider) {
-		var servletPath = new URL("../metrics", window.location).href; //$NON-NLS-0$
+		var servletPath = new URL("../metrics", self.location).href; //$NON-NLS-0$
 		var service = new GoogleAnalyticsImpl(servletPath); //$NON-NLS-0$
 		provider.registerService("orion.metrics", service, {}); //$NON-NLS-0$
 	}

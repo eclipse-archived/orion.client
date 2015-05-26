@@ -39,6 +39,9 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", 'i18n!o
 	function makeParentRelative(location) {
 		if (tryParentRelative) {
 			try {
+				if (typeof window === "undefined") {
+					return location.substring(self.location.href.indexOf(self.location.host) + self.location.host.length);
+				}
 				if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
 					return location.substring(parent.location.href.indexOf(parent.location.host) + parent.location.host.length);
 				} else {
@@ -52,9 +55,7 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", 'i18n!o
 	}
 
 	function connect() {
-		var temp = document.createElement('a');
-		temp.href = "../mixloginstatic/LoginWindow.html";
-		var login = temp.href;
+		var login = new URL("../mixloginstatic/LoginWindow.html", self.location.href).href;
 		var headers = {
 			name: "Orion File Service",
 			version: "1.0",
@@ -67,18 +68,14 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", 'i18n!o
 	}
 
 	function registerServiceProviders(provider) {
-		var temp = document.createElement('a');
-		temp.href = "../file";
 		// note global
-		var fileBase = makeParentRelative(temp.href);
+		var fileBase = makeParentRelative(new URL("../file", self.location.href).href);
 	
-		temp.href = "../workspace";
 		// note global
-		var workspaceBase = makeParentRelative(temp.href);
+		var workspaceBase = makeParentRelative(new URL("../workspace", self.location.href).href);
 	
-		temp.href = "../xfer";
 		// note global
-		var importBase = makeParentRelative(temp.href);
+		var importBase = makeParentRelative(new URL("../xfer", self.location.href).href);
 	
 		var service = new FileServiceImpl(fileBase, workspaceBase);
 		//provider.registerService("orion.core.file", trace(service), {

@@ -16,8 +16,8 @@
 (function() {
     try {
         var testURL;
-        if (typeof window.URL === "function" && window.URL.length !== 0 &&
-                (testURL = new window.URL("http://www.w3.org?q")).protocol === "http:" && testURL.query) {
+        if (typeof self.URL === "function" && self.URL.length !== 0 &&
+                (testURL = new self.URL("http://www.w3.org?q")).protocol === "http:" && testURL.query) {
             return;
         }
     } catch (e) {}
@@ -623,7 +623,7 @@
         }
     });
 
-	var _URL = window.URL || window.webkitURL;
+	var _URL = self.URL || self.webkitURL;
     if (_URL && _URL.createObjectURL) {
         Object.defineProperty(URL, "createObjectURL", {
             value: _URL.createObjectURL.bind(_URL),
@@ -635,5 +635,5 @@
             enumerable: false
         });
     }
-    window.URL = URL;
+    self.URL = URL;
 }());

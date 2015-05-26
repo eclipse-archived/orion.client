@@ -16,10 +16,8 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 	 * An implementation of the file service that understands the Orion 
 	 * server file API. This implementation is suitable for invocation by a remote plugin.
 	 */
-	var temp = document.createElement('a');
-	function makeAbsolute(location) {
-		temp.href = location;
-		return temp.href;
+	function makeAbsolute(loc) {
+		return new URL(loc, self.location.href).href;
 	}
 
 	function _normalizeLocations(data) {
@@ -454,7 +452,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
 		read: function(location, isMetadata, acceptPatch) {
-			var url = new URL(location, window.location);
+			var url = new URL(location, self.location);
 			if (isMetadata) {
 				url.query.set("parts", "meta");
 			}
@@ -492,7 +490,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 * @return A deferred for chaining events after the write completes with new metadata object
 		 */		
 		write: function(location, contents, args) {
-			var url = new URL(location, window.location);
+			var url = new URL(location, self.location);
 			
 			var headerData = {
 					"Orion-Version": "1",
@@ -649,7 +647,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		}.bind(this));
 	}
 
-	if (window.Blob) {
+	if (self.Blob) {
 		FileServiceImpl.prototype.readBlob = function(location) {
 			return _call2("GET", location).then(function(result) {
 				return result;
