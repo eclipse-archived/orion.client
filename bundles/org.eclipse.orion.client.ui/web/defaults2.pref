@@ -1,6 +1,6 @@
 {
 	"/plugins":{
-		"plugins/orionWorker.js": true,
+		"plugins/orionSharedWorker.js": true,
 		"git/plugins/gitPlugin.html":true,
 		"webtools/plugins/webToolsPlugin.html":true,
 		"javascript/plugins/javascriptPlugin.html":true,

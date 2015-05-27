@@ -38,24 +38,32 @@
         var _objectReferences = {};
         var _serviceReferences = {};
         
+        var _ports = [];
+        var _shared = false;
+        
         var _target = null;
         if (typeof(window) === "undefined") { //$NON-NLS-0$
-            _target = self;
+            if (self.postMessage) {
+                _target = self;
+            } else {
+                _shared = true;
+            }
         } else if (window !== window.parent) {
             _target = window.parent;
         } else if (window.opener !== null) {
             _target = window.opener;
         }        
 
-        function _publish(message) {
-            if (_target) {
+        function _publish(message, target) {
+            target = target || _target;
+            if (target) {
                 if (typeof(ArrayBuffer) === "undefined") { //$NON-NLS-0$
                     message = JSON.stringify(message);
                 }
-                if (_target === self) {
-                    _target.postMessage(message);
+                if (target === self || _shared) {
+                    target.postMessage(message);
                 } else {
-                    _target.postMessage(message, "*"); //$NON-NLS-0$
+                    target.postMessage(message, "*"); //$NON-NLS-0$
                 }
             }
         }
@@ -77,6 +85,24 @@
             log("heartbeat"); //$NON-NLS-0$
         }
         heartbeat();
+
+        if (_shared) {
+            self.addEventListener("connect", function(evt) {
+                var port = evt.ports[0];
+                _ports.push(port);
+                if (_connected) {
+                    var message = {
+                        method: "plugin", //$NON-NLS-0$
+                        params: [_getPluginData()]
+                    };
+                    _publish(message, port);
+                } else {
+                    heartbeat();
+                }
+                port.addEventListener("message",  _handleMessage);
+                port.start();
+            });
+        }
 
         function _getPluginData() {
             var services = [];
@@ -125,8 +151,9 @@
             return result;
         }
 
-        function _request(message) {
-            if (!_target) {
+        function _request(message, target) {
+            target = target || _target;
+            if (!target) {
                 return new Deferred().reject(new Error("plugin not connected"));
             }
 
@@ -139,7 +166,7 @@
                         requestId: message.id,
                         method: "cancel",
                         params: error.message ? [error.message] : []
-                    });
+                    }, target);
                 }
             });
 
@@ -164,24 +191,24 @@
                     }
                 }
             });
-            _notify(message);
+            _notify(message, target);
             return d.promise;
         }
 
-        function _throwError(messageId, error) {
+        function _throwError(messageId, error, target) {
             if (messageId || messageId === 0) {
                 _notify({
                     id: messageId,
                     result: null,
                     error: error
-                });
+                }, target);
             } else {
                 console.log(error);
             }
 
         }
 
-        function _callMethod(messageId, implementation, method, params) {
+        function _callMethod(messageId, implementation, method, params, target) {
             params.forEach(function(param, i) {
                 if (param && typeof param.__objectId !== "undefined") {
                     var obj = {};
@@ -191,7 +218,7 @@
                                 objectId: param.__objectId,
                                 method: method,
                                 params: Array.prototype.slice.call(arguments)
-                            });
+                            }, target);
                         };
                     });
                     params[i] = obj;
@@ -213,39 +240,40 @@
                     promiseOrResult.then(function(result) {
                         delete _requestReferences[messageId];
                         response.result = result;
-                        _notify(response);
+                        _notify(response, target);
                     }, function(error) {
                         if (_requestReferences[messageId]) {
                             delete _requestReferences[messageId];
                             response.error = _serializeError(error);
-                            _notify(response);
+                            _notify(response, target);
                         }
                     }, function() {
                         _notify({
                             responseId: messageId,
-                            method: "progress",
+                            method: "progress", //$NON-NLS-0$
                             params: Array.prototype.slice.call(arguments)
-                        }); //$NON-NLS-0$
+                        }, target);
                     });
                 } else {
                     response.result = promiseOrResult;
-                    _notify(response);
+                    _notify(response, target);
                 }
             } catch (error) {
                 if (response) {
                     response.error = _serializeError(error);
-                    _notify(response);
+                    _notify(response, target);
                 }
             }
         }
 
         function _handleMessage(event) {
-            if (event.source !== _target && typeof window !== "undefined") {
+            if (!_shared && event.source !== _target && typeof window !== "undefined") {
                 return;
             }
             var data = event.data;
             if (Array.isArray(data)) data = data[0];
             var message = (typeof data !== "string" ? data : JSON.parse(data)); //$NON-NLS-0$
+            var target = _shared ? event.srcElement : null;
             try {
                 if (message.method) { // request
                     var method = message.method,
@@ -253,23 +281,23 @@
                     if ("serviceId" in message) {
                         var service = _serviceReferences[message.serviceId];
                         if (!service) {
-                            _throwError(message.id, "service not found");
+                            _throwError(message.id, "service not found", target);
                         }
                         service = service.implementation;
                         if (method in service) {
-                            _callMethod(message.id, service, service[method], params);
+                            _callMethod(message.id, service, service[method], params, target);
                         } else {
-                            _throwError(message.id, "method not found");
+                            _throwError(message.id, "method not found", target);
                         }
                     } else if ("objectId" in message) {
                         var object = _objectReferences[message.objectId];
                         if (!object) {
-                            _throwError(message.id, "object not found");
+                            _throwError(message.id, "object not found", target);
                         }
                         if (!method in object) {
-                            _callMethod(message.id, object, object[method], params);
+                            _callMethod(message.id, object, object[method], params, target);
                         } else {
-                            _throwError(message.id, "method not found");
+                            _throwError(message.id, "method not found", target);
                         }
                     } else if ("requestId" in message) {
                         var request = _requestReferences[message.requestId];
@@ -341,18 +369,23 @@
                 }
                 return;
             }
-            if (!_target) {
-            	if (errback) {
-            		errback("No valid plugin target");
-            	}
-            	return;
-            }           
-            addEventListener("message", _handleMessage, false); //$NON-NLS-0$
             var message = {
                 method: "plugin", //$NON-NLS-0$
                 params: [_getPluginData()]
             };
-            _publish(message);
+            if (!_shared) {
+                if (!_target) {
+                    if (errback) {
+                        errback("No valid plugin target");
+                    }
+                    return;
+                }           
+                addEventListener("message", _handleMessage, false); //$NON-NLS-0$
+                _publish(message);
+            }
+            _ports.forEach(function(port) {
+                _publish(message, port);
+            });
             _connected = true;
             if (callback) {
                 callback();
@@ -362,6 +395,11 @@
         this.disconnect = function() {
             if (_connected) {
                 removeEventListener("message", _handleMessage); //$NON-NLS-0$
+                _ports.forEach(function(port) {
+                    port.close();
+                    port.removeEventListener("message",  _handleMessage);
+                });
+                _ports = null;
                 _target = null;
                 _connected = false;
             }
