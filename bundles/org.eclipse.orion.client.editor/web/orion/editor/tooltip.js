@@ -80,20 +80,22 @@ function Tooltip (view) {
 			}, true);
 			textUtil.addEventListener(tooltipDiv, "focus", /* @callback */ function(event) { //$NON-NLS-0$
 				if (!self._locked){
-					self._tooltipDiv.classList.add('textViewTooltipAllowResize'); //$NON-NLS-0$
+					self._tooltipDiv.classList.add('textViewTooltipOnFocus'); //$NON-NLS-0$
 				}
 			}, false);
 			textUtil.addEventListener(tooltipDiv, "blur", /* @callback */ function(event) { //$NON-NLS-0$
-				self._tooltipDiv.classList.remove('textViewTooltipAllowResize'); //$NON-NLS-0$
+				self._tooltipDiv.classList.remove('textViewTooltipOnFocus'); //$NON-NLS-0$
 			}, false);
-//			textUtil.addEventListener(tooltipDiv, "mouseover", /* @callback */ function(event) { //$NON-NLS-0$
-//				if (!self._locked){
-//					self._tooltipDiv.classList.add('textViewTooltipAllowResize'); //$NON-NLS-0$
-//				}
-//			}, false);
-//			textUtil.addEventListener(tooltipDiv, "mouseout", /* @callback */ function(event) { //$NON-NLS-0$
-//				self._tooltipDiv.classList.remove('textViewTooltipAllowResize'); //$NON-NLS-0$
-//			}, false);
+			textUtil.addEventListener(tooltipDiv, "mouseenter", /* @callback */ function(event) { //$NON-NLS-0$
+				if (!self._locked){
+					self._tooltipDiv.classList.add('textViewTooltipOnHover'); //$NON-NLS-0$
+				}
+			}, false);
+			textUtil.addEventListener(tooltipDiv, "mouseleave", /* @callback */ function(event) { //$NON-NLS-0$
+				if (!self._hasFocus()){
+					self._tooltipDiv.classList.remove('textViewTooltipOnHover'); //$NON-NLS-0$
+				}
+			}, false);
 			textUtil.addEventListener(tooltipDiv, "keydown", function(event) { //$NON-NLS-0$
 				if (event.keyCode === 27) {
 					if (!self._locked){
@@ -197,6 +199,8 @@ function Tooltip (view) {
 			
 			// Code projections are displayed using the editor theme colors
 			this._tooltipDiv.classList.remove("textviewTooltipCodeProjection"); //$NON-NLS-0$
+			this._tooltipDiv.classList.remove("textviewTooltipOnHover"); //$NON-NLS-0$
+			this._tooltipDiv.classList.remove("textviewTooltipOnFocus"); //$NON-NLS-0$
 			
 			this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
 			this._tooltipDiv.style.left = "";

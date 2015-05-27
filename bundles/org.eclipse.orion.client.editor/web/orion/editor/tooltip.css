@@ -80,8 +80,11 @@
 }
 
 /* Styles for custom behaviour */
-.textViewTooltipAllowResize {
+.textViewTooltipOnFocus {
 	resize: both;
+	overflow: auto;
+}
+.textViewTooltipOnHover {
 	overflow: auto;
 }
 
