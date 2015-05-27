@@ -12,10 +12,9 @@
 define([
 	'orion/editor/textModel',
 	'orion/editor/undoStack',
-	//'orion/webui/littlelib',
 	'orion/commandRegistry',
 	'orion/inputManager',
-	'embeddedEditor/helper/embeddedFileClient',
+	'orion/fileClient',
 	'orion/contentTypes',
 	'orion/editorView',
 	'orion/editorCommands',
@@ -23,21 +22,21 @@ define([
 ], function(
 	mTextModel,
 	mUndoStack,
-	//lib, 
 	mCommandRegistry,
 	mInputManager,
-	mEmbeddedFileClient,
+	mFileClient,
 	mContentTypes,
 	mEditorView,
 	mEditorCommands,
 	objects
 ) {
+	var idCounter = 0;
 	function EditorSetupHelper(options) {
-		this.parentId = options.parentId;
 		this._serviceRegistry = options.serviceRegistry;
 		this._pluginRegistry = options.pluginRegistry;
 		this._commandRegistry = new mCommandRegistry.CommandRegistry({});
-		this._fileClient = new mEmbeddedFileClient.EmbeddedFileClient();
+		//this._fileClient = new mEmbeddedFileClient.EmbeddedFileClient();
+		this._fileClient = new mFileClient.FileClient(this._serviceRegistry);
 		this._contentTypeRegistry = new mContentTypes.ContentTypeRegistry(this._serviceRegistry);
 		this._editorCommands = new mEditorCommands.EditorCommandFactory({
 			serviceRegistry: this._serviceRegistry,
@@ -74,17 +73,18 @@ define([
 				contentTypeRegistry: this._contentTypeRegistry
 			});
 			inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
-				var metadata = evt.metadata;
 				evt.editor = this.editorView.editor;
 			}.bind(this));
 			inputManager.addEventListener("InputChanging", function(e) { //$NON-NLS-0$
 				e.editor = this.editorView.editor;
 			}.bind(this));
 		},
-		defaultOptions: function() {
+		defaultOptions: function(parentId) {
 			var model = new mTextModel.TextModel();
+			var id = idCounter === 0 ? "" : idCounter.toString();
 			return {
-				parent: this.parentId,
+				id: id,
+				parent: parentId,
 				model: model,
 				undoStack: new mUndoStack.UndoStack(model, 500),
 				serviceRegistry: this._serviceRegistry,
@@ -93,21 +93,27 @@ define([
 				contentTypeRegistry: this._contentTypeRegistry,
 				editorCommands: this._editorCommands,
 				progressService: this._progressService,
-				//renderToolbars: this.renderToolbars, // fake it
 				inputManager: this._inputManager, // fake it
 				fileService: this._fileClient, // fake it
+				problemsServiceID: "orion.core.marker" + id, //$NON-NLS-0$
+				editContextServiceID: "orion.edit.context" + id, //$NON-NLS-0$
+				editModelContextServiceID: "orion.edit.model.context" + id, //$NON-NLS-0$
 				readonly: false
-//				statusReporter: this.statusReporter.bind(this),
 			};
 		},
-		createEditor: function() {
-			this._editorCommands.createCommands().then(function() {
+		createEditor: function(options) {
+			return this._editorCommands.createCommands().then(function() {
 				this.createInputManager();
-				this.editorView = new mEditorView.EditorView(this.defaultOptions());
+				this.editorView = new mEditorView.EditorView(this.defaultOptions(options.parent));
+				idCounter++;
 				this.editorView.create();
 				this._inputManager.editor = this.editorView.editor;
+				this._inputManager.setAutoSaveTimeout(300);
 				this._editorCommands.inputManager = this._inputManager;
-				this._inputManager.setInput("foo.js");
+				if(options.contentType && options.contents) {
+					this.editorView.setContents(options.contentType, options.contents);
+				}
+				return this.editorView;
 			}.bind(this));
 		}
 	});

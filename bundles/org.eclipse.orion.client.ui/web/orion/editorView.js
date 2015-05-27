@@ -42,6 +42,7 @@ define([
 	'orion/differ',
 	'orion/keyBinding',
 	'orion/util',
+	'orion/Deferred',
 	'orion/objects'
 ], function(
 	messages,
@@ -51,8 +52,9 @@ define([
 	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
 	mMarkOccurrences, mSyntaxchecker, LiveEditSession,
 	mProblems, mBlamer, mDiffer,
-	mKeyBinding, util, objects
+	mKeyBinding, util, Deferred, objects
 ) {
+	var fPattern = "/__embed/";
 	var Dispatcher = mDispatcher.Dispatcher;
 
 	function parseNumericParams(input, params) {
@@ -75,6 +77,7 @@ define([
 	 */
 	function EditorView(options) {
 		this._parent = options.parent;
+		this.id = options.id || "";
 		this.activateContext = options.activateContext;
 		this.renderToolbars = options.renderToolbars;
 		this.serviceRegistry = options.serviceRegistry;
@@ -136,6 +139,21 @@ define([
 				}
 				textView.addKeyMode(this.vi);
 			}
+		},
+		setContents: function(fileExtension, contents) {
+			var currentLocation = fPattern + this.id + "/foo." + fileExtension;
+			var def;
+			if(currentLocation === this.lastFileLocation || !this.lastFileLocation) {
+				def = new Deferred().resolve();
+			} else {
+				def = this.fileClient.deleteFile(this.lastFileLocation);
+			}
+			return def.then(function() {
+				return this.fileClient.write(currentLocation, contents).then(function(){
+					this.lastFileLocation = currentLocation;
+					this.inputManager.setInput(currentLocation);
+				}.bind(this));
+			}.bind(this));
 		},
 		getParent: function() {
 			return this._parent;

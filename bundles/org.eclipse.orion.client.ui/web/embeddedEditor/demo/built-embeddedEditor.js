@@ -12,12 +12,26 @@
 /*eslint-env browser, amd*/
 define(['embeddedEditor/builder/embeddedEditor'],
 function(mEmbeddedEditor) {
-	var embeddedEditor = new mEmbeddedEditor("embeddedEditor");
-	embeddedEditor.startup().then(function() {
+	var contents = 'var foo = "bar";\n' +
+						 "var bar = foo;\n" + 
+						 "/*\n" + 
+						 " * test demo\n" + 
+						 "*/\n" + 
+						 "function test(){\n" + 
+						 "	var foo1 = bar.lastIndexOf(char, from);\n" + 
+						 "}\n" + 
+						"//Keep editting in this demo and try the content assit, probem validations and hover service!\n" +
+						 "var foo2 = foo."; 
+	var contents1 = 
+						 '<div class="embeddedEditorParentOuter" id="embeddedEditor1">\n' + 
+						 "</div>\n" + 
+						 "<span>var foo2</span>"; 
+	var embeddedEditor = new mEmbeddedEditor();
+	embeddedEditor.create({parent: "embeddedEditor"}).then(function(editorViewer) {
 		document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
-		embeddedEditor.initEditor();
-		//embeddedEditor.editorView.inputMnager.setInput();
-		//in case that fiel name and content changed/inputHCnaged, 
-		//embeddedEditor.setInput("foo.bar", "dsafsafdsafsafsafsaf");
+		editorViewer.setContents("js", contents);
 	});
+	embeddedEditor.create({parent: "embeddedEditor1",
+						   contentType: "html",
+						   contents: contents1});
 });
