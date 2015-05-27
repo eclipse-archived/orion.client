@@ -203,7 +203,7 @@ define([
 	                }
     	        }
     	        if(hover !== '') {
-    	           return {title: title, content: hover, type:'markdown'};
+    	           return {title: title, content: hover, type:'markdown', allowFullWidth: true};
     	        }
     	    }
     	    return null;

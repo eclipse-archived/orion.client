@@ -371,7 +371,7 @@ define([
 		            }
 		            
 		        }
-		        return {title: title, content: hover, type:'markdown'}; //$NON-NLS-1$
+		        return {title: title, content: hover, type:'markdown', allowFullWidth: true}; //$NON-NLS-1$
 		    }
 		    return null;
 		}

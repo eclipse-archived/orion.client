@@ -346,7 +346,7 @@ define([
 	                hover += name + ']('+path+') - '+path+'\n\n';  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
     	        }
     	        if(hover !== '') {
-    	           return {title: title, content: hover, type:'markdown'};  //$NON-NLS-0$
+    	           return {title: title, content: hover, type:'markdown', allowFullWidth: true};  //$NON-NLS-0$
     	        }
     	    }
     	    return null;

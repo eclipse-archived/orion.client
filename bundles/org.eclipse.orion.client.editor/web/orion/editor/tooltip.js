@@ -257,6 +257,7 @@ function Tooltip (view) {
 		 * 5) TooltipArea x, y, width, height
 		 * 6) TooltipOffsetX
 		 * 7) TooltipOffsetY
+		 * 8) AllowFullWidth
 		 * 
 		 * @param update Whether to update the existing tooltip contents or open a new tooltip
 		 */
@@ -273,17 +274,6 @@ function Tooltip (view) {
  				newTooltipContents = util.createElement(this._tooltipDiv.ownerDocument, "div"); //$NON-NLS-0$
  			}
  			
-			/*
-			 * Info:
-			 * 1) Contents
-			 * 2) Context
-			 * 3) Position string left, right, top, bottom
-			 * 4) AnchorArea x, y, width, height
-			 * 5) TooltipArea x, y, width, height
-			 * 6) TooltipOffsetX
-			 * 7) TooltipOffsetY
-			 */
-			
 			if (info) {
 				// Render provided content
 				if (info.contents) {
@@ -315,6 +305,9 @@ function Tooltip (view) {
 										}
 										if (data.offsetEnd){
 											info.context.offsetEnd = data.offsetEnd;
+										}
+										if (data.allowFullWidth){
+											info.allowFullWidth = data.allowFullWidth;
 										}
 										self._showContents(newTooltipContents, info, update);
 									}
@@ -447,13 +440,19 @@ function Tooltip (view) {
 			var viewportHeight = viewBounds.height;
 			
 			// Set a default size for the tooltip
-			var defWidth = Math.min(viewportWidth/2, 600);
-			var defHeight = Math.min(viewportHeight/2, 250);
-			tipRect.width = Math.min(tipRect.width, defWidth);
-			tipRect.height = Math.min(tipRect.height, defHeight);
+			var defWidth = viewportWidth;
+			if (!info.allowFullWidth){
+				defWidth = Math.min(viewportWidth/2, 600);
+				var defHeight = Math.min(viewportHeight/2, 250);
+				tipRect.width = Math.min(tipRect.width, defWidth);
+				tipRect.height = Math.min(tipRect.height, defHeight);
+			}
+			
 			// Hack for single line tooltips that wrap, set a minimum height to make them show 2 lines without scrolling
-			if ((20+padding) > tipRect.height && tipRect.width > (defWidth-padding)){
-				tipRect.height = 50;
+			// The largest line height was MacOS Chrome with 20px+padding.  So 25 is the minimum height we are sure we are one two lines
+			// Similarly, the minimum height for the tooltip is two lines (20px x 2 + padding) (this will actually show three lines on Win7 Chrome)
+			if ((25+padding) > tipRect.height && tipRect.width > (defWidth-padding)){
+				tipRect.height = 40+padding;
 			}
 
 			var spaceBelow = viewportHeight - (anchorArea.top + anchorArea.height - viewportTop);
