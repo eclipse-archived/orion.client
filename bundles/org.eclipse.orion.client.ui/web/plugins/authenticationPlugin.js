@@ -24,9 +24,7 @@ define(["orion/xhr", 'orion/xsrfUtils', "orion/plugin", "domReady!"], function(x
 
 	function registerServiceProviders(provider) {
 		function qualifyURL(url) {
-			var a = document.createElement('a');
-			a.href = url; // set string url
-			return a.href;
+			return new URL(url, self.location.href).href;
 		}
 		var loginData;
 	
