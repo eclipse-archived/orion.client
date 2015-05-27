@@ -11,6 +11,7 @@
  ******************************************************************************/
 /*eslint-env amd, mocha, node, browser*/
 /*global doctrine*/
+/* eslint-disable missing-nls */
 define([
 'javascript/contentAssist/ternAssist',
 'javascript/astManager',

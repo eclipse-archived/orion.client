@@ -14,11 +14,10 @@
 define([
 'orion/objects', 
 'javascript/finder', 
-'javascript/compilationUnit',  
 'orion/URITemplate',
 'orion/Deferred',
 'doctrine' //last, exports into global
-], function(Objects, Finder, CU, URITemplate, Deferred) {
+], function(Objects, Finder, URITemplate, Deferred) {
 	
 	/**
 	 * @description Formats the hover info as markdown text
@@ -227,12 +226,15 @@ define([
 	 * @public
 	 * @param {javascript.ASTManager} astManager
 	 * @param {javascript.ScriptResolver} resolver
+	 * @param {javascript.TernWorkerCore} ternWorker
+	 * @param {javascript.CUProvider} cuProvider 
 	 * @since 7.0
 	 */
-	function JavaScriptHover(astManager, resolver, ternWorker) {
+	function JavaScriptHover(astManager, resolver, ternWorker, cuProvider) {
 		this.astManager = astManager;
 		this.resolver = resolver;
 		this.ternworker = ternWorker;
+		this.cuprovider = cuProvider;
 		this.ternworker.addEventListener('message', function(evnt) {
 			if(typeof(evnt.data) === 'object') {
 				var _d = evnt.data;
@@ -274,7 +276,7 @@ define([
 		        return editorContext.getText().then(function(text) {
 		            var blocks = Finder.findScriptBlocks(text);
 		            if(blocks && blocks.length > 0) {
-    		            var cu = new CU(blocks, meta);
+		            	var cu = that.cuprovider.getCompilationUnit(blocks, meta);
     		            if(cu.validOffset(ctxt.offset)) {
         		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
                 				return that._doHover(ast, ctxt, meta);

@@ -12,9 +12,8 @@
 /*eslint-env amd*/
 define([
 'orion/objects',
-'javascript/finder',
-'javascript/compilationUnit'
-], function(Objects, Finder, CU) {
+'javascript/finder'
+], function(Objects, Finder) {
 	
 	/**
 	 * @name javascript.JavaScriptOccurrences
@@ -22,9 +21,11 @@ define([
 	 * @constructor
 	 * @public
 	 * @param {javascript.ASTManager} astManager
+	 * @param {javascript.CUProvider} cuProvider
 	 */
-	function JavaScriptOccurrences(astManager) {
+	function JavaScriptOccurrences(astManager, cuProvider) {
 		this.astManager = astManager;
+		this.cuprovider = cuProvider;
 	}
 	
 	Objects.mixin(JavaScriptOccurrences.prototype, /** @lends javascript.JavaScriptOccurrences.prototype*/ {
@@ -49,7 +50,7 @@ define([
 			    return editorContext.getText().then(function(text) {
     			    var blocks = Finder.findScriptBlocks(text);
     	            if(blocks && blocks.length > 0) {
-    		            var cu = new CU(blocks, meta);
+    		            var cu = that.cuprovider.getCompilationUnit(blocks, meta);
     		            if(cu.validOffset(ctxt.selection.start)) {
         		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
                 				return Finder.findOccurrences(ast, ctxt);

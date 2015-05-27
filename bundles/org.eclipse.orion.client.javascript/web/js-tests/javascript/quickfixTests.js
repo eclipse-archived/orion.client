@@ -10,6 +10,7 @@
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env amd, mocha*/
+/* eslint-disable  missing-nls */
 define([
 	'javascript/quickFixes',
 	'javascript/validator',
@@ -17,8 +18,9 @@ define([
 	'orion/Deferred',
 	'esprima',
 	'javascript/astManager',
+	'javascript/cuProvider',
 	'mocha/mocha', //must stay at the end, not a module
-], function(QuickFixes, Validator, chai, Deferred, Esprima, ASTManager) {
+], function(QuickFixes, Validator, chai, Deferred, Esprima, ASTManager, CUProvider) {
 	var assert = chai.assert;
 
 	describe('Quick Fix Tests', function() {
@@ -32,7 +34,7 @@ define([
 		    var buffer = options.buffer;
 		    var contentType = options.contentType ? options.contentType : 'application/javascript';
 			var astManager = new ASTManager.ASTManager(Esprima);
-			var validator = new Validator(astManager);
+			var validator = new Validator(astManager, CUProvider);
 			var rule = options.rule;
 			validator._enableOnly(rule.id, rule.severity, rule.opts);
 			var fixComputer = new QuickFixes.JavaScriptQuickfixes(astManager);
@@ -62,6 +64,13 @@ define([
 				contentType: contentType
 			};
 		}
+	
+		/**
+		 * @callback from Mocha after each test run
+		 */
+		afterEach(function() {
+			CUProvider.onModelChanging({file: {location: 'quickfix_test_script.js'}});
+		});
 	
 	    /**
     	 * @description Runs the validator on the given options and computes fixes for those problems

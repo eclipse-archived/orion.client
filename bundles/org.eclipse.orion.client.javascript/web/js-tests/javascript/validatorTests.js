@@ -11,16 +11,18 @@
  ******************************************************************************/
 /*eslint-env amd, mocha, node*/
 /*global doctrine*/
+/* eslint-disable missing-nls */
 define([
 	'javascript/validator',
 	'chai/chai',
 	'orion/Deferred',
 	'esprima',
 	'javascript/astManager',
+	'javascript/cuProvider',
 	"orion/i18nUtil",
 	"i18n!javascript/nls/problems",
 	'mocha/mocha', //must stay at the end, not a module
-], function(Validator, chai, Deferred, Esprima, ASTManager, i18nUtil, messages) {
+], function(Validator, chai, Deferred, Esprima, ASTManager, CUProvider, i18nUtil, messages) {
 	var assert = chai.assert;
 
 	describe('Validator Tests', function() {
@@ -34,7 +36,7 @@ define([
 		    var buffer = options.buffer;
 		    var contentType = options.contentType ? options.contentType : 'application/javascript';
 			var astManager = new ASTManager.ASTManager(Esprima);
-			var validator = new Validator(astManager);
+			var validator = new Validator(astManager, CUProvider);
 			var editorContext = {
 				/*override*/
 				getText: function() {
@@ -56,7 +58,14 @@ define([
 				contentType: contentType
 			};
 		}
-	
+		
+		/**
+		 * @callback from Mocha after each test run
+		 */
+		afterEach(function() {
+			CUProvider.onModelChanging({file: {location: 'validator_test_script.js'}});
+		});
+		
 	    /**
     	 * @name validate
     	 * @description Runs the validator on the given options

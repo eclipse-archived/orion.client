@@ -9,6 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env node, mocha, amd*/
+/* eslint-disable missing-nls */
 define([
 	'eslint',
 	'estraverse',

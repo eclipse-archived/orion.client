@@ -29,6 +29,7 @@ define([
 'javascript/occurrences',
 'javascript/hover',
 'javascript/outliner',
+'javascript/cuProvider',
 'orion/util',
 'logger',
 'javascript/commands/generateDocCommand',
@@ -40,7 +41,7 @@ define([
 'orion/editor/stylers/application_x-ejs/syntax',
 'i18n!javascript/nls/messages'
 ], function(PluginProvider, Bootstrap, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, 
-			EslintValidator, Occurrences, Hover, Outliner,	Util, Logger, GenerateDocCommand, OpenDeclCommand, RenameCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
+			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, Util, Logger, GenerateDocCommand, OpenDeclCommand, RenameCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
     var provider = new PluginProvider({
 		name: javascriptMessages['pluginName'], //$NON-NLS-0$
@@ -216,7 +217,7 @@ define([
     	/**
     	 * Register the mark occurrences support
     	 */
-    	provider.registerService("orion.edit.occurrences", new Occurrences.JavaScriptOccurrences(astManager),  //$NON-NLS-0$
+    	provider.registerService("orion.edit.occurrences", new Occurrences.JavaScriptOccurrences(astManager, CUProvider),  //$NON-NLS-0$
     			{
     		contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-2$
     			});
@@ -224,13 +225,13 @@ define([
     	/**
     	 * Register the hover support
     	 */
-    	provider.registerService("orion.edit.hover", new Hover.JavaScriptHover(astManager, scriptresolver, ternWorker),  //$NON-NLS-0$
+    	provider.registerService("orion.edit.hover", new Hover.JavaScriptHover(astManager, scriptresolver, ternWorker, CUProvider),  //$NON-NLS-0$
     			{
     		name: javascriptMessages['jsHover'],
     		contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-2$
     			});
 
-    	var validator = new EslintValidator(astManager);
+    	var validator = new EslintValidator(astManager, CUProvider);
     	
     	/**
     	 * Register the ESLint validator
@@ -250,7 +251,19 @@ define([
     	},
     	{
     		contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$ //$NON-NLS-2$
-    		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+    		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+    	});
+    	
+    	/**
+    	 * register the compilation unit provider as a listener
+    	 */
+    	provider.registerService("orion.edit.model", {  //$NON-NLS-0$
+    		onModelChanging: CUProvider.onModelChanging.bind(CUProvider),
+    		onInputChanged: CUProvider.onInputChanged.bind(CUProvider)
+    	},
+    	{
+    		contentType: ["text/html"],  //$NON-NLS-0$ //$NON-NLS-2$
+    		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     	});
     	
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$

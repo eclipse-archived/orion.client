@@ -15,11 +15,10 @@ define([
 	"orion/objects",
 	"javascript/astManager",
 	"javascript/finder",
-	'javascript/compilationUnit',
 	"orion/i18nUtil",
 	"i18n!javascript/nls/problems",
 	"orion/metrics"
-], function(eslint, Objects, ASTManager, Finder, CU, i18nUtil, messages, Metrics) {
+], function(eslint, Objects, ASTManager, Finder, i18nUtil, messages, Metrics) {
 	var config = {
 		// 0:off, 1:warning, 2:error
 		defaults: {
@@ -107,10 +106,12 @@ define([
 	 * @constructor
 	 * @public
 	 * @param {javascript.ASTManager} astManager The AST manager backing this validator
+	 * @param {javascript.CUProvider} cuProvider
 	 * @returns {ESLintValidator} Returns a new validator
 	 */
-	function ESLintValidator(astManager) {
+	function ESLintValidator(astManager, cuProvider) {
 		this.astManager = astManager;
+		this.cuprovider = cuProvider;
 		config.setDefaults();
 	}
 	
@@ -278,7 +279,7 @@ define([
 			        return editorContext.getText().then(function(text) {
 			            var blocks = Finder.findScriptBlocks(text);
 			            if(blocks && blocks.length > 0) {
-			                var cu = new CU(blocks, meta);
+			            	var cu = _self.cuprovider.getCompilationUnit(blocks, meta);
 			                return _self.astManager.getAST(cu.getEditorContext()).then(function(ast) {
 			                    //auto-assume browser env - https://bugs.eclipse.org/bugs/show_bug.cgi?id=458676
 			                    var env = Object.create(null);
