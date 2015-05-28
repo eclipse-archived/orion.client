@@ -49,7 +49,7 @@ define([
 		iframe.id = options.id;
 		iframe.name = options.id;
 		iframe.type = "text/html"; //$NON-NLS-0$
-		iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
+		iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups"; //$NON-NLS-0$
 		iframe.frameborder = options.border !== undefined ? options.border : 1;
 		iframe.src = href;
 		iframe.className = "delegatedUI"; //$NON-NLS-0$
