@@ -173,17 +173,15 @@ define([
     			var _d  = evnt.data;
     			switch(_d.request) {
     				case 'installed_plugins': {
-    					//TODO forward to prefs
     					var plugins = _d.plugins;
-    					
     					return prefService.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
 							var props = prefs.get("tern"); //$NON-NLS-1$
-							// Check if props is an object
-							if (!props){
-								props = {};
+							if (!props) {
+								props = Object.create(null);
 							}
 							props["plugins"] = plugins;
 							prefs.put("tern", props); //$NON-NLS-1$
+							prefs.sync(true);
 						});
     				}
     			}

@@ -105,7 +105,7 @@ define([
 				
 				if (categories.showTernSettings === undefined || categories.showTernSettings) {
 					_self.settingsCategories.push({
-						id: "javascriptAssist", //$NON-NLS-0$
+						id: "ternSettings", //$NON-NLS-0$
 						textContent: messages["JavascriptAssist"],
 						show: _self.showTernSettings
 					});

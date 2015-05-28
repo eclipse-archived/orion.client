@@ -11,15 +11,14 @@
 /*eslint-env browser, amd*/
 /* This widget provides a list of Tern plug-in entries */
 
-define(['i18n!javascript/nls/messages',
-		'javascript/handlers/ternPluginsHandler',
-		'orion/commands', 
-		'orion/commandRegistry',
-		'orion/objects',
-		'orion/webui/littlelib',
-		'orion/widgets/plugin/PluginEntry',
-		'orion/explorers/explorer'
-		], function(messages, ternHandler, mCommands, mCommandRegistry, objects, lib, PluginEntry, mExplorer) {
+define([
+'i18n!javascript/nls/messages',
+'orion/commands', 
+'orion/commandRegistry',
+'orion/objects',
+'orion/webui/littlelib',
+'orion/explorers/explorer'
+], function(messages, mCommands, mCommandRegistry, objects, lib, mExplorer) {
 
 	var Explorer = mExplorer.Explorer;
 	var SelectionRenderer = mExplorer.SelectionRenderer;
@@ -32,33 +31,26 @@ define(['i18n!javascript/nls/messages',
 		this.commandService = commandService;
 	}
 	PluginListRenderer.prototype = Object.create(SelectionRenderer.prototype);
-	PluginListRenderer.prototype.getCellElement = function(col_no, item, tableRow) {
+	PluginListRenderer.prototype.getCellElement = /* @callback */ function(col_no, item, tableRow) {
 		if (col_no === 0) {
-			
-//			var pluginEntry = new PluginEntry( {plugin: item, commandService: this.commandService}  );
 			var node = document.createElement("div"); //$NON-NLS-1$
-			var entryNode = document.createElement("div");
+			var entryNode = document.createElement("div"); //$NON-NLS-1$
 			entryNode.classList.add("plugin-entry"); //$NON-NLS-1$
 			node.appendChild(entryNode);
-			
 			if (item.name){
 				var nameNode = document.createElement("div"); //$NON-NLS-1$
 				nameNode.classList.add("plugin-title"); //$NON-NLS-1$
 				nameNode.textContent = item.name;
 				entryNode.appendChild(nameNode);
 			}
-			
 			if (item.description){
 				var descNode = document.createElement("div"); //$NON-NLS-1$
-//				descNode.classList.add("plugin-description"); //$NON-NLS-1$
 				descNode.textContent = item.description;
 				entryNode.appendChild(descNode);
 			}
-			
 //			var cmdNode = document.createElement("span");
 //			entryNode.appendChild(cmdNode);
 //			this.commandService.renderCommands("pluginCommand", entryNode, null, this, "tool"); //$NON-NLS-1$ //$NON-NLS-0$
-			
 			return node;
 		}
 	};
@@ -117,10 +109,12 @@ define(['i18n!javascript/nls/messages',
 		},
 				
 		postCreate: function(){
-			var _this = this;
 			this.render();
 		},
 
+		/**
+		 * @callback
+		 */
 		updateToolbar: function(id){
 			if(this.pluginCommands) {
 				this.commandService.destroy(this.pluginCommands);
@@ -129,7 +123,6 @@ define(['i18n!javascript/nls/messages',
 				
 		show: function(){
 			this.createElements();
-
 			this.updateToolbar();
 			
 //			// set up the toolbar level commands	
@@ -183,40 +176,26 @@ define(['i18n!javascript/nls/messages',
 			this.commandService.addCommand(reloadPluginCommand);
 			this.commandService.registerCommandContribution("ternPluginCommand", "javascript.reloadTernPlugin", 1); //$NON-NLS-1$ //$NON-NLS-2$
 
-			var self = this;
+			var _self = this;
 			return this.preferences.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
 					var props = prefs.get("tern"); //$NON-NLS-1$
 					var plugins;
 					if (props && props["plugins"] !== "undefined"){
 						plugins = props["plugins"];
 					} else {
-						plugins = {};
+						plugins = Object.create(null);
 					}
 					
 					var pluginArray = [];
-					for (var property in plugins) {
-    					if (plugins.hasOwnProperty(property)) {
-    						pluginArray.push(plugins[property]);
-					    }
-					}	
-					
-					// TODO NLS
-					self.pluginTitle.textContent = "Content Assist Plugins";
-					self.pluginCount.textContent = pluginArray.length;
-					
-					// TODO Mark some as default?
-					//			for (var i=0; i<plugins.length; i++) {
-					//				if (defaultPluginURLs[plugins[i].getLocation()]) {
-					//					plugins[i].isDefaultPlugin = true;
-					//				}
-					//			}			
-								
-					// TODO Re-enable sorting?
-					//			plugins.sort(this._sortPlugins); 
-					
-					
-					self.explorer = new PluginListExplorer(self.commandService);
-					self.pluginListTree = self.explorer.createTree(self.pluginList.id, new mExplorer.SimpleFlatModel(pluginArray, "plugin", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
+					var keys = Object.keys(plugins);
+					for (var i=0; i<keys.length; i++) {
+						pluginArray.push(plugins[keys[i]]);
+					}
+					_self.pluginTitle.textContent = "Tern Plugins";
+					_self.pluginCount.textContent = pluginArray.length;
+					pluginArray.sort(this._sortPlugins); 
+					_self.explorer = new PluginListExplorer(_self.commandService);
+					_self.pluginListTree = _self.explorer.createTree(_self.pluginList.id, new mExplorer.SimpleFlatModel(pluginArray, "plugin", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
 						return item.name;
 					}), { /*setFocus: false,*/ noSelection: true});
 			});
@@ -232,33 +211,14 @@ define(['i18n!javascript/nls/messages',
 		 * @returns -1 for a first, 1 for b first, 0 if equals
 		 */
 		_sortPlugins: function(a, b) {
-			var aState = a.getState();
-			var bState = b.getState();
-			var aHeaders = a.getHeaders();
-			var bHeaders = b.getHeaders();
-
-			if (a.getProblemLoading() && !b.getProblemLoading()){
+			if (b.removable && !a.removeable){
 				return -1;
 			}
-			if (b.getProblemLoading() && !a.getProblemLoading()){
+			if (a.removable && !b.removable){
 				return 1;
 			}
-			
-			if (b.isDefaultPlugin && !a.isDefaultPlugin){
-				return -1;
-			}
-			if (a.isDefaultPlugin && !b.isDefaultPlugin){
-				return 1;
-			}
-			
-			if (!aHeaders || !aHeaders.name){
-				return -1;
-			}
-			if (!bHeaders || !bHeaders.name){
-				return 1;
-			}
-			var n1 = aHeaders.name && aHeaders.name.toLowerCase();
-			var n2 = bHeaders.name && bHeaders.name.toLowerCase();
+			var n1 = a.name.toLowerCase();
+			var n2 = b.name.toLowerCase();
 			if (n1 < n2) { return -1; }
 			if (n1 > n2) { return 1; }
 			return 0;
