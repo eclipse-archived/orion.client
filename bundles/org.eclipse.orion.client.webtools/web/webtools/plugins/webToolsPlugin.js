@@ -93,14 +93,14 @@ define(['orion/plugin',
     		onInputChanged: cssResultMgr.onInputChanged.bind(cssResultMgr)
     	},
     	{
-    		contentType: ["text/css", "text/html"],  //$NON-NLS-0$
-    		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-0$  //$NON-NLS-1$
+    		contentType: ["text/css", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
+    		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     	});
     
         provider.registerService("orion.edit.contentassist", //$NON-NLS-0$
     		new cssContentAssist.CssContentAssistProvider(cssResultMgr),
     		{	name: messages["cssContentAssist"], //$NON-NLS-0$
-    			contentType: ["text/css", "text/html"] //$NON-NLS-0$
+    			contentType: ["text/css", "text/html"] //$NON-NLS-1$ //$NON-NLS-2$
     		});
     		
     	/**
@@ -123,7 +123,7 @@ define(['orion/plugin',
     	},
     	{
     		contentType: ["text/html"],  //$NON-NLS-0$
-    		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-0$  //$NON-NLS-1$
+    		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     	});
     	
     	/**
@@ -167,7 +167,7 @@ define(['orion/plugin',
     	provider.registerService("orion.edit.hover", new cssHover.CSSHover(resolver, cssResultMgr),  //$NON-NLS-0$
     		{
     		    name: messages['cssHover'],	//$NON-NLS-0$
-    			contentType: ["text/css", "text/html"]	//$NON-NLS-0$
+    			contentType: ["text/css", "text/html"]	//$NON-NLS-0$ //$NON-NLS-2$
     	});
     	
     	/**
@@ -190,7 +190,7 @@ define(['orion/plugin',
     		name: messages["quickfix-empty-rules"],  //$NON-NLS-0$
     		scopeId: "orion.edit.quickfix", //$NON-NLS-0$
     		id : "quickfix-empty-rules",  //$NON-NLS-0$
-    		contentType: ['text/css'],  //$NON-NLS-0$
+    		contentType: ['text/css','text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
     		validationProperties: [
     		                       {source: "annotation:id", match: "empty-rules"} //$NON-NLS-1$ //$NON-NLS-0$
     		                       ]
@@ -202,7 +202,7 @@ define(['orion/plugin',
     		name: messages["quickfix-important"],  //$NON-NLS-0$
     		scopeId: "orion.edit.quickfix", //$NON-NLS-0$
     		id : "quickfix-important",  //$NON-NLS-0$
-    		contentType: ['text/css'],  //$NON-NLS-0$
+    		contentType: ['text/css','text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
     		validationProperties: [
     		                       {source: "annotation:id", match: "important"} //$NON-NLS-1$ //$NON-NLS-0$
     		                       ]
@@ -214,7 +214,7 @@ define(['orion/plugin',
     		name: messages["quickfix-zero-units"],  //$NON-NLS-0$
     		scopeId: "orion.edit.quickfix", //$NON-NLS-0$
     		id : "quickfix-zero-units",  //$NON-NLS-0$
-    		contentType: ['text/css'],  //$NON-NLS-0$
+    		contentType: ['text/css','text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
     		validationProperties: [
     		                       {source: "annotation:id", match: "zero-units"} //$NON-NLS-1$ //$NON-NLS-0$
     		                       ]
