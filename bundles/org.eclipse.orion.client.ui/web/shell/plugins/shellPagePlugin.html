@@ -15,7 +15,9 @@
 		  }
 		});
 
-		require(["shell/plugins/shellPagePlugin"]);
+		require(["shell/plugins/shellPagePlugin"], function(plugin) {
+			plugin.connect();
+		});
 	</script>
 </head>
 <body>

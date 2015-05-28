@@ -14,31 +14,40 @@ define([
 	'orion/plugin',
 	'i18n!orion/shell/nls/messages'
 ], function(PluginProvider, messages) {
-	var headers = {
-		name: "Orion Shell Page Service",
-		version: "1.0",
-		description: "This plugin integrates access to Orion's Shell page into other Orion pages."
-	};
-
-	var provider = new PluginProvider(headers);
 	
-	provider.registerService("orion.navigate.command", {}, {
-		name: messages["Shell"],
-		id: "eclipse.shell.open",
-		tooltip: messages["Open Shell page"],
-		validationProperties: [{
-			source: "ChildrenLocation|ContentLocation",
-			variableName: "ShellLocation",
-			replacements: [{pattern: "\\?depth=1$", replacement: ""}] 
-		}],
-		uriTemplate: "{+OrionHome}/shell/shellPage.html#{,ShellLocation}",
-		forceSingleItem: true
-	});
-	provider.registerService("orion.page.link.related", null, {
-		id: "eclipse.shell.open",
-		category: "shell",
-		order: 10 // First link in Shell category
-	});
+	function connect() {
+		var headers = {
+			name: "Orion Shell Page Service",
+			version: "1.0",
+			description: "This plugin integrates access to Orion's Shell page into other Orion pages."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
 
-	provider.connect();
+	function registerServiceProviders(provider) {
+		provider.registerService("orion.navigate.command", {}, {
+			name: messages["Shell"],
+			id: "eclipse.shell.open",
+			tooltip: messages["Open Shell page"],
+			validationProperties: [{
+				source: "ChildrenLocation|ContentLocation",
+				variableName: "ShellLocation",
+				replacements: [{pattern: "\\?depth=1$", replacement: ""}] 
+			}],
+			uriTemplate: "{+OrionHome}/shell/shellPage.html#{,ShellLocation}",
+			forceSingleItem: true
+		});
+		provider.registerService("orion.page.link.related", null, {
+			id: "eclipse.shell.open",
+			category: "shell",
+			order: 10 // First link in Shell category
+		});
+	}
+
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
+	};
 });

@@ -13,7 +13,9 @@
 		  }
 		});
 
-		require(["plugins/site/sitePlugin"]);
+		require(["plugins/site/sitePlugin"], function(plugin) {
+			plugin.connect();
+		});
 	</script>
 </head>
 <body>

@@ -19,7 +19,9 @@ define([
 	"plugins/preferencesPlugin",
 	"plugins/pageLinksPlugin",
 	"plugins/taskPlugin",
-	"plugins/webEditingPlugin"
+	"plugins/webEditingPlugin",
+	"shell/plugins/shellPagePlugin",
+	"plugins/site/sitePlugin"
 ], function() {
 	
 	var plugins = Array.prototype.slice.call(arguments);

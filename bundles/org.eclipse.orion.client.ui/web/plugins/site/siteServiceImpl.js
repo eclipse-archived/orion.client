@@ -16,12 +16,8 @@ define([
 	'orion/regex'
 ], function(require, i18nUtil, xhr, regex) {
 
-	var temp = document.createElement('a');
-	
 	function qualifyURL(url) {
-		var link = document.createElement("a");
-		link.href = url;
-		return link.href;
+		return new URL(url, self.location.href).href;
 	}
 	function getContext() {
 		var root = require.toUrl("._");
@@ -30,7 +26,7 @@ define([
 	}
 	function makeHostRelative(url) {
 		if (url.indexOf(":") !== -1) {
-			return url.substring(url.indexOf(window.location.host) + window.location.host.length);
+			return url.substring(url.indexOf(self.location.host) + self.location.host.length);
 		}
 		return url;
 	}
@@ -41,9 +37,8 @@ define([
 		return new RegExp("^/").test(path);
 	}
 	
-	function makeAbsolute(location) {
-		temp.href = location;
-		return temp.href;
+	function makeAbsolute(url) {
+		return new URL(url, self.location.href).href;
 	}
 	
 	function _normalizeLocations(data) {

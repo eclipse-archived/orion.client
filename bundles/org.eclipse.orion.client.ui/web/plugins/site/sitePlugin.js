@@ -10,19 +10,21 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define([
+	'require',
 	'orion/plugin',
 	'plugins/site/siteServiceImpl',
 	'plugins/site/selfHostingRules',
 	'i18n!orion/nls/messages'
-], function(PluginProvider, siteImpl, mSelfHostingRules, messages) {
+], function(require, PluginProvider, siteImpl, mSelfHostingRules, messages) {
 	function qualify(url) {
-		var a = document.createElement('a');
-		a.href = url;
-		return a.href;
+		return new URL(url, self.location.href).href;
 	}
 	function unqualify(url) {
 		url = qualify(url);
 		try {
+			if (typeof window === "undefined") {
+				return location.substring(self.location.href.indexOf(self.location.host) + self.location.host.length);
+			}
 			if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
 				return url.substring(parent.location.href.indexOf(parent.location.host) + parent.location.host.length);
 			}
@@ -38,94 +40,98 @@ define([
 			}];
 	}
 
-	// Tightly coupled to the fileClientPlugin
-	var siteBase = unqualify('../../site');
-	var fileBase = unqualify('../../file');
-	var workspaceBase = unqualify('../../workspace');
-	//console.log("sitePlugin siteBase:" + siteBase + ", fileBase:" + fileBase + ", workspaceBase:" + workspaceBase);
+	function connect() {
+		var login = qualify(require.toUrl('/mixloginstatic/LoginWindow.html'));
+		var headers = {
+			name: "Orion Site Service",
+			version: "1.0",
+			description: "This plugin provides virtual site support for hosting client web applications from your Orion workspace.",
+			login: login
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
 
-	var temp = document.createElement('a');
-	temp.href = "../../mixloginstatic/LoginWindow.html";
-	var login = temp.href;
-	var headers = {
-		name: "Orion Site Service",
-		version: "1.0",
-		description: "This plugin provides virtual site support for hosting client web applications from your Orion workspace.",
-		login: login
-	};
-
-	var provider = new PluginProvider(headers);
+	function registerServiceProviders(provider) {
+		// Tightly coupled to the fileClientPlugin
+		var siteBase = unqualify(require.toUrl('/site'));
+		var fileBase = unqualify(require.toUrl('/file'));
+		var workspaceBase = unqualify(require.toUrl('/workspace'));
+		//console.log("sitePlugin siteBase:" + siteBase + ", fileBase:" + fileBase + ", workspaceBase:" + workspaceBase);
+		var host = new URL("/", self.location.href);
 	
-	var host = document.createElement('a');
-	host.href = '/';
-
-	// "Sites" category for putting page links and related links in.
-	provider.registerService("orion.page.link.category", null, {
-		id: "sites",
-		name: messages["Sites"],
-		nls: "orion/nls/messages",
-		imageClass: "core-sprite-sites",
-		order: 50,
-		uriTemplate: "{+OrionHome}/sites/"
-	});
-
-	// Default link to ensure "Sites" category is never empty
-	provider.registerService("orion.page.link", null, {
-		name: messages["Sites"],
-		id: "orion.sites",
-		nls: "orion/nls/messages",
-		category: "sites",
-		order: 1000, // low priority
-		uriTemplate: "{+OrionHome}/sites/sites.html"
-	});
-
-	provider.registerService("orion.page.link", null, {
-		name: messages["Sites"],
-		id: "orion.sites.2",
-		nls: "orion/nls/messages",
-		category: "sites",
-		order: 10, // Make this the first since it's the most useful one
-		uriTemplate: "{+OrionHome}/sites/sites.html"
-	});
-
-	provider.registerService('orion.navigate.command', null, {
-		id: 'orion.site.' + host.hostname + '.viewon',
-		name: messages['View on Site'],
-		tooltip: messages['View this file or folder on a web site hosted by Orion'],
-		nls: 'orion/nls/messages',
-		forceSingleItem: true,
-		category: 'sites',
-		validationProperties: filesAndFoldersOnService(fileBase),
-		uriTemplate: '{+OrionHome}/sites/view.html#,file={,Location}'
-	});
-
-	provider.registerService('orion.page.link.related', null, {
-		id: 'orion.site.' + host.hostname + '.viewon',
-		name: messages['View on Site'],
-		tooltip: messages['View this file or folder on a web site hosted by Orion'],
-		nls: 'orion/nls/messages',
-		category: 'sites',
-		validationProperties: filesAndFoldersOnService(fileBase),
-		uriTemplate: '{+OrionHome}/sites/view.html#,file={,Location}'
-	});
-
-	provider.registerService('orion.site',
-		new siteImpl.SiteImpl(fileBase, workspaceBase, mSelfHostingRules),
-		{
-			id: 'orion.site.' + host.hostname,
-			name: 'Orion Sites at ' + host.hostname,
-			pattern: siteBase,
-			filePattern: fileBase,
-			canSelfHost: true,
-			selfHostingConfig: {
-				folders: [
-					{
-						name: "org.eclipse.orion.client",
-						label: messages.orionClientLabel
-					}
-				]
-			}
+		// "Sites" category for putting page links and related links in.
+		provider.registerService("orion.page.link.category", null, {
+			id: "sites",
+			name: messages["Sites"],
+			nls: "orion/nls/messages",
+			imageClass: "core-sprite-sites",
+			order: 50,
+			uriTemplate: "{+OrionHome}/sites/"
 		});
+	
+		// Default link to ensure "Sites" category is never empty
+		provider.registerService("orion.page.link", null, {
+			name: messages["Sites"],
+			id: "orion.sites",
+			nls: "orion/nls/messages",
+			category: "sites",
+			order: 1000, // low priority
+			uriTemplate: "{+OrionHome}/sites/sites.html"
+		});
+	
+		provider.registerService("orion.page.link", null, {
+			name: messages["Sites"],
+			id: "orion.sites.2",
+			nls: "orion/nls/messages",
+			category: "sites",
+			order: 10, // Make this the first since it's the most useful one
+			uriTemplate: "{+OrionHome}/sites/sites.html"
+		});
+	
+		provider.registerService('orion.navigate.command', null, {
+			id: 'orion.site.' + host.hostname + '.viewon',
+			name: messages['View on Site'],
+			tooltip: messages['View this file or folder on a web site hosted by Orion'],
+			nls: 'orion/nls/messages',
+			forceSingleItem: true,
+			category: 'sites',
+			validationProperties: filesAndFoldersOnService(fileBase),
+			uriTemplate: '{+OrionHome}/sites/view.html#,file={,Location}'
+		});
+	
+		provider.registerService('orion.page.link.related', null, {
+			id: 'orion.site.' + host.hostname + '.viewon',
+			name: messages['View on Site'],
+			tooltip: messages['View this file or folder on a web site hosted by Orion'],
+			nls: 'orion/nls/messages',
+			category: 'sites',
+			validationProperties: filesAndFoldersOnService(fileBase),
+			uriTemplate: '{+OrionHome}/sites/view.html#,file={,Location}'
+		});
+	
+		provider.registerService('orion.site',
+			new siteImpl.SiteImpl(fileBase, workspaceBase, mSelfHostingRules),
+			{
+				id: 'orion.site.' + host.hostname,
+				name: 'Orion Sites at ' + host.hostname,
+				pattern: siteBase,
+				filePattern: fileBase,
+				canSelfHost: true,
+				selfHostingConfig: {
+					folders: [
+						{
+							name: "org.eclipse.orion.client",
+							label: messages.orionClientLabel
+						}
+					]
+				}
+			});
+	}
 
-	provider.connect();
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
+	};
 });

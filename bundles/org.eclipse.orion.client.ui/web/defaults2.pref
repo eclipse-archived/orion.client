@@ -8,8 +8,6 @@
 		"edit/content/imageViewerPlugin.html":true,
 		"edit/content/jsonEditorPlugin.html":true,
 		"plugins/helpPlugin.html": true,
-		"plugins/site/sitePlugin.html": true,
-		"shell/plugins/shellPagePlugin.html":true,
 		"plugins/gitBlamePlugin.html" :true,
 		"cfui/plugins/cFPlugin.html":true,
 		"cfui/plugins/cFDeployPlugin.html":true,
