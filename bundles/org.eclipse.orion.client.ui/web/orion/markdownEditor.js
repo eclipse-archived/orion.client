@@ -1214,7 +1214,7 @@ define([
 		_TYPEID_LISTITEM: "markup.list.item.markdown", //$NON-NLS-0$
 		_TYPEID_PARAGRAPH: "markup.other.paragraph.markdown", //$NON-NLS-0$
 		_TYPEID_DEF: "meta.link.reference.def.markdown", //$NON-NLS-0$
-		_atxDetectRegex: /\s*#/g,
+		_atxDetectRegex: /[>\s]*#/g,
 		_blockquoteRemoveMarkersRegex: /^[ \t]*>[ \t]?/gm,
 		_blockquoteStartRegex: /[ \t]*>[ \t]?/g,
 		_elementCounter: 0,
