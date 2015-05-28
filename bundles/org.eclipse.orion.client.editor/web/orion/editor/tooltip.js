@@ -340,6 +340,16 @@ function Tooltip (view) {
 		_showContents: function _showContents(newContentsDiv, info, update) {
 			if (!update){
 				this.hide();
+			} else {
+				// If update is called but the set tooltip area is different, recreate the tooltip with the new sizing (ex: content assist resizing)
+				// We could also check if the set anchor area is different, but no one would be using it
+				if (this._tooltipArea && info.tooltipArea){
+					if (this._tooltipArea.left !== info.tooltipArea.left || this._tooltipArea.top !== info.tooltipArea.top || this._tooltipArea.width !== info.tooltipArea.width || this._tooltipArea.height !== info.tooltipArea.height){
+						this._anchorArea = null;
+						this._tooltipArea = null;
+						this._outerArea = null;
+					}
+				}
 			}
 			
 			this._tooltipContents = newContentsDiv;
@@ -364,11 +374,6 @@ function Tooltip (view) {
 			}
 		},
 		
-		/**
-		 * @name computeAnchorArea
-		 * @description Returns the rectangle that the tooltip is anchored to, for example the text of the current annotation range
-		 * @function
-		 */
 		/**
 		 * @name _computeAnchorArea
 		 * @description Computes and returns the rectangle that the tooltip is anchored to.  For example the anchor for an annotation 
