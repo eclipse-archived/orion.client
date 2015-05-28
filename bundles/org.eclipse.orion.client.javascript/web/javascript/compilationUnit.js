@@ -30,6 +30,7 @@ define([
         this._blocks = sourceblocks;
         this._metadata = metadata;
         this._ec = editorContext;
+        this._deps = [];
     }
     
     Objects.mixin(CompilationUnit.prototype, {
@@ -44,6 +45,9 @@ define([
             this._source = '';
             for(var i = 0; i < this._blocks.length; i++) {
                 var block = this._blocks[i];
+                if(block.dependecies) {
+                	this._deps.push(block.dependencies);
+                }
                 var pad = block.offset - _cursor;
                 while(pad > 0) {
                     this._source += ' '; //$NON-NLS-1$
@@ -109,6 +113,16 @@ define([
                 }
             };
             return proxy;
+        },
+        
+        /**
+         * @description Returns the computed list of dependencies
+         * @function
+         * @returns {Array.<string>} Returns the array of dependencies, or an empty array, never null
+         * @since 9.0
+         */
+        getDependencies: function getDependencies() {
+        	return this._deps;	
         }
     });
     
