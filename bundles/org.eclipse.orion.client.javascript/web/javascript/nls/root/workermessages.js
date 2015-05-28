@@ -10,11 +10,17 @@
 /* eslint-env amd */
 define({
 	'ternDocPluginName': 'Doc Comments',
-	'ternDocPluginDescription': 'Tern plug-in to parse and use JSDoc-like comments for inferencing',
+	'ternDocPluginDescription': 'Tern plugin to parse and use JSDoc-like comments for inferencing',
 	'orionRequirePluginName': 'Orion Requirejs',
-	'orionRequirePluginDescription': 'Plug-in that allows Orion to resolve requirejs dependencies',
-	'ternPluginsPluginName': 'Orion Tern Plug-in Support',
-	'ternPluginsPluginDescription': 'Plug-in that allows Orion to inspect and modify plug-ins running in Tern',
+	'orionRequirePluginDescription': 'Plugin that allows Orion to resolve requirejs dependencies',
+	'ternPluginsPluginName': 'Orion Tern Plugin Support',
+	'ternPluginsPluginDescription': 'Plugin that allows Orion to inspect and modify plugins running in Tern',
+	'orionNodePluginName': 'Orion Node.js',
+	'orionNodePluginDescription': 'Plugin that allows Orion to resolve node.js require dependencies',
+	'orionAngularPluginName': 'Orion AngularJS',
+	'orionAngularPluginDescription': 'Plugin that allows Orion to resolve AngularJS dependencies',
+	'orionComponentPluginName': 'Orion ComponentJS',
+	'orionComponentPluginDescription': 'Plugin that allows Orion to resolve ComponentJS dependencies',
 	'unknownError': 'An unknown error occurred.',
 	'failedDeleteRequest': 'Failed to delete file from Tern: ${0}',
 	'failedReadRequest': 'Failed to read file into Tern: ${0}'

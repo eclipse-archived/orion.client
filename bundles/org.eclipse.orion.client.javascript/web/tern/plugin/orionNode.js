@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2015 Marijn Haverbeke and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors:
+ *     IBM Corporation - Allow original node.js plugin to find files in Orion workspace
+ *******************************************************************************/
+/*eslint-env node, amd*/
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require);
@@ -31,13 +43,13 @@
   function buildWrappingScope(parent, origin, node) {
     var scope = new infer.Scope(parent);
     scope.originNode = node;
-    infer.cx().definitions.node.require.propagate(scope.defProp("require"));
-    var module = new infer.Obj(infer.cx().definitions.node.Module.getProp("prototype").getType());
-    module.propagate(scope.defProp("module"));
-    var exports = new infer.Obj(true, "exports");
+    infer.cx().definitions.node.require.propagate(scope.defProp("require")); //$NON-NLS-1$
+    var module = new infer.Obj(infer.cx().definitions.node.Module.getProp("prototype").getType()); //$NON-NLS-1$
+    module.propagate(scope.defProp("module")); //$NON-NLS-1$
+    var exports = new infer.Obj(true, "exports"); //$NON-NLS-1$
     module.origin = exports.origin = origin;
-    exports.propagate(scope.defProp("exports"));
-    var moduleExports = scope.exports = module.defProp("exports");
+    exports.propagate(scope.defProp("exports")); //$NON-NLS-1$
+    var moduleExports = scope.exports = module.defProp("exports"); //$NON-NLS-1$
     exports.propagate(moduleExports, WG_DEFAULT_EXPORT);
     return scope;
   }
@@ -85,8 +97,8 @@
     return resolvePath(normPath(server.options.projectDir) + "/", normPath(pth));
   }
 
-  infer.registerFunction("nodeRequire", function(_self, _args, argNodes) {
-    if (!argNodes || !argNodes.length || argNodes[0].type != "Literal" || typeof argNodes[0].value != "string")
+  infer.registerFunction("nodeRequire", /* @callback */ function(_self, _args, argNodes) { //$NON-NLS-1$
+    if (!argNodes || !argNodes.length || argNodes[0].type != "Literal" || typeof argNodes[0].value !== "string")
       return infer.ANull;
     var cx = infer.cx(), server = cx.parent, data = server._node, name = argNodes[0].value;
     var locals = cx.definitions.node;
@@ -137,7 +149,7 @@
     }
   }
 
-  tern.registerPlugin("node", function(server, options) {
+  tern.registerPlugin("orionNode", function(server, options) { //$NON-NLS-1$
     server._node = {
       modules: Object.create(null),
       options: options || {},
@@ -147,22 +159,25 @@
       server: server
     };
 
-    server.on("beforeLoad", function(file) {
+    server.on("beforeLoad", function(file) { //$NON-NLS-1$
       this._node.currentFile = resolveProjectPath(server, file.name);
       this._node.currentOrigin = file.name;
       this._node.currentRequires = [];
       file.scope = buildWrappingScope(file.scope, this._node.currentOrigin, file.ast);
     });
 
-    server.on("afterLoad", function(file) {
+    server.on("afterLoad", function(file) { //$NON-NLS-1$
       var mod = getModule(this._node, this._node.currentFile);
       mod.origin = this._node.currentOrigin;
-      file.scope.exports.propagate(mod);
+      var _e = file.scope.exports;
+      if(_e) {
+      	_e.propagate(mod);
+      }
       this._node.currentFile = null;
       this._node.currentOrigin = null;
     });
 
-    server.on("reset", function() {
+    server.on("reset", function() { //$NON-NLS-1$
       this._node.modules = Object.create(null);
     });
 
@@ -171,7 +186,7 @@
                      postLoadDef: postLoadDef}};
   });
 
-  tern.defineQueryType("node_exports", {
+  tern.defineQueryType("node_exports", { //$NON-NLS-1$
     takesFile: true,
     run: function(server, query, file) {
       function describe(aval) {
@@ -197,7 +212,7 @@
       return resp;
     }
   });
-
+/* eslint-disable missing-nls */
   var defs = {
     "!name": "node",
     "!define": {

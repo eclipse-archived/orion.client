@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2015 Marijn Haverbeke and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors:
+ *     IBM Corporation - Allow original requirejs plugin to find files in Orion workspace
+ *******************************************************************************/
 /*eslint-env node, amd*/
 /*globals infer tern walk*/
 (function(mod) {
@@ -321,30 +332,31 @@
       }
     };
   });
-
+  
+/* eslint-disable missing-nls */
   var defs = {
-    "!name": "requirejs", //$NON-NLS-1$
+    "!name": "requirejs", 
     "!define": {
       module: {
-        id: "string", //$NON-NLS-1$
-        uri: "string", //$NON-NLS-1$
-        config: "fn() -> ?", //$NON-NLS-1$
-        exports: "?" //$NON-NLS-1$
+        id: "string", 
+        uri: "string", 
+        config: "fn() -> ?", 
+        exports: "?" 
       }
     },
     requirejs: {
-      "!type": "fn(deps: [string], callback: fn(), errback: fn()) -> !custom:requireJS", //$NON-NLS-1$
-      onError: "fn(err: +Error)", //$NON-NLS-1$
-      load: "fn(context: ?, moduleName: string, url: string)", //$NON-NLS-1$
-      config: "fn(config: ?) -> !custom:requireJSConfig", //$NON-NLS-1$
-      version: "string", //$NON-NLS-1$
-      isBrowser: "bool" //$NON-NLS-1$
+      "!type": "fn(deps: [string], callback: fn(), errback: fn()) -> !custom:requireJS", 
+      onError: "fn(err: +Error)", 
+      load: "fn(context: ?, moduleName: string, url: string)", 
+      config: "fn(config: ?) -> !custom:requireJSConfig", 
+      version: "string", 
+      isBrowser: "bool" 
     },
-    require: "requirejs", //$NON-NLS-1$
+    require: "requirejs", 
     define: {
-      "!type": "fn(deps: [string], callback: fn()) -> !custom:requireJS", //$NON-NLS-1$
+      "!type": "fn(deps: [string], callback: fn()) -> !custom:requireJS", 
       amd: {
-        jQuery: "bool" //$NON-NLS-1$
+        jQuery: "bool" 
       }
     }
   };

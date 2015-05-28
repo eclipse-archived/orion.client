@@ -1,5 +1,17 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2015 Marijn Haverbeke and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors:
+ *     IBM Corporation - Allow original AngularJS plugin to find files in Orion workspace
+ *******************************************************************************/
+/*eslint-env node, amd*/
 (function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
+  if (typeof exports === "object" && typeof module === "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require("../lib/comment"),
                require("acorn/util/walk"));
   if (typeof define == "function" && define.amd) // AMD
@@ -8,7 +20,7 @@
 })(function(infer, tern, comment, walk) {
   "use strict";
 
-  var SetDoc = infer.constraint("doc", {
+  var SetDoc = infer.constraint("doc", { //$NON-NLS-1$
     addType: function(type) {
       if (!type.doc) type.doc = this.doc;
     }
@@ -20,7 +32,7 @@
   }
 
   Injector.prototype.get = function(name) {
-    if (name == "$scope") return new infer.Obj(globalInclude("$rootScope").getType(), "$scope");
+    if (name == "$scope") return new infer.Obj(globalInclude("$rootScope").getType(), "$scope"); //$NON-NLS-1$ //$NON-NLS-2$
     if (name in this.fields) return this.fields[name];
     var field = this.fields[name] = new infer.AVal;
     return field;
@@ -30,8 +42,8 @@
     var field = this.fields[name] || (this.fields[name] = new infer.AVal);
     if (!depth) field.local = true;
     if (!field.origin) field.origin = infer.cx().curOrigin;
-    if (typeof node == "string" && !field.span) field.span = node;
-    else if (node && typeof node == "object" && !field.originNode) field.originNode = node;
+    if (typeof node === "string" && !field.span) field.span = node;
+    else if (node && typeof node === "object" && !field.originNode) field.originNode = node;
     if (doc) { field.doc = doc; field.propagate(new SetDoc(doc)); }
     val.propagate(field);
     for (var i = 0; i < this.forward.length; ++i)
@@ -59,19 +71,19 @@
 
   function applyWithInjection(mod, fnType, node, asNew) {
     var deps = [];
-    if (node.type == "FunctionExpression") {
+    if (node.type === "FunctionExpression") {
       for (var i = 0; i < node.params.length; ++i)
         deps.push(getInclude(mod, node.params[i].name));
-    } else if (node.type == "ArrayExpression") {
-      for (var i = 0; i < node.elements.length - 1; ++i) {
+    } else if (node.type === "ArrayExpression") {
+      for (i = 0; i < node.elements.length - 1; ++i) {
         var elt = node.elements[i];
-        if (elt.type == "Literal" && typeof elt.value == "string")
+        if (elt.type === "Literal" && typeof elt.value === "string")
           deps.push(getInclude(mod, elt.value));
         else
           deps.push(infer.ANull);
       }
       var last = node.elements[node.elements.length - 1];
-      if (last && last.type == "FunctionExpression")
+      if (last && last.type === "FunctionExpression")
         fnType = last.body.scope.fnType;
     }
     var result = new infer.AVal;
@@ -86,7 +98,7 @@
     return result;
   }
 
-  infer.registerFunction("angular_callInject", function(argN) {
+  infer.registerFunction("angular_callInject", function(argN) { //$NON-NLS-1$
     return function(self, args, argNodes) {
       var mod = self.getType();
       if (mod && argNodes && argNodes[argN])
@@ -94,36 +106,36 @@
     };
   });
 
-  infer.registerFunction("angular_regFieldCall", function(self, args, argNodes) {
+  infer.registerFunction("angular_regFieldCall", function(self, args, argNodes) { //$NON-NLS-1$
     var mod = self.getType();
     if (mod && argNodes && argNodes.length > 1) {
       var result = applyWithInjection(mod, args[1], argNodes[1]);
-      if (mod.injector && argNodes[0].type == "Literal")
+      if (mod.injector && argNodes[0].type === "Literal")
         mod.injector.set(argNodes[0].value, result, argNodes[0].angularDoc, argNodes[0]);
     }
   });
 
-  infer.registerFunction("angular_regFieldNew", function(self, args, argNodes) {
+  infer.registerFunction("angular_regFieldNew", function(self, args, argNodes) { //$NON-NLS-1$
     var mod = self.getType();
     if (mod && argNodes && argNodes.length > 1) {
       var result = applyWithInjection(mod, args[1], argNodes[1], true);
-      if (mod.injector && argNodes[0].type == "Literal")
+      if (mod.injector && argNodes[0].type === "Literal")
         mod.injector.set(argNodes[0].value, result, argNodes[0].angularDoc, argNodes[0]);
     }
   });
 
-  infer.registerFunction("angular_regField", function(self, args, argNodes) {
+  infer.registerFunction("angular_regField", function(self, args, argNodes) { //$NON-NLS-1$
     var mod = self.getType();
-    if (mod && mod.injector && argNodes && argNodes[0] && argNodes[0].type == "Literal" && args[1])
+    if (mod && mod.injector && argNodes && argNodes[0] && argNodes[0].type === "Literal" && args[1])
       mod.injector.set(argNodes[0].value, args[1], argNodes[0].angularDoc, argNodes[0]);
   });
 
   function arrayNodeToStrings(node) {
     var strings = [];
-    if (node && node.type == "ArrayExpression")
+    if (node && node.type === "ArrayExpression")
       for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
-        if (elt.type == "Literal" && typeof elt.value == "string")
+        if (elt.type === "Literal" && typeof elt.value === "string")
           strings.push(elt.value);
       }
     return strings;
@@ -131,7 +143,7 @@
 
   function moduleProto(cx) {
     var ngDefs = cx.definitions.angular;
-    return ngDefs && ngDefs.Module.getProp("prototype").getType();
+    return ngDefs && ngDefs.Module.getProp("prototype").getType(); //$NON-NLS-1$
   }
 
   function declareMod(name, includes) {
@@ -149,28 +161,28 @@
       else if (depMod.injector)
         depMod.injector.forwardTo(mod.injector);
     }
-    if (typeof name == "string") {
+    if (typeof name === "string") {
       data.modules[name] = mod;
       var pending = data.pendingImports[name];
       if (pending) {
         delete data.pendingImports[name];
-        for (var i = 0; i < pending.length; ++i)
+        for (i = 0; i < pending.length; ++i)
           mod.injector.forwardTo(pending[i]);
       }
     }
     return mod;
   }
 
-  infer.registerFunction("angular_module", function(_self, _args, argNodes) {
-    var mod, name = argNodes && argNodes[0] && argNodes[0].type == "Literal" && argNodes[0].value;
-    if (typeof name == "string")
+  infer.registerFunction("angular_module", function(_self, _args, argNodes) { //$NON-NLS-1$
+    var mod, name = argNodes && argNodes[0] && argNodes[0].type === "Literal" && argNodes[0].value;
+    if (typeof name === "string")
       mod = infer.cx().parent._angular.modules[name];
     if (!mod)
       mod = declareMod(name, arrayNodeToStrings(argNodes && argNodes[1]));
     return mod;
   });
 
-  var IsBound = infer.constraint("self, args, target", {
+  var IsBound = infer.constraint("self, args, target", { //$NON-NLS-1$
     addType: function(tp) {
       if (!(tp instanceof infer.Fn)) return;
       this.target.addType(new infer.Fn(tp.name, tp.self, tp.args.slice(this.args.length),
@@ -181,7 +193,7 @@
     }
   });
 
-  infer.registerFunction("angular_bind", function(_self, args) {
+  infer.registerFunction("angular_bind", function(_self, args) { //$NON-NLS-1$
     if (args.length < 2) return infer.ANull;
     var result = new infer.AVal;
     args[1].propagate(new IsBound(args[0], args.slice(2), result));
@@ -191,14 +203,14 @@
   function postParse(ast, text) {
     walk.simple(ast, {
       CallExpression: function(node) {
-        if (node.callee.type == "MemberExpression" &&
+        if (node.callee.type === "MemberExpression" &&
             !node.callee.computed && node.arguments.length &&
             /^(value|constant|controller|factory|provider)$/.test(node.callee.property.name)) {
           var before = comment.commentsBefore(text, node.callee.property.start - 1);
           if (before) {
             var first = before[0], dot = first.search(/\.\s/);
             if (dot > 5) first = first.slice(0, dot + 1);
-            first = first.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " ");
+            first = first.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " "); //$NON-NLS-1$
             node.arguments[0].angularDoc = first;
           }
         }
@@ -208,7 +220,7 @@
 
   function postLoadDef(json) {
     var cx = infer.cx(), defName = json["!name"], defs = cx.definitions[defName];
-    if (defName == "angular") {
+    if (defName === "angular") {
       var proto = moduleProto(cx), naked = cx.parent._angular.nakedModules;
       if (proto) for (var i = 0; i < naked.length; ++i) naked[i].proto = proto;
       return;
@@ -243,7 +255,7 @@
         ++found;
         if (mod.injector) for (var inj in mod.injector.fields) {
           var field = mod.injector.fields[inj];
-          if (field.local) state.roots["!ng." + propName + "._inject_" + inj] = field;
+          if (field.local) state.roots["!ng." + propName + "._inject_" + inj] = field; //$NON-NLS-1$ //$NON-NLS-2$
         }
       }
     }
@@ -273,9 +285,9 @@
     };
   }
 
-  tern.registerPlugin("angular", function(server) {
+  tern.registerPlugin("orionAngular", function(server) { //$NON-NLS-1$
     initServer(server);
-    server.on("reset", function() { initServer(server); });
+    server.on("reset", function() { initServer(server); }); //$NON-NLS-1$
     return {defs: defs,
             passes: {postParse: postParse,
                      postLoadDef: postLoadDef,
@@ -283,7 +295,7 @@
                      postCondenseReach: postCondenseReach},
             loadFirst: true};
   });
-
+/* eslint-disable missing-nls */
   var defs = {
     "!name": "angular",
     "!define": {

@@ -1,7 +1,19 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2015 Marijn Haverbeke and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors:
+ *     IBM Corporation - Allow original ComponentJS plugin to find files in Orion workspace
+ *******************************************************************************/
+/*eslint-env node, amd*/
 (function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
+  if (typeof exports === "object" && typeof module === "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require);
-  if (typeof define == "function" && define.amd) // AMD
+  if (typeof define === "function" && define.amd) // AMD
     return define(["../lib/infer", "../lib/tern"], mod);
   mod(tern, tern);
 })(function(infer, tern, require) {
@@ -15,7 +27,7 @@
     while (m = /[^\/]*[^\/\.][^\/]*\/\.\.\//.exec(path))
       path = path.slice(0, m.index) + path.slice(m.index + m[0].length);
 
-    return path.replace(/(^|[^\.])\.\//g, "$1");
+    return path.replace(/(^|[^\.])\.\//g, "$1"); //$NON-NLS-1$
   }
 
   function resolveModule(server, name) {
@@ -28,11 +40,11 @@
   }
 
   function exportsFromScope(scope) {
-    var mType = scope.getProp("module").getType();
-    var exportsVal = mType && mType.getProp("exports");
+    var mType = scope.getProp("module").getType(); //$NON-NLS-1$
+    var exportsVal = mType && mType.getProp("exports"); //$NON-NLS-1$
 
     if (!(exportsVal instanceof infer.AVal) || exportsVal.isEmpty())
-      return scope.getProp("exports");
+      return scope.getProp("exports"); //$NON-NLS-1$
     else
       return exportsVal.types[exportsVal.types.length - 1];
   }
@@ -41,15 +53,15 @@
     var scope = new infer.Scope(parent);
     var cx = infer.cx();
     scope.originNode = node;
-    cx.definitions.component.require.propagate(scope.defProp("require"));
+    cx.definitions.component.require.propagate(scope.defProp("require")); //$NON-NLS-1$
 
-    var type = cx.definitions.component.Module.getProp("prototype").getType();
+    var type = cx.definitions.component.Module.getProp("prototype").getType(); //$NON-NLS-1$
     var module = new infer.Obj(type);
-    module.propagate(scope.defProp("module"));
+    module.propagate(scope.defProp("module")); //$NON-NLS-1$
 
-    var exports = new infer.Obj(true, "exports", origin);
-    exports.propagate(scope.defProp("exports"));
-    exports.propagate(module.defProp("exports"));
+    var exports = new infer.Obj(true, "exports", origin); //$NON-NLS-1$
+    exports.propagate(scope.defProp("exports")); //$NON-NLS-1$
+    exports.propagate(module.defProp("exports")); //$NON-NLS-1$
 
     return scope;
   }
@@ -71,7 +83,7 @@
       var dir = server.options.projectDir || "";
       var file = name;
 
-      if (data.options.dontLoad == true)
+      if (data.options.dontLoad === true)
         return infer.ANull;
 
       if (data.options.dontLoad && new RegExp(data.options.dontLoad).test(name))
@@ -82,20 +94,20 @@
 
       if (!relative) {
         try {
-          var cmp = JSON.parse(fs.readFileSync(resolve(dir, "component.json")));
+          var cmp = JSON.parse(fs.readFileSync(resolve(dir, "component.json"))); //$NON-NLS-1$
           if(!cmp.dependencies) return infer.ANull;
-          var dpx = new RegExp("(.*?)\/" + name, 'i');
+          var dpx = new RegExp("(.*?)\/" + name, 'i'); //$NON-NLS-1$
           var dep = Object.keys(cmp.dependencies).filter(function(dependency) {
             return dpx.test(dependency);
           }).pop();
           var author = dep.match(/(.*?)\/.*?/i).shift();
           author =  author.substring(0, author.length - 1);
-          file = resolve(dir, "components/" + author + "-" + name);
+          file = resolve(dir, "components/" + author + "-" + name); //$NON-NLS-1$
         } catch(e) {}
       }
 
       try {
-        var pkg = JSON.parse(fs.readFileSync(resolve(modDir, file + "/component.json")));
+        var pkg = JSON.parse(fs.readFileSync(resolve(modDir, file + "/component.json"))); //$NON-NLS-1$
       } catch(e) {}
 
       if (pkg && pkg.main) {
@@ -103,11 +115,11 @@
       } else {
         try {
           if (fs.statSync(resolve(dir, file)).isDirectory())
-            file += "/index.js";
+            file += "/index.js"; //$NON-NLS-1$
         } catch(e) {}
       }
 
-      if (!/\.js$/.test(file)) file += ".js";
+      if (!/\.js$/.test(file)) file += ".js"; //$NON-NLS-1$
 
       try {
         if (!fs.statSync(resolve(dir, file)).isFile()) return infer.ANull;
@@ -118,7 +130,7 @@
     };
   })();
 
-  tern.registerPlugin("component", function(server, options) {
+  tern.registerPlugin("orionComponent", function(server, options) { //$NON-NLS-1$
     server._component = {
       modules: Object.create(null),
       options: options || {},
@@ -127,26 +139,26 @@
       server: server
     };
 
-    server.on("beforeLoad", function(file) {
+    server.on("beforeLoad", function(file) { //$NON-NLS-1$
       this._component.currentFile = file.name.replace(/\\/g, "/");
       this._component.currentName = file.name;
       file.scope = buildWrappingScope(file.scope, file.name, file.ast);
     });
 
-    server.on("afterLoad", function(file) {
+    server.on("afterLoad", function(file) { //$NON-NLS-1$
       this._component.currentFile = this._component.currentName = null;
       exportsFromScope(file.scope).propagate(getModule(this._component, file.name));
     });
 
-    server.on("reset", function() {
+    server.on("reset", function() { //$NON-NLS-1$
       this._component.modules = Object.create(null);
     });
 
     return {defs: defs};
   });
 
-  infer.registerFunction("componentRequire", function(_self, _args, argNodes) {
-    if (!argNodes || !argNodes.length || argNodes[0].type != "Literal" || typeof argNodes[0].value != "string")
+  infer.registerFunction("componentRequire", function(_self, _args, argNodes) { //$NON-NLS-1$
+    if (!argNodes || !argNodes.length || argNodes[0].type !== "Literal" || typeof argNodes[0].value !== "string")
       return infer.ANull;
 
     var cx = infer.cx();
@@ -177,6 +189,7 @@
     return argNodes[0].required = result;
   });
 
+/* eslint-disable missing-nls */
   var defs = {
     "!name": "component",
     "!define": {

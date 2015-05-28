@@ -22,7 +22,10 @@ require({
 	'tern/lib/tern',
 	'tern/plugin/doc_comment',
 	'tern/plugin/orionRequire',
-	'tern/plugin/plugins',
+	'tern/plugin/orionNode',
+	'tern/plugin/orionAngular',
+	'tern/plugin/orionComponent',
+	'tern/plugin/ternPlugins',
 	'tern/defs/ecma5',
 	'tern/defs/browser',
 	'javascript/handlers/ternAssistHandler',
@@ -34,8 +37,9 @@ require({
 	'i18n!javascript/nls/workermessages',
 	'orion/i18nUtil'
 ],
-/* @callback */ function(Tern, docPlugin, orionRequirePlugin, ternPluginsPlugin, ecma5, browser, AssistHandler, DeclarationHandler, HoverHandler, 
-						OccurrencesHandler, RenameHandler, PluginsHandler, Messages, i18nUtil) {
+/* @callback */ function(Tern, docPlugin, orionRequirePlugin, orionNodePlugin, orionAngularPlugin, orionComponentPlugin, ternPluginsPlugin, 
+							ecma5, browser, AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler, PluginsHandler, 
+							Messages, i18nUtil) {
     
     var ternserver, pendingReads = Object.create(null);
     
@@ -52,16 +56,34 @@ require({
                     doc_comment: {
                     	name: Messages['ternDocPluginName'],
                     	description: Messages['ternDocPluginDescription'],
-                        fullDocs: true
+                        fullDocs: true,
+                        removable: false
                     },
                     orionRequire: {
                     	name: Messages['orionRequirePluginName'],
-                    	description: Messages['orionRequirePluginDescription']
+                    	description: Messages['orionRequirePluginDescription'],
+                    	removable: true
                     	//depth: 1
                     },
+                   /* orionNode: {
+                    	name: Messages['orionNodePluginName'],
+                    	description: Messages['orionNodePluginDescription'],
+                    	removable: true
+                    },
+                    orionAngular: {
+                    	name: Messages['orionAngularPluginName'],
+                    	description: Messages['orionAngularPluginDescription'],
+                    	removable: true
+                    },
+                    orionComponent: {
+                    	name: Messages['orionComponentPluginName'],
+                    	description: Messages['orionComponentPluginDescription'],
+                    	removable: true
+                    },*/
                     plugins: {
                     	name: Messages['ternPluginsPluginName'],
-                    	description: Messages['ternPluginsPluginDescription']
+                    	description: Messages['ternPluginsPluginDescription'],
+                    	removable: false
                     }
                 },
                 getFile: _getFile
