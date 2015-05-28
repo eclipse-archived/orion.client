@@ -98,5 +98,8 @@ define({//Default message bundle
 	'keywordProposalDescription': ' - Keyword',
 	'keywordHoverProposal': 'ECMAScript reserved keyword',
 	'reloadPluginCmd': 'Reload',
-	'reloadPluginCmdTooltip': 'Reload content assist plug-in'
+	'reloadPluginCmdTooltip': 'Reload plug-in',
+	'reloadAllPluginsCmd': 'Reload All',
+	'reloadAllPluginsCmdTooltip': 'Reload all plug-ins',
+	'ternPlugins': 'Tern Plugins'
 });

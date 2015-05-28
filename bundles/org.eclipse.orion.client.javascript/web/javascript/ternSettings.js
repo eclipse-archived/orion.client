@@ -36,7 +36,20 @@ define([
 			var node = document.createElement("div"); //$NON-NLS-1$
 			var entryNode = document.createElement("div"); //$NON-NLS-1$
 			entryNode.classList.add("plugin-entry"); //$NON-NLS-1$
-			node.appendChild(entryNode);
+			
+			var cmdNode = document.createElement("span");
+			cmdNode.classList.add("plugin-commands");
+			var reloadPluginsCommand = new mCommands.Command({
+				name: messages["reloadPluginCmd"],
+				tooltip: messages["reloadPluginCmdTooltip"],
+				id: "javascript.reloadTernPlugin", //$NON-NLS-0$
+				callback: function(){console.log("Reloading of Tern plugins is not supported yet");}/*this.reloadPlugins.bind(this)*/
+			});
+			this.commandService.addCommand(reloadPluginsCommand);
+			this.commandService.registerCommandContribution("ternPluginCommands", "javascript.reloadTernPlugin", 2); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.renderCommands("ternPluginCommands", cmdNode, this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			entryNode.appendChild(cmdNode);
+			
 			if (item.name){
 				var nameNode = document.createElement("div"); //$NON-NLS-1$
 				nameNode.classList.add("plugin-title"); //$NON-NLS-1$
@@ -48,9 +61,8 @@ define([
 				descNode.textContent = item.description;
 				entryNode.appendChild(descNode);
 			}
-//			var cmdNode = document.createElement("span");
-//			entryNode.appendChild(cmdNode);
-//			this.commandService.renderCommands("pluginCommand", entryNode, null, this, "tool"); //$NON-NLS-1$ //$NON-NLS-0$
+			
+			node.appendChild(entryNode);
 			return node;
 		}
 	};
@@ -76,7 +88,7 @@ define([
 						'<div id="pluginSectionHeader" class="pluginSectionHeader sectionWrapper toolComposite">' +  /* pluginSectionHeader */ //$NON-NLS-0$
 							'<div class="sectionAnchor sectionTitle layoutLeft"></div>' + /* pluginTitle */ //$NON-NLS-0$
 							'<div class="sectionItemCount layoutLeft">0</div>' + /* pluginCount */ //$NON-NLS-0$
-							'<div id="pluginCommands" class="pluginCommands layoutRight sectionActions"></div>' + /* pluginCommands */ //$NON-NLS-0$
+							'<div id="ternPluginCommands" class="pluginCommands layoutRight sectionActions"></div>' + /* pluginCommands */ //$NON-NLS-0$
 						'</div>' + //$NON-NLS-0$
 
 				        '<div class="displaytable layoutBlock sectionTable">' + //$NON-NLS-0$
@@ -96,7 +108,7 @@ define([
 			this.pluginSectionHeader = lib.$(".pluginSectionHeader", this.node); //$NON-NLS-0$
 			this.pluginTitle = lib.$(".sectionAnchor", this.node); //$NON-NLS-0$
 			this.pluginCount = lib.$(".sectionItemCount", this.node); //$NON-NLS-0$
-			this.pluginCommands = lib.$(".pluginCommands", this.node); //$NON-NLS-0$	
+			this.pluginCommands = lib.$(".ternPluginCommands", this.node); //$NON-NLS-0$	
 			this.pluginList = lib.$(".plugin-list", this.node); //$NON-NLS-0$
 			this.postCreate();
 		},
@@ -125,7 +137,7 @@ define([
 			this.createElements();
 			this.updateToolbar();
 			
-//			// set up the toolbar level commands	
+			// set up the toolbar level commands	
 //			var installPluginCommand = new mCommands.Command({
 //				name: messages["Install"],
 //				tooltip: messages["PlugInstallByURL"],
@@ -142,17 +154,21 @@ define([
 //			});
 //			
 //			this.commandService.addCommand(installPluginCommand);
-//			
-//			this.commandService.registerCommandContribution("pluginCommands", "orion.installPlugin", 2, /* not grouped */ null, false, /* no key binding yet */ null, new mCommandRegistry.URLBinding("installPlugin", "url")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-//			var reloadAllPluginsCommand = new mCommands.Command({
-//				name: messages["Reload all"],
-//				tooltip: messages["ReloadAllPlugs"],
-//				id: "orion.reloadAllPlugins", //$NON-NLS-0$
-//				callback: this.reloadPlugins.bind(this)
-//			});
+			
+//			this.commandService.registerCommandContribution("ternPluginCommands", "orion.installPlugin", 2, /* not grouped */ null, false, /* no key binding yet */ null, new mCommandRegistry.URLBinding("installPlugin", "url")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var reloadAllPluginsCommand = new mCommands.Command({
+				name: messages["reloadAllPluginsCmd"],
+				tooltip: messages["reloadAllPluginsCmdTooltip"],
+				id: "javascript.reloadAllTernPlugins", //$NON-NLS-0$
+				callback: function(){console.log("Reloading of Tern plugins is not supported yet");}/*this.reloadPlugins.bind(this)*/
+			});
+
+			this.commandService.addCommand(reloadAllPluginsCommand);
+			// register these with the toolbar
+			this.commandService.registerCommandContribution("ternPluginsCommands", "javascript.reloadAllTernPlugins", 3); //$NON-NLS-1$ //$NON-NLS-0$
 
 			// Render the commands in the heading, emptying any old ones.
-//			this.commandService.renderCommands("pluginCommands", "pluginCommands", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.renderCommands("ternPluginsCommands", "ternPluginCommands", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 	
 		render: function(referenceplugin){
@@ -191,7 +207,7 @@ define([
 					for (var i=0; i<keys.length; i++) {
 						pluginArray.push(plugins[keys[i]]);
 					}
-					_self.pluginTitle.textContent = "Tern Plugins";
+					_self.pluginTitle.textContent = messages["ternPlugins"];
 					_self.pluginCount.textContent = pluginArray.length;
 					pluginArray.sort(this._sortPlugins); 
 					_self.explorer = new PluginListExplorer(_self.commandService);
