@@ -110,7 +110,6 @@
             { name: "plugins/GitHubFilePlugin" },
             { name: "plugins/authenticationPlugin" },
             { name: "plugins/fileClientPlugin" },
-            { name: "plugins/gitBlamePlugin" },
             { name: "plugins/helpPlugin" },
             { name: "plugins/jslintPlugin" },
             { name: "plugins/languageToolsPlugin" },

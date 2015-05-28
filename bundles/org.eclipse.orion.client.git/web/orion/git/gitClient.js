@@ -141,6 +141,30 @@ eclipse.GitService = (function() {
 			return clientDeferred;
 		},
 		
+		getGitBlame: function(url) {
+			var service = this;
+			var clientDeferred = new Deferred();
+	
+			xhr("GET", url, { //$NON-NLS-1$
+				headers: {
+					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
+						"Content-Type": "application/json; charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				timeout: 15000,
+				handleAs: "json" //$NON-NLS-0$
+			}).then(
+
+			function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			},
+
+			function(error) {
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+
+			return clientDeferred;
+		},
+
 		stage: function(location){
 			var service = this;
 			

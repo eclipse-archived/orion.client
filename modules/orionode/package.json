@@ -52,7 +52,6 @@
     "cFPlugin",
     "deploy",
     "git-repository",
-    "gitBlamePlugin",
     "gitPlugin",
     "GerritFilePlugin",
     "GitHubFilePlugin",
