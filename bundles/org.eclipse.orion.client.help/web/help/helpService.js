@@ -31,7 +31,7 @@ define(["orion/xhr", "orion/URL-shim"], function(xhr) { //$NON-NLS-1$ //$NON-NLS
 		 * @return A deferred that will provide the array of child objects when complete
 		 */
 		fetchChildren: function(object) {
-			var objectUrl = new URL(object.Location, window.location).href + "/"; //$NON-NLS-0$
+			var objectUrl = new URL(object.Location, self.location).href + "/"; //$NON-NLS-0$
 			var url = new URL("toc", objectUrl); //$NON-NLS-0$
 			return xhr("GET", url.href, { //$NON-NLS-0$
 				headers: {
@@ -66,7 +66,7 @@ define(["orion/xhr", "orion/URL-shim"], function(xhr) { //$NON-NLS-1$ //$NON-NLS
 		 * @return A deferred that will be provided with the contents when available
 		 */
 		read: function(object) {
-			var url = new URL(object.Location, window.location);
+			var url = new URL(object.Location, self.location);
 			return xhr("GET", url.href, { //$NON-NLS-0$
 				timeout: 15000,
 				headers: { "Orion-Version": "1" }, //$NON-NLS-1$ //$NON-NLS-0$
@@ -77,7 +77,7 @@ define(["orion/xhr", "orion/URL-shim"], function(xhr) { //$NON-NLS-1$ //$NON-NLS
 		}
 	};
 
-	if (window.Blob) {
+	if (self.Blob) {
 		/**
 		 * Returns the binary contents of the file at the given location.
 		 *
@@ -86,7 +86,7 @@ define(["orion/xhr", "orion/URL-shim"], function(xhr) { //$NON-NLS-1$ //$NON-NLS
 		 * @return A deferred that will be provided with the binary contents when available
 		 */
 		HelpServiceImpl.prototype.readBlob = function(object, location) {
-			var url = new URL(object.Location, window.location);
+			var url = new URL(object.Location, self.location);
 			if (location) {
 				url = new URL(location, url);
 			}

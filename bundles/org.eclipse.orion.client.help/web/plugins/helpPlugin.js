@@ -9,21 +9,33 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(["orion/plugin", "help/helpService"], function(PluginProvider, mHelpService) {
-	var provider = new PluginProvider({
-		name: "Help Plugin", //$NON-NLS-0$
-		version: "1.0", //$NON-NLS-0$
-		description: "Help plugin that contributes Orion's Help content" //$NON-NLS-0$
-	});
+define(["require", "orion/plugin", "help/helpService"], function(require, PluginProvider, mHelpService) {
+	
+	function connect() {
+		var headers = {
+			name: "Help Plugin", //$NON-NLS-0$
+			version: "1.0", //$NON-NLS-0$
+			description: "Help plugin that contributes Orion's Help content" //$NON-NLS-0$
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
 
-	var serviceImpl = new mHelpService.HelpService();
-	var properties = {
-		root: {
-			Location: "../helpContent/Orion User Guide/Getting Started.md", //$NON-NLS-0$
-			Name: "Getting Started",
-			Directory: false
-		}
+	function registerServiceProviders(provider) {
+		var serviceImpl = new mHelpService.HelpService();
+		var properties = {
+			root: {
+				Location: require.toUrl("/helpContent/Orion User Guide/Getting Started.md"), //$NON-NLS-0$
+				Name: "Getting Started",
+				Directory: false
+			}
+		};
+		provider.registerService("orion.help.pages", serviceImpl, properties); //$NON-NLS-0$
+	}
+
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
 	};
-	provider.registerService("orion.help.pages", serviceImpl, properties); //$NON-NLS-0$
-	provider.connect();
 });

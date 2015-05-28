@@ -19,6 +19,22 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 	function getError(xhrResult) {
 		return new Error("Error loading " + xhrResult.args.url + " status: " + xhrResult.status);
 	}
+	
+	function qualify(url) {
+		return new URL(url, self.location.href).href;
+	}
+	function unqualify(url) {
+		url = qualify(url);
+		try {
+			if (typeof window === "undefined") {
+				return url.substring(self.location.href.indexOf(self.location.host) + self.location.host.length);
+			}
+			if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
+				return url.substring(parent.location.href.indexOf(parent.location.host) + parent.location.host.length);
+			}
+		} catch (e) {}
+		return url;
+	}
 
 	/**
 	 * @class Provides operations on users and users groups.
@@ -26,6 +42,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 	 */
 	function UsersService(serviceRegistry) {
 		EventTarget.attach(this);
+		this.api = unqualify(require.toUrl('/users'));
 		if(serviceRegistry){
 			this._serviceRegistry = serviceRegistry;
 			this._serviceRegistration = serviceRegistry.registerService(
@@ -38,7 +55,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 		getUsersListSubset : function(start, rows, onLoad) {
 			var ret = new Deferred();
 			var service = this;
-			var uri = "../users?start=" + start + "&rows=" + rows;
+			var uri = this.api + "?start=" + start + "&rows=" + rows;
 			xhr("GET", uri, { //$NON-NLS-1$ 
 				headers : {
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
@@ -61,7 +78,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 		getUsersList : function(onLoad) {
 			var ret = new Deferred();
 			var service = this;
-			xhr("GET", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
+			xhr("GET", this.api, { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
@@ -113,7 +130,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 				Password : userInfo.Password,
 				Email: userInfo.Email
 			};
-			return xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
+			return xhr("POST", this.api, { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {
 					"Content-Type": "application/json", //$NON-NLS-1$ //$NON-NLS-0$
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
@@ -196,7 +213,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 				Password : password,
 				Reset: true
 			};
-			return xhr("POST", "../users/" + username, { //$NON-NLS-1$ //$NON-NLS-0$
+			return xhr("POST", this.api + username, { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {
 					"Content-Type": "application/json; charset=UTF-8", //$NON-NLS-1$ //$NON-NLS-0$
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$

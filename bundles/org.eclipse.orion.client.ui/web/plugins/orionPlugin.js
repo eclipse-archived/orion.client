@@ -20,6 +20,8 @@ define([
 	"plugins/pageLinksPlugin",
 	"plugins/taskPlugin",
 	"plugins/webEditingPlugin",
+	"profile/userservicePlugin",
+	"plugins/helpPlugin",
 	"shell/plugins/shellPagePlugin",
 	"plugins/site/sitePlugin"
 ], function() {

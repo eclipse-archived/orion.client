@@ -23,7 +23,7 @@ define([
 		url = qualify(url);
 		try {
 			if (typeof window === "undefined") {
-				return location.substring(self.location.href.indexOf(self.location.host) + self.location.host.length);
+				return url.substring(self.location.href.indexOf(self.location.host) + self.location.host.length);
 			}
 			if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
 				return url.substring(parent.location.href.indexOf(parent.location.host) + parent.location.host.length);

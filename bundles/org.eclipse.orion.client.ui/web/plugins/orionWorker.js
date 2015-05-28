@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*globals importScripts orion*/
 /*eslint-env browser, amd*/
-importScripts("../orion/plugin.js", '../requirejs/require.min.js');
+importScripts("../orion/Deferred.js", "../orion/plugin.js", '../requirejs/require.min.js');
 var pluginProvider = new orion.PluginProvider();
 require({
 	baseUrl: '..',

@@ -13,7 +13,9 @@
 				i18n: 'requirejs/i18n'
 			}
 		});
-		require(["plugins/helpPlugin"]);
+		require(["plugins/helpPlugin"], function(plugin) {
+			plugin.connect();
+		});
 	</script>
 </head>
 <body>

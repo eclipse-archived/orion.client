@@ -15,7 +15,9 @@
 		  }
 		});
 
-		require(["profile/userservicePlugin"]);
+		require(["profile/userservicePlugin"], function(plugin) {
+			plugin.connect();
+		});
 		</script>
 	</head>
 	<body></body>
