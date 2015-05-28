@@ -1015,9 +1015,11 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                         };
                     }
                     channel.postMessage = function(message) {
-                        this.target.postMessage([(this.useStructuredClone ? message : JSON.stringify(message))]);
+                        this.target.postMessage((this.useStructuredClone ? message : JSON.stringify(message)), []);
                     };
-                    channel.target.onmessage = _messageHandler;
+                    channel.target.addEventListener("message", function(evt) {
+                    	_channelHandler(channel, evt);
+                    });
                 } else {
                     var iframe = document.createElement("iframe"); //$NON-NLS-0$
                     iframe.name = url + "_" + channel._startTime;
@@ -1187,24 +1189,27 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
 
         this.getState = internalRegistry.getState;
 
+		function _channelHandler(channel, event) {
+			try {
+                var message;
+                if (typeof channel.useStructuredClone === "undefined") {
+                    var useStructuredClone = typeof event.data !== "string"; //$NON-NLS-0$
+                    message = useStructuredClone ? event.data : JSON.parse(event.data);
+                    channel.useStructuredClone = useStructuredClone;
+                } else {
+                    message = channel.useStructuredClone ? event.data : JSON.parse(event.data);
+                }
+                channel.handler(message);
+            } catch (e) {
+                // not a valid message -- ignore it
+            }
+		}
 
-        function _messageHandler(event) { //$NON-NLS-0$
-            var source = event.source || event.srcElement;
+        function _messageHandler(event) {
+            var source = event.source;
             _channels.some(function(channel) {
                 if (source === channel.target) {
-                    try {
-                        var message;
-                        if (typeof channel.useStructuredClone === "undefined") {
-                            var useStructuredClone = typeof event.data !== "string"; //$NON-NLS-0$
-                            message = useStructuredClone ? event.data : JSON.parse(event.data);
-                            channel.useStructuredClone = useStructuredClone;
-                        } else {
-                            message = channel.useStructuredClone ? event.data : JSON.parse(event.data);
-                        }
-                        channel.handler(message);
-                    } catch (e) {
-                        // not a valid message -- ignore it
-                    }
+                    _channelHandler(channel, event);
                     return true; // e.g. break
                 }
             });

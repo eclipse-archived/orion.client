@@ -9,5 +9,4 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*globals importScripts*/
-/*eslint-env browser, amd*/
 importScripts('orionWorker.js');

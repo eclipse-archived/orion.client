@@ -10,7 +10,16 @@
  ******************************************************************************/
 /*globals importScripts*/
 /*eslint-env browser, amd*/
-importScripts('../requirejs/require.js');
+importScripts("../orion/plugin.js");
+var login = new URL("../mixloginstatic/LoginWindow.html", self.location.href).href;
+var headers = {
+	name: "Orion Core Support",
+	version: "1.0",
+	description: "This plugin provides the core Orion support.",
+	login: login
+};
+var pluginProvider = new orion.PluginProvider(headers);
+importScripts('../requirejs/require.min.js');
 require({
 	baseUrl: '..',
 	// set the paths to our library packages
@@ -22,5 +31,7 @@ require({
 	}
 });
 require(["plugins/orionPlugin"], function(plugin) {
-	plugin.connect();
+//	plugin.connect();
+	plugin.registerServiceProviders(pluginProvider);
+	pluginProvider.connect();
 });

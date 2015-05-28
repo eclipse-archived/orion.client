@@ -99,7 +99,9 @@
                 } else {
                     heartbeat();
                 }
-                port.addEventListener("message",  _handleMessage);
+                port.addEventListener("message",  function(evt) {
+                	_handleMessage(evt, port);
+                });
                 port.start();
             });
         }
@@ -266,14 +268,12 @@
             }
         }
 
-        function _handleMessage(event) {
+        function _handleMessage(event, target) {
             if (!_shared && event.source !== _target && typeof window !== "undefined") {
                 return;
             }
             var data = event.data;
-            if (Array.isArray(data)) data = data[0];
             var message = (typeof data !== "string" ? data : JSON.parse(data)); //$NON-NLS-0$
-            var target = _shared ? event.srcElement : null;
             try {
                 if (message.method) { // request
                     var method = message.method,
