@@ -397,7 +397,6 @@
                 removeEventListener("message", _handleMessage); //$NON-NLS-0$
                 _ports.forEach(function(port) {
                     port.close();
-                    port.removeEventListener("message",  _handleMessage);
                 });
                 _ports = null;
                 _target = null;

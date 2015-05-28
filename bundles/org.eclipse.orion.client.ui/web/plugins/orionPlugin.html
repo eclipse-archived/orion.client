@@ -17,8 +17,8 @@
 			  domReady: 'requirejs/domReady'
 		  }
 		});	
-		require(["plugins/orionPlugin"], function(plugin) {
-			plugin.connect();
+		require(["orion/plugin", "plugins/orionPlugin"], function(PluginProvider, plugin) {
+			plugin.connect(new PluginProvider());
 		});
 		</script>
 </head>
