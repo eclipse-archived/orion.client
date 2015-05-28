@@ -156,7 +156,7 @@ define([
 	 */
 	var PropertiesWidget = function(options, parentNode) {
 		objects.mixin(this, options);
-		if (!parentNode) { throw new Error("parentNode is required"); }
+		if (!parentNode) { throw new Error("parentNode is required"); } //$NON-NLS-1$
 		this.node = parentNode;
 		this.messageService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 		this.updateMessage = i18nUtil.formatMessage(messages["SettingUpdateSuccess"], this.categoryTitle);
@@ -394,7 +394,7 @@ define([
 			}.bind(this)
 		});
 		commandRegistry.addCommand(restoreCommand);
-		commandRegistry.registerCommandContribution("restoreDefaults", "orion.pluginsettings.restore", 2); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("restoreDefaults", "orion.pluginsettings.restore", 2); //$NON-NLS-1$ //$NON-NLS-2$
 
 		this.render(this.parent, this.serviceRegistry, this.settings, this.title);
 	}
@@ -413,10 +413,10 @@ define([
 			    var setting = this.settings[i];
 			    if(pid) {
 			        if(setting.getPid() === pid) {
-				        deferreds.push(new ConfigController(this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset());
+				        deferreds.push(new ConfigController(this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
 				    }
 				} else {
-				    deferreds.push(new ConfigController(this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset());
+				    deferreds.push(new ConfigController(this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
 				}
 			}
 			if(deferreds.length > 0) { 
@@ -424,7 +424,7 @@ define([
     				this.parent.innerHTML = ""; // empty
     				
     				this.render(this.parent, this.serviceRegistry, this.settings, this.title);
-    				this.serviceRegistry.getService("orion.page.message").setProgressResult("Settings reset."); //$NON-NLS-0$
+    				this.serviceRegistry.getService("orion.page.message").setProgressResult(messages["settingsRestored"]); //$NON-NLS-1$
     			}.bind(this));
 			}
 		},
@@ -453,7 +453,7 @@ define([
 					{	tableElement: 'div', //$NON-NLS-0$
 						tableBodyElement: 'div', //$NON-NLS-0$
 						tableRowElement: 'div', //$NON-NLS-0$
-						noSelection: true, // Until we support selection based commands, don't allow selection
+						noSelection: true // Until we support selection based commands, don't allow selection
 					});
 			}
 		}
