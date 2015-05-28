@@ -692,7 +692,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			if (!annotationModel) { return null; }
 			var annotationStyler = this._annotationStyler;
 			if (!annotationStyler) { return null; }
-			if (!textView.isValidLineIndex(y)) { return null; }
+			if (!textView.isValidTextPosition(x, y)) { return null; }
 			var offset = textView.getOffsetAtLocation(x, y);
 			if (offset === -1) { return null; }
 			offset = this.mapOffset(offset);

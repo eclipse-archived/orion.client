@@ -2163,15 +2163,32 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			return this._getLineIndex(y);
 		},
 		/**
-		 * @name isValidLineIndex
-		 * @description Return whether the given line pixel position, relative to the document, is inside a line of the document
+		 * @name isValidTextPosition
+		 * @description Return whether the given x/y pixel position, relative to the document, is inside of document text. 
+		 * 				This tests both whether the y position is below the text lines of the document as we as whether the
+		 * 				x position is within the text of the line.
 		 * @function
-		 * @param y {Number} [y] the line pixel
-		 * @returns returns {Boolean} true if the pixel position is within a line of the document
+		 * @param x {Number} [x] the x pixel position
+		 * @param y {Number} [y] the line pixel position
+		 * @returns returns {Boolean} true if the pixel position is over text content
 		 */
-		isValidLineIndex: function(y){
+		isValidTextPosition: function(x, y){
 			if (!this._clientDiv) { return false; }
-			return this._getLineIndex(y, true) >= 0;
+			// Check if we are within a valid line
+			var lineIndex = this._getLineIndex(y, true);
+			if (lineIndex < 0){
+				return false;
+			}
+			// Get the closest offset to the position
+			var line = this._getLine(lineIndex);
+			var offset = this.getOffsetAtLocation(x, y);
+			// If the closest offset is to the left of the character's bounds then position is outside the text on the line
+			var bounds = line.getBoundingClientRect(offset);
+			line.destroy();
+			if (x > bounds.right){
+				return false;
+			}
+			return true;
 		},
 		/**
 		 * Returns the top pixel position of a given line index relative to the beginning
