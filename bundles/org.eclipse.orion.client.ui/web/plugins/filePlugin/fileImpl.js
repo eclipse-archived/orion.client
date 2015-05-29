@@ -34,22 +34,52 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		return data;
 	}
 	
+	function _copyLocation(loc, remove, append) {
+		var result = loc;
+		if (remove) {
+			result = result.substring(0, result.lastIndexOf("/", result.length - (result[result.length - 1] === "/" ? 2 : 1)));
+		}
+		if (append) {
+			result += append;
+		}
+		return result
+	}
+	
+	//Note: this is very dependent on the server side code
+	function _copyLocations(target, source, remove, append) {
+		["Location", "ImportLocation", "ExportLocation"].forEach(function(key) {
+			if (source[key] && !target[key]) {
+				target[key] = _copyLocation(source[key], remove, append);
+			}
+		});
+		if (source.Git && !target.Git) {
+			target.Git = {};
+			target.Git.CloneLocation = source.Git.CloneLocation;
+			target.Git.DefaultRemoteBranchLocation = source.Git.DefaultRemoteBranchLocation;
+			Object.keys(source.Git).forEach(function(key) {
+				if (!target.Git[key]) {
+					target.Git[key] = _copyLocation(source.Git[key], remove, append);
+				}
+			});
+		}
+		if (source.JazzHub && !target.JazzHub) {
+			target.JazzHub = source.JazzHub;
+		}
+	}
+	
 	function expandLocations(metadata) {
 		if (!metadata.Parents) return;
-		var dir = metadata.Directory;
-		var location = metadata.Location;
-		metadata.Parents.forEach(function(parent) {
-			location = location.substring(0, location.lastIndexOf("/", dir ? location.length - 2 : location.length - 1) + 1);
-			dir = true;
-			parent.Location = location;
-			parent.ChildrenLocation = location + "?depth=1";
-			parent.Children.forEach(function(child) {
-				child.Location = location + child.Name;
+		var temp = metadata;
+		metadata.Parents.forEach(function(p) {
+			_copyLocations(p, temp, true, "/");
+			p.ChildrenLocation = p.Location + "?depth=1";
+			p.Children.forEach(function(child) {
+				_copyLocations(child, p, false, child.Name + (child.Directory ? "/" : ""));
 				if (child.Directory) {
-					child.Location += "/";
 					child.ChildrenLocation = child.Location + "?depth=1";
 				}
 			});
+			temp = p;
 		});
 	}
 	
