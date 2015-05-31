@@ -17,6 +17,7 @@
 define([
 'orion/plugin',
 'orion/bootstrap',
+'orion/Deferred',
 'orion/fileClient',
 'orion/metrics',
 'esprima',
@@ -40,7 +41,7 @@ define([
 'orion/editor/stylers/application_schema_json/syntax',
 'orion/editor/stylers/application_x-ejs/syntax',
 'i18n!javascript/nls/messages'
-], function(PluginProvider, Bootstrap, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, 
+], function(PluginProvider, Bootstrap, Deferred, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, 
 			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, Util, Logger, GenerateDocCommand, OpenDeclCommand, RenameCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
     var provider = new PluginProvider({
@@ -174,7 +175,7 @@ define([
     			switch(_d.request) {
     				case 'installed_plugins': {
     					var plugins = _d.plugins;
-    					return prefService.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
+    					return prefService ? prefService.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
 							var props = prefs.get("tern"); //$NON-NLS-1$
 							if (!props) {
 								props = Object.create(null);
@@ -182,7 +183,7 @@ define([
 							props["plugins"] = plugins;
 							prefs.put("tern", props); //$NON-NLS-1$
 							prefs.sync(true);
-						});
+						}) : new Deferred().resolve();
     				}
     			}
 	    	} else if(typeof(evnt.data) === 'string') {

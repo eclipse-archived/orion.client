@@ -140,8 +140,13 @@ define([
 				textView.addKeyMode(this.vi);
 			}
 		},
-		setContents: function(fileExtension, contents) {
-			var currentLocation = fPattern + this.id + "/foo." + fileExtension;
+		setContents: function(contents, contentType) {
+			var cType = this.contentTypeRegistry.getContentType(contentType);
+			var fileExt = "txt";
+			if(cType && cType.extension && cType.extension.length > 0) {
+				fileExt = cType.extension[0];
+			}
+			var currentLocation = fPattern + this.id + "/foo." + fileExt;
 			var def;
 			if(currentLocation === this.lastFileLocation || !this.lastFileLocation) {
 				def = new Deferred().resolve();

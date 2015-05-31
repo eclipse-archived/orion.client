@@ -29,9 +29,9 @@ function(mEmbeddedEditor) {
 	var embeddedEditor = new mEmbeddedEditor();
 	embeddedEditor.create({parent: "embeddedEditor"}).then(function(editorViewer) {
 		document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
-		editorViewer.setContents("js", contents);
+		editorViewer.setContents(contents, "application/javascript");
 	});
 	embeddedEditor.create({parent: "embeddedEditor1",
-						   contentType: "html",
+						   contentType: "text/html",
 						   contents: contents1});
 });
