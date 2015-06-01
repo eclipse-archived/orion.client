@@ -421,6 +421,9 @@ define([
 									
 									// run command because it knows how to collect params first then check the status again
 									this._commandRegistry.runCommand("orion.launchConfiguration.checkStatus", launchConfiguration, this, null, null, this._statusLight); //$NON-NLS-0$
+								} else if(error.HttpCode === 401){
+									this._progressService.setProgressResult(error.Message);
+									this._commandRegistry.runCommand("orion.launchConfiguration.checkStatus", launchConfiguration, this, null, null, this._statusLight); //$NON-NLS-0$
 								} else {
 									this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
 								}

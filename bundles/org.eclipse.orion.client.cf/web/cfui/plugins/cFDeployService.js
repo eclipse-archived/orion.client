@@ -450,7 +450,21 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 					error = mCfUtil.defaultDecorateError(error, params.Target);
 					if (error.HttpCode === 404) {
 						return error;
-					} else {
+					}
+					if (error.HttpCode === 401) {
+						var errorHandler = mCfUtil.buildDefaultErrorHandler({
+							cFService : null,
+							showMessage : function(error){
+								console.log(error);
+							},
+							hideMessage : null,
+							showError : function(error){
+								console.log(error);
+							}
+						}).bind(this);
+						errorHandler(error, params.Target);
+						throw error;
+					}else {
 						throw error;
 					}
 				});
