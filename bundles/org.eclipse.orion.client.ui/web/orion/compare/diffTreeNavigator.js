@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/treeModelIterator', 'orion/compare/compareUtils', 'orion/editor/annotations', 'orion/compare/jsdiffAdapter'], function(mTreeModelIterator, mCompareUtils, mAnnotations, mJSDiffAdapter){
+define(['i18n!orion/compare/nls/messages', 'orion/treeModelIterator', 'orion/compare/compareUtils', 'orion/editor/annotations', 'orion/compare/jsdiffAdapter'], function(messages, mTreeModelIterator, mCompareUtils, mAnnotations, mJSDiffAdapter){
 
 var exports = {};
 
@@ -163,7 +163,7 @@ exports.DiffTreeNavigator = (function() {
 	
 	/*** registration of all the diff word annotation types ***/
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_ADDED_WORD, {
-		title: "word added", //$NON-NLS-0$
+		title: messages["word added"],
 		html: "",
 		rangeStyle: {styleClass: "annotationRange addedWordDiff"} //$NON-NLS-0$
 	});
@@ -174,7 +174,7 @@ exports.DiffTreeNavigator = (function() {
 	});
 	
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_DELETED_WORD, {
-		title: "word deleted", //$NON-NLS-0$
+		title: messages["word deleted"],
 		html: "",
 		rangeStyle: {styleClass: "annotationRange deletedWordDiff"} //$NON-NLS-0$
 	});
