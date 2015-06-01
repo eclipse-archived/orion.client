@@ -191,7 +191,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 
 		function deploy(progressMessage){
 			if(sharedLaunchConfigurationDispatcher && context.launchConfiguration){
-				context.launchConfiguration.status = {State: "PROGRESS", Message: progressMessage, ShortMessage: messages["deploying"]}; //$NON-NLS-1$ //$NON-NLS-0$
+				context.launchConfiguration.status = {State: "PROGRESS", Message: progressMessage, ShortMessage: messages["deploying"], Info: "Deploying" }; //$NON-NLS-1$ //$NON-NLS-0$
 				sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration }); //$NON-NLS-0$
 			}
 			
