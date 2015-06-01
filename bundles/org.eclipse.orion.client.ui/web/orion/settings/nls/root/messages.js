@@ -35,20 +35,11 @@ define({//Default message bundle
 	"12pt": "12pt",
 	"Color": "Color",
 	"Background": "Background",
-	"SingleQuotedStrings": "Strings (Single Quoted)",
-	"DoubleQuotedStrings": "Strings (Double Quoted)",
-	"String Types": "String Types",
 	"blue": "blue",
 	"Weight": "Weight",
 	"Normal": "Normal",
 	"Bold": "Bold",
-	"BlockComments": "Comments (Block)",
-	"LineComments": "Comments (Line)",
-	"Comment Types": "Comment Types",
 	"green": "green",
-	"ControlKeywords": "Keywords (Control)",
-	"OperatorKeywords": "Keywords (Operator)",
-	"Keyword Types": "Keyword Types",
 	"darkred": "darkred",
 	"Categories": "Categories",
 	"User Name": "User Name:",
@@ -59,11 +50,11 @@ define({//Default message bundle
 	"Current Password": "Current Password:",
 	"New Password": "New Password:",
 	"Verify Password": "Verify Password:",
-	"UserSettings.PasswordsDoNotMatch" : "New password, and retyped password do not match",
-	"UserSettings.TypeCurrentPassword" : "You must type your current password in order to set a new one",
-	"UserSettings.InvalidPasswordLength" : "Password must be at least 8 characters long",
-	"UserSettings.InvalidPasswordAlpha" : "Password must contain at least one alpha character and one non alpha character",
-	"UserSettings.PasswordRules" : "Password must be at least 8 characters long and contain at least one alpha character and one non alpha character",
+	"UserSettings.PasswordsDoNotMatch": "New password, and retyped password do not match",
+	"UserSettings.TypeCurrentPassword": "You must type your current password in order to set a new one",
+	"UserSettings.InvalidPasswordLength": "Password must be at least 8 characters long",
+	"UserSettings.InvalidPasswordAlpha": "Password must contain at least one alpha character and one non alpha character",
+	"UserSettings.PasswordRules": "Password must be at least 8 characters long and contain at least one alpha character and one non alpha character",
 	"Password": "Password",
 	"AOL": "AOL",
 	"Yahoo": "Yahoo",
@@ -110,8 +101,8 @@ define({//Default message bundle
 	"ReloadingAllPlugins": "Realoading all plugins",
 	"Delete": "Delete",
 	"DeletePlugFromConfig": "Delete this plugin from the configuration",
-	"DeleteUser" : "Delete User Profile as well as workspaces and projects",
-	"DeleteUserComfirmation" : "WARNING: This will permanently delete your user profile as well as all of your work!",
+	"DeleteUser": "Delete User Profile as well as workspaces and projects",
+	"DeleteUserComfirmation": "WARNING: This will permanently delete your user profile as well as all of your work!",
 	"TypePlugURL": "Type a plugin url here ...",
 	"Already installed": "Already installed",
 	"Installed":"Installed ${0}",
@@ -131,8 +122,8 @@ define({//Default message bundle
 	"SelectUnstagedChanges": "Always select changed files",
 	"Clear Git Credentials": "Clear Git Credentials",
 	"Enable Storage": "Enable Storage:",
-	"BrowserCredStoreMsg" : "Please be aware that your credentials will be stored persistently in the browser.",
-	"AskEnableKeyStorage" : "Do you wish to enable the Key Storage?",
+	"BrowserCredStoreMsg": "Please be aware that your credentials will be stored persistently in the browser.",
+	"AskEnableKeyStorage": "Do you wish to enable the Key Storage?",
 	"general": "General",
 	"validation": "Validation",
 	"DeletedGitMsg": "Deleted git credentials for ${0}",
@@ -151,7 +142,7 @@ define({//Default message bundle
 	"Export a theme": "Export a theme",
 	"Theme name:": "Theme name:",
 	"yourTheme": "yourTheme",
-	"fileManagement" : "File Management",
+	"fileManagement": "File Management",
 	"typing": "Typing",
 	"autoSave": "Auto Save:",
 	"autoSaveTimeout": "Save interval (ms):",
@@ -183,7 +174,7 @@ define({//Default message bundle
 	"autoSaveTimeoutInvalid": "Invalid save interval.",
 	"scrollAnimationTimeoutInvalid": "Invalid scrolling duration.",
 	"tabSizeInvalid": "Invalid tab size.",
-	"localSettingsTooltip" : "Toggle whether this setting is shown in the local editor settings drop down.",
+	"localSettingsTooltip": "Toggle whether this setting is shown in the local editor settings drop down.",
 	"editorSettingsInfo": "Use the ${0} and ${1} to toggle whether a given setting is shown in the local editor settings drop down ${2}.",
 	"autoPairParentheses": "Autopair (Parentheses):",
 	"autoPairBraces": "Autopair {Braces}:",
@@ -246,34 +237,43 @@ define({//Default message bundle
 	"Website": "Website",
 	"License": "License",
 	"Login": "Login",
-	'clearThemeAndEditorSettings.name': 'Clear themes and editor settings',  //$NON-NLS-0$  //$NON-NLS-1$
-	'clearThemeAndEditorSettings.tooltip': 'Clear all settings associated with editor themes and window themes',  //$NON-NLS-0$  //$NON-NLS-1$
+	'clearThemeAndEditorSettings.name': 'Clear themes and editor settings',
+	'clearThemeAndEditorSettings.tooltip': 'Clear all settings associated with editor themes and window themes',
 	"Settings": "Settings",
-	'EclipseThemeName': 'Eclipse',  //$NON-NLS-0$ //$NON-NLS-1$
-	'DarkerThemeName': 'Darker',  //$NON-NLS-0$ //$NON-NLS-1$
-	'ProspectoThemeName': 'Prospecto',  //$NON-NLS-0$ //$NON-NLS-1$
-	'BlueThemeName': 'Blue',  //$NON-NLS-0$  //$NON-NLS-1$
-	'AmbienceThemeName': 'Ambience',  //$NON-NLS-0$ //$NON-NLS-1$
-	'TierraThemeName': 'Tierra',  //$NON-NLS-0$  //$NON-NLS-1$
-	'NimbusThemeName': 'Nimbus',  //$NON-NLS-0$ //$NON-NLS-1$
-	'AdelanteThemeName': 'Adelante',  //$NON-NLS-0$ //$NON-NLS-1$
-	'Raspberry PiThemeName': 'Raspberry Pi',  //$NON-NLS-0$ //$NON-NLS-1$
-    'OrionThemeName': 'Orion',  //$NON-NLS-0$  //$NON-NLS-1$
-    'Orion2014ThemeName': 'Orion2014',  //$NON-NLS-0$  //$NON-NLS-1$
-    'Green ZoneThemeName': 'Green Zone',  //$NON-NLS-0$  //$NON-NLS-1$
-    'Pretty In PinkThemeName': 'Pretty In Pink',  //$NON-NLS-0$  //$NON-NLS-1$
-    'Blue MondayThemeName': 'Blue Monday',  //$NON-NLS-0$  //$NON-NLS-1$
-    'Vanilla SkiesThemeName': 'Vanilla Skies',  //$NON-NLS-0$  //$NON-NLS-1$
-    'BeetlejuiceThemeName': 'Beetlejuice',  //$NON-NLS-0$  //$NON-NLS-1$
-    'RedThemeName': 'Red',  //$NON-NLS-0$  //$NON-NLS-1$
     "SettingUpdateSuccess": "${0} settings successfully updated.",
     "buttonSave": "Save",
     "buttonRevert": " Revert",
     "ConfirmRestore": "Restore these settings to their default values?",
-    "Theme : " : "Theme : ",
-    "Display Language : " : "Display Language : ",
-    "cannotDeleteMsg" : " is a default theme that cannot be deleted",
-    "confirmDeleteMsg" : "Are you sure you want to delete this theme?",
-    "cannotModifyMsg" : "${0} is a default theme that cannot be modified. Please use another name.",
-    "settingsRestored" : "Settings restored."
+    "Theme : ": "Theme : ",
+    "Display Language : ": "Display Language : ",
+    "cannotDeleteMsg": " is a default theme that cannot be deleted",
+    "confirmDeleteMsg": "Are you sure you want to delete this theme?",
+    "cannotModifyMsg": "${0} is a default theme that cannot be modified. Please use another name.",
+    "settingsRestored": "Settings restored.",
+    "editorTheme font size": "Font size",
+    "editorTheme background": "Background",
+    "editorTheme font color": "Font color",
+    "editorTheme ruler background": "Ruler background",
+    "editorTheme ruler color": "Ruler color",
+    "editorTheme ruler border color": "Ruler border color",
+    "editorTheme current line background": "Current line background",
+    "editorTheme comment": "Comment",
+    "editorTheme language variable": "Language variable",
+    "editorTheme language constant": "Language constant",
+    "editorTheme number": "Number",
+    "editorTheme string": "String",
+    "editorTheme entity": "Entity",
+    "editorTheme keyword (control)": "Keyword (control)",
+    "editorTheme keyword (operator)": "Keyword (operator)",
+    "editorTheme function parameter": "Function parameter",
+    "editorTheme comparison and logical operators": "Comparison and logical operators",
+    "editorTheme write occurrence background": "Write occurrence background",
+    "editorTheme matching bracket background": "Matching bracket background",
+    "editorTheme matching search background": "Matching search background",
+    "editorTheme current search background": "Current search background",
+    "editorTheme documentation task color": "Documentation task color",
+    "editorTheme property name color": "Property name color",
+    "editorTheme tag": "Tag",
+    "editorTheme tag attribute": "Tag attribute",
+    "editorTheme selection background": "Selection background"
 });

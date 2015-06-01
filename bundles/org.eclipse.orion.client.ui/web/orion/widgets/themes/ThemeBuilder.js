@@ -33,139 +33,138 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mSetup, colors, u
 
 	var scopeList = [
 		{
-			display:"font size", //$NON-NLS-0$
-			objPath:["styles.fontSize"], //$NON-NLS-0$
-			id:"editorThemeFontSize", //$NON-NLS-0$
-			value:"" //$NON-NLS-0$
-		},{
-			display:"background", //$NON-NLS-0$
-			objPath:["styles.backgroundColor"], //$NON-NLS-0$
-			id:"editorThemeBackground", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"font color", //$NON-NLS-0$
-			objPath:["styles.color"], //$NON-NLS-0$
-			id:"editorThemeColor", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"ruler background", //$NON-NLS-0$
-			objPath:["styles.ruler.backgroundColor", "styles.ruler.overview.backgroundColor","styles.ruler.annotations.backgroundColor"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			id:"editorThemeRulerBackground", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"ruler color",//$NON-NLS-0$
-			objPath:["styles.rulerLines.color","styles.rulerLines.odd.color","styles.rulerLines.even.color"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			id:"editorThemeRulerColor", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"ruler border color",//$NON-NLS-0$
-			objPath:["styles.textviewLeftRuler.borderColor","styles.textviewRightRuler.borderColor"],  //$NON-NLS-1$ //$NON-NLS-0$
-			id:"editorThemeRulerBorderColor", //$NON-NLS-0$
-			value:defaultColor
-		},
-		{
-			display:"current line background",//$NON-NLS-0$
-			objPath:["styles.annotationLine.currentLine.backgroundColor"],  //$NON-NLS-0$
-			id:"editorThemeColorCurrentLineBackground",  //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"comment",//$NON-NLS-0$
-			objPath:["styles.comment.color","styles.comment.block.color","styles.comment.line.color"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			id:"editorThemeCommentColor",  //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"language variable",//$NON-NLS-0$
-			objPath:["styles.variable.language.color"], //$NON-NLS-0$
-			id:"editorThemeLanguageVariableColor",  //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"language constant",//$NON-NLS-0$
-			objPath:["styles.constant.color"], //$NON-NLS-0$
-			id:"editorThemeConstantColor",  //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"number",//$NON-NLS-0$
-			objPath:["styles.constant.numeric.color","styles.constant.numeric.hex.color"], //$NON-NLS-1$ //$NON-NLS-0$
-			id:"editorThemeNumericConstantColor",  //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"string",//$NON-NLS-0$
-			objPath:["styles.string.color","styles.string.quoted.double.color","styles.string.quoted.single.color"], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			id:"editorThemeStringColor",  //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"entity",//$NON-NLS-0$
-			objPath:["styles.entity.name.color","styles.entity.name.function.color"], //$NON-NLS-1$ //$NON-NLS-0$
-			id:"editorThemeColorEntityColor",  //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"keyword (control)",//$NON-NLS-0$
-			objPath:["styles.keyword.control.color"], //$NON-NLS-0$
-			id:"editorThemeControlColor", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"keyword (operator)",//$NON-NLS-0$
-			objPath:["styles.keyword.operator.color"], //$NON-NLS-0$
-			id:"editorThemeOperatorColor", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"function parameter",//$NON-NLS-0$
-			objPath:["styles.variable.parameter.color"], //$NON-NLS-0$
-			id:"editorThemeFunctionParameterColor", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"comparison and logical operators", //$NON-NLS-0$
-			objPath:["styles.punctuation.operator.color"], //$NON-NLS-0$
-			id:"editorThemeLogicalOperatorColor", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"write occurrence background", //$NON-NLS-0$
-			objPath:["styles.annotationRange.writeOccurrence.backgroundColor"], //$NON-NLS-0$
-			id:"editorThemeWriteOccurrence", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"matching bracket background",//$NON-NLS-0$
-			objPath:["styles.annotationRange.matchingBracket.backgroundColor", "styles.annotationRange.currentBracket.backgroundColor"],  //$NON-NLS-0$
-			id:"editorThemeMatchingBracket", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"matching search background",//$NON-NLS-0$
-			objPath:["styles.annotationRange.matchingSearch.backgroundColor"], //$NON-NLS-0$
-			id:"editorThemeMatchingSearch", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"current search background",//$NON-NLS-0$
-			objPath:["styles.annotationRange.matchingSearch.currentSearch.backgroundColor"], //$NON-NLS-0$
-			id:"editorThemeCurrentSearch", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"documentation task color",//$NON-NLS-0$
-			objPath:["styles.keyword.other.documentation.task.color"], //$NON-NLS-0$
-			id:"editorThemeDocumentationTask", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"CSS property name color",//$NON-NLS-0$
-			objPath:["styles.support.type.propertyName.color"], //$NON-NLS-0$
-			id:"editorThemePropertyName", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"HTML tag",//$NON-NLS-0$
-			objPath:["styles.meta.tag.color"], //$NON-NLS-0$
-			id:"editorThemeMetaTag", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"HTML attribute",//$NON-NLS-0$
-			objPath:["styles.meta.tag.attribute.color"], //$NON-NLS-0$
-			id:"editorThemeMetaTagAttribute", //$NON-NLS-0$
-			value:defaultColor
-		},{
-			display:"selection background",//$NON-NLS-0$
-			objPath:["styles.textviewContent ::selection.backgroundColor", "styles.textviewContent ::-moz-selection.backgroundColor", "styles.textviewSelection.backgroundColor", "styles.textviewSelectionUnfocused.backgroundColor"], //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			id:"editorSelection", //$NON-NLS-0$
-			value:defaultColor
+			display: messages["editorTheme font size"], //$NON-NLS-0$
+			objPath: ["styles.fontSize"], //$NON-NLS-0$
+			id: "editorThemeFontSize", //$NON-NLS-0$
+			value: "" //$NON-NLS-0$
+		}, {
+			display: messages["editorTheme background"], //$NON-NLS-0$
+			objPath: ["styles.backgroundColor"], //$NON-NLS-0$
+			id: "editorThemeBackground", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme font color"], //$NON-NLS-0$
+			objPath: ["styles.color"], //$NON-NLS-0$
+			id: "editorThemeColor", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme ruler background"], //$NON-NLS-0$
+			objPath: ["styles.ruler.backgroundColor", "styles.ruler.overview.backgroundColor","styles.ruler.annotations.backgroundColor"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			id: "editorThemeRulerBackground", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme ruler color"],//$NON-NLS-0$
+			objPath: ["styles.rulerLines.color","styles.rulerLines.odd.color","styles.rulerLines.even.color"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			id: "editorThemeRulerColor", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme ruler border color"],//$NON-NLS-0$
+			objPath: ["styles.textviewLeftRuler.borderColor","styles.textviewRightRuler.borderColor"],  //$NON-NLS-1$ //$NON-NLS-0$
+			id: "editorThemeRulerBorderColor", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme current line background"],//$NON-NLS-0$
+			objPath: ["styles.annotationLine.currentLine.backgroundColor"],  //$NON-NLS-0$
+			id: "editorThemeColorCurrentLineBackground",  //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme comment"],//$NON-NLS-0$
+			objPath: ["styles.comment.color","styles.comment.block.color","styles.comment.line.color"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			id: "editorThemeCommentColor",  //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme language variable"],//$NON-NLS-0$
+			objPath: ["styles.variable.language.color"], //$NON-NLS-0$
+			id: "editorThemeLanguageVariableColor",  //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme language constant"],//$NON-NLS-0$
+			objPath: ["styles.constant.color"], //$NON-NLS-0$
+			id: "editorThemeConstantColor",  //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme number"],//$NON-NLS-0$
+			objPath: ["styles.constant.numeric.color","styles.constant.numeric.hex.color"], //$NON-NLS-1$ //$NON-NLS-0$
+			id: "editorThemeNumericConstantColor",  //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme string"],//$NON-NLS-0$
+			objPath: ["styles.string.color","styles.string.quoted.double.color","styles.string.quoted.single.color"], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			id: "editorThemeStringColor",  //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme entity"],//$NON-NLS-0$
+			objPath: ["styles.entity.name.color","styles.entity.name.function.color"], //$NON-NLS-1$ //$NON-NLS-0$
+			id: "editorThemeColorEntityColor",  //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme keyword (control)"],//$NON-NLS-0$
+			objPath: ["styles.keyword.control.color"], //$NON-NLS-0$
+			id: "editorThemeControlColor", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme keyword (operator)"],//$NON-NLS-0$
+			objPath: ["styles.keyword.operator.color"], //$NON-NLS-0$
+			id: "editorThemeOperatorColor", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme function parameter"],//$NON-NLS-0$
+			objPath: ["styles.variable.parameter.color"], //$NON-NLS-0$
+			id: "editorThemeFunctionParameterColor", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme comparison and logical operators"], //$NON-NLS-0$
+			objPath: ["styles.punctuation.operator.color"], //$NON-NLS-0$
+			id: "editorThemeLogicalOperatorColor", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme write occurrence background"], //$NON-NLS-0$
+			objPath: ["styles.annotationRange.writeOccurrence.backgroundColor"], //$NON-NLS-0$
+			id: "editorThemeWriteOccurrence", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme matching bracket background"],//$NON-NLS-0$
+			objPath: ["styles.annotationRange.matchingBracket.backgroundColor", "styles.annotationRange.currentBracket.backgroundColor"],  //$NON-NLS-0$
+			id: "editorThemeMatchingBracket", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme matching search background"],//$NON-NLS-0$
+			objPath: ["styles.annotationRange.matchingSearch.backgroundColor"], //$NON-NLS-0$
+			id: "editorThemeMatchingSearch", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme current search background"],//$NON-NLS-0$
+			objPath: ["styles.annotationRange.matchingSearch.currentSearch.backgroundColor"], //$NON-NLS-0$
+			id: "editorThemeCurrentSearch", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme documentation task color"],//$NON-NLS-0$
+			objPath: ["styles.keyword.other.documentation.task.color"], //$NON-NLS-0$
+			id: "editorThemeDocumentationTask", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme property name color"],//$NON-NLS-0$
+			objPath: ["styles.support.type.propertyName.color"], //$NON-NLS-0$
+			id: "editorThemePropertyName", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme tag"],//$NON-NLS-0$
+			objPath: ["styles.meta.tag.color"], //$NON-NLS-0$
+			id: "editorThemeMetaTag", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme tag attribute"],//$NON-NLS-0$
+			objPath: ["styles.meta.tag.attribute.color"], //$NON-NLS-0$
+			id: "editorThemeMetaTagAttribute", //$NON-NLS-0$
+			value: defaultColor
+		}, {
+			display: messages["editorTheme selection background"],//$NON-NLS-0$
+			objPath: ["styles.textviewContent ::selection.backgroundColor", "styles.textviewContent ::-moz-selection.backgroundColor", "styles.textviewSelection.backgroundColor", "styles.textviewSelectionUnfocused.backgroundColor"], //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			id: "editorSelection", //$NON-NLS-0$
+			value: defaultColor
 		}
 	];
-	
+
 	//initializes the default html structure
 	function init() {
 		ThemeBuilder.prototype.template = "<div class='editorSection'>" + //$NON-NLS-0$
