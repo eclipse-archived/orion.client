@@ -12,7 +12,7 @@
 define(["require", "orion/plugin", "profile/UsersService", "domReady!"], function(require, PluginProvider, UsersService) {
 	
 	function connect() {
-		var login = new URL(require.toUrl("/mixloginstatic/LoginWindow.html"), self.location.href).href;
+		var login = new URL(require.toUrl("mixloginstatic/LoginWindow.html"), self.location.href).href;
 		var headers = {
 			name: "Orion User Profile",
 			version: "1.0",
@@ -63,7 +63,7 @@ define(["require", "orion/plugin", "profile/UsersService", "domReady!"], functio
 	                                                                                                     {"type": "DateLong", "props": {"id": "pi_diskUsageTimestamp", "name" : "DiskUsageTimestamp"}, "label" : "Disk Usage Last Calculated:	"}
 	                                                                                                    ]
 	                            },
-	                          {"id": "oauthids", "name": "Manage External Accounts", "type": "iframe", "data" : {"src": new URL(require.toUrl("/mixloginstatic/manageExternalIds.html"), self.location.href).href}}
+	                          {"id": "oauthids", "name": "Manage External Accounts", "type": "iframe", "data" : {"src": new URL(require.toUrl("mixloginstatic/manageExternalIds.html"), self.location.href).href}}
 	                            ]
 			};
 	

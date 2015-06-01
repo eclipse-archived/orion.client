@@ -26,7 +26,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/plugin", "help/helpSer
 		var serviceImpl = new mHelpService.HelpService();
 		var properties = {
 			root: {
-				Location: require.toUrl("/helpContent/Orion User Guide/Getting Started.md"), //$NON-NLS-0$
+				Location: require.toUrl("helpContent/Orion User Guide/Getting Started.md"), //$NON-NLS-0$
 				Name: messages["Getting Started"],
 				Directory: false
 			}

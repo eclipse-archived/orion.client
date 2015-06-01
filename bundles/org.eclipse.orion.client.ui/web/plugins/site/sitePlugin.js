@@ -41,7 +41,7 @@ define([
 	}
 
 	function connect() {
-		var login = qualify(require.toUrl('/mixloginstatic/LoginWindow.html'));
+		var login = qualify(require.toUrl('mixloginstatic/LoginWindow.html'));
 		var headers = {
 			name: "Orion Site Service",
 			version: "1.0",
@@ -55,9 +55,9 @@ define([
 
 	function registerServiceProviders(provider) {
 		// Tightly coupled to the fileClientPlugin
-		var siteBase = unqualify(require.toUrl('/site'));
-		var fileBase = unqualify(require.toUrl('/file'));
-		var workspaceBase = unqualify(require.toUrl('/workspace'));
+		var siteBase = unqualify(require.toUrl('site'));
+		var fileBase = unqualify(require.toUrl('file'));
+		var workspaceBase = unqualify(require.toUrl('workspace'));
 		//console.log("sitePlugin siteBase:" + siteBase + ", fileBase:" + fileBase + ", workspaceBase:" + workspaceBase);
 		var host = new URL("/", self.location.href);
 	

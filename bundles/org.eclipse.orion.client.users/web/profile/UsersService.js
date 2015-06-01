@@ -42,7 +42,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 	 */
 	function UsersService(serviceRegistry) {
 		EventTarget.attach(this);
-		this.api = unqualify(require.toUrl('/users'));
+		this.api = unqualify(require.toUrl('users'));
 		if(serviceRegistry){
 			this._serviceRegistry = serviceRegistry;
 			this._serviceRegistration = serviceRegistry.registerService(
