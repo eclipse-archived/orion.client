@@ -59,6 +59,7 @@ define({//Default message bundle
 	"setUpYourCloud.Go": "Set up your Cloud. Go to [Settings](${0}).",
 	"service${0}NotFoundsetUpYourService.Go${1}" : "Service instance ${0} cannot be found in target space. Go to [Dashboard](${1}) and create the service.",
 	"loggingInTo${0}...": "Logging in to ${0}...",
+	"disablePopUp" : "Please disable your pop-up blocker and refresh the page",
 	"submit": "Submit",
 	"cloudApplications": "Cloud Applications",
 	"loggingInToCloudFoundry": "Logging in to Cloud Foundry",

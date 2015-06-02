@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2014 IBM Corporation and others.
+ * Copyright (c) 2010, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -1030,7 +1030,7 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                         channel._handshake = true;
                         channel._updateTimeout();
                     };
-                    iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
+                    iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups"; //$NON-NLS-0$
                     iframe.style.width = iframe.style.height = "100%"; //$NON-NLS-0$
                     iframe.frameBorder = 0;
                     (parent || _parent).appendChild(iframe);
