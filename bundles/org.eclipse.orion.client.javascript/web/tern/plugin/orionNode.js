@@ -10,26 +10,27 @@
  *     IBM Corporation - Allow original node.js plugin to find files in Orion workspace
  *******************************************************************************/
 /*eslint-env node, amd*/
+/*globals infer tern*/
 (function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
+  if (typeof exports === "object" && typeof module === "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require);
-  if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern"], mod);
-  mod(tern, tern);
-})(function(infer, tern, require) {
+  if (typeof define === "function" && define.amd) // AMD
+    return define(["../lib/infer", "../lib/tern", "./resolver"], mod);
+  mod(infer, tern);
+})(function(infer, tern, resolver, require) {
   "use strict";
 
   function resolvePath(base, path) {
-    if (path[0] == "/") return path;
+    if (path[0] === "/") return path;
     var slash = base.lastIndexOf("/"), m;
     if (slash >= 0) path = base.slice(0, slash + 1) + path;
     while (m = /[^\/]*[^\/\.][^\/]*\/\.\.\//.exec(path))
       path = path.slice(0, m.index) + path.slice(m.index + m[0].length);
-    return path.replace(/(^|[^\.])\.\//g, "$1");
+    return path.replace(/(^|[^\.])\.\//g, "$1"); //$NON-NLS-1$
   }
 
   function relativePath(from, to) {
-    if (from[from.length - 1] != "/") from += "/";
+    if (from[from.length - 1] !== "/") from += "/";
     if (to.indexOf(from) == 0) return to.slice(from.length);
     else return to;
   }
@@ -55,8 +56,8 @@
   }
 
   function resolveModule(server, name, parent) {
-    server.addFile(name, null, server._node.currentOrigin);
-    return getModule(server._node, name);
+  	server.addFile(name, null, parent);
+    return getModule(server._node, name); // fail case, don't die, just return any 'any' type
   }
 
   // Assume node.js & access to local file system
@@ -98,14 +99,22 @@
   }
 
   infer.registerFunction("nodeRequire", /* @callback */ function(_self, _args, argNodes) { //$NON-NLS-1$
-    if (!argNodes || !argNodes.length || argNodes[0].type != "Literal" || typeof argNodes[0].value !== "string")
+    if (!argNodes || !argNodes.length || argNodes[0].type !== "Literal" || typeof argNodes[0].value !== "string") {
       return infer.ANull;
+    }
     var cx = infer.cx(), server = cx.parent, data = server._node, name = argNodes[0].value;
     var locals = cx.definitions.node;
-    if (locals[name] && /^[a-z_]*$/.test(name)) return locals[name];
-
-    if (name in data.modules) return data.modules[name];
-
+    if (locals[name] && /^[a-z_]*$/.test(name)) {
+    	return locals[name];
+    }
+	
+	var _f = resolver.getResolved(name);
+	if(_f && _f.file !== undefined) {
+		name = _f.file;
+	}
+    if (name in data.modules) {
+    	return data.modules[name];
+    }
     var result;
     if (data.options.modules && data.options.modules.hasOwnProperty(name)) {
       var scope = buildWrappingScope(cx.topScope, name);
@@ -118,7 +127,9 @@
 
       var relative = /^\.{0,2}\//.test(name);
       if (relative) {
-        if (!currentFile) return argNodes[0].required || infer.ANull;
+        if (!currentFile) {
+        	return argNodes[0].required || infer.ANull;
+        }
         name = resolvePath(currentFile, name);
       }
       result = resolveModule(server, name, currentFile);
@@ -140,10 +151,10 @@
 
   function postLoadDef(data) {
     var cx = infer.cx(), mods = cx.definitions[data["!name"]]["!node"];
-    var data = cx.parent._node;
+    var _data = cx.parent._node;
     if (mods) for (var name in mods.props) {
       var origin = name.replace(/`/g, ".");
-      var mod = getModule(data, origin);
+      var mod = getModule(_data, origin);
       mod.origin = origin;
       mods.props[name].propagate(mod);
     }
@@ -154,7 +165,6 @@
       modules: Object.create(null),
       options: options || {},
       currentFile: null,
-      currentRequires: [],
       currentOrigin: null,
       server: server
     };
@@ -162,7 +172,6 @@
     server.on("beforeLoad", function(file) { //$NON-NLS-1$
       this._node.currentFile = resolveProjectPath(server, file.name);
       this._node.currentOrigin = file.name;
-      this._node.currentRequires = [];
       file.scope = buildWrappingScope(file.scope, this._node.currentOrigin, file.ast);
     });
 
@@ -182,35 +191,23 @@
     });
 
     return {defs: defs,
-            passes: {preCondenseReach: preCondenseReach,
-                     postLoadDef: postLoadDef}};
-  });
-
-  tern.defineQueryType("node_exports", { //$NON-NLS-1$
-    takesFile: true,
-    run: function(server, query, file) {
-      function describe(aval) {
-        var target = {}, type = aval.getType(false);
-        target.type = infer.toString(type, 3);
-        var doc = aval.doc || (type && type.doc), url = aval.url || (type && type.url);
-        if (doc) target.doc = doc;
-        if (url) target.url = url;
-        var span = tern.getSpan(aval) || (type && tern.getSpan(type));
-        if (span) tern.storeSpan(server, query, span, target);
-        return target;
-      }
-
-      var known = server._node.modules[resolveProjectPath(server, file.name)];
-      if (!known) return {};
-      var type = known.getType(false);
-      var resp = describe(known);
-      if (type instanceof infer.Obj) {
-        var props = resp.props = {};
-        for (var prop in type.props)
-          props[prop] = describe(type.props[prop]);
-      }
-      return resp;
-    }
+            passes: {
+            	preCondenseReach: preCondenseReach,
+                postLoadDef: postLoadDef,
+                /**
+                 * @callback
+                 */
+                postParse: function postParse(ast, text) {
+                	resolver.doPostParse(server, ast);
+                },
+                /**
+				 * @callback
+				 */
+				preInfer: function preInfer(ast, scope) {
+					resolver.doPreInfer(server);
+				}
+            }
+    };
   });
 /* eslint-disable missing-nls */
   var defs = {

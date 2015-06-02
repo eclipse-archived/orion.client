@@ -15,9 +15,9 @@
   if (typeof exports === "object" && typeof module === "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require("acorn/util/walk"));
   if (typeof define === "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", "acorn/util/walk"], mod);
+    return define(["../lib/infer", "../lib/tern", "acorn/util/walk", "./resolver"], mod);
   mod(infer, tern, walk);
-})(/* @callback */ function(infer, tern, walk) {
+})(/* @callback */ function(infer, tern, walk, resolver) {
   "use strict";
 
   function getRequire(data) {
@@ -75,7 +75,7 @@
    * @returns {Object} The mapped dependency or null if it could not be found
    */
   function getKnownModule(name, data) {
-  	var val = data.server._requireJS.resolved[name];
+  	var val = resolver.getResolved(name);
   	if(val && val.file) {
     	return data.interfaces[stripJSExt(val.file)];
     }
@@ -91,7 +91,7 @@
   function getModule(name, data) {
     var known = getKnownModule(name, data);
     if (!known) {
-      var val = data.server._requireJS.resolved[name];
+      var val = resolver.getResolved(name);
       if(val && val.file) {
 	      known = data.interfaces[stripJSExt(val.file)] = new infer.AVal;
 	      known.origin = val.file;
@@ -207,73 +207,6 @@
     }
   }
 
-  /**
-   * @description Rsolves the computed dependencies
-   * @param {TernServer} server The Tern server
-   * @since 9.0
-   */
-  function resolveDependencies(server) {
-    var keys = Object.keys(server._requireJS.resolved);
-    for (var i = 0; i < keys.length; i++) {
-      var key = keys[i];
-      var dep = server._requireJS.resolved[key];
-      if (dep) {
-      	continue;
-      }
-	  resolve(server, key);
-    }
-  }
-
-  /**
-   * @description Resolves the given key (logical name) via the server. This function starts an asynchronous job to resolve the
-   * script via the scriptResolver in the client
-   * @param {TernServer} server The server
-   * @param {String} key The logcial name to resolve
-   * @since 9.0
-   */
-  function resolve(server, key) {
-  	server.startAsyncAction();
-	server.options.getFile({logical: key}, function(err, _file) {
-	 	server._requireJS.resolved[key] = {
-	   		file: _file.file,
-	   		contents: _file.contents,
-	   		logical: _file.logical
-	   	};
-	   	server.finishAsyncAction(err);
-	});
-  }
-
-  /**
-   * @description Callback to cycle waiting for async jobs to finish
-   * @param {TernServer} server The server
-   */
-  function waitOnResolve(server) {
-    var done = function() {
-      //server.off("everythingFetched", done); //$NON-NLS-1$
-      clearTimeout(timeout);
-      doPreInfer(server);
-    };
-    //server.on("everythingFetched", done); //$NON-NLS-1$
-    var timeout = setTimeout(done, server.options.fetchTimeout);
-  }
-
-  function doPreInfer(server) {
-  	if(server.pending) {
-		return waitOnResolve(server);
-	}
-	var done = true;
-	var keys = Object.keys(server._requireJS.resolved);
-	for(var i = 0; i < keys.length; i++) {
-		if(server._requireJS.resolved[keys[i]]) {
-			continue;
-		}
-		done = false;
-		break;
-	}
-	if(!done) {
-		return waitOnResolve(server);
-	}
-  }
   tern.registerPlugin("orionRequire", function(server, options) { //$NON-NLS-1$
     server._requireJS = {
       interfaces: Object.create(null),
@@ -289,8 +222,6 @@
     server.on("reset", function() { //$NON-NLS-1$
       this._requireJS.interfaces = Object.create(null);
       this._requireJS.require = null;
-      this._requireJS.fileMap = Object.create(null);
-      this._requireJS.resolved = Object.create(null);
     });
     return {
       defs: defs,
@@ -307,27 +238,13 @@
 		 * @callback
 		 */
 		postParse: function postParse(ast, text) {
-			if(server._requireJS && Object.keys(server._requireJS.resolved).length > 0) {
-				return;
-			}
-			if(Array.isArray(ast.dependencies) && ast.dependencies.length > 0) {
-				for(var i = 0; i < ast.dependencies.length; i++) {
-					var _d = ast.dependencies[i].value;
-					if(_d) {
-						if(server._requireJS.resolved[_d]) {
-							continue; //we already resolved it, keep going
-						}
-						server._requireJS.resolved[_d] = null;
-					}
-				}
-				resolveDependencies(server);
-			}  	
+			resolver.doPostParse(server, ast);
 		},
 		/**
 		 * @callback
 		 */
 		preInfer: function preInfer(ast, scope) {
-			doPreInfer(server);
+			resolver.doPreInfer(server);
 		}
       }
     };

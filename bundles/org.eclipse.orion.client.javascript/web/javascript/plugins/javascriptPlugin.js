@@ -75,7 +75,7 @@ define([
     		               }
     		               ]
     	});
-    	
+
     	/**
     	 * Re-init
     	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=462878
@@ -155,9 +155,17 @@ define([
 		    						});	
 		    					} else {
 		    						var file = _d.args.file;
-		    						return fileClient.read(file).then(function(contents) {
-		    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:file}});	 //$NON-NLS-1$
-		    								});
+		    						try {
+			    						return fileClient.read(file).then(function(contents) {
+			    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:file}});	 //$NON-NLS-1$
+			    								},
+			    								function(err) {
+			    									ternWorker.postMessage({request: 'read', args: {file: file, message: err.toString(), error: 'Failed to read file '+file}}); //$NON-NLS-1$
+			    								});
+			    					}
+		    						catch(err) {
+		    							ternWorker.postMessage({request: 'read', args: {file: file, message: err.toString(), error: 'Failed to read file '+file}}); //$NON-NLS-1$
+		    						}
 		    					}
 		    					break;
 		    				}

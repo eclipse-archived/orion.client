@@ -19,6 +19,7 @@
   mod(infer, tern);
 })(/* @callback */ function(infer, tern) {
 
+/* eslint-disable missing-nls */
 	var defs = {
 		"!name": "amqp",
 		"this": "<top>",

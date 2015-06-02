@@ -9,6 +9,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*globals importScripts onmessage:true doctrine onconnect:true*/
 /*eslint-env node, browser*/
+/*globals importScripts */
 importScripts('../../requirejs/require.js', 'ternWorkerCore.js'); // synchronous //$NON-NLS-1$

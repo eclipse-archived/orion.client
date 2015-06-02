@@ -65,12 +65,12 @@ require({
                     	removable: true
                     	//depth: 1
                     },
-                   /* orionNode: {
+                   	orionNode: {
                     	name: Messages['orionNodePluginName'],
                     	description: Messages['orionNodePluginDescription'],
                     	removable: true
                     },
-                    orionAngular: {
+                  /*  orionAngular: {
                     	name: Messages['orionAngularPluginName'],
                     	description: Messages['orionAngularPluginDescription'],
                     	removable: true
@@ -199,15 +199,19 @@ require({
         var err = args.error;
         var contents = args.contents;
         var file = args.file;
-        var read = pendingReads[file];
-        if(typeof(read) === 'function') {
-            read(err, contents);
-             delete pendingReads[file];
+        var reads = pendingReads[file];
+        if(Array.isArray(reads)) {
+            var f = reads.shift();
+            if(typeof(f) === 'function') {
+            	f(err, contents);
+            }
         }
-        read = pendingReads[args.logical];
-        if(typeof(read) === 'function') {
-            read(err, {contents: contents, file:file, logical:args.logical});
-            delete pendingReads[args.logical];
+        reads = pendingReads[args.logical];
+        if(Array.isArray(reads)) {
+        	f = reads.shift();
+            if(typeof(f) === 'function') {
+            	f(err, {contents: contents, file:file, logical:args.logical});
+            }
         }
     }
     
@@ -230,14 +234,15 @@ require({
      * @param {Function} callback The callback once the file has been read or failed to read
      */
     function _getFile(file, callback) {
-    	if(file === 'warmup') {
-    		callback(null, null);
-    	} else if(ternserver) {
+    	if(ternserver) {
         	var _f = file;
            if(typeof(file) === 'object') {
            		_f = file.logical;
            }
-           pendingReads[_f] = callback;
+           if(!Array.isArray(pendingReads[_f])) {
+           		pendingReads[_f] = [];
+           }
+           pendingReads[_f].push(callback);
            post({request: 'read', args: {file:file}}); //$NON-NLS-1$
 	    } else {
 	       post(i18nUtil.formatMessage(Messages['failedReadRequest'], _f)); //$NON-NLS-1$
