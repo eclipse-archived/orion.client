@@ -435,7 +435,7 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/metrics'], function(req
 		this._localProvider = new LocalPreferencesProvider();
 		this._changeListeners = [];
 
-		defaultPreferencesLocation = defaultPreferencesLocation || (localStorage.onePlugin ? "defaults2.pref" : "defaults.pref"); //$NON-NLS-0$
+		defaultPreferencesLocation = defaultPreferencesLocation || "defaults.pref"; //$NON-NLS-0$
 		if (defaultPreferencesLocation.indexOf("://") === -1) { //$NON-NLS-0$
 			defaultPreferencesLocation = require.toUrl(defaultPreferencesLocation);
 		}
