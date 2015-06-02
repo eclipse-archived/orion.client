@@ -4547,6 +4547,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_handleTextInput: function (e) {
 			if (this._ignoreEvent(e)) { return; }
+			var isIME = this._imeOffset !== -1;
 			this._imeOffset = -1;
 			var selection = this._getWindow().getSelection();
 			if (
@@ -4602,8 +4603,12 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 						selections[i].end -= deltaEnd;
 					}
 					this._ignoreQueueUpdate = util.isSafari;
-					this._modifyContent({text: deltaText, selection: selections, _ignoreDOMSelection: true}, true);
-					this._ignoreQueueUpdate = false;
+					this._ignoreUpdate = isIME && util.isChrome && util.isWindows;
+					this._modifyContent({text: deltaText, selection: selections, _ignoreDOMSelection: true, _ignoreDOMSelection1: isIME && util.isChrome && util.isMac}, true);
+					if (this._ignoreUpdate) {
+						this._queueUpdate();
+					}
+					this._ignoreUpdate = this._ignoreQueueUpdate = false;
 				}
 			} else {
 				this._doContent(e.data);
@@ -6528,7 +6533,12 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			} finally {
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = false; }
 			}
-			this._setSelection(e.selection, show, true, callback);
+			try {
+				if (e._ignoreDOMSelection1) { this._ignoreDOMSelection = true; }
+				this._setSelection(e.selection, show, true, callback);
+			} finally {
+				if (e._ignoreDOMSelection1) { this._ignoreDOMSelection = false; }
+			}
 			
 			undo = this._compoundChange;
 			if (undo) undo.owner.selection = e.selection;
@@ -7279,6 +7289,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_update: function(hScrollOnly) {
 			if (this._redrawCount > 0) { return; }
+			if (this._ignoreUpdate) { return; }
 			if (this._updateTimer) {
 				var window = this._getWindow();
 				window.clearTimeout(this._updateTimer);
