@@ -41,7 +41,9 @@ define([
 		this._editorCommands = new mEditorCommands.EditorCommandFactory({
 			serviceRegistry: this._serviceRegistry,
 			commandRegistry: this._commandRegistry,
-			fileClient: this._fileClient
+			fileClient: this._fileClient,
+			toolbarId: "_orion_hidden_actions",
+			navToolbarId: "_orion_hidden_actions"
 			/*
 			renderToolbars: this.renderToolbars.bind(this),
 			searcher: this.searcher,
@@ -54,6 +56,9 @@ define([
 		});
 		this._progressService = {
 			progress: function(deferred, operationName, progressMonitor){
+				return deferred;
+			},
+			showWhile: function(deferred, message, avoidDisplayError){
 				return deferred;
 			}
 		};			
@@ -74,6 +79,9 @@ define([
 			});
 			inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				evt.editor = this.editorView.editor;
+				this.pageActionsScope = "_orion_hidden_actions";
+				this._commandRegistry.destroy(this.pageActionsScope);
+				this._commandRegistry.renderCommands(this.pageActionsScope, this.pageActionsScope, evt.metadata, evt.editor, "tool"); //$NON-NLS-0$
 			}.bind(this));
 			inputManager.addEventListener("InputChanging", function(e) { //$NON-NLS-0$
 				e.editor = this.editorView.editor;
@@ -96,13 +104,14 @@ define([
 				inputManager: this._inputManager, // fake it
 				fileService: this._fileClient, // fake it
 				problemsServiceID: "orion.core.marker" + id, //$NON-NLS-0$
-				editContextServiceID: "orion.edit.context" + id, //$NON-NLS-0$
+				editContextServiceID: "orion.edit.context", //$NON-NLS-0$
 				editModelContextServiceID: "orion.edit.model.context" + id, //$NON-NLS-0$
 				readonly: false
 			};
 		},
 		createEditor: function(options) {
 			return this._editorCommands.createCommands().then(function() {
+				this._editorCommands.registerCommands();
 				this.createInputManager();
 				this.editorView = new mEditorView.EditorView(this.defaultOptions(options.parent));
 				idCounter++;
