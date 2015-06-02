@@ -607,7 +607,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					var last = prev;
 					var filteredArrayStyle = filteredArray[0].style;
 					
-					if (filteredArrayStyle && (0 === STYLES[filteredArrayStyle].indexOf(STYLES.noemphasis))) {
+					if (filteredArrayStyle && STYLES[filteredArrayStyle] && (0 === STYLES[filteredArrayStyle].indexOf(STYLES.noemphasis))) {
 						// the style of the first element starts with noemphasis
 						// add these proposals to the end of the array
 						first = prev;
