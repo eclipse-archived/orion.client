@@ -511,7 +511,7 @@ objects.mixin(EditorViewer.prototype, {
 				if (this.curFileNode) {
 					if (!this.dirtyIndicator) {
 						this.dirtyIndicator = document.createElement("span");
-						this.dirtyIndicator.classList.add("editorViewerHeaderTitle");
+						this.dirtyIndicator.classList.add("editorViewerHeaderDirtyIndicator");
 						this.dirtyIndicator.innerHTML = "*";
 						this.curFileNode.parentNode.insertBefore(this.dirtyIndicator, this.curFileNode);
 					}

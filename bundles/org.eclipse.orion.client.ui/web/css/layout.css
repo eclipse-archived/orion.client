@@ -383,6 +383,7 @@ hard-coded numbers elsewhere.
 .editorViewerHeader {
 	display:flex;
 	background: #37474F;
+	color: white;
 	flex-direction:row;
 	align-items:center;
 	line-height:26px;
@@ -391,7 +392,10 @@ hard-coded numbers elsewhere.
 
 .editorViewerHeaderTitle {
 	padding-left: 5px;
-	color: white;
+}
+
+.editorViewerHeaderDirtyIndicator {
+	padding-left: 5px;
 }
 
 .editorViewerContent {
