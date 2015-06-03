@@ -14,6 +14,7 @@
 		${skipOrionUI}      If set, the Orion pages and plugins will not be built
 		${skipCommitBrowser}   If set, the git commit browser widget will not be generated 
 		${skipEditor}       If set, the standalone editor will not be generated
+		${skipEmbeddedEditor}       If set, the embedded editor will not be generated
 		${skipEditorStylers}       If set, the standalone editor stylers will not be generated
 		${skipCompareEditor}       If set, the standalone compare editor will not be generated
 	-->
@@ -133,6 +134,7 @@
 				<not><isset property="skipCommitBrowser" /></not>
 				<not><isset property="skipEditor" /></not>
 				<not><isset property="skipCompareEditor" /></not>
+				<not><isset property="skipEmbeddedEditor" /></not>
 			</or>
 		</condition>
 	</target>
@@ -233,6 +235,55 @@
 		</sequential>
 	</target>
 				
+	<target name="embeddedEditorOptimize" unless="skipEmbeddedEditor">
+		<sequential>
+			<mkdir dir="${out}/codeEdit" />
+			<mkdir dir="${out}/codeEdit/code_edit" />
+			<mkdir dir="${out}/codeEdit/javascript" />
+			<mkdir dir="${out}/codeEdit/webtools" />
+			<mkdir dir="${out}/codeEdit/plugins" />
+			<mkdir dir="${out}/codeEdit/requirejs" />
+			<mkdir dir="${out}/codeEdit/javascript/plugins" />
+			<mkdir dir="${out}/codeEdit/webtools/plugins" />
+			<widgetOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.css"
+				buildfile="${staging}/embeddedEditor.build-css.js"
+				optimize="closure"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.min.js"
+				buildfile="${staging}/embeddedEditor.build.js"
+				optimize="closure"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.js"
+				buildfile="${staging}/embeddedEditor.build.js"
+				optimize="none"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/codeEdit/javascript/plugins/javascriptPlugin.js"
+				buildfile="${staging}/embeddedJavascriptPlugin.build.js"
+				optimize="closure"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/codeEdit/webtools/plugins/webToolsPlugin.js"
+				buildfile="${staging}/embeddedWebtoolsPlugin.build.js"
+				optimize="closure"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/codeEdit/plugins/embeddedToolingPlugin.js"
+				buildfile="${staging}/embeddedToolingPlugin.build.js"
+				optimize="closure"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/ternWorker.js"
+				buildfile="${staging}/ternWorker.build.js"
+				optimize="closure"
+				staging="${staging}" />
+			<copy file="${out}/ternWorker.js" tofile="${out}/codeEdit/javascript/plugins/ternWorker.js" />
+			<copy file="${orionClient}/bundles/org.eclipse.orion.client.core/web/requirejs/require.min.js" tofile="${out}/codeEdit/requirejs/require.min.js" />
+			<copy file="${orionClient}/bundles/org.eclipse.orion.client.ui/web/embeddedEditor/plugins/javascriptPlugin.html" tofile="${out}/codeEdit/javascript/plugins/javascriptPlugin.html" />
+			<copy file="${orionClient}/bundles/org.eclipse.orion.client.ui/web/embeddedEditor/plugins/webToolsPlugin.html" tofile="${out}/codeEdit/webtools/plugins/webToolsPlugin.html" />
+			<copy file="${orionClient}/bundles/org.eclipse.orion.client.ui/web/embeddedEditor/plugins/embeddedToolingPlugin.html" tofile="${out}/codeEdit/plugins/embeddedToolingPlugin.html" />
+			<zip update="true" destfile="${out}/built-codeEdit.zip">
+				<fileset dir="${out}/codeEdit" />
+			</zip>
+		</sequential>
+	</target>
+
 	<target name="compareOptimize" unless="skipCompareEditor">
 		<sequential>
 			<widgetOptimizeFile out="${out}/built-compare.css"
@@ -389,6 +440,12 @@
 
 		<!-- build standalone compare editor (unless skipCompareEditor is set) -->
 		<antcall target="compareOptimize">
+			<param name="staging" value="${staging}" />
+			<param name="out" value="${widgetOutDirectory}" />
+		</antcall>
+
+		<!-- build embedded editor (unless skipEmbeddedEditor is set) -->
+		<antcall target="embeddedEditorOptimize">
 			<param name="staging" value="${staging}" />
 			<param name="out" value="${widgetOutDirectory}" />
 		</antcall>
