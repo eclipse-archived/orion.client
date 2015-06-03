@@ -435,7 +435,7 @@ define([
 				var dragEnter = function (evt) {
 					if (dragStartTarget) {
 						var copy = util.isMac ? evt.altKey : evt.ctrlKey;
-						dropEffect = evt.dataTransfer.dropEffect = copy ? "copy" : "move"; //$NON-NLS-1$ //$NON-NLS-0$
+						dropEffect = evt.dataTransfer.dropEffect = (copy ? "copy" : "move"); //$NON-NLS-1$ //$NON-NLS-0$
 					} else {
 						/* accessing dataTransfer.effectAllowed here throws an error on IE */
 						if (!util.isIE && (evt.dataTransfer.effectAllowed === "all" ||   //$NON-NLS-0$
@@ -459,7 +459,7 @@ define([
 				var dragOver = function (evt) {
 					if (dragStartTarget) {
 						var copy = util.isMac ? evt.altKey : evt.ctrlKey;
-						dropEffect = evt.dataTransfer.dropEffect = copy ? "copy" : "move"; //$NON-NLS-1$ //$NON-NLS-0$
+						dropEffect = evt.dataTransfer.dropEffect = (copy ? "copy" : "move"); //$NON-NLS-1$ //$NON-NLS-0$
 					} else {
 						// default behavior is to not trigger a drop, so we override the default
 						// behavior in order to enable drop.  
@@ -641,7 +641,20 @@ define([
 						deferred.then(function(result) {
 							var dispatcher = explorer.modelEventDispatcher;
 							dispatcher.dispatchEvent({type: isCopy ? "copy" : "move", oldValue: source, newValue: result, parent: item}); //$NON-NLS-1$ //$NON-NLS-0$
-						}, errorHandler);
+						}, function(error) {
+							if (error.status === 400 || error.status === 412) {
+								var resp = error.responseText;
+								if (typeof resp === "string") {
+									try {
+										resp = JSON.parse(resp);
+										resp.Message = messages[isCopy ? "CopyFailed" : "MoveFailed"];
+										error = resp;
+									} catch(error) {}
+								}
+							}
+							errorHandler(error);
+						}
+					);
 						
 					// webkit supports testing for and traversing directories
 					// http://wiki.whatwg.org/wiki/DragAndDropEntries
