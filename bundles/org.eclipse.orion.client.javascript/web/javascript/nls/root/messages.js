@@ -101,5 +101,6 @@ define({//Default message bundle
 	'reloadPluginCmdTooltip': 'Reload plug-in',
 	'reloadAllPluginsCmd': 'Reload All',
 	'reloadAllPluginsCmdTooltip': 'Reload all plug-ins',
-	'ternPlugins': 'Tern Plugins'
+	'ternPlugins': 'Tern Plugins',
+	'noDeclFound': 'No declaration was found to navigate to.'
 });

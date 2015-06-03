@@ -285,7 +285,7 @@ define([
     	);
     	
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
-    			new OpenDeclCommand.OpenDeclarationCommand(astManager, scriptresolver, ternWorker), 
+    			new OpenDeclCommand.OpenDeclarationCommand(astManager, scriptresolver, ternWorker, CUProvider), 
     			{
     		name: javascriptMessages["openDeclName"],  //$NON-NLS-0$
     		tooltip : javascriptMessages['openDeclTooltip'],  //$NON-NLS-0$

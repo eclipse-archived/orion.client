@@ -13,9 +13,9 @@
 define([
 'orion/objects',
 'javascript/finder',
-'javascript/compilationUnit',
-'orion/Deferred'
-], function(Objects, Finder, CU, Deferred) {
+'orion/Deferred',
+'i18n!javascript/nls/messages'
+], function(Objects, Finder, Deferred, Messages) {
 	
 	var cachedContext;
 	var deferred;
@@ -27,14 +27,16 @@ define([
 	 * @public
 	 * @param {javascript.ASTManager} ASTManager The backing AST manager
 	 * @param {javascript.ScriptResolver} Resolver The backing script resolver 
-	 * @param {TernWorker} ternWorker The running Tern worker 
+	 * @param {TernWorker} ternWorker The running Tern worker
+	 * @param {javascript.CUProvider} cuProvider
 	 * @returns {javascript.commands.OpenDeclarationCommand} A new command
 	 * @since 8.0
 	 */
-	function OpenDeclarationCommand(ASTManager, Resolver, ternWorker) {
+	function OpenDeclarationCommand(ASTManager, Resolver, ternWorker, cuProvider) {
 		this.astManager = ASTManager;
 		this.resolver = Resolver;
 		this.ternworker = ternWorker;
+		this.cuprovider = cuProvider;
 		this.ternworker.addEventListener('message', function(evnt) {
 			if(typeof(evnt.data) === 'object') {
 				var _d = evnt.data;
@@ -43,14 +45,14 @@ define([
 						if(origin !== _d.declaration.file) {
 							var options = {start: _d.declaration.start,
 											end: _d.declaration.end,
-											mode: 'split',
-											splitHint: 'vertical'};
+											mode: 'split', //$NON-NLS-1$
+											splitHint: 'vertical'}; //$NON-NLS-1$
 							deferred.resolve(cachedContext.openEditor(_d.declaration.file, options));
 						} else {
 							deferred.resolve(cachedContext.setSelection(_d.declaration.start, _d.declaration.end, true));
 						}
 					} else {
-						deferred.resolve();
+						deferred.resolve(cachedContext.setStatus(Messages['noDeclFound']));
 					}
 				}
 			}
@@ -70,7 +72,7 @@ define([
 		            var offset = options.offset;
 		            var blocks = Finder.findScriptBlocks(text);
 		            if(blocks && blocks.length > 0) {
-		                var cu = new CU(blocks, {location:options.input, contentType:options.contentType});
+		                var cu = that.cuprovider.getCompilationUnit(blocks, {location:options.input, contentType:options.contentType});
     			        if(cu.validOffset(offset)) {
     			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
     			               return that._findDecl(editorContext, options, ast); 
@@ -85,8 +87,8 @@ define([
 			cachedContext = editorContext;
 			deferred = new Deferred();
 			origin = options.input;
-			var files = [{type: 'full', name: options.input, text: ast.source}];
-			this.ternworker.postMessage({request:'definition', args:{params:{offset: options.offset}, files: files, meta:{location: options.input}}});
+			var files = [{type: 'full', name: options.input, text: ast.source}]; //$NON-NLS-1$
+			this.ternworker.postMessage({request:'definition', args:{params:{offset: options.offset}, files: files, meta:{location: options.input}}}); //$NON-NLS-1$
 			return deferred;
 		}
 	});
