@@ -140,6 +140,7 @@ define([
 		this.saveToolbarId = options.saveToolbarId;
 		this.editToolbarId = options.editToolbarId;
 		this.pageNavId = options.navToolbarId;
+		this.editorContextMenuId = options.editorContextMenuId;
 		this.isReadOnly = options.readonly;
 		this.textSearcher = options.textSearcher;
 		this.searcher = options.searcher;
@@ -199,6 +200,7 @@ define([
 			if (this._recreateEditCommands) {
 				this._createEditCommands().then(function() {
 					this.registerCommands();
+					this.registerContextMenuCommands();
 					if (this.renderToolbars) {
 						this.renderToolbars();
 					}
@@ -236,6 +238,30 @@ define([
 				} else {
 					commandRegistry.registerCommandContribution(this.toolbarId, command.id, position, "orion.menuBarToolsGroup", info.bindingOnly, createKeyBinding(info.key), null, this); //$NON-NLS-0$
 				}
+			}
+		},
+		registerContextMenuCommands: function() {
+			var commandRegistry = this.commandService;
+			// main context menu
+			commandRegistry.addCommandGroup(this.editorContextMenuId, "orion.editorContextMenuGroup", 100, null, null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			var index = 1;
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.undo", index++, "orion.editorContextMenuGroup/orion.edit.undoGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.redo", index++, "orion.editorContextMenuGroup/orion.edit.undoGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.find", index++,"orion.editorContextMenuGroup/orion.findGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.searchFiles", index++, "orion.editorContextMenuGroup/orion.findGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.gotoLine", index++, "orion.editorContextMenuGroup/orion.findGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+
+			// 'Tools' cascade
+			commandRegistry.addCommandGroup(this.editorContextMenuId, "orion.editorContextMenuToolsGroup", 400, messages["Tools"], "orion.editorContextMenuGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.blame", 1, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.diff", 2, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+
+			// Register extra tools commands
+			var commands = this.getEditCommands();
+			for (var i = 0, position = 100; i < commands.length; i++, position++) {
+				var command = commands[i], info = command.editInfo;
+				this.commandService.registerCommandContribution(this.editorContextMenuId, command.id, position, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-1$
 			}
 		},
 		overwriteKeyBindings: function(editor) {

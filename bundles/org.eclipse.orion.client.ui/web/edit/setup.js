@@ -124,6 +124,7 @@ objects.mixin(MenuBar.prototype, {
 		var editorCommands = this.editorCommands;
 		return editorCommands.createCommands().then(function() {
 			editorCommands.registerCommands();
+			editorCommands.registerContextMenuCommands();
 			return mFileCommands.createFileCommands(serviceRegistry, commandRegistry, fileClient).then(function() {
 				return mExtensionCommands.createFileCommands(serviceRegistry, null, "all", true, commandRegistry).then(function() { //$NON-NLS-0$
 					var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
@@ -570,7 +571,8 @@ objects.mixin(EditorSetup.prototype, {
 			toolbarId: "toolsActions", //$NON-NLS-0$
 			saveToolbarId: "fileActions", //$NON-NLS-0$
 			editToolbarId: "editActions", //$NON-NLS-0$
-			navToolbarId: "pageNavigationActions" //$NON-NLS-0$
+			navToolbarId: "pageNavigationActions", //$NON-NLS-0$
+			editorContextMenuId: "editorContextMenuActions", //$NON-NLS-0$
 		});
 	},
 	
