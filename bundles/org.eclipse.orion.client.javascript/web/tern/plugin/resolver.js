@@ -11,7 +11,8 @@
  *******************************************************************************/
 /*eslint-env amd, browser*/
 define([
-], function() {
+	'orion/editor/templates'
+], function(mTemplates) {
 	
 	var _resolved = Object.create(null);
 	
@@ -107,13 +108,97 @@ define([
 		}  	
 	}
 	
-	function getResolved(name) {
-		return _resolved[name];
+	/**
+	 * @description Get the resolved file for the given logical name
+	 * @param {String} _name The logical name 
+	 * @sinnce 9.0
+	 */
+	function getResolved(_name) {
+		return _resolved[_name];
+	}
+	
+	/**
+	 * @description Returns the corresponding {orion.editor.Template} object for the given metadata
+	 * @private
+	 * @param {Object} meta The metadata about the template
+	 * @returns {orion.editor.Template} The corresponding template object
+	 * @since 9.0
+	 */
+	function _getTemplate(meta) {
+		if(meta.t) {
+			return meta.t;
+		}
+		var t = new mTemplates.Template(meta.prefix, meta.description, meta.template, meta.name);
+		meta.t = t;
+		return t;
+	}
+	
+	/**
+	 * @description Gets the template kind of node
+	 * @param {Object} node The AST node
+	 * @returns {Object} The kind object or null
+	 * @since 9.0
+	 */
+	function _getKind(node) {
+		if(node) {
+    		if(node.parents && node.parents.length > 0) {
+	    		var parent = node.parents.pop();
+	    		switch(parent.type) {
+						case 'MemberExpression': {
+							return { kind : 'member'}; //$NON-NLS-1$
+						}
+						case 'VariableDeclarator': {
+							return null;
+						}
+						case 'FunctionDelcaration':
+						case 'FunctionExpression': {
+							if(offset < parent.body.range[0]) {
+								return null;						
+							}
+							break;
+						}
+						case 'Property': {
+							if(offset-1 >= parent.value.range[0] && offset-1 <= parent.value.range[1]) {
+								return { kind : 'prop'}; //$NON-NLS-1$
+							}
+							return null;
+						}
+						case 'SwitchStatement': {
+							return {kind: 'swtch'}; //$NON-NLS-1$
+						}
+					}
+			}
+    	}
+		return {kind:'top'}; //$NON-NLS-1$
+	}
+
+	/**
+	 * @description Returns the templates that apply to the given completion kind
+	 * @public
+	 * @param {Array.<Object>} templates The array of raw template data 
+	 * @param {String} kind The kind of the completion
+	 * @returns {Array} The array of templates that apply to the given completion kind
+	 * @since 9.0
+	 */
+	function getTemplatesForNode(templates, node) {
+		var kind = _getKind(node);
+		if(kind && kind.kind) {
+			var tmplates = [];
+			var len = templates.length;
+			for(var i = 0; i < len; i++) {
+				var template = templates[i];
+				if(template.nodes && template.nodes[kind.kind]) {
+					tmplates.push(template);
+				}
+			}
+			return tmplates.map(_getTemplate, this);
+		}
 	}
 	
 	return {
 		doPostParse: doPostParse,
 		doPreInfer: doPreInfer,
-		getResolved: getResolved
+		getResolved: getResolved,
+		getTemplatesForNode: getTemplatesForNode
 	};
 });

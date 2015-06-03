@@ -11,7 +11,7 @@
  ******************************************************************************/
 /*eslint-env amd*/
 define([
-'orion/editor/templates' //$NON-NLS-0$
+'orion/editor/templates'
 ], function(mTemplates) {
 
 	var typeofValues = {
@@ -442,59 +442,6 @@ define([
 			template: "${db}.collection(${id}, {strict:true}, function(${error}, collection) {\n"+//$NON-NLS-0$
 					  "\t${cursor}\n" +  //$NON-NLS-0$
 					  "});"  //$NON-NLS-0$
-		},
-		{
-			prefix: "redis", //$NON-NLS-0$
-			name: "redis", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - Node.js require statement for Redis", //$NON-NLS-0$
-			template: "var ${name} = require('redis');\n" //$NON-NLS-0$
-		},
-		{
-			prefix: "redis", //$NON-NLS-0$
-			name: "redis client", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Redis client", //$NON-NLS-0$
-			template: "var ${name} = require('redis');\n" + //$NON-NLS-0$
-					  "var ${client} = ${name}.createClient(${port}, ${host}, ${options});\n"  //$NON-NLS-0$
-		},
-		{
-			prefix: "redis", //$NON-NLS-0$
-			name: "redis connect", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Redis client and connect", //$NON-NLS-0$
-			template: "var ${name} = require('redis');\n" + //$NON-NLS-0$
-					  "var ${client} = ${name}.createClient(${port}, ${host}, ${options});\n" +  //$NON-NLS-0$
-				  "try {\n" +  //$NON-NLS-0$
-					  "\t${cursor}\n"+  //$NON-NLS-0$
-					  "} finally {\n"+  //$NON-NLS-0$
-					  "\t${client}.close();\n"+  //$NON-NLS-0$
-				  "}\n"
-		},
-		{
-			prefix: "redis", //$NON-NLS-0$
-			name: "redis set", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Redis client set call", //$NON-NLS-0$
-			template: "client.set(${key}, ${value});\n" //$NON-NLS-0$
-		},
-		{
-			prefix: "redis", //$NON-NLS-0$
-			name: "redis get", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Redis client get call", //$NON-NLS-0$
-			template: "client.get(${key}, function(${error}, ${reply}) {\n"+  //$NON-NLS-0$
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-					  "});\n" //$NON-NLS-0$
-		},
-		{
-			prefix: "redis", //$NON-NLS-0$
-			name: "redis on", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Redis client event handler", //$NON-NLS-0$
-			template: "client.on(${event}, function(${arg}) {\n"+  //$NON-NLS-0$
-					  "\t${cursor}" +  //$NON-NLS-0$
-					  "});\n" //$NON-NLS-0$
 		},
 		{
 			prefix: "postgres", //$NON-NLS-0$

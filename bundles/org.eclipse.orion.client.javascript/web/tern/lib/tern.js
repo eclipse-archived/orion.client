@@ -531,6 +531,9 @@
     return pos;
   }
 
+//ORION
+  exports.resolvePos = resolvePos;
+
   function asLineChar(file, pos) {
     if (!file) return {line: 0, ch: 0};
     var offsets = file.lineOffsets || (file.lineOffsets = [0]);
@@ -651,7 +654,7 @@
       hookname = "completion";
     }
     if (srv.passes[hookname])
-      srv.passes[hookname].forEach(function(hook) {hook(file, wordStart, wordEnd, gather);});
+      srv.passes[hookname].forEach(function(hook) {hook(file, query, completions);}); //ORION
 
     if (query.sort !== false) completions.sort(compareCompletions);
     srv.cx.completingProperty = null;
