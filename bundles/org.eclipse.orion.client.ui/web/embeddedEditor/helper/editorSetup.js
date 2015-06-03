@@ -89,8 +89,11 @@ define([
 		},
 		defaultOptions: function(parentId) {
 			var model = new mTextModel.TextModel();
-			var id = idCounter === 0 ? "" : idCounter.toString();
+			var id = idCounter.toString();
+			var context = Object.create(null);
+			context.openEditor = function(fileurl, options){this.editorView.editor.setSelection(options.start, options.end);}.bind(this);
 			return {
+				activateContext: context,
 				id: id,
 				parent: parentId,
 				model: model,
@@ -104,7 +107,7 @@ define([
 				inputManager: this._inputManager, // fake it
 				fileService: this._fileClient, // fake it
 				problemsServiceID: "orion.core.marker" + id, //$NON-NLS-0$
-				editContextServiceID: "orion.edit.context", //$NON-NLS-0$
+				editContextServiceID: "orion.edit.context" + id, //$NON-NLS-0$
 				editModelContextServiceID: "orion.edit.model.context" + id, //$NON-NLS-0$
 				readonly: false
 			};
@@ -114,7 +117,7 @@ define([
 				this._editorCommands.registerCommands();
 				this.createInputManager();
 				this.editorView = new mEditorView.EditorView(this.defaultOptions(options.parent));
-				idCounter++;
+				//idCounter++;
 				this.editorView.create();
 				this._inputManager.editor = this.editorView.editor;
 				this._inputManager.setAutoSaveTimeout(300);

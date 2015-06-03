@@ -11,30 +11,30 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 /*global URL*/
-var _editor_script_source = null; //We need to know where the editor script lives
+var _code_edit_script_source = null; //We need to know where the editor script lives
 var _all_script = document.getElementsByTagName('script');
 if (_all_script && _all_script.length && _all_script.length > 0) {
 	for (var j = 0; j < 2; j++) { // try twice in all the script tags
 		for (var i = 0; i < _all_script.length; i++) {
 			if (j === 0) { //First try: if the script id is ""orion.browse.browser""
-				if (_all_script[i].id === "orion.editor.embeddedEditor") {
-					_editor_script_source = _all_script[i].src;
+				if (_all_script[i].id === "orion.codeEdit") {
+					_code_edit_script_source = _all_script[i].src;
 					break;
 				}
 			} else {
-				var regex = /.*built-embeddedEditor.*.js/;
+				var regex = /.*built-codeEdit.*.js/;
 				if (_all_script[i].src && regex.exec(_all_script[i].src)) {
-					_editor_script_source = _all_script[i].src;
+					_code_edit_script_source = _all_script[i].src;
 					break;
 				}
 			}
 		}
-		if (_editor_script_source) {
+		if (_code_edit_script_source) {
 			break;
 		}
 	}
-	if (!_editor_script_source) {
-		_editor_script_source = _all_script[_all_script.length - 1].src;
+	if (!_code_edit_script_source) {
+		_code_edit_script_source = _all_script[_all_script.length - 1].src;
 	}
 }
 define([
@@ -53,15 +53,9 @@ define([
 	var once; // Deferred
 	var fPattern = "/__embed/";
 	var defaultPluginURLs = [
-		"../plugins/webToolsPlugin_stand_alone.html",
-		"../plugins/javascriptPlugin_stand_alone.html",
-		"../plugins/webEditingPlugin.html",
-		"../plugins/languageToolsPlugin.html"
-		/*
-		"../../webtools/plugins/webToolsPlugin.html",
-		"../../javascript/plugins/javascriptPlugin.html",
-		"../../plugins/webEditingPlugin.html",
-		"../../plugins/languageToolsPlugin.html"*/
+		"../javascript/plugins/javascriptPlugin.html",
+		"../webtools/plugins/webToolsPlugin.html",
+		"../plugins/embeddedToolingPlugin.html"
 	];
 
 	function startup() {
@@ -84,7 +78,7 @@ define([
 		});
 		var plugins = {};
 		defaultPluginURLs.forEach(function(pluginURLString){
-			var pluginURL = new URL(pluginURLString, _editor_script_source);
+			var pluginURL = new URL(pluginURLString, _code_edit_script_source);
 			plugins[pluginURL.href] = {autostart: "lazy"};
 		});
 		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {

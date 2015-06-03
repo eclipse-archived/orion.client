@@ -22,23 +22,15 @@
 	},
 	paths: {
         almond: 'requirejs/almond',
-        i18n: 'requirejs/i18n',
-        text: 'requirejs/text',
-        //"orion/extensionCommands": "embeddedEditor/builder/buildFrom/emptyExtensionCommands",
-        "orion/globalCommands": "embeddedEditor/builder/buildFrom/emptyGlobalCommands",
-        'orion/webui/dialogs/OpenResourceDialog': 'embeddedEditor/builder/buildFrom/OpenResourceDialog',
-        'orion/explorers/navigatorRenderer': 'embeddedEditor/builder/buildFrom/navigatorRenderer',
-        'examples/editor/textStyler': 'embeddedEditor/builder/buildFrom/emptyTextStyler',
-        'orion/widgets/settings/EditorSettings': 'embeddedEditor/builder/buildFrom/EditorSettings',
-        'orion/searchAndReplace/textSearcher': 'embeddedEditor/builder/buildFrom/textSearcher',
-		'orion/editorPreferences': 'embeddedEditor/builder/buildFrom/editorPreferences',
-		'orion/widgets/themes/ThemePreferences': 'embeddedEditor/builder/buildFrom/ThemePreferences',
-		'orion/widgets/themes/editor/ThemeData': 'embeddedEditor/builder/buildFrom/ThemeData'
-        //"orion/editorCommands": "embeddedEditor/builder/buildFrom/emptyEditorCommands"
+  		text: 'requirejs/text',
+  		i18n: 'requirejs/i18n',
+  		domReady: 'requirejs/domReady'
 	},
+	packages: [
+	],
 	name: "almond",
 	//locales: ["ja", "zh", "zh-tw", "fr", "de", "it", "es", "pt-br"],						
-	include: "embeddedEditor/builder/embeddedEditor",
+	include: "plugins/embeddedToolingPlugin",
 	preserveLicenseComments: false,
 	uglify: {
 		ascii_only: true
@@ -49,13 +41,14 @@
 				if (typeof define === 'function' && define.amd) {\
 					define([], factory);\
 				} else {\
-					root.orion = root.orion || {};\n\
-					root.orion.codeEdit = factory();\
+					root.orion = root.orion || {};\
+					root.orion.webtools = root.orion.webtools || {};\
+					root.orion.webtools.embeddedTooling = factory();\
 				}\
 			}(this, function () {\
 		",
 		end: "\
-				return require('embeddedEditor/builder/embeddedEditor');\
+				return require('plugins/embeddedToolingPlugin');\
 			}));\
 		"
 	}
