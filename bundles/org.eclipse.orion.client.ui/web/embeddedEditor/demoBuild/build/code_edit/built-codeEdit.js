@@ -41163,6 +41163,9 @@ define('orion/editorView',[
 	 */
 	function EditorView(options) {
 		this._parent = options.parent;
+		if(typeof this._parent === "string") {
+			this._parent = document.getElementById(options.parent);
+		}
 		this.id = options.id || "";
 		this.activateContext = options.activateContext;
 		this.renderToolbars = options.renderToolbars;
@@ -41657,9 +41660,7 @@ define('orion/editorView',[
 			}
 			
 			// Create a context menu...
-			if(this._parent.parentNode) {
-				this._createContextMenu();
-			}
+			this._createContextMenu();
 		},
 		destroy: function() {
 			this.editor.uninstall();
