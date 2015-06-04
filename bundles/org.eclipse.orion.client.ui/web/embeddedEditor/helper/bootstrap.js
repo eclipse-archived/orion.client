@@ -58,7 +58,7 @@ define([
 		"../plugins/embeddedToolingPlugin.html"
 	];
 
-	function startup() {
+	function startup(options) {
 		if (once) {
 			return once;
 		}
@@ -68,6 +68,9 @@ define([
 		orionHiddenDiv.id = "_orion_hidden_actions";
 		document.body.appendChild(orionHiddenDiv);
 		orionHiddenDiv.style.display = "none";
+		//options._defaultPlugins is for internal use to load plugins in dev mode
+		var pluginsToLoad = (options && options._defaultPlugins) ? options._defaultPlugins : defaultPluginURLs;
+		
 		once = new Deferred();
 		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 		var fService = new EmbeddedFileImpl(fPattern);
@@ -77,10 +80,16 @@ define([
 			pattern: fPattern
 		});
 		var plugins = {};
-		defaultPluginURLs.forEach(function(pluginURLString){
+		pluginsToLoad.forEach(function(pluginURLString){
 			var pluginURL = new URL(pluginURLString, _code_edit_script_source);
 			plugins[pluginURL.href] = {autostart: "lazy"};
 		});
+		
+		pluginsToLoad = (options && options.userPlugins) ? options.defaultPlugins : [];
+		pluginsToLoad.forEach(function(pluginURLString){
+			plugins[pluginURLString] = {autostart: "lazy"};
+		});
+		
 		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {
 			storage: {},
 			plugins: plugins

@@ -12,6 +12,11 @@
 /*eslint-env browser, amd*/
 define(['embeddedEditor/builder/embeddedEditor'],
 function(mEmbeddedEditor) {
+	var defaultPluginURLs = [
+		"../../javascript/plugins/javascriptPlugin_embed_dev.html",
+		"../../webtools/plugins/webToolsPlugin_embed_dev.html",
+		"../../plugins/embeddedToolingPlugin.html"
+	];
 	var contents = 'var foo = "bar";\n' +
 						 "var bar = foo;\n" + 
 						 "/*\n" + 
@@ -27,11 +32,11 @@ function(mEmbeddedEditor) {
 						 "</div>\n" + 
 						 "<span>var foo2</span>"; 
 	var embeddedEditor = new mEmbeddedEditor();
-	embeddedEditor.create({parent: "embeddedEditor"}).then(function(editorViewer) {
+	embeddedEditor.create({parent: "embeddedEditor", _defaultPlugins: defaultPluginURLs}).then(function(editorViewer) {
 		document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 		editorViewer.setContents(contents, "application/javascript");
 	});
-	embeddedEditor.create({parent: "embeddedEditor1",
+	embeddedEditor.create({parent: "embeddedEditor1", _defaultPlugins: defaultPluginURLs,
 						   contentType: "text/html",
 						   contents: contents1});
 });

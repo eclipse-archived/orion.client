@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2014." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Pluggable Editor Demo</title>
+	    <link rel="stylesheet" type="text/css" href="../build/code_edit/built-codeEdit.css"/>
+	    <link rel="stylesheet" type="text/css" href="demo.css"/>
+		<script src="../build/code_edit/built-codeEdit.js"></script>
+		<script>
+		window.onload=function(){
+			var codeEdit = new orion.codeEdit();
+			var contents = 'var foo = "bar";\n' +
+								 "var bar = foo;\n" + 
+								 "/*\n" + 
+								 " * test demo\n" + 
+								 "*/\n" + 
+								 "function test(){\n" + 
+								 "	var foo1 = bar.lastIndexOf(char, from);\n" + 
+								 "}\n" + 
+								"//Keep editting in this demo and try the content assit, probem validations and hover service!\n" +
+								 "var foo2 = foo."; 
+			var contents1 = 
+								 '<div class="embeddedEditorParentOuter" id="embeddedEditor1">\n' + 
+								 "</div>\n" + 
+								 "<span>var foo2</span>"; 
+			
+			var par1 = document.getElementById("embeddedEditor");
+			var par2 = document.getElementById("embeddedEditor1");
+			
+			codeEdit.create({parent: par1}).then(function(editorViewer) {
+				document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+				editorViewer.setContents(contents, "application/javascript");
+			});
+			codeEdit.create({parent: par2,
+								   contentType: "text/html",
+								   contents: contents1});
+		};
+		</script>
+    </head>
+	<body id="orion-browser" spellcheck="false" class="orionPage">
+		<div class="embeddedEditorDemoTextParent">
+			<div>This is a demo for the <b>Orion pluggable editor</b> widget. This demo consumes the <b>build version</b> of the widget.</div> 
+			<div> Keep editing in this demo and try:</div>
+			<div> 1.content assist. E.g., put cursor after "foo." at the last line and press CTRL+space.</div>
+			<div> 2.probem validations. E.g., modify something and press CTRL+s you will see new validation markers coming up, if any</div>
+			<div> 3.hover service. Hover on any error markers or inside the eidtor</div>
+			<div> 4.syntax highlighting</div>
+			<div> 5.Quick fix</div>
+			<div> 6.Find declaration</div>
+			<div> 7.new tooling features coming while Orion is being improved...</div>
+		</div>
+		<div class="embeddedEditorDemoTextParent">
+			<span id = "progressMessageDiv" style="color: green">Loading language tooling plugins...</span>
+		</div>
+		</div>
+		<div class="embeddedEditorParentOuter" id="embeddedEditor">
+		</div>
+		<div class="embeddedEditorParentOuter" id="embeddedEditor1">
+		</div>
+	</body>
+</html>

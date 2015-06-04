@@ -36,7 +36,7 @@ define([
 		 * @param {orion.editor.EditOptions} options the editor options.
 		 */
 		create: function(options) {
-			return mBootstrap.startup().then(function(core) {
+			return mBootstrap.startup(options).then(function(core) {
 				var serviceRegistry = core.serviceRegistry;
 				var pluginRegistry = core.pluginRegistry;
 				var editorHelper = new mEditorSetup.EditorSetupHelper({

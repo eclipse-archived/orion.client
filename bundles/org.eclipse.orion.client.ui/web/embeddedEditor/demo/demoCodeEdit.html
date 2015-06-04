@@ -18,13 +18,21 @@
 					domReady: 'requirejs/domReady'    
 				}
 			});
-			require(["embeddedEditor/built-codeEdit"]);
+			require(["embeddedEditor/demo/built-codeEdit"]);
 		</script>
     </head>
 
 	<body id="orion-browser" spellcheck="false" class="orionPage">
 		<div class="embeddedEditorDemoTextParent">
 			<p>This is a demo for the <b>stand alone</b> embedded editor widget. This demo consumes the <b>none build version</b> of the widget.</p> 
+			<div> Keep editing in this demo and try:</div>
+			<div> 1.content assist. E.g., put cursor after "foo." at the last line and press CTRL+space.</div>
+			<div> 2.probem validations. E.g., modify something and press CTRL+s you will see new validation markers coming up, if any</div>
+			<div> 3.hover service. Hover on any error markers or inside the eidtor</div>
+			<div> 4.syntax highlighting</div>
+			<div> 5.Quick fix</div>
+			<div> 6.Find declaration</div>
+			<div> 7.new tooling features coming while Orion is being improved...</div>
 		</div>
 		<div class="embeddedEditorDemoTextParent">
 			<span id = "progressMessageDiv">Loading language tooling plugins...</span>

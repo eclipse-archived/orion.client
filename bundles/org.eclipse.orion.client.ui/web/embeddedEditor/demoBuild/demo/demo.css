@@ -1,0 +1,24 @@
+.embeddedEditorParentOuter{
+	border: 1px solid;
+	vertical-align: middle;
+	border-color: blue;
+	overflow: hidden;
+	text-align: left;
+	margin-left: 15%;
+	margin-right: 15%;
+	margin-bottom: 15px;
+	padding-bottom: 5px;
+	position: relative;
+	height: 250px;
+}
+
+.embeddedEditorDemoTextParent{
+	border: none;
+	vertical-align: middle;
+	overflow: hidden;
+	text-align: left;
+	margin-left: 15%;
+	margin-right: 15%;
+	padding-bottom: 5px;
+	position: relative;
+}
