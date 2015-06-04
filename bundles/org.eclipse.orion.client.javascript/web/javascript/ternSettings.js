@@ -37,8 +37,8 @@ define([
 			var entryNode = document.createElement("div"); //$NON-NLS-1$
 			entryNode.classList.add("plugin-entry"); //$NON-NLS-1$
 			
-			var cmdNode = document.createElement("span");
-			cmdNode.classList.add("plugin-commands");
+			var cmdNode = document.createElement("span"); //$NON-NLS-1$
+			cmdNode.classList.add("plugin-commands"); //$NON-NLS-1$
 			var reloadPluginsCommand = new mCommands.Command({
 				name: messages["reloadPluginCmd"],
 				tooltip: messages["reloadPluginCmdTooltip"],
@@ -46,9 +46,9 @@ define([
 				callback: function(){console.log("Reloading of Tern plugins is not supported yet");}/*this.reloadPlugins.bind(this)*/
 			});
 			this.commandService.addCommand(reloadPluginsCommand);
-			this.commandService.registerCommandContribution("ternPluginCommands", "javascript.reloadTernPlugin", 2); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution("ternPluginCommands", "javascript.reloadTernPlugin", 2); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
 			this.commandService.renderCommands("ternPluginCommands", cmdNode, this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			entryNode.appendChild(cmdNode);
+			// TODO entryNode.appendChild(cmdNode);
 			
 			if (item.name){
 				var nameNode = document.createElement("div"); //$NON-NLS-1$
@@ -165,10 +165,10 @@ define([
 
 			this.commandService.addCommand(reloadAllPluginsCommand);
 			// register these with the toolbar
-			this.commandService.registerCommandContribution("ternPluginsCommands", "javascript.reloadAllTernPlugins", 3); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution("ternPluginsCommands", "javascript.reloadAllTernPlugins", 3); //$NON-NLS-1$ //$NON-NLS-2$
 
 			// Render the commands in the heading, emptying any old ones.
-			this.commandService.renderCommands("ternPluginsCommands", "ternPluginCommands", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.renderCommands("ternPluginsCommands", "ternPluginCommands", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 		},
 	
 		render: function(referenceplugin){
@@ -194,14 +194,11 @@ define([
 
 			var _self = this;
 			return this.preferences.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
-					var props = prefs.get("tern"); //$NON-NLS-1$
-					var plugins;
-					if (props && props["plugins"] !== "undefined"){
-						plugins = props["plugins"];
-					} else {
-						plugins = Object.create(null);
+					var props = prefs.get("tern/plugins"); //$NON-NLS-1$
+					var plugins = Object.create(null);
+					if(props) {
+						plugins = JSON.parse(props);
 					}
-					
 					var pluginArray = [];
 					var keys = Object.keys(plugins);
 					for (var i=0; i<keys.length; i++) {
@@ -209,7 +206,7 @@ define([
 					}
 					_self.pluginTitle.textContent = messages["ternPlugins"];
 					_self.pluginCount.textContent = pluginArray.length;
-					pluginArray.sort(this._sortPlugins); 
+					pluginArray.sort(_self._sortPlugins); 
 					_self.explorer = new PluginListExplorer(_self.commandService);
 					_self.pluginListTree = _self.explorer.createTree(_self.pluginList.id, new mExplorer.SimpleFlatModel(pluginArray, "plugin", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
 						return item.name;
@@ -227,12 +224,13 @@ define([
 		 * @returns -1 for a first, 1 for b first, 0 if equals
 		 */
 		_sortPlugins: function(a, b) {
-			if (b.removable && !a.removeable){
+			//TODO do we want to sort by removable? or only colour them differently? or simply use the 'remove' command to show this
+			/*if (b.removable && !a.removeable){
 				return -1;
 			}
 			if (a.removable && !b.removable){
 				return 1;
-			}
+			}*/
 			var n1 = a.name.toLowerCase();
 			var n2 = b.name.toLowerCase();
 			if (n1 < n2) { return -1; }

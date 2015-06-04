@@ -184,12 +184,18 @@ define([
     				case 'installed_plugins': {
     					var plugins = _d.plugins;
     					return prefService ? prefService.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
-							var props = prefs.get("tern"); //$NON-NLS-1$
+							var props = prefs.get("tern/plugins"); //$NON-NLS-1$
 							if (!props) {
 								props = Object.create(null);
+							} else if(typeof(props) === 'string') {
+								props = JSON.parse(props);
 							}
-							props["plugins"] = plugins;
-							prefs.put("tern", props); //$NON-NLS-1$
+							var keys = Object.keys(plugins);
+							for(var i = 0; i < keys.length; i++) {
+								var key = keys[i];
+								props[key] = plugins[key];	 //$NON-NLS-1$
+							}
+							prefs.put("tern/plugins", JSON.stringify(props)); //$NON-NLS-1$
 							prefs.sync(true);
 						}) : new Deferred().resolve();
     				}
