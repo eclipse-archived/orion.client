@@ -25,15 +25,15 @@ define({
 	'orionMySQLPluginName': 'Orion MySQL',
 	'orionMySQLPluginDescription': 'Plugin that contributes type information and code templates for MySQL.',
 	'orionNodePluginName': 'Orion Node.js',
-	'orionNodePluginDescription': 'Plugin that contributes type information and code templates for node.js require.',
+	'orionNodePluginDescription': 'Plugin that contributes type information and code templates for Node.js require.',
 	'orionPostgresPluginName': 'Orion PostgreSQL',
 	'orionPostgresPluginDescription': 'Plugin that contributes type information and code templates for PostgreSQL.',
 	'orionRequirePluginName': 'Orion RequireJS',
 	'orionRequirePluginDescription': 'Plugin that contributes type information and code templates for RequireJS.',
 	'orionRedisPluginName': 'Orion Redis',
-	'orionRedisPluginDescription': 'Plugin that contributes type information and code templates for Redis',
+	'orionRedisPluginDescription': 'Plugin that contributes type information and code templates for Redis.',
 	'ternPluginsPluginName': 'Orion Tern Plugin Support',
-	'ternPluginsPluginDescription': 'Plugin that allows Orion to inspect and modify plugins running in Tern',
+	'ternPluginsPluginDescription': 'Plugin that allows Orion to inspect and modify plugins running in Tern.',
 	
 	// Other messages
 	'unknownError': 'An unknown error occurred.',

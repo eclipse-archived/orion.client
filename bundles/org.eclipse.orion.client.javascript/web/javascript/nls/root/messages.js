@@ -102,5 +102,6 @@ define({//Default message bundle
 	'reloadAllPluginsCmd': 'Reload All',
 	'reloadAllPluginsCmdTooltip': 'Reload all plug-ins',
 	'ternPlugins': 'Tern Plugins',
+	'noTernPluginsAvailable': 'No Tern plug-ins are currently loaded. This may be because you have not yet activated content assist in a JavaScript file. Tern plug-ins provide type information and code templates for JavaScript.',
 	'noDeclFound': 'No declaration was found to navigate to.'
 });

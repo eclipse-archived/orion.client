@@ -50,17 +50,29 @@ define([
 			this.commandService.renderCommands("ternPluginCommands", cmdNode, this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			// TODO entryNode.appendChild(cmdNode);
 			
+			// TODO NLS Version and Removeable or replace with icons
 			if (item.name){
 				var nameNode = document.createElement("div"); //$NON-NLS-1$
 				nameNode.classList.add("plugin-title"); //$NON-NLS-1$
 				nameNode.textContent = item.name;
 				entryNode.appendChild(nameNode);
 			}
+			
+			if (item.version){
+				var versionNode = document.createElement("div"); //$NON-NLS-1$
+				versionNode.textContent = item.version;
+				entryNode.appendChild(versionNode);
+			}
+			
 			if (item.description){
 				var descNode = document.createElement("div"); //$NON-NLS-1$
 				descNode.textContent = item.description;
+				if (item.removable){
+					descNode.textContent += " (Removable)";
+				}
 				entryNode.appendChild(descNode);
 			}
+			
 			
 			node.appendChild(entryNode);
 			return node;
@@ -210,12 +222,18 @@ define([
 						}
 					}
 					_self.pluginTitle.textContent = messages["ternPlugins"];
-					_self.pluginCount.textContent = pluginArray.length;
-					pluginArray.sort(_self._sortPlugins); 
-					_self.explorer = new PluginListExplorer(_self.commandService);
-					_self.pluginListTree = _self.explorer.createTree(_self.pluginList.id, new mExplorer.SimpleFlatModel(pluginArray, "plugin", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
-						return item.name;
-					}), { /*setFocus: false,*/ noSelection: true});
+					
+					if (pluginArray.length > 0){
+						_self.pluginCount.textContent = pluginArray.length;
+						pluginArray.sort(_self._sortPlugins); 
+						_self.explorer = new PluginListExplorer(_self.commandService);
+						_self.pluginListTree = _self.explorer.createTree(_self.pluginList.id, new mExplorer.SimpleFlatModel(pluginArray, "plugin", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
+							return item.name;
+						}), { noSelection: true});
+					} else {
+						_self.pluginList.style.padding = "10px"; //$NON-NLS-1$
+						_self.pluginList.textContent = messages["noTernPluginsAvailable"];
+					}
 			});
 		},
 		
