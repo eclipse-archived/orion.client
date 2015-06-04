@@ -21,6 +21,8 @@ define({
 	'orionAngularPluginDescription': 'Plugin that allows Orion to resolve AngularJS dependencies',
 	'orionRedisPluginName': 'Orion Redis',
 	'orionRedisPluginDescription': 'Plugin that contributes type information and code templates for Redis',
+	'orionMongoDBPluginName': 'Orion MongoDB',
+	'orionMongoDBPluginDescription': 'Plugin that contributes type information and code templates for MongoDB',
 	'orionComponentPluginName': 'Orion ComponentJS',
 	'orionComponentPluginDescription': 'Plugin that allows Orion to resolve ComponentJS dependencies',
 	'unknownError': 'An unknown error occurred.',
