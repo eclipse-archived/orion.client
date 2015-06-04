@@ -10,6 +10,9 @@
  *     IBM Corporation - Allow original AngularJS plugin to find files in Orion workspace
  *******************************************************************************/
 /*eslint-env node, amd*/
+/**
+ * Tern type index and templates for Angular node support
+ */
 (function(mod) {
   if (typeof exports === "object" && typeof module === "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require("../lib/comment"),
@@ -285,16 +288,6 @@
     };
   }
 
-  tern.registerPlugin("orionAngular", function(server) { //$NON-NLS-1$
-    initServer(server);
-    server.on("reset", function() { initServer(server); }); //$NON-NLS-1$
-    return {defs: defs,
-            passes: {postParse: postParse,
-                     postLoadDef: postLoadDef,
-                     preCondenseReach: preCondenseReach,
-                     postCondenseReach: postCondenseReach},
-            loadFirst: true};
-  });
 /* eslint-disable missing-nls */
   var defs = {
     "!name": "angular",
@@ -948,4 +941,16 @@
       }
     }
   };
+  
+  /* eslint-enable missing-nls */
+  tern.registerPlugin("orionAngular", function(server) { //$NON-NLS-1$
+    initServer(server);
+    server.on("reset", function() { initServer(server); }); //$NON-NLS-1$
+    return {defs: defs,
+            passes: {postParse: postParse,
+                     postLoadDef: postLoadDef,
+                     preCondenseReach: preCondenseReach,
+                     postCondenseReach: postCondenseReach},
+            loadFirst: true};
+  });
 });

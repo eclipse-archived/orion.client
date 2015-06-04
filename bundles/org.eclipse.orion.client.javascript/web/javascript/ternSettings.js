@@ -206,6 +206,7 @@ define([
 					for (var i=0; i<keys.length; i++) {
 						var plugin = plugins[keys[i]];
 						if(typeof(plugin) === 'object') {
+							// TODO Check that the key is a valid plugin
 							pluginArray.push(plugins[keys[i]]);
 						}
 					}
@@ -214,7 +215,7 @@ define([
 					pluginArray.sort(_self._sortPlugins); 
 					_self.explorer = new PluginListExplorer(_self.commandService);
 					_self.pluginListTree = _self.explorer.createTree(_self.pluginList.id, new mExplorer.SimpleFlatModel(pluginArray, "plugin", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
-						return item.name;
+						return item.name ? item.name : "Unknown"; // Bad storage data leading to unnamed plugin?
 					}), { /*setFocus: false,*/ noSelection: true});
 			});
 		},
@@ -236,8 +237,8 @@ define([
 			if (a.removable && !b.removable){
 				return 1;
 			}*/
-			var n1 = a.name.toLowerCase();
-			var n2 = b.name.toLowerCase();
+			var n1 = a.name && a.name.toLowerCase();
+			var n2 = b.name && b.name.toLowerCase();
 			if (n1 < n2) { return -1; }
 			if (n1 > n2) { return 1; }
 			return 0;

@@ -22,11 +22,11 @@ define([
 			"number", //$NON-NLS-0$
 			"object", //$NON-NLS-0$
 			"string", //$NON-NLS-0$
-			"symbol",
+			"symbol", //$NON-NLS-1$
 			"undefined" //$NON-NLS-0$
 		],
 		title: 'Typeof Options',
-		style: 'emphasis'
+		style: 'emphasis' //$NON-NLS-1$
 	};
 
 	/**
@@ -292,7 +292,7 @@ define([
 			name: "typeof", //$NON-NLS-0$
 			nodes: {top:true, member:false, prop:false},
 			description: " - typeof statement", //$NON-NLS-0$
-			template: "typeof ${object} === \"${type:" + JSON.stringify(typeofValues).replace("}", "\\}") + "}\"" //$NON-NLS-1$ //$NON-NLS-0$
+			template: "typeof ${object} === \"${type:" + JSON.stringify(typeofValues).replace("}", "\\}") + "}\"" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		},
 		{
 			prefix: "instanceof", //$NON-NLS-0$
@@ -343,7 +343,7 @@ define([
 			name: "define", //$NON-NLS-0$
 			nodes: {top:true, member:false, prop:false},
 			description: " - define function call",  //$NON-NLS-0$
-			template: "/* eslint-env amd */\n"+
+			template: "/* eslint-env amd */\n"+ //$NON-NLS-1$
 					  "define('${name}', [\n"+  //$NON-NLS-0$
 					  "'${import}'\n"+  //$NON-NLS-0$
 					  "], function(${importname}) {\n"+  //$NON-NLS-0$
@@ -363,208 +363,7 @@ define([
 			nodes: {top:true, member:false, prop:false},
 			description: " - console log", //$NON-NLS-0$
 			template: "console.log(${object});" //$NON-NLS-0$
-		},
-		{
-			prefix: "postgres", //$NON-NLS-0$
-			name: "postgres", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - Node.js require statement for Postgres DB", //$NON-NLS-0$
-			template: "var pg = require('pg');\n" //$NON-NLS-0$
-		},
-		{
-			prefix: "postgres", //$NON-NLS-0$
-			name: "postgres client", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Postgres DB client", //$NON-NLS-0$
-			template: "var pg = require('pg');\n" + //$NON-NLS-0$
-					  "var url = \"postgres://postgres:${port}@${host}/${database}\";\n" +  //$NON-NLS-0$
-					  "var ${client} = new pg.Client(url);\n"  //$NON-NLS-0$
-		},
-		{
-			prefix: "postgres", //$NON-NLS-0$
-			name: "postgres connect", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Postgres DB client and connect", //$NON-NLS-0$
-			template: "var pg = require('pg');\n" + //$NON-NLS-0$
-					  "var url = \"postgres://postgres:${port}@${host}/${database}\";\n" +  //$NON-NLS-0$
-					  "var ${client} = new pg.Client(url);\n" + //$NON-NLS-0$
-					  "${client}.connect(function(error) {\n" +  //$NON-NLS-0$
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-					  "});\n"
-		},
-		{
-			prefix: "postgres", //$NON-NLS-0$
-			name: "postgres query", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Postgres DB query statement", //$NON-NLS-0$
-			template: "${client}.query(${sql}, function(error, result) {\n" + //$NON-NLS-0$
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-					  "});\n"
-		},
-		{
-			prefix: "mysql", //$NON-NLS-0$
-			name: "mysql", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - Node.js require statement for MySQL DB", //$NON-NLS-0$
-			template: "var mysql = require('mysql');\n" //$NON-NLS-0$
-		},
-		{
-			prefix: "mysql", //$NON-NLS-0$
-			name: "mysql connection", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new MySQL DB connection", //$NON-NLS-0$
-			template: "var mysql = require('mysql');\n" + //$NON-NLS-0$
-					  "var ${connection} = mysql.createConnection({\n" +  //$NON-NLS-0$
-  					  "\thost : ${host},\n" +  //$NON-NLS-0$
-  					  "\tuser : ${username},\n" +  //$NON-NLS-0$
-  					  "\tpassword : ${password}\n" +  //$NON-NLS-0$
-					  "});\n" + //$NON-NLS-0$
-					  "try {\n" +  //$NON-NLS-0$
-					  "\t${connection}.connect();\n" +  //$NON-NLS-0$
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-					  "} finally {\n" +  //$NON-NLS-0$
-					  "\t${connection}.end();\n" +  //$NON-NLS-0$
-					  "}"
-		},
-		{
-			prefix: "mysql", //$NON-NLS-0$
-			name: "mysql query", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new MySQL DB query statement", //$NON-NLS-0$
-			template: "${connection}.query(${sql}, function(error, rows, fields) {\n" + //$NON-NLS-0$
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-					  "});\n"  //$NON-NLS-0$
-		},
-		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - Node.js require statement for Express", //$NON-NLS-0$
-			template: "var ${name} = require('express');" //$NON-NLS-0$
-		},
-		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express app", //$NON-NLS-0$
-			description: " - create a new Express app", //$NON-NLS-0$
-			template: "var express = require('express');\n" + //$NON-NLS-0$
-					  "var ${app} = express();\n" +  //$NON-NLS-0$
-					  "${cursor}\n"+  //$NON-NLS-0$
-					  "app.listen(${timeout});\n"  //$NON-NLS-0$
-		},
-		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express configure", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create an Express app configure statement", //$NON-NLS-0$
-			template: "app.configure(function() {\n" +  //$NON-NLS-0$
-  					  "\tapp.set(${id}, ${value});\n" +  //$NON-NLS-0$
-					  "});"  //$NON-NLS-0$
-		},
-		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express specific configure", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a specific Express app configure statement", //$NON-NLS-0$
-			template: "app.configure(${name}, function() {\n" +  //$NON-NLS-0$
-  					  "\tapp.set(${id}, ${value});\n" +  //$NON-NLS-0$
-					  "});"  //$NON-NLS-0$
-		},
-		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express app get", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app.get call", //$NON-NLS-0$
-			template: "var value = app.get(${id}, function(request, result){\n" + //$NON-NLS-0$
-					  "\t${cursor}\n});\n"  //$NON-NLS-0$
-		},
-		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express app set", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app set call", //$NON-NLS-0$
-			template: "app.set(${id}, ${value});\n"  //$NON-NLS-0$
-		},
-		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express app use", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app use statement", //$NON-NLS-0$
-			template: "app.use(${fnOrObject});\n" //$NON-NLS-0$
-		},
-		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express app engine", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app engine statement", //$NON-NLS-0$
-			template: "app.engine(${fnOrObject});\n" //$NON-NLS-0$
-		},
-		{
-		    prefix: "express", //$NON-NLS-0$
-			name: "express app param", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app param statement", //$NON-NLS-0$
-			template: "app.param(${id}, ${value});\n" //$NON-NLS-0$
-		},
-		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express app error use", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app error handling use statement", //$NON-NLS-0$
-			template: "app.use(function(error, request, result, next) {\n" +  //$NON-NLS-0$
-  					  "\tresult.send(${code}, ${message});\n" +  //$NON-NLS-0$
-					  "});\n" //$NON-NLS-0$
-		},
-		{
-			prefix: "amqp", //$NON-NLS-0$
-			name: "amqp", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - Node.js require statement for AMQP framework", //$NON-NLS-0$
-			template: "var amqp = require('amqp');\n" //$NON-NLS-0$
-		},
-		{
-			prefix: "amqp", //$NON-NLS-0$
-			name: "amqp connection", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new AMQP connection ", //$NON-NLS-0$
-			template: "var amqp = require('amqp');\n" + //$NON-NLS-0$
-					  "var ${connection} = amqp.createConnection({\n" +  //$NON-NLS-0$ 
-					  "\thost: ${host},\n" +  //$NON-NLS-0$
-					  "\tport: ${port},\n" +  //$NON-NLS-0$
-					  "\tlogin: ${login},\n" +  //$NON-NLS-0$
-					  "\tpassword: ${password}\n" +  //$NON-NLS-0$
-					  "});\n"  //$NON-NLS-0$
-		},
-		{
-			prefix: "amqp", //$NON-NLS-0$
-			name: "amqp on", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new AMQP connection on statement", //$NON-NLS-0$
-			template: "${connection}.on(${event}, function() {\n" +  //$NON-NLS-0$ 
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-					  "});\n"  //$NON-NLS-0$
-		},
-		{
-			prefix: "amqp", //$NON-NLS-0$
-			name: "amqp queue", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new AMQP connection queue statement", //$NON-NLS-0$
-			template: "${connection}.queue(${id}, function(queue) {\n" +  //$NON-NLS-0$
-					  "\tqueue.bind(\'#\'); //catch all messages\n" + //$NON-NLS-0$
-					  "\tqueue.subscribe(function (message, headers, deliveryInfo) {\n" + //$NON-NLS-0$
-					  "\t\t// Receive messages\n" + //$NON-NLS-0$
-					  "\t});\n" + //$NON-NLS-0$
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-					  "});\n"  //$NON-NLS-0$
-		},
-		{
-			prefix: "amqp", //$NON-NLS-0$
-			name: "amqp exchange", //$NON-NLS-0$
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a new AMQP connection exchange", //$NON-NLS-0$
-			template: "var exchange = ${connection}.exchange(${id}, {type: \'topic\'}, function(exchange) {\n" +  //$NON-NLS-0$ 
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-					  "});\n"  //$NON-NLS-0$
-		},
+		}
 	];
 
 	/**
