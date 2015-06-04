@@ -149,6 +149,13 @@ define([
 				return fileClient.read.apply(fileClient, [newLocation].concat(readArgs));
 			});
 		},
+		_isSameParent: function(location) {
+			if (this._lastMetadata && this._lastMetadata.Parents && this._lastMetadata.Parents.length > 0) {
+				var parentLocation = location.substring(0, location.lastIndexOf("/", location.length - (location[location.length - 1] === "/" ? 2 : 1)) + 1); 
+				return this._lastMetadata.Parents[0].Location === parentLocation;
+			}
+			return false;
+		},
 		load: function() {
 			var fileURI = this.getInput();
 			if (!fileURI) { return; }
@@ -199,8 +206,11 @@ define([
 				}.bind(this);
 				this._acceptPatch = null;
 				// Read metadata
-				var full = localStorage.useFullCompressed ? "?full=compressed" : localStorage.useFull ? "?full=true" : localStorage.useFullDecorate ? "?full=decorate" : "";
-				progress(this._read(resource + full, true), messages.ReadingMetadata, resource).then(function(metadata) {
+				var tree = this._isSameParent(resource) ? "" : "?tree=decorated";
+				if (tree && localStorage.useCompressedTree) {
+					 tree = "?tree=compressed";
+				}
+				progress(this._read(resource + tree, true), messages.ReadingMetadata, resource).then(function(metadata) {
 					if(!metadata) {
 						errorHandler({responseText: i18nUtil.formatMessage(messages.ReadingMetadataError, resource)});
 					} else if (metadata.Directory) {
@@ -480,6 +490,7 @@ define([
 				} else {
 					this._input = fileURI;
 					this._readonly = false;
+					this._lastMetadata = this._fileMetadata;
 					this._fileMetadata = null;
 					this.load();
 				}

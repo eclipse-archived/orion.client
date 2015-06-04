@@ -493,7 +493,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			}).then(function(result) {
 				if (isMetadata) {
 					var r = result.response ? JSON.parse(result.response) : null;
-					if (url.query.get("full") === "compressed") {
+					if (url.query.get("tree") === "compressed") {
 						expandLocations(r)
 					}
 					return r;
