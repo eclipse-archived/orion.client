@@ -25,6 +25,8 @@ require({
 	'tern/plugin/orionNode',
 	'tern/plugin/orionAngular',
 	'tern/plugin/orionComponent',
+	'tern/plugin/orionRedis',
+	'tern/plugin/orionMongo',
 	'tern/plugin/ternPlugins',
 	'tern/defs/ecma5',
 	'tern/defs/browser',
@@ -37,7 +39,7 @@ require({
 	'i18n!javascript/nls/workermessages',
 	'orion/i18nUtil'
 ],
-/* @callback */ function(Tern, docPlugin, orionRequirePlugin, orionNodePlugin, orionAngularPlugin, orionComponentPlugin, ternPluginsPlugin, 
+/* @callback */ function(Tern, docPlugin, orionRequirePlugin, orionNodePlugin, orionAngularPlugin, orionComponentPlugin, orionRedis, orionMongo, ternPluginsPlugin, 
 							ecma5, browser, AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler, PluginsHandler, 
 							Messages, i18nUtil) {
     
@@ -57,32 +59,52 @@ require({
                     	name: Messages['ternDocPluginName'],
                     	description: Messages['ternDocPluginDescription'],
                         fullDocs: true,
+                        version: '0.6.2', //$NON-NLS-1$
                         removable: false
                     },
                     orionRequire: {
                     	name: Messages['orionRequirePluginName'],
                     	description: Messages['orionRequirePluginDescription'],
+                    	version: '0.6.2', //$NON-NLS-1$
                     	removable: true
                     	//depth: 1
                     },
                    	orionNode: {
                     	name: Messages['orionNodePluginName'],
                     	description: Messages['orionNodePluginDescription'],
+                    	version: '0.6.2', //$NON-NLS-1$
                     	removable: true
                     },
-                  /*  orionAngular: {
+                    orionAngular: {
                     	name: Messages['orionAngularPluginName'],
                     	description: Messages['orionAngularPluginDescription'],
+                    	version: '0.6.2', //$NON-NLS-1$
                     	removable: true
                     },
-                    orionComponent: {
+                  /*  orionComponent: {
                     	name: Messages['orionComponentPluginName'],
                     	description: Messages['orionComponentPluginDescription'],
+                    	version: '0.6.2', //$NON-NLS-1$
                     	removable: true
+                    },
+                   orionRedis: {
+                    	name: Messages['orionRedisPluginName'],
+                    	description: Messages['orionRedisPluginDescription'],
+                    	removable: true,
+                    	version: '0.12.1', //$NON-NLS-1$
+                    	requires: 'orionNode' //$NON-NLS-1$
+                    },
+                    orionMongo: {
+                    	name: Messages['orionMongoDBPluginName'],
+                    	description: Messages['orionMongoDBPluginDescription'],
+                    	removable: true,
+                    	version: '1.3.13', //$NON-NLS-1$
+                    	requires: 'orionNode' //$NON-NLS-1$
                     },*/
                     plugins: {
                     	name: Messages['ternPluginsPluginName'],
                     	description: Messages['ternPluginsPluginDescription'],
+                    	version: '1.0', //$NON-NLS-1$
                     	removable: false
                     }
                 },
