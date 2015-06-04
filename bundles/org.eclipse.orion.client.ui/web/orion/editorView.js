@@ -78,6 +78,9 @@ define([
 	 */
 	function EditorView(options) {
 		this._parent = options.parent;
+		if(typeof this._parent === "string") {
+			this._parent = document.getElementById(options.parent);
+		}
 		this.id = options.id || "";
 		this.activateContext = options.activateContext;
 		this.renderToolbars = options.renderToolbars;
