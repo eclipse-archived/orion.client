@@ -196,13 +196,18 @@ define([
 			return this.preferences.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
 					var props = prefs.get("tern/plugins"); //$NON-NLS-1$
 					var plugins = Object.create(null);
-					if(props) {
+					if(typeof(props) === 'string') {
 						plugins = JSON.parse(props);
+					} else {
+						plugins = props;
 					}
 					var pluginArray = [];
 					var keys = Object.keys(plugins);
 					for (var i=0; i<keys.length; i++) {
-						pluginArray.push(plugins[keys[i]]);
+						var plugin = plugins[keys[i]];
+						if(typeof(plugin) === 'object') {
+							pluginArray.push(plugins[keys[i]]);
+						}
 					}
 					_self.pluginTitle.textContent = messages["ternPlugins"];
 					_self.pluginCount.textContent = pluginArray.length;
