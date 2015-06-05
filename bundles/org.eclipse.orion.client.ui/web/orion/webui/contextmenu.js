@@ -90,7 +90,7 @@ define([
 			this._dropdownNode.style.position = "fixed"; //$NON-NLS-0$
 			
 			// set the initial position
-			this._dropdownNode.style.left = mouseLeft + "px"; //$NON-NLS-0$
+			this._dropdownNode.style.left = (mouseLeft + 1) + "px"; //$NON-NLS-0$
 			this._dropdownNode.style.top = mouseTop +  "px"; //$NON-NLS-0$
 					
 			// ensure that the menu fits on the page...
