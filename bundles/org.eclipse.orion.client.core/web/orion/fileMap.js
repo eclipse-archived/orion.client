@@ -186,20 +186,23 @@ define(['orion/Deferred'], function(Deferred) {
 	 * @since 9.0
 	 */
 	function getFilePrefix(fileClient) {
-		if (!this.filePrefix) {
+		if (!this.filePrefixChecked) {
            return fileClient.search(
                 {
                     'resource': fileClient.fileServiceRootURL(),
-                    'keyword': "fileMap.js",
+                    'keyword': "fileMapxx.js",
                     'nameSearch': true,
                     'fileType': "js",
                 }
            ).then(function(res) {
-				var loc = res.response.docs[0].Location;
-				var pathSegs = loc.split('/');
-				if (pathSegs.length > 4) {
-					this.filePrefix = '/' + pathSegs[1] + '/' + pathSegs[2] + '/' + pathSegs[3] + '/' + pathSegs[4] + '/';
-					return this.filePrefix;
+           		this.filePrefixChecked = true;
+           		if (res && res.response && res.response.docs && res.response.docs.length > 0) {
+					var loc = res.response.docs[0].Location;
+					var pathSegs = loc.split('/');
+					if (pathSegs.length > 4) {
+						this.filePrefix = '/' + pathSegs[1] + '/' + pathSegs[2] + '/' + pathSegs[3] + '/' + pathSegs[4] + '/';
+						return this.filePrefix;
+					}
 				}
 				return null;
 			}.bind(this));
@@ -209,6 +212,10 @@ define(['orion/Deferred'], function(Deferred) {
 	}
 	
 	function getWSPath(deployedPath) {
+		// If there's no FileMap in the WS we can't help
+		if (this.filePrefixChecked && !this.filePrefix)
+			return null;
+			
 		var match = codeMap[deployedPath]; //fast hash lookup
 		if(!match) {
     		var segments = deployedPath.split('/');
