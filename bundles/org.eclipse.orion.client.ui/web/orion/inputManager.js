@@ -206,11 +206,13 @@ define([
 				}.bind(this);
 				this._acceptPatch = null;
 				// Read metadata
-				var tree = this._isSameParent(resource) ? "" : "?tree=decorated";
-				if (tree && localStorage.useCompressedTree) {
-					 tree = "?tree=compressed";
+				var metadataURI = resource;
+				if (!this._isSameParent(metadataURI)) {
+					var uri = new URL(metadataURI);
+					uri.query.set("tree", localStorage.useCompressedTree ? "compressed" : "decorated"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+					metadataURI = uri.href;
 				}
-				progress(this._read(resource + tree, true), messages.ReadingMetadata, resource).then(function(metadata) {
+				progress(this._read(metadataURI, true), messages.ReadingMetadata, resource).then(function(metadata) {
 					if(!metadata) {
 						errorHandler({responseText: i18nUtil.formatMessage(messages.ReadingMetadataError, resource)});
 					} else if (metadata.Directory) {
