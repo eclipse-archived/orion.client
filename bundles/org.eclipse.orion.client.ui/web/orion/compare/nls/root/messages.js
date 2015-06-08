@@ -28,7 +28,7 @@ define({//Default message bundle
 	"There are unsaved changes.": "There are unsaved changes.",
 	"ERROR: ": "ERROR: ",
 	"Compare...": "Compare...",
-	"files changed": " files changed",
+	"n of t files changed": "${0} of ${1} files changed",//n and t are numbers
 	"Location": "Location",
 	"Options": "Options",
 	"Sort by folders": "Sort by folders",
