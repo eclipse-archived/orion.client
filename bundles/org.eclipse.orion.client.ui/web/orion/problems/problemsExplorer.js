@@ -27,8 +27,9 @@ define([
 	'orion/explorers/navigationUtils',
 	'orion/explorers/fileDetailRenderer',
 	'orion/uiUtils',
+	'orion/i18nUtil',
 	'orion/URL-shim'
-], function(messages, sharedMessages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, mCommands, navigatorRenderer, objects, mSyntaxchecker, mTextModel, mNavUtils, mFileDetailRenderer, mUiUtils) {
+], function(messages, sharedMessages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, mCommands, navigatorRenderer, objects, mSyntaxchecker, mTextModel, mNavUtils, mFileDetailRenderer, mUiUtils, i18nUtil) {
     var DEBUG = false;
     function _place(ndoeToPlace, parent, position) {
         var parentNode = lib.node(parent);
@@ -598,7 +599,7 @@ define([
 						div = document.createElement("div"); //$NON-NLS-0$
 						td.appendChild(div);
 						itemLabel = document.createElement("span"); //$NON-NLS-0$
-						itemLabel.textContent = item.name + " (" + item.children.length + " items)";
+						itemLabel.textContent = item.name + i18nUtil.formatMessage(messages["items"], item.children.length); //$NON-NLS-0$
 						itemLabel.id = item.name + "CategoryItemId"; //$NON-NLS-0$
 						div.appendChild(itemLabel);
 					}else if (item.type === "file") { //$NON-NLS-0$

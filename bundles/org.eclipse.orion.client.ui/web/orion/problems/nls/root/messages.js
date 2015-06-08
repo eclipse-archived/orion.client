@@ -14,6 +14,7 @@ define({//Default message bundle
 	"computingProblems": "Computing problems...", //$NON-NLS-1$ //$NON-NLS-0$
 	"Errors": "Errors", //$NON-NLS-1$ //$NON-NLS-0$
 	"Warnings": "Warnings", //$NON-NLS-1$ //$NON-NLS-0$
+	"items": " (${0} items)", //$NON-NLS-1$ //$NON-NLS-0$
 	"viewByTypes" : "By types", //$NON-NLS-1$ //$NON-NLS-0$
 	"viewByFiles" : "By files", //$NON-NLS-1$ //$NON-NLS-0$
 	"viewByTypesTooltip": "View problems grouped by errors and warnings", //$NON-NLS-1$ //$NON-NLS-0$
