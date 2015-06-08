@@ -87,7 +87,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		'</div>'; //$NON-NLS-0$
 		
 	SFTPConnectionDialog.prototype._init = function(options) {
-		this.title = "SFTP Transfer"; //$NON-NLS-0$
+		this.title = messages["SFTP Transfer"];
 		this.messages = messages;
 		this.modal = true;
 		this.buttons = [{text: messages['Start Transfer'], callback: this.done.bind(this)}]; 
