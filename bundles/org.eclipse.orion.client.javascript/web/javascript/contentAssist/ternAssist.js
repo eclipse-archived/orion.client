@@ -554,13 +554,15 @@ define([
             	calculateFunctionProposal(completion, args, proposal);
             } else if(completion.type === 'template') {
             	var _t = new mTemplates.Template(args.params.prefix, completion.description, completion.template, completion.name);
+            	var _prop = _t.getProposal(args.params.prefix, args.params.offset, {});
             	var obj = Object.create(null);
 		        obj.type = 'markdown'; //$NON-NLS-1$
 		        obj.content = 'Template source code:\n\n';
-		        obj.content += proposal.proposal;
-		        _t.hover = obj;
-		        _t.style = 'emphasis'; //$NON-NLS-1$
-		        return _t;
+		        obj.content += _prop.proposal;
+		        _prop.hover = obj;
+		        provider.removePrefix(args.params.prefix, _prop);
+		        _prop.style = 'emphasis'; //$NON-NLS-1$
+		        return _prop;
             } else if(typeof(completion.origin) === 'undefined' && (JsSyntax.keywords.indexOf(completion.name) > -1)) {
             	//keyword
             	proposal.relevance -= 2; //103
