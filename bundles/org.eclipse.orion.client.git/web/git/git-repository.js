@@ -30,6 +30,7 @@ define([
 	'orion/ssh/sshTools',
 	'orion/fileUtils',
 	'orion/links'
+	,'orion/bidiUtils'
 ], function(
 	mBrowserCompatibility,
 	messages,
@@ -50,6 +51,7 @@ define([
 	mSshTools,
 	mFileUtils,
 	mLinks
+	,mBidiUtils
 ) {
 
 mBootstrap.startup().then(function(core) {

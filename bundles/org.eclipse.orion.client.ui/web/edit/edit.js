@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/browserCompatibility', 'orion/bootstrap', 'edit/setup'], function(mBrowserCompatibility, mBootstrap, mSetup) {
+define(['orion/browserCompatibility', 'orion/bootstrap', 'edit/setup', 'orion/bidiUtils'], function(mBrowserCompatibility, mBootstrap, mSetup, mBidiUtils) {
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var pluginRegistry = core.pluginRegistry;

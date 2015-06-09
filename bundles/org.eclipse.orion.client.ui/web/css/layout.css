@@ -156,6 +156,11 @@ hard-coded numbers elsewhere.
 	/*margin-bottom: 29px;*/
 }
 
+html[dir="rtl"] .content-fixedHeight {		
+    left: 0;
+    right: 50px;
+}
+
 .content-fixedHeight-animation {
     transition: left 0.3s ease; /* if this is changed SideMenu.js->TRANSITION_DURATION_MS needs to be changed as well */
 }
@@ -597,6 +602,11 @@ and (max-device-width : 1024px)  {
 	user-select: none;
 	-webkit-user-select: none;
 	-moz-user-select: -moz-none;
+}
+
+html[dir="rtl"] .sideMenu {
+    right:0;
+    float: none;
 }
 
 .sideMenu.animating {

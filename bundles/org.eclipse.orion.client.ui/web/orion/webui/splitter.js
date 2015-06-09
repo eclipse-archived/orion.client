@@ -83,7 +83,12 @@ define([
 				if (this._vertical) {
 					this._thumb.classList.add(this._collapseTrailing ? "splitVerticalThumbDownLayout" : "splitVerticalThumbUpLayout"); //$NON-NLS-1$ //$NON-NLS-0$
 				} else {
-					this._thumb.classList.add(this._collapseTrailing ? "splitThumbRightLayout" : "splitThumbLeftLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+					if (document.dir == "rtl") {
+						this._thumb.classList.add(this._collapseTrailing ? "splitThumbLeftLayout" : "splitThumbRightLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+					}
+					else {
+						this._thumb.classList.add(this._collapseTrailing ? "splitThumbRightLayout" : "splitThumbLeftLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+					}
 				}
 			}
 
@@ -167,11 +172,17 @@ define([
 			
 			// 'Constants' (i.e. things we don't set to adjust for the offset)
 			if (!this._collapseTrailing) {
-				this.$splitter.style[this._bottomRight] = "auto"; //$NON-NLS-0$
-				
-				this.$leading.style[this._topLeft] = "0px"; //$NON-NLS-0$
-				this.$leading.style[this._bottomRight] = "auto"; //$NON-NLS-0$
-
+				if (document.dir == "rtl") {
+					this.$splitter.style[this._topLeft] = "auto"; //$NON-NLS-0$
+					this.$leading.style[this._topLeft] = "auto"; //$NON-NLS-0$
+					this.$leading.style[this._bottomRight] = "0px"; //$NON-NLS-0$
+					this.$trailing.style[this._topLeft] = "0px"; //$NON-NLS-0$					
+				}
+				else {
+					this.$splitter.style[this._bottomRight] = "auto"; //$NON-NLS-0$
+					this.$leading.style[this._topLeft] = "0px"; //$NON-NLS-0$
+					this.$leading.style[this._bottomRight] = "auto"; //$NON-NLS-0$					
+				}
 				this.$trailing.style[this._widthHeight] = "auto"; //$NON-NLS-0$
 				this.$trailing.style[this._bottomRight] = "0px"; //$NON-NLS-0$
 			} else {
@@ -191,7 +202,12 @@ define([
 					classList.add(this._collapseTrailing ? "splitVerticalThumbDownLayout" : "splitVerticalThumbUpLayout"); //$NON-NLS-1$ //$NON-NLS-0$
 				} else {
 					classList.remove(this._collapseTrailing ? "splitVerticalThumbDownLayout" : "splitVerticalThumbUpLayout"); //$NON-NLS-1$ //$NON-NLS-0$
-					classList.add(this._collapseTrailing ? "splitThumbRightLayout" : "splitThumbLeftLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+					if (document.dir == "rtl") {
+						classList.add(this._collapseTrailing ? "splitThumbLeftLayout" : "splitThumbRightLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+					}
+					else {
+						classList.add(this._collapseTrailing ? "splitThumbRightLayout" : "splitThumbLeftLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+					}
 				}
 			}
 
@@ -317,7 +333,13 @@ define([
 				var adjustment = newOffset + this._splitterSize;
 				newOffset = parentRect[this._widthHeight] - (adjustment - parentRect[this._topLeft]);
 			} else {
-				newOffset = newOffset - parentRect[this._topLeft];
+				if (document.dir == "rtl") {
+					var adjustment = newOffset + this._splitterSize;
+					newOffset = parentRect[this._widthHeight] - (adjustment - parentRect[this._topLeft]);
+				}
+				else {
+					newOffset = newOffset - parentRect[this._topLeft];
+				}
 			}
 			
 			if (this._proportional) {
@@ -335,9 +357,17 @@ define([
 			var suffix = this._proportional ? "%" : "px"; //$NON-NLS-1$ //$NON-NLS-0$
 			
 			if (!this._collapseTrailing) {
-				this.$splitter.style[this._topLeft] = this._offset + suffix;
-				this.$leading.style[this._widthHeight] = this._offset + suffix;
-				this.$trailing.style[this._topLeft] = (this._offset + this._splitterSize) + suffix;
+				if (document.dir == "rtl") {
+					this.$splitter.style[this._bottomRight] = this._offset + suffix;
+					this.$leading.style[this._widthHeight] = this._offset + suffix;
+					this.$trailing.style[this._bottomRight] = (this._offset + this._splitterSize) + suffix;
+				}
+				else
+				{
+					this.$splitter.style[this._topLeft] = this._offset + suffix;
+					this.$leading.style[this._widthHeight] = this._offset + suffix;
+					this.$trailing.style[this._topLeft] = (this._offset + this._splitterSize) + suffix;
+				}
 			} else {
 				this.$splitter.style[this._bottomRight] = this._offset + suffix;
 				this.$leading.style[this._bottomRight] = (this._offset + this._splitterSize) + suffix;

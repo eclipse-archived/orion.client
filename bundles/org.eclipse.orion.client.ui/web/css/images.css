@@ -242,6 +242,12 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+html[dir="rtl"] .core-sprite-closedarrow {
+	-ms-transform: rotate(180deg); /* IE */
+    -webkit-transform: rotate(180deg); /* Chrome, Safari, Opera */
+    transform: rotate(180deg);
+}
+
 .core-sprite-delete{
 	font-size: 16px;
 	color: #777;
