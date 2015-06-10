@@ -95,6 +95,16 @@
 	    }
 	} 
 	
+	/* eslint-enable missing-nls */
+	tern.registerPlugin("orionAmqp", /* @callback */ function(server, options) { //$NON-NLS-1$
+	    return {
+	      defs : defs,
+	      passes: {
+	      	completion: getTemplates
+	      }
+	    };
+	});
+	
 	/* eslint-disable missing-nls */
 	var defs = {
 	  "!name": "amqp",
@@ -187,6 +197,23 @@
 	        "!type": "fn(name: ?, options: Exchange.!3, openCallback: ?) -> +Exchange",
 	        "!doc": "connection.exchange('my-exchange', { type: 'topic' }); Options - type 'fanout', 'direct', or 'topic' (default) - passive (boolean) - durable (boolean) - autoDelete (boolean, default true)"
 	      },
+	      "hosti": {
+		      "!type": "number",
+		      "!doc": "If this is already set, it looks like we want to choose another one."
+		    },
+	      "_defaultExchange": "+Exchange",
+	      "readyEmitted": {
+		      "!type": "bool",
+		      "!doc": "Set 'ready' flag for auth failure detection."
+		    },
+	      "parser": {
+		      "!type": "+AMQPParser",
+		      "!doc": "Reset parser state"
+		    },
+	      "connectionAttemptScheduled": {
+		      "!type": "bool",
+		      "!doc": "Set to false, so that if we fail in the reconnect attempt, we can schedule another one."
+		    },
 	      "exchangeClosed": {
 	        "!type": "fn(name: ?)",
 	        "!doc": "remove an exchange when it's closed (called from Exchange)"
@@ -284,11 +311,6 @@
 	    "Queue._sequence": "number",
 	    "Queue.confirm": "bool",
 	    "Queue.currentMessage": "+Message",
-	    "Connection.connectionAttemptScheduled": {
-	      "!type": "bool",
-	      "!doc": "Set to false, so that if we fail in the reconnect attempt, we can schedule another one."
-	    },
-	    "Connection._defaultExchange": "+Exchange",
 	    "Connection.channelCounter": "number",
 	    "Connection._blocked": "bool",
 	    "Connection.channels": {
@@ -298,20 +320,8 @@
 	    "Connection.exchanges": {
 	      "<i>": "+Exchange"
 	    },
-	    "Connection.parser": {
-	      "!type": "+AMQPParser",
-	      "!doc": "Reset parser state"
-	    },
-	    "Connection.readyEmitted": {
-	      "!type": "bool",
-	      "!doc": "Set 'ready' flag for auth failure detection."
-	    },
 	    "Connection._inboundHeartbeatTimer": "number",
 	    "Connection._outboundHeartbeatTimer": "number",
-	    "Connection.hosti": {
-	      "!type": "number",
-	      "!doc": "If this is already set, it looks like we want to choose another one."
-	    },
 	    "Connection.<i>": "fn()",
 	    "Connection.sslConnectionOptions": {},
 	    "Message.queue": "+Queue",
@@ -441,15 +451,4 @@
 	    "name": "string"
 	  }
 	};
-	
-	/* eslint-enable missing-nls */
-	tern.registerPlugin("orionAmqp", /* @callback */ function(server, options) { //$NON-NLS-1$
-	    return {
-	      defs : defs,
-	      passes: {
-	      	completion: getTemplates
-	      }
-	    };
-	});
-	
 });
