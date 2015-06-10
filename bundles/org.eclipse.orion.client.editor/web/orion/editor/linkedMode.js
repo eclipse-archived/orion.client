@@ -446,6 +446,8 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 			var changed;
 			var sortedPositions = this._getSortedPositions(model);
 			for (var i = sortedPositions.length - 1; i >= 0; i--) {
+				if (sortedPositions[i].escape)
+					continue;
 				var position = sortedPositions[i].position;
 				if (position.offset <= start && end <= position.offset + position.length) {
 					changed = sortedPositions[i];
