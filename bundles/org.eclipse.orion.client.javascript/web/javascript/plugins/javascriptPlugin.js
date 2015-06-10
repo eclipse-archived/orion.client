@@ -40,7 +40,8 @@ define([
 'orion/editor/stylers/application_json/syntax',
 'orion/editor/stylers/application_schema_json/syntax',
 'orion/editor/stylers/application_x-ejs/syntax',
-'i18n!javascript/nls/messages'
+'i18n!javascript/nls/messages',
+'orion/URL-shim'
 ], function(PluginProvider, Bootstrap, Deferred, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, 
 			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, Util, Logger, GenerateDocCommand, OpenDeclCommand, RenameCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
@@ -111,7 +112,9 @@ define([
     			this.worker.port.start();
     			this.worker.port.postMessage('');
     		} else { */
-    			this.worker = new Worker(new URL(script, window.location.href).href);
+ 				var wUrl = new URL(script, window.location.href);
+    			wUrl.query.set("worker-language", navigator.language);   			
+    			this.worker = new Worker(wUrl.href);
     			this.worker.onmessage = onMessage;
     			this.worker.onerror = onError;
     			this.worker.postMessage('');

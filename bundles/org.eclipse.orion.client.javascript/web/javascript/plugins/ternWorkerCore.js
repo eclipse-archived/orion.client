@@ -9,8 +9,17 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*globals importScripts onmessage:true doctrine onconnect:true*/
+/*globals importScripts onmessage:true doctrine onconnect:true requirejs*/
 /*eslint-env node, browser*/
+var lang ='en';
+var sear = self.location.search;
+if(sear) {
+	var langs = sear.split('worker-language');
+	if(Array.isArray(langs) && langs.length === 2) {
+		lang = langs[1].slice(1);
+	}
+} 
+requirejs.config({locale: lang});
 require({
 	baseUrl: "../../", //$NON-NLS-1$
 	paths: {
