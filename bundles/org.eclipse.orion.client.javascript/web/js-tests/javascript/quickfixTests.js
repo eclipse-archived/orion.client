@@ -743,6 +743,18 @@ define([
 		                      rule: rule,
 		                      expected: expected});
 		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=467757
+		 */
+		it("Test no-unused-params-leading-line-comment-1", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "/**\n  * @callback\n  */\n ",
+		                    start: 16, 
+		                    end: 16};
+		    return getFixes({buffer: 'var f = {//foo\n one: function(p, p2, p3) {p(); p2();}};', 
+		                      rule: rule,
+		                      expected: expected});
+		});
 		it("Test no-unused-params-html-1", function() {
 		    var rule = createTestRule('no-unused-params');
 		    var expected = {value: "",

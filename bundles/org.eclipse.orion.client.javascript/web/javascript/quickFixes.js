@@ -139,6 +139,7 @@ define([
             }
             return 2;
         }
+        return 0;
     }
 	
 	function updateDirective(text, directive, name, usecommas) {
@@ -552,19 +553,21 @@ define([
                 if(node && node.parents && node.parents.length > 0) {
                     var func = node.parents.pop();
                     var p = node.parents.pop();
-                    if(p.type === 'Property' && !hasDocTag('@callback', p) && !hasDocTag('@callback', p.key)) {
+                    if(p.type === 'Property' && !hasDocTag('@callback', p) && !hasDocTag('@callback', p.key)) { //$NON-NLS-1$ //$NON-NLS-2$
                         var comments = p.leadingComments ? p.leadingComments : p.key.leadingComments;
                         if(comments) {
                             //attach it to the last one
                             var comment = comments[comments.length-1];
-                            var valueend = comment.range[0]+comment.value.length+getDocOffset(ast.source, comment.range[0]);
-                            var start = getLineStart(ast.source, valueend);
-                            var indent = computeIndent(ast.source, start);
-                            var fix = "* @callback\n"+indent;
-                            /*if(comment.value.charAt(valueend) !== '\n') {
-                                fix = '\n' + fix;
-                            }*/
-                            return editorContext.setText(fix, valueend-1, valueend-1);
+                            if(comment.type === 'Block') {
+	                            var valueend = comment.range[0]+comment.value.length+getDocOffset(ast.source, comment.range[0]);
+	                            var start = getLineStart(ast.source, valueend);
+	                            var indent = computeIndent(ast.source, start);
+	                            var fix = "* @callback\n"+indent;
+	                            /*if(comment.value.charAt(valueend) !== '\n') {
+	                                fix = '\n' + fix;
+	                            }*/
+	                            return editorContext.setText(fix, valueend-1, valueend-1);
+                            }
                         }
                         start = getLineStart(ast.source, p.range[0]);
                         indent = computeIndent(ast.source, start);
