@@ -55,14 +55,18 @@ define([
 				var nameNode = document.createElement("div"); //$NON-NLS-1$
 				nameNode.classList.add("plugin-title"); //$NON-NLS-1$
 				nameNode.textContent = item.name;
+				
+				if (item.version){
+					var versionNode = document.createElement("span"); //$NON-NLS-1$
+					versionNode.textContent = 'v'+item.version; //$NON-NLS-1$
+					versionNode.style.marginLeft = "10px"; //$NON-NLS-1$
+					nameNode.appendChild(versionNode);
+				}
+				
 				entryNode.appendChild(nameNode);
 			}
 			
-			if (item.version){
-				var versionNode = document.createElement("div"); //$NON-NLS-1$
-				versionNode.textContent = item.version;
-				entryNode.appendChild(versionNode);
-			}
+			
 			
 			if (item.description){
 				var descNode = document.createElement("div"); //$NON-NLS-1$
