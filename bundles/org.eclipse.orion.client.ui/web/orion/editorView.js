@@ -44,6 +44,7 @@ define([
 	'orion/util',
 	'orion/Deferred',
 	'orion/webui/contextmenu',
+	'orion/metrics',
 	'orion/objects'
 ], function(
 	messages,
@@ -53,7 +54,7 @@ define([
 	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
 	mMarkOccurrences, mSyntaxchecker, LiveEditSession,
 	mProblems, mBlamer, mDiffer,
-	mKeyBinding, util, Deferred, mContextMenu, objects
+	mKeyBinding, util, Deferred, mContextMenu, mMetrics, objects
 ) {
 	var fPattern = "/__embed/";
 	var Dispatcher = mDispatcher.Dispatcher;
@@ -626,6 +627,7 @@ define([
 					
 					this.commandRegistry.destroy(this._editorContextMenuNode); // remove previous content
 					this.commandRegistry.renderCommands("editorContextMenuActions", this._editorContextMenuNode, null, this, "menu");  //$NON-NLS-0$
+					mMetrics.logEvent("contextMenu", "opened", "editor"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 			}.bind(this);
 			contextMenu.addEventListener("triggered", contextMenuTriggered); //$NON-NLS-0$

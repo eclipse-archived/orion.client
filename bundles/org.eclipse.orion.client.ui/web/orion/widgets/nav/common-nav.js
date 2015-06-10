@@ -461,6 +461,7 @@ define([
 							navHandler.refreshSelection(true, true);
 						}
 					}
+					mMetrics.logEvent("contextMenu", "opened", "navigator"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 			}.bind(this);
 			
