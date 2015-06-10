@@ -628,6 +628,7 @@ define([
 					} else{
 						editor.showBlame([]);
 					}
+					editor.focus();
 				}
 			});
 			this.commandService.addCommand(blameCommand);
@@ -645,6 +646,7 @@ define([
 					return editor && editor.installed && differ && differ.isVisible();
 				},
 				callback: function() {
+					var editor = this.editor || that.editor;
 					var differ = this.differ || that.differ;
 					differ.toggleEnabled();
 					var editorPreferences = this.editorPreferences;
@@ -652,6 +654,7 @@ define([
 						pref.diffService = differ.isEnabled();
 						editorPreferences.setPrefs(pref);
 					});
+					editor.focus();
 				}
 			});
 			this.commandService.addCommand(diffCommand);
@@ -803,7 +806,8 @@ define([
 							createDelegatedUI.apply(null, Array.prototype.slice.call(arguments));
 						};
 						editorContext.setStatus = handleStatus;
-
+						
+						editor.focus();
 						serviceCall = service.execute(editorContext, context);
 						handleResult = null; // execute() returns nothing
 					} else {
