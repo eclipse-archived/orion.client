@@ -65,13 +65,13 @@ define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Def
 		 */
 		read: function(fLocation, isMetadata) {
 			if(isMetadata){
-				var splits = fLocation.split("/");
+				var locationURL = new URL(fLocation);
 				var meta = {
 					Directory: false,
 					Length: 123,
 					LocaltimeStamp: 123,
 					Location: fLocation,
-					Name: splits[splits.length - 1],
+					Name: locationURL.pathname,
 					Parents: []
 				};
 				return new Deferred().resolve(meta);
