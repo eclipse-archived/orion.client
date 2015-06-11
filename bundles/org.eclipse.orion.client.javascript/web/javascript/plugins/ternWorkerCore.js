@@ -11,10 +11,10 @@
  *******************************************************************************/
 /*globals importScripts onmessage:true doctrine onconnect:true requirejs*/
 /*eslint-env node, browser*/
-var lang ='en';
+var lang ='en'; //$NON-NLS-1$
 var sear = self.location.search;
 if(sear) {
-	var langs = sear.split('worker-language');
+	var langs = sear.split('worker-language'); //$NON-NLS-1$
 	if(Array.isArray(langs) && langs.length === 2) {
 		lang = langs[1].slice(1);
 	}
