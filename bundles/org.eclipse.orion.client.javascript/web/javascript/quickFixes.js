@@ -85,7 +85,7 @@ define([
 	    }
 	    var off = linestart;
 	    var char = text[off];
-	    var preamble = extraIndent ? '\t' : '';
+	    var preamble = extraIndent ? '\t' : ''; //$NON-NLS-1$
 	    //walk the proceeding whitespace so we will insert formatted at the same level
 	    while(char === ' ' || char === '\t') {
 	       preamble += char;
@@ -118,7 +118,7 @@ define([
 		    char = text[off++];
 	    }
 	    if(!newline) {
-		    val += '\n';
+		    val += '\n'; //$NON-NLS-1$
 	    }
 	    if(typeof indent !== 'undefined') {
 		    val += indent;
@@ -145,12 +145,12 @@ define([
 	function updateDirective(text, directive, name, usecommas) {
         if(usecommas) {
 	        if(text.slice(directive.length).trim() !== '') {
-	            return text.trim() + ', '+name;
+	            return text.trim() + ', '+name; //$NON-NLS-1$
 	        } else {
-	            return text.trim() + ' '+name; 
+	            return text.trim() + ' '+name;  //$NON-NLS-1$
 	        }
         } else {
-	       return text.trim() + ' '+name; 
+	       return text.trim() + ' '+name;  //$NON-NLS-1$
 	    }
     }
 	
@@ -185,7 +185,7 @@ define([
         if(node.leadingComments && node.leadingComments.length > 0) {
             for(var i = node.leadingComments.length-1; i > -1; i--) {
                 var comment = node.leadingComments[i];
-                var edit = new RegExp("(\\s*[*]+\\s*(?:@param)\\s*(?:\\{.*\\})?\\s*(?:"+name+")+.*)").exec(comment.value);
+                var edit = new RegExp("(\\s*[*]+\\s*(?:@param)\\s*(?:\\{.*\\})?\\s*(?:"+name+")+.*)").exec(comment.value); //$NON-NLS-1$ //$NON-NLS-2$
                 if(edit) {
                     var start = comment.range[0] + edit.index + getDocOffset(source, comment.range[0]);
                     return editorContext.setText('', start, start+edit[1].length);
@@ -271,7 +271,7 @@ define([
 		execute: function(editorContext, context) {
 		    var id = context.annotation.fixid ? context.annotation.fixid : context.annotation.id;
 		    delete context.annotation.fixid;
-		    Metrics.logEvent('language tools', 'quickfix', id, 'application/javascript');
+		    Metrics.logEvent('language tools', 'quickfix', id, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		    var fixes = this[id];
 	        if(fixes) {
 	            var that = this;
@@ -304,9 +304,9 @@ define([
 		"no-empty-block": function(editorContext, annotation) {
             return editorContext.getText().then(function(text) {
                 var linestart = getLineStart(text, annotation.start);
-                var fix = '//TODO empty block';
+                var fix = '//TODO empty block'; //$NON-NLS-1$
                 var indent = computeIndent(text, linestart, true);
-                fix = '\n' + indent + fix;
+                fix = '\n' + indent + fix; //$NON-NLS-1$
                 fix += computePostfix(text, annotation);
                 return editorContext.setText(fix, annotation.start+1, annotation.start+1);
             });
@@ -319,7 +319,7 @@ define([
         "no-fallthrough": function(editorContext, annotation) {
             return editorContext.getText().then(function(text) {
                 var linestart = getLineStart(text, annotation.start);
-                var fix = '//$FALLTHROUGH$';
+                var fix = '//$FALLTHROUGH$'; //$NON-NLS-1$
                 var indent = computeIndent(text, linestart);
                 fix += computePostfix(text, annotation, indent);
                 return editorContext.setText(fix, annotation.start, annotation.start);
@@ -329,11 +329,20 @@ define([
         "no-fallthrough-break": function(editorContext, annotation) {
             return editorContext.getText().then(function(text) {
                 var linestart = getLineStart(text, annotation.start);
-                var fix = 'break;';
+                var fix = 'break;'; //$NON-NLS-1$
                 var indent = computeIndent(text, linestart);
                 fix += computePostfix(text, annotation, indent);
                 return editorContext.setText(fix, annotation.start, annotation.start);
             });
+        },
+        /** for for the no-reserved-keys linting rule */
+       "no-reserved-keys": function(editorContext, annotation, astManager) {
+       		return astManager.getAST(editorContext).then(function(ast) {
+       			var node = Finder.findNode(annotation.start, ast, {parents:true});
+                if(node && node.type === 'Identifier') {
+                	return editorContext.setText('"'+node.name+'"', node.range[0], node.range[1]); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+       		});
         },
         /** fix for the no-sparse-arrays linting rule */
         "no-sparse-arrays": function(editorContext, annotation, astManager) {
@@ -369,7 +378,7 @@ define([
                         if(item === null || item.range[0] === prev.range[0]) {
                             continue;
                         }
-                        model.setText(', ', item.range[1]-annotation.start, prev.range[0]-annotation.start);
+                        model.setText(', ', item.range[1]-annotation.start, prev.range[0]-annotation.start); //$NON-NLS-1$
                         prev = item;
                     }
                     if(item === null && prev !== null) {
@@ -386,7 +395,7 @@ define([
             return astManager.getAST(editorContext).then(function(ast) {
                 var node = Finder.findNode(annotation.start, ast, {parents:true});
                 var source = node.raw || ast.source.slice(node.range[0], node.range[1]);
-                return editorContext.setText('new Error(' + source + ')', annotation.start, annotation.end);
+                return editorContext.setText('new Error(' + source + ')', annotation.start, annotation.end); //$NON-NLS-1$
             });
         },
         /** fix for the no-undef-defined linting rule */
@@ -406,15 +415,15 @@ define([
                     var insert = name[1];
                     var node = Finder.findNode(annotation.start, ast, {parents:true});
                     if(assignLike(node)) {
-                        insert += ':true';
+                        insert += ':true'; //$NON-NLS-1$
                     }
-                    comment = Finder.findDirective(ast, 'globals');
+                    comment = Finder.findDirective(ast, 'globals'); //$NON-NLS-1$
                     if(comment) {
                         start = comment.range[0]+2;
-                        return editorContext.setText(updateDirective(comment.value, 'globals', insert), start, start+comment.value.length);
+                        return editorContext.setText(updateDirective(comment.value, 'globals', insert), start, start+comment.value.length); //$NON-NLS-1$
                     } else {
                         var point = getDirectiveInsertionPoint(ast);
-                        return editorContext.setText('/*globals '+insert+' */\n', point, point);
+                        return editorContext.setText('/*globals '+insert+' */\n', point, point); //$NON-NLS-1$ //$NON-NLS-2$
                     }
                 });
             }
@@ -428,18 +437,18 @@ define([
                     var comment = null;
                     var start = 0;
                     if(name[1] === 'console') {
-                        var env = 'node';
+                        var env = 'node'; //$NON-NLS-1$
                     } else {
                         env = Finder.findESLintEnvForMember(name[1]);
                     }
                     if(env) {
-                        comment = Finder.findDirective(ast, 'eslint-env');
+                        comment = Finder.findDirective(ast, 'eslint-env'); //$NON-NLS-1$
                         if(comment) {
                             start = getDocOffset(ast.source, comment.range[0]) + comment.range[0];
-    	                    return editorContext.setText(updateDirective(comment.value, 'eslint-env', env, true), start, start+comment.value.length);
+    	                    return editorContext.setText(updateDirective(comment.value, 'eslint-env', env, true), start, start+comment.value.length); //$NON-NLS-1$
                         } else {
                             var point = getDirectiveInsertionPoint(ast);
-                            return editorContext.setText('/*eslint-env '+env+' */\n', point, point);
+                            return editorContext.setText('/*eslint-env '+env+' */\n', point, point); //$NON-NLS-1$ //$NON-NLS-2$
                         }
                     }
                 });
@@ -562,7 +571,7 @@ define([
 	                            var valueend = comment.range[0]+comment.value.length+getDocOffset(ast.source, comment.range[0]);
 	                            var start = getLineStart(ast.source, valueend);
 	                            var indent = computeIndent(ast.source, start);
-	                            var fix = "* @callback\n"+indent;
+	                            var fix = "* @callback\n"+indent; //$NON-NLS-1$
 	                            /*if(comment.value.charAt(valueend) !== '\n') {
 	                                fix = '\n' + fix;
 	                            }*/
@@ -571,10 +580,10 @@ define([
                         }
                         start = getLineStart(ast.source, p.range[0]);
                         indent = computeIndent(ast.source, start);
-                        return editorContext.setText("/**\n"+indent+" * @callback\n"+indent+" */\n"+indent, p.range[0], p.range[0]);
+                        return editorContext.setText("/**\n"+indent+" * @callback\n"+indent+" */\n"+indent, p.range[0], p.range[0]); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                     } else {
-                        if(!hasDocTag('@callback', func)) {
-                            return editorContext.setText("/* @callback */ ", func.range[0], func.range[0]);
+                        if(!hasDocTag('@callback', func)) { //$NON-NLS-1$
+                            return editorContext.setText("/* @callback */ ", func.range[0], func.range[0]); //$NON-NLS-1$
                         }
                     }
                 }
@@ -593,7 +602,7 @@ define([
 	                // Insert the correct non nls comment
 	                var end = getLineEnd(ast.source, annotation.end);
 	                // indexOnLine starts at 0, non-nls comments start at one
-	                var comment = " //$NON-NLS-" + (annotation.data.indexOnLine + 1) + "$";
+	                var comment = " //$NON-NLS-" + (annotation.data.indexOnLine + 1) + "$"; //$NON-NLS-1$
 	                return editorContext.setText(comment, end, end);
 	            });
 			}

@@ -30,6 +30,7 @@ define({//Default message bundle
     'noConstantCondition' : 'Constant as conditional expression:',
     'noRegexSpaces' : 'Multiple spaces in regular expressions:',
     'noReservedKeys' : 'Reserved words used as property keys:',
+    'noReservedKeysFixName': 'Surround key with quotes',
 	'noEqeqeq' : 'Discouraged \'==\' use:',
 	'noDebugger' : 'Discouraged \'debugger\' statement use:',
 	'noWith': 'Discouraged \'with\' statement use:',

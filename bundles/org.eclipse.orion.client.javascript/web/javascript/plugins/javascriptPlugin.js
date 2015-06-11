@@ -392,6 +392,19 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
     			quickFixComputer, 
     			{
+        			name: javascriptMessages["noReservedKeysFixName"],  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+        			id : "update.reserved.property.fix",  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-reserved-keys)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                    ]
+    			}
+    	);
+    	
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+    			quickFixComputer, 
+    			{
         			name: javascriptMessages["addESLintGlobalFixName"],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "add.eslint-global.fix",  //$NON-NLS-0$

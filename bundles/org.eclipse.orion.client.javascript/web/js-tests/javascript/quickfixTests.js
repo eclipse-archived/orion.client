@@ -541,7 +541,46 @@ define([
                 expected: { value: "new Error([1,  2])", start: 6,  end: 13 }
             });
        });
-
+	//NO-RESERVED-KEYS
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=469966
+		 */
+		it("Test no-reserved-keys-fix-1", function() {
+			var rule = createTestRule('no-reserved-keys');
+			var expected = {value: '"public"',
+							start: 11,
+							end: 17
+							};
+			return getFixes({buffer: 'var foo = {public: 1};',
+								rule: rule,
+								expected: expected});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=469966
+		 */
+		it("Test no-reserved-keys-fix-2", function() {
+			var rule = createTestRule('no-reserved-keys');
+			var expected = {value: '"enum"',
+							start: 24,
+							end: 28
+							};
+			return getFixes({buffer: 'var foo = {"public": 1, enum:2};',
+								rule: rule,
+								expected: expected});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=469966
+		 */
+		it("Test no-reserved-keys-fix-3", function() {
+			var rule = createTestRule('no-reserved-keys');
+			var expected = {value: '"break"',
+							start: 34,
+							end: 39
+							};
+			return getFixes({buffer: 'var foo = {"public": 1, "enum":2, break: function(){}};',
+								rule: rule,
+								expected: expected});
+		});
 	//NO-UNDEF
 	     /**
 	      * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=458567

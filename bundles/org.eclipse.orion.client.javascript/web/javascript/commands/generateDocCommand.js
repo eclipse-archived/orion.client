@@ -130,27 +130,27 @@ define([
 				char = text[--offset];
 			}
 			var parts = [];
-			parts.push('/**\n'+preamble+' * @name '+name+'\n');
+			parts.push('/**\n'+preamble+' * @name '+name+'\n'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			//TODO add in description template once editor bug is fixed
 			//${description}
-			parts.push(preamble+' * @description description\n');  //$NON-NLS-0$
+			parts.push(preamble+' * @description description\n');  //$NON-NLS-1$
 			if(isexpr) {
-				parts.push(preamble+' * @function\n');
+				parts.push(preamble+' * @function\n'); //$NON-NLS-1$
 			}
 			if(name.charAt(0) === '_') {
-					parts.push(preamble+' * @private\n');
+					parts.push(preamble+' * @private\n'); //$NON-NLS-1$
 				}
 			if(params) {
 				var  len = params.length;
 				for(var i = 0; i < len; i++) {
 					//TODO add template for type infos after suporting editor bug is fixed
 					// {${param'+(i+1)+'}}
-					parts.push(preamble+' * @param '+ params[i].name+'\n');  //$NON-NLS-0$  //$NON-NLS-0$
+					parts.push(preamble+' * @param '+ params[i].name+'\n');  //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 			//TODO add in returns template once editor bug is fixed
 			//{${returns}}
-			parts.push(preamble+' * @returns returns\n'+preamble+' */\n'+preamble);
+			parts.push(preamble+' * @returns returns\n'+preamble+' */\n'+preamble); //$NON-NLS-1$ //$NON-NLS-2$
 			return parts.join('');
 		},
 		
