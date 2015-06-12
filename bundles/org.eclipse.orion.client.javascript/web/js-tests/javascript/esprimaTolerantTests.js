@@ -2066,6 +2066,90 @@ define([
 				comments: []
 			});
 		});
+		/**
+		 * invalid return statemnt
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=470098
+		 * @since 9.0
+		 */
+		it('Invalid return statement 1', function() {
+			runTest({
+				source: "return 3;",
+                nodes: [{"type":"ReturnStatement","range":[0,9]},{"type":"Literal","range":[7,8],"value":3}],
+				tokens: [{"type":"Keyword","range":[0,6],"value":"return"},{"type":"Numeric","range":[7,8],"value":"3"},{"type":"Punctuator","range":[8,9],"value":";"}],
+				errors: [{"lineNumber":1,"index":0,"message":"Illegal return statement","token":"return"}],
+				comments: []
+			});
+		});
+		/**
+		 * invalid return statemnt
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=470098
+		 * @since 9.0
+		 */
+		it('Invalid return statement 2', function() {
+			runTest({
+				source: "function f(){} return 3;",
+                nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ReturnStatement","range":[15,24]},{"type":"Literal","range":[22,23],"value":3}],
+				tokens: [{"type":"Keyword","range":[0,8],"value":"function"},{"type":"Identifier","range":[9,10],"value":"f"},{"type":"Punctuator","range":[10,11],"value":"("},{"type":"Punctuator","range":[11,12],"value":")"},{"type":"Punctuator","range":[12,13],"value":"{"},{"type":"Punctuator","range":[13,14],"value":"}"},{"type":"Keyword","range":[15,21],"value":"return"},{"type":"Numeric","range":[22,23],"value":"3"},{"type":"Punctuator","range":[23,24],"value":";"}],
+				errors: [{"lineNumber":1,"index":15,"message":"Illegal return statement","token":"return"}],
+				comments: []
+			});
+		});
+		/**
+		 * invalid return statemnt
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=470098
+		 * @since 9.0
+		 */
+		it('Invalid return statement 3', function() {
+			runTest({
+				source: "var f = {} return 3;",
+                nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,11]},{"type":"VariableDeclarator","range":[4,10]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[8,10]},{"type":"ReturnStatement","range":[11,20]},{"type":"Literal","range":[18,19],"value":3}],
+				tokens: [{"type":"Keyword","range":[0,3],"value":"var"},{"type":"Identifier","range":[4,5],"value":"f"},{"type":"Punctuator","range":[6,7],"value":"="},{"type":"Punctuator","range":[8,9],"value":"{"},{"type":"Punctuator","range":[9,10],"value":"}"},{"type":"Keyword","range":[11,17],"value":"return"},{"type":"Numeric","range":[18,19],"value":"3"},{"type":"Punctuator","range":[19,20],"value":";"}],
+				errors: [{"lineNumber":1,"index":11,"message":"Unexpected token return","token":"return"},{"lineNumber":1,"index":11,"message":"Illegal return statement","token":"return"}],
+				comments: []
+			});
+		});
+		/**
+		 * invalid return statemnt
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=470098
+		 * @since 9.0
+		 */
+		it('Invalid return statement 4', function() {
+			runTest({
+				source: "switch(foo) { return f; }",
+                nodes: [],
+				tokens: [{"type":"Keyword","range":[0,6],"value":"switch"},{"type":"Punctuator","range":[6,7],"value":"("},{"type":"Identifier","range":[7,10],"value":"foo"},{"type":"Punctuator","range":[10,11],"value":")"},{"type":"Punctuator","range":[12,13],"value":"{"},{"type":"Keyword","range":[14,20],"value":"return"},{"type":"Identifier","range":[21,22],"value":"f"}],
+				errors: [{"lineNumber":1,"index":14,"message":"Unexpected token return","token":"return"}],
+				comments: []
+			});
+		});
+		/**
+		 * invalid return statemnt
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=470098
+		 * @since 9.0
+		 */
+		it('Invalid return statement 5', function() {
+			runTest({
+				source: "var return;",
+                nodes: [],
+				tokens: [{"type":"Keyword","range":[0,3],"value":"var"},{"type":"Keyword","range":[4,10],"value":"return"},{"type":"Punctuator","range":[10,11],"value":";"}],
+				errors: [{"lineNumber":1,"index":4,"message":"Unexpected token return","token":"return"}],
+				comments: []
+			});
+		});
+		/**
+		 * invalid return statemnt
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=470098
+		 * @since 9.0
+		 */
+		it('Invalid return statement 6', function() {
+			runTest({
+				source: "function f() {return; return;}",
+                nodes: [{"type":"FunctionDeclaration","range":[0,30]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[13,30]},{"type":"ReturnStatement","range":[14,21]},{"type":"ReturnStatement","range":[22,29]}],
+				tokens: [{"type":"Keyword","range":[0,8],"value":"function"},{"type":"Identifier","range":[9,10],"value":"f"},{"type":"Punctuator","range":[10,11],"value":"("},{"type":"Punctuator","range":[11,12],"value":")"},{"type":"Punctuator","range":[13,14],"value":"{"},{"type":"Keyword","range":[14,20],"value":"return"},{"type":"Punctuator","range":[20,21],"value":";"},{"type":"Keyword","range":[22,28],"value":"return"},{"type":"Punctuator","range":[28,29],"value":";"},{"type":"Punctuator","range":[29,30],"value":"}"}],
+				errors: [],
+				comments: []
+			});
+		});
 		describe('ES6 Tests', function() {
     	 //ARROW EXPRESSIONS ==============================================================================================================================================
     	   it('arrow expression 1', function() {

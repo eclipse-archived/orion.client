@@ -40,7 +40,7 @@ parseFunctionSourceElements: true, parseVariableIdentifier: true,
 parseLeftHandSideExpression: true, parseParams: true, validateParam: true,
 parseUnaryExpression: true,
 parseStatement: true, parseSourceElement: true */
-
+/* eslint-disable missing-nls */
 (function (root, factory) {
     'use strict';
 
@@ -3457,12 +3457,14 @@ parseStatement: true, parseSourceElement: true */
     // 12.9 The return statement
 
     function parseReturnStatement(node) {
-        var argument = null;
-
+        var argument = null, token = lookahead;
+		
         expectKeyword('return');
 
         if (!state.inFunctionBody) {
-            tolerateError(Messages.IllegalReturn);
+        	//ORION
+        	tolerateUnexpectedToken(token, Messages.IllegalReturn, token.value);
+            //tolerateError();
         }
 
         // 'return' followed by a space and an identifier is very common.
