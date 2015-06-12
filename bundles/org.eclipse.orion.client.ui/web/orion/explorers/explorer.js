@@ -80,17 +80,30 @@ exports.Explorer = (function() {
 		
 		makeNewItemPlaceholder: function(item, domId, insertAfter) {
 			var placeholder = null;
-			var itemRow = this.getRow(item);
+			var tr = document.createElement("tr"); //$NON-NLS-0$
+			tr.id = domId+"placeHolderRow"; //$NON-NLS-0$
+			tr.classList.add("navRow"); //$NON-NLS-0$
+			var td = document.createElement("td"); //$NON-NLS-0$
+			td.id = domId+"placeHolderCol"; //$NON-NLS-0$
+			td.classList.add("navColumn"); //$NON-NLS-0$
+			tr.appendChild(td);
+			placeholder = {
+				wrapperNode: tr, 
+				refNode: td,
+				destroyFunction: function() {
+					try {
+						if (tr && tr.parentNode) {
+							tr.parentNode.removeChild(tr);
+						}	
+					} catch (err) {
+						// tr already removed, do nothing
+					}
+				}
+			};
+			var itemRow = this.getRow(item), parentNode;
 			if (itemRow) {
-				var parentNode = itemRow.parentNode;
+				parentNode = itemRow.parentNode;
 				// make a row and empty column so that the new name appears after checkmarks/expansions
-				var tr = document.createElement("tr"); //$NON-NLS-0$
-				tr.id = domId+"placeHolderRow"; //$NON-NLS-0$
-				tr.classList.add("navRow"); //$NON-NLS-0$
-				var td = document.createElement("td"); //$NON-NLS-0$
-				td.id = domId+"placeHolderCol"; //$NON-NLS-0$
-				td.classList.add("navColumn"); //$NON-NLS-0$
-				tr.appendChild(td);
 				if (insertAfter) {
 					// insert tr after itemRow, i.e. right before itemRow's nextSibling in the parent
 					var nextSibling = itemRow.nextSibling;
@@ -101,20 +114,9 @@ exports.Explorer = (function() {
 				}
 				
 				td.style.paddingLeft = itemRow.firstChild.style.paddingLeft; //itemRow is a <tr>, we want the indentation of its <td>
-				
-				placeholder = {
-					wrapperNode: tr, 
-					refNode: td,
-					destroyFunction: function() {
-						try {
-							if (tr && tr.parentNode) {
-								tr.parentNode.removeChild(tr);
-							}	
-						} catch (err) {
-							// tr already removed, do nothing
-						}
-					}
-				};
+			} else {
+				parentNode = this.myTree.getContentNode();
+				parentNode.appendChild(tr);
 			}
 			
 			return placeholder;

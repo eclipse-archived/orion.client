@@ -243,6 +243,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			}
 		},
 		
+		getContentNode: function() {
+			return this._bodyElement;
+		},
+		
 		getItem: function(itemOrId) {  // a dom node, a dom id, or the item
 			var node = lib.node(itemOrId);
 			if (node && node._item) {
