@@ -356,7 +356,7 @@ define([
 		    if(path && files) {
 		        var title = null;
 		        if(files.length > 1) {
-		             title = '###${0} \''+path+'\'###'; //$NON-NLS-1$ //$NON-NLS-2$
+		             title = i18nUtil.formatMessage('###${0} \'${1}\'###', Messages['openFileForTitle'], path); //$NON-NLS-1$ //$NON-NLS-2$
 		        }
 		        var hover = '';
 		        for(var i = 0; i < files.length; i++) {
