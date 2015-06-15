@@ -40,8 +40,12 @@ define([
 			var fixComputer = new QuickFixes.JavaScriptQuickfixes(astManager);
 			var editorContext = {
 				/*override*/
-				getText: function() {
-					return new Deferred().resolve(buffer);
+				getText: function(start, end) {
+					if(typeof(start) === 'undefined' && typeof(end) === 'undefined') {
+						return new Deferred().resolve(buffer);
+					} else {
+						return new Deferred().resolve(buffer.slice(start, end));
+					}
 				},
 				
 				setText: function(text, start, end) {
@@ -1379,6 +1383,57 @@ define([
 		                      rule: rule,
 		                      expected: expected,
 		                      pid: 'missing-nls'});
+		});
+	//USE-ISNAN
+	    it("Test use-isnan-1", function() {
+		    var rule = createTestRule('use-isnan');
+		    var expected = {value: "isNaN(foo)",
+		                    start: 3, 
+		                    end: 14};
+		    return getFixes({buffer: 'if(foo === NaN){}', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'use-isnan'});
+		});
+		it("Test use-isnan-2", function() {
+		    var rule = createTestRule('use-isnan');
+		    var expected = {value: "isNaN(foo)",
+		                    start: 3, 
+		                    end: 14};
+		    return getFixes({buffer: 'if(NaN === foo){}', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'use-isnan'});
+		});
+		it("Test use-isnan-3", function() {
+		    var rule = createTestRule('use-isnan');
+		    var expected = {value: "isNaN(foo+23)",
+		                    start: 3, 
+		                    end: 19};
+		    return getFixes({buffer: 'if((foo+23) === NaN){}', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'use-isnan'});
+		});
+		it("Test use-isnan-4", function() {
+		    var rule = createTestRule('use-isnan');
+		    var expected = {value: "isNaN(foo+23)",
+		                    start: 3, 
+		                    end: 19};
+		    return getFixes({buffer: 'if(NaN === (foo+23)){}', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'use-isnan'});
+		});
+		it("Test use-isnan-5", function() {
+		    var rule = createTestRule('use-isnan');
+		    var expected = {value: "isNaN(45 === (foo+23))",
+		                    start: 3, 
+		                    end: 28};
+		    return getFixes({buffer: 'if(NaN === (45 === (foo+23)){}', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'use-isnan'});
 		});
 	});
 });

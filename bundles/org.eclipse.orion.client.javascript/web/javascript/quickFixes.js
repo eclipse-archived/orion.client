@@ -590,6 +590,28 @@ define([
                 return null;
             });
         },
+        /** fix for use-isnan linting rule */
+       "use-isnan": function(editorContext, annotation, astManager) {
+       		return astManager.getAST(editorContext).then(function(ast) {
+       			var node = Finder.findNode(annotation.start, ast, {parents:true});
+                if(node && node.parents && node.parents.length > 0) {
+                    var bin = node.parents.pop();
+                    if(bin.type === 'BinaryExpression') {
+                    	var tomove;
+                    	if(bin.left.type === 'Identifier' && bin.left.name === 'NaN') {
+                    		tomove = bin.right;
+                    	} else if(bin.right.type === 'Identifier' && bin.right.name === 'NaN') {
+                    		tomove = bin.left;
+                    	}
+                    	if(tomove) {
+	                    	return editorContext.getText(tomove.range[0], tomove.range[1]).then(function(text) {
+	                    		return editorContext.setText('isNaN('+text+')', bin.range[0], bin.range[1]);	 //$NON-NLS-1$
+	                    	});
+                    	}
+                    }
+                }
+       		});	
+       },
         /** fix for the semi linting rule */
         "semi": function(editorContext, annotation) {
             return editorContext.setText(';', annotation.end, annotation.end);

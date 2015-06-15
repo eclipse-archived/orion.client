@@ -41,6 +41,7 @@ define({//Default message bundle
 	'noProto': 'Discouraged __proto__ property use:',
 	'noUndefInit': 'Explicitly initializing variables to undefined:',
 	'useIsNaN' : 'NaN not compared with isNaN():',
+	'useIsNanFixName': 'Use isNaN()',
 	'missingDoc' : 'Missing JSDoc:',
 	'noUnreachable' : 'Unreachable code:',
 	'noFallthrough' : 'Switch case fall-through:',

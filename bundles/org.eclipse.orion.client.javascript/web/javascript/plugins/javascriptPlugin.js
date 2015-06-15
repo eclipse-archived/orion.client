@@ -405,6 +405,19 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
     			quickFixComputer, 
     			{
+        			name: javascriptMessages["useIsNanFixName"],  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+        			id : "use.isnan.fix",  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-2$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:use-isnan)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                    ]
+    			}
+    	);
+    	
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+    			quickFixComputer, 
+    			{
         			name: javascriptMessages["addESLintGlobalFixName"],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "add.eslint-global.fix",  //$NON-NLS-0$
