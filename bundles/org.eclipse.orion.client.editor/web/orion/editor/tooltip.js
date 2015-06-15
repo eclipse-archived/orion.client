@@ -532,7 +532,6 @@ function Tooltip (view) {
 			tooltipDiv.style.maxWidth = (tipRect.maxWidth - padding) + "px"; //$NON-NLS-0$
 			tooltipDiv.style.maxHeight = (tipRect.maxHeight - padding) + "px"; //$NON-NLS-0$
 			tooltipDiv.style.width = (tipRect.width - padding) + "px"; //$NON-NLS-1$
-			tooltipDiv.style.height = (tipRect.height - padding) + "px"; //$NON-NLS-1$
 			tooltipDiv.style.left = tipRect.left + "px"; //$NON-NLS-0$
 			tooltipDiv.style.top = tipRect.top + "px"; //$NON-NLS-0$
 			return tipRect;
@@ -601,11 +600,11 @@ function Tooltip (view) {
 			var yOK = y >= rect.top && y <= (rect.top + rect.height);
 			return xOK && yOK;
 		},
-		mapOffset: function(offset, parent) {
+		mapOffset: function(offset) {
 			var textView = this._view;
 			var model = textView.getModel();
 			if (model.getBaseModel) {
-				offset = model.mapOffset(offset, parent);
+				offset = model.mapOffset(offset, true);
 			}
 			return offset;
 		},
