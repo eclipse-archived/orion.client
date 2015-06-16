@@ -36,7 +36,7 @@
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new MongoDB client", //$NON-NLS-0$
 			template: "var MongoClient = require('mongodb').MongoClient;\n" +//$NON-NLS-0$
-					  "var Server = require('mongodb').Server;\n${cursor}"
+					  "var Server = require('mongodb').Server;\n${cursor}" //$NON-NLS-1$
 		},
 		{
 			prefix: "mongodb", //$NON-NLS-0$
@@ -123,6 +123,16 @@
 	    }
 	} 
 	
+	/* eslint-enable missing-nls */
+	tern.registerPlugin("orionMongoDB", /* @callback */ function(server, options) { //$NON-NLS-1$
+	    return {
+	      defs : defs,
+	      passes: {
+	      	completion: getTemplates
+	      }
+	    };
+	});
+	
 	/* eslint-disable missing-nls */
 	var defs = {
 		"mongodb": {
@@ -178,7 +188,7 @@
 	        "_findHandler": "fn(id: ?) -> ret",
 	        "__executeQueryCommand": "fn(self: ?, db_command: ?, options: ?, callback: ?)",
 	        "DEFAULT_URL": "string",
-	        "connect": "fn(url: string, options: [object Object], callback: fn(err: Error, result: ?))",
+	        "connect": "fn(url: string, options: Object, callback: fn(err: Error, result: ?))",
 	        "addListener": "fn(event: string, handler: fn(param: ?)) -> ?"
 	      }
 	    },
@@ -287,7 +297,7 @@
 	      "dropAllIndexes": "fn(callback: Function)",
 	      "reIndex": "fn(callback: Function)",
 	      "mapReduce": "fn(map: Function, reduce: Function, options: MapReduceOptions, callback: Function)",
-	      "group": "fn(keys: Object, condition: Object, initial: Object, reduce: Function, finalize: Function, command: bool, options: [object Object], callback: Function)",
+	      "group": "fn(keys: Object, condition: Object, initial: Object, reduce: Function, finalize: Function, command: bool, options: Object, callback: Function)",
 	      "options": "fn(callback: Function)",
 	      "isCapped": "fn(callback: Function)",
 	      "indexExists": "fn(indexes: string, callback: Function)",
@@ -295,7 +305,7 @@
 	      "geoHaystackSearch": "fn(x: number, y: number, callback: Function)",
 	      "indexes": "fn(callback: Function)",
 	      "aggregate": "fn(pipeline: [?], callback: fn(err: Error, results: ?))",
-	      "stats": "fn(options: [object Object], callback: fn(err: Error, results: CollStats))",
+	      "stats": "fn(options: Object, callback: fn(err: Error, results: CollStats))",
 	      "hint": "?"
 	    },
 	    "MapReduceOptions": {
@@ -397,14 +407,4 @@
 	    }
 	  }
 	};
-	
-	/* eslint-enable missing-nls */
-	tern.registerPlugin("orionMongoDB", /* @callback */ function(server, options) { //$NON-NLS-1$
-	    return {
-	      defs : defs,
-	      passes: {
-	      	completion: getTemplates
-	      }
-	    };
-	});
 });
