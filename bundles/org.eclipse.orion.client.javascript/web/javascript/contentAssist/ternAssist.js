@@ -241,7 +241,7 @@ define([
 	 * @description Create proposals specific to JSDoc
 	 * @returns {Array} The array of proposals
 	 */
-	function createDocProposals(params, kind, ast, buffer) {
+	function createDocProposals(params, kind, ast, buffer, pluginenvs) {
 	    var proposals = [];
 	    if(kind && kind.kind === 'jsdoc') {
 		    var offset = params.offset > params.prefix.length ? params.offset-params.prefix.length-1 : 0;
@@ -340,7 +340,8 @@ define([
 	                }
 	            } else if(/^(?:\/\*)?\s*eslint-env\s+/gi.test(params.line)) {
 	                //eslint-env (comma-separated list)
-	                var keys = Object.keys(ESLintEnv).sort();
+	                var _all = Objects.mixin(ESLintEnv, pluginenvs);
+	                var keys = Object.keys(_all).sort();
 	                for(i = 0; i < keys.length; i++) {
 	                    var key = keys[i];
 	                    if(key !== 'builtin' && Util.looselyMatches(params.prefix, key)) {
@@ -382,10 +383,12 @@ define([
 	 * @public
 	 * @param {javascript.ASTManager} astManager An AST manager to create ASTs with
 	 * @param {TernWorker} ternWorker The worker running Tern
+	 * @param {Object} pluginEnvironments The object of available environment names from installed Tern plugins 
 	 */
-	function TernContentAssist(astManager, ternWorker) {
+	function TernContentAssist(astManager, ternWorker, pluginEnvironments) {
 		this.astManager = astManager;
 		this.ternworker = ternWorker;
+		this.pluginenvs = pluginEnvironments;
 		this.ternworker.addEventListener('message', handler, false);
 	}
 
@@ -430,7 +433,7 @@ define([
 		doAssist: function(ast, params, meta, envs) {
 			var kind = getKind(ast, params.offset, ast.source);
        		params.prefix = getPrefix(params, kind, ast.source);
-       		var proposals = [].concat(createDocProposals(params, kind, ast, ast.source),
+       		var proposals = [].concat(createDocProposals(params, kind, ast, ast.source, this.pluginenvs),
        								  createTemplateProposals(params, kind, ast.source));
        		if(kind && (kind.kind === 'jsdoc' || kind.kind === 'doc')) {
        			return new Deferred().resolve(proposals); //resolve now, no need to talk to the worker
