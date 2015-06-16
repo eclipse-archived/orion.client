@@ -20,9 +20,9 @@ var dfs = require('deferred-fs'), Deferred = dfs.Deferred;
 var path = require('path');
 var IS_WINDOWS = process.platform === 'win32';
 
-var pathToTranslationRoot = 'C:/IDSDev/translations/';
-var pathToDestBundle = 'C:/IDSDev/OrionSource/org.eclipse.orion.client/bundles/';
-var configFile = 'C:/IDSDev/translations/configOrion.js';
+var pathToTranslationRoot = 'C:/IDSDev/OrionTranslation/';
+var pathToDestBundle = 'C:/IESDev/IES_TVT/bundles/';
+var configFile = 'C:/IDSDev/OrionTranslation/configOrion.js';
 var pathToCWDDir = path.resolve(__dirname, './');
 /**
  * Pass varargs to get numbered parameters, or a single object for named parameters.
@@ -89,8 +89,7 @@ function copySingleFile(copyEntry) {
 		}
 	}).then(function() {
 		return execCommand(getCopyFileCmd(pathToSource, pathToDest)).then(function() {
-			section(configFile);
-			section(pathToDestConfig);
+			section(" copy " + pathToSource  + "  to " + pathToDest);
 			return execCommand(getCopyFileCmd(pathToConfigFile, pathToDestConfig));}
 		);
 	});
@@ -109,6 +108,7 @@ var folderTemplate = [
 	'org.eclipse.orion.client.users/web/profile/nls/dummy_language/messages',
 	'org.eclipse.orion.client.javascript/web/javascript/nls/dummy_language/messages',
 	'org.eclipse.orion.client.javascript/web/javascript/nls/dummy_language/problems',
+	'org.eclipse.orion.client.javascript/web/javascript/nls/dummy_language/workermessages',
 	'org.eclipse.orion.client.help/web/orion/help/nls/dummy_language/messages',
 	'org.eclipse.orion.client.editor/web/orion/editor/nls/dummy_language/messages',
 	'org.eclipse.orion.client.git/web/git/nls/dummy_language/gitmessages',
@@ -129,33 +129,66 @@ var folderTemplate = [
 	'org.eclipse.orion.client.ui/web/orion/widgets/nls/dummy_language/messages'
 ];
 
-var allLanguages = [
-	{name: "Chinese (Simplified)", locale: "zh", prefix: "zh"},
-	{name: "Chinese (Traditional)", locale: "zh-tw", prefix: "zh_TW"},
-	{name: "Japanese", locale: "ja", prefix: "ja"},
-	{name: "French", locale: "fr", prefix: "fr"},
-	{name: "German", locale: "de", prefix: "de"},
-	{name: "Spanish", locale: "es", prefix: "es"},
-	{name: "Italian", locale: "it", prefix: "it"},
-	{name: "Korean", locale: "ko", prefix: "ko"},
-	{name: "Portuguese (Brazilian)", locale: "pt-br", prefix: "pt_BR"},
-	{name: "en_AA", locale: "en-aa", prefix: "en_AA"},
-	{name: "en_RR", locale: "en-rr", prefix: "en_RR"},
-	{name: "en_ZZ", locale: "en-zz", prefix: "en_ZZ"}
-	
-];
+var allLanguages = {
+	"ar":true,
+	"cs":true,
+	"da":true,
+	"de":true,
+	"el":true,
+	"en-aa":true,
+	"en-rr":true,
+	"en-zz":true,
+	"es":true,
+	"fi":true,
+	"fr":true,
+	"hu":true,
+	"it":true,
+	"iw":true,
+	"ja":true,
+	"ko":true,
+	"nb":true,
+	"nl":true,
+	"nn":true,
+	"no":true,
+	"pl":true,
+	"pt":true,
+	"pt-br":true,
+	"ru":true,
+	"sv":true,
+	"th":true,
+	"tr":true,
+	"zh":true,
+	"zh-hk":true,
+	"zh-tw":true
+};
 
-function generateCopyArray(sourceRoot, destRoot) {
+function generateCopyArray(sourceRoot, destRoot, relativeDest) {
 	var copyArray = [];
-	allLanguages.forEach(function(language) {
+	var keys = Object.keys(allLanguages);
+	keys.forEach(function(language) {
+		section(language);
 		var sourceTemplate = folderTemplate.map(function(folder){
-			return sourceRoot + language.prefix + "/" + folder.replace("/dummy_language/", "/" + "root" + "/") + ".js";
+			return sourceRoot + folder.replace("/dummy_language/", "/" + language + "/") + ".js";
 		}); 
 		var destTemplate = folderTemplate.map(function(folder){
-			return destRoot + folder.replace(/dummy_language.*/, language.locale);
+			var folderNew = folder;
+			if(relativeDest) {
+				var newFolder = folder.split("/");
+				newFolder.shift();
+				newFolder.shift();
+				folderNew = newFolder.join("/");
+			}
+			return destRoot + folderNew.replace(/dummy_language.*/, language);
 		}); 
 		var destTemplateConfig = folderTemplate.map(function(folder){
-			return destRoot + folder.replace("/dummy_language/", "/") + ".js";
+			var folderNew = folder;
+			if(relativeDest) {
+				var newFolder = folder.split("/");
+				newFolder.shift();
+				newFolder.shift();
+				folderNew = newFolder.join("/");
+			}
+			return destRoot + folderNew.replace("/dummy_language/", "/") + ".js";
 		}); 
 		for(var i = 0; i < sourceTemplate.length; i++) {
 			copyArray.push({source: sourceTemplate[i], dest: destTemplate[i], destConfig: destTemplateConfig[i]});
