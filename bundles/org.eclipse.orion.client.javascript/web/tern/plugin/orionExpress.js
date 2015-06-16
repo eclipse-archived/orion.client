@@ -121,652 +121,7 @@
 				completions.push(_t);
 			}
 	    }
-	} 
-	
-	/* eslint-disable missing-nls */
-	var defs = {
-	  "!name": "express",
-	  "!define": {
-	    "View.prototype": {
-	      "lookup": {
-	        "!type": "fn(name: string) -> string",
-	        "!doc": "* Lookup view by the given `name` * @param {String} name @return {String} @api private"
-	      },
-	      "render": {
-	        "!type": "fn(options: ?, fn: +Function)",
-	        "!doc": "* Render with the given `options` and callback `fn(err, str)`."
-	      },
-	      "resolve": {
-	        "!type": "fn(dir: string, file: string)",
-	        "!doc": "* Resolve the file within the given directory."
-	      }
-	    },
-	    "View.prototype.lookup.!0": "string",
-	    "View.prototype.lookup.!ret": "string",
-	    "View.prototype.resolve.!0": "string",
-	    "View.prototype.resolve.!1": "string",
-	    "View.!0": "string",
-	    "slice.!0": "number",
-	    "slice.!1": "number",
-	    "app.use.!0": "string",
-	    "app.engine.!0": "string",
-	    "app.set.!0": "string",
-	    "app.path.!ret": "string",
-	    "app.enabled.!0": "string",
-	    "app.enabled.!ret": "bool",
-	    "app.disabled.!0": "string",
-	    "app.disabled.!ret": "bool",
-	    "app.enable.!0": "string",
-	    "app.disable.!0": "string",
-	    "app.all.!0": "string",
-	    "app.render.!0": "string",
-	    "app.etag.!ret": "string",
-	    "app.wetag.!ret": "string",
-	    "app.isAbsolute.!0": "string",
-	    "app.isAbsolute.!ret": "bool",
-	    "app.flatten.!0": "[?]",
-	    "app.flatten.!1": "[?]",
-	    "app.flatten.!ret": "[?]",
-	    "app.normalizeType.!0": "string",
-	    "app.normalizeType.!ret": {
-	      "value": "string",
-	      "quality": "number",
-	      "params": {
-	        "<i>": "string"
-	      }
-	    },
-	    "app.normalizeTypes.!0": "[?]",
-	    "app.normalizeTypes.!ret": "[acceptParams.!ret]",
-	    "app.compileTrust.!0": "[?]",
-	    "app.setCharset.!0": "string",
-	    "app.setCharset.!1": "string",
-	    "app.setCharset.!ret": "string",
-	    "app.application.param.!0": "string",
-	    "app.application.use.!0": "string",
-	    "app.application.route.!0": "string",
-	    "app.request.acceptsEncodings.!ret": "bool",
-	    "app.request.acceptsCharsets.!ret": "bool",
-	    "app.request.acceptsLanguages.!ret": "bool",
-	    "app.request.range.!0": "number",
-	    "app.request.param.!0": "string",
-	    "app.request.param.!1": "string",
-	    "app.request.param.!ret": "string",
-	    "app.request.response.status.!0": "number",
-	    "app.request.response.send.!0": "string",
-	    "app.request.response.sendStatus.!0": "number",
-	    "app.request.response.attachment.!0": "string",
-	    "app.request.response.append.!0": "string",
-	    "app.request.response.header.!1": "string",
-	    "app.request.response.get.!0": "string",
-	    "app.request.response.get.!ret": "string",
-	    "app.request.response.clearCookie.!0": "string",
-	    "app.request.response.cookie.!0": "string",
-	    "app.request.response.cookie.!1": "string",
-	    "app.request.response.location.!0": "string",
-	    "app.request.Route.prototype._handles_method.!0": "string",
-	    "app.request.Route.prototype._handles_method.!ret": "bool",
-	    "app.request.Route.!0": "string",
-	    "app.response.status.!0": "number",
-	    "app.response.send.!0": "string",
-	    "app.response.sendStatus.!0": "number",
-	    "app.response.attachment.!0": "string",
-	    "app.response.append.!0": "string",
-	    "app.response.header.!1": "string",
-	    "app.response.get.!0": "string",
-	    "app.response.get.!ret": "string",
-	    "app.response.clearCookie.!0": "string",
-	    "app.response.cookie.!0": "string",
-	    "app.response.cookie.!1": "string",
-	    "app.response.location.!0": "string",
-	    "app.Route.prototype._handles_method.!0": "string",
-	    "app.Route.prototype._handles_method.!ret": "bool",
-	    "app.Route.!0": "string",
-	    "req.acceptsEncodings.!ret": "bool",
-	    "req.acceptsCharsets.!ret": "bool",
-	    "req.acceptsLanguages.!ret": "bool",
-	    "req.range.!0": "number",
-	    "req.range.!ret": "[?]",
-	    "req.param.!0": "string",
-	    "req.param.!1": "string",
-	    "req.param.!ret": "string",
-	    "req.is.!0": "[?]",
-	    "defineGetter.!1": "string",
-	    "res.status.!0": "number",
-	    "res.send.!0": "string",
-	    "res.sendStatus.!0": "number",
-	    "res.attachment.!0": "string",
-	    "res.append.!0": "string",
-	    "res.append.!1": {
-	      "!type": "[?]",
-	      "!doc": "concat the new and prev vals"
-	    },
-	    "res.header.!1": "string",
-	    "res.get.!0": "string",
-	    "res.get.!ret": "string",
-	    "res.clearCookie.!0": "string",
-	    "res.cookie.!0": "string",
-	    "res.cookie.!1": "string",
-	    "res.location.!0": "string",
-	    "res.render.!1": {},
-	    "sendfile.!3": "fn(err: +Error)",
-	    "acceptParams.!0": "string",
-	    "acceptParams.!ret": {
-	      "value": "string",
-	      "quality": "number",
-	      "params": {
-	        "<i>": "string"
-	      }
-	    },
-	    "tryStat.!0": "string",
-	    "proto.param": {
-	      "!type": "fn(name: string, fn: +Function) -> !this",
-	      "!doc": "* Map the given param placeholder `name`(s) to the given callback."
-	    },
-	    "proto.param.!0": "string",
-	    "proto.handle": {
-	      "!type": "fn(req: ?, res: ?, done: fn(err: ?))",
-	      "!doc": "* Dispatch a req, res into the router."
-	    },
-	    "proto.process_params": {
-	      "!type": "fn(layer: ?, called: ?, req: ?, res: ?, done: ?)",
-	      "!doc": "* Process any parameters for the layer."
-	    },
-	    "proto.use": {
-	      "!type": "fn(fn: ?) -> !this",
-	      "!doc": "* Use the given middleware function, with optional path, defaulting to \"/\"."
-	    },
-	    "proto.use.!0": "string",
-	    "proto.route": {
-	      "!type": "fn(path: string) -> proto.route.!ret",
-	      "!doc": "* Create a new Route for the given path."
-	    },
-	    "proto.route.!0": "string",
-	    "proto.route.!ret": {
-	      "path": "string",
-	      "stack": "Route.stack"
-	    },
-	    "proto.<i>": "fn(path: ?) -> !this",
-	    "proto.!ret": "fn(req: ?, res: ?, next: ?)",
-	    "proto.!ret._params": "[?]",
-	    "proto.!ret.stack": "[?]",
-	    "Route.prototype": {
-	      "_handles_method": {
-	        "!type": "fn(method: string) -> bool",
-	        "!doc": "* @api private"
-	      },
-	      "_options": {
-	        "!type": "fn() -> [string]",
-	        "!doc": "* @return {Array} supported HTTP methods @api private"
-	      },
-	      "dispatch": {
-	        "!type": "fn(req: ?, res: ?, done: ?)",
-	        "!doc": "* dispatch req, res into this route * @api private"
-	      },
-	      "all": {
-	        "!type": "fn() -> !this",
-	        "!doc": "* Add a handler for all HTTP verbs to this route."
-	      },
-	      "<i>": "fn() -> !this"
-	    },
-	    "Route.prototype._handles_method.!0": "string",
-	    "Route.prototype._handles_method.!ret": "bool",
-	    "Route.!0": "string",
-	    "Layer.prototype": {
-	      "handle_error": {
-	        "!type": "fn(error: +Error, req: ?, res: ?, next: ?)",
-	        "!doc": "* Handle the error for the layer."
-	      },
-	      "handle_request": {
-	        "!type": "fn(req: ?, res: ?, next: ?)",
-	        "!doc": "* Handle the request for the layer."
-	      },
-	      "match": {
-	        "!type": "fn(path: string) -> bool",
-	        "!doc": "* Check if this route matches `path`, if so populate `.params`."
-	      }
-	    },
-	    "Layer.prototype.match.!0": "string",
-	    "Layer.prototype.match.!ret": "bool",
-	    "Layer.!0": "string",
-	    "Layer.!ret": "+Layer",
-	    "toString.!ret": "string",
-	    "appendMethods.!0": {
-	      "!type": "[?]",
-	      "!doc": "store options for OPTIONS request only used if OPTIONS request"
-	    },
-	    "gettype.!ret": "string",
-	    "matchLayer.!0": {
-	      "name": "string",
-	      "route": "+Route",
-	      "handle": "Layer.handle",
-	      "keys": "Layer.keys"
-	    },
-	    "matchLayer.!1": "string",
-	    "restore.!0": "fn(err: ?)",
-	    "wrap.!1": "fn(old: ?, err: ?)",
-	    "wrap.!ret": "fn()",
-	    "hasOwnProperty.!0": "string",
-	    "hasOwnProperty.!ret": "bool",
-	    "decode_param.!0": "string",
-	    "decode_param.!ret": "string",
-	    "Route.path": "string",
-	    "Route.stack": "[?]",
-	    "Layer.handle": "fn(req: ?, res: ?, done: ?)",
-	    "Layer.name": "string",
-	    "Layer.params": {
-	      "!doc": "store values"
-	    },
-	    "Layer.path": "string",
-	    "Layer.keys": "[?]",
-	    "Layer.route": "+Route",
-	    "app.application.!ret": {
-	      "_params": "proto.!ret._params",
-	      "stack": "proto.!ret.stack"
-	    }
-	  },
-	  "View": {
-	    "!type": "fn(name: string, options: ?)",
-	    "!doc": "* Initialize a new `View` with the given `name`."
-	  },
-	  "slice": "fn(from: number, to?: number) -> !this",
-	  "app": {
-	    "init": {
-	      "!type": "fn(app: +Function)",
-	      "!doc": "* Initialize the server."
-	    },
-	    "defaultConfiguration": {
-	      "!type": "fn()",
-	      "!doc": "* Initialize application configuration."
-	    },
-	    "lazyrouter": {
-	      "!type": "fn()",
-	      "!doc": "* lazily adds the base router if it has not yet been added."
-	    },
-	    "handle": {
-	      "!type": "fn(req: ?, res: ?, done: ?)",
-	      "!doc": "* Dispatch a req, res pair into the application."
-	    },
-	    "use": {
-	      "!type": "fn(fn: ?) -> !this",
-	      "!doc": "* Proxy `Router#use()` to add middleware to the app router."
-	    },
-	    "route": {
-	      "!type": "fn(path: ?)",
-	      "!doc": "* Proxy to the app `Router#route()` Returns a new `Route` instance for the _path_."
-	    },
-	    "engine": {
-	      "!type": "fn(ext: string, fn: +Function) -> !this",
-	      "!doc": "* Register the given template engine callback `fn` as `ext`."
-	    },
-	    "param": {
-	      "!type": "fn(name: ?, fn: +Function) -> !this",
-	      "!doc": "* Proxy to `Router#param()` with one added api feature."
-	    },
-	    "set": {
-	      "!type": "fn(setting: string, val: ?) -> !this.settings.<i>",
-	      "!doc": "* Assign `setting` to `val`, or return `setting`'s value."
-	    },
-	    "path": {
-	      "!type": "fn() -> string",
-	      "!doc": "* Return the app's absolute pathname based on the parent(s) that have mounted it."
-	    },
-	    "enabled": {
-	      "!type": "fn(setting: string) -> bool",
-	      "!doc": "* Check if `setting` is enabled (truthy)."
-	    },
-	    "disabled": {
-	      "!type": "fn(setting: string) -> bool",
-	      "!doc": "* Check if `setting` is disabled."
-	    },
-	    "enable": {
-	      "!type": "fn(setting: string) -> app",
-	      "!doc": "* Enable `setting`."
-	    },
-	    "disable": {
-	      "!type": "fn(setting: string) -> app",
-	      "!doc": "* Disable `setting`."
-	    },
-	    "<i>": "fn(path: ?) -> !this",
-	    "all": {
-	      "!type": "fn(path: string) -> !this",
-	      "!doc": "* Special-cased \"all\" method, applying the given route `path`, middleware, and callback to _every_ HTTP method."
-	    },
-	    "render": {
-	      "!type": "fn(name: string, options: ?, fn: +Function)",
-	      "!doc": "* Render the given view `name` name with `options` and a callback accepting an error and the rendered template string."
-	    },
-	    "listen": {
-	      "!type": "fn()",
-	      "!doc": "* Listen for connections."
-	    },
-	    "etag": "fn(body: ?, encoding: ?) -> string",
-	    "wetag": "fn(body: ?, encoding: ?) -> string",
-	    "isAbsolute": "fn(path: string) -> bool",
-	    "flatten": "fn(arr: [?], ret: [?]) -> [!0.<i>]",
-	    "normalizeType": "fn(type: string) -> acceptParams.!ret",
-	    "normalizeTypes": "fn(types: [?]) -> [acceptParams.!ret]",
-	    "compileETag": "fn(val: ?) -> !0",
-	    "compileQueryParser": "fn(val: ?) -> !0",
-	    "compileTrust": "fn(val: ?) -> !0",
-	    "setCharset": "fn(type: string, charset: string) -> !0",
-	    "application": {
-	      "param": {},
-	      "use": {},
-	      "route": {},
-	      "handle": "proto.handle",
-	      "process_params": "proto.process_params",
-	      "<i>": "proto.<i>"
-	    },
-	    "request": {
-	      "acceptsEncodings": {},
-	      "acceptsCharsets": {},
-	      "acceptsLanguages": {},
-	      "range": {},
-	      "param": {},
-	      "response": {
-	        "status": {},
-	        "send": {},
-	        "sendStatus": {},
-	        "attachment": {},
-	        "append": {},
-	        "header": {},
-	        "get": {},
-	        "clearCookie": {},
-	        "cookie": {},
-	        "location": {},
-	        "contentType": "res.type",
-	        "set": "res.header",
-	        "links": "res.links",
-	        "json": "res.json",
-	        "jsonp": "res.jsonp",
-	        "sendFile": "res.sendFile",
-	        "sendfile": "res.sendfile",
-	        "download": "res.download",
-	        "type": "res.type",
-	        "format": "res.format",
-	        "redirect": "res.redirect",
-	        "vary": "res.vary",
-	        "render": "res.render"
-	      },
-	      "Route": {
-	        "prototype": {
-	          "_handles_method": {},
-	          "_options": "Route.prototype._options",
-	          "dispatch": "Route.prototype.dispatch",
-	          "all": "Route.prototype.all",
-	          "<i>": "Route.prototype.<i>"
-	        }
-	      },
-	      "init": "app.init",
-	      "get": "req.header",
-	      "etag": "app.etag",
-	      "wetag": "app.wetag",
-	      "isAbsolute": "app.isAbsolute",
-	      "flatten": "app.flatten",
-	      "normalizeType": "app.normalizeType",
-	      "normalizeTypes": "app.normalizeTypes",
-	      "compileETag": "app.compileETag",
-	      "compileQueryParser": "app.compileQueryParser",
-	      "compileTrust": "app.compileTrust",
-	      "setCharset": "app.setCharset",
-	      "application": "proto",
-	      "request": "req",
-	      "header": "req.header",
-	      "accepts": "req.accepts",
-	      "is": "req.is"
-	    },
-	    "response": {
-	      "status": {},
-	      "send": {},
-	      "sendStatus": {},
-	      "attachment": {},
-	      "append": {},
-	      "header": {},
-	      "get": {},
-	      "clearCookie": {},
-	      "cookie": {},
-	      "location": {},
-	      "contentType": "res.type",
-	      "set": "res.header",
-	      "links": "res.links",
-	      "json": "res.json",
-	      "jsonp": "res.jsonp",
-	      "sendFile": "res.sendFile",
-	      "sendfile": "res.sendfile",
-	      "download": "res.download",
-	      "type": "res.type",
-	      "format": "res.format",
-	      "redirect": "res.redirect",
-	      "vary": "res.vary",
-	      "render": "res.render"
-	    },
-	    "Route": {
-	      "prototype": {
-	        "_handles_method": {},
-	        "_options": "Route.prototype._options",
-	        "dispatch": "Route.prototype.dispatch",
-	        "all": "Route.prototype.all",
-	        "<i>": "Route.prototype.<i>"
-	      }
-	    },
-	    "!doc": "* Application prototype."
-	  },
-	  "trustProxyDefaultSymbol": {
-	    "!type": "string",
-	    "!doc": "* Variable for trust proxy inheritance back-compat @api private"
-	  },
-	  "logerror": {
-	    "!type": "fn(err: +Error)",
-	    "!doc": "* Log error using console.error."
-	  },
-	  "req": {
-	    "header": "fn(name: ?) -> !this.headers.referrer",
-	    "accepts": "fn()",
-	    "acceptsEncodings": {
-	      "!type": "fn() -> bool",
-	      "!doc": "* Check if the given `encoding`s are accepted."
-	    },
-	    "acceptsCharsets": {
-	      "!type": "fn() -> bool",
-	      "!doc": "* Check if the given `charset`s are acceptable, otherwise you should respond with 406 \"Not Acceptable\"."
-	    },
-	    "acceptsLanguages": {
-	      "!type": "fn() -> bool",
-	      "!doc": "* Check if the given `lang`s are acceptable, otherwise you should respond with 406 \"Not Acceptable\"."
-	    },
-	    "range": {
-	      "!type": "fn(size: number) -> [?]",
-	      "!doc": "* Parse Range header field, capping to the given `size`."
-	    },
-	    "param": {
-	      "!type": "fn(name: string, defaultValue: ?) -> !this.params.<i>",
-	      "!doc": "* Return the value of param `name` when present or `defaultValue`."
-	    },
-	    "is": "fn(types: [?])",
-	    "!doc": "* Request prototype.",
-	    "init": "app.init",
-	    "get": "req.header",
-	    "etag": "app.etag",
-	    "wetag": "app.wetag",
-	    "isAbsolute": "app.isAbsolute",
-	    "flatten": "app.flatten",
-	    "normalizeType": "app.normalizeType",
-	    "normalizeTypes": "app.normalizeTypes",
-	    "compileETag": "app.compileETag",
-	    "compileQueryParser": "app.compileQueryParser",
-	    "compileTrust": "app.compileTrust",
-	    "setCharset": "app.setCharset",
-	    "application": "proto",
-	    "request": "req",
-	    "response": "res",
-	    "Route": "Route"
-	  },
-	  "defineGetter": {
-	    "!type": "fn(obj: req, name: string, getter: ?)",
-	    "!doc": "* Helper function for creating a getter on an object."
-	  },
-	  "res": {
-	    "status": {
-	      "!type": "fn(code: number) -> !this",
-	      "!doc": "* Set status `code`."
-	    },
-	    "links": {
-	      "!type": "fn(links: ?)",
-	      "!doc": "* Set Link header field with the given `links`."
-	    },
-	    "send": {
-	      "!type": "fn(body: ?) -> !this",
-	      "!doc": "* Send a response."
-	    },
-	    "json": {
-	      "!type": "fn(obj: ?)",
-	      "!doc": "* Send JSON response."
-	    },
-	    "jsonp": {
-	      "!type": "fn(obj: ?)",
-	      "!doc": "* Send JSON response with JSONP callback support."
-	    },
-	    "sendStatus": {
-	      "!type": "fn(statusCode: number)",
-	      "!doc": "* Send given HTTP status code."
-	    },
-	    "sendFile": {
-	      "!type": "fn(path: ?, options: ?, fn: ?)",
-	      "!doc": "* Transfer the file at the given `path`."
-	    },
-	    "sendfile": {
-	      "!type": "fn(path: ?, options: ?, fn: ?)",
-	      "!doc": "* Transfer the file at the given `path`."
-	    },
-	    "download": {
-	      "!type": "fn(path: ?, filename: ?, fn: ?)",
-	      "!doc": "* Transfer the file at the given `path` as an attachment."
-	    },
-	    "type": "fn(type: ?)",
-	    "format": {
-	      "!type": "fn(obj: ?) -> !this",
-	      "!doc": "* Respond to the Acceptable formats using an `obj` of mime-type callbacks."
-	    },
-	    "attachment": {
-	      "!type": "fn(filename: string) -> !this",
-	      "!doc": "* Set _Content-Disposition_ header to _attachment_ with optional `filename`."
-	    },
-	    "append": {
-	      "!type": "fn(field: string, val: ?)",
-	      "!doc": "* Append additional header `field` with value `val`."
-	    },
-	    "header": "fn(field: ?, val: string) -> !this",
-	    "get": {
-	      "!type": "fn(field: string) -> string",
-	      "!doc": "* Get value for header `field`."
-	    },
-	    "clearCookie": {
-	      "!type": "fn(name: string, options: ?)",
-	      "!doc": "* Clear cookie `name`."
-	    },
-	    "cookie": {
-	      "!type": "fn(name: string, val: string, options: ?) -> !this",
-	      "!doc": "* Set cookie `name` to `val`, with the given `options`."
-	    },
-	    "location": {
-	      "!type": "fn(url: string) -> !this",
-	      "!doc": "* Set the location header to `url`."
-	    },
-	    "redirect": {
-	      "!type": "fn(url: ?)",
-	      "!doc": "* Redirect to the given `url` with optional response `status` defaulting to 302."
-	    },
-	    "vary": {
-	      "!type": "fn(field: ?) -> !this",
-	      "!doc": "* Add `field` to Vary."
-	    },
-	    "render": {
-	      "!type": "fn(view: ?, options: res.render.!1, fn: ?)",
-	      "!doc": "* Render `view` with the given `options` and optional callback `fn`."
-	    },
-	    "!doc": "* Response prototype.",
-	    "contentType": "res.type",
-	    "set": "res.header"
-	  },
-	  "sendfile": {
-	    "!type": "fn(res: ?, file: ?, options: ?, callback: fn(err: +Error))",
-	    "!doc": "pipe the send file stream"
-	  },
-	  "acceptParams": {
-	    "!type": "fn(str: string, index: ?) -> acceptParams.!ret",
-	    "!doc": "* Parse accept params `str` returning an object with `.value`, `.quality` and `.params`."
-	  },
-	  "newObject": {
-	    "!type": "fn() -> ?",
-	    "!doc": "* Return new empty object."
-	  },
-	  "tryStat": {
-	    "!type": "fn(path: string)",
-	    "!doc": "* Return a stat, maybe."
-	  },
-	  "proto": {
-	    "!type": "fn(options: ?) -> fn(req: ?, res: ?, next: ?)",
-	    "!doc": "* Initialize a new `Router` with the given `options`."
-	  },
-	  "Route": {
-	    "!type": "fn(path: string)",
-	    "!doc": "* Initialize `Route` with the given `path`, * @param {String} path @api private"
-	  },
-	  "createApplication": {
-	    "!type": "fn()",
-	    "!doc": "* Create an express application."
-	  },
-	  "Layer": "fn(path: string, options: ?, fn: fn(req: ?, res: ?, done: ?)) -> +Layer",
-	  "objectRegExp": {
-	    "!type": "+RegExp",
-	    "!doc": "* Module variables."
-	  },
-	  "toString": "fn() -> string",
-	  "appendMethods": {
-	    "!type": "fn(list: [?], addition: ?)",
-	    "!doc": "append methods to a list of methods"
-	  },
-	  "getPathname": {
-	    "!type": "fn(req: ?)",
-	    "!doc": "get pathname of request"
-	  },
-	  "gettype": {
-	    "!type": "fn(obj: ?) -> string",
-	    "!doc": "get type for error message"
-	  },
-	  "matchLayer": {
-	    "!type": "fn(layer: matchLayer.!0, path: string) -> +Error",
-	    "!doc": "* Match path to a layer."
-	  },
-	  "mergeParams": {
-	    "!type": "fn(params: ?, parent: ?) -> !0",
-	    "!doc": "merge params with parent params"
-	  },
-	  "restore": {
-	    "!type": "fn(fn: fn(err: ?), obj: ?) -> fn(err: ?)",
-	    "!doc": "restore obj props after function"
-	  },
-	  "sendOptionsResponse": {
-	    "!type": "fn(res: ?, options: [?], next: ?)",
-	    "!doc": "send an OPTIONS response"
-	  },
-	  "wrap": {
-	    "!type": "fn(old: fn(err: ?), fn: fn(old: ?, err: ?)) -> fn()",
-	    "!doc": "wrap a function"
-	  },
-	  "hasOwnProperty": {
-	    "!type": "fn(prop: string) -> bool",
-	    "!doc": "* Module variables."
-	  },
-	  "decode_param": {
-	    "!type": "fn(val: string) -> !0",
-	    "!doc": "* Decode param value."
-	  },
-	  "Error": {
-	    "status": "number",
-	    "code": "string"
-	  }
-	};
+	}
 	
 	/* eslint-enable missing-nls */
 	tern.registerPlugin("orionExpress", /* @callback */ function(server, options) { //$NON-NLS-1$
@@ -777,4 +132,166 @@
 	      }
 	    };
 	});
+	
+	/* eslint-disable missing-nls */
+	var defs = {
+	  "express": {
+	    "IRoute": {
+	      "path": "string",
+	      "stack": "?",
+	      "all": "fn(handler: [RequestHandler]) -> IRoute",
+	      "get": "fn(handler: [RequestHandler]) -> IRoute",
+	      "post": "fn(handler: [RequestHandler]) -> IRoute",
+	      "put": "fn(handler: [RequestHandler]) -> IRoute",
+	      "delete": "fn(handler: [RequestHandler]) -> IRoute",
+	      "patch": "fn(handler: [RequestHandler]) -> IRoute",
+	      "options": "fn(handler: [RequestHandler]) -> IRoute"
+	    },
+	    "Router": {
+	      "!type": "fn(options?: ?) -> Router",
+	      "prototype": {
+		      "param": "fn(name: string, handler: RequestParamHandler) -> T",
+		      "all": "?",
+		      "get": "?",
+		      "post": "?",
+		      "put": "?",
+		      "delete": "?",
+		      "patch": "?",
+		      "options": "?",
+		      "route": "fn(path: string) -> IRoute",
+		      "use": "fn(handler: [RequestHandler]) -> T"
+		    }
+	    },
+	    "CookieOptions": {
+	      "maxAge": "number",
+	      "signed": "bool",
+	      "expires": "Date",
+	      "httpOnly": "bool",
+	      "path": "string",
+	      "domain": "string",
+	      "secure": "bool"
+	    },
+	    "Errback": {},
+	    "Request": {
+	      "get": "fn(name: string) -> string",
+	      "header": "fn(name: string) -> string",
+	      "headers": {},
+	      "accepts": "fn(type: string) -> string",
+	      "acceptsCharset": "fn(charset: string) -> bool",
+	      "acceptsLanguage": "fn(lang: string) -> bool",
+	      "range": "fn(size: number) -> [?]",
+	      "accepted": "[MediaType]",
+	      "acceptedLanguages": "[?]",
+	      "acceptedCharsets": "[?]",
+	      "param": "fn(name: string, defaultValue?: ?) -> string",
+	      "is": "fn(type: string) -> bool",
+	      "protocol": "string",
+	      "secure": "bool",
+	      "ip": "string",
+	      "ips": "[string]",
+	      "subdomains": "[string]",
+	      "path": "string",
+	      "hostname": "string",
+	      "host": "string",
+	      "fresh": "bool",
+	      "stale": "bool",
+	      "xhr": "bool",
+	      "body": "?",
+	      "cookies": "?",
+	      "method": "string",
+	      "params": "?",
+	      "user": "?",
+	      "authenticatedUser": "?",
+	      "files": "?",
+	      "clearCookie": "fn(name: string, options?: ?) -> Response",
+	      "query": "?",
+	      "route": "?",
+	      "signedCookies": "?",
+	      "originalUrl": "string",
+	      "url": "string"
+	    },
+	    "MediaType": {
+	      "value": "string",
+	      "quality": "number",
+	      "type": "string",
+	      "subtype": "string"
+	    },
+	    "Send": {},
+	    "Response": {
+	      "status": "fn(code: number) -> Response",
+	      "sendStatus": "fn(code: number) -> Response",
+	      "links": "fn(links: ?) -> Response",
+	      "send": "Send",
+	      "json": "Send",
+	      "jsonp": "Send",
+	      "sendFile": "fn(path: string)",
+	      "sendfile": "fn(path: string)",
+	      "download": "fn(path: string)",
+	      "contentType": "fn(type: string) -> Response",
+	      "type": "fn(type: string) -> Response",
+	      "format": "fn(obj: ?) -> Response",
+	      "attachment": "fn(filename?: string) -> Response",
+	      "set": "fn(field: ?) -> Response",
+	      "header": "fn(field: ?) -> Response",
+	      "headersSent": "bool",
+	      "get": "fn(field: string) -> string",
+	      "clearCookie": "fn(name: string, options?: ?) -> Response",
+	      "cookie": "fn(name: string, val: string, options: CookieOptions) -> Response",
+	      "location": "fn(url: string) -> Response",
+	      "redirect": "fn(url: string)",
+	      "render": "fn(view: string, options?: Object, callback?: fn(err: Error, html: string))",
+	      "locals": "?",
+	      "charset": "string"
+	    },
+	    "ErrorRequestHandler": {},
+	    "RequestHandler": {},
+	    "Handler": {},
+	    "RequestParamHandler": {},
+	    "Application": {
+	      "init": "fn()",
+	      "defaultConfiguration": "fn()",
+	      "engine": "fn(ext: string, fn: Function) -> Application",
+	      "set": "fn(setting: string, val: ?) -> Application",
+	      "get": {},
+	      "path": "fn() -> string",
+	      "enabled": "fn(setting: string) -> bool",
+	      "disabled": "fn(setting: string) -> bool",
+	      "enable": "fn(setting: string) -> Application",
+	      "disable": "fn(setting: string) -> Application",
+	      "configure": "fn(fn: Function) -> Application",
+	      "render": "fn(name: string, options?: Object, callback?: fn(err: Error, html: string))",
+	      "listen": "fn(port: number, hostname: string, backlog: number, callback?: Function) -> http.Server",
+	      "route": "fn(path: string) -> IRoute",
+	      "router": "string",
+	      "settings": "?",
+	      "resource": "?",
+	      "map": "?",
+	      "locals": "?",
+	      "routes": "?"
+	    },
+	    "Express": {
+	      "version": "string",
+	      "mime": "string",
+	      "createApplication": "fn() -> Application",
+	      "createServer": "fn() -> Application",
+	      "application": "?",
+	      "request": "Request",
+	      "response": "Response"
+	    },
+	    "static": "fn(root: string, options?: ?) -> RequestHandler"
+	  },
+	  "!name": "express",
+	  "!define": {
+	  	"!node": {
+	        express: {
+	          "!type": "fn() -> express.Application",
+	          "!url": "http://expressjs.com",
+	          "!doc": "Creates an express application.",
+	          Router: {
+	            "!type": "fn(options?: express.RouterOptions) -> +express.Router"
+	          }
+	        }
+	      }
+	  }
+	};
 });
