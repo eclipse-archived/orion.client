@@ -109,10 +109,13 @@
     }
 	
 	var _f = resolver.getResolved(name);
+	var wsname = name;
 	if(_f && _f.file !== undefined) {
-		name = _f.file;
+		wsname = _f.file;
 	}
-    if (name in data.modules) {
+    if (wsname in data.modules) {
+    	return data.modules[name];
+    } else if(name in data.modules) {
     	return data.modules[name];
     }
     var result;
