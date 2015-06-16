@@ -66,14 +66,13 @@ define([
 				entryNode.appendChild(nameNode);
 			}
 			
-			
-			
 			if (item.description){
 				var descNode = document.createElement("div"); //$NON-NLS-1$
 				descNode.textContent = item.description;
-				if (item.removable){
-					descNode.textContent += " (Removable)";
-				}
+				// TODO Show to the user that the plug-in is added by the platform and can't be removed
+//				if (item.removable){
+//					descNode.textContent += " (Removable)";
+//				}
 				entryNode.appendChild(descNode);
 			}
 			
