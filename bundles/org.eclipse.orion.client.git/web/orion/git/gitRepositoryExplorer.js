@@ -534,7 +534,7 @@ define([
 									break;
 								}
 							}
-							if (util.isNewBranch(newBranch)) {
+							if (newBranch) {
 								selected = newBranch;
 								break;
 							}
