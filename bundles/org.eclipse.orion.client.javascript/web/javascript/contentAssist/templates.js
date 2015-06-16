@@ -363,6 +363,14 @@ define([
 			nodes: {top:true, member:false, prop:false},
 			description: " - console log", //$NON-NLS-0$
 			template: "console.log(${object});" //$NON-NLS-0$
+		},
+		{
+		    prefix: "node", //$NON-NLS-0$
+			name: "node", //$NON-NLS-0$
+			nodes: {top:true, member:false, prop:false, doc:false, jsdoc:false},
+			description: " - Node require function call", //$NON-NLS-0$
+			template: "/* eslint-env node*/\n"+ //$NON-NLS-1$
+					  "var lib = require('${cursor}');" //$NON-NLS-1$
 		}
 	];
 
