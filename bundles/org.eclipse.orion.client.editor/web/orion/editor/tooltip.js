@@ -452,7 +452,7 @@ function Tooltip (view) {
 			var defWidth = viewportWidth;
 			if (!info.allowFullWidth){
 				defWidth = Math.min(viewportWidth/2, 600);
-				var defHeight = Math.min(viewportHeight/2, 250);
+				var defHeight = Math.min(viewportHeight/2, 400);
 				tipRect.width = Math.min(tipRect.width, defWidth);
 				tipRect.height = Math.min(tipRect.height, defHeight);
 			}
