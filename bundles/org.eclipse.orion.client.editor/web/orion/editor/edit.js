@@ -148,6 +148,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	 * @property {Boolean} [wrapMode=false] whether or not the view wraps lines.
 	 * @property {Boolean} [wrapable=false] whether or not the view is wrappable.
 	 * @property {Function} [statusReporter] a status reporter.
+	 * @property {Function} [hoverFactory] a factory for hovers.
 	 * @property {String} [title=""] the editor title.
 	 * @property {String} [contents=""] the editor contents.
 	 * @property {String} [lang] @deprecated use contentType instead
@@ -289,6 +290,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 			contentAssistFactory: contentAssistFactory,
 			keyBindingFactory: new mEditorFeatures.KeyBindingsFactory(), 
 			statusReporter: options.statusReporter,
+			hoverFactory: options.hoverFactory,
 			domNode: parent
 		});
 		editor.addEventListener("TextViewInstalled", function() { //$NON-NLS-0$
