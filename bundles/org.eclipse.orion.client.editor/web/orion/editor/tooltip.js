@@ -601,11 +601,11 @@ function Tooltip (view) {
 			var yOK = y >= rect.top && y <= (rect.top + rect.height);
 			return xOK && yOK;
 		},
-		mapOffset: function(offset, parent) {
+		mapOffset: function(offset) {
 			var textView = this._view;
 			var model = textView.getModel();
 			if (model.getBaseModel) {
-				offset = model.mapOffset(offset, parent);
+				offset = model.mapOffset(offset, true);
 			}
 			return offset;
 		},
