@@ -450,12 +450,17 @@ function Tooltip (view) {
 			
 			// Set a default size for the tooltip
 			var defWidth = viewportWidth;
+			var defHeight = viewportHeight;
 			if (!info.allowFullWidth){
 				defWidth = Math.min(viewportWidth/2, 600);
-				var defHeight = Math.min(viewportHeight/2, 400);
+				defHeight = Math.min(viewportHeight/2, 400);
 				tipRect.width = Math.min(tipRect.width, defWidth);
 				tipRect.height = Math.min(tipRect.height, defHeight);
 			}
+
+			// Now that we have our width recalculate the desired height...
+			tooltipDiv.style.width = (tipRect.width - padding) + "px"; //$NON-NLS-1$
+			tipRect.height = Math.min(tooltipDiv.getBoundingClientRect().height, defHeight);
 			
 			// Hack for single line tooltips that wrap, set a minimum height to make them show 2 lines without scrolling
 			// The largest line height was MacOS Chrome with 20px+padding.  So 25 is the minimum height we are sure we are one two lines
@@ -467,10 +472,6 @@ function Tooltip (view) {
 			var spaceBelow = viewportHeight - (anchorArea.top + anchorArea.height - viewportTop);
 			var spaceAbove = anchorArea.top - viewportTop;
 			var spaceRight = viewportWidth - (anchorArea.left + anchorArea.width - viewportLeft);
-
-			// Now that we have our width recalculate the desired height...
-			tooltipDiv.style.width = (tipRect.width - padding) + "px"; //$NON-NLS-1$
-			tipRect.height = Math.min(tooltipDiv.getBoundingClientRect().height, defHeight);
 			
 			// If there is not enough space above or below, swap the position.  Can't do the same for right/left because rulers are at client bounds
 			if (position === "above" && tipRect.height > spaceAbove && tipRect.height <= spaceBelow){ //$NON-NLS-0$
