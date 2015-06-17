@@ -38,5 +38,25 @@ define({
 	// Other messages
 	'unknownError': 'An unknown error occurred.',
 	'failedDeleteRequest': 'Failed to delete file from Tern: ${0}',
-	'failedReadRequest': 'Failed to read file into Tern: ${0}'
+	'failedReadRequest': 'Failed to read file into Tern: ${0}',
+	'failedToComputeProposals': 'Failed to compute proposals',
+	'failedToComputeProposalsNoServer': 'Failed to compute proposals, server not started',
+	'failedToComputeDecl': 'Failed to compute declaration',
+	'failedToComputeDeclNoServer': 'Failed to compute declaration, server not started',
+	'failedToComputeDoc': 'Failed to compute documentation',
+	'failedToComputeDocNoServer': 'Failed to compute documentation, server not started',
+	'failedToComputeOccurrences': 'Failed to compute occurrences',
+	'failedToComputeOccurrencesNoServer': 'failed to compute occurrences, server not started',
+	'failedGetInstalledPlugins': 'Failed to get installed plugins',
+	'failedGetInstalledPluginsNoServer': 'Failed to get installed plugins, server not started',
+	'failedInstallPlugins': 'Failed to install plugins',
+	'failedInstallPluginsNoServer': 'Failed to install plugins, server not started',
+	'failedRemovePlugins': 'Failed to remove plugins',
+	'failedRemovePluginsNoServer': 'Failed to remove plugins, server not started',
+	'failedEnablementPlugins': 'Failed to set enablement of plugins',
+	'failedEnablementPluginsNoServer': 'Failed to set enablement of plugins, server not started',
+	'failedGetEnvs': 'Failed to get contributed environments',
+	'failedGetEnvsNoServer': 'Failed to get contributed environments, server not started',
+	'failedRename': 'Failed to compute rename changes',
+	'failedRenameNoServer': 'Failed to compute rename changes, server not started'
 });

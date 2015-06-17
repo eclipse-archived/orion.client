@@ -11,7 +11,8 @@
  ******************************************************************************/
 /* eslint-env amd */
 define([
-], function() {
+	'i18n!javascript/nls/workermessages'
+], function(Messages) {
 
     /**
      * @description Computes the content assist proposals
@@ -37,7 +38,7 @@ define([
 	           files: args.files}, 
 	           function(error, comps) {
 	               if(error) {
-	               		callback({request: 'completions', error: error.message, message: 'Failed to compute proposals'}); //$NON-NLS-1$
+	               		callback({request: 'completions', error: error.message, message: Messages['failedToComputeProposals']}); //$NON-NLS-1$
 	               } else if(comps && comps.completions) {
                			callback({request: 'completions', proposals: comps.completions}); //$NON-NLS-1$
 	               } else {
@@ -46,7 +47,7 @@ define([
 	           });
 	       
 	   } else {
-	       callback({request: 'completions', message: 'Failed to compute proposals, server not started'}); //$NON-NLS-1$
+	       callback({request: 'completions', message: Messages['failedToComputeProposalsNoServer']}); //$NON-NLS-1$
 	   }
     }
     

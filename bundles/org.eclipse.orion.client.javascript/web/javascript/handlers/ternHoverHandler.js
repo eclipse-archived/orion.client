@@ -11,7 +11,8 @@
  ******************************************************************************/
 /* eslint-env amd */
 define([
-], function() {
+	'i18n!javascript/nls/workermessages'
+], function(Messages) {
     
     /**
      * @description Compute the hover for the given arguments
@@ -31,7 +32,7 @@ define([
 	           files: args.files}, 
 	           function(error, doc) {
 	               if(error) {
-	                   callback({request: 'documentation', error: error.message, message: 'Failed to compute documentation'}); //$NON-NLS-1$
+	                   callback({request: 'documentation', error: error.message, message: Messages['failedToComputeDoc']}); //$NON-NLS-1$
 	               } else if(doc && doc.doc) {
         			   callback({request: 'documentation', doc:doc}); //$NON-NLS-1$
 	               } else {
@@ -39,7 +40,7 @@ define([
 	               }
 	           });
 	   } else {
-	       callback({request: 'documentation', message: 'Failed to compute documentation, server not started'}); //$NON-NLS-1$
+	       callback({request: 'documentation', message: Messages['failedToComputeDocNoServer']}); //$NON-NLS-1$
 	   }
     }
     

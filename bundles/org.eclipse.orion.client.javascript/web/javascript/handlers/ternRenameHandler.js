@@ -11,7 +11,8 @@
  ******************************************************************************/
 /* eslint-env amd */
 define([
-], function() {
+	'i18n!javascript/nls/workermessages'
+], function(Messages) {
    
    /**
     * @description Computes the complete rename changes for the given arguments
@@ -32,7 +33,7 @@ define([
 	           files: args.files}, 
 	           function(error, changes) {
 	               if(error) {
-	                   callback({request: 'rename', error: error.message, message: 'Failed to rename changes'}); //$NON-NLS-1$
+	                   callback({request: 'rename', error: error.message, message: Messages['failedRename']}); //$NON-NLS-1$
 	               } else if(changes && Array.isArray(changes.changes)) {
         			   callback({request: 'rename', changes:changes}); //$NON-NLS-1$
 	               } else {
@@ -40,7 +41,7 @@ define([
 	               }
 	           });
 	   } else {
-	       callback({request: 'rename', message: 'failed to rename, server not started'}); //$NON-NLS-1$
+	       callback({request: 'rename', message: Messages['failedRenameNoServer']}); //$NON-NLS-1$
 	   }
    }
    

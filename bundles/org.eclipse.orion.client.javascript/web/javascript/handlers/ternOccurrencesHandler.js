@@ -11,7 +11,8 @@
  ******************************************************************************/
 /* eslint-env amd */
 define([
-], function() {
+	'i18n!javascript/nls/workermessages'
+], function(Messages) {
     
     /**
      * @description Compute the occurrences 
@@ -24,13 +25,13 @@ define([
         if(ternserver) {
 	       ternserver.request({
 	           query: {
-		           type: "refs", 
+		           type: "refs",  //$NON-NLS-1$
 		           file: args.meta.location,
 		           end: args.params.selection.start
 	           }}, 
 	           function(error, refs) {
 	               if(error) {
-	                   callback({request: 'occurrences', error: error.message, message: 'Failed to compute occurrences'}); //$NON-NLS-1$
+	                   callback({request: 'occurrences', error: error.message, message: Messages['failedToComputeOccurrences']}); //$NON-NLS-1$
 	               } else if(refs && Array.isArray(refs)) {
         			   callback({request: 'occurrences', refs:refs}); //$NON-NLS-1$
 	               } else {
@@ -38,7 +39,7 @@ define([
 	               }
 	           });
 	   } else {
-	       callback({request: 'occurrences', message: 'failed to compute occurrences, server not started'}); //$NON-NLS-1$
+	       callback({request: 'occurrences', message: Messages['failedToComputeOccurrencesNoServer']}); //$NON-NLS-1$
 	   }
     }
     

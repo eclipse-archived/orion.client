@@ -11,7 +11,8 @@
  ******************************************************************************/
 /* eslint-env amd */
 define([
-], function() {
+	'i18n!javascript/nls/workermessages'
+], function(Messages) {
    
    var INSTALLED_PLUGINS_ID = 'installed_plugins'; //$NON-NLS-1$
    var INSTALL_PLUGINS_ID = 'install_plugins'; //$NON-NLS-1$
@@ -34,16 +35,16 @@ define([
 	           }}, 
 	           function(error, plugins) {
 	               if(error) {
-	                   callback({request: INSTALLED_PLUGINS_ID, error: error.message, message: 'Failed to get installed plugins'});
+	                   callback({request: INSTALLED_PLUGINS_ID, error: error.message, message: Messages['failedGetInstalledPlugins']});
 	               }
 	               if(typeof(plugins) === 'object') {
-	               		callback({request: INSTALLED_PLUGINS_ID, plugins:plugins}); //$NON-NLS-1$
+	               		callback({request: INSTALLED_PLUGINS_ID, plugins:plugins});
        			   } else {
-       			   		callback({request: INSTALLED_PLUGINS_ID, plugins: null}); //$NON-NLS-1$
+       			   		callback({request: INSTALLED_PLUGINS_ID, plugins: null});
        			   }
 	           });
 	   } else {
-	       callback({request: INSTALLED_PLUGINS_ID, message: 'Failed to get installed plugins, server not started'});
+	       callback({request: INSTALLED_PLUGINS_ID, message: Messages['failedGetInstalledPluginsNoServer']});
 	   }
    }
    
@@ -61,16 +62,16 @@ define([
 	           }}, 
 	           function(error, status) {
 	               if(error) {
-	                   callback({request: INSTALL_PLUGINS_ID, error: error.message, message: 'Failed to install plugins'});
+	                   callback({request: INSTALL_PLUGINS_ID, error: error.message, message: Messages['failedInstallPlugins']});
 	               }
 	               if(typeof(status) === 'object') {
-	               		callback({request: INSTALL_PLUGINS_ID, status:status}); //$NON-NLS-1$
+	               		callback({request: INSTALL_PLUGINS_ID, status:status});
        			   } else {
-       			   		callback({request: INSTALL_PLUGINS_ID, status: {state: -1}}); //$NON-NLS-1$
+       			   		callback({request: INSTALL_PLUGINS_ID, status: {state: -1}});
        			   }
 	           });
 	   } else {
-	       callback({request: INSTALL_PLUGINS_ID, message: 'Failed to install plugins, server not started'});
+	       callback({request: INSTALL_PLUGINS_ID, message: Messages['failedInstallPluginsNoServer']});
 	   }
    }
    
@@ -88,7 +89,7 @@ define([
 	           }}, 
 	           function(error, status) {
 	               if(error) {
-	                   callback({request: REMOVE_PLUGINS, error: error.message, message: 'Failed to remove plugins'});
+	                   callback({request: REMOVE_PLUGINS, error: error.message, message: Messages['failedRemovePlugins']});
 	               }
 	               if(typeof(status) === 'object') {
 	               		callback({request: REMOVE_PLUGINS, status:status}); //$NON-NLS-1$
@@ -97,7 +98,7 @@ define([
        			   }
 	           });
 	   } else {
-	       callback({request: REMOVE_PLUGINS, message: 'Failed to remove plugins, server not started'});
+	       callback({request: REMOVE_PLUGINS, message: Messages['failedRemovePluginsNoServer']});
 	   }
    }
    
@@ -115,7 +116,7 @@ define([
 	           }}, 
 	           function(error, status) {
 	               if(error) {
-	                   callback({request: PLUGIN_ENABLEMENT, error: error.message, message: 'Failed to set enablement of plugins'});
+	                   callback({request: PLUGIN_ENABLEMENT, error: error.message, message: Messages['failedEnablementPlugins']});
 	               }
 	               if(typeof(status) === 'object') {
 	               		callback({request: PLUGIN_ENABLEMENT, status:status}); //$NON-NLS-1$
@@ -124,7 +125,7 @@ define([
        			   }
 	           });
 	   } else {
-	       callback({request: PLUGIN_ENABLEMENT, message: 'Failed to set enablement of plugins, server not started'});
+	       callback({request: PLUGIN_ENABLEMENT, message: Messages['failedEnablementPluginsNoServer']});
 	   }
    }
    
@@ -142,7 +143,7 @@ define([
 	           }}, 
 	           function(error, envs) {
 	               if(error) {
-	                   callback({request: ENVIRONMENTS, error: error.message, message: 'Failed to set enablement of plugins'});
+	                   callback({request: ENVIRONMENTS, error: error.message, message: Messages['failedGetEnvs']});
 	               }
 	               if(typeof(envs) === 'object') {
 	               		callback({request: ENVIRONMENTS, envs:envs}); //$NON-NLS-1$
@@ -151,7 +152,7 @@ define([
        			   }
 	           });
 	   } else {
-	       callback({request: ENVIRONMENTS, message: 'Failed to get contributed environments, server not started'});
+	       callback({request: ENVIRONMENTS, message: Messages['failedGetEnvsNoServer']});
 	   }
    }
    
