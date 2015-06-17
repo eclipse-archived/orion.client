@@ -113,9 +113,7 @@
 	if(_f && _f.file !== undefined) {
 		wsname = _f.file;
 	}
-    if (wsname in data.modules) {
-    	return data.modules[name];
-    } else if(name in data.modules) {
+    if(!wsname && name in data.modules) {
     	return data.modules[name];
     }
     var result;
@@ -124,6 +122,7 @@
       infer.def.load(data.options.modules[name], scope);
       result = data.modules[name] = scope.exports;
     } else {
+      name = wsname;
       // data.currentFile is only available while analyzing a file; at query
       // time, determine the calling file from the caller's AST.
       var currentFile = data.currentFile || resolveProjectPath(server, argNodes[0].sourceFile.name);
