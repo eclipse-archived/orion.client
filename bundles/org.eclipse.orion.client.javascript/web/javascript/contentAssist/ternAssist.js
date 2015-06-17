@@ -383,7 +383,7 @@ define([
 	 * @public
 	 * @param {javascript.ASTManager} astManager An AST manager to create ASTs with
 	 * @param {TernWorker} ternWorker The worker running Tern
-	 * @param {Object} pluginEnvironments The object of available environment names from installed Tern plugins 
+	 * @param {Function} pluginEnvironments The function to use to query the Tern server for contributed plugins
 	 */
 	function TernContentAssist(astManager, ternWorker, pluginEnvironments) {
 		this.astManager = astManager;
@@ -417,23 +417,27 @@ define([
 			                var cu = new CU(blocks, meta);
         			        if(cu.validOffset(params.offset)) {
         			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-        			            	return that.doAssist(ast, params, meta, {ecma5:true, browser:true});
+        			            	return that.pluginenvs().then(function(envs) {
+        			            		return that.doAssist(ast, params, meta, {ecma5:true, browser:true}, envs);
+        			            	});
                     			});
         			        }
     			        }
 			        });
 			    } else {
 			        return that.astManager.getAST(editorContext).then(function(ast) {
-			        	return that.doAssist(ast, params, meta, {ecma5: true});
+			        	return that.pluginenvs().then(function(envs) {
+			        		return that.doAssist(ast, params, meta, {ecma5: true}, envs);
+			        	});
         			});
 			    }
 			});
 		},
 		
-		doAssist: function(ast, params, meta, envs) {
+		doAssist: function(ast, params, meta, envs, contributedEnvs) {
 			var kind = getKind(ast, params.offset, ast.source);
        		params.prefix = getPrefix(params, kind, ast.source);
-       		var proposals = [].concat(createDocProposals(params, kind, ast, ast.source, this.pluginenvs),
+       		var proposals = [].concat(createDocProposals(params, kind, ast, ast.source, contributedEnvs),
        								  createTemplateProposals(params, kind, ast.source));
        		if(kind && (kind.kind === 'jsdoc' || kind.kind === 'doc')) {
        			return new Deferred().resolve(proposals); //resolve now, no need to talk to the worker

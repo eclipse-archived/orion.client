@@ -17,6 +17,7 @@ define([
    var INSTALL_PLUGINS_ID = 'install_plugins'; //$NON-NLS-1$
    var REMOVE_PLUGINS = 'remove_plugins'; //$NON-NLS-1$
    var PLUGIN_ENABLEMENT = 'plugin_enablement'; //$NON-NLS-1$
+   var ENVIRONMENTS = 'environments'; //$NON-NLS-1$
    
    /**
     * @description Asks the backing server for its complete listing of installed plugins
@@ -127,10 +128,38 @@ define([
 	   }
    }
    
+   /**
+    * @description Asks the backing server to get the contributed eslint environments
+    * @param {Tern.Server} ternserver The backing Tern server
+    * @param {Object} args The map of arguments
+    * @param {Function} callback The fuction to call back to when the request completes or fails
+    */
+   function getEnvironments(ternserver, args, callback) {
+   		if(ternserver) {
+	       ternserver.request({
+	           query: {
+		           type: ENVIRONMENTS
+	           }}, 
+	           function(error, envs) {
+	               if(error) {
+	                   callback({request: ENVIRONMENTS, error: error.message, message: 'Failed to set enablement of plugins'});
+	               }
+	               if(typeof(envs) === 'object') {
+	               		callback({request: ENVIRONMENTS, envs:envs}); //$NON-NLS-1$
+       			   } else {
+       			   		callback({request: ENVIRONMENTS, envs: null}); //$NON-NLS-1$
+       			   }
+	           });
+	   } else {
+	       callback({request: ENVIRONMENTS, message: 'Failed to get contributed environments, server not started'});
+	   }
+   }
+   
    return {
        getInstalledPlugins: getInstalledPlugins,
        installPlugins: installPlugins,
        removePlugins: removePlugins,
-       setPluginEnablement: setPluginEnablement
+       setPluginEnablement: setPluginEnablement,
+       getEnvironments: getEnvironments
    };
 });

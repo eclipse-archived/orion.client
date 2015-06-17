@@ -178,11 +178,37 @@ define([
 		    	function(err) {
 		    		Logger.log(err);	
 		    	});
+    	/**
+    	 * Object of contributed environments
+    	 * 
+    	 * TODO will need to listen to updated tern plugin settings once enbaled to clear this cache
+    	 */
+    	var contributedEnvs;
     	
     	/**
-    	 * TODO once we have support for dynamically loading plugins in Tern this will need to updated via a pref listener as well
-    	 */
-    	var pluginEnvironments = Object.create(null);
+	     * @description Queries the Tern server to return all contributed environment names from the installed plugins
+	     * @returns {Object} The object of contributed environments or null
+	     * @since 9.0
+	     */
+	    function getEnvironments() {
+    		var envDeferred = new Deferred();
+    		if(!contributedEnvs) {
+	    		ternWorker.addEventListener('message', function(evnt) {
+	    			var _d  = evnt.data;
+	    			switch(_d.request) {
+	    				case 'environments': {
+	    					contributedEnvs = _d.envs;
+	    					envDeferred.resolve(_d.envs);
+	    					break;
+	    				}
+	    			}
+	    		}, false);
+    			ternWorker.postMessage({request: 'environments'}); //$NON-NLS-1$
+    		} else {
+    			return envDeferred.resolve(contributedEnvs);
+    		}
+    		return envDeferred;
+    	}
     	
     	//this handler is for ferrying preferences to and from the Tern server
     	ternWorker.addEventListener('message', function(evnt) {
@@ -201,11 +227,7 @@ define([
 							var keys = Object.keys(plugins);
 							for(var i = 0; i < keys.length; i++) {
 								var key = keys[i];
-								var _plugin = plugins[key];
-								if(_plugin.env) {
-									pluginEnvironments[_plugin.env] = true;
-								}
-								props[key] = _plugin;
+								props[key] = plugins[key];
 							}
 							prefs.put("tern/plugins", JSON.stringify(props)); //$NON-NLS-1$
 							prefs.sync(true);
@@ -219,7 +241,7 @@ define([
 	    	}
     	}, false);
     	
-    	provider.registerService("orion.edit.contentassist", new TernAssist.TernContentAssist(astManager, ternWorker, pluginEnvironments),  //$NON-NLS-1$
+    	provider.registerService("orion.edit.contentassist", new TernAssist.TernContentAssist(astManager, ternWorker, getEnvironments),  //$NON-NLS-1$
     			{
     				contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
     				nls: 'javascript/nls/messages',  //$NON-NLS-1$

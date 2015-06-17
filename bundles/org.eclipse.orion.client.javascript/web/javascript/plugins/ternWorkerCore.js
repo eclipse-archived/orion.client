@@ -214,6 +214,10 @@ require({
                     	PluginsHandler.setPluginEnablement(ternserver, _d.args, post);
                     	break;
                     }
+                    case 'environments': {
+                    	PluginsHandler.getEnvironments(ternserver, _d.args, post);
+                    	break;
+                    }
                 }
             }
         }

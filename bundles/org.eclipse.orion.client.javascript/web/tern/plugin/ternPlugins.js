@@ -17,11 +17,14 @@ define([
 	"acorn/util/walk"
 ],/* @callback */ function(infer, tern, walk) {
 	
-	tern.registerPlugin('ternPlugins', function(server, options) { //$NON-NLS-1$
+	tern.registerPlugin('ternPlugins', /* @callback */ function(server, options) { //$NON-NLS-1$
 		return {}; //TODO I don't think we need to hook any phases
 	});
 	
 	tern.defineQueryType('installed_plugins', { //$NON-NLS-1$
+		/**
+		 * @callback
+		 */
 		run: function run(server, query) {
 			if(server.options && typeof(server.options.plugins) === 'object') {
 				return server.options.plugins;
@@ -30,21 +33,52 @@ define([
 		}
 	});
 	
+	tern.defineQueryType('environments', { //$NON-NLS-1$
+		/**
+		 * @callback
+		 */
+		run: function run(server, query) {
+			if(server.options && typeof(server.options.plugins) === 'object') {
+				var plugins = server.options.plugins;
+				var keys = Object.keys(plugins);
+				var envs = Object.create(null);
+				for(var i = 0; i < keys.length; i++) {
+					var key = keys[i];
+					var env = plugins[key].env;
+					if(env) {
+						envs[env] = true;
+					}
+				}
+				return envs;
+			}
+			return null;
+		}
+	});
+	
 	tern.defineQueryType('install_plugins', { //$NON-NLS-1$
+		/**
+		 * @callback
+		 */
 		run: function run(server, query) {
 			//TODO
 		}
 	});
 	
 	tern.defineQueryType('remove_plugins', { //$NON-NLS-1$
+		/**
+		 * @callback
+		 */
 		run: function run(server, query) {
 			//TODO			
 		}
 	});
 	
 	tern.defineQueryType('plugin_enablement', { //$NON-NLS-1$
+		/**
+		 * @callback
+		 */
 		run: function run(server, query) {
 			//TODO
 		}
 	});
-});
+}); 
