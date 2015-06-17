@@ -134,6 +134,8 @@ define({//Default message bundle
 	"linkedModeExited": "Linked Mode exited", //$NON-NLS-1$ //$NON-NLS-0$
 	"syntaxError": "Syntax Error", //$NON-NLS-1$ //$NON-NLS-0$
 	"contentAssist": "Content Assist", //$NON-NLS-1$ //$NON-NLS-0$
+	"noProposals": "No proposals found",
+	"computingProposals": "Computing content assist proposals...",
 	"lineColumn": "Line ${0} : Column ${1}", //$NON-NLS-1$ //$NON-NLS-0$
 	"multiSelections": "${0} selection regions", //$NON-NLS-1$ //$NON-NLS-0$
 	

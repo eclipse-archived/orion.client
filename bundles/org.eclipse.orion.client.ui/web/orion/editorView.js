@@ -416,7 +416,7 @@ define([
 
 			var contentAssistFactory = readonly ? null : {
 				createContentAssistMode: function(editor) {
-					var contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
+					var contentAssist = new mContentAssist.ContentAssist(editor.getTextView(), serviceRegistry);
 
 					contentAssist.addEventListener("Activating", setContentAssistProviders.bind(null, editor, contentAssist)); //$NON-NLS-0$
 					var widget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist"); //$NON-NLS-0$

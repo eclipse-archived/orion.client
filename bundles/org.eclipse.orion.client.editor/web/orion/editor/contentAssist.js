@@ -102,8 +102,17 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		dfault : "proposal-default" //$NON-NLS-0$
 	};
 	
-	function ContentAssist(textView) {
+	/**
+	 * @name ContentAssist
+	 * @description Creates a new content assist manager for the given text ciew
+	 * @param textView The text view to provide content assist for
+	 * @param serviceRegistry Optional, used to look up page message service for status
+	 */
+	function ContentAssist(textView, serviceRegistry) {
 		this.textView = textView;
+		if (serviceRegistry){
+			this.pageMessage = serviceRegistry.getService("orion.page.message"); //$NON-NLS-1$
+		}
 		this.state = State.INACTIVE;
 		this.clearProviders();
 		var self = this;
@@ -368,8 +377,31 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				}
 				return Deferred.when(proposals);
 			});
+			
 			// TODO should we allow error to propagate instead of handling here?
-			return Deferred.all(promises, this.handleError);
+			var allPromises = Deferred.all(promises, this.handleError);
+			
+			if (this.pageMessage){
+				allPromises = Deferred.when(allPromises, function(proposals){
+					self.pageMessage.close();					
+					var foundProposal = false;
+					if (proposals && proposals.length > 0){
+						for (var i=0; i<proposals.length; i++) {
+							if (proposals[i].length > 0){
+								foundProposal = true;
+								break;
+							}
+						}
+					}
+					if (!foundProposal){
+						self.pageMessage.setErrorMessage(messages["noProposals"]);
+					}
+					return proposals;
+				});
+				self.pageMessage.showWhile(allPromises, messages["computingProposals"]);
+			}
+			
+			return allPromises;
 		},
 
 		filterProposals: function(force) {
