@@ -45,8 +45,7 @@ define([
 						if(origin !== _d.declaration.file) {
 							var options = {start: _d.declaration.start,
 											end: _d.declaration.end,
-											mode: 'split', //$NON-NLS-1$
-											splitHint: 'vertical'}; //$NON-NLS-1$
+											};
 							deferred.resolve(cachedContext.openEditor(_d.declaration.file, options));
 						} else {
 							deferred.resolve(cachedContext.setSelection(_d.declaration.start, _d.declaration.end, true));
