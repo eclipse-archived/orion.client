@@ -117,7 +117,7 @@ define([
     			this.worker = new Worker(wUrl.href);
     			this.worker.onmessage = onMessage;
     			this.worker.onerror = onError;
-    			this.worker.postMessage('');
+    			this.worker.postMessage('start_server'); //$NON-NLS-1$
     	//	}
     	}
     	
@@ -134,6 +134,12 @@ define([
     	};
     	
     	var prefService = core.serviceRegistry.getService("orion.core.preference"); //$NON-NLS-1$
+    	/**
+    	 * Object of contributed environments
+    	 * 
+    	 * TODO will need to listen to updated tern plugin settings once enbaled to clear this cache
+    	 */
+    	var contributedEnvs;
     	
     	// Start the worker
     	var ternWorker = new WrappedWorker("ternWorker.js",  //$NON-NLS-1$
@@ -172,18 +178,40 @@ define([
 		    					}
 		    					break;
 		    				}
+		    				case 'installed_plugins': {
+		    					var plugins = _d.plugins;
+		    					return prefService ? prefService.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
+									var props = prefs.get("tern/plugins"); //$NON-NLS-1$
+									if (!props) {
+										props = Object.create(null);
+									} else if(typeof(props) === 'string') {
+										props = JSON.parse(props);
+									}
+									var keys = Object.keys(plugins);
+									for(var i = 0; i < keys.length; i++) {
+										var key = keys[i];
+										props[key] = plugins[key];
+									}
+									prefs.put("tern/plugins", JSON.stringify(props)); //$NON-NLS-1$
+									prefs.sync(true);
+								}) : new Deferred().resolve();
+								break;
+		    				}
+		    				case 'environments': {
+		    					contributedEnvs = _d.envs;
+		    					break;
+		    				}
 		    			}
-		    		}
+		    		} else if(typeof(evnt.data) === 'string') {
+			    		if(evnt.data === 'server_ready') {
+			    			ternWorker.postMessage({request: 'installed_plugins'}); //$NON-NLS-1$
+		    				ternWorker.postMessage({request: 'environments'}); //$NON-NLS-1$
+			    		}
+			    	}
 		    	}, 
 		    	function(err) {
 		    		Logger.log(err);	
 		    	});
-    	/**
-    	 * Object of contributed environments
-    	 * 
-    	 * TODO will need to listen to updated tern plugin settings once enbaled to clear this cache
-    	 */
-    	var contributedEnvs;
     	
     	/**
 	     * @description Queries the Tern server to return all contributed environment names from the installed plugins
@@ -209,37 +237,6 @@ define([
     		}
     		return envDeferred;
     	}
-    	
-    	//this handler is for ferrying preferences to and from the Tern server
-    	ternWorker.addEventListener('message', function(evnt) {
-			if(typeof(evnt.data) === 'object') {
-    			var _d  = evnt.data;
-    			switch(_d.request) {
-    				case 'installed_plugins': {
-    					var plugins = _d.plugins;
-    					return prefService ? prefService.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
-							var props = prefs.get("tern/plugins"); //$NON-NLS-1$
-							if (!props) {
-								props = Object.create(null);
-							} else if(typeof(props) === 'string') {
-								props = JSON.parse(props);
-							}
-							var keys = Object.keys(plugins);
-							for(var i = 0; i < keys.length; i++) {
-								var key = keys[i];
-								props[key] = plugins[key];
-							}
-							prefs.put("tern/plugins", JSON.stringify(props)); //$NON-NLS-1$
-							prefs.sync(true);
-						}) : new Deferred().resolve();
-    				}
-    			}
-	    	} else if(typeof(evnt.data) === 'string') {
-	    		if(evnt.data === 'server_ready') {
-	    			ternWorker.postMessage({request: 'installed_plugins'}); //$NON-NLS-1$
-	    		}
-	    	}
-    	}, false);
     	
     	provider.registerService("orion.edit.contentassist", new TernAssist.TernContentAssist(astManager, ternWorker, getEnvironments),  //$NON-NLS-1$
     			{
