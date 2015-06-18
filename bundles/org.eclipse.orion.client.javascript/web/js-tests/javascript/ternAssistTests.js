@@ -88,7 +88,12 @@ define([
 			assert(options.callback, 'You must provide a test callback for worker-based tests');
 			state.callback = options.callback;
 			ternworker.postMessage({request: 'delfile', args:{file: file}});
-			
+		ternAssist.pluginenvs = function() {
+			if(typeof(options.env) === 'object') {
+				return new Deferred().resolve(options.env);
+			}
+			return new Deferred().resolve(Object.create(null));
+		};
 		var editorContext = {
 			/*override*/
 			getText: function() {
