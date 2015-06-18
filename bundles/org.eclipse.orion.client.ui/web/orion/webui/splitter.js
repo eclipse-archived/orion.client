@@ -338,10 +338,16 @@ define([
 				this.$splitter.style[this._topLeft] = this._offset + suffix;
 				this.$leading.style[this._widthHeight] = this._offset + suffix;
 				this.$trailing.style[this._topLeft] = (this._offset + this._splitterSize) + suffix;
+				
+				// Hide the DIV if it's zero sized
+				this.$leading.style.visibility = this._offset === 0 ? "hidden" : "visible"; //$NON-NLS-1$ //$NON-NLS-2$
 			} else {
 				this.$splitter.style[this._bottomRight] = this._offset + suffix;
 				this.$leading.style[this._bottomRight] = (this._offset + this._splitterSize) + suffix;
 				this.$trailing.style[this._widthHeight] = this._offset + suffix;
+				
+				// Hide the DIV if it's zero sized
+				this.$trailing.style.visibility = this._offset === 0 ? "hidden" : "visible"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		},
 
