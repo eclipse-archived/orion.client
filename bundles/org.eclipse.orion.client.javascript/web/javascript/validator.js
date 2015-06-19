@@ -258,6 +258,15 @@ define([
 					}
 					if(token) {
 					   error.node = token;
+					   if(token.value) {
+					   		if(!error.args) {
+					   			error.args = Object.create(null);
+					   		}
+					   		if(!error.args.data) {
+					   			error.args.data = Object.create(null);
+					   		}
+					   		error.args.data.tokenValue = token.value;
+					   }
 					}
 					errors.push(error);
 				}
