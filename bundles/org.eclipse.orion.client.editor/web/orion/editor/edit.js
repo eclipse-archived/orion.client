@@ -239,7 +239,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		var syntaxHighlighter = {
 			styler: null, 
 			
-			highlight: function(contentType, editor) {
+			highlight: function(contentType, editor, syntaxDefinition) {
 				if (this.styler && this.styler.destroy) {
 					this.styler.destroy();
 				}
@@ -259,8 +259,11 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 				var textView = editor.getTextView();
 				var annotationModel = editor.getAnnotationModel();
 				if (contentType) {
-					var folderName = contentType.replace(/[*|:/".<>?+]/g, '_');
-					require(["./stylers/" + folderName + "/syntax"], //$NON-NLS-1$ //$NON-NLS-0$
+					if (!syntaxDefinition) {
+						var folderName = contentType.replace(/[*|:/".<>?+]/g, '_');
+						syntaxDefinition = "./stylers/" + folderName + "/syntax"; //$NON-NLS-1$ //$NON-NLS-0$
+					}
+					require([syntaxDefinition],
 						function(grammar) {
 							var stylerAdapter = new mTextStyler.createPatternBasedAdapter(grammar.grammars, grammar.id, contentType);
 							this.styler = new mTextStyler.TextStyler(textView, annotationModel, stylerAdapter);
@@ -324,7 +327,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
 		editor.setInput(options.title, null, contents, false, options.noFocus);
 		
-		syntaxHighlighter.highlight(options.contentType || options.lang, editor);
+		syntaxHighlighter.highlight(options.contentType || options.lang, editor, options.syntaxDefinition);
 		/*
 		 * The minimum height of the editor is 50px. Do not compute size if the editor is not
 		 * attached to the DOM or it is display=none.
