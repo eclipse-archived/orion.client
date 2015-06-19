@@ -546,7 +546,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				} else if (contents.diff) {
 					method = "POST";
 					headerData["X-HTTP-Method-Override"] = "PATCH";
-					headerData["Content-Type"] = "application/json";
+					headerData["Content-Type"] = "application/json;charset=UTF-8";
 					options.data = JSON.stringify(options.data);
 				} else {
 					// assume we are putting metadata
