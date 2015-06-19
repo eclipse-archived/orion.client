@@ -97,7 +97,7 @@ define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Def
 		 * @param {String} location The location of the file or directory to delete.
 		 */
 		deleteFile: function(fLocation) {
-			this.fileRoot[fLocation] = undefined;
+			delete this.fileRoot[fLocation];
 			return new Deferred().resolve([]);
 		}
 	};

@@ -35,7 +35,6 @@ define([
 		this._serviceRegistry = options.serviceRegistry;
 		this._pluginRegistry = options.pluginRegistry;
 		this._commandRegistry = new mCommandRegistry.CommandRegistry({});
-		//this._fileClient = new mEmbeddedFileClient.EmbeddedFileClient();
 		this._fileClient = new mFileClient.FileClient(this._serviceRegistry);
 		this._contentTypeRegistry = new mContentTypes.ContentTypeRegistry(this._serviceRegistry);
 		this._editorCommands = new mEditorCommands.EditorCommandFactory({
@@ -117,7 +116,7 @@ define([
 				this._editorCommands.registerCommands();
 				this.createInputManager();
 				this.editorView = new mEditorView.EditorView(this.defaultOptions(options.parent));
-				//idCounter++;
+				idCounter++;
 				this.editorView.create();
 				this._inputManager.editor = this.editorView.editor;
 				this._inputManager.setAutoSaveTimeout(300);

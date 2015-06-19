@@ -579,6 +579,9 @@ define([
 			this._createContextMenu();
 		},
 		destroy: function() {
+			if(this.lastFileLocation) {
+				this.fileClient.deleteFile(this.lastFileLocation);
+			}
 			this.editor.uninstall();
 		},
 		getStyleAccessor: function() {
