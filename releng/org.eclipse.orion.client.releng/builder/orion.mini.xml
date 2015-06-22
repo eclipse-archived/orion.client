@@ -3,8 +3,8 @@
 	Required properties
 	======================================================================
 		${builder}           Path to the org.eclipse.orion.client/releng/builder/ folder
-		${requireJsHome}     Path to the folder where r.js can be found. Must also contain a ./lib/ 
-		                       subfolder containing jars for Closure and Rhino.
+		${requirejsHome}     Path to the folder where r.js can be found.
+		${nodejsHome}        Path to the folder where `node` binary lives.
 		${buildConfig}       Path to the RequireJS build config file for the product (eg. orion.build.js).
 		${buildDirectory}    Path to the directory where build will be performed.
 		${orionClient}       Path to the orion client repo. Optimized Orion page code is copied back into here.
@@ -23,10 +23,11 @@
 	<property name="widgetOutDirectory" value="${buildDirectory}/built-js" />
 	<property name="staging" value="${buildDirectory}/staging" />
 	<property name="optimized" value="${buildDirectory}/optimized" />
+	<property name="node" location="${nodejsHome}/node" />
 
     <target name="download3rdPartyLibs">
         <mkdir dir="${requirejsHome}" />
-        <get src="http://requirejs.org/docs/release/2.1.15/r.js"
+        <get src="http://requirejs.org/docs/release/2.1.18/r.js"
              dest="${requirejsHome}/r.js"
              usetimestamp="true"
              maxtime="30" />
@@ -92,37 +93,70 @@
 		<attribute name="buildfile" />
 	</scriptdef>
 
+	<!-- If Node.js seems to work then set node.ok -->
+	<macrodef name="checkNode">
+		<sequential>
+			<exec executable="${node}" failonerror="false" failifexecutionfails="false" resultproperty="node.exit">
+				<arg value="-e" />
+				<arg value="''" />
+			</exec>
+			<if>
+				<equals arg1="${node.exit}" arg2="0" />
+				<then>
+					<property name="node.ok" value="true" />
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<!-- Runs r.js. Caller provides arguments to r.js in the nested <args> element. -->
+	<macrodef name="rjs">
+		<element name="args" />
+		<sequential>
+			<property name="requirejs" location="${requirejsHome}/r.js" />
+			<checkNode />
+			<if>
+				<isset property="node.ok" />
+				<then>
+					<echo message="Running ${node}..." />
+					<exec executable="${node}" dir="${staging}" failonerror="true">
+						<arg value="${requirejs}"/>
+						<args />
+					</exec>
+				</then>
+				<else>
+					<echo message="Running Nashorn..." />
+					<exec executable="jjs" dir="${staging}" failonerror="true">
+						<arg value="-scripting" />
+						<arg value="${requirejs}"/>
+						<arg value="--" />
+						<args />
+					</exec>
+				</else>
+			</if>
+		</sequential>
+	</macrodef>
+
 	<target name="orionOptimize" unless="skipOrionUI">
 		<!-- $staging: Input folder for r.js -->
 		<!-- $out:     Output folder of r.js -->
 		<!-- $buildfile: r.js build config -->
 		<sequential>
-			<echo message="Building Orion pages and plugins..."/>
-			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="${staging}" failonerror="true">
-				<classpath>
-					<sort>
-						<fileset dir="${requirejsHome}/lib/">
-							<include name="**/*.jar"/>
-						</fileset>
-					</sort>
-				</classpath>
-				<jvmarg value="-Xss1024k" />
-				<arg value="-version" />
-				<arg value="180" />
-				<arg value="${requirejsHome}/r.js"/>
-				<arg value="-o" />
-				<arg value="${buildfile}"/>
-				<!-- <arg value="optimize=closure" /> -->
-				<arg value="appDir=${staging}" />
-				<arg value="baseUrl=./" />
-				<arg value="dir=${out}" />
-			</java>
+			<echo message="Building Orion pages and plugins from ${staging} to ${out} using ${buildfile}..."/>
+			<rjs>
+				<args>
+					<arg value="-o" />
+					<arg value="${buildfile}"/>
+					<arg value="appDir=${staging}" />
+					<arg value="baseUrl=./" />
+					<arg value="dir=${out}" />
+				</args>
+			</rjs>
 
 			<!-- Tern worker -->
 			<widgetOptimizeFile out="${out}/javascript/plugins/ternWorker.js"
 				buildfile="${staging}/ternWorker.build.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<copyBackBundles buildfile="${buildfile}" out="${out}" />
 			<updateRequire buildfile="${buildfile}" />
 		</sequential>
@@ -155,8 +189,7 @@
 	
 	<target name="editorStylersOptimize" unless="skipEditorStylers">
 		<stylerOptimizeFile out="${out}"
-			optimize="closure"
-			staging="${staging}" />
+			optimize="closure" />
 		<move todir="${out}/stylers.min" includeemptydirs="false">
 			<fileset dir="${out}/stylers">
 				<include name="**/syntax.js"/>
@@ -165,8 +198,7 @@
 			<globmapper from="*/syntax.js" to="*/syntax.min.js" handledirsep="true" />
 		</move>
 		<stylerOptimizeFile out="${out}"
-			optimize="none"
-			staging="${staging}" />
+			optimize="none" />
 		<move todir="${out}/stylers" includeemptydirs="false">
 			<fileset dir="${out}/stylers.min">
 				<include name="**/syntax.min.js"/>
@@ -189,24 +221,19 @@
 			<!-- Editor -->
 			<widgetOptimizeFile out="${out}/built-editor.css"
 				buildfile="${staging}/editor.build-css.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<widgetOptimizeFile out="${out}/built-editor-amd.min.js"
 				buildfile="${staging}/editor.build-js.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<widgetOptimizeFile out="${out}/built-editor-amd.js"
 				buildfile="${staging}/editor.build-js.js"
-				optimize="none"
-				staging="${staging}" />
+				optimize="none" />
 			<widgetOptimizeFile out="${out}/built-editor.min.js"
 				buildfile="${staging}/editor.build.almond-js.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<widgetOptimizeFile out="${out}/built-editor.js"
 				buildfile="${staging}/editor.build.almond-js.js"
-				optimize="none"
-				staging="${staging}" />
+				optimize="none" />
 			<move todir="${out}/sourcemaps">
 				<fileset dir="${out}" includes="*editor*.map, *editor*.src.js" />
 			</move>
@@ -214,12 +241,10 @@
 			<!-- Content Assist -->
 			<widgetOptimizeFile out="${out}/htmlContentAssist.min.js"
 				buildfile="${staging}/contentassist.html.build.almond-js.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<widgetOptimizeFile out="${out}/cssContentAssist.min.js"
 				buildfile="${staging}/contentassist.css.build.almond-js.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<move todir="${out}/contentAssist/sourcemaps">
 				<fileset dir="${out}" includes="*ContentAssist*.map, *ContentAssist*.src.js" />
 			</move>
@@ -247,32 +272,25 @@
 			<mkdir dir="${out}/codeEdit/webtools/plugins" />
 			<widgetOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.css"
 				buildfile="${staging}/embeddedEditor.build-css.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<widgetOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.min.js"
 				buildfile="${staging}/embeddedEditor.build.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<widgetOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.js"
 				buildfile="${staging}/embeddedEditor.build.js"
-				optimize="none"
-				staging="${staging}" />
+				optimize="none" />
 			<widgetOptimizeFile out="${out}/codeEdit/javascript/plugins/javascriptPlugin.js"
 				buildfile="${staging}/embeddedJavascriptPlugin.build.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<widgetOptimizeFile out="${out}/codeEdit/webtools/plugins/webToolsPlugin.js"
 				buildfile="${staging}/embeddedWebtoolsPlugin.build.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<widgetOptimizeFile out="${out}/codeEdit/plugins/embeddedToolingPlugin.js"
 				buildfile="${staging}/embeddedToolingPlugin.build.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<widgetOptimizeFile out="${out}/ternWorker.js"
 				buildfile="${staging}/embeddedTernWorker.build.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<copy file="${out}/ternWorker.js" tofile="${out}/codeEdit/javascript/plugins/ternWorker.js" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.core/web/requirejs/require.min.js" tofile="${out}/codeEdit/requirejs/require.min.js" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.ui/web/embeddedEditor/plugins/javascriptPlugin.html" tofile="${out}/codeEdit/javascript/plugins/javascriptPlugin.html" />
@@ -288,24 +306,19 @@
 		<sequential>
 			<widgetOptimizeFile out="${out}/built-compare.css"
 				buildfile="${staging}/compare.build-css.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<widgetOptimizeFile out="${out}/built-compare-amd.min.js"
 				buildfile="${staging}/compare.build-js.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<widgetOptimizeFile out="${out}/built-compare-amd.js"
 				buildfile="${staging}/compare.build-js.js"
-				optimize="none"
-				staging="${staging}" />
+				optimize="none" />
 			<widgetOptimizeFile out="${out}/built-compare.min.js"
 				buildfile="${staging}/compare.build.almond-js.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<widgetOptimizeFile out="${out}/built-compare.js"
 				buildfile="${staging}/compare.build.almond-js.js"
-				optimize="none"
-				staging="${staging}" />
+				optimize="none" />
 			<copy todir= "${out}" >
 				<fileset dir="${orionClient}/bundles/org.eclipse.orion.client.ui/web/font"  includes="OrionIconFont-Regular.eot, OrionIconFont-Regular.woff, OrionIconFont-Regular.ttf, OrionIconFont-Regular.svg"/>
 			</copy>
@@ -317,16 +330,13 @@
 		<sequential>
 			<widgetOptimizeFile out="${out}/built-commitBrowser.css"
 				buildfile="${staging}/commitBrowser.build-css.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<widgetOptimizeFile out="${out}/built-commitBrowser.min.js"
 				buildfile="${staging}/commitBrowser.build.almond-js.js"
-				optimize="closure"
-				staging="${staging}" />
+				optimize="closure" />
 			<widgetOptimizeFile out="${out}/built-commitBrowser.js"
 				buildfile="${staging}/commitBrowser.build.almond-js.js"
-				optimize="none"
-				staging="${staging}" />
+				optimize="none" />
 			<copy todir="${orionClient}/bundles/org.eclipse.orion.client.ui/web/gitWidgets/built" >
 				<fileset dir="${out}" includes="built-commitBrowser.js, built-commitBrowser.css, built-commitBrowser.min.js"/>
 			</copy>
@@ -334,58 +344,36 @@
 	</target>
 	
 	<macrodef name="widgetOptimizeFile">
-		<attribute name="staging" />
 		<attribute name="buildfile" />
 		<attribute name="out" />
 		<attribute name="optimize" />
 		<sequential>
-			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="@{staging}" failonerror="true">
-				<classpath>
-					<sort>
-						<fileset dir="${requirejsHome}/lib/">
-							<include name="**/*.jar"/>
-						</fileset>
-					</sort>
-				</classpath>
-				<jvmarg value="-Xss1024k" />
-				<!-- JavaScript language version -->
-				<arg value="-version" />
-				<arg value="180" />
-				<arg value="${requirejsHome}/r.js"/>
-				<arg value="-o" />
-				<arg value="@{buildfile}"/>
-				<arg value="optimize=@{optimize}" />
-				<arg value="out=@{out}"/>
-				<arg value="dir=" />
-			</java>
+			<rjs>
+				<args>
+					<arg value="-o" />
+					<arg value="@{buildfile}"/>
+					<arg value="optimize=@{optimize}" />
+					<arg value="out=@{out}"/>
+					<arg value="dir=" />
+				</args>
+			</rjs>
 		</sequential>
 	</macrodef>
 	
 	<macrodef name="stylerOptimizeFile">
-		<attribute name="staging" />
 		<attribute name="out" />
 		<attribute name="optimize" />
 		<sequential>
-			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="@{staging}" failonerror="true">
-				<classpath>
-					<sort>
-						<fileset dir="${requirejsHome}/lib/">
-							<include name="**/*.jar"/>
-						</fileset>
-					</sort>
-				</classpath>
-				<jvmarg value="-Xss1024k" />
-				<!-- JavaScript language version -->
-				<arg value="-version" />
-				<arg value="180" />
-				<arg value="${requirejsHome}/r.js"/>
-				<arg value="-o" />
-				<arg value="@{staging}/editor.build.stylers-js.js"/>
-				<arg value="optimize=@{optimize}" />
-				<arg value="appDir=@{staging}/orion/editor/stylers"/>
-				<arg value="baseUrl=./"/>
-				<arg value="dir=@{out}/stylers" />
-			</java>
+			<rjs>
+				<args>
+					<arg value="-o" />
+					<arg value="${staging}/editor.build.stylers-js.js"/>
+					<arg value="optimize=@{optimize}" />
+					<arg value="appDir=${staging}/orion/editor/stylers"/>
+					<arg value="baseUrl=./"/>
+					<arg value="dir=@{out}/stylers" />
+				</args>
+			</rjs>
 		</sequential>
 	</macrodef>
 
