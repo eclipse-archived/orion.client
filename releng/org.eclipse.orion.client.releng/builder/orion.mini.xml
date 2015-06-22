@@ -270,7 +270,7 @@
 				optimize="closure"
 				staging="${staging}" />
 			<widgetOptimizeFile out="${out}/ternWorker.js"
-				buildfile="${staging}/ternWorker.build.js"
+				buildfile="${staging}/embeddedTernWorker.build.js"
 				optimize="closure"
 				staging="${staging}" />
 			<copy file="${out}/ternWorker.js" tofile="${out}/codeEdit/javascript/plugins/ternWorker.js" />
