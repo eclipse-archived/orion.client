@@ -19,6 +19,7 @@ define([
 	'plugins/languages/docker/dockerPlugin',
 	'plugins/languages/erlang/erlangPlugin',
 	'plugins/languages/go/goPlugin',
+	'plugins/languages/git/gitFilePlugin',
 	'plugins/languages/haml/hamlPlugin',
 	'plugins/languages/jade/jadePlugin',
 	'plugins/languages/java/javaPlugin',
