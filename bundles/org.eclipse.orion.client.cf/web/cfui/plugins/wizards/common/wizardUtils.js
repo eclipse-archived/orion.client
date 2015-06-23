@@ -190,19 +190,22 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'cfui/cfUtil',  'orion/urlUt
 			
 			var d = new Deferred();
 			showMessage(message);
-			
-			Deferred.all([
-			     mCfUtil.getTargets(preferences),
-			 	 WizardUtils.getDefaultTarget(fileClient, resource)
-			 ]).then(function(results){
-				 
-				 hideMessage();
-				 d.resolve({
-					 clouds : results[0],
-					 defaultTarget : results[1]
-				 });
-				 
-			 }, d.reject);
+
+			fileClient.read(resource.ContentLocation, true).then(
+				function(result){
+					Deferred.all([
+						mCfUtil.getTargets(preferences, result),
+						mCfUtil.getDefaultTarget(result)
+					]).then(function(results){
+						
+						
+						hideMessage();
+						d.resolve({
+							clouds : results[0],
+							defaultTarget : results[1]
+						});
+				}, d.reject);
+			}, d.reject);
 			
 			return d;
 		}
