@@ -322,12 +322,34 @@ define([
     	);
     	
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    			new OpenDeclCommand.OpenDeclarationCommand(astManager, scriptresolver, ternWorker, CUProvider), 
+    			new OpenDeclCommand.OpenDeclarationCommand(astManager, scriptresolver, ternWorker, CUProvider, "replace"),  //$NON-NLS-1$
     			{
     		name: javascriptMessages["openDeclName"],  //$NON-NLS-1$
     		tooltip : javascriptMessages['openDeclTooltip'],  //$NON-NLS-1$
     		id : "open.js.decl",  //$NON-NLS-1$
     		key : [ 114, false, false, false, false],  //$NON-NLS-1$
+    		contentType: ['application/javascript']  //$NON-NLS-1$
+    			}
+    	);
+    	
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+    			new OpenDeclCommand.OpenDeclarationCommand(astManager, scriptresolver, ternWorker, CUProvider, "tab"),  //$NON-NLS-1$
+    			{
+    		name: javascriptMessages["openDeclName"] + ' (new tab)',  //$NON-NLS-1$
+    		tooltip : javascriptMessages['openDeclTooltip'],  //$NON-NLS-1$
+    		id : "open.js.decl.newtab",  //$NON-NLS-1$
+    		key : [ 114, true, false, false, false],  //$NON-NLS-1$
+    		contentType: ['application/javascript']  //$NON-NLS-1$
+    			}
+    	);
+    	
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+    			new OpenDeclCommand.OpenDeclarationCommand(astManager, scriptresolver, ternWorker, CUProvider, "split"),  //$NON-NLS-1$
+    			{
+    		name: javascriptMessages["openDeclName"] + ' (split)',  //$NON-NLS-1$
+    		tooltip : javascriptMessages['openDeclTooltip'],  //$NON-NLS-1$
+    		id : "open.js.decl.split",  //$NON-NLS-1$
+    		key : [ 114, true, true, false, false],  //$NON-NLS-1$
     		contentType: ['application/javascript']  //$NON-NLS-1$
     			}
     	);

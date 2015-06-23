@@ -32,12 +32,15 @@ define([
 	 * @returns {javascript.commands.OpenDeclarationCommand} A new command
 	 * @since 8.0
 	 */
-	function OpenDeclarationCommand(ASTManager, Resolver, ternWorker, cuProvider) {
+	function OpenDeclarationCommand(ASTManager, Resolver, ternWorker, cuProvider, openMode) {
 		this.astManager = ASTManager;
 		this.resolver = Resolver;
 		this.ternworker = ternWorker;
 		this.cuprovider = cuProvider;
+		this.openMode = openMode;
 		this.ternworker.addEventListener('message', function(evnt) {
+			if (!this.doMe)
+				return;
 			if(typeof(evnt.data) === 'object') {
 				var _d = evnt.data;
 				if(_d.request === 'definition') {
@@ -45,6 +48,7 @@ define([
 						if(origin !== _d.declaration.file) {
 							var options = {start: _d.declaration.start,
 											end: _d.declaration.end,
+											mode: this.openMode
 											};
 							deferred.resolve(cachedContext.openEditor(_d.declaration.file, options));
 						} else {
@@ -55,12 +59,14 @@ define([
 					}
 				}
 			}
-		});
+			this.doMe = false;
+		}.bind(this));
 	}
 	
 	Objects.mixin(OpenDeclarationCommand.prototype, {
 		/* override */
 		execute: function(editorContext, options) {
+			this.doMe = true;
 		    var that = this;
 		    if(options.contentType.id === 'application/javascript') {
 		        return that.astManager.getAST(editorContext).then(function(ast) {
