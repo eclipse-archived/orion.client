@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -237,16 +237,42 @@ define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/little
 				var cell = document.createElement("td"); //$NON-NLS-0$
 				row.appendChild(cell);
 				
-				if( typeof value === 'object' ){ //$NON-NLS-0$
+				var self = this;
 				
-					var debugData = { title:data.service, item:data.items[itemCount].item, value: value };
-
+				function clickableObject(object, textContent){
+					var debugData = { title:data.service, item:data.items[itemCount].item, value: object };
 					var span = document.createElement("span"); //$NON-NLS-0$
 					span.classList.add("objectLink");  //$NON-NLS-0$
 					span.title = messages['CheckJsConsoleDrillDown'];
-					span.addEventListener("click", this.consoleOutput.bind(this, debugData)); //$NON-NLS-0$
-					span.textContent = messages['JavaScript Object'];
+					span.addEventListener("click", self.consoleOutput.bind(self, debugData)); //$NON-NLS-0$
+					span.textContent = textContent ? textContent : messages['JavaScript Object'];
 					cell.appendChild(span);
+				}
+				
+				if( typeof value === 'object' ){ //$NON-NLS-0$
+					if (Array.isArray(value)){
+						var text = '[';
+						for (var i=0; i<value.length; i++){
+							if (typeof value[i] === 'string'){
+								text += value[i];
+							} else if (typeof value[i] === 'object'){
+								if (value[i].id){
+									text += value[i].id;
+								} else if (value[i].name){
+									text += value[i].name;
+								} else {
+									text += messages['JavaScript Object'];
+								}
+							}
+							if (i < value.length-1){
+								text += ', '; //$NON-NLS-1$
+							}
+						}
+						text += ']';
+						clickableObject(value, text);
+					} else {
+						clickableObject(value);
+					}		
 				}else{
 					cell.textContent = value;
 				}
