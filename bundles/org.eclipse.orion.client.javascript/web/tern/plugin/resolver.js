@@ -19,9 +19,10 @@ define([
 	/**
 	 * @description Resolves the computed dependencies
 	 * @param {TernServer} server The Tern server
+	 * @param {String} loc The original file context location (from the AST)
 	 * @since 9.0
 	 */
-	function resolveDependencies(server) {
+	function resolveDependencies(server, loc) {
 	    var keys = Object.keys(_resolved);
 	    for (var i = 0; i < keys.length; i++) {
 	        var key = keys[i];
@@ -29,7 +30,7 @@ define([
 	        if (dep && (dep.pending || dep.file)) {
 	      	  continue;
 	        }
-	  		resolve(server, key);
+	  		resolve(server, key, loc);
 		}
 	}
 	
@@ -38,12 +39,13 @@ define([
 	 * script via the scriptResolver in the client
 	 * @param {TernServer} server The server
 	 * @param {String} key The logcial name to resolve
+	 * @param {String} loc The original file context location (from the AST)
 	 * @since 9.0
 	 */
-	function resolve(server, key) {
+	function resolve(server, key, loc) {
   		server.startAsyncAction();
   		_resolved[key].pending = true;
-		server.options.getFile({logical: key}, function(err, _file) {
+		server.options.getFile({logical: key, file: loc}, function(err, _file) {
 	 		_resolved[key].file = _file.file;
 	   		_resolved[key].contents = _file.contents;
 	   		_resolved[key].logical = _file.logical;
@@ -104,7 +106,7 @@ define([
 					_resolved[_d] = Object.create(null);
 				}
 			}
-			resolveDependencies(server);
+			resolveDependencies(server, ast.sourceFile ? ast.sourceFile.name : null);
 		}  	
 	}
 	

@@ -314,12 +314,15 @@ define([
                     var path = node.value;
                     switch(parent.callee.name) {
                         case 'require': {
-                            var char = path.charAt(0);
-                            if(char !== '.' && char !== '/') {
-                                return that.resolver.getWorkspaceFile(path).then(function(files) {
-    			                    return that._formatFilesHover(path, files);
-    			                });
-                            }
+                            return that.resolver.getWorkspaceFile(path).then(function(files) {
+                            	if(!/\.js$/.test(path)) {
+	                                path += '.js'; //$NON-NLS-1$
+	                            }
+			                    var rels = that.resolver.resolveRelativeFiles(path, files, meta);
+	                            if(rels && rels.length > 0) {
+			                        return that._formatFilesHover(node.value, rels);
+			                    }
+			                });
                         }
                         //$FALLTHROUGH$
                         case 'importScripts': {

@@ -1180,10 +1180,12 @@
         options.range = true;
         options.deps = true;
         options.loc = true;
-        ast = acorn.parse(text, options); 
-        ast.sourceFile  = Object.create(null);
-        ast.sourceFile.text = ast.source;
-        ast.sourceFile.name = ast.fileLocation;
+        ast = acorn.parse(text, options);
+        if(typeof ast.sourceFile !== "object") {
+	        ast.sourceFile  = Object.create(null);
+	        ast.sourceFile.text = ast.source;
+	        ast.sourceFile.name = ast.fileLocation;
+        }
     }
     //ORION
     catch(e) {
@@ -1191,7 +1193,7 @@
 		ast.range[1] = (text && typeof text.length === "number") ? text.length : 0;  //$NON-NLS-0$
 		ast.errors = [e];
     }
-    if (ast.errors) {
+    if (Array.isArray(ast.errors) && ast.errors.length > 0) {
 		_computeErrorTypes(ast.errors);
 		ast.errors = ast.errors.map(serializeError);
 	}

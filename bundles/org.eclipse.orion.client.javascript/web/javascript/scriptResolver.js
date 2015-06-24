@@ -60,9 +60,9 @@ define([
            }
            var that = this;
            var opts = options ? options : Object.create(null);
-           var ext = opts.ext ? opts.ext : 'js';
-           var icon = opts.icon ? opts.icon : '../javascript/images/javascript.png';
-           var type = opts.type ? opts.type : 'JavaScript';
+           var ext = opts.ext ? opts.ext : 'js'; //$NON-NLS-1$
+           var icon = opts.icon ? opts.icon : '../javascript/images/javascript.png'; //$NON-NLS-1$
+           var type = opts.type ? opts.type : 'JavaScript'; //$NON-NLS-1$
            var dotext = '.'+ext;
            //first check the file map
            return FileMap.getFilePrefix(this.fileclient).then(function(prefix) {
@@ -83,7 +83,7 @@ define([
 	                {
 	                    'resource': this.fileclient.fileServiceRootURL(),
 	                    'keyword': searchname,
-	                    'sort': 'Name asc',
+	                    'sort': 'Name asc', //$NON-NLS-1$
 	                    'nameSearch': true,
 	                    'fileType': ext,
 	                    'start': 0,
@@ -95,12 +95,12 @@ define([
 	               if(r.numFound > 0) {
 	                   files = [];
 	                   var testname = filename.replace(/(?:\.?\.\/)*/, '');
-	                   testname = testname.replace(new RegExp("\\"+dotext+"$"), '');
-	                   testname = testname.replace(/\//g, "\\/");
+	                   testname = testname.replace(new RegExp("\\"+dotext+"$"), ''); //$NON-NLS-1$
+	                   testname = testname.replace(/\//g, "\\/"); //$NON-NLS-1$
 	                   for(var i = 0; i < len; i++) {
 	                       file = r.docs[i];
 	                       //TODO haxxor - only keep ones that end in the logical name or the mapped logical name
-	                       var regex = ".*(?:"+testname+")$";
+	                       var regex = ".*(?:"+testname+")$"; //$NON-NLS-1$ //$NON-NLS-2$
 	                       if(new RegExp(regex).test(file.Location.slice(0, file.Location.length-dotext.length))) {
 	                           files.push(that._newFileObj(file.Name, file.Location, that._trimName(file.Path), icon, type));
 	                       }
@@ -113,19 +113,6 @@ define([
 	               return null;
 	           });
            }.bind(this));
-       },
-       
-       /**
-        * @description Converts the given file object to a URL that can be opened in Orion
-        * @param {Object} file
-        * @function
-        * @returns {String} The URL as a string or null if one could no be computed
-        */
-       convertToURL: function convertToURL(file) {
-           if(file) {
-               return 'https://orion.eclipse.org/edit/edit.html#'+file.location;
-           }
-           return null;
        },
        
        /**
@@ -163,14 +150,56 @@ define([
 	            }
 		        for(var i = 0; i < files.length; i++) {
 		            var file = files[i];
-                    if(file.location === filepath) {
+		            var loc = file.location ? file.location : file.Location;
+                    if(loc === filepath) {
                         _files.push(file);
-                    }		            
+                    } else if(this._samePaths(file, filepath, metadata))	 {
+                    	_files.push(file);
+                    }	            
 		        }
 		        return _files;
 		    }
 		    return [];
 		},
+       
+       /**
+        * Returns if the two paths are the same
+        * @param {String} file The first path
+        * @param {String} path2 The second path
+        * @returns {Boolean} If the paths are the same 
+        */
+       _samePaths: function _samePaths(file, path2, meta) {
+       		if(file == null) {
+       			return path2 == null;
+       		}
+       		if(typeof(file) === 'undefined') {
+       			return typeof(path2) === 'undefined';
+       		}
+       		if(path2 == null) {
+       			return file == null;
+       		}
+       		if(typeof(path2) === 'undefined') {
+       			return typeof(file) === 'undefined';
+       		}
+       		if(file.contentType && meta.contentType && file.contentType.name === meta.contentType.name) {
+       			//get rid of extensions and compare the names
+       			var loc = file.location ? file.location : file.Location;
+       			if(!loc) {
+       				return false;
+       			}
+       			var idx = loc.lastIndexOf('.');
+       			var p1 = file;
+       			if(idx > -1) {
+	      			p1 = loc.slice(0, idx);
+	      		}
+	      		idx = path2.lastIndexOf('.');
+       			var p2 = path2;
+       			if(idx > -1) {
+	      			p2 = path2.slice(0, idx);
+	      		}
+	      		return p1 === p2;
+       		}
+       },
        
        /**
         * @description Adds the additional path to the given path

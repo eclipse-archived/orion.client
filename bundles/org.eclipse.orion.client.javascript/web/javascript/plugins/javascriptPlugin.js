@@ -152,9 +152,14 @@ define([
 		    						var _l = _d.args.file.logical;
 		    						scriptresolver.getWorkspaceFile(_l).then(function(files) {
 		    							if(files && files.length > 0) {
-		    								return fileClient.read(files[0].location).then(function(contents) {
-		    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:files[0].location, logical:_l, path:files[0].path}});	 //$NON-NLS-1$
-		    								});
+		    								var rel = scriptresolver.resolveRelativeFiles(_l, files, {location: _d.args.file.file, contentType: {name: 'JavaScript'}});
+		    								if(rel && rel.length > 0) {
+			    								return fileClient.read(rel[0].location).then(function(contents) {
+			    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:rel[0].location, logical:_l, path:rel[0].path}});	 //$NON-NLS-1$
+			    								});
+		    								} else {
+		    									ternWorker.postMessage({request: 'read', args: {logical:_l, error: 'Failed to read file '+_l}}); //$NON-NLS-1$
+		    								}
 		    							} else {
 		    								ternWorker.postMessage({request: 'read', args: {logical:_l, error: 'Failed to read file '+_l}}); //$NON-NLS-1$
 		    							}
