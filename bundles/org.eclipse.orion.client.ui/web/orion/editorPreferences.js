@@ -18,7 +18,7 @@ define([
 	var SETTINGS_KEY = "editorSettings"; //$NON-NLS-0$
 
 	var defaults = {
-		autoSave: false,
+		autoSave: true,
 		autoSaveVisible: true,
 		autoSaveLocalVisible: true,
 		autoSaveTimeout: 250,
