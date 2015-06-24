@@ -129,7 +129,14 @@ define([
 				}
 
 				// Read extension-contributed links
-				pageLinksInfo.getAllLinks().forEach(function(item) {
+				var pageLinks = pageLinksInfo.getAllLinks();
+				pageLinks = pageLinks.sort(function(a, b){
+					if (a.order && b.order){
+						return a.order - b.order;
+					}
+					return 0;
+				});
+				pageLinks.forEach(function(item) {
 					var categoryNumber, match;
 					if (item.category && (match = /user\.(\d+)/.exec(item.category))) {
 						categoryNumber = parseInt(match[1], 10);

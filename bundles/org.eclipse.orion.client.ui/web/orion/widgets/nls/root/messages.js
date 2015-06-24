@@ -51,6 +51,7 @@ define({//Default message bundle
 	"Report a Bug": "Report a Bug",
 	"Keyboard Shortcuts": "Keyboard Shortcuts",
 	"Settings": "Settings",
+	"userSettings": "User Profile",
 	"View profile of ": "View profile of ",
 	"Profiles": "Profiles",
 	"Information Needed": "Information Needed",

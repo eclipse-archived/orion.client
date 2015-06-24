@@ -160,9 +160,19 @@ define([
 //			}],
 //			uriTemplate: "{+OrionHome}/edit/edit.html#"
 //		});
+
+		provider.registerService("orion.page.link.user", null, {
+			id: "orion.user.settings",
+			order: 10,
+			name: widgetMessages["userSettings"],
+			nls: "orion/widgets/nls/messages",
+			uriTemplate: "{+OrionHome}/settings/settings.html#,category=userSettings",
+			category: "user.0"
+		});
 	
 		provider.registerService("orion.page.link.user", null, {
 			id: "orion.help",
+			order: 20,
 			name: widgetMessages["Help"],
 			nls: "orion/widgets/nls/messages",
 			uriTemplate: "{+OrionHome}/help/help.html",
@@ -171,9 +181,10 @@ define([
 		
 		provider.registerService("orion.page.link.user", null, {
 			id: "orion.report.bug",
+			order: 30,
 			name: widgetMessages["Report a Bug"],
 			nls: "orion/widgets/nls/messages",
-			uriTemplate: "https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&component=Client&version=8.0",
+			uriTemplate: "https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&component=Client",
 			category: "user.0"
 		});
 		
