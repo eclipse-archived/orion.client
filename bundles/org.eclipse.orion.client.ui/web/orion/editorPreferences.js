@@ -67,7 +67,7 @@ define([
 		foldingRulerVisible: true,
 		overviewRuler: true,
 		overviewRulerVisible: true,
-		zoomRuler: true,
+		zoomRuler: false,
 		zoomRulerVisible: true,
 		zoomRulerLocalVisible: true,
 		showWhitespaces: false,
