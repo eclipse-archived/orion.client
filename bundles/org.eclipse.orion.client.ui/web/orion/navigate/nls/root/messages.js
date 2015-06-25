@@ -149,7 +149,7 @@ define({//Default message bundle
 	"createAProjectFromAn": "Create a project from an SFTP site.",
 	'readMeCommandName': 'Readme File',  //$NON-NLS-0$  //$NON-NLS-1$
 	'readMeCommandTooltip': 'Create a README.md file in this project',  //$NON-NLS-0$  //$NON-NLS-1$
-	'zipArchiveCommandName': 'Zip archive',  //$NON-NLS-0$  //$NON-NLS-1$
+	'zipArchiveCommandName': 'Zip Archive',  //$NON-NLS-0$  //$NON-NLS-1$
 	'zipArchiveCommandTooltip': 'Create a project from a local zip archive.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'Url:': 'Url:',  //$NON-NLS-0$  //$NON-NLS-1$
 	'notZip' : 'The following files are not zip files: ${0}. Would you like to continue the import?', //$NON-NLS-0$  //$NON-NLS-1$

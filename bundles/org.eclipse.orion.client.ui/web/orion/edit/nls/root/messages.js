@@ -31,7 +31,7 @@ define({//Default message bundle
 	"readonly": "Read Only.", //$NON-NLS-1$ //$NON-NLS-0$
 	"saveFile": "Save this file", //$NON-NLS-1$ //$NON-NLS-0$
 	"toggleZoomRuler": "Toggle Zoom Ruler", //$NON-NLS-1$ //$NON-NLS-0$
-	"gotoLine": "Go to line...", //$NON-NLS-1$ //$NON-NLS-0$
+	"gotoLine": "Go To Line...", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLineTooltip": "Go to specified line number", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLinePrompt": "Go to line:", //$NON-NLS-1$ //$NON-NLS-0$
 	"Undo": "Undo", //$NON-NLS-1$ //$NON-NLS-0$
@@ -72,7 +72,7 @@ define({//Default message bundle
 	"Deploy As": "Deploy As", //$NON-NLS-1$ //$NON-NLS-0$
 	"Import": "Import", //$NON-NLS-1$ //$NON-NLS-0$
 	"Export": "Export", //$NON-NLS-1$ //$NON-NLS-0$
-	"OpenWith": "Open with", //$NON-NLS-1$ //$NON-NLS-0$
+	"OpenWith": "Open With", //$NON-NLS-1$ //$NON-NLS-0$
 	"OpenRelated": "Open related", //$NON-NLS-1$ //$NON-NLS-0$
 	"Dependency": "Dependency", //$NON-NLS-1$ //$NON-NLS-0$
 	"UnnamedCommand": "Unnamed", //$NON-NLS-1$ //$NON-NLS-0$
