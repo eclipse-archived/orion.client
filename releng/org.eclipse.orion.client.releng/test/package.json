@@ -36,7 +36,7 @@
     {
       "browserName": "chrome",
       "platform": "Windows 7",
-      "version": "42"
+      "version": "43"
     },
     {
       "browserName": "internet explorer",
@@ -45,12 +45,12 @@
     },
     {
       "browserName": "safari",
-      "version": "7",
-      "platform": "OS X 10.9"
+      "version": "8",
+      "platform": "OS X 10.10"
     },
     {
       "browserName": "firefox",
-      "version": "31",
+      "version": "38",
       "platform": "linux"
     }
   ]
