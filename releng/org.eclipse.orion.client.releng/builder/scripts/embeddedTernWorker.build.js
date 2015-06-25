@@ -8,18 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global Packages*/
 ({
-    closure: {
-        CompilerOptions: {
-            // Need this check to avoid TypeError when eval'ing this buildfile without the Closure jars loaded, or from Node.
-            languageIn: (typeof Packages === "object" && typeof Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.valueOf === "function")
-                ? Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.valueOf(Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode, "ECMASCRIPT5")
-                : "ECMASCRIPT5"
-        },
-        CompilationLevel: 'SIMPLE_OPTIMIZATIONS',
-        loggingLevel: 'WARNING'
-    },
 	baseUrl: ".", //$NON-NLS-1$
 	paths: {
 		text: "requirejs/text", //$NON-NLS-1$

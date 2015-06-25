@@ -13,13 +13,6 @@
  
 ({
     baseUrl: '.',
-	closure: {
-		CompilerOptions: {
-			languageIn: Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.valueOf(Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode, "ECMASCRIPT5")
-		},
-		CompilationLevel: 'SIMPLE_OPTIMIZATIONS',
-		loggingLevel: 'WARNING'
-	},
 	paths: {
         almond: 'requirejs/almond',
         i18n: 'requirejs/i18n',
@@ -46,9 +39,6 @@
 	//locales: ["ja", "zh", "zh-tw", "fr", "de", "it", "es", "pt-br"],						
 	include: "javascript/plugins/javascriptPlugin",
 	preserveLicenseComments: false,
-	uglify: {
-		ascii_only: true
-	},
 	wrap: {
 		start: "\
 			(function (root, factory) {\

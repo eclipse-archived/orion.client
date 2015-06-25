@@ -156,7 +156,7 @@
 			<!-- Tern worker -->
 			<widgetOptimizeFile out="${out}/javascript/plugins/ternWorker.js"
 				buildfile="${staging}/ternWorker.build.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<copyBackBundles buildfile="${buildfile}" out="${out}" />
 			<updateRequire buildfile="${buildfile}" />
 		</sequential>
@@ -189,7 +189,7 @@
 	
 	<target name="editorStylersOptimize" unless="skipEditorStylers">
 		<stylerOptimizeFile out="${out}"
-			optimize="closure" />
+			optimize="uglify2" />
 		<move todir="${out}/stylers.min" includeemptydirs="false">
 			<fileset dir="${out}/stylers">
 				<include name="**/syntax.js"/>
@@ -221,16 +221,16 @@
 			<!-- Editor -->
 			<widgetOptimizeFile out="${out}/built-editor.css"
 				buildfile="${staging}/editor.build-css.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<widgetOptimizeFile out="${out}/built-editor-amd.min.js"
 				buildfile="${staging}/editor.build-js.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<widgetOptimizeFile out="${out}/built-editor-amd.js"
 				buildfile="${staging}/editor.build-js.js"
 				optimize="none" />
 			<widgetOptimizeFile out="${out}/built-editor.min.js"
 				buildfile="${staging}/editor.build.almond-js.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<widgetOptimizeFile out="${out}/built-editor.js"
 				buildfile="${staging}/editor.build.almond-js.js"
 				optimize="none" />
@@ -241,10 +241,10 @@
 			<!-- Content Assist -->
 			<widgetOptimizeFile out="${out}/htmlContentAssist.min.js"
 				buildfile="${staging}/contentassist.html.build.almond-js.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<widgetOptimizeFile out="${out}/cssContentAssist.min.js"
 				buildfile="${staging}/contentassist.css.build.almond-js.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<move todir="${out}/contentAssist/sourcemaps">
 				<fileset dir="${out}" includes="*ContentAssist*.map, *ContentAssist*.src.js" />
 			</move>
@@ -272,25 +272,25 @@
 			<mkdir dir="${out}/codeEdit/webtools/plugins" />
 			<widgetOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.css"
 				buildfile="${staging}/embeddedEditor.build-css.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<widgetOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.min.js"
 				buildfile="${staging}/embeddedEditor.build.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<widgetOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.js"
 				buildfile="${staging}/embeddedEditor.build.js"
 				optimize="none" />
 			<widgetOptimizeFile out="${out}/codeEdit/javascript/plugins/javascriptPlugin.js"
 				buildfile="${staging}/embeddedJavascriptPlugin.build.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<widgetOptimizeFile out="${out}/codeEdit/webtools/plugins/webToolsPlugin.js"
 				buildfile="${staging}/embeddedWebtoolsPlugin.build.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<widgetOptimizeFile out="${out}/codeEdit/plugins/embeddedToolingPlugin.js"
 				buildfile="${staging}/embeddedToolingPlugin.build.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<widgetOptimizeFile out="${out}/ternWorker.js"
 				buildfile="${staging}/embeddedTernWorker.build.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<copy file="${out}/ternWorker.js" tofile="${out}/codeEdit/javascript/plugins/ternWorker.js" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.core/web/requirejs/require.min.js" tofile="${out}/codeEdit/requirejs/require.min.js" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.ui/web/embeddedEditor/plugins/javascriptPlugin.html" tofile="${out}/codeEdit/javascript/plugins/javascriptPlugin.html" />
@@ -306,16 +306,16 @@
 		<sequential>
 			<widgetOptimizeFile out="${out}/built-compare.css"
 				buildfile="${staging}/compare.build-css.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<widgetOptimizeFile out="${out}/built-compare-amd.min.js"
 				buildfile="${staging}/compare.build-js.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<widgetOptimizeFile out="${out}/built-compare-amd.js"
 				buildfile="${staging}/compare.build-js.js"
 				optimize="none" />
 			<widgetOptimizeFile out="${out}/built-compare.min.js"
 				buildfile="${staging}/compare.build.almond-js.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<widgetOptimizeFile out="${out}/built-compare.js"
 				buildfile="${staging}/compare.build.almond-js.js"
 				optimize="none" />
@@ -330,10 +330,10 @@
 		<sequential>
 			<widgetOptimizeFile out="${out}/built-commitBrowser.css"
 				buildfile="${staging}/commitBrowser.build-css.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<widgetOptimizeFile out="${out}/built-commitBrowser.min.js"
 				buildfile="${staging}/commitBrowser.build.almond-js.js"
-				optimize="closure" />
+				optimize="uglify2" />
 			<widgetOptimizeFile out="${out}/built-commitBrowser.js"
 				buildfile="${staging}/commitBrowser.build.almond-js.js"
 				optimize="none" />

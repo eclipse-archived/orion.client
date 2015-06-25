@@ -13,13 +13,6 @@
  
 ({
     baseUrl: '.',
-	closure: {
-		CompilerOptions: {
-			languageIn: Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.valueOf(Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode, "ECMASCRIPT5")
-		},
-		CompilationLevel: 'SIMPLE_OPTIMIZATIONS',
-		loggingLevel: 'WARNING'
-	},
 	paths: {
         i18n: 'requirejs/i18n',
         text: 'requirejs/text',
@@ -27,9 +20,6 @@
  	},
 	name: "compare/builder/compare",
 	preserveLicenseComments: false,
-	uglify: {
-		ascii_only: true
-	},
 	wrap: {
 		start: "/* orion compare */ ", //start cannot be empty
 		end: " define(['compare/builder/compare'], function(compare) {return compare;});"

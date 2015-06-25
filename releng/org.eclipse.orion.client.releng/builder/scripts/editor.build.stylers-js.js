@@ -13,15 +13,5 @@
  
 ({
 	baseUrl: '.',
-	closure: {
-		CompilerOptions: {
-			languageIn: Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.valueOf(Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode, "ECMASCRIPT5")
-		},
-		CompilationLevel: 'SIMPLE_OPTIMIZATIONS',
-		loggingLevel: 'WARNING'
-	},
-	preserveLicenseComments: false,
-	uglify: {
-		ascii_only: true
-	}
+	preserveLicenseComments: false
 })

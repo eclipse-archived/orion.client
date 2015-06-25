@@ -8,27 +8,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global Packages*/
 // optimization script to concat/minify the Orion editor javascript code
- 
+
 ({
     baseUrl: '.',
-	closure: {
-		CompilerOptions: {
-			languageIn: Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.valueOf(Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode, "ECMASCRIPT5")
-		},
-		CompilationLevel: 'SIMPLE_OPTIMIZATIONS',
-		loggingLevel: 'WARNING'
-	},
 	paths: {
         i18n: 'requirejs/i18n',
         csslint: 'csslint/csslint',
 	},
 	name: "orion/editor/edit",
 	preserveLicenseComments: false,
-	uglify: {
-		ascii_only: true
-	},
 	wrap: {
 		start: "/* orion editor */ ", //start cannot be empty
 		end: " define(['orion/editor/edit'], function(edit) {return edit;});"
