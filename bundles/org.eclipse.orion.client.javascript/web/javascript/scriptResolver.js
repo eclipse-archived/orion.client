@@ -129,9 +129,11 @@ define([
 		        var filepath = metadata.location;
 		        var _files = [];
 		        filepath = filepath.slice(0, filepath.lastIndexOf('/'));
+		        var relative = false;
 		        if(path.charAt(0) !== '.') {
 	                filepath = this._appendPath(filepath, path);
 	            } else {
+	            	relative = true;
 	                //resolve the realtive path
 	                var rel = /^\.\.\//.exec(path);
 	                if(rel) {
@@ -155,6 +157,17 @@ define([
                         _files.push(file);
                     } else if(this._samePaths(file, filepath, metadata))	 {
                     	_files.push(file);
+                    } else if(!relative) {
+                    	var idx = loc.lastIndexOf('.');
+		       			var p1 = loc;
+		       			if(idx > -1) {
+			      			p1 = loc.slice(0, idx);
+			      		}
+			      		var _p = path.replace('/', '\/');
+			      		var reg = new RegExp(_p+"$");
+			      		if(reg.test(p1)) {
+			      			_files.push(file);
+			      		}
                     }	            
 		        }
 		        return _files;
@@ -188,7 +201,7 @@ define([
        				return false;
        			}
        			var idx = loc.lastIndexOf('.');
-       			var p1 = file;
+       			var p1 = loc;
        			if(idx > -1) {
 	      			p1 = loc.slice(0, idx);
 	      		}

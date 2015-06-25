@@ -189,5 +189,15 @@ define([
 			assert(Array.isArray(res), 'There should have been a files array returned');
 			assert.equal(res.length, 0, 'There should have been no files returned');
 		});
+		
+		it('Test resolveRelativeFiles - multi path logical non-relative 1', function() {
+			var files = testFileClient.createTestFiles(['foo/esprima.js', 'foo/bar/esprima/esprima.js', 'foo/bar/esprima/baz.js']);
+			var res = resolver.resolveRelativeFiles('esprima/esprima', files, {location: 'TestingRoot/foo/esprima.js', contentType: {name: 'JavaScript'}});
+			assert(Array.isArray(res), 'There should have been a files array returned');
+			assert.equal(res.length, 1, 'There should have been one file returned');
+			assert.equal(res[0].location, testFileClient.fileServiceRootURL()+'/foo/bar/esprima/esprima.js', 'Should have found file object with location TestingRoot/foo/esprima.js');
+			assert.equal(res[0].name, 'foo/bar/esprima/esprima.js', 'Should have found file object with name equal to esprima.js');
+
+		});
 	});
 });
