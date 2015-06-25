@@ -267,5 +267,8 @@ define({//Default message bundle
     "editorTheme property name color": "Property name color",
     "editorTheme tag": "Tag",
     "editorTheme tag attribute": "Tag attribute",
-    "editorTheme selection background": "Selection background"
+    "editorTheme selection background": "Selection background",
+    'customizeTheme': 'Custom Style...',
+    'moreEditorSettings': 'Editor Settings...'
+    
 });
