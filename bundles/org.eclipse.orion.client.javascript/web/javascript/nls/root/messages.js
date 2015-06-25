@@ -67,6 +67,8 @@ define({//Default message bundle
 	'renameElement' : 'Rename Element',
 	'renameElementTooltip' : 'Rename the selected JavaScript element',
 	'openDeclName' : 'Open Declaration',
+	'openDeclTabName' : 'Open Declaration (new tab)',
+	'openDeclSplitName' : 'Open Declaration (split)',
 	'openDeclTooltip' : 'Open the declaration of the selected element',
 	'validTypeof': 'Invalid \'typeof\' comparison:',
 	'noSparseArrays': 'Sparse array declarations:',
