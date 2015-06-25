@@ -34,6 +34,10 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-git-ignore/syntax', 'orion/
 					"extends": "text/plain",
 					name: "Git Config",
 					filename: ["config"],
+				}, {id: "text/x-cf-ignore",
+					"extends": "text/x-git-ignore",
+					name: "cf Ignore",
+					extension: ["cfignore"],
 				}
 			] 
 		});

@@ -16,23 +16,20 @@ define("orion/editor/stylers/text_x-git-config/syntax", ["orion/editor/stylers/l
 	var grammars = [];
 	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
-		id: "orion.xml", //$NON-NLS-0$
+		id: "orion.gitconfig", //$NON-NLS-0$
 		contentTypes: ["text/x-git-config"], //$NON-NLS-1$
 		patterns: [
-			// http://git-scm.com/docs/git-config
-			// Comments are lines starting with # or ;
+			/* http://git-scm.com/docs/git-config */
 			{
-				match: "^\\s*\\#.*", //$NON-NLS-1$
-				name: "comment.line.character.git" //$NON-NLS-1$
-			},
-//			{
-//				match: {match: "(\\s*)([^=]*)(=.*)"}, //$NON-NLS-0$
-//				captures: {
-//					1: {name: "entity"},
-//					2: {name: "keyword.operator.git"}, //$NON-NLS-0$
-//					3: {name: "entity"}
-//				}
-//			},
+				match: "[;#][^$]*", //$NON-NLS-1$
+				name: "comment.line.gitconfig" //$NON-NLS-1$
+			}, {
+				match: "=", //$NON-NLS-0$
+				name: "punctuation.operator.equals.gitconfig" //$NON-NLS-0$
+			}, {
+				match: "^\\s*\\[[-.A-Za-z0-9]+\\]\\s*$", //$NON-NLS-0$
+				name: "entity.section.name.gitconfig" //$NON-NLS-0$
+			}
 		]
 	});
 	return {

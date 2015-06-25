@@ -16,29 +16,17 @@ define("orion/editor/stylers/text_x-git-ignore/syntax", ["orion/editor/stylers/l
 	var grammars = [];
 	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
-		id: "orion.xml", //$NON-NLS-0$
+		id: "orion.gitignore", //$NON-NLS-0$
 		contentTypes: ["text/x-git-ignore"], //$NON-NLS-1$
 		patterns: [
 			// http://git-scm.com/docs/gitignore
-			// Comments are lines starting with #
 			{
-				match: {match: "^\\s*#.*", literal: "#"}, //$NON-NLS-1$
-				name: "comment.line.number-sign.git" //$NON-NLS-1$
-			},
-//			{
-//				match: "(\!)(.*)", //$NON-NLS-0$
-//				name:  //$NON-NLS-0$
-//				captures: {
-//					1: {name: "keyword.control.git"},
-//					2: {name: "entity.name.git"} //$NON-NLS-0$
-//				}
-//			},
-//			{
-//				match: ".*(\\*\\*).*", //$NON-NLS-0$
-//				captures: {
-//					1: {name: "keyword.control.git"} //$NON-NLS-0$
-//				}
-//			},
+				match: {match: "^\\s*#[^$]*", literal: "#"}, //$NON-NLS-1$
+				name: "comment.line.number-sign.ignore" //$NON-NLS-1$
+			}, {
+				match: "^\\s*!", //$NON-NLS-0$
+				name: "punctuation.operator.negation.ignore" //$NON-NLS-0$
+			}
 		]
 	});
 	return {
