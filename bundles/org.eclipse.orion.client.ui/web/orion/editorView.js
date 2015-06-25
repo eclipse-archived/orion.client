@@ -542,6 +542,9 @@ define([
 			contextImpl.enterLinkedMode = function(linkedModeModel) {
 				editor.getLinkedMode().enterLinkedMode(linkedModeModel);
 			};
+			contextImpl.exitLinkedMode = function(escapePosition) {
+				editor.getLinkedMode().exitLinkedMode(escapePosition);
+			};
 			/**
 			 * @description Opens the given location
 			 * @function

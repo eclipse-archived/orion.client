@@ -49,6 +49,7 @@ define([
 						}
 						var groups = [{data: {}, positions: offsets}];
 						var linkModel = {groups: groups};
+						deferred.resolve(cachedContext.exitLinkedMode());
 						deferred.resolve(cachedContext.enterLinkedMode(linkModel));
 					} 
 					deferred.resolve();
