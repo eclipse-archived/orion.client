@@ -193,6 +193,9 @@ define([
 		if(typeof(start) !== 'undefined') {
 		    prob.start = start;
 		    prob.end = end;
+		} else if(typeof(e.index) === 'number') {
+			prob.start = end;
+			prob.end = e.index;
 		} else if(typeof(e.lineNumber) !== 'undefined') {
 		    prob.line = e.lineNumber;
 		    prob.start = e.column;

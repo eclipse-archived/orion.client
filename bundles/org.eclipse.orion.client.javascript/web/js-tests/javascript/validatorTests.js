@@ -105,8 +105,8 @@ define([
 			var promise = validate({buffer: "function"});
 			return promise.then(function (problems) {
 				assertProblems(problems, [
-				    {start: 9,
-				     line: 1,
+				    {start: 0,
+				     end: 8,
 				     severity: 'error',
 				     description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {nls: 'syntaxErrorIncomplete'})
 				    }
@@ -118,8 +118,8 @@ define([
 			var promise = validate({buffer: "var foo = 10;\nfunction"});
 			return promise.then(function (problems) {
 				assertProblems(problems, [
-				    {start: 9,
-				     line: 2,
+				    {start: 14,
+				     end: 22,
 				     severity: 'error',
 				     description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {nls: 'syntaxErrorIncomplete'})
 				    }

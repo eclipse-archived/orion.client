@@ -2115,9 +2115,13 @@ parseStatement: true, parseSourceElement: true */
         error.description = description;
         //ORION 
         if(token) {
-            error.index = typeof(token.start) === 'number' ? token.start : token.range[0];
-            error.token = token.value;
-            error.end = typeof(token.end) === 'number' ? token.end : token.range[1];
+        	var tok = token;
+        	if(token.type === 2 && extra && Array.isArray(extra.tokens) && extra.tokens.length > 0) {
+        		tok = extra.tokens[extra.tokens.length-1]; //grab the previous token
+        	}
+            error.index = typeof(tok.start) === 'number' ? tok.start : tok.range[0];
+            error.token = tok.value;
+            error.end = typeof(tok.end) === 'number' ? tok.end : tok.range[1];
         }
         return error;
     }
