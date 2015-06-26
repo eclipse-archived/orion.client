@@ -192,18 +192,18 @@ define([
 			});
 			
 		this._clickListener = function(evt) {
-			if (evt.target.tagName === "A") { //$NON-NLS-0$
-				var temp = evt.target;
-				while (temp) {
-					if (temp._item) {
-						break;
-					}
-					temp = temp.parentNode;
-				}
-				if (temp && temp._item) {
-					_self.onLinkClick({type: "linkClick", item: temp._item}); //$NON-NLS-0$
-				}
-			}
+            if (!(evt.metaKey || evt.altKey || evt.shiftKey || evt.ctrlKey)) {
+                var navHandler = _self.getNavHandler();
+                if (navHandler && navHandler.getSelectionPolicy() !== "cursorOnly") {
+                    var link = lib.$("a", evt.target);
+                    if (link) {
+            			window.location.href = link.href;
+            			_self._clickLink(link);
+            			return;
+                    }
+                }
+            }
+            _self._clickLink(evt.target);
 		};
 		var parent = lib.node(this.parentId);
 		if (parent) {
@@ -225,6 +225,20 @@ define([
 				parent.removeEventListener("click", this._clickListener); //$NON-NLS-0$
 			}
 			mExplorer.Explorer.prototype.destroy.call(this);
+		},
+		_clickLink: function(linkElement) {
+			if (linkElement.tagName === "A") { //$NON-NLS-0$
+				var temp = linkElement;
+				while (temp) {
+					if (temp._item) {
+						break;
+					}
+					temp = temp.parentNode;
+				}
+				if (temp && temp._item) {
+					this.onLinkClick({type: "linkClick", item: temp._item}); //$NON-NLS-0$
+				}
+			}
 		},
 		onLinkClick: function(clickEvent) {
 			this.dispatchEvent(clickEvent);
