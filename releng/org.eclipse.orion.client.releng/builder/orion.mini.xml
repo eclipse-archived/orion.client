@@ -154,6 +154,7 @@
 			</rjs>
 
 			<!-- Tern worker -->
+			<copy file="${builder}/scripts/ternWorker.build.js" todir="${staging}" overwrite="true" />
 			<widgetOptimizeFile out="${out}/javascript/plugins/ternWorker.js"
 				buildfile="${staging}/ternWorker.build.js"
 				optimize="uglify2" />
