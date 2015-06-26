@@ -1,0 +1,130 @@
+/*Editor syntax highlighting themes*/
+/*Refer to https://manual.macromates.com/en/language_grammars at section 12.4 for the theme hierarchy*/
+.editorTheme .comment {
+	color: #3C802C;
+}
+.editorTheme .constant.numeric.hex {
+	color: #9932CC;
+}
+.editorTheme .constant.numeric {
+	color: #9932CC;
+}
+.editorTheme .constant {
+	color: #9932CC;
+}
+.editorTheme .entity.name.function {
+	color: #67BBB8;
+	font-weight: bold;
+}
+.editorTheme .entity.name {
+	color: #98937B;
+}
+.editorTheme .entity.other.attribute-name {
+	color: #5F9EA0;
+}
+.editorTheme .keyword.control {
+	color: #CC4C07;
+	font-weight: bold;
+}
+.editorTheme .keyword.operator {
+	color: #9F4177;
+	font-weight: bold;
+}
+.editorTheme .keyword.other.documentation.task {
+	color: #5595ff;
+}
+.editorTheme .keyword.other.documentation {
+	color: #7F9FBF;
+}
+.editorTheme .meta.documentation.annotation {
+	color: #7F9FBF;
+}
+.editorTheme .meta.documentation.tag {
+	color: #7F7F9F;
+}
+.editorTheme .meta.preprocessor {
+	color: #A4A4A4;
+}
+.editorTheme .meta.tag.attribute {
+	color: #93a2aa;
+}
+.editorTheme .meta.tag {
+	color: #CC4C07;
+}
+.editorTheme .punctuation.operator {
+	color: #D1416F;
+}
+.editorTheme .string.interpolated {
+	color: #151515;
+}
+.editorTheme .string {
+	color: #446FBD;
+}
+.editorTheme .support.type.propertyName {
+	color: #9F4177;
+}
+.editorTheme .variable.language {
+	color: #7F0055;
+	font-weight: bold;
+}
+.editorTheme .variable.other {
+	color: #E038AD;
+}
+.editorTheme .variable.parameter {
+	color: #D1416F;
+}
+/*Editor core themes*/
+.editorTheme .annotationLine.currentLine {
+	background-color: #EAF2FE;
+}
+.editorTheme .annotationRange.currentBracket {
+	background-color: #00FE00;
+}
+.editorTheme .annotationRange.matchingBracket {
+	background-color: #00FE00;
+}
+.editorTheme .annotationRange.matchingSearch.currentSearch {
+	background-color: #53d1ff;
+}
+.editorTheme .annotationRange.matchingSearch {
+	background-color: #c3e1ff;
+}
+.editorTheme .annotationRange.writeOccurrence {
+	background-color: #ffff00;
+}
+.editorTheme .ruler.annotations {
+	background-color: #ffffff;
+}
+.editorTheme .ruler.overview {
+	background-color: #ffffff;
+}
+.editorTheme .ruler {
+	background-color: #ffffff;
+}
+.editorTheme .rulerLines {
+	color: #CCCCCC;
+}
+.editorTheme .textviewContent ::-moz-selection {
+	background-color: #b4d5ff;
+}
+.editorTheme .textviewContent ::selection {
+	background-color: #b4d5ff;
+}
+.editorTheme .textviewLeftRuler {
+	border-color: #ffffff;
+}
+.editorTheme .textviewRightRuler {
+	border-color: #ffffff;
+}
+.editorTheme .textviewSelection {
+	background-color: #b4d5ff;
+}
+.editorTheme .textviewSelectionUnfocused {
+	background-color: #b4d5ff;
+}
+.editorTheme.textview {
+	background-color: #ffffff;
+	color: #151515;
+	font-family: "Source Code Pro", "Consolas", "Monaco", "Vera Mono", monospace;
+	font-size: 12px;
+}

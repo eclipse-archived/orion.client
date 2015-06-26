@@ -35,6 +35,7 @@ function(mEmbeddedEditor) {
 	embeddedEditor.create({parent: "embeddedEditor", _defaultPlugins: defaultPluginURLs}).then(function(editorViewer) {
 		document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 		editorViewer.setContents(contents, "application/javascript");
+		editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
 	});
 	embeddedEditor.create({parent: "embeddedEditor1", _defaultPlugins: defaultPluginURLs,
 						   contentType: "text/html",
