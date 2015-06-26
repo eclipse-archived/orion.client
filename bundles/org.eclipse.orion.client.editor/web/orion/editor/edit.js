@@ -153,6 +153,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	 * @property {String} [contents=""] the editor contents.
 	 * @property {String} [lang] @deprecated use contentType instead
 	 * @property {String} [contentType] the type of the content (eg.- application/javascript, text/html, etc.)
+	 * @property {Function} [grammarProvider] a callback for providing grammars for a content type
 	 * @property {Boolean} [showLinesRuler=true] whether or not the lines ruler is shown.
 	 * @property {Boolean} [showAnnotationRuler=true] whether or not the annotation ruler is shown.
 	 * @property {Boolean} [showOverviewRuler=true] whether or not the overview ruler is shown.
@@ -239,7 +240,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		var syntaxHighlighter = {
 			styler: null, 
 			
-			highlight: function(contentType, editor) {
+			highlight: function(contentType, grammarProvider, editor) {
 				if (this.styler && this.styler.destroy) {
 					this.styler.destroy();
 				}
@@ -258,7 +259,8 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 
 				var textView = editor.getTextView();
 				var annotationModel = editor.getAnnotationModel();
-				if (contentType) {
+				var loadGrammar = function(contentType) {
+					/* attempt to locate an included file containing the grammar for contentType */
 					var folderName = contentType.replace(/[*|:/".<>?+]/g, '_');
 					require(["./stylers/" + folderName + "/syntax"], //$NON-NLS-1$ //$NON-NLS-0$
 						function(grammar) {
@@ -273,13 +275,31 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 							 */
 						}
 					);
+				};
+
+				if (contentType) {
+					if (grammarProvider && (typeof grammarProvider === "function")) { //$NON-NLS-0$
+						grammarProvider(contentType).then(
+							function(result) {
+								if (result && result.grammars && result.id) {
+									var stylerAdapter = new mTextStyler.createPatternBasedAdapter(result.grammars, result.id, contentType);
+									this.styler = new mTextStyler.TextStyler(textView, annotationModel, stylerAdapter);
+								}
+							}.bind(this),
+							/* @callback */ function(error) {
+								loadGrammar(contentType); /* fall back to default grammar file lookup */
+							}
+						);
+					} else {
+						loadGrammar(contentType);
+					}
 				}
 				if (contentType === "text/css") { //$NON-NLS-0$
 					editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
 				}
 			}
 		};
-		
+
 		var editor = new mEditor.Editor({
 			textViewFactory: textViewFactory,
 			undoStackFactory: new mEditorFeatures.UndoFactory(),
@@ -324,7 +344,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
 		editor.setInput(options.title, null, contents, false, options.noFocus);
 		
-		syntaxHighlighter.highlight(options.contentType || options.lang, editor);
+		syntaxHighlighter.highlight(options.contentType || options.lang, options.grammarProvider, editor);
 		/*
 		 * The minimum height of the editor is 50px. Do not compute size if the editor is not
 		 * attached to the DOM or it is display=none.
