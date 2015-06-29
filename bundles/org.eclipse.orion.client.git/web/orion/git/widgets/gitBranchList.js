@@ -177,13 +177,13 @@ define([
 		this.handleError = options.handleError;
 		this.gitClient = options.gitClient;
 		this.progressService = options.progressService;
-		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(event) { //$NON-NLS-0$
-			switch (event.action) {
+		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(evt) { //$NON-NLS-0$
+			switch (evt.action) {
 			case "addBranch": //$NON-NLS-0$
 				this.changedItem(this.model.localRoot, true);
 				break;
 			case "removeBranch": //$NON-NLS-0$
-				var local = event.branch.Type === "Branch"; //$NON-NLS-0$
+				var local = evt.branch.Type === "Branch"; //$NON-NLS-0$
 				this.changedItem(local ? this.model.localRoot : null, local);
 				break;
 			case "addRemote": //$NON-NLS-0$
@@ -198,6 +198,11 @@ define([
 			case "dropStash": //$NON-NLS-0$
 			case "popStash": //$NON-NLS-0$
 				this.changedItem(this.model.stashRoot, true);
+				break;
+			case "fetch": //$NON-NLS-0$
+			case "push": //$NON-NLS-0$
+			case "sync": //$NON-NLS-0$
+				this.changedItem();
 				break;
 			}
 		}.bind(this));
