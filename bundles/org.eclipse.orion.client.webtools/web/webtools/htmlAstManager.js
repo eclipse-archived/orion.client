@@ -59,7 +59,7 @@ define([
 		 */
 		_getKey: function _getKey(metadata) {
 		      if(!metadata.location) {
-		          return 'unknown';
+		          return 'unknown'; //$NON-NLS-1$
 		      }    
 		      return metadata.location;
 		},
@@ -81,7 +81,7 @@ define([
 			var start = Date.now();
 			parser.parseComplete(text);
 			var end = Date.now()-start;
-			Metrics.logTiming('language tools', 'parse', end, 'text/html');
+			Metrics.logTiming('language tools', 'parse', end, 'text/html'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			domResult.source = text;
 			return domResult;
 		},
@@ -107,7 +107,6 @@ define([
 		 */
 		onInputChanged: function(event) {
 		    this.inputChanged = event;
-		    //TODO will add to mult-env
 		}
 	});
 	return {

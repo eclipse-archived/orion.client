@@ -15,7 +15,7 @@ define([
 'mocha/mocha', //global export, stays last
 'htmlparser/htmlparser'  //stays last, exports into global scope
 ], function(chai) {
-    /* eslint-disable no-console */
+    /* eslint-disable no-console, missing-nls */
     var assert = chai.assert;
 	
 	function assertResults(results, expected) {
