@@ -3530,8 +3530,11 @@ parseStatement: true, parseSourceElement: true */
             expectKeyword('case');
             test = parseExpression();
         }
-        expect(':');
-        var start = index; //ORION prevent infinite loops by checking if the index moved
+        //ORION
+        if(match(':')) {
+        	lex();
+        }
+    	var start = index; //ORION prevent infinite loops by checking if the index moved
         while (startIndex < length) {
             if (match('}') || matchKeyword('default') || matchKeyword('case')) {
                 break;

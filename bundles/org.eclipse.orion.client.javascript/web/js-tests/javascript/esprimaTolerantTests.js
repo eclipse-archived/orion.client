@@ -2161,6 +2161,58 @@ define([
 				comments: []
 			});
 		});
+		/**
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=471340
+		 * @since 10.0
+		 */
+		it('Invalid switch case 1', function() {
+			runTest({
+				source: "switch(a) {case a {}};",
+                nodes: [{"type":"SwitchStatement","range":[0,21]},{"type":"Identifier","name":"a","range":[7,8]},{"type":"SwitchCase","range":[11,20]},{"type":"Identifier","name":"a","range":[16,17]},{"type":"BlockStatement","range":[18,20]},{"type":"EmptyStatement","range":[21,22]}],
+				tokens: [{"type":"Keyword","range":[0,6],"value":"switch"},{"type":"Punctuator","range":[6,7],"value":"("},{"type":"Identifier","range":[7,8],"value":"a"},{"type":"Punctuator","range":[8,9],"value":")"},{"type":"Punctuator","range":[10,11],"value":"{"},{"type":"Keyword","range":[11,15],"value":"case"},{"type":"Identifier","range":[16,17],"value":"a"},{"type":"Punctuator","range":[18,19],"value":"{"},{"type":"Punctuator","range":[19,20],"value":"}"},{"type":"Punctuator","range":[20,21],"value":"}"},{"type":"Punctuator","range":[21,22],"value":";"}],
+				errors: [],
+				comments: []
+			});
+		});
+		/**
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=471340
+		 * @since 10.0
+		 */
+		it('Invalid switch case 2', function() {
+			runTest({
+				source: "switch(a) {case a case y: {}};",
+				nodes: [{"type":"SwitchStatement","range":[0,29]},{"type":"Identifier","name":"a","range":[7,8]},{"type":"SwitchCase","range":[11,17]},{"type":"Identifier","name":"a","range":[16,17]},{"type":"SwitchCase","range":[18,28]},{"type":"Identifier","name":"y","range":[23,24]},{"type":"BlockStatement","range":[26,28]},{"type":"EmptyStatement","range":[29,30]}],
+				tokens: [{"type":"Keyword","range":[0,6],"value":"switch"},{"type":"Punctuator","range":[6,7],"value":"("},{"type":"Identifier","range":[7,8],"value":"a"},{"type":"Punctuator","range":[8,9],"value":")"},{"type":"Punctuator","range":[10,11],"value":"{"},{"type":"Keyword","range":[11,15],"value":"case"},{"type":"Identifier","range":[16,17],"value":"a"},{"type":"Keyword","range":[18,22],"value":"case"},{"type":"Identifier","range":[23,24],"value":"y"},{"type":"Punctuator","range":[24,25],"value":":"},{"type":"Punctuator","range":[26,27],"value":"{"},{"type":"Punctuator","range":[27,28],"value":"}"},{"type":"Punctuator","range":[28,29],"value":"}"},{"type":"Punctuator","range":[29,30],"value":";"}],
+				errors: [],
+				comments: []
+			});
+		});
+		/**
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=471340
+		 * @since 10.0
+		 */
+		it('Invalid switch case 3', function() {
+			runTest({
+				source: "switch(a) {case a case y: {break;} case x default};",
+				nodes: [{"type":"SwitchStatement","range":[0,50]},{"type":"Identifier","name":"a","range":[7,8]},{"type":"SwitchCase","range":[11,17]},{"type":"Identifier","name":"a","range":[16,17]},{"type":"SwitchCase","range":[18,34]},{"type":"Identifier","name":"y","range":[23,24]},{"type":"BlockStatement","range":[26,34]},{"type":"BreakStatement","range":[27,33]},{"type":"SwitchCase","range":[35,41]},{"type":"Identifier","name":"x","range":[40,41]},{"type":"SwitchCase","range":[42,49]},{"type":"EmptyStatement","range":[50,51]}],
+				tokens: [{"type":"Keyword","range":[0,6],"value":"switch"},{"type":"Punctuator","range":[6,7],"value":"("},{"type":"Identifier","range":[7,8],"value":"a"},{"type":"Punctuator","range":[8,9],"value":")"},{"type":"Punctuator","range":[10,11],"value":"{"},{"type":"Keyword","range":[11,15],"value":"case"},{"type":"Identifier","range":[16,17],"value":"a"},{"type":"Keyword","range":[18,22],"value":"case"},{"type":"Identifier","range":[23,24],"value":"y"},{"type":"Punctuator","range":[24,25],"value":":"},{"type":"Punctuator","range":[26,27],"value":"{"},{"type":"Keyword","range":[27,32],"value":"break"},{"type":"Punctuator","range":[32,33],"value":";"},{"type":"Punctuator","range":[33,34],"value":"}"},{"type":"Keyword","range":[35,39],"value":"case"},{"type":"Identifier","range":[40,41],"value":"x"},{"type":"Keyword","range":[42,49],"value":"default"},{"type":"Punctuator","range":[49,50],"value":"}"},{"type":"Punctuator","range":[50,51],"value":";"}],
+				errors: [],
+				comments: []
+			});
+		});
+		/**
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=471340
+		 * @since 10.0
+		 */
+		it('Invalid switch case 4', function() {
+			runTest({
+				source: "switch(a) {case a. case y: {break;} default};",
+				nodes: [{"type":"SwitchStatement","range":[0,44]},{"type":"Identifier","name":"a","range":[7,8]},{"type":"SwitchCase","range":[11,35]},{"type":"MemberExpression","range":[16,23]},{"type":"Identifier","name":"a","range":[16,17]},{"type":"Identifier","name":"case","range":[19,23]},{"type":"LabeledStatement","range":[24,35]},{"type":"Identifier","name":"y","range":[24,25]},{"type":"BlockStatement","range":[27,35]},{"type":"BreakStatement","range":[28,34]},{"type":"SwitchCase","range":[36,43]},{"type":"EmptyStatement","range":[44,45]}],
+				tokens: [{"type":"Keyword","range":[0,6],"value":"switch"},{"type":"Punctuator","range":[6,7],"value":"("},{"type":"Identifier","range":[7,8],"value":"a"},{"type":"Punctuator","range":[8,9],"value":")"},{"type":"Punctuator","range":[10,11],"value":"{"},{"type":"Keyword","range":[11,15],"value":"case"},{"type":"Identifier","range":[16,17],"value":"a"},{"type":"Punctuator","range":[17,18],"value":"."},{"type":"Keyword","range":[19,23],"value":"case"},{"type":"Identifier","range":[24,25],"value":"y"},{"type":"Punctuator","range":[25,26],"value":":"},{"type":"Punctuator","range":[27,28],"value":"{"},{"type":"Keyword","range":[28,33],"value":"break"},{"type":"Punctuator","range":[33,34],"value":";"},{"type":"Punctuator","range":[34,35],"value":"}"},{"type":"Keyword","range":[36,43],"value":"default"},{"type":"Punctuator","range":[43,44],"value":"}"},{"type":"Punctuator","range":[44,45],"value":";"}],
+				errors: [],
+				comments: []
+			});
+		});
 		describe('ES6 Tests', function() {
     	 //ARROW EXPRESSIONS ==============================================================================================================================================
     	   it('arrow expression 1', function() {
