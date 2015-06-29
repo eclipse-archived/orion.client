@@ -3369,19 +3369,45 @@ define([
     			assert.equal(messages[0].message, "'g' is already defined.");
     			assert.equal(messages[0].node.type, "Identifier");
     		});
-    //		it("should flag redeclaration in ArrowFuncExpr", function() {
-    //			var topic = "() => { var a,b; var a; }";
-    //	
-    //			var config = { rules: {} };
-    //			config.rules[RULE_ID] = 1;
-    //	
-    //			var messages = eslint.verify(topic, config);
-    //			assert.equal(messages.length, 1);
-    //			assert.equal(messages[0].ruleId, RULE_ID);
-    //			assert.equal(messages[0].message, "'a' is already defined.");
-    //			assert.equal(messages[0].node.type, "Identifier");
-    //			assert.equal(messages[0].node.range[0], 23); // The 2nd 'a' is the culprit
-    //		});
+    
+    		it("should flag redeclaration in ArrowFunctionExpression 1", function() {
+    			var topic = "() => {var a; function f(){} var a;}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "'a' is already defined.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		
+    		it("should flag redeclaration in ArrowFunctionExpression 2", function() {
+    			var topic = "a.map(() => {var a; function f(){} var a;})";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "'a' is already defined.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		
+    		it("should flag redeclaration in ArrowFunctionExpression 3", function() {
+    			var topic = "a.map(() => { function f(){var a;var a;} })";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "'a' is already defined.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
     
     		it("should identify the range of the redeclaration", function() {
     			var topic = "(function() { var a, b; var a; })";
@@ -3605,6 +3631,42 @@ define([
 //NO-SHADOW --------------------------------------------------------    	
         describe('no-shadow', function() {
             var RULE_ID = "no-shadow";
+            it("should flag shadowing in ArrowFunctionExpression 1", function() {
+                var topic = "var foo; a.map(s => {var foo;});";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 1);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, "'foo' is already declared in the upper scope.");
+                assert.equal(messages[0].node.type, "Identifier");
+            });
+            it("should flag shadowing in ArrowFunctionExpression 2", function() {
+                var topic = "var foo; () => {var foo;};";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 1);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, "'foo' is already declared in the upper scope.");
+                assert.equal(messages[0].node.type, "Identifier");
+            });
+            it("should flag shadowing in ArrowFunctionExpression 3", function() {
+                var topic = "var fives; nums.forEach(v => { if (v % 5 === 0) { fives.push(v);} else {v = function() {var fives;}}});";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 1);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, "'fives' is already declared in the upper scope.");
+                assert.equal(messages[0].node.type, "Identifier");
+            });
             it("should flag shadowing in FunctionExpression", function() {
                 var topic = "var a; (function() { var a; } ());";
     
@@ -3731,6 +3793,34 @@ define([
 //NO-SHADOW-GLOBAL ------------------------------------------------
         describe('no-shadow-global', function() {
            var RULE_ID = 'no-shadow-global'; 
+           /**
+            * @since 10.0
+            * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460728
+            */
+           it("should flag browser use ArrowExpression 1", function() {
+               var topic = "/* eslint-env browser*/a.map(name => {var w = 10;});";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 1);
+			   assert.equal(messages[0].ruleId, RULE_ID);
+			   assert.equal(messages[0].message, "Parameter 'name' shadows a global member.");
+           });
+           /**
+            * @since 10.0
+            * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460728
+            */
+           it("should flag browser use ArrowExpression 2", function() {
+               var topic = "/* eslint-env browser*/() => name => {var w = 10;};";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 1);
+			   assert.equal(messages[0].ruleId, RULE_ID);
+			   assert.equal(messages[0].message, "Parameter 'name' shadows a global member.");
+           });
            it("should flag browser use 1", function() {
                var topic = "/*eslint-env browser*/ var name = 'me';";
                var config = {rules:{}};
@@ -3751,6 +3841,34 @@ define([
 			   assert.equal(messages[0].ruleId, RULE_ID);
 			   assert.equal(messages[0].message, "Parameter 'name' shadows a global member.");
            });
+           /**
+            * @since 10.0
+            * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460728
+            */
+           it("should flag node use ArrowExpression 1", function() {
+               var topic = "/*eslint-env node*/() => require => {};";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 1);
+			   assert.equal(messages[0].ruleId, RULE_ID);
+			   assert.equal(messages[0].message, "Parameter 'require' shadows a global member.");
+           });
+           /**
+            * @since 10.0
+            * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460728
+            */
+           it("should flag node use ArrowExpression 2", function() {
+               var topic = "/*eslint-env node*/a.map(require => {});";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 1);
+			   assert.equal(messages[0].ruleId, RULE_ID);
+			   assert.equal(messages[0].message, "Parameter 'require' shadows a global member.");
+           });
            it("should flag node use 1", function() {
                var topic = "/*eslint-env node*/ var require = {};";
                var config = {rules:{}};
@@ -3770,6 +3888,34 @@ define([
 			   assert.equal(messages.length, 1);
 			   assert.equal(messages[0].ruleId, RULE_ID);
 			   assert.equal(messages[0].message, "Parameter 'module' shadows a global member.");
+           });
+           /**
+            * @since 10.0
+            * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460728
+            */
+           it("should flag builtins use ArrowFunctionExpression 1", function() {
+               var topic = "() => Math => {}";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 1);
+			   assert.equal(messages[0].ruleId, RULE_ID);
+			   assert.equal(messages[0].message, "Parameter 'Math' shadows a global member.");
+           });
+           /**
+            * @since 10.0
+            * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460728
+            */
+           it("should flag builtins use ArrowFunctionExpression 2", function() {
+               var topic = "a.map(Math => {});";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 1);
+			   assert.equal(messages[0].ruleId, RULE_ID);
+			   assert.equal(messages[0].message, "Parameter 'Math' shadows a global member.");
            });
            /**
             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461321
@@ -4597,6 +4743,86 @@ define([
 //NO-UNUSED-PARAMS -------------------------------------------    	
     	describe('no-unused-params', function() {
     	    var RULE_ID = "no-unused-params";
+    	   /**
+            * @since 10.0
+            * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460728
+            */
+    	    it("Should flag unused param ArrowFunctionExpression 1", function() {
+    			var topic = "() => a => {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Parameter 'a' is never used.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		/**
+             * @since 10.0
+             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460728
+             */
+    	    it("Should flag unused param ArrowFunctionExpression 2", function() {
+    			var topic = "() => {() => a => {}}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Parameter 'a' is never used.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		/**
+             * @since 10.0
+             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460728
+             */
+    	    it("Should flag unused param ArrowFunctionExpression 3", function() {
+    			var topic = "arr.map(a => {});";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Parameter 'a' is never used.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		/**
+             * @since 10.0
+             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460728
+             */
+    	    it("Should flag unused param ArrowFunctionExpression 4", function() {
+    			var topic = "arr.map(() => {a => {}});";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Parameter 'a' is never used.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		/**
+             * @since 10.0
+             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460728
+             */
+    	    it("Should flag unused param ArrowFunctionExpression 5", function() {
+    			var topic = "(arr.map(() => {a => {}}));";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Parameter 'a' is never used.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
     		it("Should flag unused param simple func decl", function() {
     			var topic = "function f(a) {}";
     	
@@ -4972,6 +5198,32 @@ define([
     		 */
     		it("Should not flag unused param func decl as closure call expression with @callback", function() {
     			var topic = "(/* @callback */ function f(a) {})();";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+             * @since 10.0
+             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460728
+             */
+    		it("Should not flag used param  - ArrowFunctionExpression 1", function() {
+    			var topic = "(arr.map(() => {a => {a.length}}));";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+             * @since 10.0
+             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460728
+             */
+    		it("Should not flag used param - ArrowFunctionExpression 2", function() {
+    			var topic = "var simple = a => a > 15 ? 15 : a;";
     	
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;

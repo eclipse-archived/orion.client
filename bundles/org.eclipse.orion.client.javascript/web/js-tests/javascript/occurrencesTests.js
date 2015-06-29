@@ -2312,5 +2312,87 @@ define([
 				assertOccurrences(results, [{start:0, end:1}, {start:7, end:8}]);
 			});
 		});
+		describe('ES6 Occurrences Tests', function() {
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
+			 * @since 10.0
+			 */
+			it('arrow function expression 1', function() {
+				editorContext.text = "n => {n.length;}";
+				return occurrences.computeOccurrences(editorContext, setContext(0,1)).then(function(results) {
+					assertOccurrences(results, [{start:0, end:1}, {start:6, end:7}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
+			 * @since 10.0
+			 */
+			it('arrow function expression 2', function() {
+				editorContext.text = "var n = 10; n => {n.length;}";
+				return occurrences.computeOccurrences(editorContext, setContext(12,13)).then(function(results) {
+					assertOccurrences(results, [{start:12, end:13}, {start:18, end:19}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
+			 * @since 10.0
+			 */
+			it('arrow function expression 3', function() {
+				editorContext.text = "n => f => {n.length;}";
+				return occurrences.computeOccurrences(editorContext, setContext(11,12)).then(function(results) {
+					assertOccurrences(results, [{start:0, end:1}, {start:11, end:12}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
+			 * @since 10.0
+			 */
+			it('arrow function expression 4', function() {
+				editorContext.text = "var n = 'hello'; n => f => {n.length;}";
+				return occurrences.computeOccurrences(editorContext, setContext(17,18)).then(function(results) {
+					assertOccurrences(results, [{start:17, end:18}, {start:28, end:29}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
+			 * @since 10.0
+			 */
+			it('arrow function expression 5', function() {
+				editorContext.text = "var n = []; n.map(n => {n.length;});";
+				return occurrences.computeOccurrences(editorContext, setContext(18,18)).then(function(results) {
+					assertOccurrences(results, [{start:18, end:19}, {start:24, end:25}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
+			 * @since 10.0
+			 */
+			it('arrow function expression 6', function() {
+				editorContext.text = "var n = []; n.map(n => {n.length;});";
+				return occurrences.computeOccurrences(editorContext, setContext(12, 12)).then(function(results) {
+					assertOccurrences(results, [{start:4, end:5}, {start:12, end:13}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
+			 * @since 10.0
+			 */
+			it('arrow function expression 7', function() {
+				editorContext.text = "var n = []; n.map(n => n => {n.length;});";
+				return occurrences.computeOccurrences(editorContext, setContext(12, 12)).then(function(results) {
+					assertOccurrences(results, [{start:4, end:5}, {start:12, end:13}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
+			 * @since 10.0
+			 */
+			it('arrow function expression 8', function() {
+				editorContext.text = "var n = []; n.map(n => n => {n.length;});";
+				return occurrences.computeOccurrences(editorContext, setContext(24, 24)).then(function(results) {
+					assertOccurrences(results, [{start:23, end:24}, {start:29, end:30}]);
+				});
+			});
+		});
 	});
 });

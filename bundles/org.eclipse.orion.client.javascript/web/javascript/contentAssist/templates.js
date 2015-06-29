@@ -182,6 +182,20 @@ define([
 			description: " - Throws JSDoc tag", //$NON-NLS-0$
 			template: "@throws {${type}} ${cursor}" //$NON-NLS-0$
 	    },
+	    {
+			prefix: "arrow", //$NON-NLS-0$
+			name: "arrow",  //$NON-NLS-0$
+			nodes: {top:true, member:false, prop:false},
+			description: " - arrow function expression", //$NON-NLS-0$
+			template: "${param} => {${cursor}}" //$NON-NLS-0$
+		},
+		{
+			prefix: "arrow", //$NON-NLS-0$
+			name: "arrow object",  //$NON-NLS-0$
+			nodes: {top:true, member:false, prop:false},
+			description: " - arrow function expression returning an object", //$NON-NLS-0$
+			template: "var ${name} = () => ({ ${prop}: ${val}${cursor} });" //$NON-NLS-0$
+		},
 		{
 			prefix: "if", //$NON-NLS-0$
 			name: "if",  //$NON-NLS-0$

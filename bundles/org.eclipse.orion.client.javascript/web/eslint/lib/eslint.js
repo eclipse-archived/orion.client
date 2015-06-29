@@ -919,7 +919,7 @@ module.exports = (function() {
 
             // if current node is function declaration, add it to the list
             var current = controller.current();
-            if (current.type === "FunctionDeclaration" || current.type === "FunctionExpression") {
+            if (current.type === "FunctionDeclaration" || current.type === "FunctionExpression" || current.type === "ArrowFunctionExpression") {
                 parents.push(current);
             }
 

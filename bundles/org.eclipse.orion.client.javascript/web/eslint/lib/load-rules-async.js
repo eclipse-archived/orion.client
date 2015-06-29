@@ -847,7 +847,7 @@ define([
 								        }
 								        
 								        for (var i=0; i<nodes.length; i++) {
-								        	var match = false;
+								        	match = false;
 								        	for (var j=0; j<comments.length; j++) {
 								        		
 								        		// NON-NLS comments start at 1
@@ -1011,12 +1011,11 @@ define([
                         var scope = context.getScope();
                         if (node.type === "FunctionExpression" && node.id && node.id.name) {
                             scope  = scope.upper;
+                            if (scope.type === "global") {//$NON-NLS-0$
+	                            return; // No shadowing can occur in the global (Program) scope
+	                        }
                         }
                         var symbolMap = createSymbolMap(scope);
-
-                        if (scope.type === "global") {//$NON-NLS-0$
-                            return; // No shadowing can occur in the global (Program) scope
-                        }
                         scope.variables.forEach(function(variable) {
                             if (!variable.defs.length) {
                                 return; // Skip 'arguments'
@@ -1055,7 +1054,8 @@ define([
                             break;
                         }
                         case 'FunctionExpression':
-                        case 'FunctionDeclaration': {
+                        case 'FunctionDeclaration': 
+                        case 'ArrowFunctionExpression': {
                             node.params.forEach(function(param) {
                                 if(param.type === 'Identifier' && env[Finder.findESLintEnvForMember(param.name)]) {
                                     context.report(param, ProblemMessages['no-shadow-global-param'], {0: param.name, nls:'no-shadow-global-param'}); //$NON-NLS-1$
@@ -1069,6 +1069,7 @@ define([
                 return {
                     'FunctionExpression': checkShadow,
                     'FunctionDeclaration': checkShadow,
+                    'ArrowFunctionExpression': checkShadow,
                     'VariableDeclarator': checkShadow
                 };
             }
@@ -1282,6 +1283,15 @@ define([
         					               return;
         					            }
         					        }
+        					    } else if(node.type === 'ArrowFunctionExpression') {
+        					    	pid += '-arrow'; //$NON-NLS-1$
+        					    	/*
+    					        	//check the parent: () => {a => {}}
+    					        	//the comment is attached to the ExpressionStatement
+    					        	if(node.parent.type === 'ExpressionStatement' && hasCallbackComment(node.parent)) {
+    					        		return;
+    					        	}
+        					        */
         					    }
         						context.report(defnode, ProblemMessages['no-unused-params'], {0:defnode.name, pid: pid}); //$NON-NLS-0
         					}
@@ -1293,8 +1303,9 @@ define([
         		}
         
         		return {
-        			"FunctionDeclaration": check,  //$NON-NLS-0$
-        			"FunctionExpression": check  //$NON-NLS-0$
+        			"FunctionDeclaration": check,
+        			"FunctionExpression": check,
+        			"ArrowFunctionExpression": check
         		};
         	}
         },
@@ -1344,9 +1355,10 @@ define([
         		}
         
         		return {
-        			"Program": check,  //$NON-NLS-0$
-        			"FunctionDeclaration": check,  //$NON-NLS-0$
-        			"FunctionExpression": check  //$NON-NLS-0$
+        			"Program": check,
+        			"FunctionDeclaration": check,
+        			"FunctionExpression": check,
+        			"ArrowFunctonExpression": check
         		};
         	}
         },
