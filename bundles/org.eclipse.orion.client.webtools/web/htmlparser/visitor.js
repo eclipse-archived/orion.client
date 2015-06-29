@@ -14,6 +14,24 @@
 define([
 ], function() {
 
+	var Visitor = {
+        
+        BREAK: 1,
+        SKIP: 2,
+        
+        visit: function visit(dom, callback) {
+            if(Array.isArray(dom) && callback && typeof(callback.visitNode) === 'function') {
+                this.callback = callback;
+                for(var i = 0; i < dom.length; i++) {
+                    var ret = visitNode(this.callback, dom[i], null);
+                    if(ret === this.BREAK) {
+                        return;
+                    }
+                }    
+            }
+        }
+    };
+
     function visitNode(callback, node, last) {
         node.parent = last;
         var ret = callback.visitNode(node);
@@ -48,26 +66,6 @@ define([
             }
         }
     }
-
-    var Visitor = {
-        
-        BREAK: 1,
-        SKIP: 2,
-        
-        visit: function visit(dom, callback) {
-            if(Array.isArray(dom) && callback && typeof(callback.visitNode) === 'function') {
-                this.callback = callback;
-                for(var i = 0; i < dom.length; i++) {
-                    var ret = visitNode(this.callback, dom[i], null);
-                    if(ret === this.BREAK) {
-                        return;
-                    }
-                }    
-            }
-        },
-        
-        
-    };
 
     return Visitor;    
 });
