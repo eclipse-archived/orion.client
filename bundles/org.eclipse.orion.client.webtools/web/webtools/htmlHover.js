@@ -103,7 +103,7 @@ define([
 					if(node.range[0] <= offset) {
 						found = node;
 					} else {
-						if (offset > found.range[1]){
+						if (found && offset > found.range[1]){
 							found = null;
 						}
 					    return Visitor.BREAK;
