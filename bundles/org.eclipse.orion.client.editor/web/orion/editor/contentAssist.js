@@ -387,7 +387,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					var foundProposal = false;
 					if (proposals && proposals.length > 0){
 						for (var i=0; i<proposals.length; i++) {
-							if (proposals[i].length > 0){
+							if (Array.isArray(proposals[i]) && proposals[i].length > 0){
 								foundProposal = true;
 								break;
 							}
