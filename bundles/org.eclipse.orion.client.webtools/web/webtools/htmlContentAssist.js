@@ -228,7 +228,9 @@ define([
 				} else if(this.completingTagAttributes(node, ast.source, params)) {
 					return this.getAttributesForNode(node, params);
 				} else {
-					return mTemplates.TemplateContentAssist.prototype.computeProposals.call(this, ast.source, params.offset, params);
+					var results = this.getProposalsForTextContent(node, ast.source, params);
+					results = results.concat(mTemplates.TemplateContentAssist.prototype.computeProposals.call(this, ast.source, params.offset, params));
+					return results;
 				}
 			}
 			return proposals;
@@ -240,12 +242,16 @@ define([
 		 * @since 10.0 
 		 */
 		inScriptOrStyle: function(node) {
-			if(node.name) {
-				var _n = node.name.toLowerCase();
-				return node.type === 'tag' && (_n === 'script' || _n === 'style');	
+			if(node) {
+				var _n = node.name ? node.name.toLowerCase() : '';
+				if(node.type === 'tag' && (_n === 'script' || _n === 'style')) {
+					return true;
+				} else {
+					return this.inScriptOrStyle(node.parent);
+				}
 			}
 			return false;
-		},
+		},  
 		
 		/**
 		 * Returns if the offset is in a closing tag. A closing tag is determined as an 
@@ -331,6 +337,49 @@ define([
 			//TODO compute the options for the given attribute
 			return [];	
 		},
+		/**
+		 * Returns any proposals (if any) for when the user is editing text contents based upon
+		 * state of the AST.  Templates are added to this list.
+		 * @param {Object} node The AST node for the attribute we are completing within
+		 * @param {String} source The backing source
+		 * @param {Object} params The parameters
+		 * @returns {Array.<Object>} The array of proposals
+		 * @since 10.0 
+		 */
+		getProposalsForTextContent: function(node, source, params) {
+			if (node && node.parent && node.parent.type === 'tag'){
+				var preceding = this.getPrecedingCharacters(source, params.offset, 1);
+				if (preceding.match(/.*\/$/)){
+					var name = '</' + node.parent.name + '>'; //$NON-NLS-1$
+					var desc = ' - Close the ' + node.parent.name + ' tag';
+					return [this.makeComputedProposal(name, desc, null, '/')];
+				}
+			}
+			return [];	
+		},
+		
+		/**
+		 * @name getPrecedingCharacters
+		 * @description Returns the characters previous to the offset up to the given count
+		 * @function
+		 * @param source {String} source to lookup characters in
+		 * @param offset {Number} the offset to begin counting at
+		 * @param count {Number} the number of preceding characters to return, defaults to 1
+		 * @returns returns {String} containing the preceding characters or an empty string
+		 * @private
+		 */
+		getPrecedingCharacters: function getPrecedingCharacters(source, offset, count) {
+			var result = "";
+			if (!source || !offset){
+				return result;
+			}
+			var index = count ? count : 1;
+			while (index > 0 && (offset-index > 0) && (offset-index) < source.length){
+				result += source[offset-index];
+				index--;
+			}
+			return result;
+		},
 		
 		/**
 		 * Computes if we are trying to complete attributes
@@ -343,6 +392,7 @@ define([
 		completingAttributes: function(node, source, params) {
 			if(node && node.type === 'attr') {
 				return true;
+				// Not everyone will include the value inside quotations so just return true if we anywhere inside the attribute
 //				return this.within('"', '"', source, params.offset, node.range); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			return false;
