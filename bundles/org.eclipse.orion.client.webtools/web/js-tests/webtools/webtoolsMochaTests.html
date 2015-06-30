@@ -6,6 +6,7 @@
 	<script src="../../requirejs/require.js"></script>
 	<script>
 		/*eslint-env browser, amd*/
+		/* eslint-disable missing-nls */
 		require({
 		baseUrl: "../../",
 		paths: {
@@ -22,7 +23,8 @@
 			"js-tests/webtools/cssValidatorTests",
 			"js-tests/webtools/cssParserTests",
 			"js-tests/webtools/utilTests",
-			"js-tests/webtools/htmlParserTests"
+			"js-tests/webtools/htmlParserTests",
+			"js-tests/webtools/htmlContentAssistTests"
 		], function(){
 			mocha.run();
 		});
