@@ -10,82 +10,92 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env amd */
-define("webtools/htmlContentAssist", [ //$NON-NLS-0$
-	'orion/editor/templates',  //$NON-NLS-0$
-	'orion/editor/stylers/text_html/syntax' //$NON-NLS-0$
-], function(mTemplates, mHTML) {
+define([
+	'orion/editor/templates',
+	'orion/editor/stylers/text_html/syntax',
+	'orion/objects',
+	'htmlparser/visitor'
+], function(mTemplates, mHTML, Objects, Visitor) {
 
-	var simpleDocTemplate = new mTemplates.Template("", "Simple HTML document", //$NON-NLS-0$
+	var simpleDocTemplate = new mTemplates.Template("", "Simple HTML document",
 		"<!DOCTYPE html>\n" + //$NON-NLS-0$
 		"<html lang=\"en\">\n" + //$NON-NLS-0$
-		"\t<head>\n" + //$NON-NLS-0$
-		"\t\t<meta charset=utf-8>\n" + //$NON-NLS-0$
-		"\t\t<title>${title}</title>\n" + //$NON-NLS-0$
-		"\t</head>\n" + //$NON-NLS-0$
-		"\t<body>\n" + //$NON-NLS-0$
-		"\t\t<h1>${header}</h1>\n" + //$NON-NLS-0$
-		"\t\t<p>\n" + //$NON-NLS-0$
-		"\t\t\t${cursor}\n" + //$NON-NLS-0$
-		"\t\t</p>\n" + //$NON-NLS-0$
-		"\t</body>\n" + //$NON-NLS-0$
+		"<head>\n" + //$NON-NLS-0$
+		"\t<meta charset=\"utf-8\">\n" + //$NON-NLS-0$
+		"\t<title>${title}</title>\n" + //$NON-NLS-0$
+		"</head>\n" + //$NON-NLS-0$
+		"<body>\n" + //$NON-NLS-0$
+		"\t<h1>${header}</h1>\n" + //$NON-NLS-0$
+		"\t<p>\n" + //$NON-NLS-0$
+		"\t\t${cursor}\n" + //$NON-NLS-0$
+		"\t</p>\n" + //$NON-NLS-0$
+		"</body>\n" + //$NON-NLS-0$
 		"</html>"); //$NON-NLS-0$
 		
 	var templates = [
 		{
-			prefix: "<img", //$NON-NLS-0$
-			name: "<img>", //$NON-NLS-0$
-			description: " - HTML image element", //$NON-NLS-0$
-			template: "<img src=\"${URI}\" alt=\"${Image}\"/>" //$NON-NLS-0$
+			tag: 'img', //$NON-NLS-1$
+			prefix: "<img", //$NON-NLS-1$
+			name: "<img>", //$NON-NLS-1$
+			description: " - HTML image element",
+			template: "<img src=\"${URI}\" alt=\"${Image}\"/>", //$NON-NLS-1$
+			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img" //$NON-NLS-1$
 		},
 		{
-			prefix: "<a", //$NON-NLS-0$
-			name: "<a>", //$NON-NLS-0$
-			description: " - HTML anchor element", //$NON-NLS-0$
-			template: "<a href=\"${cursor}\"></a>" //$NON-NLS-0$
+			tag: 'a', //$NON-NLS-1$
+			prefix: "<a", //$NON-NLS-1$
+			name: "<a>", //$NON-NLS-1$
+			description: " - HTML anchor element",
+			template: "<a href=\"${cursor}\"></a>", //$NON-NLS-1$
+			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a" //$NON-NLS-1$
 		},
 		{
-			prefix: "<ul", //$NON-NLS-0$
-			name: "<ul>", //$NON-NLS-0$
-			description: " - HTML unordered list",  //$NON-NLS-0$
-			template: "<ul>\n\t<li>${cursor}</li>\n</ul>" //$NON-NLS-0$
+			tag: 'ul', //$NON-NLS-1$
+			prefix: "<ul", //$NON-NLS-1$
+			name: "<ul>", //$NON-NLS-1$
+			description: " - HTML unordered list",
+			template: "<ul>\n\t<li>${cursor}</li>\n</ul>" //$NON-NLS-1$
 		},
 		{
-			prefix: "<ol", //$NON-NLS-0$
-			name: "<ol>", //$NON-NLS-0$
-			description: " - HTML ordered list", //$NON-NLS-0$
-			template: "<ol>\n\t<li>${cursor}</li>\n</ol>" //$NON-NLS-0$
+			tag: 'ol', //$NON-NLS-1$
+			prefix: "<ol", //$NON-NLS-1$
+			name: "<ol>", //$NON-NLS-1$
+			description: " - HTML ordered list",
+			template: "<ol>\n\t<li>${cursor}</li>\n</ol>" //$NON-NLS-1$
 		},
 		{
-			prefix: "<dl", //$NON-NLS-0$
-			name: "<dl>", //$NON-NLS-0$
-			description: " - HTML definition list", //$NON-NLS-0$
-			template: "<dl>\n\t<dt>${cursor}</dt>\n\t<dd></dd>\n</dl>" //$NON-NLS-0$
+			tag: 'dl', //$NON-NLS-1$
+			prefix: "<dl", //$NON-NLS-1$
+			name: "<dl>", //$NON-NLS-1$
+			description: " - HTML definition list",
+			template: "<dl>\n\t<dt>${cursor}</dt>\n\t<dd></dd>\n</dl>" //$NON-NLS-1$
 		},
 		{
-			prefix: "<table", //$NON-NLS-0$
-			name: "<table>", //$NON-NLS-0$
-			description: " - basic HTML table", //$NON-NLS-0$
-			template: "<table>\n\t<tr>\n\t\t<td>${cursor}</td>\n\t</tr>\n</table>" //$NON-NLS-0$
+			tag: 'table', //$NON-NLS-1$
+			prefix: "<table", //$NON-NLS-1$
+			name: "<table>", //$NON-NLS-1$
+			description: " - basic HTML table",
+			template: "<table>\n\t<tr>\n\t\t<td>${cursor}</td>\n\t</tr>\n</table>" //$NON-NLS-1$
 		},
 		{
-			prefix: "<!--", //$NON-NLS-0$
-			name: "<!-- -->", //$NON-NLS-0$
-			description: " - HTML comment", //$NON-NLS-0$
-			template: "<!-- ${cursor} -->" //$NON-NLS-0$
+			prefix: "<!--", //$NON-NLS-1$
+			name: "<!-- -->", //$NON-NLS-1$
+			description: " - HTML comment",
+			template: "<!-- ${cursor} -->" //$NON-NLS-1$
 		}
 	];
 
 	//elements that are typically placed on a single line (e.g., <b>, <h1>, etc)
 	var element, template, description, i;
 	var singleLineElements = [
-		"abbr","b","button","canvas","cite", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"command","dd","del","dfn","dt", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"em","embed","font","h1","h2", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"h3","h4","h5","h6","i", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"ins","kbd","label","li","mark", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"meter","object","option","output","progress", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"q","rp","rt","samp","small", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"strong","sub","sup","td","time", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"abbr","b","button","canvas","cite", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+		"command","dd","del","dfn","dt", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+		"em","embed","font","h1","h2", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+		"h3","h4","h5","h6","i", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+		"ins","kbd","label","li","mark", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+		"meter","object","option","output","progress", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+		"q","rp","rt","samp","small", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+		"strong","sub","sup","td","time", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 		"title","tt","u","var" //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 	for (i = 0; i < singleLineElements.length; i++) {
@@ -97,14 +107,14 @@ define("webtools/htmlContentAssist", [ //$NON-NLS-0$
 
 	//elements that typically start a block spanning multiple lines (e.g., <p>, <div>, etc)
 	var multiLineElements = [
-		"address","article","aside","audio","bdo", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"blockquote","body","caption","code","colgroup", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"datalist","details","div","fieldset","figure", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"footer","form","head","header","hgroup", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"iframe","legend","map","menu","nav", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"noframes","noscript","optgroup","p","pre", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"ruby","script","section","select","span", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"style","tbody","textarea","tfoot","th", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"address","article","aside","audio","bdo", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+		"blockquote","body","caption","code","colgroup", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+		"datalist","details","div","fieldset","figure", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+		"footer","form","head","header","hgroup", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+		"iframe","legend","map","menu","nav", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+		"noframes","noscript","optgroup","p","pre", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+		"ruby","script","section","select","span", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+		"style","tbody","textarea","tfoot","th", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 		"thead","tr","video" //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 	for (i = 0; i < multiLineElements.length; i++) {
@@ -116,56 +126,303 @@ define("webtools/htmlContentAssist", [ //$NON-NLS-0$
 
 	//elements with no closing element (e.g., <hr>, <br>, etc)
 	var emptyElements = [
-		"area","base","br","col", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"hr","input","link","meta", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"param","keygen","source" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"area","base","br","col", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+		"hr","input","link","meta", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+		"param","keygen","source" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
 	];
 	for (i = 0; i < emptyElements.length; i++) {
 		element = emptyElements[i];
-		template = description = "<" + element + "/>"; //$NON-NLS-1$ //$NON-NLS-0$
-		templates.push({prefix: "<" + element, description: description, template: template}); //$NON-NLS-0$
+		template = description = "<" + element + "/>"; //$NON-NLS-1$ //$NON-NLS-2$
+		templates.push({prefix: "<" + element, description: description, template: template}); //$NON-NLS-1$
 	}
 
 	/**
 	 * @name orion.editor.HTMLContentAssistProvider
+	 * @description Creates a new HTML content assist provider
 	 * @class Provides content assist for HTML.
+	 * @param {HtmlAstManager} htmlAstManager The backing AST manager
 	 */
-	function HTMLContentAssistProvider() {
+	function HTMLContentAssistProvider(htmlAstManager) {
+		this.astmanager = htmlAstManager;
 	}
-	HTMLContentAssistProvider.prototype = new mTemplates.TemplateContentAssist(mHTML.keywords, templates);
-
-	HTMLContentAssistProvider.prototype.getPrefix = function(buffer, offset, context) {
-		var prefix = "";
-		var index = offset;
-		while (index && /[A-Za-z0-9<!-]/.test(buffer.charAt(index - 1))) {
-			index--;
-			prefix = buffer.substring(index, offset);
-		}
-		return prefix;
-	};
 	
-	HTMLContentAssistProvider.prototype.computeProposals = function(buffer, offset, context) {
-		// template - simple html document
-		if (buffer.length === 0) {
-			return [simpleDocTemplate.getProposal("", offset, context)];
-		}
-		var proposals = mTemplates.TemplateContentAssist.prototype.computeProposals.call(this, buffer, offset, context);
-		
-		// sort and then return proposals
-		return proposals.sort(function(l,r) {
-			var leftString = l.prefix || l.proposal;
-			var rightString = r.prefix || r.proposal;
-			
-			// handle titles
-			if (!leftString) {
-				return -1;
-			} else if (!rightString) {
-				return 1;
+	HTMLContentAssistProvider.prototype = new mTemplates.TemplateContentAssist(mHTML.keywords, templates);
+	
+	Objects.mixin(HTMLContentAssistProvider.prototype, {
+		/**
+		 * @callback
+		 */
+		getPrefix: function(buffer, offset, context) {
+			var prefix = "";
+			var index = offset;
+			while (index && /[A-Za-z0-9<!-]/.test(buffer.charAt(index - 1))) {
+				index--;
+				prefix = buffer.substring(index, offset);
 			}
-			
-			return leftString.toLowerCase().localeCompare(rightString.toLowerCase());
-		});
-	};
+			return prefix;
+		},
+		/**
+		 * Called by the framework to initialize this provider before any <tt>computeContentAssist</tt> calls.
+		 */
+		initialize: function() {
+		    //override
+		},
+        
+		/**
+		 * @callback 
+		 */
+		computeContentAssist: function(editorContext, params) {
+			var that = this;
+			return this.astmanager.getAST(editorContext).then(function(ast) {
+				// template - simple html document
+				if (ast.source.length === 0) {
+					return [simpleDocTemplate.getProposal("", params.offset, params)];
+				}
+				var proposals = that.computeProposalsFromAst(ast, params);
+				if(proposals.length > 0 && proposals[0].unselectable) {
+					//already sorted, only templates. hack until we break out template computation
+					return proposals;
+				}
+				return proposals.sort(function(l,r) {
+					//sort by relevance and then by name
+					if(typeof(l.relevance) === 'undefined') {
+						l.relevance = 1;
+					}
+					if(typeof(r.relevance) === 'undefined') {
+						r.relevance = 1;
+					}
+					if (l.relevance > r.relevance) {
+						return -1;
+					} else if (r.relevance > l.relevance) {
+						return 1;
+					}
+					var ldesc = l.name;
+					var rdesc = r.name;
+					if (ldesc < rdesc) {
+						return -1;
+					} else if (rdesc < ldesc) {
+						return 1;
+					}
+					return 0;
+				});
+			});
+		},
+		/**
+		 * Computes the context where the completion will take place
+		 * @param {Object} ast The AST to inspect
+		 * @param {Number} offset The offset into the source 
+		 * @returns {Object} The AST node at the given offset or null 
+		 * @since 10.0
+		 */
+		_getNode: function(ast, offset) {
+			var found = null;
+			 Visitor.visit(ast, {
+	            visitNode: function(node) {
+					if(node.range[0] <= offset) {
+						found = node;
+					} else {
+						if (offset > found.range[1]){
+							found = null;
+						}
+					    return Visitor.BREAK;
+					}      
+	            }
+	        });
+	        return found;
+		},
+		/**
+		 * Computes the completions from the given AST and parameter context
+		 * @param {Object} ast The AST to inspect
+		 * @param {Object} params The paramter context
+		 * @returns {Array.<Object>} The array of proposal objects or an empty array, never null
+		 * @since 10.0 
+		 */
+		computeProposalsFromAst: function(ast, params) {
+			var proposals = [];
+			var node = this._getNode(ast, params.offset);
+			if(node) {
+				if(this.inScriptOrStyle(node) || this.inClosingTag(node, params.offset, ast.source)) {
+					return [];
+				}
+				//are we in the attrib area or between tag elements?
+				if(this.completingAttributes(node, ast.source, params)) {
+					return this.getOptionsForAttribute(node, params);
+				} else if(this.completingTagAttributes(node, ast.source, params)) {
+					return this.getAttributesForNode(node, params);
+				} else {
+					return mTemplates.TemplateContentAssist.prototype.computeProposals.call(this, ast.source, params.offset, params);
+				}
+			}
+			return proposals;
+		},
+		/**
+		 * Returns if the tag block that we are in is a style of script block
+		 * @param {Object} node The node
+		 * @returns {Boolean} True if the current node context is style or script
+		 * @since 10.0 
+		 */
+		inScriptOrStyle: function(node) {
+			if(node.name) {
+				var _n = node.name.toLowerCase();
+				return node.type === 'tag' && (_n === 'script' || _n === 'style');	
+			}
+			return false;
+		},
+		
+		/**
+		 * Returns if the offset is in a closing tag. A closing tag is determined as an 
+		 * offset past the last child but before the closing range of the tag itself
+		 * @param {Object} node The AST not context
+		 * @param {Number} offset The curren offset
+		 * @param {String} source The source 
+		 */
+		inClosingTag: function(node, offset, source) {
+			if(node && source) {
+				switch(node.type) {
+					case 'tag': {
+						var _s = source.slice(node.range[0], node.range[1]);
+						var _r = new RegExp("<\\s*\/\\s*"+node.name+"\\s*>$");
+						var _m = _r.exec(_s);
+						if(_m) {
+							return offset > _m.index && offset < node.range[1];
+						}
+						break;
+					}
+					default: {
+						var _p = node.parent;
+						if(_p && _p.type === 'tag') {
+							return Array.isArray(_p.children) && (offset > _p.children[_p.children.length-1].range[1]) && offset <= _p.range[1];
+						}
+						break;
+					}
+				}
+			}
+			return false;
+		},
+		
+		/**
+		 * Computes if we are trying to complete tag attributes
+		 * @param {Object} node The AST node to check with the offset
+		 * @param {String} source The backing source
+		 * @param {Object} params The parameters
+		 * @returns {Boolean} True if we are completing the attributes of a tag, false otherwise 
+		 * @since 10.0 
+		 */
+		completingTagAttributes: function(node, source, params) {
+			if(node) {
+				var offset = params.offset;
+				if(node.type === 'tag') {
+					var _n = node.name;
+					if(node.range[0]+_n.length < offset) {
+						var idx = offset;
+						while(idx < node.range[1]) {
+							var char = source[idx];
+							if(char === '<') {
+								return false;
+							} else if(char === '>') {
+								return true;
+							}
+							idx++;
+						}
+	 				}
+ 				} else if(node.type === 'attr') {
+ 					return offset === node.range[0] || offset === node.range[1];
+ 				}
+			}
+			return false;
+		},
+		/**
+		 * Returns the attributes that can be used in the specified tag
+		 * @param {Object} node The AST node for the tag we are completing within
+		 * @param {Object} params The parameters
+		 * @returns {Array.<Object>} The array of proposals
+		 * @since 10.0 
+		 */
+		getAttributesForNode: function(node, params) {
+			//TODO compute the attributes for a node
+			return [];	
+		},
+		/**
+		 * Returns the options (if any) that can be used in the specified attribute
+		 * @param {Object} node The AST node for the attribute we are completing within
+		 * @param {Object} params The parameters
+		 * @returns {Array.<Object>} The array of proposals
+		 * @since 10.0 
+		 */
+		getOptionsForAttribute: function(node, params) {
+			//TODO compute the options for the given attribute
+			return [];	
+		},
+		
+		/**
+		 * Computes if we are trying to complete attributes
+		 * @param {Object} node The AST node to check with the offset
+		 * @param {String} source The backing source
+		 * @param {Object} params The parameters
+		 * @returns {Boolean} True if we are completing the attributes of a tag, false otherwise 
+		 * @since 10.0 
+		 */
+		completingAttributes: function(node, source, params) {
+			if(node && node.type === 'attr') {
+				return this.within('"', '"', source, params.offset, node.range); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			return false;
+		},
+		
+		/**
+		 * Factory-like function to create proposal objects
+		 * @param {String} name The name for the proposal
+		 * @param {String} description The description for the proposal
+		 * @param {Object} hover The markdown hover object for the proposal
+		 * @param {String} prefix The prefix for the proposal
+		 * @since 10.0   
+		 */
+		makeComputedProposal: function(name, description, hover, prefix) {
+			return {
+				proposal: name,
+				relevance: 100,
+				name: name,
+				description: description,
+				hover: hover,
+				prefix: prefix,
+				style: 'emphasis', //$NON-NLS-1$
+				overwrite: true
+		    };
+		},
+		
+		/**
+		 * A util method to determine if the caret is within two given chars, that are found within 
+		 * the given bounds
+		 * @param {String} start The char to the LHS
+		 * @param {String} end The char to the RHS
+		 * @param {String} source The source to check against
+		 * @param {Number} offset   
+		 */
+		within: function(start, end, source, offset, bounds) {
+			var idx = offset;
+			var _c;
+			var before = false;
+			while(idx > bounds[0]) {
+				_c = source[idx];
+				if(_c === start) {
+					before = true;
+					break;
+				}
+				idx--;
+			}
+			if(before) {
+				idx = offset;
+				while(idx < bounds[1]) {
+					_c = source[idx];
+					if(_c === end) {
+						return true;
+					}
+					idx++;
+				}
+			}
+			return false;
+		}
+	});
 
 	return {
 		HTMLContentAssistProvider: HTMLContentAssistProvider
