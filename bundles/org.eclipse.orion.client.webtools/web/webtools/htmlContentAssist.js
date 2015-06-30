@@ -158,6 +158,10 @@ define([
 			while (index && /[A-Za-z0-9<!-]/.test(buffer.charAt(index - 1))) {
 				index--;
 				prefix = buffer.substring(index, offset);
+				// If the user has opened a new tag, stop the prefix there
+				if (buffer.charAt(index) === '<'){
+					return prefix;
+				}
 			}
 			return prefix;
 		},
@@ -228,9 +232,11 @@ define([
 				} else if(this.completingTagAttributes(node, ast.source, params)) {
 					return this.getAttributesForNode(node, params);
 				} else {
-					var results = this.getProposalsForTextContent(node, ast.source, params);
-					results = results.concat(mTemplates.TemplateContentAssist.prototype.computeProposals.call(this, ast.source, params.offset, params));
-					return results;
+					var textContentProposals = this.getProposalsForTextContent(node, ast.source, params);
+					if (textContentProposals.length > 0){
+						return textContentProposals;
+					}
+					return mTemplates.TemplateContentAssist.prototype.computeProposals.call(this, ast.source, params.offset, params);
 				}
 			}
 			return proposals;
@@ -348,11 +354,12 @@ define([
 		 */
 		getProposalsForTextContent: function(node, source, params) {
 			if (node && node.parent && node.parent.type === 'tag'){
-				var preceding = this.getPrecedingCharacters(source, params.offset, 1);
-				if (preceding.match(/.*\/$/)){
+				var preceding = this.getPrecedingCharacters(source, params.offset, 10);
+				var match = preceding.match(/<?\s*\/\s*$/)
+				if (match){
 					var name = '</' + node.parent.name + '>'; //$NON-NLS-1$
 					var desc = ' - Close the ' + node.parent.name + ' tag';
-					return [this.makeComputedProposal(name, desc, null, '/')];
+					return [this.makeComputedProposal(name, desc, null, match[0])];
 				}
 			}
 			return [];	
