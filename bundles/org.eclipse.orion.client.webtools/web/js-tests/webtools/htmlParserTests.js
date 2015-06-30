@@ -90,19 +90,19 @@ define([
 		it("parse attributes 1", function() {
 			var results = parse('<img src="test" alt="foo" bogus=bogus/>');
 		    assertResults(results, 
-		    	'[{"type":"tag","range":[1,38],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,16],"type":"attr"},"alt":{"value":"foo","range":[16,26],"type":"attr"},"bogus":{"value":"bogus","range":[26,37],"type":"attr"}}}]'
+		    	'[{"type":"tag","range":[1,38],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,15],"type":"attr"},"alt":{"value":"foo","range":[16,25],"type":"attr"},"bogus":{"value":"bogus","range":[26,37],"type":"attr"}}}]'
 		    );
 		});
 		it("parse attributes 2", function() {
 			var results = parse('<img src="test" alt="foo" bogus=bogus> </img>');
 		    assertResults(results, 
-		    	'[{"type":"tag","range":[1,45],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,16],"type":"attr"},"alt":{"value":"foo","range":[16,26],"type":"attr"},"bogus":{"value":"bogus","range":[26,37],"type":"attr"}}}]'
+		    	'[{"type":"tag","range":[1,45],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,15],"type":"attr"},"alt":{"value":"foo","range":[16,25],"type":"attr"},"bogus":{"value":"bogus","range":[26,37],"type":"attr"}}}]'
 		    );
 		});
 		it("parse attributes 3 - whitespace", function() {
 			var results = parse('<img src   =    "test"    alt="foo"   \t\t\tbogus=bogus      />');
 		    assertResults(results, 
-		    	'[{"type":"tag","range":[1,59],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,26],"type":"attr"},"alt":{"value":"foo","range":[26,41],"type":"attr"},"bogus":{"value":"bogus","range":[41,58],"type":"attr"}}}]'
+		    	'[{"type":"tag","range":[1,59],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,22],"type":"attr"},"alt":{"value":"foo","range":[26,35],"type":"attr"},"bogus":{"value":"bogus","range":[41,52],"type":"attr"}}}]'
 		    );
 		});
 	});
