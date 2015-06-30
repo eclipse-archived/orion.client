@@ -87,18 +87,30 @@ define([
 		    	'[{"type":"doctype","range":[9,14],"data":" html","location":{"line":1,"col":1}}]'
 		    );
 		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471382
+		 * @since 10.0
+		 */
 		it("parse attributes 1", function() {
 			var results = parse('<img src="test" alt="foo" bogus=bogus/>');
 		    assertResults(results, 
 		    	'[{"type":"tag","range":[1,38],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,15],"type":"attr"},"alt":{"value":"foo","range":[16,25],"type":"attr"},"bogus":{"value":"bogus","range":[26,37],"type":"attr"}}}]'
 		    );
 		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471382
+		 * @since 10.0
+		 */
 		it("parse attributes 2", function() {
 			var results = parse('<img src="test" alt="foo" bogus=bogus> </img>');
 		    assertResults(results, 
 		    	'[{"type":"tag","range":[1,45],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,15],"type":"attr"},"alt":{"value":"foo","range":[16,25],"type":"attr"},"bogus":{"value":"bogus","range":[26,37],"type":"attr"}}}]'
 		    );
 		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471382
+		 * @since 10.0
+		 */
 		it("parse attributes 3 - whitespace", function() {
 			var results = parse('<img src   =    "test"    alt="foo"   \t\t\tbogus=bogus      />');
 		    assertResults(results, 
