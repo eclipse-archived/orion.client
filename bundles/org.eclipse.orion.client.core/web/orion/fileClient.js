@@ -159,7 +159,8 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 				Name: _references[j].getProperty("Name") || _references[j].getProperty("NameKey")		 //$NON-NLS-0$
 			};
 
-			var patternStringArray = _references[j].getProperty("pattern") || _references[j].getProperty("top").replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1"); //$NON-NLS-1$ //$NON-NLS-0$
+			var filetop = _references[j].getProperty("top");
+			var patternStringArray = _references[j].getProperty("pattern") || (filetop ? filetop.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1") : ""); //$NON-NLS-1$ //$NON-NLS-0$
 			if (!Array.isArray(patternStringArray)) {
 				patternStringArray = [patternStringArray];
 			}
