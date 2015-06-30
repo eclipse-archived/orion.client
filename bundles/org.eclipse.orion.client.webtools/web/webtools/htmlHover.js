@@ -14,8 +14,8 @@
 define([
 'orion/objects',
 'orion/URITemplate',
-'htmlparser/visitor'
-], function(Objects, URITemplate, Visitor) {
+'webtools/util'
+], function(Objects, URITemplate, util) {
 	
 	/**
 	 * @description creates a new instance of the hover support
@@ -47,7 +47,7 @@ define([
 			var that = this;
 			return that.htmlAstManager.getAST(editorContext).then(function(ast) {
 			    if(ast) {
-			        var node = that._findNode(ast, ctxt.offset, null);
+			        var node = util.findNodeAtOffset(ast, ctxt.offset);
 			        if(node) {
 			            switch(node.type) {
 			                case 'tag': {
@@ -91,28 +91,6 @@ define([
 			});
 		},
 
-        /**
-		 * Returns the DOM node corresponding to the line and column number 
-		 * or null if no such node could be found.
-		 */
-		_findNode: function(dom, offset) {
-		    var found = null;
-			 Visitor.visit(dom, {
-	            visitNode: function(node) {
-	                //only check nodes that are typed, we don't care about any others
-					if(node.range[0] <= offset) {
-						found = node;
-					} else {
-						if (found && offset > found.range[1]){
-							found = null;
-						}
-					    return Visitor.BREAK;
-					}      
-	            }
-	        });
-	        return found;
-		},
-		
 		_getFileHover: function _getFileHover(editorContext, path) {
 		    if(path) {
 		        if(/^http/i.test(path)) {

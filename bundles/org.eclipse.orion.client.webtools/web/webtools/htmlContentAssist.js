@@ -14,8 +14,8 @@ define([
 	'orion/editor/templates',
 	'orion/editor/stylers/text_html/syntax',
 	'orion/objects',
-	'htmlparser/visitor'
-], function(mTemplates, mHTML, Objects, Visitor) {
+	'webtools/util'
+], function(mTemplates, mHTML, Objects, util) {
 
 	var simpleDocTemplate = new mTemplates.Template("", "Simple HTML document",
 		"<!DOCTYPE html>\n" + //$NON-NLS-0$
@@ -207,29 +207,7 @@ define([
 				});
 			});
 		},
-		/**
-		 * Computes the context where the completion will take place
-		 * @param {Object} ast The AST to inspect
-		 * @param {Number} offset The offset into the source 
-		 * @returns {Object} The AST node at the given offset or null 
-		 * @since 10.0
-		 */
-		_getNode: function(ast, offset) {
-			var found = null;
-			 Visitor.visit(ast, {
-	            visitNode: function(node) {
-					if(node.range[0] <= offset) {
-						found = node;
-					} else {
-						if (offset > found.range[1]){
-							found = null;
-						}
-					    return Visitor.BREAK;
-					}      
-	            }
-	        });
-	        return found;
-		},
+
 		/**
 		 * Computes the completions from the given AST and parameter context
 		 * @param {Object} ast The AST to inspect
@@ -239,7 +217,7 @@ define([
 		 */
 		computeProposalsFromAst: function(ast, params) {
 			var proposals = [];
-			var node = this._getNode(ast, params.offset);
+			var node = util.findNodeAtOffset(ast, params.offset);
 			if(node) {
 				if(this.inScriptOrStyle(node) || this.inClosingTag(node, params.offset, ast.source)) {
 					return [];
@@ -284,7 +262,7 @@ define([
 						var _r = new RegExp("<\\s*\/\\s*"+node.name+"\\s*>$");
 						var _m = _r.exec(_s);
 						if(_m) {
-							return offset > _m.index && offset < node.range[1];
+							return offset > (_m.index+node.range[0]) && offset < node.range[1];
 						}
 						break;
 					}
@@ -364,7 +342,8 @@ define([
 		 */
 		completingAttributes: function(node, source, params) {
 			if(node && node.type === 'attr') {
-				return this.within('"', '"', source, params.offset, node.range); //$NON-NLS-1$ //$NON-NLS-2$
+				return true;
+//				return this.within('"', '"', source, params.offset, node.range); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			return false;
 		},

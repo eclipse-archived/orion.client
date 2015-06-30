@@ -12,11 +12,36 @@
  *******************************************************************************/
 /*eslint-env amd*/
 define([
-], function() {
+'htmlparser/visitor'
+], function(Visitor) {
 
 	var Util = {
 		
 		punc: '\n\t\r (){}[]:;,.+=-*^&@!%~`\'\"\/\\',  //$NON-NLS-0$
+		
+		/**
+		 * Returns the ast node at the given offset or the parent node enclosing it
+		 * @param {Object} ast The AST to inspect
+		 * @param {Number} offset The offset into the source 
+		 * @returns {Object} The AST node at the given offset or null 
+		 * @since 10.0
+		 */
+		findNodeAtOffset: function(ast, offset) {
+			var found = null;
+			 Visitor.visit(ast, {
+	            visitNode: function(node) {
+					if(node.range[0] <= offset) {
+						found = node;
+					} else {
+							while (found && offset > found.range[1]){
+								found = found.parent;
+							}
+					    return Visitor.BREAK;
+					}      
+	            }
+	        });
+	        return found;
+		},
 		
 		/**
 		 * @description Finds the word from the start position

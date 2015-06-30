@@ -11,8 +11,8 @@
  *******************************************************************************/
 /*global Tautologistics*/
 /*eslint-env amd */
-define("webtools/htmlOutliner", [ //$NON-NLS-0$
-	'orion/objects', //$NON-NLS-0$
+define("webtools/htmlOutliner", [
+	'orion/objects',
 ], function(Objects) {
 
 	/**
