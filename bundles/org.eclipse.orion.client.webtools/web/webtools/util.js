@@ -33,11 +33,13 @@ define([
 					if(node.range[0] <= offset) {
 						found = node;
 					} else {
-							while (found && offset > found.range[1]){
-								found = found.parent;
-							}
 					    return Visitor.BREAK;
 					}      
+	            },
+	            endVisitNode: function(node) {
+	            	if(found && offset > found.range[1]) {
+	            		found = node;
+	            	}
 	            }
 	        });
 	        return found;

@@ -3,10 +3,34 @@ define([
     'webtools/util',
     'chai/chai',
     'csslint',
+    'webtools/htmlAstManager',
+    'orion/Deferred',
     'mocha/mocha' //global, stays last
-], function(Util, chai, CSSLint) {
-    
+], function(Util, chai, CSSLint, HTMLAstManager, Deferred) {
+    /* eslint-disable missing-nls */
     var assert = chai.assert;
+    
+    var htmlAstManager = new HTMLAstManager.HtmlAstManager();
+    
+    /**
+     * Creates a new testing editorContext. Also clears the AST managers
+     */
+    function getEditorContext(buffer, file) {
+    	var _file = file ? file : 'html_util_test_script.html';
+    	htmlAstManager.onModelChanging({file: {location: _file}});
+    	return {
+    		getText: function() {
+    			return new Deferred().resolve(buffer);
+    		},
+    		getFileMetadata: function() {
+    			 var o = Object.create(null);
+			    o.contentType = Object.create(null);
+			    o.contentType.id = 'text/html';
+			    o.location = _file;
+			    return new Deferred().resolve(o);
+    		}
+    	};
+    }
     
     describe("Util Tests", function() {
         
@@ -292,6 +316,110 @@ define([
 			var token = Util.findToken(26, results.tokens);
 			assert(token, "Should have found the last token in the stream");
 			assert(token.type === 'EOF', "The last token should not be EOF");
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471479
+		 * @since 10.0
+		 */
+		it('find node at offset 1 - tag', function() {
+			var text = '<p>foo</p>';
+			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
+				var node = Util.findNodeAtOffset(ast, 1);
+				assert(node, 'we should have found a node');
+				assert.equal(node.type, 'tag', 'We should have found a tag node');
+				assert.equal(node.name, 'p', 'We should have found a p node');
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471479
+		 * @since 10.0
+		 */
+		it('find node at offset 2 - tag', function() {
+			var text = '<p>foo</p>';
+			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
+				var node = Util.findNodeAtOffset(ast, 7);
+				assert(node, 'we should have found a node');
+				assert.equal(node.type, 'tag', 'We should have found a tag node');
+				assert.equal(node.name, 'p', 'We should have found a p node');
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471479
+		 * @since 10.0
+		 */
+		it('find node at offset 3 - tag', function() {
+			var text = '<p>foo</p><h1>foobar</h1>';
+			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
+				var node = Util.findNodeAtOffset(ast, 12);
+				assert(node, 'we should have found a node');
+				assert.equal(node.type, 'tag', 'We should have found a tag node');
+				assert.equal(node.name, 'h1', 'We should have found a h1 node');
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471479
+		 * @since 10.0
+		 */
+		it('find node at offset 4 -tag', function() {
+			var text = '<p>foo</p><h1>foobar</h1>';
+			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
+				var node = Util.findNodeAtOffset(ast, 21);
+				assert(node, 'we should have found a node');
+				assert.equal(node.type, 'tag', 'We should have found a tag node');
+				assert.equal(node.name, 'h1', 'We should have found a h1 node');
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471479
+		 * @since 10.0
+		 */
+		it('find node at offset 5 - text', function() {
+			var text = '<p>foo</p><h1>foobar</h1>';
+			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
+				var node = Util.findNodeAtOffset(ast, 4);
+				assert(node, 'we should have found a node');
+				assert.equal(node.type, 'text', 'We should have found a tag node');
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471479
+		 * @since 10.0
+		 */
+		it('find node at offset 6 - text', function() {
+			var text = '<p>foo</p><h1>foobar</h1>';
+			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
+				var node = Util.findNodeAtOffset(ast, 15);
+				assert(node, 'we should have found a node');
+				assert.equal(node.type, 'text', 'We should have found a tag node');
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471479
+		 * @since 10.0
+		 */
+		it('find node at offset 7 - attr', function() {
+			var text = '<p id="a">foo</p><h1>foobar</h1>';
+			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
+				var node = Util.findNodeAtOffset(ast, 4);
+				assert(node, 'we should have found a node');
+				assert.equal(node.type, 'attr', 'We should have found a tag node');
+				assert.equal(node.kind, 'id', 'We should have found an id attr');
+				assert.equal(node.value, 'a', 'We should have found the attr value of a');
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471479
+		 * @since 10.0
+		 */
+		it('find node at offset 8 - attr', function() {
+			var text = '<p id="a">foo</p><h1 id="b">foobar</h1>';
+			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
+				var node = Util.findNodeAtOffset(ast, 26);
+				assert(node, 'we should have found a node');
+				assert.equal(node.type, 'attr', 'We should have found a tag node');
+				assert.equal(node.kind, 'id', 'We should have found an id attr');
+				assert.equal(node.value, 'b', 'We should have found the attr value of b');
+			});
 		});
     });
 });

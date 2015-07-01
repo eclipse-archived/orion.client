@@ -44,51 +44,55 @@ define([
 		 * @callback
 		 */
 		computeHoverInfo: function computeHover(editorContext, ctxt) {
-			var that = this;
-			return that.htmlAstManager.getAST(editorContext).then(function(ast) {
-			    if(ast) {
-			        var node = util.findNodeAtOffset(ast, ctxt.offset);
-			        if(node) {
-			            switch(node.type) {
-			                case 'tag': {
-			                	if (that._hoverableTags.indexOf(node.name) >= 0){
-			                		return that._getTagContentsHover(editorContext, node.range);
-			                	}
-			                    break;
-			                }
-			                case 'attr': {
-			                    var path = node.value;
-			                    switch(node.kind) {
-			                        case 'href': {
-			                            if(/\.(?:png|jpg|jpeg|bmp|gif)$/.test(path)) {
-                            	            return that._getImageHover(editorContext, path);
-                            	        } else if(/^data:image.*;base64/i.test(path)) {
-                            	            return that._getImageHover(editorContext, path, true);
-                            	        }
-			                            return that._getFileHover(editorContext, path);
-			                        }
-			                        case 'src': {
-			                            if(/\.(?:png|jpg|jpeg|bmp|gif)$/.test(path)) {
-                            	            return that._getImageHover(editorContext, path);
-                            	        } else if(/^data:image.*;base64/i.test(path)) {
-                            	            return that._getImageHover(editorContext, path, true);
-                            	        } else if(/\.js$/i.test(path)) {
-                            	            return that._getFileHover(editorContext, path);
-                            	        }
-                            	        break;
-			                        }
-			                        case 'style': {
-			                            //TODO support embedded style sheets
-			                            break;
-			                        }
-			                    }
-			                    break;
-			                }
-			            }
-			        }
-			    }
-			    return null; 
-			});
+			if(ctxt.proposal) {
+				return ctxt.proposal.hover ? ctxt.proposal.hover : (ctxt.proposal.name ? ctxt.proposal.name : ctxt.proposal.description);
+			} else {
+				var that = this;
+				return that.htmlAstManager.getAST(editorContext).then(function(ast) {
+				    if(ast) {
+				        var node = util.findNodeAtOffset(ast, ctxt.offset);
+				        if(node) {
+				            switch(node.type) {
+				                case 'tag': {
+				                	if (that._hoverableTags.indexOf(node.name) >= 0){
+				                		return that._getTagContentsHover(editorContext, node.range);
+				                	}
+				                    break;
+				                }
+				                case 'attr': {
+				                    var path = node.value;
+				                    switch(node.kind) {
+				                        case 'href': {
+				                            if(/\.(?:png|jpg|jpeg|bmp|gif)$/.test(path)) {
+	                            	            return that._getImageHover(editorContext, path);
+	                            	        } else if(/^data:image.*;base64/i.test(path)) {
+	                            	            return that._getImageHover(editorContext, path, true);
+	                            	        }
+				                            return that._getFileHover(editorContext, path);
+				                        }
+				                        case 'src': {
+				                            if(/\.(?:png|jpg|jpeg|bmp|gif)$/.test(path)) {
+	                            	            return that._getImageHover(editorContext, path);
+	                            	        } else if(/^data:image.*;base64/i.test(path)) {
+	                            	            return that._getImageHover(editorContext, path, true);
+	                            	        } else if(/\.js$/i.test(path)) {
+	                            	            return that._getFileHover(editorContext, path);
+	                            	        }
+	                            	        break;
+				                        }
+				                        case 'style': {
+				                            //TODO support embedded style sheets
+				                            break;
+				                        }
+				                    }
+				                    break;
+				                }
+				            }
+				        }
+				    }
+				    return null; 
+				});
+			}
 		},
 
 		_getFileHover: function _getFileHover(editorContext, path) {
@@ -225,7 +229,7 @@ define([
 			if (range){
 				var self = this;
 				return editorContext.getText().then(function(text) {
-					if(range[0] >= 0 && range[0] < text.length && range[1] > range[0] && range[1] < text.length){
+					if(range[0] >= 0 && range[0] < text.length && range[1] > range[0] && range[1] <= text.length){
 						var start = self._findTagStart(text, range[0]);
 						if (start === null){
 							return null;
