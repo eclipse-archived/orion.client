@@ -74,13 +74,40 @@ define([
     			assert.equal(_p.proposal.indexOf("<!DOCTYPE html>"), 0, 'Should have been the HTML file template');
     		});
     	});
-    	it('meta template 1', function() {
+    	it('meta template', function() {
     		var _o = setup({buffer: '<met'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
     			assertProposals(proposals, [
     				{proposal: ''},
     				{proposal: 'er></meter>'},
     				{proposal: 'a/>'}
+    			]);
+    		});
+    	});
+    	it('param template', function() {
+    		var _o = setup({buffer: '<par'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: ''},
+    				{proposal: 'am/>'}
+    			]);
+    		});
+    	});
+    	it('script template', function() {
+    		var _o = setup({buffer: '<sc'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 3}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: ''},
+    				{proposal: 'ript>\n\t\n</script>'}
+    			]);
+    		});
+    	});
+    	it('script template', function() {
+    		var _o = setup({buffer: '<sty'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: ''},
+    				{proposal: 'le>\n\t\n</style>'}
     			]);
     		});
     	});
