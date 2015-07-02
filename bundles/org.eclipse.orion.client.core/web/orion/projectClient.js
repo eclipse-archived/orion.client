@@ -52,39 +52,54 @@ define([
 	ProjectClient.prototype = /**@lends orion.ProjectClient.ProjectClient.prototype */ {
 		_getProjectJsonData : function(folderMetadata, children, workspace){
 			var deferred = new Deferred();
+			var fileLocation = null;
 			for(var i=0; i<children.length; i++){
 				if(children[i].Name === "project.json"){
-					this.fileClient.read(children[i].Location).then(function(content) {
-						var projectJson = _toJSON(content);
-						projectJson.Name = projectJson.Name || folderMetadata.Name;
-						projectJson.ContentLocation = folderMetadata.Location;
-						projectJson.WorkspaceLocation = workspace.Location;
-						var projectId;
-						workspace.Children.some(function(child) {
-							if (child.Location === folderMetadata.Location) {
-								projectId = child.Id;
-								return true;
-							}
-							return false;
-						});
-						workspace.Projects && workspace.Projects.some(function(project) {
-							if (project.Id === projectId) {
-								projectJson.ProjectLocation = project.Location;
-								return true;
-							}
-							return false;
-						});
-						projectJson.ProjectJsonLocation = children[i].Location;
-						deferred.resolve(projectJson);
-					}, function(error) {
-						deferred.reject(error);
-					}, function(progress) {
-						deferred.progress(progress);
-					});
-					return deferred;
+					fileLocation = children[i].Location;
+					break;
 				}
 			}
-			deferred.resolve(null);
+			function _createFakeProjectJson() {
+				var json = {};
+				//TODO - get rid of "unknown" (query the current user name from somewhere)
+				json.Name = "unknown | "+ folderMetadata.Name;
+				json.ContentLocation = folderMetadata.Location;
+				json.WorkspaceLocation = workspace.Location;
+				json.ProjectLocation = json.WorkspaceLocation + "/project" + "/" + json.Name;
+				json.ProjectJsonLocation = json.ProjectLocation + "/" + "project.json";
+				return json;
+			}
+			if (fileLocation) {
+				this.fileClient.read(fileLocation).then(function(content) {
+					var projectJson = _toJSON(content);
+					projectJson.Name = projectJson.Name || folderMetadata.Name;
+					projectJson.ContentLocation = folderMetadata.Location;
+					projectJson.WorkspaceLocation = workspace.Location;
+					var projectId;
+					workspace.Children.some(function(child) {
+						if (child.Location === folderMetadata.Location) {
+							projectId = child.Id;
+							return true;
+						}
+						return false;
+					});
+					workspace.Projects && workspace.Projects.some(function(project) {
+						if (project.Id === projectId) {
+							projectJson.ProjectLocation = project.Location;
+							return true;
+						}
+						return false;
+					});
+					projectJson.ProjectJsonLocation = fileLocation;
+					deferred.resolve(projectJson);
+				}, function(error) {
+					deferred.resolve(_createFakeProjectJson());
+				}, function(progress) {
+					deferred.progress(progress);
+				});
+			} else {
+				deferred.resolve(_createFakeProjectJson());
+			}
 			return deferred;
 		},
 		readAllProjects : function(workspaceMetadata){
@@ -158,27 +173,36 @@ define([
 			return deferred;
 		},
 
+		//TODO - don't save away the closure to get contentLocation and projectMetadata (query or save them)
+		_createProjectJson : null,
+		
 		/**
 		 * Initializes a project in a folder.
 		 * @param {String} contentLocation The location of the parent folder
 		 * @return {Object} projectMetadata JSON representation of the created folder
 		 */
 		initProject : function(contentLocation, projectMetadata){
-			var that = this;
-			var deferred = new Deferred();
-			this.fileClient.createFile(contentLocation, "project.json").then(function(fileMetadata){
-				if(projectMetadata){
-					that.fileClient.write(fileMetadata.Location, JSON.stringify(projectMetadata)).then(function(){
-						deferred.resolve({ContentLocation: contentLocation, projectMetadata: projectMetadata});
-					}, deferred.reject, deferred.progress);
-				} else {
-					deferred.resolve({fileMetadata: fileMetadata});
-				}
-			},
-				deferred.reject,
-				deferred.progress);
-
-			return deferred;
+			
+			//TODO - don't save away closure, query data from the right place instead (bogus won't work called twice)
+			this._createProjectJson = function () {
+				var that = this;
+				var deferred = new Deferred();
+				this.fileClient.createFile(contentLocation, "project.json").then(function(fileMetadata){	
+					if(projectMetadata){
+						that.fileClient.write(fileMetadata.Location, JSON.stringify(projectMetadata)).then(function(){
+							deferred.resolve({ContentLocation: contentLocation, projectMetadata: projectMetadata});
+						}, deferred.reject, deferred.progress);
+					} else {
+						deferred.resolve({fileMetadata: fileMetadata});
+					}
+				},
+					deferred.reject,
+					deferred.progress);
+	
+				return contentLocation;
+			}
+			
+			return new Deferred();
 		},
 
 		createProject: function(workspaceLocation, projectMetadata){
@@ -286,37 +310,43 @@ define([
 	addProjectDependency: function(projectMetadata, dependency){
 		var deferred = new Deferred();
 		this.fileClient.fetchChildren(projectMetadata.ContentLocation).then(function(children){
+			var fileLocation = null;
 			for(var i=0; i<children.length; i++){
 				if(children[i].Name==="project.json"){
-					this.fileClient.read(children[i].Location).then(function(content){
-						try{
-							var projectJson = _toJSON(content);
-							if(!projectJson.Dependencies){
-								projectJson.Dependencies = [];
-							}
-							for(var j=0; j<projectJson.Dependencies.length; j++){
-								if(projectJson.Dependencies[j].Location === dependency.Location){
-									deferred.resolve(projectJson);
-									return;
-								}
-							}
-							projectJson.Dependencies.push(dependency);
-							this.fileClient.write(children[i].Location, JSON.stringify(projectJson)).then(
-								function(){
-									projectJson.ContentLocation = projectMetadata.ContentLocation;
-									projectJson.Name = projectMetadata.Name;
-									deferred.resolve(projectJson);
-								},
-								deferred.reject
-							);
-
-							deferred.resolve(projectJson);
-						} catch (e){
-							deferred.reject(e);
-						}
-					}.bind(this), deferred.reject, deferred.progress);
-					return;
+					fileLocation = children[i].Location;
+					break;
 				}
+			}
+			if (!fileLocation) fileLocation = this._createProjectJson();
+			if (fileLocation) {
+				this.fileClient.read(fileLocation).then(function(content){
+					try{
+						var projectJson = _toJSON(content);
+						if(!projectJson.Dependencies){
+							projectJson.Dependencies = [];
+						}
+						for(var j=0; j<projectJson.Dependencies.length; j++){
+							if(projectJson.Dependencies[j].Location === dependency.Location){
+								deferred.resolve(projectJson);
+								return;
+							}
+						}
+						projectJson.Dependencies.push(dependency);
+						this.fileClient.write(fileLocation, JSON.stringify(projectJson)).then(
+							function(){
+								projectJson.ContentLocation = projectMetadata.ContentLocation;
+								projectJson.Name = projectMetadata.Name;
+								deferred.resolve(projectJson);
+							},
+							deferred.reject
+						);
+
+						deferred.resolve(projectJson);
+					} catch (e){
+						deferred.reject(e);
+					}
+				}.bind(this), deferred.reject, deferred.progress);
+				return;
 			}
 		}.bind(this), deferred.reject);
 		return deferred;

@@ -1010,56 +1010,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		addFolderCommand.isAddDependency = true;
 		commandService.addCommand(addFolderCommand);
 
-		var initProjectCommand = new mCommands.Command({
-			name: messages["convertToProject"],
-			tooltip: messages["convertThisFolderIntoA"],
-			id: "orion.project.initProject", //$NON-NLS-0$
-			callback: function(data) {
-				var item = forceSingleItem(data.items);
-				if(item){
-					var init = function() {
-						projectClient.initProject(item.Location).then(function(project){
-							fileClient.read(item.Location, true).then(function(fileMetadata){
-								explorer.changedItem(item, true);
-							}, errorHandler);
-							dispatchNewProject(item, project);
-						}, errorHandler);
-					};
-					projectClient.readProject(item).then(function(project) {
-						if (project) {
-							progress.setProgressResult({
-								Message: messages["thisFolderIsAProject"],
-								Severity: "Warning" //$NON-NLS-0$
-							});
-							explorer.changedItem(item, true);
-						} else {
-							init();
-						}
-					}, init);
-				}
-
-			},
-			visibleWhen: function(items) {
-				if (!explorer || !explorer.isCommandsVisible()) {
-					return false;
-				}
-				var item = forceSingleItem(items);
-				if (item && ((item.parent && item.parent.Projects) || (item.Parents && item.Parents.length === 0))) {
-					//TODO only works if children has been cached
-					if (item.children) {
-						for(var i=0; i<item.children.length; i++){
-							if(item.children[i].Name && !item.children[i].Directory && item.children[i].Name.toLowerCase() === "project.json"){ //$NON-NLS-0$
-								return false;
-							}
-						}
-					}
-					return true;
-				}
-				return false;
-			}
-		});
-		commandService.addCommand(initProjectCommand);
-
 		function createAddDependencyCommand(type){
 			return projectClient.getProjectHandler(type).then(function(handler){
 				if(!handler.initDependency){
