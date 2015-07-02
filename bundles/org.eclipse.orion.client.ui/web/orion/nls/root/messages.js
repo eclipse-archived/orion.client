@@ -34,7 +34,7 @@ define({//Default message bundle
 	"HideShowBannerFooter": "Hide or show the page banner",
 	"Toggle banner and footer": "Toggle banner",
 	"ChooseFileOpenEditor": "Choose a file by name and open an editor on it",
-	"FindFile": "Find File Named...",
+	"FindFile": "Open File",
 	"System Configuration Details": "System Configuration Details",
 	"System Config Tooltip": "Go to the System Configuration Details page",
 	"Background Operations": "Background Operations",
