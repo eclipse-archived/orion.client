@@ -171,7 +171,7 @@ define([
 				//Reload if out of sync, unless we are already in the process of saving
 				if (!this._fileMetadata._saving && !this._fileMetadata.Directory && !this.getReadOnly()) {
 					progress(fileClient.read(resource, true), messages.ReadingMetadata, fileURI).then(function(data) {
-						if (this._fileMetadata && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
+						if (this._fileMetadata && !this._fileMetadata._saving && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
 							this._fileMetadata = objects.mixin(this._fileMetadata, data);
 							if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
 								progress(fileClient.read(resource), messages.Reading, fileURI).then(function(contents) {
