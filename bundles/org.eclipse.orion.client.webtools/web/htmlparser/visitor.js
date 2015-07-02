@@ -60,6 +60,9 @@ define([
 	                attr.parent = node;
 	                attr.kind = keys[i];
 	                ret = callback.visitNode(attr);
+	                if(typeof(callback.endVisitNode) === 'function') {
+			    		callback.endVisitNode(attr);
+			    	}
 	                if(ret === Visitor.SKIP) {
 	                    break;
 	                } else if(ret === Visitor.BREAK) {
@@ -71,6 +74,9 @@ define([
 	        if(kids) {
 	            for(i = 0; i < kids.length; i++) {
 	                ret = visitNode(callback, kids[i], node);
+	                if(typeof(callback.endVisitNode) === 'function') {
+			    		callback.endVisitNode(kids[i]);
+			    	}
 	                if(ret === Visitor.BREAK) {
 	                    return ret;
 	                } else if(ret === Visitor.SKIP) {

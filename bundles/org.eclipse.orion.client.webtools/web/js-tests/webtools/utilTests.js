@@ -421,5 +421,82 @@ define([
 				assert.equal(node.value, 'b', 'We should have found the attr value of b');
 			});
 		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471479
+		 * @since 10.0
+		 */
+		it('find node at offset 9 - nested p tag', function() {
+			var text = '<h1><p>foo</p></h1>';
+			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
+				var node = Util.findNodeAtOffset(ast, 5);
+				assert(node, 'we should have found a node');
+				assert.equal(node.type, 'tag', 'We should have found a tag node');
+				assert.equal(node.name, 'p', 'We should have found the start p tag');
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471479
+		 * @since 10.0
+		 */
+		it('find node at offset 10 - nested p tag', function() {
+			var text = '<h1><p>foo</p></h1>';
+			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
+				var node = Util.findNodeAtOffset(ast, 12);
+				assert(node, 'we should have found a node');
+				assert.equal(node.type, 'tag', 'We should have found a tag node');
+				assert.equal(node.name, 'p', 'We should have found the end p tag');
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471479
+		 * @since 10.0
+		 */
+		it('find node at offset 11 - nested span tag', function() {
+			var text = '<h1><p><span>hello</span></p></h1>';
+			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
+				var node = Util.findNodeAtOffset(ast, 9);
+				assert(node, 'we should have found a node');
+				assert.equal(node.type, 'tag', 'We should have found a tag node');
+				assert.equal(node.name, 'span', 'We should have found the start span tag');
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471479
+		 * @since 10.0
+		 */
+		it('find node at offset 12 - nested span tag', function() {
+			var text = '<h1><p><span>hello</span></p></h1>';
+			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
+				var node = Util.findNodeAtOffset(ast, 20);
+				assert(node, 'we should have found a node');
+				assert.equal(node.type, 'tag', 'We should have found a tag node');
+				assert.equal(node.name, 'span', 'We should have found the end span tag');
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471479
+		 * @since 10.0
+		 */
+		it('find node at offset 14 - multi nested p tag', function() {
+			var text = '<h1><p><span>hello</span></p></h1><body><div><p>world</p></div></body>';
+			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
+				var node = Util.findNodeAtOffset(ast, 46);
+				assert(node, 'we should have found a node');
+				assert.equal(node.type, 'tag', 'We should have found a tag node');
+				assert.equal(node.name, 'p', 'We should have found the start p tag');
+			});
+		});/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471479
+		 * @since 10.0
+		 */
+		it('find node at offset 15 - multi nested p tag', function() {
+			var text = '<h1><p><span>hello</span></p></h1><body><div><p>world</p></div></body>';
+			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
+				var node = Util.findNodeAtOffset(ast, 55);
+				assert(node, 'we should have found a node');
+				assert.equal(node.type, 'tag', 'We should have found a tag node');
+				assert.equal(node.name, 'p', 'We should have found the end p tag');
+			});
+		});
     });
 });
