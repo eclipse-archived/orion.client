@@ -262,7 +262,7 @@ define([
 		 * @param {Object} ctxt The current selection context
 		 */
 		computeHoverInfo: function computeHoverInfo(editorContext, ctxt) {
-		    if(ctxt.proposal) {
+		    if(ctxt.proposal && ctxt.proposal.kind === 'js') {
 		        return ctxt.proposal.hover;
 		    }
 		    var that = this;

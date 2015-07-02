@@ -59,6 +59,7 @@ define([
 			        proposal.hover = obj;
 			        proposal.style = 'emphasis'; //$NON-NLS-1$
 					this.removePrefix(prefix, proposal);
+					proposal.kind = 'js'; //$NON-NLS-1$
 					proposals.push(proposal);
 				}
 			}
@@ -283,7 +284,8 @@ define([
             								name: name,
             								description: Messages['funcProposalDescription'],
             								style: 'emphasis', //$NON-NLS-1$
-            								overwrite: true
+            								overwrite: true,
+            								kind: 'js' //$NON-NLS-1$
         							    });
     							}
         	                   } else if((val = /\s*\*\s*\@param\s*(?:\{\w*\})?\s*(\w*)/ig.exec(params.line)) !== null) {
@@ -299,7 +301,8 @@ define([
                         								name: name,
                         								description: Messages['funcParamProposalDescription'],
                         								style: 'emphasis', //$NON-NLS-1$
-                        								overwrite: true
+                        								overwrite: true,
+                        								kind: 'js' //$NON-NLS-1$
                     							    });
                 							    }
         	                               }
@@ -328,7 +331,8 @@ define([
 								description: Messages['eslintRuleProposalDescripton'],
 								prefix: params.prefix,
 								style: 'emphasis', //$NON-NLS-1$
-								overwrite: true
+								overwrite: true,
+								kind: 'js' //$NON-NLS-1$
 						    };
 						    var hover = rule.description ? rule.description : '';
 						    if(rule.url) {
@@ -351,7 +355,8 @@ define([
 								name: key,
 								description: Messages['eslintEnvProposalDescription'],
 								style: 'emphasis', //$NON-NLS-1$
-								overwrite: true
+								overwrite: true,
+								kind: 'js' //$NON-NLS-1$
 						    });
 	                    }
 	                }
@@ -553,7 +558,8 @@ define([
 	    var proposal = {
             relevance: 100,
             style: 'emphasis', //$NON-NLS-1$
-            overwrite: true
+            overwrite: true,
+            kind: 'js' //$NON-NLS-1$
         };
         proposal.name = proposal.proposal = completion.name;
         if(typeof(completion.type) !== 'undefined') {
@@ -581,7 +587,7 @@ define([
     		    proposal.description = convertTypes(' : ' + completion.type); //$NON-NLS-1$
 		    }
         }
-        var obj = Object.create(null);
+        obj = Object.create(null);
         obj.type = 'markdown'; //$NON-NLS-1$
         obj.content = '';
         if(!completion.doc) {

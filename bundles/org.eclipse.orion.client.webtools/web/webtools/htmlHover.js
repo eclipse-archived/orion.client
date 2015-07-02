@@ -44,7 +44,7 @@ define([
 		 * @callback
 		 */
 		computeHoverInfo: function computeHover(editorContext, ctxt) {
-			if(ctxt.proposal) {
+			if(ctxt.proposal && ctxt.proposal.kind === 'html') {
 				return ctxt.proposal.hover ? ctxt.proposal.hover : (ctxt.proposal.name ? ctxt.proposal.name : ctxt.proposal.description);
 			} else {
 				var that = this;

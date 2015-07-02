@@ -14,10 +14,12 @@ define([
 	'orion/editor/templates',
 	'orion/editor/stylers/text_html/syntax',
 	'orion/objects',
-	'webtools/util'
-], function(mTemplates, mHTML, Objects, util) {
+	'webtools/util',
+	'i18n!webtools/nls/messages',
+	'orion/i18nUtil'
+], function(mTemplates, mHTML, Objects, util, Messages, i18nUtil) {
 
-	var simpleDocTemplate = new mTemplates.Template("", "Simple HTML document",
+	var simpleDocTemplate = new mTemplates.Template("", Messages['simpleDocDescription'],
 		"<!DOCTYPE html>\n" + //$NON-NLS-0$
 		"<html lang=\"en\">\n" + //$NON-NLS-0$
 		"<head>\n" + //$NON-NLS-0$
@@ -37,7 +39,7 @@ define([
 			tag: 'img', //$NON-NLS-1$
 			prefix: "<img", //$NON-NLS-1$
 			name: "<img>", //$NON-NLS-1$
-			description: " - HTML image element",
+			description: Messages['imageElementDescription'],
 			template: "<img src=\"${URI}\" alt=\"${Image}\"/>", //$NON-NLS-1$
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img" //$NON-NLS-1$
 		},
@@ -45,7 +47,7 @@ define([
 			tag: 'a', //$NON-NLS-1$
 			prefix: "<a", //$NON-NLS-1$
 			name: "<a>", //$NON-NLS-1$
-			description: " - HTML anchor element",
+			description: Messages['anchorElementDescription'],
 			template: "<a href=\"${cursor}\"></a>", //$NON-NLS-1$
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a" //$NON-NLS-1$
 		},
@@ -53,35 +55,40 @@ define([
 			tag: 'ul', //$NON-NLS-1$
 			prefix: "<ul", //$NON-NLS-1$
 			name: "<ul>", //$NON-NLS-1$
-			description: " - HTML unordered list",
-			template: "<ul>\n\t<li>${cursor}</li>\n</ul>" //$NON-NLS-1$
+			description: Messages['ulElementDescription'],
+			template: "<ul>\n\t<li>${cursor}</li>\n</ul>", //$NON-NLS-1$
+			url: 'https://developer.mozilla.org/en/docs/Web/HTML/Element/ul' //$NON-NLS-1$
 		},
 		{
 			tag: 'ol', //$NON-NLS-1$
 			prefix: "<ol", //$NON-NLS-1$
 			name: "<ol>", //$NON-NLS-1$
-			description: " - HTML ordered list",
-			template: "<ol>\n\t<li>${cursor}</li>\n</ol>" //$NON-NLS-1$
+			description: Messages['olElementDescription'],
+			template: "<ol>\n\t<li>${cursor}</li>\n</ol>", //$NON-NLS-1$
+			url: 'https://developer.mozilla.org/en/docs/Web/HTML/Element/ol' //$NON-NLS-1$
 		},
 		{
 			tag: 'dl', //$NON-NLS-1$
 			prefix: "<dl", //$NON-NLS-1$
 			name: "<dl>", //$NON-NLS-1$
-			description: " - HTML definition list",
-			template: "<dl>\n\t<dt>${cursor}</dt>\n\t<dd></dd>\n</dl>" //$NON-NLS-1$
+			description: Messages['dlElementDescription'],
+			template: "<dl>\n\t<dt>${cursor}</dt>\n\t<dd></dd>\n</dl>", //$NON-NLS-1$
+			url: 'https://developer.mozilla.org/en/docs/Web/HTML/Element/dl' //$NON-NLS-1$
 		},
 		{
 			tag: 'table', //$NON-NLS-1$
 			prefix: "<table", //$NON-NLS-1$
 			name: "<table>", //$NON-NLS-1$
-			description: " - basic HTML table",
-			template: "<table>\n\t<tr>\n\t\t<td>${cursor}</td>\n\t</tr>\n</table>" //$NON-NLS-1$
+			description: Messages['basicTableDescription'],
+			template: "<table>\n\t<tr>\n\t\t<td>${cursor}</td>\n\t</tr>\n</table>", //$NON-NLS-1$
+			url: 'https://developer.mozilla.org/en/docs/Web/HTML/Element/table' //$NON-NLS-1$
 		},
 		{
 			prefix: "<!--", //$NON-NLS-1$
 			name: "<!-- -->", //$NON-NLS-1$
-			description: " - HTML comment",
-			template: "<!-- ${cursor} -->" //$NON-NLS-1$
+			description: Messages['htmlCommentDescription'],
+			template: "<!-- ${cursor} -->", //$NON-NLS-1$
+			url: 'https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Introduction#Comments_and_doctype' //$NON-NLS-1$
 		}
 	];
 
@@ -146,7 +153,7 @@ define([
 		this.astmanager = htmlAstManager;
 	}
 	
-	HTMLContentAssistProvider.prototype = new mTemplates.TemplateContentAssist(mHTML.keywords, templates);
+	HTMLContentAssistProvider.prototype = new mTemplates.TemplateContentAssist([], []);
 	
 	Objects.mixin(HTMLContentAssistProvider.prototype, {
 		/**
@@ -164,6 +171,80 @@ define([
 				}
 			}
 			return prefix;
+		},
+		/**
+		 * @callback 
+		 */
+		computeProposals: function(source, offset, params) {
+			var proposals = mTemplates.TemplateContentAssist.prototype.computeProposals.call(this, source, params.offset, params);
+			for(var i = 0; i < proposals.length; i++) {
+				if(!proposals[i].proposal) {
+					continue;
+				}
+				proposals[i].style = 'emphasis'; //$NON-NLS-1$
+				var obj = Object.create(null);
+		        obj.type = 'markdown'; //$NON-NLS-1$
+		        obj.content = Messages['templateSourceHeading'];
+		        obj.content += proposals[i].proposal;
+		        if(proposals[i].url) {
+		        	obj.content += i18nUtil.formatMessage(Messages['onlineDocumentation'], proposals[i].url);
+		        }
+		        proposals[i].hover = obj;
+			}
+			return proposals;
+		},
+		/**
+		 * @callback 
+		 */
+		getTemplates: function() {
+			if(this._templates && this._templates.length > 1) {
+				return this._templates;
+			} else {
+				//init them
+			}
+			for (var j = 0; j < templates.length; j++) {
+				var _t = new mTemplates.Template(templates[j].prefix, templates[j].description, templates[j].template, templates[j].name);
+				if(templates[j].url) {
+					_t.url = templates[j].url;
+				}
+				this._templates.push(_t);
+			}
+			return this._templates;
+		},
+		getTemplateProposals: function(prefix, offset, context) {
+			var proposals = [];
+			var _templates = this.getTemplates();
+			for (var t = 0; t < _templates.length; t++) {
+				var _template = _templates[t];
+				if (_template.match(prefix)) {
+					var proposal = _template.getProposal(prefix, offset, context);
+					if(_template.url) {
+						proposal.url = _template.url;
+					}
+					this.removePrefix(prefix, proposal);
+					proposal.kind = 'html'; //$NON-NLS-1$
+					proposals.push(proposal);
+				}
+			}
+			
+			if (0 < proposals.length) {
+				//sort the proposals by name
+				proposals.sort(function(p1, p2) {
+					if (p1.name < p2.name) return -1;
+					if (p1.name > p2.name) return 1;
+					return 0;
+				});
+				// if any templates were added to the list of 
+				// proposals, add a title as the first element
+				proposals.splice(0, 0, {
+					proposal: '',
+					description: 'Templates', //$NON-NLS-0$
+					style: 'noemphasis_title', //$NON-NLS-0$
+					unselectable: true
+				});
+			}
+			
+			return proposals;
 		},
 		/**
 		 * Called by the framework to initialize this provider before any <tt>computeContentAssist</tt> calls.
@@ -236,7 +317,7 @@ define([
 					if (textContentProposals.length > 0){
 						return textContentProposals;
 					}
-					return mTemplates.TemplateContentAssist.prototype.computeProposals.call(this, ast.source, params.offset, params);
+					return this.computeProposals(ast.source, params.offset, params);
 				}
 			}
 			return proposals;
@@ -329,8 +410,12 @@ define([
 		 * @since 10.0 
 		 */
 		getAttributesForNode: function(node, params) {
-			//TODO compute the attributes for a node
-			return [];	
+			var attrs = mHTML.attributes;
+			var proposals = [];
+			for(var i = 0; i < attrs.length; i++) {
+				
+			}
+			return proposals;	
 		},
 		/**
 		 * Returns the options (if any) that can be used in the specified attribute
@@ -422,7 +507,8 @@ define([
 				hover: hover,
 				prefix: prefix,
 				style: 'emphasis', //$NON-NLS-1$
-				overwrite: true
+				overwrite: true,
+				kind: 'html' //$NON-NLS-1$
 		    };
 		},
 		
