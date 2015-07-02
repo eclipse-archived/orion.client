@@ -321,21 +321,24 @@ define([
 			}
 			_self.lastCheckedLocation = metadata.Location;
 			_self.getProject(metadata).then(function(project) {
-				_self.getProjectJson(project).then(function(json) {
-					_self.showViewMode(!!json);
-					if (json) {
-						if (sidebar.getActiveViewModeId() === _self.id) {
-							_self.explorer.display(project);
+				var json = _self.getProjectJson(project);
+				if (json) {
+					json.then(function(json) {
+						_self.showViewMode(!!json);
+						if (json) {
+							if (sidebar.getActiveViewModeId() === _self.id) {
+								_self.explorer.display(project);
+							} else {
+								_self.project = project;
+								sidebar.setViewMode(_self.id);
+							}
 						} else {
-							_self.project = project;
-							sidebar.setViewMode(_self.id);
+							if (!sidebar.getActiveViewModeId()) {
+								sidebar.setViewMode(sidebar.getNavigationViewMode().id);
+							}
 						}
-					} else {
-						if (!sidebar.getActiveViewModeId()) {
-							sidebar.setViewMode(sidebar.getNavigationViewMode().id);
-						}
-					}
-				}, failed);
+					}, failed);
+				}
 			}, failed);
 			var handleDisplay = function (event) {
 				if(event.item === metadata) {
@@ -355,10 +358,13 @@ define([
 			var item = event.selections && event.selections.length > 0 ? event.selections[0] : null;
 			if (item) {
 				_self.getProject(item).then(function(project) {
-					_self.getProjectJson(project).then(function(json) {
-						_self.project = project;
-						_self.showViewMode(!!json);
-					});
+					var json = _self.getProjectJson(project);
+					if (json) {
+						json.then(function(json) {
+							_self.project = project;
+							_self.showViewMode(!!json);
+						});
+					}
 				});
 			} else {
 				_self.showViewMode(false);
