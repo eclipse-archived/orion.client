@@ -446,14 +446,23 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 					}
 					return appState;
 				}, function(error) {
-					/* default cf error message decoration */
-					error = mCfUtil.defaultDecorateError(error, params.Target);
-					if (error.HttpCode === 404) {
-						return error;
-					} else {
-						throw error;
-					}
-				});
+					return this._getTargets().then(function(targets){
+						if(targets){
+							targets.forEach(function(data){
+								if (params.Target.Url === data.Url){
+									params.Target.meta = data;
+								}
+							});
+						}
+						/* default cf error message decoration */
+						error = mCfUtil.defaultDecorateError(error, params.Target);
+						if (error.HttpCode === 404) {
+							return error;
+						} else {
+							throw error;
+						}
+					});
+				}.bind(this));
 			};
 			return new Deferred().reject("missing target and/or name"); // do we need this or will cfService.startApp check this for us
 		},
