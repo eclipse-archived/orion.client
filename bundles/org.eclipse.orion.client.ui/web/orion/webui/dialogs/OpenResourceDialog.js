@@ -33,6 +33,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		'<div role="search">' + //$NON-NLS-0$
 			'<div><label id="fileNameMessage" for="fileName">${Type the name of a file to open (? = any character, * = any string):}</label></div>' + //$NON-NLS-0$
 			'<div><input id="fileName" type="text" class="openResourceDialogInput" style="min-width: 25em; width:90%;"/></div>' + //$NON-NLS-0$
+			'<div><input id="searchScope" type="checkbox" style="width: auto" class="openResourceDialogInput"/><label for="searchScope">${Search all Projects}</label></input></div>' + //$NON-NLS-0$
 			'<div id="progress" style="padding: 2px 0 0; width: 100%;"><img src="'+ require.toUrl("../../../images/progress_running.gif") + '" class="progressPane_running_dialog" id="crawlingProgress"></img></div>' +  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			'<div id="results" style="max-height:250px; height:auto; overflow-y:auto;" aria-live="off"></div>' + //$NON-NLS-0$
 			'<div id="statusbar"></div>' + //$NON-NLS-0$
@@ -59,7 +60,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		if (options.nameSearch !== undefined) {
 			this._nameSearch = options.nameSearch;
 		}
-		this._searchOnRoot = true;
+		this._searchOnRoot = false; // true;
 		this._fileService = this._searcher.getFileService();
 		if (!this._fileService) {
 			throw new Error(messages['Missing required argument: fileService']);
@@ -73,6 +74,17 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 	
 	OpenResourceDialog.prototype._bindToDom = function(parent) {
 		var self = this;
+		
+		var gs = this.getSearchPref();
+		this.$searchScope.checked = gs;
+		this.updateTitle();
+		this.$searchScope.addEventListener("click", function(e) {
+			localStorage.setItem("/searchScope", this.$searchScope.checked);
+			
+			this.updateTitle();
+			this.doSearch();
+		}.bind(this));
+		
 		self.$crawlingProgress.style.display = "none"; //$NON-NLS-0$
 		if(this._nameSearch) {
 			this.$fileName.setAttribute("placeholder", messages["FileName FolderName"]);  //$NON-NLS-0$
@@ -181,6 +193,25 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 	};
 
 	/** @private */
+	OpenResourceDialog.prototype.updateTitle = function() {
+		var isGlobalSearch = this.$searchScope.checked;
+
+		var scope = messages["AnyProject"];
+		if (!isGlobalSearch) {
+			scope = "\'" + this._searcher.getSearchLocationName() + "\'"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		
+		var newTitle = util.formatMessage(this.title, scope);
+		var titleDiv = lib.$("span", this.$frame); //$NON-NLS-1$
+		titleDiv.textContent = newTitle;
+		
+		// Hide the checkbox if this search must be global
+		if (this.forcedGlobalSearch()) {
+			this.$searchScope.parentNode.style.display = "none"; //$NON-NLS-1$
+		}
+	};
+
+	/** @private */
 	OpenResourceDialog.prototype.checkSearch = function() {
 		clearTimeout(this._timeoutId);
 		var now = new Date().getTime();
@@ -190,6 +221,22 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		} else {
 			this._timeoutId = setTimeout(this.checkSearch.bind(this), 50); //$NON-NLS-0$
 		}
+	};
+
+	/** @private */
+	OpenResourceDialog.prototype.forcedGlobalSearch = function() {
+		var loc = this._searcher.getSearchLocation();
+		var rootLoc = this._searcher.getSearchRootLocation();
+		return loc === rootLoc;
+	};
+
+	/** @private */
+	OpenResourceDialog.prototype.getSearchPref = function() {
+		if (this.forcedGlobalSearch())
+			return true;
+			
+		var globalSearch = localStorage.getItem("/searchScope") === 'true'; //$NON-NLS-0$
+		return globalSearch;
 	};
 
 	/** @private */
@@ -220,6 +267,10 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		if (text) {
 			// Gives Webkit a chance to show the "Searching" message
 			var keyword = this._detectFolderKeyword(text);
+			
+			// Capture the checkbox state
+			this._searchOnRoot = this.$searchScope.checked;
+			
 			var searchParams = this._searcher.createSearchParams(keyword.keyword, this._nameSearch, this._searchOnRoot);
 			var renderFunction = this._searchRenderer.makeRenderFunction(this._contentTypeService, this.$results, false, this.decorateResult.bind(this));
 			this.currentSearch = renderFunction;

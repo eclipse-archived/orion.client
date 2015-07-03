@@ -53,6 +53,10 @@ define([
           return new Deferred().resolve(null);
        },
        
+       setSearchLocation: function(searchLocation) {
+       		this.searchLocation = searchLocation;
+       },
+       
        _getFile : function _getFile(name, options) {
            var files = this.cache.get(name);
            if(files) {
@@ -65,7 +69,7 @@ define([
            var type = opts.type ? opts.type : 'JavaScript'; //$NON-NLS-1$
            var dotext = '.'+ext;
            //first check the file map
-           return FileMap.getFilePrefix(this.fileclient).then(function(prefix) {
+           return FileMap.getFilePrefix(this.fileclient, that.searchLocation || this.fileclient.fileServiceRootURL()).then(function(prefix) {
            	   var file = FileMap.getWSPath(name);
 	           if(!file) {
 	               file = FileMap.getWSPath(name+dotext);
@@ -81,7 +85,7 @@ define([
 	           //fall back to looking for it
 	           return this.fileclient.search(
 	                {
-	                    'resource': this.fileclient.fileServiceRootURL(),
+	                	'resource': that.searchLocation || this.fileclient.fileServiceRootURL(),
 	                    'keyword': searchname,
 	                    'sort': 'Name asc', //$NON-NLS-1$
 	                    'nameSearch': true,

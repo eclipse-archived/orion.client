@@ -13,7 +13,7 @@ define({//Default message bundle
 	"switchEditor": "Switch Editor", //$NON-NLS-1$ //$NON-NLS-0$
 	"Fetching": "Fetching: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"confirmUnsavedChanges": "There are unsaved changes. Do you still want to navigate away?", //$NON-NLS-1$ //$NON-NLS-0$
-	"searchFiles": "Quick Search...", //$NON-NLS-1$ //$NON-NLS-0$
+	"searchFiles": "Quick Search in ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"searchTerm": "Enter search term:", //$NON-NLS-1$ //$NON-NLS-0$
 	"unsavedChanges": "There are unsaved changes.", //$NON-NLS-1$ //$NON-NLS-0$
 	"unsavedAutoSaveChanges": "Please stay on the page until Auto Save is complete.", //$NON-NLS-1$ //$NON-NLS-0$

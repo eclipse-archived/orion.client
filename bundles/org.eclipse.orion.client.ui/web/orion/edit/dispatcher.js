@@ -135,6 +135,8 @@ define(['orion/edit/dispatcher'], function() {
 		var data = Object.create(null);
 		data.name = metadata.Name;
 		data.location = metadata.Location;
+		data.parents = metadata.Parents;
+
 		if (contentType) {
 			data.contentType = Object.create(null);
 			data.contentType.id = contentType.id;

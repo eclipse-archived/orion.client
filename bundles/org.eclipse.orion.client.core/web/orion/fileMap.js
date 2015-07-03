@@ -185,30 +185,39 @@ define(['orion/Deferred'], function(Deferred) {
 	 * @returns [orion.Deferred] returns a deferred that will resolve the prefix or return null
 	 * @since 9.0
 	 */
-	function getFilePrefix(fileClient) {
-		if (!this.filePrefixChecked) {
-           return fileClient.search(
-                {
-                    'resource': fileClient.fileServiceRootURL(),
-                    'keyword': "fileMapxx.js",
-                    'nameSearch': true,
-                    'fileType': "js",
-                }
-           ).then(function(res) {
-           		this.filePrefixChecked = true;
-           		if (res && res.response && res.response.docs && res.response.docs.length > 0) {
-					var loc = res.response.docs[0].Location;
-					var pathSegs = loc.split('/');
-					if (pathSegs.length > 4) {
-						this.filePrefix = '/' + pathSegs[1] + '/' + pathSegs[2] + '/' + pathSegs[3] + '/' + pathSegs[4] + '/';
-						return this.filePrefix;
-					}
-				}
-				return null;
-			}.bind(this));
-		} else {
+	function getFilePrefix(fileClient, projectLocation) {
+//		if (!this.filePrefixChecked) {
+//           return fileClient.search(
+//                {
+////                    'resource': fileClient.fileServiceRootURL() + "/squarti-OrionContent/squarti%20%7C%20ssqnode/",
+//					'resource': projectLocation,
+//                    'keyword': "fileMap.js",
+////                    'nameSearch': true,
+////                    'start': 0,
+////                    'rows': 30,
+////                    'fileType': "js",
+//	                    'sort': 'Name asc',
+//	                    'nameSearch': true,
+//	                    'fileType': "*.js",
+//	                    'start': 0,
+//	                    'rows': 30
+//                }
+//           ).then(function(res) {
+//           		this.filePrefixChecked = true;
+//           		if (res && res.response && res.response.docs && res.response.docs.length > 0) {
+//					var loc = res.response.docs[0].Location;
+//					var pathSegs = loc.split('/');
+//					if (pathSegs.length > 4) {
+//						this.filePrefix = '/' + pathSegs[1] + '/' + pathSegs[2] + '/' + pathSegs[3] + '/' + pathSegs[4] + '/';
+//						return this.filePrefix;
+//					}
+//				}
+//				return null;
+//			}.bind(this));
+////			return new Deferred().resolve(null);
+//		} else {
 			return new Deferred().resolve(this.filePrefix);
-		}
+//		}
 	}
 	
 	function getWSPath(deployedPath) {

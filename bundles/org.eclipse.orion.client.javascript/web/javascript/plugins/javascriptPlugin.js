@@ -360,7 +360,7 @@ define([
     	);
 
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    			new RenameCommand.RenameCommand(astManager, ternWorker), 
+    			new RenameCommand.RenameCommand(astManager, ternWorker, scriptresolver), 
     			{
     		name: javascriptMessages['renameElement'],  //$NON-NLS-1$
     		tooltip : javascriptMessages['renameElementTooltip'],  //$NON-NLS-1$

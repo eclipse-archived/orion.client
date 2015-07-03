@@ -396,7 +396,7 @@ define([
 		var serviceRegistry = options.serviceRegistry;
 		if (options.target) { // we have metadata
 			if (options.searchService) {
-				options.searchService.setLocationByMetaData(options.target);
+				options.searchService.setLocationByMetaData(options.target, {index: "last"});
 			}
 			if (options.fileService && !options.breadcrumbTarget && !options.staticBreadcrumb) {
 				fileSystemRootName = breadcrumbRootName ? breadcrumbRootName + " " : ""; //$NON-NLS-1$ //$NON-NLS-0$
@@ -712,9 +712,11 @@ define([
 				return;
 			}
 			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+			var prefs = serviceRegistry.getService("orion.core.preference"); //$NON-NLS-0$
 			var dialog = new openResource.OpenResourceDialog({
 				searcher: searcher,
 				progress: progress,
+				prefService: prefs,
 				searchRenderer: searcher.defaultRenderer,
 				onHide: function () {
 					showingResourceDialog = false;

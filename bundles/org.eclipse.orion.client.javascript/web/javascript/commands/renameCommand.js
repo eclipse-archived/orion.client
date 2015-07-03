@@ -29,9 +29,10 @@ define([
 	 * @returns {javascript.commands.RenameCommand} A new command
 	 * @since 9.0
 	 */
-	function RenameCommand(ASTManager, ternWorker) {
+	function RenameCommand(ASTManager, ternWorker, scriptResolver) {
 		this.astManager = ASTManager;
 		this.ternworker = ternWorker;
+		this.scriptResolver = scriptResolver;
 		this.ternworker.addEventListener('message', function(event) {
 			if(typeof(event.data) === 'object') {
 				var _d = event.data;
@@ -65,20 +66,23 @@ define([
 		 */
 		execute: function(editorContext, options) {
 			var that = this;
-		    if(options.contentType.id === 'application/javascript') {
-    			return that._doRename(editorContext, options);
-		    } else {
-		        return editorContext.getText().then(function(text) {
-		            var offset = options.offset;
-		            var blocks = Finder.findScriptBlocks(text);
-		            if(blocks && blocks.length > 0) {
-		                var cu = new CU(blocks, {location:options.input, contentType:options.contentType});
-    			        if(cu.validOffset(offset)) {
-    			        	return that._doRename(editorContext, options); 
-    			        }
-			        }
-		        });
-		    }
+			return editorContext.getFileMetadata().then(function(metadata) {
+				that.scriptResolver.setSearchLocation(metadata.parents[metadata.parents.length - 1].Location);
+			    if(options.contentType.id === 'application/javascript') {
+	    			return that._doRename(editorContext, options);
+			    } else {
+			        return editorContext.getText().then(function(text) {
+			            var offset = options.offset;
+			            var blocks = Finder.findScriptBlocks(text);
+			            if(blocks && blocks.length > 0) {
+			                var cu = new CU(blocks, {location:options.input, contentType:options.contentType});
+	    			        if(cu.validOffset(offset)) {
+	    			        	return that._doRename(editorContext, options); 
+	    			        }
+				        }
+			        });
+			    }
+			})
 		},
 		
 		/**

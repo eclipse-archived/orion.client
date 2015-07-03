@@ -293,6 +293,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 			if(!locationName){
 				locationName = "";
 			}
+			this._searchLocationName = locationName;
 			if(searchInputDom && searchInputDom.placeholder){
 				searchInputDom.value = "";
 				var placeHolder = i18nUtil.formatMessage(messages["Search ${0}"], locationName);
@@ -322,6 +323,9 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 			} else {
 				return this._fileService.fileServiceRootURL();
 			}
+		},
+		getSearchLocationName: function(){
+			return this._searchLocationName;
 		},
 		getSearchRootLocation: function(){
 			if(this._searchRootLocation){

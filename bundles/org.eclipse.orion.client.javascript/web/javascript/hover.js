@@ -270,6 +270,7 @@ define([
 		    	if (!meta){
 		    		return null;
 		    	}
+		    	that.resolver.setSearchLocation(meta.parents[meta.parents.length - 1].Location);
 		        if(meta && meta.contentType.id === 'application/javascript') {
 		            return that.astManager.getAST(editorContext).then(function(ast) {
         				return that._doHover(ast, ctxt, meta);
