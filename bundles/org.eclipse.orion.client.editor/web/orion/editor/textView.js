@@ -13,15 +13,15 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/textView", [  //$NON-NLS-0$
-	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
-	'orion/editor/textModel', //$NON-NLS-0$
-	'orion/editor/keyModes', //$NON-NLS-0$
-	'orion/editor/eventTarget', //$NON-NLS-0$
-	'orion/editor/textTheme', //$NON-NLS-0$
-	'orion/editor/util', //$NON-NLS-0$
-	'orion/util', //$NON-NLS-0$
-	'orion/metrics' //$NON-NLS-0$
+define("orion/editor/textView", [  //$NON-NLS-1$
+	'i18n!orion/editor/nls/messages', //$NON-NLS-1$
+	'orion/editor/textModel', //$NON-NLS-1$
+	'orion/editor/keyModes', //$NON-NLS-1$
+	'orion/editor/eventTarget', //$NON-NLS-1$
+	'orion/editor/textTheme', //$NON-NLS-1$
+	'orion/editor/util', //$NON-NLS-1$
+	'orion/util', //$NON-NLS-1$
+	'orion/metrics' //$NON-NLS-1$
 ], function(messages, mTextModel, mKeyModes, mEventTarget, mTextTheme, textUtil, util, mMetrics) {
 
 	/** @private */
@@ -124,8 +124,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 	function convertDelimiter(text, addTextFunc, addDelimiterFunc) {
 		var cr = 0, lf = 0, index = 0, len = text.length;
 		while (index < len) {
-			if (cr !== -1 && cr <= index) { cr = text.indexOf("\r", index); } //$NON-NLS-0$
-			if (lf !== -1 && lf <= index) { lf = text.indexOf("\n", index); } //$NON-NLS-0$
+			if (cr !== -1 && cr <= index) { cr = text.indexOf("\r", index); } //$NON-NLS-1$
+			if (lf !== -1 && lf <= index) { lf = text.indexOf("\n", index); } //$NON-NLS-1$
 			var start = index, end;
 			if (lf === -1 && cr === -1) {
 				addTextFunc(text.substring(index));
@@ -160,10 +160,10 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		var win = getWindow(node.ownerDocument);
 		if (win.getComputedStyle) {
 			var style = win.getComputedStyle(node, null);
-			left = style.getPropertyValue("border-left-width"); //$NON-NLS-0$
-			_top = style.getPropertyValue("border-top-width"); //$NON-NLS-0$
-			right = style.getPropertyValue("border-right-width"); //$NON-NLS-0$
-			bottom = style.getPropertyValue("border-bottom-width"); //$NON-NLS-0$
+			left = style.getPropertyValue("border-left-width"); //$NON-NLS-1$
+			_top = style.getPropertyValue("border-top-width"); //$NON-NLS-1$
+			right = style.getPropertyValue("border-right-width"); //$NON-NLS-1$
+			bottom = style.getPropertyValue("border-bottom-width"); //$NON-NLS-1$
 		} else if (node.currentStyle) {
 			left = node.currentStyle.borderLeftWidth;
 			_top = node.currentStyle.borderTopWidth;
@@ -183,10 +183,10 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		var win = getWindow(node.ownerDocument);
 		if (win.getComputedStyle) {
 			var style = win.getComputedStyle(node, null);
-			left = style.getPropertyValue("padding-left"); //$NON-NLS-0$
-			_top = style.getPropertyValue("padding-top"); //$NON-NLS-0$
-			right = style.getPropertyValue("padding-right"); //$NON-NLS-0$
-			bottom = style.getPropertyValue("padding-bottom"); //$NON-NLS-0$
+			left = style.getPropertyValue("padding-left"); //$NON-NLS-1$
+			_top = style.getPropertyValue("padding-top"); //$NON-NLS-1$
+			right = style.getPropertyValue("padding-right"); //$NON-NLS-1$
+			bottom = style.getPropertyValue("padding-bottom"); //$NON-NLS-1$
 		} else if (node.currentStyle) {
 			left = node.currentStyle.paddingLeft;
 			_top = node.currentStyle.paddingTop;
@@ -216,16 +216,16 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 	}
 	/** @private */
 	function DOMReady(doc, _parent, className, callback) {
-		className = "_" + className + "DOMReady"; //$NON-NLS-1$ //$NON-NLS-0$
-		_parent.className = _parent.className ? _parent.className + " " + className : className; //$NON-NLS-0$
+		className = "_" + className + "DOMReady"; //$NON-NLS-1$ //$NON-NLS-1$
+		_parent.className = _parent.className ? _parent.className + " " + className : className; //$NON-NLS-1$
 		_parent.__DOMReady = callback;
-		var id = className + "Style"; //$NON-NLS-0$
+		var id = className + "Style"; //$NON-NLS-1$
 		if (doc.getElementById(id)) { return; }
-		var animationName = className + "Animation"; //$NON-NLS-0$
+		var animationName = className + "Animation"; //$NON-NLS-1$
 		function insertListener(evt) {
 			if (evt.animationName === animationName) {
 				var target = evt.target;
-				if (typeof target.__DOMReady === "function") { //$NON-NLS-0$
+				if (typeof target.__DOMReady === "function") { //$NON-NLS-1$
 					getWindow(doc).setTimeout(function() {
 						target.__DOMReady();
 					}, 0);
@@ -233,27 +233,27 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			}
 		}
 		function template(className, animationName) {
-			var props = ["", "-webkit-", "-moz-", "-ms-", "-o-"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var _frames = "", classRule = "body ." + className + " {\n"; //$NON-NLS-1$ //$NON-NLS-0$
+			var props = ["", "-webkit-", "-moz-", "-ms-", "-o-"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+			var _frames = "", classRule = "body ." + className + " {\n"; //$NON-NLS-1$ //$NON-NLS-2$
 			for (var i=0; i<props.length; i++) {
 				_frames +=
-				"@" + props[i] + "keyframes " + animationName + " {\n" + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				"from { opacity: 0.99; }\n" + //$NON-NLS-0$
-				"to { opacity: 1; }\n" + //$NON-NLS-0$
-				"}\n"; //$NON-NLS-0$
+				"@" + props[i] + "keyframes " + animationName + " {\n" + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-1$
+				"from { opacity: 0.99; }\n" + //$NON-NLS-1$
+				"to { opacity: 1; }\n" + //$NON-NLS-1$
+				"}\n"; //$NON-NLS-1$
 				classRule +=
-				props[i] + "animation-duration: 0.001s;\n" + //$NON-NLS-0$
-				props[i] + "animation-name: " + animationName + ";\n"; //$NON-NLS-1$ //$NON-NLS-0$
+				props[i] + "animation-duration: 0.001s;\n" + //$NON-NLS-1$
+				props[i] + "animation-name: " + animationName + ";\n"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			classRule += "}"; //$NON-NLS-0$
+			classRule += "}"; //$NON-NLS-1$
 			return _frames + classRule;
 		}
-		addHandler(doc, "animationstart", insertListener, false); //$NON-NLS-0$
-		addHandler(doc, "MSAnimationStart", insertListener, false);  //$NON-NLS-0$
-		addHandler(doc, "webkitAnimationStart", insertListener, false); //$NON-NLS-0$
-		var style = doc.createElement("style"); //$NON-NLS-0$
+		addHandler(doc, "animationstart", insertListener, false); //$NON-NLS-1$
+		addHandler(doc, "MSAnimationStart", insertListener, false);  //$NON-NLS-1$
+		addHandler(doc, "webkitAnimationStart", insertListener, false); //$NON-NLS-1$
+		var style = doc.createElement("style"); //$NON-NLS-1$
 		style.id = id;
-		var head = doc.getElementsByTagName("head")[0] || doc.documentElement; //$NON-NLS-0$
+		var head = doc.getElementsByTagName("head")[0] || doc.documentElement; //$NON-NLS-1$
 		style.appendChild(doc.createTextNode(template(className, animationName)));
 		head.insertBefore(style, head.firstChild);
 	}
@@ -393,7 +393,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		/** @private */
 		toString: function() {
-			return "start=" + this.start + " end=" + this.end + (this.caret ? " caret is at start" : " caret is at end"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			return "start=" + this.start + " end=" + this.end + (this.caret ? " caret is at start" : " caret is at end"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
 		},
 		/** @private */
 		isEmpty: function() {
@@ -437,16 +437,16 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var cursor = !this.primary && this._selection && this._selection.isEmpty();
 			var className;
 			if (cursor) {
-				className = "textviewSelectionCaret"; //$NON-NLS-0$
+				className = "textviewSelectionCaret"; //$NON-NLS-1$
 			} else {
-				className = focused ? "textviewSelection" : "textviewSelectionUnfocused"; //$NON-NLS-1$ //$NON-NLS-0$
+				className = focused ? "textviewSelection" : "textviewSelectionUnfocused"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			this._divs[0].style.visibility = (cursor && visible && focused) || !cursor ? "visible" : "hidden"; //$NON-NLS-1$ //$NON-NLS-0$
-			this._divs[0].style.zIndex = visible && cursor ? "2" : "0"; //$NON-NLS-1$ //$NON-NLS-0$
+			this._divs[0].style.visibility = (cursor && visible && focused) || !cursor ? "visible" : "hidden"; //$NON-NLS-1$ //$NON-NLS-2$
+			this._divs[0].style.zIndex = visible && cursor ? "2" : "0"; //$NON-NLS-1$ //$NON-NLS-2$
 			this._divs.forEach(function(div) {
 				div.className = className;
 				if (util.isWebkit && primary) {
-					div.style.background = focused ? "transparent" : ""; //$NON-NLS-0$
+					div.style.background = focused ? "transparent" : ""; //$NON-NLS-1$
 				}
 			});
 		},
@@ -535,8 +535,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					var cursorParent = view._cursorDiv.parentNode;
 					var clientRect = cursorParent.getBoundingClientRect();
 					if (rect && clientRect) {
-						view._cursorDiv.style.top = (rect.top - clientRect.top + cursorParent.scrollTop) + "px"; //$NON-NLS-0$
-						view._cursorDiv.style.left = (rect.left - clientRect.left + cursorParent.scrollLeft) + "px"; //$NON-NLS-0$
+						view._cursorDiv.style.top = (rect.top - clientRect.top + cursorParent.scrollTop) + "px"; //$NON-NLS-1$
+						view._cursorDiv.style.left = (rect.left - clientRect.left + cursorParent.scrollLeft) + "px"; //$NON-NLS-1$
 					}
 				}
 			} else if (doc.selection) {
@@ -549,17 +549,17 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				* selection at the end of some lines does not get redrawn.  The
 				* fix is to create a DOM element in the body to force a redraw.
 				*/
-				var child = util.createElement(doc, "div"); //$NON-NLS-0$
+				var child = util.createElement(doc, "div"); //$NON-NLS-1$
 				body.appendChild(child);
 				body.removeChild(child);
 				
 				range = body.createTextRange();
 				range.moveToElementText(start.node.parentNode);
-				range.moveStart("character", start.offset); //$NON-NLS-0$
+				range.moveStart("character", start.offset); //$NON-NLS-1$
 				var endRange = body.createTextRange();
 				endRange.moveToElementText(end.node.parentNode);
-				endRange.moveStart("character", end.offset); //$NON-NLS-0$
-				range.setEndPoint("EndToStart", endRange); //$NON-NLS-0$
+				endRange.moveStart("character", end.offset); //$NON-NLS-1$
+				range.setEndPoint("EndToStart", endRange); //$NON-NLS-1$
 				view._ignoreSelect = false;
 				range.select();
 				view._ignoreSelect = true;
@@ -568,7 +568,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		/** @private */
 		_setDOMFullSelection: function(startNode, startOffset, endNode, endOffset) {
 			this._divs.forEach(function(div) {
-				div.style.width = div.style.height = "0px"; //$NON-NLS-0$
+				div.style.width = div.style.height = "0px"; //$NON-NLS-1$
 			});
 			var view = this._view;
 			if (!view._fullSelection) { return; }
@@ -609,29 +609,29 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var sel1Top = Math.min(bottom, Math.max(_top, startRect.top));
 			var sel1Right = right;
 			var sel1Bottom = Math.min(bottom, Math.max(_top, startRect.bottom));
-			sel1Div.style.left = (sel1Left - hd) + "px"; //$NON-NLS-0$
-			sel1Div.style.top = (sel1Top - vd) + "px"; //$NON-NLS-0$
-			sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px"; //$NON-NLS-0$
-			sel1Div.style.height = Math.max(0, sel1Bottom - sel1Top) + "px"; //$NON-NLS-0$
+			sel1Div.style.left = (sel1Left - hd) + "px"; //$NON-NLS-1$
+			sel1Div.style.top = (sel1Top - vd) + "px"; //$NON-NLS-1$
+			sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px"; //$NON-NLS-1$
+			sel1Div.style.height = Math.max(0, sel1Bottom - sel1Top) + "px"; //$NON-NLS-1$
 			if (startNode.lineIndex === endNode.lineIndex) {
 				sel1Right = Math.min(r, right);
-				sel1Div.style.width = Math.max(this.primary ? 0 : 1, sel1Right - sel1Left) + "px"; //$NON-NLS-0$
+				sel1Div.style.width = Math.max(this.primary ? 0 : 1, sel1Right - sel1Left) + "px"; //$NON-NLS-1$
 			} else {
 				var sel3Left = left;
 				var sel3Top = Math.min(bottom, Math.max(_top, endRect.top));
 				var sel3Right = Math.min(right, Math.max(left, r));
 				var sel3Bottom = Math.min(bottom, Math.max(_top, endRect.bottom));
 				var sel3Div = this._divs[2];
-				sel3Div.style.left = (sel3Left - hd) + "px"; //$NON-NLS-0$
-				sel3Div.style.top = (sel3Top - vd) + "px"; //$NON-NLS-0$
-				sel3Div.style.width = Math.max(0, sel3Right - sel3Left) + "px"; //$NON-NLS-0$
-				sel3Div.style.height = Math.max(0, sel3Bottom - sel3Top) + "px"; //$NON-NLS-0$
+				sel3Div.style.left = (sel3Left - hd) + "px"; //$NON-NLS-1$
+				sel3Div.style.top = (sel3Top - vd) + "px"; //$NON-NLS-1$
+				sel3Div.style.width = Math.max(0, sel3Right - sel3Left) + "px"; //$NON-NLS-1$
+				sel3Div.style.height = Math.max(0, sel3Bottom - sel3Top) + "px"; //$NON-NLS-1$
 				if (Math.abs(startNode.lineIndex - endNode.lineIndex) > 1) {
 					var sel2Div = this._divs[1];
-					sel2Div.style.left = (left - hd)  + "px"; //$NON-NLS-0$
-					sel2Div.style.top = (sel1Bottom - vd) + "px"; //$NON-NLS-0$
-					sel2Div.style.width = Math.max(0, right - left) + "px"; //$NON-NLS-0$
-					sel2Div.style.height = Math.max(0, sel3Top - sel1Bottom) + "px"; //$NON-NLS-0$
+					sel2Div.style.left = (left - hd)  + "px"; //$NON-NLS-1$
+					sel2Div.style.top = (sel1Bottom - vd) + "px"; //$NON-NLS-1$
+					sel2Div.style.width = Math.max(0, right - left) + "px"; //$NON-NLS-1$
+					sel2Div.style.height = Math.max(0, sel3Top - sel1Bottom) + "px"; //$NON-NLS-1$
 				}
 			}
 		}
@@ -646,7 +646,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 	TextRect.prototype = /** @lends orion.editor.TextRect.prototype */ {
 		/** @private */
 		toString: function() {
-			return "{l=" + this.left + ", t=" + this.top + ", r=" + this.right + ", b=" + this.bottom + "}"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			return "{l=" + this.left + ", t=" + this.top + ", r=" + this.right + ", b=" + this.bottom + "}"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-1$
 		}
 	};
 	/** 
@@ -687,15 +687,15 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var model = view._model;
 			var lineText = model.getLine(lineIndex);
 			var lineStart = model.getLineStart(lineIndex);
-			var e = {type:"LineStyle", textView: view, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart}; //$NON-NLS-0$
+			var e = {type:"LineStyle", textView: view, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart}; //$NON-NLS-1$
 			view.onLineStyle(e);
 			var doc = _parent.ownerDocument;
-			var lineDiv = div || util.createElement(doc, "div"); //$NON-NLS-0$
+			var lineDiv = div || util.createElement(doc, "div"); //$NON-NLS-1$
 			if (!div || !compare(div.viewStyle, e.style)) {
 				applyStyle(e.style, lineDiv, div);
 				if (div) { div._trim = null; }
 				lineDiv.viewStyle = e.style;
-				lineDiv.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
+				lineDiv.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			lineDiv.lineIndex = lineIndex;
 			
@@ -717,17 +717,17 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			* selection at the end of the line when the line is fully selected. 
 			* 3. The height of a div with only an empty span is zero.
 			*/
-			var c = " "; //$NON-NLS-0$
+			var c = " "; //$NON-NLS-1$
 			if (!view._fullSelection && util.isIE < 9) {
 				/* 
 				* IE8 already selects extra space at end of a line fully selected,
 				* adding another space at the end of the line causes the selection 
 				* to look too big. The fix is to use a zero-width space (\uFEFF) instead. 
 				*/
-				c = "\uFEFF"; //$NON-NLS-0$
+				c = "\uFEFF"; //$NON-NLS-1$
 			}
 			var range = {text: c, style: view._metrics.largestFontStyle, ignoreChars: 1};
-			if (ranges.length === 0 || !ranges[ranges.length - 1].style || ranges[ranges.length - 1].style.tagName !== "div") { //$NON-NLS-0$
+			if (ranges.length === 0 || !ranges[ranges.length - 1].style || ranges[ranges.length - 1].style.tagName !== "div") { //$NON-NLS-1$
 				ranges.push(range);
 			} else {
 				ranges.splice(ranges.length - 1, 0, range);
@@ -853,7 +853,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			if (start > end) { return; }
 			var tabSize = this.view._customTabSize, range;
 			if (tabSize && tabSize !== 8) {
-				var tabIndex = text.indexOf("\t", start); //$NON-NLS-0$
+				var tabIndex = text.indexOf("\t", start); //$NON-NLS-1$
 				while (tabIndex !== -1 && tabIndex < end) {
 					if (start < tabIndex) {
 						range = {text: text.substring(start, tabIndex), style: style};
@@ -863,9 +863,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					var spacesCount = tabSize - (data.tabOffset % tabSize);
 					if (spacesCount > 0) {
 						//TODO hack to preserve tabs in getDOMText()
-						var spaces = "\u00A0"; //$NON-NLS-0$
+						var spaces = "\u00A0"; //$NON-NLS-1$
 						for (var i = 1; i < spacesCount; i++) {
-							spaces += " "; //$NON-NLS-0$
+							spaces += " "; //$NON-NLS-1$
 						}
 						range = {text: spaces, style: style, ignoreChars: spacesCount - 1};
 						data.ranges.push(range);
@@ -875,7 +875,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					if (start === end) {
 						return;
 					}
-					tabIndex = text.indexOf("\t", start); //$NON-NLS-0$
+					tabIndex = text.indexOf("\t", start); //$NON-NLS-1$
 				}
 			}
 			if (start <= end) {
@@ -886,14 +886,14 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_createSpan: function(_parent, text, style, ignoreChars) {
 			var view = this.view;
-			var tagName = "span"; //$NON-NLS-0$
+			var tagName = "span"; //$NON-NLS-1$
 			if (style && style.tagName) {
 				tagName = style.tagName.toLowerCase();
 			}
-			var isLink = tagName === "a"; //$NON-NLS-0$
+			var isLink = tagName === "a"; //$NON-NLS-1$
 			if (isLink) { this.hasLink = true; }
 			if (isLink && !view._linksVisible) {
-				tagName = "span"; //$NON-NLS-0$
+				tagName = "span"; //$NON-NLS-1$
 			}
 			var doc = _parent.ownerDocument;
 			var child = util.createElement(_parent.ownerDocument, tagName);
@@ -906,9 +906,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				child.ignore = true;
 			}
 			applyStyle(style, child);
-			if (tagName === "a") { //$NON-NLS-0$
+			if (tagName === "a") { //$NON-NLS-1$
 				var win = view._getWindow();
-				addHandler(child, "click", function(e) { return view._handleLinkClick(e ? e : win.event); }, false); //$NON-NLS-0$
+				addHandler(child, "click", function(e) { return view._handleLinkClick(e ? e : win.event); }, false); //$NON-NLS-1$
 			}
 			child.viewStyle = style;
 			if (ignoreChars) {
@@ -957,8 +957,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 							*/
 							var fixIE8 = index === 0 && util.isIE === 8;
 							if (fixIE8) { index = 1; }
-							range.moveEnd("character", index + 1); //$NON-NLS-0$
-							range.moveStart("character", index); //$NON-NLS-0$
+							range.moveEnd("character", index + 1); //$NON-NLS-1$
+							range.moveStart("character", index); //$NON-NLS-1$
 							result = new TextRect(range.getBoundingClientRect());
 							if (fixIE8) {
 								result.left = lineChild.getClientRects()[0].left;
@@ -967,7 +967,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 							var text = textNode.data;
 							lineChild.removeChild(textNode);
 							lineChild.appendChild(doc.createTextNode(text.substring(0, index)));
-							var span = util.createElement(doc, "span"); //$NON-NLS-0$
+							var span = util.createElement(doc, "span"); //$NON-NLS-1$
 							span.appendChild(doc.createTextNode(text.substring(index, index + 1)));
 							lineChild.appendChild(span);
 							lineChild.appendChild(doc.createTextNode(text.substring(index + 1)));
@@ -1201,10 +1201,10 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 						if (data) {
 							for (var i = data.length - 1; i >= 0; i--) {
 								var ch = data.substring(i, i + 1);
-								if (ignored < lineChild.ignoreChars && (ch === " " || ch === "\uFEFF")) { //$NON-NLS-1$ //$NON-NLS-0$
+								if (ignored < lineChild.ignoreChars && (ch === " " || ch === "\uFEFF")) { //$NON-NLS-1$ //$NON-NLS-1$
 									ignored++;
 								} else {
-									childText.push(ch === "\u00A0" ? "\t" : ch); //$NON-NLS-1$ //$NON-NLS-0$
+									childText.push(ch === "\u00A0" ? "\t" : ch); //$NON-NLS-1$ //$NON-NLS-1$
 								}
 							}
 						}
@@ -1276,8 +1276,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 						} else {
 							if (fixIE8) { start = 1; } 
 							range.moveToElementText(lineChild);
-							range.move("character", start); //$NON-NLS-0$
-							range.moveEnd("character", end - start); //$NON-NLS-0$
+							range.move("character", start); //$NON-NLS-1$
+							range.moveEnd("character", end - start); //$NON-NLS-1$
 						}
 						rects1 = range.getClientRects();
 						var found = false;
@@ -1306,8 +1306,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 						range.setEnd(textNode, end);
 					} else {
 						range.moveToElementText(lineChild);
-						range.move("character", start); //$NON-NLS-0$
-						range.moveEnd("character", end - start); //$NON-NLS-0$
+						range.move("character", start); //$NON-NLS-1$
+						range.moveEnd("character", end - start); //$NON-NLS-1$
 					}
 					rects1 = range.getClientRects();
 					var trailing = false;
@@ -1343,13 +1343,13 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				} else {
 					var newText = [];
 					for (var q = 0; q < nodeLength; q++) {
-						newText.push("<span>"); //$NON-NLS-0$
+						newText.push("<span>"); //$NON-NLS-1$
 						if (q === nodeLength - 1) {
 							newText.push(textNode.data.substring(q));
 						} else {
 							newText.push(textNode.data.substring(q, q + 1));
 						}
-						newText.push("</span>"); //$NON-NLS-0$
+						newText.push("</span>"); //$NON-NLS-1$
 					}
 					lineChild.innerHTML = newText.join("");
 					var rangeChild = lineChild.firstChild;
@@ -1470,7 +1470,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		/** @private */
 		getNextOffset: function (offset, data) {
-			if (data.unit === "line") { //$NON-NLS-0$
+			if (data.unit === "line") { //$NON-NLS-1$
 				var view = this.view;
 				var model = view._model;
 				var lineIndex = model.getLineAtOffset(offset);
@@ -1481,7 +1481,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				data.count++;
 				return model.getLineStart(lineIndex);
 			}
-			if (data.unit === "wordend" || data.unit === "wordWS" || data.unit === "wordendWS") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			if (data.unit === "wordend" || data.unit === "wordWS" || data.unit === "wordendWS") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-1$
 				return this._getNextOffset_W3C(offset, data);
 			}
 			return util.isIE ? this._getNextOffset_IE(offset, data) : this._getNextOffset_W3C(offset, data);
@@ -1504,7 +1504,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var offsetInLine = offset - lineStart;
 			var c;
 			var step = data.count < 0 ? -1 : 1;
-			if (data.unit === "word" || data.unit === "wordend" || data.unit === "wordWS" || data.unit === "wordendWS") { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			if (data.unit === "word" || data.unit === "wordend" || data.unit === "wordWS" || data.unit === "wordendWS") { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-1$
 				var previousPunctuation, previousLetterOrDigit, punctuation, letterOrDigit;
 				while (data.count !== 0) {
 					if (data.count > 0) {
@@ -1515,9 +1515,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 						offsetInLine++;
 						while (offsetInLine < lineLength) {
 							c = lineText.charCodeAt(offsetInLine);
-							if (data.unit !== "wordWS" && data.unit !== "wordendWS") { //$NON-NLS-1$ //$NON-NLS-0$
+							if (data.unit !== "wordWS" && data.unit !== "wordendWS") { //$NON-NLS-1$ //$NON-NLS-1$
 								punctuation = _isPunctuation(c);
-								if (data.unit === "wordend") { //$NON-NLS-0$
+								if (data.unit === "wordend") { //$NON-NLS-1$
 									if (!punctuation && previousPunctuation) { break; }
 								} else {
 									if (punctuation && !previousPunctuation) { break; }
@@ -1526,7 +1526,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 							} else {
 								letterOrDigit  = !_isWhitespace(c);
 							}
-							if (data.unit === "wordend" || data.unit === "wordendWS") { //$NON-NLS-1$ //$NON-NLS-0$
+							if (data.unit === "wordend" || data.unit === "wordendWS") { //$NON-NLS-1$ //$NON-NLS-1$
 								if (!letterOrDigit && previousLetterOrDigit) { break; }
 							} else {
 								if (letterOrDigit && !previousLetterOrDigit) { break; }
@@ -1543,9 +1543,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 						previousLetterOrDigit = !previousPunctuation && !_isWhitespace(c);
 						while (0 < offsetInLine) {
 							c = lineText.charCodeAt(offsetInLine - 1);
-							if (data.unit !== "wordWS" && data.unit !== "wordendWS") { //$NON-NLS-1$ //$NON-NLS-0$ 
+							if (data.unit !== "wordWS" && data.unit !== "wordendWS") { //$NON-NLS-1$ //$NON-NLS-1$ 
 								punctuation = _isPunctuation(c);
-								if (data.unit === "wordend") { //$NON-NLS-0$
+								if (data.unit === "wordend") { //$NON-NLS-1$
 									if (punctuation && !previousPunctuation) { break; }
 								} else {
 									if (!punctuation && previousPunctuation) { break; }
@@ -1554,7 +1554,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 							} else {
 								letterOrDigit  = !_isWhitespace(c);
 							}
-							if (data.unit === "wordend" || data.unit === "wordendWS") { //$NON-NLS-1$ //$NON-NLS-0$
+							if (data.unit === "wordend" || data.unit === "wordendWS") { //$NON-NLS-1$ //$NON-NLS-1$
 								if (letterOrDigit && !previousLetterOrDigit) { break; }
 							} else {
 								if (!letterOrDigit && previousLetterOrDigit) { break; }
@@ -1634,7 +1634,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 						} else {
 							range.moveToElementText(lineChild);
 							range.collapse();
-							range.moveEnd("character", offset - lineOffset); //$NON-NLS-0$
+							range.moveEnd("character", offset - lineOffset); //$NON-NLS-1$
 						}
 						len = range.text.length;
 						range.moveEnd(data.unit, step);
@@ -1666,7 +1666,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var that = this;
 			this.forEach(function(span) {
 				var style = span.viewStyle;
-				if (style && style.tagName && style.tagName.toLowerCase() === "a") { //$NON-NLS-0$
+				if (style && style.tagName && style.tagName.toLowerCase() === "a") { //$NON-NLS-1$
 					child.replaceChild(that._createSpan(child, span.firstChild.data, style), span);
 				}
 				return true;
@@ -1786,7 +1786,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			* reset to the appropriate value further down.
 			*/
 			if (util.isWebkit) {
-				clientDiv.style.width = "0x7fffffffpx"; //$NON-NLS-0$
+				clientDiv.style.width = "0x7fffffffpx"; //$NON-NLS-1$
 			}
 			var lineCount = model.getLineCount();
 			for (var lineIndex=0; lineIndex<lineCount; lineIndex++) {
@@ -1832,7 +1832,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var _scroll = this._getScroll();
 			var viewPad = this._getViewPadding();
 			var viewRect = this._viewDiv.getBoundingClientRect();
-			if (from === "document") { //$NON-NLS-0$
+			if (from === "document") { //$NON-NLS-1$
 				if (rect.x !== undefined) {
 					rect.x += - _scroll.x + viewRect.left + viewPad.left;
 				}
@@ -1841,7 +1841,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				}
 			}
 			//At this point rect is in the widget coordinate space
-			if (to === "document") { //$NON-NLS-0$
+			if (to === "document") { //$NON-NLS-1$
 				if (rect.x !== undefined) {
 					rect.x += _scroll.x - viewRect.left - viewPad.left;
 				}
@@ -1870,7 +1870,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			
 			this._destroyView();
 
-			var e = {type: "Destroy"}; //$NON-NLS-0$
+			var e = {type: "Destroy"}; //$NON-NLS-1$
 			this.onDestroy(e);
 
 			this._parent = null;
@@ -2267,8 +2267,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				options = this._defaultOptions();
 			} else if (arguments.length === 1) {
 				var arg = arguments[0];
-				if (typeof arg === "string") { //$NON-NLS-0$
-					return clone(this["_" + arg]); //$NON-NLS-0$
+				if (typeof arg === "string") { //$NON-NLS-1$
+					return clone(this["_" + arg]); //$NON-NLS-1$
 				}
 				options = arg;
 			} else {
@@ -2281,7 +2281,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			}
 			for (var option in options) {
 				if (options.hasOwnProperty(option)) {
-					options[option] = clone(this["_" + option]); //$NON-NLS-0$
+					options[option] = clone(this["_" + option]); //$NON-NLS-1$
 				}
 			}
 			return options;
@@ -2453,7 +2453,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var action = this._actions[actionID];
 			if (action) {
 				if (action.actionDescription && action.actionDescription.id) {
-					mMetrics.logEvent("editor", "action", action.actionDescription.id); //$NON-NLS-1$ //$NON-NLS-0$
+					mMetrics.logEvent("editor", "action", action.actionDescription.id); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				if (!defaultAction && action.handler) {
 					if (action.handler(actionOptions)) {
@@ -2461,7 +2461,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					}
 				}
 				if (action.defaultHandler) {
-					return typeof action.defaultHandler(actionOptions) === "boolean"; //$NON-NLS-0$
+					return typeof action.defaultHandler(actionOptions) === "boolean"; //$NON-NLS-1$
 				}
 			}
 			return false;
@@ -2923,7 +2923,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			if (!ruler && this._imeOffset !== -1) {
 				imeLineIndex = this._model.getLineAtOffset(this._imeOffset);
 			}
-			if (!ruler || ruler.getOverview() === "page") { //$NON-NLS-0$
+			if (!ruler || ruler.getOverview() === "page") { //$NON-NLS-1$
 				var child = div.firstChild;
 				while (child) {
 					var lineIndex = child.lineIndex;
@@ -2942,7 +2942,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					}
 				}
 			}
-			this.dispatchEvent({type: "Redraw", startLine: startLine, endLine: endLine, ruler: ruler}); //$NON-NLS-0$
+			this.dispatchEvent({type: "Redraw", startLine: startLine, endLine: endLine, ruler: ruler}); //$NON-NLS-1$
 			this._queueUpdate();
 		},
 		/**
@@ -3127,15 +3127,15 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		setModel: function(model) {
 			if (model === this._model) { return; }
 			model = model || new mTextModel.TextModel();
-			this._model.removeEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-0$
-			this._model.removeEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-0$
+			this._model.removeEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-1$
+			this._model.removeEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-1$
 			var oldLineCount = this._model.getLineCount();
 			var oldCharCount = this._model.getCharCount();
 			var newLineCount = model.getLineCount();
 			var newCharCount = model.getCharCount();
 			var newText = model.getText();
 			var e = {
-				type: "ModelChanging", //$NON-NLS-0$
+				type: "ModelChanging", //$NON-NLS-1$
 				text: newText,
 				start: 0,
 				removedCharCount: oldCharCount,
@@ -3146,7 +3146,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			this.onModelChanging(e);
 			this._model = model;
 			e = {
-				type: "ModelChanged", //$NON-NLS-0$
+				type: "ModelChanged", //$NON-NLS-1$
 				start: 0,
 				removedCharCount: oldCharCount,
 				addedCharCount: newCharCount,
@@ -3154,8 +3154,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				addedLineCount: newLineCount
 			};
 			this.onModelChanged(e); 
-			this._model.addEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-0$
-			this._model.addEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-0$
+			this._model.addEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-1$
+			this._model.addEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-1$
 			this._reset();
 			this._update();
 		},
@@ -3170,17 +3170,17 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var defaultOptions = this._defaultOptions();
 			for (var option in options) {
 				if (options.hasOwnProperty(option)) {
-					var newValue = options[option], oldValue = this["_" + option]; //$NON-NLS-0$
+					var newValue = options[option], oldValue = this["_" + option]; //$NON-NLS-1$
 					if (compare(oldValue, newValue)) { continue; }
 					var update = defaultOptions[option] ? defaultOptions[option].update : null;
 					if (update) {
 						update.call(this, newValue);
 						continue;
 					}
-					this["_" + option] = clone(newValue); //$NON-NLS-0$
+					this["_" + option] = clone(newValue); //$NON-NLS-1$
 				}
 			}
-			this.onOptions({type: "Options", options: options}); //$NON-NLS-0$
+			this.onOptions({type: "Options", options: options}); //$NON-NLS-1$
 		},
 		/**
 		 * @class This object describes the selection show options.
@@ -3290,7 +3290,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		 * @see orion.editor.TextView#getText
 		 */
 		setText: function (text, start, end, show, callback) {
-			var isSingle = typeof text === "string"; //$NON-NLS-0$
+			var isSingle = typeof text === "string"; //$NON-NLS-1$
 			var reset = start === undefined && end === undefined && isSingle;
 			var edit;
 			if (isSingle) {
@@ -3406,7 +3406,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				if (topNode === temp) {
 					return;
 				}
-				if (temp.className && temp.className.indexOf("textViewFind") !== -1) { //$NON-NLS-0$
+				if (temp.className && temp.className.indexOf("textViewFind") !== -1) { //$NON-NLS-1$
 					return;
 				}
 				temp = temp.parentNode;
@@ -3458,13 +3458,13 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			if (util.isIE < 9) {
 				if (!this._getSelections()[0].isEmpty()) {
 					var rootDiv = this._rootDiv;
-					var child = util.createElement(rootDiv.ownerDocument, "div"); //$NON-NLS-0$
+					var child = util.createElement(rootDiv.ownerDocument, "div"); //$NON-NLS-1$
 					rootDiv.appendChild(child);
 					rootDiv.removeChild(child);
 				}
 			}
 			if (this._cursorDiv) {
-				this._cursorDiv.style.display = "none"; //$NON-NLS-0$
+				this._cursorDiv.style.display = "none"; //$NON-NLS-1$
 			}
 			if (this._domSelection) {
 				this._domSelection.forEach(function(domSelection) { domSelection.update(); });
@@ -3496,7 +3496,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				}
 			}
 			if (!this._ignoreFocus) {
-				this.onBlur({type: "Blur"}); //$NON-NLS-0$
+				this.onBlur({type: "Blur"}); //$NON-NLS-1$
 			}
 		},
 		_handleCompositionStart: function (e) {
@@ -3538,8 +3538,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				this._updateDOMSelection();
 			}
 			var preventDefault = false;
-			if (this.isListening("ContextMenu")) { //$NON-NLS-0$
-				var evt = this._createMouseEvent("ContextMenu", e); //$NON-NLS-0$
+			if (this.isListening("ContextMenu")) { //$NON-NLS-1$
+				var evt = this._createMouseEvent("ContextMenu", e); //$NON-NLS-1$
 				evt.screenX = e.screenX;
 				evt.screenY = e.screenY;
 				this.onContextMenu(evt);
@@ -3600,9 +3600,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					that._ignoreBlur = false;
 				}, 0);
 			}
-			if (this.isListening("DragStart") && this._dragOffset !== -1) { //$NON-NLS-0$
+			if (this.isListening("DragStart") && this._dragOffset !== -1) { //$NON-NLS-1$
 				this._isMouseDown = false;
-				this.onDragStart(this._createMouseEvent("DragStart", e)); //$NON-NLS-0$
+				this.onDragStart(this._createMouseEvent("DragStart", e)); //$NON-NLS-1$
 				this._dragOffset = -1;
 			} else {
 				if (e.preventDefault) { e.preventDefault(); }
@@ -3611,16 +3611,16 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_handleDrag: function (e) {
 			if (this._ignoreEvent(e)) { return; }
-			if (this.isListening("Drag")) { //$NON-NLS-0$
-				this.onDrag(this._createMouseEvent("Drag", e)); //$NON-NLS-0$
+			if (this.isListening("Drag")) { //$NON-NLS-1$
+				this.onDrag(this._createMouseEvent("Drag", e)); //$NON-NLS-1$
 			}
 		},
 		_handleDragEnd: function (e) {
 			if (this._ignoreEvent(e)) { return; }
 			this._dropTarget = false;
 			this._dragOffset = -1;
-			if (this.isListening("DragEnd")) { //$NON-NLS-0$
-				this.onDragEnd(this._createMouseEvent("DragEnd", e)); //$NON-NLS-0$
+			if (this.isListening("DragEnd")) { //$NON-NLS-1$
+				this.onDragEnd(this._createMouseEvent("DragEnd", e)); //$NON-NLS-1$
 			}
 			if (util.isFirefox < 13) {
 				this._fixCaret();
@@ -3629,7 +3629,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				* selection is dropped onto itself. The fix is to detected the case and 
 				* call fixCaret() a second time.
 				*/
-				if (e.dataTransfer.dropEffect === "none" && !e.dataTransfer.mozUserCancelled) { //$NON-NLS-0$
+				if (e.dataTransfer.dropEffect === "none" && !e.dataTransfer.mozUserCancelled) { //$NON-NLS-1$
 					this._fixCaret();
 				}
 			}
@@ -3638,9 +3638,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			if (this._ignoreEvent(e)) { return; }
 			var prevent = true;
 			this._dropTarget = true;
-			if (this.isListening("DragEnter")) { //$NON-NLS-0$
+			if (this.isListening("DragEnter")) { //$NON-NLS-1$
 				prevent = false;
-				this.onDragEnter(this._createMouseEvent("DragEnter", e)); //$NON-NLS-0$
+				this.onDragEnter(this._createMouseEvent("DragEnter", e)); //$NON-NLS-1$
 			}
 			/*
 			* Webkit will not send drop events if this event is not prevented, as spec in HTML5.
@@ -3655,9 +3655,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		_handleDragOver: function (e) {
 			if (this._ignoreEvent(e)) { return; }
 			var prevent = true;
-			if (this.isListening("DragOver")) { //$NON-NLS-0$
+			if (this.isListening("DragOver")) { //$NON-NLS-1$
 				prevent = false;
-				this.onDragOver(this._createMouseEvent("DragOver", e)); //$NON-NLS-0$
+				this.onDragOver(this._createMouseEvent("DragOver", e)); //$NON-NLS-1$
 			}
 			/*
 			* Webkit will not send drop events if this event is not prevented, as spec in HTML5.
@@ -3665,7 +3665,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			* event will result is loss of functionality (insertion mark, etc).
 			*/
 			if (util.isWebkit || prevent) {
-				if (prevent) { e.dataTransfer.dropEffect = "none"; } //$NON-NLS-0$
+				if (prevent) { e.dataTransfer.dropEffect = "none"; } //$NON-NLS-1$
 				if (e.preventDefault) { e.preventDefault(); }
 				return false;
 			}
@@ -3673,15 +3673,15 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		_handleDragLeave: function (e) {
 			if (this._ignoreEvent(e)) { return; }
 			this._dropTarget = false;
-			if (this.isListening("DragLeave")) { //$NON-NLS-0$
-				this.onDragLeave(this._createMouseEvent("DragLeave", e)); //$NON-NLS-0$
+			if (this.isListening("DragLeave")) { //$NON-NLS-1$
+				this.onDragLeave(this._createMouseEvent("DragLeave", e)); //$NON-NLS-1$
 			}
 		},
 		_handleDrop: function (e) {
 			if (this._ignoreEvent(e)) { return; }
 			this._dropTarget = false;
-			if (this.isListening("Drop")) { //$NON-NLS-0$
-				this.onDrop(this._createMouseEvent("Drop", e)); //$NON-NLS-0$
+			if (this.isListening("Drop")) { //$NON-NLS-1$
+				this.onDrop(this._createMouseEvent("Drop", e)); //$NON-NLS-1$
 			}
 			/*
 			* This event must be prevented otherwise the user agent will modify
@@ -3702,21 +3702,21 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				this._updateDOMSelection();
 			}
 			if (this._cursorDiv) {
-				this._cursorDiv.style.display = "block"; //$NON-NLS-0$
+				this._cursorDiv.style.display = "block"; //$NON-NLS-1$
 			}
 			if (this._domSelection) {
 				this._domSelection.forEach(function(domSelection) { domSelection.update(); });
 			}
 			if (!this._ignoreFocus) {
-				this.onFocus({type: "Focus"}); //$NON-NLS-0$
+				this.onFocus({type: "Focus"}); //$NON-NLS-1$
 			}
 		},
 		_handleKeyDown: function (e) {
 			this._cancelCheckSelection();
 			if (this._ignoreEvent(e)) {	return;	}
-			if (this.isListening("KeyDown")) { //$NON-NLS-0$
-				var keyEvent = this._createKeyEvent("KeyDown", e); //$NON-NLS-0$
-				this.onKeyDown(keyEvent); //$NON-NLS-0$
+			if (this.isListening("KeyDown")) { //$NON-NLS-1$
+				var keyEvent = this._createKeyEvent("KeyDown", e); //$NON-NLS-1$
+				this.onKeyDown(keyEvent); //$NON-NLS-1$
 				if (keyEvent.defaultPrevented) {
 					/*
 					* Feature in Firefox. Keypress events still happen even if the keydown event
@@ -3844,9 +3844,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					}
 				}
 			}
-			if (this.isListening("KeyPress")) { //$NON-NLS-0$
-				var keyEvent = this._createKeyEvent("KeyPress", e); //$NON-NLS-0$
-				this.onKeyPress(keyEvent); //$NON-NLS-0$
+			if (this.isListening("KeyPress")) { //$NON-NLS-1$
+				var keyEvent = this._createKeyEvent("KeyPress", e); //$NON-NLS-1$
+				this.onKeyPress(keyEvent); //$NON-NLS-1$
 				if (keyEvent.defaultPrevented) {
 					e.preventDefault();
 					return;
@@ -3892,9 +3892,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_handleKeyUp: function (e) {
 			if (this._ignoreEvent(e)) { return; }
-			if (this.isListening("KeyUp")) { //$NON-NLS-0$
-				var keyEvent = this._createKeyEvent("KeyUp", e); //$NON-NLS-0$
-				this.onKeyUp(keyEvent); //$NON-NLS-0$
+			if (this.isListening("KeyUp")) { //$NON-NLS-1$
+				var keyEvent = this._createKeyEvent("KeyUp", e); //$NON-NLS-1$
+				this.onKeyUp(keyEvent); //$NON-NLS-1$
 				if (keyEvent.defaultPrevented) {
 					e.preventDefault();
 					return;
@@ -3933,7 +3933,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var add = util.isMac ? e.metaKey : e.ctrlKey;
 			this._blockSelection = this._doubleClickSelection = null;
 			if (this._clickCount === 1) {
-				var drag = (!util.isOpera || util.isOpera >= 12.16) && this._hasFocus && this.isListening("DragStart"); //$NON-NLS-0$
+				var drag = (!util.isOpera || util.isOpera >= 12.16) && this._hasFocus && this.isListening("DragStart"); //$NON-NLS-1$
 				result = this._setSelectionTo(e.clientX, e.clientY, true, extend, add, drag);
 				if (result) { this._setGrab(target); }
 			} else {
@@ -3964,7 +3964,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			if (this._ignoreEvent(e)) { return; }
 			if (this._linksVisible) {
 				var target = e.target || e.srcElement;
-				if (target.tagName !== "A") { //$NON-NLS-0$
+				if (target.tagName !== "A") { //$NON-NLS-1$
 					this._setLinksVisible(false);
 				} else {
 					return;
@@ -3999,8 +3999,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					this._clickCount = 1;
 				}
 			}
-			if (this.isListening("MouseDown")) { //$NON-NLS-0$
-				var mouseEvent = this._createMouseEvent("MouseDown", e); //$NON-NLS-0$
+			if (this.isListening("MouseDown")) { //$NON-NLS-1$
+				var mouseEvent = this._createMouseEvent("MouseDown", e); //$NON-NLS-1$
 				this.onMouseDown(mouseEvent);
 				if (mouseEvent.defaultPrevented) {
 					e.preventDefault();
@@ -4025,23 +4025,23 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		_handleMouseOver: function (e) {
 			if (this._ignoreEvent(e)) { return; }
 			if (this._animation) { return; }
-			if (this.isListening("MouseOver")) { //$NON-NLS-0$
-				this.onMouseOver(this._createMouseEvent("MouseOver", e)); //$NON-NLS-0$
+			if (this.isListening("MouseOver")) { //$NON-NLS-1$
+				this.onMouseOver(this._createMouseEvent("MouseOver", e)); //$NON-NLS-1$
 			}
 		},
 		_handleMouseOut: function (e) {
 			if (this._ignoreEvent(e)) { return; }
 			if (this._animation) { return; }
-			if (this.isListening("MouseOut")) { //$NON-NLS-0$
-				this.onMouseOut(this._createMouseEvent("MouseOut", e)); //$NON-NLS-0$
+			if (this.isListening("MouseOut")) { //$NON-NLS-1$
+				this.onMouseOut(this._createMouseEvent("MouseOut", e)); //$NON-NLS-1$
 			}
 		},
 		_handleMouseMove: function (e) {
 			if (this._animation) { return; }
 			var inClient = this._isClientDiv(e);
-			if (this.isListening("MouseMove")) { //$NON-NLS-0$
+			if (this.isListening("MouseMove")) { //$NON-NLS-1$
 				if (inClient || this._isMouseDown){
-					var mouseEvent = this._createMouseEvent("MouseMove", e); //$NON-NLS-0$
+					var mouseEvent = this._createMouseEvent("MouseMove", e); //$NON-NLS-1$
 					this.onMouseMove(mouseEvent);
 					if (mouseEvent.defaultPrevented) {
 						e.preventDefault();
@@ -4107,13 +4107,13 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var rightEdge = viewRect.left + viewPad.left + width;
 			var bottomEdge = viewRect.top + viewPad.top + height;
 			if (y < topEdge) {
-				this._doAutoScroll("up", x, y - topEdge); //$NON-NLS-0$
+				this._doAutoScroll("up", x, y - topEdge); //$NON-NLS-1$
 			} else if (y > bottomEdge) {
-				this._doAutoScroll("down", x, y - bottomEdge); //$NON-NLS-0$
+				this._doAutoScroll("down", x, y - bottomEdge); //$NON-NLS-1$
 			} else if (x < leftEdge && !this._wrapMode) {
-				this._doAutoScroll("left", x - leftEdge, y); //$NON-NLS-0$
+				this._doAutoScroll("left", x - leftEdge, y); //$NON-NLS-1$
 			} else if (x > rightEdge && !this._wrapMode) {
-				this._doAutoScroll("right", x - rightEdge, y); //$NON-NLS-0$
+				this._doAutoScroll("right", x - rightEdge, y); //$NON-NLS-1$
 			} else {
 				this._endAutoScroll();
 				this._setSelectionTo(x, y, false, true);
@@ -4140,7 +4140,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			};
 		},
 		_createMouseEvent: function(type, e) {
-			var pt = this.convert({x: e.clientX, y: e.clientY}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-0$
+			var pt = this.convert({x: e.clientX, y: e.clientY}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-2$
 			return {
 				type: type,
 				event: e,
@@ -4153,7 +4153,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			};
 		},
 		_createTouchEvent: function(type, e) {
-			var pt = e.touches.length ? this.convert({x: e.touches[0].clientX, y: e.touches[0].clientY}, "page", "document") : {}; //$NON-NLS-1$ //$NON-NLS-0$
+			var pt = e.touches.length ? this.convert({x: e.touches[0].clientX, y: e.touches[0].clientY}, "page", "document") : {}; //$NON-NLS-1$ //$NON-NLS-2$
 			return {
 				type: type,
 				event: e,
@@ -4167,9 +4167,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_handleMouseUp: function (e) {
 			var left = e.which ? e.button === 0 : e.button === 1;
-			if (this.isListening("MouseUp")) { //$NON-NLS-0$
+			if (this.isListening("MouseUp")) { //$NON-NLS-1$
 				if (this._isClientDiv(e) || (left && this._isMouseDown)) {
-					var mouseEvent = this._createMouseEvent("MouseUp", e); //$NON-NLS-0$
+					var mouseEvent = this._createMouseEvent("MouseUp", e); //$NON-NLS-1$
 					this.onMouseUp(mouseEvent);
 					if (mouseEvent.defaultPrevented) {
 						e.preventDefault();
@@ -4233,7 +4233,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				pixelY = (-e.wheelDelta / 40) * lineHeight;
 			} else if (util.isFirefox) {
 				var limit = 256;
-				if (e.type === "wheel") { //$NON-NLS-0$
+				if (e.type === "wheel") { //$NON-NLS-1$
 					if (e.deltaMode) { // page or line
 						pixelX = Math.max(-limit, Math.min(limit, e.deltaX)) * lineHeight;
 						pixelY = Math.max(-limit, Math.min(limit, e.deltaY)) * lineHeight;
@@ -4380,7 +4380,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				} else {
 					this._update();
 				}
-				this.dispatchEvent({type: "Resize"}); //$NON-NLS-0$
+				this.dispatchEvent({type: "Resize"}); //$NON-NLS-1$
 			}
 		},
 		_handleRulerEvent: function (e) {
@@ -4394,7 +4394,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				element = element.parentNode;
 			}
 			var ruler = element ? element._ruler : null;
-			if (lineIndex === undefined && ruler && ruler.getOverview() === "document") { //$NON-NLS-0$
+			if (lineIndex === undefined && ruler && ruler.getOverview() === "document") { //$NON-NLS-1$
 				var clientHeight = this._getClientHeight ();
 				var lineCount = this._model.getLineCount ();
 				var viewPad = this._getViewPadding();
@@ -4417,19 +4417,19 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			}
 			if (ruler) {
 				switch (e.type) {
-					case "click": //$NON-NLS-0$
+					case "click": //$NON-NLS-1$
 						if (ruler.onClick) { ruler.onClick(lineIndex, e); }
 						break;
-					case "dblclick": //$NON-NLS-0$
+					case "dblclick": //$NON-NLS-1$
 						if (ruler.onDblClick) { ruler.onDblClick(lineIndex, e); }
 						break;
-					case "mousemove": //$NON-NLS-0$
+					case "mousemove": //$NON-NLS-1$
 						if (ruler.onMouseMove) { ruler.onMouseMove(lineIndex, e); }
 						break;
-					case "mouseover": //$NON-NLS-0$
+					case "mouseover": //$NON-NLS-1$
 						if (ruler.onMouseOver) { ruler.onMouseOver(lineIndex, e); }
 						break;
-					case "mouseout": //$NON-NLS-0$
+					case "mouseout": //$NON-NLS-1$
 						if (ruler.onMouseOut) { 
 							var tmp = e.relatedTarget;
 							while (tmp && tmp !== this._rootDiv) {
@@ -4455,7 +4455,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				this._commitIME();
 				this._update(oldY === _scroll.y);
 				var e = {
-					type: "Scroll", //$NON-NLS-0$
+					type: "Scroll", //$NON-NLS-1$
 					oldValue: {x: oldX, y: oldY},
 					newValue: _scroll
 				};
@@ -4477,7 +4477,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		_getModelOffset: function(node, offset) {
 			if (!node) { return; }
 			var lineNode;
-			if (node.tagName === "DIV") { //$NON-NLS-0$
+			if (node.tagName === "DIV") { //$NON-NLS-1$
 				lineNode = node;
 			} else {
 				lineNode = node.parentNode.parentNode;
@@ -4633,8 +4633,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			e.preventDefault();
 		},
 		_handleTouchStart: function (e) {
-			if (this.isListening("TouchStart")) { //$NON-NLS-0$
-				var touchEvent = this._createTouchEvent("TouchStart", e); //$NON-NLS-0$
+			if (this.isListening("TouchStart")) { //$NON-NLS-1$
+				var touchEvent = this._createTouchEvent("TouchStart", e); //$NON-NLS-1$
 				this.onTouchStart(touchEvent);
 				if (touchEvent.defaultPrevented) {
 					e.preventDefault();
@@ -4647,8 +4647,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			this._commitIME();
 			var win = this._getWindow();
 			if (this._touchScrollTimer) {
-				this._vScrollDiv.style.display = "none"; //$NON-NLS-0$
-				this._hScrollDiv.style.display = "none"; //$NON-NLS-0$
+				this._vScrollDiv.style.display = "none"; //$NON-NLS-1$
+				this._hScrollDiv.style.display = "none"; //$NON-NLS-1$
 				win.clearInterval(this._touchScrollTimer);
 				this._touchScrollTimer = null;
 			}
@@ -4668,15 +4668,15 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 						y = touch.pageY - win.pageYOffset;
 				    }
 				}
-				var pt = this.convert({x: x, y: y}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-0$
+				var pt = this.convert({x: x, y: y}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-2$
 				this._lastTouchOffset = this.getOffsetAtLocation(pt.x, pt.y);
 				this._touchStartTime = e.timeStamp;
 				this._touching = true;
 			}
 		},
 		_handleTouchMove: function (e) {
-			if (this.isListening("TouchMove")) { //$NON-NLS-0$
-				var touchEvent = this._createTouchEvent("TouchMove", e); //$NON-NLS-0$
+			if (this.isListening("TouchMove")) { //$NON-NLS-1$
+				var touchEvent = this._createTouchEvent("TouchMove", e); //$NON-NLS-1$
 				this.onTouchMove(touchEvent);
 				if (touchEvent.defaultPrevented) {
 					e.preventDefault();
@@ -4693,9 +4693,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				this._touchCurrentY = touch.clientY;
 				var interval = 10;
 				if (!this._touchScrollTimer && (e.timeStamp - this._touchStartTime) < (interval*20)) {
-					this._vScrollDiv.style.display = "block"; //$NON-NLS-0$
+					this._vScrollDiv.style.display = "block"; //$NON-NLS-1$
 					if (!this._wrapMode) {
-						this._hScrollDiv.style.display = "block"; //$NON-NLS-0$
+						this._hScrollDiv.style.display = "block"; //$NON-NLS-1$
 					}
 					var that = this;
 					var win = this._getWindow();
@@ -4710,8 +4710,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 							that._touchStartY = that._touchCurrentY;
 						} else {
 							if (Math.abs(that._touchSpeedX) < 0.1 && Math.abs(that._touchSpeedY) < 0.1) {
-								that._vScrollDiv.style.display = "none"; //$NON-NLS-0$
-								that._hScrollDiv.style.display = "none"; //$NON-NLS-0$
+								that._vScrollDiv.style.display = "none"; //$NON-NLS-1$
+								that._hScrollDiv.style.display = "none"; //$NON-NLS-1$
 								win.clearInterval(that._touchScrollTimer);
 								that._touchScrollTimer = null;
 								return;
@@ -4731,8 +4731,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			}
 		},
 		_handleTouchEnd: function (e) {
-			if (this.isListening("TouchEnd")) { //$NON-NLS-0$
-				var touchEvent = this._createTouchEvent("TouchEnd", e); //$NON-NLS-0$
+			if (this.isListening("TouchEnd")) { //$NON-NLS-1$
+				var touchEvent = this._createTouchEvent("TouchEnd", e); //$NON-NLS-1$
 				this.onTouchEnd(touchEvent);
 				if (touchEvent.defaultPrevented) {
 					e.preventDefault();
@@ -4754,7 +4754,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var keyModes = this._keyModes;
 			for (i = keyModes.length - 1 ; i >= 0; i--) {
 				mode = keyModes[i];
-				if (typeof mode.match === "function") { //$NON-NLS-0$
+				if (typeof mode.match === "function") { //$NON-NLS-1$
 					var actionID = mode.match(e);
 					if (actionID !== undefined) {
 						return this.invokeAction(actionID);
@@ -4774,7 +4774,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				var lineStart = model.getLineStart(lineIndex);
 				if (args.count < 0 && caret === lineStart) {
 					if (lineIndex > 0) {
-						if (args.unit === "character") { //$NON-NLS-0$
+						if (args.unit === "character") { //$NON-NLS-1$
 							args.count++;
 						}
 						lineIndex--;
@@ -4784,7 +4784,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					}
 				} else if (args.count > 0 && caret === model.getLineEnd(lineIndex)) {
 					if (lineIndex + 1 < model.getLineCount()) {
-						if (args.unit === "character") { //$NON-NLS-0$
+						if (args.unit === "character") { //$NON-NLS-1$
 							args.count--;
 						}
 						lineIndex++;
@@ -4794,7 +4794,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					}
 				} else {
 					var removeTab = false;
-					if (args.expandTab && args.unit === "character" && (caret - lineStart) % this._tabSize === 0) { //$NON-NLS-0$
+					if (args.expandTab && args.unit === "character" && (caret - lineStart) % this._tabSize === 0) { //$NON-NLS-1$
 						var lineText = model.getText(lineStart, caret);
 						removeTab = !/[^ ]/.test(lineText); // Only spaces between line start and caret.
 					}
@@ -4835,9 +4835,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				that._doMove(args, selection);
 				var text = that.getText(selection.start, selection.end);
 				switch (args.type) {
-					case "lower": text = text.toLowerCase(); break; //$NON-NLS-0$
-					case "capitalize": text = text.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); }); break; //$NON-NLS-0$
-					case "reverse":  //$NON-NLS-0$
+					case "lower": text = text.toLowerCase(); break; //$NON-NLS-1$
+					case "capitalize": text = text.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); }); break; //$NON-NLS-1$
+					case "reverse":  //$NON-NLS-1$
 						var newText = "";
 						for (var i=0; i<text.length; i++) {
 							var s = text[i];
@@ -4866,7 +4866,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					var lineIndex = model.getLineAtOffset(selection.end);
 					if (selection.end < model.getLineEnd(lineIndex)) {
 						var line = that._getLine(lineIndex);
-						selection.extend(line.getNextOffset(selection.getCaret(), {unit:"character", count:1})); //$NON-NLS-0$
+						selection.extend(line.getNextOffset(selection.getCaret(), {unit:"character", count:1})); //$NON-NLS-1$
 						line.destroy();
 					}
 				}
@@ -5236,13 +5236,13 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var verticalScrollOffset = this._getScroll().y;
 			var pixel;
 			switch (type) {
-				case "textStart": pixel = 0; break; //$NON-NLS-0$
-				case "textEnd": pixel = verticalMaximum - clientHeight; break; //$NON-NLS-0$
-				case "pageDown": pixel = verticalScrollOffset + clientHeight; break; //$NON-NLS-0$
-				case "pageUp": pixel = verticalScrollOffset - clientHeight; break; //$NON-NLS-0$
-				case "lineDown": pixel = verticalScrollOffset + lineHeight; break; //$NON-NLS-0$
-				case "lineUp": pixel = verticalScrollOffset - lineHeight; break; //$NON-NLS-0$
-				case "centerLine": //$NON-NLS-0$
+				case "textStart": pixel = 0; break; //$NON-NLS-1$
+				case "textEnd": pixel = verticalMaximum - clientHeight; break; //$NON-NLS-1$
+				case "pageDown": pixel = verticalScrollOffset + clientHeight; break; //$NON-NLS-1$
+				case "pageUp": pixel = verticalScrollOffset - clientHeight; break; //$NON-NLS-1$
+				case "lineDown": pixel = verticalScrollOffset + lineHeight; break; //$NON-NLS-1$
+				case "lineUp": pixel = verticalScrollOffset - lineHeight; break; //$NON-NLS-1$
+				case "centerLine": //$NON-NLS-1$
 					var selection = this._getSelections()[0];
 					var lineStart = model.getLineAtOffset(selection.start);
 					var lineEnd = model.getLineAtOffset(selection.end);
@@ -5263,7 +5263,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_doTab: function () {
 			if (!this._tabMode || this._readonly) { return; }
-			var text = "\t"; //$NON-NLS-0$
+			var text = "\t"; //$NON-NLS-1$
 			var selections = this._getSelections();
 			if (this._expandTab) {
 				text = [];
@@ -5274,7 +5274,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					var lineIndex = model.getLineAtOffset(caret);
 					var lineStart = model.getLineStart(lineIndex);
 					var spaces = tabSize - ((caret - lineStart) % tabSize);
-					text.push((newArray(spaces + 1)).join(" ")); //$NON-NLS-0$
+					text.push((newArray(spaces + 1)).join(" ")); //$NON-NLS-1$
 				});
 			}
 			return this._modifyContent({text: text, selection: selections, _ignoreDOMSelection: true}, true);
@@ -5285,7 +5285,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_doOverwriteMode: function () {
 			if (this._readonly) { return; }
-			this.setOptions({overwriteMode: !this.getOptions("overwriteMode")}); //$NON-NLS-0$
+			this.setOptions({overwriteMode: !this.getOptions("overwriteMode")}); //$NON-NLS-1$
 			return true;
 		},
 		_doTabMode: function () {
@@ -5293,7 +5293,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			return true;
 		},
 		_doWrapMode: function () {
-			this.setOptions({wrapMode: !this.getOptions("wrapMode")}); //$NON-NLS-0$
+			this.setOptions({wrapMode: !this.getOptions("wrapMode")}); //$NON-NLS-1$
 			return true;
 		},
 		
@@ -5301,17 +5301,17 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		_autoScroll: function () {
 			var model = this._model;
 			var selections = this._getSelections();
-			var selection = Selection.editing(selections, this._autoScrollDir === "down"); //$NON-NLS-0$
-			var pt = this.convert({x: this._autoScrollX, y: this._autoScrollY}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-0$
+			var selection = Selection.editing(selections, this._autoScrollDir === "down"); //$NON-NLS-1$
+			var pt = this.convert({x: this._autoScrollX, y: this._autoScrollY}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-2$
 			var caret = selection.getCaret();
 			var lineCount = model.getLineCount();
 			var caretLine = model.getLineAtOffset(caret), lineIndex, line;
-			if (this._autoScrollDir === "up" || this._autoScrollDir === "down") { //$NON-NLS-1$ //$NON-NLS-0$
+			if (this._autoScrollDir === "up" || this._autoScrollDir === "down") { //$NON-NLS-1$ //$NON-NLS-1$
 				var _scroll = this._autoScrollY / this._getLineHeight();
 				_scroll = _scroll < 0 ? Math.floor(_scroll) : Math.ceil(_scroll);
 				lineIndex = caretLine;
 				lineIndex = Math.max(0, Math.min(lineCount - 1, lineIndex + _scroll));
-			} else if (this._autoScrollDir === "left" || this._autoScrollDir === "right") { //$NON-NLS-1$ //$NON-NLS-0$
+			} else if (this._autoScrollDir === "left" || this._autoScrollDir === "right") { //$NON-NLS-1$ //$NON-NLS-1$
 				lineIndex = this._getLineIndex(pt.y);
 				line = this._getLine(caretLine); 
 				pt.x += line.getBoundingClientRect(caret, false).left;
@@ -5381,30 +5381,30 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		_calculateMetrics: function() {
 			var _parent = this._clientDiv;
 			var doc = _parent.ownerDocument;
-			var c = " "; //$NON-NLS-0$
-			var line = util.createElement(doc, "div"); //$NON-NLS-0$
-			line.style.lineHeight = "normal"; //$NON-NLS-0$
+			var c = " "; //$NON-NLS-1$
+			var line = util.createElement(doc, "div"); //$NON-NLS-1$
+			line.style.lineHeight = "normal"; //$NON-NLS-1$
 			var model = this._model;
 			var lineText = model.getLine(0);
-			var e = {type:"LineStyle", textView: this, 0: 0, lineText: lineText, lineStart: 0}; //$NON-NLS-0$
+			var e = {type:"LineStyle", textView: this, 0: 0, lineText: lineText, lineStart: 0}; //$NON-NLS-1$
 			this.onLineStyle(e);
 			applyStyle(e.style, line);
-			line.style.position = "fixed"; //$NON-NLS-0$
-			line.style.left = "-1000px"; //$NON-NLS-0$
-			var span1 = util.createElement(doc, "span"); //$NON-NLS-0$
+			line.style.position = "fixed"; //$NON-NLS-1$
+			line.style.left = "-1000px"; //$NON-NLS-1$
+			var span1 = util.createElement(doc, "span"); //$NON-NLS-1$
 			span1.appendChild(doc.createTextNode(c));
 			line.appendChild(span1);
-			var span2 = util.createElement(doc, "span"); //$NON-NLS-0$
-			span2.style.fontStyle = "italic"; //$NON-NLS-0$
+			var span2 = util.createElement(doc, "span"); //$NON-NLS-1$
+			span2.style.fontStyle = "italic"; //$NON-NLS-1$
 			span2.appendChild(doc.createTextNode(c));
 			line.appendChild(span2);
-			var span3 = util.createElement(doc, "span"); //$NON-NLS-0$
-			span3.style.fontWeight = "bold"; //$NON-NLS-0$
+			var span3 = util.createElement(doc, "span"); //$NON-NLS-1$
+			span3.style.fontWeight = "bold"; //$NON-NLS-1$
 			span3.appendChild(doc.createTextNode(c));
 			line.appendChild(span3);
-			var span4 = util.createElement(doc, "span"); //$NON-NLS-0$
-			span4.style.fontWeight = "bold"; //$NON-NLS-0$
-			span4.style.fontStyle = "italic"; //$NON-NLS-0$
+			var span4 = util.createElement(doc, "span"); //$NON-NLS-1$
+			span4.style.fontWeight = "bold"; //$NON-NLS-1$
+			span4.style.fontStyle = "italic"; //$NON-NLS-1$
 			span4.appendChild(doc.createTextNode(c));
 			line.appendChild(span4);
 			_parent.appendChild(line);
@@ -5433,10 +5433,10 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			if (fontStyle !== 0) {
 				style = {style: {}};
 				if ((fontStyle & 1) !== 0) {
-					style.style.fontStyle = "italic"; //$NON-NLS-0$
+					style.style.fontStyle = "italic"; //$NON-NLS-1$
 				}
 				if ((fontStyle & 2) !== 0) {
-					style.style.fontWeight = "bold"; //$NON-NLS-0$
+					style.style.fontWeight = "bold"; //$NON-NLS-1$
 				}
 			}
 			var trim = getLineTrim(line);
@@ -5444,28 +5444,28 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			
 			// calculate pad and scroll width
 			var pad = getPadding(this._viewDiv);
-			var div1 = util.createElement(doc, "div"); //$NON-NLS-0$
-			div1.style.position = "fixed"; //$NON-NLS-0$
-			div1.style.left = "-1000px"; //$NON-NLS-0$
-			div1.style.paddingLeft = pad.left + "px"; //$NON-NLS-0$
-			div1.style.paddingTop = pad.top + "px"; //$NON-NLS-0$
-			div1.style.paddingRight = pad.right + "px"; //$NON-NLS-0$
-			div1.style.paddingBottom = pad.bottom + "px"; //$NON-NLS-0$
-			div1.style.width = "100px"; //$NON-NLS-0$
-			div1.style.height = "100px"; //$NON-NLS-0$
-			var div2 = util.createElement(doc, "div"); //$NON-NLS-0$
-			div2.style.width = "100%"; //$NON-NLS-0$
-			div2.style.height = "100%"; //$NON-NLS-0$
+			var div1 = util.createElement(doc, "div"); //$NON-NLS-1$
+			div1.style.position = "fixed"; //$NON-NLS-1$
+			div1.style.left = "-1000px"; //$NON-NLS-1$
+			div1.style.paddingLeft = pad.left + "px"; //$NON-NLS-1$
+			div1.style.paddingTop = pad.top + "px"; //$NON-NLS-1$
+			div1.style.paddingRight = pad.right + "px"; //$NON-NLS-1$
+			div1.style.paddingBottom = pad.bottom + "px"; //$NON-NLS-1$
+			div1.style.width = "100px"; //$NON-NLS-1$
+			div1.style.height = "100px"; //$NON-NLS-1$
+			var div2 = util.createElement(doc, "div"); //$NON-NLS-1$
+			div2.style.width = "100%"; //$NON-NLS-1$
+			div2.style.height = "100%"; //$NON-NLS-1$
 			div1.appendChild(div2);
 			_parent.appendChild(div1);
 			var rect1 = div1.getBoundingClientRect();
 			var rect2 = div2.getBoundingClientRect();
 			var scrollWidth = 0;
 			if (!this._singleMode && !this._noScroll) {
-				div1.style.overflow = 'hidden'; //$NON-NLS-0$
-				div2.style.height = "200px"; //$NON-NLS-0$
+				div1.style.overflow = 'hidden'; //$NON-NLS-1$
+				div2.style.height = "200px"; //$NON-NLS-1$
 				var w1 = div1.clientWidth;
-				div1.style.overflow = 'scroll'; //$NON-NLS-0$
+				div1.style.overflow = 'scroll'; //$NON-NLS-1$
 				var w2 = div1.clientWidth;
 				scrollWidth = w1 - w2;
 			}
@@ -5478,18 +5478,18 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			};
 			var wrapWidth = 0, marginWidth = 0, charWidth = 0;
 			if (!invalid) {
-				div1 = util.createElement(doc, "div"); //$NON-NLS-0$
-				div1.style.position = "fixed"; //$NON-NLS-0$
-				div1.style.left = "-1000px"; //$NON-NLS-0$
+				div1 = util.createElement(doc, "div"); //$NON-NLS-1$
+				div1.style.position = "fixed"; //$NON-NLS-1$
+				div1.style.left = "-1000px"; //$NON-NLS-1$
 				_parent.appendChild(div1);
-				div1.innerHTML = newArray(2).join("a"); //$NON-NLS-0$
+				div1.innerHTML = newArray(2).join("a"); //$NON-NLS-1$
 				rect1 = div1.getBoundingClientRect();
 				charWidth = Math.ceil(rect1.right - rect1.left);
 				if (this._wrapOffset || this._marginOffset) {
-					div1.innerHTML = newArray(this._wrapOffset + 1 + (util.isWebkit ? 0 : 1)).join(" "); //$NON-NLS-0$
+					div1.innerHTML = newArray(this._wrapOffset + 1 + (util.isWebkit ? 0 : 1)).join(" "); //$NON-NLS-1$
 					rect1 = div1.getBoundingClientRect();
 					wrapWidth = Math.ceil(rect1.right - rect1.left);
-					div1.innerHTML = newArray(this._marginOffset + 1).join(" "); //$NON-NLS-0$
+					div1.innerHTML = newArray(this._marginOffset + 1).join(" "); //$NON-NLS-1$
 					rect2 = div1.getBoundingClientRect();
 					marginWidth = Math.ceil(rect2.right - rect2.left);
 				}
@@ -5516,7 +5516,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		_clearSelection: function (direction) {
 			var selections = this._getSelections();
 			selections.forEach(function(selection) {
-				if (direction === "next") { //$NON-NLS-0$
+				if (direction === "next") { //$NON-NLS-1$
 					selection.start = selection.end;
 				} else {
 					selection.end = selection.start;
@@ -5559,82 +5559,82 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			//1 to 1, no duplicates
 			var that = this;
 			this._actions = {
-				"noop": {defaultHandler: function() {return that._doNoop();}}, //$NON-NLS-0$
+				"noop": {defaultHandler: function() {return that._doNoop();}}, //$NON-NLS-1$
 
-				"lineUp": {defaultHandler: function(data) {return that._doLineUp(merge(data,{select: false}));}, actionDescription: {name: messages.lineUp}}, //$NON-NLS-0$
-				"lineDown": {defaultHandler: function(data) {return that._doLineDown(merge(data,{select: false}));}, actionDescription: {name: messages.lineDown}}, //$NON-NLS-0$
-				"lineStart": {defaultHandler: function(data) {return that._doHome(merge(data,{select: false, ctrl:false}));}, actionDescription: {name: messages.lineStart}}, //$NON-NLS-0$
-				"lineEnd": {defaultHandler: function(data) {return that._doEnd(merge(data,{select: false, ctrl:false}));}, actionDescription: {name: messages.lineEnd}}, //$NON-NLS-0$
-				"charPrevious": {defaultHandler: function(data) {return that._doCursorPrevious(merge(data,{select: false, unit:"character"}));}, actionDescription: {name: messages.charPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"charNext": {defaultHandler: function(data) {return that._doCursorNext(merge(data,{select: false, unit:"character"}));}, actionDescription: {name: messages.charNext}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"pageUp": {defaultHandler: function(data) {return that._doPageUp(merge(data,{select: false}));}, actionDescription: {name: messages.pageUp}}, //$NON-NLS-0$
-				"pageDown": {defaultHandler: function(data) {return that._doPageDown(merge(data,{select: false}));}, actionDescription: {name: messages.pageDown}}, //$NON-NLS-0$
-				"scrollPageUp": {defaultHandler: function(data) {return that._doScroll(merge(data,{type: "pageUp"}));}, actionDescription: {name: messages.scrollPageUp}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"scrollPageDown": {defaultHandler: function(data) {return that._doScroll(merge(data,{type: "pageDown"}));}, actionDescription: {name: messages.scrollPageDown}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"scrollLineUp": {defaultHandler: function(data) {return that._doScroll(merge(data,{type: "lineUp"}));}, actionDescription: {name: messages.scrollLineUp}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"scrollLineDown": {defaultHandler: function(data) {return that._doScroll(merge(data,{type: "lineDown"}));}, actionDescription: {name: messages.scrollLineDown}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"wordPrevious": {defaultHandler: function(data) {return that._doCursorPrevious(merge(data,{select: false, unit:"word"}));}, actionDescription: {name: messages.wordPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"wordNext": {defaultHandler: function(data) {return that._doCursorNext(merge(data,{select: false, unit:"word"}));}, actionDescription: {name: messages.wordNext}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"textStart": {defaultHandler: function(data) {return that._doHome(merge(data,{select: false, ctrl:true}));}, actionDescription: {name: messages.textStart}}, //$NON-NLS-0$
-				"textEnd": {defaultHandler: function(data) {return that._doEnd(merge(data,{select: false, ctrl:true}));}, actionDescription: {name: messages.textEnd}}, //$NON-NLS-0$
-				"scrollTextStart": {defaultHandler: function(data) {return that._doScroll(merge(data,{type: "textStart"}));}, actionDescription: {name: messages.scrollTextStart}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"scrollTextEnd": {defaultHandler: function(data) {return that._doScroll(merge(data,{type: "textEnd"}));}, actionDescription: {name: messages.scrollTextEnd}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"centerLine": {defaultHandler: function(data) {return that._doScroll(merge(data,{type: "centerLine"}));}, actionDescription: {name: messages.centerLine}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"lineUp": {defaultHandler: function(data) {return that._doLineUp(merge(data,{select: false}));}, actionDescription: {name: messages.lineUp}}, //$NON-NLS-1$
+				"lineDown": {defaultHandler: function(data) {return that._doLineDown(merge(data,{select: false}));}, actionDescription: {name: messages.lineDown}}, //$NON-NLS-1$
+				"lineStart": {defaultHandler: function(data) {return that._doHome(merge(data,{select: false, ctrl:false}));}, actionDescription: {name: messages.lineStart}}, //$NON-NLS-1$
+				"lineEnd": {defaultHandler: function(data) {return that._doEnd(merge(data,{select: false, ctrl:false}));}, actionDescription: {name: messages.lineEnd}}, //$NON-NLS-1$
+				"charPrevious": {defaultHandler: function(data) {return that._doCursorPrevious(merge(data,{select: false, unit:"character"}));}, actionDescription: {name: messages.charPrevious}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"charNext": {defaultHandler: function(data) {return that._doCursorNext(merge(data,{select: false, unit:"character"}));}, actionDescription: {name: messages.charNext}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"pageUp": {defaultHandler: function(data) {return that._doPageUp(merge(data,{select: false}));}, actionDescription: {name: messages.pageUp}}, //$NON-NLS-1$
+				"pageDown": {defaultHandler: function(data) {return that._doPageDown(merge(data,{select: false}));}, actionDescription: {name: messages.pageDown}}, //$NON-NLS-1$
+				"scrollPageUp": {defaultHandler: function(data) {return that._doScroll(merge(data,{type: "pageUp"}));}, actionDescription: {name: messages.scrollPageUp}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"scrollPageDown": {defaultHandler: function(data) {return that._doScroll(merge(data,{type: "pageDown"}));}, actionDescription: {name: messages.scrollPageDown}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"scrollLineUp": {defaultHandler: function(data) {return that._doScroll(merge(data,{type: "lineUp"}));}, actionDescription: {name: messages.scrollLineUp}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"scrollLineDown": {defaultHandler: function(data) {return that._doScroll(merge(data,{type: "lineDown"}));}, actionDescription: {name: messages.scrollLineDown}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"wordPrevious": {defaultHandler: function(data) {return that._doCursorPrevious(merge(data,{select: false, unit:"word"}));}, actionDescription: {name: messages.wordPrevious}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"wordNext": {defaultHandler: function(data) {return that._doCursorNext(merge(data,{select: false, unit:"word"}));}, actionDescription: {name: messages.wordNext}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"textStart": {defaultHandler: function(data) {return that._doHome(merge(data,{select: false, ctrl:true}));}, actionDescription: {name: messages.textStart}}, //$NON-NLS-1$
+				"textEnd": {defaultHandler: function(data) {return that._doEnd(merge(data,{select: false, ctrl:true}));}, actionDescription: {name: messages.textEnd}}, //$NON-NLS-1$
+				"scrollTextStart": {defaultHandler: function(data) {return that._doScroll(merge(data,{type: "textStart"}));}, actionDescription: {name: messages.scrollTextStart}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"scrollTextEnd": {defaultHandler: function(data) {return that._doScroll(merge(data,{type: "textEnd"}));}, actionDescription: {name: messages.scrollTextEnd}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"centerLine": {defaultHandler: function(data) {return that._doScroll(merge(data,{type: "centerLine"}));}, actionDescription: {name: messages.centerLine}}, //$NON-NLS-1$ //$NON-NLS-1$
 				
-				"selectLineUp": {defaultHandler: function(data) {return that._doLineUp(merge(data,{select: true}));}, actionDescription: {name: messages.selectLineUp}}, //$NON-NLS-0$
-				"selectLineDown": {defaultHandler: function(data) {return that._doLineDown(merge(data,{select: true}));}, actionDescription: {name: messages.selectLineDown}}, //$NON-NLS-0$
-				"selectWholeLineUp": {defaultHandler: function(data) {return that._doLineUp(merge(data,{select: true, wholeLine: true}));}, actionDescription: {name: messages.selectWholeLineUp}}, //$NON-NLS-0$
-				"selectWholeLineDown": {defaultHandler: function(data) {return that._doLineDown(merge(data,{select: true, wholeLine: true}));}, actionDescription: {name: messages.selectWholeLineDown}}, //$NON-NLS-0$
-				"selectLineStart": {defaultHandler: function(data) {return that._doHome(merge(data,{select: true, ctrl:false}));}, actionDescription: {name: messages.selectLineStart}}, //$NON-NLS-0$
-				"selectLineEnd": {defaultHandler: function(data) {return that._doEnd(merge(data,{select: true, ctrl:false}));}, actionDescription: {name: messages.selectLineEnd}}, //$NON-NLS-0$
-				"selectCharPrevious": {defaultHandler: function(data) {return that._doCursorPrevious(merge(data,{select: true, unit:"character"}));}, actionDescription: {name: messages.selectCharPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"selectCharNext": {defaultHandler: function(data) {return that._doCursorNext(merge(data,{select: true, unit:"character"}));}, actionDescription: {name: messages.selectCharNext}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"selectPageUp": {defaultHandler: function(data) {return that._doPageUp(merge(data,{select: true}));}, actionDescription: {name: messages.selectPageUp}}, //$NON-NLS-0$
-				"selectPageDown": {defaultHandler: function(data) {return that._doPageDown(merge(data,{select: true}));}, actionDescription: {name: messages.selectPageDown}}, //$NON-NLS-0$
-				"selectWordPrevious": {defaultHandler: function(data) {return that._doCursorPrevious(merge(data,{select: true, unit:"word"}));}, actionDescription: {name: messages.selectWordPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"selectWordNext": {defaultHandler: function(data) {return that._doCursorNext(merge(data,{select: true, unit:"word"}));}, actionDescription: {name: messages.selectWordNext}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"selectTextStart": {defaultHandler: function(data) {return that._doHome(merge(data,{select: true, ctrl:true}));}, actionDescription: {name: messages.selectTextStart}}, //$NON-NLS-0$
-				"selectTextEnd": {defaultHandler: function(data) {return that._doEnd(merge(data,{select: true, ctrl:true}));}, actionDescription: {name: messages.selectTextEnd}}, //$NON-NLS-0$
+				"selectLineUp": {defaultHandler: function(data) {return that._doLineUp(merge(data,{select: true}));}, actionDescription: {name: messages.selectLineUp}}, //$NON-NLS-1$
+				"selectLineDown": {defaultHandler: function(data) {return that._doLineDown(merge(data,{select: true}));}, actionDescription: {name: messages.selectLineDown}}, //$NON-NLS-1$
+				"selectWholeLineUp": {defaultHandler: function(data) {return that._doLineUp(merge(data,{select: true, wholeLine: true}));}, actionDescription: {name: messages.selectWholeLineUp}}, //$NON-NLS-1$
+				"selectWholeLineDown": {defaultHandler: function(data) {return that._doLineDown(merge(data,{select: true, wholeLine: true}));}, actionDescription: {name: messages.selectWholeLineDown}}, //$NON-NLS-1$
+				"selectLineStart": {defaultHandler: function(data) {return that._doHome(merge(data,{select: true, ctrl:false}));}, actionDescription: {name: messages.selectLineStart}}, //$NON-NLS-1$
+				"selectLineEnd": {defaultHandler: function(data) {return that._doEnd(merge(data,{select: true, ctrl:false}));}, actionDescription: {name: messages.selectLineEnd}}, //$NON-NLS-1$
+				"selectCharPrevious": {defaultHandler: function(data) {return that._doCursorPrevious(merge(data,{select: true, unit:"character"}));}, actionDescription: {name: messages.selectCharPrevious}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"selectCharNext": {defaultHandler: function(data) {return that._doCursorNext(merge(data,{select: true, unit:"character"}));}, actionDescription: {name: messages.selectCharNext}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"selectPageUp": {defaultHandler: function(data) {return that._doPageUp(merge(data,{select: true}));}, actionDescription: {name: messages.selectPageUp}}, //$NON-NLS-1$
+				"selectPageDown": {defaultHandler: function(data) {return that._doPageDown(merge(data,{select: true}));}, actionDescription: {name: messages.selectPageDown}}, //$NON-NLS-1$
+				"selectWordPrevious": {defaultHandler: function(data) {return that._doCursorPrevious(merge(data,{select: true, unit:"word"}));}, actionDescription: {name: messages.selectWordPrevious}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"selectWordNext": {defaultHandler: function(data) {return that._doCursorNext(merge(data,{select: true, unit:"word"}));}, actionDescription: {name: messages.selectWordNext}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"selectTextStart": {defaultHandler: function(data) {return that._doHome(merge(data,{select: true, ctrl:true}));}, actionDescription: {name: messages.selectTextStart}}, //$NON-NLS-1$
+				"selectTextEnd": {defaultHandler: function(data) {return that._doEnd(merge(data,{select: true, ctrl:true}));}, actionDescription: {name: messages.selectTextEnd}}, //$NON-NLS-1$
 
-				"deletePrevious": {defaultHandler: function(data) {return that._doBackspace(merge(data,{unit:"character"}));}, actionDescription: {name: messages.deletePrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteNext": {defaultHandler: function(data) {return that._doDelete(merge(data,{unit:"character"}));}, actionDescription: {name: messages.deleteNext}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteWordPrevious": {defaultHandler: function(data) {return that._doBackspace(merge(data,{unit:"word"}));}, actionDescription: {name: messages.deleteWordPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteWordNext": {defaultHandler: function(data) {return that._doDelete(merge(data,{unit:"word"}));}, actionDescription: {name: messages.deleteWordNext}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteLineStart": {defaultHandler: function(data) {return that._doBackspace(merge(data,{unit: "line"}));}, actionDescription: {name: messages.deleteLineStart}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteLineEnd": {defaultHandler: function(data) {return that._doDelete(merge(data,{unit: "line"}));}, actionDescription: {name: messages.deleteLineEnd}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"tab": {defaultHandler: function(data) {return that._doTab(merge(data,{}));}, actionDescription: {name: messages.tab}}, //$NON-NLS-0$
-				"shiftTab": {defaultHandler: function(data) {return that._doShiftTab(merge(data,{}));}, actionDescription: {name: messages.shiftTab}}, //$NON-NLS-0$
-				"enter": {defaultHandler: function(data) {return that._doEnter(merge(data,{}));}, actionDescription: {name: messages.enter}}, //$NON-NLS-0$
-				"enterNoCursor": {defaultHandler: function(data) {return that._doEnter(merge(data,{noCursor:true}));}, actionDescription: {name: messages.enterNoCursor}}, //$NON-NLS-0$
-				"escape": {defaultHandler: function(data) {return that._doEscape(merge(data,{}));}, actionDescription: {name: messages.escape}}, //$NON-NLS-0$
-				"selectAll": {defaultHandler: function(data) {return that._doSelectAll(merge(data,{}));}, actionDescription: {name: messages.selectAll}}, //$NON-NLS-0$
-				"copy": {defaultHandler: function(data) {return that._doCopy(merge(data,{}));}, actionDescription: {name: messages.copy}}, //$NON-NLS-0$
-				"cut": {defaultHandler: function(data) {return that._doCut(merge(data,{}));}, actionDescription: {name: messages.cut}}, //$NON-NLS-0$
-				"paste": {defaultHandler: function(data) {return that._doPaste(merge(data,{}));}, actionDescription: {name: messages.paste}}, //$NON-NLS-0$
+				"deletePrevious": {defaultHandler: function(data) {return that._doBackspace(merge(data,{unit:"character"}));}, actionDescription: {name: messages.deletePrevious}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"deleteNext": {defaultHandler: function(data) {return that._doDelete(merge(data,{unit:"character"}));}, actionDescription: {name: messages.deleteNext}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"deleteWordPrevious": {defaultHandler: function(data) {return that._doBackspace(merge(data,{unit:"word"}));}, actionDescription: {name: messages.deleteWordPrevious}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"deleteWordNext": {defaultHandler: function(data) {return that._doDelete(merge(data,{unit:"word"}));}, actionDescription: {name: messages.deleteWordNext}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"deleteLineStart": {defaultHandler: function(data) {return that._doBackspace(merge(data,{unit: "line"}));}, actionDescription: {name: messages.deleteLineStart}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"deleteLineEnd": {defaultHandler: function(data) {return that._doDelete(merge(data,{unit: "line"}));}, actionDescription: {name: messages.deleteLineEnd}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"tab": {defaultHandler: function(data) {return that._doTab(merge(data,{}));}, actionDescription: {name: messages.tab}}, //$NON-NLS-1$
+				"shiftTab": {defaultHandler: function(data) {return that._doShiftTab(merge(data,{}));}, actionDescription: {name: messages.shiftTab}}, //$NON-NLS-1$
+				"enter": {defaultHandler: function(data) {return that._doEnter(merge(data,{}));}, actionDescription: {name: messages.enter}}, //$NON-NLS-1$
+				"enterNoCursor": {defaultHandler: function(data) {return that._doEnter(merge(data,{noCursor:true}));}, actionDescription: {name: messages.enterNoCursor}}, //$NON-NLS-1$
+				"escape": {defaultHandler: function(data) {return that._doEscape(merge(data,{}));}, actionDescription: {name: messages.escape}}, //$NON-NLS-1$
+				"selectAll": {defaultHandler: function(data) {return that._doSelectAll(merge(data,{}));}, actionDescription: {name: messages.selectAll}}, //$NON-NLS-1$
+				"copy": {defaultHandler: function(data) {return that._doCopy(merge(data,{}));}, actionDescription: {name: messages.copy}}, //$NON-NLS-1$
+				"cut": {defaultHandler: function(data) {return that._doCut(merge(data,{}));}, actionDescription: {name: messages.cut}}, //$NON-NLS-1$
+				"paste": {defaultHandler: function(data) {return that._doPaste(merge(data,{}));}, actionDescription: {name: messages.paste}}, //$NON-NLS-1$
 				
-				"uppercase": {defaultHandler: function(data) {return that._doCase(merge(data,{type: "upper"}));}, actionDescription: {name: messages.uppercase}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"lowercase": {defaultHandler: function(data) {return that._doCase(merge(data,{type: "lower"}));}, actionDescription: {name: messages.lowercase}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"capitalize": {defaultHandler: function(data) {return that._doCase(merge(data,{unit: "word", type: "capitalize"}));}, actionDescription: {name: messages.capitalize}}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				"reversecase": {defaultHandler: function(data) {return that._doCase(merge(data,{type: "reverse"}));}, actionDescription: {name: messages.reversecase}}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				"uppercase": {defaultHandler: function(data) {return that._doCase(merge(data,{type: "upper"}));}, actionDescription: {name: messages.uppercase}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"lowercase": {defaultHandler: function(data) {return that._doCase(merge(data,{type: "lower"}));}, actionDescription: {name: messages.lowercase}}, //$NON-NLS-1$ //$NON-NLS-1$
+				"capitalize": {defaultHandler: function(data) {return that._doCase(merge(data,{unit: "word", type: "capitalize"}));}, actionDescription: {name: messages.capitalize}}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-1$
+				"reversecase": {defaultHandler: function(data) {return that._doCase(merge(data,{type: "reverse"}));}, actionDescription: {name: messages.reversecase}}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-1$
 				
-				"toggleOverwriteMode": {defaultHandler: function(data) {return that._doOverwriteMode(merge(data,{}));}, actionDescription: {name: messages.toggleOverwriteMode}}, //$NON-NLS-0$
-				"toggleTabMode": {defaultHandler: function(data) {return that._doTabMode(merge(data,{}));}, actionDescription: {name: messages.toggleTabMode}}, //$NON-NLS-0$
-				"toggleWrapMode": {defaultHandler: function(data) {return that._doWrapMode(merge(data,{}));}, actionDescription: {name: messages.toggleWrapMode}} //$NON-NLS-0$
+				"toggleOverwriteMode": {defaultHandler: function(data) {return that._doOverwriteMode(merge(data,{}));}, actionDescription: {name: messages.toggleOverwriteMode}}, //$NON-NLS-1$
+				"toggleTabMode": {defaultHandler: function(data) {return that._doTabMode(merge(data,{}));}, actionDescription: {name: messages.toggleTabMode}}, //$NON-NLS-1$
+				"toggleWrapMode": {defaultHandler: function(data) {return that._doWrapMode(merge(data,{}));}, actionDescription: {name: messages.toggleWrapMode}} //$NON-NLS-1$
 			};
 		},
 		_createRulerParent: function(doc, className) {
-			var div = util.createElement(doc, "div"); //$NON-NLS-0$
+			var div = util.createElement(doc, "div"); //$NON-NLS-1$
 			div.className = className;
 			div.tabIndex = -1;
-			div.style.overflow = "hidden"; //$NON-NLS-0$
-			div.style.MozUserSelect = "none"; //$NON-NLS-0$
-			div.style.WebkitUserSelect = "none"; //$NON-NLS-0$
-			div.style.position = "absolute"; //$NON-NLS-0$
-			div.style.top = "0px"; //$NON-NLS-0$
-			div.style.bottom = "0px"; //$NON-NLS-0$
-			div.style.cursor = "default"; //$NON-NLS-0$
-			div.style.display = "none"; //$NON-NLS-0$
-			div.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			div.style.overflow = "hidden"; //$NON-NLS-1$
+			div.style.MozUserSelect = "none"; //$NON-NLS-1$
+			div.style.WebkitUserSelect = "none"; //$NON-NLS-1$
+			div.style.position = "absolute"; //$NON-NLS-1$
+			div.style.top = "0px"; //$NON-NLS-1$
+			div.style.bottom = "0px"; //$NON-NLS-1$
+			div.style.cursor = "default"; //$NON-NLS-1$
+			div.style.display = "none"; //$NON-NLS-1$
+			div.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 			this._rootDiv.appendChild(div);
 			return div;
 		},
@@ -5643,17 +5643,17 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var rulerParent = this._getRulerParent(ruler);
 			if (!rulerParent) { return; }
 			if (rulerParent !== this._marginDiv || this._marginOffset) {
-				rulerParent.style.display = "block"; //$NON-NLS-0$
+				rulerParent.style.display = "block"; //$NON-NLS-1$
 			}
 			rulerParent.rulerWidth = undefined;
-			var div = util.createElement(rulerParent.ownerDocument, "div"); //$NON-NLS-0$
+			var div = util.createElement(rulerParent.ownerDocument, "div"); //$NON-NLS-1$
 			div._ruler = ruler;
 			ruler.node = div;
 			div.rulerChanged = true;
-			div.style.position = "relative"; //$NON-NLS-0$
-			div.style.cssFloat = "left"; //$NON-NLS-0$
-			div.style.styleFloat = "left"; //$NON-NLS-0$
-			div.style.outline = "none"; //$NON-NLS-0$
+			div.style.position = "relative"; //$NON-NLS-1$
+			div.style.cssFloat = "left"; //$NON-NLS-1$
+			div.style.styleFloat = "left"; //$NON-NLS-1$
+			div.style.outline = "none"; //$NON-NLS-1$
 			if (index === undefined || index < 0 || index >= rulerParent.children.length) {
 				rulerParent.appendChild(div);
 			} else {
@@ -5665,16 +5665,16 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			}
 		},
 		_createSelectionDiv: function() {
-			var div = util.createElement(this._parent.ownerDocument, "div"); //$NON-NLS-0$
-			div.className = "textviewSelection"; //$NON-NLS-0$
-			div.style.position = "absolute"; //$NON-NLS-0$
-			div.style.borderWidth = "0px"; //$NON-NLS-0$
-			div.style.margin = "0px"; //$NON-NLS-0$
-			div.style.padding = "0px"; //$NON-NLS-0$
-			div.style.outline = "none"; //$NON-NLS-0$
-			div.style.width = "0px"; //$NON-NLS-0$
-			div.style.height = "0px"; //$NON-NLS-0$
-			div.style.zIndex = "0"; //$NON-NLS-0$
+			var div = util.createElement(this._parent.ownerDocument, "div"); //$NON-NLS-1$
+			div.className = "textviewSelection"; //$NON-NLS-1$
+			div.style.position = "absolute"; //$NON-NLS-1$
+			div.style.borderWidth = "0px"; //$NON-NLS-1$
+			div.style.margin = "0px"; //$NON-NLS-1$
+			div.style.padding = "0px"; //$NON-NLS-1$
+			div.style.outline = "none"; //$NON-NLS-1$
+			div.style.width = "0px"; //$NON-NLS-1$
+			div.style.height = "0px"; //$NON-NLS-1$
+			div.style.zIndex = "0"; //$NON-NLS-1$
 			return div;
 		},
 		_createView: function() {
@@ -5683,140 +5683,140 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			while (_parent.hasChildNodes()) { _parent.removeChild(_parent.lastChild); }
 
 			var doc = _parent.ownerDocument;
-			var rootDiv = util.createElement(doc, "div"); //$NON-NLS-0$
+			var rootDiv = util.createElement(doc, "div"); //$NON-NLS-1$
 			this._rootDiv = rootDiv;
 			rootDiv.tabIndex = -1;
-			rootDiv.style.position = "relative"; //$NON-NLS-0$
-			rootDiv.style.overflow = "hidden"; //$NON-NLS-0$
-			rootDiv.style.width = "100%"; //$NON-NLS-0$
-			rootDiv.style.height = "100%"; //$NON-NLS-0$
-			rootDiv.style.overflow = "hidden"; //$NON-NLS-0$
-			rootDiv.style.WebkitTextSizeAdjust = "100%"; //$NON-NLS-0$
-			rootDiv.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-0$
+			rootDiv.style.position = "relative"; //$NON-NLS-1$
+			rootDiv.style.overflow = "hidden"; //$NON-NLS-1$
+			rootDiv.style.width = "100%"; //$NON-NLS-1$
+			rootDiv.style.height = "100%"; //$NON-NLS-1$
+			rootDiv.style.overflow = "hidden"; //$NON-NLS-1$
+			rootDiv.style.WebkitTextSizeAdjust = "100%"; //$NON-NLS-1$
+			rootDiv.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-2$
 			_parent.appendChild(rootDiv);
 			
-			var leftDiv = this._createRulerParent(doc, "textviewLeftRuler"); //$NON-NLS-0$
+			var leftDiv = this._createRulerParent(doc, "textviewLeftRuler"); //$NON-NLS-1$
 			this._leftDiv = leftDiv;
 
-			var viewDiv = util.createElement(doc, "div"); //$NON-NLS-0$
-			viewDiv.className = "textviewScroll"; //$NON-NLS-0$
+			var viewDiv = util.createElement(doc, "div"); //$NON-NLS-1$
+			viewDiv.className = "textviewScroll"; //$NON-NLS-1$
 			this._viewDiv = viewDiv;
 			viewDiv.tabIndex = -1;
-			viewDiv.style.position = "absolute"; //$NON-NLS-0$
-			viewDiv.style.top = "0px"; //$NON-NLS-0$
-			viewDiv.style.bottom = "0px"; //$NON-NLS-0$
-			viewDiv.style.borderWidth = "0px"; //$NON-NLS-0$
-			viewDiv.style.margin = "0px"; //$NON-NLS-0$
-			viewDiv.style.outline = "none"; //$NON-NLS-0$
-			viewDiv.style.background = "transparent"; //$NON-NLS-0$
+			viewDiv.style.position = "absolute"; //$NON-NLS-1$
+			viewDiv.style.top = "0px"; //$NON-NLS-1$
+			viewDiv.style.bottom = "0px"; //$NON-NLS-1$
+			viewDiv.style.borderWidth = "0px"; //$NON-NLS-1$
+			viewDiv.style.margin = "0px"; //$NON-NLS-1$
+			viewDiv.style.outline = "none"; //$NON-NLS-1$
+			viewDiv.style.background = "transparent"; //$NON-NLS-1$
 			rootDiv.appendChild(viewDiv);
 			
-			var rightDiv = this._createRulerParent(doc, "textviewRightRuler"); //$NON-NLS-0$
+			var rightDiv = this._createRulerParent(doc, "textviewRightRuler"); //$NON-NLS-1$
 			this._rightDiv = rightDiv;
-			rightDiv.style.right = "0px"; //$NON-NLS-0$
+			rightDiv.style.right = "0px"; //$NON-NLS-1$
 
-			var innerRightDiv = this._createRulerParent(doc, "textviewInnerRightRuler"); //$NON-NLS-0$
+			var innerRightDiv = this._createRulerParent(doc, "textviewInnerRightRuler"); //$NON-NLS-1$
 			this._innerRightDiv = innerRightDiv;
-			innerRightDiv.style.zIndex = "1"; //$NON-NLS-0$
+			innerRightDiv.style.zIndex = "1"; //$NON-NLS-1$
 
-			var scrollDiv = util.createElement(doc, "div"); //$NON-NLS-0$
+			var scrollDiv = util.createElement(doc, "div"); //$NON-NLS-1$
 			this._scrollDiv = scrollDiv;
-			scrollDiv.style.margin = "0px"; //$NON-NLS-0$
-			scrollDiv.style.borderWidth = "0px"; //$NON-NLS-0$
-			scrollDiv.style.padding = "0px"; //$NON-NLS-0$
+			scrollDiv.style.margin = "0px"; //$NON-NLS-1$
+			scrollDiv.style.borderWidth = "0px"; //$NON-NLS-1$
+			scrollDiv.style.padding = "0px"; //$NON-NLS-1$
 			viewDiv.appendChild(scrollDiv);
 			
-			var marginDiv = this._marginDiv = this._createRulerParent(doc, "textviewMarginRuler"); //$NON-NLS-0$
-			marginDiv.style.zIndex = "4"; //$NON-NLS-0$
+			var marginDiv = this._marginDiv = this._createRulerParent(doc, "textviewMarginRuler"); //$NON-NLS-1$
+			marginDiv.style.zIndex = "4"; //$NON-NLS-1$
 			
 			if (!util.isIE && !util.isIOS) {
-				var clipDiv = util.createElement(doc, "div"); //$NON-NLS-0$
+				var clipDiv = util.createElement(doc, "div"); //$NON-NLS-1$
 				this._clipDiv = clipDiv;
-				clipDiv.style.position = "absolute"; //$NON-NLS-0$
-				clipDiv.style.overflow = "hidden"; //$NON-NLS-0$
-				clipDiv.style.margin = "0px"; //$NON-NLS-0$
-				clipDiv.style.borderWidth = "0px"; //$NON-NLS-0$
-				clipDiv.style.padding = "0px"; //$NON-NLS-0$
-				clipDiv.style.background = "transparent"; //$NON-NLS-0$
+				clipDiv.style.position = "absolute"; //$NON-NLS-1$
+				clipDiv.style.overflow = "hidden"; //$NON-NLS-1$
+				clipDiv.style.margin = "0px"; //$NON-NLS-1$
+				clipDiv.style.borderWidth = "0px"; //$NON-NLS-1$
+				clipDiv.style.padding = "0px"; //$NON-NLS-1$
+				clipDiv.style.background = "transparent"; //$NON-NLS-1$
 				rootDiv.appendChild(clipDiv);
 				
-				var clipScrollDiv = util.createElement(doc, "div"); //$NON-NLS-0$
+				var clipScrollDiv = util.createElement(doc, "div"); //$NON-NLS-1$
 				this._clipScrollDiv = clipScrollDiv;
-				clipScrollDiv.style.position = "absolute"; //$NON-NLS-0$
-				clipScrollDiv.style.height = "1px"; //$NON-NLS-0$
-				clipScrollDiv.style.top = "-1000px"; //$NON-NLS-0$
-				clipScrollDiv.style.background = "transparent"; //$NON-NLS-0$
+				clipScrollDiv.style.position = "absolute"; //$NON-NLS-1$
+				clipScrollDiv.style.height = "1px"; //$NON-NLS-1$
+				clipScrollDiv.style.top = "-1000px"; //$NON-NLS-1$
+				clipScrollDiv.style.background = "transparent"; //$NON-NLS-1$
 				clipDiv.appendChild(clipScrollDiv);
 			}
 
-			var clientDiv = util.createElement(doc, "div"); //$NON-NLS-0$
-			clientDiv.className = "textviewContent"; //$NON-NLS-0$
+			var clientDiv = util.createElement(doc, "div"); //$NON-NLS-1$
+			clientDiv.className = "textviewContent"; //$NON-NLS-1$
 			this._clientDiv = clientDiv;
 			clientDiv.tabIndex = 0;
-			clientDiv.style.position = "absolute"; //$NON-NLS-0$
-			clientDiv.style.borderWidth = "0px"; //$NON-NLS-0$
-			clientDiv.style.margin = "0px"; //$NON-NLS-0$
-			clientDiv.style.padding = "0px"; //$NON-NLS-0$
-			clientDiv.style.outline = "none"; //$NON-NLS-0$
-			clientDiv.style.zIndex = "1"; //$NON-NLS-0$
-			clientDiv.style.WebkitUserSelect = "text"; //$NON-NLS-0$
-			clientDiv.setAttribute("spellcheck", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+			clientDiv.style.position = "absolute"; //$NON-NLS-1$
+			clientDiv.style.borderWidth = "0px"; //$NON-NLS-1$
+			clientDiv.style.margin = "0px"; //$NON-NLS-1$
+			clientDiv.style.padding = "0px"; //$NON-NLS-1$
+			clientDiv.style.outline = "none"; //$NON-NLS-1$
+			clientDiv.style.zIndex = "1"; //$NON-NLS-1$
+			clientDiv.style.WebkitUserSelect = "text"; //$NON-NLS-1$
+			clientDiv.setAttribute("spellcheck", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 			if (util.isIOS || util.isAndroid) {
-				clientDiv.style.WebkitTapHighlightColor = "transparent"; //$NON-NLS-0$
+				clientDiv.style.WebkitTapHighlightColor = "transparent"; //$NON-NLS-1$
 			}
 			(this._clipDiv || rootDiv).appendChild(clientDiv);
 			
 			this._setFullSelection(this._fullSelection, true);
 			
 			if (util.isIOS || util.isAndroid) {
-				var vScrollDiv = util.createElement(doc, "div"); //$NON-NLS-0$
+				var vScrollDiv = util.createElement(doc, "div"); //$NON-NLS-1$
 				this._vScrollDiv = vScrollDiv;
-				vScrollDiv.style.position = "absolute"; //$NON-NLS-0$
-				vScrollDiv.style.borderWidth = "1px"; //$NON-NLS-0$
-				vScrollDiv.style.borderColor = "white"; //$NON-NLS-0$
-				vScrollDiv.style.borderStyle = "solid"; //$NON-NLS-0$
-				vScrollDiv.style.borderRadius = "4px"; //$NON-NLS-0$
-				vScrollDiv.style.backgroundColor = "black"; //$NON-NLS-0$
-				vScrollDiv.style.opacity = "0.5"; //$NON-NLS-0$
-				vScrollDiv.style.margin = "0px"; //$NON-NLS-0$
-				vScrollDiv.style.padding = "0px"; //$NON-NLS-0$
-				vScrollDiv.style.outline = "none"; //$NON-NLS-0$
-				vScrollDiv.style.zIndex = "3"; //$NON-NLS-0$
-				vScrollDiv.style.width = "8px"; //$NON-NLS-0$
-				vScrollDiv.style.display = "none"; //$NON-NLS-0$
+				vScrollDiv.style.position = "absolute"; //$NON-NLS-1$
+				vScrollDiv.style.borderWidth = "1px"; //$NON-NLS-1$
+				vScrollDiv.style.borderColor = "white"; //$NON-NLS-1$
+				vScrollDiv.style.borderStyle = "solid"; //$NON-NLS-1$
+				vScrollDiv.style.borderRadius = "4px"; //$NON-NLS-1$
+				vScrollDiv.style.backgroundColor = "black"; //$NON-NLS-1$
+				vScrollDiv.style.opacity = "0.5"; //$NON-NLS-1$
+				vScrollDiv.style.margin = "0px"; //$NON-NLS-1$
+				vScrollDiv.style.padding = "0px"; //$NON-NLS-1$
+				vScrollDiv.style.outline = "none"; //$NON-NLS-1$
+				vScrollDiv.style.zIndex = "3"; //$NON-NLS-1$
+				vScrollDiv.style.width = "8px"; //$NON-NLS-1$
+				vScrollDiv.style.display = "none"; //$NON-NLS-1$
 				rootDiv.appendChild(vScrollDiv);
-				var hScrollDiv = util.createElement(doc, "div"); //$NON-NLS-0$
+				var hScrollDiv = util.createElement(doc, "div"); //$NON-NLS-1$
 				this._hScrollDiv = hScrollDiv;
-				hScrollDiv.style.position = "absolute"; //$NON-NLS-0$
-				hScrollDiv.style.borderWidth = "1px"; //$NON-NLS-0$
-				hScrollDiv.style.borderColor = "white"; //$NON-NLS-0$
-				hScrollDiv.style.borderStyle = "solid"; //$NON-NLS-0$
-				hScrollDiv.style.borderRadius = "4px"; //$NON-NLS-0$
-				hScrollDiv.style.backgroundColor = "black"; //$NON-NLS-0$
-				hScrollDiv.style.opacity = "0.5"; //$NON-NLS-0$
-				hScrollDiv.style.margin = "0px"; //$NON-NLS-0$
-				hScrollDiv.style.padding = "0px"; //$NON-NLS-0$
-				hScrollDiv.style.outline = "none"; //$NON-NLS-0$
-				hScrollDiv.style.zIndex = "3"; //$NON-NLS-0$
-				hScrollDiv.style.height = "8px"; //$NON-NLS-0$
-				hScrollDiv.style.display = "none"; //$NON-NLS-0$
+				hScrollDiv.style.position = "absolute"; //$NON-NLS-1$
+				hScrollDiv.style.borderWidth = "1px"; //$NON-NLS-1$
+				hScrollDiv.style.borderColor = "white"; //$NON-NLS-1$
+				hScrollDiv.style.borderStyle = "solid"; //$NON-NLS-1$
+				hScrollDiv.style.borderRadius = "4px"; //$NON-NLS-1$
+				hScrollDiv.style.backgroundColor = "black"; //$NON-NLS-1$
+				hScrollDiv.style.opacity = "0.5"; //$NON-NLS-1$
+				hScrollDiv.style.margin = "0px"; //$NON-NLS-1$
+				hScrollDiv.style.padding = "0px"; //$NON-NLS-1$
+				hScrollDiv.style.outline = "none"; //$NON-NLS-1$
+				hScrollDiv.style.zIndex = "3"; //$NON-NLS-1$
+				hScrollDiv.style.height = "8px"; //$NON-NLS-1$
+				hScrollDiv.style.display = "none"; //$NON-NLS-1$
 				rootDiv.appendChild(hScrollDiv);
 			}
 
 			if (util.isFirefox && !clientDiv.setCapture) {
-				var overlayDiv = util.createElement(doc, "div"); //$NON-NLS-0$
+				var overlayDiv = util.createElement(doc, "div"); //$NON-NLS-1$
 				this._overlayDiv = overlayDiv;
 				overlayDiv.style.position = clientDiv.style.position;
 				overlayDiv.style.borderWidth = clientDiv.style.borderWidth;
 				overlayDiv.style.margin = clientDiv.style.margin;
 				overlayDiv.style.padding = clientDiv.style.padding;
-				overlayDiv.style.cursor = "text"; //$NON-NLS-0$
-				overlayDiv.style.zIndex = "2"; //$NON-NLS-0$
+				overlayDiv.style.cursor = "text"; //$NON-NLS-1$
+				overlayDiv.style.zIndex = "2"; //$NON-NLS-1$
 				(this._clipDiv || rootDiv).appendChild(overlayDiv);
 			}
-			clientDiv.contentEditable = "true"; //$NON-NLS-0$
-			clientDiv.setAttribute("role", "textbox"); //$NON-NLS-1$ //$NON-NLS-0$
-			clientDiv.setAttribute("aria-multiline", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			clientDiv.contentEditable = "true"; //$NON-NLS-1$
+			clientDiv.setAttribute("role", "textbox"); //$NON-NLS-1$ //$NON-NLS-2$
+			clientDiv.setAttribute("aria-multiline", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 			this._setWrapMode(this._wrapMode, true);
 			this._setReadOnly(this._readonly);
 			this._setThemeClass(this._themeClass, true);
@@ -5839,7 +5839,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					}, 100);
 				}
 			}
-			DOMReady(doc, rootDiv, "textview", checkDOMReady); //$NON-NLS-0$
+			DOMReady(doc, rootDiv, "textview", checkDOMReady); //$NON-NLS-1$
 		},
 		_defaultOptions: function() {
 			return {
@@ -5873,7 +5873,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 						div._ruler = undefined;
 						rulerParent.removeChild(div);
 						if (rulerParent.children.length === 0 && (rulerParent !== this._marginDiv || !this._marginOffset)) {
-							rulerParent.style.display = "none"; //$NON-NLS-0$
+							rulerParent.style.display = "none"; //$NON-NLS-1$
 						}
 						rulerParent.rulerWidth = undefined;
 						break;
@@ -6046,21 +6046,21 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				return clipboadText;
 			}
 			if (clipboardData) {
-				return convert(clipboardData.getData(util.isIE ? "Text" : "text/plain")); //$NON-NLS-1$"//$NON-NLS-0$
+				return convert(clipboardData.getData(util.isIE ? "Text" : "text/plain")); //$NON-NLS-1$"//$NON-NLS-2$
 			}
 			if (util.isFirefox) {
 				this._ignoreFocus = true;
 				var clipboardDiv = this._clipboardDiv;
 				var doc = this._rootDiv.ownerDocument;
 				if (!clipboardDiv) {
-					clipboardDiv = util.createElement(doc, "div"); //$NON-NLS-0$
+					clipboardDiv = util.createElement(doc, "div"); //$NON-NLS-1$
 					this._clipboardDiv = clipboardDiv;
-					clipboardDiv.style.position = "fixed"; //$NON-NLS-0$
-					clipboardDiv.style.whiteSpace = "pre"; //$NON-NLS-0$
-					clipboardDiv.style.left = "-1000px"; //$NON-NLS-0$
+					clipboardDiv.style.position = "fixed"; //$NON-NLS-1$
+					clipboardDiv.style.whiteSpace = "pre"; //$NON-NLS-1$
+					clipboardDiv.style.left = "-1000px"; //$NON-NLS-1$
 					this._rootDiv.appendChild(clipboardDiv);
 				}
-				clipboardDiv.innerHTML = "<pre contenteditable=''></pre>"; //$NON-NLS-0$
+				clipboardDiv.innerHTML = "<pre contenteditable=''></pre>"; //$NON-NLS-1$
 				clipboardDiv.firstChild.focus();
 				var that = this;
 				var _getText = function() {
@@ -6076,7 +6076,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				/* Do not try execCommand if middle-click is used, because if we do, we get the clipboard text, not the primary selection text. */
 				if (!util.isLinux || this._lastMouseButton !== 2) {
 					try {
-						result = doc.execCommand("paste", false, null); //$NON-NLS-0$
+						result = doc.execCommand("paste", false, null); //$NON-NLS-1$
 					} catch (ex) {
 						/* Firefox can throw even when execCommand() works, see bug 362835. */
 						result = clipboardDiv.childNodes.length > 1 || clipboardDiv.firstChild && clipboardDiv.firstChild.childNodes.length > 0;
@@ -6245,10 +6245,10 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_getRulerParent: function(ruler) {
 			switch (ruler.getLocation()) {
-				case "left": return this._leftDiv; //$NON-NLS-0$
-				case "right": return this._rightDiv; //$NON-NLS-0$
-				case "innerRight": return this._innerRightDiv; //$NON-NLS-0$
-				case "margin": return this._marginDiv; //$NON-NLS-0$
+				case "left": return this._leftDiv; //$NON-NLS-1$
+				case "right": return this._rightDiv; //$NON-NLS-1$
+				case "innerRight": return this._innerRightDiv; //$NON-NLS-1$
+				case "margin": return this._marginDiv; //$NON-NLS-1$
 			}
 			return null;
 		},
@@ -6291,15 +6291,15 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					that._onModelChanged(modelChangedEvent);
 				}
 			};
-			this._model.addEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-0$
-			this._model.addEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-0$
+			this._model.addEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-1$
+			this._model.addEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-1$
 			
 			this._themeListener = {
 				onChanged: function() {
 					that._setThemeClass(that._themeClass);
 				}
 			};
-			this._theme.addEventListener("ThemeChanged", this._themeListener.onChanged); //$NON-NLS-0$
+			this._theme.addEventListener("ThemeChanged", this._themeListener.onChanged); //$NON-NLS-1$
 			
 			var handlers = this._handlers = [];
 			var clientDiv = this._clientDiv, viewDiv = this._viewDiv, rootDiv = this._rootDiv;
@@ -6307,46 +6307,46 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var doc = clientDiv.ownerDocument;
 			var win = this._getWindow();
 			var grabNode = util.isIE ? doc : win;
-			handlers.push({target: win, type: "resize", handler: function(e) { return that._handleResize(e ? e : win.event);}}); //$NON-NLS-0$
-			handlers.push({target: clientDiv, type: "blur", handler: function(e) { return that._handleBlur(e ? e : win.event);}}); //$NON-NLS-0$
-			handlers.push({target: clientDiv, type: "focus", handler: function(e) { return that._handleFocus(e ? e : win.event);}}); //$NON-NLS-0$
-			handlers.push({target: viewDiv, type: "focus", handler: function() { clientDiv.focus(); }}); //$NON-NLS-0$
-			handlers.push({target: viewDiv, type: "scroll", handler: function(e) { return that._handleScroll(e ? e : win.event);}}); //$NON-NLS-0$
-			handlers.push({target: clientDiv, type: "textInput", handler: function(e) { return that._handleTextInput(e ? e : win.event); }}); //$NON-NLS-0$
-			handlers.push({target: clientDiv, type: "keydown", handler: function(e) { return that._handleKeyDown(e ? e : win.event);}}); //$NON-NLS-0$
-			handlers.push({target: clientDiv, type: "keypress", handler: function(e) { return that._handleKeyPress(e ? e : win.event);}}); //$NON-NLS-0$
-			handlers.push({target: clientDiv, type: "keyup", handler: function(e) { return that._handleKeyUp(e ? e : win.event);}}); //$NON-NLS-0$
+			handlers.push({target: win, type: "resize", handler: function(e) { return that._handleResize(e ? e : win.event);}}); //$NON-NLS-1$
+			handlers.push({target: clientDiv, type: "blur", handler: function(e) { return that._handleBlur(e ? e : win.event);}}); //$NON-NLS-1$
+			handlers.push({target: clientDiv, type: "focus", handler: function(e) { return that._handleFocus(e ? e : win.event);}}); //$NON-NLS-1$
+			handlers.push({target: viewDiv, type: "focus", handler: function() { clientDiv.focus(); }}); //$NON-NLS-1$
+			handlers.push({target: viewDiv, type: "scroll", handler: function(e) { return that._handleScroll(e ? e : win.event);}}); //$NON-NLS-1$
+			handlers.push({target: clientDiv, type: "textInput", handler: function(e) { return that._handleTextInput(e ? e : win.event); }}); //$NON-NLS-1$
+			handlers.push({target: clientDiv, type: "keydown", handler: function(e) { return that._handleKeyDown(e ? e : win.event);}}); //$NON-NLS-1$
+			handlers.push({target: clientDiv, type: "keypress", handler: function(e) { return that._handleKeyPress(e ? e : win.event);}}); //$NON-NLS-1$
+			handlers.push({target: clientDiv, type: "keyup", handler: function(e) { return that._handleKeyUp(e ? e : win.event);}}); //$NON-NLS-1$
 			if (util.isIE) {
-				handlers.push({target: doc, type: "keyup", handler: function(e) { return that._handleDocKeyUp(e ? e : win.event);}}); //$NON-NLS-0$
+				handlers.push({target: doc, type: "keyup", handler: function(e) { return that._handleDocKeyUp(e ? e : win.event);}}); //$NON-NLS-1$
 			}
-			handlers.push({target: clientDiv, type: "contextmenu", handler: function(e) { return that._handleContextMenu(e ? e : win.event);}}); //$NON-NLS-0$
-			handlers.push({target: clientDiv, type: "copy", handler: function(e) { return that._handleCopy(e ? e : win.event);}}); //$NON-NLS-0$
-			handlers.push({target: clientDiv, type: "cut", handler: function(e) { return that._handleCut(e ? e : win.event);}}); //$NON-NLS-0$
-			handlers.push({target: clientDiv, type: "paste", handler: function(e) { return that._handlePaste(e ? e : win.event);}}); //$NON-NLS-0$
-			handlers.push({target: doc, type: "selectionchange", handler: function(e) { return that._handleSelectionChange(e ? e : win.event); }}); //$NON-NLS-0$
+			handlers.push({target: clientDiv, type: "contextmenu", handler: function(e) { return that._handleContextMenu(e ? e : win.event);}}); //$NON-NLS-1$
+			handlers.push({target: clientDiv, type: "copy", handler: function(e) { return that._handleCopy(e ? e : win.event);}}); //$NON-NLS-1$
+			handlers.push({target: clientDiv, type: "cut", handler: function(e) { return that._handleCut(e ? e : win.event);}}); //$NON-NLS-1$
+			handlers.push({target: clientDiv, type: "paste", handler: function(e) { return that._handlePaste(e ? e : win.event);}}); //$NON-NLS-1$
+			handlers.push({target: doc, type: "selectionchange", handler: function(e) { return that._handleSelectionChange(e ? e : win.event); }}); //$NON-NLS-1$
 			if (util.isIOS || util.isAndroid) {
-				handlers.push({target: clientDiv, type: "touchstart", handler: function(e) { return that._handleTouchStart(e ? e : win.event); }}); //$NON-NLS-0$
-				handlers.push({target: clientDiv, type: "touchmove", handler: function(e) { return that._handleTouchMove(e ? e : win.event); }}); //$NON-NLS-0$
-				handlers.push({target: clientDiv, type: "touchend", handler: function(e) { return that._handleTouchEnd(e ? e : win.event); }}); //$NON-NLS-0$
+				handlers.push({target: clientDiv, type: "touchstart", handler: function(e) { return that._handleTouchStart(e ? e : win.event); }}); //$NON-NLS-1$
+				handlers.push({target: clientDiv, type: "touchmove", handler: function(e) { return that._handleTouchMove(e ? e : win.event); }}); //$NON-NLS-1$
+				handlers.push({target: clientDiv, type: "touchend", handler: function(e) { return that._handleTouchEnd(e ? e : win.event); }}); //$NON-NLS-1$
 			} else {
-				handlers.push({target: clientDiv, type: "selectstart", handler: function(e) { return that._handleSelectStart(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: clientDiv, type: "mousedown", handler: function(e) { return that._handleMouseDown(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: clientDiv, type: "mouseover", handler: function(e) { return that._handleMouseOver(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: clientDiv, type: "mouseout", handler: function(e) { return that._handleMouseOut(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: grabNode, type: "mouseup", handler: function(e) { return that._handleMouseUp(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: grabNode, type: "mousemove", handler: function(e) { return that._handleMouseMove(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: rootDiv, type: "mousedown", handler: function(e) { return that._handleRootMouseDown(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: rootDiv, type: "mouseup", handler: function(e) { return that._handleRootMouseUp(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: topNode, type: "dragstart", handler: function(e) { return that._handleDragStart(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: topNode, type: "drag", handler: function(e) { return that._handleDrag(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: topNode, type: "dragend", handler: function(e) { return that._handleDragEnd(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: topNode, type: "dragenter", handler: function(e) { return that._handleDragEnter(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: topNode, type: "dragover", handler: function(e) { return that._handleDragOver(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: topNode, type: "dragleave", handler: function(e) { return that._handleDragLeave(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: topNode, type: "drop", handler: function(e) { return that._handleDrop(e ? e : win.event);}}); //$NON-NLS-0$
-				handlers.push({target: this._clientDiv, type: util.isFirefox > 26 ? "wheel" : util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return that._handleMouseWheel(e ? e : win.event); }}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				handlers.push({target: clientDiv, type: "selectstart", handler: function(e) { return that._handleSelectStart(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: clientDiv, type: "mousedown", handler: function(e) { return that._handleMouseDown(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: clientDiv, type: "mouseover", handler: function(e) { return that._handleMouseOver(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: clientDiv, type: "mouseout", handler: function(e) { return that._handleMouseOut(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: grabNode, type: "mouseup", handler: function(e) { return that._handleMouseUp(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: grabNode, type: "mousemove", handler: function(e) { return that._handleMouseMove(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: rootDiv, type: "mousedown", handler: function(e) { return that._handleRootMouseDown(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: rootDiv, type: "mouseup", handler: function(e) { return that._handleRootMouseUp(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: topNode, type: "dragstart", handler: function(e) { return that._handleDragStart(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: topNode, type: "drag", handler: function(e) { return that._handleDrag(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: topNode, type: "dragend", handler: function(e) { return that._handleDragEnd(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: topNode, type: "dragenter", handler: function(e) { return that._handleDragEnter(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: topNode, type: "dragover", handler: function(e) { return that._handleDragOver(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: topNode, type: "dragleave", handler: function(e) { return that._handleDragLeave(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: topNode, type: "drop", handler: function(e) { return that._handleDrop(e ? e : win.event);}}); //$NON-NLS-1$
+				handlers.push({target: this._clientDiv, type: util.isFirefox > 26 ? "wheel" : util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return that._handleMouseWheel(e ? e : win.event); }}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 				if (this._clipDiv) {
-					handlers.push({target: this._clipDiv, type: util.isFirefox > 26 ? "wheel" : util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return that._handleMouseWheel(e ? e : win.event); }}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					handlers.push({target: this._clipDiv, type: util.isFirefox > 26 ? "wheel" : util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return that._handleMouseWheel(e ? e : win.event); }}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 				}
 				if (util.isFirefox && (!util.isWindows || util.isFirefox >= 15)) {
 					var MO = win.MutationObserver || win.MozMutationObserver;
@@ -6354,22 +6354,22 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 						this._mutationObserver = new MO(function(mutations) { that._handleDataModified(mutations); });
 						this._mutationObserver.observe(clientDiv, {subtree: true, characterData: true});
 					} else {
-						handlers.push({target: this._clientDiv, type: "DOMCharacterDataModified", handler: function (e) { return that._handleDataModified(e ? e : win.event); }}); //$NON-NLS-0$
+						handlers.push({target: this._clientDiv, type: "DOMCharacterDataModified", handler: function (e) { return that._handleDataModified(e ? e : win.event); }}); //$NON-NLS-1$
 					}
 				}
 				if ((util.isFirefox && (!util.isWindows || util.isFirefox >= 15)) || util.isIE || util.isWebkit) {
-					handlers.push({target: this._clientDiv, type: "compositionstart", handler: function (e) { return that._handleCompositionStart(e ? e : win.event); }}); //$NON-NLS-0$
-					handlers.push({target: this._clientDiv, type: "compositionend", handler: function (e) { return that._handleCompositionEnd(e ? e : win.event); }}); //$NON-NLS-0$
-					handlers.push({target: this._clientDiv, type: "compositionupdate", handler: function (e) { return that._handleCompositionUpdate(e ? e : win.event); }}); //$NON-NLS-0$
+					handlers.push({target: this._clientDiv, type: "compositionstart", handler: function (e) { return that._handleCompositionStart(e ? e : win.event); }}); //$NON-NLS-1$
+					handlers.push({target: this._clientDiv, type: "compositionend", handler: function (e) { return that._handleCompositionEnd(e ? e : win.event); }}); //$NON-NLS-1$
+					handlers.push({target: this._clientDiv, type: "compositionupdate", handler: function (e) { return that._handleCompositionUpdate(e ? e : win.event); }}); //$NON-NLS-1$
 				}
 				if (this._overlayDiv) {
-					handlers.push({target: this._overlayDiv, type: "mousedown", handler: function(e) { return that._handleMouseDown(e ? e : win.event);}}); //$NON-NLS-0$
-					handlers.push({target: this._overlayDiv, type: "mouseover", handler: function(e) { return that._handleMouseOver(e ? e : win.event);}}); //$NON-NLS-0$
-					handlers.push({target: this._overlayDiv, type: "mouseout", handler: function(e) { return that._handleMouseOut(e ? e : win.event);}}); //$NON-NLS-0$
-					handlers.push({target: this._overlayDiv, type: "contextmenu", handler: function(e) { return that._handleContextMenu(e ? e : win.event); }}); //$NON-NLS-0$
+					handlers.push({target: this._overlayDiv, type: "mousedown", handler: function(e) { return that._handleMouseDown(e ? e : win.event);}}); //$NON-NLS-1$
+					handlers.push({target: this._overlayDiv, type: "mouseover", handler: function(e) { return that._handleMouseOver(e ? e : win.event);}}); //$NON-NLS-1$
+					handlers.push({target: this._overlayDiv, type: "mouseout", handler: function(e) { return that._handleMouseOut(e ? e : win.event);}}); //$NON-NLS-1$
+					handlers.push({target: this._overlayDiv, type: "contextmenu", handler: function(e) { return that._handleContextMenu(e ? e : win.event); }}); //$NON-NLS-1$
 				}
 				if (!this._isW3CEvents) {
-					handlers.push({target: this._clientDiv, type: "dblclick", handler: function(e) { return that._handleDblclick(e ? e : win.event); }}); //$NON-NLS-0$
+					handlers.push({target: this._clientDiv, type: "dblclick", handler: function(e) { return that._handleDblclick(e ? e : win.event); }}); //$NON-NLS-1$
 				}
 			}
 
@@ -6388,14 +6388,14 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var that = this;
 			var win = this._getWindow();
 			if (util.isIE) {
-				handlers.push({target: div, type: "selectstart", handler: function() {return false;}}); //$NON-NLS-0$
+				handlers.push({target: div, type: "selectstart", handler: function() {return false;}}); //$NON-NLS-1$
 			}
-			handlers.push({target: div, type: util.isFirefox > 26 ? "wheel" : util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return that._handleMouseWheel(e ? e : win.event); }}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			handlers.push({target: div, type: "click", handler: function(e) { that._handleRulerEvent(e ? e : win.event); }}); //$NON-NLS-0$
-			handlers.push({target: div, type: "dblclick", handler: function(e) { that._handleRulerEvent(e ? e : win.event); }}); //$NON-NLS-0$
-			handlers.push({target: div, type: "mousemove", handler: function(e) { that._handleRulerEvent(e ? e : win.event); }}); //$NON-NLS-0$
-			handlers.push({target: div, type: "mouseover", handler: function(e) { that._handleRulerEvent(e ? e : win.event); }}); //$NON-NLS-0$
-			handlers.push({target: div, type: "mouseout", handler: function(e) { that._handleRulerEvent(e ? e : win.event); }}); //$NON-NLS-0$
+			handlers.push({target: div, type: util.isFirefox > 26 ? "wheel" : util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return that._handleMouseWheel(e ? e : win.event); }}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
+			handlers.push({target: div, type: "click", handler: function(e) { that._handleRulerEvent(e ? e : win.event); }}); //$NON-NLS-1$
+			handlers.push({target: div, type: "dblclick", handler: function(e) { that._handleRulerEvent(e ? e : win.event); }}); //$NON-NLS-1$
+			handlers.push({target: div, type: "mousemove", handler: function(e) { that._handleRulerEvent(e ? e : win.event); }}); //$NON-NLS-1$
+			handlers.push({target: div, type: "mouseover", handler: function(e) { that._handleRulerEvent(e ? e : win.event); }}); //$NON-NLS-1$
+			handlers.push({target: div, type: "mouseout", handler: function(e) { that._handleRulerEvent(e ? e : win.event); }}); //$NON-NLS-1$
 		},
 		_getWindow: function() {
 			return getWindow(this._parent.ownerDocument);
@@ -6410,10 +6410,10 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_init: function(options) {
 			var _parent = options.parent;
-			if (typeof(_parent) === "string") { //$NON-NLS-0$
+			if (typeof(_parent) === "string") { //$NON-NLS-1$
 				_parent = (options.document || document).getElementById(_parent);
 			}
-			if (!_parent) { throw new Error("no parent"); } //$NON-NLS-0$
+			if (!_parent) { throw new Error("no parent"); } //$NON-NLS-1$
 			options.parent = _parent;
 			options.model = options.model || new mTextModel.TextModel();
 			var defaultOptions = this._defaultOptions();
@@ -6425,7 +6425,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					} else {
 						value = defaultOptions[option].value;
 					}
-					this["_" + option] = value; //$NON-NLS-0$
+					this["_" + option] = value; //$NON-NLS-1$
 				}
 			}
 			this._keyModes = [];
@@ -6439,7 +6439,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			this._ignoreFocus = false;
 			this._hasFocus = false;
 			this._dragOffset = -1;
-			this._isRangeRects = (!util.isIE || util.isIE >= 9) && typeof _parent.ownerDocument.createRange().getBoundingClientRect === "function"; //$NON-NLS-0$
+			this._isRangeRects = (!util.isIE || util.isIE >= 9) && typeof _parent.ownerDocument.createRange().getBoundingClientRect === "function"; //$NON-NLS-1$
 			this._isW3CEvents = _parent.addEventListener;
 
 			/* Auto scroll */
@@ -6478,9 +6478,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					var viewDiv = this._viewDiv;
 					var overlay = this._isOverOverlayScroll();
 					if (overlay.vertical || overlay.horizontal) {
-						viewDiv.style.pointerEvents = ""; //$NON-NLS-0$
+						viewDiv.style.pointerEvents = ""; //$NON-NLS-1$
 					} else {
-						viewDiv.style.pointerEvents = "none"; //$NON-NLS-0$
+						viewDiv.style.pointerEvents = "none"; //$NON-NLS-1$
 					}
 				}
 			}	
@@ -6518,7 +6518,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			if (this._readonly && !e._code) {
 				return false;
 			}
-			e.type = "Verify"; //$NON-NLS-0$
+			e.type = "Verify"; //$NON-NLS-1$
 			var oldStart = e.start = e.selection[0].start;
 			var oldEnd = e.end = e.selection[0].end;
 			this.onVerify(e);
@@ -6562,13 +6562,13 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			
 			if (e.selection.length > 1) this.setRedraw(true);
 
-			this.onModify({type: "Modify"}); //$NON-NLS-0$
+			this.onModify({type: "Modify"}); //$NON-NLS-1$
 			return true;
 		},
 		_onModelChanged: function(modelChangedEvent) {
-			modelChangedEvent.type = "ModelChanged"; //$NON-NLS-0$
+			modelChangedEvent.type = "ModelChanged"; //$NON-NLS-1$
 			this.onModelChanged(modelChangedEvent);
-			modelChangedEvent.type = "Changed"; //$NON-NLS-0$
+			modelChangedEvent.type = "Changed"; //$NON-NLS-1$
 			var start = modelChangedEvent.start;
 			var addedCharCount = modelChangedEvent.addedCharCount;
 			var removedCharCount = modelChangedEvent.removedCharCount;
@@ -6625,9 +6625,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			this._update();
 		},
 		_onModelChanging: function(modelChangingEvent) {
-			modelChangingEvent.type = "ModelChanging"; //$NON-NLS-0$
+			modelChangingEvent.type = "ModelChanging"; //$NON-NLS-1$
 			this.onModelChanging(modelChangingEvent);
-			modelChangingEvent.type = "Changing"; //$NON-NLS-0$
+			modelChangingEvent.type = "Changing"; //$NON-NLS-1$
 		},
 		_queueUpdate: function() {
 			if (this._updateTimer || this._ignoreQueueUpdate) { return; }
@@ -6780,24 +6780,24 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				/*
 				* Note that setData() succeeds on Firefox 22 and greater, but the return value is not a boolean like IE and Chrome.
 				*/
-				var success = clipboardData.setData(util.isIE ? "Text" : "text/plain", clipboardText.join("")); //$NON-NLS-1$ //$NON-NLS-0$
+				var success = clipboardData.setData(util.isIE ? "Text" : "text/plain", clipboardText.join("")); //$NON-NLS-1$ //$NON-NLS-2$
 				if (success || util.isFirefox > 21) {
 					return true;
 				}
 			}
 			var doc = this._parent.ownerDocument;
-			var child = util.createElement(doc, "pre"); //$NON-NLS-0$
-			child.style.position = "fixed"; //$NON-NLS-0$
-			child.style.left = "-1000px"; //$NON-NLS-0$
+			var child = util.createElement(doc, "pre"); //$NON-NLS-1$
+			child.style.position = "fixed"; //$NON-NLS-1$
+			child.style.left = "-1000px"; //$NON-NLS-1$
 			convertDelimiter(text, 
 				function(t) {
 					child.appendChild(doc.createTextNode(t));
 				}, 
 				function() {
-					child.appendChild(util.createElement(doc, "br")); //$NON-NLS-0$
+					child.appendChild(util.createElement(doc, "br")); //$NON-NLS-1$
 				}
 			);
-			child.appendChild(doc.createTextNode(" ")); //$NON-NLS-0$
+			child.appendChild(doc.createTextNode(" ")); //$NON-NLS-1$
 			this._clientDiv.appendChild(child);
 			var range = doc.createRange();
 			range.setStart(child.firstChild, 0);
@@ -6820,7 +6820,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			*/
 			this._ignoreCopy = true;
 			try {
-				result = doc.execCommand("copy", false, null); //$NON-NLS-0$
+				result = doc.execCommand("copy", false, null); //$NON-NLS-1$
 			} catch (e) {}
 			this._ignoreCopy = false;
 			if (!result) {
@@ -6861,7 +6861,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				clientDiv.focus();
 			}
 			if (this._overlayDiv) {
-				this._overlayDiv.style.zIndex = visible ? "-1" : "1"; //$NON-NLS-1$ //$NON-NLS-0$
+				this._overlayDiv.style.zIndex = visible ? "-1" : "1"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			var line = this._getLineNext();
 			while (line) {
@@ -6907,7 +6907,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				
 				if (!Selection.compare(oldSelection, newSelection)) {
 					var e = {
-						type: "Selection", //$NON-NLS-0$
+						type: "Selection", //$NON-NLS-1$
 						oldValue: Selection.convert(oldSelection),
 						newValue: Selection.convert(newSelection)
 					};
@@ -6918,7 +6918,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		_setSelectionTo: function (x, y, down, extent, add, drag) {
 			var model = this._model;
 			var selections = this._getSelections();
-			var pt = this.convert({x: x, y: y}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-0$
+			var pt = this.convert({x: x, y: y}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-2$
 			var lineIndex = this._getLineIndex(pt.y);
 			var line = this._getLine(lineIndex);
 			var offset = line.getOffset(pt.x, pt.y - this._getLinePixel(lineIndex));
@@ -6958,14 +6958,14 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 						if (this._doubleClickSelection) {
 							if (offset >= this._doubleClickSelection.start) {
 								start = this._doubleClickSelection.start;
-								end = line.getNextOffset(offset, {unit:"wordend", count:1}); //$NON-NLS-0$
+								end = line.getNextOffset(offset, {unit:"wordend", count:1}); //$NON-NLS-1$
 							} else {
-								start = line.getNextOffset(offset, {unit:"word", count:-1}); //$NON-NLS-0$
+								start = line.getNextOffset(offset, {unit:"word", count:-1}); //$NON-NLS-1$
 								end = this._doubleClickSelection.end;
 							}
 						} else {
-							start = line.getNextOffset(offset, {unit:"word", count:-1}); //$NON-NLS-0$
-							end = line.getNextOffset(start, {unit:"wordend", count:1}); //$NON-NLS-0$
+							start = line.getNextOffset(offset, {unit:"word", count:-1}); //$NON-NLS-1$
+							end = line.getNextOffset(start, {unit:"wordend", count:1}); //$NON-NLS-1$
 						}
 					} else {
 						if (this._doubleClickSelection) {
@@ -7015,15 +7015,15 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			if (this._blockCursorVisible || this._overwriteMode) {
 				if (!this._cursorDiv) {
 					var viewDiv = this._viewDiv;
-					var cursorDiv = util.createElement(viewDiv.ownerDocument, "div"); //$NON-NLS-0$
-					cursorDiv.className = "textviewBlockCursor"; //$NON-NLS-0$
+					var cursorDiv = util.createElement(viewDiv.ownerDocument, "div"); //$NON-NLS-1$
+					cursorDiv.className = "textviewBlockCursor"; //$NON-NLS-1$
 					this._cursorDiv = cursorDiv;
 					cursorDiv.tabIndex = -1;
-					cursorDiv.style.zIndex = "2"; //$NON-NLS-0$
-					cursorDiv.style.color = "transparent"; //$NON-NLS-0$
-					cursorDiv.style.position = "absolute"; //$NON-NLS-0$
-					cursorDiv.style.pointerEvents = "none"; //$NON-NLS-0$
-					cursorDiv.innerHTML = "&nbsp;"; //$NON-NLS-0$
+					cursorDiv.style.zIndex = "2"; //$NON-NLS-1$
+					cursorDiv.style.color = "transparent"; //$NON-NLS-1$
+					cursorDiv.style.position = "absolute"; //$NON-NLS-1$
+					cursorDiv.style.pointerEvents = "none"; //$NON-NLS-1$
+					cursorDiv.innerHTML = "&nbsp;"; //$NON-NLS-1$
 					viewDiv.appendChild(cursorDiv);
 					this._updateDOMSelection();
 				}
@@ -7036,7 +7036,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_setMarginOffset: function(marginOffset, init) {
 			this._marginOffset = marginOffset;
-			this._marginDiv.style.display = marginOffset ? "block" : "none"; //$NON-NLS-1$ //$NON-NLS-0$
+			this._marginDiv.style.display = marginOffset ? "block" : "none"; //$NON-NLS-1$ //$NON-NLS-2$
 			if (!init) {
 				this._metrics = this._calculateMetrics();
 				this._queueUpdate();
@@ -7051,7 +7051,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_setReadOnly: function (readOnly) {
 			this._readonly = readOnly;
-			this._clientDiv.setAttribute("aria-readonly", readOnly ? "true" : "false"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this._clientDiv.setAttribute("aria-readonly", readOnly ? "true" : "false"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 		},
 		_setSingleMode: function (singleMode, init) {
 			this._singleMode = singleMode;
@@ -7083,20 +7083,20 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_setTheme: function(theme) {
 			if (this._theme) {
-				this._theme.removeEventListener("ThemeChanged", this._themeListener.onChanged); //$NON-NLS-0$
+				this._theme.removeEventListener("ThemeChanged", this._themeListener.onChanged); //$NON-NLS-1$
 			}
 			this._theme = theme;
 			if (this._theme) {
-				this._theme.addEventListener("ThemeChanged", this._themeListener.onChanged); //$NON-NLS-0$
+				this._theme.addEventListener("ThemeChanged", this._themeListener.onChanged); //$NON-NLS-1$
 			}
 			this._setThemeClass(this._themeClass);
 		},
 		_setThemeClass: function (themeClass, init) {
 			this._themeClass = themeClass;
-			var viewContainerClass = "textview"; //$NON-NLS-0$
+			var viewContainerClass = "textview"; //$NON-NLS-1$
 			var globalThemeClass = this._theme.getThemeClass();
-			if (globalThemeClass) { viewContainerClass += " " + globalThemeClass; } //$NON-NLS-0$
-			if (this._themeClass && globalThemeClass !== this._themeClass) { viewContainerClass += " " + this._themeClass; } //$NON-NLS-0$
+			if (globalThemeClass) { viewContainerClass += " " + globalThemeClass; } //$NON-NLS-1$
+			if (this._themeClass && globalThemeClass !== this._themeClass) { viewContainerClass += " " + this._themeClass; } //$NON-NLS-1$
 			this._rootDiv.className = viewContainerClass;
 			this._updateStyle(init);
 		},
@@ -7107,11 +7107,11 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			this._wrapMode = wrapMode && this._wrappable;
 			var clientDiv = this._clientDiv;
 			if (this._wrapMode) {
-				clientDiv.style.whiteSpace = "pre-wrap"; //$NON-NLS-0$
-				clientDiv.style.wordWrap = "break-word"; //$NON-NLS-0$
+				clientDiv.style.whiteSpace = "pre-wrap"; //$NON-NLS-1$
+				clientDiv.style.wordWrap = "break-word"; //$NON-NLS-1$
 			} else {
-				clientDiv.style.whiteSpace = "pre"; //$NON-NLS-0$
-				clientDiv.style.wordWrap = "normal"; //$NON-NLS-0$
+				clientDiv.style.whiteSpace = "pre"; //$NON-NLS-1$
+				clientDiv.style.wordWrap = "normal"; //$NON-NLS-1$
 			}
 			this._updateOverflow();
 			if (!init) {
@@ -7127,7 +7127,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			if (this._imeOffset !== -1) return;
 			var model = this._model;
 			var selections = this._getSelections();
-			var selection = Selection.editing(selections, this._autoScrollDir === "down"); //$NON-NLS-0$
+			var selection = Selection.editing(selections, this._autoScrollDir === "down"); //$NON-NLS-1$
 			var _scroll = this._getScroll();
 			var caret = selection.getCaret();
 			var start = selection.start;
@@ -7144,7 +7144,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var _top = bounds.top;
 			var bottom = bounds.bottom;
 			var selectionHeight = 0;
-			var hasShowOptions = typeof showOptions === "object"; //$NON-NLS-0$
+			var hasShowOptions = typeof showOptions === "object"; //$NON-NLS-1$
 			if ((allSelection || hasShowOptions) && !selection.isEmpty()) {
 				bounds = this._getBoundsAtOffset(caret === end ? start : endInclusive);
 				selectionHeight = (bounds.bottom > bottom ? bounds.bottom : bottom) - (bounds.top < _top ? bounds.top : _top);
@@ -7188,7 +7188,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					}
 				}
 			}
-			var alwaysScroll = hasShowOptions && showOptions.scrollPolicy === "always"; //$NON-NLS-0$
+			var alwaysScroll = hasShowOptions && showOptions.scrollPolicy === "always"; //$NON-NLS-1$
 			if (pixelX !== 0 || pixelY !== 0 || alwaysScroll) {
 				if (hasShowOptions) {
 					var flag = pixelY > 0;
@@ -7199,27 +7199,27 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					var selectionAnchor = showOptions.selectionAnchor;
 					var viewAnchorOffset = Math.min(Math.max(0, showOptions.viewAnchorOffset || 0));
 //					var selectionAnchorOffset = Math.min(Math.max(0, showOptions.selectionAnchorOffset || 0));
-					if (viewAnchor === "top") { //$NON-NLS-0$
+					if (viewAnchor === "top") { //$NON-NLS-1$
 						pixelY += Math.floor(flag ? (1 - viewAnchorOffset) * clientHeight : -viewAnchorOffset * clientHeight);
-					} else if (viewAnchor === "bottom") { //$NON-NLS-0$
+					} else if (viewAnchor === "bottom") { //$NON-NLS-1$
 						pixelY += Math.floor(flag ? viewAnchorOffset * clientHeight : -(1 - viewAnchorOffset) * clientHeight);
-					} else if (viewAnchor === "center") { //$NON-NLS-0$
+					} else if (viewAnchor === "center") { //$NON-NLS-1$
 						pixelY += Math.floor(flag ? clientHeight / 2 + viewAnchorOffset * clientHeight : clientHeight / 2  - (1 - viewAnchorOffset) * clientHeight);
 					} else { // caret is the default
 						pixelY += Math.floor(flag ? viewAnchorOffset * clientHeight : -viewAnchorOffset * clientHeight);
 					}
 					if (startLine !== endLine) {
-						if (selectionAnchor === "top" && caret !== start) { //$NON-NLS-0$
+						if (selectionAnchor === "top" && caret !== start) { //$NON-NLS-1$
 							pixelY += Math.floor(-selectionHeight);
-						} else if (selectionAnchor === "bottom" && caret !== end) { //$NON-NLS-0$
+						} else if (selectionAnchor === "bottom" && caret !== end) { //$NON-NLS-1$
 							pixelY += Math.floor(selectionHeight);
-						} else if (selectionAnchor === "center") { //$NON-NLS-0$
+						} else if (selectionAnchor === "center") { //$NON-NLS-1$
 							pixelY += Math.floor(selectionHeight / 2);
 						} else {
 							// caret is the default
 						}
 					}
-				} else if (pixelY !== 0 && typeof showOptions === "number") { //$NON-NLS-0$
+				} else if (pixelY !== 0 && typeof showOptions === "number") { //$NON-NLS-1$
 					if (showOptions < 0) { showOptions = 0; }
 					if (showOptions > 1) { showOptions = 1; }
 					pixelY += Math.floor(pixelY > 0 ? showOptions * clientHeight : -showOptions * clientHeight);
@@ -7257,9 +7257,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			this._imeOffset = selections[0].start;
 		},
 		_unhookEvents: function() {
-			this._model.removeEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-0$
-			this._model.removeEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-0$
-			this._theme.removeEventListener("ThemeChanged", this._themeListener.onChanged); //$NON-NLS-0$
+			this._model.removeEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-1$
+			this._model.removeEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-1$
+			this._theme.removeEventListener("ThemeChanged", this._themeListener.onChanged); //$NON-NLS-1$
 			this._modelListener = null;
 			for (var i=0; i<this._handlers.length; i++) {
 				var h = this._handlers[i];
@@ -7332,7 +7332,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var scrollbarWidth = this._metrics.scrollWidth;
 			
 			if (this._wrapMode) {
-				clientDiv.style.width = (this._metrics.wrapWidth || this._getClientWidth()) + "px"; //$NON-NLS-0$
+				clientDiv.style.width = (this._metrics.wrapWidth || this._getClientWidth()) + "px"; //$NON-NLS-1$
 			}
 			
 			/*
@@ -7408,7 +7408,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					var nextChild = child.nextSibling;
 					if (!(lineStart <= lineIndex && lineIndex <= lineEnd) || child.lineRemoved || child.lineIndex === -1) {
 						if (this._mouseWheelLine === child) {
-							child.style.display = "none"; //$NON-NLS-0$
+							child.style.display = "none"; //$NON-NLS-1$
 							child.lineIndex = -1;
 						} else {
 							clientDiv.removeChild(child);
@@ -7446,7 +7446,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				* reset to the appropriate value further down.
 				*/ 
 				if (util.isWebkit && !this._wrapMode) {
-					clientDiv.style.width = "0x7fffffffpx"; //$NON-NLS-0$
+					clientDiv.style.width = "0x7fffffffpx"; //$NON-NLS-1$
 				}
 	
 				var rect;
@@ -7523,24 +7523,24 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					var rightRect = this._rightDiv.getBoundingClientRect();
 					rightWidth = rightRect.right - rightRect.left;
 				}
-				viewDiv.style.left = leftWidth + "px"; //$NON-NLS-0$
-				viewDiv.style.right = rightWidth + "px"; //$NON-NLS-0$
+				viewDiv.style.left = leftWidth + "px"; //$NON-NLS-1$
+				viewDiv.style.right = rightWidth + "px"; //$NON-NLS-1$
 
 				/* Need to set the height first in order for the width to consider the vertical scrollbar */
 				var scrollDiv = this._scrollDiv;
-				scrollDiv.style.height = (scrollHeight + (util.isWebkit ? 0 : viewPad.bottom)) + "px"; //$NON-NLS-0$
+				scrollDiv.style.height = (scrollHeight + (util.isWebkit ? 0 : viewPad.bottom)) + "px"; //$NON-NLS-1$
 				
 				clientWidth = this._getClientWidth();
 				if (!this._singleMode && !this._wrapMode && !this._noScroll) {
 					var clientHeightNoScroll = clientHeight, clientHeightScroll = clientHeight;
-					var oldHScroll = viewDiv.style.overflowX === "scroll"; //$NON-NLS-0$
+					var oldHScroll = viewDiv.style.overflowX === "scroll"; //$NON-NLS-1$
 					if (oldHScroll) {
 						clientHeightNoScroll += scrollbarWidth;
 					} else {
 						clientHeightScroll -= scrollbarWidth;
 					}
 					var clientWidthNoScroll = clientWidth, clientWidthScroll = clientWidth;
-					var oldVScroll = viewDiv.style.overflowY === "scroll"; //$NON-NLS-0$
+					var oldVScroll = viewDiv.style.overflowY === "scroll"; //$NON-NLS-1$
 					if (oldVScroll) {
 						clientWidthNoScroll += scrollbarWidth;
 					} else {
@@ -7561,10 +7561,10 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 						}
 					}
 					if (oldHScroll !== hScroll) {
-						viewDiv.style.overflowX = hScroll ? "scroll" : "hidden"; //$NON-NLS-1$ //$NON-NLS-0$
+						viewDiv.style.overflowX = hScroll ? "scroll" : "hidden"; //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					if (oldVScroll !== vScroll) {
-						viewDiv.style.overflowY = vScroll ? "scroll" : "hidden"; //$NON-NLS-1$ //$NON-NLS-0$
+						viewDiv.style.overflowY = vScroll ? "scroll" : "hidden"; //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					needUpdate = oldHScroll !== hScroll || oldVScroll !== vScroll;
 				}
@@ -7583,33 +7583,33 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				*/
 				scrollWidth = width;
 				if ((!util.isIE || util.isIE >= 9) && this._maxLineWidth > clientWidth) { width += viewPad.right + viewPad.left; }
-				scrollDiv.style.width = width + "px"; //$NON-NLS-0$
+				scrollDiv.style.width = width + "px"; //$NON-NLS-1$
 				if (this._clipScrollDiv) {
-					this._clipScrollDiv.style.width = width + "px"; //$NON-NLS-0$
+					this._clipScrollDiv.style.width = width + "px"; //$NON-NLS-1$
 				}
 				/* Get the left scroll after setting the width of the scrollDiv as this can change the horizontal scroll offset. */
 				_scroll = this._getScroll(false);
 
 				var innerRightDiv = this._innerRightDiv;
 				if (innerRightDiv) {
-					innerRightDiv.style.right = rightWidth + (viewDiv.style.overflowY === "scroll" ? this._metrics.scrollWidth : 0) + "px"; //$NON-NLS-1$ //$NON-NLS-0$
-					innerRightDiv.style.bottom = (viewDiv.style.overflowX === "scroll" ? scrollbarWidth : 0) + "px"; //$NON-NLS-1$ //$NON-NLS-0$
+					innerRightDiv.style.right = rightWidth + (viewDiv.style.overflowY === "scroll" ? this._metrics.scrollWidth : 0) + "px"; //$NON-NLS-1$ //$NON-NLS-1$
+					innerRightDiv.style.bottom = (viewDiv.style.overflowX === "scroll" ? scrollbarWidth : 0) + "px"; //$NON-NLS-1$ //$NON-NLS-1$
 				}
 			}
 			this._scrollHeight = scrollHeight;
 			if (this._vScrollDiv) {
 				var trackHeight = clientHeight - 8;
 				var thumbHeight = Math.max(15, Math.ceil(Math.min(1, trackHeight / (scrollHeight + viewPad.top + viewPad.bottom)) * trackHeight));
-				this._vScrollDiv.style.left = (leftWidth + clientWidth - 8) + "px"; //$NON-NLS-0$
-				this._vScrollDiv.style.top = Math.floor(Math.max(0, (_scroll.y * trackHeight / scrollHeight))) + "px"; //$NON-NLS-0$
-				this._vScrollDiv.style.height = thumbHeight + "px"; //$NON-NLS-0$
+				this._vScrollDiv.style.left = (leftWidth + clientWidth - 8) + "px"; //$NON-NLS-1$
+				this._vScrollDiv.style.top = Math.floor(Math.max(0, (_scroll.y * trackHeight / scrollHeight))) + "px"; //$NON-NLS-1$
+				this._vScrollDiv.style.height = thumbHeight + "px"; //$NON-NLS-1$
 			}
 			if (!this._wrapMode && this._hScrollDiv) {
 				var trackWidth = clientWidth - 8;
 				var thumbWidth = Math.max(15, Math.ceil(Math.min(1, trackWidth / (this._maxLineWidth + viewPad.left + viewPad.right)) * trackWidth));
-				this._hScrollDiv.style.left = leftWidth + Math.floor(Math.max(0, Math.floor(_scroll.x * trackWidth / this._maxLineWidth))) + "px"; //$NON-NLS-0$
-				this._hScrollDiv.style.top = (clientHeight - 9) + "px"; //$NON-NLS-0$
-				this._hScrollDiv.style.width = thumbWidth + "px"; //$NON-NLS-0$
+				this._hScrollDiv.style.left = leftWidth + Math.floor(Math.max(0, Math.floor(_scroll.x * trackWidth / this._maxLineWidth))) + "px"; //$NON-NLS-1$
+				this._hScrollDiv.style.top = (clientHeight - 9) + "px"; //$NON-NLS-1$
+				this._hScrollDiv.style.width = thumbWidth + "px"; //$NON-NLS-1$
 			}
 			var left = _scroll.x;	
 			var clipDiv = this._clipDiv;
@@ -7617,8 +7617,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var marginDiv = this._marginDiv;
 			var clipLeft, clipTop;
 			if (marginDiv) {
-				marginDiv.style.left = (-left + leftWidth + this._metrics.marginWidth + viewPad.left) + "px"; //$NON-NLS-0$
-				marginDiv.style.bottom = (viewDiv.style.overflowX === "scroll" ? scrollbarWidth : 0) + "px"; //$NON-NLS-1$ //$NON-NLS-0$
+				marginDiv.style.left = (-left + leftWidth + this._metrics.marginWidth + viewPad.left) + "px"; //$NON-NLS-1$
+				marginDiv.style.bottom = (viewDiv.style.overflowX === "scroll" ? scrollbarWidth : 0) + "px"; //$NON-NLS-1$ //$NON-NLS-1$
 			}
 			if (clipDiv) {
 				clipDiv.scrollLeft = left;
@@ -7644,14 +7644,14 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				if (_scroll.y + clientHeight === scrollHeight) { 
 					clipHeight += viewPad.bottom; 
 				}
-				clipDiv.style.left = clipLeft + "px"; //$NON-NLS-0$
-				clipDiv.style.top = clipTop + "px"; //$NON-NLS-0$
-				clipDiv.style.right = (rootWidth - clipWidth - clipLeft) + "px"; //$NON-NLS-0$
-				clipDiv.style.bottom = (rootHeight - clipHeight - clipTop) + "px"; //$NON-NLS-0$
-				clientDiv.style.left = clientLeft + "px"; //$NON-NLS-0$
-				clientDiv.style.top = clientTop + "px"; //$NON-NLS-0$
-				clientDiv.style.width = scrollWidth + "px"; //$NON-NLS-0$
-				clientDiv.style.height = (clientHeight + _top) + "px"; //$NON-NLS-0$
+				clipDiv.style.left = clipLeft + "px"; //$NON-NLS-1$
+				clipDiv.style.top = clipTop + "px"; //$NON-NLS-1$
+				clipDiv.style.right = (rootWidth - clipWidth - clipLeft) + "px"; //$NON-NLS-1$
+				clipDiv.style.bottom = (rootHeight - clipHeight - clipTop) + "px"; //$NON-NLS-1$
+				clientDiv.style.left = clientLeft + "px"; //$NON-NLS-1$
+				clientDiv.style.top = clientTop + "px"; //$NON-NLS-1$
+				clientDiv.style.width = scrollWidth + "px"; //$NON-NLS-1$
+				clientDiv.style.height = (clientHeight + _top) + "px"; //$NON-NLS-1$
 				if (overlayDiv) {
 					overlayDiv.style.left = clientDiv.style.left;
 					overlayDiv.style.top = clientDiv.style.top;
@@ -7667,12 +7667,12 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				if (clipTop === 0) { clipTop -= viewPad.top; }
 				if (clipRight === scrollWidth) { clipRight += viewPad.right; }
 				if (_scroll.y + clientHeight === scrollHeight) { clipBottom += viewPad.bottom; }
-				clientDiv.style.clip = "rect(" + clipTop + "px," + clipRight + "px," + clipBottom + "px," + clipLeft + "px)"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				clientDiv.style.left = (-left + leftWidth + viewPad.left) + "px"; //$NON-NLS-0$
-				clientDiv.style.width = (this._wrapMode || util.isWebkit ? scrollWidth : clientWidth + left) + "px"; //$NON-NLS-0$
+				clientDiv.style.clip = "rect(" + clipTop + "px," + clipRight + "px," + clipBottom + "px," + clipLeft + "px)"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+				clientDiv.style.left = (-left + leftWidth + viewPad.left) + "px"; //$NON-NLS-1$
+				clientDiv.style.width = (this._wrapMode || util.isWebkit ? scrollWidth : clientWidth + left) + "px"; //$NON-NLS-1$
 				if (!hScrollOnly) {
-					clientDiv.style.top = (-_top + viewPad.top) + "px"; //$NON-NLS-0$
-					clientDiv.style.height = (clientHeight + _top) + "px"; //$NON-NLS-0$
+					clientDiv.style.top = (-_top + viewPad.top) + "px"; //$NON-NLS-1$
+					clientDiv.style.height = (clientHeight + _top) + "px"; //$NON-NLS-1$
 				}
 				if (overlayDiv) {
 					overlayDiv.style.clip = clientDiv.style.clip;
@@ -7698,12 +7698,12 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		_updateOverflow: function() {
 			var viewDiv = this._viewDiv;
 			if (this._noScroll) {
-				viewDiv.style.overflow = "hidden"; //$NON-NLS-0$
+				viewDiv.style.overflow = "hidden"; //$NON-NLS-1$
 			} else if (this._wrapMode) {
-				viewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
-				viewDiv.style.overflowY = "scroll"; //$NON-NLS-0$
+				viewDiv.style.overflowX = "hidden"; //$NON-NLS-1$
+				viewDiv.style.overflowY = "scroll"; //$NON-NLS-1$
 			} else {
-				viewDiv.style.overflow = "hidden"; //$NON-NLS-0$
+				viewDiv.style.overflow = "hidden"; //$NON-NLS-1$
 			}
 		},
 		_updateRuler: function (divRuler, topIndex, bottomIndex, rootHeight) {
@@ -7719,15 +7719,15 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					applyStyle(ruler.getRulerStyle(), div);
 					divRuler.rulerWidth = undefined;
 				}
-				if (overview === "fixed") { //$NON-NLS-0$
+				if (overview === "fixed") { //$NON-NLS-1$
 					div.rulerChanged = false;
 					div = div.nextSibling;
 					continue;
 				}
 				var offset = lineHeight;
-				if (overview === "page") { offset += this._topIndexY; } //$NON-NLS-0$
-				div.style.top = -offset + "px"; //$NON-NLS-0$
-				div.style.height = (rootHeight + offset) + "px"; //$NON-NLS-0$
+				if (overview === "page") { offset += this._topIndexY; } //$NON-NLS-1$
+				div.style.top = -offset + "px"; //$NON-NLS-1$
+				div.style.height = (rootHeight + offset) + "px"; //$NON-NLS-1$
 				
 				
 				var widthDiv;
@@ -7736,8 +7736,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					widthDiv = child;
 					child = child.nextSibling;
 				} else {
-					widthDiv = util.createElement(doc, "div"); //$NON-NLS-0$
-					widthDiv.style.visibility = "hidden"; //$NON-NLS-0$
+					widthDiv = util.createElement(doc, "div"); //$NON-NLS-1$
+					widthDiv.style.visibility = "hidden"; //$NON-NLS-1$
 					div.appendChild(widthDiv);
 				}
 				var lineIndex, annotation;
@@ -7752,12 +7752,12 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 							}
 						}
 						widthDiv.lineIndex = lineIndex;
-						widthDiv.style.height = (lineHeight + viewPad.top) + "px"; //$NON-NLS-0$
+						widthDiv.style.height = (lineHeight + viewPad.top) + "px"; //$NON-NLS-1$
 					}
 				}
 
 				var lineDiv, frag, annotations;
-				if (overview === "page") { //$NON-NLS-0$
+				if (overview === "page") { //$NON-NLS-1$
 					annotations = ruler.getAnnotations(topIndex, bottomIndex + 1);
 					while (child) {
 						lineIndex = child.lineIndex;
@@ -7771,7 +7771,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					frag = doc.createDocumentFragment();
 					for (lineIndex=topIndex; lineIndex<=bottomIndex; lineIndex++) {
 						if (!child || child.lineIndex > lineIndex) {
-							lineDiv = util.createElement(doc, "div"); //$NON-NLS-0$
+							lineDiv = util.createElement(doc, "div"); //$NON-NLS-1$
 							annotation = annotations[lineIndex];
 							if (annotation) {
 								applyStyle(annotation.style, lineDiv);
@@ -7781,7 +7781,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 								lineDiv.annotation = annotation;
 							}
 							lineDiv.lineIndex = lineIndex;
-							lineDiv.style.height = this._getLineHeight(lineIndex) + "px"; //$NON-NLS-0$
+							lineDiv.style.height = this._getLineHeight(lineIndex) + "px"; //$NON-NLS-1$
 							frag.appendChild(lineDiv);
 						} else {
 							if (frag.firstChild) {
@@ -7818,11 +7818,11 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 						for (var prop in annotations) {
 							lineIndex = prop >>> 0;
 							if (lineIndex < 0) { continue; }
-							lineDiv = util.createElement(doc, "div"); //$NON-NLS-0$
+							lineDiv = util.createElement(doc, "div"); //$NON-NLS-1$
 							annotation = annotations[prop];
 							applyStyle(annotation.style, lineDiv);
-							lineDiv.style.position = "absolute"; //$NON-NLS-0$
-							lineDiv.style.top = arrowWidth + lineHeight + Math.floor(lineIndex * divHeight) + "px"; //$NON-NLS-0$
+							lineDiv.style.position = "absolute"; //$NON-NLS-1$
+							lineDiv.style.top = arrowWidth + lineHeight + Math.floor(lineIndex * divHeight) + "px"; //$NON-NLS-1$
 							if (annotation.html) {
 								lineDiv.innerHTML = annotation.html;
 							}
@@ -7834,7 +7834,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					} else if (div._oldTrackHeight !== trackHeight) {
 						lineDiv = div.firstChild ? div.firstChild.nextSibling : null;
 						while (lineDiv) {
-							lineDiv.style.top = this._metrics.scrollWidth + lineHeight + Math.floor(lineDiv.lineIndex * divHeight) + "px"; //$NON-NLS-0$
+							lineDiv.style.top = this._metrics.scrollWidth + lineHeight + Math.floor(lineDiv.lineIndex * divHeight) + "px"; //$NON-NLS-1$
 							lineDiv = lineDiv.nextSibling;
 						}
 					}
@@ -7847,15 +7847,15 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		_updateStyleSheet: function() {
 			var styleText = "";
 			if (util.isWebkit && this._metrics.scrollWidth > 0) {
-				styleText += "\n.textview ::-webkit-scrollbar-corner {background: #eeeeee;}"; //$NON-NLS-0$
+				styleText += "\n.textview ::-webkit-scrollbar-corner {background: #eeeeee;}"; //$NON-NLS-1$
 			}
 			if (styleText) {
 				var doc = this._clientDiv.ownerDocument;
-				var node = doc.getElementById("_textviewStyle"); //$NON-NLS-0$
+				var node = doc.getElementById("_textviewStyle"); //$NON-NLS-1$
 				if (!node) {
-					node = util.createElement(doc, "style"); //$NON-NLS-0$
-					node.id = "_textviewStyle"; //$NON-NLS-0$
-					var head = doc.getElementsByTagName("head")[0] || doc.documentElement; //$NON-NLS-0$
+					node = util.createElement(doc, "style"); //$NON-NLS-1$
+					node.id = "_textviewStyle"; //$NON-NLS-1$
+					var head = doc.getElementsByTagName("head")[0] || doc.documentElement; //$NON-NLS-1$
 					node.appendChild(doc.createTextNode(styleText));
 					head.insertBefore(node, head.firstChild);
 				} else {
@@ -7866,7 +7866,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		},
 		_updateStyle: function (init, metrics) {
 			if (!init && util.isIE) {
-				this._rootDiv.style.lineHeight = "normal"; //$NON-NLS-0$
+				this._rootDiv.style.lineHeight = "normal"; //$NON-NLS-1$
 			}
 			metrics = this._metrics = metrics || this._calculateMetrics();
 			if (this._variableLineHeight) {
@@ -7874,19 +7874,19 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				this._resetLineHeight();
 			}
 			if (util.isIE) {
-				this._rootDiv.style.lineHeight = (metrics.lineHeight - (metrics.lineTrim.top + metrics.lineTrim.bottom)) + "px"; //$NON-NLS-0$
+				this._rootDiv.style.lineHeight = (metrics.lineHeight - (metrics.lineTrim.top + metrics.lineTrim.bottom)) + "px"; //$NON-NLS-1$
 			} else {
-				this._rootDiv.style.lineHeight = "normal"; //$NON-NLS-0$
+				this._rootDiv.style.lineHeight = "normal"; //$NON-NLS-1$
 			}
 			this._updateStyleSheet();
 			if (util.isMac && util.isWebkit) {
 				var viewDiv = this._viewDiv;
 				if (!metrics.invalid && metrics.scrollWidth === 0) {
-					viewDiv.style.pointerEvents = "none"; //$NON-NLS-0$
-					viewDiv.style.zIndex = "2"; //$NON-NLS-0$
+					viewDiv.style.pointerEvents = "none"; //$NON-NLS-1$
+					viewDiv.style.zIndex = "2"; //$NON-NLS-1$
 				} else {
-					viewDiv.style.pointerEvents = ""; //$NON-NLS-0$
-					viewDiv.style.zIndex = ""; //$NON-NLS-0$
+					viewDiv.style.pointerEvents = ""; //$NON-NLS-1$
+					viewDiv.style.zIndex = ""; //$NON-NLS-1$
 				}
 			}
 			if (!init) {
