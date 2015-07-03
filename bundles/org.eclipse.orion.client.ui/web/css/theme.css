@@ -551,7 +551,7 @@ a.breadcrumb.currentLocation {
 /* widget theming */
 /* splitter - typically the color of the title area */
 .split {
-	background: #263238;
+	background: #37474F;
 }
 
 .splitTracking {
