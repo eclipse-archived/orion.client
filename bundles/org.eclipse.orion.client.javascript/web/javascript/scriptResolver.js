@@ -68,55 +68,44 @@ define([
            var icon = opts.icon ? opts.icon : '../javascript/images/javascript.png'; //$NON-NLS-1$
            var type = opts.type ? opts.type : 'JavaScript'; //$NON-NLS-1$
            var dotext = '.'+ext;
-           //first check the file map
-           return FileMap.getFilePrefix(this.fileclient, that.searchLocation || this.fileclient.fileServiceRootURL()).then(function(prefix) {
-           	   var file = FileMap.getWSPath(name);
-	           if(!file) {
-	               file = FileMap.getWSPath(name+dotext);
-	           }
-	           if(file && file.indexOf(dotext) > -1) {
-	               files = [that._newFileObj(name, file, that._trimName(file), icon, type, this.fileclient)];
-	               that.cache.put(name, files);
-	               return files;
-	           }
-	           var filename = name.replace(/^i18n!/, '');
-	           var idx = filename.lastIndexOf('/');
-	           var searchname = filename.slice(idx+1);
-	           //fall back to looking for it
-	           return this.fileclient.search(
-	                {
-	                	'resource': that.searchLocation || this.fileclient.fileServiceRootURL(),
-	                    'keyword': searchname,
-	                    'sort': 'Name asc', //$NON-NLS-1$
-	                    'nameSearch': true,
-	                    'fileType': ext,
-	                    'start': 0,
-	                    'rows': 30
-	                }
-	           ).then(function(res) {
-	               var r = res.response;
-	               var len = r.docs.length;
-	               if(r.numFound > 0) {
-	                   files = [];
-	                   var testname = filename.replace(/(?:\.?\.\/)*/, '');
-	                   testname = testname.replace(new RegExp("\\"+dotext+"$"), ''); //$NON-NLS-1$
-	                   testname = testname.replace(/\//g, "\\/"); //$NON-NLS-1$
-	                   for(var i = 0; i < len; i++) {
-	                       file = r.docs[i];
-	                       //TODO haxxor - only keep ones that end in the logical name or the mapped logical name
-	                       var regex = ".*(?:"+testname+")$"; //$NON-NLS-1$ //$NON-NLS-2$
-	                       if(new RegExp(regex).test(file.Location.slice(0, file.Location.length-dotext.length))) {
-	                           files.push(that._newFileObj(file.Name, file.Location, that._trimName(file.Path), icon, type));
-	                       }
-	                   }
-	                   if(files.length > 0) {
-	                       that.cache.put(filename, files);
-	                       return files;
-	                   }
-	               }
-	               return null;
-	           });
-           }.bind(this));
+           var filename = name.replace(/^i18n!/, '');
+           var idx = filename.lastIndexOf('/');
+           var searchname = filename.slice(idx+1);
+
+           // Search for it
+           return this.fileclient.search(
+                {
+                	'resource': that.searchLocation || this.fileclient.fileServiceRootURL(),
+                    'keyword': searchname,
+                    'sort': 'Name asc', //$NON-NLS-1$
+                    'nameSearch': true,
+                    'fileType': ext,
+                    'start': 0,
+                    'rows': 30
+                }
+           ).then(function(res) {
+               var r = res.response;
+               var len = r.docs.length;
+               if(r.numFound > 0) {
+                   files = [];
+                   var testname = filename.replace(/(?:\.?\.\/)*/, '');
+                   testname = testname.replace(new RegExp("\\"+dotext+"$"), ''); //$NON-NLS-1$
+                   testname = testname.replace(/\//g, "\\/"); //$NON-NLS-1$
+                   for(var i = 0; i < len; i++) {
+                       var file = r.docs[i];
+                       //TODO haxxor - only keep ones that end in the logical name or the mapped logical name
+                       var regex = ".*(?:"+testname+")$"; //$NON-NLS-1$ //$NON-NLS-2$
+                       if(new RegExp(regex).test(file.Location.slice(0, file.Location.length-dotext.length))) {
+                           files.push(that._newFileObj(file.Name, file.Location, that._trimName(file.Path), icon, type));
+                       }
+                   }
+                   if(files.length > 0) {
+                       that.cache.put(filename, files);
+                       return files;
+                   }
+               }
+               return null;
+           });
        },
        
        /**
