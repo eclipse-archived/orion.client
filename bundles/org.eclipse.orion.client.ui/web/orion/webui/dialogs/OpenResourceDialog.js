@@ -11,8 +11,9 @@
  *     Andy Clement (vmware) - bug 344614
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion/contentTypes', 'require', 'orion/webui/littlelib', 'orion/util', 'orion/webui/dialog', 'orion/Deferred'], 
-		function(messages, mSearchCrawler, mContentTypes, require, lib, util, dialog, Deferred) {
+define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion/contentTypes', 'require', 
+			'orion/webui/littlelib', 'orion/util', 'orion/webui/dialog', 'orion/metrics', 'orion/Deferred'], 
+		function(messages, mSearchCrawler, mContentTypes, require, lib, util, dialog, mMetrics, Deferred) {
 	/**
 	 * Usage: <code>new OpenResourceDialog(options).show();</code>
 	 * 
@@ -79,7 +80,8 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		this.$searchScope.checked = gs;
 		this.updateTitle();
 		this.$searchScope.addEventListener("click", function(e) {
-			localStorage.setItem("/searchScope", this.$searchScope.checked);
+			mMetrics.logEvent("preferenceChange", "searchScope", null, this.$searchScope.checked ? 0 : 1); //$NON-NLS-1$ //$NON-NLS-2$
+			localStorage.setItem("/searchScope", this.$searchScope.checked); //$NON-NLS-1$
 			
 			this.updateTitle();
 			this.doSearch();
