@@ -9,13 +9,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
- /*eslint-env amd*/
+ /*eslint-env amd, browser*/
 define([
 'orion/objects',
 'javascript/finder',
 'orion/Deferred',
-'javascript/compilationUnit'
-], function(Objects, Finder, Deferred, CU) {
+'javascript/compilationUnit',
+'i18n!javascript/nls/messages'
+], function(Objects, Finder, Deferred, CU, Messages) {
 	
 	var deferred;
 	var cachedContext;
@@ -33,9 +34,9 @@ define([
 		this.astManager = ASTManager;
 		this.ternworker = ternWorker;
 		this.scriptResolver = scriptResolver;
-		this.ternworker.addEventListener('message', function(event) {
-			if(typeof(event.data) === 'object') {
-				var _d = event.data;
+		this.ternworker.addEventListener('message', function(evnt) {
+			if(typeof(evnt.data) === 'object') {
+				var _d = evnt.data;
 				if(_d.request === 'rename') {
 					var changes = _d.changes;
 					if(changes && changes.changes && changes.changes.length > 0) {
@@ -54,9 +55,11 @@ define([
 						deferred.resolve(cachedContext.enterLinkedMode(linkModel));
 					} 
 					deferred.resolve();
+					deferred = null;
 				}
 			}
 		});
+		this.timeout = null;
 	}
 	
 	Objects.mixin(RenameCommand.prototype, {
@@ -82,7 +85,7 @@ define([
 				        }
 			        });
 			    }
-			})
+			});
 		},
 		
 		/**
@@ -98,8 +101,18 @@ define([
 			return editorContext.getText().then(function(text) {
 				cachedContext = editorContext;
 				deferred = new Deferred();
-				var files = [{type:'full', name:params.input, text:text}];
-				that.ternworker.postMessage({request:'rename', args:{params:{offset: params.offset}, files: files, meta:{location: params.input}, newname:''}});
+				if(that.timeout) {
+					clearTimeout(that.timeout);
+				}
+				that.timeout = setTimeout(function() {
+					cachedContext.setStatus({Severity: 'Error', Message: Messages['renameFailedTimedOut']}); //$NON-NLS-1$
+					if(deferred) {
+						deferred.resolve();
+					}
+					that.timeout = null;
+				}, 5000);
+				var files = [{type:'full', name:params.input, text:text}]; //$NON-NLS-1$
+				that.ternworker.postMessage({request:'rename', args:{params:{offset: params.offset}, files: files, meta:{location: params.input}, newname:''}}); //$NON-NLS-1$
 				return deferred;
 			});
 		}

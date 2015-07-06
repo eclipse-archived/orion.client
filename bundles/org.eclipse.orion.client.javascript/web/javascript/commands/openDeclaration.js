@@ -61,6 +61,7 @@ define([
 			}
 			this.doMe = false;
 		}.bind(this));
+		this.timeout = null;
 	}
 	
 	Objects.mixin(OpenDeclarationCommand.prototype, {
@@ -91,6 +92,16 @@ define([
 		_findDecl: function(editorContext, options, ast) {
 			cachedContext = editorContext;
 			deferred = new Deferred();
+			if(this.timeout) {
+				clearTimeout(this.timeout);
+			}
+			this.timeout = setTimeout(function() {
+				cachedContext.setStatus({Severity: 'Error', Message: Messages['noDeclTimedOut']}); //$NON-NLS-1$
+				if(deferred) {
+					deferred.resolve(Messages['noDeclFound']);
+				}
+				this.timeout = null;
+			}, 5000);
 			origin = options.input;
 			var files = [{type: 'full', name: options.input, text: ast.source}]; //$NON-NLS-1$
 			this.ternworker.postMessage({request:'definition', args:{params:{offset: options.offset}, files: files, meta:{location: options.input}}}); //$NON-NLS-1$

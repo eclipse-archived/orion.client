@@ -9,7 +9,7 @@
  * Contributors:
  *   IBM Corporation - Various improvements
  ******************************************************************************/
-/*eslint-env amd */
+/*eslint-env amd, browser*/
 define([
 	'i18n!javascript/nls/messages',
     'orion/Deferred',
@@ -37,7 +37,7 @@ define([
  	TemplateProvider.prototype = new mTemplates.TemplateContentAssist([], []);
  	
  	Objects.mixin(TemplateProvider.prototype, {
- 		uninterestingChars: ":!#$^&.?<>", //$NON-NLS-0$
+ 		uninterestingChars: ":!#$^&.?<>", //$NON-NLS-1$
  		
  		isValid: function(prefix, buffer, offset) {
 			var char = buffer.charAt(offset-prefix.length-1);
@@ -47,14 +47,14 @@ define([
 		getTemplateProposals: function(prefix, offset, context, kind) {
 			var proposals = [];
 			var k = kind ? kind.kind : null;
-			var templates = Templates.getTemplatesForKind(k); //this.getTemplates();
+			var templates = Templates.getTemplatesForKind(k);
 			for (var t = 0; t < templates.length; t++) {
 				var template = templates[t];
 				if (this.templateMatches(template, prefix, kind, context)) {
 					var proposal = template.getProposal(prefix, offset, context);
 					var obj = Object.create(null);
 			        obj.type = 'markdown'; //$NON-NLS-1$
-			        obj.content = 'Template source code:\n\n';
+			        obj.content = Messages['templateHoverHeader'];
 			        obj.content += proposal.proposal;
 			        proposal.hover = obj;
 			        proposal.style = 'emphasis'; //$NON-NLS-1$
@@ -79,8 +79,8 @@ define([
 				// proposals, add a title as the first element
 				proposals.splice(0, 0, {
 					proposal: '',
-					description: 'Templates', //$NON-NLS-0$
-					style: 'noemphasis_title', //$NON-NLS-0$
+					description: Messages['templateAssistHeader'],
+					style: 'noemphasis_title', //$NON-NLS-1$
 					unselectable: true
 				});
 			}
@@ -207,26 +207,26 @@ define([
     	node = Finder.findNode(offset, ast, {parents:true});
     	if(node) {
     		if(node.parents && node.parents.length > 0) {
-	    		var parent = node.parents.pop();
-	    		switch(parent.type) {
+	    		var prent = node.parents.pop();
+	    		switch(prent.type) {
 						case 'MemberExpression': 
 							return { kind : 'member'}; //$NON-NLS-1$
 						case 'Program':
 						case 'BlockStatement':
 							break;
 						case 'VariableDeclarator':
-							if(!parent.init || offset < parent.init.range[0]) {
+							if(!prent.init || offset < prent.init.range[0]) {
 								return null;
 							}
 							break;
 						case 'FunctionDelcaration':
 						case 'FunctionExpression':
-							if(offset < parent.body.range[0]) {
+							if(offset < prent.body.range[0]) {
 								return null;						
 							}
 							break;
 						case 'Property':
-							if(offset-1 >= parent.value.range[0] && offset-1 <= parent.value.range[1]) {
+							if(offset-1 >= prent.value.range[0] && offset-1 <= prent.value.range[1]) {
 								return { kind : 'prop'}; //$NON-NLS-1$
 							}
 							return null;
@@ -272,16 +272,16 @@ define([
     	                       var val;
         	                   if((val = /\s*\*\s*\@name\s*(\w*)/ig.exec(params.line)) !== null) {
         	                       if(val[1] === params.prefix) {
-        	                           var name;
+        	                           var _name;
         	                           if(ismember) {
-            	                           name = Signatures.expandMemberExpression(node.left, '');
+            	                           _name = Signatures.expandMemberExpression(node.left, '');
             	                       } else {
-            	                           name = isdecl ? node.id.name : node.key.name;
+            	                           _name = isdecl ? node.id.name : node.key.name;
             	                       }
             	                       proposals.push({
-            								proposal: name,
+            								proposal: _name,
             								relevance: 100,
-            								name: name,
+            								name: _name,
             								description: Messages['funcProposalDescription'],
             								style: 'emphasis', //$NON-NLS-1$
             								overwrite: true,
@@ -293,12 +293,12 @@ define([
         	                           var prms = isdecl ? node.params : node.value.params;
         	                           if(prms) {
         	                               for(var i = 0; i < prms.length; i++) {
-        	                                   name = prms[i].name;
-        	                                   if(Util.looselyMatches(params.prefix, name)) { 
+        	                                   _name = prms[i].name;
+        	                                   if(Util.looselyMatches(params.prefix, _name)) { 
             	                                   proposals.push({
-                        								proposal: name,
+                        								proposal: _name,
                         								relevance: 100,
-                        								name: name,
+                        								name: _name,
                         								description: Messages['funcParamProposalDescription'],
                         								style: 'emphasis', //$NON-NLS-1$
                         								overwrite: true,
@@ -368,9 +368,9 @@ define([
 
 	var deferred = null;
 
-	var handler = function(event) {
-		 if(deferred && typeof(event.data) === 'object') {
-	        var _d = event.data;
+	var handler = function(evnt) {
+		 if(deferred && typeof(evnt.data) === 'object') {
+	        var _d = evnt.data;
 	        if(_d.request === 'completions') {
 	        	if(deferred.proposals) {
 	        		deferred.resolve([].concat(sortProposals(_d.proposals, deferred.args), deferred.proposals));
@@ -395,6 +395,7 @@ define([
 		this.ternworker = ternWorker;
 		this.pluginenvs = pluginEnvironments;
 		this.ternworker.addEventListener('message', handler, false);
+		this.timeout = null;
 	}
 
 	/**
@@ -456,9 +457,19 @@ define([
 			    }
 			    var args = {params: params, meta: meta, envs:env, files: files};
 	        	this.ternworker.postMessage({request: 'completions', args: args}); //$NON-NLS-1$
+	        	if(deferred) {
+	        		deferred.resolve();
+	        	}
 				deferred = new Deferred();
 				deferred.proposals = proposals;
 				deferred.args = args;
+				if(this.timeout) {
+					clearTimeout(this.timeout);
+				}
+				this.timeout = setTimeout(function() {
+					deferred.resolve(Messages['noProposalsTimedOut']);
+					this.timeout = null;
+				}, 5000);
 				return deferred;
    			}
 		},
@@ -477,12 +488,12 @@ define([
 			                if(match[1] === 'eslint-env') {
 			                	// Collapse whitespace around ,
 							    var string = value.replace(/\s*,\s*/g, ",");
-							    string.split(/,+/).forEach(function(name) {
-							        name = name.trim();
-							        if (!name) {
+							    string.split(/,+/).forEach(function(_name) {
+							        _name = _name.trim();
+							        if (!_name) {
 							            return;
 							        }
-							        env[name] = true;
+							        env[_name] = true;
 							    });
 			                }
 			            }
@@ -570,7 +581,7 @@ define([
             	var _prop = _t.getProposal(args.params.prefix, args.params.offset, {});
             	var obj = Object.create(null);
 		        obj.type = 'markdown'; //$NON-NLS-1$
-		        obj.content = 'Template source code:\n\n';
+		        obj.content = Messages['templateHoverHeader'];
 		        obj.content += _prop.proposal;
 		        _prop.hover = obj;
 		        provider.removePrefix(args.params.prefix, _prop);
