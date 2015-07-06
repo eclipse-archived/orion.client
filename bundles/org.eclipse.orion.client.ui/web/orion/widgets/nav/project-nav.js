@@ -27,6 +27,10 @@ define([
 	messages, mCommands, i18nUtil, objects, lib, mExplorer, mCommonNav, ProjectCommands,
 	PageUtil, URITemplate, Deferred, mFileUtils, mCustomGlobalCommands
 ) {
+	
+	//TODO - this should be a setting
+	var AUTOMATIC_VIEW_PROJECT = false;
+	
 	var CommonNavExplorer = mCommonNav.CommonNavExplorer;
 	var CommonNavRenderer = mCommonNav.CommonNavRenderer;
 	var FileModel = mExplorer.FileModel;
@@ -321,9 +325,9 @@ define([
 			}
 			_self.lastCheckedLocation = metadata.Location;
 			_self.getProject(metadata).then(function(project) {
-				_self.getProjectJson(project).then(function(json) {
-					_self.showViewMode(!!json);
-					if (json) {
+				var setViewMode = function (project, viewMode) {
+					_self.showViewMode(viewMode);
+					if (viewMode) {
 						if (sidebar.getActiveViewModeId() === _self.id) {
 							_self.explorer.display(project);
 						} else {
@@ -335,7 +339,28 @@ define([
 							sidebar.setViewMode(sidebar.getNavigationViewMode().id);
 						}
 					}
-				}, failed);
+				}
+				if (AUTOMATIC_VIEW_PROJECT) {
+					var json = _self.getProjectJson(project);
+					if (json) {
+						json.then(function(json) {
+							setViewMode(project, !!json);
+						}, failed);
+					} else {
+						_self.project = project;
+					}
+				} else {
+					_self.project = project;
+					_self.showViewMode(true);
+					if (!sidebar.getActiveViewModeId()) {
+						var viewMode = localStorage.activeViewModeId;
+						if (viewMode === "nav" || !viewMode) {
+							sidebar.setViewMode("nav");
+						} else {
+							setViewMode(project, true);
+						}
+					}
+				}
 			}, failed);
 			var handleDisplay = function (event) {
 				if(event.item === metadata) {
@@ -355,10 +380,17 @@ define([
 			var item = event.selections && event.selections.length > 0 ? event.selections[0] : null;
 			if (item) {
 				_self.getProject(item).then(function(project) {
-					_self.getProjectJson(project).then(function(json) {
+					if (AUTOMATIC_VIEW_PROJECT) {
+						var json = _self.getProjectJson(project);
+						if (json) {
+							json.then(function(json) {
+								_self.project = project;
+								_self.showViewMode(!!json);
+							});
+						}
+					} else {
 						_self.project = project;
-						_self.showViewMode(!!json);
-					});
+					}
 				});
 			} else {
 				_self.showViewMode(false);

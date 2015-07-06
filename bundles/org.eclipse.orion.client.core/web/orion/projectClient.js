@@ -52,39 +52,51 @@ define([
 	ProjectClient.prototype = /**@lends orion.ProjectClient.ProjectClient.prototype */ {
 		_getProjectJsonData : function(folderMetadata, children, workspace){
 			var deferred = new Deferred();
+			var fileLocation = null;
 			for(var i=0; i<children.length; i++){
 				if(children[i].Name === "project.json"){
-					this.fileClient.read(children[i].Location).then(function(content) {
-						var projectJson = _toJSON(content);
-						projectJson.Name = projectJson.Name || folderMetadata.Name;
-						projectJson.ContentLocation = folderMetadata.Location;
-						projectJson.WorkspaceLocation = workspace.Location;
-						var projectId;
-						workspace.Children.some(function(child) {
-							if (child.Location === folderMetadata.Location) {
-								projectId = child.Id;
-								return true;
-							}
-							return false;
-						});
-						workspace.Projects && workspace.Projects.some(function(project) {
-							if (project.Id === projectId) {
-								projectJson.ProjectLocation = project.Location;
-								return true;
-							}
-							return false;
-						});
-						projectJson.ProjectJsonLocation = children[i].Location;
-						deferred.resolve(projectJson);
-					}, function(error) {
-						deferred.reject(error);
-					}, function(progress) {
-						deferred.progress(progress);
-					});
-					return deferred;
+					fileLocation = children[i].Location;
+					break;
 				}
 			}
-			deferred.resolve(null);
+			function _createFakeProjectJson() {
+				var json = {};
+				json.Name = folderMetadata.Name;
+				json.ContentLocation = folderMetadata.Location;
+				json.WorkspaceLocation = workspace.Location;
+				return json;
+			}
+			if (fileLocation) {
+				this.fileClient.read(fileLocation).then(function(content) {
+					var projectJson = _toJSON(content);
+					projectJson.Name = projectJson.Name || folderMetadata.Name;
+					projectJson.ContentLocation = folderMetadata.Location;
+					projectJson.WorkspaceLocation = workspace.Location;
+					var projectId;
+					workspace.Children.some(function(child) {
+						if (child.Location === folderMetadata.Location) {
+							projectId = child.Id;
+							return true;
+						}
+						return false;
+					});
+					workspace.Projects && workspace.Projects.some(function(project) {
+						if (project.Id === projectId) {
+							projectJson.ProjectLocation = project.Location;
+							return true;
+						}
+						return false;
+					});
+					projectJson.ProjectJsonLocation = fileLocation;
+					deferred.resolve(projectJson);
+				}, function(error) {
+					deferred.resolve(_createFakeProjectJson());
+				}, function(progress) {
+					deferred.progress(progress);
+				});
+			} else {
+				deferred.resolve(_createFakeProjectJson());
+			}
 			return deferred;
 		},
 		readAllProjects : function(workspaceMetadata){
@@ -163,22 +175,8 @@ define([
 		 * @param {String} contentLocation The location of the parent folder
 		 * @return {Object} projectMetadata JSON representation of the created folder
 		 */
-		initProject : function(contentLocation, projectMetadata){
-			var that = this;
-			var deferred = new Deferred();
-			this.fileClient.createFile(contentLocation, "project.json").then(function(fileMetadata){
-				if(projectMetadata){
-					that.fileClient.write(fileMetadata.Location, JSON.stringify(projectMetadata)).then(function(){
-						deferred.resolve({ContentLocation: contentLocation, projectMetadata: projectMetadata});
-					}, deferred.reject, deferred.progress);
-				} else {
-					deferred.resolve({fileMetadata: fileMetadata});
-				}
-			},
-				deferred.reject,
-				deferred.progress);
-
-			return deferred;
+		initProject : function(contentLocation, projectMetadata) {
+			return new Deferred();
 		},
 
 		createProject: function(workspaceLocation, projectMetadata){
@@ -286,39 +284,51 @@ define([
 	addProjectDependency: function(projectMetadata, dependency){
 		var deferred = new Deferred();
 		this.fileClient.fetchChildren(projectMetadata.ContentLocation).then(function(children){
+			var writeContent = function (fileLocation, content) {
+				var projectJson = _toJSON(content);
+				try{
+					if(!projectJson.Dependencies){
+						projectJson.Dependencies = [];
+					}
+					for(var j=0; j<projectJson.Dependencies.length; j++){
+						if(projectJson.Dependencies[j].Location === dependency.Location){
+							deferred.resolve(projectJson);
+							return;
+						}
+					}
+					projectJson.Dependencies.push(dependency);
+					var json = JSON.stringify(projectJson);
+					this.fileClient.write(fileLocation, json).then(
+						function(){
+							projectJson.ContentLocation = projectMetadata.ContentLocation;
+							projectJson.Name = projectMetadata.Name;
+							deferred.resolve(projectJson);
+						},
+						deferred.reject
+					);
+					deferred.resolve(projectJson);
+				} catch (e){
+					deferred.reject(e);
+				}
+			}.bind(this);
+			var fileLocation = null;
 			for(var i=0; i<children.length; i++){
 				if(children[i].Name==="project.json"){
-					this.fileClient.read(children[i].Location).then(function(content){
-						try{
-							var projectJson = _toJSON(content);
-							if(!projectJson.Dependencies){
-								projectJson.Dependencies = [];
-							}
-							for(var j=0; j<projectJson.Dependencies.length; j++){
-								if(projectJson.Dependencies[j].Location === dependency.Location){
-									deferred.resolve(projectJson);
-									return;
-								}
-							}
-							projectJson.Dependencies.push(dependency);
-							this.fileClient.write(children[i].Location, JSON.stringify(projectJson)).then(
-								function(){
-									projectJson.ContentLocation = projectMetadata.ContentLocation;
-									projectJson.Name = projectMetadata.Name;
-									deferred.resolve(projectJson);
-								},
-								deferred.reject
-							);
-
-							deferred.resolve(projectJson);
-						} catch (e){
-							deferred.reject(e);
-						}
-					}.bind(this), deferred.reject, deferred.progress);
-					return;
+					fileLocation = children[i].Location;
+					break;
 				}
 			}
-		}.bind(this), deferred.reject);
+			if (fileLocation) {
+				this.fileClient.read(fileLocation).then(function(content) {
+					writeContent(fileLocation, content);
+				}.bind(this), deferred.reject, deferred.progress);
+			} else {
+				this.fileClient.createFile(projectMetadata.ContentLocation, "project.json").then(function(fileMetaData) {
+					//TODO - file tree not updated to show newly created 'project.json' file
+					writeContent(fileMetaData.Location, "{}");
+				}.bind(this), deferred.reject, deferred.progress);
+			}
+		}.bind(this), deferred.reject, deferred.progress);
 		return deferred;
 	},
 

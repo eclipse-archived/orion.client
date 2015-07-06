@@ -42,6 +42,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			this._clouds = options.Clouds || [];
 			this._defaultTarget = options.DefaultTarget;
 			this._filePath = options.FilePath;
+			//TODO - is this a place where ProjectLocation can now be null/undefined?
 			this._projectLocation = options.ProjectLocation;
 			this._initManifestPath = options.InitManifestPath || ""; //$NON-NLS-0$
 			this._manifestApplication = options.ManifestApplication;

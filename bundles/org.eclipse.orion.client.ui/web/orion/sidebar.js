@@ -122,7 +122,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			}
 			delete this.viewModes[id];
 			if (this.getActiveViewModeId() === id) {
-				this.activeViewModeId = null;
+				localStorage.activeViewModeId = this.activeViewModeId = null;
 			}
 		},
 		/**
@@ -148,7 +148,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			}
 			lib.empty(this.parentNode);
 			mode = this.activeViewMode = this.getViewMode(id);
-			this.activeViewModeId = mode ? id : null;
+			localStorage.activeViewModeId = this.activeViewModeId = mode ? id : null;
 			if (mode && typeof mode.create === "function") { //$NON-NLS-0$
 				mode.create();
 			}
