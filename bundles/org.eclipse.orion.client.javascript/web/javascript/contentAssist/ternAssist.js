@@ -314,9 +314,9 @@ define([
 		        }
 		    }
         } else if(kind && kind.kind === 'doc') {
-            var comment = kind.node.value.trim();
+            var comment = kind.node.value;
             if(comment) {
-	            if(/^(?:\/\*)?\s*eslint(?:-enable|-disable)?\s+/gi.test(params.line)) {
+	            if(/^\s*(?:\/\*)?\s*eslint(?:-enable|-disable)?\s+/gi.test(comment)) {
 	                //eslint eslint-enable eslint-disable
 	                var rules = Rules.getRules();
 	                var rulekeys = Object.keys(rules).sort();
@@ -342,7 +342,7 @@ define([
                             proposals.push(_p);
 					    }
 	                }
-	            } else if(/^(?:\/\*)?\s*eslint-env\s+/gi.test(params.line)) {
+	            } else if(/^\s*(?:\/\*)?\s*eslint-env\s+/gi.test(comment)) {
 	                //eslint-env (comma-separated list)
 	                var _all = Objects.mixin(ESLintEnv, pluginenvs);
 	                var keys = Object.keys(_all).sort();
@@ -373,7 +373,7 @@ define([
 	        var _d = evnt.data;
 	        if(_d.request === 'completions') {
 	        	if(deferred.proposals) {
-	        		deferred.resolve([].concat(sortProposals(_d.proposals, deferred.args), deferred.proposals));
+	        		deferred.resolve([].concat(sortProposals(_d.proposals ? _d.proposals : [], deferred.args), deferred.proposals));
 	        	} else {
 	        		deferred.resolve(sortProposals(_d.proposals, deferred.args));
 	        	}
@@ -467,7 +467,9 @@ define([
 					clearTimeout(this.timeout);
 				}
 				this.timeout = setTimeout(function() {
-					deferred.resolve(Messages['noProposalsTimedOut']);
+					if(deferred) {
+						deferred.resolve(Messages['noProposalsTimedOut']);
+					}
 					this.timeout = null;
 				}, 5000);
 				return deferred;

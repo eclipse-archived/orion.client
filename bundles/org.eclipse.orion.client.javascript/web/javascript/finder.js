@@ -571,7 +571,7 @@ define([
 					},
 					/** override */
 					leave: function(node) {
-						if(parents && offset >= node.range[1]) {
+						if(parents && offset > node.range[1]) {
 							parents.pop();
 						}
 					}

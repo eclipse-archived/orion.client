@@ -195,7 +195,7 @@ define([
 		};
 		var _p = setup(options);
 		state.warmup = true;
-		ternAssist.computeContentAssist(_p.editorContext, _p.params).then(function (actualProposals) {
+		ternAssist.computeContentAssist(_p.editorContext, _p.params).then(/* @callback */ function (actualProposals) {
 			//do noting, warm up
 		});
 	});
@@ -267,5 +267,520 @@ define([
 				]);
 			});
 		});
+		describe('Function Templates and Keywords', function() {
+			/**
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425675
+			 * @since 5.0
+			 */
+			it("test completions for Function1", function(done) {
+				var options = {
+					buffer: "var foo; foo !== null ? fun : function(f2) {};", 
+					prefix: "fun",
+					offset: 27,
+					templates: true,
+					keywords: true,
+					callback: done};
+				return testProposals(options, [
+						//proposal, description
+						["function", "function - Keyword"],
+						["", "Templates"], 
+						["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"]
+						]);
+			});
+			/**
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425675
+			 * @since 5.0
+			 */
+			it("test completions for Function2", function(done) {
+				var options = {
+					buffer: "var foo; foo !== null ? function(f2) {} : fun;",
+					prefix: "fun",
+					offset: 45,
+					templates: true,
+					keywords: true,
+					callback: done
+				};
+				return testProposals(options, [
+						//proposal, description
+						["function", "function - Keyword"],
+						["", "Templates"], 
+						["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
+						]);
+			});
+			/**
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425675
+			 * @since 5.0
+			 */
+			it("test completions for Function3", function(done) {
+				var options = {
+					buffer: "var foo = {f: fun};", 
+					prefix: 'fun',
+					offset: 17,
+					templates: true,
+					keywords: true,
+					callback: done
+				};
+				return testProposals(options, [
+						//proposal, description
+						["function", "function - Keyword"],
+						["", "Templates"], 
+						['ction(parameter) {\n\t\n}', 'function - member function expression'],
+						]);
+			});
+			/**
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425675
+			 * @since 5.0
+			 */
+			it("test completions for Function4", function(done) {
+				var options = {
+					buffer: "var foo = {f: fun};", 
+					prefix: 'fun',
+					offset: 17,
+					templates: true,
+					keywords: true,
+					callback: done
+				};
+				return testProposals(options, [
+						//proposal, description
+						["function", "function - Keyword"],
+						["", "Templates"], 
+						['ction(parameter) {\n\t\n}', 'function - member function expression'],
+						]);
+			});
+			/**
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425675
+			 * @since 5.0
+			 */
+			it("test completions for Function5", function(done) {
+				var options = {
+					buffer: "fun", 
+					prefix: 'fun',
+					offset: 3,
+					templates: true,
+					keywords: true,
+					callback: done
+				};
+				return testProposals(options, [
+						//proposal, description
+						["function", "function - Keyword"],
+						["", "Templates"], 
+						["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
+						]);
+			});
+			/*
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426284
+			 * @since 6.0
+			 */
+			it("test completions for Function6", function(done) {
+				var options = {
+					buffer: "var foo = {f: t};", 
+					prefix: 't',
+					offset: 15,
+					keywords:true, 
+					templates:true,
+					callback: done
+				};
+				return testProposals(options, [
+						//proposal, description
+						["this", "this - Keyword"],
+						['throw', 'throw - Keyword'],
+						['try', 'try - Keyword'],
+						["typeof", "typeof - Keyword"],
+						['', 'ecma5'],
+						["toLocaleString()", "toLocaleString() : string"],
+						["toString()", "toString() : string"],
+						
+						]);
+			});
+			/**
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426284
+			 * @since 6.0
+			 */
+			it("test completions for Function7", function(done) {
+				var options = {
+					buffer: "var foo = {f: h};", 
+					prefix: 'h',
+					offset: 15,
+					keywords: true, 
+					templates: true,
+					callback: done
+				};
+				return testProposals(options, [
+						['', 'ecma5'],
+						['hasOwnProperty(prop)', 'hasOwnProperty(prop) : bool']
+						]);
+			});
+			
+			/**
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426284
+			 * @since 6.0
+			 */
+			it("test completions for Function8", function(done) {
+				var options = {
+					buffer: "var foo = {f: n};", 
+					prefix: 'n',
+					offset: 15,
+					keywords: true, 
+					templates: true,
+					callback: done
+				};
+				return testProposals(options, [
+						//proposal, description
+						["new", "new - Keyword"]
+						]);
+			});
+		});
+		describe('ESLint Directive Tests', function() {
+			/**
+			 * Tests the eslint* templates in source
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 */
+			it("test eslint* template 1", function(done) {
+				var options = {
+					buffer: "es", 
+					prefix: "es", 
+					offset: 2,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, [
+					['', 'Templates'],
+				    ['/* eslint rule-id:0/1*/', 'eslint - ESLint rule enable / disable directive'],
+				    ['/* eslint-disable rule-id */', 'eslint-disable - ESLint rule disablement directive'],
+				    ['/* eslint-enable rule-id */', 'eslint-enable - ESLint rule enablement directive'],
+				    ['/* eslint-env library*/', 'eslint-env - ESLint environment directive']]
+				);
+			});
+			/**
+			 * Tests the eslint* templates in comments
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 */
+			it("test eslint* template 2", function(done) {
+				var options = {
+					buffer: "/* es", 
+					prefix: "es", 
+					offset: 5,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, [
+					['', 'Templates'],
+				    ['lint rule-id:0/1 ', 'eslint - ESLint rule enable or disable'],
+				    ['lint-disable rule-id ', 'eslint-disable - ESLint rule disablement directive'],
+				    ['lint-enable rule-id ', 'eslint-enable - ESLint rule enablement directive'],
+				    ['lint-env library', 'eslint-env - ESLint environment directive']]
+				);
+			});
+			/**
+			 * Tests the eslint* templates in comments
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 */
+			it("test eslint* template 3", function(done) {
+				var options = {
+					buffer: "/* es */", 
+					prefix: "es", 
+					offset: 5,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, [
+					['', 'Templates'],
+				    ['lint rule-id:0/1 ', 'eslint - ESLint rule enable or disable'],
+				    ['lint-disable rule-id ', 'eslint-disable - ESLint rule disablement directive'],
+				    ['lint-enable rule-id ', 'eslint-enable - ESLint rule enablement directive'],
+				    ['lint-env library', 'eslint-env - ESLint environment directive']]
+				);
+			});
+			/**
+			 * Tests the eslint* templates in comments
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 */
+			it("test eslint* template 4", function(done) {
+				var options = {
+					buffer: "var f; /* es", 
+					prefix: "es", 
+					offset: 12,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, [
+					['', 'Templates'],
+				    ['lint rule-id:0/1 ', 'eslint - ESLint rule enable or disable'],
+				    ['lint-disable rule-id ', 'eslint-disable - ESLint rule disablement directive'],
+				    ['lint-enable rule-id ', 'eslint-enable - ESLint rule enablement directive'],
+				    ['lint-env library', 'eslint-env - ESLint environment directive']]
+				);
+			});
+			/**
+			 * Tests that no eslint* templates are in jsdoc comments
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 */
+			it("test eslint* template 5", function(done) {
+				var options = {
+					buffer: "/** es", 
+					prefix: "es", 
+					offset: 6,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, []);
+			});
+			/**
+			 * Tests that eslint* templates will be proposed further in comment with no content beforehand
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 * @since 7.0
+			 */
+			it("test eslint* template 6", function(done) {
+				var options = {
+					buffer: "/* \n\n es", 
+					prefix: "es", 
+					offset: 10,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, [
+					['','Templates'],
+				    ['/* eslint rule-id:0/1*/', 'eslint - ESLint rule enable / disable directive'],
+				    ['/* eslint-disable rule-id */', 'eslint-disable - ESLint rule disablement directive'],
+				    ['/* eslint-enable rule-id */', 'eslint-enable - ESLint rule enablement directive'],
+				    ['/* eslint-env library*/', 'eslint-env - ESLint environment directive']]
+				);
+			});
+			/**
+			 * Tests that no eslint* templates are in comments after other content
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 * @since 7.0
+			 */
+//			it("test eslint* template 7", function(done) {
+//				var options = {
+//					buffer: "/* foo \n\n es", 
+//					prefix: "es", 
+//					offset: 10,
+//					callback: done,
+//					templates: true
+//				};
+//				testProposals(options, []);
+//			});
+			/**
+			 * Tests that no eslint* templates are proposed when there is already one
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 * @since 7.0
+			 */
+			it("test eslint* template 9", function(done) {
+				var options = {
+					buffer: "/* eslint ", 
+					prefix: "eslint", 
+					offset: 9,
+					callback: done,
+					templates: true
+				};
+	            testProposals(options, [
+	            	['', 'Templates'],
+				    [' rule-id:0/1 ', 'eslint - ESLint rule enable or disable'],
+				    ['-disable rule-id ', 'eslint-disable - ESLint rule disablement directive'],
+				    ['-enable rule-id ', 'eslint-enable - ESLint rule enablement directive'],
+				    ['-env library', 'eslint-env - ESLint environment directive']]
+				);
+			});
+			/**
+			 * Tests that eslint-env environs are proposed
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 * @since 7.0
+			 */
+			it("test eslint-env proposals 1", function(done) {
+				var options = {
+					buffer: "/* eslint-env ", 
+					prefix: "", 
+					offset: 14,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, [
+				     ['amd', 'amd - ESLint environment name'],
+				     ['browser', 'browser - ESLint environment name'],
+				     ['jasmine', 'jasmine - ESLint environment name'],
+					 ['jquery', 'jquery - ESLint environment name'],
+					 ['meteor', 'meteor - ESLint environment name'],
+				     ['mocha', 'mocha - ESLint environment name'],
+				     ['node', 'node - ESLint environment name'],
+				     ['phantomjs', 'phantomjs - ESLint environment name'],
+					 ['prototypejs', 'prototypejs - ESLint environment name'],
+					 ['shelljs', 'shelljs - ESLint environment name']
+				     ]);
+			});
+			/**
+			 * Tests that eslint-env environs are proposed
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 * @since 7.0
+			 */
+			it("test eslint-env proposals 2", function(done) {
+				var options = {
+					buffer: "/* eslint-env a", 
+					prefix: "a", 
+					offset: 15,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, [
+				     ['amd', 'amd - ESLint environment name'],
+				     ]);
+			});
+			/**
+			 * Tests that eslint rules are proposed
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 * @since 7.0
+			 */
+			it("test eslint rule proposals 1", function(done) {
+				var options = {
+					buffer: "/* eslint c", 
+					prefix: "c", 
+					offset: 11,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, [
+				     ['curly', 'curly - ESLint rule']
+				     ]);
+			});
+			/**
+			 * Tests that eslint rules are proposed
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 * @since 7.0
+			 */
+			it("test eslint rule proposals 2", function(done) {
+				var options = {
+					buffer: "/* eslint no-js", 
+					prefix: "no-js", 
+					offset: 15,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, [
+				     ['no-jslint', 'no-jslint - ESLint rule'],
+				     ]);
+			});
+			/**
+			 * Tests that eslint rules are proposed
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 * @since 7.0
+			 */
+			it("test eslint rule proposals 3", function(done) {
+				var options = {
+					buffer: "/* eslint-enable no-js", 
+					prefix: "no-js", 
+					offset: 22,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, [
+				     ['no-jslint', 'no-jslint - ESLint rule'],
+				     ]);
+			});
+			/**
+			 * Tests that eslint rules are proposed
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 * @since 7.0
+			 */
+			it("test eslint rule proposals 4", function(done) {
+				var options = {
+					buffer: "/* eslint-disable no-js", 
+					prefix: "no-js", 
+					offset: 23,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, [
+				     ['no-jslint', 'no-jslint - ESLint rule'],
+				     ]);
+			});
+			/**
+			 * Tests that eslint rules are proposed
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 * @since 7.0
+			 */
+			it("test eslint rule proposals 5", function(done) {
+				var options = {
+					buffer: "/* eslint-enable no-jslint, c", 
+					prefix: "c", 
+					offset: 29,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, [
+				     ['curly', 'curly - ESLint rule']
+				     ]);
+			});
+		});
+//		describe('MySQl Index Tests', function() {
+//			/**
+//			 * Tests mysql index
+//			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+//			 * @since 7.0
+//			 */
+//			it("test mysql index 1", function(done) {
+//				var options = {
+//					buffer: "require('mysql').createP", 
+//					prefix: "createP", 
+//					offset: 24,
+//					callback: done
+//				};
+//				testProposals(options, [
+//					['', 'mysql'],
+//				    ['ool', 'createPool(config) : Pool'],
+//				    ['oolCluster', 'createPoolCluster(config) : PoolCluster']
+//				]);
+//			});
+//			/**
+//			 * Tests mysql index
+//			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+//			 * @since 7.0
+//			 */
+//			it("test mysql index 2", function(done) {
+//				var options = {
+//					buffer: "require('mysql').createC", 
+//					prefix: "createC", 
+//					offset: 25,
+//					callback: done
+//				};
+//				testProposals(options, [
+//					['', 'mysql'],
+//				    ['onnection', 'createConnection(config) : Connection']
+//				]);
+//			});
+//			/**
+//			 * Tests mysql index
+//			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+//			 * @since 7.0
+//			 */
+//			it("test mysql index 3", function(done) {
+//				var options = {
+//					buffer: "require('mysql').createQ", 
+//					prefix: "createQ", 
+//					offset: 25,
+//					callback: done
+//				};
+//				testProposals(options, [
+//					['', 'mysql'],
+//				    ['uery', 'createQuery(sql, values, cb) : Query']
+//				]);
+//			});
+//			/**
+//			 * Tests mysql index for indirect proposals
+//			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+//			 * @since 7.0
+//			 */
+//			it("test mysql index 4", function(done) {
+//				var options = {
+//					buffer: "require('mysql').createQuery(null,null,null).sta",
+//					prefix: "sta", 
+//					offset: 47,
+//					callback:done
+//				};
+//				testProposals(options, [
+//					['', 'mysql'],
+//				    ['rt', 'start()']
+//				]);
+//			});
+//		});
 	});
 });
