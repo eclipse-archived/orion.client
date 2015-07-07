@@ -633,6 +633,8 @@ define([
 		if(ret) {
 			proposal.description = ' : ' + convertTypes(ret[1]); //$NON-NLS-1$
 			type = type.slice(0, ret.index);
+		} else {
+			proposal.description = '';
 		}
 		var _p = completion.name + '(';
 		var params = collectParams(type.slice(1, type.length-1));
@@ -690,11 +692,11 @@ define([
 	 * @returns {String} The formatted type sig
 	 */
 	function convertTypes(type) {
-		//TODO do we want to convert all types? make arrays pretty?
-		type = type.replace(/:\s*\?/g, ': Any'); //$NON-NLS-1$
-		type = type.replace(/:\s*bool/g, ': Boolean'); //$NON-NLS-1$
-		type = type.replace(/:\s*number/g, ': Number'); //$NON-NLS-1$
-		type = type.replace(/:\s*string/g, ': String'); //$NON-NLS-1$
+		//TODO do we want to convert all types (any types)? make arrays pretty?
+		type = type.replace(/:\s*\?/g, ': any'); //$NON-NLS-1$
+//		type = type.replace(/:\s*bool/g, ': Boolean'); //$NON-NLS-1$
+//		type = type.replace(/:\s*number/g, ': Number'); //$NON-NLS-1$
+//		type = type.replace(/:\s*string/g, ': String'); //$NON-NLS-1$
 		return type;
 	}
 
