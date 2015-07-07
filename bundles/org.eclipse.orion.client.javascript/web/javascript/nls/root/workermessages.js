@@ -25,7 +25,7 @@ define({
 	'orionMySQLPluginName': 'Orion MySQL',
 	'orionMySQLPluginDescription': 'Plugin that contributes type information and code templates for MySQL.',
 	'orionNodePluginName': 'Orion Node.js',
-	'orionNodePluginDescription': 'Plugin that contributes type information and code templates for Node.js require.',
+	'orionNodePluginDescription': 'Plugin that contributes type information and code templates for Node.js.',
 	'orionPostgresPluginName': 'Orion PostgreSQL',
 	'orionPostgresPluginDescription': 'Plugin that contributes type information and code templates for PostgreSQL.',
 	'orionRequirePluginName': 'Orion RequireJS',
