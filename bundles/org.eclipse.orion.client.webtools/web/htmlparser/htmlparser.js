@@ -261,6 +261,14 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
                 state.pos += 8;
                 return;
             }
+            if (match[2].charAt(0) === '<'){ // TODO ORION 8.0
+            	// Unclosed tag followed by another tag
+            	state.mode = Mode.Tag;
+            	var index = match[0].indexOf('<');
+            	state.pos += index;
+            	state.pos++; // Match text should not include leading <
+            	return;
+            }
             if (!state.done && (state.pos + match[0].length) === state.data.length) {
                 //We're at the and of the data, might be incomplete
                 state.needData = true;
