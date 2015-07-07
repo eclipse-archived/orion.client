@@ -32,9 +32,10 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'cfui/cfUtil',  'orion/urlUt
 		buildDefaultPostError : function(defaultDecorateError){
 			return function(error, target){
 				error = defaultDecorateError(error, target);
-				window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", //$NON-NLS-0$
-					source: "org.eclipse.orion.client.cf.deploy.uritemplate", //$NON-NLS-0$
-					status: error}), "*"); //$NON-NLS-0$
+				if(error.HttpCode != 401)
+					window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", //$NON-NLS-0$
+						source: "org.eclipse.orion.client.cf.deploy.uritemplate", //$NON-NLS-0$
+						status: error}), "*"); //$NON-NLS-0$
 			};
 		},
 		
