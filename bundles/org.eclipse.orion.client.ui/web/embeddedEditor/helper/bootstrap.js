@@ -85,7 +85,7 @@ define([
 			plugins[pluginURL.href] = {autostart: "lazy"};
 		});
 		
-		pluginsToLoad = (options && options.userPlugins) ? options.defaultPlugins : [];
+		pluginsToLoad = (options && options.userPlugins) ? options.userPlugins : [];
 		pluginsToLoad.forEach(function(pluginURLString){
 			plugins[pluginURLString] = {autostart: "lazy"};
 		});
