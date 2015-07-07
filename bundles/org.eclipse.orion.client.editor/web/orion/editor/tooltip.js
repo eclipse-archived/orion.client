@@ -64,6 +64,7 @@ function Tooltip (view) {
 			tooltipDiv.setAttribute("aria-live", "assertive"); //$NON-NLS-1$ //$NON-NLS-0$
 			tooltipDiv.setAttribute("aria-atomic", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
+			this._tipShowing = false;
 			document.body.appendChild(tooltipDiv);
 			var self = this;
 			textUtil.addEventListener(document, "mousedown", this._mouseDownHandler = function(event) { //$NON-NLS-0$
@@ -203,6 +204,7 @@ function Tooltip (view) {
 			this._tooltipDiv.classList.remove("textviewTooltipOnFocus"); //$NON-NLS-0$
 			
 			this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
+			this._tipShowing = false;
 			this._tooltipDiv.style.left = "";
 			this._tooltipDiv.style.right = "";
 			this._tooltipDiv.style.top = "";
@@ -243,7 +245,7 @@ function Tooltip (view) {
 		 * @returns {boolean} 'true' iff the tooltip is currently visible
 		*/
 		isVisible: function() {
-			return this._tooltipDiv && this._tooltipDiv.style.visibility === "visible"; //$NON-NLS-0$
+			return this._tipShowing;
 		},
 		
 		/**
@@ -367,6 +369,7 @@ function Tooltip (view) {
 			}
 
 			this._tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
+			this._tipShowing = true;
 			
 			if (this._giveFocus) {
 				this._setInitialFocus(this._tooltipDiv);
