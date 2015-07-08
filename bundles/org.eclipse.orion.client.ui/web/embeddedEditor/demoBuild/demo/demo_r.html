@@ -5,12 +5,15 @@
 		<meta http-equiv="Content-Language" content="en-us">
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<title>Pluggable Editor Demo</title>
-	    <link rel="stylesheet" type="text/css" href="../build/code_edit/built-codeEdit.css"/>
+	    <link rel="stylesheet" type="text/css" href="editorBuild/code_edit/built-codeEdit.css"/>
 	    <link rel="stylesheet" type="text/css" href="demo.css"/>
-		<script src="../build/requirejs/require.min.js"></script>
+		<script src="editorBuild/requirejs/require.min.js"></script>
 		<script>
     	/*eslint-env browser, amd*/
-    	require(["../build/code_edit/built-codeEdit.js"], function(edit) {
+    	require(["editorBuild/code_edit/built-codeEdit"], function(edit) {
+    		require(["orion/editor/annotations"], function(dd){
+    			console.log(dd);
+    		});
 			var codeEdit = new edit();
 			var contents = 'var foo = "bar";\n' +
 								 "var bar = foo;\n" + 
