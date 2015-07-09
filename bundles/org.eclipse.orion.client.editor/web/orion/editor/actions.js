@@ -631,7 +631,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(']', false, false, false, false, "keypress"), "skipClosingSquareBracket"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("skipClosingSquareBracket", function() { //$NON-NLS-0$
-				return this.skipClosingBracket(']'); //$NON-NLS-0$
+				return this.handleClosingBracket(']'); //$NON-NLS-0$
 			}.bind(this));
 
 			// Autocomplete angle brackets <>
@@ -642,7 +642,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 
 			textView.setKeyBinding(new mKeyBinding.KeyBinding('>', false, false, false, false, "keypress"), "skipClosingAngleBracket"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("skipClosingAngleBracket", function() { //$NON-NLS-0$
-				return this.skipClosingBracket('>'); //$NON-NLS-0$
+				return this.handleClosingBracket('>'); //$NON-NLS-0$
 			}.bind(this));
 
 			// Autocomplete parentheses ()
@@ -653,7 +653,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(')', false, false, false, false, "keypress"), "skipClosingParenthesis"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("skipClosingParenthesis", function() { //$NON-NLS-0$
-				return this.skipClosingBracket(")"); //$NON-NLS-0$
+				return this.handleClosingBracket(")"); //$NON-NLS-0$
 			}.bind(this));
 
 			// Autocomplete braces {}
@@ -664,7 +664,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 
 			textView.setKeyBinding(new mKeyBinding.KeyBinding('}', false, false, false, false, "keypress"), "skipClosingBrace"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("skipClosingBrace", function() { //$NON-NLS-0$
-				return this.skipClosingBracket("}"); //$NON-NLS-0$
+				return this.handleClosingBracket("}"); //$NON-NLS-0$
 			}.bind(this));
 
 			// Autocomplete single quotations
@@ -1199,18 +1199,51 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				this.undoStack.startCompoundChange();
 			}
 		},
-		skipClosingBracket: function(closingChar) {
+		/**
+		 * @name handleClosingBracket
+		 * @description When the user types a closing bracket we should skip auto-paired brackets and reduce indenting if
+		 * 				we are on a new line.
+		 * @function
+		 * @param closingChar {String} the closing bracket character
+		 * @returns returns <code>true</code> to skip printing the closing bracket, false to print it
+		 */
+		handleClosingBracket: function(closingChar) {
 			var editor = this.editor;
 			var textView = editor.getTextView();
 			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 			var model = editor.getModel();
 			var selections = editor.getSelections();
 			if (selections.length === 1 && selections[0].start === selections[0].end) {
+				// If the next character is the same bracket close, skip it
 				var nextChar = selections[0].start === model.getCharCount() ? "" : model.getText(selections[0].start, selections[0].start + 1); //$NON-NLS-0$
 				if (nextChar === closingChar) {
 					selections[0].start = selections[0].end = selections[0].start + 1;
 					editor.setSelections(selections);
 					return true;
+				}
+				// If the close bracket is on a new line, reduce the indentation
+				var lineNum = model.getLineAtOffset(selections[0].start);
+				var line = model.getLine(lineNum, true);
+				if (line.match(/^\s*$/)){
+					if(textView.getOptions("tabMode")){ //$NON-NLS-1$
+						var tabSize = textView.getOptions("tabSize"); //$NON-NLS-1$
+						var spaceTab = new Array(tabSize + 1).join(" "); //$NON-NLS-1$
+						var lineStart = model.getLineStart(lineNum);
+						var lineEnd = model.getLineEnd(lineNum);
+						if (lineStart !== lineEnd) {
+							if (line.indexOf("\t") === 0) { //$NON-NLS-1$
+								line = line.substring(1);
+								model.setText(line, lineStart, lineEnd);
+								editor.setSelection(selections[0].start-1, selections[0].end-1);
+								return false;
+							} else if (line.indexOf(spaceTab) === 0) {
+								line = line.substring(tabSize);
+								model.setText(line, lineStart, lineEnd);
+								editor.setSelection(selections[0].start-1, selections[0].end-1);
+								return false;
+							}
+						}
+					}
 				}
 			}
 			return false;
