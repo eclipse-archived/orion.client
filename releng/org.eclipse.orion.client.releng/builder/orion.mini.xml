@@ -176,7 +176,7 @@
 			relative to the build file location, and having build file location == ${staging} is easier.
 		-->
 		<copy todir="${staging}" overwrite="true">
-			<fileset dir="${builder}/scripts" includes="*build*.js" />
+			<fileset dir="${builder}/scripts" includes="*build*.js,*.frag" />
 		</copy>
 	</target>
 	
@@ -266,10 +266,16 @@
 			<widgetOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.css"
 				buildfile="${staging}/embeddedEditor.build-css.js"
 				optimize="uglify2" />
-			<widgetOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.min.js"
+			<embeddedEditorOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.min.js"
 				buildfile="${staging}/embeddedEditor.build.js"
 				optimize="uglify2" />
-			<widgetOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.js"
+			<embeddedEditorOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.js"
+				buildfile="${staging}/embeddedEditor.build.js"
+				optimize="none" />
+			<embeddedEditorAMDOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit-amd.min.js"
+				buildfile="${staging}/embeddedEditor.build.js"
+				optimize="uglify2" />
+			<embeddedEditorAMDOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit-amd.js"
 				buildfile="${staging}/embeddedEditor.build.js"
 				optimize="none" />
 			<widgetOptimizeFile out="${out}/codeEdit/javascript/plugins/javascriptPlugin.js"
@@ -353,6 +359,46 @@
 		</sequential>
 	</macrodef>
 	
+	<macrodef name="embeddedEditorAMDOptimizeFile">
+		<attribute name="buildfile" />
+		<attribute name="out" />
+		<attribute name="optimize" />
+		<sequential>
+			<rjs>
+				<args>
+					<arg value="-o" />
+					<arg value="@{buildfile}"/>
+					<arg value="optimize=@{optimize}" />
+					<arg value="out=@{out}"/>
+					<arg value="dir=" />
+					<arg value="name=embeddedEditor/builder/embeddedEditor" />
+					<arg value="wrap.end=define(['embeddedEditor/builder/embeddedEditor'], function(p) { return p; });" />
+				</args>
+			</rjs>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="embeddedEditorOptimizeFile">
+		<attribute name="buildfile" />
+		<attribute name="out" />
+		<attribute name="optimize" />
+		<sequential>
+			<rjs>
+				<args>
+					<arg value="-o" />
+					<arg value="@{buildfile}"/>
+					<arg value="optimize=@{optimize}" />
+					<arg value="out=@{out}"/>
+					<arg value="dir=" />
+					<arg value="name=almond" />
+					<arg value="include=embeddedEditor/builder/embeddedEditor" />
+					<arg value="wrap.startFile=embeddedEditor.start.frag" />
+					<arg value="wrap.end=return require('embeddedEditor/builder/embeddedEditor');}));" />
+				</args>
+			</rjs>
+		</sequential>
+	</macrodef>
+
 	<macrodef name="stylerOptimizeFile">
 		<attribute name="out" />
 		<attribute name="optimize" />

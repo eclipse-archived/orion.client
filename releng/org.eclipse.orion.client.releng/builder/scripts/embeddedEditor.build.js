@@ -29,24 +29,5 @@
 		'orion/widgets/themes/editor/ThemeData': 'embeddedEditor/builder/buildFrom/ThemeData'
         //"orion/editorCommands": "embeddedEditor/builder/buildFrom/emptyEditorCommands"
 	},
-	name: "almond",
-	//locales: ["ja", "zh", "zh-tw", "fr", "de", "it", "es", "pt-br"],						
-	include: "embeddedEditor/builder/embeddedEditor",
 	preserveLicenseComments: false,
-	wrap: {
-		start: "\
-			(function (root, factory) {\
-				if (typeof define === 'function' && define.amd) {\
-					define([], factory);\
-				} else {\
-					root.orion = root.orion || {};\n\
-					root.orion.codeEdit = factory();\
-				}\
-			}(this, function () {\
-		",
-		end: "\
-				return require('embeddedEditor/builder/embeddedEditor');\
-			}));\
-		"
-	}
 })
