@@ -12,12 +12,13 @@
 /*eslint-env amd */
 define([
 	'orion/editor/templates',
-	'orion/editor/stylers/text_html/syntax',
 	'orion/objects',
 	'webtools/util',
+	'javascript/util',
+	'webtools/attributes',
 	'i18n!webtools/nls/messages',
 	'orion/i18nUtil'
-], function(mTemplates, mHTML, Objects, util, Messages, i18nUtil) {
+], function(mTemplates, Objects, util, jsUtil, Attributes, Messages, i18nUtil) {
 
 	var simpleDocTemplate = new mTemplates.Template("", Messages['simpleDocDescription'],
 		"<!DOCTYPE html>\n" + //$NON-NLS-0$
@@ -397,7 +398,7 @@ define([
 						}
 	 				}
  				} else if(node.type === 'attr') {
- 					return offset === node.range[0] || offset === node.range[1];
+ 					return offset >= node.range[0] || offset <= node.range[1];
  				}
 			}
 			return false;
@@ -410,10 +411,22 @@ define([
 		 * @since 10.0 
 		 */
 		getAttributesForNode: function(node, params) {
-			var attrs = mHTML.attributes;
+			var attrs = Attributes.getAttributesForNode(node);
 			var proposals = [];
 			for(var i = 0; i < attrs.length; i++) {
-				
+				var attr = attrs[i];
+				if(jsUtil.looselyMatches(params.prefix, attr.name)) {
+					var _h = Object.create(null);
+					 _h.type = 'markdown'; //$NON-NLS-1$
+			         _h.content = attr.doc;
+			        if(attr.url) {
+			        	_h.content += i18nUtil.formatMessage(Messages['onlineDocumentation'], attr.url);
+			        }
+			        var _p = this.makeComputedProposal(attr.name, " ", _h, params.prefix); //$NON-NLS-1$
+			        _p.proposal = attr.name+'=""'; //$NON-NLS-1$
+			        _p.escapePosition = params.offset - params.prefix.length + attr.name.length + 2;
+					proposals.push(_p);
+				}
 			}
 			return proposals;	
 		},
@@ -483,9 +496,8 @@ define([
 		 */
 		completingAttributes: function(node, source, params) {
 			if(node && node.type === 'attr') {
-				return true;
-				// Not everyone will include the value inside quotations so just return true if we anywhere inside the attribute
-//				return this.within('"', '"', source, params.offset, node.range); //$NON-NLS-1$ //$NON-NLS-2$
+				return this.within('"', '"', source, params.offset, node.range) || //$NON-NLS-1$ //$NON-NLS-2$
+						this.within("'", "'", source, params.offset, node.range); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			return false;
 		},
