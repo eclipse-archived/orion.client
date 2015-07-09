@@ -4219,7 +4219,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			* Note that on Chrome and IE, the caret stops blicking if mouse up is
 			* prevented.
 			*/
-			if (left && util.isFirefox) {
+			if (left && this._isMouseDown && util.isFirefox) {
 				this._updateDOMSelection();
 				e.preventDefault();
 			}
