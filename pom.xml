@@ -62,7 +62,8 @@
 		<tycho.scmUrl>scm:git:http://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git</tycho.scmUrl>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java-version>[1.7, 1.8]</java-version>
-		<requirejsHome>${basedir}/target/requirejs/</requirejsHome>
+		<requirejsDir>${basedir}/target/requirejs</requirejsDir>
+		<requirejsVersion>2.1.18</requirejsVersion>
 		<nodejsHome>${basedir}/target/nodejs</nodejsHome>
 		<jsdocHome>${basedir}/target/jsdoc</jsdocHome>
 		<antrun-version>1.7</antrun-version>
@@ -141,6 +142,34 @@
 				<extensions>true</extensions>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.10</version>
+				<executions>
+					<execution>
+						<id>unpack</id>
+						<inherited>false</inherited>
+						<phase>verify</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.webjars</groupId>
+									<artifactId>requirejs-node</artifactId>
+									<version>${requirejsVersion}</version>
+									<type>jar</type>
+									<overWrite>false</overWrite>
+									<outputDirectory>${requirejsDir}</outputDirectory>
+									<includes>**/*.js</includes>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
@@ -151,7 +180,7 @@
 							<target unless="orion.client.build.skip">
 								<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath" />
 								<property name="builder"        value="${basedir}/releng/org.eclipse.orion.client.releng/builder/"/>
-								<property name="requirejsHome"  value="${requirejsHome}"/>
+								<property name="requirejsHome"  value="${requirejsDir}/META-INF/resources/webjars/requirejs-node/${requirejsVersion}"/>
 								<property name="nodejsHome"     value="${nodejsHome}"/>
 								<property name="buildConfig"    value="${builder}/scripts/orion.build.js" />
 								<property name="buildDirectory" value="${basedir}"/>
@@ -168,7 +197,6 @@
 							    <!-- minify javascript -->
 								<ant antfile="${basedir}/releng/org.eclipse.orion.client.releng/builder/orion.mini.xml">
 									<property name="requirejsHome" value="${requirejsHome}"/>
-								    <target name="download3rdPartyLibs"/>
 								    <target name="updateBuildLabel"/>
 									<target name="requirejs"/>
 								</ant>

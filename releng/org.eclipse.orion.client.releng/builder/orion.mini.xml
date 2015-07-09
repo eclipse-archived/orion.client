@@ -25,14 +25,6 @@
 	<property name="optimized" value="${buildDirectory}/optimized" />
 	<property name="node" location="${nodejsHome}/node" />
 
-    <target name="download3rdPartyLibs">
-        <mkdir dir="${requirejsHome}" />
-        <get src="http://requirejs.org/docs/release/2.1.18/r.js"
-             dest="${requirejsHome}/r.js"
-             usetimestamp="true"
-             maxtime="30" />
-    </target>
-
 	<target name="updateBuildLabel" if="buildLabel">
 	    <echo message="Updating build label..."/>
 		<replace dir="${buildDirectory}" includes="pluginVersions.properties,featureVersions.properties"  >
