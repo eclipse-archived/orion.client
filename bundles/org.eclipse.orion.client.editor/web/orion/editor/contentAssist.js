@@ -1070,6 +1070,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		this.textView = this.contentAssist.getTextView();
 		this.textViewListenerAdded = false;
 		this.isShowing = false;
+		this._useResizeTimer = false;
 		var document = this.textView.getOptions("parent").ownerDocument; //$NON-NLS-0$
 		this.parentNode = typeof parentNode === "string" ? document.getElementById(parentNode) : parentNode; //$NON-NLS-0$
 		if (!this.parentNode) {
@@ -1081,6 +1082,16 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			} else {
 				throw new Error("parentNode is required"); //$NON-NLS-0$
 			}
+		}
+		var MO = window.MutationObserver || window.MozMutationObserver;
+		if (MO && util.isFirefox) {//MutationObserver does not work in chrome for resize https://code.google.com/p/chromium/issues/detail?id=293948
+			this._mutationObserver = new MO(function(mutations) {
+				//TODO: code edit widget : separate a finer API to only reposition and resize the tooltips
+				this._contentAssistMode._showTooltip(true);
+			}.bind(this));
+			this._mutationObserver.observe(this.parentNode, {attributes: true});
+		} else {
+			this._useResizeTimer = true;
 		}
 		
 		textUtil.addEventListener(this.parentNode, "scroll", this.onScroll.bind(this)); //$NON-NLS-0$
@@ -1102,8 +1113,10 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		this.scrollListener = function(e) {
 			if (self.isShowing) {
 				self.position();
+				//TODO: code edit widget : redo the tooltip positioning by the same new api
 			}
 		};
+		//TODO: code edit widget : clean up the code to remove the listener here
 		textUtil.addEventListener(document, "scroll", this.scrollListener); //$NON-NLS-0$
 	}
 	ContentAssistWidget.prototype = /** @lends orion.editor.ContentAssistWidget.prototype */ {
@@ -1201,6 +1214,30 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			node.contentAssistProposalIndex = index;
 			
 			return node;
+		},
+		/** @private */
+		_stopResizeTimer: function() {
+			if (this._resizeTimer) {
+				window.clearInterval(this._resizeTimer);
+				this._resizeTimer = null; 
+			}
+		},
+		_startResizeTimer: function() {
+			this._stopResizeTimer();
+			this._cachedResizeBound = this.parentNode.getBoundingClientRect();
+			this._resizeTimer = window.setInterval(function() {
+				if(this._contentAssistMode) {
+					var bound = this.parentNode.getBoundingClientRect();
+					if(bound.left === this._cachedResizeBound.left && 
+					   bound.top === this._cachedResizeBound.top &&
+					   bound.width === this._cachedResizeBound.width &&
+					   bound.height === this._cachedResizeBound.height) {
+						return;   	
+					}
+					this._cachedResizeBound = bound;
+					this._contentAssistMode._showTooltip(true);
+				}
+			}.bind(this), 100);
 		},
 		/** @private */
 		_createNameNode: function(name) {
@@ -1385,6 +1422,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				
 				this._contentAssistMode._showTooltip(false);
 				
+				if(this._useResizeTimer) {
+					this._startResizeTimer();
+				}
 				if (!this.textViewListenerAdded) {
 					this.textView.addEventListener("MouseDown", this.textViewListener.onMouseDown); //$NON-NLS-0$
 					this.textViewListenerAdded = true;
@@ -1400,6 +1440,10 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			this.isShowing = false;
 			
 			this._contentAssistMode._hideTooltip();
+			
+			if(this._useResizeTimer) {
+				this._stopResizeTimer();
+			}
 			
 			if (this.textViewListenerAdded) {
 				this.textView.removeEventListener("MouseDown", this.textViewListener.onMouseDown); //$NON-NLS-0$
