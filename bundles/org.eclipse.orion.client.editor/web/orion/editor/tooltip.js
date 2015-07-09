@@ -177,11 +177,12 @@ function Tooltip (view) {
 		 * @function
 		 * @public
 		*/
-		hide: function() {
-			// Always clear the lock whether the tooltip has acutally shown or not
-			this._locked = undefined;
+		hide: function(clearLock) {
+			if (clearLock) {
+				this._locked = undefined;
+			}
 			
-			if (!this.isVisible()){
+			if (this._locked || !this.isVisible()){
 				return;
 			}
 				

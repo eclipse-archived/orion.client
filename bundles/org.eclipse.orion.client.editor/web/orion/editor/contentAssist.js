@@ -1009,7 +1009,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		
 		_hideTooltip: function() {
 			var tooltip = mTooltip.Tooltip.getTooltip(this.contentAssist.textView);
-			tooltip.hide();
+			tooltip.hide(true); // Clear the lock
 		},
 
 		pageUp: function() {
