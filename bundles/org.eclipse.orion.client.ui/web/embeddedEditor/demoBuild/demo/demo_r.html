@@ -10,9 +10,14 @@
 		<script src="editorBuild/requirejs/require.min.js"></script>
 		<script>
     	/*eslint-env browser, amd*/
-    	require(["editorBuild/code_edit/built-codeEdit"], function(edit) {
+    	require(["editorBuild/code_edit/built-codeEdit-amd.min"], function(edit) {
     		require(["orion/editor/annotations"], function(dd){
     			console.log(dd);
+    		});
+    		require(["orion/Deferred", "orion/editor/annotations"], function(dd, aa){
+    			console.log(dd);
+    			console.log(aa);
+   				new dd().resolve("sda");
     		});
 			var codeEdit = new edit();
 			var contents = 'var foo = "bar";\n' +

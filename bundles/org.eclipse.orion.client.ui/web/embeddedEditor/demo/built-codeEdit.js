@@ -68,11 +68,20 @@ function(mEmbeddedEditor) {
 	};
 	var hoverProvider = {
 		computeHoverInfo: function (editorContext, context) {
-			return {
-				title: "This is the title",
-				content: "*This text will be italic*\n\n **This text will be bold**\n\n",
-				type: "markdown"};
-				
+			var pContent = "*This text will be italic*\n\n **This text will be bold**\n\n";
+			if(typeof context.offset === "number") {
+				return context.offset > 12 ? {
+					title: "This is the title",
+					content: pContent,
+					type: "markdown"} : null;
+			} else if(typeof context.proposal === "string") {
+				var index = parseInt(context.proposal.substring("proposal ".length - 1), 10);
+				return index > 3 ? {
+					title: "This is the title",
+					content: pContent,
+					type: "markdown"} : {};
+			}
+			return null;
 		}
 	};
 
