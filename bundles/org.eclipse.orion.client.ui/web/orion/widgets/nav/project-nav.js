@@ -27,6 +27,10 @@ define([
 	messages, mCommands, i18nUtil, objects, lib, mExplorer, mCommonNav, ProjectCommands,
 	PageUtil, URITemplate, Deferred, mFileUtils, mCustomGlobalCommands
 ) {
+	
+	//TODO - this should be a setting
+	var AUTOMATIC_VIEW_PROJECT = false;
+	
 	var CommonNavExplorer = mCommonNav.CommonNavExplorer;
 	var CommonNavRenderer = mCommonNav.CommonNavRenderer;
 	var FileModel = mExplorer.FileModel;
@@ -304,13 +308,13 @@ define([
 		var sidebar = this.sidebar;
 		// Switch to project view mode if a project is opened
 		function openProject(metadata){
-			function failed() {
+			function openDefaultMode() {
 				if (!sidebar.getActiveViewModeId()) {
-					sidebar.setViewMode(sidebar.getNavigationViewMode().id);
+					sidebar.setViewMode(sidebar.getDefaultViewModeId());
 				}
 			}
 			if (!metadata) {
-				failed();
+				openDefaultMode();
 				return;
 			}
 			if(_self.lastCheckedLocation === metadata.Location){
@@ -321,22 +325,30 @@ define([
 			}
 			_self.lastCheckedLocation = metadata.Location;
 			_self.getProject(metadata).then(function(project) {
-				_self.getProjectJson(project).then(function(json) {
-					_self.showViewMode(!!json);
-					if (json) {
-						if (sidebar.getActiveViewModeId() === _self.id) {
-							_self.explorer.display(project);
+				if (AUTOMATIC_VIEW_PROJECT) {
+					_self.getProjectJson(project).then(function(json) {
+						_self.showViewMode(!!json);
+						if (json) {
+							if (sidebar.getActiveViewModeId() === _self.id) {
+								_self.explorer.display(project);
+							} else {
+								_self.project = project;
+								sidebar.setViewMode(_self.id);
+							}
 						} else {
-							_self.project = project;
-							sidebar.setViewMode(_self.id);
+							if (!sidebar.getActiveViewModeId()) {
+								sidebar.setViewMode(sidebar.getNavigationViewMode().id);
+							}
 						}
-					} else {
-						if (!sidebar.getActiveViewModeId()) {
-							sidebar.setViewMode(sidebar.getNavigationViewMode().id);
-						}
-					}
-				}, failed);
-			}, failed);
+						
+					}, openDefaultMode);
+				} else {
+					//TODO - Bug - go into non-project.json, view menu only shows 'Navigator', refresh, view menu shows both
+					_self.project = project;
+					_self.showViewMode(true);
+					openDefaultMode();
+				}
+			}, openDefaultMode);
 			var handleDisplay = function (event) {
 				if(event.item === metadata) {
 					sidebar.sidebarNavInputManager.removeEventListener("projectDisplayed", handleDisplay); //$NON-NLS-0$
@@ -355,10 +367,17 @@ define([
 			var item = event.selections && event.selections.length > 0 ? event.selections[0] : null;
 			if (item) {
 				_self.getProject(item).then(function(project) {
-					_self.getProjectJson(project).then(function(json) {
+					if (AUTOMATIC_VIEW_PROJECT) {
+						var json = _self.getProjectJson(project);
+						if (json) {
+							json.then(function(json) {
+								_self.project = project;
+								_self.showViewMode(!!json);
+							});
+						}
+					} else {
 						_self.project = project;
-						_self.showViewMode(!!json);
-					});
+					}
 				});
 			} else {
 				_self.showViewMode(false);
