@@ -178,6 +178,9 @@ function Tooltip (view) {
 		 * @public
 		*/
 		hide: function() {
+			// Always clear the lock whether the tooltip has acutally shown or not
+			this._locked = undefined;
+			
 			if (!this.isVisible()){
 				return;
 			}
@@ -217,7 +220,6 @@ function Tooltip (view) {
 			this._tooltipDiv.style.overflowY = "";		 //$NON-NLS-0$	
 			
 			this._giveFocus = undefined;
-			this._locked = undefined;
 			
 			this._anchorArea = undefined;  // Area of text/ruler/etc. we are showing a tooltip for
 			this._tooltipArea = undefined;  // The area the tooltip covers
