@@ -372,6 +372,14 @@ define([
 			
 			this._outlineNode = document.createElement("div"); //$NON-NLS-0$
 			this._outlineNode.classList.add("outlineNodeWrapper"); //$NON-NLS-0$
+			this._outlineNode.addEventListener("keydown", function(e){
+				if (e.keyCode === lib.KEY.ESCAPE || e.keyCode === lib.KEY.ENTER) {
+					if (this._slideout.getPreviousActiveElement()) {
+						this.hide();
+					}
+				}
+			}.bind(this), false);
+			
 			this._wrapperNode.appendChild(this._outlineNode);
 			
 			this._toolbar = toolbar;
@@ -583,19 +591,18 @@ define([
 		
 			input.addEventListener("keydown", function (e) { //$NON-NLS-0$
 				var navHandler = null;
-				var firstNode = null;
+				var nodes = null;
 				if (e.keyCode === lib.KEY.DOWN)	{
-					input.blur();
 					navHandler = this.explorer.getNavHandler();
-					navHandler.focus();
-					if (navHandler.getTopLevelNodes()) {
-						firstNode = navHandler.getTopLevelNodes()[0];
-						navHandler.cursorOn(firstNode, false, true);
-						if (firstNode.isNotSelectable) {
+					nodes = navHandler.getTopLevelNodes();
+					if (nodes){
+						input.blur();
+						navHandler.focus();
+						navHandler.cursorOn(nodes[0], false, true);
+						if (nodes[0].isNotSelectable) {
 							navHandler.iterate(true, false, false, true);
 						}
 					}
-					
 					//prevent the browser's default behavior of automatically scrolling 
 					//the outline view down because the DOWN key was pressed
 					if (e.preventDefault) {
@@ -609,6 +616,17 @@ define([
 							this._slideout.getPreviousActiveElement().focus();
 						}
 						this.hide();
+					}
+				} else if (e.keyCode === lib.KEY.ENTER) {
+					navHandler = this.explorer.getNavHandler();
+					nodes = navHandler.getTopLevelNodes();
+					if (nodes){
+						input.blur();
+						navHandler.focus();
+						navHandler.cursorOn(nodes[0], false, true);
+						if (nodes[0].isNotSelectable) {
+							navHandler.iterate(true, false, false, true);
+						}
 					}
 				}
 			}.bind(this), false);
