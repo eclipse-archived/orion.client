@@ -137,15 +137,18 @@ function Tooltip (view) {
 		 * @name update
 		 * @description Updates the information in an already visible tooltip
 		 * @function
-		 * @param target The target through which the info is obtained
-		 * @param locked If true locks the tooltip (never hides unless 'hide' is called)
-		 * @param giveFocus If true forces the focus onto the tooltip (used for F2 processing)
+		 * @param tooltipInfo a function that will return the parameters need to update the information
+		 * @param noContent If true makes no attempt to gather new info and just updates the tooltip's position
 		 */
-		update: function(tooltipInfo) {
+		update: function(tooltipInfo, noContent) {
 			if (!tooltipInfo){
 				return;
 			}
-			this._processInfo(tooltipInfo.getTooltipInfo(), true);
+			if (noContent) {
+				this._showContents(null, tooltipInfo.getTooltipInfo(), true);
+			} else {
+				this._processInfo(tooltipInfo.getTooltipInfo(), true);
+			}
 		},
 		
 		/**
@@ -357,8 +360,10 @@ function Tooltip (view) {
 				}
 			}
 			
-			this._tooltipContents = newContentsDiv;
-			this._tooltipDiv.appendChild(newContentsDiv);
+			if (newContentsDiv) {
+				this._tooltipContents = newContentsDiv;
+				this._tooltipDiv.appendChild(newContentsDiv);				
+			}
 			
 			if (!this._anchorArea){
 				this._anchorArea = this._computeAnchorArea(info);

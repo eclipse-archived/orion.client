@@ -977,7 +977,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			return true;
 		},
 		
-		_showTooltip: function(update) {
+		_showTooltip: function(update, noContent) {
 			var tooltip = mTooltip.Tooltip.getTooltip(this.contentAssist.textView);
 			var self = this;
 			var target = {
@@ -1001,7 +1001,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			};
 			
 			if (update) {
-				tooltip.update(target);
+				tooltip.update(target, noContent);
 			} else {
 				tooltip.show(target, true, false);
 			}
@@ -1235,7 +1235,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 						return;   	
 					}
 					this._cachedResizeBound = bound;
-					this._contentAssistMode._showTooltip(true);
+					this._contentAssistMode._showTooltip(true, true);
 				}
 			}.bind(this), 100);
 		},
