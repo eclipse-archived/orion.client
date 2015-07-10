@@ -174,6 +174,7 @@ define([
 			this._createDiffCommand();
 			this._createShowTooltipCommand();
 			this._createUndoStackCommands();
+			this._createCopyCutPasteCommands();
 			this._createSaveCommand();
 			return this._createEditCommands();
 		},
@@ -247,6 +248,10 @@ define([
 			commandRegistry.addCommandGroup(this.editorContextMenuId, "orion.editorContextMenuGroup", 100, null, null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			var index = 1;
+			//TODO - non-nls is wrong, check accelerator conflicts etc.
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.copy", index++, "orion.editorContextMenuGroup/orion.edit.copyGroup", false, new mKeyBinding.KeyBinding('c', true)); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.cut", index++, "orion.editorContextMenuGroup/orion.edit.copyGroup", false, new mKeyBinding.KeyBinding('x', true)); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.paste", index++, "orion.editorContextMenuGroup/orion.edit.copyGroup", false, new mKeyBinding.KeyBinding('v', true)); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.undo", index++, "orion.editorContextMenuGroup/orion.edit.undoGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.redo", index++, "orion.editorContextMenuGroup/orion.edit.undoGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.find", index++,"orion.editorContextMenuGroup/orion.findGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
@@ -380,6 +385,88 @@ define([
 				}
 			});
 			this.commandService.addCommand(settingsCommand);
+		},
+		_createCopyCutPasteCommands: function() {
+			
+			//TODO - test to see whether copy/cut/paste is supported instead of IE
+			if (util.isIE) {
+				var that = this;
+				
+				var copyCommand = new mCommands.Command({
+					name: messages.Copy,
+					id: "orion.edit.copy", //$NON-NLS-0$
+					visibleWhen: /** @callback */ function(items, data) {
+						var editor = data.handler.editor || that.editor;
+						return editor && editor.installed;
+					},
+					callback: function() {
+						var editor = this.editor || that.editor;
+						if (editor && editor.getTextView()) {
+							var text = editor.getTextView().getSelectionText();
+							var success = window.clipboardData.setData('Text', text);
+							if (!success) {
+								//TODO - warn that data not copied
+							}
+							//TODO - wrong
+							editor.focus();
+						}
+					}
+				});
+				this.commandService.addCommand(copyCommand);
+				
+				var cutCommand = new mCommands.Command({
+					name: messages.Cut,
+					id: "orion.edit.cut", //$NON-NLS-0$
+					visibleWhen: /** @callback */ function(items, data) {
+						var editor = data.handler.editor || that.editor;
+						return editor && editor.installed;
+					},
+					callback: function() {
+						var editor = this.editor || that.editor;
+						if (editor && editor.getTextView()) {
+							var text = editor.getTextView().getSelectionText();
+							var success = window.clipboardData.setData('Text', text);
+							if (success) {
+								var selection = editor.getSelection();
+								editor.setText("", selection.start, selection.end);
+							} else {
+								//TODO - warn that data not cut
+							}
+							//TODO - wrong
+							editor.focus();
+						}
+					}
+				});
+				this.commandService.addCommand(cutCommand);
+				
+				var pasteCommand = new mCommands.Command({
+					name: messages.Paste,
+					id: "orion.edit.paste", //$NON-NLS-0$
+					visibleWhen: /** @callback */ function(items, data) {
+						var editor = data.handler.editor || that.editor;
+						return editor && editor.installed;
+					},
+					callback: function() {
+						var editor = this.editor || that.editor;
+						if (editor && editor.getTextView()) {
+							var success = true;
+							var text = window.clipboardData.getData("Text");
+							if (text === "") {
+								success = window.clipboardData.setData('Text', text);
+							}
+							if (success) {
+								var selection = editor.getSelection();
+								editor.setText(text, selection.start, selection.end);
+							} else {
+								//TODO - warn that data not pasted
+							}
+							//TODO - wrong
+							editor.focus();
+						}
+					}
+				});
+				this.commandService.addCommand(pasteCommand);
+			}
 		},
 		_createUndoStackCommands: function() {
 			var that = this;
