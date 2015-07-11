@@ -55,7 +55,7 @@ define([
 				            switch(node.type) {
 				                case 'tag': {
 				                	if (that._hoverableTags.indexOf(node.name) >= 0){
-				                		return that._getTagContentsHover(editorContext, node.range);
+				                		//return that._getTagContentsHover(editorContext, node.range);
 				                	}
 				                    break;
 				                }
