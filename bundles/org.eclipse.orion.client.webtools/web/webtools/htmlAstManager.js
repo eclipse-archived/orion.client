@@ -16,8 +16,130 @@ define([
 	'orion/objects',
 	'javascript/lru',
 	'orion/metrics',
+	'htmlparser2/parser',
 	'htmlparser/htmlparser'  //stays last, exports into global scope
-], function(Deferred, Objects, LRU, Metrics) {
+], function(Deferred, Objects, LRU, Metrics, HtmlParser2) {
+
+	var handler = {
+		ast: null,
+		tagstack: [],
+		comments: [],
+		errors: [],
+		attribstack: [],
+	    onopentag: function(name, attribs, range){
+	    	var node = Object.create(null);
+	    	node.range = [0, 0];
+	    	if(Array.isArray(range)) {
+	    		node.range[0] = range[0];
+	    		node.openrange = range;
+	    	} 
+	    	node.name = name;
+	    	node.type = 'tag'; //$NON-NLS-1$
+	    	node.attributes = [];
+	    	if(Array.isArray(this.attribstack)) {
+	    		for (var i = 0; i < this.attribstack.length; i++) {
+	    			node.attributes[i] = this.attribstack[i];
+	    		}	
+	    	}
+ 	    	node.children = [];
+	    	var tag = this._getLastTag();
+	    	if(tag) {
+	    		tag.children.push(node);
+	    	} else {
+	    		this.ast.children.push(node);
+	    	}
+	    	this.attribstack = [];
+	    	this.tagstack.push(node);
+	    },
+	    onclosetag: function(tagname, range){
+	    	var tag = this._getLastTag();
+	    	if(tag && tag.name === tagname) {
+	    		tag.range[1] = range[1];
+	    		tag.endrange = range;
+	    		this.tagstack.pop();
+	    	}
+	    },
+	    onopentagname: function(name) {
+	    },
+	    onattribute: function(name, value, range) {
+	    	var node = Object.create(null);
+	    	node.range = Array.isArray(range) ? range : [0, 0];
+	    	node.name = name;
+	    	node.type = 'attr'; //$NON-NLS-1$
+	    	node.value = value;
+	    	this.attribstack.push(node);
+	    },
+	    onprocessinginstruction: function(name, data, range) {
+	    	var node = Object.create(null);
+	    	node.range = Array.isArray(range) ? range : [0, 0];
+	    	node.name = name;
+	    	node.type = 'instr'; //$NON-NLS-1$
+	    	node.value = data;
+	    	var tag = this._getLastTag();
+	    	if(tag) {
+	    		tag.children.push(node);
+	    	} else {
+	    		this.ast.children.push(node);
+	    	}
+	    },
+	    oncomment: function(data, range) {
+	    	var node = Object.create(null);
+	    	node.range = Array.isArray(range) ? range : [0, 0];
+	    	node.type = 'comment'; //$NON-NLS-1$
+	    	node.value = data;
+	    	this.comments.push(node);
+	    },
+	    oncommentend: function(range) {
+	    	if(Array.isArray(range)) {
+	    		this.comments[this.comments.length-1].range[1] = range[1];
+	    	}
+	    },
+	    oncdatastart: function() {
+	    	var node = Object.create(null);
+	    	node.range = [0, 0];
+	    	node.type = 'cdata'; //$NON-NLS-1$
+	    },
+	    oncdataend: function() {
+	    	
+	    },
+	    ontext: function(text) {
+	    	var node = Object.create(null);
+	    	node.range = [0, 0];
+	    	node.type = 'text'; //$NON-NLS-1$
+	    	node.value = text;
+	    	var tag = this._getLastTag();
+	    	if(tag) {
+	    		tag.text = node;
+	    	}
+	    },
+	    onerror: function(error) {
+	    	var err = Object.create(null);
+	    	err.error = error;
+	    	err.range = [0, 0];
+	    	this.errors.push(err);
+	    },
+	    onend: function(range) {
+	    	if(Array.isArray(range)) {
+	    		this.ast.range[0] = this.ast.children.length > 0 ? this.ast.children[0].range[0] : 0;
+	    		this.ast.range[1] = range[1];
+	    	}
+	    },
+	    onreset: function() {
+			this.ast = Object.create(null);
+			this.ast.range = [0,0];
+			this.ast.children = [];
+			this.tagstack = [];
+			this.comments = [];
+			this.errors = [];
+			this.attribstack = [];
+	    },
+	    _getLastTag: function() {
+	    	if(this.tagstack && this.tagstack.length > 0) {
+	    		return this.tagstack[this.tagstack.length-1];
+	    	} 
+	    	return null;
+	    }
+	};
 
 	/**
 	 * Provides a shared AST.
@@ -70,14 +192,22 @@ define([
 		 * @returns {Object} The AST.
 		 */
 		parse: function(text) {
+			var parser = new HtmlParser2(handler, {decodeEntities: true, recognizeSelfClosing: true});
+			parser.reset();
+			parser.write(text);
+			parser.done();
+			if(handler.ast) {
+				handler.ast.source = text;
+				//return handler.ast;
+			}
 		    var domResult;
-			var handler = new Tautologistics.NodeHtmlParser.HtmlBuilder(function(error, dom) {
+			var _handler = new Tautologistics.NodeHtmlParser.HtmlBuilder(function(error, dom) {
 				if (!error) {
 					//parsing done
 					domResult = dom;
 				}
 			}, {ignoreWhitespace: true, includeLocation: true, verbose: false});
-			var parser = new Tautologistics.NodeHtmlParser.Parser(handler);
+			var parser = new Tautologistics.NodeHtmlParser.Parser(_handler);
 			var start = Date.now();
 			parser.parseComplete(text);
 			var end = Date.now()-start;
