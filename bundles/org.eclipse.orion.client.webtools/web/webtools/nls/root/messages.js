@@ -12,7 +12,7 @@ define({//Default message bundle
 	'htmlOutline' : 'HTML Outline',   
 	'htmlHover' : 'HTML Hover',   
 	'htmlContentAssist' : 'HTML Content Assist',   
-	'css' : 'CSS',
+	'css' : 'CSS Validation',
 	'cssOutline' : 'CSS Rule Outline',   
 	'cssContentAssist' : 'CSS Content Assist',   
 	'cssHover' : 'CSS Hover',   
