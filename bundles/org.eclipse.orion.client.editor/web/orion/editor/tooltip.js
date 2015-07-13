@@ -844,7 +844,7 @@ function Tooltip (view) {
 				return html;
 			} else {
 				var tooltipHTML = util.createElement(document, "div"); //$NON-NLS-0$
-				var em = util.createElement(document, "em"); //$NON-NLS-0$
+				var em = util.createElement(document, "multi_anno"); //$NON-NLS-0$
 				em.appendChild(document.createTextNode(messages.multipleAnnotations));
 				tooltipHTML.appendChild(em);
 				for (var i = 0; i < annotations.length; i++) {

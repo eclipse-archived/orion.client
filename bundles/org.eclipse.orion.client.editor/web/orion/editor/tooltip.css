@@ -49,7 +49,7 @@
 .textviewTooltip p {
 	word-wrap: break-word;
 }
-.textviewTooltip em {
+.textviewTooltip multi_anno {
 	font-style: normal;
 	font-weight: bold;
 }
