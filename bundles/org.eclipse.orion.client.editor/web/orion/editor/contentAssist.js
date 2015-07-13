@@ -1089,7 +1089,6 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				//TODO: code edit widget : separate a finer API to only reposition and resize the tooltips
 				this._contentAssistMode._showTooltip(true);
 			}.bind(this));
-			this._mutationObserver.observe(this.parentNode, {attributes: true});
 		} else {
 			this._useResizeTimer = true;
 		}
@@ -1424,6 +1423,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				
 				if(this._useResizeTimer) {
 					this._startResizeTimer();
+				} else if(this._mutationObserver){
+					this._mutationObserver.observe(this.parentNode, {attributes: true});
 				}
 				if (!this.textViewListenerAdded) {
 					this.textView.addEventListener("MouseDown", this.textViewListener.onMouseDown); //$NON-NLS-0$
@@ -1439,11 +1440,13 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			this.parentNode.onclick = null;
 			this.isShowing = false;
 			
-			this._contentAssistMode._hideTooltip();
-			
 			if(this._useResizeTimer) {
 				this._stopResizeTimer();
+			} else if(this._mutationObserver){
+				this._mutationObserver.disconnect();
 			}
+			
+			this._contentAssistMode._hideTooltip();
 			
 			if (this.textViewListenerAdded) {
 				this.textView.removeEventListener("MouseDown", this.textViewListener.onMouseDown); //$NON-NLS-0$
