@@ -610,7 +610,9 @@ exports.ExplorerNavHandler = (function() {
 					return;
 				}
 				if(this.gridClickSelectionPolicy === "none" && this._onModelGrid(model, mouseEvt)){ //$NON-NLS-0$
-					return;
+					//TODO - not returning from here "fixes" the problem that the Ctrl+Click selection code needs to run when preventDetault() stops the link code from running
+            		//TODO - is commenting out this code the right fix?  Needs more investigation
+            		//return;
 				}
 				this.cursorOn(model, true, false, true);
 				if(isPad){

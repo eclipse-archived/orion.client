@@ -202,7 +202,26 @@ define([
             			return;
                     }
                 }
-            }
+            } else {
+            	//TODO - do we need to test for "cursorOnly" like the code above
+            	var selection = _self.selection.getSelections();
+            	switch (selection.length) {
+            		case 0: break;
+            		case 1:
+            			//TODO - is it ok to rely on evt.target.href being undefined for non-link nodes?
+            			var suffix = selection[0].Location;
+            			var fileLocation = evt.target.href;
+            			if (fileLocation) {
+            				if (fileLocation.indexOf(suffix, fileLocation.length - suffix.length) === -1) {
+	            				evt.preventDefault();
+            				}
+            			}
+            			break;
+            		default:
+            			evt.preventDefault();
+            			break;
+				}
+           }
             _self._clickLink(evt.target);
 		};
 		var parent = lib.node(this.parentId);
