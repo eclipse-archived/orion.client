@@ -35,7 +35,7 @@ define([
 		var headers = {
 			name: "Orion Core Support",
 			version: "1.0",
-			description: "This plugin provides the core Orion support.",
+			description: "This plug-in provides the core Orion support.",
 			login: login
 		};
 		pluginProvider = pluginProvider || new PluginProvider();

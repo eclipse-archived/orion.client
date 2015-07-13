@@ -15,7 +15,7 @@ require(["cfui/plugins/cFDeployService", "orion/plugin", "i18n!cfui/nls/messages
 	var provider = new PluginProvider({
 		name: "Cloud Foundry Deploy",
 		version: "1.0",
-		description: "This plugin integrates with Cloud Foundry."
+		description: "This plug-in integrates with Cloud Foundry."
 	});
 		
 	provider.registerServiceProvider("orion.project.deploy",

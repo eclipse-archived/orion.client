@@ -62,7 +62,7 @@ define([
 	var headers = {
 		name: "Orion JSON Editor Plugin",
 		version: "1.0", //$NON-NLS-0$
-		description: "This plugin provides editor for JSON files."
+		description: "This plug-in provides an editor for JSON files."
 	};
 
 	var provider = new PluginProvider(headers);

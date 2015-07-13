@@ -69,7 +69,7 @@ define([
 	var headers = {
 		name: "Orion Image Viewer Plugin",
 		version: "1.0", //$NON-NLS-0$
-		description: "This plugin provides viewer for image files."
+		description: "This plug-in provides a viewer for image files."
 	};
 
 	var provider = new PluginProvider(headers);

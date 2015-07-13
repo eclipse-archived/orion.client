@@ -30,7 +30,7 @@ define([
 	var headers = {
 		name: "Orion Git Support",
 		version: "1.0",
-		description: "This plugin provides Git Support to the Orion File Service.",
+		description: "This plug-in provides Git Support to the Orion File Service.",
 		login: login
 	};
 	var GIT_TIMEOUT = 60000;

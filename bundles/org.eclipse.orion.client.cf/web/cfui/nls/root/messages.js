@@ -96,7 +96,7 @@ define({//Default message bundle
 	"clearLogs": "Clear",
 	"loginTo": "Login to ",
 	"loggingInTo${0}": "Logging in to ${0}",
-	"thisPluginIntegratesWithCloud": "This plugin integrates with Cloud Foundry.",
+	"thisPluginIntegratesWithCloud": "This plug-in integrates with Cloud Foundry.",
 	"commandsForInteractingWithA": "Commands for interacting with a Cloud Foundry compatible target",
 	"targetNotSet": "Target not set",
 	"setOrDisplayTheTarget": "Set or display the target cloud, organization, and space",

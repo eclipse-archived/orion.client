@@ -10,7 +10,7 @@
 /* eslint-env amd */
 define({//Default message bundle
     'pluginName': 'Orion JavaScript Tool Support',
-    'pluginDescription': 'This plugin provides JavaScript tools support for Orion, like editing, search, navigation, validation, and code completion.',
+    'pluginDescription': 'This plug-in provides JavaScript tools support for Orion, like editing, search, navigation, validation, and code completion.',
 	'error': 'Error',
 	'warning' : 'Warning',
 	'ignore' : 'Ignore',
@@ -110,7 +110,7 @@ define({//Default message bundle
 	'templateHoverHeader': 'Template source code:\n\n',
 	'templateAssistHeader': 'Templates',
 	'noProposalsTimedOut': 'Could not compute proposals - operation timed out',
-	'ternPlugins': 'Tern Plugins',
+	'ternPlugins': 'Tern Plug-ins',
 	'noTernPluginsAvailable': 'No Tern plug-ins are currently loaded. This may be because you have not yet activated content assist in a JavaScript file. Tern plug-ins provide type information and code templates for JavaScript.',
 	'noDeclFound': 'Could not find declaration',
 	"deprecatedHoverTitle": "Deprecated.", // the in-line title for deprecated memebers. The word is used alone in a sentence with no further punctuation
