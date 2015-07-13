@@ -70,6 +70,9 @@
 	padding-left: 3px;
 	vertical-align: middle;
 }
+.textviewTooltip .hoverTooltipTitle {
+	font-weight: normal;
+}
 .textviewTooltip .commandButton { /* Styling quickfixes */
 	border: 1px solid #325C80;
 	background-color: inherit;
