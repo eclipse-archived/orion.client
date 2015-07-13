@@ -35,6 +35,9 @@ define({//Default message bundle
 	"gotoLineTooltip": "Go to specified line number", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLinePrompt": "Go to line:", //$NON-NLS-1$ //$NON-NLS-0$
 	"Undo": "Undo", //$NON-NLS-1$ //$NON-NLS-0$
+	"Cut": "Cut", //$NON-NLS-1$ //$NON-NLS-0$
+	"Copy": "Copy", //$NON-NLS-1$ //$NON-NLS-0$
+	"Paste": "Paste", //$NON-NLS-1$ //$NON-NLS-0$
 	"Redo": "Redo", //$NON-NLS-1$ //$NON-NLS-0$
 	"Find": "Find...", //$NON-NLS-1$ //$NON-NLS-0$
 	"noResponse": "No response from server. Check your internet connection and try again.", //$NON-NLS-1$ //$NON-NLS-0$
