@@ -37,7 +37,7 @@ define([
 					}      
 	            },
 	            endVisitNode: function(node) {
-	            	if(found && offset > found.range[1]) {
+	            	if(found && offset > found.range[1] && offset > node.range[0]) {
 	            		found = node;
 	            	}
 	            }

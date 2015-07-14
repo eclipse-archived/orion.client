@@ -462,13 +462,23 @@ define([
 		 * @since 10.0 
 		 */
 		getProposalsForTextContent: function(node, source, params) {
-			if (node && node.parent && node.parent.type === 'tag'){
-				var preceding = this.getPrecedingCharacters(source, params.offset, 10);
-				var match = preceding.match(/<?\s*\/\s*$/)
-				if (match){
-					var name = '</' + node.parent.name + '>'; //$NON-NLS-1$
-					var desc = ' - Close the ' + node.parent.name + ' tag';
-					return [this.makeComputedProposal(name, desc, null, match[0])];
+			if (node){
+				var startTag;
+				// If text content is a '/' offer to close the tag
+				// If we have an uncompleted tag '</' offer to complete the tag
+				if (node.type === 'text' && node.parent && node.parent.type === 'tag'){
+					startTag = node.parent;
+				} else if (node.type === 'tag' && (params.offset > node.range[1] || params.offset < node.range[0])){
+					startTag = node;
+				}
+				if (startTag){
+					var preceding = source.substring(0, params.offset);
+					var match = preceding.match(/<?\/$/);
+					if (match){
+						var name = '</' + startTag.name + '>'; //$NON-NLS-1$
+						var desc = i18nUtil.formatMessage(Messages['closeTagDescription'], startTag.name);
+						return [this.makeComputedProposal(name, desc, null, match[0])];
+					}
 				}
 			}
 			return [];	

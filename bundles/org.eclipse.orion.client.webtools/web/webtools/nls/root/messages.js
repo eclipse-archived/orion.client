@@ -77,5 +77,6 @@ define({//Default message bundle
 	'basicTableDescription': ' - basic HTML table',
 	'htmlCommentDescription': ' - HTML comment',
 	'onlineDocumentation': '\n\n[Online documentation](${0})',
-	'templateSourceHeading': 'Template source code:\n\n'
+	'templateSourceHeading': 'Template source code:\n\n',
+	'closeTagDescription': ' - Close the ${0} tag',
 });

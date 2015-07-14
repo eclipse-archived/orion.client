@@ -58,9 +58,10 @@ define([
     	assert(Array.isArray(expected), 'There must be an expected array of proposals');
     	assert.equal(computed.length, expected.length, 'The number of computed proposals does not match the expected count');
     	for(var i = 0; i < computed.length; i++) {
-    		var _c = computed[i];
-    		var _e = expected[i];
-    		assert.equal(_c.proposal, _e.proposal, 'The proposals do not match');
+    		var c = computed[i];
+    		var e = expected[i];
+    		assert.equal(c.proposal, e.proposal, 'The proposals do not match');
+    		assert.equal(c.prefix, e.prefix, 'The prefixes do not match');
     	}
     }
     
@@ -109,6 +110,144 @@ define([
     				{proposal: ''},
     				{proposal: 'le>\n\t\n</style>'}
     			]);
+    		});
+    	});
+    	it('Close tag </ 1', function() {
+    		var _o = setup({buffer: '<a></'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '</a>', prefix: '</'}
+    			]);
+    		});
+    	});
+    	it('Close tag </ 2', function() {
+    		var _o = setup({buffer: '<a>     </'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 10}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '</a>', prefix: '</'}
+    			]);
+    		});
+    	});
+    	it('Close tag </ 3', function() {
+    		var _o = setup({buffer: '<a>\tfoo\t</'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 10}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '</a>', prefix: '</'}
+    			]);
+    		});
+    	});
+    	it('Close tag </ 4', function() {
+    		var _o = setup({buffer: '<a>foo\n\n</'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 10}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '</a>', prefix: '</'}
+    			]);
+    		});
+    	});    	
+    	// TODO This test should be made to pass but the parser ignores the <a> tag
+//    	it('Close tag </ nested', function() {
+//    		var _o = setup({buffer: '<body><a>foo\n\n</</body>'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 16}).then(function(proposals) {
+//    			assertProposals(proposals, [
+//    				{proposal: '</a>', prefix: '</'}
+//    			]);
+//    		});
+//    	});
+    	it('Close tag </ whitespace after 1', function() {
+    		var _o = setup({buffer: '<a></    '});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+    			// Check that we are getting the list of tag completions, not close tag proposal
+    			assert("Did not get tag proposals", proposals > 10);
+    		});
+    	});
+    	it('Close tag </ whitespace after 2', function() {
+    		var _o = setup({buffer: '<a></\t'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+    			// Check that we are getting the list of tag completions, not close tag proposal
+    			assert("Did not get tag proposals", proposals > 10);
+    		});
+    	});
+    	it('Close tag </ whitespace after 3', function() {
+    		var _o = setup({buffer: '<a></\n'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+    			// Check that we are getting the list of tag completions, not close tag proposal
+    			assert("Did not get tag proposals", proposals > 10);
+    		});
+    	});
+    	it('Close tag </ whitespace after 4', function() {
+    		var _o = setup({buffer: '<a><\n/'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+    			// Check that we are getting the list of tag completions, not close tag proposal
+    			assert("Did not get tag proposals", proposals > 10);
+    		});
+    	});
+    	it('Close tag / 1', function() {
+    		var _o = setup({buffer: '<a>/'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '</a>', prefix: '/'}
+    			]);
+    		});
+    	});
+    	it('Close tag / 2', function() {
+    		var _o = setup({buffer: '<a>     /'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 9}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '</a>', prefix: '/'}
+    			]);
+    		});
+    	});
+    	it('Close tag / 3', function() {
+    		var _o = setup({buffer: '<a>\tfoo\t/'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 9}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '</a>', prefix: '/'}
+    			]);
+    		});
+    	});
+    	it('Close tag / 4', function() {
+    		var _o = setup({buffer: '<a>foo\n\n/'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 9}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '</a>', prefix: '/'}
+    			]);
+    		});
+    	});    	
+    	// TODO This test should be made to pass but the parser ignores the <a> tag
+    	it('Close tag / nested', function() {
+    		var _o = setup({buffer: '<body><a>foo\n\n/</body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 15}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '</a>', prefix: '/'}
+    			]);
+    		});
+    	});
+    	it('Close tag / whitespace after 1', function() {
+    		var _o = setup({buffer: '<a>/    '});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+    			// Check that we are getting the list of tag completions, not close tag proposal
+    			assert("Did not get tag proposals", proposals > 10);
+    		});
+    	});
+    	it('Close tag / whitespace after 2', function() {
+    		var _o = setup({buffer: '<a>/\t'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
+    			// Check that we are getting the list of tag completions, not close tag proposal
+    			assert("Did not get tag proposals", proposals > 10);
+    		});
+    	});
+    	it('Close tag / whitespace after 3', function() {
+    		var _o = setup({buffer: '<a>/\n'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
+    			// Check that we are getting the list of tag completions, not close tag proposal
+    			assert("Did not get tag proposals", proposals > 10);
+    		});
+    	});
+    	it('Close tag / whitespace after 4', function() {
+    		var _o = setup({buffer: '<a><\n/'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
+    			// Check that we are getting the list of tag completions, not close tag proposal
+    			assert("Did not get tag proposals", proposals > 10);
     		});
     	});
     });
