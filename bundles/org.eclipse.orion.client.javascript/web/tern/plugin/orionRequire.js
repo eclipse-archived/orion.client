@@ -91,7 +91,7 @@
   function getModule(name, data) {
     var known = getKnownModule(name, data);
     if (!known) {
-      var val = resolver.getResolved(name);
+      var val = resolver.getResolved(name); //ORION
       if(val && val.file) {
 	      known = data.interfaces[stripJSExt(val.file)] = new infer.AVal;
 	      known.origin = val.file;
@@ -104,6 +104,16 @@
 
   function stripJSExt(f) {
     return f.replace(/\.js$/, '');
+  }
+
+//ORION
+  function addInterfaceDep(name, deps, data) {
+  	var inter = getInterface(name, data);
+  	if(inter) {
+    	deps.push(inter);
+    } else {
+    	deps.push(infer.ANull);
+    }
   }
 
   infer.registerFunction("requireJS", /* @callback */ function(_self, args, argNodes) { //$NON-NLS-1$
@@ -119,35 +129,27 @@
     if (argNodes && args.length > 1) {
       var node = argNodes[args.length === 2 ? 0 : 1];
       if (node.type === "Literal" && typeof node.value === "string") {
-      	var inter = getInterface(node.value, data);
-      	if(inter) {
-        	deps.push(inter);
-        }
+      	addInterfaceDep(node.value, deps, data); //ORION
       } else if (node.type === "ArrayExpression") {
       	for (var i = 0; i < node.elements.length; ++i) {
 	        var elt = node.elements[i];
 	        if (elt.type === "Literal" && typeof elt.value === "string") {
 	          if (elt.value === "exports") {
-	            var exports = new infer.Obj(true);
-	            deps.push(exports);
-	            out.addType(exports, EXPORT_OBJ_WEIGHT);
+	            var exprts = new infer.Obj(true);
+	            deps.push(exprts);
+	            out.addType(exprts, EXPORT_OBJ_WEIGHT);
 	          } else {
-	          	inter = getInterface(elt.value, data);
-	          	if(inter) {
-	            	deps.push(inter);
-	            }
+	          	addInterfaceDep(elt.value, deps, data); //ORION
 	          }
 	        }
         }
       }
     } else if (argNodes && args.length === 1 && argNodes[0].type === "FunctionExpression" && argNodes[0].params.length) {
       // Simplified CommonJS call
-      var exports = new infer.Obj(true);
-      inter = getInterface("require", data); //$NON-NLS-1$
-      if(inter) {
-      	deps.push(inter, exports);
-      }
-      out.addType(exports, EXPORT_OBJ_WEIGHT);
+      exprts = new infer.Obj(true);
+      addInterfaceDep('require', deps, data); //$NON-NLS-1$ //ORION
+      deps.push(exprts);
+      out.addType(exprts, EXPORT_OBJ_WEIGHT);
       fn = args[0];
     }
 
@@ -161,7 +163,7 @@
 
     return infer.ANull;
   });
-
+	
   // Parse simple ObjectExpression AST nodes to their corresponding JavaScript objects.
   function parseExprNode(node) {
     switch (node.type) {

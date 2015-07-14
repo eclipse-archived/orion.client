@@ -46,10 +46,11 @@ define([
   		server.startAsyncAction();
   		_resolved[key].pending = true;
 		server.options.getFile({logical: key, file: loc}, function(err, _file) {
-	 		_resolved[key].file = _file.file;
+			_resolved[key].file = _file.file;
 	   		_resolved[key].contents = _file.contents;
 	   		_resolved[key].logical = _file.logical;
-	   		delete _resolved.pending;
+	   		_resolved[key].err = err;
+	   		delete _resolved[key].pending;
 	   		server.finishAsyncAction(err);
 		});
 	}
