@@ -75,6 +75,41 @@ define([
     			assert.equal(_p.proposal.indexOf("<!DOCTYPE html>"), 0, 'Should have been the HTML file template');
     		});
     	});
+    	it('No complete tags 1', function() {
+    		var _o = setup({buffer: '   \t\n'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 0}).then(function(proposals) {
+    			// Check that we are getting the list of tag completions
+    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    		});
+    	});
+    	it('No complete tags 2', function() {
+    		var _o = setup({buffer: '   \t\n'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+    			// Check that we are getting the list of tag completions
+    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    		});
+    	});
+    	it('No complete tags 3', function() {
+    		var _o = setup({buffer: '   <'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 0}).then(function(proposals) {
+    			// Check that we are getting the list of tag completions
+    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    		});
+    	});
+    	it('No complete tags 4', function() {
+    		var _o = setup({buffer: '<'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 0}).then(function(proposals) {
+    			// Check that we are getting the list of tag completions
+    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    		});
+    	});    	
+    	it('No complete tags 5', function() {
+    		var _o = setup({buffer: 'foo\n'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
+    			// Check that we are getting the list of tag completions
+    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    		});
+    	});
     	it('meta template', function() {
     		var _o = setup({buffer: '<met'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {

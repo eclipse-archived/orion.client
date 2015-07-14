@@ -178,19 +178,19 @@ define([
 		 */
 		computeProposals: function(source, offset, params) {
 			var proposals = mTemplates.TemplateContentAssist.prototype.computeProposals.call(this, source, params.offset, params);
-			for(var i = 0; i < proposals.length; i++) {
-				if(!proposals[i].proposal) {
+			for(var j = 0; j < proposals.length; j++) {
+				if(!proposals[j].proposal) {
 					continue;
 				}
-				proposals[i].style = 'emphasis'; //$NON-NLS-1$
+				proposals[j].style = 'emphasis'; //$NON-NLS-1$
 				var obj = Object.create(null);
 		        obj.type = 'markdown'; //$NON-NLS-1$
 		        obj.content = Messages['templateSourceHeading'];
-		        obj.content += proposals[i].proposal;
-		        if(proposals[i].url) {
-		        	obj.content += i18nUtil.formatMessage(Messages['onlineDocumentation'], proposals[i].url);
+		        obj.content += proposals[j].proposal;
+		        if(proposals[j].url) {
+		        	obj.content += i18nUtil.formatMessage(Messages['onlineDocumentation'], proposals[j].url);
 		        }
-		        proposals[i].hover = obj;
+		        proposals[j].hover = obj;
 			}
 			return proposals;
 		},
@@ -309,15 +309,21 @@ define([
 					return [];
 				}
 				//are we in the attrib area or between tag elements?
-				if(this.completingAttributes(node, ast.source, params)) {
-					return this.getOptionsForAttribute(node, params);
-				} else if(this.completingTagAttributes(node, ast.source, params)) {
+				if(this.isCompletingAttributeValue(node, ast.source, params)) {
+					return this.getValuesForAttribute(node, params);
+				} else if(this.isCompletingTagAttribute(node, ast.source, params)) {
 					return this.getAttributesForNode(node, params);
 				} else {
 					var textContentProposals = this.getProposalsForTextContent(node, ast.source, params);
 					if (textContentProposals.length > 0){
 						return textContentProposals;
 					}
+					return this.computeProposals(ast.source, params.offset, params);
+				}
+			} else {
+				// If the user has no completed tags, still offer tag templates
+				// TODO Can be removed if the parser creates text node for unfinished tags Bug 472659
+				if (ast.source.match(/^\s*<?\s*$/)) {
 					return this.computeProposals(ast.source, params.offset, params);
 				}
 			}
@@ -380,7 +386,7 @@ define([
 		 * @returns {Boolean} True if we are completing the attributes of a tag, false otherwise 
 		 * @since 10.0 
 		 */
-		completingTagAttributes: function(node, source, params) {
+		isCompletingTagAttribute: function(node, source, params) {
 			if(node) {
 				var offset = params.offset;
 				if(node.type === 'tag') {
@@ -448,7 +454,7 @@ define([
 		 * @returns {Array.<Object>} The array of proposals
 		 * @since 10.0 
 		 */
-		getOptionsForAttribute: function(node, params) {
+		getValuesForAttribute: function(node, params) {
 			//TODO compute the options for the given attribute
 			return [];	
 		},
@@ -492,7 +498,7 @@ define([
 		 * @returns {Boolean} True if we are completing the attributes of a tag, false otherwise 
 		 * @since 10.0 
 		 */
-		completingAttributes: function(node, source, params) {
+		isCompletingAttributeValue: function(node, source, params) {
 			if(node && node.type === 'attr') {
 				return this.within('"', '"', source, params.offset, node.range) || //$NON-NLS-1$ //$NON-NLS-2$
 						this.within("'", "'", source, params.offset, node.range); //$NON-NLS-1$ //$NON-NLS-2$
