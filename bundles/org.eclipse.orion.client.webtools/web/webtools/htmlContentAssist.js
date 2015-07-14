@@ -415,7 +415,7 @@ define([
 			var proposals = [];
 			for(var i = 0; i < attrs.length; i++) {
 				var attr = attrs[i];
-				if(jsUtil.looselyMatches(params.prefix, attr.name)) {
+				if(jsUtil.looselyMatches(params.prefix, attr.name) && !this._hasAttribute(node, attr.name)) {
 					var _h = Object.create(null);
 					 _h.type = 'markdown'; //$NON-NLS-1$
 			         _h.content = attr.doc;
@@ -430,6 +430,17 @@ define([
 			}
 			return proposals;	
 		},
+		
+		/**
+		 * @description Returns true if the node has the given attribute already
+		 * @param {Object} node The AST node to check
+		 * @param {String} attribute the name of the attribute
+		 * @returns {Boolean} True if the node has the given attribute, false otherwise
+		 */
+		_hasAttribute: function(node, attribute) {
+			return node && node.type === 'tag' && typeof(node.attributes) === 'object' && attribute && !!node.attributes[attribute];			
+		},
+		
 		/**
 		 * Returns the options (if any) that can be used in the specified attribute
 		 * @param {Object} node The AST node for the attribute we are completing within
