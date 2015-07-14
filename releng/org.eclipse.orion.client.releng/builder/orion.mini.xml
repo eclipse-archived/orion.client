@@ -372,7 +372,7 @@
 					<arg value="out=@{out}"/>
 					<arg value="dir=" />
 					<arg value="name=embeddedEditor/builder/embeddedEditor" />
-					<arg value="wrap.end=define(['embeddedEditor/builder/embeddedEditor'], function(p) { return p; });" />
+					<arg value="wrap.end=define('orion/codeEdit', ['embeddedEditor/builder/embeddedEditor'], function(p) { return p; });" />
 				</args>
 			</rjs>
 		</sequential>

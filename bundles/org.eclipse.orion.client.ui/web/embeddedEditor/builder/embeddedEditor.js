@@ -18,10 +18,10 @@ define([
 	mEditorSetup,
 	objects
 ) {
-	function Editor() {
+	function CodeEdit() {
 	}
 
-	objects.mixin(Editor.prototype, {
+	objects.mixin(CodeEdit.prototype, {
 		/**
 		 * @class This object describes the options for <code>create</code>.
 		 * @name orion.editor.EditOptions
@@ -47,5 +47,5 @@ define([
 			});
 		}
 	});
-	return Editor;
+	return CodeEdit;
 });
