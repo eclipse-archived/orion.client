@@ -199,5 +199,19 @@ define([
 			assert.equal(res[0].name, 'foo/bar/esprima/esprima.js', 'Should have found file object with name equal to esprima.js');
 
 		});
+		
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=472639
+		 * @since 10.0
+		 */
+		it('Test resolveRelativeFiles - i18n-style paths 1', function() {
+			var files = testFileClient.createTestFiles(['foo/messages.js', 'foo/bar/messages.js', 'foo/bar/baz/messages.js']);
+			var res = resolver.resolveRelativeFiles('i18n!foo/messages', files, {location: 'TestingRoot/foo/messages.js', contentType: {name: 'JavaScript'}});
+			assert(Array.isArray(res), 'There should have been a files array returned');
+			assert.equal(res.length, 1, 'There should have been one file returned');
+			assert.equal(res[0].location, testFileClient.fileServiceRootURL()+'/foo/messages.js', 'Should have found file object with location TestingRoot/foo/messages.js');
+			assert.equal(res[0].name, 'foo/messages.js', 'Should have found file object with name equal to esprima.js');
+
+		});
 	});
 });

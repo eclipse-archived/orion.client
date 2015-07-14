@@ -121,26 +121,27 @@ define([
 		    if(files && files.length > 0 && metadata) {
 		        var filepath = metadata.location;
 		        var _files = [];
+		        var _p = path.replace(/^i18n!/, '');
 		        filepath = filepath.slice(0, filepath.lastIndexOf('/'));
 		        var relative = false;
-		        if(path.charAt(0) !== '.') {
-	                filepath = this._appendPath(filepath, path);
+		        if(_p.charAt(0) !== '.') {
+	                filepath = this._appendPath(filepath, _p);
 	            } else {
 	            	relative = true;
 	                //resolve the realtive path
-	                var rel = /^\.\.\//.exec(path);
+	                var rel = /^\.\.\//.exec(_p);
 	                if(rel) {
     	                while(rel != null) {
     	                    filepath = filepath.slice(0, filepath.lastIndexOf('/'));
-    	                    path = path.slice(3);
-    	                    rel = /^\.\.\//.exec(path);
+    	                    _p = _p.slice(3);
+    	                    rel = /^\.\.\//.exec(_p);
     	                }
-    	                filepath = this._appendPath(filepath, path);
+    	                filepath = this._appendPath(filepath, _p);
 	                } else {
-	                    while(/^\.\//.test(path)) {
-	                       path = path.slice(2);
+	                    while(/^\.\//.test(_p)) {
+	                       _p = _p.slice(2);
 	                    }
-	                    filepath = this._appendPath(filepath, path);
+	                    filepath = this._appendPath(filepath, _p);
 	                }
 	            }
 		        for(var i = 0; i < files.length; i++) {
@@ -156,7 +157,7 @@ define([
 		       			if(idx > -1) {
 			      			p1 = loc.slice(0, idx);
 			      		}
-			      		var _p = path.replace('/', '\/');
+			      		_p = _p.replace('/', '\/');
 			      		var reg = new RegExp(_p+"$");
 			      		if(reg.test(p1)) {
 			      			_files.push(file);
