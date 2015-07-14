@@ -10,16 +10,13 @@
 		<script src="editorBuild/requirejs/require.min.js"></script>
 		<script>
     	/*eslint-env browser, amd*/
-    	require(["editorBuild/code_edit/built-codeEdit-amd.min"], function(edit) {
-    		require(["orion/editor/annotations"], function(dd){
-    			console.log(dd);
-    		});
-    		require(["orion/Deferred", "orion/editor/annotations"], function(dd, aa){
-    			console.log(dd);
-    			console.log(aa);
-   				new dd().resolve("sda");
-    		});
-			var codeEdit = new edit();
+	    require.config({
+	        bundles: {
+	            "editorBuild/code_edit/built-codeEdit-amd": ["orion/codeEdit", "orion/editor/editor", "orion/editor/textView", "orion/editor/textModel", "orion/editor/projectionTextModel", "orion/keyBinding", "orion/editor/textStyler", "orion/editor/contentAssist", "orion/editor/editorFeatures", "orion/editor/textTheme", "orion/Deferred"],
+	        }	    
+	    });
+    	require(["orion/codeEdit", "orion/Deferred"], function(mCodeEdit, deferred) {
+			var codeEdit = new mCodeEdit();
 			var contents = 'var foo = "bar";\n' +
 								 "var bar = foo;\n" + 
 								 "/*\n" + 

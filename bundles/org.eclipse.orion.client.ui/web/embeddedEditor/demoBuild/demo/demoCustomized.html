@@ -31,7 +31,7 @@
 			}
 		</style>
 	    <link rel="stylesheet" type="text/css" href="editorBuild/code_edit/built-codeEdit.css"/>
-		<script src="editorBuild/code_edit/built-codeEdit.min.js"></script>
+		<script src="editorBuild/code_edit/built-codeEdit.js"></script>
 		<script>
 			/*globals orion */
 			var contents = 'var foo = "bar";\n' +
@@ -77,14 +77,14 @@
 				computeProposals: function(buffer, offset, context) {
 					var result = [];
 					for(var i = 0; i < proposals.length; i++){
-						result.push(proposals[i] + i);
+						result.push(proposals[i] + i);  
 					}
 					return result;
 				}
 			};
 			var hoverProvider = {
 				computeHoverInfo: function (editorContext, context) {
-					var pContent = "*This text will be italic*\n\n **This text will be bold**\n\n";
+					var pContent = "_This text will be italic_  \n\nabcdef  \n__This text will be bold__";
 					if(typeof context.offset === "number") {
 						return context.offset > 12 ? {
 							title: "This is the title",
@@ -92,7 +92,7 @@
 							type: "markdown"} : null;
 					} else if(typeof context.proposal === "string") {
 						var index = parseInt(context.proposal.substring("proposal ".length - 1), 10);
-						return index > 3 ? {
+						return index > -1 ? {
 							title: "This is the title",
 							content: pContent,
 							type: "markdown"} : {};
