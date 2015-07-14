@@ -361,6 +361,9 @@ function Tooltip (view) {
 			}
 			
 			if (newContentsDiv) {
+				if (this._tooltipContents) {
+					this._tooltipDiv.removeChild(this._tooltipContents);
+				}
 				this._tooltipContents = newContentsDiv;
 				this._tooltipDiv.appendChild(newContentsDiv);				
 			}
