@@ -485,29 +485,6 @@ define([
 		},
 		
 		/**
-		 * @name getPrecedingCharacters
-		 * @description Returns the characters previous to the offset up to the given count
-		 * @function
-		 * @param source {String} source to lookup characters in
-		 * @param offset {Number} the offset to begin counting at
-		 * @param count {Number} the number of preceding characters to return, defaults to 1
-		 * @returns returns {String} containing the preceding characters or an empty string
-		 * @private
-		 */
-		getPrecedingCharacters: function getPrecedingCharacters(source, offset, count) {
-			var result = "";
-			if (!source || !offset){
-				return result;
-			}
-			var index = count ? count : 1;
-			while (index > 0 && (offset-index > 0) && (offset-index) < source.length){
-				result += source[offset-index];
-				index--;
-			}
-			return result;
-		},
-		
-		/**
 		 * Computes if we are trying to complete attributes
 		 * @param {Object} node The AST node to check with the offset
 		 * @param {String} source The backing source
