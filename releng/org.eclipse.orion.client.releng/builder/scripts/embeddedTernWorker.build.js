@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -8,26 +8,28 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+/* eslint-disable missing-nls */
 ({
-	baseUrl: ".", //$NON-NLS-1$
+	baseUrl: ".", 
 	paths: {
-		text: "requirejs/text", //$NON-NLS-1$
-		esprima: "esprima/esprima", //$NON-NLS-1$
-		estraverse: "estraverse/estraverse", //$NON-NLS-1$
-		escope: "escope/escope", //$NON-NLS-1$
-		logger: "javascript/logger", //$NON-NLS-1$
-		doctrine: 'doctrine/doctrine', //$NON-NLS-1$
-		i18n: "requirejs/i18n" //$NON-NLS-1$
+		text: "requirejs/text",
+		json: "requirejs/json", 
+		esprima: "esprima/esprima", 
+		estraverse: "estraverse/estraverse", 
+		escope: "escope/escope", 
+		logger: "javascript/logger", 
+		doctrine: 'doctrine/doctrine', 
+		i18n: "requirejs/i18n" 
 	},
 	packages: [
 		{
-			name: "eslint/conf", //$NON-NLS-1$
-			location: "eslint/conf" //$NON-NLS-1$
+			name: "eslint/conf", 
+			location: "eslint/conf" 
 		},
 		{
-			name: "eslint", //$NON-NLS-1$
-			location: "eslint/lib", //$NON-NLS-1$
-			main: "eslint" //$NON-NLS-1$
+			name: "eslint", 
+			location: "eslint/lib", 
+			main: "eslint" 
 		},
 	],
 	name: "javascript/plugins/ternWorkerCore",
@@ -35,4 +37,4 @@
 		start: "importScripts('../../requirejs/require.min.js');\n",
 		end: ""
 	}
-})
+});

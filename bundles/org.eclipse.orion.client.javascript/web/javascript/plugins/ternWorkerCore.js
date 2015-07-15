@@ -24,6 +24,7 @@ require({
 	baseUrl: "../../", //$NON-NLS-1$
 	paths: {
 		i18n: 'requirejs/i18n', //$NON-NLS-1$
+		json: 'requirejs/json', //$NON-NLS-1$
 		esprima: "esprima/esprima" //$NON-NLS-1$
 	}
 },
@@ -41,8 +42,8 @@ require({
 	'tern/plugin/orionRedis',
 	'tern/plugin/orionRequire',
 	'tern/plugin/ternPlugins',
-	'tern/defs/ecma5',
-	'tern/defs/browser',
+	'json!tern/defs/ecma5.json',
+	'json!tern/defs/browser.json',
 	'javascript/handlers/ternAssistHandler',
 	'javascript/handlers/ternDeclarationHandler',
 	'javascript/handlers/ternHoverHandler',

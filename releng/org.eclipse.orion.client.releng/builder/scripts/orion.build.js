@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+/* eslint-disable missing-nls */
 ({
     optimizeCss: "standard.keepLines",
     optimize: "uglify2",
@@ -25,6 +26,7 @@
     inlineText: true,
     paths: {
         text: 'requirejs/text',
+        json: 'requirejs/json',
         i18n: 'requirejs/i18n',
         domReady: 'requirejs/domReady',
         gcli: 'gcli/gcli',
@@ -45,7 +47,7 @@
         // As eslint/conf/ is not located in eslint/lib/, override the previous package
         {
             name: "eslint/conf",
-            location: "eslint/conf",
+            location: "eslint/conf"
         }],
     // Bundles whose ./web/ folders will be copied into the staging directory by the builder.
     // ** For Nashorn compatibility, use single quotes here **
