@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+/* eslint-disable missing-nls */
 ({
     generateSourceMaps: true,
     preserveLicenseComments: false,
@@ -38,4 +39,4 @@
 		start: "importScripts('../../requirejs/require.min.js');\n",
 		end: ""
 	}
-})
+});
