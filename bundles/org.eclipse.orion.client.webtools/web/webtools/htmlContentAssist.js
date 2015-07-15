@@ -421,16 +421,17 @@ define([
 			var proposals = [];
 			for(var i = 0; i < attrs.length; i++) {
 				var attr = attrs[i];
-				if(jsUtil.looselyMatches(params.prefix, attr.name) && !this._hasAttribute(node, attr.name)) {
+				var prefix = params.prefix ? params.prefix : "";
+				if(jsUtil.looselyMatches(prefix, attr.name) && !this._hasAttribute(node, attr.name)) {
 					var _h = Object.create(null);
 					 _h.type = 'markdown'; //$NON-NLS-1$
 			         _h.content = attr.doc;
 			        if(attr.url) {
 			        	_h.content += i18nUtil.formatMessage(Messages['onlineDocumentation'], attr.url);
 			        }
-			        var _p = this.makeComputedProposal(attr.name, " ", _h, params.prefix); //$NON-NLS-1$
+			        var _p = this.makeComputedProposal(attr.name, " ", _h, prefix); //$NON-NLS-1$
 			        _p.proposal = attr.name+'=""'; //$NON-NLS-1$
-			        _p.escapePosition = params.offset - params.prefix.length + attr.name.length + 2;
+			        _p.escapePosition = params.offset - prefix.length + attr.name.length + 2;
 					proposals.push(_p);
 				}
 			}

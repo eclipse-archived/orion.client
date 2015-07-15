@@ -21,6 +21,8 @@ define([
     
     var astmanager = new ASTManager.HtmlAstManager();
     var assist = new HTMLAssist.HTMLContentAssistProvider(astmanager);
+    var tagTemplates = assist.getTemplates();
+    var globalTagAttributes = assist.getAttributesForNode({name: "zzz", type: "tag"}, {offset: 0, prefix: ""});
     
     /**
      * Set up the test and return an object for the test context
@@ -65,7 +67,25 @@ define([
     	}
     }
     
+    function assertTagProposals(computed){
+    	// Add 1 for the title proposal
+    	assert(computed.length === tagTemplates.length+1, "Incorrect number of proposals for tag templates. Proposal count: " + computed.length + " Expected count: " + tagTemplates.length);
+    	assert(computed[0].proposal === "", "No templates header proposal found, not displaying tag templates");
+    	assert(computed[0].style === "noemphasis_title", "No templates header proposal found, not displaying tag templates");
+    }
+    
+    function assertGlobalTagAttributes(computed){
+    	assert(computed.length === globalTagAttributes.length, "Incorrect number of proposals for tag attributes. Proposal count: " + computed.length + " Expected count: " + globalTagAttributes.length)
+    	assert(computed[0].name === "accesskey", "First proposal wasn't the tag attribute 'accesskey'.");
+    }
+    
     describe('HTML Content Assist Tests', function() {
+    	it('Check there are tag templates and attribute map', function() {
+	    	assert(tagTemplates.length > 100, "Not enough tag templates. Template count: " + tagTemplates.length);
+	    	assert(tagTemplates.length < 120, "Too many tag templates. Template count: " + tagTemplates.length);
+	    	assert(globalTagAttributes.length > 60, "Not enough global tag attributes. Global attribute count: " + globalTagAttributes.length);
+	    	assert(globalTagAttributes.length < 75, "Too many global tag attributes. Global attribute count: " + globalTagAttributes.length);
+    	});
     	it('Empty file', function() {
     		var _o = setup({buffer: ''});
     		return assist.computeContentAssist(_o.editorContext, {offset: 0}).then(function(proposals) {
@@ -78,36 +98,31 @@ define([
     	it('No complete tags 1', function() {
     		var _o = setup({buffer: '   \t\n'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 0}).then(function(proposals) {
-    			// Check that we are getting the list of tag completions
-    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    			assertTagProposals(proposals);
     		});
     	});
     	it('No complete tags 2', function() {
     		var _o = setup({buffer: '   \t\n'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
-    			// Check that we are getting the list of tag completions
-    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    			assertTagProposals(proposals);
     		});
     	});
     	it('No complete tags 3', function() {
     		var _o = setup({buffer: '   <'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 0}).then(function(proposals) {
-    			// Check that we are getting the list of tag completions
-    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    			assertTagProposals(proposals);
     		});
     	});
     	it('No complete tags 4', function() {
     		var _o = setup({buffer: '<'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 0}).then(function(proposals) {
-    			// Check that we are getting the list of tag completions
-    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    			assertTagProposals(proposals);
     		});
     	});    	
     	it('No complete tags 5', function() {
     		var _o = setup({buffer: 'foo\n'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
-    			// Check that we are getting the list of tag completions
-    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    			assertTagProposals(proposals);
     		});
     	});
     	it('meta template', function() {
@@ -191,22 +206,18 @@ define([
     	it('Close tag </ whitespace after 1', function() {
     		var _o = setup({buffer: '<a></  '});
     		return assist.computeContentAssist(_o.editorContext, {offset: 7}).then(function(proposals) {
-    			// Check that we are getting the list of tag completions, not close tag proposal
-    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    			assertTagProposals(proposals);
     		});
     	});
     	it('Close tag </ whitespace after 2', function() {
     		var _o = setup({buffer: '<a></\t'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 6}).then(function(proposals) {
-    			// Check that we are getting the list of tag completions, not close tag proposal
-    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    			assertTagProposals(proposals);
     		});
     	});
     	it('Close tag </ whitespace after 3', function() {
     		var _o = setup({buffer: '<a></\n'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 6}).then(function(proposals) {
-    			// Check that we are getting the list of tag completions, not close tag proposal
-    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
     		});
     	});
     	it('Close tag / 1', function() {
@@ -252,22 +263,19 @@ define([
     	it('Close tag / whitespace after 1', function() {
     		var _o = setup({buffer: '<a>/   '});
     		return assist.computeContentAssist(_o.editorContext, {offset: 7}).then(function(proposals) {
-    			// Check that we are getting the list of tag completions, not close tag proposal
-    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    			assertTagProposals(proposals);
     		});
     	});
     	it('Close tag / whitespace after 2', function() {
     		var _o = setup({buffer: '<a>/\t'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
-    			// Check that we are getting the list of tag completions, not close tag proposal
-    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    			assertTagProposals(proposals);
     		});
     	});
     	it('Close tag / whitespace after 3', function() {
     		var _o = setup({buffer: '<a>/\n'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
-    			// Check that we are getting the list of tag completions, not close tag proposal
-    			assert(proposals.length > 10, "Did not get tag proposals. Proposals found: " + proposals.length);
+    			assertTagProposals(proposals);
     		});
     	});
     	it('Close tag </ with newline between', function() {
@@ -278,5 +286,162 @@ define([
     			]);
     		});
     	});
+    	it('Tag templates 1', function() {
+    		var _o = setup({buffer: '<ar'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 3}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: ''},
+    				{proposal: 'ticle>\n\t\n</article>'},
+    				{proposal: 'ea/>'},
+    			]);
+    		});
+    	});
+    	it('Tag templates 2', function() {
+    		var _o = setup({buffer: '<html>\n<body><ar</body>\n</html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 16}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: ''},
+    				{proposal: 'ticle>\n\t\n</article>'},
+    				{proposal: 'ea/>'},
+    			]);
+    		});
+    	});
+    	it('Tag templates 3', function() {
+    		var _o = setup({buffer: '<html>\n<body><ar\n</body>\n</html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 17}).then(function(proposals) {
+    			assertTagProposals(proposals);
+    		});
+    	});
+    	it('Tag attribute proposals 1', function() {
+    		var _o = setup({buffer: '<zzz >'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+    			assertGlobalTagAttributes(proposals);
+    		});
+    	});
+    	it('Tag attribute proposals 2', function() {
+    		var _o = setup({buffer: '<body>\n<zzz >\n</body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 12}).then(function(proposals) {
+    			assertGlobalTagAttributes(proposals);
+    		});
+    	});
+    	// TODO The parser gets us the body node rather than zzz so we get proposals specific to the body tag
+//    	it('Tag attribute proposals 3', function() {
+//    		var _o = setup({buffer: '<body>\n<zzz aria="test" >\n</body>'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 24}).then(function(proposals) {
+//    			assertGlobalTagAttributes(proposals);
+//    		});
+//    	});
+		// TODO The parser doesn't recognize that we are inside of a valid tag so tag proposals rather than attributes are returned
+//		it('Tag attribute proposals 4', function() {
+//    		var _o = setup({buffer: '<body>\n<zzz  aria="test">\n</body>'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 12}).then(function(proposals) {
+//    			assertGlobalTagAttributes(proposals);
+//    		});
+//    	});
+    	it('Tag attribute proposals prefix 1', function() {
+    		var _o = setup({buffer: '<zzz acc>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 8, prefix: 'acc'}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: 'accesskey=""', prefix: 'acc'},
+    			]);
+    		});
+    	});
+    	it('Tag attribute proposals prefix 2', function() {
+    		var _o = setup({buffer: '<body><zzz acc></body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 14, prefix: 'acc'}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: 'accesskey=""', prefix: 'acc'},
+    			]);
+    		});
+    	});
+    	it('Tag attribute proposals prefix 3', function() {
+    		var _o = setup({buffer: '<body><zzz aria="test" acc></body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 26, prefix: 'acc'}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: 'accesskey=""', prefix: 'acc'},
+    			]);
+    		});
+    	});
+    	// TODO The parser does not return the correct ranges on the zzz start tag so we don't recognized that we are looking for attributes
+//    	it('Tag attribute proposals prefix 4', function() {
+//    		var _o = setup({buffer: '<body><zzz acc aria="test"></body>'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 14, prefix: 'acc'}).then(function(proposals) {
+//    			assertProposals(proposals, [
+//    				{proposal: 'accesskey=""', prefix: 'acc'},
+//    			]);
+//    		});
+//    	});
+    	// TODO The parser does not create a start tag element so we don't recognize that we are looking for attributes
+//    	it('Tag attribute proposals incomplete tag 1', function() {
+//    		var _o = setup({buffer: '<zzz '});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+//    			assertGlobalTagAttributes(proposals);
+//    		});
+//    	});
+//    	it('Tag attribute proposals incomplete tag 2', function() {
+//    		var _o = setup({buffer: '<body><zzz </body>'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 11}).then(function(proposals) {
+//    			assertGlobalTagAttributes(proposals);
+//    		});
+//    	});
+    	it('Attribute value proposals 1', function() {
+    		var _o = setup({buffer: '<a href=""></a>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 9}).then(function(proposals) {
+    			assertProposals(proposals, []);
+    		});
+    	});
+    	it('Attribute value proposals 2', function() {
+    		var _o = setup({buffer: '<body>\n<a href=""></a>\n</body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 16}).then(function(proposals) {
+    			assertProposals(proposals, []);
+    		});
+    	});
+    	it('Attribute value proposals incomplete tag 1', function() {
+    		var _o = setup({buffer: '<a href=""'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 9}).then(function(proposals) {
+    			assertProposals(proposals, []);
+    		});
+    	});
+    	it('Attribute value proposals incomplete tag 2', function() {
+    		var _o = setup({buffer: '<body>\n<a href=""\n</body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 16}).then(function(proposals) {
+    			assertProposals(proposals, []);
+    		});
+    	});
+    	// TODO 
+    	it('Offsets within tags proposals 1', function() {
+    		var _o = setup({buffer: '<zzz href="" ></zzz>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 13}).then(function(proposals) {
+    			assertGlobalTagAttributes(proposals);
+    		});
+    	});
+    	it('Offsets within tags proposals 2', function() {
+    		var _o = setup({buffer: '<zzz href="" ></zzz>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 12}).then(function(proposals) {
+    			// TODO Can you have two attributes touching when the value is quoted correctly?
+    			assertGlobalTagAttributes(proposals);
+    		});
+    	});
+    	it('Offsets within tags proposals 3', function() {
+    		var _o = setup({buffer: '<zzz href="" ></zzz>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 10}).then(function(proposals) {
+    			assertProposals(proposals, []);
+    		});
+    	});
+    	it('Offsets within tags proposals 4', function() {
+    		var _o = setup({buffer: '<zzz href="" ></zzz>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 9, prefix: "href"}).then(function(proposals) {
+    			assertProposals(proposals, []);
+    		});
+    	});
+    	it('Offsets within tags proposals 5', function() {
+    		var _o = setup({buffer: '<zzz href="" ></zzz>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+    			assertGlobalTagAttributes(proposals);
+    		});
+    	});
+    	// TODO HTML5 does not require lower case tags/attributes, our templates require lower case
+    	
+    	
     });
 });

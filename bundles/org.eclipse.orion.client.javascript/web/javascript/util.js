@@ -35,7 +35,7 @@ define([
 	 * @returns {Boolean} If the two strings match
 	 */
 	function looselyMatches(prefix, target) {
-		if (target === null || prefix === null) {
+		if (typeof prefix !== "string" || typeof target !== "string") {
 			return false;
 		}
 
