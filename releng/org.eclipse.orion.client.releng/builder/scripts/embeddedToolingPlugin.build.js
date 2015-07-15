@@ -14,6 +14,7 @@
     baseUrl: '.',
 	paths: {
         almond: 'requirejs/almond',
+        json: "requirejs/json",
   		text: 'requirejs/text',
   		i18n: 'requirejs/i18n',
   		domReady: 'requirejs/domReady'

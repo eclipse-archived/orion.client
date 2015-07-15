@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,12 +10,13 @@
  *******************************************************************************/
  
 // optimization script to concat/minify the Orion editor javascript code
- 
+/* eslint-disable missing-nls */
 ({
     baseUrl: '.',
 	paths: {
         almond: 'requirejs/almond',
         i18n: 'requirejs/i18n',
+        json: "requirejs/json",
         text: 'requirejs/text',
         //"orion/extensionCommands": "embeddedEditor/builder/buildFrom/emptyExtensionCommands",
         "orion/globalCommands": "embeddedEditor/builder/buildFrom/emptyGlobalCommands",
@@ -29,5 +30,5 @@
 		'orion/widgets/themes/editor/ThemeData': 'embeddedEditor/builder/buildFrom/ThemeData'
         //"orion/editorCommands": "embeddedEditor/builder/buildFrom/emptyEditorCommands"
 	},
-	preserveLicenseComments: false,
-})
+	preserveLicenseComments: false
+});

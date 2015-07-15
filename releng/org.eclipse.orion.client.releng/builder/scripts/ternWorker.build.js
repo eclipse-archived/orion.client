@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -14,6 +14,7 @@
 	baseUrl: ".", //$NON-NLS-1$
 	paths: {
 		text: "requirejs/text", //$NON-NLS-1$
+		json: "requirejs/json", //$NON-NLS-1$
 		esprima: "esprima/esprima", //$NON-NLS-1$
 		estraverse: "estraverse/estraverse", //$NON-NLS-1$
 		escope: "escope/escope", //$NON-NLS-1$
