@@ -6810,10 +6810,10 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				clipboardText = [];
 				convertDelimiter(text, function(t) {clipboardText.push(t);}, function() {clipboardText.push(util.platformDelimiter);});
 				/*
-				* Note that setData() succeeds on Firefox 22 and greater, but the return value is not a boolean like IE and Chrome.
+				* Note that setData() succeeds on Firefox > 21 and WebKit, but the return value is not a boolean like IE.
 				*/
 				var success = clipboardData.setData(util.isIE ? "Text" : "text/plain", clipboardText.join("")); //$NON-NLS-1$ //$NON-NLS-2$
-				if (success || util.isFirefox > 21) {
+				if (success || (evt && (util.isFirefox > 21 || util.isWebkit))) {
 					return true;
 				}
 				if (!evt) return false;
