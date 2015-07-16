@@ -411,7 +411,7 @@ define({//Default message bundle
 	"Loading default workspace": "Loading default workspace", //$NON-NLS-0$  //$NON-NLS-1$
 	"Show workspace changes as a patch": "Show workspace changes as a patch", //$NON-NLS-0$  //$NON-NLS-1$
 	"Show checked changes as a patch": "Show checked changes as a patch", //$NON-NLS-0$  //$NON-NLS-1$
-	"Please select at least one file to be included in the patch": "Please select at least one file to be included in the patch", //$NON-NLS-0$  //$NON-NLS-1$ 
+	"EmptyPatchWarning": "Please select at least one file to be included in the patch", //$NON-NLS-0$  //$NON-NLS-1$ 
 	"ShowCommitPatchTip": "Show patch for changes in this commit", //$NON-NLS-0$  //$NON-NLS-1$
 	"Continue": "Continue", //$NON-NLS-0$  //$NON-NLS-1$
 	"Contibue Rebase": "Continue Rebase", //$NON-NLS-0$  //$NON-NLS-1$

@@ -2057,7 +2057,7 @@ var exports = {};
 				var display = {};
 				display.Severity = "Warning"; //$NON-NLS-0$
 				display.HTML = false;
-				display.Message = messages["Please select at least one file to be included in the patch"];
+				display.Message = messages.EmptyPatchWarning;
 				serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 				return null;
 			}
