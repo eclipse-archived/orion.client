@@ -80,6 +80,34 @@
 	z-index: 1000; /* must be greater than .contentassist z-index */
 }
 
+.contentassist .proposalTag {
+	display: inline-block;
+  	line-height: 11px;
+  	height: 10px;
+   	border-radius: 2px;
+	background: #325C80;
+	padding: 2px;
+	margin-right: 3px;
+	text-align: center;
+  	color: white;
+}
+
+/* TODO This class should be moved to a language specific location */
+.contentassist .iconTagGreen {
+	display: inline-block;
+	font-size: 10px;
+  	font-weight: bold;
+  	line-height: 13px;
+  	height: 12px;
+  	width: 12px;
+   	border-radius: 50%;
+	background: green;
+	padding: 1px;
+	margin-right: 3px;
+	text-align: center;
+  	color: white;
+}
+
 .contentassist>div {
 	padding: 1px 3px 1px 5px;
 }

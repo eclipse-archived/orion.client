@@ -1190,14 +1190,16 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				plainString = proposal;
 			} else if (proposal.description && typeof proposal.description === "string") { //$NON-NLS-0$
 				if (proposal.name && typeof proposal.name === "string") { //$NON-NLS-0$
+					var tagsNode = this._createTagsNode(proposal.tags);
 					var nameNode = this._createNameNode(proposal.name);
 					nameNode.contentAssistProposalIndex = index;
+					var descriptionNode = document.createTextNode(proposal.description);
 					
 					node = document.createElement("span"); //$NON-NLS-0$
+					if (tagsNode) { node.appendChild(tagsNode); }
 					node.appendChild(nameNode);
-					
-					var descriptionNode = document.createTextNode(proposal.description);
 					node.appendChild(descriptionNode);
+					
 				} else {
 					plainString = proposal.description;
 				}
@@ -1244,6 +1246,33 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			node.classList.add("proposal-name"); //$NON-NLS-0$
 			node.appendChild(document.createTextNode(name));
 			return node;
+		},
+		/**
+		 * @private
+		 * @param tags {Array} The array of tags to display
+		 * @returns {Object} the dom node for the tags or <code>null</code>
+		 */
+		_createTagsNode: function(tags) {
+			var tagsNode = null;
+			if (tags && tags.constructor === Array && tags.length > 0){
+				tagsNode = document.createElement("span");	 //$NON-NLS-1$
+				for (var i=0; i<tags.length; i++) {
+					var tag = tags[i];
+					if (tag.content || tag.cssClass){
+						var tagNode = document.createElement("span"); //$NON-NLS-1$
+						if (tag.cssClass){
+							tagNode.classList.add(tag.cssClass);
+						} else {
+							tagNode.classList.add('proposalTag'); //$NON-NLS-1$
+						}
+						if (tag.content){
+							tagNode.textContent = tag.content;
+						}
+						tagsNode.appendChild(tagNode);
+					}
+				}
+			}
+			return tagsNode;
 		},
 		/**
 		 * @private
