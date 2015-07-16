@@ -2053,6 +2053,14 @@ var exports = {};
 		
 		var showPatchCallback = function(data) {
 			var items = forceArray(data.items);
+			if (items.length === 0) {
+				var display = {};
+				display.Severity = "Warning"; //$NON-NLS-0$
+				display.HTML = false;
+				display.Message = messages["Please select at least one file to be included in the patch"];
+				serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+				return null;
+			}
 			var url, i;
 			if (data.userData && data.userData.Clone && data.userData.Clone.DiffLocation) {
 				url = data.userData.Clone.DiffLocation.replace("\/Default\/", "\/Cached\/") + "?parts=diff"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
