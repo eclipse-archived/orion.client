@@ -20,6 +20,7 @@ define({//Default message bundle
 	"EditorRelatedLinkParent": "Show Enclosing Folder",
 	"EditorLinkWorkspace": "Edit",
 	"EditorRelatedLinkProj": "Show Project",
+	"navigationBar": "Navigation Bar",
 	"Filter bindings": "Filter bindings",
 	"orionClientLabel": "Orion client repository",
 	"Orion Editor": "Orion Editor",

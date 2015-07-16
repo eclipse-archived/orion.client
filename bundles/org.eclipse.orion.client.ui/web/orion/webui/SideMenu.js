@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 /*global URL*/
-define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(lib, PageUtil) {
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(messages, lib, PageUtil) {
 	var LOCAL_STORAGE_NAME = "sideMenuNavigation";
 	var OPEN_STATE = "open";
 	var CLOSED_STATE = "closed";
@@ -116,6 +116,7 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 				var sideMenuList = document.createElement("ul"); //$NON-NLS-0$
 				sideMenuList.classList.add("sideMenuList"); //$NON-NLS-0$
 				sideMenuList.setAttribute("role", "navigation"); //$NON-NLS-1$ //$NON-NLS-2$
+				sideMenuList.setAttribute("aria-label", messages.navigationBar); //$NON-NLS-1$
 				this._sideMenuList = sideMenuList;
 
 				this._categoryInfos.forEach(function(categoryInfo) {
