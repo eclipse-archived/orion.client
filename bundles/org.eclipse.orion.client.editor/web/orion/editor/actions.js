@@ -28,7 +28,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		var offset = 0;
 		var editor = actions.editor;
 		var selections = editor.getSelections();
-		if (!noUndo && (compound || selections.length > 1)) actions.startUndo();
+		if (!noUndo && (compound || selections.length > 1)){ actions.startUndo(); }
 		function setText(text, start, end) {
 			editor.setText(text, start, end);
 			offset += (start - end) + text.length;
@@ -39,7 +39,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			callback(selection, setText);
 		});
 		editor.setSelections(selections);
-		if (!noUndo && (compound || selections.length > 1)) actions.endUndo();
+		if (!noUndo && (compound || selections.length > 1)){ actions.endUndo(); }
 	}
 
 	/**
@@ -97,7 +97,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				return false;
 			}.bind(this), {name: messages.redo});
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("f", true), "find"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("f", true), "find"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("find", function() { //$NON-NLS-0$
 				if (this._find) {
 					var selection = this.editor.getSelection();
@@ -107,7 +107,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				return false;
 			}.bind(this), {name: messages.find});
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true), "findNext"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true), "findNext"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("findNext", function(options) { //$NON-NLS-0$
 				if (this._find){
 					this._find.find(true, options);
@@ -116,7 +116,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				return false;
 			}.bind(this), {name: messages.findNext});
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true, true), "findPrevious"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true, true), "findPrevious"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("findPrevious", function(options) { //$NON-NLS-0$
 				if (this._find){
 					this._find.find(false, options);
@@ -125,7 +125,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				return false;
 			}.bind(this), {name: messages.findPrevious});
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("j", true), "incrementalFind"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("j", true), "incrementalFind"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("incrementalFind", function() { //$NON-NLS-0$
 				if (this._incrementalFind) {
 					this._incrementalFind.find(true);
@@ -133,7 +133,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				return true;
 			}.bind(this), {name: messages.incrementalFind});
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("j", true, true), "incrementalFindReverse"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("j", true, true), "incrementalFindReverse"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("incrementalFindReverse", function() { //$NON-NLS-0$
 				if (this._incrementalFind) {
 					this._incrementalFind.find(false);
@@ -169,12 +169,12 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				return this.copyLinesDown();
 			}.bind(this), {name: messages.copyLinesDown});
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding('d', true, false, false), "deleteLines"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding('d', true, false, false), "deleteLines"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("deleteLines", function(data) { //$NON-NLS-0$
 				return this.deleteLines(data);
 			}.bind(this), {name: messages.deleteLines});
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("l", !util.isMac, false, false, util.isMac), "gotoLine"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("l", !util.isMac, false, false, util.isMac), "gotoLine"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("gotoLine", function() { //$NON-NLS-0$
 				return this.gotoLine();
 			}.bind(this), {name: messages.gotoLine});
@@ -189,27 +189,27 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				return this.nextAnnotation(false);
 			}.bind(this), {name: messages.prevAnnotation});
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("e", true, false, true, false), "expand"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("e", true, false, true, false), "expand"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("expand", function() { //$NON-NLS-0$
 				return this.expandAnnotation(true);
 			}.bind(this), {name: messages.expand});
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("c", true, false, true, false), "collapse"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("c", true, false, true, false), "collapse"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("collapse", function() { //$NON-NLS-0$
 				return this.expandAnnotation(false);
 			}.bind(this), {name: messages.collapse});
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("e", true, true, true, false), "expandAll"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("e", true, true, true, false), "expandAll"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("expandAll", function() { //$NON-NLS-0$
 				return this.expandAnnotations(true);
 			}.bind(this), {name: messages.expandAll});
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("c", true, true, true, false), "collapseAll"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("c", true, true, true, false), "collapseAll"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("collapseAll", function() { //$NON-NLS-0$
 				return this.expandAnnotations(false);
 			}.bind(this), {name: messages.collapseAll});
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("q", !util.isMac, false, false, util.isMac), "lastEdit"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("q", !util.isMac, false, false, util.isMac), "lastEdit"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("lastEdit", function() { //$NON-NLS-0$
 				return this.gotoLastEdit();
 			}.bind(this), {name: messages.lastEdit});
@@ -345,36 +345,40 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var model = editor.getModel();
 			var offset = 0;
 			var selections = editor.getSelections();
-			if (selections.length > 1) this.startUndo();
-			if (selections.some(function(selection) {
-				selection.start += offset;
-				selection.end += offset;
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
-				if (firstLine !== lastLine || selections.length > 1) {
-					var lines = [];
-					lines.push("");
-					for (var i = firstLine; i <= lastLine; i++) {
-						lines.push(model.getLine(i, true));
+			if (selections.length > 1) { this.startUndo(); }
+			if (selections.some(
+				function(selection) {
+					selection.start += offset;
+					selection.end += offset;
+					var firstLine = model.getLineAtOffset(selection.start);
+					var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+					if (firstLine !== lastLine || selections.length > 1) {
+						var lines = [];
+						lines.push("");
+						for (var i = firstLine; i <= lastLine; i++) {
+							lines.push(model.getLine(i, true));
+						}
+						var lineStart = model.getLineStart(firstLine);
+						var lineEnd = model.getLineEnd(lastLine, true);
+						var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-2$
+						var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-2$
+						var text = lines.join(tab);
+						editor.setText(text, lineStart, lineEnd);
+						var start = lineStart === selection.start ? selection.start : selection.start + tab.length;
+						var end = selection.end + ((lastLine - firstLine + 1) * tab.length);
+						offset += (lineStart - lineEnd) + text.length;
+						selection.start = start;
+						selection.end = end;
+					} else {
+						return true;
 					}
-					var lineStart = model.getLineStart(firstLine);
-					var lineEnd = model.getLineEnd(lastLine, true);
-					var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
-					var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
-					var text = lines.join(tab);
-					editor.setText(text, lineStart, lineEnd);
-					var start = lineStart === selection.start ? selection.start : selection.start + tab.length;
-					var end = selection.end + ((lastLine - firstLine + 1) * tab.length);
-					offset += (lineStart - lineEnd) + text.length;
-					selection.start = start;
-					selection.end = end;
-				} else {
-					return true;
+					return false;
 				}
+			)){
 				return false;
-			})) return false;
+			}
 			editor.setSelections(selections);
-			if (selections.length > 1) this.endUndo();
+			if (selections.length > 1) { this.endUndo(); }
 			return true;
 		},
 		gotoLastEdit: function() {
@@ -508,7 +512,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 							var tooltipCoords = view.convert({
 								x: view.getLocationAtOffset(foundAnnotation.start).x,
 								y: view.getLocationAtOffset(model.getLineStart(nextLine)).y
-							}, "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
+							}, "document", "page"); //$NON-NLS-1$ //$NON-NLS-2$
 							return {
 								contents: foundAnnotations,
 								x: tooltipCoords.x,
@@ -603,7 +607,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				return this.autoIndent();
 			}.bind(this));
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("t", true, false, true), "trimTrailingWhitespaces"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("t", true, false, true), "trimTrailingWhitespaces"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("trimTrailingWhitespaces", function() { //$NON-NLS-0$
 				return this.trimTrailingWhitespaces();
 			}.bind(this), {name: messages.trimTrailingWhitespaces});
@@ -624,59 +628,59 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			}.bind(this), {name: messages.removeBlockComment});
 
 			// Autocomplete square brackets []
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("[", false, false, false, false, "keypress"), "autoPairSquareBracket"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("[", false, false, false, false, "keypress"), "autoPairSquareBracket"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("autoPairSquareBracket", function() { //$NON-NLS-0$
-				return this.autoPairBrackets("[", "]"); //$NON-NLS-1$ //$NON-NLS-0$
+				return this.autoPairBrackets("[", "]"); //$NON-NLS-1$ //$NON-NLS-2$
 			}.bind(this));
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding(']', false, false, false, false, "keypress"), "skipClosingSquareBracket"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(']', false, false, false, false, "keypress"), "skipClosingSquareBracket"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("skipClosingSquareBracket", function() { //$NON-NLS-0$
 				return this.handleClosingBracket(']'); //$NON-NLS-0$
 			}.bind(this));
 
 			// Autocomplete angle brackets <>
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("<", false, false, false, false, "keypress"), "autoPairAngleBracket"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("<", false, false, false, false, "keypress"), "autoPairAngleBracket"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("autoPairAngleBracket", function() { //$NON-NLS-0$
-				return this.autoPairBrackets("<", ">"); //$NON-NLS-1$ //$NON-NLS-0$
+				return this.autoPairBrackets("<", ">"); //$NON-NLS-1$ //$NON-NLS-2$
 			}.bind(this));
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding('>', false, false, false, false, "keypress"), "skipClosingAngleBracket"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding('>', false, false, false, false, "keypress"), "skipClosingAngleBracket"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("skipClosingAngleBracket", function() { //$NON-NLS-0$
 				return this.handleClosingBracket('>'); //$NON-NLS-0$
 			}.bind(this));
 
 			// Autocomplete parentheses ()
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("(", false, false, false, false, "keypress"), "autoPairParentheses"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("(", false, false, false, false, "keypress"), "autoPairParentheses"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("autoPairParentheses", function() { //$NON-NLS-0$
-				return this.autoPairBrackets("(", ")"); //$NON-NLS-1$ //$NON-NLS-0$
+				return this.autoPairBrackets("(", ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}.bind(this));
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding(')', false, false, false, false, "keypress"), "skipClosingParenthesis"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(')', false, false, false, false, "keypress"), "skipClosingParenthesis"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("skipClosingParenthesis", function() { //$NON-NLS-0$
 				return this.handleClosingBracket(")"); //$NON-NLS-0$
 			}.bind(this));
 
 			// Autocomplete braces {}
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("{", false, false, false, false, "keypress"), "autoPairBraces"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("{", false, false, false, false, "keypress"), "autoPairBraces"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("autoPairBraces", function() { //$NON-NLS-0$
-				return this.autoPairBrackets("{", "}"); //$NON-NLS-1$ //$NON-NLS-0$
+				return this.autoPairBrackets("{", "}"); //$NON-NLS-1$ //$NON-NLS-2$
 			}.bind(this));
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding('}', false, false, false, false, "keypress"), "skipClosingBrace"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding('}', false, false, false, false, "keypress"), "skipClosingBrace"); //$NON-NLS-1$ //$NON-NLS-2$
 			textView.setAction("skipClosingBrace", function() { //$NON-NLS-0$
 				return this.handleClosingBracket("}"); //$NON-NLS-0$
 			}.bind(this));
 
 			// Autocomplete single quotations
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("'", false, false, false, false, "keypress"), "autoPairSingleQuotation"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("'", false, false, false, false, "keypress"), "autoPairSingleQuotation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			textView.setAction("autoPairSingleQuotation", function() { //$NON-NLS-0$
-				return this.autoPairQuotations("'"); //$NON-NLS-1$ //$NON-NLS-0$
+				return this.autoPairQuotations("'"); //$NON-NLS-1$ //$NON-NLS-2$
 			}.bind(this));
 
 			// Autocomplete double quotations
-			textView.setKeyBinding(new mKeyBinding.KeyBinding('"', false, false, false, false, "keypress"), "autoPairDblQuotation"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding('"', false, false, false, false, "keypress"), "autoPairDblQuotation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			textView.setAction("autoPairDblQuotation", function() { //$NON-NLS-0$
-				return this.autoPairQuotations('"'); //$NON-NLS-1$ //$NON-NLS-0$
+				return this.autoPairQuotations('"'); //$NON-NLS-1$ //$NON-NLS-2$
 			}.bind(this));
 
 			textView.setAction("deletePrevious", function() { //$NON-NLS-0$
@@ -689,8 +693,8 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 			if (textView.getOptions("singleMode")) { return false; } //$NON-NLS-0$
 			var model = editor.getModel();
-			var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
-			var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
+			var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-2$
+			var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-2$
 			var lineDelimiter = model.getLineDelimiter();
 			var matchCommentStart = /^[\s]*\/\*[\*]*[\s]*$/;
 			var matchCommentDelimiter = /^[\s]*\*/;
@@ -818,7 +822,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var textView = editor.getTextView();
 			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 			var model = editor.getModel();
-			var open = "/*", close = "*/", commentTags = new RegExp("/\\*" + "|" + "\\*/", "g"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var open = "/*", close = "*/", commentTags = new RegExp("/\\*" + "|" + "\\*/", "g"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-2$
 			var self = this;
 			forEachSelection(this, false, function(selection, setText) {
 				var result = self._findEnclosingComment(model, selection.start, selection.end);
@@ -994,19 +998,19 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				var prevChar = (selection.start === 0) ? "" : model.getText(selection.start - 1, selection.start); //$NON-NLS-0$
 				var nextChar = (selection.start === model.getCharCount()) ? "" : model.getText(selection.start, selection.start + 1); //$NON-NLS-0$
 	
-				if ((prevChar === "(" && nextChar === ")") || //$NON-NLS-1$ //$NON-NLS-0$
-					(prevChar === "[" && nextChar === "]") || //$NON-NLS-1$ //$NON-NLS-0$
-					(prevChar === "{" && nextChar === "}") || //$NON-NLS-1$ //$NON-NLS-0$
-					(prevChar === "<" && nextChar === ">") || //$NON-NLS-1$ //$NON-NLS-0$
-					(prevChar === '"' && nextChar === '"') || //$NON-NLS-1$ //$NON-NLS-0$
-					(prevChar === "'" && nextChar === "'")) { //$NON-NLS-1$ //$NON-NLS-0$
+				if ((prevChar === "(" && nextChar === ")") || //$NON-NLS-1$ //$NON-NLS-2$
+					(prevChar === "[" && nextChar === "]") || //$NON-NLS-1$ //$NON-NLS-2$
+					(prevChar === "{" && nextChar === "}") || //$NON-NLS-1$ //$NON-NLS-2$
+					(prevChar === "<" && nextChar === ">") || //$NON-NLS-1$ //$NON-NLS-2$
+					(prevChar === '"' && nextChar === '"') || //$NON-NLS-1$ //$NON-NLS-2$
+					(prevChar === "'" && nextChar === "'")) { //$NON-NLS-1$ //$NON-NLS-2$
 					setText("", selection.start, selection.start + 1); //$NON-NLS-0$
 				}
 			}, true);
 			return false;
 		},
 		_findEnclosingComment: function(model, start, end) {
-			var open = "/*", close = "*/"; //$NON-NLS-1$ //$NON-NLS-0$
+			var open = "/*", close = "*/"; //$NON-NLS-1$ //$NON-NLS-2$
 			var firstLine = model.getLineAtOffset(start);
 			var lastLine = model.getLineAtOffset(end);
 			var i, line, extent, openPos, closePos;
@@ -1066,7 +1070,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var textView = editor.getTextView();
 			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 			var model = editor.getModel();
-			var open = "/*", close = "*/"; //$NON-NLS-1$ //$NON-NLS-0$
+			var open = "/*", close = "*/"; //$NON-NLS-1$ //$NON-NLS-2$
 			var self  = this;
 			forEachSelection(this, false, function(selection, setText) {
 
@@ -1239,7 +1243,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 							} else if (line.indexOf(spaceTab) === 0) {
 								line = line.substring(tabSize);
 								model.setText(line, lineStart, lineEnd);
-								editor.setSelection(selections[0].start-1, selections[0].end-1);
+								editor.setSelection(selections[0].start-tabSize, selections[0].end-tabSize);
 								return false;
 							}
 						}
