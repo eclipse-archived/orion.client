@@ -60,6 +60,11 @@ define([
 			        proposal.style = 'emphasis'; //$NON-NLS-1$
 					this.removePrefix(prefix, proposal);
 					proposal.kind = 'js'; //$NON-NLS-1$
+					if (kind.kind === 'jsdoc' || kind.kind === 'doc'){
+						proposal.tags = [{content: '/*', cssClass: 'iconTagGreen'}]; //$NON-NLS-1$ //$NON-NLS-2$
+					} else if (!proposal.tags){
+						proposal.tags = [{content: 'T', cssClass: 'iconTagBlue'}]; //$NON-NLS-1$ //$NON-NLS-2$
+					}
 					proposals.push(proposal);
 				}
 			}
@@ -285,7 +290,8 @@ define([
             								description: Messages['funcProposalDescription'],
             								style: 'emphasis', //$NON-NLS-1$
             								overwrite: true,
-            								kind: 'js' //$NON-NLS-1$
+            								kind: 'js', //$NON-NLS-1$
+            								tags: [{content: '/*', cssClass: 'iconTagGreen'}] //$NON-NLS-1$ //$NON-NLS-2$
         							    });
     							}
         	                   } else if((val = /\s*\*\s*\@param\s*(?:\{\w*\})?\s*(\w*)/ig.exec(params.line)) !== null) {
@@ -302,7 +308,8 @@ define([
                         								description: Messages['funcParamProposalDescription'],
                         								style: 'emphasis', //$NON-NLS-1$
                         								overwrite: true,
-                        								kind: 'js' //$NON-NLS-1$
+                        								kind: 'js', //$NON-NLS-1$
+                        								tags: [{content: '/*', cssClass: 'iconTagGreen'}] //$NON-NLS-1$ //$NON-NLS-2$
                     							    });
                 							    }
         	                               }
@@ -332,7 +339,8 @@ define([
 								prefix: params.prefix,
 								style: 'emphasis', //$NON-NLS-1$
 								overwrite: true,
-								kind: 'js' //$NON-NLS-1$
+								kind: 'js', //$NON-NLS-1$
+								tags: [{content: '/*', cssClass: 'iconTagGreen'}] //$NON-NLS-1$ //$NON-NLS-2$
 						    };
 						    var hover = rule.description ? rule.description : '';
 						    if(rule.url) {
@@ -356,7 +364,8 @@ define([
 								description: Messages['eslintEnvProposalDescription'],
 								style: 'emphasis', //$NON-NLS-1$
 								overwrite: true,
-								kind: 'js' //$NON-NLS-1$
+								kind: 'js', //$NON-NLS-1$
+								tags: [{content: '/*', cssClass: 'iconTagGreen'}] //$NON-NLS-1$ //$NON-NLS-2$
 						    });
 	                    }
 	                }
@@ -572,13 +581,16 @@ define([
             relevance: 100,
             style: 'emphasis', //$NON-NLS-1$
             overwrite: true,
-            kind: 'js' //$NON-NLS-1$
+            kind: 'js', //$NON-NLS-1$
+            tags: [{cssClass: 'iconTagYellow'}] //$NON-NLS-1$
         };
         proposal.name = proposal.proposal = completion.name;
         if(typeof(completion.type) !== 'undefined') {
             if(/^fn/.test(completion.type)) {
+            	proposal.tags = [{content: 'F', cssClass: 'iconTagPurple'}]; //$NON-NLS-1$ //$NON-NLS-2$
             	calculateFunctionProposal(completion, args, proposal);
             } else if(completion.type === 'template') {
+            	proposal.tags = [{content: 'T', cssClass: 'iconTagBlue'}]; //$NON-NLS-1$ //$NON-NLS-2$
             	var _t = new mTemplates.Template(args.params.prefix, completion.description, completion.template, completion.name);
             	var _prop = _t.getProposal(args.params.prefix, args.params.offset, {});
             	var obj = Object.create(null);
@@ -594,9 +606,11 @@ define([
             	proposal.relevance -= 2; //103
             	//proposal.style = 'noemphasis_keyword';//$NON-NLS-1$
             	proposal.description = Messages['keywordProposalDescription'];
+            	proposal.tags = [{content: 'K', cssClass: 'iconTagOrange'}]; //$NON-NLS-1$ //$NON-NLS-2$
             	completion.doc = Messages['keywordHoverProposal'];
             	completion.url = getKeywordLink(proposal.name);
             } else {
+            	proposal.tags = [{content: 'T', cssClass: 'iconTagGray'}]; //$NON-NLS-1$ //$NON-NLS-2$
     		    proposal.description = convertTypes(' : ' + completion.type); //$NON-NLS-1$
 		    }
         }
