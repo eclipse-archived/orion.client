@@ -218,6 +218,7 @@ define([
     	it('Close tag </ whitespace after 3', function() {
     		var _o = setup({buffer: '<a></\n'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 6}).then(function(proposals) {
+    			assertTagProposals(proposals);
     		});
     	});
     	it('Close tag / 1', function() {
@@ -408,7 +409,6 @@ define([
     			assertProposals(proposals, []);
     		});
     	});
-    	// TODO 
     	it('Offsets within tags proposals 1', function() {
     		var _o = setup({buffer: '<zzz href="" ></zzz>'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 13}).then(function(proposals) {
