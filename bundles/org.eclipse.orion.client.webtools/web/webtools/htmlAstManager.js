@@ -54,8 +54,17 @@ define([
 	    onclosetag: function(tagname, range){
 	    	var tag = this._getLastTag();
 	    	if(tag && tag.name === tagname) {
-	    		tag.range[1] = range[1];
-	    		tag.endrange = range;
+	    		if (range){
+	    			tag.range[1] = range[1];
+	    			tag.endrange = range;
+    			} else {
+    				// No matching closing tag
+    				// TODO Need to add tests for this, can it have children as well as text?
+    				if (tag.openrange && tag.text){
+    					tag.range[1] = tag.openrange[1] + tag.text.value.length;
+    					tag.endrange = [tag.range[1], tag.range[1]];
+    				}	
+    			}
 	    		this.tagstack.pop();
 	    	}
 	    },
