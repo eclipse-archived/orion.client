@@ -116,6 +116,7 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 				var sideMenuList = document.createElement("ul"); //$NON-NLS-0$
 				sideMenuList.classList.add("sideMenuList"); //$NON-NLS-0$
 				sideMenuList.setAttribute("role", "navigation"); //$NON-NLS-1$ //$NON-NLS-2$
+				sideMenuList.setAttribute("aria-label", "Navigation bar"); //$NON-NLS-1$
 				this._sideMenuList = sideMenuList;
 
 				this._categoryInfos.forEach(function(categoryInfo) {
