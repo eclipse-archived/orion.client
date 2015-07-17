@@ -31,7 +31,8 @@
 			}
 		</style>
 	    <link rel="stylesheet" type="text/css" href="editorBuild/code_edit/built-codeEdit.css"/>
-		<script src="editorBuild/code_edit/built-codeEdit.js"></script>
+	    <link rel="stylesheet" type="text/css" href="custom.css"/>
+		<script src="editorBuild/code_edit/built-codeEdit.min.js"></script>
 		<script>
 			/*globals orion */
 			var contents = 'var foo = "bar";\n' +
@@ -77,14 +78,14 @@
 				computeProposals: function(buffer, offset, context) {
 					var result = [];
 					for(var i = 0; i < proposals.length; i++){
-						result.push(proposals[i] + i);  
+						result.push(proposals[i] + i);
 					}
 					return result;
 				}
 			};
 			var hoverProvider = {
 				computeHoverInfo: function (editorContext, context) {
-					var pContent = "_This text will be italic_  \n\nabcdef  \n__This text will be bold__";
+					var pContent = "_This text will be italic_  \n\n__This text will be bold__  \nThis text is normal";
 					if(typeof context.offset === "number") {
 						return context.offset > 12 ? {
 							title: "This is the title",
@@ -93,7 +94,7 @@
 					} else if(typeof context.proposal === "string") {
 						var index = parseInt(context.proposal.substring("proposal ".length - 1), 10);
 						return index > -1 ? {
-							title: "This is the title",
+							title: "The tile is bold with customized css",
 							content: pContent,
 							type: "markdown"} : {};
 					}
