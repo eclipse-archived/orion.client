@@ -32,7 +32,7 @@ define(["orion/Deferred", "orion/commands", "orion/contentTypes", "orion/URITemp
 	    var temp = item.constructor(); // changed
 	
 	    for(var key in item){
-			if(key!=="children" && key!=="Children") { //$NON-NLS-1$ //$NON-NLS-0$
+			if(key!=="children" && key!=="Children" && key!=="parent" && key!=="Project") { //$NON-NLS-1$ //$NON-NLS-0$
 				temp[key] = clone(item[key]);
 			}
 	    }
