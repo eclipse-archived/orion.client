@@ -1138,13 +1138,13 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var document = parent.ownerDocument;
 			var div = util.createElement(document, "div"); //$NON-NLS-0$
 			div.id = "contentoption" + itemIndex; //$NON-NLS-0$
-			div.setAttribute("role", "option"); //$NON-NLS-1$ //$NON-NLS-0$
+			div.setAttribute("role", "option"); //$NON-NLS-1$ //$NON-NLS-2$
 			div.className = STYLES[proposal.style] ? STYLES[proposal.style] : STYLES.dfault;
 			var node;
 			if (proposal.style === "hr") { //$NON-NLS-0$
 				node = util.createElement(document, "hr"); //$NON-NLS-0$
 			} else {
-				node = this._createDisplayNode(div, proposal, itemIndex);
+				node = this._createDisplayNode(proposal, itemIndex);
 				div.contentAssistProposalIndex = itemIndex; // make div clickable
 			}
 			div.appendChild(node);
@@ -1181,40 +1181,48 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			});
 		},
 		/** @private */
-		_createDisplayNode: function(div, proposal, index) {
-			var node = null;
-			var plainString = null;
+		_createDisplayNode: function(proposal, index) {
+			var node = document.createElement("span"); //$NON-NLS-0$
 			
-			if (typeof proposal === "string") { //$NON-NLS-0$
-				//for simple string content assist, the display string is just the proposal
-				plainString = proposal;
-			} else if (proposal.description && typeof proposal.description === "string") { //$NON-NLS-0$
-				if (proposal.name && typeof proposal.name === "string") { //$NON-NLS-0$
-					var tagsNode = this._createTagsNode(proposal.tags);
-					var nameNode = this._createNameNode(proposal.name);
-					nameNode.contentAssistProposalIndex = index;
-					var descriptionNode = document.createTextNode(proposal.description);
-					
-					node = document.createElement("span"); //$NON-NLS-0$
-					if (tagsNode) { node.appendChild(tagsNode); }
-					node.appendChild(nameNode);
-					node.appendChild(descriptionNode);
-					
-				} else {
-					plainString = proposal.description;
-				}
+			if (!proposal){
+				return node;
+			}
+			
+			if (typeof proposal === "string"){
+				var simpleName = this._createNameNode(proposal);
+				simpleName.contentAssistProposalIndex = index;
+				return simpleName;
+			}
+			
+			var nameNode;
+			var usingDescription; // Proposals are allowed to use the description as the name
+			if (proposal.name && typeof proposal.name === "string") {
+				nameNode = this._createNameNode(proposal.name);
+			} else if (proposal.description && typeof proposal.description === "string"){
+				nameNode = this._createNameNode(proposal.description);
+				usingDescription = true;
+			} else if (proposal.proposal && typeof proposal.proposal === "string"){
+				nameNode = this._createNameNode(proposal.proposal);
 			} else {
-				//by default return the straight proposal text
-				plainString = proposal.proposal;
+				// Must have a name
+				return node;
 			}
 			
-			if (plainString) {
-				node = this._createNameNode(plainString);
-			}
+			var tagsNode = this._createTagsNode(proposal.tags);
 			
+			var descriptionNode;
+			if (!usingDescription && proposal.description && typeof proposal.description === "string") {
+				descriptionNode = document.createTextNode(proposal.description);
+			}
+
+			if (tagsNode) { node.appendChild(tagsNode); }
+			node.appendChild(nameNode);
+			if (descriptionNode) { node.appendChild(descriptionNode); }
+
+			nameNode.contentAssistProposalIndex = index;
 			node.contentAssistProposalIndex = index;
 			
-			return node;
+			return node;		
 		},
 		/** @private */
 		_stopResizeTimer: function() {
