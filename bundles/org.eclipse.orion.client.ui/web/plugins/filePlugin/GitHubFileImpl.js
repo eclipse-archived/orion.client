@@ -22,12 +22,17 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 	var use_gravatar_id = true;
 	function GitHubFileImpl(repoURL, token) {
 		this._originalRepoURL = repoURL;//Used for reference in error message to indicate a repo URL
-		var found = repoURL.match(/https\:\/\/github\.com(?:\:443)?\/([^/]+)\/([^/]+).git$/);
+		var found = repoURL.match(/^(https\:\/\/(.*github.*\.com)(?:\:443)?\/)([^\/]+)\/([^\/]+).git$/);
 		if (!found) {
 			throw "Bad Github repository url " + repoURL;
 		}
-		this._repoURL = new URL("https://api.github.com/repos/" + found[1] + "/" + found[2]);
-		this._commitURLBase = "https://github.com/" + found[1] + "/" + found[2] + "/commit/";
+		var url = new URL(window.location.href);
+		var apiURL = url.origin + "/githubapi/github";
+		if (found[2] === "github.ibm.com") {
+			apiURL = url.origin + "/githubapi/githubibm";
+		}
+		this._repoURL = new URL(apiURL + "/repos/" + found[3] + "/" + found[4]);
+		this._commitURLBase = found[1] + found[3] + "/" + found[4] + "/commit/";
 		this._contentsPath = this._repoURL.pathname + "/contents";
 		this._headers = {
 			"Accept": "application/vnd.github.v3+json"
