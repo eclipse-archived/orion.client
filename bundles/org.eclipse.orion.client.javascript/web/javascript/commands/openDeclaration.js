@@ -57,9 +57,9 @@ define([
 					} else {
 						deferred.resolve(cachedContext.setStatus(Messages['noDeclFound']));
 					}
+					this.doMe = false;
 				}
 			}
-			this.doMe = false;
 		}.bind(this));
 		this.timeout = null;
 	}
