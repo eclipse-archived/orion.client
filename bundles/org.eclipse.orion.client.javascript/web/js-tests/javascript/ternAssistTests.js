@@ -300,12 +300,14 @@ define([
 					['RegExp(source, flags?)', ''],
 					['String(value)', 'String(value) : string'],
 					['SyntaxError(message)', ''],
+					['TypeError(message)', ''],
 					['URIError(message)', ''],
 					['decodeURI(uri)', 'decodeURI(uri) : string'],
 					['decodeURIComponent(uri)', 'decodeURIComponent(uri) : string'],
 					['encodeURI(uri)', 'encodeURI(uri) : string'],
 					['encodeURIComponent(uri)', 'encodeURIComponent(uri) : string'],
 					['eval(code)', 'eval(code)'],
+					['isFinite(value)', 'isFinite(value) : bool'],
 					['isNaN(value)', 'isNaN(value) : bool'],
 					['parseFloat(string)', 'parseFloat(string) : number'],
 					['parseInt(string, radix?)', 'parseInt(string, radix?) : number'],
@@ -313,7 +315,27 @@ define([
 					['JSON', 'JSON : JSON'],
 					['Math', 'Math : Math'],
 					['NaN', 'NaN : number'],
-					['undefined', 'undefined : any']
+					['undefined', 'undefined : any'],
+					['', 'ecma6'],
+					['ArrayBuffer(length)', ''],
+					['DataView(buffer, byteOffset?, byteLength?)', ''],
+					['Float32Array(length)', ''],
+					['Float64Array(length)', ''],
+					['Int16Array(length)', ''],
+					['Int32Array(length)', ''],
+					['Int8Array(length)', ''],
+					['Map(iterable?)', ''],
+					['Promise(executor)', ''],
+					['Proxy(target, handler)', ''],
+					['Set(iterable)', ''],
+					['Symbol(description?)', ''],
+					['TypedArray(length)', ''],
+					['Uint16Array()', ''],
+					['Uint32Array()', ''],
+					['Uint8Array()', ''],
+					['Uint8ClampedArray()', ''],
+					['WeakMap(iterable)', ''],
+					['WeakSet(iterable)', '']
 				]);
 			});
 			it("test Single Var Content Assist", function(done) {
@@ -341,12 +363,14 @@ define([
 					['RegExp(source, flags?)', ''],
 					['String(value)', 'String(value) : string'],
 					['SyntaxError(message)', ''],
+					['TypeError(message)', ''],
 					['URIError(message)', ''],
 					['decodeURI(uri)', 'decodeURI(uri) : string'],
 					['decodeURIComponent(uri)', 'decodeURIComponent(uri) : string'],
 					['encodeURI(uri)', 'encodeURI(uri) : string'],
 					['encodeURIComponent(uri)', 'encodeURIComponent(uri) : string'],
 					['eval(code)', 'eval(code)'],
+					['isFinite(value)', 'isFinite(value) : bool'],
 					['isNaN(value)', 'isNaN(value) : bool'],
 					['parseFloat(string)', 'parseFloat(string) : number'],
 					['parseInt(string, radix?)', 'parseInt(string, radix?) : number'],
@@ -354,7 +378,27 @@ define([
 					['JSON', 'JSON : JSON'],
 					['Math', 'Math : Math'],
 					['NaN', 'NaN : number'],
-					['undefined', 'undefined : any']
+					['undefined', 'undefined : any'],
+					['', 'ecma6'],
+					['ArrayBuffer(length)', ''],
+					['DataView(buffer, byteOffset?, byteLength?)', ''],
+					['Float32Array(length)', ''],
+					['Float64Array(length)', ''],
+					['Int16Array(length)', ''],
+					['Int32Array(length)', ''],
+					['Int8Array(length)', ''],
+					['Map(iterable?)', ''],
+					['Promise(executor)', ''],
+					['Proxy(target, handler)', ''],
+					['Set(iterable)', ''],
+					['Symbol(description?)', ''],
+					['TypedArray(length)', ''],
+					['Uint16Array()', ''],
+					['Uint32Array()', ''],
+					['Uint8Array()', ''],
+					['Uint8ClampedArray()', ''],
+					['WeakMap(iterable)', ''],
+					['WeakSet(iterable)', '']
 				]);
 			});
 			it("test Single Var Content Assist 2", function(done) {
@@ -382,12 +426,14 @@ define([
 					['RegExp(source, flags?)', ''],
 					['String(value)', 'String(value) : string'],
 					['SyntaxError(message)', ''],
+					['TypeError(message)', ''],
 					['URIError(message)', ''],
 					['decodeURI(uri)', 'decodeURI(uri) : string'],
 					['decodeURIComponent(uri)', 'decodeURIComponent(uri) : string'],
 					['encodeURI(uri)', 'encodeURI(uri) : string'],
 					['encodeURIComponent(uri)', 'encodeURIComponent(uri) : string'],
 					['eval(code)', 'eval(code)'],
+					['isFinite(value)', 'isFinite(value) : bool'],
 					['isNaN(value)', 'isNaN(value) : bool'],
 					['parseFloat(string)', 'parseFloat(string) : number'],
 					['parseInt(string, radix?)', 'parseInt(string, radix?) : number'],
@@ -395,7 +441,27 @@ define([
 					['JSON', 'JSON : JSON'],
 					['Math', 'Math : Math'],
 					['NaN', 'NaN : number'],
-					['undefined', 'undefined : any']
+					['undefined', 'undefined : any'],
+					['', 'ecma6'],
+					['ArrayBuffer(length)', ''],
+					['DataView(buffer, byteOffset?, byteLength?)', ''],
+					['Float32Array(length)', ''],
+					['Float64Array(length)', ''],
+					['Int16Array(length)', ''],
+					['Int32Array(length)', ''],
+					['Int8Array(length)', ''],
+					['Map(iterable?)', ''],
+					['Promise(executor)', ''],
+					['Proxy(target, handler)', ''],
+					['Set(iterable)', ''],
+					['Symbol(description?)', ''],
+					['TypedArray(length)', ''],
+					['Uint16Array()', ''],
+					['Uint32Array()', ''],
+					['Uint8Array()', ''],
+					['Uint8ClampedArray()', ''],
+					['WeakMap(iterable)', ''],
+					['WeakSet(iterable)', '']
 				]);
 			});
 			it("test multi var content assist 1", function(done) {
@@ -425,12 +491,14 @@ define([
 					['RegExp(source, flags?)', ''],
 					['String(value)', 'String(value) : string'],
 					['SyntaxError(message)', ''],
+					['TypeError(message)', ''],
 					['URIError(message)', ''],
 					['decodeURI(uri)', 'decodeURI(uri) : string'],
 					['decodeURIComponent(uri)', 'decodeURIComponent(uri) : string'],
 					['encodeURI(uri)', 'encodeURI(uri) : string'],
 					['encodeURIComponent(uri)', 'encodeURIComponent(uri) : string'],
 					['eval(code)', 'eval(code)'],
+					['isFinite(value)', 'isFinite(value) : bool'],
 					['isNaN(value)', 'isNaN(value) : bool'],
 					['parseFloat(string)', 'parseFloat(string) : number'],
 					['parseInt(string, radix?)', 'parseInt(string, radix?) : number'],
@@ -438,7 +506,27 @@ define([
 					['JSON', 'JSON : JSON'],
 					['Math', 'Math : Math'],
 					['NaN', 'NaN : number'],
-					['undefined', 'undefined : any']
+					['undefined', 'undefined : any'],
+					['', 'ecma6'],
+					['ArrayBuffer(length)', ''],
+					['DataView(buffer, byteOffset?, byteLength?)', ''],
+					['Float32Array(length)', ''],
+					['Float64Array(length)', ''],
+					['Int16Array(length)', ''],
+					['Int32Array(length)', ''],
+					['Int8Array(length)', ''],
+					['Map(iterable?)', ''],
+					['Promise(executor)', ''],
+					['Proxy(target, handler)', ''],
+					['Set(iterable)', ''],
+					['Symbol(description?)', ''],
+					['TypedArray(length)', ''],
+					['Uint16Array()', ''],
+					['Uint32Array()', ''],
+					['Uint8Array()', ''],
+					['Uint8ClampedArray()', ''],
+					['WeakMap(iterable)', ''],
+					['WeakSet(iterable)', '']
 				]);
 			});
 			it("test multi var content assist 2", function(done) {
@@ -478,12 +566,14 @@ define([
 					['RegExp(source, flags?)', ''],
 					['String(value)', 'String(value) : string'],
 					['SyntaxError(message)', ''],
+					['TypeError(message)', ''],
 					['URIError(message)', ''],
 					['decodeURI(uri)', 'decodeURI(uri) : string'],
 					['decodeURIComponent(uri)', 'decodeURIComponent(uri) : string'],
 					['encodeURI(uri)', 'encodeURI(uri) : string'],
 					['encodeURIComponent(uri)', 'encodeURIComponent(uri) : string'],
 					['eval(code)', 'eval(code)'],
+					['isFinite(value)', 'isFinite(value) : bool'],
 					['isNaN(value)', 'isNaN(value) : bool'],
 					['parseFloat(string)', 'parseFloat(string) : number'],
 					['parseInt(string, radix?)', 'parseInt(string, radix?) : number'],
@@ -491,7 +581,27 @@ define([
 					['JSON', 'JSON : JSON'],
 					['Math', 'Math : Math'],
 					['NaN', 'NaN : number'],
-					['undefined', 'undefined : any']
+					['undefined', 'undefined : any'],
+					['', 'ecma6'],
+					['ArrayBuffer(length)', ''],
+					['DataView(buffer, byteOffset?, byteLength?)', ''],
+					['Float32Array(length)', ''],
+					['Float64Array(length)', ''],
+					['Int16Array(length)', ''],
+					['Int32Array(length)', ''],
+					['Int8Array(length)', ''],
+					['Map(iterable?)', ''],
+					['Promise(executor)', ''],
+					['Proxy(target, handler)', ''],
+					['Set(iterable)', ''],
+					['Symbol(description?)', ''],
+					['TypedArray(length)', ''],
+					['Uint16Array()', ''],
+					['Uint32Array()', ''],
+					['Uint8Array()', ''],
+					['Uint8ClampedArray()', ''],
+					['WeakMap(iterable)', ''],
+					['WeakSet(iterable)', '']
 				]);
 			});
 			it("test multi function content assist 1", function(done) {
@@ -520,12 +630,14 @@ define([
 					['RegExp(source, flags?)', ''],
 					['String(value)', 'String(value) : string'],
 					['SyntaxError(message)', ''],
+					['TypeError(message)', ''],
 					['URIError(message)', ''],
 					['decodeURI(uri)', 'decodeURI(uri) : string'],
 					['decodeURIComponent(uri)', 'decodeURIComponent(uri) : string'],
 					['encodeURI(uri)', 'encodeURI(uri) : string'],
 					['encodeURIComponent(uri)', 'encodeURIComponent(uri) : string'],
 					['eval(code)', 'eval(code)'],
+					['isFinite(value)', 'isFinite(value) : bool'],
 					['isNaN(value)', 'isNaN(value) : bool'],
 					['parseFloat(string)', 'parseFloat(string) : number'],
 					['parseInt(string, radix?)', 'parseInt(string, radix?) : number'],
@@ -533,7 +645,27 @@ define([
 					['JSON', 'JSON : JSON'],
 					['Math', 'Math : Math'],
 					['NaN', 'NaN : number'],
-					['undefined', 'undefined : any']
+					['undefined', 'undefined : any'],
+					['', 'ecma6'],
+					['ArrayBuffer(length)', ''],
+					['DataView(buffer, byteOffset?, byteLength?)', ''],
+					['Float32Array(length)', ''],
+					['Float64Array(length)', ''],
+					['Int16Array(length)', ''],
+					['Int32Array(length)', ''],
+					['Int8Array(length)', ''],
+					['Map(iterable?)', ''],
+					['Promise(executor)', ''],
+					['Proxy(target, handler)', ''],
+					['Set(iterable)', ''],
+					['Symbol(description?)', ''],
+					['TypedArray(length)', ''],
+					['Uint16Array()', ''],
+					['Uint32Array()', ''],
+					['Uint8Array()', ''],
+					['Uint8ClampedArray()', ''],
+					['WeakMap(iterable)', ''],
+					['WeakSet(iterable)', '']
 				]);
 			});
 			it("test no dupe 1", function(done) {
@@ -630,7 +762,9 @@ define([
 				};
 				return testProposals(options, [
 					['', 'ecma5'],
-				    ["Array(size)", "Array(size)"]
+				    ["Array(size)", "Array(size)"],
+					['', 'ecma6'],
+					['ArrayBuffer(length)', ''],
 				]);
 			});
 			// all inferencing based content assist tests here
@@ -697,6 +831,7 @@ define([
 					["toExponential(digits)", "toExponential(digits) : string"],
 					["toFixed(digits)", "toFixed(digits) : string"],
 					["toLocaleString()", "toLocaleString() : string"],
+					['toPrecision(digits)', 'toPrecision(digits) : string'],
 					["toString(radix?)", "toString(radix?) : string"]
 				]);
 			});
@@ -758,6 +893,8 @@ define([
 					callback: done
 				};
 				return testProposals(options, [
+					['', 'ecma6'],
+					['codePointAt(pos)', 'codePointAt(pos) : number'],
 					['', 'ecma5'],
 					["concat(other)", "concat(other) : string"]
 				]);
@@ -872,9 +1009,9 @@ define([
 				return testProposals(options, [
 					["ii", "ii : number"],
 					['', 'ecma5'],
-					//["isFinite(num)", "isFinite(num) : bool"],
+					["isFinite(value)", "isFinite(value) : bool"],
 					["isNaN(value)", "isNaN(value) : bool"],
-					//["isPrototypeOf(object)", "isPrototypeOf(object) : bool"],
+					["isPrototypeOf(obj)", "isPrototypeOf(obj) : bool"],
 					//["Infinity", "Infinity : number"],
 				]);
 			});
@@ -888,9 +1025,9 @@ define([
 				return testProposals(options, [
 					["ii", "ii : number"],
 					['', 'ecma5'],
-					//["isFinite(num)", "isFinite(num) : bool"],
+					["isFinite(value)", "isFinite(value) : bool"],
 					["isNaN(value)", "isNaN(value) : bool"],
-					//["isPrototypeOf(object)", "isPrototypeOf(object) : bool"],
+					["isPrototypeOf(obj)", "isPrototypeOf(obj) : bool"],
 					//["Infinity", "Infinity : number"]
 				]);
 			});
@@ -904,9 +1041,9 @@ define([
 				return testProposals(options, [
 					["ii", "ii : number"],
 					['', 'ecma5'],
-					//["isFinite(num)", "isFinite(num) : bool"],
+					["isFinite(value)", "isFinite(value) : bool"],
 					["isNaN(value)", "isNaN(value) : bool"],
-					//["isPrototypeOf(object)", "isPrototypeOf(object) : bool"],
+					["isPrototypeOf(obj)", "isPrototypeOf(obj) : bool"],
 					//["Infinity", "Infinity : number"],
 				]);
 			});
@@ -971,8 +1108,8 @@ define([
 					callback: done
 				};
 				return testProposals(options, [
-					//TODO does not correctly infer Error
-					//["message", "message : string"]
+					['', 'ecma5'],
+					["message", "message : string"]
 				]);
 			});
 		});
@@ -991,6 +1128,7 @@ define([
 					callback: done};
 				return testProposals(options, [
 						//proposal, description
+						['', 'Keywords'],
 						["function", "function - Keyword"],
 						["", "Templates"], 
 						["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"]
@@ -1011,6 +1149,7 @@ define([
 				};
 				return testProposals(options, [
 						//proposal, description
+						['', 'Keywords'],
 						["function", "function - Keyword"],
 						["", "Templates"], 
 						["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
@@ -1031,6 +1170,7 @@ define([
 				};
 				return testProposals(options, [
 						//proposal, description
+						['', 'Keywords'],
 						["function", "function - Keyword"],
 						["", "Templates"], 
 						['ction(parameter) {\n\t\n}', 'function - member function expression'],
@@ -1051,6 +1191,7 @@ define([
 				};
 				return testProposals(options, [
 						//proposal, description
+						['', 'Keywords'],
 						["function", "function - Keyword"],
 						["", "Templates"], 
 						['ction(parameter) {\n\t\n}', 'function - member function expression'],
@@ -1071,6 +1212,7 @@ define([
 				};
 				return testProposals(options, [
 						//proposal, description
+						['', 'Keywords'],
 						["function", "function - Keyword"],
 						["", "Templates"], 
 						["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
@@ -1091,6 +1233,7 @@ define([
 				};
 				return testProposals(options, [
 						//proposal, description
+						['', 'Keywords'],
 						["this", "this - Keyword"],
 						['throw', 'throw - Keyword'],
 						['try', 'try - Keyword'],
@@ -1135,6 +1278,7 @@ define([
 				};
 				return testProposals(options, [
 						//proposal, description
+						['', 'Keywords'],
 						["new", "new - Keyword"]
 						]);
 			});

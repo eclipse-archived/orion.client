@@ -23,85 +23,87 @@
 })(/* @callback */ function(infer, tern, resolver) {
 
 	var templates = [
+	/* eslint-disable missing-nls */
 		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express", //$NON-NLS-0$
+			prefix: "express",
+			name: "express",
 			nodes: {top:true, member:false, prop:false},
-			description: " - Node.js require statement for Express", //$NON-NLS-0$
-			template: "var ${name} = require('express');" //$NON-NLS-0$
+			description: " - Node.js require statement for Express",
+			template: "var ${name} = require('express');"
 		},
 		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express app", //$NON-NLS-0$
-			description: " - create a new Express app", //$NON-NLS-0$
-			template: "var express = require('express');\n" + //$NON-NLS-0$
-					  "var ${app} = express();\n" +  //$NON-NLS-0$
-					  "${cursor}\n"+  //$NON-NLS-0$
-					  "app.listen(${timeout});\n"  //$NON-NLS-0$
+			prefix: "express",
+			name: "express app",
+			description: " - create a new Express app",
+			template: "var express = require('express');\n" +
+					  "var ${app} = express();\n" + 
+					  "${cursor}\n"+ 
+					  "app.listen(${timeout});\n"
 		},
 		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express configure", //$NON-NLS-0$
+			prefix: "express",
+			name: "express configure",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create an Express app configure statement", //$NON-NLS-0$
-			template: "app.configure(function() {\n" +  //$NON-NLS-0$
-  					  "\tapp.set(${id}, ${value});\n" +  //$NON-NLS-0$
-					  "});"  //$NON-NLS-0$
+			description: " - create an Express app configure statement",
+			template: "app.configure(function() {\n" + 
+  					  "\tapp.set(${id}, ${value});\n" + 
+					  "});"
 		},
 		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express specific configure", //$NON-NLS-0$
+			prefix: "express",
+			name: "express specific configure",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a specific Express app configure statement", //$NON-NLS-0$
-			template: "app.configure(${name}, function() {\n" +  //$NON-NLS-0$
-  					  "\tapp.set(${id}, ${value});\n" +  //$NON-NLS-0$
-					  "});"  //$NON-NLS-0$
+			description: " - create a specific Express app configure statement",
+			template: "app.configure(${name}, function() {\n" + 
+  					  "\tapp.set(${id}, ${value});\n" + 
+					  "});"
 		},
 		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express app get", //$NON-NLS-0$
+			prefix: "express",
+			name: "express app get",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app.get call", //$NON-NLS-0$
-			template: "var value = app.get(${id}, function(request, result){\n" + //$NON-NLS-0$
-					  "\t${cursor}\n});\n"  //$NON-NLS-0$
+			description: " - create a new Express app.get call",
+			template: "var value = app.get(${id}, function(request, result){\n" +
+					  "\t${cursor}\n});\n"
 		},
 		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express app set", //$NON-NLS-0$
+			prefix: "express",
+			name: "express app set",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app set call", //$NON-NLS-0$
-			template: "app.set(${id}, ${value});\n"  //$NON-NLS-0$
+			description: " - create a new Express app set call",
+			template: "app.set(${id}, ${value});\n"
 		},
 		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express app use", //$NON-NLS-0$
+			prefix: "express",
+			name: "express app use",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app use statement", //$NON-NLS-0$
-			template: "app.use(${fnOrObject});\n" //$NON-NLS-0$
+			description: " - create a new Express app use statement",
+			template: "app.use(${fnOrObject});\n"
 		},
 		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express app engine", //$NON-NLS-0$
+			prefix: "express",
+			name: "express app engine",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app engine statement", //$NON-NLS-0$
-			template: "app.engine(${fnOrObject});\n" //$NON-NLS-0$
+			description: " - create a new Express app engine statement",
+			template: "app.engine(${fnOrObject});\n"
 		},
 		{
-		    prefix: "express", //$NON-NLS-0$
-			name: "express app param", //$NON-NLS-0$
+		    prefix: "express",
+			name: "express app param",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app param statement", //$NON-NLS-0$
-			template: "app.param(${id}, ${value});\n" //$NON-NLS-0$
+			description: " - create a new Express app param statement",
+			template: "app.param(${id}, ${value});\n"
 		},
 		{
-			prefix: "express", //$NON-NLS-0$
-			name: "express app error use", //$NON-NLS-0$
+			prefix: "express",
+			name: "express app error use",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app error handling use statement", //$NON-NLS-0$
-			template: "app.use(function(error, request, result, next) {\n" +  //$NON-NLS-0$
-  					  "\tresult.send(${code}, ${message});\n" +  //$NON-NLS-0$
-					  "});\n" //$NON-NLS-0$
+			description: " - create a new Express app error handling use statement",
+			template: "app.use(function(error, request, result, next) {\n" + 
+  					  "\tresult.send(${code}, ${message});\n" + 
+					  "});\n"
 		}
+		/* eslint-enable missing-nls */
 	];
 	
 	/**
@@ -109,8 +111,8 @@
 	 * @since 9.0
 	 * @callback
 	 */
-	function getTemplates(file, query, completions) {
-		var wordEnd = tern.resolvePos(file, query.end);
+	function getTemplates(file, start, end, completions) {
+		var wordEnd = tern.resolvePos(file, end);
 		var expr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope);
 		var tmps = resolver.getTemplatesForNode(templates, expr);
 		if(tmps && tmps.length > 0) {
@@ -128,7 +130,7 @@
 	    return {
 	      defs : defs,
 	      passes: {
-	      	completion: getTemplates
+	      	variableCompletion: getTemplates
 	      }
 	    };
 	});

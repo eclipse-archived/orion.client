@@ -23,43 +23,45 @@
 })(/* @callback */ function(infer, tern, resolver) {
 
 	var templates = [
+	/* eslint-disable missing-nls */
 		{
-			prefix: "postgres", //$NON-NLS-0$
-			name: "postgres", //$NON-NLS-0$
+			prefix: "postgres", 
+			name: "postgres", 
 			nodes: {top:true, member:false, prop:false},
-			description: " - Node.js require statement for Postgres DB", //$NON-NLS-0$
-			template: "var pg = require('pg');\n" //$NON-NLS-0$
+			description: " - Node.js require statement for Postgres DB", 
+			template: "var pg = require('pg');\n"
 		},
 		{
-			prefix: "postgres", //$NON-NLS-0$
-			name: "postgres client", //$NON-NLS-0$
+			prefix: "postgres", 
+			name: "postgres client", 
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Postgres DB client", //$NON-NLS-0$
-			template: "var pg = require('pg');\n" + //$NON-NLS-0$
-					  "var url = \"postgres://postgres:${port}@${host}/${database}\";\n" +  //$NON-NLS-0$
-					  "var ${client} = new pg.Client(url);\n"  //$NON-NLS-0$
+			description: " - create a new Postgres DB client", 
+			template: "var pg = require('pg');\n" + 
+					  "var url = \"postgres://postgres:${port}@${host}/${database}\";\n" +  
+					  "var ${client} = new pg.Client(url);\n"
 		},
 		{
-			prefix: "postgres", //$NON-NLS-0$
-			name: "postgres connect", //$NON-NLS-0$
+			prefix: "postgres", 
+			name: "postgres connect", 
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Postgres DB client and connect", //$NON-NLS-0$
-			template: "var pg = require('pg');\n" + //$NON-NLS-0$
-					  "var url = \"postgres://postgres:${port}@${host}/${database}\";\n" +  //$NON-NLS-0$
-					  "var ${client} = new pg.Client(url);\n" + //$NON-NLS-0$
-					  "${client}.connect(function(error) {\n" +  //$NON-NLS-0$
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-					  "});\n" //$NON-NLS-1$
+			description: " - create a new Postgres DB client and connect", 
+			template: "var pg = require('pg');\n" + 
+					  "var url = \"postgres://postgres:${port}@${host}/${database}\";\n" +  
+					  "var ${client} = new pg.Client(url);\n" + 
+					  "${client}.connect(function(error) {\n" +  
+					  "\t${cursor}\n" +  
+					  "});\n"
 		},
 		{
-			prefix: "postgres", //$NON-NLS-0$
-			name: "postgres query", //$NON-NLS-0$
+			prefix: "postgres", 
+			name: "postgres query", 
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Postgres DB query statement", //$NON-NLS-0$
-			template: "${client}.query(${sql}, function(error, result) {\n" + //$NON-NLS-0$
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-					  "});\n" //$NON-NLS-1$
+			description: " - create a new Postgres DB query statement", 
+			template: "${client}.query(${sql}, function(error, result) {\n" + 
+					  "\t${cursor}\n" +  
+					  "});\n"
 		}
+		/* eslint-enable missing-nls */
 	];
 	
 	/**
@@ -67,8 +69,8 @@
 	 * @since 9.0
 	 * @callback
 	 */
-	function getTemplates(file, query, completions) {
-		var wordEnd = tern.resolvePos(file, query.end);
+	function getTemplates(file, start, end, completions) {
+		var wordEnd = tern.resolvePos(file, end);
 		var expr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope);
 		var tmps = resolver.getTemplatesForNode(templates, expr);
 		if(tmps && tmps.length > 0) {
@@ -86,7 +88,7 @@
 	    return {
 	      defs : defs,
 	      passes: {
-	      	completion: getTemplates
+	      	variableCompletion: getTemplates
 	      }
 	    };
 	});

@@ -1,20 +1,6 @@
-/*******************************************************************************
- * @license
- * Copyright (c) 2015 Marijn Haverbeke and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- *
- * Contributors:
- *     IBM Corporation - Allow original AngularJS plugin to find files in Orion workspace
- *******************************************************************************/
-/*eslint-env node, amd*/
-/**
- * Tern type index and templates for Angular node support
- */
+/* eslint-disable */
 (function(mod) {
-  if (typeof exports === "object" && typeof module === "object") // CommonJS
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require("../lib/comment"),
                require("acorn/util/walk"));
   if (typeof define == "function" && define.amd) // AMD
@@ -23,7 +9,7 @@
 })(function(infer, tern, comment, walk) {
   "use strict";
 
-  var SetDoc = infer.constraint("doc", { //$NON-NLS-1$
+  var SetDoc = infer.constraint("doc", {
     addType: function(type) {
       if (!type.doc) type.doc = this.doc;
     }
@@ -35,7 +21,7 @@
   }
 
   Injector.prototype.get = function(name) {
-    if (name == "$scope") return new infer.Obj(globalInclude("$rootScope").getType(), "$scope"); //$NON-NLS-1$ //$NON-NLS-2$
+    if (name == "$scope") return new infer.Obj(globalInclude("$rootScope").getType(), "$scope");
     if (name in this.fields) return this.fields[name];
     var field = this.fields[name] = new infer.AVal;
     return field;
@@ -45,8 +31,8 @@
     var field = this.fields[name] || (this.fields[name] = new infer.AVal);
     if (!depth) field.local = true;
     if (!field.origin) field.origin = infer.cx().curOrigin;
-    if (typeof node === "string" && !field.span) field.span = node;
-    else if (node && typeof node === "object" && !field.originNode) field.originNode = node;
+    if (typeof node == "string" && !field.span) field.span = node;
+    else if (node && typeof node == "object" && !field.originNode) field.originNode = node;
     if (doc) { field.doc = doc; field.propagate(new SetDoc(doc)); }
     val.propagate(field);
     for (var i = 0; i < this.forward.length; ++i)
@@ -74,19 +60,19 @@
 
   function applyWithInjection(mod, fnType, node, asNew) {
     var deps = [];
-    if (node.type === "FunctionExpression") {
+    if (node.type == "FunctionExpression") {
       for (var i = 0; i < node.params.length; ++i)
         deps.push(getInclude(mod, node.params[i].name));
-    } else if (node.type === "ArrayExpression") {
-      for (i = 0; i < node.elements.length - 1; ++i) {
+    } else if (node.type == "ArrayExpression") {
+      for (var i = 0; i < node.elements.length - 1; ++i) {
         var elt = node.elements[i];
-        if (elt.type === "Literal" && typeof elt.value === "string")
+        if (elt.type == "Literal" && typeof elt.value == "string")
           deps.push(getInclude(mod, elt.value));
         else
           deps.push(infer.ANull);
       }
       var last = node.elements[node.elements.length - 1];
-      if (last && last.type === "FunctionExpression")
+      if (last && last.type == "FunctionExpression")
         fnType = last.body.scope.fnType;
     }
     var result = new infer.AVal;
@@ -101,7 +87,7 @@
     return result;
   }
 
-  infer.registerFunction("angular_callInject", function(argN) { //$NON-NLS-1$
+  infer.registerFunction("angular_callInject", function(argN) {
     return function(self, args, argNodes) {
       var mod = self.getType();
       if (mod && argNodes && argNodes[argN])
@@ -109,36 +95,36 @@
     };
   });
 
-  infer.registerFunction("angular_regFieldCall", function(self, args, argNodes) { //$NON-NLS-1$
+  infer.registerFunction("angular_regFieldCall", function(self, args, argNodes) {
     var mod = self.getType();
     if (mod && argNodes && argNodes.length > 1) {
       var result = applyWithInjection(mod, args[1], argNodes[1]);
-      if (mod.injector && argNodes[0].type === "Literal")
+      if (mod.injector && argNodes[0].type == "Literal")
         mod.injector.set(argNodes[0].value, result, argNodes[0].angularDoc, argNodes[0]);
     }
   });
 
-  infer.registerFunction("angular_regFieldNew", function(self, args, argNodes) { //$NON-NLS-1$
+  infer.registerFunction("angular_regFieldNew", function(self, args, argNodes) {
     var mod = self.getType();
     if (mod && argNodes && argNodes.length > 1) {
       var result = applyWithInjection(mod, args[1], argNodes[1], true);
-      if (mod.injector && argNodes[0].type === "Literal")
+      if (mod.injector && argNodes[0].type == "Literal")
         mod.injector.set(argNodes[0].value, result, argNodes[0].angularDoc, argNodes[0]);
     }
   });
 
-  infer.registerFunction("angular_regField", function(self, args, argNodes) { //$NON-NLS-1$
+  infer.registerFunction("angular_regField", function(self, args, argNodes) {
     var mod = self.getType();
-    if (mod && mod.injector && argNodes && argNodes[0] && argNodes[0].type === "Literal" && args[1])
+    if (mod && mod.injector && argNodes && argNodes[0] && argNodes[0].type == "Literal" && args[1])
       mod.injector.set(argNodes[0].value, args[1], argNodes[0].angularDoc, argNodes[0]);
   });
 
   function arrayNodeToStrings(node) {
     var strings = [];
-    if (node && node.type === "ArrayExpression")
+    if (node && node.type == "ArrayExpression")
       for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
-        if (elt.type === "Literal" && typeof elt.value === "string")
+        if (elt.type == "Literal" && typeof elt.value == "string")
           strings.push(elt.value);
       }
     return strings;
@@ -146,7 +132,7 @@
 
   function moduleProto(cx) {
     var ngDefs = cx.definitions.angular;
-    return ngDefs && ngDefs.Module.getProp("prototype").getType(); //$NON-NLS-1$
+    return ngDefs && ngDefs.Module.getProp("prototype").getType();
   }
 
   function declareMod(name, includes) {
@@ -164,28 +150,28 @@
       else if (depMod.injector)
         depMod.injector.forwardTo(mod.injector);
     }
-    if (typeof name === "string") {
+    if (typeof name == "string") {
       data.modules[name] = mod;
       var pending = data.pendingImports[name];
       if (pending) {
         delete data.pendingImports[name];
-        for (i = 0; i < pending.length; ++i)
+        for (var i = 0; i < pending.length; ++i)
           mod.injector.forwardTo(pending[i]);
       }
     }
     return mod;
   }
 
-  infer.registerFunction("angular_module", function(_self, _args, argNodes) { //$NON-NLS-1$
-    var mod, name = argNodes && argNodes[0] && argNodes[0].type === "Literal" && argNodes[0].value;
-    if (typeof name === "string")
+  infer.registerFunction("angular_module", function(_self, _args, argNodes) {
+    var mod, name = argNodes && argNodes[0] && argNodes[0].type == "Literal" && argNodes[0].value;
+    if (typeof name == "string")
       mod = infer.cx().parent._angular.modules[name];
     if (!mod)
       mod = declareMod(name, arrayNodeToStrings(argNodes && argNodes[1]));
     return mod;
   });
 
-  var IsBound = infer.constraint("self, args, target", { //$NON-NLS-1$
+  var IsBound = infer.constraint("self, args, target", {
     addType: function(tp) {
       if (!(tp instanceof infer.Fn)) return;
       this.target.addType(new infer.Fn(tp.name, tp.self, tp.args.slice(this.args.length),
@@ -196,7 +182,7 @@
     }
   });
 
-  infer.registerFunction("angular_bind", function(_self, args) { //$NON-NLS-1$
+  infer.registerFunction("angular_bind", function(_self, args) {
     if (args.length < 2) return infer.ANull;
     var result = new infer.AVal;
     args[1].propagate(new IsBound(args[0], args.slice(2), result));
@@ -206,14 +192,14 @@
   function postParse(ast, text) {
     walk.simple(ast, {
       CallExpression: function(node) {
-        if (node.callee.type === "MemberExpression" &&
+        if (node.callee.type == "MemberExpression" &&
             !node.callee.computed && node.arguments.length &&
             /^(value|constant|controller|factory|provider)$/.test(node.callee.property.name)) {
           var before = comment.commentsBefore(text, node.callee.property.start - 1);
           if (before) {
             var first = before[0], dot = first.search(/\.\s/);
             if (dot > 5) first = first.slice(0, dot + 1);
-            first = first.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " "); //$NON-NLS-1$
+            first = first.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " ");
             node.arguments[0].angularDoc = first;
           }
         }
@@ -223,7 +209,7 @@
 
   function postLoadDef(json) {
     var cx = infer.cx(), defName = json["!name"], defs = cx.definitions[defName];
-    if (defName === "angular") {
+    if (defName == "angular") {
       var proto = moduleProto(cx), naked = cx.parent._angular.nakedModules;
       if (proto) for (var i = 0; i < naked.length; ++i) naked[i].proto = proto;
       return;
@@ -258,7 +244,7 @@
         ++found;
         if (mod.injector) for (var inj in mod.injector.fields) {
           var field = mod.injector.fields[inj];
-          if (field.local) state.roots["!ng." + propName + "._inject_" + inj] = field; //$NON-NLS-1$ //$NON-NLS-2$
+          if (field.local) state.roots["!ng." + propName + "._inject_" + inj] = field;
         }
       }
     }
@@ -271,7 +257,6 @@
       var m;
       if (m = path.match(/^!ng\.([^\.]+)\._inject_([^\.]+)^/)) {
         var mod = mods[m[1].replace(/`/g, ".")];
-        console.log(mod.injector.fields, m[2]);
         var field = mod.injector.fields[m[2]];
         var data = state.types[path];
         if (field.span) data.span = field.span;
@@ -288,7 +273,17 @@
     };
   }
 
-/* eslint-disable missing-nls */
+  tern.registerPlugin("angular", function(server) {
+    initServer(server);
+    server.on("reset", function() { initServer(server); });
+    return {defs: defs,
+            passes: {postParse: postParse,
+                     postLoadDef: postLoadDef,
+                     preCondenseReach: preCondenseReach,
+                     postCondenseReach: postCondenseReach},
+            loadFirst: true};
+  });
+
   var defs = {
     "!name": "angular",
     "!define": {
@@ -307,6 +302,83 @@
         stopPropagation: "fn()",
         preventDefault: "fn()",
         defaultPrevented: "bool"
+      },
+      directiveObj: {
+        multiElement: {
+          "!type": "bool",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-multielement-",
+          "!doc": "When this property is set to true, the HTML compiler will collect DOM nodes between nodes with the attributes directive-name-start and directive-name-end, and group them together as the directive elements. It is recommended that this feature be used on directives which are not strictly behavioural (such as ngClick), and which do not manipulate or replace child nodes (such as ngInclude)."
+        },
+        priority: {
+          "!type": "number",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-priority-",
+          "!doc": "When there are multiple directives defined on a single DOM element, sometimes it is necessary to specify the order in which the directives are applied. The priority is used to sort the directives before their compile functions get called. Priority is defined as a number. Directives with greater numerical priority are compiled first. Pre-link functions are also run in priority order, but post-link functions are run in reverse order. The order of directives with the same priority is undefined. The default priority is 0."
+        },
+        terminal: {
+          "!type": "bool",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-terminal-",
+          "!doc": "If set to true then the current priority will be the last set of directives which will execute (any directives at the current priority will still execute as the order of execution on same priority is undefined). Note that expressions and other directives used in the directive's template will also be excluded from execution."
+        },
+        scope: {
+          "!type": "?",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-scope-",
+          "!doc": "If set to true, then a new scope will be created for this directive. If multiple directives on the same element request a new scope, only one new scope is created. The new scope rule does not apply for the root of the template since the root of the template always gets a new scope. If set to {} (object hash), then a new 'isolate' scope is created. The 'isolate' scope differs from normal scope in that it does not prototypically inherit from the parent scope. This is useful when creating reusable components, which should not accidentally read or modify data in the parent scope."
+        },
+        bindToController: {
+          "!type": "bool",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-bindtocontroller-",
+          "!doc": "When an isolate scope is used for a component (see above), and controllerAs is used, bindToController: true will allow a component to have its properties bound to the controller, rather than to scope. When the controller is instantiated, the initial values of the isolate scope bindings are already available."
+        },
+        controller: {
+          "!type": "fn()",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-require-",
+          "!doc": "Controller constructor function. The controller is instantiated before the pre-linking phase and it is shared with other directives (see require attribute). This allows the directives to communicate with each other and augment each other's behavior."
+        },
+        require: {
+          "!type": "string",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-controller-",
+          "!doc": "Require another directive and inject its controller as the fourth argument to the linking function. The require takes a string name (or array of strings) of the directive(s) to pass in. If an array is used, the injected argument will be an array in corresponding order. If no such directive can be found, or if the directive does not have a controller, then an error is raised."
+        },
+        controllerAs: {
+          "!type": "string",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-controlleras-",
+          "!doc": "Controller alias at the directive scope. An alias for the controller so it can be referenced at the directive template. The directive needs to define a scope for this configuration to be used. Useful in the case when directive is used as component."
+        },
+        restrict: {
+          "!type": "string",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-restrict-",
+          "!doc": "String of subset of EACM which restricts the directive to a specific directive declaration style. If omitted, the defaults (elements and attributes) are used. E - Element name (default): <my-directive></my-directive>. A - Attribute (default): <div my-directive='exp'></div>. C - Class: <div class='my-directive: exp;'></div>. M - Comment: <!-- directive: my-directive exp --> "
+        },
+        templateNamespace: {
+          "!type": "string",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-templatenamespace-",
+          "!doc": "String representing the document type used by the markup in the template. AngularJS needs this information as those elements need to be created and cloned in a special way when they are defined outside their usual containers like <svg> and <math>."
+        },
+        template: {
+          "!type": "string",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-template-",
+          "!doc": "HTML markup that may: Replace the contents of the directive's element (default). Replace the directive's element itself (if replace is true - DEPRECATED). Wrap the contents of the directive's element (if transclude is true)."
+        },
+        templateUrl: {
+          "!type": "string",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-templateurl-",
+          "!doc": "This is similar to template but the template is loaded from the specified URL, asynchronously."
+        },
+        transclude: {
+          "!type": "bool",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-transclude-",
+          "!doc": "Extract the contents of the element where the directive appears and make it available to the directive. The contents are compiled and provided to the directive as a transclusion function."
+        },
+        compile: {
+          "!type": "fn(tElement: +Element, tAttrs: +Attr)",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-transclude-",
+          "!doc": "The compile function deals with transforming the template DOM. Since most directives do not do template transformation, it is not used often."
+        },
+        link: {
+          "!type": "fn(scope: ?, iElement: +Element, iAttrs: +Attr, controller: ?, transcludeFn: fn())",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-link-",
+          "!doc": "The link function is responsible for registering DOM listeners as well as updating the DOM. It is executed after the template has been cloned. This is where most of the directive logic will be put."
+        }
       },
       Module: {
         "!url": "http://docs.angularjs.org/api/angular.Module",
@@ -331,7 +403,7 @@
             "!doc": "Register a controller."
           },
           directive: {
-            "!type": "fn(name: string, directiveFactory: fn()) -> !this",
+            "!type": "fn(name: string, directiveFactory: fn() -> directiveObj) -> !this",
             "!effects": ["custom angular_regFieldCall"],
             "!url": "http://docs.angularjs.org/api/ng.$compileProvider#directive",
             "!doc": "Register a new directive with the compiler."
@@ -941,16 +1013,4 @@
       }
     }
   };
-  
-  /* eslint-enable missing-nls */
-  tern.registerPlugin("orionAngular", function(server) { //$NON-NLS-1$
-    initServer(server);
-    server.on("reset", function() { initServer(server); }); //$NON-NLS-1$
-    return {defs: defs,
-            passes: {postParse: postParse,
-                     postLoadDef: postLoadDef,
-                     preCondenseReach: preCondenseReach,
-                     postCondenseReach: postCondenseReach},
-            loadFirst: true};
-  });
 });

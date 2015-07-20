@@ -23,9 +23,8 @@ define([
 	'eslint/conf/environments',
 	'javascript/signatures',
 	'javascript/util',
-	'orion/editor/stylers/application_javascript/syntax',
-	'orion/i18nUtil',
-], function(Messages, Deferred, Objects, Finder, CU, mTemplates, Templates, Hover, Rules, ESLintEnv, Signatures, Util, JsSyntax, i18nUtil) {
+	'orion/i18nUtil'
+], function(Messages, Deferred, Objects, Finder, CU, mTemplates, Templates, Hover, Rules, ESLintEnv, Signatures, Util, i18nUtil) {
 
 	/**
 	 * @description Creates a new delegate to create keyword and template proposals
@@ -60,6 +59,9 @@ define([
 			        proposal.style = 'emphasis'; //$NON-NLS-1$
 					this.removePrefix(prefix, proposal);
 					proposal.kind = 'js'; //$NON-NLS-1$
+					if (kind.kind === 'jsdoc' || kind.kind === 'doc'){
+						proposal.tags = [{content: '@', cssClass: 'iconTagBlue'}]; //$NON-NLS-1$ //$NON-NLS-2$
+					}
 					proposals.push(proposal);
 				}
 			}
@@ -424,7 +426,7 @@ define([
         			        if(cu.validOffset(params.offset)) {
         			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
         			            	return that.pluginenvs().then(function(envs) {
-        			            		return that.doAssist(ast, params, meta, {ecma5:true, browser:true}, envs);
+        			            		return that.doAssist(ast, params, meta, {ecma5:true, ecma6:true, browser:true}, envs);
         			            	});
                     			});
         			        }
@@ -433,7 +435,7 @@ define([
 			    } else {
 			        return that.astManager.getAST(editorContext).then(function(ast) {
 			        	return that.pluginenvs().then(function(envs) {
-			        		return that.doAssist(ast, params, meta, {ecma5: true}, envs);
+			        		return that.doAssist(ast, params, meta, {ecma5: true, ecma6: true}, envs);
 			        	});
         			});
 			    }
@@ -577,6 +579,7 @@ define([
         proposal.name = proposal.proposal = completion.name;
         if(typeof(completion.type) !== 'undefined') {
             if(/^fn/.test(completion.type)) {
+            	proposal.tags = [{content: 'F', cssClass: 'iconTagPurple'}]; //$NON-NLS-1$ //$NON-NLS-2$
             	calculateFunctionProposal(completion, args, proposal);
             } else if(completion.type === 'template') {
             	var _t = new mTemplates.Template(args.params.prefix, completion.description, completion.template, completion.name);
@@ -588,17 +591,17 @@ define([
 		        _prop.hover = obj;
 		        provider.removePrefix(args.params.prefix, _prop);
 		        _prop.style = 'emphasis'; //$NON-NLS-1$
+		        _prop.kind = 'js'; //$NON-NLS-1$
 		        return _prop;
-            } else if(typeof(completion.origin) === 'undefined' && (JsSyntax.keywords.indexOf(completion.name) > -1)) {
-            	//keyword
-            	proposal.relevance -= 2; //103
-            	//proposal.style = 'noemphasis_keyword';//$NON-NLS-1$
-            	proposal.description = Messages['keywordProposalDescription'];
-            	completion.doc = Messages['keywordHoverProposal'];
-            	completion.url = getKeywordLink(proposal.name);
             } else {
     		    proposal.description = convertTypes(' : ' + completion.type); //$NON-NLS-1$
 		    }
+        } else if(completion.isKeyword) {
+        	proposal.relevance -= 2; //103
+        	proposal.description = Messages['keywordProposalDescription'];
+        	proposal.isKeyword = true;
+        	completion.doc = Messages['keywordHoverProposal'];
+        	completion.url = getKeywordLink(proposal.name);
         }
         obj = Object.create(null);
         obj.type = 'markdown'; //$NON-NLS-1$
@@ -735,11 +738,14 @@ define([
 	    var _p = Object.create(null);
 	    //bucket them by origin
 	    var locals = [];
+	    var keywords = [];
 	    for(var i = 0; i < completions.length; i++) {
 	        var _c = completions[i];
 	        if(Util.looselyMatches(args.params.prefix, _c.name)) {
     	        var _o = _c.origin;
-    	        if(typeof(_o) === 'undefined') {
+    	        if(_c.isKeyword) {
+    	        	keywords.push(_formatTernProposal(_c, args));
+    	        } else if(typeof(_o) === 'undefined') {
     	        	locals.push(_formatTernProposal(_c, args));
     	        	continue;
     	        }
@@ -758,7 +764,19 @@ define([
     	        }
 	        }
 	    }
-	    var proposals = [].concat(locals.sort(sorter));
+	    var proposals = [];
+	    if(keywords.length > 0) {
+	    	keywords.sort(sorter);
+	    	keywords.splice(0, 0, {
+					proposal: '',
+					description: Messages['keywordAssistHeader'],
+					style: 'noemphasis_title', //$NON-NLS-1$
+					unselectable: true
+				});
+			proposals = [].concat(locals.sort(sorter), keywords);
+	    } else {
+	    	proposals = [].concat(locals.sort(sorter));
+	    }
 	    var keys = Object.keys(_p);
 	    for(i = 0; i < keys.length; i++) {
 	        var key = keys[i];

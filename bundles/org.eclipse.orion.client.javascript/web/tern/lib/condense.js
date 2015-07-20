@@ -6,14 +6,14 @@
 
 // The idea being that big libraries can be analyzed once, dumped, and
 // then cheaply included in later analysis.
-
-(function(mod) {
+/* eslint-disable */
+(function(root, mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(exports, require("./infer"));
   if (typeof define == "function" && define.amd) // AMD
     return define(["exports", "./infer"], mod);
-  mod(self.tern || (self.tern = {}), tern); // Plain browser env
-})(function(exports, infer) {
+  mod(root.tern || (root.tern = {}), tern); // Plain browser env
+})(this, function(exports, infer) {
   "use strict";
 
   exports.condense = function(origins, name, options) {
@@ -113,7 +113,7 @@
           state.altPaths[oldPath] = actual;
         } else data = {type: actual};
         data.span = state.getSpan(type) || (actual != type && state.isTarget(actual.origin) && state.getSpan(actual)) || data.span;
-        data.doc = type.doc || (actual != type && state.isTarget(actual.origin) && type.doc) || data.doc;
+        data.doc = type.doc || (actual != type && state.isTarget(actual.origin) && actual.doc) || data.doc;
         data.data = actual.metaData;
         data.byName = data.byName == null ? !!byName : data.byName && byName;
         state.types[newPath] = data;
@@ -177,12 +177,10 @@
   function createPath(parts, state) {
     var base = state.output, defs = state.output["!define"];
     for (var i = 0, path; i < parts.length; ++i) {
-      var part = parts[i], known = path && state.types[path];
+      var part = parts[i];
       path = path ? path + "." + part : part;
       var me = state.types[path];
-      if (part.charAt(0) == "!" ||
-          known && known.type.constructor != infer.Obj ||
-          me && me.byName) {
+      if (part.charAt(0) == "!" || me && me.byName) {
         if (hop(defs, path)) base = defs[path];
         else defs[path] = base = {};
       } else {
@@ -216,15 +214,29 @@
   }
 
   var typeNameStack = [];
-  function typeName(type) {
-    var actual = type.getType(false);
-    if (!actual || typeNameStack.indexOf(actual) > -1)
-      return actual && actual.path || "?";
-    typeNameStack.push(actual);
-    var name = actual.typeName();
-    typeNameStack.pop();
+  function typeName(value) {
+    var isType = value instanceof infer.Type;
+    if (isType) {
+      if (typeNameStack.indexOf(value) > -1)
+        return value.path || "?";
+      typeNameStack.push(value);
+    }
+    var name = value.typeName();
+    if (isType) typeNameStack.pop();
     return name;
   }
+
+  infer.AVal.prototype.typeName = function() {
+    if (this.types.length == 0) return "?";
+    if (this.types.length == 1) return typeName(this.types[0]);
+    var simplified = infer.simplifyTypes(this.types);
+    if (simplified.length > 2) return "?";
+    for (var strs = [], i = 0; i < simplified.length; i++)
+      strs.push(typeName(simplified[i]));
+    return strs.join("|");
+  };
+
+  infer.ANull.typeName = function() { return "?"; };
 
   infer.Prim.prototype.typeName = function() { return this.name; };
 
@@ -241,12 +253,10 @@
       out += typeName(this.args[i]);
     }
     out += ")";
-    if (this.computeRetSource) {
+    if (this.computeRetSource)
       out += " -> " + this.computeRetSource;
-    } else if (!this.retval.isEmpty()) {
-      var rettype = this.retval.getType(false);
-      if (rettype) out += " -> " + typeName(rettype);
-    }
+    else if (!this.retval.isEmpty())
+      out += " -> " + typeName(this.retval);
     return out;
   };
 

@@ -32,8 +32,8 @@ require({
 	'tern/lib/tern',
 	'tern/plugin/doc_comment',
 	'tern/plugin/orionAmqp',
-	'tern/plugin/orionAngular',
-	//'tern/plugin/orionComponent',
+	'tern/plugin/angular',
+	//'tern/plugin/component',
 	'tern/plugin/orionExpress',	
 	'tern/plugin/orionMongoDB',
 	'tern/plugin/orionMySQL',	
@@ -43,6 +43,7 @@ require({
 	'tern/plugin/orionRequire',
 	'tern/plugin/ternPlugins',
 	'json!tern/defs/ecma5.json',
+	'json!tern/defs/ecma6.json',
 	'json!tern/defs/browser.json',
 	'javascript/handlers/ternAssistHandler',
 	'javascript/handlers/ternDeclarationHandler',
@@ -53,9 +54,9 @@ require({
 	'i18n!javascript/nls/workermessages',
 	'orion/i18nUtil'
 ],
-/* @callback */ function(Tern, docPlugin, orionAMQPPlugin, orionAngularPlugin,/* orionComponentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
+/* @callback */ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
 							orionMySQLPlugin, orionNodePlugin, orionPostgresPlugin, orionRedisPlugin, orionRequirePlugin, ternPluginsPlugin, 
-							ecma5, browser, AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler, PluginsHandler, 
+							ecma5, ecma6, browser, AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler, PluginsHandler, 
 							Messages, i18nUtil) {
     
     var ternserver, pendingReads = Object.create(null);
@@ -67,14 +68,14 @@ require({
         var options = {
                 async: true,
                 debug:true,
-                defs: [ecma5, browser],
+                defs: [ecma5, ecma6, browser],
                 projectDir: '/', //$NON-NLS-1$
                 plugins: {
                     doc_comment: {
                     	name: Messages['ternDocPluginName'],
                     	description: Messages['ternDocPluginDescription'],
                         fullDocs: true,
-                        version: '0.6.2', //$NON-NLS-1$
+                        version: '0.10.0', //$NON-NLS-1$
                         removable: false
                     },
                     orionAmqp: {
@@ -84,16 +85,16 @@ require({
                     	removable: true,
                     	env: 'amqp' //$NON-NLS-1$
                     },
-                    orionAngular: {
+                    angular: {
                     	name: Messages['orionAngularPluginName'],
                     	description: Messages['orionAngularPluginDescription'],
-                    	version: '0.6.2', //$NON-NLS-1$
+                    	version: '0.10.0', //$NON-NLS-1$
                     	removable: true
                     },
-                   /* orionComponent: {
+                   /* component: {
                     	name: Messages['orionComponentPluginName'],
                     	description: Messages['orionComponentPluginDescription'],
-                    	version: '0.6.2', //$NON-NLS-1$
+                    	version: '0.10.0', //$NON-NLS-1$
                     	removable: true,
                     },*/
                     orionExpress: {
@@ -120,7 +121,7 @@ require({
                     orionNode: {
                     	name: Messages['orionNodePluginName'],
                     	description: Messages['orionNodePluginDescription'],
-                    	version: '0.6.2', //$NON-NLS-1$
+                    	version: '0.10.0', //$NON-NLS-1$
                     	removable: true
                     },
                     orionPostgres: {
@@ -140,7 +141,7 @@ require({
                     orionRequire: {
                     	name: Messages['orionRequirePluginName'],
                     	description: Messages['orionRequirePluginDescription'],
-                    	version: '0.6.2', //$NON-NLS-1$
+                    	version: '0.10.0', //$NON-NLS-1$
                     	removable: true
                     },
                     plugins: {

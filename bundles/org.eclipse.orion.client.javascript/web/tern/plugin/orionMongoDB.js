@@ -23,85 +23,87 @@
 })(/* @callback */ function(infer, tern, resolver) {
 
 	var templates = [
+	/* eslint-disable missing-nls */
 		{
-			prefix: "mongodb", //$NON-NLS-0$
-			name: "mongodb", //$NON-NLS-0$
+			prefix: "mongodb",
+			name: "mongodb",
 			nodes: {top:true, member:false, prop:false},
-			description: " - Node.js require statement for MongoDB", //$NON-NLS-0$
-			template: "var ${name} = require('mongodb');\n" //$NON-NLS-0$
+			description: " - Node.js require statement for MongoDB",
+			template: "var ${name} = require('mongodb');\n"
 		},
 		{
-			prefix: "mongodb", //$NON-NLS-0$
-			name: "mongodb client", //$NON-NLS-0$
+			prefix: "mongodb",
+			name: "mongodb client",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new MongoDB client", //$NON-NLS-0$
-			template: "var MongoClient = require('mongodb').MongoClient;\n" +//$NON-NLS-0$
-					  "var Server = require('mongodb').Server;\n${cursor}" //$NON-NLS-1$
+			description: " - create a new MongoDB client",
+			template: "var MongoClient = require('mongodb').MongoClient;\n" +
+					  "var Server = require('mongodb').Server;\n${cursor}"
 		},
 		{
-			prefix: "mongodb", //$NON-NLS-0$
-			name: "mongodb open", //$NON-NLS-0$
+			prefix: "mongodb",
+			name: "mongodb open",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new MongoDB client and open a connection", //$NON-NLS-0$
-			template: "var MongoClient = require('mongodb').MongoClient;\n" +//$NON-NLS-0$
-					  "var Server = require('mongodb').Server;\n"+  //$NON-NLS-0$
-					  "var ${client} = new MongoClient(new Server(${host}, ${port}));\n"+ //$NON-NLS-0$
-					  "try {\n" + //$NON-NLS-0$
-					  "\t${client}.open(function(error, ${client}) {\n" + //$NON-NLS-0$
-  					  "\t\tvar ${db} = ${client}.db(${name});\n" + //$NON-NLS-0$
-  					  "\t\t${cursor}\n" + //$NON-NLS-0$
-  					  "\t});\n" +  //$NON-NLS-0$
-  					  "} finally {\n" + //$NON-NLS-0$
-  					  "\t${client}.close();\n" + //$NON-NLS-0$
-  					  "};" //$NON-NLS-0$
+			description: " - create a new MongoDB client and open a connection",
+			template: "var MongoClient = require('mongodb').MongoClient;\n" +
+					  "var Server = require('mongodb').Server;\n"+ 
+					  "var ${client} = new MongoClient(new Server(${host}, ${port}));\n"+
+					  "try {\n" +
+					  "\t${client}.open(function(error, ${client}) {\n" +
+  					  "\t\tvar ${db} = ${client}.db(${name});\n" +
+  					  "\t\t${cursor}\n" +
+  					  "\t});\n" + 
+  					  "} finally {\n" +
+  					  "\t${client}.close();\n" +
+  					  "};"
 		},
 		{
-			prefix: "mongodb", //$NON-NLS-0$
-			name: "mongodb connect", //$NON-NLS-0$
+			prefix: "mongodb",
+			name: "mongodb connect",
 			nodes: {top:true, member:false, prop:false},
-			description: " - connect to an existing MongoDB database", //$NON-NLS-0$
-			template: "var MongoClient = require('mongodb').MongoClient;\n" +//$NON-NLS-0$
-					  "MongoClient.connect(${url}, function(error, db) {\n"+  //$NON-NLS-0$
-					  "\t${cursor}\n"+ //$NON-NLS-0$
-  					  "});\n" //$NON-NLS-0$
+			description: " - connect to an existing MongoDB database",
+			template: "var MongoClient = require('mongodb').MongoClient;\n" +
+					  "MongoClient.connect(${url}, function(error, db) {\n"+ 
+					  "\t${cursor}\n"+
+  					  "});\n"
 		},
 		{
-			prefix: "mongodb", //$NON-NLS-0$
-			name: "mongodb connect (Cloud Foundry)", //$NON-NLS-0$
+			prefix: "mongodb",
+			name: "mongodb connect (Cloud Foundry)",
 			nodes: {top:true, member:false, prop:false},
-			description: " - connect to an existing MongoDB database using Cloud Foundry", //$NON-NLS-0$
-			template: "if (${process}.env.VCAP_SERVICES) {\n" +  //$NON-NLS-0$
-   					  "\tvar env = JSON.parse(${process}.env.VCAP_SERVICES);\n" +  //$NON-NLS-0$
-   					  "\tvar mongo = env[\'${mongo-version}\'][0].credentials;\n" +  //$NON-NLS-0$
-					  "} else {\n" +  //$NON-NLS-0$
-					  "\tvar mongo = {\n" +  //$NON-NLS-0$
-					  "\t\tusername : \'username\',\n" +  //$NON-NLS-0$
-					  "\t\tpassword : \'password\',\n" +  //$NON-NLS-0$
-					  "\t\turl : \'mongodb://username:password@localhost:27017/database\'\n" +  //$NON-NLS-0$
-					  "\t};\n}\n" +  //$NON-NLS-0$
-					  "var MongoClient = require('mongodb').MongoClient;\n" +//$NON-NLS-0$
-					  "MongoClient.connect(mongo.url, function(error, db) {\n"+  //$NON-NLS-0$
-					  "\t${cursor}\n"+ //$NON-NLS-0$
-  					  "});\n" //$NON-NLS-0$
+			description: " - connect to an existing MongoDB database using Cloud Foundry",
+			template: "if (${process}.env.VCAP_SERVICES) {\n" + 
+   					  "\tvar env = JSON.parse(${process}.env.VCAP_SERVICES);\n" + 
+   					  "\tvar mongo = env[\'${mongo-version}\'][0].credentials;\n" + 
+					  "} else {\n" + 
+					  "\tvar mongo = {\n" + 
+					  "\t\tusername : \'username\',\n" + 
+					  "\t\tpassword : \'password\',\n" + 
+					  "\t\turl : \'mongodb://username:password@localhost:27017/database\'\n" + 
+					  "\t};\n}\n" + 
+					  "var MongoClient = require('mongodb').MongoClient;\n" +
+					  "MongoClient.connect(mongo.url, function(error, db) {\n"+ 
+					  "\t${cursor}\n"+
+  					  "});\n"
 		},
 		{
-			prefix: "mongodb", //$NON-NLS-0$
-			name: "mongodb collection", //$NON-NLS-0$
+			prefix: "mongodb",
+			name: "mongodb collection",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a MongoDB database collection", //$NON-NLS-0$
-			template: "${db}.collection(${id}, function(${error}, collection) {\n"+//$NON-NLS-0$
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-				  "});"  //$NON-NLS-0$
+			description: " - create a MongoDB database collection",
+			template: "${db}.collection(${id}, function(${error}, collection) {\n"+
+					  "\t${cursor}\n" + 
+				  "});"
 		},
 		{
-			prefix: "mongodb", //$NON-NLS-0$
-			name: "mongodb strict collection", //$NON-NLS-0$
+			prefix: "mongodb",
+			name: "mongodb strict collection",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a MongoDB database strict collection", //$NON-NLS-0$
-			template: "${db}.collection(${id}, {strict:true}, function(${error}, collection) {\n"+//$NON-NLS-0$
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-					  "});"  //$NON-NLS-0$
+			description: " - create a MongoDB database strict collection",
+			template: "${db}.collection(${id}, {strict:true}, function(${error}, collection) {\n"+
+					  "\t${cursor}\n" + 
+					  "});"
 		}
+		/* eslint-enable missing-nls */
 	];
 	
 	/**
@@ -109,8 +111,8 @@
 	 * @since 9.0
 	 * @callback
 	 */
-	function getTemplates(file, query, completions) {
-		var wordEnd = tern.resolvePos(file, query.end);
+	function getTemplates(file, start, end, completions) {
+		var wordEnd = tern.resolvePos(file, end);
 		var expr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope);
 		var tmps = resolver.getTemplatesForNode(templates, expr);
 		if(tmps && tmps.length > 0) {
@@ -128,7 +130,7 @@
 	    return {
 	      defs : defs,
 	      passes: {
-	      	completion: getTemplates
+	      	variableCompletion: getTemplates
 	      }
 	    };
 	});

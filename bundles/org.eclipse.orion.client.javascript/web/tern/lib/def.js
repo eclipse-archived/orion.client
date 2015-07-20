@@ -7,7 +7,7 @@
 //
 // B) to cheaply load the types for big libraries, or libraries that
 //    can't be inferred well
-
+/* eslint-disable */
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return exports.init = mod;
@@ -27,6 +27,42 @@
     this.base = base;
     this.forceNew = forceNew;
   };
+
+  function unwrapType(type, self, args) {
+    return type.call ? type(self, args) : type;
+  }
+
+  function extractProp(type, prop) {
+    if (prop == "!ret") {
+      if (type.retval) return type.retval;
+      var rv = new infer.AVal;
+      type.propagate(new infer.IsCallee(infer.ANull, [], null, rv));
+      return rv;
+    } else {
+      return type.getProp(prop);
+    }
+  }
+
+  function computedFunc(args, retType) {
+    return function(self, cArgs) {
+      var realArgs = [];
+      for (var i = 0; i < args.length; i++) realArgs.push(unwrapType(args[i], self, cArgs));
+      return new infer.Fn(name, infer.ANull, realArgs, unwrapType(retType, self, cArgs));
+    };
+  }
+  function computedUnion(types) {
+    return function(self, args) {
+      var union = new infer.AVal;
+      for (var i = 0; i < types.length; i++) unwrapType(types[i], self, args).propagate(union);
+      return union;
+    };
+  }
+  function computedArray(inner) {
+    return function(self, args) {
+      return new infer.Arr(inner(self, args));
+    };
+  }
+
   TypeParser.prototype = {
     eat: function(str) {
       if (str.length == 1 ? this.spec.charAt(this.pos) == str : this.spec.indexOf(str, this.pos) == this.pos) {
@@ -42,8 +78,8 @@
     error: function() {
       throw new Error("Unrecognized type spec: " + this.spec + " (at " + this.pos + ")");
     },
-    parseFnType: function(name, top) {
-      var args = [], names = [];
+    parseFnType: function(comp, name, top) {
+      var args = [], names = [], computed = false;
       if (!this.eat(")")) for (var i = 0; ; ++i) {
         var colon = this.spec.indexOf(": ", this.pos), argname;
         if (colon != -1) {
@@ -54,7 +90,9 @@
             argname = null;
         }
         names.push(argname);
-        args.push(this.parseType());
+        var argType = this.parseType(comp);
+        if (argType.call) computed = true;
+        args.push(argType);
         if (!this.eat(", ")) {
           this.eat(")") || this.error();
           break;
@@ -62,12 +100,22 @@
       }
       var retType, computeRet, computeRetStart, fn;
       if (this.eat(" -> ")) {
-        if (top && this.spec.indexOf("!", this.pos) > -1) {
-          retType = infer.ANull;
-          computeRetStart = this.pos;
-          computeRet = this.parseRetType();
-        } else retType = this.parseType();
-      } else retType = infer.ANull;
+        var retStart = this.pos;
+        retType = this.parseType(true);
+        if (retType.call) {
+          if (top) {
+            computeRet = retType;
+            retType = infer.ANull;
+            computeRetStart = retStart;
+          } else {
+            computed = true;
+          }
+        }
+      } else {
+        retType = infer.ANull;
+      }
+      if (computed) return computedFunc(args, retType);
+
       if (top && (fn = this.base))
         infer.Fn.call(this.base, name, infer.ANull, args, names, retType);
       else
@@ -76,16 +124,40 @@
       if (computeRetStart != null) fn.computeRetSource = this.spec.slice(computeRetStart, this.pos);
       return fn;
     },
-    parseType: function(name, top) {
+    parseType: function(comp, name, top) {
+      var main = this.parseTypeMaybeProp(comp, name, top);
+      if (!this.eat("|")) return main;
+      var types = [main], computed = main.call;
+      for (;;) {
+        var next = this.parseTypeMaybeProp(comp, name, top);
+        types.push(next);
+        if (next.call) computed = true;
+        if (!this.eat("|")) break;
+      }
+      if (computed) return computedUnion(types);
+      var union = new infer.AVal;
+      for (var i = 0; i < types.length; i++) types[i].propagate(union);
+      return union;
+    },
+    parseTypeMaybeProp: function(comp, name, top) {
+      var result = this.parseTypeInner(comp, name, top);
+      while (comp && this.eat(".")) result = this.extendWithProp(result);
+      return result;
+    },
+    extendWithProp: function(base) {
+      var propName = this.word(/[\w<>$!]/) || this.error();
+      if (base.apply) return function(self, args) {
+        return extractProp(base(self, args), propName);
+      };
+      return extractProp(base, propName);
+    },
+    parseTypeInner: function(comp, name, top) {
       if (this.eat("fn(")) {
-        return this.parseFnType(name, top);
+        return this.parseFnType(comp, name, top);
       } else if (this.eat("[")) {
-        var inner = this.parseType();
-        if (inner == infer.ANull && this.spec == "[b.<i>]") {
-          var b = parsePath("b");
-          console.log(b.props["<i>"].types.length);
-        }
+        var inner = this.parseType(comp);
         this.eat("]") || this.error();
+        if (inner.call) return computedArray(inner);
         if (top && this.base) {
           infer.Arr.call(this.base, inner);
           return this.base;
@@ -94,10 +166,25 @@
       } else if (this.eat("+")) {
         var path = this.word(/[\w$<>\.!]/);
         var base = parsePath(path + ".prototype");
+        var type;
         if (!(base instanceof infer.Obj)) base = parsePath(path);
         if (!(base instanceof infer.Obj)) return base;
+        if (comp && this.eat("[")) return this.parsePoly(base);
         if (top && this.forceNew) return new infer.Obj(base);
         return infer.getInstance(base);
+      } else if (comp && this.eat("!")) {
+        var arg = this.word(/\d/);
+        if (arg) {
+          arg = Number(arg);
+          return function(_self, args) {return args[arg] || infer.ANull;};
+        } else if (this.eat("this")) {
+          return function(self) {return self;};
+        } else if (this.eat("custom:")) {
+          var fname = this.word(/[\w$]/);
+          return customFunctions[fname] || function() { return infer.ANull; };
+        } else {
+          return this.fromWord("!" + this.word(/[\w$<>\.!]/));
+        }
       } else if (this.eat("?")) {
         return infer.ANull;
       } else {
@@ -115,51 +202,27 @@
       if (cx.localDefs && spec in cx.localDefs) return cx.localDefs[spec];
       return parsePath(spec);
     },
-    parseBaseRetType: function() {
-      if (this.eat("[")) {
-        var inner = this.parseRetType();
-        this.eat("]") || this.error();
-        return function(self, args) { return new infer.Arr(inner(self, args)); };
-      } else if (this.eat("+")) {
-        var base = this.parseRetType();
-        return function(self, args) { return infer.getInstance(base(self, args)); };
-      } else if (this.eat("!")) {
-        var arg = this.word(/\d/);
-        if (arg) {
-          arg = Number(arg);
-          return function(_self, args) {return args[arg] || infer.ANull;};
-        } else if (this.eat("this")) {
-          return function(self) {return self;};
-        } else if (this.eat("custom:")) {
-          var fname = this.word(/[\w$]/);
-          return customFunctions[fname] || function() { return infer.ANull; };
-        } else {
-          return this.fromWord("!" + arg + this.word(/[\w$<>\.!]/));
-        }
+    parsePoly: function(base) {
+      var propName = "<i>", match;
+      if (match = this.spec.slice(this.pos).match(/^\s*(\w+)\s*=\s*/)) {
+        propName = match[1];
+        this.pos += match[0].length;
       }
-      var t = this.parseType();
-      return function(){return t;};
-    },
-    extendRetType: function(base) {
-      var propName = this.word(/[\w<>$!]/) || this.error();
-      if (propName == "!ret") return function(self, args) {
-        var lhs = base(self, args);
-        if (lhs.retval) return lhs.retval;
-        var rv = new infer.AVal;
-        lhs.propagate(new infer.IsCallee(infer.ANull, [], null, rv));
-        return rv;
+      var value = this.parseType(true);
+      if (!this.eat("]")) this.error();
+      if (value.call) return function(self, args) {
+        var instance = infer.getInstance(base);
+        value(self, args).propagate(instance.defProp(propName));
+        return instance;
       };
-      return function(self, args) {return base(self, args).getProp(propName);};
-    },
-    parseRetType: function() {
-      var tp = this.parseBaseRetType();
-      while (this.eat(".")) tp = this.extendRetType(tp);
-      return tp;
+      var instance = infer.getInstance(base);
+      value.propagate(instance.defProp(propName));
+      return instance;
     }
   };
 
   function parseType(spec, name, base, forceNew) {
-    var type = new TypeParser(spec, null, base, forceNew).parseType(name, true);
+    var type = new TypeParser(spec, null, base, forceNew).parseType(false, name, true);
     if (/^fn\(/.test(spec)) for (var i = 0; i < type.args.length; ++i) (function(i) {
       var arg = type.args[i];
       if (arg instanceof infer.Fn && arg.args && arg.args.length) addEffect(type, function(_self, fArgs) {
@@ -183,22 +246,22 @@
     var m;
     if (effect.indexOf("propagate ") == 0) {
       var p = new TypeParser(effect, 10);
-      var getOrigin = p.parseRetType();
+      var origin = p.parseType(true);
       if (!p.eat(" ")) p.error();
-      var getTarget = p.parseRetType();
+      var target = p.parseType(true);
       addEffect(fn, function(self, args) {
-        getOrigin(self, args).propagate(getTarget(self, args));
+        unwrapType(origin, self, args).propagate(unwrapType(target, self, args));
       });
     } else if (effect.indexOf("call ") == 0) {
       var andRet = effect.indexOf("and return ", 5) == 5;
       var p = new TypeParser(effect, andRet ? 16 : 5);
-      var getCallee = p.parseRetType(), getSelf = null, getArgs = [];
-      if (p.eat(" this=")) getSelf = p.parseRetType();
-      while (p.eat(" ")) getArgs.push(p.parseRetType());
+      var getCallee = p.parseType(true), getSelf = null, getArgs = [];
+      if (p.eat(" this=")) getSelf = p.parseType(true);
+      while (p.eat(" ")) getArgs.push(p.parseType(true));
       addEffect(fn, function(self, args) {
-        var callee = getCallee(self, args);
-        var slf = getSelf ? getSelf(self, args) : infer.ANull, as = [];
-        for (var i = 0; i < getArgs.length; ++i) as.push(getArgs[i](self, args));
+        var callee = unwrapType(getCallee, self, args);
+        var slf = getSelf ? unwrapType(getSelf, self, args) : infer.ANull, as = [];
+        for (var i = 0; i < getArgs.length; ++i) as.push(unwrapType(getArgs[i], self, args));
         var result = andRet ? new infer.AVal : infer.ANull;
         callee.propagate(new infer.IsCallee(slf, as, null, result));
         return result;
@@ -208,11 +271,11 @@
       if (customFunc) addEffect(fn, m[2] ? customFunc(m[2]) : customFunc);
     } else if (effect.indexOf("copy ") == 0) {
       var p = new TypeParser(effect, 5);
-      var getFrom = p.parseRetType();
+      var getFrom = p.parseType(true);
       p.eat(" ");
-      var getTo = p.parseRetType();
+      var getTo = p.parseType(true);
       addEffect(fn, function(self, args) {
-        var from = getFrom(self, args), to = getTo(self, args);
+        var from = unwrapType(getFrom, self, args), to = unwrapType(getTo, self, args);
         from.forAllProps(function(prop, val, local) {
           if (local && prop != "<i>")
             to.propagate(new infer.PropHasSubset(prop, val));
@@ -225,12 +288,12 @@
 
   var currentTopScope;
 
-  var parsePath = exports.parsePath = function(path) {
+  var parsePath = exports.parsePath = function(path, scope) {
     var cx = infer.cx(), cached = cx.paths[path], origPath = path;
     if (cached != null) return cached;
     cx.paths[path] = infer.ANull;
 
-    var base = currentTopScope || cx.topScope;
+    var base = scope || currentTopScope || cx.topScope;
 
     if (cx.localDefs) for (var name in cx.localDefs) {
       if (path.indexOf(name) == 0) {
@@ -308,7 +371,7 @@
       var inner = spec[name];
       if (typeof inner == "string" || isSimpleAnnotation(inner)) continue;
       var prop = base.defProp(name);
-      passOne(prop.getType(false), inner, path ? path + "." + name : name).propagate(prop);
+      passOne(prop.getObjType(), inner, path ? path + "." + name : name).propagate(prop);
     }
     return base;
   }
@@ -332,23 +395,21 @@
 
     for (var name in spec) if (hop(spec, name) && name.charCodeAt(0) != 33) {
       var inner = spec[name], known = base.defProp(name), innerPath = path ? path + "." + name : name;
-      var type = known.getType(false);
       if (typeof inner == "string") {
-        if (type) continue;
-        parseType(inner, innerPath).propagate(known);
+        if (known.isEmpty()) parseType(inner, innerPath).propagate(known);
       } else {
-        if (!isSimpleAnnotation(inner)) {
-          passTwo(type, inner, innerPath);
-        } else if (!type) {
+        if (!isSimpleAnnotation(inner))
+          passTwo(known.getObjType(), inner, innerPath);
+        else if (known.isEmpty())
           parseType(inner["!type"], innerPath, null, true).propagate(known);
-          type = known.getType(false);
-          if (type instanceof infer.Obj) copyInfo(inner, type);
-        } else continue;
+        else
+          continue;
         if (inner["!doc"]) known.doc = inner["!doc"];
         if (inner["!url"]) known.url = inner["!url"];
         if (inner["!span"]) known.span = inner["!span"];
       }
     }
+    return base;
   }
 
   function copyInfo(spec, type) {
@@ -403,6 +464,23 @@
     }
   };
 
+  exports.parse = function(data, origin, path) {
+    var cx = infer.cx();
+    if (origin) {
+      cx.origin = origin;
+      cx.localDefs = cx.definitions[origin];
+    }
+
+    try {
+      if (typeof data == "string")
+        return parseType(data, path);
+      else
+        return passTwo(passOne(null, data, path), data, path);
+    } finally {
+      if (origin) cx.origin = cx.localDefs = null;
+    }
+  };
+
   // Used to register custom logic for more involved effect or type
   // computation.
   var customFunctions = Object.create(null);
@@ -412,7 +490,7 @@
     addType: function(tp) {
       if (tp instanceof infer.Obj && this.created++ < 5) {
         var derived = new infer.Obj(tp), spec = this.spec;
-        if (spec instanceof infer.AVal) spec = spec.getType(false);
+        if (spec instanceof infer.AVal) spec = spec.getObjType(false);
         if (spec instanceof infer.Obj) for (var prop in spec.props) {
           var cur = spec.props[prop].types[0];
           var p = derived.defProp(prop);
@@ -433,6 +511,26 @@
     var result = new infer.AVal;
     if (args[0]) args[0].propagate(new IsCreated(0, result, args[1]));
     return result;
+  });
+
+  var PropSpec = infer.constraint("target", {
+    addType: function(tp) {
+      if (!(tp instanceof infer.Obj)) return;
+      if (tp.hasProp("value"))
+        tp.getProp("value").propagate(this.target);
+      else if (tp.hasProp("get"))
+        tp.getProp("get").propagate(new infer.IsCallee(infer.ANull, [], null, this.target));
+    }
+  });
+
+  infer.registerFunction("Object_defineProperty", function(_self, args, argNodes) {
+    if (argNodes && argNodes.length >= 3 && argNodes[1].type == "Literal" &&
+        typeof argNodes[1].value == "string") {
+      var obj = args[0], connect = new infer.AVal;
+      obj.propagate(new infer.PropHasSubset(argNodes[1].value, connect, argNodes[1]));
+      args[2].propagate(new PropSpec(connect));
+    }
+    return infer.ANull;
   });
 
   var IsBound = infer.constraint("self, args, target", {
@@ -460,6 +558,18 @@
       for (var i = 0; i < args.length; ++i) args[i].propagate(content);
     }
     return arr;
+  });
+
+  infer.registerFunction("Promise_ctor", function(_self, args, argNodes) {
+    if (args.length < 1) return infer.ANull;
+    var self = new infer.Obj(infer.cx().definitions.ecma6["Promise.prototype"]);
+    var valProp = self.defProp("value", argNodes && argNodes[0]);
+    var valArg = new infer.AVal;
+    valArg.propagate(valProp);
+    var exec = new infer.Fn("execute", infer.ANull, [valArg], ["value"], infer.ANull);
+    var reject = infer.cx().definitions.ecma6.promiseReject;
+    args[0].propagate(new infer.IsCallee(infer.ANull, [exec, reject], null, infer.ANull));
+    return self;
   });
 
   return exports;

@@ -1,6 +1,6 @@
 // Main type inference engine
 
-// Walks an AST, building up a graph of abstract values and contraints
+// Walks an AST, building up a graph of abstract values and constraints
 // that cause types to flow from one node to another. Also defines a
 // number of utilities for accessing ASTs and scopes.
 
@@ -11,22 +11,19 @@
 // similar to abstract values (which can hold multiple types), and can
 // thus be used in place abstract values that only ever contain a
 // single type.
-
-/*eslint-env node, amd, browser*/
-/*globals acorn tern acorn_loose*/
 /* eslint-disable */
-(function(mod) {
+(function(root, mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(exports, require("esprima"), require("acorn/util/walk"),
                require("./def"), require("./signal"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["exports", "esprima", /*"acorn/acorn_loose",*/ "acorn/util/walk", "./def", "./signal"], mod);
-  mod(self.tern || (self.tern = {}), acorn, acorn_loose, acorn.walk, tern.def, tern.signal); // Plain browser env
-})(function(exports, acorn, /*acorn_loose,*/ walk, def, signal) {
+    return define(["exports", "esprima", "acorn/util/walk", "./def", "./signal"], mod);
+  mod(root.tern || (root.tern = {}), acorn, acorn.walk, tern.def, tern.signal); // Plain browser env
+})(this, function(exports, acorn, walk, def, signal) {
   "use strict";
 
   var toString = exports.toString = function(type, maxDepth, parent) {
-    return !type || type == parent ? "?": type.toString(maxDepth);
+    return !type || type == parent ? "?": type.toString(maxDepth, parent);
   };
 
   // A variant of AVal used for unknown, dead-end values. Also serves
@@ -41,11 +38,13 @@
     hasType: function() { return false; },
     isEmpty: function() { return true; },
     getFunctionType: function() {},
+    getObjType: function() {},
     getType: function() {},
     gatherProperties: function() {},
     propagatesTo: function() {},
     typeHint: function() {},
-    propHint: function() {}
+    propHint: function() {},
+    toString: function() { return "?"; }
   });
 
   function extend(proto, props) {
@@ -84,8 +83,8 @@
     },
 
     propagate: function(target, weight) {
-      if (target == ANull || (target instanceof Type)) return;
-      if (weight && weight < WG_DEFAULT) target = new Muffle(target, weight);
+      if (target == ANull || (target instanceof Type && this.forward && this.forward.length > 2)) return;
+      if (weight && weight != WG_DEFAULT) target = new Muffle(target, weight);
       (this.forward || (this.forward = [])).push(target);
       var types = this.types;
       if (types.length) withWorklist(function(add) {
@@ -110,16 +109,34 @@
     hasType: function(type) {
       return this.types.indexOf(type) > -1;
     },
-    isEmpty: function() { return this.types.length == 0; },
+    isEmpty: function() { return this.types.length === 0; },
     getFunctionType: function() {
       for (var i = this.types.length - 1; i >= 0; --i)
         if (this.types[i] instanceof Fn) return this.types[i];
     },
+    getObjType: function() {
+      var seen = null;
+      for (var i = this.types.length - 1; i >= 0; --i) {
+        var type = this.types[i];
+        if (!(type instanceof Obj)) continue;
+        if (type.name) return type;
+        if (!seen) seen = type;
+      }
+      return seen;
+    },
 
     getType: function(guess) {
-      if (this.types.length == 0 && guess !== false) return this.makeupType();
-      if (this.types.length == 1) return this.types[0];
+      if (this.types.length === 0 && guess !== false) return this.makeupType();
+      if (this.types.length === 1) return this.types[0];
       return canonicalType(this.types);
+    },
+
+    toString: function(maxDepth, parent) {
+      if (this.types.length == 0) return toString(this.makeupType(), maxDepth, parent);
+      if (this.types.length == 1) return toString(this.types[0], maxDepth, parent);
+      var simplified = simplifyTypes(this.types);
+      if (simplified.length > 2) return "?";
+      return simplified.map(function(tp) { return toString(tp, maxDepth, parent); }).join("|");
     },
 
     computedPropType: function() {
@@ -180,6 +197,59 @@
       if (guessed) guessed.gatherProperties(f);
     }
   });
+
+  function similarAVal(a, b, depth) {
+    var typeA = a.getType(false), typeB = b.getType(false);
+    if (!typeA || !typeB) return true;
+    return similarType(typeA, typeB, depth);
+  }
+
+  function similarType(a, b, depth) {
+    if (!a || depth >= 5) return b;
+    if (!a || a == b) return a;
+    if (!b) return a;
+    if (a.constructor != b.constructor) return false;
+    if (a.constructor == Arr) {
+      var innerA = a.getProp("<i>").getType(false);
+      if (!innerA) return b;
+      var innerB = b.getProp("<i>").getType(false);
+      if (!innerB || similarType(innerA, innerB, depth + 1)) return b;
+    } else if (a.constructor == Obj) {
+      var propsA = 0, propsB = 0, same = 0;
+      for (var prop in a.props) {
+        propsA++;
+        if (prop in b.props && similarAVal(a.props[prop], b.props[prop], depth + 1))
+          same++;
+      }
+      for (var prop in b.props) propsB++;
+      if (propsA && propsB && same < Math.max(propsA, propsB) / 2) return false;
+      return propsA > propsB ? a : b;
+    } else if (a.constructor == Fn) {
+      if (a.args.length != b.args.length ||
+          !a.args.every(function(tp, i) { return similarAVal(tp, b.args[i], depth + 1); }) ||
+          !similarAVal(a.retval, b.retval, depth + 1) || !similarAVal(a.self, b.self, depth + 1))
+        return false;
+      return a;
+    } else {
+      return false;
+    }
+  }
+
+  var simplifyTypes = exports.simplifyTypes = function(types) {
+    var found = [];
+    outer: for (var i = 0; i < types.length; ++i) {
+      var tp = types[i];
+      for (var j = 0; j < found.length; j++) {
+        var similar = similarType(tp, found[j], 0);
+        if (similar) {
+          found[j] = similar;
+          continue outer;
+        }
+      }
+      found.push(tp);
+    }
+    return found;
+  };
 
   function canonicalType(types) {
     var arrays = 0, fns = 0, objs = 0, prim = null;
@@ -271,7 +341,7 @@
   }
   var IsCallee = exports.IsCallee = constraint("self, args, argNodes, retval", {
     init: function() {
-      Constraint.prototype.init();
+      Constraint.prototype.init.call(this);
       this.disabled = cx.disabledComputing;
     },
     addType: function(fn, weight) {
@@ -283,7 +353,7 @@
       this.self.propagate(fn.self, this.self == cx.topScope ? WG_GLOBAL_THIS : weight);
       var compute = fn.computeRet;
       if (compute) for (var d = this.disabled; d; d = d.prev)
-        if (d.fn == fn || fn.name && d.fn.name == fn.name) compute = null;
+        if (d.fn == fn || fn.originNode && d.fn.originNode == fn.originNode) compute = null;
       if (compute)
         compute(this.self, this.args, this.argNodes).propagate(this.retval, weight);
       else
@@ -301,7 +371,7 @@
 
   var HasMethodCall = constraint("propName, args, argNodes, retval", {
     init: function() {
-      Constraint.prototype.init();
+      Constraint.prototype.init.call(this);
       this.disabled = cx.disabledComputing;
     },
     addType: function(obj, weight) {
@@ -315,6 +385,7 @@
   var IsCtor = exports.IsCtor = constraint("target, noReuse", {
     addType: function(f, weight) {
       if (!(f instanceof Fn)) return;
+      if (cx.parent && !cx.parent.options.reuseInstances) this.noReuse = true;
       f.getProp("prototype").propagate(new IsProto(this.noReuse ? false : f, this.target), weight);
     }
   });
@@ -432,7 +503,7 @@
       for (var prop in this.props) if (prop != "<i>") {
         if (props.length > 5) { etc = true; break; }
         if (maxDepth)
-          props.push(prop + ": " + toString(this.props[prop].getType(), maxDepth - 1));
+          props.push(prop + ": " + toString(this.props[prop], maxDepth - 1));
         else
           props.push(prop);
       }
@@ -449,7 +520,6 @@
     defProp: function(prop, originNode) {
       var found = this.hasProp(prop, false);
       if (found) {
-        if (found.maybePurge) found.maybePurge = false;
         if (originNode && !found.originNode) found.originNode = originNode;
         return found;
       }
@@ -510,6 +580,7 @@
       var av = this.props[prop];
       delete this.props[prop];
       this.ensureMaybeProps()[prop] = av;
+      av.types.length = 0;
     },
     forAllProps: function(c) {
       if (!this.onNewProp) {
@@ -541,7 +612,8 @@
       for (var prop in this.props) if (prop != "<i>")
         f(prop, this, depth);
       if (this.proto) this.proto.gatherProperties(f, depth + 1);
-    }
+    },
+    getObjType: function() { return this; }
   });
 
   var Fn = exports.Fn = function(name, self, args, argNames, retval) {
@@ -560,11 +632,11 @@
         if (i) str += ", ";
         var name = this.argNames[i];
         if (name && name != "?") str += name + ": ";
-        str += toString(this.args[i].getType(), maxDepth, this);
+        str += toString(this.args[i], maxDepth, this);
       }
       str += ")";
       if (!this.retval.isEmpty())
-        str += " -> " + toString(this.retval.getType(), maxDepth, this);
+        str += " -> " + toString(this.retval, maxDepth, this);
       return str;
     },
     getProp: function(prop) {
@@ -602,7 +674,7 @@
   Arr.prototype = extend(Obj.prototype, {
     constructor: Arr,
     toString: function(maxDepth) {
-      return "[" + toString(this.getProp("<i>").getType(), maxDepth, this) + "]";
+      return "[" + toString(this.getProp("<i>"), maxDepth, this) + "]";
     }
   });
 
@@ -664,7 +736,7 @@
   exports.TimedOut = function() {
     this.message = "Timed out";
     this.stack = (new Error()).stack;
-  }
+  };
   exports.TimedOut.prototype = Object.create(Error.prototype);
   exports.TimedOut.prototype.name = "infer.TimedOut";
 
@@ -682,7 +754,7 @@
     if (cx.origins.indexOf(origin) < 0) cx.origins.push(origin);
   };
 
-  var baseMaxWorkDepth = 20, reduceMaxWorkDepth = .0001;
+  var baseMaxWorkDepth = 20, reduceMaxWorkDepth = 0.0001;
   function withWorklist(f) {
     if (cx.workList) return f(cx.workList);
 
@@ -771,6 +843,7 @@
         var argNames = fn.argNames.length != args.length ? fn.argNames.slice(0, args.length) : fn.argNames;
         while (argNames.length < args.length) argNames.push("?");
         scopeCopy.fnType = new Fn(fn.name, self, args, argNames, ANull);
+        scopeCopy.fnType.originNode = fn.originNode;
         if (fn.arguments) {
           var argset = scopeCopy.fnType.arguments = new AVal;
           scopeCopy.defProp("arguments").addType(new Arr(argset));
@@ -817,7 +890,8 @@
     if (foundPath) {
       if (asArray) foundPath = "[" + foundPath + "]";
       var p = new def.TypeParser(foundPath);
-      fn.computeRet = p.parseRetType();
+      var parsed = p.parseType(true);
+      fn.computeRet = parsed.apply ? parsed : function() { return parsed; };
       fn.computeRetSource = foundPath;
       return true;
     }
@@ -890,14 +964,15 @@
     case "in": case "instanceof": return true;
     }
   }
-  function literalType(val) {
-    switch (typeof val) {
+  function literalType(node) {
+    if (node.regex) return getInstance(cx.protos.RegExp);
+    switch (typeof node.value) {
     case "boolean": return cx.bool;
     case "number": return cx.num;
     case "string": return cx.str;
     case "object":
     case "function":
-      if (!val) return ANull;
+      if (!node.value) return ANull;
       return getInstance(cx.protos.RegExp);
     }
   }
@@ -918,9 +993,10 @@
   }
 
   var inferExprVisitor = {
-  	RecoveredNode: ret(function(node, scope, c, out, name) {
+    //ORION
+    RecoveredNode: ret(function(node, scope, c, out, name) {
   		return new AVal;
-  	}),  //ORION ignore the recovered node
+  	}),
     ArrayExpression: ret(function(node, scope, c) {
       var eltval = new AVal;
       for (var i = 0; i < node.elements.length; ++i) {
@@ -935,17 +1011,23 @@
 
       for (var i = 0; i < node.properties.length; ++i) {
         var prop = node.properties[i], key = prop.key, name;
+        if (prop.value.name == "✖") continue;
+
         if (key.type == "Identifier") {
           name = key.name;
         } else if (typeof key.value == "string") {
           name = key.value;
-        } else {
+        }
+        if (!name || prop.kind == "set") {
           infer(prop.value, scope, c, ANull);
           continue;
         }
-        var val = obj.defProp(name, key);
+
+        var val = obj.defProp(name, key), out = val;
         val.initializer = true;
-        infer(prop.value, scope, c, val, name);
+        if (prop.kind == "get")
+          out = new IsCallee(obj, [], null, val);
+        infer(prop.value, scope, c, out, name);
       }
       return obj;
     }),
@@ -1024,9 +1106,7 @@
         }
         obj.propagate(new PropHasSubset(pName, rhs, node.left.property));
       } else { // Identifier
-        var v = scope.defVar(node.left.name, node.left);
-        if (v.maybePurge) v.maybePurge = false;
-        rhs.propagate(v);
+        rhs.propagate(scope.defVar(node.left.name, node.left));
       }
       return rhs;
     }),
@@ -1092,16 +1172,16 @@
       return scope.fnType ? scope.fnType.self : cx.topScope;
     }),
     Literal: ret(function(node) {
-      return literalType(node.value);
+      return literalType(node);
     })
   };
 
   function infer(node, scope, c, out, name) {
-  	var _f = inferExprVisitor[node.type]; //ORION
-  	if(_f) {
-    	return _f(node, scope, c, out, name);
-    } 
-   	return null;
+      //ORION
+      var _f = inferExprVisitor[node.type];
+      if(_f) {
+          return _f(node, scope, c, out, name);
+      }
   }
 
   var inferWrapper = walk.make({
@@ -1163,13 +1243,6 @@
     if (arr) for (var i = 0; i < arr.length; ++i) arr[i].apply(null, args);
   }
 
-  var emptyAST = Object.create(null);
-	emptyAST.type = "Program"; //$NON-NLS-0$
-	emptyAST.body = [];
-	emptyAST.comments = [];
-	emptyAST.tokens = [];
-	emptyAST.range = [0, 0];
-
   var parse = exports.parse = function(text, passes, options) {
     var ast;
     try {
@@ -1201,7 +1274,7 @@
     return ast;
   };
 
-  //ORION
+    //ORION
   function serializeError(error) {
 	var result = error ? JSON.parse(JSON.stringify(error)) : error; // sanitizing Error object
 	if (error instanceof Error) {
@@ -1212,7 +1285,7 @@
 		result.stack = result.stack || error.stack;
 	}
 	return result;
-}
+  }
 
   //ORION
   function _computeErrorTypes(errors) {
@@ -1229,8 +1302,7 @@
 			}
 		});
 	}
-}
-
+  }
   // ANALYSIS INTERFACE
 
   exports.analyze = function(ast, name, scope, passes) {
@@ -1250,7 +1322,7 @@
 
   // PURGING
 
-  exports.purgeTypes = function(origins, start, end) {
+  exports.purge = function(origins, start, end) {
     var test = makePredicate(origins, start, end);
     ++cx.purgeGen;
     cx.topScope.purge(test);
@@ -1300,7 +1372,6 @@
   Obj.prototype.purge = function(test) {
     if (this.purgeGen == cx.purgeGen) return true;
     this.purgeGen = cx.purgeGen;
-    var props = [];
     for (var p in this.props) {
       var av = this.props[p];
       if (test(av, av.originNode))
@@ -1313,22 +1384,6 @@
     this.self.purge(test);
     this.retval.purge(test);
     for (var i = 0; i < this.args.length; ++i) this.args[i].purge(test);
-  };
-
-  exports.markVariablesDefinedBy = function(scope, origins, start, end) {
-    var test = makePredicate(origins, start, end);
-    for (var s = scope; s; s = s.prev) for (var p in s.props) {
-      var prop = s.props[p];
-      if (test(prop, prop.originNode)) {
-        prop.maybePurge = true;
-        if (start == null && prop.originNode) prop.originNode = null;
-      }
-    }
-  };
-
-  exports.purgeMarkedVariables = function(scope) {
-    for (var s = scope; s; s = s.prev) for (var p in s.props)
-      if (s.props[p].maybePurge) delete s.props[p];
   };
 
   // EXPRESSION TYPE DETERMINATION
@@ -1389,7 +1444,7 @@
     },
     NewExpression: function(node, scope) {
       var f = findType(node.callee, scope).getFunctionType();
-      var proto = f && f.getProp("prototype").getType();
+      var proto = f && f.getProp("prototype").getObjType();
       if (!proto) return ANull;
       return getInstance(proto, f);
     },
@@ -1420,16 +1475,17 @@
       return scope.fnType ? scope.fnType.self : cx.topScope;
     },
     Literal: function(node) {
-      return literalType(node.value);
+      return literalType(node);
     }
   };
 
   function findType(node, scope) {
-  	var _f = typeFinder[node.type]; //ORION
-  	if(_f) {
+    //ORION
+    var _f = typeFinder[node.type];
+    if(_f) {
       return _f(node, scope);
-  	}
-  	return null;
+    }
+    return null;
   }
 
   var searchVisitor = exports.searchVisitor = walk.make({
@@ -1467,13 +1523,17 @@
   }, searchVisitor);
 
   exports.findExpressionAt = function(ast, start, end, defaultScope, filter) {
-    var test = filter || function(_t, node) {return typeFinder.hasOwnProperty(node.type);};
+    var test = filter || function(_t, node) {
+      if (node.type == "Identifier" && node.name == "✖") return false;
+      return typeFinder.hasOwnProperty(node.type);
+    };
     return walk.findNodeAt(ast, start, end, test, searchVisitor, defaultScope || cx.topScope);
   };
 
   exports.findExpressionAround = function(ast, start, end, defaultScope, filter) {
     var test = filter || function(_t, node) {
       if (start != null && node.start > start) return false;
+      if (node.type == "Identifier" && node.name == "✖") return false;
       return typeFinder.hasOwnProperty(node.type);
     };
     return walk.findNodeAround(ast, end, test, searchVisitor, defaultScope || cx.topScope);
@@ -1481,6 +1541,87 @@
 
   exports.expressionType = function(found) {
     return findType(found.node, found.state);
+  };
+
+  // Finding the expected type of something, from context
+
+  exports.parentNode = function(child, ast) {
+    var stack = [];
+    function c(node, st, override) {
+      if (node.start <= child.start && node.end >= child.end) {
+        var top = stack[stack.length - 1];
+        if (node == child) throw {found: top};
+        if (top != node) stack.push(node);
+        walk.base[override || node.type](node, st, c);
+        if (top != node) stack.pop();
+      }
+    }
+    try {
+      c(ast, null);
+    } catch (e) {
+      if (e.found) return e.found;
+      throw e;
+    }
+  };
+
+  var findTypeFromContext = {
+    ArrayExpression: function(parent, _, get) { return get(parent, true).getProp("<i>"); },
+    ObjectExpression: function(parent, node, get) {
+      for (var i = 0; i < parent.properties.length; ++i) {
+        var prop = node.properties[i];
+        if (prop.value == node)
+          return get(parent, true).getProp(prop.key.name);
+      }
+    },
+    UnaryExpression: function(parent) { return unopResultType(parent.operator); },
+    UpdateExpression: function() { return cx.num; },
+    BinaryExpression: function(parent) { return binopIsBoolean(parent.operator) ? cx.bool : cx.num; },
+    AssignmentExpression: function(parent, _, get) { return get(parent.left); },
+    LogicalExpression: function(parent, _, get) { return get(parent, true); },
+    ConditionalExpression: function(parent, node, get) {
+      if (parent.consequent == node || parent.alternate == node) return get(parent, true);
+    },
+    NewExpression: function(parent, node, get) {
+      return this.CallExpression(parent, node, get);
+    },
+    CallExpression: function(parent, node, get) {
+      for (var i = 0; i < parent.arguments.length; i++) {
+        var arg = parent.arguments[i];
+        if (arg == node) {
+          var calleeType = get(parent.callee).getFunctionType();
+          if (calleeType instanceof Fn)
+            return calleeType.args[i];
+          break;
+        }
+      }
+    },
+    ReturnStatement: function(_parent, node, get) {
+      var fnNode = walk.findNodeAround(node.sourceFile.ast, node.start, "Function");
+      if (fnNode) {
+        var fnType = get(fnNode.node, true).getFunctionType();
+        if (fnType) return fnType.retval.getType();
+      }
+    },
+    VariableDeclaration: function(parent, node, get) {
+      for (var i = 0; i < parent.declarations.length; i++) {
+        var decl = parent.declarations[i];
+        if (decl.init == node) return get(decl.id);
+      }
+    }
+  };
+
+  exports.typeFromContext = function(ast, found) {
+    var parent = exports.parentNode(found.node, ast);
+    if (!parent) console.log(ast, found.node);
+    var type = null;
+    if (findTypeFromContext.hasOwnProperty(parent.type)) {
+      type = findTypeFromContext[parent.type](parent, found.node, function(node, fromContext) {
+        var obj = {node: node, state: found.state};
+        var tp = fromContext ? exports.typeFromContext(ast, obj) : exports.expressionType(obj);
+        return tp || ANull;
+      });
+    }
+    return type || exports.expressionType(found);
   };
 
   // Flag used to indicate that some wild guessing was used to produce
@@ -1544,6 +1685,4 @@
 
   // Delayed initialization because of cyclic dependencies.
   def = exports.def = def.init({}, exports);
-  
-  return exports;
 });

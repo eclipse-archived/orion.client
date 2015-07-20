@@ -43,6 +43,10 @@ define([
 	 * @since 9.0
 	 */
 	function resolve(server, key, loc) {
+		if(_resolved[key].pending) {
+			//if we are waiting don't fire of another request
+			return;
+		}
   		server.startAsyncAction();
   		_resolved[key].pending = true;
 		server.options.getFile({logical: key, file: loc}, function(err, _file) {
@@ -101,7 +105,7 @@ define([
 			for(var i = 0; i < ast.dependencies.length; i++) {
 				var _d = ast.dependencies[i].value;
 				if(_d) {
-					if(_resolved[_d] !== undefined) {
+					if(typeof(_resolved[_d]) === 'object') {
 						continue; //we already resolved it or are trying, keep going
 					}
 					_resolved[_d] = Object.create(null);
@@ -147,29 +151,29 @@ define([
     		if(node.parents && node.parents.length > 0) {
 	    		var parent = node.parents.pop();
 	    		switch(parent.type) {
-						case 'MemberExpression': {
-							return { kind : 'member'}; //$NON-NLS-1$
-						}
-						case 'VariableDeclarator': {
-							return null;
-						}
-						case 'FunctionDelcaration':
-						case 'FunctionExpression': {
-							if(offset < parent.body.range[0]) {
-								return null;						
-							}
-							break;
-						}
-						case 'Property': {
-							if(offset-1 >= parent.value.range[0] && offset-1 <= parent.value.range[1]) {
-								return { kind : 'prop'}; //$NON-NLS-1$
-							}
-							return null;
-						}
-						case 'SwitchStatement': {
-							return {kind: 'swtch'}; //$NON-NLS-1$
-						}
+					case 'MemberExpression': {
+						return { kind : 'member'}; //$NON-NLS-1$
 					}
+					case 'VariableDeclarator': {
+						return null;
+					}
+					case 'FunctionDelcaration':
+					case 'FunctionExpression': {
+						if(offset < parent.body.range[0]) {
+							return null;						
+						}
+						break;
+					}
+					case 'Property': {
+						if(offset-1 >= parent.value.range[0] && offset-1 <= parent.value.range[1]) {
+							return { kind : 'prop'}; //$NON-NLS-1$
+						}
+						return null;
+					}
+					case 'SwitchStatement': {
+						return {kind: 'swtch'}; //$NON-NLS-1$
+					}
+				}
 			}
     	}
 		return {kind:'top'}; //$NON-NLS-1$

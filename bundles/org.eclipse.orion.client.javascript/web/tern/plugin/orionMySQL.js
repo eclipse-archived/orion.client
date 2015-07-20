@@ -23,40 +23,42 @@
 })(/* @callback */ function(infer, tern, resolver) {
 
 	var templates = [
+	/* eslint-disable missing-nls */
 		{
-			prefix: "mysql", //$NON-NLS-0$
-			name: "mysql", //$NON-NLS-0$
+			prefix: "mysql", 
+			name: "mysql", 
 			nodes: {top:true, member:false, prop:false},
-			description: " - Node.js require statement for MySQL DB", //$NON-NLS-0$
-			template: "var mysql = require('mysql');\n" //$NON-NLS-0$
+			description: " - Node.js require statement for MySQL DB", 
+			template: "var mysql = require('mysql');\n"
 		},
 		{
-			prefix: "mysql", //$NON-NLS-0$
-			name: "mysql connection", //$NON-NLS-0$
+			prefix: "mysql", 
+			name: "mysql connection", 
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new MySQL DB connection", //$NON-NLS-0$
-			template: "var mysql = require('mysql');\n" + //$NON-NLS-0$
-					  "var ${connection} = mysql.createConnection({\n" +  //$NON-NLS-0$
-  					  "\thost : ${host},\n" +  //$NON-NLS-0$
-  					  "\tuser : ${username},\n" +  //$NON-NLS-0$
-  					  "\tpassword : ${password}\n" +  //$NON-NLS-0$
-					  "});\n" + //$NON-NLS-0$
-					  "try {\n" +  //$NON-NLS-0$
-					  "\t${connection}.connect();\n" +  //$NON-NLS-0$
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-					  "} finally {\n" +  //$NON-NLS-0$
-					  "\t${connection}.end();\n" +  //$NON-NLS-0$
+			description: " - create a new MySQL DB connection", 
+			template: "var mysql = require('mysql');\n" + 
+					  "var ${connection} = mysql.createConnection({\n" +  
+  					  "\thost : ${host},\n" +  
+  					  "\tuser : ${username},\n" +  
+  					  "\tpassword : ${password}\n" +  
+					  "});\n" + 
+					  "try {\n" +  
+					  "\t${connection}.connect();\n" +  
+					  "\t${cursor}\n" +  
+					  "} finally {\n" +  
+					  "\t${connection}.end();\n" +  
 					  "}"
 		},
 		{
-			prefix: "mysql", //$NON-NLS-0$
-			name: "mysql query", //$NON-NLS-0$
+			prefix: "mysql", 
+			name: "mysql query", 
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new MySQL DB query statement", //$NON-NLS-0$
-			template: "${connection}.query(${sql}, function(error, rows, fields) {\n" + //$NON-NLS-0$
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-					  "});\n"  //$NON-NLS-0$
+			description: " - create a new MySQL DB query statement", 
+			template: "${connection}.query(${sql}, function(error, rows, fields) {\n" + 
+					  "\t${cursor}\n" +  
+					  "});\n"
 		}
+		/* eslint-enable missing-nls */
 	];
 	
 	/**
@@ -64,8 +66,8 @@
 	 * @since 9.0
 	 * @callback
 	 */
-	function getTemplates(file, query, completions) {
-		var wordEnd = tern.resolvePos(file, query.end);
+	function getTemplates(file, start, end, completions) {
+		var wordEnd = tern.resolvePos(file, end);
 		var expr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope);
 		var tmps = resolver.getTemplatesForNode(templates, expr);
 		if(tmps && tmps.length > 0) {
@@ -83,7 +85,7 @@
 	    return {
 	      defs : defs,
 	      passes: {
-	      	completion: getTemplates
+	      	variableCompletion: getTemplates
 	      }
 	    };
 	});

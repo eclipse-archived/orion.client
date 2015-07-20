@@ -20,59 +20,61 @@
 })(/* @callback */ function(infer, tern, resolver) {
 
 	var templates = [
+	/* eslint-disable missing-nls */
 		{
-			prefix: "redis", //$NON-NLS-0$
-			name: "redis", //$NON-NLS-0$
+			prefix: "redis",
+			name: "redis",
 			nodes: {top:true, member:false, prop:false},
-			description: " - Node.js require statement for Redis", //$NON-NLS-0$
-			template: "var ${name} = require('redis');\n" //$NON-NLS-0$
+			description: " - Node.js require statement for Redis",
+			template: "var ${name} = require('redis');\n"
 		},
 		{
-			prefix: "redis", //$NON-NLS-0$
-			name: "redis client", //$NON-NLS-0$
+			prefix: "redis",
+			name: "redis client",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Redis client", //$NON-NLS-0$
-			template: "var ${name} = require('redis');\n" + //$NON-NLS-0$
-					  "var ${client} = ${name}.createClient(${port}, ${host}, ${options});\n"  //$NON-NLS-0$
+			description: " - create a new Redis client",
+			template: "var ${name} = require('redis');\n" +
+					  "var ${client} = ${name}.createClient(${port}, ${host}, ${options});\n"
 		},
 		{
-			prefix: "redis", //$NON-NLS-0$
-			name: "redis connect", //$NON-NLS-0$
+			prefix: "redis",
+			name: "redis connect",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Redis client and connect", //$NON-NLS-0$
-			template: "var ${name} = require('redis');\n" + //$NON-NLS-0$
-					  "var ${client} = ${name}.createClient(${port}, ${host}, ${options});\n" +  //$NON-NLS-0$
-				  "try {\n" +  //$NON-NLS-0$
-					  "\t${cursor}\n"+  //$NON-NLS-0$
-					  "} finally {\n"+  //$NON-NLS-0$
-					  "\t${client}.close();\n"+  //$NON-NLS-0$
-				  "}\n" //$NON-NLS-1$
+			description: " - create a new Redis client and connect",
+			template: "var ${name} = require('redis');\n" +
+					  "var ${client} = ${name}.createClient(${port}, ${host}, ${options});\n" + 
+				  "try {\n" + 
+					  "\t${cursor}\n"+ 
+					  "} finally {\n"+ 
+					  "\t${client}.close();\n"+ 
+				  "}\n"
 		},
 		{
-			prefix: "redis", //$NON-NLS-0$
-			name: "redis set", //$NON-NLS-0$
+			prefix: "redis",
+			name: "redis set",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Redis client set call", //$NON-NLS-0$
-			template: "client.set(${key}, ${value});\n" //$NON-NLS-0$
+			description: " - create a new Redis client set call",
+			template: "client.set(${key}, ${value});\n"
 		},
 		{
-			prefix: "redis", //$NON-NLS-0$
-			name: "redis get", //$NON-NLS-0$
+			prefix: "redis",
+			name: "redis get",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Redis client get call", //$NON-NLS-0$
-			template: "client.get(${key}, function(${error}, ${reply}) {\n"+  //$NON-NLS-0$
-					  "\t${cursor}\n" +  //$NON-NLS-0$
-					  "});\n" //$NON-NLS-0$
+			description: " - create a new Redis client get call",
+			template: "client.get(${key}, function(${error}, ${reply}) {\n"+ 
+					  "\t${cursor}\n" + 
+					  "});\n"
 		},
 		{
-			prefix: "redis", //$NON-NLS-0$
-			name: "redis on", //$NON-NLS-0$
+			prefix: "redis",
+			name: "redis on",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Redis client event handler", //$NON-NLS-0$
-			template: "client.on(${event}, function(${arg}) {\n"+  //$NON-NLS-0$
-					  "\t${cursor}" +  //$NON-NLS-0$
-					  "});\n" //$NON-NLS-0$
+			description: " - create a new Redis client event handler",
+			template: "client.on(${event}, function(${arg}) {\n"+ 
+					  "\t${cursor}" + 
+					  "});\n"
 		}
+		/* eslint-enable missing-nls */
 	];
 	
 	/**
@@ -80,8 +82,8 @@
 	 * @since 9.0
 	 * @callback
 	 */
-	function getTemplates(file, query, completions) {
-		var wordEnd = tern.resolvePos(file, query.end);
+	function getTemplates(file, start, end, completions) {
+		var wordEnd = tern.resolvePos(file, end);
 		var expr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope);
 		var tmps = resolver.getTemplatesForNode(templates, expr);
 		if(tmps && tmps.length > 0) {
@@ -98,7 +100,7 @@
 	    return {
 	      defs : defs,
 	      passes: {
-	      	completion: getTemplates
+	      	variableCompletion: getTemplates
 	      }
 	    };
 	});

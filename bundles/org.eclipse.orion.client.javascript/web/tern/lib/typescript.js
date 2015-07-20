@@ -3,7 +3,7 @@
 // Takes a TypeScript file as, for example, found in
 // github.com/borisyankov/DefinitelyTyped , and spits out Tern type
 // description JSON data.
-
+/* eslint-disable */
 var fs = require("fs");
 
 // The TypeScript code is all there in the npm package, but it's not
@@ -37,9 +37,18 @@ function buildPath(cx) {
   return path;
 }
 
+function merge(obj1, obj2) {
+  for (var key in obj2) {
+    if (obj2.hasOwnProperty(key)) {
+      obj1[key] = obj2[key];
+    }
+  }
+}
+
 function functionType(node, cx) {
   var type = "fn(";
-  var args = node.parameterList.parameters;
+  var args = (node.parameterList || node.callSignature.parameterList).parameters;
+
   for (var i = 0, e = args.childCount(); i < e; ++i) {
     var arg = args.childAt(i);
     if (!arg.identifier) continue;
@@ -56,15 +65,17 @@ function functionType(node, cx) {
 }
 
 function addToObj(data, identifier, val) {
-  var known = data[name];
   var name = identifier.text();
   if (/^".*"$/.test(name)) name = name.slice(1, name.length - 1);
+  var known = data[name];
   if (known) {
     if (typeof known != "string" && typeof val == "string" && !known["!type"]) {
       known["!type"] = val;
     } else if (typeof known == "string" && typeof val != "string") {
       data[name] = val;
       val["!type"] = known;
+    } else if (Object.prototype.toString.call(known) == '[object Object]') {
+      merge(known, val);
     }
   } else {
     data[name] = val;
@@ -162,6 +173,7 @@ function walk(node, cx) {
     return "bool";
   case nt.AnyKeyword:
   case nt.VoidKeyword:
+  case nt.GenericType:
     return "?";
   case nt.TypeQuery:
     return walk(node.name);
