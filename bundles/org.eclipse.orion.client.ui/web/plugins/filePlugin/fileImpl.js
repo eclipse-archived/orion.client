@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
+/* eslint-disable missing-nls */
 /*eslint-env browser, amd*/
 define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "orion/form"], function(Deferred, xhr, _, operation, form) {
 
@@ -42,7 +42,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		if (append) {
 			result += append;
 		}
-		return result
+		return result;
 	}
 	
 	//Note: this is very dependent on the server side code
@@ -110,29 +110,8 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		});
 	}
 
-	/**
-	 * Escapes all characters in the string that require escaping in Lucene queries.
-	 * See http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Escaping%20Special%20Characters
-	 * The following characters need to be escaped in lucene queries: + - && || ! ( ) { } [ ] ^ " ~ * ? : \
-	 * @param {String} input The string to perform escaping on
-	 * @param {Boolean} [omitWildcards=false] If true, the * and ? characters will not be escaped.
-	 * @private
-	 */
-	function _luceneEscape(input, omitWildcards) {
-		var output = "",
-		    specialChars = "+-&|!(){}[]^\"~:\\" + (!omitWildcards ? "*?" : ""); //$NON-NLS-1$ //$NON-NLS-0$
-		for (var i = 0; i < input.length; i++) {
-			var c = input.charAt(i);
-			if (specialChars.indexOf(c) >= 0) {
-				output += '\\'; //$NON-NLS-0$
-			}
-			output += c;
-		}
-		return output;
-	}
-	
 	function _generateLuceneQuery(searchParams){
-		var newKeyword = _luceneEscape(searchParams.keyword, true);
+		var newKeyword = searchParams.keyword;
 		var caseSensitiveFlag = "", regExFlag = "";
 		if(searchParams.caseSensitive) {
 			caseSensitiveFlag = "+CaseSensitive:" + searchParams.caseSensitive;
@@ -194,11 +173,11 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 	{
 		/**
 		 * Obtains the children of a remote resource
-		 * @param location The location of the item to obtain children for
+		 * @param {String} loc The location of the item to obtain children for
 		 * @return A deferred that will provide the array of child objects when complete
 		 */
-		fetchChildren: function(location) {
-			var fetchLocation = location;
+		fetchChildren: function(loc) {
+			var fetchLocation = loc;
 			if (fetchLocation===this.fileBase) {
 				return this.loadWorkspace(fetchLocation).then(function(jsondata) {return jsondata.Children || [];});
 			}
@@ -227,14 +206,14 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		/**
 		 * Creates a new workspace with the given name. The resulting workspace is
 		 * passed as a parameter to the provided onCreate function.
-		 * @param {String} name The name of the new workspace
+		 * @param {String} _name The name of the new workspace
 		 */
-		_createWorkspace: function(name) {
+		_createWorkspace: function(_name) {
 			//return the deferred so client can chain on post-processing
 			return _xhr("POST", this.workspaceBase, {
 				headers: {
 					"Orion-Version": "1",
-					"Slug": form.encodeSlug(name)
+					"Slug": form.encodeSlug(_name)
 				},
 				timeout: 15000
 			}).then(function(result) {
@@ -267,14 +246,14 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		/**
 		 * Loads the workspace with the given id and sets it to be the current
 		 * workspace for the IDE. The workspace is created if none already exists.
-		 * @param {String} location the location of the workspace to load
+		 * @param {String} loc the location of the workspace to load
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
 		 */
-		loadWorkspace: function(location) {
-			if (location===this.fileBase) {
-				location = null;
+		loadWorkspace: function(loc) {
+			if (loc===this.fileBase) {
+				loc = null;
 			}
-			return _xhr("GET", location ? location : this.workspaceBase, {
+			return _xhr("GET", loc ? loc : this.workspaceBase, {
 				headers: {
 					"Orion-Version": "1"
 				},
@@ -283,7 +262,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			}).then(function(result) {
 				var jsonData = result.response ? JSON.parse(result.response) : {};
 				//in most cases the returned object is the workspace we care about
-				if (location) {
+				if (loc) {
 					return jsonData;
 				} else {
 					//user didn't specify a workspace so we are at the root
@@ -305,13 +284,13 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		
 		/**
 		 * Adds a project to a workspace.
-		 * @param {String} url The workspace location
+		 * @param {String} loc The workspace location
 		 * @param {String} projectName the human-readable name of the project
 		 * @param {String} serverPath The optional path of the project on the server.
 		 * @param {Boolean} create If true, the project is created on the server file system if it doesn't already exist
 		 */
-		createProject: function(location, projectName, serverPath, create) {
-			if (!location) { // null, undefined, '' ...
+		createProject: function(loc, projectName, serverPath, create) {
+			if (!loc) { // null, undefined, '' ...
 				// window.document.eas.status.setErrorMessage("<enter message here>");
 				console.error("url is undefined, make sure you're signed in before creating a project");
 				return;
@@ -325,7 +304,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			if (create) {
 				data.CreateIfDoesntExist = create;
 			}
-			return _xhr("POST", location, {
+			return _xhr("POST", loc, {
 				headers: {
 					"Orion-Version": "1",
 					"Content-Type": "application/json;charset=UTF-8"
@@ -403,10 +382,10 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		},
 		/**
 		 * Deletes a file, directory, or project.
-		 * @param {String} location The location of the file or directory to delete.
+		 * @param {String} loc The location of the file or directory to delete.
 		 */
-		deleteFile: function(location) {
-			return _xhr("DELETE", location, {
+		deleteFile: function(loc) {
+			return _xhr("DELETE", loc, {
 				headers: {
 					"Orion-Version": "1"
 				},
@@ -425,10 +404,10 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 * Moves a file or directory.
 		 * @param {String} sourceLocation The location of the file or directory to move.
 		 * @param {String} targetLocation The location of the target folder.
-		 * @param {String} [name] The name of the destination file or directory in the case of a rename
+		 * @param {String} fileName The name of the destination file or directory in the case of a rename
 		 */
-		moveFile: function(sourceLocation, targetLocation, name) {
-			return this._doCopyMove(sourceLocation, targetLocation, true, name).then(function(result) {
+		moveFile: function(sourceLocation, targetLocation, fileName) {
+			return this._doCopyMove(sourceLocation, targetLocation, true, fileName).then(function(result) {
 				if (this.makeAbsolute) {
 					_normalizeLocations(result);
 				}
@@ -440,10 +419,10 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 * Copies a file or directory.
 		 * @param {String} sourceLocation The location of the file or directory to copy.
 		 * @param {String} targetLocation The location of the target folder.
-		 * @param {String} [name] The name of the destination file or directory in the case of a rename
+		 * @param {String} fileName The name of the destination file or directory in the case of a rename
 		 */
-		copyFile: function(sourceLocation, targetLocation, name) {
-			return this._doCopyMove(sourceLocation, targetLocation, false, name).then(function(result) {
+		copyFile: function(sourceLocation, targetLocation, fileName) {
+			return this._doCopyMove(sourceLocation, targetLocation, false, fileName).then(function(result) {
 				if (this.makeAbsolute) {
 					_normalizeLocations(result);
 				}
@@ -451,22 +430,22 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			}.bind(this));
 		},
 		
-		_doCopyMove: function(sourceLocation, targetLocation, isMove, name) {
-			if (!name) {
+		_doCopyMove: function(sourceLocation, targetLocation, isMove, _name) {
+			if (!_name) {
 				//take the last segment (trailing slash will product an empty segment)
 				var segments = sourceLocation.split("/");
-				name = segments.pop() || segments.pop();
+				_name = segments.pop() || segments.pop();
 			}
 			return _xhr("POST", targetLocation, {
 				headers: {
 					"Orion-Version": "1",
-					"Slug": form.encodeSlug(name),
+					"Slug": form.encodeSlug(_name),
 					"X-Create-Options": "no-overwrite," + (isMove ? "move" : "copy"),
 					"Content-Type": "application/json;charset=UTF-8"
 				},
 				data: JSON.stringify({
 					"Location": sourceLocation,
-					"Name": name
+					"Name": _name
 				}),
 				timeout: 15000
 			}).then(function(result) {
@@ -476,13 +455,13 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		/**
 		 * Returns the contents or metadata of the file at the given location.
 		 *
-		 * @param {String} location The location of the file to get contents for
+		 * @param {String} loc The location of the file to get contents for
 		 * @param {Boolean} [isMetadata] If defined and true, returns the file metadata, 
 		 *   otherwise file contents are returned
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
-		read: function(location, isMetadata, acceptPatch) {
-			var url = new URL(location, self.location);
+		read: function(loc, isMetadata, acceptPatch) {
+			var url = new URL(loc, self.location);
 			if (isMetadata) {
 				url.query.set("parts", "meta");
 			}
@@ -494,7 +473,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				if (isMetadata) {
 					var r = result.response ? JSON.parse(result.response) : null;
 					if (url.query.get("tree") === "compressed") {
-						expandLocations(r)
+						expandLocations(r);
 					}
 					return r;
 				} else {
@@ -519,8 +498,8 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 * @param {String|Object} args Additional arguments used during write operation (i.e. ETag) 
 		 * @return A deferred for chaining events after the write completes with new metadata object
 		 */		
-		write: function(location, contents, args) {
-			var url = new URL(location, self.location);
+		write: function(loc, contents, args) {
+			var url = new URL(loc, self.location);
 			
 			var headerData = {
 					"Orion-Version": "1",
@@ -678,18 +657,18 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 	}
 
 	if (self.Blob) {
-		FileServiceImpl.prototype.readBlob = function(location) {
-			return _call2("GET", location).then(function(result) {
+		FileServiceImpl.prototype.readBlob = function(loc) {
+			return _call2("GET", loc).then(function(result) {
 				return result;
 			});
 		};
 
-		FileServiceImpl.prototype.writeBlob = function(location, contents, args) {
+		FileServiceImpl.prototype.writeBlob = function(loc, contents, args) {
 			var headerData = {};
 			if (args && args.ETag) {
 				headerData["If-Match"] = args.ETag;
 			}
-			return _call2("PUT", location, headerData, contents);
+			return _call2("PUT", loc, headerData, contents);
 		};
 	}
 	

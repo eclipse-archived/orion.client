@@ -16,9 +16,8 @@
 define([
 'orion/objects',
 'orion/Deferred',
-'javascript/lru',
-'orion/fileMap'
-], function(Objects, Deferred, LRU, FileMap) {
+'javascript/lru'
+], function(Objects, Deferred, LRU) {
     
     /**
      * @name ScriptResolver
@@ -68,7 +67,8 @@ define([
            var icon = opts.icon ? opts.icon : '../javascript/images/javascript.png'; //$NON-NLS-1$
            var type = opts.type ? opts.type : 'JavaScript'; //$NON-NLS-1$
            var dotext = '.'+ext;
-           var filename = name.replace(/^i18n!/, '');
+           var pref = this._removePrefix(name);
+           var filename = pref.length > 1 ? pref[1] : pref[0];
            var idx = filename.lastIndexOf('/');
            var searchname = filename.slice(idx+1);
 
@@ -109,6 +109,20 @@ define([
        },
        
        /**
+        * @description Removes the prefix of a name a la requirejs
+        * @param {String} name The name to remove the prefix from 
+        * @returns {Array.<String>} The array of prefix followed by the trimmed name, or an array with a single entry (if no prefix was removed).
+        * @since 10.0
+        */
+       _removePrefix: function _removePrefix(name) {
+       		var idx = name.indexOf('!');
+       		if(idx > -1) {
+       			return name.split('!');
+       		} 
+  			return [name];
+       },
+       
+       /**
         * @description Resolves the files that match the given location
         * @function
         * @param {String} path The path to resolve against
@@ -121,7 +135,8 @@ define([
 		    if(files && files.length > 0 && metadata) {
 		        var filepath = metadata.location;
 		        var _files = [];
-		        var _p = path.replace(/^i18n!/, '');
+		        var pref = this._removePrefix(path);
+		        var _p = pref.length > 1 ? pref[1] : pref[0];
 		        filepath = filepath.slice(0, filepath.lastIndexOf('/'));
 		        var relative = false;
 		        if(_p.charAt(0) !== '.') {
