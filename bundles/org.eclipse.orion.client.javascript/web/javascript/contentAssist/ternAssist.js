@@ -60,7 +60,7 @@ define([
 					this.removePrefix(prefix, proposal);
 					proposal.kind = 'js'; //$NON-NLS-1$
 					if (kind.kind === 'jsdoc' || kind.kind === 'doc'){
-						proposal.tags = [{content: '@', cssClass: 'iconTagBlue'}]; //$NON-NLS-1$ //$NON-NLS-2$
+						//TODO proposal.tags = [{content: '@', cssClass: 'iconTagBlue'}]; //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					proposals.push(proposal);
 				}
@@ -579,7 +579,7 @@ define([
         proposal.name = proposal.proposal = completion.name;
         if(typeof(completion.type) !== 'undefined') {
             if(/^fn/.test(completion.type)) {
-            	proposal.tags = [{content: 'F', cssClass: 'iconTagPurple'}]; //$NON-NLS-1$ //$NON-NLS-2$
+            	//TODO proposal.tags = [{content: 'F', cssClass: 'iconTagPurple'}]; //$NON-NLS-1$ //$NON-NLS-2$
             	calculateFunctionProposal(completion, args, proposal);
             } else if(completion.type === 'template') {
             	var _t = new mTemplates.Template(args.params.prefix, completion.description, completion.template, completion.name);
