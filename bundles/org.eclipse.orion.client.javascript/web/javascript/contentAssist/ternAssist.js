@@ -9,7 +9,7 @@
  * Contributors:
  *   IBM Corporation - Various improvements
  ******************************************************************************/
-/*eslint-env amd, browser*/
+/*eslint-env amd, browser, node*/
 define([
 	'i18n!javascript/nls/messages',
     'orion/Deferred',
@@ -201,6 +201,10 @@ define([
         		            return {kind:'doc', node: node};
         		        }
     		        }
+    		        break;
+	            }
+	            case 'Line': {
+	            	return {kind: 'linedoc', node: node};
 	            }
 	            //$FALLTHROUGH$
 	            default: return null;
@@ -447,7 +451,7 @@ define([
        		params.prefix = getPrefix(params, kind, ast.source);
        		var proposals = [].concat(createDocProposals(params, kind, ast, ast.source, contributedEnvs),
        								  createTemplateProposals(params, kind, ast.source));
-       		if(kind && (kind.kind === 'jsdoc' || kind.kind === 'doc')) {
+       		if(kind && (kind.kind === 'jsdoc' || kind.kind === 'doc' || kind.kind === 'linedoc')) {
        			return new Deferred().resolve(proposals); //resolve now, no need to talk to the worker
        		} else {
        			var env = this.getActiveEnvironments(ast, envs);
@@ -632,7 +636,7 @@ define([
 		var positions = [];
 		proposal.relevance += 5;
 		var type = completion.type.slice(2);
-		var ret = /\s*->\s*(\w*|\d*|(?:fn\(.*\))|(?:\[.*\]))$/.exec(type);
+		var ret = /\s*->\s*(\?|(?:fn\(.*\))|(?:\[.*\])|(?:\w*\.*\w*))$/.exec(type);
 		if(ret) {
 			proposal.description = ' : ' + convertTypes(ret[1]); //$NON-NLS-1$
 			type = type.slice(0, ret.index);
@@ -656,6 +660,10 @@ define([
 		if(positions.length > 0) {
 			proposal.positions = positions;
 		}
+	}
+	
+	function getReturnType(type) {
+		
 	}
 
 	function collectParams(type) {

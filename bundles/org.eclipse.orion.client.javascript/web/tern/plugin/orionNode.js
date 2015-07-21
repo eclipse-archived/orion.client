@@ -103,7 +103,8 @@
       
     if (locals[name] && /^[a-z_]*$/.test(name)) {
       result = locals[name];
-    } else if (!wsname && name in data.modules) {
+    } else if (name in data.modules) {
+      //ORION choose index over workspace
       result = data.modules[name];
     } else if (data.options.modules && data.options.modules.hasOwnProperty(name)) {
       var scope = buildWrappingScope(cx.topScope, name);

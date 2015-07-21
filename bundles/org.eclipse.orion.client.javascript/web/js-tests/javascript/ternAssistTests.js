@@ -29,7 +29,16 @@ define([
 		if(typeof(ev.data) === 'object') {
 			var _d = ev.data;
 			if(_d.request === 'read') {
-				ternworker.postMessage({request: 'read', args: {contents: state.buffer, file: state.file}});
+				if(fileMap && _d.args.file.logical) {
+					var _f = fileMap[_d.args.file.logical];
+					if(_f) {
+						ternworker.postMessage({request: 'read', args: {contents: state.buffer, file: state.file, logical: _d.args.file.logical}});
+					} else {
+						ternworker.postMessage({request: 'read', args: {logical: _d.args.file.logical, error: 'could not read test file'}});
+					}
+				} else {
+					ternworker.postMessage({request: 'read', args: {contents: state.buffer, file: state.file}});
+				}
 			} else if(typeof(_d.request) === 'string') {
 				//don't process requests other than the ones we want
 				return;
@@ -72,7 +81,8 @@ define([
 	var ternAssist = new TernAssist.TernContentAssist(astManager, ternworker, function() {
 			return new Deferred().resolve(envs);
 		});
-
+		
+	var fileMap = Object.create(null);
 	/**
 	 * @description Sets up the test
 	 * @param {Object} options The options the set up with
@@ -80,6 +90,7 @@ define([
 	 */
 	function setup(options) {
 		state = Object.create(null);
+		fileMap = Object.create(null);
 		var buffer = state.buffer = typeof(options.buffer) === 'undefined' ? '' : options.buffer,
 		    prefix = state.prefix = typeof(options.prefix) === 'undefined' ? '' : options.prefix,
 		    offset = state.offset = typeof(options.offset) === 'undefined' ? 0 : options.offset,
@@ -1564,76 +1575,205 @@ define([
 				     ]);
 			});
 		});
-//		describe('MySQl Index Tests', function() {
-//			/**
-//			 * Tests mysql index
-//			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
-//			 * @since 7.0
-//			 */
-//			it("test mysql index 1", function(done) {
-//				var options = {
-//					buffer: "require('mysql').createP", 
-//					prefix: "createP", 
-//					offset: 24,
-//					callback: done
-//				};
-//				testProposals(options, [
-//					['', 'mysql'],
-//				    ['ool', 'createPool(config) : Pool'],
-//				    ['oolCluster', 'createPoolCluster(config) : PoolCluster']
-//				]);
-//			});
-//			/**
-//			 * Tests mysql index
-//			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
-//			 * @since 7.0
-//			 */
-//			it("test mysql index 2", function(done) {
-//				var options = {
-//					buffer: "require('mysql').createC", 
-//					prefix: "createC", 
-//					offset: 25,
-//					callback: done
-//				};
-//				testProposals(options, [
-//					['', 'mysql'],
-//				    ['onnection', 'createConnection(config) : Connection']
-//				]);
-//			});
-//			/**
-//			 * Tests mysql index
-//			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
-//			 * @since 7.0
-//			 */
-//			it("test mysql index 3", function(done) {
-//				var options = {
-//					buffer: "require('mysql').createQ", 
-//					prefix: "createQ", 
-//					offset: 25,
-//					callback: done
-//				};
-//				testProposals(options, [
-//					['', 'mysql'],
-//				    ['uery', 'createQuery(sql, values, cb) : Query']
-//				]);
-//			});
-//			/**
-//			 * Tests mysql index for indirect proposals
-//			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
-//			 * @since 7.0
-//			 */
-//			it("test mysql index 4", function(done) {
-//				var options = {
-//					buffer: "require('mysql').createQuery(null,null,null).sta",
-//					prefix: "sta", 
-//					offset: 47,
-//					callback:done
-//				};
-//				testProposals(options, [
-//					['', 'mysql'],
-//				    ['rt', 'start()']
-//				]);
-//			});
-//		});
+		describe('MySQl Index Tests', function() {
+			/*
+			 * Tests mysql index
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+			 * @since 7.0
+			 */
+			it("test mysql index 1", function(done) {
+				var options = {
+					buffer: "/*eslint-env mysql*/ require('mysql').createP", 
+					prefix: "createP", 
+					offset: 45,
+					callback: done
+				};
+				testProposals(options, [
+					['', 'mysql'],
+				    ['createPool(config)', 'createPool(config) : mysql.Pool'],
+				    ['createPoolCluster(config?)', 'createPoolCluster(config?) : mysql.PoolCluster']
+				]);
+			});
+			/*
+			 * Tests mysql index
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+			 * @since 7.0
+			 */
+			it("test mysql index 2", function(done) {
+				var options = {
+					buffer: "/*eslint-env mysql*/ require('mysql').createPoolC", 
+					prefix: "createPoolC", 
+					offset: 49,
+					callback: done
+				};
+				testProposals(options, [
+					['', 'mysql'],
+				    ['createPoolCluster(config?)', 'createPoolCluster(config?) : mysql.PoolCluster']
+				]);
+			});
+			/*
+			 * Tests mysql index
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+			 * @since 7.0
+			 */
+			it("test mysql index 3", function(done) {
+				var options = {
+					buffer: "/*eslint-env mysql*/ require('mysql').createQ", 
+					prefix: "createQ", 
+					offset: 45,
+					callback: done
+				};
+				testProposals(options, [
+					['', 'mysql'],
+				    ['createQuery(sql)', 'createQuery(sql)']
+				]);
+			});
+			/*
+			 * Tests mysql index for indirect proposals
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+			 * @since 7.0
+			 */
+			it("test mysql index 4", function(done) {
+				var options = {
+					buffer: "/*eslint-env mysql*/ require('mysql').createQuery(null,null,null).sta",
+					prefix: "sta", 
+					offset: 69,
+					callback:done
+				};
+				testProposals(options, [
+					['', 'mysql'],
+				    ['start()', 'start()'],
+				    ['', 'ecma6'],
+				    ['startsWith(searchString, position?)', 'startsWith(searchString, position?) : bool']
+				]);
+			});
+			/**
+			 * Tests no proposals are returned without the eslint-env directive
+			 * @since 10.0
+			 */
+			it("test mysql empty 1", function(done) {
+				var options = {
+					buffer: "require('mysql').createQuery(null,null,null).",
+					prefix: "sta", 
+					offset: 45,
+					callback:done
+				};
+				testProposals(options, [
+				]);
+			});
+		});
+		describe('Comment Assist Tests', function() {
+			/**
+			 * Tests line comments
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
+			 * @since 7.0
+			 */
+			it("test line comment 1", function(done) {
+				var options = {
+					buffer: "//  ", 
+					prefix: "", 
+					offset: 4,
+					callback: done};
+				testProposals(options, []);
+			});
+			
+			/**
+			 * Tests line comments
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
+			 * @since 7.0
+			 */
+			it("test line comment 2", function(done) {
+				var options = {
+					buffer: "// foo ", 
+					prefix: "", 
+					offset: 3,
+					callback: done};
+				testProposals(options, []);
+			});
+			
+			/**
+			 * Tests line comments
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
+			 * @since 7.0
+			 */
+			it("test line comment 3", function(done) {
+				var options = {
+					buffer: "// foo ", 
+					prefix: "", 
+					offset: 7,
+					callback: done};
+				testProposals(options, []);
+			});
+			
+			/**
+			 * Tests line comments
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
+			 * @since 7.0
+			 */
+			it("test line comment 4", function(done) {
+				var options = {
+					buffer: "// cur ", 
+					prefix: "c", 
+					offset: 4,
+					callback: done};
+				testProposals(options, []);
+			});
+			
+			/**
+			 * Tests line comments
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
+			 * @since 7.0
+			 */
+			it("test line comment 5", function(done) {
+				var options = {
+					buffer: "// es ", 
+					prefix: "es", 
+					offset: 5,
+					callback: done};
+				testProposals(options, []);
+			});
+			
+			/**
+			 * Tests line comments
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444001
+			 * @since 7.0
+			 */
+			it("test line comment 6", function(done) {
+				var options = {
+					buffer: "// .", 
+					prefix: "", 
+					offset: 4,
+					callback: done};
+				testProposals(options, []);
+			});
+			
+			/**
+			 * Tests line comments
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444001
+			 * @since 7.0
+			 */
+			it("test line comment 7", function(done) {
+				var options = {
+					buffer: "// . es", 
+					prefix: "", 
+					offset: 4,
+					callback: done};
+				testProposals(options, []);
+			});
+			
+			/**
+			 * Tests line comments
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444001
+			 * @since 7.0
+			 */
+			it("test line comment 8", function(done) {
+				var options = {
+					buffer: "// es .", 
+					prefix: "", 
+					offset: 7,
+					callback: done};
+				testProposals(options, []);
+			});
+		});
 	});
 });
