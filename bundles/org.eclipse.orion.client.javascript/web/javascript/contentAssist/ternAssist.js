@@ -606,6 +606,8 @@ define([
         	proposal.isKeyword = true;
         	completion.doc = Messages['keywordHoverProposal'];
         	completion.url = getKeywordLink(proposal.name);
+        } else {
+        	proposal.description = '';
         }
         obj = Object.create(null);
         obj.type = 'markdown'; //$NON-NLS-1$

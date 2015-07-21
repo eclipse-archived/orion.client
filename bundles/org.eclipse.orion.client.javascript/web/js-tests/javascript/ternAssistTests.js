@@ -246,6 +246,576 @@ define([
 					["coo", "coo : number"]
 				]);
 			});
+			it("test full file inferecing 1", function(done) {
+				var options = {
+					buffer: "x;\n var x = 0;", 
+					prefix: "x", 
+					offset: 1,
+					callback: done};
+				return testProposals(options, [
+					["x", "x : number"]
+				]);
+			});
+			it("test full file inferecing 2", function(done) {
+				var options = {
+					buffer: "function a() { x; }\n var x = 0;", 
+					prefix: "x", 
+					offset: 16,
+					callback: done};
+				return testProposals(options, [
+					["x", "x : number"]
+				]);
+			});
+			it("test full file inferecing 3", function(done) {
+				var options = {
+					buffer: "function a() { var y = x; y}\n var x = 0;", 
+					prefix: "y", 
+					offset: 27,
+					callback: done};
+				return testProposals(options, [
+					["y", "y : number"]
+				]);
+			});
+			it("test full file inferecing 4", function(done) {
+				var options = {
+					buffer: "function a() { var y = x.fff; y}\n var x = { fff : 0 };", 
+					prefix: "y", 
+					offset: 31,
+					callback: done};
+				return testProposals(options, [
+					["y", "y : number"]
+				]);
+			});
+			it("test full file inferecing 5", function(done) {
+				var options = {
+					buffer: "function a() { var y = x.fff; y}\n var x = {};\n x.fff = 8;", 
+					prefix: "y", 
+					offset: 31,
+					callback: done};
+				return testProposals(options, [
+					["y", "y : number"]
+				]);
+			});
+			it("test full file inferecing 6", function(done) {
+				var options = {
+					buffer: "function a() { x.fff = ''; var y = x.fff; y}\n" +
+					"var x = {};\n" +
+					"x.fff = 8;",
+					prefix: "y", 
+					offset: 43,
+					callback: done};
+				return testProposals(options, [
+					["y", "y : string|number"]
+				]);
+			});
+			it("test full file inferecing 7", function(done) {
+				var options = {
+					buffer: "function a() { x.fff = ''; var y = x(); y}\n" +
+					"var x = function() { return 8; }", 
+					prefix: "y", 
+					offset: 41,
+					callback: done};
+				return testProposals(options, [
+					["y", "y : number"]
+				]);
+			});
+			it("test full file inferecing 8", function(done) {
+				var options = {
+					buffer: "function a() { x.fff = ''; var y = z(); y}\n" +
+					"var x = function() { return 8; }, z = x", 
+					prefix: "y", 
+					offset: 41,
+					callback: done};
+				return testProposals(options, [
+					["y", "y : number"]
+				]);
+			});
+		
+			it("test full file inferecing 9", function(done) {
+				var options = {
+					buffer: "function a() {\n function b() {\n x.fff = '';\n }\n x.f\n}\n var x = {};", 
+					prefix: "f", 
+					offset: 51,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+			it("test full file inferecing 10", function(done) {
+				var options = {
+					buffer: "function a() {\n function b() {\n x.fff = '';\n }\n var y = x;\n y.f\n }\n var x = {};", 
+					prefix: "f", 
+					offset: 63,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+		
+			it("test full file inferecing 11a", function(done) {
+				var options = {
+					buffer: "var x = {};\n function a() {\n var y = x;\n y.f\n function b() {\n x.fff = '';\n}\n}", 
+					prefix: "f", 
+					offset: 44,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+		
+			it("test full file inferecing 11", function(done) {
+				var options = {
+					buffer: "function a() {\n var y = x;\n y.f\n function b() {\n x.fff = '';\n }\n }\n var x = {};", 
+					prefix: "f", 
+					offset: 31,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+		
+			it("test full file inferecing 12", function(done) {
+				var options = {
+					buffer: "function a() {\n var y = x;\n y.f\n x.fff = '';\n }\n var x = {};", 
+					prefix: "f", 
+					offset: 31,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+		
+			it("test full file inferecing 13", function(done) {
+				var options = {
+					buffer: "function b() {\n x.fff = '';\n }\n function a() {\n var y = x;\n y.f\n }\n var x = {};", 
+					prefix: "f", 
+					offset: 63,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+		
+			it("test full file inferecing 14", function(done) {
+				var options = {
+					buffer: "function a() {\n  var y = x;\n y.f\n }\n function b() {\n x.fff = '';\n }\n var x = {};", 
+					prefix: "f", 
+					offset: 32,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+		
+			it("test full file inferecing 15", function(done) {
+				var options = {
+					buffer: "function b() {\n x.fff = '';\n }\n function a() {\n x.f\n }\n var x = {};", 
+					prefix: "f", 
+					offset: 51,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+		
+			// should still find the fff property here evem though it
+			// is defined after and in another funxtion
+			it("test full file inferecing 16", function(done) {
+				var options = {
+					buffer: "function a() {\n x.f\n }\n function b() {\n x.fff = '';\n }\n var x = {};", 
+					prefix: "f", 
+					offset: 19,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+			it("test full file inferecing 17", function(done) {
+				var options = {
+					buffer: "function a() {\n x.f\n function b() {\n x.fff = '';\n }\n }\n var x = {};", 
+					prefix: "f", 
+					offset: 19,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+		
+			it("test full file inferecing 18", function(done) {
+				var options = {
+					buffer: "function a() {\n x.fff = '';\n function b() {\n x.f\n }\n }\n var x = {};", 
+					prefix: "f", 
+					offset: 48,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+		
+			it("test full file inferecing 19", function(done) {
+				var options = {
+					buffer: "function a() {\n function b() {\n x.f\n }\n x.fff = '';\n }\n var x = {};", 
+					prefix: "f", 
+					offset: 35,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+		
+			// don't find anything because assignment is in same scope, but after
+			it("test full file inferecing 20", function(done) {
+				var options = {
+					buffer: "x.\n" +
+					"var x = {};\n" +
+					"x.fff = '';", 
+					prefix: "f", 
+					offset: 2,
+					callback: done};
+				return testProposals(options, [
+					['fff', 'fff : string']
+				]);
+			});
+		
+			it("test full file inferecing 21", function(done) {
+				var options = {
+					buffer: "function a() {\n x.fff = '';\n }\n x.\n var x = {}; ", 
+					prefix: "f", 
+					offset: 34,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+		
+			it("test full file inferecing 22", function(done) {
+				var options = {
+					buffer: "x.\n" +
+					"function a() {\n" +
+					"x.fff = '';\n" +
+					"}\n" +
+					"var x = {}; ", 
+					prefix: "f", 
+					offset: 2,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+		
+			it("test full file inferecing 26", function(done) {
+				var options = {
+					buffer: "function a() {\n function b() {\n var fff = x();\n f;\n }\n }\n function x() { return ''; }", 
+					prefix: "f", 
+					offset: 49,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"],
+				]);
+			});
+		
+			// Not inferencing String because function decl comes after reference in same scope
+			it("test full file inferecing 27", function(done) {
+				var options = {
+					buffer: "var fff = x();\n f;\n function x() { return ''; }", 
+					prefix: "f", 
+					offset: 17,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+		
+			// Not gonna work because of recursive
+			it("test full file inferecing 28", function(done) {
+				var options = {
+					buffer: "function x() {\n var fff = x();\n f;\n return ''; }", 
+					prefix: "f", 
+					offset: 33,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"],
+				]);
+			});
+		
+			it("test full file inferecing 29", function(done) {
+				var options = {
+					buffer: "function a() {\n function b() {\n var fff = x();\n f;\n }\n }\n var x = function() { return ''; }", 
+					prefix: "f", 
+					offset: 49,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"],
+				]);
+			});
+		
+			// Not working because function decl comes after reference in same scope
+			it("test full file inferecing 30", function(done) {
+				var options = {
+					buffer: "var fff = x();\n f;\n var x = function() { return ''; }", 
+					prefix: "f", 
+					offset: 17,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"]
+				]);
+			});
+		
+			// Not gonna work because of recursive
+			it("test full file inferecing 31", function(done) {
+				var options = {
+					buffer: "var x = function() { var fff = x();\nf;return ''; }", 
+					prefix: "f", 
+					offset: 37,
+					callback: done};
+				return testProposals(options, [
+					["fff", "fff : string"],
+				]);
+			});
+		
+			it("test full file inferecing 32", function(done) {
+				var options = {
+					buffer: "x\n function x() { return ''; }", 
+					prefix: "x", 
+					offset: 1,
+					callback: done};
+				return testProposals(options, [
+					["x()", "x() : string"]
+				]);
+			});
+		
+			it("test full file inferecing 33", function(done) {
+				var options = {
+					buffer: "var xxx = {\n aaa: '',\n bbb: this.a\n};", 
+					prefix: "a", 
+					offset: 34,
+					callback: done};
+				return testProposals(options, [
+					//TODO bug in Tern? ["aaa", "aaa : string"]
+				]);
+			});
+		
+			it("test full file inferecing 34", function(done) {
+				var options = {
+					buffer: "var xxx = {\n" +
+					"	bbb: this.a,\n" +
+					"	aaa: ''\n" +
+					"};", 
+					prefix: "a", 
+					offset: 24,
+					callback: done};
+				return testProposals(options, [
+					//TODO bug in Tern? ["aaa", "aaa : string"]
+				]);
+			});
+			it("test property read before", function(done) {
+				var options = {
+					buffer: "var xxx; xxx.lll++; xxx.ll", 
+					prefix: "ll",
+					offset: 26,
+					callback: done};
+				return testProposals(options, [
+					["lll", "lll"]
+				]);
+			});
+		
+			it("test property read after", function(done) {
+				var options = {
+					buffer: "var xxx;\n" +
+					"xxx.ll;\n" +
+					"xxx.lll++;", 
+					prefix: "ll", 
+					offset: 15,
+					callback: done};
+				return testProposals(options, [
+					["lll", "lll"]
+				]);
+			});
+		
+			it("test property read global before", function(done) {
+				var options = {
+					buffer: "lll++; ll", 
+					prefix: "ll",
+					offset: 9,
+					callback: done};
+				return testProposals(options, [
+					//TODO ["lll", "lll"]
+				]);
+			});
+		
+			it("test property read global after", function(done) {
+				var options = {
+					buffer: "ll; lll++;", 
+					prefix: "ll", 
+					offset: 2,
+					callback: done};
+				return testProposals(options, [
+					//TODO ["lll", "lll"]
+				]);
+			});
+			
+			it("test array parameterization 1", function(done) {
+				var options = {
+					buffer: "var x = [1]; x[foo].toFi", 
+					prefix: "toFi",
+					offset: 24,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test array parameterization 2", function(done) {
+				var options = {
+					buffer: "var x = [1]; x[0].toFi", 
+					prefix: "toFi",
+					offset: 22,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test array parameterization 3", function(done) {
+				var options = {
+					buffer: "var x = [1]; x['foo'].toFi", 
+					prefix: "toFi",
+					offset: 26,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test array parameterization 4", function(done) {
+				var options = {
+					buffer: "([1, 0])[0].toFi", 
+					prefix: "toFi",
+					offset: 16,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test array parameterization 5", function(done) {
+				var options = {
+					buffer: "var x = [[1]]; x[0][0].toFi", 
+					prefix: "toFi",
+					offset: 27,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test array parameterization 6", function(done) {
+				var options = {
+					buffer: "var x = [{}];x[0].a = 8; x[0].a.toFi", 
+					prefix: "toFi",
+					offset: 36,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test array parameterization 7", function(done) {
+				var options = {
+					buffer: "var a = {a : 8}; var x = [a]; x[0].a.toFi", 
+					prefix: "toFi",
+					offset: 41,
+					callback: done};
+					// may not work because a string
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test array parameterization 8", function(done) {
+				var options = {
+					buffer: "var x = [[1]]; x = x[0]; x[0].toFi", 
+					prefix: "toFi",
+					offset: 34,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test array parameterization 9", function(done) {
+				var options = {
+					buffer: "var x = []; x[9] = 0; x[0].toFi", 
+					prefix: "toFi",
+					offset: 31,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test array parameterization 10", function(done) {
+				var options = {
+					buffer: "var x = []; x[9] = ''; x[9] = 0; x[0].toFi", 
+					prefix: "toFi",
+					offset: 42,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test array parameterization 11", function(done) {
+				var options = {
+					buffer: "var x = (function() { return [0]; })(); x[9] = 0; x[0].toFi", 
+					prefix: "toFi",
+					offset: 59,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test array parameterization 12", function(done) {
+				var options = {
+					buffer: "var x = ['','','']; x[9] = 0; x[0].toFi", 
+					prefix: "toFi",
+					offset: 39,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+		
+			// https://github.com/scripted-editor/scripted/issues/65
+			it("test case insensitive ordering 1", function(done) {
+				var options = {
+					buffer: "var xXXX = 8; var xXYZ = 8; var xxxx = 8; var xxyz = 8; x", 
+					prefix: "x",
+					offset: 57,
+					callback: done};
+				return testProposals(options, [
+					["xXXX", "xXXX : number"],
+					["xXYZ", "xXYZ : number"],
+					["xxxx", "xxxx : number"],
+					["xxyz", "xxyz : number"]
+				]);
+			});
+			// https://github.com/scripted-editor/scripted/issues/65
+			it("test case insensitive ordering 2", function(done) {
+				var options = {
+					buffer: "var xXYZ = 8;var xxxx = 8; var xXXX = 8; var xxyz = 8; x", 
+					prefix: "x",
+					offset: 56,
+					callback: done};
+				return testProposals(options, [
+					["xXXX", "xXXX : number"],
+					["xXYZ", "xXYZ : number"],
+					["xxxx", "xxxx : number"],
+					["xxyz", "xxyz : number"]
+				]);
+			});
 		});
 		describe('Incomplete Syntax', function() {
 			/**
@@ -1123,6 +1693,90 @@ define([
 					["message", "message : string"]
 				]);
 			});
+			/**
+			 * Tests RegExp proposals
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426733
+			 * @since 7.0
+			 */
+			it("test RegExp literal 1", function(done) {
+				var options = {
+					buffer: "/^.*/.t", 
+					prefix: "t", 
+					offset: 6,
+					callback: done};
+				testProposals(options, [
+						['', 'ecma5'],
+						['test(input)', 'test(input) : bool'],
+						['toLocaleString()', 'toLocaleString() : string'],
+						['toString()', 'toString() : string'],
+					]);
+			});
+			
+			/**
+			 * Tests RegExp proposals
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426733
+			 * @since 7.0
+			 */
+			it("test RegExp literal 2", function(done) {
+				var options = {
+					buffer: "/^.*/.e", 
+					prefix: "e", 
+					offset: 7,
+					callback: done};
+				testProposals(options, [
+						['', 'ecma5'],
+						['exec(input)', 'exec(input) : [string]']
+					]);
+			});
+			
+			/**
+			 * Tests proposal doc for function expressions
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=458693
+			 * @since 8.0
+			 */
+			it("test func expr doc 1", function(done) {
+				var options = {
+					buffer: "var f = { /** \n* @returns {Array.<String>} array or null\n*/\n one: function() {}};\n f.", 
+					prefix: "o", 
+					offset: 85,
+					callback: done};
+				testProposals(options, [
+				//TODO should we use guessing here?
+					['one()', 'one()']
+				]);
+			});
+			
+			/**
+			 * Tests proposal doc for function expressions
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=458693
+			 * @since 8.0
+			 */
+			it("test func expr doc 2", function(done) {
+				var options = {
+					buffer: "var f = { /** \n* @return {Array.<String>} array or null\n*/\n one: function() {}};\n f.", 
+					prefix: "o", 
+					offset: 84,
+					callback: done};
+				testProposals(options, [
+					['one()', 'one()']
+				]);
+			});
+			
+			/**
+			 * Tests proposal doc for function decls
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=458693
+			 * @since 8.0
+			 */
+			it("test func decl doc 1", function(done) {
+				var options = {
+					buffer: "/** @returns {Object} Something or nothing */ function z(a) {} z", 
+					prefix: "z", 
+					offset: 64,
+					callback: done};
+				testProposals(options, [
+					['z(a)', 'z(a)']
+				]);
+			});
 		});
 		describe('Function Templates and Keywords', function() {
 			/**
@@ -1658,6 +2312,106 @@ define([
 					offset: 45,
 					callback:done
 				};
+				testProposals(options, [
+				]);
+			});
+		});
+		describe('Redis Index Tests', function() {
+			/**
+			 * Tests redis index indirect proposals
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+			 * @since 7.0
+			 */
+			it("test redis index 1", function(done) {
+				var options = {
+					buffer: "/*eslint-env redis*/ require('redis').createClient(null, null, null).a", 
+					prefix: "a", 
+					offset: 70,
+					callback: done};
+				testProposals(options, [
+					['', 'redis'],
+				    ['append(key, value, callback?)', 'append(key, value, callback?)'],
+				    ['auth(password, callback?)', 'auth(password, callback?)']
+				]);
+			});
+			
+			/**
+			 * Tests redis index 
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+			 * @since 7.0
+			 */
+			it("test redis index 2", function(done) {
+				var options = {
+					buffer: "/*eslint-env redis*/ require('redis').c", 
+					prefix: "c", 
+					offset: 39,
+					callback: done};
+				testProposals(options, [
+					['', 'redis'],
+				    ['createClient(port_arg, host_arg?, options?)', 'createClient(port_arg, host_arg?, options?) : RedisClient']
+				]);
+			});
+			
+			/**
+			 * Tests redis index 
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+			 * @since 10.0
+			 */
+			it("test redis index no proposals 1", function(done) {
+				var options = {
+					buffer: "require('redis').c", 
+					prefix: "c", 
+					offset: 18,
+					callback: done};
+				testProposals(options, [
+				]);
+			});
+		});
+		describe('Postgres Index Tests', function() {
+			/**
+			 * Tests pg index indirect proposals
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+			 * @since 7.0
+			 */
+			it("test pg index 1", function(done) {
+				var options = {
+					buffer: "/*eslint-env pg*/require('pg').c", 
+					prefix: "c", 
+					offset: 32,
+					callback: done};
+				testProposals(options, [
+					['', 'pg'],
+				    ['connect(connection, callback)', 'connect(connection, callback)'],
+				]);
+			});
+			
+			/**
+			 * Tests redis index 
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+			 * @since 7.0
+			 */
+			it("test pg index 2", function(done) {
+				var options = {
+					buffer: "/*eslint-env pg*/require('pg').Cl", 
+					prefix: "Cl", 
+					offset: 33,
+					callback: done};
+				testProposals(options, [
+					['', 'pg'],
+				    ['Client(connection)', 'Client(connection)']
+				]);
+			});
+			/**
+			 * Tests redis index 
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+			 * @since 10.0
+			 */
+			it("test pg index no proposals 1", function(done) {
+				var options = {
+					buffer: "require('pg').Cl", 
+					prefix: "Cl", 
+					offset: 16,
+					callback: done};
 				testProposals(options, [
 				]);
 			});
