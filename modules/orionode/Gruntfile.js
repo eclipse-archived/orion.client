@@ -1,4 +1,4 @@
-/*jslint node:true*/
+/*eslint-env node*/
 var _path = require("path"),
     utilFactory = require("./build/utils");
 module.exports = function(grunt) {
