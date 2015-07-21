@@ -41,8 +41,12 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-git-ignore/syntax', 'orion/
 				}
 			] 
 		});
-		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mGitIgnore.grammars[mGitIgnore.grammars.length - 1]);
-		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mGitConfig.grammars[mGitConfig.grammars.length - 1]);
+		mGitIgnore.grammars.forEach(function(current) {
+			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
+		});
+		mGitConfig.grammars.forEach(function(current) {
+			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
+		});
 	}
 
 	return {

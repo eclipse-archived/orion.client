@@ -33,7 +33,9 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-jade/syntax'], function(Plu
 				}
 			] 
 		});
-		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mJade.grammars[mJade.grammars.length - 1]);
+		mJade.grammars.forEach(function(current) {
+			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
+		});
 	}
 
 	return {

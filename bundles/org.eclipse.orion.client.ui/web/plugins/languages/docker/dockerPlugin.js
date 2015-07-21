@@ -33,7 +33,9 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-dockerfile/syntax'], functi
 				}
 			] 
 		});
-		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mDockerfile.grammars[mDockerfile.grammars.length - 1]);
+		mDockerfile.grammars.forEach(function(current) {
+			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
+		});
 	}
 
 	return {

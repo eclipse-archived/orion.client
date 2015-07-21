@@ -33,7 +33,9 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-haml/syntax'], function(Plu
 				}
 			] 
 		});
-		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mHaml.grammars[mHaml.grammars.length - 1]);
+		mHaml.grammars.forEach(function(current) {
+			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
+		});
 	}
 
 	return {

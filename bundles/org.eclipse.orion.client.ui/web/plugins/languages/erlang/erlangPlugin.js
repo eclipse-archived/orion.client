@@ -33,7 +33,9 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-erlang/syntax'], function(P
 				}
 			] 
 		});
-		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mErlang.grammars[mErlang.grammars.length - 1]);
+		mErlang.grammars.forEach(function(current) {
+			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
+		});
 	}
 
 	return {

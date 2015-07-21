@@ -33,7 +33,9 @@ define(['orion/plugin', 'orion/form', 'orion/editor/stylers/text_x-go/syntax'], 
 				}
 			] 
 		});
-		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mGo.grammars[mGo.grammars.length - 1]);
+		mGo.grammars.forEach(function(current) {
+			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
+		});
 		pluginProvider.registerServiceProvider("orion.edit.contentAssist", {
 			computeProposals: function (buffer, offset, context) {
 				var NL = context.delimiter;

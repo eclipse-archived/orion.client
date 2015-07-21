@@ -39,7 +39,9 @@ define(['orion/plugin', 'orion/editor/stylers/application_xml/syntax'], function
 				}
 			] 
 		});
-		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mXML.grammars[mXML.grammars.length - 1]);
+		mXML.grammars.forEach(function(current) {
+			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
+		});
 	}
 
 	return {

@@ -33,7 +33,9 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-c__src/syntax'], function(P
 				}
 			] 
 		});
-		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mCPP.grammars[mCPP.grammars.length - 1]);
+		mCPP.grammars.forEach(function(current) {
+			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
+		});
 	}
 
 	return {

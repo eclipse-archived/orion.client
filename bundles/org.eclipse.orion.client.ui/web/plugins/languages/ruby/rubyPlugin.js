@@ -33,7 +33,9 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-ruby/syntax'], function(Plu
 				}
 			] 
 		});
-		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mRuby.grammars[mRuby.grammars.length - 1]);
+		mRuby.grammars.forEach(function(current) {
+			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
+		});
 	}
 
 	return {

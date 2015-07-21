@@ -33,7 +33,9 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-python/syntax'], function(P
 				}
 			] 
 		});
-		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mPython.grammars[mPython.grammars.length - 1]);
+		mPython.grammars.forEach(function(current) {
+			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
+		});
 	}
 
 	return {
