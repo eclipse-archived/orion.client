@@ -1243,6 +1243,13 @@
     if (arr) for (var i = 0; i < arr.length; ++i) arr[i].apply(null, args);
   }
 
+  var emptyAST = Object.create(null);
+	emptyAST.type = "Program"; //$NON-NLS-0$
+	emptyAST.body = [];
+	emptyAST.comments = [];
+	emptyAST.tokens = [];
+	emptyAST.range = [0, 0];
+
   var parse = exports.parse = function(text, passes, options) {
     var ast;
     try {
