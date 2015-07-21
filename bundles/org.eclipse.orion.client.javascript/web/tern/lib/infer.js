@@ -1270,8 +1270,13 @@
     //ORION
     catch(e) {
     	ast = emptyAST;
-		ast.range[1] = (text && typeof text.length === "number") ? text.length : 0;  //$NON-NLS-0$
+		ast.range[1] = typeof(text) === "string" ? text.length : 0;
 		ast.errors = [e];
+		if(typeof ast.sourceFile !== "object") {
+	        ast.sourceFile  = Object.create(null);
+	        ast.sourceFile.text = options.directSourceFile.text;
+	        ast.sourceFile.name = options.directSourceFile.name;
+        }
     }
     if (Array.isArray(ast.errors) && ast.errors.length > 0) {
 		_computeErrorTypes(ast.errors);
