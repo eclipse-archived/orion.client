@@ -419,20 +419,25 @@ define([
 		getAttributesForNode: function(node, params) {
 			var attrs = Attributes.getAttributesForNode(node);
 			var proposals = [];
-			for(var i = 0; i < attrs.length; i++) {
-				var attr = attrs[i];
+			for(var j = 0; j < attrs.length; j++) {
+				var attr = attrs[j];
 				var prefix = params.prefix ? params.prefix : "";
 				if(jsUtil.looselyMatches(prefix, attr.name) && !this._hasAttribute(node, attr.name)) {
-					var _h = Object.create(null);
-					 _h.type = 'markdown'; //$NON-NLS-1$
-			         _h.content = attr.doc;
+					var hover = Object.create(null);
+					 hover.type = 'markdown'; //$NON-NLS-1$
+			         hover.content = attr.doc ? attr.doc : "";
 			        if(attr.url) {
-			        	_h.content += i18nUtil.formatMessage(Messages['onlineDocumentation'], attr.url);
+			        	hover.content += i18nUtil.formatMessage(Messages['onlineDocumentation'], attr.url);
 			        }
-			        var _p = this.makeComputedProposal(attr.name, " ", _h, prefix); //$NON-NLS-1$
-			        _p.proposal = attr.name+'=""'; //$NON-NLS-1$
-			        _p.escapePosition = params.offset - prefix.length + attr.name.length + 2;
-					proposals.push(_p);
+			        var desc = " "; //$NON-NLS-1$
+			        if (attr.category){
+			        	// TODO The doc and categories are not translatable
+			        	desc = " - " + attr.category; //$NON-NLS-1$
+			        }
+			        var proposal = this.makeComputedProposal(attr.name, desc, hover, prefix); //$NON-NLS-1$
+			        proposal.proposal = attr.name+'=""'; //$NON-NLS-1$
+					proposal.escapePosition = params.offset - prefix.length + attr.name.length + 2;
+					proposals.push(proposal);
 				}
 			}
 			return proposals;	
