@@ -21,7 +21,7 @@ define([
     
     var astmanager = new ASTManager.HtmlAstManager();
     var assist = new HTMLAssist.HTMLContentAssistProvider(astmanager);
-    var tagTemplates = assist.getTemplates();
+    var tagTemplates = assist.getTags("", "");
     var globalTagAttributes = assist.getAttributesForNode({name: "zzz", type: "tag"}, {offset: 0, prefix: ""});
     
     /**
@@ -69,20 +69,19 @@ define([
     
     function assertTagProposals(computed){
     	// Add 1 for the title proposal
-    	assert(computed.length === tagTemplates.length+1, "Incorrect number of proposals for tag templates. Proposal count: " + computed.length + " Expected count: " + tagTemplates.length);
-    	assert(computed[0].proposal === "", "No templates header proposal found, not displaying tag templates");
-    	assert(computed[0].style === "noemphasis_title", "No templates header proposal found, not displaying tag templates");
+    	assert(computed.length === tagTemplates.length, "Incorrect number of proposals for tag templates. Proposal count: " + computed.length + " Expected count: " + tagTemplates.length);
+    	assert(computed[0].name === "a", "First proposal wasn't the tag 'a'");
     }
     
     function assertGlobalTagAttributes(computed){
-    	assert(computed.length === globalTagAttributes.length, "Incorrect number of proposals for tag attributes. Proposal count: " + computed.length + " Expected count: " + globalTagAttributes.length)
+    	assert(computed.length === globalTagAttributes.length, "Incorrect number of proposals for tag attributes. Proposal count: " + computed.length + " Expected count: " + globalTagAttributes.length);
     	assert(computed[0].name === "accesskey", "First proposal wasn't the tag attribute 'accesskey'.");
     }
     
     describe('HTML Content Assist Tests', function() {
     	it('Check there are tag templates and attribute map', function() {
-	    	assert(tagTemplates.length > 100, "Not enough tag templates. Template count: " + tagTemplates.length);
-	    	assert(tagTemplates.length < 120, "Too many tag templates. Template count: " + tagTemplates.length);
+	    	assert(tagTemplates.length > 120, "Not enough tag templates. Template count: " + tagTemplates.length);
+	    	assert(tagTemplates.length < 140, "Too many tag templates. Template count: " + tagTemplates.length);
 	    	assert(globalTagAttributes.length > 60, "Not enough global tag attributes. Global attribute count: " + globalTagAttributes.length);
 	    	assert(globalTagAttributes.length < 75, "Too many global tag attributes. Global attribute count: " + globalTagAttributes.length);
     	});

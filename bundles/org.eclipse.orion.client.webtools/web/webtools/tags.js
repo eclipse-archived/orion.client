@@ -17,6 +17,12 @@ define([
 	var tagTemplates = Object.create(null);
 	tagTemplates = [
 		{
+			name: "a",
+			category: "Text content",
+			doc: "The HTML Anchor Element (<a>) defines a hyperlink",
+			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a"
+		},
+		{
 			name: "abbr",
 			category: "Inline text semantics",
 			doc: "The HTML Abbreviation element (<abbr>) represents an abbreviation and optionally provides a full description for it. If present, the title attribute must contain this full description and nothing else.",

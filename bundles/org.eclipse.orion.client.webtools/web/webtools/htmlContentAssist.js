@@ -345,6 +345,7 @@ define([
 		 * @returns returns {Array.<Object>} The array of proposals
 		 */
 		getTags: function(source, params) {
+			// TODO It looks like tags.js is missing around 6 tags, including <a>
 			var tags = Tags.tagTemplates;
 			var proposals = [];
 			for(var j = 0; j < tags.length; j++) {
