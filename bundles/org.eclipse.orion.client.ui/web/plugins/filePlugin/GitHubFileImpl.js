@@ -20,18 +20,14 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 	//3: inject commit information to both meta data and each item of the return list of fetchChildren function
 	var commit_info_level = 1;
 	var use_gravatar_id = true;
-	function GitHubFileImpl(repoURL, token) {
+	function GitHubFileImpl(repoURL, token, apiAlias) {
 		this._originalRepoURL = repoURL;//Used for reference in error message to indicate a repo URL
-		var found = repoURL.match(/^(https\:\/\/(.*github.*\.com)(?:\:443)?\/)([^\/]+)\/([^\/]+).git$/);
+		var found = repoURL.match(/^(https\:\/\/(.*)(?:\:443)?\/)([^\/]+)\/([^\/]+).git$/);
 		if (!found) {
 			throw "Bad Github repository url " + repoURL;
 		}
 		var url = new URL(window.location.href);
-		var apiURL = url.origin + "/githubapi/github";
-		if (found[2] === "github.ibm.com") {
-			apiURL = url.origin + "/githubapi/githubibm";
-		}
-		this._repoURL = new URL(apiURL + "/repos/" + found[3] + "/" + found[4]);
+		this._repoURL = new URL(url.origin + apiAlias + "/repos/" + found[3] + "/" + found[4]);
 		this._commitURLBase = found[1] + found[3] + "/" + found[4] + "/commit/";
 		this._contentsPath = this._repoURL.pathname + "/contents";
 		this._headers = {
