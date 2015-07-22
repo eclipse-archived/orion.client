@@ -28,12 +28,16 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 			return preferences.getPreferences('/cm/configurations').then(function(settings){ //$NON-NLS-0$
 				var cloud = settings.get("org.eclipse.orion.client.cf.settings"); //$NON-NLS-0$
 				if (cloud && cloud.targetUrl){
-					var target = {};
-					target.Url = cloud.targetUrl;
-					target.Name = cloud.targetUrl;
+					var Target = {};
+					Target.clouds = [];
+					var newTarget = {}
+					newTarget.Url = cloud.targetUrl;
+					newTarget.Name = cloud.targetUrl;
 					if (cloud.manageUrl)
-						target.ManageUrl = cloud.manageUrl;
-					return [target];
+						newTarget.ManageUrl = cloud.manageUrl;
+					
+					Target.clouds.push(newTarget);
+					return Target;
 				}
 				return handleNoCloud();
 			}, handleNoCloud);

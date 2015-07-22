@@ -253,11 +253,11 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 				var self = this;
 
 				var getTargets = this._getTargets();
-				getTargets.then(function(targets){
+				getTargets.then(function(result){
 
-					targets.forEach(function(result){
-						if(result.Url === target.Url && result.ManageUrl){
-							target.ManageUrl = result.ManageUrl;
+					result.clouds.forEach(function(cloud){
+						if(cloud.Url === target.Url && cloud.ManageUrl){
+							target.ManageUrl = cloud.ManageUrl;
 						}
 					});
 
@@ -446,9 +446,9 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 					}
 					return appState;
 				}, function(error) {
-					return this._getTargets().then(function(targets){
-						if(targets){
-							targets.forEach(function(data){
+					return this._getTargets().then(function(result){
+						if(result.clouds){
+							result.clouds.forEach(function(data){
 								if (params.Target.Url === data.Url){
 									params.Target.meta = data;
 								}

@@ -116,22 +116,6 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'cfui/cfUtil',  'orion/urlUt
 		},
 		
 		/**
-		 * Retrieves the default target by passing the given resource file
-		 * meta-data to the cfUtil.getDefaultTarget method.
-		 */
-		getDefaultTarget : function(fileClient, resource){
-			var clientDeferred = new Deferred();
-			fileClient.read(resource.ContentLocation, true).then(function(result){
-					mCfUtil.getDefaultTarget(result).then(
-						clientDeferred.resolve,
-						clientDeferred.reject
-					);
-				}, clientDeferred.reject);
-			
-			return clientDeferred;
-		},
-		
-		/**
 		 * Makes the current iframe draggable.
 		 */
 		makeDraggable : function(frameHolder){
@@ -195,17 +179,9 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'cfui/cfUtil',  'orion/urlUt
 
 			fileClient.read(resource.ContentLocation, true).then(
 				function(result){
-					Deferred.all([
-						mCfUtil.getTargets(preferences, result),
-						mCfUtil.getDefaultTarget(result)
-					]).then(function(results){
-						
-						
-						hideMessage();
-						d.resolve({
-							clouds : results[0],
-							defaultTarget : results[1]
-						});
+					mCfUtil.getTargets(preferences, result).then(function(result){
+					hideMessage();
+					d.resolve(result);
 				}, d.reject);
 			}, d.reject);
 			
