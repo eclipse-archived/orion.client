@@ -91,8 +91,8 @@ mBootstrap.startup().then(function(core) {
 	function displayTargets(){
 		lib.empty(targetNode);
 
-		progressService.showWhile(mCfUtil.getTargets(preferences), messages["checkingForCloudFoundrySettings"]).then(function(targets){
-			selectedRegion = targets[0];
+		progressService.showWhile(mCfUtil.getTargets(preferences), messages["checkingForCloudFoundrySettings"]).then(function(result){
+			selectedRegion = result.clouds[0];
 
 			var targetTable = createElement("table", null, "centerTable");
 
@@ -119,7 +119,7 @@ mBootstrap.startup().then(function(core) {
 
 			targetNode.appendChild(targetTable);
 
-			fillRegionDropdown(targets);
+			fillRegionDropdown(result.clouds);
 			loadSelectedRegion();
 		}.bind(this),
 		function(error){
