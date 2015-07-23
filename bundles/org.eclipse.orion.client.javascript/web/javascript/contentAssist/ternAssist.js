@@ -250,7 +250,10 @@ define([
 	 */
 	function createDocProposals(params, kind, ast, buffer, pluginenvs) {
 	    var proposals = [];
-	    if(kind && kind.kind === 'jsdoc') {
+	    if(typeof(kind) !== 'object') {
+	    	return proposals;
+	    }
+	    if(kind.kind === 'jsdoc') {
 		    var offset = params.offset > params.prefix.length ? params.offset-params.prefix.length-1 : 0;
 		    switch(buffer.charAt(offset)) {
 		        case '{': {
@@ -264,40 +267,28 @@ define([
 		        }
 		        case '*':
 		        case ' ': {
-		            var node = Finder.findNode(kind.node.range[1], ast, {parents:true, next:true});
-    	               if(node) {
-    	                   var isdecl = node.type === 'FunctionDeclaration';
-    	                   var ismember = node.type === 'ExpressionStatement';
-    	                   if(isdecl || (node.type === 'Property' && node.value.type === 'FunctionExpression') || ismember) {
-    	                       if(ismember && node.expression && node.expression.type === 'AssignmentExpression') {
-    	                           node = node.expression;
-    	                           if(node.left.type !== 'MemberExpression' && node.right.type !== 'FunctionExpression') {
-    	                               break;
-    	                           }
-    	                       }
-    	                       var val;
-        	                   if((val = /\s*\*\s*\@name\s*(\w*)/ig.exec(params.line)) !== null) {
+		            var node = Finder.findNodeAfterComment(kind.node, ast);
+    	            if(node) {
+	                   var val;
+	                   if((val = /\s*\*\s*\@name\s*(\w*)/ig.exec(params.line)) !== null) {
+	                       if(val[1] === params.prefix) {
+	                           var _name = getFunctionName(node);
+	                           if(_name) {
+        	                       proposals.push({
+        								proposal: _name,
+        								relevance: 100,
+        								name: _name,
+        								description: Messages['funcProposalDescription'],
+        								style: 'emphasis', //$NON-NLS-1$
+        								overwrite: true,
+        								kind: 'js' //$NON-NLS-1$
+    							   });
+							   }
+							}
+    	                 } else if((val = /\s*\*\s*\@param\s*(?:\{\w*\})?\s*(\w*)/ig.exec(params.line)) !== null) {
         	                       if(val[1] === params.prefix) {
-        	                           var _name;
-        	                           if(ismember) {
-            	                           _name = Signatures.expandMemberExpression(node.left, '');
-            	                       } else {
-            	                           _name = isdecl ? node.id.name : node.key.name;
-            	                       }
-            	                       proposals.push({
-            								proposal: _name,
-            								relevance: 100,
-            								name: _name,
-            								description: Messages['funcProposalDescription'],
-            								style: 'emphasis', //$NON-NLS-1$
-            								overwrite: true,
-            								kind: 'js' //$NON-NLS-1$
-        							    });
-    							}
-        	                   } else if((val = /\s*\*\s*\@param\s*(?:\{\w*\})?\s*(\w*)/ig.exec(params.line)) !== null) {
-        	                       if(val[1] === params.prefix) {
-        	                           var prms = isdecl ? node.params : node.value.params;
-        	                           if(prms) {
+        	                           var prms = getFunctionParams(node);
+        	                           if(Array.isArray(prms)) {
         	                               for(var i = 0; i < prms.length; i++) {
         	                                   _name = prms[i].name;
         	                                   if(Util.looselyMatches(params.prefix, _name)) { 
@@ -316,10 +307,9 @@ define([
         	                       }
         	                   }
     	                   }
-    	               }
 		        }
 		    }
-        } else if(kind && kind.kind === 'doc') {
+        } else if(kind.kind === 'doc') {
             var comment = kind.node.value;
             if(comment) {
 	            if(/^\s*(?:\/\*)?\s*eslint(?:-enable|-disable)?\s+/gi.test(comment)) {
@@ -370,6 +360,93 @@ define([
             }
         }
         return proposals;
+	}
+	
+	/**
+	 * @description Returns the function name from the given node if it relates to a function in some way
+	 * @param {Object} node The AST node
+	 * @returns {String} The name of he related function or null
+	 * @since 10.0
+	 */
+	function getFunctionName(node) {
+		switch(node.type) {
+			case 'FunctionDeclaration': {
+				return node.id.name;
+			}
+			case 'Property': {
+				if(node.value.type === 'FunctionExpression') {
+					return node.value.id ? node.value.id.name : node.key.name;
+				}
+				break;
+			}
+			case 'ExpressionStatement': {
+				var _n = node.expression
+				if(_n && _n.type === 'AssignmentExpression' && _n.right.type === 'FunctionExpression') {
+					if(_n.right.id) {
+						return _n.right.id.name;
+					}
+					if(_n.left.type === 'Identifier') {
+						return _n.left.name;
+					}
+					if(_n.left.type === 'MemberExpression') {
+						return Signatures.expandMemberExpression(_n.left, '');
+					}
+				}
+				break;
+			}
+			case 'VariableDeclaration': {
+				if(node.declarations.length > 0) {
+					//always pick the first one to attach the comment to
+					var decl = node.declarations[0];
+					if(decl.init && decl.init.type === 'FunctionExpression') {
+						if(decl.init.id) {
+							return decl.init.id.name;
+						}
+						return decl.id.name;
+					}
+				}
+				break;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * @description Returns the parameters from the related function
+	 * @param {Object} node The AST node
+	 * @returns {Array.<Object>} The parameters from the related function or an empty array
+	 * @since 10.0
+	 */
+	function getFunctionParams(node) {
+		switch(node.type) {
+			case 'FunctionDeclaration': {
+				return node.params;
+			}
+			case 'Property': {
+				if(node.value.type === 'FunctionExpression') {
+					return node.value.params
+				}
+				break;
+			}
+			case 'ExpressionStatement': {
+				var _n = node.expression;
+				if(_n && _n.type === 'AssignmentExpression' && _n.right.type === 'FunctionExpression') {
+					return _n.right.params;
+				}
+				break;
+			}
+			case 'VariableDeclaration': {
+				if(node.declarations.length > 0) {
+					//always pick the first one to attach the comment to
+					var decl = node.declarations[0];
+					if(decl.init && decl.init.type === 'FunctionExpression') {
+						return decl.init.params;
+					}
+				}
+				break;
+			}
+		}
+		return [];
 	}
 
 	var deferred = null;
@@ -664,10 +741,6 @@ define([
 		}
 	}
 	
-	function getReturnType(type) {
-		
-	}
-
 	function collectParams(type) {
 		if(type && type.length > 0) {
 			var params = [];

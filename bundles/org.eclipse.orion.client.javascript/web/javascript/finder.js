@@ -589,6 +589,45 @@ define([
 		},
 		
 		/**
+		 * @description Finds the first non-comment AST node immediately following the given comment node
+		 * @param {Object} comment The comment node
+		 * @param {Object} ast The AST 
+		 * @since 10.0
+		 */
+		findNodeAfterComment: function(comment, ast) {
+			var found = null;
+			var parents = [];
+			if(Array.isArray(comment.range) && ast) {
+				var offset = comment.range[1];
+				Estraverse.traverse(ast, {
+					/**
+					 * start visiting an AST node
+					 */
+					enter: function(node, last) {
+						if(node.type && node.range) {
+							if(last) {
+								parents.push(last);
+							}
+							if(offset > node.range[0]) {
+								found = node;
+							} else {
+								found = node;
+								if(node.type !== Estraverse.Syntax.Program) {
+									return Estraverse.VisitorOption.Break;
+								}
+
+							}
+						}
+					}
+				});
+			}
+			if(found) {
+				found.parents = parents;
+			}
+			return found;
+		},
+		
+		/**
 		 * @name findToken
 		 * @description Finds the token in the given token stream for the given start offset
 		 * @function

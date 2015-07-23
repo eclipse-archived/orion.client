@@ -94,6 +94,7 @@ define([
 		var buffer = state.buffer = typeof(options.buffer) === 'undefined' ? '' : options.buffer,
 		    prefix = state.prefix = typeof(options.prefix) === 'undefined' ? '' : options.prefix,
 		    offset = state.offset = typeof(options.offset) === 'undefined' ? 0 : options.offset,
+		    line = state.line = typeof(options.line) === 'undefined' ? '' : options.line,
 		    keywords = typeof(options.keywords) === 'undefined' ? false : options.keywords,
 		    templates = typeof(options.templates) === 'undefined' ? false : options.templates,
 		    contentType = options.contenttype ? options.contenttype : 'application/javascript',
@@ -117,7 +118,7 @@ define([
 			}
 		};
 		astManager.onModelChanging({file: {location: file}});
-		var params = {offset: offset, prefix : prefix, keywords: keywords, template: templates};
+		var params = {offset: offset, prefix : prefix, keywords: keywords, template: templates, line: line};
 		return {
 			editorContext: editorContext,
 			params: params
@@ -2527,6 +2528,537 @@ define([
 					offset: 7,
 					callback: done};
 				testProposals(options, []);
+			});
+			/**
+			 * Tests the author tag insertion
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test author tag", function(done) {
+				var options = {
+					buffer: "/**\n* @a \n*/", 
+					prefix: "@a", 
+					offset: 8,
+					templates: true,
+					callback: done};
+				testProposals(options, [
+					['', 'Templates'],
+				    ['uthor ', '@author - Author JSDoc tag']
+				]);
+			});
+			/**
+			 * Tests the lends tag insertion
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test lends tag", function(done) {
+				var options = {
+					buffer: "/**\n* @name foo\n* @l \n*/", 
+					prefix: "@l", 
+					offset: 20,
+					templates: true,
+					callback: done};
+				testProposals(options, [
+					['', 'Templates'],
+				    ['ends ', '@lends - Lends JSDoc tag'],
+				    ['icense ', '@license - License JSDoc tag']
+				]);
+			});
+			/**
+			 * Tests the function name insertion for a function decl with no prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test name tag completion 1", function(done) {
+				var options = {
+					buffer: "/**\n* @name  \n*/ function a(){}", 
+					line: '* @name  ',
+					prefix: "", 
+					offset: 13,
+					callback: done};
+				testProposals(options, [
+				     ['a', 'a - The name of the function']
+				]);
+			});
+			/**
+			 * Tests the function name insertion for a function decl with no prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 10.0
+			 */
+			it("test name tag completion 1a - no space", function(done) {
+				var options = {
+					buffer: "/**\n* @name  \n*/function a(){}", 
+					prefix: "",
+					line: '* @name  ',
+					offset: 13,
+					callback: done};
+				testProposals(options, [
+				     ['a', 'a - The name of the function']
+				]);
+			});
+			/**
+			 * Tests the function name insertion for a function decl with a prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test name tag completion 2", function(done) {
+				var options = {
+					buffer: "/**\n* @name  \n*/ function bar(){}",
+					line: '* @name  ',
+					prefix: "b", 
+					offset: 13,
+					callback: done};
+				testProposals(options, [
+				     ['bar', 'bar - The name of the function']
+				]);
+			});
+			/**
+			 * Tests the function name insertion for a object property with function expr with no prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test name tag completion 3", function(done) {
+				var options = {
+					buffer: "var o = {/**\n* @name  \n*/f: function bar(){}}",
+					line: '* @name  ',
+					prefix: "", 
+					offset: 21,
+					callback: done};
+				testProposals(options, [
+				     ['bar', 'bar - The name of the function']
+				]);
+			});
+			/**
+			 * Tests the function name insertion for a object property with function expr with a prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test name tag completion 4", function(done) {
+				var options = {
+					buffer: "var o = {/**\n* @name  \n*/f: function bar(){}}", 
+					line: '* @name  ',
+					prefix: "b", 
+					offset: 21,
+					callback: done};
+				testProposals(options, [
+				     ['bar', 'bar - The name of the function']
+				]);
+			});
+			/**
+			 * Tests the function name insertion for a object property with function expr with no prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test name tag completion 5", function(done) {
+				var options = {
+					buffer: "/**\n* @name  \n*/ Foo.bar.baz = function(){}",
+					line: '* @name  ',
+					prefix: "", 
+					offset: 12,
+					callback: done};
+				testProposals(options, [
+				     ['Foo.bar.baz', 'Foo.bar.baz - The name of the function']
+				]);
+			});
+			/**
+			 * Tests the function name insertion for a object property with function expr with a prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test name tag completion 6", function(done) {
+				var options = {
+					buffer: "/**\n* @name  \n*/ Foo.bar.baz = function(){}",
+					line: '* @name  ',
+					prefix: "Foo", 
+					offset: 12,
+					callback: done};
+				testProposals(options, [
+				     ['Foo.bar.baz', 'Foo.bar.baz - The name of the function']
+				]);
+			});
+			/**
+			 * Tests no proposals for assignment expression
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test name tag completion 6a", function(done) {
+				var options = {
+					buffer: "/**\n* @name f \n*/Foo.bar.baz = function(){}",
+					line: '* @name f ',
+					prefix: "", 
+					offset: 14,
+					callback: done};
+				testProposals(options, []);
+			});
+			/**
+			 * Tests func decl param name proposals no prefix, no type
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test param name completion 1", function(done) {
+				var options = {
+					buffer: "/**\n* @param  \n*/ function a(a, b, c){}",
+					line: '* @param  ',
+					prefix: "", 
+					offset: 13,
+					callback: done};
+				testProposals(options, [
+				     ['a', 'a - Function parameter'],
+				     ['b', 'b - Function parameter'],
+				     ['c', 'c - Function parameter']
+				]);
+			});
+			
+			/**
+			 * Tests func decl param name proposals no prefix, no type
+			 * @since 10.0
+			 */
+			it("test param name completion whitespace 1", function(done) {
+				var options = {
+					buffer: "/**\n* @param  \n*/function a(a, b, c){}",
+					line: '* @param  ',
+					prefix: "", 
+					offset: 13,
+					callback: done};
+				testProposals(options, [
+				  ['a', 'a - Function parameter'],
+				  ['b', 'b - Function parameter'],
+				  ['c', 'c - Function parameter']
+				]);
+			});
+			
+			/**
+			 * Tests func decl param name proposals no prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test param name completion 2", function(done) {
+				var options = {
+					buffer: "/**\n* @param {type} \n*/ function a(a, b, c){}",
+					line: '* @param {type} ',
+					prefix: "", 
+					offset: 20,
+					callback: done};
+				testProposals(options, [
+				     ['a', 'a - Function parameter'],
+				     ['b', 'b - Function parameter'],
+				     ['c', 'c - Function parameter']
+				]);
+			});
+			/**
+			 * Tests func decl param name proposals a prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test param name completion 3", function(done) {
+				var options = {
+					buffer: "/**\n* @param a \n*/ function a(aa, bb, cc){}", 
+					line: '* @param a ',
+					prefix: "a", 
+					offset: 14,
+					callback: done};
+				testProposals(options, [
+				     ['aa', 'aa - Function parameter']
+				]);
+			});
+			/**
+			 * Tests no proposals for after name
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test param name completion 4", function(done) {
+				var options = {
+					buffer: "/**\n* @param f  \n*/ function a(aa, bb, cc){}", 
+					line: '* @param f  ',
+					prefix: "", 
+					offset: 15,
+					callback: done};
+				testProposals(options, []);
+			});
+			/**
+			 * Tests object property func expr param name proposals no prefix, no type
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test param name completion 5", function(done) {
+				var options = {
+					buffer: "var o = {/**\n* @param  \n*/f: function a(a, b, c){}}", 
+					line: '* @param  ',
+					prefix: "", 
+					offset: 22,
+					callback: done};
+				testProposals(options, [
+				     ['a', 'a - Function parameter'],
+				     ['b', 'b - Function parameter'],
+				     ['c', 'c - Function parameter']
+				]);
+			});
+			/**
+			 * Tests object property func expr param name proposals no prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test param name completion 6", function(done) {
+				var options = {
+					buffer: "var o = {/**\n* @param {type} \n*/f: function a(a, b, c){}}", 
+					line: '* @param {type} ',
+					prefix: "", 
+					offset: 29,
+					callback: done};
+				testProposals(options, [
+				     ['a', 'a - Function parameter'],
+				     ['b', 'b - Function parameter'],
+				     ['c', 'c - Function parameter']
+				]);
+			});
+			/**
+			 * Tests object property func expr param name proposals a prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test param name completion 7", function(done) {
+				var options = {
+					buffer: "var o = {/**\n* @param {type} a\n*/f: function a(aa, bb, cc){}}", 
+					line: '* @param {type} a',
+					prefix: "a", 
+					offset: 30,
+					callback: done};
+				testProposals(options, [
+				     ['aa', 'aa - Function parameter']
+				]);
+			});
+			/**
+			 * Tests object property func expr param name proposals a prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test param name completion 8", function(done) {
+				var options = {
+					buffer: "var o = {/**\n* @param {type} a \n*/f: function a(aa, bb, cc){}}",
+					line: '* @param {type} a ',
+					prefix: "a", 
+					ofset: 31,
+					callback: done};
+				testProposals(options, []);
+			});
+			/**
+			 * Tests assingment func expr param name proposals no prefix, no type
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test param name completion 9", function(done) {
+				var options = {
+					buffer: "/**\n* @param  \n*/ Foo.bar.baz = function a(a, b, c){}", 
+					line: '* @param  ',
+					prefix: "", 
+					offset: 13,
+					callback: done};
+				testProposals(options, [
+				     ['a', 'a - Function parameter'],
+				     ['b', 'b - Function parameter'],
+				     ['c', 'c - Function parameter']
+				]);
+			});
+			/**
+			 * Tests assingment func expr param name proposals no prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test param name completion 10", function(done) {
+				var options = {
+					buffer: "/**\n* @param {type} \n*/ Foo.bar.baz = function a(a, b, c){}", 
+					line: '* @param {type} ',
+					prefix: "", 
+					offset: 20,
+					callback: done};
+				testProposals(options, [
+				     ['a', 'a - Function parameter'],
+				     ['b', 'b - Function parameter'],
+				     ['c', 'c - Function parameter']
+				]);
+			});
+			/**
+			 * Tests assingment func expr param name proposals no prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test param name completion 10a", function(done) {
+				var options = {
+					buffer: "/**\n* @param {type} a\n*/Foo.bar.baz = function a(aa, bb, cc){}", 
+					line: '* @param {type} a',
+					prefix: "a", 
+					offset: 21,
+					callback: done};
+				testProposals(options, [
+				     ['aa', 'aa - Function parameter']
+				]);
+			});
+			/**
+			 * Tests assingment func expr param name proposals no prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test param name completion 11", function(done) {
+				var options = {
+					buffer: "/**\n* @param {type} d\n*/ Foo.bar.baz = function a(aa, bb, cc){}", 
+					line: '* @param {type} d',
+					prefix: "d", 
+					offset: 20,
+					callback: done};
+				testProposals(options, []);
+			});
+			
+			/**
+			 * Tests var decl func expr param name proposals
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473425
+			 * @since 10.0
+			 */
+			it("test param name completion 12", function(done) {
+				var options = {
+					buffer: "/**\n* @param {type} d\n*/var Foo.bar.baz = function a(aa, bb, cc){}", 
+					line: '* @param {type} d',
+					prefix: "d", 
+					offset: 20,
+					callback: done};
+				testProposals(options, []);
+			});
+			/**
+			 * Tests var decl func expr param name proposals
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473425
+			 * @since 10.0
+			 */
+			it("test param name completion 13", function(done) {
+				var options = {
+					buffer: "/**\n* @param {type} a\n*/var baz = function a(aa, bb, cc){}", 
+					line: '* @param {type} a',
+					prefix: "a", 
+					offset: 21,
+					callback: done};
+				testProposals(options, [
+					['aa', 'aa - Function parameter']
+				]);
+			});
+			
+			/**
+			 * Tests var decl func expr name proposals
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473425
+			 * @since 10.0
+			 */
+			it("test param name completion 14", function(done) {
+				var options = {
+					buffer: "/**\n* @name \n*/var baz = function baz(aa, bb, cc){}", 
+					line: '* @name ',
+					prefix: "", 
+					offset: 12,
+					callback: done};
+				testProposals(options, [
+					['baz', 'baz - The name of the function']
+				]);
+			});
+			
+			/**
+			 * Tests var decl func expr name proposals
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473425
+			 * @since 10.0
+			 */
+			it("test param name completion 15", function(done) {
+				var options = {
+					buffer: "/**\n* @name \n*/var baz = function foo(aa, bb, cc){}", 
+					line: '* @name ',
+					prefix: "", 
+					offset: 12,
+					callback: done};
+				testProposals(options, [
+					['foo', 'foo - The name of the function']
+				]);
+			});
+			
+			/**
+			 * Tests var decl func expr name proposals
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473425
+			 * @since 10.0
+			 */
+			it("test param name completion 16", function(done) {
+				var options = {
+					buffer: "/**\n* @name b\n*/var baz = function foo(aa, bb, cc){}", 
+					line: '* @name ',
+					prefix: "b", 
+					offset: 13,
+					callback: done};
+				testProposals(options, [
+				]);
+			});
+			
+			/**
+			 * Tests one-line JSDoc completions
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439574
+			 * @since 7.0
+			 */
+			it("test one-line doc completion", function(done) {
+				var options = {
+					buffer: "Objects.mixin(Foo.prototype, /** @l  */{});", 
+					prefix: "@l",
+					line: 'Objects.mixin(Foo.prototype, /** @l  */{});',
+					offset: 35,
+					templates: true,
+					callback: done};
+				testProposals(options, [
+					 ['', 'Templates'],
+				     ['ends ', '@lends - Lends JSDoc tag'],
+				     ['icense ', '@license - License JSDoc tag']
+				]);
+			});
+			
+			/**
+			 * Tests object JSDoc completions
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test object doc completion 1", function(done) {
+				var options = {
+					buffer: "/**\n* @param {O \n*/", 
+					line: '* @param {O ',
+					prefix: "O", 
+					offset: 15,
+					callback: done};
+				testProposals(options, [
+				  //TODO   ['bject', 'Object', 'Object'],
+				]);
+			});
+			
+			/**
+			 * Tests object JSDoc completions
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test object doc completion 2", function(done) {
+				var options = {
+					buffer: "/**\n* @returns {I} \n*/",
+					line: '* @returns {I} ',
+					prefix: "I", 
+					offset: 17,
+					callback: done};
+				testProposals(options, [
+				  //TODO   ['nfinity', 'Infinity', 'Infinity'],
+				]);
+			});
+			
+			/**
+			 * Tests object JSDoc completions
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+			 * @since 7.0
+			 */
+			it("test object doc completion 3", function(done) {
+				var options = {
+					buffer: "/*eslint-env amd*//**\n* @returns {I} \n*/", 
+					line: '* @returns {I} ',
+					prefix: "I", 
+					offset: 35,
+					callback: done};
+				testProposals(options, [
+				  //TODO   ['mage', 'Image', 'Image'],
+				  ///   ['nfinity', 'Infinity', 'Infinity']
+				]);
 			});
 		});
 	});
