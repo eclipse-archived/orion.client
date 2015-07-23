@@ -126,38 +126,34 @@ define([
     	});
     	it('meta template', function() {
     		var _o = setup({buffer: '<met'});
-    		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
+    		return assist.computeContentAssist(_o.editorContext, {offset: 4, prefix: 'met'}).then(function(proposals) {
     			assertProposals(proposals, [
-    				{proposal: ''},
-    				{proposal: 'er></meter>'},
-    				{proposal: 'a/>'}
+    				{proposal: '<meta></meta>', prefix: '<met'},
+    				{proposal: '<meter></meter>', prefix: '<met'}
     			]);
     		});
     	});
     	it('param template', function() {
     		var _o = setup({buffer: '<par'});
-    		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
+    		return assist.computeContentAssist(_o.editorContext, {offset: 4, prefix: 'par'}).then(function(proposals) {
     			assertProposals(proposals, [
-    				{proposal: ''},
-    				{proposal: 'am/>'}
+    				{proposal: '<param></param>', prefix: '<par'}
     			]);
     		});
     	});
     	it('script template', function() {
     		var _o = setup({buffer: '<sc'});
-    		return assist.computeContentAssist(_o.editorContext, {offset: 3}).then(function(proposals) {
+    		return assist.computeContentAssist(_o.editorContext, {offset: 3, prefix: 'sc'}).then(function(proposals) {
     			assertProposals(proposals, [
-    				{proposal: ''},
-    				{proposal: 'ript>\n\t\n</script>'}
+    				{proposal: '<script></script>', prefix: '<sc'}
     			]);
     		});
     	});
-    	it('script template', function() {
+    	it('style template', function() {
     		var _o = setup({buffer: '<sty'});
-    		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
+    		return assist.computeContentAssist(_o.editorContext, {offset: 4, prefix: 'sty'}).then(function(proposals) {
     			assertProposals(proposals, [
-    				{proposal: ''},
-    				{proposal: 'le>\n\t\n</style>'}
+    				{proposal: '<style></style>', prefix: '<sty'}
     			]);
     		});
     	});
@@ -288,21 +284,19 @@ define([
     	});
     	it('Tag templates 1', function() {
     		var _o = setup({buffer: '<ar'});
-    		return assist.computeContentAssist(_o.editorContext, {offset: 3}).then(function(proposals) {
+    		return assist.computeContentAssist(_o.editorContext, {offset: 3, prefix: 'ar'}).then(function(proposals) {
     			assertProposals(proposals, [
-    				{proposal: ''},
-    				{proposal: 'ticle>\n\t\n</article>'},
-    				{proposal: 'ea/>'},
+    				{proposal: '<area></area>', prefix: '<ar'},
+    				{proposal: '<article></article>', prefix: '<ar'}
     			]);
     		});
     	});
     	it('Tag templates 2', function() {
     		var _o = setup({buffer: '<html>\n<body><ar</body>\n</html>'});
-    		return assist.computeContentAssist(_o.editorContext, {offset: 16}).then(function(proposals) {
+    		return assist.computeContentAssist(_o.editorContext, {offset: 16, prefix: 'ar'}).then(function(proposals) {
     			assertProposals(proposals, [
-    				{proposal: ''},
-    				{proposal: 'ticle>\n\t\n</article>'},
-    				{proposal: 'ea/>'},
+    				{proposal: '<area></area>', prefix: '<ar'},
+    				{proposal: '<article></article>', prefix: '<ar'}
     			]);
     		});
     	});
