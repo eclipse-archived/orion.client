@@ -16,6 +16,11 @@ define([
 	/* eslint-disable missing-nls */
 	var tagTemplates = Object.create(null);
 	tagTemplates = [
+	/*
+	 * The following data was scraped from https://developer.mozilla.org/en-US/docs/Web/HTML/Element
+	 * These tags were missing from the scraped data and added manually:
+	 * 		a, aside, blockquote, font, marquee, noframes
+	 */
 		{
 			name: "a",
 			category: "Text content",
@@ -52,11 +57,18 @@ define([
 			doc: "The HTML <area> element defines a hot-spot region on an image, and optionally associates it with a hypertext link. This element is used only within a <map> element.",
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/area"
 		},
+		
 		{
 			name: "article",
 			category: "Content sectioning",
 			doc: "The HTML Article Element (<article>) represents a self-contained composition in a document, page, application, or site, which is intended to be independently distributable or reusable, e.g., in syndication. This could be a forum post, a magazine or newspaper article, a blog entry, or any other independent item of content. Each <article> should be identified, typically by including a heading (h1-h6 element) as a child of the <article> element.",
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/article"
+		},
+		{
+			name: "aside",
+			category: "Text content",
+			doc: "The HTML <aside> element represents a section of the page with content connected tangentially to the rest, which could be considered separate from that content.",
+			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/aside"
 		},
 		{
 			name: "audio",
@@ -105,6 +117,12 @@ define([
 			category: "Obsolete and deprecated elements",
 			doc: "The HTML Blink Element (<blink>) is a non-standard element causing the enclosed text to flash slowly.",
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/blink"
+		},
+		{
+			name: "blockquote",
+			category: "Text content",
+			doc: "The HTML <blockquote> Element (or HTML Block Quotation Element) indicates that the enclosed text is an extended quotation.",
+			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/blockquote"
 		},
 		{
 			name: "body",
@@ -273,6 +291,12 @@ define([
 			category: "Text content",
 			doc: "The HTML <figure> Element represents self-contained content, frequently with a caption (<figcaption>), and is typically referenced as a single unit. While it is related to the main flow, its position is independent of the main flow. Usually this is an image, an illustration, a diagram, a code snippet, or a schema that is referenced in the main text, but that can be moved to another page or to an appendix without affecting the main flow.",
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figure"
+		},
+		{
+			name: "font",
+			category: "Obsolete and deprecated elements",
+			doc: "The HTML Font Element (<font>) defines the font size, color and face for its content.",
+			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/font"
 		},
 		{
 			name: "footer",
@@ -460,6 +484,12 @@ define([
 			doc: "The HTML Mark Element (<mark>) represents highlighted text, i.e., a run of text marked for reference purpose, due to its relevance in a particular context. For example it can be used in a page showing search results to highlight every instance of the searched-for word.",
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/mark"
 		},
+				{
+			name: "marquee",
+			category: "Obsolete and deprecated elements",
+			doc: "The HTML <marquee> element is used to insert a scrolling area of text.",
+			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/marquee"
+		},
 		{
 			name: "menu",
 			category: "Interactive elements",
@@ -495,6 +525,12 @@ define([
 			category: "Obsolete and deprecated elements",
 			doc: "The <noembed> element is a deprecated and non-standard way to provide alternative, or \"fallback\", content for browsers that do not support the <embed> element or do not support embedded content an author wishes to use.",
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/noembed"
+		},
+		{
+			name: "noframes",
+			category: "Embedded content",
+			doc: "<noframes> is an HTML element which is used to supporting browsers which are not able to support <frame> elements or configured to do so.",
+			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/noframes"
 		},
 		{
 			name: "noscript",

@@ -85,13 +85,6 @@ define([
 //			template: "<table>\n\t<tr>\n\t\t<td>${cursor}</td>\n\t</tr>\n</table>", //$NON-NLS-1$
 //			url: 'https://developer.mozilla.org/en/docs/Web/HTML/Element/table' //$NON-NLS-1$
 //		},
-//		{
-//			prefix: "<!--", //$NON-NLS-1$
-//			name: "<!-- -->", //$NON-NLS-1$
-//			description: Messages['htmlCommentDescription'],
-//			template: "<!-- ${cursor} -->", //$NON-NLS-1$
-//			url: 'https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Introduction#Comments_and_doctype' //$NON-NLS-1$
-//		}
 //	];
 //
 //	//elements that are typically placed on a single line (e.g., <b>, <h1>, etc)
@@ -159,29 +152,6 @@ define([
 	
 	Objects.mixin(HTMLContentAssistProvider.prototype, {
 		/**
-		 * Called by the framework to initialize this provider before any <tt>computeContentAssist</tt> calls.
-		 * @callback
-		 */
-		initialize: function() {
-		    //override
-		},
-		/**
-		 * @callback
-		 */
-		getPrefix: function(buffer, offset, context) {
-			var prefix = "";
-			var index = offset;
-			while (index && /[A-Za-z0-9<!-]/.test(buffer.charAt(index - 1))) {
-				index--;
-				prefix = buffer.substring(index, offset);
-				// If the user has opened a new tag, stop the prefix there
-				if (buffer.charAt(index) === '<'){
-					return prefix;
-				}
-			}
-			return prefix;
-		},
-		/**
 		 * @callback 
 		 */
 		computeContentAssist: function(editorContext, params) {
@@ -234,17 +204,20 @@ define([
 				if(this.inScriptOrStyle(node) || this.inClosingTag(node, params.offset, ast.source)) {
 					return [];
 				}
-				//are we in the attrib area or between tag elements?
-				if(this.isCompletingAttributeValue(node, ast.source, params)) {
+				if (this.isCompletingCommentClose(node, params.offset)){
+					return this.getComment(node, false);
+				} else if (this.isCompletingAttributeValue(node, ast.source, params)) {
 					return this.getValuesForAttribute(node, params);
-				} else if(this.isCompletingTagAttribute(node, ast.source, params)) {
+				} else if (this.isCompletingTagAttribute(node, ast.source, params)) {
 					return this.getAttributesForNode(node, params);
-				} else {
-					var textContentProposals = this.getProposalsForTextContent(node, ast.source, params);
-					if (textContentProposals.length > 0){
-						return textContentProposals;
+				} else if (this.isCompletingTag(node, params)){
+					if (this.isCompletingCommentOpen(node)){
+						return this.getComment(node, true);
+					} else {
+						return this.getTags(ast.source, params);
 					}
-					return this.getTags(ast.source, params);
+				} else {
+					return this.getProposalsForTextContent(node, ast.source, params);
 				}
 			} else {
 				// If the user has no completed tags, still offer tag templates
@@ -306,6 +279,29 @@ define([
 		},
 		
 		/**
+		 * Computes if we are trying to complete a comment start or end
+		 * @param {Object} node The AST node to check with the offset
+		 * @returns {Boolean} True if we are completing a comment, false otherwise 
+		 * @since 10.0 
+		 */
+		isCompletingCommentClose: function(node, offset) {
+			return node && node.type === 'comment' && offset >= node.range[0] && offset <= node.range[1];
+		},
+		
+		/**
+		 * Computes if we are trying to complete an open comment
+		 * @param {Object} node The AST node to check with the offset
+		 * @returns {Boolean} True if we are completing a comment, false otherwise 
+		 * @since 10.0 
+		 */
+		isCompletingCommentOpen: function(node) {
+			if(node 	&& node.type === 'tag' && node.name.match(/^!-{0,2}$/)){
+				return true;
+			}
+			return false;
+		},
+		
+		/**
 		 * Computes if we are trying to complete tag attributes
 		 * @param {Object} node The AST node to check with the offset
 		 * @param {String} source The backing source
@@ -338,6 +334,25 @@ define([
 		},
 		
 		/**
+		 * Computes if we are trying to complete a tag
+		 * @param {Object} node The AST node to check with the offset
+		 * @param {Object} params The parameters
+		 * @returns {Boolean} True if we are completing a tag, false otherwise 
+		 * @since 10.0 
+		 */
+		isCompletingTag: function(node, params) {
+			if(node) {
+				var offset = params.offset;
+				if(node.type === 'tag') {
+					if (offset >= node.range[0] && offset <= node.range[1]){
+						return true;
+					}
+ 				}
+			}
+			return false;
+		},
+		
+		/**
 		 * Returns the tag proposals for the current offset
 		 * @function
 		 * @param {Object} source The source in the buffer
@@ -350,8 +365,12 @@ define([
 			var proposals = [];
 			for(var j = 0; j < tags.length; j++) {
 				var tag = tags[j];
-				var prefix = params.prefix ? params.prefix : "";
-				if(jsUtil.looselyMatches(prefix, tag.name)) {
+				var namePrefix = params.prefix ? params.prefix : "";
+				var leadingBracket = false;
+		        if (source.charAt(params.offset - namePrefix.length - 1) === '<'){
+		        	leadingBracket = true;
+		        }
+				if(jsUtil.looselyMatches(namePrefix, tag.name)) {
 					var hover = Object.create(null);
 					hover.type = 'markdown'; //$NON-NLS-1$
 			        hover.content = tag.doc ? tag.doc : "";
@@ -361,32 +380,47 @@ define([
 			        var proposalText = "";
 			        var desc = "";
 			        // TODO Allow tags to have custom templates
-			        tag.type = 'single';
+			        tag.type = 'single'; //$NON-NLS-1$
 			        switch (tag.type) {
 			        	case 'single':
 			        		proposalText = "<" + tag.name + "></" + tag.name + ">"; //$NON-NLS-1$
 			        		desc = " - " + proposalText; //$NON-NLS-1$
+			        		if (leadingBracket){
+			        			proposalText = proposalText.substring(1);
+			        		}
 			        		break;
 			        	case 'multi':
 			        		proposalText = "<" + tag.name + ">\n\n</" + tag.name + ">"; //$NON-NLS-1$
 			        		desc = " - " + proposalText; //$NON-NLS-1$
+			        		if (leadingBracket){
+			        			proposalText = proposalText.substring(1);
+			        		}
 			        		break;
 			        	case 'empty':
 			        		proposalText = "<" + tag.name + "/>"; //$NON-NLS-1$
 			        		desc = " - " + proposalText; //$NON-NLS-1$
+			        		if (leadingBracket){
+			        			proposalText = proposalText.substring(1);
+			        		}
 			        		break;
 			        	default:
 			        		proposalText = "<" + tag.name + ">";
 			        		desc = " - " + proposalText; //$NON-NLS-1$
+			        		if (leadingBracket){
+			        			proposalText = proposalText.substring(1);
+			        		}
 			        		break;
 			        }
-			        var proposal = this.makeComputedProposal(proposalText, tag.name, desc, hover, prefix); //$NON-NLS-1$
+			        var proposal = this.makeComputedProposal(proposalText, tag.name, desc, hover, params.prefix); //$NON-NLS-1$
 			        // The prefix not being includes prevents content assist staying open while typing
-			        if (source.charAt(params.offset - prefix.length - 1) === '<'){
-			        	prefix = '<' + prefix;
-			        	proposal.prefix = prefix;
-			        }
-					proposal.escapePosition = params.offset - prefix.length + tag.name.length + 2;
+//			        if (source.charAt(params.offset - prefix.length - 1) === '<'){
+//			        	prefix = '<' + prefix;
+//			        	proposal.prefix = prefix;
+//			        }
+					proposal.escapePosition = params.offset - namePrefix.length + tag.name.length + 2;
+					if(leadingBracket){
+						proposal.escapePosition--;
+					}
 					proposals.push(proposal);
 				}
 			}
@@ -426,6 +460,34 @@ define([
 			}
 			return proposals;	
 		},
+		
+		/**
+		 * Returns a comment open/close proposal or an empty array
+		 * @param {Object} node The AST node for the tag we are completing within
+		 * @param {Boolean} open If true will propose open comment proposals, otherwise return close comment
+		 * @returns {Array.<Object>} The array of proposals
+		 * @since 10.0 
+		 */
+		getComment: function(node, open) {
+			var proposals = [];
+			if (open){
+				var prefix = '<' + node.name;
+				proposals.push(this.makeComputedProposal("<!-- ", Messages['openCommentName'], " - <!-- -->", null, prefix)); //$NON-NLS-1$ //$NON-NLS-2$
+			} else {
+				if (node.data.length > 0){
+					prefix = "";
+					if (node.data.charAt(node.data.length-1) === '-'){
+						prefix += '-';
+						if (node.data.charAt(node.data.length-2) === '-'){
+							prefix += '-';
+						}
+					}
+					proposals.push(this.makeComputedProposal("-->", Messages['closeCommentName'], " - <!-- -->", null, prefix)); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
+			return proposals;	
+		},
+		
 		
 		/**
 		 * @description Returns true if the node has the given attribute already
@@ -477,7 +539,7 @@ define([
 					}
 				}
 			}
-			return [];	
+			return this.getTags(source, params);	
 		},
 		
 		/**

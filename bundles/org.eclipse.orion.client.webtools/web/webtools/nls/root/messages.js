@@ -68,15 +68,9 @@ define({//Default message bundle
 	'quickfix-zero-units': 'Remove \'px\' qualifier.',   
 	
 	//HTML content assist
-	'imageElementDescription': ' - HTML image element',
 	'simpleDocDescription': 'Simple HTML document',
-	'anchorElementDescription': ' - HTML anchor element',
-	'ulElementDescription': ' - HTML unordered list',
-	'olElementDescription': ' - HTML ordered list',
-	'dlElementDescription': ' - HTML definition list',
-	'basicTableDescription': ' - basic HTML table',
-	'htmlCommentDescription': ' - HTML comment',
 	'onlineDocumentation': '\n\n[Online documentation](${0})',
-	'templateSourceHeading': 'Template source code:\n\n',
 	'closeTagDescription': ' - Close the ${0} tag',
+	'openCommentName': 'Open comment',
+	'closeCommentName': 'Close comment'
 });

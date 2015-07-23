@@ -128,8 +128,8 @@ define([
     		var _o = setup({buffer: '<met'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 4, prefix: 'met'}).then(function(proposals) {
     			assertProposals(proposals, [
-    				{proposal: '<meta></meta>', prefix: '<met'},
-    				{proposal: '<meter></meter>', prefix: '<met'}
+    				{proposal: 'meta></meta>', prefix: 'met'},
+    				{proposal: 'meter></meter>', prefix: 'met'}
     			]);
     		});
     	});
@@ -137,7 +137,7 @@ define([
     		var _o = setup({buffer: '<par'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 4, prefix: 'par'}).then(function(proposals) {
     			assertProposals(proposals, [
-    				{proposal: '<param></param>', prefix: '<par'}
+    				{proposal: 'param></param>', prefix: 'par'}
     			]);
     		});
     	});
@@ -145,7 +145,7 @@ define([
     		var _o = setup({buffer: '<sc'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 3, prefix: 'sc'}).then(function(proposals) {
     			assertProposals(proposals, [
-    				{proposal: '<script></script>', prefix: '<sc'}
+    				{proposal: 'script></script>', prefix: 'sc'}
     			]);
     		});
     	});
@@ -153,7 +153,7 @@ define([
     		var _o = setup({buffer: '<sty'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 4, prefix: 'sty'}).then(function(proposals) {
     			assertProposals(proposals, [
-    				{proposal: '<style></style>', prefix: '<sty'}
+    				{proposal: 'style></style>', prefix: 'sty'}
     			]);
     		});
     	});
@@ -286,8 +286,8 @@ define([
     		var _o = setup({buffer: '<ar'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 3, prefix: 'ar'}).then(function(proposals) {
     			assertProposals(proposals, [
-    				{proposal: '<area></area>', prefix: '<ar'},
-    				{proposal: '<article></article>', prefix: '<ar'}
+    				{proposal: 'area></area>', prefix: 'ar'},
+    				{proposal: 'article></article>', prefix: 'ar'}
     			]);
     		});
     	});
@@ -295,8 +295,8 @@ define([
     		var _o = setup({buffer: '<html>\n<body><ar</body>\n</html>'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 16, prefix: 'ar'}).then(function(proposals) {
     			assertProposals(proposals, [
-    				{proposal: '<area></area>', prefix: '<ar'},
-    				{proposal: '<article></article>', prefix: '<ar'}
+    				{proposal: 'area></area>', prefix: 'ar'},
+    				{proposal: 'article></article>', prefix: 'ar'}
     			]);
     		});
     	});
@@ -433,8 +433,193 @@ define([
     			assertGlobalTagAttributes(proposals);
     		});
     	});
+    	it('Comment open proposals 1', function() {
+    		var _o = setup({buffer: '<!'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 2}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '<!-- ', prefix: '<!'},
+    			]);
+    		});
+    	});
+    	it('Comment open proposals 2', function() {
+    		var _o = setup({buffer: '<!-'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 3}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '<!-- ', prefix: '<!-'},
+    			]);
+    		});
+    	});
+    	it('Comment open proposals 3', function() {
+    		var _o = setup({buffer: '<!--'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
+    			assertProposals(proposals, []);
+    		});
+    	});
+    	it('Comment open proposals 4', function() {
+    		var _o = setup({buffer: '<'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 1}).then(function(proposals) {
+    			assertTagProposals(proposals);
+    		});
+    	});
+    	it('Comment open proposals after tag 1', function() {
+    		var _o = setup({buffer: '<a><!'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '<!-- ', prefix: '<!'},
+    			]);
+    		});
+    	});
+    	it('Comment open proposals after tag 2', function() {
+    		var _o = setup({buffer: '<a><!-'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 6}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '<!-- ', prefix: '<!-'},
+    			]);
+    		});
+    	});
+    	it('Comment open proposals after tag 3', function() {
+    		var _o = setup({buffer: '<a><!--'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 7}).then(function(proposals) {
+    			assertProposals(proposals, []);
+    		});
+    	});
+    	it('Comment open proposals after tag 4', function() {
+    		var _o = setup({buffer: '<a><'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
+    			assertTagProposals(proposals);
+    		});
+    	});
+    	// TODO Can't test inside tags as the parser doesn't create a separate tag start
+//    	it('Comment open proposals inside tag 1', function() {
+//    		var _o = setup({buffer: '<a<!'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
+//    			assertProposals(proposals, [
+//    				{proposal: '<!-- ', prefix: '<!'},
+//    			]);
+//    		});
+//    	});
+//    	it('Comment open proposals inside tag 2', function() {
+//    		var _o = setup({buffer: '<a<!-'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+//    			assertProposals(proposals, [
+//    				{proposal: '<!-- ', prefix: '<!-'},
+//    			]);
+//    		});
+//    	});
+//    	it('Comment open proposals inside tag 3', function() {
+//    		var _o = setup({buffer: '<a<!--'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 6}).then(function(proposals) {
+//    			assertProposals(proposals, []);
+//    		});
+//    	});
+//    	it('Comment open proposals inside tag 4', function() {
+//    		var _o = setup({buffer: '<a<'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 3}).then(function(proposals) {
+//    			assertTagProposals(proposals);
+//    		});    	
+//    	});
+		// TODO Can't test inside nested tags as the parser includes the start of the close tag in the name
+//    	it('Comment open proposals nested tag 1', function() {
+//    		var _o = setup({buffer: '<a><!</a>'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+//    			assertProposals(proposals, [
+//    				{proposal: '<!-- ', prefix: '<!'},
+//    			]);
+//    		});
+//    	});
+//    	it('Comment open proposals nested tag 2', function() {
+//    		var _o = setup({buffer: '<a><!-</a>'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 6}).then(function(proposals) {
+//    			assertProposals(proposals, [
+//    				{proposal: '<!-- ', prefix: '<!-'},
+//    			]);
+//    		});
+//    	});
+//    	it('Comment open proposals nested tag 3', function() {
+//    		var _o = setup({buffer: '<a><!--</a>'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 7}).then(function(proposals) {
+//    			assertProposals(proposals, []);
+//    		});
+//    	});
+//    	it('Comment open proposals nested tag 4', function() {
+//    		var _o = setup({buffer: '<a><</a>'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
+//    			assertTagProposals(proposals);
+//    		});
+//    	});
+		it('Comment close proposals 1', function() {
+    		var _o = setup({buffer: '<!-- '});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '-->', prefix: ''},
+    			]);
+    		});
+    	});
+    	it('Comment close proposals 2', function() {
+    		var _o = setup({buffer: '<!-- -'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 6}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '-->', prefix: '-'},
+    			]);
+    		});
+    	});
+    	it('Comment close proposals 3', function() {
+    		var _o = setup({buffer: '<!-- --'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 7}).then(function(proposals) {
+    			assertProposals(proposals, [
+    				{proposal: '-->', prefix: '--'},
+    			]);
+    		});
+    	});
+    	it('Comment close proposals 4', function() {
+    		var _o = setup({buffer: '<!-- -->'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 8}).then(function(proposals) {
+    			assertTagProposals(proposals);
+    		});
+    	});
+    	it('Comment close proposals 5', function() {
+    		var _o = setup({buffer: '<!--'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 4}).then(function(proposals) {
+    			assertProposals(proposals, []);
+    		});
+    	});
+    	// TODO Can't test inside nested tags as the parser includes the start of the close tag in the name
+//    	it('Comment close proposals in tag 1', function() {
+//    		var _o = setup({buffer: '<a><!-- </a>'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 8}).then(function(proposals) {
+//    			assertProposals(proposals, [
+//    				{proposal: '-->', prefix: ''},
+//    			]);
+//    		});
+//    	});
+//    	it('Comment close proposals in tag 2', function() {
+//    		var _o = setup({buffer: '<a><!-- -</a>'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 9}).then(function(proposals) {
+//    			assertProposals(proposals, [
+//    				{proposal: '-->', prefix: '-'},
+//    			]);
+//    		});
+//    	});
+//    	it('Comment close proposals in tag 3', function() {
+//    		var _o = setup({buffer: '<a><!-- --</a>'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 10}).then(function(proposals) {
+//    			assertProposals(proposals, [
+//    				{proposal: '-->', prefix: '--'},
+//    			]);
+//    		});
+//    	});
+//    	it('Comment close proposals in tag 4', function() {
+//    		var _o = setup({buffer: '<a><!-- --></a>'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 11}).then(function(proposals) {
+//    			assertTagProposals(proposals);
+//    		});
+//    	});
+//    	it('Comment close proposals in tag 5', function() {
+//    		var _o = setup({buffer: '<a><!--</a>'});
+//    		return assist.computeContentAssist(_o.editorContext, {offset: 7}).then(function(proposals) {
+//    			assertProposals(proposals, []);
+//    		});
+//    	});
     	// TODO HTML5 does not require lower case tags/attributes, our templates require lower case
-    	
-    	
     });
 });
