@@ -97,16 +97,25 @@ define([
 	/**
 	 * @description Default callback to be used durning the post-parse phase of plugin loading
 	 * @param {TernServer} server The server
-	 * @param {Object} ast The backing AST that was just parsed 
+	 * @param {Object} ast The backing AST that was just parsed
+	 * @param {Object} ignores A mapping of names that can be ignored
 	 * @since 9.0
 	 */
-	function doPostParse(server, ast) {
+	function doPostParse(server, ast, ignores) {
 		if(Array.isArray(ast.dependencies) && ast.dependencies.length > 0) {
 			for(var i = 0; i < ast.dependencies.length; i++) {
 				var _d = ast.dependencies[i].value;
 				if(_d) {
 					if(typeof(_resolved[_d]) === 'object') {
 						continue; //we already resolved it or are trying, keep going
+					}
+					if(typeof(ignores) === 'object') {
+						if(ignores[_d]) {
+							continue;
+						}
+						if(typeof(ignores.node) === 'object' && ignores[_d]) {
+							continue;
+						}
 					}
 					_resolved[_d] = Object.create(null);
 				}

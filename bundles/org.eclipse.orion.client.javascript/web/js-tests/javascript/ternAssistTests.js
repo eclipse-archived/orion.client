@@ -29,16 +29,7 @@ define([
 		if(typeof(ev.data) === 'object') {
 			var _d = ev.data;
 			if(_d.request === 'read') {
-				if(fileMap && _d.args.file.logical) {
-					var _f = fileMap[_d.args.file.logical];
-					if(_f) {
-						ternworker.postMessage({request: 'read', args: {contents: state.buffer, file: state.file, logical: _d.args.file.logical}});
-					} else {
-						ternworker.postMessage({request: 'read', args: {logical: _d.args.file.logical, error: 'could not read test file'}});
-					}
-				} else {
-					ternworker.postMessage({request: 'read', args: {contents: state.buffer, file: state.file}});
-				}
+				ternworker.postMessage({request: 'read', args: {contents: state.buffer, file: state.file}});
 			} else if(typeof(_d.request) === 'string') {
 				//don't process requests other than the ones we want
 				return;

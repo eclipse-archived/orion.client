@@ -95,12 +95,6 @@
     var locals = cx.definitions.node;
     var result;
 
-    var _f = resolver.getResolved(name);
-	var wsname = name;
-	if(_f && _f.file !== undefined) {
-		wsname = _f.file;
-	}
-      
     if (locals[name] && /^[a-z_]*$/.test(name)) {
       result = locals[name];
     } else if (name in data.modules) {
@@ -111,7 +105,10 @@
       infer.def.load(data.options.modules[name], scope);
       result = data.modules[name] = scope.exports;
     } else {
-      name = wsname;
+    	var _f = resolver.getResolved(name);
+		if(_f && _f.file !== undefined) {
+			name = _f.file;
+		}
       // data.currentFile is only available while analyzing a file; at query
       // time, determine the calling file from the caller's AST.
       var currentFile = data.currentFile || resolveProjectPath(server, argNodes[0].sourceFile.name);
@@ -211,7 +208,7 @@
                      * @callback
                      */
                     postParse: function postParse(ast, text) {
-                        resolver.doPostParse(server, ast);
+                        resolver.doPostParse(server, ast, infer.cx().definitions);
                     },
                     /**
                      * @callback

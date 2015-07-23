@@ -3004,39 +3004,6 @@ define([
 			});
 		}
 	
-		/////////////////////////////////////
-		// various tests for reassignment
-		// reassignments are only performed
-		// if the new type is not less general
-		// than the old type
-		/////////////////////////////////////
-		/*
-		 undefined -> Object yes
-		 undefined -> { } yes
-		 undefined -> {a} yes
-		 undefined -> any yes
-	
-		 Object -> undefined no
-		 Object -> { } yes
-		 Object -> {a} yes
-		 Object -> any yes
-	
-		 { } -> undefined no
-		 { } -> Object no
-		 { } -> {a} yes
-		 { } -> any yes
-	
-		 {a} -> undefined no
-		 {a} -> Object no
-		 {a} -> { } no
-		 {a} -> any yes
-	
-		 any -> undefined no
-		 any -> Object no
-		 any -> { } no
-		 any -> {a} yes
-		*/
-	
 		//undefined
 		it("test reassignment undef->Obj", function() {
 			var results = computeContentAssist(

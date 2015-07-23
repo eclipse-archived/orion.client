@@ -234,7 +234,7 @@
 		 * @callback
 		 */
 		postParse: function postParse(ast, text) {
-			resolver.doPostParse(server, ast);
+			resolver.doPostParse(server, ast, infer.cx().definitions);
 		},
 		/**
 		 * @callback
