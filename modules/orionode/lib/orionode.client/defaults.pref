@@ -5,14 +5,15 @@
 		"edit/content/imageViewerPlugin.html":true,
 		"edit/content/jsonEditorPlugin.html":true,
 		"plugins/webEditingPlugin.html":true,
-		"plugins/helpPlugin.html": true,
+		"plugins/helpPlugin.html":true,
 		"plugins/languageToolsPlugin.html":true,
 		"plugins/pageLinksPlugin.html":true,
 		"webtools/plugins/webToolsPlugin.html":true,
 		"javascript/plugins/javascriptPlugin.html":true,
 		"shell/plugins/shellPagePlugin.html":true,
 		"plugins/nodePlugin.html":true,
-		"plugins/consolePlugin.html" :true
+		"plugins/consolePlugin.html":true,
+		"git/plugins/gitPlugin.html":true
 	},
 	"/settingsContainer":{
 		"categories":{

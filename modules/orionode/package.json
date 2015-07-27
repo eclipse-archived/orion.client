@@ -5,15 +5,22 @@
   "homepage": "http://eclipse.org/orion/",
   "bugs": "https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&component=Node",
   "dependencies": {
-    "connect": "~2.4.6",
-    "node-inspector": "~0.7.4",
-    "socket.io": "~1.0.4",
+    "async": "^0.9.0",
+    "connect": "~2.8",
+    "connect-redirection": "0.0.1",
     "deferred-fs": "~0.3.2",
     "rimraf": "~2.2.6",
+    "socket.io": "~1.0.4",
+    "socket.io-client": "~0.9.11",
     "term.js": "0.0.3"
   },
   "optionalDependencies": {
-    "pty.js": "0.2.5"
+    "pty.js": "0.2.5",
+    "nodegit": "~0.4.0",
+    "findit": "~2.0.0",
+    "ini": "~1.3",
+    "mkdirp": "*",
+    "node-inspector": "~0.7.4"
   },
   "devDependencies": {
     "mocha": "*",
