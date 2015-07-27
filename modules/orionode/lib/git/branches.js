@@ -94,10 +94,10 @@ function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
 			})
 			.catch(function(err) {
 				cb(err);
-			})
+			});
 		}, function(err) {
 			if (err) {
-				console.log(err)
+				console.log(err);
 				return writeError(500, res);
 			}
 			var resp = JSON.stringify({
@@ -114,7 +114,7 @@ function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
 	.catch(function(err) {
 		console.log(err);
 		writeError(500, res);
-	})
+	});
 }
 
 function getBranchMetadata(workspaceDir, fileRoot, req, res, next, rest) {
@@ -127,12 +127,12 @@ function getBranchMetadata(workspaceDir, fileRoot, req, res, next, rest) {
 	.then(function(repo) {
 		git.Branch.lookup(repo, branchName,	git.Branch.BRANCH.LOCAL)
 		.then(function(ref) {
-			var remotes = []
+			var remotes = [];
 			repo.getReferences(git.Reference.TYPE.OID)
 			.then(function(referenceList) {
 		 		referenceList.forEach(function(ref) {
 	 				if (ref.isRemote()) {
-						remoteName = ref.name().replace("refs/remotes/", "");
+						var remoteName = ref.name().replace("refs/remotes/", "");
 						remotes.push(remoteName);
 					}
 	 			});
@@ -147,7 +147,7 @@ function getBranchMetadata(workspaceDir, fileRoot, req, res, next, rest) {
 					if (remoteName === branchName) {
 						remoteLocations.push({
 					        "Children": [{
-					          "CloneLocation": branches[nameToMatch]["CloneLocation"],
+					          "CloneLocation": branches[nameToMatch]["CloneLocation"], // FIXME
 					          "CommitLocation": "/gitapi/commit/" + remoteURL + "/file/" + fileDir,
 					          "DiffLocation": "/gitapi/diff/" + remoteURL + "/file/" + fileDir,
 					          "FullName": "refs/remotes/" + remote,
@@ -231,7 +231,7 @@ function createBranch(workspaceDir, fileRoot, req, res, next, rest) {
 					res.setHeader('Content-Type', 'application/json');
 					res.setHeader('Content-Length', resp.length);
 					res.end(resp);
-				})
+				});
 			});
 		});
 	});

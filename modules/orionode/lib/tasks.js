@@ -11,7 +11,6 @@
 /*eslint-env node*/
 
 var connect = require('connect');
-var fs = require('fs');
 var resource = require('./resource');
 var api = require('./api'), writeError = api.writeError;
 
@@ -19,7 +18,7 @@ var taskList = {};
 
 function orionTasksAPI(options) {
     var workspaceRoot = options.root;
-    if (!workspaceRoot) { throw 'options.root path required'; }
+    if (!workspaceRoot) { throw new Error('options.root path required'); }
 
     return connect()
     .use(connect.json())
@@ -58,7 +57,7 @@ function orionTasksAPI(options) {
             res.end();
         }
     }));
-};
+}
 
 //Add the task, return the task so it can be sent
 function addTask(id, message, running, completionPercent) {
@@ -93,4 +92,4 @@ module.exports = {
     orionTasksAPI: orionTasksAPI,
     addTask: addTask,
     updateTask: updateTask
-}
+};

@@ -9,9 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api');
 var git = require('nodegit');
-var path = require("path");
 
 /*
  * Stash for_each available after Nodegit commit f91c501
@@ -27,9 +26,9 @@ function getStash(workspaceDir, fileRoot, req, res, next, rest) {
 
 	var location = url.substring(0, url.indexOf('?'));
 	var cloneLocation = location.replace("/stash","/clone");
-	var stashType = "StashCommit";
+//	var stashType = "StashCommit";
 
-	stashesArray = [];
+	var stashesArray = [];
         var stashCb = function(index, message, oid) {
           stashesArray.push({
 			"ApplyLocation" : "/gitapi/stash/" + oid + "/" + repoName, 
@@ -70,4 +69,4 @@ function getStash(workspaceDir, fileRoot, req, res, next, rest) {
 
 module.exports = {
         getStash: getStash
-}
+};

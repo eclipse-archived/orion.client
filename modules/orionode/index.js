@@ -49,7 +49,7 @@ function startServer(options) {
 
                 // Fake login response
                 if (req.url === "/login" && req.method === "POST") {
-                    console.log("login")
+                    console.log("login");
                     return res.end(JSON.stringify({
                         "EmailConfirmed": false,
                         "FullName": "anonymous",
@@ -57,7 +57,7 @@ function startServer(options) {
                         "LastLoginTimestamp": "1416865840208",
                         "Location": "/workspace/orionode",
                         "UserName": "anonymous"
-                    }))
+                    }));
                 }
 
                 next();

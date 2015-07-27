@@ -12,10 +12,8 @@
 var api = require('../api'),
     writeError = api.writeError;
 var git = require('nodegit');
-var path = require("path");
 
 function getStatus(workspaceDir, fileRoot, req, res, next, rest) {
-    var status = [];
     var repoPath = rest.replace("status/file/", "");
     var fileDir = repoPath;
     repoPath = api.join(workspaceDir, repoPath);
@@ -47,7 +45,7 @@ function getStatus(workspaceDir, fileRoot, req, res, next, rest) {
                 "Location": "/file/" + orionFilePath,
                 "Name": file.path(),
                 "Path": file.path()
-            }
+            };
         }
 
         statuses.forEach(function(file) {
@@ -100,7 +98,7 @@ function getStatus(workspaceDir, fileRoot, req, res, next, rest) {
     .catch(function(err) {
         console.log(err);
         writeError(403, res);
-    })
+    });
 
 }
 

@@ -11,10 +11,7 @@
 /*eslint-env node*/
 
 var connect = require('connect');
-var fs = require('fs');
-var util = require('util');
 var api = require('./api'), writeError = api.writeError;
-var fileUtil = require('./fileUtil');
 var resource = require('./resource');
 var add = require('./git/add');
 var clone = require('./git/clone');
@@ -28,7 +25,6 @@ var stash = require('./git/stash');
 var blame = require('./git/blame');
 var diff = require('./git/diff');
 var rmdir = require('rimraf');
-var path = require('path');
 var url = require('url');
 var redirect = require('connect-redirection');
 
@@ -36,7 +32,7 @@ module.exports = function(options) {
 	var workspaceRoot = options.root;
 	var workspaceDir = options.workspaceDir;
 	var fileRoot = options.fileRoot;
-	if (!workspaceRoot) { throw 'options.root path required'; }
+	if (!workspaceRoot) { throw new Error('options.root path required'); }
 	return connect()
 	.use(connect.json())
 	.use(redirect())
@@ -47,6 +43,7 @@ module.exports = function(options) {
 	.use(resource(workspaceRoot, {
 		GET: function(req, res, next, rest) {
 			var query = url.parse(req.url, true).query;
+			var diffOnly, uriOnly;
 			if (rest === '') {
 				console.log("nope");
 			} else if (rest.indexOf("clone/workspace/") === 0) {
@@ -83,20 +80,20 @@ module.exports = function(options) {
 			} else if (rest.indexOf("commit/") === 0) {
 				commit.getCommit(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("diff/Default/file/") === 0) {
-				var diffOnly = query.parts === 'diff';
-				var uriOnly = query.parts === 'uris';
+				diffOnly = query.parts === 'diff';
+				uriOnly = query.parts === 'uris';
 
 				diff.getDiffBetweenWorkingTreeAndHead(workspaceDir, fileRoot, req, res, next, rest, diffOnly, uriOnly);
 			} else if (rest.indexOf("diff/Cached/file/") === 0) {
-				var diffOnly = query.parts === 'diff';
-				var uriOnly = query.parts === 'uris';
+				diffOnly = query.parts === 'diff';
+				uriOnly = query.parts === 'uris';
 
 				diff.getDiffBetweenIndexAndHead(workspaceDir, fileRoot, req, res, next, rest, diffOnly, uriOnly);
 			} else if (rest.indexOf("diff/") === 0) {
-				var diffOnly = query.parts === 'diff';
-				var uriOnly = query.parts === 'uris';
+				diffOnly = query.parts === 'diff';
+				uriOnly = query.parts === 'uris';
 
-				diff.getDiffBetweenTwoCommits(workspaceDir, fileRoot, req, res, next, rest, diffOnly, uriOnly)
+				diff.getDiffBetweenTwoCommits(workspaceDir, fileRoot, req, res, next, rest, diffOnly, uriOnly);
 			} else {
 				writeError(403, res);
 			}
@@ -135,7 +132,6 @@ module.exports = function(options) {
 		DELETE: function(req, res, next, rest) {
 			if(rest.indexOf("clone/file/") === 0) {
 				var configPath = rest.replace("clone/file", "");
-				var rmdir = require('rimraf');
 				rmdir(workspaceDir.concat(configPath), function() {
 					res.statusCode = 200;
 					res.end();

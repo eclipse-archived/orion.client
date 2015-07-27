@@ -19,11 +19,11 @@ function getClone(workspaceDir, fileRoot, req, res, next, rest) {
 	var repos = [];
 
 	fs.readdir(workspaceDir, function(err, files) {
-		if (err) return cb(err);
+		if (err) return writeError(500);
 		
 		files = files.map(function(file) {
 			return path.join(workspaceDir, file);
-		})
+		});
 
 		async.each(files, checkDirectory, function(err) {
 			if (err) return writeError(403);
@@ -37,7 +37,7 @@ function getClone(workspaceDir, fileRoot, req, res, next, rest) {
 			res.setHeader('Content-Length', resp.length);
 			res.end(resp);	
 		});
-	})
+	});
 
 	function checkDirectory(dir, cb) {
 		//Check if the dir is a directory
@@ -79,8 +79,8 @@ function getClone(workspaceDir, fileRoot, req, res, next, rest) {
 					}, function(err) {
 						repos.push(repoInfo);
 						return cb();	
-					})
-				})
+					});
+				});
 	 		})
 			.catch(function(err) {
 				fs.readdir(dir, function(err, files) {
@@ -90,11 +90,11 @@ function getClone(workspaceDir, fileRoot, req, res, next, rest) {
 
 					files = files.map(function(file) {
 						return path.join(dir, file);
-					})
+					});
 					async.each(files, checkDirectory, cb);
-				})	
-			})
-		})
+				});
+			});
+		});
 	}
 }
 
@@ -147,7 +147,7 @@ function postInit(workspaceDir, fileRoot, req, res, next, rest) {
 		    .catch(function(err){
 		    	console.log(err);
 		    	writeError(403, res);
-		    })
+		    });
 
 	    });
 	}

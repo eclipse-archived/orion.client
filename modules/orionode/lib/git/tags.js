@@ -11,7 +11,6 @@
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
-var path = require("path");
 
 function getTags(workspaceDir, fileRoot, req, res, next, rest) {
 	var repoPath = rest.replace("tag/file/", "");
@@ -26,9 +25,7 @@ function getTags(workspaceDir, fileRoot, req, res, next, rest) {
       var counts = 0;
       var total = refNames.length;
       refNames.forEach(function(refName) { 
-        git.Reference.lookup(repo, refName, function(ref) {
-
-        })
+        git.Reference.lookup(repo, refName)
         .then(function(ref) {
           if (ref.isTag()) {
             tags.push({
@@ -47,15 +44,15 @@ function getTags(workspaceDir, fileRoot, req, res, next, rest) {
             res.setHeader('Content-Length', resp.length);
             res.end(resp);
           }
-        })
-    	})
-  	})
-  })
+        });
+    	});
+  	});
+  });
 }
 
 function deleteTags(workspaceDir, fileRoot, req, res, next, rest) {
   var restOfTheUrl = rest.replace("tag/", "");
-  var index = restOfTheUrl.indexOf("/")
+  var index = restOfTheUrl.indexOf("/");
   var tag = restOfTheUrl.substring(0, index);
   var repoPath = restOfTheUrl.substring(index+1).replace("file/", "");
   
@@ -72,10 +69,10 @@ function deleteTags(workspaceDir, fileRoot, req, res, next, rest) {
         writeError(403, res);
       } 
     }
-  })
+  });
 }
 
 module.exports = {
 	getTags: getTags,
   deleteTags: deleteTags
-}
+};

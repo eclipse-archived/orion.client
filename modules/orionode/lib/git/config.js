@@ -16,17 +16,16 @@ var ini = require('ini');
 var fs = require('fs');
 
 function getAConfig(workspaceDir, fileRoot, req, res, next, rest) {
-	var restOfTheUrl = rest.replace("config/", "")
-	var index = restOfTheUrl.indexOf("/")
-	var key = restOfTheUrl.substring(0, index)
-	var repoPath = restOfTheUrl.substring(index+1).replace("clone/file/", "")
-	var location = api.join(fileRoot, repoPath);
+	var restOfTheUrl = rest.replace("config/", "");
+	var index = restOfTheUrl.indexOf("/");
+	var key = restOfTheUrl.substring(0, index);
+	var repoPath = restOfTheUrl.substring(index+1).replace("clone/file/", "");
 	repoPath = api.join(workspaceDir, repoPath);
 	git.Repository.open(repoPath)
 	.then(function(repo) {
 		if (repo) {
 			fs.readFile(api.join(repoPath, ".git/config"), {encoding:'utf-8'}, function(err, config){
-				var config = ini.parse(config)
+				config = ini.parse(config);
 				val = undefined;
 				findInPath(config, "", key);
 				var resp = JSON.stringify({
@@ -38,19 +37,19 @@ function getAConfig(workspaceDir, fileRoot, req, res, next, rest) {
 				res.setHeader('Content-Type', 'application/json');
 				res.setHeader('Content-Length', resp.length);
 				res.end(resp);
-			})
+			});
 
 			function findInPath(config, prefix, key) {
 				if (typeof config !== "object") {
 					if (prefix === key) {
-						console.log(config)
+						console.log(config);
 						val = config;
 					}
 				} else {
 					for (var property in config) {
 					    if (config.hasOwnProperty(property)) {
 					    	// ini gives reply as 'branch "origin"', remove the ", add period
-					    	var path = property.split('"').join("").replace(" ", ".")
+					    	var path = property.split('"').join("").replace(" ", ".");
 					        findInPath(config[property], prefix === "" ? path : prefix + "." + path, key);
 					    }
 					}
@@ -67,15 +66,15 @@ function getConfig(workspaceDir, fileRoot, req, res, next, rest) {
 	var repoPath = rest.replace("config/clone/file/", "");
 	var location = api.join(fileRoot, repoPath);
 	repoPath = api.join(workspaceDir, repoPath);
-	console.log(repoPath)
+	console.log(repoPath);
 	git.Repository.open(repoPath)
 	.then(function(repo) {
 		if (repo) {
 			fs.readFile(api.join(repoPath, ".git/config"), {encoding:'utf-8'}, function(err, config){
-				var config = ini.parse(config)
-				configs = []
+				config = ini.parse(config);
+				configs = [];
 
-				getFullPath(config, "")
+				getFullPath(config, "");
 
 				var resp = JSON.stringify({
 					"Children": configs,
@@ -101,13 +100,13 @@ function getConfig(workspaceDir, fileRoot, req, res, next, rest) {
 					 	for (var property in config) {
 						    if (config.hasOwnProperty(property)) {
 						    	// ini gives reply as 'branch "origin"', remove the ", add period
-						    	var path = property.split('"').join("").replace(" ", ".")
+						    	var path = property.split('"').join("").replace(" ", ".");
 						        getFullPath(config[property], prefix === "" ? path : prefix + "." + path);
 						    }
 						}
 					 }
 				}
-			})
+			});
 		}
 		else {
 			writeError(403, res);
@@ -118,7 +117,6 @@ function getConfig(workspaceDir, fileRoot, req, res, next, rest) {
 function postConfig(workspaceDir, fileRoot, req, res, next, rest) {
 	var repoPath = rest.replace("config/clone/file/", "");
 	var oldPath = repoPath;
-	var location = api.join(fileRoot, repoPath);
 	repoPath = api.join(workspaceDir, repoPath);
 	git.Repository.open(repoPath)
 	.then(function(repo) {
@@ -126,7 +124,7 @@ function postConfig(workspaceDir, fileRoot, req, res, next, rest) {
 			repo.config().then(function(config) {
 				var resp = config.setString(req.body.Key, req.body.Value);
 				if (resp === 0) {
-					var resp = JSON.stringify({
+					resp = JSON.stringify({
 						"Key": req.body.Key,
 						"Location": "/gitapi/config/"+req.body.Key+"/clone/file/"+oldPath,
 						"Value": req.body.Value
@@ -139,18 +137,17 @@ function postConfig(workspaceDir, fileRoot, req, res, next, rest) {
 				else {
 					writeError(403, res);
 				}
-			})
+			});
 		}
 	});
 }
 
 function putConfig(workspaceDir, fileRoot, req, res, next, rest) {
-	var restOfTheUrl = rest.replace("config/", "")
-	var index = restOfTheUrl.indexOf("/")
-	var key = restOfTheUrl.substring(0, index)
-	var repoPath = restOfTheUrl.substring(index+1).replace("clone/file/", "")
-	var oldPath = repoPath
-	var location = api.join(fileRoot, repoPath);
+	var restOfTheUrl = rest.replace("config/", "");
+	var index = restOfTheUrl.indexOf("/");
+	var key = restOfTheUrl.substring(0, index);
+	var repoPath = restOfTheUrl.substring(index+1).replace("clone/file/", "");
+	var oldPath = repoPath;
 	repoPath = api.join(workspaceDir, repoPath);
 	git.Repository.open(repoPath)
 	.then(function(repo) {
@@ -158,7 +155,7 @@ function putConfig(workspaceDir, fileRoot, req, res, next, rest) {
 			repo.config().then(function(config) {
 				var resp = config.setString(key, req.body.Value);
 				if (resp === 0) {
-					var resp = JSON.stringify({
+					resp = JSON.stringify({
 						"Key": key,
 						"Location": "/gitapi/config/"+key+"/clone/file/"+oldPath,
 						"Value": req.body.Value
@@ -171,7 +168,7 @@ function putConfig(workspaceDir, fileRoot, req, res, next, rest) {
 				else {
 					writeError(403, res);
 				}
-			})
+			});
 		}
 	});
 }
@@ -181,4 +178,4 @@ module.exports = {
 	getAConfig: getAConfig,
 	putConfig: putConfig,
 	postConfig: postConfig
-}
+};

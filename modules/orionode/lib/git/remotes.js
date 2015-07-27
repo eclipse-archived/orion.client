@@ -52,7 +52,7 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 			res.setHeader('Content-Length', resp.length);
 			res.end(resp);
 		});
-	})
+	});
 }
 
 function getRemotesBranches(workspaceDir, fileRoot, req, res, next, rest) {
@@ -60,12 +60,11 @@ function getRemotesBranches(workspaceDir, fileRoot, req, res, next, rest) {
 	var repoPath = rest.substring(rest.lastIndexOf("/file/")).replace("/file/","");
 	var fileDir = repoPath;
 	repoPath = api.join(workspaceDir, repoPath);
-	var repo;
 	git.Repository.open(repoPath)
 	.then(function(repo) {
 		repo.getReferences(git.Reference.TYPE.OID)
 		.then(function(referenceList) {
-			var branches = []
+			var branches = [];
 			async.each(referenceList, iterator, function(err) {
 				if (err) {
 					return writeError(403, res);
@@ -92,7 +91,7 @@ function getRemotesBranches(workspaceDir, fileRoot, req, res, next, rest) {
 								"Id": commit.sha(),
 								"Location": "/gitapi/remote/" + remoteName + "/file/" + fileDir,
 								"Name": rName
-							})
+							});
 							callback();
 						});
 					} else {
@@ -158,7 +157,7 @@ function addRemote(workspaceDir, fileRoot, req, res, next, rest) {
 	.catch(function(err) {
 		console.log(err);
 		writeError(403, res);
-	})
+	});
 }
 
 function postRemote(workspaceDir, fileRoot, req, res, next, rest) {
@@ -332,7 +331,7 @@ function pushRemote(repoPath, req, res, remote) {
 			},
 			"error"
 		);
-	})
+	});
 }
 
 function deleteRemote(workspaceDir, fileRoot, req, res, next, rest) {

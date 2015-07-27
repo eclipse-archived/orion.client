@@ -85,12 +85,12 @@ function getCommitRevision(workspaceDir, fileRoot, req, res, next, rest) {
 	nextLocation = url.format(nextLocation);
 
 	if (branches[0].indexOf("~") !== -1) {
-		var split = branches[0].split("~")
+		var split = branches[0].split("~");
 		numToReturn = Number(split[1]);
 		branches[0] = split[0];
 	}
 
-	var theRepo, finalCommit, startingCommit;
+	var theRepo, finalCommit;
 
 	git.Repository.open(repoPath)
 	.then(function(repo) {
@@ -102,9 +102,8 @@ function getCommitRevision(workspaceDir, fileRoot, req, res, next, rest) {
 		return theRepo.getReferenceCommit(branches[1]);
 	})
 	.then(function(commit) {
-		startingCommit = commit;
-		oid = commit.id();
-		hideOid = finalCommit.id();
+		var oid = commit.id();
+		var hideOid = finalCommit.id();
 
 	    var revWalk = theRepo.createRevWalk();
 
@@ -135,7 +134,7 @@ function getCommitRevision(workspaceDir, fileRoot, req, res, next, rest) {
 			};
 
 			if (page) {
-				resp['NextLocation'] = nextLocation
+				resp['NextLocation'] = nextLocation;
 			}
 
 			if (page && prevLocation) {
@@ -188,7 +187,7 @@ function getCommitRevision(workspaceDir, fileRoot, req, res, next, rest) {
 		}
 
     	return walk();
-	})
+	});
 
 }
 
@@ -216,11 +215,8 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest) {
 	nextLocation.search = null; //So that query object will be used for format
 	nextLocation = url.format(nextLocation);
 
-    var theRepo;
-
 	git.Repository.open(repoPath)
 	.then(function(repo) {
-		theRepo = repo;
 		return repo.getReferenceCommit(reference);
 	})
 	.then(function(commit) {
@@ -235,9 +231,9 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest) {
 			}
 		});
 
-		history.on('end', function(commits) {
+		history.on('end', function(/*commits*/) {
 			sendResponse();
-		})
+		});
 		history.start();
 
 		function sendResponse() {
@@ -257,7 +253,7 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest) {
 			};
 
 			if (prevLocation) {
-				resp["PreviousLocation"] = prevLocation
+				resp["PreviousLocation"] = prevLocation;
 			}
 
 			resp = JSON.stringify(resp);
@@ -268,7 +264,7 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest) {
 			res.end(resp);
 			return;
 		}
-	})
+	});
 }
 
 function getCommitMetadata(workspaceDir, fileRoot, req, res, next, rest) {
@@ -284,7 +280,7 @@ function getCommitMetadata(workspaceDir, fileRoot, req, res, next, rest) {
 			var commitResp = {
 				"Children": [generateCommitObject(commit, fileDir)],
 				"RepositoryPath": ""
-			}
+			};
 			var resp = JSON.stringify(commitResp);
 
 			res.statusCode = 200;
@@ -299,7 +295,7 @@ function getFileContent(workspaceDir, fileRoot, req, res, next, rest) {
 	var repoPath = rest;
 	var commitID = repoPath.substring(0, repoPath.indexOf("/"));
 	repoPath = repoPath.substring(repoPath.indexOf("/")+1).replace("file/", "");
-	filePath = repoPath.substring(repoPath.indexOf("/")+1).replace("Folder/", "");
+	var filePath = repoPath.substring(repoPath.indexOf("/")+1).replace("Folder/", "");
 	repoPath = repoPath.substring(0, repoPath.indexOf("/"));
 	var fileDir = repoPath;
 	repoPath = api.join(workspaceDir, repoPath);
@@ -325,8 +321,9 @@ function getFileContent(workspaceDir, fileRoot, req, res, next, rest) {
 }
 
 function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
+	var repoPath;
 	if (req.body.New) { //This is a weird route. Placeholder code so server doesn't crash.
-		var repoPath = rest.replace("commit/", "");
+		repoPath = rest.replace("commit/", "");
 		var branch = repoPath.substring(0, repoPath.indexOf("/"));
 		var location = "/gitapi/commit/" + branch + ".." + req.body.New + repoPath.replace(branch, "");
 		res.statusCode = 200;
@@ -338,14 +335,13 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
         res.setHeader('Location', url.format({
         	pathname: location,
         	query: url.parse(req.url, true).query
-        }))
+        }));
         // res.end(resp);
         res.end();
         return;
 	}
 
-	var repoPath = rest.replace("commit/HEAD/file/", "");
-	var filePath = repoPath.substring(repoPath.indexOf("/")+1);
+	repoPath = rest.replace("commit/HEAD/file/", "");
 	repoPath = repoPath.indexOf("/") === -1 ? repoPath : repoPath.substring(0, repoPath.indexOf("/"));
 	var fileDir = repoPath;
 	repoPath = api.join(workspaceDir, repoPath);
@@ -418,7 +414,7 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 	     				 patch.isTypeChange() ? "TYPECHANGE" :
 	     				 patch.isUnmodified() ? "UNMODIFY" :
 	     				 patch.isAdded() ? "ADDED" :
-	     				 patch.isUntracked() ? "UNTRACKED" : "NONE"
+	     				 patch.isUntracked() ? "UNTRACKED" : "NONE";
 	        
 	        diffs.push({
 				"ChangeType": change,
@@ -427,7 +423,7 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 				"OldPath": oldFile.path(),
 				"Type": "Diff"
 			});
-	    })
+	    });
 	})
 	.catch(function(err) {
 		console.log(err);
@@ -441,7 +437,7 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Content-Length', resp.length);
         res.end(resp);
-	})
+	});
 }
 
 module.exports = {

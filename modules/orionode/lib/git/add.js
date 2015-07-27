@@ -11,13 +11,10 @@
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
-var async = require('async');
-var path = require("path");
 
 function getFileIndex(workspaceDir, fileRoot, req, res, next, rest) {
         var repo;
         var index;
-        var result = "";
 
         var repoPath = rest.replace("index/file/", "");
         var file = repoPath.substring(repoPath.indexOf("/")+1);
@@ -38,7 +35,7 @@ function getFileIndex(workspaceDir, fileRoot, req, res, next, rest) {
         })
         .then(function() {
           var indexEntry = index.getByPath(file);
-          return git.Blob.lookup(repo, indexEntry.id)
+          return git.Blob.lookup(repo, indexEntry.id);
         })
         .then(function(blob) {
           res.write(blob.toString());
@@ -53,18 +50,15 @@ function getFileIndex(workspaceDir, fileRoot, req, res, next, rest) {
 
 // Stage files
 function putStage(workspaceDir, fileRoot, req, res, next, rest) {
-  var repo;
   var index;
 
   var repoPath = rest.replace("index/file/", "");
   var filePath = repoPath.substring(repoPath.indexOf("/")+1);
   repoPath = repoPath.indexOf("/") === -1 ? repoPath : repoPath.substring(0, repoPath.indexOf("/"));
-  var fileDir = repoPath;
   repoPath = api.join(workspaceDir, repoPath);
 
   git.Repository.open(repoPath)
   .then(function(repoResult) {
-    repo = repoResult;
     return repoResult;
   })
   .then(function(repo) {
@@ -78,7 +72,7 @@ function putStage(workspaceDir, fileRoot, req, res, next, rest) {
     if (req.body.Path) {
       req.body.Path.forEach(function(path) {
         index.addByPath(path);
-      })
+      });
     } else {
       return index.addByPath(filePath);
     }
@@ -99,12 +93,10 @@ function putStage(workspaceDir, fileRoot, req, res, next, rest) {
 // unstage files
 function postStage(workspaceDir, fileRoot, req, res, next, rest) {
   var repo;
-  var index;
 
   var repoPath = rest.replace("index/file/", "");
   var filePath = repoPath.substring(repoPath.indexOf("/")+1);
   repoPath = repoPath.indexOf("/") === -1 ? repoPath : repoPath.substring(0, repoPath.indexOf("/"));
-  var fileDir = repoPath;
   repoPath = api.join(workspaceDir, repoPath);
 
   git.Repository.open(repoPath)
@@ -120,17 +112,17 @@ function postStage(workspaceDir, fileRoot, req, res, next, rest) {
   })
   .then(function(commit) {
     if (req.body.Path) {
-      if (typeof req.body.Path == "string") {
+      if (typeof req.body.Path === "string") {
         return git.Reset.default(repo, commit, req.body.Path);
       } else {
         req.body.Path.forEach(function(path) {
-          return git.Reset.default(repo, commit, path)
-        })
+          return git.Reset.default(repo, commit, path);
+        });
       }
     } else if (req.body.Reset) {
-      return git.Reset.default(repo, commit, ".")
+      return git.Reset.default(repo, commit, ".");
     } else {
-      return git.Reset.default(repo, commit, filePath)
+      return git.Reset.default(repo, commit, filePath);
 
     }
   })

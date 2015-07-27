@@ -11,7 +11,6 @@
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
-var path = require("path");
 
 function getDiffBetweenWorkingTreeAndHead(workspaceDir, fileRoot, req, res, next, rest, diffOnly, uriOnly) {
 	var repoPath = rest.replace("diff/Default/file/", "");
@@ -19,7 +18,6 @@ function getDiffBetweenWorkingTreeAndHead(workspaceDir, fileRoot, req, res, next
     repoPath = repoPath.substring(0, repoPath.indexOf("/"));
 	var fileDir = repoPath;
     repoPath = api.join(workspaceDir, repoPath);
-    var body = "";
 
     git.Repository.open(repoPath)
     .then(function(repo) {
@@ -38,7 +36,7 @@ function getDiffBetweenWorkingTreeAndHead(workspaceDir, fileRoot, req, res, next
     .catch(function(err) {
         console.log(err);
         writeError(404, res);
-    })
+    });
 }
 
 function processDiff(diff, filePath, fileDir, res, diffOnly, uriOnly) {
@@ -48,8 +46,8 @@ function processDiff(diff, filePath, fileDir, res, diffOnly, uriOnly) {
         var newFile = patch.newFile();
         var newFilePath = newFile.path();
         if (!filePath || newFilePath === filePath) {
-            URI = ""
-            diffContent = ""
+            var URI = "";
+            var diffContent = "";
 
             if (!diffOnly) {
                 URI += JSON.stringify({
@@ -59,8 +57,8 @@ function processDiff(diff, filePath, fileDir, res, diffOnly, uriOnly) {
                     "New": "/file/" + fileDir + "/" + newFilePath,
                     "Old": "/gitapi/index/file/" + fileDir + "/" + newFilePath,
                     "Type": "Diff"
-                })
-                URI += "\n"
+                });
+                URI += "\n";
             }
 
             if (!uriOnly) {
@@ -71,19 +69,19 @@ function processDiff(diff, filePath, fileDir, res, diffOnly, uriOnly) {
                 
                 var hunks = patch.hunks();
 
-                hunks.forEach(function(hunk, i) {
+                hunks.forEach(function(hunk) {
 
-                    diffContent += hunk.header() + "\n"
+                    diffContent += hunk.header() + "\n";
 
-                    var lines = hunk.lines()
+                    var lines = hunk.lines();
                     /*
                      * For some reason, nodegit returns basically the entire content of the file
                      * for each line. 
                      * 
                      * The first line (separated by \n), seems to be what we want.
                      */
-                    lines.forEach(function(line, index) {
-                        var prefix = " "
+                    lines.forEach(function(line) {
+                        var prefix = " ";
                         switch(line.origin()) {
                             case git.Diff.LINE.ADDITION:
                                 prefix = "+";
@@ -92,16 +90,16 @@ function processDiff(diff, filePath, fileDir, res, diffOnly, uriOnly) {
                                 prefix = "-";
                                 break;
                             case git.Diff.LINE.DEL_EOFNL:
-                                prefix = "\\ No newline at end of file"
+                                prefix = "\\ No newline at end of file";
                                 break;
                             case git.Diff.LINE.ADD_EOFNL:
-                                prefix = "\\ No newline at end of file"
+                                prefix = "\\ No newline at end of file";
                                 break;
                         }
 
                         diffContent += prefix + line.content().split("\n")[0] + "\n";
-                    })
-                })
+                    });
+                });
             }
 
             var body = "";
@@ -110,7 +108,7 @@ function processDiff(diff, filePath, fileDir, res, diffOnly, uriOnly) {
                 body += "--BOUNDARY\n";
                 body += "Content-Type: application/json\n\n";
                 body += URI;
-                body += "--BOUNDARY\n"
+                body += "--BOUNDARY\n";
                 body += "Content-Type: plain/text\n\n";
                 body += diffContent;
             } else if (!uriOnly) {
@@ -125,7 +123,7 @@ function processDiff(diff, filePath, fileDir, res, diffOnly, uriOnly) {
             } else if (diffOnly) {
                 res.setHeader('Content-Type', 'plain/text');
             } else {
-                res.setHeader('Content-Type', 'application/json')
+                res.setHeader('Content-Type', 'application/json');
             }
             
             res.setHeader('Content-Length', body.length);
@@ -147,24 +145,24 @@ function getDiffBetweenIndexAndHead(workspaceDir, fileRoot, req, res, next, rest
     git.Repository.open(repoPath)
     .then(function(r) {
     	repo = r;
-        return repo.head()
+        return repo.head();
     })
     .then(function(ref) {
-    	return repo.getReferenceCommit(ref)
+    	return repo.getReferenceCommit(ref);
     })
 	.then(function(commit) {
-		return commit.getTree()
+		return commit.getTree();
 	})
     .then(function(tree) {
         return git.Diff.treeToWorkdir(repo, tree, null);
     })
     .then(function(diff) {
         processDiff(diff, filePath, fileDir, res, diffOnly, uriOnly);
-    }) 
+    });
 }
 
 function getDiffBetweenTwoCommits(workspaceDir, fileRoot, req, res, next, rest, diffOnly, uriOnly) {
-    var rest = rest.replace("diff/", "");
+    rest = rest.replace("diff/", "");
     var repoPath = rest.substring(rest.indexOf("/")+1).replace("file/", "");
     var commitHashes = rest.substring(0, rest.indexOf("/")).split("..");
     var fileDir = repoPath;
@@ -182,7 +180,7 @@ function getDiffBetweenTwoCommits(workspaceDir, fileRoot, req, res, next, rest, 
         return repo.getCommit(commitHashes[0]);
     })
     .then(function(commit) {
-        return commit.getTree()
+        return commit.getTree();
     })
     .then(function(tree) {
         tree1 = tree;
@@ -191,7 +189,7 @@ function getDiffBetweenTwoCommits(workspaceDir, fileRoot, req, res, next, rest, 
         return repo.getCommit(commitHashes[1]);
     })
     .then(function(commit) {
-        return commit.getTree()
+        return commit.getTree();
     })
     .then(function(tree) {
         tree2 = tree;
@@ -201,21 +199,21 @@ function getDiffBetweenTwoCommits(workspaceDir, fileRoot, req, res, next, rest, 
     })
     .then(function(diff) {
         processDiff(diff, null, fileDir, res, diffOnly, uriOnly);
-    }) 
+    });
 }
 
 function getDiffLocation(workspaceDir, fileRoot, req, res, next, rest) {
-	var rest = rest.replace("diff/", "");
+	rest = rest.replace("diff/", "");
     var repoPath = rest.substring(rest.indexOf("/")+1).replace("file/", "");
     var oldCommit = rest.substring(0, rest.indexOf("/"));
     var fileDir = repoPath;
     repoPath = api.join(workspaceDir, repoPath);
-    var newCommit = req.body.New
-    var URL = "/gitapi/diff/" + oldCommit + ".." + newCommit + "/file/" + fileDir
+    var newCommit = req.body.New;
+    var URL = "/gitapi/diff/" + oldCommit + ".." + newCommit + "/file/" + fileDir;
 
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Location', URL)
+    res.setHeader('Location', URL);
     res.end();
 
 }
