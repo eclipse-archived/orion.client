@@ -57,12 +57,17 @@ define([
 		if (startsWith(lowerCase, prefix)) {
 			return true;
 		}
-
+		
+		var _prefix = prefix.toLowerCase();
+		
 		// Test for camel characters in the prefix.
-		if (prefix === prefix.toLowerCase()) {
+		if (prefix === _prefix) {
 			return false;
 		}
-
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=473777
+		if(startsWith(lowerCase, _prefix)) {
+			return true;
+		}
 		var prefixParts = toCamelCaseParts(prefix);
 		var targetParts = toCamelCaseParts(target);
 

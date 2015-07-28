@@ -205,6 +205,83 @@ define([
 
 	describe('Tern Content Assist Tests', function() {
 		this.timeout(10000);
+		describe('Case-insensitive proposals', function() {
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473777
+			 */
+			it('test casing 1', function(done) {
+				var options = {
+					buffer: "[].fore",
+					prefix: "fore",
+					offset: 7,
+					callback: done
+				};
+				testProposals(options, [
+					['', 'ecma5'],
+					['forEach(f, context?)', 'forEach(f, context?)']
+				]);
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473777
+			 */
+			it('test casing 2', function(done) {
+				var options = {
+					buffer: "[].isPrototypeo",
+					prefix: "isPrototypeo",
+					offset: 15,
+					callback: done
+				};
+				testProposals(options, [
+					['', 'ecma5'],
+					['isPrototypeOf(obj)', 'isPrototypeOf(obj) : bool']
+				]);
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473777
+			 */
+			it('test casing 3', function(done) {
+				var options = {
+					buffer: "[].copyw",
+					prefix: "copyw",
+					offset: 8,
+					callback: done
+				};
+				testProposals(options, [
+					['', 'ecma6'],
+					['copyWithin(target, start, end?)', 'copyWithin(target, start, end?)']
+				]);
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473777
+			 */
+			it('test casing 4', function(done) {
+				var options = {
+					buffer: "[].isprototypeo",
+					prefix: "isprototypeo",
+					offset: 15,
+					callback: done
+				};
+				testProposals(options, [
+					['', 'ecma5'],
+					['isPrototypeOf(obj)', 'isPrototypeOf(obj) : bool']
+				]);
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473777
+			 */
+			it('test casing params 1', function(done) {
+				var options = {
+					buffer: "[].filter",
+					prefix: "filter",
+					offset: 9,
+					callback: done
+				};
+				testProposals(options, [
+					['', 'ecma5'],
+					['filter(test, context?)', 'filter(test, context?)']
+				]);
+			});
+		});
 		describe('Complete Syntax', function() {
 			it("test no dupe 1", function(done) {
 				var options = {
@@ -238,7 +315,7 @@ define([
 					["coo", "coo : number"]
 				]);
 			});
-			it("test full file inferecing 1", function(done) {
+			it("test full file inferencing 1", function(done) {
 				var options = {
 					buffer: "x;\n var x = 0;", 
 					prefix: "x", 
@@ -248,7 +325,7 @@ define([
 					["x", "x : number"]
 				]);
 			});
-			it("test full file inferecing 2", function(done) {
+			it("test full file inferencing 2", function(done) {
 				var options = {
 					buffer: "function a() { x; }\n var x = 0;", 
 					prefix: "x", 
@@ -258,7 +335,7 @@ define([
 					["x", "x : number"]
 				]);
 			});
-			it("test full file inferecing 3", function(done) {
+			it("test full file inferencing 3", function(done) {
 				var options = {
 					buffer: "function a() { var y = x; y}\n var x = 0;", 
 					prefix: "y", 
@@ -268,7 +345,7 @@ define([
 					["y", "y : number"]
 				]);
 			});
-			it("test full file inferecing 4", function(done) {
+			it("test full file inferencing 4", function(done) {
 				var options = {
 					buffer: "function a() { var y = x.fff; y}\n var x = { fff : 0 };", 
 					prefix: "y", 
@@ -278,7 +355,7 @@ define([
 					["y", "y : number"]
 				]);
 			});
-			it("test full file inferecing 5", function(done) {
+			it("test full file inferencing 5", function(done) {
 				var options = {
 					buffer: "function a() { var y = x.fff; y}\n var x = {};\n x.fff = 8;", 
 					prefix: "y", 
@@ -288,7 +365,7 @@ define([
 					["y", "y : number"]
 				]);
 			});
-			it("test full file inferecing 6", function(done) {
+			it("test full file inferencing 6", function(done) {
 				var options = {
 					buffer: "function a() { x.fff = ''; var y = x.fff; y}\n" +
 					"var x = {};\n" +
@@ -300,7 +377,7 @@ define([
 					["y", "y : string|number"]
 				]);
 			});
-			it("test full file inferecing 7", function(done) {
+			it("test full file inferencing 7", function(done) {
 				var options = {
 					buffer: "function a() { x.fff = ''; var y = x(); y}\n" +
 					"var x = function() { return 8; }", 
@@ -311,7 +388,7 @@ define([
 					["y", "y : number"]
 				]);
 			});
-			it("test full file inferecing 8", function(done) {
+			it("test full file inferencing 8", function(done) {
 				var options = {
 					buffer: "function a() { x.fff = ''; var y = z(); y}\n" +
 					"var x = function() { return 8; }, z = x", 
@@ -323,7 +400,7 @@ define([
 				]);
 			});
 		
-			it("test full file inferecing 9", function(done) {
+			it("test full file inferencing 9", function(done) {
 				var options = {
 					buffer: "function a() {\n function b() {\n x.fff = '';\n }\n x.f\n}\n var x = {};", 
 					prefix: "f", 
@@ -333,7 +410,7 @@ define([
 					["fff", "fff : string"]
 				]);
 			});
-			it("test full file inferecing 10", function(done) {
+			it("test full file inferencing 10", function(done) {
 				var options = {
 					buffer: "function a() {\n function b() {\n x.fff = '';\n }\n var y = x;\n y.f\n }\n var x = {};", 
 					prefix: "f", 
@@ -344,7 +421,7 @@ define([
 				]);
 			});
 		
-			it("test full file inferecing 11a", function(done) {
+			it("test full file inferencing 11a", function(done) {
 				var options = {
 					buffer: "var x = {};\n function a() {\n var y = x;\n y.f\n function b() {\n x.fff = '';\n}\n}", 
 					prefix: "f", 
@@ -355,7 +432,7 @@ define([
 				]);
 			});
 		
-			it("test full file inferecing 11", function(done) {
+			it("test full file inferencing 11", function(done) {
 				var options = {
 					buffer: "function a() {\n var y = x;\n y.f\n function b() {\n x.fff = '';\n }\n }\n var x = {};", 
 					prefix: "f", 
@@ -366,7 +443,7 @@ define([
 				]);
 			});
 		
-			it("test full file inferecing 12", function(done) {
+			it("test full file inferencing 12", function(done) {
 				var options = {
 					buffer: "function a() {\n var y = x;\n y.f\n x.fff = '';\n }\n var x = {};", 
 					prefix: "f", 
@@ -377,7 +454,7 @@ define([
 				]);
 			});
 		
-			it("test full file inferecing 13", function(done) {
+			it("test full file inferencing 13", function(done) {
 				var options = {
 					buffer: "function b() {\n x.fff = '';\n }\n function a() {\n var y = x;\n y.f\n }\n var x = {};", 
 					prefix: "f", 
@@ -388,7 +465,7 @@ define([
 				]);
 			});
 		
-			it("test full file inferecing 14", function(done) {
+			it("test full file inferencing 14", function(done) {
 				var options = {
 					buffer: "function a() {\n  var y = x;\n y.f\n }\n function b() {\n x.fff = '';\n }\n var x = {};", 
 					prefix: "f", 
@@ -399,7 +476,7 @@ define([
 				]);
 			});
 		
-			it("test full file inferecing 15", function(done) {
+			it("test full file inferencing 15", function(done) {
 				var options = {
 					buffer: "function b() {\n x.fff = '';\n }\n function a() {\n x.f\n }\n var x = {};", 
 					prefix: "f", 
@@ -412,7 +489,7 @@ define([
 		
 			// should still find the fff property here evem though it
 			// is defined after and in another funxtion
-			it("test full file inferecing 16", function(done) {
+			it("test full file inferencing 16", function(done) {
 				var options = {
 					buffer: "function a() {\n x.f\n }\n function b() {\n x.fff = '';\n }\n var x = {};", 
 					prefix: "f", 
@@ -422,7 +499,7 @@ define([
 					["fff", "fff : string"]
 				]);
 			});
-			it("test full file inferecing 17", function(done) {
+			it("test full file inferencing 17", function(done) {
 				var options = {
 					buffer: "function a() {\n x.f\n function b() {\n x.fff = '';\n }\n }\n var x = {};", 
 					prefix: "f", 
@@ -433,7 +510,7 @@ define([
 				]);
 			});
 		
-			it("test full file inferecing 18", function(done) {
+			it("test full file inferencing 18", function(done) {
 				var options = {
 					buffer: "function a() {\n x.fff = '';\n function b() {\n x.f\n }\n }\n var x = {};", 
 					prefix: "f", 
@@ -444,7 +521,7 @@ define([
 				]);
 			});
 		
-			it("test full file inferecing 19", function(done) {
+			it("test full file inferencing 19", function(done) {
 				var options = {
 					buffer: "function a() {\n function b() {\n x.f\n }\n x.fff = '';\n }\n var x = {};", 
 					prefix: "f", 
@@ -456,7 +533,7 @@ define([
 			});
 		
 			// don't find anything because assignment is in same scope, but after
-			it("test full file inferecing 20", function(done) {
+			it("test full file inferencing 20", function(done) {
 				var options = {
 					buffer: "x.\n" +
 					"var x = {};\n" +
@@ -469,7 +546,7 @@ define([
 				]);
 			});
 		
-			it("test full file inferecing 21", function(done) {
+			it("test full file inferencing 21", function(done) {
 				var options = {
 					buffer: "function a() {\n x.fff = '';\n }\n x.\n var x = {}; ", 
 					prefix: "f", 
@@ -480,7 +557,7 @@ define([
 				]);
 			});
 		
-			it("test full file inferecing 22", function(done) {
+			it("test full file inferencing 22", function(done) {
 				var options = {
 					buffer: "x.\n" +
 					"function a() {\n" +
@@ -495,7 +572,7 @@ define([
 				]);
 			});
 		
-			it("test full file inferecing 26", function(done) {
+			it("test full file inferencing 26", function(done) {
 				var options = {
 					buffer: "function a() {\n function b() {\n var fff = x();\n f;\n }\n }\n function x() { return ''; }", 
 					prefix: "f", 
@@ -503,23 +580,33 @@ define([
 					callback: done};
 				return testProposals(options, [
 					["fff", "fff : string"],
+					['', 'ecma6'],
+					['Float32Array(length)', 'Float32Array(length)'],
+					['Float64Array(length)', 'Float64Array(length)'],
+					['', 'ecma5'],
+					['Function(body)', 'Function(body) : fn()']
 				]);
 			});
 		
 			// Not inferencing String because function decl comes after reference in same scope
-			it("test full file inferecing 27", function(done) {
+			it("test full file inferencing 27", function(done) {
 				var options = {
 					buffer: "var fff = x();\n f;\n function x() { return ''; }", 
 					prefix: "f", 
 					offset: 17,
 					callback: done};
 				return testProposals(options, [
-					["fff", "fff : string"]
+					["fff", "fff : string"],
+					['', 'ecma6'],
+					['Float32Array(length)', 'Float32Array(length)'],
+					['Float64Array(length)', 'Float64Array(length)'],
+					['', 'ecma5'],
+					['Function(body)', 'Function(body) : fn()']
 				]);
 			});
 		
 			// Not gonna work because of recursive
-			it("test full file inferecing 28", function(done) {
+			it("test full file inferencing 28", function(done) {
 				var options = {
 					buffer: "function x() {\n var fff = x();\n f;\n return ''; }", 
 					prefix: "f", 
@@ -527,10 +614,15 @@ define([
 					callback: done};
 				return testProposals(options, [
 					["fff", "fff : string"],
+					['', 'ecma6'],
+					['Float32Array(length)', 'Float32Array(length)'],
+					['Float64Array(length)', 'Float64Array(length)'],
+					['', 'ecma5'],
+					['Function(body)', 'Function(body) : fn()']
 				]);
 			});
 		
-			it("test full file inferecing 29", function(done) {
+			it("test full file inferencing 29", function(done) {
 				var options = {
 					buffer: "function a() {\n function b() {\n var fff = x();\n f;\n }\n }\n var x = function() { return ''; }", 
 					prefix: "f", 
@@ -538,23 +630,33 @@ define([
 					callback: done};
 				return testProposals(options, [
 					["fff", "fff : string"],
+					['', 'ecma6'],
+					['Float32Array(length)', 'Float32Array(length)'],
+					['Float64Array(length)', 'Float64Array(length)'],
+					['', 'ecma5'],
+					['Function(body)', 'Function(body) : fn()']
 				]);
 			});
 		
 			// Not working because function decl comes after reference in same scope
-			it("test full file inferecing 30", function(done) {
+			it("test full file inferencing 30", function(done) {
 				var options = {
 					buffer: "var fff = x();\n f;\n var x = function() { return ''; }", 
 					prefix: "f", 
 					offset: 17,
 					callback: done};
 				return testProposals(options, [
-					["fff", "fff : string"]
+					["fff", "fff : string"],
+					['', 'ecma6'],
+					['Float32Array(length)', 'Float32Array(length)'],
+					['Float64Array(length)', 'Float64Array(length)'],
+					['', 'ecma5'],
+					['Function(body)', 'Function(body) : fn()']
 				]);
 			});
 		
 			// Not gonna work because of recursive
-			it("test full file inferecing 31", function(done) {
+			it("test full file inferencing 31", function(done) {
 				var options = {
 					buffer: "var x = function() { var fff = x();\nf;return ''; }", 
 					prefix: "f", 
@@ -562,10 +664,15 @@ define([
 					callback: done};
 				return testProposals(options, [
 					["fff", "fff : string"],
+					['', 'ecma6'],
+					['Float32Array(length)', 'Float32Array(length)'],
+					['Float64Array(length)', 'Float64Array(length)'],
+					['', 'ecma5'],
+					['Function(body)', 'Function(body) : fn()']
 				]);
 			});
 		
-			it("test full file inferecing 32", function(done) {
+			it("test full file inferencing 32", function(done) {
 				var options = {
 					buffer: "x\n function x() { return ''; }", 
 					prefix: "x", 
@@ -576,7 +683,7 @@ define([
 				]);
 			});
 		
-			it("test full file inferecing 33", function(done) {
+			it("test full file inferencing 33", function(done) {
 				var options = {
 					buffer: "var xxx = {\n aaa: '',\n bbb: this.a\n};", 
 					prefix: "a", 
@@ -584,10 +691,14 @@ define([
 					callback: done};
 				return testProposals(options, [
 					//TODO bug in Tern? ["aaa", "aaa : string"]
+					['', 'ecma5'],
+					['Array(size)', 'Array(size)'],
+					['', 'ecma6'],
+					['ArrayBuffer(length)', 'ArrayBuffer(length)']
 				]);
 			});
 		
-			it("test full file inferecing 34", function(done) {
+			it("test full file inferencing 34", function(done) {
 				var options = {
 					buffer: "var xxx = {\n" +
 					"	bbb: this.a,\n" +
@@ -597,6 +708,10 @@ define([
 					offset: 24,
 					callback: done};
 				return testProposals(options, [
+					['', 'ecma5'],
+					['Array(size)', 'Array(size)'],
+					['', 'ecma6'],
+					['ArrayBuffer(length)', 'ArrayBuffer(length)']
 					//TODO bug in Tern? ["aaa", "aaa : string"]
 				]);
 			});
@@ -821,7 +936,12 @@ define([
 					callback: done
 				};
 				testProposals(options, [
-					["foo", "foo : foo"]
+					["foo", "foo : foo"],
+					['', 'ecma6'],
+					['Float32Array(length)', 'Float32Array(length)'],
+					['Float64Array(length)', 'Float64Array(length)'],
+					['', 'ecma5'],
+					['Function(body)', 'Function(body) : fn()']
 				]);
 			});
 			/**
@@ -836,7 +956,13 @@ define([
 				};
 				testProposals(options, [
 					["", "ecma5", ""],
-					["undefined", "undefined : any"]
+					['URIError(message)', 'URIError(message)'],
+					["undefined", "undefined : any"],
+					['', 'ecma6'],
+					['Uint16Array()', 'Uint16Array()'],
+					['Uint32Array()', 'Uint32Array()'],
+					['Uint8Array()', 'Uint8Array()'],
+					['Uint8ClampedArray()', 'Uint8ClampedArray()']
 				]);
 			});
 		});
@@ -1585,7 +1711,11 @@ define([
 					["isFinite(value)", "isFinite(value) : bool"],
 					["isNaN(value)", "isNaN(value) : bool"],
 					["isPrototypeOf(obj)", "isPrototypeOf(obj) : bool"],
-					//["Infinity", "Infinity : number"],
+					["Infinity", "Infinity : number"],
+					['', 'ecma6'],
+					['Int16Array(length)', 'Int16Array(length)'],
+					['Int32Array(length)', 'Int32Array(length)'],
+					['Int8Array(length)', 'Int8Array(length)']
 				]);
 			});
 			it("test for loop 2", function(done) {
@@ -1601,7 +1731,11 @@ define([
 					["isFinite(value)", "isFinite(value) : bool"],
 					["isNaN(value)", "isNaN(value) : bool"],
 					["isPrototypeOf(obj)", "isPrototypeOf(obj) : bool"],
-					//["Infinity", "Infinity : number"]
+					["Infinity", "Infinity : number"],
+					['', 'ecma6'],
+					['Int16Array(length)', 'Int16Array(length)'],
+					['Int32Array(length)', 'Int32Array(length)'],
+					['Int8Array(length)', 'Int8Array(length)']
 				]);
 			});
 			it("test for loop 3", function(done) {
@@ -1617,7 +1751,11 @@ define([
 					["isFinite(value)", "isFinite(value) : bool"],
 					["isNaN(value)", "isNaN(value) : bool"],
 					["isPrototypeOf(obj)", "isPrototypeOf(obj) : bool"],
-					//["Infinity", "Infinity : number"],
+					["Infinity", "Infinity : number"],
+					['', 'ecma6'],
+					['Int16Array(length)', 'Int16Array(length)'],
+					['Int32Array(length)', 'Int32Array(length)'],
+					['Int8Array(length)', 'Int8Array(length)']
 				]);
 			});
 			it("test while loop 1", function(done) {
@@ -1663,10 +1801,11 @@ define([
 					callback: done
 				};
 				return testProposals(options, [
-					//TODO does not propose Error
 					//["eee", "eee : Error"],
 					['exports', 'exports : exports'],
 					["", "ecma5"],
+					['Error(message)', 'Error(message)'],
+					['EvalError(message)', 'EvalError(message)'],
 					["encodeURI(uri)", "encodeURI(uri) : string"],
 					["encodeURIComponent(uri)", "encodeURIComponent(uri) : string"],
 					["eval(code)", "eval(code)"]
@@ -1787,6 +1926,8 @@ define([
 						//proposal, description
 						['', 'Keywords'],
 						["function", "function - Keyword"],
+						['', 'ecma5'],
+						['Function(body)', 'Function(body) : fn()'],
 						["", "Templates"], 
 						["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"]
 						]);
@@ -1808,6 +1949,8 @@ define([
 						//proposal, description
 						['', 'Keywords'],
 						["function", "function - Keyword"],
+						['', 'ecma5'],
+						['Function(body)', 'Function(body) : fn()'],
 						["", "Templates"], 
 						["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
 						]);
@@ -1829,6 +1972,8 @@ define([
 						//proposal, description
 						['', 'Keywords'],
 						["function", "function - Keyword"],
+						['', 'ecma5'],
+						['Function(body)', 'Function(body) : fn()'],
 						["", "Templates"], 
 						['ction(parameter) {\n\t\n}', 'function - member function expression'],
 						]);
@@ -1850,6 +1995,8 @@ define([
 						//proposal, description
 						['', 'Keywords'],
 						["function", "function - Keyword"],
+						['', 'ecma5'],
+						['Function(body)', 'Function(body) : fn()'],
 						["", "Templates"], 
 						['ction(parameter) {\n\t\n}', 'function - member function expression'],
 						]);
@@ -1871,6 +2018,8 @@ define([
 						//proposal, description
 						['', 'Keywords'],
 						["function", "function - Keyword"],
+						['', 'ecma5'],
+						['Function(body)', 'Function(body) : fn()'],
 						["", "Templates"], 
 						["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
 						]);
@@ -1896,9 +2045,11 @@ define([
 						['try', 'try - Keyword'],
 						["typeof", "typeof - Keyword"],
 						['', 'ecma5'],
+						['TypeError(message)', 'TypeError(message)'],
 						["toLocaleString()", "toLocaleString() : string"],
 						["toString()", "toString() : string"],
-						
+						['', 'ecma6'],
+						['TypedArray(length)', 'TypedArray(length)']
 						]);
 			});
 			/**
@@ -1936,7 +2087,10 @@ define([
 				return testProposals(options, [
 						//proposal, description
 						['', 'Keywords'],
-						["new", "new - Keyword"]
+						["new", "new - Keyword"],
+						['', 'ecma5'],
+						['Number(value)', 'Number(value) : number'],
+						['NaN', 'NaN : number']
 						]);
 			});
 		});
@@ -2340,7 +2494,8 @@ define([
 					callback: done};
 				testProposals(options, [
 					['', 'redis'],
-				    ['createClient(port_arg, host_arg?, options?)', 'createClient(port_arg, host_arg?, options?) : RedisClient']
+				    ['createClient(port_arg, host_arg?, options?)', 'createClient(port_arg, host_arg?, options?) : RedisClient'],
+				    ['ClientOpts', 'ClientOpts : any']
 				]);
 			});
 			
@@ -2373,6 +2528,7 @@ define([
 					callback: done};
 				testProposals(options, [
 					['', 'pg'],
+					['Client(connection)', 'Client(connection)'],
 				    ['connect(connection, callback)', 'connect(connection, callback)'],
 				]);
 			});
