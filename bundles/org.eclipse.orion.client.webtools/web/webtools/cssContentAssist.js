@@ -18,8 +18,9 @@ define("webtools/cssContentAssist", [
 	'webtools/util',
 	'javascript/compilationUnit',
 	'csslint',
+	'webtools/cssVisitor',
 	'i18n!webtools/nls/messages'
-], function(Deferred, mTemplates, mCSS, Objects, Util, CU, CSSLint, Messages) {
+], function(Deferred, mTemplates, mCSS, Objects, Util, CU, CSSLint, Visitor, Messages) {
 
 /* eslint-disable missing-nls */
 	var overflowValues = {
@@ -299,7 +300,7 @@ define("webtools/cssContentAssist", [
 			var proposals = [];
 			var keywords = this.getKeywords();
 			if (keywords) {
-				for (var i = 0; i < keywords.length; i++) {
+				for (i = 0; i < keywords.length; i++) {
 					if (keywords[i].indexOf(prefix) === 0) {
 						var _p = keywords[i].substring(prefix.length);
 						proposals.push({
@@ -396,7 +397,7 @@ define("webtools/cssContentAssist", [
             var that = this;
             return Deferred.when(editorContext.getFileMetadata(), function(meta) {
                if(meta.contentType.id === 'text/html') {
-                  return Deferred.when(editorContext.getText(), function(text) {
+                  return editorContext.getText().then(function(text) {
                      var blocks = Util.findStyleBlocks(text, params.offset);
                      if(blocks && blocks.length > 0) {
                          var cu = new CU(blocks, meta);
@@ -404,7 +405,7 @@ define("webtools/cssContentAssist", [
                      }
                   });
                } else {
-                   return Deferred.when(editorContext.getText(), function(text) {
+                   return editorContext.getText().then(function(text) {
                       return that._computeProposals(editorContext, text, params);
                    });
                }
@@ -417,7 +418,10 @@ define("webtools/cssContentAssist", [
          * @callback
          */
         _computeProposals: function _computeProposals(editorContext, buffer, context) {
-            //TODO compute completion context
+            var _ctxt = this._getCompletionContext(editorContext, context);
+            if(_ctxt) {
+            	context.kind = _ctxt.value;
+            }
             return [].concat(templateAssist.computeProposals(buffer, context.offset, context));
         },
         
@@ -431,28 +435,45 @@ define("webtools/cssContentAssist", [
          */
         _getCompletionContext: function _getCompletionContext(editorContext, context) {
             if(this._resultManager) {
+            	var that = this;
                 return this._resultManager.getResult(editorContext).then(function(results) {
-                   if(results) {
-                       var tok = Util.findToken(context.offset, results.tokens);
-                       if(tok) {
-                           switch(tok.type) {
-                               case 'EOF': {
-                                   if(results.tokens.length > 1) {
-                                       //grab the token right before the EOF if there is one
-                                       tok = results.tokens[results.tokens.length -2];
-                                       if(tok) {
-                                           return {prefix: tok.value, value: 'root'}; //$NON-NLS-1$
-                                       }
-                                   }
-                               }
-                           }
+                   if(results && results.ast) {
+                       var node = that.findNodeAtOffset(results.ast, context.offset);
+                       if(node && node.type === 'Rule') {
+                       		return 'rule'; //$NON-NLS-1$
                        }
                    }
                    return null;
                 });
             }
             return null;
-        }
+        },
+        
+        /**
+		 * Returns the ast node at the given offset or the parent node enclosing it
+		 * @param {Object} ast The AST to inspect
+		 * @param {Number} offset The offset into the source 
+		 * @returns {Object} The AST node at the given offset or null 
+		 * @since 10.0
+		 */
+		findNodeAtOffset: function(ast, offset) {
+			var found = null;
+			 Visitor.visit(ast, {
+	            visitNode: function(node) {
+					if(node.range[0] <= offset) {
+						found = node;
+					} else {
+					    return Visitor.BREAK;
+					}      
+	            },
+	            endVisitNode: function(node) {
+	            	if(found && offset > found.range[1] && offset > node.range[0]) {
+	            		found = node;
+	            	}
+	            }
+	        });
+	        return found;
+		}
 	});
 
 	return {

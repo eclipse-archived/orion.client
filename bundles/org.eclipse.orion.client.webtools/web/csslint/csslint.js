@@ -1379,7 +1379,8 @@ Parser.prototype = function(){
             //-----------------------------------------------------------------
 
             _stylesheet: function(){
-
+				ast = Object.create(null);
+            	_aststack = [];
                 /*
                  * stylesheet
                  *  : [ CHARSET_SYM S* STRING S* ';' ]?
@@ -1396,7 +1397,7 @@ Parser.prototype = function(){
                     tt;
 
                 this.fire("startstylesheet");
-                this.ast = this.startNode('StyleSheet'); //ORION 8.0
+                this.ast = this.startNode('StyleSheet', 0); //ORION 8.0
                 this.ast.body = [];
                 //try to read character set
                 this._charset();
@@ -1417,7 +1418,7 @@ Parser.prototype = function(){
 
                 //get the next token
                 tt = tokenStream.peek();
-
+				
                 //try to read the rest
                 while(tt > Tokens.EOF){
 
@@ -2181,7 +2182,7 @@ Parser.prototype = function(){
                     token,
                     line,
                     col;
-                var node = this.startNode('Property'); //ORION 8.0
+                var node = this.startNode('Property', tokenStream.curr().range[0]); //ORION 8.0
                 //check for star hack - throws error if not allowed
                 if (tokenStream.peek() == Tokens.STAR && this.options.starHack){
                     tokenStream.get();
@@ -2204,11 +2205,10 @@ Parser.prototype = function(){
                     }
                     node.hack = hack;
                     node.value = tokenValue;
-                    this.addToParent(this.endNode(node, tokenStream.curr().range[1]), 'property'); //ORION 8.0
                     value = new PropertyName(tokenValue, hack, (line||token.startLine), (col||token.startCol));
                     this._readWhitespace();
                 }
-
+				this.addToParent(this.endNode(node, tokenStream.curr().range[1]), 'properties'); //ORION 8.0
                 return value;
             },
 
@@ -2225,16 +2225,14 @@ Parser.prototype = function(){
                     tt,
                     selectors;
 
-                var node = this.startNode('RuleSet'); //ORION 8.0
+                var node = this.startNode('Rule', tokenStream.curr().range[1]); //ORION 8.0
+                node.declarations = [];
                 /*
                  * Error Recovery: If even a single selector fails to parse,
                  * then the entire ruleset should be thrown away.
                  */
                 try {
                     selectors = this._selectors_group();
-                    if(node.selectors && node.selectors.length > 0) {
-                        this.setNodeStart(node, node.selectors[0].range[0]); //ORION 8.0
-                    }
                 } catch (ex){
                     if (ex instanceof SyntaxError && !this.options.strict){
 
@@ -2852,10 +2850,10 @@ Parser.prototype = function(){
                     error       = null,
                     invalid     = null,
                     propertyName= "";
-
+				var node = this.startNode('Declaration', this._tokenStream.curr().range[0], 'declarations'); //ORION
                 property = this._property();
                 if (property !== null){
-
+					node.value = property; //ORION
                     tokenStream.mustMatch(Tokens.COLON);
                     this._readWhitespace();
 
@@ -2895,9 +2893,10 @@ Parser.prototype = function(){
                         col:        property.col,
                         invalid:    invalid
                     });
-
+					this.endNode(node, this._tokenStream.curr().range[1]);
                     return true;
                 } else {
+                	this.endNode(node, this._tokenStream.curr().range[1]);
                     return false;
                 }
             },
@@ -3396,10 +3395,9 @@ Parser.prototype = function(){
                  */
                 var tokenStream = this._tokenStream,
                     tt;
-
-
                 this._readWhitespace();
-
+				var node = this.startNode('Declarations', this._tokenStream.curr().range[0], 'declarations');
+				node.declarations = [];
                 if (checkStart){
                     tokenStream.mustMatch(Tokens.LBRACE);
                 }
@@ -3457,7 +3455,7 @@ Parser.prototype = function(){
                         throw ex;
                     }
                 }
-
+				this.addToParent(node, this.endNode(node, this._tokenStream.curr().range[1]));
             },
 
             /**

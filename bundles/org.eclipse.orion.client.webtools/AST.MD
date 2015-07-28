@@ -107,16 +107,16 @@ The feature part of a media query expression
 }
 ```
 
-### RuleSet
+### Rule
 
 This is a descriptor that combines a [Selector](#selector), pseudo-classes and pseudo-elements to scope a particular set of rules.
 
 ```json
-"RuleSet": {
+"Rule": {
     "selector": Selector | Combinator,
     "pseudoclass": Pseudo | null,
     "pseudoelement": Pseudo | null,
-    "declarations": [Declaration*]
+    "properties": [Property*]
 }
 ```
 
@@ -143,12 +143,12 @@ This is a pseudo-part of a selector, being one of a [pseudo-class](https://devel
 }
 ```
 
-### Declaration
+### Property
 
-This is a `property:value` pairing in a [RuleSet](#ruleset)
+This is a `property:value` pairing in a [Rule](#rule)
 
 ```json
-"Declaration": {
+"Property": {
     "property": {
         "value": String
         "range": [Number, Number]
