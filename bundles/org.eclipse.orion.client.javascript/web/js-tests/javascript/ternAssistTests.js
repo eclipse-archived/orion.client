@@ -267,7 +267,7 @@ define([
 				]);
 			});
 			/**
-			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473777
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473786
 			 */
 			it('test casing params 1', function(done) {
 				var options = {
@@ -279,6 +279,21 @@ define([
 				testProposals(options, [
 					['', 'ecma5'],
 					['filter(test, context?)', 'filter(test, context?)']
+				]);
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473786
+			 */
+			it('test casing params 2', function(done) {
+				var options = {
+					buffer: "new TypedArray(10).ev",
+					prefix: "ev",
+					offset: 21,
+					callback: done
+				};
+				testProposals(options, [
+					['', 'ecma6'],
+					['every(callback, thisArg?)', 'every(callback, thisArg?) : bool']
 				]);
 			});
 		});

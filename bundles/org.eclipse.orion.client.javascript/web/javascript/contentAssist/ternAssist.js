@@ -761,7 +761,9 @@ define([
 					aftercolon = true;
 				} else if(char === ',') {
 					index++; //eat the space
-					aftercolon = false;
+					if(parencount < 1) {
+						aftercolon = false;
+					}
 				} else if(!aftercolon && parencount < 1) {
 					param += char;
 				}
