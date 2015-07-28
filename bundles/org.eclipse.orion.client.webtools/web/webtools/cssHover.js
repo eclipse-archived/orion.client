@@ -46,6 +46,9 @@ define([
 		 * @param {Object} ctxt The current selection context
 		 */
 		computeHoverInfo: function computeHover(editorContext, ctxt) {
+			if(ctxt.proposal && ctxt.proposal.kind === 'css') {
+				return ctxt.proposal.hover;
+			}
 			var that = this;
 			return editorContext.getFileMetadata().then(function(meta) {
 			   if(meta.contentType.id === 'text/html') {

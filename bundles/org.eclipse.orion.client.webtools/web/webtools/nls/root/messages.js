@@ -72,5 +72,18 @@ define({//Default message bundle
 	'onlineDocumentation': '\n\n[Online documentation](${0})',
 	'closeTagDescription': ' - Close the ${0} tag',
 	'openCommentName': 'Open comment',
-	'closeCommentName': 'Close comment'
+	'closeCommentName': 'Close comment',
+	
+	//CSS content assist
+	'ruleTemplateDescription': 'rule - class selector rule',
+	'idSelectorTemplateDescription': 'rule - id selector rule',
+	'outlineStyleTemplateDescription': 'outline - outline style',
+	'backgroundImageTemplateDescription': 'background-image - image style',
+	'urlImageTemplateDescription': 'url - url image',
+	'rgbColourTemplateDescription': 'rgb - rgb color',
+	'importTemplateDescription': 'import - import style sheet',
+	'csslintTemplateDescription': 'csslint - add embedded rule severity',
+	'keywordsAssistTitle': 'Keywords',
+	'templateAssistHeader': 'Templates',
+	'templateHoverHeader': 'Template source code:\n\n'
 });

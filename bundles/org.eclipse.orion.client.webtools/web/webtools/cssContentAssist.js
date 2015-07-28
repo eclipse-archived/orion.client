@@ -10,269 +10,362 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define("webtools/cssContentAssist", [ //$NON-NLS-0$
-	'orion/Deferred', //$NON-NLS-0$
-	'orion/editor/templates', //$NON-NLS-0$
-	'orion/editor/stylers/text_css/syntax', //$NON-NLS-0$
+define("webtools/cssContentAssist", [
+	'orion/Deferred',
+	'orion/editor/templates',
+	'orion/editor/stylers/text_css/syntax',
 	'orion/objects',
 	'webtools/util',
 	'javascript/compilationUnit',
-	'csslint'
-], function(Deferred, mTemplates, mCSS, Objects, Util, CU, CSSLint) {
+	'csslint',
+	'i18n!webtools/nls/messages'
+], function(Deferred, mTemplates, mCSS, Objects, Util, CU, CSSLint, Messages) {
 
+/* eslint-disable missing-nls */
 	var overflowValues = {
-		type: "link", //$NON-NLS-0$
-		values: ["visible", "hidden", "scroll", "auto", "no-display", "no-content"] //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		type: "link",
+		values: ["visible", "hidden", "scroll", "auto", "no-display", "no-content"]
 	};
 	var fontStyleValues = {
-		type: "link", //$NON-NLS-0$
-		values: ["italic", "normal", "oblique", "inherit"] //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		type: "link",
+		values: ["italic", "normal", "oblique", "inherit"]
 	};
 	var fontWeightValues = {
-		type: "link", //$NON-NLS-0$
+		type: "link",
 		values: [
-			"bold", "normal", "bolder", "lighter", //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			"100", "200", "300", "400", "500", "600", //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			"700", "800", "900", "inherit" //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			"bold", "normal", "bolder", "lighter",
+			"100", "200", "300", "400", "500", "600",
+			"700", "800", "900", "inherit"
 		]
 	};
 	var displayValues = {
-		type: "link", //$NON-NLS-0$
+		type: "link",
 		values: [
-			"none", "block", "box", "flex", "inline", "inline-block", "inline-flex", "inline-table", //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			"list-item", "table", "table-caption", "table-cell", "table-column", "table-column-group", //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			"table-footer-group", "table-header-group", "table-row", "table-row-group", "inherit" //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			"none", "block", "box", "flex", "inline", "inline-block", "inline-flex", "inline-table",
+			"list-item", "table", "table-caption", "table-cell", "table-column", "table-column-group",
+			"table-footer-group", "table-header-group", "table-row", "table-row-group", "inherit"
 		]
 	};
 	var visibilityValues = {
-		type: "link", //$NON-NLS-0$
-		values: ["hidden", "visible", "collapse", "inherit"] //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		type: "link",
+		values: ["hidden", "visible", "collapse", "inherit"]
 	};
 	var positionValues = {
-		type: "link", //$NON-NLS-0$
-		values: ["absolute", "fixed", "relative", "static", "inherit"] //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		type: "link",
+		values: ["absolute", "fixed", "relative", "static", "inherit"]
 	};
 	var whitespaceValues = {
-		type: "link", //$NON-NLS-0$
-		values: ["pre", "pre-line", "pre-wrap", "nowrap", "normal", "inherit"] //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		type: "link",
+		values: ["pre", "pre-line", "pre-wrap", "nowrap", "normal", "inherit"]
 	};
 	var wordwrapValues = {
-		type: "link", //$NON-NLS-0$
-		values: ["normal", "break-word"] //$NON-NLS-1$ //$NON-NLS-0$
+		type: "link",
+		values: ["normal", "break-word"] 
 	};
 	var floatValues = {
-		type: "link", //$NON-NLS-0$
-		values: ["left", "right", "none", "inherit"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		type: "link",
+		values: ["left", "right", "none", "inherit"] 
 	};
 	var borderStyles = {
-		type: "link", //$NON-NLS-0$
-		values: ["solid", "dashed", "dotted", "double", "groove", "ridge", "inset", "outset"] //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		type: "link",
+		values: ["solid", "dashed", "dotted", "double", "groove", "ridge", "inset", "outset"]
 	};
 	var widths = {
-		type: "link", //$NON-NLS-0$
+		type: "link",
 		values: []
 	};
-	widths.values.push('0'); //$NON-NLS-0$
+	widths.values.push('0');
 	for (var i=1; i<10; i++) {
-		widths.values.push(i.toString() + 'px'); //$NON-NLS-0$
+		widths.values.push(i.toString() + 'px');
 	}
 	var colorValues = {
-		type: "link", //$NON-NLS-0$
+		type: "link",
 		values: Object.keys(CSSLint.Colors)
 	};
 	var cursorValues = {
-		type: "link", //$NON-NLS-0$
+		type: "link",
 		values: [
-			"auto", //$NON-NLS-0$
-			"crosshair", //$NON-NLS-0$
-			"default", //$NON-NLS-0$
-			"e-resize", //$NON-NLS-0$
-			"help", //$NON-NLS-0$
-			"move", //$NON-NLS-0$
-			"n-resize", //$NON-NLS-0$
-			"ne-resize", //$NON-NLS-0$
-			"nw-resize", //$NON-NLS-0$
-			"pointer", //$NON-NLS-0$
-			"progress", //$NON-NLS-0$
-			"s-resize", //$NON-NLS-0$
-			"se-resize", //$NON-NLS-0$
-			"sw-resize", //$NON-NLS-0$
-			"text", //$NON-NLS-0$
-			"w-resize", //$NON-NLS-0$
-			"wait", //$NON-NLS-0$
-			"inherit" //$NON-NLS-0$
+			"auto",
+			"crosshair",
+			"default",
+			"e-resize",
+			"help",
+			"move",
+			"n-resize",
+			"ne-resize",
+			"nw-resize",
+			"pointer",
+			"progress",
+			"s-resize",
+			"se-resize",
+			"sw-resize",
+			"text",
+			"w-resize",
+			"wait",
+			"inherit"
 		]
 	};
 	var csslintRules = {
-		type: "link", //$NON-NLS-0$
+		type: "link",
 		values: [
-			"adjoining-classes", //$NON-NLS-0$
-			"box-model", //$NON-NLS-0$
-			"box-sizing", //$NON-NLS-0$
-			"bulletproof-font-face", //$NON-NLS-0$
-			"compatible-vendor-prefixes", //$NON-NLS-0$
-			"display-property-grouping", //$NON-NLS-0$
-			"duplicate-background-images", //$NON-NLS-0$
-			"duplicate-properties", //$NON-NLS-0$
-			"empty-rules", //$NON-NLS-0$
-			"fallback-colors", //$NON-NLS-0$
-			"floats", //$NON-NLS-0$
-			"font-faces", //$NON-NLS-0$
-			"font-sizes", //$NON-NLS-0$
-			"gradients", //$NON-NLS-0$
-			"ids", //$NON-NLS-0$
-			"import", //$NON-NLS-0$
-			"important", //$NON-NLS-0$
-			"known-properties", //$NON-NLS-0$
-			"outline-none", //$NON-NLS-0$
-			"overqualified-elements", //$NON-NLS-0$
-			"qualified-headings", //$NON-NLS-0$
-			"regex-selectors", //$NON-NLS-0$
-			"rules-count", //$NON-NLS-0$
-			"selector-max-approaching", //$NON-NLS-0$
-			"selector-max", //$NON-NLS-0$
-			"shorthand", //$NON-NLS-0$
-			"star-property-hack", //$NON-NLS-0$
-			"text-indent", //$NON-NLS-0$
-			"underscore-property-hack", //$NON-NLS-0$
-			"unique-headings", //$NON-NLS-0$
-			"universal-selector", //$NON-NLS-0$
-			"unqualified-attributes", //$NON-NLS-0$
-			"vendor-prefix", //$NON-NLS-0$
-			"zero-units" //$NON-NLS-0$
+			"adjoining-classes",
+			"box-model",
+			"box-sizing",
+			"bulletproof-font-face",
+			"compatible-vendor-prefixes",
+			"display-property-grouping",
+			"duplicate-background-images",
+			"duplicate-properties",
+			"empty-rules",
+			"fallback-colors",
+			"floats",
+			"font-faces",
+			"font-sizes",
+			"gradients",
+			"ids",
+			"import",
+			"important",
+			"known-properties",
+			"outline-none",
+			"overqualified-elements",
+			"qualified-headings",
+			"regex-selectors",
+			"rules-count",
+			"selector-max-approaching",
+			"selector-max",
+			"shorthand",
+			"star-property-hack",
+			"text-indent",
+			"underscore-property-hack",
+			"unique-headings",
+			"universal-selector",
+			"unqualified-attributes",
+			"vendor-prefix",
+			"zero-units"
 		]
 	};
 	var severityValues = {
-		type: "link", //$NON-NLS-0$
+		type: "link",
 		values: [
-			"false", //$NON-NLS-0$
-			"true", //$NON-NLS-0$
-			"0", //$NON-NLS-0$
-			"1", //$NON-NLS-0$
-			"2" //$NON-NLS-0$
+			"false",
+			"true",
+			"0",
+			"1",
+			"2"
 		]
 	};
 	
+	var valuesProperties = [
+		{prop: "display", values: displayValues},
+		{prop: "overflow", values: overflowValues},
+		{prop: "overflow-x", values: overflowValues},
+		{prop: "overflow-y", values: overflowValues},
+		{prop: "float", values: floatValues},
+		{prop: "position", values: positionValues},
+		{prop: "cursor", values: cursorValues},
+		{prop: "color", values: colorValues},
+		{prop: "border-top-color", values: colorValues},
+		{prop: "border-bottom-color", values: colorValues},
+		{prop: "border-right-color", values: colorValues},
+		{prop: "border-left-color", values: colorValues},
+		{prop: "background-color", values: colorValues},
+		{prop: "font-style", values: fontStyleValues},
+		{prop: "font-weight", values: fontWeightValues},
+		{prop: "white-space", values: whitespaceValues},
+		{prop: "word-wrap", values: wordwrapValues},
+		{prop: "visibility", values: visibilityValues}
+	];
+	
+	var pixelProperties = [
+		"width", "height", "top", "bottom", "left", "right",
+		"min-width", "min-height", "max-width", "max-height",
+		"margin", "padding", "padding-left", "padding-right",
+		"padding-top", "padding-bottom", "margin-left", "margin-top",
+		"margin-bottom", "margin-right"
+	];
+	
+	var borderProperties = ["border", "border-top", "border-bottom", "border-left", "border-right"];
+/* eslint-enable missing-nls */
+
 	function fromJSON(o) {
-		return JSON.stringify(o).replace("}", "\\}"); //$NON-NLS-1$ //$NON-NLS-0$
+		return JSON.stringify(o).replace("}", "\\}");  //$NON-NLS-1$
 	}
 	
 	var templates = [
 		{
-			prefix: "rule", //$NON-NLS-0$
-			description: "rule - class selector rule",
-			template: ".${class} {\n\t${cursor}\n}" //$NON-NLS-0$
+			prefix: "rule", //$NON-NLS-1$
+			description: Messages['ruleTemplateDescription'],
+			template: ".${class} {\n\t${cursor}\n}" //$NON-NLS-1$
 		},
 		{
-			prefix: "rule", //$NON-NLS-0$
-			description: "rule - id selector rule",
-			template: "#${id} {\n\t${cursor}\n}" //$NON-NLS-0$
+			prefix: "rule", //$NON-NLS-1$
+			description: Messages['idSelectorTemplateDescription'],
+			template: "#${id} {\n\t${cursor}\n}" //$NON-NLS-1$
 		},
 		{
-			prefix: "outline", //$NON-NLS-0$
-			description: "outline - outline style",
-			template: "outline: ${color:" + fromJSON(colorValues) + "} ${style:" + fromJSON(borderStyles) + "} ${width:" + fromJSON(widths) + "};" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			prefix: "outline", //$NON-NLS-1$
+			description: Messages['outlineStyleTemplateDescription'],
+			template: "outline: ${color:" + fromJSON(colorValues) + "} ${style:" + fromJSON(borderStyles) + "} ${width:" + fromJSON(widths) + "};" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		},
 		{
-			prefix: "background-image", //$NON-NLS-0$
-			description: "background-image - image style",
-			template: "background-image: url(\"${uri}\");" //$NON-NLS-0$
+			prefix: "background-image", //$NON-NLS-1$
+			description: Messages['backgroundImageTemplateDescription'],
+			template: "background-image: url(\"${uri}\");" //$NON-NLS-1$
 		},
 		{
-			prefix: "url", //$NON-NLS-0$
-			description: "url - url image",
-			template: "url(\"${uri}\");" //$NON-NLS-0$
+			prefix: "url", //$NON-NLS-1$
+			description: Messages['urlImageTemplateDescription'],
+			template: "url(\"${uri}\");" //$NON-NLS-1$
 		},
 		{
-			prefix: "rgb", //$NON-NLS-0$
-			description: "rgb - rgb color",
-			template: "rgb(${red},${green},${blue});" //$NON-NLS-0$
+			prefix: "rgb", //$NON-NLS-1$
+			description: Messages['rgbColourTemplateDescription'],
+			template: "rgb(${red},${green},${blue});" //$NON-NLS-1$
 		},
 		{
-			prefix: "@import", //$NON-NLS-0$
-			description: "import - import style sheet",
-			template: "@import \"${uri}\";" //$NON-NLS-0$
+			prefix: "@import", //$NON-NLS-1$
+			description: Messages['importTemplateDescription'],
+			template: "@import \"${uri}\";" //$NON-NLS-1$
 		},
 		{
-			prefix: "csslint", //$NON-NLS-0$
-			description: "csslint - add embedded rule severity", //$NON-NLS-0$
-			template: "\/*csslint ${:" + fromJSON(csslintRules) + "}: ${a:" + fromJSON(severityValues) + "} *\/" //$NON-NLS-0$  // Template suggestions use colon location to separate positions making the 'a' necessary
+			prefix: "csslint", //$NON-NLS-1$
+			description: Messages['csslintTemplateDescription'],
+			template: "\/*csslint ${:" + fromJSON(csslintRules) + "}: ${a:" + fromJSON(severityValues) + "} *\/" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 	];
 	
-	var valuesProperties = [
-		{prop: "display", values: displayValues}, //$NON-NLS-0$
-		{prop: "overflow", values: overflowValues}, //$NON-NLS-0$
-		{prop: "overflow-x", values: overflowValues}, //$NON-NLS-0$
-		{prop: "overflow-y", values: overflowValues}, //$NON-NLS-0$
-		{prop: "float", values: floatValues}, //$NON-NLS-0$
-		{prop: "position", values: positionValues}, //$NON-NLS-0$
-		{prop: "cursor", values: cursorValues}, //$NON-NLS-0$
-		{prop: "color", values: colorValues}, //$NON-NLS-0$
-		{prop: "border-top-color", values: colorValues}, //$NON-NLS-0$
-		{prop: "border-bottom-color", values: colorValues}, //$NON-NLS-0$
-		{prop: "border-right-color", values: colorValues}, //$NON-NLS-0$
-		{prop: "border-left-color", values: colorValues}, //$NON-NLS-0$
-		{prop: "background-color", values: colorValues}, //$NON-NLS-0$
-		{prop: "font-style", values: fontStyleValues}, //$NON-NLS-0$
-		{prop: "font-weight", values: fontWeightValues}, //$NON-NLS-0$
-		{prop: "white-space", values: whitespaceValues}, //$NON-NLS-0$
-		{prop: "word-wrap", values: wordwrapValues}, //$NON-NLS-0$
-		{prop: "visibility", values: visibilityValues} //$NON-NLS-0$
-	];
 	var prop;
 	for (i=0; i<valuesProperties.length; i++) {
 		prop = valuesProperties[i];
 		templates.push({
-			prefix: prop.prop, //$NON-NLS-0$
-			description: prop.prop + " - " + prop.prop + " style",
-			template: prop.prop + ": ${value:" + fromJSON(prop.values) + "};" //$NON-NLS-1$ //$NON-NLS-0$
+			prefix: prop.prop,
+			description: prop.prop + " - " + prop.prop + " style", //$NON-NLS-1$ //$NON-NLS-2$
+			template: prop.prop + ": ${value:" + fromJSON(prop.values) + "};" //$NON-NLS-1$ //$NON-NLS-2$
 		});
 	}	
-	var pixelProperties = [
-		"width", "height", "top", "bottom", "left", "right", //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"min-width", "min-height", "max-width", "max-height", //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"margin", "padding", "padding-left", "padding-right", //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"padding-top", "padding-bottom", "margin-left", "margin-top", //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"margin-bottom", "margin-right" //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	];
+	
 	for (i=0; i<pixelProperties.length; i++) {
 		prop = pixelProperties[i];
 		templates.push({
-			prefix: prop, //$NON-NLS-0$
-			description: prop + " - " + prop + " pixel style",
-			template: prop  + ": ${value}px;" //$NON-NLS-0$
+			prefix: prop,
+			description: prop + " - " + prop + " pixel style", //$NON-NLS-1$ //$NON-NLS-2$
+			template: prop  + ": ${value}px;" //$NON-NLS-1$
 		});
 	}
-	var fourWidthsProperties = ["padding", "margin"]; //$NON-NLS-1$ //$NON-NLS-0$
+	var fourWidthsProperties = ["padding", "margin"]; //$NON-NLS-1$ //$NON-NLS-2$
 	for (i=0; i<fourWidthsProperties.length; i++) {
 		prop = fourWidthsProperties[i];
 		templates.push({
-			prefix: prop, //$NON-NLS-0$
-			description: prop + " - " + prop + " top right bottom left style",
-			template: prop  + ": ${top}px ${left}px ${bottom}px ${right}px;" //$NON-NLS-0$
+			prefix: prop,
+			description: prop + " - " + prop + " top right bottom left style", //$NON-NLS-1$ //$NON-NLS-2$
+			template: prop  + ": ${top}px ${left}px ${bottom}px ${right}px;" //$NON-NLS-1$
 		});
 		templates.push({
-			prefix: prop, //$NON-NLS-0$
-			description: prop + " - " + prop + " top right,left bottom style",
-			template: prop  + ": ${top}px ${right_left}px ${bottom}px;" //$NON-NLS-0$
+			prefix: prop,
+			description: prop + " - " + prop + " top right,left bottom style", //$NON-NLS-1$ //$NON-NLS-2$
+			template: prop  + ": ${top}px ${right_left}px ${bottom}px;" //$NON-NLS-1$
 		});
 		templates.push({
-			prefix: prop, //$NON-NLS-0$
-			description: prop + " - " + prop + " top,bottom right,left style",
-			template: prop  + ": ${top_bottom}px ${right_left}px" //$NON-NLS-0$
+			prefix: prop,
+			description: prop + " - " + prop + " top,bottom right,left style", //$NON-NLS-1$ //$NON-NLS-2$
+			template: prop  + ": ${top_bottom}px ${right_left}px" //$NON-NLS-1$
 		});
 	}
-	var borderProperties = ["border", "border-top", "border-bottom", "border-left", "border-right"]; //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	
 	for (i=0; i<borderProperties.length; i++) {
 		prop = borderProperties[i];
 		templates.push({
-			prefix: prop, //$NON-NLS-0$
-			description: prop + " - " + prop + " style",
-			template: prop + ": ${width:" + fromJSON(widths) + "} ${style:" + fromJSON(borderStyles) + "} ${color:" + fromJSON(colorValues) + "};" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			prefix: prop,
+			description: prop + " - " + prop + " style", //$NON-NLS-1$ //$NON-NLS-2$
+			template: prop + ": ${width:" + fromJSON(widths) + "} ${style:" + fromJSON(borderStyles) + "} ${color:" + fromJSON(colorValues) + "};" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		});
 	}
-
+	
+	/**
+	 * @description Create a proxy template provider
+	 * @returns {TemplateProvider} A new TemplateProvider
+	 * @since 10.0
+	 */
+	function TemplateProvider() {
+	}
+	
+	TemplateProvider.prototype = new mTemplates.TemplateContentAssist(mCSS.keywords, templates);
+	
+	Objects.mixin(TemplateProvider.prototype, {
+		/**
+         * @callback 
+         */
+        getKeywordProposals: function(prefix) {
+			var proposals = [];
+			var keywords = this.getKeywords();
+			if (keywords) {
+				for (var i = 0; i < keywords.length; i++) {
+					if (keywords[i].indexOf(prefix) === 0) {
+						var _p = keywords[i].substring(prefix.length);
+						proposals.push({
+							proposal: _p, 
+							description: keywords[i], 
+							style: 'emphasis', //$NON-NLS-1$
+							kind: 'css' //$NON-NLS-1$
+						});
+					}
+				}
+				
+				if (0 < proposals.length) {
+					proposals.splice(0, 0,{
+						proposal: '',
+						description: Messages['keywordsAssistTitle'],
+						style: 'noemphasis_title_keywords', //$NON-NLS-1$
+						unselectable: true,
+						kind: 'css' //$NON-NLS-1$
+					});	
+				}
+			}
+			return proposals;
+		},
+		/**
+		 * @callback 
+		 */
+		getTemplateProposals: function(prefix, offset, context) {
+			var proposals = [];
+			var _tmplates = this.getTemplates();
+			for (var t = 0; t < _tmplates.length; t++) {
+				var template = _tmplates[t];
+				if (template.match(prefix)) {
+					var proposal = template.getProposal(prefix, offset, context);
+					proposal.style = 'emphasis'; //$NON-NLS-1$
+					var obj = Object.create(null);
+			        obj.type = 'markdown'; //$NON-NLS-1$
+			        obj.content = Messages['templateHoverHeader'];
+			        obj.content += proposal.proposal;
+			        proposal.hover = obj;
+			        proposal.kind = 'css'; //$NON-NLS-1$
+			        this.removePrefix(prefix, proposal);
+					proposals.push(proposal);
+				}
+			}
+			
+			if (0 < proposals.length) {
+				//sort the proposals by name
+				proposals.sort(function(p1, p2) {
+					if (p1.name < p2.name) return -1;
+					if (p1.name > p2.name) return 1;
+					return 0;
+				});
+				// if any templates were added to the list of 
+				// proposals, add a title as the first element
+				proposals.splice(0, 0, {
+					proposal: '',
+					description: Messages['templateAssistHeader'],
+					style: 'noemphasis_title', //$NON-NLS-0$
+					unselectable: true
+				});
+			}
+			
+			return proposals;
+		}
+	});
+	
 	/**
 	 * @name orion.editor.CssContentAssistProvider
 	 * @class Provides content assist for CSS keywords.
@@ -281,7 +374,7 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
 	function CssContentAssistProvider(resultManager) {
 	    this._resultManager = resultManager;
 	}
-	var templateAssist = new mTemplates.TemplateContentAssist(mCSS.keywords, templates);
+	var templateAssist = new TemplateProvider();
 	
 	Objects.mixin(CssContentAssistProvider.prototype, {
 	   /**
@@ -294,6 +387,7 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
     		}
     		return index >= 0 ? buffer.substring(index, offset) : "";
         },
+        
         /**
          * @callback
          * @since 8.0
@@ -347,7 +441,7 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
                                        //grab the token right before the EOF if there is one
                                        tok = results.tokens[results.tokens.length -2];
                                        if(tok) {
-                                           return {prefix: tok.value, value: 'root'};
+                                           return {prefix: tok.value, value: 'root'}; //$NON-NLS-1$
                                        }
                                    }
                                }
