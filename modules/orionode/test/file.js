@@ -24,7 +24,7 @@ var app = testData.createApp()
 			}));
 
 function byName(a, b) {
-	return String.prototype.localeCompare(a.Name, b.Name);
+	return String.prototype.localeCompare.call(a.Name, b.Name);
 }
 
 /**
