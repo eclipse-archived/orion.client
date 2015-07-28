@@ -10,7 +10,14 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/nodeFileImpl" /*node!*/, "domReady!"], function(Deferred, PluginProvider, FileServiceImpl) {
+define([
+	"orion/Deferred",
+	"orion/plugin",
+	"plugins/filePlugin/nodeFileImpl" /*node!*/,
+	"orion/URL-shim", // no exports
+	"domReady!" // no exports
+], function(Deferred, PluginProvider, FileServiceImpl) {
+
 	function trace(implementation) {
 		var method;
 		var traced = {};
@@ -39,6 +46,9 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/nodeFileImpl" /*no
 	function makeParentRelative(location) {
 		if (tryParentRelative) {
 			try {
+				if (typeof window === "undefined") {
+					return location.substring(self.location.href.indexOf(self.location.host) + self.location.host.length);
+				}
 				if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
 					return location.substring(parent.location.href.indexOf(parent.location.host) + parent.location.host.length);
 				} else {
@@ -51,32 +61,40 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/nodeFileImpl" /*no
 		return location;
 	}
 
-	var temp = document.createElement('a');
-	temp.href = "../mixloginstatic/LoginWindow.html";
-	var login = temp.href;
-	var headers = {
-		name: "Orion Node File Service",
-		version: "1.0",
-		description: "This plugin provides file access to a user's workspace.",
-		login: login
+	function connect() {
+		var login = new URL("../mixloginstatic/LoginWindow.html", self.location.href).href;
+		var headers = {
+			name: "Orion Node File Service",
+			version: "1.0",
+			description: "This plugin provides file access to a user's workspace.",
+			login: login
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(provider) {
+		// note global
+		var fileBase = makeParentRelative(new URL("../file", self.location.href).href);
+
+		// note global
+		var workspaceBase = makeParentRelative(new URL("../workspace", self.location.href).href);
+
+		// note global
+		var importBase = makeParentRelative(new URL("../xfer", self.location.href).href);
+
+		var service = new FileServiceImpl(fileBase, workspaceBase);
+		//provider.registerService("orion.core.file", trace(service), {Name:'Orion Content', top:fileBase, pattern:patternBase});
+		provider.registerService("orion.core.file", service, {
+			Name: 'Orion Node Content',  // HACK  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386509
+			top: fileBase,
+			pattern: [fileBase, workspaceBase]
+		});
+	}
+
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
 	};
-
-	var provider = new PluginProvider(headers);
-
-	temp.href = "../file";
-	// note global
-	var fileBase = makeParentRelative(temp.href);
-
-	temp.href = "../workspace";
-	// note global
-	var workspaceBase = makeParentRelative(temp.href);
-
-	var service = new FileServiceImpl(fileBase, workspaceBase);
-	//provider.registerService("orion.core.file", trace(service), {Name:'Orion Content', top:fileBase, pattern:patternBase});
-	provider.registerService("orion.core.file", service, {
-		Name: 'Orion Node Content',  // HACK  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386509
-		top: fileBase,
-		pattern: [fileBase, workspaceBase]
-	});
-	provider.connect();
 });
