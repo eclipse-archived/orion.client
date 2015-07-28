@@ -170,8 +170,8 @@ module.exports = function(options) {
 		req.on('error', function(e) {
 			writeError(500, res, e.toString());
 		});
-		// Tolerate both json and text/plain here for compatibility with Java server and client code
-		if (req.headers['content-type'] === "application/json" && req.body) {
+		// req.body may be parsed json or stringified here
+		if (req.body) {
 			handleDiff(req, res, rest, req.body);
 			return;
 		}
