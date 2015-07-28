@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
+/* eslint-disable missing-nls */
 /*eslint-env browser, amd*/
 /*global URL*/
 define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"], function(Deferred, EventTarget, splash) {
@@ -337,8 +337,7 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                         var service = _serviceReferences[message.serviceId];
                         if (!service) {
                             _throwError(message.id, "service not found");
-                        }
-                        if (method in service) {
+                        } else if (method in service) {
                             _callMethod(message.id, service, service[method], params);
                         } else {
                             _throwError(message.id, "method not found");
@@ -347,8 +346,7 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                         var object = _objectReferences[message.objectId];
                         if (!object) {
                             _throwError(message.id, "object not found");
-                        }
-                        if (method in object) {
+                        } else if (method in object) {
                             _callMethod(message.id, object, object[method], params);
                         } else {
                             _throwError(message.id, "method not found");

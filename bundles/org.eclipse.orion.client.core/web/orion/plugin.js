@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * Copyright (c) 2011, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,10 +10,11 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd, node*/
+/* eslint-disable missing-nls */
 (function(root, factory) { // UMD
-    if (typeof define === "function" && define.amd) { //$NON-NLS-0$
+    if (typeof define === "function" && define.amd) {
         define(["orion/Deferred"], factory);
-    } else if (typeof exports === "object") { //$NON-NLS-0$
+    } else if (typeof exports === "object") {
         module.exports = factory(require("orion/Deferred"));
     } else {
         root.orion = root.orion || {};
@@ -42,7 +43,7 @@
         var _shared = false;
         
         var _target = null;
-        if (typeof(window) === "undefined") { //$NON-NLS-0$
+        if (typeof(window) === "undefined") {
             if (self.postMessage) {
                 _target = self;
             } else {
@@ -57,13 +58,13 @@
         function _publish(message, target) {
             target = target || _target;
             if (target) {
-                if (typeof(ArrayBuffer) === "undefined") { //$NON-NLS-0$
+                if (typeof(ArrayBuffer) === "undefined") {
                     message = JSON.stringify(message);
                 }
                 if (target === self || _shared) {
                     target.postMessage(message);
                 } else {
-                    target.postMessage(message, "*"); //$NON-NLS-0$
+                    target.postMessage(message, "*");
                 }
             }
         }
@@ -72,7 +73,9 @@
         var lastHeartbeat;
         var startTime = new Date().getTime();
         function log(state) {
-            if (typeof(localStorage) !== "undefined" && localStorage.pluginLogging) console.log(state + "(" + (new Date().getTime() - startTime) + "ms)=" + self.location); //$NON-NLS-1$ //$NON-NLS-0$
+            if (typeof(localStorage) !== "undefined" && localStorage.pluginLogging) {
+            	console.log(state + "(" + (new Date().getTime() - startTime) + "ms)=" + self.location);
+        	}
         }
         function heartbeat() {
             var time = new Date().getTime();
@@ -80,9 +83,9 @@
             if (lastHeartbeat  && time - lastHeartbeat < 4000) return;
             lastHeartbeat = time;
             _publish({
-                method: "loading", //$NON-NLS-0$
+                method: "loading"
             });
-            log("heartbeat"); //$NON-NLS-0$
+            log("heartbeat");
         }
         heartbeat();
 
@@ -92,7 +95,7 @@
                 _ports.push(port);
                 if (_connected) {
                     var message = {
-                        method: "plugin", //$NON-NLS-0$
+                        method: "plugin",
                         params: [_getPluginData()]
                     };
                     _publish(message, port);
@@ -237,7 +240,7 @@
                     return;
                 }
 
-                if (promiseOrResult && typeof promiseOrResult.then === "function") { //$NON-NLS-0$
+                if (promiseOrResult && typeof promiseOrResult.then === "function") {
                     _requestReferences[messageId] = promiseOrResult;
                     promiseOrResult.then(function(result) {
                         delete _requestReferences[messageId];
@@ -252,7 +255,7 @@
                     }, function() {
                         _notify({
                             responseId: messageId,
-                            method: "progress", //$NON-NLS-0$
+                            method: "progress",
                             params: Array.prototype.slice.call(arguments)
                         }, target);
                     });
@@ -268,12 +271,12 @@
             }
         }
 
-        function _handleMessage(event, target) {
-            if (!_shared && event.source !== _target && typeof window !== "undefined") {
+        function _handleMessage(evnt, target) {
+            if (!_shared && evnt.source !== _target && typeof window !== "undefined") {
                 return;
             }
-            var data = event.data;
-            var message = (typeof data !== "string" ? data : JSON.parse(data)); //$NON-NLS-0$
+            var data = evnt.data;
+            var message = (typeof data !== "string" ? data : JSON.parse(data));
             try {
                 if (message.method) { // request
                     var method = message.method,
@@ -282,19 +285,19 @@
                         var service = _serviceReferences[message.serviceId];
                         if (!service) {
                             _throwError(message.id, "service not found", target);
-                        }
-                        service = service.implementation;
-                        if (method in service) {
-                            _callMethod(message.id, service, service[method], params, target);
                         } else {
-                            _throwError(message.id, "method not found", target);
-                        }
+	                        service = service.implementation;
+	                        if (method in service) {
+	                            _callMethod(message.id, service, service[method], params, target);
+	                        } else {
+	                            _throwError(message.id, "method not found", target);
+	                        }
+                    	}
                     } else if ("objectId" in message) {
                         var object = _objectReferences[message.objectId];
                         if (!object) {
                             _throwError(message.id, "object not found", target);
-                        }
-                        if (!method in object) {
+                        } else if (!method in object) {
                             _callMethod(message.id, object, object[method], params, target);
                         } else {
                             _throwError(message.id, "method not found", target);
@@ -347,7 +350,7 @@
             var method = null;
             var methods = [];
             for (method in implementation) {
-                if (typeof implementation[method] === 'function') { //$NON-NLS-0$
+                if (typeof implementation[method] === 'function') {
                     methods.push(method);
                 }
             }
@@ -370,7 +373,7 @@
                 return;
             }
             var message = {
-                method: "plugin", //$NON-NLS-0$
+                method: "plugin",
                 params: [_getPluginData()]
             };
             if (!_shared) {
@@ -380,7 +383,7 @@
                     }
                     return;
                 }           
-                addEventListener("message", _handleMessage, false); //$NON-NLS-0$
+                addEventListener("message", _handleMessage, false);
                 _publish(message);
             }
             _ports.forEach(function(port) {
@@ -394,7 +397,7 @@
 
         this.disconnect = function() {
             if (_connected) {
-                removeEventListener("message", _handleMessage); //$NON-NLS-0$
+                removeEventListener("message", _handleMessage);
                 _ports.forEach(function(port) {
                     port.close();
                 });
