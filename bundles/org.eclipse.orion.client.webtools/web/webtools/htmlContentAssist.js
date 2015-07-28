@@ -360,7 +360,6 @@ define([
 		 * @returns returns {Array.<Object>} The array of proposals
 		 */
 		getTags: function(source, params) {
-			// TODO It looks like tags.js is missing around 6 tags, including <a>
 			var tags = Tags.tagTemplates;
 			var proposals = [];
 			for(var j = 0; j < tags.length; j++) {
@@ -373,7 +372,13 @@ define([
 				if(jsUtil.looselyMatches(namePrefix, tag.name)) {
 					var hover = Object.create(null);
 					hover.type = 'markdown'; //$NON-NLS-1$
-			        hover.content = tag.doc ? tag.doc : "";
+					hover.content = "";
+					if (tag.category === "Obsolete and deprecated elements"){
+			        	hover.content += Messages['obsoleteTag'];
+			        }
+			        if (tag.doc){
+			        	hover.content += tag.doc;
+			        }
 			        if(tag.url) {
 			        	hover.content += i18nUtil.formatMessage(Messages['onlineDocumentation'], tag.url);
 			        }
@@ -410,6 +415,9 @@ define([
 			        			proposalText = proposalText.substring(1);
 			        		}
 			        		break;
+			        }
+			        if (tag.category === "Obsolete and deprecated elements"){
+			        	desc += Messages['obsoleteTagDesc'];
 			        }
 			        var proposal = this.makeComputedProposal(proposalText, tag.name, desc, hover, params.prefix); //$NON-NLS-1$
 			        // The prefix not being includes prevents content assist staying open while typing

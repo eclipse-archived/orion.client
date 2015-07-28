@@ -73,6 +73,8 @@ define({//Default message bundle
 	'closeTagDescription': ' - Close the ${0} tag',
 	'openCommentName': 'Open comment',
 	'closeCommentName': 'Close comment',
+	'obsoleteTag': '*Obsolete: This tag is obsolete. Its use is discouraged since it may not work in some browsers.*\n\n',
+	'obsoleteTagDesc': ' - [Obsolete]',
 	
 	//CSS content assist
 	'ruleTemplateDescription': 'rule - class selector rule',
