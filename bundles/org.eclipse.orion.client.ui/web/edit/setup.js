@@ -679,7 +679,7 @@ objects.mixin(EditorSetup.prototype, {
 	 */
 	computeNavigationHref: function(item, options) {
 		var openWithCommand = mExtensionCommands.getOpenWithCommand(this.commandRegistry, item);
-		if (openWithCommand) {
+		if (openWithCommand && typeof(openWithCommand.hrefCallback) === 'function') {
 			return openWithCommand.hrefCallback({items: objects.mixin({}, item, {params: options})});
 		}
 		if(options) {

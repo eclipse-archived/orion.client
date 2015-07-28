@@ -57,7 +57,7 @@ define([
 			var invocation = binding.invocation;
 			if (invocation) {
 				var command = binding.command;
-				if (command.hrefCallback) {
+				if (typeof(command.hrefCallback) === 'function') {
 					var href = command.hrefCallback.call(invocation.handler || window, invocation);
 					if (href.then){
 						href.then(function(l){
@@ -250,7 +250,7 @@ define([
 				}
 		};
 		
-		if (command.hrefCallback) {
+		if (typeof(command.hrefCallback) === 'function') {
 			element = clickTarget = document.createElement("a"); //$NON-NLS-0$
 			element.id = id;
 			if (useImage && command.hasImage()) {
@@ -390,7 +390,7 @@ define([
 	function createCommandMenuItem(parent, command, commandInvocation, keyBinding, callback, keyBindingString) {
 		var element, li;
 		var dropdown = parent.dropdown;
-		if (command.hrefCallback) {
+		if (typeof(command.hrefCallback) === 'function') {
 			li = Dropdown.createMenuItem(command.name, "a"); //$NON-NLS-0$
 			element = li.firstElementChild;
 			var href = command.hrefCallback.call(commandInvocation.handler, commandInvocation);
