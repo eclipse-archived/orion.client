@@ -516,7 +516,7 @@ define([
         		function fallsthrough(node) {
         		    // cases with no statements or only a single case are implicitly fall-through
         		    if(node.consequent) {
-        		        var statements = node.consequent;
+        		        var statements = node.consequent.slice(0);
         		        if(statements.length > 0 && statements[0].type === 'BlockStatement') {
         		            var stmts = statements.shift(); //take the block statement off the list, it is not returnable
         		            if(stmts.body.length > 0) {

@@ -17,8 +17,9 @@ define([
 	'orion/Deferred',
 	'javascript/occurrences',
 	'javascript/cuProvider',
+	'eslint',
 	'mocha/mocha'  //must stay at the end, not a module
-], function(chai, Esprima, ASTManager, Deferred, Occurrences, CUProvider) {
+], function(chai, Esprima, ASTManager, Deferred, Occurrences, CUProvider, ESLint) {
 	var assert = chai.assert;
 	
 	describe('Occurrences Tests', function() {
@@ -2310,6 +2311,21 @@ define([
 			editorContext.text = "a; var a;";
 			return occurrences.computeOccurrences(editorContext, setContext(7,7)).then(function(results) {
 				assertOccurrences(results, [{start:0, end:1}, {start:7, end:8}]);
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473861
+		 * @since 10.0
+		 */
+		it('should not mutate the AST 1', function() {
+			editorContext.text = "switch(tag.title) {case 'name': {tag.name;break;}case 'return': {tag.description;break;}}";
+			return astManager.getAST(editorContext).then(function(ast) {
+				var config = { rules: {} };
+    			config.rules['no-fallthrough'] = 1;
+				ESLint.verify(ast, config);
+				return occurrences.computeOccurrences(editorContext, setContext(34, 34)).then(function(results) {
+					assertOccurrences(results, [{start:7, end:10}, {start:33, end:36}, {start:65, end:68}]);
+				});
 			});
 		});
 		describe('ES6 Occurrences Tests', function() {
