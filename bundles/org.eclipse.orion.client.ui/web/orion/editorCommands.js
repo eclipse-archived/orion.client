@@ -483,8 +483,8 @@ define([
 			// global search
 			var showingSearchDialog = false;
 			var searchCommand =  new mCommands.Command({
-				name: messages.searchFiles,
-				tooltip: messages.searchFiles,
+				name: messages.searchFilesCommand,
+				tooltip: messages.searchFilesCommand,
 				id: "orion.edit.searchFiles", //$NON-NLS-0$
 				visibleWhen: /** @callback */ function(items, data) {
 					var editor = data.handler.editor || that.editor;
