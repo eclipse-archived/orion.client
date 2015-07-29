@@ -695,6 +695,8 @@ define([
         	var _h = Hover.formatMarkdownHover(completion.doc);
         	if(_h) {
         		obj.content += _h.content;	
+        	} else {
+        		obj.content += proposal.name;
         	}
         }
         if(completion.url) {
