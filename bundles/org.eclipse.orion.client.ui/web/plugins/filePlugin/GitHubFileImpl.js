@@ -26,8 +26,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 		if (!found) {
 			throw "Bad Github repository url " + repoURL;
 		}
-		var url = new URL(window.location.href);
-		this._repoURL = new URL(url.origin + apiAlias + "/repos/" + found[3] + "/" + found[4]);
+		this._repoURL = new URL(apiAlias + "/repos/" + found[3] + "/" + found[4]);
 		this._commitURLBase = found[1] + found[3] + "/" + found[4] + "/commit/";
 		this._contentsPath = this._repoURL.pathname + "/contents";
 		this._headers = {
