@@ -77,6 +77,10 @@ define({//Default message bundle
 	'obsoleteTagDesc': ' [Obsolete]',
 	'obsoleteAttr': '*Obsolete: This attribute is obsolete since ${0}. Its use is discouraged.*\n\n',
 	'obsoleteAttrDesc': ' [Obsolete]',
+	'formeventsHeader': 'Form Events',
+	'keyboardeventsHeader': 'Keyboard Events',
+	'mouseeventsHeader': 'Mouse Events',
+	'windoweventsHeader': 'Window Events',
 	
 	//CSS content assist
 	'ruleTemplateDescription': 'rule - class selector rule',

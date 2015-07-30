@@ -2237,14 +2237,20 @@ define([
 	 * @since 10.0
 	 */
 	function getAttributesForNode(node) {
-		var attrs = [].concat(attributes.globals, attributes.formevents, attributes.keyboardevents, attributes.mouseevents, attributes.windowevents);
+		var ret = Object.create(null);
+		var attrs = [].concat(attributes.globals);
 		if(node && node.type === 'tag') {
 			var tags = attributes.tags[node.name];
 			if(Array.isArray(tags) && tags.length > 0) {
 				return [].concat(attrs, tags);
 			}
 		}
-		return attrs;
+		ret.global = attrs;
+		ret.formevents = attributes.formevents.slice(0);
+		ret.keyboardevents = attributes.keyboardevents.slice(0);
+		ret.mouseevents = attributes.mouseevents.slice(0);
+		ret.windowevents = attributes.windowevents.slice(0);
+		return ret;
 	}
 	
 	return {

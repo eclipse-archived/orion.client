@@ -167,28 +167,7 @@ define([
 					//already sorted, only templates. hack until we break out template computation
 					return proposals;
 				}
-				return proposals.sort(function(l,r) {
-					//sort by relevance and then by name
-					if(typeof(l.relevance) === 'undefined') {
-						l.relevance = 1;
-					}
-					if(typeof(r.relevance) === 'undefined') {
-						r.relevance = 1;
-					}
-					if (l.relevance > r.relevance) {
-						return -1;
-					} else if (r.relevance > l.relevance) {
-						return 1;
-					}
-					var ldesc = l.name;
-					var rdesc = r.name;
-					if (ldesc < rdesc) {
-						return -1;
-					} else if (rdesc < ldesc) {
-						return 1;
-					}
-					return 0;
-				});
+				return proposals;
 			});
 		},
 		/**
@@ -446,6 +425,70 @@ define([
 		getAttributesForNode: function(node, params) {
 			var attrs = Attributes.getAttributesForNode(node);
 			var proposals = [];
+			if(Array.isArray(attrs.global)) {
+				proposals = proposals.concat(this.addProposals(node, attrs.global, params));
+			}
+			if(Array.isArray(attrs.formevents)) {
+				var arr = this.addProposals(node, attrs.formevents, params);
+				if(arr.length > 0) {
+					proposals.push({
+							proposal: '',
+							description: Messages['formeventsHeader'],
+							style: 'noemphasis_title', //$NON-NLS-1$
+							unselectable: true,
+							kind: 'html' //$NON-NLS-1$
+					});
+					proposals = proposals.concat(arr);
+				}
+
+			}
+			if(Array.isArray(attrs.keyboardevents)) {
+				arr = this.addProposals(node, attrs.keyboardevents, params);
+				if(arr.length > 0) {
+					proposals.push({
+							proposal: '',
+							description: Messages['keyboardeventsHeader'],
+							style: 'noemphasis_title', //$NON-NLS-1$
+							unselectable: true,
+							kind: 'html' //$NON-NLS-1$
+					});
+					proposals = proposals.concat(arr);
+				}
+
+			}
+			if(Array.isArray(attrs.mouseevents)) {
+				arr = this.addProposals(node, attrs.mouseevents, params);
+				if(arr.length > 0) {
+					proposals.push({
+							proposal: '',
+							description: Messages['mouseeventsHeader'],
+							style: 'noemphasis_title', //$NON-NLS-1$
+							unselectable: true,
+							kind: 'html' //$NON-NLS-1$
+						});
+					proposals = proposals.concat(arr);
+				}
+
+			}
+			if(Array.isArray(attrs.windowevents) && attrs.windowevents.length > 0) {
+				arr = this.addProposals(node, attrs.windowevents, params);
+				if(arr.length > 0) {
+					proposals.push({
+							proposal: '',
+							description: Messages['windoweventsHeader'],
+							style: 'noemphasis_title', //$NON-NLS-1$
+							unselectable: true,
+							kind: 'html' //$NON-NLS-1$
+						});
+					proposals = proposals.concat(arr);
+				}
+
+			}
+			return proposals;	
+		},
+		
+		addProposals: function addProposals(node, attrs, params) {
+			var proposals = [];
 			for(var j = 0; j < attrs.length; j++) {
 				var attr = attrs[j];
 				var prefix = params.prefix ? params.prefix : "";
@@ -471,7 +514,29 @@ define([
 					proposals.push(proposal);
 				}
 			}
-			return proposals;	
+			proposals.sort(function(l,r) {
+				//sort by relevance and then by name
+				if(typeof(l.relevance) === 'undefined') {
+					l.relevance = 1;
+				}
+				if(typeof(r.relevance) === 'undefined') {
+					r.relevance = 1;
+				}
+				if (l.relevance > r.relevance) {
+					return -1;
+				} else if (r.relevance > l.relevance) {
+					return 1;
+				}
+				var ldesc = l.name;
+				var rdesc = r.name;
+				if (ldesc < rdesc) {
+					return -1;
+				} else if (rdesc < ldesc) {
+					return 1;
+				}
+				return 0;
+			});
+			return proposals;
 		},
 		
 		/**

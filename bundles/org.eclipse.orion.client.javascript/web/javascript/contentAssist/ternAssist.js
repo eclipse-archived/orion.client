@@ -870,7 +870,7 @@ define([
 	        proposals.push({
 					proposal: '',
 					description: key, //$NON-NLS-0$
-					style: 'noemphasis_title_keywords', //$NON-NLS-0$
+					style: 'noemphasis_title', //$NON-NLS-0$
 					unselectable: true
 				});
 	        proposals = proposals.concat(_p[key].sort(sorter));
