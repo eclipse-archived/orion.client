@@ -42,7 +42,6 @@ function getAConfig(workspaceDir, fileRoot, req, res, next, rest) {
 			function findInPath(config, prefix, key) {
 				if (typeof config !== "object") {
 					if (prefix === key) {
-						console.log(config);
 						val = config;
 					}
 				} else {
@@ -66,7 +65,6 @@ function getConfig(workspaceDir, fileRoot, req, res, next, rest) {
 	var repoPath = rest.replace("config/clone/file/", "");
 	var location = api.join(fileRoot, repoPath);
 	repoPath = api.join(workspaceDir, repoPath);
-	console.log(repoPath);
 	git.Repository.open(repoPath)
 	.then(function(repo) {
 		if (repo) {
@@ -91,7 +89,7 @@ function getConfig(workspaceDir, fileRoot, req, res, next, rest) {
 					 if (typeof config !== "object") {
 					 	configs.push({
 							"CloneLocation": "/gitapi/clone" + location,
-							"Location": "/gitapi/config"+ prefix +"/clone"+location,
+							"Location": "/gitapi/config/"+ prefix +"/clone"+location, // FIXME
 							"Key": prefix,
 							"Value": [config],
 							"Type": "Config"
@@ -151,25 +149,38 @@ function putConfig(workspaceDir, fileRoot, req, res, next, rest) {
 	repoPath = api.join(workspaceDir, repoPath);
 	git.Repository.open(repoPath)
 	.then(function(repo) {
-		if (repo) {
-			repo.config().then(function(config) {
-				var resp = config.setString(key, req.body.Value);
-				if (resp === 0) {
-					resp = JSON.stringify({
-						"Key": key,
-						"Location": "/gitapi/config/"+key+"/clone/file/"+oldPath,
-						"Value": req.body.Value
-					});
-					res.statusCode = 200;
-					res.setHeader('Content-Type', 'application/json');
-					res.setHeader('Content-Length', resp.length);
-					res.end(resp);
-				}
-				else {
-					writeError(403, res);
-				}
-			});
+		if (!repo) {
+			return writeError(500, res);
 		}
+		var values = req.body.Value;
+		if (!values) {
+			return writeError(400, res, "Config entry value must be provided");
+		} else if (!Array.isArray(values)) {
+			return writeError(400, res, "Config entry value must be array");
+		} else if (values.length > 1) {
+			// TODO implement lists once nodegit provides better multivar support
+			return writeError(501, res, "Multivar config entries are not implemented");
+		}
+		var newValue = values[0];
+		return repo.config().then(function(config) {
+			return config.setString(key, newValue)
+			.then(function(resp) {
+				if (resp !== 0 && typeof resp !== "undefined") {
+					writeError(403, res);
+					return;
+				}
+				resp = JSON.stringify({
+					"Key": key,
+					"Location": "/gitapi/config/"+key+"/clone/file/"+oldPath,
+					"Value": req.body.Value
+				});
+				res.statusCode = 200;
+				res.setHeader('Content-Type', 'application/json');
+				res.setHeader('Content-Length', resp.length);
+				res.end(resp);
+			})
+			.catch(writeError.bind(null, 500, res));
+		});
 	});
 }
 

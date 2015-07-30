@@ -14,6 +14,7 @@ var connect = require('connect'),
     path = require('path'),
     AppContext = require('./lib/node_apps').AppContext,
     orionFile = require('./lib/file'),
+    orionLogin = require('./lib/login'),
     orionNode = require('./lib/node'),
     orionWorkspace = require('./lib/workspace'),
     orionGit = require('./lib/git'),
@@ -45,23 +46,7 @@ function startServer(options) {
 				orionClientRoot: ORION_CLIENT,
 				maxAge: options.maxAge
 			}))
-            .use(function(req, res, next) {
-
-                // Fake login response
-                if (req.url === "/login" && req.method === "POST") {
-                    console.log("login");
-                    return res.end(JSON.stringify({
-                        "EmailConfirmed": false,
-                        "FullName": "anonymous",
-                        "HasPassword": true,
-                        "LastLoginTimestamp": "1416865840208",
-                        "Location": "/workspace/orionode",
-                        "UserName": "anonymous"
-                    }));
-                }
-
-                next();
-            })
+			.use(orionLogin())
             .use(orionTasks.orionTasksAPI({
                 root: '/task'
             }))

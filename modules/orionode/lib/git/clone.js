@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
+/*eslint no-console:1*/
 var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
 var path = require("path");

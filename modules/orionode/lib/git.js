@@ -12,6 +12,7 @@
 
 var connect = require('connect');
 var api = require('./api'), writeError = api.writeError;
+var fileUtil = require('./fileUtil');
 var resource = require('./resource');
 var add = require('./git/add');
 var clone = require('./git/clone');
@@ -36,16 +37,12 @@ module.exports = function(options) {
 	return connect()
 	.use(connect.json())
 	.use(redirect())
-	.use(function(req, res, next) {
-		console.log(req.method + " " + req.url);
-		next();
-	})
 	.use(resource(workspaceRoot, {
 		GET: function(req, res, next, rest) {
 			var query = url.parse(req.url, true).query;
 			var diffOnly, uriOnly;
 			if (rest === '') {
-				console.log("nope");
+				writeError(400, res);
 			} else if (rest.indexOf("clone/workspace/") === 0) {
 				clone.getClone(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("remote/file/") === 0) {
@@ -132,7 +129,8 @@ module.exports = function(options) {
 		DELETE: function(req, res, next, rest) {
 			if(rest.indexOf("clone/file/") === 0) {
 				var configPath = rest.replace("clone/file", "");
-				rmdir(workspaceDir.concat(configPath), function() {
+				rmdir(fileUtil.safeFilePath(workspaceDir, configPath), function(err) {
+					if (err) return writeError(500, res, err)
 					res.statusCode = 200;
 					res.end();
 				});
@@ -142,7 +140,7 @@ module.exports = function(options) {
 				branches.deleteBranch(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("remote/") === 0) {
 				remotes.deleteRemote(workspaceDir, fileRoot, req, res, next, rest);
-			} else {	
+			} else {
 				writeError(403, res);
 			}
 		}

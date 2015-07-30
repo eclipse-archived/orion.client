@@ -9,17 +9,16 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node, mocha*/
+/*eslint no-shadow:0*/
 var assert = require('assert');
 var path = require('path');
 var testData = require('./support/test_data');
 var git = require('nodegit');
 var fs = require('fs');
-var rmdir = require('rimraf');
 
 var CONTEXT_PATH = '/orionn';
-var PREFIX = CONTEXT_PATH + '/workspace', PREFIX_FILE = CONTEXT_PATH + '/file';
+var PREFIX = CONTEXT_PATH + '/workspace';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
-var DEFAULT_WORKSPACE_NAME = 'Orionode Workspace';
 
 var app = testData.createApp()
 		.use(CONTEXT_PATH, require('../lib/tasks').orionTasksAPI({
@@ -41,32 +40,28 @@ var app = testData.createApp()
 			workspaceDir: WORKSPACE
 		}));
 
-var TEST_REPO_NAME = 'test';
-var repoPath = path.join(WORKSPACE, TEST_REPO_NAME);
+var TEST_REPO_NAME, repoPath;
 
-function byName(a, b) {
-	return String.prototype.localeCompare(a.Name, b.Name);
+function setup(done) {
+	TEST_REPO_NAME = 'test';
+	repoPath = path.join(WORKSPACE, TEST_REPO_NAME);
+	testData.setUp(WORKSPACE, done);
 }
 
-// Retrieves the 0th Workspace in the list and invoke the callback
-function withDefaultWorkspace(callback) {
-	app.request()
-	.get(PREFIX)
-	.end(function(err, res) {
-		assert.ifError(err);
-		callback(res.body.Workspaces[0]);
+function setupRepo(done) {
+	TEST_REPO_NAME = "Spoon-Knife";
+	repoPath = path.join(WORKSPACE, TEST_REPO_NAME);
+	testData.setUp(WORKSPACE, function() {
+		git.Clone.clone("http://github.com/octocat/Spoon-Knife.git", repoPath).then(done.bind(null, null), done);
 	});
 }
 
 describe("git", function() {
-
 	/**
 	 * init repo, add file, commit file, add remote, get list of remotes, fetch from remote, delete repo
 	 */
-	describe('Use case 1', function(done) {
-		before(function(done) { // testData.setUp.bind(null, parentDir)
-			testData.setUp(WORKSPACE, done);
-		});
+	describe('Use case 1', function(/*done*/) {
+		before(setup);
 
 		describe('Creates a new directory and init repository', function() {
 			it('GET clone (initializes a git repo)', function(finished) {
@@ -620,5 +615,82 @@ describe("git", function() {
 
 		});
 	}); // describe("Use case 3")
+
+	describe("config", function() {
+		this.timeout(10000);
+
+		function repoConfig() {
+			return app.request()
+			.get(CONTEXT_PATH + "/gitapi/config/clone/file/" + TEST_REPO_NAME);
+		}
+
+		// @returns first item in arr for which pred(arr) returns truthy
+		function find(arr, pred) {
+			var found = null;
+			Array.prototype.some.call(arr, function(item, i, array) {
+				if (pred(item, i, array)) {
+					found = item;
+					return true;
+				}
+				return false;
+			});
+			return found;
+		}
+
+		before(setupRepo);
+
+		it("gets repo config", function(done) {
+			return repoConfig()
+			.expect(200)
+			.expect(function(res) {
+				assert.equal(res.body.Type, "Config", "Is a config");
+				assert.ok(res.body.Children.length > 0, "has Children");
+			})
+			.end(done);
+		});
+		it("gets key", function(done) {
+			return repoConfig()
+			.end(function(err, res) {
+				assert.ifError(err);
+				// Ensure we can GET a child's Location to retrieve it individually
+				var child = res.body.Children[0];
+
+				app.request()
+				.get(CONTEXT_PATH + child.Location)
+				.expect(200)
+				.expect(function(res2) {
+					assert.equal(child.Key, res2.body.Key, "Got the correct key");
+				})
+				.end(done);
+			});
+		});
+		it("updates key", function(done) {
+			return repoConfig()
+			.end(function(err, res) {
+				assert.ifError(err);
+				// Find the core.filemode config and toggle it
+				var child = find(res.body.Children, function(c) { return c.Key === "core.filemode"; });
+				var newValue = String(!(child.Value));
+
+				app.request()
+				.put(CONTEXT_PATH + child.Location)
+				.send({ Value: [newValue] })
+				.expect(200)
+				.end(function(err/*, res*/) {
+					assert.ifError(err);
+					// Ensure the value was actually changed in the repo
+					git.Repository.open(repoPath).then(function(repo) {
+						return repo.config().then(function(config) {
+							return config.getString(child.Key).then(function(value) {
+								assert.equal(value, newValue, "Value was changed");
+							});
+						});
+					})
+					.then(done.bind(null, null))
+					.catch(done);
+				});
+			});
+		});
+	}); // describe("config")
 
 }); // describe("Git")

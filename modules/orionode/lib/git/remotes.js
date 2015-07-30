@@ -338,15 +338,20 @@ function deleteRemote(workspaceDir, fileRoot, req, res, next, rest) {
 	rest = rest.replace("remote/", "");
 	var split = rest.split("/file/");
 	var repoPath = api.join(workspaceDir, split[1]);
-	git.Repository.open(repoPath)
+	var remoteName = split[0];
+	return git.Repository.open(repoPath)
 	.then(function(repo) {
-		var resp = git.Remote.delete(repo, split[0]);
-		if (resp === 0) {
-	        res.statusCode = 200;
-	        res.end();
-	    } else {
-	        writeError(403, res);
-	    } 
+		return git.Remote.delete(repo, remoteName).then(function(resp) {
+			// Docs claim this resolves 0 on success, but in practice we get undefined
+			if (resp === 0 || typeof resp === "undefined") {
+		        res.statusCode = 200;
+		        res.end();
+		    } else {
+		        writeError(403, res);
+		    }
+		}).catch(function(error) {
+			writeError(500, error);
+		});
 	});
 }
 

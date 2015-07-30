@@ -23,6 +23,7 @@
     "node-inspector": "~0.7.4"
   },
   "devDependencies": {
+    "bluebird": "^2.9.34",
     "mocha": "*",
     "requirejs": "~2.1.14",
     "supertest": "*",
@@ -64,6 +65,7 @@
 
     "authenticationPlugin",
     "git-repository",
+    "deploy",
     "gitPlugin",
     "GerritFilePlugin",
     "GitHubFilePlugin",
