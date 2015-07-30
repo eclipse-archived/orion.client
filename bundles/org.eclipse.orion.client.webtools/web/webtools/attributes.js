@@ -15,7 +15,10 @@ define([
 ], function() {
 	/* eslint-disable missing-nls */
 	var attributes = Object.create(null);
-	
+	/*
+	 * ADDED MISSING TAGS
+	 * - xmlns
+	 */
 	attributes.globals = [
 			{
 				name: "aria",
@@ -95,41 +98,41 @@ define([
  				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id",
  				doc: "Defines a unique identifier (ID) which must be unique in the whole document. Its purpose is to identify the element when linking (using a fragment identifier), scripting, or styling (with CSS)."
  			},
- 			{
- 				name: "itemid",
- 				category: "Global attribute",
- 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemid",
- 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
- 				experimental: true
- 			},
- 			{
- 				name: "itemprop",
- 				category: "Global attribute",
- 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemprop",
- 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
- 				experimental: true
- 			},
- 			{
- 				name: "itemref",
- 				category: "Global attribute",
- 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemref",
- 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
- 				experimental: true
- 			},
- 			{
- 				name: "itemscope",
- 				category: "Global attribute",
- 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemscope",
- 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
- 				experimental: true
- 			},
- 			{
- 				name: "itemtype",
- 				category: "Global attribute",
- 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemtype",
- 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
- 				experimental: true
- 			},
+// 			{
+// 				name: "itemid",
+// 				category: "Global attribute",
+// 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemid",
+// 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
+// 				experimental: true
+// 			},
+// 			{
+// 				name: "itemprop",
+// 				category: "Global attribute",
+// 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemprop",
+// 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
+// 				experimental: true
+// 			},
+// 			{
+// 				name: "itemref",
+// 				category: "Global attribute",
+// 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemref",
+// 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
+// 				experimental: true
+// 			},
+// 			{
+// 				name: "itemscope",
+// 				category: "Global attribute",
+// 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemscope",
+// 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
+// 				experimental: true
+// 			},
+// 			{
+// 				name: "itemtype",
+// 				category: "Global attribute",
+// 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemtype",
+// 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
+// 				experimental: true
+// 			},
  			{
  				name: "lang",
  				category: "Global attribute",
@@ -1110,7 +1113,7 @@ define([
 			category: "<html> attribute",
 			doc: "Specifies the URI of a resource manifest indicating resources that should be cached locally. See Using the application cache for details.",
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/html#attr-manifest"
-		}
+		},
 		// Deprecated attributes
 //		{
 //			name: "version",
@@ -1118,11 +1121,11 @@ define([
 //			doc: "Specifies the version of the HTML Document Type Definition that governs the current document. This attribute is not needed, because it is redundant with the version information in the document type declaration.",
 //			deprecated: "HTML 4.01"
 //		},
-//		{
-//			name: "xmlns",
-//			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/html#Attributes",
-//			doc: "Specifies the XML Namespace of the document. Default value is \"http://www.w3.org/1999/xhtml\". This is required in XHTML, and optional in HTML5."
-//		}
+		{
+			name: "xmlns",
+			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/html#attr-xmlns",
+			doc: "Specifies the XML Namespace of the document. Default value is http://www.w3.org/1999/xhtml. This is required in XHTML, and optional in HTML5."
+		}
 	];
 
 	attributes.tags.iframe = [
@@ -2234,7 +2237,7 @@ define([
 	 * @since 10.0
 	 */
 	function getAttributesForNode(node) {
-		var attrs = [].concat(attributes.globals, attributes.windowevents, attributes.keyboardevents, attributes.formevents, attributes.mouseevents);
+		var attrs = [].concat(attributes.globals, attributes.formevents, attributes.keyboardevents, attributes.mouseevents, attributes.windowevents);
 		if(node && node.type === 'tag') {
 			var tags = attributes.tags[node.name];
 			if(Array.isArray(tags) && tags.length > 0) {
