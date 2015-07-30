@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*eslint-env amd, node, mocha*/
+/*eslint-env amd, mocha*/
 /* eslint-disable missing-nls */
 define([
 	'chai/chai',

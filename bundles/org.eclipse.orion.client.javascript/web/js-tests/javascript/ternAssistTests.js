@@ -9,8 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*eslint-env amd, mocha, node, browser*/
-/*global doctrine*/
+/*eslint-env amd, mocha, browser*/
 /* eslint-disable missing-nls */
 define([
 'javascript/contentAssist/ternAssist',
@@ -936,6 +935,466 @@ define([
 					["xXYZ", "xXYZ : number"],
 					["xxxx", "xxxx : number"],
 					["xxyz", "xxyz : number"]
+				]);
+			});
+			
+			it("test @type var type 1", function(done) {
+				var options = {
+					buffer: "/** @type {Number}*/var xx;x", 
+					prefix: "x",
+					offset: 28,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : number"],
+				]);
+			});
+			it("test @type var type 2", function(done) {
+				var options = {
+					buffer: "/** @type {String}*//** @type {Number}*/var xx;x", 
+					prefix: "x",
+					offset: 48,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : any"],
+				]);
+			});
+			it("test @type var type 3", function(done) {
+				var options = {
+					buffer: "/** @type {Number}*//** @type {String}*/var xx;x", 
+					prefix: "x",
+					offset: 48,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : any"],
+				]);
+			});
+			it("test @type var type 4", function(done) {
+				var options = {
+					buffer: "/** @type {Number}*/\n// @type {String}\nvar xx;x", 
+					prefix: "x",
+					offset: 47,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : number"],
+				]);
+			});
+			it("test @type var type 5", function(done) {
+				var options = {
+					buffer: "/** @type {Number}*/\n//* @type {String}\nvar xx;x", 
+					prefix: "x",
+					offset: 48,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : number"],
+				]);
+			});
+			it("test @type var type 6", function(done) {
+				var options = {
+					buffer: "/** @type {String}*/var yy;/** @type {Number}*/var xx;x", 
+					prefix: "x",
+					offset: 55,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : any"],
+				]);
+			});
+			it("test @type var type 7", function(done) {
+				var options = {
+					buffer: "/** @type {String}*/var yy;\n/** @type {Number}*/var xx;x", 
+					prefix: "x",
+					offset: 56,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : number"],
+				]);
+			});
+			it("test @type var type 8", function(done) {
+				var options = {
+					buffer: "/** @type {Number}*/var xx;/** @type {String}*/xx;x", 
+					prefix: "x",
+					offset: 51,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : number"],
+				]);
+			});
+			it("test @type var type 9", function(done) {
+				var options = {
+					buffer: "/** @type {{foo:String}}*/var xx;xx.f", 
+					prefix: "f",
+					offset: 37,
+					callback: done};
+				return testProposals(options, [
+					["foo", "foo : string"],
+				]);
+			});
+			it("test @type var type 10", function(done) {
+				var options = {
+					buffer: "/** @type {{foo:string,foo2:number}}*/var xx;xx.f", 
+					prefix: "f",
+					offset: 49,
+					callback: done};
+				return testProposals(options, [
+					["foo", "foo : string"],
+					["foo2", "foo2 : number"]
+				]);
+			});
+			it("test @type var type 11", function(done) {
+				var options = {
+					buffer: "/** @returns {String}\n@type {Number}*/var xx;x", 
+					prefix: "x",
+					offset: 46,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : number"]
+				]);
+			});
+			it("test @type var type 12", function(done) {
+				var options = {
+					buffer: "/** @param {String} f\n@type {Number}*/var xx;x", 
+					prefix: "x",
+					offset: 46,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : number"]
+				]);
+			});
+			it("test @type var type 13", function(done) {
+				var options = {
+					buffer: "/** @return {Number}*/var xx = function() { };x", 
+					prefix: "x",
+					offset: 47,
+					callback: done};
+				return testProposals(options, [
+				//TODO we should see a return type here
+					["xx()", "xx()"]
+				]);
+			});
+			it("test @type var type 14", function(done) {
+				var options = {
+					buffer: "var xx;\n /** @type String\n@param Number ss*/\n xx = function(yy) { y };", 
+					prefix: "y",
+					offset: 67,
+					callback: done};
+				return testProposals(options, [
+					["yy", "yy : any"]
+				]);
+			});
+			it("test @type var type 15", function(done) {
+				var options = {
+					buffer: "var xx;\n /** @param {Number} ss\n@return {String}*/\n xx = function(yy) { y };", 
+					prefix: "y",
+					offset: 73,
+					callback: done};
+				return testProposals(options, [
+					["yy", "yy : any"]
+				]);
+			});
+			/**
+			 *  @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=459499
+			 */
+			it("test @type var type 16", function(done) {
+				var options = {
+					buffer: "/** @type {String}\n@returns {Number}*/var xx = function() { };x", 
+					prefix: "x",
+					offset: 63,
+					callback: done};
+				return testProposals(options, [
+					//TODO should be a standin type for return
+					["xx()", "xx()"]
+				]);
+			});
+			it("test @type var type 17", function(done) {
+				var options = {
+					buffer: "/** @type {Number} xx2 */var flar = '';fla", 
+					prefix: "fla",
+					offset: 42,
+					callback: done};
+				return testProposals(options, [
+					["flar", "flar : string|number"]
+				]);
+			});
+			it("test @type var type 18", function(done) {
+				var options = {
+					buffer: "/** @type {Number} xx2 */var flar;flar = '';fla", 
+					prefix: "fla",
+					offset: 47,
+					callback: done};
+				return testProposals(options, [
+					["flar", "flar : string|number"]
+				]);
+			});
+			it("test @type var type 19", function(done) {
+				var options = {
+					buffer: "/** @type {Number} xx2 */var flar;flar = iDontKnow();fla", 
+					prefix: "fla",
+					offset: 56,
+					callback: done};
+				return testProposals(options, [
+					["flar", "flar : number"]
+				]);
+			});
+			// SCRIPTED-138 jsdoc support for functions parameters that are in object literals
+			it("test @type var type 20", function(done) {
+				var options = {
+					buffer: "var obj = {\n  /** @param {String} foo */\n fun : function(foo) { foo }\n}", 
+					prefix: "foo",
+					offset: 67,
+					callback: done};
+				return testProposals(options, [
+					["foo", "foo : string"]
+				]);
+			});
+			it("test @type var type 21", function(done) {
+				var options = {
+					buffer: "var obj = {\n/** @type {String} foo */\nfoo : undefined};obj.f", 
+					prefix: "f",
+					offset: 60,
+					callback: done};
+				return testProposals(options, [
+					["foo", "foo : string"]
+				]);
+			});
+			it("test @type var type 22", function(done) {
+				var options = {
+					buffer: "var obj = { Fun : function() { this.yyy = 9; } };\n/** @type {obj.Fun} */ var xxx;x", 
+					prefix: "x",
+					offset: 82,
+					callback: done};
+				return testProposals(options, [
+					["xxx()", "xxx()"]
+				]);
+			});
+			it("test @type var type 23", function(done) {
+				var options = {
+					buffer: "/** @type {[Number]} */ var xxx;xxx[0].toF", 
+					prefix: "toF",
+					offset: 42,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test @type var type 24", function(done) {
+				var options = {
+					buffer: "/** @type {[Number,String]} */ var xxx;xxx[0].toF", 
+					prefix: "toF",
+					offset: 49,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test @type var type 25", function(done) {
+				var options = {
+					buffer: "/** @type {Array.<Number>} */ var xxx;xxx[0].toF", 
+					prefix: "toF",
+					offset: 48,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test @type var type 26", function(done) {
+				var options = {
+					buffer: "/** @type {[Number]} */ var xxx;xxx[0].toF", 
+					prefix: "toF",
+					offset: 42,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test @type var type 27", function(done) {
+				var options = {
+					buffer: "/** @type {Array.<{foo:Number}>} */ var xxx;xxx[0].foo.toF", 
+					prefix: "toF",
+					offset: 58,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test @type var type 28", function(done) {
+				var options = {
+					buffer: "/** @type {Array.<Array.<Number>>} */ var xxx;xxx[0][0].toF", 
+					prefix: "toF",
+					offset: 59,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test @type var type 29", function(done) {
+				var options = {
+					buffer: "/** @type {Array.<Array.<Array.<Number>>>} */ var xxx;xxx[0][0][bar].toF", 
+					prefix: "toF",
+					offset: 72,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test @type var type 30", function(done) {
+				var options = {
+					buffer: "/** @type {...Number} */ var xxx;xxx[0].toF", 
+					prefix: "toF",
+					offset: 43,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test @type var type 31", function(done) {
+				var options = {
+					buffer: "/** @type {...Array.<Number>} */ var xxx;xxx[0][0].toF", 
+					prefix: "toF",
+					offset: 54,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test @type var type 32", function(done) {
+				var options = {
+					buffer: "var jjj = {};/** @type {Number} */jjj.x = '';x.toF", 
+					prefix: "toF",
+					offset: 50,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test @type var type 33", function(done) {
+				var options = {
+					buffer: "var jjj = {x:false};/** @type {Number} */jjj.x = '';x.toF", 
+					prefix: "toF",
+					offset: 57,
+					callback: done};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test @type var type 34", function(done) {
+				var options = {
+					buffer: "var obj = { Fun : function() {} };\n/** @type {obj.Fun} */ var xxx;x", 
+					prefix: "x",
+					offset: 67,
+					callback: done};
+				return testProposals(options, [
+					//TODO we should have a standin type 
+					["xxx()", "xxx()"]
+				]);
+			});
+			it("test @type tag union", function(done) {
+				var options = {
+					buffer: "/** @type {String|Number}*/var xx;x", 
+					prefix: "x",
+					offset: 35,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : string|number"],
+				]);
+			});
+			it("test @type tag optional 1", function(done) {
+				var options = {
+					buffer: "/** @type {?String}*/var xx;x", 
+					prefix: "x",
+					offset: 29,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : any"],
+				]);
+			});
+			it("test @type tag optional 2", function(done) {
+				var options = {
+					buffer: "/** @type {String?}*/var xx;x", 
+					prefix: "x",
+					offset: 29,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : any"],
+				]);
+			});
+			it("test @type tag optional 3", function(done) {
+				var options = {
+					buffer: "/** @type {!String}*/var xx;x", 
+					prefix: "x",
+					offset: 29,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : any"],
+				]);
+			});
+			it("test @type tag optional 4", function(done) {
+				var options = {
+					buffer: "/** @type {String!}*/var xx;x", 
+					prefix: "x",
+					offset: 29,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : any"],
+				]);
+			});
+			it("test @type tag any 1", function(done) {
+				var options = {
+					buffer: "/** @type {[]}*/var xx;x", 
+					prefix: "x",
+					offset: 24,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : any"],
+				]);
+			});
+			it("test @type tag array 1", function(done) {
+				var options = {
+					buffer: "/** @type {Array.<number>}*/var xx;x", 
+					prefix: "x",
+					offset: 36,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : [number]"],
+				]);
+			});
+			it("test @type tag array 2", function(done) {
+				var options = {
+					buffer: "/** @type {Array.<String>}*/var xx;x", 
+					prefix: "x",
+					offset: 36,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : [string]"],
+				]);
+			});
+			it("test @type tag array 3", function(done) {
+				var options = {
+					buffer: "/** @type {[String]}*/var xx;x", 
+					prefix: "x",
+					offset: 30,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : [string]"],
+				]);
+			});
+			it("test @type tag array 3", function(done) {
+				var options = {
+					buffer: "/** @type {[?]}*/var xx;x", 
+					prefix: "x",
+					offset: 25,
+					callback: done};
+				return testProposals(options, [
+					["xx", "xx : any"],
 				]);
 			});
 		});
