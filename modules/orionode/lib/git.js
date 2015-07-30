@@ -11,25 +11,45 @@
 /*eslint-env node*/
 
 var connect = require('connect');
-var api = require('./api'), writeError = api.writeError;
+var api = require('./api');
 var fileUtil = require('./fileUtil');
 var resource = require('./resource');
-var add = require('./git/add');
-var clone = require('./git/clone');
-var remotes = require('./git/remotes');
-var branches = require('./git/branches');
-var status = require('./git/status');
-var config = require('./git/config');
-var commit = require('./git/commit');
-var tags = require('./git/tags');
-var stash = require('./git/stash');
-var blame = require('./git/blame');
-var diff = require('./git/diff');
 var rmdir = require('rimraf');
 var url = require('url');
 var redirect = require('connect-redirection');
+var writeError = api.writeError;
 
-module.exports = function(options) {
+// Handle optional nodegit dependency
+var hasNodegit = true;
+try {
+	var add = require('./git/add');
+	var clone = require('./git/clone');
+	var remotes = require('./git/remotes');
+	var branches = require('./git/branches');
+	var status = require('./git/status');
+	var config = require('./git/config');
+	var commit = require('./git/commit');
+	var tags = require('./git/tags');
+	var stash = require('./git/stash');
+	var blame = require('./git/blame');
+	var diff = require('./git/diff');
+} catch (e) {
+	if (e.code === "MODULE_NOT_FOUND" && e.message.indexOf("nodegit") >= 0) {
+		hasNodegit = false;
+	}
+}
+
+if (hasNodegit) {
+	module.exports = Git;
+} else {
+	module.exports = Nothing;
+}
+
+function Nothing(/*req, res, next*/) {
+	return connect();
+}
+
+function Git(options) {
 	var workspaceRoot = options.root;
 	var workspaceDir = options.workspaceDir;
 	var fileRoot = options.fileRoot;

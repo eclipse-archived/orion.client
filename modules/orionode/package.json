@@ -16,11 +16,13 @@
   },
   "optionalDependencies": {
     "pty.js": "0.2.5",
-    "nodegit": "~0.4.0",
     "findit": "~2.0.0",
     "ini": "~1.3",
     "mkdirp": "*",
     "node-inspector": "~0.7.4"
+  },
+  "experimentalDependencies": {
+    "nodegit": "~0.4.0"
   },
   "devDependencies": {
     "bluebird": "^2.9.34",
