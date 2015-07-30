@@ -2149,6 +2149,392 @@ define([
 					["the", "the : number"]
 				]);
 			});
+			it("test function return types 1", function(done) {
+				var options = {
+					buffer: "function first() { return 9; };first().toF", 
+					prefix: "toF",
+					offset: 42,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 2", function(done) {
+				var options = {
+					buffer: "var obj = { first : function () { return 9; } };obj.first().toF", 
+					prefix: "toF",
+					offset: 63,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 3", function(done) {
+				var options = {
+					buffer: "function first() { return { ff : 9 }; };first().ff.toF", 
+					prefix: "toF",
+					offset: 54,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 4", function(done) {
+				var options = {
+					buffer: "function first() { return function() { return 9; }; };var ff = first();ff().toF", 
+					prefix: "toF",
+					offset: 79,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 5", function(done) {
+				var options = {
+					buffer: "function first() { return function() { return 9; }; };first()().toF", 
+					prefix: "toF",
+					offset: 67,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 6", function(done) {
+				var options = {
+					buffer: "function first() { if(true) { return 8; } };first().toF", 
+					prefix: "toF",
+					offset: 55,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 7", function(done) {
+				var options = {
+					buffer: "function first() { if(true) { return ''; } else  { return 8; } };first().toF", 
+					prefix: "toF",
+					offset: 76,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 8", function(done) {
+				var options = {
+					buffer: "function first() { while(true) { return 1; } };first().toF", 
+					prefix: "toF",
+					offset: 58,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 9", function(done) {
+				var options = {
+					buffer: "function first() { do { return 1; } while(true); };first().toF", 
+					prefix: "toF",
+					offset: 62,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 10", function(done) {
+				var options = {
+					buffer: "function first() { for (var i; i < 10; i++) { return 1; } };first().toF", 
+					prefix: "toF",
+					offset: 71,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 11", function(done) {
+				var options = {
+					buffer: "function first() { for (var i in k) { return 1; } };first().toF", 
+					prefix: "toF",
+					offset: 63,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 12", function(done) {
+				var options = {
+					buffer: "function first() { try { return 1; } catch(e) { } };first().toF", 
+					prefix: "toF",
+					offset: 63,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 13", function(done) {
+				var options = {
+					buffer: "function first() { try { return 1; } catch(e) { } finally { } };first().toF", 
+					prefix: "toF",
+					offset: 75,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 14", function(done) {
+				var options = {
+					buffer: "function first() { try { return ''; } catch(e) { return 9; } finally { } };first().toF", 
+					prefix: "toF",
+					offset: 86,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 15", function(done) {
+				var options = {
+					buffer: "function first() { try { return ''; } catch(e) { return ''; } finally { return 9; } };first().toF", 
+					prefix: "toF",
+					offset: 97,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 16", function(done) {
+				var options = {
+					buffer: "function first() { switch (v) { case a: return 9; } };first().toF", 
+					prefix: "toF",
+					offset: 65,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 17", function(done) {
+				var options = {
+					buffer: "function first() { switch (v) { case b: return ''; case a: return 1; } };first().toF", 
+					prefix: "toF",
+					offset: 84,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 18", function(done) {
+				var options = {
+					buffer: "function first() { switch (v) { case b: return ''; default: return 1; } };first().toF", 
+					prefix: "toF",
+					offset: 85,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 19", function(done) {
+				var options = {
+					buffer: "function first() { while(true) { a;b;return 9; } };first().toF", 
+					prefix: "toF",
+					offset: 62,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 20", function(done) {
+				var options = {
+					buffer: "function first() { while(true) { while(false) { ;return 9; } } };first().toF", 
+					prefix: "toF",
+					offset: 76,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test function return types 21", function(done) {
+				var options = {
+					buffer: "function first() { return { a : 9, b : '' }; };fir", 
+					prefix: "fir",
+					offset: 50,
+					callback: done
+				};
+				return testProposals(options, [
+					["first()", "first()"]
+				]);
+			});
+			it("test function return types 22", function(done) {
+				var options = {
+					buffer: "function first () {return function () {var a = { a : 9, b : '' };return a;}}fir", 
+					prefix: "fir",
+					offset: 79,
+					callback: done
+				};
+				return testProposals(options, [
+					["first()", "first() : a"]
+				]);
+			});
+			it("test function return types 23", function(done) {
+				var options = {
+					buffer: "function first () {return function () {var a = { a : 9, b : '' };return a;}}first().a", 
+					prefix: "a",
+					offset: 85,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["apply(this, args)", "apply(this, args)"]
+				]);
+			});
+			it("test function return types 24", function(done) {
+				var options = {
+					buffer: "function first () {return function () {var a = { aa : 9, b : '' };return a;}}first()().a", 
+					prefix: "a",
+					offset: 88,
+					callback: done
+				};
+				return testProposals(options, [
+					["aa", "aa : number"]
+				]);
+			});
+			it("test function return types 25", function(done) {
+				var options = {
+					buffer: "var first = function() { return 9; };first.a", 
+					prefix: "a",
+					offset: 44,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["apply(this, args)", "apply(this, args)"]
+				]);
+			});
+			it("test function return types 26", function(done) {
+				var options = {
+					buffer: "var first = function() { return 9; };first().toF", 
+					prefix: "toF",
+					offset: 48,
+					callback: done
+				};
+				return testProposals(options, [
+					['', 'ecma5'],
+					["toFixed(digits)", "toFixed(digits) : string"]
+				]);
+			});
+			it("test implicit inference 1", function(done) {
+				var options = {
+					buffer: "xxx;xx", 
+					prefix: "xx",
+					offset: 6,
+					callback: done
+				};
+				return testProposals(options, [
+					//TODO we should find 'xxx' ["xxx", "xxx : any"]
+				]);
+			});
+			it("test implicit inference 2", function(done) {
+				var options = {
+					buffer: "xxx.yyy = 0;xxx.yy", 
+					prefix: "yy",
+					offset: 18,
+					callback: done
+				};
+				return testProposals(options, [
+					//TODO we should find 'yyy' ["yyy", "yyy : number"]
+				]);
+			});
+			it("test implicit inference 3", function(done) {
+				var options = {
+					buffer: "xxx; xxx.yyy = 0;xxx.yy", 
+					prefix: "yy",
+					offset: 23,
+					callback: done
+				};
+				return testProposals(options, [
+					//TODO we should find 'yyy' ["yyy", "yyy : number"]
+				]);
+			});
+			it("test implicit inference 4", function(done) {
+				var options = {
+					buffer: "xxx = 0;xx", 
+					prefix: "xx",
+					offset: 10,
+					callback: done
+				};
+				return testProposals(options, [
+					["xxx", "xxx : number"]
+				]);
+			});
+			it("test implicit inference 5", function(done) {
+				var options = {
+					buffer: "function inner() { xxx = 0; }xx", 
+					prefix: "xx",
+					offset: 31,
+					callback: done
+				};
+				return testProposals(options, [
+					["xxx", "xxx : number"]
+				]);
+			});
+			it("test implicit inference 6", function(done) {
+				var options = {
+					buffer: "var obj = { foo : function inner() { xxx = 0; } }xx", 
+					prefix: "xx",
+					offset: 51,
+					callback: done
+				};
+				return testProposals(options, [
+					["xxx", "xxx : number"]
+				]);
+			});
+			it("test implicit inference 7", function(done) {
+				var options = {
+					buffer: "var xxx;var obj = { foo : function inner() { xxx = 0; } }xx", 
+					prefix: "xx",
+					offset: 59,
+					callback: done
+				};
+				return testProposals(options, [
+					["xxx", "xxx : number"]
+				]);
+			});
 			it("test this reference 1", function(done) {
 				var options = {
 					buffer: "var xxxx;\nthis.x", 
@@ -3679,6 +4065,315 @@ define([
 				testProposals(options, [
 				  //TODO   ['mage', 'Image', 'Image'],
 				  ///   ['nfinity', 'Infinity', 'Infinity']
+				]);
+			});
+		});
+		describe('Node.js Tests', function() {
+			/**
+			 * Tests support for the eslint-env directive to find global objects
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+			 * @since 7.0
+			 */
+			it('node awareness 1', function(done) {
+				var options = {
+					buffer: "/*eslint-env node*/gl", 
+					prefix: "gl", 
+					offset: 21,
+					callback: done};
+				testProposals(options, [
+					['', 'node'],
+					['global', 'global : <top>']
+				]);
+			});
+			/**
+			 * Tests support for the eslint-env directive to find global objects
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+			 * @since 7.0
+			 */
+			it('node awareness 2', function(done) {
+				var options = {
+					buffer: "/*eslint-env node*/gl", 
+					prefix: "gl", 
+					offset: 21,
+					callback: done};
+				testProposals(options, [
+					['', 'node'],
+					['global', 'global : <top>']
+				]);
+			});
+			/**
+			 * Tests support for the eslint-env directive to find global objects
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+			 * @since 7.0
+			 */
+			it('node awareness 3', function(done) {
+				var options = {
+					buffer: "/*eslint-env amd*/ require('fs').mk", 
+					prefix: "mk", 
+					offset: 35,
+					callback: done};
+				testProposals(options, [
+				]);
+			});
+			/**
+			 * Tests support for the eslint-env directive to find global objects
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+			 * @since 7.0
+			 */
+			it('node awareness 4', function(done) {
+				var options = {
+					buffer: "/*eslint-env node*/ require('fs').mkd", 
+					prefix: "mkd", 
+					offset: 37,
+					callback: done};
+				testProposals(options, [
+					['', 'node'],
+					['mkdir(path, mode?, callback?)', 'mkdir(path, mode?, callback?)'],
+					['mkdirSync(path, mode?)', 'mkdirSync(path, mode?)']
+				]);
+			});
+			/**
+			 * Tests support for the eslint-env directive to find global objects
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+			 * @since 7.0
+			 */
+			it('node awareness 5', function(done) {
+				var options = {
+					buffer: "/*eslint-env browser*/ require('fs').mkd", 
+					prefix: "mkd", 
+					offset: 40,
+					callback: done};
+				testProposals(options, [
+				]);
+			});
+			it('node awareness 6', function(done) {
+				var options = {
+					buffer: "/*eslint-env node*/ proc", 
+					prefix: "proc", 
+					offset: 24,
+					callback: done};
+				testProposals(options, [
+					['', 'node'],
+					['process', 'process : process']
+				]);
+			});
+			it('node awareness 7', function(done) {
+				var options = {
+					buffer: "/*eslint-env node*/ process.co", 
+					prefix: "co", 
+					offset: 30,
+					callback: done};
+				testProposals(options, [
+					['', 'node'],
+					['config', 'config : process.config']
+				]);
+			});
+			it('node awareness 8', function(done) {
+				var options = {
+					buffer: "/*eslint-env node*/ var x = require('fs');x.o", 
+					prefix: "o", 
+					offset: 45,
+					callback: done};
+				testProposals(options, [
+					['', 'node'],
+					["open(path, flags, mode?, callback?)", "open(path, flags, mode?, callback?)"],
+					["openSync(path, flags, mode?)", "openSync(path, flags, mode?) : number"]
+				]);
+			});
+			it('node awareness 9', function(done) {
+				var options = {
+					buffer: "/*eslint-env node*/ process.stdout.wr", 
+					prefix: "wr", 
+					offset: 37,
+					callback: done};
+				testProposals(options, [
+					['', 'node'],
+					["write(chunk, encoding?, callback?)", "write(chunk, encoding?, callback?) : bool"]
+				]);
+			});
+			it('node awareness 10', function(done) {
+				var options = {
+					buffer: "/*eslint-env node*/ require('buffer').IN", 
+					prefix: "IN", 
+					offset: 40,
+					callback: done};
+				testProposals(options, [
+					['', 'node'],
+					["INSPECT_MAX_BYTES", "INSPECT_MAX_BYTES : number"]
+				]);
+			});
+			it('node awareness 11', function(done) {
+				var options = {
+					buffer: "/*eslint-env node*/ var x = new Buffer(10);x.cop", 
+					prefix: "cop", 
+					offset: 48,
+					callback: done};
+				testProposals(options, [
+					['', 'node'],
+					["copy(targetBuffer, targetStart?, sourceStart?, sourceEnd?)", "copy(targetBuffer, targetStart?, sourceStart?, sourceEnd?)"]
+				]);
+			});
+			it('node awareness 12', function(done) {
+				var options = {
+					buffer: "/*eslint-env node*/ Buffer.isB", 
+					prefix: "isB", 
+					offset: 30,
+					callback: done};
+				testProposals(options, [
+					['', 'node'],
+					["isBuffer(obj)", "isBuffer(obj) : bool"]
+				]);
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473964
+			 * @since 10.0
+			 */
+			it('node assumed awareness 1', function(done) {
+				var options = {
+					buffer: "require('fs').mkdirS", 
+					prefix: "mkdirS", 
+					offset: 20,
+					callback: done};
+				testProposals(options, [
+				//TODO this will pass ['', 'node'],
+				//	["mkdirSync(path, mode?)", "mkdirSync(path, mode?)"]
+				]);
+			});
+		});
+		describe('Browser Tests', function() {
+			/**
+			 * Tests support for the eslint-env directive to find global objects
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+			 * @since 7.0
+			 */
+			it('browser awareness 1', function(done) {
+				var options = {
+					buffer: "/*eslint-env browser */ win", 
+					prefix: "win", 
+					offset: 27,
+					callback: done};
+				testProposals(options, [
+					['', 'browser'],
+					["window", "window : <top>"]
+				]);
+			});
+			/**
+			 * Tests support for the eslint-env directive to find global objects
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+			 * @since 7.0
+			 */
+			it('browser awareness 2', function(done) {
+				var options = {
+					buffer: "/*eslint-env browser */ cons", 
+					prefix: "cons", 
+					offset: 28,
+					callback: done};
+				testProposals(options, [
+					['', 'browser'],
+					["console", "console : console"]
+				]);
+			});
+			/**
+			 * Tests support for the eslint-env directive to find global objects
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+			 * @since 7.0
+			 */
+			it('browser awareness 3', function(done) {
+				var options = {
+					buffer: "/*eslint-env browser, node */ win", 
+					prefix: "win", 
+					offset: 33,
+					callback: done};
+				testProposals(options, [
+					['', 'browser'],
+					["window", "window : <top>"]
+				]);
+			});
+			/**
+			 * Tests support for the eslint-env directive to find global objects
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+			 * @since 7.0
+			 */
+			it('browser awareness 4', function(done) {
+				var options = {
+					buffer: "/*eslint-env node, browser */ win", 
+					prefix: "win", 
+					offset: 33,
+					callback: done};
+				testProposals(options, [
+					['', 'browser'],
+					["window", "window : <top>"]
+				]);
+			});
+			it('browser awareness 5', function(done) {
+				var options = {
+					buffer: "win", 
+					prefix: "win", 
+					offset: 3,
+					callback: done};
+				testProposals(options, [
+				]);
+			});
+			it('browser awareness 6', function(done) {
+				var options = {
+					buffer: "/*eslint-env browser */ locat", 
+					prefix: "locat", 
+					offset: 29,
+					callback: done};
+				testProposals(options, [
+					['', 'browser'],
+					['location', 'location : location']
+				]);
+			});
+			it('browser awareness 7', function(done) {
+				var options = {
+					buffer: "/*eslint-env browser */ location = 5; locat", 
+					prefix: "locat", 
+					offset: 43,
+					callback: done};
+				testProposals(options, [
+					['', 'browser'],
+					['location', 'location : location|number']
+				]);
+			});
+			it('browser awareness 8', function(done) {
+				var options = {
+					buffer: "/*eslint-env browser */window.xx = 9;x", 
+					prefix: "x", 
+					offset: 38,
+					callback: done};
+				testProposals(options, [
+					['xx', 'xx : number'],
+					['', 'browser'],
+					['XMLDocument()', 'XMLDocument()'],
+					['XMLHttpRequest()', 'XMLHttpRequest()'],
+					['XPathResult()', 'XPathResult()']
+				]);
+			});
+			it('browser awareness 9', function(done) {
+				var options = {
+					buffer: "/*eslint-env browser */var xx = 9;window.x", 
+					prefix: "x", 
+					offset: 42,
+					callback: done};
+				testProposals(options, [
+					['', 'browser'],
+					['XMLDocument()', 'XMLDocument()'],
+					['XMLHttpRequest()', 'XMLHttpRequest()'],
+					['XPathResult()', 'XPathResult()']
+				]);
+			});
+			it('browser awareness 10', function(done) {
+				var options = {
+					buffer: "/*eslint-env browser */var xx = 9; this.x", 
+					prefix: "x", 
+					offset: 41,
+					callback: done};
+				testProposals(options, [
+					['', 'browser'],
+					['XMLDocument()', 'XMLDocument()'],
+					['XMLHttpRequest()', 'XMLHttpRequest()'],
+					['XPathResult()', 'XPathResult()']
 				]);
 			});
 		});

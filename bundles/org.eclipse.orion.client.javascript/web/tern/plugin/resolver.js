@@ -113,7 +113,10 @@ define([
 						if(ignores[_d]) {
 							continue;
 						}
-						if(typeof(ignores.node) === 'object' && ignores[_d]) {
+						if(typeof(ignores.node) === 'object' && ignores.node[_d]) {
+							continue;
+						}
+						if(typeof(ignores.requirejs) === 'object' && ignores.requirejs[_d]) {
 							continue;
 						}
 					}
