@@ -196,10 +196,6 @@ function Tooltip (view) {
 			if (this._hasFocus()) {
 				this._view.focus();
 			}
-			if (this._contentsView) {
-				this._contentsView.destroy();
-				this._contentsView = null;
-			}
 			if (this._tooltipContents) {
 				this._tooltipDiv.removeChild(this._tooltipContents);
 				this._tooltipContents = null;
@@ -411,8 +407,8 @@ function Tooltip (view) {
 				
 				if (info.context.offset >= 0){
 					// Use the enclosing word
-					var start = this._view.getNextOffset(info.context.offset, { unit: "word", count: -1}); //$NON-NLS-0$
-					var end = this._view.getNextOffset(info.context.offset, { unit: "word", count: 0}); //$NON-NLS-0$
+					var end = this._view.getNextOffset(info.context.offset, { unit: "wordend", count: 0}); //$NON-NLS-0$
+					var start = this._view.getNextOffset(end, { unit: "word", count: -1}); //$NON-NLS-0$
 					return this._computeRectangleFromOffset(start, end);
 				}
 			}
