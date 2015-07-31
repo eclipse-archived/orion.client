@@ -12,6 +12,7 @@
  * Helpers for the grunt build script.
  */
 /*eslint-env browser, node*/
+/*eslint no-new-func:0*/
 var _path = require("path");
 module.exports = function(grunt) {
 	var self = {};
@@ -20,7 +21,8 @@ module.exports = function(grunt) {
 		props = props || {};
 		return str.replace(/\$\{([^}]*)\}/g, function(match, propertyName) {
 			if (props[propertyName] === undefined)
-				throw new Error("Property not found, cannot replace: " + propertyName)
+				throw new Error("Property not found, cannot replace: " + propertyName);
+			// grunt.log.writeln("Replace ", propertyName, "with", props[propertyName]);
 			return props[propertyName];
 		});
 	}
