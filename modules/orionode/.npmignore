@@ -1,7 +1,3 @@
-
-
-
-
 # Ignore npm artifacts
 node_modules/
 npm-debug.log
@@ -18,3 +14,6 @@ test/.test_workspace/
 
 # Ignore client js tests
 **/bundles/**/js-tests/
+
+# Ignore i18n doc
+**/bundles/org.eclipse.orion.client.ui/web/globalization/documentation
