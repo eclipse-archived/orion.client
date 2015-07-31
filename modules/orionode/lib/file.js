@@ -13,9 +13,10 @@ var connect = require('connect');
 var fs = require('fs');
 var path = require('path');
 var url = require('url');
-var api = require('./api'), write = api.write, writeError = api.writeError;
-var fileUtil = require('./fileUtil'), ETag = fileUtil.ETag;
+var api = require('./api');
+var fileUtil = require('./fileUtil');
 var resource = require('./resource');
+var  write = api.write, writeError = api.writeError, ETag = fileUtil.ETag;
 
 //var USER_WRITE_FLAG = parseInt('0200', 8);
 //var USER_EXECUTE_FLAG = parseInt('0100', 8);
@@ -170,12 +171,12 @@ module.exports = function(options) {
 		req.on('error', function(e) {
 			writeError(500, res, e.toString());
 		});
-		// req.body may be parsed json or stringified here
-		if (req.body) {
+		// Check for a body already parsed
+		if (/^application\/json/.test(req.headers['content-type'])) {
 			handleDiff(req, res, rest, req.body);
 			return;
 		}
-		// Buffer it
+		// Otherwise buffer it
 		req.on('data', function(data) {
 			requestBody = Buffer.concat([requestBody,data]);
 		});
