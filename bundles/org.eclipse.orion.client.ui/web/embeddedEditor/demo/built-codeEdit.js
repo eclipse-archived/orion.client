@@ -61,7 +61,11 @@ function(mEmbeddedEditor) {
 		computeProposals: function(buffer, offset, context) {
 			var result = [];
 			for(var i = 0; i < proposals.length; i++){
-				result.push(proposals[i] + i);
+				result.push({//name: "<" + proposals[i] + i + ">", 
+							 //description: "<" + proposals[i] + i + ">", 
+							 proposal: "<" + proposals[i] + i + ">", 
+							 overwrite: true,
+							 prefix: "<"});
 			}
 			return result;
 		}
@@ -84,7 +88,6 @@ function(mEmbeddedEditor) {
 			return null;
 		}
 	};
-
 	embeddedEditor.create({parent: "embeddedEditor", _defaultPlugins: defaultPluginURLs}).then(function(editorViewer) {
 		document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 		editorViewer.setContents(contents, "application/javascript");
