@@ -102,13 +102,13 @@ define([
 				};
 				parentDiv.appendChild(searchStringInput);
 				that._initCompletion(searchStringInput);				
-				that._createButton(messages["Next"], parentDiv, function() { //$NON-NLS-0$
+				that._createButton(messages["Next"], parentDiv, function(evt) { //$NON-NLS-0$
 					that._addRecentfind(that.getFindString());
-					that.find(true);
+					that.find(!evt.shiftKey);
 				});			
-				that._createButton(messages["Previous"], parentDiv, function() { //$NON-NLS-0$
+				that._createButton(messages["Previous"], parentDiv, function(evt) { //$NON-NLS-0$
 					that._addRecentfind(that.getFindString());
-					that.find(false);
+					that.find(evt.shiftKey);
 				});			
 				
 				var readonly = that._editor.getTextView().getOptions("readonly"); //$NON-NLS-0$
