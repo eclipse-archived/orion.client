@@ -329,11 +329,7 @@ define([
 				}
 				evt.cancelBubble = true;
 				this._addRecentfind(this.getFindString());
-				if (evt.keyCode === 13) {
-					this.find(this._reverse ? evt.shiftKey : !evt.shiftKey);
-				} else {
-					this.find(!evt.shiftKey);
-				}
+				this.find(!evt.shiftKey);
 				return false;
 			}
 			if( ctrlKeyOnly &&  evt.keyCode === 82 /*"r"*/){
