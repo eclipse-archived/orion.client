@@ -43,15 +43,13 @@ define([
 				var _d = evnt.data;
 				if(_d.request === 'definition') {
 					if(_d.declaration && (typeof(_d.declaration.start) === 'number' && typeof(_d.declaration.end) === 'number')) {
-						if(origin !== _d.declaration.file) {
-							var options = {start: _d.declaration.start,
-											end: _d.declaration.end,
-											mode: this.openMode
-											};
-							deferred.resolve(cachedContext.openEditor(_d.declaration.file, options));
-						} else {
-							deferred.resolve(cachedContext.setSelection(_d.declaration.start, _d.declaration.end, true));
+						var options = Object.create(null);
+						options.start = _d.declaration.start;
+						options.end = _d.declaration.end;
+						if(this.openMode != null && typeof(this.openMode) !== 'undefined') {
+							options.mode = this.openMode;
 						}
+						deferred.resolve(cachedContext.openEditor(_d.declaration.file, options));
 					} else {
 						deferred.resolve(cachedContext.setStatus(Messages['noDeclFound']));
 					}
