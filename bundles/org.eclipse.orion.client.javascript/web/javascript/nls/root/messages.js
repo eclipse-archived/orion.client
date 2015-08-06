@@ -68,8 +68,6 @@ define({//Default message bundle
 	'renameElementTooltip' : 'Rename the selected JavaScript element',
 	'renameFailedTimedOut': 'Could not rename element - operation timed out',
 	'openDeclName' : 'Open Declaration',
-	'openDeclTabName' : 'Open Declaration (new tab)',
-	'openDeclSplitName' : 'Open Declaration (split)',
 	'openDeclTooltip' : 'Open the declaration of the selected element',
 	'noDeclTimedOut': 'No declaration was found - operation timed out',
 	'validTypeof': 'Invalid \'typeof\' comparison:',

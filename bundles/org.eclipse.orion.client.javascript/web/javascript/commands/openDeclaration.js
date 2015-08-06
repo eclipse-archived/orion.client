@@ -39,8 +39,6 @@ define([
 		this.cuprovider = cuProvider;
 		this.openMode = openMode;
 		this.ternworker.addEventListener('message', function(evnt) {
-			if (!this.doMe)
-				return;
 			if(typeof(evnt.data) === 'object') {
 				var _d = evnt.data;
 				if(_d.request === 'definition') {
@@ -57,7 +55,6 @@ define([
 					} else {
 						deferred.resolve(cachedContext.setStatus(Messages['noDeclFound']));
 					}
-					this.doMe = false;
 				}
 			}
 		}.bind(this));
@@ -67,7 +64,6 @@ define([
 	Objects.mixin(OpenDeclarationCommand.prototype, {
 		/* override */
 		execute: function(editorContext, options) {
-			this.doMe = true;
 		    var that = this;
 		    if(options.contentType.id === 'application/javascript') {
 		        return that.astManager.getAST(editorContext).then(function(ast) {
