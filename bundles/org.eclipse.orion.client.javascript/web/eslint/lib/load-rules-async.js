@@ -36,11 +36,11 @@ define([
         			        case 'IfStatement': {
             					if(node.consequent && node.consequent.type !== 'BlockStatement') {
             						//flag the first token of the statement that should be in the block
-            						context.report(node.consequent, "Statement should be enclosed in braces.", null /*, context.getTokens(node.consequent)[0]*/);
+            						context.report(node.consequent, ProblemMessages['curly'], null /*, context.getTokens(node.consequent)[0]*/);
             					}
             					if(node.alternate && node.alternate.type !== 'BlockStatement' && node.alternate.type !== 'IfStatement') {
             						//flag the first token of the statement that should be in the block
-            						context.report(node.alternate, "Statement should be enclosed in braces.", null /*, context.getTokens(node.alternate)[0]*/);
+            						context.report(node.alternate, ProblemMessages['curly'], null /*, context.getTokens(node.alternate)[0]*/);
             					}
             					break;
         				    }
@@ -962,13 +962,12 @@ define([
             description: ProblemMessages['no-shadow-description'],
             url: 'http://eslint.org/docs/rules/no-shadow', //$NON-NLS-1$
             rule: function(context) {
-                var hasOwnProperty = Object.prototype.hasOwnProperty;
                 function addVariables(map, scope) {
                     scope.variables.forEach(function(variable) {
                         var name = variable.name;
                         if (!variable.defs.length) { // Ignore the synthetic 'arguments' variable
                             return;
-                        } if (!hasOwnProperty.call(map, name)) {
+                        } if (!Object.prototype.hasOwnProperty.call(map, name)) {
                             map[variable.name] = scope;
                         }
                     });
@@ -1271,17 +1270,42 @@ define([
         					            return;
         					        }
         					        var parent = node.parent;
-        					        if(parent.type === 'Property' && (hasCallbackComment(parent) || hasCallbackComment(parent.key))) {
-        					            return;
-        					        }
-        					        if(parent.type === 'MemberExpression') {
-        					            //https://bugs.eclipse.org/bugs/show_bug.cgi?id=457067
-        					            // func epxrs part of call expressions, i.e. bind-like calls
-        					            //Esprima tags the root containing expression with the doc, not the func expr
-        					            parent = parent.parent;
-        					            if(parent.type === 'CallExpression' && hasCallbackComment(parent)) {
-        					               return;
-        					            }
+        					        switch(parent.type) {
+        					        	case 'Property': {
+        					        		if(hasCallbackComment(parent) || hasCallbackComment(parent.key)) {
+        					        			return;
+        					        		}
+        					        		break;
+        					        	}
+        					        	case 'MemberExpression': {
+	        					        	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=457067
+	        					            // func epxrs part of call expressions, i.e. bind-like calls
+	        					            //Esprima tags the root containing expression with the doc, not the func expr
+	        					            parent = parent.parent;
+	        					            if(parent.type === 'CallExpression' && hasCallbackComment(parent)) {
+	        					               return;
+	        					            }
+        					        		break;
+        					        	}
+        					        	case 'AssignmentExpression': {
+        					        		var left = parent.left;
+	        					        	if(left.type === 'MemberExpression') {
+	        					        		if(hasCallbackComment(left)) {
+	        					        			return;
+	        					        		}
+	        					        	} else if(left.type === 'Identifier') {
+	        					        		if(hasCallbackComment(left)) {
+	        					        			return;
+	        					        		}
+	        					        	}
+        					        		break;
+        					        	}
+        					        	case 'VariableDeclarator': {
+        					        		if(hasCallbackComment(parent.id)) {
+        					        			return;
+        					        		}
+        					        		break;
+        					        	}
         					        }
         					    } else if(node.type === 'ArrowFunctionExpression') {
         					    	pid += '-arrow'; //$NON-NLS-1$

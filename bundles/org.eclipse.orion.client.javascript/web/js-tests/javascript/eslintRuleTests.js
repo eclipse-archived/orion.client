@@ -5206,6 +5206,71 @@ define([
     			assert.equal(messages.length, 0);
     		});
     		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473790
+    		 * @since 10.0
+    		 */
+    		it("Should not flag unused param func expr assignment with @callback 1", function() {
+    			var topic = "/** @callback */a.b.c = function(p1) {};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473790
+    		 * @since 10.0
+    		 */
+    		it("Should not flag unused param func expr assignment with @callback 2", function() {
+    			var topic = "/** @callback */f = function(p1) {};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473790
+    		 * @since 10.0
+    		 */
+    		it("Should not flag unused param func expr assignment with @callback 3", function() {
+    			var topic = "/** @callback */var f = function(p1, p2) {};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473790
+    		 * @since 10.0
+    		 */
+    		it("Should not flag unused param func expr assignment with @callback 4", function() {
+    			var topic = "var f = 10, /** @callback */g = function(p1, p2) {};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473790
+    		 * @since 10.0
+    		 */
+    		it("Should not flag unused param func expr assignment with @callback 5", function() {
+    			var topic = "var f = { /** @callback */one: function(p, p2, p3) {p(); p2();}};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
              * @since 10.0
              * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460728
              */

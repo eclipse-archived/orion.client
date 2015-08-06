@@ -557,37 +557,65 @@ define([
         },
         /** alternate id for the no-unsed-params linting fix */
         "no-unused-params-expr": function(editorContext, annotation, astManager) {
+        	function updateCallback(node, ast, comments) {
+                if(Array.isArray(comments)) {
+                    //attach it to the last one
+                    var comment = comments[comments.length-1];
+                    if(comment.type === 'Block') {
+                        var valueend = comment.range[0]+comment.value.length+getDocOffset(ast.source, comment.range[0]);
+                        var start = getLineStart(ast.source, valueend);
+                        var indent = computeIndent(ast.source, start);
+                        var fix = "* @callback\n"+indent; //$NON-NLS-1$
+                        /*if(comment.value.charAt(valueend) !== '\n') {
+                            fix = '\n' + fix;
+                        }*/
+                        return editorContext.setText(fix, valueend-1, valueend-1);
+                    }
+                }
+                start = getLineStart(ast.source, node.range[0]);
+                indent = computeIndent(ast.source, start);
+                return editorContext.setText("/**\n"+indent+" * @callback\n"+indent+" */\n"+indent, node.range[0], node.range[0]); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        	}
             return astManager.getAST(editorContext).then(function(ast) {
                 var node = Finder.findNode(annotation.start, ast, {parents:true});
                 if(node && node.parents && node.parents.length > 0) {
                     var func = node.parents.pop();
                     var p = node.parents.pop();
-                    if(p.type === 'Property' && !hasDocTag('@callback', p) && !hasDocTag('@callback', p.key)) { //$NON-NLS-1$ //$NON-NLS-2$
-                        var comments = p.leadingComments ? p.leadingComments : p.key.leadingComments;
-                        if(comments) {
-                            //attach it to the last one
-                            var comment = comments[comments.length-1];
-                            if(comment.type === 'Block') {
-	                            var valueend = comment.range[0]+comment.value.length+getDocOffset(ast.source, comment.range[0]);
-	                            var start = getLineStart(ast.source, valueend);
-	                            var indent = computeIndent(ast.source, start);
-	                            var fix = "* @callback\n"+indent; //$NON-NLS-1$
-	                            /*if(comment.value.charAt(valueend) !== '\n') {
-	                                fix = '\n' + fix;
-	                            }*/
-	                            return editorContext.setText(fix, valueend-1, valueend-1);
-                            }
-                        }
-                        start = getLineStart(ast.source, p.range[0]);
-                        indent = computeIndent(ast.source, start);
-                        return editorContext.setText("/**\n"+indent+" * @callback\n"+indent+" */\n"+indent, p.range[0], p.range[0]); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-                    } else {
-                        if(!hasDocTag('@callback', func)) { //$NON-NLS-1$
-                            return editorContext.setText("/* @callback */ ", func.range[0], func.range[0]); //$NON-NLS-1$
-                        }
+                    var promise;
+                    switch(p.type) {
+                    	case 'Property': {
+                    		if(!hasDocTag('@callback', p) && !hasDocTag('@callback', p.key)) { //$NON-NLS-1$ //$NON-NLS-2$
+                    			promise = updateCallback(p, ast, (p.leadingComments ? p.leadingComments : p.key.leadingComments));
+                			}
+                    		break;
+                    	}
+                    	case 'AssignmentExpression': {
+                    		var left = p.left;
+                    		if(left.type === 'MemberExpression' && !hasDocTag('@callback', left)) { //$NON-NLS-1$
+				        		promise = updateCallback(left, ast, left.leadingComments);
+				        	} else if(left.type === 'Identifier' && !hasDocTag('@callback', left)) { //$NON-NLS-1$
+				        		promise = updateCallback(p.left, ast, left.leadingComments);	        		
+				        	}
+                			break;
+                    	}
+                    	case 'VariableDeclarator': {
+                    		var oldp = p;
+                			p = p.parent;
+                			if((p.declarations[0].range[0] == oldp.range[0]) && (p.declarations[0].range[1] === oldp.range[1])) {
+                				//insert at the var keyword level to not mess up the code
+                				promise = updateCallback(p, ast, oldp.id.leadingComments);
+                			} else if(!hasDocTag('@callback', oldp.id)) { //$NON-NLS-1$
+                    			promise = updateCallback(oldp, ast, oldp.id.leadingComments);
+                			} 
+                			
+                    		break;
+                    	}
+                    }
+                    if(!promise && !hasDocTag('@callback', func)) { //$NON-NLS-1$
+                        return editorContext.setText("/* @callback */ ", func.range[0], func.range[0]); //$NON-NLS-1$
                     }
                 }
-                return null;
+                return promise;
             });
         },
         /** fix for use-isnan linting rule */

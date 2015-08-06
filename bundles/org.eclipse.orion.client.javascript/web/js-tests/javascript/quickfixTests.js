@@ -49,7 +49,7 @@ define([
 				},
 				
 				setText: function(text, start, end) {
-				    assertFixes(text, start, end, options.expected);
+				    return new Deferred().resolve(assertFixes(text, start, end, options.expected));
 				},
 				
 				getFileMetadata: function() {
@@ -783,6 +783,110 @@ define([
 		                    start: 25, 
 		                    end: 25};
 		    return getFixes({buffer: 'var f = { /**\n *@see\n *\n */\none: function(p, p2, p3) {p(); p2();}};', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473790
+		 * @since 10.0
+		 */
+		it("Test no-unused-params-assignment-1", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "* @callback\n",
+		                    start: 4, 
+		                    end: 4};
+		    return getFixes({buffer: '/** */a.b.c = function(p1) {};', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473790
+		 * @since 10.0
+		 */
+		it("Test no-unused-params-assignment-2", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "* @callback\n",
+		                    start: 4, 
+		                    end: 4};
+		    return getFixes({buffer: '/** */f = function(p1) {};', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473790
+		 * @since 10.0
+		 */
+		it("Test no-unused-params-assignment-3", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "* @callback\n",
+		                    start: 4, 
+		                    end: 4};
+		    return getFixes({buffer: '/** */var f = function(p1) {};', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473790
+		 * @since 10.0
+		 */
+		it("Test no-unused-params-assignment-4", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "* @callback\n",
+		                    start: 16, 
+		                    end: 16};
+		    return getFixes({buffer: 'var f = 10, /** */g = function(p1) {};', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473790
+		 * @since 10.0
+		 */
+		it("Test no-unused-params-assignment-5", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "/**\n * @callback\n */\n",
+		                    start: 0, 
+		                    end: 0};
+		    return getFixes({buffer: 'a.b.c = function(p1) {};', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473790
+		 * @since 10.0
+		 */
+		it("Test no-unused-params-assignment-6", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "/**\n * @callback\n */\n",
+		                    start: 0, 
+		                    end: 0};
+		    return getFixes({buffer: 'f = function(p1) {};', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473790
+		 * @since 10.0
+		 */
+		it("Test no-unused-params-assignment-7", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "/**\n * @callback\n */\n",
+		                    start: 0, 
+		                    end: 0};
+		    return getFixes({buffer: 'var f = function(p1) {};', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473790
+		 * @since 10.0
+		 */
+		it("Test no-unused-params-assignment-8", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "/**\n * @callback\n */\n",
+		                    start: 12, 
+		                    end: 12};
+		    return getFixes({buffer: 'var f = 10, g = function(p1) {};', 
 		                      rule: rule,
 		                      expected: expected});
 		});
