@@ -402,12 +402,18 @@ function Tooltip (view) {
 			
 			if (info.context){
 				if (info.context.offsetStart && info.context.offsetEnd){
-					return this._computeRectangleFromOffset(info.context.offsetStart, info.context.offsetEnd);
+					// The full text content of the editor is given to the plug-in hover service, so we must adjust the offsets
+					// for the projection model as folded comments will change the offsets/coordinates in the displayed editor
+					var mappedStart = this.mapOffset(info.context.offsetStart, false);
+					var mappedEnd = this.mapOffset(info.context.offsetEnd, false);
+					return this._computeRectangleFromOffset(mappedStart, mappedEnd);
 				}
 				
 				if (info.context.offset >= 0){
-					// Use the enclosing word
-					var end = this._view.getNextOffset(info.context.offset, { unit: "wordend", count: 0}); //$NON-NLS-0$
+					// The provided offset is based on the full text content, not the projection model
+					// Adjust the offset before finding the closest enclosing word
+					var mappedOffset = this.mapOffset(info.context.offset, false);
+					var end = this._view.getNextOffset(mappedOffset, { unit: "wordend", count: 0}); //$NON-NLS-0$
 					var start = this._view.getNextOffset(end, { unit: "word", count: -1}); //$NON-NLS-0$
 					return this._computeRectangleFromOffset(start, end);
 				}
@@ -624,11 +630,10 @@ function Tooltip (view) {
 			}
 			return offset;
 		},
+		/**
+		 * Note that the offsets passed here must already be mapped to the base model being displayed (i.e. reduced by collapsed comments)
+		 */
 		_computeRectangleFromOffset: function(start, end) {
-			// The offsets from annotations/hovering don't account for the projection model (folded comments) Bug 456715
-			start = this.mapOffset(start);
-			end = this.mapOffset(end);
-			
 			var tv = this._view;
 			var curLine = tv.getLineAtOffset(start);
 			var endLine = tv.getLineAtOffset(end);
