@@ -51,13 +51,14 @@ require({
 	'javascript/handlers/ternOccurrencesHandler',
 	'javascript/handlers/ternRenameHandler',
 	'javascript/handlers/ternPluginsHandler',
+	'javascript/handlers/ternRefsHandler',	
 	'i18n!javascript/nls/workermessages',
 	'orion/i18nUtil'
 ],
 /* @callback */ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
 							orionMySQLPlugin, orionNodePlugin, orionPostgresPlugin, orionRedisPlugin, orionRequirePlugin, ternPluginsPlugin, 
 							ecma5, ecma6, browser, AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler, PluginsHandler, 
-							Messages, i18nUtil) {
+							RefsHandler, Messages, i18nUtil) {
     
     var ternserver, pendingReads = Object.create(null);
     
@@ -187,6 +188,10 @@ require({
                     case 'rename': {
                         RenameHandler.computeRename(ternserver, _d.args, post);
                         break;
+                    }
+                    case 'refs': {
+                    	RefsHandler.computeRefs(ternserver, _d.args, post);
+                    	break;
                     }
                     case 'addFile': {
                     	ternserver.addFile(_d.args.file, _d.args.source);

@@ -106,7 +106,9 @@ define([
     	function WrappedWorker(script, onMessage, onError) {
     		/*if(typeof(SharedWorker) === 'function') {
     			this.shared = true;
-    			this.worker = new SharedWorker(new URL(script, window.location.href).href);
+    			var wUrl = new URL(script, window.location.href);
+    			wUrl.query.set("worker-language", navigator.language);
+    			this.worker = new SharedWorker(wUrl.href);
     			this.worker.port.onmessage = onMessage;
     			this.worker.port.onerror = onError;
     			this.worker.port.start();
@@ -137,7 +139,7 @@ define([
     	/**
     	 * Object of contributed environments
     	 * 
-    	 * TODO will need to listen to updated tern plugin settings once enbaled to clear this cache
+    	 * TODO will need to listen to updated tern plugin settings once enabled to clear this cache
     	 */
     	var contributedEnvs;
     	
@@ -152,20 +154,20 @@ define([
 		    						var _l = _d.args.file.logical;
 		    						scriptresolver.getWorkspaceFile(_l).then(function(files) {
 		    							if(files && files.length > 0) {
-		    								var rel = scriptresolver.resolveRelativeFiles(_l, files, {location: _d.args.file.file, contentType: {name: 'JavaScript'}});
+		    								var rel = scriptresolver.resolveRelativeFiles(_l, files, {location: _d.args.file.file, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
 		    								if(rel && rel.length > 0) {
 			    								return fileClient.read(rel[0].location).then(function(contents) {
 			    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:rel[0].location, logical:_l, path:rel[0].path}});	 //$NON-NLS-1$
 			    								});
 		    								} else {
-		    									ternWorker.postMessage({request: 'read', args: {logical:_l, error: 'Failed to read file '+_l}}); //$NON-NLS-1$
+		    									ternWorker.postMessage({request: 'read', args: {logical:_l, error: 'Failed to read file '+_l}}); //$NON-NLS-1$ //$NON-NLS-2$
 		    								}
 		    							} else {
-		    								ternWorker.postMessage({request: 'read', args: {logical:_l, error: 'Failed to read file '+_l}}); //$NON-NLS-1$
+		    								ternWorker.postMessage({request: 'read', args: {logical:_l, error: 'Failed to read file '+_l}}); //$NON-NLS-1$ //$NON-NLS-2$
 		    							}
 		    						},
 		    						function(err) {
-		    							ternWorker.postMessage({request: 'read', args: {logical: _l, message: err.toString(), error: 'Failed to read file '+_l}}); //$NON-NLS-1$
+		    							ternWorker.postMessage({request: 'read', args: {logical: _l, message: err.toString(), error: 'Failed to read file '+_l}}); //$NON-NLS-1$ //$NON-NLS-2$
 		    						});	
 		    					} else {
 		    						var file = _d.args.file;
@@ -174,11 +176,11 @@ define([
 			    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:file}});	 //$NON-NLS-1$
 			    								},
 			    								function(err) {
-			    									ternWorker.postMessage({request: 'read', args: {file: file, message: err.toString(), error: 'Failed to read file '+file}}); //$NON-NLS-1$
+			    									ternWorker.postMessage({request: 'read', args: {file: file, message: err.toString(), error: 'Failed to read file '+file}}); //$NON-NLS-1$ //$NON-NLS-2$
 			    								});
 			    					}
 		    						catch(err) {
-		    							ternWorker.postMessage({request: 'read', args: {file: file, message: err.toString(), error: 'Failed to read file '+file}}); //$NON-NLS-1$
+		    							ternWorker.postMessage({request: 'read', args: {file: file, message: err.toString(), error: 'Failed to read file '+file}}); //$NON-NLS-1$ //$NON-NLS-2$
 		    						}
 		    					}
 		    					break;
@@ -200,7 +202,6 @@ define([
 									prefs.put("tern/plugins", JSON.stringify(props)); //$NON-NLS-1$
 									prefs.sync(true);
 								}) : new Deferred().resolve();
-								break;
 		    				}
 		    				case 'environments': {
 		    					contributedEnvs = _d.envs;
@@ -266,7 +267,7 @@ define([
     	/**
     	 * Register the mark occurrences support
     	 */
-    	provider.registerService("orion.edit.occurrences", new Occurrences.JavaScriptOccurrences(astManager, CUProvider),  //$NON-NLS-1$
+    	provider.registerService("orion.edit.occurrences", new Occurrences.JavaScriptOccurrences(astManager, CUProvider), //$NON-NLS-1$
     			{
     		contentType: ["application/javascript", "text/html"]	//$NON-NLS-1$ //$NON-NLS-2$
     			});

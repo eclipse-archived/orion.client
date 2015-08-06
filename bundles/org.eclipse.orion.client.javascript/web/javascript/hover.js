@@ -168,15 +168,15 @@ define([
         switch(type.type) {
             case 'NameExpression': {
                 if(type.name) {
-                  return '*('+type.name+')* ';
+                  return '*('+type.name+')* '; //$NON-NLS-1$ //$NON-NLS-2$
                 }
                 break;
             }
             case 'RecordType': {
-                return '*(Object)* ';
+                return '*(Object)* '; //$NON-NLS-1$
             }
             case 'FunctionType': {
-                return '*(Function)* ';
+                return '*(Function)* '; //$NON-NLS-1$
             }
             case 'NullableType': 
             case 'NonNullableType':
@@ -192,7 +192,7 @@ define([
                         var val = type.applications[0];
                         if(val.name) {
                             //simple type
-                            return '*('+val.name+'[])* ';
+                            return '*('+val.name+'[])* '; //$NON-NLS-1$ //$NON-NLS-2$
                         } else if(val.fields && val.fields.length > 0) {
                             return _convertTagType(val.fields[0]);
                         } else {
