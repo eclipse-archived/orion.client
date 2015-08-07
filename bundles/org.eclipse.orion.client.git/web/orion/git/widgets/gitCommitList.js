@@ -796,16 +796,16 @@ define([
 							deferred.resolve(model.log);
 							return; // fetching already expanded sections in #changedItem
 						}
-					var children = [];
-					that.model.getRoot(function(root) {
-						that.model.getChildren(root, function(c) {
-							children = c;
+						var children = [];
+						that.model.getRoot(function(root) {
+							that.model.getChildren(root, function(c) {
+								children = c;
+							});
 						});
-					});
-					that.expandSections(children).then(function() {
-						that.updateCommands();
+						that.expandSections(children).then(function() {
+							that.updateCommands();
 							deferred.resolve(model.log);
-					});
+						});
 					};
 					that.fetch().then(fetched, fetched);
 				}
