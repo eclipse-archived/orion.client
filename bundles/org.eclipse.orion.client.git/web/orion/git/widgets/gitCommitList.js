@@ -423,6 +423,8 @@ define([
 				this.changedItem(parent);
 				break;
 			case "fetch": //$NON-NLS-0$
+				if (this.ignoreFetch) return;
+				//$FALLTHROUGH$
 			case "push": //$NON-NLS-0$
 			case "pull": //$NON-NLS-0$
 			case "sync": //$NON-NLS-0$
@@ -794,16 +796,16 @@ define([
 							deferred.resolve(model.log);
 							return; // fetching already expanded sections in #changedItem
 						}
-						var children = [];
-						that.model.getRoot(function(root) {
-							that.model.getChildren(root, function(c) {
-								children = c;
-							});
+					var children = [];
+					that.model.getRoot(function(root) {
+						that.model.getChildren(root, function(c) {
+							children = c;
 						});
-						that.expandSections(children).then(function() {
-							that.updateCommands();
+					});
+					that.expandSections(children).then(function() {
+						that.updateCommands();
 							deferred.resolve(model.log);
-						});
+					});
 					};
 					that.fetch().then(fetched, fetched);
 				}
@@ -919,7 +921,14 @@ define([
 							remotes.push(commandService.runCommand("eclipse.orion.git.fetchRemote", {Remote: remote, noAuth: true}, this));  //$NON-NLS-0$
 						}
 					});
-					if (remotes.length) return Deferred.all(remotes);
+					if (remotes.length) {
+						this.ignoreFetch = true;
+						var done = function() {
+							this.ignoreFetch = false;
+							this.changedItem();
+						}.bind(this);
+						return Deferred.all(remotes).then(done, done);
+					}
 				}
 			}
 			return new Deferred().resolve();
