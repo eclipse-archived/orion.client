@@ -34,31 +34,31 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 
 	GitCredentialsDialog.prototype = new dialog.Dialog();
 
-	GitCredentialsDialog.prototype.TEMPLATE = '<div id="gitCredentialsLabel" style="padding: 8px">${Repository URL:}<strong id="url"></strong></div>'
+	GitCredentialsDialog.prototype.TEMPLATE ='<table><tbody><tr><td align="right" id="gitCredentialsLabel">${Repository URL:}</td><td><strong id="url"></strong></td></tr>'
 
-	+ '<div id="gitSshUsernameRow" style="padding: 8px">' + '<label id="gitSshUsernameLabel" for="gitSshUsername">${Username:}</label>'
-			+ '<input id="gitSshUsername" value="">' + '</div>'
+	+ '<tr id="gitSshUsernameRow">' + '<td align="right"><label style="line-height: 1;" id="gitSshUsernameLabel" for="gitSshUsername">${Username:}</label></td>'
+			+ '<td><input id="gitSshUsername" type="text" value="" style="margin: 0;">' + '</td></tr>'
 
-			+ '<div id="gitSshPasswordRow" style="padding: 8px">' + '<input id="isSshPassword" type="radio" name="isSshPassword" checked value="password"/>'
-			+ '<label id="gitSshPasswordLabel" for="gitSshPassword" style="padding: 0 8px">${Password:}</label>'
-			+ '<input type="password" id="gitSshPassword" value="" style="width: 30em">' + '</div>'
+			+ '<tr id="gitSshPasswordRow">' + '<td align="right"><input style = "margin: 0;" id="isSshPassword" type="radio" name="isSshPassword" checked value="password"/>'
+			+ '<label style="line-height: 1; margin-left: 5px; vertical-align: text-top;" id="gitSshPasswordLabel" for="gitSshPassword">${Password:}</label></td>'
+			+ '<td><input type="password" id="gitSshPassword" value="" style="margin: 0;">' + '</td></tr>'
 
-			+ '<div style="padding: 8px">' + '<div id="gitPrivateKeyRow">'
-			+ '<input id="isPrivateKey" type="radio" name="isSshPassword" value="privateKey" style="vertical-align: top"/>'
-			+ '<label id="gitPrivateKeyLabel" for="gitPrivateKey" style="padding: 0 8px; vertical-align: top">${Private key:}</label>'
-			+ '<textarea id="gitPrivateKey" value=""></textarea>' + '</div>'
+			+ '<tr id="gitPrivateKeyRow">'
+			+ '<td align="right" valign="top"><input  style = "margin: 0;" id="isPrivateKey" type="radio" name="isSshPassword" value="privateKey"/>'
+			+ '<label style="line-height: 1; margin-left: 5px; vertical-align: text-top;" id="gitPrivateKeyLabel" for="gitPrivateKey">${Private key:}</label></td>'
+			+ '<td><textarea style="border: 1px solid #f1f3f4;" id="gitPrivateKey" value=""></textarea>' + '</td></tr>'
 
-			+ '<div id="gitPrivateKeyFileRow" style="padding-left: 8em">'
-			+ '<label id="gitPrivateKeyFileLabel" for="gitPrivateKeyFile">${Private key file (optional):}</label><br>'
-			+ '<input id="gitPrivateKeyFile" multiple="false" type="file" size="53" label="Browse...">' + '</div>'
+			+ '<tr id="gitPrivateKeyFileRow">'
+			+ '<td align="right"><label id="gitPrivateKeyFileLabel" for="gitPrivateKeyFile">${Private key file (optional):}</label></td>'
+			+ '<td><input style="margin: 0; padding: 0;" id="gitPrivateKeyFile" multiple="false" type="file" size="53" label="Browse..."></td>' + '</tr>'
 
-			+ '<div id="gitPassphraseRow" style="padding-left: 8em">'
-			+ '<label id="gitPassphraseLabel" for="gitPassphrase">${Passphrase (optional):}</label><br>'
-			+ '<input type="password" id="gitPassphrase" value="" style="width: 30em">' + '</div>' + '</div>'
+			+ '<tr id="gitPassphraseRow">'
+			+ '<td align="right"><label id="gitPassphraseLabel" for="gitPassphrase">${Passphrase (optional):}</label></td>'
+			+ '<td><input type="password" id="gitPassphrase" value="" style="margin: 0;"></td>' + '</tr>'
 
-			+ '<div id="gitSaveCredentialsRow" style="padding: 8px">' + '<img id="gitSaveCredentialsInfo" src="/images/info.gif"">'
-			+ '<input id="gitSaveCredentials" type="checkbox" name="gitSaveCredentials">'
-			+ '<label id="gitSaveCredentialsLabel" for="gitSaveCredentials">${Don\'t prompt me again:}</label>' + '</div>';
+			+ '<tr id="gitSaveCredentialsRow">' + '<td align="right"><img id="gitSaveCredentialsInfo" src="/images/info.gif"">'
+			+ '<input id="gitSaveCredentials" type="checkbox" name="gitSaveCredentials"></td>'
+			+ '<td><label id="gitSaveCredentialsLabel" for="gitSaveCredentials">${Don\'t prompt me again}</label></td>' + '</tr></tbody></table>';
 
 	GitCredentialsDialog.prototype._init = function(options) {
 		var that = this;
