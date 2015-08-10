@@ -295,6 +295,46 @@ define([
 					['every(callback, thisArg?)', 'every(callback, thisArg?) : bool']
 				]);
 			});
+			it("test loosely match 1", function(done) {
+				var options = {
+					buffer: "var getAnotherThing = 0; gAT",
+					prefix: "gAT",
+					offset: 28,
+					callback: done};
+				return testProposals(options, [
+					//TODO Tern does not support camel case only ["getAnotherThing", "getAnotherThing : Number"]
+				]);
+			});
+			it("test loosely match 2", function(done) {
+				var options = {
+					buffer: "var getAnotherThing = 0; getan", 
+					prefix: "getan",
+					offset: 30,
+					callback: done};
+				return testProposals(options, [
+					["getAnotherThing", "getAnotherThing : number"]
+				]);
+			});
+			it("test loosely match 3", function(done) {
+				var options = {
+					buffer: "var getAnotherThing = 0; getaN", 
+					prefix: "getaN",
+					offset: 30,
+					callback: done};
+				return testProposals(options, [
+					["getAnotherThing", "getAnotherThing : number"]
+				]);
+			});
+			it("test loosely match 4", function(done) {
+				var options = {
+					buffer: "var getAnotherThing = 0; getAN",
+					prefix: "getAN",
+					offset: 30,
+					callback: done};
+				return testProposals(options, [
+					["getAnotherThing", "getAnotherThing : number"]
+				]);
+			});
 		});
 		describe('Complete Syntax', function() {
 			it("test no dupe 1", function(done) {
@@ -1438,6 +1478,117 @@ define([
 					['Uint8Array()', 'Uint8Array()'],
 					['Uint8ClampedArray()', 'Uint8ClampedArray()']
 				]);
+			});
+			it("test tolerant parsing function 1", function(done) {
+				var options = {
+					buffer: "var xxxyyy = {}; function foo() { if (xx", 
+					prefix: "xx",
+					offset: 40,
+					callback: done};
+				return testProposals(options, [["xxxyyy", "xxxyyy : xxxyyy"]]);
+			});	
+		
+			it("test tolerant parsing function 2", function(done) {
+				var options = {
+					buffer: "function foo() { var xxxyyy = false; if (!xx",
+					prefix: "xx",
+					offset: 44,
+					callback: done};
+				return testProposals(options, [["xxxyyy", "xxxyyy : bool"]]);
+			});	
+		
+			it("test tolerant parsing function 3", function(done) {
+				var options = {
+					buffer: "function foo(xxxyyy) {if (!xx",
+					prefix: "xx",
+					offset: 29,
+					callback: done};
+				return testProposals(options, [["xxxyyy", "xxxyyy : any"]]);
+			});	
+		
+			it("test tolerant parsing function 4", function(done) {
+				var options = {
+					buffer: "var x = { bazz: 3 }; function foo() { if (x.b",
+					prefix: "b",
+					offset: 45,
+					callback: done};
+				return testProposals(options, [["bazz", "bazz : number"]]);
+			});	
+		
+			it("test tolerant parsing function 5", function(done) {
+				var options = {
+					buffer: "function foo(p) { p.ffffff = false; while (p.ff",
+					prefix: "ff",
+					offset: 47,
+					callback: done};
+				return testProposals(options, [["ffffff", "ffffff"]]);
+			});	
+		
+			it("test tolerant parsing function 6", function(done) {
+				var options = {
+					buffer: "function foo(p) { p.ffffff = false; if (p) { while (p.ff", 
+					prefix: "ff",
+					offset: 56,
+					callback: done};
+				return testProposals(options, [["ffffff", "ffffff"]]);
+			});	
+		
+			it("test tolerant parsing function 7", function(done) {
+				var options = {
+					buffer: "function foo(p) { p.ffffff = false; if (p) { for (var q in p.ff",
+					prefix: "ff",
+					offset: 63,
+					callback: done};
+				return testProposals(options, [["ffffff", "ffffff"]]);
+			});	
+		
+			it("test tolerant parsing function 8", function(done) {
+				var options = {
+					buffer: "function foo(p) { p.ffffff = false; if (p) { for (var q in p) { while (p.ff",
+					prefix: "ff",
+					offset: 75,
+					callback: done};
+				return testProposals(options, [["ffffff", "ffffff"]]);
+			});	
+		
+			it("test tolerant parsing function 9", function(done) {
+				var options = {
+					buffer: "function f(s) {} f(JSON.str",
+					prefix: "str",
+					offset: 27,
+					callback: done};
+				return testProposals(options, [
+					["",  "ecma5"],
+					["stringify(value)", "stringify(value) : string"]
+				]);
+			});	
+		
+			it("test tolerant parsing function 10", function(done) {
+				var options = {
+					buffer: "function f(a,b) {} f(0,JSON.str",
+					prefix: "str",
+					offset: 31,
+					callback: done};
+				return testProposals(options, [
+					["",  "ecma5"],
+					["stringify(value)", "stringify(value) : string"]
+				]);
+			});
+			it("test tolerant parsing function 11", function(done) {
+				var options = {
+					buffer: "var xxyy = 10; with(xx",
+					prefix: "xx",
+					offset: 22,
+					callback: done};
+				return testProposals(options, [["xxyy", "xxyy : number"]]);
+			});
+			it("test tolerant parsing function 12", function(done) {
+				var options = {
+					buffer: "var xxyy = 10; do {} while(xx",
+					prefix: "xx",
+					offset: 29,
+					callback: done};
+				return testProposals(options, [["xxyy", "xxyy : number"]]);
 			});
 		});
 		describe('Simple File Completions', function() {

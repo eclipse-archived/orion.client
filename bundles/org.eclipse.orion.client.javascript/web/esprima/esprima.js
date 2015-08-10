@@ -1892,7 +1892,7 @@ parseStatement: true, parseSourceElement: true */
             this.type = Syntax.ForInStatement;
             this.left = left;
             this.right = right;
-            this.body = body;
+            this.body = body ? body : recoveredNode(this, 'Statement'); //ORION
             this.each = false;
             this.finish();
             return this;
@@ -1934,7 +1934,7 @@ parseStatement: true, parseSourceElement: true */
         finishIfStatement: function (test, consequent, alternate) {
             this.type = Syntax.IfStatement;
             this.test = test;
-            this.consequent = consequent;
+            this.consequent = consequent ? consequent : recoveredNode(this, 'Statement'); //ORION
             this.alternate = alternate;
             this.finish();
             return this;
@@ -2093,7 +2093,7 @@ parseStatement: true, parseSourceElement: true */
         finishWhileStatement: function (test, body) {
             this.type = Syntax.WhileStatement;
             this.test = test;
-            this.body = body;
+            this.body = body ? body : recoveredNode(this, 'Statement'); //ORION
             this.finish();
             return this;
         },
@@ -2101,7 +2101,7 @@ parseStatement: true, parseSourceElement: true */
         finishWithStatement: function (object, body) {
             this.type = Syntax.WithStatement;
             this.object = object;
-            this.body = body;
+            this.body = body ? body : recoveredNode(this, 'Statement'); //ORION
             this.finish();
             return this;
         }
@@ -3228,7 +3228,7 @@ parseStatement: true, parseSourceElement: true */
         expectSkipTo(')', '{');
 
         consequent = parseStatement();
-
+		
         if (matchKeyword('else')) {
             lex();
             alternate = parseStatement();
@@ -3397,11 +3397,12 @@ parseStatement: true, parseSourceElement: true */
         }
 
         if (lookahead.type === Token.Identifier) {
+        	var token = lookahead;
             label = parseVariableIdentifier();
 
             key = '$' + label.name;
             if (!Object.prototype.hasOwnProperty.call(state.labelSet, key)) {
-                throwError(Messages.UnknownLabel, label.name);
+            	tolerateUnexpectedToken(token, Messages.UnknownLabel, label.name); //ORION
             }
         }
 

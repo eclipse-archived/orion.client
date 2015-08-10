@@ -389,7 +389,7 @@ define([
 			var data = { 
 				source: "var xxxyyy = {};\nfunction foo() {\n    if (xx",
 				errors: [{ lineNumber: 3, message: "Unexpected end of input" }],
-				nodes: [{type:"VariableDeclaration",kind:"var",range:[0,16]},{type:"VariableDeclarator",range:[4,15]},{type:"Identifier",name:"xxxyyy",range:[4,10]},{type:"ObjectExpression",range:[13,15]},{type:"FunctionDeclaration",range:[17,44]},{type:"Identifier",name:"foo",range:[26,29]},{type:"BlockStatement",range:[32,44]},{type:"IfStatement",range:[38,44]},{type:"Identifier",name:"xx",range:[42,44]}]
+				nodes: [{type:"VariableDeclaration",kind:"var",range:[0,16]},{type:"VariableDeclarator",range:[4,15]},{type:"Identifier",name:"xxxyyy",range:[4,10]},{type:"ObjectExpression",range:[13,15]},{type:"FunctionDeclaration",range:[17,44]},{type:"Identifier",name:"foo",range:[26,29]},{type:"BlockStatement",range:[32,44]},{type:"IfStatement",range:[38,44]},{type:"Identifier",name:"xx",range:[42,44]},{"type":"RecoveredNode","name":"","recovered":true,"expectedType":"Statement","range":[38,44],"start":[38,44],"end":44}]
 			};
 			runTest(data);
 		});
@@ -397,7 +397,7 @@ define([
 			var data = { 
 				source: "function foo() {\n    var xxxyyy = false;\n    if (!xx",
 				errors: [{ lineNumber: 3, message: "Unexpected end of input" }],
-				nodes: [{type:"FunctionDeclaration",range:[0,52]},{type:"Identifier",name:"foo",range:[9,12]},{type:"BlockStatement",range:[15,52]},{type:"VariableDeclaration",kind:"var",range:[21,40]},{type:"VariableDeclarator",range:[25,39]},{type:"Identifier",name:"xxxyyy",range:[25,31]},{type:"Literal",range:[34,39]},{type:"IfStatement",range:[45,52]},{type:"UnaryExpression",range:[49,52]},{type:"Identifier",name:"xx",range:[50,52]}]
+				nodes: [{type:"FunctionDeclaration",range:[0,52]},{type:"Identifier",name:"foo",range:[9,12]},{type:"BlockStatement",range:[15,52]},{type:"VariableDeclaration",kind:"var",range:[21,40]},{type:"VariableDeclarator",range:[25,39]},{type:"Identifier",name:"xxxyyy",range:[25,31]},{type:"Literal",range:[34,39]},{type:"IfStatement",range:[45,52]},{type:"UnaryExpression",range:[49,52]},{type:"Identifier",name:"xx",range:[50,52]},{"type":"RecoveredNode","name":"","recovered":true,"expectedType":"Statement","range":[45,52],"start":[45,52],"end":52}]
 			};
 			runTest(data);
 		});
@@ -405,7 +405,7 @@ define([
 			var data = { 
 				source: "function foo(xxxyyy) {\n    if (!xx",
 				errors: [{ lineNumber: 2, message: "Unexpected end of input" }],
-				nodes: [{type:"FunctionDeclaration",range:[0,34]},{type:"Identifier",name:"foo",range:[9,12]},{type:"Identifier",name:"xxxyyy",range:[13,19]},{type:"BlockStatement",range:[21,34]},{type:"IfStatement",range:[27,34]},{type:"UnaryExpression",range:[31,34]},{type:"Identifier",name:"xx",range:[32,34]}]
+				nodes: [{type:"FunctionDeclaration",range:[0,34]},{type:"Identifier",name:"foo",range:[9,12]},{type:"Identifier",name:"xxxyyy",range:[13,19]},{type:"BlockStatement",range:[21,34]},{type:"IfStatement",range:[27,34]},{type:"UnaryExpression",range:[31,34]},{type:"Identifier",name:"xx",range:[32,34]},{"type":"RecoveredNode","name":"","recovered":true,"expectedType":"Statement","range":[27,34],"start":[27,34],"end":34}]
 			};
 			runTest(data);
 		});
@@ -413,7 +413,7 @@ define([
 			var data = { 
 				source: "var x = { bazz: 3 };\nfunction foo() {\n    if (x.b",
 				errors: [{ lineNumber: 3, message: "Unexpected end of input" }],
-				nodes: [{type:"VariableDeclaration",kind:"var",range:[0,20]},{type:"VariableDeclarator",range:[4,19]},{type:"Identifier",name:"x",range:[4,5]},{type:"ObjectExpression",range:[8,19]},{type:"Property",kind:"init",range:[10,17],value:{type:"Literal",value:3,range:[16,17]}},{type:"Identifier",name:"bazz",range:[10,14]},{type:"Literal",range:[16,17],value:3},{type:"FunctionDeclaration",range:[21,49]},{type:"Identifier",name:"foo",range:[30,33]},{type:"BlockStatement",range:[36,49]},{type:"IfStatement",range:[42,49]},{type:"MemberExpression",range:[46,49]},{type:"Identifier",name:"x",range:[46,47]},{type:"Identifier",name:"b",range:[48,49]}]
+				nodes: [{type:"VariableDeclaration",kind:"var",range:[0,20]},{type:"VariableDeclarator",range:[4,19]},{type:"Identifier",name:"x",range:[4,5]},{type:"ObjectExpression",range:[8,19]},{type:"Property",kind:"init",range:[10,17],value:{type:"Literal",value:3,range:[16,17]}},{type:"Identifier",name:"bazz",range:[10,14]},{type:"Literal",range:[16,17],value:3},{type:"FunctionDeclaration",range:[21,49]},{type:"Identifier",name:"foo",range:[30,33]},{type:"BlockStatement",range:[36,49]},{type:"IfStatement",range:[42,49]},{type:"MemberExpression",range:[46,49]},{type:"Identifier",name:"x",range:[46,47]},{type:"Identifier",name:"b",range:[48,49]},{"type":"RecoveredNode","name":"","recovered":true,"expectedType":"Statement","range":[42,49],"start":[42,49],"end":49}]
 			};
 			runTest(data);
 		});
@@ -421,7 +421,7 @@ define([
 			var data = { 
 				source: "function foo(p) {\n    p.ffffff = false;\n    while (p.ff",
 				errors: [{ lineNumber: 3, message: "Unexpected end of input" }],
-				nodes: [{type:"FunctionDeclaration",range:[0,55]},{type:"Identifier",name:"foo",range:[9,12]},{type:"Identifier",name:"p",range:[13,14]},{type:"BlockStatement",range:[16,55]},{type:"ExpressionStatement",range:[22,39]},{type:"AssignmentExpression",range:[22,38]},{type:"MemberExpression",range:[22,30]},{type:"Identifier",name:"p",range:[22,23]},{type:"Identifier",name:"ffffff",range:[24,30]},{type:"Literal",range:[33,38]},{type:"WhileStatement",range:[44,55]},{type:"MemberExpression",range:[51,55]},{type:"Identifier",name:"p",range:[51,52]},{type:"Identifier",name:"ff",range:[53,55]}]
+				nodes: [{type:"FunctionDeclaration",range:[0,55]},{type:"Identifier",name:"foo",range:[9,12]},{type:"Identifier",name:"p",range:[13,14]},{type:"BlockStatement",range:[16,55]},{type:"ExpressionStatement",range:[22,39]},{type:"AssignmentExpression",range:[22,38]},{type:"MemberExpression",range:[22,30]},{type:"Identifier",name:"p",range:[22,23]},{type:"Identifier",name:"ffffff",range:[24,30]},{type:"Literal",range:[33,38]},{type:"WhileStatement",range:[44,55]},{type:"MemberExpression",range:[51,55]},{type:"Identifier",name:"p",range:[51,52]},{type:"Identifier",name:"ff",range:[53,55]},{"type":"RecoveredNode","name":"","recovered":true,"expectedType":"Statement","range":[44,55],"start":[44,55],"end":55}]
 			};
 			runTest(data);
 		});
@@ -429,7 +429,7 @@ define([
 			var data = { 
 				source: "function foo(p) {\n    p.ffffff = false;\n    if (p) {\n        while (p.ff",
 				errors: [{ lineNumber: 4, message: "Unexpected end of input" }],
-				nodes: [{type:"FunctionDeclaration",range:[0,72]},{type:"Identifier",name:"foo",range:[9,12]},{type:"Identifier",name:"p",range:[13,14]},{type:"BlockStatement",range:[16,72]},{type:"ExpressionStatement",range:[22,39]},{type:"AssignmentExpression",range:[22,38]},{type:"MemberExpression",range:[22,30]},{type:"Identifier",name:"p",range:[22,23]},{type:"Identifier",name:"ffffff",range:[24,30]},{type:"Literal",range:[33,38]},{type:"IfStatement",range:[44,72]},{type:"Identifier",name:"p",range:[48,49]},{type:"BlockStatement",range:[51,72]},{type:"WhileStatement",range:[61,72]},{type:"MemberExpression",range:[68,72]},{type:"Identifier",name:"p",range:[68,69]},{type:"Identifier",name:"ff",range:[70,72]}]
+				nodes: [{type:"FunctionDeclaration",range:[0,72]},{type:"Identifier",name:"foo",range:[9,12]},{type:"Identifier",name:"p",range:[13,14]},{type:"BlockStatement",range:[16,72]},{type:"ExpressionStatement",range:[22,39]},{type:"AssignmentExpression",range:[22,38]},{type:"MemberExpression",range:[22,30]},{type:"Identifier",name:"p",range:[22,23]},{type:"Identifier",name:"ffffff",range:[24,30]},{type:"Literal",range:[33,38]},{type:"IfStatement",range:[44,72]},{type:"Identifier",name:"p",range:[48,49]},{type:"BlockStatement",range:[51,72]},{type:"WhileStatement",range:[61,72]},{type:"MemberExpression",range:[68,72]},{type:"Identifier",name:"p",range:[68,69]},{type:"Identifier",name:"ff",range:[70,72]},{"type":"RecoveredNode","name":"","recovered":true,"expectedType":"Statement","range":[61,72],"start":[61,72],"end":72}]
 			};
 			runTest(data);
 		});
@@ -437,7 +437,7 @@ define([
 			var data = { 
 				source: "function foo(p) {\n    p.ffffff = false;\n    if (p) {\n        for (var q in p.ff",
 				errors: [{ lineNumber: 4, message: "Unexpected end of input" }],
-				nodes: [{type:"FunctionDeclaration",range:[0,79]},{type:"Identifier",name:"foo",range:[9,12]},{type:"Identifier",name:"p",range:[13,14]},{type:"BlockStatement",range:[16,79]},{type:"ExpressionStatement",range:[22,39]},{type:"AssignmentExpression",range:[22,38]},{type:"MemberExpression",range:[22,30]},{type:"Identifier",name:"p",range:[22,23]},{type:"Identifier",name:"ffffff",range:[24,30]},{type:"Literal",range:[33,38]},{type:"IfStatement",range:[44,79]},{type:"Identifier",name:"p",range:[48,49]},{type:"BlockStatement",range:[51,79]},{type:"ForInStatement",range:[61,79]},{type:"VariableDeclaration",kind:"var",range:[66,71]},{type:"VariableDeclarator",range:[70,71]},{type:"Identifier",name:"q",range:[70,71]},{type:"MemberExpression",range:[75,79]},{type:"Identifier",name:"p",range:[75,76]},{type:"Identifier",name:"ff",range:[77,79]}]
+				nodes: [{type:"FunctionDeclaration",range:[0,79]},{type:"Identifier",name:"foo",range:[9,12]},{type:"Identifier",name:"p",range:[13,14]},{type:"BlockStatement",range:[16,79]},{type:"ExpressionStatement",range:[22,39]},{type:"AssignmentExpression",range:[22,38]},{type:"MemberExpression",range:[22,30]},{type:"Identifier",name:"p",range:[22,23]},{type:"Identifier",name:"ffffff",range:[24,30]},{type:"Literal",range:[33,38]},{type:"IfStatement",range:[44,79]},{type:"Identifier",name:"p",range:[48,49]},{type:"BlockStatement",range:[51,79]},{type:"ForInStatement",range:[61,79]},{type:"VariableDeclaration",kind:"var",range:[66,71]},{type:"VariableDeclarator",range:[70,71]},{type:"Identifier",name:"q",range:[70,71]},{type:"MemberExpression",range:[75,79]},{type:"Identifier",name:"p",range:[75,76]},{type:"Identifier",name:"ff",range:[77,79]},{"type":"RecoveredNode","name":"","recovered":true,"expectedType":"Statement","range":[61,79],"start":[61,79],"end":79}]
 			};
 			runTest(data);
 		});
@@ -445,7 +445,7 @@ define([
 			var data = { 
 				source: "function foo(p) {\n    p.ffffff = false;\n    if (p) {\n        for (var q in p) {\n            while (p.ff",
 				errors: [{ lineNumber: 5, message: "Unexpected end of input" }],
-				nodes: [{type:"FunctionDeclaration",range:[0,103]},{type:"Identifier",name:"foo",range:[9,12]},{type:"Identifier",name:"p",range:[13,14]},{type:"BlockStatement",range:[16,103]},{type:"ExpressionStatement",range:[22,39]},{type:"AssignmentExpression",range:[22,38]},{type:"MemberExpression",range:[22,30]},{type:"Identifier",name:"p",range:[22,23]},{type:"Identifier",name:"ffffff",range:[24,30]},{type:"Literal",range:[33,38]},{type:"IfStatement",range:[44,103]},{type:"Identifier",name:"p",range:[48,49]},{type:"BlockStatement",range:[51,103]},{type:"ForInStatement",range:[61,103]},{type:"VariableDeclaration",kind:"var",range:[66,71]},{type:"VariableDeclarator",range:[70,71]},{type:"Identifier",name:"q",range:[70,71]},{type:"Identifier",name:"p",range:[75,76]},{type:"BlockStatement",range:[78,103]},{type:"WhileStatement",range:[92,103]},{type:"MemberExpression",range:[99,103]},{type:"Identifier",name:"p",range:[99,100]},{type:"Identifier",name:"ff",range:[101,103]}]
+				nodes: [{type:"FunctionDeclaration",range:[0,103]},{type:"Identifier",name:"foo",range:[9,12]},{type:"Identifier",name:"p",range:[13,14]},{type:"BlockStatement",range:[16,103]},{type:"ExpressionStatement",range:[22,39]},{type:"AssignmentExpression",range:[22,38]},{type:"MemberExpression",range:[22,30]},{type:"Identifier",name:"p",range:[22,23]},{type:"Identifier",name:"ffffff",range:[24,30]},{type:"Literal",range:[33,38]},{type:"IfStatement",range:[44,103]},{type:"Identifier",name:"p",range:[48,49]},{type:"BlockStatement",range:[51,103]},{type:"ForInStatement",range:[61,103]},{type:"VariableDeclaration",kind:"var",range:[66,71]},{type:"VariableDeclarator",range:[70,71]},{type:"Identifier",name:"q",range:[70,71]},{type:"Identifier",name:"p",range:[75,76]},{type:"BlockStatement",range:[78,103]},{type:"WhileStatement",range:[92,103]},{type:"MemberExpression",range:[99,103]},{type:"Identifier",name:"p",range:[99,100]},{type:"Identifier",name:"ff",range:[101,103]},{"type":"RecoveredNode","name":"","recovered":true,"expectedType":"Statement","range":[92,103],"start":[92,103],"end":103}]
 			};
 			runTest(data);
 		});
@@ -482,7 +482,7 @@ define([
 		it('if missing ) 1', function() {
 			var data = { 
 				source: "if(foo ",
-				nodes: [{"type":"IfStatement","range":[0,7]},{"type":"Identifier","name":"foo","range":[3,6]}],
+				nodes: [{"type":"IfStatement","range":[0,7]},{"type":"Identifier","name":"foo","range":[3,6]},{"type":"RecoveredNode","name":"","recovered":true,"expectedType":"Statement","range":[0,7],"start":[0,7],"end":7}],
 				tokens: [{"type":"Keyword","range":[0,2],"value":"if"},{"type":"Punctuator","range":[2,3],"value":"("},{"type":"Identifier","range":[3,6],"value":"foo"}],
 				errors: [{"lineNumber":1,"index":3,"message":"Unexpected end of input","token":"foo"}],
 				comments: []
@@ -520,7 +520,7 @@ define([
 		it('with missing ) 1', function() {
 			var data = { 
 				source: "with(foo ",
-				nodes: [{"type":"WithStatement","range":[0,9]},{"type":"Identifier","name":"foo","range":[5,8]}],
+				nodes: [{"type":"WithStatement","range":[0,9]},{"type":"Identifier","name":"foo","range":[5,8]},{"type":"RecoveredNode","name":"","recovered":true,"expectedType":"Statement","range":[0,9],"start":[0,9],"end":9}],
 				tokens: [{"type":"Keyword","range":[0,4],"value":"with"},{"type":"Punctuator","range":[4,5],"value":"("},{"type":"Identifier","range":[5,8],"value":"foo"}],
 				errors: [{"lineNumber":1,"index":5,"message":"Unexpected end of input","token":"foo"}],
 				comments: []
@@ -558,7 +558,7 @@ define([
 		it('while missing ) 1', function() {
 			var data = { 
 				source: "while(foo ",
-				nodes: [{"type":"WhileStatement","range":[0,10]},{"type":"Identifier","name":"foo","range":[6,9]}],
+				nodes: [{"type":"WhileStatement","range":[0,10]},{"type":"Identifier","name":"foo","range":[6,9]},{"type":"RecoveredNode","name":"","recovered":true,"expectedType":"Statement","range":[0,10],"start":[0,10],"end":10}],
 				tokens: [{"type":"Keyword","range":[0,5],"value":"while"},{"type":"Punctuator","range":[5,6],"value":"("},{"type":"Identifier","range":[6,9],"value":"foo"}],
 				errors: [{"lineNumber":1,"index":6,"message":"Unexpected end of input","token":"foo"}],
 				comments: []
@@ -1903,7 +1903,7 @@ define([
 		it('doc comment recovery 7', function() {
 			runTest({
 				source: "if(foo /* \n\n",
-                nodes: [{"type":"IfStatement","range":[0,12]},{"type":"Identifier","name":"foo","range":[3,6]}],
+                nodes: [{"type":"IfStatement","range":[0,12]},{"type":"Identifier","name":"foo","range":[3,6]},{"type":"RecoveredNode","name":"","recovered":true,"expectedType":"Statement","range":[0,12],"start":[0,12],"end":12}],
 				tokens: [{"type":"Keyword","range":[0,2],"value":"if"},{"type":"Punctuator","range":[2,3],"value":"("},{"type":"Identifier","range":[3,6],"value":"foo"}],
 				errors: [{"lineNumber":3,"index":12,"message":"Unexpected token ILLEGAL"},{"lineNumber":3,"index":3,"message":"Unexpected end of input","token":"foo"}],
 				comments: [{"start":7,"end":12,"value":" \n\n"}]

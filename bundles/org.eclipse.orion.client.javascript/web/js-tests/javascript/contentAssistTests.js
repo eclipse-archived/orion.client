@@ -1999,38 +1999,6 @@ define([
 			]);
 		});
 	
-		// https://github.com/scripted-editor/scripted/issues/65
-		it("test loosely match 1", function() {
-			var results = computeContentAssist(
-				"var getAnotherThing = 0;\n" +
-				"gAT", "gAT");
-			return testProposals(results, [
-				["getAnotherThing", "getAnotherThing : Number"]
-			]);
-		});
-		it("test loosely match 2", function() {
-			var results = computeContentAssist(
-				"var getAnotherThing = 0;\n" +
-				"getan", "getan");
-			return testProposals(results, [
-				["getAnotherThing", "getAnotherThing : Number"]
-			]);
-		});
-		it("test loosely match 3", function() {
-			var results = computeContentAssist(
-				"var getAnotherThing = 0;\n" +
-				"getaN", "getaN");
-			return testProposals(results, [
-			]);
-		});
-		it("test loosely match 4", function() {
-			var results = computeContentAssist(
-				"var getAnotherThing = 0;\n" +
-				"getAN", "getAN");
-			return testProposals(results, [
-			]);
-		});
-	
 		// Issue 221 problems with navigating to proto definitions inside of constructors
 		it('test proto ref in this1', function() {
 			var results = computeContentAssist(
@@ -2055,86 +2023,6 @@ define([
 				["_init()", "_init() : TextView.prototype._init"]
 			]);
 		});
-		it("test tolerant parsing function 1", function() {
-			var results = computeContentAssist(
-				"var xxxyyy = {};\n" +
-				"function foo() {\n" +
-				"    if (xx", "xx");
-			return testProposals(results, [["xxxyyy", "xxxyyy : {}"]]);
-		});	
-	
-		it("test tolerant parsing function 2", function() {
-			var results = computeContentAssist(
-				"function foo() {\n" +
-				"    var xxxyyy = false;\n" +
-				"    if (!xx", "xx");
-			return testProposals(results, [["xxxyyy", "xxxyyy : Boolean"]]);
-		});	
-	
-		it("test tolerant parsing function 3", function() {
-			var results = computeContentAssist(
-				"function foo(xxxyyy) {\n" +
-				"    if (!xx", "xx");
-			return testProposals(results, [["xxxyyy", "xxxyyy : {}"]]);
-		});	
-	
-		it("test tolerant parsing function 4", function() {
-			var results = computeContentAssist(
-				"var x = { bazz: 3 };\n" +
-				"function foo() {\n" +
-				"    if (x.b", "b");
-			return testProposals(results, [["bazz", "bazz : Number"]]);
-		});	
-	
-		it("test tolerant parsing function 5", function() {
-			var results = computeContentAssist(
-				"function foo(p) {\n" +
-				"    p.ffffff = false;\n" +
-				"    while (p.ff", "ff");
-			return testProposals(results, [["ffffff", "ffffff : Boolean"]]);
-		});	
-	
-		it("test tolerant parsing function 6", function() {
-			var results = computeContentAssist(
-				"function foo(p) {\n" +
-				"    p.ffffff = false;\n" +
-				"    if (p) {\n" +
-				"        while (p.ff", "ff");
-			return testProposals(results, [["ffffff", "ffffff : Boolean"]]);
-		});	
-	
-		it("test tolerant parsing function 7", function() {
-			var results = computeContentAssist(
-				"function foo(p) {\n" +
-				"    p.ffffff = false;\n" +
-				"    if (p) {\n" +
-				"        for (var q in p.ff", "ff");
-			return testProposals(results, [["ffffff", "ffffff : Boolean"]]);
-		});	
-	
-		it("test tolerant parsing function 8", function() {
-			var results = computeContentAssist(
-				"function foo(p) {\n" +
-				"    p.ffffff = false;\n" +
-				"    if (p) {\n" +
-				"        for (var q in p) {\n" +
-				"            while (p.ff", "ff");
-			return testProposals(results, [["ffffff", "ffffff : Boolean"]]);
-		});	
-	
-		it("test tolerant parsing function 9", function() {
-			var results = computeContentAssist(
-				"function f(s) {}\n" +
-				"f(JSON.str", "str");
-			return testProposals(results, [["stringify(json)", "stringify(json) : String"]]);
-		});	
-	
-		it("test tolerant parsing function 10", function() {
-			var results = computeContentAssist(
-				"function f(a,b) {}\n" +
-				"f(0,JSON.str", "str");
-			return testProposals(results, [["stringify(json)", "stringify(json) : String"]]);
-		});	
 	
 		// tests for richer function types
 		it('test function with property', function() {
