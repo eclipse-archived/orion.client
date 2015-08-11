@@ -473,8 +473,14 @@ define([
 				input: input
 			};
 			this.dispatchEvent(evt);
+			function saveSession() {
+				if (evt.session) {
+					evt.session.save();
+				}
+			}
 			var fileURI = input.resource;
 			if (evt.metadata) {
+				saveSession();
 				this.reportStatus("");
 				this._input = fileURI;
 				var metadata = evt.metadata;
@@ -483,13 +489,22 @@ define([
 			}
 			if (fileURI) {
 				if (fileURI === this._input) {
+					if (!this._parametersProcessed) {
+						saveSession();
+					}
 					if (editorChanged) {
 						this.reportStatus("");
 						this._setInputContents(input, fileURI, null, this._fileMetadata, this._isText(this._fileMetadata));
 					} else {
-						this.processParameters(input);
+						this._parametersProcessed = this.processParameters(input);
+						if (!this._parametersProcessed) {
+							if (evt.session) {
+								evt.session.apply(true);
+							}
+						}
 					}
 				} else {
+					saveSession();
 					this._input = fileURI;
 					this._readonly = false;
 					this._lastMetadata = this._fileMetadata;
@@ -497,6 +512,7 @@ define([
 					this.load();
 				}
 			} else {
+				saveSession();
 				this._setNoInput(true);
 			}
 		},
@@ -611,7 +627,8 @@ define([
 					textView.addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
 				}
 				this._clearUnsavedChanges();
-				if (!this.processParameters(input)) {
+				this._parametersProcessed = this.processParameters(input);
+				if (!this._parametersProcessed) {
 					if (evt.session) {
 						evt.session.apply();
 					}

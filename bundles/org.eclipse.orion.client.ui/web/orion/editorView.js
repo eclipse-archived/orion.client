@@ -248,41 +248,35 @@ define([
 				}
 			}
 		},
-		recordSession: function() {
+		createSession: function(evt) {
 			var editor = this.editor;
 			var textView = editor.getTextView();
 			var inputManager = this.inputManager;
 			if (textView && inputManager) {
 				var metadata = inputManager.getFileMetadata();
 				if (metadata) {
-					var session = sessionStorage.editorViewSection ? JSON.parse(sessionStorage.editorViewSection) : {};
-					var selections = editor.getSelections().map(function(s) { return s.getOrientedSelection(); });
-					session[metadata.Location] = {
-						ETag: metadata.ETag,
-						topIndex: textView.getTopIndex(),
-						selections: selections
-					};
-					sessionStorage.editorViewSection = JSON.stringify(session);
-				}
-			}
-		},
-		loadSession: function(evt) {
-			var editor = this.editor;
-			var textView = editor.getTextView();
-			var inputManager = this.inputManager;
-			if (textView && inputManager) {
-				var metadata = inputManager.getFileMetadata();
-				if (metadata) {
-					var session = sessionStorage.editorViewSection ? JSON.parse(sessionStorage.editorViewSection) : {};
-					var locationSession = session[metadata.Location];
-					if (locationSession && locationSession.ETag === metadata.ETag) {
-						evt.session = {
-							apply: function() {
+					evt.session = {
+						get: function() {
+							return sessionStorage.editorViewSection ? JSON.parse(sessionStorage.editorViewSection) : {}; 
+						},
+						apply: function(animate) {
+							var session = this.get();
+							var locationSession = session[metadata.Location];
+							if (locationSession && locationSession.ETag === metadata.ETag) {
 								editor.setSelections(locationSession.selections);
-								textView.setTopIndex(locationSession.topIndex);
+								textView.setTopIndex(locationSession.topIndex, animate ? function() {} : undefined);
 							}
-						};
-					}
+						},
+						save: function() {
+							var session = this.get();
+							session[metadata.Location] = {
+								ETag: metadata.ETag,
+								topIndex: textView.getTopIndex(),
+								selections: editor.getSelections().map(function(s) { return s.getOrientedSelection(); })
+							};
+							sessionStorage.editorViewSection = JSON.stringify(session);
+						}
+					};
 				}
 			}
 		},
@@ -462,13 +456,17 @@ define([
 				this.localSettings = EditorSettings ? new EditorSettings({local: true, editor: editor, themePreferences: this.themePreferences, preferences: this.editorPreferences}) : null;
 			}
 			var liveEditSession = new LiveEditSession(serviceRegistry, editor);
-			var recordListener = function() {
-				that.recordSession();
-			};
-			inputManager.addEventListener("InputChanging", recordListener); //$NON-NLS-0$
-			window.addEventListener("beforeunload", recordListener); //$NON-NLS-0$
+			inputManager.addEventListener("InputChanging", function(evt) { //$NON-NLS-0$
+				that.createSession(evt);
+			});
+			window.addEventListener("beforeunload", function(evt) { //$NON-NLS-0$
+				that.createSession(evt);
+				if (evt.session) {
+					evt.session.save();
+				}
+			});
 			inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
-				that.loadSession(event);
+				that.createSession(event);
 				var textView = editor.getTextView();
 				if (textView) {
 					liveEditSession.start(inputManager.getContentType(), event.title);
