@@ -10,7 +10,6 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-<<<<<<< HEAD
 define([
 	"orion/Deferred",
 	"orion/plugin",
