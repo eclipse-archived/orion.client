@@ -108,6 +108,7 @@
 	outline: none;
 	padding: 1px;
 	transition: opacity 0.3s ease;
+	cursor: pointer;
 }
 
 .runBarWrapper .runBarButton:not(.disabled):hover {
