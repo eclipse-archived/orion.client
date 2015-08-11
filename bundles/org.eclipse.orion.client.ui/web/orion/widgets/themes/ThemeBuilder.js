@@ -169,7 +169,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mSetup, colors, u
 	function init() {
 		ThemeBuilder.prototype.template = "<div class='editorSection'>" + //$NON-NLS-0$
 												"<div class='editorSectionHeader'>" +
-													"<span>${Display Language : }</span>" + 
+													"<label for='editorLanguage'>${Display Language: }</label>" + 
 													"<select id='editorLanguage'>" + 
 														"<option value='javascript' selected='selected'>javascript</option>" +
 														"<option value='java'>java</option>" +
@@ -210,13 +210,13 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mSetup, colors, u
 		ThemeBuilder.prototype.template = 
 			'<div class="themeController">' +//$NON-NLS-0$
 				'<div class="scopeListHeader" id="scopeOriginal">'+
-					'<span>${Theme : }</span>' + 
+					'<label for="editorTheme">${Theme: }</label>' + 
 					'<select id="editorTheme">' +
 					'</select>'+
 					'<button id="editorThemeDelete" class="editorThemeCleanButton"><span class="core-sprite-trashcan editorThemeButton"></span></button>'+
 				'</div>' +
 				'<div class="scopeListHeader hide" id="scopeChanged">'+
-					'<span> Theme : </span>' + 
+					'<label for="editorThemeName">${Theme: }</label>' + 
 					'<input id="editorThemeName" type="text">' +
 					'<button id="editorThemeSave" class="editorThemeCleanButton"><span class="core-sprite-save editorThemeButton"></span></button>'+
 					'<button id="editorThemeRevert" class="editorThemeCleanButton"><span class="git-sprite-revert editorThemeButton"></span></button>'+
@@ -337,7 +337,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mSetup, colors, u
 
 		for (var i = 0; i < scopeList.length; i++){
 			if (scopeList[i].id === "editorThemeFontSize"){
-				htmlString = htmlString + "<li><span>" + scopeList[i].display + "</span><select id='editorThemeFontSize'>";
+				htmlString = htmlString + "<li><label for='editorThemeFontSize'>" + scopeList[i].display + "</label><select id='editorThemeFontSize'>";
 				for (var l = 8; l < 19; l++){
 					htmlString = htmlString + "<option value='" + l+"px'>"+l+"px</option>";
 				}
@@ -348,7 +348,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mSetup, colors, u
 			}
 			else {
 				var hideValueCSS = hiddenValues.indexOf(scopeList[i].id) >= 0 ? "style='display: none'" : ""; //$NON-NLS-0$
-				htmlString = htmlString + "<li " + hideValueCSS + "><span>" + scopeList[i].display + "</span><input id='"+scopeList[i].id+"' class='colorpicker-input" + ieClass + "' type='color' value='" + scopeList[i].value + "'></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				htmlString = htmlString + "<li " + hideValueCSS + "><label for='"+scopeList[i].id+"'>" + scopeList[i].display + "</label><input id='"+scopeList[i].id+"' class='colorpicker-input" + ieClass + "' type='color' value='" + scopeList[i].value + "'></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		}
 		return htmlString;
