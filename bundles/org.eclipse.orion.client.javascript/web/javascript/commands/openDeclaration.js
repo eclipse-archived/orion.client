@@ -19,7 +19,6 @@ define([
 	
 	var cachedContext;
 	var deferred;
-	var origin;
 	
 	/**
 	 * @description Creates a new open declaration command
