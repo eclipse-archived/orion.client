@@ -15,8 +15,9 @@ define([
 'javascript/finder',
 'orion/Deferred',
 'javascript/compilationUnit',
-'i18n!javascript/nls/messages'
-], function(Objects, Finder, Deferred, CU, Messages) {
+'i18n!javascript/nls/messages',
+'orion/i18nUtil'
+], function(Objects, Finder, Deferred, CU, Messages, i18nUtil) {
 	
 	var deferred;
 	var cachedContext;
@@ -53,7 +54,9 @@ define([
 						var linkModel = {groups: groups};
 						deferred.resolve(cachedContext.exitLinkedMode());
 						deferred.resolve(cachedContext.enterLinkedMode(linkModel));
-					} 
+					} else if(typeof(_d.error) === 'string') {
+						cachedContext.setStatus({Severity: 'Error', Message: i18nUtil.formatMessage(Messages['couldNotRename'], _d.error.toLowerCase())}); //$NON-NLS-1$
+					}
 					deferred.resolve();
 					deferred = null;
 				}

@@ -95,7 +95,6 @@ define([
 				}
 				this.timeout = null;
 			}, 5000);
-			origin = options.input;
 			var files = [{type: 'full', name: options.input, text: ast.source}]; //$NON-NLS-1$
 			this.ternworker.postMessage({request:'definition', args:{params:{offset: options.offset}, files: files, meta:{location: options.input}}}); //$NON-NLS-1$
 			return deferred;

@@ -119,5 +119,6 @@ define({//Default message bundle
 	"callbackHoverTitle": "Callback:", // the in-line title for the callback section. The word is used alone in a sentence with no further punctuation
 	"sinceHoverTitle": "Since:", // the in-line title for the since section. The word is used alone in a sentence with no further punctuation
 	"seeAlsoHoverTitle": "See Also:", // the in-line title for the since section. The word is used alone in a sentence with no further punctuation
-	"openFileForTitle": "Open file for" // the in-line title for the 'open file hover'. The sentence is used as-is and is followed only by a OS file path
+	"openFileForTitle": "Open file for", // the in-line title for the 'open file hover'. The sentence is used as-is and is followed only by a OS file path
+	"couldNotRename": "Could not rename element because it is ${0}"
 });
