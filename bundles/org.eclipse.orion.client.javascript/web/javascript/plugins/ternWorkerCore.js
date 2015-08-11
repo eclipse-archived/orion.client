@@ -42,6 +42,7 @@ require({
 	'tern/plugin/orionRedis',
 	'tern/plugin/orionRequire',
 	'tern/plugin/ternPlugins',
+	'tern/plugin/openImplementation',
 	'json!tern/defs/ecma5.json',
 	'json!tern/defs/ecma6.json',
 	'json!tern/defs/browser.json',
@@ -51,14 +52,15 @@ require({
 	'javascript/handlers/ternOccurrencesHandler',
 	'javascript/handlers/ternRenameHandler',
 	'javascript/handlers/ternPluginsHandler',
-	'javascript/handlers/ternRefsHandler',	
+	'javascript/handlers/ternRefsHandler',
+	'javascript/handlers/ternImplementationHandler',
 	'i18n!javascript/nls/workermessages',
 	'orion/i18nUtil'
 ],
 /* @callback */ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
 							orionMySQLPlugin, orionNodePlugin, orionPostgresPlugin, orionRedisPlugin, orionRequirePlugin, ternPluginsPlugin, 
-							ecma5, ecma6, browser, AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler, PluginsHandler, 
-							RefsHandler, Messages, i18nUtil) {
+							openImplPlugin, ecma5, ecma6, browser, AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, 
+							RenameHandler, PluginsHandler, RefsHandler, ImplHandler, Messages, i18nUtil) {
     
     var ternserver, pendingReads = Object.create(null);
     
@@ -150,6 +152,12 @@ require({
                     	description: Messages['ternPluginsPluginDescription'],
                     	version: '1.0', //$NON-NLS-1$
                     	removable: false
+                    },
+                    openImplementation: {
+                    	name : Messages['openImplPluginName'],
+                    	description: Messages['openImplPluginDescription'],
+                    	version: '1.0', //$NON-NLS-1$
+                    	removable: false
                     }
                 },
                 getFile: _getFile
@@ -191,6 +199,10 @@ require({
                     }
                     case 'refs': {
                     	RefsHandler.computeRefs(ternserver, _d.args, post);
+                    	break;
+                    }
+                    case 'implementation': {
+                    	ImplHandler.computeImplementation(ternserver, _d.args, post);
                     	break;
                     }
                     case 'addFile': {

@@ -34,6 +34,8 @@ define({
 	'orionRedisPluginDescription': 'Plug-in that contributes type information and code templates for Redis.',
 	'ternPluginsPluginName': 'Orion Tern Plug-in Support',
 	'ternPluginsPluginDescription': 'Plug-in that allows Orion to inspect and modify plug-ins running in Tern.',
+	'openImplPluginName': 'Orion Open Implementation Support',
+	'openImplPluginDescription': 'Plug-in that allows Orion to try to find implementation locations of elements rather than simple declarations',
 	
 	// Other messages
 	'unknownError': 'An unknown error occurred.',
@@ -43,6 +45,8 @@ define({
 	'failedToComputeProposalsNoServer': 'Failed to compute proposals, server not started',
 	'failedToComputeDecl': 'Failed to compute declaration',
 	'failedToComputeDeclNoServer': 'Failed to compute declaration, server not started',
+	'failedToComputeImpl': 'Failed to compute implementation',
+	'failedToComputeImplNoServer': 'Failed to compute implementation, server not started',
 	'failedToComputeDoc': 'Failed to compute documentation',
 	'failedToComputeDocNoServer': 'Failed to compute documentation, server not started',
 	'failedToComputeOccurrences': 'Failed to compute occurrences',

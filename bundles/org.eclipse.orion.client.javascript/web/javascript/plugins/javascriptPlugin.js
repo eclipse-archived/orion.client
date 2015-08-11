@@ -35,6 +35,7 @@ define([
 'logger',
 'javascript/commands/generateDocCommand',
 'javascript/commands/openDeclaration',
+'javascript/commands/openImplementation',
 'javascript/commands/renameCommand',
 'orion/editor/stylers/application_javascript/syntax',
 'orion/editor/stylers/application_json/syntax',
@@ -43,7 +44,8 @@ define([
 'i18n!javascript/nls/messages',
 'orion/URL-shim'
 ], function(PluginProvider, Bootstrap, Deferred, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, 
-			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, Util, Logger, GenerateDocCommand, OpenDeclCommand, RenameCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
+			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
+			RenameCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
     var provider = new PluginProvider({
 		name: javascriptMessages['pluginName'], //$NON-NLS-1$
@@ -337,7 +339,17 @@ define([
     		contentType: ['application/javascript']  //$NON-NLS-1$
     			}
     	);
-    	
+   /* 	
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+    			new OpenImplCommand.OpenImplementationCommand(astManager, scriptresolver, ternWorker, CUProvider),  //$NON-NLS-1$
+    			{
+    		name: javascriptMessages["openImplName"],  //$NON-NLS-1$
+    		tooltip : javascriptMessages['openImplTooltip'],  //$NON-NLS-1$
+    		id : "open.js.impl",  //$NON-NLS-1$
+    		contentType: ['application/javascript']  //$NON-NLS-1$
+    			}
+    	);
+    */	
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			new RenameCommand.RenameCommand(astManager, ternWorker, scriptresolver), 
     			{

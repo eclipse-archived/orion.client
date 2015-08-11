@@ -69,6 +69,8 @@ define({//Default message bundle
 	'renameFailedTimedOut': 'Could not rename element - operation timed out',
 	'openDeclName' : 'Open Declaration',
 	'openDeclTooltip' : 'Open the declaration of the selected element',
+	'openImplName' : 'Open Implementation',
+	'openImplTooltip' : 'Open the implementation of the selected element',
 	'noDeclTimedOut': 'No declaration was found - operation timed out',
 	'validTypeof': 'Invalid \'typeof\' comparison:',
 	'noSparseArrays': 'Sparse array declarations:',
