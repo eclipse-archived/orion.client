@@ -13,17 +13,20 @@
 define([
 	'chai/chai',
 	'esprima',
-	'javascript/astManager',
 	'orion/Deferred',
-	'javascript/occurrences',
+	'javascript/astManager',
 	'javascript/cuProvider',
+	'javascript/occurrences',
+	'javascript/validator',
 	'eslint',
 	'mocha/mocha'  //must stay at the end, not a module
-], function(chai, Esprima, ASTManager, Deferred, Occurrences, CUProvider, ESLint) {
+], function(chai, Esprima, Deferred, ASTManager, CUProvider, Occurrences, Validator, ESLint) {
 	var assert = chai.assert;
 	
 	describe('Occurrences Tests', function() {
 		var astManager = new ASTManager.ASTManager(Esprima);
+		var validator = new Validator(astManager, CUProvider);
+		validator._enableOnly("NOTARULE");
 		var occurrences = new Occurrences.JavaScriptOccurrences(astManager, CUProvider);
 		var editorContext = {
 			text: "",
@@ -1805,7 +1808,7 @@ define([
 		/**
 		 * Tests named function expression in object property
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439641
-		 * TODO Add a test if the carat is in the named function expression or the call expression.
+		 * TODO Add a test if the caret is in the named function expression or the call expression.
 		 */
 		it('test_namedFuncExpr6', function() {
 			editorContext.text = "var x = { a: function a() {} }; a();";
@@ -2407,6 +2410,266 @@ define([
 				editorContext.text = "var n = []; n.map(n => n => {n.length;});";
 				return occurrences.computeOccurrences(editorContext, setContext(24, 24)).then(function(results) {
 					assertOccurrences(results, [{start:23, end:24}, {start:29, end:30}]);
+				});
+			});
+		});
+		describe('Define and Require Statement Occurrences Tests', function() {
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Unnamed Define statement 1', function() {
+				editorContext.text = "define(['A', 'B'], function (a, b) { var x = a; var y = b; });";
+				return occurrences.computeOccurrences(editorContext, setContext(10,10)).then(function(results) {
+					assertOccurrences(results, [{start:8, end:11}, {start:29, end:30}, {start:45, end:46}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Unnamed Define statement 2', function() {
+				editorContext.text = "define(['A', 'B'], function (a, b) { var x = a; var y = b; });";
+				return occurrences.computeOccurrences(editorContext, setContext(29,29)).then(function(results) {
+					assertOccurrences(results, [{start:8, end:11}, {start:29, end:30}, {start:45, end:46}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Unnamed Define statement 3', function() {
+				editorContext.text = "define(['A', 'B'], function (a, b) { var x = a; var y = b; });";
+				// TODO This functionality depends on having node.parent which is currently added to the AST by ESLint
+				return validator.computeProblems(editorContext).then(function() {
+					return occurrences.computeOccurrences(editorContext, setContext(46,46)).then(function(results) {
+						assertOccurrences(results, [{start:8, end:11}, {start:29, end:30}, {start:45, end:46}]);
+					});
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Unnamed Define statement 4', function() {
+				editorContext.text = "define(['A', 'B'], function (a, b) { var x = a; var y = b; });";
+				return occurrences.computeOccurrences(editorContext, setContext(14,15)).then(function(results) {
+					assertOccurrences(results, [{start:13, end:16}, {start:32, end:33}, {start:56, end:57}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Unnamed Define statement 5', function() {
+				editorContext.text = "define(['A', 'B'], function (a, b) { var x = a; var y = b; });";
+				return occurrences.computeOccurrences(editorContext, setContext(33,33)).then(function(results) {
+					assertOccurrences(results, [{start:13, end:16}, {start:32, end:33}, {start:56, end:57}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Unnamed Define statement 6', function() {
+				editorContext.text = "define(['A', 'B'], function (a, b) { var x = a; var y = b; });";
+				// TODO This functionality depends on having node.parent which is currently added to the AST by ESLint
+				return validator.computeProblems(editorContext).then(function() {
+					return occurrences.computeOccurrences(editorContext, setContext(56,56)).then(function(results) {
+						assertOccurrences(results, [{start:13, end:16}, {start:32, end:33}, {start:56, end:57}]);
+					});
+				});
+			});			
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Named Define statement 1', function() {
+				editorContext.text = "define('ABC', ['A', 'B'], function (a, b) { var x = a; var y = b; });";
+				return occurrences.computeOccurrences(editorContext, setContext(17,17)).then(function(results) {
+					assertOccurrences(results, [{start:15, end:18}, {start:36, end:37}, {start:52, end:53}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Named Define statement 2', function() {
+				editorContext.text = "define('ABC', ['A', 'B'], function (a, b) { var x = a; var y = b; });";
+				return occurrences.computeOccurrences(editorContext, setContext(37,37)).then(function(results) {
+					assertOccurrences(results, [{start:15, end:18}, {start:36, end:37}, {start:52, end:53}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Named Define statement 3', function() {
+				editorContext.text = "define('ABC', ['A', 'B'], function (a, b) { var x = a; var y = b; });";
+				// TODO This functionality depends on having node.parent which is currently added to the AST by ESLint
+				return validator.computeProblems(editorContext).then(function() {
+					return occurrences.computeOccurrences(editorContext, setContext(52,53)).then(function(results) {
+						assertOccurrences(results, [{start:15, end:18}, {start:36, end:37}, {start:52, end:53}]);
+					});
+				});
+
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Named Define statement 4', function() {
+				editorContext.text = "define('ABC', ['A', 'B'], function (a, b) { var x = a; var y = b; });";
+				return occurrences.computeOccurrences(editorContext, setContext(21,21)).then(function(results) {
+					assertOccurrences(results, [{start:20, end:23}, {start:39, end:40}, {start:63, end:64}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Named Define statement 5', function() {
+				editorContext.text = "define('ABC', ['A', 'B'], function (a, b) { var x = a; var y = b; });";
+				return occurrences.computeOccurrences(editorContext, setContext(39,39)).then(function(results) {
+					assertOccurrences(results, [{start:20, end:23}, {start:39, end:40}, {start:63, end:64}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Named Define statement 6', function() {
+				editorContext.text = "define('ABC', ['A', 'B'], function (a, b) { var x = a; var y = b; });";
+				// TODO This functionality depends on having node.parent which is currently added to the AST by ESLint
+				return validator.computeProblems(editorContext).then(function() {
+					return occurrences.computeOccurrences(editorContext, setContext(64,64)).then(function(results) {
+						assertOccurrences(results, [{start:20, end:23}, {start:39, end:40}, {start:63, end:64}]);
+					});
+				});
+
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Mismatched Define statement 1', function() {
+				editorContext.text = "define(['A', 'B'], function (a) { var x = a; var b = null; });";
+				return occurrences.computeOccurrences(editorContext, setContext(9,9)).then(function(results) {
+					assertOccurrences(results, [{start:8, end:11}, {start:29, end:30}, {start:42, end:43}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Mismatched Define statement 2', function() {
+				editorContext.text = "define(['A', 'B'], function (a) { var x = a; var b = null; });";
+				return occurrences.computeOccurrences(editorContext, setContext(29,29)).then(function(results) {
+					assertOccurrences(results, [{start:8, end:11}, {start:29, end:30}, {start:42, end:43}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Mismatched Define statement 3', function() {
+				editorContext.text = "define(['A', 'B'], function (a) { var x = a; var b = null; });";
+				// TODO This functionality depends on having node.parent which is currently added to the AST by ESLint
+				return validator.computeProblems(editorContext).then(function() {
+					return occurrences.computeOccurrences(editorContext, setContext(43,43)).then(function(results) {
+						assertOccurrences(results, [{start:8, end:11}, {start:29, end:30}, {start:42, end:43}]);
+					});
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Mismatched Define statement 4', function() {
+				editorContext.text = "define(['A', 'B'], function (a) { var x = a; var b = null; });";
+				return occurrences.computeOccurrences(editorContext, setContext(14,14)).then(function(results) {
+					assertOccurrences(results, []);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
+			 * @since 10.0
+			 */
+			it('Mismatched Define statement 5', function() {
+				editorContext.text = "define(['A', 'B'], function (a) { var x = a; var b = null; });";
+				return occurrences.computeOccurrences(editorContext, setContext(49,50)).then(function(results) {
+					assertOccurrences(results, [{start:49, end:50}]);
+				});
+			});
+			// TODO Require statements not supported yet
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=474816
+			 * @since 10.0
+			 */
+			it('Require statement 1', function() {
+				editorContext.text = "define(function (require) { var a = require('A'); });";
+				return occurrences.computeOccurrences(editorContext, setContext(20,20)).then(function(results) {
+					assertOccurrences(results, [{start:17, end:24}, {start:36, end:43}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=474816
+			 * @since 10.0
+			 */
+			it('Require statement 2', function() {
+				editorContext.text = "define(function (require) { var a = require('A'); });";
+				return occurrences.computeOccurrences(editorContext, setContext(36,36)).then(function(results) {
+					assertOccurrences(results, [{start:17, end:24}, {start:36, end:43}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=474816
+			 * @since 10.0
+			 */
+			it.skip('Require statement 3', function() {
+				editorContext.text = "define(function (require) { var a = require('A'); });";
+				return occurrences.computeOccurrences(editorContext, setContext(32,33)).then(function(results) {
+					assertOccurrences(results, [{start:32, end:33}, {start:44, end:47}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=474816
+			 * @since 10.0
+			 */
+			it.skip('Require statement 4', function() {
+				editorContext.text = "define(function (require) { var a = require('A'); });";
+				return occurrences.computeOccurrences(editorContext, setContext(45,45)).then(function(results) {
+					assertOccurrences(results, [{start:32, end:33}, {start:44, end:47}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=474816
+			 * @since 10.0
+			 */
+			it.skip('Require with Define statement 1', function() {
+				editorContext.text = "define(['require', 'A'], function (require) { var a = require('A'); });";
+				return occurrences.computeOccurrences(editorContext, setContext(21,21)).then(function(results) {
+					assertOccurrences(results, [{start:20, end:21}, {start:50, end:51}, {start:62, end:65}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=474816
+			 * @since 10.0
+			 */
+			it.skip('Require with Define statement 1', function() {
+				editorContext.text = "define(['require', 'A'], function (require) { var a = require('A'); });";
+				return occurrences.computeOccurrences(editorContext, setContext(50,50)).then(function(results) {
+					assertOccurrences(results, [{start:20, end:21}, {start:50, end:51}, {start:62, end:65}]);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=474816
+			 * @since 10.0
+			 */
+			it.skip('Require with Define statement 1', function() {
+				editorContext.text = "define(['require', 'A'], function (require) { var a = require('A'); });";
+				return occurrences.computeOccurrences(editorContext, setContext(63,63)).then(function(results) {
+					assertOccurrences(results, [{start:20, end:21}, {start:50, end:51}, {start:62, end:65}]);
 				});
 			});
 		});

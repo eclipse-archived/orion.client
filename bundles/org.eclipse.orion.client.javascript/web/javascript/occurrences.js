@@ -39,7 +39,6 @@ define([
 		context: null,
 		thisCheck: false,
 		objectPropCheck: false,
-		labeledStatementCheck: false,
 		
 		/**
 		 * @name enter
@@ -406,6 +405,40 @@ define([
 		},
 		
 		/**
+		 * @description Checks if the given node is a parameter specifying an AMD define dependency.  If so, mark the matching dependency path.
+		 * @function
+		 * @private
+		 * @param {ASTNode} node The AST node we are inspecting
+		 * @param {Array} occurrencesList The array of occurrences to add the new occurrence to
+		 */
+		_markDefineStatementOccurrences: function(node, occurrencesList){
+			// If ESLint verify has been run on the AST, the nodes will have their parent marked
+			// If the cursor is on this node, it will have a parents array added by Finder.findNode()
+			// If no parent can be found, we cannot mark the matching define argument
+			var parent = node.parent ? node.parent : (node.parents && node.parents.length > 0 ? node.parents[node.parents.length-1] : null);
+			if (parent && parent.type === Estraverse.Syntax.FunctionExpression){
+				var parent2 = parent.parent ? parent.parent : (node.parents && node.parents.length > 1 ? node.parents[node.parents.length-2] : null);
+				if (parent2 && parent2.type === Estraverse.Syntax.CallExpression && parent2.callee && parent2.callee.name === "define"){
+					var funcExpression = parent;
+					for (var i=0; i<funcExpression.params.length; i++) {
+						if (funcExpression.params[i] === node){
+							if (parent2.arguments.length === 2 || parent2.arguments.length === 3){
+								var pathsNode = parent2.arguments[parent2.arguments.length-2];
+								if (pathsNode.elements && pathsNode.elements.length > i){
+									occurrencesList.push({
+										start: pathsNode.elements[i].range[0],
+										end: pathsNode.elements[i].range[1]
+									});
+								}
+							}
+							break;
+						}
+					}
+				}
+			}
+		},
+		
+		/**
 		 * @name checkId
 		 * @description Checks if the given identifier matches the occurrence we are looking for
 		 * @function
@@ -455,6 +488,9 @@ define([
 						//does the scope enclose it?
 						if((scope.range[0] <= this.context.start) && (scope.range[1] >= this.context.end)) {
 							this.defscope = scope;
+							
+							// If identifier is an argument of a define statement, also mark the matching dependency
+							this._markDefineStatementOccurrences(node, scope.occurrences);
 						} else {
 							// Selection belongs to an outside scope so use the outside definition (Bug 447962)
 							scope.occurrences = [];
@@ -485,16 +521,32 @@ define([
 	 */
 	function findOccurrences(ast, ctxt) {
 		if(ast && ctxt) {
-			var token = _getToken(ctxt.selection.start, ast);
+			var start = ctxt.selection.start;
+			var end = ctxt.selection.end;
+			var token = _getToken(start, ast);
 			if (token) {
 				// The token ignores punctuators, but the node is required for context
 				// TODO Look for a more efficient way to move between node/token, see Bug 436191
-				var node = Finder.findNode(ctxt.selection.start, ast, {parents: true});
+				var node = Finder.findNode(start, ast, {parents: true});
 				if(!_skip(node)) {
 					if (token.range[0] >= node.range[0] && token.range[1] <= node.range[1]){
+						
+						// Check if the user has selected a AMD define statement dependency path.  If so run findOccurrences on matching dependency param instead
+						if (node.type === Estraverse.Syntax.Literal){
+							var amdNode = checkNodeDefineStatement(node);
+							if (amdNode){
+								node = amdNode;
+								start = node.range[0];
+								end = node.range[1];
+							} else {
+								// No other literals can have occurrences so bail
+								return [];
+							}
+						}
+						
 						var context = {
-							start: ctxt.selection.start,
-							end: ctxt.selection.end,
+							start: start,
+							end: end,
 							word: _nameFromNode(node),
 							token: node
 						};
@@ -506,7 +558,31 @@ define([
 			}
 		}
 		return [];
+		
+		function checkNodeDefineStatement(node){
+			var parent = node.parent ? node.parent : (node.parents && node.parents.length > 0 ? node.parents[node.parents.length-1] : null);
+			if (parent && parent.type === Estraverse.Syntax.ArrayExpression){
+				var parent2 = parent.parent ? parent.parent : (node.parents && node.parents.length > 1 ? node.parents[node.parents.length-2] : null);
+				if (parent2 && parent2.type === Estraverse.Syntax.CallExpression && parent2.callee && parent2.callee.name === "define"){
+					var elements = parent.elements;
+					for (var i=0; i<elements.length; i++) {
+						if (elements[i] === node){
+							var deps = parent2;
+							if (deps && deps.arguments && (deps.arguments.length === 2 || deps.arguments.length === 3)){
+								deps = deps.arguments[deps.arguments.length-1];
+								if (deps.params && deps.params.length > i){
+									return Finder.findNode(deps.params[i].range[0], ast, {parents: true});
+								}
+							}
+							break;
+						}
+					}
+				}
+			}
+			return null;
+		}
 	}
+
 	
 	/**
 	 * @description Gets the token from the given offset or the proceeding token if the found token 
@@ -535,7 +611,7 @@ define([
 						}
 					}
 				}
-				if(token.type === 'Identifier' || (token.type === 'Keyword' && token.value === 'this')) { //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+				if(token.type === 'Identifier' || token.type === "String" || (token.type === 'Keyword' && token.value === 'this')) { //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
 					return token;
 				}
 			}
@@ -573,6 +649,11 @@ define([
 		if(node.type === Estraverse.Syntax.ThisExpression) {
 			return false;
 		}
+		
+		if (node.type === Estraverse.Syntax.Literal){
+			return false;
+		}
+		
 		return node.type !== Estraverse.Syntax.Identifier;
 	}
 	
@@ -612,7 +693,7 @@ define([
 				 	// Selecting the property key of a member expression that is not computed (foo.a vs foo[a])
 					this.visitor.objectPropCheck = true;
 				}
-			} else if (parent && parent.type === Estraverse.Syntax.FunctionExpression && context.token.parents.length > 1 && context.token.parents[context.token.parents.length-2].type === Estraverse.Syntax.Property){
+			} else if (parent && parent.type === Estraverse.Syntax.FunctionExpression && context.token.parents && context.token.parents.length > 1 && context.token.parents[context.token.parents.length-2].type === Estraverse.Syntax.Property){
 				// Both the name and the params have the same parent
 				if (parent.id && parent.id.range === context.token.range){
 					// Named function expresison as the child of a property
