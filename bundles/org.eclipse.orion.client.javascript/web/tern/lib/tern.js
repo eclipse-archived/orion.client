@@ -974,8 +974,24 @@
   function buildRename(srv, query, file) {
     if (typeof query.newName != "string") throw ternError(".query.newName should be a string");
     var expr = findExprOrThrow(file, query);
-    if (!expr || expr.node.type != "Identifier") throw ternError("Not at a variable.");
-
+    if (!expr) {
+    	throw ternError("Could not find an expression to rename.");
+	} else if(expr.node.type !== 'Identifier') {
+    	switch(expr.node.type) {
+    		case 'MemberExpression': {
+    			throw ternError("Rename is not supported on member expressions.");
+    		}
+    		case 'ThisExpression': {
+    			throw ternError("Rename is not supported on this expressions.");
+    		}
+    		case 'ObjectExpression': {
+    			throw ternError("Rename is not supported on object properties.");
+    		}
+    		default: {
+    			throw ternError("Rename is only supported on variables.");
+    		}
+    	}
+	}
     var data = findRefsToVariable(srv, query, file, expr, query.newName), refs = data.refs;
     delete data.refs;
     data.files = srv.files.map(function(f){return f.name;});
