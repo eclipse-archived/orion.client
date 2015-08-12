@@ -504,7 +504,9 @@ define([
 					tooltipText += " (" + appInfoText + ")"; //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				if (appInfoText !== longStatusText) {
-					tooltipText += " : " + longStatusText; //$NON-NLS-0$
+					if(longStatusText){
+						tooltipText += " : " + longStatusText; //$NON-NLS-0$
+					}					
 				}
 				
 			}
