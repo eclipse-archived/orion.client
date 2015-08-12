@@ -55,7 +55,7 @@ define([
 						deferred.resolve(cachedContext.exitLinkedMode());
 						deferred.resolve(cachedContext.enterLinkedMode(linkModel));
 					} else if(typeof(_d.error) === 'string') {
-						cachedContext.setStatus({Severity: 'Error', Message: i18nUtil.formatMessage(Messages['couldNotRename'], _d.error.toLowerCase())}); //$NON-NLS-1$
+						cachedContext.setStatus({Severity: 'Warning', Message: i18nUtil.formatMessage(Messages['couldNotRename'], _d.error.toLowerCase())}); //$NON-NLS-1$
 					}
 					deferred.resolve();
 					deferred = null;
