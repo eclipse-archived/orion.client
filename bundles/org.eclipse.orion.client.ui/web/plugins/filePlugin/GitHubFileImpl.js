@@ -20,14 +20,21 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 	//3: inject commit information to both meta data and each item of the return list of fetchChildren function
 	var commit_info_level = 1;
 	var use_gravatar_id = true;
-	function GitHubFileImpl(repoURL, token) {
+	function GitHubFileImpl(repoURL, token, apiUrl) {
 		this._originalRepoURL = repoURL;//Used for reference in error message to indicate a repo URL
-		var found = repoURL.match(/https\:\/\/github\.com(?:\:443)?\/([^/]+)\/([^/]+).git$/);
+		var found = repoURL.match(/^(https\:\/\/(.*)(?:\:443)?\/)([^\/]+)\/([^\/]+).git$/);
 		if (!found) {
 			throw "Bad Github repository url " + repoURL;
 		}
-		this._repoURL = new URL("https://api.github.com/repos/" + found[1] + "/" + found[2]);
-		this._commitURLBase = "https://github.com/" + found[1] + "/" + found[2] + "/commit/";
+		if (apiUrl) {
+			// route requests through the provided GitHub API url
+			this._repoURL = new URL(apiUrl + "/repos/" + found[3] + "/" + found[4]);
+			this._commitURLBase = found[1] + found[3] + "/" + found[4] + "/commit/";
+		} else {
+			// route requests through the default public GitHub API url
+			this._repoURL = new URL("https://api.github.com/repos/" + found[3] + "/" + found[4]);
+			this._commitURLBase = "https://github.com/" + found[3] + "/" + found[4] + "/commit/";
+		}
 		this._contentsPath = this._repoURL.pathname + "/contents";
 		this._headers = {
 			"Accept": "application/vnd.github.v3+json"

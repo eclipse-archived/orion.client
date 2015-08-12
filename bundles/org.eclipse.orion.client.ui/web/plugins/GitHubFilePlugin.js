@@ -43,7 +43,7 @@ define(["orion/plugin", "orion/Deferred", "plugins/filePlugin/GitHubFileImpl", "
 	};
 	var provider = new PluginProvider(headers);
 	var url = new URL(window.location.href);
-	var service = new GitHubFileImpl(url.query.get("repo"), url.query.get("token"));
+	var service = new GitHubFileImpl(url.query.get("repo"), url.query.get("token"), url.query.get("api_url"));
 	var base = service._repoURL.href;
 
 	provider.registerService("orion.core.file", service, {
