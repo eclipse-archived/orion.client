@@ -711,10 +711,15 @@ objects.mixin(EditorSetup.prototype, {
 		if (!href)
 			return;
 			
-		var mode = typeof(options.mode) === 'string' ? options.mode : 'replace';
+		var mode = typeof(options.mode) === 'string' ? options.mode : 'replace'; //$NON-NLS-1$
 		switch (mode) {
 			case 'replace':
-				window.location = href;
+				var hash = href.split('#')[1];
+				if (hash === window.location.hash.substring(1)) {
+					this.activeEditorViewer.inputManager.setInput(hash);
+				} else {
+					window.location = href;
+				}
 				break;
 			case 'tab':
 				window.open(href);
@@ -722,7 +727,7 @@ objects.mixin(EditorSetup.prototype, {
 			case 'split':
 				var locWithParams = href.split('#')[1];
 				if (!this.splitterMode || this.splitterMode === MODE_SINGLE) {
-					var splitHint = typeof(options.splitHint) === 'string' ? options.splitHint : 'vertical';
+					var splitHint = typeof(options.splitHint) === 'string' ? options.splitHint : 'vertical'; //$NON-NLS-1$
 					if (splitHint === 'horizontal') 
 						this.setSplitterMode(MODE_HORIZONTAL, locWithParams);
 					else if (splitHint === 'vertical') 
