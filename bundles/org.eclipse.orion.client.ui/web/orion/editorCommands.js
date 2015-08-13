@@ -208,6 +208,23 @@ define([
 				}.bind(this));
 			}
 		},
+		_registerCommandGroups: function(scopeId, rootPath) {
+			var commandRegistry = this.commandService;
+			var serviceRegistry = this.serviceRegistry, parentPath;
+			var groupReferences = serviceRegistry.getServiceReferences("orion.edit.command.category"); //$NON-NLS-0$
+			groupReferences.forEach(function(serviceReference) {
+				var groupInfo = {};
+				var propertyNames = serviceReference.getPropertyKeys();
+				for (var j = 0; j < propertyNames.length; j++) {
+					groupInfo[propertyNames[j]] = serviceReference.getProperty(propertyNames[j]);
+				}
+				parentPath = rootPath;
+				if (groupInfo.parentPath) {
+					parentPath += "/" + groupInfo.parentPath;
+				}
+				commandRegistry.addCommandGroup(scopeId, groupInfo.id, groupInfo.position || 101, groupInfo.name, parentPath, null, groupInfo.imageClass);
+			}.bind(this));			
+		},
 		registerCommands: function() {
 			var commandRegistry = this.commandService;
 			
@@ -219,10 +236,12 @@ define([
 			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.edit.save", 2, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.saveGroup" : null, false, new mKeyBinding.KeyBinding('s', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.gotoLine", 3, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.find", 0, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
-			commandRegistry.registerCommandContribution(this.toolbarId, "orion.keyAssist", 100, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(191, false, true, true)); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
-			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
-			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 2, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
-			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 3, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(113), null, this);//$NON-NLS-1$ //$NON-NLS-2$ 
+			commandRegistry.registerCommandContribution(this.toolbarId, "orion.keyAssist", 0, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(191, false, true, true)); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(113), null, this);//$NON-NLS-1$ //$NON-NLS-2$ 
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 2, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 3, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+			
+			this._registerCommandGroups(this.toolbarId, "orion.menuBarToolsGroup"); //$NON-NLS-1$
 
 			// KB exists so that we can pass an array (from info.key) rather than actual arguments
 			function createKeyBinding(args) {
@@ -239,7 +258,11 @@ define([
 				if (info.scopeId) {
 					commandRegistry.registerCommandContribution(info.scopeId, command.id, position, info.scopeId + "Group", info.bindingOnly, createKeyBinding(info.key), null, this); //$NON-NLS-0$
 				} else {
-					commandRegistry.registerCommandContribution(this.toolbarId, command.id, position, "orion.menuBarToolsGroup", info.bindingOnly, createKeyBinding(info.key), null, this); //$NON-NLS-0$
+					var parentPath = "orion.menuBarToolsGroup"; //$NON-NLS-1$
+					if (info.parentPath) {
+						parentPath += "/" + info.parentPath;
+					}
+					commandRegistry.registerCommandContribution(this.toolbarId, command.id, position, parentPath, info.bindingOnly, createKeyBinding(info.key), null, this);
 				}
 			}
 		},
@@ -264,11 +287,17 @@ define([
 			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.blame", 1, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.diff", 2, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 
+			this._registerCommandGroups(this.editorContextMenuId, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-1$
+
 			// Register extra tools commands
 			var commands = this.getEditCommands();
 			for (var i = 0, position = 100; i < commands.length; i++, position++) {
 				var command = commands[i], info = command.editInfo;
-				this.commandService.registerCommandContribution(this.editorContextMenuId, command.id, position, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-1$
+				var parentPath = "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"; //$NON-NLS-1$
+				if (info.parentPath) {
+					parentPath += "/" + info.parentPath;
+				}
+				this.commandService.registerCommandContribution(this.editorContextMenuId, command.id, position, parentPath);
 			}
 		},
 		overwriteKeyBindings: function(editor) {
