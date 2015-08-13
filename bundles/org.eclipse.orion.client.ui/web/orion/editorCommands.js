@@ -276,7 +276,7 @@ define([
 			this.editor = editor;
 			if (editor.getTextView && editor.getTextView()) {
 				var textView = editor.getTextView();
-				textView.setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
+				textView.setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-2$
 				var saveCommand = that.commandService.findCommand("orion.edit.save"); //$NON-NLS-0$
 				textView.setAction("save", function() { //$NON-NLS-0$
 					saveCommand.callback.call({inputManager: that.inputManager});
@@ -299,10 +299,16 @@ define([
 							return true;
 						}
 						that.commandService.runCommand("orion.edit.find", null, null, new mCommandRegistry.ParametersDescription( //$NON-NLS-0$
-							[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 							{clientCollect: true}));
 						return true;
 					}, that.commandService.findCommand("orion.edit.find")); //$NON-NLS-0$
+				}
+				
+				var keyAssistCommand = that.commandService.findCommand("orion.keyAssist"); //$NON-NLS-0$
+				if (keyAssistCommand) {
+					textView.setKeyBinding(new mKeyBinding.KeyStroke(191, false, true, !util.isMac, util.isMac), keyAssistCommand.id);
+					textView.setAction(keyAssistCommand.id, keyAssistCommand.callback, keyAssistCommand);
 				}
 			}
 		},
