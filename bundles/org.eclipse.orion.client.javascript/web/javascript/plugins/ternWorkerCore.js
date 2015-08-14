@@ -20,15 +20,7 @@ if(sear) {
 	}
 } 
 requirejs.config({locale: lang});
-require({
-	baseUrl: "../../", //$NON-NLS-1$
-	paths: {
-		i18n: 'requirejs/i18n', //$NON-NLS-1$
-		json: 'requirejs/json', //$NON-NLS-1$
-		esprima: "esprima/esprima" //$NON-NLS-1$
-	}
-},
-[
+require([
 	'tern/lib/tern',
 	'tern/plugin/doc_comment',
 	'tern/plugin/orionAmqp',

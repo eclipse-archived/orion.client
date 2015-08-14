@@ -11,4 +11,10 @@
  *******************************************************************************/
 /*eslint-env node, browser*/
 /*globals importScripts */
-importScripts('../../requirejs/require.js', 'ternWorkerCore.js'); // synchronous //$NON-NLS-1$
+importScripts('../../requirejs/require.js'); // synchronous //$NON-NLS-1$
+require(["../../orion/require-config.js"], function(config){
+	require.config({
+		baseUrl: "../../"
+	});
+	require(["javascript/plugins/ternWorkerCore"], null, config.errback);
+});

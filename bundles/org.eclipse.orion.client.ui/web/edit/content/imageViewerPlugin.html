@@ -7,17 +7,12 @@
 		<title>Image Viewer</title>
 		<link rel="stylesheet" type="text/css" href="imageViewerPlugin.css" />
 		<script src="../../requirejs/require.js"></script>
-		<script type="text/javascript">
-			/*eslint-env browser, amd*/		
-			require({
-				baseUrl: '../..',
-				paths: {
-					text: 'requirejs/text',
-					i18n: 'requirejs/i18n',
-					domReady: 'requirejs/domReady'    
-				}
+		<script>
+			/*eslint-env browser, amd*/	
+			require(["../../orion/require-config.js"], function(config){
+				require.config({baseUrl: "../.."});
+				require(["edit/content/imageViewerPlugin"], null, config.errback);
 			});
-			require(["edit/content/imageViewerPlugin"]);
 		</script>
     </head>
 	<body>

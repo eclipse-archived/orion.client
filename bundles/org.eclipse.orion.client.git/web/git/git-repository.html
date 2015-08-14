@@ -9,21 +9,10 @@
 		<link rel="icon" href="images/git.png" type="image/png">
 		<script src="../requirejs/require.js"></script>
 		<script>
-		/*eslint-env browser, amd*/
-		require({
-		  baseUrl: '..',
-		
-		  // set the paths to our library packages
-		  packages: [],
-		
-		  paths: {
-		    text: 'requirejs/text',
-		    i18n: 'requirejs/i18n',
-			domReady: 'requirejs/domReady'
-		  }
-		});
-		
-		require(["git/git-repository"]);
+			/*eslint-env browser, amd*/
+			require(["../orion/require-config.js"], function(config){
+				require(["git/git-repository"], null, config.errback);
+			});
 		</script>
 </head>
 	<body id="orion-repository" class="orionPage">

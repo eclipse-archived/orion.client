@@ -8,17 +8,11 @@
 		<title>Editor</title>
 		<link rel="stylesheet" type="text/css" href="edit.css" />
 		<script src="../requirejs/require.js"></script>
-		<script type="text/javascript">
+		<script>
 			/*eslint-env browser, amd*/
-			require({
-				baseUrl: '..',
-				paths: {
-					text: 'requirejs/text',
-					i18n: 'requirejs/i18n',
-					domReady: 'requirejs/domReady'    
-				}
+			require(["../orion/require-config.js"], function(config){
+				require(["edit/edit"], null, config.errback);
 			});
-			require(["edit/edit"]);
 		</script>
 	</head>
 

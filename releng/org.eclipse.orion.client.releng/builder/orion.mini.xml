@@ -145,11 +145,6 @@
 				</args>
 			</rjs>
 
-			<!-- Tern worker -->
-			<copy file="${builder}/scripts/ternWorker.build.js" todir="${staging}" overwrite="true" />
-			<widgetOptimizeFile out="${out}/javascript/plugins/ternWorker.js"
-				buildfile="${staging}/ternWorker.build.js"
-				optimize="uglify2" />
 			<copyBackBundles buildfile="${buildfile}" out="${out}" />
 			<updateRequire buildfile="${buildfile}" />
 		</sequential>
@@ -258,6 +253,7 @@
 			<mkdir dir="${out}/codeEdit" />
 			<mkdir dir="${out}/codeEdit/code_edit" />
 			<mkdir dir="${out}/codeEdit/javascript" />
+			<mkdir dir="${out}/codeEdit/orion" />
 			<mkdir dir="${out}/codeEdit/webtools" />
 			<mkdir dir="${out}/codeEdit/plugins" />
 			<mkdir dir="${out}/codeEdit/requirejs" />
@@ -287,10 +283,12 @@
 			<widgetOptimizeFile out="${out}/codeEdit/plugins/embeddedToolingPlugin.js"
 				buildfile="${staging}/embeddedToolingPlugin.build.js"
 				optimize="uglify2" />
-			<widgetOptimizeFile out="${out}/ternWorker.js"
+			<widgetOptimizeFile out="${out}/ternWorkerCore.js"
 				buildfile="${staging}/embeddedTernWorker.build.js"
 				optimize="uglify2" />
-			<copy file="${out}/ternWorker.js" tofile="${out}/codeEdit/javascript/plugins/ternWorker.js" />
+			<copy file="${out}/ternWorkerCore.js" tofile="${out}/codeEdit/javascript/plugins/ternWorkerCore.js" />
+			<copy file="${orionClient}/bundles/org.eclipse.orion.client.javascript/web/javascript/plugins/ternWorker.js" tofile="${out}/codeEdit/javascript/plugins/ternWorker.js" />
+			<copy file="${orionClient}/bundles/org.eclipse.orion.client.core/web/orion/require-config.js" tofile="${out}/codeEdit/orion/require-config.js" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.core/web/requirejs/require.min.js" tofile="${out}/codeEdit/requirejs/require.min.js" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.ui/web/embeddedEditor/plugins/javascriptPlugin.html" tofile="${out}/codeEdit/javascript/plugins/javascriptPlugin.html" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.ui/web/embeddedEditor/plugins/webToolsPlugin.html" tofile="${out}/codeEdit/webtools/plugins/webToolsPlugin.html" />

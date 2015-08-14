@@ -12,16 +12,8 @@
 /*eslint-env browser, amd*/
 importScripts("../orion/Deferred.js", "../orion/plugin.js", '../requirejs/require.min.js');
 var pluginProvider = new orion.PluginProvider();
-require({
-	baseUrl: '..',
-	// set the paths to our library packages
-	packages: [],
-	paths: {
-		text: 'requirejs/text',
-		i18n: 'requirejs/i18n',
-		domReady: 'requirejs/domReady'
-	}
-});
-require(["plugins/orionPlugin"], function(plugin) {
-	plugin.connect(pluginProvider);
+require(["../orion/require-config.js"], function(config){
+	require(["plugins/orionPlugin"], function(plugin){
+		plugin.connect(pluginProvider);
+	}, config.errback);
 });

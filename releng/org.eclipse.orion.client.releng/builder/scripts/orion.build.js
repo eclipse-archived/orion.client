@@ -90,6 +90,7 @@
             { name: "git/plugins/gitPlugin" },
             { name: "help/help" },
             { name: "javascript/plugins/javascriptPlugin" },
+            { name: "javascript/plugins/ternWorkerCore" },
             { name: "mixloginstatic/javascript/landing-new" },
             { name: "mixloginstatic/javascript/login" },
             { name: "mixloginstatic/javascript/register" },

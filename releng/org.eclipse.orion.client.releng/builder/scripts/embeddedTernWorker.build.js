@@ -34,7 +34,5 @@
 	],
 	name: "javascript/plugins/ternWorkerCore",
 	wrap: {
-		start: "importScripts('../../requirejs/require.min.js');\n",
-		end: ""
 	}
 });

@@ -8,18 +8,11 @@
 		<title>Settings</title>
 		<link rel="stylesheet" type="text/css" href="settings.css"/>
 		<script src="../requirejs/require.js"></script>
-		<script type="text/javascript">
+		<script>
 			/*eslint-env browser, amd*/
-			require({ baseUrl: '..',
-				      packages: [],
-				      paths: {
-				          text: 'requirejs/text',
-				          i18n: 'requirejs/i18n',
-				          domReady: 'requirejs/domReady',
-				          csslint: 'csslint/csslint',
-				      } 
+			require(["../orion/require-config.js"], function(config){
+				require(["settings/settings"], null, config.errback);
 			});
-			require(["settings/settings"]);
 		</script>
 	</head>
 	
