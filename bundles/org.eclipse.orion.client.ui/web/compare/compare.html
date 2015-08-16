@@ -9,16 +9,10 @@
 		<link rel="stylesheet" type="text/css" href="compare.css" />
 		<script src="../requirejs/require.js"></script>
 		<script>
-		/*eslint-env browser, amd*/
-		require({
-			  baseUrl: '..',
-			  paths: {
-				  text: 'requirejs/text',
-				  i18n: 'requirejs/i18n',
-				  domReady: 'requirejs/domReady'	    
-			  }
+			/*eslint-env browser, amd*/
+			require(["../orion/require-config.js"], function(config){
+				require(["compare/compare"], null, config.errback);
 			});
-			require(["compare/compare"]);
 		</script>
 	</head>
 	<body id="orion-compare" class="orionPage">

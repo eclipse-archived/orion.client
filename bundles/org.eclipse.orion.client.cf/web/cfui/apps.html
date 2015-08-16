@@ -8,22 +8,12 @@
 		<link rel="stylesheet" type="text/css" href="css/apps.css" />
 		<link rel="icon" href="../cfui/images/deploy.png" type="image/png">
 		<script src="../requirejs/require.js"></script>
-		<script type="text/javascript">
-		require({
-		  baseUrl: '..',
-		
-		  // set the paths to our library packages
-		  packages: [],
-		
-		  paths: {
-		    text: 'requirejs/text',
-		    i18n: 'requirejs/i18n',
-		    domReady: 'requirejs/domReady'
-		  }
-		});
-		
-		require(["cfui/apps"]);
-		</script>	 	
+		<script>
+			/*eslint-env browser, amd*/
+			require(["../orion/require-config.js"], function(config){
+				require(["cfui/apps"], null, config.errback);
+			});
+		</script>
  	
 </head>
 
