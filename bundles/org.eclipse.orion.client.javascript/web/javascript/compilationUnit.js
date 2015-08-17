@@ -1,25 +1,24 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /* eslint-env amd */
 define([
-'orion/objects',
 'orion/Deferred'
-], function(Objects, Deferred) {
-    
+], function(Deferred) {
+
     /**
      * @name CompilationUnit
      * @description Creates a new CompilationUint instance. These instances should not be cached as they do
      * not respond to model change events.
-     * @constructor 
+     * @constructor
      * @param {Array.<String>} sourceblocks The blocks of source to combine into one unit
      * @param {Object} metadata The metadata describing the file this unit represents
      * @param {Object} editorContext Optional editor context for the source file. Delegated to for setText and to get line information
@@ -32,99 +31,96 @@ define([
         this._ec = editorContext;
         this._deps = [];
     }
-    
-    Objects.mixin(CompilationUnit.prototype, {
-        
-        /**
-         * @description Builds the backing source for the compilation unit
-         * @function
-         * @private
-         */
-        _init: function _init() {
-            var _cursor = 0;
-            this._source = '';
-            for(var i = 0; i < this._blocks.length; i++) {
-                var block = this._blocks[i];
-                if(block.dependencies) {
-                	this._deps.push(block.dependencies);
-                }
-                var pad = block.offset - _cursor;
-                while(pad > 0) {
-                    this._source += ' '; //$NON-NLS-1$
-                    pad--;
-                }
-                this._source += block.text;
-                _cursor = this._source.length;
+
+    /**
+     * @description Builds the backing source for the compilation unit
+     * @function
+     * @private
+     */
+    CompilationUnit.prototype._init = function _init() {
+        var _cursor = 0;
+        this._source = '';
+        for(var i = 0; i < this._blocks.length; i++) {
+            var block = this._blocks[i];
+            if(block.dependencies) {
+            	this._deps.push(block.dependencies);
             }
-        },
-        
-        /**
-         * @description Returns the source of this compilation unit
-         * @function
-         * @returns {String} The source of the compilation unit
-         */
-        getSource: function getSource() {
-        	if(!this._source) {
-                this._init();
+            var pad = block.offset - _cursor;
+            while(pad > 0) {
+                this._source += ' '; //$NON-NLS-1$
+                pad--;
             }
-            return this._source;
-        },
-        
-        /**
-         * @description Returns if the given offset is valid compared to the blocks of code
-         * that make up this unit
-         * @function
-         * @param {Number} offset The offset to check
-         * @returns {Boolean} If the given offset is within any of the backing code blocks
-         */
-        validOffset: function validOffset(offset) {
-            if(!this._blocks || this._blocks.length < 1 || offset < 0) {
-		        return false;
-		    }
-		    for(var i = 0; i < this._blocks.length; i++) {
-		        var block = this._blocks[i];
-		        var idx = block.offset;
-		        if(offset >= idx && offset <= idx+block.text.length) {
-		            return true;
-		        }
-		    }
-		    return false;
-        },    
-    
-        /**
-         * @description Returns an EditorContext-like object that can resolve promises for <code>getText</code> and <code>getFileMetadata</code>
-         * @function
-         * @returns {Object} The EditorContext object to use when parsing
-         */
-        getEditorContext: function getEditorContext() {
-            var proxy = Object.create(null);
-            var that = this;
-            proxy.getText = function() {
-                return new Deferred().resolve(that.getSource());
-            };
-            proxy.getFileMetadata = function() {
-                return new Deferred().resolve(that._metadata);
-            };
-            proxy.setText = function(text, start, end) {
-                if(that._ec) {
-                    return that._ec.setText(text, start, end);
-                } else {
-                    return new Deferred().resolve(null);
-                }
-            };
-            return proxy;
-        },
-        
-        /**
-         * @description Returns the computed list of dependencies
-         * @function
-         * @returns {Array.<string>} Returns the array of dependencies, or an empty array, never null
-         * @since 9.0
-         */
-        getDependencies: function getDependencies() {
-        	return this._deps;	
+            this._source += block.text;
+            _cursor = this._source.length;
         }
-    });
-    
+    };
+
+    /**
+     * @description Returns the source of this compilation unit
+     * @function
+     * @returns {String} The source of the compilation unit
+     */
+    CompilationUnit.prototype.getSource = function getSource() {
+    	if(!this._source) {
+            this._init();
+        }
+        return this._source;
+    };
+
+    /**
+     * @description Returns if the given offset is valid compared to the blocks of code
+     * that make up this unit
+     * @function
+     * @param {Number} offset The offset to check
+     * @returns {Boolean} If the given offset is within any of the backing code blocks
+     */
+    CompilationUnit.prototype.validOffset = function validOffset(offset) {
+        if(!this._blocks || this._blocks.length < 1 || offset < 0) {
+	        return false;
+	    }
+	    for(var i = 0; i < this._blocks.length; i++) {
+	        var block = this._blocks[i];
+	        var idx = block.offset;
+	        if(offset >= idx && offset <= idx+block.text.length) {
+	            return true;
+	        }
+	    }
+	    return false;
+    };
+
+    /**
+     * @description Returns an EditorContext-like object that can resolve promises for <code>getText</code> and <code>getFileMetadata</code>
+     * @function
+     * @returns {Object} The EditorContext object to use when parsing
+     */
+   CompilationUnit.prototype.getEditorContext = function getEditorContext() {
+        var proxy = Object.create(null);
+        var that = this;
+        proxy.getText = function() {
+            return new Deferred().resolve(that.getSource());
+        };
+        proxy.getFileMetadata = function() {
+            return new Deferred().resolve(that._metadata);
+        };
+        proxy.setText = function(text, start, end) {
+            if(that._ec) {
+                return that._ec.setText(text, start, end);
+            } else {
+                return new Deferred().resolve(null);
+            }
+        };
+        return proxy;
+    };
+
+    /**
+     * @description Returns the computed list of dependencies
+     * @function
+     * @returns {Array.<string>} Returns the array of dependencies, or an empty array, never null
+     * @since 9.0
+     */
+    CompilationUnit.prototype.getDependencies = function getDependencies() {
+    	return this._deps;
+    };
+
     return CompilationUnit;
 });

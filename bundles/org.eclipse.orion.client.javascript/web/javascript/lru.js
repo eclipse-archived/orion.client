@@ -11,8 +11,7 @@
  *******************************************************************************/
 /*eslint-env amd*/
 define([
-	'orion/objects',
-], function(Objects) {
+], function() {
 
     function node(key, value) {
         var n = Object.create(null);
@@ -42,80 +41,79 @@ define([
 	    this._cache = Object.create(null);
 	}
 	
-	Objects.mixin(LRU.prototype, /** @lends javascript.LRU.prototype */ {
-		/**
-		 * @description Clears the entire cache
-		 * @function
-		 */
-		clear: function clear() {
-		    this._cache = Object.create(null);
-		    this._start = null;
-		    this._end = null;
-		    this._size = 0;
-		},
-		/**
-		 * @description Returns the current size of the map
-		 * @function
-		 * @returns {Number} The size of the map
-		 */
-		size: function size() {
-		  return this._size;  
-		},
-		/**
-		 * @description If the map contains the given key
-		 * @function
-		 * @param {String} key The key to check
-		 * @returns {Boolean} If the map contains the key or not
-		 */
-		containsKey: function containsKey(key) {
-		    return typeof this._cache[key] !== 'undefined';
-		},
-		/**
-		 * @description Adds the given key / value pair to the map. If the addition is
-		 * greater than the given maximum map size, the last entry will be removed 
-		 * and the new entry added to the head of the map.
-		 * 
-		 * Putting a value that already exists in the map will move it to the head
-		 * of the LRU discarding the existing value.
-		 * 
-		 * @function
-		 * @param {String} key The key to map the given value to
-		 * @param {*} value The value to map to the given key
-		 */
-		put: function put(key, value) {
-		    if(this._max !== -1 && this._size+1 > this._max) {
-		        //shuffle one off the end
-		       this.remove(this._end._v.key);
-		    }
-		    this.remove(key);  //torch the existing value
-		    var entry = node(key, value);
-		    if(!this._start) {
-		        this._start = this._end = entry;
-		    } else {
-		        entry = node(key, value);
-		        entry._n = this._start;
-		        this._start._p = entry;
-		        this._start = entry;
-		    }
-		    this._cache[key] = entry;
-		    this._size++;
-		},
-		/**
-		 * @description Gets the value from the map with the given key. Returns
-		 * null if no mapping exists.
-		 * @function
-		 * @param {String} key The key to look up
-		 * @returns {*} The value mapped to the given key
-		 */
-		get: function get(key) {
-		    if(this._size > 0) {
-		        var entry = this._cache[key];
-		        if(entry && entry._v) {
-		          return entry._v.value;
-		        }
-		    }
-		    return null;
-		},
+	/**
+	 * @description Clears the entire cache
+	 * @function
+	 */
+	LRU.prototype.clear = function clear() {
+	    this._cache = Object.create(null);
+	    this._start = null;
+	    this._end = null;
+	    this._size = 0;
+	};
+	/**
+	 * @description Returns the current size of the map
+	 * @function
+	 * @returns {Number} The size of the map
+	 */
+	LRU.prototype.size = function size() {
+	  return this._size;  
+	};
+	/**
+	 * @description If the map contains the given key
+	 * @function
+	 * @param {String} key The key to check
+	 * @returns {Boolean} If the map contains the key or not
+	 */
+	LRU.prototype.containsKey = function containsKey(key) {
+	    return typeof this._cache[key] !== 'undefined';
+	};
+	/**
+	 * @description Adds the given key / value pair to the map. If the addition is
+	 * greater than the given maximum map size, the last entry will be removed 
+	 * and the new entry added to the head of the map.
+	 * 
+	 * Putting a value that already exists in the map will move it to the head
+	 * of the LRU discarding the existing value.
+	 * 
+	 * @function
+	 * @param {String} key The key to map the given value to
+	 * @param {*} value The value to map to the given key
+	 */
+	LRU.prototype.put = function put(key, value) {
+	    if(this._max !== -1 && this._size+1 > this._max) {
+	        //shuffle one off the end
+	       this.remove(this._end._v.key);
+	    }
+	    this.remove(key);  //torch the existing value
+	    var entry = node(key, value);
+	    if(!this._start) {
+	        this._start = this._end = entry;
+	    } else {
+	        entry = node(key, value);
+	        entry._n = this._start;
+	        this._start._p = entry;
+	        this._start = entry;
+	    }
+	    this._cache[key] = entry;
+	    this._size++;
+	};
+	/**
+	 * @description Gets the value from the map with the given key. Returns
+	 * null if no mapping exists.
+	 * @function
+	 * @param {String} key The key to look up
+	 * @returns {*} The value mapped to the given key
+	 */
+	LRU.prototype.get = function get(key) {
+	    if(this._size > 0) {
+	        var entry = this._cache[key];
+	        if(entry && entry._v) {
+	          return entry._v.value;
+	        }
+	    }
+	    return null;
+	};
  		/**
 		  * @description Removes the key and mapped value from the map and returnns
 		  * the removed value or null if nothign was removed.
@@ -123,7 +121,7 @@ define([
 		  * @param {String} key The key to remove
 		  * @returns {*} The removed value or null
 		  */
-		 remove: function remove(key) {
+		 LRU.prototype.remove = function remove(key) {
  		    if(this._size === 0) {
  		        return null;
  		    }
@@ -148,14 +146,14 @@ define([
  		        return entry._v.value;
  		    }
  		    return null;
- 		},
+ 		};
  		/**
 		  * @description Returns the array of keys found in the map in the order they were inserted,
 		  * so for this LRU map the first key would be the oldest mapped value
 		  * @function
 		  * @returns {String[]} The keys in the map in insertion order
 		  */
-		 keys: function keys() {
+		 LRU.prototype.keys = function keys() {
 		    var keys = [];
 		    if(this._end) {
 		       var n = this._end;
@@ -165,8 +163,7 @@ define([
 		       }
 		    }
 		    return keys;
- 		}
-	});
+ 		};
 	
-	return {LRU : LRU};
+	return LRU;
 });

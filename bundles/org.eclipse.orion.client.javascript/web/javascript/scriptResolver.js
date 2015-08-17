@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2013, 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -18,27 +18,27 @@ define([
 'orion/Deferred',
 'javascript/lru'
 ], function(Objects, Deferred, LRU) {
-    
+
     /**
      * @name ScriptResolver
      * @description Creates a new script resolver for finding workspace file based
      * on a given logical path and search options
      * @param {orion.FileClient} fileclient The bootstrap object
-     * @constructor 
+     * @constructor
      * @since 8.0
      */
     function ScriptResolver(fileclient) {
         this.fileclient = fileclient;
-        this.cache = new LRU.LRU(10);
+        this.cache = new LRU(10);
     }
-    
+
     Objects.mixin(ScriptResolver.prototype, {
        /**
         * @description Tries to find the workspace file for the given logical name and options
         * @function
         * @param {String} logicalName The name of the file to look up, for example, 'orion/objects'
         * @param {Object} options The map of search options.
-        * 
+        *
         * >Supported options include:
         * >  * ext - the file extension type to look for, for example 'js'
         * >  * icon - the URL or relative path to the icon to describe found files
@@ -51,11 +51,11 @@ define([
           }
           return new Deferred().resolve(null);
        },
-       
+
        setSearchLocation: function(searchLocation) {
        		this.searchLocation = searchLocation;
        },
-       
+
        _getFile : function _getFile(name, options) {
            var files = this.cache.get(name);
            if(files) {
@@ -107,10 +107,10 @@ define([
                return null;
            });
        },
-       
+
        /**
         * @description Removes the prefix of a name a la requirejs
-        * @param {String} name The name to remove the prefix from 
+        * @param {String} name The name to remove the prefix from
         * @returns {Array.<String>} The array of prefix followed by the trimmed name, or an array with a single entry (if no prefix was removed).
         * @since 10.0
         */
@@ -118,10 +118,10 @@ define([
        		var idx = name.indexOf('!');
        		if(idx > -1) {
        			return name.split('!');
-       		} 
+       		}
   			return [name];
        },
-       
+
        /**
         * @description Resolves the files that match the given location
         * @function
@@ -177,18 +177,18 @@ define([
 			      		if(reg.test(p1)) {
 			      			_files.push(file);
 			      		}
-                    }	            
+                    }
 		        }
 		        return _files;
 		    }
 		    return [];
 		},
-       
+
        /**
         * Returns if the two paths are the same
         * @param {String} file The first path
         * @param {String} path2 The second path
-        * @returns {Boolean} If the paths are the same 
+        * @returns {Boolean} If the paths are the same
         */
        _samePaths: function _samePaths(file, path2, meta) {
        		if(file == null) {
@@ -222,7 +222,7 @@ define([
 	      		return p1 === p2;
        		}
        },
-       
+
        /**
         * @description Adds the additional path to the given path
         * @function
@@ -244,15 +244,15 @@ define([
                     newpath += addition;
                 }
                 return newpath;
-            }  
+            }
             return null;
        },
-       
+
        _trimName: function _trimeName(name) {
            //TODO haxxor - we don't need to see the root client path
            return name.replace(/^(?:org\.eclipse\.orion\.client)?(?:\/)?bundles\//, '');
        },
-       
+
        _newFileObj: function _newFileObj(name, location, path, icon, type, fileClient) {
            var meta = Object.create(null);
            meta.name = name;
@@ -268,7 +268,7 @@ define([
            return meta;
        }
     });
-    
+
     return {
         ScriptResolver: ScriptResolver
     };

@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2013, 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -31,14 +31,14 @@ define([
 		 */
 		EndOfInput: 2
 	};
-	
+
 	var emptyAST = Object.create(null);
 	emptyAST.type = "Program"; //$NON-NLS-0$
 	emptyAST.body = [];
 	emptyAST.comments = [];
 	emptyAST.tokens = [];
 	emptyAST.range = [0, 0];
-	
+
 	/**
 	 * Provides a shared AST.
 	 * @name javascript.ASTManager
@@ -47,12 +47,12 @@ define([
 	 */
 	function ASTManager(esprima) {
 		this.parser = esprima;
-		this.cache = new LRU.LRU(10);
+		this.cache = new LRU(10);
 		if (!this.parser) {
 			throw new Error("Missing parser"); //$NON-NLS-1$
 		}
 	}
-	
+
 	Objects.mixin(ASTManager.prototype, /** @lends javascript.ASTManager.prototype */ {
 		/**
 		 * @param {orion.editor.EditorContext} editorContext
@@ -75,13 +75,13 @@ define([
 		},
 		/**
 		 * Returns the key to use when caching
-		 * @param {Object} metadata The file infos 
+		 * @param {Object} metadata The file infos
 		 * @since 8.0
 		 */
 		_getKey: function _getKey(metadata) {
 		      if(!metadata || !metadata.location) {
 		          return 'unknown'; //$NON-NLS-1$
-		      }    
+		      }
 		      return metadata.location;
 		},
 		/**
