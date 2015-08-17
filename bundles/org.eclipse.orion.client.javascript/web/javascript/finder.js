@@ -272,20 +272,37 @@ define([
 		 */
 		findScriptBlocks: function(buffer, offset) {
 			var blocks = [];
-			var val = null, regex = /<\s*script(?:(type|language)(?:\s*)=(?:\s*)"([^"]*)"|[^>]|\n)*>((?:.|\r?\n)*?)<\s*\/script(?:[^>]|\n)*>/ig;
+			var val = null;
+			var regex = /<\s*script([^>]*)(?:\/>|>((?:.|\r?\n)*?)<\s*\/script[^<>]*>)/ig;
+			var langRegex = /(type|language)\s*=\s*"([^"]*)"/i;
+			var srcRegex = /src\s*=\s*"([^"]*)"/i;			
 			var comments = this.findHtmlCommentBlocks(buffer, offset);
 			loop: while((val = regex.exec(buffer)) != null) {
-				var attribute = val[1];
-			    var type = val[2];
-			    if(attribute && type){
-			    	if (attribute === "language"){  //$NON-NLS-0$
-			    		type = "text/" + type;  //$NON-NLS-0$
-			    	}
-			    	if (!/^(application|text)\/(ecmascript|javascript(\d.\d)?|livescript|jscript|x\-ecmascript|x\-javascript)$/ig.test(type)) {
-			        	continue;
+				var attributes = val[1];
+			    var text = val[2];
+			    var deps = null;
+			    if (attributes){
+			    	var lang = langRegex.exec(attributes);
+			    	// No type/language attribute or empty values default to javascript
+			    	if (lang && lang[2]){
+			    		var type = lang[2];
+			    		if (lang[1] === "language"){
+			    			// Language attribute does not include 'text' prefix
+			    			type = "text/" + type; //$NON-NLS-1$
+		    			}
+		    			if (!/^(application|text)\/(ecmascript|javascript(\d.\d)?|livescript|jscript|x\-ecmascript|x\-javascript)$/ig.test(type)) {
+				        	continue;
+				        }
+			        }
+			        var src = srcRegex.exec(attributes);
+			        if (src){
+			        	deps = src[1];
 			        }
 			    }
-				var text = val[3];
+			    if (!text && deps){
+			    	blocks.push({text: "", offset: 0, dependencies: deps});
+			    	continue;
+			    }
 				if(text.length < 1) {
 					continue;
 				}
@@ -298,7 +315,9 @@ define([
 					}
 					blocks.push({
 						text: text,
-						offset: index
+						offset: index,
+						dependencies: deps
+						
 					});
 				}
 			}
