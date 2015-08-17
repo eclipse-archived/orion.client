@@ -45,7 +45,7 @@ define([
             this._source = '';
             for(var i = 0; i < this._blocks.length; i++) {
                 var block = this._blocks[i];
-                if(block.dependecies) {
+                if(block.dependencies) {
                 	this._deps.push(block.dependencies);
                 }
                 var pad = block.offset - _cursor;
