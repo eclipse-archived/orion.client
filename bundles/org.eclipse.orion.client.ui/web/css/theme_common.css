@@ -107,6 +107,11 @@ a:hover {
 	color:white !important;
 }
 
+.checkedRow  > td > a > span > span
+{
+	color:white !important;
+}
+
 .checkedRow .secondaryColumn {
 	color: white;
 }
