@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -15,13 +15,12 @@ define([
 'javascript/finder',
 'orion/Deferred',
 'javascript/compilationUnit',
-'i18n!javascript/nls/messages',
-'orion/i18nUtil'
-], function(Objects, Finder, Deferred, CU, Messages, i18nUtil) {
-	
+'i18n!javascript/nls/messages'
+], function(Objects, Finder, Deferred, CU, Messages) {
+
 	var deferred;
 	var cachedContext;
-	
+
 	/**
 	 * @description Creates a new rename command
 	 * @constructor
@@ -64,9 +63,9 @@ define([
 		});
 		this.timeout = null;
 	}
-	
+
 	Objects.mixin(RenameCommand.prototype, {
-		/* 
+		/*
 		 * override
 		 * @callback
 		 */
@@ -83,20 +82,20 @@ define([
 			            if(blocks && blocks.length > 0) {
 			                var cu = new CU(blocks, {location:options.input, contentType:options.contentType});
 	    			        if(cu.validOffset(offset)) {
-	    			        	return that._doRename(editorContext, options); 
+	    			        	return that._doRename(editorContext, options);
 	    			        }
 				        }
 			        });
 			    }
 			});
 		},
-		
+
 		/**
 		 * @description Actually do the work
 		 * @function
 		 * @private
 		 * @param {orion.editor.EditorContext} editorContext The editor context
-		 * @param {Object} params The parameters 
+		 * @param {Object} params The parameters
 		 * @returns {Deferred} A deferred to resolve
 		 */
 		_doRename: function _doRename(editorContext, params) {
@@ -120,7 +119,7 @@ define([
 			});
 		}
 	});
-	
+
 	return {
 		RenameCommand : RenameCommand
 	};
