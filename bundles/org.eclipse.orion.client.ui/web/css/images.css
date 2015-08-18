@@ -122,10 +122,6 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.core-sprite-silhouette:hover {
-	color: #C0E6FF;
-}
-
 .core-sprite-addcontent{
 	font-size: 16px;
 	color: #f89427;
@@ -140,7 +136,7 @@
 
 .core-sprite-gear{
 	font-size: 16px;
-	color: #555555;
+	color: white;
 	font-family: 'Orion Icon Font';
 	padding: 0;
 	background: none;
@@ -164,7 +160,7 @@
 }
 
 .core-sprite-go-up{ font-size: 16px;
-	color: #555555;
+	color: white;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding: 0;
@@ -178,7 +174,7 @@
 .core-sprite-outline{
 	font-size: 16px;
 	vertical-align:middle;
-	color: #555555;
+	color: #77858D;
 	font-family: 'Orion Icon Font';
 	padding: 0;
 	background: none;
@@ -219,7 +215,7 @@
 .core-sprite-openarrow{
 	font-size: 16px;
 	line-height: normal;
-	vertical-align: bottom;
+	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding: 0;
 	background: none;
@@ -232,7 +228,7 @@
 .core-sprite-closedarrow{
 	font-size: 16px;
 	line-height: normal;
-	vertical-align: bottom;
+	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding: 0;
 	background: none;
@@ -300,7 +296,7 @@
 
 .core-sprite-folder{
 	font-size: 16px;
-	color: #555;
+	color: white;
 	line-height: 16px;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
@@ -314,9 +310,9 @@
 
 .core-sprite-file{
 	font-size: 16px;
-	color: #555555;
+	color: white;
 	line-height: 16px;
-	vertical-align: bottom;
+	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
@@ -342,7 +338,7 @@
 
 .core-sprite-edit{
 	font-size: 16px;
-	color: #555;
+	color: white;
 	line-height: normal;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
@@ -356,7 +352,7 @@
 
 .core-sprite-leftarrow{
 	font-size: 16px;
-	color: #555;
+	color: white;
 	line-height: 14px;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
@@ -371,7 +367,7 @@
 
 .core-sprite-rightarrow{
 	font-size: 16px;
-	color: #555;
+	color: white;
 	line-height: 14px;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
@@ -386,9 +382,9 @@
 
 .file-sprite-css{
 	font-size: 16px;
-	color: #555;
-	line-height: 16px;
-	vertical-align: bottom;
+	color: white;
+	line-height: normal;
+	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
@@ -400,9 +396,9 @@
 
 .file-sprite-html{
 	font-size: 16px;
-	color: #555;
+	color: white;
 	line-height: 16px;
-	vertical-align: bottom;
+	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
@@ -414,9 +410,9 @@
 
  .file-sprite-javascript{
 	font-size: 16px;
-	color: #555;
+	color: white;
 	line-height: 16px;
-	vertical-align: bottom;
+	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
@@ -428,9 +424,9 @@
 
 .file-sprite-xml{
 	font-size: 16px;
-	color: #555;
+	color: white;
 	line-height: 16px;
-	vertical-align: bottom;
+	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
@@ -442,9 +438,9 @@
 
 .file-sprite-text{
 	font-size: 16px;
-	color: #555;
+	color: white;
 	line-height: 16px;
-	vertical-align: bottom;
+	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
@@ -456,9 +452,9 @@
 
 .file-sprite-image{
 	font-size: 16px;
-	color: #555;
+	color: white;
 	line-height: 16px;
-	vertical-align: bottom;
+	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
@@ -470,7 +466,7 @@
 
 .core-sprite-warning{
 	font-size: 16px;
-	color: #555;
+	color: white;
 	line-height: 14px;
 	vertical-align:top;
 	font-family: 'Orion Icon Font';
@@ -496,7 +492,7 @@
 
 .core-sprite-deploy{
 	font-size: 16px;
-	color: #555;
+	color: white;
 	line-height: normal;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
@@ -512,7 +508,7 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
+	color: white;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -524,7 +520,7 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
+	color: white;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -536,7 +532,7 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
+	color: white;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -548,7 +544,7 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
+	color: white;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -560,7 +556,7 @@
 	font-size: 20px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
+	color: white;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -573,7 +569,7 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
+	color: white;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -585,7 +581,7 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
+	color: white;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -597,7 +593,7 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
+	color: white;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -609,7 +605,7 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
+	color: #77858d;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -621,7 +617,7 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
+	color: #77858D;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -633,7 +629,7 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
+	color: #77858D;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -645,7 +641,7 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
+	color: white;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -657,7 +653,7 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
+	color: white;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -669,7 +665,7 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
+	color: #77858D;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -678,22 +674,6 @@
 }
 
 .core-sprite-show-filtered{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: #555;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-
-.core-sprite-dashboard,
-.core-sprite-runlogs,
-.core-sprite-play,
-.core-sprite-stop{
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
@@ -708,9 +688,26 @@
 .core-sprite-page,
 .core-sprite-horizontal,
 .core-sprite-vertical,
-.core-sprite-pip,
+.core-sprite-pip{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	padding: 2px;
+	padding-top: 0;
+}
+
+.core-sprite-dashboard,
+.core-sprite-runlogs,
+.core-sprite-play,
+.core-sprite-stop,
 .core-sprite-open,
 .core-sprite-debug,
+.core-sprite-restart,
 .core-sprite-download,
 .core-sprite-collected-errors,
 .core-sprite-listed-errors,
@@ -720,20 +717,12 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
+	color: white;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-}
-
-
-.core-sprite-page,
-.core-sprite-horizontal,
-.core-sprite-vertical,
-.core-sprite-pip {
-	padding: 2px;
-	padding-top: 0;
 }
 
 .core-sprite-hamburger:before{ content:'\E000'; }
@@ -783,6 +772,7 @@
 .core-sprite-collected-errors:before{ content:'\E054'; }
 .core-sprite-download:before{ content:'\E036'; }
 .core-sprite-debug:before{ content:'\E056'; }
+.core-sprite-restart:before{ content:'\E025'; }
 .core-sprite-play:before{ content:'\E057'; }
 .core-sprite-stop:before{ content:'\E058'; }
 .core-sprite-open:before{ content:'\E059'; }

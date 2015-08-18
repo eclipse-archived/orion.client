@@ -8,8 +8,8 @@
 }
 
 .progressInfo {
-	color: #468847 !important;
-	background-color: #dff0d8 !important;
+	color: white !important;
+	background-color: #1BB199 !important;
 }
 
 /* More prominent hyperlinks in notification area */
@@ -18,18 +18,21 @@
 }
 
 .progressWarning {
-	color: #3C3200 !important;
- 	background-color: #FDE876 !important;
+	color: white !important;
+	background-color: #f0ad4e !important;
+	border: 1px solid #f0ad4e !important;
 }
 
 .progressError {
-	color: #E71D32 !important;
-  	background-color: #FFD2DD !important;
+	color: white !important;
+	background-color: #d9534f !important;
+	border: 1px solid #d9534f !important;
 }
 
 .progressNormal {
-	color: #144D14 !important;
-  	background-color: #B4E051 !important;
+	color: white !important;
+	background-color: #1BB199 !important;
+	border: 1px solid #1BB199 !important;
 }
 
 .progressPane {
@@ -59,8 +62,8 @@
 }
 
 .watchButton {
-	border-top: 1px solid #515a5f;
-	position: absolute;
+	border-top: 1px solid #626e76;
+	position: relative;
 	top: 0;
 	width: 3px;
 	left: calc(50% - 2px);
@@ -70,13 +73,13 @@
 }
 
 .watchBody {
-	position: absolute;
+	position: relative;
 	left: 1px;
-	top: 2px;
+	top: 1px;
 	width: calc(100% - 5px); /* subtract borders and button height */
 	height: calc(100% - 5px); /* subtract borders, button height and space between button and body */
 	background: transparent;
-	border: 1px solid #515a5f;
+	border: 1px solid #626e76;
 	-moz-border-radius: 50%;
 	-webkit-border-radius: 50%;
 	border-radius: 50%;
@@ -104,7 +107,7 @@
 	display: block;
 	border-radius: 40%;
 	height: 5px;
-	background: #515a5f;
+	background: #626e76;
 	transition: background-color 1s ease;
 }
 
@@ -123,7 +126,7 @@
 	border-radius: 40%;
 	right: 0;
 	width: 4px;
-	background: #515a5f;
+	background: #626e76;
 	
 	transition: background-color 1s ease;
 }
@@ -224,10 +227,8 @@
 	100% { transform: rotate(360deg);}
 }
 
-
-
 .progressWarning .progressPane_running, .progressWarning .core-sprite-progress {
-	border-color: #c09853; 
+	border-color: #f0ad4e; 
 }
 
 .progressError .progressPane_running, .progressError .core-sprite-progress {
@@ -259,21 +260,20 @@
 }
 
 .notificationShow {
-	color: #144D14;
-	background-color: #B4E051;
+	color: white; 
+	background-color: #1BB199; 
 	top: 0;
 	position: fixed;
 	float: left; 
 	margin-left: 20%; 
 	margin-right: auto; 
 	width: 60%; 
-/*	box-shadow: 0 2px 0 rgba(0,0,0,0.1); */
 	max-height: 1000px; 
 	overflow: hidden;
 	padding-top: 5px;
 	padding-bottom: 5px;
 	padding-left: 5px;
-	z-index: 100; 
+	z-index: 300; 
 	border-bottom-right-radius: 5px; 
 	border-bottom-left-radius: 5px; 
 	border:none;
@@ -284,8 +284,8 @@
 	-o-transition: top 0.7s;
 }
 .notificationHide {
-	color: #468847; 
-	background-color: #dff0d8; 
+	color: white; 
+	background-color: #1BB199; 
 	top: -45px;
 	position: fixed;
 	text-align:center;
@@ -297,7 +297,7 @@
 	max-height: 1000px; 
 	overflow: hidden;
 	padding-left: 5px;
-	z-index: 100; 
+	z-index: 300;
 	border-bottom-right-radius: 5px; 
 	border-bottom-left-radius: 5px; 
 	transition:top 0.7s;
@@ -305,6 +305,11 @@
 	-moz-transition: top 0.7s;
 	-ms-transition: top 0.7s;
 	-o-transition: top 0.7s;
+}
+
+.notifications a {
+	color: white;
+	text-decoration: underline;
 }
 
 .notifications {

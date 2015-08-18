@@ -12,6 +12,8 @@
 
 @import "../css/theme.css";
 
+@import "css/git_extra.css";
+
 .tag-description {
 	white-space: normal;
 	padding-right: 10px;

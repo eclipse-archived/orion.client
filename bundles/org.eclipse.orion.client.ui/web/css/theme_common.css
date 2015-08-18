@@ -1,0 +1,1158 @@
+/**
+ * Note: many styles defined in this file are dynamically overridden at page-load time by by ThemeSheetWriter.js and ThemeData.js
+ */
+
+/* Page color */
+
+.orionPage {
+	background-color: #26343F;
+	width: 100%;
+	height: 100%;
+}
+
+/* Top row/navigation banner */
+
+.topRowBanner {
+	margin: 0;
+	border: 0;
+	display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
+	display: -ms-flexbox;     /* TWEENER - IE 10 */
+	display: -webkit-flex;     /* NEW - Chrome */
+	display: flex; 
+	border-top-width: 0px;
+	border-right-width: 0px;
+	border-left-width: 0px;
+	border-bottom-style: none;
+	background-color: white;
+	height: 16px;
+	padding: 8px 2px 7px 6px !important;
+	box-shadow: rgba(0, 0, 0, 0.0980392) 0px 2px 2px 0px, rgba(0, 0, 0, 0.0980392) 0px 1px 0px 0px;
+	z-index: 100;
+	display: none;
+}
+
+a {
+	text-decoration: none;
+	color: #00AED1;
+}
+
+a:hover {
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+/* Navigation text */
+
+.primaryNav {
+	font-size: 8pt; 
+	font-weight: normal;
+	color: #BFBFBF;
+	vertical-align: baseline;
+}
+
+.primaryNav > div {
+	padding-top: 6px;
+}
+
+.primaryNav > nav {
+	padding-top: 6px;
+}
+
+.primaryNav > nav > a {
+	color: #BFBFBF;
+	margin-right: 6px;
+	margin-left: 6px; 
+	text-decoration: none;
+}
+
+.primaryNav > nav > a:hover, .primaryNav span.dropdownTrigger:hover {
+	cursor: pointer;
+	color: white;
+}
+
+/* Title area - the place for location/breadcrumbs */
+
+.titleArea {
+    margin: 0;
+    padding-top: 3px;
+    border: 0;
+    background: #EFEFEF;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#EFEFEF), color-stop(100%,#EFEFEF));
+    border-bottom: 1px solid #DEDEDE;
+    min-height: 20px;
+}
+
+/* Row selection */
+
+.checkedRow {
+	color: white !important;
+	background-color: #1bb199 !important;
+}
+
+.checkedRow.disabledRow {
+	background-color: #dadada !important;
+}
+
+.checkedRow  > td > span > a
+{
+	color:white !important;
+}
+.checkedRow  > td > span > span
+{
+	color:white !important;
+}
+
+.checkedRow  > td > span > a > span
+{
+	color:white !important;
+}
+
+.checkedRow .secondaryColumn {
+	color: white;
+}
+
+.checkedRow .navColumnNoIcon {
+	color: white;
+}
+
+.checkedRow .secondaryColumn > a:hover {
+	color: white !important;
+	font-weight:bold;
+	text-decoration: none;
+}
+
+.checkedRow .sectionTableItem {
+	color: white !important;
+}
+
+.checkedRow a {
+	color: white;
+}
+
+.checkedRow .jazz-description {
+	color: white;
+}
+
+.navRow > td:first-child {
+	/* border-left: 6px solid transparent; THIS CAUSES PIXELATION PROBLEMS! */
+}
+
+.navRow.checkedRow > td:first-child {
+	border-left-color: #d57152;
+}
+
+.navbar-item-selected {
+	color: #FFFFFF !important;
+	font-weight: bold;
+	position: relative;
+	background: #1bb199 !important;
+}
+
+/* Breadcrumbs */
+
+.breadcrumbContainer {
+	align-items: baseline;
+	display: inline-flex;
+	justify-content: center;
+	
+	-webkit-align-items: baseline;		/* Safari */
+	display: -webkit-inline-flex;		/* Safari */
+	-webkit-justify-content: center;	/* Safari */
+	
+	margin-right: 0;
+	overflow: hidden;
+	visibility: visible;
+	width: 100%;
+}
+
+.breadcrumb {
+	color: #E6E6E6;
+	-webkit-flex-grow: 0;		/* Safari */
+	flex-grow: 0;
+	font: 9pt;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", 
+		Helvetica, Tahoma, Geneva, Arial, "Lucida Grande", sans-serif;
+	overflow: hidden;
+	text-decoration: none;
+	text-overflow: ellipsis;
+}
+
+a.breadcrumb:hover {
+	text-decoration: none;
+	border-bottom: 1px dotted;
+	color: #00AED1;
+	cursor: pointer;
+}
+
+.breadcrumbSeparator {
+	color: #E6E6E6;
+	font-size: 9pt;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", 
+		Helvetica, Tahoma, Geneva, Arial, "Lucida Grande", sans-serif;
+	font-weight: bold;
+	-webkit-flex-shrink: 0;		/* Safari */
+	flex-shrink: 0;
+	margin: 2px;
+	text-decoration: none;
+}
+
+.currentLocation {
+	padding-top:1px;
+	font-weight: bold;
+	font-size: 9pt;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", 
+		Helvetica, Tahoma, Geneva, Arial, "Lucida Grande", sans-serif;
+	color: #E6E6E6;
+	text-decoration: none;
+	line-height: 10pt;
+	white-space:nowrap;
+}
+
+div.currentLocation {
+	width: 100%;
+}
+
+.breadcrumbContainer > .currentLocation {
+	margin: 0;
+}
+
+.tooltipContainer .currentLocation {
+	color: #3b4b54;
+}
+
+.tooltipContainer .breadcrumb {
+	color: #3b4b54;
+}
+
+.tooltipContainer .breadcrumbSeparator {
+	color: #3b4b54;
+}
+
+a.currentLocation:hover {
+	font-weight: bold;
+	color: #00AED1;
+ 	text-decoration: none;
+	border-bottom: 1px dotted;
+}
+
+a.breadcrumb.currentLocation {
+	font-weight: bold;
+	margin: 0;
+}
+
+.auxpane {
+	border: 0;
+	background: #3B4B54;
+	color: white;
+}
+
+.mainpane {
+	border: 0;
+	background: #3B4B54 !important;
+	padding-right:20px;
+}
+
+.mainToolbar {
+ 	background: #26343f;
+ 	padding-left: 2px;
+ 	padding-right: 5px;
+	white-space: nowrap;
+}
+
+/* Filesystem switcher toolbar */
+.fsToolbar {
+	padding: 2px 4px 2px 4px; /*$FSToolbarPadding*/
+	background-color: #DFE6EB;
+	/* border-bottom: 1px solid rgb(235, 235, 235); */
+	
+}
+
+.filesystemName {
+	display: inline-block;
+	font-weight: normal;
+	margin-left: 10px;
+	margin-top: 8px;
+	margin-bottom: 8px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	/* 100% - filesystemName_margin - filesystemName_margin - filesystemSwitcher_width */
+	max-width: calc(100% - 6px - 4px - 24px);
+	max-width: -webkit-calc(100% - 6px - 4px - 24px);
+	-moz-user-select: -moz-none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	color: white;
+}
+
+.filesystemSwitcher {
+	display: inline-block;
+	margin: 0;
+}
+
+.filesystemSwitcherWrapper {
+	display: block;
+	max-width: 100%;
+	white-space: nowrap;
+}
+
+.sidebarToolbar {
+	display: inline;
+	overflow: visible;
+	padding: 0 !important;
+}
+
+/* Searchbox in the top navigation area seems a difficult thing to 
+   get right. I've worked with a range of colors. What I notice is that
+   if the edges are curved, then it seems to need a lighter shade. That
+   draws more attention to the search box. It is more passive and fitting
+   if drawn with straight edges and a darker background */
+
+.searchbox {
+    background-image: url(../images/core_sprites.png);
+    background-repeat: no-repeat; 
+    background-position: 4px -297px; 
+    width: 12px; height: 12px;
+    background-color: #444;
+	border: 1px solid #222;
+	font-size: 11px;
+	width: 15em;
+	height: 16px;
+	border-radius: 10px; /* 10px */
+	color: #999;
+	padding: 0;
+	padding-left: 20px;
+	padding-right: 16px;
+	margin-left: 5px;
+	font-size: 7pt;
+}
+
+.searchbox:focus{
+	color: white;
+	outline: none;
+}
+
+/* Orion button provides standard padding, margin, alignment for any button, regardless of whether it is a command or not.  Using
+   this helps non-gray buttons remain uniform looking with respect to size. */
+   
+.orionButton {
+	border: 1px solid transparent;
+	text-align: center;
+	vertical-align: baseline;
+    display: inline-block;
+    padding: 4px 6px;
+    border-radius: 1px;
+    line-height: 12px;
+    font-size: 9pt;
+	font-family: "HelveticaNeue", "Helvetica Neue", "HelveticaNeueRoman", "HelveticaNeue-Roman", "Helvetica Neue Roman", 
+		'TeXGyreHerosRegular', "Helvetica", "Tahoma", "Geneva", "Arial", sans-serif;
+	margin: 0;  /* to override user agent stylesheet */
+}
+
+.commandButton.orionButton.dropdownTrigger {
+	/* border-color: #00AED1; */
+}
+
+.commandButton.orionButton.dropdownTrigger:hover {
+	border-color: #ccc;
+}
+
+.mainToolbar .commandButton.orionButton.dropdownTrigger {
+	color:white;
+}
+
+.mainToolbar .commandImage {
+	color:white;
+}
+
+.commandButton {
+	color: #00AED1;
+	border: 1px solid #00AED1;
+	background-color: rgba(0, 0, 0, 0);
+	/* border-radius: 3px; */
+	vertical-align: middle;
+	-webkit-transition: color 0.2s ease;
+	transition: color 0.2s ease;
+}
+
+.commandButton:not(.dropdownTrigger) {
+ 	/* text-transform: uppercase; */
+}
+
+.extraActions .commandButton {
+	text-transform: uppercase;
+}
+
+.commandButton.dropdownDefaultButton {
+	/* text-transform: uppercase; */
+}
+
+.commandButton:not(.primaryButton):hover, .commandButton:not(.primaryButton):focus {
+	background-color: #a5b5bc;
+	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
+}
+
+.commandButton.disabled {
+	color: #cdcdcd;
+}
+
+.primaryButton{
+	background: #1bb199;
+	border-color: #1bb199;
+	color: white;
+}
+
+.primaryButton:hover, .primaryButton:focus {
+	background: #01CDB0;
+	border-color: #01CDB0;
+}
+
+.commandImage {
+	border: 1px solid transparent;
+    border-radius: 1px;
+	background-color: transparent;
+	vertical-align: baseline;
+	cursor: pointer;
+	display: inline-block;
+	padding: 2px;
+	padding-top: 0;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.commandImage:hover, .commandImage:focus {
+	background-color: #a5b5bc;
+	border: 1px solid #ccc;
+}
+
+.mainToolbar .commandImage {
+	color: white;
+}
+
+/* push toggle */
+
+.orionToggleOff {
+	color: #222;
+	border-radius: 3px;
+	vertical-align:middle;
+	-webkit-animation-duration: .2s; 
+	animation-duration: .2s; 
+	-webkit-animation-fill-mode: both; 
+	animation-fill-mode: both; 
+	-webkit-animation-timing-function: linear; 
+	animation-timing-function: linear;
+}
+
+.orionToggleOn {
+	color: #222;
+	background-color: whitesmoke;
+	border-radius: 3px;
+	box-shadow: inset 1px 1px 2px 1px rgba(0,0,0,0.3);
+	vertical-align:middle;
+	-webkit-animation-duration: .2s; 
+	animation-duration: .2s; 
+	-webkit-animation-fill-mode: both; 
+	animation-fill-mode: both; 
+	-webkit-animation-timing-function: linear; 
+	animation-timing-function: linear; 
+}
+
+.orionToggleOn:hover {
+	background: white;
+	box-shadow: inset 0 0 1px 1px rgba(0,0,0,0.2);
+}
+
+.orionToggleOff:hover {
+	background: whitesmoke;
+	box-shadow: inset 0 0 1px 1px rgba(0,0,0,0.2);
+}
+
+.orionToggleAnimate {
+	-webkit-animation-name: pulse; 
+	animation-name: pulse; 
+}
+
+
+@-webkit-keyframes pulse { 
+    0% { -webkit-transform: scale(1); } 
+    50% { -webkit-transform: scale(1.3); } 
+    100% { -webkit-transform: scale(1); } 
+} 
+@keyframes pulse { 
+    0% { transform: scale(1); } 
+    50% { transform: scale(1.3); } 
+    100% { transform: scale(1); } 
+} 
+
+/* toggle */
+
+.orionSwitch {
+	position: relative;
+	width: auto;
+}
+
+.orionSwitchCheck {
+ 	display: none;
+}
+
+.orionSwitchLabel {
+	display: block;
+	overflow: hidden;
+	cursor: pointer;
+	border: 1px solid #DFE6EB;
+	border-radius: 3px;
+	height: 20px;
+}
+
+.orionSwitchInner {
+	display: block; 
+	width: 200%; 
+	margin-left: -100%;
+	margin-top:-1px;
+	text-align: left;
+	-moz-transition: margin 0.2s ease-in 0s; 
+	-webkit-transition: margin 0.2s ease-in 0s;
+	-o-transition: margin 0.2s ease-in 0s; 
+	transition: margin 0.2s ease-in 0s;
+}
+
+.orionSwitchInner:before, .orionSwitchInner:after {
+	display: block; 
+	float: left; 
+	width: 50%; 
+	padding: 0;
+	padding-bottom: 2px;
+	-moz-box-sizing: border-box; 
+	-webkit-box-sizing: border-box; 
+	box-sizing: border-box;
+}
+
+.orionSwitchInner:before {
+	padding-left: 3px;
+	padding-right: 2px;
+	background-color: #FFF;
+}
+
+.orionSwitchInner:after {
+	padding-right: 3px;
+	background-color: #eee;
+	text-align: right;
+}
+
+.orionSwitchSwitch {
+	display: block; 
+	width: calc(50% - 2px); 
+	margin: 0;
+	background: #DFE6EB;
+	border: 1px solid #DFE6EB;
+	border-radius: 3px;
+	position: absolute; 
+	top: 0; 
+	bottom: 0; 
+	right: calc(50% + 2px); 
+	-moz-transition: all 0.2s ease-in 0s;
+	-webkit-transition: all 0.2s ease-in 0s;
+	-o-transition: all 0.2s ease-in 0s; 
+	transition: all 0.2s ease-in 0s; 
+}
+
+.orionSwitchCheck:checked + .orionSwitchLabel .orionSwitchInner {
+	margin-left: 0;
+}
+
+.orionSwitchCheck:checked + .orionSwitchLabel .orionSwitchSwitch {
+	right: 0px; 
+}
+
+/* should be used in conjunction with .commandButton when a tool has no icon. */
+.commandMissingImageButton {
+	font-weight: normal;
+}
+
+.commandLink {
+	display: inline-block;
+	vertical-align: middle;
+	padding: 4px 0 1px;  /* other commands have 1px plus a border and 4px of padding, so we need 5px */
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.commandSeparator {
+	padding: 2px;
+}
+
+.commandActive {
+	background-color: #e6e6e6 !important;
+	border: 1px solid #808080 !important;
+    border-radius: 2px !important;
+}
+
+
+/* placeholders for possible hover states on command items */
+.commandActiveItem {
+}
+
+.commandInactiveItem {
+}
+
+/* widget theming */
+/* splitter - typically the color of the title area */
+.split {
+	background: #3B4B54;
+}
+
+.splitTracking {
+	background: #3B4B54;
+}
+
+.splitThumb {
+	background: #3B4B54;
+}
+
+/* dropdowns */
+.dropdown {
+}
+
+.dropdownArrowDown {
+	display: inline-block;
+	vertical-align: top;
+	line-height: 12px;
+	text-transform: lowercase;
+}
+
+.dropdownArrowRight {
+	flex-grow: 0;
+	-webkit-flex-grow: 0;		/* Safari */
+	font-size: 12px;
+}
+
+.dropdownTrigger:not(.dropdownDefaultButton) {
+ 	font-weight: normal;
+	color: #FFFFFF; /* why here? why now? */
+ 	border-color: transparent;
+}
+
+.dropdownTrigger a {
+	text-decoration: none;
+}
+
+.dropdownMenu {
+	box-shadow: 2px 2px 5px 3px rgba(0, 0, 0, .2);
+	color: #3b4b54;
+	background-color: white;
+	border-collapse: separate;
+	border: 1px solid #bbbbbb;
+	border-radius: 1px;
+	visibility: hidden;
+	z-index: 150;
+	position: absolute;
+	list-style-type: none;
+	display: none; /* don't take part in layout until open */
+	line-height: normal; /* don't want to inherit strange line-heights from ancestor elements */
+	margin: 0; /* needed for context menu positioning to work properly */
+	cursor: default;
+	font-size: 12px;
+	margin: 0;
+	outline: none;
+	padding: 3px 0 3px;
+}
+
+.dropdownMenuOpen {
+	min-width: 120px;
+	display: block;
+	visibility: visible;
+}
+
+.dropdownSubMenu {
+	position: relative;
+	line-height: normal;
+}
+
+.dropdownSubMenu > ul {
+	top: 0;
+	left: 100%;
+}
+
+.dropdownMenu > li {
+	min-width: 120px;
+	display: flex;
+	display: -webkit-flex; /* Safari */
+}
+
+.dropdownMenu > li > a, .dropdownMenu > li > span {
+	width: calc( 100% - 9px );
+	margin: 0;
+}
+
+.dropdownMenu > li > *:focus {
+	outline: none;
+}
+
+
+.dropdownSeparator {
+	height: 1px;
+	background-color: #ddd;
+	color: #ddd;
+	padding: 0 !important;
+	margin: 0;
+}
+
+.dropdownMenuItem, .dropdownMenuItem a {
+	align-items: center;
+	-webkit-align-items: center;		/* Safari */
+	align-content: stretch;
+	-webkit-align-content: stretch;		/* Safari */
+	display: inline-flex;
+	display: -webkit-inline-flex;		/* Safari */
+	vertical-align: middle;
+	color: #3b4b54 !important;
+	padding: 3px 3px 3px 5px;
+	cursor: pointer;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	white-space: nowrap;
+	border-left: 6px solid transparent;
+}
+
+.dropdownMenu .dropdownMenuItemSelected {
+	background-color: #FEF6F4;
+	border-left-color: #a6b5bc;
+}
+
+.dropdownMenuItem .check {
+	display: inline-block;
+	width: 12px;
+}
+
+.dropdownMenuItem .dropdownKeyBinding {
+	color: grey !important; /* !important to override .dropdownMenuItem */
+	flex-grow: 0;
+	-webkit-flex-grow: 0;		/* Safari */
+	font-size: 11px;
+	padding-left: 15px;
+	padding-right: 10px;
+}
+
+.dropdownMenuItem .dropdownCommandName {
+	-webkit-align-items: center;		/* Safari */
+	align-items: center;
+	display: inline-flex;
+	display: -webkit-inline-flex;		/* Safari */
+	
+	flex-grow: 1;
+	-webkit-flex-grow: 1;		/* Safari */
+	text-decoration: inherit; /* inherit hover decoration when inside an <a> */
+}
+
+.dropdownSelection {
+/* Using !important everywhere because this class is used by
+ * a variety of elements making it difficult to increase the
+ * specificity correctly for all users.
+ */
+	background-color: white !important;
+ 	color: #3b4b54 !important;
+	border: 1px solid #bbbbbb !important;
+	border-bottom: none !important;
+	border-bottom-left-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+	box-shadow: -1px -1px 2px 0 rgba(0, 0, 0, .2) !important;
+	margin-bottom: -1px !important;
+	position: relative !important;
+	z-index: 200 !important;
+}
+
+.checkedMenuItem {
+	margin: 4px 6px 2px 0;
+	vertical-align: bottom;
+}
+
+/* tooltips */
+
+.tooltipContainer {
+	display: none;
+	z-index: 200;
+	background: transparent;
+	position: absolute;
+	max-width: 110em;
+}
+.tooltip .textContent {
+	max-width: 40em;
+}
+.tooltip {
+	color: white;
+	background-color: #158d7a;
+	border-radius: 3px;
+	padding: 8px;
+	clear: both;
+	float: left;
+	border: 1px solid #158d7a;
+	box-shadow: 0px 0px 10pt -2pt rgba(0, 0, 0, 0.5);
+}
+
+.tooltip.left {
+}
+
+.tooltip .navlinkonpage {
+	color: #00aed1 !important;
+}
+
+.tooltip h2 {
+	color: #3b4b54;
+}
+
+.tooltip .operationStatus {
+	color: #00aed1;
+}
+
+.tooltip .operationError {
+	color: #a6b5bc;
+}
+
+.tooltipTailFromleft {
+	position: absolute;
+	display: inline-block;
+	top: 14px;
+	content: '';
+	z-index: 201;
+}
+
+.tooltipTailFromleft:after, .tooltipTailFromleft:before {
+	left: -1px;
+	top: 50%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+.tooltipTailFromleft:after {
+	border-color: transparent;
+	border-left-color: #158d7a;
+	border-width: 8px;
+	margin-top: -8px;
+}
+
+.tooltipTailFromleft:before {
+	border-color: transparent;
+	border-left-color: #158d7a;
+	border-width: 9px;
+	margin-top: -9px;
+}
+
+
+.tooltipTailBorderFromleft {
+	position: absolute;
+	display: inline-block;
+	border: 10px solid;
+	border-color: transparent transparent transparent #158d7a;
+	top: 2px;
+	right: -17px;
+	content: '';
+}
+
+.tooltipTailFromright {
+	position: absolute;
+	display: inline-block;
+	left: 0;
+	top: 14px;
+	content: '';
+	z-index: 201;
+}
+
+.tooltipTailFromright:after, .tooltipTailFromright:before {
+	right: -1px;
+	top: 50%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+.tooltipTailFromright:after {
+	border-color: transparent;
+	border-right-color: #158d7a;
+	border-width: 8px;
+	margin-top: -8px;
+}
+
+.tooltipTailFromright:before {
+	border-color: transparent;
+	border-right-color: #158d7a;
+	border-width: 9px;
+	margin-top: -9px;
+}
+
+.tooltipTailBorderFromright {
+	position: absolute;
+	display: inline-block;
+	border: 10px solid;
+	border-color: transparent #158d7a transparent transparent;
+	left: -17px;
+	top: 2px;
+	content: '';
+}
+
+.tooltipTailFrombelow {
+	position: absolute;
+	display: block;
+	left: 16px;
+	top: 0;
+	content: '';
+	z-index: 201;
+}
+
+
+.tooltipTailFrombelow:after, .tooltipTailFrombelow:before {
+	bottom: -1px;
+	left: 50%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+.tooltipTailFrombelow:after {
+	border-color: transparent;
+	border-bottom-color: #158d7a;
+	border-width: 8px;
+	margin-left: -8px;
+}
+
+.tooltipTailFrombelow:before {
+	border-color: transparent;
+	border-bottom-color: #158d7a;
+	border-width: 9px;
+	margin-left: -9px;
+}
+
+.tooltipTailBorderFrombelow {
+	position: absolute;
+	display: block;
+	border: 10px solid;
+	border-color: transparent transparent #158d7a transparent;
+	left: 14px;
+	top: -17px;
+	content: '';
+}
+
+.tooltipTailFromabove {
+	position: absolute;
+	display: block;
+	left: 16px;
+	content: '';
+	bottom: 0;
+	z-index: 201;
+}
+
+.tooltipTailFromabove:after, .tooltipTailFromabove:before {
+	top: -1px;
+	left: 50%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+.tooltipTailFromabove:after {
+	border-color: transparent;
+	border-top-color: #158d7a;
+	border-width: 8px;
+	margin-left: -8px;
+}
+
+.tooltipTailFromabove:before {
+	border-color: transparent;
+	border-top-color: #158d7a;
+	border-width: 9px;
+	margin-left: -9px;
+}
+
+.tooltipTailBorderFromabove {
+	position: absolute;
+	display: block;
+	border: 10px solid;
+	border-color: #158d7a transparent transparent transparent;
+	left: 14px;
+	bottom: -17px;
+	content: '';
+}
+
+.tooltipShowing {
+	display: block;
+}
+
+.tooltip > .parametersDismiss > .dismissButton {
+	color: whitesmoke;
+}
+
+.tooltip > .parametersDismiss > .dismissButton:hover {
+	color: white; 
+}
+
+/* dialogs */
+.dialog {
+	visibility: hidden;
+	z-index: 175;  /* less than tooltips, more than the rest */
+	position: absolute;
+	background-color: #fbfbfb;
+	border-radius: 2px;
+	border: 1px solid #BBB;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+	padding-bottom:5px;
+}
+
+.dialogShowing {
+	visibility: visible;
+}
+
+.dialogTitle {
+	display: block;
+}
+
+.dialogTitle {
+	padding-top: 5px;
+	display: inline-block;
+	background: #555;
+	width: 100%;
+	padding-bottom: 5px;
+	border-top-left-radius: 1px;
+	border-top-right-radius: 1px;
+}
+
+.dialogTitle > .dismissButton {
+	margin-right: 0;	
+}
+
+.dialogTitleText {
+	margin: 2px 2px 0;
+	color: whitesmoke;
+	font-size: 1em;
+	height: 18px;
+	padding-left: 4px;
+	font-weight: bold;
+}
+
+.dialogDismiss {
+	display: block;
+	cursor: pointer;
+	padding: 2px;
+}
+
+.dialogContent {
+	padding: 8px;
+}
+
+.parameterPopup .dismissButton, .dialogTitle .dismissButton {
+	color: rgb(221, 221, 221);
+	cursor: pointer;
+}
+
+.parameterPopup .dismissButton:hover, .dialogTitle .dismissButton:hover {
+	color: white;
+}
+
+.dialogButtons {
+	-webkit-align-items: center;	/* Safari */
+	align-items: center;
+	
+	display: -webkit-flex;	/* Safari */
+	display: flex;
+	
+	-webkit-justify-content: center;	/* Safari */
+	justify-content: center;
+
+	margin: 2px 4px 4px 4px;
+}
+
+.dialogButtons > button.commandButton {
+	min-width: 60px;
+}
+
+.confirmDialog {
+	min-width: 300px;
+	max-width: 450px;
+}
+
+.confirmDialog .checkboxWrapper {
+	margin: 10px 2px 5px 2px;
+}
+
+.checkboxMessage > .confirmDialogCheckbox {
+	margin: 0 5px 0 0;
+	outline: none;
+	vertical-align: top;
+}
+
+.modalBackdrop {
+	opacity: 0.5;
+	-webkit-transition: opacity 0.2s ease-in;
+	transition: opacity 0.2s ease-in;
+}
+
+.textviewTooltip {
+	background-color: #158d7a;
+}
+
+.textviewTooltip .commandButton {
+	border-color: white;
+	color: white;
+	margin-bottom: 2px;
+}
+
+.extraActions:not(:empty) {
+	margin-right: 10px !important;
+	padding-left: 10px !important;
+	margin-top: 0;
+	margin-bottom: 0;
+	padding-top: 7px;
+	height: 37px;
+	border-left: 1px solid #1B252E !important;
+}
+
+.core-sprite-git-logo {
+	font-size: 20px !important;
+}
+
+.outlineExplorer .navlinkonpage {
+	color: #333 !important;	
+}
+
+.outlineExplorer .treeIterationCursorRow_Dotted {
+	background-color: #1bb199;
+}
+
+.outlineExplorer .treeIterationCursorRow_Dotted .modelDecorationSprite {
+	color: white;
+}
+
+.outlineExplorer .treeIterationCursorRow_Dotted .navlinkonpage {
+	color: white !important;
+}
+
+.contentassist .selected {
+	background-color: #1BB199 !important;
+	background: #1BB199 !important;
+	border-radius: 0; 
+	color: #FFF;
+}

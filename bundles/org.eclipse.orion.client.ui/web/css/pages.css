@@ -9,7 +9,9 @@ html {
 html, body {
 	margin: 0;
 	padding: 0;
-	font: 9pt Helvetica, Arial, Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
+	font-family: "HelveticaNeue", "Helvetica Neue", "HelveticaNeueRoman", "HelveticaNeue-Roman", "Helvetica Neue Roman", 
+		'TeXGyreHerosRegular', "Helvetica", "Tahoma", "Geneva", "Arial", sans-serif;
+	font-size: 9pt;
 	min-width:700px;
 	-webkit-font-smoothing: antialiased;
   	-moz-osx-font-smoothing: grayscale;
@@ -40,9 +42,9 @@ input {
 	-moz-user-select: text;
 	text-indent: 0;
 	text-shadow: none;
-	border: 1px solid #f1f3f4;
+	border: 1px solid #bbb;
 	color: #333;
-	font-size: 8pt;
+	font-size: 9pt;
 	padding: 2px;
 	margin-left: 5px;
 }

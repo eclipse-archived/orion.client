@@ -410,7 +410,7 @@ textarea.parameterInput {
 }
 
 .slideParameters {
-	background-color: #C0E6FF;
+	background-color: #5fc8b7;
 }
 
 .mainToolbar .slideContainer {
@@ -711,10 +711,6 @@ textarea.parameterInput {
 
 .treeIterationCursorRow {
 	background-color: white;
-}
-
-#auxpane .treeIterationCursorRow {
-	background-color: #37474F;
 }
 
 .treeIterationCursorRow_Dotted {
