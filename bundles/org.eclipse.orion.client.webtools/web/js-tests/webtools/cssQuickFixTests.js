@@ -1,9 +1,9 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
@@ -19,25 +19,25 @@ define([
 	'mocha/mocha', //must stay at the end, not a module
 ], function(CssQuickFixes, CssValidator, ResultMgr, chai, Deferred) {
 	var assert = chai.assert;
-
+/* eslint-disable missing-nls */
 	describe('CSS Quick Fix Tests', function() {
-		
+
 		var validator;
 		var resultMgr;
 		var contentsChanged;
-		
+
 		beforeEach(function(){
 			contentsChanged = false;
 		});
-		
+
 		afterEach(function(){
 			// Reset the rule severities to defaults
 			if (validator){
 				validator._restoreRules();
 			}
 		});
-		
-		
+
+
 		/**
 		 * @description Sets up the test
 		 * @param {Object} options {buffer, contentType}
@@ -46,7 +46,7 @@ define([
 		function setup(options) {
 		    var buffer = options.buffer;
 		    var contentType = options.contentType ? options.contentType : 'text/css';
-		    resultMgr = new ResultMgr.CssResultManager();
+		    resultMgr = new ResultMgr();
 			validator = new CssValidator(resultMgr);
 			var rule = options.rule;
 			validator._enableOnly(rule.id, rule.severity);
@@ -56,12 +56,12 @@ define([
 				getText: function() {
 					return new Deferred().resolve(buffer);
 				},
-				
+
 				setText: function(text, start, end) {
 					contentsChanged = true;
 				    assertFixes(text, start, end, options.expected);
 				},
-				
+
 				getFileMetadata: function() {
     			    var o = Object.create(null);
     			    o.contentType = Object.create(null);
@@ -77,7 +77,7 @@ define([
 				contentType: contentType
 			};
 		}
-	
+
 	    /**
     	 * @description Runs the validator on the given options and computes fixes for those problems
     	 * @param {Object} options {buffer, contentType, rule}
@@ -101,7 +101,7 @@ define([
                     assert.equal(pbs.length, 1, 'There should only be one problem per test');
                 }
                 annot.title = annot.description;
-                
+
             	// Problem has start/end ranges with a line number, Annotation uses a start/end offset of the entire text buffer. Translate these values to allow tests with more than one line
                 if (pbs[0].line){
                 	annot.start--;
@@ -126,7 +126,7 @@ define([
                 });
             });
 	    }
-	
+
 	    /**
     	 * @description Compares the computed fixes set against the expected ones
     	 * @param {Array.<orion.Fix>} computed The computed set of fixes
@@ -138,7 +138,7 @@ define([
     	    assert.equal(start, expected.start, 'The fix location {' + start + ',' + end + '} does not match the expected position {'+ expected.start + ',' + expected.end + '}');
     	    assert.equal(end, expected.end, 'The fix location {' + start + ',' + end + '} does not match the expected position {'+ expected.start + ',' + expected.end + '}');
 	    }
-	
+
 	    /**
     	 * @description Creates a test rule object for the test set up
     	 * @param {String} id The id of the rule used to update the preferences in webtools/cssValidator#updated
@@ -151,71 +151,71 @@ define([
 	        rule.severity = severity ? severity : 2;
 	        return rule;
 	    }
-	
+
 		it("Test empty-rules - single line", function() {
 		    var rule = createTestRule('empty-rules');
 		    var expected = {value: "",
-		                    start: 0, 
+		                    start: 0,
 		                    end: 7};
-		    return getFixes({buffer: 'rule {}', 
+		    return getFixes({buffer: 'rule {}',
 		                      rule: rule,
 		                      expected: expected});
 		});
-		
+
 		it("Test empty-rules - multi line", function() {
 		    var rule = createTestRule('empty-rules');
 		    var expected = {value: "",
-		                    start: 0, 
+		                    start: 0,
 		                    end: 9};
-		    return getFixes({buffer: 'rule {\n}\n', 
+		    return getFixes({buffer: 'rule {\n}\n',
 		                      rule: rule,
 		                      expected: expected});
 		});
-		
+
 		it("Test empty-rules - leading trailing whitespace", function() {
 		    var rule = createTestRule('empty-rules');
 		    var expected = {value: "",
-		                    start: 0, 
+		                    start: 0,
 		                    end: 14};
-		    return getFixes({buffer: '\t rule {\t\n}   \t\n', 
+		    return getFixes({buffer: '\t rule {\t\n}   \t\n',
 		                      rule: rule,
 		                      expected: expected});
 		});
-		
+
 		it("Test empty-rules - multiple identifiers", function() {
 		    var rule = createTestRule('empty-rules');
 		    var expected = {value: "",
-		                    start: 0, 
+		                    start: 0,
 		                    end: 21};
-		    return getFixes({buffer: '\truleA ruleB ruleC {}\n', 
+		    return getFixes({buffer: '\truleA ruleB ruleC {}\n',
 		                      rule: rule,
 		                      expected: expected});
 		});
-		
+
 		it("Test important - single line", function() {
 		    var rule = createTestRule('important');
 		    var expected = {value: "",
-		                    start: 19, 
+		                    start: 19,
 		                    end: 30};
-		    return getFixes({buffer: 'rule { border : 0px !important;}', 
+		    return getFixes({buffer: 'rule { border : 0px !important;}',
 		                      rule: rule,
 		                      expected: expected});
 		});
 		it("Test important - uppercase", function() {
 		    var rule = createTestRule('important');
 		    var expected = {value: "",
-		                    start: 19, 
+		                    start: 19,
 		                    end: 30};
-		    return getFixes({buffer: 'rule { border : 0px !IMPORTANT;}', 
+		    return getFixes({buffer: 'rule { border : 0px !IMPORTANT;}',
 		                      rule: rule,
 		                      expected: expected});
 		});
 		it("Test important - missing semi", function() {
 		    var rule = createTestRule('important');
 		    var expected = {value: "",
-		                    start: 19, 
+		                    start: 19,
 		                    end: 30};
-		    return getFixes({buffer: 'rule { border : 0px !important}', 
+		    return getFixes({buffer: 'rule { border : 0px !important}',
 		                      rule: rule,
 		                      expected: expected});
 		});
@@ -223,37 +223,37 @@ define([
 			// Used to test that getFixes() can properly translate a line/col problem to an offset annotation
 		    var rule = createTestRule('important');
 		    var expected = {value: "",
-		                    start: 20, 
+		                    start: 20,
 		                    end: 31};
-		    return getFixes({buffer: 'rule {\n border : 0px\n!important;\n}', 
+		    return getFixes({buffer: 'rule {\n border : 0px\n!important;\n}',
 		                      rule: rule,
 		                      expected: expected});
 		});
 		it("Test important - trailing spaces", function() {
 		    var rule = createTestRule('important');
 		    var expected = {value: "",
-		                    start: 20, 
+		                    start: 20,
 		                    end: 40};
-		    return getFixes({buffer: 'rule {\n border : 0px !important       \t\n;\n}', 
+		    return getFixes({buffer: 'rule {\n border : 0px !important       \t\n;\n}',
 		                      rule: rule,
 		                      expected: expected});
 		});
 		it("Test important - preceding spaces", function() {
 		    var rule = createTestRule('important');
 		    var expected = {value: "",
-		                    start: 20, 
+		                    start: 20,
 		                    end: 40};
-		    return getFixes({buffer: 'rule {\n border : 0px        \n\t!important;\n}', 
+		    return getFixes({buffer: 'rule {\n border : 0px        \n\t!important;\n}',
 		                      rule: rule,
 		                      expected: expected});
 		});
-		
+
 		it("Test zero-units - single line", function() {
 		    var rule = createTestRule('zero-units');
 		    var expected = {value: "0",
-		                    start: 16, 
+		                    start: 16,
 		                    end: 19};
-		    return getFixes({buffer: 'rule { border : 0px;}', 
+		    return getFixes({buffer: 'rule { border : 0px;}',
 		                      rule: rule,
 		                      expected: expected});
 		});
@@ -261,13 +261,13 @@ define([
 			// Used to test that getFixes() can properly translate a line/col problem to an offset annotation
 		    var rule = createTestRule('zero-units');
 		    var expected = {value: "0",
-		                    start: 16, 
+		                    start: 16,
 		                    end: 19};
-		    return getFixes({buffer: 'rule {\n border : 0px;\n}', 
+		    return getFixes({buffer: 'rule {\n border : 0px;\n}',
 		                      rule: rule,
 		                      expected: expected});
 		});
-		
+
 	});
-		
+
 });

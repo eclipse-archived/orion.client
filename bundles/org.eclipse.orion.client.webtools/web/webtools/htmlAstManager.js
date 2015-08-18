@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2013, 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -25,9 +25,9 @@ define([
 	 * @since 8.0
 	 */
 	function HtmlAstManager() {
-		this.cache = new LRU.LRU(10);
+		this.cache = new LRU(10);
 	}
-	
+
 	Objects.mixin(HtmlAstManager.prototype, /** @lends webtools.HtmlAstManager.prototype */ {
 		/**
 		 * @param {orion.editor.EditorContext} editorContext
@@ -55,15 +55,15 @@ define([
 		},
 		/**
 		 * Returns the key to use when caching
-		 * @param {Object} metadata The file infos 
+		 * @param {Object} metadata The file infos
 		 */
 		_getKey: function _getKey(metadata) {
 		      if(!metadata.location) {
 		          return 'unknown'; //$NON-NLS-1$
-		      }    
+		      }
 		      return metadata.location;
 		},
-		
+
 		/**
 		 * @private
 		 * @param {String} text The code to parse.

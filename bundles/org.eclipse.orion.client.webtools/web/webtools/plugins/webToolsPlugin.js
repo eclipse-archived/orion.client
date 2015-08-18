@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2014, 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -17,10 +17,10 @@ define(['orion/plugin',
 'javascript/scriptResolver',
 'webtools/htmlAstManager',
 'webtools/htmlHover',
-'webtools/htmlContentAssist', 
+'webtools/htmlContentAssist',
 'webtools/htmlOutliner',
-'orion/editor/stylers/text_html/syntax', 
-'webtools/cssContentAssist', 
+'orion/editor/stylers/text_html/syntax',
+'webtools/cssContentAssist',
 'webtools/cssValidator',
 'webtools/cssOutliner',
 'webtools/cssHover',
@@ -28,9 +28,9 @@ define(['orion/plugin',
 'webtools/cssResultManager',
 'orion/editor/stylers/text_css/syntax',
 'i18n!webtools/nls/messages'
-], function(PluginProvider, Bootstrap, FileClient, Metrics, ScriptResolver, HtmlAstManager, htmlHover, htmlContentAssist, htmlOutliner, 
+], function(PluginProvider, Bootstrap, FileClient, Metrics, ScriptResolver, HtmlAstManager, htmlHover, htmlContentAssist, htmlOutliner,
             mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, messages) {
-	
+
 	/**
 	 * Plug-in headers
 	 */
@@ -41,8 +41,8 @@ define(['orion/plugin',
 	};
 	var provider = new PluginProvider(headers);
 
-	Bootstrap.startup().then(function(core) { 
-    
+	Bootstrap.startup().then(function(core) {
+
     	/**
     	 * Register the content types: HTML, CSS
     	 */
@@ -60,7 +60,7 @@ define(['orion/plugin',
     				extension: ["css"], //$NON-NLS-1$
     				imageClass: "file-sprite-css modelDecorationSprite" //$NON-NLS-1$
     			}
-    		] 
+    		]
     	});
     	/**
     	 * Re-init
@@ -71,8 +71,8 @@ define(['orion/plugin',
     	 * load file client early
     	 */
     	var fileClient = new FileClient.FileClient(core.serviceRegistry);
-        var cssResultMgr = new cssResultManager.CssResultManager();
-    	
+        var cssResultMgr = new cssResultManager();
+
     	/**
     	 * Register result manager as model changed listener
     	 */
@@ -84,13 +84,13 @@ define(['orion/plugin',
     		contentType: ["text/css", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
     		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     	});
-    
+
         provider.registerService("orion.edit.contentassist", //$NON-NLS-1$
     		new cssContentAssist.CssContentAssistProvider(cssResultMgr),
     		{	name: messages["cssContentAssist"],
     			contentType: ["text/css", "text/html"] //$NON-NLS-1$ //$NON-NLS-2$
     		});
-    		
+
     	/**
     	 * Register validators
     	 */
@@ -99,9 +99,9 @@ define(['orion/plugin',
     			contentType: ["text/css", "text/html"], //$NON-NLS-1$ //$NON-NLS-2$
     			pid: 'csslint.config'  //$NON-NLS-1$
     		});
-    		
+
     	var htmlAstManager = new HtmlAstManager.HtmlAstManager();
-    	
+
     	/**
     	 * Register content assist providers
     	 */
@@ -112,7 +112,7 @@ define(['orion/plugin',
     			charTriggers: "<", //$NON-NLS-1$
     			excludedStyles: "(comment.*|string.*)" //$NON-NLS-1$
     		});
-    	
+
     	/**
     	 * Register AST manager as Model Change listener
     	 */
@@ -124,7 +124,7 @@ define(['orion/plugin',
     		contentType: ["text/html"],  //$NON-NLS-1$
     		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     	});
-    	
+
     	/**
     	* Register outliners
     	*/
@@ -134,14 +134,14 @@ define(['orion/plugin',
     			name: messages["htmlOutline"],
     			contentType: ["text/html"] //$NON-NLS-1$
     		});
-    	
+
     	provider.registerService("orion.edit.outliner", new mCssOutliner.CssOutliner(),  //$NON-NLS-1$
     		{
     			id: "orion.outline.css.outliner", //$NON-NLS-1$
     			name: messages["cssOutline"],
     			contentType: ["text/css"] //$NON-NLS-1$
     		});
-    		
+
     	/**
     	 * Register syntax styling
     	 */
@@ -157,9 +157,9 @@ define(['orion/plugin',
        			provider.registerService("orion.edit.highlighter", {}, newGrammars[current]); //$NON-NLS-1$
       		}
         }
-    
+
         var resolver = new ScriptResolver.ScriptResolver(fileClient);
-    
+
         /**
     	 * Register the hover support
     	 */
@@ -168,23 +168,23 @@ define(['orion/plugin',
     		    name: messages['cssHover'],
     			contentType: ["text/css", "text/html"]	//$NON-NLS-1$ //$NON-NLS-2$
     	});
-    	
+
     	/**
     	 * Register the hover support
     	 */
     	provider.registerService("orion.edit.hover", new htmlHover.HTMLHover(htmlAstManager, resolver),  //$NON-NLS-1$
     		{
-    		    name: messages['htmlHover'],	
+    		    name: messages['htmlHover'],
     			contentType: ["text/html"]	//$NON-NLS-1$
     	});
-    	
+
     	/**
     	 * Register quick fixes as editor commands
     	 */
     	var cssQuickFixComputer = new cssQuickFixes.CssQuickFixes();
-    		
+
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    		cssQuickFixComputer, 
+    		cssQuickFixComputer,
     		{
 	    		name: messages["quickfix-empty-rules"],
 	    		scopeId: "orion.edit.quickfix", //$NON-NLS-1$
@@ -196,7 +196,7 @@ define(['orion/plugin',
     		}
     	);
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    		cssQuickFixComputer, 
+    		cssQuickFixComputer,
     		{
 	    		name: messages["quickfix-important"],
 	    		scopeId: "orion.edit.quickfix", //$NON-NLS-1$
@@ -208,7 +208,7 @@ define(['orion/plugin',
     		}
     	);
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    		cssQuickFixComputer, 
+    		cssQuickFixComputer,
     		{
 	    		name: messages["quickfix-zero-units"],
 	    		scopeId: "orion.edit.quickfix", //$NON-NLS-1$
@@ -219,7 +219,7 @@ define(['orion/plugin',
     		    ]
     		}
     	);
-    	
+
         /**
     	 * CSSLint settings
     	 */
@@ -477,7 +477,7 @@ define(['orion/plugin',
     				}]
     		}
     	);
-    
+
     	provider.connect();
 	});
 });

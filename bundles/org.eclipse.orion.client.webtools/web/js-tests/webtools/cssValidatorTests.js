@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2014, 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd, mocha*/
@@ -16,8 +16,9 @@ define([
 	'webtools/cssResultManager',
 	'mocha/mocha' // no exports
 ], function(chai, Deferred, CssValidator, ResultMgr) {
+	/* eslint-disable missing-nls */
 	var assert = chai.assert;
-    
+
     var validator = null;
     var resultMgr = null;
 
@@ -26,7 +27,7 @@ define([
 		function setup(options) {
 		    var buffer = options.buffer;
 		    var contentType = options.contentType ? options.contentType : 'text/css';
-		    resultMgr = new ResultMgr.CssResultManager();
+		    resultMgr = new ResultMgr();
 		    validator = new CssValidator(resultMgr);
 		    validator._restoreRules();
 			var rule = options.rule;
@@ -36,7 +37,7 @@ define([
 				getText: function() {
 					return new Deferred().resolve(buffer);
 				},
-				
+
 				getFileMetadata: function() {
     			    var o = Object.create(null);
     			    o.contentType = Object.create(null);
@@ -51,7 +52,7 @@ define([
 				contentType: contentType
 			};
 		}
-		
+
 		/**
     	 * @name assertProblems
     	 * @description Compares the computed problem set against the expected ones
@@ -87,12 +88,12 @@ define([
 				     end: 6,
 				     line: 1,
 				     severity: 'warning',
-				     description: 'Unknown property \'f\'.',
+				     description: 'Unknown property \'f\'.'
 				    }
 				]);
 			});
 		});
-		
+
 		/**
 		 * Test common csslint problems. Tests a duplicate property
 		 */
@@ -104,12 +105,12 @@ define([
 				     end: 22,
 				     line: 1,
 				     severity: 'warning',
-				     description: 'Duplicate property \'border\' found.',
+				     description: 'Duplicate property \'border\' found.'
 				    }
 				]);
 			});
 		});
-		
+
 		/**
 		 * Test common csslint problems. Tests an empty rule
 		 */
@@ -121,12 +122,12 @@ define([
 				     end: 3,
 				     line: 1,
 				     severity: 'warning',
-				     description: 'Rule is empty.',
+				     description: 'Rule is empty.'
 				    }
 				]);
 			});
 		});
-		
+
 		/**
 		 * Test csslint parsing errors. Missing end of rule brace
 		 */
@@ -138,18 +139,18 @@ define([
 				     end: 5,
 				     line: 1,
 				     severity: 'error',
-				     description: 'Expected RBRACE at line 1, col 5.',
+				     description: 'Expected RBRACE at line 1, col 5.'
 				    },
 				    {start: 1,
 				     end: 5,
 				     line: 1,
 				     severity: 'error',
-				     description: 'Expected RBRACE at line 1, col 5.',
+				     description: 'Expected RBRACE at line 1, col 5.'
 				    }
 				]);
 			});
 		});
-		
+
 		/**
 		 * Test csslint parsing errors. Unexpected brace token
 		 */
@@ -161,12 +162,12 @@ define([
 				     end: 16,
 				     line: 1,
 				     severity: 'error',
-				     description: 'Unexpected token \'}\' at line 1, col 15.',
+				     description: 'Unexpected token \'}\' at line 1, col 15.'
 				    }
 				]);
 			});
-		});	
-		
+		});
+
 		/**
 		 * Test csslint parsing errors. Fatal error missing string
 		 */
@@ -178,12 +179,12 @@ define([
 				     end: 10,
 				     line: 1,
 				     severity: 'error',
-				     description: 'Fatal error, cannot continue: Expected STRING at line 1, col 9.',
+				     description: 'Fatal error, cannot continue: Expected STRING at line 1, col 9.'
 				    }
 				]);
 			});
-		});	
-		
+		});
+
 		/**
 		 * Test embedded rulset. False to ignore
 		 */
@@ -192,8 +193,8 @@ define([
 			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, []);
 			});
-		});	
-		
+		});
+
 		/**
 		 * Test embedded rulset. True to error
 		 */
@@ -205,12 +206,12 @@ define([
 				     end: 3,
 				     line: 2,
 				     severity: 'error',
-				     description: 'Rule is empty.',
+				     description: 'Rule is empty.'
 				    }
 				]);
 			});
-		});	
-		
+		});
+
 		/**
 		 * Test embedded rulset. 0 to ignore
 		 */
@@ -219,8 +220,8 @@ define([
 			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, []);
 			});
-		});	
-		
+		});
+
 		/**
 		 * Test embedded rulset. 1 to warn
 		 */
@@ -232,12 +233,12 @@ define([
 				     end: 3,
 				     line: 2,
 				     severity: 'warning',
-				     description: 'Rule is empty.',
+				     description: 'Rule is empty.'
 				    }
 				]);
 			});
-		});	
-		
+		});
+
 		/**
 		 * Test embedded rulset. 2 to error
 		 */
@@ -249,12 +250,12 @@ define([
 				     end: 3,
 				     line: 2,
 				     severity: 'error',
-				     description: 'Rule is empty.',
+				     description: 'Rule is empty.'
 				    }
 				]);
 			});
-		});	
-		
+		});
+
 		/**
 		 * Test embedded rulset. Allow whitespace
 		 */
@@ -266,12 +267,12 @@ define([
 				     end: 3,
 				     line: 2,
 				     severity: 'error',
-				     description: 'Rule is empty.',
+				     description: 'Rule is empty.'
 				    }
 				]);
 			});
-		});	
-		
+		});
+
 		/**
 		 * Test embedded rulset. Allow multiple rules
 		 */
@@ -283,18 +284,18 @@ define([
 				     end: 3,
 				     line: 2,
 				     severity: 'error',
-				     description: 'Rule is empty.',
+				     description: 'Rule is empty.'
 				    },
 				    {start: 16,
 				     end: 22,
 				     line: 3,
 				     severity: 'error',
-				     description: 'Duplicate property \'border\' found.',
+				     description: 'Duplicate property \'border\' found.'
 				    }
 				]);
 			});
 		});
-		
+
 		/**
 		 * Test embedded rulset. Ignore multiple embedded rulesets
 		 */
@@ -306,13 +307,13 @@ define([
 				     end: 3,
 				     line: 3,
 				     severity: 'error',
-				     description: 'Rule is empty.',
+				     description: 'Rule is empty.'
 				    },
 				    {start: 16,
 				     end: 22,
 				     line: 4,
 				     severity: 'warning',
-				     description: 'Duplicate property \'border\' found.',
+				     description: 'Duplicate property \'border\' found.'
 				    }
 				]);
 			});

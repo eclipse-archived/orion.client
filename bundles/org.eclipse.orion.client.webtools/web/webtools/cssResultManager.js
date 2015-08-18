@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -25,13 +25,13 @@ define([
 	 * @since 8.0
 	 */
 	function CssResultManager() {
-		this.cache = new LRU.LRU(10);
+		this.cache = new LRU(10);
 	}
-	
+
 	Objects.mixin(CssResultManager.prototype, /** @lends webtools.CssResultManager.prototype */ {
 		/**
 		 * @param {orion.editor.EditorContext} editorContext
-		 * @returns {orion.Promise} A promise resolving to the CSS parse / checking result or null if called 
+		 * @returns {orion.Promise} A promise resolving to the CSS parse / checking result or null if called
 		 * with an incomplete config
 		 */
 		getResult: function(editorContext, config) {
@@ -53,7 +53,7 @@ define([
 				    var start = Date.now();
 					result = CSSLint.verify(text, config.getRuleSet());
 					var end = Date.now() - start;
-					Metrics.logTiming('language tools', 'parse', end, 'text/css');
+					Metrics.logTiming('language tools', 'parse', end, 'text/css'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					_self.cache.put(loc, result);
 					if(metadata.location) {
 					    //only set this if the original metadata has a real location
@@ -65,15 +65,15 @@ define([
 		},
 		/**
 		 * Returns the key to use when caching
-		 * @param {Object} metadata The file infos 
+		 * @param {Object} metadata The file infos
 		 */
 		_getKey: function _getKey(metadata) {
 		      if(!metadata.location) {
-		          return 'unknown';
-		      }    
+		          return 'unknown'; //$NON-NLS-1$
+		      }
 		      return metadata.location;
 		},
-		
+
 		/**
 		 * Callback from the orion.edit.model service
 		 * @param {Object} event An <tt>orion.edit.model</tt> event.
@@ -98,7 +98,5 @@ define([
 		    //TODO will add to mult-env
 		}
 	});
-	return {
-		CssResultManager : CssResultManager,
-	};
+	return CssResultManager;
 });
