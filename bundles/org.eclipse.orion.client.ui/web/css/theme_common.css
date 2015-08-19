@@ -402,6 +402,7 @@ a.breadcrumb.currentLocation {
 }
 
 .commandButton:not(.primaryButton):hover, .commandButton:not(.primaryButton):focus {
+	color: white;
 	background-color: #a5b5bc;
 	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
 }
