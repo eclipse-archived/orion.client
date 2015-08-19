@@ -221,18 +221,6 @@ div.currentLocation {
 	margin: 0;
 }
 
-.tooltipContainer .currentLocation {
-	color: #3b4b54;
-}
-
-.tooltipContainer .breadcrumb {
-	color: #3b4b54;
-}
-
-.tooltipContainer .breadcrumbSeparator {
-	color: #3b4b54;
-}
-
 a.currentLocation:hover {
 	font-weight: bold;
 	color: #00AED1;
@@ -243,6 +231,26 @@ a.currentLocation:hover {
 a.breadcrumb.currentLocation {
 	font-weight: bold;
 	margin: 0;
+}
+
+.tooltipContainer .currentLocation {
+	color: white;
+}
+
+.tooltipContainer .breadcrumb {
+	color: white;
+}
+
+.tooltipContainer .breadcrumbSeparator {
+	color: white;
+}
+
+.tooltipContainer a.currentLocation:hover {
+	color: white;
+}
+
+.tooltipContainer a.breadcrumb:hover {
+	color: white;
 }
 
 .auxpane {
