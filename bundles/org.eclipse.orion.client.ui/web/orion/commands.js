@@ -434,7 +434,7 @@ define([
 			element.commandTooltip = new Tooltip.Tooltip({
 				node: element,
 				text: command.tooltip,
-				position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				position: ["right", "above", "below", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			});
 		}
 		
