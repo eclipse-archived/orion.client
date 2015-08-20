@@ -744,8 +744,8 @@ a.breadcrumb.currentLocation {
 }
 
 .dropdownMenu .dropdownMenuItemSelected {
-	background-color: #FEF6F4;
-	border-left-color: #a6b5bc;
+	background-color: rgba(27,177,153, 0.1);
+	border-left-color: #1BB199;
 }
 
 .dropdownMenuItem .check {
@@ -1155,7 +1155,7 @@ a.breadcrumb.currentLocation {
 }
 
 .outlineExplorer .treeIterationCursorRow_Dotted {
-	background-color: #1bb199;
+	background-color: # Task 43802: Merge IDS and Orion CSS -;
 }
 
 .outlineExplorer .treeIterationCursorRow_Dotted .modelDecorationSprite {
