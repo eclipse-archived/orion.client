@@ -328,7 +328,7 @@ define([
 	var service = new GitFileImpl(gitBase);
 
 	provider.registerService("orion.core.file", service, {
-		Name: 'Git File System',
+		Name: gitmessages["GitFileSysName"],
 		top: gitBase,
 		pattern: gitBase
 	});
