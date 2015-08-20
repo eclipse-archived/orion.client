@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2014, 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  ******************************************************************************/
 /* eslint-env amd */
 define({//Default message bundle
@@ -71,6 +71,12 @@ define({//Default message bundle
 	'openDeclTooltip' : 'Open the declaration of the selected element',
 	'openImplName' : 'Open Implementation',
 	'openImplTooltip' : 'Open the implementation of the selected element',
+	'workspaceRefsName': 'Workspace',
+	'workspaceRefsTooltip': 'Show all references to the selection in the workspace',
+	'projectRefsName': 'Project',
+	'projectRefsTooltip': 'Show all references to the selection in the current project',
+	'referencesMenuName': 'References',
+	'referencesMenuTooltip': 'Show different kinds of references',
 	'noDeclTimedOut': 'No declaration was found - operation timed out',
 	'validTypeof': 'Invalid \'typeof\' comparison:',
 	'noSparseArrays': 'Sparse array declarations:',
