@@ -200,6 +200,38 @@ define(["orion/util"], function(util) {
 	}
 
 	/**
+	 * @name pixelValueOf
+	 * @description Returns the pixel value of the given CSS attribute
+	 * @param node The element whose style is to be checked
+	 * @param attrName The name of the attribute to check. Use the literal CSS name
+	 * (i.e. 'padding-left' rather than 'paddingLeft').
+	 * @returns returns The value (in pixels) of the attribute. If the value cannot be parsed to an int the zero is returned
+	 */
+	function pixelValueOf(node, attrName) {
+		if (!node || !attrName) {
+			return 0;
+		}
+		
+		var doc = node.ownerDocument;
+		var win =  doc.defaultView || doc.parentWindow;
+		if (win.getComputedStyle) {
+			var style = win.getComputedStyle(node, null);
+			var value = style.getPropertyValue(attrName);
+			// Ensure that value ends in "px"
+			if (value.length > 2 && value.indexOf("px", value.length - 2) !== -1) {
+				value = value.slice(0,-2);
+				var intVal = parseInt(value,10);
+				if (intVal !== intVal) {
+					return 0;  // value was NaN
+				} else {
+					return intVal;
+				}
+			}
+		}
+		return 0;
+	}
+	
+	/**
 	 * Performs substitution of strings into textContent within the given node and its descendants. An occurrence of <code>${n}</code>
 	 * in text content will be replaced with the string <code>messages[n]</code>.
 	 * <p>This function is recommended for binding placeholder text in template-created DOM elements to actual display strings.</p>
@@ -368,6 +400,9 @@ define(["orion/util"], function(util) {
 		BKSPC: 8,
 		TAB: 9,
 		ENTER: 13,
+		SHIFT: 16,
+		CONTROL: 17,
+		ALT: 18,
 		ESCAPE: 27,
 		SPACE: 32,
 		PAGEUP: 33,
@@ -379,7 +414,8 @@ define(["orion/util"], function(util) {
 		RIGHT: 39,
 		DOWN: 40,
 		INSERT: 45,
-		DEL: 46
+		DEL: 46,
+		COMMAND: 991
 	};
 	/**
 	 * Maps a <code>keyCode</code> to <tt>KEY</tt> name. This is the inverse of {@link orion.webui.littlelib.KEY}.
@@ -438,6 +474,7 @@ define(["orion/util"], function(util) {
 		empty: empty,
 		firstTabbable: firstTabbable,
 		lastTabbable: lastTabbable,
+		pixelValueOf: pixelValueOf,
 		stop: stop,
 		processTextNodes: processTextNodes,
 		processDOMNodes: processDOMNodes,

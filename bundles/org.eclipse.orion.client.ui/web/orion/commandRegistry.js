@@ -12,6 +12,7 @@
  
 define([
 	'orion/commands',
+	'orion/keyBinding',
 	'orion/explorers/navigationUtils',
 	'orion/PageUtil',
 	'orion/uiUtils',
@@ -19,8 +20,10 @@ define([
 	'orion/webui/dropdown',
 	'orion/webui/tooltip',
 	'text!orion/webui/submenutriggerbutton.html',
-	'orion/metrics'
-], function(Commands, mNavUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, SubMenuButtonFragment, mMetrics) {
+	'orion/metrics',
+	'orion/Deferred',
+	'orion/EventTarget'
+], function(Commands, mKeyBinding, mNavUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, SubMenuButtonFragment, mMetrics, mDeferred, mEventTarget) {
 
 	/**
 	 * Constructs a new command registry with the given options.
@@ -35,14 +38,46 @@ define([
 		this._activeBindings = {};
 		this._urlBindings = {};
 		this._pendingBindings = {}; // bindings for as-yet-unknown commands
-		this._init(options || {});
 		this._parameterCollector = null;
+		this._init(options || {});
 	}
 	CommandRegistry.prototype = /** @lends orion.commandregistry.CommandRegistry.prototype */ {
 		_init: function(options) {
 			this._selectionService = options.selection;
 			var self = this;
 			Commands.setKeyBindingProvider(function() { return self._activeBindings; });
+
+			// Make the CommandRegistry an EventTarget. This is somewhat different from the normal pattern
+			// so that we can override the normal 'addEventTarget' processing (see below)
+			mEventTarget.attach(CommandRegistry.prototype);
+
+			// Add a listener so our bindings get updated immediately
+			this.addEventListener("bindingChanged", function(info) {
+				this._handleBindingChanges(info);
+			}.bind(this));
+
+		
+			/**
+			 * @name addEventListener
+			 * 
+			 * @description  This is an override of the normal addEventListener to allow it to
+			 * keep listeners synch'd with the current binding overrides whether or not they get added before or
+			 * after the actual binding overrides have been retrieved from the preference store.
+			 * 
+			 * Once the overrides preference is loaded any currently registered listeners are informed of the current
+			 * binding overrides. Subsequent listeners are also imformed when they get added.
+			 * @param eventType The type of event being listened on.
+			 * @param listener The listener to call when the event is dispatched.
+			 */
+			this.addEventListener = function(eventType, listener) {
+				// if we've already received the overrides from the preference store then broadcast them to the new listener
+				if (this._bindingOverrides && eventType === "bindingChanged") {
+					this._updateBindingOverrides(listener);
+				}
+				
+				// hook the listener for future changes
+				CommandRegistry.prototype.addEventListener.call(this, eventType, listener);
+			}
 		},
 		
 		/**
@@ -243,7 +278,7 @@ define([
 							this.destroy();
 						},
 						trigger: "click", //$NON-NLS-0$
-						position: ["below", "right", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						position: ["below", "right", "above", "left"] //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 					});
 					var parameterArea = tooltip.contentContainer();
 					parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
@@ -335,7 +370,7 @@ define([
 									this.destroy();
 								},
 								trigger: "click", //$NON-NLS-0$
-								position: ["below", "right", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								position: ["below", "right", "above", "left"] //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 							});
 							var parameterArea = tooltip.contentContainer();
 							parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
@@ -359,12 +394,12 @@ define([
 						}
 					}
 					if (!collecting) {
-						mMetrics.logEvent("command", "invoke", commandInvocation.command.id); //$NON-NLS-1$ //$NON-NLS-0$
+						mMetrics.logEvent("command", "invoke", commandInvocation.command.id); //$NON-NLS-2$ //$NON-NLS-1$
 						// Just call the callback with the information we had.
 						return commandInvocation.command.callback.call(commandInvocation.handler || window, commandInvocation);
 					}
 				} else {
-					mMetrics.logEvent("command", "invoke", commandInvocation.command.id); //$NON-NLS-1$ //$NON-NLS-0$
+					mMetrics.logEvent("command", "invoke", commandInvocation.command.id); //$NON-NLS-2$ //$NON-NLS-1$
 					// We should not be trying to collect parameters, just call the callback.
 					return commandInvocation.command.callback.call(commandInvocation.handler || window, commandInvocation);
 				}
@@ -395,13 +430,14 @@ define([
 		 */
 		showKeyBindings: function(keyAssist) {
 			var scopes = {};
-			var bindingString, binding;
+			var binding;
 			// see commands.js _processKey
 			function execute(activeBinding) {
 				return function() {
 					Commands.executeBinding(activeBinding);
 				};
 			}
+			
 			var bindings = [];
 			for (var aBinding in this._activeBindings) {
 				binding = this._activeBindings[aBinding];
@@ -423,19 +459,149 @@ define([
 					}
 					scopes[binding.keyBinding.scopeName].push(binding);
 				} else {
-					bindingString = UIUtil.getUserKeyString(binding.keyBinding);
-					keyAssist.createItem(bindingString, binding.command.name || binding.command.tooltip, execute(binding));
+					keyAssist.createItem(binding.keyBinding, binding.command.name || binding.command.tooltip, binding.command.id, execute(binding));
 				}
 			}
 			for (var scopedBinding in scopes) {
 				if (scopes[scopedBinding].length && scopes[scopedBinding].length > 0) {
 					keyAssist.createHeader(scopedBinding);
 					scopes[scopedBinding].forEach(function(binding) {
-						bindingString = UIUtil.getUserKeyString(binding.keyBinding);
-						keyAssist.createItem(bindingString, binding.command.name || binding.command.tooltip, execute(binding));
+						keyAssist.createItem(binding.keyBinding, binding.command.name || binding.command.tooltip, binding.command.id, execute(binding));
 					});
 				}	
 			}
+		},
+		
+		_handleBindingChanges: function(args) {
+			// Change the command's current binding
+			var command = this.findCommand(args.id);
+			if (command) {
+				// Add the new binding (overrides any existing one)
+				var curBinding = this._activeBindings[args.id];
+				if (curBinding) {
+					curBinding.keyBinding = args.newBinding;
+				} else {
+					this._addBinding(command, "key", args.newBinding); //$NON-NLS-1$
+				}
+			}
+			
+			// Now see if we have any menu items to update
+			if (this._renderedCommands && this._renderedCommands[args.id]) {
+				var scopes = this._renderedCommands[args.id];
+				var keys = Object.keys(scopes);
+				for (var i=0; i<keys.length; i++) {
+					var invocation = scopes[keys[i]];
+					var bindingString = UIUtil.getUserKeyString(args.newBinding);
+					var newElement = Commands.createCommandMenuItem(invocation.domParent, invocation.command, invocation, null, invocation.onClick, bindingString);
+					invocation.domNode.parentNode.replaceChild(newElement, invocation.domNode);
+					invocation.domNode = newElement;
+				}
+			}
+		},
+		
+		/**
+		 * @name createBindingOverride
+		 * @description Creates an override for the binding of a particular Command or Text Action.
+		 * @param id The id of the Command or Text Action being overridden
+		 * @param newBinding The new binding to use
+		 * @param prevBinding The binding (if any) being overridden. Note that this is needed to ensure that
+		 * we override the correct Text Action (which can havemultiple bindings for the same id).
+		 */
+		createBindingOverride: function(id, newBinding, prevBinding) {
+			if (!this._bindingOverrides) {
+				this._bindingOverrides = [];
+			}
+
+			// Capture this change			
+			this._bindingOverrides.push ({id: id, newBinding: newBinding, prevBinding: prevBinding});
+
+			// Update the preference store
+			if (this._prefService) {
+				var overridesStr = JSON.stringify(this._bindingOverrides);
+				this._prefService.getPreferences("/KeyBindings").then(function(prefs) { //$NON-NLS-1$
+					prefs.put("overridesJSON", overridesStr); //$NON-NLS-1$
+				});
+			}
+			
+			// Handle the change locally
+			var bindingChangeEvent = {type: "bindingChanged", id: id, newBinding: newBinding, prevBinding: prevBinding}; //$NON-NLS-1$
+			this.dispatchEvent(bindingChangeEvent);
+		},
+
+		/**
+		 * @name _registerRenderedCommand
+		 * @description Keeps a record of the 'invocation' object for a renderred command. The invocation contains
+		 * a lot of information about the rendered item (including the DOM element created to show it). This is currently
+		 * used to update the menu item's key binding info if its binding changes.
+		 * 
+		 * @param actionID The actionID of the menu item
+		 * @param scopeID The scopeID of this particular invocation (two different menus can be created using teh same commands)
+		 * @param invocation The invocation record to store
+		 */
+		_registerRenderedCommand: function(actionID, scopeID, invocation) {
+			if (!this._renderedCommands) {
+				this._renderedCommands = {};
+			}
+			var scopes = this._renderedCommands[actionID];
+			if (!scopes) {
+				scopes = this._renderedCommands[actionID] = {};
+			}
+			scopes[scopeID] = invocation;
+		},
+		
+		_getBindingOverrides: function() {
+			// Get the key binding overrides from the preference store
+			return this._prefService.getPreferences("/KeyBindings").then(function(bindingPrefs) { //$NON-NLS-1$
+				var overrides;
+				this.bindingPrefs = bindingPrefs;
+				
+				var prefVal = bindingPrefs.get("overridesJSON"); //$NON-NLS-1$
+				if (prefVal) {
+					// Sometimes we get the parsing done for us, sometimes not...wtf?
+					if (typeof prefVal === "string") {
+						overrides = JSON.parse(prefVal);
+					} else {
+						overrides = prefVal;
+					}
+				}
+				
+				// Turn the Objects back into KeyStrokes
+				for (var i = 0; i < overrides.length; i++) {
+					var bindingChange = overrides[i];
+					if (bindingChange.newBinding) {
+						var nb = bindingChange.newBinding;
+						overrides[i].newBinding = new mKeyBinding.KeyStroke(nb.keyCode, nb.mod1, nb.mod2, nb.mod3, nb.mod4, nb.type);
+					}
+					if (bindingChange.prevBinding) {
+						var pb = bindingChange.prevBinding;
+						overrides[i].prevBinding = new mKeyBinding.KeyStroke(pb.keyCode, pb.mod1, pb.mod2, pb.mod3, pb.mod4, pb.type);
+					}
+				}
+				
+				return new mDeferred().resolve(overrides);
+			}.bind(this));
+		},
+		
+		/**
+		 * @name getBindingOverride
+		 * @description returns the binding that the given id should be overridden with (or null if no override exists). Note that
+		 * this method is only valid for Commands, not Text Actions,
+		 * @param cmdId The id of the Command to check
+		 * @returns returns the new KeyStroke if there's an override else null
+		 */
+		getBindingOverride: function(cmdId) {
+			// If we haven't recieved the overrides yet
+			if (!this._bindingOverrides)
+				return null;
+			
+			// Here we want the *last* override so we iterate backwards
+			for (var i = (this._bindingOverrides.length - 1); i >= 0; i--) {
+				var override = this._bindingOverrides[i];
+				if (override.id === cmdId) {
+					return override.newBinding;
+				}
+			}
+			return null;
 		},
 		
 		/** 
@@ -567,6 +733,60 @@ define([
 		},
 		
 		/**
+		 * Register the serviceRegistry. Use this gain access to any other services we need (i.e. the preferenceService)
+		 * @param serviceRegistry {orion.serviceregistry.ServiceRegistry} the current service registry.
+		 */
+		setServiceRegistry: function(serviceRegistry) {
+			this._serviceRegistry = serviceRegistry;
+			this._prefService = serviceRegistry.getService("orion.core.preference"); //$NON-NLS-1$
+
+			if (this._prefService) {
+				// Get the overrides from the preference store
+				this._getBindingOverrides().then(function(overrides) {
+					this._bindingOverrides = overrides;
+					
+					// Update all folks that are listening
+					this._updateBindingOverrides();
+				}.bind(this));
+	
+				// listen for changes form other pages
+				var storageKey;
+				this._prefService.listenForChangedSettings("/KeyBindings", function (e) { //$NON-NLS-1$
+					if (e.key === storageKey) {
+						// Refresh the binding overrides
+						this._getBindingOverrides().then(function(overrides) {
+							if (overrides.length > this._bindingOverrides.length) {
+								// handle any new changes
+								for (var i = this._bindingOverrides.length; i < overrides.length; i++) {
+									var override = overrides[i];
+									var bindingChangeEvent = {type: "bindingChanged", id: override.id, newBinding: override.newBinding,  //$NON-NLS-1$
+																prevBinding: override.prevBinding};
+									this.dispatchEvent(bindingChangeEvent);
+								}
+							}
+							this._bindingOverrides = overrides;
+						}.bind(this));
+					}
+				}.bind(this)).then(function(key) {
+					storageKey = key;
+				}.bind(this));
+			}
+		},
+
+		_updateBindingOverrides: function(listener) {
+			for(var i = 0; i < this._bindingOverrides.length; i++) {
+				var override = this._bindingOverrides[i];
+				var bindingChangeEvent = {type: "bindingChanged", id: override.id, newBinding: override.newBinding,  //$NON-NLS-1$
+					prevBinding: override.prevBinding};
+				if (listener) {
+					listener(bindingChangeEvent);
+				} else {
+					this.dispatchEvent(bindingChangeEvent);
+				}
+			}
+		},
+		
+		/**
 		 * Register a command contribution, which identifies how a command appears
 		 * on a page and how it is invoked.
 		 * @param {String} scopeId The id describing the scope of the command.  Required.
@@ -594,6 +814,12 @@ define([
 			parentTable[commandId] = {position: position, handler: handler};
 			
 			var command;
+			if (this._bindingOverrides) {
+				var bindingOverride = this.getBindingOverride(commandId, keyBinding);
+				if (bindingOverride) {
+					keyBinding = bindingOverride;
+				}
+			}
 			// add to the bindings table now
 			if (keyBinding) {
 				command = this._commandList[commandId];
@@ -649,7 +875,7 @@ define([
 		 */
 		_addBinding: function(command, type, binding, bindingOnly) {
 			if (!command.id) {
-				throw new Error("No command id: " + command);
+				throw new Error("No command id: " + command); //$NON-NLS-1$
 			}
 			if (type === "key") { //$NON-NLS-0$
 				this._activeBindings[command.id] = {command: command, keyBinding: binding, bindingOnly: bindingOnly};
@@ -740,7 +966,8 @@ define([
 				return;
 			} 
 			if (contributions) {
-				this._render(contributions, parent, items, handler, renderType || "button", userData, domNodeWrapperList); //$NON-NLS-0$
+				this._render(scopeId, contributions, parent, items, handler, renderType || "button", userData, domNodeWrapperList); //$NON-NLS-0$
+				
 				// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
 				this._checkForTrailingSeparator(parent, renderType, true);
 			}
@@ -771,7 +998,7 @@ define([
 			}
 		},
 		
-		_render: function(contributions, parent, items, handler, renderType, userData, domNodeWrapperList, extraClasses) {
+		_render: function(scopeId, contributions, parent, items, handler, renderType, userData, domNodeWrapperList, extraClasses) {
 			// sort the items
 			var sortedByPosition = contributions.sortedContributions;
 			
@@ -838,7 +1065,7 @@ define([
 							// render the children asynchronously
 							if (created) {
 //								window.setTimeout(function() {
-									self._render(contribution.children, created.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
+									self._render(scopeId, contribution.children, created.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
 									// special post-processing when we've created a menu in an image bar.  We want to get rid 
 									// of a trailing separator in the menu first, and then decide if our menu is necessary
 									self._checkForTrailingSeparator(created.menu, "menu", true);  //$NON-NLS-0$
@@ -880,7 +1107,7 @@ define([
 							if (parent.childNodes.length > 0 && !self._checkForTrailingSeparator(parent, renderType)) {
 								sep = self.generateSeparatorImage(parent);
 							}
-							self._render(childContributions, parent, items, handler, renderType, userData, domNodeWrapperList); 
+							self._render(scopeId, childContributions, parent, items, handler, renderType, userData, domNodeWrapperList); 
 	
 							// make sure that more than just the separator got rendered before rendering a trailing separator
 							if (parent.childNodes.length > 0) {
@@ -895,7 +1122,7 @@ define([
 						if (contribution.title) {
 							var subMenu = self._createDropdownMenu(parent, contribution.title, true, null, null, contribution.imageClass);
 							if (subMenu) {
-								self._render(childContributions, subMenu.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
+								self._render(scopeId, childContributions, subMenu.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
 								// special post-processing when we've created a menu in an image bar.  We want to get rid 
 								// of a trailing separator in the menu first, and then decide if our menu is necessary
 								self._checkForTrailingSeparator(subMenu.menu, "menu", true);  //$NON-NLS-0$
@@ -911,7 +1138,7 @@ define([
 								self._generateMenuSeparator(parent);
 							}
 							// synchronously render the children since order matters
-							self._render(childContributions, parent, items, handler, renderType, userData, domNodeWrapperList); 
+							self._render(scopeId, childContributions, parent, items, handler, renderType, userData, domNodeWrapperList); 
 							// Add a trailing separator if children rendered.
 							if (parent.childNodes.length > 0) {
 								self._generateMenuSeparator(parent);
@@ -997,6 +1224,10 @@ define([
 									bindingString = UIUtil.getUserKeyString(keyBinding.keyBinding);
 								}
 								element = Commands.createCommandMenuItem(parent, command, invocation, null, onClick, bindingString);
+								
+								// Register this command as being rendered (do we want to register all the commands ?)
+								invocation.onClick = onClick;  // cache the handler
+								self._registerRenderedCommand(command.id, scopeId, invocation);
 							} else if (renderType === "quickfix") { //$NON-NLS-0$
 								id = renderType + command.id + index; //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item
 								var commandDiv = document.createElement("div"); //$NON-NLS-0$

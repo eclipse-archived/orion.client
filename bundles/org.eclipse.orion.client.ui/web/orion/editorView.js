@@ -326,8 +326,6 @@ define([
 				var keyBindings = new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
 				that.updateSourceCodeActions(that.settings, keyBindings.sourceCodeActions);
 
-				editorCommands.overwriteKeyBindings(editor);
-
 				var textView = editor.getTextView();
 				textView.setAction("toggleWrapMode", function() { //$NON-NLS-0$
 					textView.invokeAction("toggleWrapMode", true); //$NON-NLS-0$
@@ -351,6 +349,8 @@ define([
 
 				that.vi = that.emacs = null;
 				that.updateKeyMode(that.settings, textView);
+
+				editorCommands.overwriteKeyBindings(editor);
 
 				return keyBindings;
 			};

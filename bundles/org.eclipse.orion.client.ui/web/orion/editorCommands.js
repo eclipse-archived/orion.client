@@ -339,6 +339,22 @@ define([
 					textView.setKeyBinding(new mKeyBinding.KeyStroke(191, false, true, !util.isMac, util.isMac), keyAssistCommand.id);
 					textView.setAction(keyAssistCommand.id, keyAssistCommand.callback, keyAssistCommand);
 				}
+				
+				// Support future key binding changes
+				this.bindingChangeListener = function(args) {
+					this._handleBindingChanges(textView, args);
+				}.bind(this);
+				this.commandService.addEventListener("bindingChanged", this.bindingChangeListener);
+			}
+		},
+		_handleBindingChanges: function(textView, args) {
+			// Only execute if this is a textView action
+			var actions = textView.getActions(true);
+			if (actions.indexOf(args.id) !== -1) {
+				if (args.prevBinding) {
+					textView.setKeyBinding(args.prevBinding, null);
+				}
+				textView.setKeyBinding(args.newBinding, args.id);
 			}
 		},
 		showKeyBindings: function(keyAssist) {
@@ -365,17 +381,21 @@ define([
 					var actionID = editorActions[i];
 					var actionDescription = textView.getActionDescription(actionID);
 					var bindings = textView.getKeyBindings(actionID);
-					for (var j = 0; j < bindings.length; j++) {
-						binding = bindings[j];
-						var bindingString = mUIUtils.getUserKeyString(binding);
-						if (binding.scopeName) {
-							if (!scopes[binding.scopeName]) {
-								scopes[binding.scopeName] = [];
+					if (bindings.length > 0) {
+						for (var j = 0; j < bindings.length; j++) {
+							binding = bindings[j];
+							var bindingString = mUIUtils.getUserKeyString(binding);
+							if (binding.scopeName) {
+								if (!scopes[binding.scopeName]) {
+									scopes[binding.scopeName] = [];
+								}
+								scopes[binding.scopeName].push({bindingString: bindingString, name: actionDescription.name, execute: execute(actionID)});
+							} else {
+								keyAssist.createItem(binding, actionDescription.name, actionID, execute(actionID));
 							}
-							scopes[binding.scopeName].push({bindingString: bindingString, name: actionDescription.name, execute: execute(actionID)});
-						} else {
-							keyAssist.createItem(bindingString, actionDescription.name, execute(actionID));
 						}
+					} else {
+						keyAssist.createItem(null, actionDescription.name, actionID, execute(actionID)); //$NON-NLS-1$
 					}
 				}
 				for (var scopedBinding in scopes) {
@@ -383,7 +403,7 @@ define([
 						keyAssist.createHeader(scopedBinding);
 						for (var k = 0; k < scopes[scopedBinding].length; k++) {
 							binding = scopes[scopedBinding][k];
-							keyAssist.createItem(binding.bindingString, binding.name, binding.execute);
+							keyAssist.createItem(binding, binding.name, binding.name, binding.execute);
 						}
 					}
 				}

@@ -599,6 +599,10 @@ define([
 			}
 		});
 
+
+		// forward the preference service on to the command registry
+		commandRegistry.setServiceRegistry(serviceRegistry);
+		
 		new mThemePreferences.ThemePreferences(prefsService, new mThemeData.ThemeData()).apply();
 
 		var parent = lib.node(parentId);
