@@ -656,7 +656,7 @@ and (max-device-width : 1024px)  {
 }
 
 .sideMenuItemActive > .submenu-trigger {
-	color: white !important;
+	color: #1bb199 !important;
 }
 
 .sideMenuToggle {

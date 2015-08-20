@@ -266,6 +266,7 @@ a.breadcrumb.currentLocation {
 }
 
 .mainToolbar {
+	color: white;
  	background: #26343f;
  	padding-left: 2px;
  	padding-right: 5px;
@@ -425,6 +426,7 @@ a.breadcrumb.currentLocation {
 .commandImage {
 	border: 1px solid transparent;
     border-radius: 1px;
+    color: inherit;
 	background-color: transparent;
 	vertical-align: baseline;
 	cursor: pointer;

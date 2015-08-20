@@ -8,7 +8,7 @@
 }
 
 .navlink:hover {
-	color: #F58B0F;
+	color: #00AED1;
 }
 
 .navlink > span {
@@ -33,7 +33,7 @@
 .navlinkonpage:hover {
 	text-decoration: none;
 	border-bottom: 1px dotted;
-	color: #F58B0F;
+	color: #00AED1;
 }
 
 /* ----- side panel ----- */
@@ -141,7 +141,7 @@
 .dismissButton {
 	border: 1px solid transparent;
 	background: transparent;
-	color: #666;
+	color: white;
 	cursor: pointer;
     border-radius: 1px;
 	padding: 2px;
@@ -883,7 +883,7 @@ textarea.parameterInput {
 }
 
 .centralNavigation:hover{
-	color: #F58B0F;
+	color: #00AED1;
 }
 
 .navigationLabel{
@@ -1056,7 +1056,7 @@ textarea.parameterInput {
 }
 
 .treeTableRow span.core-sprite-closedarrow:hover, .treeTableRow span.core-sprite-openarrow:hover {
-	color: #F58B0F;
+	color: #00AED1;
 }
 
 .searchOutlineContainer {
@@ -1233,7 +1233,7 @@ textarea.parameterInput {
 }
 
 .uploadCancelButton:hover {
-	color: #F58B0F;
+	color: #00AED1;
 }
 
 .progressBar.continuous {

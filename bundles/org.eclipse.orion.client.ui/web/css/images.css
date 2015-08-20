@@ -93,614 +93,56 @@
 	height: 12px; 
 }
 
-.core-sprite-hamburger{
-	font-size: 16px;
-	vertical-align:top;
-	color: #333333;
-	font-family: 'Orion Icon Font';
-	padding: 0;
-	background: none;
-	border: none;
-	margin: 0;
-	margin-top: -3px;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	outline:none;
-}
-
-
-.core-sprite-silhouette{
-	font-size: 16px;
-	line-height: 14px;
-	vertical-align: top;
-	font-family: 'Orion Icon Font';
-	padding: 3px;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-addcontent{
-	font-size: 16px;
-	color: #f89427;
-	font-family: 'Orion Icon Font';
-	padding: 0;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-gear{
-	font-size: 16px;
-	color: white;
-	font-family: 'Orion Icon Font';
-	padding: 0;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-wrench{
-	font-size: 14px;
-	line-height:16px;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding: 2px;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-go-up{ font-size: 16px;
-	color: white;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding: 0;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-} 
-
-.core-sprite-outline{
-	font-size: 16px;
-	vertical-align:middle;
-	color: #77858D;
-	font-family: 'Orion Icon Font';
-	padding: 0;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-move-down{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: #777;
-	font-family: 'Orion Icon Font';
-	padding: 0;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-move-up{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: #777;
-	font-family: 'Orion Icon Font';
-	padding: 0;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-openarrow{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding: 0;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-closedarrow{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding: 0;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-delete{
-	font-size: 16px;
-	color: #777;
-	line-height: normal;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding: 0;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-refresh{
-	font-size: 16px;
-	color: #777;
-	line-height: normal;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding: 0;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-expandAll{
-	font-size: 16px;
-	color: #777;
-	line-height: normal;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding: 0;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-collapseAll{
-	font-size: 16px;
-	color: #777;
-	line-height: normal;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding: 0;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-folder{
-	font-size: 16px;
-	color: white;
-	line-height: 16px;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding-right: 5px;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-file{
-	font-size: 16px;
-	color: white;
-	line-height: 16px;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding-right: 5px;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-close{
-	font-size: 16px;
-	color: #666;
-	line-height: 14px;
-	vertical-align:top;
-	font-family: 'Orion Icon Font';
-	padding-right: 5px;
-	background: none;
-	border: none;
-	margin-top: -3px;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-edit{
-	font-size: 16px;
-	color: white;
-	line-height: normal;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	/* padding-right: 5px; */
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-leftarrow{
-	font-size: 16px;
-	color: white;
-	line-height: 14px;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding-top: 2px;
-	padding-bottom: 2px;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-rightarrow{
-	font-size: 16px;
-	color: white;
-	line-height: 14px;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding-top: 2px;
-	padding-bottom: 2px;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.file-sprite-css{
-	font-size: 16px;
-	color: white;
-	line-height: normal;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding-right: 5px;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.file-sprite-html{
-	font-size: 16px;
-	color: white;
-	line-height: 16px;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding-right: 5px;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
- .file-sprite-javascript{
-	font-size: 16px;
-	color: white;
-	line-height: 16px;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding-right: 5px;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.file-sprite-xml{
-	font-size: 16px;
-	color: white;
-	line-height: 16px;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding-right: 5px;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.file-sprite-text{
-	font-size: 16px;
-	color: white;
-	line-height: 16px;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding-right: 5px;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.file-sprite-image{
-	font-size: 16px;
-	color: white;
-	line-height: 16px;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	padding-right: 5px;
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-warning{
-	font-size: 16px;
-	color: white;
-	line-height: 14px;
-	vertical-align:top;
-	font-family: 'Orion Icon Font';
-	padding-right: 5px;
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-error{
-	font-size: 16px;
-	color: #b94a48;
-	line-height: 14px;
-	vertical-align:top;
-	font-family: 'Orion Icon Font';
-	padding-right: 5px;
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-deploy{
-	font-size: 16px;
-	color: white;
-	line-height: normal;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	margin: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-/* This is needed for the Git category in SideMenu */
-.core-sprite-repository{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: white;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-sites{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: white;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-shell{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: white;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-search{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: white;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-git-logo{
-	font-size: 20px;
-	line-height: normal;
-	vertical-align:middle;
-	color: white;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	padding-bottom: 10px !important;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-delta{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: white;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-blank-menu-item{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: white;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-printer{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: white;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-split-pane-orientation{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: #77858d;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-trashcan{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: #77858D;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-whitespace{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: #77858D;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-compare-view{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: white;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-compare-inline{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: white;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-filter{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: #77858D;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.core-sprite-show-filtered{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: white;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
+.core-sprite-hamburger,
+.core-sprite-silhouette,
+.core-sprite-addcontent,
+.core-sprite-gear,
+.core-sprite-wrench,
+.core-sprite-go-up,
+.core-sprite-outline,
+.core-sprite-move-down,
+.core-sprite-move-up,
+.core-sprite-openarrow,
+.core-sprite-closedarrow,
+.core-sprite-delete,
+.core-sprite-refresh,
+.core-sprite-expandAll,
+.core-sprite-collapseAll,
+.core-sprite-folder,
+.core-sprite-file,
+.core-sprite-close,
+.core-sprite-edit,
+.core-sprite-leftarrow,
+.core-sprite-rightarrow,
+.file-sprite-css,
+.file-sprite-html,
+.file-sprite-javascript,
+.file-sprite-xml,
+.file-sprite-text,
+.file-sprite-image,
+.core-sprite-shell,
+.core-sprite-warning,
+.core-sprite-error,
+.core-sprite-deploy,
+.core-sprite-repository,
+.core-sprite-sites,
+.core-sprite-shell,
+.core-sprite-search,
+.core-sprite-git-logo,
+.core-sprite-delta,
+.core-sprite-blank-menu-item,
+.core-sprite-printer,
+.core-sprite-split-pane-orientation,
+.core-sprite-trashcan,
+.core-sprite-whitespace,
+.core-sprite-compare-view,
+.core-sprite-compare-inline,
+.core-sprite-filter,
+.core-sprite-show-filtered,
 .core-sprite-page,
 .core-sprite-horizontal,
 .core-sprite-vertical,
-.core-sprite-pip{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	padding: 2px;
-	padding-top: 0;
-}
-
+.core-sprite-pip,
 .core-sprite-dashboard,
 .core-sprite-runlogs,
 .core-sprite-play,
@@ -713,16 +155,116 @@
 .core-sprite-listed-errors,
 .core-sprite-checkmark,
 .core-sprite-save,
-.core-sprite-eraser{
+.core-sprite-eraser
+{
+	color: inherit;
 	font-size: 16px;
 	line-height: normal;
-	vertical-align:middle;
-	color: white;
+	vertical-align: middle;
 	font-family: 'Orion Icon Font';
+	padding: 0;
 	background: none;
 	border: none;
+	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-hamburger {
+	margin-top: -3px;
+}
+
+.core-sprite-silhouette {
+	line-height: 14px;
+	padding: 3px;
+}
+
+.core-sprite-wrench {
+	font-size: 14px;
+	line-height:16px;
+	padding: 2px;
+}
+
+.core-sprite-folder {
+	line-height: 16px;
+	padding-right: 5px;
+}
+
+.core-sprite-file {
+	line-height: 16px;
+	padding-right: 5px;
+}
+
+.core-sprite-close {
+	line-height: 14px;
+	padding-right: 5px;
+	margin-top: -3px;
+}
+
+.core-sprite-leftarrow {
+	line-height: 14px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+.core-sprite-rightarrow {
+	line-height: 14px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+.file-sprite-css {
+	padding-right: 5px;
+}
+
+.file-sprite-html {
+	line-height: 16px;
+	padding-right: 5px;
+}
+
+.file-sprite-javascript {
+	line-height: 16px;
+	padding-right: 5px;
+}
+
+.file-sprite-xml {
+	line-height: 16px;
+	padding-right: 5px;
+}
+
+.file-sprite-text {
+	line-height: 16px;
+	padding-right: 5px;
+}
+
+.file-sprite-image {
+	line-height: 16px;
+	padding-right: 5px;
+}
+
+.core-sprite-warning {
+	line-height: 14px;
+	padding-right: 5px;
+}
+
+.core-sprite-error {
+	color: #b94a48;
+	line-height: 14px;
+	padding-right: 5px;
+}
+
+/* This is needed for the Git category in SideMenu */
+.core-sprite-git-logo {
+	font-size: 20px;
+	padding-bottom: 10px !important;
+}
+
+.core-sprite-page,
+.core-sprite-horizontal,
+.core-sprite-vertical,
+.core-sprite-pip{
+	padding: 2px;
+	padding-top: 0;
 }
 
 .core-sprite-hamburger:before{ content:'\E000'; }
