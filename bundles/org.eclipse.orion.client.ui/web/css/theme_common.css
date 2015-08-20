@@ -453,7 +453,7 @@ a.breadcrumb.currentLocation {
 /* push toggle */
 
 .orionToggleOff {
-	color: #222;
+	color: inherit;
 	border-radius: 3px;
 	vertical-align:middle;
 	-webkit-animation-duration: .2s; 
@@ -465,7 +465,7 @@ a.breadcrumb.currentLocation {
 }
 
 .orionToggleOn {
-	color: #222;
+	color: inherit;
 	background-color: whitesmoke;
 	border-radius: 3px;
 	box-shadow: inset 1px 1px 2px 1px rgba(0,0,0,0.3);
