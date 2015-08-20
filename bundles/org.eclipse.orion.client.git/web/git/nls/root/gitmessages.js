@@ -10,6 +10,7 @@
 /*eslint-env browser, amd*/
 define({//Default message bundle
 	"Compare": "Compare", //$NON-NLS-0$  //$NON-NLS-1$
+	"gitFileSysName": "Git File System",
 	"View the side-by-side compare": "View the side-by-side compare", //$NON-NLS-0$  //$NON-NLS-1$
 	"WorkingDirVer": "Open Working Directory", //$NON-NLS-0$  //$NON-NLS-1$
 	"Working Directory": "Working Directory", //$NON-NLS-0$  //$NON-NLS-1$
