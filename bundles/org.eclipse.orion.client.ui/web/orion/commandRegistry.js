@@ -552,7 +552,7 @@ define([
 		_getBindingOverrides: function() {
 			// Get the key binding overrides from the preference store
 			return this._prefService.getPreferences("/KeyBindings").then(function(bindingPrefs) { //$NON-NLS-1$
-				var overrides;
+				var overrides = [];
 				this.bindingPrefs = bindingPrefs;
 				
 				var prefVal = bindingPrefs.get("overridesJSON"); //$NON-NLS-1$
