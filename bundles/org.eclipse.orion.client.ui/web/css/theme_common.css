@@ -740,7 +740,7 @@ a.breadcrumb.currentLocation {
 	-ms-user-select: none;
 	user-select: none;
 	white-space: nowrap;
-	border-left: 6px solid transparent;
+	border-left: 4px solid transparent;
 }
 
 .dropdownMenu .dropdownMenuItemSelected {
