@@ -81,3 +81,15 @@
 .mainpane {
 	padding-right:0;
 }
+
+.workingTarget {
+	background: #253B46;
+}
+
+.sectionWrapper {
+	background: white !important;
+}
+
+.orionMarkdown {
+	background: white;
+}
