@@ -375,7 +375,7 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                                     _deferredLoad.resolve(_this);
                                 }
                             });
-                        } else if ("timeout" === message.method) {
+                        } else if ("timeout" === message.method || "error" === message.method) {
                             if (_deferredLoad) {
                                 _deferredLoad.reject(message.error);
                             }
@@ -666,7 +666,7 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                 _internalRegistry.dispatchEvent(new PluginEvent("started", _this));
                 _deferredStateChange = null;
                 deferredStateChange.resolve();
-            }, function() {
+            }, function(error) {
                 _deferredLoad = null;
                 _state = "stopping";
                 _internalRegistry.dispatchEvent(new PluginEvent("stopping", _this));
@@ -680,7 +680,7 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                 _deferredStateChange = null;
                 _internalRegistry.dispatchEvent(new PluginEvent("stopped", _this));
                 _this._problemLoading = true;
-                deferredStateChange.reject(new Error("Failed to load plugin: " + _url));
+                deferredStateChange.reject(new Error("Failed to load plugin: " + _url + (error && error.message ? "\n    Reason: " + error.message : "")));
                 if (_this._default) {
                     _lastModified = 0;
                     _persist();
@@ -971,7 +971,7 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                                 }
                             });
                             message = "Plugin handshake timeout for: " + url;
-                           newTimeout = (timeout || 60000) + extraTimeout;
+                           newTimeout = this._loading ? 5000 : (timeout || 60000) + extraTimeout;
                         } else {
                             message = "Plugin load timeout for: " + url;
                             newTimeout = timeout || 15000;
@@ -1114,7 +1114,7 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                         internalRegistry.disconnect(channel);
                         channel = null;
                         d.resolve(manifest);
-                    } else if ("timeout" === message.method) {
+                    } else if ("timeout" === message.method || "error" === message.method) {
                         internalRegistry.disconnect(channel);
                         channel = null;
                         d.reject(message.error);

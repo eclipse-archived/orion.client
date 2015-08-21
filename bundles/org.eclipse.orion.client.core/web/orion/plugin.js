@@ -69,6 +69,10 @@
             }
         }
         var _notify = _publish;
+        var _errHandler = function(evt){
+        	_publish({method: "error", error: _serializeError(evt.error)});
+        };
+        addEventListener("error", _errHandler);
         
         var lastHeartbeat;
         var startTime = new Date().getTime();
@@ -372,6 +376,7 @@
                 }
                 return;
             }
+            removeEventListener("error", _errHandler);
             var message = {
                 method: "plugin",
                 params: [_getPluginData()]

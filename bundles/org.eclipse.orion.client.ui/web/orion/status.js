@@ -221,8 +221,11 @@ define([
 			this.progressMessage = message;
 			//could either be responseText from xhrGet or just a string
 			var status = message.responseText || message;
+			if(status instanceof Error) {
+				status.Severity = SEV_ERROR;
+			}
 			//accept either a string or a JSON representation of an IStatus
-			if (typeof status === "string") {
+			else if (typeof status === "string") {
 				try {
 					status = JSON.parse(status);
 				} catch(error) {
