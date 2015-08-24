@@ -1,7 +1,5 @@
 @import "../globalSearch/globalSearch.css";
 
-@import "../widgets/input/ComboTextInput.css";
-
 .searchResultsWrapperDiv .treeTableRow > td {
 	overflow: hidden;
 }
@@ -51,10 +49,6 @@
 	table-layout: fixed;
 }
 
-.replaceModeActive > .searchResultsWrapperDiv {
-	height: calc(100% - 220px - 54px - 38px); /* subtract height of search options and replace box */
-}
-
 .searchWrapper > .comboTextInputWrapper {
 	margin: 5px 10px 0 10px;
 }
@@ -64,30 +58,6 @@
 	-ms-user-select: none;
 	-webkit-user-select: none;
 	user-select: none;
-}
-
-.fileNamePatternsTextInput {
-	min-width: 219px;
-}
-
-.fileNamePatternsHint {
-	color: #777;
-	font-size: 11px;
-	margin: 0 0 2px 0;
-	padding: 0 2px;
-	display: block;
-	opacity: 0;
-	text-align: center;
-	transition: opacity 0.1s ease;
-	width: 252px;
-}
-
-.fileNamePatternsHintVisible {
-	opacity: 1 !important;
-}
-
-.fileNamePatternsInput {
-	margin: 0;
 }
 
 .toggleDisplayLink {
@@ -136,11 +106,6 @@
 .searchButton > span {
 	font-size: 14px;
 	color: white;
-}
-
-.commandButton.comboTextInputButton.searchButton {
-	background-color: #7fa4c0;
-	padding: 3px 5px 5px 5px;
 }
 
 .commandButton.comboTextInputButton.searchButton.isHidden {
