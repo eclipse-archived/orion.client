@@ -9,13 +9,13 @@ developing for the web, in the web. Tools are written in JavaScript and run in t
 been taken to provide a web experience for development, rather than to recreate the traditional desktop
 IDE experience in a browser tab.
 
-- [https://projects.eclipse.org/projects/eclipse.orion](https://projects.eclipse.org/projects/eclipse.orion)
+- [https://projects.eclipse.org/projects/ecd.orion](https://projects.eclipse.org/projects/ecd.orion)
 
 Developer resources
 --------------------
 Information regarding source code management, builds, coding standards, and more.
 
-- [https://projects.eclipse.org/projects/eclipse.orion/developer](https://projects.eclipse.org/projects/eclipse.orion/developer)
+- [https://projects.eclipse.org/projects/ecd.orion/developer](https://projects.eclipse.org/projects/ecd.orion/developer)
 
 Contributor License Agreement
 ------------------------------
