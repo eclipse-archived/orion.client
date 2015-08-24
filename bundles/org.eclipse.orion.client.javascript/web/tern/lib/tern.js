@@ -856,7 +856,7 @@
     }
   };
 
-  function findDef(srv, query, file) {
+  var findDef = exports.findDef = function(srv, query, file) { //ORION API
     var expr = findExpr(file, query);
     var type = findExprType(srv, query, file, expr);
     //ORION if (infer.didGuess()) return {};
@@ -977,7 +977,7 @@
     if (!expr) {
     	throw ternError("Could not find an expression to rename.");
 	} else if(expr.node.type !== 'Identifier') {
-    	switch(expr.node.type) {
+    	switch(expr.node.type) { //ORION
     		case 'MemberExpression': {
     			throw ternError("Rename is not supported on member expressions.");
     		}
