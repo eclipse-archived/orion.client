@@ -54,7 +54,8 @@
 }
 
 .dragOver {
-	background: #ffffd8;
+	color: white !important;
+	background: #1bb199;
 	outline: #AAA 2px dotted !important;
 }
 
