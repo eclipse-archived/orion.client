@@ -856,7 +856,7 @@
     }
   };
 
-  var findDef = exports.findDef = function(srv, query, file) { //ORION API
+  function findDef(srv, query, file) { //ORION API
     var expr = findExpr(file, query);
     var type = findExprType(srv, query, file, expr);
     //ORION if (infer.didGuess()) return {};
@@ -1011,4 +1011,5 @@
   }
 
   exports.version = "0.10.0";
+  exports.findDef = findDef; //ORION
 });
