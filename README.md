@@ -21,11 +21,11 @@ How to build Orion using Maven
 
 ###Install Maven:
 
-install latest Maven 3.0 from http://maven.apache.org
+Install latest Maven 3.0 from http://maven.apache.org
 
 ###Clone Git repositories:
 
-clone `org.eclipse.orion.client` and `org.eclipse.orion.server` under the same local folder
+Clone `org.eclipse.orion.client` and `org.eclipse.orion.server` under the same local folder
 
 ```
 % cd /my/git/repos
@@ -45,7 +45,7 @@ clone `org.eclipse.orion.client` and `org.eclipse.orion.server` under the same l
 % ./orion
 ```
 
-Now point your browser to start the Orion client at http://localhost:8080
+Now point your browser at http://localhost:8080 to start the Orion client
 
 License
 -------
