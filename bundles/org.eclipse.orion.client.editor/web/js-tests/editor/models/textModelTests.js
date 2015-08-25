@@ -10,6 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd, mocha*/
+/*eslint-disable missing-nls*/
 
 define(["chai/chai", 'orion/editor/textModel', 'orion/editor/annotations'], function(chai, mTextModel) {
 	var assert = chai.assert;
