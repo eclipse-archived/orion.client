@@ -163,6 +163,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cf
 				    	},
 				    	showMessage : showMessage,
 				    	hideMessage : hideMessage,
+				    	showError : showError,
 				    	handleError : handleError,
 				    	postError : postError
 				    });
