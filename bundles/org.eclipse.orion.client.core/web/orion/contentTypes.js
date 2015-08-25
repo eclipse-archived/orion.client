@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define([], function() {
+define(["orion/serviceTracker"], function(ServiceTracker) {
 	var SERVICE_ID = "orion.core.contentTypeRegistry"; //$NON-NLS-0$
 	var EXTENSION_ID = "orion.core.contenttype"; //$NON-NLS-0$
 	var OLD_EXTENSION_ID = "orion.file.contenttype"; // backwards compatibility //$NON-NLS-0$
@@ -123,14 +123,33 @@ define([], function() {
 			filename: array(contentTypeData.filename)
 		};
 	}
-
-	function buildMap(contentTypeDatas) {
-		var map = Object.create(null);
+	
+	function add2Map(map, contentTypeDatas) {
 		contentTypeDatas.map(process).forEach(function(contentType) {
 			if (!Object.prototype.hasOwnProperty.call(map, contentType.id)) {
 				map[contentType.id] = contentType;
 			}
 		});
+	}
+	
+	function deleteFromMap(map, contentTypeDatas) {
+		contentTypeDatas.map(process).forEach(function(contentType) {
+			if (Object.prototype.hasOwnProperty.call(map, contentType.id)) {
+				delete map[contentType.id];
+			}
+		});
+	}
+	
+	function add2TypeData(serviceRef, contentTypeDatas) {
+		var types = array(serviceRef.getProperty("contentTypes")); //$NON-NLS-0$
+		for (var j=0; j < types.length; j++) {
+			contentTypeDatas.push(types[j]);
+		}
+	}
+
+	function buildMap(contentTypeDatas) {
+		var map = Object.create(null);
+		add2Map(map, contentTypeDatas);
 		return map;
 	}
 
@@ -139,10 +158,8 @@ define([], function() {
 				serviceRegistry.getServiceReferences(OLD_EXTENSION_ID));
 		var contentTypeDatas = [];
 		for (var i=0; i < serviceReferences.length; i++) {
-			var serviceRef = serviceReferences[i], types = array(serviceRef.getProperty("contentTypes")); //$NON-NLS-0$
-			for (var j=0; j < types.length; j++) {
-				contentTypeDatas.push(types[j]);
-			}
+			var serviceRef = serviceReferences[i];
+			add2TypeData(serviceRef, contentTypeDatas);
 		}
 		return buildMap(contentTypeDatas);
 	}
@@ -165,6 +182,19 @@ define([], function() {
 	function ContentTypeRegistry(dataSource) {
 		if (dataSource && dataSource.registerService) {
 			this.serviceRegistry = dataSource;
+			var tracker = new ServiceTracker(this.serviceRegistry, "orion.core.contenttype"); //$NON-NLS-0$
+			var _self = this;
+			tracker.onServiceAdded = function(serviceRef) {
+				var contentTypeDatas = [];
+				add2TypeData(serviceRef, contentTypeDatas);
+				add2Map(_self.map, contentTypeDatas);
+			};
+			tracker.removedService = function(serviceRef) {
+				var contentTypeDatas = [];
+				add2TypeData(serviceRef, contentTypeDatas);
+				deleteFromMap(_self.map, contentTypeDatas);
+			};
+			tracker.open(false);
 			this.map = buildMapFromServiceRegistry(dataSource);
 			dataSource.registerService(SERVICE_ID, this);
 		} else if (Array.isArray(dataSource)) {

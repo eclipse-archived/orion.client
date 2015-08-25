@@ -92,8 +92,12 @@ define([], function() {
 		 * Begins tracking services.
 		 * @name orion.ServiceTracker#open
 		 * @function
+		 * @param {boolean} all=true TODO document me
 		 */
-		this.open = function() {
+		this.open = function(all) {
+			if (typeof all === "undefined") {
+				all = true;
+			}
 			if (state !== CLOSED) {
 				throw 'Already open'; //$NON-NLS-0$
 			}
@@ -114,12 +118,14 @@ define([], function() {
 			};
 			serviceRegistry.addEventListener('registered', addedListener); //$NON-NLS-0$
 			serviceRegistry.addEventListener('unregistering', removedListener); //$NON-NLS-0$
-			serviceRegistry.getServiceReferences(objectClass).forEach(function(serviceRef) {
-				add.call(self, serviceRef);
-				if (typeof self.onServiceAdded === 'function') { //$NON-NLS-0$
-					return self.onServiceAdded(serviceRef, serviceRegistry.getService(serviceRef));
-				}
-			});
+			if (all) {
+				serviceRegistry.getServiceReferences(objectClass).forEach(function(serviceRef) {
+					add.call(self, serviceRef);
+					if (typeof self.onServiceAdded === 'function') { //$NON-NLS-0$
+						return self.onServiceAdded(serviceRef, serviceRegistry.getService(serviceRef));
+					}
+				});
+			}
 			if (typeof this.onOpen === 'function') {
 				this.onOpen();
 			}
