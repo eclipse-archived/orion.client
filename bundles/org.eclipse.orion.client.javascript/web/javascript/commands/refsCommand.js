@@ -55,7 +55,7 @@ define([
 			});
 		},
 
-		findRefs: function findDefs(options) {
+		findRefs: function findRefs(options) {
 			//TODO
 			if(options.kind === 'workspace') {
 

@@ -120,22 +120,27 @@ define([
  				var wUrl = new URL(script, window.location.href);
     			wUrl.query.set("worker-language", navigator.language);   			 //$NON-NLS-1$
     			this.worker = new Worker(wUrl.href);
-    			this.worker.onmessage = onMessage;
-    			this.worker.onerror = onError;
+    			this.worker.onmessage = onMessage.bind(this);
+    			this.worker.onerror = onError.bind(this);
     			this.worker.postMessage('start_server'); //$NON-NLS-1$
+    			this.messageId = 0;
+    			this.callbacks = Object.create(null);
     	//	}
     	}
 
-    	WrappedWorker.prototype.postMessage = function(msg) {
+    	WrappedWorker.prototype.postMessage = function(msg, f) {
+			if(msg != null && typeof(msg) === 'object') {
+				if(typeof(msg.messageID) !== 'number') {
+					//don't overwrite an id from a tern-side request
+					msg.messageID = this.messageId++;
+					this.callbacks[msg.messageID] = f;
+				}
+			}
     		if(this.shared) {
     			this.worker.port.postMessage(msg);
     		} else {
     			this.worker.postMessage(msg);
     		}
-    	};
-
-    	WrappedWorker.prototype.addEventListener = function(msg, handler) {
-    		this.worker.addEventListener(msg, handler);
     	};
 
     	var prefService = core.serviceRegistry.getService("orion.core.preference"); //$NON-NLS-1$
@@ -146,81 +151,118 @@ define([
     	 */
     	var contributedEnvs;
 
-    	// Start the worker
+		var handlers ={
+			'read': doRead,
+			'server_ready': getPrefs
+		};
+
+		// Start the worker
     	var ternWorker = new WrappedWorker("ternWorker.js",  //$NON-NLS-1$
-		    	function(evnt) {
-		    		if(typeof(evnt.data) === 'object') {
-		    			var _d  = evnt.data;
-		    			switch(_d.request) {
-		    				case 'read': {
-		    					if(typeof(_d.args.file) === 'object') {
-		    						var _l = _d.args.file.logical;
-		    						scriptresolver.getWorkspaceFile(_l).then(function(files) {
-		    							if(files && files.length > 0) {
-		    								var rel = scriptresolver.resolveRelativeFiles(_l, files, {location: _d.args.file.file, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
-		    								if(rel && rel.length > 0) {
-			    								return fileClient.read(rel[0].location).then(function(contents) {
-			    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:rel[0].location, logical:_l, path:rel[0].path}});	 //$NON-NLS-1$
-			    								});
-		    								} else {
-		    									ternWorker.postMessage({request: 'read', args: {logical:_l, error: 'Failed to read file '+_l}}); //$NON-NLS-1$ //$NON-NLS-2$
-		    								}
-		    							} else {
-		    								ternWorker.postMessage({request: 'read', args: {logical:_l, error: 'Failed to read file '+_l}}); //$NON-NLS-1$ //$NON-NLS-2$
-		    							}
-		    						},
-		    						function(err) {
-		    							ternWorker.postMessage({request: 'read', args: {logical: _l, message: err.toString(), error: 'Failed to read file '+_l}}); //$NON-NLS-1$ //$NON-NLS-2$
-		    						});
-		    					} else {
-		    						var file = _d.args.file;
-		    						try {
-			    						return fileClient.read(file).then(function(contents) {
-			    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:file}});	 //$NON-NLS-1$
-			    								},
-			    								function(err) {
-			    									ternWorker.postMessage({request: 'read', args: {file: file, message: err.toString(), error: 'Failed to read file '+file}}); //$NON-NLS-1$ //$NON-NLS-2$
-			    								});
-			    					}
-		    						catch(err) {
-		    							ternWorker.postMessage({request: 'read', args: {file: file, message: err.toString(), error: 'Failed to read file '+file}}); //$NON-NLS-1$ //$NON-NLS-2$
-		    						}
-		    					}
-		    					break;
-		    				}
-		    				case 'installed_plugins': {
-		    					var plugins = _d.plugins;
-		    					return prefService ? prefService.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
-									var props = prefs.get("tern/plugins"); //$NON-NLS-1$
-									if (!props) {
-										props = Object.create(null);
-									} else if(typeof(props) === 'string') {
-										props = JSON.parse(props);
-									}
-									var keys = Object.keys(plugins);
-									for(var i = 0; i < keys.length; i++) {
-										var key = keys[i];
-										props[key] = plugins[key];
-									}
-									prefs.put("tern/plugins", JSON.stringify(props)); //$NON-NLS-1$
-									prefs.sync(true);
-								}) : new Deferred().resolve();
-		    				}
-		    				case 'environments': {
-		    					contributedEnvs = _d.envs;
-		    					break;
-		    				}
-		    			}
-		    		} else if(typeof(evnt.data) === 'string') {
-			    		if(evnt.data === 'server_ready') {
-			    			ternWorker.postMessage({request: 'installed_plugins'}); //$NON-NLS-1$
-		    				ternWorker.postMessage({request: 'environments'}); //$NON-NLS-1$
-			    		}
-			    	}
-		    	},
-		    	function(err) {
-		    		Logger.log(err);
-		    	});
+	    	function(evnt) {
+	    		var _d = evnt.data;
+				if(typeof(_d) === 'object') {
+					var id  = _d.messageID;
+					var f = this.callbacks[id];
+					if(typeof(f) === 'function') {
+						f(_d);
+						delete this.callbacks[id];
+					}
+					var _handler = handlers[_d.request];
+					if(typeof(_handler) === 'function') {
+						_handler(_d);
+					}
+				} else if(typeof(evnt.data) === 'string') {
+					_handler = handlers[evnt.data];
+					if(typeof(_handler) === 'function') {
+						_handler(_d);
+					}
+		    	}
+	    	},
+	    	function(err) {
+	    		Logger.log(err);
+	    });
+
+		/**
+		 * @description Handler for Tern read requests
+		 * @param {Object} request Therequest from Tern
+		 * @since 10.0
+		 */
+		function doRead(request) {
+			var response = {request: 'read', messageID: request.messageID, args: {}}; //$NON-NLS-1$
+			if(typeof(request.args.file) === 'object') {
+				var _l = request.args.file.logical;
+				response.args.logical = _l;
+				scriptresolver.getWorkspaceFile(_l).then(function(files) {
+					if(files && files.length > 0) {
+						var rel = scriptresolver.resolveRelativeFiles(_l, files, {location: request.args.file.file, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
+						if(rel && rel.length > 0) {
+							return fileClient.read(rel[0].location).then(function(contents) {
+								response.args.contents = contents;
+								response.args.file = rel[0].location;
+								response.args.path = rel[0].path;
+								ternWorker.postMessage(response);
+							});
+						} else {
+							response.args.error = 'Failed to read file '+_l;
+							ternWorker.postMessage(response);
+						}
+					} else {
+						response.args.error = 'Failed to read file '+_l;
+						ternWorker.postMessage(response);
+					}
+				},
+				function(err) {
+					response.args.error = 'Failed to read file '+_l;
+					response.args.message = err.toString();
+					ternWorker.postMessage(response);
+				});
+			} else {
+				var file = request.args.file;
+				response.args.file = file;
+				try {
+					return fileClient.read(file).then(function(contents) {
+								response.args.contents = contents;
+								ternWorker.postMessage(response);
+							},
+							function(err) {
+								response.args.message = err.toString();
+								response.args.error = 'Failed to read file '+file;
+								ternWorker.postMessage(response);
+							});
+				}
+				catch(err) {
+					response.args.message = err.toString();
+					response.args.error = 'Failed to read file '+file;
+					ternWorker.postMessage(response);
+				}
+			}
+		}
+
+		/**
+		 * @description Pre-loads the tern plugin prefs
+		 * @param {Object} request The request
+		 * @since 10.0
+		 */
+		function getPrefs() {
+			ternWorker.postMessage({request: 'installed_plugins'}, function(response) { //$NON-NLS-1$
+				var plugins = response.plugins;
+				return prefService ? prefService.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
+					var props = prefs.get("tern/plugins"); //$NON-NLS-1$
+					if (!props) {
+						props = Object.create(null);
+					} else if(typeof(props) === 'string') {
+						props = JSON.parse(props);
+					}
+					var keys = Object.keys(plugins);
+					for(var i = 0; i < keys.length; i++) {
+						var key = keys[i];
+						props[key] = plugins[key];
+					}
+					prefs.put("tern/plugins", JSON.stringify(props)); //$NON-NLS-1$
+					prefs.sync(true);
+				}) : new Deferred().resolve();
+			});
+		}
 
     	/**
 	     * @description Queries the Tern server to return all contributed environment names from the installed plugins
@@ -230,17 +272,10 @@ define([
 	    function getEnvironments() {
     		var envDeferred = new Deferred();
     		if(!contributedEnvs) {
-	    		ternWorker.addEventListener('message', function(evnt) {
-	    			var _d  = evnt.data;
-	    			switch(_d.request) {
-	    				case 'environments': {
-	    					contributedEnvs = _d.envs;
-	    					envDeferred.resolve(_d.envs);
-	    					break;
-	    				}
-	    			}
-	    		}, false);
-    			ternWorker.postMessage({request: 'environments'}); //$NON-NLS-1$
+    			ternWorker.postMessage({request: 'environments'}, function(response) { //$NON-NLS-1$
+					contributedEnvs = response.envs;
+	    			envDeferred.resolve(response.envs);
+    			});
     		} else {
     			return envDeferred.resolve(contributedEnvs);
     		}

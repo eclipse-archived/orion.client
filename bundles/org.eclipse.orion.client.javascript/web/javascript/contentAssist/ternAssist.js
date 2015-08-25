@@ -1,9 +1,9 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2015 IBM Corporation, Inc. and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
@@ -32,17 +32,17 @@ define([
 	function TemplateProvider() {
 	    //constructor
  	}
- 	
+
  	TemplateProvider.prototype = new mTemplates.TemplateContentAssist([], []);
- 	
+
  	Objects.mixin(TemplateProvider.prototype, {
  		uninterestingChars: ":!#$^&.?<>", //$NON-NLS-1$
- 		
+
  		isValid: function(prefix, buffer, offset) {
 			var char = buffer.charAt(offset-prefix.length-1);
 			return !char || this.uninterestingChars.indexOf(char) === -1;
 		},
-		
+
 		getTemplateProposals: function(prefix, offset, context, kind) {
 			var proposals = [];
 			var k = kind ? kind.kind : null;
@@ -65,7 +65,7 @@ define([
 					proposals.push(proposal);
 				}
 			}
-			
+
 			if (0 < proposals.length) {
 				//sort the proposals by name
 				proposals.sort(function(p1, p2) {
@@ -77,7 +77,7 @@ define([
 					}
 					return 0;
 				});
-				// if any templates were added to the list of 
+				// if any templates were added to the list of
 				// proposals, add a title as the first element
 				proposals.splice(0, 0, {
 					proposal: '',
@@ -88,7 +88,7 @@ define([
 			}
 			return proposals;
 		},
-		
+
 		templateMatches: function(template, prefix, kind, context) {
 		    if(template.match(prefix)) {
 		        //must match the prefix always
@@ -98,7 +98,7 @@ define([
 			        if(kind && kind.kind === 'jsdoc') {
 			            // don't propose tag templates when one exists already on the same line
 			            return !/^[\/]?[\*]+\s*[@]/ig.test(line);
-			        } 
+			        }
 		        }
 		        if(kind && kind.kind === 'doc') {
 		            var comment = kind.node.value.trim();
@@ -110,7 +110,7 @@ define([
 		                        //nothing else is allowed in the directives - eslint won't parse it
 		                        return false;
 			                }
-		                } 
+		                }
 		            }
 		        }
 		        return true;
@@ -118,7 +118,7 @@ define([
 		    return false;
 		}
  	});
- 	
+
  	var provider = new TemplateProvider();
 
 	/**
@@ -130,13 +130,13 @@ define([
 	 * @returns {Array} The array of template proposals
 	 */
 	function createTemplateProposals (params, kind, buffer) {
-		if((typeof params.template === 'undefined' || params.template) && 
+		if((typeof params.template === 'undefined' || params.template) &&
 				provider.isValid(params.prefix, buffer, params.offset, params)) {
 			return provider.getTemplateProposals(params.prefix, params.offset, params, kind);
 		}
 		return [];
 	}
-    
+
     /**
      * @description Get the prefix to use for the proposal, handles @-based prefixes
      * @param {Object} context The proposal context
@@ -173,14 +173,14 @@ define([
 	    		                return word;
 	    		            }
 		                }
-	                    return word;        		        
+	                    return word;
 		            }
 		        }
 		    }
 	    }
 	    return prefix;
     }
-    
+
     /**
 	 * @description Computes the kind of context to complete in
 	 * @param {Object} ast The backing AST to visit
@@ -196,7 +196,7 @@ define([
 	                var start  = node.range[0];
     		        if(contents.charAt(start) === '/' && contents.charAt(start+1) === '*') {
                         if(contents.charAt(start+2) === '*' && offset > start+2) { // must be past the second '*'
-                            return {kind:'jsdoc', node: node};  
+                            return {kind:'jsdoc', node: node};
                         } else if(offset > start+1) { //must be past the '*'
         		            return {kind:'doc', node: node};
         		        }
@@ -209,13 +209,13 @@ define([
 	            //$FALLTHROUGH$
 	            default: return null;
 	        }
-	    } 
+	    }
     	node = Finder.findNode(offset, ast, {parents:true});
     	if(node) {
     		if(node.parents && node.parents.length > 0) {
 	    		var prent = node.parents.pop();
 	    		switch(prent.type) {
-						case 'MemberExpression': 
+						case 'MemberExpression':
 							return { kind : 'member'}; //$NON-NLS-1$
 						case 'Program':
 						case 'BlockStatement':
@@ -228,7 +228,7 @@ define([
 						case 'FunctionDelcaration':
 						case 'FunctionExpression':
 							if(offset < prent.body.range[0]) {
-								return null;						
+								return null;
 							}
 							break;
 						case 'Property':
@@ -243,7 +243,7 @@ define([
     	}
 		return {kind:'top'}; //$NON-NLS-1$
 	}
-    
+
     /**
 	 * @description Create proposals specific to JSDoc
 	 * @returns {Array} The array of proposals
@@ -291,7 +291,7 @@ define([
         	                           if(Array.isArray(prms)) {
         	                               for(var i = 0; i < prms.length; i++) {
         	                                   _name = prms[i].name;
-        	                                   if(Util.looselyMatches(params.prefix, _name)) { 
+        	                                   if(Util.looselyMatches(params.prefix, _name)) {
             	                                   proposals.push({
                         								proposal: _name,
                         								relevance: 100,
@@ -361,7 +361,7 @@ define([
         }
         return proposals;
 	}
-	
+
 	/**
 	 * @description Returns the function name from the given node if it relates to a function in some way
 	 * @param {Object} node The AST node
@@ -380,7 +380,7 @@ define([
 				break;
 			}
 			case 'ExpressionStatement': {
-				var _n = node.expression
+				var _n = node.expression;
 				if(_n && _n.type === 'AssignmentExpression' && _n.right.type === 'FunctionExpression') {
 					if(_n.right.id) {
 						return _n.right.id.name;
@@ -410,7 +410,7 @@ define([
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @description Returns the parameters from the related function
 	 * @param {Object} node The AST node
@@ -424,7 +424,7 @@ define([
 			}
 			case 'Property': {
 				if(node.value.type === 'FunctionExpression') {
-					return node.value.params
+					return node.value.params;
 				}
 				break;
 			}
@@ -451,20 +451,6 @@ define([
 
 	var deferred = null;
 
-	var handler = function(evnt) {
-		 if(deferred && typeof(evnt.data) === 'object') {
-	        var _d = evnt.data;
-	        if(_d.request === 'completions') {
-	        	if(deferred.proposals) {
-	        		deferred.resolve([].concat(sortProposals(_d.proposals ? _d.proposals : [], deferred.args), deferred.proposals));
-	        	} else {
-	        		deferred.resolve(sortProposals(_d.proposals, deferred.args));
-	        	}
-	        	deferred = null;
-	        }
-	     }
-	};
-	
 	/**
 	 * @description Creates a new TernContentAssist object
 	 * @constructor
@@ -477,7 +463,6 @@ define([
 		this.astManager = astManager;
 		this.ternworker = ternWorker;
 		this.pluginenvs = pluginEnvironments;
-		this.ternworker.addEventListener('message', handler, false);
 		this.timeout = null;
 	}
 
@@ -492,7 +477,7 @@ define([
 		initialize: function() {
 		    //override
 		},
-        
+
 		/**
 		 * @description Implements the Orion content assist API v4.0
 		 */
@@ -522,7 +507,7 @@ define([
 			    }
 			});
 		},
-		
+
 		doAssist: function(ast, params, meta, envs, contributedEnvs) {
 			var kind = getKind(ast, params.offset, ast.source);
        		params.prefix = getPrefix(params, kind, ast.source);
@@ -539,7 +524,16 @@ define([
 			    	params.keywords = true;
 			    }
 			    var args = {params: params, meta: meta, envs:env, files: files};
-	        	this.ternworker.postMessage({request: 'completions', args: args}); //$NON-NLS-1$
+	        	this.ternworker.postMessage({request: 'completions', args: args}, //$NON-NLS-1$
+					function(response) {
+						if(deferred.proposals) {
+			        		deferred.resolve([].concat(sortProposals(response.proposals ? response.proposals : [], deferred.args), deferred.proposals));
+			        	} else {
+			        		deferred.resolve(sortProposals(response.proposals, deferred.args));
+			        	}
+			        	deferred = null;
+					}
+	        	);
 	        	if(deferred) {
 	        		deferred.resolve();
 	        	}
@@ -558,7 +552,7 @@ define([
 				return deferred;
    			}
 		},
-		
+
 		getActiveEnvironments: function getActiveEnvironements(ast, defenvs) {
 			var env = Object.create(null);
 			Objects.mixin(env, defenvs);
@@ -588,7 +582,7 @@ define([
 		    return env;
 		}
 	});
-	
+
 	var operators = {
     	'delete': true,
     	'new': true,
@@ -599,7 +593,7 @@ define([
     	'void': true,
     	'yield': true
     };
-    
+
     /**
      * @description Returns the root URL to use for the online doc portion of a keyword proposal
      * @param keyword
@@ -609,22 +603,22 @@ define([
     	var key = keyword;
     	switch(keyword) {
     		case 'do': {
-    			key = 'do...while';
+    			key = 'do...while'; //$NON-NLS-1$
     			break;
     		}
     		case 'in': {
-    			key = 'for...in';
+    			key = 'for...in'; //$NON-NLS-1$
     			break;
     		}
     		case 'try':
-    		case 'catch': 
+    		case 'catch':
     		case 'finally': {
-    			key = 'try...catch';
+    			key = 'try...catch'; //$NON-NLS-1$
     			break;
     		}
-    		case 'case': 
+    		case 'case':
     		case 'default' : {
-    			key = 'switch';
+    			key = 'switch'; //$NON-NLS-1$
     			break;
     		}
     		case 'if':
@@ -640,14 +634,14 @@ define([
     	}
     	return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/'+key; //$NON-NLS-1$
     }
-    
+
     /**
 	 * @name _formatTernProposal
 	 * @description Formats the proposal
 	 * @function
 	 * @private
 	 * @param {tern.Completion} completion The Tern proposal object
-	 * @param {Object} args The arguments from the original 
+	 * @param {Object} args The arguments from the original
 	 * @returns {orion.Proposal} An Orion-formatted proposal object
 	 */
 	function _formatTernProposal(completion, args) {
@@ -694,7 +688,7 @@ define([
         } else {
         	var _h = Hover.formatMarkdownHover(completion.doc);
         	if(_h) {
-        		obj.content += _h.content;	
+        		obj.content += _h.content;
         	} else {
         		obj.content += proposal.name;
         	}
@@ -705,7 +699,7 @@ define([
         proposal.hover = obj;
         return proposal;
 	}
-	
+
   	 /**
 	 * @description Convert an array of parameters into a string and also compute linked editing positions
 	 * @function
@@ -742,7 +736,7 @@ define([
 			proposal.positions = positions;
 		}
 	}
-	
+
 	function collectParams(type) {
 		if(type && type.length > 0) {
 			var params = [];
@@ -807,7 +801,7 @@ define([
 		}
 		return 0;
 	};
-	
+
 	function formatOrigin(origin) {
 		var match = /([^/.]+\/[^\/]+)$/g.exec(origin);
 		if(match) {
@@ -819,7 +813,7 @@ define([
 		}
 		return origin;
 	}
-	
+
 	function sortProposals(completions, args) {
 		var envs = args.envs ? args.envs : {};
 	    var _p = Object.create(null);
@@ -877,7 +871,7 @@ define([
 	    }
 	    return proposals;
 	}
-	
+
 	return {
 		TernContentAssist : TernContentAssist
 	};

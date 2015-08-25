@@ -34,33 +34,6 @@ define([
 		this.astManager = ASTManager;
 		this.ternworker = ternWorker;
 		this.scriptResolver = scriptResolver;
-		this.ternworker.addEventListener('message', function(evnt) {
-			if(typeof(evnt.data) === 'object') {
-				var _d = evnt.data;
-				if(_d.request === 'rename') {
-					var changes = _d.changes;
-					if(changes && changes.changes && changes.changes.length > 0) {
-						var ranges = changes.changes;
-						// turn the ranges into offset / length
-						var offsets = [ranges.length];
-						for (var i = 0; i < ranges.length; i++) {
-							offsets[i] = {
-								offset: ranges[i].start,
-								length: ranges[i].end - ranges[i].start
-							};
-						}
-						var groups = [{data: {}, positions: offsets}];
-						var linkModel = {groups: groups};
-						deferred.resolve(cachedContext.exitLinkedMode());
-						deferred.resolve(cachedContext.enterLinkedMode(linkModel));
-					} else if(typeof(_d.error) === 'string') {
-						cachedContext.setStatus({Severity: 'Warning', Message: _d.error}); //$NON-NLS-1$
-					}
-					deferred.resolve();
-					deferred = null;
-				}
-			}
-		});
 		this.timeout = null;
 	}
 
@@ -114,7 +87,30 @@ define([
 					that.timeout = null;
 				}, 5000);
 				var files = [{type:'full', name:params.input, text:text}]; //$NON-NLS-1$
-				that.ternworker.postMessage({request:'rename', args:{params:{offset: params.offset}, files: files, meta:{location: params.input}, newname:''}}); //$NON-NLS-1$
+				that.ternworker.postMessage(
+					{request:'rename', args:{params:{offset: params.offset}, files: files, meta:{location: params.input}, newname:''}}, //$NON-NLS-1$
+					function(response) {
+						var changes = response.changes;
+						if(changes && changes.changes && changes.changes.length > 0) {
+							var ranges = changes.changes;
+							// turn the ranges into offset / length
+							var offsets = [ranges.length];
+							for (var i = 0; i < ranges.length; i++) {
+								offsets[i] = {
+									offset: ranges[i].start,
+									length: ranges[i].end - ranges[i].start
+								};
+							}
+							var groups = [{data: {}, positions: offsets}];
+							var linkModel = {groups: groups};
+							deferred.resolve(cachedContext.exitLinkedMode());
+							deferred.resolve(cachedContext.enterLinkedMode(linkModel));
+						} else if(typeof(response.error) === 'string') {
+							cachedContext.setStatus({Severity: 'Warning', Message: response.error}); //$NON-NLS-1$
+						}
+						deferred.resolve();
+						deferred = null;
+					});
 				return deferred;
 			});
 		}

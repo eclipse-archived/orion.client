@@ -1,10 +1,10 @@
  /*******************************************************************************
  * @license
  * Copyright (c) 2014, 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -12,15 +12,15 @@
 /*eslint-env amd*/
 /* global doctrine */
 define([
-'orion/objects', 
-'javascript/finder', 
+'orion/objects',
+'javascript/finder',
 'orion/URITemplate',
 'orion/Deferred',
 'i18n!javascript/nls/messages',
 'orion/i18nUtil',
 'doctrine' //last, exports into global
 ], function(Objects, Finder, URITemplate, Deferred, Messages, i18nUtil) {
-	
+
 	/**
 	 * @description Formats the hover info as markdown text
 	 * @param {String} node The text to format
@@ -45,7 +45,7 @@ define([
 		                switch(tag.title) {
 		                    case 'name': {
 		                        if(tag.name) {
-		                          format.name = tag.name; 
+		                          format.name = tag.name;
 		                        }
 		                        break;
 		                    }
@@ -57,11 +57,11 @@ define([
 		                    }
 		                    case 'param': {
 		                        format.params.push(_convertTagType(tag.type) +
-		                                  (tag.name ? '__'+tag.name+'__ ' : '') + 
+		                                  (tag.name ? '__'+tag.name+'__ ' : '') +
 		                                  (tag.description ? tag.description+'\n' : ''));
 		                        break;
 		                    }
-		                    case 'returns': 
+		                    case 'returns':
 		                    case 'return': {
 		                        format.returns = _convertTagType(tag.type) +
 		                              (tag.description ? tag.description+'\n' : '');
@@ -139,7 +139,7 @@ define([
 	        //TODO scope this to not show when you are on a decl
 	        /**var href = new URITemplate("#{,resource,params*}").expand(
 	                      {
-	                      resource: metadata.location, 
+	                      resource: metadata.location,
 	                      params: {start:node.range[0], end: node.range[1]}
 	                      }); //$NON-NLS-0$
 	        hover += '\n\n\n  [Jump to declaration]('+href+')';*/
@@ -154,7 +154,7 @@ define([
 	    }
 	    return result;
 	}
-	
+
 	/**
 	 * @description Converts the doctrine tag type to a simple form to appear in the hover
 	 * @private
@@ -178,7 +178,7 @@ define([
             case 'FunctionType': {
                 return '*(Function)* '; //$NON-NLS-1$
             }
-            case 'NullableType': 
+            case 'NullableType':
             case 'NonNullableType':
             case 'OptionalType':
             case 'RestType': {
@@ -199,12 +199,12 @@ define([
                             //fallback to trying to format the raw value
                             return _convertTagType(val);
                         }
-	                    
+
 	                }
                 }
                 return _convertTagType(type.expression);
             }
-            case 'UnionType': 
+            case 'UnionType':
             case 'ArrayType': {
                 if(type.elements && type.elements.length > 0) {
                     //always just take the first type
@@ -218,9 +218,9 @@ define([
             default: return '';
         }
 	}
-	
+
 	var deferred;
-	
+
 	/**
 	 * @name javascript.JavaScriptHover
 	 * @description creates a new instance of the hover
@@ -229,7 +229,7 @@ define([
 	 * @param {javascript.ASTManager} astManager
 	 * @param {javascript.ScriptResolver} resolver
 	 * @param {javascript.TernWorkerCore} ternWorker
-	 * @param {javascript.CUProvider} cuProvider 
+	 * @param {javascript.CUProvider} cuProvider
 	 * @since 7.0
 	 */
 	function JavaScriptHover(astManager, resolver, ternWorker, cuProvider) {
@@ -237,26 +237,14 @@ define([
 		this.resolver = resolver;
 		this.ternworker = ternWorker;
 		this.cuprovider = cuProvider;
-		this.ternworker.addEventListener('message', function(evnt) {
-			if(typeof(evnt.data) === 'object') {
-				var _d = evnt.data;
-				var hover = '';
-				if(_d.request === 'documentation') {
-					if(_d.doc) {
-						hover = formatMarkdownHover(_d.doc.doc);
-					}
-					deferred.resolve(hover);
-				} 
-			}
-		});
 	}
-	
+
 	Objects.mixin(JavaScriptHover.prototype, /** @lends javascript.JavaScriptHover.prototype*/ {
-		
+
 		/**
 		 * @description Callback from the editor to compute the hover
 		 * @function
-		 * @public 
+		 * @public
 		 * @memberof javascript.JavaScriptOccurrences.prototype
 		 * @param {Object} editorContext The current editor context
 		 * @param {Object} ctxt The current selection context
@@ -289,9 +277,9 @@ define([
         			return null;
 		        });
 		    });
-			
+
 		},
-		
+
 		_doHover: function _doHover(ast, ctxt, meta) {
 			var node = Finder.findNode(ctxt.offset, ast, {parents:true});
 		    if(node && node.type === 'Literal') {
@@ -341,13 +329,23 @@ define([
                     }
                 }
                 return null;
-		    } 
+		    }
 			deferred = new Deferred();
 			var files = [{type: 'full', name: meta.location, text: ast.source}]; //$NON-NLS-1$
-			this.ternworker.postMessage({request:'documentation', args:{params:{offset: ctxt.offset}, files: files, meta:{location: meta.location}}}); //$NON-NLS-1$
+			this.ternworker.postMessage(
+				{request:'documentation', args:{params:{offset: ctxt.offset}, files: files, meta:{location: meta.location}}}, //$NON-NLS-1$
+				function(response) {
+					var hover = '';
+					if(response.request === 'documentation') {
+						if(response.doc) {
+							hover = formatMarkdownHover(response.doc.doc);
+						}
+						deferred.resolve(hover);
+					}
+				});
 			return deferred;
 		},
-		
+
 		/**
 		 * @description Formats the list of files as links for the hover
 		 * @function
@@ -372,21 +370,21 @@ define([
 		                }
 		                var href = new URITemplate("#{,resource,params*}").expand( //$NON-NLS-1$
     		                      {
-    		                      resource: file.location, 
+    		                      resource: file.location,
     		                      params: {}
     		                      }); //$NON-NLS-0$
 		                hover += file.name + ']('+href+') - '+file.path+'\n\n'; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		            }
-		            
+
 		        }
 		        return {title: title, content: hover, type:'markdown', allowFullWidth: true}; //$NON-NLS-1$
 		    }
 		    return null;
 		}
 	});
-	
+
 	JavaScriptHover.prototype.contructor = JavaScriptHover;
-	
+
 	return {
 		JavaScriptHover: JavaScriptHover,
 		formatMarkdownHover: formatMarkdownHover

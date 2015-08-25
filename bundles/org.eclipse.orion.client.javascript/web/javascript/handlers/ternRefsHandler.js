@@ -1,9 +1,9 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2015 IBM Corporation, Inc. and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
@@ -11,8 +11,9 @@
  ******************************************************************************/
 /* eslint-env amd */
 define([
-], function() {
-   
+	'i18n!javascript/nls/workermessages'
+], function(Messages) {
+
    /**
     * @description Computes the refs for the given arguments
     * @param {Object} ternserver The server to query
@@ -20,7 +21,7 @@ define([
     * @param {Function} callback The callback to call once the request completes or fails
     * @since 9.0
     */
-   function computeRefs(ternserver, args, callback) {
+   return function (ternserver, args, callback) {
         if(ternserver) {
 	       ternserver.request({
 	           query: {
@@ -29,10 +30,10 @@ define([
 		           end: args.params.offset,
 		           newName: args.newname
 	           },
-	           files: args.files}, 
+	           files: args.files},
 	           function(error, refs) {
 	               if(error) {
-	                   callback({request: 'refs', error: error.message, message: 'Failed to find refs'}); //$NON-NLS-1$
+	                   callback({request: 'refs', error: error.message, message: Messages['failedRefs']}); //$NON-NLS-1$
 	               } else if(refs && Array.isArray(refs.refs)) {
         			   callback({request: 'refs', refs:refs.refs}); //$NON-NLS-1$
 	               } else {
@@ -40,11 +41,7 @@ define([
 	               }
 	           });
 	   } else {
-	       callback({request: 'refs', message: 'failed to find refs - server not started'}); //$NON-NLS-1$
+	       callback({request: 'refs', message: Messages['failedRefsNoServer']}); //$NON-NLS-1$
 	   }
-   }
-   
-   return {
-       computeRefs: computeRefs
    };
 });

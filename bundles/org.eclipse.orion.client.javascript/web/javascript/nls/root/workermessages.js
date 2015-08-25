@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2014, 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  ******************************************************************************/
 /* eslint-env amd */
 define({
@@ -36,7 +36,7 @@ define({
 	'ternPluginsPluginDescription': 'Plug-in that allows Orion to inspect and modify plug-ins running in Tern.',
 	'openImplPluginName': 'Orion Open Implementation Support',
 	'openImplPluginDescription': 'Plug-in that allows Orion to try to find implementation locations of elements rather than simple declarations',
-	
+
 	// Other messages
 	'unknownError': 'An unknown error occurred.',
 	'failedDeleteRequest': 'Failed to delete file from Tern: ${0}',
@@ -62,5 +62,7 @@ define({
 	'failedGetEnvs': 'Failed to get contributed environments',
 	'failedGetEnvsNoServer': 'Failed to get contributed environments, server not started',
 	'failedRename': 'Failed to compute rename changes',
-	'failedRenameNoServer': 'Failed to compute rename changes, server not started'
+	'failedRenameNoServer': 'Failed to compute rename changes, server not started',
+	'failedRefs': 'Failed to find refs',
+	'failedRefsNoServer': 'failed to find refs - server not started'
 });

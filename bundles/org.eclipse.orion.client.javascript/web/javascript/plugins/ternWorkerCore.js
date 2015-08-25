@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -18,7 +18,7 @@ if(sear) {
 	if(Array.isArray(langs) && langs.length === 2) {
 		lang = langs[1].slice(1);
 	}
-} 
+}
 requirejs.config({locale: lang});
 require([
 	'tern/lib/tern',
@@ -26,9 +26,9 @@ require([
 	'tern/plugin/orionAmqp',
 	'tern/plugin/angular',
 	//'tern/plugin/component',
-	'tern/plugin/orionExpress',	
+	'tern/plugin/orionExpress',
 	'tern/plugin/orionMongoDB',
-	'tern/plugin/orionMySQL',	
+	'tern/plugin/orionMySQL',
 	'tern/plugin/orionNode',
 	'tern/plugin/orionPostgres',
 	'tern/plugin/orionRedis',
@@ -50,19 +50,19 @@ require([
 	'orion/i18nUtil'
 ],
 /* @callback */ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
-							orionMySQLPlugin, orionNodePlugin, orionPostgresPlugin, orionRedisPlugin, orionRequirePlugin, ternPluginsPlugin, 
-							openImplPlugin, ecma5, ecma6, browser, AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, 
-							RenameHandler, PluginsHandler, RefsHandler, ImplHandler, Messages, i18nUtil) {
-    
+							orionMySQLPlugin, orionNodePlugin, orionPostgresPlugin, orionRedisPlugin, orionRequirePlugin, ternPluginsPlugin,
+							openImplPlugin, ecma5, ecma6, browser, assistHandler, declarationHandler, hoverHandler, occurrencesHandler,
+							renameHandler, pluginsHandler, refsHandler, implHandler, Messages, i18nUtil) {
+
     var ternserver, pendingReads = Object.create(null);
-    
+
     /**
      * @description Start up the Tern server, send a message after trying
      */
     function startServer() {
         var options = {
                 async: true,
-                debug:true,
+                debug: false,
                 defs: [ecma5, ecma6, browser],
                 projectDir: '/', //$NON-NLS-1$
                 plugins: {
@@ -154,12 +154,30 @@ require([
                 },
                 getFile: _getFile
             };
-        
+
         ternserver = new Tern.Server(options);
         post('server_ready'); //$NON-NLS-1$
     }
     startServer();
-    
+
+	var handlers = {
+		'completions': assistHandler,
+		'definition': declarationHandler,
+		'documentation': hoverHandler,
+		'environments': pluginsHandler.getEnvironments,
+		'implementation': implHandler,
+		'install_plugins':pluginsHandler.installPlugins,
+		'installed_plugins': pluginsHandler.getInstalledPlugins,
+		'occurrences': occurrencesHandler,
+		'plugin_enablement': pluginsHandler.setPluginEnablement,
+		'refs': refsHandler,
+		'remove_plugins': pluginsHandler.removePlugins,
+		'rename': renameHandler
+	};
+
+	var messageID = 0;
+	var callbacks = Object.create(null);
+
     /**
      * @description Worker callback when a message is sent to the worker
      * @callback
@@ -167,36 +185,18 @@ require([
     onmessage = function(evnt) {
         if(typeof(evnt.data) === 'object') {
             var _d = evnt.data;
-            if(typeof(_d.request) === 'string') {
+            var _handler = handlers[_d.request];
+			if(typeof(_handler) === 'function') {
+				_handler(ternserver, _d.args, function(response) {
+					response.messageID = _d.messageID;
+                	post(response);
+				});
+			} else if(typeof(_d.request) === 'string') {
+				var _callback = callbacks[_d.messageID];
+				if(typeof(_callback) === 'function') {
+					_callback(_d.args);
+				}
                 switch(_d.request) {
-                    case 'completions': {
-                        AssistHandler.computeProposals(ternserver, _d.args, post);
-                        break;
-                    }
-                    case 'occurrences': {
-                        OccurrencesHandler.computeOccurrences(ternserver, _d.args, post);
-                        break;
-                    }
-                    case 'definition': {
-                        DeclarationHandler.computeDeclaration(ternserver, _d.args, post);
-                        break;
-                    }
-                    case 'documentation': {
-                        HoverHandler.computeHover(ternserver, _d.args, post);
-                        break;
-                    }
-                    case 'rename': {
-                        RenameHandler.computeRename(ternserver, _d.args, post);
-                        break;
-                    }
-                    case 'refs': {
-                    	RefsHandler.computeRefs(ternserver, _d.args, post);
-                    	break;
-                    }
-                    case 'implementation': {
-                    	ImplHandler.computeImplementation(ternserver, _d.args, post);
-                    	break;
-                    }
                     case 'addFile': {
                     	ternserver.addFile(_d.args.file, _d.args.source);
                     	break;
@@ -205,35 +205,11 @@ require([
                         _deleteFile(_d.args);
                         break;
                     }
-                    case 'read': {
-                        _contents(_d.args);
-                        break;
-                    }
-                    case 'installed_plugins': {
-                    	PluginsHandler.getInstalledPlugins(ternserver, _d.args, post);
-                    	break;
-                    }
-                    case 'install_plugins': {
-                    	PluginsHandler.installPlugins(ternserver, _d.args, post);
-                    	break;
-                    }
-                    case 'remove_plugins': {
-                    	PluginsHandler.removePlugins(ternserver, _d.args, post);
-                    	break;
-                    }
-                    case 'plugin_enablement': {
-                    	PluginsHandler.setPluginEnablement(ternserver, _d.args, post);
-                    	break;
-                    }
-                    case 'environments': {
-                    	PluginsHandler.getEnvironments(ternserver, _d.args, post);
-                    	break;
-                    }
                 }
             }
         }
     };
-    
+
     /**
      * @description Worker callback when an error occurs
      * @callback
@@ -241,7 +217,7 @@ require([
    	onerror = function(evnt) {
     	post(evnt);
     };
-    
+
     /**
      * @description Worker callback when a shared worker starts up
      * @callback
@@ -251,24 +227,30 @@ require([
     	this.port.onmessage = onmessage;
     	this.port.start();
     };
-    
+
     /**
      * @description Sends the given message back to the client. If the msg is null, send an Error
      * object with the optional given error message
      * @param {Object} msg The message to send back to the client
      * @param {String} errormsg The optional error message to send back to the client if the main message is null
      */
-    function post(msg, errormsg) {
+    function post(msg, errormsg, callback) {
     	if(!msg) {
     		msg = new Error(errormsg ? errormsg : Messages['unknownError']);
     	}
+		if(msg != null && typeof(msg) === 'object') {
+	    	if(typeof(msg.messageID) !== 'number') {
+				msg.messageID = messageID++;
+				callbacks[msg.messageID] = callback;
+	    	}
+		}
     	if(this.port) {
     		this.port.postMessage(msg);
     	} else {
     		postMessage(msg);
     	}
     }
-    
+
     /**
      * @description Notifies the Tern server that file contents are ready
      * @param {Object} args The args from the message
@@ -292,7 +274,7 @@ require([
             }
         }
     }
-    
+
     /**
      * @description Removes a file from Tern
      * @param {Object} args the request args
@@ -301,10 +283,10 @@ require([
         if(ternserver && typeof(args.file) === 'string') {
             ternserver.delFile(args.file);
         } else {
-            post(i18nUtil.formatMessage(Messages['failedDeleteRequest'], args.file)); 
+            post(i18nUtil.formatMessage(Messages['failedDeleteRequest'], args.file));
         }
     }
-    
+
     /**
      * @description Read a file from the workspace into Tern
      * @private
@@ -321,7 +303,7 @@ require([
            		pendingReads[_f] = [];
            }
            pendingReads[_f].push(callback);
-           post({request: 'read', args: {file:file}}); //$NON-NLS-1$
+           post({request: 'read', args: {file:file}}, null, _contents); //$NON-NLS-1$
 	    } else {
 	       post(i18nUtil.formatMessage(Messages['failedReadRequest'], _f)); //$NON-NLS-1$
 	    }

@@ -21,7 +21,7 @@ define([
     * @param {Function} callback The callback to call once the request completes or fails
     * @since 10.0
     */
-   function computeImplementation(ternserver, args, callback) {
+   return function (ternserver, args, callback) {
        if(ternserver) {
 	       ternserver.request({
 	           query: {
@@ -43,9 +43,5 @@ define([
 	   } else {
 	       callback({request: 'implementation', message: Messages['failedToComputeImplNoServer']}); //$NON-NLS-1$
 	   }
-   }
-
-   return {
-       computeImplementation: computeImplementation
    };
 });
