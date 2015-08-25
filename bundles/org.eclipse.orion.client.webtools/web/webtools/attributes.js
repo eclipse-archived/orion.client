@@ -2239,10 +2239,16 @@ define([
 	function getAttributesForNode(node) {
 		var ret = Object.create(null);
 		var attrs = [].concat(attributes.globals);
-		if(node && node.type === 'tag') {
-			var tags = attributes.tags[node.name];
-			if(Array.isArray(tags) && tags.length > 0) {
-				return [].concat(attrs, tags);
+		if (node){
+			var testNode = node;
+			if (node.type === 'attr'){
+				testNode = node.parent;
+			}
+			if(testNode && testNode.type === 'tag') {
+				var tags = attributes.tags[testNode.name];
+				if(Array.isArray(tags) && tags.length > 0) {
+					attrs = attrs.concat(tags);
+				}
 			}
 		}
 		ret.global = attrs;

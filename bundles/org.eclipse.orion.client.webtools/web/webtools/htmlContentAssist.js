@@ -181,7 +181,7 @@ define([
 			var proposals = [];
 			var node = util.findNodeAtOffset(ast, params.offset);
 			if(node) {
-				if(this.inScriptOrStyle(node) || this.inClosingTag(node, params.offset, ast.source)) {
+				if(this.inScriptOrStyle(node, params.offset, ast.source) || this.inClosingTag(node, params.offset, ast.source)) {
 					return [];
 				}
 				if (this.isCompletingCommentClose(node, params.offset)){
@@ -215,13 +215,35 @@ define([
 		 * @returns {Boolean} True if the current node context is style or script
 		 * @since 10.0 
 		 */
-		inScriptOrStyle: function(node) {
-			if(node) {
-				var _n = node.name ? node.name.toLowerCase() : '';
-				if(node.type === 'tag' && (_n === 'script' || _n === 'style')) {
-					return true;
-				} else {
-					return this.inScriptOrStyle(node.parent);
+		inScriptOrStyle: function(node, offset, source) {
+			if (node){
+				if(node.type === 'text' && node.parent && node.parent.type === 'tag'){
+					var name = node.parent.name ? node.parent.name.toLowerCase() : '';
+					if (name === 'script' || name === 'style') {
+						return true;
+					}
+				} else if (node.type === 'tag'){
+					name = node.name ? node.name.toLowerCase() : '';
+					if (name === 'script' || name === 'style') {
+						if (!node.children || !node.children.length > 0){
+							// Empty <script></script>, see if the previous non-whitespace character is '>'
+							if (offset > node.range[0] && offset < node.range[1]){
+								var whitespace = '\t\r\n '; //$NON-NLS-1$
+								var pos = offset;
+								var posChar;
+								var inwhite = true;
+								while (inwhite && pos > node.range[0]){
+									pos--;
+									posChar = source.charAt(pos)
+									inwhite = whitespace.indexOf(posChar) >= 0;
+								}
+								if (posChar === '>'){
+									return true;
+								}
+							}
+						}
+					}
+
 				}
 			}
 			return false;
@@ -489,11 +511,16 @@ define([
 		
 		addProposals: function addProposals(node, attrs, params) {
 			var proposals = [];
+			var tagNode = node;
+			if (node.type === 'attr' && node.parent){
+				tagNode = node.parent;
+			}
 			for(var j = 0; j < attrs.length; j++) {
 				var attr = attrs[j];
 				var prefix = params.prefix ? params.prefix : "";
-				if(jsUtil.looselyMatches(prefix, attr.name) && !this._hasAttribute(node, attr.name)) {
-					var deprecated = Deprecated.isAttributeDeprecated(node.name, attr.name);
+				if(jsUtil.looselyMatches(prefix, attr.name) && !this._hasAttribute(tagNode, attr.name)) {
+					
+					var deprecated = Deprecated.isAttributeDeprecated(tagNode.name, attr.name);
 					var hover = Object.create(null);
 					var desc = "";
 					hover.type = 'markdown'; //$NON-NLS-1$

@@ -332,6 +332,72 @@ define([
 //    			assertGlobalTagAttributes(proposals);
 //    		});
 //    	});
+    	it('Tag attribute proposals filter existing 1', function() {
+    		var _o = setup({buffer: '<html><body ></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 12}).then(function(proposals) {
+    			assert(proposals.length === globalTagAttributes.length + 1, "Incorrect number of proposals for body tag attributes. Proposal count: " + proposals.length + " Expected count: " + (globalTagAttributes.length + 1));
+    			var knownProp;
+    			for (var i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "bgcolor"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal bgcolor");
+    			assert(knownProp.description.indexOf("Obsolete") >= 0, "bgcolor should be marked as obsolete");
+    		});
+    	});
+    	it('Tag attribute proposals filter existing 2', function() {
+    		var _o = setup({buffer: '<html><body bgcolor="blue"></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 12}).then(function(proposals) {
+    			assert(proposals.length === globalTagAttributes.length, "Incorrect number of proposals for body tag attributes. Proposal count: " + proposals.length + " Expected count: " + (globalTagAttributes.length));
+    			var knownProp;
+    			for (var i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "bgcolor"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(!knownProp, "bgcolor was not filtered");
+    		});
+    	});
+    	it('Tag attribute proposals filter existing 3', function() {
+    		var _o = setup({buffer: '<html><body TESTTESTTEST="TEST" bgcolor="blue"></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 12}).then(function(proposals) {
+    			assert(proposals.length === globalTagAttributes.length, "Incorrect number of proposals for body tag attributes. Proposal count: " + proposals.length + " Expected count: " + (globalTagAttributes.length));
+    			var knownProp;
+    			for (var i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "bgcolor"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(!knownProp, "bgcolor was not filtered");
+    		});
+    	});
+    	it('Tag attribute proposals filter existing 4', function() {
+    		var _o = setup({buffer: '<html><body  TESTTESTTEST="TEST" bgcolor="blue"></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 12}).then(function(proposals) {
+    			assert(proposals.length === globalTagAttributes.length, "Incorrect number of proposals for body tag attributes. Proposal count: " + proposals.length + " Expected count: " + (globalTagAttributes.length));
+    			var knownProp;
+    			for (var i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "bgcolor"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(!knownProp, "bgcolor was not filtered");
+    		});
+    	});
+    	it('Tag attribute proposals filter existing 5', function() {
+    		var _o = setup({buffer: '<html><body  bgcolor="blue"></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 12}).then(function(proposals) {
+    			assert(proposals.length === globalTagAttributes.length, "Incorrect number of proposals for body tag attributes. Proposal count: " + proposals.length + " Expected count: " + (globalTagAttributes.length));
+    			var knownProp;
+    			for (var i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "bgcolor"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(!knownProp, "bgcolor was not filtered");
+    		});
+    	});
     	it('Tag attribute proposals prefix 1', function() {
     		var _o = setup({buffer: '<zzz acc>'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 8, prefix: 'acc'}).then(function(proposals) {
@@ -378,6 +444,90 @@ define([
 //    			assertGlobalTagAttributes(proposals);
 //    		});
 //    	});
+		it('Tag attribute proposals script blocks 1', function() {
+    		var _o = setup({buffer: '<body><script ></script></body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 14}).then(function(proposals) {
+    			assert(proposals.length === globalTagAttributes.length + 6, "Incorrect number of proposals for script tag attributes. Proposal count: " + proposals.length + " Expected count: " + globalTagAttributes.length);
+//				name: "async",
+//				name: "charset",
+//				name: "defer",
+//				name: "language",
+//				name: "src",
+//				name: "type",
+    		});
+    	});
+    	it('Tag attribute proposals script blocks 2', function() {
+    		var _o = setup({buffer: '<body><script TESTTESTTEST="TEST"></script></body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 14}).then(function(proposals) {
+    			assert(proposals.length === globalTagAttributes.length + 6, "Incorrect number of proposals for script tag attributes. Proposal count: " + proposals.length + " Expected count: " + (globalTagAttributes.length + 6));
+//				name: "async",
+//				name: "charset",
+//				name: "defer",
+//				name: "language",
+//				name: "src",
+//				name: "type",
+    		});
+    	});
+    	it('Tag attribute proposals script blocks 3', function() {
+    		var _o = setup({buffer: '<body><script async="false"></script></body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 14}).then(function(proposals) {
+    			assert(proposals.length === globalTagAttributes.length + 5, "Incorrect number of proposals for script tag attributes. Proposal count: " + proposals.length + " Expected count: " + (globalTagAttributes.length + 5));
+//				name: "async", ALREADY THERE
+//				name: "charset",
+//				name: "defer",
+//				name: "language",
+//				name: "src",
+//				name: "type",
+    		});
+    	});
+    	it('Tag attribute proposals script blocks 4', function() {
+    		var _o = setup({buffer: '<body><script ></script></body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 15}).then(function(proposals) {
+    			assertProposals(proposals, []);
+    		});
+    	});
+    	it('Tag attribute proposals obsolete 1', function() {
+    		var _o = setup({buffer: '<html><body ></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 12}).then(function(proposals) {
+    			assert(proposals.length === globalTagAttributes.length + 1, "Incorrect number of proposals for body tag attributes. Proposal count: " + proposals.length + " Expected count: " + (globalTagAttributes.length + 1));
+    			var knownProp;
+    			for (var i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "bgcolor"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal bgcolor");
+    			assert(knownProp.description.indexOf("Obsolete") >= 0, "bgcolor should be marked as obsolete");
+    		});
+    	});
+    	it('Tag attribute proposals obsolete 2', function() {
+    		var _o = setup({buffer: '<html><body TESTTESTTEST="TEST"></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 12}).then(function(proposals) {
+    			assert(proposals.length === globalTagAttributes.length + 1, "Incorrect number of proposals for body tag attributes. Proposal count: " + proposals.length + " Expected count: " + (globalTagAttributes.length + 1));
+    			var knownProp;
+    			for (var i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "bgcolor"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal bgcolor");
+    			assert(knownProp.description.indexOf("Obsolete") >= 0, "bgcolor should be marked as obsolete");
+    		});
+    	});
+    	it('Tag attribute proposals obsolete 3', function() {
+    		var _o = setup({buffer: '<html><body onclick="TEST"></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 12}).then(function(proposals) {
+    			assert(proposals.length === globalTagAttributes.length, "Incorrect number of proposals for body tag attributes. Proposal count: " + proposals.length + " Expected count: " + (globalTagAttributes.length));
+    			var knownProp;
+    			for (var i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "bgcolor"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal bgcolor");
+    			assert(knownProp.description.indexOf("Obsolete") >= 0, "bgcolor should be marked as obsolete");
+    		});
+    	});
     	it('Attribute value proposals 1', function() {
     		var _o = setup({buffer: '<a href=""></a>'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 9}).then(function(proposals) {
