@@ -11,10 +11,11 @@
 /*eslint-env browser, amd*/
 define([
 	'i18n!cfui/nls/messages',
+	'orion/i18nUtil',
 	'orion/webui/tooltip',
 	'orion/webui/Wizard',
 	'orion/webui/littlelib'
-], function(messages, mTooltip, mWizard, lib){
+], function(messages, i18nUtil, mTooltip, mWizard, lib){
 	var Tooltip = mTooltip.Tooltip;
 	
 	var rendered = false;
@@ -52,6 +53,7 @@ define([
 			
 			this._showMessage = options.showMessage;
 			this._hideMessage = options.hideMessage;
+			this._showError = options.showError;
 			this._handleError = options.handleError;
 			this._postError = options.postError;
 		},
@@ -221,9 +223,11 @@ define([
 						self._cfService.getServices(self._targetSelection).then(function(servicesResp){
 							self._hideMessage();
 					    	var servicesToChooseFrom = [];
+					    	var availableServices = [];
 					    	
 							if(servicesResp.Children){
 								servicesResp.Children.forEach(function(service){
+									availableServices.push(service.Name);
 									if(services && services.some(function(manService){return manService === service.Name;})){
 										
 									} else {
@@ -241,9 +245,21 @@ define([
 								self._servicesDropdown.appendChild(serviceOption);
 					    	});
 					    	
+					    	services.every(function(serviceName){
+					    		if( availableServices.indexOf(serviceName) === -1 ){
+					    			var errMessage = i18nUtil.formatMessage(messages["service${0}NotFoundsetUpYourService.Go${1}"], serviceName, self._targetSelection.ManageUrl);
+					    			self._showError(errMessage);
+					    			return false;
+								}
+					    		return true;
+							});					    	
+					   
+					    	
 				    	}, function(error){
 				    		self._handleError(error, self._targetSelection);
 				    	});
+						
+						
 						
 						setRendered(true);
 					}
