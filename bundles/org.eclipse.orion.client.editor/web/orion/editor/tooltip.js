@@ -797,7 +797,7 @@ function Tooltip (view) {
 		_getAnnotationContents: function(annotations, context) {
 			var self = this;
 			var inEditor = self.hover ? true : false;
-			if (inEditor && context && context.source && context.source.indexOf('ruler') >= 0){ //$NON-NLS-0$
+			if (inEditor && context && context.source && context.source.indexOf('ruler') >= 0 && annotations.length > 1){ //$NON-NLS-0$
 				inEditor = false;
 			}
 			
