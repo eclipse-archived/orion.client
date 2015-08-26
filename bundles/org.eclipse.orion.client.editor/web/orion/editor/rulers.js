@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,6 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+/**
+ * @class Provides the various rulers that show up on the left and right sides of the editor.  The rulers
+ * 			contain annotations with varying styles, hovers and on click behaviours.
+ */
 /*eslint-env browser, amd*/
 define("orion/editor/rulers", [
 	'i18n!orion/editor/nls/messages',
@@ -366,9 +370,15 @@ define("orion/editor/rulers", [
 			}
 			
 			var target = e.target ? e.target : e.srcElement;
-			this._curElementBounds = target.getBoundingClientRect();
+			var bounds = target.getBoundingClientRect();
+			this._curElementBounds = Object.create(null);
+			this._curElementBounds.top = bounds.top;
+			this._curElementBounds.left = bounds.left;
+			this._curElementBounds.height = bounds.height;
+			this._curElementBounds.width = bounds.width;
+			
 			// If we have the entire ruler selected, just use a 1 pixel high area in the ruler (Bug 463486)
-			if (target._ruler){
+			if (target === this.node){
 				this._curElementBounds.top = e.clientY;
 				this._curElementBounds.height = 1;
 			}
@@ -508,6 +518,7 @@ define("orion/editor/rulers", [
 			hoverArea.left = this._curElementBounds.left;
 			hoverArea.height = this._curElementBounds.height;
 			hoverArea.width = this._curElementBounds.width;
+			
 			if (typeof contents === 'string' && y) { //$NON-NLS-0$
 				// Hack for line numbers
 				hoverArea.top = y;
