@@ -67,7 +67,7 @@
 		<nodejsHome>${basedir}/target/nodejs</nodejsHome>
 		<jsdocHome>${basedir}/target/jsdoc</jsdocHome>
 		<antrun-version>1.7</antrun-version>
-		<build-timestamp>${maven.build.timestamp}</build-timestamp>
+		<build-version>10.0.0-v${maven.build.timestamp}</build-version>
 		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
 	</properties>
 
@@ -217,10 +217,10 @@
 									<available file="about.properties" />
 									<then>
 										<echo
-											message="Replacing @qualifier@ token within about.properties with build id 10.0.0-v${build-timestamp}" />
+											message="Replacing @qualifier@ token within about.properties with build id ${build-version}" />
 										<replace file="about.properties">
 											<replacefilter token="@qualifier@"
-												value="10.0.0-v${build-timestamp}" />
+												value="${build-version}" />
 										</replace>
 									</then>
 								</if>
