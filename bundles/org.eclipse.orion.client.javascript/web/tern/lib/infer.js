@@ -1251,6 +1251,10 @@
 	emptyAST.range = [0, 0];
 
   var parse = exports.parse = function(text, passes, options) {
+  	if (passes && passes.preParse) for (var i = 0; i < passes.preParse.length; i++) {
+      var result = passes.preParse[i](text, options);
+      if (typeof result == "string") text = result;
+    }
     var ast;
     try {
         //TODO ORION we need to hook in the AST manager here

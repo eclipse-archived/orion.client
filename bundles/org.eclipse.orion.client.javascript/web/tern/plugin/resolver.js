@@ -104,7 +104,7 @@ define([
 	function doPostParse(server, ast, ignores) {
 		if(Array.isArray(ast.dependencies) && ast.dependencies.length > 0) {
 			for(var i = 0; i < ast.dependencies.length; i++) {
-				var _d = ast.dependencies[i].value;
+				var _d = _getDependencyName(ast.dependencies[i]);
 				if(_d) {
 					if(typeof(_resolved[_d]) === 'object') {
 						continue; //we already resolved it or are trying, keep going
@@ -125,6 +125,20 @@ define([
 			}
 			resolveDependencies(server, ast.sourceFile ? ast.sourceFile.name : null);
 		}  	
+	}
+	
+	/**
+	 * @description Resolve the dependency name
+	 * @param {Object|String} dep
+	 * @since 10.0
+	 */
+	function _getDependencyName(dep) {
+		if(typeof(dep) === 'string') {
+			return dep;
+		} else if(dep != null && typeof(dep) === 'object') {
+			return dep.value;
+		}
+		return null;
 	}
 	
 	/**

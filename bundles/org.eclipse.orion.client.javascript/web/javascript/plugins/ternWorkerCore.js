@@ -35,6 +35,7 @@ require([
 	'tern/plugin/orionRequire',
 	'tern/plugin/ternPlugins',
 	'tern/plugin/openImplementation',
+	'tern/plugin/htmlDependencies',
 	'json!tern/defs/ecma5.json',
 	'json!tern/defs/ecma6.json',
 	'json!tern/defs/browser.json',
@@ -51,7 +52,7 @@ require([
 ],
 /* @callback */ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
 							orionMySQLPlugin, orionNodePlugin, orionPostgresPlugin, orionRedisPlugin, orionRequirePlugin, ternPluginsPlugin,
-							openImplPlugin, ecma5, ecma6, browser, assistHandler, declarationHandler, hoverHandler, occurrencesHandler,
+							openImplPlugin, htmlDepPlugin, ecma5, ecma6, browser, assistHandler, declarationHandler, hoverHandler, occurrencesHandler,
 							renameHandler, pluginsHandler, refsHandler, implHandler, Messages, i18nUtil) {
 
     var ternserver, pendingReads = Object.create(null);
@@ -148,6 +149,12 @@ require([
                     openImplementation: {
                     	name : Messages['openImplPluginName'],
                     	description: Messages['openImplPluginDescription'],
+                    	version: '1.0', //$NON-NLS-1$
+                    	removable: false
+                    },
+                    orionHTML: {
+                    	name : Messages["htmlDepPluginName"],
+                    	description: Messages["htmlDepPluginDescription"],
                     	version: '1.0', //$NON-NLS-1$
                     	removable: false
                     }

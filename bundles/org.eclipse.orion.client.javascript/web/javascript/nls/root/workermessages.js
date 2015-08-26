@@ -36,6 +36,8 @@ define({
 	'ternPluginsPluginDescription': 'Plug-in that allows Orion to inspect and modify plug-ins running in Tern.',
 	'openImplPluginName': 'Orion Open Implementation Support',
 	'openImplPluginDescription': 'Plug-in that allows Orion to try to find implementation locations of elements rather than simple declarations',
+	'htmlDepPluginName': 'Orion HTML Dependency Analysis',
+	'htmlDepPluginDescription': 'Resolves script block and script tag dependencies',
 
 	// Other messages
 	'unknownError': 'An unknown error occurred.',
