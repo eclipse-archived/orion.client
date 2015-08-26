@@ -447,7 +447,7 @@ define([
 		it('Tag attribute proposals script blocks 1', function() {
     		var _o = setup({buffer: '<body><script ></script></body>'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 14}).then(function(proposals) {
-    			assert(proposals.length === globalTagAttributes.length + 6, "Incorrect number of proposals for script tag attributes. Proposal count: " + proposals.length + " Expected count: " + globalTagAttributes.length);
+    			assert(proposals.length === globalTagAttributes.length + 6, "Incorrect number of proposals for script tag attributes. Proposal count: " + proposals.length + " Expected count: " + globalTagAttributes.length + 6);
 //				name: "async",
 //				name: "charset",
 //				name: "defer",
@@ -482,6 +482,39 @@ define([
     	});
     	it('Tag attribute proposals script blocks 4', function() {
     		var _o = setup({buffer: '<body><script ></script></body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 15}).then(function(proposals) {
+    			assertProposals(proposals, []);
+    		});
+    	});
+    	it('Tag attribute proposals style blocks 1', function() {
+    		var _o = setup({buffer: '<body><style ></style></body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 13}).then(function(proposals) {
+    			assert(proposals.length === globalTagAttributes.length + 3, "Incorrect number of proposals for script tag attributes. Proposal count: " + proposals.length + " Expected count: " + globalTagAttributes.length + 3);
+//				name: "media",
+//				name: "scoped",
+//				name: "type",
+    		});
+    	});
+    	it('Tag attribute proposals style blocks 2', function() {
+    		var _o = setup({buffer: '<body><style TESTTESTTEST="TEST"></style></body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 14}).then(function(proposals) {
+    			assert(proposals.length === globalTagAttributes.length + 3, "Incorrect number of proposals for script tag attributes. Proposal count: " + proposals.length + " Expected count: " + (globalTagAttributes.length + 3));
+//				name: "media",
+//				name: "scoped",
+//				name: "type",
+    		});
+    	});
+    	it('Tag attribute proposals style blocks 3', function() {
+    		var _o = setup({buffer: '<body><style media="false"></style></body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 14}).then(function(proposals) {
+    			assert(proposals.length === globalTagAttributes.length + 2, "Incorrect number of proposals for script tag attributes. Proposal count: " + proposals.length + " Expected count: " + (globalTagAttributes.length + 2));
+//				name: "media", // ALREADY THERE
+//				name: "scoped",
+//				name: "type",
+    		});
+    	});
+    	it('Tag attribute proposals style blocks 4', function() {
+    		var _o = setup({buffer: '<body><style ></style></body>'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 15}).then(function(proposals) {
     			assertProposals(proposals, []);
     		});
