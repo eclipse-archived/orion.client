@@ -1648,8 +1648,6 @@ define([
 					callback: done
 				};
 				return testProposals(options, [
-					['exports', 'exports : exports'],
-					['module', 'module : Module'],
  					['', 'ecma5'],
 					['Array(size)', ''],
 					['Boolean(value)', 'Boolean(value) : bool'],
@@ -1710,8 +1708,6 @@ define([
 					callback: done
 				};
 				return testProposals(options, [
-					['exports', 'exports : exports'],
-					['module', 'module : Module'],
 					["zzz", "zzz : number"],
  					['', 'ecma5'],
 					['Array(size)', ''],
@@ -1773,8 +1769,6 @@ define([
 					callback: done
 				};
 				return testProposals(options, [
-					['exports', 'exports : exports'],
-					['module', 'module : Module'],
 					["zzz", "zzz : any"],
  					['', 'ecma5'],
 					['Array(size)', ''],
@@ -1836,8 +1830,6 @@ define([
 					callback: done
 				};
 				return testProposals(options, [
-					['exports', 'exports : exports'],
-					['module', 'module : Module'],
 					["xxx", "xxx : any"],
 					["yyy", "yyy : any"],
 					["zzz", "zzz : any"],
@@ -1914,8 +1906,6 @@ define([
 				};
 				return testProposals(options, [
 					['fun(a, b, c)', ''],
-					['exports', 'exports : exports'],
-					['module', 'module : Module'],
  					['', 'ecma5'],
 					['Array(size)', ''],
 					['Boolean(value)', 'Boolean(value) : bool'],
@@ -1978,8 +1968,6 @@ define([
 				return testProposals(options, [
 					['fun(a, b, c)', ''],
 					['other(a, b, c)', ''],
-					['exports', 'exports : exports'],
-					['module', 'module : Module'],
  					['', 'ecma5'],
 					['Array(size)', ''],
 					['Boolean(value)', 'Boolean(value) : bool'],
@@ -2853,7 +2841,7 @@ define([
 				};
 				return testProposals(options, [
 					//["eee", "eee : Error"],
-					['exports', 'exports : exports'],
+					
 					["", "ecma5"],
 					['Error(message)', 'Error(message)'],
 					['EvalError(message)', 'EvalError(message)'],
