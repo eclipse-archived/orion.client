@@ -125,7 +125,7 @@ define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domRea
 	}
 
 	domReady(function() {
-		common.checkUserCreationEnabled();
+		common.redirectIfNeeded(false);
 		common.checkEmailConfigured();
 
 		/* initialize metrics collection for this page */

@@ -61,7 +61,7 @@ define(['domReady', 'orion/xhr', './common', './jquery', 'orion/URL-shim'], func
 	}
 
 	domReady(function() {
-		common.checkUserCreationEnabled();
+		common.redirectIfNeeded(true);
 
 		var doc = $(document);
 		var pos = $("#tryIt").offset().top;

@@ -79,30 +79,35 @@ define(['orion/PageUtil', 'orion/xsrfUtils', 'orion/PageLinks', './jquery'],func
         checkemailrequest.send();
     }
 
-    function checkUserCreationEnabled() {
-        var checkusersrequest = new XMLHttpRequest();
-        checkusersrequest.onreadystatechange = function() {
-            if (checkusersrequest.readyState === 4) {
-                if (checkusersrequest.status === 200) {
-                    var responseObject = JSON.parse(checkusersrequest.responseText);
-                    userCreationEnabled = responseObject.CanAddUsers;
-                    forceUserEmail = responseObject.ForceEmail;
-                    registrationURI = responseObject.RegistrationURI;
-                    if (!userCreationEnabled && !registrationURI) {
-                        var loginURL = "LoginWindow.html";
-                        var redirect = getRedirect() ? "?redirect=" + getRedirect() : "";
-                        var redirectURL = loginURL + redirect;
-                        window.location.replace(redirectURL);
+    function redirectIfNeeded(checkAuthRedirect) {
+        var checkredirectrequest = new XMLHttpRequest();
+        checkredirectrequest.onreadystatechange = function() {
+            if (checkredirectrequest.readyState === 4) {
+                if (checkredirectrequest.status === 200) {
+                    var responseObject = JSON.parse(checkredirectrequest.responseText);
+                    var authProvider = responseObject.AuthProvider;
+                    if (checkAuthRedirect && authProvider !== "") {
+                        var oauthLink = createOAuthLink(authProvider);
+                        window.location.replace(oauthLink);
+                    } else {
+                        var userCreationEnabled = responseObject.CanAddUsers;
+                        var registrationURI = responseObject.RegistrationURI;
+                        if (!userCreationEnabled && !registrationURI) {
+                            var loginURL = "LoginWindow.html";
+                            var redirect = getRedirect() ? "?redirect=" + getRedirect() : "";
+                            var redirectURL = loginURL + redirect;
+                            window.location.replace(redirectURL);
+                        }
                     }
                 }
             }
         };
 
-        checkusersrequest.open("POST", "../login/canaddusers", true);
-        checkusersrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        checkusersrequest.setRequestHeader("Orion-Version", "1");
-        xsrfUtils.addCSRFNonce(checkusersrequest);
-        checkusersrequest.send();
+        checkredirectrequest.open("POST", "../login/redirectinfo", true);
+        checkredirectrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        checkredirectrequest.setRequestHeader("Orion-Version", "1");
+        xsrfUtils.addCSRFNonce(checkredirectrequest);
+        checkredirectrequest.send();
     }
 
     function copyText(original, destination) {
@@ -371,7 +376,7 @@ define(['orion/PageUtil', 'orion/xsrfUtils', 'orion/PageLinks', './jquery'],func
     return {
         addClass: addClass,
         checkEmailConfigured: checkEmailConfigured,
-        checkUserCreationEnabled: checkUserCreationEnabled,
+        redirectIfNeeded: redirectIfNeeded,
         copyText: copyText,
         confirmLogin: confirmLogin,
         createOAuthLink: createOAuthLink,
