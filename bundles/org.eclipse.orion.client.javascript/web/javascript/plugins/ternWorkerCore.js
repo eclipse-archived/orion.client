@@ -17,6 +17,9 @@ if(sear) {
 	var langs = sear.split('worker-language'); //$NON-NLS-1$
 	if(Array.isArray(langs) && langs.length === 2) {
 		lang = langs[1].slice(1);
+		if(lang){
+			lang = lang.toLocaleLowerCase();
+		}
 	}
 }
 requirejs.config({locale: lang});
