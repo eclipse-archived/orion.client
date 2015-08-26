@@ -323,27 +323,6 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			}
 		},
 		
-		validateHostInputValue : function(){
-
-			var self = this;
-			self._setSelection();
-			if(self._hostInput.value.indexOf("_") > -1 && !self._hostDropdown._parentNode.classList.contains("error")){
-					self._hostDropdown._parentNode.classList.add("error");
-					self._hostDropdown._domNode.classList.add("errorBorder");
-					self._hostDropdown._parentNode.tooltip = new mTooltip.Tooltip({
-						node: self._hostDropdown._parentNode,
-						text: messages["hostNamesCannotHaveUnderscore"],
-						trigger: "mouseover", //$NON-NLS-0$
-						position: ["above"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					});
-			}
-			else if(self._hostInput.value.indexOf("_") === -1 && self._hostDropdown._parentNode.classList.contains("error")){
-					self._hostDropdown._parentNode.tooltip.destroy();
-					self._hostDropdown._parentNode.classList.remove("error");
-					self._hostDropdown._domNode.classList.remove("errorBorder");
-			}
-		},
-		
 		getPlan : function(){
 			var manifestPath = this.getManifestPath();
 
@@ -643,17 +622,6 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 				    	}
 				    	addListener(self._hostInput, self._manifestApplication.host);
 
-				    	self.validateHostInputValue();
-				    	self._hostInput.onfocus = function(){
-							self._hostCheck = setInterval(function(){
-								self.validateHostInputValue();
-							},1000);
-						};
-
-						self._hostInput.onblur = function(){
-							clearInterval(self._hostCheck);
-						};
-
 						var selectedCloud = self._clouds[self._clouds.length > 1 ? self._cloudsDropdown.selectedIndex : 0];
 						self._loadTargets(selectedCloud);
 						
@@ -679,11 +647,6 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					}
 					
 					if(!self._domainsDropdown.value){
-						setValid(false);
-						return;
-					}
-					
-					if(self._hostInput.value.indexOf("_") > -1){
 						setValid(false);
 						return;
 					}
