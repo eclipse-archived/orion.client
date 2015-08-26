@@ -372,7 +372,7 @@ define([
     		tooltip : javascriptMessages['openDeclTooltip'],  //$NON-NLS-1$
     		id : "open.js.decl",  //$NON-NLS-1$
     		key : [ 114, false, false, false, false],  //$NON-NLS-1$
-    		contentType: ['application/javascript']  //$NON-NLS-1$
+    		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
     			}
     	);
 
@@ -426,7 +426,7 @@ define([
 	    		name: javascriptMessages["openImplName"],  //$NON-NLS-1$
 	    		tooltip : javascriptMessages['openImplTooltip'],  //$NON-NLS-1$
 	    		id : "open.js.impl",  //$NON-NLS-1$
-	    		contentType: ['application/javascript']  //$NON-NLS-1$
+	    		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
 	    			}
 	    	);
 		}
@@ -437,7 +437,7 @@ define([
     		tooltip : javascriptMessages['renameElementTooltip'],  //$NON-NLS-1$
     		id : "rename.js.element",  //$NON-NLS-1$
     		key : [ 'R', false, true, !Util.isMac, Util.isMac],  //$NON-NLS-1$
-    		contentType: ['application/javascript']  //$NON-NLS-1$
+    		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
     			}
     	);
 

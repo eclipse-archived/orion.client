@@ -56,7 +56,7 @@ define([
 		                var cu = that.cuprovider.getCompilationUnit(blocks, {location:options.input, contentType:options.contentType});
     			        if(cu.validOffset(offset)) {
     			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-    			               return that._findDecl(editorContext, options, ast);
+    			               return that._findDecl(editorContext, options, ast, text);
     			            });
     			        }
 			        }
@@ -64,7 +64,7 @@ define([
 		    }
 		},
 
-		_findDecl: function(editorContext, options, ast) {
+		_findDecl: function(editorContext, options, ast, htmlsource) {
 			cachedContext = editorContext;
 			deferred = new Deferred();
 			if(this.timeout) {
@@ -77,7 +77,7 @@ define([
 				}
 				this.timeout = null;
 			}, 5000);
-			var files = [{type: 'full', name: options.input, text: ast.source}]; //$NON-NLS-1$
+			var files = [{type: 'full', name: options.input, text: htmlsource ? htmlsource : ast.source}]; //$NON-NLS-1$
 			this.ternworker.postMessage(
 				{request:'definition', args:{params:{offset: options.offset}, files: files, meta:{location: options.input}}}, //$NON-NLS-1$
 				function(response) {

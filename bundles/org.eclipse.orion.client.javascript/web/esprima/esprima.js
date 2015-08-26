@@ -1609,19 +1609,23 @@ parseStatement: true, parseSourceElement: true */
     		} else if(callee.name === 'require') {
     			var _a = args[0];
     			if(_a.type === Syntax.ArrayExpression) {
+    				extra.envs.node = true;
     				addArrayDeps(_a.elements); //require([foo])
     			} else if(_a.type === Syntax.Literal) {
+    				extra.envs.node = true;
     				extra.deps.push(_a); // require('foo')
     			}
     			if(len > 1) {
     				_a = args[1];
     				if(_a.type === Syntax.ArrayExpression) {
+    					extra.envs.node = true;
     					addArrayDeps(_a.elements);
     				}
     			}
     		} else if(callee.name === 'requirejs') {
     			_a = args[0];
     			if(_a.type === Syntax.ArrayExpression) {
+    				extra.envs.amd = true;
     				addArrayDeps(_a.elements); //requirejs([foo])
     			}
     		} else if(callee.name === 'define' && len > 1) {//second arg must be array
@@ -1630,6 +1634,7 @@ parseStatement: true, parseSourceElement: true */
     				_a = args[1];
     			}
     			if(_a.type === Syntax.ArrayExpression) {
+    				extra.envs.amd = true;
     				addArrayDeps(_a.elements);
     			}
     		}
@@ -4223,6 +4228,7 @@ parseStatement: true, parseSourceElement: true */
         if (typeof options !== 'undefined') {
         	if(typeof(options.deps) === 'boolean' && options.deps)  { //ORION dependencies
         		extra.deps = [];
+        		extra.envs = Object.create(null);
         	}
             extra.range = (typeof options.range === 'boolean') && options.range;
             extra.loc = (typeof options.loc === 'boolean') && options.loc;
@@ -4270,8 +4276,9 @@ parseStatement: true, parseSourceElement: true */
             if (typeof extra.errors !== 'undefined') {
                 program.errors = extra.errors;
             }
-            if(typeof(extra.deps) != 'undefined') {
+            if(typeof(extra.deps) !== 'undefined') {
             	program.dependencies = extra.deps;
+            	program.environments = extra.envs;
             }
         } catch (e) {
             throw e;

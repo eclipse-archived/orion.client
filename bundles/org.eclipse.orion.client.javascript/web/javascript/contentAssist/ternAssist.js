@@ -492,7 +492,7 @@ define([
         			        if(cu.validOffset(params.offset)) {
         			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
         			            	return that.pluginenvs().then(function(envs) {
-        			            		return that.doAssist(ast, params, meta, {ecma5:true, ecma6:true, browser:true}, envs);
+        			            		return that.doAssist(ast, params, meta, {ecma5:true, ecma6:true, browser:true}, envs, text);
         			            	});
                     			});
         			        }
@@ -508,7 +508,7 @@ define([
 			});
 		},
 
-		doAssist: function(ast, params, meta, envs, contributedEnvs) {
+		doAssist: function(ast, params, meta, envs, contributedEnvs, htmlsource) {
 			var kind = getKind(ast, params.offset, ast.source);
        		params.prefix = getPrefix(params, kind, ast.source);
        		var proposals = [].concat(createDocProposals(params, kind, ast, ast.source, contributedEnvs),
@@ -518,7 +518,7 @@ define([
        		} else {
        			var env = this.getActiveEnvironments(ast, envs);
 			    var files = [
-			    	{type:'full', name: meta.location, text: ast.source} //$NON-NLS-1$
+			    	{type:'full', name: meta.location, text: htmlsource ? htmlsource : ast.source} //$NON-NLS-1$
 			    ];
 			    if(typeof(params.keywords) === 'undefined') {
 			    	params.keywords = true;

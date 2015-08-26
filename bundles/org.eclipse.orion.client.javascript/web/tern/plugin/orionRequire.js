@@ -33,12 +33,12 @@
   var EXPORT_OBJ_WEIGHT = 50;
 
   function getExports(data) {
-    var exports = new infer.Obj(true, "exports");
+    var _exports = new infer.Obj(true, "exports");
     var mod = getModule(stripJSExt(data.currentFile), data);
     if(mod) {
-    	mod.addType(exports, EXPORT_OBJ_WEIGHT);
+    	mod.addType(_exports, EXPORT_OBJ_WEIGHT);
     }
-    return exports;
+    return _exports;
   }
 
   function getInterface(name, data) {
@@ -74,7 +74,7 @@
     if (!known) {
       var val = resolver.getResolved(name); //ORION
       if(val && val.file) {
-	      known = data.interfaces[stripJSExt(val.file)] = new infer.AVal;
+	      known = data.interfaces[stripJSExt(val.file)] = new infer.AVal();
 	      known.origin = val.file;
       }
     }
@@ -83,7 +83,7 @@
 
   function getRequire(data) {
     if (!data.require) {
-      data.require = new infer.Fn("require", infer.ANull, [infer.cx().str], ["module"], new infer.AVal);
+      data.require = new infer.Fn("require", infer.ANull, [infer.cx().str], ["module"], new infer.AVal());
       data.require.computeRet = /* @callback */ function(_self, _args, argNodes) {
         if (argNodes.length && argNodes[0].type === "Literal" && typeof argNodes[0].value === "string") {
           var _i = getInterface(argNodes[0].value, data); //ORION
@@ -97,14 +97,14 @@
     return data.require;
   }
 
-  function getModuleInterface(data, exports) {
+  function getModuleInterface(data, _exports) {
     var mod = new infer.Obj(infer.cx().definitions.requirejs.module, "module");
     var expProp = mod.defProp("exports");
     var _m = getModule(stripJSExt(data.currentFile), data);
     if(_m) {
  	   expProp.propagate(_m);
 	}
-    exports.propagate(expProp, EXPORT_OBJ_WEIGHT);
+    _exports.propagate(expProp, EXPORT_OBJ_WEIGHT);
     return mod;
   }
 
@@ -117,15 +117,15 @@
     if (!data || !args.length) return infer.ANull;
 
     var name = data.currentFile;
-    var out = data.interfaces[stripJSExt(name)] = new infer.AVal;
+    var out = data.interfaces[stripJSExt(name)] = new infer.AVal();
     out.origin = name;
 
-    var deps = [], fn, exports, mod;
+    var deps = [], fn, _exports, mod;
 
     function interf(name) {
       if (name === "require") return getRequire(data);
-      if (name === "exports") return exports || (exports = getExports(data));
-      if (name === "module") return mod || (mod = getModuleInterface(data, exports || (exports = getExports(data))));
+      if (name === "exports") return _exports || (exports = getExports(data));
+      if (name === "module") return mod || (mod = getModuleInterface(data, _exports || (exports = getExports(data))));
       return getInterface(name, data);
     }
 
@@ -204,9 +204,9 @@
 
   function postLoadDef(data) {
     var cx = infer.cx(), interfaces = cx.definitions[data["!name"]]["!requirejs"];
-    var data = cx.parent._requireJS;
+    var rjsdata = cx.parent._requireJS;
     if (interfaces) for (var name in interfaces.props) {
-      interfaces.props[name].propagate(getInterface(name, data));
+      interfaces.props[name].propagate(getInterface(name, rjsdata));
     }
   }
 

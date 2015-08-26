@@ -270,7 +270,7 @@ define([
 		            	var cu = that.cuprovider.getCompilationUnit(blocks, meta);
     		            if(cu.validOffset(ctxt.offset)) {
         		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-                				return that._doHover(ast, ctxt, meta);
+                				return that._doHover(ast, ctxt, meta, text);
                 			});
             			}
         			}
@@ -280,7 +280,7 @@ define([
 
 		},
 
-		_doHover: function _doHover(ast, ctxt, meta) {
+		_doHover: function _doHover(ast, ctxt, meta, htmlsource) {
 			var node = Finder.findNode(ctxt.offset, ast, {parents:true});
 		    if(node && node.type === 'Literal') {
 		    	//Symantic navigation
@@ -331,7 +331,7 @@ define([
                 return null;
 		    }
 			deferred = new Deferred();
-			var files = [{type: 'full', name: meta.location, text: ast.source}]; //$NON-NLS-1$
+			var files = [{type: 'full', name: meta.location, text: htmlsource ? htmlsource : ast.source}]; //$NON-NLS-1$
 			this.ternworker.postMessage(
 				{request:'documentation', args:{params:{offset: ctxt.offset}, files: files, meta:{location: meta.location}}}, //$NON-NLS-1$
 				function(response) {

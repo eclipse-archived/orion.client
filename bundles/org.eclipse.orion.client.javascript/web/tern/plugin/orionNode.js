@@ -34,14 +34,14 @@
     var scope = new infer.Scope(parent);
     scope.originNode = node;
     infer.cx().definitions.node.require.propagate(scope.defProp("require"));
-    var module = new infer.Obj(infer.cx().definitions.node.Module.getProp("prototype").getType());
-    module.propagate(scope.defProp("module"));
-    var exports = new infer.Obj(true, "exports");
-    module.origin = exports.origin = origin;
-    module.originNode = exports.originNode = scope.originNode;
-    exports.propagate(scope.defProp("exports"));
-    var moduleExports = scope.exports = module.defProp("exports");
-    exports.propagate(moduleExports, WG_DEFAULT_EXPORT);
+    var _module = new infer.Obj(infer.cx().definitions.node.Module.getProp("prototype").getType());
+    _module.propagate(scope.defProp("module"));
+    var _exports = new infer.Obj(true, "exports");
+    _module.origin = _exports.origin = origin;
+    _module.originNode = _exports.originNode = scope.originNode;
+    _exports.propagate(scope.defProp("exports"));
+    var moduleExports = scope.exports = _module.defProp("exports");
+    _exports.propagate(moduleExports, WG_DEFAULT_EXPORT);
     return scope;
   }
 
@@ -179,20 +179,38 @@
       currentOrigin: null,
       server: server
     };
-
+	
+	/**
+	 * @description If we should be using the node plugin
+	 * @param {Object} file The file object
+	 * @returns {Boolean} If we should do any work in the node plugin
+	 * @since 10.0
+	 * Orion
+	 */
+	function usingNode(file) {
+		if(/\.js$/g.test(file.name) && file.ast && file.ast.environments) {
+      	  	return file.ast.environments.node;
+      	}
+      	return false;
+	}
+	
     server.on("beforeLoad", function(file) {
-      this._node.currentFile = resolveProjectPath(server, file.name);
-      this._node.currentOrigin = file.name;
-      this._node.currentRequires = [];
-      file.scope = buildWrappingScope(file.scope, this._node.currentOrigin, file.ast);
+      if(usingNode(file)) {
+	      this._node.currentFile = resolveProjectPath(server, file.name);
+	      this._node.currentOrigin = file.name;
+	      this._node.currentRequires = [];
+	      file.scope = buildWrappingScope(file.scope, this._node.currentOrigin, file.ast);
+      }
     });
 
     server.on("afterLoad", function(file) {
-      var mod = getModule(this._node, this._node.currentFile);
-      mod.origin = this._node.currentOrigin;
-      file.scope.exports.propagate(mod);
-      this._node.currentFile = null;
-      this._node.currentOrigin = null;
+	    if(usingNode(file)) {
+	      var mod = getModule(this._node, this._node.currentFile);
+	      mod.origin = this._node.currentOrigin;
+	      file.scope.exports.propagate(mod);
+	      this._node.currentFile = null;
+	      this._node.currentOrigin = null;
+	    }
     });
 
     server.on("reset", function() {
