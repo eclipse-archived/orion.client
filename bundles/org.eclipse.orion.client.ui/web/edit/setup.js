@@ -714,6 +714,12 @@ objects.mixin(EditorSetup.prototype, {
 		var mode = typeof(options.mode) === 'string' ? options.mode : 'replace'; //$NON-NLS-1$
 		switch (mode) {
 			case 'replace':
+				var editorView = this.activeEditorViewer.getCurrentEditorView();
+				if (editorView && editorView.editor) {
+					var sel = editorView.editor.getSelection();
+					var currentHref = this.computeNavigationHref({Location: this.activeEditorViewer.inputManager.getInput()}, {start: sel.start, end: sel.end});
+					history.pushState({}, "", currentHref);
+				}
 				var hash = href.split('#')[1];
 				if (hash === window.location.hash.substring(1)) {
 					this.activeEditorViewer.inputManager.setInput(hash);

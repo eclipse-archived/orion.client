@@ -489,15 +489,11 @@ define([
 			}
 			if (fileURI) {
 				if (fileURI === this._input) {
-					if (!this._parametersProcessed) {
-						saveSession();
-					}
 					if (editorChanged) {
 						this.reportStatus("");
 						this._setInputContents(input, fileURI, null, this._fileMetadata, this._isText(this._fileMetadata));
 					} else {
-						this._parametersProcessed = this.processParameters(input);
-						if (!this._parametersProcessed) {
+						if (!this.processParameters(input)) {
 							if (evt.session) {
 								evt.session.apply(true);
 							}
@@ -627,8 +623,7 @@ define([
 					textView.addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
 				}
 				this._clearUnsavedChanges();
-				this._parametersProcessed = this.processParameters(input);
-				if (!this._parametersProcessed) {
+				if (!this.processParameters(input)) {
 					if (evt.session) {
 						evt.session.apply();
 					}
