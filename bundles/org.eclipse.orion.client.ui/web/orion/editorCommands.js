@@ -167,7 +167,6 @@ define([
 		 */
 		createCommands: function() {
 			this._createSettingsCommand();
-			this._createSearchFilesCommand();
 			this._createGotoLineCommnand();
 			this._createFindCommnand();
 			this._createBlameCommand();
@@ -231,7 +230,6 @@ define([
 			commandRegistry.registerCommandContribution("settingsActions", "orion.edit.settings", 1, null, false, new mKeyBinding.KeyBinding("s", true, true), null, this); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.edit.undo", 400, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.undoGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('z', true), null, this); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.edit.redo", 401, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.undoGroup" : null, !this.editToolbarId, util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
-			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.searchFiles", 1, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding("h", true), null, this); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.openResource", 1, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.saveGroup" : null, false, new mKeyBinding.KeyBinding('f', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.edit.save", 2, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.saveGroup" : null, false, new mKeyBinding.KeyBinding('s', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.gotoLine", 3, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
@@ -279,8 +277,9 @@ define([
 			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.undo", index++, "orion.editorContextMenuGroup/orion.edit.undoGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.redo", index++, "orion.editorContextMenuGroup/orion.edit.undoGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.find", index++,"orion.editorContextMenuGroup/orion.findGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
-			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.searchFiles", index++, "orion.editorContextMenuGroup/orion.findGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.gotoLine", index++, "orion.editorContextMenuGroup/orion.findGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.quickSearch", index++, "orion.editorContextMenuGroup/orion.findGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.openSearch", index++, "orion.editorContextMenuGroup/orion.findGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 
 			// 'Tools' cascade
 			commandRegistry.addCommandGroup(this.editorContextMenuId, "orion.editorContextMenuToolsGroup", 400, messages["Tools"], "orion.editorContextMenuGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -532,50 +531,6 @@ define([
 				}
 			});
 			this.commandService.addCommand(redoCommand);
-		},
-		_createSearchFilesCommand: function() {
-			var that = this;
-
-			// global search
-			var showingSearchDialog = false;
-			var searchCommand =  new mCommands.Command({
-				name: messages.searchFilesCommand,
-				tooltip: messages.searchFilesCommand,
-				id: "orion.edit.searchFiles", //$NON-NLS-0$
-				visibleWhen: /** @callback */ function(items, data) {
-					var editor = data.handler.editor || that.editor;
-					var searcher = data.handler.searcher || that.searcher;
-					return editor && editor.installed && searcher;
-				},
-				callback: function() {
-					var editor = this.editor || that.editor;
-					if (showingSearchDialog) {
-						return;
-					}
-					var selection = editor.getSelection();
-					var searchTerm = editor.getText(selection.start, selection.end);
-					var serviceRegistry = that.serviceRegistry;
-					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					var dialog = new openResource.OpenResourceDialog({
-						searcher: that.searcher,
-						progress: progress,
-						searchRenderer: that.searcher.defaultRenderer,
-						nameSearch: false,
-						title: messages.searchFiles,
-						message: messages.searchTerm,
-						initialText: searchTerm,
-						onHide: function () {
-							showingSearchDialog = false;
-							editor.focus();
-						}
-					});
-					window.setTimeout(function () {
-						showingSearchDialog = true;
-						dialog.show(lib.node(that.toolbarId));
-					}, 0);
-				}
-			});
-			this.commandService.addCommand(searchCommand);
 		},
 		_createSaveCommand: function() {
 			var that = this;

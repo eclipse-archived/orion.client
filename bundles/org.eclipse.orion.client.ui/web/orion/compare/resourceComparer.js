@@ -264,7 +264,6 @@ exports.ResourceComparer = (function() {
 						commandRegistry.registerCommandContribution(inputManager.manager._actionBarId, "orion.edit.save", 2000, null, false, new mKeyBinding.KeyBinding('s', true), null, handler); //$NON-NLS-1$ //$NON-NLS-0$
 						commandRegistry.registerCommandContribution("pageNavigationActions", "orion.edit.gotoLine", 0, null, true, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						commandRegistry.registerCommandContribution("pageNavigationActions", "orion.edit.find", 0, null, true, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						commandRegistry.registerCommandContribution("pageNavigationActions", "orion.edit.searchFiles", 0, null, true, new mKeyBinding.KeyBinding("h", true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						editor.getTextView().addEventListener("Focus", function() { //$NON-NLS-0$
 							editorCommands.updateCommands(handler);
 						});

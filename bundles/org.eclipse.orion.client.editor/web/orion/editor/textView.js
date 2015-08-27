@@ -2384,6 +2384,17 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 		getSelections: function () {
 			return this._getSelections();
 		},
+		/**
+		 * Returns the text view selection text.
+		 * <p>
+		 * If there are multiple selection ranges, the result is concatenated with the specified delimiter.
+		 * </p>
+		 * 
+		 * @param {String} delimiter The offset into the editor
+		 * @returns {String} the view selection text
+		 * @since 10.0
+		 * @see orion.editor.TextView#setSelection
+		 */
 		getSelectionText: function(delimiter) {
 			var text = [];
 			var that = this;

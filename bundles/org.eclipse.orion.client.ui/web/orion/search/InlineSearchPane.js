@@ -118,6 +118,10 @@ define([
 			        resource: resource
 			};
 		},
+		
+		search: function(){
+			this._submitSearch();
+		},
 				
 		_submitSearch: function(){
 			var options = this.getOptions();
@@ -358,6 +362,10 @@ define([
 			}
 			
 			this._displaySelectedSearchScope();
+		},
+		
+		setSearchText: function(str) {
+			this._searchBox.setTextInputValue(str);
 		},
 		
 		_initSearchScope: function() {

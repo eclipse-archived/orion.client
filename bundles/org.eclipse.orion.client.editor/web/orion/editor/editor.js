@@ -569,6 +569,22 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this.mapOffset(this._textView.getCaretOffset());
 		},
 		
+		/**
+		 * Returns the text view selection text.
+		 * <p>
+		 * If there are multiple selection ranges, the result is concatenated with the specified delimiter.
+		 * </p>
+		 * 
+		 * @param {String} delimiter The offset into the editor
+		 * @returns {String} the view selection text
+		 * @since 10.0
+		 * @see orion.editor.TextView#setSelection
+		 */
+		getSelectionText: function(delimiter) {
+			var textView = this._textView;
+			return textView.getSelectionText(delimiter);
+		},
+		
 		getSelection: function() {
 			var textView = this._textView;
 			var selection = textView.getSelection();

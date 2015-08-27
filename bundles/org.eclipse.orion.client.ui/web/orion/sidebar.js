@@ -304,6 +304,14 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				}
 			}.bind(this));
 			
+			var getSearchText = function () {
+				var editor = this.editorInputManager.getEditor();
+				if (editor && editor.getSelectionText) {
+					return editor.getSelectionText("");
+				}
+				return "";
+			}.bind(this);
+			
 			var searchInFolderCommand = new mCommands.Command({
 				name: messages["searchInFolder"], //$NON-NLS-0$
 				id: "orion.searchInFolder", //$NON-NLS-0$
@@ -317,6 +325,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				},
 				callback: function (data) {
 					var item = data.items[0];
+					this._inlineSearchPane.setSearchText(getSearchText());
 					this._inlineSearchPane.setSearchScope(item);
 					this._inlineSearchPane.show();
 					this._inlineSearchPane.showSearchOptions();	
@@ -325,7 +334,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			
 			var openSearchCommand = new mCommands.Command({
 				name: messages["Global Search"], //$NON-NLS-0$
-				id: "orion.openInlineSearchPane", //$NON-NLS-0$
+				id: "orion.openSearch", //$NON-NLS-0$
 				visibleWhen: function() {
 					return true;
 				},
@@ -337,6 +346,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 						if (mainSplitter.splitter.isClosed()) {
 							mainSplitter.splitter.toggleSidePanel();
 						}
+						this._inlineSearchPane.setSearchText(getSearchText());
 						this._inlineSearchPane.setSearchScope(this._lastSearchRoot); //reset search scope
 						this._inlineSearchPane.show();
 						this._inlineSearchPane.showSearchOptions();	
@@ -344,11 +354,33 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				}.bind(this)
 			});
 			
+			var quickSearchCommand =  new mCommands.Command({
+				name: messages.searchFilesCommand,
+				tooltip: messages.searchFilesCommand,
+				id: "orion.quickSearch", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					return true;
+				},
+				callback: function() {
+					var mainSplitter = mGlobalCommands.getMainSplitter();
+					if (mainSplitter.splitter.isClosed()) {
+						mainSplitter.splitter.toggleSidePanel();
+					}
+					this._inlineSearchPane.setSearchText(getSearchText());
+					this._inlineSearchPane.setSearchScope(this._lastSearchRoot); //reset search scope
+					this._inlineSearchPane.show();
+					this._inlineSearchPane.showSearchOptions();
+					this._inlineSearchPane.search();
+				}.bind(this)
+			});
+			
 			this.commandRegistry.addCommand(searchInFolderCommand);
 			this.commandRegistry.addCommand(openSearchCommand);
+			this.commandRegistry.addCommand(quickSearchCommand);
 			
-			this.commandRegistry.registerCommandContribution(this.editScope, "orion.searchInFolder", 99, "orion.menuBarEditGroup/orion.findGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandRegistry.registerCommandContribution(this.editScope, "orion.openInlineSearchPane", 100, "orion.menuBarEditGroup/orion.findGroup", false, new mKeyBinding.KeyBinding('h', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandRegistry.registerCommandContribution(this.editScope, "orion.searchInFolder", 99, "orion.menuBarEditGroup/orion.findGroup");  //$NON-NLS-1$ //$NON-NLS-2$
+			this.commandRegistry.registerCommandContribution(this.editScope, "orion.quickSearch", 100, "orion.menuBarEditGroup/orion.findGroup", false, new mKeyBinding.KeyBinding('h', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
+			this.commandRegistry.registerCommandContribution(this.editScope, "orion.openSearch", 101, "orion.menuBarEditGroup/orion.findGroup", false, new mKeyBinding.KeyBinding('h', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 			
  		}
 	});

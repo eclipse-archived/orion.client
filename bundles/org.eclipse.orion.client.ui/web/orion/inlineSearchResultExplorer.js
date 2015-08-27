@@ -570,7 +570,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		this.createTree(this.getParentDivId(), this.model, {
             selectionPolicy: "singleSelection", //$NON-NLS-0$
             indent: 0,
-            setFocus: false,
+            setFocus: true,
             onCollapse: function(model) {
                 that.onCollapse(model);
             }
@@ -941,7 +941,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 				selectionPolicy: "singleSelection", //$NON-NLS-0$
                 indent: 0,
 				getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
-				setFocus: false,
+				setFocus: true,
                 onCollapse: function(model) {
                     that.onCollapse(model);
                 }
@@ -970,7 +970,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             selectionPolicy: "singleSelection", //$NON-NLS-0$
             getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
             indent: 0,
-            setFocus: false,
+            setFocus: true,
             onCollapse: function(model) {
                 that.onCollapse(model);
             }
@@ -1048,7 +1048,9 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 	InlineSearchResultExplorer.prototype._renderSearchResult = function(crawling, resultsNode, searchParams, jsonData, incremental) {
 		var foundValidHit = false;
 		var resultLocation = [];
-		lib.empty(lib.node(resultsNode));
+		var node = lib.node(resultsNode);
+		lib.empty(node);
+		node.focus();
 		
 		if (jsonData.response.numFound > 0) {
 			for (var i=0; i < jsonData.response.docs.length; i++) {
