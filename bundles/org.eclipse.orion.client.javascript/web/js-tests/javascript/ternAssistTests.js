@@ -112,7 +112,6 @@ define([
 			return new Deferred().resolve(envs);
 		});
 
-	var fileMap = Object.create(null);
 	/**
 	 * @description Sets up the test
 	 * @param {Object} options The options the set up with
@@ -120,7 +119,6 @@ define([
 	 */
 	function setup(options) {
 		state = Object.create(null);
-		fileMap = Object.create(null);
 		var buffer = state.buffer = typeof(options.buffer) === 'undefined' ? '' : options.buffer,
 		    prefix = state.prefix = typeof(options.prefix) === 'undefined' ? '' : options.prefix,
 		    offset = state.offset = typeof(options.offset) === 'undefined' ? 0 : options.offset,
