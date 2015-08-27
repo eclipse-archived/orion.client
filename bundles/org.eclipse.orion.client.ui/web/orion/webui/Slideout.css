@@ -43,6 +43,7 @@
 }
 
 .slideoutWrapper.slideoutWrapperVisible > .slideoutDismissButton:hover {
+	color: #00AED1;
 	opacity: 1;
 }
 

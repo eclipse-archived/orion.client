@@ -9,7 +9,7 @@
 }
 
 .searchResultsWrapperDiv .selectableNavRow:hover {
-	background-color: #cedce7;
+	background-color: rgba(27, 177, 153, 0.3);
 }
 
 .searchResultsWrapperDiv .navlink {
@@ -42,6 +42,7 @@
 .searchWrapper.searchOptionsHidden > .searchOptWrapperDiv {
 	height: 0;
 	overflow: hidden;
+	visibility: hidden;
 }
 
 .searchResultsWrapperDiv {
