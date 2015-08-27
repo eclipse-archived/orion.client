@@ -4554,5 +4554,50 @@ define([
 				]);
 			});
 		});
+		describe('Proposal sorting Tests', function() {
+			/**
+			 * Tests that proposals are sorted by their origin, relevence and name
+			 * Order:
+			 * 1) Local
+			 * 2) Dependent files TODO Not tested
+			 * 3) Keywords
+			 * 4) Envs (browser, ecma5, ecma6)
+			 * 5) Templates
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476063
+			 * @since 10.0
+			 */
+			it('proposal sorting 1', function(done) {
+				var options = {
+					buffer: "/*eslint-env browser */ var iii = 1; i",
+					prefix: "i",
+					offset: 38,
+					keywords: true,
+					templates: true,
+					callback: done};
+				testProposals(options, [
+					['iii', ''],
+					['', 'Keywords'],
+					['if', 'if - Keyword'],
+					['in', 'in - Keyword'],
+					['instanceof', 'instanceof - Keyword'],
+					['', 'browser'],
+					['innerHeight', 'innerHeight : number'],
+					['innerWidth', 'innerWidth : number'],
+					['', 'ecma5'],
+					['isFinite(value)', 'isFinite(value) : bool'],
+					['isNaN(value)', 'isNaN(value) : bool'],
+					['isPrototypeOf(obj)', 'isPrototypeOf(obj) : bool'],
+					['Infinity', 'Infinity : number'],
+					['', 'ecma6'],
+					['Int16Array(length)', 'Int16Array(length)'],
+					['Int32Array(length)', 'Int32Array(length)'],
+					['Int8Array(length)', 'Int8Array(length)'],
+					['', 'Templates'],
+					['f (condition) {\n\t\n}', 'if - if statement'],
+					['f (condition) {\n\t\n} else {\n\t\n}', 'if - if else statement'],
+					['object instanceof type', 'instanceof - instanceof statement']
+				]);
+			});
+		});
 	});
 });
