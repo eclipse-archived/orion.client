@@ -217,12 +217,12 @@ define([
 			
 			this._searchBox.setRecentEntryButtonTitle(messages["Show previous search terms"]); //$NON-NLS-0$
 			
-			this._searchTextInputBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
+			this._searchWrapper.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
 					return;
 				}
 				var keyCode= e.charCode || e.keyCode;
-				if (keyCode === lib.KEY.ENTER) {
+				if (keyCode === lib.KEY.ENTER && this._searchTextInputBox === e.target) {
 					this._searchTextInputBox.blur();
 					if (this._replaceBoxIsHidden()) {
 						this._submitSearch();
