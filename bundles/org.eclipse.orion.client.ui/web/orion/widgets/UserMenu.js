@@ -13,13 +13,40 @@ define([
 	'i18n!orion/widgets/nls/messages',
 	'orion/webui/littlelib',
 	'orion/PageLinks',
-	'orion/webui/dropdown'
-], function(messages, lib, PageLinks, Dropdown) {
+	'orion/webui/dropdown',
+	'orion/xsrfUtils'
+], function(messages, lib, PageLinks, Dropdown, xsrfUtils) {
 	
 	function UserMenu(options) {
 		this._displaySignOut = true;
 		this._init(options);		
 	}
+
+	function redirectAfterSignOut(authService) {
+		var checkredirectrequest = new XMLHttpRequest();
+		checkredirectrequest.onreadystatechange = function() {
+			if (checkredirectrequest.readyState === 4) {
+				if (checkredirectrequest.status === 200) {
+					var responseObject = JSON.parse(checkredirectrequest.responseText);
+					if (responseObject.SignOutRedirect) {
+						window.location = responseObject.SignOutRedirect;
+					}
+					else {
+						authService.getAuthForm(PageLinks.getOrionHome()).then(function(formURL) {
+							window.location = formURL;
+						});
+					}
+				}
+			}
+		};
+
+		checkredirectrequest.open("POST", "../login/redirectinfo", true);
+		checkredirectrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		checkredirectrequest.setRequestHeader("Orion-Version", "1");
+		xsrfUtils.addCSRFNonce(checkredirectrequest);
+		checkredirectrequest.send();
+	}
+	
 	UserMenu.prototype = /** @lends orion.widgets.UserMenu.UserMenu.prototype */ {
 			
 		_init: function(options) {
@@ -90,9 +117,7 @@ define([
 								localStorage.removeItem(name);
 							}
 						}
-						authService.getAuthForm(PageLinks.getOrionHome()).then(function(formURL) {
-							window.location = formURL;
-						});
+						redirectAfterSignOut(authService);
 					});
 				});
 				this._dropdownNode.appendChild(element.parentNode);
