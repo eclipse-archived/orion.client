@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2014." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Pluggable Editor Demo</title>
+		<style type="text/css">
+			.demoTitle{
+				border: none;
+				vertical-align: middle;
+				overflow: hidden;
+				text-align: left;
+				margin-left: 15%;
+				margin-right: 15%;
+				padding-bottom: 5px;
+				position: relative;
+			}
+			.demoBody{
+				border: 1px solid;
+				vertical-align: middle;
+				border-color: blue;
+				overflow: hidden;
+				text-align: left;
+				margin-left: 15%;
+				margin-right: 15%;
+				margin-bottom: 15px;
+				padding-bottom: 5px;
+				position: relative;
+				height: 450px;
+			}
+		</style>
+	    <link rel="stylesheet" type="text/css" href="editorBuild/code_edit/built-codeEdit.css"/>
+	    <link rel="stylesheet" type="text/css" href="custom.css"/>
+		<script src="editorBuild/code_edit/built-codeEdit.js"></script>
+		<script>
+			/*globals orion */
+			var contents = 'foo: bar;\n' +
+							"bar: foo\n" + 
+							"bar: foo\n" + 
+							"bar: foo\n";
+			var syntaxF = function() { //$NON-NLS-0$
+				var keywords = ["false", "null", "true"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var casts = ["!!bool", "!!float", "!!int", "!!map", "!!null", "!!omap", "!!seq", "!!str"]; //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+				var id = "orion.foo"; //$NON-NLS-0$
+				var grammar = {
+					id: id,
+					contentTypes: ["foo/bar"], //$NON-NLS-0$
+					patterns: [
+						{include: "#numberSignComment"}, //$NON-NLS-0$
+						{
+							match: "^%(?:YAML|TAG)\\s.*", //$NON-NLS-0$
+							name: "meta.directive.yaml" //$NON-NLS-0$
+						}, {
+							begin: "^.*?:(?:[\\t ]|$)", //$NON-NLS-0$
+							end: "$", //$NON-NLS-0$
+							contentName: "string.unquoted.yaml", //$NON-NLS-0$
+							beginCaptures: {
+								0: {
+									name: "entity.name.key.yaml"
+								}
+							},
+							patterns: [
+								{include: "#numberSignComment"}, //$NON-NLS-0$
+								{
+									match: "^\\s*[&*]\\s*$", //$NON-NLS-0$
+									name: "entity.name.tag.yaml" //$NON-NLS-0$
+								}, {
+									match: "(?i)^\\s*(?:" + keywords.join("|") + ")\\s*$", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+									name: "keyword.operator.yaml" //$NON-NLS-0$
+								}, {
+									match: "(?i)^\\s*(?:" + casts.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+									name: "keyword.operator.yaml" //$NON-NLS-0$
+								}, {
+									match: "(?i)^\\s*(?:-?[0-9]*(?:\\.[0-9]+)?(?:e[-+][1-9][0-9]*)?)\\s*$", //$NON-NLS-0$
+									name: "constant.numeric.yaml" //$NON-NLS-0$
+								}, {
+									match: "(?i)^\\s*(?:-?[1-9][0-9]*|0|-?\\.inf|\\.nan)\\s*$", //$NON-NLS-0$
+									name: "constant.numeric.yaml" //$NON-NLS-0$
+								}
+							]
+						}, {
+							match: "---|\\.\\.\\.", //$NON-NLS-0$
+							name: "meta.separator.yaml" //$NON-NLS-0$
+						}
+					],
+					repository: {
+						numberSignComment: {
+							begin: {match: "(?:^|\\s)#", literal: "#"}, //$NON-NLS-0$
+							end: {match: "$", literal: ""}, //$NON-NLS-0$
+							name: "comment.line.number-sign.yaml", //$NON-NLS-0$
+							patterns: [
+								{include: "orion.lib#todo_comment_singleLine"} //$NON-NLS-0$
+							]
+						}
+					}
+				};
+			
+				return {
+					id: id,
+					grammars: [grammar],
+					keywords: casts.concat(keywords)
+				};
+			};			
+			window.onload=function(){
+				var codeEdit = new orion.codeEdit();
+				codeEdit.create({parent: "embeddedEditor", userPlugins:["webEditingPlugin.html"]}).then(function(editorViewer) {
+					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+					var cto = {
+						id: "foo/bar",
+						extension: ["bar"],
+						name: 'Xtext Language',
+						'extends': 'text/plain'
+					};
+					
+					//editorViewer.serviceRegistry.registerService('orion.core.contenttype', {}, {contentTypes: [cto]});
+					editorViewer.serviceRegistry.registerService("orion.edit.highlighter", {}, syntaxF().grammars[0]);
+					editorViewer.setContents(contents, "foo/bar");
+				});
+			};
+		</script>
+    </head>
+	<body id="orion-browser" spellcheck="false" class="orionPage">
+		<div class="demoTitle">
+			<span id = "progressMessageDiv" style="color: green">Loading language tooling plugins...</span>
+		</div>
+		</div>
+		<div class="demoBody" id="embeddedEditor">
+		</div>
+	</body>
+</html>

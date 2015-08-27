@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2014." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Pluggable Editor Demo</title>
+		<style type="text/css">
+			.lineHighlight{
+				outline: 2px dotted black;
+			}
+			.lineHighlightGutter{
+				background-color: red;
+			}
+			.demoTitle{
+				border: none;
+				vertical-align: middle;
+				overflow: hidden;
+				text-align: left;
+				margin-left: 15%;
+				margin-right: 15%;
+				padding-bottom: 5px;
+				position: relative;
+			}
+			.demoBody{
+				border: 1px solid;
+				vertical-align: middle;
+				border-color: blue;
+				overflow: hidden;
+				text-align: left;
+				margin-left: 15%;
+				margin-right: 15%;
+				margin-bottom: 15px;
+				padding-bottom: 5px;
+				position: relative;
+				height: 450px;
+			}
+		</style>
+	    <link rel="stylesheet" type="text/css" href="editorBuild/code_edit/built-codeEdit.css"/>
+		<script src="editorBuild/code_edit/built-codeEdit.js"></script>
+		<script>
+			/*globals orion */
+			function setupOnce(editorViewer) {
+				editorViewer.editor.addEventListener("InputChanged", function(){ //$NON-NLS-0$
+		 			/*
+		 			 * Things you only need to do once per editor
+		 			 */
+		 			var editor = editorViewer.editor;
+		 		 	//Get the line styler inside the editor
+				 	var annoStyler = editor.getAnnotationStyler();
+		 		 	//Add your annotation type to the editor 
+		 		 	annoStyler.addAnnotationType("my.customize.linehighlight");
+		 		 	//Add the same annotation type ot the annotation ruler(gutter)
+		 		 	editor.getAnnotationRuler().addAnnotationType("my.customize.linehighlight");
+		 		 	editor.getAnnotationRuler().onDblClick = function(lineIndex, e) {
+						if (lineIndex === undefined) { return; }
+						if (lineIndex === -1) { return; }
+						var view = editor.getTextView();
+						var viewModel = view.getModel();
+						var annotationModel = editor.getAnnotationModel();
+						var lineStart = editor.mapOffset(viewModel.getLineStart(lineIndex));
+						var lineEnd = editor.mapOffset(viewModel.getLineEnd(lineIndex));
+						var annotations = annotationModel.getAnnotations(lineStart, lineEnd);
+						var gutter = null;
+						while (annotations.hasNext()) {
+							var annotation = annotations.next();
+							if (annotation.type === "my.customize.linehighlight") {
+								gutter = annotation;
+								break;
+							}
+						}
+		 		 		setCursorAndGotoLine(editorViewer, lineIndex, gutter);
+		 		 	};
+			 	});
+			}
+			function setCursorAndGotoLine(editorViewer, lineNumber/*zero based*/, gutter) {
+		 		editorViewer.editor.onGotoLine(lineNumber, 0, 0, function() {
+		 			var editor = editorViewer.editor;
+		 		 	//annotationModel is the handler you add or remove you annotation models
+		 		 	var annotationModel = editor.getAnnotationModel();
+		  		 	if(!annotationModel){
+				 		return;
+		 		 	}
+		 		 	//As the annotation model is a range that is based on the charater offset of the {star, end}, you have to use the textModel to calculate that)
+		 		 	var textModel = editor.getTextView().getModel();
+		 		 	var startIndex = textModel.getLineStart(lineNumber);
+		 		 	var endIndex = textModel.getLineEnd(lineNumber);
+		 		 	
+		  		 	//Add and/or remove your annotation models
+		 		 	//The first param is an array of the annotations you want to remove
+		 		 	//The second param is an array of the annotations you want to add
+		 		 	var firstParam = [], secondParam = [],
+		 		 	param = [{
+			 		 	start: startIndex,
+			 		 	end: endIndex,
+			 		 	title: "",
+			 		 	type: "my.customize.linehighlight",
+			 		 	html: "",
+			 		 	style: {styleClass: "lineHighlightGutter"}, //Gutter style at the line		 		 		 		 
+			 		 	lineStyle: {styleClass: "lineHighlight"} //The line style in the editor
+		 		 	}];
+		 		 	if(gutter) {
+		 		 		firstParam = [gutter];
+		 		 	} else {
+		 		 		secondParam = param;
+		 		 	}
+		 		 	annotationModel.replaceAnnotations(firstParam, secondParam);
+		 		});
+			}
+			window.onload=function(){
+				var codeEdit = new orion.codeEdit();
+				var contents = 'var foo = "bar";\n' +
+									 "var bar = foo;\n" + 
+									 "/*\n" + 
+									 " * test demo\n" + 
+									 "*/\n" + 
+									 "function test(){\n" + 
+									 "	var foo1 = bar.lastIndexOf(char, from);\n" + 
+									 "}\n" + 
+									"//Keep editting in this demo and try the content assit, probem validations and hover service!\n" +
+									 "var foo2 = foo."; 
+				codeEdit.create({parent: "embeddedEditor", contentType: "application/javascript", contents: contents}).then(function(editorViewer) {
+					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+					setupOnce(editorViewer);
+					//editorViewer.editor.getAnnotationRuler().on
+					//setTimeout(function(){setCursorAndGotoLine(editorViewer, 1);}, 2000);
+					//You can call APIs from editorViewer.editor  for further actions.
+				});
+			};
+		</script>
+    </head>
+	<body id="orion-browser" spellcheck="false" class="orionPage">
+		<div class="demoTitle">
+			<span id = "progressMessageDiv" style="color: green">Loading language tooling plugins...</span>
+		</div>
+		</div>
+		<div class="demoBody" id="embeddedEditor">
+		</div>
+	</body>
+</html>
