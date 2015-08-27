@@ -124,8 +124,8 @@
 
     function interf(name) {
       if (name === "require") return getRequire(data);
-      if (name === "exports") return _exports || (exports = getExports(data));
-      if (name === "module") return mod || (mod = getModuleInterface(data, _exports || (exports = getExports(data))));
+      if (name === "exports") return _exports || (_exports = getExports(data));
+      if (name === "module") return mod || (mod = getModuleInterface(data, _exports || (_exports = getExports(data))));
       return getInterface(name, data);
     }
 
