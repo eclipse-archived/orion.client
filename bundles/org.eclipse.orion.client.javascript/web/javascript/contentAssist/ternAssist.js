@@ -524,7 +524,14 @@ define([
 			    	params.keywords = true;
 			    }
 			    var args = {params: params, meta: meta, envs:env, files: files};
-	        	this.ternworker.postMessage({request: 'completions', args: args}, //$NON-NLS-1$
+	        	if(deferred) {
+	        		deferred.resolve();
+	        	}
+				deferred = new Deferred();
+				deferred.proposals = proposals;
+				deferred.args = args;
+				
+				this.ternworker.postMessage({request: 'completions', args: args}, //$NON-NLS-1$
 					function(response) {
 						if(deferred.proposals) {
 			        		deferred.resolve([].concat(sortProposals(response.proposals ? response.proposals : [], deferred.args), deferred.proposals));
@@ -534,12 +541,7 @@ define([
 			        	deferred = null;
 					}
 	        	);
-	        	if(deferred) {
-	        		deferred.resolve();
-	        	}
-				deferred = new Deferred();
-				deferred.proposals = proposals;
-				deferred.args = args;
+				
 				if(this.timeout) {
 					clearTimeout(this.timeout);
 				}
@@ -802,12 +804,18 @@ define([
 		return 0;
 	};
 
+	/**
+	 * @name formatOrigin
+	 * @description Formats the origin into a readable string that can fit in content assist.
+	 * @param origin {String} the origin string to format
+	 * @returns returns a formatted origin string, may be the same as the origin
+	 */
 	function formatOrigin(origin) {
-		var match = /([^/.]+\/[^\/]+)$/g.exec(origin);
+		var match = /([^/.]+\/[^\/]+)$/g.exec(origin);  // Shortens long / separated file paths to the last two segments
 		if(match) {
 			return match[1];
 		}
-		match = /\/([^\/]+)$/g.exec(origin);
+		match = /\/([^\/]+)$/g.exec(origin);  // Removes leading slash from a file path
 		if(match) {
 			return match[1];
 		}
@@ -816,9 +824,10 @@ define([
 
 	function sortProposals(completions, args) {
 		var envs = args.envs ? args.envs : {};
-	    var _p = Object.create(null);
 	    //bucket them by origin
-	    var locals = [];
+	    var _p = Object.create(null); // Grouped proposals from env and indexes
+	    var _d = Object.create(null); // Grouped proposals from dependencies 
+	    var locals = []; // Proposals from local scope
 	    var keywords = [];
 	    for(var i = 0; i < completions.length; i++) {
 	        var _c = completions[i];
@@ -837,15 +846,32 @@ define([
     	        	if(_o.indexOf('/') < 0 && !envs[_o]) {
 	    	        	continue;
 	    	        }
-	    	       var orig = formatOrigin(_o);
-    	           if(!Array.isArray(_p[orig])) {
-    	           		_p[orig] = [];
-    	           }
-    	           _p[orig].push(_formatTernProposal(_c, args));
+					var orig = formatOrigin(_o);
+					var propMap = _p;
+					if (!envs[_o]){
+						// Must be a file dependency
+						propMap = _d;
+					}
+					if(!Array.isArray(propMap[orig])) {
+						propMap[orig] = [];
+					}					
+					propMap[orig].push(_formatTernProposal(_c, args));
     	        }
 	        }
 	    }
-	    var proposals = [];
+	    // Locals, then dependencies, then keywords, then environment/indexes
+	    var proposals = [].concat(locals.sort(sorter));
+	    var keys = Object.keys(_d);
+	    for(i = 0; i < keys.length; i++) {
+	        var key = keys[i];
+	        proposals.push({
+					proposal: '',
+					description: key, //$NON-NLS-0$
+					style: 'noemphasis_title', //$NON-NLS-0$
+					unselectable: true
+				});
+	        proposals = proposals.concat(_d[key].sort(sorter));
+	    }
 	    if(keywords.length > 0) {
 	    	keywords.sort(sorter);
 	    	keywords.splice(0, 0, {
@@ -854,13 +880,11 @@ define([
 					style: 'noemphasis_title', //$NON-NLS-1$
 					unselectable: true
 				});
-			proposals = [].concat(locals.sort(sorter), keywords);
-	    } else {
-	    	proposals = [].concat(locals.sort(sorter));
-	    }
-	    var keys = Object.keys(_p);
+			proposals = proposals.concat(keywords);
+	    } 
+	    keys = Object.keys(_p);
 	    for(i = 0; i < keys.length; i++) {
-	        var key = keys[i];
+	        key = keys[i];
 	        proposals.push({
 					proposal: '',
 					description: key, //$NON-NLS-0$
