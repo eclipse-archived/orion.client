@@ -2257,7 +2257,7 @@ define([
 					callback: done
 				};
 				return testProposals(options, [
-					//["ssss", "ssss : number"]
+					["ssss", "ssss : number"]
 				]);
 			});
 			it("test Object Literal inside", function(done) {
@@ -2720,7 +2720,7 @@ define([
 					callback: done
 				};
 				return testProposals(options, [
-					///["xxxx", "xxxx : any"]
+					["xxxx", "xxxx : any"]
 				]);
 			});
 			it("test binary expression 1", function(done) {
@@ -2814,8 +2814,7 @@ define([
 					callback: done
 				};
 				return testProposals(options, [
-					//TODO does not find global defined in global
-					//["iii", "iii : any"]
+					["iii", "iii : any"]
 				]);
 			});
 			it("test while loop 3", function(done) {
@@ -2826,8 +2825,7 @@ define([
 					callback: done
 				};
 				return testProposals(options, [
-					//TODO does not find global defined in global
-					//["iii", "iii : any"]
+					["iii", "iii : any"]
 				]);
 			});
 			it("test catch clause 1", function(done) {
@@ -4534,6 +4532,7 @@ define([
 					offset: 42,
 					callback: done};
 				testProposals(options, [
+					['xx', 'xx : number'],
 					['', 'browser'],
 					['XMLDocument()', 'XMLDocument()'],
 					['XMLHttpRequest()', 'XMLHttpRequest()'],
@@ -4547,6 +4546,7 @@ define([
 					offset: 41,
 					callback: done};
 				testProposals(options, [
+					['xx', 'xx : number'],
 					['', 'browser'],
 					['XMLDocument()', 'XMLDocument()'],
 					['XMLHttpRequest()', 'XMLHttpRequest()'],
