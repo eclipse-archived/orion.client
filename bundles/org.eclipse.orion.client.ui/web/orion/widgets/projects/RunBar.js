@@ -534,17 +534,20 @@ define([
 					};
 					this._enableLink(this._logsLink, uriTemplate.expand(uriParams));
 			} else {
-				this._serviceRegistry.getService("orion.project.deploy").getLogLocationTemplate(this._selectedLaunchConfiguration).then(function(result){
-					uriTemplate = new URITemplate(result);
-					uriParams = {
-							OrionHome: PageLinks.getOrionHome(),
-							Name: "",
-							Target: {
-								launchConfLocation: this._selectedLaunchConfiguration.File.Location
-							}
-						};
-						this._enableLink(this._logsLink, uriTemplate.expand(uriParams));
-				}.bind(this));
+				var service = this._serviceRegistry.getService("orion.project.deploy");
+				if (service.getLogLocationTemplate) {
+					service.getLogLocationTemplate(this._selectedLaunchConfiguration).then(function(result){
+						uriTemplate = new URITemplate(result);
+						uriParams = {
+								OrionHome: PageLinks.getOrionHome(),
+								Name: "",
+								Target: {
+									launchConfLocation: this._selectedLaunchConfiguration.File.Location
+								}
+							};
+							this._enableLink(this._logsLink, uriTemplate.expand(uriParams));
+					}.bind(this));
+				}
 			}
 		},
 		
