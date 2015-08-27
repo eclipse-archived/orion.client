@@ -17,100 +17,16 @@ define([
 'esprima',
 'chai/chai',
 'orion/Deferred',
+'js-tests/javascript/testingWorker',
 'mocha/mocha', //must stay at the end, not a module
 'doctrine' //must stay at the end, does not export a module
-], function(TernAssist, ASTManager, Esprima, chai, Deferred) {
+], function(TernAssist, ASTManager, Esprima, chai, Deferred, TestWorker) {
 	var assert = chai.assert;
 
-	var state;
-	function WrappedWorker(script, onMessage, onError) {
-		/*if(typeof(SharedWorker) === 'function') {
-			this.shared = true;
-			var wUrl = new URL(script, window.location.href);
-			wUrl.query.set("worker-language", navigator.language);
-			this.worker = new SharedWorker(wUrl.href);
-			this.worker.port.onmessage = onMessage;
-			this.worker.port.onerror = onError;
-			this.worker.port.start();
-			this.worker.port.postMessage('');
-		} else { */
- 			var wUrl = new URL(script, window.location.href);
-    		this.worker = new Worker(wUrl.href);
-    		this.worker.onmessage = onMessage.bind(this);
-    		this.worker.onerror = onError.bind(this);
-    		this.worker.postMessage('start_server'); //$NON-NLS-1$
-    		this.messageId = 0;
-    		this.callbacks = Object.create(null);
-    	//}
-	}
-
-	WrappedWorker.prototype.postMessage = function(msg, f) {
-		if(msg != null && typeof(msg) === 'object') {
-			if(typeof(msg.messageID) !== 'number') {
-				//don't overwrite an id from a tern-side request
-				msg.messageID = this.messageId++;
-				this.callbacks[msg.messageID] = f;
-			}
-		}
-		if(this.shared) {
-			this.worker.port.postMessage(msg);
-		} else {
-			this.worker.postMessage(msg);
-		}
-	};
-	var ternworker = new WrappedWorker('../../javascript/plugins/ternWorker.js',
-		function(ev) {
-			if(typeof(ev.data) === 'object') {
-				var _d = ev.data;
-				var id  = _d.messageID;
-				var f = this.callbacks[id];
-				if(typeof(f) === 'function') {
-					f(_d);
-					delete this.callbacks[id];
-				} else if(_d.request === 'read') {
-					ternworker.postMessage({request: 'read', messageID: _d.messageID, args: {contents: state.buffer, file: state.file}});
-				} else if(typeof(_d.request) === 'string') {
-					//don't process requests other than the ones we want
-					return;
-				} else if(_d.error) {
-					var err = _d.error;
-					if(err instanceof Error) {
-						state.callback(err);
-					} else if(typeof(err) === 'string') {
-						if(typeof(_d.message) === 'string') {
-							state.callback(new Error(err+": "+_d.message));
-						} else {
-							//wrap it
-							state.callback(new Error(err));
-						}
-					} else if(err && typeof(err.message) === 'string') {
-						state.callback(new Error(err.message));
-					}
-				}
-				else {
-					state.callback(new Error('Got message I don\'t know'));
-				}
-			} else if(typeof(ev.data) === 'string' && ev.data === 'server_ready' && state.warmup) {
-				delete state.warmup;
-				state.callback();
-			}
-		},
-		function(err) {
-			if(err instanceof Error) {
-				state.callback(err);
-			} else if(typeof(err) === 'string') {
-				//wrap it
-				state.callback(new Error(err));
-			} else if(err && typeof(err.message) === 'string') {
-				state.callback(new Error(err.message));
-			}
-		});
-	ternworker.postMessage('tests_ready');
+	var testworker;
+	var ternAssist;
 	var envs = Object.create(null);
 	var astManager = new ASTManager.ASTManager(Esprima);
-	var ternAssist = new TernAssist.TernContentAssist(astManager, ternworker, function() {
-			return new Deferred().resolve(envs);
-		});
 
 	/**
 	 * @description Sets up the test
@@ -118,7 +34,7 @@ define([
 	 * @returns {Object} The object with the initialized values
 	 */
 	function setup(options) {
-		state = Object.create(null);
+		var state = Object.create(null);
 		var buffer = state.buffer = typeof(options.buffer) === 'undefined' ? '' : options.buffer,
 		    prefix = state.prefix = typeof(options.prefix) === 'undefined' ? '' : options.prefix,
 		    offset = state.offset = typeof(options.offset) === 'undefined' ? 0 : options.offset,
@@ -129,7 +45,8 @@ define([
 			file = state.file = 'tern_content_assist_test_script.js';
 			assert(options.callback, 'You must provide a test callback for worker-based tests');
 			state.callback = options.callback;
-			ternworker.postMessage({request: 'delfile', args:{file: file}});
+			testworker.setTestState(state);
+			testworker.postMessage({request: 'delfile', args:{file: file}});
 		envs = typeof(options.env) === 'object' ? options.env : Object.create(null);
 		var editorContext = {
 			/*override*/
@@ -215,32 +132,39 @@ define([
 					    assert(ap.hover.indexOf(ep[2]) === 0, "The doc should have started with the given value");
 					}
 				}
-				state.callback();
+				testworker._state.callback();
 			}
 			catch(err) {
-				state.callback(err);
+				testworker._state.callback(err);
 			}
 		}, function (error) {
-			state.callback(error);
+			testworker._state.callback(error);
 		});
 	}
 
-	before('Message the server for warm up', function(callback) {
-		this.timeout(10000);
-		var options = {
-			buffer: "xx",
-			prefix: "xx",
-			offset: 1,
-			callback: callback
-		};
-		var _p = setup(options);
-		state.warmup = true;
-		ternAssist.computeContentAssist(_p.editorContext, _p.params).then(/* @callback */ function (actualProposals) {
-			//do noting, warm up
-		});
-	});
-
 	describe('Tern Content Assist Tests', function() {
+		before('Message the server for warm up', function(callback) {
+			testworker = TestWorker.instance();
+			ternAssist = new TernAssist.TernContentAssist(astManager, testworker, function() {
+				return new Deferred().resolve(envs);
+			});
+			this.timeout(10000);
+			var options = {
+				buffer: "xx",
+				prefix: "xx",
+				offset: 1,
+				callback: callback
+			};
+			var _p = setup(options);
+			testworker._state.warmup = true;
+			ternAssist.computeContentAssist(_p.editorContext, _p.params).then(/* @callback */ function (actualProposals) {
+				//do noting, warm up
+			});
+		});
+	
+		after("Shut down the test worker", function() {
+			testworker.terminate();
+		});
 		this.timeout(10000);
 		describe('Case-insensitive proposals', function() {
 			/**
@@ -4551,51 +4475,6 @@ define([
 					['XMLDocument()', 'XMLDocument()'],
 					['XMLHttpRequest()', 'XMLHttpRequest()'],
 					['XPathResult()', 'XPathResult()']
-				]);
-			});
-		});
-		describe('Proposal sorting Tests', function() {
-			/**
-			 * Tests that proposals are sorted by their origin, relevence and name
-			 * Order:
-			 * 1) Local
-			 * 2) Dependent files TODO Not tested
-			 * 3) Keywords
-			 * 4) Envs (browser, ecma5, ecma6)
-			 * 5) Templates
-			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476063
-			 * @since 10.0
-			 */
-			it('proposal sorting 1', function(done) {
-				var options = {
-					buffer: "/*eslint-env browser */ var iii = 1; i",
-					prefix: "i",
-					offset: 38,
-					keywords: true,
-					templates: true,
-					callback: done};
-				testProposals(options, [
-					['iii', ''],
-					['', 'Keywords'],
-					['if', 'if - Keyword'],
-					['in', 'in - Keyword'],
-					['instanceof', 'instanceof - Keyword'],
-					['', 'browser'],
-					['innerHeight', 'innerHeight : number'],
-					['innerWidth', 'innerWidth : number'],
-					['', 'ecma5'],
-					['isFinite(value)', 'isFinite(value) : bool'],
-					['isNaN(value)', 'isNaN(value) : bool'],
-					['isPrototypeOf(obj)', 'isPrototypeOf(obj) : bool'],
-					['Infinity', 'Infinity : number'],
-					['', 'ecma6'],
-					['Int16Array(length)', 'Int16Array(length)'],
-					['Int32Array(length)', 'Int32Array(length)'],
-					['Int8Array(length)', 'Int8Array(length)'],
-					['', 'Templates'],
-					['f (condition) {\n\t\n}', 'if - if statement'],
-					['f (condition) {\n\t\n} else {\n\t\n}', 'if - if else statement'],
-					['object instanceof type', 'instanceof - instanceof statement']
 				]);
 			});
 		});
