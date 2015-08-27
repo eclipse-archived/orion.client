@@ -32,7 +32,7 @@ define({//Default message bundle
 	"readonly": "Read Only.", //$NON-NLS-1$ //$NON-NLS-0$
 	"saveFile": "Save this file", //$NON-NLS-1$ //$NON-NLS-0$
 	"toggleZoomRuler": "Toggle Zoom Ruler", //$NON-NLS-1$ //$NON-NLS-0$
-	"gotoLine": "Go To Line...", //$NON-NLS-1$ //$NON-NLS-0$
+	"gotoLine": "Go to Line...", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLineTooltip": "Go to specified line number", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLinePrompt": "Go to line:", //$NON-NLS-1$ //$NON-NLS-0$
 	"Undo": "Undo", //$NON-NLS-1$ //$NON-NLS-0$
@@ -77,10 +77,10 @@ define({//Default message bundle
 	"Import": "Import", //$NON-NLS-1$ //$NON-NLS-0$
 	"Export": "Export", //$NON-NLS-1$ //$NON-NLS-0$
 	"OpenWith": "Open With", //$NON-NLS-1$ //$NON-NLS-0$
-	"OpenRelated": "Open related", //$NON-NLS-1$ //$NON-NLS-0$
+	"OpenRelated": "Open Related", //$NON-NLS-1$ //$NON-NLS-0$
 	"Dependency": "Dependency", //$NON-NLS-1$ //$NON-NLS-0$
 	"UnnamedCommand": "Unnamed", //$NON-NLS-1$ //$NON-NLS-0$
-	"searchInFolder": "Search in folder...",  //$NON-NLS-1$ //$NON-NLS-0$
+	"searchInFolder": "Folder Search...",  //$NON-NLS-1$ //$NON-NLS-0$
 	"Global Search": "Global Search...", //$NON-NLS-1$ //$NON-NLS-0$
 	"ClickEditLabel": "Click to edit", //$NON-NLS-1$ //$NON-NLS-0$
 	"ProjectInfo": "Project Information", //$NON-NLS-1$ //$NON-NLS-0$
@@ -90,7 +90,7 @@ define({//Default message bundle
 	'projectsSectionTitle': 'Projects',  //$NON-NLS-0$  //$NON-NLS-1$
 	'listingProjects': 'Listing projects...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'gettingWorkspaceInfo': 'Getting workspace information...',  //$NON-NLS-0$  //$NON-NLS-1$
-	"showProblems": "Show problems...",  //$NON-NLS-1$ //$NON-NLS-0$
+	"showProblems": "Show Problems...",  //$NON-NLS-1$ //$NON-NLS-0$
 	"showTooltip": "Show Tooltip", //$NON-NLS-1$ //$NON-NLS-0$
 	"showTooltipTooltip": "Shows the tooltip immediately based on the caret position", //$NON-NLS-1$ //$NON-NLS-0$
 	"emptyDeploymentInfoMessage": "Use the Launch Configurations dropdown to deploy this project" //$NON-NLS-1$ //$NON-NLS-0$
