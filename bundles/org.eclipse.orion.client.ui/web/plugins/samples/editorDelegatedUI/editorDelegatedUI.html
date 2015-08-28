@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Delegated UI</title>
+	<style>
+		body {
+			background: white;
+		}
+		.option {
+			padding: 10px;
+		}
+	</style>
+	<script>
+		function done() {
+			var text = "";
+			text += "First Name=" + document.getElementById("firstNameField").value +"\n";
+			text += "Last Name=" + document.getElementById("lastNameField").value +"\n";
+			
+			window.parent.postMessage(JSON.stringify({
+			   pageService: "orion.page.delegatedUI",
+			   source: "delegatedUI.example",
+			   result: text
+			}), "*");
+		}
+	</script>
+</head>
+<body>
+	<h1>Please provide your info:</h1>
+	<p>
+		<div class="option"><label>First Name:<input id="firstNameField"></input></label></div>
+		<div class="option"><label>Last Name:<input id="lastNameField"></input></label></div>
+		<button onclick="done()">Ok</button>
+	</p>
+</body>
+</html>

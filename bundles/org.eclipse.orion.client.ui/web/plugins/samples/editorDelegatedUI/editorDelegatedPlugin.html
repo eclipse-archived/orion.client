@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="../../../orion/plugin.js"></script>
+	<script>
+		window.onload = function() {
+			var provider = new orion.PluginProvider();
+			var serviceImpl = {
+				run : function(text) {
+					var url = new URL("./editorDelegatedUI.html", self.location.href).href;
+					return {uriTemplate: url, width: "600px", height: "400px"}
+				}
+			};
+			var serviceProps = {
+				id : "delegatedUI.example",
+				name : "Delegated UI",
+			};
+			provider.registerService("orion.edit.command", serviceImpl, serviceProps);
+			provider.connect();
+		};
+	</script>
+</head>
+<body>
+</body>
+</html>
