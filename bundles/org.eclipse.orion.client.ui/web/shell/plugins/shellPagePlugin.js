@@ -44,6 +44,14 @@ define([
 			category: "shell",
 			order: 10 // First link in Shell category
 		});
+		provider.registerService("orion.page.link", {}, {
+			name: messages["ShellLinkWorkspace"],
+			id: "orion.shell",
+			nls: "orion/nls/messages",
+			category: "shell",
+			order: 1000, // low priority
+			uriTemplate: "{+OrionHome}/shell/shellPage.html"
+		});
 	}
 
 	return {

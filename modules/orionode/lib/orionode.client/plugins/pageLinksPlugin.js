@@ -62,14 +62,6 @@ define([
 		order: 1000, // low priority
 		uriTemplate: "{+OrionHome}/edit/edit.html"
 	});
-	provider.registerService("orion.page.link", serviceImpl, {
-		name: messages["ShellLinkWorkspace"],
-		id: "orion.shell",
-		nls: "orion/nls/messages",
-		category: "shell",
-		order: 1000, // low priority
-		uriTemplate: "{+OrionHome}/shell/shellPage.html"
-	});
 
 	provider.registerService("orion.page.link", null, {
 		name: widgetMessages["Settings"],
