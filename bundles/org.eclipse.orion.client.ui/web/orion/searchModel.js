@@ -149,6 +149,7 @@ function(messages, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils) {
                 parent: this.getListRoot(),
                 type: "file", //$NON-NLS-0$
                 name: this._resultLocation[i].name,
+                children: this._resultLocation[i].children,
                 lastModified: this._resultLocation[i].lastModified, //$NON-NLS-0$
                 linkLocation: this._resultLocation[i].linkLocation,
                 location: this._resultLocation[i].location,
@@ -339,60 +340,60 @@ function(messages, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils) {
         this._indexedFileItems = validList;
     };
 
-    /**
-     * Store the current selected model in to a session storage. Optional.
-     * If defined, this function is called every time a selection on the model is changed by user.
-     */
-    SearchResultModel.prototype.storeLocationStatus = function(currentModel) {
-        if (currentModel) {
-            var fileItem = _getFileModel(currentModel);
-            if(!fileItem){
-				return;
-            }
-            window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentFileLocation"] = fileItem.location; //$NON-NLS-0$
-            if (currentModel.type === "file") { //$NON-NLS-0$
-                window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentDetailIndex"] = "none"; //$NON-NLS-1$ //$NON-NLS-0$
-            } else {
-                window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentDetailIndex"] = JSON.stringify(this._model2Index(currentModel)); //$NON-NLS-0$
-            }
-        }
-    };
-
-    /**
-     * Restore the previously selected model when the page is restored. Optional.
-     * If defined, this function is called every time when the page is loaded.
-     */
-    SearchResultModel.prototype.restoreLocationStatus = function() {
-        var currentFileLocation = window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentFileLocation"]; //$NON-NLS-0$
-        var fileModel = this._location2Model(currentFileLocation);
-        var currentDetailIndex = "none"; //$NON-NLS-0$
-        var detailIndexCached = window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentDetailIndex"]; //$NON-NLS-0$
-        if (typeof detailIndexCached === "string") { //$NON-NLS-0$
-            if (detailIndexCached.length > 0) {
-                currentDetailIndex = detailIndexCached;
-            }
-        }
-        return {
-            file: fileModel,
-            detail: currentDetailIndex
-        };
-    };
-    
-    /**
-     * Check if the given file content still contain the search term. Optional.
-     * If defined, the explorer will check all the files that has different time stamp between the search result and the file meta data. Then ask this function to do the final judge.
-     */
-    SearchResultModel.prototype.staleCheck = function(fileContentText) {
-        var lineString = fileContentText.toLowerCase();
-        var result;
-        if (this._searchHelper.inFileQuery.wildCard) {
-            result = mSearchUtils.searchOnelineRegEx(this._searchHelper.inFileQuery, lineString, true);
-        } else {
-            result = mSearchUtils.searchOnelineLiteral(this._searchHelper.inFileQuery, lineString, true);
-        }
-        return result;
-    };
-
+//    /**
+//     * Store the current selected model in to a session storage. Optional.
+//     * If defined, this function is called every time a selection on the model is changed by user.
+//     */
+//    SearchResultModel.prototype.storeLocationStatus = function(currentModel) {
+//        if (currentModel) {
+//            var fileItem = _getFileModel(currentModel);
+//            if(!fileItem){
+//				return;
+//            }
+//            window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentFileLocation"] = fileItem.location; //$NON-NLS-0$
+//            if (currentModel.type === "file") { //$NON-NLS-0$
+//                window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentDetailIndex"] = "none"; //$NON-NLS-1$ //$NON-NLS-0$
+//            } else {
+//                window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentDetailIndex"] = JSON.stringify(this._model2Index(currentModel)); //$NON-NLS-0$
+//            }
+//        }
+//    };
+//
+//    /**
+//     * Restore the previously selected model when the page is restored. Optional.
+//     * If defined, this function is called every time when the page is loaded.
+//     */
+//    SearchResultModel.prototype.restoreLocationStatus = function() {
+//        var currentFileLocation = window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentFileLocation"]; //$NON-NLS-0$
+//        var fileModel = this._location2Model(currentFileLocation);
+//        var currentDetailIndex = "none"; //$NON-NLS-0$
+//        var detailIndexCached = window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentDetailIndex"]; //$NON-NLS-0$
+//        if (typeof detailIndexCached === "string") { //$NON-NLS-0$
+//            if (detailIndexCached.length > 0) {
+//                currentDetailIndex = detailIndexCached;
+//            }
+//        }
+//        return {
+//            file: fileModel,
+//            detail: currentDetailIndex
+//        };
+//    };
+//    
+//    /**
+//     * Check if the given file content still contain the search term. Optional.
+//     * If defined, the explorer will check all the files that has different time stamp between the search result and the file meta data. Then ask this function to do the final judge.
+//     */
+//    SearchResultModel.prototype.staleCheck = function(fileContentText) {
+//        var lineString = fileContentText.toLowerCase();
+//        var result;
+//        if (this._searchHelper.inFileQuery.wildCard) {
+//            result = mSearchUtils.searchOnelineRegEx(this._searchHelper.inFileQuery, lineString, true);
+//        } else {
+//            result = mSearchUtils.searchOnelineLiteral(this._searchHelper.inFileQuery, lineString, true);
+//        }
+//        return result;
+//    };
+//
     /**
      * Filter the model by the given filter text. Optional.
      * If defined, the explorer will render a filter input box in the tool bar. Typing in the input field filters the result on the fly.

@@ -711,7 +711,7 @@ define([
 
 		// open resource
 		var showingResourceDialog = false;
-		var openResourceDialog = function (searcher, serviceRegistry) {
+		var openResourceDialog = function (searcher, serviceRegistry, commandRegistry) {
 			if (showingResourceDialog) {
 				return;
 			}
@@ -721,6 +721,8 @@ define([
 				searcher: searcher,
 				progress: progress,
 				prefService: prefs,
+				serviceRegistry: serviceRegistry,
+				commandRegistry: commandRegistry,
 				searchRenderer: searcher.defaultRenderer,
 				onHide: function () {
 					showingResourceDialog = false;
@@ -737,7 +739,7 @@ define([
 			tooltip: messages["ChooseFileOpenEditor"],
 			id: "orion.openResource", //$NON-NLS-0$
 			callback: function (data) {
-				openResourceDialog(searcher, serviceRegistry);
+				openResourceDialog(searcher, serviceRegistry, commandRegistry);
 			}
 		});
 

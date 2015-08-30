@@ -11,9 +11,176 @@
  *     Andy Clement (vmware) - bug 344614
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion/contentTypes', 'require', 
-			'orion/webui/littlelib', 'orion/util', 'orion/webui/dialog', 'orion/metrics', 'orion/Deferred'], 
-		function(messages, mSearchCrawler, mContentTypes, require, lib, util, dialog, mMetrics, Deferred) {
+/*global define document console window*/
+define([
+	'i18n!orion/widgets/nls/messages', 
+	'i18n!orion/search/nls/messages',
+	'orion/extensionCommands', 
+	'orion/gSearchClient',
+	'orion/i18nUtil', 
+	'orion/searchUtils', 
+	'orion/explorers/navigatorRenderer', 
+	'orion/contentTypes', 
+	'require', 
+	'orion/webui/littlelib', 
+	'orion/util', 
+	'orion/webui/dialog', 
+	'orion/metrics', 
+	'orion/Deferred'
+], function(messages, searchMSG, extensionCommands, mGSearchClient, i18nUtil, mSearchUtils, navigatorRenderer, mContentTypes, require, lib, util, dialog, mMetrics, Deferred) {
+	//default search renderer until we factor this out completely
+	function DefaultSearchRenderer(serviceRegistry, commandRegistry) {
+		this.serviceRegistry = serviceRegistry;
+		this.commandRegistry = commandRegistry;
+		this.openWithCommands = null;
+	}
+	/**
+	 * Create a renderer to display search results.
+	 * @public
+     * @param {DOMNode} resultsNode Node under which results will be added.
+	 * @param {String} [heading] the heading text, or null if none required
+	 * @param {Function(DOMNode)} [onResultReady] If any results were found, this is called on the resultsNode.
+	 * @param {Function(DOMNode)} [decorator] A function to be called that knows how to decorate each row in the result table
+	 *   This function is passed a <td> element.
+	 * @returns a render function.
+	 */
+	DefaultSearchRenderer.prototype.makeRenderFunction = function(contentTypeService, resultsNode, heading, onResultReady, decorator) {
+		var serviceRegistry = this.serviceRegistry, commandRegistry = this.commandRegistry;
+		this.openWithCommands = this.openWithCommands || extensionCommands.createOpenWithCommands(serviceRegistry, contentTypeService, commandRegistry);
+
+		/**
+		 * Displays links to resources under the given DOM node.
+		 * @param {Object[]} resources array of resources. The shape of a resource is {name, path, lineNumber, directory, isExternalResource}
+		 *	Both directory and isExternalResource cannot be true at the same time.
+		 * @param {String} [queryName] A human readable name to display when there are no matches.  If 
+		 *  not used, then there is nothing displayed for no matches
+		 * @param {String} [error] A human readable error to display.
+		 * @param {Object} [searchParams] Search params used
+		 */
+		var _self = this;
+		function render(resources, queryName, error, searchParams) {
+			return Deferred.when(_self.openWithCommands, function(openWithCommands) {
+				if (error) {
+					lib.empty(resultsNode);
+					var message = document.createElement("div"); //$NON-NLS-0$
+					message.appendChild(document.createTextNode(searchMSG["Search failed."]));
+					resultsNode.appendChild(message);
+					if (typeof(onResultReady) === "function") { //$NON-NLS-0$
+						onResultReady(resultsNode);
+					}
+					return;
+				} 
+			
+				//Helper function to append a path String to the end of a search result dom node 
+				var appendPath = (function() { 
+				
+					//Map to track the names we have already seen. If the name is a key in the map, it means
+					//we have seen it already. Optionally, the value associated to the key may be a function' 
+					//containing some deferred work we need to do if we see the same name again.
+					var namesSeenMap = {};
+					
+					function doAppend(domElement, resource) {
+						var path = resource.folderName ? resource.folderName : resource.path;
+						var pathNode = document.createElement('span'); //$NON-NLS-0$
+						pathNode.id = path.replace(/[^a-zA-Z0-9_\.:\-]/g,'');
+						pathNode.appendChild(document.createTextNode(' - ' + path + ' ')); //$NON-NLS-1$ //$NON-NLS-0$
+						domElement.appendChild(pathNode);
+					}
+					
+					function appendPath(domElement, resource) {
+						var name = resource.name;
+						if (namesSeenMap.hasOwnProperty(name)) {
+							//Seen the name before
+							doAppend(domElement, resource);
+							var deferred = namesSeenMap[name];
+							if (typeof(deferred)==='function') { //$NON-NLS-0$
+								//We have seen the name before, but prior element left some deferred processing
+								namesSeenMap[name] = null;
+								deferred();
+							}
+						} else {
+							//Not seen before, so, if we see it again in future we must append the path
+							namesSeenMap[name] = function() { doAppend(domElement, resource); };
+						}
+					}
+					return appendPath;
+				}()); //End of appendPath function
+	
+				var foundValidHit = false;
+				lib.empty(resultsNode);
+				if (resources && resources.length > 0) {
+					var table = document.createElement('table'); //$NON-NLS-0$
+					table.setAttribute('role', 'presentation'); //$NON-NLS-1$ //$NON-NLS-0$
+					for (var i=0; i < resources.length; i++) {
+						var resource = resources[i];
+						var col;
+						if (!foundValidHit) {
+							foundValidHit = true;
+							// Every caller is passing heading === false, consider removing this code.
+							if (heading) {
+								var headingRow = table.insertRow(0);
+								col = headingRow.insertCell(0);
+								col.textContent = heading;
+							}
+						}
+						var row = table.insertRow(-1);
+						col = row.insertCell(0);
+						col.colspan = 2;
+						if (decorator) {
+							decorator(col);
+						}
+	
+						// Transform into File object that navigatorRenderer can consume
+						var item = {
+							Name: resource.name,
+							Location: resource.location
+						};
+						var params = null;
+						if (typeof resource.LineNumber === "number") { //$NON-NLS-0$
+							params = {};
+							params.line = resource.LineNumber;
+						}
+						if (searchParams && searchParams.keyword && !searchParams.nameSearch) {
+							var searchHelper = mSearchUtils.generateSearchHelper(searchParams);
+							params = params || {};
+							params.find = searchHelper.inFileQuery.searchStr;
+							params.regEx = searchHelper.inFileQuery.wildCard ? true : undefined;
+						}
+						var resourceLink = navigatorRenderer.createLink(require.toUrl("edit/edit.html"), item, commandRegistry, contentTypeService,
+							openWithCommands, {
+								"aria-describedby": (resource.folderName ? resource.folderName : resource.path).replace(/[^a-zA-Z0-9_\.:\-]/g,''), //$NON-NLS-0$
+								style: {
+									verticalAlign: "middle" //$NON-NLS-0$
+								}
+							}, params);
+						if (resource.LineNumber) { // FIXME LineNumber === 0 
+							resourceLink.appendChild(document.createTextNode(' (Line ' + resource.LineNumber + ')'));
+						}
+	
+						col.appendChild(resourceLink);
+						appendPath(col, resource);
+					}
+					resultsNode.appendChild(table);
+					if (typeof(onResultReady) === "function") { //$NON-NLS-0$
+						onResultReady(resultsNode);
+					}
+				}
+				if (!foundValidHit) {
+					// only display no matches found if we have a proper name
+					if (queryName) {
+						var errorStr = i18nUtil.formatMessage(searchMSG["NoMatchFound"], queryName); 
+						lib.empty(resultsNode);
+						resultsNode.appendChild(document.createTextNode(errorStr)); 
+						if (typeof(onResultReady) === "function") { //$NON-NLS-0$
+							onResultReady(resultsNode);
+						}
+					}
+				} 
+			});
+		} // end render
+		return render;
+	};//end makeRenderFunction
+
 	/**
 	 * Usage: <code>new OpenResourceDialog(options).show();</code>
 	 * 
@@ -44,16 +211,17 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		this.title = options.title || messages['Find File Named'];
 		this.modal = true;
 		this.messages = messages;
+		this.serviceRegistry = options.serviceRegistry;
+		this.commandRegistry = options.commandRegistry;
 		this._searcher = options.searcher;
 		this._progress = options.progress;
 		this._onHide = options.onHide;
-		this._contentTypeService = new mContentTypes.ContentTypeRegistry(this._searcher.registry);
+		this._contentTypeService = new mContentTypes.ContentTypeRegistry(this.serviceRegistry);
 		if (!this._searcher) {
 			throw new Error("Missing required argument: searcher"); //$NON-NLS-0$
 		}	
 		this._searchDelay = options.searchDelay || 500;
 		this._time = 0;
-		this._searcher.setCrawler(null);
 		this._forceUseCrawler = false;
 		this._initialText = options.initialText;
 		this._message = options.message;
@@ -62,14 +230,12 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 			this._nameSearch = options.nameSearch;
 		}
 		this._searchOnRoot = false; // true;
-		this._fileService = this._searcher.getFileService();
-		if (!this._fileService) {
+		this._fileClient = this._searcher.getFileService();
+		if (!this._fileClient) {
 			throw new Error(messages['Missing required argument: fileService']);
 		}
-		this._searchRenderer = options.searchRenderer;
-		if (!this._searchRenderer || typeof(this._searchRenderer.makeRenderFunction) !== "function") { //$NON-NLS-0$
-			throw new Error(messages['MissingSearchRenderer']);
-		}
+		this._gSearchClient = new mGSearchClient.GSearchClient({serviceRegistry: this.serviceRegistry, fileClient: this._fileClient});
+		this._searchRenderer = new DefaultSearchRenderer(this.serviceRegistry, this.commandRegistry);
 		this._initialize();
 	};
 	
@@ -171,11 +337,10 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 			e.target.focus();
 		}, false);
 		setTimeout(function() {
-			if(self._forceUseCrawler || !self._fileService.getService(self._searcher.getSearchLocation())["search"]){//$NON-NLS-0$
+			if(self._forceUseCrawler || !self._fileClient.getService(self._searcher.getSearchLocation())["search"]){//$NON-NLS-0$
 				var searchLoc = self._searchOnRoot ? self._searcher.getSearchRootLocation() : self._searcher.getChildrenLocation();
-				var crawler = new mSearchCrawler.SearchCrawler(self._searcher.registry, self._fileService, "", {searchOnName: true, location: searchLoc}); 
-				self._searcher.setCrawler(crawler);
-				crawler.buildSkeleton(function() {
+				self._crawler = self._gSearchClient._createCrawler({resource: searchLoc}, {searchOnName: true}); 
+				self._crawler.buildSkeleton(function() {
 					self.$crawlingProgress.style.display = "inline"; //$NON-NLS-0$
 					self.$progress.appendChild(document.createTextNode(messages['Building file skeleton...']));
 					}, function(){
@@ -282,19 +447,24 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 			this.$results.appendChild(div);
 			var deferredSearch;
 			if(this._searchPending) {
-				deferredSearch = this._searcher.cancel();
+				deferredSearch = this._gSearchClient.cancel();
 				this.cancelled = true;
 			} else {
 				deferredSearch = new Deferred().resolve();
 			}
-			deferredSearch.then(function(result) {
+			deferredSearch.then(function(/*result*/) {
 				this._searchPending = true;
-				this._searcher.search(searchParams, keyword.folderKeyword, function() {
+				this._gSearchClient.search(searchParams).then(function(searchResult) {
 					this._searchPending = false;
 					if (renderFunction === this.currentSearch || this.cancelled) {
 						this.cancelled = false;
-						renderFunction.apply(null, arguments);
+						var filteredResult = searchResult.filter(function(item) {
+							return (keyword.folderKeyword ? (item.path.indexOf(keyword.folderKeyword) >= 0) : true);
+						});
+						renderFunction(filteredResult, searchParams.keyword, null, searchParams);
 					}
+				}.bind(this), function(error) {
+					renderFunction(null, null, error, null);
 				}.bind(this));
 			}.bind(this));
 		}

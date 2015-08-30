@@ -16,7 +16,6 @@ define([
 	'i18n!orion/edit/nls/messages',
 	'orion/i18nUtil',
 	'orion/webui/littlelib',
-	'orion/webui/dialogs/OpenResourceDialog',
 	'orion/widgets/input/DropDownMenu',
 	'orion/Deferred',
 	'orion/URITemplate',
@@ -33,7 +32,7 @@ define([
 	'orion/regex',
 	'orion/uiUtils',
 	'orion/util'
-], function(messages, i18nUtil, lib, openResource, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, objects, mPageUtil, PageLinks, mAnnotations, regex, mUIUtils, util) {
+], function(messages, i18nUtil, lib, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, objects, mPageUtil, PageLinks, mAnnotations, regex, mUIUtils, util) {
 
 	var exports = {};
 

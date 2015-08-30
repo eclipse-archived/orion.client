@@ -421,7 +421,7 @@ define(['chai/chai', 'js-tests/ui/searchCrawler/mockFileClient', 'orion/crawler/
 		var d  = new Deferred();
 		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
 			function(){
-				crawler.searchName(searchParam, function(searchResult){
+				crawler.searchName(searchParam).then(function(searchResult){
 					try {
 						assertSearchReresultEqual(expected,	searchResult);
 						d.resolve();
