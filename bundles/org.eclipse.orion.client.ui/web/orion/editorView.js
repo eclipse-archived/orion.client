@@ -592,7 +592,7 @@ define([
 			// Create the context menu element (TBD: re0use a single Node for all context Menus ??)
 			this._editorContextMenuNode = document.createElement("ul"); //$NON-NLS-0$
 			this._editorContextMenuNode.className = "dropdownMenu"; //$NON-NLS-0$
-			this._editorContextMenuNode.setAttribute("role", "menu"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._editorContextMenuNode.setAttribute("role", "menu"); //$NON-NLS-1$ //$NON-NLS-2$
 			this._parent.parentNode.appendChild(this._editorContextMenuNode);
 			
 			// Hook the context menu to the textView's content node
@@ -606,26 +606,8 @@ define([
 			var contextMenuTriggered = function(wrapper) {
 				var re = wrapper.event;
 				if (re.target) {
-					var tv = this.editor.getTextView();
-					var pt = tv.convert({x: re.clientX, y: re.clientY}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-0$
-					var offset = tv.getOffsetAtLocation(pt.x, pt.y);
-
-					// Check if we're inside an existing selection, otherwise set the offset
-					var insideSel = false;
-					var sels = tv.getSelections();
-					for (var i=0; i<sels.length; i++) {
-						var sel = sels[i];
-						if (sel.start <= offset && sel.end >= offset) {
-							insideSel = true;
-							break;
-						}
-					}
-					if (!insideSel) {
-						tv.setCaretOffset(offset);
-					}
-					
 					this.commandRegistry.destroy(this._editorContextMenuNode); // remove previous content
-					this.commandRegistry.renderCommands("editorContextMenuActions", this._editorContextMenuNode, null, this, "menu");  //$NON-NLS-0$
+					this.commandRegistry.renderCommands("editorContextMenuActions", this._editorContextMenuNode, null, this, "menu"); //$NON-NLS-1$ //$NON-NLS-2$
 					mMetrics.logEvent("contextMenu", "opened", "editor"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 			}.bind(this);
