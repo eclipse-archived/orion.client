@@ -292,5 +292,18 @@ define([
 			assert.equal(res[0].name, 'foo/messages-file.js', 'Should have found file object with name equal to foo/messages-file.js');
 
 		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476250
+		 * @since 10.0
+		 */
+		it('Test resolveRelativeFiles - single relative dotted path', function() {
+			var files = testFileClient.createTestFiles(['foo.bar.baz/messages-file.js', 'foo.bar.baz/bar/messages.js', 'foo.bar.baz/bar/baz/messages.js']);
+			var res = resolver.resolveRelativeFiles('./requirejs/json!foo.bar.baz/messages-file', files, {location: 'TestingRoot/foo.bar.baz/messages.js', contentType: {name: 'JavaScript'}});
+			assert(Array.isArray(res), 'There should have been a files array returned');
+			assert.equal(res.length, 1, 'There should have been one file returned');
+			assert.equal(res[0].location, testFileClient.fileServiceRootURL()+'/foo.bar.baz/messages-file.js', 'Should have found file object with location TestingRoot/foo.bar.baz/messages.js');
+			assert.equal(res[0].name, 'foo.bar.baz/messages-file.js', 'Should have found file object with name equal to foo.bar.baz/messages-file.js');
+
+		});
 	});
 });

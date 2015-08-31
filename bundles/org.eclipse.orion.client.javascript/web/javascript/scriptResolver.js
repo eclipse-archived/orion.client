@@ -214,6 +214,9 @@ define([
        			if(idx > -1) {
 	      			p1 = loc.slice(0, idx);
 	      		}
+	      		if(path2 === p1) {
+	      			return true; //could be that only the extension was missing from the other path
+	      		}
 	      		idx = path2.lastIndexOf('.');
        			var p2 = path2;
        			if(idx > -1) {
