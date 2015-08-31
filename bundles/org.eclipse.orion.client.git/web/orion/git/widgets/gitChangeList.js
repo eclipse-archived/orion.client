@@ -950,7 +950,6 @@ define([
 						bottomRow.appendChild(bottomLeft);
 						
 						function createInput(parent, id, key, placeholderKey, value, isCheck) {
-							var div = document.createElement("span"); //$NON-NLS-0$
 							var label = document.createElement("label"); //$NON-NLS-0$
 							label.classList.add(isCheck ? "gitChangeListCheckLabel" : "gitChangeListInputLabel"); //$NON-NLS-1$ //$NON-NLS-0$
 							label.setAttribute("for", id); //$NON-NLS-0$
@@ -964,8 +963,18 @@ define([
 							input.addEventListener("input", function() { //$NON-NLS-0$
 								if (input.value) input.classList.remove("invalidParam"); //$NON-NLS-0$
 							});
-							div.appendChild(!isCheck ? label : input);
-							div.appendChild(isCheck ? label : input);
+							if(isCheck){
+								var div = document.createElement("span"); //$NON-NLS-0$								
+							}
+							else{								
+								var div = document.createElement("tr"); //$NON-NLS-0$
+								var labelCol = document.createElement("td"); //$NON-NLS-0$
+								var inputCol = document.createElement("td"); //$NON-NLS-0$
+								labelCol.appendChild(label);
+								inputCol.appendChild(input); 
+							}
+							div.appendChild(!isCheck ? labelCol : input);
+							div.appendChild(isCheck ? label : inputCol);
 							parent.appendChild(div);
 							return input;
 						}
@@ -1021,13 +1030,24 @@ define([
 						});
 							
 						var div1Content = createGroup(moreDiv, "Author:"); //$NON-NLS-0$
-						explorer.authorNameInput = createInput(div1Content, "authorNameInput", "Name:", "AuthorNamePlaceholder", config.AuthorName); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						explorer.authorEmailInput = createInput(div1Content, "authorEmailInput", "Email:", "AuthorEmailPlaceholder", config.AuthorEmail); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var div1ContentTable = document.createElement("table"); //$NON-NLS-0$
+						var div1ContentTbody = document.createElement("tbody"); //$NON-NLS-0$
+						div1ContentTable.appendChild(div1ContentTbody);
+						div1Content.appendChild(div1ContentTable);
+						explorer.authorNameInput = createInput(div1ContentTbody, "authorNameInput", "Name:", "AuthorNamePlaceholder", config.AuthorName); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						explorer.authorEmailInput = createInput(div1ContentTbody, "authorEmailInput", "Email:", "AuthorEmailPlaceholder", config.AuthorEmail); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 						var div2Content = createGroup(moreDiv, "Committer:"); //$NON-NLS-0$
-						explorer.committerNameInput = createInput(div2Content, "committerNameInput", "Name:", "CommitterNamePlaceholder", config.CommitterName); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						explorer.committerEmailInput = createInput(div2Content, "committerEmailInput", "Email:", "CommitterEmailPlaceholder", config.CommitterEmail); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						explorer.persistCheck = createInput(div2Content, "persitCheck", "Save", null, null, true); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var div2ContentTable = document.createElement("table"); //$NON-NLS-0$
+						var div2ContentTbody = document.createElement("tbody"); //$NON-NLS-0$
+						div2ContentTable.appendChild(div2ContentTbody);
+						div2Content.appendChild(div2ContentTable);
+						explorer.committerNameInput = createInput(div2ContentTbody, "committerNameInput", "Name:", "CommitterNamePlaceholder", config.CommitterName); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						explorer.committerEmailInput = createInput(div2ContentTbody, "committerEmailInput", "Email:", "CommitterEmailPlaceholder", config.CommitterEmail); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var persistCheckDiv = document.createElement("div"); //$NON-NLS-0$
+						persistCheckDiv.className = "persitCheck";
+						div2Content.appendChild(persistCheckDiv);
+						explorer.persistCheck = createInput(persistCheckDiv, "persitCheck", "Save", null, null, true); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 						var more;
 						explorer.setMoreVisible = function (visible) {
