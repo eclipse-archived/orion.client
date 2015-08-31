@@ -86,10 +86,14 @@
 	background: #253B46;
 }
 
-.sectionWrapper {
-	background: white !important;
+.workingTarget .sectionWrapper {
+	background-color: white !important;
 }
 
-.orionMarkdown {
+.workingTarget .sectionTable {
+	background-color: white;
+}
+
+.workingTarget .orionMarkdown {
 	background: white;
 }
