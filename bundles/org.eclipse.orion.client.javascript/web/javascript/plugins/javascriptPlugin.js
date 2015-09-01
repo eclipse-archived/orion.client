@@ -426,7 +426,8 @@ define([
 	    		name: javascriptMessages["openImplName"],  //$NON-NLS-1$
 	    		tooltip : javascriptMessages['openImplTooltip'],  //$NON-NLS-1$
 	    		id : "open.js.impl",  //$NON-NLS-1$
-	    		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
+	    		contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+    		key : [ 114, true, false, false, false],  //$NON-NLS-1$
 	    			}
 	    	);
 		}
