@@ -101,7 +101,22 @@ define([
 							f(_d);
 							delete _instance.callbacks[id];
 						} else if(_d.request === 'read') {
-							_instance.postMessage({request: 'read', messageID: _d.messageID, args: {contents: _instance._state.buffer, file: _instance._state.file}});
+							if(_d.args && _d.args.file) {
+								var _f = 'js-tests/javascript/';
+								_f += _d.args.file.logical ? _d.args.file.logical : _d.args.file;
+								if(!/\.js$/g.test(_f)) {
+									_f += '.js';
+								}
+								var url = new URL(_f, window.location.href);
+								var req = new XMLHttpRequest();
+								req.onload = function(response) {
+									_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.target.response, file: response.target.responseURL, logical: _d.args.file.logical}});
+								};
+								req.open('GET', url, true);
+								req.send();
+							} else {
+								_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: _instance._state.buffer, file: _instance._state.file}});
+							}
 						} else if(typeof(_d.request) === 'string') {
 							//don't process requests other than the ones we want
 							return;

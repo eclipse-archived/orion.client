@@ -550,7 +550,7 @@ define([
 						deferred.resolve([]/*Messages['noProposalsTimedOut']*/);
 					}
 					this.timeout = null;
-				}, 5000);
+				}, params.timeout ? params.timeout : 5000);
 				return deferred;
    			}
 		},

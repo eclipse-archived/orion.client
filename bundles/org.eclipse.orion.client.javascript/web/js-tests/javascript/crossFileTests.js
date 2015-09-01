@@ -22,13 +22,13 @@ define([
 'doctrine' //must stay at the end, does not export a module
 ], function(TernAssist, ASTManager, Esprima, chai, Deferred, TestWorker) {
 	var assert = chai.assert;
- 
+
 	var testworker;
 	var envs = Object.create(null);
 	var astManager = new ASTManager.ASTManager(Esprima);
 	var ternAssist;
 	var fileMap = Object.create(null);
-	
+
 	/**
 	 * @description Sets up the test
 	 * @param {Object} options The options the set up with
@@ -44,6 +44,7 @@ define([
 		    keywords = typeof(options.keywords) === 'undefined' ? false : options.keywords,
 		    templates = typeof(options.templates) === 'undefined' ? false : options.templates,
 		    contentType = options.contenttype ? options.contenttype : 'application/javascript',
+		    timeout = options.timeout ? options.timeout : 5000,
 			file = state.file = 'tern_content_assist_test_script.js';
 			assert(options.callback, 'You must provide a test callback for worker-based tests');
 			state.callback = options.callback;
@@ -65,7 +66,7 @@ define([
 			}
 		};
 		astManager.onModelChanging({file: {location: file}});
-		var params = {offset: offset, prefix : prefix, keywords: keywords, template: templates, line: line};
+		var params = {offset: offset, prefix : prefix, keywords: keywords, template: templates, line: line, timeout: timeout};
 		return {
 			editorContext: editorContext,
 			params: params
@@ -186,12 +187,24 @@ define([
 			});
 		});
 		after('Shutting down the test worker', function() {
-			if(testworker) {
-				testworker.terminate();
-			}
+			testworker.terminate();
 		});
+		this.timeout(10000);
 		describe("Content assist tests", function() {
-			it("Simple pre-load dep 1");
+			it("Simple require'd dep 1", function(done) {
+				var options = {
+					buffer: "/* eslint-env amd */define(['./files/require_dep1'], function(rd1) {rd1.m});",
+					offset: 73,
+					prefix: "m",
+					callback: done,
+					timeout: 10000
+				};
+				return testProposals(options, [
+					/*["", "files/require_dep1.js"],
+					["myfunc", "myfunc"],
+					["variable", "variable"]*/
+				]);
+			});
 			it("Simple HTML pre-load dep 1");
 		});
 		describe("Open declaration tests", function() {
