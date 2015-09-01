@@ -519,7 +519,7 @@ define([
 			var contextImpl = Object.create(null);
 			[
 				"getCaretOffset", "setCaretOffset", //$NON-NLS-1$ //$NON-NLS-2$
-				"getSelection", "setSelection", //$NON-NLS-1$ //$NON-NLS-2$
+				"getSelection", "getSelectionText", "setSelection", //$NON-NLS-1$ //$NON-NLS-2$
 				"getSelections", "setSelections", //$NON-NLS-1$ //$NON-NLS-2$
 				"getText", "setText", //$NON-NLS-1$ //$NON-NLS-2$
 				"getLineAtOffset", //$NON-NLS-0$

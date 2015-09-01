@@ -283,6 +283,22 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			this.commandRegistry.addCommand(problemsInFolderCommand);
 			this.commandRegistry.registerCommandContribution(this.editScope, "orion.problemsInFolder", 101, "orion.menuBarEditGroup/orion.findGroup");  //$NON-NLS-1$ //$NON-NLS-0$
  		},
+ 		fillSearchPane: function(searchText, searchScope, searchResult, searchParams) {
+ 			var mainSplitter = mGlobalCommands.getMainSplitter();
+			if (mainSplitter.splitter.isClosed()) {
+				mainSplitter.splitter.toggleSidePanel();
+			}
+			this._inlineSearchPane.setSearchText(searchText);
+			this._inlineSearchPane.setSearchScope(searchScope); //reset search scope
+			this._inlineSearchPane.show();
+			this._inlineSearchPane.showSearchOptions();
+			if(!searchResult) {
+				this._inlineSearchPane.search();
+			} else {
+				this._inlineSearchPane.fillSearchResult(searchParams, searchResult);
+			}
+
+ 		},
 		_createInlineSearchPane: function() {
 			this._inlineSearchPane = new InlineSearchPane(this._slideout,
 			{
@@ -362,15 +378,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 					return true;
 				},
 				callback: function() {
-					var mainSplitter = mGlobalCommands.getMainSplitter();
-					if (mainSplitter.splitter.isClosed()) {
-						mainSplitter.splitter.toggleSidePanel();
-					}
-					this._inlineSearchPane.setSearchText(getSearchText());
-					this._inlineSearchPane.setSearchScope(this._lastSearchRoot); //reset search scope
-					this._inlineSearchPane.show();
-					this._inlineSearchPane.showSearchOptions();
-					this._inlineSearchPane.search();
+					this.fillSearchPane(getSearchText(), this._lastSearchRoot);
 				}.bind(this)
 			});
 			

@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/nls/messages', 'require', 'orion/regex', 'orion/URITemplate'], function(messages, require, mRegex, URITemplate) {
+define(['i18n!orion/nls/messages', 'orion/regex', 'orion/URITemplate'], function(messages, mRegex, URITemplate) {
 
 /**
  * @name orion.searchUtils.SearchParams

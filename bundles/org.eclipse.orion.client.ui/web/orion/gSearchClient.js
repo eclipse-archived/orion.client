@@ -44,15 +44,16 @@ define("orion/gSearchClient", [ //$NON-NLS-0$
 		 * @param {Object} searchParams The search parameters.
 		 * @param {Function(JSONObject)} Callback function that receives the results of the query.
 		 */
-		search: function(searchParams, onProgress) {
+		search: function(searchParams) {
+			var result = new Deferred();
 			try {
 				this._searchDeferred = this._fileClient.search(searchParams);
-				return progress(this._registry, this._searchDeferred, "Searching " + searchParams.keyword).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
+				progress(this._registry, this._searchDeferred, "Searching " + searchParams.keyword).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
 					this._searchDeferred = null;
-					return new Deferred().resolve(this.convert(jsonData, searchParams));
+					result.resolve(this.convert(jsonData, searchParams));
 				}.bind(this), function(error) {
 					this._searchDeferred = null;
-					return new Deferred().reject(error);
+					result.reject(error);
 				}.bind(this));
 			}
 			catch(err){
@@ -62,20 +63,23 @@ define("orion/gSearchClient", [ //$NON-NLS-0$
 						this._crawler = this._createCrawler(searchParams);
 					}
 					if(searchParams.nameSearch) {
-						return this._crawler.searchName(searchParams).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
+						this._crawler.searchName(searchParams).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
 							this._searchDeferred = null;
-							return new Deferred().resolve(this.convert(jsonData, searchParams));
+							result.resolve(this.convert(jsonData, searchParams));
 						}.bind(this));
 					} else {
-						return this._crawler.search(onProgress).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
+						this._crawler.search(function() {
+							result.progress(arguments[0], arguments[1]);
+						}).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
 							this._searchDeferred = null;
-							return new Deferred().resolve(this.convert(jsonData, searchParams));
+							result.resolve(this.convert(jsonData, searchParams));
 						}.bind(this));
 					}
 				} else {
 					throw error;
 				}
 			}
+			return result;
 		},
 		convert: function(jsonData, searchParams) {
 			var converted = [];

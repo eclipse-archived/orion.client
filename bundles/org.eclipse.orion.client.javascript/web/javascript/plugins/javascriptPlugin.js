@@ -383,13 +383,13 @@ define([
 		});
 		//TODO
 		if ("true" === localStorage.getItem("darklaunch")) {
-			var refscommand = new RefsCommand(ternWorker, scriptresolver);
+			var refscommand = new RefsCommand(ternWorker, scriptresolver, core.serviceRegistry, fileClient);
 
 	    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
 	    			{
 						execute: function(editorContext, options) {
 							options.kind ='workspace'; //$NON-NLS-1$
-							refscommand.execute(editorContext, options);
+							return refscommand.execute(editorContext, options);
 						}
 					},
 	    			{
@@ -405,7 +405,7 @@ define([
 	    			{
 						execute: function(editorContext, options) {
 							options.kind ='project'; //$NON-NLS-1$
-							refscommand.execute(editorContext, options);
+							return refscommand.execute(editorContext, options);
 						}
 					},
 	    			{

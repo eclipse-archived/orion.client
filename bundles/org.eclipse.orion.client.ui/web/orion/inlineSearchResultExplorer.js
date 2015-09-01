@@ -1070,18 +1070,18 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 	 * @param {Object} searchParams The search parameters to use for the search
 	 * @param {Searcher} searcher
 	 */
-	InlineSearchResultExplorer.prototype._search = function(resultsNode, searchParams, searcher) {
+	InlineSearchResultExplorer.prototype._search = function(resultsNode, searchParams, searchResult) {
 		lib.empty(resultsNode);
+		if(searchResult) {
+			this._renderSearchResult(resultsNode, searchParams, searchResult);
+		}
 		//If there is no search keyword defined, then we treat the search just as the scope change.
 		if(typeof searchParams.keyword === "undefined"){ //$NON-NLS-0$
 			return;
 		}
 		this.registry.getService("orion.page.message").setProgressMessage(messages["Searching..."]); //$NON-NLS-0$
 		var gSearchClient = new mGSearchClient.GSearchClient({serviceRegistry: this.registry, fileClient: this.fileClient});
-		gSearchClient.search(searchParams, 
-							function(jsonData, incremental) {
-								this._renderSearchResult(resultsNode, searchParams, gSearchClient.convert(jsonData, searchParams), incremental);
-		}.bind(this)).then(function(searchResult) {
+		gSearchClient.search(searchParams).then(function(searchResult) {
 			this.registry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-0$
 			if(searchResult) {
 				this._renderSearchResult(resultsNode, searchParams, searchResult);
@@ -1089,6 +1089,8 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 		}.bind(this), function(error) {
 			var message = i18nUtil.formatMessage(messages["${0}. Try your search again."], error && error.error ? error.error : "Error"); //$NON-NLS-0$
 			this.registry.getService("orion.page.message").setProgressResult({Message: message, Severity: "Error"}); //$NON-NLS-0$
+		}.bind(this), function(jsonData, incremental) {
+			this._renderSearchResult(resultsNode, searchParams, gSearchClient.convert(jsonData, searchParams), incremental);
 		}.bind(this));
 	};
 
@@ -1099,9 +1101,9 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 	 * @param {String | DomNode} parentNode The parent node to display the results in
 	 * @param {Searcher} searcher
 	 */
-	InlineSearchResultExplorer.prototype.runSearch = function(searchParams, parentNode, searcher) {
+	InlineSearchResultExplorer.prototype.runSearch = function(searchParams, parentNode, searchResult) {
 		var parent = lib.node(parentNode);
-		this._search(parent, searchParams, searcher);
+		this._search(parent, searchParams, searchResult);
 	};
 
     InlineSearchResultExplorer.prototype.constructor = InlineSearchResultExplorer;

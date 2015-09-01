@@ -653,6 +653,7 @@ objects.mixin(EditorSetup.prototype, {
 			}
 		};
 		sidebar.create();
+		this.editorCommands.setSideBar(sidebar);
 		this.sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
 			this.lastRoot = evt.root;
 		}.bind(this));

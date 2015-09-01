@@ -122,6 +122,10 @@ define([
 		search: function(){
 			this._submitSearch();
 		},
+		
+		fillSearchResult: function(searchParams, searchResult) {
+			this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, searchResult);
+		},
 				
 		_submitSearch: function(){
 			var options = this.getOptions();
@@ -130,7 +134,7 @@ define([
 				this._searchBox.addTextInputValueToRecentEntries();
 				this._fileNamePatternsBox.addTextInputValueToRecentEntries();
 				var searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
-				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, this._searcher);
+				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv);
 				this._hideSearchOptions();
 			}
 		},
@@ -145,7 +149,7 @@ define([
 				this._replaceBox.addTextInputValueToRecentEntries();
 				this._fileNamePatternsBox.addTextInputValueToRecentEntries();
 				var searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
-				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, this._searcher);
+				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv);
 				this._hideSearchOptions();
 			}
 		},

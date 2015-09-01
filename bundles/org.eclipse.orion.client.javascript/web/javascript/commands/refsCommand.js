@@ -13,8 +13,10 @@
 define([
 'orion/objects',
 'javascript/finder',
-'javascript/compilationUnit'
-], function(Objects, Finder, CU) {
+'javascript/compilationUnit',
+'orion/gSearchClient',
+'orion/Deferred'
+], function(Objects, Finder, CU, mGSearchClient, Deferred) {
 
 	/**
 	 * @description Creates a new rename command
@@ -24,9 +26,12 @@ define([
 	 * @returns {javascript.commands.RenameCommand} A new command
 	 * @since 10.0
 	 */
-	function RefsCommand(ternWorker, scriptResolver) {
+	function RefsCommand(ternWorker, scriptResolver, serviceRegistry, fileClient) {
 		this.ternworker = ternWorker;
 		this.scriptResolver = scriptResolver;
+		this.serviceRegistry = serviceRegistry;
+		this.fileClient = fileClient;
+		this.searchClient = new mGSearchClient.GSearchClient({serviceRegistry: this.serviceRegistry, fileClient: this.fileClient});
 	}
 
 	Objects.mixin(RefsCommand.prototype, {
@@ -36,10 +41,12 @@ define([
 		 */
 		execute: function(editorContext, options) {
 			var that = this;
-			return editorContext.getFileMetadata().then(function(metadata) {
-				that.scriptResolver.setSearchLocation(metadata.parents[metadata.parents.length - 1].Location);
+			var deferred = new Deferred();
+			editorContext.getFileMetadata().then(function(metadata) {
+				var searchLoc = metadata.parents[metadata.parents.length - 1].Location;
+				that.scriptResolver.setSearchLocation(searchLoc);
 			    if(options.contentType.id === 'application/javascript') {
-	    			return that.findRefs();
+	    			that.findRefs(options.kind, searchLoc, editorContext, deferred);
 			    } else {
 			        return editorContext.getText().then(function(text) {
 			            var offset = options.offset;
@@ -53,16 +60,33 @@ define([
 			        });
 			    }
 			});
+			return deferred;
 		},
 
-		findRefs: function findRefs(options) {
-			//TODO
-			if(options.kind === 'workspace') {
-
-			} else if(options.kind === 'project') {
-
-			}
-			return [];
+		findRefs: function findRefs(kind, searchLoc, editorContext, deferred) {
+			editorContext.getSelectionText().then(function(selText) {
+				//TODO: Not sure about the difference between 'workspace' and 'project'. But only searchLoc will be different I think
+				if(kind === 'workspace' || kind === 'project') {//Not sure 
+					var searchParams = {keyword: selText, resource: searchLoc};
+					this.searchClient.search(searchParams).then(function(searchResult) {
+						if(searchResult) {
+							//TODO: Attach detail items on each array items from searchResult, contract to be decided.
+							//this.fillDetails(searchParams, searchResult);
+						}
+						//TODO: Need a default replace string?
+						searchParams.replace = selText + "temporary";
+						deferred.resolve({searchParams: searchParams, refResult: searchResult});
+					}.bind(this), function(error) {
+						//Handle error
+					}.bind(this), function(result/*format of param to be decided*/) {
+						//Handle progress
+						//TODO: We need to incrementally feed the result back to UI.
+						//deferred.progress(result);
+					}.bind(this));
+				}			
+			}.bind(this), function(err) {
+				console.log(err);
+			});
 		}
 	});
 

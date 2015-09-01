@@ -16,15 +16,15 @@ function(messages, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils) {
 
     /*** Internal model wrapper functions ***/
 
-    function _getFileModel(modelItem) {
-        if (!modelItem) {
-            return null;
-        }
-        if (modelItem.type === "file") { //$NON-NLS-0$
-            return modelItem;
-        }
-        return modelItem.parent;
-    }
+//    function _getFileModel(modelItem) {
+//        if (!modelItem) {
+//            return null;
+//        }
+//        if (modelItem.type === "file") { //$NON-NLS-0$
+//            return modelItem;
+//        }
+//        return modelItem.parent;
+//    }
 
     /*
      *	The model to support the search result.
@@ -141,7 +141,7 @@ function(messages, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils) {
      * The bottom layer is the detail matches within a file, whose type is "detail". It should have a property called parent which points to the file item.
      */
     SearchResultModel.prototype.buildResultModel = function() {
-        this._restoreGlobalStatus();
+        //this._restoreGlobalStatus();
         this._indexedFileItems = [];
         this.getListRoot().children = [];
         for (var i = 0; i < this._resultLocation.length; i++) {
