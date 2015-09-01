@@ -56,7 +56,7 @@
     }
     known = getModule(name, data);
     if (known) {
-      data.server.addFile(known.origin, null, data.currentFile);
+      data.server.addFile(known.origin, known.contents, data.currentFile);
     }
     return known;
   }
@@ -76,6 +76,7 @@
       if(val && val.file) {
 	      known = data.interfaces[stripJSExt(val.file)] = new infer.AVal();
 	      known.origin = val.file;
+	      known.contents = val.contents;
       }
     }
     return known;
