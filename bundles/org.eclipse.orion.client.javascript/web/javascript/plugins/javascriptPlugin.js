@@ -130,7 +130,7 @@ define([
 
     	WrappedWorker.prototype.postMessage = function(msg, f) {
 			if(msg != null && typeof(msg) === 'object') {
-				if(typeof(msg.messageID) !== 'number') {
+				if(typeof(msg.messageID) !== 'number' && typeof(msg.ternID) !== 'number') {
 					//don't overwrite an id from a tern-side request
 					msg.messageID = this.messageId++;
 					this.callbacks[msg.messageID] = f;
@@ -188,7 +188,7 @@ define([
 		 * @since 10.0
 		 */
 		function doRead(request) {
-			var response = {request: 'read', messageID: request.messageID, args: {}}; //$NON-NLS-1$
+			var response = {request: 'read', ternID: request.ternID, args: {}}; //$NON-NLS-1$
 			if(typeof(request.args.file) === 'object') {
 				var _l = request.args.file.logical;
 				response.args.logical = _l;

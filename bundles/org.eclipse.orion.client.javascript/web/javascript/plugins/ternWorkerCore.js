@@ -185,7 +185,7 @@ require([
 		'rename': renameHandler
 	};
 
-	var messageID = 0;
+	var ternID = 0;
 	var callbacks = Object.create(null);
 
     /**
@@ -202,7 +202,7 @@ require([
                 	post(response);
 				});
 			} else if(typeof(_d.request) === 'string') {
-				var _callback = callbacks[_d.messageID];
+				var _callback = callbacks[_d.ternID];
 				if(typeof(_callback) === 'function') {
 					_callback(_d.args);
 				}
@@ -244,16 +244,10 @@ require([
      * @param {Object} msg The message to send back to the client
      * @param {String} errormsg The optional error message to send back to the client if the main message is null
      */
-    function post(msg, errormsg, callback) {
+    function post(msg, errormsg) {
     	if(!msg) {
     		msg = new Error(errormsg ? errormsg : Messages['unknownError']);
     	}
-		if(msg != null && typeof(msg) === 'object') {
-	    	if(typeof(msg.messageID) !== 'number') {
-				msg.messageID = messageID++;
-				callbacks[msg.messageID] = callback;
-	    	}
-		}
     	if(this.port) {
     		this.port.postMessage(msg);
     	} else {
@@ -313,7 +307,9 @@ require([
            		pendingReads[_f] = [];
            }
            pendingReads[_f].push(callback);
-           post({request: 'read', args: {file:file}}, null, _contents); //$NON-NLS-1$
+           var request = {request: 'read', ternID: ternID++, args: {file:file}}; //$NON-NLS-1$
+           callbacks[request.ternID] = _contents;
+           post(request, null);
 	    } else {
 	       post(i18nUtil.formatMessage(Messages['failedReadRequest'], _f)); //$NON-NLS-1$
 	    }
