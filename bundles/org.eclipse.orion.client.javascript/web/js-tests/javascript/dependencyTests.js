@@ -142,5 +142,15 @@ define([
 				assertDeps(ast, ['a', 'b', 'c']);
 			});
 		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476370
+		 * @since 10.0
+		 */
+		it("Collect deps requirejs + require", function() {
+			var _s = setup({buffer: '(function(root, mod) {if (typeof exports == "object" && typeof module == "object") return mod(exports, require("./infer"), require("./signal"), require("esprima"), require("acorn/util/walk")); if (typeof define == "function" && define.amd) return define(["exports", "./infer", "./signal", "esprima", "acorn/util/walk"], mod); mod(root.tern || (root.tern = {}), tern, tern.signal, acorn, acorn.walk);})(this, function(exports, infer, signal, acorn, walk) {})'}); //requirejs
+			return astManager.getAST(_s.editorContext).then(function(ast) {
+				assertDeps(ast, ['./infer', './signal', 'esprima', 'acorn/util/walk', 'exports']);
+			});
+		});
 	});
 });

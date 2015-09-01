@@ -1583,11 +1583,23 @@ parseStatement: true, parseSourceElement: true */
 		if(extra.deps) {
 			var len = array.length;
 			for(var i = 0; i < len; i++) {
-				var arg = array[i];
-				if(arg.type === Syntax.Literal) {
-					extra.deps.push(arg);
+				addDep(array[i]);
+			}
+		}
+	}
+	
+	/**
+	 * @description Adds a dependency if it has not already been added
+	 * @param {Object} node The AST node
+	 */
+	function addDep(node) {
+		if(extra.deps && node.type === Syntax.Literal) {
+			for(var i = 0; i < extra.deps.length; i++) {
+				if(extra.deps[i].value === node.value) {
+					return;
 				}
 			}
+			extra.deps.push(node);
 		}
 	}
 	
@@ -1603,9 +1615,7 @@ parseStatement: true, parseSourceElement: true */
     		if(callee.name === 'importScripts') {
     			addArrayDeps(args); //importScripts('foo', 'bar'...)
     		} else if(callee.name === 'Worker') {
-    			if(args[0].type === Syntax.Literal) {
-    				extra.deps.push(args[0]);
-    			}
+    			addDep(args[0]);
     		} else if(callee.name === 'require') {
     			var _a = args[0];
     			if(_a.type === Syntax.ArrayExpression) {
@@ -1613,7 +1623,7 @@ parseStatement: true, parseSourceElement: true */
     				addArrayDeps(_a.elements); //require([foo])
     			} else if(_a.type === Syntax.Literal) {
     				extra.envs.node = true;
-    				extra.deps.push(_a); // require('foo')
+    				addDep(_a); // require('foo')
     			}
     			if(len > 1) {
     				_a = args[1];

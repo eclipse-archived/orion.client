@@ -530,9 +530,10 @@ define([
 				deferred = new Deferred();
 				deferred.proposals = proposals;
 				deferred.args = args;
-				
+				var that = this;
 				this.ternworker.postMessage({request: 'completions', args: args}, //$NON-NLS-1$
 					function(response) {
+						clearTimeout(that.timeout);
 						if(deferred.proposals) {
 			        		deferred.resolve([].concat(sortProposals(response.proposals ? response.proposals : [], deferred.args), deferred.proposals));
 			        	} else {
