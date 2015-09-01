@@ -97,10 +97,6 @@
 
 }
 
-.launchConfigurationEditButton > .core-sprite-edit {
-	color: #77858D;
-}
-
 .runBarWrapper .runBarButton {
 	background: none;
 	border: 1px solid transparent;
@@ -158,7 +154,7 @@
 }
 
 .statusLight.statusLightGreen {
-	background: #1BB199;
+	background: #13dd6d;
 }
 
 .statusLight.statusLightRed {

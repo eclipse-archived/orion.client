@@ -376,10 +376,6 @@ a.breadcrumb.currentLocation {
 	color:white;
 }
 
-.mainToolbar .commandImage {
-	color:white;
-}
-
 .commandButton {
 	color: #00AED1;
 	border: 1px solid #00AED1;
@@ -446,7 +442,7 @@ a.breadcrumb.currentLocation {
 	border: 1px solid #ccc;
 }
 
-.mainToolbar .commandImage {
+.mainToolbar .commandImage.dropdownTrigger {
 	color: white;
 }
 
