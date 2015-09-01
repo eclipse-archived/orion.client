@@ -289,7 +289,9 @@
         var result = [];
         path.split("/").forEach(function(segment) {
             if (segment === "..") {
-                result.pop();
+            	if (result.length > 1) {
+                	result.pop();
+            	}
             } else if (segment !== ".") {
                 result.push(segment);
             }

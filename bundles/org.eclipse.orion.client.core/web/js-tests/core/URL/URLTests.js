@@ -147,5 +147,14 @@ define([
 			assert.equal(url.query, null);
 			assert.equal(url.hash, "");
 		});
+
+		it("should handle relative URL with port", function() {
+			var base = "http://mrennie-unit-tests.orion.eclipse.org:9000/JsMochaSuite.html?grep=Cross-file%20Tests";
+			var rel1 = new URL("../../javascript/plugins/ternWorker.js", base);
+			assert.equal(rel1.href, "http://mrennie-unit-tests.orion.eclipse.org:9000/javascript/plugins/ternWorker.js");
+
+			var rel2 = new URL("../../javascript/plugins/ternWorker.js", base);
+			assert.equal(rel2.href, "http://mrennie-unit-tests.orion.eclipse.org:9000/javascript/plugins/ternWorker.js");
+		});
 	});
 });
