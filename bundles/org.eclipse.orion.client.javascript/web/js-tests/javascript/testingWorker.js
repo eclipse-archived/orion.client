@@ -101,19 +101,34 @@ define([
 							f(_d);
 							delete _instance.callbacks[id];
 						} else if(_d.request === 'read') {
+							var url, req, _f;
 							if(_d.args && _d.args.file) {
-								var _f = 'js-tests/javascript/';
-								_f += _d.args.file.logical ? _d.args.file.logical : _d.args.file;
-								if(!/\.js$/g.test(_f)) {
-									_f += '.js';
+								if(typeof(_d.args.file) === 'object') {
+									_f = 'js-tests/javascript/';
+									_f += _d.args.file.logical ? _d.args.file.logical : _d.args.file;
+									if(!/\.js$/g.test(_f)) {
+										_f += '.js';
+									}
+									url = new URL(_f, window.location.href);
+									req = new XMLHttpRequest();
+									req.onload = function(response) {
+										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.target.response, file: response.target.responseURL, logical: _d.args.file.logical}});
+									};
+									req.open('GET', url, true);
+									req.send();
+								} else if(typeof(_d.args.file) === 'string') {
+									_f = _d.args.file;
+									if(!/\.js$/g.test(_f)) {
+										_f += '.js';
+									}
+									url = new URL(_f, window.location.href);
+									req = new XMLHttpRequest();
+									req.onload = function(response) {
+										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.target.response, file: response.target.responseURL}});
+									};
+									req.open('GET', url, true);
+									req.send();
 								}
-								var url = new URL(_f, window.location.href);
-								var req = new XMLHttpRequest();
-								req.onload = function(response) {
-									_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.target.response, file: response.target.responseURL, logical: _d.args.file.logical}});
-								};
-								req.open('GET', url, true);
-								req.send();
 							} else {
 								_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: _instance._state.buffer, file: _instance._state.file}});
 							}
