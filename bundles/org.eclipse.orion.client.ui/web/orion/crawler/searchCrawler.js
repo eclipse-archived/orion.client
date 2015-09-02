@@ -37,7 +37,7 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 		this._fetchChildrenCallBack = options && options.fetchChildrenCallBack;
 		this._searchParams = searchParams;
 		this.searchHelper = (this._searchOnName || this._buildSkeletonOnly || !this._searchParams) ? null: mSearchUtils.generateSearchHelper(searchParams);
-		this._location = searchParams.resource;
+		this._location = searchParams ? searchParams.resource : options && options.location;
 		this._childrenLocation = options && options.childrenLocation ? options.childrenLocation : this._location;   
 		this._reportOnCancel = options && options.reportOnCancel;
 		this._visitSingleFile = options && options.visitSingleFile;
