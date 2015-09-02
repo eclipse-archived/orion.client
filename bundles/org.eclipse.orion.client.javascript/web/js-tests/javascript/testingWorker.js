@@ -12,6 +12,7 @@
 /*eslint-env amd, browser*/
 /* eslint-disable missing-nls */
 define([
+'orion/URL-shim' //global
 ], function() {
 
 	/**
