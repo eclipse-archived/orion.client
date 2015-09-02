@@ -28,17 +28,25 @@
 		 * @callback
 		 */
 		run: function run(server, query) {
-			var property = this._getDefNode(server, query);
-			while (property) {
-				var fileName = property.value.sourceFile.name;
-				var newQuery = {start: property.value.range[0],
-								end: property.value.range[1],
-								type: "definition", //$NON-NLS-1$
-								file: fileName};
-				if (property.value.type === "FunctionExpression") {
-					return {implementation: newQuery};
-				} else if (property.value.type === "Identifier") {
-					property = this._getDefNode(server, newQuery);
+			var definition = this._getDefNode(server, query);
+			var prevDef;
+			while (definition) {
+				// If a 'findDef' finds itself we're done
+				if (prevDef && prevDef.start === definition.start && prevDef.end === definition.end) {
+					return {implementation: {start: definition.start, end: definition.end,
+												file: definition.sourceFile.name}};
+				}
+				prevDef = definition;
+				
+				if (definition.type === "Property") {					
+					definition = definition.value;
+				} else if (definition.type === "Identifier") {
+					query = {start: definition.start, end: definition.end,
+									type: "definition", //$NON-NLS-1$
+									file: definition.sourceFile.name};
+					definition = this._getDefNode(server, query);
+				} else if (definition.type === "MemberExpression") {
+					definition = definition.property;
 				}
 			}
 			return {implementation: {}};
@@ -48,23 +56,10 @@
 			var res = tern.findDef(server, query, theFile);
 			if (res) {
 				theFile = server.fileMap[res.file];
-				var implName = theFile.text.substring(res.start, res.end);
-				var theNode = infer.findExpressionAt(theFile.ast, res.start, res.end, null, function(type, node) {
+				var theNode = infer.findExpressionAt(theFile.ast, res.start, null, null, function(type, node) {
 					return true;
 				});
-				var outerNode = infer.findExpressionAround(theFile.ast, res.start, res.end);
-				if (outerNode) {
-					if (outerNode.node.properties) {
-						for (var i=0; i<outerNode.node.properties.length; i++) {
-							var property = outerNode.node.properties[i];
-							if (property.key.name === implName) {
-								return property;
-							}
-						}
-					} else if (outerNode.start === res.start && outerNode.end === res.end) {
-						return outerNode;
-					}
-				}
+				return theNode.node;
 			}
 			return null;
 		}
