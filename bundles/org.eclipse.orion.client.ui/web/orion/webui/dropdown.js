@@ -168,6 +168,9 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 						this._triggerNode.classList.add(this._selectionClass);
 					}
 					this._dropdownNode.classList.add("dropdownMenuOpen"); //$NON-NLS-0$
+					if(this._dropdownNode.parentNode.id === "launchConfigurations"){
+						this._dropdownNode.style.width=(this._dropdownNode.parentNode.clientWidth + 30).toString() + "px";
+					}					
 					this._isVisible = true;
 					
 					this._positionDropdown(mouseEvent);
