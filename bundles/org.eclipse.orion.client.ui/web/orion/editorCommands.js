@@ -893,11 +893,11 @@ define([
 						handleResult = function(result){
 							if (result && result.searchParams && result.refResult) {
 								var refResult = result.refResult;
-								if(this.sideBar) {
-									this.sideBar.fillSearchPane(result.searchParams.keyword, {Location: result.searchParams.resource}, refResult, result.searchParams);
+								if(that.sideBar) {
+									that.sideBar.fillSearchPane(result.searchParams.keyword, {Location: result.searchParams.resource}, refResult, result.searchParams);
 								}
 							}
-						}.bind(this);
+						};
 					} else {
 						serviceCall = service.run(model.getText(selection.start,selection.end), model.getText(), selection, inputManager.getInput());
 						handleResult = function(result){
