@@ -14,8 +14,9 @@
 define("orion/gSearchClient", [ //$NON-NLS-0$
 	'orion/fileClient', //$NON-NLS-0$
 	'orion/Deferred', //$NON-NLS-0$
-	'orion/crawler/searchCrawler' //$NON-NLS-0$
-], function(mFileClient, Deferred, mSearchCrawler) {
+	'orion/crawler/searchCrawler', //$NON-NLS-0$
+	'orion/searchUtils' //$NON-NLS-0$
+], function(mFileClient, Deferred, mSearchCrawler, mSearchUtils) {
 	function progress(serviceRegistry, searchDeferred, msg) {
 		var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		if (!progressService) { return searchDeferred; }
@@ -44,13 +45,16 @@ define("orion/gSearchClient", [ //$NON-NLS-0$
 		 * @param {Object} searchParams The search parameters.
 		 * @param {Function(JSONObject)} Callback function that receives the results of the query.
 		 */
-		search: function(searchParams) {
+		search: function(searchParams, generateMatches) {
 			var result = new Deferred();
 			try {
 				this._searchDeferred = this._fileClient.search(searchParams);
 				progress(this._registry, this._searchDeferred, "Searching " + searchParams.keyword).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
 					this._searchDeferred = null;
-					result.resolve(this.convert(jsonData, searchParams));
+					var searchResult = this.convert(jsonData, searchParams);
+					this._generateMatches(searchParams, searchResult, generateMatches).then(function() {
+						result.resolve(searchResult);
+					});
 				}.bind(this), function(error) {
 					this._searchDeferred = null;
 					result.reject(error);
@@ -80,6 +84,28 @@ define("orion/gSearchClient", [ //$NON-NLS-0$
 				}
 			}
 			return result;
+		},
+		_generateSingle: function(sResult, searchHelper) {
+            return this._fileClient.read(sResult.location).then(function(jsonData) {
+                mSearchUtils.searchWithinFile(searchHelper.inFileQuery, sResult, jsonData, false, searchHelper.params.caseSensitive, true);
+                return sResult;
+            }.bind(this),
+            function(error) {
+                console.error("Error loading file content: " + error.message); //$NON-NLS-0$
+            }.bind(this));
+			
+		},
+		_generateMatches: function(searchParams, searchResult, generateMatches) {
+			if(!generateMatches || searchResult.length === 0) {
+				return new Deferred().resolve(searchResult);
+			}
+        	var searchHelper = mSearchUtils.generateSearchHelper(searchParams);
+        	
+	        var promises = [];
+			searchResult.forEach(function(sResult) {
+				promises.push(this._generateSingle(sResult, searchHelper));
+			}.bind(this)); 
+			return Deferred.all(promises, function(error) { return {_error: error}; });
 		},
 		convert: function(jsonData, searchParams) {
 			var converted = [];

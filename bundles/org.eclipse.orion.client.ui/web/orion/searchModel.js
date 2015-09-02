@@ -80,7 +80,7 @@ function(messages, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils) {
             this.registry.getService("orion.page.progress").progress(this.fileClient.read(parentItem.location), "Getting file contents " + parentItem.name).then( //$NON-NLS-1$ //$NON-NLS-0$
 
             function(jsonData) {
-                mSearchUtils.searchWithinFile(this._searchHelper.inFileQuery, parentItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchHelper.params.caseSensitive);
+                mSearchUtils.searchWithinFile(this._searchHelper.inFileQuery, parentItem, jsonData, this.replaceMode(), this._searchHelper.params.caseSensitive);
                 if (this.onMatchNumberChanged) {
                     this.onMatchNumberChanged(parentItem);
                 }
@@ -145,17 +145,27 @@ function(messages, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils) {
         this._indexedFileItems = [];
         this.getListRoot().children = [];
         for (var i = 0; i < this._resultLocation.length; i++) {
+        	var children = this._resultLocation[i].children;
             var childNode = {
                 parent: this.getListRoot(),
                 type: "file", //$NON-NLS-0$
                 name: this._resultLocation[i].name,
-                children: this._resultLocation[i].children,
-                lastModified: this._resultLocation[i].lastModified, //$NON-NLS-0$
-                linkLocation: this._resultLocation[i].linkLocation,
+                children: children,
+                //lastModified: this._resultLocation[i].lastModified, //$NON-NLS-0$
+                //linkLocation: this._resultLocation[i].linkLocation,
                 location: this._resultLocation[i].location,
                 parentLocation: mUiUtils.path2FolderName(this._resultLocation[i].location, this._resultLocation[i].name, true),
                 fullPathName: mUiUtils.path2FolderName(this._resultLocation[i].path, this._resultLocation[i].name)
             };
+            if(children) {
+            	children.forEach(function(child) {
+            		child.parent = childNode;
+            		child.location = childNode.location + "-" + child.lineNumber;
+            		if(child && child.matches && child.matches[0] && child.matches[0].confidence) {
+            			child.name = child.name + "(" + child.matches[0].confidence + ")";
+            		}
+            	});
+            }
             this._location2ModelMap[childNode.location] = childNode;
             this.getListRoot().children.push(childNode);
             this._indexedFileItems.push(childNode);
@@ -244,7 +254,7 @@ function(messages, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils) {
             return this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location), "Getting file contents " + fileItem.Name).then( //$NON-NLS-1$ //$NON-NLS-0$
 
             function(jsonData) {
-                mSearchUtils.searchWithinFile(this._searchHelper.inFileQuery, fileItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchHelper.params.caseSensitive);
+                mSearchUtils.searchWithinFile(this._searchHelper.inFileQuery, fileItem, jsonData, this.replaceMode(), this._searchHelper.params.caseSensitive);
                 return fileItem;
             }.bind(this),
 

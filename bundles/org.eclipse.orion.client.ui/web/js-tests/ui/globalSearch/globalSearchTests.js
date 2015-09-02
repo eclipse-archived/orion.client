@@ -31,7 +31,7 @@ define(["chai/chai", "orion/searchUtils"], function(chai, mSearchUtils) {
 			keyword: keyword
 		});
 		var fileModel = makeFileModel();
-		mSearchUtils.searchWithinFile(searchHelper.inFileQuery, fileModel, fileContentText, "\n", replacing);
+		mSearchUtils.searchWithinFile(searchHelper.inFileQuery, fileModel, fileContentText, replacing);
 		return {m: fileModel, q:searchHelper.inFileQuery};
 	}
 	

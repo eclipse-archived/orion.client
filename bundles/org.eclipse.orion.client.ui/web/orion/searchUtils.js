@@ -411,9 +411,9 @@ searchUtils.splitFile = function(text) {
 	return splitLines;
 };
 
-searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContentText, lineDelim, replacing, caseSensitive){
+searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContentText, replacing, caseSensitive, noContext){
 	var fileContents = searchUtils.splitFile(fileContentText);
-	if(replacing){
+	if(replacing && !noContext){
 		fileModelNode.contents = fileContents;
 	}
 	if(fileModelNode){
@@ -432,9 +432,13 @@ searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContent
 				if(result){
 					var detailNode, lineNumber = i+1;
 					if(!replacing){
-						detailNode = {parent: fileModelNode, context: searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, 
-										  type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, //$NON-NLS-0$ 
-										  location: fileModelNode.location + "-" + lineNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						if(noContext) {
+							detailNode = {lineNumber: lineNumber, matches: result, name: lineStringOrigin};
+						} else {
+							detailNode = {parent: fileModelNode, context: searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, 
+											  type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, //$NON-NLS-0$ 
+											  location: fileModelNode.location + "-" + lineNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						}
 						fileModelNode.children.push(detailNode);
 					} else {
 						for(var j = 0; j < result.length; j++){

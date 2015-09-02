@@ -62,20 +62,45 @@ define([
 			});
 			return deferred;
 		},
+		
+		_weighMatches: function(searchResult) {
+			searchResult.forEach(function(fileItem) {
+				if(fileItem.children) {
+					for(var i=0; i < fileItem.children.length; i++) {
+						var matchingLine = fileItem.children[i];
+						//matchingLine has 2 properties:
+						//lineNumber: the matching line number in the file. THIS IS 1-based, NOT 0-based.
+						//matches: A matching line can have multiple matches.
+							//Each match has:
+							//startIndex: 0-base offset start in that line
+							//length: total chars in this match
+						var confidence, zeroBasedLineNumber = matchingLine.lineNumber;
+						if(i <= fileItem.children.length/2 ) {
+							confidence = "100%";// For first half of hte matches we give 100% confidence
+						} else {
+							confidence = "80%";
+						}
+						matchingLine.matches.forEach(function(match) {
+							//TODO: Uncomment the two lines below to convert the match into an editorModel range.
+							//var convertedRangeStart = editorModel.getLineOffset(zeroBasedLineNumber) + match.startIndex;
+							//var convertedRange = {start: convertedRangeStart, end: convertedRangeStart + match.length};
+							match.confidence = confidence;//Just for fun!
+						});
+					}
+				}
+			});	
+			return new Deferred().resolve(searchResult);
+		},
 
 		findRefs: function findRefs(kind, searchLoc, editorContext, deferred) {
 			editorContext.getSelectionText().then(function(selText) {
 				//TODO: Not sure about the difference between 'workspace' and 'project'. But only searchLoc will be different I think
 				if(kind === 'workspace' || kind === 'project') {//Not sure 
 					var searchParams = {keyword: selText, resource: searchLoc};
-					this.searchClient.search(searchParams).then(function(searchResult) {
-						if(searchResult) {
-							//TODO: Attach detail items on each array items from searchResult, contract to be decided.
-							//this.fillDetails(searchParams, searchResult);
-						}
-						//TODO: Need a default replace string?
-						searchParams.replace = selText + "temporary";
-						deferred.resolve({searchParams: searchParams, refResult: searchResult});
+					this.searchClient.search(searchParams, true).then(function(searchResult) {
+						this._weighMatches(searchResult).then(function(weighedResult) {
+							deferred.resolve({searchParams: searchParams, refResult: weighedResult});
+						});
 					}.bind(this), function(error) {
 						//Handle error
 					}.bind(this), function(result/*format of param to be decided*/) {

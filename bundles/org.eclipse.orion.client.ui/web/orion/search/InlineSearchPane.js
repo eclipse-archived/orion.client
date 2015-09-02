@@ -125,6 +125,7 @@ define([
 		
 		fillSearchResult: function(searchParams, searchResult) {
 			this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, searchResult);
+			this._hideSearchOptions();
 		},
 				
 		_submitSearch: function(){
