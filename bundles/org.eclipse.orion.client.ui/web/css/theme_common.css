@@ -1143,16 +1143,6 @@ a.breadcrumb.currentLocation {
 	margin-bottom: 2px;
 }
 
-.extraActions:not(:empty) {
-	margin-right: 10px !important;
-	padding-left: 10px !important;
-	margin-top: 0;
-	margin-bottom: 0;
-	padding-top: 7px;
-	height: 37px;
-	border-left: 1px solid #1B252E !important;
-}
-
 .core-sprite-git-logo {
 	font-size: 20px !important;
 }

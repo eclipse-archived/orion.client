@@ -73,9 +73,12 @@
 }
 
 .extraActions:not(:empty) {
-	margin-left: 4px;
+	margin-top: 0;
+	margin-bottom: 0;
+	margin-right: 10px;
+	margin-left: 10px;
 	padding-left: 10px;
-	border-left: 1px solid #ccc;
+	border-left: 1px solid #aaa;
 }
 
 .mainpane {
