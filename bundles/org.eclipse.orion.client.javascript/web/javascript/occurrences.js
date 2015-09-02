@@ -742,14 +742,13 @@ define([
 					});
 			    }
 			    return editorContext.getText().then(function(text) {
-    			    var blocks = Finder.findScriptBlocks(text);
-    	            if(blocks && blocks.length > 0) {
-    		            var cu = that.cuprovider.getCompilationUnit(blocks, meta);
-    		            if(cu.validOffset(ctxt.selection.start)) {
-        		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-                				return findOccurrences(ast, ctxt);
-                			});
-            			}
+		            var cu = that.cuprovider.getCompilationUnit(function(){
+		            		return Finder.findScriptBlocks(text);
+		            	}, meta);
+		            if(cu.validOffset(ctxt.selection.start)) {
+    		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+            				return findOccurrences(ast, ctxt);
+            			});
         			}
     			});
 			});

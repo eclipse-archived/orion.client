@@ -265,14 +265,13 @@ define([
         			});
 		        }
 		        return editorContext.getText().then(function(text) {
-		            var blocks = Finder.findScriptBlocks(text);
-		            if(blocks && blocks.length > 0) {
-		            	var cu = that.cuprovider.getCompilationUnit(blocks, meta);
-    		            if(cu.validOffset(ctxt.offset)) {
-        		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-                				return that._doHover(ast, ctxt, meta, text);
-                			});
-            			}
+	            	var cu = that.cuprovider.getCompilationUnit(function(){
+	            			Finder.findScriptBlocks(text);
+	            		}, meta);
+		            if(cu.validOffset(ctxt.offset)) {
+    		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+            				return that._doHover(ast, ctxt, meta, text);
+            			});
         			}
         			return null;
 		        });

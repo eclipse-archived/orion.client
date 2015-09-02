@@ -42,28 +42,13 @@ define([
 	Objects.mixin(OpenImplementationCommand.prototype, {
 		/* override */
 		execute: function(editorContext, options) {
-		    var that = this;
-		    if(options.contentType.id === 'application/javascript') {
-		        return that.astManager.getAST(editorContext).then(function(ast) {
-    				return that._findImpl(editorContext, options, ast);
-    			});
-		    } else {
-		        return editorContext.getText().then(function(text) {
-		            var offset = options.offset;
-		            var blocks = Finder.findScriptBlocks(text);
-		            if(blocks && blocks.length > 0) {
-		                var cu = that.cuprovider.getCompilationUnit(blocks, {location:options.input, contentType:options.contentType});
-    			        if(cu.validOffset(offset)) {
-    			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-    			               return that._findImpl(editorContext, options, ast, text);
-    			            });
-    			        }
-			        }
-		        });
-		    }
+			var that = this;
+			return editorContext.getText().then(function(text) {
+		     	return that._findImpl(editorContext, options, text);
+			});
 		},
 
-		_findImpl: function(editorContext, options, ast, htmlsource) {
+		_findImpl: function(editorContext, options, text) {
 			cachedContext = editorContext;
 			deferred = new Deferred();
 			if(this.timeout) {
@@ -76,7 +61,7 @@ define([
 				}
 				this.timeout = null;
 			}, 5000);
-			var files = [{type: 'full', name: options.input, text: htmlsource ? htmlsource : ast.source}]; //$NON-NLS-1$
+			var files = [{type: 'full', name: options.input, text: text}]; //$NON-NLS-1$
 			this.ternworker.postMessage(
 				{request:'implementation', args:{params:{offset: options.offset}, files: files, meta:{location: options.input}}}, //$NON-NLS-1$
 				function(response) {

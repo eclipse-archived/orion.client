@@ -289,16 +289,15 @@ define([
 			return editorContext.getFileMetadata().then(function(meta) {
 			    if(meta.contentType.id === 'text/html') {
 			        return editorContext.getText().then(function(text) {
-			            var blocks = Finder.findScriptBlocks(text);
-			            if(blocks && blocks.length > 0) {
-			            	var cu = _self.cuprovider.getCompilationUnit(blocks, meta);
-			                return _self.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-			                    //auto-assume browser env - https://bugs.eclipse.org/bugs/show_bug.cgi?id=458676
-			                    var env = Object.create(null);
-			                    env.browser = true;
-            					return _self._validateAst(ast, env);
-            				});
-			            }
+		            	var cu = _self.cuprovider.getCompilationUnit(function(){
+		            			return Finder.findScriptBlocks(text);
+		            		}, meta);
+		                return _self.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+		                    //auto-assume browser env - https://bugs.eclipse.org/bugs/show_bug.cgi?id=458676
+		                    var env = Object.create(null);
+		                    env.browser = true;
+        					return _self._validateAst(ast, env);
+        				});
 			        });
 			    } else {
     			    return _self.astManager.getAST(editorContext).then(function(ast) {

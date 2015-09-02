@@ -20,17 +20,21 @@ define([
 
 	/**
 	 * @description fetches or creates a compilation unit for the given information
-	 * @param {Array.<object>} sourceblocks The blocks of source
+	 * @param {Function} sourceblocks a function that returns the blocks of source
 	 * @param {Object} metadata The file metadata
 	 * @param {orion.editor.EditorContext} editorContext The editor context
 	 * @returns {javascript.CompilationUnit} The compilation unit for the given information
 	 */
-	function getCompilationUnit(sourceblocks, metadata, editorContext) {
+	function getCompilationUnit(getSourceBlocks, metadata, editorContext) {
 		var cu = _cache.get(metadata.location);
 		if(cu) {
 			return cu;
 		}
-		cu = new CU(sourceblocks, metadata, editorContext);
+		var blocks = getSourceBlocks();
+		if (!blocks){
+			blocks = [];
+		}
+		cu = new CU(blocks, metadata, editorContext);
 		_cache.put(metadata.location, cu);
 		return cu;
 	}
