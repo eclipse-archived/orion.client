@@ -220,6 +220,9 @@
 
 .runBarLink:hover:not(.disabled) {
 	color: #00AED1;
+}
+
+.runBarLink:hover {
 	text-decoration: none;
 }
 

@@ -816,11 +816,6 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	color: white;
 }
 
-.checkedRow .commandButton {
-	color: white;
-	border-color: white;
-}
-
 .git-sprite-notsure{ background-position: 0 -216px; width: 16px; height: 16px; } 
 
 .git-sprite-apply-patch,

@@ -138,6 +138,15 @@ a:hover {
 	color: white;
 }
 
+.checkedRow .commandButton {
+	color: white;
+	border-color: white;
+}
+
+.checkedRow .commandImage {
+	color: white;
+}
+
 .navRow > td:first-child {
 	/* border-left: 6px solid transparent; THIS CAUSES PIXELATION PROBLEMS! */
 }
