@@ -58,7 +58,7 @@ require([
 							openImplPlugin, htmlDepPlugin, ecma5, ecma6, browser, assistHandler, declarationHandler, hoverHandler, occurrencesHandler,
 							renameHandler, pluginsHandler, refsHandler, implHandler, Messages, i18nUtil) {
 
-    var ternserver, pendingReads = Object.create(null);
+    var ternserver = Object.create(null);
 
     /**
      * @description Start up the Tern server, send a message after trying
@@ -275,15 +275,11 @@ require([
      */
     function _getFile(file, callback) {
     	if(ternserver) {
-        	var _f = file;
-           if(typeof(file) === 'object') {
-           		_f = file.logical;
-           }
            var request = {request: 'read', ternID: ternID++, args: {file:file}}; //$NON-NLS-1$
            reads[request.ternID] = callback;
            post(request, null);
 	    } else {
-	       post(i18nUtil.formatMessage(Messages['failedReadRequest'], _f)); //$NON-NLS-1$
+	       post(i18nUtil.formatMessage(Messages['failedReadRequest'], typeof(file) === 'object' ? file.logical : file)); //$NON-NLS-1$
 	    }
     }
 });
