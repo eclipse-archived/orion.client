@@ -132,6 +132,19 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 		return link;
     };
     
+	SearchResultRenderer.prototype.generateDetailDecorator = function(item, spanHolder) {
+		if(typeof item.confidence !== "number") {
+			return;
+		}
+		var classNames = ["confidenceDecorator"];
+		if(item.confidence >= 100) {
+			classNames.push("confidenceHigh"); //$NON-NLS-0$
+		} else {
+			classNames.push("confidenceLow"); //$NON-NLS-0$
+		}
+    	_createSpan(classNames, null, spanHolder, item.confidence + "%");
+	};
+	
     SearchResultRenderer.prototype.generateDetailLink = function(item) {
         var helper = null;
         if (this.explorer.model._provideSearchHelper) {

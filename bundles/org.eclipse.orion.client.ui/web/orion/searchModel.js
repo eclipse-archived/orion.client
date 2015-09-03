@@ -146,7 +146,7 @@ function(messages, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils) {
         this.getListRoot().children = [];
         for (var i = 0; i < this._resultLocation.length; i++) {
         	var children = this._resultLocation[i].children;
-            var childNode = {
+            var fileNode = {
                 parent: this.getListRoot(),
                 type: "file", //$NON-NLS-0$
                 name: this._resultLocation[i].name,
@@ -157,18 +157,29 @@ function(messages, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils) {
                 parentLocation: mUiUtils.path2FolderName(this._resultLocation[i].location, this._resultLocation[i].name, true),
                 fullPathName: mUiUtils.path2FolderName(this._resultLocation[i].path, this._resultLocation[i].name)
             };
-            if(children) {
+            if(children) {//If the children is already generated, we need convert it back to UI model.
+            	var newChildren = [];
             	children.forEach(function(child) {
-            		child.parent = childNode;
-            		child.location = childNode.location + "-" + child.lineNumber;
-            		if(child && child.matches && child.matches[0] && child.matches[0].confidence) {
-            			child.name = child.name + "(" + child.matches[0].confidence + ")";
-            		}
+					for(var j = 0; j < child.matches.length; j++){
+						var matchNumber = j+1;
+						var newMatch = {confidence: child.matches[j].confidence, parent: fileNode, matches: child.matches, lineNumber: child.lineNumber, matchNumber: matchNumber, 
+							name: child.name, location: fileNode.location + "-" + child.lineNumber + "-" + matchNumber
+						};
+						newChildren.push(newMatch);
+					}
             	});
+ 				newChildren.sort(function(a, b) {
+ 					if(a.confidence === b.confidence) {
+ 						return a.lineNumber - b.lineNumber;
+ 					}
+					return b.confidence - a.confidence;
+				});
+           	
+            	fileNode.children = newChildren;
             }
-            this._location2ModelMap[childNode.location] = childNode;
-            this.getListRoot().children.push(childNode);
-            this._indexedFileItems.push(childNode);
+            this._location2ModelMap[fileNode.location] = fileNode;
+            this.getListRoot().children.push(fileNode);
+            this._indexedFileItems.push(fileNode);
         }
     };
 
@@ -190,8 +201,8 @@ function(messages, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils) {
     SearchResultModel.prototype.getPagingParams = function() {
         return {
             totalNumber: this._totalNumber,
-            start: this._searchHelper.params.start,
-            rows: this._searchHelper.params.rows,
+            start: (typeof this._searchHelper.params.start === "undefined" ? 0 : this._searchHelper.params.start),
+            rows: (typeof this._searchHelper.params.rows === "undefined" ? this._totalNumber : this._searchHelper.params.rows),
             numberOnPage: this._numberOnPage
         };
     };

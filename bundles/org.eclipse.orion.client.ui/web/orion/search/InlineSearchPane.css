@@ -8,6 +8,25 @@
 	overflow: hidden;
 }
 
+.searchResultsWrapperDiv .confidenceDecorator {
+	display: inline-block;
+	width: 32px;
+	height: 16px;
+	vertical-align: middle;
+	margin-top: 4px;
+	border: none;
+}
+
+.searchResultsWrapperDiv .confidenceHigh {
+	color: white;
+	background-color:green;
+}
+
+.searchResultsWrapperDiv .confidenceLow {
+	color: black;
+	background-color:yellow;
+}
+
 .searchResultsWrapperDiv .selectableNavRow:hover {
 	background-color: rgba(27, 177, 153, 0.3);
 }

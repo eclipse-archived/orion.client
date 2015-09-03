@@ -96,7 +96,8 @@ define([
 			editorContext.getSelectionText().then(function(selText) {
 				//TODO: Not sure about the difference between 'workspace' and 'project'. But only searchLoc will be different I think
 				if(kind === 'workspace' || kind === 'project') {//Not sure 
-					var searchParams = {keyword: selText, resource: searchLoc};
+					//Currently Orion server does not support multiple fileNamePatters, we need to fix that if we need something like ["*.js","*.html"]
+					var searchParams = {keyword: selText, resource: searchLoc, fileNamePatterns:["*.js"], caseSensitive: true };
 					this.searchClient.search(searchParams, true).then(function(searchResult) {
 						this._weighMatches(searchResult).then(function(weighedResult) {
 							deferred.resolve({searchParams: searchParams, refResult: weighedResult});
