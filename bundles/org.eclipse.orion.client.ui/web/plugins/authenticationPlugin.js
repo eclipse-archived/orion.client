@@ -113,6 +113,11 @@ define(["orion/xhr", 'orion/xsrfUtils', "orion/plugin", "domReady!"], function(x
 				});
 			},
 
+			getSignOutLink: function(redirect) {
+				return this.getAuthData().then(function(responseObject) {
+					return responseObject.SignOutRedirect ? responseObject.SignOutRedirect : getAuthLinkFromJSON(responseObject, redirect);
+				});
+			},
 			getKey: function() {
 				return "FORMOAuthUser";
 			},
