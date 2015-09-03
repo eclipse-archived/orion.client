@@ -107,9 +107,7 @@
 				codeEdit.create({parent: "embeddedEditor", contentType: "application/javascript", contents: contents}).then(function(editorViewer) {
 					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 				});
-				codeEdit.create({parent: "embeddedEditor1",
-									   contentType: "application/xml",
-									   contents: contents2}).then(function(editorViewer){
+				codeEdit.create({parent: "embeddedEditor1"}).then(function(editorViewer){
 					editorViewer.serviceRegistry.registerService("orion.edit.contentassist",
 							contentAssistProvider,
 				    		{	name: "xmlContentAssist",
@@ -120,6 +118,7 @@
 			    		{	name: "xmlContentHover",
 			    			contentType: ["application/xml"]
 			    		});
+			    	editorViewer.setContents(contents2, "application/xml");
 				});
 			};
 		</script>
