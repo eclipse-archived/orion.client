@@ -98,7 +98,7 @@ define(['orion/PageUtil', 'orion/xsrfUtils', 'orion/PageLinks', './jquery'],func
             }
         };
 
-        checkusersrequest.open("POST", "../login/canaddusers", true);
+        checkusersrequest.open("POST", "../login/redirectinfo", true);
         checkusersrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         checkusersrequest.setRequestHeader("Orion-Version", "1");
         xsrfUtils.addCSRFNonce(checkusersrequest);

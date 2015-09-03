@@ -26,6 +26,26 @@ define(["orion/xhr", 'orion/xsrfUtils', "orion/plugin", "domReady!"], function(x
 		function qualifyURL(url) {
 			return new URL(url, self.location.href).href;
 		}
+
+		function getAuthLinkFromJSON(responseObject, redirect) {
+			redirect = redirect ? encodeURIComponent(redirect) : "";
+			var loginURL = "../mixloginstatic/landing.html"; //$NON-NLS-0$
+			authForm = redirect ? ("../mixloginstatic/landing.html?redirect=" + redirect + "&key=FORMOAuthUser") : "../mixloginstatic/LoginWindow.html"; //$NON-NLS-0$
+			if (responseObject) {
+				var authProvider = responseObject.AuthProvider;
+				if (authProvider) {
+					authForm = "../login/oauth?oauth=" + authProvider + (redirect ? "&redirect=" + redirect : ""); //$NON-NLS-0$
+				} else {
+					var userCreationEnabled = responseObject.CanAddUsers;
+					var registrationURI = responseObject.RegistrationURI;
+					if (!userCreationEnabled && !registrationURI) {
+						authForm = "../mixloginstatic/LoginWindow.html" + (redirect ? "?redirect=" + redirect : ""); //$NON-NLS-0$
+					}
+				}
+			}
+			return qualifyURL(authForm);
+		}
+
 		var loginData;
 	
 		var serviceImpl = {
@@ -65,10 +85,34 @@ define(["orion/xhr", 'orion/xsrfUtils', "orion/plugin", "domReady!"], function(x
 					return error.response ? JSON.parse(error.response) : null;
 				});
 			},
-			getAuthForm: function(notify) {
-				return qualifyURL(notify ? ('../mixloginstatic/landing.html?redirect=' + encodeURIComponent(notify) + '&key=FORMOAuthUser') : '../mixloginstatic/LoginWindow.html');
+			getAuthData: function() {
+				var errorMsg = "Error while getting redirection info from the Orion server";
+				return xhr("POST", "../login/redirectinfo", { //$NON-NLS-0$
+					headers: {
+						"Orion-Version": "1" //$NON-NLS-0$
+					},
+					timeout: 15000
+				}).then(function(result) {
+					if (result.response) {
+						return JSON.parse(result.response);
+					} else {
+						console.error(errorMsg);
+					}
+				}, function(error) {
+					if (error.response) {
+						console.error("Post request returned error: " + error.response);
+						return JSON.parse(error.response);
+					} else {
+						console.error(errorMsg);
+					}
+				});
 			},
-	
+			getAuthForm: function(redirect) {
+				return this.getAuthData().then(function(responseObject) {
+					return getAuthLinkFromJSON(responseObject, redirect);
+				});
+			},
+
 			getKey: function() {
 				return "FORMOAuthUser";
 			},
