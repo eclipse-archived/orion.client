@@ -973,7 +973,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 			 */
 			it('test_findScriptBlock1', function() {
-				var r = setup("<!DOCTYPE html><head><script>function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script>function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 29);
@@ -985,7 +985,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 			 */
 			it('test_findScriptBlock2', function() {
-				var r = setup("<!DOCTYPE html><head><scriPt>function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><scriPt>function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 29);
@@ -997,7 +997,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 			 */
 			it('test_findScriptBlock3', function() {
-				var r = setup("<!DOCTYPE html><head><script>function f() {}</scriPt></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script>function f() {}</scriPt></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 29);
@@ -1009,7 +1009,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 			 */
 			it('test_findScriptBlock4', function() {
-				var r = setup("<!DOCTYPE html><head><scRipt>function f() {}</scripT></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><scRipt>function f() {}</scripT></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 29);
@@ -1021,7 +1021,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 			 */
 			it('test_findScriptBlock5', function() {
-				var r = setup("<!DOCTYPE html><head><scriPt   >function f() {}</scRIpt></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><scriPt   >function f() {}</scRIpt></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 32);
@@ -1033,7 +1033,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 			 */
 			it('test_findScriptBlockMulti1', function() {
-				var r = setup("<!DOCTYPE html><head><script>function f() {}</script><script>function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script>function f() {}</script><script>function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 2, "Should have found two script blocks");
 				assert.equal(blocks[0].offset, 29);
@@ -1047,7 +1047,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 			 */
 			it('test_findScriptBlockMulti2', function() {
-				var r = setup("<!DOCTYPE html><head><scrIpt>function f() {}</script><scRipt>function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><scrIpt>function f() {}</script><scRipt>function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 2, "Should have found two script blocks");
 				assert.equal(blocks[0].offset, 29);
@@ -1061,7 +1061,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 			 */
 			it('test_findScriptBlockMulti3', function() {
-				var r = setup("<!DOCTYPE html><head><scripT>function f() {}</scriPt><scRipt>function f() {}</Script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><scripT>function f() {}</scriPt><scRipt>function f() {}</Script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 2, "Should have found two script blocks");
 				assert.equal(blocks[0].offset, 29);
@@ -1075,7 +1075,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 			 */
 			it('test_findScriptBlockMulti4', function() {
-				var r = setup("<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 2, "Should have found two script blocks");
 				assert.equal(blocks[0].offset, 30);
@@ -1089,7 +1089,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 			 */
 			it('test_findScriptBlockMultiWithOffset1', function() {
-				var r = setup("<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 39);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 30);
@@ -1100,7 +1100,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 			 */
 			it('test_findScriptBlockMultiWithOffset2', function() {
-				var r = setup("<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 71);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 64);
@@ -1112,7 +1112,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 			 */
 			it('test_findScriptBlockWithOffset1', function() {
-				var r = setup("<!DOCTYPE html><head><script >function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script >function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 39);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 30);
@@ -1124,7 +1124,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 			 */
 			it('test_findScriptBlockWithSpacePostamble1', function() {
-				var r = setup("<!DOCTYPE html><head><script type='javascript'>function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script type='javascript'>function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 48);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 47);
@@ -1136,7 +1136,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 			 */
 			it('test_findScriptBlockWithSpacePostamble2', function() {
-				var r = setup("<!DOCTYPE html><head><script type=javascript  >function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script type=javascript  >function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 48);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 47);
@@ -1148,7 +1148,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 			 */
 			it('test_findScriptBlockWithSpacePostamble3', function() {
-				var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 47);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 46);
@@ -1160,7 +1160,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 			 */
 			it('test_findScriptBlockWithSpacePostamble4', function() {
-				var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type='javascript' ></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type='javascript' ></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 47);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 46);
@@ -1172,7 +1172,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 			 */
 			it('test_findScriptBlockWithSpacePostamble5', function() {
-				var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type=javascript ></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type=javascript ></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 47);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 46);
@@ -1184,7 +1184,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 			 */
 			it('test_findScriptBlockWithSpacePostamble6', function() {
-				var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type= javas cript ></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type= javas cript ></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 47);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 46);
@@ -1196,7 +1196,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 			 */
 			it('test_findScriptBlockWithSpacePostamble7', function() {
-				var r = setup("<!DOCTYPE html><head>< script source=foo bar  >function f() {}</script type= javas cript ></head><html></html>");
+				var r = setup("<!DOCTYPE html><head>< script source=foo bar  >function f() {}</script type= javas cript ></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 48);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 47);
@@ -1208,7 +1208,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 			 */
 			it('test_findScriptBlockWithSpacePostamble8', function() {
-				var r = setup("<!DOCTYPE html><head><   scrIpt source=foo bar  >function f() {}</script type= javas cript ></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><   scrIpt source=foo bar  >function f() {}</script type= javas cript ></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 50);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 49);
@@ -1220,7 +1220,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 			 */
 			it('test_findScriptBlockWithSpacePostamble9', function() {
-				var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}<   /scrIpt type= javas cript ></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}<   /scrIpt type= javas cript ></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 47);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 46);
@@ -1231,7 +1231,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
 			 */
 			it('test_findScriptBlockWithType1', function() {
-				var r = setup("<!DOCTYPE html><head><script type=\"\">function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script type=\"\">function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 51);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 37);
@@ -1242,7 +1242,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
 			 */
 			it('test_findScriptBlockWithType2', function() {
-				var r = setup("<!DOCTYPE html><head><script type=\"text/javascript\">function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script type=\"text/javascript\">function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 54);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 52);
@@ -1253,7 +1253,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
 			 */
 			it('test_findScriptBlockWithType3', function() {
-				var r = setup("<!DOCTYPE html><head><script type=\"text/handlebars\">function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script type=\"text/handlebars\">function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 54);
 				assert.equal(blocks.length, 0, "Should have found no script blocks");
 			});
@@ -1276,7 +1276,7 @@ define([
 				text += "<script type=\"text/livescript\">function f10() {}</script>\n";
 				text += "<script type=\"text/x-ecmascript\">function f11() {}</script>\n";
 				text += "<script type=\"text/x-javascript\">function f12() {}</script>\n";
-				text += "</head><html></html>";
+				text += "</head></html>";
 				var blocks = Finder.findScriptBlocks(text);
 				assert.equal(blocks.length, 12, "Should have found 12 script blocks");
 			});
@@ -1300,7 +1300,7 @@ define([
 				text += "<script type=\"text/javascript1.1.1\">function f11() {}</script>\n";
 				text += "<script type=\"text/javascript1\">function f12() {}</script>\n";
 				text += "<script type=\"text/javascriptBLARGH\">function f13() {}</script>\n";
-				text += "</head><html></html>";
+				text += "</head></html>";
 				var blocks = Finder.findScriptBlocks(text);
 				assert.equal(blocks.length, 0, "Should have found 0 valid script blocks");
 			});
@@ -1310,7 +1310,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
 			 */
 			it('test_findScriptBlockWithLanguage1', function() {
-				var r = setup("<!DOCTYPE html><head><script language=\"javascript\">function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script language=\"javascript\">function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 53);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 				assert.equal(blocks[0].offset, 51);
@@ -1321,7 +1321,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
 			 */
 			it('test_findScriptBlockWithLanguage2', function() {
-				var r = setup("<!DOCTYPE html><head><script language=\"text/javascript\">function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script language=\"text/javascript\">function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 58);
 				assert.equal(blocks.length, 0, "Should have found no valid script block");
 			});
@@ -1330,7 +1330,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
 			 */
 			it('test_findScriptBlockWithLanguage3', function() {
-				var r = setup("<!DOCTYPE html><head><script language=\"text/handlebars\">function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script language=\"text/handlebars\">function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 58);
 				assert.equal(blocks.length, 0, "Should have found no valid script block");
 			});
@@ -1349,7 +1349,7 @@ define([
 				text += "<script language=\"livescript\">function f6() {}</script>\n";
 				text += "<script language=\"x-ecmascript\">function f7() {}</script>\n";
 				text += "<script language=\"x-javascript\">function f8() {}</script>\n";
-				text += "</head><html></html>";
+				text += "</head></html>";
 				var blocks = Finder.findScriptBlocks(text);
 				assert.equal(blocks.length, 8, "Should have found 8 script blocks");
 			});
@@ -1371,7 +1371,7 @@ define([
 				text += "<script language=\"xml\">function f9() {}</script>\n";
 				text += "<script language=\"javascript1.1.1\">function f10() {}</script>\n";
 				text += "<script language=\"javascript1\">function f11() {}</script>\n";
-				text += "</head><html></html>";
+				text += "</head></html>";
 				var blocks = Finder.findScriptBlocks(text);
 				assert.equal(blocks.length, 0, "Should have found 0 valid script blocks");
 			});
@@ -1381,7 +1381,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 			 */
 			it('test_findNoScriptBlockWithSpacePostamble1', function() {
-				var r = setup("<!DOCTYPE html><head><script <source=foo bar  >function f() {}</script type= javas cript ></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script <source=foo bar  >function f() {}</script type= javas cript ></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 39);
 				assert.equal(blocks.length, 0, "Should not have found any script blocks");
 			});
@@ -1391,7 +1391,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 			 */
 			it('test_findNoScriptBlockWithSpacePostamble2', function() {
-				var r = setup("<!DOCTYPE html><head><script source=foo bar  > source='js'>function f() {}</script type= javas cript ></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script source=foo bar  > source='js'>function f() {}</script type= javas cript ></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 39);
 				assert.equal(blocks.length, 0, "Should not have found any script blocks");
 			});
@@ -1401,7 +1401,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=431054
 			 */
 			it('test_findNoScriptBlockInHTMLComment1', function() {
-				var r = setup("<!DOCTYPE html><head><!--<script>function f() {}</script>--></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><!--<script>function f() {}</script>--></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text, 39);
 				assert.equal(blocks.length, 0, "Should not have found any script blocks");
 			});
@@ -1410,7 +1410,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=431054
 			 */
 			it('test_findNoScriptBlockInHTMLComment2', function() {
-				var r = setup("<!DOCTYPE html><head><!--<script>function f() {}</script>--><script>function f() {}</script><!--<script>function f() {}</script>--></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><!--<script>function f() {}</script>--><script>function f() {}</script><!--<script>function f() {}</script>--></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 1, "Should have found one script block");
 			});
@@ -1419,7 +1419,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=431054
 			 */
 			it('test_findNoScriptBlockInHTMLComment3', function() {
-				var r = setup("<!DOCTYPE html><head><!--<script>function f() {}</script><script>function f() {}</script><script>function f() {}</script>--></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><!--<script>function f() {}</script><script>function f() {}</script><script>function f() {}</script>--></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 0, "Should have found no script blocks");
 			});
@@ -1428,7 +1428,7 @@ define([
 			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=431054
 			 */
 			it('test_findNoScriptBlockInHTMLComment2', function() {
-				var r = setup("<!DOCTYPE html><head><script>function f() {}</script><!--<script>function f() {}</script>--><script>function f() {}</script></head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script>function f() {}</script><!--<script>function f() {}</script>--><script>function f() {}</script></head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 2, "Should have found two script blocks");
 			});
@@ -1438,7 +1438,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
 			 */
 			it('test_findScriptBlockEmptyAndMixedAttributes1', function() {
-				var r = setup("<!DOCTYPE html><head><script language=\"BLARGH\" type=\"\">function f() {}</script>\n</head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script language=\"BLARGH\" type=\"\">function f() {}</script>\n</head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 0, "Should have found no script block");
 			});
@@ -1448,7 +1448,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
 			 */
 			it('test_findScriptBlockEmptyAndMixedAttributes2', function() {
-				var r = setup("<!DOCTYPE html><head><script language=\"\">function f() {}</script>\n</head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script language=\"\">function f() {}</script>\n</head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 1, "Should have found 1 script block");
 			});
@@ -1458,7 +1458,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
 			 */
 			it('test_findScriptBlockEmptyAndMixedAttributes3', function() {
-				var r = setup("<!DOCTYPE html><head><script>function f() {}</script>\n</head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script>function f() {}</script>\n</head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 1, "Should have found 1 script block");
 			});
@@ -1468,7 +1468,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
 			 */
 			it('test_findScriptBlockEmptyAndMixedAttributes4', function() {
-				var r = setup("<!DOCTYPE html><head><script language=\"BLARGH\" type=\"text/javascript\">function f() {}</script>\n</head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script language=\"BLARGH\" type=\"text/javascript\">function f() {}</script>\n</head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 0, "Should have found no script block");
 			});
@@ -1478,7 +1478,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
 			 */
 			it('test_findScriptBlockEmptyAndMixedAttributes5', function() {
-				var r = setup("<!DOCTYPE html><head><script type=\"text/javascript\" language=\"BLARGH\">function f() {}</script>\n</head><html></html>");
+				var r = setup("<!DOCTYPE html><head><script type=\"text/javascript\" language=\"BLARGH\">function f() {}</script>\n</head></html>");
 				var blocks = Finder.findScriptBlocks(r.text);
 				// TODO If we have both attributes, the regex will always take the last matching 
 	//			assert.equal(blocks.length, 0, "Should have found no script block");
@@ -1490,7 +1490,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=465816
 			 */
 			it('Script Blocks with Dependencies Simple 1', function() {
-				var r = setup('<!DOCTYPE html><head><script src="foo.js"></script>\n</head><html></html>');
+				var r = setup('<!DOCTYPE html><head><script src="foo.js"></script>\n</head></html>');
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 1, "Should have found 1 script block");
 				assert(blocks[0].dependencies, "Block should have src dependency");
@@ -1501,7 +1501,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=465816
 			 */
 			it('Script Blocks with Dependencies Simple 2', function() {
-				var r = setup('<!DOCTYPE html><head><script src="foo"></script>\n</head><html></html>');
+				var r = setup('<!DOCTYPE html><head><script src="foo"></script>\n</head></html>');
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 1, "Should have found 1 script block");
 				assert(blocks[0].dependencies, "Block should have src dependency");
@@ -1513,7 +1513,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=465816
 			 */
 			it('Script Blocks with Dependencies Inline', function() {
-				var r = setup('<!DOCTYPE html><head><script src="foo.js"/>\n</head><html></html>');
+				var r = setup('<!DOCTYPE html><head><script src="foo.js"/>\n</head></html>');
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 1, "Should have found 1 script block");
 				assert(blocks[0].dependencies, "Block should have src dependency");
@@ -1524,7 +1524,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=465816
 			 */
 			it('Script Blocks with Dependencies Content', function() {
-				var r = setup('<!DOCTYPE html><head><script src="foo.js">function f(){};</script>\n</head><html></html>');
+				var r = setup('<!DOCTYPE html><head><script src="foo.js">function f(){};</script>\n</head></html>');
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 1, "Should have found 1 script block");
 				assert(blocks[0].dependencies, "Block should have src dependency");
@@ -1535,7 +1535,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=465816
 			 */
 			it('Script Blocks with Dependencies Attributes 1', function() {
-				var r = setup('<!DOCTYPE html><head><script type="text/javascript" src="foo.js"></script>\n</head><html></html>');
+				var r = setup('<!DOCTYPE html><head><script type="text/javascript" src="foo.js"></script>\n</head></html>');
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 1, "Should have found 1 script block");
 				assert(blocks[0].dependencies, "Block should have src dependency");
@@ -1546,7 +1546,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=465816
 			 */
 			it('Script Blocks with Dependencies Attributes 2', function() {
-				var r = setup('<!DOCTYPE html><head><script language="javascript" src="foo.js"></script>\n</head><html></html>');
+				var r = setup('<!DOCTYPE html><head><script language="javascript" src="foo.js"></script>\n</head></html>');
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 1, "Should have found 1 script block");
 				assert(blocks[0].dependencies, "Block should have src dependency");
@@ -1557,10 +1557,184 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=465816
 			 */
 			it('Script Blocks with Dependencies Attributes 3', function() {
-				var r = setup('<!DOCTYPE html><head><script language="NOT_JAVASCRIPT" src="foo.js"></script>\n</head><html></html>');
+				var r = setup('<!DOCTYPE html><head><script language="NOT_JAVASCRIPT" src="foo.js"></script>\n</head></html>');
 				var blocks = Finder.findScriptBlocks(r.text);
 				assert.equal(blocks.length, 0, "Should have found 0 script blocks");
 			});	
+			
+			/**
+			 * Find script blocks for on event HTML attributes
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475965
+			 */
+			it('Script Blocks for event attributes 1', function() {
+				var r = setup('<!DOCTYPE html><body><a onclick="test()"></a></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 1, "Should have found 1 script block");
+				assert(!blocks[0].dependencies, "Block should not have dependency");
+				assert(blocks[0].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[0].text, 'test()');
+			});
+			/**
+			 * Find script blocks for on event HTML attributes
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475965
+			 */
+			it('Script Blocks for event attributes 2', function() {
+				var r = setup('<!DOCTYPE html><body><a onclick="test();"/></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 1, "Should have found 1 script block");
+				assert(!blocks[0].dependencies, "Block should not have dependency");
+				assert(blocks[0].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[0].text, 'test();');
+			});
+			/**
+			 * Find script blocks for on event HTML attributes
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475965
+			 */
+			it('Script Blocks for event attributes 3', function() {
+				var r = setup('<!DOCTYPE html><body><a onclick="test()" onkeydown="test2()"></a></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 2, "Should have found 2 script blocks");
+				assert(!blocks[0].dependencies, "Block should not have dependency");
+				assert(blocks[0].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[0].text, 'test()');
+				assert(!blocks[1].dependencies, "Block should not have dependency");
+				assert(blocks[1].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[1].text, 'test2()');
+			});
+			/**
+			 * Find script blocks for on event HTML attributes
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475965
+			 */
+			it('Script Blocks for event attributes 4', function() {
+				var r = setup('<!DOCTYPE html><body><a onclick="test()"></a><a onkeydown="test2()"></a></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 2, "Should have found 2 script blocks");
+				assert(!blocks[0].dependencies, "Block should not have dependency");
+				assert(blocks[0].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[0].text, 'test()');
+				assert(!blocks[1].dependencies, "Block should not have dependency");
+				assert(blocks[1].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[1].text, 'test2()');
+			});
+			/**
+			 * Find script blocks for on event HTML attributes
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475965
+			 */
+			it('Script Blocks for event attributes 5', function() {
+				var r = setup('<!DOCTYPE html><head><script>function test(){}</script></head><body><a onclick="test()"></a></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 2, "Should have found 2 script blocks");
+				assert(!blocks[0].dependencies, "Block should not have dependency");
+				assert(!blocks[0].isWrappedFunctionCall, "Block should not be a function call needing wrapping");
+				assert.equal(blocks[0].text, 'function test(){}');
+				assert(!blocks[1].dependencies, "Block should not have dependency");
+				assert(blocks[1].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[1].text, 'test()');
+			});
+			/**
+			 * Find script blocks for on event HTML attributes
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475965
+			 */
+			it('Script Blocks for event attributes 6', function() {
+				var r = setup('<!DOCTYPE html><head><script src="foo.js">function test(){}</script></head><body><a onclick="test()"></a></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 2, "Should have found 2 script blocks");
+				assert(blocks[0].dependencies, "Block should have dependency");
+				assert(!blocks[0].isWrappedFunctionCall, "Block should not be a function call needing wrapping");
+				assert.equal(blocks[0].text, 'function test(){}');
+				assert(!blocks[1].dependencies, "Block should not have dependency");
+				assert(blocks[1].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[1].text, 'test()');
+			});
+			/**
+			 * Find script blocks for on event HTML attributes
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475965
+			 */
+			it('Script Blocks for event attributes 9', function() {
+				var r = setup('<!DOCTYPE html><body><a    \t\nonclick   \t\n=   \t\n"test()"    \t\n></a></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 1, "Should have found 1 script block");
+				assert(!blocks[0].dependencies, "Block should not have dependency");
+				assert(blocks[0].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[0].text, 'test()');
+			});
+			/**
+			 * Find script blocks for on event HTML attributes
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475965
+			 */
+			it('Script Blocks for event attributes 7', function() {
+				var r = setup('<!DOCTYPE html><head><script src="foo.js">test1();</script></head><body><a onclick="test2()"></a><a onclick="test3()"></a><a onclick="test4()"></a><a onclick="test5()"></a><a onclick="test6()"></a><a onclick="test7()"></a><script>test8();</script></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				blocks.sort(function(a,b){
+					return a.offset - b.offset;
+				});
+				assert.equal(blocks.length, 8, "Should have found 2 script blocks");
+				assert(blocks[0].dependencies, "Block should have dependency");
+				assert(!blocks[0].isWrappedFunctionCall, "Block should not be a function call needing wrapping");
+				assert.equal(blocks[0].text, 'test1();');
+				assert(!blocks[1].dependencies, "Block should not have dependency");
+				assert(blocks[1].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[1].text, 'test2()');
+				assert(!blocks[2].dependencies, "Block should not have dependency");
+				assert(blocks[2].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[2].text, 'test3()');
+				assert(!blocks[3].dependencies, "Block should not have dependency");
+				assert(blocks[3].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[3].text, 'test4()');
+				assert(!blocks[4].dependencies, "Block should not have dependency");
+				assert(blocks[4].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[4].text, 'test5()');
+				assert(!blocks[5].dependencies, "Block should not have dependency");
+				assert(blocks[5].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[5].text, 'test6()');
+				assert(!blocks[6].dependencies, "Block should not have dependency");
+				assert(blocks[6].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[6].text, 'test7()');
+				assert(!blocks[7].dependencies, "Block should not have dependency");
+				assert(!blocks[7].isWrappedFunctionCall, "Block should not be a function call needing wrapping");
+				assert.equal(blocks[7].text, 'test8();');
+			});
+			function testSpecificOnEventAttribute(eventName, shouldPass){
+				var r = setup('<!DOCTYPE html><body><a ' + eventName + '="test()"></a></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				if (shouldPass){
+					assert.equal(blocks.length, 1, "Should have found 1 script block for event: " + eventName);
+					assert(!blocks[0].dependencies, "Block should not have dependency");
+					assert(blocks[0].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+					assert.equal(blocks[0].text, 'test()');
+				} else {
+					assert.equal(blocks.length, 0, "No blocks should have been found for event: " + eventName);
+				}
+			}
+			/**
+			 * Find script blocks for on event HTML attributes
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475965
+			 */
+			it('Script Blocks for specific event attributes', function() {
+				testSpecificOnEventAttribute('onblur', true);
+				testSpecificOnEventAttribute('onchange', true);
+				testSpecificOnEventAttribute('onclick', true);
+				testSpecificOnEventAttribute('ondblclick', true);
+				testSpecificOnEventAttribute('onfocus', true);
+				testSpecificOnEventAttribute('onkeydown', true);
+				testSpecificOnEventAttribute('onkeypress', true);
+				testSpecificOnEventAttribute('onkeyup', true);
+				testSpecificOnEventAttribute('onload', true);
+				testSpecificOnEventAttribute('onmousedown', true);
+				testSpecificOnEventAttribute('onmousemove', true);
+				testSpecificOnEventAttribute('onmouseout', true);
+				testSpecificOnEventAttribute('onmouseover', true);
+				testSpecificOnEventAttribute('onmouseup', true);
+				testSpecificOnEventAttribute('onreset', true);
+				testSpecificOnEventAttribute('onselect', true);
+				testSpecificOnEventAttribute('onsubmit', true);
+				testSpecificOnEventAttribute('onunload', true);
+				testSpecificOnEventAttribute('onon', false);
+				testSpecificOnEventAttribute('blur', false);
+				testSpecificOnEventAttribute('onclick=', false);
+				testSpecificOnEventAttribute('=onclick', false);
+				testSpecificOnEventAttribute('on click=', false);
+			});
 		});
 		
 		/**

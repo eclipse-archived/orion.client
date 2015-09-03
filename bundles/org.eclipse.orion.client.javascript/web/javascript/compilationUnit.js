@@ -38,19 +38,43 @@ define([
      * @private
      */
     CompilationUnit.prototype._init = function _init() {
+    	var wrappedFunctionCallPrefix = "this."; //$NON-NLS-1$
         var _cursor = 0;
         this._source = '';
+        this._blocks.sort(function(a, b){
+        	var _a = a.offset ? a.offset : 0;
+        	var _b = b.offset ? b.offset : 0;
+        	return _a - _b;
+        });
         for(var i = 0; i < this._blocks.length; i++) {
             var block = this._blocks[i];
             if(block.dependencies) {
             	this._deps.push(block.dependencies);
             }
             var pad = block.offset - _cursor;
-            while(pad > 0) {
-                this._source += ' '; //$NON-NLS-1$
-                pad--;
+            if(block.isWrappedFunctionCall){
+            	// Wrap function calls such as those in onclick event attributes to avoid syntax exceptions
+				if (pad < wrappedFunctionCallPrefix.length){
+					continue;
+				}
+				pad -= wrappedFunctionCallPrefix.length;
+				while(pad > 0) {
+                	this._source += ' '; //$NON-NLS-1$
+                	pad--;
+            	}
+            	this._source += wrappedFunctionCallPrefix;
+            	this._source += block.text;
+            	if (block.text && block.text.charAt(block.text.length-1) !== ';'){
+            		this._source += ';';
+            	}
+            } else {
+	            while(pad > 0) {
+	                this._source += ' '; //$NON-NLS-1$
+	                pad--;
+	            }
+	            this._source += block.text;
             }
-            this._source += block.text;
+
             _cursor = this._source.length;
         }
     };

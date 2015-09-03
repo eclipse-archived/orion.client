@@ -262,7 +262,7 @@ define([
 		},
 		
 		/**
-		 * @description Finds the script blocks from an HTML file and returns the code and offset for found blocks
+		 * @description Finds the script blocks from an HTML file and returns the code and offset for found blocks. The returned array may not be sorted.
 		 * @function
 		 * @public
 		 * @param {String} buffer The file contents
@@ -273,6 +273,8 @@ define([
 		findScriptBlocks: function(buffer, offset) {
 			var blocks = [];
 			var val = null;
+			
+			// Find script tags
 			var regex = /<\s*script([^>]*)(?:\/>|>((?:.|\r?\n)*?)<\s*\/script[^<>]*>)/ig;
 			var langRegex = /(type|language)\s*=\s*"([^"]*)"/i;
 			var srcRegex = /src\s*=\s*"([^"]*)"/i;			
@@ -319,6 +321,35 @@ define([
 						dependencies: deps
 						
 					});
+				}
+			}
+			
+			// Find onevent attribute values
+			var eventAttributes = {'blur':true, 'change':true, 'click':true, 'dblclick':true, 'focus':true, 'keydown':true, 'keypress':true, 'keyup':true, 'load':true, 'mousedown':true, 'mousemove':true, 'mouseout':true, 'mouseover':true, 'mouseup':true, 'reset':true, 'select':true, 'submit':true, 'unload':true};
+			var eventRegex = /\s+on(\w*)(\s*=\s*")([^"]*)"/ig;
+			var count = 0;
+			loop: while((val = eventRegex.exec(buffer)) != null) {
+				count++;
+				var attribute = val[1];
+				var assignment = val[2];
+			    text = val[3];
+			    if (attribute && attribute in eventAttributes){
+					if(!text || !assignment) {
+						continue;
+					}
+					index = val.index + 2 + attribute.length + assignment.length;
+					if((offset == null || (index <= offset && index+text.length >= offset))) {
+						for(var j = 0; j < comments.length; j++) {
+							if(comments[j].start <= index && comments[j].end >= index) {
+								continue loop;
+							}
+						}
+						blocks.push({
+							text: text,
+							offset: index,
+							isWrappedFunctionCall: true
+						});
+					}
 				}
 			}
 			return blocks;
