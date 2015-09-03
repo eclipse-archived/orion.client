@@ -414,6 +414,11 @@
     }
 
     Object.defineProperties(URL.prototype, {
+    	toString: {
+    		value: function() {
+    			return this.href;
+    		}		
+    	},
         href: {
             get: function() {
                 return this._url ? _serialize(this._url) : this._input;
