@@ -12,8 +12,9 @@
 /*eslint-env amd, browser*/
 /* eslint-disable missing-nls */
 define([
-'orion/URL-shim' //global
-], function() {
+'orion/xhr',
+'orion/URL-shim' //global, stays last
+], function(_xhr) {
 
 	/**
 	 * @description Create a new instance of the worker
@@ -111,12 +112,9 @@ define([
 										_f += '.js';
 									}
 									url = new URL(_f, window.location.href);
-									req = new XMLHttpRequest();
-									req.onload = function(response) {
-										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.target.response, file: response.target.responseURL, logical: _d.args.file.logical}});
-									};
-									req.open('GET', url, true);
-									req.send();
+									_xhr('GET', url.href).then(function(response) {
+										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.response, file: response.url, logical: _d.args.file.logical}});
+									});
 								} else if(typeof(_d.args.file) === 'string') {
 									_f = _d.args.file;
 									if(!/\.js$/g.test(_f)) {
