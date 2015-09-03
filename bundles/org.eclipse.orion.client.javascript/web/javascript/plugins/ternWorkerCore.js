@@ -186,7 +186,7 @@ require([
 	};
 
 	var ternID = 0;
-	var callbacks = Object.create(null);
+	var reads = Object.create(null);
 
     /**
      * @description Worker callback when a message is sent to the worker
@@ -201,10 +201,10 @@ require([
 					response.messageID = _d.messageID;
                 	post(response);
 				});
-			} else if(typeof(_d.request) === 'string') {
-				var _callback = callbacks[_d.ternID];
-				if(typeof(_callback) === 'function') {
-					_callback(_d.args);
+			} else if(_d.request === 'read') {
+				var _read = reads[_d.ternID];
+				if(typeof(_read) === 'function') {
+					_read(_d.args.error, {contents: _d.args.contents ? _d.args.contents : '', file:_d.args.file, logical: _d.args.logical});
 				}
                 switch(_d.request) {
                     case 'addFile': {
@@ -256,30 +256,6 @@ require([
     }
 
     /**
-     * @description Notifies the Tern server that file contents are ready
-     * @param {Object} args The args from the message
-     */
-    function _contents(args) {
-        var err = args.error;
-        var contents = args.contents;
-        var file = args.file;
-        var reads = pendingReads[file];
-        if(Array.isArray(reads)) {
-            var f = reads.shift();
-            if(typeof(f) === 'function') {
-            	f(err, contents);
-            }
-        }
-        reads = pendingReads[args.logical];
-        if(Array.isArray(reads)) {
-        	f = reads.shift();
-            if(typeof(f) === 'function') {
-            	f(err, {contents: contents, file:file, logical:args.logical});
-            }
-        }
-    }
-
-    /**
      * @description Removes a file from Tern
      * @param {Object} args the request args
      */
@@ -303,12 +279,8 @@ require([
            if(typeof(file) === 'object') {
            		_f = file.logical;
            }
-           if(!Array.isArray(pendingReads[_f])) {
-           		pendingReads[_f] = [];
-           }
-           pendingReads[_f].push(callback);
            var request = {request: 'read', ternID: ternID++, args: {file:file}}; //$NON-NLS-1$
-           callbacks[request.ternID] = _contents;
+           reads[request.ternID] = callback;
            post(request, null);
 	    } else {
 	       post(i18nUtil.formatMessage(Messages['failedReadRequest'], _f)); //$NON-NLS-1$
