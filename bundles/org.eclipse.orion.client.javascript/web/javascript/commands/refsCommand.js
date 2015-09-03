@@ -75,10 +75,10 @@ define([
 							//startIndex: 0-base offset start in that line
 							//length: total chars in this match
 						var confidence, zeroBasedLineNumber = matchingLine.lineNumber;
-						if(i <= fileItem.children.length/2 ) {
-							confidence = "100%";// For first half of hte matches we give 100% confidence
+						if(i%2 === 0 ) {
+							confidence = 100;// For even numbers we give 100% confidence
 						} else {
-							confidence = "80%";
+							confidence = 80;
 						}
 						matchingLine.matches.forEach(function(match) {
 							//TODO: Uncomment the two lines below to convert the match into an editorModel range.
