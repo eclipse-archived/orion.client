@@ -18,9 +18,13 @@
 	text-align: left;
 }
 
+.siteEditorTable .cell {
+	width: 70%;
+}
+
 .siteEditorTable .header {
 	vertical-align: top;
-	min-width: 10em;
+	width: 20%;
 }
 .siteEditorTable td {
 	vertical-align: middle;
