@@ -90,7 +90,7 @@ define([
 								localStorage.removeItem(name);
 							}
 						}
-						authService.getAuthForm(PageLinks.getOrionHome()).then(function(formURL) {
+						authService.getSignOutLink(PageLinks.getOrionHome()).then(function(formURL) {
 							window.location = formURL;
 						});
 					});
