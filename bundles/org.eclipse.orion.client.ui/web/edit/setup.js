@@ -47,13 +47,14 @@ define([
 	'orion/Deferred',
 	'orion/projectClient',
 	'orion/webui/splitter',
-	'orion/webui/tooltip'
+	'orion/webui/tooltip',
+	'orion/bidiUtils'
 ], function(
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModel, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip
+	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils
 ) {
 
 var exports = {};
@@ -360,7 +361,11 @@ objects.mixin(EditorViewer.prototype, {
 			this.activateContext.setActiveEditorViewer(this);
 			this.commandRegistry.processURL(href);
 			if (this.curFileNode) {
-				this.curFileNode.innerHTML = evt.name || "";
+				var curFileNodeName = evt.name || "";
+				if (bidiUtils.isBidiEnabled) {
+					curFileNodeName = bidiUtils.enforceTextDirWithUcc(curFileNodeName);
+				}				
+				this.curFileNode.innerHTML = curFileNodeName;
 			}
 		}.bind(this));
 		inputManager.addEventListener("InputChanging", function(e) { //$NON-NLS-0$

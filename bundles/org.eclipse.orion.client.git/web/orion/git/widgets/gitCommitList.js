@@ -27,8 +27,9 @@ define([
 	'orion/i18nUtil',
 	'orion/git/util',
 	'orion/webui/littlelib',
-	'orion/objects'
-], function(messages, KeyBinding, mGitChangeList, mGitFileList, mGitCommitInfo, mSection, mSelection, mCommands, Deferred, mExplorer, mHTMLFragments, mGitCommands, i18nUtil, util, lib, objects) {
+	'orion/objects',
+	'orion/bidiUtils'
+], function(messages, KeyBinding, mGitChangeList, mGitFileList, mGitCommitInfo, mSection, mSelection, mCommands, Deferred, mExplorer, mHTMLFragments, mGitCommands, i18nUtil, util, lib, objects, bidiUtils) {
 
 	var pageQuery = "page=1&pageSize=20"; //$NON-NLS-0$
 
@@ -212,7 +213,11 @@ define([
 							if (that.simpleLog && targetRef) {
 								section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef)));
 							} else {
-								section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], util.shortenRefName(activeBranch)));
+								var shortRefName = util.shortenRefName(activeBranch);
+								if (bidiUtils.isBidiEnabled) {
+									shortRefName = bidiUtils.enforceTextDirWithUcc(shortRefName);
+								}								
+								section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], shortRefName));
 							}
 						}
 						if (progress) progress.done();

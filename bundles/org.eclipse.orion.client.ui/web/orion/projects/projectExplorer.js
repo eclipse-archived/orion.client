@@ -14,8 +14,9 @@ define([
 	'orion/URITemplate',
 	'orion/webui/littlelib',
 	'orion/explorers/explorer',
-	'orion/section'
-], function(messages, URITemplate, lib, mExplorer, mSection){
+	'orion/section',
+	'orion/bidiUtils'
+], function(messages, URITemplate, lib, mExplorer, mSection, bidiUtils){
 	
 	var ID_COUNT = 0;
 	
@@ -55,17 +56,25 @@ define([
 			if(!item.Description){
 				return " ";
 			}
-			if(item.Description.length>200){
-				return item.Description.substring(0, 180) + "...";
+			var itemDesc = item.Description;
+			if (bidiUtils.isBidiEnabled) {
+				itemDesc = bidiUtils.enforceTextDirWithUcc(itemDesc);
 			}
-			return item.Description;
+			if(item.Description.length>200){
+				return itemDesc.substring(0, 180) + "...";
+			}
+			return itemDesc;
 		}
 		
 		switch(col_no){
 			case 0:
 				cell.className = "navColumnNoIcon";
 				var a = document.createElement("a");
-				a.appendChild(document.createTextNode(item.Name));
+				var itemName = item.Name;
+				if (bidiUtils.isBidiEnabled) {
+					itemName = bidiUtils.enforceTextDirWithUcc(itemName);
+				}
+				a.appendChild(document.createTextNode(itemName));
 				a.href = editTemplate.expand({resource: item.ContentLocation}); //$NON-NLS-0$
 				cell.appendChild(a);
 				return cell;
