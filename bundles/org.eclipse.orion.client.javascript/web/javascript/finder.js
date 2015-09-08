@@ -305,9 +305,6 @@ define([
 			    	blocks.push({text: "", offset: 0, dependencies: deps});
 			    	continue;
 			    }
-				if(text.length < 1) {
-					continue;
-				}
 				var index = val.index+val[0].indexOf('>')+1;  //$NON-NLS-0$
 				if((offset == null || (index <= offset && index+text.length >= offset))) {
 					for(var i = 0; i < comments.length; i++) {
