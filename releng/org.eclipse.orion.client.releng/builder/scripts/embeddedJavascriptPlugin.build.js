@@ -21,7 +21,6 @@
 		esprima: "esprima/esprima",
 		estraverse: "estraverse/estraverse",
 		escope: "escope/escope",
-		logger: "javascript/logger",
 		doctrine: 'doctrine/doctrine',
         'orion/bootstrap': 'embeddedEditor/builder/buildFrom/bootstrap'
 	},

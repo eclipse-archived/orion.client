@@ -15,7 +15,7 @@
  */
 define([
 './util',
-'logger',
+'javascript/logger',
 'javascript/finder',
 'i18n!javascript/nls/problems',
 'estraverse',

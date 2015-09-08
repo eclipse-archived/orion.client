@@ -17,7 +17,6 @@
 		esprima: "esprima/esprima", 
 		estraverse: "estraverse/estraverse", 
 		escope: "escope/escope", 
-		logger: "javascript/logger", 
 		doctrine: 'doctrine/doctrine', 
 		i18n: "requirejs/i18n" 
 	},

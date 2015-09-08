@@ -32,7 +32,7 @@ define([
 'javascript/outliner',
 'javascript/cuProvider',
 'orion/util',
-'logger',
+'javascript/logger',
 'javascript/commands/generateDocCommand',
 'javascript/commands/openDeclaration',
 'javascript/commands/openImplementation',
