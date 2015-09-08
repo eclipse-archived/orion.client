@@ -201,20 +201,26 @@ require([
 					response.messageID = _d.messageID;
                 	post(response);
 				});
-			} else if(_d.request === 'read') {
-				var _read = reads[_d.ternID];
-				if(typeof(_read) === 'function') {
-					_read(_d.args.error, {contents: _d.args.contents ? _d.args.contents : '', file:_d.args.file, logical: _d.args.logical});
-				}
-                switch(_d.request) {
-                    case 'addFile': {
-                    	ternserver.addFile(_d.args.file, _d.args.source);
-                    	break;
-                    }
-                    case 'delfile': {
-                        _deleteFile(_d.args);
-                        break;
-                    }
+			}
+            switch(_d.request) {
+                case 'addFile': {
+                	ternserver.addFile(_d.args.file, _d.args.source);
+                	break;
+                }
+                case 'delfile': {
+                    if(ternserver && typeof(_d.args.file) === 'string') {
+			            ternserver.delFile(_d.args.file);
+			        } else {
+			            post(i18nUtil.formatMessage(Messages['failedDeleteRequest'], _d.args.file));
+			        }
+                    break;
+                }
+                case 'read': {
+                	var _read = reads[_d.ternID];
+					if(typeof(_read) === 'function') {
+						_read(_d.args.error, {contents: _d.args.contents ? _d.args.contents : '', file:_d.args.file, logical: _d.args.logical});
+					}
+                	break;
                 }
             }
         }
@@ -253,18 +259,6 @@ require([
     	} else {
     		postMessage(msg);
     	}
-    }
-
-    /**
-     * @description Removes a file from Tern
-     * @param {Object} args the request args
-     */
-    function _deleteFile(args) {
-        if(ternserver && typeof(args.file) === 'string') {
-            ternserver.delFile(args.file);
-        } else {
-            post(i18nUtil.formatMessage(Messages['failedDeleteRequest'], args.file));
-        }
     }
 
     /**
