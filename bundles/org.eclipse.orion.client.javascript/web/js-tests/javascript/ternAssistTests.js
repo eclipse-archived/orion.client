@@ -27,6 +27,8 @@ define([
 	var ternAssist;
 	var envs = Object.create(null);
 	var astManager = new ASTManager.ASTManager(Esprima);
+	var jsFile = 'tern_content_assist_test_script.js';
+	var htmlFile = 'tern_content_assist_test_script.html';
 
 	/**
 	 * @description Sets up the test
@@ -35,18 +37,27 @@ define([
 	 */
 	function setup(options) {
 		var state = Object.create(null);
-		var buffer = state.buffer = typeof(options.buffer) === 'undefined' ? '' : options.buffer,
-		    prefix = state.prefix = typeof(options.prefix) === 'undefined' ? '' : options.prefix,
-		    offset = state.offset = typeof(options.offset) === 'undefined' ? 0 : options.offset,
-		    line = state.line = typeof(options.line) === 'undefined' ? '' : options.line,
-		    keywords = typeof(options.keywords) === 'undefined' ? false : options.keywords,
-		    templates = typeof(options.templates) === 'undefined' ? false : options.templates,
-		    contentType = options.contenttype ? options.contenttype : 'application/javascript',
-			file = state.file = 'tern_content_assist_test_script.js';
-			assert(options.callback, 'You must provide a test callback for worker-based tests');
-			state.callback = options.callback;
-			testworker.setTestState(state);
-			testworker.postMessage({request: 'delfile', args:{file: file}});
+		var buffer = state.buffer = typeof(options.buffer) === 'undefined' ? '' : options.buffer;
+		var prefix = state.prefix = typeof(options.prefix) === 'undefined' ? '' : options.prefix;
+		var offset = state.offset = typeof(options.offset) === 'undefined' ? 0 : options.offset;
+		var line = state.line = typeof(options.line) === 'undefined' ? '' : options.line;
+		var keywords = typeof(options.keywords) === 'undefined' ? false : options.keywords;
+		var templates = typeof(options.templates) === 'undefined' ? false : options.templates;
+		
+		var contentType = options.contenttype ? options.contenttype : 'application/javascript';
+		var	file = state.file = jsFile;				
+		if (contentType === 'text/html'){
+			// Tern plug-ins don't have the content type, only the name of the file
+			file = state.file = htmlFile;
+		}
+		assert(options.callback, 'You must provide a test callback for worker-based tests');
+		state.callback = options.callback;
+		testworker.setTestState(state);
+		
+		// Delete any test files created by previous tests
+		testworker.postMessage({request: 'delfile', args:{file: jsFile}});
+		testworker.postMessage({request: 'delfile', args:{file: htmlFile}});
+		
 		envs = typeof(options.env) === 'object' ? options.env : Object.create(null);
 		var editorContext = {
 			/*override*/
@@ -111,6 +122,7 @@ define([
 		assert(_p, 'setup() should have completed normally');
 		ternAssist.computeContentAssist(_p.editorContext, _p.params).then(function (actualProposals) {
 			try {
+				assert(actualProposals, "Error occurred, returned proposals was undefined");
 				assert.equal(actualProposals.length, expectedProposals.length,
 					"Wrong number of proposals.  Expected:\n" + stringifyExpected(expectedProposals) +"\nActual:\n" + stringifyActual(actualProposals));
 				for (var i = 0; i < actualProposals.length; i++) {
@@ -148,7 +160,7 @@ define([
 			ternAssist = new TernAssist.TernContentAssist(astManager, testworker, function() {
 				return new Deferred().resolve(envs);
 			});
-			this.timeout(10000);
+			this.timeout(100000);
 			var options = {
 				buffer: "xx",
 				prefix: "xx",
@@ -4468,6 +4480,170 @@ define([
 					buffer: "/*eslint-env browser */var xx = 9; this.x",
 					prefix: "x",
 					offset: 41,
+					callback: done};
+				testProposals(options, [
+					['xx', 'xx : number'],
+					['', 'browser'],
+					['XMLDocument()', 'XMLDocument()'],
+					['XMLHttpRequest()', 'XMLHttpRequest()'],
+					['XPathResult()', 'XPathResult()']
+				]);
+			});
+		});
+		describe('HTML Embedded Script Block Tests', function() {
+			/**
+			 * Tests support for content assist results inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML embedded script blocks 1 - simple block with valid syntax', function(done) {
+				var options = {
+					buffer: "<html><head><script>var xx = 0; this.x;</script></head></html>",
+					prefix: "x",
+					offset: 38,
+					contenttype: "text/html",
+					callback: done};
+				testProposals(options, [
+					['xx', 'xx : number'],
+					
+					['', 'browser'],
+					['XMLDocument()', 'XMLDocument()'],
+					['XMLHttpRequest()', 'XMLHttpRequest()'],
+					['XPathResult()', 'XPathResult()']
+				]);
+			});
+			/**
+			 * Tests support for content assist results inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML embedded script blocks 2 - simple block with no ending semi', function(done) {
+				var options = {
+					buffer: "<html><head><script>var xx = 0; this.x</script></head></html>",
+					prefix: "x",
+					offset: 38,
+					contenttype: "text/html",
+					callback: done};
+				testProposals(options, [
+					['xx', 'xx : number'],
+					['', 'browser'],
+					['XMLDocument()', 'XMLDocument()'],
+					['XMLHttpRequest()', 'XMLHttpRequest()'],
+					['XPathResult()', 'XPathResult()']
+				]);
+			});
+			/**
+			 * Tests support for content assist results inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML embedded script blocks 3 - empty script block', function(done) {
+				var options = {
+					buffer: "<html><head><script></script></head></html>",
+					prefix: "x",
+					offset: 20,
+					contenttype: "text/html",
+					callback: done};
+				testProposals(options, [
+					['', 'browser'],
+					['XMLDocument()', 'XMLDocument()'],
+					['XMLHttpRequest()', 'XMLHttpRequest()'],
+					['XPathResult()', 'XPathResult()']
+				]);
+			});
+			/**
+			 * Tests support for content assist results inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML embedded script blocks multi 1', function(done) {
+				var options = {
+					buffer: "<html><head><script>var xx = 0;</script></head><body><a>test</a><script>this.x</script></body></html>",
+					prefix: "x",
+					offset: 78,
+					contenttype: "text/html",
+					callback: done};
+				testProposals(options, [
+					['xx', 'xx : number'],
+					['', 'browser'],
+					['XMLDocument()', 'XMLDocument()'],
+					['XMLHttpRequest()', 'XMLHttpRequest()'],
+					['XPathResult()', 'XPathResult()']
+				]);
+			});
+			/**
+			 * Tests support for content assist results inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML embedded script blocks multi 2', function(done) {
+				var options = {
+					buffer: "<html><head><script>this.x</script></head><body><a>test</a><script>var xx = 0;</script></body></html>",
+					prefix: "x",
+					offset: 26,
+					contenttype: "text/html",
+					callback: done};
+				testProposals(options, [
+					['xx', 'xx : number'],
+					['', 'browser'],
+					['XMLDocument()', 'XMLDocument()'],
+					['XMLHttpRequest()', 'XMLHttpRequest()'],
+					['XPathResult()', 'XPathResult()']
+				]);
+			});
+			/**
+			 * Tests support for content assist results inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML wrapped function call 1 - local script blocks are included in scope', function(done) {
+				var options = {
+					buffer: '<html><head><script>var xx = 0;</script></head><body><a onclick="x"></a></body></html>',
+					prefix: "x",
+					offset: 65,
+					contenttype: "text/html",
+					callback: done};
+				testProposals(options, [
+					['xx', 'xx : number'],
+					['', 'browser'],
+					['XMLDocument()', 'XMLDocument()'],
+					['XMLHttpRequest()', 'XMLHttpRequest()'],
+					['XPathResult()', 'XPathResult()']
+				]);
+			});
+			/**
+			 * Tests support for content assist results inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML wrapped function call 2 - calls are wrapped with "this.<func>;"', function(done) {
+				var options = {
+					// Checks that the compilation unit is wrapping the function correctly
+					buffer: '<html><head><script>var xx = 0;</script></head><body><a onclick="garblegarble"></a><a onclick="x"></a></body></html>',
+					prefix: "x",
+					offset: 95,
+					contenttype: "text/html",
+					callback: done};
+				testProposals(options, [
+					['xx', 'xx : number'],
+					['', 'browser'],
+					['XMLDocument()', 'XMLDocument()'],
+					['XMLHttpRequest()', 'XMLHttpRequest()'],
+					['XPathResult()', 'XPathResult()']
+				]);
+			});
+			/**
+			 * Tests support for content assist results inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML wrapped function call 3 - order doesn\'t affect compilation unit', function(done) {
+				var options = {
+					// Checks the the compilation unit sorts
+					buffer: '<html><body><a onclick="x"></a><script>var xx = 0;</script></body></html>',
+					prefix: "x",
+					offset: 24,
+					contenttype: "text/html",
 					callback: done};
 				testProposals(options, [
 					['xx', 'xx : number'],
