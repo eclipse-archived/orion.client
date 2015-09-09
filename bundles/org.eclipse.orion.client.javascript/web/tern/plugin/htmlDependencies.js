@@ -75,6 +75,7 @@
 		preParse: function preParse(text, options) {
 			var f = options.directSourceFile.name;
 			if(isHTML(f)) {
+				// TODO We want to use a cuProvider to cache the CU, but there are no onModelChange events in the Tern server to recognize that the file contents have changed.
 				var blocks = Finder.findScriptBlocks(text);
 				if(Array.isArray(blocks)) {
 					var cu = new CU(blocks, {location: f});

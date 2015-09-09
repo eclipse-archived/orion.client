@@ -16,6 +16,7 @@ define([
 ], function(LRU, CU) {
 
 	var _cache = new LRU(10);
+	var _useCache = true;
 	var inputChanged = null;
 
 	/**
@@ -26,16 +27,20 @@ define([
 	 * @returns {javascript.CompilationUnit} The compilation unit for the given information
 	 */
 	function getCompilationUnit(getSourceBlocks, metadata, editorContext) {
-		var cu = _cache.get(metadata.location);
-		if(cu) {
-			return cu;
+		if (_useCache){
+			var cu = _cache.get(metadata.location);
+			if(cu) {
+				return cu;
+			}
 		}
 		var blocks = getSourceBlocks();
 		if (!blocks){
 			blocks = [];
 		}
 		cu = new CU(blocks, metadata, editorContext);
-		_cache.put(metadata.location, cu);
+		if (_useCache){
+			_cache.put(metadata.location, cu);
+		}
 		return cu;
 	}
 
@@ -52,6 +57,15 @@ define([
 	    } else {
 	        _cache.remove(_getKey(evnt.file));
 	    }
+	}
+	
+	/**
+	 * Allows a caller to turn off the cache cuProvider is using, creating a new CU each time one is requested.
+	 * Intended for use in testing where no onModelChanging events are fired.
+	 * @param useCache whether to use the cache (default) or not
+	 */
+	function setUseCache(useCache){
+		_useCache = useCache;
 	}
 
 	/**
@@ -78,6 +92,7 @@ define([
 	return {
 		getCompilationUnit: getCompilationUnit,
 		onModelChanging: onModelChanging,
-		onInputChanged: onInputChanged
+		onInputChanged: onInputChanged,
+		setUseCache: setUseCache
 	};
 });

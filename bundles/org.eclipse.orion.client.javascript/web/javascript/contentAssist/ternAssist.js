@@ -458,11 +458,13 @@ define([
 	 * @param {javascript.ASTManager} astManager An AST manager to create ASTs with
 	 * @param {TernWorker} ternWorker The worker running Tern
 	 * @param {Function} pluginEnvironments The function to use to query the Tern server for contributed plugins
+	 * @param {Object} cuprovider The CU Provider that caches compilation units
 	 */
-	function TernContentAssist(astManager, ternWorker, pluginEnvironments) {
+	function TernContentAssist(astManager, ternWorker, pluginEnvironments, cuprovider) {
 		this.astManager = astManager;
 		this.ternworker = ternWorker;
 		this.pluginenvs = pluginEnvironments;
+		this.cuprovider = cuprovider;
 		this.timeout = null;
 	}
 
@@ -486,16 +488,15 @@ define([
 			return editorContext.getFileMetadata().then(function(meta) {
 			    if(meta.contentType.id === 'text/html') {
 			        return editorContext.getText().then(function(text) {
-			            var blocks = Finder.findScriptBlocks(text);
-			            if(blocks && blocks.length > 0) {
-			                var cu = new CU(blocks, meta);
-        			        if(cu.validOffset(params.offset)) {
-        			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-        			            	return that.pluginenvs().then(function(envs) {
-        			            		return that.doAssist(ast, params, meta, {ecma5:true, ecma6:true, browser:true}, envs, text);
-        			            	});
-                    			});
-        			        }
+			        	var cu = that.cuprovider.getCompilationUnit(function(){
+		            		return Finder.findScriptBlocks(text);
+		            	}, meta);
+    			        if(cu.validOffset(params.offset)) {
+    			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+    			            	return that.pluginenvs().then(function(envs) {
+    			            		return that.doAssist(ast, params, meta, {ecma5:true, ecma6:true, browser:true}, envs, text);
+    			            	});
+                			});
     			        }
 			        });
 			    } else {

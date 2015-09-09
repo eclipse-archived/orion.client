@@ -262,9 +262,10 @@ define([
 	describe("Cross-file Tests", function() {
 		before('Message the server for warm up on cross file tests', function(callback) {
 			testworker = TestWorker.instance();
+			CUProvider.setUseCache(false);
 			assist = new TernAssist.TernContentAssist(astManager, testworker, function() {
 				return new Deferred().resolve(envs);
-			});
+			}, CUProvider);
 			this.timeout(20000);
 			var options = {
 				buffer: "xx",

@@ -12,15 +12,16 @@
 /*eslint-env amd, mocha, browser*/
 /* eslint-disable missing-nls */
 define([
-'javascript/contentAssist/ternAssist',
 'javascript/astManager',
+'javascript/contentAssist/ternAssist',
+'javascript/cuProvider',
 'esprima',
 'chai/chai',
 'orion/Deferred',
 'js-tests/javascript/testingWorker',
 'mocha/mocha', //must stay at the end, not a module
 'doctrine' //must stay at the end, does not export a module
-], function(TernAssist, ASTManager, Esprima, chai, Deferred, TestWorker) {
+], function(ASTManager, TernAssist, CUProvider, Esprima, chai, Deferred, TestWorker) {
 	var assert = chai.assert;
 
 	var testworker;
@@ -157,9 +158,10 @@ define([
 	describe('Tern Content Assist Tests', function() {
 		before('Message the server for warm up', function(callback) {
 			testworker = TestWorker.instance();
+			CUProvider.setUseCache(false);
 			ternAssist = new TernAssist.TernContentAssist(astManager, testworker, function() {
 				return new Deferred().resolve(envs);
-			});
+			}, CUProvider);
 			this.timeout(100000);
 			var options = {
 				buffer: "xx",
@@ -4505,7 +4507,6 @@ define([
 					callback: done};
 				testProposals(options, [
 					['xx', 'xx : number'],
-					
 					['', 'browser'],
 					['XMLDocument()', 'XMLDocument()'],
 					['XMLHttpRequest()', 'XMLHttpRequest()'],
