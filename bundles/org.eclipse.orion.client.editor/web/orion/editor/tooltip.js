@@ -807,7 +807,7 @@ function Tooltip (view) {
 				annotation = annotations[j];
 				if (annotation.title !== "" && !annotation.groupAnnotation) {
 					// Don't display untitled annotations in the editor such as occurrences as the code is already visible
-					if (!inEditor || annotation.title){
+					if (!inEditor || annotation.title || annotation.type === "orion.annotation.folding"){
 						newAnnotations.push(annotation); 
 					}
 				}
