@@ -34,7 +34,8 @@
 	background: #37474F;
 	border-radius: 5px;
 	padding: 2px 0 2px 4px;
-	width: 270px;
+	min-width: 270px;
+	max-width: 400px;
 }
 
 .launchConfigurationsButton > .dropdownTriggerButtonLabel {
@@ -47,6 +48,7 @@
 	vertical-align: top;
 	white-space: nowrap;
 	width: calc(100% - 20px);
+	padding-right: 1px;
 }
 
 .launchConfigurationsButton > .dropdownArrowDown {

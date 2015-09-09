@@ -138,6 +138,7 @@ define([
 				} else {
 					this._menuItemsCache = []; // clear launch configurations menu items cache
 					var dropdown = this._launchConfigurationsDropdown.getDropdown();
+					dropdown._dropdownNode.style.width = (this._launchConfigurationsDropdown._parentNode.clientWidth + 30) + "px";
 					var hash, launchConfiguration, menuItem, domNodeWrapperList;
 					
 					var sortedHashes = Object.keys(this._cachedLaunchConfigurations);
@@ -217,7 +218,7 @@ define([
 			});
 			this._launchConfigurationsDropdownTriggerButton = this._launchConfigurationsDropdown.getDropdownTriggerButton();
 			this._launchConfigurationsDropdownTriggerButton.classList.remove("dropdownDefaultButton"); //$NON-NLS-0$
-			this._launchConfigurationsDropdownTriggerButton.classList.add("launchConfigurationsButton"); //$NON-NLS-0$
+			this._launchConfigurationsDropdownTriggerButton.classList.add("launchConfigurationsButton"); //$NON-NLS-0$			
 			
 			this._disableLaunchConfigurationsDropdown(); // start with control greyed out until launch configs are set
 			
