@@ -50,13 +50,13 @@ define([
 	 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
 	 */
 	function onModelChanging(evnt) {
-	    if(inputChanged) {
-	        //TODO haxxor, eat the first model changing event which immediately follows
-	        //input changed
-	        inputChanged = null;
-	    } else {
-	        _cache.remove(_getKey(evnt.file));
-	    }
+		if(inputChanged) {
+			//TODO haxxor, eat the first model changing event which immediately follows
+			//input changed
+			inputChanged = null;
+		} else {
+			_cache.remove(_getKey(evnt.file));
+		}
 	}
 	
 	/**
@@ -74,10 +74,10 @@ define([
 	 * @since 8.0
 	 */
 	function _getKey(metadata) {
-      if(!metadata || !metadata.location) {
-          return 'unknown'; //$NON-NLS-1$
-      }
-      return metadata.location;
+	  if(!metadata || !metadata.location) {
+		  return 'unknown'; //$NON-NLS-1$
+	  }
+	  return metadata.location;
 	}
 
 	/**
@@ -86,7 +86,7 @@ define([
 	 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
 	 */
 	function onInputChanged(evnt) {
-	    inputChanged = evnt;
+		inputChanged = evnt;
 	}
 
 	return {

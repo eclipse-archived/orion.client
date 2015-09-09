@@ -84,10 +84,10 @@ define([
 					 */
 					enter: function(node) {
 						if(node.type && node.range) {
-						    if(!next && node.type === Estraverse.Syntax.Program && offset < node.range[0]) {
-						        //https://bugs.eclipse.org/bugs/show_bug.cgi?id=447454
-						        return Estraverse.VisitorOption.Break;
-						    }
+							if(!next && node.type === Estraverse.Syntax.Program && offset < node.range[0]) {
+								//https://bugs.eclipse.org/bugs/show_bug.cgi?id=447454
+								return Estraverse.VisitorOption.Break;
+							}
 							//only check nodes that are typed, we don't care about any others
 							if(node.range[0] <= offset) {
 								found = node;
@@ -95,17 +95,17 @@ define([
 									parents.push(node);
 								}
 							} else {
-							    if(next) {
-							        found = node;
-							        if(parents) {
-    									parents.push(node);
-    								}
-							    }
-							    if(found.type !== Estraverse.Syntax.Program) {
-							        //we don't want to find the next node as the program root
-							        //if program has no children it will be returned on the next pass
-							        //https://bugs.eclipse.org/bugs/show_bug.cgi?id=442411
-								    return Estraverse.VisitorOption.Break;
+								if(next) {
+									found = node;
+									if(parents) {
+										parents.push(node);
+									}
+								}
+								if(found.type !== Estraverse.Syntax.Program) {
+									//we don't want to find the next node as the program root
+									//if program has no children it will be returned on the next pass
+									//https://bugs.eclipse.org/bugs/show_bug.cgi?id=442411
+									return Estraverse.VisitorOption.Break;
 								}
 							}
 						}
@@ -251,7 +251,7 @@ define([
 					} else if(offset === ast.range[1] && offset === comment.range[1]) {
 					   return comment;
 					} else if(offset > ast.range[1] && offset <= comment.range[1]) {
-					    return comment;
+						return comment;
 					} else if(comment.range[0] > offset) {
 						//we've passed the node
 						return null;
@@ -281,30 +281,30 @@ define([
 			var comments = this.findHtmlCommentBlocks(buffer, offset);
 			loop: while((val = regex.exec(buffer)) != null) {
 				var attributes = val[1];
-			    var text = val[2];
-			    var deps = null;
-			    if (attributes){
-			    	var lang = langRegex.exec(attributes);
-			    	// No type/language attribute or empty values default to javascript
-			    	if (lang && lang[2]){
-			    		var type = lang[2];
-			    		if (lang[1] === "language"){
-			    			// Language attribute does not include 'text' prefix
-			    			type = "text/" + type; //$NON-NLS-1$
-		    			}
-		    			if (!/^(application|text)\/(ecmascript|javascript(\d.\d)?|livescript|jscript|x\-ecmascript|x\-javascript)$/ig.test(type)) {
-				        	continue;
-				        }
-			        }
-			        var src = srcRegex.exec(attributes);
-			        if (src){
-			        	deps = src[1];
-			        }
-			    }
-			    if (!text && deps){
-			    	blocks.push({text: "", offset: 0, dependencies: deps});
-			    	continue;
-			    }
+				var text = val[2];
+				var deps = null;
+				if (attributes){
+					var lang = langRegex.exec(attributes);
+					// No type/language attribute or empty values default to javascript
+					if (lang && lang[2]){
+						var type = lang[2];
+						if (lang[1] === "language"){
+							// Language attribute does not include 'text' prefix
+							type = "text/" + type; //$NON-NLS-1$
+						}
+						if (!/^(application|text)\/(ecmascript|javascript(\d.\d)?|livescript|jscript|x\-ecmascript|x\-javascript)$/ig.test(type)) {
+							continue;
+						}
+					}
+					var src = srcRegex.exec(attributes);
+					if (src){
+						deps = src[1];
+					}
+				}
+				if (!text && deps){
+					blocks.push({text: "", offset: 0, dependencies: deps});
+					continue;
+				}
 				var index = val.index+val[0].indexOf('>')+1;  //$NON-NLS-0$
 				if((offset == null || (index <= offset && index+text.length >= offset))) {
 					for(var i = 0; i < comments.length; i++) {
@@ -329,8 +329,8 @@ define([
 				count++;
 				var attribute = val[1];
 				var assignment = val[2];
-			    text = val[3];
-			    if (attribute && attribute in eventAttributes){
+				text = val[3];
+				if (attribute && attribute in eventAttributes){
 					if(!text || !assignment) {
 						continue;
 					}
@@ -389,21 +389,21 @@ define([
 		 * @since 8.0
 		 */
 		findESLintEnvForMember: function findESLintEnvForMember(name) {
-		    var keys = Object.keys(ESlintEnv);
-		    if(keys) {
-		        var len = keys.length;
-		        for(var i = 0; i < len; i++) {
-		            var env = ESlintEnv[keys[i]];
-		            if(typeof env[name] !== 'undefined') {
-		                return keys[i];
-		            }
-		            var globals = env['globals'];
-		            if(globals && (typeof globals[name] !== 'undefined')) {
-		                return keys[i];
-		            }
-		        }
-		    }
-		    return null;
+			var keys = Object.keys(ESlintEnv);
+			if(keys) {
+				var len = keys.length;
+				for(var i = 0; i < len; i++) {
+					var env = ESlintEnv[keys[i]];
+					if(typeof env[name] !== 'undefined') {
+						return keys[i];
+					}
+					var globals = env['globals'];
+					if(globals && (typeof globals[name] !== 'undefined')) {
+						return keys[i];
+					}
+				}
+			}
+			return null;
 		},
 		
 		/**
@@ -415,16 +415,16 @@ define([
 		 * @since 8.0
 		 */
 		findDirective: function findDirective(ast, name) {
-		    if(ast && (typeof name !== 'undefined')) {
-		        var len = ast.comments.length;
-		        for(var i = 0; i < len; i++) {
-		            var match = /^\s*(eslint-\w+|eslint|globals?)(\s|$)/.exec(ast.comments[i].value);
-		            if(match != null && typeof match !== 'undefined' && match[1] === name) {
-		                return ast.comments[i];
-		            }
-		        }
-		    }
-		    return null;
+			if(ast && (typeof name !== 'undefined')) {
+				var len = ast.comments.length;
+				for(var i = 0; i < len; i++) {
+					var match = /^\s*(eslint-\w+|eslint|globals?)(\s|$)/.exec(ast.comments[i].value);
+					if(match != null && typeof match !== 'undefined' && match[1] === name) {
+						return ast.comments[i];
+					}
+				}
+			}
+			return null;
 		},
 		
 		/**
@@ -437,33 +437,33 @@ define([
 		 * @since 8.0
 		 */
 		findCommentForNode: function findCommentForNode(node) {
-		    var comments = node.leadingComments;
-		    var comment = null;
-	        if(comments && comments.length > 0) {
-	            //simple case: the node has an attaced comment, take the last comment in the leading array
-	            comment = comments[comments.length-1];
-	            if(comment.type === 'Block') {
-    	            comment.node = node;
-    	            return comment;
-	            }
-	        } else if(node.type === 'Property') { //TODO https://github.com/jquery/esprima/issues/1071
-	            comment = findCommentForNode(node.key);
-	            if(comment) {
-	                comment.node = node;
-	                return comment;
-	            }
-	        } else if(node.type === 'FunctionDeclaration') { //TODO https://github.com/jquery/esprima/issues/1071
-	            comment = findCommentForNode(node.id);
-	            if(comment) {
-	                comment.node = node;
-	                return comment;
-	            }
-	        }
-            //we still want to show a hover for something with no doc
-            comment = Object.create(null);
-            comment.node = node;
-            comment.value = '';
-	        return comment;
+			var comments = node.leadingComments;
+			var comment = null;
+			if(comments && comments.length > 0) {
+				//simple case: the node has an attaced comment, take the last comment in the leading array
+				comment = comments[comments.length-1];
+				if(comment.type === 'Block') {
+					comment.node = node;
+					return comment;
+				}
+			} else if(node.type === 'Property') { //TODO https://github.com/jquery/esprima/issues/1071
+				comment = findCommentForNode(node.key);
+				if(comment) {
+					comment.node = node;
+					return comment;
+				}
+			} else if(node.type === 'FunctionDeclaration') { //TODO https://github.com/jquery/esprima/issues/1071
+				comment = findCommentForNode(node.id);
+				if(comment) {
+					comment.node = node;
+					return comment;
+				}
+			}
+			//we still want to show a hover for something with no doc
+			comment = Object.create(null);
+			comment.node = node;
+			comment.value = '';
+			return comment;
 		},
 		
 		/**
@@ -474,29 +474,29 @@ define([
 		 * @since 9.0
 		 */
 		findParentFunction: function findParentFunction(node) {
-		    if(node) {
-		        if(node.parents) {
-		            //the node has been computed with the parents array from Finder#findNode
-    		        var parents = node.parents;
-    		        var parent = parents.pop();
-    		        while(parent) {
-    		            if(parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression') {
-    		                return parent;
-    		            }
-    		            parent = parents.pop();
-    		        }
-		        } else if(node.parent) {
-		            //eslint has tagged the AST with herarchy infos
-		            var parent = node.parent;
-		            while(parent) {
-		                if(parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression') {
-    		                return parent;
-    		            }
-    		            parent = parent.parent;
-		            }
-		        }
-		    }
-		    return null;
+			if(node) {
+				if(node.parents) {
+					//the node has been computed with the parents array from Finder#findNode
+					var parents = node.parents;
+					var parent = parents.pop();
+					while(parent) {
+						if(parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression') {
+							return parent;
+						}
+						parent = parents.pop();
+					}
+				} else if(node.parent) {
+					//eslint has tagged the AST with herarchy infos
+					var parent = node.parent;
+					while(parent) {
+						if(parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression') {
+							return parent;
+						}
+						parent = parent.parent;
+					}
+				}
+			}
+			return null;
 		} 
 	};
 
