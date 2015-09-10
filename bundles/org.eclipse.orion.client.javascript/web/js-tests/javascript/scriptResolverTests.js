@@ -305,5 +305,90 @@ define([
 			assert.equal(res[0].name, 'foo.bar.baz/messages-file.js', 'Should have found file object with name equal to foo.bar.baz/messages-file.js');
 
 		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476907
+		 * @since 10.0
+		 */
+		it('Test resolveRelativeFiles - encoding 1', function() {
+			var files = testFileClient.createTestFiles(['foo.bar | baz/messages-file.js', 'foo.bar | baz/bar/messages.js', 'foo.bar | baz/bar/baz/messages.js']);
+			var res = resolver.resolveRelativeFiles('./requirejs/json!foo.bar | baz/messages-file', files, {location: 'TestingRoot/foo.bar | baz/messages.js', contentType: {name: 'JavaScript'}});
+			assert(Array.isArray(res), 'There should have been a files array returned');
+			assert.equal(res.length, 1, 'There should have been one file returned');
+			assert.equal(res[0].location, testFileClient.fileServiceRootURL()+'/foo.bar | baz/messages-file.js', 'Should have found file object with location TestingRoot/foo.bar | baz/messages.js');
+			assert.equal(res[0].name, 'foo.bar | baz/messages-file.js', 'Should have found file object with name equal to foo.bar | baz/messages-file.js');
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476907
+		 * @since 10.0
+		 */
+		it('Test resolveRelativeFiles - encoding 2', function() {
+			var files = testFileClient.createTestFiles(['foo.bar | #baz/messages-file.js', 'foo.bar | #baz/bar/messages.js', 'foo.bar | #baz/bar/baz/messages.js']);
+			var res = resolver.resolveRelativeFiles('./requirejs/json!foo.bar | #baz/messages-file', files, {location: 'TestingRoot/foo.bar | #baz/messages.js', contentType: {name: 'JavaScript'}});
+			assert(Array.isArray(res), 'There should have been a files array returned');
+			assert.equal(res.length, 1, 'There should have been one file returned');
+			assert.equal(res[0].location, testFileClient.fileServiceRootURL()+'/foo.bar | #baz/messages-file.js', 'Should have found file object with location TestingRoot/foo.bar | #baz/messages.js');
+			assert.equal(res[0].name, 'foo.bar | #baz/messages-file.js', 'Should have found file object with name equal to foo.bar | #baz/messages-file.js');
+
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476907
+		 * @since 10.0
+		 */
+		it('Test resolveRelativeFiles - encoding 3', function() {
+			var files = testFileClient.createTestFiles(['foo.bar { $ baz/messages-file.js', 'foo.bar { $ baz/bar/messages.js', 'foo.bar { $ baz/bar/baz/messages.js']);
+			var res = resolver.resolveRelativeFiles('./requirejs/json!foo.bar { $ baz/messages-file', files, {location: 'TestingRoot/foo.bar { $ baz/messages.js', contentType: {name: 'JavaScript'}});
+			assert(Array.isArray(res), 'There should have been a files array returned');
+			assert.equal(res.length, 1, 'There should have been one file returned');
+			assert.equal(res[0].location, testFileClient.fileServiceRootURL()+'/foo.bar { $ baz/messages-file.js', 'Should have found file object with location TestingRoot/foo.bar { $ baz/messages.js');
+			assert.equal(res[0].name, 'foo.bar { $ baz/messages-file.js', 'Should have found file object with name equal to foo.bar { $ baz/messages-file.js');
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476907
+		 * @since 10.0
+		 */
+		it('Test resolveRelativeFiles - encoding 4', function() {
+			var files = testFileClient.createTestFiles(['foo.bar%20|%20baz/messages-file.js', 'foo.bar%20|%20baz/bar/messages.js', 'foo.bar%20|%20baz/bar/baz/messages.js']);
+			var res = resolver.resolveRelativeFiles('./requirejs/json!foo.bar%20|%20baz/messages-file', files, {location: 'TestingRoot/foo.bar%20|%20baz/messages.js', contentType: {name: 'JavaScript'}});
+			assert(Array.isArray(res), 'There should have been a files array returned');
+			assert.equal(res.length, 1, 'There should have been one file returned');
+			assert.equal(res[0].location, testFileClient.fileServiceRootURL()+'/foo.bar%20|%20baz/messages-file.js', 'Should have found file object with location TestingRoot/foo.bar%20|%20baz/messages.js');
+			assert.equal(res[0].name, 'foo.bar%20|%20baz/messages-file.js', 'Should have found file object with name equal to foo.bar%20|%20baz/messages-file.js');
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476907
+		 * @since 10.0
+		 */
+		it('Test resolveRelativeFiles - encoding 5', function() {
+			var files = testFileClient.createTestFiles(['foo.bar%20%7C%20baz/messages-file.js', 'foo.bar%20%7C%20baz/bar/messages.js', 'foo.bar%20%7C%20baz/bar/baz/messages.js']);
+			var res = resolver.resolveRelativeFiles('./requirejs/json!foo.bar%20%7C%20baz/messages-file', files, {location: 'TestingRoot/foo.bar%20%7C%20baz/messages.js', contentType: {name: 'JavaScript'}});
+			assert(Array.isArray(res), 'There should have been a files array returned');
+			assert.equal(res.length, 1, 'There should have been one file returned');
+			assert.equal(res[0].location, testFileClient.fileServiceRootURL()+'/foo.bar%20%7C%20baz/messages-file.js', 'Should have found file object with location TestingRoot/foo.bar%20%7C%20baz/messages.js');
+			assert.equal(res[0].name, 'foo.bar%20%7C%20baz/messages-file.js', 'Should have found file object with name equal to foo.bar%20%7C%20baz/messages-file.js');
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476907
+		 * @since 10.0
+		 */
+		it('Test resolveRelativeFiles - encoding 6', function() {
+			var files = testFileClient.createTestFiles(['foo.bar{}()*&^$baz/messages-file.js', 'foo.bar{}()*&^$baz/bar/messages.js', 'foo.bar{}()*&^$baz/bar/baz/messages.js']);
+			var res = resolver.resolveRelativeFiles('./requirejs/json!foo.bar{}()*&^$baz/messages-file', files, {location: 'TestingRoot/foo.bar{}()*&^$baz/messages.js', contentType: {name: 'JavaScript'}});
+			assert(Array.isArray(res), 'There should have been a files array returned');
+			assert.equal(res.length, 1, 'There should have been one file returned');
+			assert.equal(res[0].location, testFileClient.fileServiceRootURL()+'/foo.bar{}()*&^$baz/messages-file.js', 'Should have found file object with location TestingRoot/foo.bar{}()*&^$baz/messages.js');
+			assert.equal(res[0].name, 'foo.bar{}()*&^$baz/messages-file.js', 'Should have found file object with name equal to foo.bar{}()*&^$baz/messages-file.js');
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476907
+		 * @since 10.0
+		 */
+		it('Test resolveRelativeFiles - encoding 7', function() {
+			var files = testFileClient.createTestFiles(['foo.bar%7B%7D()*%26%5E%24baz/messages-file.js', 'foo.bar%7B%7D()*%26%5E%24baz/bar/messages.js', 'foo.bar%7B%7D()*%26%5E%24baz/bar/baz/messages.js']);
+			var res = resolver.resolveRelativeFiles('./requirejs/json!foo.bar%7B%7D()*%26%5E%24baz/messages-file', files, {location: 'TestingRoot/foo.bar%7B%7D()*%26%5E%24baz/messages.js', contentType: {name: 'JavaScript'}});
+			assert(Array.isArray(res), 'There should have been a files array returned');
+			assert.equal(res.length, 1, 'There should have been one file returned');
+			assert.equal(res[0].location, testFileClient.fileServiceRootURL()+'/foo.bar%7B%7D()*%26%5E%24baz/messages-file.js', 'Should have found file object with location TestingRoot/foo.bar%7B%7D()*%26%5E%24baz/messages.js');
+			assert.equal(res[0].name, 'foo.bar%7B%7D()*%26%5E%24baz/messages-file.js', 'Should have found file object with name equal to foo.bar%7B%7D()*%26%5E%24baz/messages-file.js');
+		});
 	});
 });

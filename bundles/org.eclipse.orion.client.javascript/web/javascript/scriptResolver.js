@@ -172,8 +172,8 @@ define([
 		       			if(idx > -1) {
 			      			p1 = loc.slice(0, idx);
 			      		}
-			      		_p = _p.replace('/', '\/');
-			      		var reg = new RegExp(_p+"$");
+			      		var _test = _p.replace(/[/?|{}()*.#$^]/g, '\\$&'); //$NON-NLS-1$
+			      		var reg = new RegExp(_test+"$");
 			      		if(reg.test(p1)) {
 			      			_files.push(file);
 			      		}
@@ -222,7 +222,12 @@ define([
        			if(idx > -1) {
 	      			p2 = path2.slice(0, idx);
 	      		}
-	      		return p1 === p2;
+	      		if(p1 === p2) {
+	      			return true;
+	      		} else if(p1 === decodeURIComponent(p2)) {
+	      			return true;
+	      		}
+	      		return false;
        		}
        },
 
