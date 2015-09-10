@@ -926,7 +926,8 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
     InlineSearchResultExplorer.prototype._startUp = function() {
 		var pagingParams = this.model.getPagingParams();
 		if(this.model._provideSearchHelper){
-			window.document.title = this.model._provideSearchHelper().displayedSearchTerm + " - " +  i18nUtil.formatMessage(messages["${0} matches"], pagingParams.totalNumber);//$NON-NLS-0$
+			this._inlineSearchPane.newDocumentTitle = this.model._provideSearchHelper().displayedSearchTerm + " - " +  i18nUtil.formatMessage(messages["${0} matches"], pagingParams.totalNumber);//$NON-NLS-0$
+			window.document.title = this._inlineSearchPane.newDocumentTitle;
 		}
 		if (pagingParams.numberOnPage === 0) {
 			var message = messages["No matches"];

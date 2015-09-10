@@ -82,11 +82,15 @@ define([
 		},
 				
 		show: function() {
+			this.previousDocumentTitle = window.document.title;
 			SlideoutViewMode.prototype.show.call(this);
 			window.setTimeout(this._focusOnTextInput, 100);
 		},
 		
 		hide: function() {
+			if(window.document.title === this.newDocumentTitle){
+				window.document.title = this.previousDocumentTitle;
+			}
 			SlideoutViewMode.prototype.hide.call(this);
 			this.hideReplacePreview();
 		},
