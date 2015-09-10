@@ -313,6 +313,71 @@ define([
 			});
 		});
 		describe('Complete Syntax', function() {
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=477014
+			 * @since 10.0
+			 */
+			it("test func expression middle 1", function(done) {
+				var options = {
+					buffer: "var p =  function foo(){}",
+					prefix: "",
+					offset: 8,
+					callback: done
+				};
+				testProposals(options, [
+					['p()', 'p()'],
+					['', 'ecma5'],
+					['Array(size)', ''],
+					['Boolean(value)', 'Boolean(value) : bool'],
+					['Date(ms)', 'Date(ms)'],
+					['Error(message)', ''],
+					['EvalError(message)', ''],
+					['Function(body)', 'Function(body) : fn()'],
+					['Number(value)', 'Number(value) : number'],
+					['Object()', 'Object()'],
+					['RangeError(message)', ''],
+					['ReferenceError(message)', ''],
+					['RegExp(source, flags?)', ''],
+					['String(value)', 'String(value) : string'],
+					['SyntaxError(message)', ''],
+					['TypeError(message)', ''],
+					['URIError(message)', ''],
+					['decodeURI(uri)', 'decodeURI(uri) : string'],
+					['decodeURIComponent(uri)', 'decodeURIComponent(uri) : string'],
+					['encodeURI(uri)', 'encodeURI(uri) : string'],
+					['encodeURIComponent(uri)', 'encodeURIComponent(uri) : string'],
+					['eval(code)', 'eval(code)'],
+					['isFinite(value)', 'isFinite(value) : bool'],
+					['isNaN(value)', 'isNaN(value) : bool'],
+					['parseFloat(string)', 'parseFloat(string) : number'],
+					['parseInt(string, radix?)', 'parseInt(string, radix?) : number'],
+					['Infinity', 'Infinity : number'],
+					['JSON', 'JSON : JSON'],
+					['Math', 'Math : Math'],
+					['NaN', 'NaN : number'],
+					['undefined', 'undefined : any'],
+					['', 'ecma6'],
+					['ArrayBuffer(length)', ''],
+					['DataView(buffer, byteOffset?, byteLength?)', ''],
+					['Float32Array(length)', ''],
+					['Float64Array(length)', ''],
+					['Int16Array(length)', ''],
+					['Int32Array(length)', ''],
+					['Int8Array(length)', ''],
+					['Map(iterable?)', ''],
+					['Promise(executor)', ''],
+					['Proxy(target, handler)', ''],
+					['Set(iterable)', ''],
+					['Symbol(description?)', ''],
+					['TypedArray(length)', ''],
+					['Uint16Array()', ''],
+					['Uint32Array()', ''],
+					['Uint8Array()', ''],
+					['Uint8ClampedArray()', ''],
+					['WeakMap(iterable)', ''],
+					['WeakSet(iterable)', '']
+				]);
+			});
 			it("test no dupe 1", function(done) {
 				var options = {
 					buffer: "x",

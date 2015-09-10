@@ -59,7 +59,7 @@ define([
 			        proposal.style = 'emphasis'; //$NON-NLS-1$
 					this.removePrefix(prefix, proposal);
 					proposal.kind = 'js'; //$NON-NLS-1$
-					if (kind.kind === 'jsdoc' || kind.kind === 'doc'){
+					if (k && (k === 'jsdoc' || k === 'doc')) {
 						//TODO proposal.tags = [{content: '@', cssClass: 'iconTagBlue'}]; //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					proposals.push(proposal);
@@ -250,7 +250,7 @@ define([
 	 */
 	function createDocProposals(params, kind, ast, buffer, pluginenvs) {
 	    var proposals = [];
-	    if(typeof(kind) !== 'object') {
+	    if(!kind) {
 	    	return proposals;
 	    }
 	    if(kind.kind === 'jsdoc') {
