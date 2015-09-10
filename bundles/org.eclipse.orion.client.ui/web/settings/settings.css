@@ -78,6 +78,11 @@
 	text-transform: uppercase;
 }
 
+html[dir="rtl"] .navbar-item { /* ACGC */
+	padding-right: 20px;
+	padding-left: 0px;
+}
+
 .navbar-item:hover {
 	background: whitesmoke;
 	color: #F58B0F;
@@ -109,11 +114,21 @@
 	margin: 0;
 }
 
+html[dir="rtl"] .pluginTitle { /* ACGC */
+	float: right;
+}
+
 .oldLink {
 	float: left;
 	color: #222;
 	margin: 2px;
 	padding-left: 5px;
+}
+
+html[dir="rtl"] .oldLink { /* ACGC */
+	float: right;
+	padding-right: 5px;
+	padding-left: 0px;
 }
 
 .pluginSubTitle {
@@ -133,12 +148,20 @@
 	cursor: pointer;
 }
 
+html[dir="rtl"] .additions { /* ACGC */
+	float: left;
+}
+
 .additions-light {
 	float: right;
 	font-size: .9em;
 	color: white;
 	padding: 4px;
 	border-radius: 2px;
+}
+
+html[dir="rtl"] .additions-light { /* ACGC */
+	float: left;
 }
 
 .settings h1 {
@@ -161,6 +184,11 @@
 	padding-bottom: 20px;
 	width: 100%;
 	margin-right: 16px;
+}
+
+html[dir="rtl"] .setting-row { /* ACGC */
+	margin-left: 16px;
+	margin-right: auto;
 }
 
 .setting-row:last-child {
@@ -225,6 +253,10 @@
 	vertical-align: top;
 }
 
+html[dir="rtl"] .setting-local-indicator { /* ACGC */
+	margin: 3px 2px 2px 4px;
+}
+
 .setting-local-indicator.on {
 	border: 1px solid black;
 	background-color: green;
@@ -259,6 +291,10 @@
 	font-size: 8pt;
 	border-radius: 4px;
 	top: 10px;
+}
+
+html[dir="rtl"] .addPluginClosed{ /* ACGC */
+	float: left;
 }
 
 .interactionOpen {
@@ -346,6 +382,11 @@ div.page section:last-child {
 	opacity: 0.5;
 }
 
+html[dir="rtl"] .plugin-icon { /* ACGC */
+	float: right;
+  	background-position: right;
+}
+
 /* TODO this rule should be more narrowly scoped */
 .plugin-list>*, .plugin-entry>* {
 	outline: none;
@@ -361,6 +402,11 @@ div.page section:last-child {
 	font-size: 15px;
 	font-weight: 500;
 	padding-right: 20px;
+}
+
+html[dir="rtl"] .plugin-title { /* ACGC */ 
+	padding-left: 20px;
+	padding-right: 0px;
 }
 
 /*#plugin-settings .displaytable {
@@ -402,9 +448,18 @@ div.page section:last-child {
 	max-width:200px;
 }
 
+html[dir="rtl"] .plugin-description { /* ACGC */
+	padding-left: 10px;
+	padding-right: 0px;
+}
+
 .plugin-commands {
 	float: right;
 	position: relative;
+}
+
+html[dir="rtl"] .plugin-commands { /* ACGC */
+	float: left;
 }
 
 .serviceContainer {
@@ -412,6 +467,10 @@ div.page section:last-child {
 	outline: none;
 	line-height:14px;
 	padding-top: 5px;
+}
+
+html[dir="rtl"] .serviceContainer { /* ACGC */
+	clear: right;
 }
 
 .serviceCount {
@@ -428,6 +487,12 @@ div.page section:last-child {
 	border: 1px solid #CCC;
 }
 
+html[dir="rtl"] .serviceCount { /* ACGC */
+	float: right;
+	margin-right: 5px;
+	margin-left: auto;
+}
+
 .plugin-action-area {
 	float: right;
 	position: relative;
@@ -436,12 +501,26 @@ div.page section:last-child {
 	font-size: 0.9em;
 }
 
+html[dir="rtl"] .plugin-action-area { /* ACGC */
+	float: left;
+}
+
 .plugin-link {
 	margin-right: 5px;
 }
 
+html[dir="rtl"] .plugin-link { /* ACGC */
+	margin-left: 5px;
+	margin-right: 0px;
+}
+
 .plugin-links {
 	padding-right: 7px;
+}
+
+html[dir="rtl"] .plugin-links { /* ACGC */
+	padding-left: 7px;
+	padding-right: 0px;
 }
 
 .plugin-service-item {
@@ -488,6 +567,10 @@ div.page section:last-child {
 	text-align:center;
 }
 
+html[dir="rtl"] .toggleOff{ /* ACGC */
+	float:right;
+}
+
 .toggleOff:hover{
 	background:#FEE49A;
 }
@@ -513,6 +596,9 @@ div.page section:last-child {
 	text-align:center;
 }
 
+html[dir="rtl"] .toggleOn{ /* ACGC */
+	float:right;
+}
 
 /* - - - - - T H E M E  C H O O S E R - - - - - */
 
@@ -591,6 +677,10 @@ div.page section:last-child {
     float: left;
 }
 
+html[dir="rtl"] .themeController { /* ACGC */
+    float: right;
+}
+
 .themeDisplayEditor {  
     width: 100%;
     height: calc(100% - 39px);  
@@ -612,9 +702,17 @@ div.page section:last-child {
     top: 0px;
 }
 
+html[dir="rtl"] .colorpicker-input { /* ACGC */
+	float: left;
+}
+
 .colorpicker-input-ie {
 	float: right;
 	width: 60px;
+}
+
+html[dir="rtl"] .colorpicker-input-ie { /* ACGC */
+	float: left;
 }
 
 _:-moz-tree-row(hover), .colorpicker-input { /* Firefox  HACK */
@@ -660,12 +758,20 @@ _:-moz-tree-row(hover), .colorpicker-input { /* Firefox  HACK */
     outline: none;
 }
 
+html[dir="rtl"] .scopeList li select{ /* ACGC */
+    float:left;
+}
 
 .scopeListHeader, .editorSectionHeader {
     padding: 10px 15px;  
     border-bottom: 1px solid #dadada;  
     border-right: 1px solid #dadada;
     font-weight: bold;
+}
+
+html[dir="rtl"] .scopeListHeader, .editorSectionHeader { /* ACGC */
+    border-left: 1px solid #dadada;
+    border-right: 0px;
 }
 
 .editorSectionHeader{
@@ -677,6 +783,11 @@ _:-moz-tree-row(hover), .colorpicker-input { /* Firefox  HACK */
     height: calc(100% - 37px);
     position: absolute;
     width: calc(100% - 300px);
+}
+
+html[dir="rtl"] .editorSection { /* ACGC */
+    margin-right: 300px;
+    margin-left: auto;
 }
 
 .scopeList li.modified::after {
@@ -703,6 +814,10 @@ _:-moz-tree-row(hover), .colorpicker-input { /* Firefox  HACK */
     float: right;
 }
 
+html[dir="rtl"] #editorThemeDelete, #editorThemeRevert, #editorThemeSave { /* ACGC */
+    float: left;
+}
+ 
 .editorThemeCleanButton{
 	padding:0;
 	border:none;
@@ -728,6 +843,11 @@ _:-moz-tree-row(hover), .colorpicker-input { /* Firefox  HACK */
 
 #editorThemeRevert {
     margin-right: 10px;
+}
+
+html[dir="rtl"] #editorThemeRevert { /* ACGC */
+    margin-left: 10px;
+    margin-left: auto;
 }
 
 input[type=color]::-webkit-color-swatch-wrapper

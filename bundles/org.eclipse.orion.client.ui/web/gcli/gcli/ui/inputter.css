@@ -14,11 +14,20 @@
   background-color: transparent;
 }
 
+html[dir="rtl"] .gcli-in-input,
+html[dir="rtl"] .gcli-in-complete { /* ACGC */
+  padding: 0 22px 0 0;
+}
+
 .gcli-in-input {
   color: #000;
   border: 0;
   box-shadow: 0 0 10px 1px #ddd;
   border-top: 1px solid #999;
+}
+
+html[dir="rtl"] .gcli-in-input { /* ACGC */
+  box-shadow: 0 1px 10px 0 #ddd;
 }
 
 .gcli-in-complete {
@@ -65,3 +74,10 @@
   color: #888;
   padding-right: 10px;
 }
+
+html[dir="rtl"] .gcli-in-scratchlink { /* ACGC */
+  float: left;
+  padding-left: 10px;
+  padding-right: 0px;
+}
+

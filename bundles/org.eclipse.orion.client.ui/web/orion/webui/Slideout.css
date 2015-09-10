@@ -17,6 +17,10 @@
 	z-index: 100;
 }
 
+html[dir="rtl"] .slideoutWrapper { /* BDL */
+	transform: translateX(100%);
+}
+
 .slideoutWrapperVisible {
 	-webkit-transform: translateX(0);	/* Safari */
 	transform: translateX(0);

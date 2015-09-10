@@ -49,3 +49,8 @@ input {
 	margin-left: 5px;
 }
 
+html[dir="rtl"] input{ /* ACGC */
+	margin-right: 5px;
+	margin-left: auto;
+}
+

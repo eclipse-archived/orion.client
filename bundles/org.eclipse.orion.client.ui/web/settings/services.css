@@ -13,6 +13,13 @@
 	cursor:pointer;
 }
 
+html[dir="rtl"] .serviceContainerClosed{ /* ACGC */
+	padding-right:16px;
+	padding-left: 0px;
+	background-position:right;
+	float:right;
+}
+
 .serviceContainerOpen{
 	position: relative;
 	padding-left:16px;
@@ -28,6 +35,13 @@
 	cursor:pointer;
 }
 
+html[dir="rtl"] .serviceContainerOpen{ /* ACGC */
+	padding-right:16px;
+	padding-left:0px;
+	background-position:right;
+	float:right;
+}
+
 .service-container:hover{
 	color: #039;
 }
@@ -40,6 +54,10 @@
 	text-align: left;
 	border-collapse: collapse;
 	-webkit-user-select: none;
+}
+
+html[dir="rtl"] .serviceTable{ /* ACGC */
+	text-align: right;
 }
 	
   .serviceTable th{
@@ -83,6 +101,11 @@
 	padding-right: 20px;
 }
 
+html[dir="rtl"] .serviceData{ /* ACGC */
+	padding-left: 20px;
+	padding-right: 0px;
+}
+
 .serviceRails, .serviceRailsVisible {
 	background-color: white;
 }
@@ -112,6 +135,11 @@
 	width:700px;
 }
 
+html[dir="rtl"] .serviceRailsHidden{ /* ACGC */
+	margin-left:20px;
+	margin-right:auto;
+}
+
 .serviceList{
 	margin-right:20px;
 	padding-right:20px;
@@ -119,6 +147,15 @@
 	float:left;
 	/* position:relative; */
 	overflow:hidden;
+}
+
+html[dir="rtl"] .serviceList{ /* ACGC */
+	margin-left:20px;
+	margin-right:auto;
+	padding-left:20px;
+	padding-right:0px;
+
+	float:right;
 }
 
 .leftButtonArea{
@@ -130,6 +167,11 @@
 	text-align:right;
 }
 
+html[dir="rtl"] .leftButtonArea{ /* ACGC */
+	float:right;
+	text-align:left;
+}
+
 .rightButtonArea{
 	width: 40px;
 	float:left;
@@ -138,6 +180,11 @@
 	display: inline;
   	margin: 0 1em 0 1em;
   	text-align:right;
+}
+
+html[dir="rtl"] .rightButtonArea{ /* ACGC */
+	float:right;
+  	text-align:left;
 }
 
 .carouselControl{
@@ -161,6 +208,10 @@
 	-moz-user-select: -moz-none;
 	user-select: none;
 }
+
+html[dir="rtl"] .carouselControl{ /* ACGC */
+	text-align:left;
+}
 	
 .carouselControl:hover{
 	opacity:0.8;
@@ -172,6 +223,14 @@
 	padding-left:0px;
 	margin-left:0px;
 	width:600px;
+}
+
+html[dir="rtl"] .listContainer{ /* ACGC */
+	float:right;
+	padding-right:0px;
+	padding-left:0px;
+	margin-right:0px;
+	margin-left:auto;
 }
 
 .listEntry{

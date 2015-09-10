@@ -68,6 +68,11 @@
 	margin-right:5px;
 }
 
+html[dir="rtl"] .logo { /* ACGC */
+	margin-left:5px;
+	margin-right:auto;
+}
+
 .toolbarTarget:focus{
 	outline:none;
 }
@@ -121,6 +126,10 @@
 	min-height: 30px;
 }
 
+html[dir="rtl"] .pageNavigationActions { /* ACGC */
+	text-align: left;
+}
+
 /* slideout styles */
 
 /* the left hand side of slideout containing parameter fields */
@@ -136,6 +145,10 @@
 	font-weight: normal;
 	padding: 3px 0 0 3px;
 	padding-bottom: 0;
+}
+
+html[dir="rtl"] .parametersDismiss { /* ACGC */
+	padding: 3px 3px 0px 0px;
 }
 
 /* buttons used to dismiss or complete a slideout */
@@ -157,6 +170,12 @@
 	margin-right: 0;
 	padding-right: 0;
 	padding-top: 0;
+}
+
+html[dir="rtl"] .parametersDismiss .core-sprite-close { /* ACGC */
+	margin-left: 0;
+	margin-right: auto;
+	padding-left: 0;
 }
 
 .cancelButton {
@@ -295,6 +314,12 @@ textarea.parameterInput {
 	height: 24px;  /* breathing room */
 }
 
+html[dir="rtl"] .actionsColumn { /* ACGC */
+	text-align: left;
+	padding-right: 16px;
+	padding-left: 0px;
+}
+
 .selectionCheckmarkSprite {
 	display: inline-block; 
 	vertical-align: middle; 
@@ -308,6 +333,11 @@ textarea.parameterInput {
 	margin-left: 8px;
 	padding-right: 8px;
 	margin-right: 8px;
+}
+
+html[dir="rtl"] .modelDecorationSprite { /* ACGC */ 
+	padding-left: 8px;
+	padding-right: 0px;
 }
 
 .advancedSearchDecorationSprite { 
@@ -330,6 +360,11 @@ textarea.parameterInput {
 	vertical-align:bottom;
 }
 
+html[dir="rtl"] .thumbnail { /* ACGC */
+	padding-left: 8px;
+	padding-right: 0px;
+}
+
 /* less hit-area since we aren't worried about touch */
 @media all and (min-device-width: 1025px) {
 	.modelDecorationSprite { 	
@@ -338,6 +373,11 @@ textarea.parameterInput {
 		margin-left: 2px;
 		padding-right: 2px;
 		margin-right: 2px;
+	}
+	
+	html[dir="rtl"] .modelDecorationSprite {  /* ACGC */	
+		padding-left: 2px;
+		padding-right: 0px;
 	}
 	
 	.thumbnail {
@@ -349,11 +389,21 @@ textarea.parameterInput {
 		vertical-align:bottom;
 	}
 	
+	html[dir="rtl"] .thumbnail {  /* ACGC */	
+		padding-left: 2px;
+		padding-right: 0px;
+	}
+	
 	.selectionCheckmarkSprite { 	
 		padding: 0;
 		padding-left: 2px;
 		padding-right: 2px;
 		margin-right: 2px;
+	}
+	
+	html[dir="rtl"] .selectionCheckmarkSprite {  /* ACGC */	
+		padding-left: 2px;
+		padding-right: 0px;
 	}
 	
 	.checkColumn {
@@ -378,6 +428,11 @@ textarea.parameterInput {
 	padding-top: 2px;
     padding-bottom: 8px;
 }
+
+html[dir="rtl"] .auxPadding { /* ACGC */
+	padding-right: 8px;
+	padding-left: 0px;
+}
  
 .help {
 	font-weight: bold;
@@ -393,8 +448,17 @@ textarea.parameterInput {
 	padding: 0;
 }
 
+html[dir="rtl"] .footer { /* ACGC */
+	text-align: right;
+}
+
 .toolbarLabel {
 	padding-left: 8px;
+}
+
+html[dir="rtl"] .toolbarLabel { /* ACGC */
+	padding-right: 8px;
+	padding-left: 0px;
 }
 
 .slideContainer {
@@ -408,6 +472,12 @@ textarea.parameterInput {
 	font-size: 11px;
 	z-index: 70;
 	color: #999;
+}
+
+html[dir="rtl"] .slideContainer { /* ACGC */
+	float: left;
+	margin-right: 4px;
+	margin-left: auto;
 }
 
 .slideParameters {
@@ -460,6 +530,11 @@ textarea.parameterInput {
 	margin-left: -20px;
 }
 
+html[dir="rtl"] .bannerMenuSearchOptions { /* ACGC */
+	margin-right: -20px;
+	margin-left: 0px;
+}
+
 .bannerButton {
 	border: 1px solid transparent;
 	text-align: center;
@@ -493,6 +568,11 @@ textarea.parameterInput {
 	padding: 5px;
 	z-index:100;
 	border-radius: 4px;
+}
+
+html[dir="rtl"] .keyAssistFloat { /* ACGC */
+	left: 44px !important;
+	right: auto !important;
 }
 
 .keyAssistContents {
@@ -651,6 +731,11 @@ textarea.parameterInput {
 	overflow-x: hidden;
 }
 
+html[dir="rtl"] #tree { /* ACGC */
+	margin-left: 9em;
+	margin-right: auto;
+}
+
 #treeButtons br {
 	line-height: 0.5em;
 }
@@ -660,6 +745,10 @@ textarea.parameterInput {
 	padding: 0;
 	float: right;
 	width: 9em;
+}
+
+html[dir="rtl"] #treeButtons { /* ACGC */
+	float: left;
 }
 
 #treeButtons .contentButton {
@@ -703,6 +792,11 @@ textarea.parameterInput {
 	vertical-align:top;
 }
 
+html[dir="rtl"] .secondaryColumn { /* ACGC */
+	padding-left: 8px;
+	padding-right: 0px;
+}
+
 .secondaryColumnRight {
 	color: #666666;	
 	padding-right: 8px;
@@ -711,6 +805,12 @@ textarea.parameterInput {
 	text-align: right;
 }
 
+html[dir="rtl"] .secondaryColumnRight { /* ACGC */
+	padding-left: 8px;
+	padding-right: 0px;
+	text-align: left;
+}
+ 
 .secondaryColumnLeft {
 	color: #666666;	
 	padding-right: 8px;
@@ -718,6 +818,10 @@ textarea.parameterInput {
 	padding-top: 8px;
 	vertical-align:top;
 	text-align: left;
+}
+
+html[dir="rtl"] .secondaryColumnLeft { /* ACGC */
+	text-align: right;
 }
 
 .primaryColumn {
@@ -729,6 +833,11 @@ textarea.parameterInput {
 .checkColumn {
 	padding: 0;
 	padding-left:10px;
+}
+
+html[dir="rtl"] .checkColumn { /* ACGC */
+	padding-right:10px;
+	padding-left:0px;
 }
 
 .testNavTreetable {
@@ -768,12 +877,27 @@ textarea.parameterInput {
 	margin-top: 2px;
 }
 
+html[dir="rtl"] .searchCmdGroupMargin { /* ACGC */
+	margin-right: 16px;
+	margin-left: auto;
+}
+
 .LoginWindowLeft {
 	padding-left: 0.5em;
 }
 
+html[dir="rtl"] .LoginWindowLeft { /* ACGC */
+	padding-right: 0.5em;
+	padding-left: 0em;
+}
+
 .LoginWindowRight {
 	padding-right: 0.5em;
+}
+
+html[dir="rtl"] .LoginWindowRight { /* ACGC */
+	padding-left: 0.5em;
+	padding-right: 0em;
 }
 
 .LoginWindowComment {
@@ -781,8 +905,17 @@ textarea.parameterInput {
 	padding-left: 15px;
 }
 
+html[dir="rtl"] .LoginWindowComment { /* ACGC */
+	padding-right: 15px;
+	padding-left: 0px;
+}
+
 #outline #switchOutlineMenu {
 	float: right;
+}
+
+html[dir="rtl"] #outline #switchOutlineMenu { /* ACGC */
+	float: left;
 }
 
 #outline #switchOutlineMenu .commandImage {
@@ -795,8 +928,18 @@ textarea.parameterInput {
 	margin: 4px 0 0 8px;
 }
 
+html[dir="rtl"] #outline>ul { /* ACGC */
+	padding-right: 0 !important;
+	margin: 4px 8px 0px 0px;
+}
+
 #outline ul {
 	padding-left: 14px;
+}
+
+html[dir="rtl"] #outline ul { /* ACGC */
+	padding-right: 14px;
+	padding-left: 0px;
 }
 
 #outline li {
@@ -862,6 +1005,11 @@ textarea.parameterInput {
     border-radius:1px;
 }
 
+html[dir="rtl"] .uploadChooser{ /* ACGC */
+	margin-left: 24px;
+	margin-right: auto;
+}
+
 .targetSelector{
 
 }
@@ -906,6 +1054,12 @@ textarea.parameterInput {
 	vertical-align: middle;
 }
 
+html[dir="rtl"] .local .setting-label { /* ACGC */
+	padding-right: 8px;
+	padding-left: 0px;
+	text-align: left;
+}
+
 .delegatedUI {
 	position: absolute; 
 	min-width: 250px;
@@ -939,6 +1093,11 @@ textarea.parameterInput {
 	padding-right: 3px;
 }
 
+html[dir="rtl"] .navigationLabel{ /* ACGC */
+	padding-left: 3px;
+	padding-right: 0px;
+}
+
 .groupedContentDivider{
 	float: left;
 	width: 1px;
@@ -946,6 +1105,12 @@ textarea.parameterInput {
 	margin-top: 10px;
 	margin-bottom: 10px;
 	border-left: dashed 1px #ddd;
+}
+
+html[dir="rtl"] .groupedContentDivider{ /* ACGC */
+	float: right;
+	border-right: dashed 1px #ddd;
+	border-left: 0px;
 }
 
 .navigationBreadcrumb{
@@ -960,6 +1125,11 @@ textarea.parameterInput {
 .modifiedFileMarker{
 	color:#333;
 	padding-left:5px;
+}
+
+html[dir="rtl"] .modifiedFileMarker{ /* ACGC */
+	padding-right:5px;
+	padding-left:0px;
 }
 
 .noFile {
@@ -1007,6 +1177,10 @@ textarea.parameterInput {
 	padding: 0;
 	margin-top: 40px;
 	overflow-y: hidden; /* prevent vertical scrollbar from showing during expand/collapse */
+}
+
+html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{ /* ACGC */
+	text-align: right;
 }
 
 .mainpane .sectionTable .treetable, .mainpane .sectionWrapper .treetable, .mainpane .sectionTable .treetable .actionsColumn{
@@ -1175,6 +1349,11 @@ textarea.parameterInput {
 	background-color: inherit;
 }
 
+html[dir="rtl"] .orionProject .discreetInput { /* ACGC */
+	margin-right: 0;
+	margin-left: auto !important;
+}
+
 .orionProject .discreetInput:hover, .orionProject .discreetInput:focus {
 	border: 1px solid lightgrey;
 	color: black;
@@ -1242,6 +1421,11 @@ textarea.parameterInput {
 	width: 100px;
 }
 
+html[dir="rtl"] .progressBarWrapper { /* ACGC */
+	margin-right: 5px;
+	margin-left: auto;
+}
+
 .uploadNode {
 	background-color: whitesmoke;
 	padding: 2px 0;
@@ -1268,6 +1452,10 @@ textarea.parameterInput {
 	font-size: 14px;
 	padding: 2px 6px;
 	vertical-align: middle;
+}
+
+html[dir="rtl"] .uploadNode .uploadCancelButton { /* ACGC */
+	float: left;
 }
 
 .uploadCancelButton:hover {
@@ -1328,3 +1516,9 @@ textarea.parameterInput {
 .fileExplorerProgressDiv {
 	margin-left: 10px;	
 }
+
+html[dir="rtl"] .fileExplorerProgressDiv { /* ACGC */
+	margin-right: 10px;
+	margin-left: auto;	
+}
+

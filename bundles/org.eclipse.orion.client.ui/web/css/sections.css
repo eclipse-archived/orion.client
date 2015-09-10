@@ -6,6 +6,10 @@
 	width: 16px;
 }
 
+html[dir="rtl"] .sectionIcon { /* ACGC */
+	float: right;
+}
+
 .sectionTitle {
 	margin-top: 5px;
 }
@@ -26,6 +30,12 @@
 	margin-left: 5px;
 }
 
+html[dir="rtl"] .sectionItemCount { /* ACGC */
+	float: right;
+	margin-right: 5px;
+	margin-left: auto;
+}
+
 .sectionTable {
 	overflow-x: hidden;
 }
@@ -40,9 +50,18 @@
 	color: #666;
 }
 
+html[dir="rtl"] .sectionTableItemActions { /* ACGC */
+	float: left;
+}
+
 .sectionExplorerActions {
 	text-align: right;
 	padding: 0px 4px 4px 0px;
+}
+
+html[dir="rtl"] .sectionExplorerActions { /* ACGC */
+	text-align: left;
+	padding: 0px 0px 4px 4px;
 }
 
 .sectionActions {

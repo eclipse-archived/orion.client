@@ -244,6 +244,11 @@
 	padding-right: 22px;
 }
 
+html[dir="rtl"] .mainToolbar .gitFilterBox input { /* ACGC */
+	padding-left: 22px;
+	padding-right: 0px;
+}
+
 .auxpane .gitFilterBox input {
 	width: 60%;
 }

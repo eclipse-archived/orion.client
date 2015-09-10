@@ -14,6 +14,11 @@
   margin-bottom: -3px;
 }
 
+html[dir="rtl"] .gcli-panel { /* ACGC */
+	right: 0;
+	lefT: auto;
+}
+
 .gcli-panel.gcli-panel-hide {
   opacity: 0;
   height: 0;
@@ -27,6 +32,11 @@
   background: white;
   border-left: 1px solid #999;
   border-right: 1px solid #999;
+}
+
+html[dir="rtl"] .gcli-panel-connector { /* ACGC */
+  margin-right: 20px;
+  margin-left: auto;
 }
 
 .gcli-tt-description {
@@ -55,4 +65,8 @@
   margin: 10px 0 0 0;
   background: hsla(0, 100%, 100%, 0.95);
   padding-bottom: 5px;
+}
+
+html[dir="rtl"] .gcli-tt { /* ACGC */
+  box-shadow: 0 1px 10px 0 #ddd;
 }

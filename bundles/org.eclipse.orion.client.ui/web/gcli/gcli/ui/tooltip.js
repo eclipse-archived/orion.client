@@ -244,7 +244,12 @@ Tooltip.prototype._updatePosition = function() {
 
   // 10 is roughly the width of a char
   if (this.panelElement) {
-    this.panelElement.style.left = (dimensions.start * 10) + 'px';
+	  if (document.dir == "rtl") { /* ACGC */
+		  this.panelElement.style.right = (dimensions.start * 10) + 'px';
+	  }
+	  else{
+		  this.panelElement.style.left = (dimensions.start * 10) + 'px';	  
+	  }
   }
 
   this.focusManager.updatePosition(dimensions);

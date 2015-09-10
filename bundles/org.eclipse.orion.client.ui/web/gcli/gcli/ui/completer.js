@@ -96,7 +96,12 @@ Completer.prototype.resized = function(ev) {
   this.element.style.top = ev.top + 'px';
   this.element.style.height = ev.height + 'px';
   this.element.style.lineHeight = ev.height + 'px';
-  this.element.style.left = ev.left + 'px';
+  if (document.dir == "rtl") { /* ACGC */
+	  this.element.style.right = ev.right + 'px';
+  }
+  else{
+	  this.element.style.left = ev.left + 'px';	  
+  }  
   this.element.style.width = ev.width + 'px';
 };
 
