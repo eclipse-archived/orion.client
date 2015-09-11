@@ -1088,6 +1088,9 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 		lib.empty(resultsNode);
 		if(searchResult) {
 			this._renderSearchResult(resultsNode, searchParams, searchResult);
+			window.setTimeout(function() {
+				this.expandAll();
+			}.bind(this), 10);
 			return;
 		}
 		//If there is no search keyword defined, then we treat the search just as the scope change.

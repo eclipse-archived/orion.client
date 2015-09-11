@@ -668,7 +668,9 @@ exports.TwoWayCompareView = (function() {
 			start = 0;
 		}
 		var gotoLineCallback = function() {
-			callback(lineNumber);
+			if(callback) {
+				callback(lineNumber);
+			}
 		}.bind(this);
 		this._editors[1].onGotoLine(lineNumber, start, end, gotoLineCallback);
 	};

@@ -59,6 +59,10 @@ define([
 			this._domNode = lib.createNodes(ComboTextInputTemplate);
 			this._domNode.id = this._domNodeId;
 			
+			this._comboTextInputWrapper = lib.$(".comboTextInputWrapper", this._domNode); //$NON-NLS-0$
+			if(!this._comboTextInputWrapper) {
+				this._comboTextInputWrapper = this._domNode;
+			}
 			this._textInputNode = lib.$(".comboTextInputField", this._domNode); //$NON-NLS-0$
 			this._textInputNode.addEventListener("focus", function() { //$NON-NLS-0$
 				this._domNode.classList.add("comboTextInputWrapperFocussed"); //$NON-NLS-0$ 
@@ -293,6 +297,14 @@ define([
 		 */
 		hideButton: function() {
 			this._comboTextInputButton.classList.add("isHidden"); //$NON-NLS-0$
+		},
+		
+		show: function() {
+			this._comboTextInputWrapper.classList.remove("hidden");
+		},
+		
+		hide: function() {
+			this._comboTextInputWrapper.classList.add("hidden");
 		},
 		
 		/**

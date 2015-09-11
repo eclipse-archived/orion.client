@@ -48,20 +48,25 @@
 	width: 100%;
 }
 
-
 .searchOptWrapperDiv {
-	height: 224px;
 	transition: height 0.2s ease;
 }
 
 .replaceModeActive > .searchOptWrapperDiv {
-	height: 262px;
 }
 
 .searchWrapper.searchOptionsHidden > .searchOptWrapperDiv {
 	height: 0;
 	overflow: hidden;
 	visibility: hidden;
+}
+
+.searchWrapper.searchOptParamBlockHidden > .searchOptWrapperDiv > .searchParamBlockDiv {
+	display: none;
+}
+
+.searchWrapper.searchOptParamBlockHidden > .searchResultsWrapperDiv{
+	height: calc(100% - 98px);
 }
 
 .searchResultsWrapperDiv {

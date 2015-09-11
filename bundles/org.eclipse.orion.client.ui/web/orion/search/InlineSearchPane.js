@@ -92,6 +92,16 @@ define([
 				window.document.title = this.previousDocumentTitle;
 			}
 			SlideoutViewMode.prototype.hide.call(this);
+			if(this._filledResult) {
+				this._showSearchOptBLocks();	
+				this._hideReplaceField();
+				this._searchBox.show();
+				delete this._filledResult;
+				delete this._filledParams;
+				lib.empty(lib.node("searchResultsTitle"));
+				lib.empty(lib.node("searchPageActions"));
+				lib.empty(this._searchResultsWrapperDiv);
+			}
 			this.hideReplacePreview();
 		},
 		
@@ -127,9 +137,12 @@ define([
 			this._submitSearch();
 		},
 		
-		fillSearchResult: function(searchParams, searchResult) {
-			this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, searchResult);
-			this._hideSearchOptions();
+		fillSearchResult: function(filledParams, filledResult) {
+			this._hideSearchOptBLocks();	
+			this._filledResult = filledResult;
+			this._filledParams = filledParams;
+			this._showReplaceField();
+			this._searchResultExplorer.runSearch(filledParams, this._searchResultsWrapperDiv, filledResult);
 		},
 				
 		_submitSearch: function(){
@@ -153,9 +166,15 @@ define([
 				this._searchBox.addTextInputValueToRecentEntries();
 				this._replaceBox.addTextInputValueToRecentEntries();
 				this._fileNamePatternsBox.addTextInputValueToRecentEntries();
-				var searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
-				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv);
-				this._hideSearchOptions();
+       			var searchParams;
+				if(this._filledResult && this._filledParams) {
+       				searchParams = mSearchUtils.copySearchParams(this._filledParams);
+       				searchParams.replace = options.replace;
+				} else {
+					searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
+					this._hideSearchOptions();
+				}
+				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, this._filledResult);
 			}
 		},
 	    
@@ -410,7 +429,6 @@ define([
 				this._hideReplaceField();
 			}
 			this._searchTextInputBox.focus();
-			this._searchResultExplorer.initCommands();
 		},
 		
 		showSearchOptions: function() {
@@ -421,6 +439,15 @@ define([
 		_hideSearchOptions: function() {
 			this._searchWrapper.classList.add("searchOptionsHidden"); //$NON-NLS-0$
 			this._toggleSearchOptionsLink.classList.remove("linkHidden"); //$NON-NLS-0$
+		},
+		
+		_showSearchOptBLocks: function() {
+			this._searchWrapper.classList.remove("searchOptParamBlockHidden");
+		},
+		
+		_hideSearchOptBLocks: function() {
+			this._searchWrapper.classList.add("searchOptParamBlockHidden");
+			this._searchBox.hide();
 		},
 		
 		_showReplaceField: function() {

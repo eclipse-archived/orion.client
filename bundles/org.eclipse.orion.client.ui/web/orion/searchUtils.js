@@ -413,7 +413,7 @@ searchUtils.splitFile = function(text) {
 
 searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContentText, replacing, caseSensitive, noContext){
 	var fileContents = searchUtils.splitFile(fileContentText);
-	if(replacing && !noContext){
+	if(replacing || noContext){
 		fileModelNode.contents = fileContents;
 	}
 	if(fileModelNode){
