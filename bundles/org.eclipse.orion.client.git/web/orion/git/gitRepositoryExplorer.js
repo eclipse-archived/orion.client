@@ -28,8 +28,9 @@ define([
 	'orion/globalCommands',
 	'orion/git/gitCommands',
 	'orion/Deferred',
-	'orion/metrics'
-], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mSection, mSelection, lib, URITemplate, PageUtil, util, mFileUtils, i18nUtil, mGlobalCommands, mGitCommands, Deferred, mMetrics) {
+	'orion/metrics',
+	'orion/bidiUtils'
+], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mSection, mSelection, lib, URITemplate, PageUtil, util, mFileUtils, i18nUtil, mGlobalCommands, mGitCommands, Deferred, mMetrics, bidiUtils) {
 	
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 	
@@ -587,6 +588,9 @@ define([
 		var activeBranch = explorer.model.getActiveBranch();
 		var targetRef = explorer.model.getTargetReference();
 		if (activeBranch && targetRef) {
+			if (bidiUtils.isBidiEnabled) {
+				activeBranch.Name = bidiUtils.enforceTextDirWithUcc(activeBranch.Name);
+			}			
 			var targetName =  util.shortenRefName(targetRef);
 			title = activeBranch.Name + " => " + targetName;  //$NON-NLS-0$
 		} else if (!activeBranch && !targetRef) {

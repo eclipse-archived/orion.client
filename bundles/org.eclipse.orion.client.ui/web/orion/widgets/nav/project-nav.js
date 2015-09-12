@@ -22,10 +22,11 @@ define([
 	'orion/URITemplate',
 	'orion/Deferred',
 	'orion/fileUtils',
-	'orion/customGlobalCommands'
+	'orion/customGlobalCommands',
+	'orion/bidiUtils'
 ], function(
 	messages, mCommands, i18nUtil, objects, lib, mExplorer, mCommonNav, ProjectCommands,
-	PageUtil, URITemplate, Deferred, mFileUtils, mCustomGlobalCommands
+	PageUtil, URITemplate, Deferred, mFileUtils, mCustomGlobalCommands, bidiUtils
 ) {
 	var CommonNavExplorer = mCommonNav.CommonNavExplorer;
 	var CommonNavRenderer = mCommonNav.CommonNavRenderer;
@@ -261,6 +262,9 @@ define([
 				var span = lib.$(".mainNavColumn", col); //$NON-NLS-0$
 				span.classList.add("projectInformationNode"); //$NON-NLS-0$
 				var nameText = item.Dependency ? item.Dependency.Name : (item.Project ? item.Project.Name : item.Name);
+				if (bidiUtils.isBidiEnabled) {
+					nameText = bidiUtils.enforceTextDirWithUcc(nameText);
+				}				
 				var itemNode = lib.$("a", col); //$NON-NLS-0$
 				if(item.disconnected){
 					nameText = i18nUtil.formatMessage(messages.Disconnected, nameText);

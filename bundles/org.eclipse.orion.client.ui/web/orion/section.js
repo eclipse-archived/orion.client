@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	'orion/selection'], function(EventTarget, lib, mHTMLFragments, objects, Selection){
+define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	'orion/selection', 'orion/bidiUtils'], function(EventTarget, lib, mHTMLFragments, objects, Selection, bidiUtils){
 	
 	/**
 	 * Generates a section
@@ -442,7 +442,11 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 						getCellHeaderElement: function(col_no){
 							var firstHeader = Object.getPrototypeOf(this).getCellHeaderElement.call(this, col_no);
 							if(firstHeader){
-								this.section.setTitle(firstHeader.innerHTML);
+								var sectionTitle = firstHeader.innerHTML;
+								if (bidiUtils.isBidiEnabled) {
+									sectionTitle = bidiUtils.enforceTextDirWithUcc(sectionTitle);
+								}
+								this.section.setTitle(sectionTitle);								
 							}
 							return null;
 						}

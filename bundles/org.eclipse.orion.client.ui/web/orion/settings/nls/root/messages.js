@@ -9,6 +9,15 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define({//Default message bundle
+	"Globalization": "Globalization",
+	"Enable bidi support": "Enable bidi support",
+	"Base text direction": "Base text direction",
+	"Calendar type": "Calendar type",
+	"Left-To-Right": "Left-To-Right",
+	"Right-To-Left": "Right-To-Left",
+	"Auto direction": "Auto direction",
+	"Gregorian": "Gregorian",
+	"Hebrew": "Hebrew",	
 	"Plugin Description": "Plug-in Description",
 	"Create": "Create",
 	"Loading...": "Loading...",
