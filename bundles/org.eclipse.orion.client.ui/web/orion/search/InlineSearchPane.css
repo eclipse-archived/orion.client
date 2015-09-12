@@ -69,6 +69,10 @@
 	height: calc(100% - 98px);
 }
 
+.searchWrapper.searchOptParamBlockHidden > .searchOptWrapperDiv > .searchMainOptionBlock > .toggleDisplayLink{
+	display: none;
+}
+
 .searchResultsWrapperDiv {
 	height: calc(100% - 220px - 54px); /* subtract height of search options*/
 	transition: height 0.2s ease; /* avoid extra scroll bar while switching between search and replace modes */

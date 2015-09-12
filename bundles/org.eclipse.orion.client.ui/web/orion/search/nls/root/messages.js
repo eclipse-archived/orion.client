@@ -25,7 +25,7 @@ define({//Default message bundle
 	"Next": "Next",
 	"Previous": "Previous",
 	"Replace": "Replace",
-	"Replace...": "Replace...",
+	"Replace...": "Preview Replacement",
 	"Replace All": "Replace All",
 	"Show Replace": "Switch to Replace Mode",
 	"Hide Replace": "Switch to Search Mode",
