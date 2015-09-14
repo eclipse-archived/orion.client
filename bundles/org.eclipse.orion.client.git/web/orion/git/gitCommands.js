@@ -11,7 +11,6 @@
 
 /*eslint-env browser, amd*/
 /*globals confirm*/
-
 define([
 	'i18n!git/nls/gitmessages',
 	'require',
@@ -333,8 +332,9 @@ var exports = {};
 						progressService.createProgressMonitor(deferred, messages["Removing remote branch: "] + item.Name);
 						deferred.then(function(remoteJsonData) {
 							exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry, function(jsonData) {
-								if (!jsonData || jsonData.Result.Severity === "Ok") //$NON-NLS-0$
+								if (!jsonData || jsonData.Severity ==="Normal" || !jsonData.Result|| jsonData.Result.Severity === "Ok" ) {//$NON-NLS-0$
 									dispatchModelEventOn({type: "modelChanged", action: "removeBranch", branch: item}); //$NON-NLS-1$ //$NON-NLS-0$
+								}
 							}, func, messages["Delete Remote Branch"]);
 						}, function(jsonData) {
 							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Removing remote branch: '] + item.Name);
