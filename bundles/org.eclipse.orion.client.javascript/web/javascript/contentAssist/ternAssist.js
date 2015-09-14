@@ -498,6 +498,7 @@ define([
     			            	});
                 			});
     			        }
+    			        return [];
 			        });
 			    } else {
 			        return that.astManager.getAST(editorContext).then(function(ast) {

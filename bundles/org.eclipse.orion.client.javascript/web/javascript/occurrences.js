@@ -750,6 +750,7 @@ define([
             				return findOccurrences(ast, ctxt);
             			});
         			}
+        			return [];
     			});
 			});
 		}
