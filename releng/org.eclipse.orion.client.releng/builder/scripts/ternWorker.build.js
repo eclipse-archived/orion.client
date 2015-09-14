@@ -12,22 +12,21 @@
 ({
     generateSourceMaps: true,
     preserveLicenseComments: false,
-	baseUrl: ".", //$NON-NLS-1$
+	baseUrl: ".",
 	paths: {
-		text: "requirejs/text", //$NON-NLS-1$
-		json: "requirejs/json", //$NON-NLS-1$
-		escope: "escope/escope", //$NON-NLS-1$
-		i18n: "requirejs/i18n" //$NON-NLS-1$
+		text: "requirejs/text",
+		json: "requirejs/json",
+		i18n: "requirejs/i18n"
 	},
 	packages: [
 		{
-			name: "eslint/conf", //$NON-NLS-1$
-			location: "eslint/conf" //$NON-NLS-1$
+			name: "eslint/conf",
+			location: "eslint/conf"
 		},
 		{
-			name: "eslint", //$NON-NLS-1$
-			location: "eslint/lib", //$NON-NLS-1$
-			main: "eslint" //$NON-NLS-1$
+			name: "eslint",
+			location: "eslint/lib",
+			main: "eslint"
 		},
 	],
 	name: "javascript/plugins/ternWorkerCore",

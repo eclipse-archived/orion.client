@@ -14,7 +14,6 @@
 	paths: {
 		text: "requirejs/text",
 		json: "requirejs/json", 
-		escope: "escope/escope", 
 		i18n: "requirejs/i18n" 
 	},
 	packages: [

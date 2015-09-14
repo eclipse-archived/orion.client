@@ -2,7 +2,7 @@
 define([
 'esprima/esprima', 
 'estraverse/estraverse', 
-'escope', 
+'escope/escope', 
 'eslint/conf/environments', 
 './rules', 
 './util', 

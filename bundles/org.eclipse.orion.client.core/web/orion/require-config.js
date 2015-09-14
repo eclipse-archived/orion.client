@@ -10,7 +10,6 @@ define(function() {
 	        domReady: 'requirejs/domReady',
 	        gcli: 'gcli/gcli',
 	        util: 'gcli/util',
-	        escope: 'escope/escope',
 	        csslint: 'csslint/csslint',
 		}
 	});

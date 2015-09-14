@@ -18,7 +18,6 @@
         i18n: 'requirejs/i18n',
         text: 'requirejs/text',
         json: "requirejs/json", 
-		escope: "escope/escope",
         'orion/bootstrap': 'embeddedEditor/builder/buildFrom/bootstrap'
 	},
 	packages: [
