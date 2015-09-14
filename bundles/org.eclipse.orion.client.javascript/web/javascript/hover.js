@@ -18,7 +18,7 @@ define([
 'orion/Deferred',
 'i18n!javascript/nls/messages',
 'orion/i18nUtil',
-'doctrine' //last, exports into global
+'doctrine/doctrine' //last, exports into global
 ], function(Objects, Finder, URITemplate, Deferred, Messages, i18nUtil) {
 
 	/**

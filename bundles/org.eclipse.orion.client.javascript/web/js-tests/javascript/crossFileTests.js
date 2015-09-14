@@ -23,8 +23,7 @@ define([
 'chai/chai',
 'orion/Deferred',
 'js-tests/javascript/testingWorker',
-'mocha/mocha', //must stay at the end, not a module
-'doctrine' //must stay at the end, does not export a module
+'mocha/mocha' //must stay at the end, not a module
 ], function(TernAssist, Hover, OpenDecl, OpenImpl, ASTManager, CUProvider, Logger, Esprima, chai, Deferred, TestWorker) {
 	var assert = chai.assert;
 

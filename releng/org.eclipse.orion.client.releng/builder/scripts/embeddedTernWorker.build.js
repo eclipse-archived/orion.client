@@ -15,7 +15,6 @@
 		text: "requirejs/text",
 		json: "requirejs/json", 
 		escope: "escope/escope", 
-		doctrine: 'doctrine/doctrine', 
 		i18n: "requirejs/i18n" 
 	},
 	packages: [

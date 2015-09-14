@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*globals importScripts onmessage:true doctrine onconnect:true requirejs*/
+/*globals importScripts onmessage:true onconnect:true requirejs*/
 /*eslint-env node, browser*/
 var lang ='en'; //$NON-NLS-1$
 var sear = self.location.search;

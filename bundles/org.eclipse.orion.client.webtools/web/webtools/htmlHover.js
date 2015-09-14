@@ -10,7 +10,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env amd, node*/
-/* global doctrine */
 define([
 'orion/objects',
 'orion/URITemplate',

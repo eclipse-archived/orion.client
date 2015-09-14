@@ -32,8 +32,7 @@
         gcli: 'gcli/gcli',
         util: 'gcli/util',
         escope: 'escope/escope',
-        csslint: 'csslint/csslint',
-        doctrine: 'doctrine/doctrine'
+        csslint: 'csslint/csslint'
     },
     packages: [
         {

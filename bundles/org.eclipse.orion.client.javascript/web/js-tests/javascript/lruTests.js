@@ -10,7 +10,6 @@
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env amd, mocha, node*/
-/*global doctrine*/
 /* eslint-disable missing-nls */
 define([
 	'chai/chai',

@@ -12,7 +12,6 @@ define(function() {
 	        util: 'gcli/util',
 	        escope: 'escope/escope',
 	        csslint: 'csslint/csslint',
-	        doctrine: 'doctrine/doctrine'
 		}
 	});
 	function errback(err) {

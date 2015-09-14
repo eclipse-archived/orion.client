@@ -17,7 +17,6 @@
 		text: "requirejs/text", //$NON-NLS-1$
 		json: "requirejs/json", //$NON-NLS-1$
 		escope: "escope/escope", //$NON-NLS-1$
-		doctrine: 'doctrine/doctrine', //$NON-NLS-1$
 		i18n: "requirejs/i18n" //$NON-NLS-1$
 	},
 	packages: [

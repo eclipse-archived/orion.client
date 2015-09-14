@@ -19,7 +19,6 @@
         text: 'requirejs/text',
         json: "requirejs/json", 
 		escope: "escope/escope",
-		doctrine: 'doctrine/doctrine',
         'orion/bootstrap': 'embeddedEditor/builder/buildFrom/bootstrap'
 	},
 	packages: [

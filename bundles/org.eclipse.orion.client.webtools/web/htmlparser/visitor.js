@@ -10,7 +10,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env amd*/
-/* global doctrine */
 define([
 ], function() {
 
