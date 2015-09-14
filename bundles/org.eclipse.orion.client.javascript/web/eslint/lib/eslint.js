@@ -1,7 +1,7 @@
 /* eslint-env amd */
 define([
 'esprima/esprima', 
-'estraverse', 
+'estraverse/estraverse', 
 'escope', 
 'eslint/conf/environments', 
 './rules', 

@@ -51,7 +51,7 @@
 /* eslint-disable missing-nls */
 define([
 'esrecurse/esrecurse',
-'estraverse',
+'estraverse/estraverse',
 'orion/objects'
 ], function(esrecurse, estraverse, objects) {
 	'use strict';

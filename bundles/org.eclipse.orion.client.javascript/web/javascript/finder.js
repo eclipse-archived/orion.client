@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*eslint-env amd*/
 define([
-'estraverse',
+'estraverse/estraverse',
 'eslint/conf/environments'
 ], function(Estraverse, ESlintEnv) {
 

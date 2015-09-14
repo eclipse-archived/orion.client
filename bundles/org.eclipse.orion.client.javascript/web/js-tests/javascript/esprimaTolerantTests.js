@@ -13,7 +13,7 @@
 define([
 	"chai/chai",
 	"esprima/esprima",
-	'estraverse',
+	'estraverse/estraverse',
 	'orion/util',
 	'mocha/mocha'  //must stay last, not a module
 ], function(chai, Esprima, Estraverse, Util) {

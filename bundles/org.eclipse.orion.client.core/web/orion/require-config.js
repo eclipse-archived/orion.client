@@ -10,7 +10,6 @@ define(function() {
 	        domReady: 'requirejs/domReady',
 	        gcli: 'gcli/gcli',
 	        util: 'gcli/util',
-	        estraverse: 'estraverse/estraverse',
 	        escope: 'escope/escope',
 	        csslint: 'csslint/csslint',
 	        doctrine: 'doctrine/doctrine'

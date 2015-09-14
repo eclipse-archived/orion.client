@@ -12,7 +12,7 @@
 /* eslint-disable missing-nls */
 define([
 	'eslint',
-	'estraverse',
+	'estraverse/estraverse',
 	'chai/chai',
 	'mocha/mocha' //not a module, leave at the end
 ], function(eslint, Estraverse, chai) {

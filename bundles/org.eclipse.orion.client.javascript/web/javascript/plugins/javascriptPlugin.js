@@ -21,7 +21,7 @@ define([
 'orion/fileClient',
 'orion/metrics',
 'esprima/esprima',
-'estraverse',
+'estraverse/estraverse',
 'javascript/scriptResolver',
 'javascript/astManager',
 'javascript/quickFixes',

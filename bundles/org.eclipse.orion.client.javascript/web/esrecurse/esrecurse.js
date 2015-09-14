@@ -24,14 +24,13 @@
 /* eslint-env amd */
 /* eslint-disable missing-nls */
 define([
-'estraverse'
-], function(estraverse) {
+], function() {
 	'use strict';
 
     var isArray,
         objectKeys;
 
-    estraverse = require('estraverse');
+    var estraverse = require('estraverse/estraverse');
 
     isArray = Array.isArray;
     if (!isArray) {

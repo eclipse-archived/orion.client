@@ -18,7 +18,6 @@
         i18n: 'requirejs/i18n',
         text: 'requirejs/text',
         json: "requirejs/json", 
-		estraverse: "estraverse/estraverse",
 		escope: "escope/escope",
 		doctrine: 'doctrine/doctrine',
         'orion/bootstrap': 'embeddedEditor/builder/buildFrom/bootstrap'

@@ -18,7 +18,7 @@ define([
 'javascript/logger',
 'javascript/finder',
 'i18n!javascript/nls/problems',
-'estraverse',
+'estraverse/estraverse',
 'orion/editor/stylers/application_javascript/syntax'
 ], function(util, Logger, Finder, ProblemMessages, Estraverse, JsSyntax) {
 
