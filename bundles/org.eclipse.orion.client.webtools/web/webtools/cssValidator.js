@@ -10,8 +10,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env amd*/
-define("webtools/cssValidator", [ //$NON-NLS-0$
-	'orion/objects', //$NON-NLS-0$
+define("webtools/cssValidator", [
+	'orion/objects',
 	'webtools/compilationUnit',
 	'webtools/util'
 ], function(Objects, CU, Util) {

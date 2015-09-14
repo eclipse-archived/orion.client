@@ -17,7 +17,7 @@ define("webtools/cssContentAssist", [
 	'orion/objects',
 	'webtools/util',
 	'javascript/compilationUnit',
-	'csslint',
+	'csslint/csslint',
 	'webtools/cssVisitor',
 	'i18n!webtools/nls/messages'
 ], function(Deferred, mTemplates, mCSS, Objects, Util, CU, CSSLint, Visitor, Messages) {

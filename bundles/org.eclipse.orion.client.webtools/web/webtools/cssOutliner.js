@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,10 +10,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-/*global CSSLint*/
-define("webtools/cssOutliner", [ //$NON-NLS-0$
-	'csslint', //$NON-NLS-0$
-	'orion/objects' //$NON-NLS-0$
+define("webtools/cssOutliner", [
+	'csslint/csslint',
+	'orion/objects'
 ], function(csslint, Objects) {
 
 	/**
@@ -30,6 +29,7 @@ define("webtools/cssOutliner", [ //$NON-NLS-0$
 		
 		/**
 		 * @descripton API callback to compute the outline
+		 * @callback
 		 */
 		getOutline: function(contents, title) {
 			csslint.verify(contents);
@@ -48,6 +48,7 @@ define("webtools/cssOutliner", [ //$NON-NLS-0$
 			outline: [],
 			/**
 			 * @description API callback to start verifying
+			 * @callback
 			 */
 			init: function(parser, reporter) {
 				this.outline = [];

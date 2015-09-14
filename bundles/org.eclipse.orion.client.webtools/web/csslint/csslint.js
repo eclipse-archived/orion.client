@@ -1,6 +1,6 @@
 /* eslint-disable  */
 /* eslint-env amd */
-define('csslint', [
+define([
 ], function() {
 
 /*!

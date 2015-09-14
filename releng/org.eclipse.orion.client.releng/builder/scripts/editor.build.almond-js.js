@@ -14,8 +14,7 @@
     baseUrl: '.',
 	paths: {
         almond: 'requirejs/almond',
-        i18n: 'requirejs/i18n',
-        csslint: 'csslint/csslint'
+        i18n: 'requirejs/i18n'
 	},
 	name: "almond",
 	locales: ["ja", "zh", "zh-tw", "fr", "de", "it", "es", "pt-br"],						

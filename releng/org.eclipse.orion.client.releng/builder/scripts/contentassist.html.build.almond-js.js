@@ -13,8 +13,7 @@
 ({
 	baseUrl: ".",
 	paths: {
-		i18n: "requirejs/i18n",
-		csslint: "csslint/csslint"
+		i18n: "requirejs/i18n"
 	},
 	name: "requirejs/almond",
 	include: ["webtools/htmlContentAssist"],

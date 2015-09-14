@@ -15,7 +15,7 @@ define([
 	'orion/Deferred',
 	'orion/objects',
 	'javascript/lru',
-	'csslint',
+	'csslint/csslint',
 	'orion/metrics'
 ], function(Deferred, Objects, LRU, CSSLint, Metrics) {
 

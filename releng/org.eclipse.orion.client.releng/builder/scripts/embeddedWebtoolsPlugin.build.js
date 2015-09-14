@@ -19,7 +19,6 @@
 		text: 'requirejs/text',
 		i18n: 'requirejs/i18n',
 		domReady: 'requirejs/domReady',
-		csslint: 'csslint/csslint',
 		'orion/bootstrap': 'embeddedEditor/builder/buildFrom/bootstrap'
 	},
 	packages: [],

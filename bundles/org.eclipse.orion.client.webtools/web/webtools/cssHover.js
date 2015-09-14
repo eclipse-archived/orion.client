@@ -16,7 +16,7 @@ define([
 'webtools/util',
 'javascript/compilationUnit',
 'i18n!webtools/nls/messages',
-'csslint' //for colour object
+'csslint/csslint' //for colour object
 ], function(Objects, URITemplate, Util, CU, messages, CSSLint) {
 	
 	/**
