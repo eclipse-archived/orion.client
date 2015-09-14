@@ -18,7 +18,6 @@
         i18n: 'requirejs/i18n',
         text: 'requirejs/text',
         json: "requirejs/json", 
-		esprima: "esprima/esprima",
 		estraverse: "estraverse/estraverse",
 		escope: "escope/escope",
 		doctrine: 'doctrine/doctrine',

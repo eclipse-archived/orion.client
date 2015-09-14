@@ -15,7 +15,7 @@ define([
 'javascript/astManager',
 'javascript/contentAssist/ternAssist',
 'javascript/cuProvider',
-'esprima',
+'esprima/esprima',
 'chai/chai',
 'orion/Deferred',
 'js-tests/javascript/testingWorker',

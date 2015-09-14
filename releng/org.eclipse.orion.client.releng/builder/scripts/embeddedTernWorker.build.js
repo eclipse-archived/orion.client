@@ -14,7 +14,6 @@
 	paths: {
 		text: "requirejs/text",
 		json: "requirejs/json", 
-		esprima: "esprima/esprima", 
 		estraverse: "estraverse/estraverse", 
 		escope: "escope/escope", 
 		doctrine: 'doctrine/doctrine', 

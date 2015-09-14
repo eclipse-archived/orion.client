@@ -12,7 +12,7 @@
 /* eslint-disable missing-nls */
 define([
 	"chai/chai",
-	"esprima",
+	"esprima/esprima",
 	'estraverse',
 	'orion/util',
 	'mocha/mocha'  //must stay last, not a module

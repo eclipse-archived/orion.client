@@ -12,10 +12,9 @@
  /*eslint-env amd, browser*/
 define([
 'orion/objects',
-'javascript/finder',
 'orion/Deferred',
 'i18n!javascript/nls/messages'
-], function(Objects, Finder, Deferred, Messages) {
+], function(Objects, Deferred, Messages) {
 
 	var cachedContext;
 	var deferred;
@@ -25,15 +24,13 @@ define([
 	 * @constructor
 	 * @public
 	 * @param {javascript.ASTManager} ASTManager The backing AST manager
-	 * @param {javascript.ScriptResolver} Resolver The backing script resolver
 	 * @param {TernWorker} ternWorker The running Tern worker
 	 * @param {javascript.CUProvider} cuProvider
 	 * @returns {javascript.commands.OpenDeclarationCommand} A new command
 	 * @since 10.0
 	 */
-	function OpenImplementationCommand(ASTManager, Resolver, ternWorker, cuProvider) {
+	function OpenImplementationCommand(ASTManager, ternWorker, cuProvider) {
 		this.astManager = ASTManager;
-		this.resolver = Resolver;
 		this.ternworker = ternWorker;
 		this.cuprovider = cuProvider;
 		this.timeout = null;

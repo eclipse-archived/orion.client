@@ -16,7 +16,7 @@ define([
 	'javascript/validator',
 	'chai/chai',
 	'orion/Deferred',
-	'esprima',
+	'esprima/esprima',
 	'javascript/astManager',
 	'javascript/cuProvider',
 	"orion/i18nUtil",

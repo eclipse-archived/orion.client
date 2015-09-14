@@ -12,7 +12,7 @@
 /* eslint-disable missing-nls */
 define([
 	'chai/chai',
-	'esprima',
+	'esprima/esprima',
 	'javascript/astManager',
 	'orion/Deferred',
 	'javascript/outliner',

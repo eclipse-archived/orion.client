@@ -14,10 +14,10 @@
 /* eslint-disable */
 (function(root, mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(exports, require("esprima"), require("acorn/util/walk"),
+    return mod(exports, require("esprima/esprima"), require("acorn/util/walk"),
                require("./def"), require("./signal"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["exports", "esprima", "acorn/util/walk", "./def", "./signal"], mod);
+    return define(["exports", "esprima/esprima", "acorn/util/walk", "./def", "./signal"], mod);
   mod(root.tern || (root.tern = {}), acorn, acorn.walk, tern.def, tern.signal); // Plain browser env
 })(this, function(exports, acorn, walk, def, signal) {
   "use strict";

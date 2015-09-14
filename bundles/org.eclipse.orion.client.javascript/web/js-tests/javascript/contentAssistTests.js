@@ -17,7 +17,7 @@ define([
 	'chai/chai',
 	'orion/objects',
 	'orion/Deferred',
-	'esprima',
+	'esprima/esprima',
 	'mocha/mocha', //mjust stay at the end, not a module
 	'doctrine' //must stay at the end, does not export a module 
 ], function(ContentAssist, chai, objects, Deferred, Esprima) {

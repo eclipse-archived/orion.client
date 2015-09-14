@@ -16,7 +16,7 @@ define([
 	'javascript/validator',
 	'chai/chai',
 	'orion/Deferred',
-	'esprima',
+	'esprima/esprima',
 	'javascript/astManager',
 	'javascript/cuProvider',
 	'mocha/mocha', //must stay at the end, not a module
