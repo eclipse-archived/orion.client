@@ -4719,6 +4719,20 @@ define([
 					['XPathResult()', 'XPathResult()']
 				]);
 			});
+			/**
+			 * Tests support for content assist results inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML - empty array from JS proposals outside of valid blocks', function(done) {
+				var options = {
+					buffer: '<html><body><a onclick="xxx">xx</a><script>var xxx = 0;</script></body></html>',
+					prefix: "xx",
+					offset: 31,
+					contenttype: "text/html",
+					callback: done};
+				testProposals(options, []);
+			});
 		});
 	});
 });
