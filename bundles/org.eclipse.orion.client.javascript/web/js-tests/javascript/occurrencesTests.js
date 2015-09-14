@@ -1187,90 +1187,6 @@ define([
 			});
 		});
 		
-		/**
-		 * Tests computing occurrences from a script block in the <head> block
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
-		 */
-		it('test_htmlHead1', function() {
-		    editorContext.contentTypeId = 'text/html';
-			editorContext.text = "<!DOCTYPE html><head><script>function f() {}</script></head><html></html>";
-			return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
-				assertOccurrences(results, [{start:38, end:39}]);
-			});
-		});
-		
-		/**
-		 * Tests computing occurrences from a script block in the <head> block
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
-		 */
-		it('test_htmlHead2', function() {
-		    editorContext.contentTypeId = 'text/html';
-			editorContext.text = "<!DOCTYPE html><head><scRipt>function f() {}</script></head><html></html>";
-			return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
-				assertOccurrences(results, [{start:38, end:39}]);
-			});
-		});
-		
-		/**
-		 * Tests computing occurrences from a script block in the <head> block
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
-		 */
-		it('test_htmlHead3', function() {
-		    editorContext.contentTypeId = 'text/html';
-			editorContext.text = "<!DOCTYPE html><head><scRipt  >function f() {}</script></head><html></html>";
-			return occurrences.computeOccurrences(editorContext, setContext(41, 41, 'text/html')).then(function(results) {
-				assertOccurrences(results, [{start:40, end:41}]);
-			});
-		});
-		
-		/**
-		 * Tests computing occurrences from a script block in the <head> block
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
-		 */
-		it('test_htmlHeadMulti1', function() {
-		    editorContext.contentTypeId = 'text/html';
-			editorContext.text = "<!DOCTYPE html><head><script>function f() {}</script><script>function f() {}</script></head><html></html>";
-			return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
-				assertOccurrences(results, [{start:38, end:39}, {start:70, end:71}]);
-			});
-		});
-		
-		/**
-		 * Tests computing occurrences from a script block in the <head> block
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
-		 */
-		it('test_htmlHeadMulti2', function() {
-		    editorContext.contentTypeId = 'text/html';
-			editorContext.text = "<!DOCTYPE html><head><scRipt>function f() {}</script><script>function f() {}</script></head><html></html>";
-			return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
-				assertOccurrences(results, [{start:38, end:39}, {start:70, end:71}]);
-			});
-		});
-		
-		/**
-		 * Tests computing occurrences from a script block in the <head> block
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
-		 */
-		it('test_htmlHeadMulti3', function() {
-		    editorContext.contentTypeId = 'text/html';
-			editorContext.text = "<!DOCTYPE html><head><scRipt   >function f() {}</script><script>function f() {}</script></head><html></html>";
-			return occurrences.computeOccurrences(editorContext, setContext(42, 42, 'text/html')).then(function(results) {
-				assertOccurrences(results, [{start:41, end:42}, {start:73, end:74}]);
-			});
-		});
-		
-		/**
-		 * Tests computing occurrences from a script block in the <head> block
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
-		 */
-		it('test_htmlHeadMulti4', function() {
-		    editorContext.contentTypeId = 'text/html';
-			editorContext.text = "<!DOCTYPE html><head><scRipt   >function f() {}</script><script>function f() {}</script></head><html></html>";
-			return occurrences.computeOccurrences(editorContext, setContext(74, 74, 'text/html')).then(function(results) {
-				assertOccurrences(results, [{start:41, end:42}, {start:73, end:74}]);
-			});
-		});
-		
 		//RECOVERED OCCURRENCES
 		/**
 		 * Tests computing occurrences within an AST that has been recovered
@@ -2670,6 +2586,283 @@ define([
 				editorContext.text = "define(['require', 'A'], function (require) { var a = require('A'); });";
 				return occurrences.computeOccurrences(editorContext, setContext(63,63)).then(function(results) {
 					assertOccurrences(results, [{start:20, end:21}, {start:50, end:51}, {start:62, end:65}]);
+				});
+			});
+		});
+		describe('HTML script block occurrences tests', function() {
+			/**
+			 * Tests computing occurrences from a script block in the <head> block
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+			 */
+			it('test_htmlHead1', function() {
+			    editorContext.contentTypeId = 'text/html';
+				editorContext.text = "<!DOCTYPE html><head><script>function f() {}</script></head><html></html>";
+				return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
+					assertOccurrences(results, [{start:38, end:39}]);
+				});
+			});
+			
+			/**
+			 * Tests computing occurrences from a script block in the <head> block
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+			 */
+			it('test_htmlHead2', function() {
+			    editorContext.contentTypeId = 'text/html';
+				editorContext.text = "<!DOCTYPE html><head><scRipt>function f() {}</script></head><html></html>";
+				return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
+					assertOccurrences(results, [{start:38, end:39}]);
+				});
+			});
+			
+			/**
+			 * Tests computing occurrences from a script block in the <head> block
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+			 */
+			it('test_htmlHead3', function() {
+			    editorContext.contentTypeId = 'text/html';
+				editorContext.text = "<!DOCTYPE html><head><scRipt  >function f() {}</script></head><html></html>";
+				return occurrences.computeOccurrences(editorContext, setContext(41, 41, 'text/html')).then(function(results) {
+					assertOccurrences(results, [{start:40, end:41}]);
+				});
+			});
+			
+			/**
+			 * Tests computing occurrences from a script block in the <head> block
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+			 */
+			it('test_htmlHeadMulti1', function() {
+			    editorContext.contentTypeId = 'text/html';
+				editorContext.text = "<!DOCTYPE html><head><script>function f() {}</script><script>function f() {}</script></head><html></html>";
+				return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
+					assertOccurrences(results, [{start:38, end:39}, {start:70, end:71}]);
+				});
+			});
+			
+			/**
+			 * Tests computing occurrences from a script block in the <head> block
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+			 */
+			it('test_htmlHeadMulti2', function() {
+			    editorContext.contentTypeId = 'text/html';
+				editorContext.text = "<!DOCTYPE html><head><scRipt>function f() {}</script><script>function f() {}</script></head><html></html>";
+				return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
+					assertOccurrences(results, [{start:38, end:39}, {start:70, end:71}]);
+				});
+			});
+			
+			/**
+			 * Tests computing occurrences from a script block in the <head> block
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+			 */
+			it('test_htmlHeadMulti3', function() {
+			    editorContext.contentTypeId = 'text/html';
+				editorContext.text = "<!DOCTYPE html><head><scRipt   >function f() {}</script><script>function f() {}</script></head><html></html>";
+				return occurrences.computeOccurrences(editorContext, setContext(42, 42, 'text/html')).then(function(results) {
+					assertOccurrences(results, [{start:41, end:42}, {start:73, end:74}]);
+				});
+			});
+			
+			/**
+			 * Tests computing occurrences from a script block in the <head> block
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+			 */
+			it('test_htmlHeadMulti4', function() {
+			    editorContext.contentTypeId = 'text/html';
+				editorContext.text = "<!DOCTYPE html><head><scRipt   >function f() {}</script><script>function f() {}</script></head><html></html>";
+				return occurrences.computeOccurrences(editorContext, setContext(74, 74, 'text/html')).then(function(results) {
+					assertOccurrences(results, [{start:41, end:42}, {start:73, end:74}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML script block - simple occurrences 1', function() {
+				editorContext.text = "<html><head><script>var xx = 0; xx = 5;</script></head></html>";
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(25,25)).then(function(results) {
+					assertOccurrences(results, [{start:24, end:26}, {start:32, end:34}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML script block - simple occurrences 2', function() {
+				editorContext.text = "<html><head><script>var xx = 0; xx = 5;</script></head></html>";
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(32,34)).then(function(results) {
+					assertOccurrences(results, [{start:24, end:26}, {start:32, end:34}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML script block - simple occurrences missing semi 1', function() {
+				editorContext.text = "<html><head><script>var xx = 0; xx</script></head></html>";
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(24,24)).then(function(results) {
+					assertOccurrences(results, [{start:24, end:26}, {start:32, end:34}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML script block - simple occurrences missing semi 2', function() {
+				editorContext.text = "<html><head><script>var xx = 0; xx</script></head></html>";
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(34,34)).then(function(results) {
+					assertOccurrences(results, [{start:24, end:26}, {start:32, end:34}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML script block - empty script block', function() {
+				editorContext.text = "<html><head><script></script></head></html>";
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(20,20)).then(function(results) {
+					assertOccurrences(results, []);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML script block - multi block occurrences 1', function() {
+				editorContext.text = "<html><head><script>var xx = 0; xx;</script></head><body><a>xx</a><script>xx;</script></body></html>";
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(26,26)).then(function(results) {
+					assertOccurrences(results, [{start:24, end:26}, {start:32, end:34}, {start:74, end:76}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML script block - multi block occurrences 2', function() {
+				editorContext.text = "<html><head><script>var xx = 0; xx;</script></head><body><a>xx</a><script>xx;</script></body></html>";
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(34,34)).then(function(results) {
+					assertOccurrences(results, [{start:24, end:26}, {start:32, end:34}, {start:74, end:76}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML script block - multi block occurrences 3', function() {
+				editorContext.text = "<html><head><script>var xx = 0; xx;</script></head><body><a>xx</a><script>xx;</script></body></html>";
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(74,76)).then(function(results) {
+					assertOccurrences(results, [{start:24, end:26}, {start:32, end:34}, {start:74, end:76}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML script block - multi block occurrences hoisting 1', function() {
+				editorContext.text = "<html><head><script>xx;</script></head><body><a>xx</a><script>xx; var xx = 0;</script></body></html>";
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(21,21)).then(function(results) {
+					assertOccurrences(results, [{start:20, end:22}, {start:62, end:64}, {start:70, end:72}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML script block - multi block occurrences hoisting 2', function() {
+				editorContext.text = "<html><head><script>xx;</script></head><body><a>xx</a><script>xx; var xx = 0;</script></body></html>";
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(62,62)).then(function(results) {
+					assertOccurrences(results, [{start:20, end:22}, {start:62, end:64}, {start:70, end:72}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML script block - multi block occurrences hoisting 3', function() {
+				editorContext.text = "<html><head><script>xx;</script></head><body><a>xx</a><script>xx; var xx = 0;</script></body></html>";
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(71,72)).then(function(results) {
+					assertOccurrences(results, [{start:20, end:22}, {start:62, end:64}, {start:70, end:72}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML wrapped function call - script blocks show occurrences 1', function() {
+				editorContext.text = '<html><head><script>this.xx = function(){};</script></head><body><a onclick="xx()">xx()</a></body></html>';
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(25,25)).then(function(results) {
+					assertOccurrences(results, [{start:25, end:27}, {start:76, end:78}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML wrapped function call - script blocks show occurrences 2', function() {
+				editorContext.text = '<html><head><script>this.xx = function(){};</script></head><body><a onclick="xx()">xx()</a></body></html>';
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(77,77)).then(function(results) {
+					assertOccurrences(results, [{start:25, end:27}, {start:76, end:78}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML wrapped function call - occurrences ignore order 1', function() {
+				editorContext.text = '<html><body><a onclick="xx()">xx()</a><script>this.xx = function(){};</script></body></html>';
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(25,25)).then(function(results) {
+					assertOccurrences(results, [{start:23, end:25}, {start:51, end:53}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML wrapped function call - occurrences ignore order 2', function() {
+				editorContext.text = '<html><body><a onclick="xx()">xx()</a><script>this.xx = function(){};</script></body></html>';
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(51,53)).then(function(results) {
+					assertOccurrences(results, [{start:23, end:25}, {start:51, end:53}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML wrapped function call - occurrences only inside blocks', function() {
+				editorContext.text = '<html><body><a onclick="xx()">xx()</a><script>this.xx = function(){};</script></body></html>';
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(30,30)).then(function(results) {
+					assertOccurrences(results, []);
 				});
 			});
 		});
