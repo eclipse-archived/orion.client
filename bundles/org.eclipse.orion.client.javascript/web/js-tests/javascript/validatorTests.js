@@ -47,6 +47,9 @@ define([
     			    o.contentType = Object.create(null);
     			    o.contentType.id = contentType;
     			    o.location = 'validator_test_script.js';
+    			    if (contentType === 'text/javascript'){
+						o.location = 'validator_test_script.html';
+    			    }
     			    return new Deferred().resolve(o);
     			}
 				
@@ -149,5 +152,135 @@ define([
 				]);
 			});
 		});
+		
+		describe("HTML script block validation tests", function(){
+			/*
+			 * Tests that the validator runs correctly on script blocks and wrapped functions in HTML files
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it("HTML Script Block - simple block unused var", function() {
+				var promise = validate({buffer: '<html><head><script>var xx = 0; this.x;</script></head></html>', contentType: 'text/html'});
+				return promise.then(function (problems) {
+					assertProblems(problems, [
+					    {start: 24,
+					     end: 26,
+					     severity: 'warning',
+					     description: i18nUtil.formatMessage.call(null, messages['no-unused-vars-unread'], {0: 'xx', nls: 'no-unused-vars-unread'})
+					    }
+					]);
+				});
+			});
+			/*
+			 * Tests that the validator runs correctly on script blocks and wrapped functions in HTML files
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it("HTML Script Block - simple block missing semi", function() {
+				var promise = validate({buffer: '<html><head><script>var xx = 0; xx++; this.x</script></head></html>', contentType: 'text/html'});
+				return promise.then(function (problems) {
+					assertProblems(problems, [
+					    {start: 43,
+					     end: 44,
+					     severity: 'warning',
+					     description: i18nUtil.formatMessage.call(null, messages['semi'], {})
+					    }
+					]);
+				});
+			});
+			/*
+			 * Tests that the validator runs correctly on script blocks and wrapped functions in HTML files
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it("HTML Script Block - empty block", function() {
+				var promise = validate({buffer: '<html><head><script></script></head></html>', contentType: 'text/html'});
+				return promise.then(function (problems) {
+					assertProblems(problems, [
+					]);
+				});
+			});
+			/*
+			 * Tests that the validator runs correctly on script blocks and wrapped functions in HTML files
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it("HTML Script Block - multi block used var 1", function() {
+				var promise = validate({buffer: '<html><head><script>var xx;</script></head><body><a>test</a><script>xx++;</script></body></html>', contentType: 'text/html'});
+				return promise.then(function (problems) {
+					assertProblems(problems, [
+					]);
+				});
+			});
+			/*
+			 * Tests that the validator runs correctly on script blocks and wrapped functions in HTML files
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it("HTML Script Block - multi block used var 2", function() {
+				var promise = validate({buffer: '<html><head><script>xx++;</script></head><body><a>test</a><script>var xx;</script></body></html>', contentType: 'text/html'});
+				return promise.then(function (problems) {
+					assertProblems(problems, [
+					    {start: 20,
+					     end: 22,
+					     severity: 'warning',
+					     description: i18nUtil.formatMessage.call(null, messages['no-use-before-define'], {0: 'xx', nls: 'no-use-before-define'})
+					    }
+					]);
+				});
+			});
+			/*
+			 * Tests that the validator runs correctly on script blocks and wrapped functions in HTML files
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it("HTML Script Block - multi block unused var", function() {
+				var promise = validate({buffer: '<html><head><script>var xx;</script></head><body><a>test</a><script>var yy;</script></body></html>', contentType: 'text/html'});
+				return promise.then(function (problems) {
+					assertProblems(problems, [
+						{start: 24,
+					     end: 26,
+					     severity: 'warning',
+					     description: i18nUtil.formatMessage.call(null, messages['no-unused-vars-unused'], {0: 'xx', nls: 'no-unused-vars-unused'})
+					    },
+						{start: 72,
+					     end: 74,
+					     severity: 'warning',
+					     description: i18nUtil.formatMessage.call(null, messages['no-unused-vars-unused'], {0: 'yy', nls: 'no-unused-vars-unused'})
+					    }
+					]);
+				});
+			});
+			/*
+			 * Tests that the validator runs correctly on script blocks and wrapped functions in HTML files
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it("HTML Wrapped Function - multi block unused var", function() {
+				var promise = validate({buffer: '<html><head><script></script></head><body><a onclick="xx;;"></a></body></html>', contentType: 'text/html'});
+				return promise.then(function (problems) {
+					assertProblems(problems, [
+						{start: 56,
+					     end: 57,
+					     severity: 'warning',
+					     description: i18nUtil.formatMessage.call(null, messages['no-extra-semi'], {})
+					    }
+					]);
+				});
+			});
+			/*
+			 * Tests that the validator runs correctly on script blocks and wrapped functions in HTML files
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it("HTML - Empty array for empty blocks", function() {
+				var promise = validate({buffer: '<html><head><script></script></head><body><a onclick=""></a></body></html>', contentType: 'text/html'});
+				return promise.then(function (problems) {
+					assertProblems(problems, [
+					]);
+				});
+			});
+		});
+
 	});
 });
