@@ -19,7 +19,7 @@ define([
 'javascript/astManager',
 'javascript/cuProvider',
 'javascript/logger',
-'esprima',
+'esprima/esprima',
 'chai/chai',
 'orion/Deferred',
 'js-tests/javascript/testingWorker',
@@ -168,97 +168,6 @@ define([
 		return p(type, options);
 	}
 
-	/**
-	 * @description Pretty-prints the given array of proposal objects
-	 * @param {Array} expectedProposals The array of proposals
-	 * @returns {String} The pretty-printed proposals
-	 */
-	function stringifyActual(actualProposals) {
-		var text = "";
-		for (var i = 0; i < actualProposals.length; i++) {
-			if (actualProposals[i].name) {
-				text += actualProposals[i].proposal + " : " + actualProposals[i].name + actualProposals[i].description + "\n"; //$NON-NLS-1$ //$NON-NLS-0$
-			} else {
-				text += actualProposals[i].proposal + " : " + actualProposals[i].description + "\n"; //$NON-NLS-1$ //$NON-NLS-0$
-			}
-		}
-		return text;
-	}
-	
-	/**
-	 * @description Tests the proposals message directly to the worker without using the TernAssist class
-	 * @param {Object} options The map of options
-	 * @param {Array.<object>} expected The expected array of proposals
-	 */
-	function testDirectProposals(options, expected) {
-		var _p = setup(options);
-		assert(_p, 'setup() should have completed normally');
-		testworker.postMessage(message('completions', _p), function(response) {
-			try {
-				assert(response, 'There was no response from the worker');
-				var actual = response.proposals;
-				assert(Array.isArray(actual), 'There were no proposals returned');
-				//_compareProposals(actual, expected);
-				options.callback(); //TODO remove this once the real tests are running
-			}
-			catch(err) {
-				testworker._state.callback(err);
-			}
-		});
-	}
-	
-	/**
-	 * @description Checks the proposals returned from the given proposal promise against
-	 * the array of given proposals
-	 * @param {Object} options The options to test with
-	 * @param {Array} expectedProposals The array of expected proposal objects
-	 */
-	function testProposals(options, expectedProposals) {
-		var _p = setup(options);
-		assert(_p, 'setup() should have completed normally');
-		assist.computeContentAssist(_p.editorContext, _p.params).then(function (actualProposals) {
-			_compareProposals(actualProposals, expectedProposals);
-		}, function (error) {
-			testworker._state.callback(error);
-		});
-	}
-
-	/**
-	 * @description Compares the given arrays of proposals
-	 * @private
-	 * @param {Array.<Object>} actualProposals The proposals returned from the service
-	 * @param {Array.<Object>} expectedProposals The proposals we are expecting to get
-	 */
-	function _compareProposals(actualProposals, expectedProposals) {
-		try {
-			assert.equal(actualProposals.length, expectedProposals.length,
-				"Wrong number of proposals.  Expected:\n" + stringifyExpected(expectedProposals) +"\nActual:\n" + stringifyActual(actualProposals));
-			for (var i = 0; i < actualProposals.length; i++) {
-			    var ap = actualProposals[i];
-			    var ep = expectedProposals[i];
-				var text = ep[0];
-				var description = ep[1];
-				assert.equal(ap.proposal, text, "Invalid proposal text"); //$NON-NLS-0$
-				if (description) {
-					if (ap.name) {
-						assert.equal(ap.name + ap.description, description, "Invalid proposal description"); //$NON-NLS-0$
-					} else {
-						assert.equal(ap.description, description, "Invalid proposal description"); //$NON-NLS-0$
-					}
-				}
-				if(expectedProposals[i].length === 3 && !ap.unselectable /*headers have no hover*/) {
-				    //check for doc hover
-				    assert(ap.hover, 'There should be a hover entry for the proposal');
-				    assert(ap.hover.indexOf(ep[2]) === 0, "The doc should have started with the given value");
-				}
-			}
-			testworker._state.callback();
-		}
-		catch(err) {
-			testworker._state.callback(err);
-		}
-	}
-
 	describe("Cross-file Tests", function() {
 		before('Message the server for warm up on cross file tests', function(callback) {
 			testworker = TestWorker.instance();
@@ -266,6 +175,7 @@ define([
 			assist = new TernAssist.TernContentAssist(astManager, testworker, function() {
 				return new Deferred().resolve(envs);
 			}, CUProvider);
+			openimpl = new OpenImpl.OpenImplementationCommand(astManager, testworker, CUProvider);
 			this.timeout(20000);
 			var options = {
 				buffer: "xx",
@@ -284,6 +194,97 @@ define([
 		});
 		this.timeout(20000);
 		describe("Content assist tests", function() {
+			/**
+			 * @description Checks the proposals returned from the given proposal promise against
+			 * the array of given proposals
+			 * @param {Object} options The options to test with
+			 * @param {Array} expectedProposals The array of expected proposal objects
+			 */
+			function testProposals(options, expectedProposals) {
+				var _p = setup(options);
+				assert(_p, 'setup() should have completed normally');
+				assist.computeContentAssist(_p.editorContext, _p.params).then(function (actualProposals) {
+					_compareProposals(actualProposals, expectedProposals);
+				}, function (error) {
+					testworker._state.callback(error);
+				});
+			}
+			
+			/**
+			 * @description Tests the proposals message directly to the worker without using the TernAssist class
+			 * @param {Object} options The map of options
+			 * @param {Array.<object>} expected The expected array of proposals
+			 */
+			function testDirectProposals(options, expected) {
+				var _p = setup(options);
+				assert(_p, 'setup() should have completed normally');
+				testworker.postMessage(message('completions', _p), function(response) {
+					try {
+						assert(response, 'There was no response from the worker');
+						var actual = response.proposals;
+						assert(Array.isArray(actual), 'There were no proposals returned');
+						//_compareProposals(actual, expected);
+						options.callback(); //TODO remove this once the real tests are running
+					}
+					catch(err) {
+						testworker._state.callback(err);
+					}
+				});
+			}
+		
+			/**
+			 * @description Compares the given arrays of proposals
+			 * @private
+			 * @param {Array.<Object>} actualProposals The proposals returned from the service
+			 * @param {Array.<Object>} expectedProposals The proposals we are expecting to get
+			 */
+			function _compareProposals(actualProposals, expectedProposals) {
+				try {
+					assert.equal(actualProposals.length, expectedProposals.length,
+						"Wrong number of proposals.  Expected:\n" + stringifyExpected(expectedProposals) +"\nActual:\n" + stringifyActual(actualProposals));
+					for (var i = 0; i < actualProposals.length; i++) {
+					    var ap = actualProposals[i];
+					    var ep = expectedProposals[i];
+						var text = ep[0];
+						var description = ep[1];
+						assert.equal(ap.proposal, text, "Invalid proposal text"); //$NON-NLS-0$
+						if (description) {
+							if (ap.name) {
+								assert.equal(ap.name + ap.description, description, "Invalid proposal description"); //$NON-NLS-0$
+							} else {
+								assert.equal(ap.description, description, "Invalid proposal description"); //$NON-NLS-0$
+							}
+						}
+						if(expectedProposals[i].length === 3 && !ap.unselectable /*headers have no hover*/) {
+						    //check for doc hover
+						    assert(ap.hover, 'There should be a hover entry for the proposal');
+						    assert(ap.hover.indexOf(ep[2]) === 0, "The doc should have started with the given value");
+						}
+					}
+					testworker._state.callback();
+				}
+				catch(err) {
+					testworker._state.callback(err);
+				}
+			}
+			
+			/**
+			 * @description Pretty-prints the given array of proposal objects
+			 * @param {Array} expectedProposals The array of proposals
+			 * @returns {String} The pretty-printed proposals
+			 */
+			function stringifyActual(actualProposals) {
+				var text = "";
+				for (var i = 0; i < actualProposals.length; i++) {
+					if (actualProposals[i].name) {
+						text += actualProposals[i].proposal + " : " + actualProposals[i].name + actualProposals[i].description + "\n"; //$NON-NLS-1$ //$NON-NLS-0$
+					} else {
+						text += actualProposals[i].proposal + " : " + actualProposals[i].description + "\n"; //$NON-NLS-1$ //$NON-NLS-0$
+					}
+				}
+				return text;
+			}
+		
 			it("Simple require'd dep 1", function(done) {
 				var options = {
 					buffer: "/* eslint-env amd */define(['./files/require_dep1'], function(rd1) {rd1.m});",
@@ -327,8 +328,142 @@ define([
 			it("Simple HTML pre-load dep 1");
 		});
 		describe("Open implementation tests", function() {
-			it("Simple pre-load dep 1");
-			it("Simple HTML pre-load dep 1");
+			/**
+			 * @description Tests the result of calling the implementation command via the Orion API
+			 * @since 10.0
+			 */
+			function testImplementation(options, expected) {
+			}
+			/**
+			 * @description Tests the result of sending the implementation request directly to Tern
+			 * @since 10.0
+			 */
+			function testDirectImplementation(options, expected) {
+				var _p = setup(options);
+				assert(_p, 'setup() should have completed normally');
+				testworker.postMessage(message('implementation', _p), function(response) {
+					try {
+						assert(response, 'There was no response from the worker');
+						var actual = response.implementation;
+						assert(actual, 'There was no implmentation returned');
+						_compareImpls(actual, expected);
+					}
+					catch(err) {
+						testworker._state.callback(err);
+					}
+				});
+			}
+			
+			/**
+			 * @description Compares the actual file (from Tern response) to the given file name.
+			 * @private
+			 * @param {String} actual The actual file from the Tern response
+			 * @param {String} expected The name of the file to compare to. This name is not fully qualified, it is ony the name (last path segment)
+			 * of the file.
+			 */
+			function _sameFile(actual, expected) {
+				assert(actual, 'The actual file name cannot be undefined');
+				assert(expected, 'The expected file name cannot be undefined');
+				var idx = actual.lastIndexOf('/');
+				var f = actual;
+				if(idx > -1) {
+					f = f.slice(idx+1);
+				}
+				assert.equal(f, expected, 'The origin file names are not the same');
+			}
+			
+			/**
+			 * @description Compares the actual impl found to what we are expecting
+			 * @private
+			 * @param {Object} actual The actual found impl
+			 * @param {Object} expected The expected impl
+			 */
+			function _compareImpls(actual, expected) {
+				try {
+					_sameFile(actual.file, expected.file);
+					assert(actual.start, expected.start, 'The implementation starts are not the same');
+					assert(actual.end, expected.end, 'The implementation ends are not the same');
+					testworker._state.callback();
+				} catch(err) {
+					testworker._state.callback(err);
+				}
+			}
+			
+			it("Test direct impl - same file var reassignment", function(done) {
+				var options = {
+					buffer: 'function f(){} var q = f; f();',
+					offset: 27,
+					callback: done
+				};
+				testDirectImplementation(options, {start:9, end:10, file: 'tern_crossfile_test_script.js'});
+			});
+			it("Test direct impl - same file simple use", function(done) {
+				var options = {
+					buffer: 'function f(){} f();',
+					offset: 16,
+					callback: done
+				};
+				testDirectImplementation(options, {start:9, end:10, file: 'tern_crossfile_test_script.js'});
+			});
+			it("Test direct impl - same file object proxy", function(done) {
+				var options = {
+					buffer: 'function f(){} var o = {one: f}; o.one();',
+					offset: 37,
+					callback: done
+				};
+				testDirectImplementation(options, {start:9, end:10, file: 'tern_crossfile_test_script.js'});
+			});
+			it("Test direct impl - same file function return indirection", function(done) {
+				var options = {
+					buffer: 'function f(){} function g() {return {ff: f}} g().ff();',
+					offset: 51,
+					callback: done
+				};
+				testDirectImplementation(options, {start:9, end:10, file: 'tern_crossfile_test_script.js'});
+			});
+			it("Test direct impl - cross file return object indirection 1", function(done) {
+				var options = {
+					buffer: "define(['./files/require_dep1'], function(a) {a.myfunc()});",
+					offset: 52,
+					callback: done
+				};
+				testDirectImplementation(options, {start:859, end:865, file: 'require_dep1.js'});
+			});
+			it("Test direct impl - cross file return object indirection 2", function(done) {
+				var options = {
+					buffer: "define(['./files/require_dep1'], function(a) {a.variable});",
+					offset: 52,
+					callback: done
+				};
+				testDirectImplementation(options, {start:733, end:741, file: 'require_dep1.js'});
+			});
+			it("Test direct impl - cross file return object indirection 3", function(done) {
+				var options = {
+					buffer: "define(['./files/require_dep2'], function(a) {a.myfunc()});",
+					offset: 52,
+					callback: done
+				};
+				//TODO this test passes, but is marking the RHS of the property rather than the property name
+				testDirectImplementation(options, {start:868, end:881, file: 'require_dep2.js'});
+			});
+			it("Test direct impl - cross file return object indirection 4", function(done) {
+				var options = {
+					buffer: "define(['./files/require_dep2'], function(a) {a.variable});",
+					offset: 52,
+					callback: done
+				};
+				//TODO this test fails to find the impl, but it should work
+				testDirectImplementation(options, {start:733, end:741, file: 'require_dep2.js'});
+			});
+			it("Test direct impl - cross file constructor", function(done) {
+				var options = {
+					buffer: "define(['./files/require_dep3'], function(a) {var local = new a();});",
+					offset: 63,
+					callback: done
+				};
+				//TODO this test finds the impl as the define import, but should find the function declaration in the required file 
+				testDirectImplementation(options, {start:-1, end:-1, file: 'require_dep3.js'});
+			});
 		});
 		describe("All References Tests", function() {
 			it("Simple pre-load dep 1");
