@@ -7,7 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
  /*eslint-env amd*/
 define([
@@ -15,8 +15,7 @@ define([
 'javascript/finder',
 'javascript/signatures',
 'orion/Deferred',
-'javascript/compilationUnit'
-], function(Objects, Finder, Signatures, Deferred, CU) {
+], function(Objects, Finder, Signatures, Deferred) {
 	
 	/**
 	 * @description Creates a new generate doc command
@@ -25,8 +24,9 @@ define([
 	 * @returns {javascript.commands.GenerateDocCommand} A new command
 	 * @since 6.0
 	 */
-	function GenerateDocCommand(ASTManager) {
+	function GenerateDocCommand(ASTManager, CUProvider) {
 		this.astManager = ASTManager;
+		this.cuprovider = CUProvider;
 	}
 	
 	Objects.mixin(GenerateDocCommand.prototype, {
@@ -36,30 +36,29 @@ define([
 		execute: function(editorContext, options) {
 			var that = this;
 			return editorContext.getFileMetadata().then(function(meta) {
-			    if(meta.contentType.id === 'application/javascript') {
-			        return Deferred.all([
-        				that.astManager.getAST(editorContext),
-        				editorContext.getCaretOffset()
-        			]).then(function(results) {
-        				that._doCommand(editorContext, results[0], results[1]);
-        			});
-			    } else {
-			        return Deferred.all([
-			            editorContext.getText(),
-			            editorContext.getCaretOffset()
-			        ]).then(function(results) {
-			            var offset = results[1];
-			            var blocks = Finder.findScriptBlocks(results[0]);
-			            if(blocks && blocks.length > 0) {
-			                var cu = new CU(blocks, meta);
-        			        if(cu.validOffset(offset)) {
-        			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-        			               that._doCommand(editorContext, ast, offset); 
-        			            });
-        			        }
-    			        }
-			        });
-			    }
+				if(meta.contentType.id === 'application/javascript') {
+					return Deferred.all([
+						that.astManager.getAST(editorContext),
+						editorContext.getCaretOffset()
+					]).then(function(results) {
+						that._doCommand(editorContext, results[0], results[1]);
+					});
+				} else {
+					return Deferred.all([
+						editorContext.getText(),
+						editorContext.getCaretOffset()
+					]).then(function(results) {
+						var offset = results[1];
+						var cu = that.cuprovider.getCompilationUnit(function(){
+							return Finder.findScriptBlocks(results[0]);
+						}, meta);
+						if(cu.validOffset(offset)) {
+							 return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+								  that._doCommand(editorContext, ast, offset); 
+							 });
+						}
+					});
+				}
 			});
 		},
 
@@ -71,7 +70,7 @@ define([
 		 * @since 8.0
 		 */
 		_doCommand: function _doCommand(editorContext, ast, offset) {
-		    var node = Finder.findNode(offset, ast, {parents:true});
+			var node = Finder.findNode(offset, ast, {parents:true});
 			if(node) {
 				var text = ast.source;
 				var parent = this._resolveParent(node);

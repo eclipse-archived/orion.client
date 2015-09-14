@@ -355,7 +355,7 @@ define([
     	});
 
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    			new GenerateDocCommand.GenerateDocCommand(astManager),
+    			new GenerateDocCommand.GenerateDocCommand(astManager, CUProvider),
     			{
     		name: javascriptMessages["generateDocName"],  //$NON-NLS-1$
     		tooltip : javascriptMessages['generateDocTooltip'],  //$NON-NLS-1$
@@ -432,7 +432,7 @@ define([
 	    	);
 		}
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    			new RenameCommand.RenameCommand(astManager, ternWorker, scriptresolver),
+    			new RenameCommand.RenameCommand(astManager, ternWorker, scriptresolver, CUProvider),
     			{
     		name: javascriptMessages['renameElement'],  //$NON-NLS-1$
     		tooltip : javascriptMessages['renameElementTooltip'],  //$NON-NLS-1$
