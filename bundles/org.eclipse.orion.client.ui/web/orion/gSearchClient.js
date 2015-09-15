@@ -45,7 +45,7 @@ define("orion/gSearchClient", [ //$NON-NLS-0$
 		 * @param {Object} searchParams The search parameters.
 		 * @param {Function(JSONObject)} Callback function that receives the results of the query.
 		 */
-		search: function(searchParams, generateMatches) {
+		search: function(searchParams, generateMatches, generateMeta) {
 			var result = new Deferred();
 			try {
 				this._searchDeferred = this._fileClient.search(searchParams);
@@ -53,8 +53,10 @@ define("orion/gSearchClient", [ //$NON-NLS-0$
 					this._searchDeferred = null;
 					var searchResult = this.convert(jsonData, searchParams);
 					this._generateMatches(searchParams, searchResult, generateMatches).then(function() {
-						result.resolve(searchResult);
-					});
+						this._generateMeta(searchResult, generateMeta).then(function() {
+							result.resolve(searchResult);
+						});
+					}.bind(this));
 				}.bind(this), function(error) {
 					this._searchDeferred = null;
 					result.reject(error);
@@ -104,6 +106,26 @@ define("orion/gSearchClient", [ //$NON-NLS-0$
 	        var promises = [];
 			searchResult.forEach(function(sResult) {
 				promises.push(this._generateSingle(sResult, searchHelper));
+			}.bind(this)); 
+			return Deferred.all(promises, function(error) { return {_error: error}; });
+		},
+		_generateSingleMeta: function(sResult) {
+            return this._fileClient.read(sResult.location, true).then(function(jsonData) {
+            	sResult.metadata = jsonData;
+                 return sResult;
+            }.bind(this),
+            function(error) {
+                console.error("Error loading file meta data: " + error.message); //$NON-NLS-0$
+            }.bind(this));
+			
+		},
+		_generateMeta: function(searchResult, generateMeta) {
+			if(!generateMeta || searchResult.length === 0) {
+				return new Deferred().resolve(searchResult);
+			}
+	        var promises = [];
+			searchResult.forEach(function(sResult) {
+				promises.push(this._generateSingleMeta(sResult));
 			}.bind(this)); 
 			return Deferred.all(promises, function(error) { return {_error: error}; });
 		},

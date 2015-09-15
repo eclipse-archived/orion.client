@@ -88,7 +88,7 @@ define([
 								deferred.resolve(err);
 							} else {
 								var searchParams = {keyword: node.name, resource: that.scriptresolver.getSearchLocation(), fileNamePatterns:["*.js"], caseSensitive: true }; //$NON-NLS-1$
-								that.searchclient.search(searchParams, true).then(function(searchResult) {
+								that.searchclient.search(searchParams, true, true).then(function(searchResult) {
 									searchResult.forEach(function(fileItem) {
 										if(fileItem.children) {
 											for(var i = 0; i < fileItem.children.length; i++) {
