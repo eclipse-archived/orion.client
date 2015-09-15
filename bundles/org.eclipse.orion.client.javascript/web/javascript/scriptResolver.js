@@ -55,7 +55,9 @@ define([
        setSearchLocation: function(searchLocation) {
        		this.searchLocation = searchLocation;
        },
-
+	   getSearchLocation: function() {
+	   		return this.searchLocation || this.fileclient.fileServiceRootURL();
+	   },
        _getFile : function _getFile(name, options) {
            var files = this.cache.get(name);
            if(files) {

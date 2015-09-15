@@ -13,10 +13,9 @@
 define([
 'orion/objects',
 'javascript/finder',
-'javascript/compilationUnit',
-'orion/gSearchClient',
-'orion/Deferred'
-], function(Objects, Finder, CU, mGSearchClient, Deferred) {
+'orion/Deferred',
+'i18n!javascript/nls/messages'
+], function(Objects, Finder, Deferred, Messages) {
 
 	/**
 	 * @description Creates a new rename command
@@ -26,93 +25,105 @@ define([
 	 * @returns {javascript.commands.RenameCommand} A new command
 	 * @since 10.0
 	 */
-	function RefsCommand(ternWorker, scriptResolver, serviceRegistry, fileClient) {
+	function RefsCommand(ternWorker, astManager, scriptResolver, cuProvider, searchClient) {
 		this.ternworker = ternWorker;
-		this.scriptResolver = scriptResolver;
-		this.serviceRegistry = serviceRegistry;
-		this.fileClient = fileClient;
-		this.searchClient = new mGSearchClient.GSearchClient({serviceRegistry: this.serviceRegistry, fileClient: this.fileClient});
+		this.scriptresolver = scriptResolver;
+		this.astmanager = astManager;
+		this.cuprovider = cuProvider;
+		this.searchclient = searchClient;
 	}
 
 	Objects.mixin(RefsCommand.prototype, {
-		/*
-		 * override
+		/**
 		 * @callback
 		 */
 		execute: function(editorContext, options) {
 			var that = this;
 			var deferred = new Deferred();
 			editorContext.getFileMetadata().then(function(metadata) {
-				var searchLoc = metadata.parents[metadata.parents.length - 1].Location;
-				that.scriptResolver.setSearchLocation(searchLoc);
+				if(options.kind === 'project' && Array.isArray(metadata.parents) && metadata.parents.length > 0) {
+					that.scriptresolver.setSearchLocation(metadata.parents[metadata.parents.length - 1].Location);
+				} else {
+					that.scriptresolver.setSearchLocation(null);
+				}
 			    if(options.contentType.id === 'application/javascript') {
-	    			that.findRefs(options.kind, searchLoc, editorContext, deferred);
+	    			that._findRefs(editorContext, options, metadata, deferred);
 			    } else {
 			        return editorContext.getText().then(function(text) {
 			            var offset = options.offset;
-			            var blocks = Finder.findScriptBlocks(text);
-			            if(blocks && blocks.length > 0) {
-			                var cu = new CU(blocks, {location:options.input, contentType:options.contentType});
-	    			        if(cu.validOffset(offset)) {
-	    			        	return that.findRefs();
-	    			        }
-				        }
+			        	var cu = that.cuprovider.getCompilationUnit(function(){
+		            		return Finder.findScriptBlocks(text);
+		            	}, {location:options.input, contentType:options.contentType});
+    			        if(cu.validOffset(offset)) {
+    			        	that._findRefs(editorContext, options, metadata, deferred);
+    			        }
+			        }, /* @callback */ function(err) {
+			        	deferred.resolve('Could not compute references: failed to compute file text content');
 			        });
 			    }
+			}, /* @callback */ function(err) {
+				deferred.resolve('Could not compute references: failed to compute file metadata');
 			});
 			return deferred;
 		},
 		
-		_weighMatches: function(searchResult) {
-			searchResult.forEach(function(fileItem) {
-				if(fileItem.children) {
-					for(var i=0; i < fileItem.children.length; i++) {
-						var matchingLine = fileItem.children[i];
-						//matchingLine has 2 properties:
-						//lineNumber: the matching line number in the file. THIS IS 1-based, NOT 0-based.
-						//matches: A matching line can have multiple matches.
-							//Each match has:
-							//startIndex: 0-base offset start in that line
-							//length: total chars in this match
-						var confidence, zeroBasedLineNumber = matchingLine.lineNumber;
-						if(i%2 === 0 ) {
-							confidence = 100;// For even numbers we give 100% confidence
-						} else {
-							confidence = 80;
-						}
-						matchingLine.matches.forEach(function(match) {
-							//TODO: Uncomment the two lines below to convert the match into an editorModel range.
-							//var convertedRangeStart = editorModel.getLineOffset(zeroBasedLineNumber) + match.startIndex;
-							//var convertedRange = {start: convertedRangeStart, end: convertedRangeStart + match.length};
-							match.confidence = confidence;//Just for fun!
-						});
-					}
+		/**
+		 * @description Performs the actual searching and type matching
+		 * @function
+		 * @private 
+		 * @param {Object} editorContext The editor context
+		 * @param {Object} options The map of options
+		 * @param {Object} metadata The map of origin file metadata
+		 * @param {orion.Deferred} deferred The backing Deffered to report back to
+		 */
+		_findRefs: function _findRefs(editorContext, options, metadata, deferred) {
+			var that = this;
+			return that.astmanager.getAST(editorContext).then(function(ast) {
+				var node = Finder.findNode(options.offset, ast);
+				if(node && node.type === 'Identifier') {
+					that.ternworker.postMessage(
+						{request: 'type', args: {meta: metadata, params: options}},  //$NON-NLS-1$
+						function(type, err) {
+							if(err) {
+								deferred.resolve(err);
+							} else {
+								var searchParams = {keyword: node.name, resource: that.scriptresolver.getSearchLocation(), fileNamePatterns:["*.js"], caseSensitive: true }; //$NON-NLS-1$
+								that.searchclient.search(searchParams, true).then(function(searchResult) {
+									searchResult.forEach(function(fileItem) {
+										if(fileItem.children) {
+											for(var i = 0; i < fileItem.children.length; i++) {
+												var matchingLine = fileItem.children[i];
+												matchingLine.matches.forEach(function(match) {
+													that._checkType(type, fileItem, match, searchParams, deferred);
+												});
+											}
+										}
+									});	
+								}, /* @callback */ function(err) {
+								}, /* @callback */ function(result) {
+									//TODO progress
+								});
+						  }
+					});
 				}
-			});	
-			return new Deferred().resolve(searchResult);
-		},
-
-		findRefs: function findRefs(kind, searchLoc, editorContext, deferred) {
-			editorContext.getSelectionText().then(function(selText) {
-				//TODO: Not sure about the difference between 'workspace' and 'project'. But only searchLoc will be different I think
-				if(kind === 'workspace' || kind === 'project') {//Not sure 
-					//Currently Orion server does not support multiple fileNamePatters, we need to fix that if we need something like ["*.js","*.html"]
-					var searchParams = {keyword: selText, resource: searchLoc, fileNamePatterns:["*.js"], caseSensitive: true };
-					this.searchClient.search(searchParams, true).then(function(searchResult) {
-						this._weighMatches(searchResult).then(function(weighedResult) {
-							deferred.resolve({searchParams: searchParams, refResult: weighedResult});
-						});
-					}.bind(this), function(error) {
-						//Handle error
-					}.bind(this), function(result/*format of param to be decided*/) {
-						//Handle progress
-						//TODO: We need to incrementally feed the result back to UI.
-						//deferred.progress(result);
-					}.bind(this));
-				}			
-			}.bind(this), function(err) {
-				console.log(err);
 			});
+		},
+		
+		/**
+		 * @description Compares one type object to the other. Types are considered the same if they
+		 * come from the same origin, have the same location infos, the same inferred base type and the same prototype infos
+		 * @function
+		 * @private
+		 * @param {Object} original The original type object
+		 * @param {Object} type The type to compare to the original
+		 * @returns {Boolean} If the types are considered equal
+		 */
+		_checkType: function _checkType(original, fileItem, match, searchParams, deferred) {
+			this.ternworker.postMessage(
+					{request: 'type', args: {meta:{location: fileItem.location}, params: {offset: match.end}}},  //$NON-NLS-1$
+					function(type, err) { //$NON-NLS-1$
+						deferred.progress({searchParams: searchParams, refResult: match});
+					});
 		}
 	});
 

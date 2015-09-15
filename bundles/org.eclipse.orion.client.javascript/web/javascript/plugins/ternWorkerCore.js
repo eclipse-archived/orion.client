@@ -453,6 +453,21 @@ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ o
 		   } else {
 		       callback({request: 'rename', message: Messages['failedRenameNoServer']}); //$NON-NLS-1$
 		   }
+		},
+		'type': function(args, callback) {
+			ternserver.request({
+		           query: {
+			           type: "type",  //$NON-NLS-1$
+			           file: args.meta.location,
+			           end: args.params.offset
+		           }},
+		           function(error, type) {
+		               if(error) {
+		                   callback({request: 'type', error: typeof(error) === 'string' ? error : error.message, message: Messages['failedType']}); //$NON-NLS-1$
+		               } else {
+		               	   callback({request: 'type', type: type}); //$NON-NLS-1$
+		               }
+		           });
 		}
 	};
 

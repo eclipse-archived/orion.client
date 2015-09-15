@@ -45,7 +45,11 @@ define([
 		execute: function(editorContext, options) {
 			var that = this;
 			return editorContext.getFileMetadata().then(function(metadata) {
-				that.scriptResolver.setSearchLocation(metadata.parents[metadata.parents.length - 1].Location);
+				if(Array.isArray(metadata.parents) && metadata.parents.length > 1) {
+					that.scriptResolver.setSearchLocation(metadata.parents[metadata.parents.length - 1].Location);
+				} else {
+					that.scriptResolver.setSearchLocation(null);	
+				}
 			    if(options.contentType.id === 'application/javascript') {
 	    			return that._doRename(editorContext, options);
 			    } else {

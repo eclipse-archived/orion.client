@@ -260,6 +260,8 @@ define([
 		    	}
 		    	if(Array.isArray(meta.parents) && meta.parents.length > 1) {
 		    		that.resolver.setSearchLocation(meta.parents[meta.parents.length - 1].Location);	
+		    	} else {
+		    		that.resolver.setSearchLocation(null);
 		    	}
 		        if(meta && meta.contentType.id === 'application/javascript') {
 		            return that.astManager.getAST(editorContext).then(function(ast) {

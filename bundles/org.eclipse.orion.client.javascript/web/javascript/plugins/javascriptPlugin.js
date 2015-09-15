@@ -38,6 +38,7 @@ define([
 'javascript/commands/openImplementation',
 'javascript/commands/renameCommand',
 'javascript/commands/refsCommand',
+'orion/gSearchClient',
 'orion/editor/stylers/application_javascript/syntax',
 'orion/editor/stylers/application_json/syntax',
 'orion/editor/stylers/application_schema_json/syntax',
@@ -46,7 +47,7 @@ define([
 'orion/URL-shim'
 ], function(PluginProvider, Bootstrap, Deferred, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist,
 			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
-			RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
+			RenameCommand, RefsCommand, mGSearchClient, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
     var provider = new PluginProvider({
 		name: javascriptMessages['pluginName'], //$NON-NLS-1$
@@ -164,7 +165,7 @@ define([
 					var id  = _d.messageID;
 					var f = this.callbacks[id];
 					if(typeof(f) === 'function') {
-						f(_d);
+						f(_d, _d.error);
 						delete this.callbacks[id];
 					}
 					var _handler = handlers[_d.request];
@@ -383,7 +384,11 @@ define([
 		});
 		//TODO
 		if ("true" === localStorage.getItem("darklaunch")) {
-			var refscommand = new RefsCommand(ternWorker, scriptresolver, core.serviceRegistry, fileClient);
+			var refscommand = new RefsCommand(ternWorker, 
+							astManager,
+							scriptresolver,
+							CUProvider,
+							new mGSearchClient.GSearchClient({serviceRegistry: core.serviceRegistry, fileClient: fileClient}));
 
 	    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
 	    			{

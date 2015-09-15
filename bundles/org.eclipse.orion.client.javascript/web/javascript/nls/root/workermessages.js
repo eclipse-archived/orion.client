@@ -67,5 +67,6 @@ define({
 	'failedRenameNoServer': 'Failed to compute rename changes, server not started',
 	'failedRefs': 'Failed to find refs',
 	'failedRefsNoServer': 'failed to find refs - server not started',
+	'failedType': 'Failed to find type',
 	'unknownRequest': 'The request \'${0}\' is unknown'
 });
