@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/nls/messages', 'orion/regex', 'orion/URITemplate'], function(messages, mRegex, URITemplate) {
+define(['i18n!orion/nls/messages', 'orion/regex', 'orion/editor/textModel', 'orion/URITemplate'], function(messages, mRegex, mTextModel, URITemplate) {
 
 /**
  * @name orion.searchUtils.SearchParams
@@ -206,7 +206,7 @@ searchUtils.replaceStringLiteral = function(text, keyword, replacingStr){
 	return searchUtils.replaceRegEx(text,regexp, replacingStr);
 };
 
-searchUtils.searchOnelineLiteral =  function(inFileQuery, lineString, onlyOnce){
+searchUtils.searchOnelineLiteral =  function(inFileQuery, lineString, onlyOnce, textModel, lineIndex){
 	var i,startIndex = 0;
 	var found = false;
 	var result = [];
@@ -215,7 +215,12 @@ searchUtils.searchOnelineLiteral =  function(inFileQuery, lineString, onlyOnce){
 		if (i < 0) {
 			break;
 		} else {
-			result.push({startIndex: i, length: inFileQuery.searchStrLength});
+			if(textModel) {
+				var start = textModel.getLineStart(lineIndex) + i;
+				result.push({startIndex: i, length: inFileQuery.searchStrLength, start: start, end: start + inFileQuery.searchStrLength});
+			} else {
+				result.push({startIndex: i, length: inFileQuery.searchStrLength});
+			}
 			found = true;
 			if(onlyOnce){
 				break;
@@ -267,13 +272,18 @@ searchUtils.findRegExp =  function(text, pattern, flags, startIndex) {
 	};
 };
 
-searchUtils.searchOnelineRegEx =  function(inFileQuery, lineString, onlyOnce){
+searchUtils.searchOnelineRegEx =  function(inFileQuery, lineString, onlyOnce, textModel, lineIndex){
 	var startIndex = 0;
 	var found = false;
 	var result = [];
 	while(true){
 		var regExResult = searchUtils.findRegExp(lineString, inFileQuery.regExp.pattern, inFileQuery.regExp.flags, startIndex);
 		if(regExResult){
+			if(textModel) {
+				var start = textModel.getLineStart(lineIndex) + regExResult.startIndex;
+				regExResult.start = start;
+				regExResult.end = start + regExResult.length;
+			}
 			result.push(regExResult);
 			found = true;
 			if(onlyOnce){
@@ -412,6 +422,10 @@ searchUtils.splitFile = function(text) {
 };
 
 searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContentText, replacing, caseSensitive, noContext){
+	var textModel;
+	if(noContext) {
+		textModel = new mTextModel.TextModel(fileContentText);
+	}
 	var fileContents = searchUtils.splitFile(fileContentText);
 	if(replacing || noContext){
 		fileModelNode.contents = fileContents;
@@ -425,9 +439,9 @@ searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContent
 				var lineString = caseSensitive ? lineStringOrigin : lineStringOrigin.toLowerCase();
 				var result;
 				if(inFileQuery.wildCard){
-					result = searchUtils.searchOnelineRegEx(inFileQuery, lineString);
+					result = searchUtils.searchOnelineRegEx(inFileQuery, lineString, false, textModel, i);
 				} else {
-					result = searchUtils.searchOnelineLiteral(inFileQuery, lineString);
+					result = searchUtils.searchOnelineLiteral(inFileQuery, lineString, false, textModel, i);
 				}
 				if(result){
 					var detailNode, lineNumber = i+1;
