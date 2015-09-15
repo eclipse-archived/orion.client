@@ -343,7 +343,7 @@ define({//Default message bundle
 	"Force Push Branch": "Force Push Branch", //$NON-NLS-0$  //$NON-NLS-1$
 	"PushCommitsWithoutTagsOverridingCurrentContent": "Push commits without tags from your local branch into the remote branch overriding its current content", //$NON-NLS-0$  //$NON-NLS-1$
  	"Pushing remote: ": "Pushing remote: ", //$NON-NLS-0$  //$NON-NLS-1$
- 	"PushingRemoteSucceeded": "Pushing to remote: ${0} succeeded", //$NON-NLS-0$  //$NON-NLS-1$
+ 	"PushingRemoteSucceeded": "Pushing to my remote: ${0} succeeded", //$NON-NLS-0$  //$NON-NLS-1$
  	"PushingGerritChangeSucceeded": "Pushing to gerrit ${0} succeeded: ${1}(${1})", //$NON-NLS-0$  //$NON-NLS-1$
 	"ChooseBranchDialog": "Choose Branch", //$NON-NLS-0$  //$NON-NLS-1$
 	"Choose the remote branch.": "Choose the remote branch.", //$NON-NLS-0$  //$NON-NLS-1$
