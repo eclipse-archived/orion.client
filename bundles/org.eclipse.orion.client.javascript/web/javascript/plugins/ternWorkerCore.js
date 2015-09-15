@@ -42,21 +42,12 @@ require([
 	'json!tern/defs/ecma5.json',
 	'json!tern/defs/ecma6.json',
 	'json!tern/defs/browser.json',
-	'javascript/handlers/ternAssistHandler',
-	'javascript/handlers/ternDeclarationHandler',
-	'javascript/handlers/ternHoverHandler',
-	'javascript/handlers/ternOccurrencesHandler',
-	'javascript/handlers/ternRenameHandler',
-	'javascript/handlers/ternPluginsHandler',
-	'javascript/handlers/ternRefsHandler',
-	'javascript/handlers/ternImplementationHandler',
 	'i18n!javascript/nls/workermessages',
 	'orion/i18nUtil'
 ],
-/* @callback */ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
+function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
 							orionMySQLPlugin, orionNodePlugin, orionPostgresPlugin, orionRedisPlugin, orionRequirePlugin, ternPluginsPlugin,
-							openImplPlugin, htmlDepPlugin, ecma5, ecma6, browser, assistHandler, declarationHandler, hoverHandler, occurrencesHandler,
-							renameHandler, pluginsHandler, refsHandler, implHandler, Messages, i18nUtil) {
+							openImplPlugin, htmlDepPlugin, ecma5, ecma6, browser, Messages, i18nUtil) {
 
     var ternserver = Object.create(null);
 
@@ -171,18 +162,286 @@ require([
     startServer();
 
 	var handlers = {
-		'completions': assistHandler,
-		'definition': declarationHandler,
-		'documentation': hoverHandler,
-		'environments': pluginsHandler.getEnvironments,
-		'implementation': implHandler,
-		'install_plugins':pluginsHandler.installPlugins,
-		'installed_plugins': pluginsHandler.getInstalledPlugins,
-		'occurrences': occurrencesHandler,
-		'plugin_enablement': pluginsHandler.setPluginEnablement,
-		'refs': refsHandler,
-		'remove_plugins': pluginsHandler.removePlugins,
-		'rename': renameHandler
+		'completions': function(args, callback) {
+			if(ternserver) {
+		       ternserver.request({
+		           query: {
+		           type: "completions",  //$NON-NLS-1$
+		           file: args.meta.location,
+		           types: true,
+		           origins: true,
+		           urls: true,
+		           docs: true,
+		           end: args.params.offset,
+		           sort:true,
+		           includeKeywords: args.params.keywords,
+		           caseInsensitive: true
+		           },
+		           files: args.files},
+		           function(error, comps) {
+		               if(error) {
+		               		callback({request: 'completions', error: error.message, message: Messages['failedToComputeProposals']}); //$NON-NLS-1$
+		               } else if(comps && comps.completions) {
+	               			callback({request: 'completions', proposals: comps.completions}); //$NON-NLS-1$
+		               } else {
+		               		callback({request: 'completions', proposals:[]}); //$NON-NLS-1$
+		               }
+		           });
+	
+		   } else {
+		       callback({request: 'completions', message: Messages['failedToComputeProposalsNoServer']}); //$NON-NLS-1$
+		   }
+		},
+		'definition': function(args, callback) {
+			if(ternserver) {
+		       ternserver.request({
+		           query: {
+			           type: "definition",  //$NON-NLS-1$
+			           file: args.meta.location,
+			           end: args.params.offset
+		           },
+		           files: args.files},
+		           function(error, decl) {
+		               if(error) {
+		                  callback({request: 'definition', error: error.message, message: Messages['failedToComputeDecl']}); //$NON-NLS-1$
+		               }
+		               if(decl && typeof(decl.start) === 'number' && typeof(decl.end) === "number") {
+		               		callback({request: 'definition', declaration:decl}); //$NON-NLS-1$
+	       			   } else {
+	       			   		callback({request: 'definition', declaration: null}); //$NON-NLS-1$
+	       			   }
+		           });
+		   } else {
+		       callback({request: 'definition', message: Messages['failedToComputeDeclNoServer']}); //$NON-NLS-1$
+		   }
+		},
+		'documentation': function(args, callback) {
+			if(ternserver) {
+		       ternserver.request({
+		           query: {
+			           type: "documentation",  //$NON-NLS-1$
+			           file: args.meta.location,
+			           end: args.params.offset
+		           },
+		           files: args.files},
+		           function(error, doc) {
+		               if(error) {
+		                   callback({request: 'documentation', error: error.message, message: Messages['failedToComputeDoc']}); //$NON-NLS-1$
+		               } else if(doc && doc.doc) {
+	        			   callback({request: 'documentation', doc:doc}); //$NON-NLS-1$
+		               } else {
+							callback({request: 'documentation', doc: null}); //$NON-NLS-1$
+		               }
+		           });
+		   } else {
+		       callback({request: 'documentation', message: Messages['failedToComputeDocNoServer']}); //$NON-NLS-1$
+		   }
+	   	},
+		/**
+		 * @callback
+		 */
+		'environments': function(args, callback) {
+			if(ternserver) {
+		       ternserver.request({
+		           query: {
+			           type: 'environments' //$NON-NLS-1$
+		           }}, 
+		           function(error, envs) {
+		               if(error) {
+		                   callback({request: 'environments', error: error.message, message: Messages['failedGetEnvs']}); //$NON-NLS-1$
+		               }
+		               if(typeof(envs) === 'object') {
+		               		callback({request: 'environments', envs:envs}); //$NON-NLS-1$
+	       			   } else {
+	       			   		callback({request: 'environments', envs: null}); //$NON-NLS-1$
+	       			   }
+		           });
+		   } else {
+		       callback({request: 'environments', message: Messages['failedGetEnvsNoServer']}); //$NON-NLS-1$
+		   }
+		},
+		'implementation': function(args, callback) {
+			if(ternserver) {
+		       ternserver.request({
+		           query: {
+			           type: "implementation",  //$NON-NLS-1$
+			           file: args.meta.location,
+			           end: args.params.offset
+		           },
+		           files: args.files},
+		           function(error, impl) {
+		               if(error) {
+		                   callback({request: 'implementation', error: error.message, message: Messages['failedToComputeImpl']}); //$NON-NLS-1$
+		               }
+		               if(impl && impl.implementation && typeof(impl.implementation.start) === 'number' && typeof(impl.implementation.end) === "number") {
+		               		callback({request: 'implementation', implementation:impl.implementation}); //$NON-NLS-1$
+	       			   } else {
+	       			   		callback({request: 'implementation', implementation: null}); //$NON-NLS-1$
+	       			   }
+		           });
+		   } else {
+		       callback({request: 'implementation', message: Messages['failedToComputeImplNoServer']}); //$NON-NLS-1$
+		   }
+		},
+		/**
+		 * @callback
+		 */
+		'install_plugins': function(args, callback) {
+			if(ternserver) {
+		       ternserver.request({
+		           query: {
+			           type: 'install_plugins' //$NON-NLS-1$
+		           }}, 
+		           function(error, res) {
+		               if(error) {
+		                   callback({request: 'install_plugins', error: error.message, message: Messages['failedInstallPlugins']}); //$NON-NLS-1$
+		               }
+		               if(typeof(res) === 'object') {
+		               		callback({request: 'install_plugins', status:res}); //$NON-NLS-1$
+	       			   } else {
+	       			   		callback({request: 'install_plugins', status: {state: -1}}); //$NON-NLS-1$
+	       			   }
+		           });
+		   } else {
+		       callback({request: 'install_plugins', message: Messages['failedInstallPluginsNoServer']}); //$NON-NLS-1$
+		   }
+		},
+		/**
+		 * @callback
+		 */
+		'installed_plugins': function(args, callback) {
+			if(ternserver) {
+		       ternserver.request({
+		           query: {
+			           type: 'installed_plugins' //$NON-NLS-1$
+		           }}, 
+		           function(error, plugins) {
+		               if(error) {
+		                   callback({request: 'installed_plugins', error: error.message, message: Messages['failedGetInstalledPlugins']}); //$NON-NLS-1$
+		               }
+		               if(typeof(plugins) === 'object') {
+		               		callback({request: 'installed_plugins', plugins:plugins}); //$NON-NLS-1$
+	       			   } else {
+	       			   		callback({request: 'installed_plugins', plugins: null}); //$NON-NLS-1$
+	       			   }
+		           });
+		   } else {
+		       callback({request: 'installed_plugins', message: Messages['failedGetInstalledPluginsNoServer']}); //$NON-NLS-1$
+		   }
+		},
+		'occurrences': function(args, callback) {
+			if(ternserver) {
+		       ternserver.request({
+		           query: {
+			           type: "refs",  //$NON-NLS-1$
+			           file: args.meta.location,
+			           end: args.params.selection.start
+		           }},
+		           function(error, refs) {
+		               if(error) {
+		                   callback({request: 'occurrences', error: error.message, message: Messages['failedToComputeOccurrences']}); //$NON-NLS-1$
+		               } else if(refs && Array.isArray(refs)) {
+	        			   callback({request: 'occurrences', refs:refs}); //$NON-NLS-1$
+		               } else {
+		               		callback({request: 'occurrences', refs:[]}); //$NON-NLS-1$
+		               }
+		           });
+		   } else {
+		       callback({request: 'occurrences', message: Messages['failedToComputeOccurrencesNoServer']}); //$NON-NLS-1$
+		   }
+		},
+		/**
+		 * @callback
+		 */
+		'plugin_enablement': function(args, callback) {
+			if(ternserver) {
+		       ternserver.request({
+		           query: {
+			           type: 'plugin_enablement' //$NON-NLS-1$
+		           }}, 
+		           function(error, res) {
+		               if(error) {
+		                   callback({request: 'plugin_enablement', error: error.message, message: Messages['failedEnablementPlugins']}); //$NON-NLS-1$
+		               }
+		               if(typeof(res) === 'object') {
+		               		callback({request: 'plugin_enablement', status:res}); //$NON-NLS-1$
+	       			   } else {
+	       			   		callback({request: 'plugin_enablement', status: {state: -1}}); //$NON-NLS-1$
+	       			   }
+		           });
+		   } else {
+		       callback({request: 'plugin_enablement', message: Messages['failedEnablementPluginsNoServer']}); //$NON-NLS-1$
+		   }
+		},
+		'refs': function(args, callback) {
+			if(ternserver) {
+		       ternserver.request({
+		           query: {
+			           type: "refs",  //$NON-NLS-1$
+			           file: args.meta.location,
+			           end: args.params.offset,
+			           newName: args.newname
+		           },
+		           files: args.files},
+		           function(error, refs) {
+		               if(error) {
+		                   callback({request: 'refs', error: error.message, message: Messages['failedRefs']}); //$NON-NLS-1$
+		               } else if(refs && Array.isArray(refs.refs)) {
+	        			   callback({request: 'refs', refs:refs.refs}); //$NON-NLS-1$
+		               } else {
+		               		callback({request: 'refs', refs:[]}); //$NON-NLS-1$
+		               }
+		           });
+		   } else {
+		       callback({request: 'refs', message: Messages['failedRefsNoServer']}); //$NON-NLS-1$
+		   }
+		},
+		/**
+		 * @callback
+		 */
+		'remove_plugins': function(args, callback) {
+			if(ternserver) {
+		       ternserver.request({
+		           query: {
+			           type: 'remove_plugins' //$NON-NLS-1$
+		           }}, 
+		           function(error, res) {
+		               if(error) {
+		                   callback({request: 'remove_plugins', error: error.message, message: Messages['failedRemovePlugins']}); //$NON-NLS-1$
+		               }
+		               if(typeof(res) === 'object') {
+		               		callback({request: 'remove_plugins', status:res}); //$NON-NLS-1$
+	       			   } else {
+	       			   		callback({request: 'remove_plugins', status: {state: -1}}); //$NON-NLS-1$
+	       			   }
+		           });
+		   } else {
+		       callback({request: 'remove_plugins', message: Messages['failedRemovePluginsNoServer']}); //$NON-NLS-1$
+		   }
+		},
+		'rename': function(args, callback) {
+			if(ternserver) {
+		       ternserver.request({
+		           query: {
+			           type: "rename",  //$NON-NLS-1$
+			           file: args.meta.location,
+			           end: args.params.offset,
+			           newName: args.newname
+		           },
+		           files: args.files},
+		           function(error, changes) {
+		               if(error) {
+		                   callback({request: 'rename', error: error.message, message: Messages['failedRename']}); //$NON-NLS-1$
+		               } else if(changes && Array.isArray(changes.changes)) {
+	        			   callback({request: 'rename', changes:changes}); //$NON-NLS-1$
+		               } else {
+		               		callback({request: 'rename', changes:[]}); //$NON-NLS-1$
+		               }
+		           });
+		   } else {
+		       callback({request: 'rename', message: Messages['failedRenameNoServer']}); //$NON-NLS-1$
+		   }
+		}
 	};
 
 	var ternID = 0;
@@ -197,7 +456,7 @@ require([
             var _d = evnt.data;
             var _handler = handlers[_d.request];
 			if(typeof(_handler) === 'function') {
-				_handler(ternserver, _d.args, function(response) {
+				_handler(_d.args, function(response) {
 					response.messageID = _d.messageID;
                 	post(response);
 				});
