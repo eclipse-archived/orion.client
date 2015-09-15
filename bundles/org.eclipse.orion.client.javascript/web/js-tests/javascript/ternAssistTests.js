@@ -55,8 +55,8 @@ define([
 		testworker.setTestState(state);
 		
 		// Delete any test files created by previous tests
-		testworker.postMessage({request: 'delfile', args:{file: jsFile}});
-		testworker.postMessage({request: 'delfile', args:{file: htmlFile}});
+		testworker.postMessage({request: 'delFile', args:{file: jsFile}});
+		testworker.postMessage({request: 'delFile', args:{file: htmlFile}});
 		
 		envs = typeof(options.env) === 'object' ? options.env : Object.create(null);
 		var editorContext = {

@@ -50,7 +50,7 @@ define([
 			assert(options.callback, 'You must provide a test callback for worker-based tests');
 			state.callback = options.callback;
 		testworker.setTestState(state);
-		testworker.postMessage({request: 'delfile', args:{file: file}});
+		testworker.postMessage({request: 'delFile', args:{file: file}});
 		envs = typeof(options.env) === 'object' ? options.env : Object.create(null);
 		var editorContext = {
 			/*override*/

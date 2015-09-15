@@ -162,6 +162,10 @@ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ o
     startServer();
 
 	var handlers = {
+		'addFile': function(args, callback) {
+			ternserver.addFile(args.file, args.source);
+			callback({request: 'addFile'}); //$NON-NLS-1$
+		},
 		'completions': function(args, callback) {
 			if(ternserver) {
 		       ternserver.request({
@@ -214,6 +218,14 @@ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ o
 		   } else {
 		       callback({request: 'definition', message: Messages['failedToComputeDeclNoServer']}); //$NON-NLS-1$
 		   }
+		},
+		'delFile': function(args, callback) {
+			if(ternserver && typeof(args.file) === 'string') {
+	            ternserver.delFile(args.file);
+	            callback({request: 'delFile'}); //$NON-NLS-1$
+	        } else {
+	        	callback({request: 'delFile', message: i18nUtil.formatMessage(Messages['failedDeleteRequest'], args.file)}); //$NON-NLS-1$
+	        }
 		},
 		'documentation': function(args, callback) {
 			if(ternserver) {
@@ -457,33 +469,42 @@ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ o
             var _handler = handlers[_d.request];
 			if(typeof(_handler) === 'function') {
 				_handler(_d.args, function(response) {
-					response.messageID = _d.messageID;
-                	post(response);
-				});
-			}
-            switch(_d.request) {
-                case 'addFile': {
-                	ternserver.addFile(_d.args.file, _d.args.source);
-                	break;
-                }
-                case 'delfile': {
-                    if(ternserver && typeof(_d.args.file) === 'string') {
-			            ternserver.delFile(_d.args.file);
-			        } else {
-			            post(i18nUtil.formatMessage(Messages['failedDeleteRequest'], _d.args.file));
-			        }
-                    break;
-                }
-                case 'read': {
-                	var _read = reads[_d.ternID];
-					if(typeof(_read) === 'function') {
-						_read(_d.args.error, {contents: _d.args.contents ? _d.args.contents : '', file:_d.args.file, logical: _d.args.logical});
+					if(_d.messageID) {
+						response.messageID = _d.messageID;
+					} else if(_d.ternID) {
+						response.ternID = _d.ternID;
 					}
-                	break;
-                }
-            }
+                	post(response);
+                	return;
+				});
+			} else if(_d.request === 'read') {
+            	var _read = reads[_d.ternID];
+				if(typeof(_read) === 'function') {
+					_read(_d.args.error, {contents: _d.args.contents ? _d.args.contents : '', file:_d.args.file, logical: _d.args.logical});
+				}
+            	return;
+            } else {
+	            //no one handled the request, report back an error
+	            unknownRequest(_d);
+	        }
         }
     };
+
+	/**
+	 * @description Respond back that the request is unknown
+	 * @param {Object} data The original request data
+	 */
+	function unknownRequest(data) {
+		var response = Object.create(null);
+		response.request = data.request;
+		if(data.messageID) {
+			response.messageID = data.messageID;
+		} else if(data.ternID) {
+			response.ternID = data.ternID;
+		}
+		response.error = i18nUtil.formatMessage(Messages['unknownRequest'], response.request);
+		post(response);
+	}
 
     /**
      * @description Worker callback when an error occurs
