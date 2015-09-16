@@ -106,14 +106,23 @@ define([
 							var url, req, _f;
 							if(_d.args && _d.args.file) {
 								if(typeof(_d.args.file) === 'object') {
-									_f = 'js-tests/javascript/';
+									// The tests can be run from the server root or from js-tests/javascript/ folder
+									if (window.location.href.indexOf('js-tests/javascript') === -1){
+										_f = 'js-tests/javascript/';
+									} else {
+										_f = '';
+									}
 									_f += _d.args.file.logical ? _d.args.file.logical : _d.args.file;
 									if(!/\.js$/g.test(_f)) {
 										_f += '.js';
 									}
 									url = new URL(_f, window.location.href);
-									_xhr('GET', url.href).then(function(response) {
+									
+									
+									_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
 										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.response, file: response.url, logical: _d.args.file.logical}});
+									}, function(rejection){
+										_instance._state.callback(new Error('XHR GET failed: ' + url.href));
 									});
 								} else if(typeof(_d.args.file) === 'string') {
 									_f = _d.args.file;
@@ -121,12 +130,13 @@ define([
 										_f += '.js';
 									}
 									url = new URL(_f, window.location.href);
-									req = new XMLHttpRequest();
-									req.onload = function(response) {
+									
+									
+									_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
 										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.target.response, file: response.target.responseURL}});
-									};
-									req.open('GET', url, true);
-									req.send();
+									}, function(rejection){
+										_instance._state.callback(new Error('XHR GET failed: ' + url.href));
+									});
 								}
 							} else {
 								_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: _instance._state.buffer, file: _instance._state.file}});

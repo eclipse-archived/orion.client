@@ -344,7 +344,7 @@ define([
 					try {
 						assert(response, 'There was no response from the worker');
 						var actual = response.implementation;
-						assert(actual, 'There was no implmentation returned');
+						assert(actual, 'There was no implementation returned');
 						_compareImpls(actual, expected);
 					}
 					catch(err) {
