@@ -122,7 +122,9 @@ define([
 									_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
 										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.response, file: response.url, logical: _d.args.file.logical}});
 									}, function(rejection){
-										_instance._state.callback(new Error('XHR GET failed: ' + url.href));
+										var error = 'XHR GET failed: ' + url.href;
+										_instance._state.callback(new Error(error));
+										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {error: error, logical: _d.args.file.logical, file: rejection.url}});
 									});
 								} else if(typeof(_d.args.file) === 'string') {
 									_f = _d.args.file;
@@ -135,7 +137,9 @@ define([
 									_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
 										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.target.response, file: response.target.responseURL}});
 									}, function(rejection){
-										_instance._state.callback(new Error('XHR GET failed: ' + url.href));
+										var error = 'XHR GET failed: ' + url.href;
+										_instance._state.callback(new Error(error));
+										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {error: error, logical: _d.args.file.logical, file: rejection.url}});
 									});
 								}
 							} else {
