@@ -49,6 +49,16 @@ input {
 	margin-left: 5px;
 }
 
+textarea {
+	-moz-user-select: text;
+	text-indent: 0;
+	text-shadow: none;
+	border: 1px solid #bbb;
+	color: #333;
+	font-size: 9pt;
+	padding: 2px;
+}
+
 html[dir="rtl"] input{ /* ACGC */
 	margin-right: 5px;
 	margin-left: auto;
