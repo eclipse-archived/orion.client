@@ -23,7 +23,10 @@ define([
 	 */
 	function Foo() {
 	}
-	
+
+	// Need to determine if this is required by RequireJS or a limitation in Tern	
+//	Foo.prototype.constructor = Foo;
+
 	Objects.mixin(Foo.prototype, {
 		/**
 	     * @description A simple string var
