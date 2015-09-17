@@ -40,6 +40,6 @@ define([
 		myfunc: function() {}
 	});
 	
-	return {Foo:Foo};
+	return Foo;
 	
 });
