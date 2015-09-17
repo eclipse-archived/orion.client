@@ -120,6 +120,11 @@ define([
 					that.changedItem();
 				}
 				break;
+			case "addClone": //$NON-NLS-0$
+				if(!that.repository){
+					that.changedItem();
+				}
+				break;
 			case "removeBranch": //$NON-NLS-0$
 			case "removeRemote": //$NON-NLS-0$
 			case "removeTag": //$NON-NLS-0$
