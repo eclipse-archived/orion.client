@@ -47,11 +47,13 @@ define([
 				dropdown: userDropdown,
 				serviceRegistry: serviceRegistry
 			});
+			var optionsLabel = messages['Options'];
 			var dropdownTrigger = lib.node("userTrigger"); //$NON-NLS-0$
+			dropdownTrigger.setAttribute("aria-label", optionsLabel);
 
 			new mTooltip.Tooltip({
 				node: dropdownTrigger,
-				text: messages['Options'],
+				text: optionsLabel,
 				position: ["below", "left"] //$NON-NLS-1$ //$NON-NLS-0$
 			});
 
