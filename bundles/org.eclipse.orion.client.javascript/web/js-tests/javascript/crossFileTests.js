@@ -220,6 +220,7 @@ define([
 				testworker.postMessage(message('completions', _p), function(response) {
 					try {
 						assert(response, 'There was no response from the worker');
+						assert(!response.error, 'Tern returned an error response: ' + response.error);
 						var actual = response.proposals;
 						assert(Array.isArray(actual), 'There were no proposals returned');
 						//_compareProposals(actual, expected);
@@ -343,6 +344,7 @@ define([
 				testworker.postMessage(message('implementation', _p), function(response) {
 					try {
 						assert(response, 'There was no response from the worker');
+						assert(!response.error, 'Tern returned an error response: ' + response.error);
 						var actual = response.implementation;
 						assert(actual, 'There was no implementation returned');
 						_compareImpls(actual, expected);
