@@ -456,7 +456,7 @@ define([
 				//TODO this test fails to find the impl, but it should work
 				testDirectImplementation(options, {start:733, end:741, file: 'require_dep2.js'});
 			});
-			it.skip("Test direct impl - cross file constructor", function(done) {
+			it.skip("Test direct impl - cross file constructor direct export, non-proto constructor", function(done) {
 				var options = {
 					buffer: "define(['./files/require_dep3'], function(a) {var local = new a();});",
 					offset: 63,
@@ -464,6 +464,14 @@ define([
 				};
 				//TODO this test finds the impl as the define import, but should find the function declaration in the required file 
 				testDirectImplementation(options, {start:-1, end:-1, file: 'require_dep3.js'});
+			});
+			it("Test direct impl - cross file constructor exported object and prototype constructor", function(done) {
+				var options = {
+					buffer: "define(['./files/require_dep4'], function(a) {var local = new a.Foo();});",
+					offset: 65,
+					callback: done
+				};
+				testDirectImplementation(options, {start:-1, end:-1, file: 'require_dep4.js'});
 			});
 		});
 		describe("All References Tests", function() {
