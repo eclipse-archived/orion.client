@@ -29,6 +29,7 @@ define([
 	'orion/git/gitCommands',
 	'orion/Deferred',
 	'orion/metrics'
+	//'orion/webui/widgets/section'
 ], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mSection, mSelection, lib, URITemplate, PageUtil, util, mFileUtils, i18nUtil, mGlobalCommands, mGitCommands, Deferred, mMetrics) {
 	
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
@@ -750,6 +751,7 @@ define([
 			dropdown: true,
 			noTwistie: true,
 			noArrow: true,
+			tooltip: "Configurations",
 			preferenceService: this.preferencesService
 		});
 			
