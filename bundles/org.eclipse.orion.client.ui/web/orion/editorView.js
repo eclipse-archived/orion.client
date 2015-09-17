@@ -513,8 +513,11 @@ define([
 			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor.getModel());
 			editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				syntaxChecker.setTextModel(editor.getModel());
+				var input = inputManager.getInput();
 				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents, editor.getEditorContext()).then(function(problems) {
-					serviceRegistry.getService(that.problemsServiceID)._setProblems(problems);
+					if (input === inputManager.getInput()) {
+						serviceRegistry.getService(that.problemsServiceID)._setProblems(problems);
+					}
 				});
 				if (inputManager.getReadOnly()) {
 					editor.reportStatus(messages.readonly, "error"); //$NON-NLS-0$
