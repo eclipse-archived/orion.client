@@ -55,6 +55,19 @@ define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Def
 		writeBlob: function(/*fLocation, contents, args*/) {
 			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
+		_getFile: function(fLocation, create) {
+			var locationURL = new URL(fLocation);
+			var filePath = locationURL.pathname;
+			if (!this.fileRoot[filePath] && create) {
+				this.fileRoot[filePath] = {
+					Name: locationURL.pathname.split("/").pop(),
+					Location: filePath,
+					LocalTimeStamp: Date.now(),
+					ETag: 0
+				};
+			}
+			return this.fileRoot[filePath];
+		},
 		/**
 		 * Returns the contents or metadata of the file at the given location.
 		 *
@@ -64,19 +77,21 @@ define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Def
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
 		read: function(fLocation, isMetadata) {
+			var file = this._getFile(fLocation);
+			if (!file) return new Deferred().reject();
 			if(isMetadata){
-				var locationURL = new URL(fLocation);
 				var meta = {
-					Directory: false,
-					Length: 123,
-					LocaltimeStamp: 123,
-					Location: fLocation,
-					Name: locationURL.pathname,
+					Length: file.length,
+					Directory: !!file.Directory,
+					LocalTimeStamp: file.LocalTimeStamp,
+					ETag: file.ETag,
+					Location: file.Location,
+					Name: file.Name,
 					Parents: []
 				};
 				return new Deferred().resolve(meta);
 			}
-			return new Deferred().resolve(this.fileRoot[fLocation]);
+			return new Deferred().resolve(file.contents);
 		},
 		/**
 		 * Writes the contents or metadata of the file at the given location.
@@ -87,8 +102,11 @@ define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Def
 		 * @return A deferred for chaining events after the write completes with new metadata object
 		 */		
 		write: function(fLocation, contents, args) {
+			var file = this._getFile(fLocation, true);
 			if (typeof contents === "string") {
-				this.fileRoot[fLocation] = contents;
+				file.ETag++;
+				file.LocalTimeStamp = Date.now();
+				file.contents = contents;
 			}
 			return new Deferred().resolve(contents);
 		},
@@ -97,8 +115,10 @@ define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Def
 		 * @param {String} location The location of the file or directory to delete.
 		 */
 		deleteFile: function(fLocation) {
-			delete this.fileRoot[fLocation];
-			return new Deferred().resolve([]);
+			var locationURL = new URL(fLocation);
+			var filePath = locationURL.pathname;
+			delete this.fileRoot[filePath];
+			return new Deferred().resolve();
 		}
 	};
 	EmbeddedFileImpl.prototype.constructor = EmbeddedFileImpl;

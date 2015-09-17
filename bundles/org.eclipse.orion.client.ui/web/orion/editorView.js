@@ -153,7 +153,8 @@ define([
 			}
 			var currentLocation = fPattern + this.id + "/foo." + fileExt;
 			var def;
-			if(currentLocation === this.lastFileLocation || !this.lastFileLocation) {
+			var sameFile = currentLocation === this.lastFileLocation;
+			if(sameFile || !this.lastFileLocation) {
 				def = new Deferred().resolve();
 			} else {
 				def = this.fileClient.deleteFile(this.lastFileLocation);
@@ -161,7 +162,11 @@ define([
 			return def.then(function() {
 				return this.fileClient.write(currentLocation, contents).then(function(){
 					this.lastFileLocation = currentLocation;
-					this.inputManager.setInput(currentLocation);
+					if (sameFile) {
+						this.inputManager.load();
+					} else {
+						this.inputManager.setInput(currentLocation);
+					}
 				}.bind(this));
 			}.bind(this));
 		},
