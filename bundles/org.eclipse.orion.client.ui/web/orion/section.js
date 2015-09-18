@@ -15,8 +15,8 @@ define([
 	'orion/commonHTMLFragments', 
 	'orion/objects', 	
 	'orion/selection',
-	'orion/webui/tooltip'], 
-	function(EventTarget, lib, mHTMLFragments, objects, Selection, sTooltip){
+	'orion/webui/tooltip'
+], function(EventTarget, lib, mHTMLFragments, objects, Selection, sTooltip){
 	
 	/**
 	 * Generates a section
