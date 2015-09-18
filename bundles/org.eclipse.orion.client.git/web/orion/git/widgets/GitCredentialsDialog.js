@@ -46,7 +46,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 			+ '<tr id="gitPrivateKeyRow">'
 			+ '<td align="right" valign="top"><input  style = "margin: 0;" id="isPrivateKey" type="radio" name="isSshPassword" value="privateKey"/>'
 			+ '<label style="line-height: 1; margin-left: 5px; vertical-align: text-top;" id="gitPrivateKeyLabel" for="gitPrivateKey">${Private key:}</label></td>'
-			+ '<td><textarea style="border: 1px solid #f1f3f4;" id="gitPrivateKey" value=""></textarea>' + '</td></tr>'
+			+ '<td><textarea id="gitPrivateKey" value=""></textarea>' + '</td></tr>'
 
 			+ '<tr id="gitPrivateKeyFileRow">'
 			+ '<td align="right"><label id="gitPrivateKeyFileLabel" for="gitPrivateKeyFile">${Private key file (optional):}</label></td>'
