@@ -18,8 +18,9 @@ define([
 	'orion/objects',
 	'orion/URITemplate',
 	'orion/contentTypes',
-	'orion/webui/littlelib'
-], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, URITemplate, mContentTypes, lib) {
+	'orion/webui/littlelib',
+	'orion/bidiUtils'
+], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, URITemplate, mContentTypes, lib, bidiUtils) {
 		
 	var max_more_info_column_length = 60;
 	/* Internal */
@@ -79,13 +80,17 @@ define([
 		// TODO FIXME refactor the async href calculation portion of this function into a separate function, for clients who do not want the <A> created.
 		item = objects.clone(item);
 		var link;
+		var linkName = item.Name || '';
+		if (bidiUtils.isBidiEnabled) {
+			linkName = bidiUtils.enforceTextDirWithUcc(linkName);
+		}
 		if (item.Directory) {
 			link = document.createElement("a"); //$NON-NLS-0$
 			link.className = "navlinkonpage"; //$NON-NLS-0$
 			var template = !folderPageURL ? uriTemplate : new URITemplate(folderPageURL + "#{,resource,params*}"); //$NON-NLS-0$
 			link.href = template.expand({resource: item.ChildrenLocation});
 			if(item.Name){
-				link.appendChild(document.createTextNode(item.Name));
+				link.appendChild(document.createTextNode(linkName));
 			}
 		} else {
 			if (!openWithCommands) {
@@ -110,7 +115,7 @@ define([
 				imageHolderDom.appendChild(image);
 			}
 			if(item.Name){
-				link.appendChild(document.createTextNode(item.Name));
+				link.appendChild(document.createTextNode(linkName));
 			}
 			var href = item.Location;
 			if (uriParams && typeof uriParams === "object") { //$NON-NLS-0$

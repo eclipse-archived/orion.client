@@ -17,8 +17,9 @@ define([
 	'orion/URITemplate',
 	'orion/i18nUtil',
 	'orion/git/util',
-	'orion/objects'
-], function(require, messages, URITemplate, i18nUtil, util, objects) {
+	'orion/objects',
+	'orion/bidiUtils'
+], function(require, messages, URITemplate, i18nUtil, util, objects, bidiUtils) {
 	
 	var commitTemplate = new URITemplate("git/git-repository.html#{,resource,params*}?page=1"); //$NON-NLS-0$	
 	
@@ -112,6 +113,9 @@ define([
 					link.className = "gitCommitTitle"; //$NON-NLS-0$
 				}
 				var text = headerMessage;
+				if (bidiUtils.isBidiEnabled) {
+					link.dir = bidiUtils.getTextDirection(text);
+				}
 				if (headerMessage.length < commit.Message.length) {
 					 text += "..."; //$NON-NLS-0$
 				}
@@ -132,6 +136,9 @@ define([
 					restSpan.textContent = commit.Message.substring(headerMessage.length);
 					fullMessage.appendChild(restSpan);
 				}
+				if (bidiUtils.isBidiEnabled) {
+					fullMessage.dir = bidiUtils.getTextDirection(fullMessage.textContent);
+				}
 				detailsDiv.appendChild(fullMessage);
 			}
 			
@@ -141,12 +148,20 @@ define([
 				section = createSection(detailsDiv);
 			}
 			if (displayAuthor) {
-				var authorName = this.showAuthorEmail ? i18nUtil.formatMessage(messages["nameEmail"], commit.AuthorName, commit.AuthorEmail) : commit.AuthorName;
+				var commitAuthorName = commit.AuthorName || '';
+				if (bidiUtils.isBidiEnabled) {
+					commitAuthorName = bidiUtils.enforceTextDirWithUcc(commitAuthorName);
+				}
+				var authorName = this.showAuthorEmail ? i18nUtil.formatMessage(messages["nameEmail"], commitAuthorName, commit.AuthorEmail) : commitAuthorName;
 				createInfo(detailsDiv, ["", "on"], [authorName, new Date(commit.Time).toLocaleString()]); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			
 			if (displayCommitter) {
-				var committerName = this.showCommitterEmail ? i18nUtil.formatMessage(messages["nameEmail"], commit.CommitterName, commit.CommitterEmail) : commit.CommitterName;
+				var commitCommitterName = commit.CommitterName || '';
+				if (bidiUtils.isBidiEnabled) {
+					commitCommitterName = bidiUtils.enforceTextDirWithUcc(commitCommitterName);
+				}
+				var committerName = this.showCommitterEmail ? i18nUtil.formatMessage(messages["nameEmail"], commitCommitterName, commit.CommitterEmail) : commitCommitterName;
 				createInfo(detailsDiv, "committedby", committerName); //$NON-NLS-0$
 			}
 			
@@ -202,6 +217,9 @@ define([
 					});
 					branchNameSpan.textContent = branchName;
 					branchNameSpan.className = "gitCommitBranch"; //$NON-NLS-0$
+					if (bidiUtils.isBidiEnabled) {
+						branchNameSpan.dir = bidiUtils.getTextDirection(branchName);
+					}
 					branches.appendChild(branchNameSpan);
 				});
 			}
@@ -212,7 +230,11 @@ define([
 				commit.Tags.forEach(function (tag) {
 					tag.parent = commit;
 					var tagSpan = document.createElement("span"); //$NON-NLS-0$
-					tagSpan.textContent = tag.Name;
+					var tagName = tag.Name;
+					if (bidiUtils.isBidiEnabled) {
+						tagName = bidiUtils.enforceTextDirWithUcc(tagName);
+					}
+					tagSpan.textContent = tagName;
 					tagSpan.className = "gitCommitTag"; //$NON-NLS-0$
 					tags.appendChild(tagSpan);
 					

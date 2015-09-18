@@ -33,11 +33,12 @@ define([
 	'javascript/ternSettings',
 	'orion/widgets/settings/ThemeSettings',
 	'orion/widgets/settings/UserSettings',
+	'orion/widgets/settings/GlobalizationSettings',	
 	'orion/editorPreferences',
 	'orion/metrics'
 ], function(messages, Deferred, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
 		ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, editorThemeImporter, SplitSelectionLayout, PluginList, 
-		GitSettings, EditorSettings, TernSettings, ThemeSettings, UserSettings, mEditorPreferences, mMetrics) {
+		GitSettings, EditorSettings, TernSettings, ThemeSettings, UserSettings, GlobalizationSettings, mEditorPreferences, mMetrics) {
 
 	/**
 	 * @param {Object} options
@@ -111,6 +112,14 @@ define([
 					});
 				}
 
+				if (categories.showGlobalizationSettings === undefined || categories.showGlobalizationSettings) {
+					_self.settingsCategories.push({
+						id: "Globalization", //$NON-NLS-0$
+						textContent: messages.Globalization,
+						show: _self.showGlobalizationSettings
+					});
+				}
+				
 				_self.settingsCategories.forEach(function(item) {
 					item.show = item.show.bind(_self, item.id);
 				}.bind(_self));
@@ -328,6 +337,34 @@ define([
 			}, userNode);
 			
 			this.ternWidget.show();
+		},
+
+		showGlobalizationSettings: function(id){
+
+			this.selectCategory(id);
+
+			lib.empty(this.table);
+
+			if (this.globalizationWidget) {
+				this.globalizationWidget.destroy();
+			}
+
+			this.updateToolbar(id);
+			
+			var userNode = document.createElement('div'); //$NON-NLS-0$
+			this.table.appendChild(userNode);
+
+			this.globalizationWidget = new GlobalizationSettings({
+				registry: this.registry,
+				settings: this.settingsCore,
+				preferences: this.preferences,
+				statusService: this.preferencesStatusService,
+				dialogService: this.preferenceDialogService,
+				commandService: this.commandService,
+				userClient: this.userClient	
+			}, userNode);
+			
+			this.globalizationWidget.show();
 		},
 		
 		initPlugins: function(id){
