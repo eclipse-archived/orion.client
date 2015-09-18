@@ -45,7 +45,7 @@
 	height: calc(100% - 14px);
 	background-color: white;
 	padding-bottom: 10px;
-	z-index: 49;
+	z-index: 50;
 }
 
 .gitChangeListCompareContainerMaximized {
