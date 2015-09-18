@@ -207,7 +207,10 @@ The Git page currently allows users to *push* and *fetch* patches from a Gerrit.
 
 ### Adding a Remote
  
-The first thing you need to do is add a Gerrit remote to an existing repo. This can be done from the References dropdown. For the purpose of this example, we will be setting up a remote to allow us to push patches for the Orion client project.
+The first thing you need to do is add a Gerrit remote to an existing repo. 
+Name the remote 'Gerrit' and copy corresponding url from git.eclipse.org/r/.
+This can be done from the References dropdown. For the purpose of this example, we will be setting up a remote to allow us to push patches for the Orion client project.
+
 
 <pic>
 
@@ -220,6 +223,7 @@ Next thing to do is to edit your new remote fetch config entry to add the appopr
 
 		+refs/heads/*:refs/remotes/<NAME OF REMOTE>/for/*
 		+refs/changes/*:refs/remotes/<NAME OF REMOTE>/changes/*
+3. Name entries remote.<NAME OF REMOTE>.fetch
 		
 
 Note that if you know the change id of the patch you are interested in reviewing, you can just enter it instead of *. For example, if you want to take a look at change id 34154, you can enter:
@@ -242,6 +246,11 @@ You can also fetch changes from the Incoming section in the Commits area.
 
 <pic>
 
+### Eclipse CLA
+
+Before committing changes sign the Eclipse CLA at https://projects.eclipse.org/.
+Sign in and click link at top right corner labeled 'Eclipse CLA'.
+
 ### Getting changes into Gerrit
 
 We'll now take a look at two sample workflows for getting changes into Gerrit, one for simple changes and one for more complex changes. These are by no means the only way of working with Gerrit but just illustrate two different approaches one can take.
@@ -252,11 +261,13 @@ The starting point for both of these workflows is that you have your Gerrit acco
 
 For this workflow, we just want to make a small change on a branch (we will use master in this example).
 
-1. Checkout the branch you want to make the change for (see the section 'Checking Out a Branch')
+1. Fetch from 'Gerrit' remote you created earlier.
 
-2. Make the change(s) and test...
+2. Checkout the branch you want to make the change for (see the section 'Checking Out a Branch'). 
 
-3. When the changes are ready to go, enter a commit message and check the  ***'Add Change-ID to message'***
+3. Make the change(s) and test...
+
+4. When the changes are ready to go, enter a commit message and check the  ***'Add Change-ID and Signed-off-by to message'***. Make sure name and email correspond to Gerrit.
 
 4. From the References dropdown, select the **<REMOTE>/for/<BRANCHNAME>** that you want to push to. For example, if you have named your remote "gerrit" and you your change is meant for the master branch, you would select "gerrit/for/master".
 
