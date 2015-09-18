@@ -98,7 +98,6 @@ define({//Default message bundle
 	'unusedFuncDeclFixName': 'Remove unused function',
 	'noCommaDangleFixName': 'Remove extra \',\'',
 	'addBBreakFixName': 'Add break statement',
-	'addBBreakFixTooltip': 'Add a break statement to the proceeding line',
 	'noShadowGlobals': 'Global shadowing:',
 	'noThrowLiteralFixName': 'Change to Error' ,
 	'missingNlsFixName': 'Add missing $NON-NLS$ tag',
