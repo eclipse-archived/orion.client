@@ -161,7 +161,6 @@ define("orion/gSearchClient", [ //$NON-NLS-0$
 
 	GSearchClient.prototype.constructor = GSearchClient;
 	return {
-		GSearchClient:GSearchClient,
-		
+		GSearchClient:GSearchClient
 	};
 });

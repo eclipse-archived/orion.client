@@ -31,6 +31,7 @@ define([
 		this.astmanager = astManager;
 		this.cuprovider = cuProvider;
 		this.searchclient = searchClient;
+		this.cache = Object.create(null);
 	}
 
 	Objects.mixin(RefsCommand.prototype, {
@@ -87,24 +88,44 @@ define([
 							if(err) {
 								deferred.resolve(err);
 							} else {
+								var expected = Object.create(null);
+								expected.total = 0;
+								expected.done = 0;
+								expected.result = [];
 								var searchParams = {keyword: node.name, resource: that.scriptresolver.getSearchLocation(), fileNamePatterns:["*.js"], caseSensitive: true }; //$NON-NLS-1$
+								expected.params = searchParams;
+								expected.deferred = deferred;
 								that.searchclient.search(searchParams, true, true).then(function(searchResult) {
-									searchResult.forEach(function(fileItem) {
-										if(fileItem.children) {
-											for(var i = 0; i < fileItem.children.length; i++) {
-												var matchingLine = fileItem.children[i];
-												matchingLine.matches.forEach(function(match) {
-													that._checkType(type, fileItem, match, searchParams, deferred);
-												});
+									expected.result = searchResult;
+									for (var h = 0, l1 = searchResult.length; h < l1; h++) {
+										var file = searchResult[h];
+										for(var i = 0, l2 = file.children.length; i < l2; i++) {
+											var line = file.children[i];
+											expected.total += line.matches.length;
+											for(var j = 0, l3 = line.matches.length; j < l3; j++) {
+												var match = line.matches[j];
+												var v = Finder.findWord(line.name, match.startIndex);
+												if(v === node.name) {
+													that._checkType(type, file, match, expected);
+												} else {
+													match.confidence = -1;
+													expected.done++;
+												}
 											}
 										}
-									});	
+									}
+									that._checkDone(expected);
 								}, /* @callback */ function(err) {
+									editorContext.setStatus({Severity: 'Error', Message: 'Cannot compute references: '+err.message}); //$NON-NLS-1$
+									deferred.resolve([]);
 								}, /* @callback */ function(result) {
 									//TODO progress
 								});
 						  }
 					});
+				} else {
+					editorContext.setStatus({Severity: 'Error', Message: 'Cannot compute references at the selected location: Location is not an identifier'}); //$NON-NLS-1$
+					deferred.resolve([]);
 				}
 			});
 		},
@@ -114,16 +135,154 @@ define([
 		 * come from the same origin, have the same location infos, the same inferred base type and the same prototype infos
 		 * @function
 		 * @private
-		 * @param {Object} original The original type object
-		 * @param {Object} type The type to compare to the original
-		 * @returns {Boolean} If the types are considered equal
 		 */
-		_checkType: function _checkType(original, fileItem, match, searchParams, deferred) {
-			this.ternworker.postMessage(
-					{request: 'type', args: {meta:{location: fileItem.location}, params: {offset: match.end}}},  //$NON-NLS-1$
+		_checkType: function _checkType(original, file, match, expected) {
+			var that = this;
+			that.ternworker.postMessage(
+					{request: 'type', args: {meta:{location: file.location}, params: {offset: match.end}}},  //$NON-NLS-1$
 					function(type, err) { //$NON-NLS-1$
-						deferred.progress({searchParams: searchParams, refResult: match});
+						//TODO not until incremental support is added 
+						//deferred.progress({searchParams: searchParams, refResult: match});
+						if(type && type.type) {
+							//TODO
+							var _t = type.type;
+							var _ot = original.type;
+							if(_t.name === _ot.name && _t.type === _ot.type && _t.origin === _ot.origin) {
+								match.confidence = 100;
+							} else {
+								match.confidence = -1; //we got the type info for this and it did not match, weed it out
+							}
+							expected.done++;
+						} else {
+							that._staticCheck(original, file, match, expected);
+						}
+						that._checkDone(expected);
 					});
+		},
+		
+		/**
+		 * @description Function to statically look at the search result by loading its AST and making some non-type inferred guesses.
+		 * This function is used if Tern reports it has no idea what the type of a match is.
+		 * @function
+		 * @private
+		 */
+		_staticCheck: function _staticCheck(original, file, match, expected) {
+			var that = this;
+			that._getAST(file).then(function(ast) {
+				var node = Finder.findNode(match.start, ast, {parents: true});
+				if(node) {
+					that._checkNode(original, node, match, expected);
+				} else {
+					match.confidence = -1;
+				}
+				expected.done++;
+				that._checkDone(expected);
+			});
+		},
+		
+		_checkNode: function _checkNode(original, node, match, expected) {
+			switch(node.type) {
+				case 'FunctionDeclaration':
+				case 'FucntionExpression':
+				case 'VariableDeclarator': {
+					//a re-decl cannot be a reference
+					match.confidence = -1;
+					this._checkDone(expected);
+					break;
+				}
+				case 'Identifier': {
+					if(Array.isArray(node.parents)) {
+						var p = node.parents.slice(node.parents.length-1)[0];
+						this._checkNode(original, p, match, expected);
+					} else {
+						match.confidence = 25;
+						this._checkDone(expected);
+					}
+					break;
+				}
+				case 'AssignmentExpression': {
+					if(node.left.name === original.type.exprName ||
+						node.right.name === original.type.exprName) {
+						match.confidence = 25;
+					}
+					break;
+				}
+				case 'MemberExpression': {
+					//if part of the expression, maybe relevant
+					break;
+				}
+				case 'CallExpression': {
+					if(node.callee.name === original.type.exprName) {
+						if(original.type.type === 'fn()') {
+							match.confidence = 40;
+						} else {
+							match.confidence = -1;
+						}
+					}
+					for(var i = 0, l = node.arguments.length; i < l; i++) {
+						var arg = node.arguments[i];
+						if(arg.type === 'Identifier') {
+							if(original.type.type === 'fn()') {
+								//orig type is function, this is not relevant
+								match.confidence = -1;
+							} else {
+								//with no type infos we have no idea if this is the same one
+								match.confidence = 40;
+							}
+						} else if(arg.type === 'FunctionExpression') {
+							if(arg.id === original.type.exprName) {
+								//redecl, not relevant
+								match.confidence = -1;
+							}
+						}
+					}
+					break;
+				}
+			}
+		},
+		
+		/**
+		 * @description Returns the AST for the given file match. We do caching before the AST manager to avoid having to 
+		 * read the complete file contents each time
+		 * @function
+		 * @private
+		 * @param {Object} file The file match from the search results
+		 * @returns {Deferred} The deferred to resolve to get the AST
+		 */
+		_getAST: function _getAST(file) {
+			var that = this;
+			var ast = that.cache[file.location];
+			if(ast) {
+				return new Deferred().resolve(ast);
+			} else {
+				return that.searchclient._fileClient.read(file.location).then(function(contents) {
+					var proxy = {
+						getFileMetadata: function() {
+							return new Deferred().resolve(file.metadata);
+						},
+						getText: function() {
+							return new Deferred().resolve(contents);
+						}
+					};
+					return that.astmanager.getAST(proxy).then(function(ast) {
+						that.cache[file.location] = ast;
+						return new Deferred().resolve(ast);
+					});
+				});
+			}
+		},
+		
+		/**
+		 * @description Checks if all the confidence checking is done and resolves the backing deferred if so
+		 * @function
+		 * @private
+		 * @param {Object} expected The context of confidence computation
+		 */
+		_checkDone: function _checkDone(expected) {
+			if(expected.done === expected.total) {
+				this.cache = Object.create(null);
+				expected.deferred.resolve({searchParams: expected.params, refResult: expected.result});
+			}
 		}
 	});
 
