@@ -2712,32 +2712,66 @@ define([
 //NO-NEW-ARRAY ----------------------------------------------------
     	describe('no-new-array', function() {
     	    var RULE_ID = "no-new-array";
-    		it("flag in global scope", function() {
-    			var topic = "new Array()";
-
+    		it("not flag no args", function() {
+    			var topic = "var ar = new Array()";
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
-
     			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 1);
-    			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Use the array literal notation '[]'.");
-    			assert.equal(messages[0].node.type, "Identifier");
+    			assert.equal(messages.length, 0);
     		});
-    		it("flag when symbol is declared in /*global block", function() {
-    			var topic = "/*global Array*/ new Array();";
-
+    		it("not flag call expression no args", function() {
+    			var topic = "var ar = Array();";
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
-
     			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 1);
-    			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Use the array literal notation '[]'.");
-    			assert.equal(messages[0].node.type, "Identifier");
+    			assert.equal(messages.length, 0);
     		});
-    		it("flag in inner scope", function() {
+    		it("not flag single number arg", function() {
+    			var topic = "var ar = new Array(1)";
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("not flag call expression single number arg", function() {
+    			var topic = "var ar = Array(1);";
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("not flag single non-literal arg", function() {
+    			var topic = "var ar = new Array(otherarr.length)";
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("not flag call expression single non-literal arg", function() {
+    			var topic = "var ar = Array(otherarr.length);";
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("not flag in inner scope - no args", function() {
     			var topic = "(function f() { var x = new Array(); }());";
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+			it("not flag in inner scope - single number arg", function() {
+    			var topic = "(function f() { var x = new Array(1); }());";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+			it("flag in single arg - non number", function() {
+    			var topic = "(function f() { var x = new Array('a'); }());";
 
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
@@ -2748,25 +2782,29 @@ define([
     			assert.equal(messages[0].message, "Use the array literal notation '[]'.");
     			assert.equal(messages[0].node.type, "Identifier");
     		});
-
-    		it("not flag when symbol refers to in-scope var - global", function() {
-    			var topic = "var Array; new Array();";
+    		it("flag in multi arg - numbers", function() {
+    			var topic = "(function f() { var x = new Array(1, 2, 3); }());";
 
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
 
     			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Use the array literal notation '[]'.");
+    			assert.equal(messages[0].node.type, "Identifier");
     		});
-
-    		it("not flag when symbol refers to in-scope var - non-global", function() {
-    			var topic = "var Array; function f() { new Array(); }";
+    		it("flag in multi arg - mixed", function() {
+    			var topic = "(function f() { var x = new Array(1, 'a', {}); }());";
 
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
 
     			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Use the array literal notation '[]'.");
+    			assert.equal(messages[0].node.type, "Identifier");
     		});
     	});
 
@@ -2809,26 +2847,6 @@ define([
     			assert.equal(messages[0].message, "The Function constructor is eval.");
     			assert.equal(messages[0].node.type, "Identifier");
     		});
-
-    		it("not flag when symbol refers to in-scope var - global", function() {
-    			var topic = "var Function; new Function();";
-
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
-    		});
-
-    		it("not flag when symbol refers to in-scope var - non-global", function() {
-    			var topic = "var Function; function f() { new Function(); }";
-
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
-    		});
     	});
 
 //NO-NEW-OBJECT -------------------------------------------------
@@ -2869,26 +2887,6 @@ define([
     			assert.equal(messages[0].ruleId, RULE_ID);
     			assert.equal(messages[0].message, "Use the object literal notation '{}' or Object.create(null).");
     			assert.equal(messages[0].node.type, "Identifier");
-    		});
-
-    		it("not flag when symbol refers to in-scope var - global", function() {
-    			var topic = "var Object; new Object();";
-
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
-    		});
-
-    		it("not flag when symbol refers to in-scope var - non-global", function() {
-    			var topic = "var Object; function f() { new Object(); }";
-
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
     		});
     	});
 
@@ -2934,26 +2932,6 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 5);
     			assertMessages(messages);
-    		});
-
-    		it("not flag when symbol refers to in-scope var - global", function() {
-    			var topic = "var String, Number, Math, Boolean, JSON; new String; new Number; new Math; new Boolean; new JSON;";
-
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
-    		});
-
-    		it("not flag when symbol refers to in-scope var - non-global", function() {
-    			var topic = "var String, Number, Math, Boolean, JSON; function f() { new String; new Number; new Math; new Boolean; new JSON; }";
-
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
     		});
     	});
 
