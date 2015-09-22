@@ -42,9 +42,7 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 							var url = require.toUrl(key);
 							if (!pluginRegistry.getPlugin(url)) {
 								installs.push(pluginRegistry.installPlugin(url,{autostart: "lazy"}).then(function(plugin) {
-									return plugin.update().then(function() {
-										return plugin.start({lazy:true});
-									});
+									return plugin.start({lazy:true});
 								}));
 							}
 						});	
