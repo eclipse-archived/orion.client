@@ -1,5 +1,5 @@
 /*eslint-env amd */
-define(['./files/require_dep6'], function(a) {
+define(['./require_dep6'], function(a) {
 	var local = new a.directFoo();
 	var local2 = a.directFunc();
 	var local3 = a.directVar;
