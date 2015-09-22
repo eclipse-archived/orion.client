@@ -520,6 +520,55 @@ define([
 		                      fixid: 'no-fallthrough-break',
 		                      contentType: 'text/html'});
 		});
+	//NO-NEW-ARRAY
+		it("test no-new-array single non-number literal param", function() {
+			var rule = createTestRule('no-new-array');
+            return getFixes({
+                buffer: "var ar = new Array('a');",
+                rule: rule,
+                expected: { value: "['a']", start: 9,  end: 23 }
+            });
+		});
+		it("test no-new-array multi number literal params", function() {
+			var rule = createTestRule('no-new-array');
+            return getFixes({
+                buffer: "var ar = new Array(1, 2, 3);",
+                rule: rule,
+                expected: { value: "[1, 2, 3]", start: 9,  end: 27 }
+            });
+		});
+		it("test no-new-array mixed multi params", function() {
+			var rule = createTestRule('no-new-array');
+            return getFixes({
+                buffer: "var ar = new Array(1, 'd', {});",
+                rule: rule,
+                expected: { value: "[1, 'd', {}]", start: 9,  end: 30 }
+            });
+		});
+		it("test no-new-array call expr single non-number literal param", function() {
+			var rule = createTestRule('no-new-array');
+            return getFixes({
+                buffer: "var ar = Array('a');",
+                rule: rule,
+                expected: { value: "['a']", start: 9,  end: 19 }
+            });
+		});
+		it("test no-new-array call expr multi number literal params", function() {
+			var rule = createTestRule('no-new-array');
+            return getFixes({
+                buffer: "var ar = Array(1, 2, 3);",
+                rule: rule,
+                expected: { value: "[1, 2, 3]", start: 9,  end: 23 }
+            });
+		});
+		it("test no-new-array call expr mixed multi params", function() {
+			var rule = createTestRule('no-new-array');
+            return getFixes({
+                buffer: "var ar = Array(1, 'd', {});",
+                rule: rule,
+                expected: { value: "[1, 'd', {}]", start: 9,  end: 26 }
+            });
+		});
     //NO-THROW-LITERAL
         it("Test no-throw-literal-number", function() {
             var rule = createTestRule('no-throw-literal');

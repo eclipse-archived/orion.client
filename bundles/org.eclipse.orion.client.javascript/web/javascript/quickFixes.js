@@ -334,6 +334,24 @@ define([
                 return editorContext.setText(fix, annotation.start, annotation.start);
             });
         },
+        "no-new-array": function(editorContext, annotation, astManager) {
+        	return astManager.getAST(editorContext).then(function(ast) {
+       			var node = Finder.findNode(annotation.start, ast, {parents:true});
+       			if(node && node.parents) {
+       				var p = node.parents[node.parents.length-1];
+       				if(p.type === 'CallExpression' || p.type === 'NewExpression') {
+       					var fix = '';
+       					if(p.arguments.length > 0) {
+       						var start = p.arguments[0].range[0], end = p.arguments[p.arguments.length-1].range[1];
+       						fix += '[' + ast.source.substring(start, end) + ']';
+       					} else {
+       						fix += '[]'; //$NON-NLS-1$
+       					}
+       					return editorContext.setText(fix, p.start, p.end);
+       				}
+       			}
+   			});
+        },
         /** for for the no-reserved-keys linting rule */
        "no-reserved-keys": function(editorContext, annotation, astManager) {
        		return astManager.getAST(editorContext).then(function(ast) {
