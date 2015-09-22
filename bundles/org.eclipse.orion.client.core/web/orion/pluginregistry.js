@@ -383,14 +383,16 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                             throw new Error("Bad method: " + message.method);
                         }
                     }
-                } else {
+                } else if (message.id) {
                     var deferred = _responseReferences[String(message.id)];
-                    delete _responseReferences[String(message.id)];
-                    if (message.error) {
-                        var error = _internalRegistry.handleServiceError(_this, message.error);
-                        deferred.reject(error);
-                    } else {
-                        deferred.resolve(message.result);
+                    if (deferred) {
+	                    delete _responseReferences[String(message.id)];
+	                    if (message.error) {
+	                        var error = _internalRegistry.handleServiceError(_this, message.error);
+	                        deferred.reject(error);
+	                    } else {
+	                        deferred.resolve(message.result);
+	                    }
                     }
                 }
             } catch (e) {
