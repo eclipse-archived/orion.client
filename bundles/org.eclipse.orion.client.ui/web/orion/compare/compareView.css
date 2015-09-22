@@ -85,6 +85,7 @@
 	height:30px;
 	overflow: hidden;
 	color: gray;
+	white-space: nowrap;
 }
 
 .titleContainer {
