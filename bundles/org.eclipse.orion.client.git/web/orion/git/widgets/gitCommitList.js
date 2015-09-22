@@ -208,9 +208,23 @@ define([
 						repository.CurrentBranch = currentBranch;
 						var activeBranch = that.getActiveBranch();
 						var targetRef = that.getTargetReference();
+						if (!activeBranch.Current) {
+							that.simpleLog = true;
+						}
 						if (section) {
 							if (that.simpleLog && targetRef) {
+								if (activeBranch && !activeBranch.Current) {
+									var Hlocation = activeBranch.HeadLocation;
+									that.progressService.progress(that.gitClient.doGitLog(Hlocation), "test").then(function(resp) {
+										activeBranch.Name = "Detached HEAD";
+										var sha = resp.Children[0].Name.substring(0, 7);
+										section.setTitle("Detached HEAD @ " + sha);
+									}, function(error){
+										that.handleError(error);
+									});
+								} else {
 								section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef)));
+								} 
 							} else {
 								section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], util.shortenRefName(activeBranch)));
 							}
