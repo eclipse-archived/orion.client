@@ -15,18 +15,7 @@
 			json: "requirejs/json", 
 			i18n: 'requirejs/i18n',
 			domReady: 'requirejs/domReady'
-		},
-		packages: [
-			{
-				name: "eslint/conf",
-				location: "eslint/conf"
-			},
-			{
-				name: "eslint",
-				location: "eslint/lib",
-				main: "eslint"
-			},
-		]
+		}
 	});
 	require(['mocha/sauce'], function(mocha) {
 		mocha.setup('bdd');

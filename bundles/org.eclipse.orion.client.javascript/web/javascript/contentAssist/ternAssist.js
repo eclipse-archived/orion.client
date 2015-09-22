@@ -19,7 +19,7 @@ define([
 	'orion/editor/templates',
 	'javascript/contentAssist/templates',
 	'javascript/hover',
-	'eslint/load-rules-async',
+	'eslint/lib/load-rules-async',
 	'eslint/conf/environments',
 	'javascript/signatures',
 	'javascript/util',
@@ -196,15 +196,15 @@ define([
 	                var start  = node.range[0];
     		        if(contents.charAt(start) === '/' && contents.charAt(start+1) === '*') {
                         if(contents.charAt(start+2) === '*' && offset > start+2) { // must be past the second '*'
-                            return {kind:'jsdoc', node: node};
+                            return {kind:'jsdoc', node: node}; //$NON-NLS-1$
                         } else if(offset > start+1) { //must be past the '*'
-        		            return {kind:'doc', node: node};
+        		            return {kind:'doc', node: node}; //$NON-NLS-1$
         		        }
     		        }
     		        break;
 	            }
 	            case 'Line': {
-	            	return {kind: 'linedoc', node: node};
+	            	return {kind: 'linedoc', node: node}; //$NON-NLS-1$
 	            }
 	            //$FALLTHROUGH$
 	            default: return null;
@@ -536,12 +536,14 @@ define([
 				this.ternworker.postMessage({request: 'completions', args: args}, //$NON-NLS-1$
 					function(response) {
 						clearTimeout(that.timeout);
-						if(deferred.proposals) {
-			        		deferred.resolve([].concat(sortProposals(response.proposals ? response.proposals : [], deferred.args), deferred.proposals));
-			        	} else {
-			        		deferred.resolve(sortProposals(response.proposals, deferred.args));
+						if(deferred) {
+							if(deferred.proposals) {
+				        		deferred.resolve([].concat(sortProposals(response.proposals ? response.proposals : [], deferred.args), deferred.proposals));
+				        	} else {
+				        		deferred.resolve(sortProposals(response.proposals, deferred.args));
+				        	}
+				        	deferred = null;
 			        	}
-			        	deferred = null;
 					}
 	        	);
 				

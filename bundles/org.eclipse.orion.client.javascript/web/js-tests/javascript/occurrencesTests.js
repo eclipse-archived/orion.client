@@ -18,7 +18,7 @@ define([
 	'javascript/cuProvider',
 	'javascript/occurrences',
 	'javascript/validator',
-	'eslint',
+	'eslint/lib/eslint',
 	'mocha/mocha'  //must stay at the end, not a module
 ], function(chai, Esprima, Deferred, ASTManager, CUProvider, Occurrences, Validator, ESLint) {
 	var assert = chai.assert;

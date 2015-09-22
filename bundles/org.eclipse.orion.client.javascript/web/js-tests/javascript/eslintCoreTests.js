@@ -11,9 +11,9 @@
 /*eslint-env node, mocha, amd*/
 /* eslint-disable missing-nls */
 define([
-	'eslint/events',
-	'eslint/util',
-	'eslint',
+	'eslint/lib/events',
+	'eslint/lib/util',
+	'eslint/lib/eslint',
 	'chai/chai',
 	'mocha/mocha' //not a module, leave at the end
 ], function(events, util, eslint, chai) {

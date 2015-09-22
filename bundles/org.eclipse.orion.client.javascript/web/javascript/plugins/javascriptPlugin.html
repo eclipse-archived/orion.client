@@ -6,20 +6,10 @@
 	<script src="../../requirejs/require.js"></script>
 	<script>
 		/*eslint-env browser, amd*/	
+		/* eslint-disable missing-nls */
 		require(["../../orion/require-config.js"], function(config){
 			require.config({
-				baseUrl: "../../",
-				packages: [
-					{
-						name: "eslint/conf",
-						location: "eslint/conf"
-					},
-					{
-						name: "eslint",
-						location: "eslint/lib",
-						main: "eslint"
-					},
-				]
+				baseUrl: "../../"
 			});
 			require(["javascript/plugins/javascriptPlugin"], null, config.errback);
 		});

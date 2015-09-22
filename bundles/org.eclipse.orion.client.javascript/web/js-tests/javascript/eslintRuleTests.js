@@ -11,7 +11,7 @@
 /*eslint-env node, mocha, amd*/
 /* eslint-disable missing-nls */
 define([
-	'eslint',
+	'eslint/lib/eslint',
 	'estraverse/estraverse',
 	'chai/chai',
 	'mocha/mocha' //not a module, leave at the end
