@@ -10,7 +10,7 @@
  ******************************************************************************/
 /* eslint-env amd */
 define([
-	'require_dep2'
+	'js-tests/javascript/files/require_dep2'
 ], function(d2) {
 /* eslint-disable */
 	
