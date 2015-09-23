@@ -510,6 +510,24 @@ define([
 				//TODO this test fails to find the impl, but it should work
 				testDirectImplementation(options, {start:1179, end:1187, file: 'require_dep6.js'});
 			});
+			it("Test direct impl - cross 2 files func 1", function(done) {
+				var options = {
+					buffer: "define(['./files/require_dep7'], function(a) {a.reExportFunc;});",
+					offset: 52,
+					callback: done
+				};
+				//TODO this test fails to find the impl, but it should work
+				testDirectImplementation(options, {start:868, end:881, file: 'require_dep2.js'});
+			});
+			it("Test direct impl - cross 2 files var 1", function(done) {
+				var options = {
+					buffer: "define(['./files/require_dep7'], function(a) {a.reExportVar;});",
+					offset: 52,
+					callback: done
+				};
+				//TODO this test fails to find the impl, but it should work
+				testDirectImplementation(options, {start:751, end:758, file: 'require_dep2.js'});
+			});
 			it.skip("Test direct impl - cross file return object proto function 1", function(done) {
 				var options = {
 					buffer: "define(['./files/require_dep6'], function(a) {a.pFunc;});",
