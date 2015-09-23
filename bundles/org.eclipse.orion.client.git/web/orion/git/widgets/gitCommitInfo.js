@@ -64,7 +64,7 @@ define([
 					if (commit.AuthorImage) {
 						var image = new Image();
 						image.src = commit.AuthorImage;
-						image.name = commit.AuthorName;
+						image.alt = "";
 						image.className = "git-author-icon"; //$NON-NLS-0$
 						parent.appendChild(image);
 						if (commit.incoming) image.classList.add("incoming"); //$NON-NLS-0$

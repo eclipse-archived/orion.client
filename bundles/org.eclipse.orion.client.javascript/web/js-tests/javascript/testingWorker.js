@@ -99,34 +99,57 @@ define([
 						var _d = ev.data;
 						var id  = _d.messageID;
 						var f = _instance.callbacks[id];
+						function getFileURL(filePath){
+							var rootIndex = window.location.href.indexOf('js-tests/javascript');
+							if(!/\.js$/g.test(filePath)) {
+								// Must have trailing .js extension
+								filePath += '.js';
+							}
+							if (/^(?:\.\/|\.\.\/)/g.test(filePath)){ // starts with ./ or ../
+								// Relative file paths need to be relative to js-tests/javascript/ folder
+								if (rootIndex === -1){
+									return new URL('js-tests/javascript/' + filePath, window.location.href);
+								} else {
+									return new URL(filePath, window.location.href);
+								}
+							} else {
+								// Absolute paths need to use the site root
+								if (rootIndex > -1){
+									return new URL(filePath, window.location.href.substring(0, rootIndex));
+								} else {
+									return new URL(filePath, window.location.href);
+								}
+							}
+						}
+						
 						if(typeof(f) === 'function') {
 							f(_d);
 							delete _instance.callbacks[id];
 						} else if(_d.request === 'read') {
-							var url, req, _f;
+							var url, req, filePath;
 							if(_d.args && _d.args.file) {
 								if(typeof(_d.args.file) === 'object') {
-									_f = 'js-tests/javascript/';
-									_f += _d.args.file.logical ? _d.args.file.logical : _d.args.file;
-									if(!/\.js$/g.test(_f)) {
-										_f += '.js';
-									}
-									url = new URL(_f, window.location.href);
-									_xhr('GET', url.href).then(function(response) {
+									filePath = _d.args.file.logical ? _d.args.file.logical : _d.args.file;
+									url = getFileURL(filePath);
+									
+									_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
 										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.response, file: response.url, logical: _d.args.file.logical}});
+									}, function(rejection){
+										var error = 'XHR GET failed: ' + url.href;
+										_instance._state.callback(new Error(error));
+										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {error: error, logical: _d.args.file.logical, file: rejection.url}});
 									});
 								} else if(typeof(_d.args.file) === 'string') {
-									_f = _d.args.file;
-									if(!/\.js$/g.test(_f)) {
-										_f += '.js';
-									}
-									url = new URL(_f, window.location.href);
-									req = new XMLHttpRequest();
-									req.onload = function(response) {
+									filePath = _d.args.file;
+									url = getFileURL(filePath);
+									
+									_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
 										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.target.response, file: response.target.responseURL}});
-									};
-									req.open('GET', url, true);
-									req.send();
+									}, function(rejection){
+										var error = 'XHR GET failed: ' + url.href;
+										_instance._state.callback(new Error(error));
+										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {error: error, logical: _d.args.file.logical, file: rejection.url}});
+									});
 								}
 							} else {
 								_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: _instance._state.buffer, file: _instance._state.file}});

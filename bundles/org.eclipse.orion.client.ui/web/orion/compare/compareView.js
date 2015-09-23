@@ -640,18 +640,53 @@ exports.TwoWayCompareView = (function() {
 		return leftViewHeight > rightViewHeight ? leftViewHeight : rightViewHeight;
 	};
 	
-	TwoWayCompareView.prototype.refreshTitle = function(editorIndex, dirty){	
+	TwoWayCompareView.prototype.refreshTitle = function(editorIndex, dirty){
+		var title1 = this.options.newFile.Name, title2 = this.options.oldFile.Name;
+		var separator = "/"; //$NON-NLS-0$
+		var ellipses = " ... "; //$NON-NLS-0$
+		var segments1 = title1.split(separator);
+		var segments2 = title2.split(separator);
+		var simplified1 = [];
+		var simplified2 = [];
+		var skipped = false, i;
+		for (i=0; i<Math.min(segments1.length - 1, segments2.length - 1); i++) {
+			if (segments1[i] !== segments2[i]) {
+				if (skipped) {
+					simplified1.push(ellipses);
+					simplified2.push(ellipses);
+				}
+				simplified1.push(segments1[i]);
+				simplified2.push(segments2[i]);
+				skipped = false;
+			} else {
+				skipped = true;
+			}
+		}
+		if (skipped) {
+			simplified1.push(ellipses);
+			simplified2.push(ellipses);
+		}
+		for (; i<Math.max(segments1.length, segments2.length); i++) {
+			if (i < segments1.length) {
+				simplified1.push(segments1[i]);
+			}
+			if (i < segments2.length) {
+				simplified2.push(segments2[i]);
+			}
+		}
+		title1 = simplified1.join(separator);
+		title2 = simplified2.join(separator);
 		if(editorIndex === 1){
 			var newFileTitleNode = this._uiFactory.getTitleDiv(true);
 			if(newFileTitleNode){
 				lib.empty(newFileTitleNode);
-				newFileTitleNode.appendChild(document.createTextNode(dirty || this._editors[editorIndex].isDirty() ? this.options.newFile.Name + "*" : this.options.newFile.Name)); //$NON-NLS-0$
+				newFileTitleNode.appendChild(document.createTextNode(dirty || this._editors[editorIndex].isDirty() ? title1 + "*" : title1)); //$NON-NLS-0$
 			}
 		} else {
 			var oldFileTitleNode = this._uiFactory.getTitleDiv(false);
 			if(oldFileTitleNode){
 				lib.empty(oldFileTitleNode);
-				oldFileTitleNode.appendChild(document.createTextNode(dirty || this._editors[editorIndex].isDirty() ? this.options.oldFile.Name + "*" : this.options.oldFile.Name)); //$NON-NLS-0$
+				oldFileTitleNode.appendChild(document.createTextNode(dirty || this._editors[editorIndex].isDirty() ? title2 + "*" : title2)); //$NON-NLS-0$
 			}
 		}
 	};

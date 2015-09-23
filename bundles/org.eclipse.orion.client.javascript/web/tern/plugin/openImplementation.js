@@ -28,6 +28,9 @@
 		 * @callback
 		 */
 		run: function run(server, query) {
+			if (query.end && !query.start) {
+				query.start = query.end;
+			}
 			var definition = this._getDefNode(server, query);
 			var prevDef;
 			while (definition) {
@@ -54,12 +57,14 @@
 		_getDefNode: function(server, query) {
 			var theFile = server.fileMap[query.file];
 			var res = tern.findDef(server, query, theFile);
-			if (res) {
+			if (res && res.start) {
 				theFile = server.fileMap[res.file];
-				var theNode = infer.findExpressionAt(theFile.ast, res.start, null, null, function(type, node) {
-					return true;
-				});
-				return theNode.node;
+				if (theFile.ast) {
+					var theNode = infer.findExpressionAt(theFile.ast, res.start, null, null, function(type, node) {
+						return true;
+					});
+					return theNode.node;
+				}
 			}
 			return null;
 		}

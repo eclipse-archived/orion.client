@@ -153,7 +153,8 @@ define([
 			}
 			var currentLocation = fPattern + this.id + "/foo." + fileExt;
 			var def;
-			if(currentLocation === this.lastFileLocation || !this.lastFileLocation) {
+			var sameFile = currentLocation === this.lastFileLocation;
+			if(sameFile || !this.lastFileLocation) {
 				def = new Deferred().resolve();
 			} else {
 				def = this.fileClient.deleteFile(this.lastFileLocation);
@@ -161,7 +162,11 @@ define([
 			return def.then(function() {
 				return this.fileClient.write(currentLocation, contents).then(function(){
 					this.lastFileLocation = currentLocation;
-					this.inputManager.setInput(currentLocation);
+					if (sameFile) {
+						this.inputManager.load();
+					} else {
+						this.inputManager.setInput(currentLocation);
+					}
 				}.bind(this));
 			}.bind(this));
 		},
@@ -508,8 +513,11 @@ define([
 			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor.getModel());
 			editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				syntaxChecker.setTextModel(editor.getModel());
+				var input = inputManager.getInput();
 				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents, editor.getEditorContext()).then(function(problems) {
-					serviceRegistry.getService(that.problemsServiceID)._setProblems(problems);
+					if (input === inputManager.getInput()) {
+						serviceRegistry.getService(that.problemsServiceID)._setProblems(problems);
+					}
 				});
 				if (inputManager.getReadOnly()) {
 					editor.reportStatus(messages.readonly, "error"); //$NON-NLS-0$

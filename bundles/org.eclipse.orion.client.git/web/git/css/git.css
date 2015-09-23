@@ -45,7 +45,7 @@
 	height: calc(100% - 14px);
 	background-color: white;
 	padding-bottom: 10px;
-	z-index: 49;
+	z-index: 50;
 }
 
 .gitChangeListCompareContainerMaximized {
@@ -382,7 +382,7 @@ table .sectionTable {
 }
 
 .gitChangeListInput {
-	width: 240px;
+	width: 450px;
 	font-size: 12px;
 }
 
@@ -392,8 +392,8 @@ table .sectionTable {
 	vertical-align: text-top;
 }
 
-#persitCheck.gitChangeListCheck {
-	margin-left: 10px; /*  We only need margin on the left for the Save checkbox */
+.persitCheck {
+	padding-left: 10px; /*  We only need padding on the left for the Save Checkbox */
 }
 
 #persitCheck.gitChangeListCheck ~ label {
@@ -414,6 +414,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	padding-top: 10px;
 	padding-bottom: 10px;
 	margin-top: 3px;
+	padding-right: 10px;
 }
 
 .gitChangeListCompareActions {

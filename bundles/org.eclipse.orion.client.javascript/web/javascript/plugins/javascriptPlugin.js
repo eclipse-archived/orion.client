@@ -711,6 +711,19 @@ define([
                 }
         );
 
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+    			quickFixComputer,
+    			{
+        			name: javascriptMessages["noNewArrayFixName"],  //$NON-NLS-1$
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+        			id : "no.new.array.literal.fix",  //$NON-NLS-1$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-new-array)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                    ]
+    			}
+    	);
+
     	/**
     	 * legacy pref id
     	 */

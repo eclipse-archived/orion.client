@@ -162,9 +162,9 @@ function(messages, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils) {
             	var newChildren = [];
             	children.forEach(function(child) {
 					for(var j = 0; j < child.matches.length; j++){
-						if(child.matches[j].confidence < 0) {
+						/*if(child.matches[j].confidence < 0) {
 							continue;
-						}
+						}*/
 						var matchNumber = j+1;
 						var newMatch = {confidence: child.matches[j].confidence, parent: fileNode, matches: child.matches, lineNumber: child.lineNumber, matchNumber: matchNumber, 
 							checked: child.matches[j].confidence === 100 ? true: false, type: "detail",

@@ -701,21 +701,49 @@ define([
 		"no-new-array": {
 		    description: ProblemMessages['no-new-array-description'],
 		    rule: function(context) {
-        		return util.createNewBuiltinRule("Array", ProblemMessages['no-new-array'], context); //$NON-NLS-0$
+		    	function checkNode(node) {
+		    		var callee = node.callee;
+	    			if (callee && callee.name === 'Array') {
+						var args = node.arguments;
+						if(args.length > 1) {
+							context.report(callee, ProblemMessages['no-new-array']);
+						} else if(args.length === 1 && (args[0].type === 'Literal' && typeof(args[0].value) !== 'number')) {
+							context.report(callee, ProblemMessages['no-new-array']);
+						}
+					}
+		    	}
+        		return {
+        			'NewExpression': checkNode,
+        			'CallExpression': checkNode
+        		};
         	}
         },
 		"no-new-func": {
 		    description: ProblemMessages['no-new-func-description'],
 		    url: 'http://eslint.org/docs/rules/no-new-func', //$NON-NLS-1$
 		    rule: function(context) {
-        		return util.createNewBuiltinRule("Function", ProblemMessages['no-new-func'], context); //$NON-NLS-1$
+        		return {
+        			'NewExpression': function(node) {
+        				var callee = node.callee;
+		    			if (callee && callee.name === 'Function') {
+		    				context.report(callee, ProblemMessages['no-new-func']);
+	    				}
+        			}
+        		};
         	}
         },
 		"no-new-object": {
 		    description: ProblemMessages['no-new-object-description'],
 		    url: 'http://eslint.org/docs/rules/no-new-object', //$NON-NLS-1$
 		    rule: function(context) {
-        		return util.createNewBuiltinRule("Object", ProblemMessages['no-new-object'], context); //$NON-NLS-0$
+		   		return {
+        			'NewExpression': function(node) {
+        				var callee = node.callee;
+		    			if (callee && callee.name === 'Object') {
+		    				context.report(callee, ProblemMessages['no-new-object']);
+	    				}
+        			}
+        		};
         	}
         },
 		"no-new-wrappers": {
@@ -723,10 +751,14 @@ define([
 		    url: 'http://eslint.org/docs/rules/no-new-wrappers', //$NON-NLS-1$
 		    rule: function(context) {
         		var wrappers = ["String", "Number", "Math", "Boolean", "JSON"]; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-5$
-
-        		return util.createNewBuiltinRule(wrappers, function(context, node, symbol) {
-        			context.report(node, ProblemMessages['no-new-wrappers'], [symbol]);
-        		}, context);
+				return {
+        			'NewExpression': function(node) {
+        				var callee = node.callee;
+		    			if (callee && wrappers.indexOf(callee.name) > -1) {
+		    				context.report(callee, ProblemMessages['no-new-wrappers'], [callee.name]);
+	    				}
+        			}
+        		};
         	}
         },
         "no-with": {

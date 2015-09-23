@@ -18,17 +18,6 @@
 		json: "requirejs/json",
 		i18n: "requirejs/i18n"
 	},
-	packages: [
-		{
-			name: "eslint/conf",
-			location: "eslint/conf"
-		},
-		{
-			name: "eslint",
-			location: "eslint/lib",
-			main: "eslint"
-		},
-	],
 	name: "javascript/plugins/ternWorkerCore",
 	wrap: {
 		start: "importScripts('../../requirejs/require.min.js');\n",

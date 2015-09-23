@@ -9,8 +9,14 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	'orion/selection'], function(EventTarget, lib, mHTMLFragments, objects, Selection){
-	
+define([
+	'orion/EventTarget', 
+	'orion/webui/littlelib', 
+	'orion/commonHTMLFragments', 
+	'orion/objects', 	
+	'orion/selection',
+	'orion/webui/tooltip'
+], function(EventTarget, lib, mHTMLFragments, objects, Selection, sTooltip){
 	/**
 	 * Generates a section
 	 * 
@@ -71,7 +77,15 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 			this.domNode.classList.add(wrapperClasses[i]);
 		}
 		this.domNode.id = options.id;
-
+		
+		if(options.tooltip) {
+			this.domNode.optionsTooltip = new sTooltip.Tooltip({
+				node: this.domNode,
+				text: options.tooltip,
+				position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			});
+		}
+		
 		// if canHide, add twistie and stuff...
 		this.canHide = options.canHide;
 		if(options.canHide){

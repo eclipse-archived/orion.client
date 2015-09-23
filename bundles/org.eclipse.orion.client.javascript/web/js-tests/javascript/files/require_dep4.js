@@ -24,6 +24,8 @@ define([
 	function Foo() {
 	}
 
+	Foo.prototype.constructor = Foo;
+
 	Objects.mixin(Foo.prototype, {
 		/**
 	     * @description A simple string var

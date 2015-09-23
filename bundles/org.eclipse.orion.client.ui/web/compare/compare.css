@@ -7,3 +7,11 @@
 @import "../orion/compare/compareView.css";
 
 @import "../css/theme.css";
+
+.titleActionContainer,
+.statusContainer,
+.workingTarget {
+	color: white;
+	background: #3B4B54;
+}
+	

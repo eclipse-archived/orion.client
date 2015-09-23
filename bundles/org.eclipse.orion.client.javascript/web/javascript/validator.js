@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*eslint-env amd*/
 define([
-	"eslint",
+	"eslint/lib/eslint",
 	"orion/objects",
 	"javascript/astManager",
 	"javascript/finder",
