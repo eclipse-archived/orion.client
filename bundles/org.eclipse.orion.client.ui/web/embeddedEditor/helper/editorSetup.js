@@ -121,7 +121,7 @@ define([
 				this._inputManager.editor = this.editorView.editor;
 				this._inputManager.setAutoSaveTimeout(300);
 				this._editorCommands.inputManager = this._inputManager;
-				if(options.contentType && options.contents) {
+				if(options.contentType && typeof options.contents === "string") {
 					this.editorView.setContents(options.contents, options.contentType);
 				}
 				return this.editorView;
