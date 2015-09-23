@@ -19,7 +19,7 @@
         text: 'requirejs/text',
         json: "requirejs/json", 
         'orion/bootstrap': 'embeddedEditor/builder/buildFrom/bootstrap'
-	}
+	},
 	name: "almond",
 	//locales: ["ja", "zh", "zh-tw", "fr", "de", "it", "es", "pt-br"],						
 	include: "javascript/plugins/javascriptPlugin",
