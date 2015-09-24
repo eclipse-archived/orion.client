@@ -174,7 +174,7 @@ define([
             return editorContext.setText('', node.range[0], node.range[1]);
         } else if(index === list.length-1) {
             return editorContext.setText('', list[index-1].range[1], node.range[1]);
-        } else {
+        } else if(node) {
             return editorContext.setText('', node.range[0], list[index+1].range[0]);
         }
         return null;
