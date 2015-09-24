@@ -94,19 +94,28 @@ define([
 		},
 
 		/**
-		 * Returns a message that is as detailed as possible.
-		 * @param {String|orionError} status Either a string or a JSON representation of an IStatus
+		 * Returns a JSON object with the message details, or a string if no JSON is included. 
+		 * @param {String|orionError} messageObject ResponseText from xhrGet, deferred error object, or plain string
 		 */
-		retrieveMessageFromStatus: function(status) { 
-			if (typeof status === "string") {
+		retrieveStatus: function(messageObject) { 
+			var status = messageObject.responseText || messageObject.message || messageObject;
+			if(status instanceof Error) {
+				status.Severity = SEV_ERROR;
+			} else if (typeof status === "string") {
 				try {
 					status = JSON.parse(status);
 				} catch(error) {
 					//it is not JSON, just continue;
 				}
 			}
+			return status;
+		},
 
-			// Create the message
+		/**
+		 * Returns a message that is as detailed as possible.
+		 * @param {String|orionError} status Either a string or a JSON representation of an IStatus
+		 */
+		retrieveMessageFromStatus: function(status) { 
 			var msg = status.DetailedMessage || status.Message || status.toString();
 			if (msg === Object.prototype.toString()) {
 				// Last ditch effort to prevent user from seeing meaningless "[object Object]" message
@@ -164,8 +173,8 @@ define([
 			this._clickToDisMiss = true;
 			this.statusMessage = st;
 			this._init();
-			//could be: responseText from xhrGet, deferred error object, or plain string
-			var status = st.responseText || st.message || st;
+
+			var status = this.retrieveStatus(st);
 			var message = this.retrieveMessageFromStatus(status);
 			var color = "red"; //$NON-NLS-0$
 			if (status.Severity) {
@@ -234,14 +243,9 @@ define([
 			this._clickToDisMiss = false;
 			this._cancelMsg = cancelMsg;
 			this.progressMessage = message;
-			//could either be responseText from xhrGet or just a string
-			var status = message.responseText || message;
-			if(status instanceof Error) {
-				status.Severity = SEV_ERROR;
-			}
 			this._init();
 
-			// Create the message
+			var status = this.retrieveStatus(message);
 			var msg = this.retrieveMessageFromStatus(status);
 			var node = lib.node(this.progressDomId);
 			lib.empty(node);
