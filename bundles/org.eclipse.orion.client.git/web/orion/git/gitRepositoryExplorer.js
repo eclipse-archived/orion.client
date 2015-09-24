@@ -591,32 +591,20 @@ define([
 		if (!explorer) return;
 		var activeBranch = explorer.model.getActiveBranch();
 		var targetRef = explorer.model.getTargetReference();
-		if (activeBranch&&!activeBranch.Current) {
-			var that = this;
-			var Hlocation = activeBranch.HeadLocation;
-			that.progressService.progress(that.gitClient.doGitLog(Hlocation), "test").then(function(resp) {
-				activeBranch.Name = messages["DetachedHead"];
-				var sha = resp.Children[0].Name.substring(0, 7);
-				title = activeBranch.Name + " @ " + sha;
-				that.branchesSection.setTitle(that.previousBranchTitle = title);
-			}, function(error){
-				that.handleError(error);
-			});
-		}
-		else{
-			if (activeBranch && targetRef) {
+		if (activeBranch && targetRef) {
+			if (!activeBranch.Current) {
+				title = activeBranch.Name + " @ " + activeBranch.headLocationSHA; //$NON-NLS-0$
+			} else {
 				var targetName =  util.shortenRefName(targetRef);
 				title = activeBranch.Name + " => " + targetName;  //$NON-NLS-0$
-			} else if (!activeBranch && !targetRef) {
-				title = messages["NoActiveBranch"];
-			} else if (!activeBranch && targetRef) {
-				title = messages["NoActiveBranch"] + " => " +  util.shortenRefName(targetRef);  //$NON-NLS-0$
-			} else {
-				title = util.shortenRefName(activeBranch || targetRef);
 			}
-			this.branchesSection.setTitle(this.previousBranchTitle = title);
+		} else if (!activeBranch && !targetRef) {
+			title = messages["NoActiveBranch"];
+		} else if (!activeBranch && targetRef) {
+			title = messages["NoActiveBranch"] + " => " +  util.shortenRefName(targetRef);  //$NON-NLS-0$
+		} else {
+			title = util.shortenRefName(activeBranch || targetRef);
 		}
-	
 	};
 
 	GitRepositoryExplorer.prototype.displayStatus = function(repository) {	
