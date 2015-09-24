@@ -204,6 +204,7 @@ define([
 				var _p = setup(options);
 				assert(_p, 'setup() should have completed normally');
 				assist.computeContentAssist(_p.editorContext, _p.params).then(function (actualProposals) {
+					assert(actualProposals, "Error during content assist, undefined returned");
 					if (actualProposals === timeoutReturn){
 						assert(false, "The content assist operation timed out");
 					}

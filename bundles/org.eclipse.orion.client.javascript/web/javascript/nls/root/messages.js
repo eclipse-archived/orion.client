@@ -116,7 +116,6 @@ define({//Default message bundle
 	'templateHoverHeader': 'Template source code:\n\n',
 	'templateAssistHeader': 'Templates',
 	'keywordAssistHeader': 'Keywords',
-	'noProposalsTimedOut': 'Could not compute proposals - operation timed out',
 	'ternPlugins': 'Tern Plug-ins',
 	'noTernPluginsAvailable': 'No Tern plug-ins are currently loaded. This may be because you have not yet activated content assist in a JavaScript file. Tern plug-ins provide type information and code templates for JavaScript.',
 	'noDeclFound': 'Could not find declaration',

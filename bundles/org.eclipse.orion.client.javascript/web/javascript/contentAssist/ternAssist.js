@@ -552,7 +552,8 @@ define([
 				}
 				this.timeout = setTimeout(function() {
 					if(deferred) {
-						deferred.resolve(params.timeoutReturn ? params.timeoutReturn : []); // Messages['noProposalsTimedOut']
+						// In the editor we can't return an error message here or it will be treated as a proposal and inserted into text
+						deferred.resolve(params.timeoutReturn ? params.timeoutReturn : []);
 					}
 					this.timeout = null;
 				}, params.timeout ? params.timeout : 5000);

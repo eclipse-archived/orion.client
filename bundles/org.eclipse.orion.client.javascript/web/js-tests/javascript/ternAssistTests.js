@@ -29,7 +29,7 @@ define([
 	var astManager = new ASTManager.ASTManager(Esprima);
 	var jsFile = 'tern_content_assist_test_script.js';
 	var htmlFile = 'tern_content_assist_test_script.html';
-	var timeoutReturn = 'Content assist timeout out';
+	var timeoutReturn = 'Content assist timed out';
 
 	/**
 	 * @description Sets up the test
