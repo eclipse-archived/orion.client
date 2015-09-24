@@ -216,9 +216,9 @@ define([
 								if (activeBranch && !activeBranch.Current) {
 									var Hlocation = activeBranch.HeadLocation;
 									that.progressService.progress(that.gitClient.doGitLog(Hlocation), "test").then(function(resp) {
-										activeBranch.Name = "Detached HEAD";
+										activeBranch.Name = messages["DetachedHead"];
 										var sha = resp.Children[0].Name.substring(0, 7);
-										section.setTitle("Detached HEAD @ " + sha);
+										section.setTitle(messages["DetachedHead"] + " @ " + sha);
 									}, function(error){
 										that.handleError(error);
 									});
