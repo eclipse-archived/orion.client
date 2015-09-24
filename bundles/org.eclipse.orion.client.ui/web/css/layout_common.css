@@ -832,6 +832,7 @@ and (max-device-width : 1024px)  {
 	background-color: rgb(57,75,84);
 	padding: 20px;
 	border-radius: 5px;
+	box-shadow: 5px 5px 5px 0 rgba(0,0,0,0.3);
 }
 
 .splashAbout {
