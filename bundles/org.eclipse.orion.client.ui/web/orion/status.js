@@ -92,6 +92,29 @@ define([
 			}
 			return this._notifierElements;
 		},
+
+		/**
+		 * Returns a message that is as detailed as possible.
+		 * @param {String|orionError} status Either a string or a JSON representation of an IStatus
+		 */
+		retrieveMessageFromStatus: function(status) { 
+			if (typeof status === "string") {
+				try {
+					status = JSON.parse(status);
+				} catch(error) {
+					//it is not JSON, just continue;
+				}
+			}
+
+			// Create the message
+			var msg = status.DetailedMessage || status.Message || status.toString();
+			if (msg === Object.prototype.toString()) {
+				// Last ditch effort to prevent user from seeing meaningless "[object Object]" message
+				msg = messages.UnknownError;
+			}
+			return msg;
+		},
+
 		/**
 		 * Displays a status message to the user.
 		 * @param {String} msg Message to display.
@@ -143,15 +166,7 @@ define([
 			this._init();
 			//could be: responseText from xhrGet, deferred error object, or plain string
 			var status = st.responseText || st.message || st;
-			//accept either a string or a JSON representation of an IStatus
-			if (typeof status === "string") {
-				try {
-					status = JSON.parse(status);
-				} catch(error) {
-					//it is not JSON, just continue;
-				}
-			}
-			var message = status.Message || status;
+			var message = this.retrieveMessageFromStatus(status);
 			var color = "red"; //$NON-NLS-0$
 			if (status.Severity) {
 				switch (status.Severity) {
@@ -224,22 +239,10 @@ define([
 			if(status instanceof Error) {
 				status.Severity = SEV_ERROR;
 			}
-			//accept either a string or a JSON representation of an IStatus
-			else if (typeof status === "string") {
-				try {
-					status = JSON.parse(status);
-				} catch(error) {
-					//it is not JSON, just continue;
-				}
-			}
 			this._init();
 
 			// Create the message
-			var msg = status.Message || status.toString();
-			if (msg === Object.prototype.toString()) {
-				// Last ditch effort to prevent user from seeing meaningless "[object Object]" message
-				msg = messages.UnknownError;
-			}
+			var msg = this.retrieveMessageFromStatus(status);
 			var node = lib.node(this.progressDomId);
 			lib.empty(node);
 			node.appendChild(this.createMessage(status, msg));
