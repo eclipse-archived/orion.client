@@ -569,5 +569,7 @@ define({//Default message bundle
 	'confirmUnsavedChanges': 'There are unsaved changes. Do you want to save them?', //$NON-NLS-1$ //$NON-NLS-0$
 	'NewConfigurationEntryTooltip': "Add a new entry to the repository configuration", //$NON-NLS-1$ //$NON-NLS-0$
 	'Configurations' : "Configurations", //$NON-NLS-0$  //$NON-NLS-1$
-	'DetachedHead' : "Detached HEAD" //$NON-NLS-0$  //$NON-NLS-1$
+	'DetachedHead' : "Detached HEAD", //$NON-NLS-1$ //$NON-NLS-0$
+	'SingleSubmodule' : "submodule", //$NON-NLS-1$ //$NON-NLS-0$
+	'PluralSubmodule' : "submodules" //$NON-NLS-1$ //$NON-NLS-0$
 });

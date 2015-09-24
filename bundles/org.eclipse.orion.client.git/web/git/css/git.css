@@ -551,6 +551,18 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	overflow: hidden;
 }
 
+.gitSubmodule-tier1 {
+	padding-left: 25px;
+}
+
+.gitSubmodule-tier2 {
+	padding-left: 50px;
+}
+
+.gitSubmodule-tier3 {
+	padding-left: 75px;
+}
+
 .gitCommitListSectionTitle {
 	font-size: 8.5pt;
 	/* text-transform: uppercase; */
