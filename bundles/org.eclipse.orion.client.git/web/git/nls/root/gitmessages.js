@@ -568,5 +568,6 @@ define({//Default message bundle
 	'Ssh Passphrase:' : 'Ssh Passphrase:', //$NON-NLS-0$  //$NON-NLS-1$
 	'confirmUnsavedChanges': 'There are unsaved changes. Do you want to save them?', //$NON-NLS-1$ //$NON-NLS-0$
 	'NewConfigurationEntryTooltip': "Add a new entry to the repository configuration", //$NON-NLS-1$ //$NON-NLS-0$
-	'Configurations' : "Configurations" //$NON-NLS-0$  //$NON-NLS-1$
+	'Configurations' : "Configurations", //$NON-NLS-0$  //$NON-NLS-1$
+	'DetachedHead' : "Detached HEAD" //$NON-NLS-0$  //$NON-NLS-1$
 });

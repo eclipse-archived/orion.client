@@ -595,7 +595,7 @@ define([
 			var that = this;
 			var Hlocation = activeBranch.HeadLocation;
 			that.progressService.progress(that.gitClient.doGitLog(Hlocation), "test").then(function(resp) {
-				activeBranch.Name = "Detached HEAD";
+				activeBranch.Name = messages["DetachedHead"];
 				var sha = resp.Children[0].Name.substring(0, 7);
 				title = activeBranch.Name + " @ " + sha;
 				that.branchesSection.setTitle(that.previousBranchTitle = title);
