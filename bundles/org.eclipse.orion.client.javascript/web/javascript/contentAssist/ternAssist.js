@@ -552,7 +552,7 @@ define([
 				}
 				this.timeout = setTimeout(function() {
 					if(deferred) {
-						deferred.resolve([]/*Messages['noProposalsTimedOut']*/);
+						deferred.resolve(params.timeoutReturn ? params.timeoutReturn : []); // Messages['noProposalsTimedOut']
 					}
 					this.timeout = null;
 				}, params.timeout ? params.timeout : 5000);

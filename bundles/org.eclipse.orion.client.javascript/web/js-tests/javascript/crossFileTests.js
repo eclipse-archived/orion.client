@@ -30,6 +30,7 @@ define([
 	var testworker, assist, hover, opendecl, openimpl;
 	var envs = Object.create(null);
 	var astManager = new ASTManager.ASTManager(Esprima);
+	var timeoutReturn = 'Content assist operation timed out';
 
 	/**
 	 * @description Sets up the test
@@ -67,7 +68,7 @@ define([
 			}
 		};
 		astManager.onModelChanging({file: {location: file}});
-		var params = {offset: offset, prefix : prefix, keywords: keywords, template: templates, line: line, timeout: timeout};
+		var params = {offset: offset, prefix : prefix, keywords: keywords, template: templates, line: line, timeout: timeout, timeoutReturn: timeoutReturn};
 		return {
 			editorContext: editorContext,
 			params: params,
@@ -185,7 +186,7 @@ define([
 			var _p = setup(options);
 			testworker._state.warmup = true;
 			assist.computeContentAssist(_p.editorContext, _p.params).then(/* @callback */ function (actualProposals) {
-				//do noting, warm up
+				//do nothing, warm up
 			});
 		});
 		after('Shutting down the test worker', function() {
@@ -203,6 +204,9 @@ define([
 				var _p = setup(options);
 				assert(_p, 'setup() should have completed normally');
 				assist.computeContentAssist(_p.editorContext, _p.params).then(function (actualProposals) {
+					if (actualProposals === timeoutReturn){
+						assert(false, "The content assist operation timed out");
+					}
 					_compareProposals(actualProposals, expectedProposals);
 				}, function (error) {
 					testworker._state.callback(error);

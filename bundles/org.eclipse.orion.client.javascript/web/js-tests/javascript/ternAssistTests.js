@@ -29,6 +29,7 @@ define([
 	var astManager = new ASTManager.ASTManager(Esprima);
 	var jsFile = 'tern_content_assist_test_script.js';
 	var htmlFile = 'tern_content_assist_test_script.html';
+	var timeoutReturn = 'Content assist timeout out';
 
 	/**
 	 * @description Sets up the test
@@ -74,7 +75,7 @@ define([
 			}
 		};
 		astManager.onModelChanging({file: {location: file}});
-		var params = {offset: offset, prefix : prefix, keywords: keywords, template: templates, line: line};
+		var params = {offset: offset, prefix : prefix, keywords: keywords, template: templates, line: line, timeout: options.timeout ? options.timeout : 5000, timeoutReturn: timeoutReturn};
 		return {
 			editorContext: editorContext,
 			params: params
@@ -123,6 +124,9 @@ define([
 		ternAssist.computeContentAssist(_p.editorContext, _p.params).then(function (actualProposals) {
 			try {
 				assert(actualProposals, "Error occurred, returned proposals was undefined");
+				if (actualProposals === timeoutReturn){
+					assert(false, "The content assist operation timed out");
+				}
 				assert.equal(actualProposals.length, expectedProposals.length,
 					"Wrong number of proposals.  Expected:\n" + stringifyExpected(expectedProposals) +"\nActual:\n" + stringifyActual(actualProposals));
 				for (var i = 0; i < actualProposals.length; i++) {
