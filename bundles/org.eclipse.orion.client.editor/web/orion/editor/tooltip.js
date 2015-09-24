@@ -456,6 +456,12 @@ function Tooltip (view) {
 				height: divBounds.height
 			};
 			
+			// If there is an unloaded image its width will not be included in the calculated size, add some buffer space so tooltip doesn't wrap (See bug 478357)
+			var image = tooltipDiv.getElementsByTagName('img')[0]; //$NON-NLS-1$
+			if (image && !image.complete && image.width === 0){
+				tipRect.width += 30;
+			}
+			
 			var position = info.position ? info.position : "below"; //$NON-NLS-0$
 			
 			var viewBounds = (this._view._rootDiv ? this._view._rootDiv : documentElement).getBoundingClientRect();
