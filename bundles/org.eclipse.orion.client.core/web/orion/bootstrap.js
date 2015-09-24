@@ -19,6 +19,8 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 		if (once) {
 			return once;
 		}
+		var pageLoader = require.specified("orion/splash") && require("orion/splash");
+		if (pageLoader) pageLoader.nextStep();
 		once = new Deferred();
 		
 		// initialize service registry and EAS services
@@ -80,6 +82,7 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 					preferences: preferences,
 					pluginRegistry: pluginRegistry
 				};
+				if (pageLoader) pageLoader.nextStep();
 				once.resolve(result);
 				return result;
 			});

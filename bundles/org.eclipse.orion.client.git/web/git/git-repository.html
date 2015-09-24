@@ -11,7 +11,9 @@
 		<script>
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
-				require(["git/git-repository"], null, config.errback);
+				var deps = ["git/git-repository"];
+				if (localStorage.showSplash) deps.splice(0, 0, "orion/splash");
+				require(deps, null, config.errback);
 			});
 		</script>
 </head>
@@ -35,17 +37,5 @@
 			</div>
 		</div>
 		<div class="footer-fixed-bottom footer" id="footer"></div>
-		<div id="splash" class="splash">
-			<div class="splashProgress">
-				<span class="core-sprite-progress">
-				</span>
-				<span id="splashProgress" class="splashProgressLabel">Loading...</span>
-			</div>
-		</div>
-		<script type="text/javascript">
-			if (localStorage.showSplash) {
-				document.getElementById("splash").classList.add("splashShown");
-			}
-		</script>
 	</body>
 </html>

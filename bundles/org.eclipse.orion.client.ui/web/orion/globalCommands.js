@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 define([
-		'i18n!orion/nls/messages', 'require', 'orion/splash', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/EventTarget', 'orion/commands',
+		'i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/EventTarget', 'orion/commands',
 		'orion/parameterCollectors', 'orion/extensionCommands', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/i18nUtil',
 		'orion/webui/splitter', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/contentTypes', 'orion/keyAssist',
 		'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
@@ -19,7 +19,7 @@ define([
 		'text!orion/banner/toolbar.html',
 		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu', 'orion/objects', "orion/metrics",'orion/bidiUtils'
 	],
-	function (messages, require, splash, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands,
+	function (messages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands,
 		mBreadcrumbs, lib, i18nUtil, mSplitter, mDropdown, mTooltip, mContentTypes, mKeyAssist, mThemePreferences, mThemeData, Deferred,
 		mUserMenu, PageLinks, openResource, BannerTemplate, ToolbarTemplate, util, mCustomGlobalCommands, mFileClient, SideMenu, objects, mMetrics, mBidiUtils) {
 	/**
@@ -569,22 +569,23 @@ define([
 	 * @param {Boolean} closeSplitter true to make the splitter's initial state "closed".
 	 */
 	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, closeSplitter, fileClient) {
-		if (localStorage.consoleMetrics) {
-			serviceRegistry.registerService("orion.metrics", {
-				/** @callback */
-				logEvent: function(category, action, label, value) {
-				},
-				logTiming: function(timingCategory, timingVar, timingValue, timingLabel) {
-					if (timingCategory === "page" && timingVar === "complete") {
-						splash.takeDown();
-					}
-					window.console.log(timingCategory + " " + timingVar + " " + timingValue + " " + timingLabel);
-				},
-				/** @callback */
-				pageLoad: function(href, page, title, args) {
+		var pageLoader = require.specified("orion/splash") && require("orion/splash");
+		serviceRegistry.registerService("orion.metrics", {
+			/** @callback */
+			logEvent: function(category, action, label, value) {
+			},
+			logTiming: function(timingCategory, timingVar, timingValue, timingLabel) {
+				if (timingCategory === "page" && timingVar === "complete") {
+					if (pageLoader) pageLoader.takeDown();
 				}
-			}, {});
-		}
+				if (localStorage.consoleMetrics) {
+					window.console.log(timingCategory + " " + timingVar + " " + timingValue + " " + timingLabel);
+				}
+			},
+			/** @callback */
+			pageLoad: function(href, page, title, args) {
+			}
+		}, {});
 		mMetrics.initFromRegistry(serviceRegistry);
 		prefsService.addChangeListener(function(name, value) {
 			if (value.length < METRICS_MAXLENGTH && name.indexOf("/git/credentials/")) { //$NON-NLS-0$

@@ -808,34 +808,95 @@ and (max-device-width : 1024px)  {
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background-color: #37474F;
+	background-color: rgba(57,75,84, 0.2);
 	z-index: 1000;
-	display: none;
-	align-items: center;
+	display: block;
 }
 
-.splashShown {
+.splashContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height:100%;
+    flex-direction: column;
+    font-family: sans-serif;
+    font-size: 14px;
+}
+
+.splashLoader {
+    display: flex;
+    height:300px;
+    width:400px;
+    flex-direction: column;
+    align-items: center;
+	background-color: #26343f;/*rgb(57,75,84);*/
+	padding: 20px;
+	border-radius: 5px;
+}
+
+.splashAbout {
+    align-content: center;
+    justify-content: center;
+    text-align: center;
+	color: #FFFFFF;
+	font-size:16px;
+	font-family: 'helvetica';
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+.splashProgressbar {
+    align-content: center;
+}
+
+.splashSteps {
+	margin:20px; 
+    max-width: 200px;
+}
+
+.splashStep {
 	display: flex;
+	flex-direction: row;
+	width:400px;
+	padding-top: 10px;
+	padding-bottom:10px;
+	height:24px;
 }
 
-.splashProgress {
-	font-size: 20px;
-	width: 100%;
-	text-align: center;
-	margin-top: -20px;
-	color: white;
+.splashVisual {
+	width:40px;
+	align-content: center;
+	justify-content: center;
+}
+
+.splashVerbal {
+	margin-left:10px;
+	align-content: center;
+	justify-content: center;
+	color: #3BDEFF;
+	font-family: 'helvetica';
+	font-weight: bold;
+	margin-top: 3px; /* should not have to do this */
+}
+
+.splashVerbalwaiting {
+	color:grey;
+}
+
+.splashLoadingImage {
+	background: url(../images/loading_24.gif) no-repeat top left;
 	vertical-align: middle;
+	display: inline-block;
+	border: none;	
+	height:24px;
+	width:24px;
 }
 
-.splashProgress .core-sprite-progress {
-	display:inline-block;
-	border-color:white;
-	width:20px;
-	height:20px;
+.splashSuccessImage {
+	background: url(../images/message_success_24.png) no-repeat top left;
+	vertical-align: middle;
+	display: inline-block;
+	border: none;	
+	height:24px;
+	width:24px;
 }
-
-.splashProgressLabel {
-	position:relative;
-	top:-6px;
-}
-

@@ -12,7 +12,7 @@
 /* eslint-disable missing-nls */
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"], function(Deferred, EventTarget, splash) {
+define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Deferred, EventTarget) {
     
     function _equal(obj1, obj2) {
         var keys1 = Object.keys(obj1);
@@ -1010,7 +1010,7 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                 if ((!localStorage.useWorkers || !isWorker) && url.match(workerRegex)) {
                     url = url.replace(workerRegex, pluginHtml);
                     isWorker = isSharedWorker = false;
-                }
+                }               
 
                 channel.url = url;
                 channel._updateTimeout();
@@ -1038,11 +1038,10 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                     	_channelHandler(channel, evt);
                     });
                 } else {
-                    var iframe = document.createElement("iframe"); //$NON-NLS-0$
+                   	var iframe = document.createElement("iframe"); //$NON-NLS-0$
                     iframe.name = url + "_" + channel._startTime;
                     iframe.src = url;
                     iframe.onload = function() {
-                        splash.progress("Loading " + url);
                         log("handshake"); //$NON-NLS-0$
                         channel._handshake = true;
                         channel._updateTimeout();
@@ -1063,13 +1062,13 @@ define(["orion/Deferred", "orion/EventTarget", 'orion/splash', "orion/URL-shim"]
                             }
                             iframe = null;
                         }
-                    };
+                    }; 
                 }
                 channel.connected = function() {
                     log("connected"); //$NON-NLS-0$
                     this._connected = true;
                     this._updateTimeout();
-                    splash.progress("Loaded " + url);
+                    
                 };
                 channel.loading = function() {
                     log("loading"); //$NON-NLS-0$
