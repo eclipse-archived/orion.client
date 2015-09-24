@@ -143,7 +143,39 @@ define([
 				return repo1.Name.localeCompare(repo2.Name);
 			});
 			parentItem.children = children;
-			return children;
+			function isParent(repo) {
+				return !repo.parentRepo;
+			}
+			
+			var rootRepo = [];
+			var temp = [];
+			
+			for (var i=0; i<children.length; i++) {
+				if (isParent(children[i])) {
+					rootRepo.push(children[i]);
+				} else {
+					temp.push(children[i]);
+				}
+			}
+			
+			for (var i=0; i<rootRepo.length; i++) {
+				rootRepo[i].level = 0;
+			}			
+			
+			while (temp.length > 0) {
+
+				for (var j=0; j<rootRepo.length; j++) {
+					for (var k=(temp.length-1); k>=0; k--) {
+						if (temp[k].parentRepo.Name === rootRepo[j].Name) {
+							rootRepo.splice(j+1, 0, temp[k]);
+							rootRepo[j+1].level = rootRepo[j].level + 1;
+							temp.splice(k, 1);
+						}
+					}
+				}
+			}
+						
+			return rootRepo;
 		},
 		getId: function(/* item */ item){
 			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : ""); //$NON-NLS-0$
@@ -287,12 +319,29 @@ define([
 					var explorer = this.explorer;
 					var repo = item;
 				
+					function hasSubmodule(repo) {
+						return repo.submodules;
+					}
+					function isParent(repo) {
+						return repo.submodules && !repo.parentRepo;
+					}
+				
 					td = document.createElement("td"); //$NON-NLS-0$
 					div = document.createElement("div"); //$NON-NLS-0$
 					div.className = "sectionTableItem"; //$NON-NLS-0$
 					td.appendChild(div);
 					var horizontalBox = document.createElement("div"); //$NON-NLS-0$
 					horizontalBox.className = "gitListCell"; //$NON-NLS-0$
+					
+					switch (item.level) {
+						case 1: horizontalBox.classList.add("gitSubmodule-tier1");
+							break;
+						case 2: horizontalBox.classList.add("gitSubmodule-tier2");
+							break;
+					}
+					
+					if (item.level >= 3) horizontalBox.classList.add("gitSubmodule-tier3");
+					
 					div.appendChild(horizontalBox);	
 					
 					var actionsID, title, description, subDescription, extraDescriptions = [], titleClass = "", titleLink;
@@ -328,8 +377,21 @@ define([
 									extraDescriptions.push(commitsState > 0 ? i18nUtil.formatMessage(messages["NCommitsToPush"], commitsState) : messages["Nothing to push."]);
 								}
 							}
+							
+							title = repo.Name;
+							if (hasSubmodule(item) && isParent(item)) {
+								var subLength = item.submodules.length;
+								title += " (" + subLength + " ";
+								if (subLength === 1) {
+									title += messages["SingleSubmodule"];
+								} else {
+									title += messages["PluralSubmodule"];
+								}
+								title += ")";
+							}
+							
 							if (repo.infoDeferred) {
-								title = repo.Name + ellipses;
+								title = title + ellipses;
 								if (explorer.mode === "full") extraDescriptions.push(ellipses); //$NON-NLS-0$
 								repo.infoDeferred.then(function() {
 									if (explorer.destroyed) return;
