@@ -45,5 +45,12 @@
 		<div class="footer-fixed-bottom footer" id="footer">
 		</div>
 		<div id="contentassist" class="contentassist" role="listbox" tabindex="-1"></div>
+		<script>
+			if (localStorage.showSplash) {
+				var splash = document.createElement("div");
+				splash.id = splash.className = "splash";
+				document.body.appendChild(splash);
+			}
+		</script>
 	</body>
 </html>

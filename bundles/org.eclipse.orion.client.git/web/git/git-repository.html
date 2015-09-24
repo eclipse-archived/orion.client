@@ -37,5 +37,12 @@
 			</div>
 		</div>
 		<div class="footer-fixed-bottom footer" id="footer"></div>
+		<script>
+			if (localStorage.showSplash) {
+				var splash = document.createElement("div");
+				splash.id = splash.className = "splash";
+				document.body.appendChild(splash);
+			}
+		</script>
 	</body>
 </html>

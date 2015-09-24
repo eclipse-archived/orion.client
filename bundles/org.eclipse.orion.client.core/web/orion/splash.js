@@ -155,6 +155,10 @@ loader.prototype.nextStep = function(){
 	/* initaliate next step */
 	this.currentStep = this.currentStep + 1;
 	
+	if (this.currentStep > 1) {
+		this.splash.style.backgroundColor = "rgba(255,255,255, 0.1)";
+	}
+	
 	myStep = this.steps[this.currentStep];
 	
 	if (!myStep) return;
@@ -239,17 +243,17 @@ loader.prototype.createStep = function(description, type, total, incrementCount)
 
 var pageLoader;
 function start() {
-	var splash = document.createElement("div");
+	var splash = document.getElementById("splash");//document.createElement("div");
 	splash.className = 	splash.id = "splash";
 	document.body.appendChild(splash);
 	var container = document.createElement("div");
 	container.id = container.className = "splashContainer";
-//	container.style.display = "none";
 	splash.appendChild(container);
 	
 	pageLoader = new loader('splashContainer', 'Setting up workspace');
 	var initial = new step('Loading Page', 0, 50);
 	pageLoader.addStep(initial);
+	pageLoader.splash = splash;
 	
 	var pluginStep;
 	pluginStep = new step('Loading Plugins', 0, 20);
@@ -261,7 +265,7 @@ function start() {
 	pageLoader.nextStep();
 	
 //	setTimeout(function() {
-//		container.style.display = "";
+//		splash.style.backgroundColor = "rgba(255,255,255, 0.1)";
 //	}, 2000);
 }
 

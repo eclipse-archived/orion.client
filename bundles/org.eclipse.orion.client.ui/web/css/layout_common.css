@@ -808,7 +808,7 @@ and (max-device-width : 1024px)  {
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background-color: rgba(255,255,255, 0.2);
+	background-color: rgb(38,52,63);/*rgba(57,75,84, 1);*/
 	z-index: 1000;
 	display: block;
 }
@@ -831,23 +831,19 @@ and (max-device-width : 1024px)  {
     align-items: center;
 	background-color: rgb(57,75,84);
 	padding: 20px;
+	padding-top: 60px;
+	padding-bottom: 0px;
 	border-radius: 5px;
 	box-shadow: 5px 5px 5px 0 rgba(0,0,0,0.3);
 }
 
 .splashAbout {
-    align-content: center;
-    justify-content: center;
     text-align: center;
 	color: #FFFFFF;
 	font-size:16px;
 	font-family: 'helvetica';
 	font-weight: bold;
 	margin-bottom: 10px;
-}
-
-.splashProgressbar {
-    align-content: center;
 }
 
 .splashSteps {
@@ -865,15 +861,11 @@ and (max-device-width : 1024px)  {
 }
 
 .splashVisual {
-	width:40px;
-	align-content: center;
-	justify-content: center;
+	width: 24px;
 }
 
 .splashVerbal {
-	margin-left:10px;
-	align-content: center;
-	justify-content: center;
+	margin-left:20px;
 	color: #3BDEFF;
 	font-family: 'helvetica';
 	font-weight: bold;
