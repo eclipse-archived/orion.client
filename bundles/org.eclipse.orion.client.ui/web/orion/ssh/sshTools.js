@@ -129,10 +129,13 @@ define(['orion/Deferred', 'orion/xhr'], function(Deferred, xhr){
 				
 				/* default ssh port */
 				port = port || 22;
-				
-				if(!host || !port){
-					/* required parameters missing, fail */
-					deferred.reject();
+				/* if required parameters missing, fail */
+				if(!host){
+					deferred.reject(new Error("Hostname unspecified"));
+					return deferred;
+				}
+				if (!port){
+					deferred.reject(new Error("Port unspecified"));
 					return deferred;
 				}
 				
