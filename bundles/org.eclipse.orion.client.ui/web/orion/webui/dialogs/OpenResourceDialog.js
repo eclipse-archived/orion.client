@@ -208,7 +208,7 @@ define([
 		'</div>'; //$NON-NLS-0$
 
 	OpenResourceDialog.prototype._init = function(options) {
-		this.title = options.title || messages['Find File Named'];
+		this.title = options.title || messages['FindFileNamed'];
 		this.modal = true;
 		this.messages = messages;
 		this.serviceRegistry = options.serviceRegistry;
@@ -363,12 +363,15 @@ define([
 	OpenResourceDialog.prototype.updateTitle = function() {
 		var isGlobalSearch = this.$searchScope.checked;
 
-		var scope = messages["AnyProject"];
+		var newTitle, scope;
 		if (!isGlobalSearch) {
 			scope = "\'" + this._searcher.getSearchLocationName() + "\'"; //$NON-NLS-1$ //$NON-NLS-2$
+			newTitle = util.formatMessage(this.title, scope);
+		} else {
+			scope = messages["FileFileGlobal"];
+			newTitle = messages["FindFileGlobal"];
 		}
 		
-		var newTitle = util.formatMessage(this.title, scope);
 		var titleDiv = lib.$("span", this.$frame); //$NON-NLS-1$
 		titleDiv.textContent = newTitle;
 		
