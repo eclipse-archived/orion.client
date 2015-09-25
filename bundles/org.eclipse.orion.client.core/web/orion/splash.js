@@ -17,7 +17,7 @@ function step(description, type, total, incrementCount){
 	this.TYPE_DRIVEN = 1;
 	
 	this.type = type;
-	this.incrementCount = incrementCount;
+	this.incrementCount = incrementCount || 1;
 	this.total = total;
 	this.description = description;
 	
@@ -155,8 +155,8 @@ loader.prototype.nextStep = function(){
 	/* initaliate next step */
 	this.currentStep = this.currentStep + 1;
 	
-	if (this.currentStep > 1) {
-		this.splash.style.backgroundColor = "rgba(255,255,255, 0.1)";
+	if (this.currentStep === 2) {
+		this.splash.classList.add("splashSeeThrough");
 	}
 	
 	myStep = this.steps[this.currentStep];
@@ -259,7 +259,7 @@ function start() {
 	pluginStep = new step('Loading Plugins', 0, 20);
 	pageLoader.addStep(pluginStep );
 	
-	pluginStep = new step('Loading Workspace', 0, 30);
+	pluginStep = new step('Loading Resources', 0, 30);
 	pageLoader.addStep(pluginStep);
 	
 	pageLoader.nextStep();

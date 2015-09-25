@@ -808,10 +808,28 @@ and (max-device-width : 1024px)  {
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background-color: rgb(38,52,63);/*rgba(57,75,84, 1);*/
+	background-color: rgb(38,52,63);
 	z-index: 1000;
 	display: block;
 }
+
+.splashSeeThrough {
+	-webkit-animation-name: splashSeeThrough;
+	animation-name: splashSeeThrough;
+	animation-duration: 0.7s;
+	background-color: rgba(38,52,63, 0.7);
+}
+
+@-webkit-keyframes splashSeeThrough { 
+	from {background-color: rgb(38,52,63);}
+	to {background-color: rgba(38,52,63, 0.7);}
+}
+
+@keyframes splashSeeThrough { 
+	from {background-color: rgb(38,52,63);}
+	to {background-color: rgba(38,52,63, 0.7);}
+}
+
 
 .splashContainer {
     display: flex;
@@ -833,8 +851,9 @@ and (max-device-width : 1024px)  {
 	padding: 20px;
 	padding-top: 60px;
 	padding-bottom: 0px;
-	border-radius: 5px;
-	box-shadow: 5px 5px 5px 0 rgba(0,0,0,0.3);
+	border-radius: 4px;
+	box-shadow: 5px 5px 5px 0 rgba(0,0,0,0.2);
+	border-bottom: 1px solid rgb(59,222,255);
 }
 
 .splashAbout {
