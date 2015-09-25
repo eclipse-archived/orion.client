@@ -465,7 +465,7 @@ define([
 					}
 					deferred.reject(error);
 				}.bind(this), deferred.progress);	
-			});
+			}, deferred.reject, deferred.progress);
 			
 			return deferred;
 		},
