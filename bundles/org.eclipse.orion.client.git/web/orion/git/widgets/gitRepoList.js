@@ -143,7 +143,35 @@ define([
 				return repo1.Name.localeCompare(repo2.Name);
 			});
 			parentItem.children = children;
-			return children;
+			var rootRepo = [];
+			var temp = [];
+			
+			for (var i=0; i<children.length; i++) {
+				if (!children[i].parentRepo) {
+					rootRepo.push(children[i]);
+				} else {
+					temp.push(children[i]);
+				}
+			}
+			
+			for (var i=0; i<rootRepo.length; i++) {
+				rootRepo[i].level = 0;
+			}			
+			
+			while (temp.length > 0) {
+
+				for (var j=0; j<rootRepo.length; j++) {
+					for (var k=(temp.length-1); k>=0; k--) {
+						if (temp[k].parentRepo.Name === rootRepo[j].Name) {
+							rootRepo.splice(j+1, 0, temp[k]);
+							rootRepo[j+1].level = rootRepo[j].level + 1;
+							temp.splice(k, 1);
+						}
+					}
+				}
+			}
+						
+			return rootRepo;
 		},
 		getId: function(/* item */ item){
 			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : ""); //$NON-NLS-0$
@@ -286,13 +314,22 @@ define([
 				case 0:
 					var explorer = this.explorer;
 					var repo = item;
-				
 					td = document.createElement("td"); //$NON-NLS-0$
 					div = document.createElement("div"); //$NON-NLS-0$
 					div.className = "sectionTableItem"; //$NON-NLS-0$
 					td.appendChild(div);
 					var horizontalBox = document.createElement("div"); //$NON-NLS-0$
 					horizontalBox.className = "gitListCell"; //$NON-NLS-0$
+					
+					var padding = 25;
+					var pad = item.level * padding;
+					if (item.level && item.level >= 3) {
+						pad = 3 * padding;
+					}
+					if (item.level && item.level > 0) {
+						horizontalBox.style.paddingLeft = pad.toString() + "px";
+					}
+					
 					div.appendChild(horizontalBox);	
 					
 					var actionsID, title, description, subDescription, extraDescriptions = [], titleClass = "", titleLink;
@@ -328,8 +365,21 @@ define([
 									extraDescriptions.push(commitsState > 0 ? i18nUtil.formatMessage(messages["NCommitsToPush"], commitsState) : messages["Nothing to push."]);
 								}
 							}
+							
+							title = repo.Name;
+							if (item.submodules && !item.parentRepo) {
+								var subLength = item.submodules.length;
+								title += " (" + subLength + " ";
+								if (subLength === 1) {
+									title += messages["SingleSubmodule"];
+								} else {
+									title += messages["PluralSubmodule"];
+								}
+								title += ")";
+							}
+							
 							if (repo.infoDeferred) {
-								title = repo.Name + ellipses;
+								title = title + ellipses;
 								if (explorer.mode === "full") extraDescriptions.push(ellipses); //$NON-NLS-0$
 								repo.infoDeferred.then(function() {
 									if (explorer.destroyed) return;

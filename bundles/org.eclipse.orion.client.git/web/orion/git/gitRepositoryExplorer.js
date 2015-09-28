@@ -592,8 +592,12 @@ define([
 		var activeBranch = explorer.model.getActiveBranch();
 		var targetRef = explorer.model.getTargetReference();
 		if (activeBranch && targetRef) {
-			var targetName =  util.shortenRefName(targetRef);
-			title = activeBranch.Name + " => " + targetName;  //$NON-NLS-0$
+			if (!activeBranch.Current) {
+				title = activeBranch.Name + " @ " + activeBranch.headLocationSHA; //$NON-NLS-0$
+			} else {
+				var targetName =  util.shortenRefName(targetRef);
+				title = activeBranch.Name + " => " + targetName;  //$NON-NLS-0$
+			}
 		} else if (!activeBranch && !targetRef) {
 			title = messages["NoActiveBranch"];
 		} else if (!activeBranch && targetRef) {

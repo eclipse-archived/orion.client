@@ -171,6 +171,10 @@ define([
 			var getSimpleLog = function() {
 				return Deferred.when(that.log || that._getLog(parentItem), function(log) {
 					that.log = parentItem.log = log;
+					if (!that.currentBranch.Current) {
+						var sha = log.Children[0].Name.substring(0, 7);
+						that.currentBranch.headLocationSHA = sha;
+					}
 					var children = log.Children.slice(0);
 					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, log)));
 					return log;
@@ -208,9 +212,21 @@ define([
 						repository.CurrentBranch = currentBranch;
 						var activeBranch = that.getActiveBranch();
 						var targetRef = that.getTargetReference();
+						if (!activeBranch.Current) {
+							that.simpleLog = true;
+						}
 						if (section) {
 							if (that.simpleLog && targetRef) {
+								if (activeBranch && !activeBranch.Current) {
+									activeBranch.Name = messages["DetachedHead"];
+									getSimpleLog().then(function() {
+										if (activeBranch.headLocationSHA) {
+											section.setTitle(activeBranch.Name + " @ " + activeBranch.headLocationSHA);
+										}
+									}); 
+								} else {
 								section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef)));
+								} 
 							} else {
 								section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], util.shortenRefName(activeBranch)));
 							}
