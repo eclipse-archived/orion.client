@@ -29,7 +29,7 @@ define([
 	var astManager = new ASTManager.ASTManager(Esprima);
 	var jsFile = 'tern_content_assist_test_script.js';
 	var htmlFile = 'tern_content_assist_test_script.html';
-	var timeoutReturn = 'Content assist timed out';
+	var timeoutReturn = ['Content assist timed out'];
 
 	/**
 	 * @description Sets up the test
@@ -75,7 +75,7 @@ define([
 			}
 		};
 		astManager.onModelChanging({file: {location: file}});
-		var params = {offset: offset, prefix : prefix, keywords: keywords, template: templates, line: line, timeout: options.timeout ? options.timeout : 5000, timeoutReturn: timeoutReturn};
+		var params = {offset: offset, prefix : prefix, keywords: keywords, template: templates, line: line, timeout: options.timeout ? options.timeout : 20000, timeoutReturn: timeoutReturn};
 		return {
 			editorContext: editorContext,
 			params: params

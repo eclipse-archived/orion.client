@@ -30,7 +30,7 @@ define([
 	var testworker, assist, hover, opendecl, openimpl;
 	var envs = Object.create(null);
 	var astManager = new ASTManager.ASTManager(Esprima);
-	var timeoutReturn = 'Content assist operation timed out';
+	var timeoutReturn = ['Content assist operation timed out'];
 
 	/**
 	 * @description Sets up the test
