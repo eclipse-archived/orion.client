@@ -114,6 +114,7 @@ define({//Default message bundle
 	"Writing .gitignore rules" : "Writing .gitignore rules", //$NON-NLS-0$  //$NON-NLS-1$ 
 	"Save Patch": "Save Patch", //$NON-NLS-0$  //$NON-NLS-1$
 	"Unstage the change": "Unstage the change", //$NON-NLS-0$  //$NON-NLS-1$
+	"EmptyUnstageWarning": "Please select at least one file to unstage", //$NON-NLS-0$  //$NON-NLS-1$ 
 	"Unstaging...": "Unstaging...", //$NON-NLS-0$  //$NON-NLS-1$
 	"Undo": "Undo", //$NON-NLS-0$  //$NON-NLS-1$
 	"UndoTooltip": "Revert this commit, keeping all changed files and not making any changes to the working directory.", //$NON-NLS-0$  //$NON-NLS-1$

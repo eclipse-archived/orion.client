@@ -1938,6 +1938,15 @@ var exports = {};
 				return preCallback("checkoutFile", data);
 			},
 			callback: function(data) {				
+				var items = forceArray(data.items);
+				if (items.length === 0) {
+					var display = {};
+					display.Severity = "Warning"; //$NON-NLS-0$
+					display.HTML = false;
+					display.Message = messages.EmptyUnstageWarning;
+					serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+					return null;
+				}
 				commandService.confirm(data.domNode, messages["CheckoutConfirm"], messages.OK, messages.Cancel, false,
 					function(doit) {
 						if (!doit) {
