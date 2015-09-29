@@ -15,7 +15,6 @@ define([
     'orion/Deferred',
 	'orion/objects',
 	'javascript/finder',
-	'javascript/compilationUnit',
 	'orion/editor/templates',
 	'javascript/contentAssist/templates',
 	'javascript/hover',
@@ -23,8 +22,9 @@ define([
 	'eslint/conf/environments',
 	'javascript/signatures',
 	'javascript/util',
+	'javascript/contentAssist/sigparser',
 	'orion/i18nUtil'
-], function(Messages, Deferred, Objects, Finder, CU, mTemplates, Templates, Hover, Rules, ESLintEnv, Signatures, Util, i18nUtil) {
+], function(Messages, Deferred, Objects, Finder, mTemplates, Templates, Hover, Rules, ESLintEnv, Signatures, Util, SigParser, i18nUtil) {
 
 	/**
 	 * @description Creates a new delegate to create keyword and template proposals
@@ -718,20 +718,25 @@ define([
 	function calculateFunctionProposal(completion, args, proposal) {
 		var positions = [];
 		proposal.relevance += 5;
-		var type = completion.type.slice(2);
-		var ret = /\s*->\s*(\?|(?:fn\(.*\))|(?:\[.*\])|(?:\w*\.*\w*))$/.exec(type);
-		if(ret) {
-			proposal.description = ' : ' + convertTypes(ret[1]); //$NON-NLS-1$
-			type = type.slice(0, ret.index);
+		var sig = SigParser.parse(completion.type);
+		if(sig.ret) {
+			if(sig.ret.value) {
+				proposal.description = convertTypes(' : '+sig.ret.value); //$NON-NLS-1$
+			} else if(sig.ret.ret) {
+				proposal.description = ' : function';  //$NON-NLS-1$
+			} else {
+				proposal.description = '';
+			}
 		} else {
 			proposal.description = '';
 		}
 		var _p = completion.name + '(';
-		var params = collectParams(type.slice(1, type.length-1));
+		var params = sig.params;
 		if(params) {
 			for(var i = 0; i < params.length; i++) {
-				positions.push({offset: (args.params.offset+_p.length)-args.params.prefix.length, length: params[i].length});
-				_p += params[i];
+				var param = params[i];
+				positions.push({offset: (args.params.offset+_p.length)-args.params.prefix.length, length: param.value.length});
+				_p += param.value;
 				if(i < params.length-1) {
 					_p += ', '; //$NON-NLS-1$
 				}
@@ -745,51 +750,13 @@ define([
 		}
 	}
 
-	function collectParams(type) {
-		if(type && type.length > 0) {
-			var params = [];
-			var parencount = 0, char, param = '', index = 0, aftercolon = false;
-			while(index < type.length) {
-				char = type.charAt(index);
-				if(char === 'f') {
-					if(type.charAt(index+1) === 'n' && type.charAt(index+2) === '(') {
-						parencount++;
-					} else if(!aftercolon) {
-						param += char;
-					}
-				} else if(char === ')') {
-					parencount--;
-				} else if(char === ':' && parencount < 1) {
-					params.push(param);
-					param = '';
-					aftercolon = true;
-				} else if(char === ',') {
-					index++; //eat the space
-					if(parencount < 1) {
-						aftercolon = false;
-					}
-				} else if(!aftercolon && parencount < 1) {
-					param += char;
-				}
-				index++;
-			}
-			return params;
-		}
-		return null;
-	}
-
 	/**
 	 * @description Convert the Tern types to be more Orion-like
 	 * @param {String} type The type computed from Tern
 	 * @returns {String} The formatted type sig
 	 */
 	function convertTypes(type) {
-		//TODO do we want to convert all types (any types)? make arrays pretty?
-		type = type.replace(/:\s*\?/g, ': any'); //$NON-NLS-1$
-//		type = type.replace(/:\s*bool/g, ': Boolean'); //$NON-NLS-1$
-//		type = type.replace(/:\s*number/g, ': Number'); //$NON-NLS-1$
-//		type = type.replace(/:\s*string/g, ': String'); //$NON-NLS-1$
-		return type;
+		return type.replace(/:\s*\?/g, ': any'); //$NON-NLS-1$
 	}
 
 	var sorter = function(l,r) {
