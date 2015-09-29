@@ -878,12 +878,12 @@ and (max-device-width : 1024px)  {
 	height:24px;
 }
 
-.splashSubTask {
+.splashMessage {
 	color: white;
 	font-size: 12px;
 }
 
-.splashSubTaskDetail {
+.splashDetailedMessage {
 	color: white;
 	font-size: 12px;
 }
