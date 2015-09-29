@@ -7,7 +7,7 @@
 //
 // B) to cheaply load the types for big libraries, or libraries that
 //    can't be inferred well
-/* eslint-disable */
+
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return exports.init = mod;
@@ -54,6 +54,7 @@
     return function(self, args) {
       var union = new infer.AVal;
       for (var i = 0; i < types.length; i++) unwrapType(types[i], self, args).propagate(union);
+      union.maxWeight = 1e5;
       return union;
     };
   }
@@ -137,6 +138,7 @@
       if (computed) return computedUnion(types);
       var union = new infer.AVal;
       for (var i = 0; i < types.length; i++) types[i].propagate(union);
+      union.maxWeight = 1e5;
       return union;
     },
     parseTypeMaybeProp: function(comp, name, top) {
@@ -486,7 +488,12 @@
   var customFunctions = Object.create(null);
   infer.registerFunction = function(name, f) { customFunctions[name] = f; };
 
-  var IsCreated = infer.constraint("created, target, spec", {
+  var IsCreated = infer.constraint({
+    construct: function(created, target, spec) {
+      this.created = created;
+      this.target = target;
+      this.spec = spec;
+    },
     addType: function(tp) {
       if (tp instanceof infer.Obj && this.created++ < 5) {
         var derived = new infer.Obj(tp), spec = this.spec;
@@ -513,7 +520,8 @@
     return result;
   });
 
-  var PropSpec = infer.constraint("target", {
+  var PropSpec = infer.constraint({
+    construct: function(target) { this.target = target; },
     addType: function(tp) {
       if (!(tp instanceof infer.Obj)) return;
       if (tp.hasProp("value"))
@@ -533,10 +541,26 @@
     return infer.ANull;
   });
 
-  var IsBound = infer.constraint("self, args, target", {
+  infer.registerFunction("Object_defineProperties", function(_self, args, argNodes) {
+    if (args.length >= 2) {
+      var obj = args[0];
+      args[1].forAllProps(function(prop, val, local) {
+        if (!local) return;
+        var connect = new infer.AVal;
+        obj.propagate(new infer.PropHasSubset(prop, connect, argNodes && argNodes[1]));
+        val.propagate(new PropSpec(connect));
+      });
+    }
+    return infer.ANull;
+  });
+
+  var IsBound = infer.constraint({
+    construct: function(self, args, target) {
+      this.self = self; this.args = args; this.target = target;
+    },
     addType: function(tp) {
       if (!(tp instanceof infer.Fn)) return;
-      this.target.addType(new infer.Fn(tp.name, tp.self, tp.args.slice(this.args.length),
+      this.target.addType(new infer.Fn(tp.name, infer.ANull, tp.args.slice(this.args.length),
                                        tp.argNames.slice(this.args.length), tp.retval));
       this.self.propagate(tp.self);
       for (var i = 0; i < Math.min(tp.args.length, this.args.length); ++i)

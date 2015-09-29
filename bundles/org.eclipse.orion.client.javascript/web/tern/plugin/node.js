@@ -1,16 +1,14 @@
-/* eslint-disable missing-nls */
-/*eslint-env node, amd*/
 (function(mod) {
-  if (typeof exports === "object" && typeof module === "object") // CommonJS
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require);
-  if (typeof define === "function" && define.amd) // AMD
+  if (typeof define == "function" && define.amd) // AMD
     return define(["../lib/infer", "../lib/tern", "./resolver"], mod);
   mod(tern, tern);
 })(function(infer, tern, resolver, require) {
   "use strict";
 
   function resolvePath(base, path) {
-    if (path[0] === "/") return path;
+    if (path[0] == "/") return path;
     var slash = base.lastIndexOf("/"), m;
     if (slash >= 0) path = base.slice(0, slash + 1) + path;
     while (m = /[^\/]*[^\/\.][^\/]*\/\.\.\//.exec(path))
@@ -19,8 +17,8 @@
   }
 
   function relativePath(from, to) {
-    if (from[from.length - 1] !== "/") from += "/";
-    if (to.indexOf(from) === 0) return to.slice(from.length);
+    if (from[from.length - 1] != "/") from += "/";
+    if (to.indexOf(from) == 0) return to.slice(from.length);
     else return to;
   }
 
@@ -34,14 +32,14 @@
     var scope = new infer.Scope(parent);
     scope.originNode = node;
     infer.cx().definitions.node.require.propagate(scope.defProp("require"));
-    var _module = new infer.Obj(infer.cx().definitions.node.Module.getProp("prototype").getType());
-    _module.propagate(scope.defProp("module"));
-    var _exports = new infer.Obj(true, "exports");
-    _module.origin = _exports.origin = origin;
-    _module.originNode = _exports.originNode = scope.originNode;
-    _exports.propagate(scope.defProp("exports"));
-    var moduleExports = scope.exports = _module.defProp("exports");
-    _exports.propagate(moduleExports, WG_DEFAULT_EXPORT);
+    var module = new infer.Obj(infer.cx().definitions.node.Module.getProp("prototype").getType());
+    module.propagate(scope.defProp("module"));
+    var exports = new infer.Obj(true, "exports");
+    module.origin = exports.origin = origin;
+    module.originNode = exports.originNode = scope.originNode;
+    exports.propagate(scope.defProp("exports"));
+    var moduleExports = scope.exports = module.defProp("exports");
+    exports.propagate(moduleExports, WG_DEFAULT_EXPORT);
     return scope;
   }
 
@@ -58,7 +56,7 @@
 
     resolveModule = function(server, name, parent) {
       var data = server._node;
-      if (data.options.dontLoad === true ||
+      if (data.options.dontLoad == true ||
           data.options.dontLoad && new RegExp(data.options.dontLoad).test(name) ||
           data.options.load && !new RegExp(data.options.load).test(name))
         return infer.ANull;
@@ -89,7 +87,7 @@
   }
 
   infer.registerFunction("nodeRequire", function(_self, _args, argNodes) {
-    if (!argNodes || !argNodes.length || argNodes[0].type !== "Literal" || typeof argNodes[0].value !== "string")
+    if (!argNodes || !argNodes.length || argNodes[0].type != "Literal" || typeof argNodes[0].value != "string")
       return infer.ANull;
     var cx = infer.cx(), server = cx.parent, data = server._node, name = argNodes[0].value;
     var locals = cx.definitions.node;
@@ -98,14 +96,18 @@
     if (locals[name] && /^[a-z_]*$/.test(name)) {
       result = locals[name];
     } else if (name in data.modules) {
-      //ORION choose index over workspace
       result = data.modules[name];
     } else if (data.options.modules && data.options.modules.hasOwnProperty(name)) {
-      var scope = buildWrappingScope(cx.topScope, name);
-      infer.def.load(data.options.modules[name], scope);
-      result = data.modules[name] = scope.exports;
+      var mod = data.options.modules[name];
+      if (typeof(mod) == "string" && mod.charAt(0) == "=") {
+        result = infer.def.parsePath(mod.slice(1));
+      } else {
+        var scope = buildWrappingScope(cx.topScope, name);
+        infer.def.load(data.options.modules[name], scope);
+        result = data.modules[name] = scope.exports;
+      }
     } else {
-    	var _f = resolver.getResolved(name);
+        var _f = resolver.getResolved(name); //ORION
 		if(_f && _f.file !== undefined) {
 			name = _f.file;
 		}
@@ -147,30 +149,29 @@
   }
 
   function findTypeAt(_file, _pos, expr, type) {
-  	if(expr) {
-	    var isStringLiteral = expr.node.type === "Literal" &&
-	       typeof expr.node.value === "string";
-	    var isRequireArg = !!expr.node.required;
-	
-	    if (isStringLiteral && isRequireArg) {
-	      // The `type` is a value shared for all string literals.
-	      // We must create a copy before modifying `origin` and `originNode`.
-	      // Otherwise all string literals would point to the last jump location
-	      type = Object.create(type);
-	
-	      // Provide a custom origin location pointing to the require()d file
-	      var exportedType;
-	      if (expr.node.required && (exportedType = expr.node.required.getType())) {
-	        type.origin = exportedType.origin;
-	        type.originNode = exportedType.originNode;
-	      }
-	    }
-	    return type;
+    if (!expr) return type;
+    var isStringLiteral = expr.node.type === "Literal" &&
+       typeof expr.node.value === "string";
+    var isRequireArg = !!expr.node.required;
+
+    if (isStringLiteral && isRequireArg) {
+      // The `type` is a value shared for all string literals.
+      // We must create a copy before modifying `origin` and `originNode`.
+      // Otherwise all string literals would point to the last jump location
+      type = Object.create(type);
+
+      // Provide a custom origin location pointing to the require()d file
+      var exportedType;
+      if (expr.node.required && (exportedType = expr.node.required.getType())) {
+        type.origin = exportedType.origin;
+        type.originNode = exportedType.originNode;
+      }
     }
-	return null;
+
+    return type;
   }
 
-  tern.registerPlugin("orionNode", function(server, options) {
+  tern.registerPlugin("node", function(server, options) {
     server._node = {
       modules: Object.create(null),
       options: options || {},
@@ -179,8 +180,8 @@
       currentOrigin: null,
       server: server
     };
-	
-	/**
+
+    /**
 	 * @description If we should be using the node plugin
 	 * @param {Object} file The file object
 	 * @returns {Boolean} If we should do any work in the node plugin
@@ -193,24 +194,24 @@
       	}
       	return false;
 	}
-	
+      
     server.on("beforeLoad", function(file) {
-      if(usingNode(file)) {
-	      this._node.currentFile = resolveProjectPath(server, file.name);
-	      this._node.currentOrigin = file.name;
-	      this._node.currentRequires = [];
-	      file.scope = buildWrappingScope(file.scope, this._node.currentOrigin, file.ast);
-      }
+        if(usingNode(file)) { //ORION
+          this._node.currentFile = resolveProjectPath(server, file.name);
+          this._node.currentOrigin = file.name;
+          this._node.currentRequires = [];
+          file.scope = buildWrappingScope(file.scope, this._node.currentOrigin, file.ast);
+        }
     });
 
     server.on("afterLoad", function(file) {
-	    if(usingNode(file)) {
-	      var mod = getModule(this._node, this._node.currentFile);
-	      mod.origin = this._node.currentOrigin;
-	      file.scope.exports.propagate(mod);
-	      this._node.currentFile = null;
-	      this._node.currentOrigin = null;
-	    }
+        if(usingNode(file)) { //ORION
+          var mod = getModule(this._node, this._node.currentFile);
+          mod.origin = this._node.currentOrigin;
+          file.scope.exports.propagate(mod);
+          this._node.currentFile = null;
+          this._node.currentOrigin = null;
+        }
     });
 
     server.on("reset", function() {
@@ -224,12 +225,14 @@
                      typeAt: findTypeAt,
                     /**
                      * @callback
+                     * Orion
                      */
                     postParse: function postParse(ast, text) {
                         resolver.doPostParse(server, ast, infer.cx().definitions);
                     },
                     /**
                      * @callback
+                     * Orion
                      */
                     preInfer: function preInfer(ast, scope) {
                         resolver.doPreInfer(server);
@@ -242,27 +245,27 @@
     var callExpr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope, "CallExpression");
     if (!callExpr) return;
     var callNode = callExpr.node;
-    if (callNode.callee.type !== "Identifier" || callNode.callee.name !== "require" ||
+    if (callNode.callee.type != "Identifier" || callNode.callee.name != "require" ||
         callNode.arguments.length < 1) return;
     var argNode = callNode.arguments[0];
-    if (argNode.type !== "Literal" || typeof argNode.value !== "string" ||
+    if (argNode.type != "Literal" || typeof argNode.value != "string" ||
         argNode.start > wordEnd || argNode.end < wordEnd) return;
 
     var word = argNode.raw.slice(1, wordEnd - argNode.start), quote = argNode.raw.charAt(0);
-    if (word && word.charAt(word.length - 1) === quote)
+    if (word && word.charAt(word.length - 1) == quote)
       word = word.slice(0, word.length - 1);
     var completions = completeModuleName(query, file, word);
-    if (argNode.end === wordEnd + 1 && file.text.charAt(wordEnd) === quote)
+    if (argNode.end == wordEnd + 1 && file.text.charAt(wordEnd) == quote)
       ++wordEnd;
     return {
       start: tern.outputPos(query, file, argNode.start),
       end: tern.outputPos(query, file, wordEnd),
       isProperty: false,
       completions: completions.map(function(rec) {
-        var name = typeof rec === "string" ? rec : rec.name;
+        var name = typeof rec == "string" ? rec : rec.name;
         var string = JSON.stringify(name);
-        if (quote === "'") string = quote + string.slice(1, string.length -1).replace(/'/g, "\\'") + quote;
-        if (typeof rec === "string") return string;
+        if (quote == "'") string = quote + string.slice(1, string.length -1).replace(/'/g, "\\'") + quote;
+        if (typeof rec == "string") return string;
         rec.displayName = name;
         rec.name = string;
         return rec;
@@ -278,7 +281,7 @@
 
     function gather(modules) {
       for (var name in modules) {
-        if (name === currentFile) continue;
+        if (name == currentFile) continue;
 
         var moduleName = resolveModulePath(name, currentFile);
         if (moduleName &&
@@ -317,14 +320,14 @@
   function resolveModulePath(name, currentFile) {
 
     function startsWith(str, prefix) {
-      return str.slice(0, prefix.length) === prefix;
+      return str.slice(0, prefix.length) == prefix;
     }
 
     function endsWith(str, suffix) {
-      return str.slice(-suffix.length) === suffix;
+      return str.slice(-suffix.length) == suffix;
     }
 
-    if (name.indexOf('/') === -1) return name;
+    if (name.indexOf('/') == -1) return name;
     // module name has '/', compute the module path
     var modulePath = normPath(relativePath(currentFile + '/..', name));
     if (startsWith(modulePath, 'node_modules')) {
@@ -346,7 +349,7 @@
   }
 
   function maybeSet(obj, prop, val) {
-    if (val !== null) obj[prop] = val;
+    if (val != null) obj[prop] = val;
   }
 
   tern.defineQueryType("node_exports", {
@@ -375,7 +378,7 @@
       return resp;
     }
   });
-
+/* eslint-disable missing-nls */
   var defs = {
     "!name": "node",
     "!define": {

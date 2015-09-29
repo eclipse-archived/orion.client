@@ -1,21 +1,9 @@
-/*******************************************************************************
- * @license
- * Copyright (c) 2015 Marijn Haverbeke and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- *
- * Contributors:
- *     IBM Corporation - Allow original requirejs plugin to find files in Orion workspace
- *******************************************************************************/
-/* eslint-disable missing-nls */
 /*eslint-env node, amd*/
-/*globals tern tern*/
+/*globals tern */
 (function(mod) {
-  if (typeof exports === "object" && typeof module === "object") // CommonJS
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"));
-  if (typeof define === "function" && define.amd) // AMD
+  if (typeof define == "function" && define.amd) // AMD
     return define(["../lib/infer", "../lib/tern", "./resolver"], mod);
   mod(tern, tern);
 })(function(infer, tern, resolver) {
@@ -29,10 +17,38 @@
     	deps.push(infer.ANull);
     }
   }
+    
+  function getRequire(data) {
+    if (!data.require) {
+      data.require = new infer.Fn("require", infer.ANull, [infer.cx().str], ["module"], new infer.AVal);
+      data.require.computeRet = function(_self, _args, argNodes) {
+        if (argNodes.length && argNodes[0].type == "Literal" && typeof argNodes[0].value == "string") {
+          var _i = getInterface(argNodes[0].value, data); //ORION
+          if(_i) {
+          	return _i;
+          }
+        }
+        return infer.ANull;
+      };
+    }
+    return data.require;
+  }
 
   var EXPORT_OBJ_WEIGHT = 50;
 
+  function getModuleInterface(data, exports) {
+    var mod = new infer.Obj(infer.cx().definitions.requirejs.module, "module");
+    var expProp = mod.defProp("exports");
+    var _m = getModule(stripJSExt(data.currentFile), data); //ORION
+    if(_m) {
+ 	   expProp.propagate(_m);
+	}
+    exports.propagate(expProp, EXPORT_OBJ_WEIGHT);
+    return mod;
+  }
+
   function getExports(data) {
+  //ORION
     var _exports = new infer.Obj(true, "exports");
     var mod = getModule(stripJSExt(data.currentFile), data);
     if(mod) {
@@ -44,8 +60,8 @@
   function getInterface(name, data) {
     if (data.options.override && Object.prototype.hasOwnProperty.call(data.options.override, name)) {
       var over = data.options.override[name];
-      if (typeof over === "string" && over.charAt(0) === "=") return infer.def.parsePath(over.slice(1));
-      if (typeof over === "object") {
+      if (typeof over == "string" && over.charAt(0) == "=") return infer.def.parsePath(over.slice(1));
+      if (typeof over == "object") {
         var known = getKnownModule(name, data);
         if (known) return known;
         var scope = data.interfaces[stripJSExt(name)] = new infer.Obj(null, stripJSExt(name));
@@ -54,7 +70,8 @@
       }
       name = over;
     }
-    known = getModule(name, data);
+
+	known = getModule(name, data);
     if (known) {
       data.server.addFile(known.origin, known.contents, data.currentFile);
     }
@@ -82,69 +99,42 @@
     return known;
   }
 
-  function getRequire(data) {
-    if (!data.require) {
-      data.require = new infer.Fn("require", infer.ANull, [infer.cx().str], ["module"], new infer.AVal());
-      data.require.computeRet = /* @callback */ function(_self, _args, argNodes) {
-        if (argNodes.length && argNodes[0].type === "Literal" && typeof argNodes[0].value === "string") {
-          var _i = getInterface(argNodes[0].value, data); //ORION
-          if(_i) {
-          	return _i;
-          }
-        }
-        return infer.ANull;
-      };
-    }
-    return data.require;
-  }
-
-  function getModuleInterface(data, _exports) {
-    var mod = new infer.Obj(infer.cx().definitions.requirejs.module, "module");
-    var expProp = mod.defProp("exports");
-    var _m = getModule(stripJSExt(data.currentFile), data);
-    if(_m) {
- 	   expProp.propagate(_m);
-	}
-    _exports.propagate(expProp, EXPORT_OBJ_WEIGHT);
-    return mod;
-  }
-
   function stripJSExt(f) {
     return f.replace(/\.js$/, '');
   }
 
-  infer.registerFunction("requireJS", /* @callback */ function(_self, args, argNodes) {
+  infer.registerFunction("requireJS", function(_self, args, argNodes) {
     var server = infer.cx().parent, data = server && server._requireJS;
     if (!data || !args.length) return infer.ANull;
 
     var name = data.currentFile;
-    var out = data.interfaces[stripJSExt(name)] = new infer.AVal();
+    var out = data.interfaces[stripJSExt(name)] = new infer.AVal;
     out.origin = name;
 
     var deps = [], fn, _exports, mod;
 
     function interf(name) {
-      if (name === "require") return getRequire(data);
-      if (name === "exports") return _exports || (_exports = getExports(data));
-      if (name === "module") return mod || (mod = getModuleInterface(data, _exports || (_exports = getExports(data))));
+      if (name == "require") return getRequire(data);
+      if (name == "exports") return _exports || (_exports = getExports(data));
+      if (name == "module") return mod || (mod = getModuleInterface(data, _exports || (_exports = getExports(data))));
       return getInterface(name, data);
     }
 
     if (argNodes && args.length > 1) {
-      var node = argNodes[args.length === 2 ? 0 : 1];
-      if (node.type === "Literal" && typeof node.value === "string") {
+      var node = argNodes[args.length == 2 ? 0 : 1]; //ORION
+      if (node.type == "Literal" && typeof node.value == "string") {
         addInterfaceDep(interf(node.value), deps); //ORION
-      } else if (node.type === "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
+      } else if (node.type == "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
-        if (elt.type === "Literal" && typeof elt.value === "string") {
-            addInterfaceDep(interf(elt.value), deps); //ORION
+        if (elt.type == "Literal" && typeof elt.value == "string") {
+          addInterfaceDep(interf(elt.value), deps); //ORION
         }
       }
-    } else if (argNodes && args.length === 1 && argNodes[0].type === "FunctionExpression" && argNodes[0].params.length) {
+    } else if (argNodes && args.length == 1 && argNodes[0].type == "FunctionExpression" && argNodes[0].params.length) {
       // Simplified CommonJS call
-        addInterfaceDep(interf("require", data), deps); //ORION
-        addInterfaceDep(interf("exports", data), deps); //ORION
-        addInterfaceDep(interf("module", data), deps); //ORION
+      addInterfaceDep(interf("require", data), deps); //ORION
+      addInterfaceDep(interf("exports", data), deps); //ORION
+      addInterfaceDep(interf("module", data), deps); //ORION
       fn = args[0];
     }
 
@@ -153,8 +143,10 @@
       if (!fn.isEmpty() && !fn.getFunctionType()) fn = null;
     }
 
-    if (fn) fn.propagate(new infer.IsCallee(infer.ANull, deps, null, out));
-    else if (args.length) args[0].propagate(out);
+    if (fn) {
+      fn.propagate(new infer.IsCallee(infer.ANull, deps, null, out)); 
+      out.originNode = fn.originNode;
+    } else if (args.length) args[0].propagate(out);
 
     return infer.ANull;
   });
@@ -176,15 +168,15 @@
     }
   }
 
-  infer.registerFunction("requireJSConfig", /* @callback */ function(_self, _args, argNodes) {
+  infer.registerFunction("requireJSConfig", function(_self, _args, argNodes) {
     var server = infer.cx().parent, data = server && server._requireJS;
-    if (data && argNodes && argNodes.length && argNodes[0].type === "ObjectExpression") {
+    if (data && argNodes && argNodes.length && argNodes[0].type == "ObjectExpression") {
       var config = parseExprNode(argNodes[0]);
       for (var key in config) if (config.hasOwnProperty(key)) {
         var value = config[key], exists = data.options[key];
         if (!exists) {
           data.options[key] = value;
-        } else if (key === "paths") {
+        } else if (key == "paths") {
           for (var path in value) if (value.hasOwnProperty(path) && !data.options.paths[path])
             data.options.paths[path] = value[path];
         }
@@ -205,13 +197,13 @@
 
   function postLoadDef(data) {
     var cx = infer.cx(), interfaces = cx.definitions[data["!name"]]["!requirejs"];
-    var rjsdata = cx.parent._requireJS;
+    var data = cx.parent._requireJS;
     if (interfaces) for (var name in interfaces.props) {
-      interfaces.props[name].propagate(getInterface(name, rjsdata));
+      interfaces.props[name].propagate(getInterface(name, data));
     }
   }
 
-  tern.registerPlugin("orionRequire", function(server, options) {
+  tern.registerPlugin("requirejs", function(server, options) {
     server._requireJS = {
       interfaces: Object.create(null),
       options: options || {},
@@ -231,14 +223,17 @@
       passes: {
         preCondenseReach: preCondenseReach,
         postLoadDef: postLoadDef,
+        typeAt: findTypeAt,
         /**
 		 * @callback
+		 * Orion
 		 */
 		postParse: function postParse(ast, text) {
 			resolver.doPostParse(server, ast, infer.cx().definitions);
 		},
 		/**
 		 * @callback
+		 * Orion
 		 */
 		preInfer: function preInfer(ast, scope) {
 			resolver.doPreInfer(server);
@@ -247,6 +242,23 @@
     };
   });
 
+  function findTypeAt(_file, _pos, expr, type) {
+    if (!expr || expr.node.type != "Literal" ||
+        typeof expr.node.value != "string" || !expr.node.required)
+      return type;
+
+    // The `type` is a value shared for all string literals.
+    // We must create a copy before modifying `origin` and `originNode`.
+    // Otherwise all string literals would point to the last jump location
+    type = Object.create(type);
+
+    // Provide a custom origin location pointing to the require()d file
+    var exportedType = expr.node.required;
+    type.origin = exportedType.origin;
+    type.originNode = exportedType.originNode;
+    return type;
+  }
+/* eslint-disable missing-nls */
   var defs = {
     "!name": "requirejs",
     "!define": {
@@ -337,12 +349,27 @@
           "!doc": "Introduced in RequireJS 2.1.9: If set to true, skips the data-main attribute scanning done to start module loading. Useful if RequireJS is embedded in a utility library that may interact with other RequireJS library on the page, and the embedded version should not do data-main loading.",
           "!url": "http://requirejs.org/docs/api.html#config-skipDataMain"
         }
+      },
+      RequireJSError: {
+        "prototype" : {
+          "!proto": "Error.prototype",
+          "requireType": {
+            "!type": "string",
+            "!doc": "A string value with a general classification, like 'timeout', 'nodefine', 'scripterror'.",
+            "!url": "http://requirejs.org/docs/api.html#errors"
+          },
+          "requireModules": {
+            "!type": "[string]",
+            "!doc": "An array of module names/URLs that timed out.",
+            "!url": "http://requirejs.org/docs/api.html#errors"
+          }
+        }
       }
     },
     requirejs: {
-      "!type": "fn(deps: [string], callback: fn(), errback: fn()) -> !custom:requireJS",
+      "!type": "fn(deps: [string], callback: fn(), errback?: fn(err: +RequireJSError)) -> !custom:requireJS",
       onError: {
-        "!type": "fn(err: +Error)",
+        "!type": "fn(err: +RequireJSError)",
         "!doc": "To detect errors that are not caught by local errbacks, you can override requirejs.onError()",
         "!url": "http://requirejs.org/docs/api.html#requirejsonerror"
       },

@@ -3,7 +3,7 @@
 // Takes a TypeScript file as, for example, found in
 // github.com/borisyankov/DefinitelyTyped , and spits out Tern type
 // description JSON data.
-/* eslint-disable */
+
 var fs = require("fs");
 
 // The TypeScript code is all there in the npm package, but it's not

@@ -14,7 +14,7 @@
 define([
 	"../lib/infer", 
 	"../lib/tern", 
-	"acorn/util/walk"
+	"acorn/dist/walk"
 ],/* @callback */ function(infer, tern, walk) {
 	
 	tern.registerPlugin('ternPlugins', /* @callback */ function(server, options) { //$NON-NLS-1$

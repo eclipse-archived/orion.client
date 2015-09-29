@@ -3,19 +3,18 @@
 // A server is a stateful object that manages the analysis for a
 // project, and defines an interface for querying the code in the
 // project.
-/* eslint-disable */
+
 (function(root, mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(exports, require("./infer"), require("./signal"),
-               require("esprima/esprima"), require("acorn/util/walk"));
+               require("acorn"), require("acorn/dist/walk"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["exports", "./infer", "./signal", "esprima/esprima", "acorn/util/walk"], mod);
+    return define(["exports", "./infer", "./signal", "esprima/esprima", "acorn/dist/walk"], mod);
   mod(root.tern || (root.tern = {}), tern, tern.signal, acorn, acorn.walk); // Plain browser env
 })(this, function(exports, infer, signal, acorn, walk) {
   "use strict";
 
   var plugins = Object.create(null);
-  exports.resolvePos = resolvePos; //ORION
   exports.registerPlugin = function(name, init) { plugins[name] = init; };
 
   var defaultOptions = exports.defaultOptions = {
@@ -611,7 +610,7 @@
     function gather(prop, obj, depth, addInfo) {
       // 'hasOwnProperty' and such are usually just noise, leave them
       // out when no prefix is provided.
-      if (query.omitObjectPrototype !== false && obj == srv.cx.protos.Object && !word) return;
+      if ((objLit || query.omitObjectPrototype !== false) && obj == srv.cx.protos.Object && !word) return;
       if (query.filter !== false && word &&
           (query.caseInsensitive ? prop.toLowerCase() : prop).indexOf(word) !== 0) return;
       if (ignoreObj && ignoreObj.props[prop]) return;
@@ -630,7 +629,7 @@
         if (query.types)
           rec.type = infer.toString(val);
         if (query.docs)
-          maybeSet(rec, "doc", val.doc || type && type.doc);
+          maybeSet(rec, "doc", parseDoc(query, val.doc || type && type.doc));
         if (query.urls)
           maybeSet(rec, "url", val.url || type && type.url);
         if (query.origins)
@@ -704,7 +703,7 @@
       hookname = "variableCompletion";
     }
     if (srv.passes[hookname])
-      srv.passes[hookname].forEach(function(hook) {hook(file, wordStart, wordEnd, completions);});
+      srv.passes[hookname].forEach(function(hook) {hook(file, wordStart, wordEnd, completions);}); //ORION
 
     if (query.sort !== false) completions.sort(compareCompletions);
     srv.cx.completingProperty = null;
@@ -806,30 +805,44 @@
                   type: infer.toString(exprType, query.depth),
                   name: type && type.name,
                   exprName: exprName};
-    if (type) storeTypeDocs(type, result);
-    if (!result.doc && exprType.doc) result.doc = exprType.doc;
+    if (type) storeTypeDocs(query, type, result);
+    if (!result.doc && exprType.doc) result.doc = parseDoc(query, exprType.doc);
 
     return clean(result);
+  }
+
+  function parseDoc(query, doc) {
+    if (!doc) return null;
+    if (query.docFormat == "full") return doc;
+    var parabreak = /.\n[\s@\n]/.exec(doc);
+    if (parabreak) doc = doc.slice(0, parabreak.index + 1);
+    doc = doc.replace(/\n\s*/g, " ");
+    if (doc.length < 100) return doc;
+    var sentenceEnd = /[\.!?] [A-Z]/g;
+    sentenceEnd.lastIndex = 80;
+    var found = sentenceEnd.exec(doc);
+    if (found) doc = doc.slice(0, found.index + 1);
+    return doc;
   }
 
   function findDocs(srv, query, file) {
     var expr = findExpr(file, query);
     var type = findExprType(srv, query, file, expr);
-    var result = {url: type.url, doc: type.doc, type: infer.toString(type)};
+    var result = {url: type.url, doc: parseDoc(query, type.doc), type: infer.toString(type)};
     var inner = type.getType();
-    if (inner) storeTypeDocs(inner, result);
+    if (inner) storeTypeDocs(query, inner, result);
     return clean(result);
   }
 
-  function storeTypeDocs(type, out) {
+  function storeTypeDocs(query, type, out) {
     if (!out.url) out.url = type.url;
-    if (!out.doc) out.doc = type.doc;
+    if (!out.doc) out.doc = parseDoc(query, type.doc);
     if (!out.origin) out.origin = type.origin;
     var ctor, boring = infer.cx().protos;
     if (!out.url && !out.doc && type.proto && (ctor = type.proto.hasCtor) &&
         type.proto != boring.Object && type.proto != boring.Function && type.proto != boring.Array) {
       out.url = ctor.url;
-      out.doc = ctor.doc;
+      out.doc = parseDoc(query, ctor.doc);
     }
   }
 
@@ -856,20 +869,17 @@
     }
   };
 
-  function findDef(srv, query, file) { //ORION API
+  function findDef(srv, query, file) {
     var expr = findExpr(file, query);
     var type = findExprType(srv, query, file, expr);
     //ORION if (infer.didGuess()) return {};
 
     var span = getSpan(type);
-    var result = {url: type.url, doc: type.doc, origin: type.origin};
-    if(infer.didGuess()) {
-    	result.didGuess = true;
-    }
+    var result = {url: type.url, doc: parseDoc(query, type.doc), origin: type.origin};
 
     if (type.types) for (var i = type.types.length - 1; i >= 0; --i) {
       var tp = type.types[i];
-      storeTypeDocs(tp, result);
+      storeTypeDocs(query, tp, result);
       if (!span) span = getSpan(tp);
     }
 
@@ -975,9 +985,9 @@
     if (typeof query.newName != "string") throw ternError(".query.newName should be a string");
     var expr = findExprOrThrow(file, query);
     if (!expr) {
-    	throw ternError("Could not find an expression to rename.");
-	} else if(expr.node.type !== 'Identifier') {
-    	switch(expr.node.type) { //ORION
+        throw ternError("Could not find an expression to rename.");
+    } else if(expr.node.type != "Identifier") {
+        switch(expr.node.type) { //ORION
     		case 'MemberExpression': {
     			throw ternError("Rename is not supported on member expressions.");
     		}
@@ -991,7 +1001,7 @@
     			throw ternError("Rename is only supported on variables.");
     		}
     	}
-	}
+    }
     var data = findRefsToVariable(srv, query, file, expr, query.newName), refs = data.refs;
     delete data.refs;
     data.files = srv.files.map(function(f){return f.name;});
@@ -1010,6 +1020,7 @@
     return {files: srv.files.map(function(f){return f.name;})};
   }
 
-  exports.version = "0.10.0";
+  exports.version = "0.12.0";
   exports.findDef = findDef; //ORION
+  exports.resolvePos = resolvePos; //ORION
 });

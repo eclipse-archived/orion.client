@@ -6,7 +6,7 @@
 
 // The idea being that big libraries can be analyzed once, dumped, and
 // then cheaply included in later analysis.
-/* eslint-disable */
+
 (function(root, mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(exports, require("./infer"));

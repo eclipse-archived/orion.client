@@ -1150,8 +1150,7 @@ define([
 					offset: 47,
 					callback: done};
 				return testProposals(options, [
-				//TODO we should see a return type here
-					["xx()", "xx()"]
+					["xx()", "xx() : number"]
 				]);
 			});
 			it("test @type var type 14", function(done) {
@@ -1184,8 +1183,7 @@ define([
 					offset: 63,
 					callback: done};
 				return testProposals(options, [
-					//TODO should be a standin type for return
-					["xx()", "xx()"]
+					["xx()", "xx() : number"]
 				]);
 			});
 			it("test @type var type 17", function(done) {
@@ -2580,7 +2578,7 @@ define([
 					callback: done
 				};
 				return testProposals(options, [
-					["first()", "first()"]
+					["first()", "first() : {a: number, b: string}"]
 				]);
 			});
 			it("test function return types 22", function(done) {
@@ -2591,7 +2589,7 @@ define([
 					callback: done
 				};
 				return testProposals(options, [
-					["first()", "first() : a"]
+					["first()", "first() : fn() -> a"]
 				]);
 			});
 			it("test function return types 23", function(done) {
@@ -2946,7 +2944,7 @@ define([
 					offset: 64,
 					callback: done};
 				testProposals(options, [
-					['z(a)', 'z(a)']
+					['z(a)', 'z(a) : {}']
 				]);
 			});
 		});

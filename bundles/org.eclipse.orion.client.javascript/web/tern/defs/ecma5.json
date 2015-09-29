@@ -34,7 +34,7 @@
       "!doc": "Defines a new property directly on an object, or modifies an existing property on an object, and returns the object. If you want to see how to use the Object.defineProperty method with a binary-flags-like syntax, see this article."
     },
     "defineProperties": {
-      "!type": "fn(obj: ?, props: ?)",
+      "!type": "fn(obj: ?, props: ?) -> !custom:Object_defineProperties",
       "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/defineProperty",
       "!doc": "Defines a new property directly on an object, or modifies an existing property on an object, and returns the object. If you want to see how to use the Object.defineProperty method with a binary-flags-like syntax, see this article."
     },
@@ -64,7 +64,7 @@
       "!doc": "Determine if an object is sealed."
     },
     "freeze": {
-      "!type": "fn(obj: ?)",
+      "!type": "fn(obj: ?) -> !0",
       "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/freeze",
       "!doc": "Freezes an object: that is, prevents new properties from being added to it; prevents existing properties from being removed; and prevents existing properties, or their enumerability, configurability, or writability, from being changed. In essence the object is made effectively immutable. The method returns the object being frozen."
     },
@@ -388,7 +388,7 @@
         "!doc": "Used to retrieve the matches when matching a string against a regular expression."
       },
       "replace": {
-        "!type": "fn(pattern: +RegExp, replacement: string) -> string",
+        "!type": "fn(pattern: string|+RegExp, replacement: string) -> string",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/replace",
         "!doc": "Returns a new string with some or all matches of a pattern replaced by a replacement.  The pattern can be a string or a RegExp, and the replacement can be a string or a function to be called for each match."
       },

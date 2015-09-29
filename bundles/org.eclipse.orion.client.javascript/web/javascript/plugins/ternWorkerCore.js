@@ -32,10 +32,10 @@ require([
 	'tern/plugin/orionExpress',
 	'tern/plugin/orionMongoDB',
 	'tern/plugin/orionMySQL',
-	'tern/plugin/orionNode',
+	'tern/plugin/node',
 	'tern/plugin/orionPostgres',
 	'tern/plugin/orionRedis',
-	'tern/plugin/orionRequire',
+	'tern/plugin/requirejs',
 	'tern/plugin/ternPlugins',
 	'tern/plugin/openImplementation',
 	'tern/plugin/htmlDependencies',
@@ -45,7 +45,7 @@ require([
 	'i18n!javascript/nls/workermessages',
 	'orion/i18nUtil'
 ],
-function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
+/* @callback */ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
 							orionMySQLPlugin, orionNodePlugin, orionPostgresPlugin, orionRedisPlugin, orionRequirePlugin, ternPluginsPlugin,
 							openImplPlugin, htmlDepPlugin, ecma5, ecma6, browser, Messages, i18nUtil) {
 
@@ -65,7 +65,7 @@ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ o
                     	name: Messages['ternDocPluginName'],
                     	description: Messages['ternDocPluginDescription'],
                         fullDocs: true,
-                        version: '0.10.0', //$NON-NLS-1$
+                        version: '0.12.0', //$NON-NLS-1$
                         removable: false
                     },
                     orionAmqp: {
@@ -78,13 +78,13 @@ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ o
                     angular: {
                     	name: Messages['orionAngularPluginName'],
                     	description: Messages['orionAngularPluginDescription'],
-                    	version: '0.10.0', //$NON-NLS-1$
+                    	version: '0.12.0', //$NON-NLS-1$
                     	removable: true
                     },
                    /* component: {
                     	name: Messages['orionComponentPluginName'],
                     	description: Messages['orionComponentPluginDescription'],
-                    	version: '0.10.0', //$NON-NLS-1$
+                    	version: '0.12.0', //$NON-NLS-1$
                     	removable: true,
                     },*/
                     orionExpress: {
@@ -108,10 +108,10 @@ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ o
                     	removable: true,
                     	env: 'mysql' //$NON-NLS-1$
                     },
-                    orionNode: {
+                    node: {
                     	name: Messages['orionNodePluginName'],
                     	description: Messages['orionNodePluginDescription'],
-                    	version: '0.10.0', //$NON-NLS-1$
+                    	version: '0.12.0', //$NON-NLS-1$
                     	removable: true
                     },
                     orionPostgres: {
@@ -128,10 +128,10 @@ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ o
                     	removable: true,
                     	env: 'redis' //$NON-NLS-1$
                     },
-                    orionRequire: {
+                    requirejs: {
                     	name: Messages['orionRequirePluginName'],
                     	description: Messages['orionRequirePluginDescription'],
-                    	version: '0.10.0', //$NON-NLS-1$
+                    	version: '0.12.0', //$NON-NLS-1$
                     	removable: true
                     },
                     plugins: {
