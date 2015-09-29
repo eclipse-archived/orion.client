@@ -34,7 +34,7 @@
 			var definition = this._getDefNode(server, query);
 			var prevDef;
 			while (definition) {
-				console.log(definition.type);
+//				console.log(definition.type);
 				// If a 'findDef' finds itself we're done
 				if (prevDef && prevDef.start === definition.start && prevDef.end === definition.end) {
 					return {implementation: {start: definition.start, end: definition.end,
@@ -60,7 +60,7 @@
 		},
 		_getDefNode: function(server, query) {
 			var theFile = server.fileMap[query.file];
-			console.log("findDef: " + query.start + "," + query.end + " : " + theFile.name);
+//			console.log("findDef: " + query.start + "," + query.end + " : " + theFile.name);
 			var res = tern.findDef(server, query, theFile);
 			if (res && res.start) {
 				theFile = server.fileMap[res.file];
@@ -68,7 +68,7 @@
 					var theNode = infer.findExpressionAt(theFile.ast, res.start, null, null, function(type, node) {
 						return true;
 					});
-					console.log("OK");
+//					console.log("OK");
 					return theNode.node;
 				}
 			}
