@@ -867,16 +867,25 @@ and (max-device-width : 1024px)  {
 
 .splashSteps {
 	margin:20px; 
-    max-width: 200px;
+    max-width: 300px;
 }
 
 .splashStep {
 	display: flex;
 	flex-direction: row;
-	width:400px;
 	padding-top: 10px;
 	padding-bottom:10px;
 	height:24px;
+}
+
+.splashSubTask {
+	color: white;
+	font-size: 12px;
+}
+
+.splashSubTaskDetail {
+	color: white;
+	font-size: 12px;
 }
 
 .splashVisual {

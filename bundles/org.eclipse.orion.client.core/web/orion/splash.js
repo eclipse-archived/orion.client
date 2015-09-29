@@ -11,28 +11,26 @@
 
 define([], function() {
 
-function step(description, type, total, incrementCount){
+function step(description, type, total) {
 	
 	this.TYPE_FILLER = 0;
 	this.TYPE_DRIVEN = 1;
-	
 	this.type = type;
-	this.incrementCount = incrementCount || 1;
-	this.total = total;
+
 	this.description = description;
-	
+	this.total = total;
+	this.worked = 0;
+
 	this.WAITING = 0;
 	this.HAPPENING = 1;
 	this.COMPLETED = 2;
 	this.state = this.WAITING;
-	
+
 	this.template = "";
 	this.domNode;
-	
-	this.increments = 0;
 }
 
-step.prototype.complete = function(){
+step.prototype.complete = function() {
 	this.state = this.COMPLETED;
 	this.domNode.className = 'splashSuccessImage';
 };
@@ -42,7 +40,7 @@ step.prototype.spin = function(){
 	this.domNode.className = 'splashLoadingImage';
 };
 
-step.prototype.getStepNode = function(){
+step.prototype.getStepNode = function() {
 	
 	var stepNode = document.createElement( 'div' );
 	stepNode.className = 'splashStep';
@@ -84,14 +82,17 @@ function loader( domNode, subject ){
 	this.title = subject;
 	this.steps = [];   
 	this.FILLER_TIMEOUT = 200;
-	this.progressbar = 'progressbar';
-	
+
 	this.template = '<div class="splashLoader">' +
 						'<div class="splashAbout">Setting up workspace</div>' +
 						'<div class="splashProgressbar">' +
-							'<progress id ="' + this.progressbar + '"></progress>' +
+							'<progress id ="progressbar"></progress>' +
 						'</div>' +
 						'<div id="steps" class="splashSteps">' +
+						'</div>' +
+						'<div id="subTask" class="splashSubTask">' +
+						'</div>' +
+						'<div id="subTaskDetail" class="splashSubTaskDetail">' +
 						'</div>' +
 					'</div>';   
 	
@@ -103,30 +104,22 @@ function loader( domNode, subject ){
 }
 
 loader.prototype.showFillerProgress = function(){
-
-	var splashProgress = this.splashProgress;
-	
-	var cs = this.steps[ this.currentStep ];
-	
-	var total = 0;
-	
-	for( var s = 0; s <= cs.order; s++ ){
-		total = total + this.steps[s].total;
-	}
-
-	if( splashProgress  ) {	
-		var increment = ( total - splashProgress.value )/5;
-		splashProgress.value = splashProgress.value + increment;
-	}	
+	var cs = this.getStep();
+	var increment = (cs.total - cs.worked)/10;
+	cs.worked = Math.min(cs.worked + increment, cs.total);
+	this.update();
 };
 
-loader.prototype.startFillerProgress = function(){   
-	var myloader = this;
-	this.interval = setInterval( function(){ myloader.showFillerProgress(); }, this.FILLER_TIMEOUT );
+loader.prototype.startFillerProgress = function() {
+	var cs = this.getStep();
+	if (cs.type !== cs.TYPE_FILLER) return;
+	this.interval = setInterval(function(){ this.showFillerProgress(); }.bind(this), this.FILLER_TIMEOUT);
 };
 	
-loader.prototype.completeFillerProgress = function (){
-	clearInterval( this.interval );		
+loader.prototype.stopFillerProgress = function () {
+	if (!this.interval) return;
+	clearInterval(this.interval);
+	delete this.interval;
 };
 
 loader.prototype.nextStep = function(){
@@ -137,12 +130,12 @@ loader.prototype.nextStep = function(){
 	
 	if( this.currentStep >= 0  ){
 		
-		myStep = this.steps[this.currentStep];
+		myStep = this.getStep();
 	
 		switch( myStep.type ){
 
 			case myStep.TYPE_FILLER:
-				this.completeFillerProgress();
+				this.stopFillerProgress();
 				myStep.complete();
 				break;
 
@@ -159,7 +152,7 @@ loader.prototype.nextStep = function(){
 		this.splash.classList.add("splashSeeThrough");
 	}
 	
-	myStep = this.steps[this.currentStep];
+	myStep = this.getStep();
 	
 	if (!myStep) return;
 	
@@ -174,12 +167,15 @@ loader.prototype.nextStep = function(){
 				 myStep.spin();
 				break;
 	}
+	this.update();
 };
 
 loader.prototype.initialize = function(){
 	this.content = document.getElementById( this.domNode );
 	this.content.innerHTML = this.template;
-	this.splashProgress = document.getElementById( this.progressbar );
+	this.splashProgress = document.getElementById( "progressbar" );
+	this.subTask = document.getElementById( "subTask" );
+	this.subTaskDetail = document.getElementById( "subTaskDetail" );
 	this.splashProgress.value = 0;
 };
 
@@ -189,6 +185,10 @@ loader.prototype.emptySteps = function(){
 		stepsNode.removeChild( stepsNode.firstChild ) ;
 	}   
 };
+
+loader.prototype.getStep = function(id){
+	if (!id) return this.steps[this.currentStep];
+}
 
 loader.prototype.drawSteps = function(){
 	
@@ -202,31 +202,48 @@ loader.prototype.drawSteps = function(){
 	}
 };
 
-/* Newly provided steps need to begin at 1 */
-
-loader.prototype.addStep = function( step ){
+loader.prototype.addStep = function( step, index ){
 	step.order = this.steps.length;
-	this.steps.push(step);
-	
-	var max = 0;
-	for(var s = 0; s < this.steps.length; s++ ){
-		max = max + this.steps[s].total;
-	}
-	this.splashProgress.max = max;
-	
+	this.steps.splice(index || this.steps.length, 0, step);
 	this.drawSteps();
+	this.update();
 };
 
-loader.prototype.increment = function(){
-	var cs = this.steps[ this.currentStep ];
-	cs.increments = cs.increments + 1;
-	var splashProgress = this.splashProgress;
-	var increment = cs.total / cs.incrementCount;		
-	splashProgress.value = splashProgress.value + increment;
-	
-	if( cs.increments === cs.incrementCount ){
+loader.prototype.worked = function(increment){
+	var cs = this.getStep();
+	cs.worked = cs.worked + (increment || 1);
+	if (cs.worked === cs.total) {
 		this.nextStep();   
+	} else {
+		this.update();
 	}
+};
+
+loader.prototype.update = function(){
+	var cs = this.getStep();
+	if (!cs) return;
+	
+	var worked = 0, s;
+	
+	for(s = 0; s < cs.order; s++){
+		worked = worked + this.steps[s].total;
+	}
+
+	var total = worked;
+	worked += cs.worked;
+	
+	for(; s < this.steps.length; s++){
+		total += this.steps[s].total;
+	}
+	
+	this.subTask.textContent = cs.subTask || "";
+	this.subTaskDetail.textContent = cs.subTaskDetail || "";
+
+	var splashProgress = this.splashProgress;
+	if (splashProgress) {
+		splashProgress.max = total;
+		splashProgress.value = worked;
+	}	
 };
 
 loader.prototype.takeDown = function() {
@@ -237,13 +254,13 @@ loader.prototype.takeDown = function() {
 	}
 };
 
-loader.prototype.createStep = function(description, type, total, incrementCount) {
-	return new step(description, type, total, incrementCount);
+loader.prototype.createStep = function(description, type, total) {
+	return new step(description, type, total);
 };
 
 var pageLoader;
 function start() {
-	var splash = document.getElementById("splash");//document.createElement("div");
+	var splash = document.getElementById("splash");
 	splash.className = 	splash.id = "splash";
 	document.body.appendChild(splash);
 	var container = document.createElement("div");
@@ -263,10 +280,6 @@ function start() {
 	pageLoader.addStep(pluginStep);
 	
 	pageLoader.nextStep();
-	
-//	setTimeout(function() {
-//		splash.style.backgroundColor = "rgba(255,255,255, 0.1)";
-//	}, 2000);
 }
 
 start();
