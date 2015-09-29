@@ -165,6 +165,9 @@ define([
 		if (ref.Type === "RemoteTrackingBranch" && !ref.Id) { //$NON-NLS-0$
 			refName += messages[" [New branch]"];
 		}
+		if (ref.Type === "HeadLocation") {
+			refName = refName.substring(0, 6);
+		}
 		return refName;
 	}
 	
