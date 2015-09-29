@@ -11,12 +11,13 @@
 
 define([], function() {
 
-function step(description, type, total) {
+function step(id, description, type, total) {
 	
 	this.TYPE_FILLER = 0;
 	this.TYPE_DRIVEN = 1;
 	this.type = type;
 
+	this.id = id;
 	this.description = description;
 	this.total = total;
 	this.worked = 0;
@@ -90,9 +91,9 @@ function loader( domNode, subject ){
 						'</div>' +
 						'<div id="steps" class="splashSteps">' +
 						'</div>' +
-						'<div id="subTask" class="splashSubTask">' +
+						'<div id="stepMessage" class="splashMessage">' +
 						'</div>' +
-						'<div id="subTaskDetail" class="splashSubTaskDetail">' +
+						'<div id="stepDetailedMessage" class="splashDetailedMessage">' +
 						'</div>' +
 					'</div>';   
 	
@@ -174,8 +175,8 @@ loader.prototype.initialize = function(){
 	this.content = document.getElementById( this.domNode );
 	this.content.innerHTML = this.template;
 	this.splashProgress = document.getElementById( "progressbar" );
-	this.subTask = document.getElementById( "subTask" );
-	this.subTaskDetail = document.getElementById( "subTaskDetail" );
+	this.stepMessage = document.getElementById( "stepMessage" );
+	this.stepDetailedMessage = document.getElementById( "stepDetailedMessage" );
 	this.splashProgress.value = 0;
 };
 
@@ -188,7 +189,12 @@ loader.prototype.emptySteps = function(){
 
 loader.prototype.getStep = function(id){
 	if (!id) return this.steps[this.currentStep];
-}
+	
+	for (var s = 0; s < this.steps.length; s++) {
+		if (this.steps[s].id === id) return this.steps[s];
+	}
+	return null;
+};
 
 loader.prototype.drawSteps = function(){
 	
@@ -236,8 +242,8 @@ loader.prototype.update = function(){
 		total += this.steps[s].total;
 	}
 	
-	this.subTask.textContent = cs.subTask || "";
-	this.subTaskDetail.textContent = cs.subTaskDetail || "";
+	this.stepMessage.textContent = cs.message || "";
+	this.stepDetailedMessage.textContent = cs.detailedMessage || "";
 
 	var splashProgress = this.splashProgress;
 	if (splashProgress) {
@@ -261,6 +267,7 @@ loader.prototype.createStep = function(description, type, total) {
 var pageLoader;
 function start() {
 	var splash = document.getElementById("splash");
+	if (!splash) return;
 	splash.className = 	splash.id = "splash";
 	document.body.appendChild(splash);
 	var container = document.createElement("div");
@@ -268,15 +275,15 @@ function start() {
 	splash.appendChild(container);
 	
 	pageLoader = new loader('splashContainer', 'Setting up workspace');
-	var initial = new step('Loading Page', 0, 50);
+	var initial = new step("orion.splash.page", 'Loading Page', 0, 50);
 	pageLoader.addStep(initial);
 	pageLoader.splash = splash;
 	
 	var pluginStep;
-	pluginStep = new step('Loading Plugins', 0, 20);
+	pluginStep = new step("orion.splash.plugins", 'Loading Plugins', 0, 20);
 	pageLoader.addStep(pluginStep );
 	
-	pluginStep = new step('Loading Resources', 0, 30);
+	pluginStep = new step("orion.splash.resources", 'Loading Resources', 0, 30);
 	pageLoader.addStep(pluginStep);
 	
 	pageLoader.nextStep();
