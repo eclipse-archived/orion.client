@@ -449,8 +449,6 @@ define([
 		return [];
 	}
 
-	var deferred = null;
-
 	/**
 	 * @description Creates a new TernContentAssist object
 	 * @constructor
@@ -526,23 +524,17 @@ define([
 			    	params.keywords = true;
 			    }
 			    var args = {params: params, meta: meta, envs:env, files: files};
-	        	if(deferred) {
-	        		deferred.resolve();
-	        	}
-				deferred = new Deferred();
+				var deferred = new Deferred();
 				deferred.proposals = proposals;
 				deferred.args = args;
 				var that = this;
 				this.ternworker.postMessage({request: 'completions', args: args}, //$NON-NLS-1$
 					function(response) {
 						clearTimeout(that.timeout);
-						if(deferred) {
-							if(deferred.proposals) {
-				        		deferred.resolve([].concat(sortProposals(response.proposals ? response.proposals : [], deferred.args), deferred.proposals));
-				        	} else {
-				        		deferred.resolve(sortProposals(response.proposals, deferred.args));
-				        	}
-				        	deferred = null;
+						if(deferred.proposals) {
+			        		deferred.resolve([].concat(sortProposals(response.proposals ? response.proposals : [], deferred.args), deferred.proposals));
+			        	} else {
+			        		deferred.resolve(sortProposals(response.proposals, deferred.args));
 			        	}
 					}
 	        	);
