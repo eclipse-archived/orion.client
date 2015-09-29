@@ -253,6 +253,9 @@ loader.prototype.update = function(){
 };
 
 loader.prototype.takeDown = function() {
+	this.pluginRegistry.addEventListener("started", this._pluginListener);
+	this.pluginRegistry.addEventListener("lazy activation", this._pluginListener);
+	this.pluginRegistry.addEventListener("starting", this._pluginListener);
 	this.nextStep();
 	var splash = document.getElementById("splash");
 	if (splash && splash.parentNode) {
@@ -262,6 +265,22 @@ loader.prototype.takeDown = function() {
 
 loader.prototype.createStep = function(description, type, total) {
 	return new step(description, type, total);
+};
+
+loader.prototype.setPluginRegistry = function(pluginRegistry) {
+	this.pluginRegistry = pluginRegistry; 
+	var listener = this._pluginListener = function(evt) {
+		var step = this.getStep();
+		if (!step) return;
+		var name = evt.plugin.getName();
+		if (!name) return;
+		step.message = '"'+ name + '" '
+		step.message += evt.type;
+		this.update();
+	}.bind(this);
+	pluginRegistry.addEventListener("started", listener);
+	pluginRegistry.addEventListener("lazy activation", listener);
+	pluginRegistry.addEventListener("starting", listener);
 };
 
 var pageLoader;

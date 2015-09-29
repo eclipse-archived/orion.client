@@ -35,7 +35,10 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 				var url = require.toUrl(key);
 				configuration.plugins[url] = pluginsPreference[key];
 			});
-			var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, configuration);	
+			var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, configuration);
+			if (pageLoader) {
+				pageLoader.setPluginRegistry(pluginRegistry);
+			}
 			return pluginRegistry.start().then(function() {
 				if (serviceRegistry.getServiceReferences("orion.core.preference.provider").length > 0) { //$NON-NLS-0$
 					return preferences.getPreferences("/plugins", mPreferences.PreferencesService.USER_SCOPE).then(function(pluginsPreference) { //$NON-NLS-0$
