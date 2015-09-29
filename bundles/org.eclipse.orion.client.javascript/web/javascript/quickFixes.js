@@ -498,7 +498,7 @@ define([
                     switch(parent.type) {
                         case 'FunctionExpression': {
                             var funcparent = node.parents.pop();
-                            if(funcparent.type === 'CallExpression' && funcparent.callee.name === 'define') {
+                            if(funcparent.type === 'CallExpression' && (funcparent.callee.name === 'define' || funcparent.callee.name === 'require')) {
                                 var args = funcparent.arguments;
                                 for(i = 0; i < args.length; i++) {
                                     var arg = args[i];
