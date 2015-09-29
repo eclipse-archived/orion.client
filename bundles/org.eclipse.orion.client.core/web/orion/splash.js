@@ -9,6 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+/*eslint-env amd, browser*/
 define([], function() {
 
 function step(id, description, type, total) {
@@ -263,19 +264,20 @@ loader.prototype.takeDown = function() {
 	}
 };
 
-loader.prototype.createStep = function(description, type, total) {
-	return new step(description, type, total);
+loader.prototype.createStep = function(id, description, type, total) {
+	return new step(id, description, type, total);
 };
 
 loader.prototype.setPluginRegistry = function(pluginRegistry) {
 	this.pluginRegistry = pluginRegistry; 
 	var listener = this._pluginListener = function(evt) {
-		var step = this.getStep();
-		if (!step) return;
-		var name = evt.plugin.getName();
-		if (!name) return;
-		step.message = '"'+ name + '" '
-		step.message += evt.type;
+		var s = this.getStep();
+		if (!s) return;
+		var pluginName = evt.plugin.getName();
+		if (!pluginName) return;
+		//TODO nls messages
+		s.message = '"'+ pluginName + '" ';
+		s.message += evt.type;
 		this.update();
 	}.bind(this);
 	pluginRegistry.addEventListener("started", listener);
@@ -285,6 +287,7 @@ loader.prototype.setPluginRegistry = function(pluginRegistry) {
 
 var pageLoader;
 function start() {
+	//TODO nls messages
 	var splash = document.getElementById("splash");
 	if (!splash) return;
 	splash.className = 	splash.id = "splash";
