@@ -41,17 +41,24 @@ define([], function() {
 		});
 	}
 
+	var timingVars = {};
 	function logPageLoadTiming(timingVar, timingLabel) {
 		/* 
 		 * The level of window.performance implementation varies across the browsers,
 		 * so check for the existence of all utilized functions up-front.
 		 */
 		if (window.performance) {
+			 /* ensure that no more timings of this type are logged for this page */
 			if (window.performance.getEntriesByName && window.performance.mark) {
 				if (window.performance.getEntriesByName(timingVar).length) {
 					return;
 				}
-				window.performance.mark(timingVar); /* ensure that no more timings of this type are logged for this page */
+				window.performance.mark(timingVar);
+			} else {
+				if (timingVars[timingVar]) {
+					return;
+				}
+				timingVars[timingVar] = new Date();				
 			}
 			logTiming("page", timingVar, window.performance.now(), timingLabel); //$NON-NLS-0$
 		}
