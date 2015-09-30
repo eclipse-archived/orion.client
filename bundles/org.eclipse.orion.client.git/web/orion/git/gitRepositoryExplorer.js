@@ -352,7 +352,7 @@ define([
 			return;
 		}
 		this.statusDeferred = this.displayStatus(this.repository).then(function() {
-			if (changes.length === 0) {
+			if (changes.length === 0 && !this.repository.status.promise) {
 				this.changes = [this.repository.status];
 			}
 		}.bind(this));
@@ -592,8 +592,12 @@ define([
 		var activeBranch = explorer.model.getActiveBranch();
 		var targetRef = explorer.model.getTargetReference();
 		if (activeBranch && targetRef) {
-			var targetName =  util.shortenRefName(targetRef);
-			title = activeBranch.Name + " => " + targetName;  //$NON-NLS-0$
+			if (!activeBranch.Current) {
+				title = i18nUtil.formatMessage(messages['DetachedHead ${0}'], util.shortenRefName(explorer.model.log.Children[0])); 
+			} else {
+				var targetName =  util.shortenRefName(targetRef);
+				title = activeBranch.Name + " => " + targetName;  //$NON-NLS-0$
+			}
 		} else if (!activeBranch && !targetRef) {
 			title = messages["NoActiveBranch"];
 		} else if (!activeBranch && targetRef) {
