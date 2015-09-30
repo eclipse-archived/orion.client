@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env amd, browser*/
-define([], function() {
+define(['module', 'i18n!orion/nls/messages', 'orion/i18nUtil'], function(module, messages, i18nUtil) {
 
 function step(id, description, type, total) {
 	
@@ -77,11 +77,11 @@ step.prototype.transition = function(){
 	}
 };
 
-function loader( domNode, subject ){
+function loader( domNode, title ){
 
 	this.domNode = domNode;
 	this.content;
-	this.title = subject;
+	this.title = title;
 	this.steps = [];   
 	this.FILLER_TIMEOUT = 200;
 	if (window.performance && window.performance.now) {
@@ -89,7 +89,7 @@ function loader( domNode, subject ){
 	}
 
 	this.template = '<div class="splashLoader">' +
-						'<div class="splashAbout">Setting up workspace</div>' +
+						'<div class="splashAbout">' + this.title + '</div>' +
 						'<div class="splashProgressbar">' +
 							'<progress id ="progressbar"></progress>' +
 						'</div>' +
@@ -278,9 +278,7 @@ loader.prototype.setPluginRegistry = function(pluginRegistry) {
 		if (!s) return;
 		var pluginName = evt.plugin.getName();
 		if (!pluginName) return;
-		//TODO nls messages
-		s.message = '"'+ pluginName + '" ';
-		s.message += evt.type;
+		s.message = i18nUtil.formatMessage(messages["plugin_" + evt.type], pluginName);
 		this.update();
 	}.bind(this);
 	pluginRegistry.addEventListener("started", listener);
@@ -290,7 +288,6 @@ loader.prototype.setPluginRegistry = function(pluginRegistry) {
 
 var pageLoader;
 function start() {
-	//TODO nls messages
 	var splash = document.getElementById("splash");
 	if (!splash) return;
 	splash.className = 	splash.id = "splash";
@@ -311,16 +308,17 @@ function start() {
 	container.id = container.className = "splashContainer";
 	splash.appendChild(container);
 	
-	pageLoader = new loader('splashContainer', 'Setting up workspace');
-	var initial = new step("orion.splash.page", 'Loading Page', 0, 50);
+	var config = module.config();
+	pageLoader = new loader('splashContainer', messages["SplashTitle" + (config.splashID || "")]);
+	var initial = new step("orion.splash.page", messages.LoadingPage, 0, 50);
 	pageLoader.addStep(initial);
 	pageLoader.splash = splash;
 	
 	var pluginStep;
-	pluginStep = new step("orion.splash.plugins", 'Loading Plugins', 0, 20);
+	pluginStep = new step("orion.splash.plugins", messages.LoadingPlugins, 0, 20);
 	pageLoader.addStep(pluginStep );
 	
-	pluginStep = new step("orion.splash.resources", 'Loading Resources', 0, 30);
+	pluginStep = new step("orion.splash.resources", messages.LoadingResources, 0, 30);
 	pageLoader.addStep(pluginStep);
 	
 	pageLoader.nextStep();

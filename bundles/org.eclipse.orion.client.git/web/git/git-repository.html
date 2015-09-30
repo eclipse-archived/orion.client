@@ -12,7 +12,10 @@
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
 				var deps = ["git/git-repository"];
-				if (localStorage.showSplash) deps.splice(0, 0, "orion/splash");
+				if (localStorage.showSplash) {
+					require.config({config: {"orion/splash": {splashID: "Git"}}});
+					deps.splice(0, 0, "orion/splash");
+				}
 				require(deps, null, config.errback);
 			});
 		</script>
