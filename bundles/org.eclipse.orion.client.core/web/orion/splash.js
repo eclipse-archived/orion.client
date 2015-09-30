@@ -84,6 +84,9 @@ function loader( domNode, subject ){
 	this.title = subject;
 	this.steps = [];   
 	this.FILLER_TIMEOUT = 200;
+	if (window.performance && window.performance.now) {
+		this.FILLER_TIMEOUT = window.performance.now() / 7;
+	}
 
 	this.template = '<div class="splashLoader">' +
 						'<div class="splashAbout">Setting up workspace</div>' +
