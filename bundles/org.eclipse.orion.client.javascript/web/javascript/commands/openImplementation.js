@@ -26,7 +26,7 @@ define([
 	 * @param {javascript.ASTManager} ASTManager The backing AST manager
 	 * @param {TernWorker} ternWorker The running Tern worker
 	 * @param {javascript.CUProvider} cuProvider
-	 * @returns {javascript.commands.OpenDeclarationCommand} A new command
+	 * @returns {javascript.commands.OpenImplementationCommand} A new command
 	 * @since 10.0
 	 */
 	function OpenImplementationCommand(ASTManager, ternWorker, cuProvider) {

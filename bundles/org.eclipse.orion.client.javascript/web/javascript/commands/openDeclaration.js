@@ -25,15 +25,13 @@ define([
 	 * @constructor
 	 * @public
 	 * @param {javascript.ASTManager} ASTManager The backing AST manager
-	 * @param {javascript.ScriptResolver} Resolver The backing script resolver
 	 * @param {TernWorker} ternWorker The running Tern worker
 	 * @param {javascript.CUProvider} cuProvider
 	 * @returns {javascript.commands.OpenDeclarationCommand} A new command
 	 * @since 8.0
 	 */
-	function OpenDeclarationCommand(ASTManager, Resolver, ternWorker, cuProvider, openMode) {
+	function OpenDeclarationCommand(ASTManager, ternWorker, cuProvider, openMode) {
 		this.astManager = ASTManager;
-		this.resolver = Resolver;
 		this.ternworker = ternWorker;
 		this.cuprovider = cuProvider;
 		this.openMode = openMode;
