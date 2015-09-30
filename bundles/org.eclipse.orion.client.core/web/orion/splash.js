@@ -11,6 +11,8 @@
 
 /*eslint-env amd, browser*/
 define(['module', 'i18n!orion/nls/messages', 'orion/i18nUtil'], function(module, messages, i18nUtil) {
+	
+var pageLoader;
 
 function step(id, description, type, total) {
 	
@@ -265,6 +267,7 @@ loader.prototype.takeDown = function() {
 	if (splash && splash.parentNode) {
 		splash.parentNode.removeChild(splash);
 	}
+	pageLoader = null;
 };
 
 loader.prototype.createStep = function(id, description, type, total) {
@@ -286,7 +289,6 @@ loader.prototype.setPluginRegistry = function(pluginRegistry) {
 	pluginRegistry.addEventListener("starting", listener);
 };
 
-var pageLoader;
 function start() {
 	var splash = document.getElementById("splash");
 	if (!splash) return;

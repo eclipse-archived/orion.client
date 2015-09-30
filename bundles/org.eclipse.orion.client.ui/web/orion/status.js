@@ -70,6 +70,13 @@ define([
 			}
 		},
 		
+		_takeDownSplash: function() {
+			var pageLoader = require.specified("orion/splash") && require("orion/splash");
+			if (pageLoader) {
+				pageLoader.takeDown();
+			}
+		},
+		
 		close: function(){
 			window.clearTimeout(this._timer);
 			var closeButton = lib.node(closeButtonDomId); //$NON-NLS-0$
@@ -173,6 +180,7 @@ define([
 			var node = lib.node(this.domId);
 			lib.empty(node);
 			node.appendChild(span);
+			this._takeDownSplash();
 		},
 		
 		/**
@@ -296,6 +304,9 @@ define([
 					closeButton.classList.add("core-sprite-close"); //$NON-NLS-0$
 					closeButton.classList.add("imageSprite"); //$NON-NLS-0$
 				}
+			}
+			if (this._clickToDisMiss) {
+				this._takeDownSplash();
 			}
 		},
 
