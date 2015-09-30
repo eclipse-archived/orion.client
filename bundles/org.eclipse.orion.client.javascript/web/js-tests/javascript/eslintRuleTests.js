@@ -2281,9 +2281,92 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 0);
     		});
-
     		it("should not flag doc'd fallthrough 2", function() {
     			var topic = "switch(a) {case 1: switch(b) {case 1: foo; //$FALLTHROUGH$\ncase 2: foo;}}";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=478720
+    		 */
+    		it("should not flag doc'd fallthrough 3", function() {
+    			var topic = "switch(a) {case 1: switch(b) {case 1: foo; //$FALLTHROUGH\ncase 2: foo;}}";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=478720
+    		 */
+    		it("should not flag doc'd fallthrough 4", function() {
+    			var topic = "switch(a) {case 1: switch(b) {case 1: foo; //FALLTHROUGH\ncase 2: foo;}}";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=478720
+    		 */
+    		it("should not flag doc'd fallthrough 5", function() {
+    			var topic = "switch(a) {case 1: switch(b) {case 1: foo; //$FALL THROUGH\ncase 2: foo;}}";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=478720
+    		 */
+    		it("should not flag doc'd fallthrough 6", function() {
+    			var topic = "switch(a) {case 1: switch(b) {case 1: foo; //$fallthrough$\ncase 2: foo;}}";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=478720
+    		 */
+    		it("should not flag doc'd fallthrough 7", function() {
+    			var topic = "switch(a) {case 1: switch(b) {case 1: foo; //$fallsthrough$\ncase 2: foo;}}";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=478720
+    		 */
+    		it("should not flag doc'd fallthrough 8", function() {
+    			var topic = "switch(a) {case 1: switch(b) {case 1: foo; //$falls through$\ncase 2: foo;}}";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=478720
+    		 */
+    		it("should not flag doc'd fallthrough 9", function() {
+    			var topic = "switch(a) {case 1: switch(b) {case 1: foo; //falls through\ncase 2: foo;}}";
 
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;

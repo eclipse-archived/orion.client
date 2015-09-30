@@ -570,7 +570,7 @@ define([
                         		            var comment = null;
                         		            for(var c = 0; c < comments.length; c++) {
                         		                comment = comments[c];
-                        		                if(/\s*\$FALLTHROUGH\$\s*/.test(comment.value)) {
+                        		                if(/\$?falls?\s?through\$?/i.test(comment.value.toLowerCase())) {
                         		                    continue cases;
                         		                }
                         		            }
