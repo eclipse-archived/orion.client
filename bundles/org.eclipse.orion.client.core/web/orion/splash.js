@@ -296,6 +296,18 @@ function start() {
 	splash.className = 	splash.id = "splash";
 	document.body.appendChild(splash);
 	var container = document.createElement("div");
+	var showTimeout = 500;
+	if (localStorage.showSplashTimeout) {
+		try {
+			showTimeout = parseInt(localStorage.showSplashTimeout, 10);
+		} catch (ex) {}
+	}
+	if (showTimeout !== 0) {
+		container.style.display = "none";
+		setTimeout(function() {
+			container.style.display = "";
+		}, showTimeout);
+	}
 	container.id = container.className = "splashContainer";
 	splash.appendChild(container);
 	
