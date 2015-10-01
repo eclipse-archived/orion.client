@@ -101,6 +101,8 @@ eclipse.GitService = (function() {
 			return clientDeferred;
 		},
 		
+		
+
 		removeGitRepository : function(repositoryLocation){
 			var service = this;
 			
@@ -120,6 +122,7 @@ eclipse.GitService = (function() {
 			
 			return clientDeferred;
 		},
+
 	
 		getGitStatus: function(url){
 			var service = this;
@@ -1168,6 +1171,109 @@ eclipse.GitService = (function() {
 			
 			return clientDeferred;
 		},
+		
+		updateSubmodules : function(submoduleLocation){
+			var service = this;
+			var postData = {};
+			postData.OperationType = "submodule";
+			postData.Operation = "update";
+			var clientDeferred = new Deferred();
+			xhr("PUT", submoduleLocation, { 
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				timeout : GIT_TIMEOUT,
+				handleAs : "json", //$NON-NLS-0$
+				data:JSON.stringify(postData)
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		
+		syncSubmodules : function(submoduleLocation){
+			var service = this;
+			var postData = {};
+			postData.OperationType = "submodule";//$NON-NLS-0$
+			postData.Operation = "sync";//$NON-NLS-0$
+			var clientDeferred = new Deferred();
+			xhr("PUT", submoduleLocation, { 
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				timeout : GIT_TIMEOUT,
+				handleAs : "json", //$NON-NLS-0$
+				data:JSON.stringify(postData)
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		
+		addSubmodule : function(gitName, submoduleLocation,targetPath, gitUrl, repoLocation){
+			var service = this;
+			var postData = {};
+			if(gitName){
+				postData.Name = gitName;
+			}
+			if(targetPath){
+				postData.Path = targetPath;
+			}
+			if(gitUrl){
+				postData.GitUrl=gitUrl;
+			}
+			postData.Location = repoLocation;
+			var clientDeferred = new Deferred();
+			xhr("POST", submoduleLocation, { 
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				timeout : GIT_TIMEOUT,
+				handleAs : "json", //$NON-NLS-0$
+				data:JSON.stringify(postData)
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		
+		deleteSubmodule : function(submoduleLocation, parents){
+			var service = this;
+			var postData = {};
+			postData.OperationType = "submodule";//$NON-NLS-0$
+			postData.Operation = "delete";//$NON-NLS-0$
+			postData.SubmodulePath = submoduleLocation;//$NON-NLS-0$
+			postData.Parents = parents;//$NON-NLS-0$
+			var clientDeferred = new Deferred();
+			xhr("PUT", submoduleLocation, { 
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				timeout : GIT_TIMEOUT,
+				handleAs : "json", //$NON-NLS-0$
+				data:JSON.stringify(postData)
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+
 
 		_getGitServiceResponse : function(deferred, result) {
 			var response =  result.response ? JSON.parse(result.response) : null;
