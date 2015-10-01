@@ -111,13 +111,15 @@ define([
 				Deferred.when (this.repositories || this.progressService.progress(this.gitClient.getGitClone(that.location), messages["Getting git repository details"]), function(resp){
 					var repositories = that.repositories = resp.Children || resp;
 					var processedChildren = that.processChildren(parentItem, repositories);
-					var allInfoDeferreds = processedChildren.map(function(repo) {
-						return repo.infoDeferred = that.loadRepositoryInfo(repo);
-					});
-					function done() {
-						if (progress) progress.done();
+					if (repositories.length > 0) {
+						var allInfoDeferreds = processedChildren.map(function(repo) {
+							return repo.infoDeferred = that.loadRepositoryInfo(repo);
+						});
+						function done() {
+							if (progress) progress.done();
+						}
+						Deferred.all(allInfoDeferreds).then(done, done);
 					}
-					Deferred.all(allInfoDeferreds).then(done, done);
 					onComplete(processedChildren);
 				}, function(error){
 					if (progress) progress.done();
