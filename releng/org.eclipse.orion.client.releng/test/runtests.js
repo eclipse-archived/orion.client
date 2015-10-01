@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -22,7 +22,7 @@ try {
 		force: true,
 		stack: true,
 		verbose: true,
-		color: !("VCAP_APPLICATION" in process.env), // CF logs can't deal with color codes
+		color: !("VCAP_APPLICATION" in process.env) // CF logs can't deal with color codes
 	});
 } catch(e) {
 	// Uncaught exceptions are getting swallowed in CF env, need to log explicitly

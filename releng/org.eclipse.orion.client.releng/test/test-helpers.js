@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
+/* eslint-disable missing-nls */
 var fmt = require("util").format,
     rest = require("restler"),
     nodeUrl = require("url"),
@@ -37,7 +38,7 @@ exports.xunit_cleanup = function(xml, sauceResult, testUrl) {
 	    packageName = sanitizeClassName(fmt("%s.%s", platform, testUrl));
 	return xml
 		.replace(/(<testsuite\s+name="[^"]+")/g, fmt("$1 classname=\"%s\"", packageName))
-		.replace(/<testcase classname="([^"]+)"/g, function(match, className) {
+		.replace(/<testcase classname="([^"]+)"/g, /* @callback */ function(match, className) {
 			return fmt("<testcase classname=\"%s.%s\"", packageName, className.replace(/[#?.]/g, "_"));
 		});
 };
@@ -53,7 +54,7 @@ exports.get_mocha_result_from_log = function(grunt, job_id, username, password) 
 	var url = nodeUrl.format({
 		protocol: "https",
 		host: "saucelabs.com",
-		pathname: fmt("/rest/v1/%s/jobs/%s/assets/log.json", username, job_id),
+		pathname: fmt("/rest/v1/%s/jobs/%s/assets/log.json", username, job_id)
 	});
 
 	grunt.verbose.write(fmt("Downloading logs from %s...", nodeUrl.format(url)));
@@ -63,9 +64,9 @@ exports.get_mocha_result_from_log = function(grunt, job_id, username, password) 
 		password: password
 	})
 	.on("success", function(data) {
-		if (!Array.isArray(data))
+		if (!Array.isArray(data)) {
 			d.reject(new Error("Could not parse log.json"));
-
+		}
 		grunt.verbose.ok();
 		for (var i = data.length - 1; i >= 0; i--) {
 			var entry = data[i];

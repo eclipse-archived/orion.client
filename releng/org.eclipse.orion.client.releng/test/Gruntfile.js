@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-/*eslint no-unused-params:0 */
+/* eslint-disable missing-nls */
 /*
  * Script for running Orion mocha tests at Sauce Labs. This launches a mini Orion web server (using connect)
  * that hosts the client code. Then Sauce Labs API is called, passing the URLs of test pages on the web
@@ -81,8 +81,14 @@ module.exports = function(grunt) {
 					hostname: "<%= hostname %>",
 					port: "<%= port %>",
 					base: bundles.map(function(bundle) { return bundle.web; }),
+					/**
+					 * @callback
+					 */
 					middleware: function(connect, options, middlewares) {
 						var logger = connect.logger();
+						/**
+						 * @callback
+						 */
 						var optionalLogger = function(req, res, next) {
 							// By default we only log /testresults calls, TRACE can be used to override this
 							if (typeof env.TRACE === "undefined" || req.url !== TEST_RESULTS_PATH)
@@ -109,7 +115,7 @@ module.exports = function(grunt) {
 		},
 		"saucelabs-mocha": {
 			// Will be filled in dynamically
-		},
+		}
 	});
 
 	// Load dependencies
@@ -126,7 +132,7 @@ module.exports = function(grunt) {
 			hostname: grunt.config.get("appHostname"),
 			port: grunt.config.get("appPort"),
 			pathname: url,
-			hash: "env=integration",
+			hash: "env=integration"
 		});
 		var suiteURLShort = url.replace(/\./g, "_") ;
 		grunt.config("saucelabs-mocha." + suiteURLShort + ".options", {
@@ -139,7 +145,7 @@ module.exports = function(grunt) {
 			maxRetries: 1, // retry once on timeout
 			"max-duration":    120, // default: 180
 			testname: suiteURLShort,
-			urls: [suiteURL],
+			urls: [suiteURL]
 		});
 	});
 
