@@ -197,6 +197,24 @@ define({//Default message bundle
 	"Commits for \"${0}\" branch": "Commits for ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Commits for \"${0}\" branch against": "Commits for \"${0}\" branch against", //$NON-NLS-0$  //$NON-NLS-1$
 	"Add Remote": "Add Remote", //$NON-NLS-0$  //$NON-NLS-1$
+	"Are you sure you want do delete submodule ${0}?":"Are you sure you want do delete submodule ${0}?",//$NON-NLS-0$  //$NON-NLS-1$
+	"DeleteSubmodule": "DeleteSubmodule", //$NON-NLS-0$  //$NON-NLS-1$
+	"Delete Submodule": "Delete Submodule", //$NON-NLS-0$  //$NON-NLS-1$
+	"Deleting submodule": "Deleting submodule", //$NON-NLS-0$  //$NON-NLS-1$
+	"Submodule deleted": "Submodule deleted", //$NON-NLS-0$  //$NON-NLS-1$
+	"SyncSubmodules": "SyncSubmodules", //$NON-NLS-0$  //$NON-NLS-1$
+	"Sync Submodules": "Sync Submodules", //$NON-NLS-0$  //$NON-NLS-1$
+	"Submodules Synced": "Submodules Synced", //$NON-NLS-0$  //$NON-NLS-1$
+	"Syncing submodules": "Syncing submodules", //$NON-NLS-0$  //$NON-NLS-1$
+	"UpdateSubmodules": "UpdateSubmodules", //$NON-NLS-0$  //$NON-NLS-1$
+	"Update Submodules": "Update Submodules", //$NON-NLS-0$  //$NON-NLS-1$
+	"Updating submodules": "Updating submodules", //$NON-NLS-0$  //$NON-NLS-1$
+	"Submodules updated": "Submodules updated", //$NON-NLS-0$  //$NON-NLS-1$
+	"Add git submodule": "Add git submodule", //$NON-NLS-0$  //$NON-NLS-1$
+	"AddSubmodule": "Adding submodule: ${0} to repository: ${1}", //$NON-NLS-0$  //$NON-NLS-1$
+	"Adding submodule: ": "Adding submodule: ", //$NON-NLS-0$  //$NON-NLS-1$
+	"Add Submodule": "Add Submodule", //$NON-NLS-0$  //$NON-NLS-1$
+	"Add a submodules to this Git repository": "Add a submodules to this Git repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"Remote Name:": "Remote Name:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Remote URI:": "Remote URI:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Apply Patch": "Apply Patch", //$NON-NLS-0$  //$NON-NLS-1$
