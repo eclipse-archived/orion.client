@@ -169,10 +169,11 @@ define([
 		getChildren: function(parentItem, onComplete) {
 			var that = this;
 			var tracksRemoteBranch = this.tracksRemoteBranch();
+			var section = this.section;
 			var getSimpleLog = function() {
 				return Deferred.when(that.log || that._getLog(parentItem), function(log) {
 					that.log = parentItem.log = log;
-					if (that.currentBranch && !that.currentBranch.Current) {
+					if (section && that.currentBranch && !that.currentBranch.Current) {
 						section.setTitle(i18nUtil.formatMessage(messages['DetachedHead ${0}'], util.shortenRefName(log.Children[0])));
 					}
 					var children = log.Children.slice(0);
@@ -187,7 +188,6 @@ define([
 			} else if (parentItem.children && !parentItem.more) {
 				onComplete(parentItem.children);
 			} else if (parentItem.Type === "CommitRoot") { //$NON-NLS-0$
-				var section = this.section;
 				var progress = section ? section.createProgressMonitor() : null;
 				if (progress) progress.begin(messages["Getting git log"]);
 				return Deferred.when(parentItem.repository || that._getRepository(parentItem), function(repository) {
@@ -823,7 +823,7 @@ define([
 		},
 		expandSections: function(children) {
 			var deferreds = [];
-			if (!this.simpleLog && !this.model.isRebasing()) {
+			if (!this.model.simpleLog && !this.model.isRebasing()) {
 				for (var i = 0; i < children.length; i++) {
 					var deferred = new Deferred();
 					deferreds.push(deferred);
@@ -831,8 +831,9 @@ define([
 						d.resolve();
 					}, [deferred]);
 				}
+				return Deferred.all(deferreds);
 			}
-			return Deferred.all(deferreds);
+			return new Deferred().resolve();
 		},
 		isRowSelectable: function() {
 			return !!this.selection;
@@ -979,7 +980,7 @@ define([
 			var activeBranch = model.getActiveBranch();
 			var targetRef = model.getTargetReference();
 				
-			if (currentBranch && !this.simpleLog) {
+			if (currentBranch && !this.model.simpleLog) {
 				var incomingActionScope = this.incomingActionScope;
 				var outgoingActionScope = this.outgoingActionScope;
 				
