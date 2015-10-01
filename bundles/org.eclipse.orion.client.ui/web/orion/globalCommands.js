@@ -614,16 +614,18 @@ define([
 			throw i18nUtil.formatMessage("could not find banner parent, id was ${0}", parentId);
 		}
 		// place the HTML fragment for the header.
-		var range = document.createRange();
-		range.selectNode(parent);
-		var headerFragment = range.createContextualFragment(BannerTemplate);
-		// do the i18n string substitutions
-		lib.processTextNodes(headerFragment, messages);
-
-		if (parent.firstChild) {
-			parent.insertBefore(headerFragment, parent.firstChild);
-		} else {
-			parent.appendChild(headerFragment);
+		if (!document.getElementById("banner")) {
+			var range = document.createRange();
+			range.selectNode(parent);
+			var headerFragment = range.createContextualFragment(BannerTemplate);
+			// do the i18n string substitutions
+			lib.processTextNodes(headerFragment, messages);
+	
+			if (parent.firstChild) {
+				parent.insertBefore(headerFragment, parent.firstChild);
+			} else {
+				parent.appendChild(headerFragment);
+			}
 		}
 		// TODO not entirely happy with this. Dynamic behavior that couldn't be in the html template, maybe it could be
 		// dynamically bound in a better way like we do with NLS strings
