@@ -88,11 +88,12 @@ define([
 		_getLog: function(parentItem) {
 			var that = this;
 			var logMsg = that.location ? messages["Getting git log"] : i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], that.currentBranch.Name);
-			var ref = that.simpleLog ? that.getTargetReference() : that.getActiveBranch();
+			var detach = !that.getActiveBranch().Current;
+			var ref = that.simpleLog && !detach ? that.getTargetReference() : that.getActiveBranch();
 			if (that.isNewBranch(ref)) {
 				ref = that.getActiveBranch();
 			}
-			var location = parentItem.more ? parentItem.location : ((that.location || ref.CommitLocation || ref.Location) + that.repositoryPath + that.getQueries());
+			var location = parentItem.more ? parentItem.location : ((that.location || (detach ? ref.HeadLocation : null) || ref.CommitLocation || ref.Location) + that.repositoryPath + that.getQueries());
 			return that.progressService.progress(that.gitClient.doGitLog(location), logMsg).then(function(resp) {
 				if (that.location && resp.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
 					return that.progressService.progress(that.gitClient.doGitLog(resp.CommitLocation + that.repositoryPath + that.getQueries(), logMsg)).then(function(resp) { //$NON-NLS-0$
