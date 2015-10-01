@@ -313,14 +313,9 @@ define([
 					horizontalBox.className = "gitListCell"; //$NON-NLS-0$
 					
 					if (item.Parents) {
-						var padding = 25;
 						var len = item.Parents.length;
-						var pad = len * padding;
-						if (len >= 3) {
-							pad = 3 * padding;
-						}
 						if (len > 0) {
-							horizontalBox.style.paddingLeft = pad.toString() + "px";
+							horizontalBox.style.paddingLeft = (len * 25).toString() + "px";
 						}
 					}
 					
