@@ -12,24 +12,13 @@
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
 				var deps = ["edit/edit"];
-				if (localStorage.showSplash) deps.splice(0, 0, "edit/banner", "orion/splash");
+				if (localStorage.showSplash) deps.splice(0, 0, "orion/splash");
 				require(deps, null, config.errback);
 			});
 		</script>
 	</head>
 
 	<body id="orion-editor" spellcheck="false" class="orionPage">
-<header id="banner" role="banner" class="headerLayout">
-	<!-- JazzHub IDE Banner File -->
-	<div id='navbar'></div>
-	
-	<!--  IDE notification message area - lives at the top of the page -->
-	<div id="notificationArea" class="notificationHide">
-		<div class="notifications" id="notifications" aria-live="assertive" aria-atomic="true"></div>
-		<div class="layoutRight"><button type="button" aria-label="Close" class="dismissButton layoutRight core-sprite-close imageSprite" id="closeNotifications"></span></div>
-	</div>
-</header>
-	
 		<!-- file input doesn't function properly on all web browsers if it is dynamically generated, we don't want the input to be visible -->
 		<input id="fileSelectorInput" type="file" multiple style="position:fixed; top: -100px;"/>
 		<div id="sideMenu" class="sideMenu"></div>

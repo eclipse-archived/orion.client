@@ -11,9 +11,22 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 //define([/*'text!jconfig/jazzhuburl'*/], function(jazzhuburl) {
-define([], function() {
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'text!orion/banner/banner.html'], function(messages, lib, template) {
 //(function() {
-	if (!document.getElementById("navbar")) return;
+	if (!document.getElementById("banner")) {
+		var _parent = document.body;
+		var range = document.createRange();
+		range.selectNode(_parent);
+		var headerFragment = range.createContextualFragment(template);
+		// do the i18n string substitutions
+		lib.processTextNodes(headerFragment, messages);
+
+		if (_parent.firstChild) {
+			_parent.insertBefore(headerFragment, _parent.firstChild);
+		} else {
+			_parent.appendChild(headerFragment);
+		}
+	}
 	var jazzhuburl = window.location;
 	if (!document.getElementById("navbar.js") && !document.getElementById("navbar.css")) {
 		var _navbarScript = new URL("/api/v1/composition/js/header/navbar.js", jazzhuburl);

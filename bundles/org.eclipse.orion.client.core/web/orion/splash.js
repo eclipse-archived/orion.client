@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env amd, browser*/
-define(['module', 'i18n!orion/nls/messages', 'orion/i18nUtil'], function(module, messages, i18nUtil) {
+define(['module', 'i18n!orion/nls/messages', 'orion/i18nUtil', 'edit/banner'], function(module, messages, i18nUtil) {
 	
 var pageLoader;
 
