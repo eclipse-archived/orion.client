@@ -122,6 +122,7 @@
             { name: "sites/sites" },
             { name: "sites/view" },
             { name: "webtools/plugins/webToolsPlugin" },
+            { name: "orion/splash" },
         ];
         modules.forEach(function(module) {
             module.excludeShallow = ["chai/chai"];
