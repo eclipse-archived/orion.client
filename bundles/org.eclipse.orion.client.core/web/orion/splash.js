@@ -292,8 +292,6 @@ loader.prototype.setPluginRegistry = function(pluginRegistry) {
 function start() {
 	var splash = document.getElementById("splash");
 	if (!splash) return;
-	splash.className = 	splash.id = "splash";
-	document.body.appendChild(splash);
 	var container = document.createElement("div");
 	var showTimeout = 500;
 	if (localStorage.showSplashTimeout) {

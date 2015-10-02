@@ -11,37 +11,26 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 //define([/*'text!jconfig/jazzhuburl'*/], function(jazzhuburl) {
-(function() {
-	jazzhuburl = window.location;
-	
-	var _navbarScript = new URL("/api/v1/composition/js/header/navbar.js", jazzhuburl);
-	var _navbarStylesheet = new URL("/api/v1/composition/css/header/navbar.css", jazzhuburl);
-
-	function _loadStylesheet(stylesheetURL, id) {
+define([], function() {
+//(function() {
+	if (!document.getElementById("navbar")) return;
+	var jazzhuburl = window.location;
+	if (!document.getElementById("navbar.js") && !document.getElementById("navbar.css")) {
+		var _navbarScript = new URL("/api/v1/composition/js/header/navbar.js", jazzhuburl);
+		var _navbarStylesheet = new URL("/api/v1/composition/css/header/navbar.css", jazzhuburl);
 		var link = document.createElement("link");
+		link.id =  "navbar.css";
 		link.setAttribute("rel", "stylesheet");
 		link.setAttribute("type", "text/css");
-		link.setAttribute("href", stylesheetURL.href);
-		if (id) {
-			link.setAttribute("id", id);
-		}
+		link.setAttribute("href", _navbarStylesheet.href);
+		link.onload = function() {
+			var script = document.createElement("script");
+			script.id =  "navbar.js";
+			script.type = "text/javascript";
+			script.src = _navbarScript.href;
+			document.getElementsByTagName('head')[0].appendChild(script);
+		};
 		document.getElementsByTagName("head")[0].appendChild(link);
 	}
-
-	function _loadScript(scriptURL, id) {
-		var script = document.createElement("script");
-		if (id) {
-			script.id = id;
-		}
-		script.type = "text/javascript";
-		script.src = scriptURL.href;
-		document.getElementsByTagName('head')[0].appendChild(script);
-	}
-	
-	var addBanner = !document.getElementById("navbar.js");
-	if (addBanner) {
-		_loadStylesheet(_navbarStylesheet, "navbar.css");
-		_loadScript(_navbarScript, "navbar.js");
-	}
-//});
-})();
+});
+//})();
