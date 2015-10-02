@@ -804,16 +804,17 @@ and (max-device-width : 1024px)  {
 
 .splash {
 	position: absolute;
-	top: 0;
+	top: 51px;
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background-color: rgb(38,52,63);
+	background-color: rgb(57,75,84)/*rgb(38,52,63)*/;
 	z-index: 1000;
 	display: block;
+	box-shadow: 0 3px 7pt 0 rgba(0,0,0,0.3) inset;
 }
 
-.splashSeeThrough {
+.splashSeeThroughX {
 	-webkit-animation-name: splashSeeThrough;
 	animation-name: splashSeeThrough;
 	animation-duration: 0.7s;
@@ -859,8 +860,8 @@ and (max-device-width : 1024px)  {
 	padding-top: 60px;
 	padding-bottom: 0px;
 	border-radius: 4px;
-	box-shadow: 5px 5px 5px 0 rgba(0,0,0,0.2);
-	border-bottom: 1px solid rgb(59,222,255);
+	Xbox-shadow: 5px 5px 5px 0 rgba(0,0,0,0.2);
+	Xborder-bottom: 1px solid rgb(59,222,255);
 }
 
 .splashAbout {
