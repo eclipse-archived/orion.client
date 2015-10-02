@@ -7,21 +7,18 @@
 		<link rel="icon" href="../images/edit.png" type="image/png">
 		<title>Editor</title>
 		<link rel="stylesheet" type="text/css" href="edit.css" />
-		<link rel="stylesheet" type="text/css" href="/api/v1/composition/css/header/navbar.css" />
 		<script src="../requirejs/require.js"></script>
 		<script>
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
 				var deps = ["edit/edit"];
-				if (localStorage.showSplash) deps.splice(0, 0, "orion/splash");
+				if (localStorage.showSplash) deps.splice(0, 0, "edit/banner", "orion/splash");
 				require(deps, null, config.errback);
 			});
 		</script>
 	</head>
 
 	<body id="orion-editor" spellcheck="false" class="orionPage">
-	
-
 <header id="banner" role="banner" class="headerLayout">
 	<!-- JazzHub IDE Banner File -->
 	<div id='navbar'></div>
@@ -31,30 +28,7 @@
 		<div class="notifications" id="notifications" aria-live="assertive" aria-atomic="true"></div>
 		<div class="layoutRight"><button type="button" aria-label="Close" class="dismissButton layoutRight core-sprite-close imageSprite" id="closeNotifications"></span></div>
 	</div>
-	
-	<!-- These are the remaining Dom nodes that the dynamic code needs to find they will be appended to the secondary nav bar -->
-	
-	<div id="navBreadcrumb" class="clear navigationBreadcrumb" style="margin-top:-400px;display:none;">
-		<div id="location" class="currentLocation"></div>
-	</div>
-	
-	<a id="home"></a></div>
-
 </header>
-<script type="text/javascript">
-	var _gaq = _gaq || [];
-	_gaq.push(['_setAccount', 'UA-10864409-1']);
-	_gaq.push(['_setDomainName', 'jazz.net']);  //comment this line out to test it outside of the jazz.net domain (if present, ga requests aren't made elsewhere)
-	_gaq.push(['_trackPageview', location.pathname + location.hash]); //since the IDE uses hashes as resource urls, we can assume we always want to track the hash
-	
-	(function() {
-	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-	})();
-</script>
-<script id="navbar.js" src="/api/v1/composition/js/header/navbar.js"></script>
-	
 	
 		<!-- file input doesn't function properly on all web browsers if it is dynamically generated, we don't want the input to be visible -->
 		<input id="fileSelectorInput" type="file" multiple style="position:fixed; top: -100px;"/>
