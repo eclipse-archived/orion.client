@@ -15,7 +15,7 @@ define([
 	'orion/globalCommands',
 	'marked/marked',
 ], function(messages, lib, mGlobalCommands, marked) {
-	var SEV_ERROR = "Error", SEV_WARNING = "Warning", SEV_INFO = "Info", SEV_OK = "Ok"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var SEV_ERROR = "Error", SEV_WARNING = "Warning", SEV_INFO = "Info", SEV_OK = "Ok"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
 
 	// this is a cheat, all dom ids should be passed in
 	var closeButtonDomId = "closeNotifications"; //$NON-NLS-0$
@@ -71,7 +71,7 @@ define([
 		},
 		
 		_takeDownSplash: function() {
-			var pageLoader = require.specified("orion/splash") && require("orion/splash");
+			var pageLoader = require.specified("orion/splash") && require("orion/splash"); //$NON-NLS-1$
 			if (pageLoader) {
 				pageLoader.takeDown();
 			}
@@ -114,7 +114,7 @@ define([
 				// this is kind of a hack; when there is good screen reader support for aria-busy,
 				// this should be done by toggling that instead
 				var readSetting = node.getAttribute("aria-live"); //$NON-NLS-0$
-				node.setAttribute("aria-live", isAccessible ? "polite" : "off"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				node.setAttribute("aria-live", isAccessible ? "polite" : "off"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 				window.setTimeout(function() {
 					if (msg === this.statusMessage) {
 						lib.empty(node);
@@ -149,19 +149,19 @@ define([
 			this.statusMessage = st;
 			this._init();
 			//could be: responseText from xhrGet, deferred error object, or plain string
-			var status = st.responseText || st.message || st;
+			var _status = st.responseText || st.message || st;
 			//accept either a string or a JSON representation of an IStatus
-			if (typeof status === "string") {
+			if (typeof _status === "string") {
 				try {
-					status = JSON.parse(status);
+					_status = JSON.parse(_status);
 				} catch(error) {
 					//it is not JSON, just continue;
 				}
 			}
-			var message = status.Message || status;
+			var message = _status.Message || _status;
 			var color = "red"; //$NON-NLS-0$
-			if (status.Severity) {
-				switch (status.Severity) {
+			if (_status.Severity) {
+				switch (_status.Severity) {
 				case SEV_WARNING: //$NON-NLS-0$
 					color = "#FFCC00"; //$NON-NLS-0$
 					break;
@@ -228,14 +228,14 @@ define([
 			this._cancelMsg = cancelMsg;
 			this.progressMessage = message;
 			//could either be responseText from xhrGet or just a string
-			var status = message.responseText || message;
-			if(status instanceof Error) {
-				status.Severity = SEV_ERROR;
+			var _status = message.responseText || message;
+			if(_status instanceof Error) {
+				_status.Severity = SEV_ERROR;
 			}
 			//accept either a string or a JSON representation of an IStatus
-			else if (typeof status === "string") {
+			else if (typeof _status === "string") {
 				try {
-					status = JSON.parse(status);
+					_status = JSON.parse(_status);
 				} catch(error) {
 					//it is not JSON, just continue;
 				}
@@ -243,42 +243,42 @@ define([
 			this._init();
 
 			// Create the message
-			var msg = status.Message || status.toString();
+			var msg = _status.Message || _status.toString();
 			if (msg === Object.prototype.toString()) {
 				// Last ditch effort to prevent user from seeing meaningless "[object Object]" message
 				msg = messages.UnknownError;
 			}
 			var node = lib.node(this.progressDomId);
 			lib.empty(node);
-			node.appendChild(this.createMessage(status, msg));
+			node.appendChild(this.createMessage(_status, msg));
 
 			// Given the severity, add/remove the appropriate classes from the notificationContainerDomId
 			var extraClass = "progressNormal"; //$NON-NLS-0$
 			var removedClasses = [];
-			if (status.Severity) {
-				switch (status.Severity) {
+			if (_status.Severity) {
+				switch (_status.Severity) {
 				case SEV_WARNING: //$NON-NLS-0$
 					extraClass="progressWarning"; //$NON-NLS-0$
-					removedClasses.push("progressInfo");
-					removedClasses.push("progressError");
+					removedClasses.push("progressInfo"); //$NON-NLS-1$
+					removedClasses.push("progressError"); //$NON-NLS-1$
 					removedClasses.push("progressNormal"); //$NON-NLS-0$
 					this._clickToDisMiss = true;
 					break;
 				case SEV_ERROR: //$NON-NLS-0$
 					extraClass="progressError"; //$NON-NLS-0$
-					removedClasses.push("progressWarning");
-					removedClasses.push("progressInfo");
+					removedClasses.push("progressWarning"); //$NON-NLS-1$
+					removedClasses.push("progressInfo"); //$NON-NLS-1$
 					removedClasses.push("progressNormal"); //$NON-NLS-0$
 					this._clickToDisMiss = true;
 					break;
 				default:
 					extraClass="progressNormal"; //$NON-NLS-0$
-					removedClasses.push("progressWarning");
-					removedClasses.push("progressError");
-					removedClasses.push("progressNormal");
+					removedClasses.push("progressWarning"); //$NON-NLS-1$
+					removedClasses.push("progressError"); //$NON-NLS-1$
+					removedClasses.push("progressNormal"); //$NON-NLS-1$
 				}
 			}
-			removedClasses.push("notificationHide");
+			removedClasses.push("notificationHide"); //$NON-NLS-1$
 			var container = lib.node(this.notificationContainerDomId);
 			if (extraClass && this.progressDomId !== this.domId) {
 				container.classList.add(extraClass);
@@ -314,8 +314,8 @@ define([
 		 * @private
 		 * @returns {Element}
 		 */
-		createMessage: function(status, msg) {
-			if (status.HTML) {
+		createMessage: function(_status, msg) {
+			if (_status.HTML) {
 				// msg is HTML to be inserted directly
 				var span = document.createElement("span"); //$NON-NLS-0$
 				span.innerHTML = msg;
@@ -323,8 +323,8 @@ define([
 			}
 			// Check for Markdown
 			var markdownSource;
-			if (status.type === "markdown") { //$NON-NLS-0$
-				markdownSource = status.content || msg;
+			if (_status.type === "markdown") { //$NON-NLS-0$
+				markdownSource = _status.content || msg;
 			} else {
 				// Attempt to parse the msg field as Markdown
 				// TODO this is deprecated - should be removed in favor of explicit `type`
@@ -334,7 +334,7 @@ define([
 			var html= null;
 			try {
 				html = marked(markdownSource, {
-					sanitize: true,
+					sanitize: true
 				});
 			} catch (e) {
 			}
@@ -352,7 +352,7 @@ define([
 				// Treat as plain text
 				msgNode = document.createTextNode(msg);
 			}
-			if (!links.length && status.Severity !== SEV_WARNING && status.Severity !== SEV_ERROR && !this._cancelMsg) {
+			if (!links.length && _status.Severity !== SEV_WARNING && _status.Severity !== SEV_ERROR && !this._cancelMsg) {
 				// Message has no links in it, and is not a Warning or Error severity. Therefore we consider
 				// it unimportant and will auto hide it in 5 seconds.
 				if(this._timer){
@@ -466,12 +466,12 @@ define([
 	/**
 	 * Sets the progress monitor as done. If no status is provided the message will be
 	 * removed from the status.
-	 * @param {String|orionError} status [optional] The error to display. Can be a simple String,
+	 * @param {String|orionError} _status [optional] The error to display. Can be a simple String,
 	 * or an error object from a XHR error callback, or the body of an error response 
 	 * from the Orion server.
 	 */
-	ProgressMonitor.prototype.done = function(status){
-				this.status = status;
+	ProgressMonitor.prototype.done = function(_status){
+				this.status = _status;
 				this.statusService._doneProgressMonitor(this);
 			};
 	/**
