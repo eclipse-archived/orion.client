@@ -106,7 +106,12 @@ define([
 												var match = line.matches[j];
 												var v = Finder.findWord(line.name, match.startIndex);
 												if(v === node.name) {
-													that._checkType(type, file, match, expected);
+													if(match.start === node.range[0] && match.end === node.range[1]) {
+														match.confidence = 100;
+														expected.done++;
+													} else {
+														that._checkType(type, file, match, expected);
+													}
 												} else {
 													match.confidence = -1;
 													expected.done++;
@@ -184,10 +189,10 @@ define([
 			switch(node.type) {
 				case 'FunctionDeclaration':
 				case 'FucntionExpression':
-				case 'VariableDeclarator': {
+				case 'VariableDeclarator': 
+				case 'Literal': {
 					//a re-decl cannot be a reference
 					match.confidence = -1;
-					this._checkDone(expected);
 					break;
 				}
 				case 'Identifier': {
@@ -196,7 +201,6 @@ define([
 						this._checkNode(original, p, match, expected);
 					} else {
 						match.confidence = 25;
-						this._checkDone(expected);
 					}
 					break;
 				}
@@ -209,12 +213,13 @@ define([
 				}
 				case 'MemberExpression': {
 					//if part of the expression, maybe relevant
+					match.confidence = 10;
 					break;
 				}
 				case 'CallExpression': {
 					if(node.callee.name === original.type.exprName) {
 						if(original.type.type === 'fn()') {
-							match.confidence = 40;
+							match.confidence = 25;
 						} else {
 							match.confidence = -1;
 						}
@@ -237,6 +242,9 @@ define([
 						}
 					}
 					break;
+				}
+				default: {
+					match.confidence = 0;
 				}
 			}
 		},
