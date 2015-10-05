@@ -233,7 +233,8 @@ require([
 		           query: {
 			           type: "documentation",  //$NON-NLS-1$
 			           file: args.meta.location,
-			           end: args.params.offset
+			           end: args.params.offset,
+			           docFormat: args.params.docFormat
 		           },
 		           files: args.files},
 		           function(error, doc) {
