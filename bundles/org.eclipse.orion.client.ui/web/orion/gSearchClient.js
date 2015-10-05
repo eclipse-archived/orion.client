@@ -93,7 +93,7 @@ define("orion/gSearchClient", [ //$NON-NLS-0$
                 return sResult;
             }.bind(this),
             function(error) {
-                console.error("Error loading file content: " + error.message); //$NON-NLS-0$
+                this._registry.getService("orion.page.message").setProgressResult({Message: error.message, Severity: "Error"}); //$NON-NLS-1$ //$NON-NLS-2$
             }.bind(this));
 			
 		},
@@ -115,7 +115,7 @@ define("orion/gSearchClient", [ //$NON-NLS-0$
                  return sResult;
             }.bind(this),
             function(error) {
-                console.error("Error loading file meta data: " + error.message); //$NON-NLS-0$
+            	this._registry.getService("orion.page.message").setProgressResult({Message: error.message, Severity: "Error"}); //$NON-NLS-1$ //$NON-NLS-2$
             }.bind(this));
 			
 		},

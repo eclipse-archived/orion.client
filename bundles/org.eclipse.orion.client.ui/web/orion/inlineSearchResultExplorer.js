@@ -136,7 +136,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 		if(typeof item.confidence !== "number") {
 			return;
 		}
-		var classNames = ["confidenceDecorator"];
+		var classNames = ["confidenceDecorator"]; //$NON-NLS-1$
 		if(item.confidence >= 100) {
 			classNames.push("confidenceHigh"); //$NON-NLS-0$
 		} else {
@@ -266,7 +266,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
         var th, h2;
         switch (col_no) {
             case 0:
-                th = _createElement('th', "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-0$
+                th = _createElement('th', "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
                 h2 = _createElement('h2', null, null, th); //$NON-NLS-0$
                 h2.textContent = messages["Files replaced"];
                 break;
@@ -278,7 +278,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
     	var td = null;
         switch (col_no) {
             case 0:
-                td = _createElement("td", "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-0$
+                td = _createElement("td", "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
                 
                 var fileSpan = _createSpan(null, null, td, null);
                 SearchResultRenderer.prototype.renderFileElement.call(this, item.model, fileSpan, this.explorer.resultModel);
@@ -310,7 +310,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
                     
                     linkNode.insertBefore(operationIcon, linkNode.firstElementChild);
 
-                    var statusMessageSpan = _createElement("span", "replacementStatusSpan", null, linkNode); //$NON-NLS-1$ //$NON-NLS-0$
+                    var statusMessageSpan = _createElement("span", "replacementStatusSpan", null, linkNode); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
                     statusMessageSpan.appendChild(document.createTextNode("(" + statusMessage + ")")); //$NON-NLS-1$ //$NON-NLS-0$
                 }
         }
@@ -388,7 +388,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
             checkbox: false,
             highlightSelection: false
         }, this);
-    	mFileDetailRenderer.getFullPathPref(this._preferences, "/inlineSearchPane", ["showFullPath"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$
+    	mFileDetailRenderer.getFullPathPref(this._preferences, "/inlineSearchPane", ["showFullPath"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
     		this._shouldShowFullPath = (properties ? properties[0] : false);
     		this.declareCommands();
      	}.bind(this));
@@ -488,7 +488,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
         this._commandService.addCommand(replaceAllCommand);
         this._commandService.addCommand(switchFullPathCommand);
         
-        this._commandService.addCommandGroup("searchPageActions", "orion.searchActions.unlabeled", 200); //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.addCommandGroup("searchPageActions", "orion.searchActions.unlabeled", 200); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
         
         mExplorer.createExplorerCommands(this._commandService, function(item) {
 			var emptyKeyword = false;
@@ -498,12 +498,12 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 			return !item._reporting && !emptyKeyword;
         });
         
-        this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.replaceAll", 1); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.expandAll", 2); //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.collapseAll", 3); //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.search.nextResult", 4); //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.search.prevResult", 5); //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.search.switchFullPath", 6); //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.replaceAll", 1); //$NON-NLS-2$ //$NON-NLS-1$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.expandAll", 2); //$NON-NLS-1$ //$NON-NLS-2$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.collapseAll", 3); //$NON-NLS-1$ //$NON-NLS-2$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.search.nextResult", 4); //$NON-NLS-1$ //$NON-NLS-2$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.search.prevResult", 5); //$NON-NLS-1$ //$NON-NLS-2$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.search.switchFullPath", 6); //$NON-NLS-1$ //$NON-NLS-2$
     };
 
     InlineSearchResultExplorer.prototype._fileExpanded = function(fileIndex, detailIndex) {
@@ -741,10 +741,10 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
     InlineSearchResultExplorer.prototype.initCommands = function() {
         var that = this;
         this._commandService.destroy("searchPageActions"); //$NON-NLS-0$
-        this._commandService.renderCommands("searchPageActions", "searchPageActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.renderCommands("searchPageActions", "searchPageActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 
         this._commandService.destroy("pageNavigationActions"); //$NON-NLS-0$
-        this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
     };
 
     InlineSearchResultExplorer.prototype.reportStatus = function(message) {
@@ -763,7 +763,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
         var modelLinkId = this.renderer.getDetailIconId(model);
         var tableNode = this.renderer.generateContextTip(model);
         var aroundNode = lib.node(modelLinkId);
-        var orient = ["below", "right"]; //$NON-NLS-1$ //$NON-NLS-0$
+        var orient = ["below", "right"]; //$NON-NLS-1$ //$NON-NLS-2$
         if (aroundNode) {
             var parentNode = this.myTree._parent;
             var parentRect = parentNode.getClientRects()[0];
@@ -771,7 +771,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
             for (var i = 0, l = rects.length; i < l; i++) {
                 var r = rects[i];
                 if ((r.bottom + 100) > parentRect.bottom) {
-                    orient = ["above", "right"]; //$NON-NLS-1$ //$NON-NLS-0$
+                    orient = ["above", "right"]; //$NON-NLS-1$ //$NON-NLS-2$
                     break;
                 }
             }
@@ -1049,7 +1049,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
     };
     
     InlineSearchResultExplorer.prototype.switchFullPath = function() {
-    	mFileDetailRenderer.switchFullPathPref(this._preferences, "/inlineSearchPane", ["showFullPath"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$
+    	mFileDetailRenderer.switchFullPathPref(this._preferences, "/inlineSearchPane", ["showFullPath"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-2$
     		this._shouldShowFullPath = (properties ? properties[0] : false);
        		mFileDetailRenderer.showFullPath(this.parentNode, this._shouldShowFullPath);
      	}.bind(this));
@@ -1106,7 +1106,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 			}
 		}.bind(this), function(error) {
 			var message = i18nUtil.formatMessage(messages["${0}. Try your search again."], error && error.error ? error.error : "Error"); //$NON-NLS-0$
-			this.registry.getService("orion.page.message").setProgressResult({Message: message, Severity: "Error"}); //$NON-NLS-0$
+			this.registry.getService("orion.page.message").setProgressResult({Message: message, Severity: "Error"}); //$NON-NLS-1$ //$NON-NLS-2$
 		}.bind(this), function(jsonData, incremental) {
 			this._renderSearchResult(resultsNode, searchParams, gSearchClient.convert(jsonData, searchParams), incremental);
 		}.bind(this));
