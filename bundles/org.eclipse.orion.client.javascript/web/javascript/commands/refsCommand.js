@@ -110,7 +110,7 @@ define([
 														match.confidence = 100;
 														expected.done++;
 													} else {
-														that._checkType(type, file, match, expected);
+														that._checkType(type, file.metadata, match, expected);
 													}
 												} else {
 													match.confidence = -1;
@@ -144,7 +144,7 @@ define([
 		_checkType: function _checkType(original, file, match, expected) {
 			var that = this;
 			that.ternworker.postMessage(
-					{request: 'type', args: {meta:{location: file.location}, params: {offset: match.end}}},  //$NON-NLS-1$
+					{request: 'type', args: {meta:{location: file.Location}, params: {offset: match.end}}},  //$NON-NLS-1$
 					function(type, err) { //$NON-NLS-1$
 						//TODO not until incremental support is added 
 						//deferred.progress({searchParams: searchParams, refResult: match});
@@ -254,26 +254,26 @@ define([
 		 * read the complete file contents each time
 		 * @function
 		 * @private
-		 * @param {Object} file The file match from the search results
+		 * @param {Object} file The file match metadata from the search results
 		 * @returns {Deferred} The deferred to resolve to get the AST
 		 */
 		_getAST: function _getAST(file) {
 			var that = this;
-			var ast = that.cache[file.location];
+			var ast = that.cache[file.Location];
 			if(ast) {
 				return new Deferred().resolve(ast);
 			} else {
-				return that.searchclient._fileClient.read(file.location).then(function(contents) {
+				return that.searchclient._fileClient.read(file.Location).then(function(contents) {
 					var proxy = {
 						getFileMetadata: function() {
-							return new Deferred().resolve(file.metadata);
+							return new Deferred().resolve(file);
 						},
 						getText: function() {
 							return new Deferred().resolve(contents);
 						}
 					};
 					return that.astmanager.getAST(proxy).then(function(ast) {
-						that.cache[file.location] = ast;
+						that.cache[file.Location] = ast;
 						return new Deferred().resolve(ast);
 					});
 				});
