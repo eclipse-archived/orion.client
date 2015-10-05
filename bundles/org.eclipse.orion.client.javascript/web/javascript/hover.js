@@ -258,8 +258,12 @@ define([
 		    	if (!meta){
 		    		return null;
 		    	}
-		    	if(Array.isArray(meta.parents) && meta.parents.length > 1) {
-		    		that.resolver.setSearchLocation(meta.parents[meta.parents.length - 1].Location);	
+		    	if(Array.isArray(meta.parents)) {
+		    		var idx = 0;
+		    		if(meta.parents.length > 0) {
+		    			idx = meta.parents.length-1;
+		    		}
+		    		that.resolver.setSearchLocation(meta.parents[idx].Location);	
 		    	} else {
 		    		that.resolver.setSearchLocation(null);
 		    	}
@@ -336,7 +340,7 @@ define([
 			deferred = new Deferred();
 			var files = [{type: 'full', name: meta.location, text: htmlsource ? htmlsource : ast.source}]; //$NON-NLS-1$
 			this.ternworker.postMessage(
-				{request:'documentation', args:{params:{offset: ctxt.offset}, files: files, meta:{location: meta.location}}}, //$NON-NLS-1$
+				{request:'documentation', args:{params:{offset: ctxt.offset, docFormat: 'full'}, files: files, meta:{location: meta.location}}}, //$NON-NLS-1$ //$NON-NLS-2$
 				function(response) {
 					var hover = '';
 					if(response.request === 'documentation') {
