@@ -15,13 +15,13 @@ define([
 		'orion/parameterCollectors', 'orion/extensionCommands', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/i18nUtil',
 		'orion/webui/splitter', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/contentTypes', 'orion/keyAssist',
 		'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
-		'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html',
+		'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', '!orion/banner/banner',
 		'text!orion/banner/toolbar.html',
 		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu', 'orion/objects', "orion/metrics",'orion/bidiUtils'
 	],
 	function (messages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands,
 		mBreadcrumbs, lib, i18nUtil, mSplitter, mDropdown, mTooltip, mContentTypes, mKeyAssist, mThemePreferences, mThemeData, Deferred,
-		mUserMenu, PageLinks, openResource, BannerTemplate, ToolbarTemplate, util, mCustomGlobalCommands, mFileClient, SideMenu, objects, mMetrics, mBidiUtils) {
+		mUserMenu, PageLinks, openResource, Banner, ToolbarTemplate, util, mCustomGlobalCommands, mFileClient, SideMenu, objects, mMetrics, mBidiUtils) {
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 *
@@ -614,19 +614,8 @@ define([
 			throw i18nUtil.formatMessage("could not find banner parent, id was ${0}", parentId);
 		}
 		// place the HTML fragment for the header.
-		if (!document.getElementById("banner")) {
-			var range = document.createRange();
-			range.selectNode(parent);
-			var headerFragment = range.createContextualFragment(BannerTemplate);
-			// do the i18n string substitutions
-			lib.processTextNodes(headerFragment, messages);
-	
-			if (parent.firstChild) {
-				parent.insertBefore(headerFragment, parent.firstChild);
-			} else {
-				parent.appendChild(headerFragment);
-			}
-		}
+		new Banner().create(parent);
+		
 		// TODO not entirely happy with this. Dynamic behavior that couldn't be in the html template, maybe it could be
 		// dynamically bound in a better way like we do with NLS strings
 		var home = lib.node("home"); //$NON-NLS-0$

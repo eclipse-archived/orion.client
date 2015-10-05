@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env amd, browser*/
-define(['module', 'i18n!orion/nls/messages', 'orion/i18nUtil', 'edit/banner'], function(module, messages, i18nUtil) {
+define(['module', 'i18n!orion/nls/messages', 'orion/i18nUtil', 'orion/banner/banner'], function(module, messages, i18nUtil, Banner) {
 	
 var pageLoader;
 
@@ -290,6 +290,8 @@ loader.prototype.setPluginRegistry = function(pluginRegistry) {
 };
 
 function start() {
+	new Banner().create(document.body);
+	
 	var splash = document.getElementById("splash");
 	if (!splash) return;
 	var container = document.createElement("div");

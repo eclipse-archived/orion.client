@@ -1,27 +1,7 @@
-<header id="banner" role="banner">
-	<!-- Requires some js code to bind the home link, link to progress image, and binding NLS variables  -->
-
-	<div id="staticBanner" class="layoutBlock topRowBanner"> <!-- primaryNav -->
-		<!-- Static "Home" link. TODO delete this -->
-		<a id="home" class="layoutLeft "></a>
-
-		<!-- Left banner component: hamburger -->
-		<nav id="primaryNav" class="bannerLeftArea" style="z-index:2;" role="navigation">
-		</nav>
-
-		<!-- Middle banner component: Breadcrumb bar -->
-		<div class="clear navigationBreadcrumb bannerMiddleArea" >
-			<div id="location" class="currentLocation"></div>
-		</div>
-
-		<!-- Right banner component: user identity -->
-		<div class="bannerRightArea">
-		</div>
-	</div>
-
-	<!-- IDE notification messages go in here -->
+<header id="banner" role="banner" class="headerLayout">
+	<nav id='navbar'></nav>
 	<div id="notificationArea" class="notificationHide">
 		<div class="notifications" id="notifications" aria-live="assertive" aria-atomic="true"></div>
-		<div class="layoutRight"><button aria-label="Close" class="dismissButton layoutRight core-sprite-close imageSprite" type="button" id="closeNotifications"></span></div>
+		<div class="layoutRight"><button type="button" aria-label="Close" class="dismissButton layoutRight core-sprite-close imageSprite" id="closeNotifications"></span></div>
 	</div>
 </header>

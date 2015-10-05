@@ -804,7 +804,7 @@ and (max-device-width : 1024px)  {
 
 .splash {
 	position: absolute;
-	top: 51px;
+	top: 0;
 	bottom: 0;
 	left: 0;
 	right: 0;
