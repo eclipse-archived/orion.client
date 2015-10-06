@@ -78,6 +78,9 @@ define([
 		showMarginVisible: true,
 		marginOffset: 80,
 		marginOffsetVisible: true,
+		encodingCharset: "UTF-8", //$NON-NLS-0$
+		encodingCharsetVisible: true,
+		encodingCharsetLocalVisible: false,
 		keyBindings: "Default",
 		keyBindingsVisible: true,
 		keyBindingsLocalVisible: true,
