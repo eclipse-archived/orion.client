@@ -1087,7 +1087,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 	InlineSearchResultExplorer.prototype._search = function(resultsNode, searchParams, searchResult) {
 		lib.empty(resultsNode);
 		if(searchResult) {
-			this._renderSearchResult(resultsNode, searchParams, searchResult);
+			this._renderSearchResult(resultsNode, searchParams, searchResult, searchParams.incremental);
 			window.setTimeout(function() {
 				this.expandAll();
 			}.bind(this), 10);

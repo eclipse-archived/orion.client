@@ -92,7 +92,7 @@ define([
 								expected.total = 0;
 								expected.done = 0;
 								expected.result = [];
-								var searchParams = {keyword: node.name, resource: that.scriptresolver.getSearchLocation(), fileNamePatterns:["*.js"], caseSensitive: true }; //$NON-NLS-1$
+								var searchParams = {keyword: node.name, resource: that.scriptresolver.getSearchLocation(), fileNamePatterns:["*.js"], caseSensitive: true, incremental:true, kind: 'flat' }; //$NON-NLS-1$
 								expected.params = searchParams;
 								expected.deferred = deferred;
 								that.searchclient.search(searchParams, true, true).then(function(searchResult) {
