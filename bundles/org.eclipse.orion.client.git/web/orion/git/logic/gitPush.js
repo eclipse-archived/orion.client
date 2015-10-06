@@ -161,6 +161,7 @@ define([
 											}
 											display.Message = "<span class=\"gitPushResult\">" + result + "</span>"; //$NON-NLS-0$ //$NON-NLS-1$
 										} else {
+											display.HTML = false;
 											display.Message = i18nUtil.formatMessage(messages["PushingRemoteSucceeded"], name); //$NON-NLS-0$ 
 											var isGerrit = name.split('/')[1];
 											if (isGerrit === "for") {
