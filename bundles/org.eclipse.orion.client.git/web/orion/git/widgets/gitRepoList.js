@@ -132,26 +132,26 @@ define([
 			}
 		},
 		processChildren: function(parentItem, children) {
-			var filter = this.filterQuery;
-			if (filter) {
-				children = children.filter(function(item) {
-					return item.Name.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
-				});
-			}
 			if (children.length === 0) {
 				children = [{Type: "NoContent", selectable: false, isNotSelectable: true}]; //$NON-NLS-0$
 			}
 			children.forEach(function(item) {
 				item.parent = parentItem;
 			});
-			children.sort(function(repo1, repo2) {
+			
+			function sort(children) {
+				children.sort(function(repo1, repo2) {
 				return repo1.Name.localeCompare(repo2.Name);
 			});
+			}
+			
+			sort(children);
 			parentItem.children = children;
 			
 			function attachChildren(repo, array) {
 				array.push(repo);
 				if (repo.Children) {
+					sort(repo.Children);
 					for (var j=0; j<repo.Children.length; j++) {
 						attachChildren(repo.Children[j], array);
 					}
@@ -163,11 +163,19 @@ define([
 				attachChildren(children[i], rootRepo);
 			}
 			
-			children = rootRepo;			
+			children = rootRepo;
+			
+			var filter = this.filterQuery;
+			if (filter) {
+				children = children.filter(function(item) {
+					return item.Name.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
+				});
+			}
 			return children;
 		},
 		getId: function(/* item */ item){
-			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : ""); //$NON-NLS-0$
+			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : "") +
+					(item.Parents ? ("-for-" + item.Parents[item.Parents.length-1].replace(/\//g, "")) : ""); //$NON-NLS-0$
 		}
 	});
 	
