@@ -168,6 +168,10 @@ define([
 		return refName;
 	}
 	
+	function shortenSHA(SHA) {
+		return SHA.substring(0, 6);
+	}
+	
 	function shortenPath(path) {
 		var result = path.split('/').slice(-3); //$NON-NLS-0$
 		result = result.join("/"); //$NON-NLS-0$
@@ -217,6 +221,7 @@ define([
 		changeSignedOffByCommitMessage: changeSignedOffByCommitMessage,
 		shortenRefName: shortenRefName,
 		shortenPath: shortenPath,
+		shortenSHA : shortenSHA,
 		relativePath: relativePath,
 		getGerritFooter: getGerritFooter
 	};
