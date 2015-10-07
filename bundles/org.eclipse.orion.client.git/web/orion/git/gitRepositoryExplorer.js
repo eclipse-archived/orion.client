@@ -149,6 +149,12 @@ define([
 				that.changes = null;
 				that.setSelectedChanges(that.changes);
 				break;
+			case "deleteSubmodule": //$NON-NLS-0$
+				if (that.repository && event.item.Location === that.repository.Location) {
+					window.location.href = require.toUrl(repoTemplate.expand({resource: that.lastResource = ""}));
+					that.changedItem();
+				}
+				break;
 			}
 		});
 	}
