@@ -115,7 +115,16 @@ define([
 				that.changedItem();
 				break;
 			case "removeClone": //$NON-NLS-0$
-				if (that.repository && event.items.some(function(repo) { return repo.Location === that.repository.Location; })) {
+				function submoduleSelected(repo) {
+					var parentSelected = repo.Location === that.repository.Location;
+					var childSelected = false;
+					if (repo.Children) {
+						childSelected = repo.Children.some(function(childrepo) {return submoduleSelected(childrepo);});
+					}
+
+					return parentSelected || childSelected;
+				}
+				if (that.repository && event.items.some(submoduleSelected)) {
 					window.location.href = require.toUrl(repoTemplate.expand({resource: that.lastResource = ""}));
 					that.changedItem();
 				}
