@@ -160,7 +160,7 @@ define([
 				Deferred.when(repository.status || (repository.status = progressService.progress(gitClient.getGitStatus(location), messages["Getting changes"])), function(resp) {//$NON-NLS-0$
 					var status = that.status = that.items = resp;
 					Deferred.when(that.repository || progressService.progress(gitClient.getGitClone(status.CloneLocation), messages["Getting git repository details"]), function(resp) {
-						var repository = resp.Children ? resp.Children[0] : resp;
+						var repository = (resp.Children&&resp.Type!=="Clone") ? resp.Children[0] : resp;//$NON-NLS-0$
 						repository.status = status;
 						progressService.progress(gitClient.getGitCloneConfig(repository.ConfigLocation), "Getting repository configuration ", repository.Name).then(function(resp) { //$NON-NLS-0$
 							var config = resp.Children;
