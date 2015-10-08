@@ -88,7 +88,7 @@ define([
 		_getLog: function(parentItem) {
 			var that = this;
 			var logMsg = that.location ? messages["Getting git log"] : i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], that.currentBranch.Name);
-			var detach = !that.getActiveBranch().Current;
+			var detach = that.getActiveBranch().Detached;
 			var ref = that.simpleLog && !detach ? that.getTargetReference() : that.getActiveBranch();
 			if (that.isNewBranch(ref)) {
 				ref = that.getActiveBranch();
@@ -173,9 +173,6 @@ define([
 			var getSimpleLog = function() {
 				return Deferred.when(that.log || that._getLog(parentItem), function(log) {
 					that.log = parentItem.log = log;
-					if (section && that.currentBranch && !that.currentBranch.Current) {
-						section.setTitle(i18nUtil.formatMessage(messages['DetachedHead ${0}'], util.shortenRefName(log.Children[0])));
-					}
 					var children = log.Children.slice(0);
 					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, log)));
 					return log;
@@ -212,14 +209,16 @@ define([
 						repository.CurrentBranch = currentBranch;
 						var activeBranch = that.getActiveBranch();
 						var targetRef = that.getTargetReference();
-						if (!activeBranch.Current) {
+						if (activeBranch.Detached) {
 							that.simpleLog = true;
 						}
 						if (section) {
 							if (that.simpleLog && targetRef) {
-								if (activeBranch && activeBranch.Current) {
+								if (activeBranch && activeBranch.Current && !activeBranch.Detached) {
 									section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef)));
-								} 
+								}else if (activeBranch && activeBranch.Current && activeBranch.Detached) {
+									section.setTitle(i18nUtil.formatMessage(messages['DetachedHead ${0}'], util.shortenString(that.currentBranch.HeadSHA)));
+								}
 							} else {
 								section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], util.shortenRefName(activeBranch)));
 							}
@@ -873,7 +872,7 @@ define([
 					}
 					simpleLogCommand.imageClass = imgClass;
 					var activeBranch = that.model.getActiveBranch();
-					if (!activeBranch.Current) return false;
+					if (!activeBranch.Current || activeBranch.Detached) return false;
 					simpleLogCommand.tooltip = i18nUtil.formatMessage(messages[that.model.simpleLog ? "ShowActiveBranchTip" : "ShowReferenceTip"], activeBranch.Name, messages[targetRef.Type + "Type"], targetRef.Name);
 					simpleLogCommand.checked = !that.model.simpleLog;
 					return !that.model.isRebasing();

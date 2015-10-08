@@ -438,6 +438,9 @@ define([
 					if (titleLink) {
 						titleDiv.href = titleLink;
 					}
+					if(item.Type ==="Branch" && item.Detached){ //$NON-NLS-0$
+						title = i18nUtil.formatMessage(messages['DetachedHead ${0}'], util.shortenString(item.HeadSHA));
+					}
 					titleDiv.textContent = title || item.Name;
 					detailsView.appendChild(titleDiv);
 					

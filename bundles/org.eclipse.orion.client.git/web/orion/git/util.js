@@ -160,12 +160,16 @@ define([
 			refName = i18nUtil.formatMessage(messages["stashIndex"], ref.parent.children.indexOf(ref), refName.substring(0, 6)); //$NON-NLS-0$
 		}
 		if (ref.Type === "Commit") { //$NON-NLS-0$
-			refName = refName.substring(0, 6);
+			refName = shortenString(refName);
 		}
 		if (ref.Type === "RemoteTrackingBranch" && !ref.Id) { //$NON-NLS-0$
 			refName += messages[" [New branch]"];
 		}
 		return refName;
+	}
+	
+	function shortenString(str) {
+		return str.substring(0, 6);
 	}
 	
 	function shortenPath(path) {
@@ -217,6 +221,7 @@ define([
 		changeSignedOffByCommitMessage: changeSignedOffByCommitMessage,
 		shortenRefName: shortenRefName,
 		shortenPath: shortenPath,
+		shortenString : shortenString,
 		relativePath: relativePath,
 		getGerritFooter: getGerritFooter
 	};
