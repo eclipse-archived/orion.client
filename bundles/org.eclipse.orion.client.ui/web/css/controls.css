@@ -1148,7 +1148,7 @@ html[dir="rtl"] .modifiedFileMarker{ /* ACGC */
 }
 
 .projectNavColumn {
-    color: #666;
+    color: #EEE;
     font-weight: bold;
 }
 
@@ -1157,12 +1157,12 @@ html[dir="rtl"] .modifiedFileMarker{ /* ACGC */
 }
 
 .projectNavColumn a{
-	color: #555;
+	color: #EEE;
     font-weight: bold;
 }
 
 .projectPrimaryNavColumn a{
-	color: #555;
+	color: white;
     font-weight: bold;
 }
 
