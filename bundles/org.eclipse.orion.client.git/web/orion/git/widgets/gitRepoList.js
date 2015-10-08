@@ -109,20 +109,18 @@ define([
 				onComplete(parentItem.children);
 			} else if (parentItem.Type === "RepoRoot") { //$NON-NLS-0$
 				Deferred.when (this.repositories || this.progressService.progress(this.gitClient.getGitClone(that.location), messages["Getting git repository details"]), function(resp){
-					var repositories = that.repositories = resp.Children || resp;
-					var processedChildren = that.processChildren(parentItem, repositories);
+					var repositories = that.repositories = that.processChildren(parentItem, resp.Children || resp);
 					function done() {
 						if (progress) progress.done();
 					}
-					if (repositories.length > 0) {
-						var allInfoDeferreds = processedChildren.map(function(repo) {
+					var allInfoDeferreds = repositories.map(function(repo) {
+						if (repo.Type === "Clone") {
 							return repo.infoDeferred = that.loadRepositoryInfo(repo);
-						});
-						Deferred.all(allInfoDeferreds).then(done, done);
-					} else {
-						done();
-					}
-					onComplete(processedChildren);
+						}
+						return new Deferred().resolve();
+					});
+					Deferred.all(allInfoDeferreds).then(done, done);
+					onComplete(repositories);
 				}, function(error){
 					if (progress) progress.done();
 					that.handleError(error);
@@ -132,21 +130,13 @@ define([
 			}
 		},
 		processChildren: function(parentItem, children) {
-			if (children.length === 0) {
-				children = [{Type: "NoContent", selectable: false, isNotSelectable: true}]; //$NON-NLS-0$
-			}
-			children.forEach(function(item) {
-				item.parent = parentItem;
-			});
-			
 			function sort(children) {
 				children.sort(function(repo1, repo2) {
-				return repo1.Name.localeCompare(repo2.Name);
-			});
+					return repo1.Name.localeCompare(repo2.Name);
+				});
 			}
 			
 			sort(children);
-			parentItem.children = children;
 			
 			function attachChildren(repo, array) {
 				array.push(repo);
@@ -158,12 +148,12 @@ define([
 				}
 			}
 			
-			var rootRepo = [];
+			var allRepos = [];
 			for (var i=0; i<children.length; i++) {
-				attachChildren(children[i], rootRepo);
+				attachChildren(children[i], allRepos);
 			}
 			
-			children = rootRepo;
+			children = allRepos;
 			
 			var filter = this.filterQuery;
 			if (filter) {
@@ -171,6 +161,13 @@ define([
 					return item.Name.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
 				});
 			}
+			if (children.length === 0) {
+				children = [{Type: "NoContent", selectable: false, isNotSelectable: true}]; //$NON-NLS-0$
+			}
+			children.forEach(function(item) {
+				item.parent = parentItem;
+			});
+			parentItem.children = children;
 			return children;
 		},
 		getId: function(/* item */ item){
