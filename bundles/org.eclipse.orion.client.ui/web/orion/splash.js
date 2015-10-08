@@ -259,6 +259,7 @@ loader.prototype.update = function(){
 };
 
 loader.prototype.takeDown = function() {
+	if (!pageLoader) return;
 	this.pluginRegistry.addEventListener("started", this._pluginListener);
 	this.pluginRegistry.addEventListener("lazy activation", this._pluginListener);
 	this.pluginRegistry.addEventListener("starting", this._pluginListener);
