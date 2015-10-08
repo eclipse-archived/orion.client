@@ -114,6 +114,8 @@ define([
 				}
 				that.changedItem();
 				break;
+			case "addSubmodule": //$NON-NLS-0$
+			case "deleteSubmodule": //$NON-NLS-0$
 			case "removeClone": //$NON-NLS-0$
 				function submoduleSelected(repo) {
 					var parentSelected = repo.Location === that.repository.Location;
