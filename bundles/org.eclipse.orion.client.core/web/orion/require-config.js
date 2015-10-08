@@ -16,7 +16,7 @@ define(function() {
 	function errback(err) {
 	    if (err.requireType === 'timeout') {
 			try {
-				alert("RequireJS error: Timeout occured loading module " + err.requireModules + ".\n\nPlease try refreshing the page.");
+				alert("RequireJS error: Timeout occurred loading module " + err.requireModules + ".\n\nPlease try refreshing the page.");
 			} catch (er) {
 			}
 	    } 
