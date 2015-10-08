@@ -28,8 +28,6 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils' ], 
 	'</div>';
 
 	ApplyPatchDialog.prototype._init = function(options) {
-		var that = this;
-
 		this.title = messages["ApplyPatchDialog"];
 		this.modal = true;
 		this.messages = messages;
@@ -38,30 +36,64 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils' ], 
 
 		this.buttons = [];
 
-		this.buttons.push({ callback : function() {
-			that._applyPatch();
-		},
-		text : messages["OK"]
+		this.buttons.push({
+			callback: function() {
+				if (this.$okButton.classList.contains(this.DISABLED)) {
+					return;
+				}
+				this._applyPatch();
+			}.bind(this),
+			id: "okButton",
+			text: messages["OK"]
 		});
-		
 
 		// Start the dialog initialization.
 		this._initialize();
 	};
 
+	/** @callback */
 	ApplyPatchDialog.prototype._bindToDom = function(parent) {
-		var urlField = this.$patchurl;
-		this.$selectedFile.onchange = function(event){
+		var updateOkEnablement = function() {
+			if ((this.$fileRadio.checked && this.$selectedFile.value) || (this.$urlRadio.checked && this.$patchurl.value)) {
+				this.$okButton.classList.remove(this.DISABLED);
+			} else {
+				this.$okButton.classList.add(this.DISABLED);
+			}
+		}.bind(this);
+
+		this.$selectedFile.onchange = function() {
 			this.$urlRadio.checked = false;
 			this.$fileRadio.checked = "fileRadio";
+			updateOkEnablement();
 		}.bind(this);
-		this.$patchurl.onchange = function(event){
+		this.$patchurl.onfocus = function() {
 			this.$urlRadio.checked = "urlRadio";
 			this.$fileRadio.checked = false;
+			updateOkEnablement();
 		}.bind(this);
-		window.setTimeout(function () {urlField.focus();}, 0);
+		this.$patchurl.onkeyup = function() {
+			this.$urlRadio.checked = "urlRadio";
+			this.$fileRadio.checked = false;
+			updateOkEnablement();
+		}.bind(this);
+		this.$urlRadio.onchange = function() {
+			updateOkEnablement();
+		}.bind(this);
+		this.$fileRadio.onchange = function() {
+			updateOkEnablement();
+		}.bind(this);
+
+		this.$okButton.classList.add(this.DISABLED);
+
+		window.setTimeout(
+			function() {
+				this.$patchurl.focus();
+			}.bind(this),
+			0
+		);
 	};
 
+	/** @callback */
 	ApplyPatchDialog.prototype._applyPatch = function(parent) {
 		var formData = new FormData();
 		formData.append("uploadedfile", this.$selectedFile.files[0]);
@@ -76,14 +108,15 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils' ], 
 		this.req.send(formData);
 	};
 
+	/** @callback */
 	ApplyPatchDialog.prototype.handleReadyState = function(state) {
 		if (this.req.readyState === 4) {
-			if(this.req.status === 200){
-				if(this.options.deferred){
+			if (this.req.status === 200){
+				if (this.options.deferred){
 					this.options.deferred.resolve(this.req.responseText);
 				}
 			} else {
-				if(this.options.deferred){
+				if (this.options.deferred){
 					this.options.deferred.reject(this.req.responseText);
 				}
 			}
@@ -94,7 +127,6 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils' ], 
 	ApplyPatchDialog.prototype.constructor = ApplyPatchDialog;
 
 	// return the module exports
-	return { ApplyPatchDialog : ApplyPatchDialog
-	};
+	return {ApplyPatchDialog : ApplyPatchDialog};
 
 });
