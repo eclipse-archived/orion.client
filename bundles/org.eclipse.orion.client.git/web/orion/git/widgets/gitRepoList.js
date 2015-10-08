@@ -110,16 +110,19 @@ define([
 			} else if (parentItem.Type === "RepoRoot") { //$NON-NLS-0$
 				Deferred.when (this.repositories || this.progressService.progress(this.gitClient.getGitClone(that.location), messages["Getting git repository details"]), function(resp){
 					var repositories = that.repositories = that.processChildren(parentItem, resp.Children || resp);
+					var count = 0;
 					function done() {
-						if (progress) progress.done();
-					}
-					var allInfoDeferreds = repositories.map(function(repo) {
-						if (repo.Type === "Clone") {
-							return repo.infoDeferred = that.loadRepositoryInfo(repo);
+						if (--count === 0) {
+							if (progress) progress.done();
 						}
-						return new Deferred().resolve();
+					}
+					repositories.forEach(function(repo) {
+						if (repo.Type === "Clone") {
+							count++;
+							repo.infoDeferred = that.loadRepositoryInfo(repo);
+							repo.infoDeferred.then(done, done);
+						}
 					});
-					Deferred.all(allInfoDeferreds).then(done, done);
 					onComplete(repositories);
 				}, function(error){
 					if (progress) progress.done();
