@@ -607,8 +607,8 @@ define([
 		var activeBranch = explorer.model.getActiveBranch();
 		var targetRef = explorer.model.getTargetReference();
 		if (activeBranch && targetRef) {
-			if (!activeBranch.Current) {
-				title = i18nUtil.formatMessage(messages['DetachedHead ${0}'], util.shortenRefName(explorer.model.log.Children[0])); 
+			if (activeBranch.Detached) {
+				title = i18nUtil.formatMessage(messages['DetachedHead ${0}'], util.shortenString(activeBranch.HeadSHA)); 
 			} else {
 				var targetName =  util.shortenRefName(targetRef);
 				title = activeBranch.Name + " => " + targetName;  //$NON-NLS-0$
