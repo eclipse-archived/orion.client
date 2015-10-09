@@ -197,6 +197,24 @@ define({//Default message bundle
 	"Commits for \"${0}\" branch": "Commits for ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Commits for \"${0}\" branch against": "Commits for \"${0}\" branch against", //$NON-NLS-0$  //$NON-NLS-1$
 	"Add Remote": "Add Remote", //$NON-NLS-0$  //$NON-NLS-1$
+	"Are you sure you want to delete submodule ${0}?":"Are you sure you want to delete submodule ${0}?",//$NON-NLS-0$  //$NON-NLS-1$
+	"Delete submodule from its parent": "Delete submodule from its parent", //$NON-NLS-0$  //$NON-NLS-1$
+	"Delete Submodule": "Delete Submodule", //$NON-NLS-0$  //$NON-NLS-1$
+	"Deleting submodule": "Deleting submodule", //$NON-NLS-0$  //$NON-NLS-1$
+	"Submodule deleted": "Submodule deleted", //$NON-NLS-0$  //$NON-NLS-1$
+	"Sync submodules for the repository": "Sync submodules for the repository", //$NON-NLS-0$  //$NON-NLS-1$
+	"Sync Submodules": "Sync Submodules", //$NON-NLS-0$  //$NON-NLS-1$
+	"Submodules Synced": "Submodules Synced", //$NON-NLS-0$  //$NON-NLS-1$
+	"Syncing submodules": "Syncing submodules", //$NON-NLS-0$  //$NON-NLS-1$
+	"Update submodules for the repository": "Update submodules for the repository", //$NON-NLS-0$  //$NON-NLS-1$
+	"Update Submodules": "Update Submodules", //$NON-NLS-0$  //$NON-NLS-1$
+	"Updating submodules": "Updating submodules", //$NON-NLS-0$  //$NON-NLS-1$
+	"Submodules updated": "Submodules updated", //$NON-NLS-0$  //$NON-NLS-1$
+	"Add git submodule": "Add git submodule", //$NON-NLS-0$  //$NON-NLS-1$
+	"AddSubmodule": "Adding submodule: ${0} to repository: ${1}", //$NON-NLS-0$  //$NON-NLS-1$
+	"Adding submodule: ": "Adding submodule: ", //$NON-NLS-0$  //$NON-NLS-1$
+	"Add Submodule": "Add Submodule", //$NON-NLS-0$  //$NON-NLS-1$
+	"Add a submodule to this Git repository": "Add a submodule to this Git repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"Remote Name:": "Remote Name:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Remote URI:": "Remote URI:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Apply Patch": "Apply Patch", //$NON-NLS-0$  //$NON-NLS-1$
@@ -416,7 +434,7 @@ define({//Default message bundle
 	"EmptyPatchWarning": "Please select at least one file to be included in the patch", //$NON-NLS-0$  //$NON-NLS-1$ 
 	"ShowCommitPatchTip": "Show patch for changes in this commit", //$NON-NLS-0$  //$NON-NLS-1$
 	"Continue": "Continue", //$NON-NLS-0$  //$NON-NLS-1$
-	"Contibue Rebase": "Continue Rebase", //$NON-NLS-0$  //$NON-NLS-1$
+	"Continue Rebase": "Continue Rebase", //$NON-NLS-0$  //$NON-NLS-1$
 	"Skip Patch": "Skip Patch", //$NON-NLS-0$  //$NON-NLS-1$
 	"Abort": "Abort", //$NON-NLS-0$  //$NON-NLS-1$
 	"Abort Rebase": "Abort Rebase", //$NON-NLS-0$  //$NON-NLS-1$

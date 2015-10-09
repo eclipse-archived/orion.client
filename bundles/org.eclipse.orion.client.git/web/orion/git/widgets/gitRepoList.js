@@ -212,8 +212,12 @@ define([
 			switch (event.action) {
 			case "addClone": //$NON-NLS-0$
 			case "removeClone": //$NON-NLS-0$
+			case "updateSubmodules": //$NON-NLS-0$
+			case "addSubmodule": //$NON-NLS-0$
+			case "deleteSubmodule": //$NON-NLS-0$
 				this.changedItem();
 				break;
+				
 			}
 		}.bind(this));
 	}
@@ -288,7 +292,12 @@ define([
 			var commandRegistry = this.commandService;
 			var actionsNodeScope = this.sectionActionScodeId || section.actionsNode.id;
 //			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.pull", 100); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.git.deleteClone", 200); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.git.addSubmodule", 100); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.git.syncSubmodules", 200); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.git.updateSubmodules", 300); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.git.deleteSubmodule", 400); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.git.deleteClone", 500); //$NON-NLS-1$ //$NON-NLS-0$
+			
 			if (this.singleRepository) {
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.popStash", 100); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 200); //$NON-NLS-1$ //$NON-NLS-0$

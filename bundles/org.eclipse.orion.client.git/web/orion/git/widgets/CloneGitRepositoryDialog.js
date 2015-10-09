@@ -35,7 +35,10 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 			+ '<div style="padding: 8px">' + '<input id="isExistingProject" type="radio" name="isNewProject" value="existing"/>'
 			+ '<label for="isExistingProject" style="padding: 0 8px">${Existing directory:}</label>' + '<input id="gitPath" type="hidden" value="">'
 			+ '<span id="shownGitPath" style="padding-right: 24px"></span>' + '<a id="changeGitPath" href="javascript:">${Change...}</a>' + '</div>'
-
+			
+			+ '<div style="padding: 8px" id="cloneSubmoduleContainer">' 
+			+ '<input type="checkbox" id="cloneSubmoduleCheckbox" checked><label for="isExistingProject" style="padding: 0 8px">${Clone submodules automatically}</label>' + '</div>'
+			
 			+ '</span>';
 
 	CloneGitRepositoryDialog.prototype._init = function(options) {
@@ -45,6 +48,8 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 		this.modal = true;
 		this.messages = messages;
 
+
+		this.showSubmoduleOptions = options.showSubmoduleOptions||false;
 		this.advancedShown = false;
 		this.alwaysShowAdvanced = options.alwaysShowAdvanced;
 		this.advancedOnly = options.advancedOnly;
@@ -78,6 +83,10 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 
 	CloneGitRepositoryDialog.prototype._bindToDom = function(parent) {
 		var that = this;
+
+		if(!this.showSubmoduleOptions){
+			this.$cloneSubmoduleContainer.style.display = "none"; //$NON-NLS-0$
+		}
 
 		if (this.url) {
 			this.$gitUrl.value = this.url;
@@ -138,7 +147,8 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 		this.func && this.func(
 			(this.advancedOnly ? undefined : this.$gitUrl.value),
 			(this.advancedShown && this.$isNewProject.checked) ? undefined : this.$gitPath.value,
-			(this.advancedShown && !this.$isNewProject.checked) ? undefined : this.$gitName.value
+			(this.advancedShown && !this.$isNewProject.checked) ? undefined : this.$gitName.value,
+			(this.showSubmoduleOptions) ? this.$cloneSubmoduleCheckbox.checked:undefined
 		);
 	};
 

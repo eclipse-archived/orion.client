@@ -114,9 +114,13 @@ define([
 				}
 				that.changedItem();
 				break;
+			case "deleteSubmodule": //$NON-NLS-0$
 			case "removeClone": //$NON-NLS-0$
 				function submoduleSelected(repo) {
 					var parentSelected = repo.Location === that.repository.Location;
+					if(!parentSelected && repo.Parents){
+						parentSelected = repo.Parents.some(function(parentrepo) {return parentrepo === that.repository.Location;});
+					}
 					var childSelected = false;
 					if (repo.Children) {
 						childSelected = repo.Children.some(function(childrepo) {return submoduleSelected(childrepo);});
@@ -129,6 +133,7 @@ define([
 					that.changedItem();
 				}
 				break;
+			case "addSubmodule": //$NON-NLS-0$
 			case "addClone": //$NON-NLS-0$
 				if(!that.repository){
 					that.changedItem();
