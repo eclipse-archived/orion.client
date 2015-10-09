@@ -301,7 +301,7 @@ var exports = {};
 				commandService.confirm(data.domNode, i18nUtil.formatMessage(messages["DelBrConfirm"], item.Name), messages.OK, messages.Cancel, false, function(doit) {
 					if (!doit) return;
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
- 					var msg = i18nUtil.formatMessage(messages["Removing branch ${0}..."], item.Name);
+					var msg = i18nUtil.formatMessage(messages["Removing branch ${0}..."], item.Name);
 					progress.progress(serviceRegistry.getService("orion.git.provider").removeBranch(item.Location), msg).then(function() { //$NON-NLS-0$
 						dispatchModelEventOn({type: "modelChanged", action: "removeBranch", branch: item}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus);
@@ -1495,7 +1495,7 @@ var exports = {};
 			
 			var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-			var cloneFunction = function(gitUrl, path, name) {
+			var cloneFunction = function(gitUrl, path, name, cloneSubmodules) {
 				
 				item.GitUrl = gitUrl;
 				exports.getDefaultSshOptions(serviceRegistry, item).then(function(options) {
@@ -1504,7 +1504,7 @@ var exports = {};
 					gitConfigPreference.getConfig().then(function(userInfo){
 						var msg = i18nUtil.formatMessage(messages["AddClone"], name);
 						var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
-								options.gitPrivateKey, options.gitPassphrase, userInfo), msg);
+								options.gitPrivateKey, options.gitPassphrase, userInfo, false, cloneSubmodules), msg);
 						serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred, //$NON-NLS-0$
 								messages["Cloning repository: "] + gitUrl);
 						deferred.then(function(jsonData) {
@@ -1525,7 +1525,8 @@ var exports = {};
 					fileClient: fileClient,
 					url: data.parameters.valueFor("url"), //$NON-NLS-0$
 					alwaysShowAdvanced: data.parameters.optionsRequested,
-					func: cloneFunction
+					func: cloneFunction,
+					showSubmoduleOptions:true
 				});
 						
 				dialog.show();
@@ -1602,7 +1603,7 @@ var exports = {};
 			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.git.deleteClone", //$NON-NLS-0$
 			visibleWhen: function(item) {
-				return item.Type === "Clone"; //$NON-NLS-0$
+				return item.Type === "Clone" && !item.Parents; //$NON-NLS-0$
 			},
 			callback: function(data) {
 				var item = data.items;
@@ -1879,7 +1880,7 @@ var exports = {};
 		var checkoutCommand = new mCommands.Command({
 			name: messages['Checkout'],
 			tooltip: messages["CheckoutSelectedFiles"],
- 			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
+			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.orion.git.checkoutCommand", //$NON-NLS-0$
 			preCallback: function(data) {
 				return preCallback("checkoutFile", data);
@@ -1932,7 +1933,7 @@ var exports = {};
 		var checkoutStagedCommand = new mCommands.Command({
 			name: messages['Discard'],
 			tooltip: messages["CheckoutSelectedFiles"],
- 			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
+			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.orion.git.checkoutStagedCommand", //$NON-NLS-0$
 			preCallback: function(data) {
 				return preCallback("checkoutFile", data);
@@ -2143,12 +2144,12 @@ var exports = {};
 						display.Severity = "Warning"; //$NON-NLS-0$
 						display.HTML = false;
 						display.Message = jsonData.Result + messages['RepoConflict'];
- 						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 					} else if (jsonData.Result === "FAILED_UNMERGED_PATHS") { //$NON-NLS-0$
 						display.Severity = "Error"; //$NON-NLS-0$
 						display.HTML = false;
 						display.Message = jsonData.Result + messages['RepoUnmergedPathResolveConflict'];
- 						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 					}
 					dispatchModelEventOn({type: "modelChanged", action: "rebase", rebaseAction: action, result: jsonData.Result, failed: display.Severity !== "Ok"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					
@@ -2158,7 +2159,7 @@ var exports = {};
 		
 		var rebaseContinueCommand = new mCommands.Command({
 			name: messages["Continue"],
-			tooltip: messages["Contibue Rebase"],
+			tooltip: messages["Continue Rebase"],
 			id: "eclipse.orion.git.rebaseContinueCommand", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
@@ -2366,6 +2367,148 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(popStashCommand);
+		
+		var updateSubmodulesCommand = new mCommands.Command({
+			name: messages["Update Submodules"],
+			tooltip: messages["Update submodules for the repository"],
+			imageClass: "git-sprite-pull",
+			id: "eclipse.git.updateSubmodules",
+			visibleWhen: function(item) {
+				return item.Type === "Clone" && item.Children;
+			},
+			callback : function(data){
+				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").updateSubmodules(data.items.SubmoduleLocation), messages['Updating submodules']); //$NON-NLS-1$ //$NON-NLS-0$ 
+					progressService.createProgressMonitor(
+						deferred,
+						messages['Updating submodules']);
+					deferred.then(
+						function(){
+							progressService.setProgressResult(messages['Submodules updated']);
+							dispatchModelEventOn({type: "modelChanged", action: "updateSubmodules"}); //$NON-NLS-1$ //$NON-NLS-0$
+						},function(error){
+							displayErrorOnStatus(error);
+						 }
+					);		
+			
+			},
+		});
+		commandService.addCommand(updateSubmodulesCommand);
+		
+		var deleteSubmodulesCommand = new mCommands.Command({
+			name: messages["Delete Submodule"],
+			tooltip: messages["Delete submodule from its parent"],
+			imageClass: "core-sprite-trashcan",
+			id: "eclipse.git.deleteSubmodule",
+			visibleWhen: function(item) {
+				return item.Type === "Clone" && item.Parents;
+			},
+			callback : function(data){
+				var item = data.items;
+				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				commandService.confirm(data.domNode, i18nUtil.formatMessage(messages["Are you sure you want to delete submodule ${0}?"], item.Name), messages.OK, messages.Cancel, false, function(doit) {
+					if (!doit) return;
+					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").deleteSubmodule(data.items.SubmoduleLocation, data.items.Parents), messages['Deleting submodule']); //$NON-NLS-1$ //$NON-NLS-0$ 
+					progressService.createProgressMonitor(deferred, messages['Deleting submodule']);
+					deferred.then(
+						function(){
+							progressService.setProgressResult(messages['Submodule deleted']);
+							dispatchModelEventOn({type: "modelChanged", action: "deleteSubmodule", items:[item]}); //$NON-NLS-1$ //$NON-NLS-0$
+						},function(error){
+							displayErrorOnStatus(error);
+						}
+					);		
+				});
+			
+			},
+		});
+		commandService.addCommand(deleteSubmodulesCommand);
+		
+		var syncSubmodulesCommand = new mCommands.Command({
+			name: messages["Sync Submodules"],
+			tooltip: messages["Sync submodules for the repository"],
+			imageClass: "core-sprite-refresh",
+			id: "eclipse.git.syncSubmodules",
+			visibleWhen: function(item) {
+				return item.Type === "Clone" && item.Children;
+			},
+			callback : function(data){
+				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").syncSubmodules(data.items.SubmoduleLocation), messages['Syncing submodules']); //$NON-NLS-1$ //$NON-NLS-0$ 
+					progressService.createProgressMonitor(
+						deferred,
+						messages['Syncing submodules']);
+					deferred.then(
+						function(){
+							progressService.setProgressResult(messages['Submodules Synced']);
+							dispatchModelEventOn({type: "modelChanged", action: "syncSubmodules"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						},function(error){
+							displayErrorOnStatus(error);
+						 }
+					);
+							
+			},
+		});
+		commandService.addCommand(syncSubmodulesCommand);
+		
+		var submoduleParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("url", "url", messages['Repository URL:'])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+		
+	   
+
+		var addSubmoduleCallback = function(data) {
+			var item = data.items;
+			var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
+			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+			var addFunction = function(gitUrl, path, name) {
+				item.GitUrl = gitUrl;
+				exports.getDefaultSshOptions(serviceRegistry, item).then(function(options) {
+					var func = arguments.callee;
+					var msg = i18nUtil.formatMessage(messages["AddSubmodule"], name, data.items.Name);
+					var deferred = progress.progress(gitService.addSubmodule(name, data.items.SubmoduleLocation, path, gitUrl, explorer.defaultPath), msg);
+					serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred, //$NON-NLS-0$
+						   messages["Adding submodule: "]  + gitUrl);
+					deferred.then(function(jsonData) {
+						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {
+							dispatchModelEventOn({type: "modelChanged", action: "addSubmodule", name: name, gitUrl: gitUrl}); //$NON-NLS-1$ //$NON-NL-0$
+						}, func, messages['Add git submodule']);
+					}, function(jsonData) {
+						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Add git submodule']);
+					});
+				});
+			};
+			if (data.parameters.valueFor("url") && !data.parameters.optionsRequested) { //$NON-NLS-0$
+				addFunction(data.parameters.valueFor("url")); //$NON-NLS-0$
+			} else {
+				var dialog = new mCloneGitRepository.CloneGitRepositoryDialog({
+					serviceRegistry: serviceRegistry,
+					url: data.parameters.valueFor("url"), //$NON-NLS-0$
+					alwaysShowAdvanced: data.parameters.optionsRequested,
+					func: addFunction
+				});
+						
+				dialog.show();
+			}
+		};
+		
+		
+		
+		 var addSubmoduleCommand = new mCommands.Command({
+			name : messages["Add Submodule"],
+			tooltip: messages["Add a submodule to this Git repository"],
+			imageClass : "git-sprite-addition",
+			id : "eclipse.git.addSubmodule",
+			parameters : submoduleParameters,
+			callback : addSubmoduleCallback,
+			visibleWhen : function(item) {
+				return item.Type === "Clone";
+			}
+		});
+		commandService.addCommand(addSubmoduleCommand);
+
+
 	};
 
 }());
