@@ -210,7 +210,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 		if (this.privateKeyFile) {
 			// load private key from file
 			var reader = new FileReader();
-			reader.onload = (function(f) {
+			reader.onload = (function() {
 				return function(e) {
 					loadedPrivateKey = e.target.result;
 
