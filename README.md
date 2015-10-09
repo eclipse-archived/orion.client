@@ -39,7 +39,7 @@ Clone `org.eclipse.orion.client` and `org.eclipse.orion.server` under the same l
 % mvn clean install -P platform-kepler,local-build -Dorion.client.build.skip -DskipTests
 ```
 
-###Run the Orion server
+###Run the Orion server (or not)
 ```
 % cd releng/org.eclipse.orion.server.repository/target/products/org.eclipse.orion/linux/gtk/x86_64/eclipse/
 % ./orion
