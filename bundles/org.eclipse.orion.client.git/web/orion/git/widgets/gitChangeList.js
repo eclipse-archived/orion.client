@@ -119,7 +119,7 @@ define([
 			var progressService = this.progressService;
 			var gitClient = this.gitClient;
 			var repository = that.repository;
-			var progress, location;
+			var progress, thelocation;
 			if (parentItem.children && !parentItem.more) {
 				onComplete(parentItem.children);
 			} else if (parentItem.Children) {
@@ -127,8 +127,8 @@ define([
 			} else if (parentItem.Type === "Diff" && !parentItem.parent) { //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
 				progress.begin(messages["Getting changes"]);
-				location = parentItem.more ? parentItem.location : (this.location ? this.location + pageQuery : "");
-				if (!location) {
+				thelocation = parentItem.more ? parentItem.location : (this.location ? this.location + pageQuery : "");
+				if (!thelocation) {
 					progress.done();
 					onComplete([]);
 					return;
@@ -144,20 +144,20 @@ define([
 					});
 				}
 				if (this.commitName && !parentItem.more) {
-					gitClient.getDiff(location, this.commitName).then(function(resp) {
+					gitClient.getDiff(thelocation, this.commitName).then(function(resp) {
 						doDiff(resp.Location + pageQuery);
 					}, function(error) {
 						progress.done();
 						that.handleError(error);
 					});
 				} else {
-					doDiff(location);
+					doDiff(thelocation);
 				}
 			} else if (parentItem.Type === "Root") { //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
 				progress.begin(messages["Getting changes"]);
-				location = repository.StatusLocation;
-				Deferred.when(repository.status || (repository.status = progressService.progress(gitClient.getGitStatus(location), messages["Getting changes"])), function(resp) {//$NON-NLS-0$
+				thelocation = repository.StatusLocation;
+				Deferred.when(repository.status || (repository.status = progressService.progress(gitClient.getGitStatus(thelocation), messages["Getting changes"])), function(resp) {//$NON-NLS-0$
 					var status = that.status = that.items = resp;
 					Deferred.when(that.repository || progressService.progress(gitClient.getGitClone(status.CloneLocation), messages["Getting git repository details"]), function(resp) {
 						var repository = (resp.Children&&resp.Type!=="Clone") ? resp.Children[0] : resp;//$NON-NLS-0$
