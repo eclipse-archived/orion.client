@@ -12,7 +12,7 @@
 /*eslint-env browser, amd*/
 /*eslint no-unused-params:0*/
 
-define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialog', 'orion/URITemplate', 'require' ], function(messages, DirPrompter, dialog, URITemplate, require) {
+define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialog', 'orion/URITemplate', 'require' ], function(messages, DirPrompter, mDialog, URITemplate, require) {
 
 	var editTemplate = new URITemplate("edit/edit.html#{,resource,params*}"); //$NON-NLS-0$
 	
@@ -20,7 +20,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 		this._init(options);
 	}
 
-	CloneGitRepositoryDialog.prototype = new dialog.Dialog();
+	CloneGitRepositoryDialog.prototype = new mDialog.Dialog();
 
 	CloneGitRepositoryDialog.prototype.TEMPLATE = '<span id="basicPane">' + '<div style="padding: 8px">' + '<label for="gitUrl">${Repository URL:}</label>'
 			+ '<input id="gitUrl" style="width: 50em" value=""/>' + '</div>'
