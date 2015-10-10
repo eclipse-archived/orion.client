@@ -146,7 +146,7 @@ define([
 										var display = {};
 										display.HTML = true;
 										display.Severity = jsonData.Severity || "Error"; //$NON-NLS-0$
-										if (display.Severity != "Ok") {
+										if (display.Severity !== "Ok") {
 											var result = jsonData.Updates.length ? "<b>" +  messages["PushResult"] + "</b>\n" : ""; //$NON-NLS-0$ //$NON-NLS-1$
 											result += "<table class=\"gitPushUpdates\">"; //$NON-NLS-0$
 											jsonData.Updates.forEach(function (update) {
