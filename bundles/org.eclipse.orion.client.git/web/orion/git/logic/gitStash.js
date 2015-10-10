@@ -47,7 +47,7 @@ define([
 				index = i18nUtil.formatMessage(messages["IndexStash"], data.items.CurrentBranch.Name, name);
 			}
 			/* TODO: Distinguish between index and working directory messages */
-			gitService.doStashCreate(gitStashLocation, index, wip, true).then(function(resp){
+			gitService.doStashCreate(gitStashLocation, index, wip, true).then(function(){
 				d.resolve(data);
 			}, function(error){
 				d.reject(error);
@@ -63,7 +63,7 @@ define([
 			var item = data.items.status || data.handler.status || data.items;
 			var dropLocation = item.DropLocation;
 
-			gitService.doStashDrop(dropLocation).then(function(resp){
+			gitService.doStashDrop(dropLocation).then(function(reps){
 				d.resolve(data);
 			}, function(error){
 				d.reject(error);
@@ -79,7 +79,7 @@ define([
 			var item = data.items.status || data.handler.status || data.items;
 			var applyLocation = item.ApplyLocation;
 
-			gitService.doStashApply(applyLocation).then(function(resp){
+			gitService.doStashApply(applyLocation).then(function(reps){
 				d.resolve(data);
 			}, function(error){
 				d.reject(error);
@@ -95,7 +95,7 @@ define([
 			var item = data.items.status || data.handler.status || data.items;
 			var gitStashLocation = item.Clone.StashLocation;
 
-			gitService.doStashPop(gitStashLocation).then(function(resp){
+			gitService.doStashPop(gitStashLocation).then(/* @callback */ function(reps){
 				d.resolve(data);
 			}, function(error){
 				d.reject(error);
