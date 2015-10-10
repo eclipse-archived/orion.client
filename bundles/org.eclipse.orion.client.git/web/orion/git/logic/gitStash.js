@@ -95,7 +95,7 @@ define([
 			var item = data.items.status || data.handler.status || data.items;
 			var gitStashLocation = item.Clone.StashLocation;
 
-			gitService.doStashPop(gitStashLocation).then(function(resp){
+			gitService.doStashPop(gitStashLocation).then(/* @callback */ function(resp){
 				d.resolve(data);
 			}, function(error){
 				d.reject(error);
