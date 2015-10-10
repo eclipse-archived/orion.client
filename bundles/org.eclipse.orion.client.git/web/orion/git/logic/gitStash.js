@@ -47,7 +47,7 @@ define([
 				index = i18nUtil.formatMessage(messages["IndexStash"], data.items.CurrentBranch.Name, name);
 			}
 			/* TODO: Distinguish between index and working directory messages */
-			gitService.doStashCreate(gitStashLocation, index, wip, true).then(function(resp){
+			gitService.doStashCreate(gitStashLocation, index, wip, true).then(/* @callback */ function(resp){
 				d.resolve(data);
 			}, function(error){
 				d.reject(error);
