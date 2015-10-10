@@ -358,7 +358,7 @@ define({//Default message bundle
 	"Show next page of git log": "Show next page of git log", //$NON-NLS-0$  //$NON-NLS-1$
 	"Show next page of git tags" : "Show next page of git tags", //$NON-NLS-0$  //$NON-NLS-1$
 	"Push from your local branch into the selected remote branch": "Push from your local branch into the selected remote branch", //$NON-NLS-0$  //$NON-NLS-1$
-	"ResetActiveBr": "Reset your active branch to the state of this reference. Discard all staged and unstaged changes.", //$NON-NLS-0$  //$NON-NLS-1$
+	"ResetActiveBr": "Reset your active branch to the state of this reference.", //$NON-NLS-0$  //$NON-NLS-1$
  	"GitResetIndexConfirm": "The content of your active branch will be replaced with commit \"${0}\". All unstaged and staged changes will be discarded and cannot be recovered if \"${1}\" is not checked. Are you sure?", //$NON-NLS-0$  //$NON-NLS-1$
 	"Resetting index...": "Resetting index...", //$NON-NLS-0$  //$NON-NLS-1$
 	"Resetting git index for ${0}" : "Resetting git index for ${0}", //$NON-NLS-0$  //$NON-NLS-1$
