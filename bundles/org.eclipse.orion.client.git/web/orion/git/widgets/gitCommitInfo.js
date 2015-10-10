@@ -53,10 +53,10 @@ define([
 			}
 			
 			function createSection(parent) {
-				var section = document.createElement("div"); //$NON-NLS-0$
-				if (!that.simple) section.classList.add("gitCommitSection"); //$NON-NLS-0$
-				parent.appendChild(section);
-				return section;
+				var newSection = document.createElement("div"); //$NON-NLS-0$
+				if (!that.simple) newSection.classList.add("gitCommitSection"); //$NON-NLS-0$
+				parent.appendChild(newSection);
+				return newSection;
 			}
 			
 			function createImage(parent) {
