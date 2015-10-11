@@ -109,20 +109,25 @@ define([
 				onComplete(parentItem.children);
 			} else if (parentItem.Type === "RepoRoot") { //$NON-NLS-0$
 				Deferred.when (this.repositories || this.progressService.progress(this.gitClient.getGitClone(that.location), messages["Getting git repository details"]), function(resp){
-					var repositories = that.repositories = that.processChildren(parentItem, resp.Children || resp);
+					var repositories = that.processChildren(parentItem, resp.Children || resp);
 					var count = 0;
 					function done() {
-						if (--count === 0) {
+						if (--count <= 0) {
 							if (progress) progress.done();
 						}
 					}
-					repositories.forEach(function(repo) {
+					that.repositories = repositories.filter(function(repo) {
 						if (repo.Type === "Clone") {
 							count++;
 							repo.infoDeferred = that.loadRepositoryInfo(repo);
 							repo.infoDeferred.then(done, done);
+							return repo;
 						}
+						return null;
 					});
+					if (count == 0) {
+						done();
+					}
 					onComplete(repositories);
 				}, function(error){
 					if (progress) progress.done();
