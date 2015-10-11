@@ -2,11 +2,14 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pushd "$DIR" > /dev/null
 
-
-
 # Optimize
 shift
-$(npm bin)/grunt "$@" || ( echo "grunt failed." >&2 ; exit 1 )
+if ! which $(npm bin)/grunt ; then
+    echo "Could not find grunt. Please run 'npm install' then retry." >&2
+    exit 1
+fi
+
+$(npm bin)/grunt "$@" || echo "Grunt build failed." >&2 && exit 1
 
 # Pack tarball
 tarball=$(npm pack)
