@@ -277,6 +277,7 @@ define({//Default message bundle
 	"Repository was linked to ": "Repository was linked to ", //$NON-NLS-0$  //$NON-NLS-1$
 	"CheckoutCommitTooltip": "Checkout this commit, creating a local branch based on its contents.", //$NON-NLS-0$  //$NON-NLS-1$
 	"CheckoutTagTooltip": "Checkout this tag, creating a local branch based on its contents.", //$NON-NLS-0$  //$NON-NLS-1$
+	"CheckoutHeadTooltip": "Checkout this commit, creating a detached HEAD.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Checking out ${0}": "Checking out ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"CheckoutBranchMsg": "Checkout the branch or corresponding local branch and make it active. If the remote tracking branch does not have a corresponding local branch, the local branch will be created first.", //$NON-NLS-0$  //$NON-NLS-1$
  	"Checking out branch...": "Checking out branch", //$NON-NLS-0$  //$NON-NLS-1$
