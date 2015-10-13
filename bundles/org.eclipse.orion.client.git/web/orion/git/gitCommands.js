@@ -160,7 +160,9 @@ var exports = {};
 				}, displayErrorOnStatus);
 			};
 			var repositoryLocation = item.Repository ? item.Repository.Location : item.CloneLocation;
-			if (data.parameters.valueFor("name") && !data.parameters.optionsRequested) { //$NON-NLS-0$
+			if (!data.parameters) {
+				checkoutTagFunction(repositoryLocation, item.Name, item.Name);
+			} else if (data.parameters.valueFor("name") && !data.parameters.optionsRequested) { //$NON-NLS-0$
 				checkoutTagFunction(repositoryLocation, item.Name, data.parameters.valueFor("name")); //$NON-NLS-0$
 			}
 		}
@@ -180,7 +182,7 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(checkoutTagCommand);
-
+	
 		var checkoutCommitCommand = new mCommands.Command({
 			name: messages['Checkout'],
 			tooltip: messages["CheckoutCommitTooltip"],
@@ -197,6 +199,22 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(checkoutCommitCommand);
+		
+		var checkoutHeadCommand = new mCommands.Command({
+			name: messages['Checkout'],
+			tooltip: messages["CheckoutHeadTooltip"],
+			imageClass: "git-sprite-checkout", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			id: "eclipse.checkoutHead", //$NON-NLS-0$
+			callback: checkoutCallback,
+			visibleWhen: function(item){
+				if (item.outgoing && item.top) {
+					return false;
+				}
+				return item.Type === "Commit";	//$NON-NLS-0$
+			}
+		});
+		commandService.addCommand(checkoutHeadCommand);
 
 		var checkoutBranchCommand = new mCommands.Command({
 			name: messages['Checkout'],
