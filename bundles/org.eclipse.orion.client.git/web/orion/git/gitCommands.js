@@ -2206,7 +2206,7 @@ var exports = {};
 		commandService.addCommand(rebaseAbortCommand);	
 	};
 	
-	exports.createSharedCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
+	exports.createSharedCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
 		
 		//used both as confirm and remotePrompter dialogs callback
 		var refresh = function(data) { 
@@ -2486,6 +2486,7 @@ var exports = {};
 					serviceRegistry: serviceRegistry,
 					url: data.parameters.valueFor("url"), //$NON-NLS-0$
 					alwaysShowAdvanced: data.parameters.optionsRequested,
+					fileClient: fileClient,
 					func: addFunction
 				});
 						
