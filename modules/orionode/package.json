@@ -1,6 +1,6 @@
 {
   "name": "orion",
-  "version": "0.0.37",
+  "version": "0.0.38",
   "description": "An Eclipse Orion server based on Node.js and connect.",
   "homepage": "http://eclipse.org/orion/",
   "bugs": "https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&component=Node",
@@ -64,7 +64,6 @@
     "genericDeploymentWizard",
     "GerritFilePlugin",
     "GitHubFilePlugin",
-
     "authenticationPlugin",
     "git-repository",
     "deploy",
@@ -80,7 +79,6 @@
     "reset",
     "ServerStatus",
     "manageExternalIds",
-
     "orionPlugin",
     "preferencesPlugin",
     "site",
