@@ -251,7 +251,7 @@ var exports = {};
 				}
 			},
 			visibleWhen: function(item) {
-				return item.Type === "Branch" || (item.Type === "RemoteTrackingBranch" && item.Id); //$NON-NLS-1$ //$NON-NLS-0$
+				return (item.Type === "Branch" && !item.Detached) || (item.Type === "RemoteTrackingBranch" && item.Id); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(checkoutBranchCommand);
