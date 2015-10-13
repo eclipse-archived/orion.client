@@ -203,6 +203,38 @@ define([
 			};
 			testOpenImpl(options, {start: 4, end: 5});
 		});
+		it('Open Declaration - Simple var 3', function(done) {
+			var options = {
+				buffer: "var a = 1; a = function(){}; a;",
+				offset: 30,
+				callback: done
+			};
+			testOpenDecl(options, {start: 4, end: 5});
+		});
+		it('Open Implementation - Simple var 3', function(done) {
+			var options = {
+				buffer: "var a = 1; a = function(){}; a;",
+				offset: 30,
+				callback: done
+			};
+			testOpenImpl(options, {start: 4, end: 5});
+		});
+		it('Open Declaration - Simple var 4', function(done) {
+			var options = {
+				buffer: "var a = function(){}; a = 1; a;",
+				offset: 30,
+				callback: done
+			};
+			testOpenDecl(options, {start: 4, end: 5});
+		});
+		it('Open Implementation - Simple var 4', function(done) {
+			var options = {
+				buffer: "var a = function(){}; a = 1; a;",
+				offset: 30,
+				callback: done
+			};
+			testOpenImpl(options, {start: 4, end: 5});
+		});
 		it('Open Declaration - Chained var 1 - Expression statement', function(done) {
 			var options = {
 				buffer: "var a = 1; var b = a; b;",
@@ -382,20 +414,20 @@ define([
 		it('Open Declaration - Multiple implementation member expression 2', function(done) {
 			// Tern will always return the object expression over the assignment
 			var options = {
-				buffer: "function f(){} var a = {}; a.b = f; a={b: function(){}}; a.b();",
+				buffer: "function f(){} var a = {}; a.b = 1; a.b = function(){}; a.b();",
 				offset: 59,
 				callback: done
 			};
-			testOpenDecl(options, {start: 39, end: 40});
+			testOpenDecl(options, {start: 29, end: 30});
 		});
 		it('Open Implementation - Multiple implementation member expression 2', function(done) {
 			// Tern will always return the object expression over the assignment
 			var options = {
-				buffer: "function f(){} var a = {}; a.b = f; a={b: function(){}}; a.b();",
+				buffer: "function f(){} var a = {}; a.b = 1; a.b = function(){}; a.b();",
 				offset: 59,
 				callback: done
 			};
-			testOpenImpl(options, {start: 39, end: 40});
+			testOpenImpl(options, {start: 29, end: 30});
 		});
 		it('Open Declaration - Chained call expression', function(done) {
 			var options = {
