@@ -29,7 +29,7 @@ define([
         this._resultLocation = resultLocation;
         this._numberOnPage = resultLocation.length;
         this._totalNumber = totalNumber;
-        this._shape = searchParams.shape ? searchParams.shape : 'file';
+        this._shape = searchParams.shape ? searchParams.shape : 'file'; //$NON-NLS-1$
         this._listRoot = {
             isRoot: true,
             children: []
@@ -69,7 +69,7 @@ define([
 	        if (!parentItem) {
 	            return;
 	        }
-	        if(parentItem.type === "file" && this._filterText){
+	        if(parentItem.type === "file" && this._filterText) {
 				if(parentItem.filteredChildren) {
 					onComplete(parentItem.filteredChildren);
 				} else {
@@ -98,6 +98,8 @@ define([
 	            	this.registry.getService("orion.page.message").setProgressResult({Message: error.message, Severity: "Error"}); //$NON-NLS-1$ //$NON-NLS-2$
 	                onComplete([]);
 	            }.bind(this));
+	        } else if(parentItem.type === 'group') {
+	        	onComplete(parentItem.children);
 	        } else {
 	            onComplete([]);
 	        }
@@ -271,15 +273,73 @@ define([
     	 * @since 10.0
     	 */
     	_buildFlatResult: function _buildFlatResult(result) {
-    		for(var i = 0, len = result.children.length; i < len; i++) {
-    			this.getListRoot().children.push(result.children[i]);
+    		if(this._map('exact', { //$NON-NLS-1$
+    			parent: this.getListRoot(),
+    			type: 'group', //$NON-NLS-1$
+    			name: 'Exact Matches',
+    			location: 'exact',
+    			children: []
+    		})) {
+	    		this.getListRoot().children.push(this._location2ModelMap.exact);
+			}
+    		if(this._map('possible', { //$NON-NLS-1$
+    			parent: this.getListRoot(),
+    			type: 'group', //$NON-NLS-1$
+    			name: 'Possible Matches',
+    			location: 'possible',
+    			children: []
+    		})) {
+	    		this.getListRoot().children.push(this._location2ModelMap.possible);
+			}
+    		if(this._map('unrelated', { //$NON-NLS-1$
+    			parent: this.getListRoot(),
+    			type: 'group', //$NON-NLS-1$
+    			name: 'Unrelated Matches',
+    			location: 'unrelated',
+    			children: []
+    		})) {
+	    		this.getListRoot().children.push(this._location2ModelMap.unrelated);
+			}
+    		var files = result.children;
+    		for(var i = 0, len = files.length; i < len; i++) {
+    			var file = files[i];
+    			var matches = file.matches;
+    			for (var j = 0, len2 = matches.length; j < len2; j++) {
+    				var match = matches[j];
+    				match.parent = this.getListRoot();
+    				match.lineNumber = file.lineNumber;
+    				if(file.name) {
+    					match.lineString = file.name;
+    					match.name = file.name;
+    				} else {
+    					match.lineString = '';
+    					match.name = '';
+    				}
+    				if(result.location) {
+    					match.location = result.location;
+    				} else {
+    					match.location = '';
+    				}
+    				if(typeof(match.confidence) === 'number') {
+    					if(match.confidence < 1) {
+		    				this._location2ModelMap.unrelated.children.push(match);
+		    			} else if(match.confidence < 100) {
+		    				this._location2ModelMap.possible.children.push(match);
+		    			} else {
+		    				this._location2ModelMap.exact.children.push(match);
+		    			}
+    				}
+    			}
     		}
-    		this.getListRoot().children.sort(function(a, b) {
- 					if(a.confidence === b.confidence) {
- 						return a.lineNumber - b.lineNumber;
- 					}
-					return b.confidence - a.confidence;
-				});
+    		function _srt(a, b) {
+    			if(a.confidence === b.confidence) {
+ 					return a.lineNumber - b.lineNumber;
+ 				}
+				return b.confidence - a.confidence;
+    		}
+    		this._location2ModelMap.exact.children.sort(_srt);
+    		this._location2ModelMap.possible.children.sort(_srt);
+    		this._location2ModelMap.unrelated.children.sort(_srt);
 	    },
 	    /**
     	 * @description if replace mode is enabled
@@ -349,7 +409,9 @@ define([
     	 * @override
     	 */
     	getDetailInfo: function getDetailInfo(modelItem) {
-			return {lineString: modelItem.name, lineNumber: modelItem.lineNumber -1, matches:modelItem.matches, matchNumber: (modelItem.matchNumber ? modelItem.matchNumber - 1 : 0)};
+    		var lineString = modelItem.lineString ? modelItem.lineString : modelItem.name;
+    		var matches = Array.isArray(modelItem.matches) ? modelItem.matches : modelItem.parent.children;
+			return {lineString: lineString, lineNumber: modelItem.lineNumber-1, matches: matches, matchNumber: (modelItem.matchNumber ? modelItem.matchNumber - 1 : 0)};
 	    },
 	    /**
     	 * @description Returns the file name from the given item or undefined if one has not been set
@@ -510,6 +572,40 @@ define([
 				return this._filteredRoot.children;
 	        }
 	        return model.children;
+	    },
+	    /**
+    	 * @description Maps the given node to the given location. This function does not allow a mapping to be overwritten
+    	 * @function
+    	 * @private
+    	 * @param {String} loc The location to map to
+    	 * @param {Object} node The object to cache
+    	 * @returns {Boolean} True if the cache changed, false otherwise 
+    	 * @since 10.0
+    	 */
+    	_map: function _map(loc, node) {
+	    	if(loc) {
+	    		if(!this._location2ModelMap[loc]) {
+	    			this._location2ModelMap[loc] = node;
+	    			return true;
+	    		}
+	    	}
+	    	return false;
+	    },
+	    /**
+    	 * @description description
+    	 * @function
+    	 * @private
+    	 * @param {String} loc The location to fetch from the map
+    	 * @returns {Object|null} The mapped object or null
+    	 */
+    	_location2Model: function _location2Model(loc) {
+	        if (loc && this._location2ModelMap[loc]) {
+	            return this._location2ModelMap[loc];
+	        }
+	        if (this._indexedFileItems.length > 0) {
+	            return this._indexedFileItems[0];
+	        }
+	        return null;
 	    }
 	});
 
@@ -555,16 +651,6 @@ define([
             }
         }
         return -1;
-    };
-
-    SearchResultModel.prototype._location2Model = function(loc) {
-        if (loc && this._location2ModelMap[loc]) {
-            return this._location2ModelMap[loc];
-        }
-        if (this._indexedFileItems.length > 0) {
-            return this._indexedFileItems[0];
-        }
-        return null;
     };
 
     SearchResultModel.prototype._restoreGlobalStatus = function() {

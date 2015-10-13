@@ -132,8 +132,10 @@ define([
 	    	var renderName;
 	    	if (item.totalMatches) {
 	    		renderName = this.explorer.model.getFileName(item) + " (" + i18nUtil.formatMessage(messages["${0} matches"], item.totalMatches) + ")"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	    	} else {
+	    	} else if(item.type === 'file') {
 	    		renderName = this.explorer.model.getFileName(item);
+	    	} else if(item.type === 'group') {
+	    		renderName = item.name;
 	    	}
 	    	return renderName;
 	    },
@@ -143,6 +145,22 @@ define([
 	    	fileSpan.classList.add("fileNameSpan"); //$NON-NLS-0$
 			fileSpan.appendChild(document.createTextNode(renderName));
 			return fileSpan;
+	    },
+	    /**
+    	 * @description Renders the name of the group in its span
+    	 * @function
+    	 * @param {Object} item The backing group item to render
+    	 * @param {DOMNode} spanHolder The DOM element to hold the rendered element
+    	 * @param {SearchResultModel} resultModel The backing model
+    	 * @since 10.0
+    	 */
+    	renderGroupElement: function renderGroupElement(item, spanHolder, resultModel) {
+			var parentSpan = document.createElement("span"); //$NON-NLS-0$
+			parentSpan.classList.add("fileParentSpan"); //$NON-NLS-0$
+			parentSpan.appendChild(document.createTextNode(item.name)); //$NON-NLS-0$
+			// append link to parent span
+	        spanHolder.appendChild(parentSpan);
+	        spanHolder.classList.add("filePathSpan"); //$NON-NLS-0$
 	    },
 	    renderFileElement: function(item, spanHolder, resultModel) {
 			var link = this.generateFileLink(resultModel, item);
@@ -312,6 +330,10 @@ define([
 	                    } else {
 	                        this.getExpandImage(tableRow, span); //$NON-NLS-0$
 	                    }
+	                } else if (item.type === "group") { //$NON-NLS-0$
+	                	col = _createElement('td'); //$NON-NLS-0$
+	                    col.noWrap = true;
+	                    this.getExpandImage(tableRow, _createSpan(null, null, col, null)); //$NON-NLS-0$
 	                } else {
 	                	if (typeof this.explorer.model.enableCheckbox === "function" && this.explorer.model.enableCheckbox(item)) { //$NON-NLS-0$
 	                		col = mExplorer.ExplorerRenderer.prototype.getCheckboxColumn.call(this, item, tableRow);
@@ -327,12 +349,11 @@ define([
 	                if (item.type === "file") { //$NON-NLS-0$
 	                	span = _createSpan(null, this.getFileSpanId(item), col, null);
 	                    this.renderFileElement(item, span, this.explorer.model);
-	                    
-	                    //render file location
-	                    if (item.parentLocation) {
-							var scopeParams = this.explorer.model.getScopingParams(item);
-							tableRow.title = decodeURI(scopeParams.name + "/" + item.name); //$NON-NLS-0$
-	                    }
+						tableRow.title = item.name;
+	                } else if (item.type === "group") { //$NON-NLS-0$
+	                	span = _createSpan(null, null, col, null);
+	                    this.renderGroupElement(item, span, this.explorer.model);
+						tableRow.title = item.name;
 	                } else {
 	                	if (this.enableCheckbox(item)) {
 	                		this.renderDetailLineNumber(item, col);
