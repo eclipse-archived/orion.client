@@ -423,19 +423,16 @@ define([
 	    			}
 	    	);
 		}
-		//TODO
-		if ("true" === localStorage.getItem("darklaunch")) {
-	    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-	    			new OpenImplCommand.OpenImplementationCommand(astManager, ternWorker, CUProvider),  //$NON-NLS-1$
-	    			{
-	    		name: javascriptMessages["openImplName"],  //$NON-NLS-1$
-	    		tooltip : javascriptMessages['openImplTooltip'],  //$NON-NLS-1$
-	    		id : "open.js.impl",  //$NON-NLS-1$
-	    		contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
-    		key : [ 114, true, false, false, false],  //$NON-NLS-1$
-	    			}
-	    	);
-		}
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+    			new OpenImplCommand.OpenImplementationCommand(astManager, ternWorker, CUProvider),  //$NON-NLS-1$
+    			{
+    		name: javascriptMessages["openImplName"],  //$NON-NLS-1$
+    		tooltip : javascriptMessages['openImplTooltip'],  //$NON-NLS-1$
+    		id : "open.js.impl",  //$NON-NLS-1$
+    		contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+			key : [ 114, true, false, false, false],  //$NON-NLS-1$
+    			}
+    	);
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			new RenameCommand.RenameCommand(astManager, ternWorker, scriptresolver, CUProvider),
     			{
