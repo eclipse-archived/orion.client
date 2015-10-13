@@ -485,9 +485,9 @@ require([
             var _handler = handlers[_d.request];
 			if(typeof(_handler) === 'function') {
 				_handler(_d.args, function(response) {
-					if(_d.messageID) {
+					if(typeof(_d.messageID) === 'number') {
 						response.messageID = _d.messageID;
-					} else if(_d.ternID) {
+					} else if(typeof(_d.ternID) === 'number') {
 						response.ternID = _d.ternID;
 					}
                 	post(response);

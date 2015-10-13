@@ -107,6 +107,9 @@ define([
     	 */
     	var astManager = new ASTManager.ASTManager(Esprima);
 
+		var ternReady = false;
+		var messageQueue = [];
+
     	function WrappedWorker(script, onMessage, onError) {
     		/*if(typeof(SharedWorker) === 'function') {
     			this.shared = true;
@@ -130,18 +133,22 @@ define([
     	}
 
     	WrappedWorker.prototype.postMessage = function(msg, f) {
-			if(msg != null && typeof(msg) === 'object') {
-				if(typeof(msg.messageID) !== 'number' && typeof(msg.ternID) !== 'number') {
-					//don't overwrite an id from a tern-side request
-					msg.messageID = this.messageId++;
-					this.callbacks[msg.messageID] = f;
+    		if(ternReady) {
+				if(msg != null && typeof(msg) === 'object') {
+					if(typeof(msg.messageID) !== 'number' && typeof(msg.ternID) !== 'number') {
+						//don't overwrite an id from a tern-side request
+						msg.messageID = this.messageId++;
+						this.callbacks[msg.messageID] = f;
+					}
 				}
+	    		if(this.shared) {
+	    			this.worker.port.postMessage(msg);
+	    		} else {
+	    			this.worker.postMessage(msg);
+	    		}
+			} else {
+				messageQueue.push({msg: msg, f: f});
 			}
-    		if(this.shared) {
-    			this.worker.port.postMessage(msg);
-    		} else {
-    			this.worker.postMessage(msg);
-    		}
     	};
 
     	var prefService = core.serviceRegistry.getService("orion.core.preference"); //$NON-NLS-1$
@@ -154,7 +161,7 @@ define([
 
 		var handlers ={
 			'read': doRead,
-			'server_ready': getPrefs
+			'server_ready': serverReady
 		};
 
 		// Start the worker
@@ -240,11 +247,16 @@ define([
 		}
 
 		/**
-		 * @description Pre-loads the tern plugin prefs
+		 * @description Handles the server being ready
 		 * @param {Object} request The request
 		 * @since 10.0
 		 */
-		function getPrefs() {
+		function serverReady() {
+			ternReady = true;
+			for(var i = 0, len = messageQueue.length; i < len; i++) {
+				var item = messageQueue[i];
+				ternWorker.postMessage(item.msg, item.f);
+			}
 			ternWorker.postMessage({request: 'installed_plugins'}, function(response) { //$NON-NLS-1$
 				var plugins = response.plugins;
 				return prefService ? prefService.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
@@ -255,7 +267,7 @@ define([
 						props = JSON.parse(props);
 					}
 					var keys = Object.keys(plugins);
-					for(var i = 0; i < keys.length; i++) {
+					for(i = 0; i < keys.length; i++) {
 						var key = keys[i];
 						props[key] = plugins[key];
 					}
