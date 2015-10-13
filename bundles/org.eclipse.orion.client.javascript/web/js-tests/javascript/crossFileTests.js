@@ -290,7 +290,7 @@ define([
 				return text;
 			}
 		
-			it("Simple require'd dep 1", function(done) {
+			it.skip("Simple require'd dep 1", function(done) {
 				var options = {
 					buffer: "/* eslint-env amd */define(['./files/require_dep1'], function(rd1) {rd1.m});",
 					offset: 73,
@@ -298,7 +298,7 @@ define([
 					callback: done,
 					timeout: 20000
 				};
-				Logger.log('implement me');
+				// TODO Implement me
 				done();
 				/*return testProposals(options, [
 					["", "files/require_dep1.js"],
@@ -306,7 +306,7 @@ define([
 					["variable", "variable"]
 				]);*/
 			});
-			it("Simple direct require'd dep 1", function(done) {
+			it.skip("Simple direct require'd dep 1", function(done) {
 				var options = {
 					buffer: "/* eslint-env amd */define(['./files/require_dep1'], function(rd1) {rd1.m});",
 					offset: 73,
@@ -314,7 +314,7 @@ define([
 					callback: done,
 					timeout: 20000
 				};
-				Logger.log('implement me');
+				// TODO Implement me
 				done();
 				/*return testDirectProposals(options, [
 					["", "files/require_dep1.js"],
@@ -333,12 +333,6 @@ define([
 			it("Simple HTML pre-load dep 1");
 		});
 		describe("Open implementation tests", function() {
-			/**
-			 * @description Tests the result of calling the implementation command via the Orion API
-			 * @since 10.0
-			 */
-			function testImplementation(options, expected) {
-			}
 			/**
 			 * @description Tests the result of sending the implementation request directly to Tern
 			 * @since 10.0
@@ -368,7 +362,7 @@ define([
 			 * of the file.
 			 */
 			function _sameFile(actual, expected) {
-				assert(actual, 'The actual file name cannot be undefined');
+				assert(actual, 'The returned file for the implementation was undefined');
 				assert(expected, 'The expected file name cannot be undefined');
 				var idx = actual.lastIndexOf('/');
 				var f = actual;
@@ -395,38 +389,6 @@ define([
 				}
 			}
 			
-			it("Test direct impl - same file var reassignment", function(done) {
-				var options = {
-					buffer: 'function f(){} var q = f; f();',
-					offset: 27,
-					callback: done
-				};
-				testDirectImplementation(options, {start:9, end:10, file: 'tern_crossfile_test_script.js'});
-			});
-			it("Test direct impl - same file simple use", function(done) {
-				var options = {
-					buffer: 'function f(){} f();',
-					offset: 16,
-					callback: done
-				};
-				testDirectImplementation(options, {start:9, end:10, file: 'tern_crossfile_test_script.js'});
-			});
-			it("Test direct impl - same file object proxy", function(done) {
-				var options = {
-					buffer: 'function f(){} var o = {one: f}; o.one();',
-					offset: 37,
-					callback: done
-				};
-				testDirectImplementation(options, {start:9, end:10, file: 'tern_crossfile_test_script.js'});
-			});
-			it("Test direct impl - same file function return indirection", function(done) {
-				var options = {
-					buffer: 'function f(){} function g() {return {ff: f}} g().ff();',
-					offset: 51,
-					callback: done
-				};
-				testDirectImplementation(options, {start:9, end:10, file: 'tern_crossfile_test_script.js'});
-			});
 			it("Test direct impl - cross file return object indirection 1", function(done) {
 				var options = {
 					buffer: "define(['./files/require_dep1'], function(a) {a.myfunc()});",
@@ -449,16 +411,15 @@ define([
 					offset: 52,
 					callback: done
 				};
-				//TODO this test passes, but is marking the RHS of the property rather than the property name
-				testDirectImplementation(options, {start:868, end:881, file: 'require_dep2.js'});
+				testDirectImplementation(options, {start:860, end:866, file: 'require_dep2.js'});
 			});
-			it.skip("Test direct impl - cross file return object indirection 4", function(done) {
+			it("Test direct impl - cross file return object indirection 4", function(done) {
 				var options = {
 					buffer: "define(['./files/require_dep2'], function(a) {a.variable});",
 					offset: 52,
 					callback: done
 				};
-				testDirectImplementation(options, {start:751, end:758, file: 'require_dep2.js'});
+				testDirectImplementation(options, {start:741, end:749, file: 'require_dep2.js'});
 			});
 			it("Test direct impl - cross file return object constructor 1", function(done) {
 				var options = {
@@ -474,7 +435,6 @@ define([
 					offset: 52,
 					callback: done
 				};
-				//TODO this test fails to find the impl, but it should work
 				testDirectImplementation(options, {start:1210, end:1219, file: 'require_dep6.js'});
 			});
 			it("Test direct impl - cross file return object direct var 1", function(done) {
@@ -516,7 +476,7 @@ define([
 					offset: 52,
 					callback: done
 				};
-				testDirectImplementation(options, {start:868, end:881, file: 'require_dep2.js'});
+				testDirectImplementation(options, {start:860, end:866, file: 'require_dep2.js'});
 			});
 			it("Test direct impl - cross 2 files var 1", function(done) {
 				var options = {
@@ -524,7 +484,7 @@ define([
 					offset: 52,
 					callback: done
 				};
-				testDirectImplementation(options, {start:751, end:758, file: 'require_dep2.js'});
+				testDirectImplementation(options, {start:741, end:749, file: 'require_dep2.js'});
 			});
 			it.skip("Test direct impl - cross file return object proto function 1", function(done) {
 				var options = {
@@ -571,6 +531,15 @@ define([
 				testDirectImplementation(options, {start:824, end:827, file: 'require_dep5.js'});
 			});
 			//TODO Add similar constructor tests for content assist, hovers, openDeclaration
+			it.skip("Open Impl - Node.js export to function implementation", function(done) {
+				var options = {
+					buffer: "var lib = require('./files/node_dep1.js'); lib.myfunc();",
+					offset: 49,
+					callback: done
+				};
+				// TODO Node not yet supported
+				testDirectImplementation(options, {start:859, end:865, file: 'node_dep1.js'});
+			});
 		});
 		describe("All References Tests", function() {
 			it("Simple pre-load dep 1");

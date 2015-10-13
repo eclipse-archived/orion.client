@@ -15,9 +15,9 @@
   if (typeof exports === "object" && typeof module === "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require);
   if (typeof define === "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", './resolver'], mod);
+    return define(["../lib/infer", "../lib/tern", './resolver', "javascript/finder"], mod);
   mod(infer, tern, resolver);
-})(/* @callback */ function(infer, tern, resolver) {
+})(/* @callback */ function(infer, tern, resolver, Finder) {
 	
 	tern.registerPlugin("openImplementation", /* @callback */ function(server, options) { //$NON-NLS-1$
 	    return {};
@@ -31,48 +31,67 @@
 			if (query.end && !query.start) {
 				query.start = query.end;
 			}
-			var definition = this._getDefNode(server, query);
-			var prevDef;
-			while (definition) {
-//				console.log(definition.type);
-				// If a 'findDef' finds itself we're done
-				if (prevDef && prevDef.start === definition.start && prevDef.end === definition.end) {
-					return {implementation: {start: definition.start, end: definition.end,
-												file: definition.sourceFile.name}};
-				}
-				prevDef = definition;
-				
-				if (definition.type === "Property") {					
-					definition = definition.value;
-				} else if (definition.type === "Identifier") {
-					query = {start: definition.start, end: definition.end,
-									type: "definition", //$NON-NLS-1$
-									file: definition.sourceFile.name};
-					definition = this._getDefNode(server, query);
-				} else if (definition.type === "MemberExpression") {
-					definition = definition.property;
-				} else if (definition.type === "FunctionExpression") {
-					return {implementation: {start: definition.start, end: definition.end,
-												file: definition.sourceFile.name}};
-				}
-			}
-			return {implementation: {}};
-		},
-		_getDefNode: function(server, query) {
 			var theFile = server.fileMap[query.file];
-//			console.log("findDef: " + query.start + "," + query.end + " : " + theFile.name);
-			var res = tern.findDef(server, query, theFile);
-			if (res && res.start) {
-				theFile = server.fileMap[res.file];
-				if (theFile.ast) {
-					var theNode = infer.findExpressionAt(theFile.ast, res.start, null, null, function(type, node) {
-						return true;
-					});
-//					console.log("OK");
-					return theNode.node;
+			return this.findImplRecurse(query.end, theFile, {implementation: {}}, server);
+		},
+		
+		/**
+		 * Looks at the given offset in the given file and returns the implementation if one can be found.
+		 * Otherwise returns the given candidateImpl.  This function will run recursively until it finds a node
+		 * that is the implementation or findDef returns the same node.
+		 * @param offset offset in the file where the node/caret is
+		 * @param serverFile the server file containing the ast and filename
+		 * @param candidateImpl the value to return if an implementation can't be found
+		 * @param server the server to lookup other files in
+		 * @returns {Object} Implementation object containing a single 'implementation' property with start/end/file info
+		 */
+		findImplRecurse: function findImplRecurse(offset, serverFile, candidateImpl, server){
+			var query, typeDef, newServerFile;
+			if (serverFile){
+				var node = Finder.findNode(offset, serverFile.ast, {parents: true});
+				if (node){
+					if (node.type === 'Identifier'){
+						var parent = node.parents[node.parents.length-1];
+						if (parent){
+							var rhs;
+							if (parent.type === 'VariableDeclarator' && parent.init){
+								rhs = parent.init;
+							} else if (parent.type === 'AssignmentExpression' && parent.right){
+								rhs = parent.right;
+							} else if (parent.type === 'Property' && parent.value){
+								rhs = parent.value;
+							}
+							if (rhs){
+								if (rhs.type === 'Literal' || rhs.type === 'FunctionExpression'){
+									// Literals count as implementations
+									// Function expressions are implementations of a function
+									// Short circuit and use the current node
+									return {implementation: {start: node.start, end: node.end, file: serverFile.name}};
+								}
+								// Find the implementation of the RHS identifier
+								query = {start: rhs.start, end: rhs.end, file: serverFile.name};
+								typeDef = tern.findDef(server, query, serverFile);
+								if (typeDef && (typeDef.start !== node.start || typeDef.end !== node.end)){
+									newServerFile = server.fileMap[typeDef.file];
+									return this.findImplRecurse(typeDef.end, newServerFile, {implementation: {start: typeDef.start, end: typeDef.end, file: typeDef.file}}, server);
+								}
+							}
+						}
+						// There are many parents of an identifier, rather than list them all, default to look up the typeDef of the identifier
+						query = {start: node.start, end: node.end, file: serverFile.name};
+						typeDef = tern.findDef(server, query, serverFile);
+						if (typeDef && (typeDef.start !== node.start || typeDef.end !== node.end)){
+							newServerFile = server.fileMap[typeDef.file];
+							return this.findImplRecurse(typeDef.end, newServerFile, {implementation: {start: typeDef.start, end: typeDef.end, file: typeDef.file}}, server);
+						}
+						
+						// The typeDef couldn't be found or matches the current node, just return the node
+						return {implementation: {start: node.start, end: node.end, file: serverFile.name}};
+					}
 				}
 			}
-			return null;
+			// Fall back on the last candidate implementation
+			return candidateImpl;
 		}
 	});
 });
