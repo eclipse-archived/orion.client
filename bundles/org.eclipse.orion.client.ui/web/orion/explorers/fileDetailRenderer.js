@@ -427,8 +427,12 @@ define([
 	        return this.explorer.model.getId(itemOrId) + "_itemLink"; //$NON-NLS-0$
 	    },
 	    getPrimColumnStyle: function(item) {
-	        if(item && item.type === "file") { //$NON-NLS-0$
-	        	return "search_primaryColumn"; //$NON-NLS-0$
+	        if(item) {
+	        	if(item.type === 'group') {
+	        		return 'refs_primaryColumn'; //$NON-NLS-1$
+	        	} else if(item.type === 'file') {
+	        		return "search_primaryColumn"; //$NON-NLS-1$
+	        	}
 	        } else {
 	        	return  "search_primaryColumn_Details"; //$NON-NLS-0$
 	        }
@@ -446,3 +450,4 @@ define([
 	};
 
 });
+	

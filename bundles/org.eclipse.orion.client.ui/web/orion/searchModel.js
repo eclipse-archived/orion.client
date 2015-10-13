@@ -288,7 +288,7 @@ define([
     						match.parent = this._location2ModelMap.unrelated;
 		    				this._location2ModelMap.unrelated.children.push(match);
 		    			} else if(match.confidence < 100) {
-		    				match.parent = this._location2ModelMap.possible;;
+		    				match.parent = this._location2ModelMap.possible;
 		    				this._location2ModelMap.possible.children.push(match);
 		    			} else {
 		    				match.parent = this._location2ModelMap.exact;

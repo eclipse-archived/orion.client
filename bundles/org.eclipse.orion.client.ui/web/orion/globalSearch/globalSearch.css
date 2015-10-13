@@ -15,6 +15,14 @@
 	width: 38px;
 }
 
+.refs_primaryColumn {
+	padding-left: 0 !important;
+	padding-top: 0 !important;
+	vertical-align: top;
+	white-space: nowrap;
+	width: 14px;
+}
+
 .search_primaryColumn_Details {
 	padding-left: 0 !important;
 	text-align: right;
