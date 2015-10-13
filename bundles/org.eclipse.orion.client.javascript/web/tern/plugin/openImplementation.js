@@ -53,6 +53,11 @@
 					if (node.type === 'Identifier'){
 						var parent = node.parents[node.parents.length-1];
 						if (parent){
+							if (parent.type === 'MemberExpression' && node.parents.length >= 2){
+								// See if the member expression is an assignment a.b=1 that we can follow, otherwise fallthrough and lookup typeDef for the property node
+								parent = node.parents[node.parents.length-2];
+							}
+							
 							var rhs;
 							if (parent.type === 'VariableDeclarator' && parent.init){
 								rhs = parent.init;

@@ -317,7 +317,7 @@ define([
 		});
 		it('Open Declaration - Simple member expression', function(done) {
 			var options = {
-				buffer: "var a = {b: function(){ console.log('test'); } }; a.b();",
+				buffer: "var a = {b: function(){ console.log('test'); } }; a.b;",
 				offset: 52,
 				callback: done
 			};
@@ -325,11 +325,77 @@ define([
 		});
 		it('Open Implementation - Simple member expression', function(done) {
 			var options = {
-				buffer: "var a = {b: function(){ console.log('test'); } }; a.b();",
+				buffer: "var a = {b: function(){ console.log('test'); } }; a.b;",
 				offset: 52,
 				callback: done
 			};
 			testOpenImpl(options, {start: 9, end: 10});
+		});
+		it('Open Declaration - Chained member expression', function(done) {
+			var options = {
+				buffer: "function f(){} var a={}; a.b = f; a.b();",
+				offset: 36,
+				callback: done
+			};
+			testOpenDecl(options, {start: 27, end: 28});
+		});
+		it('Open Implementation - Chained member expression', function(done) {
+			var options = {
+				buffer: "function f(){} var a={}; a.b = f; a.b();",
+				offset: 36,
+				callback: done
+			};
+			testOpenImpl(options, {start: 9, end: 10});
+		});
+		it('Open Declaration - Chained member expression with member selected', function(done) {
+			var options = {
+				buffer: "function f(){} var a={}; a.b = f; a.b();",
+				offset: 34,
+				callback: done
+			};
+			testOpenDecl(options, {start: 19, end: 20});
+		});
+		it('Open Implementation - Chained member expression with member selected', function(done) {
+			var options = {
+				buffer: "function f(){} var a={}; a.b = f; a.b();",
+				offset: 34,
+				callback: done
+			};
+			testOpenImpl(options, {start: 21, end: 23});
+		});
+		it('Open Declaration - Multiple implementation member expression 1', function(done) {
+			var options = {
+				buffer: "function f(){} var a={b: function(){}}; a.b = f; a.b();",
+				offset: 52,
+				callback: done
+			};
+			testOpenDecl(options, {start: 22, end: 23});
+		});
+		it('Open Implementation - Multiple implementation member expression 1', function(done) {
+			var options = {
+				buffer: "function f(){} var a={b: function(){}}; a.b = f; a.b();",
+				offset: 52,
+				callback: done
+			};
+			testOpenImpl(options, {start: 22, end: 23});
+		});
+		it('Open Declaration - Multiple implementation member expression 2', function(done) {
+			// Tern will always return the object expression over the assignment
+			var options = {
+				buffer: "function f(){} var a = {}; a.b = f; a={b: function(){}}; a.b();",
+				offset: 59,
+				callback: done
+			};
+			testOpenDecl(options, {start: 39, end: 40});
+		});
+		it('Open Implementation - Multiple implementation member expression 2', function(done) {
+			// Tern will always return the object expression over the assignment
+			var options = {
+				buffer: "function f(){} var a = {}; a.b = f; a={b: function(){}}; a.b();",
+				offset: 59,
+				callback: done
+			};
+			testOpenImpl(options, {start: 39, end: 40});
 		});
 		it('Open Declaration - Chained call expression', function(done) {
 			var options = {
