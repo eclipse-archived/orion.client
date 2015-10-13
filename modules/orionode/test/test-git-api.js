@@ -52,7 +52,7 @@ function setupRepo(done) {
 	TEST_REPO_NAME = "Spoon-Knife";
 	repoPath = path.join(WORKSPACE, TEST_REPO_NAME);
 	testData.setUp(WORKSPACE, function() {
-		git.Clone.clone("http://github.com/octocat/Spoon-Knife.git", repoPath).then(done.bind(null, null), done);
+		git.Clone.clone("https://github.com/octocat/Spoon-Knife.git", repoPath).then(done.bind(null, null), done);
 	});
 }
 
