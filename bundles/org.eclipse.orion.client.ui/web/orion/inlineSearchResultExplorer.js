@@ -133,7 +133,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
     };
     
 	SearchResultRenderer.prototype.generateDetailDecorator = function(item, spanHolder) {
-		if(item.type === 'group') {
+		if(item.parent.type === 'group') {
 			//TODO do nothing for now
 		} else {
 			if(typeof(item.confidence) === "number") {
@@ -156,7 +156,10 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
        
 		var params = helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, item.lineNumber, helper.params.replace, true) : null;
 		//var name = item.parent.name;
-		var location = item.parent.location ? item.parent.location : '#';
+		var location = item.location;
+		if(!location) {
+			item.parent.location ? item.parent.location : '#';
+		}
 		var link = navigatorRenderer.createLink(null, 
 			{Location: location/*, Name: name*/}, 
 			this.explorer._commandService, 

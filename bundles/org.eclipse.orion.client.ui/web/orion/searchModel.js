@@ -173,12 +173,8 @@ define([
 	        			this._buildFileResult(this._resultLocation[i]);
 	        			break;
 	        		}
-	        		case 'category': {
-	        			this._buildCategoryResult(this._resultLocation[i]);
-	        			break;
-	        		}
-	        		case 'flat': {
-	        			this._buildFlatResult(this._resultLocation[i]);
+	        		case 'group': {
+	        			this._buildGroupedResult(this._resultLocation[i]);
 	        			break;
 	        		}
 	        	}
@@ -234,45 +230,13 @@ define([
             this._indexedFileItems.push(fileNode);
 	    },
 	    /**
-    	 * @description Builds a category-based result model. Each searh result will have a categories array for all the categories it supports
-    	 * and each child result will be tagged with the category it belongs to.
-    	 * @function
-    	 * @private
-    	 * @param {Object} result The current search result element
-    	 * @since 10.0
-    	 */
-    	_buildCategoryResult: function _buildCategoryResult(result) {
-    		var children = result.children;
-    		var categories = result.categories;
-    		for(var i = 0, len = categories.length; i < len; i++) {
-    			var cat = categories[i];
-    			if(this._location2ModelMap[cat]) {
-    				continue;
-    			}
-	    		var node = {
-	    			parent: this.getListRoot(),
-	    			type: 'category', //$NON-NLS-1$
-	    			name: result.name,
-	    			category: cat,
-	    			children: children,
-	    			contents: result.contents,
-	    			location: result.location,
-	    			parentLocation: mUiUtils.path2FolderName(result.location, result.name, true),
-	    			fullPathName: mUiUtils.path2FolderName(result.path, result.name)
-	    		};
-		    	this._location2ModelMap[cat] = node;
-	            this.getListRoot().children.push(node);
-	            this._indexedFileItems.push(node);
-	        }
-	    },
-	    /**
-    	 * @description Builds a flat list search result model. Takes the complete result and turns it into a flat list of matches
+    	 * @description Builds a grouped result model.
     	 * @function
     	 * @private
     	 * @param {Object} result The search result
     	 * @since 10.0
     	 */
-    	_buildFlatResult: function _buildFlatResult(result) {
+    	_buildGroupedResult: function _buildGroupedResult(result) {
     		if(this._map('exact', { //$NON-NLS-1$
     			parent: this.getListRoot(),
     			type: 'group', //$NON-NLS-1$
@@ -306,7 +270,6 @@ define([
     			var matches = file.matches;
     			for (var j = 0, len2 = matches.length; j < len2; j++) {
     				var match = matches[j];
-    				match.parent = this.getListRoot();
     				match.lineNumber = file.lineNumber;
     				if(file.name) {
     					match.lineString = file.name;
@@ -322,10 +285,13 @@ define([
     				}
     				if(typeof(match.confidence) === 'number') {
     					if(match.confidence < 1) {
+    						match.parent = this._location2ModelMap.unrelated;
 		    				this._location2ModelMap.unrelated.children.push(match);
 		    			} else if(match.confidence < 100) {
+		    				match.parent = this._location2ModelMap.possible;;
 		    				this._location2ModelMap.possible.children.push(match);
 		    			} else {
+		    				match.parent = this._location2ModelMap.exact;
 		    				this._location2ModelMap.exact.children.push(match);
 		    			}
     				}
@@ -486,26 +452,50 @@ define([
     	 * @override
     	 */
     	getHeaderString: function getHeaderString() {
-	        var headerStr = messages["Results"]; //$NON-NLS-0$
-	        if (this._searchHelper.displayedSearchTerm) {
-	            var pagingParams = this.getPagingParams();
-	            if (pagingParams.numberOnPage > 0) {
-	                var startNumber = pagingParams.start + 1;
-	                var endNumber = startNumber + pagingParams.numberOnPage - 1;
-	                headerStr = "";
-	                if (!this.replaceMode()) {
-	                    headerStr = i18nUtil.formatMessage(messages["FilesAofBmatchingC"],
-	                    startNumber + "-" + endNumber, pagingParams.totalNumber, this._searchHelper.displayedSearchTerm); //$NON-NLS-0$
-	                } else {
-	                    headerStr = i18nUtil.formatMessage(messages["ReplaceAwithBforCofD"],
-	                    this._searchHelper.displayedSearchTerm,
-	                    this._searchHelper.params.replace,
-	                    startNumber + "-" + endNumber, //$NON-NLS-0$
-	                    pagingParams.totalNumber);
-	                }
-	            }
-	        }
-	        return headerStr;
+    		if(this._shape === 'group') {
+    			//# references to <str> in <project_name>|<workspace>
+    			var total = 0;
+    			for(var i = 0, len = this._resultLocation.length; i < len; i++) {
+    				total += this._resultLocation[i].totalMatches;
+    			}
+    			var header = total+' references ';
+    			if(this._searchHelper.displayedSearchTerm) {
+    				header += 'to \''+this._searchHelper.displayedSearchTerm+'\'';
+    			}
+    			var res = this._searchHelper.params.resource;
+    			if(res) {
+    				res = res.replace(/\/$/g, '');
+    				var idx = res.lastIndexOf('/');
+    				if(idx > -1) {
+    					res = res.substring(idx+1);
+    				}
+    				header += ' in '+decodeURIComponent(res);
+    			} else {
+    				header += ' in the workspace';
+    			}
+    			return header;
+    		} else {
+		        var headerStr = messages["Results"]; //$NON-NLS-0$
+		        if (this._searchHelper.displayedSearchTerm) {
+		            var pagingParams = this.getPagingParams();
+		            if (pagingParams.numberOnPage > 0) {
+		                var startNumber = pagingParams.start + 1;
+		                var endNumber = startNumber + pagingParams.numberOnPage - 1;
+		                headerStr = "";
+		                if (!this.replaceMode()) {
+		                    headerStr = i18nUtil.formatMessage(messages["FilesAofBmatchingC"],
+		                    startNumber + "-" + endNumber, pagingParams.totalNumber, this._searchHelper.displayedSearchTerm); //$NON-NLS-0$
+		                } else {
+		                    headerStr = i18nUtil.formatMessage(messages["ReplaceAwithBforCofD"],
+		                    this._searchHelper.displayedSearchTerm,
+		                    this._searchHelper.params.replace,
+		                    startNumber + "-" + endNumber, //$NON-NLS-0$
+		                    pagingParams.totalNumber);
+		                }
+		            }
+		        }
+		        return headerStr;
+        	}	
 	    },
 	    /**
     	 * @description The function to return the list of valid files. Optional.

@@ -206,29 +206,45 @@ define([
 	    },
 	    _generateDetailSegments: function(detailModel) {
 	        var detailInfo = this.explorer.model.getDetailInfo(detailModel);
-	        var startIndex = 0;
 	        var segments = [];
-	        for (var i = 0; i < detailInfo.matches.length; i++) {
-	            if (startIndex >= detailInfo.lineString.length) {
-					break;
-	            }
-	            if (this.enableCheckbox(detailModel)) {
-	                if (i !== detailInfo.matchNumber) {
-	                    continue;
-	                }
-	            }
-	            if (startIndex !== detailInfo.matches[i].startIndex) {
-	                segments.push({name: detailInfo.lineString.substring(startIndex, detailInfo.matches[i].startIndex), startIndex: startIndex, bold: false, highlight: false});
-	            }
-	            var  gap = detailInfo.matches[i].length;
-	            segments.push({name: detailInfo.lineString.substring(detailInfo.matches[i].startIndex, detailInfo.matches[i].startIndex + gap), startIndex: detailInfo.matches[i].startIndex, bold: true, highlight: false});
-	            startIndex = detailInfo.matches[i].startIndex + gap;
-	            if (this.enableCheckbox(detailModel)) {
-	                break;
-	            }
-	        }
-	        if (startIndex < (detailInfo.lineString.length - 1)) {
-	            segments.push({name: detailInfo.lineString.substring(startIndex), startIndex: startIndex, bold: false, highlight: false});
+	        if(detailModel.parent.type === 'group') {
+	        	var end = detailModel.startIndex+detailModel.length;
+	        	if(detailModel.startIndex > 0) {
+			    	segments.push({name: detailModel.lineString.substring(0, detailModel.startIndex), startIndex: 0, bold: false, highlight: false});
+	        	}
+	        	segments.push({
+	        		name: detailModel.lineString.substring(detailModel.startIndex, end), 
+	        		startIndex: detailModel.startIndex, 
+	        		bold: true, 
+	        		highlight: false
+	        	});
+	        	if (end < detailModel.lineString.length) {
+		            segments.push({name: detailModel.lineString.substring(end), startIndex: end, bold: false, highlight: false});
+		        }
+	        } else {
+		        var startIndex = 0;
+		        for (var i = 0; i < detailInfo.matches.length; i++) {
+		            if (startIndex >= detailInfo.lineString.length) {
+						break;
+		            }
+		            if (this.enableCheckbox(detailModel)) {
+		                if (i !== detailInfo.matchNumber) {
+		                    continue;
+		                }
+		            }
+		            if (startIndex !== detailInfo.matches[i].startIndex) {
+		                segments.push({name: detailInfo.lineString.substring(startIndex, detailInfo.matches[i].startIndex), startIndex: startIndex, bold: false, highlight: false});
+		            }
+		            var  gap = detailInfo.matches[i].length;
+		            segments.push({name: detailInfo.lineString.substring(detailInfo.matches[i].startIndex, detailInfo.matches[i].startIndex + gap), startIndex: detailInfo.matches[i].startIndex, bold: true, highlight: false});
+		            startIndex = detailInfo.matches[i].startIndex + gap;
+		            if (this.enableCheckbox(detailModel)) {
+		                break;
+		            }
+		        }
+		        if (startIndex < (detailInfo.lineString.length - 1)) {
+		            segments.push({name: detailInfo.lineString.substring(startIndex), startIndex: startIndex, bold: false, highlight: false});
+		        }
 	        }
 	        return segments;
 	    },
@@ -337,7 +353,11 @@ define([
 	                } else {
 	                	if (typeof this.explorer.model.enableCheckbox === "function" && this.explorer.model.enableCheckbox(item)) { //$NON-NLS-0$
 	                		col = mExplorer.ExplorerRenderer.prototype.getCheckboxColumn.call(this, item, tableRow);
-	                	} else {
+	                	} else if(item.parent.type === 'group') {
+	                		col = _createElement('td'); //$NON-NLS-0$
+	                		span = _createSpan(null, null, col, null);
+	                		_place(document.createTextNode("", span, "last")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	                	}else {
 	                		col = _createElement('td'); //$NON-NLS-0$
 	                		span = _createSpan(null, null, col, null);
 	                		this.renderDetailLineNumber(item, span);
