@@ -220,7 +220,7 @@ define([
 						var matchNumber = j+1;
 						var newMatch = {confidence: child.matches[j].confidence, parent: fileNode, matches: child.matches, lineNumber: child.lineNumber, matchNumber: matchNumber, 
 							checked: child.matches[j].confidence === 100 ? true: false, type: "detail", //$NON-NLS-1$
-							name: child.name, location: fileNode.location + "-" + child.lineNumber + "-" + matchNumber
+							start: child.matches[j].start, end: child.matches[j].end, name: child.name, location: fileNode.location
 						};
 						newChildren.push(newMatch);
 					}

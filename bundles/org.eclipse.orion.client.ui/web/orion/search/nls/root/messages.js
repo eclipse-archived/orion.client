@@ -108,5 +108,10 @@ define({//Default message bundle
 	"possibleMatches": "Possible Matches",
 	"unrelatedMatches": "Unrelated Matches",
 	"refsInProject": "${0} references to \'${1}\' in ${2}",
-	"refsInWorkspace": "${0} references to \'${1}\' in the workspace"
+	"refsInWorkspace": "${0} references to \'${1}\' in the workspace",
+	"viewByTypes" : "By types", //$NON-NLS-1$ //$NON-NLS-0$
+	"viewByFiles" : "By files", //$NON-NLS-1$ //$NON-NLS-0$
+	"viewByTypesTooltip": "View references grouped by categories", //$NON-NLS-1$ //$NON-NLS-0$
+	"viewByFilesTooltip": "View references grouped by files" //$NON-NLS-1$ //$NON-NLS-0$
+	
 });

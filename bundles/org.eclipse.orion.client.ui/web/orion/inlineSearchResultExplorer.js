@@ -399,8 +399,9 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
             checkbox: false,
             highlightSelection: false
         }, this);
-    	mFileDetailRenderer.getFullPathPref(this._preferences, "/inlineSearchPane", ["showFullPath"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
+    	mFileDetailRenderer.getFullPathPref(this._preferences, "/inlineSearchPane", ["showFullPath", "viewByFile"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
     		this._shouldShowFullPath = (properties ? properties[0] : false);
+    		this._viewByFile = (properties ? properties[1] : false);
     		this.declareCommands();
      	}.bind(this));
     }
@@ -440,6 +441,23 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
     InlineSearchResultExplorer.prototype.declareCommands = function() {
         var that = this;
         // page actions for search
+		var switchViewCommand = new mCommands.Command({
+			tooltip : messages["viewByTypesTooltip"],
+			name: messages["viewByTypes"],
+			imageClass : "problems-sprite-view-mode", //$NON-NLS-0$
+            id: "orion.globalSearch.switchView", //$NON-NLS-0$
+            groupId: "orion.searchGroup", //$NON-NLS-0$
+			type: "switch", //$NON-NLS-0$
+			checked: this._viewByFile,
+			visibleWhen: function(/*item*/) {
+				switchViewCommand.checked = this._viewByFile;
+				switchViewCommand.name = this._viewByFile ? messages["viewByTypes"] : messages["viewByFiles"];
+				switchViewCommand.tooltip = this._viewByFile ? messages["viewByTypesTooltip"] : messages["viewByFilesTooltip"];
+				return this.getItemCount() > 0 && this._cacheSearchResult && that.model && !that.model.replaceMode();
+			}.bind(this),
+			callback : function(data) {
+				this.switchViewMode();
+		}.bind(this)});
         var replaceAllCommand = new mCommands.Command({
             name: messages["Apply Changes"],
             tooltip: messages["Replace all selected matches"],
@@ -486,6 +504,9 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
             type: "switch", //$NON-NLS-0$
             checked: this._shouldShowFullPath,
             visibleWhen: function(/*item*/) {
+            	if(that._cacheSearchResult) {
+            		return that.getItemCount() > 0 && that._cacheSearchParams && that._cacheSearchParams.shape === "file";
+            	}
                 return (that.getItemCount() > 0);
             },
             callback: function() {
@@ -494,6 +515,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
             }
         });
         
+	    this._commandService.addCommand(switchViewCommand);
         this._commandService.addCommand(nextResultCommand);
         this._commandService.addCommand(prevResultCommand);
         this._commandService.addCommand(replaceAllCommand);
@@ -509,6 +531,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 			return !item._reporting && !emptyKeyword;
         });
         
+	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.switchView", 0); //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.replaceAll", 1); //$NON-NLS-2$ //$NON-NLS-1$
         this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.expandAll", 2); //$NON-NLS-1$ //$NON-NLS-2$
         this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.collapseAll", 3); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1066,6 +1089,13 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
      	}.bind(this));
     };
 
+    InlineSearchResultExplorer.prototype.switchViewMode = function() {
+	    	mFileDetailRenderer.switchFullPathPref(this._preferences, "/inlineSearchPane", ["viewByFile"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$
+	    		this._viewByFile = (properties ? properties[0] : false);
+	    		this.runSearch(this._cacheSearchParams, this._resultsNode, this._cacheSearchResult); 
+	     	}.bind(this));
+	};
+	
 	InlineSearchResultExplorer.prototype._renderSearchResult = function(resultsNode, searchParams, searchResult, incremental) {
 		var node = lib.node(resultsNode);
 		lib.empty(node);
@@ -1098,12 +1128,17 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 	InlineSearchResultExplorer.prototype._search = function(resultsNode, searchParams, searchResult) {
 		lib.empty(resultsNode);
 		if(searchResult) {
-			this._renderSearchResult(resultsNode, searchParams, searchResult, searchParams.incremental);
+			this._resultsNode = resultsNode;
+			this._cacheSearchParams = searchParams;
+			this._cacheSearchParams.shape = this._viewByFile ? "file" : "group";
+			this._cacheSearchResult = searchResult;
+			this._renderSearchResult(resultsNode, this._cacheSearchParams, searchResult, searchParams.incremental);
 			window.setTimeout(function() {
 				this.expandAll();
 			}.bind(this), 10);
 			return;
 		}
+		this._cacheSearchResult = null;
 		//If there is no search keyword defined, then we treat the search just as the scope change.
 		if(typeof searchParams.keyword === "undefined"){ //$NON-NLS-0$
 			return;
