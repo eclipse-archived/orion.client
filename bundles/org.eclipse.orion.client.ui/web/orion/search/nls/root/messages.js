@@ -12,7 +12,7 @@ define({//Default message bundle
 	"Find:": "Find:",
 	"Find With": "Find With",
 	"ReplaceWith:": "ReplaceWith:",
-	"Replace With": "Replace With",
+	"Replace With": "Replace with",
 	"Show all": "Show all",
 	"Wrap search": "Wrap search",
 	"Incremental search": "Incremental search",
