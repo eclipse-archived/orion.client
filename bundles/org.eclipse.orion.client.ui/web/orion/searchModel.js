@@ -327,7 +327,12 @@ define([
 	    			this.getListRoot().children.push(this._location2ModelMap.unrelated);
 	    			delete this._location2ModelMap.unrelated.add;
 				}
-    		} 
+    		}
+    		if(this.getListRoot().children.length > 0) {
+    			this.getListRoot().children.sort(function(a, b) {
+    				return a.name.localeCompare(b.name);
+    			});
+    		}
 	    },
 	    /**
     	 * @description if replace mode is enabled
