@@ -319,6 +319,16 @@
 	font-weight: normal;
 }
 
+.groupNameSpan {
+	color: #333 !important;
+	flex-grow: 0;
+	flex-shrink: 0;
+	-webkit-flex-grow: 0;		/* Safari */
+	-webkit-flex-shrink: 0;		/* Safari */
+	font-weight: bold;
+	margin-right: 5px;
+}
+
 .ellipsisSpan {
 	color: #666 !important;
 	flex-grow: 0;
