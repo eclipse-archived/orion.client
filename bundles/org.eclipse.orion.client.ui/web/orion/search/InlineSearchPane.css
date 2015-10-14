@@ -309,6 +309,14 @@
 	margin-right: 5px;
 }
 
+.fileLineSpan {
+	color: black;
+	display: inline-block;
+	padding-right: 10px;
+	font-style: italic;
+	font-size: 8pt;
+}
+
 .fileParentSpan {
 	color: #666 !important;
 	flex-grow: 0;

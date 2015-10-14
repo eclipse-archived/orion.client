@@ -302,15 +302,22 @@ define([
 	        var linkSpan = this.getDetailElement(item, spanHolder);
 	        this.generateDetailHighlight(item, linkSpan);
 	    },
-	    renderDetailLineNumber: function(item, spanHolder) {
+	    renderDetailLineNumber: function(item, spanHolder, showFile) {
 			var detailInfo = this.explorer.model.getDetailInfo(item);
 			var lineNumber = detailInfo.lineNumber + 1;
+			var span = document.createElement("span"); //$NON-NLS-1$
+			span.className = "fileLineSpan"; //$NON-NLS-1$
+			if (showFile) {
+				var loc = item.location;
+				_place(document.createTextNode(loc.substring(loc.lastIndexOf('/') + 1) + "@"), span, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+			}
 	        if (!this.enableCheckbox(item) || detailInfo.matches.length <= 1) {
-	            _place(document.createTextNode(lineNumber + ":"), spanHolder, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+	            _place(document.createTextNode(lineNumber + ":"), span, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 	        } else {
 				var matchNumber = detailInfo.matchNumber + 1;
-	            _place(document.createTextNode(lineNumber + "(" + matchNumber + "):"), spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	            _place(document.createTextNode(lineNumber + "(" + matchNumber + "):"), span, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	        }
+	        spanHolder.appendChild(span);
 	    },
 	    getDetailElement: function(item, spanHolder) {
 	    	var link = this.generateDetailLink(item);
@@ -378,8 +385,8 @@ define([
 	                    this.renderGroupElement(item, span, this.explorer.model);
 						tableRow.title = item.name;
 	                } else {
-	                	if (this.enableCheckbox(item)) {
-	                		this.renderDetailLineNumber(item, col);
+	                	if (item.parent.type === "group") {
+	                		this.renderDetailLineNumber(item, col, true);
 	                	}
 	                    this.renderDetailElement(item, col);
 	                }
