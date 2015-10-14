@@ -367,7 +367,7 @@ define([
 	                		col = _createElement('td'); //$NON-NLS-0$
 	                		span = _createSpan(null, null, col, null);
 	                		_place(document.createTextNode("", span, "last")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	                	}else {
+	                	} else {
 	                		col = _createElement('td'); //$NON-NLS-0$
 	                		span = _createSpan(null, null, col, null);
 	                		this.renderDetailLineNumber(item, span);

@@ -278,38 +278,41 @@ define([
 		    		};
 	    	}
     		var files = result.children;
-    		for(var i = 0, len = files.length; i < len; i++) {
-    			var file = files[i];
-    			var matches = file.matches;
-    			for (var j = 0, len2 = matches.length; j < len2; j++) {
-    				var match = matches[j];
-    				match.lineNumber = file.lineNumber;
-    				if(file.name) {
-    					match.lineString = file.name;
-    					match.name = file.name;
-    				} else {
-    					match.lineString = '';
-    					match.name = '';
-    				}
-    				if(result.location) {
-    					match.location = result.location;
-    				} else {
-    					match.location = '';
-    				}
-    				if(typeof(match.confidence) === 'number') {
-    					if(match.confidence < 1) {
-    						match.parent = this._location2ModelMap.unrelated;
-		    				this._location2ModelMap.unrelated.children.push(match);
-		    			} else if(match.confidence < 100) {
-		    				match.parent = this._location2ModelMap.possible;
-		    				this._location2ModelMap.possible.children.push(match);
-		    			} else {
-		    				match.parent = this._location2ModelMap.exact;
-		    				this._location2ModelMap.exact.children.push(match);
-		    			}
-    				}
-    			}
-    		}
+    		if(files) {
+	    		for(var i = 0, len = files.length; i < len; i++) {
+	    			var file = files[i];
+	    			var matches = file.matches;
+	    			for (var j = 0, len2 = matches.length; j < len2; j++) {
+	    				var match = matches[j];
+	    				match.lineNumber = file.lineNumber;
+	    				if(file.name) {
+	    					match.lineString = file.name;
+	    					match.name = file.name;
+	    				} else {
+	    					match.lineString = '';
+	    					match.name = '';
+	    				}
+	    				if(result.location) {
+	    					match.location = result.location;
+	    				} else {
+	    					match.location = '';
+	    				}
+	    				if(typeof(match.confidence) === 'number') {
+	    					if(match.confidence < 1) {
+	    						match.parent = this._location2ModelMap.unrelated;
+			    				this._location2ModelMap.unrelated.children.push(match);
+			    			} else if(match.confidence < 100) {
+			    				match.parent = this._location2ModelMap.possible;
+			    				this._location2ModelMap.possible.children.push(match);
+			    			} else {
+			    				match.parent = this._location2ModelMap.exact;
+			    				this._location2ModelMap.exact.children.push(match);
+			    			}
+	    				}
+	    			}
+	    		}
+			}
+
     		function _srt(a, b) {
     			if(a.confidence === b.confidence) {
  					return a.lineNumber - b.lineNumber;
@@ -492,24 +495,22 @@ define([
     			//# references to <str> in <project_name>|<workspace>
     			var total = 0;
     			for(var i = 0, len = this._resultLocation.length; i < len; i++) {
-    				total += this._resultLocation[i].totalMatches;
-    			}
-    			var header = total+' references ';
-    			if(this._searchHelper.displayedSearchTerm) {
-    				header += 'to \''+this._searchHelper.displayedSearchTerm+'\'';
+    				var matches = this._resultLocation[i].totalMatches;
+    				if(typeof(matches) === 'number') {
+	    				total += matches;
+					}
     			}
     			var res = this._searchHelper.params.resource;
-    			if(res) {
+    			if(res && res !== '/file') {
     				res = res.replace(/\/$/g, '');
     				var idx = res.lastIndexOf('/');
     				if(idx > -1) {
     					res = res.substring(idx+1);
     				}
-    				header += ' in '+decodeURIComponent(res);
+    				return i18nUtil.formatMessage(messages['refsInProject'], {0: total, 1: this._searchHelper.displayedSearchTerm, 2: decodeURIComponent(res)});
     			} else {
-    				header += ' in the workspace';
+    				return i18nUtil.formatMessage(messages['refsInWorkspace'], {0: total, 1: this._searchHelper.displayedSearchTerm});
     			}
-    			return header;
     		} else {
 		        var headerStr = messages["Results"]; //$NON-NLS-0$
 		        if (this._searchHelper.displayedSearchTerm) {

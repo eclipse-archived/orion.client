@@ -97,7 +97,7 @@ define({//Default message bundle
 	"Show replacement preview": "Show replacement preview",
 	"File name patterns (comma-separated)": "File name patterns (comma-separated)",
 	"(* = any string, ? = any character)": "(* = any string, ? = any character)",
-	"(${0})": "(${0})",
+	"(${0})": "(${0} matches)",
 	"Choose a Folder": "Choose a Folder",
 	"Remove from search results": "Remove from search results",
 	"^ Edit Search": "^ Edit Search",
@@ -107,4 +107,6 @@ define({//Default message bundle
 	"exactMatches": "Exact Matches",
 	"possibleMatches": "Possible Matches",
 	"unrelatedMatches": "Unrelated Matches",
+	"refsInProject": "${0} references to \'${1}\' in ${2}",
+	"refsInWorkspace": "${0} references to \'${1}\' in the workspace"
 });
