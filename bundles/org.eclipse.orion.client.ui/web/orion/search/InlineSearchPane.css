@@ -319,14 +319,26 @@
 	font-weight: normal;
 }
 
-.groupNameSpan {
+.groupParentSpan {
 	color: #333 !important;
 	flex-grow: 0;
 	flex-shrink: 0;
 	-webkit-flex-grow: 0;		/* Safari */
 	-webkit-flex-shrink: 0;		/* Safari */
+	font-size: 9pt; 
+}
+
+.groupNameSpan {
 	font-weight: bold;
-	margin-right: 5px;
+	padding-top: 2px;
+    display: inline-block;
+}
+
+.groupCountSpan {
+	font-weight: bold;
+	padding-top: 2px;
+	padding-left: 5px;
+    display: inline-block;
 }
 
 .ellipsisSpan {

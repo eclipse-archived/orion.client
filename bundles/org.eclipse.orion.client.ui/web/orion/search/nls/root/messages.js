@@ -97,6 +97,7 @@ define({//Default message bundle
 	"Show replacement preview": "Show replacement preview",
 	"File name patterns (comma-separated)": "File name patterns (comma-separated)",
 	"(* = any string, ? = any character)": "(* = any string, ? = any character)",
+	"(${0})": "(${0})",
 	"Choose a Folder": "Choose a Folder",
 	"Remove from search results": "Remove from search results",
 	"^ Edit Search": "^ Edit Search",

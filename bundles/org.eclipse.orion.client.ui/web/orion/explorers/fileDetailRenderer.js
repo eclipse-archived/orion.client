@@ -155,12 +155,15 @@ define([
     	 * @since 10.0
     	 */
     	renderGroupElement: function renderGroupElement(item, spanHolder, resultModel) {
-			var parentSpan = document.createElement("span"); //$NON-NLS-0$
-			parentSpan.classList.add("groupNameSpan"); //$NON-NLS-0$
-			parentSpan.appendChild(document.createTextNode(item.name)); //$NON-NLS-0$
-			// append link to parent span
-	        spanHolder.appendChild(parentSpan);
-	        spanHolder.classList.add("groupNameSpan"); //$NON-NLS-0$
+			var nameSpan = document.createElement("span"); //$NON-NLS-0$
+			nameSpan.appendChild(document.createTextNode(item.name)); //$NON-NLS-0$
+			nameSpan.classList.add("groupNameSpan"); //$NON-NLS-0$
+	        spanHolder.appendChild(nameSpan);
+   			var countSpan = document.createElement("span"); //$NON-NLS-0$
+			countSpan.appendChild(document.createTextNode(i18nUtil.formatMessage(messages["(${0})"], item.children.length) ));
+			countSpan.classList.add("groupCountSpan"); //$NON-NLS-0$
+	        spanHolder.appendChild(countSpan);
+			spanHolder.classList.add("groupParentSpan"); //$NON-NLS-0$
 	    },
 	    renderFileElement: function(item, spanHolder, resultModel) {
 			var link = this.generateFileLink(resultModel, item);
