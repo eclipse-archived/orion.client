@@ -451,13 +451,13 @@ searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContent
 						} else {
 							detailNode = {parent: fileModelNode, context: searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, 
 											  type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, //$NON-NLS-0$ 
-											  location: fileModelNode.location + "-" + lineNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+											  location: fileModelNode.location}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						}
 						fileModelNode.children.push(detailNode);
 					} else {
 						for(var j = 0; j < result.length; j++){
 							var matchNumber = j+1;
-							detailNode = {parent: fileModelNode, checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, matchNumber: matchNumber, name: lineStringOrigin, location: fileModelNode.location + "-" + lineNumber + "-" + matchNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							detailNode = {parent: fileModelNode, checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, matchNumber: matchNumber, name: lineStringOrigin, location: fileModelNode.location}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							fileModelNode.children.push(detailNode);
 						}
 					}

@@ -119,6 +119,15 @@ define([
 	            result = item.location;
 	            // remove all non valid chars to make a dom id. 
 	            result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+	            if(typeof item.lineNumber === "number") {
+	            	result = result + "-" + item.lineNumber;
+	            }
+	            if(typeof item.matchNumber === "number") {
+	            	result = result + "-" + item.matchNumber;
+	            }
+	            if(typeof item.start === "number") {
+	            	result = result + "-" + item.start;
+	            }
 	        }
 	        return result;
 	    },

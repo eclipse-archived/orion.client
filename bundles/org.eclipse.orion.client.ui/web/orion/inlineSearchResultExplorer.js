@@ -154,7 +154,12 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
             helper = this.explorer.model._provideSearchHelper();
         }
        
-		var params = helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, item.lineNumber, helper.params.replace, true) : null;
+        var params;
+        if(typeof item.start === "number" && typeof item.end === "number") {
+        	params = {start: item.start, end: item.end};
+        } else {
+			params = helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, item.lineNumber, helper.params.replace, true) : null;
+		}
 		//var name = item.parent.name;
 		var location = item.location;
 		if(!location) {
