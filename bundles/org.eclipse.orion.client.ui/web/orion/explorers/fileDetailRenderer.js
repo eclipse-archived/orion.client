@@ -442,10 +442,9 @@ define([
 	        		return 'refs_primaryColumn'; //$NON-NLS-1$
 	        	} else if(item.type === 'file') {
 	        		return "search_primaryColumn"; //$NON-NLS-1$
-	        	}
-	        } else {
-	        	return  "search_primaryColumn_Details"; //$NON-NLS-0$
-	        }
+	        	} 
+	        } 
+	        return  "search_primaryColumn_Details"; //$NON-NLS-0$
 	    },
 	    getSecondaryColumnStyle: function() {
 	        return "search_secondaryColumn"; //$NON-NLS-0$
