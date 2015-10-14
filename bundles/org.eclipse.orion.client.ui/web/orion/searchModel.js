@@ -243,7 +243,8 @@ define([
 		    			type: 'group', //$NON-NLS-1$
 		    			name: messages['exactMatches'],
 		    			location: 'exact', //$NON-NLS-1$
-		    			children: []
+		    			children: [],
+		    			add: true
 		    		};
     		}
     		if(!this._location2ModelMap.possible) {
@@ -252,7 +253,8 @@ define([
 		    			type: 'group', //$NON-NLS-1$
 		    			name: messages['possibleMatches'],
 		    			location: 'possible', //$NON-NLS-1$
-		    			children: []
+		    			children: [],
+		    			add: true
 		    		};
 			}	
 
@@ -262,7 +264,8 @@ define([
 		    			type: 'group', //$NON-NLS-1$
 		    			name: messages['unrelatedMatches'],
 		    			location: 'unrelated', //$NON-NLS-1$
-		    			children: []
+		    			children: [],
+		    			add: true
 		    		};
 	    	}
     		var files = result.children;
@@ -306,15 +309,24 @@ define([
     		}
     		if(this._location2ModelMap.exact.children.length > 0) {
     			this._location2ModelMap.exact.children.sort(_srt);
-    			this.getListRoot().children.push(this._location2ModelMap.exact);
+    			if(this._location2ModelMap.exact.add) {
+	    			this.getListRoot().children.push(this._location2ModelMap.exact);
+	    			delete this._location2ModelMap.exact.add;
+				}
     		} 
     		if(this._location2ModelMap.possible.children.length > 0) {
     			this._location2ModelMap.possible.children.sort(_srt);
-    			this.getListRoot().children.push(this._location2ModelMap.possible);
+    			if(this._location2ModelMap.possible.add) {
+	    			this.getListRoot().children.push(this._location2ModelMap.possible);
+	    			delete this._location2ModelMap.possible.add;
+				}
     		} 
     		if(this._location2ModelMap.unrelated.children.length > 0) {
     			this._location2ModelMap.unrelated.children.sort(_srt);
-    			this.getListRoot().children.push(this._location2ModelMap.unrelated);
+    			if(this._location2ModelMap.unrelated.add) {
+	    			this.getListRoot().children.push(this._location2ModelMap.unrelated);
+	    			delete this._location2ModelMap.unrelated.add;
+				}
     		} 
 	    },
 	    /**
