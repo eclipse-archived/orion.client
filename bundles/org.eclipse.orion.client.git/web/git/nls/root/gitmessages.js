@@ -590,5 +590,6 @@ define({//Default message bundle
 	'Configurations' : "Configurations", //$NON-NLS-0$  //$NON-NLS-1$
 	'DetachedHead ${0}' : "Detached HEAD @ ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	'SingleSubmodule' : "${0} (${1} submodule)", //$NON-NLS-1$ //$NON-NLS-0$
-	'PluralSubmodule' : "${0} (${1} submodules)" //$NON-NLS-1$ //$NON-NLS-0$
+	'PluralSubmodule' : "${0} (${1} submodules)", //$NON-NLS-1$ //$NON-NLS-0$
+	"Detach Head:": "Detach Head:" //$NON-NLS-0$  //$NON-NLS-1$
 });
