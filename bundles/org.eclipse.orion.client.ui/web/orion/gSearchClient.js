@@ -93,7 +93,10 @@ define("orion/gSearchClient", [ //$NON-NLS-0$
                 return sResult;
             }.bind(this),
             function(error) {
-                this._registry.getService("orion.page.message").setProgressResult({Message: error.message, Severity: "Error"}); //$NON-NLS-1$ //$NON-NLS-2$
+                var statusService = this._registry.getService("orion.page.message"); //$NON-NLS-1$
+                if (statusService) {
+	                statusService.setProgressResult({Message: error.message, Severity: "Error"}); //$NON-NLS-1$
+                }
             }.bind(this));
 			
 		},
@@ -115,7 +118,10 @@ define("orion/gSearchClient", [ //$NON-NLS-0$
                  return sResult;
             }.bind(this),
             function(error) {
-            	this._registry.getService("orion.page.message").setProgressResult({Message: error.message, Severity: "Error"}); //$NON-NLS-1$ //$NON-NLS-2$
+                var statusService = this._registry.getService("orion.page.message"); //$NON-NLS-1$
+                if (statusService) {
+	                statusService.setProgressResult({Message: error.message, Severity: "Error"}); //$NON-NLS-1$
+                }
             }.bind(this));
 			
 		},
