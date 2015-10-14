@@ -160,12 +160,14 @@ var exports = {};
 				}, displayErrorOnStatus);
 			};
 			var repositoryLocation = item.Repository ? item.Repository.Location : item.CloneLocation;
-			if (data.parameters.valueFor("name") && !data.parameters.optionsRequested) { //$NON-NLS-0$
+			if (data.parameters.valueFor("detachHead") && !data.parameters.optionsRequested) { //$NON-NLS-0$
+				checkoutTagFunction(repositoryLocation, item.Name, ""); //$NON-NLS-0$
+			} else if (data.parameters.valueFor("name") && !data.parameters.optionsRequested) { //$NON-NLS-0$
 				checkoutTagFunction(repositoryLocation, item.Name, data.parameters.valueFor("name")); //$NON-NLS-0$
 			}
 		}
 
-		var checkoutNameParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages["Local Branch Name:"])]); //$NON-NLS-1$ //$NON-NLS-0$
+		var checkoutNameParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages["Local Branch Name:"]), new mCommandRegistry.CommandParameter("detachHead", "boolean", messages["Detach Head:"])]); //$NON-NLS-1$ //$NON-NLS-0$
 
 		var checkoutTagCommand = new mCommands.Command({
 			name: messages['Checkout'],
