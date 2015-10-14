@@ -257,6 +257,7 @@ define([
 				var item = messageQueue[i];
 				ternWorker.postMessage(item.msg, item.f);
 			}
+			messageQueue = [];
 			ternWorker.postMessage({request: 'installed_plugins'}, function(response) { //$NON-NLS-1$
 				var plugins = response.plugins;
 				return prefService ? prefService.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
@@ -401,7 +402,22 @@ define([
 							scriptresolver,
 							CUProvider,
 							new mGSearchClient.GSearchClient({serviceRegistry: core.serviceRegistry, fileClient: fileClient}));
-
+			provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+	    			{
+						execute: function(editorContext, options) {
+							options.kind ='project'; //$NON-NLS-1$
+							return refscommand.execute(editorContext, options);
+						}
+					},
+	    			{
+	    		name: javascriptMessages["projectRefsName"],  //$NON-NLS-1$
+	    		tooltip : javascriptMessages['projectRefsTooltip'],  //$NON-NLS-1$
+	    		parentPath: "js.references", //$NON-NLS-1$
+	    		id : "project.js.refs",  //$NON-NLS-1$
+	    		key : [ "y", true, true, false, false],  //$NON-NLS-1$
+	    		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
+	    			}
+	    	);
 	    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
 	    			{
 						execute: function(editorContext, options) {
@@ -414,23 +430,7 @@ define([
 	    		tooltip : javascriptMessages['workspaceRefsTooltip'],  //$NON-NLS-1$
 	    		parentPath: "js.references", //$NON-NLS-1$
 	    		id : "workspace.js.refs",  //$NON-NLS-1$
-	    		key : [ "g", true, true, false, false],  //$NON-NLS-1$
-	    		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
-	    			}
-	    	);
-	    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-	    			{
-						execute: function(editorContext, options) {
-							options.kind ='project'; //$NON-NLS-1$
-							return refscommand.execute(editorContext, options);
-						}
-					},
-	    			{
-	    		name: javascriptMessages["projectRefsName"],  //$NON-NLS-1$
-	    		tooltip : javascriptMessages['projectRefsTooltip'],  //$NON-NLS-1$
-	    		parentPath: "js.references", //$NON-NLS-1$
-	    		id : "project.js.refs",  //$NON-NLS-1$
-	    		key : [ "k", true, true, false, false],  //$NON-NLS-1$
+	    		//key : [ "g", true, true, false, false],  //$NON-NLS-1$
 	    		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
 	    			}
 	    	);
@@ -442,7 +442,7 @@ define([
     		tooltip : javascriptMessages['openImplTooltip'],  //$NON-NLS-1$
     		id : "open.js.impl",  //$NON-NLS-1$
     		contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
-			key : [ 114, true, false, false, false],  //$NON-NLS-1$
+			key : [ 114, true, false, false, false]  //$NON-NLS-1$
     			}
     	);
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
