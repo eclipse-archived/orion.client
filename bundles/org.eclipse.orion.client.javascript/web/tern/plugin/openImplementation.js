@@ -76,7 +76,7 @@
 								// Find the implementation of the RHS identifier
 								query = {start: rhs.start, end: rhs.end, file: serverFile.name};
 								typeDef = tern.findDef(server, query, serverFile);
-								if (typeDef && (typeDef.start !== node.start || typeDef.end !== node.end)){
+								if (typeDef && typeof typeDef.start === 'number' && typeof typeDef.end === 'number' && (typeDef.start !== node.start || typeDef.end !== node.end)){
 									newServerFile = server.fileMap[typeDef.file];
 									return this.findImplRecurse(typeDef.end, newServerFile, {implementation: {start: typeDef.start, end: typeDef.end, file: typeDef.file}}, server);
 								}
@@ -85,7 +85,7 @@
 						// There are many parents of an identifier, rather than list them all, default to look up the typeDef of the identifier
 						query = {start: node.start, end: node.end, file: serverFile.name};
 						typeDef = tern.findDef(server, query, serverFile);
-						if (typeDef && (typeDef.start !== node.start || typeDef.end !== node.end)){
+						if (typeDef && typeof typeDef.start === 'number' && typeof typeDef.end === 'number' && (typeDef.start !== node.start || typeDef.end !== node.end)){
 							newServerFile = server.fileMap[typeDef.file];
 							return this.findImplRecurse(typeDef.end, newServerFile, {implementation: {start: typeDef.start, end: typeDef.end, file: typeDef.file}}, server);
 						}

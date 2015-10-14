@@ -363,7 +363,7 @@ define([
 			};
 			testOpenImpl(options, {start: 9, end: 10});
 		});
-		it('Open Declaration - Chained member expression', function(done) {
+		it('Open Declaration - Chained member expression 1', function(done) {
 			var options = {
 				buffer: "function f(){} var a={}; a.b = f; a.b();",
 				offset: 36,
@@ -371,10 +371,26 @@ define([
 			};
 			testOpenDecl(options, {start: 27, end: 28});
 		});
-		it('Open Implementation - Chained member expression', function(done) {
+		it('Open Implementation - Chained member expression 1', function(done) {
 			var options = {
 				buffer: "function f(){} var a={}; a.b = f; a.b();",
 				offset: 36,
+				callback: done
+			};
+			testOpenImpl(options, {start: 9, end: 10});
+		});
+		it('Open Declaration - Chained member expression 2', function(done) {
+			var options = {
+				buffer: "function f(){} var a={}; a.b = {}; a.b.c = f; a.b.c();",
+				offset: 50,
+				callback: done
+			};
+			testOpenDecl(options, {start: 39, end: 40});
+		});
+		it('Open Implementation - Chained member expression 2', function(done) {
+			var options = {
+				buffer: "function f(){} var a={}; a.b = {}; a.b.c = f; a.b.c();",
+				offset: 50,
 				callback: done
 			};
 			testOpenImpl(options, {start: 9, end: 10});
@@ -493,6 +509,39 @@ define([
 				callback: done
 			};
 			testOpenImpl(options, {start: 9, end: 10});
+		});
+		// Possible Tern bug, for binary expressions, findDef returns an Object with no start/end information
+		it('Open Declaration - Binary expression', function(done) {
+			var options = {
+				buffer: "function f(){} var a = f !== null; a;",
+				offset: 35,
+				callback: done
+			};
+			testOpenDecl(options, {start: 19, end: 20});
+		});
+		it('Open Implementation - Binary expression', function(done) {
+			var options = {
+				buffer: "function f(){} var a = f !== null; a;",
+				offset: 35,
+				callback: done
+			};
+			testOpenImpl(options, {start: 19, end: 20});
+		});
+		it('Open Declaration - Unary expression', function(done) {
+			var options = {
+				buffer: "function f(){} var a = !f; a;",
+				offset: 27,
+				callback: done
+			};
+			testOpenDecl(options, {start: 19, end: 20});
+		});
+		it('Open Implementation - Unary expression', function(done) {
+			var options = {
+				buffer: "function f(){} var a = !f; a;",
+				offset: 27,
+				callback: done
+			};
+			testOpenImpl(options, {start: 19, end: 20});
 		});
 	});
 });
