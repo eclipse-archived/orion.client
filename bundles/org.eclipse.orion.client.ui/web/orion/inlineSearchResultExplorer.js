@@ -197,7 +197,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
     };
     
     SearchResultRenderer.prototype.getCheckboxColumn = function(item, tableRow){
-    	if (!this.enableCheckbox(item) || (item.type === "file")) { //$NON-NLS-0$
+    	if (!this.enableCheckbox(item) || item.type === "file" || item.type === 'group') { //$NON-NLS-0$
     		return mExplorer.ExplorerRenderer.prototype.getCheckboxColumn.call(this, item, tableRow);
     	} else {
     		//detail row checkboxes should be placed in next column
@@ -650,7 +650,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 
     InlineSearchResultExplorer.prototype.onItemChecked = function(item, checked, manually) {
         item.checked = checked;
-        if (item.type === "file" || item === this.model.getListRoot()) { //$NON-NLS-0$
+        if (item.type === "file" || item.type === 'group' || item === this.model.getListRoot()) { //$NON-NLS-0$
             if (item.children) {
                 for (var i = 0; i < item.children.length; i++) {
                     var checkBox = lib.node(this.renderer.getCheckBoxId(this.model.getId(item.children[i])));
@@ -661,7 +661,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
                     }
                 }
             }
-            if (item.type === "file") { //$NON-NLS-0$
+            if (item.type === "file" || item.type === 'group') { //$NON-NLS-0$
                 this.onNewContentChanged(item);
             }
         } else if (manually) {

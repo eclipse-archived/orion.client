@@ -237,33 +237,34 @@ define([
     	 * @since 10.0
     	 */
     	_buildGroupedResult: function _buildGroupedResult(result) {
-    		if(this._map('exact', { //$NON-NLS-1$
-    			parent: this.getListRoot(),
-    			type: 'group', //$NON-NLS-1$
-    			name: 'Exact Matches',
-    			location: 'exact',
-    			children: []
-    		})) {
-	    		this.getListRoot().children.push(this._location2ModelMap.exact);
-			}
-    		if(this._map('possible', { //$NON-NLS-1$
-    			parent: this.getListRoot(),
-    			type: 'group', //$NON-NLS-1$
-    			name: 'Possible Matches',
-    			location: 'possible',
-    			children: []
-    		})) {
-	    		this.getListRoot().children.push(this._location2ModelMap.possible);
-			}
-    		if(this._map('unrelated', { //$NON-NLS-1$
-    			parent: this.getListRoot(),
-    			type: 'group', //$NON-NLS-1$
-    			name: 'Unrelated Matches',
-    			location: 'unrelated',
-    			children: []
-    		})) {
-	    		this.getListRoot().children.push(this._location2ModelMap.unrelated);
-			}
+    		if(!this._location2ModelMap.exact) {
+    			this._location2ModelMap.exact = { //$NON-NLS-1$
+		    			parent: this.getListRoot(),
+		    			type: 'group', //$NON-NLS-1$
+		    			name: messages['exactMatches'],
+		    			location: 'exact', //$NON-NLS-1$
+		    			children: []
+		    		};
+    		}
+    		if(!this._location2ModelMap.possible) {
+    			this._location2ModelMap.possible = { //$NON-NLS-1$
+		    			parent: this.getListRoot(),
+		    			type: 'group', //$NON-NLS-1$
+		    			name: messages['possibleMatches'],
+		    			location: 'possible', //$NON-NLS-1$
+		    			children: []
+		    		};
+			}	
+
+    		if(!this._location2ModelMap.unrelated) {
+		    			this._location2ModelMap.unrelated = { //$NON-NLS-1$
+		    			parent: this.getListRoot(),
+		    			type: 'group', //$NON-NLS-1$
+		    			name: messages['unrelatedMatches'],
+		    			location: 'unrelated', //$NON-NLS-1$
+		    			children: []
+		    		};
+	    	}
     		var files = result.children;
     		for(var i = 0, len = files.length; i < len; i++) {
     			var file = files[i];
@@ -303,9 +304,18 @@ define([
  				}
 				return b.confidence - a.confidence;
     		}
-    		this._location2ModelMap.exact.children.sort(_srt);
-    		this._location2ModelMap.possible.children.sort(_srt);
-    		this._location2ModelMap.unrelated.children.sort(_srt);
+    		if(this._location2ModelMap.exact.children.length > 0) {
+    			this._location2ModelMap.exact.children.sort(_srt);
+    			this.getListRoot().children.push(this._location2ModelMap.exact);
+    		} 
+    		if(this._location2ModelMap.possible.children.length > 0) {
+    			this._location2ModelMap.possible.children.sort(_srt);
+    			this.getListRoot().children.push(this._location2ModelMap.possible);
+    		} 
+    		if(this._location2ModelMap.unrelated.children.length > 0) {
+    			this._location2ModelMap.unrelated.children.sort(_srt);
+    			this.getListRoot().children.push(this._location2ModelMap.unrelated);
+    		} 
 	    },
 	    /**
     	 * @description if replace mode is enabled
@@ -562,24 +572,6 @@ define([
 				return this._filteredRoot.children;
 	        }
 	        return model.children;
-	    },
-	    /**
-    	 * @description Maps the given node to the given location. This function does not allow a mapping to be overwritten
-    	 * @function
-    	 * @private
-    	 * @param {String} loc The location to map to
-    	 * @param {Object} node The object to cache
-    	 * @returns {Boolean} True if the cache changed, false otherwise 
-    	 * @since 10.0
-    	 */
-    	_map: function _map(loc, node) {
-	    	if(loc) {
-	    		if(!this._location2ModelMap[loc]) {
-	    			this._location2ModelMap[loc] = node;
-	    			return true;
-	    		}
-	    	}
-	    	return false;
 	    },
 	    /**
     	 * @description description
