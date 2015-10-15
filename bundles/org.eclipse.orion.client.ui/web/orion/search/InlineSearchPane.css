@@ -414,11 +414,10 @@
 	display: none;
 	font-size: 8pt;
 	font-weight: bold;
-	height: 20px;
-	left: 1px;
+	left: 0px;
 	padding: 3px 10px;
 	position: absolute;
-	top: -19px;
+	top: 1px;
 	z-index: 1;
 }
 
@@ -428,6 +427,7 @@
 
 .replaceCompareDiv {
 	display: none;
+	top: 20px;
 	z-index: 51;
 }
 
