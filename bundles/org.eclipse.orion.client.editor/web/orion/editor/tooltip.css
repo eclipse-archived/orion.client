@@ -5,6 +5,8 @@
 	background-color: #325C80; /* Must match the quickfix command button border color */
 	color: #FAFAFA;
 	padding: 8px;
+	/* The tooltip initial size explicitly counts for padding size, border-box sizing breaks this */
+	box-sizing: content-box;
 	border-radius: 3px;
 	z-index: 101;
 	position: fixed;
