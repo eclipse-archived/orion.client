@@ -37,7 +37,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 			+ '<span id="shownGitPath" style="padding-right: 24px"></span>' + '<a id="changeGitPath" href="javascript:">${Change...}</a>' + '</div>'
 			
 			+ '<div style="padding: 8px" id="cloneSubmoduleContainer">' 
-			+ '<input type="checkbox" id="cloneSubmoduleCheckbox" checked><label for="isExistingProject" style="padding: 0 8px">${Clone submodules automatically}</label>' + '</div>'
+			+ '<label for="cloneSubmoduleCheckbox"><input type="checkbox" id="cloneSubmoduleCheckbox" checked>${Clone submodules automatically}</label>' + '</div>'
 			
 			+ '</span>';
 
