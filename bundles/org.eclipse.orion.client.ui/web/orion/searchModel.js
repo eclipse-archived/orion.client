@@ -238,6 +238,32 @@ define([
             this.getListRoot().children.push(fileNode);
             this._indexedFileItems.push(fileNode);
 	    },
+	    
+	    _getLogicalFileNode: function _getLogicalFileNode(fileResult) {
+			var hasOne = null;
+			this._indexedFileItems.some(function(element){
+				if (element.location === fileResult.location) {
+					hasOne = element;
+					return true;
+				}				
+				return false;
+			}, this);
+	    	if(!hasOne) {
+	    		hasOne = {
+	                //parent: this.getListRoot(),
+	                type: "file", //$NON-NLS-0$
+	                name: fileResult.name,
+	                children: [],
+	                contents: fileResult.contents,
+	                location: fileResult.location,
+	                parentLocation: mUiUtils.path2FolderName(fileResult.location, fileResult.name, true),
+	                fullPathName: mUiUtils.path2FolderName(fileResult.path, fileResult.name)
+	            };
+	            this._indexedFileItems.push(hasOne);
+	    	}
+	    	return hasOne;
+	    },
+	    
 	    /**
     	 * @description Builds a grouped result model.
     	 * @function
@@ -279,12 +305,16 @@ define([
 	    	}
     		var files = result.children;
     		if(files) {
+    			var logicalFileNode = this._getLogicalFileNode(result);
 	    		for(var i = 0, len = files.length; i < len; i++) {
 	    			var file = files[i];
 	    			var matches = file.matches;
 	    			for (var j = 0, len2 = matches.length; j < len2; j++) {
 	    				var match = matches[j];
+						var matchNumber = j+1;
 	    				match.lineNumber = file.lineNumber;
+	    				match.matchNumber = matchNumber;
+	    				match.matches = matches;
 	    				if(file.name) {
 	    					match.lineString = file.name;
 	    					match.name = file.name;
@@ -308,6 +338,8 @@ define([
 			    				match.parent = this._location2ModelMap.exact;
 			    				this._location2ModelMap.exact.children.push(match);
 			    			}
+			    			match.logicalParent = logicalFileNode;
+			    			logicalFileNode.children.push(match);
 	    				}
 	    			}
 	    		}

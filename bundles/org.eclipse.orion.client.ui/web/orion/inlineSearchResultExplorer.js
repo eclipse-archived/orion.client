@@ -85,7 +85,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
         if (modelItem.type === "file") { //$NON-NLS-0$
             return modelItem;
         }
-        return modelItem.parent;
+        return modelItem.logicalParent ? modelItem.logicalParent : modelItem.parent;
     }
 
     function _onSameFile(modelItem1, modelItem2) {
