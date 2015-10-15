@@ -895,7 +895,7 @@ exports.SelectionRenderer = (function(){
 				}
 			} else {
 				if(this.getSecondaryColumnStyle){
-					cell.classList.add(this.getSecondaryColumnStyle()); //$NON-NLS-0$
+					cell.classList.add(this.getSecondaryColumnStyle(i)); //$NON-NLS-0$
 				} else {
 					cell.classList.add("secondaryColumn"); //$NON-NLS-0$
 				}

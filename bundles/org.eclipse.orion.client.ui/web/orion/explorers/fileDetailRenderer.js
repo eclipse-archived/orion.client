@@ -346,15 +346,12 @@ define([
 	                if (item.type === "file") { //$NON-NLS-0$
 	                	col = _createElement('td'); //$NON-NLS-0$
 	                    col.noWrap = true;
-						span = _createSpan(null, this.getFileIconId ? this.getFileIconId(item) : null, col, null);                    
-						this._lastFileIconDom = span;
-	                    
 	                    if(typeof this.explorer.model.disableExpand === "function" && this.explorer.model.disableExpand(item)){ //$NON-NLS-0$
 	                        //var decorateImage = _createSpan(null, null, col, null);
 	                        //decorateImage.classList.add('imageSprite'); //$NON-NLS-0$
 	                        //decorateImage.classList.add('core-sprite-file'); //$NON-NLS-0$
 	                    } else {
-	                        this.getExpandImage(tableRow, span); //$NON-NLS-0$
+	                        this.getExpandImage(tableRow, _createSpan(null, null, col, null)); //$NON-NLS-0$
 	                    }
 	                } else if (item.type === "group") { //$NON-NLS-0$
 	                	col = _createElement('td'); //$NON-NLS-0$
@@ -363,34 +360,37 @@ define([
 	                } else {
 	                	if (typeof this.explorer.model.enableCheckbox === "function" && this.explorer.model.enableCheckbox(item)) { //$NON-NLS-0$
 	                		col = mExplorer.ExplorerRenderer.prototype.getCheckboxColumn.call(this, item, tableRow);
-	                	} else if(item.parent.type === 'group') {
-	                		col = _createElement('td'); //$NON-NLS-0$
-	                		span = _createSpan(null, null, col, null);
-	                		_place(document.createTextNode("", span, "last")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	                	} else {
 	                		col = _createElement('td'); //$NON-NLS-0$
 	                		span = _createSpan(null, null, col, null);
-	                		this.renderDetailLineNumber(item, span);
+	                		_place(document.createTextNode("", span, "last")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	                	}
 	                }
 	                break;
 	            case 1:
 					col = _createElement('td'); //$NON-NLS-0$
 	                if (item.type === "file") { //$NON-NLS-0$
+	                	col.colSpan = 2;
+						span = _createSpan(null, this.getFileIconId ? this.getFileIconId(item) : null, col, null);                    
+						this._lastFileIconDom = span;
 	                	span = _createSpan(null, this.getFileSpanId(item), col, null);
 	                    this.renderFileElement(item, span, this.explorer.model);
 						tableRow.title = item.name;
 	                } else if (item.type === "group") { //$NON-NLS-0$
+	                	col.colSpan = 2;
 	                	span = _createSpan(null, null, col, null);
 	                    this.renderGroupElement(item, span, this.explorer.model);
 						tableRow.title = item.name;
 	                } else {
-	                	if (item.parent.type === "group") {
-	                		this.renderDetailLineNumber(item, col, true);
-	                	}
-	                    this.renderDetailElement(item, col);
+	                	this.renderDetailLineNumber(item, col, item.parent.type === "group");
 	                }
 	                break;
+	            case 2: 
+	                if (item.type !== "file" && item.type !== "group") { //$NON-NLS-0$
+		            	col = _createElement('td'); //$NON-NLS-0$
+	                    this.renderDetailElement(item, col);
+                	}
+					break;
 				case 20: //TODO fix look and feel, re-enable
 					if (item.type === "file") { //$NON-NLS-0$
 						col = _createElement('td'); //$NON-NLS-0$
@@ -446,7 +446,10 @@ define([
 	        } 
 	        return  "search_primaryColumn_Details"; //$NON-NLS-0$
 	    },
-	    getSecondaryColumnStyle: function() {
+	    getSecondaryColumnStyle: function(i) {
+	    	if (i === 2) {
+	    		return "search_secondaryColumn_line"; //$NON-NLS-0$
+	    	}
 	        return "search_secondaryColumn"; //$NON-NLS-0$
 	    }
 	});

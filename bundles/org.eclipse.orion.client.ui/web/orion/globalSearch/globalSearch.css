@@ -12,7 +12,7 @@
 	padding-top: 0 !important;
 	vertical-align: top;
 	white-space: nowrap;
-	width: 38px;
+	width: 14px;
 }
 
 .refs_primaryColumn {
@@ -33,6 +33,12 @@
 .search_secondaryColumn{
 	color: #666666;	
 	white-space: nowrap;
+}
+
+.search_secondaryColumn_line {
+	color: #666666;	
+	white-space: nowrap;
+	width: 100%;
 }
 
 .search_report {
