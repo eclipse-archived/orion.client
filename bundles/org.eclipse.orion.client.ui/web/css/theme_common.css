@@ -93,6 +93,10 @@ a:hover {
 	background-color: #dadada !important;
 }
 
+.checkedRow > td > span
+{
+	color:white !important;
+}
 .checkedRow  > td > span > a
 {
 	color:white !important;
