@@ -920,7 +920,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 	        	// removed from diffs and must therefore be skipped.
 				var changeIndex = 0;
 				currentModel.parent.children.some(function(element){
-					if (currentModel.location === element.location) {
+					if (this.model.getId(currentModel) === this.model.getId(element)) {
 						return true;
 					} else if (element.checked) {
 						changeIndex++;
