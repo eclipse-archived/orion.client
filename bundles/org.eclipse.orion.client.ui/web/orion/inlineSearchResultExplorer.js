@@ -629,9 +629,9 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 
     InlineSearchResultExplorer.prototype.getItemChecked = function(item) {
         if (item.checked === undefined) {
-        	if(item.type === 'group' && item.location === 'unrelated') {
+        	if(item.type === 'group' && item.location === 'other') {
         		item.checked = false;
-        	} else if(item.parent && item.parent.type === 'group' && item.parent.location === 'unrelated') {
+        	} else if(item.parent && item.parent.type === 'group' && item.parent.location === 'other') {
         		item.checked = false;
         	} else {
 	            item.checked = true;

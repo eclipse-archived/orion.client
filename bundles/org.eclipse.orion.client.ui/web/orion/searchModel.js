@@ -278,6 +278,7 @@ define([
 		    			type: 'group', //$NON-NLS-1$
 		    			name: messages['exactMatches'],
 		    			location: 'exact', //$NON-NLS-1$
+		    			sort: 0,
 		    			children: [],
 		    			add: true
 		    		};
@@ -289,17 +290,19 @@ define([
 		    			name: messages['possibleMatches'],
 		    			location: 'possible', //$NON-NLS-1$
 		    			children: [],
+		    			sort: 1,
 		    			add: true
 		    		};
 			}	
 
-    		if(!this._location2ModelMap.unrelated) {
-		    			this._location2ModelMap.unrelated = { //$NON-NLS-1$
+    		if(!this._location2ModelMap.other) {
+		    			this._location2ModelMap.other = { //$NON-NLS-1$
 		    			parent: this.getListRoot(),
 		    			type: 'group', //$NON-NLS-1$
-		    			name: messages['unrelatedMatches'],
-		    			location: 'unrelated', //$NON-NLS-1$
+		    			name: messages['otherMatches'],
+		    			location: 'other', //$NON-NLS-1$
 		    			children: [],
+		    			sort: 2,
 		    			add: true
 		    		};
 	    	}
@@ -329,8 +332,8 @@ define([
 	    				}
 	    				if(typeof(match.confidence) === 'number') {
 	    					if(match.confidence < 1) {
-	    						match.parent = this._location2ModelMap.unrelated;
-			    				this._location2ModelMap.unrelated.children.push(match);
+	    						match.parent = this._location2ModelMap.other;
+			    				this._location2ModelMap.other.children.push(match);
 			    			} else if(match.confidence < 100) {
 			    				match.parent = this._location2ModelMap.possible;
 			    				this._location2ModelMap.possible.children.push(match);
@@ -365,16 +368,22 @@ define([
 	    			delete this._location2ModelMap.possible.add;
 				}
     		} 
-    		if(this._location2ModelMap.unrelated.children.length > 0) {
-    			this._location2ModelMap.unrelated.children.sort(_srt);
-    			if(this._location2ModelMap.unrelated.add) {
-	    			this.getListRoot().children.push(this._location2ModelMap.unrelated);
-	    			delete this._location2ModelMap.unrelated.add;
+    		if(this._location2ModelMap.other.children.length > 0) {
+    			this._location2ModelMap.other.children.sort(_srt);
+    			if(this._location2ModelMap.other.add) {
+	    			this.getListRoot().children.push(this._location2ModelMap.other);
+	    			delete this._location2ModelMap.other.add;
 				}
     		}
     		if(this.getListRoot().children.length > 0) {
     			this.getListRoot().children.sort(function(a, b) {
-    				return a.name.localeCompare(b.name);
+    				if(a.sort < b.sort) {
+    					return -1;
+    				}
+    				if(a.sort > b.sort) {
+    					return 1;
+    				}
+    				return 0;
     			});
     		}
 	    },

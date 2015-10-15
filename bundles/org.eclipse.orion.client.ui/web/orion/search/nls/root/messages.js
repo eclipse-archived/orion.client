@@ -106,7 +106,7 @@ define({//Default message bundle
 	"switchFullPath": "Show/hide full path",
 	"exactMatches": "Exact Matches",
 	"possibleMatches": "Possible Matches",
-	"unrelatedMatches": "Unrelated Matches",
+	"otherMatches": "Other Matches",
 	"refsInProject": "${0} references to \'${1}\' in ${2}",
 	"refsInWorkspace": "${0} references to \'${1}\' in the workspace",
 	"viewByTypes" : "By types", //$NON-NLS-1$ //$NON-NLS-0$
