@@ -1961,11 +1961,16 @@ var exports = {};
 							var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 							
 							var paths = [];
+							var addedSubmodules = [];
 							for (var i = 0; i < items.length; i++) {
-								paths[i] = items[i].name;
+								if(items[i].type === "AddedSubmodule"){
+									addedSubmodules.push(items[i].name);
+								}else{
+									paths.push(items[i].name);
+								}
 							}
 							
-							var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").checkoutPath(data.userData.Clone.Location, paths), messages['Resetting local changes']); //$NON-NLS-0$
+							var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").checkoutPath(data.userData.Clone.Location, paths, addedSubmodules), messages['Resetting local changes']); //$NON-NLS-0$
 							progressService.createProgressMonitor(
 								deferred,
 								messages['Resetting local changes']);

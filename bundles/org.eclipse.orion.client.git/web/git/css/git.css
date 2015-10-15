@@ -53,6 +53,10 @@
 	height: calc(100% - 30px);
 }
 
+.submoduleMessageHolder{
+	padding:10px;
+}
+
 .gitPushUpdates {
 	border-spacing: 10px;
 }

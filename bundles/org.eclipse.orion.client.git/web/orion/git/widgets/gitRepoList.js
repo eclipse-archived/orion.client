@@ -220,6 +220,7 @@ define([
 			case "updateSubmodules": //$NON-NLS-0$
 			case "addSubmodule": //$NON-NLS-0$
 			case "deleteSubmodule": //$NON-NLS-0$
+			case "checkout": //$NON-NLS-0$
 				this.changedItem();
 				break;
 				

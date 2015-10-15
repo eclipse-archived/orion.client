@@ -260,7 +260,7 @@ eclipse.GitService = (function() {
 			return clientDeferred;
 		},
 		
-		checkoutPath: function(gitCloneURI, paths){
+		checkoutPath: function(gitCloneURI, paths, addedSubmodules){
 			var service = this;
 			
 			var clientDeferred = new Deferred();
@@ -273,6 +273,7 @@ eclipse.GitService = (function() {
 				handleAs : "json", //$NON-NLS-0$
 				data: JSON.stringify({
 					"Path" : paths, //$NON-NLS-0$
+					"AddedSubmodule":addedSubmodules,//$NON-NLS-0$
 					"RemoveUntracked" : "true" //$NON-NLS-1$ //$NON-NLS-0$
 				})
 			}).then(function(result) {

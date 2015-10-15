@@ -31,8 +31,9 @@ define([
 	
 	var pageQuery = "?pageSize=100&page=1"; //$NON-NLS-0$
 	
-	var interestedUnstagedGroup = [ "Missing", "Modified", "Untracked", "Conflicting" ]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	var interestedStagedGroup = [ "Added", "Changed", "Removed" ]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var interestedUnstagedGroup = [  "MissingSubmodule", "Missing", "Modified", "Untracked", "Conflicting" ]; //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var interestedStagedGroup = [  "AddedSubmodule", "Added", "Changed", "Removed"];  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var submoduleGroup = [ "MissingSubmodule", "AddedSubmodule" ]; //$NON-NLS-1$ //$NON-NLS-0$
 	var allGroups = interestedUnstagedGroup.concat(interestedStagedGroup);
 	var conflictType = "Conflicting"; //$NON-NLS-0$
 	function isConflict(type) {
@@ -40,6 +41,9 @@ define([
 	}
 	
 	var statusTypeMap = {
+		"MissingSubmodule" : { imageClass: "gitImageSprite git-sprite-removal", tooltip: messages['Missing submodule'] }, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"AddedSubmodule" : { imageClass: "gitImageSprite git-sprite-addition", tooltip: messages['Added submodule'] }, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		
 		"Missing" : { imageClass: "gitImageSprite git-sprite-removal", tooltip: messages['Unstaged removal'] }, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"Removed" : { imageClass: "gitImageSprite git-sprite-removal", tooltip: messages['Staged removal'] }, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"Modified" : { imageClass: "gitImageSprite git-sprite-file", tooltip: messages['Unstaged change'] }, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -307,14 +311,6 @@ define([
 		getGroupData: function(groupName) {
 			return this.items[groupName];
 		},
-		isStaged: function(type) {
-			for (var i = 0; i < interestedStagedGroup.length; i++) {
-				if (type === interestedStagedGroup[i]) {
-					return true;
-				}
-			}
-			return false;
-		},
 		getClass: function(item) {
 			return statusTypeMap[item.type].imageClass;
 		},
@@ -415,7 +411,7 @@ define([
 					parent.removeAll = true;
 					that.myTree.refresh.bind(that.myTree)(parent, children, false);
 					var selection = children.filter(function(item) {
-						return that.model.isStaged(item.type);
+						return mGitUtil.isStaged(item);
 					});
 					that.selection.setSelections(selection);
 					that.setMoreVisible(moreVisible);
@@ -547,7 +543,7 @@ define([
 							if (userInfo && userInfo.GitSelectAll) {
 								model.getRoot(function(root) {
 									var selection = root.children.filter(function(item) {
-										return !that.model.isStaged(item.type) && mGitUtil.isChange(item);
+										return !mGitUtil.isStaged(item) && mGitUtil.isChange(item);
 									});
 									that.commandService.runCommand("eclipse.orion.git.stageCommand", selection, that, null, that.repository.status); //$NON-NLS-0$
 									selectFunc();
@@ -681,7 +677,7 @@ define([
 					that.model.getRoot(function(root) {
 						if (root.children) {
 							var selection = root.children.filter(function(item) {
-								return !that.model.isStaged(item.type) && mGitUtil.isChange(item);
+								return !mGitUtil.isStaged(item) && mGitUtil.isChange(item);
 							});
 							result = selection.length > 0;
 						}
@@ -692,7 +688,7 @@ define([
 					var deferred = new Deferred();
 					that.model.getRoot(function(root) {
 						var selection = root.children.filter(function(item) {
-							return !that.model.isStaged(item.type) && mGitUtil.isChange(item);
+							return !mGitUtil.isStaged(item) && mGitUtil.isChange(item);
 						});
 						that.commandService.runCommand("eclipse.orion.git.stageCommand", selection, that, null, that.status).then(deferred.resolve, deferred.reject); //$NON-NLS-0$
 					});
@@ -709,7 +705,7 @@ define([
 					that.model.getRoot(function(root) {
 						if (root.children && root.children.length > 1) {
 							var selection = root.children.filter(function(item) {
-								return that.model.isStaged(item.type);
+								return mGitUtil.isStaged(item);
 							});
 							result = selection.length === Math.max(0, root.children.length - 2);
 						}
@@ -720,7 +716,7 @@ define([
 					var deferred = new Deferred();
 					that.model.getRoot(function(root) {
 						var selection = root.children.filter(function(item) {
-							return that.model.isStaged(item.type);
+							return mGitUtil.isStaged(item);
 						});
 						that.commandService.runCommand("eclipse.orion.git.unstageCommand", selection, that, null, that.status).then(deferred.resolve, deferred.reject); //$NON-NLS-0$
 					});
@@ -1212,7 +1208,7 @@ define([
 								hasConflict,
 								diffContainer,
 								compareWidgetActionWrapper.id,
-								explorer.editableInComparePage ? !this.explorer.model.isStaged(item.parent.type) : false,
+								explorer.editableInComparePage ? !mGitUtil.isStaged(item.parent.type) : false,
 								{
 									navGridHolder : navGridHolder,
 									additionalCmdRender : function(gridHolder) {
@@ -1268,7 +1264,7 @@ define([
 				return !this.explorer.commandService.findCommand("orion.explorer.selectAllCommandChangeList").visibleWhen(this.explorer); //$NON-NLS-0$
 			}
 			
-			return this.explorer.model.isStaged(item.type);
+			return mGitUtil.isStaged(item);
 		}
 	});
 	

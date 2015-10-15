@@ -20,8 +20,9 @@ define([
 	"orion/URL-shim"
 ], function(messages, i18nUtil) {
 
-	var interestedUnstagedGroup = ["Missing", "Modified", "Untracked", "Conflicting"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	var interestedStagedGroup = ["Added", "Changed", "Removed"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var interestedUnstagedGroup = [  "MissingSubmodule", "Missing", "Modified", "Untracked", "Conflicting"];  //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var interestedStagedGroup = [  "AddedSubmodule", "Added", "Changed", "Removed"];  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var submoduleGroup = [ "MissingSubmodule", "AddedSubmodule" ]; //$NON-NLS-2$ //$NON-NLS-1$ 
 	
 	function isStaged(change) {
 		for (var i = 0; i < interestedStagedGroup.length; i++) {
@@ -35,6 +36,15 @@ define([
 	function isUnstaged(change) {
 		for (var i = 0; i < interestedUnstagedGroup.length; i++) {
 			if (change.type === interestedUnstagedGroup[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	function isSubmoduleChange(change) {
+		for (var i = 0; i < submoduleGroup.length; i++) {
+			if (change.type === submoduleGroup[i]) {
 				return true;
 			}
 		}
@@ -211,6 +221,7 @@ define([
 		isStaged: isStaged,
 		isUnstaged: isUnstaged,
 		isChange: isChange,
+		isSubmoduleChange:isSubmoduleChange,
 		isNewBranch: isNewBranch,
 		tracksRemoteBranch: tracksRemoteBranch,
 		generateQuery: generateQuery,
