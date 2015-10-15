@@ -629,7 +629,13 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 
     InlineSearchResultExplorer.prototype.getItemChecked = function(item) {
         if (item.checked === undefined) {
-            item.checked = true;
+        	if(item.type === 'group' && item.location === 'unrelated') {
+        		item.checked = false;
+        	} else if(item.parent && item.parent.type === 'group' && item.parent.location === 'unrelated') {
+        		item.checked = false;
+        	} else {
+	            item.checked = true;
+	        }
         }
         return item.checked;
     };
