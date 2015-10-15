@@ -220,7 +220,7 @@ label.parameterInput{
 .parameterInput {
 	margin: 4px;
 	font-weight: normal;
-	vertical-align: baseline;
+	vertical-align: middle;
 	color:#333;
 	outline:none;
 }
