@@ -307,14 +307,6 @@ define([
 		getGroupData: function(groupName) {
 			return this.items[groupName];
 		},
-		isStaged: function(type) {
-			for (var i = 0; i < interestedStagedGroup.length; i++) {
-				if (type === interestedStagedGroup[i]) {
-					return true;
-				}
-			}
-			return false;
-		},
 		getClass: function(item) {
 			return statusTypeMap[item.type].imageClass;
 		},
@@ -415,7 +407,7 @@ define([
 					parent.removeAll = true;
 					that.myTree.refresh.bind(that.myTree)(parent, children, false);
 					var selection = children.filter(function(item) {
-						return that.model.isStaged(item.type);
+						return mGitUtil.isStaged(item);
 					});
 					that.selection.setSelections(selection);
 					that.setMoreVisible(moreVisible);
@@ -547,7 +539,7 @@ define([
 							if (userInfo && userInfo.GitSelectAll) {
 								model.getRoot(function(root) {
 									var selection = root.children.filter(function(item) {
-										return !that.model.isStaged(item.type) && mGitUtil.isChange(item);
+										return !mGitUtil.isStaged(item) && mGitUtil.isChange(item);
 									});
 									that.commandService.runCommand("eclipse.orion.git.stageCommand", selection, that, null, that.repository.status); //$NON-NLS-0$
 									selectFunc();
@@ -681,7 +673,7 @@ define([
 					that.model.getRoot(function(root) {
 						if (root.children) {
 							var selection = root.children.filter(function(item) {
-								return !that.model.isStaged(item.type) && mGitUtil.isChange(item);
+								return !mGitUtil.isStaged(item) && mGitUtil.isChange(item);
 							});
 							result = selection.length > 0;
 						}
@@ -692,7 +684,7 @@ define([
 					var deferred = new Deferred();
 					that.model.getRoot(function(root) {
 						var selection = root.children.filter(function(item) {
-							return !that.model.isStaged(item.type) && mGitUtil.isChange(item);
+							return !mGitUtil.isStaged(item) && mGitUtil.isChange(item);
 						});
 						that.commandService.runCommand("eclipse.orion.git.stageCommand", selection, that, null, that.status).then(deferred.resolve, deferred.reject); //$NON-NLS-0$
 					});
@@ -709,7 +701,7 @@ define([
 					that.model.getRoot(function(root) {
 						if (root.children && root.children.length > 1) {
 							var selection = root.children.filter(function(item) {
-								return that.model.isStaged(item.type);
+								return mGitUtil.isStaged(item);
 							});
 							result = selection.length === Math.max(0, root.children.length - 2);
 						}
@@ -720,7 +712,7 @@ define([
 					var deferred = new Deferred();
 					that.model.getRoot(function(root) {
 						var selection = root.children.filter(function(item) {
-							return that.model.isStaged(item.type);
+							return mGitUtil.isStaged(item);
 						});
 						that.commandService.runCommand("eclipse.orion.git.unstageCommand", selection, that, null, that.status).then(deferred.resolve, deferred.reject); //$NON-NLS-0$
 					});
@@ -1212,7 +1204,7 @@ define([
 								hasConflict,
 								diffContainer,
 								compareWidgetActionWrapper.id,
-								explorer.editableInComparePage ? !this.explorer.model.isStaged(item.parent.type) : false,
+								explorer.editableInComparePage ? !mGitUtil.isStaged(item.parent.type) : false,
 								{
 									navGridHolder : navGridHolder,
 									additionalCmdRender : function(gridHolder) {
@@ -1268,7 +1260,7 @@ define([
 				return !this.explorer.commandService.findCommand("orion.explorer.selectAllCommandChangeList").visibleWhen(this.explorer); //$NON-NLS-0$
 			}
 			
-			return this.explorer.model.isStaged(item.type);
+			return mGitUtil.isStaged(item);
 		}
 	});
 	
