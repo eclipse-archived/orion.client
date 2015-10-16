@@ -605,13 +605,13 @@ define([
 		if (!explorer) return;
 		var activeBranch = explorer.model.getActiveBranch();
 		var targetRef = explorer.model.getTargetReference();
-		if (activeBranch && targetRef) {
-			if (activeBranch.Detached) {
-				title = i18nUtil.formatMessage(messages['DetachedHead ${0}'], util.shortenString(activeBranch.HeadSHA)); 
-			} else {
-				var targetName =  util.shortenRefName(targetRef);
-				title = activeBranch.Name + " => " + targetName;  //$NON-NLS-0$
-			}
+		if (activeBranch && !activeBranch.Detached && targetRef) {
+			title = activeBranch.Name + " => " + util.shortenRefName(targetRef);  //$NON-NLS-0$
+		} else if (activeBranch && activeBranch.Detached && !targetRef) {
+			title = i18nUtil.formatMessage(messages['DetachedHead ${0}'], util.shortenString(activeBranch.HeadSHA)); 
+		} else if (activeBranch && activeBranch.Detached && targetRef) {
+			var activeBranchName = i18nUtil.formatMessage(messages['DetachedHead ${0}'], util.shortenString(activeBranch.HeadSHA)); 
+				title = activeBranchName + " => " + util.shortenRefName(targetRef);  //$NON-NLS-0$
 		} else if (!activeBranch && !targetRef) {
 			title = messages["NoActiveBranch"];
 		} else if (!activeBranch && targetRef) {
