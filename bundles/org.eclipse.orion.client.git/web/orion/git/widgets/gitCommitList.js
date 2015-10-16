@@ -88,12 +88,13 @@ define([
 		_getLog: function(parentItem) {
 			var that = this;
 			var logMsg = that.location ? messages["Getting git log"] : i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], that.currentBranch.Name);
-			var detach = that.getActiveBranch().Detached;
-			var ref = that.simpleLog && !detach ? that.getTargetReference() : that.getActiveBranch();
+			var activeBranch = that.getActiveBranch();
+			var targetRef = that.getTargetReference();
+			var ref = that.simpleLog && targetRef ? targetRef : activeBranch;
 			if (that.isNewBranch(ref)) {
 				ref = that.getActiveBranch();
 			}
-			var location = parentItem.more ? parentItem.location : ((that.location || (detach ? ref.HeadLocation : null) || ref.CommitLocation || ref.Location) + that.repositoryPath + that.getQueries());
+			var location = parentItem.more ? parentItem.location : ((that.location || (ref.Detached ? ref.HeadLocation : null) || ref.CommitLocation || ref.Location) + that.repositoryPath + that.getQueries());
 			return that.progressService.progress(that.gitClient.doGitLog(location), logMsg).then(function(resp) {
 				if (that.location && resp.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
 					return that.progressService.progress(that.gitClient.doGitLog(resp.CommitLocation + that.repositoryPath + that.getQueries(), logMsg)).then(function(resp) { //$NON-NLS-0$
@@ -214,12 +215,10 @@ define([
 						var activeBranch = that.getActiveBranch();
 						var targetRef = that.getTargetReference();
 						if (section) {
-							if (targetRef && activeBranch && activeBranch.Current && !activeBranch.Detached) {
-								section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef)));
-							} else if (!targetRef && activeBranch && activeBranch.Current && activeBranch.Detached) {
-								section.setTitle(i18nUtil.formatMessage(messages['DetachedHead ${0}'], util.shortenString(that.currentBranch.HeadSHA)));
+							if (that.simpleLog && targetRef) {
+								section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef))); //$NON-NLS-1$
 							} else {
-								section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], util.shortenRefName(activeBranch)));
+								section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], util.refName(activeBranch)));
 							}
 						}
 						if (progress) progress.done();
