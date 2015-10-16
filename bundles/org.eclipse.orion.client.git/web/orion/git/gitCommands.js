@@ -930,6 +930,7 @@ var exports = {};
 					return false;
 				}
 				item = item.LocalBranch;
+				if (!item.Current || item.Detached) return false;
 			}
 			if (item.toRef)
 				// for action in the git log
