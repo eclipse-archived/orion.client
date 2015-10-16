@@ -222,7 +222,7 @@ define([
 							}
 						}
 						if (progress) progress.done();
-						if (that.simpleLog || !targetRef) {
+						if (that.simpleLog || !targetRef || util.sameRef(activeBranch, targetRef)) {
 							that.outgoingItem = that.incomingItem = that.syncItem = null;
 							return getSimpleLog();
 						} else {
@@ -870,7 +870,7 @@ define([
 					}
 					simpleLogCommand.imageClass = imgClass;
 					var activeBranch = that.model.getActiveBranch();
-					if (!activeBranch.Current) return false;
+					if (!activeBranch.Current || util.sameRef(activeBranch, targetRef)) return false;
 					simpleLogCommand.tooltip = i18nUtil.formatMessage(messages[that.model.simpleLog ? "ShowActiveBranchTip" : "ShowReferenceTip"], activeBranch.Name, messages[targetRef.Type + "Type"], targetRef.Name);
 					simpleLogCommand.checked = !that.model.simpleLog;
 					return !that.model.isRebasing();

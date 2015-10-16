@@ -178,6 +178,12 @@ define([
 				shortenRefName(ref);
 	}
 	
+	function sameRef(ref1, ref2) {
+		if (!ref1 || !ref2) return false;
+		if (ref1 === ref2) return true;
+		return ref1.Name === ref2.Name && ref1.Type === ref2.Type;
+	}
+	
 	function shortenPath(path) {
 		var result = path.split('/').slice(-3); //$NON-NLS-0$
 		result = result.join("/"); //$NON-NLS-0$
@@ -226,6 +232,7 @@ define([
 		trimCommitMessage: trimCommitMessage,
 		changeSignedOffByCommitMessage: changeSignedOffByCommitMessage,
 		refName: refName,
+		sameRef: sameRef,
 		shortenRefName: shortenRefName,
 		shortenPath: shortenPath,
 		shortenString : shortenString,
