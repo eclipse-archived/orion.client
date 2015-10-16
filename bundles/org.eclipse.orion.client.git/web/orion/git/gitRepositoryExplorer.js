@@ -606,11 +606,13 @@ define([
 		var activeBranch = explorer.model.getActiveBranch();
 		var targetRef = explorer.model.getTargetReference();
 		if (activeBranch && targetRef) {
-			if (activeBranch.Detached) {
+			if (activeBranch.Detached && targetRef.Detached || activeBranch.Detached && targetRef.Name.indexOf("HEAD") > -1) {
 				title = i18nUtil.formatMessage(messages['DetachedHead ${0}'], util.shortenString(activeBranch.HeadSHA)); 
+			} else if (activeBranch.Detached && !targetRef.Detached) {
+				var activeBranchName = i18nUtil.formatMessage(messages['DetachedHead ${0}'], util.shortenString(activeBranch.HeadSHA)); 
+				title = activeBranchName + " => " + util.shortenRefName(targetRef);  //$NON-NLS-0$
 			} else {
-				var targetName =  util.shortenRefName(targetRef);
-				title = activeBranch.Name + " => " + targetName;  //$NON-NLS-0$
+				title = activeBranch.Name + " => " + util.shortenRefName(targetRef);  //$NON-NLS-0$
 			}
 		} else if (!activeBranch && !targetRef) {
 			title = messages["NoActiveBranch"];
