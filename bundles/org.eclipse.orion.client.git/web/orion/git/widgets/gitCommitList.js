@@ -218,7 +218,7 @@ define([
 							if (that.simpleLog && targetRef) {
 								section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef))); //$NON-NLS-1$
 							} else {
-								section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], util.refName(activeBranch)));
+								section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], util.shortenRefName(activeBranch)));
 							}
 						}
 						if (progress) progress.done();

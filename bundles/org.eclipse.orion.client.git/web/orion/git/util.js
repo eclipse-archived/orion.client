@@ -155,27 +155,24 @@ define([
 	}
 	
 	function shortenRefName(ref) {
+		if (ref.Detached) {
+			return i18nUtil.formatMessage(messages['DetachedHead ${0}'], shortenString(ref.HeadSHA));
+		}
 		var result = ref.Name;
 		if (ref.Type === "StashCommit") { //$NON-NLS-0$
-			refName = i18nUtil.formatMessage(messages["stashIndex"], ref.parent.children.indexOf(ref), result.substring(0, 6)); //$NON-NLS-0$
+			result = i18nUtil.formatMessage(messages["stashIndex"], ref.parent.children.indexOf(ref), shortenString(result)); //$NON-NLS-0$
 		}
 		if (ref.Type === "Commit") { //$NON-NLS-0$
-			refName = shortenString(result);
+			result = shortenString(result);
 		}
 		if (ref.Type === "RemoteTrackingBranch" && !ref.Id) { //$NON-NLS-0$
-			refName += messages[" [New branch]"];
+			result += messages[" [New branch]"];
 		}
 		return result;
 	}
 	
 	function shortenString(str) {
 		return str.substring(0, 6);
-	}
-	
-	function refName(ref) {
-		return ref.Detached ? 
-				i18nUtil.formatMessage(messages['DetachedHead ${0}'], shortenString(ref.HeadSHA)) :
-				shortenRefName(ref);
 	}
 	
 	function sameRef(ref1, ref2) {
@@ -231,7 +228,6 @@ define([
 		parseSshGitUrl: parseSshGitUrl,
 		trimCommitMessage: trimCommitMessage,
 		changeSignedOffByCommitMessage: changeSignedOffByCommitMessage,
-		refName: refName,
 		sameRef: sameRef,
 		shortenRefName: shortenRefName,
 		shortenPath: shortenPath,
