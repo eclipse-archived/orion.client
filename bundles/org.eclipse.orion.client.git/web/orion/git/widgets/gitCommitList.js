@@ -142,14 +142,12 @@ define([
 			return this.currentBranch;
 		},
 		getTargetReference: function() {
-			if (this.targetRef && this.targetRef.Detached) {
-				return null;
-			}
 			if (this.targetRef) {
+				if (this.targetRef.Detached) return null;
 				return this.targetRef;
 			}
 			var ref = this.currentBranch;
-			if (ref.Detached) return null;
+			if (ref && ref.Detached) return null;
 			return ref && ref.RemoteLocation &&  ref.RemoteLocation[0] && ref.RemoteLocation[0].Children[ref.RemoteLocation[0].Children.length - 1];
 		},
 		tracksRemoteBranch: function(){
@@ -343,7 +341,7 @@ define([
 			}
 		},
 		getId: function(/* item */ item){
-			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : ""); //$NON-NLS-0$
+			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : "") + (item.parent ? item.parent.Type : ""); //$NON-NLS-0$; //$NON-NLS-0$
 		},
 		processMoreChildren: function(parentItem, children, item, type) {
 			type = type || "MoreCommits"; //$NON-NLS-0$ /* use more commits by default */
