@@ -258,21 +258,36 @@ define([
 				ternWorker.postMessage(item.msg, item.f);
 			}
 			messageQueue = [];
+			function cleanPrefs(prefs) {
+				var all = prefs.keys();
+				for(i = 0, len = all.length; i < len; i++) {
+					var id = all[i];
+					if(/^tern/.test(id)) {
+						prefs.remove(all[i]);
+					}
+				}
+			}
 			ternWorker.postMessage({request: 'installed_plugins'}, function(response) { //$NON-NLS-1$
 				var plugins = response.plugins;
 				return prefService ? prefService.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
-					var props = prefs.get("tern/plugins"); //$NON-NLS-1$
+					var props = prefs.get("tern"); //$NON-NLS-1$
+					cleanPrefs(prefs);
 					if (!props) {
 						props = Object.create(null);
 					} else if(typeof(props) === 'string') {
 						props = JSON.parse(props);
 					}
 					var keys = Object.keys(plugins);
+					var plugs = props.plugins ? props.plugins : Object.create(null);
 					for(i = 0; i < keys.length; i++) {
 						var key = keys[i];
-						props[key] = plugins[key];
+						if(/^orion/.test(key)) {
+							delete plugs[key]; //make sure only the latest of Orion builtins are shown
+						}
+						plugs[key] = plugins[key];
 					}
-					prefs.put("tern/plugins", JSON.stringify(props)); //$NON-NLS-1$
+					props.plugins = plugs;
+					prefs.put("tern", JSON.stringify(props)); //$NON-NLS-1$
 					prefs.sync(true);
 				}) : new Deferred().resolve();
 			});
