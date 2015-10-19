@@ -338,7 +338,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				data: JSON.stringify({
 					"Name": folderName,
 					"LocalTimeStamp": "0",
-					"Directory": "true"
+					"Directory": true
 				}),
 				timeout: 15000
 			}).then(function(result) {
@@ -368,7 +368,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				data: JSON.stringify({
 					"Name": fileName,
 					"LocalTimeStamp": "0",
-					"Directory": "false"
+					"Directory": false
 				}),
 				timeout: 15000
 			}).then(function(result) {
