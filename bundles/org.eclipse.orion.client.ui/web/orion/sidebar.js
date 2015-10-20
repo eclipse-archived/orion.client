@@ -283,7 +283,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			this.commandRegistry.addCommand(problemsInFolderCommand);
 			this.commandRegistry.registerCommandContribution(this.editScope, "orion.problemsInFolder", 101, "orion.menuBarEditGroup/orion.findGroup");  //$NON-NLS-1$ //$NON-NLS-0$
  		},
- 		fillSearchPane: function(searchText, searchScope, searchResult, searchParams) {
+ 		fillSearchPane: function(searchText, searchScope, searchResult) {
  			var mainSplitter = mGlobalCommands.getMainSplitter();
 			if (mainSplitter.splitter.isClosed()) {
 				mainSplitter.splitter.toggleSidePanel();
@@ -295,7 +295,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			if(!searchResult) {
 				this._inlineSearchPane.search();
 			} else {
-				this._inlineSearchPane.fillSearchResult(searchParams, searchResult);
+				this._inlineSearchPane.fillSearchResult(searchResult);
 			}
 
  		},

@@ -97,7 +97,6 @@ define([
 				this._hideReplaceField();
 				this._searchBox.show();
 				delete this._filledResult;
-				delete this._filledParams;
 				lib.empty(lib.node("searchResultsTitle"));
 				lib.empty(lib.node("searchPageActions"));
 				lib.empty(this._searchResultsWrapperDiv);
@@ -137,12 +136,11 @@ define([
 			this._submitSearch();
 		},
 		
-		fillSearchResult: function(filledParams, filledResult) {
+		fillSearchResult: function(searchResult) {
 			this._hideSearchOptBLocks();	
-			this._filledResult = filledResult;
-			this._filledParams = filledParams;
+			this._filledResult = searchResult;
 			this._showReplaceField();
-			this._searchResultExplorer.runSearch(filledParams, this._searchResultsWrapperDiv, filledResult);
+			this._searchResultExplorer.runSearch(searchResult.searchParams, this._searchResultsWrapperDiv, searchResult);
 		},
 				
 		_submitSearch: function(){
@@ -167,8 +165,8 @@ define([
 				this._replaceBox.addTextInputValueToRecentEntries();
 				this._fileNamePatternsBox.addTextInputValueToRecentEntries();
        			var searchParams;
-				if(this._filledResult && this._filledParams) {
-       				searchParams = mSearchUtils.copySearchParams(this._filledParams);
+				if(this._filledResult) {
+       				searchParams = mSearchUtils.copySearchParams(this._filledResult.searchParams);
        				searchParams.replace = options.replace;
 				} else {
 					searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);

@@ -23,11 +23,16 @@ define([
     /*
      *	The model to support the search result.
      */
-    function SearchResultModel(serviceRegistry, fileClient, resultLocation, totalNumber, searchParams, options) {
+    function SearchResultModel(serviceRegistry, fileClient, searchResult, totalNumber, searchParams, options) {
         this.registry = serviceRegistry;
         this.fileClient = fileClient;
-        this._resultLocation = resultLocation;
-        this._numberOnPage = resultLocation.length;
+        if(searchResult && searchResult.categories) {
+        	this._fileList = searchResult.refResult;
+        	this._categories = searchResult.categories;
+        } else {
+        	this._fileList = searchResult;
+        }
+        this._numberOnPage = this._fileList.length;
         this._totalNumber = totalNumber;
         this._shape = searchParams.shape ? searchParams.shape : 'file'; //$NON-NLS-1$
         this._listRoot = {
@@ -176,14 +181,36 @@ define([
     	buildResultModel: function buildResultModel() {
 	        this._indexedFileItems = [];
 	        this.getListRoot().children = [];
-	        for (var i = 0, len = this._resultLocation.length; i < len; i++) {
+	        var temp = [];
+	        if(this._shape === 'group' && this._categories) {
+				for (var prop in this._categories) {
+					if(this._categories[prop] !== undefined && this._categories[prop] !== null){
+		    			var categoryNode = { //$NON-NLS-1$
+				    			parent: this.getListRoot(),
+				    			type: 'group', //$NON-NLS-1$
+				    			name: this._categories[prop].name,
+				    			location: this._categories[prop].category,
+				    			category: this._categories[prop].category,
+				    			sort: this._categories[prop].sort,
+				    			children: []
+				    	};
+						temp.push(categoryNode);
+					}
+				}
+ 				temp.sort(function(a, b) {
+					return a.sort - b.sort;
+				});
+				//this.getListRoot().children = temp;
+	        }
+	        for (var i = 0, len = this._fileList.length; i < len; i++) {
 	        	switch(this._shape) {
 	        		case 'file': {
-	        			this._buildFileResult(this._resultLocation[i]);
+	        			this._buildFileResult(this._fileList[i]);
 	        			break;
 	        		}
 	        		case 'group': {
-	        			this._buildGroupedResult(this._resultLocation[i]);
+	        			//this._buildCategoryResult(this._fileList[i]);
+	        			this._buildGroupedResult(this._fileList[i]);
 	        			break;
 	        		}
 	        	}
@@ -204,8 +231,6 @@ define([
 	                name: result.name,
 	                children: children,
 	                contents: result.contents,
-	                //lastModified: this._resultLocation[i].lastModified, //$NON-NLS-0$
-	                //linkLocation: this._resultLocation[i].linkLocation,
 	                location: result.location,
 	                parentLocation: mUiUtils.path2FolderName(result.location, result.name, true),
 	                fullPathName: mUiUtils.path2FolderName(result.path, result.name)
@@ -234,9 +259,21 @@ define([
            	
             	fileNode.children = newChildren;
             }
-            this._location2ModelMap[fileNode.location] = fileNode;
+            //this._location2ModelMap[fileNode.location] = fileNode;
             this.getListRoot().children.push(fileNode);
             this._indexedFileItems.push(fileNode);
+	    },
+	    
+	    _match2Category: function _match2Category(match) {
+			var hasOne = this.getListRoot().children[0];
+			this.getListRoot().children.some(function(element){
+				if (element.category === match.category) {
+					hasOne = element;
+					return true;
+				}				
+				return false;
+			}, this);
+	    	return hasOne;
 	    },
 	    
 	    _getLogicalFileNode: function _getLogicalFileNode(fileResult) {
@@ -262,6 +299,41 @@ define([
 	            this._indexedFileItems.push(hasOne);
 	    	}
 	    	return hasOne;
+	    },
+	    
+	    _buildCategoryResult: function _buildCategoryResult(singleFileResult) {
+    		var matchLines = singleFileResult.children;
+    		if(matchLines) {
+    			var logicalFileNode = this._getLogicalFileNode(singleFileResult);
+	    		for(var i = 0, len = matchLines.length; i < len; i++) {
+	    			var matchLine = matchLines[i];
+	    			var matches = matchLine.matches;
+	    			for (var j = 0, len2 = matches.length; j < len2; j++) {
+	    				var match = matches[j];
+						var matchNumber = j+1;
+	    				match.lineNumber = matchLine.lineNumber;
+	    				match.matchNumber = matchNumber;
+	    				match.matches = matches;
+	    				if(matchLine.name) {
+	    					match.lineString = matchLine.name;
+	    					match.name = matchLine.name;
+	    				} else {
+	    					match.lineString = '';
+	    					match.name = '';
+	    				}
+	    				if(singleFileResult.location) {
+	    					match.location = singleFileResult.location;
+	    				} else {
+	    					match.location = '';
+	    				}
+	    				var categoryNode = this._match2Category(match);
+	    				match.parent = categoryNode;
+	    				categoryNode.children.push(match);
+			    		match.logicalParent = logicalFileNode;
+			    		logicalFileNode.children.push(match);
+	    			}
+	    		}
+			}
 	    },
 	    
 	    /**
@@ -535,8 +607,8 @@ define([
     		if(this._shape === 'group') {
     			//# references to <str> in <project_name>|<workspace>
     			var total = 0;
-    			for(var i = 0, len = this._resultLocation.length; i < len; i++) {
-    				var matches = this._resultLocation[i].totalMatches;
+    			for(var i = 0, len = this._fileList.length; i < len; i++) {
+    				var matches = this._fileList[i].totalMatches;
     				if(typeof(matches) === 'number') {
 	    				total += matches;
 					}
