@@ -193,29 +193,30 @@ define([
 					if(typeof(props) === 'string') {
 						tern = JSON.parse(props);
 					} else {
-						tern = {};
+						tern = Object.create(null);
 					}
-					if(tern.plugins) {
-						var pluginArray = [];
-						var keys = Object.keys(tern.plugins);
-						for (var i = 0, len = keys.length; i < len; i++) {
-							var plugin = tern.plugins[keys[i]];
-							if(typeof(plugin) === 'object' && plugin.name) {
-								pluginArray.push(plugin);
-							}
+					if(!tern.plugins) {
+						tern.plugins = Object.create(null);
+					}
+					var pluginArray = [];
+					var keys = Object.keys(tern.plugins);
+					for (var i = 0, len = keys.length; i < len; i++) {
+						var plugin = tern.plugins[keys[i]];
+						if(typeof(plugin) === 'object' && plugin.name) {
+							pluginArray.push(plugin);
 						}
-						_self.pluginTitle.textContent = messages["ternPlugins"];
-						if (pluginArray.length > 0){
-							_self.pluginCount.textContent = pluginArray.length;
-							pluginArray.sort(_self._sortPlugins); 
-							_self.explorer = new PluginListExplorer(_self.commandService);
-							_self.pluginListTree = _self.explorer.createTree(_self.pluginList.id, new mExplorer.SimpleFlatModel(pluginArray, "plugin", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
-								return item.name;
-							}), { noSelection: true});
-						} else {
-							_self.pluginList.style.padding = "10px"; //$NON-NLS-1$
-							_self.pluginList.textContent = messages["noTernPluginsAvailable"];
-						}
+					}
+					_self.pluginTitle.textContent = messages["ternPlugins"];
+					if (pluginArray.length > 0){
+						_self.pluginCount.textContent = pluginArray.length;
+						pluginArray.sort(_self._sortPlugins); 
+						_self.explorer = new PluginListExplorer(_self.commandService);
+						_self.pluginListTree = _self.explorer.createTree(_self.pluginList.id, new mExplorer.SimpleFlatModel(pluginArray, "plugin", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
+							return item.name;
+						}), { noSelection: true});
+					} else {
+						_self.pluginList.style.padding = "10px"; //$NON-NLS-1$
+						_self.pluginList.textContent = messages["noTernPluginsAvailable"];
 					}
 			});
 		},
@@ -230,13 +231,6 @@ define([
 		 * @returns -1 for a first, 1 for b first, 0 if equals
 		 */
 		_sortPlugins: function(a, b) {
-			//TODO do we want to sort by removable? or only colour them differently? or simply use the 'remove' command to show this
-			/*if (b.removable && !a.removeable){
-				return -1;
-			}
-			if (a.removable && !b.removable){
-				return 1;
-			}*/
 			var n1 = a.name.toLowerCase();
 			var n2 = b.name.toLowerCase();
 			if (n1 < n2) { return -1; }
