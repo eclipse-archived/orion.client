@@ -83,7 +83,6 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 				"Content-Type" : contentType
 				},
 				timeout : 15000,
-				handleAs : "json",
 				data : JSON.stringify(data)
 				}).then(function(result) {
 					self._getServiceResponse(clientDeferred, result);

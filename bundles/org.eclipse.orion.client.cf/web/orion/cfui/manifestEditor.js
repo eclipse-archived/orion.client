@@ -46,8 +46,7 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 				"Orion-Version" : "1",
 				"Content-Type" : contentType
 			},
-			timeout : 15000,
-			handleAs : "json" //$NON-NLS-0$
+			timeout : 15000
 		}).then(function(resp) {
 			handleResponse(d, resp);
 		}, function(error){

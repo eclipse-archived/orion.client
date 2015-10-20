@@ -69,7 +69,6 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 					headers : {
 						"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 					},
-					handleAs : "json", //$NON-NLS-0$
 					timeout : 15000,
 					load : function(jsonData, ioArgs) {
 						window.location.hash = '#' + jsonData.Location;//$NON-NLS-0$

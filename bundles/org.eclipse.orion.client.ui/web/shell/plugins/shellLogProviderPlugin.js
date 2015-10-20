@@ -71,8 +71,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 				"Orion-Version" : "1",
 				"Content-Type" : handler + "; charset=UTF-8"
 			},
-			timeout : 15000,
-			handleAs : handler
+			timeout : 15000
 		}).then(function(resp) {
 			if(raw){ d.resolve(resp.responseText); }
 			else { d.resolve(JSON.parse(resp.responseText)); }
@@ -91,7 +90,6 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 				"Content-Type" : "application/json; charset=UTF-8"
 			},
 			timeout : 15000,
-			handleAs : "json", //$NON-NLS-0$
 			data: JSON.stringify(dataJSON)
 		}).then(function(resp) {
 			d.resolve(JSON.parse(resp.responseText));
