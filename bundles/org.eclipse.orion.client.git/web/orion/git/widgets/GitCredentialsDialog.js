@@ -39,12 +39,12 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 	+ '<tr id="gitSshUsernameRow">' + '<td align="right"><label style="line-height: 1;" id="gitSshUsernameLabel" for="gitSshUsername">${Username:}</label></td>'
 			+ '<td><input id="gitSshUsername" type="text" value="" style="margin: 0;">' + '</td></tr>'
 
-			+ '<tr id="gitSshPasswordRow">' + '<td align="right"><input style = "margin: 0;" id="isSshPassword" type="radio" name="isSshPassword" checked value="password"/>'
+			+ '<tr id="gitSshPasswordRow">' + '<td align="right"><input style="margin: 0;" id="isSshPassword" type="radio" name="isSshPassword" checked value="password"/>'
 			+ '<label style="line-height: 1; margin-left: 5px; vertical-align: text-top;" id="gitSshPasswordLabel" for="gitSshPassword">${Password:}</label></td>'
 			+ '<td><input type="password" id="gitSshPassword" value="" style="margin: 0;">' + '</td></tr>'
 
 			+ '<tr id="gitPrivateKeyRow">'
-			+ '<td align="right" valign="top"><input  style = "margin: 0;" id="isPrivateKey" type="radio" name="isSshPassword" value="privateKey"/>'
+			+ '<td align="right" valign="top"><input style="margin: 0;" id="isPrivateKey" type="radio" name="isSshPassword" value="privateKey"/>'
 			+ '<label style="line-height: 1; margin-left: 5px; vertical-align: text-top;" id="gitPrivateKeyLabel" for="gitPrivateKey">${Private key:}</label></td>'
 			+ '<td><textarea id="gitPrivateKey" value=""></textarea>' + '</td></tr>'
 

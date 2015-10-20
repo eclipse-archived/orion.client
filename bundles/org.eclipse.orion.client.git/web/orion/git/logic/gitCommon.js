@@ -69,6 +69,7 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 				title: title,
 				serviceRegistry: serviceRegistry,
 				func: func,
+				authUrl: options.authUrl,
 				errordata: options.errordata,
 				failedOperation: options.failedOperation,
 				closeCallback : closeCallback
@@ -338,25 +339,28 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 		
 		switch (jsonData.HttpCode) {
 			case 401:
-				if(jsonData.JsonData){
+				if (jsonData.JsonData) {
 					options.errordata = jsonData.JsonData;
 				}
-				if(jsonData.failedOperation){
+				if (jsonData.failedOperation) {
 					options.failedOperation = jsonData.failedOperation;
+				}
+				if (jsonData.authUrl) {
+					options.authUrl = jsonData.authUrl;
 				}
 				handleSshAuthenticationError(serviceRegistry, jsonData.JsonData, options, callee, title);
 				return;
 			case 400:
 				if(jsonData.JsonData && jsonData.JsonData.HostKey){
-					if(jsonData.failedOperation){
+					if (jsonData.failedOperation) {
 						options.failedOperation = jsonData.failedOperation;
 					}
 					handleKnownHostsError(serviceRegistry, jsonData.JsonData, options, callee);
 				} else if(jsonData.JsonData && jsonData.JsonData.Host){
-					if(jsonData.JsonData){
+					if (jsonData.JsonData) {
 						options.errordata = jsonData.JsonData;
 					}
-					if(jsonData.failedOperation){
+					if (jsonData.failedOperation) {
 						options.failedOperation = jsonData.failedOperation;
 					}
 					handleSshAuthenticationError(serviceRegistry, jsonData.JsonData, options, callee, title);

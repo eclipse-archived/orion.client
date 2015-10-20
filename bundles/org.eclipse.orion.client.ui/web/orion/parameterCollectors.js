@@ -247,6 +247,17 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'],
 						if (parm.value) {
 							field.checked = true;
 						}
+					} else if (parm.type === "button") { //$NON-NLS-0$
+						if (!field) {
+							field = document.createElement("input"); //$NON-NLS-0$
+							field.type = "button"; //$NON-NLS-0$
+							field.id = id;
+							field.classList.add("dismissButton"); //$NON-NLS-0$
+							parent.appendChild(field);
+						}
+						if (parm.value) {
+							field.value = parm.value;
+						}
 					} else {
 						if (!field) {
 							field = document.createElement("input"); //$NON-NLS-0$
