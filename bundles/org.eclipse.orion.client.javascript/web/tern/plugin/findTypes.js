@@ -19,16 +19,40 @@ define([
 ],/* @callback */ function(infer, tern, walk, finder) {
 	
 	function addNodeContext(file, end, result) {
-		var node = finder.findNode(end, file.ast);
+		var node = finder.findNode(end, file.ast, {parents:true});
 		if(node) {
-			//we only want a very small subset of node infos
 			var n = Object.create(null);
 			n.type = node.type;
 			n.range = node.range;
-			n.value = node.value;
+			if(node.type === 'Identifier') {
+				node = node.parents.pop();
+				if(node.type === 'Property') {
+					n.value = copyNode(node.value);
+					n.key = copyNode(node.key);
+				} else if(node.type === 'VariableDeclarator') {
+					n.id = copyNode(node.id);
+					n.init = copyNode(node.init);
+				} else if(node.type === 'AssignmentExpression') {
+					n.left = copyNode(node.left);
+					n.right = copyNode(node.right);
+				} else if(node.type === 'CallExpression') {
+					n.callee = copyNode(node.callee);
+				} else if(node.type === 'MemberExpression') {
+				}
+			} else if(node.type === 'Literal') {
+				n.value = node.value;
+				if(node.regex) {
+					n.regex = node.regex;
+				}
+			}
 			result.node = n;
 		}
-
+	}
+	
+	function copyNode(node) {
+		var n = Object.create(null);
+		n.range = node.range;
+		n.type = node.type;
 	}
 	
 	function inComment(file, end) {

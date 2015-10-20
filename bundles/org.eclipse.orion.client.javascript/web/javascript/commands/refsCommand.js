@@ -70,7 +70,7 @@ define([
 			sort: 6
 		},
 		blockComments: {
-			name: Messages['blockCommets'],
+			name: Messages['blockComments'],
 			category: 'block', //$NON-NLS-1$
 			sort: 7
 		},
