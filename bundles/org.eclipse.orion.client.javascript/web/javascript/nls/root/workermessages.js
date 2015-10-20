@@ -38,6 +38,8 @@ define({
 	'openImplPluginDescription': 'Plug-in that allows Orion to try to find implementation locations of elements rather than simple declarations',
 	'htmlDepPluginName': 'Orion HTML Dependency Analysis',
 	'htmlDepPluginDescription': 'Resolves script block and script tag dependencies',
+	'findTypesName': 'Orion Type Information Support',
+	'findTypesDescription': 'Plug-in that provides expanded type-finding support in Orion',
 
 	// Other messages
 	'unknownError': 'An unknown error occurred.',

@@ -3,7 +3,7 @@
 // A server is a stateful object that manages the analysis for a
 // project, and defines an interface for querying the code in the
 // project.
-
+/* eslint-disable */
 (function(root, mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(exports, require("./infer"), require("./signal"),
@@ -142,7 +142,7 @@
       var self = this;
       doRequest(this, doc, function(err, data) {
         c(err, data);
-        if (self.uses > 40) {
+        if (self.uses > 40000) {
           self.reset();
           analyzeAll(self, null, function(){});
         }
@@ -1022,5 +1022,10 @@
 
   exports.version = "0.12.0";
   exports.findDef = findDef; //ORION
+  exports.findExpr = findExpr; //ORION
+  exports.findExprType = findExprType; //ORION
+  exports.resolveFile = resolveFile; //ORION
+  exports.storeTypeDocs = storeTypeDocs; //ORION
+  exports.parseDoc = parseDoc; //ORION
   exports.resolvePos = resolvePos; //ORION
 });

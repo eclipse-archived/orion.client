@@ -37,6 +37,7 @@ require([
 	'tern/plugin/orionRedis',
 	'tern/plugin/requirejs',
 	'tern/plugin/ternPlugins',
+	'tern/plugin/findTypes',
 	'tern/plugin/openImplementation',
 	'tern/plugin/htmlDependencies',
 	'json!tern/defs/ecma5.json',
@@ -47,7 +48,7 @@ require([
 ],
 /* @callback */ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
 							orionMySQLPlugin, orionNodePlugin, orionPostgresPlugin, orionRedisPlugin, orionRequirePlugin, ternPluginsPlugin,
-							openImplPlugin, htmlDepPlugin, ecma5, ecma6, browser, Messages, i18nUtil) {
+							findTypesPlugin, openImplPlugin, htmlDepPlugin, ecma5, ecma6, browser, Messages, i18nUtil) {
 
     var ternserver = Object.create(null);
 
@@ -149,6 +150,12 @@ require([
                     orionHTML: {
                     	name : Messages["htmlDepPluginName"],
                     	description: Messages["htmlDepPluginDescription"],
+                    	version: '1.0', //$NON-NLS-1$
+                    	removable: false
+                    },
+                    findTypes: {
+                    	name : Messages["findTypesName"],
+                    	description: Messages["findTypesDescription"],
                     	version: '1.0', //$NON-NLS-1$
                     	removable: false
                     }
@@ -467,6 +474,21 @@ require([
 		                   callback({request: 'type', error: typeof(error) === 'string' ? error : error.message, message: Messages['failedType']}); //$NON-NLS-1$
 		               } else {
 		               	   callback({request: 'type', type: type}); //$NON-NLS-1$
+		               }
+		           });
+		},
+		'findType': function(args, callback) {
+			ternserver.request({
+		           query: {
+			           type: "findType",  //$NON-NLS-1$
+			           file: args.meta.location,
+			           end: args.params.offset
+		           }},
+		           function(error, type) {
+		               if(error) {
+		                   callback({request: 'findType', error: typeof(error) === 'string' ? error : error.message, message: Messages['failedType']}); //$NON-NLS-1$
+		               } else {
+		               	   callback({request: 'findType', type: type}); //$NON-NLS-1$
 		               }
 		           });
 		}

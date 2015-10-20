@@ -14,8 +14,9 @@ define([
 'orion/objects',
 'javascript/finder',
 'orion/Deferred',
-'i18n!javascript/nls/messages'
-], function(Objects, Finder, Deferred, Messages) {
+'i18n!javascript/nls/messages',
+'orion/i18nUtil',
+], function(Objects, Finder, Deferred, Messages, i18nUtil) {
 
 	/**
 	 * @description Creates a new rename command
@@ -33,6 +34,52 @@ define([
 		this.searchclient = searchClient;
 		this.cache = Object.create(null);
 	}
+
+	/**
+	 * The listing of all categories, their NLS'd names and the order they should e sorted in
+	 */
+	var categories = {
+		funcDecls: {
+			name: Messages['funcDecls'],
+			category: 'funcdecl', //$NON-NLS-1$
+			sort: 1
+		},
+		funcCalls: {
+			name: Messages['funcCalls'],
+			category: 'funccall', //$NON-NLS-1$
+			sort: 2
+		},
+		propRead: {
+			name: Messages['propRead'],
+			category: 'propread', //$NON-NLS-1$
+			sort: 3
+		},
+		propWrite: {
+			name: Messages['propWrite'],
+			category: 'propwrite', //$NON-NLS-1$
+			sort: 4
+		},
+		regexLiterals: {
+			name: Messages['regexLiterals'],
+			category: 'regex', //$NON-NLS-1$
+			sort: 5
+		},
+		stringLiteral: {
+			name: Messages['stringLiterals'],
+			category: 'string', //$NON-NLS-1$
+			sort: 6
+		},
+		blockComments: {
+			name: Messages['blockCommets'],
+			category: 'block', //$NON-NLS-1$
+			sort: 7
+		},
+		lineComments: {
+			name: Messages['lineComments'],
+			category: 'line', //$NON-NLS-1$
+			sort: 8
+		}
+	};
 
 	Objects.mixin(RefsCommand.prototype, {
 		/**
@@ -59,11 +106,11 @@ define([
     			        	that._findRefs(editorContext, options, metadata, deferred);
     			        }
 			        }, /* @callback */ function(err) {
-			        	deferred.resolve('Could not compute references: failed to compute file text content');
+			        	deferred.resolve(Messages['noFileContents']);
 			        });
 			    }
 			}, /* @callback */ function(err) {
-				deferred.resolve('Could not compute references: failed to compute file metadata');
+				deferred.resolve(Messages['noFileMeta']);
 			});
 			return deferred;
 		},
@@ -92,7 +139,13 @@ define([
 								expected.total = 0;
 								expected.done = 0;
 								expected.result = [];
-								var searchParams = {keyword: node.name, resource: that.scriptresolver.getSearchLocation(), fileNamePatterns:["*.js"], caseSensitive: true, incremental:false, shape: 'group' }; //$NON-NLS-1$
+								var searchParams = {keyword: node.name, 
+									resource: that.scriptresolver.getSearchLocation(), 
+									fileNamePatterns: ["*.js"],  //$NON-NLS-1$
+									caseSensitive: true, 
+									incremental:false, 
+									shape: 'group' //$NON-NLS-1$
+								};
 								expected.params = searchParams;
 								expected.deferred = deferred;
 								that.searchclient.search(searchParams, true, true).then(function(searchResult) {
@@ -121,7 +174,7 @@ define([
 									}
 									that._checkDone(expected);
 								}, /* @callback */ function(err) {
-									editorContext.setStatus({Severity: 'Error', Message: 'Cannot compute references: '+err.message}); //$NON-NLS-1$
+									editorContext.setStatus({Severity: 'Error', Message: i18nUtil.formatMessage(Messages['cannotComputeRefs'], err.message)}); //$NON-NLS-1$
 									deferred.resolve([]);
 								}, /* @callback */ function(result) {
 									//TODO progress
@@ -129,7 +182,7 @@ define([
 						  }
 					});
 				} else {
-					editorContext.setStatus({Severity: 'Error', Message: 'Cannot compute references at the selected location: Location is not an identifier'}); //$NON-NLS-1$
+					editorContext.setStatus({Severity: 'Error', Message: Messages['notAnIdentifier']}); //$NON-NLS-1$
 					deferred.resolve([]);
 				}
 			});
@@ -144,10 +197,9 @@ define([
 		_checkType: function _checkType(original, file, match, expected) {
 			var that = this;
 			that.ternworker.postMessage(
-					{request: 'type', args: {meta:{location: file.Location}, params: {offset: match.end}}},  //$NON-NLS-1$
-					function(type, err) { //$NON-NLS-1$
-						//TODO not until incremental support is added 
-						//deferred.progress({searchParams: searchParams, refResult: match});
+					{request: 'findType', args: {meta:{location: file.Location}, params: {offset: match.end}}},  //$NON-NLS-1$
+					/* @callback */ function(type, err) {
+						that._categorizeMatch(type, match);
 						if(type && type.type) {
 							//TODO
 							var _t = type.type;
@@ -164,7 +216,37 @@ define([
 						that._checkDone(expected);
 					});
 		},
-		
+		/**
+		 * @description Tags the match with the category is belongs to
+		 * @function
+		 * @private
+		 * @param {Object} type The type information from the Tern request (if any)
+		 * @param {Object} match The original match object we asked about
+		 */
+		_categorizeMatch: function _categorizeMatch(type, match) {
+			if(type && type.expr && type.expr.node) {
+				var node = type.expr.node;
+				switch(node.type) {
+					case 'FunctionDeclaration':
+					case 'FunctionExpression': {
+						match.category = categories.funcDecls.category;
+						break;
+					}
+					case 'CallExpression': {
+						match.category = categories.funcCalls.category;
+						break;
+					}
+					case 'Literal': {
+						if(node.regex) {
+							match.category = categories.regexLiterals.category;
+						} else if(typeof(node.value) === "string") {
+							match.category = categories.stringLiteral.category;
+						}
+						break;
+					}
+				}
+			}
+		},
 		/**
 		 * @description Function to statically look at the search result by loading its AST and making some non-type inferred guesses.
 		 * This function is used if Tern reports it has no idea what the type of a match is.
@@ -289,7 +371,7 @@ define([
 		_checkDone: function _checkDone(expected) {
 			if(expected.done === expected.total) {
 				this.cache = Object.create(null);
-				expected.deferred.resolve({searchParams: expected.params, refResult: expected.result});
+				expected.deferred.resolve({searchParams: expected.params, refResult: expected.result, categories: categories});
 			}
 		}
 	});
