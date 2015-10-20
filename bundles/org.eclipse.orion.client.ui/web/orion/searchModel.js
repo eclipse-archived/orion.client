@@ -20,6 +20,7 @@ define([
 'orion/objects'
 ], function(messages, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils, Objects) {
 
+    var staticCategory = ("true" === localStorage.getItem("staticCategory"));
     /*
      *	The model to support the search result.
      */
@@ -181,8 +182,7 @@ define([
     	buildResultModel: function buildResultModel() {
 	        this._indexedFileItems = [];
 	        this.getListRoot().children = [];
-	        var temp = [];
-	        if(this._shape === 'group' && this._categories) {
+	        if(this._shape === 'group' && this._categories && !staticCategory) {
 				for (var prop in this._categories) {
 					if(this._categories[prop] !== undefined && this._categories[prop] !== null){
 		    			var categoryNode = { //$NON-NLS-1$
@@ -194,13 +194,12 @@ define([
 				    			sort: this._categories[prop].sort,
 				    			children: []
 				    	};
-						temp.push(categoryNode);
+						this.getListRoot().children.push(categoryNode);
 					}
 				}
- 				temp.sort(function(a, b) {
+ 				this.getListRoot().children.sort(function(a, b) {
 					return a.sort - b.sort;
 				});
-				//this.getListRoot().children = temp;
 	        }
 	        for (var i = 0, len = this._fileList.length; i < len; i++) {
 	        	switch(this._shape) {
@@ -209,8 +208,11 @@ define([
 	        			break;
 	        		}
 	        		case 'group': {
-	        			//this._buildCategoryResult(this._fileList[i]);
-	        			this._buildGroupedResult(this._fileList[i]);
+	        			if(staticCategory) {
+	        				this._buildGroupedResult(this._fileList[i]);
+	        			} else {
+	        				this._buildCategoryResult(this._fileList[i]);
+        				}
 	        			break;
 	        		}
 	        	}
