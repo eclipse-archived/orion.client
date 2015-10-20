@@ -199,10 +199,9 @@ define([
 			that.ternworker.postMessage(
 					{request: 'findType', args: {meta:{location: file.Location}, params: {offset: match.end}}},  //$NON-NLS-1$
 					/* @callback */ function(type, err) {
-						that._categorizeMatch(type, match);
 						if(type && type.type) {
-							//TODO
 							var _t = type.type;
+							that._categorizeMatch(_t, match);
 							var _ot = original.type;
 							if(_t.name === _ot.name && _t.type === _ot.type && _t.origin === _ot.origin) {
 								match.confidence = 100;
@@ -224,8 +223,8 @@ define([
 		 * @param {Object} match The original match object we asked about
 		 */
 		_categorizeMatch: function _categorizeMatch(type, match) {
-			if(type && type.expr && type.expr.node) {
-				var node = type.expr.node;
+			if(type && type.node) {
+				var node = type.node;
 				switch(node.type) {
 					case 'FunctionDeclaration':
 					case 'FunctionExpression': {
@@ -243,6 +242,14 @@ define([
 							match.category = categories.stringLiteral.category;
 						}
 						break;
+					}
+					case 'Block': {
+						match.category = categories.blockComments.category;
+						break;
+					}
+					case 'Line': {
+						match.category = categories.lineComments.category;
+						break;	
 					}
 				}
 			}
