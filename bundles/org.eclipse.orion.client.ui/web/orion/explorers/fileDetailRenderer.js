@@ -151,16 +151,19 @@ define([
     	 * @function
     	 * @param {Object} item The backing group item to render
     	 * @param {DOMNode} spanHolder The DOM element to hold the rendered element
-    	 * @param {SearchResultModel} resultModel The backing model
     	 * @since 10.0
     	 */
-    	renderGroupElement: function renderGroupElement(item, spanHolder, resultModel) {
+    	renderGroupElement: function renderGroupElement(item, spanHolder) {
 			var nameSpan = document.createElement("span"); //$NON-NLS-0$
 			nameSpan.appendChild(document.createTextNode(item.name)); //$NON-NLS-0$
 			nameSpan.classList.add("groupNameSpan"); //$NON-NLS-0$
 	        spanHolder.appendChild(nameSpan);
    			var countSpan = document.createElement("span"); //$NON-NLS-0$
-			countSpan.appendChild(document.createTextNode(i18nUtil.formatMessage(messages["(${0})"], item.children.length) ));
+   			var message = i18nUtil.formatMessage(messages["(${0})"], item.children.length);
+   			if(item.children.length === 1) {
+   				message = messages["singleMatch"];
+   			}
+			countSpan.appendChild(document.createTextNode(message));
 			countSpan.classList.add("groupCountSpan"); //$NON-NLS-0$
 	        spanHolder.appendChild(countSpan);
 			spanHolder.classList.add("groupParentSpan"); //$NON-NLS-0$

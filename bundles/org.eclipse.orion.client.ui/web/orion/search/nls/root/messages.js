@@ -98,6 +98,7 @@ define({//Default message bundle
 	"File name patterns (comma-separated)": "File name patterns (comma-separated)",
 	"(* = any string, ? = any character)": "(* = any string, ? = any character)",
 	"(${0})": "(${0} matches)",
+	"singleMatch": "(1 match)",
 	"Choose a Folder": "Choose a Folder",
 	"Remove from search results": "Remove from search results",
 	"^ Edit Search": "^ Edit Search",
