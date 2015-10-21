@@ -20,7 +20,6 @@ define([
 'orion/objects'
 ], function(messages, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils, Objects) {
 
-    var staticCategory = ("true" === localStorage.getItem("staticCategory"));
     /*
      *	The model to support the search result.
      */
@@ -182,7 +181,7 @@ define([
     	buildResultModel: function buildResultModel() {
 	        this._indexedFileItems = [];
 	        this.getListRoot().children = [];
-	        if(this._shape === 'group' && this._categories && !staticCategory) {
+	        if(this._shape === 'group' && this._categories) {
 				for (var prop in this._categories) {
 					if(this._categories[prop] !== undefined && this._categories[prop] !== null){
 		    			var categoryNode = { //$NON-NLS-1$
@@ -208,11 +207,7 @@ define([
 	        			break;
 	        		}
 	        		case 'group': {
-	        			if(staticCategory) {
-	        				this._buildGroupedResult(this._fileList[i]);
-	        			} else {
-	        				this._buildCategoryResult(this._fileList[i]);
-        				}
+	        			this._buildCategoryResult(this._fileList[i]);
 	        			break;
 	        		}
 	        	}
@@ -336,130 +331,6 @@ define([
 	    			}
 	    		}
 			}
-	    },
-	    
-	    /**
-    	 * @description Builds a grouped result model.
-    	 * @function
-    	 * @private
-    	 * @param {Object} result The search result
-    	 * @since 10.0
-    	 */
-    	_buildGroupedResult: function _buildGroupedResult(result) {
-    		if(!this._location2ModelMap.exact) {
-    			this._location2ModelMap.exact = { //$NON-NLS-1$
-		    			parent: this.getListRoot(),
-		    			type: 'group', //$NON-NLS-1$
-		    			name: messages['exactMatches'],
-		    			location: 'exact', //$NON-NLS-1$
-		    			sort: 0,
-		    			children: [],
-		    			add: true
-		    		};
-    		}
-    		if(!this._location2ModelMap.possible) {
-    			this._location2ModelMap.possible = { //$NON-NLS-1$
-		    			parent: this.getListRoot(),
-		    			type: 'group', //$NON-NLS-1$
-		    			name: messages['possibleMatches'],
-		    			location: 'possible', //$NON-NLS-1$
-		    			children: [],
-		    			sort: 1,
-		    			add: true
-		    		};
-			}	
-
-    		if(!this._location2ModelMap.other) {
-		    			this._location2ModelMap.other = { //$NON-NLS-1$
-		    			parent: this.getListRoot(),
-		    			type: 'group', //$NON-NLS-1$
-		    			name: messages['otherMatches'],
-		    			location: 'other', //$NON-NLS-1$
-		    			children: [],
-		    			sort: 2,
-		    			add: true
-		    		};
-	    	}
-    		var files = result.children;
-    		if(files) {
-    			var logicalFileNode = this._getLogicalFileNode(result);
-	    		for(var i = 0, len = files.length; i < len; i++) {
-	    			var file = files[i];
-	    			var matches = file.matches;
-	    			for (var j = 0, len2 = matches.length; j < len2; j++) {
-	    				var match = matches[j];
-						var matchNumber = j+1;
-	    				match.lineNumber = file.lineNumber;
-	    				match.matchNumber = matchNumber;
-	    				match.matches = matches;
-	    				if(file.name) {
-	    					match.lineString = file.name;
-	    					match.name = file.name;
-	    				} else {
-	    					match.lineString = '';
-	    					match.name = '';
-	    				}
-	    				if(result.location) {
-	    					match.location = result.location;
-	    				} else {
-	    					match.location = '';
-	    				}
-	    				if(typeof(match.confidence) === 'number') {
-	    					if(match.confidence < 1) {
-	    						match.parent = this._location2ModelMap.other;
-			    				this._location2ModelMap.other.children.push(match);
-			    			} else if(match.confidence < 100) {
-			    				match.parent = this._location2ModelMap.possible;
-			    				this._location2ModelMap.possible.children.push(match);
-			    			} else {
-			    				match.parent = this._location2ModelMap.exact;
-			    				this._location2ModelMap.exact.children.push(match);
-			    			}
-			    			match.logicalParent = logicalFileNode;
-			    			logicalFileNode.children.push(match);
-	    				}
-	    			}
-	    		}
-			}
-
-    		function _srt(a, b) {
-    			if(a.confidence === b.confidence) {
- 					return a.lineNumber - b.lineNumber;
- 				}
-				return b.confidence - a.confidence;
-    		}
-    		if(this._location2ModelMap.exact.children.length > 0) {
-    			this._location2ModelMap.exact.children.sort(_srt);
-    			if(this._location2ModelMap.exact.add) {
-	    			this.getListRoot().children.push(this._location2ModelMap.exact);
-	    			delete this._location2ModelMap.exact.add;
-				}
-    		} 
-    		if(this._location2ModelMap.possible.children.length > 0) {
-    			this._location2ModelMap.possible.children.sort(_srt);
-    			if(this._location2ModelMap.possible.add) {
-	    			this.getListRoot().children.push(this._location2ModelMap.possible);
-	    			delete this._location2ModelMap.possible.add;
-				}
-    		} 
-    		if(this._location2ModelMap.other.children.length > 0) {
-    			this._location2ModelMap.other.children.sort(_srt);
-    			if(this._location2ModelMap.other.add) {
-	    			this.getListRoot().children.push(this._location2ModelMap.other);
-	    			delete this._location2ModelMap.other.add;
-				}
-    		}
-    		if(this.getListRoot().children.length > 0) {
-    			this.getListRoot().children.sort(function(a, b) {
-    				if(a.sort < b.sort) {
-    					return -1;
-    				}
-    				if(a.sort > b.sort) {
-    					return 1;
-    				}
-    				return 0;
-    			});
-    		}
 	    },
 	    /**
     	 * @description if replace mode is enabled
