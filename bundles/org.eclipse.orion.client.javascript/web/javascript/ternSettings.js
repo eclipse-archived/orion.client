@@ -189,13 +189,11 @@ define([
 			var _self = this;
 			return this.preferences.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
 					var props = prefs.get("tern"); //$NON-NLS-1$
-					var tern;
+					var tern = props;
 					if(typeof(props) === 'string') {
 						tern = JSON.parse(props);
-					} else {
+					} else if(!tern) {
 						tern = Object.create(null);
-					}
-					if(!tern.plugins) {
 						tern.plugins = Object.create(null);
 					}
 					var pluginArray = [];

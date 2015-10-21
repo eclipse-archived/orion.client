@@ -262,10 +262,11 @@ define([
 				var all = prefs.keys();
 				for(i = 0, len = all.length; i < len; i++) {
 					var id = all[i];
-					if(/^tern/.test(id)) {
+					if(/^tern.$/.test(id)) {
 						prefs.remove(all[i]);
 					}
 				}
+				prefs.sync(true);
 			}
 			ternWorker.postMessage({request: 'installed_plugins'}, function(response) { //$NON-NLS-1$
 				var plugins = response.plugins;
