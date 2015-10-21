@@ -32,9 +32,9 @@ define([
 		 * @returns {String} Returns the computed word from the given string and offset or <code>null</code>
 		 */
 		findWord: function(text, start) {
-			if(text && start) {
+			if(text && start > -1) {
 				var ispunc = this.punc.indexOf(text.charAt(start)) > -1;
-				var pos = ispunc ? start-1 : start;
+				var pos = ispunc && start > 0 ? start-1 : start;
 				while(pos >= 0) {
 					if(this.punc.indexOf(text.charAt(pos)) > -1) {
 						break;

@@ -95,6 +95,13 @@ define([
 			var word = Finder.findWord('	foo.bar = function(param1, param2)', 2);
 			assert.equal(word, 'foo', 'Should have found word foo');
 		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=480329
+		 */
+		it('test_findWord12', function() {
+			var word = Finder.findWord('myfunc();', 0);
+			assert.equal(word, 'myfunc', 'Should have found word myfunc');
+		});
 		it('test_findNoWord1', function() {
 			var word = Finder.findWord('f: function(p1, p2)', 2);
 			assert.equal(word, null, 'Should have found no word');
@@ -125,6 +132,13 @@ define([
 		});
 		it('test_findNoWord8', function() {
 			var word = Finder.findWord('var a = [1, 2]', 14);
+			assert.equal(word, null, 'Should have found no word');
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=480329
+		 */
+		it('test_findNoWord9', function() {
+			var word = Finder.findWord(' myfunc();', 0);
 			assert.equal(word, null, 'Should have found no word');
 		});
 		it('test_findNode1', function() {
