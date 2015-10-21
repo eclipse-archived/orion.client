@@ -507,18 +507,17 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					return true;
 				}
 				editor.moveSelection(foundAnnotation.start, foundAnnotation.start, function() {
-					tooltip.setTarget({
-						getTooltipInfo: function() {
-							var tooltipCoords = view.convert({
-								x: view.getLocationAtOffset(foundAnnotation.start).x,
-								y: view.getLocationAtOffset(model.getLineStart(nextLine)).y
-							}, "document", "page"); //$NON-NLS-1$ //$NON-NLS-2$
-							return {
-								contents: foundAnnotations,
-								x: tooltipCoords.x,
-								y: tooltipCoords.y + Math.floor(view.getLineHeight(nextLine) * 1.33)
-							};
-						}
+					setTimeout(function() {
+						var tv = editor.getTextView();
+						var offset = foundAnnotation.start;
+						var pos = tv.getLocationAtOffset(offset);
+						tooltip.show({
+							x: pos.x,
+							y: pos.y,
+							getTooltipInfo: function() {
+								return editor._getTooltipInfo(this.x, this.y);
+							}
+						}, false, false);						
 					}, 0);
 				});
 			}
