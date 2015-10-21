@@ -39,45 +39,35 @@ define([
 	 * The listing of all categories, their NLS'd names and the order they should e sorted in
 	 */
 	var categories = {
-		funcDecls: {
-			name: Messages['funcDecls'],
-			category: 'funcdecl', //$NON-NLS-1$
+		functions: {
+			name: Messages['functions'],
+			category: 'funcs', //$NON-NLS-1$
 			sort: 1
 		},
-		funcCalls: {
-			name: Messages['funcCalls'],
-			category: 'funccall', //$NON-NLS-1$
+		props: {
+			name: Messages['properties'],
+			category: 'props', //$NON-NLS-1$
 			sort: 2
 		},
-		propRead: {
-			name: Messages['propRead'],
-			category: 'propread', //$NON-NLS-1$
+		regex: {
+			name: Messages['regex'],
+			category: 'regex', //$NON-NLS-1$
 			sort: 3
 		},
-		propWrite: {
-			name: Messages['propWrite'],
-			category: 'propwrite', //$NON-NLS-1$
+		strings: {
+			name: Messages['strings'],
+			category: 'string', //$NON-NLS-1$
 			sort: 4
 		},
-		regexLiterals: {
-			name: Messages['regexLiterals'],
-			category: 'regex', //$NON-NLS-1$
+		comments: {
+			name: Messages['comments'],
+			category: 'comments', //$NON-NLS-1$
 			sort: 5
 		},
-		stringLiteral: {
-			name: Messages['stringLiterals'],
-			category: 'string', //$NON-NLS-1$
+		partial: {
+			name: Messages['partial'],
+			category: 'partial', //$NON-NLS-1$
 			sort: 6
-		},
-		blockComments: {
-			name: Messages['blockComments'],
-			category: 'block', //$NON-NLS-1$
-			sort: 7
-		},
-		lineComments: {
-			name: Messages['lineComments'],
-			category: 'line', //$NON-NLS-1$
-			sort: 8
 		}
 	};
 
@@ -166,7 +156,8 @@ define([
 														that._checkType(type, file.metadata, match, expected);
 													}
 												} else {
-													match.confidence = -1;
+													match.category = categories.partial.category;
+													match.confidence = -100;
 													expected.done++;
 												}
 											}
@@ -227,31 +218,27 @@ define([
 				var node = type.node;
 				switch(node.type) {
 					case 'FunctionDeclaration':
-					case 'FunctionExpression': {
-						match.category = categories.funcDecls.category;
-						break;
-					}
+					case 'FunctionExpression': 
 					case 'CallExpression': {
-						match.category = categories.funcCalls.category;
+						match.category = categories.functions.category;
 						break;
 					}
 					case 'Literal': {
 						if(node.regex) {
-							match.category = categories.regexLiterals.category;
+							match.category = categories.regex.category;
 						} else if(typeof(node.value) === "string") {
-							match.category = categories.stringLiteral.category;
+							match.category = categories.strings.category;
 						}
 						break;
 					}
-					case 'Block': {
-						match.category = categories.blockComments.category;
+					case 'Block': 
+					case 'Line': {
+						match.category = categories.comments.category;
 						break;
 					}
-					case 'Line': {
-						match.category = categories.lineComments.category;
-						break;	
-					}
 				}
+			} else {
+				match.category = categories.partial.category;
 			}
 		},
 		/**
