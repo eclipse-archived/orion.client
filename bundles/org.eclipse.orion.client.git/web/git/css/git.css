@@ -30,6 +30,10 @@
 	padding-bottom: 2px;
 }
 
+.selectableNavRow{
+	cursor:pointer;
+}
+
 .gitChangeListCompare {
 	height: 420px;
 	border: 1px solid lightgray;
