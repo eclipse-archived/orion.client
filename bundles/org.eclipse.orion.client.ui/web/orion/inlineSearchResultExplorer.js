@@ -133,19 +133,15 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
     };
     
 	SearchResultRenderer.prototype.generateDetailDecorator = function(item, spanHolder) {
-		if(item.parent.type === 'group') {
-			//TODO do nothing for now
-		} else {
-			if(typeof(item.confidence) === "number") {
-				var classNames = ["confidenceDecorator"]; //$NON-NLS-1$
-				if(item.confidence >= 100) {
-					classNames.push("confidenceHigh"); //$NON-NLS-0$
-				} else {
-					classNames.push("confidenceLow"); //$NON-NLS-0$
-				}
-		    	_createSpan(classNames, null, spanHolder, item.confidence + "%");
-	    	}
-		}
+		if(typeof(item.confidence) === "number") {
+			var classNames = ["confidenceDecorator"]; //$NON-NLS-1$
+			if(item.confidence >= 100) {
+				classNames.push("confidenceHigh"); //$NON-NLS-0$
+			} else {
+				classNames.push("confidenceLow"); //$NON-NLS-0$
+			}
+	    	_createSpan(classNames, null, spanHolder, item.confidence + "%");
+    	}
 	};
 	
     SearchResultRenderer.prototype.generateDetailLink = function(item) {
