@@ -212,6 +212,12 @@ define([
 	        		}
 	        	}
 	        }
+	        if(this._shape === 'group' && this._categories) {
+ 				var filtered = this.getListRoot().children.filter(function(category) {
+					return category.children.length > 0;
+				});
+				this.getListRoot().children = filtered;
+	        }
 	    },
 	    /**
     	 * @description Builds the file-based search result model
