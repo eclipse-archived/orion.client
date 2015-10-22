@@ -14,7 +14,12 @@ define([
 'estraverse/estraverse',
 'eslint/conf/environments'
 ], function(Estraverse, ESlintEnv) {
-
+	
+	if(!Estraverse.VisitorKeys.RecoveredNode) {
+		///do not visit the recovered node. If called from the worker this will not be set
+    	Estraverse.VisitorKeys.RecoveredNode = [];
+	}
+	
 	var Finder = {
 		
 		visitor: null,

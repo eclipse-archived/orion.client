@@ -482,7 +482,9 @@ require([
 		           query: {
 			           type: "findType",  //$NON-NLS-1$
 			           file: args.meta.location,
-			           end: args.params.offset
+			           end: args.params.offset,
+			           origin: args.origin,
+			           node: args.params.node
 		           }},
 		           function(error, type) {
 		               if(error) {

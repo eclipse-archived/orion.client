@@ -18,55 +18,7 @@ define([
 	"javascript/finder"
 ],/* @callback */ function(infer, tern, walk, finder) {
 	
-	function addNodeContext(file, end, result) {
-		var node = finder.findNode(end, file.ast, {parents:true});
-		if(node) {
-			var n = Object.create(null);
-			n.type = node.type;
-			n.range = node.range;
-			if(node.type === 'Identifier') {
-				node = node.parents.pop();
-				if(node.type === 'Property') {
-					n.value = copyNode(node.value);
-					n.key = copyNode(node.key);
-				} else if(node.type === 'VariableDeclarator') {
-					n.id = copyNode(node.id);
-					n.init = copyNode(node.init);
-				} else if(node.type === 'AssignmentExpression') {
-					n.left = copyNode(node.left);
-					n.right = copyNode(node.right);
-				} else if(node.type === 'CallExpression') {
-					n.callee = copyNode(node.callee);
-				} else if(node.type === 'MemberExpression') {
-				}
-			} else if(node.type === 'Literal') {
-				n.value = node.value;
-				if(node.regex) {
-					n.regex = node.regex;
-				}
-			}
-			result.node = n;
-		}
-	}
-	
-	function copyNode(node) {
-		var n = Object.create(null);
-		n.range = node.range;
-		n.type = node.type;
-	}
-	
-	function inComment(file, end) {
-		var comments = file.ast.comments;
-		if(Array.isArray(comments)) {
-			for(var i = 0, len = comments.length; i < len; i++) {
-				var comment = comments[i];
-				if(comment.range[0] <= end && comment.range[1] >= end) {
-					return comment;
-				}
-			}
-		}
-		return null;
-	}
+	var pending = Object.create(null);
 	
 	tern.registerPlugin('findTypes', /* @callback */ function(server, options) { //$NON-NLS-1$
 		return {};
@@ -77,21 +29,53 @@ define([
 		 * @callback
 		 */
 		run: function run(server, query) {
-			var file = tern.resolveFile(server, server.fileMap, query.file), result;
-			if(file) {
-				var comment = inComment(file, query.end);
-				if(comment) {
-					//handle in a comment
-					result = {
-				    	guess: infer.didGuess(),
-				        type: null,
-				        name: null,
-				        node: comment
-				    };
+			//TODO run async
+		},
+		
+		/**
+		 * @callback
+		 */
+		runAsync: function runAsync(server, query, serverFile, f) {
+			var file = tern.resolveFile(server, server.fileMap, query.file);
+				if(!file) {
+					server.addFile(query.file);
+					pending[query.file] = {
+						callback: f,
+						query: query
+					};
+					server.on("afterLoad", function(file) { //$NON-NLS-1$
+						if(file && file.name) {
+							var p = pending[file.name];
+							if(p) {
+								delete pending[file.name];
+								doIt(p.query, file, this, p.callback);
+							}
+
+						}
+					}.bind(server));
 				} else {
-					var expr = tern.findExpr(file, query), exprName;
-				    var type = tern.findExprType(server, query, file, expr); 
-				    var exprType = type;
+					doIt(query, file, server, f);
+				}
+			}
+	});
+	
+	function doIt(query, file, server, f) {
+		try {
+			var comment = finder.findComment(query.end, file.ast), result;
+			if(comment) {
+				result = {
+			    	guess: infer.didGuess(),
+			        type: null,
+			        name: null
+			    };
+			    if(query.node) {
+			    	result.node = comment;
+			    }
+			} else {
+				var expr = tern.findExpr(file, query), exprName, type, exprType;
+				try {
+				    type = tern.findExprType(server, query, file, expr);
+				    exprType = type;
 				    if (query.preferFunction) {
 						type = type.getFunctionType() || type.getType();
 					} else {
@@ -104,22 +88,181 @@ define([
 				        	exprName = expr.node.property.name;
 			        	}
 				    }
-				    result = {
-				    	guess: infer.didGuess(),
-				        type: infer.toString(exprType),
-				        name: type && type.name,
-				        exprName: exprName
-				    };
-				    addNodeContext(file, query.end, result);
-				    if (type) {
-				    	tern.storeTypeDocs(query, type, result);
-			    	}
-				    if (!result.doc && exprType.doc) {
-				    	result.doc = tern.parseDoc(query, exprType.doc);
-					}
 			    }
+				catch(er) {
+					//do nothing tag the result later and do a static check
+				}
+			    result = {
+			    	guess: infer.didGuess(),
+			        type: infer.toString(exprType),
+			        name: type && type.name,
+			        exprName: exprName
+			    };
+			    addNodeContext(file, query, result);
+			    if (type) {
+			    	tern.storeTypeDocs(query, type, result);
+		    	} else {
+		    		staticCheck(query, file, result);
+		    	}
+			    if (!result.doc && exprType && exprType.doc) {
+			    	result.doc = tern.parseDoc(query, exprType.doc);
+				}
+		    }
+		    f(null, result);
+	    }
+	    catch(err) {
+		    if (server.options.debug && err.name !== "TernError") {
+				console.error(err.stack);
 			}
-			return result;
+	        f(err);
+	    }
+	}
+	
+	function addNodeContext(file, query, result) {
+		if(query.node) {
+			var _n = finder.findNode(query.end, file.ast, {parents:true});
+			if(_n) {
+				var n = Object.create(null);
+				n.type = _n.type;
+				n.range = _n.range;
+				if(_n.type === 'Identifier') {
+					_n = _n.parents.pop();
+					if(_n.type === 'Property') {
+						n.type = _n.type;
+						n.value = copyNode(_n.value);
+						n.key = copyNode(_n.key);
+					} else if(_n.type === 'VariableDeclarator') {
+						n.type = _n.type;
+						n.id = copyNode(_n.id);
+						n.init = copyNode(_n.init);
+					} else if(_n.type === 'AssignmentExpression') {
+						n.type = _n.type;
+						n.left = copyNode(_n.left);
+						n.right = copyNode(_n.right);
+					} else if(_n.type === 'CallExpression') {
+						n.type = _n.type;
+						n.callee = copyNode(_n.callee);
+					} else if(_n.type === 'MemberExpression') {
+						n.type = _n.type;
+					}
+				} else if(_n.type === 'Literal') {
+					n.value = _n.value;
+					if(_n.regex) {
+						n.regex = _n.regex;
+					}
+				}
+				result.node = n;
+			}
 		}
-	});
+	}
+	
+	function copyNode(node) {
+		var n = Object.create(null);
+		n.range = node.range;
+		n.type = node.type;
+		return n;
+	}
+	
+	function staticCheck(query, file, result) {
+		var node = finder.findNode(query.end, file.ast, {parents: true});
+		if(node) {
+			checkNode(query, node, result);
+		} else {
+			result.staticCheck = {
+				confidence: -1
+			};
+		}
+	}
+		
+	function checkNode(query, node, result) {
+		switch(node.type) {
+			case 'FunctionDeclaration':
+			case 'FucntionExpression':
+			case 'VariableDeclarator': 
+			case 'Literal': {
+				//a re-decl cannot be a reference
+				result.staticCheck = {
+					confidence: -1
+				};
+				break;
+			}
+			case 'Identifier': {
+				if(Array.isArray(node.parents)) {
+					var p = node.parents.slice(node.parents.length-1)[0];
+					checkNode(query, p, result);
+				} else {
+					result.staticCheck = {
+						confidence: 25
+					};
+				}
+				break;
+			}
+			case 'AssignmentExpression': {
+				if(node.left.type === 'Identifier' && node.left.name === query.origin.type.exprName) {
+					result.staticCheck = {
+						confidence: 25
+					};
+				} else if(node.right.type === 'Identifier' && node.right.name === query.origin.type.exprName) {
+					result.staticCheck = {
+						confidence: 25
+					};
+				} else {
+					//TODO catch all
+					result.staticCheck = {
+						confidence: 5
+					};
+				}
+				break;
+			}
+			case 'MemberExpression': {
+				//if part of the expression, maybe relevant
+				result.staticCheck = {
+					confidence: 10
+				};
+				break;
+			}
+			case 'CallExpression': {
+				if(node.callee.name === query.origin.type.exprName) {
+					if(query.origin.type.type === 'fn()') {
+						result.staticCheck = {
+							confidence: 25
+						};
+					} else {
+						result.staticCheck = {
+							confidence: -1
+						};
+					}
+				}
+				for(var i = 0, l = node.arguments.length; i < l; i++) {
+					var arg = node.arguments[i];
+					if(arg.type === 'Identifier') {
+						if(query.origin.type.type === 'fn()') {
+							//orig type is function, this is not relevant
+							result.staticCheck = {
+								confidence: -1
+							};
+						} else {
+							//with no type infos we have no idea if this is the same one
+							result.staticCheck = {
+								confidence: 40
+							};
+						}
+					} else if(arg.type === 'FunctionExpression') {
+						if(arg.id === query.origin.type.exprName) {
+							//redecl, not relevant
+							result.staticCheck = {
+								confidence: -1
+							};
+						}
+					}
+				}
+				break;
+			}
+			default: {
+				result.staticCheck = {
+					confidence: 0
+				};
+			}
+		}
+	}
 }); 

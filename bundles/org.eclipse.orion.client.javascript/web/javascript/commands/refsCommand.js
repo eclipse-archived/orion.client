@@ -39,35 +39,60 @@ define([
 	 * The listing of all categories, their NLS'd names and the order they should e sorted in
 	 */
 	var categories = {
-		functions: {
-			name: Messages['functions'],
-			category: 'funcs', //$NON-NLS-1$
+		functionDecls: {
+			name: Messages['functionDecls'],
+			category: 'funcdecls', //$NON-NLS-1$
 			sort: 1
 		},
-		props: {
-			name: Messages['properties'],
-			category: 'props', //$NON-NLS-1$
+		functionCalls: {
+			name: Messages['functionCalls'],
+			category: 'funccalls', //$NON-NLS-1$
 			sort: 2
+		},
+		propAccess: {
+			name: Messages['propAccess'],
+			category: 'propaccess', //$NON-NLS-1$
+			sort: 3
+		},
+		propWrite: {
+			name: Messages['propWrite'],
+			category: 'propwrite', //$NON-NLS-1$
+			sort: 4
+		},
+		varAccess: {
+			name: Messages['varAccess'],
+			category: 'varaccess', //$NON-NLS-1$
+			sort: 5
+		},
+		varWrite: {
+			name: Messages['varWrite'],
+			category: 'varwrite', //$NON-NLS-1$
+			sort: 6
 		},
 		regex: {
 			name: Messages['regex'],
 			category: 'regex', //$NON-NLS-1$
-			sort: 3
+			sort: 7
 		},
 		strings: {
 			name: Messages['strings'],
 			category: 'string', //$NON-NLS-1$
-			sort: 4
+			sort: 8
 		},
-		comments: {
-			name: Messages['comments'],
-			category: 'comments', //$NON-NLS-1$
-			sort: 5
+		blockComments: {
+			name: Messages['blockComments'],
+			category: 'blockcomments', //$NON-NLS-1$
+			sort: 9
+		},
+		lineComments: {
+			name: Messages['lineComments'],
+			category: 'linecomments', //$NON-NLS-1$
+			sort: 10
 		},
 		partial: {
 			name: Messages['partial'],
 			category: 'partial', //$NON-NLS-1$
-			sort: 6
+			sort: 11
 		}
 	};
 
@@ -150,6 +175,8 @@ define([
 												var v = Finder.findWord(line.name, match.startIndex);
 												if(v === node.name) {
 													if(match.start === node.range[0] && match.end === node.range[1]) {
+														type.type.node = node.parents.slice(node.parents.length-1)[0];
+														that._categorizeMatch(type.type, match);
 														match.confidence = 100;
 														expected.done++;
 													} else {
@@ -188,7 +215,7 @@ define([
 		_checkType: function _checkType(original, file, match, expected) {
 			var that = this;
 			that.ternworker.postMessage(
-					{request: 'findType', args: {meta:{location: file.Location}, params: {offset: match.end}}},  //$NON-NLS-1$
+					{request: 'findType', args: {meta:{location: file.Location}, params: {offset: match.end, node:true}, origin: original}},  //$NON-NLS-1$
 					/* @callback */ function(type, err) {
 						if(type && type.type) {
 							var _t = type.type;
@@ -196,13 +223,18 @@ define([
 							var _ot = original.type;
 							if(_t.name === _ot.name && _t.type === _ot.type && _t.origin === _ot.origin) {
 								match.confidence = 100;
+							} else if(type.staticCheck) {
+								that._categorizeMatch(_t, match);
+								match.confidence = type.staticCheck.confidence;
 							} else {
-								match.confidence = -1; //we got the type info for this and it did not match, weed it out
+								that._categorizeMatch(_t, match);
+								match.confidence = -1;
 							}
-							expected.done++;
-						} else {
-							that._staticCheck(original, file, match, expected);
+						} else if(err) {
+							match.category = categories.partial.category;
+							match.confidence = -1;
 						}
+						expected.done++;
 						that._checkDone(expected);
 					});
 		},
@@ -218,9 +250,59 @@ define([
 				var node = type.node;
 				switch(node.type) {
 					case 'FunctionDeclaration':
-					case 'FunctionExpression': 
+					case 'FunctionExpression': {
+						match.category = categories.functionDecls.category;
+						break;
+					}
+					case 'Property': {
+						if(node.id && match.start < node.id.range[1]) {
+							match.category = categories.propWrite.category;
+						} else if(node.value && match.start < node.value.range[1]) {
+							if(node.value.type === 'FunctionExpression') {
+								match.category = categories.functionDecls.category;
+							} else if(node.value.type === 'Identifier') {
+								match.category = categories.varAccess.category;
+							} else {
+								match.category = categories.propWrite.category;
+							}
+						} else {
+							match.category = categories.partial.category;
+						}
+						break;
+					}
 					case 'CallExpression': {
-						match.category = categories.functions.category;
+						match.category = categories.functionCalls.category;
+						break;
+					}
+					case 'AssignmentExpression': {
+						if(node.left && match.start < node.left.range[1]) {
+							//on the left, write
+							if(node.left.type === 'Identifier') {
+								match.category = categories.varWrite.category;
+							} else {
+								match.category = categories.propWrite.category;
+							}
+						} else if(node.right && match.start < node.right.range[1]) {
+							if(node.right.type === 'Identifier') {
+								match.category = categories.varAccess.category;
+							} else if(node.right.type === 'MemberExpression') {
+								match.category = categories.propAccess.category;
+							} else {
+								match.category = categories.partial.category;
+							}
+						} else {
+							match.category = categories.partial.category;
+						}
+						break;
+					}
+					case 'VariableDeclarator': {
+						if(node.id && match.start < node.id.range[1]) {
+							match.category = categories.varWrite.category;
+						} else if(node.init && match.start < node.init.range[1]) {
+							match.category = categories.varAccess.category;						
+						} else {
+							match.category = categories.partial.category;
+						}
 						break;
 					}
 					case 'Literal': {
@@ -231,9 +313,18 @@ define([
 						}
 						break;
 					}
-					case 'Block': 
+					case 'MemberExpression': {
+						//TODO we need the first non=member expression parent from Tern to know how the expression is being used
+						//LHS vs RHS expressions
+						match.category = categories.propAccess.category;
+						break;
+					}
+					case 'Block': {
+						match.category = categories.blockComments.category;
+						break;
+					}
 					case 'Line': {
-						match.category = categories.comments.category;
+						match.category = categories.lineComments.category;
 						break;
 					}
 				}
@@ -241,121 +332,7 @@ define([
 				match.category = categories.partial.category;
 			}
 		},
-		/**
-		 * @description Function to statically look at the search result by loading its AST and making some non-type inferred guesses.
-		 * This function is used if Tern reports it has no idea what the type of a match is.
-		 * @function
-		 * @private
-		 */
-		_staticCheck: function _staticCheck(original, file, match, expected) {
-			var that = this;
-			that._getAST(file).then(function(ast) {
-				var node = Finder.findNode(match.start, ast, {parents: true});
-				if(node) {
-					that._checkNode(original, node, match, expected);
-				} else {
-					match.confidence = -1;
-				}
-				expected.done++;
-				that._checkDone(expected);
-			});
-		},
-		
-		_checkNode: function _checkNode(original, node, match, expected) {
-			switch(node.type) {
-				case 'FunctionDeclaration':
-				case 'FucntionExpression':
-				case 'VariableDeclarator': 
-				case 'Literal': {
-					//a re-decl cannot be a reference
-					match.confidence = -1;
-					break;
-				}
-				case 'Identifier': {
-					if(Array.isArray(node.parents)) {
-						var p = node.parents.slice(node.parents.length-1)[0];
-						this._checkNode(original, p, match, expected);
-					} else {
-						match.confidence = 25;
-					}
-					break;
-				}
-				case 'AssignmentExpression': {
-					if(node.left.name === original.type.exprName ||
-						node.right.name === original.type.exprName) {
-						match.confidence = 25;
-					}
-					break;
-				}
-				case 'MemberExpression': {
-					//if part of the expression, maybe relevant
-					match.confidence = 10;
-					break;
-				}
-				case 'CallExpression': {
-					if(node.callee.name === original.type.exprName) {
-						if(original.type.type === 'fn()') {
-							match.confidence = 25;
-						} else {
-							match.confidence = -1;
-						}
-					}
-					for(var i = 0, l = node.arguments.length; i < l; i++) {
-						var arg = node.arguments[i];
-						if(arg.type === 'Identifier') {
-							if(original.type.type === 'fn()') {
-								//orig type is function, this is not relevant
-								match.confidence = -1;
-							} else {
-								//with no type infos we have no idea if this is the same one
-								match.confidence = 40;
-							}
-						} else if(arg.type === 'FunctionExpression') {
-							if(arg.id === original.type.exprName) {
-								//redecl, not relevant
-								match.confidence = -1;
-							}
-						}
-					}
-					break;
-				}
-				default: {
-					match.confidence = 0;
-				}
-			}
-		},
-		
-		/**
-		 * @description Returns the AST for the given file match. We do caching before the AST manager to avoid having to 
-		 * read the complete file contents each time
-		 * @function
-		 * @private
-		 * @param {Object} file The file match metadata from the search results
-		 * @returns {Deferred} The deferred to resolve to get the AST
-		 */
-		_getAST: function _getAST(file) {
-			var that = this;
-			var ast = that.cache[file.Location];
-			if(ast) {
-				return new Deferred().resolve(ast);
-			} else {
-				return that.searchclient._fileClient.read(file.Location).then(function(contents) {
-					var proxy = {
-						getFileMetadata: function() {
-							return new Deferred().resolve(file);
-						},
-						getText: function() {
-							return new Deferred().resolve(contents);
-						}
-					};
-					return that.astmanager.getAST(proxy).then(function(ast) {
-						that.cache[file.Location] = ast;
-						return new Deferred().resolve(ast);
-					});
-				});
-			}
-		},
-		
+			
 		/**
 		 * @description Checks if all the confidence checking is done and resolves the backing deferred if so
 		 * @function

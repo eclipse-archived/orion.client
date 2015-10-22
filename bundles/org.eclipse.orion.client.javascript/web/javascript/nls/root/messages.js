@@ -128,11 +128,16 @@ define({//Default message bundle
 	"seeAlsoHoverTitle": "See Also:", // the in-line title for the since section. The word is used alone in a sentence with no further punctuation
 	"openFileForTitle": "Open file for", // the in-line title for the 'open file hover'. The sentence is used as-is and is followed only by a OS file path
 	//All refs
-	"functions": "Functions",
-	"properties": "Properties",
+	"functionDecls": "Function Declarations",
+	"functionCalls": "Function Calls",
+	"propAccess": "Property Access",
+	"propWrite": "Property Write",
+	"varAccess": "Variable Access",
+	"varWrite": "Variable Write",
 	"regex": "Regular Expressions",
 	"strings": "Strings",
-	"comments": "Comments",
+	"blockComments": "Block Comments",
+	"lineComments": "Line Comments",
 	"partial": "Partial Matches",
 	"noFileContents": "Could not compute references: failed to compute file text content",
 	"noFileMeta": "Could not compute references: failed to compute file metadata",
