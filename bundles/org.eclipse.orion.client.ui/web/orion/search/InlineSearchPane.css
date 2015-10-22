@@ -18,12 +18,12 @@
 }
 
 .searchResultsWrapperDiv .confidenceHigh {
-	color: white;
+	color: white !important;
 	background-color:green;
 }
 
 .searchResultsWrapperDiv .confidenceLow {
-	color: black;
+	color: black !important;
 	background-color:yellow;
 }
 
