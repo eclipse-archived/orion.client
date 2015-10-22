@@ -217,6 +217,21 @@ define([
 					return category.children.length > 0;
 				});
 				this.getListRoot().children = filtered;
+				this.getListRoot().children.forEach(function(category){
+					category.children.sort(function(a, b) {
+						//There are rare cases that a match confidence is not assigned.
+						var aC = typeof a.confidence === 'number' ? a.confidence : -1000;
+						var bC = typeof b.confidence === 'number' ? b.confidence : -1000;
+	 					if(aC === bC) {
+	 						if(a.location === b.location) {
+	 							return a.lineNumber - b.lineNumber;
+	 						} else {
+	 							return a.logicalParent.name - b.logicalParent.name;
+	 						}
+	 					}
+						return bC - aC;
+					});
+				});
 	        }
 	    },
 	    /**
