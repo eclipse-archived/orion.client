@@ -142,8 +142,33 @@ define([
 					} else if(_n.type === 'CallExpression') {
 						n.type = _n.type;
 						n.callee = copyNode(_n.callee);
+						n.args = [];
+						for(var i = 0, len = _n.arguments.length; i < len; i++) {
+							n.args.push(copyNode(_n.arguments[i]));
+						}
 					} else if(_n.type === 'MemberExpression') {
 						n.type = _n.type;
+						n.property = copyNode(_n.property);
+						n.range = _n.range;
+					} else if(_n.type === 'NewExpression') {
+						n.type = _n.type;
+						n.callee = copyNode(_n.callee);
+						n.args = [];
+						for(i = 0, len = _n.arguments.length; i < len; i++) {
+							n.args.push(copyNode(_n.arguments[i]));
+						}
+					} else if(_n.type === 'FunctionDeclaration' || _n.type === 'FunctionExpression') {
+						n.type = _n.type;
+						if(_n.id) {
+							n.id = copyNode(_n.id);
+						}
+						n.params = [];
+						for(i = 0, len = _n.params.length; i < len; i++) {
+							n.params.push(copyNode(_n.params[i]));
+						}
+					} else if(_n.type === 'UpdateExpression') {
+						n.type = _n.type;
+						n.argument = copyNode(_n.argument);
 					}
 				} else if(_n.type === 'Literal') {
 					n.value = _n.value;

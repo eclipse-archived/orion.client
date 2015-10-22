@@ -96,6 +96,10 @@ define([
 		}
 	};
 
+	function encloses(offset, node) {
+		return node && (node.range[0] <= offset && offset <= node.range[1]);
+	}
+
 	Objects.mixin(RefsCommand.prototype, {
 		/**
 		 * @callback
@@ -255,9 +259,9 @@ define([
 						break;
 					}
 					case 'Property': {
-						if(node.id && match.start < node.id.range[1]) {
+						if(encloses(match.start, node.key)) {
 							match.category = categories.propWrite.category;
-						} else if(node.value && match.start < node.value.range[1]) {
+						} else if(encloses(match.start, node.value)) {
 							if(node.value.type === 'FunctionExpression') {
 								match.category = categories.functionDecls.category;
 							} else if(node.value.type === 'Identifier') {
@@ -265,43 +269,49 @@ define([
 							} else {
 								match.category = categories.propWrite.category;
 							}
-						} else {
-							match.category = categories.partial.category;
 						}
 						break;
 					}
 					case 'CallExpression': {
-						match.category = categories.functionCalls.category;
+						if(encloses(match.start, node.callee)) {
+							match.category = categories.functionCalls.category;
+						} 
+						if(node.args.length > 0) {
+							for(var i = 0, len = node.args.length; i < len; i++) {
+								var param = node.args[i];
+								if(encloses(match.start, param))	{
+									if(param.type === 'Identifier') {
+										match.category = categories.varAccess.category;
+									} else if(param.type === 'MemberExpression') {
+										match.category = categories.propAccess.category;
+									}
+								}
+							}
+						}
 						break;
 					}
 					case 'AssignmentExpression': {
-						if(node.left && match.start < node.left.range[1]) {
+						if(encloses(match.start, node.left)) {
 							//on the left, write
 							if(node.left.type === 'Identifier') {
 								match.category = categories.varWrite.category;
 							} else {
 								match.category = categories.propWrite.category;
 							}
-						} else if(node.right && match.start < node.right.range[1]) {
+						} else if(encloses(match.start, node.right)) {
 							if(node.right.type === 'Identifier') {
 								match.category = categories.varAccess.category;
 							} else if(node.right.type === 'MemberExpression') {
 								match.category = categories.propAccess.category;
-							} else {
-								match.category = categories.partial.category;
-							}
-						} else {
-							match.category = categories.partial.category;
+							} 
 						}
 						break;
 					}
 					case 'VariableDeclarator': {
-						if(node.id && match.start < node.id.range[1]) {
+						if(encloses(match.start, node.id)) {
 							match.category = categories.varWrite.category;
-						} else if(node.init && match.start < node.init.range[1]) {
+						} else if(encloses(match.start, node.init)) {
 							match.category = categories.varAccess.category;						
-						} else {
-							match.category = categories.partial.category;
 						}
 						break;
 					}
@@ -319,6 +329,14 @@ define([
 						match.category = categories.propAccess.category;
 						break;
 					}
+					case 'UpdateExpression': {
+						if(node.argument.type === 'Identifier') {
+							match.category = categories.varAccess.category;
+						} else if(node.argument.type === 'MemberExpression') {
+							match.category = categories.propAccess.category;
+						}
+						break;
+					}
 					case 'Block': {
 						match.category = categories.blockComments.category;
 						break;
@@ -328,11 +346,12 @@ define([
 						break;
 					}
 				}
-			} else {
+			}
+			if(!match.category) {
 				match.category = categories.partial.category;
 			}
 		},
-			
+		
 		/**
 		 * @description Checks if all the confidence checking is done and resolves the backing deferred if so
 		 * @function
