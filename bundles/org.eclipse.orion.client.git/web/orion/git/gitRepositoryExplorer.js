@@ -99,6 +99,19 @@ define([
 		this.checkbox = false;
 		
 		var that = this;
+		
+		function submoduleSelected(repo) {
+			var parentSelected = repo.Location === that.repository.Location;
+			if(!parentSelected && repo.Parents){
+				parentSelected = repo.Parents.some(function(parentrepo) {return parentrepo === that.repository.Location;});
+			}
+			var childSelected = false;
+			if (repo.Children) {
+				childSelected = repo.Children.some(function(childrepo) {return submoduleSelected(childrepo);});
+			}
+
+			return parentSelected || childSelected;
+		}
 		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", function(event) { //$NON-NLS-0$
 			switch (event.action) {
 			case "rebase": //$NON-NLS-0$
@@ -116,18 +129,6 @@ define([
 				break;
 			case "deleteSubmodule": //$NON-NLS-0$
 			case "removeClone": //$NON-NLS-0$
-				function submoduleSelected(repo) {
-					var parentSelected = repo.Location === that.repository.Location;
-					if(!parentSelected && repo.Parents){
-						parentSelected = repo.Parents.some(function(parentrepo) {return parentrepo === that.repository.Location;});
-					}
-					var childSelected = false;
-					if (repo.Children) {
-						childSelected = repo.Children.some(function(childrepo) {return submoduleSelected(childrepo);});
-					}
-
-					return parentSelected || childSelected;
-				}
 				if (that.repository && event.items.some(submoduleSelected)) {
 					window.location.href = require.toUrl(repoTemplate.expand({resource: that.lastResource = ""}));
 					that.changedItem();

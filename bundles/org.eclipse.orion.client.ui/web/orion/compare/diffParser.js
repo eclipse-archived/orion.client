@@ -80,8 +80,19 @@ orion.DiffParser = (function() {
 			if(diffString === ""){
 				return {outPutFile: oFileString, mapper: []};
 			}
-			this._oFileContents = oFileString === "" ? []:oFileString.split(this._lineDelimiter);
 			this._diffContents = diffString.split(this._diffLineDelimiter);
+			if(!oFileString){
+				if(this._diffContents[1].indexOf("deleted file mode 160000") > -1){
+					return {submoduleChanged:"removed", mapper: []};
+				}else if(this._diffContents[1].indexOf("new file mode 160000") > -1){
+					return {submoduleChanged:"added", mapper: []};
+				}
+				
+				
+			}else{
+				this._oFileContents = oFileString === "" ? []:oFileString.split(this._lineDelimiter);
+			}
+			
 			var totalLines = this._diffContents.length;
 			this._hunkRanges = [];
 			for(var i = 0; i <totalLines ; i++){

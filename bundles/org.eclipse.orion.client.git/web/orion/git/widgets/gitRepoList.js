@@ -117,11 +117,17 @@ define([
 						}
 					}
 					that.repositories = repositories.filter(function(repo) {
-						if (repo.Type === "Clone") {
-							count++;
-							repo.infoDeferred = that.loadRepositoryInfo(repo);
-							repo.infoDeferred.then(done, done);
-							return repo;
+						if (repo.Type === "Clone" ) {
+
+							if(!repo.Uninitialized){
+								count++;
+								repo.infoDeferred = that.loadRepositoryInfo(repo);
+								repo.infoDeferred.then(done, done);
+								return repo;
+							}else{
+								repo.notSelectable = true;
+							}
+							
 						}
 						return null;
 					});
@@ -358,8 +364,15 @@ define([
 							tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
 						} else {
 							var ellipses = "..."; //$NON-NLS-0$
+
 							description = repo.GitUrl ? messages["git url:"] + repo.GitUrl : messages["(no remote)"];
-							subDescription = repo.Content ? messages["location: "] + repo.Content.Path : ellipses;
+							if(repo.Uninitialized){
+								subDescription = messages["UninitializedSubmodule"];
+							}else {
+								subDescription = repo.Content ? messages["location: "] + repo.Content.Path : ellipses;
+							}
+							
+
 							if (explorer.mode === "full") { //$NON-NLS-0$
 								var status = repo.status;
 								if (status) {
@@ -435,7 +448,10 @@ define([
 							section.appendChild(span);
 						});
 					}
-
+					if(repo.Uninitialized){
+						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
+						tableRow.classList.add("notSelectable");
+					}
 					if (explorer.singleRepository) {
 						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
 					} else {
