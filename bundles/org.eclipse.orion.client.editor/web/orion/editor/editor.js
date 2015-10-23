@@ -864,10 +864,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						self._hoverTimeout = null;
 					}
 				},
-				onScroll: function(e) {
-					if (!tooltip) { return; }
-					tooltip.hide();
-				},
 				onSelection: function(e) {
 					if (tooltip) { tooltip.hide(); }
 					self._updateCursorStatus();
@@ -881,7 +877,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			textView.addEventListener("MouseDown", this._listener.onMouseDown); //$NON-NLS-0$
 			textView.addEventListener("MouseUp", this._listener.onMouseUp); //$NON-NLS-0$
 			textView.addEventListener("MouseMove", this._listener.onMouseMove); //$NON-NLS-0$
-			textView.addEventListener("Scroll", this._listener.onScroll); //$NON-NLS-0$
 
 			// Set up keybindings
 			if (this._keyBindingFactory) {

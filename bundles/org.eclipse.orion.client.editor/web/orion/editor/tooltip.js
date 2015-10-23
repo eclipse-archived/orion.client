@@ -74,7 +74,15 @@ function Tooltip (view) {
 					self.hide();
 				}
 			}, true);
+			textUtil.addEventListener(document, "scroll", this._scrollHandler = function(event) { //$NON-NLS-0$
+				self.hide();
+			}, true);
 			textUtil.addEventListener(document, "mousemove", this._mouseMoveHandler = function(event) { //$NON-NLS-0$
+				// Ignore spurious mousemove events
+				if (self._prevX && self._prevX === event.clientX && self._prevY && self._prevY === event.clientY) {
+					return;
+				}
+				
 				if (!self.isVisible() || self._locked || self._hasFocus()) { return; }
 				if (self._isInRect(self._outerArea, event.clientX, event.clientY)){ return; }
 				self.hide();
@@ -115,6 +123,7 @@ function Tooltip (view) {
 			if (parent) { parent.removeChild(this._tooltipDiv); }
 			var doc = this._tooltipDiv.ownerDocument;
 			textUtil.removeEventListener(doc, "mousedown", this._mouseDownHandler, true); //$NON-NLS-0$
+			textUtil.removeEventListener(doc, "scroll", this._scrollHandler, true); //$NON-NLS-0$
 			textUtil.removeEventListener(doc, "mousemove", this._mouseMoveHandler, true); //$NON-NLS-0$
 			this._tooltipDiv = null;
 		},
