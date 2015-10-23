@@ -76,7 +76,8 @@ define([
 		for(var i=0; i<wrapperClasses.length; i++) {
 			this.domNode.classList.add(wrapperClasses[i]);
 		}
-		this.domNode.id = options.id;
+		// set DOM id
+		this.domNode.id = options.id + "Header";
 		
 		if(options.tooltip) {
 			this.domNode.optionsTooltip = new sTooltip.Tooltip({
