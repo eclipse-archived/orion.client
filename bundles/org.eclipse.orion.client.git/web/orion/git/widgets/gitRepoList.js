@@ -117,7 +117,7 @@ define([
 						}
 					}
 					that.repositories = repositories.filter(function(repo) {
-						if (repo.Type === "Clone") {
+						if (repo.Type === "Clone" ) {
 							count++;
 							repo.infoDeferred = that.loadRepositoryInfo(repo);
 							repo.infoDeferred.then(done, done);
@@ -288,8 +288,8 @@ define([
 			});
 			return deferred;
 		},
-		isRowSelectable: function() {
-			return !!this.selection;
+		isRowSelectable: function(item) {
+			return !!this.selection && (!item.SubmoduleStatus || item.SubmoduleStatus.Type != "UNINITIALIZED"); //$NON-NLS-0$
 		},
 		updateCommands: function() {
 			var section = this.section;
@@ -358,8 +358,15 @@ define([
 							tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
 						} else {
 							var ellipses = "..."; //$NON-NLS-0$
+
 							description = repo.GitUrl ? messages["git url:"] + repo.GitUrl : messages["(no remote)"];
-							subDescription = repo.Content ? messages["location: "] + repo.Content.Path : ellipses;
+							if(repo.SubmoduleStatus && repo.SubmoduleStatus.Type ==="UNINITIALIZED" ){
+								subDescription = messages["location: "] + repo.SubmoduleStatus.Path;
+							}else {
+								subDescription = repo.Content ? messages["location: "] + repo.Content.Path : ellipses;
+							}
+							
+
 							if (explorer.mode === "full") { //$NON-NLS-0$
 								var status = repo.status;
 								if (status) {
@@ -388,7 +395,9 @@ define([
 									title = i18nUtil.formatMessage(messages["PluralSubmodule"], repo.Name, subLength);
 								}
 							}
-							if (repo.infoDeferred) {
+							if(repo.SubmoduleStatus && repo.SubmoduleStatus.Type ==="UNINITIALIZED" ){
+								title = title + messages["UninitializedSubmodule"];
+							}else if (repo.infoDeferred) {
 								title = title + ellipses;
 								if (explorer.mode === "full") extraDescriptions.push(ellipses); //$NON-NLS-0$
 								repo.infoDeferred.then(function() {
@@ -435,7 +444,6 @@ define([
 							section.appendChild(span);
 						});
 					}
-
 					if (explorer.singleRepository) {
 						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
 					} else {
