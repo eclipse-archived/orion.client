@@ -46,8 +46,11 @@ define([
 			for(var i=0; i<children.length; i++){
 				if(children[i].Name === ".tern-project"){
 					return fileClient.read(children[i].Location).then(function(content) {
-						// TODO Log a problem with the JSON
-						return content ? JSON.parse(content) : {};
+						try {
+							return content ? JSON.parse(content) : {};
+						} catch(e) {
+							return {};
+						}
 					});
 				}
 			}
@@ -64,7 +67,6 @@ define([
 					}
 					
 					// TODO Can't provide error messages once the deferred is resolved.
-					// TODO Can we set the script resolver to only return matches from the current project
 					scriptResolver.getWorkspaceFile(filename, {ext: ext}).then(function(files){
 						if (Array.isArray(files) && files.length > 0){
 							// TODO If more than one file satisfies script resolver, do we load the first, the last or them all?  Warn the user?
@@ -96,7 +98,7 @@ define([
 			this.timeout = setTimeout(function() {
 				cachedContext.setStatus({Severity: 'Error', Message: "Add context timed out"}); //$NON-NLS-1$
 				if(deferred) {
-					deferred.resolve("No context file found");
+					deferred.resolve("No .tern-project file found");
 				}
 				this.timeout = null;
 			}, 20000);
