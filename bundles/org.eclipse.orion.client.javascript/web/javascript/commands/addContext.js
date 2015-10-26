@@ -42,7 +42,7 @@ define([
 			return this._addContext(editorContext, options);
 		},
 		
-		_getProjectTernConfiguration: function(fileClient, folderMetadata, children, workspace){
+		_getProjectTernConfiguration: function(fileClient, children){
 			for(var i=0; i<children.length; i++){
 				if(children[i].Name === ".tern-project"){
 					return fileClient.read(children[i].Location).then(function(content) {
@@ -62,6 +62,7 @@ define([
 					if (filename.match(/\.html$/)){
 						ext = 'html';
 					}
+					
 					// TODO Can't provide error messages once the deferred is resolved.
 					// TODO Can we set the script resolver to only return matches from the current project
 					scriptResolver.getWorkspaceFile(filename, {ext: ext}).then(function(files){
@@ -102,22 +103,21 @@ define([
 
 			var that = this;
 			editorContext.getFileMetadata().then(function(fileMetadata){
-				that.fileClient.loadWorkspace().then(function(workspace){
-					if(fileMetadata.parents && fileMetadata.parents.length>0){
-						var topFolder = fileMetadata.parents[fileMetadata.parents.length-1];
-						if(topFolder.Children){
-							that._getProjectTernConfiguration(that.fileClient, topFolder, topFolder.Children, workspace).then(function(jsonOptions){
+				if(fileMetadata.parents && fileMetadata.parents.length>0){
+					var topFolder = fileMetadata.parents[fileMetadata.parents.length-1];
+					that.scriptResolver.setSearchLocation(topFolder.Location);
+					if(topFolder.Children){
+						that._getProjectTernConfiguration(that.fileClient, topFolder.Children).then(function(jsonOptions){
+							that._loadEagerly(cachedContext, deferred, that.ternworker, that.scriptResolver, jsonOptions);
+						});
+					} else if(topFolder.ChildrenLocation) {
+						that.fileClient.fetchChildren(topFolder.ChildrenLocation).then(function(children){
+							that._getProjectJsonData(that.fileClient, children).then(function(jsonOptions){
 								that._loadEagerly(cachedContext, deferred, that.ternworker, that.scriptResolver, jsonOptions);
 							});
-						} else if(topFolder.ChildrenLocation) {
-							that.fileClient.fetchChildren(topFolder.ChildrenLocation).then(function(children){
-								that._getProjectJsonData(that.fileClient, topFolder, children, workspace).then(function(jsonOptions){
-									that._loadEagerly(cachedContext, deferred, that.ternworker, that.scriptResolver, jsonOptions);
-								});
-							});
-						}
+						});
 					}
-				});
+				}
 			});
 			return deferred;
 		}
