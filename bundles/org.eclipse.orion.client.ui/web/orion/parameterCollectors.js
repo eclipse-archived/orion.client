@@ -249,14 +249,21 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'],
 						}
 					} else if (parm.type === "button") { //$NON-NLS-0$
 						if (!field) {
-							field = document.createElement("input"); //$NON-NLS-0$
-							field.type = "button"; //$NON-NLS-0$
-							field.id = id;
-							field.classList.add("dismissButton"); //$NON-NLS-0$
+							field = document.createElement("span"); //$NON-NLS-0$
+							field.classList.add("parametersDismiss"); //$NON-NLS-0$
+							var button = document.createElement("input"); //$NON-NLS-0$
+							button.type = "button"; //$NON-NLS-0$
+							button.id = id;
+							button.classList.add("dismissButton"); //$NON-NLS-0$
+							field.appendChild(button);
 							parent.appendChild(field);
-						}
-						if (parm.value) {
-							field.value = parm.value;
+							if (parm.value) {
+								button.value = parm.value;
+							}
+						} else {
+							if (parm.value) {
+								field.value = parm.value;
+							}
 						}
 					} else {
 						if (!field) {
