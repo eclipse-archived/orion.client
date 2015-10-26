@@ -261,6 +261,10 @@
     } else if (srv.options.async) {
       srv.startAsyncAction();
       srv.options.getFile(name, function(err, text) {
+      	//ORION We pass back an object containing addition information about the file
+      	if (typeof text === 'object'){ //ORION
+      	  text = text.contents; //ORION
+      	} //ORION
         updateText(file, text || "", srv);
         srv.finishAsyncAction(err);
       });
