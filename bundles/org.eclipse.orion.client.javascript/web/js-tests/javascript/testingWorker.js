@@ -72,6 +72,14 @@ define([
 		}
 	};
 	
+	WrappedWorker.prototype.startServer = function(jsonOptions){
+		if(this.shared) {
+			this.worker.port.postMessage({request: 'start_server', args: {options: jsonOptions}});
+		} else {
+			this.worker.postMessage({request: 'start_server', args: {options: jsonOptions}});
+		}
+	}
+	
 	/**
 	 * @name WrappedWorker.prototype.terminate
 	 * @description Stops the underlying worker
@@ -175,6 +183,8 @@ define([
 						else {
 							_instance._state.callback(new Error('Got message I don\'t know'));
 						}
+					} else if (typeof(ev.data) === 'string' && ev.data === 'worker_ready'){
+						_instance.startServer();
 					} else if(typeof(ev.data) === 'string' && ev.data === 'server_ready' && _instance._state.warmup) {
 						delete _instance._state.warmup;
 						_instance._state.callback();

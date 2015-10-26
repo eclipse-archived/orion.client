@@ -50,12 +50,12 @@ require([
 							orionMySQLPlugin, orionNodePlugin, orionPostgresPlugin, orionRedisPlugin, orionRequirePlugin, ternPluginsPlugin,
 							findTypesPlugin, openImplPlugin, htmlDepPlugin, ecma5, ecma6, browser, Messages, i18nUtil) {
 
-    var ternserver = Object.create(null);
+    var ternserver = null;
 
     /**
      * @description Start up the Tern server, send a message after trying
      */
-    function startServer() {
+    function startServer(jsonOptions) {
         var options = {
                 async: true,
                 debug: false,
@@ -162,13 +162,24 @@ require([
                 },
                 getFile: _getFile
             };
-
+        if (jsonOptions){
+			if (Array.isArray(jsonOptions.loadEagerly)){
+				options.loadEagerly = jsonOptions.loadEagerly;
+			}
+        	if (Array.isArray(jsonOptions.plugins)){
+        		options.plugins = jsonOptions.plugins;
+        	}
+        	// TODO Should we add all properties from the JSON or plugins, libs, loadEagerly
+        }
         ternserver = new Tern.Server(options);
         post('server_ready'); //$NON-NLS-1$
     }
-    startServer();
+	post('worker_ready');
 
 	var handlers = {
+		'start_server': function(args){
+			startServer(args && args.options);	
+		},
 		'addFile': function(args, callback) {
 			ternserver.addFile(args.file, args.source);
 			callback({request: 'addFile'}); //$NON-NLS-1$
@@ -506,6 +517,9 @@ require([
     onmessage = function(evnt) {
         if(typeof(evnt.data) === 'object') {
             var _d = evnt.data;
+            if (!ternserver && _d.request !== 'start_server'){
+            	serverNotReady(_d);
+            }
             var _handler = handlers[_d.request];
 			if(typeof(_handler) === 'function') {
 				_handler(_d.args, function(response) {
@@ -543,6 +557,23 @@ require([
 			response.ternID = data.ternID;
 		}
 		response.error = i18nUtil.formatMessage(Messages['unknownRequest'], response.request);
+		post(response);
+	}
+	
+	/**
+	 * @description Respond back that the tern server has not been started
+	 * @param {Object} data The original request data
+	 */
+	function serverNotReady(data) {
+		var response = Object.create(null);
+		response.request = data.request;
+		if(data.messageID) {
+			response.messageID = data.messageID;
+		} else if(data.ternID) {
+			response.ternID = data.ternID;
+		}
+		// TODO NLS
+		response.error = i18nUtil.formatMessage("The Tern server has not been started", response.request);
 		post(response);
 	}
 

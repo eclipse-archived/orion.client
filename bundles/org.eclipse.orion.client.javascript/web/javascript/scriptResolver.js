@@ -34,8 +34,7 @@ define([
 
     Objects.mixin(ScriptResolver.prototype, {
        /**
-        * @description Tries to find the workspace file for the given logical name and options
-        * @function
+        * Returns an array of workspace file that match the given logical name and options
         * @param {String} logicalName The name of the file to look up, for example, 'orion/objects'
         * @param {Object} options The map of search options.
         *
@@ -43,7 +42,8 @@ define([
         * >  * ext - the file extension type to look for, for example 'js'
         * >  * icon - the URL or relative path to the icon to describe found files
         * >  * type - the name to use for the content type of any found files
-        * @returns {File | null} The found file or ```null```
+        * 
+        * @returns {File | null} Array of found files or ```null```
         */
        getWorkspaceFile : function getWorkspaceFile(logicalName, options) {
           if(logicalName) {

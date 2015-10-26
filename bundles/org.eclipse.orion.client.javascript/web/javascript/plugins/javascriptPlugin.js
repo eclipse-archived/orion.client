@@ -33,6 +33,7 @@ define([
 'javascript/cuProvider',
 'orion/util',
 'javascript/logger',
+'javascript/commands/addContext',
 'javascript/commands/generateDocCommand',
 'javascript/commands/openDeclaration',
 'javascript/commands/openImplementation',
@@ -46,7 +47,7 @@ define([
 'i18n!javascript/nls/messages',
 'orion/URL-shim'
 ], function(PluginProvider, Bootstrap, Deferred, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist,
-			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
+			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, Util, Logger, AddContextCommand, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 			RenameCommand, RefsCommand, mGSearchClient, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
     var provider = new PluginProvider({
@@ -96,7 +97,7 @@ define([
     	 * Create the file client early
     	 */
     	var fileClient = new FileClient.FileClient(core.serviceRegistry);
-
+    	
     	/**
     	 * Create the script resolver
     	 * @since 8.0
@@ -126,12 +127,20 @@ define([
     			this.worker = new Worker(wUrl.href);
     			this.worker.onmessage = onMessage.bind(this);
     			this.worker.onerror = onError.bind(this);
-    			this.worker.postMessage('start_server'); //$NON-NLS-1$
+    			this.worker.postMessage('start_worker'); //$NON-NLS-1$
     			this.messageId = 0;
     			this.callbacks = Object.create(null);
     	//	}
     	}
-
+    	
+    	WrappedWorker.prototype.startServer = function(jsonOptions){
+    		if(this.shared) {
+	    			this.worker.port.postMessage({request: 'start_server', args: {options: jsonOptions}});
+	    		} else {
+	    			this.worker.postMessage({request: 'start_server', args: {options: jsonOptions}});
+	    		}
+    	}
+    	
     	WrappedWorker.prototype.postMessage = function(msg, f) {
     		if(ternReady) {
 				if(msg != null && typeof(msg) === 'object') {
@@ -161,6 +170,7 @@ define([
 
 		var handlers ={
 			'read': doRead,
+			'worker_ready': workerReady,
 			'server_ready': serverReady
 		};
 
@@ -245,7 +255,11 @@ define([
 				}
 			}
 		}
-
+		
+		function workerReady() {
+			ternWorker.startServer();
+		};
+		
 		/**
 		 * @description Handles the server being ready
 		 * @param {Object} request The request
@@ -405,6 +419,19 @@ define([
     		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
     			}
     	);
+    	
+    	// TODO This command is dark launched as it will be automated during editor open - Bug 476062
+    	if ("true" === localStorage.getItem("darklaunch")) {
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+    			new AddContextCommand.AddContextCommand(ternWorker, scriptresolver, fileClient),  //$NON-NLS-1$
+    			{
+    		name: "Add context",  //$NON-NLS-1$
+    		tooltip : "Add context tooltip",  //$NON-NLS-1$
+    		id : "add.js.context",  //$NON-NLS-1$
+    		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
+    			}
+    	);
+		}
 
 		provider.registerServiceProvider("orion.edit.command.category", {}, { //$NON-NLS-1$
 			  id : "js.references", //$NON-NLS-1$
