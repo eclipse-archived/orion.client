@@ -169,12 +169,11 @@ require([
         	if (Array.isArray(jsonOptions.plugins)){
         		options.plugins = jsonOptions.plugins;
         	}
-        	// TODO Should we add all properties from the JSON or plugins, libs, loadEagerly
         }
         ternserver = new Tern.Server(options);
         post('server_ready'); //$NON-NLS-1$
     }
-	post('worker_ready');
+	post('worker_ready'); //$NON-NLS-1$
 
 	var handlers = {
 		'start_server': function(args){
@@ -572,8 +571,7 @@ require([
 		} else if(data.ternID) {
 			response.ternID = data.ternID;
 		}
-		// TODO NLS
-		response.error = i18nUtil.formatMessage("The Tern server has not been started", response.request);
+		response.error = i18nUtil.formatMessage(Messages['serverNotStarted'], response.request);
 		post(response);
 	}
 

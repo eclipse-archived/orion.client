@@ -70,5 +70,6 @@ define({
 	'failedRefs': 'Failed to find refs',
 	'failedRefsNoServer': 'failed to find refs - server not started',
 	'failedType': 'Failed to find type',
-	'unknownRequest': 'The request \'${0}\' is unknown'
+	'unknownRequest': 'The request \'${0}\' is unknown',
+	'serverNotStarted': 'The server has not been started. Request: \'${0}\''
 });
