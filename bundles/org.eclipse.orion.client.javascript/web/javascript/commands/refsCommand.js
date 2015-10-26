@@ -147,7 +147,8 @@ define([
 						{request: 'type', args: {meta: metadata, params: options}},  //$NON-NLS-1$
 						function(type, err) {
 							if(err) {
-								deferred.resolve(err);
+								editorContext.setStatus({Severity: 'Error', Message: err}); //$NON-NLS-1$
+								deferred.resolve([]);
 							} else {
 								var expected = Object.create(null);
 								expected.total = 0;

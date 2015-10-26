@@ -244,6 +244,24 @@ define([
 						}
 						break;
 					}
+					case 'BreakStatement':
+					case 'ContinueStatement':
+					case 'IfStatement': 
+					case 'DoWhileStatement':
+					case 'ForInStatement':
+					case 'ForStatement':
+					case 'SwitchStatement':
+					case 'SwitchCase':
+					case 'WithStatement': 
+					case 'WhileStatement': {
+						result.category = 'varaccess'; //$NON-NLS-1$
+						break;
+					}
+					case 'LetStatement':
+					case 'LabeledStatement': {
+						result.category = 'varwrite'; //$NON-NLS-1$
+						break;
+					}
 					case 'Block': {
 						result.category = 'blockcomments'; //$NON-NLS-1$
 						break;
