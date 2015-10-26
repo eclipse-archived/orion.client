@@ -307,6 +307,11 @@ define([
 			this._comboTextInputWrapper.classList.add("hidden");
 		},
 		
+		enable: function(enabled) {
+			this._textInputNode.disabled = !enabled;
+			this._recentEntryButton.disabled = !enabled;
+		},
+		
 		/**
 		 * @returns an array of the recent entries that were
 		 * saved by this combo text input, or null

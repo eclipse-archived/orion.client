@@ -96,6 +96,7 @@ define([
 				this._showSearchOptBLocks();	
 				this._hideReplaceField();
 				this._searchBox.show();
+				this._searchBox.enable(true);
 				delete this._filledResult;
 				lib.empty(lib.node("searchResultsTitle"));
 				lib.empty(lib.node("searchPageActions"));
@@ -133,13 +134,14 @@ define([
 		},
 		
 		search: function(){
+			this._searchBox.enable(true);
 			this._submitSearch();
 		},
 		
 		fillSearchResult: function(searchResult) {
-			this._hideSearchOptBLocks();	
 			this._filledResult = searchResult;
 			this._showReplaceField();
+			this._hideSearchOptBLocks();	
 			this._searchResultExplorer.runSearch(searchResult.searchParams, this._searchResultsWrapperDiv, searchResult);
 		},
 				
@@ -445,7 +447,9 @@ define([
 		
 		_hideSearchOptBLocks: function() {
 			this._searchWrapper.classList.add("searchOptParamBlockHidden");
-			this._searchBox.hide();
+			//this._searchBox.hide();
+			this._replaceTextInputBox.focus();
+			this._searchBox.enable(false);
 		},
 		
 		_showReplaceField: function() {
