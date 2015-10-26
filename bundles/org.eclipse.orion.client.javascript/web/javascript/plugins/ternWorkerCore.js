@@ -37,7 +37,7 @@ require([
 	'tern/plugin/orionRedis',
 	'tern/plugin/requirejs',
 	'tern/plugin/ternPlugins',
-	'tern/plugin/findTypes',
+	'tern/plugin/refs',
 	'tern/plugin/openImplementation',
 	'tern/plugin/htmlDependencies',
 	'json!tern/defs/ecma5.json',
@@ -48,7 +48,7 @@ require([
 ],
 /* @callback */ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
 							orionMySQLPlugin, orionNodePlugin, orionPostgresPlugin, orionRedisPlugin, orionRequirePlugin, ternPluginsPlugin,
-							findTypesPlugin, openImplPlugin, htmlDepPlugin, ecma5, ecma6, browser, Messages, i18nUtil) {
+							refsPlugin, openImplPlugin, htmlDepPlugin, ecma5, ecma6, browser, Messages, i18nUtil) {
 
     var ternserver = null;
 
@@ -403,29 +403,6 @@ require([
 		       callback({request: 'plugin_enablement', message: Messages['failedEnablementPluginsNoServer']}); //$NON-NLS-1$
 		   }
 		},
-		'refs': function(args, callback) {
-			if(ternserver) {
-		       ternserver.request({
-		           query: {
-			           type: "refs",  //$NON-NLS-1$
-			           file: args.meta.location,
-			           end: args.params.offset,
-			           newName: args.newname
-		           },
-		           files: args.files},
-		           function(error, refs) {
-		               if(error) {
-		                   callback({request: 'refs', error: error.message, message: Messages['failedRefs']}); //$NON-NLS-1$
-		               } else if(refs && Array.isArray(refs.refs)) {
-	        			   callback({request: 'refs', refs:refs.refs}); //$NON-NLS-1$
-		               } else {
-		               		callback({request: 'refs', refs:[]}); //$NON-NLS-1$
-		               }
-		           });
-		   } else {
-		       callback({request: 'refs', message: Messages['failedRefsNoServer']}); //$NON-NLS-1$
-		   }
-		},
 		/**
 		 * @callback
 		 */
@@ -487,20 +464,19 @@ require([
 		               }
 		           });
 		},
-		'findType': function(args, callback) {
+		'checkRef': function(args, callback) {
 			ternserver.request({
 		           query: {
-			           type: "findType",  //$NON-NLS-1$
+			           type: "checkRef",  //$NON-NLS-1$
 			           file: args.meta.location,
 			           end: args.params.offset,
-			           origin: args.origin,
-			           node: args.params.node
+			           origin: args.origin
 		           }},
 		           function(error, type) {
 		               if(error) {
-		                   callback({request: 'findType', error: typeof(error) === 'string' ? error : error.message, message: Messages['failedType']}); //$NON-NLS-1$
+		                   callback({request: 'checkRef', error: typeof(error) === 'string' ? error : error.message, message: Messages['failedType']}); //$NON-NLS-1$
 		               } else {
-		               	   callback({request: 'findType', type: type}); //$NON-NLS-1$
+		               	   callback({request: 'checkRef', type: type}); //$NON-NLS-1$
 		               }
 		           });
 		}

@@ -32,7 +32,6 @@ define([
 		this.astmanager = astManager;
 		this.cuprovider = cuProvider;
 		this.searchclient = searchClient;
-		this.cache = Object.create(null);
 	}
 
 	/**
@@ -76,7 +75,7 @@ define([
 		},
 		strings: {
 			name: Messages['strings'],
-			category: 'string', //$NON-NLS-1$
+			category: 'strings', //$NON-NLS-1$
 			sort: 8
 		},
 		blockComments: {
@@ -95,10 +94,6 @@ define([
 			sort: 11
 		}
 	};
-
-	function encloses(offset, node) {
-		return node && (node.range[0] <= offset && offset <= node.range[1]);
-	}
 
 	Objects.mixin(RefsCommand.prototype, {
 		/**
@@ -178,14 +173,7 @@ define([
 												var match = line.matches[j];
 												var v = Finder.findWord(line.name, match.startIndex);
 												if(v === node.name) {
-													if(match.start === node.range[0] && match.end === node.range[1]) {
-														type.type.node = node.parents.slice(node.parents.length-1)[0];
-														that._categorizeMatch(type.type, match);
-														match.confidence = 100;
-														expected.done++;
-													} else {
-														that._checkType(type, file.metadata, match, expected);
-													}
+													that._checkType(type, file.metadata, match, expected);
 												} else {
 													match.category = categories.partial.category;
 													match.confidence = -100;
@@ -219,21 +207,18 @@ define([
 		_checkType: function _checkType(original, file, match, expected) {
 			var that = this;
 			that.ternworker.postMessage(
-					{request: 'findType', args: {meta:{location: file.Location}, params: {offset: match.end, node:true}, origin: original}},  //$NON-NLS-1$
+					{request: 'checkRef', args: {meta:{location: file.Location}, params: {offset: match.end}, origin: original}},  //$NON-NLS-1$
 					/* @callback */ function(type, err) {
 						if(type && type.type) {
-							var _t = type.type;
-							that._categorizeMatch(_t, match);
-							var _ot = original.type;
+							var _t = type.type, _ot = original.type;
 							if(_t.name === _ot.name && _t.type === _ot.type && _t.origin === _ot.origin) {
 								match.confidence = 100;
 							} else if(type.staticCheck) {
-								that._categorizeMatch(_t, match);
 								match.confidence = type.staticCheck.confidence;
 							} else {
-								that._categorizeMatch(_t, match);
 								match.confidence = -1;
 							}
+							match.category = _t.category;
 						} else if(err) {
 							match.category = categories.partial.category;
 							match.confidence = -1;
@@ -241,115 +226,6 @@ define([
 						expected.done++;
 						that._checkDone(expected);
 					});
-		},
-		/**
-		 * @description Tags the match with the category is belongs to
-		 * @function
-		 * @private
-		 * @param {Object} type The type information from the Tern request (if any)
-		 * @param {Object} match The original match object we asked about
-		 */
-		_categorizeMatch: function _categorizeMatch(type, match) {
-			if(type && type.node) {
-				var node = type.node;
-				switch(node.type) {
-					case 'FunctionDeclaration':
-					case 'FunctionExpression': {
-						match.category = categories.functionDecls.category;
-						break;
-					}
-					case 'Property': {
-						if(encloses(match.start, node.key)) {
-							match.category = categories.propWrite.category;
-						} else if(encloses(match.start, node.value)) {
-							if(node.value.type === 'FunctionExpression') {
-								match.category = categories.functionDecls.category;
-							} else if(node.value.type === 'Identifier') {
-								match.category = categories.varAccess.category;
-							} else {
-								match.category = categories.propWrite.category;
-							}
-						}
-						break;
-					}
-					case 'CallExpression': {
-						if(encloses(match.start, node.callee)) {
-							match.category = categories.functionCalls.category;
-						} 
-						if(node.args.length > 0) {
-							for(var i = 0, len = node.args.length; i < len; i++) {
-								var param = node.args[i];
-								if(encloses(match.start, param))	{
-									if(param.type === 'Identifier') {
-										match.category = categories.varAccess.category;
-									} else if(param.type === 'MemberExpression') {
-										match.category = categories.propAccess.category;
-									}
-								}
-							}
-						}
-						break;
-					}
-					case 'AssignmentExpression': {
-						if(encloses(match.start, node.left)) {
-							//on the left, write
-							if(node.left.type === 'Identifier') {
-								match.category = categories.varWrite.category;
-							} else {
-								match.category = categories.propWrite.category;
-							}
-						} else if(encloses(match.start, node.right)) {
-							if(node.right.type === 'Identifier') {
-								match.category = categories.varAccess.category;
-							} else if(node.right.type === 'MemberExpression') {
-								match.category = categories.propAccess.category;
-							} 
-						}
-						break;
-					}
-					case 'VariableDeclarator': {
-						if(encloses(match.start, node.id)) {
-							match.category = categories.varWrite.category;
-						} else if(encloses(match.start, node.init)) {
-							match.category = categories.varAccess.category;						
-						}
-						break;
-					}
-					case 'Literal': {
-						if(node.regex) {
-							match.category = categories.regex.category;
-						} else if(typeof(node.value) === "string") {
-							match.category = categories.strings.category;
-						}
-						break;
-					}
-					case 'MemberExpression': {
-						//TODO we need the first non=member expression parent from Tern to know how the expression is being used
-						//LHS vs RHS expressions
-						match.category = categories.propAccess.category;
-						break;
-					}
-					case 'UpdateExpression': {
-						if(node.argument.type === 'Identifier') {
-							match.category = categories.varAccess.category;
-						} else if(node.argument.type === 'MemberExpression') {
-							match.category = categories.propAccess.category;
-						}
-						break;
-					}
-					case 'Block': {
-						match.category = categories.blockComments.category;
-						break;
-					}
-					case 'Line': {
-						match.category = categories.lineComments.category;
-						break;
-					}
-				}
-			}
-			if(!match.category) {
-				match.category = categories.partial.category;
-			}
 		},
 		
 		/**
@@ -359,8 +235,7 @@ define([
 		 * @param {Object} expected The context of confidence computation
 		 */
 		_checkDone: function _checkDone(expected) {
-			if(expected.done === expected.total) {
-				this.cache = Object.create(null);
+			if(expected.done >= expected.total) {
 				expected.deferred.resolve({searchParams: expected.params, refResult: expected.result, categories: categories});
 			}
 		}
