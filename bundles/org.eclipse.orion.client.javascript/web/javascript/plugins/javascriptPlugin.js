@@ -134,11 +134,12 @@ define([
     	}
     	
     	WrappedWorker.prototype.startServer = function(jsonOptions){
+    		ternReady = false;
     		if(this.shared) {
-	    			this.worker.port.postMessage({request: 'start_server', args: {options: jsonOptions}});
-	    		} else {
-	    			this.worker.postMessage({request: 'start_server', args: {options: jsonOptions}});
-	    		}
+	    		this.worker.port.postMessage({request: 'start_server', args: {options: jsonOptions}}); //$NON-NLS-1$
+    		} else {
+    			this.worker.postMessage({request: 'start_server', args: {options: jsonOptions}}); //$NON-NLS-1$
+    		}
     	}
     	
     	WrappedWorker.prototype.postMessage = function(msg, f) {

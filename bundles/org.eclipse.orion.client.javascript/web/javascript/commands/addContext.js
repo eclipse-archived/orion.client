@@ -58,34 +58,46 @@ define([
 		},
 		
 		_loadEagerly: function(editorContext, deferred, ternWorker, scriptResolver, jsonOptions){
-			if (jsonOptions && Array.isArray(jsonOptions.loadEagerly)){
-				for (var i=0; i<jsonOptions.loadEagerly.length; i++) {
-					var filename = jsonOptions.loadEagerly[i];
-					var ext = 'js';
-					if (filename.match(/\.html$/)){
-						ext = 'html';
-					}
-					
-					// TODO Can't provide error messages once the deferred is resolved.
-					scriptResolver.getWorkspaceFile(filename, {ext: ext}).then(function(files){
-						if (Array.isArray(files) && files.length > 0){
-							// TODO If more than one file satisfies script resolver, do we load the first, the last or them all?  Warn the user?
-							if (files.length > 1){
-								editorContext.setStatus({Severity: 'Warning', Message: filename + ' represents multiple files.'});
-							}
-							ternWorker.postMessage(
-								{request:'addFile', args:{file: files[0].location}} //$NON-NLS-1$
-							);
-						} else {
-							// TODO Find a way to hold the deferred until we at least have run script resolver on all files
-							editorContext.setStatus({Severity: 'Warning', Message: filename + ' could not be found.'});
+			if (jsonOptions){
+				
+				// TODO Remove console
+				console.log('Parsed from .tern-project:');
+				console.log(jsonOptions);
+				
+				if (jsonOptions.plugins){
+					ternWorker.startServer({plugins: jsonOptions.plugins});
+				}				
+
+				if (Array.isArray(jsonOptions.loadEagerly)){
+					for (var i=0; i<jsonOptions.loadEagerly.length; i++) {
+						var filename = jsonOptions.loadEagerly[i];
+						var ext = 'js';
+						if (filename.match(/\.html$/)){
+							ext = 'html';
 						}
-					});
+						
+						// TODO Can't provide error messages once the deferred is resolved.
+						scriptResolver.getWorkspaceFile(filename, {ext: ext}).then(function(files){
+							if (Array.isArray(files) && files.length > 0){
+								// TODO If more than one file satisfies script resolver, do we load the first, the last or them all?  Warn the user?
+								if (files.length > 1){
+									editorContext.setStatus({Severity: 'Warning', Message: filename + ' represents multiple files.'});
+								}
+								ternWorker.postMessage(
+									{request:'addFile', args:{file: files[0].location}} //$NON-NLS-1$
+								);
+							} else {
+								// TODO Find a way to hold the deferred until we at least have run script resolver on all files
+								editorContext.setStatus({Severity: 'Warning', Message: filename + ' could not be found.'});
+							}
+						});
+					}
 				}
+
 				deferred.resolve();
 				return;
 			}
-			editorContext.setStatus({Severity: 'Error', Message: 'No loadEagerly entries found in the .tern-project file.'});
+			editorContext.setStatus({Severity: 'Error', Message: 'No valid entries found in the .tern-project file.'});
 			deferred.resolve("No additional files found");
 		},
 
@@ -114,7 +126,7 @@ define([
 						});
 					} else if(topFolder.ChildrenLocation) {
 						that.fileClient.fetchChildren(topFolder.ChildrenLocation).then(function(children){
-							that._getProjectJsonData(that.fileClient, children).then(function(jsonOptions){
+							that._getProjectTernConfiguration(that.fileClient, children).then(function(jsonOptions){
 								that._loadEagerly(cachedContext, deferred, that.ternworker, that.scriptResolver, jsonOptions);
 							});
 						});

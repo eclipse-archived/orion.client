@@ -56,6 +56,10 @@ require([
      * @description Start up the Tern server, send a message after trying
      */
     function startServer(jsonOptions) {
+    	if (ternserver){
+    		ternserver.reset();
+    		ternserver = null;
+    	}
         var options = {
                 async: true,
                 debug: false,
@@ -163,10 +167,7 @@ require([
                 getFile: _getFile
             };
         if (jsonOptions){
-			if (Array.isArray(jsonOptions.loadEagerly)){
-				options.loadEagerly = jsonOptions.loadEagerly;
-			}
-        	if (Array.isArray(jsonOptions.plugins)){
+			if (jsonOptions.plugins){
         		options.plugins = jsonOptions.plugins;
         	}
         }
