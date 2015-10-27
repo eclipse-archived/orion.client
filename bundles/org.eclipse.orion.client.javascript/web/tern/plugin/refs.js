@@ -222,7 +222,17 @@ define([
 							node = p;
 						}
 						if(node && (node.type === 'CallExpression' || node.type === 'NewExpression') && encloses(query.end, prop)) {
-							result.category = 'funccalls'; //$NON-NLS-1$
+							if(node.callee && encloses(query.end, node.callee)) {
+								result.category = 'funccalls'; //$NON-NLS-1$
+							} else if(node.arguments && node.arguments.length > 0) {
+								//check args
+								for(i = 0, len = node.arguments.length; i < len; i++) {
+									if(encloses(query.end, node.arguments[i])) {
+										result.category = 'propaccess'; //$NON-NLS-1$
+									}
+								}
+							}
+							
 						} else if(node && node.type === 'AssignmentExpression') {
 							if(encloses(query.end, node.left)) {
 								if(encloses(query.end, prop)) {
