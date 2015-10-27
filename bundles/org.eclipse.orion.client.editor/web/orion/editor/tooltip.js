@@ -82,6 +82,8 @@ function Tooltip (view) {
 				if (self._prevX && self._prevX === event.clientX && self._prevY && self._prevY === event.clientY) {
 					return;
 				}
+				self._prevX = event.clientX;
+				self._prevY = event.clientY;
 				
 				if (!self.isVisible() || self._locked || self._hasFocus()) { return; }
 				if (self._isInRect(self._outerArea, event.clientX, event.clientY)){ return; }
