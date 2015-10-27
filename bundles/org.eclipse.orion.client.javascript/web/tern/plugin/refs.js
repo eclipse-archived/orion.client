@@ -205,6 +205,12 @@ define([
 						}
 						break;
 					}
+					case 'NewExpression': {
+						if(node.callee && encloses(query.end, node.callee)) {
+							result.category = 'funccalls'; //$NON-NLS-1$
+						}
+						break;
+					}
 					case 'MemberExpression': {
 						//TODO we need the first non-member expression parent from Tern to know how the expression is being used
 						//LHS vs RHS expressions
