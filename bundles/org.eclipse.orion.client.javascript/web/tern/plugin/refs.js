@@ -212,9 +212,13 @@ define([
 						break;
 					}
 					case 'MemberExpression': {
-						//TODO we need the first non-member expression parent from Tern to know how the expression is being used
-						//LHS vs RHS expressions
+						//if we are talking about the root object, it will be a var access
+						if(node.object && node.object.type === 'Identifier' && encloses(query.end, node.object)) {
+							result.category = 'varaccess'; //$NON-NLS-1$
+							break;
+						}
 						var prop;
+						//walk up to find first non-member expression
 						while(node.type === 'MemberExpression') {
 							prop = node.property;
 							p = node.parents.pop();
