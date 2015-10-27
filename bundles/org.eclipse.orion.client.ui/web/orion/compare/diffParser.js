@@ -80,8 +80,29 @@ orion.DiffParser = (function() {
 			if(diffString === ""){
 				return {outPutFile: oFileString, mapper: []};
 			}
-			this._oFileContents = oFileString === "" ? []:oFileString.split(this._lineDelimiter);
 			this._diffContents = diffString.split(this._diffLineDelimiter);
+			var returnObj = {};
+			returnObj.mapper = [];
+			if(oFileString) {
+				this._oFileContents = oFileString === "" ? []:oFileString.split(this._lineDelimiter);
+			}else{
+				var headerLine = this._diffContents[1];
+				if(headerLine.indexOf("deleted file mode") > -1){
+					returnObj.deletedFileMode = headerLine.split("deleted file mode")[1].match(/[^ ]+/g)[0];
+				}
+				if(headerLine.indexOf("new file mode") > -1){
+					returnObj.newFileMode = headerLine.split("new file mode")[1].match(/[^ ]+/g)[0];
+				}
+				return returnObj;
+			}
+
+			if(diffString.indexOf("old mode") > -1){
+				returnObj.oldMode = diffString.split("old mode")[1].match(/[^ ]+/g)[0];
+			}
+			if(diffString.indexOf("new mode") > -1){
+				returnObj.newMode = diffString.split("new mode")[1].match(/[^ ]+/g)[0];
+			}
+			
 			var totalLines = this._diffContents.length;
 			this._hunkRanges = [];
 			for(var i = 0; i <totalLines ; i++){
@@ -91,7 +112,8 @@ orion.DiffParser = (function() {
 				}
 		    }
 			if(0 === this._hunkRanges.length){
-				return {outPutFile:oFileString,mapper:[]};
+				returnObj.outPutFile = oFileString;
+				return returnObj;
 			}
 
 			if(this._DEBUG){
@@ -129,7 +151,9 @@ orion.DiffParser = (function() {
 				//this._logNewFile();
 				//console.log("***Total line number in new file: " + this._nFileContents.length);
 			}
-			return {outPutFile:this._nFileContents.join(this._diffLineDelimiter),mapper:this._deltaMap};
+			returnObj.outPutFile = this._nFileContents.join(this._diffLineDelimiter);
+			returnObj.mapper = this._deltaMap;
+			return returnObj;
 		},
 
 		_logMap: function(){

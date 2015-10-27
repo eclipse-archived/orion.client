@@ -86,7 +86,13 @@ exports.CompareView = (function() {
 					this.options.newFile.Content = output/*result.outPutFile*/;
 					this.options.diffArray = diffArray;
 				}
-				return {delim:delim , mapper:result.mapper, output: output/*result.outPutFile*/, diffArray:diffArray};
+				var returnObj = {delim:delim , mapper:result.mapper, output: output/*result.outPutFile*/, diffArray:diffArray};
+				if(result.deletedFileMode &&result.deletedFileMode==="160000"){
+					returnObj.submoduleChanged="removed";			
+				}else if(result.newFileMode  &&result.newFileMode==="160000"){
+					returnObj.submoduleChanged="added";	
+				}
+				return returnObj;
 			}
 		},
 		/** @private */
@@ -878,28 +884,39 @@ exports.InlineCompareView = (function() {
 			});
 		}
 		var result = this._generateMapper(generateMapper, this.options.oldFile.Content, this.options.newFile.Content, this.options.diffContent, this.options.hasConflicts, !this.options.toggler);
-		this._mapper = result.mapper;
-		this._textView.getModel().setText(this.options.oldFile.Content);
-		//Merge the text with diff 
-		var rFeeder = new mDiffTreeNavigator.inlineDiffBlockFeeder(result.mapper, 1);
-		var lFeeder = new mDiffTreeNavigator.inlineDiffBlockFeeder(result.mapper, 0);
-		mCompareUtils.mergeDiffBlocks(this._textView.getModel(), lFeeder.getDiffBlocks(), result.mapper, result.diffArray.array, result.diffArray.index, this._diffParser._lineDelimiter);
-		rFeeder.setModel(this._textView.getModel());
-		lFeeder.setModel(this._textView.getModel());
-		this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editor, this._editor, rFeeder, lFeeder, this._overviewRuler); //$NON-NLS-1$ //$NON-NLS-0$
-		
-		this._initSyntaxHighlighter([{fileName: this.options.oldFile.Name, contentType: this.options.oldFile.Type, editor: this._editor}]);
-		this._highlightSyntax();
-		if(this.options.commandProvider){
-			this.options.commandProvider.renderCommands(this);
+		if(result.submoduleChanged){
+			switch(result.submoduleChanged){
+				case "removed":
+					this._textView.getModel().setText(messages["Removed Submodule Message"]);
+					break;
+				case "added":
+					this._textView.getModel().setText(messages["Added Submodule Message"]);
+					break;
+			}
+		}else{
+			this._mapper = result.mapper;
+			this._textView.getModel().setText(this.options.oldFile.Content);
+			//Merge the text with diff 
+			var rFeeder = new mDiffTreeNavigator.inlineDiffBlockFeeder(result.mapper, 1);
+			var lFeeder = new mDiffTreeNavigator.inlineDiffBlockFeeder(result.mapper, 0);
+			mCompareUtils.mergeDiffBlocks(this._textView.getModel(), lFeeder.getDiffBlocks(), result.mapper, result.diffArray.array, result.diffArray.index, this._diffParser._lineDelimiter);
+			rFeeder.setModel(this._textView.getModel());
+			lFeeder.setModel(this._textView.getModel());
+			this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editor, this._editor, rFeeder, lFeeder, this._overviewRuler); //$NON-NLS-1$ //$NON-NLS-0$
+			
+			this._initSyntaxHighlighter([{fileName: this.options.oldFile.Name, contentType: this.options.oldFile.Type, editor: this._editor}]);
+			this._highlightSyntax();
+			if(this.options.commandProvider){
+				this.options.commandProvider.renderCommands(this);
+			}
+			this.removeRulers();
+			this.addRulers();
+			var drawLine = this._textView.getTopIndex() ;
+			this._textView.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
+			this._textView.redrawLines(drawLine , drawLine+  1 , this._rulerOrigin);
+			this._textView.redrawLines(drawLine , drawLine+  1 , this._rulerNew);
+			this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 		}
-		this.removeRulers();
-		this.addRulers();
-		var drawLine = this._textView.getTopIndex() ;
-		this._textView.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
-		this._textView.redrawLines(drawLine , drawLine+  1 , this._rulerOrigin);
-		this._textView.redrawLines(drawLine , drawLine+  1 , this._rulerNew);
-		this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 		return this._textView.getLineHeight() * this._textView.getModel().getLineCount() + 5;
 	};
 	

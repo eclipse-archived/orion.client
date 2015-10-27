@@ -25,6 +25,8 @@ define({//Default message bundle
 	"Compare": "Compare",
 	"Open the compare page": "Open the compare page",
 	"fetching...": "fetching...",
+	"Removed Submodule Message": "Removed submodule files that are not yet committed, discard this change will not bring the files back", 
+	"Added Submodule Message": "Added submodule files that are not yet committed, to view the actual files please open its own repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"There are unsaved changes.": "There are unsaved changes.",
 	"ERROR: ": "ERROR: ",
 	"Compare...": "Compare...",
