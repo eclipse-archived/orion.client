@@ -235,7 +235,9 @@ define([
 							
 						} else if(node && node.type === 'AssignmentExpression') {
 							if(encloses(query.end, node.left)) {
-								if(encloses(query.end, prop)) {
+								if(node.right && node.right.type === 'FunctionExpression') {
+									result.category = 'funcdecls'; //$NON-NLS-1$
+								} else if(encloses(query.end, prop)) {
 									result.category = 'propwrite'; //$NON-NLS-1$
 								} else {
 									result.category = 'propaccess'; //$NON-NLS-1$
