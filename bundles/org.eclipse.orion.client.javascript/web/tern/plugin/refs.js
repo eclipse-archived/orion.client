@@ -138,7 +138,11 @@ define([
 					}
 					case 'Property': {
 						if(encloses(query.end, node.key)) {
-							result.category = 'propwrite'; //$NON-NLS-1$
+							if(node.value && node.value.type === 'FunctionExpression') {
+								result.category = 'funcdecl'; //$NON-NLS-1$
+							} else {
+								result.category = 'propwrite'; //$NON-NLS-1$
+							}
 						} else if(encloses(query.end, node.value)) {
 							if(node.value.type === 'FunctionExpression') {
 								result.category = 'funcdecls'; //$NON-NLS-1$
