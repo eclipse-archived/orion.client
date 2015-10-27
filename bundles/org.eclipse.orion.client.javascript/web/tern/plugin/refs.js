@@ -271,6 +271,7 @@ define([
 					case 'DoWhileStatement':
 					case 'ForInStatement':
 					case 'ForStatement':
+					case 'LogicalExpression':
 					case 'SwitchStatement':
 					case 'SwitchCase':
 					case 'WithStatement': 
