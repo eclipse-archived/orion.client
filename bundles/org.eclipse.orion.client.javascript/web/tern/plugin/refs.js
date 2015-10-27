@@ -265,6 +265,7 @@ define([
 						break;
 					}
 					case 'BreakStatement':
+					case 'ConditionalExpression':
 					case 'ContinueStatement':
 					case 'IfStatement': 
 					case 'DoWhileStatement':
@@ -288,6 +289,12 @@ define([
 					}
 					case 'Line': {
 						result.category = 'linecomments'; //$NON-NLS-1$
+						break;
+					}
+					case 'UnaryExpression': {
+						if(node.argument && encloses(query.end, node.argument)) {
+							result.category = 'varaccess'; //$NON-NLS-1$
+						}
 						break;
 					}
 				}
