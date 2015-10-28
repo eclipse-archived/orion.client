@@ -31,9 +31,9 @@ define([
 'javascript/hover',
 'javascript/outliner',
 'javascript/cuProvider',
+'javascript/ternProjectManager',
 'orion/util',
 'javascript/logger',
-'javascript/commands/addContext',
 'javascript/commands/generateDocCommand',
 'javascript/commands/openDeclaration',
 'javascript/commands/openImplementation',
@@ -47,7 +47,7 @@ define([
 'i18n!javascript/nls/messages',
 'orion/URL-shim'
 ], function(PluginProvider, Bootstrap, Deferred, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist,
-			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, Util, Logger, AddContextCommand, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
+			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, TernProjectManager, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 			RenameCommand, RefsCommand, mGSearchClient, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
     var provider = new PluginProvider({
@@ -140,7 +140,7 @@ define([
     		} else {
     			this.worker.postMessage({request: 'start_server', args: {options: jsonOptions}}); //$NON-NLS-1$
     		}
-    	}
+    	};
     	
     	WrappedWorker.prototype.postMessage = function(msg, f) {
     		if(ternReady) {
@@ -386,6 +386,21 @@ define([
     		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
     		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     	});
+    	
+    	// TODO This manager is dark launched as it will be automated during editor open - Bug 476062
+    	if ("true" === localStorage.getItem("ternProject")) { //$NON-NLS-1$
+	    	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, fileClient);
+	    	/**
+	    	 * Register Tern project manager as input changed listener
+	    	 */
+	    	provider.registerService("orion.edit.model", {  //$NON-NLS-1$
+	    		onInputChanged: ternProjectManager.onInputChanged.bind(ternProjectManager)
+	    	},
+	    	{
+	    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
+	    		types: ['onInputChanged']  //$NON-NLS-1$
+	    	});
+    	}
 
     	/**
     	 * register the compilation unit provider as a listener
@@ -421,19 +436,6 @@ define([
     			}
     	);
     	
-    	// TODO This command is dark launched as it will be automated during editor open - Bug 476062
-    	if ("true" === localStorage.getItem("darklaunch")) {
-    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    			new AddContextCommand.AddContextCommand(ternWorker, scriptresolver, fileClient),  //$NON-NLS-1$
-    			{
-    		name: "Add context",  //$NON-NLS-1$
-    		tooltip : "Add context tooltip",  //$NON-NLS-1$
-    		id : "add.js.context",  //$NON-NLS-1$
-    		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
-    			}
-    	);
-		}
-
 		provider.registerServiceProvider("orion.edit.command.category", {}, { //$NON-NLS-1$
 			  id : "js.references", //$NON-NLS-1$
 	          name: javascriptMessages['referencesMenuName'],
