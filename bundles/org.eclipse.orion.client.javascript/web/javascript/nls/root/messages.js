@@ -140,7 +140,7 @@ define({//Default message bundle
 	"blockComments": "Block Comments",
 	"lineComments": "Line Comments",
 	"partial": "Partial Matches",
-	"uncategorized": "Uncategorized Matches",
+	"uncategorized": "Uncategorized",
 	"noFileContents": "Could not compute references: failed to compute file text content",
 	"noFileMeta": "Could not compute references: failed to compute file metadata",
 	"cannotComputeRefs": "Cannot compute references: ${0}",
