@@ -122,7 +122,7 @@ define([
 	 * @param {Object} result The result
 	 */
 	function categorize(query, file, result) {
-		var node = finder.findNode(query.end, file.ast, {parents:true});
+		var node = finder.findNode(query.end-1, file.ast, {parents:true});
 		if(node) {
 			if(node.type === 'Identifier') {
 				var p = node.parents.pop();
@@ -131,9 +131,21 @@ define([
 			} 
 			if(node.type !== 'RecoveredNode') {
 				switch(node.type) {
+					case 'Program': {
+						result.category = 'uncategorized'; //$NON-NLS-1$
+						break;
+					}
 					case 'FunctionDeclaration':
 					case 'FunctionExpression': {
-						result.category = 'funcdecls'; //$NON-NLS-1$
+						for(var i = 0, len = node.params.length; i< len; i++) {
+							if(encloses(query.end, node.params[i])) {
+								result.category = 'vardecls'; //$NON-NLS-1$
+								break;
+							}
+						}
+						if(!result.category) {
+							result.category = 'funcdecls'; //$NON-NLS-1$
+						}
 						break;
 					}
 					case 'Property': {
@@ -159,7 +171,7 @@ define([
 							result.category = 'funccalls'; //$NON-NLS-1$
 						} 
 						if(node.arguments.length > 0) {
-							for(var i = 0, len = node.arguments.length; i < len; i++) {
+							for(i = 0, len = node.arguments.length; i < len; i++) {
 								var param = node.arguments[i];
 								if(encloses(query.end, param))	{
 									if(param.type === 'Identifier') {
@@ -191,7 +203,7 @@ define([
 					}
 					case 'VariableDeclarator': {
 						if(encloses(query.end, node.id)) {
-							result.category = 'varwrite'; //$NON-NLS-1$
+							result.category = 'vardecls'; //$NON-NLS-1$
 						} else if(encloses(query.end, node.init)) {
 							result.category = 'varaccess';						 //$NON-NLS-1$
 						}
@@ -308,7 +320,7 @@ define([
 			}
 		}
 		if(!result.category) {
-			result.category = 'partial'; //$NON-NLS-1$
+			result.category = 'uncategorized'; //$NON-NLS-1$
 		}
 	}
 	
