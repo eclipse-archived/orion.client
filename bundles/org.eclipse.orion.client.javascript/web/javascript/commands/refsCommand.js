@@ -131,6 +131,8 @@ define([
 		            	}, {location:options.input, contentType:options.contentType});
     			        if(cu.validOffset(offset)) {
     			        	that._findRefs(editorContext, options, metadata, deferred);
+    			        } else {
+    			        	deferred.resolve('Not a valid offset in HTML');
     			        }
 			        }, /* @callback */ function(err) {
 			        	deferred.resolve(Messages['noFileContents']);
@@ -169,7 +171,7 @@ define([
 								expected.result = [];
 								var searchParams = {keyword: node.name, 
 									resource: that.scriptresolver.getSearchLocation(), 
-									fileNamePatterns: ["*.js"],  //$NON-NLS-1$
+									fileNamePatterns: ["*.js", "*.html", "*.htm"],  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 									caseSensitive: true, 
 									incremental:false, 
 									shape: 'group' //$NON-NLS-1$
@@ -180,7 +182,7 @@ define([
 									expected.result = searchResult;
 									for (var h = 0, l1 = searchResult.length; h < l1; h++) {
 										var file = searchResult[h];
-										expected.deferred.progress({message: 'Checking matches in file: \''+file.name+'\'...'});
+										//TODO expected.deferred.progress({message: 'Checking matches in file: \''+file.name+'\'...'});
 										for(var i = 0, l2 = file.children.length; i < l2; i++) {
 											var line = file.children[i];
 											expected.total += line.matches.length;
@@ -230,12 +232,17 @@ define([
 								match.confidence = 100;
 							} else if(type.staticCheck) {
 								match.confidence = type.staticCheck.confidence;
-							} else {
+							} else if(_t.category === 'blockcomments') {
+								match.confidence = 5;
+								//TODO propagate type infos to named elements in structured doc
+								//for example @name mentions func decl match
+							}
+							else {
 								match.confidence = 0;
 							}
 							match.category = _t.category;
 						} else if(err) {
-							match.category = categories.partial.category;
+							match.category = categories.uncategorized.category;
 							match.confidence = 0;
 						}
 						expected.done++;
