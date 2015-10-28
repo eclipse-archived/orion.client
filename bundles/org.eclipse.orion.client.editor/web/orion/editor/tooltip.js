@@ -75,7 +75,10 @@ function Tooltip (view) {
 				}
 			}, true);
 			textUtil.addEventListener(document, "scroll", this._scrollHandler = function(event) { //$NON-NLS-0$
-				self.hide();
+				if (!self.isVisible()) return;
+				if (self._topPixel !== self._view.getTopPixel() || self._leftPixel !== self._view.getHorizontalPixel()) {
+					self.hide();
+				}
 			}, true);
 			textUtil.addEventListener(document, "mousemove", this._mouseMoveHandler = function(event) { //$NON-NLS-0$
 				// Ignore spurious mousemove events
@@ -141,6 +144,8 @@ function Tooltip (view) {
 		show: function(tooltipInfo, locked, giveFocus) {
 			this._locked = locked;
 			this._giveFocus = giveFocus;
+			this._topPixel = this._view.getTopPixel();
+			this._leftPixel = this._view.getHorizontalPixel();
 			this._processInfo(tooltipInfo.getTooltipInfo());
 		},
 		
