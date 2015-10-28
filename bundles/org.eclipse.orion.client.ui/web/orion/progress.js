@@ -25,7 +25,7 @@ function(messages, lib, mOperationsDialog) {
 			}
 		});
 		
-		this._progressPane.addEventListener("click", function(evt) {  //$NON-NLS-0$
+		this._progressPane.addEventListener("click", /* @callback */ function(evt) {  //$NON-NLS-0$
 			if (that._operationsDialog.isShowing()) {
 				that._operationsDialog.hide();
 			} else {
@@ -152,13 +152,13 @@ function(messages, lib, mOperationsDialog) {
 					progressMonitor = new this._progressMonitorClass();
 					progressMonitor.begin(operationName);
 				}
-				deferred.then(function(result){
+				deferred.then(/* @callback */ function(result){
 					if(that._operations[operationsIndex]){
 						var operation = that._operations[operationsIndex];
 						if(operationName)
 							operation.Name = operationName;
 						that._lastOperation = operation;
-						operation.type = "loadend";
+						operation.type = "loadend"; //$NON-NLS-1$
 						if(progressMonitor){
 							operation.progressMonitor = progressMonitor;
 						}
@@ -176,7 +176,7 @@ function(messages, lib, mOperationsDialog) {
 							operation.progressMonitor = progressMonitor;
 						}
 						that._lastOperation = operation;
-						operation.type = error.canceled ? "abort" : "error";
+						operation.type = error.canceled ? "abort" : "error"; //$NON-NLS-1$ //$NON-NLS-2$
 						operation.error = error; 
 						that.writeOperation.bind(that)(operationsIndex, operation, deferred);
 						if(!operation.Location){
@@ -184,6 +184,9 @@ function(messages, lib, mOperationsDialog) {
 						}
 					}
 				}, function(operation){
+					if (operation.message) {
+						that._serviceRegistry.getService("orion.page.message").setProgressMessage(operation.message); //$NON-NLS-0$
+					}
 					if(operationName)
 						operation.Name = operationName;
 					if(progressMonitor){
@@ -239,7 +242,7 @@ function(messages, lib, mOperationsDialog) {
 			 * @returns {orion.Promise}
 			 */
 			showWhile: function(deferred, message, avoidDisplayError){
-				this._serviceRegistry.getService("orion.page.message").showWhile(deferred, message);
+				this._serviceRegistry.getService("orion.page.message").showWhile(deferred, message); //$NON-NLS-1$
 
 				var that = this;
 				// If the underlying deferred was rejected, display an error
@@ -256,7 +259,7 @@ function(messages, lib, mOperationsDialog) {
 				this._operations[operationIndex] = operation;
 				this._operationDeferrds[operationIndex] = deferred;
 				if(operation.Location){
-					this._serviceRegistry.getService("orion.core.preference").getPreferences("/operations").then(function(globalOperations){
+					this._serviceRegistry.getService("orion.core.preference").getPreferences("/operations").then(function(globalOperations){ //$NON-NLS-1$ //$NON-NLS-2$
 						globalOperations.put(operation.Location, {Name: operation.Name, expires: operation.expires});
 					});
 				}

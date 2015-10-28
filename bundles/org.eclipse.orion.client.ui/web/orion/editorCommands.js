@@ -896,6 +896,10 @@ define([
 									that.sideBar.fillSearchPane(result.searchParams.keyword, {Location: result.searchParams.resource}, result);
 								}
 							}
+							var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+							if (statusService) {
+								statusService.setProgressResult("");
+							}
 						};
 					} else {
 						serviceCall = service.run(model.getText(selection.start,selection.end), model.getText(), selection, inputManager.getInput());

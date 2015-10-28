@@ -113,11 +113,14 @@ define([
 			var that = this;
 			var deferred = new Deferred();
 			editorContext.getFileMetadata().then(function(metadata) {
+				var loc = null;
 				if(options.kind === 'project' && Array.isArray(metadata.parents) && metadata.parents.length > 0) {
-					that.scriptresolver.setSearchLocation(metadata.parents[metadata.parents.length - 1].Location);
+					loc = metadata.parents[metadata.parents.length - 1].Location;
+					deferred.progress({message: 'Finding all project references..'});
 				} else {
-					that.scriptresolver.setSearchLocation(null);
+					deferred.progress({message: 'Finding all workspace references..'});
 				}
+				that.scriptresolver.setSearchLocation(loc);
 			    if(options.contentType.id === 'application/javascript') {
 	    			that._findRefs(editorContext, options, metadata, deferred);
 			    } else {
@@ -177,6 +180,7 @@ define([
 									expected.result = searchResult;
 									for (var h = 0, l1 = searchResult.length; h < l1; h++) {
 										var file = searchResult[h];
+										expected.deferred.progress({message: 'Checking matches in file: \''+file.name+'\'...'});
 										for(var i = 0, l2 = file.children.length; i < l2; i++) {
 											var line = file.children[i];
 											expected.total += line.matches.length;
