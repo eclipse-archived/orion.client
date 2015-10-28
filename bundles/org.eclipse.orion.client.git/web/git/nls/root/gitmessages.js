@@ -215,6 +215,10 @@ define({//Default message bundle
 	"Adding submodule: ": "Adding submodule: ", //$NON-NLS-0$  //$NON-NLS-1$
 	"Add Submodule": "Add Submodule", //$NON-NLS-0$  //$NON-NLS-1$
 	"Add a submodule to this Git repository": "Add a submodule to this Git repository", //$NON-NLS-0$  //$NON-NLS-1$
+	"Missing submodule": "Missing submodule", //$NON-NLS-0$  //$NON-NLS-1$
+	"Added submodule": "Added submodule", //$NON-NLS-0$  //$NON-NLS-1$
+	"Missing Submodule Message": "Missing submodule, it is either removed or uninitialized", //$NON-NLS-0$  //$NON-NLS-1$
+	"Added Submodule Message": "Added submodule files that are not yet committed, to view the actual files please open its own repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"Remote Name:": "Remote Name:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Remote URI:": "Remote URI:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Apply Patch": "Apply Patch", //$NON-NLS-0$  //$NON-NLS-1$
@@ -592,5 +596,6 @@ define({//Default message bundle
 	'DetachedHead ${0}' : "Detached HEAD@${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	'SingleSubmodule' : "${0} (${1} submodule)", //$NON-NLS-1$ //$NON-NLS-0$
 	'PluralSubmodule' : "${0} (${1} submodules)", //$NON-NLS-1$ //$NON-NLS-0$
+	'UninitializedSubmodule' : " ( Uninitialized Submodule )", //$NON-NLS-1$ //$NON-NLS-0$
 	"Detach Head:": "Detach Head:" //$NON-NLS-0$  //$NON-NLS-1$
 });
