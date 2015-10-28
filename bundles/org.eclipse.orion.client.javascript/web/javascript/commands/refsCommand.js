@@ -191,7 +191,7 @@ define([
 													that._checkType(type, file.metadata, match, expected);
 												} else {
 													match.category = categories.partial.category;
-													match.confidence = -100;
+													match.confidence = 0;
 													expected.done++;
 												}
 											}
@@ -231,12 +231,12 @@ define([
 							} else if(type.staticCheck) {
 								match.confidence = type.staticCheck.confidence;
 							} else {
-								match.confidence = -1;
+								match.confidence = 0;
 							}
 							match.category = _t.category;
 						} else if(err) {
 							match.category = categories.partial.category;
-							match.confidence = -1;
+							match.confidence = 0;
 						}
 						expected.done++;
 						that._checkDone(expected);

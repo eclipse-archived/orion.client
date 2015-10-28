@@ -137,7 +137,10 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 			var classNames = ["confidenceDecorator"]; //$NON-NLS-1$
 			if(item.confidence >= 100) {
 				classNames.push("confidenceHigh"); //$NON-NLS-0$
-			} else {
+			} else if(item.confidence > 0 && item.confidence < 100) {
+				classNames.push('confidenceMid'); //$NON-NLS-1$
+			}
+			else {
 				classNames.push("confidenceLow"); //$NON-NLS-0$
 			}
 	    	_createSpan(classNames, null, spanHolder, item.confidence + "%");

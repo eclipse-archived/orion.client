@@ -19,12 +19,18 @@
 
 .searchResultsWrapperDiv .confidenceHigh {
 	color: white !important;
-	background-color:green;
+	background-color: #1BB199 !important;
 }
 
+.searchResultsWrapperDiv .confidenceMid {
+	color: white !important;
+	background-color: #f0ad4e !important;
+}
+
+
 .searchResultsWrapperDiv .confidenceLow {
-	color: black !important;
-	background-color:yellow;
+	color: white !important;
+	background-color: #d9534f !important;
 }
 
 .searchResultsWrapperDiv .selectableNavRow:hover {
