@@ -625,9 +625,9 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 
     InlineSearchResultExplorer.prototype.getItemChecked = function(item) {
         if (item.checked === undefined) {
-        	if(item.type === 'group' && item.location === 'other') {
+        	if(item.type === 'group' && (item.children.length === 0 || item.location === 'partial' || item.location === 'uncategorized')) {
         		item.checked = false;
-        	} else if(item.parent && item.parent.type === 'group' && item.parent.location === 'other') {
+        	} else if(item.parent && item.parent.type === 'group' && (item.parent.location === 'partial' || item.parent.location === 'uncategorized')) {
         		item.checked = false;
         	} else {
 	            item.checked = true;
