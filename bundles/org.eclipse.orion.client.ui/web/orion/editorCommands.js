@@ -898,7 +898,7 @@ define([
 							}
 							var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 							if (statusService) {
-								statusService.setProgressResult("");
+								statusService.setProgressMessage("");
 							}
 						};
 					} else {
