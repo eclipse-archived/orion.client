@@ -82,16 +82,21 @@ orion.DiffParser = (function() {
 			}
 			this._oFileContents = oFileString === "" ? []:oFileString.split(this._lineDelimiter);
 			this._diffContents = diffString.split(this._diffLineDelimiter);
+			var returnObj = {};
+			returnObj.mapper = [];
+
 			var totalLines = this._diffContents.length;
 			this._hunkRanges = [];
 			for(var i = 0; i <totalLines ; i++){
+				this._addFileModeProperties(this._diffContents[i], returnObj);
 				var hunkRange = this._parseHunkRange(i);
 				if (hunkRange) {
 				    this._hunkRanges.push(hunkRange);
 				}
 		    }
 			if(0 === this._hunkRanges.length){
-				return {outPutFile:oFileString,mapper:[]};
+				returnObj.outPutFile = oFileString;
+				return returnObj;
 			}
 
 			if(this._DEBUG){
@@ -129,8 +134,33 @@ orion.DiffParser = (function() {
 				//this._logNewFile();
 				//console.log("***Total line number in new file: " + this._nFileContents.length);
 			}
-			return {outPutFile:this._nFileContents.join(this._diffLineDelimiter),mapper:this._deltaMap};
+			returnObj.outPutFile = this._nFileContents.join(this._diffLineDelimiter);
+			returnObj.mapper = this._deltaMap;
+			return returnObj;
 		},
+		
+		_addFileModeProperties: function(line, returnObj){
+			function startWith(line, str){
+				return line.lastIndexOf(str, 0) === 0;				
+			}
+			
+			if(startWith(line,"-")||startWith(line,"+")||startWith(line,"@")){
+				return;
+			}
+			if(startWith(line,"deleted file mode")){
+				returnObj.deletedFileMode = line.split("deleted file mode")[1].match(/[^ ]+/g)[0];
+			}
+			if(startWith(line,"new file mode")){
+				returnObj.newFileMode = line.split("new file mode")[1].match(/[^ ]+/g)[0];
+			}
+			if(startWith(line,"old mode")){
+				returnObj.oldMode = line.split("old mode")[1].match(/[^ ]+/g)[0];
+			}
+			if(startWith(line,"new mode")){
+				returnObj.newMode = line.split("new mode")[1].match(/[^ ]+/g)[0];
+			}
+		},
+
 
 		_logMap: function(){
 			for(var i = 0;i < this._deltaMap.length ; i++){

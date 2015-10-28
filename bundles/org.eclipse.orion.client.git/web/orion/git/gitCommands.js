@@ -2411,7 +2411,7 @@ var exports = {};
 			imageClass: "core-sprite-trashcan",
 			id: "eclipse.git.deleteSubmodule",
 			visibleWhen: function(item) {
-				return item.Type === "Clone" && item.Parents;
+				return item.Type === "Clone" && item.SubmoduleStatus && item.SubmoduleStatus.Type != "UNINITIALIZED";
 			},
 			callback : function(data){
 				var item = data.items;
@@ -2513,7 +2513,7 @@ var exports = {};
 			parameters : submoduleParameters,
 			callback : addSubmoduleCallback,
 			visibleWhen : function(item) {
-				return item.Type === "Clone";
+				return item.Type === "Clone" && (!item.SubmoduleStatus || item.SubmoduleStatus.Type != "UNINITIALIZED") ;
 			}
 		});
 		commandService.addCommand(addSubmoduleCommand);
