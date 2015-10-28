@@ -11,9 +11,7 @@
 .searchResultsWrapperDiv .confidenceDecorator {
 	display: inline-block;
 	width: 32px;
-	height: 16px;
 	vertical-align: middle;
-	margin-top: 4px;
 	border: none;
 }
 
