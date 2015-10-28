@@ -245,6 +245,7 @@ define({//Default message bundle
 	"Git Credentials": "Git Credentials", //$NON-NLS-0$  //$NON-NLS-1$
 	"Username:": "Username:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Private key:": "Private key:", //$NON-NLS-0$  //$NON-NLS-1$
+	"AuthorizeWithGitHub": "Authorize with GitHub", //$NON-NLS-0$  //$NON-NLS-1$
 	"Passphrase (optional):": "Passphrase (optional):", //$NON-NLS-0$  //$NON-NLS-1$
 	"commit:": "commit: ", //$NON-NLS-0$  //$NON-NLS-1$
 	"parent:": "parent: ", //$NON-NLS-0$  //$NON-NLS-1$

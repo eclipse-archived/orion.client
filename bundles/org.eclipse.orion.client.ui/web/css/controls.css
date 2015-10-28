@@ -166,6 +166,15 @@ html[dir="rtl"] .parametersDismiss { /* ACGC */
 	min-width: 16px;
 }
 
+.githubCloneAuth .dismissButton {
+	color: #1bb199;
+	margin-left: 0;
+}
+
+.githubCloneAuth .dismissButton:hover {
+	color: #1bb199;
+}
+
 .parametersDismiss .core-sprite-close {
 	margin-right: 0;
 	padding-right: 0;

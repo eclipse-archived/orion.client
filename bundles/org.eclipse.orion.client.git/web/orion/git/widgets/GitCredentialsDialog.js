@@ -34,9 +34,11 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 
 	GitCredentialsDialog.prototype = new dialog.Dialog();
 
-	GitCredentialsDialog.prototype.TEMPLATE ='<table><tbody><tr><td align="right" id="gitCredentialsLabel">${Repository URL:}</td><td><strong id="url"></strong></td></tr>'
+	GitCredentialsDialog.prototype.TEMPLATE = '<table><tbody><tr><td align="right" id="gitCredentialsLabel">${Repository URL:}</td><td><strong id="url"></strong></td></tr>'
 
-	+ '<tr id="gitSshUsernameRow">' + '<td align="right"><label style="line-height: 1;" id="gitSshUsernameLabel" for="gitSshUsername">${Username:}</label></td>'
+			+ '<tr id="gitHubAuthRow"><td></td><td><span class="githubCloneAuth"><input type="button" class="dismissButton" id="authButton"></span></td></tr>'
+
+			+ '<tr id="gitSshUsernameRow">' + '<td align="right"><label style="line-height: 1;" id="gitSshUsernameLabel" for="gitSshUsername">${Username:}</label></td>'
 			+ '<td><input id="gitSshUsername" type="text" value="" style="margin: 0;">' + '</td></tr>'
 
 			+ '<tr id="gitSshPasswordRow">' + '<td align="right"><input style="margin: 0;" id="isSshPassword" type="radio" name="isSshPassword" checked value="password"/>'
@@ -118,6 +120,17 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 		if (this.options.errordata && this.options.errordata.Url) {
 			this.$gitCredentialsLabel.style.display = "block"; //$NON-NLS-0$
 			this.$url.textContent = this.options.errordata.Url;
+		}
+
+		if (localStorage.githubAuth && this.options.errordata && this.options.errordata.GitHubAuth) {
+			this.$authButton.value = messages.AuthorizeWithGitHub;
+			(function(authUrl) {
+				this.$authButton.addEventListener("click", function(e) { //$NON-NLS-0$
+					window.location.href = authUrl;
+				});
+			}.bind(this))(this.options.errordata.GitHubAuth + "?ref=" + encodeURIComponent(window.location.href)); //$NON-NLS-0$
+		} else {
+			this.$gitHubAuthRow.style.display = "none"; //$NON-NLS-0$			
 		}
 
 		if (this.options.errordata && this.options.errordata.User && this.options.errordata.User !== "") {

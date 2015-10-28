@@ -69,7 +69,6 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 				title: title,
 				serviceRegistry: serviceRegistry,
 				func: func,
-				authUrl: options.authUrl,
 				errordata: options.errordata,
 				failedOperation: options.failedOperation,
 				closeCallback : closeCallback
@@ -344,9 +343,6 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 				}
 				if (jsonData.failedOperation) {
 					options.failedOperation = jsonData.failedOperation;
-				}
-				if (jsonData.authUrl) {
-					options.authUrl = jsonData.authUrl;
 				}
 				handleSshAuthenticationError(serviceRegistry, jsonData.JsonData, options, callee, title);
 				return;
