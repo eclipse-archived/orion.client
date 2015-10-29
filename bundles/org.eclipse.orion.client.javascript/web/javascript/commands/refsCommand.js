@@ -182,7 +182,6 @@ define([
 									expected.result = searchResult;
 									for (var h = 0, l1 = searchResult.length; h < l1; h++) {
 										var file = searchResult[h];
-										//TODO expected.deferred.progress({message: 'Checking matches in file: \''+file.name+'\'...'});
 										for(var i = 0, l2 = file.children.length; i < l2; i++) {
 											var line = file.children[i];
 											expected.total += line.matches.length;
@@ -246,6 +245,7 @@ define([
 							match.confidence = 0;
 						}
 						expected.done++;
+						expected.deferred.progress({message: 'References found in file: \''+file.Name+ '\'  (' + expected.done + '/' + expected.total + ')'});
 						that._checkDone(expected);
 					});
 		},
