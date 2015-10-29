@@ -34,7 +34,6 @@ define([
 		this.scriptResolver = scriptResolver;
 		this.fileClient = fileClient;
 		this.currentProjectLocation = null;
-		this.currentOptions = null;
 		this.timeout = null;
 	}
 
@@ -64,9 +63,9 @@ define([
 				console.log('Parsed from .tern-project:');
 				console.log(jsonOptions);
 				
-				if (jsonOptions.plugins){
-					ternWorker.startServer({plugins: jsonOptions.plugins});
-				}				
+				if (jsonOptions.plugins || Array.isArray(jsonOptions.libs) || jsonOptions.dependencyBudget || jsonOptions.ecmaVersion){
+					ternWorker.startServer(jsonOptions);
+				}
 
 				if (Array.isArray(jsonOptions.loadEagerly)){
 					for (var i=0; i<jsonOptions.loadEagerly.length; i++) {
@@ -74,6 +73,8 @@ define([
 						var ext = 'js';
 						if (filename.match(/\.html$/)){
 							ext = 'html';
+						} else if (filename.match(/\.htm$/)){
+							ext = 'htm';
 						}
 						
 						// TODO Can't provide error messages once the deferred is resolved.
@@ -101,7 +102,7 @@ define([
 		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
 		 */
 		onInputChanged: function onInputChanged(event) {
-//			console.log("Tern Project Manager:");
+//			console.log("Tern Project Manager: On Input Changed");
 			
 			var that = this;
 			// Get the project
@@ -110,14 +111,13 @@ define([
 				var topFolder = file.parents[file.parents.length-1];
 				if (topFolder && (!that.currentProjectLocation || topFolder.Location !== that.currentProjectLocation)){
 					
-					console.log("Tern Project Manager: Project changed, check for .tern-project");
+//					console.log("Tern Project Manager: Project changed, check for .tern-project");
 					that.currentProjectLocation = topFolder.Location;
 					that.scriptResolver.setSearchLocation(topFolder.Location);
 					
 					// See if the new project has a .tern-project file
 					if(topFolder.Children){
 						that._getProjectTernConfiguration(that.fileClient, topFolder.Children).then(function(jsonOptions){
-							that.currentOptions = jsonOptions;
 							if (jsonOptions){
 								that._loadTernConfig(that.ternworker, that.scriptResolver, jsonOptions);
 							}
@@ -125,7 +125,6 @@ define([
 					} else if(topFolder.ChildrenLocation) {
 						that.fileClient.fetchChildren(topFolder.ChildrenLocation).then(function(children){
 							that._getProjectTernConfiguration(that.fileClient, children).then(function(jsonOptions){
-								that.currentOptions = jsonOptions;
 							if (jsonOptions){
 								that._loadTernConfig(that.ternworker, that.scriptResolver, jsonOptions);
 							}
@@ -141,8 +140,13 @@ define([
 //				console.log("Problem with the input changed event:");
 //				console.log(event);
 			}
-		}
-		
+			
+			// If the user opened the .tern-project file assume that it was edited
+			if (file.name === '.tern-project'){
+				that.currentProjectLocation = null;
+			}
+			
+		}		
 	});
 
 	return {

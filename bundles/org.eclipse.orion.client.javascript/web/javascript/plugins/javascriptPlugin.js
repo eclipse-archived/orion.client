@@ -397,7 +397,7 @@ define([
 	    		onInputChanged: ternProjectManager.onInputChanged.bind(ternProjectManager)
 	    	},
 	    	{
-	    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
+	    		contentType: ["application/javascript", "application/json", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	    		types: ['onInputChanged']  //$NON-NLS-1$
 	    	});
     	}

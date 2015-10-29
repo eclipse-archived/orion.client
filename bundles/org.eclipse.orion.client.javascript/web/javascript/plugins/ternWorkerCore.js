@@ -170,6 +170,18 @@ require([
 			if (jsonOptions.plugins){
         		options.plugins = jsonOptions.plugins;
         	}
+        	if (Array.isArray(jsonOptions.libs)){
+        		// TODO Untested option, related to the defs lookup
+        		options.libs = jsonOptions.libs;
+        	}
+        	if (typeof jsonOptions.ecmaVersion === 'number'){
+        		// TODO Untested option
+        		options.ecmaVersion = jsonOptions.ecmaVersion;
+        	}
+        	if (typeof jsonOptions.dependencyBudget === 'number'){
+        		// TODO Untested option
+        		options.dependencyBudget = jsonOptions.dependencyBudget;
+        	}
         }
         ternserver = new Tern.Server(options);
         post('server_ready'); //$NON-NLS-1$
