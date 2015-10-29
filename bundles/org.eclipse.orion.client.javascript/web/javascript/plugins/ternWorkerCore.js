@@ -157,7 +157,7 @@ require([
                     	version: '1.0', //$NON-NLS-1$
                     	removable: false
                     },
-                    findTypes: {
+                    refs: {
                     	name : Messages["findTypesName"],
                     	description: Messages["findTypesDescription"],
                     	version: '1.0', //$NON-NLS-1$
