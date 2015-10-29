@@ -59,7 +59,7 @@ img {
     -webkit-align-items: flex-start;
         -ms-flex-align: start;
             align-items: flex-start;
-    height: 80px;
+    height: 110px;
     margin-left: auto;
     margin-right: auto;
     margin-top: 0;
@@ -84,7 +84,7 @@ img {
     margin-top: 20px;
     margin-bottom: 20px;
     margin-left: -10px;
-    height: 36px;
+    height: 83px;
     width: 110px;
 }
 
@@ -180,7 +180,7 @@ input::-ms-reveal {
 }
 
 .orion-link-button:hover {
-    background-color: #fbaf43;
+    background-color: #FDD900;
     border-color: #007095;
     color: white;
 }
@@ -223,8 +223,7 @@ input::-ms-reveal {
     -ms-flex-item-align: auto;
             -webkit-align-self: auto;
             align-self: auto;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.15);
-    background: linear-gradient(to right, #FFF 0%, #FFF 47%, #F7F7F7 50%);
+    border: 1px solid #E5E5E5;
 }
 
 .buffer-space{
@@ -484,7 +483,7 @@ input::-ms-reveal {
 }
 
 .login-button {
-    background: #FBAF43;
+    background: #FDD900;
     border: none;
     cursor: pointer;
     padding: 10px;
