@@ -220,7 +220,7 @@ html[dir="rtl"] .parametersDismiss .core-sprite-close { /* ACGC */
 }
 
 /* parameter labels */
-label.parameterInput{
+label.parameterInput {
 	color: #555;
 	white-space: nowrap;
 }
@@ -232,6 +232,12 @@ label.parameterInput{
 	vertical-align: middle;
 	color:#333;
 	outline:none;
+}
+
+button.dismissButton.parameterInput {
+	color: whitesmoke;
+	margin-top: 3px;
+	margin-bottom: 3px;
 }
 
 .parameterInvalid {

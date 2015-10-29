@@ -206,6 +206,17 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'],
 						lib.stop(event);
 					}
 				};
+
+				var makeButton = function(text, parent) {
+					var button = document.createElement("button"); //$NON-NLS-0$
+					parent.appendChild(button);
+					if (text) {
+						button.appendChild(document.createTextNode(text)); //$NON-NLS-0$
+					}
+					button.classList.add("dismissButton"); //$NON-NLS-0$
+					return button;
+				};
+
 				var parameters = commandInvocation.parameters;
 				
 				if (parameters.message) {
@@ -249,17 +260,8 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'],
 						}
 					} else if (parm.type === "button") { //$NON-NLS-0$
 						if (!field) {
-							field = document.createElement("span"); //$NON-NLS-0$
-							field.classList.add("parametersDismiss"); //$NON-NLS-0$
-							var button = document.createElement("input"); //$NON-NLS-0$
-							button.type = "button"; //$NON-NLS-0$
-							button.id = id;
-							button.classList.add("dismissButton"); //$NON-NLS-0$
-							field.appendChild(button);
-							parent.appendChild(field);
-							if (parm.value) {
-								button.value = parm.value;
-							}
+							field = makeButton(parm.value || "", parent);
+							field.id = id;
 						} else {
 							if (parm.value) {
 								field.value = parm.value;
@@ -307,16 +309,6 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'],
 					if (collector._collectAndCall(commandInvocation, parameterArea)) {
 						localClose();
 					}
-				};
-
-				var makeButton = function(text, parent) {
-					var button = document.createElement("button"); //$NON-NLS-0$
-					parent.appendChild(button);
-					if (text) {
-						button.appendChild(document.createTextNode(text)); //$NON-NLS-0$
-					}
-					button.classList.add("dismissButton"); //$NON-NLS-0$
-					return button;
 				};
 				
 				if (commandInvocation.parameters.hasOptionalParameters()) {
