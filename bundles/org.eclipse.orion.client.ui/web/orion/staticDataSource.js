@@ -35,13 +35,14 @@ define([
 	"orion/editor/stylers/text_x-ruby/syntax",
 	"orion/editor/stylers/text_x-go/syntax",
 	"orion/editor/stylers/text_x-objective-c/syntax",
+	"orion/editor/stylers/text_x-smarty/syntax",
 	"orion/editor/stylers/text_x-swift/syntax",
 	"orion/editor/stylers/text_x-vb/syntax",
 	"orion/editor/stylers/text_x-vbhtml/syntax",
 	'orion/editor/stylers/application_x-ejs/syntax',
 	'orion/editor/stylers/application_xml/syntax',
 	'orion/editor/stylers/text_x-yaml/syntax',
-], function(Deferred, mStyler, mJS, mJSP, mXQuery, mCss, mHtml, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mSwift, mVB, mVBHTML, mEJS, mXml, mYaml) {
+], function(Deferred, mStyler, mJS, mJSP, mXQuery, mCss, mHtml, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mSmarty, mSwift, mVB, mVBHTML, mEJS, mXml, mYaml) {
 	var ContentTypes = [
 		{	id: "text/plain",
 			name: "Text",
@@ -128,6 +129,11 @@ define([
 			"extends": "text/plain",
 			name: "PHP",
 			extension: ["php", "php3", "php4", "php5", "phpt", "phtml", "aw", "ctp"]
+		},
+		{	id: "text/x-smarty",
+			"extends": "text/plain",
+			name: "Smarty",
+			extension: ["tpl"]
 		},
 		{	id: "text/x-swift",
 			"extends": "text/plain",
@@ -330,6 +336,9 @@ define([
 						break;
 					case "text/x-php": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mPhp.grammars, "orion.php", fileContentType.id); //$NON-NLS-0$
+						break;
+					case "text/x-smarty": //$NON-NLS-0$
+						stylerAdapter = new mStyler.createPatternBasedAdapter(mSmarty.grammars, "orion.smarty", fileContentType.id); //$NON-NLS-0$
 						break;
 					case "text/x-swift": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mSwift.grammars, "orion.swift", fileContentType.id); //$NON-NLS-0$
