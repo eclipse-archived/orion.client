@@ -213,12 +213,10 @@ define([
 	        	}
 	        }
 	        if(this._shape === 'group' && this._categories) {
- 				/*
  				var filtered = this.getListRoot().children.filter(function(category) {
 					return category.children.length > 0;
 				});
 				this.getListRoot().children = filtered;
-				*/
 				this.getListRoot().children.forEach(function(category){
 					category.children.sort(function(a, b) {
 						//There are rare cases that a match confidence is not assigned.
