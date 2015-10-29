@@ -122,6 +122,10 @@ define([
 	 * @param {Object} result The result
 	 */
 	function categorize(query, file, result) {
+		if(Array.isArray(file.ast.errors) && file.ast.errors.length > 0) {
+			result.category = 'parseerrors'; //$NON-NLS-1$
+			return;
+		}
 		var node = finder.findNode(query.end-1, file.ast, {parents:true});
 		if(node) {
 			if(node.type === 'Identifier') {
@@ -334,7 +338,7 @@ define([
 			checkNode(query, node, result);
 		} else {
 			result.staticCheck = {
-				confidence: -1
+				confidence: 0
 			};
 		}
 	}
@@ -347,7 +351,7 @@ define([
 			case 'Literal': {
 				//a re-decl cannot be a reference
 				result.staticCheck = {
-					confidence: -1
+					confidence: 0
 				};
 				break;
 			}
@@ -394,7 +398,7 @@ define([
 						};
 					} else {
 						result.staticCheck = {
-							confidence: -1
+							confidence: 0
 						};
 					}
 				}
@@ -404,7 +408,7 @@ define([
 						if(query.origin.type.type === 'fn()') {
 							//orig type is function, this is not relevant
 							result.staticCheck = {
-								confidence: -1
+								confidence: 0
 							};
 						} else {
 							//with no type infos we have no idea if this is the same one
@@ -416,7 +420,7 @@ define([
 						if(arg.id === query.origin.type.exprName) {
 							//redecl, not relevant
 							result.staticCheck = {
-								confidence: -1
+								confidence: 0
 							};
 						}
 					}

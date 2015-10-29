@@ -102,6 +102,11 @@ define([
 			name: Messages['uncategorized'],
 			category: 'uncategorized', //$NON-NLS-1$
 			sort: 13
+		},
+		syntax: {
+			name: Messages['parseErrors'],
+			category: 'parseerrors', //$NON-NLS-1$
+			sort: 14
 		}
 	};
 
