@@ -227,10 +227,10 @@ define([
 					/* @callback */ function(type, err) {
 						if(type && type.type) {
 							var _t = type.type, _ot = original.type;
-							if(_t.name === _ot.name && _t.type === _ot.type && _t.origin === _ot.origin) {
+							if(_t.name === _ot.name && _t.type === _ot.type && that._sameOrigin(_t.origin, _ot.origin)) {
 								match.confidence = 100;
-							} else if(type.staticCheck) {
-								match.confidence = type.staticCheck.confidence;
+							} else if(_t.staticCheck) {
+								match.confidence = _t.staticCheck.confidence;
 							} else if(_t.category === 'blockcomments') {
 								match.confidence = 5;
 								//TODO propagate type infos to named elements in structured doc
@@ -248,6 +248,28 @@ define([
 						expected.deferred.progress({message: 'References found in file: \''+file.Name+ '\'  (' + expected.done + '/' + expected.total + ')'});
 						that._checkDone(expected);
 					});
+		},
+		
+		/**
+		 * @description Compares the two origins to see if they are the same. This function will
+		 * try decoding the URIs to compare for equality
+		 * @function
+		 * @private
+		 * @param {String} o1 The first origin
+		 * @param {String} o2 The second origin
+		 * @returns {Boolean} If the origins are equal
+		 */
+		_sameOrigin: function _sameOrigin(o1, o2) {
+			if(o1 === o2) {
+				return true;
+			}
+			var u1 = decodeURIComponent(o1);
+			var u2 = decodeURIComponent(o2);
+			if(u1 === u2) {
+				return true;
+			}
+			//last try, in case we have re-encoded URIs
+			return decodeURIComponent(u1) === decodeURIComponent(u2);
 		},
 		
 		/**
