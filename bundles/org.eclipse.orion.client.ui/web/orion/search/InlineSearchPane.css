@@ -15,6 +15,32 @@
 	border: none;
 }
 
+.searchResultsWrapperDiv .confidenceDecoratorImg {
+	display: inline-block;
+	width: 16px;
+	vertical-align: middle;
+	font-size: 12px;
+	border: none;
+}
+
+.searchResultsWrapperDiv .confidenceHighImg {
+	color: green;
+}
+
+.searchResultsWrapperDiv .confidenceMidImg {
+	color: orange;
+	padding-right: 1px;
+}
+
+.searchResultsWrapperDiv .confidenceUnknownImg {
+	color: blue;
+}
+
+.searchResultsWrapperDiv .confidenceLowImg {
+	color: red;
+	padding-right: 1px;
+}
+
 .searchResultsWrapperDiv .confidenceHigh {
 	color: white !important;
 	background-color: #1BB199 !important;

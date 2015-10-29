@@ -131,7 +131,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 				{holderDom: this._lastFileIconDom});
 		return link;
     };
-    
+/*    
 	SearchResultRenderer.prototype.generateDetailDecorator = function(item, spanHolder) {
 		if(typeof(item.confidence) === "number") {
 			var classNames = ["confidenceDecorator"]; //$NON-NLS-1$
@@ -145,6 +145,32 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 			}
 	    	_createSpan(classNames, null, spanHolder, item.confidence + "%");
     	}
+	};
+*/	
+	SearchResultRenderer.prototype.generateDetailDecorator = function(item, spanHolder) {
+		if(typeof(item.confidence) === "number") {
+			var icon = document.createElement("div"); //$NON-NLS-0$
+			icon.classList.add("confidenceDecoratorImg"); //$NON-NLS-0$
+			//TODO: Use message.js for the real titles.
+			if(item.confidence >= 100) {
+				icon.classList.add('confidenceHighImg'); //$NON-NLS-1$
+				icon.classList.add("core-sprite-checkmark"); //$NON-NLS-0$
+				icon.title = "Perfect match";
+			} else if(item.confidence > 0 && item.confidence < 100) {
+				icon.classList.add('confidenceMidImg'); //$NON-NLS-1$
+				icon.classList.add("core-sprite-warning"); //$NON-NLS-0$
+				icon.title = "Possible match: " + item.confidence + "%";
+			} else if(item.confidence === -1) {
+				icon.classList.add('confidenceUnknownImg'); //$NON-NLS-1$
+				icon.classList.add("core-sprite-questionmark"); //$NON-NLS-0$
+				icon.title = "Not enough information on this match";
+			} else {
+				icon.classList.add('confidenceLowImg'); //$NON-NLS-1$
+				icon.classList.add("core-sprite-error"); //$NON-NLS-0$
+				icon.title = "Not a match";
+			}
+			spanHolder.appendChild(icon);
+		}
 	};
 	
     SearchResultRenderer.prototype.generateDetailLink = function(item) {

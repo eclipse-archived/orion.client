@@ -155,6 +155,7 @@
 .core-sprite-listed-errors,
 .core-sprite-checkmark,
 .core-sprite-save,
+.core-sprite-questionmark,
 .core-sprite-eraser
 {
 	color: inherit;
@@ -168,6 +169,10 @@
 	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-questionmark {
+	font-weight: bold;
 }
 
 .core-sprite-hamburger {
@@ -325,7 +330,7 @@
 .core-sprite-horizontal:before{ content:'\E042'; }
 .core-sprite-vertical:before{ content:'\E041'; }
 .core-sprite-pip:before{ content:'\E067'; }
-
+.core-sprite-questionmark:before{ content:'?'; }
 
 /* icons for file types - possibly more to come - at least one for images */ 
 
