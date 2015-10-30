@@ -121,9 +121,9 @@ define([
 				var loc = null;
 				if(options.kind === 'project' && Array.isArray(metadata.parents) && metadata.parents.length > 0) {
 					loc = metadata.parents[metadata.parents.length - 1].Location;
-					deferred.progress({message: 'Finding all project references..'});
+					deferred.progress({message: Messages['allProjectRefs']});
 				} else {
-					deferred.progress({message: 'Finding all workspace references..'});
+					deferred.progress({message: Messages['allWorkspaceRefs']});
 				}
 				that.scriptresolver.setSearchLocation(loc);
 			    if(options.contentType.id === 'application/javascript') {
@@ -137,7 +137,7 @@ define([
     			        if(cu.validOffset(offset)) {
     			        	that._findRefs(editorContext, options, metadata, deferred);
     			        } else {
-    			        	deferred.resolve('Not a valid offset in HTML');
+    			        	deferred.resolve(Messages['notHtmlOffset']);
     			        }
 			        }, /* @callback */ function(err) {
 			        	deferred.resolve(Messages['noFileContents']);
@@ -254,7 +254,7 @@ define([
 							match.confidence = -1;
 						}
 						expected.done++;
-						expected.deferred.progress({message: 'References found in file: \''+file.Name+ '\'  (' + expected.done + '/' + expected.total + ')'});
+						expected.deferred.progress({message: i18nUtil.formatMessage(Messages['refsFoundIn'], file.Name, expected.done, expected.total)});
 						that._checkDone(expected);
 					});
 		},
