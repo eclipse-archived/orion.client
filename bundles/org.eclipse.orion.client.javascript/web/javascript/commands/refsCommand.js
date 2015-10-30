@@ -237,7 +237,7 @@ define([
 							} else if(_t.staticCheck) {
 								match.confidence = _t.staticCheck.confidence;
 							} else if(_t.category === 'blockcomments') {
-								match.confidence = 5;
+								match.confidence = 0;
 								//TODO propagate type infos to named elements in structured doc
 								//for example @name mentions func decl match
 							}
@@ -245,9 +245,13 @@ define([
 								match.confidence = 0;
 							}
 							match.category = _t.category;
+							//TODO for demo anything with parsererrors category is -1
+							if(_t.category === categories.syntax.category) {
+								match.confidence = -1;
+							}
 						} else if(err) {
 							match.category = categories.uncategorized.category;
-							match.confidence = 0;
+							match.confidence = -1;
 						}
 						expected.done++;
 						expected.deferred.progress({message: 'References found in file: \''+file.Name+ '\'  (' + expected.done + '/' + expected.total + ')'});
