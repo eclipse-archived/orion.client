@@ -122,7 +122,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 			this.$url.textContent = this.options.errordata.Url;
 		}
 
-		if (localStorage.githubAuth && this.options.errordata && this.options.errordata.GitHubAuth) {
+		if (this.options.errordata && this.options.errordata.GitHubAuth) {
 			this.$authButton.value = messages.AuthorizeWithGitHub;
 			(function(authUrl) {
 				this.$authButton.addEventListener("click", function(e) { //$NON-NLS-0$

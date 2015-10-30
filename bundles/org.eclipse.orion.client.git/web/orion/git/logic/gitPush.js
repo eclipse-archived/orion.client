@@ -100,7 +100,7 @@ define([
 									parameters.push(new mCommandRegistry.CommandParameter("sshuser", "text", messages['User Name:'])); //$NON-NLS-1$ //$NON-NLS-0$
 								}
 								parameters.push(new mCommandRegistry.CommandParameter("sshpassword", "password", messages['Password:'])); //$NON-NLS-1$ //$NON-NLS-0$
-								if (localStorage.githubAuth && jsonData.JsonData.GitHubAuth) {
+								if (jsonData.JsonData.GitHubAuth) {
 									var listener;
 									(function(authUrl) {
 										listener = new mCommandRegistry.CommandEventListener("click", function(event, commandInvocation) { //$NON-NLS-0$
