@@ -381,20 +381,23 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 			if (end === undefined) { end = this.getCharCount(); }
 			if (start === end) { return ""; }
 			var offset = 0, chunk = 0, length;
-			while (chunk<this._text.length) {
+			while (chunk<this._text.length-1) {
 				length = this._text[chunk].length; 
 				if (start <= offset + length) { break; }
 				offset += length;
 				chunk++;
 			}
+			// set the first offset and chunks
 			var firstOffset = offset;
 			var firstChunk = chunk;
-			while (chunk<this._text.length) {
+			
+			while (chunk<this._text.length-1) {
 				length = this._text[chunk].length; 
 				if (end <= offset + length) { break; }
 				offset += length;
 				chunk++;
 			}
+			// set the last offset and chunks
 			var lastOffset = offset;
 			var lastChunk = chunk;
 			if (firstChunk === lastChunk) {
