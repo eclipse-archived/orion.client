@@ -128,7 +128,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 				this.$authButton.addEventListener("click", function(e) { //$NON-NLS-0$
 					window.location.href = authUrl;
 				});
-			}.bind(this))(this.options.errordata.GitHubAuth + "?ref=" + encodeURIComponent(window.location.href)); //$NON-NLS-0$
+			}.bind(this))(this.options.errordata.GitHubAuth + "?ref=" + encodeURIComponent(window.location.href) + ",cloneGitRepository=" + encodeURIComponent(this.options.errordata.Url)); //$NON-NLS-1$ //$NON-NLS-0$
 		} else {
 			this.$gitHubAuthRow.style.display = "none"; //$NON-NLS-0$			
 		}

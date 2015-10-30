@@ -504,9 +504,7 @@ define([
 			mode: mode,
 			showLinks: links,
 		});
-		return explorer.display().then(function() {
-			this.loadingDeferred.resolve();
-		}.bind(this), this.loadingDeferred.reject);
+		return explorer.display();
 	};
 	
 	GitRepositoryExplorer.prototype.displayBranches = function(repository) {
@@ -715,8 +713,10 @@ define([
 				} else {
 					explorer.select(repository.status);
 				}
+
 				mMetrics.logPageLoadTiming("complete", window.location.pathname); //$NON-NLS-0$
-			}.bind(this));
+				this.loadingDeferred.resolve();
+			}.bind(this), this.loadingDeferred.reject);
 		}.bind(this));
 	};
 
