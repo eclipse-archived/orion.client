@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-
+/* eslint-disable */
 define([
 	"orion/editor/eventTarget",
 	"orion/editor/keyModes",
@@ -111,6 +111,14 @@ define([
 			this._hookEvents();
 			this._createActions();
 			this._updatePage();
+		},
+		getTopPixel: function() {
+			if (!this._clientDiv) { return 0; }
+			return this._getScroll().y;
+		},
+		getHorizontalPixel: function() {
+			if (!this._clientDiv) { return 0; }
+			return this._getScroll().x;
 		},
 		addKeyMode: function(mode, index) {
 			var keyModes = this._keyModes;
