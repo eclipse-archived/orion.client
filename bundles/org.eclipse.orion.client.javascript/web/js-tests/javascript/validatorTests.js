@@ -260,8 +260,8 @@ define([
 				var promise = validate({buffer: '<html><head><script></script></head><body><a onclick="xx;;"></a></body></html>', contentType: 'text/html'});
 				return promise.then(function (problems) {
 					assertProblems(problems, [
-						{start: 56,
-					     end: 57,
+						{start: 57,
+					     end: 58,
 					     severity: 'warning',
 					     description: i18nUtil.formatMessage.call(null, messages['no-extra-semi'], {})
 					    }

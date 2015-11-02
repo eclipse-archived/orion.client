@@ -2814,7 +2814,7 @@ define([
 				editorContext.text = '<html><head><script>this.xx = function(){};</script></head><body><a onclick="xx()">xx()</a></body></html>';
 				editorContext.contentTypeId = "text/html";
 				return occurrences.computeOccurrences(editorContext, setContext(25,25)).then(function(results) {
-					assertOccurrences(results, [{start:25, end:27}, {start:76, end:78}]);
+					assertOccurrences(results, [{start:25, end:27}, {start:77, end:79}]);
 				});
 			});
 			/**
@@ -2826,7 +2826,7 @@ define([
 				editorContext.text = '<html><head><script>this.xx = function(){};</script></head><body><a onclick="xx()">xx()</a></body></html>';
 				editorContext.contentTypeId = "text/html";
 				return occurrences.computeOccurrences(editorContext, setContext(77,77)).then(function(results) {
-					assertOccurrences(results, [{start:25, end:27}, {start:76, end:78}]);
+					assertOccurrences(results, [{start:25, end:27}, {start:77, end:79}]);
 				});
 			});
 			/**
@@ -2838,7 +2838,7 @@ define([
 				editorContext.text = '<html><body><a onclick="xx()">xx()</a><script>this.xx = function(){};</script></body></html>';
 				editorContext.contentTypeId = "text/html";
 				return occurrences.computeOccurrences(editorContext, setContext(25,25)).then(function(results) {
-					assertOccurrences(results, [{start:23, end:25}, {start:51, end:53}]);
+					assertOccurrences(results, [{start:24, end:26}, {start:51, end:53}]);
 				});
 			});
 			/**
@@ -2850,7 +2850,7 @@ define([
 				editorContext.text = '<html><body><a onclick="xx()">xx()</a><script>this.xx = function(){};</script></body></html>';
 				editorContext.contentTypeId = "text/html";
 				return occurrences.computeOccurrences(editorContext, setContext(51,53)).then(function(results) {
-					assertOccurrences(results, [{start:23, end:25}, {start:51, end:53}]);
+					assertOccurrences(results, [{start:24, end:26}, {start:51, end:53}]);
 				});
 			});
 			/**

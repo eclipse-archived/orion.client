@@ -1672,6 +1672,68 @@ define([
 				assert(blocks[0].isWrappedFunctionCall, "Block should be a function call needing wrapping");
 				assert.equal(blocks[0].text, 'test()');
 			});
+			
+			/**
+			 * Find script blocks for on event HTML attributes no matter the casing
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481245
+			 */
+			it('Script Blocks for event attributes case sensitive 1', function() {
+				var r = setup('<!DOCTYPE html><body><a onClick="test()"></a></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 1, "Should have found 1 script block");
+				assert(!blocks[0].dependencies, "Block should not have dependency");
+				assert(blocks[0].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[0].text, 'test()');
+			});
+			/**
+			 * Find script blocks for on event HTML attributes no matter the casing
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481245
+			 */
+			it('Script Blocks for event attributes case sensitive 2', function() {
+				var r = setup('<!DOCTYPE html><body><a onCLICK="test()"></a></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 1, "Should have found 1 script block");
+				assert(!blocks[0].dependencies, "Block should not have dependency");
+				assert(blocks[0].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[0].text, 'test()');
+			});
+			/**
+			 * Find script blocks for on event HTML attributes no matter the casing
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481245
+			 */
+			it('Script Blocks for event attributes case sensitive 3', function() {
+				var r = setup('<!DOCTYPE html><body><a ONclick="test()"></a></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 1, "Should have found 1 script block");
+				assert(!blocks[0].dependencies, "Block should not have dependency");
+				assert(blocks[0].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[0].text, 'test()');
+			});
+			/**
+			 * Find script blocks for on event HTML attributes no matter the casing
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481245
+			 */
+			it('Script Blocks for event attributes case sensitive 4', function() {
+				var r = setup('<!DOCTYPE html><body><a ONCLICK="test()"></a></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 1, "Should have found 1 script block");
+				assert(!blocks[0].dependencies, "Block should not have dependency");
+				assert(blocks[0].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[0].text, 'test()');
+			});
+			/**
+			 * Find script blocks for on event HTML attributes no matter the casing
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481245
+			 */
+			it('Script Blocks for event attributes case sensitive 5', function() {
+				var r = setup('<!DOCTYPE html><body><a oNcLiCk="test()"></a></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 1, "Should have found 1 script block");
+				assert(!blocks[0].dependencies, "Block should not have dependency");
+				assert(blocks[0].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[0].text, 'test()');
+			});
+			
 			/**
 			 * Find script blocks for on event HTML attributes
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475965
