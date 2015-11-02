@@ -777,6 +777,61 @@ define([
 		                      expected: expected,
 		                      contentType: 'text/html'});
 		});
+		it("Test no-undef-defined-indent-1", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "/*globals foo */\n\t\t",
+		                    start: 2, 
+		                    end: 2};
+		    return getFixes({buffer: '\t\tfoo(10);', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test no-undef-defined-indent-2", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "/*globals foo */\n    ",
+		                    start: 4, 
+		                    end: 4};
+		    return getFixes({buffer: '    foo(10);', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test no-undef-defined-indent-3", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "/*globals foo */\n\t  \t",
+		                    start: 4, 
+		                    end: 4};
+		    return getFixes({buffer: '\t  \tfoo(10);', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test no-undef-defined-indent-4", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "/*eslint-env node */\n\t\t",
+		                    start: 2, 
+		                    end: 2};
+		    return getFixes({buffer: '\t\tconsole.log(10);', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test no-undef-defined-indent-5", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "/*eslint-env node */\n    ",
+		                    start: 4, 
+		                    end: 4};
+		    return getFixes({buffer: '    console.log(10);', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test no-undef-defined-indent-6", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "/*eslint-env node */\n\t  \t",
+		                    start: 4, 
+		                    end: 4};
+		    return getFixes({buffer: '\t  \tconsole.log(10);', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		        
 	//NO-UNUSED-PARAMS
 		it("Test no-unused-params-1", function() {
 		    var rule = createTestRule('no-unused-params');

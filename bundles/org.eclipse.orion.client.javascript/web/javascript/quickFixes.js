@@ -440,7 +440,10 @@ define([
                         return editorContext.setText(updateDirective(comment.value, 'globals', insert), start, start+comment.value.length); //$NON-NLS-1$
                     } else {
                         var point = getDirectiveInsertionPoint(ast);
-                        return editorContext.setText('/*globals '+insert+' */\n', point, point); //$NON-NLS-1$ //$NON-NLS-2$
+                    	var linestart = getLineStart(ast.source, point);
+                    	var indent = computeIndent(ast.source, linestart, false);
+               			var fix = '/*globals '+insert+' */\n' + indent; //$NON-NLS-1$ //$NON-NLS-2$
+                        return editorContext.setText(fix, point, point); //$NON-NLS-1$ //$NON-NLS-2$
                     }
                 });
             }
@@ -465,7 +468,10 @@ define([
     	                    return editorContext.setText(updateDirective(comment.value, 'eslint-env', env, true), start, start+comment.value.length); //$NON-NLS-1$
                         } else {
                             var point = getDirectiveInsertionPoint(ast);
-                            return editorContext.setText('/*eslint-env '+env+' */\n', point, point); //$NON-NLS-1$ //$NON-NLS-2$
+                    		var linestart = getLineStart(ast.source, point);
+                    		var indent = computeIndent(ast.source, linestart, false);
+               				var fix = '/*eslint-env '+env+' */\n' + indent; //$NON-NLS-1$ //$NON-NLS-2$
+                            return editorContext.setText(fix, point, point); //$NON-NLS-1$ //$NON-NLS-2$
                         }
                     }
                 });
