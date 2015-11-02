@@ -15,8 +15,9 @@ define([
 	'orion/commonHTMLFragments', 
 	'orion/objects', 	
 	'orion/selection',
-	'orion/webui/tooltip'
-], function(EventTarget, lib, mHTMLFragments, objects, Selection, sTooltip){
+	'orion/webui/tooltip',
+	'orion/bidiUtils'
+], function(EventTarget, lib, mHTMLFragments, objects, Selection, sTooltip, bidiUtils){
 	/**
 	 * Generates a section
 	 * 
@@ -456,7 +457,11 @@ define([
 						getCellHeaderElement: function(col_no){
 							var firstHeader = Object.getPrototypeOf(this).getCellHeaderElement.call(this, col_no);
 							if(firstHeader){
-								this.section.setTitle(firstHeader.innerHTML);
+								var sectionTitle = firstHeader.innerHTML;
+								if (bidiUtils.isBidiEnabled) {
+									sectionTitle = bidiUtils.enforceTextDirWithUcc(sectionTitle);
+								}
+								this.section.setTitle(sectionTitle);
 							}
 							return null;
 						}

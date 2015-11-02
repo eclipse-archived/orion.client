@@ -32,11 +32,12 @@ define([
 	'orion/git/logic/gitStash',
 	'orion/git/logic/gitCommit',
 	'orion/objects',
+	'orion/bidiUtils',
 	'orion/URL-shim'
 ], function(
 	messages, require, EventTarget, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, GitPreferenceStorage,
 	GitConfigPreference, mCloneGitRepository, mApplyPatch, URITemplate, mGitCommonLogic, mGitPushLogic, 
-	mGitStashLogic, mGitCommitLogic, objects) {
+	mGitStashLogic, mGitCommitLogic, objects, bidiUtils) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -1159,9 +1160,13 @@ var exports = {};
 			id: "eclipse.removeTag", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
-				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete tag ${0}?"], item.Name))) {
+				var itemName = item.Name;
+				if (bidiUtils.isBidiEnabled) {
+					itemName = bidiUtils.enforceTextDirWithUcc(itemName);
+				}
+				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete tag ${0}?"], itemName))) {
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					var msg = i18nUtil.formatMessage(messages["Removing tag {$0}"], item.Name);
+					var msg = i18nUtil.formatMessage(messages["Removing tag {$0}"], itemName);
 					progress.progress(serviceRegistry.getService("orion.git.provider").doRemoveTag(item.Location), msg).then(function() { //$NON-NLS-0$
 						dispatchModelEventOn({type: "modelChanged", action: "removeTag", tag: item}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus);
