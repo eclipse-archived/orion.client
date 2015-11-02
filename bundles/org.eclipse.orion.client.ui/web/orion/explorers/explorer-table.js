@@ -191,21 +191,30 @@ define([
 				modelEventDispatcher.addEventListener(eventType, _self._modelListeners[eventType] = _self.modelHandler[eventType].bind(_self));
 			});
 			
+		var parent = lib.node(this.parentId);
 		this._clickListener = function(evt) {
             if (!(evt.metaKey || evt.altKey || evt.shiftKey || evt.ctrlKey)) {
                 var navHandler = _self.getNavHandler();
                 if (navHandler && navHandler.getSelectionPolicy() !== "cursorOnly") {
-                    var link = lib.$("a", evt.target);
-                    if (link) {
-            			window.location.href = link.href;
-            			_self._clickLink(link);
-            			return;
-                    }
+                	var temp = evt.target;
+					while (temp && temp !== parent) {
+						if (temp._item) {
+							break;
+						}
+						temp = temp.parentNode;
+					}
+					if (temp && temp._item) {
+	                    var link = lib.$("a", evt.target);
+	                    if (link) {
+	            			window.location.href = link.href;
+            				_self._clickLink(link);
+            				return;
+	                    }
+                	}
                 }
             }
             _self._clickLink(evt.target);
 		};
-		var parent = lib.node(this.parentId);
 		if (parent) {
 			parent.addEventListener("click", this._clickListener); //$NON-NLS-0$
 		}
