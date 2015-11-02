@@ -43,7 +43,7 @@ define([
 	 * @since 9.0
 	 */
 	function resolve(server, key, loc) {
-		if(_resolved[key].pending) {
+		if(_resolved[key].pending || _resolved[key].err) {
 			//if we are waiting don't fire of another request
 			return;
 		}
@@ -51,7 +51,7 @@ define([
   		_resolved[key].pending = true;
 		server.options.getFile({logical: key, file: loc}, function(err, _file) {
 			_resolved[key].file = _file.file;
-	   		_resolved[key].contents = _file.contents;
+	   		_resolved[key].contents = typeof(_file.contents) === 'string' ? _file.contents : '';
 	   		_resolved[key].logical = _file.logical;
 	   		_resolved[key].err = err;
 	   		delete _resolved[key].pending;
