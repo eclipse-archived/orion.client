@@ -16,6 +16,7 @@ define([
 	'orion/Deferred',
 	'orion/section',
 	'orion/objects',
+	'orion/bidiUtils',
 	'orion/sites/siteMappingsTable',
 	'orion/i18nUtil',
 	'orion/webui/littlelib',
@@ -24,7 +25,7 @@ define([
 	'orion/webui/dialog',
 	'text!orion/sites/templates/SiteEditor.html',
 	'text!orion/sites/templates/ConvertToSelfHostingDialog.html'
-], function(messages, widgetMessages, mCommands, Deferred, mSection, objects, mSiteMappingsTable, i18nUtil, lib, EventTarget,
+], function(messages, widgetMessages, mCommands, Deferred, mSection, objects, bidiUtils, mSiteMappingsTable, i18nUtil, lib, EventTarget,
 		DirPrompter, dialog, SiteEditorTemplate, ConvertToSelfHostingDialogTemplate) {
 var Dialog = dialog.Dialog;
 
@@ -116,7 +117,11 @@ objects.mixin(ConvertToSelfHostingDialog.prototype, {
 	onFolderChosen: function(folderIndex, chosenFolder) {
 		var folderInfo = this.folders[folderIndex];
 		folderInfo.folder = chosenFolder;
-		this.folderTexts[folderIndex].textContent = chosenFolder ? chosenFolder.Name : ''; //$NON-NLS-0$
+		var chosenFolderName = chosenFolder ? chosenFolder.Name : '';	//$NON-NLS-0$
+		if (bidiUtils.isBidiEnabled) {
+			chosenFolderName = bidiUtils.enforceTextDirWithUcc(chosenFolderName);
+		}
+		this.folderTexts[folderIndex].textContent = chosenFolderName;
 		this.updateValidity();
 	},
 	isValid: function() {

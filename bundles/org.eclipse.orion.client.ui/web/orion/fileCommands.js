@@ -15,8 +15,8 @@
 define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/fileDownloader',
 	'orion/commandRegistry', 'orion/contentTypes', 'orion/compare/compareUtils', 
 	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog',
-	'orion/EventTarget', 'orion/form', 'orion/xsrfUtils'],
-	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form, xsrfUtils){
+	'orion/EventTarget', 'orion/form', 'orion/xsrfUtils', 'orion/bidiUtils'],
+	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form, xsrfUtils, bidiUtils){
 
 	/**
 	 * Utility methods
@@ -806,7 +806,11 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			visibleWhen: oneOrMoreFilesOrFolders,
 			callback: function(data) {
 				var items = Array.isArray(data.items) ? data.items : [data.items];
-				var confirmMessage = items.length === 1 ? i18nUtil.formatMessage(messages["DeleteTrg"], items[0].Name) : i18nUtil.formatMessage(messages["delete item msg"], items.length);
+				var deleteItemName = items.length === 1 ? items[0].Name : '';			
+				if (bidiUtils.isBidiEnabled) {
+					deleteItemName = bidiUtils.enforceTextDirWithUcc(deleteItemName);
+				}
+				var confirmMessage = items.length === 1 ? i18nUtil.formatMessage(messages["DeleteTrg"], deleteItemName) : i18nUtil.formatMessage(messages["delete item msg"], items.length);
 				serviceRegistry.getService("orion.page.dialog").confirm(confirmMessage,  //$NON-NLS-0$
 					function(doit) {
 						if (!doit) {

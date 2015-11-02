@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/widgets/nls/messages', 'orion/webui/dialog', 'orion/fileUtils', 'orion/selection', 'orion/explorers/explorer', 'orion/explorers/explorer-table'], 
-function(messages, dialog, mFileUtils, mSelection, mExplorer, mExplorerTable) {
+define(['i18n!orion/widgets/nls/messages', 'orion/webui/dialog', 'orion/fileUtils', 'orion/selection', 'orion/explorers/explorer', 'orion/explorers/explorer-table', 'orion/bidiUtils'], 
+function(messages, dialog, mFileUtils, mSelection, mExplorer, mExplorerTable, bidiUtils) {
 
 	function DirectoryPrompterRenderer (options, explorer) {
 		this.explorer = explorer;
@@ -29,7 +29,11 @@ function(messages, dialog, mFileUtils, mSelection, mExplorer, mExplorerTable) {
 		col.appendChild(span);
 		span.className = "mainNavColumn singleNavColumn"; //$NON-NLS-0$
 		this.getExpandImage(tableRow, span);
-		span.appendChild(document.createTextNode(item.Name)); 
+		var itemName = item.Name;
+		if (bidiUtils.isBidiEnabled) {
+			itemName = bidiUtils.enforceTextDirWithUcc(itemName);
+		}
+		span.appendChild(document.createTextNode(itemName));		
 	};
 
 	/**

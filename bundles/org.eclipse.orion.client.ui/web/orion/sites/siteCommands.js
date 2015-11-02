@@ -11,8 +11,8 @@
 
 /*eslint-env browser, amd*/
 define(['i18n!orion/sites/nls/messages', 'orion/commandRegistry', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteClient', 
-			'orion/Deferred', 'orion/i18nUtil'],
-		function(messages, mCommandRegistry, mCommands, mSiteUtils, mSiteClient, Deferred, i18nUtil) {
+			'orion/Deferred', 'orion/i18nUtil', 'orion/bidiUtils'],
+		function(messages, mCommandRegistry, mCommands, mSiteUtils, mSiteClient, Deferred, i18nUtil, bidiUtils) {
 	var Command = mCommands.Command;
 	var formatMessage = i18nUtil.formatMessage;
 	/**
@@ -185,8 +185,12 @@ define(['i18n!orion/sites/nls/messages', 'orion/commandRegistry', 'orion/command
 			callback: function(data) {
 				var items = wrap(data.items);
 				var userData = data.userData;
+				var itemName  = (items.length === 1) ? items[0].Name : '';
+				if (bidiUtils.isBidiEnabled) {
+					itemName = bidiUtils.enforceTextDirWithUcc(itemName);
+				}
 				var msg = (items.length === 1)
-					? formatMessage(messages.ConfirmDeleteSingle, items[0].Name)
+					? formatMessage(messages.ConfirmDeleteSingle, itemName)
 					: formatMessage(messages.ConfirmDeleteMultiple, items.length);
 				dialogService.confirm(msg, function(confirmed) {
 					if (confirmed) {
