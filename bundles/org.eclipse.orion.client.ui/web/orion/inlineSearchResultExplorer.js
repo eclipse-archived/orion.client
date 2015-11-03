@@ -420,9 +420,22 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
             checkbox: false,
             highlightSelection: false
         }, this);
-    	mFileDetailRenderer.getFullPathPref(this._preferences, "/inlineSearchPane", ["showFullPath", "viewByFile"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
+    	mFileDetailRenderer.getPrefs(this._preferences, "/inlineSearchPane", ["showFullPath", "viewByFile", "hidePerfectMatch", "hideNonMatch", "hidePossibleMatch"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
     		this._shouldShowFullPath = (properties ? properties[0] : false);
     		this._viewByFile = (properties ? properties[1] : false);
+    		this._matchFilter = {};
+    		this._matchFilter["hidePerfectMatch"] = {flag: (properties ? properties[2] : false),
+    												 filterFunc: function(confidence, hide) {
+    												 	return !hide && confidence === 100;
+    												 }};
+    		this._matchFilter["hideNonMatch"] = {flag: (properties ? properties[3] : false),
+    												 filterFunc: function(confidence, hide) {
+    												 	return !hide && confidence === 0;
+    												 }};
+    		this._matchFilter["hidePossibleMatch"] = {flag: (properties ? properties[4] : false),
+    												 filterFunc: function(confidence, hide) {
+    												 	return !hide && confidence !== 100 && confidence !== 0;
+    												 }};
     		this.declareCommands();
      	}.bind(this));
     }
@@ -536,7 +549,61 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
             }
         });
         
+		var togglePerfectMatchCommand = new mCommands.Command({
+			tooltip : messages["showPerfectMatch"],
+			imageClass : "core-sprite-checkmark", //$NON-NLS-0$
+            id: "orion.globalSearch.toggleMatch.perfect", //$NON-NLS-0$
+            groupId: "orion.searchGroup", //$NON-NLS-0$
+			type: "toggle",
+			visibleWhen: function(/*item*/) {
+				var show = !this._matchFilter["hidePerfectMatch"].flag;
+				togglePerfectMatchCommand.checked = show;
+				togglePerfectMatchCommand.tooltip = show ? messages["hidePerfectMatch"] : messages["showPerfectMatch"];
+				return this._cacheSearchResult && that.model && !that.model.replaceMode();
+			}.bind(this),
+			callback : function(/*data*/) {
+				this.filterMatch("hidePerfectMatch");
+			}.bind(this)
+		});
+
+		var toggleNonMatchCommand = new mCommands.Command({
+			tooltip : messages["showNonMatch"],
+			imageClass : "core-sprite-error", //$NON-NLS-0$
+            id: "orion.globalSearch.toggleMatch.non", //$NON-NLS-0$
+            groupId: "orion.searchGroup", //$NON-NLS-0$
+			type: "toggle",
+			visibleWhen: function(/*item*/) {
+				var show = !this._matchFilter["hideNonMatch"].flag;
+				toggleNonMatchCommand.checked = show;
+				toggleNonMatchCommand.tooltip = show ? messages["hideNonMatch"] : messages["showNonMatch"];
+				return this._cacheSearchResult && that.model && !that.model.replaceMode();
+			}.bind(this),
+			callback : function(/*data*/) {
+				this.filterMatch("hideNonMatch");
+			}.bind(this)
+		});
+
+		var togglePossibleMatchCommand = new mCommands.Command({
+			tooltip : messages["showPossibleMatch"],
+			imageClass : "core-sprite-questionmark", //$NON-NLS-0$
+            id: "orion.globalSearch.toggleMatch.possible", //$NON-NLS-0$
+            groupId: "orion.searchGroup", //$NON-NLS-0$
+			type: "toggle",
+			visibleWhen: function(/*item*/) {
+				var show = !this._matchFilter["hidePossibleMatch"].flag;
+				togglePossibleMatchCommand.checked = show;
+				togglePossibleMatchCommand.tooltip = show ? messages["hidePossibleMatch"] : messages["showPossibleMatch"];
+				return this._cacheSearchResult && that.model && !that.model.replaceMode();
+			}.bind(this),
+			callback : function(/*data*/) {
+				this.filterMatch("hidePossibleMatch");
+			}.bind(this)
+		});
+
 	    this._commandService.addCommand(switchViewCommand);
+//	    this._commandService.addCommand(togglePerfectMatchCommand);
+//	    this._commandService.addCommand(toggleNonMatchCommand);
+//	    this._commandService.addCommand(togglePossibleMatchCommand);
         this._commandService.addCommand(nextResultCommand);
         this._commandService.addCommand(prevResultCommand);
         this._commandService.addCommand(replaceAllCommand);
@@ -553,12 +620,15 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
         });
         
 	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.switchView", 0); //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.replaceAll", 1); //$NON-NLS-2$ //$NON-NLS-1$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.expandAll", 2); //$NON-NLS-1$ //$NON-NLS-2$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.collapseAll", 3); //$NON-NLS-1$ //$NON-NLS-2$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.search.nextResult", 4); //$NON-NLS-1$ //$NON-NLS-2$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.search.prevResult", 5); //$NON-NLS-1$ //$NON-NLS-2$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.search.switchFullPath", 6); //$NON-NLS-1$ //$NON-NLS-2$
+//	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.toggleMatch.perfect", 1); //$NON-NLS-1$ //$NON-NLS-0$
+//	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.toggleMatch.non", 2); //$NON-NLS-1$ //$NON-NLS-0$
+//	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.toggleMatch.possible", 3); //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.replaceAll", 11); //$NON-NLS-2$ //$NON-NLS-1$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.expandAll", 12); //$NON-NLS-1$ //$NON-NLS-2$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.collapseAll", 13); //$NON-NLS-1$ //$NON-NLS-2$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.search.nextResult", 14); //$NON-NLS-1$ //$NON-NLS-2$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.search.prevResult", 15); //$NON-NLS-1$ //$NON-NLS-2$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.search.switchFullPath", 16); //$NON-NLS-1$ //$NON-NLS-2$
     };
 
     InlineSearchResultExplorer.prototype._fileExpanded = function(fileIndex, detailIndex) {
@@ -1110,15 +1180,22 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
     };
     
     InlineSearchResultExplorer.prototype.switchFullPath = function() {
-    	mFileDetailRenderer.switchFullPathPref(this._preferences, "/inlineSearchPane", ["showFullPath"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-2$
+    	mFileDetailRenderer.togglePrefs(this._preferences, "/inlineSearchPane", ["showFullPath"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-2$
     		this._shouldShowFullPath = (properties ? properties[0] : false);
        		mFileDetailRenderer.showFullPath(this.parentNode, this._shouldShowFullPath);
      	}.bind(this));
     };
 
     InlineSearchResultExplorer.prototype.switchViewMode = function() {
-	    	mFileDetailRenderer.switchFullPathPref(this._preferences, "/inlineSearchPane", ["viewByFile"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$
+	    	mFileDetailRenderer.togglePrefs(this._preferences, "/inlineSearchPane", ["viewByFile"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$
 	    		this._viewByFile = (properties ? properties[0] : false);
+	    		this.runSearch(this._cacheSearchParams, this._resultsNode, this._cacheSearchResult); 
+	     	}.bind(this));
+	};
+	
+    InlineSearchResultExplorer.prototype.filterMatch = function(prefName) {
+	    	mFileDetailRenderer.togglePrefs(this._preferences, "/inlineSearchPane", [prefName]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$
+	    		this._matchFilter[prefName].flag = (properties ? properties[0] : false);
 	    		this.runSearch(this._cacheSearchParams, this._resultsNode, this._cacheSearchResult); 
 	     	}.bind(this));
 	};
@@ -1131,7 +1208,8 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
         var searchModel = new mSearchModel.SearchResultModel(this.registry, this.fileClient, searchResult, searchResult.length, searchParams, {
             onMatchNumberChanged: function(fileItem) {
                 that.renderer.replaceFileElement(fileItem);
-            }
+            },
+            matchFilter: this._matchFilter
         });
 		this.setResult(resultsNode, searchModel);
 		if(incremental){

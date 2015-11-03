@@ -243,7 +243,7 @@ define([
 		this.actionScopeId = options.actionScopeId;
 		this.location = options.location;
 		this.progressService = options.progressService;
-    	mFileDetailRenderer.getFullPathPref(this.preferences, "/problemsView", ["showFullPath", "viewByFile"]).then(function(properties){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+    	mFileDetailRenderer.getPrefs(this.preferences, "/problemsView", ["showFullPath", "viewByFile"]).then(function(properties){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
     		this._shouldShowFullPath = (properties ? properties[0] : false);
     		this._viewByFile = (properties ? properties[1] : false);
     		this.declareCommands();
@@ -341,14 +341,14 @@ define([
 	        this.getNavHandler().iterate(next, forceExpand, true);
 	    },
 	    switchViewMode: function() {
-	    	mFileDetailRenderer.switchFullPathPref(this.preferences, "/problemsView", ["viewByFile"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$
+	    	mFileDetailRenderer.togglePrefs(this.preferences, "/problemsView", ["viewByFile"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$
 	    		this._viewByFile = (properties ? properties[0] : false);
 				this._generateProblemsModel(this.currentFlatProblems);
 				this.incrementalRender(true);
 	     	}.bind(this));
 	    },
 	    switchFullPath: function() {
-	    	mFileDetailRenderer.switchFullPathPref(this.preferences, "/problemsView", ["showFullPath"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$
+	    	mFileDetailRenderer.togglePrefs(this.preferences, "/problemsView", ["showFullPath"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$
 	    		this._shouldShowFullPath = (properties ? properties[0] : false);
 	       		mFileDetailRenderer.showFullPath(lib.node(this.parentId), this._shouldShowFullPath);
 	     	}.bind(this));

@@ -68,7 +68,7 @@ define([
         return span;
     }
 
-	function getFullPathPref(preferences, prefName, properties) {
+	function getPrefs(preferences, prefName, properties) {
     	return preferences.getPreferences(prefName).then(function(prefs) { //$NON-NLS-0$
 			var returnVal = [];
 			properties.forEach(function(property){
@@ -93,7 +93,7 @@ define([
         }
     }
 
-    function switchFullPathPref(preferences, prefName, properties) {
+    function togglePrefs(preferences, prefName, properties) {
     	return preferences.getPreferences(prefName).then(function(prefs) { //$NON-NLS-0$
 			var returnVal = [];
 			properties.forEach(function(property){
@@ -459,8 +459,8 @@ define([
 	
 	return {
 		FileDetailRenderer: FileDetailRenderer,
-		switchFullPathPref: switchFullPathPref,
-		getFullPathPref: getFullPathPref,
+		togglePrefs: togglePrefs,
+		getPrefs: getPrefs,
 		showFullPath: showFullPath
 	};
 

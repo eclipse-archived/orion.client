@@ -48,6 +48,7 @@ define([
         this._location2ModelMap = [];
         this._lineDelimiter = "\n"; //$NON-NLS-0$
         this.onMatchNumberChanged = options.onMatchNumberChanged;
+        this._matchFilter = options.matchFilter;
         this._searchHelper = mSearchUtils.generateSearchHelper(searchParams);
     }
     SearchResultModel.prototype = new mExplorer.ExplorerModel();
@@ -318,7 +319,17 @@ define([
 	    	}
 	    	return hasOne;
 	    },
-	    
+	    _filterOnMatch: function _filterOnMatch(match) {
+	    	if(!this._matchFilter) {
+	    		return true;
+	    	}
+			for (var prop in this._matchFilter) {
+				if(this._matchFilter[prop].filterFunc(match.confidence, this._matchFilter[prop].flag)) {
+					return true;
+				}
+			}
+			return false;
+	    },
 	    _buildCategoryResult: function _buildCategoryResult(singleFileResult) {
     		var matchLines = singleFileResult.children;
     		if(matchLines) {
@@ -328,6 +339,9 @@ define([
 	    			var matches = matchLine.matches;
 	    			for (var j = 0, len2 = matches.length; j < len2; j++) {
 	    				var match = matches[j];
+	    				if(!this._filterOnMatch(match)) {
+	    					continue;
+	    				}
 						var matchNumber = j+1;
 	    				match.lineNumber = matchLine.lineNumber;
 	    				match.matchNumber = matchNumber;
