@@ -643,9 +643,9 @@ define([
 						findCommand.textSearcher.hide();
 					}
 					findCommand.textSearcher = textSearcher;
-					var searchString = "";
-					var parsedParam = null;
 					var selection = editor.getSelection();
+					var searchString = this.editor.getText(selection.start, selection.end);
+					var parsedParam = null;
 					if (selection.end > selection.start && data.parameters.valueFor('useEditorSelection')) {//$NON-NLS-0$ If there is selection from editor, we want to use it as the default keyword
 						var model = editor.getModel();
 						searchString = model.getText(selection.start, selection.end);
