@@ -89,7 +89,7 @@ define([
 				
 				if (categories.showEditorSettings === undefined || categories.showEditorSettings) {
 					_self.settingsCategories.push({
-						id: "editorSettings", //$NON-NLS-0$
+						id: "editorSettingsCategories", //$NON-NLS-0$
 						textContent: messages.Editor,
 						show: _self.showEditor
 					});

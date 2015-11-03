@@ -76,6 +76,7 @@ define([
 		for(var i=0; i<wrapperClasses.length; i++) {
 			this.domNode.classList.add(wrapperClasses[i]);
 		}
+
 		this.domNode.id = options.id;
 		
 		if(options.tooltip) {
