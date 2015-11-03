@@ -156,18 +156,14 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 				icon.classList.add('confidenceHighImg'); //$NON-NLS-1$
 				icon.classList.add("core-sprite-checkmark"); //$NON-NLS-0$
 				icon.title = "Perfect match";
-			} else if(item.confidence > 0 && item.confidence < 100) {
-				icon.classList.add('confidenceMidImg'); //$NON-NLS-1$
-				icon.classList.add("core-sprite-warning"); //$NON-NLS-0$
-				icon.title = "Possible match: " + item.confidence + "%";
-			} else if(item.confidence === -1) {
-				icon.classList.add('confidenceUnknownImg'); //$NON-NLS-1$
-				icon.classList.add("core-sprite-questionmark"); //$NON-NLS-0$
-				icon.title = "Not enough information on this match";
-			} else {
+			} else if(item.confidence === 0) {
 				icon.classList.add('confidenceLowImg'); //$NON-NLS-1$
 				icon.classList.add("core-sprite-error"); //$NON-NLS-0$
 				icon.title = "Not a match";
+			} else {
+				icon.classList.add('confidenceUnknownImg'); //$NON-NLS-1$
+				icon.classList.add("core-sprite-questionmark"); //$NON-NLS-0$
+				icon.title = "Could be a match";
 			}
 			spanHolder.appendChild(icon);
 		}
