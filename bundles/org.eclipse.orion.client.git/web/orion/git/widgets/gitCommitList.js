@@ -460,6 +460,9 @@ define([
 		}.bind(this));
 		this.createCommands();
 	}
+	// I have access to add text link but I can't seem to find header message so I'm a bit confused
+	
+
 	GitCommitListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitCommitListExplorer.prototype, /** @lends orion.git.GitCommitListExplorer.prototype */ {
 		destroy: function(){

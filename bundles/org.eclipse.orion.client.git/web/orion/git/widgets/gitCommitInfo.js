@@ -102,6 +102,13 @@ define([
 	
 			var headerMessage = util.trimCommitMessage(commit.Message);
 			var displayMessage = this.showMessage === undefined || this.showMessage;
+			
+			// TODO: need to add link here where header message gets processes
+//			if (headerMessage) {
+				// I dont have access to get the service to add link
+//				this.registry.getService("orion.core.textlink")
+//			}
+//			
 			if (displayMessage) {
 				var link;
 				if (this.commitLink) {
