@@ -51,6 +51,11 @@
 	color: inherit;
 	vertical-align: bottom;
     line-height: 12px;
+	border-bottom: 1px solid transparent;
+}
+
+#auxpane .navlink:hover {
+	border-bottom: 1px dotted;
 }
 
 .dragOver {
