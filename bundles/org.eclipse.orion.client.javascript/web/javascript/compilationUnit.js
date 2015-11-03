@@ -38,7 +38,7 @@ define([
      * @private
      */
     CompilationUnit.prototype._init = function _init() {
-    	var wrappedFunctionCallPrefix = "this."; //$NON-NLS-1$
+		var wrappedFunctionCallPrefix = "";  // Previously to avoid ESLint warnings we prefixed function calls with 'this.' See Bug 481137
         var _cursor = 0;
         this._source = '';
         this._blocks.sort(function(a, b){
@@ -53,7 +53,6 @@ define([
             }
             var pad = block.offset - _cursor;
             if(block.isWrappedFunctionCall){
-            	// Wrap function calls such as those in onclick event attributes to avoid syntax exceptions
 				if (pad < wrappedFunctionCallPrefix.length){
 					continue;
 				}

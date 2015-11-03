@@ -2814,7 +2814,7 @@ define([
 				editorContext.text = '<html><head><script>this.xx = function(){};</script></head><body><a onclick="xx()">xx()</a></body></html>';
 				editorContext.contentTypeId = "text/html";
 				return occurrences.computeOccurrences(editorContext, setContext(25,25)).then(function(results) {
-					assertOccurrences(results, [{start:25, end:27}, {start:77, end:79}]);
+					assertOccurrences(results, [{start:25, end:27}]);
 				});
 			});
 			/**
@@ -2826,7 +2826,31 @@ define([
 				editorContext.text = '<html><head><script>this.xx = function(){};</script></head><body><a onclick="xx()">xx()</a></body></html>';
 				editorContext.contentTypeId = "text/html";
 				return occurrences.computeOccurrences(editorContext, setContext(77,77)).then(function(results) {
-					assertOccurrences(results, [{start:25, end:27}, {start:77, end:79}]);
+					assertOccurrences(results, [{start:77, end:79}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML wrapped function call - script blocks show occurrences 3', function() {
+				editorContext.text = '<html><head><script>var xx = function(){};</script></head><body><a onclick="xx()">xx()</a></body></html>';
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(24,24)).then(function(results) {
+					assertOccurrences(results, [{start:24, end:26}, {start:76, end:78}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML wrapped function call - script blocks show occurrences 4', function() {
+				editorContext.text = '<html><head><script>var xx = function(){};</script></head><body><a onclick="xx()">xx()</a></body></html>';
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(76,76)).then(function(results) {
+					assertOccurrences(results, [{start:24, end:26}, {start:76, end:78}]);
 				});
 			});
 			/**
@@ -2838,7 +2862,7 @@ define([
 				editorContext.text = '<html><body><a onclick="xx()">xx()</a><script>this.xx = function(){};</script></body></html>';
 				editorContext.contentTypeId = "text/html";
 				return occurrences.computeOccurrences(editorContext, setContext(25,25)).then(function(results) {
-					assertOccurrences(results, [{start:24, end:26}, {start:51, end:53}]);
+					assertOccurrences(results, [{start:24, end:26}]);
 				});
 			});
 			/**
@@ -2850,7 +2874,31 @@ define([
 				editorContext.text = '<html><body><a onclick="xx()">xx()</a><script>this.xx = function(){};</script></body></html>';
 				editorContext.contentTypeId = "text/html";
 				return occurrences.computeOccurrences(editorContext, setContext(51,53)).then(function(results) {
-					assertOccurrences(results, [{start:24, end:26}, {start:51, end:53}]);
+					assertOccurrences(results, [{start:51, end:53}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML wrapped function call - occurrences ignore order 3', function() {
+				editorContext.text = '<html><body><a onclick="xx()">xx()</a><script>var xx = function(){};</script></body></html>';
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(25,25)).then(function(results) {
+					assertOccurrences(results, [{start:24, end:26}, {start:50, end:52}]);
+				});
+			});
+			/**
+			 * Tests support for occurrences inside embedded script blocks in HTML
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
+			 * @since 10.0
+			 */
+			it('HTML wrapped function call - occurrences ignore order 4', function() {
+				editorContext.text = '<html><body><a onclick="xx()">xx()</a><script>var xx = function(){};</script></body></html>';
+				editorContext.contentTypeId = "text/html";
+				return occurrences.computeOccurrences(editorContext, setContext(50,52)).then(function(results) {
+					assertOccurrences(results, [{start:24, end:26}, {start:50, end:52}]);
 				});
 			});
 			/**
@@ -2865,6 +2913,7 @@ define([
 					assertOccurrences(results, []);
 				});
 			});
+			
 		});
 	});
 });

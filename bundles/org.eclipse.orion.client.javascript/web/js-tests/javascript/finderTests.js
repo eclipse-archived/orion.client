@@ -1733,6 +1733,54 @@ define([
 				assert(blocks[0].isWrappedFunctionCall, "Block should be a function call needing wrapping");
 				assert.equal(blocks[0].text, 'test()');
 			});
+			/**
+			 * Find empty script blocks so the offsets are still valid
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481137
+			 */
+			it('Empty Script Blocks 1', function() {
+				var r = setup('<!DOCTYPE html><body><script></script></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 1, "Should have found 1 script block");
+				assert(!blocks[0].dependencies, "Block should not have dependency");
+				assert(!blocks[0].isWrappedFunctionCall, "Block should not be a function call needing wrapping");
+				assert.equal(blocks[0].text, '');
+			});
+			/**
+			 * Find empty script blocks so the offsets are still valid
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481137
+			 */
+			it('Empty Script Blocks 2', function() {
+				var r = setup('<!DOCTYPE html><body><a onclick=""></a></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 1, "Should have found 1 script block");
+				assert(!blocks[0].dependencies, "Block should not have dependency");
+				assert(blocks[0].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[0].text, '');
+			});
+			/**
+			 * Find empty script blocks so the offsets are still valid
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481137
+			 */
+			it('Empty Script Blocks 3', function() {
+				var r = setup('<!DOCTYPE html><body><script/></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 0, "Should have found no script blocks");
+			});
+			/**
+			 * Find empty script blocks so the offsets are still valid
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481137
+			 */
+			it('Empty Script Blocks 4', function() {
+				var r = setup('<!DOCTYPE html><body><script></script><a onclick=""></a><script/></body></html>');
+				var blocks = Finder.findScriptBlocks(r.text);
+				assert.equal(blocks.length, 2, "Should have found 2 script blocks");
+				assert(!blocks[0].dependencies, "Block should not have dependency");
+				assert(!blocks[0].isWrappedFunctionCall, "Block should not be a function call needing wrapping");
+				assert.equal(blocks[0].text, '');
+				assert(!blocks[1].dependencies, "Block should not have dependency");
+				assert(blocks[1].isWrappedFunctionCall, "Block should be a function call needing wrapping");
+				assert.equal(blocks[1].text, '');
+			});
 			
 			/**
 			 * Find script blocks for on event HTML attributes

@@ -296,7 +296,7 @@ define([
 		                    //auto-assume browser env - https://bugs.eclipse.org/bugs/show_bug.cgi?id=458676
 		                    var env = Object.create(null);
 		                    env.browser = true;
-        					return _self._validateAst(ast, env);
+        					return _self._validateAst(ast, env, true);
         				});
 			        });
 			    } else {
@@ -313,13 +313,22 @@ define([
 		 * @private
 		 * @param {Object} ast The AST
 		 * @param {Object} env An environment object to set in the config
+		 * @param {Boolean} htmlMode Set to <code>true</code> to ignore rules that are inaccurate for html script snippets
 		 * @returns {Array|Object} The array of problem objects
 		 * @since 6.0
 		 */
-		_validateAst: function(ast, env) {
+		_validateAst: function(ast, env, htmlMode) {
 			var eslintErrors = [], 
 				parseErrors = this._extractParseErrors(ast);
-				var start = Date.now();
+			var start = Date.now();
+			
+			// When validating snippets in an html file ignore undefined rule because other scripts may add to the window object
+			var undefRuleValue;
+		    if (htmlMode){
+		    	undefRuleValue = config.rules['no-undef'];
+		    	config.rules['no-undef'] = 0;
+		    }
+			
 			try {
 			    config.env = env;
 				eslintErrors = eslint.verify(ast, config);
@@ -332,6 +341,10 @@ define([
 					});
 				}
 			}
+			if (htmlMode){
+				config.rules['no-undef'] = undefRuleValue;
+			}
+			
 			var end = Date.now() - start;
 			Metrics.logTiming('language tools', 'validation', end, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			return { problems: this._filterProblems(parseErrors, eslintErrors).map(toProblem) };

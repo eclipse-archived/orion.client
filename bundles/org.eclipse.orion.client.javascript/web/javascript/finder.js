@@ -310,6 +310,10 @@ define([
 					blocks.push({text: "", offset: 0, dependencies: deps});
 					continue;
 				}
+				if (text === undefined){
+					// Inline script blocks with no dependents are not valid i.e. <script/>
+					continue;
+				}
 				var index = val.index+val[0].indexOf('>')+1;  //$NON-NLS-0$
 				if((offset == null || (index <= offset && index+text.length >= offset))) {
 					for(var i = 0; i < comments.length; i++) {
@@ -337,8 +341,8 @@ define([
 				var assignment = val[3];
 				text = val[4];
 				if (attribute && attribute.toLowerCase() in eventAttributes){
-					if(!text || !assignment) {
-						continue;
+					if(!text){
+						text = "";
 					}
 					index = val.index + leadingWhitespace.length + 2 + attribute.length + assignment.length;
 					if((offset == null || (index <= offset && index+text.length >= offset))) {

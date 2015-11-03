@@ -737,46 +737,6 @@ define([
 		                      rule: rule,
 		                      expected: expected});
 		});
-		it("Test no-undef-defined-html-1", function() {
-		    var rule = createTestRule('no-undef');
-		    var expected = {value: "/*globals foo */",
-		                    start: 20, 
-		                    end: 20};
-		    return getFixes({buffer: '<html><head><script>foo(10);</script></head></html>', 
-		                      rule: rule,
-		                      expected: expected,
-		                      contentType: 'text/html'});
-		});
-		it("Test no-undef-defined-html-2", function() {
-		    var rule = createTestRule('no-undef');
-		    var expected = {value: "globals foo bar",
-		                    start: 22, 
-		                    end: 34};
-		    return getFixes({buffer: '<html><head><script>/*globals foo */ foo(10); bar();</script></head></html>', 
-		                      rule: rule,
-		                      expected: expected,
-		                      contentType: 'text/html'});
-		});
-		it("Test no-undef-defined-html-3", function() {
-		    var rule = createTestRule('no-undef');
-		    var expected = {value: "globals bar foo:true",
-		                    start: 22, 
-		                    end: 33};
-		    return getFixes({buffer: '<html><head><script>/*globals bar*/ foo++; bar();</script></head></html>', 
-		                      rule: rule,
-		                      expected: expected,
-		                      contentType: 'text/html'});
-		});
-		it("Test no-undef-defined-html-4", function() {
-		    var rule = createTestRule('no-undef');
-		    var expected = {value: "globals bar foo:true",
-		                    start: 22, 
-		                    end: 33};
-		    return getFixes({buffer: '<html><head><script>/*globals bar*/ foo = bar; bar();</script></head></html>', 
-		                      rule: rule,
-		                      expected: expected,
-		                      contentType: 'text/html'});
-		});
 		it("Test no-undef-defined-indent-1", function() {
 		    var rule = createTestRule('no-undef');
 		    var expected = {value: "/*globals foo */\n\t\t",
