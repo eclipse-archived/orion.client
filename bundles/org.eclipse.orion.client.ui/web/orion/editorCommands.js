@@ -809,6 +809,7 @@ define([
 			var commandRegistry = this.commandService;
 			var actionReferences = serviceRegistry.getServiceReferences("orion.edit.command"); //$NON-NLS-0$
 			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+			var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 			var handleStatus = handleStatusMessage.bind(null, serviceRegistry);
 			var makeCommand = function(info, service, options) {
 				var commandVisibleWhen = options.visibleWhen;
@@ -917,7 +918,9 @@ define([
 							}
 						};
 					}
-					progress.showWhile(serviceCall, i18nUtil.formatMessage(messages.running, options.name)).then(handleResult);
+					var msg = i18nUtil.formatMessage(messages.running, options.name);
+					progress.showWhile(serviceCall, msg).then(handleResult);
+					statusService.createProgressMonitor(serviceCall, msg);
 					return true;
 				};
 				return new mCommands.Command(options);

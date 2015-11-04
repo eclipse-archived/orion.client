@@ -126,6 +126,7 @@ define({//Default message bundle
 	"text": "text",
 	"title (optional)": "title (optional)",
 	"url": "url",
+	"workedProgress": "${0} (${1}/${2})",
 	"TogglePaneOrientationTooltip": "Toggle split pane orientation",
 	"WarningDuplicateLinkId": "Duplicate link ID: ${0} (link IDs are not case-sensitive)",
 	"WarningHeaderTooDeep": "Header level cannot exceed 6",

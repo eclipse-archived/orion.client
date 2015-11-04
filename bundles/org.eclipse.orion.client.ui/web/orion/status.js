@@ -11,10 +11,11 @@
 /*eslint-env browser, amd*/
 define([
 	'i18n!orion/nls/messages',
+	'orion/i18nUtil', 
 	'orion/webui/littlelib',
 	'orion/globalCommands',
 	'marked/marked',
-], function(messages, lib, mGlobalCommands, marked) {
+], function(messages, i18nUtil, lib, mGlobalCommands, marked) {
 	var SEV_ERROR = "Error", SEV_WARNING = "Warning", SEV_INFO = "Info", SEV_OK = "Ok"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
 
 	// this is a cheat, all dom ids should be passed in
@@ -451,6 +452,15 @@ define([
 					},
 					function(/*error, secondArg*/){
 						that.done.bind(that)();
+					},
+					function(progress) {
+						if (progress.message) {
+							var msg = progress.message;
+							if (typeof progress.loaded === "number" && typeof progress.total === "number") {
+								msg = i18nUtil.formatMessage(messages["workedProgress"], msg, progress.loaded, progress.total);
+							}
+							that.worked(msg);
+						}
 					});
 		}
 	}

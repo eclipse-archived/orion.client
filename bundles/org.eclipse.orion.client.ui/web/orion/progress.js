@@ -184,9 +184,6 @@ function(messages, lib, mOperationsDialog) {
 						}
 					}
 				}, function(operation){
-					if (operation.message) {
-						that._serviceRegistry.getService("orion.page.message").setProgressMessage(operation.message); //$NON-NLS-0$
-					}
 					if(operationName)
 						operation.Name = operationName;
 					if(progressMonitor){
