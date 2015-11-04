@@ -18,7 +18,7 @@ define([
 'orion/plugin',
 'orion/bootstrap',
 'orion/Deferred',
-'orion/fileClient', 
+'orion/fileClient',
 'orion/metrics',
 'esprima/esprima',
 'estraverse/estraverse',
