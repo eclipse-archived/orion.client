@@ -100,6 +100,7 @@ define([
 				delete this._filledResult;
 				lib.empty(lib.node("searchResultsTitle"));
 				lib.empty(lib.node("searchPageActions"));
+				lib.empty(lib.node("searchPageActionsRight"));
 				lib.empty(this._searchResultsWrapperDiv);
 			}
 			this.hideReplacePreview();
