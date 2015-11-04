@@ -236,7 +236,7 @@ define([
 								match.confidence = 100;
 							} else if(_t.staticCheck) {
 								match.confidence = _t.staticCheck.confidence;
-							} else if(_t.category === 'blockcomments') {
+							} else if(_t.category === 'blockcomments' || _t.category === 'linecomments') {
 								match.confidence = -1;
 								//TODO propagate type infos to named elements in structured doc
 								//for example @name mentions func decl match
