@@ -80,7 +80,7 @@ function createProxyApp(options) {
 		target: {},
 		inspector: {},
 		dav: {},
-		tty: { ws: true, },
+		tty: { ws: true },
 	});
 	var inspector = proxies.inspector,
 	    target = proxies.target;
