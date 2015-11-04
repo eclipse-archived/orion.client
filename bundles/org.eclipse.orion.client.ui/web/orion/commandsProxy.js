@@ -151,6 +151,6 @@ define([
 	//return the module exports
 	return {
 		handleKeyEvent: handleKeyEvent,
-		CommandsProxy: CommandsProxy,
+		CommandsProxy: CommandsProxy
 	};
 });
