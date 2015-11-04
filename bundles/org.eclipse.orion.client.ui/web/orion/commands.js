@@ -304,6 +304,9 @@ define([
 				element = clickTarget = document.createElement("button"); //$NON-NLS-0$
 				element.className = "orionButton"; //$NON-NLS-0$
 				element.classList.add(command.checked ? "orionToggleOn" : "orionToggleOff");  //$NON-NLS-1$ //$NON-NLS-0$
+				if (command.extraClass) {
+					element.classList.add(command.extraClass);
+				}
 				element.id = "orionToggle" + command.id; //$NON-NLS-0$
 				if(parent.id) {
 					element.id = element.id + parent.id;

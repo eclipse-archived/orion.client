@@ -258,9 +258,9 @@ define([
             	var newChildren = [];
             	children.forEach(function(child) {
 					for(var j = 0; j < child.matches.length; j++){
-						/*if(child.matches[j].confidence < 0) {
-							continue;
-						}*/
+	    				if(!this._filterOnMatch(child.matches[j])) {
+	    					continue;
+	    				}
 						var matchNumber = j+1;
 						var newMatch = {confidence: child.matches[j].confidence, parent: fileNode, matches: child.matches, lineNumber: child.lineNumber, matchNumber: matchNumber, 
 							checked: child.matches[j].confidence === 100 ? true: false, type: "detail", //$NON-NLS-1$
@@ -268,7 +268,7 @@ define([
 						};
 						newChildren.push(newMatch);
 					}
-            	});
+            	}.bind(this));
  				newChildren.sort(function(a, b) {
  					if(a.confidence === b.confidence) {
  						return a.lineNumber - b.lineNumber;
@@ -279,8 +279,10 @@ define([
             	fileNode.children = newChildren;
             }
             //this._location2ModelMap[fileNode.location] = fileNode;
-            this.getListRoot().children.push(fileNode);
-            this._indexedFileItems.push(fileNode);
+            if(fileNode.children && fileNode.children.length > 0) {
+	            this.getListRoot().children.push(fileNode);
+	            this._indexedFileItems.push(fileNode);
+        	}
 	    },
 	    
 	    _match2Category: function _match2Category(match) {

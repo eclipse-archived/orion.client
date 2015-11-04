@@ -29,14 +29,46 @@
 	padding-top: 1PX;
 }
 
-.searchResultsWrapperDiv .confidenceMidImg {
-	color: orange;
-	padding-right: 1px;
+.searchPageActions .orionSwitchSwitch {
+	margin-bottom: 0;
+}
+
+.searchPageActions .orionSwitchLabel {
+	margin-bottom: 0;
+}
+
+.searchPageActions .togglePerfectMatch {
+	border: 1px solid lightgray;
+	border-radius: 3px;
+}
+
+.searchPageActions .core-sprite-checkmark {
+	color: green !important;
+    line-height: 18px;
+    padding-right: 2px;
+    padding-left: 2px;
+    padding-top: 2px;
+    font-size: 13px;
 }
 
 .searchResultsWrapperDiv .confidenceUnknownImg {
 	color: blue;
 	margin-top: -2px;
+}
+
+.searchPageActions .togglePossibleMatch {
+	border: 1px solid lightgray;
+	border-radius: 3px;
+	margin-left: -3px !important;
+}
+
+.searchPageActions .core-sprite-questionmark {
+	color: blue !important;
+    line-height: 18px;
+    padding-right: 6px;
+    padding-left: 6px;
+    padding-top: 2px;
+    font-size: 14px;
 }
 
 .searchResultsWrapperDiv .confidenceLowImg {
@@ -46,16 +78,25 @@
 	padding-top: 1px;
 }
 
+.searchPageActions .toggleNonMatch {
+	border: 1px solid lightgray;
+	border-radius: 3px;
+	margin-left: -3px !important;
+}
+
+.searchPageActions .core-sprite-error {
+	color: red !important;
+    line-height: 18px;
+    padding-right: 2px;
+    padding-left: 2px;
+    padding-top: 2px;
+    font-size: 13px;
+}
+
 .searchResultsWrapperDiv .confidenceHigh {
 	color: white !important;
 	background-color: #1BB199 !important;
 }
-
-.searchResultsWrapperDiv .confidenceMid {
-	color: white !important;
-	background-color: #f0ad4e !important;
-}
-
 
 .searchResultsWrapperDiv .confidenceLow {
 	color: white !important;
@@ -492,6 +533,10 @@
 	display: block;
 	margin: 5px 0;
 	white-space: nowrap;
+}
+
+.searchPageActionsRight {
+	padding-right: 5px;
 }
 
 .searchPageActions > .orionButton > .core-sprite-move-down, .searchPageActions > .orionButton > .core-sprite-move-up {

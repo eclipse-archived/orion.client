@@ -487,7 +487,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 				switchViewCommand.checked = this._viewByFile;
 				switchViewCommand.name = this._viewByFile ? messages["viewByTypes"] : messages["viewByFiles"];
 				switchViewCommand.tooltip = this._viewByFile ? messages["viewByTypesTooltip"] : messages["viewByFilesTooltip"];
-				return this.getItemCount() > 0 && this._cacheSearchResult && that.model && !that.model.replaceMode();
+				return this._cacheSearchResult && that.model && !that.model.replaceMode();
 			}.bind(this),
 			callback : function(data) {
 				this.switchViewMode();
@@ -550,8 +550,9 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
         });
         
 		var togglePerfectMatchCommand = new mCommands.Command({
-			tooltip : messages["showPerfectMatch"],
-			imageClass : "core-sprite-checkmark", //$NON-NLS-0$
+			tooltip: messages["showPerfectMatch"],
+			imageClass: "core-sprite-checkmark", //$NON-NLS-0$
+			extraClass: "togglePerfectMatch",
             id: "orion.globalSearch.toggleMatch.perfect", //$NON-NLS-0$
             groupId: "orion.searchGroup", //$NON-NLS-0$
 			type: "toggle",
@@ -569,6 +570,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 		var toggleNonMatchCommand = new mCommands.Command({
 			tooltip : messages["showNonMatch"],
 			imageClass : "core-sprite-error", //$NON-NLS-0$
+			extraClass: "toggleNonMatch",
             id: "orion.globalSearch.toggleMatch.non", //$NON-NLS-0$
             groupId: "orion.searchGroup", //$NON-NLS-0$
 			type: "toggle",
@@ -586,6 +588,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 		var togglePossibleMatchCommand = new mCommands.Command({
 			tooltip : messages["showPossibleMatch"],
 			imageClass : "core-sprite-questionmark", //$NON-NLS-0$
+			extraClass: "togglePossibleMatch",
             id: "orion.globalSearch.toggleMatch.possible", //$NON-NLS-0$
             groupId: "orion.searchGroup", //$NON-NLS-0$
 			type: "toggle",
@@ -601,9 +604,9 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 		});
 
 	    this._commandService.addCommand(switchViewCommand);
-//	    this._commandService.addCommand(togglePerfectMatchCommand);
-//	    this._commandService.addCommand(toggleNonMatchCommand);
-//	    this._commandService.addCommand(togglePossibleMatchCommand);
+	    this._commandService.addCommand(togglePerfectMatchCommand);
+	    this._commandService.addCommand(toggleNonMatchCommand);
+	    this._commandService.addCommand(togglePossibleMatchCommand);
         this._commandService.addCommand(nextResultCommand);
         this._commandService.addCommand(prevResultCommand);
         this._commandService.addCommand(replaceAllCommand);
@@ -620,15 +623,15 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
         });
         
 	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.switchView", 0); //$NON-NLS-1$ //$NON-NLS-0$
-//	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.toggleMatch.perfect", 1); //$NON-NLS-1$ //$NON-NLS-0$
-//	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.toggleMatch.non", 2); //$NON-NLS-1$ //$NON-NLS-0$
-//	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.toggleMatch.possible", 3); //$NON-NLS-1$ //$NON-NLS-0$
+	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.toggleMatch.perfect", 1); //$NON-NLS-1$ //$NON-NLS-0$
+	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.toggleMatch.non", 2); //$NON-NLS-1$ //$NON-NLS-0$
+	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.toggleMatch.possible", 3); //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.replaceAll", 11); //$NON-NLS-2$ //$NON-NLS-1$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.expandAll", 12); //$NON-NLS-1$ //$NON-NLS-2$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.collapseAll", 13); //$NON-NLS-1$ //$NON-NLS-2$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.search.nextResult", 14); //$NON-NLS-1$ //$NON-NLS-2$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.search.prevResult", 15); //$NON-NLS-1$ //$NON-NLS-2$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.search.switchFullPath", 16); //$NON-NLS-1$ //$NON-NLS-2$
+        this._commandService.registerCommandContribution("searchPageActionsRight", "orion.explorer.expandAll", 12); //$NON-NLS-1$ //$NON-NLS-2$
+        this._commandService.registerCommandContribution("searchPageActionsRight", "orion.explorer.collapseAll", 13); //$NON-NLS-1$ //$NON-NLS-2$
+        this._commandService.registerCommandContribution("searchPageActionsRight", "orion.search.nextResult", 14); //$NON-NLS-1$ //$NON-NLS-2$
+        this._commandService.registerCommandContribution("searchPageActionsRight", "orion.search.prevResult", 15); //$NON-NLS-1$ //$NON-NLS-2$
+        this._commandService.registerCommandContribution("searchPageActionsRight", "orion.search.switchFullPath", 16); //$NON-NLS-1$ //$NON-NLS-2$
     };
 
     InlineSearchResultExplorer.prototype._fileExpanded = function(fileIndex, detailIndex) {
@@ -873,9 +876,11 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
         var that = this;
         this._commandService.destroy("searchPageActions"); //$NON-NLS-0$
         this._commandService.renderCommands("searchPageActions", "searchPageActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
+        this._commandService.destroy("searchPageActionsRight"); //$NON-NLS-0$
+        this._commandService.renderCommands("searchPageActionsRight", "searchPageActionsRight", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 
-        this._commandService.destroy("pageNavigationActions"); //$NON-NLS-0$
-        this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
+        //this._commandService.destroy("pageNavigationActions"); //$NON-NLS-0$
+        //this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
     };
 
     InlineSearchResultExplorer.prototype.reportStatus = function(message) {
