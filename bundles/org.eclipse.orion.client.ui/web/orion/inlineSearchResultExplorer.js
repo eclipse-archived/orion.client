@@ -608,8 +608,8 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
         });
 	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.switchView", 0); //$NON-NLS-1$ //$NON-NLS-0$
 	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.toggleMatch.perfect", 1); //$NON-NLS-1$ //$NON-NLS-0$
-	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.toggleMatch.non", 2); //$NON-NLS-1$ //$NON-NLS-0$
-	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.toggleMatch.possible", 3); //$NON-NLS-1$ //$NON-NLS-0$
+	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.toggleMatch.possible", 2); //$NON-NLS-1$ //$NON-NLS-0$
+	    this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.toggleMatch.non", 3); //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("searchPageActionsRight", "orion.globalSearch.replaceAll", 11); //$NON-NLS-2$ //$NON-NLS-1$
         this._commandService.registerCommandContribution("searchPageActionsRight", "orion.explorer.expandAll", 12); //$NON-NLS-1$ //$NON-NLS-2$
         this._commandService.registerCommandContribution("searchPageActionsRight", "orion.explorer.collapseAll", 13); //$NON-NLS-1$ //$NON-NLS-2$
