@@ -1511,14 +1511,13 @@ var exports = {};
 					var func = arguments.callee;
 					var gitConfigPreference = new GitConfigPreference(serviceRegistry);
 					gitConfigPreference.getConfig().then(function(userInfo){
-						var msg = i18nUtil.formatMessage(messages["AddClone"], name);
+						var msg = i18nUtil.formatMessage(messages["AddClone"], gitUrl);
 						var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
 								options.gitPrivateKey, options.gitPassphrase, userInfo, false, cloneSubmodules), msg);
-						serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred, //$NON-NLS-0$
-								messages["Cloning repository: "] + gitUrl);
+						serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred, msg); //$NON-NLS-0$
 						deferred.then(function(jsonData) {
 							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {
-								dispatchModelEventOn({type: "modelChanged", action: "addClone", name: name, gitUrl: gitUrl}); //$NON-NLS-1$ //$NON-NLS-0$
+								dispatchModelEventOn({type: "modelChanged", action: "addClone", name: name, gitUrl: gitUrl}); //$NON-NLS-1$ //$NON-NLS-2$
 							}, func, messages['Clone Git Repository']);
 						}, function(jsonData) {
 							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Clone Git Repository']);
