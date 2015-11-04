@@ -9,8 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var connect = require('connect');
-var statik = connect['static'];
+var express = require('express');
 
 exports = module.exports = function(root, options) {
 	options = options || {};
@@ -25,6 +24,6 @@ exports = module.exports = function(root, options) {
  * -----------------------------------------------------------------------------------
  *   /           lib/orionode.client                 Mounts Orionode's plugin setup, and plugin code.
  */
-	return connect()
-		.use(statik(root, options));
+	return express()
+	  .use(express.static(root));
 };

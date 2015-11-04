@@ -12,7 +12,8 @@
 var child_process = require('child_process');
 var fs = require('fs');
 var path = require('path');
-var connect = require('connect');
+//var connect = require('connect');
+var express = require('express');
 var request = require('supertest');
 var rimraf = require('rimraf');
 
@@ -101,7 +102,7 @@ function setUp(dir, callback) {
  * <code>createApp().request().get('/foobar.txt').expect(...)</code>
  */
 function createApp() {
-	var app = connect();
+	var app = express();
 	app.request = request.bind(null, app);
 	return app;
 }

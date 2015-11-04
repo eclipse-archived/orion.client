@@ -10,7 +10,8 @@
  *******************************************************************************/
 /*eslint-env node*/
 
-var connect = require('connect');
+var express = require('express');
+var json = require('express-json');
 var api = require('./api');
 var fileUtil = require('./fileUtil');
 var resource = require('./resource');
@@ -46,7 +47,7 @@ if (hasNodegit) {
 }
 
 function Nothing(/*req, res, next*/) {
-	return connect();
+	return express(); 
 }
 
 function Git(options) {
@@ -54,8 +55,8 @@ function Git(options) {
 	var workspaceDir = options.workspaceDir;
 	var fileRoot = options.fileRoot;
 	if (!workspaceRoot) { throw new Error('options.root path required'); }
-	return connect()
-	.use(connect.json())
+	return express()
+	.use(json())
 	.use(redirect())
 	.use(resource(workspaceRoot, {
 		GET: function(req, res, next, rest) {

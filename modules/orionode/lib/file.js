@@ -9,7 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var connect = require('connect');
+var express = require('express');
+var json = require('express-json');
 var fs = require('fs');
 var path = require('path');
 var url = require('url');
@@ -188,8 +189,8 @@ module.exports = function(options) {
 	/*
 	 * Handler begins here
 	 */
-	return connect()
-	.use(connect.json())
+	return express()
+	.use(json())
 	.use(resource(fileRoot, {
 		GET: function(req, res, next, rest) {
 			if (writeEmptyFilePathError(res, rest)) {

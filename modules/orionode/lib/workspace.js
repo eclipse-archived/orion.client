@@ -9,7 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var connect = require('connect');
+var express = require('express');
+var json = require('express-json');
 var fs = require('fs');
 var util = require('util');
 var api = require('./api'), writeError = api.writeError;
@@ -41,8 +42,8 @@ module.exports = function(options) {
 		return api.join(originalWorkspaceRoot(req), 'project', projectName);
 	}
 
-	return connect()
-	.use(connect.json())
+	return express()
+	.use(json())
 	.use(resource(workspaceRoot, {
 		GET: function(req, res, next, rest) {
 			var workspaceRootUrl = originalWorkspaceRoot(req);

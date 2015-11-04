@@ -10,7 +10,8 @@
  *******************************************************************************/
 /*jslint node:true*/
 /*eslint-env node */
-var connect = require('connect'),
+var express = require('express'),
+	http = require('http'),
     path = require('path'),
     AppContext = require('./lib/node_apps').AppContext,
     orionFile = require('./lib/file'),
@@ -38,40 +39,40 @@ function startServer(options) {
 	try {
 		var appContext = new AppContext({fileRoot: '/file', workspaceDir: workspaceDir, configParams: configParams});
 
-		// HTTP server
-		var app = connect()
-      .use(term.middleware())
-			// static code
-			.use(orionNodeStatic(path.normalize(path.join(LIBS, 'orionode.client/'))))
-			.use(orionStatic({
+		//http server
+		var app = express();
+		var server = http.createServer(app);
+		app.use(term.middleware());
+		app.use(orionNodeStatic(path.normalize(path.join(LIBS, 'orionode.client/'))))
+		app.use(orionStatic({
 				orionClientRoot: ORION_CLIENT,
 				maxAge: options.maxAge
 			}))
-			.use(orionLogin())
-            .use(orionTasks.orionTasksAPI({
+		app.use(orionLogin())
+        app.use(orionTasks.orionTasksAPI({
                 root: '/task'
             }))
 			// API handlers
-			.use(orionFile({
+		app.use(orionFile({
 				root: '/file',
 				workspaceDir: workspaceDir
 			}))
-			.use(orionWorkspace({
+		app.use(orionWorkspace({
 				root: '/workspace',
 				fileRoot: '/file',
 				workspaceDir: workspaceDir
 			}))
-			.use(orionGit({ 
+		app.use(orionGit({ 
 				root: '/gitapi',
 				fileRoot: '/file',
 				workspaceDir: workspaceDir
 			}))
-			.use(orionSearch({
+		app.use(orionSearch({
 				root: '/filesearch',
 				fileRoot: '/file',
 				workspaceDir: workspaceDir
 			}))
-			.use(orionNode({
+		app.use(orionNode({
 				appContext: appContext,
 				root: '/node'
 			}));
