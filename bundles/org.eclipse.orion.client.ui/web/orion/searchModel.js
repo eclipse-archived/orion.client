@@ -279,7 +279,7 @@ define([
             	fileNode.children = newChildren;
             }
             //this._location2ModelMap[fileNode.location] = fileNode;
-            if(fileNode.children && fileNode.children.length > 0) {
+            if(!children || (fileNode.children && fileNode.children.length > 0)) {
 	            this.getListRoot().children.push(fileNode);
 	            this._indexedFileItems.push(fileNode);
         	}
