@@ -920,7 +920,9 @@ define([
 					}
 					var msg = i18nUtil.formatMessage(messages.running, options.name);
 					progress.showWhile(serviceCall, msg).then(handleResult);
-					statusService.createProgressMonitor(serviceCall, msg);
+					if (statusService) {
+						statusService.createProgressMonitor(serviceCall, msg);
+					}
 					return true;
 				};
 				return new mCommands.Command(options);
