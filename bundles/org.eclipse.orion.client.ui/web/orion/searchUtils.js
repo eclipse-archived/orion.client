@@ -415,7 +415,7 @@ searchUtils.splitFile = function(text) {
 		} else {
 			index = lf + 1;
 		}
-		splitLines.push(text.substring(start, index - offset));
+		splitLines.push(text.substring(start, index));
 		start = index;
 	}
 	return splitLines;

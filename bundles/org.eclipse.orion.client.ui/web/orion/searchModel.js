@@ -46,7 +46,7 @@ define([
         this._filterText = null;
         this._indexedFileItems = [];
         this._location2ModelMap = [];
-        this._lineDelimiter = "\n"; //$NON-NLS-0$
+        this._lineDelimiter = ""; //$NON-NLS-0$
         this.onMatchNumberChanged = options.onMatchNumberChanged;
         this._matchFilter = options.matchFilter;
         this._searchHelper = mSearchUtils.generateSearchHelper(searchParams);
