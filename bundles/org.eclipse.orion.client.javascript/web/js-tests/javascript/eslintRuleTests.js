@@ -23,6 +23,40 @@ define([
 	}
 
 	describe('ESLint Rule Tests', function() {
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481045
+		 */
+		describe("Unknown Rule Tests", function() {
+			it("missing rule - no options", function() {
+				var topic = '/*eslint myrule:2 */ var foo \n var bar';
+				var config = { rules: {} };
+    			config.rules['semi'] = 1;
+				var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 2);
+			});
+			it("missing rule - array options", function() {
+				var topic = '/*eslint strict: [2, "global"] */ var foo \n var bar';
+				var config = { rules: {} };
+    			config.rules['semi'] = 1;
+				var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 2);
+			});
+			it("missing rule - eslint-disable", function() {
+				var topic = '/*eslint-disable strict */ var foo \n var bar';
+				var config = { rules: {} };
+    			config.rules['semi'] = 1;
+				var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 2);
+			});
+			it("missing rule - eslint-enable", function() {
+				var topic = '/*eslint-enable strict */ var foo \n var bar';
+				var config = { rules: {} };
+    			config.rules['semi'] = 1;
+				var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 2);
+			});
+		});
+	
 // CURLY ---------------------------------------------
     	describe('curly', function() {
     	    var RULE_ID = 'curly';

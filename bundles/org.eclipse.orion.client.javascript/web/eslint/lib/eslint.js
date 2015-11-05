@@ -581,7 +581,7 @@ module.exports = (function() {
 
             // enable appropriate rules
             Object.keys(config.rules).filter(function(key) {
-                return getRuleSeverity(config.rules[key]) > 0;
+                return rules.get(key) && getRuleSeverity(config.rules[key]) > 0; //ORION
             }).forEach(function(key) {
 
                 var ruleCreator = rules.get(key),
