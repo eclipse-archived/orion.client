@@ -460,7 +460,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 	 	var element = document.createElement(innerNodeType); //$NON-NLS-0$
 		element.tabIndex = 0;
 		element.className = "dropdownMenuItem"; //$NON-NLS-0$
-		element.role = "menuitem";  //$NON-NLS-0$
+		element.setAttribute("role", "menuitem");  //$NON-NLS-0$ //$NON-NLS-1$
 		
 		if (text) {
 			var span = document.createElement("span");  //$NON-NLS-0$

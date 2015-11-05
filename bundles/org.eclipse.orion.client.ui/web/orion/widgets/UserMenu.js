@@ -148,7 +148,7 @@ define([
 
 					var li = doc.createElement("li");//$NON-NLS-0$
 					var link = doc.createElement("a"); //$NON-NLS-0$
-					link.role = "menuitem"; //$NON-NLS-0$
+					link.setAttribute("role", "menuitem"); //$NON-NLS-0$ //$NON-NLS-1$
 					if(typeof this._dropDownItemClass === "string") {//$NON-NLS-0$
 						if(this._dropDownItemClass !== "") {
 							link.classList.add(this._dropDownItemClass);
