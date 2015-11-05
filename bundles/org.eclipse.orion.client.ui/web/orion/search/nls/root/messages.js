@@ -113,8 +113,8 @@ define({//Default message bundle
 	"viewByFilesTooltip": "View references grouped by files", //$NON-NLS-1$ //$NON-NLS-0$
 	"hidePerfectMatch": "Hide perfect matches", //$NON-NLS-1$ //$NON-NLS-0$
 	"showPerfectMatch": "Show perfect matches", //$NON-NLS-1$ //$NON-NLS-0$
-	"hideNonMatch": "Hide non matches", //$NON-NLS-1$ //$NON-NLS-0$
-	"showNonMatch": "Show non matches", //$NON-NLS-1$ //$NON-NLS-0$
+	"hideNonMatch": "Hide non-matches", //$NON-NLS-1$ //$NON-NLS-0$
+	"showNonMatch": "Show non-matches", //$NON-NLS-1$ //$NON-NLS-0$
 	"hidePossibleMatch": "Hide possible matches", //$NON-NLS-1$ //$NON-NLS-0$
 	"showPossibleMatch": "Show possible matches" //$NON-NLS-1$ //$NON-NLS-0$
 });
