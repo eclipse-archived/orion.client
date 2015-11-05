@@ -55,7 +55,7 @@ define([
 	   		_resolved[key].logical = _file.logical;
 	   		_resolved[key].err = err;
 	   		delete _resolved[key].pending;
-	   		server.addFile(_file.file, _resolved[key].contents);
+	   		//server.addFile(_file.file ? _file.file : _file.logical, _resolved[key].contents);
 	   		server.finishAsyncAction(err);
 		});
 	}

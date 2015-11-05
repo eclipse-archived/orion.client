@@ -42,7 +42,8 @@ define([
 					callback: f,
 					query: query
 				};
-				server.on("afterLoad", function(file) { //$NON-NLS-1$
+				var func = function(file) {
+					server.off("afterLoad", func); //$NON-NLS-1$
 					if(file && file.name) {
 						var p = pending[file.name];
 						if(p) {
@@ -50,7 +51,8 @@ define([
 							doCheck(p.query, file, server, p.callback);
 						}	
 					}
-				}.bind(server));
+				};
+				server.on("afterLoad", func);  //$NON-NLS-1$
 			} else {
 				doCheck(query, file, server, f);
 			}
