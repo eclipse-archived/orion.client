@@ -12,10 +12,9 @@
  /*eslint-env amd, browser*/
 define([
 'orion/objects',
-'javascript/finder',
 'orion/Deferred',
 'i18n!javascript/nls/messages'
-], function(Objects, Finder, Deferred, Messages) {
+], function(Objects, Deferred, Messages) {
 
 	/**
 	 * @description Creates a new open declaration command
@@ -68,7 +67,7 @@ define([
 							}
 							deferred.resolve(editorContext.openEditor(response.declaration.file, opts));
 						} else {
-							deferred.reject({Severity: 'Warning', Message: Messages['noDeclFound']});
+							deferred.resolve({Severity: 'Warning', Message: Messages['noDeclFound']}); //$NON-NLS-1$
 						}
 					}
 				}.bind(this)); //$NON-NLS-1$

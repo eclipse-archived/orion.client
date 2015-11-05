@@ -72,6 +72,8 @@ define({//Default message bundle
 	'openDeclTooltip' : 'Open the declaration of the selected element',
 	'openImplName' : 'Open Implementation',
 	'openImplTooltip' : 'Open the implementation of the selected element',
+	'noImplFound': 'No implementation was found',
+	'implTimedOut': 'Could not compute implementation, the operation timed out',
 	'workspaceRefsName': 'Workspace',
 	'workspaceRefsTooltip': 'Show all references to the selection in the workspace',
 	'projectRefsName': 'Project',

@@ -102,12 +102,11 @@ define([
 	function testOpenCommand(command, options, expected){
 		var _p = setup(options);
 		assert(_p, 'setup() should have completed normally');
-		command.execute(_p.editorContext, _p.params).then(function (){
+		command.execute(_p.editorContext, _p.params).then(function (result) {
 			try {
-				var status = _p.editorContext.status;
 				if (!expected){
-					assert(status, "Expected no result but error status not returned");
-					assert(typeof status === "string", "Expected no result but wrong status format returned");
+					assert(result, "Expected no result but error status not returned");
+					assert(typeof result.Message === "string", "Expected no result but wrong status format returned");
 					testworker._state.callback();
 					return;
 				}
@@ -120,8 +119,12 @@ define([
 			} catch (err){
 				testworker._state.callback(err);
 			}
-		}, function (error){
-			testworker._state.callback(error);
+		}, function (error) {
+			if(error instanceof Error || toString.call(error) === '[object Error]') {
+				testworker._state.callback(error);
+			} else {
+				testworker._state.callback(new Error('Unknown error'));
+			}
 		});
 	}
 	

@@ -49,7 +49,7 @@ define([
 				clearTimeout(this.timeout);
 			}
 			this.timeout = setTimeout(function() {
-				deferred.reject({Severity: 'Error', Message: "Could not compute implementation, the operation timed out"}); //$NON-NLS-1$
+				deferred.reject({Severity: 'Error', Message: Messages['implTimedOut']}); //$NON-NLS-1$
 				this.timeout = null;
 			}, 5000);
 			var files = [{type: 'full', name: options.input, text: text}]; //$NON-NLS-1$
@@ -57,12 +57,12 @@ define([
 				{request:'implementation', args:{params:{offset: options.offset}, files: files, meta:{location: options.input}}}, //$NON-NLS-1$
 				function(response) {
 					if(response.implementation && (typeof(response.implementation.start) === 'number' && typeof(response.implementation.end) === 'number')) {
-						var options = Object.create(null);
-						options.start = response.implementation.start;
-						options.end = response.implementation.end;
-						deferred.resolve(editorContext.openEditor(response.implementation.file, options));
+						var opts = Object.create(null);
+						opts.start = response.implementation.start;
+						opts.end = response.implementation.end;
+						deferred.resolve(editorContext.openEditor(response.implementation.file, opts));
 					} else {
-						deferred.reject({Severity: 'Warning', Message: "No implementation was found"});
+						deferred.resolve({Severity: 'Warning', Message: Messages['noImplFound']}); //$NON-NLS-1$
 					}
 				});
 		}
