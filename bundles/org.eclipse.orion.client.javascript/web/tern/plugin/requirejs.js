@@ -70,7 +70,11 @@
       }
       name = over;
     }
-    return getModule(name, data);
+    known = getModule(name, data);
+    if (known) {
+      data.server.addFile(known.origin, known.contents, data.currentFile);
+    }
+    return known;
   }
 
   function getKnownModule(name, data) {

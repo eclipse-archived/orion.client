@@ -7,7 +7,7 @@
 (function(root, mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(exports, require("./infer"), require("./signal"),
-               require("acorn"), require("acorn/dist/walk"));
+               require("esprima/esprima"), require("acorn/dist/walk"));
   if (typeof define == "function" && define.amd) // AMD
     return define(["exports", "./infer", "./signal", "esprima/esprima", "acorn/dist/walk"], mod);
   mod(root.tern || (root.tern = {}), tern, tern.signal, acorn, acorn.walk); // Plain browser env
@@ -249,6 +249,8 @@
       if (parentDepth(srv, known.parent) > parentDepth(srv, parent)) {
         known.parent = parent;
         if (known.excluded) known.excluded = null;
+      } else if(!known.parent) {
+      	known.parent = parent; //ORION - if no parent assign it
       }
       return;
     }

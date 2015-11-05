@@ -523,6 +523,7 @@ require([
             	var _read = reads[_d.ternID];
 				if(typeof(_read) === 'function') {
 					_read(_d.args.error, {contents: _d.args.contents ? _d.args.contents : '', file:_d.args.file, logical: _d.args.logical});
+					delete reads[_d.ternID];
 				}
             	return;
             } else {
@@ -607,18 +608,6 @@ require([
      */
     function _getFile(file, callback) {
     	if(ternserver) {
-    		if(typeof(file) === 'object' && typeof(file.logical) === 'string') {
-    			//https://bugs.eclipse.org/bugs/show_bug.cgi?id=481067
-    			//do not try to find plugin-prefixed files as dependencies
-    			//TODO we might want to let through i18n plugin requests so that we could resolve to complete strings
-    			var idx = file.logical.indexOf('!');
-    			if(idx > -1) {
-    				file.contents = '';
-    				file.file = file.logical;
-    				callback(null, file);
-    				return;
-    			}
-    		}
            var request = {request: 'read', ternID: ternID++, args: {file:file}}; //$NON-NLS-1$
            reads[request.ternID] = callback;
            post(request, null);

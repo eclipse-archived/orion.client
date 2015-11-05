@@ -49,14 +49,13 @@ define([
 		}
   		server.startAsyncAction();
   		_resolved[key].pending = true;
-  		_resolved[key].parent = loc;
 		server.options.getFile({logical: key, file: loc}, function(err, _file) {
 			_resolved[key].file = _file.file;
 	   		_resolved[key].contents = typeof(_file.contents) === 'string' ? _file.contents : '';
 	   		_resolved[key].logical = _file.logical;
 	   		_resolved[key].err = err;
 	   		delete _resolved[key].pending;
-	   		server.addFile(_file.file, _resolved[key].contents, _resolved[key].parent);
+	   		server.addFile(_file.file, _resolved[key].contents);
 	   		server.finishAsyncAction(err);
 		});
 	}
