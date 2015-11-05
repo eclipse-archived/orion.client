@@ -624,7 +624,7 @@ define([
 					parent.appendChild(itemNode);
 					var node = document.createElement("span"); //$NON-NLS-0$
 					node.tabIndex = 0; 
-					node.role = "menuitem"; //$NON-NLS-0$
+					node.setAttribute("role", "menuitem"); //$NON-NLS-1$ //$NON-NLS-0$
 					node.classList.add("dropdownMenuItem"); //$NON-NLS-0$
 					if (addCheck) {
 						var check = document.createElement("span"); //$NON-NLS-0$
