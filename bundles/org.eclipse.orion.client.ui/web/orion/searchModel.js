@@ -348,6 +348,7 @@ define([
 	    				match.lineNumber = matchLine.lineNumber;
 	    				match.matchNumber = matchNumber;
 	    				match.matches = matches;
+	    				match.checked = match.confidence === 100 ? true: false;
 	    				if(matchLine.name) {
 	    					match.lineString = matchLine.name;
 	    					match.name = matchLine.name;
