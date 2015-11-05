@@ -233,22 +233,20 @@ define([
 						if(type && type.type) {
 							var _t = type.type, _ot = original.type;
 							if(_t.name === _ot.name && _t.type === _ot.type && that._sameOrigin(_t.origin, _ot.origin)) {
-								match.confidence = 100;
+								if(_t.guess) {
+									//we took a stab at it, not 100% sure
+									match.confidence = 50;
+								} else {
+									match.confidence = 100;
+								}
 							} else if(_t.staticCheck) {
 								match.confidence = _t.staticCheck.confidence;
-							} else if(_t.category === 'blockcomments' || _t.category === 'linecomments') {
-								match.confidence = -1;
-								//TODO propagate type infos to named elements in structured doc
-								//for example @name mentions func decl match
-							}
-							else {
+							} else if(_t.category === categories.strings.category ||	_t.category === categories.regex.category) {
 								match.confidence = 0;
+							} else {
+								match.confidence = -1;
 							}
 							match.category = _t.category;
-							//TODO for demo anything with parsererrors category is -1
-							if(_t.category === categories.syntax.category) {
-								match.confidence = -1;
-							}
 						} else if(err) {
 							match.category = categories.uncategorized.category;
 							match.confidence = -1;
