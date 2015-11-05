@@ -144,7 +144,7 @@ define([
 			        });
 			    }
 			}, /* @callback */ function(err) {
-				deferred.resolve(Messages['noFileMeta']);
+				deferred.reject({Severity: 'Error', Message: Messages['noFileMeta']}); //$NON-NLS-1$
 			});
 			return deferred;
 		},
@@ -167,8 +167,7 @@ define([
 						{request: 'type', args: {meta: metadata, params: options}},  //$NON-NLS-1$
 						function(type, err) {
 							if(err) {
-								editorContext.setStatus({Severity: 'Error', Message: err}); //$NON-NLS-1$
-								deferred.resolve([]);
+								deferred.reject({Severity: 'Error', Message: err}); //$NON-NLS-1$
 							} else {
 								var expected = Object.create(null);
 								expected.total = 0;
@@ -205,16 +204,14 @@ define([
 									}
 									that._checkDone(expected);
 								}, /* @callback */ function(err) {
-									editorContext.setStatus({Severity: 'Error', Message: i18nUtil.formatMessage(Messages['cannotComputeRefs'], err.message)}); //$NON-NLS-1$
-									deferred.resolve([]);
+									deferred.reject({Severity: 'Error', Message: i18nUtil.formatMessage(Messages['cannotComputeRefs'], err.message)}); //$NON-NLS-1$
 								}, /* @callback */ function(result) {
 									//TODO progress
 								});
 						  }
 					});
 				} else {
-					editorContext.setStatus({Severity: 'Error', Message: Messages['notAnIdentifier']}); //$NON-NLS-1$
-					deferred.resolve([]);
+					deferred.reject({Severity: 'Error', Message: Messages['notAnIdentifier']}); //$NON-NLS-1$
 				}
 			});
 		},

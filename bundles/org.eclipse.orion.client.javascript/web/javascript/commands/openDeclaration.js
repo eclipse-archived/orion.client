@@ -17,9 +17,6 @@ define([
 'i18n!javascript/nls/messages'
 ], function(Objects, Finder, Deferred, Messages) {
 
-	var cachedContext;
-	var deferred;
-
 	/**
 	 * @description Creates a new open declaration command
 	 * @constructor
@@ -42,22 +39,19 @@ define([
 		/* override */
 		execute: function(editorContext, options) {
 			var that = this;
-			return editorContext.getText().then(function(text) {
-				return that._findDecl(editorContext, options, text);
-			});
+			var deferred = new Deferred();
+			editorContext.getText().then(function(text) {
+				return that._findDecl(editorContext, options, text, deferred);
+			}, deferred.reject);
+			return deferred;
 		},
 
-		_findDecl: function(editorContext, options, text) {
-			cachedContext = editorContext;
-			deferred = new Deferred();
+		_findDecl: function(editorContext, options, text, deferred) {
 			if(this.timeout) {
 				clearTimeout(this.timeout);
 			}
 			this.timeout = setTimeout(function() {
-				cachedContext.setStatus({Severity: 'Error', Message: Messages['noDeclTimedOut']}); //$NON-NLS-1$
-				if(deferred) {
-					deferred.resolve(Messages['noDeclFound']);
-				}
+				deferred.reject({Severity: 'Error', Message: Messages['noDeclTimedOut']}); //$NON-NLS-1$
 				this.timeout = null;
 			}, 5000);
 			var files = [{type: 'full', name: options.input, text: text}]; //$NON-NLS-1$
@@ -72,13 +66,12 @@ define([
 							if(this.openMode != null && typeof(this.openMode) !== 'undefined') {
 								opts.mode = this.openMode;
 							}
-							deferred.resolve(cachedContext.openEditor(response.declaration.file, opts));
+							deferred.resolve(editorContext.openEditor(response.declaration.file, opts));
 						} else {
-							deferred.resolve(cachedContext.setStatus(Messages['noDeclFound']));
+							deferred.reject({Severity: 'Warning', Message: Messages['noDeclFound']});
 						}
 					}
 				}.bind(this)); //$NON-NLS-1$
-			return deferred;
 		}
 	});
 
