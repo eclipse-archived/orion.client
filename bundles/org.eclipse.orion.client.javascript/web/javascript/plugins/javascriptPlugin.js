@@ -34,6 +34,7 @@ define([
 'javascript/ternProjectManager',
 'orion/util',
 'javascript/logger',
+'javascript/commands/addToTernCommand',
 'javascript/commands/generateDocCommand',
 'javascript/commands/openDeclaration',
 'javascript/commands/openImplementation',
@@ -47,7 +48,7 @@ define([
 'i18n!javascript/nls/messages',
 'orion/URL-shim'
 ], function(PluginProvider, Bootstrap, Deferred, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist,
-			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, TernProjectManager, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
+			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, TernProjectManager, Util, Logger, AddToTernCommand, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 			RenameCommand, RefsCommand, mGSearchClient, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
     var provider = new PluginProvider({
@@ -387,19 +388,28 @@ define([
     		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     	});
     	
-    	// TODO This manager is dark launched as it will be automated during editor open - Bug 476062
-    	if ("true" === localStorage.getItem("ternProject")) { //$NON-NLS-1$
-	    	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, fileClient);
-	    	/**
-	    	 * Register Tern project manager as input changed listener
-	    	 */
-	    	provider.registerService("orion.edit.model", {  //$NON-NLS-1$
-	    		onInputChanged: ternProjectManager.onInputChanged.bind(ternProjectManager)
-	    	},
-	    	{
-	    		contentType: ["application/javascript", "application/json", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	    		types: ['onInputChanged']  //$NON-NLS-1$
-	    	});
+    	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, fileClient);
+    	/**
+    	 * Register Tern project manager as input changed listener
+    	 */
+    	provider.registerService("orion.edit.model", {  //$NON-NLS-1$
+    		onInputChanged: ternProjectManager.onInputChanged.bind(ternProjectManager)
+    	},
+    	{
+    		contentType: ["application/javascript", "application/json", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    		types: ['onInputChanged']  //$NON-NLS-1$
+    	});
+	    
+	    if ("true" === localStorage.getItem("darklaunch")) {
+	    	provider.registerServiceProvider("orion.navigate.command",  //$NON-NLS-1$
+	    			new AddToTernCommand.AddToTernCommand(ternProjectManager),
+	    			{
+	    		name: javascriptMessages["addToTernCommand"],  //$NON-NLS-1$
+	    		tooltip : javascriptMessages['addToTernCommandTooltip'],  //$NON-NLS-1$
+	    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
+	    		id : "add.js.tern",  //$NON-NLS-1$
+	    			}
+	    	);
     	}
 
     	/**
@@ -413,7 +423,7 @@ define([
     		contentType: ["text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
     		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     	});
-
+    	
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			new GenerateDocCommand.GenerateDocCommand(astManager, CUProvider),
     			{

@@ -149,5 +149,7 @@ define({//Default message bundle
 	"notHtmlOffset": "Not a valid offset in HTML",
 	"allProjectRefs": "Finding all project references...",
 	"allWorkspaceRefs": "Finding all workspace references...",
-	"refsFoundIn": "References found in file: \'${0}\' (${1}/${2})"
+	"refsFoundIn": "References found in file: \'${0}\' (${1}/${2})",
+	"addToTernCommand": "Add to .tern-project",
+	"addToTernCommandTooltip": "The JavaScript tooling will always load the contents of this file to Tern"
 });
