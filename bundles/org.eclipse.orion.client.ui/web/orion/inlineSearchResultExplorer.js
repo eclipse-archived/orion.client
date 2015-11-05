@@ -1229,7 +1229,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 			this._cacheSearchResult = searchResult;
 			this._renderSearchResult(resultsNode, this._cacheSearchParams, searchResult, searchParams.incremental);
 			window.setTimeout(function() {
-				this.expandAll();
+				this.expandAll(null, ["partial"]);
 			}.bind(this), 10);
 			return;
 		}

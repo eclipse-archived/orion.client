@@ -143,9 +143,9 @@ exports.Explorer = (function() {
 		 * Expand all the nodes under a node in the explorer
 		 * @param nodeModel {Object} the node model to be expanded. If not provided the whole tree is expanded recursively
 		 */
-		expandAll: function(nodeModel) {
+		expandAll: function(nodeModel, excludes) {
 			if(nodeModel){
-				this._expandRecursively(nodeModel);
+				this._expandRecursively(nodeModel, excludes);
 			} else {
 				if(!this._navHandler){
 					return;
@@ -153,14 +153,24 @@ exports.Explorer = (function() {
 				//We already know what the top level children is under the root, from the navigation handler.
 				var topLevelNodes = this._navHandler.getTopLevelNodes();
 				for (var i = 0; i < topLevelNodes.length ; i++){
-					this._expandRecursively(topLevelNodes[i]);
+					this._expandRecursively(topLevelNodes[i], excludes);
 				}
 			}
 		},
 		
-		_expandRecursively: function(node){
+		_inExcludes: function(node, excludes) {
+			if(this.model && this.model.getId && Array.isArray(excludes)) {
+				var matchFound = excludes.some(function(exclude) {
+					return exclude === this.model.getId(node);
+				}.bind(this));
+				return matchFound;				
+			}
+			return false;
+		},
+		
+		_expandRecursively: function(node, excludes){
 			//If a node is not expandable, we stop here.
-			if(!this._navHandler || !this._navHandler.isExpandable(node)){
+			if(!this._navHandler || !this._navHandler.isExpandable(node) || this._inExcludes(node, excludes)){
 				return;
 			}
 			var that = this;
@@ -171,7 +181,7 @@ exports.Explorer = (function() {
 					}
 					var len = children.length;
 					for (var i = 0; i < len ; i++){
-						that._expandRecursively(children[i]);
+						that._expandRecursively(children[i], excludes);
 					}
 				});
 			});
