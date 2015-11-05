@@ -614,6 +614,7 @@ require([
     			var idx = file.logical.indexOf('!');
     			if(idx > -1) {
     				file.contents = '';
+    				file.file = file.logical;
     				callback(null, file);
     				return;
     			}

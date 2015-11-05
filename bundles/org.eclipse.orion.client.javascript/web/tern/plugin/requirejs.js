@@ -60,8 +60,8 @@
   function getInterface(name, data) {
     if (data.options.override && Object.prototype.hasOwnProperty.call(data.options.override, name)) {
       var over = data.options.override[name];
-      if (typeof over == "string" && over.charAt(0) == "=") return infer.def.parsePath(over.slice(1));
-      if (typeof over == "object") {
+      if (typeof over === "string" && over.charAt(0) === "=") return infer.def.parsePath(over.slice(1));
+      if (typeof over === "object") {
         var known = getKnownModule(name, data);
         if (known) return known;
         var scope = data.interfaces[stripJSExt(name)] = new infer.Obj(null, stripJSExt(name));
@@ -70,12 +70,7 @@
       }
       name = over;
     }
-
-	known = getModule(name, data);
-    if (known) {
-      data.server.addFile(known.origin, known.contents, data.currentFile);
-    }
-    return known;
+    return getModule(name, data);
   }
 
   function getKnownModule(name, data) {
