@@ -43,10 +43,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		this._undoStack = options.undoStack;
 		this._statusReporter = options.statusReporter;
 		this._title = null;
-		var self = this;
+		var that = this;
 		this._listener = {
 			onChanged: function(e) {
-				self.onChanged(e);
+				that.onChanged(e);
 			}
 		};
 		if (this._model) {
@@ -151,6 +151,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		/**
 		 * Called when the editor's text model has been changed.
 		 * @param {Event} inputChangedEvent
+		 * @callback
 		 */
 		onChanged: function (modelChangedEvent) {
 			this.checkDirty();
@@ -531,11 +532,11 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			}
 		},
 
-		mapOffset: function(offset, parent) {
+		mapOffset: function(offset, _parent) {
 			var textView = this._textView;
 			var model = textView.getModel();
 			if (model.getBaseModel) {
-				offset = model.mapOffset(offset, parent);
+				offset = model.mapOffset(offset, _parent);
 			}
 			return offset;
 		},
@@ -662,15 +663,15 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			textView.setSelection(start, end, show, callback);
 		},
 		setSelections: function(ranges, show, callback) {
-			var self = this;
+			var that = this;
 			var textView = this._textView;
 			var model = textView.getModel();
 			ranges.forEach(function(range) {
 				var start = range.start;
 				var end = range.end;
 				if (model.getBaseModel) {
-					self._expandOffset(start);
-					self._expandOffset(end);
+					that._expandOffset(start);
+					that._expandOffset(end);
 					start = model.mapOffset(start, true);
 					end = model.mapOffset(end, true);
 				}
@@ -684,15 +685,15 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @param {Number} start
 		 * @param {Number} [end]
 		 * @param {function} [callback] if callback is specified, scrolling to show the selection is animated and callback is called when the animation is done.
-		 * @param {Boolean} [focus=true] whether the text view should be focused when the selection is done.
+		 * @param {Boolean} [focused=true] whether the text view should be focused when the selection is done.
 		 * @private
 		 * @deprecated use #setSelection instead
 		 */
-		moveSelection: function(start, end, callback, focus) {
+		moveSelection: function(start, end, callback, focused) {
 			end = end || start;
 			var textView = this._textView;
 			this.setSelection(start, end, 1 / 3, function() {
-				if (focus === undefined || focus) {
+				if (focused === undefined || focused) {
 					textView.focus();
 				}
 				if (callback) {
@@ -810,41 +811,41 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			
 			var editor = this, textView = this._textView;
 
-			var self = this;
+			var that = this;
 			this._listener = {
-				onModelChanged: function(e) {
-					self.checkDirty();
+				onModelChanged: /* @callback */ function(e) {
+					that.checkDirty();
 				},
 				onMouseOver: function(e) {
-					self._listener.onMouseMove(e);
+					that._listener.onMouseMove(e);
 				},
-				onMouseDown: function(e) {
-					self._listener.mouseDown = true;
+				onMouseDown: /* @callback */ function(e) {
+					that._listener.mouseDown = true;
 				},
-				onMouseUp: function(e) {
-					self._listener.mouseDown = false;
+				onMouseUp: /* @callback */ function(e) {
+					that._listener.mouseDown = false;
 				},
 				onMouseMove: function(e) {
-					if (!tooltip || self._listener.mouseDown) { return; }
+					if (!tooltip || that._listener.mouseDown) { return; }
 
 					// Prevent spurious mouse event (e.g. on a scroll)					
-					if (e.event.clientX === self._listener.lastMouseX
-						&& e.event.clientY === self._listener.lastMouseY) {
+					if (e.event.clientX === that._listener.lastMouseX
+						&& e.event.clientY === that._listener.lastMouseY) {
 						return;
 					}
 					
-					self._listener.lastMouseX = e.event.clientX;
-					self._listener.lastMouseY = e.event.clientY;
+					that._listener.lastMouseX = e.event.clientX;
+					that._listener.lastMouseY = e.event.clientY;
 
-					if (self._hoverTimeout) {
-						window.clearTimeout(self._hoverTimeout);
-						self._hoverTimeout = null;
+					if (that._hoverTimeout) {
+						window.clearTimeout(that._hoverTimeout);
+						that._hoverTimeout = null;
 					}
-					self._hoverTimeout = window.setTimeout(function() {
-						self._hoverTimeout = null;
+					that._hoverTimeout = window.setTimeout(function() {
+						that._hoverTimeout = null;
 						
 						// Re-check incase editor closed...
-						if (!self._listener){
+						if (!that._listener){
 							return;
 						}
 						
@@ -852,22 +853,22 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 							y: e.y,
 							x: e.x,							
 							getTooltipInfo: function() {
-								return self._getTooltipInfo(this.x, this.y);
+								return that._getTooltipInfo(this.x, this.y);
 							}
 						}, e.x, e.y);
 					}, 175);
 				},
-				onMouseOut: function(e) {
+				onMouseOut: /* @callback */ function(e) {
 					// When mouse leaves the editor, ignore any pending onMouseMove events
-					if (self._hoverTimeout) {
-						window.clearTimeout(self._hoverTimeout);
-						self._hoverTimeout = null;
+					if (that._hoverTimeout) {
+						window.clearTimeout(that._hoverTimeout);
+						that._hoverTimeout = null;
 					}
 				},
 				onSelection: function(e) {
 					if (tooltip) { tooltip.hide(); }
-					self._updateCursorStatus();
-					self._highlightCurrentLine(e.newValue, e.oldValue);
+					that._updateCursorStatus();
+					that._highlightCurrentLine(e.newValue, e.oldValue);
 				}
 			};
 			textView.addEventListener("ModelChanged", this._listener.onModelChanged); //$NON-NLS-0$
@@ -893,7 +894,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				}
 			}
 
-			var addRemoveBookmark = function(lineIndex, e) {
+			var addRemoveBookmark = /* @callback */ function(lineIndex, e) {
 				if (lineIndex === undefined) { return; }
 				if (lineIndex === -1) { return; }
 				var view = this.getView();
@@ -1051,19 +1052,19 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					return;
 				}
 			}
-			var status;
+			var _status;
 			var model = this.getModel();
 			var selections = this.getSelections();
 			if (selections.length > 1) {
-				status = util.formatMessage(messages.multiSelections, selections.length);
+				_status = util.formatMessage(messages.multiSelections, selections.length);
 			} else {
 				var caretOffset = selections[0].getCaret();
 				var lineIndex = model.getLineAtOffset(caretOffset);
 				var lineStart = model.getLineStart(lineIndex);
 				var offsetInLine = caretOffset - lineStart;
-				status = util.formatMessage(messages.lineColumn, lineIndex + 1, offsetInLine + 1);
+				_status = util.formatMessage(messages.lineColumn, lineIndex + 1, offsetInLine + 1);
 			}
-			this.reportStatus(status);
+			this.reportStatus(_status);
 		},
 
 		showAnnotations: function(annotations, types, createAnnotation, getType) {
@@ -1151,13 +1152,13 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 
 		showBlame : function(blameMarkers) {
 			var blameRGB = this._blameRGB;
-			var document = this.getTextView().getOptions("parent").ownerDocument; //$NON-NLS-0$
+			var doc = this.getTextView().getOptions("parent").ownerDocument; //$NON-NLS-0$
 			if (!blameRGB) {
-				var div = util.createElement(document, "div"); //$NON-NLS-0$
+				var div = util.createElement(doc, "div"); //$NON-NLS-0$
 				div.className = "annotation blame"; //$NON-NLS-0$
-				document.body.appendChild(div);
-				var window = document.defaultView || document.parentWindow;
-				var blameStyle = window.getComputedStyle(div);
+				doc.body.appendChild(div);
+				var win = doc.defaultView || doc.parentWindow;
+				var blameStyle = win.getComputedStyle(div);
 				var color = blameStyle.getPropertyValue("background-color"); //$NON-NLS-0$
 				div.parentNode.removeChild(div);
 				var i1 = color.indexOf("("); //$NON-NLS-0$
@@ -1177,17 +1178,17 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				return annotation;
 			};
 			var title = function() {
-				var div = util.createElement(document, "div"); //$NON-NLS-0$
-				div.className = "tooltipTitle"; //$NON-NLS-0$
+				var titleDiv = util.createElement(doc, "div"); //$NON-NLS-0$
+				titleDiv.className = "tooltipTitle"; //$NON-NLS-0$
 				var index = this.blame.Message.indexOf("\n"); //$NON-NLS-0$
 				if (index === -1) { index = this.blame.Message.length; }
-				var commitLink = util.createElement(document, "a"); //$NON-NLS-0$
+				var commitLink = util.createElement(doc, "a"); //$NON-NLS-0$
 				commitLink.href = this.blame.CommitLink;
-				commitLink.appendChild(document.createTextNode(this.blame.Message.substring(0, index)));
-				div.appendChild(commitLink);
-				div.appendChild(util.createElement(document, "br")); //$NON-NLS-0$
-				div.appendChild(document.createTextNode(util.formatMessage(messages.committerOnTime, this.blame.AuthorName, this.blame.Time)));
-				return div;
+				commitLink.appendChild(doc.createTextNode(this.blame.Message.substring(0, index)));
+				titleDiv.appendChild(commitLink);
+				titleDiv.appendChild(util.createElement(doc, "br")); //$NON-NLS-0$
+				titleDiv.appendChild(doc.createTextNode(util.formatMessage(messages.committerOnTime, this.blame.AuthorName, this.blame.Time)));
+				return titleDiv;
 			};
 			var model = this.getModel();
 			this.showAnnotations(blameMarkers, [
@@ -1240,7 +1241,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @param {Number} offset
 		 * @param {Number} length
 		 */
-		showSelection: function(start, end, line, offset, length) {
+		showSelection: function(start, end, line, offset, len) {
 			// We use typeof because we need to distinguish the number 0 from an undefined or null parameter
 			if (typeof(start) === "number") { //$NON-NLS-0$
 				if (typeof(end) !== "number") { //$NON-NLS-0$
@@ -1254,10 +1255,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				if (typeof(offset) === "number") { //$NON-NLS-0$
 					pos = pos + offset;
 				}
-				if (typeof(length) !== "number") { //$NON-NLS-0$
-					length = 0;
+				if (typeof(len) !== "number") { //$NON-NLS-0$
+					len = 0;
 				}
-				this.moveSelection(pos, pos+length);
+				this.moveSelection(pos, pos+len);
 				return true;
 			}
 			return false;
