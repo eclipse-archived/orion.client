@@ -83,7 +83,7 @@ define([
 					clearTimeout(that.timeout);
 				}
 				that.timeout = setTimeout(function() {
-					deferred.reject({Severity: 'Error', Message: Messages['renameFailedTimedOut']});
+					deferred.reject({Severity: 'Error', Message: Messages['renameFailedTimedOut']}); //$NON-NLS-1$
 					that.timeout = null;
 				}, 5000);
 				var files = [{type:'full', name:params.input, text:text}]; //$NON-NLS-1$

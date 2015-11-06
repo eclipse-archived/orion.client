@@ -62,7 +62,7 @@ define([
 						opts.end = response.implementation.end;
 						deferred.resolve(editorContext.openEditor(response.implementation.file, opts));
 					} else {
-						deferred.resolve({Severity: 'Warning', Message: Messages['noImplFound']}); //$NON-NLS-1$
+						deferred.reject({Severity: 'Warning', Message: Messages['noImplFound']}); //$NON-NLS-1$
 					}
 				});
 		}

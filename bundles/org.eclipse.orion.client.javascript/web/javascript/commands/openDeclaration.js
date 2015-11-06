@@ -67,7 +67,7 @@ define([
 							}
 							deferred.resolve(editorContext.openEditor(response.declaration.file, opts));
 						} else {
-							deferred.resolve({Severity: 'Warning', Message: Messages['noDeclFound']}); //$NON-NLS-1$
+							deferred.reject({Severity: 'Warning', Message: Messages['noDeclFound']}); //$NON-NLS-1$
 						}
 					}
 				}.bind(this)); //$NON-NLS-1$

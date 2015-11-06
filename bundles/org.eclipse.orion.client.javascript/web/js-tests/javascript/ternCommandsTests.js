@@ -74,10 +74,6 @@ define([
 			    return new Deferred().resolve(o);
 			},
 			
-			setStatus: function(status) {
-				this.status = status;
-			},
-			
 			openEditor: function(file, options){
 				this.file = file;
 				this.options = options;
@@ -104,13 +100,11 @@ define([
 		assert(_p, 'setup() should have completed normally');
 		command.execute(_p.editorContext, _p.params).then(function (result) {
 			try {
-				if (!expected){
+				if (!expected) {
 					assert(result, "Expected no result but error status not returned");
-					assert(typeof result.Message === "string", "Expected no result but wrong status format returned");
 					testworker._state.callback();
 					return;
 				}
-				assert(!status, "Error status returned: " + (status && status.message ? status.message : status));
 				assert(_p.editorContext.options, "OpenEditor was not called on the editor context");
 				var actual = _p.editorContext.options;
 				assert.equal(actual.start, expected.start, 'The offset starts are not the same. Actual ' + actual.start + '-' + actual.end + ' Expected ' + expected.start + '-' + expected.end);
@@ -120,6 +114,12 @@ define([
 				testworker._state.callback(err);
 			}
 		}, function (error) {
+			if (!expected) {
+				if (error.Severity === "Warning") {
+					testworker._state.callback();
+					return;
+				}
+			}
 			if(error instanceof Error || toString.call(error) === '[object Error]') {
 				testworker._state.callback(error);
 			} else {
