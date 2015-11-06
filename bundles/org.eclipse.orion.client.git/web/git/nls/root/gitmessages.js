@@ -597,5 +597,14 @@ define({//Default message bundle
 	'SingleSubmodule' : "${0} (${1} submodule)", //$NON-NLS-1$ //$NON-NLS-0$
 	'PluralSubmodule' : "${0} (${1} submodules)", //$NON-NLS-1$ //$NON-NLS-0$
 	'UninitializedSubmodule' : " ( Uninitialized Submodule )", //$NON-NLS-1$ //$NON-NLS-0$
-	"Detach Head:": "Detach Head:" //$NON-NLS-0$  //$NON-NLS-1$
+	"Detach Head:": "Detach Head:", //$NON-NLS-0$  //$NON-NLS-1$
+	"CreatePullRequestRemoteConfirm": "In order to check out this pull request, a remote branch named ${0} with url ${1} will be created if it does not exist, are you sure?", //$NON-NLS-0$  //$NON-NLS-1$
+	"pull requests": "pull requests", //$NON-NLS-0$  //$NON-NLS-1$
+    "CheckoutPullRequest": "Checkout Pull Request", //$NON-NLS-0$  //$NON-NLS-1$
+    "CheckoutPullRequestMsg": "Checkout the pull request and make it active.", //$NON-NLS-0$  //$NON-NLS-1$
+    "Checking out pull request ${0}...": "Checking out pull request ${0}", //$NON-NLS-0$  //$NON-NLS-1$
+    "Checking out pull request...": "Checking out pull request", //$NON-NLS-0$  //$NON-NLS-1$
+    "Pull Request checked out.": "Pull Request checked out.", //$NON-NLS-0$  //$NON-NLS-1$
+	"Getting pull requests...": "Getting pull requests...", //$NON-NLS-0$  //$NON-NLS-1$
+	"PullRequestTreeItem":"${0}/${1} => ${2}/${3}" //$NON-NLS-0$  //$NON-NLS-1$
 });

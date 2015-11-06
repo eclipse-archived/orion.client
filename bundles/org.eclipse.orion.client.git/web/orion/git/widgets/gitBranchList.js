@@ -31,6 +31,7 @@ define([
 		this.showHistory = options.showHistory === undefined || options.showHistory;
 		this.showTags = options.showTags === undefined || options.showTags;
 		this.showStashes = options.showStashes === undefined || options.showStashes;
+		this.showPullRequests = options.showPullRequests === undefined || options.showPullRequests;
 		this.registry = options.registry;
 		this.handleError = options.handleError;
 		this.section = options.section;
@@ -73,6 +74,18 @@ define([
 				}, function(error){
 					that.handleError(error);
 				});
+			}else if (parentItem.Type === "PullRequestRoot") { //$NON-NLS-0$
+				progress = this.section && !parentItem.parent  ? this.section.createProgressMonitor() : null;
+				msg = messages["Getting pull requests..."];
+				if (progress) progress.begin(msg);
+				return that.progressService.progress(that.gitClient.doPullRequestList(parentItem.location ? parentItem.location : repository.PullRequestLocation + util.generateQuery([pageQuery, that.filterQuery])), msg).then(function(resp) {
+					if (progress) progress.done();
+					var children = resp.Children || resp;
+					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, resp, "MorePullRequest"))); //$NON-NLS-0$
+				}, function(error){
+					that.handleError(error);
+				});
+			
 			} else if (parentItem.Type === "TagRoot") { //$NON-NLS-0$
 				progress = this.section && !parentItem.parent  ? this.section.createProgressMonitor() : null;
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], repository.Name);
@@ -93,6 +106,9 @@ define([
 					if (progress) progress.done();
 					var remotes = resp.Children;
 					remotes.unshift(that.localRoot = {Type: "LocalRoot", Name: messages["Local"]}); //$NON-NLS-0$
+					if(that.showPullRequests){
+						remotes.push(that.pullRequestRoot = {Type: "PullRequestRoot", Name: messages["pull requests"]}); //$NON-NLS-0$
+					}
 					if (that.showTags) {
 						remotes.push(that.tagRoot = {Type: "TagRoot", Name: messages["tags"]}); //$NON-NLS-0$
 					}
@@ -180,6 +196,7 @@ define([
 		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(evt) { //$NON-NLS-0$
 			switch (evt.action) {
 			case "addBranch": //$NON-NLS-0$
+			case "pullRequestCheckout": //$NON-NLS-0$
 				this.changedItem(this.model.localRoot, true);
 				break;
 			case "removeBranch": //$NON-NLS-0$
@@ -287,6 +304,7 @@ define([
 			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.checkoutTag", 100); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.checkoutBranch", 100); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.fetchRemote", 100); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.checkoutPullRequest", 100); //$NON-NLS-1$ //$NON-NLS-0$
 			if (root.Type === "RemoteRoot") { //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.addBranch", 200); //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.addRemote", 100); //$NON-NLS-0$
@@ -308,7 +326,7 @@ define([
 					var commit, explorer = this.explorer;
 					td = document.createElement("td"); //$NON-NLS-0$
 					
-					if (item.Type === "MoreBranches" || item.Type === "MoreTags" || item.Type === "MoreStashes") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					if (item.Type === "MoreBranches" || item.Type === "MoreTags" || item.Type === "MoreStashes"|| item.Type === "MorePullRequests") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						td.classList.add("gitListMore"); //$NON-NLS-0$
 						var moreButton = document.createElement("button"); //$NON-NLS-0$
 						moreButton.className = "commandButton"; //$NON-NLS-0$
@@ -384,7 +402,10 @@ define([
 							description = item.GitUrl || item.Description || item.parent.repository.ContentLocation;
 						}
 						actionsID = "remoteActionsArea"; //$NON-NLS-0$
-					} else if (item.parent.Type === "Remote") { //$NON-NLS-0$
+					} else if (item.parent.Type === "PullRequestRoot") { //$NON-NLS-0$
+						var baseRoot = (item.Head.user.login !== item.Base.user.login)?item.Head.user.login:"origin";//$NON-NLS-0$
+						title = i18nUtil.formatMessage(messages["PullRequestTreeItem"], baseRoot, item.Head.ref, "origin", item.Base.ref); //$NON-NLS-0$
+					}  else if (item.parent.Type === "Remote") { //$NON-NLS-0$
 						if (explorer.showHistory) createExpand();
 						actionsID = "branchActionsArea"; //$NON-NLS-0$
 						description = "";
