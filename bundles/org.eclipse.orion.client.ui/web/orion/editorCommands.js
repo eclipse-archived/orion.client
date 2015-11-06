@@ -891,33 +891,30 @@ define([
 						
 						editor.focus();
 						serviceCall = service.execute(editorContext, context); 
-						handleResult = function(result){
-							if (result && result.searchParams && result.refResult) {
-								if(that.sideBar) {
-									that.sideBar.fillSearchPane(result.searchParams.keyword, {Location: result.searchParams.resource}, result);
-								}
-							}
-						};
 					} else {
 						serviceCall = service.run(model.getText(selection.start,selection.end), model.getText(), selection, inputManager.getInput());
-						handleResult = function(result){
-							if (result && result.uriTemplate) {
-								var options1 = {};
-								options1.uriTemplate = result.uriTemplate;
-								options1.params = inputManager.getFileMetadata();
-								options1.id = info.id;
-								options1.width = result.width;
-								options1.height = result.height;
-								options1.done = processEditorResult;
-								options1.status = handleStatus;
-								createDelegatedUI(options1);
-							} else if (result && (result.Status || result.status)) {
-								handleStatus(result.Status || result.status);
-							} else {
-								processEditorResult(result);
-							}
-						};
 					}
+					handleResult = function(result) {
+						if (result && result.uriTemplate) {
+							var options1 = {};
+							options1.uriTemplate = result.uriTemplate;
+							options1.params = inputManager.getFileMetadata();
+							options1.id = info.id;
+							options1.width = result.width;
+							options1.height = result.height;
+							options1.done = processEditorResult;
+							options1.status = handleStatus;
+							createDelegatedUI(options1);
+						} else if (result && result.searchParams && result.refResult) {
+							if(that.sideBar) {
+								that.sideBar.fillSearchPane(result.searchParams.keyword, {Location: result.searchParams.resource}, result);
+							}
+						} else if (result && (result.Status || result.status)) {
+							handleStatus(result.Status || result.status);
+						} else {
+							processEditorResult(result);
+						}
+					};
 					var msg = i18nUtil.formatMessage(messages.running, options.name);
 					if (statusService) {
 						statusService.createProgressMonitor(serviceCall, msg);
