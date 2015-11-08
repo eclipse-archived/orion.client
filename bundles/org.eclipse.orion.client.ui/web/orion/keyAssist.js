@@ -40,7 +40,8 @@ define([
 			var keyAssistInput = this._keyAssistInput = document.createElement("input"); //$NON-NLS-1$
 			keyAssistInput.classList.add("keyAssistInput"); //$NON-NLS-1$
 			keyAssistInput.type = "text"; //$NON-NLS-1$
-			keyAssistInput.placeholder = messages["Filter bindings"];
+			keyAssistInput.placeholder = messages["Filter bindings"]; //$NON-NLS-1$
+			keyAssistInput.setAttribute("aria-autocomplete", "list"); //$NON-NLS-1$ //$NON-NLS-0$
 			keyAssistDiv.appendChild(keyAssistInput);
 
 			var keyAssistContents = this._keyAssistContents = document.createElement("div"); //$NON-NLS-1$
