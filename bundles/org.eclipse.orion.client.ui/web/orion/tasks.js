@@ -73,7 +73,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/section'], fu
 					contentDiv.appendChild(p);
 				}
 				var taskTable = document.createElement("table"); //$NON-NLS-0$
-				taskTable.role = "presentation"; //$NON-NLS-0$
+				taskTable.setAttribute("role", "presentation"); //$NON-NLS-2$ //$NON-NLS-1$
 				contentDiv.appendChild(taskTable);
 				for (var i=0; i<this._tasks.length; i++) {
 					var row = document.createElement("tr"); //$NON-NLS-0$
