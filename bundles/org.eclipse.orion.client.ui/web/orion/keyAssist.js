@@ -164,7 +164,7 @@ define([
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistActions"); //$NON-NLS-1$
 			var eb = document.createElement("button"); //$NON-NLS-1$
-			eb.id = "keyAssistEditButton"; //$NON-NLS-1$
+			eb.id = "keyAssistEditButton" + this._idCount; //$NON-NLS-1$
 			eb.classList.add("keyAssistEditButton"); //$NON-NLS-1$
 			eb.classList.add("core-sprite-edit"); //$NON-NLS-1$
 			//eb.textContent = "E"; //$NON-NLS-1$
