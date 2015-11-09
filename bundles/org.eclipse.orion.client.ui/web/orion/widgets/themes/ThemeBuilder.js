@@ -14,6 +14,7 @@ define(['i18n!orion/settings/nls/messages',
 		'orion/commands', 
 		'orion/commandRegistry', 
 		'orion/webui/littlelib', 
+		'orion/webui/tooltip',
 		'orion/widgets/themes/editor/editorSetup',
 		'orion/widgets/themes/colors',
 		'orion/util',
@@ -21,7 +22,7 @@ define(['i18n!orion/settings/nls/messages',
 		'text!examples/html-demo.html',
 		'text!examples/css-demo.css',
 		'text!examples/java-demo.java'],
-function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExample, htmlExample, cssExample, javaExample) {
+function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup, colors, util, jsExample, htmlExample, cssExample, javaExample) {
 
 	var editorLanguage, editorTheme, originalTheme, currentTheme, revertBtn, deleteBtn ,saveBtn, themeNameInput;
 	var protectedThemes = [];
@@ -445,12 +446,33 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mSetup, colors, u
 		
 		revertBtn = document.getElementById("editorThemeRevert");
 		revertBtn.onclick = this.revertTheme.bind(this);
+		var revertThemeLabel = messages['Revert Theme']; //$NON-NLS-1$
+		revertBtn.setAttribute("aria-label", revertThemeLabel); //$NON-NLS-1$
+		new mTooltip.Tooltip({
+			node: revertBtn,
+			text: revertThemeLabel,
+			position: ["above", "below", "left", "right"] //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		});
 		
 		deleteBtn = document.getElementById("editorThemeDelete");
 		deleteBtn.onclick = this.deleteTheme.bind(this);
+		var deleteThemeLabel = messages['Delete Theme']; //$NON-NLS-1$
+		deleteBtn.setAttribute("aria-label", deleteThemeLabel); //$NON-NLS-1$
+		new mTooltip.Tooltip({
+			node: deleteBtn,
+			text: deleteThemeLabel,
+			position: ["above", "below", "left", "right"] //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		});
 		
 		saveBtn = document.getElementById("editorThemeSave");
 		saveBtn.onclick = this.saveTheme.bind(this);
+		var saveThemeLabel = messages['Save Theme']; //$NON-NLS-1$
+		saveBtn.setAttribute("aria-label", saveThemeLabel); //$NON-NLS-1$
+		new mTooltip.Tooltip({
+			node: saveBtn,
+			text: saveThemeLabel,
+			position: ["above", "below", "left", "right"] //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		});
 		
 		themeNameInput = document.getElementById("editorThemeName");
 		themeNameInput.onchange = this.updateThemeName.bind(this);

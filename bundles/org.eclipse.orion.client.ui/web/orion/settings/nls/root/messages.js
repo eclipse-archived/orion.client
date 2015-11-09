@@ -221,6 +221,8 @@ define({//Default message bundle
 	"Show Guide": "Show Guide",
 	"Check Guide": "Check Guide",
 	"Cancel": "Cancel",
+	"Save Theme": "Save Theme",
+	"Delete Theme": "Delete Theme",
 	"Revert Theme": "Revert Theme",
 	"Update Theme": "Update Theme",
 	"clickDiagram": "Select a theme, or click elements in the diagram to style them individually.",
