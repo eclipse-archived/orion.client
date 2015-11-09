@@ -220,7 +220,7 @@ define([
 
 		this._contentParent = document.createElement("div"); //$NON-NLS-0$
 		this._contentParent.id = this.id + "Content"; //$NON-NLS-0$
-		this._contentParent.role = "region"; //$NON-NLS-0$
+		this._contentParent.setAttribute("role", "region"); //$NON-NLS-2$ //$NON-NLS-1$
 		this._contentParent.classList.add("sectionTable"); //$NON-NLS-0$
 		this._contentParent.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-0$
 		// initially style as hidden until we determine what needs to happen

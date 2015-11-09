@@ -119,7 +119,7 @@ define(['orion/webui/littlelib'], function(lib) {
 				var self = this;
 				lib.addAutoDismiss([this._tip, this._node], function() {self.hide();});
 				if (this._trigger === "mouseover") { //$NON-NLS-0$
-					 this._tipInner.role = "tooltip"; //$NON-NLS-0$
+					 this._tipInner.setAttribute("role", "tooltip"); //$NON-NLS-2$ //$NON-NLS-1$
 					 this._tipInner.id = "tooltip" + new Date().getTime().toString(); //$NON-NLS-0$
 					 this._node.setAttribute("aria-describedby", this._tipInner.id); //$NON-NLS-0$
 				

@@ -482,9 +482,9 @@ define([
 
 		addCategory: function(category) {
 			category['class'] = (category['class'] || '') + ' navbar-item'; //$NON-NLS-1$ //$NON-NLS-0$
-			category.role = "tab";
+			category.role = "tab"; //$NON-NLS-1$
 			category.tabindex = -1;
-			category["aria-selected"] = "false"; //$NON-NLS-1$ //$NON-NLS-0$
+			category["aria-selected"] = "false"; //$NON-NLS-2$ //$NON-NLS-1$
 			category.onclick = category.show;
 			superPrototype.addCategory.apply(this, arguments);
 		},

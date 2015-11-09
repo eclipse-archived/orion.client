@@ -56,7 +56,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 				trigger: trigger ? trigger : "click" //$NON-NLS-0$
 			});
 			this.$parent = this._tooltip.contentContainer();
-			this.$parent.role = "dialog"; //$NON-NLS-0$
+			this.$parent.setAttribute("role", "dialog"); //$NON-NLS-2$ //$NON-NLS-1$
 			var range = document.createRange();
 			range.selectNode(this.$parent);
 			var contentFragment = range.createContextualFragment(this.TEMPLATE);
