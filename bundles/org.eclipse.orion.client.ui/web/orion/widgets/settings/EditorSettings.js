@@ -27,28 +27,6 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		{value: "Emacs", label: "Emacs"}, //$NON-NLS-1$ //$NON-NLS-2$
 		{value: "vi", label: "vi"} //$NON-NLS-1$ //$NON-NLS-2$
 	];
-	var ENCODING_LIST = [
-		"UTF-8", "UTF-16LE", //$NON-NLS-1$ //$NON-NLS-2$
-		
-		"iso-8859-1", "iso-8859-2", "iso-8859-3", "iso-8859-4", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
-		"iso-8859-5", "iso-8859-6", "iso-8859-7", "iso-8859-8", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
-		"iso-8859-9", "iso-8859-10", "iso-8859-11", "iso-8859-12", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
-		"iso-8859-13", "iso-8859-14", "iso-8859-15", "iso-8859-16", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
-		
-		"windows-1250", "windows-1251", "windows-1252", "windows-1253", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
-		"windows-1254", "windows-1255", "windows-1256", "windows-1258", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
-		
-		"gb18030", "gb2312", "gbk", "Big5", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
-		"Big5-HKSCS", "koi8-r", "koi8-u", "euc-jp", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
-		"euc-tw", "shift-jis", "iso-2022-jp", "iso-2022-kr", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
-		"iso-2022-cn", "hz", "", "MacRoman", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
-	];
-	var ENCODING = [];
-	ENCODING_LIST.forEach(function(encoding) {
-		if (encoding){
-			ENCODING.push({value: encoding, label: messages[encoding] || encoding});
-		}
-	});
 
 	var localIndicatorClass = "setting-local-indicator"; //$NON-NLS-0$
 	var on = "on"; //$NON-NLS-0$
@@ -131,10 +109,6 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				},
 				saveDiffs: {
 					create: createBooleanProperty
-				},
-				encodingCharset: {
-					values: ENCODING,
-					create: createSelectProperty
 				},
 				trimTrailingWhiteSpace: {
 					create: createBooleanProperty

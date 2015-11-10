@@ -30,9 +30,10 @@ define([
 	'orion/PageLinks',
 	'orion/editor/annotations',
 	'orion/regex',
+	'orion/PageUtil',
 	'orion/uiUtils',
 	'orion/util'
-], function(messages, i18nUtil, lib, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, objects, mPageUtil, PageLinks, mAnnotations, regex, mUIUtils, util) {
+], function(messages, i18nUtil, lib, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, objects, mPageUtil, PageLinks, mAnnotations, regex, PageUtil, mUIUtils, util) {
 
 	var exports = {};
 
@@ -173,6 +174,7 @@ define([
 			this._createShowTooltipCommand();
 			this._createUndoStackCommands();
 			this._createClipboardCommands();
+			this._createEncodingCommand();
 			this._createSaveCommand();
 			return this._createEditCommands();
 		},
@@ -239,8 +241,9 @@ define([
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.find", 0, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.toolbarId, "orion.keyAssist", 0, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(191, false, true, true)); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(113), null, this);//$NON-NLS-1$ //$NON-NLS-2$ 
-			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 2, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
-			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 3, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+			commandRegistry.registerCommandContribution(this.toolbarId, "orion.edit.reloadWithEncoding", 2, "orion.menuBarToolsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 3, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 4, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			
 			this._registerCommandGroups(this.toolbarId, "orion.menuBarToolsGroup"); //$NON-NLS-1$
 
@@ -286,6 +289,7 @@ define([
 
 			// 'Tools' cascade
 			commandRegistry.addCommandGroup(this.editorContextMenuId, "orion.editorContextMenuToolsGroup", 400, messages["Tools"], "orion.editorContextMenuGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.reloadWithEncoding", 0, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.blame", 1, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.diff", 2, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -556,6 +560,53 @@ define([
 				}
 			});
 			this.commandService.addCommand(saveCommand);
+		},
+		_createEncodingCommand: function() {
+			var that = this;
+			var ENCODING_LIST = [
+				"UTF-8", "UTF-16LE", //$NON-NLS-1$ //$NON-NLS-2$
+				
+				"iso-8859-1", "iso-8859-2", "iso-8859-3", "iso-8859-4", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+				"iso-8859-5", "iso-8859-6", "iso-8859-7", "iso-8859-8", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+				"iso-8859-9", "iso-8859-10", "iso-8859-11", "iso-8859-12", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+				"iso-8859-13", "iso-8859-14", "iso-8859-15", "iso-8859-16", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+				
+				"windows-1250", "windows-1251", "windows-1252", "windows-1253", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+				"windows-1254", "windows-1255", "windows-1256", "windows-1258", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+				
+				"gb18030", "gb2312", "gbk", "Big5", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+				"Big5-HKSCS", "koi8-r", "koi8-u", "euc-jp", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+				"euc-tw", "shift-jis", "iso-2022-jp", "iso-2022-kr", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+				"iso-2022-cn", "hz", "MacRoman", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+			];
+			var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
+			var changeEncodingCommand = new mCommands.Command({
+				name: messages["ReloadWith"],
+				selectionClass: "dropdownSelection", //$NON-NLS-0$
+				id: "orion.edit.reloadWithEncoding", //$NON-NLS-0$
+				visibleWhen: function() {
+					var editor = that.editor;
+					return editor && editor.installed;
+				},
+				choiceCallback: function() {
+					return ENCODING_LIST.map(function(encoding) {
+						return {
+							name: encoding,
+							callback: function() {
+								var input = PageUtil.matchResourceParameters();
+								var resource = input.resource;
+								delete input.resource;
+								delete input.encoding;
+								if (this.name !== "UTF-8") {
+									input.encoding = this.name;
+								}
+								window.location.href = uriTemplate.expand({resource: resource, params: input});
+							}
+						};
+					});
+				}
+			});
+			this.commandService.addCommand(changeEncodingCommand);
 		},
 		_createGotoLineCommnand: function() {
 			var that = this;

@@ -177,7 +177,6 @@ define({//Default message bundle
 	"wordWrap": "Word Wrap:",
 	"showMargin": "Show Margin:",
 	"marginOffset": "Margin Column:",
-	"encodingCharset": "Encoding",
 	"showWhitespaces": "Show Whitespace Characters:",
 	"autoSaveTimeoutInvalid": "Invalid save interval.",
 	"scrollAnimationTimeoutInvalid": "Invalid scrolling duration.",

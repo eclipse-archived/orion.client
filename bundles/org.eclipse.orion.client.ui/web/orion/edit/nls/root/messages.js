@@ -29,6 +29,7 @@ define({//Default message bundle
 	"ReadingMetadata": "Reading metadata of ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"ReadingMetadataError": "Cannot get metadata of ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"Reading": "Reading ${0}", //$NON-NLS-1$ //$NON-NLS-0$
+	"ReloadWith": "Reload With", //$NON-NLS-1$ //$NON-NLS-0$
 	"readonly": "Read Only.", //$NON-NLS-1$ //$NON-NLS-0$
 	"saveFile": "Save this file", //$NON-NLS-1$ //$NON-NLS-0$
 	"toggleZoomRuler": "Toggle Zoom Ruler", //$NON-NLS-1$ //$NON-NLS-0$
