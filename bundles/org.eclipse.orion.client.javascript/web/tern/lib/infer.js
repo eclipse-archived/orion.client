@@ -1687,7 +1687,7 @@
   var refFindWalker = walk.make({}, searchVisitor);
 
   exports.findRefs = function(ast, baseScope, name, refScope, f) {
-    refFindWalker.Identifier = function(node, scope) {
+    refFindWalker.Identifier = refFindWalker.VariablePattern = function(node, scope) {
       if (node.name != name) return;
       for (var s = scope; s; s = s.prev) {
         if (s == refScope) f(node, scope);
