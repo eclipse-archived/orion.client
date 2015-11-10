@@ -29,9 +29,11 @@ define([], function() {
 		var node = document.createElement('section'); //$NON-NLS-0$
 		node.classList.add('setting-row'); //$NON-NLS-0$
 		node.setAttribute('role', 'region'); //$NON-NLS-1$ //$NON-NLS-0$
-		node.setAttribute('aria-labelledby', 'Navigation-header'); //$NON-NLS-1$ //$NON-NLS-0$
+		var headerId = 'setting-header-' + sectionName.replace(/\s/g, ''); //$NON-NLS-0$
+		node.setAttribute('aria-labelledby', headerId); //$NON-NLS-0$
 		var titleNode = document.createElement('div'); //$NON-NLS-0$
 		titleNode.classList.add('setting-header'); //$NON-NLS-0$
+		titleNode.id = headerId;
 		titleNode.textContent = sectionName;
 		var content = document.createElement('div'); //$NON-NLS-0$
 		content.classList.add('setting-content'); //$NON-NLS-0$

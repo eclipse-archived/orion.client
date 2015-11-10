@@ -62,7 +62,7 @@ define([
 				var sectionWidget = new mSection.Section(this.node, {
 					id: "Globalization", //$NON-NLS-0$
 					title: messages.Globalization,
-					content: '<section class="setting-row" role="region" aria-labelledby="Navigation-header" id="setting-row">', //$NON-NLS-0$
+					content: '<section class="setting-row" role="region" aria-labelledby="GlobalizationTitle" id="setting-row">', //$NON-NLS-0$
 				});	
 				
 				var settingsContentElement = document.createElement('div'); //$NON-NLS-0$

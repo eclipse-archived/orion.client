@@ -308,13 +308,14 @@ define([
 		settingSection.id = sectionId;
 		settingSection.className = 'setting-row'; //$NON-NLS-0$
 		settingSection.setAttribute('role', 'region'); //$NON-NLS-0$ //$NON-NLS-1$
-		settingSection.setAttribute('aria-labelledby', headerId); //$NON-NLS-0$
+		settingSection.setAttribute('aria-label', setting.getName()); //$NON-NLS-0$ // currently there's only one section, so just use setting name
+//		settingSection.setAttribute('aria-labelledby', headerId); //$NON-NLS-0$ // if there are ever multiple sections, use section header
 
-		var sectionHeader = document.createElement('h3'); //$NON-NLS-0$
+		var sectionHeader = document.createElement('div'); //$NON-NLS-0$
 		sectionHeader.id = headerId;
 		// setting-header-generated sets the heading to be 0 width as there are no categories on generated settings pages
 		sectionHeader.className = 'setting-header setting-header-generated'; //$NON-NLS-0$
-//		sectionHeader.textContent = setting.getName(); // TODO nls
+//		sectionHeader.textContent = setting.getName(); // if there are ever multiple sections, use section header
 
 		var propertiesElement = document.createElement('div'); //$NON-NLS-0$
 		propertiesElement.className = 'setting-content'; //$NON-NLS-0$
