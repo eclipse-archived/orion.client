@@ -365,7 +365,7 @@ objects.mixin(EditorViewer.prototype, {
 				if (bidiUtils.isBidiEnabled) {
 					curFileNodeName = bidiUtils.enforceTextDirWithUcc(curFileNodeName);
 				}
-				this.curFileNode.innerHTML = curFileNodeName;				
+				this.curFileNode.textContent = curFileNodeName;				
 			}
 		}.bind(this));
 		inputManager.addEventListener("InputChanging", function(e) { //$NON-NLS-0$
