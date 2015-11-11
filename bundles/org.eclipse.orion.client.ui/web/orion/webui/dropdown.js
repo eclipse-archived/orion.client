@@ -147,13 +147,13 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 			var actionTaken = false;
 			if (!this.isVisible()) {
 				this.dispatchEvent({type: "triggered", dropdown: this, event: mouseEvent}); //$NON-NLS-0$
-				lib.setFramesEnabled(false);
 				if (this._populate) {
 					this.empty();
 					this._populate(this._dropdownNode);
 				}
 				var items = this.getItems();
 				if (items.length > 0) {
+					lib.setFramesEnabled(false);
 					if (this._boundAutoDismiss) {
 						lib.removeAutoDismiss(this._boundAutoDismiss);
 					} 
