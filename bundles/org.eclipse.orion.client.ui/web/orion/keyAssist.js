@@ -167,6 +167,7 @@ define([
 			var eb = document.createElement("button"); //$NON-NLS-1$
 			eb.classList.add("keyAssistEditButton"); //$NON-NLS-1$
 			eb.classList.add("core-sprite-edit"); //$NON-NLS-1$
+			eb.setAttribute("aria-label", messages["Edit"]); //$NON-NLS-1$
 			//eb.textContent = "E"; //$NON-NLS-1$
 			eb.addEventListener("click", function(evt) {
 				lib.stop(evt);
