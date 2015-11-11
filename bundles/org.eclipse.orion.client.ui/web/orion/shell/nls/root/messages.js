@@ -10,6 +10,7 @@
 /*eslint-env browser, amd*/
 define({//Default message bundle
 	"Shell": "Shell",
+	"ShellLinkWorkspace": "Shell",
 	"Changed to: ": "Changed to: ",
 	"Initial directory: ": "Initial directory: ",
 	"ChangeCurrDir": "Changes the current directory",

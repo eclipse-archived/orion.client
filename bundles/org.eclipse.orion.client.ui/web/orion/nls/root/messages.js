@@ -12,7 +12,6 @@ define({//Default message bundle
 	"Navigator": "Navigator",
 	"Sites": "Sites",
 	"Shell": "Shell",
-	"ShellLinkWorkspace": "Shell",
 	"Get Plugins": "Get Plug-ins",
 	"Global": "Global",
 	"Editor": "Editor",
