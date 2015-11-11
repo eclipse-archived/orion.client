@@ -481,11 +481,12 @@ define([
 				loc = "#" + loc; //$NON-NLS-0$
 			}
 			var input = PageUtil.matchResourceParameters(loc), oldInput = this._parsedLocation || {};
+			var encodingChanged = oldInput.encoding !== input.encoding;
 			if (editor && editor.isDirty()) {
 				var oldLocation = this._location;
 				var oldResource = oldInput.resource;
 				var newResource = input.resource;
-				if (oldResource !== newResource) {
+				if (oldResource !== newResource || encodingChanged) {
 					if (this._autoSaveEnabled) {
 						this.save();
 					} else if (!window.confirm(messages.confirmUnsavedChanges)) {
@@ -495,7 +496,6 @@ define([
 				}
 			}
 			var editorChanged = editor && oldInput.editor !== input.editor;
-			var encodingChanged = oldInput.encoding !== input.encoding;
 			this._location = loc;
 			this._parsedLocation = input;
 			this._ignoreInput = true;
