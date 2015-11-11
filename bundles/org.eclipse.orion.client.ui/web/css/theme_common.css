@@ -151,6 +151,26 @@ a:hover {
 	color: white;
 }
 
+.checkedRow .commitCommands {
+	visibility: visible !important;
+}
+
+.treeTableRow .commitCommands {
+	visibility: hidden;
+}
+
+.treeTableRow:hover .commitCommands{
+	visibility: visible;
+}
+
+.treeTableRow .parameterPopupOpen {
+	visibility: visible;
+}
+
+.treeTableRow table {
+	width: 100%;
+}
+
 .navRow > td:first-child {
 	/* border-left: 6px solid transparent; THIS CAUSES PIXELATION PROBLEMS! */
 }

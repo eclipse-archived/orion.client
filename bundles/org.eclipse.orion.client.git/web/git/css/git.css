@@ -576,6 +576,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 
 .sectionTable .gitCommitImageCell {
 	vertical-align: top;
+	text-align: center;
 }
 
 .sectionTable .gitCommitDetailsCell {
@@ -740,13 +741,12 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 }
 
 .git-author-icon {
-	float: left;
 	position: relative;
 	height: 30px;
 	vertical-align: text-top;
 	width: 30px;
 	padding: 3px;
-	margin-right: 10px;
+	margin: 0;
 }
 
 .git-author-icon.incoming {

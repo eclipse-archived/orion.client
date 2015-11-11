@@ -380,8 +380,10 @@ define([
 									originalFocusNode.focus();
 								}
 								tooltip.destroy();
+								if (commandInvocation.domParent) commandInvocation.domParent.classList.remove("parameterPopupOpen");
 							}, cancelCallback)(parameterArea);
 							tooltip.show();
+							if (commandInvocation.domParent) commandInvocation.domParent.classList.add("parameterPopupOpen");
 							if (focusNode) {
 								window.setTimeout(function() {
 										focusNode.focus();
