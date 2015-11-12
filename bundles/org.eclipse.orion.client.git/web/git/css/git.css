@@ -499,7 +499,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 }
 
 .gitCommitMore {
-	padding: 0;
+	padding: 5px 0 5px 0;
 	margin: 0;
 	opacity: 0.6;
 	border: none;
@@ -508,6 +508,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	margin-right: 5px;
 	color: #00aed1;
 	cursor: pointer;
+	float: left;
 }
 
 .checkedRow .gitCommitMore {
@@ -821,6 +822,23 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 
 .checkedRow .gitImageSprite {
 	color: white;
+}
+
+.treeTableRow .commitActions {
+	display: none;
+	padding-top: 3px;
+}
+
+.treeTableRow:hover .commitActions {
+	display: block;
+}
+
+.treeTableRow .parameterPopupOpen {
+	display: block;
+}
+
+.checkedRow .commitActions {
+	display: block;
 }
 
 .git-sprite-notsure{ background-position: 0 -216px; width: 16px; height: 16px; } 
