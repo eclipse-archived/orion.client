@@ -965,6 +965,16 @@ define([
 			if (lib.node(actionsNodeScope)) {
 				commandService.destroy(actionsNodeScope);
 			}
+			var itemActionScope = "itemLevelCommands";
+			commandService.registerCommandContribution(itemActionScope, "eclipse.checkoutCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
+			commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.undoCommit", 2); //$NON-NLS-1$ //$NON-NLS-0$
+			commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.resetIndex", 3); //$NON-NLS-0$
+			commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.addTag", 4); //$NON-NLS-1$ //$NON-NLS-0$
+			commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.cherryPick", 5); //$NON-NLS-1$ //$NON-NLS-0$
+			commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.revert", 6); //$NON-NLS-1$ //$NON-NLS-0$
+			commandService.registerCommandContribution(itemActionScope, "eclipse.openGitCommit", 7); //$NON-NLS-1$ //$NON-NLS-0$
+			commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.showCommitPatchCommand", 8); //$NON-NLS-1$ //$NON-NLS-0$
+								
 
 			if (model.isRebasing()) {
 				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseContinueCommand", 200); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -1222,7 +1232,7 @@ define([
 						onlyFullMessage: !simple,
 						fullMessage: !simple,
 						showMore: true,
-						simple: simple,
+						simple: simple
 					});
 					commitInfo.display();
 					
@@ -1233,9 +1243,10 @@ define([
 					
 					var itemActionScope = "itemLevelCommands"; //$NON-NLS-0$
 					actionsArea = document.createElement("ul"); //$NON-NLS-0$
-					actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$
+					actionsArea.className = "layoutRight commandList toolComposite commitActions"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0
 					actionsArea.id = itemActionScope;
-					horizontalBox.appendChild(actionsArea);
+					var moreDiv = commitInfo.moreButton.parentNode;
+					moreDiv.appendChild(actionsArea);
 					
 					item.Clone = repository;
 					

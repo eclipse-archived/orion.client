@@ -823,6 +823,27 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	color: white;
 }
 
+.checkedRow .commitActions {
+	visibility: visible !important;
+}
+
+.treeTableRow .commitActions {
+	visibility: hidden;
+	padding-top: 3px;
+}
+
+.treeTableRow:hover .commitActions {
+	visibility: visible;
+}
+
+.treeTableRow .parameterPopupOpen {
+	visibility: visible;
+}
+
+.treeTableRow table {
+	width: 100%;
+}
+
 .git-sprite-notsure{ background-position: 0 -216px; width: 16px; height: 16px; } 
 
 .git-sprite-apply-patch,
