@@ -101,7 +101,15 @@ define([
 		command.execute(_p.editorContext, _p.params).then(function (result) {
 			try {
 				if (!expected) {
-					assert(result, "Expected no result but error status not returned");
+					// We expect an error status as the result
+					if (!result){
+						// If no error was returned, check to see if we have results
+						if (_p.editorContext.options){
+							var actual = _p.editorContext.options;
+							assert(false, 'Expected error status indicating no result, instead found result: ' + actual.start + '-' + actual.end)
+						}
+						assert(result, 'Expected error status indicating no result, instead result returned was ' + result);
+					}
 					testworker._state.callback();
 					return;
 				}
@@ -545,6 +553,23 @@ define([
 				callback: done
 			};
 			testOpenImpl(options, {start: 19, end: 20});
+		});
+		// TODO Do we want Tern to guess in this case?
+		it.skip('Open Declaration - Tern didGuess() === true', function(done) {
+			var options = {
+				buffer: "var a = {x: function() {}}; var b = {x: function() {}}; function test(z){ return z.x() }",
+				offset: 84,
+				callback: done
+			};
+			testOpenDecl(options, null);
+		});
+		it.skip('Open Implementation - Tern didGuess() === true', function(done) {
+			var options = {
+				buffer: "var a = {x: function() {}}; var b = {x: function() {}}; function test(z){ return z.x() }",
+				offset: 84,
+				callback: done
+			};
+			testOpenImpl(options, null);
 		});
 	});
 });
