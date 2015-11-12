@@ -152,7 +152,7 @@ define([
                 textBox.addEventListener("input", this.watchTextarea.bind(this)); //$NON-NLS-0$
 
                 docFragment.appendChild(textBox);
-                this.$importThemeMessage.innerHTML = messages["ImportThemeDialogMessage"];
+                this.$importThemeMessage.textContent = messages["ImportThemeDialogMessage"];
                 this.$importThemeContainer.appendChild(docFragment, null);
             },
             watchTextarea: function() {

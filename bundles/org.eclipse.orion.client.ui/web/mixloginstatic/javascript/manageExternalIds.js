@@ -102,7 +102,7 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 		var removeLink = document.createElement("a"); //$NON-NLS-0$
 		removeLink.classList.add("removeExternalId"); //$NON-NLS-0$
 		removeLink.id = "remlink" + i; //$NON-NLS-0$
-		removeLink.innerHTML = "Remove";
+		removeLink.textContent = "Remove";
 		removeLink.style.visibility = "hidden"; //$NON-NLS-0$
 		removeLink.title = "Remove " + externalId;
 		td.appendChild(removeLink);

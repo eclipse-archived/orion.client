@@ -72,7 +72,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', '
 									settingsRegistry: settingsRegistry
 									};
 									
-		lib.node("categoriesTitle").innerHTML = messages["Categories"]; //$NON-NLS-1$ //$NON-NLS-0$
+		lib.node("categoriesTitle").textContent = messages["Categories"]; //$NON-NLS-1$ //$NON-NLS-0$
 		var settingsContainer = new SettingsContainer( containerParameters, lib.node("categoriesContainer"), lib.node("settings")); //$NON-NLS-0$
 		settingsContainer.show();
 
