@@ -12,6 +12,7 @@
 /*global define document console window*/
 /*eslint forin:true regexp:false sub:true*/
 
+/*eslint-env browser */
 define(['i18n!orion/search/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 
 	'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/compare/compareView', 
 	'orion/highlight', 'orion/webui/tooltip', 'orion/explorers/navigatorRenderer', 'orion/extensionCommands',
@@ -542,6 +543,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
             groupId: "orion.searchGroup", //$NON-NLS-0$
 			type: "toggle",
 			visibleWhen: function(/*item*/) {
+				if (!localStorage.showSearchFilters) return false;
 				var show = !this._matchFilter["hidePerfectMatch"].flag;
 				togglePerfectMatchCommand.checked = show;
 				togglePerfectMatchCommand.tooltip = show ? messages["hidePerfectMatch"] : messages["showPerfectMatch"];
@@ -560,6 +562,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
             groupId: "orion.searchGroup", //$NON-NLS-0$
 			type: "toggle",
 			visibleWhen: function(/*item*/) {
+				if (!localStorage.showSearchFilters) return false;
 				var show = !this._matchFilter["hideNonMatch"].flag;
 				toggleNonMatchCommand.checked = show;
 				toggleNonMatchCommand.tooltip = show ? messages["hideNonMatch"] : messages["showNonMatch"];
@@ -578,6 +581,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
             groupId: "orion.searchGroup", //$NON-NLS-0$
 			type: "toggle",
 			visibleWhen: function(/*item*/) {
+				if (!localStorage.showSearchFilters) return false;
 				var show = !this._matchFilter["hidePossibleMatch"].flag;
 				togglePossibleMatchCommand.checked = show;
 				togglePossibleMatchCommand.tooltip = show ? messages["hidePossibleMatch"] : messages["showPossibleMatch"];
