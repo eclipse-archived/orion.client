@@ -86,7 +86,7 @@ define([
 				}
 				
 				this._launchConfigurationDispatcher = this._projectCommands.getLaunchConfigurationDispatcher();
-				this._launchConfigurationEventTypes = ["create", "delete", "changeState", "deleteAll"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				this._launchConfigurationEventTypes = ["create", "delete", "changeState", "deleteAll"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
 				this._boundLaunchConfigurationListener = this._launchConfigurationListener.bind(this);
 				this._launchConfigurationEventTypes.forEach(function(eventType) {
 					this._launchConfigurationDispatcher.addEventListener(eventType, this._boundLaunchConfigurationListener);
@@ -111,8 +111,8 @@ define([
 					this.loadLaunchConfigurations(this._projectExplorer.treeRoot.Project);
 				} else {
 					// the Project has not yet been fully loaded into the explorer, wait until that happens 
-					this._projectExplorer.addEventListener("rootChanged", function(event){ //$NON-NLS-0$
-						var root = event.root;
+					this._projectExplorer.addEventListener("rootChanged", function(evnt){ //$NON-NLS-0$
+						var root = evnt.root;
 						if (root && root.Project) {
 							this.loadLaunchConfigurations(root.Project);
 						}
@@ -130,15 +130,15 @@ define([
 			var separator;
 			
 			// function which populates the launch configurations dropdown menu
-			var populateFunction = function(parent) {
+			var populateFunction = function(paren) {
 				if (this._menuItemsCache && this._menuItemsCache.length > 0) {
 					this._menuItemsCache.forEach(function(menuItem){
-						parent.appendChild(menuItem);
+						paren.appendChild(menuItem);
 					});
 				} else {
 					this._menuItemsCache = []; // clear launch configurations menu items cache
 					var dropdown = this._launchConfigurationsDropdown.getDropdown();
-					var hash, launchConfiguration, menuItem, domNodeWrapperList;
+					var launchConfiguration, menuItem, domNodeWrapperList;
 					
 					var sortedHashes = Object.keys(this._cachedLaunchConfigurations);
 
@@ -158,7 +158,7 @@ define([
 								menuItem.classList.add("dropdownMenuItemActive"); //$NON-NLS-0$
 							}
 
-							menuItem.addEventListener("click", function(currentHash, event){ //$NON-NLS-0$
+							menuItem.addEventListener("click", /* @callback */ function(currentHash, evnt){ //$NON-NLS-0$
 								// Use currentHash to get cached launch config again because it will be updated 
 								// by the listener as events occur. Using currentHash directly here to avoid 
 								// unnecessarily keeping old copies of the launchConfiguration alive.
@@ -229,8 +229,8 @@ define([
 			this._launchConfigurationsWrapper.removeChild(this._launchConfigurationsLabel);
 			this._launchConfigurationsDropdown.setCustomTriggerButtonLabelNode(this._launchConfigurationsLabel);
 			
-			this._boundTriggerButtonEventListener = function(event){ 
-				mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + ".launchConfigurationsDropdownTriggerButton.clicked", event.which); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this._boundTriggerButtonEventListener = function(evnt){ 
+				mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + ".launchConfigurationsDropdownTriggerButton.clicked", evnt.which); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$
 			}.bind(this);
 			this._launchConfigurationsDropdownTriggerButton.addEventListener("click", this._boundTriggerButtonEventListener); //$NON-NLS-0$
 		},
@@ -290,20 +290,20 @@ define([
 			}
 		},
 		
-		_launchConfigurationListener: function(event) {
-			var newConfig = event.newValue;
+		_launchConfigurationListener: function(evnt) {
+			var newConfig = evnt.newValue;
 			
-			if((event.type === "changeState") && newConfig){ //$NON-NLS-0$
+			if((evnt.type === "changeState") && newConfig){ //$NON-NLS-0$
 				this._updateLaunchConfiguration(newConfig);
 			} else {
 				this._menuItemsCache = []; // clear launch configurations menu items cache
 				
-				if((event.type === "create") && newConfig){ //$NON-NLS-0$
+				if((evnt.type === "create") && newConfig){ //$NON-NLS-0$
 					// cache and select new launch config
 					this._putInLaunchConfigurationsCache(newConfig);					
 					this.selectLaunchConfiguration(newConfig, true); //check the status of newly created configs
-				} else if(event.type === "delete"){ //$NON-NLS-0$
-					var deletedFile = event.oldValue.File;
+				} else if(evnt.type === "delete"){ //$NON-NLS-0$
+					var deletedFile = evnt.oldValue.File;
 					
 					// iterate over cached launch configs, find and delete 
 					// the one that matches the deleted file
@@ -314,14 +314,14 @@ define([
 								if (current === this._selectedLaunchConfiguration) {
 									this.selectLaunchConfiguration(null);
 								}
-								var element = document.getElementById(current.Name + '_RunBarMenuItem');
+								var element = document.getElementById(current.Name + '_RunBarMenuItem'); //$NON-NLS-1$
 								if (element) {
-									var parent = element.parentNode;
+									var paren = element.parentNode;
 									var sep = element.previousSibling;
 									if (sep && sep.className === "dropdownSeparator") {
-										parent.removeChild(sep);
+										paren.removeChild(sep);
 									}
-									parent.removeChild(element);										
+									paren.removeChild(element);										
 								}
 								//TODO: this has left a menu iteme separator in the dom still 
 								this._removeFromLaunchConfigurationsCache(current);
@@ -329,7 +329,7 @@ define([
 							}
 						}
 					}
-				} else if(event.type === "deleteAll"){ //$NON-NLS-0$
+				} else if(evnt.type === "deleteAll"){ //$NON-NLS-0$
 					this._cacheLaunchConfigurations([]);
 					this.selectLaunchConfiguration(null);
 				}
@@ -357,11 +357,11 @@ define([
 				if (checkStatus) {
 					this._displayStatusCheck(launchConfiguration);
 					var startTime = Date.now();
-					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(status) {
+					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(_status) {
 						var interval = Date.now() - startTime;
-						mMetrics.logTiming("deployment", "check status (launch config)", interval, launchConfiguration.Type);
+						mMetrics.logTiming("deployment", "check status (launch config)", interval, launchConfiguration.Type); //$NON-NLS-1$ //$NON-NLS-2$
 
-						launchConfiguration.status = status;
+						launchConfiguration.status = _status;
 						this._updateLaunchConfiguration(launchConfiguration);
 					}.bind(this), errorHandler);
 				} else {
@@ -410,8 +410,8 @@ define([
 			return this._projectClient.getProjectDeployService(launchConfiguration.ServiceId, launchConfiguration.Type).then(
 				function(service){
 					if(service && service.getState){
-						return service.getState(launchConfiguration).then(function(status){
-								return status;
+						return service.getState(launchConfiguration).then(function(_status){
+								return _status;
 							}.bind(this),
 							function(error){
 								launchConfiguration.status = {error: error};
@@ -423,7 +423,7 @@ define([
 									// run command because it knows how to collect params first then check the status again
 									this._commandRegistry.runCommand("orion.launchConfiguration.checkStatus", launchConfiguration, this, null, null, this._statusLight); //$NON-NLS-0$
 								} else {
-									if(error.Alert && error.Alert == true)
+									if(error.Alert && error.Alert === true)
 										this._progressService.setProgressResult(error.Message);
 									this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
 								}
@@ -434,19 +434,19 @@ define([
 			);
 		},
 		
-		setStatus: function(status) {
+		setStatus: function(_status) {
 			var longStatusText = null;
 			var tooltipText = "";
 			var uriTemplate = null;
 			var uriParams = null;
 			var logLocationTemplate = null;			
 			var appName = this._getDisplayName(this._selectedLaunchConfiguration);
-			var appInfoText = this._getAppInfoText(status);
+			var appInfoText = this._getAppInfoText(_status);
 
 			
 			// logLocationTemplate in status takes precendence because it comes from the 
 			// service implementation's method rather than from the service properties
-			logLocationTemplate = (status && status.logLocationTemplate) || (this._selectedLaunchConfiguration && this._selectedLaunchConfiguration.Params && this._selectedLaunchConfiguration.Params.LogLocationTemplate);
+			logLocationTemplate = (_status && _status.logLocationTemplate) || (this._selectedLaunchConfiguration && this._selectedLaunchConfiguration.Params && this._selectedLaunchConfiguration.Params.LogLocationTemplate);
 			
 			// turn status light off
 			this._statusLight.classList.remove("statusLightGreen"); //$NON-NLS-0$
@@ -455,25 +455,25 @@ define([
 			
 			this._setText(this._appInfoSpan, null);
 			
-			if(status.Info && status.Info == "Deploying"){
+			if(_status.Info && _status.Info === "Deploying"){
 				this._disableControl(this._playButton);
 				this._disableControl(this._stopButton);
 			} else {
 				this._disableAllControls(); // applicable controls will be re-enabled further below
 			}
 			
-			if (status) {
-				if (status.error) {
+			if (_status) {
+				if (_status.error) {
 					this._enableControl(this._playButton);
 					
-					if (!status.error.Retry) {
+					if (!_status.error.Retry) {
 						// this is a real error
-						if (status.error.Message) {
-							longStatusText = status.error.Message;
+						if (_status.error.Message) {
+							longStatusText = _status.error.Message;
 						}
 					}
 				} else {
-					switch (status.State) {
+					switch (_status.State) {
 						case "PROGRESS": //$NON-NLS-0$
 							this._statusLight.classList.add("statusLightProgress"); //$NON-NLS-0$
 							this._stopStatusPolling(); // do not poll while status is in a transitive state
@@ -490,10 +490,10 @@ define([
 						default:
 							break;
 					}
-					longStatusText = status.Message;
+					longStatusText = _status.Message;
 				}
 				
-				if (!status.error && ("PROGRESS" !== status.State)) {
+				if (!_status.error && ("PROGRESS" !== _status.State)) {
 					this._startStatusPolling();
 				}
 			}
@@ -519,8 +519,8 @@ define([
 			}
 			
 			
-			if (status && status.Url) {
-				this._enableLink(this._appLink, status.Url);
+			if (_status && _status.Url) {
+				this._enableLink(this._appLink, _status.Url);
 			}
 			
 			if (logLocationTemplate) {
@@ -534,15 +534,16 @@ define([
 					};
 					this._enableLink(this._logsLink, uriTemplate.expand(uriParams));
 			} else {
-				var service = this._serviceRegistry.getService("orion.project.deploy");
+				var service = this._serviceRegistry.getService("orion.project.deploy"); //$NON-NLS-1$
 				if (service.getLogLocationTemplate) {
 					service.getLogLocationTemplate(this._selectedLaunchConfiguration).then(function(result){
 						uriTemplate = new URITemplate(result);
+						var config = this._selectedLaunchConfiguration ? this._selectedLaunchConfiguration.File.Location : '';
 						uriParams = {
 								OrionHome: PageLinks.getOrionHome(),
 								Name: "",
 								Target: {
-									launchConfLocation: this._selectedLaunchConfiguration.File.Location
+									launchConfLocation: config
 								}
 							};
 							this._enableLink(this._logsLink, uriTemplate.expand(uriParams));
@@ -551,21 +552,21 @@ define([
 			}
 		},
 		
-		_getAppInfoText: function(status) {
+		_getAppInfoText: function(_status) {
 			var appInfoText = ""; //$NON-NLS-0$
 			
-			if (status) {
-				if (status.error) {
-					if (status.error.Retry) {
-						appInfoText = status.ShortMessage || messages["appInfoUnknown"]; //$NON-NLS-0$
+			if (_status) {
+				if (_status.error) {
+					if (_status.error.Retry) {
+						appInfoText = _status.ShortMessage || messages["appInfoUnknown"]; //$NON-NLS-0$
 					} else {
-						appInfoText = status.ShortMessage || status.error.Message || messages["appInfoError"]; //$NON-NLS-0$
+						appInfoText = _status.ShortMessage || _status.error.Message || messages["appInfoError"]; //$NON-NLS-0$
 					}
 				} else {
-					switch (status.State) {
+					switch (_status.State) {
 						case "PROGRESS": //$NON-NLS-0$
-							if (status.ShortMessage || status.Message) {
-								appInfoText = status.ShortMessage || status.Message;
+							if (_status.ShortMessage || _status.Message) {
+								appInfoText = _status.ShortMessage || _status.Message;
 							}
 							break;
 						case "STARTED": //$NON-NLS-0$
@@ -654,13 +655,13 @@ define([
 		 * @param[in] {String | Function} command A String containing the id of the command to run or a Function to call
 		 * @param[in] {Event} event The event which triggered the listener
 		 */
-		_runBarButtonListener: function(command, event) {
-			var buttonNode = event.target;
+		_runBarButtonListener: function(command, evnt) {
+			var buttonNode = evnt.target;
 			var id = buttonNode.id;
 			var isEnabled = this._isEnabled(buttonNode);
 			var disabled = isEnabled ? "" : ".disabled"; //$NON-NLS-1$ //$NON-NLS-0$
 			
-			mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + "." + id +".clicked" + disabled, event.which); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + "." + id +".clicked" + disabled, evnt.which); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			if (isEnabled) {
 				if (typeof command === "function") { //$NON-NLS-0$
@@ -708,12 +709,12 @@ define([
 			return !linkNode.hasAttribute("href") || !linkNode.href; //$NON-NLS-0$
 		},
 		
-		_linkClickListener: function(event) {
-			var domNode = event.target;
+		_linkClickListener: function(evnt) {
+			var domNode = evnt.target;
 			var id = domNode.id;
 			var disabled = this._isLinkDisabled(domNode) ? ".disabled" : ""; //$NON-NLS-1$ //$NON-NLS-0$
 			
-			mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + "." + id +".clicked" + disabled, event.which); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + "." + id +".clicked" + disabled, evnt.which); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		
 		_setNodeTooltip: function(domNode, text) {
@@ -730,7 +731,7 @@ define([
 					node: domNode,
 					text: text,
 					trigger: "mouseover", //$NON-NLS-0$
-					position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
 				});
 				this._undestroyedTooltips.push(domNode.tooltip);
 			}
@@ -802,17 +803,17 @@ define([
 					// get the latest app status
 					this._displayStatusCheck(launchConfiguration);
 					var startTime = Date.now();
-					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(status) {
+					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(_status) {
 						var interval = Date.now() - startTime;
-						mMetrics.logTiming("deployment", "check status (deploy)", interval, launchConfiguration.Type);
+						mMetrics.logTiming("deployment", "check status (deploy)", interval, launchConfiguration.Type); //$NON-NLS-1$ //$NON-NLS-2$
 
 						var dialogTitle = messages["redeployConfirmationDialogTitle"]; //$NON-NLS-0$
 						var appName = this._getDisplayName(launchConfiguration);
 						var confirmMessage = i18nUtil.formatMessage(messages["redeployConfirmationDialogMessage"], appName); //$NON-NLS-0$
 						
-						launchConfiguration.status = status;
+						launchConfiguration.status = _status;
 						
-						if (status && ("STARTED" === status.State)) { //$NON-NLS-0$
+						if (_status && ("STARTED" === _status.State)) { //$NON-NLS-0$
 							this._confirmBeforeRedeploy(prefs, dialogTitle, confirmMessage, REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING, deployFunction, cancelFunction);
 						} else {
 							// app is not running, just deploy again
@@ -828,12 +829,12 @@ define([
 			var confirmDialog = new mConfirmDialog.ConfirmDialog({
 				title: dialogTitle,
 				confirmMessage: confirmMessage,
-				checkboxMessage: messages["redeployConfirmationDialogCheckboxMessage"], //$NON-NLS-0$
+				checkboxMessage: messages["redeployConfirmationDialogCheckboxMessage"] //$NON-NLS-0$
 			});
 			
-			var handleDismiss = function(event) {
-				var confirmed = event.value;
-				var doNotConfirmAnymore = event.checkboxValue;
+			var handleDismiss = function(evnt) {
+				var confirmed = evnt.value;
+				var doNotConfirmAnymore = evnt.checkboxValue;
 				
 				if (doNotConfirmAnymore) {
 					// save user preference to no longer display confirmation dialog
@@ -871,11 +872,11 @@ define([
 						return;
 					}
 					var startTime = Date.now();
-					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(status) {
+					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(_status) {
 						var interval = Date.now() - startTime;
-						mMetrics.logTiming("deployment", "check status (poll)", interval, launchConfiguration.Type);
+						mMetrics.logTiming("deployment", "check status (poll)", interval, launchConfiguration.Type); //$NON-NLS-1$ //$NON-NLS-2$
 
-						launchConfiguration.status = status;
+						launchConfiguration.status = _status;
 						this._updateLaunchConfiguration(launchConfiguration);
 					}.bind(this));
 				}.bind(this), STATUS_POLL_INTERVAL_MS);
