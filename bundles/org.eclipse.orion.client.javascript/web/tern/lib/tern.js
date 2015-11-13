@@ -209,9 +209,15 @@
       function run() {
         var result;
         if(queryType.runAsync) { //ORION
-        	queryType.runAsync(srv, query, file, function(err, result) {
-        		c(err, result);
-        	});
+        	try {
+	        	queryType.runAsync(srv, query, file, function(err, result) {
+	        		c(err, result);
+	        	});
+	    	}
+	    	catch(e) {
+	    		if (srv.options.debug && e.name != "TernError") console.error(e.stack);
+	    		return c(e);
+	    	}
         } else {
 	        try {
 	          result = queryType.run(srv, query, file);

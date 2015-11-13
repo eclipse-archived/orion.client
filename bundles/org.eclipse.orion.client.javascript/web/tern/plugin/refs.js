@@ -25,6 +25,7 @@ define([
 	});
 		
 	tern.defineQueryType('checkRef', { //$NON-NLS-1$
+		takesFile: true,
 		/**
 		 * @callback
 		 */
@@ -37,11 +38,6 @@ define([
 		runAsync: function runAsync(server, query, serverFile, f) {
 			var file = tern.resolveFile(server, server.fileMap, query.file);
 			if(!file) {
-				server.addFile(query.file);
-				pending[query.file] = {
-					callback: f,
-					query: query
-				};
 				var func = function(file) {
 					server.off("afterLoad", func); //$NON-NLS-1$
 					if(file && file.name) {
@@ -53,6 +49,11 @@ define([
 					}
 				};
 				server.on("afterLoad", func);  //$NON-NLS-1$
+				server.addFile(query.file);
+				pending[query.file] = {
+					callback: f,
+					query: query
+				};
 			} else {
 				doCheck(query, file, server, f);
 			}
