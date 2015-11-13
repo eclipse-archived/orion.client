@@ -198,7 +198,7 @@ function handleArrows(e){
 
 
 		var header = document.createElement("div");
-		header.innerHTML = "Clone Repository Into";
+		header.textContent = "Clone Repository Into";
 		header.className = "context-title";
 		header.style.display="none";
 		header.id  = "header";	
@@ -244,7 +244,7 @@ function handleArrows(e){
 		orionhubA.href = "http://orionhub.org/git/git-repository.html#,cloneGitRepository=" + gitRepoUrl;
 		orionhubA.className = "js-navigation-open";
 		orionhubA.target = "_blank";
-		orionhubA.innerHTML = "OrionHub";
+		orionhubA.textContent = "OrionHub";
 		orionhubA.style.display = "none";
 		orionhubA.onclick = function(){
             toggleDisplay(selectionDialog, "none");
@@ -278,7 +278,7 @@ function handleArrows(e){
 		orioneclipseorgA.href = "http://orion.eclipse.org/git/git-repository.html#,cloneGitRepository=" + gitRepoUrl;
 		orioneclipseorgA.rel = "nofollow";
 		orioneclipseorgA.target = "_blank";
-		orioneclipseorgA.innerHTML = "orion.eclipse.org";
+		orioneclipseorgA.textContent = "orion.eclipse.org";
 		orioneclipseorgA.style.display = "none";
 		orioneclipseorgA.onclick = function(){
             toggleDisplay(selectionDialog, "none");
@@ -351,7 +351,7 @@ function handleArrows(e){
 		otherA.style.paddingRight = "0px"
 		otherA.className = "js-navigation-open";
 		otherA.target = "_blank";
-		otherA.innerHTML = "other Orion at ";
+		otherA.textContent = "other Orion at ";
 		otherA.style.display = "none";
 		otherA.style.width = "100px";
 		otherA.onclick = function(){
@@ -387,7 +387,7 @@ function handleArrows(e){
 		    }
 
 		var span = document.createElement("span");
-		span.innerHTML = "Clone into";
+		span.textContent = "Clone into";
 		span.style.backgroundRepeat = "no-repeat";
 		span.style.backgroundPosition = "78% 4px";
 		span.style.paddingLeft = "2px";

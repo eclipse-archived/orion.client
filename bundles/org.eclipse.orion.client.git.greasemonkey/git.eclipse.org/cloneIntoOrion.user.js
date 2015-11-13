@@ -120,7 +120,7 @@
 		cloneTr.className = "nohover";
 		var cloneTh = contentTableRows[contentTableRows.length - 4].children[0];
 		if (cloneTh.innerHTML === "Clone") {
-			cloneTh.innerHTML = "Clone into Orion";
+			cloneTh.textContent = "Clone into Orion";
 			cloneTh.style.fontStyle = "bold";
 			cloneTh.style.fontWeight = "bold";
 			cloneTh.style.paddingTop = "10px";
@@ -130,23 +130,23 @@
 			cloneTh.appendChild(div);
 			div.appendChild(radio1);
 			var node1 = document.createElement("span");
-			node1.innerHTML = "orionhub.org       ";
+			node1.textContent = "orionhub.org       ";
 			node1.style.fontWeight = "normal";
 			div.appendChild(node1);
 			div.appendChild(radio2);
 			var node2 = document.createElement("span");
-			node2.innerHTML = "orion.eclipse.org      ";
+			node2.textContent = "orion.eclipse.org      ";
 			node2.style.fontWeight = "normal";
 			div.appendChild(node2);
 			div.appendChild(radio3);
 			var node3 = document.createElement("span");
-			node3.innerHTML = "other Orion at ";
+			node3.textContent = "other Orion at ";
 			node3.style.fontWeight = "normal";
 			div.appendChild(node3);
 			div.appendChild(host);
 			
 			var node4 = document.createElement("span");
-			node4.innerHTML = "and click one of the links below to clone ";
+			node4.textContent = "and click one of the links below to clone ";
 			node4.style.fontWeight = "normal";
 			cloneTh.appendChild(node4);
 

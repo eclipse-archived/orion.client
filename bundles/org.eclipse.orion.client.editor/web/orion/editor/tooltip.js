@@ -692,7 +692,11 @@ function Tooltip (view) {
 			// render the title, if any
 			if (data.title) {
 				var titleDiv = util.createElement(document, "div"); //$NON-NLS-0$;
-				titleDiv.innerHTML = this.hover.renderMarkDown ? this.hover.renderMarkDown(data.title) : data.title;
+				if (this.hover.renderMarkDown) {
+					titleDiv.innerHTML = this.hover.renderMarkDown(data.title);
+				} else {
+					titleDiv.textContent = data.title;
+				}
 				titleDiv.classList.add("hoverTooltipTitle"); //$NON-NLS-0$
 				sectionDiv.appendChild(titleDiv);
 			}
