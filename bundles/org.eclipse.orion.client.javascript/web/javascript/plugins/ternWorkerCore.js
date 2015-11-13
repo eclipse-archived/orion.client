@@ -484,7 +484,8 @@ require([
 			           file: args.meta.location,
 			           end: args.params.offset,
 			           origin: args.origin
-		           }},
+		           },
+		           files: args.files},
 		           function(error, type) {
 		               if(error) {
 		                   callback({request: 'checkRef', error: typeof(error) === 'string' ? error : error.message, message: Messages['failedType']}); //$NON-NLS-1$

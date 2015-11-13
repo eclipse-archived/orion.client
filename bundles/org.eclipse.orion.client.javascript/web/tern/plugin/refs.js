@@ -18,8 +18,6 @@ define([
 	"javascript/finder"
 ],/* @callback */ function(infer, tern, walk, finder) {
 	
-	var pending = Object.create(null);
-	
 	tern.registerPlugin('refs', /* @callback */ function(server, options) { //$NON-NLS-1$
 		return {};
 	});
@@ -29,34 +27,8 @@ define([
 		/**
 		 * @callback
 		 */
-		run: function run(server, query) {
-		},
-		
-		/**
-		 * @callback
-		 */
-		runAsync: function runAsync(server, query, serverFile, f) {
-			var file = tern.resolveFile(server, server.fileMap, query.file);
-			if(!file) {
-				var func = function(file) {
-					server.off("afterLoad", func); //$NON-NLS-1$
-					if(file && file.name) {
-						var p = pending[file.name];
-						if(p) {
-							delete pending[file.name];
-							doCheck(p.query, file, server, p.callback);
-						}	
-					}
-				};
-				server.on("afterLoad", func);  //$NON-NLS-1$
-				server.addFile(query.file);
-				pending[query.file] = {
-					callback: f,
-					query: query
-				};
-			} else {
-				doCheck(query, file, server, f);
-			}
+		run: function run(server, query, file) {
+			return doCheck(query, file, server);
 		}
 	});
 	
@@ -107,13 +79,13 @@ define([
 			    	result.doc = tern.parseDoc(query, exprType.doc);
 				}
 		    }
-		    f(null, result);
+		    return result;
 	    }
 	    catch(err) {
 		    if (server.options.debug && err.name !== "TernError") {
 				console.error(err.stack);
 			}
-	        f(err);
+	        return err;
 	    }
 	}
 	

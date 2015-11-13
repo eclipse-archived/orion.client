@@ -182,10 +182,13 @@ define([
 								};
 								expected.params = searchParams;
 								expected.deferred = deferred;
+								var srcCache = {};
 								that.searchclient.search(searchParams, true, true).then(function(searchResult) {
 									expected.result = searchResult;
 									for (var h = 0, l1 = searchResult.length; h < l1; h++) {
 										var file = searchResult[h];
+										var source = Array.isArray(file.contents) ? file.contents.join("") : null;
+										srcCache[file.metadata.Location] = {};
 										for(var i = 0, l2 = file.children.length; i < l2; i++) {
 											var line = file.children[i];
 											expected.total += line.matches.length;
@@ -193,7 +196,14 @@ define([
 												var match = line.matches[j];
 												var v = Finder.findWord(line.name, match.startIndex);
 												if(v === node.name) {
-													that._checkType(type, file.metadata, match, expected);
+													//XXX do not send the full source more than once
+													//until bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=474420 is fixed
+													var req = {request: 'checkRef', args: {meta:{location: file.metadata.Location}, params: {offset: match.end}, origin: type}} //$NON-NLS-1$
+													if(!srcCache[file.metadata.Location].src) {
+														srcCache[file.metadata.Location].src = true;
+														req.files = [{type: 'full', name: file.metadata.Location, text: source}]; //$NON-NLS-1$;
+													}													
+													that._checkType(type, file.metadata, match, expected, req);
 												} else {
 													match.category = categories.partial.category;
 													match.confidence = 0;
@@ -222,10 +232,10 @@ define([
 		 * @function
 		 * @private
 		 */
-		_checkType: function _checkType(original, file, match, expected) {
+		_checkType: function _checkType(original, file, match, expected, request) {
 			var that = this;
 			that.ternworker.postMessage(
-					{request: 'checkRef', args: {meta:{location: file.Location}, params: {offset: match.end}, origin: original}},  //$NON-NLS-1$
+					request, 
 					/* @callback */ function(type, err) {
 						if(type && type.type) {
 							var _t = type.type, _ot = original.type;
