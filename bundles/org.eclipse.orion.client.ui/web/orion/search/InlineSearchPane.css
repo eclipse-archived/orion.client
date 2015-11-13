@@ -158,7 +158,6 @@
 .searchResultsWrapperDiv > div {
 	border-top: 1px solid lightgray;
 	height: 100%;
-	overflow: auto;
 	width: 100%;
 }
 
@@ -168,6 +167,7 @@
 
 .searchWrapper.searchOptionsHidden > .searchResultsWrapperDiv{
 	height: calc(100% - 70px);
+	overflow: auto;
 }
 
 .replaceModeActive > .searchResultsWrapperDiv {
