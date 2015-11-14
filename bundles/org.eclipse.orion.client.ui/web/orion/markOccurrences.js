@@ -74,7 +74,7 @@ define([
 			
 			var occurrenceTimer;
 			var self = this;
-			var occurrencesService = self.registry.getService("orion.edit.occurrences"); //$NON-NLS-0$
+			this.occurrencesService = self.registry.getService("orion.edit.occurrences"); //$NON-NLS-0$
 			var selectionListener = function(e) {
 				if (occurrenceTimer) {
 					window.clearTimeout(occurrenceTimer);
@@ -92,7 +92,7 @@ define([
 						selection: selections[0],
 						contentType: self.inputManager.getContentType().id
 					};
-					occurrencesService.computeOccurrences(editor.getEditorContext(), context).then(function (occurrences) {
+					self.occurrencesService.computeOccurrences(editor.getEditorContext(), context).then(function (occurrences) {
 						self.editor.showOccurrences(occurrences);
 					});	
 				}, 500);
@@ -108,6 +108,7 @@ define([
 								window.clearTimeout(occurrenceTimer);
 							}
 						} else {
+							self.occurrencesService = self.registry.getService(serviceRefs[0]);
 							textView.addEventListener("Selection", selectionListener); //$NON-NLS-0$
 						}
 					});
