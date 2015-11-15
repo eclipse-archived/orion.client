@@ -360,11 +360,15 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 			}, this._msg("viT")); //$NON-NLS-0$
 			
 			view.setAction("vi" + key + ",", function() { //$NON-NLS-1$ //$NON-NLS-0$
-				return self._findNextChar(self._charTempOptions.reverse);
+				if (self._charTempOptions) {
+					return self._findNextChar(self._charTempOptions.reverse);
+				}
 			}, this._msg("vi,")); //$NON-NLS-0$
 			
 			view.setAction("vi" + key + ";", function() { //$NON-NLS-1$ //$NON-NLS-0$
-				return self._findNextChar(!self._charTempOptions.reverse);
+				if (self._charTempOptions) {
+					return self._findNextChar(!self._charTempOptions.reverse);
+				}
 			}, this._msg("vi;")); //$NON-NLS-0$
 			
 			//Line numbering
