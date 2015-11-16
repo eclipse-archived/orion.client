@@ -137,6 +137,7 @@ define({//Default message bundle
 	"noProposals": "No proposals found",
 	"computingProposals": "Computing content assist proposals...",
 	"lineColumn": "Line ${0} : Column ${1}", //$NON-NLS-1$ //$NON-NLS-0$
+	"lineColumnOffset": "Line ${0} : Column ${1} : Offset ${2}",
 	"multiSelections": "${0} selection regions", //$NON-NLS-1$ //$NON-NLS-0$
 	
 	//vi

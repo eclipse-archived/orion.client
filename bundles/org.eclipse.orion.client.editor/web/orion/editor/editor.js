@@ -1062,7 +1062,11 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				var lineIndex = model.getLineAtOffset(caretOffset);
 				var lineStart = model.getLineStart(lineIndex);
 				var offsetInLine = caretOffset - lineStart;
-				_status = util.formatMessage(messages.lineColumn, lineIndex + 1, offsetInLine + 1);
+				if (localStorage.languageTools){
+					_status = util.formatMessage(messages.lineColumnOffset, lineIndex + 1, offsetInLine + 1, caretOffset);
+				} else {
+					_status = util.formatMessage(messages.lineColumn, lineIndex + 1, offsetInLine + 1);
+				}
 			}
 			this.reportStatus(_status);
 		},
