@@ -1097,7 +1097,7 @@ var exports = {};
 					return false;
 				}
 				resetParameters.message = i18nUtil.formatMessage(messages.GitResetIndexConfirm, mGitUtil.shortenRefName(item), messages.KeepWorkDir);
-				return (item.Type === "RemoteTrackingBranch"  && item.Id) || item.Type === "Branch" || item.Type === "Commit"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				return item.Type === "Commit";  //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(resetIndexCommand);
@@ -2124,8 +2124,8 @@ var exports = {};
 			tooltip: messages["ShowCommitPatchTip"],
 			id: "eclipse.orion.git.showCommitPatchCommand", //$NON-NLS-0$
 			callback: showPatchCallback,
-			visibleWhen: function() {
-				return true;
+			visibleWhen: function(item) {
+				return item.Type === "Commit"; //$NON-NLS-0$;
 			}
 		});
 		commandService.addCommand(showCommitPatchCommand);
