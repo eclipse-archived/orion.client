@@ -73,42 +73,43 @@ define([
 			}
 			
 			var occurrenceTimer;
-			var self = this;
-			this.occurrencesService = self.registry.getService("orion.edit.occurrences"); //$NON-NLS-0$
-			var selectionListener = function(e) {
+			var that = this;
+			var selectionListener = function() {
 				if (occurrenceTimer) {
 					window.clearTimeout(occurrenceTimer);
 				}
-				if (!self.occurrencesVisible) { return; }
+				if (!that.occurrencesVisible) { return; }
 				occurrenceTimer = window.setTimeout(function() {
 					occurrenceTimer = null;
-					var editor = self.editor;
+					var editor = that.editor;
 					var selections = editor.getSelections();
 					if (selections.length > 1) {
-						self.editor.showOccurrences([]);
+						that.editor.showOccurrences([]);
 						return;
 					}
 					var context = {
 						selection: selections[0],
-						contentType: self.inputManager.getContentType().id
+						contentType: that.inputManager.getContentType().id
 					};
-					self.occurrencesService.computeOccurrences(editor.getEditorContext(), context).then(function (occurrences) {
-						self.editor.showOccurrences(occurrences);
-					});	
+					if(that.occurrencesService) {
+						that.occurrencesService.computeOccurrences(editor.getEditorContext(), context).then(function (occurrences) {
+							that.editor.showOccurrences(occurrences);
+						});	
+					}
 				}, 500);
 			};
 						
-			self.inputManager.addEventListener("InputChanged", function(event) {//$NON-NLS-0$
-				var textView = self.editor.getTextView();
+			that.inputManager.addEventListener("InputChanged", function(evt) {//$NON-NLS-0$
+				var textView = that.editor.getTextView();
 				if (textView) {
 					textView.removeEventListener("Selection", selectionListener); //$NON-NLS-0$
-					getServiceRefs(self.registry, event.contentType, event.title).then(function(serviceRefs) {
+					getServiceRefs(that.registry, evt.contentType, evt.title).then(function(serviceRefs) {
 						if (!serviceRefs || serviceRefs.length === 0) {
 							if (occurrenceTimer) {
 								window.clearTimeout(occurrenceTimer);
 							}
 						} else {
-							self.occurrencesService = self.registry.getService(serviceRefs[0]);
+							that.occurrencesService = that.registry.getService(serviceRefs[0]);
 							textView.addEventListener("Selection", selectionListener); //$NON-NLS-0$
 						}
 					});
