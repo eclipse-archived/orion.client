@@ -239,6 +239,10 @@ define([
 			} else {
 				var file = request.args.file;
 				response.args.file = file;
+				if(!/\.js|\.htm|\.htm$/ig.test(file)) {
+					//no extension given, guess at js
+					file += '.js'; //$NON-NLS-1$
+				}
 				try {
 					return fileClient.read(file).then(function(contents) {
 								response.args.contents = contents;

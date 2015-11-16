@@ -108,19 +108,21 @@
       }
     } else {
         var _f = resolver.getResolved(name); //ORION
-		if(_f && _f.file !== undefined) {
+		if(_f && _f.file) {
 			name = _f.file;
+			// data.currentFile is only available while analyzing a file; at query
+	      // time, determine the calling file from the caller's AST.
+	      var currentFile = data.currentFile || resolveProjectPath(server, argNodes[0].sourceFile.name);
+	
+	      var relative = /^\.{0,2}\//.test(name);
+	      if (relative) {
+	        if (!currentFile) return argNodes[0].required || infer.ANull;
+	        name = resolvePath(currentFile, name);
+	      }
+	      result = resolveModule(server, name, currentFile);
+		} else {
+			result = new infer.AVal(); //ORION
 		}
-      // data.currentFile is only available while analyzing a file; at query
-      // time, determine the calling file from the caller's AST.
-      var currentFile = data.currentFile || resolveProjectPath(server, argNodes[0].sourceFile.name);
-
-      var relative = /^\.{0,2}\//.test(name);
-      if (relative) {
-        if (!currentFile) return argNodes[0].required || infer.ANull;
-        name = resolvePath(currentFile, name);
-      }
-      result = resolveModule(server, name, currentFile);
     }
     return argNodes[0].required = result;
   });
@@ -228,14 +230,20 @@
                      * Orion
                      */
                     postParse: function postParse(ast, text) {
-                        resolver.doPostParse(server, ast, infer.cx().definitions);
+                    	if(ast && ast.environments && ast.environments.node) {
+	                        resolver.doPostParse(server, ast, infer.cx().definitions, function(name) {
+	                        	return /^[.]+\//.test(name);
+	                        });
+	                    }
                     },
                     /**
                      * @callback
                      * Orion
                      */
                     preInfer: function preInfer(ast, scope) {
-                        resolver.doPreInfer(server);
+                    	if(ast && ast.environments && ast.environments.node) {
+	                        resolver.doPreInfer(server);
+	                    }
                     }}};
   });
 
