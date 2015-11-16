@@ -14,11 +14,13 @@
  * This class extends orion/git/util to provide UI-related utility methods.
  */
 define([
+	'i18n!git/nls/gitmessages',
 	'orion/compare/compareCommands',
 	'orion/compare/resourceComparer',
 	'orion/webui/littlelib',
 	'orion/git/util',
-], function(mCompareCommands, mResourceComparer, lib, mGitUtil) {
+	'orion/webui/tooltip'
+], function(messages, mCompareCommands, mResourceComparer, lib, mGitUtil, Tooltip) {
 	var exports = Object.create(mGitUtil); // extend util
 
 	function createFilter(section, msg, callback) {
@@ -26,10 +28,17 @@ define([
 		filterDiv.className = "gitFilterBox"; //$NON-NLS-0$
 		var filter = document.createElement("input"); //$NON-NLS-0$
 		filter.placeholder = msg;
+		filter.type = "search"; //$NON-NLS-1$
+		filter.setAttribute("aria-label", messages["Filter Section"]); //$NON-NLS-1$ 
 		filterDiv.appendChild(filter);
 		var button = document.createElement("button"); //$NON-NLS-0$
-		button.tabIndex = -1;
+		button.setAttribute("aria-label", messages["Search"]); //$NON-NLS-1$
 		button.className = "core-sprite-filter searchButton"; //$NON-NLS-0$
+		button.commandTooltip = new Tooltip.Tooltip({
+			node: button,
+			text: messages["Filter Section"],
+			position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		});
 		filterDiv.appendChild(button);
 		var doFilter = function() {
 			callback(filter.value);

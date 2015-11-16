@@ -597,5 +597,6 @@ define({//Default message bundle
 	'SingleSubmodule' : "${0} (${1} submodule)", //$NON-NLS-1$ //$NON-NLS-0$
 	'PluralSubmodule' : "${0} (${1} submodules)", //$NON-NLS-1$ //$NON-NLS-0$
 	'UninitializedSubmodule' : " ( Uninitialized Submodule )", //$NON-NLS-1$ //$NON-NLS-0$
-	"Detach Head:": "Detach Head:" //$NON-NLS-0$  //$NON-NLS-1$
+	"Detach Head:": "Detach Head:", //$NON-NLS-0$  //$NON-NLS-1$
+	"Filter Section": "Filter Section" //$NON-NLS-0$  //$NON-NLS-1$
 });
