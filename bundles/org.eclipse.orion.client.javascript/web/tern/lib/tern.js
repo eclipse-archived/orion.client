@@ -166,7 +166,11 @@
     },
     finishAsyncAction: function(err) {
       if (err) this.asyncError = err;
-      if (--this.pending === 0) this.signal("everythingFetched");
+      //ORION
+      if(this.pending > 0) {
+      	this.pending--;
+      }
+      if (this.pending === 0) this.signal("everythingFetched");
     }
   });
 

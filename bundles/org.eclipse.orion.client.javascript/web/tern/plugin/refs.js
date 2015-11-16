@@ -32,61 +32,53 @@ define([
 		}
 	});
 	
-	function doCheck(query, file, server, f) {
-		try {
-			var comment = finder.findComment(query.end, file.ast), result;
-			if(comment) {
-				result = {
-			    	guess: false,
-			        type: undefined,
-			        name: undefined,
-			        category: comment.type === 'Block' ? 'blockcomments': 'linecomments' //$NON-NLS-1$ //$NON-NLS-2$
-			    };
-			} else {
-				var expr = tern.findExpr(file, query), exprName, type, exprType;
-				try {
-				    type = tern.findExprType(server, query, file, expr);
-				    exprType = type;
-				    if (query.preferFunction) {
-						type = type.getFunctionType() || type.getType();
-					} else {
-						type = type.getType();
-					}
-				    if (expr) {
-						if (expr.node.type === "Identifier") {
-				        	exprName = expr.node.name;
-			        	} else if (expr.node.type === "MemberExpression" && !expr.node.computed) {
-				        	exprName = expr.node.property.name;
-			        	}
-				    }
+	function doCheck(query, file, server) {
+		var comment = finder.findComment(query.end, file.ast), result;
+		if(comment) {
+			result = {
+		    	guess: false,
+		        type: undefined,
+		        name: undefined,
+		        category: comment.type === 'Block' ? 'blockcomments': 'linecomments' //$NON-NLS-1$ //$NON-NLS-2$
+		    };
+		} else {
+			var expr = tern.findExpr(file, query), exprName, type, exprType;
+			try {
+			    type = tern.findExprType(server, query, file, expr);
+			    exprType = type;
+			    if (query.preferFunction) {
+					type = type.getFunctionType() || type.getType();
+				} else {
+					type = type.getType();
+				}
+			    if (expr) {
+					if (expr.node.type === "Identifier") {
+			        	exprName = expr.node.name;
+		        	} else if (expr.node.type === "MemberExpression" && !expr.node.computed) {
+			        	exprName = expr.node.property.name;
+		        	}
 			    }
-				catch(er) {
-					//do nothing tag the result later and do a static check
-				}
-			    result = {
-			    	guess: infer.didGuess(),
-			        type: infer.toString(exprType),
-			        name: type && type.name,
-			        exprName: exprName
-			    };
-			    categorize(query, file, result);
-			    if (type) {
-			    	tern.storeTypeDocs(query, type, result);
-		    	} else {
-		    		staticCheck(query, file, result);
-		    	}
-			    if (!result.doc && exprType && exprType.doc) {
-			    	result.doc = tern.parseDoc(query, exprType.doc);
-				}
 		    }
-		    return result;
-	    }
-	    catch(err) {
-		    if (server.options.debug && err.name !== "TernError") {
-				console.error(err.stack);
+			catch(er) {
+				//do nothing tag the result later and do a static check
 			}
-	        return err;
+		    result = {
+		    	guess: infer.didGuess(),
+		        type: infer.toString(exprType),
+		        name: type && type.name,
+		        exprName: exprName
+		    };
+		    categorize(query, file, result);
+		    if (type) {
+		    	tern.storeTypeDocs(query, type, result);
+	    	} else {
+	    		staticCheck(query, file, result);
+	    	}
+		    if (!result.doc && exprType && exprType.doc) {
+		    	result.doc = tern.parseDoc(query, exprType.doc);
+			}
 	    }
+	    return result;
 	}
 	
 	/**

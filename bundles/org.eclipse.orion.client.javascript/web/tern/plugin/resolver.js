@@ -27,6 +27,7 @@ define([
 	    for (var i = 0; i < keys.length; i++) {
 	        var key = keys[i];
 	        var dep = _resolved[key];
+	        //we will try again for a timed out read
 	        if (dep && (dep.pending || dep.file)) {
 	      	  continue;
 	        }
@@ -47,15 +48,24 @@ define([
 			//if we are waiting don't fire of another request
 			return;
 		}
+		var resetPending = function(key) {
+			clearTimeout(_resolved[key].timeout);
+			_resolved[key].file = null;
+			_resolved[key].contents = '';
+			_resolved[key].err = "Read operation timed out."; //$NON-NLS-1$
+			delete _resolved[key].pending;
+			server.finishAsyncAction(_resolved[key].err);
+		};
   		server.startAsyncAction();
   		_resolved[key].pending = true;
+  		_resolved[key].timeout = setTimeout(resetPending, 4000, key);
 		server.options.getFile({logical: key, file: loc}, function(err, _file) {
+			clearTimeout(_resolved[key].timeout);
 			_resolved[key].file = _file.file;
 	   		_resolved[key].contents = typeof(_file.contents) === 'string' ? _file.contents : '';
 	   		_resolved[key].logical = _file.logical;
 	   		_resolved[key].err = err;
 	   		delete _resolved[key].pending;
-	   		//server.addFile(_file.file ? _file.file : _file.logical, _resolved[key].contents);
 	   		server.finishAsyncAction(err);
 		});
 	}
@@ -100,9 +110,10 @@ define([
 	 * @param {TernServer} server The server
 	 * @param {Object} ast The backing AST that was just parsed
 	 * @param {Object} ignores A mapping of names that can be ignored
+	 * @param {Function} test An optional function callback to test the name of the dependency
 	 * @since 9.0
 	 */
-	function doPostParse(server, ast, ignores) {
+	function doPostParse(server, ast, ignores, test) {
 		if(Array.isArray(ast.dependencies) && ast.dependencies.length > 0) {
 			for(var i = 0; i < ast.dependencies.length; i++) {
 				var _d = _getDependencyName(ast.dependencies[i]);
@@ -120,6 +131,13 @@ define([
 						if(typeof(ignores.requirejs) === 'object' && ignores.requirejs[_d]) {
 							continue;
 						}
+					}
+					/**
+					 * @since 11.0
+					 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481271
+					 */
+					if(typeof(test) === 'function' && !test(_d)) {
+						continue;
 					}
 					_resolved[_d] = Object.create(null);
 				}
