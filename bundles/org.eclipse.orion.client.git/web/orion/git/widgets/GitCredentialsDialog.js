@@ -85,13 +85,17 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 
 		this.buttons = [];
 
-		this.buttons.push({ callback : function() {
-			that.destroy();
-			that._execute();
-		},
-		text : 'OK',
-		isDefault: true
-		});
+		if(!this.options.onlyAuthorizeWithGitHub){
+			this.buttons.push({ callback : function() {
+				that.destroy();
+				that._execute();
+			},
+			text : 'OK',
+			isDefault: true
+			});
+	
+		}
+
 
 		// Start the dialog initialization.
 		this._initialize();
@@ -99,7 +103,32 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 
 	GitCredentialsDialog.prototype._bindToDom = function(parent) {
 		var that = this;
-
+		
+		if (this.options.errordata && this.options.errordata.GitHubAuth) {
+			this.$authButton.value = messages.AuthorizeWithGitHub;
+			(function(authUrl) {
+				this.$authButton.addEventListener("click", function(e) { //$NON-NLS-0$
+					window.location.href = authUrl;
+				});
+			}.bind(this))(this.options.errordata.GitHubAuth + "?ref=" + encodeURIComponent(window.location.href) + ((this.options.errordata.Url)?",cloneGitRepository=" + encodeURIComponent(this.options.errordata.Url):"")); //$NON-NLS-1$ //$NON-NLS-0$
+		} else {
+			this.$gitHubAuthRow.style.display = "none"; //$NON-NLS-0$			
+		}
+		
+		if(this.options.onlyAuthorizeWithGitHub)
+		{
+			this.$gitSshUsernameRow.style.display = "none"; //$NON-NLS-0$
+			this.$gitSshPasswordRow.style.display = "none"; //$NON-NLS-0$
+			this.$gitPrivateKeyRow.style.display = "none"; //$NON-NLS-0$		
+			this.$gitPrivateKeyFileRow.style.display = "none"; //$NON-NLS-0$
+			this.$gitCredentialsLabel.style.display = "none"; //$NON-NLS-0$
+			this.$gitPassphraseRow.style.display = "none"; //$NON-NLS-0$
+			this.$gitSaveCredentials.style.display = "none"; //$NON-NLS-0$
+			this.$gitSaveCredentialsLabel.style.display = "none"; //$NON-NLS-0$
+			this.$gitSaveCredentialsInfo.style.display = "none"; //$NON-NLS-0$
+			return;
+		}
+		
 		if (!this.options.username) {
 			this.$gitSshUsernameRow.style.display = "none"; //$NON-NLS-0$
 		}
@@ -120,17 +149,6 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 		if (this.options.errordata && this.options.errordata.Url) {
 			this.$gitCredentialsLabel.style.display = "block"; //$NON-NLS-0$
 			this.$url.textContent = this.options.errordata.Url;
-		}
-
-		if (this.options.errordata && this.options.errordata.GitHubAuth) {
-			this.$authButton.value = messages.AuthorizeWithGitHub;
-			(function(authUrl) {
-				this.$authButton.addEventListener("click", function(e) { //$NON-NLS-0$
-					window.location.href = authUrl;
-				});
-			}.bind(this))(this.options.errordata.GitHubAuth + "?ref=" + encodeURIComponent(window.location.href) + ",cloneGitRepository=" + encodeURIComponent(this.options.errordata.Url)); //$NON-NLS-1$ //$NON-NLS-0$
-		} else {
-			this.$gitHubAuthRow.style.display = "none"; //$NON-NLS-0$			
 		}
 
 		if (this.options.errordata && this.options.errordata.User && this.options.errordata.User !== "") {

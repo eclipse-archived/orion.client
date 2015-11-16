@@ -1217,7 +1217,25 @@ eclipse.GitService = (function() {
 			
 			return clientDeferred;
 		},
-
+		
+		doPullRequestList : function(pullRequestLocation){
+			var service = this;
+			
+			var clientDeferred = new Deferred();
+			xhr("GET", pullRequestLocation, {
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				timeout : GIT_TIMEOUT
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
 
 		_getGitServiceResponse : function(deferred, result) {
 			var response =  result.response ? JSON.parse(result.response) : null;
