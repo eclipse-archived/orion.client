@@ -188,7 +188,7 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 		h2.style.margin = "10px 5px 10px 0"; //$NON-NLS-0$
 		h2.style.cssFloat = "left";//$NON-NLS-0$
 		h2.id = "addExternalAccount";//$NON-NLS-0$
-		h2.innerHTML = messages["AddExternalAccount"];//$NON-NLS-0$
+		h2.textContent = messages["AddExternalAccount"];//$NON-NLS-0$
 		externalIdContainer.appendChild(h2);
 	}
 

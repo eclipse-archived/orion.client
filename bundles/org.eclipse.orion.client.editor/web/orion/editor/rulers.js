@@ -1105,7 +1105,7 @@ define("orion/editor/rulers", [
 					div1.style.position = "fixed"; //$NON-NLS-0$
 					div1.style.left = "-1000px"; //$NON-NLS-0$
 					zoomView._clientDiv.appendChild(div1);
-					div1.innerHTML = new Array(Math.ceil(textView.getClientArea().width / textView._metrics.charWidth) + 1).join("a"); //$NON-NLS-0$
+					div1.textContent = new Array(Math.ceil(textView.getClientArea().width / textView._metrics.charWidth) + 1).join("a"); //$NON-NLS-0$
 					var rect1 = div1.getBoundingClientRect();
 					width = Math.min(150, Math.ceil(rect1.right - rect1.left)) + "px"; //$NON-NLS-0$
 				} else {

@@ -518,7 +518,7 @@ objects.mixin(EditorViewer.prototype, {
 					if (!this.dirtyIndicator) {
 						this.dirtyIndicator = document.createElement("span");
 						this.dirtyIndicator.classList.add("editorViewerHeaderDirtyIndicator");
-						this.dirtyIndicator.innerHTML = "*";
+						this.dirtyIndicator.textContent = "*";
 						this.curFileNode.parentNode.insertBefore(this.dirtyIndicator, this.curFileNode);
 					}
 					this.dirtyIndicator.style.display = this.editor.isDirty() ? "block" : "none";
