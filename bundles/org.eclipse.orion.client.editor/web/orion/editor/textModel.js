@@ -397,6 +397,12 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 			}
 			var lastOffset = offset;
 			var lastChunk = chunk;
+
+			// error check for invalid chunks of text
+			if (firstChunk >= this._text.length || lastChunk >= this._text.length || firstChunk > lastChunk) {
+				return "";
+			}
+			
 			if (firstChunk === lastChunk) {
 				return this._text[firstChunk].substring(start - firstOffset, end - lastOffset);
 			}
