@@ -349,25 +349,45 @@ define([
 			};
 			sidebar.sidebarNavInputManager.addEventListener("projectDisplayed", handleDisplay); //$NON-NLS-0$
 		}
+					
+		// If we are displaying project root, update the project.  Otherwise check setting and set the new nav root
 		this.editorInputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
-			openProject(event.metadata);
-		});
-		// Only show project view mode if selection is in a project
-		this.sidebarNavInputManager.addEventListener("selectionChanged", function(event){ //$NON-NLS-0$
-			if (sidebar.getActiveViewModeId() === _self.id) { return; }
-			_self.project = null;
-			var item = event.selections && event.selections.length > 0 ? event.selections[0] : null;
-			if (item) {
-				_self.getProject(item).then(function(project) {
-					_self.getProjectJson(project).then(function(json) {
-						_self.project = project;
-						_self.showViewMode(!!json);
-					});
-				});
+			if (sidebar.getActiveViewModeId() === _self.id) {
+				openProject(event.metadata);
 			} else {
-				_self.showViewMode(false);
+				if (localStorage.languageTools){
+					// Don't navigate into the project
+					// If no mode set, change to default nav view
+					if (!sidebar.getActiveViewModeId()){
+						sidebar.setViewMode(sidebar.getNavigationViewMode().id);
+					}
+				} else {
+					openProject(event.metadata);
+				}
 			}
 		});
+		
+		// If we are displaying project root, continue. Otherwise check setting and only show project view if the selection is a project
+		this.sidebarNavInputManager.addEventListener("selectionChanged", function(event){ //$NON-NLS-0$
+			if (sidebar.getActiveViewModeId() === _self.id) { return; }
+			if (localStorage.languageTools){
+				_self.showViewMode(false);
+			} else {
+				_self.project = null;
+				var item = event.selections && event.selections.length > 0 ? event.selections[0] : null;
+				if (item) {
+					_self.getProject(item).then(function(project) {
+						_self.getProjectJson(project).then(function(json) {
+							_self.project = project;
+							_self.showViewMode(!!json);
+						});
+					});
+				} else {
+					_self.showViewMode(false);
+				}
+			}
+ 		});
+ 		
 	}
 	objects.mixin(ProjectNavViewMode.prototype, {
 		label: messages["Project"],
