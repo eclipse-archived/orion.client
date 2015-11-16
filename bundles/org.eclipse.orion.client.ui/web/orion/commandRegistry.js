@@ -368,6 +368,7 @@ define([
 								node: commandInvocation.domNode || commandInvocation.domParent,
 								afterHiding: function() {
 									this.destroy();
+									if (commandInvocation.domParent) commandInvocation.domParent.classList.remove("parameterPopupOpen"); //$NON-NLS-1$
 								},
 								trigger: "click", //$NON-NLS-0$
 								position: ["below", "right", "above", "left"] //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
@@ -380,8 +381,10 @@ define([
 									originalFocusNode.focus();
 								}
 								tooltip.destroy();
+								if (commandInvocation.domParent) commandInvocation.domParent.classList.remove("parameterPopupOpen"); //$NON-NLS-0$
 							}, cancelCallback)(parameterArea);
 							tooltip.show();
+							if (commandInvocation.domParent) commandInvocation.domParent.classList.add("parameterPopupOpen"); //$NON-NLS-0$
 							if (focusNode) {
 								window.setTimeout(function() {
 										focusNode.focus();
