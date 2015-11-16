@@ -2840,8 +2840,7 @@ define([
 					callback: done
 				};
 				return testProposals(options, [
-					//["eee", "eee : Error"],
-					
+					["eee", "eee : Error"],
 					["", "ecma5"],
 					['Error(message)', 'Error(message)'],
 					['EvalError(message)', 'EvalError(message)'],

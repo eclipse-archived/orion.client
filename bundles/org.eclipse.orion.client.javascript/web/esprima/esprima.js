@@ -2075,6 +2075,10 @@ parseStatement: true, parseSourceElement: true */
             this.block = block;
             this.guardedHandlers = guardedHandlers;
             this.handlers = handlers;
+            //ORION see https://bugs.eclipse.org/bugs/show_bug.cgi?id=482317
+            if(Array.isArray(handlers) && handlers.length > 0) {
+            	this.handler = handlers[0];
+            }
             this.finalizer = finalizer;
             this.finish();
             return this;
