@@ -32,7 +32,7 @@
 		</style>
 	    <link rel="stylesheet" type="text/css" href="editorBuild/code_edit/built-codeEdit.css"/>
 	    <link rel="stylesheet" type="text/css" href="custom.css"/>
-		<script src="editorBuild/code_edit/built-codeEdit.min.js"></script>
+		<script src="editorBuild/code_edit/built-codeEdit.js"></script>
 		<script>
 			/*globals orion */
 			var contents = 'var foo = "bar";\n' +
@@ -102,22 +102,40 @@
 				}
 			};
 		
+			function computeOccurrences(orionContext, context) {
+				if(typeof context.selection) {
+					return context.selection.start > 5 ? [{start: context.selection.start + 5, end: context.selection.start + 9}] : [];
+				} 
+				return [];
+			}
+			
 			window.onload=function(){
 				var codeEdit = new orion.codeEdit();
 				codeEdit.create({parent: "embeddedEditor", contentType: "application/javascript", contents: contents}).then(function(editorViewer) {
 					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+					if (editorViewer.settings) {
+						editorViewer.settings.contentAssistAutoTrigger = true;
+						editorViewer.settings.showOccurrences = true;
+					}
 				});
 				codeEdit.create({parent: "embeddedEditor1"}).then(function(editorViewer){
+					if (editorViewer.settings) {
+						editorViewer.settings.contentAssistAutoTrigger = true;
+						editorViewer.settings.showOccurrences = true;
+					}
 					editorViewer.serviceRegistry.registerService("orion.edit.contentassist",
 							contentAssistProvider,
 				    		{	name: "xmlContentAssist",
-				    			contentType: ["application/xml"]
+				    			contentType: ["application/xml"],
+				    			charTriggers: "[.(]"
 				    		});
 					editorViewer.serviceRegistry.registerService("orion.edit.hover",
 						hoverProvider,
 			    		{	name: "xmlContentHover",
 			    			contentType: ["application/xml"]
 			    		});
+					editorViewer.serviceRegistry.registerService('orion.edit.occurrences',
+						{computeOccurrences: computeOccurrences}, {contentType: ["application/xml"]});	
 			    	editorViewer.setContents(contents2, "application/xml");
 				});
 			};

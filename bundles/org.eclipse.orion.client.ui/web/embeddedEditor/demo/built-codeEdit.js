@@ -88,26 +88,48 @@ function(mEmbeddedEditor) {
 			return null;
 		}
 	};
+	function computeOccurrences(orionContext, context) {
+		if(typeof context.selection) {
+			return context.selection.start > 5 ? [{start: context.selection.start + 5, end: context.selection.start + 9}] : [];
+		} 
+		return [];
+	}
+	function execute(orionContext, params) {
+		alert("foo");
+	}
+	
 	embeddedEditor.create({parent: "embeddedEditor", _defaultPlugins: defaultPluginURLs}).then(function(editorViewer) {
 		document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 		editorViewer.setContents(contents, "application/javascript");
 		//editorViewer.inputManager.setAutoSaveTimeout(-1);
 		editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
 	});
+	
 	embeddedEditor.create({parent: "embeddedEditor1", _defaultPlugins: defaultPluginURLs,
 						   contentType: "application/xml",
 						   contents: contents2}).then(function(editorViewer){
+		if (editorViewer.settings) {
+			editorViewer.settings.contentAssistAutoTrigger = true;
+			editorViewer.settings.showOccurrences = true;
+		}
+		editorViewer.serviceRegistry.registerService('orion.edit.command', {execute: execute}, {
+			name: 'Xtext formatting service',
+			id: 'xtext.formatter',
+			key: ['f', true, true],
+			contentType: ["application/xml"]
+		});		
 		editorViewer.serviceRegistry.registerService("orion.edit.contentassist",
 				contentAssistProvider,
 	    		{	name: "xmlContentAssist",
-	    			contentType: ["application/xml"]
+	    			contentType: ["application/xml"],
+	    			charTriggers: "[.(]"
 	    		});
 		editorViewer.serviceRegistry.registerService("orion.edit.hover",
 			hoverProvider,
     		{	name: "xmlContentHover",
     			contentType: ["application/xml"]
     		});
-	
-						   		
+		editorViewer.serviceRegistry.registerService('orion.edit.occurrences',
+			{computeOccurrences: computeOccurrences}, {contentType: ["application/xml"]});	
 	});
 });
