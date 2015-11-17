@@ -344,7 +344,7 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 				if (jsonData.failedOperation) {
 					options.failedOperation = jsonData.failedOperation;
 				}
-				handleSshAuthenticationError(serviceRegistry, jsonData.JsonData, options, callee, title);
+				handleSshAuthenticationError(serviceRegistry, jsonData.JsonData, options, callee, title, callback);
 				return;
 			case 400:
 				if(jsonData.JsonData && jsonData.JsonData.HostKey){
@@ -359,7 +359,7 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 					if (jsonData.failedOperation) {
 						options.failedOperation = jsonData.failedOperation;
 					}
-					handleSshAuthenticationError(serviceRegistry, jsonData.JsonData, options, callee, title);
+					handleSshAuthenticationError(serviceRegistry, jsonData.JsonData, options, callee, title, callback);
 				}
 				return;
 			default:
