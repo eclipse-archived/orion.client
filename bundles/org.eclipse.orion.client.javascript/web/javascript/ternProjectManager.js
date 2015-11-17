@@ -124,6 +124,7 @@ define([
 		writeTernFile: function(fileLocation, jsonOptions){
 			try {
 				// TODO Should we only allow writing of known options?
+				// TODO Should we add proper whitespace?
 				var jsonString = JSON.stringify(jsonOptions);
 				return this.fileClient.write(fileLocation, jsonString);
 			} catch(e) {
@@ -141,8 +142,8 @@ define([
 			if (jsonOptions){
 				
 				// TODO Remove console
-				console.log('Loading the following options from .tern-project:');
-				console.log(jsonOptions);
+//				console.log('Loading the following options from .tern-project:');
+//				console.log(jsonOptions);
 				
 				if (jsonOptions.plugins || Array.isArray(jsonOptions.libs) || jsonOptions.dependencyBudget || jsonOptions.ecmaVersion){
 					this.ternWorker.startServer(jsonOptions);
@@ -163,13 +164,13 @@ define([
 							if (Array.isArray(files) && files.length > 0){
 								// TODO If more than one file satisfies script resolver, do we load the first, the last or them all?  Warn the user?
 								if (files.length > 1){
-									console.log('Found multiple potential files for: ' + filename);
+									console.log('Tern-Project File: Found multiple potential files for: ' + filename);
 								}
 								this.ternWorker.postMessage(
 									{request:'addFile', args:{file: files[0].location}} //$NON-NLS-1$
 								);
 							} else {
-								console.log("Could not find any matching files for: " + filename);
+								console.log("Tern-Project File: Could not find any matching files for: " + filename);
 							}
 						}.bind(this));
 					}
@@ -186,6 +187,7 @@ define([
 //			console.log("Tern Project Manager: On Input Changed");
 
 			// TODO We also want to listen to .tern-project file creation/modification/deletion
+			// TODO On startup we start Tern, then restart it with loaded options
 
 			// Get the project
 			var file = event.file;
