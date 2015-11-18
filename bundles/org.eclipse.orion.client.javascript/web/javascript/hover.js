@@ -258,15 +258,11 @@ define([
 		    	if (!meta){
 		    		return null;
 		    	}
-		    	if(Array.isArray(meta.parents)) {
-		    		var idx = 0;
-		    		if(meta.parents.length > 0) {
-		    			idx = meta.parents.length-1;
-		    		}
-		    		that.resolver.setSearchLocation(meta.parents[idx].Location);	
-		    	} else {
-		    		that.resolver.setSearchLocation(null);
-		    	}
+				if(Array.isArray(meta.parents) && meta.parents.length > 0) {
+					that.resolver.setSearchLocation(meta.parents[meta.parents.length - 1].Location);
+				} else {
+					that.resolver.setSearchLocation(null);	
+				}
 		        if(meta && meta.contentType.id === 'application/javascript') {
 		            return that.astManager.getAST(editorContext).then(function(ast) {
         				return that._doHover(ast, ctxt, meta);
