@@ -2589,6 +2589,7 @@ var exports = {};
 					url: data.parameters.valueFor("url"), //$NON-NLS-0$
 					alwaysShowAdvanced: data.parameters.optionsRequested,
 					fileClient: fileClient,
+					root:item.ContentLocation,
 					func: addFunction
 				});
 						

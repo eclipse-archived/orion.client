@@ -54,6 +54,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 		this.alwaysShowAdvanced = options.alwaysShowAdvanced;
 		this.advancedOnly = options.advancedOnly;
 		this.url = options.url;
+		this.root = options.root||"/";
 		this.serviceRegistry = options.serviceRegistry;
 		this.fileClient = options.fileClient;
 		this.func = options.func;
@@ -190,25 +191,27 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 
 		this.$isExistingProject.checked = true;
 
-		var dialog = new DirPrompter.DirectoryPrompterDialog({ title : messages["ChooseFolderDialog"],
-		serviceRegistry : this.serviceRegistry,
-		fileClient : this.fileClient,
-		func : function(targetFolder) {
-			if (targetFolder && targetFolder.Location) {
-				that.$gitPath.value = targetFolder.Location;
-				while (that.$shownGitPath.hasChildNodes()) {
-					that.$shownGitPath.removeChild(that.$shownGitPath.lastChild);
-				}
-				that.$shownGitPath.appendChild(makePathSegment(targetFolder));
-
-				var currentFolder = targetFolder;
-				while (currentFolder.parent && currentFolder.parent.Location !== "/") {
-					that.$shownGitPath.insertBefore(document.createTextNode("/"), that.$shownGitPath.firstChild); //$NON-NLS-0$
-					that.$shownGitPath.insertBefore(makePathSegment(currentFolder.parent), that.$shownGitPath.firstChild);
-					currentFolder = currentFolder.parent;
+		var dialog = new DirPrompter.DirectoryPrompterDialog({
+			title : messages["ChooseFolderDialog"],
+			root:this.root,
+			serviceRegistry : this.serviceRegistry,
+			fileClient : this.fileClient,
+			func : function(targetFolder) {
+				if (targetFolder && targetFolder.Location) {
+					that.$gitPath.value = targetFolder.Location;
+					while (that.$shownGitPath.hasChildNodes()) {
+						that.$shownGitPath.removeChild(that.$shownGitPath.lastChild);
+					}
+					that.$shownGitPath.appendChild(makePathSegment(targetFolder));
+	
+					var currentFolder = targetFolder;
+					while (currentFolder.parent && currentFolder.parent.Location !== "/") {
+						that.$shownGitPath.insertBefore(document.createTextNode("/"), that.$shownGitPath.firstChild); //$NON-NLS-0$
+						that.$shownGitPath.insertBefore(makePathSegment(currentFolder.parent), that.$shownGitPath.firstChild);
+						currentFolder = currentFolder.parent;
+					}
 				}
 			}
-		}
 		});
 		
 		this._addChildDialog(dialog);
