@@ -507,8 +507,14 @@ define([
 		_changeExpandedState: function() {
 			if (this.hidden){
 				this._expand();
+				if (this.filterBox) {
+					this.filterBox.focus();
+				}
 			} else {
 				this._collapse();
+				if (this.filterBox) {
+					this.filterBox.clear();
+				}
 			}
 			
 			this._updateExpandedState(true);

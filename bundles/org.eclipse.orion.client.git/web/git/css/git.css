@@ -245,7 +245,6 @@
 
 .mainToolbar .gitFilterBox input {
 	width: 200px;
-	padding-right: 22px;
 }
 
 html[dir="rtl"] .mainToolbar .gitFilterBox input { /* ACGC */
@@ -259,14 +258,17 @@ html[dir="rtl"] .mainToolbar .gitFilterBox input { /* ACGC */
 
 .searchButton {
 	position: relative;
-	left: -28px;
-	top: -2px;
+	left: 5px;
 	cursor: pointer;
 	outline: none;
+	color: gray;
+	padding: 0 2px 2px;
+    border: 1px solid transparent;
 }
 
 .searchButton:hover {
-	color: #00AED1;
+	background-color: #a5b5bc;
+	border: 1px solid #ccc;
 }
 
 .mainToolbar #configSection {
