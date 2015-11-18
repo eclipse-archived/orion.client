@@ -60,6 +60,7 @@ function(messages, dialog, mFileUtils, mSelection, mExplorer, mExplorerTable, bi
 		this.modal = true;
 		this.buttons = [{text: messages['OK'], isDefault: true, callback: this.done.bind(this)}]; 
 		this.customFocus = true;
+		this.root = options.root||"/";
 		this._fileClient = options.fileClient;
 		this._serviceRegistry = options.serviceRegistry;
 		this._message = options.message || "";
@@ -69,7 +70,7 @@ function(messages, dialog, mFileUtils, mSelection, mExplorer, mExplorerTable, bi
 	
 	DirectoryPrompterDialog.prototype._bindToDom = function(parent) {
 		// TODO this is assuming a particular file system
-		this.loadFolderList("/");	// workspace root //$NON-NLS-0$
+		this.loadFolderList(this.root);	// workspace root //$NON-NLS-0$
 		if (this._message) {
 			this.$message.appendChild(document.createTextNode(this._message));
 		} else {
