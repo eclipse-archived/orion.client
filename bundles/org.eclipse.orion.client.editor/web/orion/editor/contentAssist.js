@@ -1086,8 +1086,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		var MO = window.MutationObserver || window.MozMutationObserver;
 		if (MO && util.isFirefox) {//MutationObserver does not work in chrome for resize https://code.google.com/p/chromium/issues/detail?id=293948
 			this._mutationObserver = new MO(function(mutations) {
-				//TODO: code edit widget : separate a finer API to only reposition and resize the tooltips
-				this._contentAssistMode._showTooltip(true);
+				this._contentAssistMode._showTooltip(true, true);
 			}.bind(this));
 		} else {
 			this._useResizeTimer = true;
