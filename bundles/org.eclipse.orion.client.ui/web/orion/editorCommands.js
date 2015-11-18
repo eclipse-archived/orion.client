@@ -241,9 +241,9 @@ define([
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.find", 0, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.toolbarId, "orion.keyAssist", 0, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(191, false, true, true)); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(113), null, this);//$NON-NLS-1$ //$NON-NLS-2$ 
-			commandRegistry.registerCommandContribution(this.toolbarId, "orion.edit.reloadWithEncoding", 2, "orion.menuBarToolsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
-			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 3, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
-			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 4, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 2, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 3, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+			commandRegistry.registerCommandContribution(this.toolbarId, "orion.edit.reloadWithEncoding", 1000, "orion.menuBarToolsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			this._registerCommandGroups(this.toolbarId, "orion.menuBarToolsGroup"); //$NON-NLS-1$
 
@@ -289,7 +289,7 @@ define([
 
 			// 'Tools' cascade
 			commandRegistry.addCommandGroup(this.editorContextMenuId, "orion.editorContextMenuToolsGroup", 400, messages["Tools"], "orion.editorContextMenuGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.reloadWithEncoding", 0, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.reloadWithEncoding", 1000, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.blame", 1, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.diff", 2, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 
