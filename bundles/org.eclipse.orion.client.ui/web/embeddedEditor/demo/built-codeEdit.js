@@ -10,8 +10,11 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['embeddedEditor/builder/embeddedEditor'],
-function(mEmbeddedEditor) {
+define(['embeddedEditor/builder/embeddedEditor',
+		'orion/Deferred'
+],
+function(mEmbeddedEditor,
+Deferred) {
 	var defaultPluginURLs = [
 		"../../javascript/plugins/javascriptPlugin_embed_dev.html",
 		"../../webtools/plugins/webToolsPlugin_embed_dev.html",
@@ -34,7 +37,10 @@ function(mEmbeddedEditor) {
 						 
 	var contents2 = '<server description="new server">\n' +
 					 '</server>';
-	var embeddedEditor = new mEmbeddedEditor();
+	var embeddedEditor = new mEmbeddedEditor({
+		_defaultPlugins: defaultPluginURLs,
+		toolbarId: "__toolbar__",
+		/*, userPlugins:["editorCommandsPlugin.html"]*/});
 	var proposals = [
 		"proposal ",
 		"proposal ",
@@ -89,23 +95,24 @@ function(mEmbeddedEditor) {
 		}
 	};
 	function computeOccurrences(orionContext, context) {
+		var oc = [];
 		if(typeof context.selection) {
-			return context.selection.start > 5 ? [{start: context.selection.start + 5, end: context.selection.start + 9}] : [];
+			oc = context.selection.start > 5 ? [{start: context.selection.start + 5, end: context.selection.start + 9}] : [];
 		} 
-		return [];
+		return new Deferred().resolve(oc);
 	}
 	function execute(orionContext, params) {
 		alert("foo");
 	}
 	
-	embeddedEditor.create({parent: "embeddedEditor", _defaultPlugins: defaultPluginURLs}).then(function(editorViewer) {
+	embeddedEditor.create({parent: "embeddedEditor"}).then(function(editorViewer) {
 		document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 		editorViewer.setContents(contents, "application/javascript");
 		//editorViewer.inputManager.setAutoSaveTimeout(-1);
 		editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
 	});
 	
-	embeddedEditor.create({parent: "embeddedEditor1", _defaultPlugins: defaultPluginURLs,
+	embeddedEditor.create({parent: "embeddedEditor1",
 						   contentType: "application/xml",
 						   contents: contents2}).then(function(editorViewer){
 		if (editorViewer.settings) {
@@ -115,7 +122,7 @@ function(mEmbeddedEditor) {
 		editorViewer.serviceRegistry.registerService('orion.edit.command', {execute: execute}, {
 			name: 'Xtext formatting service',
 			id: 'xtext.formatter',
-			key: ['f', true, true],
+			key: ['l', true, true],
 			contentType: ["application/xml"]
 		});		
 		editorViewer.serviceRegistry.registerService("orion.edit.contentassist",

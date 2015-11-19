@@ -12,6 +12,21 @@
 	height: 250px;
 }
 
+.embeddedEditorTool{
+	border: 1px solid;
+	vertical-align: middle;
+	border-color: blue;
+	overflow: hidden;
+	text-align: left;
+	margin-left: 15%;
+	margin-right: 15%;
+	margin-bottom: 5px;
+	padding-bottom: 2px;
+	padding-top: 4px;
+	position: relative;
+	height: 24px;
+}
+
 .embeddedEditorDemoTextParent{
 	border: none;
 	vertical-align: middle;
