@@ -3205,12 +3205,7 @@ define([
 					callback: done,
 					templates: true
 				};
-				testProposals(options, [
-					['', 'Templates'],
-				    ['lint rule-id:0/1 ', 'eslint - ESLint rule enable or disable'],
-				    ['lint-disable rule-id ', 'eslint-disable - ESLint rule disablement directive'],
-				    ['lint-enable rule-id ', 'eslint-enable - ESLint rule enablement directive'],
-				    ['lint-env library', 'eslint-env - ESLint environment directive']]
+				testProposals(options, []
 				);
 			});
 			/**
@@ -3299,14 +3294,20 @@ define([
 				};
 				testProposals(options, [
 				     ['amd', 'amd - ESLint environment name'],
+				     ['amqp', 'amqp - ESLint environment name'],
 				     ['browser', 'browser - ESLint environment name'],
+				     ['express', 'express - ESLint environment name'],
 				     ['jasmine', 'jasmine - ESLint environment name'],
 					 ['jquery', 'jquery - ESLint environment name'],
 					 ['meteor', 'meteor - ESLint environment name'],
 				     ['mocha', 'mocha - ESLint environment name'],
+				     ['mongodb', 'mongodb - ESLint environment name'],
+				     ['mysql', 'mysql - ESLint environment name'],
 				     ['node', 'node - ESLint environment name'],
+				     ['pg', 'pg - ESLint environment name'],
 				     ['phantomjs', 'phantomjs - ESLint environment name'],
 					 ['prototypejs', 'prototypejs - ESLint environment name'],
+					 ['redis', 'redis - ESLint environment name'],
 					 ['shelljs', 'shelljs - ESLint environment name']
 				     ]);
 			});
@@ -3325,6 +3326,7 @@ define([
 				};
 				testProposals(options, [
 				     ['amd', 'amd - ESLint environment name'],
+				     ['amqp', 'amqp - ESLint environment name']
 				     ]);
 			});
 			/**
@@ -3727,8 +3729,13 @@ define([
 					templates: true,
 					callback: done};
 				testProposals(options, [
+					['@abstract', '@abstract'],
+					['@access', '@access'],
+					['@alias', '@alias'],
+					['@augments', '@augments'],
+					['@author', '@author'],
 					['', 'Templates'],
-				    ['uthor ', '@author - Author JSDoc tag']
+				    ['uthor ', '@author']
 				]);
 			});
 			/**
@@ -3744,9 +3751,12 @@ define([
 					templates: true,
 					callback: done};
 				testProposals(options, [
+					['@lends', '@lends'],
+					['@license', '@license'],
+					['@listens', '@listens'],
 					['', 'Templates'],
-				    ['ends ', '@lends - Lends JSDoc tag'],
-				    ['icense ', '@license - License JSDoc tag']
+				    ['ends ', '@lends'],
+				    ['icense ', '@license']
 				]);
 			});
 			/**
@@ -4188,9 +4198,12 @@ define([
 					templates: true,
 					callback: done};
 				testProposals(options, [
+					['@lends', '@lends'],
+					['@license', '@license'],
+					['@listens', '@listens'],
 					 ['', 'Templates'],
-				     ['ends ', '@lends - Lends JSDoc tag'],
-				     ['icense ', '@license - License JSDoc tag']
+				     ['ends ', '@lends'],
+				     ['icense ', '@license']
 				]);
 			});
 

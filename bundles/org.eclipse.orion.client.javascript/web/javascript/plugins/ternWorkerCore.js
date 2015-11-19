@@ -26,6 +26,7 @@ requirejs.config({locale: lang});
 require([
 	'tern/lib/tern',
 	'tern/plugin/doc_comment',
+	'tern/plugin/jsdoc',
 	'tern/plugin/orionAmqp',
 	'tern/plugin/angular',
 	//'tern/plugin/component',
@@ -46,7 +47,7 @@ require([
 	'i18n!javascript/nls/workermessages',
 	'orion/i18nUtil'
 ],
-/* @callback */ function(Tern, docPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
+/* @callback */ function(Tern, docPlugin, jsdocPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
 							orionMySQLPlugin, orionNodePlugin, orionPostgresPlugin, orionRedisPlugin, orionRequirePlugin, ternPluginsPlugin,
 							refsPlugin, openImplPlugin, htmlDepPlugin, ecma5, ecma6, browser, Messages, i18nUtil) {
 
@@ -161,6 +162,12 @@ require([
                     	name : Messages["findTypesName"],
                     	description: Messages["findTypesDescription"],
                     	version: '1.0', //$NON-NLS-1$
+                    	removable: false
+                    },
+                    jsdoc: {
+                    	name: "JSDoc types and completion support",
+                    	description: "Provides auto-complete and type information for JSDoc",
+                    	version: "1.0",
                     	removable: false
                     }
                 },

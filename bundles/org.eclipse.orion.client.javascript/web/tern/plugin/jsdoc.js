@@ -14,13 +14,18 @@
 /*globals tern tern */
 define([
 	"../lib/infer", 
-	"../lib/tern", 
+	"../lib/tern",
+	"orion/objects",
 	"javascript/finder",
 	"javascript/signatures",
 	"javascript/util",
+	"json!javascript/rules.json",
+	"eslint/conf/environments",
 	"orion/i18nUtil",
 	"i18n!javascript/nls/workermessages"
-], /* @callback */ function(infer, tern, Finder, Signatures, Util, i18nUtil, Messages) {
+], /* @callback */ function(infer, tern, objects, Finder, Signatures, Util, Rules, ESLintEnvs, i18nUtil, Messages) {
+	
+	var allEnvs = {};
 	
 	tern.registerPlugin("jsdoc", /* @callback */ function(server, options) {
 		return {
@@ -31,6 +36,8 @@ define([
 		      	completion: function(file, options, expr, type) {
 		      		var comment = Finder.findComment(options.end, file.ast);
 		      		if(comment) {
+		      			objects.mixin(allEnvs, ESLintEnvs);
+		      			fetchPluginEnvs(server);
 		      			if(comment.type === 'Line') {
 		      				return findLineCompletions(comment, options, file);
 		      			}
@@ -42,14 +49,40 @@ define([
     	};
 	});
 	
-	function findLineCompletions(comment, options, file) {
-		//TODO
-		console.log('Finding line completions...');
-		return null;
+	function fetchPluginEnvs(server) {
+		if(server.options && server.options.plugins) {
+			var keys = Object.keys(server.options.plugins);
+			for(var i = 0, len = keys.length; i < len; i++) {
+				var env = server.options.plugins[keys[i]].env;
+				if(env) {
+					allEnvs[env] = true;
+				}			
+			}
+		}
 	}
 	
+	/**
+	 * @description Finds completions for line comments: //-prefixed
+	 * @param {Object} comment The comment AST node
+	 * @param {Object} options The options object
+	 * @param {File} file The Tern file object
+	 * @returns {Array.<Object>} The array of completion objects
+	 * @since 11.0
+	 */
+	function findLineCompletions(comment, options, file) {
+		//TODO do we want to do anything here?
+		return {completions: []};
+	}
+	
+	/**
+	 * @description Finds the completions for block comments: /**- or /*-prefixed 
+	 * @param {Object} comment The comment AST node
+	 * @param {Object} options The options object
+	 * @param {File} file The Tern file object
+	 * @returns {Array.<Object>} The array of completion objects
+	 * @since 11.0
+	 */
 	function findBlockCompletions(comment, options, file) {
-		//TODO
 		var proposals = [];
 		var prefix = getPrefix(options.end, file.text), char = file.text.charAt(options.end-prefix.length-1);
 		if(char === '{') {
@@ -125,35 +158,51 @@ define([
 	function computeBlockCompletions(prefix, comment, options, file) {
 		var proposals = [];
 		var val;
-		if((val = /\s*\*\s*\@name\s*(\w*)/ig.exec(comment.value)) !== null) {
+		var line = getLine(options.end, file);
+		var preamble = line.line.slice(0, options.end-line.start-prefix.length-1);
+		if(/^\/\*$/.test(preamble.trim())) {
+			var keys = Object.keys(block);
+			for(var len = keys.length, i = 0; i < len; i++) {
+				var tag = block[keys[i]];
+				if(Util.looselyMatches(prefix, tag.name)) {
+					var _p = createProposal(tag.name, tag.desc, prefix, tag.template);
+					_p.url = tag.url;
+					_p.doc = tag.desc;
+					proposals.push(_p);
+				}
+			}
+		} else if((val = /\s*\*\s*\@name\s*(\w*)/ig.exec(line.line)) !== null) {
 			if(val[1] === prefix) {
-				var node = Finder.findNodeAfterComment(comment, file.ast)
+				var node = Finder.findNodeAfterComment(comment, file.ast);
 				var _name = getFunctionName(node);
 				if(_name) {
 					proposals.push(createProposal(_name, Messages['funcProposalDescription'], prefix));
 				}
 			}
-		} else if((val = /\s*\*\s*\@param\s*(?:\{\w*\})?\s*(\w*)/ig.exec(comment.value)) !== null) {
+		} else if((val = /\s*\*\s*\@param\s*(?:\{\w*\})?\s*(\w*)/ig.exec(line.line)) !== null) {
 			if(val[1] === prefix) {
-				var prms = getFunctionParams(node);
-				if(Array.isArray(prms)) {
-					for(var i = 0; i < prms.length; i++) {
-						_name = prms[i].name;
-						if(Util.looselyMatches(prefix, _name)) {
-							proposals.push(createProposal(_name, Messages['funcParamProposalDescription'], prefix));
+				node = Finder.findNodeAfterComment(comment, file.ast);
+				if(node) {
+					var prms = getFunctionParams(node);
+					if(Array.isArray(prms)) {
+						for(i = 0; i < prms.length; i++) {
+							_name = prms[i].name;
+							if(Util.looselyMatches(prefix, _name)) {
+								proposals.push(createProposal(_name, Messages['funcParamProposalDescription'], prefix));
+							}
 						}
 					}
 				}
 			}
-		} else if(/^\s*(?:\/\*)?\s*eslint(?:-enable|-disable)?\s+/gi.test(comment)) {
+		} else if(/^\s*(?:\/\*)?\s*eslint(?:-enable|-disable)?\s+/gi.test(line.line)) {
 			//eslint eslint-enable eslint-disable
-			var rules = Rules.getRules();
+			var rules = Rules.rules;
 			var rulekeys = Object.keys(rules).sort();
 			for(i = 0; i < rulekeys.length; i++) {
 				var rulekey = rulekeys[i];
 				if(Util.looselyMatches(prefix, rulekey)) {
 					var rule = rules[rulekey];
-					var _p = createProposal(rulekey, Messages['eslintRuleProposalDescripton'], prefix);
+					_p = createProposal(rulekey, Messages['eslintRuleProposalDescripton'], prefix);
 					var hover = rule.description ? rule.description : '';
 					if(rule.url) {
 						hover += i18nUtil.formatMessage.call(null, Messages['onlineDocumentationProposalEntry'], rule.url);
@@ -162,10 +211,9 @@ define([
 					proposals.push(_p);
 				}
 			}
-		} else if(/^\s*(?:\/\*)?\s*eslint-env\s+/gi.test(comment)) {
+		} else if(/^\s*(?:\/\*)?\s*eslint-env\s+/gi.test(line.line)) {
 			//eslint-env (comma-separated list)
-			var _all = Objects.mixin(ESLintEnv, pluginenvs);
-			var keys = Object.keys(_all).sort();
+			keys = Object.keys(allEnvs).sort();
 			for(i = 0; i < keys.length; i++) {
 				var key = keys[i];
 				if(key !== 'builtin' && Util.looselyMatches(prefix, key)) {
@@ -173,24 +221,50 @@ define([
 				}
 			}
 		} else {
-			keys = Object.keys(tags);
-			for(var len = keys.length, i = 0; i < len; i++) {
-				var tag = tags[keys[i]];
-				if(Util.looselyMatches(prefix, tag.name)) {
-					_p = createProposal(tag.name, "", prefix);
-					_p.url = tag.url;
-					_p.doc = tag.desc;
-					proposals.push(_p);
-					if(tag.template) {
-						_p = createProposal(tag.name, "", prefix, tag.template);
+				keys = Object.keys(tags);
+				for(len = keys.length, i = 0; i < len; i++) {
+					tag = tags[keys[i]];
+					if(Util.looselyMatches(prefix, tag.name)) {
+						_p = createProposal(tag.name, "", prefix);
 						_p.url = tag.url;
 						_p.doc = tag.desc;
 						proposals.push(_p);
+						if(tag.template) {
+							_p = createProposal(tag.name, "", prefix, tag.template);
+							_p.url = tag.url;
+							_p.doc = tag.desc;
+							proposals.push(_p);
+						}
 					}
 				}
-			}
 		}
 		return proposals;
+	}
+	
+	/**
+	 * @description Finds the line of text the completion is happening on - this mimics 
+	 * an option we used to get from the client
+	 * @param {Number} offset The offset in text the completion is happening at
+	 * @param {File} file The file obejct from Tern
+	 * @returns {String} The line of text
+	 * @since 11.0
+	 */
+	function getLine(offset, file) {
+		var line = '', idx = offset;
+		if(idx > 0 && idx <= file.text.length) {
+			var c = file.text.charAt(idx);
+			if(c === '\n') {
+				//started at the end, walk back to the next end
+				idx--;
+				c = file.text.charAt(idx);
+			}
+			while(c !== '\n' && idx > -1) {
+				line = c+line;
+				idx--;
+				c = file.text.charAt(idx);
+			}
+		}
+		return {line: line, start: idx};
 	}
 	
 	/**
@@ -280,17 +354,24 @@ define([
 		return [];
 	}
 	
+	/**
+	 * @description Helper function to create a new proposal object
+	 * @param {String} name The name of the proposal
+	 * @param {String} description The description
+	 * @param {String} prefix The optional prefix to pass along
+	 * @param {String} template The optional code template for the proposal
+	 * @returns {Object} A new proposal object
+	 */
 	function createProposal(name, description, prefix, template) {
 		var p = Object.create(null);
 		if(typeof(template) === 'string') {
-			p.type = 'template';
+			p.type = 'jsdoc_template';
 			p.template = template;
 			p.isTemplate = true;
 		} else {
 			p.type = 'doc';
 		}
 		p.name = name;
-		p.overwrite = false;
 		p.proposal = name.slice(prefix.length);
 		p.description = description;
 		if(typeof(prefix) === 'string') {
@@ -298,6 +379,32 @@ define([
 		}
 		return p;
 	}
+	
+	/**
+	 * These are templates / entries that apply to blocks starting with /* vs. /**
+	 */
+	var block = {
+		"eslint": {
+			name: "eslint",  //$NON-NLS-0$
+			desc: Messages['eslintRuleEnableDisable'],
+			template: "eslint ${rule-id}:${0/1} ${cursor}" //$NON-NLS-0$  
+	    },
+	    "eslint-env": {
+			name: "eslint-env",  //$NON-NLS-0$
+			desc: Messages['eslintEnvDirective'],
+			template: "eslint-env ${library}" //$NON-NLS-0$  
+	    },
+	    "eslint-enable": {
+			name: "eslint-enable",  //$NON-NLS-0$
+			desc: Messages['eslintRuleEnable'],
+			template: "eslint-enable ${rule-id} ${cursor}" //$NON-NLS-0$  
+	    },
+	    "eslint-disable": {
+			name: "eslint-disable",  //$NON-NLS-0$
+			desc: Messages['eslintRuleDisable'],
+			template: "eslint-disable ${rule-id} ${cursor}" //$NON-NLS-0$  
+	    }
+	};
 	
 	var tags = {
 		"abstract": {
