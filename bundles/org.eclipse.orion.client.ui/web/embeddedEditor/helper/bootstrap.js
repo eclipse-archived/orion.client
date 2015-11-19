@@ -62,12 +62,6 @@ define([
 		if (once) {
 			return once;
 		}
-		//TODO: We should create this hidden div somewhere else
-		//The hidden DIV that allows some commands for editorCommnads to be rendered. We only want to use keybinding of them though.
-		var orionHiddenDiv = document.createElement("div");
-		orionHiddenDiv.id = "_orion_hidden_actions";
-		document.body.appendChild(orionHiddenDiv);
-		orionHiddenDiv.style.display = "none";
 		//options._defaultPlugins is for internal use to load plugins in dev mode
 		var pluginsToLoad = (options && options._defaultPlugins) ? options._defaultPlugins : defaultPluginURLs;
 		

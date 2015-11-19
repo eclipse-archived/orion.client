@@ -12,56 +12,30 @@
 define([
 	'orion/editor/textModel',
 	'orion/editor/undoStack',
-	'orion/commandRegistry',
 	'orion/inputManager',
-	'orion/fileClient',
-	'orion/contentTypes',
 	'orion/editorView',
-	'orion/editorCommands',
+	'orion/Deferred',
+	'orion/webui/littlelib',
 	'orion/objects'
 ], function(
 	mTextModel,
 	mUndoStack,
-	mCommandRegistry,
 	mInputManager,
-	mFileClient,
-	mContentTypes,
 	mEditorView,
-	mEditorCommands,
+	Deferred,
+	lib,
 	objects
 ) {
 	var idCounter = 0;
 	function EditorSetupHelper(options) {
 		this._serviceRegistry = options.serviceRegistry;
 		this._pluginRegistry = options.pluginRegistry;
-		this._commandRegistry = new mCommandRegistry.CommandRegistry({});
-		this._fileClient = new mFileClient.FileClient(this._serviceRegistry);
-		this._contentTypeRegistry = new mContentTypes.ContentTypeRegistry(this._serviceRegistry);
-		this._editorCommands = new mEditorCommands.EditorCommandFactory({
-			serviceRegistry: this._serviceRegistry,
-			commandRegistry: this._commandRegistry,
-			fileClient: this._fileClient,
-			toolbarId: "_orion_hidden_actions",
-			navToolbarId: "_orion_hidden_actions"
-			/*
-			renderToolbars: this.renderToolbars.bind(this),
-			searcher: this.searcher,
-			readonly: this.readonly,
-			toolbarId: "toolsActions", //$NON-NLS-0$
-			saveToolbarId: "fileActions", //$NON-NLS-0$
-			editToolbarId: "editActions", //$NON-NLS-0$
-			navToolbarId: "pageNavigationActions", //$NON-NLS-0$
-			*/
-		});
-		this._progressService = {
-			progress: function(deferred, operationName, progressMonitor){
-				return deferred;
-			},
-			showWhile: function(deferred, message, avoidDisplayError){
-				return deferred;
-			}
-		};			
-		this._serviceRegistry.registerService("orion.page.progress", this._progressService);
+		this._commandRegistry = options.commandRegistry;
+		this._fileClient = options.fileClient;
+		this._contentTypeRegistry = options.contentTypeRegistry;
+		this._editorCommands = options.editorCommands;
+		this._progressService = options.progressService;
+		this._toolbarId = options.toolbarId;
 	}
 	
 	objects.mixin(EditorSetupHelper.prototype, /** @lends orion.editor.EditorSetupHelper.prototype */ {
@@ -78,14 +52,14 @@ define([
 			});
 			inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				evt.editor = this.editorView.editor;
-				this.pageActionsScope = "_orion_hidden_actions";
-				this._commandRegistry.destroy(this.pageActionsScope);
-				this._commandRegistry.renderCommands(this.pageActionsScope, this.pageActionsScope, evt.metadata, evt.editor, "tool"); //$NON-NLS-0$
+				this.setActiveEditorView(this.editorView);
 			}.bind(this));
 			inputManager.addEventListener("InputChanging", function(e) { //$NON-NLS-0$
 				e.editor = this.editorView.editor;
 			}.bind(this));
 		},
+		
+		
 		defaultOptions: function(parentId) {
 			var model = new mTextModel.TextModel();
 			var id = idCounter.toString();
@@ -111,21 +85,33 @@ define([
 				readonly: false
 			};
 		},
-		createEditor: function(options) {
-			return this._editorCommands.createCommands().then(function() {
-				this._editorCommands.registerCommands();
-				this.createInputManager();
-				this.editorView = new mEditorView.EditorView(this.defaultOptions(options.parent));
-				idCounter++;
-				this.editorView.create();
-				this._inputManager.editor = this.editorView.editor;
-				this._inputManager.setAutoSaveTimeout(300);
-				this._editorCommands.inputManager = this._inputManager;
-				if(options.contentType && typeof options.contents === "string") {
-					this.editorView.setContents(options.contents, options.contentType);
-				}
-				return this.editorView;
-			}.bind(this));
+		
+		setActiveEditorView: function(eView) {
+			this._editorCommands.updateCommands(eView);
+			this._commandRegistry.destroy(this._toolbarId);
+			this._commandRegistry.renderCommands(this._toolbarId, this._toolbarId, this._inputManager.getFileMetadata(), eView.editor, "tool"); //$NON-NLS-0$
+		},
+		
+		createEditor: function(options, startupOptions) {
+			this.createInputManager();
+			this.editorView = new mEditorView.EditorView(this.defaultOptions(options.parent));
+			idCounter++;
+			this.editorView.create();
+			this._inputManager.editor = this.editorView.editor;
+			this._inputManager.setAutoSaveTimeout(300);
+			
+			var domNode = lib.node(options.parent);
+			domNode.addEventListener("mousedown", function() { //$NON-NLS-0$
+				this.setActiveEditorView(this.editorView);
+			}.bind(this), true);
+			domNode.addEventListener("keyup", function() { //$NON-NLS-0$
+				this.setActiveEditorView(this.editorView);
+			}.bind(this), true);
+			
+			if(options.contentType && typeof options.contents === "string") {
+				this.editorView.setContents(options.contents, options.contentType);
+			}
+			return new Deferred().resolve(this.editorView);
 		}
 	});
 	
