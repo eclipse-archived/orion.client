@@ -69,7 +69,9 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 				thead.appendChild(tr);
 				var td = document.createElement("td"); //$NON-NLS-0$
 				td.classList.add("navColumn"); //$NON-NLS-0$
-				td.innerHTML = "<h2>External Id</h2>"; //$NON-NLS-0$
+				var h2 = document.createElement("h2"); //$NON-NLS-0$
+				h2.textContent = "External Id<"; //$NON-NLS-1$
+				td.appendChild(h2);
 				tr.appendChild(td);
 			}
 

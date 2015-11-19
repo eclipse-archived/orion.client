@@ -297,7 +297,7 @@ define([
 					closeButton.classList.remove("dismissButton"); //$NON-NLS-0$
 					closeButton.classList.remove("core-sprite-close"); //$NON-NLS-0$
 					closeButton.classList.remove("imageSprite"); //$NON-NLS-0$
-					closeButton.innerHTML = this._cancelMsg;
+					closeButton.textContent = this._cancelMsg;
 				} else {
 					closeButton.innerHTML = "";
 					closeButton.classList.remove("cancelButton"); //$NON-NLS-0$
