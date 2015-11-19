@@ -76,6 +76,10 @@ function Tooltip (view) {
 			}, true);
 			textUtil.addEventListener(document, "scroll", this._scrollHandler = function(event) { //$NON-NLS-0$
 				if (!self.isVisible()) return;
+
+				// Make sure the scroll isn't *inside* the tooltip...
+				if (textUtil.contains(tooltipDiv, event.target || event.srcElement)) { return; }
+
 				if (self._topPixel !== self._view.getTopPixel() || self._leftPixel !== self._view.getHorizontalPixel()) {
 					self.hide();
 				}
