@@ -11,14 +11,294 @@
  *******************************************************************************/
 /* eslint-disable missing-nls */
 /*eslint-env node, amd*/
-/*globals tern tern*/
+/*globals tern tern */
 define([
 	"../lib/infer", 
 	"../lib/tern", 
-	"./resolver", 
-	"javascript/finder"
-], function(infer, tern, resolver, Finder) {
+	"javascript/finder",
+	"javascript/signatures",
+	"javascript/util",
+	"orion/i18nUtil",
+	"i18n!javascript/nls/workermessages"
+], /* @callback */ function(infer, tern, Finder, Signatures, Util, i18nUtil, Messages) {
+	
+	tern.registerPlugin("jsdoc", /* @callback */ function(server, options) {
+		return {
+     		passes: {
+		      	/**
+		      	 * @callback
+		      	 */
+		      	completion: function(file, options, expr, type) {
+		      		var comment = Finder.findComment(options.end, file.ast);
+		      		if(comment) {
+		      			if(comment.type === 'Line') {
+		      				return findLineCompletions(comment, options, file);
+		      			}
+		      			return findBlockCompletions(comment, options, file);
+		      		}
+		      		return null;
+		      	}
+      		}
+    	};
+	});
+	
+	function findLineCompletions(comment, options, file) {
+		//TODO
+		console.log('Finding line completions...');
+		return null;
+	}
+	
+	function findBlockCompletions(comment, options, file) {
+		//TODO
+		var proposals = [];
+		var prefix = getPrefix(options.end, file.text), char = file.text.charAt(options.end-prefix.length-1);
+		if(char === '{') {
+			proposals = computeTypeCompletions(prefix);
+		} else if(char === '.') {
+			proposals = computeMemberCompletions(prefix, comment, options);
+		} else if(char === '*' || char === ' ') {
+			proposals = computeBlockCompletions(prefix, comment, options, file);
+		}
+		return {completions: proposals};
+	}
+	
+	/**
+     * @description Get the prefix to use for the proposal, handles @-based prefixes
+     * @param {Number} pos The activation context
+     * @param {String} buffer The text
+     * @returns {String} The prefix to use
+     */
+    function getPrefix(pos, buffer) {
+        var index = pos-1;
+        var word = '', char = buffer.charAt(index);
+        if('{*,'.indexOf(char) > -1) {
+            return word;
+        }
+        if(char === '@') {
+            return char;
+        } else if(char === '/' && buffer.charAt(index-1) === '/') {
+        	return word;
+    	}
+        while(index >= 0 && /\S/.test(char)) {
+            word = char+word;
+            if(char === '@' || char === '*' || char === '{') {
+                //we want the prefix to include the '@'
+	            return word;
+	        } else if(char === '/' && buffer.charAt(index-1) === '/') {
+	        	return word;
+	        }
+            index--;
+            char = buffer.charAt(index);
+            if('{*,'.indexOf(char) > -1) {
+                // we don't want the prefix to include the '*'
+                return word;
+            }
+        }
+        return word;
+    }
+	/**
+	 * @description Computes the reachable type names from the given scope
+	 * @param {String} prefix The prefix
+	 * @returns {Array.<Object>} The array of completion objects
+	 */
+	function computeTypeCompletions(prefix) {
+		//TODO
+		return [];
+	}
+	/**
+	 * @description Computes the reachable type member names for completions
+	 * @param {String} prefix The prefix
+	 * @returns {Array.<Object>} The array of completion objects
+	 */
+	function computeMemberCompletions(prefix) {
+		//TODO
+		return [];
+	}
+	/**
+	 * @description Computes the proposals for the block
+	 * @param {String} prefix The prefix
+	 * @param {Object} comment The AST node for the comment
+	 * @param {Object} options The activation options
+	 * @param {File} file The mapped file from Tern
+	 * @returns {Array.<Object>} The array of completion objects
+	 */
+	function computeBlockCompletions(prefix, comment, options, file) {
+		var proposals = [];
+		var val;
+		if((val = /\s*\*\s*\@name\s*(\w*)/ig.exec(comment.value)) !== null) {
+			if(val[1] === prefix) {
+				var node = Finder.findNodeAfterComment(comment, file.ast)
+				var _name = getFunctionName(node);
+				if(_name) {
+					proposals.push(createProposal(_name, Messages['funcProposalDescription'], prefix));
+				}
+			}
+		} else if((val = /\s*\*\s*\@param\s*(?:\{\w*\})?\s*(\w*)/ig.exec(comment.value)) !== null) {
+			if(val[1] === prefix) {
+				var prms = getFunctionParams(node);
+				if(Array.isArray(prms)) {
+					for(var i = 0; i < prms.length; i++) {
+						_name = prms[i].name;
+						if(Util.looselyMatches(prefix, _name)) {
+							proposals.push(createProposal(_name, Messages['funcParamProposalDescription'], prefix));
+						}
+					}
+				}
+			}
+		} else if(/^\s*(?:\/\*)?\s*eslint(?:-enable|-disable)?\s+/gi.test(comment)) {
+			//eslint eslint-enable eslint-disable
+			var rules = Rules.getRules();
+			var rulekeys = Object.keys(rules).sort();
+			for(i = 0; i < rulekeys.length; i++) {
+				var rulekey = rulekeys[i];
+				if(Util.looselyMatches(prefix, rulekey)) {
+					var rule = rules[rulekey];
+					var _p = createProposal(rulekey, Messages['eslintRuleProposalDescripton'], prefix);
+					var hover = rule.description ? rule.description : '';
+					if(rule.url) {
+						hover += i18nUtil.formatMessage.call(null, Messages['onlineDocumentationProposalEntry'], rule.url);
+					}
+					_p.hover = {content: hover, type: 'markdown'}; //$NON-NLS-1$
+					proposals.push(_p);
+				}
+			}
+		} else if(/^\s*(?:\/\*)?\s*eslint-env\s+/gi.test(comment)) {
+			//eslint-env (comma-separated list)
+			var _all = Objects.mixin(ESLintEnv, pluginenvs);
+			var keys = Object.keys(_all).sort();
+			for(i = 0; i < keys.length; i++) {
+				var key = keys[i];
+				if(key !== 'builtin' && Util.looselyMatches(prefix, key)) {
+					proposals.push(createProposal(key, Messages['eslintEnvProposalDescription'], prefix));
+				}
+			}
+		} else {
+			keys = Object.keys(tags);
+			for(var len = keys.length, i = 0; i < len; i++) {
+				var tag = tags[keys[i]];
+				if(Util.looselyMatches(prefix, tag.name)) {
+					_p = createProposal(tag.name, "", prefix);
+					_p.url = tag.url;
+					_p.doc = tag.desc;
+					proposals.push(_p);
+					if(tag.template) {
+						_p = createProposal(tag.name, "", prefix, tag.template);
+						_p.url = tag.url;
+						_p.doc = tag.desc;
+						proposals.push(_p);
+					}
+				}
+			}
+		}
+		return proposals;
+	}
+	
+	/**
+	 * @description Returns the function name from the given node if it relates to a function in some way
+	 * @param {Object} node The AST node
+	 * @returns {String} The name of he related function or null
+	 * @since 10.0
+	 */
+	function getFunctionName(node) {
+		switch(node.type) {
+			case 'FunctionDeclaration': {
+				return node.id.name;
+			}
+			case 'Property': {
+				if(node.value.type === 'FunctionExpression') {
+					return node.value.id ? node.value.id.name : node.key.name;
+				}
+				break;
+			}
+			case 'ExpressionStatement': {
+				var _n = node.expression;
+				if(_n && _n.type === 'AssignmentExpression' && _n.right.type === 'FunctionExpression') {
+					if(_n.right.id) {
+						return _n.right.id.name;
+					}
+					if(_n.left.type === 'Identifier') {
+						return _n.left.name;
+					}
+					if(_n.left.type === 'MemberExpression') {
+						return Signatures.expandMemberExpression(_n.left, '');
+					}
+				}
+				break;
+			}
+			case 'VariableDeclaration': {
+				if(node.declarations.length > 0) {
+					//always pick the first one to attach the comment to
+					var decl = node.declarations[0];
+					if(decl.init && decl.init.type === 'FunctionExpression') {
+						if(decl.init.id) {
+							return decl.init.id.name;
+						}
+						return decl.id.name;
+					}
+				}
+				break;
+			}
+		}
+		return null;
+	}
 
+	/**
+	 * @description Returns the parameters from the related function
+	 * @param {Object} node The AST node
+	 * @returns {Array.<Object>} The parameters from the related function or an empty array
+	 * @since 10.0
+	 */
+	function getFunctionParams(node) {
+		switch(node.type) {
+			case 'FunctionDeclaration': {
+				return node.params;
+			}
+			case 'Property': {
+				if(node.value.type === 'FunctionExpression') {
+					return node.value.params;
+				}
+				break;
+			}
+			case 'ExpressionStatement': {
+				var _n = node.expression;
+				if(_n && _n.type === 'AssignmentExpression' && _n.right.type === 'FunctionExpression') {
+					return _n.right.params;
+				}
+				break;
+			}
+			case 'VariableDeclaration': {
+				if(node.declarations.length > 0) {
+					//always pick the first one to attach the comment to
+					var decl = node.declarations[0];
+					if(decl.init && decl.init.type === 'FunctionExpression') {
+						return decl.init.params;
+					}
+				}
+				break;
+			}
+		}
+		return [];
+	}
+	
+	function createProposal(name, description, prefix, template) {
+		var p = Object.create(null);
+		if(typeof(template) === 'string') {
+			p.type = 'template';
+			p.template = template;
+			p.isTemplate = true;
+		} else {
+			p.type = 'doc';
+		}
+		p.name = name;
+		p.overwrite = false;
+		p.proposal = name.slice(prefix.length);
+		p.description = description;
+		if(typeof(prefix) === 'string') {
+			p.prefix = prefix;
+		}
+		return p;
+	}
+	
 	var tags = {
 		"abstract": {
 			"name": "@abstract",
@@ -43,7 +323,8 @@ define([
 		"author": {
 			"name": "@author",
 			"url": "http://usejsdoc.org/tags-author.html",
-			"desc": "Identify the author of an item."
+			"desc": "Identify the author of an item.",
+			"template": "@author ${cursor}"
 		},
 		"borrows": {
 			"name": "@borrows",
@@ -53,12 +334,14 @@ define([
 		"callback": {
 			"name": "@callback",
 			"url": "http://usejsdoc.org/tags-callback.html",
-			"desc": "Document a callback function."
+			"desc": "Document a callback function.",
+			"template": "@callback ${cursor}"
 		},
 		"class": {
 			"name": "@class",
 			"url": "http://usejsdoc.org/tags-class.html",
-			"desc": "This function is intended to be called with the \"new\" keyword."
+			"desc": "This function is intended to be called with the \"new\" keyword.",
+			"template": "@class ${cursor}"
 		},
 		"classdesc": {
 			"name": "@classdesc",
@@ -88,12 +371,14 @@ define([
 		"deprecated": {
 			"name": "@deprecated",
 			"url": "http://usejsdoc.org/tags-deprecated.html",
-			"desc": "Document that this is no longer the preferred way."
+			"desc": "Document that this is no longer the preferred way.",
+			"template": "@deprecated ${cursor}"
 		},
 		"description": {
 			"name": "@description",
 			"url": "http://usejsdoc.org/tags-description.html",
-			"desc": "Describe a symbol."
+			"desc": "Describe a symbol.",
+			"template": "@description ${cursor}"
 		},
 		"enum": {
 			"name": "@enum",
@@ -133,7 +418,8 @@ define([
 		"function": {
 			"name": "@function",
 			"url": "http://usejsdoc.org/tags-function.html",
-			"desc": "Describe a function or method."
+			"desc": "Describe a function or method.",
+			"template": "@function ${cursor}"
 		},
 		"global": {
 			"name": "@global",
@@ -178,12 +464,14 @@ define([
 		"lends": {
 			"name": "@lends",
 			"url": "http://usejsdoc.org/tags-lends.html",
-			"desc": "Document properties on an object literal as if they belonged to a symbol with a given name."
+			"desc": "Document properties on an object literal as if they belonged to a symbol with a given name.",
+			"template": "@lends ${cursor}"
 		},
 		"license": {
 			"name": "@license",
 			"url": "http://usejsdoc.org/tags-license.html",
-			"desc": "Identify the license that applies to this code."
+			"desc": "Identify the license that applies to this code.",
+			"template": "@license ${cursor}"
 		},
 		"listens": {
 			"name": "@listens",
@@ -218,7 +506,8 @@ define([
 		"name": {
 			"name": "@name",
 			"url": "http://usejsdoc.org/tags-name.html",
-			"desc": "Document the name of an object."
+			"desc": "Document the name of an object.",
+			"template": "@name ${cursor}"
 		},
 		"namespace": {
 			"name": "@namespace",
@@ -233,12 +522,14 @@ define([
 		"param": {
 			"name": "@param",
 			"url": "http://usejsdoc.org/tags-param.html",
-			"desc": "Document the parameter to a function."
+			"desc": "Document the parameter to a function.",
+			"template": "@param {${type}} ${cursor}"
 		},
 		"private": {
 			"name": "@private",
 			"url": "http://usejsdoc.org/tags-private.html",
-			"desc": "This symbol is meant to be private."
+			"desc": "This symbol is meant to be private.",
+			"template": "@private ${cursor}"
 		},
 		"property": {
 			"name": "@property",
@@ -253,7 +544,8 @@ define([
 		"public": {
 			"name": "@public",
 			"url": "http://usejsdoc.org/tags-public.html",
-			"desc": "This symbol is meant to be public."
+			"desc": "This symbol is meant to be public.",
+			"template": "@public ${cursor}"
 		},
 		"readonly": {
 			"name": "@readonly",
@@ -268,17 +560,20 @@ define([
 		"returns": {
 			"name": "@returns",
 			"url": "http://usejsdoc.org/tags-returns.html",
-			"desc": "Document the return value of a function."
+			"desc": "Document the return value of a function.",
+			"template": "@returns {${type}} ${cursor}"
 		},
 		"see": {
 			"name": "@see",
 			"url": "http://usejsdoc.org/tags-see.html",
-			"desc": "Refer to some other documentation for more information."
+			"desc": "Refer to some other documentation for more information.",
+			"template": "@see ${cursor}"
 		},
 		"since": {
 			"name": "@since",
 			"url": "http://usejsdoc.org/tags-since.html",
-			"desc": "When was this feature added?"
+			"desc": "When was this feature added?",
+			"template": "@since ${cursor}"
 		},
 		"static": {
 			"name": "@static",
@@ -298,7 +593,8 @@ define([
 		"throws": {
 			"name": "@throws",
 			"url": "http://usejsdoc.org/tags-throws.html",
-			"desc": "Describe what errors could be thrown."
+			"desc": "Describe what errors could be thrown.",
+			"template": "@throws {${type}} ${cursor}"
 		},
 		"todo": {
 			"name": "@todo",
@@ -341,26 +637,5 @@ define([
 			"desc": "Link to a tutorial."
 		}
 	};
-
-	
-	var templates = {
-	
-	}
-	
-	tern.registerPlugin("jsdoc", function(server, options) {
-		return {
-     		passes: {
-		     /* 	typeAt: function(file, query) {
-		      		console.log(JSON.stringify(query));
-		      		return null;
-		      	},
-		      	completion: function(file, pos, expr, type) {
-		      		console.log(pos);
-		      		return null;
-		      	} */
-      		}
-    	};
-	});
-	
 	
 });
