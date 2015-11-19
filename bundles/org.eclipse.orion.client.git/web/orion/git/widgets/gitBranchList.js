@@ -210,6 +210,9 @@ define([
 	GitBranchListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitBranchListExplorer.prototype, /** @lends orion.git.GitBranchListExplorer.prototype */ {
 		destroy: function(){
+			if (this.section.filterBox) {
+				this.section.filterBox.destroy();
+			}
 			mGitCommands.getModelEventDispatcher().removeEventListener("modelChanged", this._modelListener); //$NON-NLS-0$
 			mExplorer.Explorer.prototype.destroy.call(this);
 		},
@@ -233,7 +236,10 @@ define([
 			return deferred;
 		},
 		createFilter: function() {
-			uiUtil.createFilter(this.section, messages["Filter items"],  function(value) {
+			if (this.section.filterBox) {
+				this.section.filterBox.destroy();
+			}
+			this.section.filterBox = uiUtil.createFilter(this.section, messages["Filter references"],  function(value) {
 				this.model.filterQuery = "filter=" + encodeURIComponent(value); //$NON-NLS-0$
 				this.changedItem().then(function () {
 					if (this.model.filterQuery)

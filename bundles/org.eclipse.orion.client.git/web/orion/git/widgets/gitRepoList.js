@@ -234,6 +234,9 @@ define([
 				mGitCommands.getModelEventDispatcher().removeEventListener("modelChanged", this._modelListener); //$NON-NLS-0$
 				this._modelListener = null;
 			}
+			if (this.section.filterBox) {
+				this.section.filterBox.destroy();
+			}
 			mExplorer.Explorer.prototype.destroy.call(this);
 		},
 		changedItem: function(item) {
@@ -257,7 +260,10 @@ define([
 			return deferred;
 		},
 		createFilter: function() {
-			uiUtil.createFilter(this.section, messages["Filter items"],  function(value) {
+			if (this.section.filterBox) {
+				this.section.filterBox.destroy();
+			}
+			this.section.filterBox = uiUtil.createFilter(this.section, messages["Filter repositories"],  function(value) {
 				this.model.filterQuery = value;
 				this.changedItem();
 			}.bind(this));
