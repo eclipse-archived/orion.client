@@ -577,7 +577,7 @@ define([
 		},
 		isRebasing: function() {
 			var repository = this.model.repository;
-			return repository && repository.status && repository.status.RepositoryState === "REBASING_INTERACTIVE"; //$NON-NLS-0$
+			return repository && repository.status && repository.status.RepositoryState.indexOf("REBASING") === 0; //$NON-NLS-0$
 		},
 		getItemCount: function() {
 			var result = 0;

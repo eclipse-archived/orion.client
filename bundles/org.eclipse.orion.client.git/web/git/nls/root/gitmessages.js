@@ -600,5 +600,8 @@ define({//Default message bundle
 	"Detach Head:": "Detach Head:", //$NON-NLS-0$ //$NON-NLS-1$
 	"Filter repositories": "Filter repositories", //$NON-NLS-0$ //$NON-NLS-1$
 	"Filter references": "Filter references", //$NON-NLS-0$ //$NON-NLS-1$
-	"Filter configuration entries": "Filter configuration entries" //$NON-NLS-0$ //$NON-NLS-1$
+	"Filter configuration entries": "Filter configuration entries", //$NON-NLS-0$ //$NON-NLS-1$
+	"ContinueTooltip": "Use after merging the conflicts and selecting all files", //$NON-NLS-0$  //$NON-NLS-1$
+	"SkipTooltip": "Bypass the current patch", //$NON-NLS-0$  //$NON-NLS-1$
+	"AbortTooltip": "Abort to end the rebase at any time" //$NON-NLS-0$  //$NON-NLS-1$
 });
