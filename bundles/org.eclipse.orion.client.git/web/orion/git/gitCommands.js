@@ -2172,7 +2172,7 @@ var exports = {};
 		
 		var rebaseContinueCommand = new mCommands.Command({
 			name: messages["Continue"],
-			tooltip: messages["Continue Rebase"],
+			tooltip: messages["ContinueTooltip"],
 			id: "eclipse.orion.git.rebaseContinueCommand", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
@@ -2188,7 +2188,7 @@ var exports = {};
 		
 		var rebaseSkipPatchCommand = new mCommands.Command({
 			name: messages["Skip Patch"],
-			tooltip: messages['Skip Patch'],
+			tooltip: messages['SkipTooltip'],
 			id: "eclipse.orion.git.rebaseSkipPatchCommand", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
@@ -2204,7 +2204,7 @@ var exports = {};
 		
 		var rebaseAbortCommand = new mCommands.Command({
 			name: messages["Abort"],
-			tooltip: messages["Abort Rebase"],
+			tooltip: messages["AbortTooltip"],
 			id: "eclipse.orion.git.rebaseAbortCommand", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;

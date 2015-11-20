@@ -165,7 +165,7 @@ define([
 		},
 		isRebasing: function() {
 			var repository = this.root.repository;
-			return repository && repository.status && repository.status.RepositoryState === "REBASING_INTERACTIVE"; //$NON-NLS-0$
+			return repository && repository.status && repository.status.RepositoryState === "REBASING_MERGE"; //$NON-NLS-0$
 		},
 		isNewBranch: function(branch) {
 			return util.isNewBranch(branch);
@@ -197,8 +197,9 @@ define([
 					that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation + "?commits=0&page=1&pageSize=1"), currentBranchMsg).then(function(resp) { //$NON-NLS-0$
 						var currentBranch = resp.Children[0];
 						that.currentBranch = currentBranch;
-						if (!that.currentBranch && that.isRebasing()) {
+						if (that.isRebasing()) {
 							if (section) section.setTitle(messages["RebaseProgress"]);
+							getSimpleLog();
 							onComplete([]);
 							if (progress) progress.done();
 							return;
@@ -891,7 +892,7 @@ define([
 				},
 				visibleWhen: function() {
 					filterCommand.imageClass = that.model.isFiltered() ? "core-sprite-show-filtered" : "core-sprite-filter"; //$NON-NLS-1$ //$NON-NLS-0$
-					return !that.model.isRebasing();
+					return true;
 				}
 			});
 			commandService.addCommand(filterCommand);
@@ -977,6 +978,7 @@ define([
 								
 
 			if (model.isRebasing()) {
+				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.toggleFilter", 100, null, false, new KeyBinding.KeyBinding('h', true, true)); //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseContinueCommand", 200); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseSkipPatchCommand", 300); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseAbortCommand", 400); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
