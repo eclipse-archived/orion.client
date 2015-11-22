@@ -127,6 +127,7 @@ define([
 					start: 0,
 					replace: replaceValue,
 					caseSensitive: this._caseSensitiveCB.checked,
+					wholeWord: this._wholeWordCB.checked,
 			        regEx: this._regExCB.checked,
 					fileNamePatterns: fileNamePatternsArray,
 			        resource: resource
@@ -347,6 +348,7 @@ define([
 			this._initFileNamePatternsBox();
 			
 			this._caseSensitiveCB = lib.$("#advSearchCaseSensitive", this._searchWrapper); //$NON-NLS-0$
+			this._wholeWordCB = lib.$("#advSearchWholeWord", this._searchWrapper); //$NON-NLS-0$
 			this._regExCB = lib.$("#advSearchRegEx", this._searchWrapper); //$NON-NLS-0$
 			this._toggleReplaceLink = lib.$("#toggleReplaceLink", this._searchWrapper); //$NON-NLS-0$
 			
@@ -365,6 +367,7 @@ define([
 		_initHTMLLabels: function(){
 			this._replaceCompareTitleDiv.innerHTML = messages["Preview: "]; //$NON-NLS-0$
 			lib.$("#advSearchCaseSensitiveLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Case sensitive"])); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.$("#advSearchWholeWordLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Whole Word"])); //$NON-NLS-1$ //$NON-NLS-0$
 			lib.$("#advSearchRegExLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Regular expression"])); //$NON-NLS-1$ //$NON-NLS-0$
 			lib.$("#searchScopeLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope"])); //$NON-NLS-1$ //$NON-NLS-0$
 			lib.$("#fileNamePatternsLabel", this._searchWrapper).appendChild(document.createTextNode(messages["File name patterns (comma-separated)"])); //$NON-NLS-1$ //$NON-NLS-0$

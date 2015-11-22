@@ -157,6 +157,7 @@ define([
 				rows: advancedOptions && advancedOptions.rows ? advancedOptions.rows : 40,
 				start: 0,
 				caseSensitive: advancedOptions ? advancedOptions.caseSensitive : undefined,
+				wholeWord: advancedOptions ? advancedOptions.wholeWord : undefined,
 				regEx: advancedOptions ? advancedOptions.regEx : undefined,
 				fileType: advancedOptions ? advancedOptions.fileType : undefined,
 				fileNamePatterns: (advancedOptions && advancedOptions.fileNamePatterns) ? advancedOptions.fileNamePatterns : undefined,
