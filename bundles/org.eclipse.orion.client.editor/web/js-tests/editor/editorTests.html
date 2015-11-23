@@ -3,19 +3,20 @@
 <head>
 	<title>Editor Tests</title>
 	<link rel="stylesheet" href="../../mocha/mocha.css" />
+	<link rel="stylesheet" href="../../orion/editor/tooltip.css"/>
 	<link rel="stylesheet" href="editorTests.css" />
 	<script src="../../requirejs/require.js"></script>
 	<script>
 		/*eslint-env browser,amd*/
 		require({
-		baseUrl: "../../",
+		baseUrl: "../../", //$NON-NLS-1$
 		paths: {
-			text: "requirejs/text",
-			i18n: "requirejs/i18n",
+			text: "requirejs/text", //$NON-NLS-1$
+			i18n: "requirejs/i18n" //$NON-NLS-1$
 		}
 	});
 	require(["mocha/sauce"], function(mocha) {
-		mocha.setup("bdd");
+		mocha.setup("bdd"); //$NON-NLS-1$
 
 		// The commented-out test cases below need to be converted to use Mocha.
 		require([
@@ -27,7 +28,8 @@
 			"js-tests/editor/perf/performanceTests",
 			"js-tests/editor/shim/bindShimTests",
 			"js-tests/editor/textMateStyler/textMateStylerTests",
-			"js-tests/editor/textStyler/textStylerTests"
+			"js-tests/editor/textStyler/textStylerTests",
+			"js-tests/editor/tooltips/tooltipTests",
 		], function(){
 			mocha.run();
 		});
