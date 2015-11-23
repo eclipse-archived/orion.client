@@ -1293,6 +1293,83 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(revertCommand);
+		
+		var checkoutPullRequestCommand = new mCommands.Command({
+			name: messages['CheckoutPullRequest'],
+			tooltip: messages["CheckoutPullRequestMsg"],
+			imageClass: "git-sprite-checkout", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			id: "eclipse.checkoutPullRequest", //$NON-NLS-0$
+			callback: function(data) {
+				var item = data.items;
+				var base = item.Base;
+				var head = item.Head;
+				var remote = item.RemoteLocation;
+				var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
+				var messageService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+				var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				
+				var msg = item.Name ? i18nUtil.formatMessage(messages["Checking out pull request ${0}..."], item.Name) : messages[    "Checking out pull request..."];
+				messageService.setProgressMessage(msg);
+							
+				var branchLocation;
+				if (item.Repository) {
+					branchLocation = item.Repository.BranchLocation;
+				} else {
+					branchLocation = item.parent.parent.repository.BranchLocation;
+				}
+					
+				var addMsg;
+				var localBranchCheckOut = function(remote){
+					addMsg = i18nUtil.formatMessage(messages["Adding branch ${0}..."], remote+"/"+item.Head.ref);//$NON-NLS-0$
+					progressService.progress(service.addBranch(branchLocation, null, remote+"/"+item.Head.ref), addMsg).then(//$NON-NLS-0$
+						function(branch){
+							progressService.progress(service.checkoutBranch(branch.CloneLocation, branch.Name), msg).then(
+								function(){
+									messageService.setProgressResult(messages["Pull Request checked out."]);
+									dispatchModelEventOn({type: "modelChanged", action: "pullRequestCheckout", pullRequest : item}); //$NON-NLS-1$ //$NON-NLS-0$
+								},
+								function(error){
+									displayErrorOnStatus(error);
+								}
+							);
+						},
+						function(error){
+							displayErrorOnStatus(error);
+						 }
+					);	
+				};
+				if(head.user.login !== base.user.login){
+					commandService.confirm(data.domNode, i18nUtil.formatMessage(messages["CreatePullRequestRemoteConfirm"], head.user.login, head.repo.clone_url), messages.OK, messages.Cancel, false, function(doit) {
+						if (!doit) return;
+						var createRemoteFunction = function(remoteLocation, name, url) {
+							var msg = i18nUtil.formatMessage(messages["Adding remote ${0}..."], remoteLocation);
+							progressService.progress(serviceRegistry.getService("orion.git.provider").addRemote(remoteLocation, name, url), msg).then(function(remoteResult) { //$NON-NLS-0$
+								dispatchModelEventOn({type: "modelChanged", action: "addRemote", remote: name}); //$NON-NLS-1$ //$NON-NLS-0$
+								data.items.Location = remoteResult.Location;
+								data.items.Name = name;
+								fetchCallback(data).then(function(){
+									localBranchCheckOut(name);
+								});
+								
+							}, displayErrorOnStatus);
+						};
+						createRemoteFunction(remote, head.user.login, head.repo.clone_url);
+					});
+				}else{
+					localBranchCheckOut("origin");
+				//}
+				}
+
+					
+			},
+			visibleWhen: function(item) {
+				return item.Type === "PullRequest"; //$NON-NLS-1$ //$NON-NLS-0$
+			}
+		});
+		commandService.addCommand(checkoutPullRequestCommand);
+
+		
 	};
 	
 
@@ -2508,7 +2585,7 @@ var exports = {};
 			}
 		};
 		
-		
+				
 		
 		 var addSubmoduleCommand = new mCommands.Command({
 			name : messages["Add Submodule"],
