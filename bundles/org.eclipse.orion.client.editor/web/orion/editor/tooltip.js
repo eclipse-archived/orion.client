@@ -774,7 +774,7 @@ function Tooltip (view) {
 			}
 			
 			if (typeof contents === "string") { //$NON-NLS-0$
-				contentsDiv.innerHTML = contents;
+				contentsDiv.textContent = contents;
 				return true;
 			} else if (this._isNode(contents)) {
 				contentsDiv.appendChild(contents);
