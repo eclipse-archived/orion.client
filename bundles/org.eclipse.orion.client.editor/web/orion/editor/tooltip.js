@@ -141,6 +141,7 @@ function Tooltip (view) {
 		 * @name show
 		 * @description Show the tooltip using the given target information
 		 * @function
+		 * @param tooltipInfo a function that will return the tooltip contents (see _processInfo())
 		 * @param target The target through which the info is obtained
 		 * @param locked If true locks the tooltip (never hides unless 'hide' is called)
 		 * @param giveFocus If true forces the focus onto the tooltip (used for F2 processing)
@@ -157,7 +158,7 @@ function Tooltip (view) {
 		 * @name update
 		 * @description Updates the information in an already visible tooltip
 		 * @function
-		 * @param tooltipInfo a function that will return the parameters need to update the information
+		 * @param tooltipInfo a function that will return the parameters need to update the information (see _processInfo())
 		 * @param noContent If true makes no attempt to gather new info and just updates the tooltip's position
 		 */
 		update: function(tooltipInfo, noContent) {
@@ -173,10 +174,11 @@ function Tooltip (view) {
 		
 		/**
 		 * @name onHover
-		 * @description Show the tooltip using the given target information. Only called for hover events.
+		 * @description Checks the x,y location and updates the tooltip contents or hides the tooltip as appropriate
 		 * @function
-		 * @param target
-		 * @param giveFocus
+		 * @param tooltipInfo a function that will return the parameters need to update the information (see _processInfo())
+		 * @param x coordinates of the mouse event
+		 * @param y coordinates of the mouse event
 		 */
 		onHover: function(tooltipInfo, x, y) {
 			if (!tooltipInfo) {
@@ -498,8 +500,10 @@ function Tooltip (view) {
 				defHeight = Math.min(viewportHeight/2, 400);
 				tipRect.width = Math.min(tipRect.width, defWidth);
 				tipRect.height = Math.min(tipRect.height, defHeight);
+			} else if (tipRect.width > viewportWidth){
+				tipRect.width = viewportWidth;
 			}
-
+			
 			// Now that we have our width recalculate the desired height...
 			tooltipDiv.style.width = (tipRect.width - padding) + "px"; //$NON-NLS-1$
 			tipRect.height = Math.min(tooltipDiv.getBoundingClientRect().height, defHeight);
