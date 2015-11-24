@@ -39,8 +39,16 @@ Deferred) {
 					 '</server>';
 	var embeddedEditor = new mEmbeddedEditor({
 		_defaultPlugins: defaultPluginURLs,
-		toolbarId: "__toolbar__",
-		/*, userPlugins:["editorCommandsPlugin.html"]*/});
+		//defaultPlugins: ["webToolsPlugin_embed_dev.html", "../adsada/asdsad/embeddedToolingPlugin.html"],
+		toolbarId: "__toolbar__"/*,
+		userPlugins:["editorCommandsPlugin.html"]*/});
+	var cto = {
+		id: "foo/bar",
+		extension: ["bar"],
+		name: 'Xtext Language',
+		'extends': 'text/plain'
+	};
+	embeddedEditor.serviceRegistry.registerService('orion.core.contenttype', {}, {contentTypes: [cto]});
 	var proposals = [
 		"proposal ",
 		"proposal ",
@@ -83,7 +91,7 @@ Deferred) {
 				return context.offset > 12 ? {
 					title: "This is the title",
 					content: pContent,
-					type: "markdown"} : null;
+					type: "html"} : null;
 			} else if(typeof context.proposal === "string") {
 				var index = parseInt(context.proposal.substring("proposal ".length - 1), 10);
 				return index > 3 ? {
@@ -108,35 +116,41 @@ Deferred) {
 	embeddedEditor.create({parent: "embeddedEditor"}).then(function(editorViewer) {
 		document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 		editorViewer.setContents(contents, "application/javascript");
-		//editorViewer.inputManager.setAutoSaveTimeout(-1);
+		editorViewer.inputManager.setAutoSaveTimeout(-1);
 		editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
 	});
 	
 	embeddedEditor.create({parent: "embeddedEditor1",
-						   contentType: "application/xml",
+						   contentType: "foo/bar",
 						   contents: contents2}).then(function(editorViewer){
+		editorViewer.inputManager.setAutoSaveTimeout(-1);
+		editorViewer.editor.addEventListener("InputChanged", function(evt) {
+			if(evt.contentsSaved) {
+				console.log(evt.contents);
+			}
+		});
 		if (editorViewer.settings) {
 			editorViewer.settings.contentAssistAutoTrigger = true;
 			editorViewer.settings.showOccurrences = true;
 		}
-		editorViewer.serviceRegistry.registerService('orion.edit.command', {execute: execute}, {
+		editorViewer.serviceRegistry.registerService('orion.edit.command', {run: execute}, {
 			name: 'Xtext formatting service',
 			id: 'xtext.formatter',
 			key: ['l', true, true],
-			contentType: ["application/xml"]
+			contentType: ["foo/bar"]
 		});		
 		editorViewer.serviceRegistry.registerService("orion.edit.contentassist",
 				contentAssistProvider,
 	    		{	name: "xmlContentAssist",
-	    			contentType: ["application/xml"],
+	    			contentType: ["foo/bar"],
 	    			charTriggers: "[.(]"
 	    		});
 		editorViewer.serviceRegistry.registerService("orion.edit.hover",
 			hoverProvider,
     		{	name: "xmlContentHover",
-    			contentType: ["application/xml"]
+    			contentType: ["foo/bar"]
     		});
 		editorViewer.serviceRegistry.registerService('orion.edit.occurrences',
-			{computeOccurrences: computeOccurrences}, {contentType: ["application/xml"]});	
+			{computeOccurrences: computeOccurrences}, {contentType: ["foo/bar"]});	
 	});
 });

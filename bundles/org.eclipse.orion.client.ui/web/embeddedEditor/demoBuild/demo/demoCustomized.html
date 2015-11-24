@@ -113,7 +113,7 @@
 			}
 			
 			window.onload=function(){
-				var codeEdit = new orion.codeEdit();
+				var codeEdit = new orion.codeEdit(/*{ userPlugins:["editorCommandsPlugin.html"] }*/);
 				
 				codeEdit.create({parent: "embeddedEditor", userPlugins:["editorCommandsPlugin.html"], contentType: "application/javascript", contents: contents}).then(function(editorViewer) {
 					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
@@ -123,7 +123,7 @@
 					}
 				});
 				
-				codeEdit.create({parent: "embeddedEditor1"/*, userPlugins:["editorCommandsPlugin.html"]*/}).then(function(editorViewer){
+				codeEdit.create({parent: "embeddedEditor1"}).then(function(editorViewer){
 					if (editorViewer.settings) {
 						editorViewer.settings.contentAssistAutoTrigger = true;
 						editorViewer.settings.showOccurrences = true;
@@ -131,23 +131,30 @@
 					editorViewer.serviceRegistry.registerService("orion.edit.contentassist",
 							contentAssistProvider,
 				    		{	name: "xmlContentAssist",
-				    			contentType: ["application/xml"],
+				    			contentType: ["foo/bar"],
 				    			charTriggers: "[.(]"
 				    		});
 					editorViewer.serviceRegistry.registerService("orion.edit.hover",
 						hoverProvider,
 			    		{	name: "xmlContentHover",
-			    			contentType: ["application/xml"]
+			    			contentType: ["foo/bar"]
 			    		});
+					var cto = {
+						id: "foo/bar",
+						extension: ["bar"],
+						name: 'Xtext Language',
+						'extends': 'text/plain'
+					};
+					editorViewer.serviceRegistry.registerService('orion.core.contenttype', {}, {contentTypes: [cto]});
 					editorViewer.serviceRegistry.registerService('orion.edit.command', {execute: execute}, {
 						name: 'Xtext formatting service',
 						id: 'xtext.formatter',
 						key: ['l', true, true],
-						contentType: ["application/xml"]
+						contentType: ["foo/bar"]
 					});		
 					editorViewer.serviceRegistry.registerService('orion.edit.occurrences',
-						{computeOccurrences: computeOccurrences}, {contentType: ["application/xml"]});	
-			    	editorViewer.setContents(contents2, "application/xml");
+						{computeOccurrences: computeOccurrences}, {contentType: ["foo/bar"]});	
+			    	editorViewer.setContents(contents2, "foo/bar");
 				});
 			};
 		</script>
