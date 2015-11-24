@@ -28,6 +28,7 @@ define([
 		filterDiv.className = "gitFilterBox"; //$NON-NLS-0$
 			
 		var filter = document.createElement("input"); //$NON-NLS-0$
+		filter.type = "search"; //$NON-NLS-1$
 		filter.placeholder = msg;
 		filter.setAttribute("aria-label", msg); //$NON-NLS-1$ 
 		filterDiv.appendChild(filter);
