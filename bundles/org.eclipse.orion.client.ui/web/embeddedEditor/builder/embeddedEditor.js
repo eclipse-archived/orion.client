@@ -16,6 +16,7 @@ define([
 	'orion/editorCommands',
 	'embeddedEditor/helper/bootstrap',
 	'embeddedEditor/helper/editorSetup',
+	'orion/serviceregistry',
 	'orion/Deferred',
 	'orion/objects'
 ], function(
@@ -25,10 +26,12 @@ define([
 	mEditorCommands,
 	mBootstrap,
 	mEditorSetup,
+	mServiceRegistry, 
 	Deferred,
 	objects
 ) {
 	function CodeEdit(options) {
+		this.serviceRegistry = new mServiceRegistry.ServiceRegistry();
 		this._startupOptions = options;
 		this._toolbarId = options && options.toolbarId ? options.toolbarId : "__code__edit__hidden__toolbar";
 	}
@@ -89,7 +92,7 @@ define([
 		 * @param {orion.editor.EditOptions} options the editor options.
 		 */
 		create: function(options) {
-			return mBootstrap.startup(this._startupOptions).then(function(core) {
+			return mBootstrap.startup(this.serviceRegistry, this._startupOptions).then(function(core) {
 				var serviceRegistry = core.serviceRegistry;
 				var pluginRegistry = core.pluginRegistry;
 				return this._init(core).then( function () {

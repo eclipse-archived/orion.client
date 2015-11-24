@@ -823,10 +823,16 @@ define([
 			if (serviceReference.getProperty("objectClass").indexOf("orion.edit.command") !== -1) { //$NON-NLS-1$ //$NON-NLS-2$
 				this._recreateEditCommands = true;
 			}
+			if (serviceReference.getProperty("objectClass").indexOf("orion.core.contenttype") !== -1) { //$NON-NLS-1$ //$NON-NLS-2$
+				contentTypesCache = null;
+			}
 		},
 		_onServiceAdded: function(serviceReference) {
 			if (serviceReference.getProperty("objectClass").indexOf("orion.edit.command") !== -1) { //$NON-NLS-1$ //$NON-NLS-2$
 				this._recreateEditCommands = true;
+			}
+			if (serviceReference.getProperty("objectClass").indexOf("orion.core.contenttype") !== -1) { //$NON-NLS-1$ //$NON-NLS-2$
+				contentTypesCache = null;
 			}
 		},
 		_createEditCommands: function() {

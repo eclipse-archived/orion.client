@@ -39,13 +39,11 @@ if (_all_script && _all_script.length && _all_script.length > 0) {
 }
 define([
 	'embeddedEditor/helper/embeddedFileImpl',
-	'orion/serviceregistry',
 	'orion/pluginregistry',
 	'orion/Deferred',
 	'orion/URL-shim'
 ], function(
 	EmbeddedFileImpl,
-	mServiceRegistry, 
 	mPluginRegistry,
 	Deferred
 ) {
@@ -58,7 +56,7 @@ define([
 		"../plugins/embeddedToolingPlugin.html"
 	];
 
-	function startup(options) {
+	function startup(serviceRegistry, options) {
 		if (once) {
 			return once;
 		}
@@ -66,7 +64,6 @@ define([
 		var pluginsToLoad = (options && options._defaultPlugins) ? options._defaultPlugins : defaultPluginURLs;
 		
 		once = new Deferred();
-		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 		var fService = new EmbeddedFileImpl(fPattern);
 		serviceRegistry.registerService("orion.core.file", fService, {
 			Name: 'Embedded File System',
