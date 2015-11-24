@@ -507,6 +507,8 @@ define([
 		_changeExpandedState: function() {
 			if (this.hidden){
 				this._expand();
+				var nextTabbable = lib.firstTabbable(this.domNode.nextElementSibling);
+				if (nextTabbable && nextTabbable.tagName === "INPUT") nextTabbable.focus(); //$NON-NLS-0$
 			} else {
 				this._collapse();
 			}
