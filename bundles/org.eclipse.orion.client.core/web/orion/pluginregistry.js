@@ -208,12 +208,11 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 
         var _currentMessageId = 0;
         var _currentObjectId = 0;
-        //var _currentServiceId = 0; not supported yet...
 
         var _requestReferences = {};
         var _responseReferences = {};
         var _objectReferences = {};
-        var _serviceReferences = {};
+        var _serviceReferences;
 
 
         function _notify(message) {
@@ -241,12 +240,12 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                 }
             });
 
-            var toString = Object.prototype.toString;
+            var toStr = Object.prototype.toString;
             message.params.forEach(function(param, i) {
-                if (toString.call(param) === "[object Object]" && !(param instanceof ObjectReference)) {
+                if (toStr.call(param) === "[object Object]" && !(param instanceof ObjectReference)) {
                     var candidate, methods;
                     for (candidate in param) {
-                        if (toString.call(param[candidate]) === "[object Function]") {
+                        if (toStr.call(param[candidate]) === "[object Function]") {
                             methods = methods || [];
                             methods.push(candidate);
                         }
@@ -276,7 +275,6 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
             } else {
                 console.log(error);
             }
-
         }
 
         function _callMethod(messageId, implementation, method, params) {
@@ -350,11 +348,17 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                         var service = _serviceReferences[message.serviceId];
                         if (!service) {
                             _throwError(message.id, "service not found");
-                        } else if (method in service) {
-                            _callMethod(message.id, service, service[method], params);
-                        } else {
-                            _throwError(message.id, "method not found");
-                        }
+                        } else if (_isTrusted(service)) {
+                        	var serviceRegistry = _internalRegistry.serviceRegistry;
+	                        service = serviceRegistry.getService(service);
+	                        if (method in service) {
+	                            _callMethod(message.id, service, service[method], params);
+	                        } else {
+	                            _throwError(message.id, "method not found");
+	                        }
+                    	} else {
+                    		_throwError(message.id, "not trusted");
+                    	}
                     } else if ("objectId" in message) {
                         var object = _objectReferences[message.objectId];
                         if (!object) {
@@ -388,6 +392,9 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                                     _deferredLoad.resolve(_this);
                                 }
                             });
+                            if (manifest.updateRegistry) {
+                            	_updateRemoteRegistry();
+                        	}
                         } else if ("timeout" === message.method || "error" === message.method) {
                             if (_deferredLoad) {
                                 _deferredLoad.reject(message.error);
@@ -481,6 +488,83 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                 registration: registration,
                 proxy: serviceProxy
             };
+        }
+        
+        function _getPluginData() {
+            var services = [];
+            Object.keys(_serviceReferences).forEach(function(serviceId) {
+                var serviceReference = _serviceReferences[serviceId];
+                var properties = {};
+                serviceReference.getPropertyKeys().forEach(function(key) {
+                	properties[key] = serviceReference.getProperty(key);
+                });
+                ["service.id", "service.names", "objectClass", "__plugin__"].forEach(function(key) {
+	                delete properties[key];
+                });
+                var methods = [];
+                var serviceRegistry = _internalRegistry.serviceRegistry;
+                var implementation = serviceRegistry.getService(serviceReference);
+	            for (var method in implementation) {
+	                if (typeof implementation[method] === 'function') {
+	                    methods.push(method);
+	                }
+	            }
+                services.push({
+                    serviceId: String(serviceReference.getProperty('service.id')),
+                    names: serviceReference.getProperty('service.names'),
+                    methods: methods,
+                    properties: properties
+                });
+            });
+            return {
+                services: services
+            };
+        }
+        
+        function _isTrusted(serviceReference) {
+        	var pluginUrl = new URL(_url);
+        	// if plugin is from same origin of host page, it has access to all references
+        	if (pluginUrl.origin === location.origin) return true;
+        	var refUrl = serviceReference.getProperty("__plugin__");
+        	// if plugin is from same origin of reference, it has access to this reference
+        	return pluginUrl.origin === (refUrl ? new URL(refUrl) : location).origin;
+        }
+        
+        var _registerListener, _unregisterListener, _modifiedListerner;
+        function _updateRemoteRegistry() {
+        	if (!_serviceReferences) {
+        		_serviceReferences = {};
+        		var serviceRegistry = _internalRegistry.serviceRegistry;
+        		serviceRegistry.getServiceReferences().forEach(function(serviceReference) {
+		        	if (_isTrusted(serviceReference)) {
+		        		_serviceReferences[serviceReference.getProperty('service.id')] = serviceReference;
+	        		}
+        		});
+        		function updateReference(add, remove, evt) {
+        			var serviceReference = evt.serviceReference;
+		        	var id = serviceReference.getProperty('service.id');
+		        	if (!_serviceReferences[id] && _isTrusted(serviceReference)) {
+		        		if (add) _serviceReferences[id] = serviceReference;
+		        		if (remove) delete _serviceReferences[id];
+			        	_updateRemoteRegistry();
+		        	}
+		        }
+		        serviceRegistry.addEventListener("registered", _registerListener = updateReference.bind(null, true, false));
+		        serviceRegistry.addEventListener("unregistered", _unregisterListener = updateReference.bind(null, false, true));
+		        serviceRegistry.addEventListener("modified", _modifiedListerner = updateReference.bind(null, false, false));
+        	}
+    		_request({
+                method: "plugin",
+                params: [_getPluginData()]
+             });
+        }
+        
+        function _removeListeners() {
+    		var serviceRegistry = _internalRegistry.serviceRegistry;
+    		if (_registerListener) serviceRegistry.removeEventListener("registered", _registerListener);
+	        if (_unregisterListener) serviceRegistry.removeEventListener("unregistered", _unregisterListener);
+	        if (_modifiedListerner) serviceRegistry.removeEventListener("modified", _modifiedListerner);
+	        _registerListener = _unregisterListener = _modifiedListerner = null;
         }
 
         function _persist() {
@@ -740,6 +824,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
             if (_channel) {
                 _internalRegistry.disconnect(_channel);
                 _channel = null;
+                _removeListeners();
             }
             _state = "resolved";
             _deferredStateChange = null;
@@ -955,6 +1040,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
         var _installing = {};
 
         var internalRegistry = {
+            serviceRegistry: serviceRegistry,
             registerService: serviceRegistry.registerService.bind(serviceRegistry),
             connect: function(url, handler, parent, timeout) {
                 var channel = {

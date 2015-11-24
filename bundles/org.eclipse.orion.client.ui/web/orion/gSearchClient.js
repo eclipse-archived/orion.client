@@ -17,12 +17,6 @@ define("orion/gSearchClient", [ //$NON-NLS-0$
 	'orion/crawler/searchCrawler', //$NON-NLS-0$
 	'orion/searchUtils' //$NON-NLS-0$
 ], function(mFileClient, Deferred, mSearchCrawler, mSearchUtils) {
-	function progress(serviceRegistry, searchDeferred, msg) {
-		var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-		if (!progressService) { return searchDeferred; }
-		return progressService.progress(searchDeferred, msg);
-	}
-	
 	/**
 	 * Creates a new global search client.
 	 * @param {Object} options The options object
@@ -49,7 +43,7 @@ define("orion/gSearchClient", [ //$NON-NLS-0$
 			var result = new Deferred();
 			try {
 				this._searchDeferred = this._fileClient.search(searchParams);
-				progress(this._registry, this._searchDeferred, "Searching " + searchParams.keyword).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
+				this._searchDeferred.then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
 					this._searchDeferred = null;
 					var searchResult = this.convert(jsonData, searchParams);
 					this._generateMatches(searchParams, searchResult, generateMatches).then(function() {

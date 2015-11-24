@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 define(['orion/plugin',
-'orion/bootstrap',
+'orion/serviceregistry',
 'orion/fileClient',
 'orion/metrics',
 'javascript/scriptResolver',
@@ -28,7 +28,7 @@ define(['orion/plugin',
 'webtools/cssResultManager',
 'orion/editor/stylers/text_css/syntax',
 'i18n!webtools/nls/messages'
-], function(PluginProvider, Bootstrap, FileClient, Metrics, ScriptResolver, HtmlAstManager, htmlHover, htmlContentAssist, htmlOutliner,
+], function(PluginProvider, mServiceRegistry, FileClient, Metrics, ScriptResolver, HtmlAstManager, htmlHover, htmlContentAssist, htmlOutliner,
             mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, messages) {
 
 	/**
@@ -39,9 +39,8 @@ define(['orion/plugin',
 		version: "1.0", //$NON-NLS-1$
 		description: messages["pluginDescription"] //$NON-NLS-1$
 	};
-	var provider = new PluginProvider(headers);
-
-	Bootstrap.startup().then(function(core) {
+	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
+	var provider = new PluginProvider(headers, serviceRegistry);
 
     	/**
     	 * Register the content types: HTML, CSS
@@ -63,14 +62,9 @@ define(['orion/plugin',
     		]
     	});
     	/**
-    	 * Re-init
-    	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=462878
-    	 */
-    	Metrics.initFromRegistry(core.serviceRegistry);
-    	/**
     	 * load file client early
     	 */
-    	var fileClient = new FileClient.FileClient(core.serviceRegistry);
+    	var fileClient = new FileClient.FileClient(serviceRegistry);
         var cssResultMgr = new cssResultManager();
 
     	/**
@@ -478,6 +472,11 @@ define(['orion/plugin',
     		}
     	);
 
-    	provider.connect();
-	});
+    	provider.connect(function() {
+    		/**
+	    	 * Re-init
+	    	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=462878
+	    	 */
+			Metrics.initFromRegistry(serviceRegistry);
+ 		});
 });

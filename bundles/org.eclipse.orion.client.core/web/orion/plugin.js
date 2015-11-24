@@ -13,20 +13,46 @@
 /* eslint-disable missing-nls */
 (function(root, factory) { // UMD
     if (typeof define === "function" && define.amd) {
-        define(["orion/Deferred"], factory);
+        define(["orion/Deferred", "orion/EventTarget"], factory);
     } else if (typeof exports === "object") {
-        module.exports = factory(require("orion/Deferred"));
+        module.exports = factory(require("orion/Deferred"), require("orion/EventTarget"));
     } else {
         root.orion = root.orion || {};
-        root.orion.PluginProvider = factory(root.orion.Deferred);
+        root.orion.PluginProvider = factory(root.orion.Deferred, root.orion.EventTarget);
     }
-}(this, function(Deferred) {
+}(this, function(Deferred, EventTarget) {
+
+    function _equal(obj1, obj2) {
+        var keys1 = Object.keys(obj1);
+        var keys2 = Object.keys(obj2);
+        if (keys1.length !== keys2.length) {
+            return false;
+        }
+        keys1.sort();
+        keys2.sort();
+        for (var i = 0, len = keys1.length; i < len; i++) {
+            var key = keys1[i];
+            if (key !== keys2[i]) {
+                return false;
+            }
+            var value1 = obj1[key],
+                value2 = obj2[key];
+            if (value1 === value2) {
+                continue;
+            }
+            if (JSON.stringify(value1) !== JSON.stringify(value2)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     function ObjectReference(objectId, methods) {
         this.__objectId = objectId;
         this.__methods = methods;
     }
     
-    function PluginProvider(headers) {
+    function PluginProvider(headers, serviceRegistry) {
         var _headers = headers;
         var _connected = false;
 
@@ -38,6 +64,11 @@
         var _responseReferences = {};
         var _objectReferences = {};
         var _serviceReferences = {};
+        
+        var _services;
+        var _remoteServices = {};
+        var _registry = serviceRegistry;
+        var _connectCallback;
         
         var _ports = [];
         var _shared = false;
@@ -126,6 +157,7 @@
                 });
             });
             return {
+            	updateRegistry: !!_registry,
                 headers: _headers || {},
                 services: services
             };
@@ -179,12 +211,12 @@
                 }
             });
 
-            var toString = Object.prototype.toString;
+            var toStr = Object.prototype.toString;
             message.params.forEach(function(param, i) {
-                if (toString.call(param) === "[object Object]" && !(param instanceof ObjectReference)) {
+                if (toStr.call(param) === "[object Object]" && !(param instanceof ObjectReference)) {
                     var candidate, methods;
                     for (candidate in param) {
-                        if (toString.call(param[candidate]) === "[object Function]") {
+                        if (toStr.call(param[candidate]) === "[object Function]") {
                             methods = methods || [];
                             methods.push(candidate);
                         }
@@ -214,7 +246,6 @@
             } else {
                 console.log(error);
             }
-
         }
 
         function _callMethod(messageId, implementation, method, params, target) {
@@ -317,7 +348,14 @@
                             response.progress.apply(response, params);
                         }
                     } else {
-                        throw new Error("Bad method: " + message.method);
+                        if ("plugin" === message.method) { //$NON-NLS-0$
+                            var manifest = message.params[0];
+                            _update({
+                                services: manifest.services
+                            });
+                        } else {
+                            throw new Error("Bad method: " + message.method);
+                        }
                     }
                 } else if (message.id) {
                     var deferred = _responseReferences[String(message.id)];
@@ -333,6 +371,110 @@
             } catch (e) {
                 console.log("Plugin._messageHandler " + e);
             }
+        }        
+        
+        function _createServiceProxy(service) {
+            var serviceProxy = {};
+            if (service.methods) {
+                service.methods.forEach(function(method) {
+                    serviceProxy[method] = function() {
+                        var message = {
+                            serviceId: service.serviceId,
+                            method: method,
+                            params: Array.prototype.slice.call(arguments)
+                        };
+                        return _request(message);
+                    };
+                });
+
+                if (serviceProxy.addEventListener && serviceProxy.removeEventListener && EventTarget) {
+                    var eventTarget = new EventTarget();
+                    var objectId = _currentObjectId++;
+                    _objectReferences[objectId] = {
+                        handleEvent: eventTarget.dispatchEvent.bind(eventTarget)
+                    };
+                    var listenerReference = new ObjectReference(objectId, ["handleEvent"]);
+
+                    var _addEventListener = serviceProxy.addEventListener;
+                    serviceProxy.addEventListener = function(type, listener) {
+                        if (!eventTarget._namedListeners[type]) {
+                            _addEventListener(type, listenerReference);
+                        }
+                        eventTarget.addEventListener(type, listener);
+                    };
+                    var _removeEventListener = serviceProxy.removeEventListener;
+                    serviceProxy.removeEventListener = function(type, listener) {
+                        eventTarget.removeEventListener(type, listener);
+                        if (!eventTarget._namedListeners[type]) {
+                            _removeEventListener(type, listenerReference);
+                        }
+                    };
+                }
+            }
+            return serviceProxy;
+        }
+
+        function _createServiceProperties(service) {
+            var properties = JSON.parse(JSON.stringify(service.properties));
+            var objectClass = service.names || service.type || [];
+            if (!Array.isArray(objectClass)) {
+                objectClass = [objectClass];
+            }
+            properties.objectClass = objectClass;
+            return properties;
+        }
+
+        function _registerService(service) {
+        	if (!_registry) return;
+            var serviceProxy = _createServiceProxy(service);
+            var properties = _createServiceProperties(service);
+            var registration = _registry.registerService(service.names || service.type, serviceProxy, properties);
+            _remoteServices[service.serviceId] = {
+                registration: registration,
+                proxy: serviceProxy
+            };
+        }
+
+        function _update(input) {
+            var oldServices = _services || [];
+            _services = input.services || [];
+
+            if (!_equal(_services, oldServices)) {
+	            var serviceIds = [];
+				_services.forEach(function(service) {
+					var serviceId = service.serviceId;
+	                serviceIds.push(serviceId);
+	                var remoteService = _remoteServices[serviceId];
+	                if (remoteService) {
+	                    if (_equal(service.methods, Object.keys(remoteService.proxy))) {
+	                        var properties = _createServiceProperties(service);
+	                        var reference = remoteService.registration.getReference();
+	                        var currentProperties = {};
+	                        reference.getPropertyKeys().forEach(function(_name) {
+	                            currentProperties[_name] = reference.getProperty(_name);
+	                        });
+	                        if (!_equal(properties, currentProperties)) {
+	                            remoteService.registration.setProperties(properties);
+	                        }
+	                        return;
+	                    }
+	                    remoteService.registration.unregister();
+	                    delete _remoteServices[serviceId];
+	                }
+	                _registerService(service);
+	            });
+	            Object.keys(_remoteServices).forEach(function(serviceId) {
+	                if (serviceIds.indexOf(serviceId) === -1) {
+	                    _remoteServices[serviceId].registration.unregister();
+	                    delete _remoteServices[serviceId];
+	                }
+	            });
+           }
+           
+           if (_connectCallback) {
+               _connectCallback();
+               _connectCallback = null;
+           }
         }
 
         this.updateHeaders = function(headers) {
@@ -397,8 +539,12 @@
                 _publish(message, port);
             });
             _connected = true;
-            if (callback) {
-                callback();
+            if (_registry) {
+            	_connectCallback = callback;
+            } else {
+	            if (callback) {
+	                callback();
+	            }
             }
         };
 

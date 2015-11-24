@@ -81,24 +81,9 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 	 * @name orion.fileClient.FileClient
 	 */
 	function FileClient(serviceRegistry, filter) {
-		var allReferences = serviceRegistry.getServiceReferences("orion.core.file"); //$NON-NLS-0$
-		var _references = allReferences;
-		if (filter) {
-			_references = [];
-			for(var i = 0; i < allReferences.length; ++i) {
-				if (filter(allReferences[i])) {
-					_references.push(allReferences[i]);
-				}
-			}
-		}
-		_references.sort(function (ref1, ref2) {
-			var ranking1 = ref1.getProperty("ranking") || 0;
-			var ranking2 = ref2.getProperty("ranking")  || 0;
-			return ranking1 - ranking2;
-		});
-		var _patterns = [];
-		var _services = [];
-		var _names = [];
+		var _patterns;
+		var _services;
+		var _names;
 		
 		function _noMatch(location) {
 			var d = new Deferred();
@@ -107,7 +92,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		}
 		
 		var _fileSystemsRoots = [];
-		var _allFileSystemsService =  {
+		var _allFileSystemsService = {
 			fetchChildren: function() {
 				var d = new Deferred();
 				d.resolve(_fileSystemsRoots);
@@ -148,36 +133,59 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 			read: _noMatch,
 			write: _noMatch
 		};
-				
-		for(var j = 0; j < _references.length; ++j) {
-			_fileSystemsRoots[j] = {
-				Directory: true, 
-				Length: 0, 
-				LocalTimeStamp: 0,
-				Location: _references[j].getProperty("top"), //$NON-NLS-0$
-				ChildrenLocation: _references[j].getProperty("top"), //$NON-NLS-0$
-				Name: _references[j].getProperty("Name") || _references[j].getProperty("NameKey")		 //$NON-NLS-0$
-			};
-
-			var filetop = _references[j].getProperty("top");
-			var patternStringArray = _references[j].getProperty("pattern") || (filetop ? filetop.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1") : ""); //$NON-NLS-1$ //$NON-NLS-0$
-			if (!Array.isArray(patternStringArray)) {
-				patternStringArray = [patternStringArray];
-			}
-			var patterns = [];
-			for (var k = 0; k < patternStringArray.length; k++) {
-				var patternString = patternStringArray[k];
-				if (patternString[0] !== "^") { //$NON-NLS-0$
-					patternString = "^" + patternString; //$NON-NLS-0$
+			
+		function init() {
+			if (_services) return;
+			_patterns = [];
+			_services = [];
+			_names = [];
+			
+			var allReferences = serviceRegistry.getServiceReferences("orion.core.file"); //$NON-NLS-0$
+			var _references = allReferences;
+			if (filter) {
+				_references = [];
+				for(var i = 0; i < allReferences.length; ++i) {
+					if (filter(allReferences[i])) {
+						_references.push(allReferences[i]);
+					}
 				}
-				patterns.push(new RegExp(patternString));
 			}
-			_patterns[j] = patterns;			
-			_services[j] = serviceRegistry.getService(_references[j]);
-			_names[j] = _references[j].getProperty("Name") || _references[j].getProperty("NameKey"); //$NON-NLS-0$
+			_references.sort(function (ref1, ref2) {
+				var ranking1 = ref1.getProperty("ranking") || 0;
+				var ranking2 = ref2.getProperty("ranking")  || 0;
+				return ranking1 - ranking2;
+			});
+			for(var j = 0; j < _references.length; ++j) {
+				_fileSystemsRoots[j] = {
+					Directory: true, 
+					Length: 0, 
+					LocalTimeStamp: 0,
+					Location: _references[j].getProperty("top"), //$NON-NLS-0$
+					ChildrenLocation: _references[j].getProperty("top"), //$NON-NLS-0$
+					Name: _references[j].getProperty("Name") || _references[j].getProperty("NameKey")		 //$NON-NLS-0$
+				};
+	
+				var filetop = _references[j].getProperty("top");
+				var patternStringArray = _references[j].getProperty("pattern") || (filetop ? filetop.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1") : ""); //$NON-NLS-1$ //$NON-NLS-0$
+				if (!Array.isArray(patternStringArray)) {
+					patternStringArray = [patternStringArray];
+				}
+				var patterns = [];
+				for (var k = 0; k < patternStringArray.length; k++) {
+					var patternString = patternStringArray[k];
+					if (patternString[0] !== "^") { //$NON-NLS-0$
+						patternString = "^" + patternString; //$NON-NLS-0$
+					}
+					patterns.push(new RegExp(patternString));
+				}
+				_patterns[j] = patterns;			
+				_services[j] = serviceRegistry.getService(_references[j]);
+				_names[j] = _references[j].getProperty("Name") || _references[j].getProperty("NameKey"); //$NON-NLS-0$
+			}
 		}
 				
 		this._getServiceIndex = function(location) {
+			init();
 			// client must specify via "/" when a multi file service tree is truly wanted
 			if (location === "/") { //$NON-NLS-0$
 				return -1;

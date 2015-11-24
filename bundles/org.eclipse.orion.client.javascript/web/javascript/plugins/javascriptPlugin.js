@@ -16,7 +16,8 @@
  */
 define([
 'orion/plugin',
-'orion/bootstrap',
+'orion/serviceregistry',
+'orion/preferences',
 'orion/Deferred',
 'orion/fileClient',
 'orion/metrics',
@@ -47,17 +48,17 @@ define([
 'orion/editor/stylers/application_x-ejs/syntax',
 'i18n!javascript/nls/messages',
 'orion/URL-shim'
-], function(PluginProvider, Bootstrap, Deferred, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist,
+], function(PluginProvider, mServiceRegistry, mPreferences, Deferred, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist,
 			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, TernProjectManager, Util, Logger, AddToTernCommand, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 			RenameCommand, RefsCommand, mGSearchClient, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
+	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
+	var preferences = new mPreferences.PreferencesService(serviceRegistry);
     var provider = new PluginProvider({
 		name: javascriptMessages['pluginName'], //$NON-NLS-1$
 		version: "1.0", //$NON-NLS-1$
 		description: javascriptMessages['pluginDescription'] //$NON-NLS-1$
-	});
-
-    Bootstrap.startup().then(function(core) {
+	}, serviceRegistry);
 
     	/**
     	 * Register the JavaScript content types
@@ -84,12 +85,6 @@ define([
     	});
 
     	/**
-    	 * Re-init
-    	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=462878
-    	 */
-    	Metrics.initFromRegistry(core.serviceRegistry);
-
-    	/**
     	 * make sure the RecoveredNode is ignored
     	 * @since 9.0
     	 */
@@ -97,7 +92,7 @@ define([
     	/**
     	 * Create the file client early
     	 */
-    	var fileClient = new FileClient.FileClient(core.serviceRegistry);
+    	var fileClient = new FileClient.FileClient(serviceRegistry);
     	
     	/**
     	 * Create the script resolver
@@ -162,7 +157,6 @@ define([
 			}
     	};
 
-    	var prefService = core.serviceRegistry.getService("orion.core.preference"); //$NON-NLS-1$
     	/**
     	 * Object of contributed environments
     	 *
@@ -290,7 +284,7 @@ define([
 			}
 			ternWorker.postMessage({request: 'installed_plugins'}, function(response) { //$NON-NLS-1$
 				var plugins = response.plugins;
-				return prefService ? prefService.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
+ 				return preferences ? preferences.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
 					var props = prefs.get("tern"); //$NON-NLS-1$
 					cleanPrefs(prefs);
 					if (!props) {
@@ -459,7 +453,7 @@ define([
 						astManager,
 						scriptresolver,
 						CUProvider,
-						new mGSearchClient.GSearchClient({serviceRegistry: core.serviceRegistry, fileClient: fileClient}));
+						new mGSearchClient.GSearchClient({serviceRegistry: serviceRegistry, fileClient: fileClient}));
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			{
 					execute: function(editorContext, options) {
@@ -1116,7 +1110,12 @@ define([
     			provider.registerService("orion.edit.highlighter", {}, newGrammars[current]); //$NON-NLS-1$
     		}
     	}
-    	provider.connect();
-	});
+    	provider.connect(function() {
+    		/**
+	    	 * Re-init
+	    	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=462878
+	    	 */
+	    	Metrics.initFromRegistry(serviceRegistry);
+    	});
 });
 
