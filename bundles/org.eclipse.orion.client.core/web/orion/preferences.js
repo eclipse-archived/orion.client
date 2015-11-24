@@ -437,7 +437,7 @@ define(['require', 'orion/Deferred', 'orion/xhr'], function(require, Deferred, x
 
 		defaultPreferencesLocation = defaultPreferencesLocation || "defaults.pref"; //$NON-NLS-0$
 		if (defaultPreferencesLocation.indexOf("://") === -1) { //$NON-NLS-0$
-			defaultPreferencesLocation = require.toUrl(defaultPreferencesLocation);
+			defaultPreferencesLocation = require.toUrl ? require.toUrl(defaultPreferencesLocation) : defaultPreferencesLocation;
 		}
 		this._defaultsProvider = new DefaultPreferencesProvider(defaultPreferencesLocation);
 		this._serviceRegistration = serviceRegistry.registerService("orion.core.preference", this); //$NON-NLS-0$
