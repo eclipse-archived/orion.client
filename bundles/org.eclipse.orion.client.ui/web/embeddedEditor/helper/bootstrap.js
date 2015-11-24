@@ -61,7 +61,27 @@ define([
 			return once;
 		}
 		//options._defaultPlugins is for internal use to load plugins in dev mode
-		var pluginsToLoad = (options && options._defaultPlugins) ? options._defaultPlugins : defaultPluginURLs;
+		var pluginsToLoad;
+		if(options && options._defaultPlugins) {
+			pluginsToLoad = options._defaultPlugins;
+		} else {
+			pluginsToLoad = defaultPluginURLs;
+		}			
+		if(options && options.defaultPlugins) {
+			var newArray = [];
+			options.defaultPlugins.forEach(function(pl) {
+				var splitPl = pl.split("/").pop();
+				var hasOne = null;
+				pluginsToLoad.some(function(item) {
+					if(item.indexOf(splitPl) !== -1) {
+						newArray.push(item);
+						return true;
+					}
+					return false;
+				});
+			});
+			pluginsToLoad = newArray;
+		}
 		
 		once = new Deferred();
 		var fService = new EmbeddedFileImpl(fPattern);
