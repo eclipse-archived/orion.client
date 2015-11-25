@@ -28,11 +28,26 @@ define([
 	messages, mCommands, i18nUtil, objects, lib, mExplorer, mCommonNav, ProjectCommands,
 	PageUtil, URITemplate, Deferred, mFileUtils, mCustomGlobalCommands, bidiUtils
 ) {
+	
 	var CommonNavExplorer = mCommonNav.CommonNavExplorer;
 	var CommonNavRenderer = mCommonNav.CommonNavRenderer;
 	var FileModel = mExplorer.FileModel;
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 
+	function getProject (fileClient, metadata) {
+		while (metadata.parent && metadata.parent.parent && metadata.parent.parent.type !== "ProjectRoot") {
+			metadata = metadata.parent;
+		}
+		if (metadata.Parents && metadata.Parents.length > 0) {
+			var topParent = metadata.Parents[metadata.Parents.length - 1];
+			if (topParent.Children) {
+				return new Deferred().resolve(topParent);
+			}
+			return fileClient.read(topParent.Location, true);
+		}
+		return new Deferred().resolve(metadata);
+	}
+		
 	function ProjectNavModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders, projectClient, fileMetadata){
 		this.projectClient = projectClient;
 		this.project = root;
@@ -171,8 +186,15 @@ define([
 			return new ProjectNavModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders, this.projectClient, this.fileMetadata);
 		},
 		reroot: function(item) {
-			this.scopeUp(item.Location);
-			return new Deferred().reject();
+			var defer = new Deferred();
+			getProject(this.fileClient, item).then(function(project) {
+				this.display(project);
+				defer.resolve(item);
+			}.bind(this), function () {		
+				this.scopeUp(item.Location);
+				defer.reject();
+			}.bind(this));
+			return defer;
 		},
 		registerCommands: function() {
 			return CommonNavExplorer.prototype.registerCommands.call(this).then(function() {
@@ -203,6 +225,7 @@ define([
 		},
 		changedItem: function(item, forceExpand){
 			if(!item || !this.model){
+				this.fileMetadata.children = null;
 				return this.display(this.fileMetadata, true);
 			}
 			if(item.Projects){
@@ -306,88 +329,35 @@ define([
 		this.explorer = null;
 		var _self = this;
 		var sidebar = this.sidebar;
-		// Switch to project view mode if a project is opened
-		function openProject(metadata){
-			function failed() {
-				if (!sidebar.getActiveViewModeId()) {
-					sidebar.setViewMode(sidebar.getNavigationViewMode().id);
-				}
-			}
-			if (!metadata) {
-				failed();
-				return;
-			}
-			if(_self.lastCheckedLocation === metadata.Location){
-				return;
-			}
-			if (sidebar.getActiveViewModeId() === _self.id) {
-				return;
-			}
-			_self.lastCheckedLocation = metadata.Location;
-			_self.getProject(metadata).then(function(project) {
-				_self.getProjectJson(project).then(function(json) {
-					_self.showViewMode(!!json);
-					if (json) {
-						if (sidebar.getActiveViewModeId() === _self.id) {
-							_self.explorer.display(project);
-						} else {
-							_self.project = project;
-							sidebar.setViewMode(_self.id);
-						}
-					} else {
-						if (!sidebar.getActiveViewModeId()) {
-							sidebar.setViewMode(sidebar.getNavigationViewMode().id);
-						}
-					}
-				}, failed);
-			}, failed);
-			var handleDisplay = function (event) {
-				if(event.item === metadata) {
-					sidebar.sidebarNavInputManager.removeEventListener("projectDisplayed", handleDisplay); //$NON-NLS-0$
-					sidebar.sidebarNavInputManager.dispatchEvent({type:"projectOpened", item: metadata}); //$NON-NLS-0$
-				}
-			};
-			sidebar.sidebarNavInputManager.addEventListener("projectDisplayed", handleDisplay); //$NON-NLS-0$
-		}
-					
-		// If we are displaying project root, update the project.  Otherwise check setting and set the new nav root
-		this.editorInputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
-			if (sidebar.getActiveViewModeId() === _self.id) {
-				openProject(event.metadata);
-			} else {
-				if (localStorage.languageTools){
-					// Don't navigate into the project
-					// If no mode set, change to default nav view
-					if (!sidebar.getActiveViewModeId()){
-						sidebar.setViewMode(sidebar.getNavigationViewMode().id);
-					}
-				} else {
-					openProject(event.metadata);
-				}
-			}
-		});
 		
-		// If we are displaying project root, continue. Otherwise check setting and only show project view if the selection is a project
-		this.sidebarNavInputManager.addEventListener("selectionChanged", function(event){ //$NON-NLS-0$
-			if (sidebar.getActiveViewModeId() === _self.id) { return; }
-			if (localStorage.languageTools){
-				_self.showViewMode(false);
-			} else {
-				_self.project = null;
-				var item = event.selections && event.selections.length > 0 ? event.selections[0] : null;
-				if (item) {
-					_self.getProject(item).then(function(project) {
-						_self.getProjectJson(project).then(function(json) {
-							_self.project = project;
-							_self.showViewMode(!!json);
-						});
-					});
-				} else {
-					_self.showViewMode(false);
+		this.editorInputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
+			function openDefaultMode() {
+				if (!sidebar.getActiveViewModeId()) {
+					sidebar.setViewMode(sidebar.getDefaultViewModeId());
 				}
 			}
- 		});
- 		
+			var oldProject = _self.project;
+			_self.project = null;
+ 			_self.showViewMode(event.metadata && !event.metadata.Projects);
+			getProject(_self.fileClient, event.metadata).then(function(project) {
+				_self.project = project;
+				if (oldProject && project) {
+					if (oldProject.Location === project.Location) return;
+				}
+				openDefaultMode();
+				var id = sidebar.getActiveViewModeId();
+				if (id === _self.id) {
+					var metadata = event.metadata;
+					var handleDisplay = function (event) {
+						if(event.item === metadata) {
+							sidebar.sidebarNavInputManager.removeEventListener("projectDisplayed", handleDisplay); //$NON-NLS-0$
+							sidebar.sidebarNavInputManager.dispatchEvent({type:"projectOpened", item: metadata}); //$NON-NLS-0$
+						}
+					};
+					sidebar.sidebarNavInputManager.addEventListener("projectDisplayed", handleDisplay); //$NON-NLS-0$
+				}
+			}, openDefaultMode);
+		});
 	}
 	objects.mixin(ProjectNavViewMode.prototype, {
 		label: messages["Project"],
@@ -425,39 +395,6 @@ define([
 			this.explorer = null;
 			this.toolbarNode.parentNode.classList.remove("projectNavSidebarWrapper"); //$NON-NLS-0$
 		},
-		getProject: function(metadata) {
-			while (metadata.parent && metadata.parent.parent) {
-				metadata = metadata.parent;
-			}
-			if (metadata.Parents && metadata.Parents.length > 0) {
-				var topParent = metadata.Parents[metadata.Parents.length - 1];
-				if (topParent.Children) {
-					return new Deferred().resolve(topParent);
-				}
-				return this.fileClient.read(topParent.Location, true);
-			}
-			return new Deferred().resolve(metadata);
-		},
-		getProjectJson: function(metadata) {
-			function getJson(children) {
-				for(var i=0; i<children.length; i++){
-					if(!children[i].Directory && children[i].Name === "project.json"){ //$NON-NLS-0$
-						return children[i];
-					}
-				}
-				return null;
-			}
-			var deferred = new Deferred();
-			if (metadata.Children || metadata.children){
-				deferred.resolve(getJson(metadata.Children || metadata.children));
-			} else if(metadata.ChildrenLocation){
-				this.fileClient.fetchChildren(metadata.ChildrenLocation).then(function(children){
-					metadata.Children = children;
-					deferred.resolve(getJson(children));
-				}, deferred.reject);
-			}
-			return deferred;
-		},
 		showViewMode: function(show) {
 			var sidebar = this.sidebar;
 			var showing = !!sidebar.getViewMode(this.id);
@@ -468,7 +405,6 @@ define([
 			} else {
 				sidebar.removeViewMode(this.id);
 				sidebar.renderViewModeMenu();
-				this.lastCheckedLocation = null;
 			}
 		}
 	});
