@@ -112,6 +112,8 @@ define([
 		this.gitClient = options.gitClient;
 		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(event) { //$NON-NLS-0$
 			switch (event.action) {
+			case "addRemote": //$NON-NLS-0$
+			case "removeRemote": //$NON-NLS-0$
 			case "addConfig": //$NON-NLS-0$
 			case "editConfig": //$NON-NLS-0$
 			case "deleteConfig": //$NON-NLS-0$
