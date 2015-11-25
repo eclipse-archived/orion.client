@@ -367,7 +367,7 @@ var exports = {};
 				
 				var createRemoteFunction = function(remoteLocation, name, url) {
 					var msg = i18nUtil.formatMessage(messages["Adding remote ${0}..."], remoteLocation);
-					progress.progress(serviceRegistry.getService("orion.git.provider").addRemote(remoteLocation, name, url), msg).then(function() { //$NON-NLS-0$
+					progress.progress(serviceRegistry.getService("orion.git.provider").addRemote(remoteLocation, name, url, false), msg).then(function() { //$NON-NLS-0$
 						dispatchModelEventOn({type: "modelChanged", action: "addRemote", remote: name}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus);
 				};
@@ -388,6 +388,39 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(addRemoteCommand);
+		
+		var addGerritRemoteCommand = new mCommands.Command({
+			name: messages["New Gerrit Remote"],
+			tooltip: messages["Add a new remote to the repository"],
+			id: "eclipse.addGerritRemote", //$NON-NLS-0$
+			parameters: addRemoteParameters,
+			callback : function(data) {
+				var item = data.items;
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+					var createRemoteFunction = function(remoteLocation, name, url) {
+					var msg = i18nUtil.formatMessage(messages["Adding remote ${0}..."], remoteLocation);
+					progress.progress(serviceRegistry.getService("orion.git.provider").addRemote(remoteLocation, name, url, true), msg).then(function() { //$NON-NLS-0$
+						dispatchModelEventOn({type: "modelChanged", action: "addRemote", remote: name}); //$NON-NLS-1$ //$NON-NLS-0$
+					}, displayErrorOnStatus);
+				};
+				
+				var remoteLocation;
+				if (item.Type === "Clone") { //$NON-NLS-0$
+					remoteLocation = item.RemoteLocation;
+				} else {
+					remoteLocation = item.Location;
+				}
+				
+				if (data.parameters.valueFor("name") && data.parameters.valueFor("url")) { //$NON-NLS-1$ //$NON-NLS-0$
+					createRemoteFunction(remoteLocation, data.parameters.valueFor("name"), data.parameters.valueFor("url")); //$NON-NLS-1$ //$NON-NLS-0$
+				}
+			},
+			visibleWhen: function(item) {
+				return (item.GroupNode && item.Name === "Remotes") ||  (item.Type === "Clone" && explorer.parentId === "artifacts"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			}
+		});
+		commandService.addCommand(addGerritRemoteCommand);
+
 
 		var removeRemoteCommand = new mCommands.Command({
 			name: messages['Delete'], // "Delete Remote",
