@@ -48,55 +48,51 @@ function getStatus(workspaceDir, fileRoot, req, res, next, rest) {
             };
         }
 
-		statuses.then(function(status_array) {
-			
-	        status_array.forEach(function(file) {
-	            var bit = file.statusBit();
-	
-	            switch(bit) {
-	                case git.Status.STATUS.WT_MODIFIED:
-	                    modified.push(returnContent(file));
-	                    break;
-	                case git.Status.STATUS.WT_DELETED:
-	                    removed.push(returnContent(file));
-	                    break;
-	                case git.Status.STATUS.WT_TYPECHANGE:
-	                    changed.push(returnContent(file));
-	                    break;
-	                case git.Status.STATUS.WT_NEW:
-	                    untracked.push(returnContent(file));
-	                    break;
-	                default:
-	                    added.push(returnContent(file));
-	                    break;
-	            }
-	           
-	            //		        if (status.isRenamed()) { words.push("RENAMED"); }
-	            //		        if (status.isIgnored()) { words.push("IGNORED"); }
-	        });
-	
-	        var resp = JSON.stringify({
-	            "Added": added,
-	            "Changed": changed,
-	            "CloneLocation": "/gitapi/clone/file/" + rest.replace("status/file/", ""),
-	            "CommitLocation": "/gitapi/commit/HEAD/file/" + rest.replace("status/file/", ""),
-	            "Conflicting": conflicting,
-	            "IndexLocation": "/gitapi/index/file/" + rest.replace("status/file/", ""),
-	            "Location": "/gitapi/status/file/" + rest.replace("status/file/", ""),
-	            "Missing": missing,
-	            "Modified": modified,
-	            "Removed": removed,
-	            "RepositoryState": "SAFE",
-	            "Type": "Status",
-	            "Untracked": untracked   
-	        });
-	
-	        res.statusCode = 200;
-	        res.setHeader('Content-Type', 'application/json');
-	        res.setHeader('Content-Length', resp.length);
-	        res.end(resp);
-		});
-        
+        statuses.forEach(function(file) {
+            var bit = file.statusBit();
+
+            switch(bit) {
+                case git.Status.STATUS.WT_MODIFIED:
+                    modified.push(returnContent(file));
+                    break;
+                case git.Status.STATUS.WT_DELETED:
+                    removed.push(returnContent(file));
+                    break;
+                case git.Status.STATUS.WT_TYPECHANGE:
+                    changed.push(returnContent(file));
+                    break;
+                case git.Status.STATUS.WT_NEW:
+                    untracked.push(returnContent(file));
+                    break;
+                default:
+                    added.push(returnContent(file));
+                    break;
+            }
+           
+            //		        if (status.isRenamed()) { words.push("RENAMED"); }
+            //		        if (status.isIgnored()) { words.push("IGNORED"); }
+        });
+
+        var resp = JSON.stringify({
+            "Added": added,
+            "Changed": changed,
+            "CloneLocation": "/gitapi/clone/file/" + rest.replace("status/file/", ""),
+            "CommitLocation": "/gitapi/commit/HEAD/file/" + rest.replace("status/file/", ""),
+            "Conflicting": conflicting,
+            "IndexLocation": "/gitapi/index/file/" + rest.replace("status/file/", ""),
+            "Location": "/gitapi/status/file/" + rest.replace("status/file/", ""),
+            "Missing": missing,
+            "Modified": modified,
+            "Removed": removed,
+            "RepositoryState": "SAFE",
+            "Type": "Status",
+            "Untracked": untracked   
+        });
+
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Length', resp.length);
+        res.end(resp);
 
     })
     .catch(function(err) {
