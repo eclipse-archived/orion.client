@@ -208,6 +208,7 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id: "eclipse.checkoutBranch", //$NON-NLS-0$
 			callback: function(data) {
+				var commandInvocation = data;
 				var item = data.items;
 				var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 				var messageService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
@@ -243,6 +244,10 @@ var exports = {};
 									dispatchModelEventOn({type: "modelChanged", action: "checkout"}); //$NON-NLS-1$ //$NON-NLS-0$
 								},
 								function(error){
+									if(error.status===409){
+										commandInvocation.parameters = branchNameParameters;
+										commandService.collectParameters(commandInvocation);
+									}
 									displayErrorOnStatus(error);
 								}
 							);
@@ -267,6 +272,7 @@ var exports = {};
 			id: "eclipse.addBranch", //$NON-NLS-0$
 			parameters: branchNameParameters,
 			callback: function(data) {
+				var commandInvocation = data;
 				var item = data.items;
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				
@@ -274,7 +280,13 @@ var exports = {};
 					var addMsg = i18nUtil.formatMessage(messages["Adding branch ${0}..."], name);
 					progress.progress(serviceRegistry.getService("orion.git.provider").addBranch(branchLocation, name), addMsg).then(function() { //$NON-NLS-0$
 						dispatchModelEventOn({type: "modelChanged", action: "addBranch", branch: name}); //$NON-NLS-1$ //$NON-NLS-0$
-					}, displayErrorOnStatus);
+					}, function(error){
+						if(error.status===409){
+							commandInvocation.parameters = branchNameParameters;
+							commandService.collectParameters(commandInvocation);
+						}
+						displayErrorOnStatus(error);
+					});
 				};
 				
 				var branchLocation;
@@ -1310,6 +1322,7 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id: "eclipse.checkoutPullRequest", //$NON-NLS-0$
 			callback: function(data) {
+				var commandInvocation = data;
 				var item = data.items;
 				var base = item.Base;
 				var head = item.Head;
@@ -1344,7 +1357,12 @@ var exports = {};
 							);
 						},
 						function(error){
+							if(error.status===409){
+								commandInvocation.parameters = branchNameParameters;
+								commandService.collectParameters(commandInvocation);
+							}
 							displayErrorOnStatus(error);
+					
 						 }
 					);	
 				};
