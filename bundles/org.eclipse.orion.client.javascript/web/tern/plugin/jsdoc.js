@@ -70,8 +70,13 @@ define([
 	 * @since 11.0
 	 */
 	function findLineCompletions(comment, options, file) {
-		//TODO do we want to do anything here?
-		return {completions: []};
+		var proposals = [];
+		var prefix = getPrefix(options.end, file.text), char = file.text.charAt(options.end-prefix.length-1);
+		if(char === '{') {
+			proposals = computeTypeCompletions(prefix, file);
+		}
+		return {completions: proposals};
+
 	}
 	
 	/**
@@ -86,7 +91,7 @@ define([
 		var proposals = [];
 		var prefix = getPrefix(options.end, file.text), char = file.text.charAt(options.end-prefix.length-1);
 		if(char === '{') {
-			proposals = computeTypeCompletions(prefix);
+			proposals = computeTypeCompletions(prefix, file);
 		} else if(char === '.') {
 			proposals = computeMemberCompletions(prefix, comment, options);
 		} else if(char === '*' || char === ' ') {
@@ -134,10 +139,106 @@ define([
 	 * @param {String} prefix The prefix
 	 * @returns {Array.<Object>} The array of completion objects
 	 */
-	function computeTypeCompletions(prefix) {
-		//TODO
-		return [];
+	function computeTypeCompletions(prefix, file) {
+		var cx = infer.cx();
+		var theType, proposal, key;
+		var proposals = [];
+		// TODO Check if we are in an HTML file and if so add browser: true
+		var envs = getActiveEnvironments(file.ast, {ecma5: true, ecma6: true});
+		var existingCompletions = Object.create(null); // Tern separates proto and non-proto props into two entries, we only want to see one
+		for (key in cx.protos){
+			theType = cx.protos[key];
+			proposal = getProposalForType(theType, envs, existingCompletions, prefix);
+			if (proposal){
+				proposals.push(proposal);
+			}
+		}
+		for (key in cx.paths) {
+			theType = cx.paths[key];
+			proposal = getProposalForType(theType, envs, existingCompletions, prefix);
+			if (proposal){
+				proposals.push(proposal);
+			}
+		}
+		return proposals;
 	}
+	
+	/**
+	 * @name getProposalForType
+	 * @description Returns a completion proposal for the given type object or <code>null<code> if no proposal should be added
+	 * @param theType {Object} type to make a proposal for
+	 * @param envs {Object} list of active environments
+	 * @param existingCompletions {Object} list of existing completion names
+	 * @param prefix {String} preceding characters to the completion
+	 * @returns returns a proposal or null
+	 */
+	function getProposalForType(theType, envs, existingCompletions, prefix){
+		// TODO This will skip Events, Extracts, IRoute and many others which are null
+		if (theType && typeof theType === 'object' && theType.name){
+			if (!theType.origin || envs[theType.origin]){
+				var name = theType.name;
+				if (name.indexOf('.prototype') === (name.length-10)){
+					name = name.substring(0, name.length-10);
+				}
+				if (existingCompletions[name.toLowerCase()]){
+					return null;
+				}
+				existingCompletions[name.toLowerCase()] = true;
+				// TODO Check if the following character is already a close }, check if we should add @link
+				var _p = createProposal(name, '', prefix);
+				
+				if (theType.origin){
+					_p.origin = theType.origin;
+				}
+				if (theType.hasCtor){
+					_p.doc = theType.hasCtor.doc;
+					_p.url = theType.hasCtor.url;
+				}
+				return _p;
+			}
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * @name getActiveEnvironments
+	 * @description Return an {Object} containing all active environments in the given ast based on eslint env and global settings
+	 * @param ast File AST to get environments for
+	 * @param defenvs {Object} containing environments that should be included in the active list by default
+	 * @returns returns {Object} will all active environments set to <code>true</code>
+	 */
+	function getActiveEnvironments(ast, defenvs) {
+		var env = Object.create(null);
+		objects.mixin(env, defenvs);
+		if(ast.comments) {
+			for(var i = 0; i < ast.comments.length; i++) {
+				var comment = ast.comments[i];
+				if (comment.type === "Block") {
+		            var value = comment.value.trim();
+		            var match = /^(eslint-\w+|eslint|globals?)(\s|$)/.exec(value);
+					if (match) {
+		                value = value.substring(match.index + match[1].length);
+		                if(match[1] === 'eslint-env') {
+		                	// Collapse whitespace around ,
+						    var string = value.replace(/\s*,\s*/g, ",");
+						    string.split(/,+/).forEach(function(_name) {
+						        _name = _name.trim();
+						        if (!_name) {
+						            return;
+						        }
+						        env[_name] = true;
+						    });
+		                }
+		            }
+		        }
+			}
+		}
+	    return env;
+	}
+	
+	
+	
 	/**
 	 * @description Computes the reachable type member names for completions
 	 * @param {String} prefix The prefix

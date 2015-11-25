@@ -142,10 +142,10 @@ define([
 							assert.equal(ap.description, description, "Invalid proposal description"); //$NON-NLS-0$
 						}
 					}
-					if(expectedProposals[i].length === 3 && !ap.unselectable /*headers have no hover*/) {
+					if(ep.length === 3 && !ap.unselectable /*headers have no hover*/) {
 					    //check for doc hover
 					    assert(ap.hover, 'There should be a hover entry for the proposal');
-					    assert(ap.hover.indexOf(ep[2]) === 0, "The doc should have started with the given value");
+					    assert(ap.hover.content.indexOf(ep[2]) === 0, "The doc should have started with the given value.\nActual: " + ap.hover.content + '\nExpected: ' + ep[2]);
 					}
 				}
 				testworker._state.callback();
@@ -4220,16 +4220,18 @@ define([
 					offset: 15,
 					callback: done};
 				testProposals(options, [
-				  //TODO   ['bject', 'Object', 'Object'],
+					['', 'ecma5'],
+					['Object', 'Object', 'Creates an object wrapper.'],
 				]);
 			});
 
 			/**
+			 * TODO
 			 * Tests object JSDoc completions
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
 			 * @since 7.0
 			 */
-			it("test object doc completion 2", function(done) {
+			it.skip("test object doc completion 2", function(done) {
 				var options = {
 					buffer: "/**\n* @returns {I} \n*/",
 					line: '* @returns {I} ',
@@ -4237,16 +4239,17 @@ define([
 					offset: 17,
 					callback: done};
 				testProposals(options, [
-				  //TODO   ['nfinity', 'Infinity', 'Infinity'],
+					['nfinity', 'Infinity', 'Infinity'],
 				]);
 			});
 
 			/**
+			 * TODO
 			 * Tests object JSDoc completions
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
 			 * @since 7.0
 			 */
-			it("test object doc completion 3", function(done) {
+			it.skip("test object doc completion 3", function(done) {
 				var options = {
 					buffer: "/*eslint-env amd*//**\n* @returns {I} \n*/",
 					line: '* @returns {I} ',
@@ -4254,8 +4257,8 @@ define([
 					offset: 35,
 					callback: done};
 				testProposals(options, [
-				  //TODO   ['mage', 'Image', 'Image'],
-				  ///   ['nfinity', 'Infinity', 'Infinity']
+					['mage', 'Image', 'Image'],
+					['nfinity', 'Infinity', 'Infinity']
 				]);
 			});
 		});
