@@ -481,7 +481,7 @@ eclipse.GitService = (function() {
 			return clientDeferred;
 		},
 		
-		addRemote : function(gitRemoteParentURI, remoteName, remoteURI) {
+		addRemote : function(gitRemoteParentURI, remoteName, remoteURI, isGerrit) {
 			var service = this;
 			
 			var clientDeferred = new Deferred();
@@ -493,7 +493,8 @@ eclipse.GitService = (function() {
 				timeout : GIT_TIMEOUT,
 				data: JSON.stringify({
 					"Remote" : remoteName, //$NON-NLS-0$
-					"RemoteURI" : remoteURI //$NON-NLS-0$
+					"RemoteURI" : remoteURI, //$NON-NLS-0$
+					"IsGerrit" : isGerrit //$NON-NLS-0$
 				})
 			}).then(function(result) {
 				service._getGitServiceResponse(clientDeferred, result);
