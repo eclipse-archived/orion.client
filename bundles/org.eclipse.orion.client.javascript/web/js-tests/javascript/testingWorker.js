@@ -15,38 +15,32 @@ define([
 'orion/xhr',
 'orion/URL-shim' //global, stays last
 ], function(_xhr) {
-
+	
+	var worker, //the backing worker
+		_state, //the mutable testing state
+		callbacks, //the object of callback functions per request ID 
+		messageID = 0; //the message ID counter
+	
 	/**
 	 * @description Create a new instance of the worker
 	 * @param {String} script The URL to load
-	 * @param {Function} onMessage The default onmessage callback
-	 * @param {Function} onError The default onerror callback
 	 * @returns {WrappedWorker} A new WrappedWorker instance
 	 * @since 10.0
 	 */
-	function WrappedWorker(script, onMessage, onError) {
-		/*if(typeof(SharedWorker) === 'function') {
-			this.shared = true;
-			var wUrl = new URL(script, window.location.href);
-			wUrl.query.set("worker-language", navigator.language);
-			this.worker = new SharedWorker(wUrl.href);
-			this.worker.port.onmessage = onMessage;
-			this.worker.port.onerror = onError;
-			this.worker.port.start();
-			this.worker.port.postMessage('');
-			this.messageId = 0;
-    		this.callbacks = Object.create(null);
-    		this._state;
-		} else { */
- 			var wUrl = new URL(script, window.location.href);
-    		this.worker = new Worker(wUrl.href);
-    		this.worker.onmessage = onMessage.bind(this);
-    		this.worker.onerror = onError.bind(this);
-    		this.worker.postMessage('start_server'); //$NON-NLS-1$
-    		this.messageId = 0;
-    		this.callbacks = Object.create(null);
-    		this._state;
-    	//}
+	function WrappedWorker(script, state) {
+ 		var wUrl = new URL(script, window.location.href);
+    	worker = new Worker(wUrl.href);
+    	worker.onmessage = onmessage.bind(this);
+    	worker.onerror = onerror.bind(this);
+    	worker.postMessage({request: 'start_worker'}); 
+    	messageID = 0;
+    	callbacks = Object.create(null);
+    	if(state) {
+    		_state = state;
+		} else {
+	
+	    	_state = Object.create(null);
+		}
 	}
 
 	/**
@@ -61,24 +55,12 @@ define([
 		if(msg != null && typeof(msg) === 'object') {
 			if(typeof(msg.messageID) !== 'number') {
 				//don't overwrite an id from a tern-side request
-				msg.messageID = this.messageId++;
-				this.callbacks[msg.messageID] = f;
+				msg.messageID = messageID++;
+				callbacks[msg.messageID] = f;
 			}
 		}
-		if(this.shared) {
-			this.worker.port.postMessage(msg);
-		} else {
-			this.worker.postMessage(msg);
-		}
+		worker.postMessage(msg);
 	};
-	
-	WrappedWorker.prototype.startServer = function(jsonOptions){
-		if(this.shared) {
-			this.worker.port.postMessage({request: 'start_server', args: {options: jsonOptions}});
-		} else {
-			this.worker.postMessage({request: 'start_server', args: {options: jsonOptions}});
-		}
-	}
 	
 	/**
 	 * @name WrappedWorker.prototype.terminate
@@ -86,7 +68,7 @@ define([
 	 * @function
 	 */
 	WrappedWorker.prototype.terminate = function() {
-		this.worker.terminate();
+		worker.terminate();
 	};
 	
 	/**
@@ -96,111 +78,127 @@ define([
 	 * @param {Object} state The state for the worker to use per test
 	 */
 	WrappedWorker.prototype.setTestState = function(state) {
-		this._state = state;
+		_state = state;
 	};
 	
-	return {
-		instance: function instance() {
-			var _instance = new WrappedWorker('../../javascript/plugins/ternWorker.js',
-				function(ev) {
-					if(typeof(ev.data) === 'object') {
-						var _d = ev.data;
-						var id  = _d.messageID;
-						var f = _instance.callbacks[id];
-						function getFileURL(filePath){
-							var rootIndex = window.location.href.indexOf('js-tests/javascript');
-							if(!/\.js$/g.test(filePath)) {
-								// Must have trailing .js extension
-								filePath += '.js';
-							}
-							if (/^(?:\.\/|\.\.\/)/g.test(filePath)){ // starts with ./ or ../
-								// Relative file paths need to be relative to js-tests/javascript/ folder
-								if (rootIndex === -1){
-									return new URL('js-tests/javascript/' + filePath, window.location.href);
-								} else {
-									return new URL(filePath, window.location.href);
-								}
-							} else {
-								// Absolute paths need to use the site root
-								if (rootIndex > -1){
-									return new URL(filePath, window.location.href.substring(0, rootIndex));
-								} else {
-									return new URL(filePath, window.location.href);
-								}
-							}
-						}
-						
-						if(typeof(f) === 'function') {
-							f(_d);
-							delete _instance.callbacks[id];
-						} else if(_d.request === 'read') {
-							var url, req, filePath;
-							if(_d.args && _d.args.file) {
-								if(typeof(_d.args.file) === 'object') {
-									filePath = _d.args.file.logical ? _d.args.file.logical : _d.args.file;
-									url = getFileURL(filePath);
-									
-									_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
-										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.response, file: response.url, logical: _d.args.file.logical}});
-									}, function(rejection){
-										var error = 'XHR GET failed: ' + url.href;
-										_instance._state.callback(new Error(error));
-										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {error: error, logical: _d.args.file.logical, file: rejection.url}});
-									});
-								} else if(typeof(_d.args.file) === 'string') {
-									filePath = _d.args.file;
-									url = getFileURL(filePath);
-									
-									_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
-										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.target.response, file: response.target.responseURL}});
-									}, function(rejection){
-										var error = 'XHR GET failed: ' + url.href;
-										_instance._state.callback(new Error(error));
-										_instance.postMessage({request: 'read', ternID: _d.ternID, args: {error: error, logical: _d.args.file.logical, file: rejection.url}});
-									});
-								}
-							} else {
-								_instance.postMessage({request: 'read', ternID: _d.ternID, args: {contents: _instance._state.buffer, file: _instance._state.file}});
-							}
-						} else if(typeof(_d.request) === 'string') {
-							//don't process requests other than the ones we want
-							return;
-						} else if(_d.error) {
-							var err = _d.error;
-							if(err instanceof Error) {
-								_instance._state.callback(err);
-							} else if(typeof(err) === 'string') {
-								if(typeof(_d.message) === 'string') {
-									_instance._state.callback(new Error(err+": "+_d.message));
-								} else {
-									//wrap it
-									_instance._state.callback(new Error(err));
-								}
-							} else if(err && typeof(err.message) === 'string') {
-								_instance._state.callback(new Error(err.message));
-							}
-						}
-						else {
-							_instance._state.callback(new Error('Got message I don\'t know'));
-						}
-					} else if (typeof(ev.data) === 'string' && ev.data === 'worker_ready'){
-						_instance.startServer();
-					} else if(typeof(ev.data) === 'string' && ev.data === 'server_ready' && _instance._state.warmup) {
-						delete _instance._state.warmup;
-						_instance._state.callback();
+	/**
+	 * @description Returns the current test state
+	 * @function
+	 * @returns {Object} The current state being tested in the worker
+	 * @since 11.0
+	 */
+	WrappedWorker.prototype.getTestState = function() {
+		return _state;
+	};
+	
+	function onmessage(ev) {
+		if(typeof(ev.data) === 'object') {
+			var _d = ev.data;
+			var id  = _d.messageID;
+			var f = callbacks[id];
+			if(typeof(f) === 'function') {
+				f(_d);
+				delete callbacks[id];
+			} else if(_d.request === "worker_ready") {
+    			if(typeof(_state.workerReady) === 'function') {
+					_state.workerReady();
+				} else {
+					this.postMessage({request: 'start_server', args: {}}, 
+						/* @callback */ function(response) {
+							delete _state.warmup;
+							_state.callback();
+						});
+				}
+			} else if(_d.request === 'read') {
+				var url, filePath;
+				if(_d.args && _d.args.file) {
+					if(typeof(_d.args.file) === 'object') {
+						filePath = _d.args.file.logical ? _d.args.file.logical : _d.args.file;
+						url = getFileURL(filePath);
+						_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
+							this.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.response, file: response.url, logical: _d.args.file.logical}});
+						}.bind(this), function(rejection){
+							var error = 'XHR GET failed: ' + url.href;
+							_state.callback(new Error(error));
+							this.postMessage({request: 'read', ternID: _d.ternID, args: {error: error, logical: _d.args.file.logical, file: rejection.url}});
+						}.bind(this));
+					} else if(typeof(_d.args.file) === 'string') {
+						filePath = _d.args.file;
+						url = getFileURL(filePath);
+						_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
+							this.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.target.response, file: response.target.responseURL}});
+						}.bind(this), function(rejection){
+							var error = 'XHR GET failed: ' + url.href;
+							_state.callback(new Error(error));
+							this.postMessage({request: 'read', ternID: _d.ternID, args: {error: error, logical: _d.args.file.logical, file: rejection.url}});
+						}.bind(this));
 					}
-				}.bind(this),
-				function(err) {
-					if(err instanceof Error) {
-						_instance._state.callback(err);
-					} else if(typeof(err) === 'string') {
+				} else {
+					this.postMessage({request: 'read', ternID: _d.ternID, args: {contents: _state.buffer, file: _state.file}});
+				}
+			} else if(_d.request === 'delFile') {
+				//don't process the ack
+				return;
+			} else if(typeof(_d.request) === 'string') {
+				//don't process requests other than the ones we want
+				_state.callback(new Error('Got message I don\'t know: '+_d.request));
+			} else if(_d.error) {
+				var err = _d.error;
+				if(err instanceof Error) {
+					_state.callback(err);
+				} else if(typeof(err) === 'string') {
+					if(typeof(_d.message) === 'string') {
+						_state.callback(new Error(err+": "+_d.message));
+					} else {
 						//wrap it
-						_instance._state.callback(new Error(err));
-					} else if(err && typeof(err.message) === 'string') {
-						_instance._state.callback(new Error(err.message));
+						_state.callback(new Error(err));
 					}
-				});
-			return _instance;
+				} else if(err && typeof(err.message) === 'string') {
+					_state.callback(new Error(err.message));
+				}
+			} else {
+				_state.callback(new Error('Got message I don\'t know'));
+			}
+		}
+	}
+	
+	function onerror(err) {
+		if(err instanceof Error) {
+			_state.callback(err);
+		} else if(typeof(err) === 'string') {
+			//wrap it
+			_state.callback(new Error(err));
+		} else if(err && typeof(err.message) === 'string') {
+			_state.callback(new Error(err.message));
+		}
+	}
+	
+	function getFileURL(filePath){
+		var rootIndex = window.location.href.indexOf('js-tests/javascript');
+		if(!/\.js$/g.test(filePath)) {
+			// Must have trailing .js extension
+			filePath += '.js';
+		}
+		if (/^(?:\.\/|\.\.\/)/g.test(filePath)){ // starts with ./ or ../
+			// Relative file paths need to be relative to js-tests/javascript/ folder
+			if (rootIndex === -1){
+				return new URL('js-tests/javascript/' + filePath, window.location.href);
+			} else {
+				return new URL(filePath, window.location.href);
+			}
+		} else {
+			// Absolute paths need to use the site root
+			if (rootIndex > -1){
+				return new URL(filePath, window.location.href.substring(0, rootIndex));
+			} else {
+				return new URL(filePath, window.location.href);
+			}
+		}
+	}
+	
+	return {
+		instance:  function(state) {
+			return new WrappedWorker('../../javascript/plugins/ternWorker.js', state);
 		}
 	};
 });

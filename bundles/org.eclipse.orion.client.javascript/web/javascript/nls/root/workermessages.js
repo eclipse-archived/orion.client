@@ -40,6 +40,10 @@ define({
 	'htmlDepPluginDescription': 'Resolves script block and script tag dependencies',
 	'findTypesName': 'Orion References Support',
 	'findTypesDescription': 'Plug-in that provides expanded type-finding support in Orion',
+	'eslintPluginName': 'ESLint plugin for Tern',
+	'eslintPluginDescription': 'Provides ESLint linting for Tern',
+	'jsdocPluginName': 'JSDoc types and completion support',
+	'jsdocPluginDescription': 'Provides auto-complete and type information for JSDoc',
 
 	// Other messages
 	'unknownError': 'An unknown error occurred.',

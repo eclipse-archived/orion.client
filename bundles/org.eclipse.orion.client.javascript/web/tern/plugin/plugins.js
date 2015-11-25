@@ -17,7 +17,7 @@ define([
 	"acorn/dist/walk"
 ],/* @callback */ function(infer, tern, walk) {
 	
-	tern.registerPlugin('ternPlugins', /* @callback */ function(server, options) { //$NON-NLS-1$
+	tern.registerPlugin('plugins', /* @callback */ function(server, options) { //$NON-NLS-1$
 		return {}; //TODO I don't think we need to hook any phases
 	});
 	

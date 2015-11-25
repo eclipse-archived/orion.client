@@ -21,7 +21,7 @@
 })(function(infer, tern, resolver, CU, Finder) {
   "use strict";
 
-  tern.registerPlugin("orionHTML", /* @callback */ function(server, options) {
+  tern.registerPlugin("htmlDependencies", /* @callback */ function(server, options) {
 	server._htmlDeps = Object.create(null);
 	server._htmlDeps.map = Object.create(null);
 	

@@ -1,0 +1,111 @@
+{
+	"pluginsDir": "tern/plugin/",
+	"defsDir": "tern/defs/",
+	"defs": ["ecma5", "ecma6", "browser"],
+	"plugins": {
+		"doc_comment": {
+			"name": "ternDocPluginName",
+			"description": "ternDocPluginDescription",
+			"fullDocs": true,
+			"version": "0.12.0",
+			"removable": false
+		},
+		"orionAmqp": {
+			"name": "orionAMQPPluginName",
+			"description": "orionAMQPPluginDescription",
+			"version": "0.9.1",
+			"removable": true,
+			"env": "amqp"
+		},
+		"angular": {
+			"name": "orionAngularPluginName",
+			"description": "orionAngularPluginDescription",
+			"version": "0.12.0",
+			"removable": true
+		},
+		"orionExpress": {
+			"name": "orionExpressPluginName",
+			"description": "orionExpressPluginDescription",
+			"version": "4.12.4",
+			"removable": true,
+			"env": "express"
+		},
+		"orionMongoDB": {
+			"name": "orionMongoDBPluginName",
+			"description": "orionMongoDBPluginDescription",
+			"version": "1.1.21",
+			"removable": true,
+			"env": "mongodb"
+		},
+		"orionMySQL": {
+			"name": "orionMySQLPluginName",
+			"description": "orionMySQLPluginDescription",
+			"version": "2.7.0",
+			"removable": true,
+			"env": "mysql"
+		},
+		"node": {
+			"name": "orionNodePluginName",
+			"description": "orionNodePluginDescription",
+			"version": "0.12.0",
+			"removable": true
+		},
+		"orionPostgres": {
+			"name": "orionPostgresPluginName",
+			"description": "orionPostgresPluginDescription",
+			"version": "4.4.0",
+			"removable": true,
+			"env": "pg"
+		},
+		"orionRedis": {
+			"name": "orionRedisPluginName",
+			"description": "orionRedisPluginDescription",
+			"version": "0.12.1",
+			"removable": true,
+			"env": "redis"
+		},
+		"requirejs": {
+			"name": "orionRequirePluginName",
+			"description": "orionRequirePluginDescription",
+			"nls": "javascript/nls/workermessages",
+			"version": "0.12.0",
+			"removable": true
+		},
+		"plugins": {
+			"name": "ternPluginsPluginName",
+			"description": "ternPluginsPluginDescription",
+			"version": "1.0",
+			"removable": false
+		},
+		"openImplementation": {
+			"name": "openImplPluginName",
+			"description": "openImplPluginDescription",
+			"version": "1.0",
+			"removable": false
+		},
+		"htmlDependencies": {
+			"name": "htmlDepPluginName",
+			"description": "htmlDepPluginDescription",
+			"version": "1.0",
+			"removable": false
+		},
+		"refs": {
+			"name": "findTypesName",
+			"description": "findTypesDescription",
+			"version": "1.0",
+			"removable": false
+		},
+		"jsdoc": {
+			"name": "jsdocPluginName",
+			"description": "jsdocPluginDescription",
+			"version": "1.0",
+			"removable": false
+		},
+		"eslint": {
+			"name": "eslintPluginName",
+			"description": "eslintPluginDescription",
+			"version": "1.0",
+			"removeable": true
+		}
+	}
+}

@@ -47,10 +47,11 @@ define([
 'orion/editor/stylers/application_schema_json/syntax',
 'orion/editor/stylers/application_x-ejs/syntax',
 'i18n!javascript/nls/messages',
+'orion/i18nUtil',
 'orion/URL-shim'
 ], function(PluginProvider, mServiceRegistry, mPreferences, Deferred, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist,
 			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, TernProjectManager, Util, Logger, AddToTernCommand, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
-			RenameCommand, RefsCommand, mGSearchClient, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
+			RenameCommand, RefsCommand, mGSearchClient, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 	var preferences = new mPreferences.PreferencesService(serviceRegistry);
@@ -116,30 +117,25 @@ define([
     			this.worker.port.onmessage = onMessage;
     			this.worker.port.onerror = onError;
     			this.worker.port.start();
-    			this.worker.port.postMessage('');
+    			this.worker.postMessage({request: "start_worker"}); //$NON-NLS-1$
     		} else { */
  				var wUrl = new URL(script, window.location.href);
-    			wUrl.query.set("worker-language", navigator.language);   			 //$NON-NLS-1$
+    			wUrl.query.set("worker-language", navigator.language); //$NON-NLS-1$
     			this.worker = new Worker(wUrl.href);
     			this.worker.onmessage = onMessage.bind(this);
     			this.worker.onerror = onError.bind(this);
-    			this.worker.postMessage('start_worker'); //$NON-NLS-1$
+    			this.worker.postMessage({request: "start_worker"}); //$NON-NLS-1$
     			this.messageId = 0;
     			this.callbacks = Object.create(null);
     	//	}
     	}
     	
-    	WrappedWorker.prototype.startServer = function(jsonOptions){
-    		ternReady = false;
-    		if(this.shared) {
-	    		this.worker.port.postMessage({request: 'start_server', args: {options: jsonOptions}}); //$NON-NLS-1$
-    		} else {
-    			this.worker.postMessage({request: 'start_server', args: {options: jsonOptions}}); //$NON-NLS-1$
-    		}
-    	};
-    	
     	WrappedWorker.prototype.postMessage = function(msg, f) {
-    		if(ternReady) {
+    		var starting = msg.request === 'start_server';
+    		if(starting) {
+    			ternReady = false;
+    		}
+    		if(ternReady || starting) {
 				if(msg != null && typeof(msg) === 'object') {
 					if(typeof(msg.messageID) !== 'number' && typeof(msg.ternID) !== 'number') {
 						//don't overwrite an id from a tern-side request
@@ -163,18 +159,29 @@ define([
     	 * TODO will need to listen to updated tern plugin settings once enabled to clear this cache
     	 */
     	var contributedEnvs;
-
+		var ternWorker;
+		
 		var handlers ={
 			'read': doRead,
-			'worker_ready': workerReady,
-			'server_ready': serverReady
+			/**
+			 * @callback
+			 */
+			'worker_ready': function(response) {
+				ternReady = false;
+				ternWorker.postMessage({request: 'start_server', args: {options: {}}}, /* @callback */ function(response) { //$NON-NLS-1$
+					serverReady();
+				});
+			}
 		};
 
 		// Start the worker
-    	var ternWorker = new WrappedWorker("ternWorker.js",  //$NON-NLS-1$
+    	ternWorker = new WrappedWorker("ternWorker.js",  //$NON-NLS-1$
 	    	function(evnt) {
 	    		var _d = evnt.data;
-				if(typeof(_d) === 'object') {
+	    		if(_d.__isError) {
+	    			//TODO log using the new platform hooks when available
+	    			Logger.log(_d.message);
+	    		} else if(typeof(_d) === 'object') {
 					var id  = _d.messageID;
 					var f = this.callbacks[id];
 					if(typeof(f) === 'function') {
@@ -185,12 +192,7 @@ define([
 					if(typeof(_handler) === 'function') {
 						_handler(_d);
 					}
-				} else if(typeof(evnt.data) === 'string') {
-					_handler = handlers[evnt.data];
-					if(typeof(_handler) === 'function') {
-						_handler(_d);
-					}
-		    	}
+				}
 	    	},
 	    	function(err) {
 	    		Logger.log(err);
@@ -217,16 +219,16 @@ define([
 								ternWorker.postMessage(response);
 							});
 						} else {
-							response.args.error = 'Failed to read file '+_l;
+							response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
 							ternWorker.postMessage(response);
 						}
 					} else {
-						response.args.error = 'Failed to read file '+_l;
+						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
 						ternWorker.postMessage(response);
 					}
 				},
 				function(err) {
-					response.args.error = 'Failed to read file '+_l;
+					response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
 					response.args.message = err.toString();
 					ternWorker.postMessage(response);
 				});
@@ -244,21 +246,17 @@ define([
 							},
 							function(err) {
 								response.args.message = err.toString();
-								response.args.error = 'Failed to read file '+file;
+								response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], file);
 								ternWorker.postMessage(response);
 							});
 				}
 				catch(err) {
 					response.args.message = err.toString();
-					response.args.error = 'Failed to read file '+file;
+					response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], file);
 					ternWorker.postMessage(response);
 				}
 			}
 		}
-		
-		function workerReady() {
-			ternWorker.startServer();
-		};
 		
 		/**
 		 * @description Handles the server being ready
@@ -402,10 +400,10 @@ define([
 	    	provider.registerServiceProvider("orion.navigate.command",  //$NON-NLS-1$
 	    			new AddToTernCommand.AddToTernCommand(ternProjectManager),
 	    			{
-	    		name: javascriptMessages["addToTernCommand"],  //$NON-NLS-1$
-	    		tooltip : javascriptMessages['addToTernCommandTooltip'],  //$NON-NLS-1$
-	    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
-	    		id : "add.js.tern",  //$NON-NLS-1$
+			    		name: javascriptMessages["addToTernCommand"],  //$NON-NLS-1$
+			    		tooltip : javascriptMessages['addToTernCommandTooltip'],  //$NON-NLS-1$
+			    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
+			    		id : "add.js.tern"  //$NON-NLS-1$
 	    			}
 	    	);
     	}

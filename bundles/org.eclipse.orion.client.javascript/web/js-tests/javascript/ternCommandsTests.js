@@ -44,7 +44,7 @@ define([
 		var buffer = state.buffer = typeof(options.buffer) === 'undefined' ? '' : options.buffer;
 		var offset = state.offset = typeof(options.offset) === 'undefined' ? 0 : options.offset;
 		var line = state.line = typeof(options.line) === 'undefined' ? '' : options.line;
-		
+		var prefix = state.prefix = typeof(options.prefix) === 'undefined' ? '' : options.prefix;
 		var contentType = options.contenttype ? options.contenttype : 'application/javascript';
 		var	file = state.file = jsFile;				
 		if (contentType === 'text/html'){
@@ -80,7 +80,7 @@ define([
 			}
 		};
 		astManager.onModelChanging({file: {location: file}});
-		var params = {offset: offset, input: file, line: line, timeout: options.timeout ? options.timeout : 20000, timeoutReturn: timeoutReturn};
+		var params = {prefix: prefix, offset: offset, input: file, line: line, timeout: options.timeout ? options.timeout : 20000, timeoutReturn: timeoutReturn};
 		return {
 			editorContext: editorContext,
 			params: params
@@ -106,32 +106,32 @@ define([
 						// If no error was returned, check to see if we have results
 						if (_p.editorContext.options){
 							var actual = _p.editorContext.options;
-							assert(false, 'Expected error status indicating no result, instead found result: ' + actual.start + '-' + actual.end)
+							assert(false, 'Expected error status indicating no result, instead found result: ' + actual.start + '-' + actual.end);
 						}
 						assert(result, 'Expected error status indicating no result, instead result returned was ' + result);
 					}
-					testworker._state.callback();
+					testworker.getTestState().callback();
 					return;
 				}
 				assert(_p.editorContext.options, "OpenEditor was not called on the editor context");
-				var actual = _p.editorContext.options;
+				actual = _p.editorContext.options;
 				assert.equal(actual.start, expected.start, 'The offset starts are not the same. Actual ' + actual.start + '-' + actual.end + ' Expected ' + expected.start + '-' + expected.end);
 				assert.equal(actual.end, expected.end, 'The offset ends are not the same. Actual ' + actual.start + '-' + actual.end + ' Expected ' + expected.start + '-' + expected.end);
-				testworker._state.callback();
+				testworker.getTestState().callback();
 			} catch (err){
-				testworker._state.callback(err);
+				testworker.getTestState().callback(err);
 			}
 		}, function (error) {
 			if (!expected) {
 				if (error.Severity === "Warning") {
-					testworker._state.callback();
+					testworker.getTestState().callback();
 					return;
 				}
 			}
 			if(error instanceof Error || toString.call(error) === '[object Error]') {
-				testworker._state.callback(error);
+				testworker.getTestState().callback(error);
 			} else {
-				testworker._state.callback(new Error('Unknown error'));
+				testworker.getTestState().callback(new Error('Unknown error'));
 			}
 		});
 	}
@@ -156,7 +156,7 @@ define([
 				callback: callback
 			};
 			var _p = setup(options);
-			testworker._state.warmup = true;
+			testworker.getTestState().warmup = true;
 			ternAssist.computeContentAssist(_p.editorContext, _p.params).then(/* @callback */ function (actualProposals) {
 				//do nothing, warm up
 			});

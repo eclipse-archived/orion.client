@@ -148,13 +148,13 @@ define([
 					    assert(ap.hover.content.indexOf(ep[2]) === 0, "The doc should have started with the given value.\nActual: " + ap.hover.content + '\nExpected: ' + ep[2]);
 					}
 				}
-				testworker._state.callback();
+				testworker.getTestState().callback();
 			}
 			catch(err) {
-				testworker._state.callback(err);
+				testworker.getTestState().callback(err);
 			}
 		}, function (error) {
-			testworker._state.callback(error);
+			testworker.getTestState().callback(error);
 		});
 	}
 
@@ -173,7 +173,7 @@ define([
 				callback: callback
 			};
 			var _p = setup(options);
-			testworker._state.warmup = true;
+			testworker.getTestState().warmup = true;
 			ternAssist.computeContentAssist(_p.editorContext, _p.params).then(/* @callback */ function (actualProposals) {
 				//do noting, warm up
 			});

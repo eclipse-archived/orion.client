@@ -25,38 +25,23 @@ if(sear) {
 requirejs.config({locale: lang});
 require([
 	'tern/lib/tern',
-	'tern/plugin/doc_comment',
-	'tern/plugin/jsdoc',
-	'tern/plugin/orionAmqp',
-	'tern/plugin/angular',
-	//'tern/plugin/component',
-	'tern/plugin/orionExpress',
-	'tern/plugin/orionMongoDB',
-	'tern/plugin/orionMySQL',
-	'tern/plugin/node',
-	'tern/plugin/orionPostgres',
-	'tern/plugin/orionRedis',
-	'tern/plugin/requirejs',
-	'tern/plugin/ternPlugins',
-	'tern/plugin/refs',
-	'tern/plugin/openImplementation',
-	'tern/plugin/htmlDependencies',
-	'json!tern/defs/ecma5.json',
-	'json!tern/defs/ecma6.json',
-	'json!tern/defs/browser.json',
+	'json!javascript/plugins/ternDefaults.json',
+	'orion/Deferred',
+	'orion/serialize',
 	'i18n!javascript/nls/workermessages',
 	'orion/i18nUtil'
 ],
-/* @callback */ function(Tern, docPlugin, jsdocPlugin, orionAMQPPlugin, angularPlugin,/* componentPlugin,*/ orionExpressPlugin, orionMongoDBPlugin,
-							orionMySQLPlugin, orionNodePlugin, orionPostgresPlugin, orionRedisPlugin, orionRequirePlugin, ternPluginsPlugin,
-							refsPlugin, openImplPlugin, htmlDepPlugin, ecma5, ecma6, browser, Messages, i18nUtil) {
+/* @callback */ function(Tern, defaultOptions, Deferred, Serialize, Messages, i18nUtil) {
 
     var ternserver = null;
-
+	nlsDefaultPlugins(defaultOptions.plugins);
+	
     /**
+     * @param {Object} jsonOptions The optional map of JSON options to start the server with
+     * @param {Function} callback The optional function to callback to 
      * @description Start up the Tern server, send a message after trying
      */
-    function startServer(jsonOptions) {
+    function startServer(jsonOptions, callback) {
     	if (ternserver){
     		ternserver.reset();
     		ternserver = null;
@@ -64,140 +49,66 @@ require([
         var options = {
                 async: true,
                 debug: false,
-                defs: [ecma5, ecma6, browser],
                 projectDir: '/', //$NON-NLS-1$
-                plugins: {
-                    doc_comment: {
-                    	name: Messages['ternDocPluginName'],
-                    	description: Messages['ternDocPluginDescription'],
-                        fullDocs: true,
-                        version: '0.12.0', //$NON-NLS-1$
-                        removable: false
-                    },
-                    orionAmqp: {
-                    	name: Messages['orionAMQPPluginName'],
-                    	description: Messages['orionAMQPPluginDescription'],
-                    	version: '0.9.1', //$NON-NLS-1$
-                    	removable: true,
-                    	env: 'amqp' //$NON-NLS-1$
-                    },
-                    angular: {
-                    	name: Messages['orionAngularPluginName'],
-                    	description: Messages['orionAngularPluginDescription'],
-                    	version: '0.12.0', //$NON-NLS-1$
-                    	removable: true
-                    },
-                   /* component: {
-                    	name: Messages['orionComponentPluginName'],
-                    	description: Messages['orionComponentPluginDescription'],
-                    	version: '0.12.0', //$NON-NLS-1$
-                    	removable: true,
-                    },*/
-                    orionExpress: {
-                    	name: Messages['orionExpressPluginName'],
-                    	description: Messages['orionExpressPluginDescription'],
-                    	version: '4.12.4', //$NON-NLS-1$
-                    	removable: true,
-                    	env: 'express' //$NON-NLS-1$
-                    },
-                    orionMongoDB: {
-                    	name: Messages['orionMongoDBPluginName'],
-                    	description: Messages['orionMongoDBPluginDescription'],
-                    	version: '1.1.21', //$NON-NLS-1$
-                    	removable: true,
-                    	env: 'mongodb' //$NON-NLS-1$
-                    },
-                    orionMySQL: {
-                    	name: Messages['orionMySQLPluginName'],
-                    	description: Messages['orionMySQLPluginDescription'],
-                    	version: '2.7.0', //$NON-NLS-1$
-                    	removable: true,
-                    	env: 'mysql' //$NON-NLS-1$
-                    },
-                    node: {
-                    	name: Messages['orionNodePluginName'],
-                    	description: Messages['orionNodePluginDescription'],
-                    	version: '0.12.0', //$NON-NLS-1$
-                    	removable: true
-                    },
-                    orionPostgres: {
-                    	name: Messages['orionPostgresPluginName'],
-                    	description: Messages['orionPostgresPluginDescription'],
-                    	version: '4.4.0', //$NON-NLS-1$
-	                   	removable: true,
-	                   	env: 'pg' //$NON-NLS-1$
-                    },
-                    orionRedis: {
-                    	name: Messages['orionRedisPluginName'],
-                    	description: Messages['orionRedisPluginDescription'],
-                    	version: '0.12.1', //$NON-NLS-1$
-                    	removable: true,
-                    	env: 'redis' //$NON-NLS-1$
-                    },
-                    requirejs: {
-                    	name: Messages['orionRequirePluginName'],
-                    	description: Messages['orionRequirePluginDescription'],
-                    	version: '0.12.0', //$NON-NLS-1$
-                    	removable: true
-                    },
-                    plugins: {
-                    	name: Messages['ternPluginsPluginName'],
-                    	description: Messages['ternPluginsPluginDescription'],
-                    	version: '1.0', //$NON-NLS-1$
-                    	removable: false
-                    },
-                    openImplementation: {
-                    	name : Messages['openImplPluginName'],
-                    	description: Messages['openImplPluginDescription'],
-                    	version: '1.0', //$NON-NLS-1$
-                    	removable: false
-                    },
-                    orionHTML: {
-                    	name : Messages["htmlDepPluginName"],
-                    	description: Messages["htmlDepPluginDescription"],
-                    	version: '1.0', //$NON-NLS-1$
-                    	removable: false
-                    },
-                    refs: {
-                    	name : Messages["findTypesName"],
-                    	description: Messages["findTypesDescription"],
-                    	version: '1.0', //$NON-NLS-1$
-                    	removable: false
-                    },
-                    jsdoc: {
-                    	name: "JSDoc types and completion support",
-                    	description: "Provides auto-complete and type information for JSDoc",
-                    	version: "1.0",
-                    	removable: false
-                    }
-                },
+                plugins: defaultOptions.plugins,
                 getFile: _getFile
             };
-        if (jsonOptions){
+        var pluginsDir = defaultOptions.pluginsDir;
+        var defsDir = defaultOptions.defsDir;
+        var defNames = defaultOptions.defs;
+        if (jsonOptions) {
 			if (jsonOptions.plugins){
         		options.plugins = jsonOptions.plugins;
         	}
+        	if(jsonOptions.pluginDir) {
+        		pluginsDir = jsonOptions.pluginsDir;
+        	}
         	if (Array.isArray(jsonOptions.libs)){
-        		// TODO Untested option, related to the defs lookup
-        		options.libs = jsonOptions.libs;
+        		defNames = jsonOptions.libs;
+        		defsDir = jsonOptions.defsDir;
+        	}
+        	if (Array.isArray(jsonOptions.defs)){
+        		defNames = jsonOptions.defs;
+        		defsDir = jsonOptions.defsDir;
         	}
         	if (typeof jsonOptions.ecmaVersion === 'number'){
-        		// TODO Untested option
         		options.ecmaVersion = jsonOptions.ecmaVersion;
         	}
         	if (typeof jsonOptions.dependencyBudget === 'number'){
-        		// TODO Untested option
         		options.dependencyBudget = jsonOptions.dependencyBudget;
         	}
         }
-        ternserver = new Tern.Server(options);
-        post('server_ready'); //$NON-NLS-1$
+        function defaultStartUp(err) {
+        	options.plugins = defaultOptions.plugins;
+        	options.defs = defaultOptions.defs;
+        	Deferred.all(loadPlugins(options.plugins, defaultOptions.pluginsDir)).then(/* @callback */ function(plugins) {
+	        	Deferred.all(loadDefs(defaultOptions.defs, defaultOptions.defsDir)).then(function(json) {
+	        			options.defs = json;
+	        			ternserver = new Tern.Server(options);
+				        callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
+				        if(err) {
+				        	post(Serialize.serializeError(err));
+				        }
+	        		});
+	        });
+        }
+        if(!options.plugins && !defNames) {
+        	defaultStartUp();
+        } else {
+        	Deferred.all(loadPlugins(options.plugins, pluginsDir)).then(/* @callback */ function(plugins) {
+	        	Deferred.all(loadDefs(defNames, defsDir)).then(function(json) {
+	        			options.defs = json;
+	        			ternserver = new Tern.Server(options);
+				        callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
+	        		}, defaultStartUp);
+	        }, defaultStartUp);
+        }
     }
-	post('worker_ready'); //$NON-NLS-1$
+	post({request: "worker_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
 
 	var handlers = {
-		'start_server': function(args){
-			startServer(args && args.options);	
+		'start_server': function(args, callback){
+			startServer(args.options, callback);	
 		},
 		'addFile': function(args, callback) {
 			ternserver.addFile(args.file, args.source);
@@ -622,5 +533,121 @@ require([
 	    } else {
 	       post(i18nUtil.formatMessage(Messages['failedReadRequest'], typeof(file) === 'object' ? file.logical : file)); //$NON-NLS-1$
 	    }
+    }
+    
+    /**
+     * @description Loads the plugins listed in the given plugins object
+     * @param {Object} plugins The object of plugins
+     * @param {String} pluginsDir The base directory to load plugins from, if not defined, the default of 'tern/plugin/' is assumed
+     * @returns {Promise} The promise to resolve all of the plugin loads
+     * @since 11.0
+     */
+    function loadPlugins(plugins, pluginsDir) {
+    	var promises = [];
+    	Object.keys(plugins).forEach(function(key) {
+    		var plugin = plugins[key];
+    		var loc = plugin.location;
+    		if(typeof(loc) !== 'string') {
+    			if(typeof(pluginsDir) === 'string') {
+	    			loc = pluginsDir + key;
+				} else {
+					//assume it is in /tern/plugin/
+					loc = 'tern/plugin/' + key; //$NON-NLS-1$
+				}
+    		}
+    		var deferred = new Deferred();
+    		try {
+				promises.push(deferred);    		
+    			requirejs([loc], function(_) {
+	    			deferred.resolve(_);
+    			},
+    			function(err) {
+    				deferred.reject(err);
+    			});
+			}
+			catch(err) {
+				post(err);
+				deferred.reject(err);
+			}
+    	});
+    	return promises;
+    }
+    
+    /**
+     * @description Load any defs from the .tern-project file
+     * @param {Array.<String>|Object} defs The definitions, either from an array of names or an object of names with additional metadata
+     * @param {String} defsDir The optional directory where to find the definitions. If not given the 'tern/defs' directory is assumed
+     * @returns {Promise} Returns a promise to resolve all def loads
+     * @since 11.0
+     */
+    function loadDefs(defs, defsDir) {
+    	var _defs = [];
+    	if(Array.isArray(defs)) {
+	    	defs.forEach(function(_def) {
+	    		_defs.push(_loadDef(_def, defsDir, _defs));
+	    	});
+    	} else if(defs && typeof(defs) === 'object') {
+	     	Object.keys(defs).forEach(function(key) {
+	    		var def = defs[key];
+	    		if(typeof(def.location) === 'string') {
+		    		_defs.push(_loadDef(def.location, defsDir, _defs));
+	    		} else {
+	    			_defs.push(_loadDef(key, defsDir, _defs));
+	    		}
+	     	});
+		}
+		return _defs;
+    }
+    
+    /**
+     * @description Delegate to actually load a definition
+     * @private
+     * @param {String} def The name of the definition load try and load
+     * @param {String} defsDir The optional base directory to load from
+     * @param {Array.<Object>} defs The collector array for loaded defs
+     * @since 11.0
+     */
+    function _loadDef(def, defsDir) {
+    	var loc = def;
+		if(typeof(defsDir) === 'string') {
+			loc = defsDir + def;
+		} else {
+			//assume it is in /tern/defs/
+			loc = 'json!tern/defs/' + def; //$NON-NLS-1$
+		}
+		if(!/^json!/i.test(loc)) {
+			loc = 'json!'+loc; //$NON-NLS-1$
+		}
+		if(!/$.json/i.test(def)) {
+			loc = loc + '.json'; //$NON-NLS-1$
+		}
+		var deferred = new Deferred();
+		try {
+			requirejs([loc], function(_) {
+				deferred.resolve(_);
+			},
+			function(err) {
+				deferred.reject(err);
+			});
+		}
+		catch(err) {
+			post(err);
+			deferred.reject(err);
+		}
+		return deferred;
+    }
+    
+    function nlsDefaultPlugins(plugins) {
+    	Object.keys(plugins).forEach(function(key) {
+    		var plugin = plugins[key];
+    		var nls = Messages[plugin.name];
+    		if(nls) {
+    			plugins[key].name = nls;
+    		}
+    		nls = Messages[plugin.description];
+    		if(nls) {
+    			plugins[key].description = nls;
+    		}
+    	});
     }
 });

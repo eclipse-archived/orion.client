@@ -12,9 +12,8 @@
  /*eslint-env amd, browser*/
 define([
 'orion/objects',
-'orion/Deferred',
-'i18n!javascript/nls/messages'
-], function(Objects, Deferred, Messages) {
+'orion/Deferred'
+], function(Objects, Deferred) {
 
 	/**
 	 * @description Creates a new open declaration command
@@ -146,7 +145,7 @@ define([
 //				console.log(jsonOptions);
 				
 				if (jsonOptions.plugins || Array.isArray(jsonOptions.libs) || jsonOptions.dependencyBudget || jsonOptions.ecmaVersion){
-					this.ternWorker.startServer(jsonOptions);
+					this.ternWorker.postMessage({request: "start_server", args: {options: jsonOptions}}); //$NON-NLS-1$
 				}
 
 				if (Array.isArray(jsonOptions.loadEagerly)){
