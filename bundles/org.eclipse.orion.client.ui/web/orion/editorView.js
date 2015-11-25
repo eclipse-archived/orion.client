@@ -502,8 +502,8 @@ define([
 			this.problemService = new mProblems.ProblemService(serviceRegistry, this.problemsServiceID);
 			var markerService = serviceRegistry.getService(this.problemsServiceID);
 			if(markerService) {
-				markerService.addEventListener("problemsChanged", function(event) { //$NON-NLS-0$
-					editor.showProblems(event.problems);
+				markerService.addEventListener("problemsChanged", function(evt) { //$NON-NLS-0$
+					editor.showProblems(evt.problems);
 				});
 			}
 
@@ -516,7 +516,7 @@ define([
 				syntaxChecker.setTextModel(editor.getModel());
 				var input = inputManager.getInput();
 				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents, editor.getEditorContext()).then(function(problems) {
-					if (input === inputManager.getInput()) {
+					if (input === inputManager.getInput() && problems) {
 						serviceRegistry.getService(that.problemsServiceID)._setProblems(problems);
 					}
 				});
