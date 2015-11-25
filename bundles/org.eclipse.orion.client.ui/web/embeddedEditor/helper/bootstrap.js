@@ -56,7 +56,7 @@ define([
 		"../plugins/embeddedToolingPlugin.html"
 	];
 
-	function startup(serviceRegistry, options) {
+	function startup(serviceRegistry, cTypeRegistry, options) {
 		if (once) {
 			return once;
 		}
@@ -110,6 +110,10 @@ define([
 				serviceRegistry: serviceRegistry,
 				pluginRegistry: pluginRegistry
 			};
+			//We need to register the parent contentType for text type if user just use the widget as bare-bone without registering any default plugins
+			if(!cTypeRegistry.getContentType("text/plain")) {
+				serviceRegistry.registerService('orion.core.contenttype', {}, {contentTypes: [{	id: "text/plain", name: "Text",	extension: ["txt"]}]});
+			}
 			once.resolve(result);
 			return result;
 		});

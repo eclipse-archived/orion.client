@@ -32,6 +32,7 @@ define([
 ) {
 	function CodeEdit(options) {
 		this.serviceRegistry = new mServiceRegistry.ServiceRegistry();
+		this.contentTypeRegistry = new mContentTypes.ContentTypeRegistry(this.serviceRegistry);
 		this._startupOptions = options;
 		this._toolbarId = options && options.toolbarId ? options.toolbarId : "__code__edit__hidden__toolbar";
 	}
@@ -50,12 +51,10 @@ define([
 				orionHiddenDiv.style.display = "none";
 			}
 			//once = new Deferred();
-			this._serviceRegistry = core.serviceRegistry;
 			this._commandRegistry = new mCommandRegistry.CommandRegistry({});
-			this._fileClient = new mFileClient.FileClient(this._serviceRegistry);
-			this._contentTypeRegistry = new mContentTypes.ContentTypeRegistry(this._serviceRegistry);
+			this._fileClient = new mFileClient.FileClient(this.serviceRegistry);
 			this._editorCommands = new mEditorCommands.EditorCommandFactory({
-				serviceRegistry: this._serviceRegistry,
+				serviceRegistry: this.serviceRegistry,
 				commandRegistry: this._commandRegistry,
 				fileClient: this._fileClient,
 				toolbarId: this._toolbarId,
@@ -69,7 +68,7 @@ define([
 					return deferred;
 				}
 			};			
-			this._serviceRegistry.registerService("orion.page.progress", this._progressService);
+			this.serviceRegistry.registerService("orion.page.progress", this._progressService);
 			once = this._editorCommands.createCommands().then(function() {
 				this._editorCommands.registerCommands();
 				return new Deferred().resolve();
@@ -92,7 +91,7 @@ define([
 		 * @param {orion.editor.EditOptions} options the editor options.
 		 */
 		create: function(options) {
-			return mBootstrap.startup(this.serviceRegistry, this._startupOptions).then(function(core) {
+			return mBootstrap.startup(this.serviceRegistry, this.contentTypeRegistry, this._startupOptions).then(function(core) {
 				var serviceRegistry = core.serviceRegistry;
 				var pluginRegistry = core.pluginRegistry;
 				return this._init(core).then( function () {
@@ -101,7 +100,7 @@ define([
 						pluginRegistry: pluginRegistry,
 						commandRegistry: this._commandRegistry,
 						fileClient: this._fileClient,
-						contentTypeRegistry: this._contentTypeRegistry,
+						contentTypeRegistry: this.contentTypeRegistry,
 						editorCommands: this._editorCommands,
 						progressService: this._progressService,
 						toolbarId: this._toolbarId
