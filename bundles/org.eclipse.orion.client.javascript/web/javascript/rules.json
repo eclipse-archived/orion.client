@@ -41,6 +41,7 @@
 		"no-empty-block" : 0, 
 		"valid-typeof": 2, 
 		"no-sparse-arrays": 1, 
-		"no-with": 1
+		"no-with": 1,
+		"no-mixed-spaces-and-tabs": 0
 	}
 }

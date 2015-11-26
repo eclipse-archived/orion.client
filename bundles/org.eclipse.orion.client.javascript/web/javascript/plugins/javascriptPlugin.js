@@ -1083,7 +1083,13 @@ define([
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
-				 	        	                }]
+				 	        	                },
+				 	        	                {	id: "no-mixed-spaces-and-tabs",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["noMixedSpacesAndTabs"],  //$NON-NLS-1$
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: ignore,
+				 	        	                	options: severities
+ 				 	        	                }]
 				 	        	}]
     			});
 

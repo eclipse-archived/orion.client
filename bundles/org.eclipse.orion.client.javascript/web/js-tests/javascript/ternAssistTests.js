@@ -3295,20 +3295,32 @@ define([
 				testProposals(options, [
 				     ['amd', 'amd - ESLint environment name'],
 				     ['amqp', 'amqp - ESLint environment name'],
+				     ['applescript' , 'applescript - ESLint environment name'],
 				     ['browser', 'browser - ESLint environment name'],
+				     ['commonjs', 'commonjs - ESLint environment name'],
+				     ['embertest', 'embertest - ESLint environment name'],
+				     ['es6', 'es6 - ESLint environment name'],
 				     ['express', 'express - ESLint environment name'],
 				     ['jasmine', 'jasmine - ESLint environment name'],
+				     ['jest', 'jest - ESLint environment name'],
 					 ['jquery', 'jquery - ESLint environment name'],
 					 ['meteor', 'meteor - ESLint environment name'],
 				     ['mocha', 'mocha - ESLint environment name'],
+				     ['mongo', 'mongo - ESLint environment name'],
 				     ['mongodb', 'mongodb - ESLint environment name'],
 				     ['mysql', 'mysql - ESLint environment name'],
+				     ['nashorn', 'nashorn - ESLint environment name'],
 				     ['node', 'node - ESLint environment name'],
 				     ['pg', 'pg - ESLint environment name'],
 				     ['phantomjs', 'phantomjs - ESLint environment name'],
 					 ['prototypejs', 'prototypejs - ESLint environment name'],
+					 ['protractor', 'protractor - ESLint environment name'],
+				     ['qunit', 'qunit - ESLint environment name'],
 					 ['redis', 'redis - ESLint environment name'],
-					 ['shelljs', 'shelljs - ESLint environment name']
+					 ['serviceworker', 'serviceworker - ESLint environment name'],
+					 ['shelljs', 'shelljs - ESLint environment name'],
+					 ['webextensions', 'webextensions - ESLint environment name'],
+					 ['worker', 'worker - ESLint environment name']
 				     ]);
 			});
 			/**
@@ -3326,7 +3338,8 @@ define([
 				};
 				testProposals(options, [
 				     ['amd', 'amd - ESLint environment name'],
-				     ['amqp', 'amqp - ESLint environment name']
+				     ['amqp', 'amqp - ESLint environment name'],
+				     ['applescript', 'applescript - ESLint environment name']
 				     ]);
 			});
 			/**

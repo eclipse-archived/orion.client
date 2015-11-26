@@ -6522,5 +6522,77 @@ define([
     			assert.equal(messages.length, 0);
     		});
     	});
+// NO-MIXED-SPACES-AND-TABS --------------------------------------------
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=462980
+    	describe('no-mixed-spaces-and-tabs', function() {
+    	    var RULE_ID = "no-mixed-spaces-and-tabs";
+    		it("flag mixed spaces and tabs", function() {
+    			var topic = "	 	var a;";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Mixed spaces and tabs.");
+    		});
+    		it("should not flag mixed spaces and tabs (only tabs)", function() {
+    			var topic = "		var a;";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag mixed spaces and tabs (only spaces)", function() {
+    			var topic = "     var a;";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag mixed spaces and tabs (spaces after tabs (smart-tabs))", function() {
+    			var topic = "		     var a;";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag mixed spaces and tabs inside comments", function() {
+    			var topic = " /* 	 	 */var a;";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("flag mixed spaces and tabs outside of comments", function() {
+    			var topic = " 	 /* 	 	 */var a;";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].message, "Mixed spaces and tabs.");
+    		});
+    		it("flag mixed spaces and tabs outside of comments", function() {
+    			var topic = "	 	\n/* 	 	 */\nvar a;";
+
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].message, "Mixed spaces and tabs.");
+    		});
+    	});
     });
 });
