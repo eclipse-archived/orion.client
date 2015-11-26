@@ -1235,7 +1235,7 @@ var exports = {};
 						display.Message = jsonData.Result;
 					}
 					serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-					dispatchModelEventOn({type: "modelChanged", action: "cherrypick"}); //$NON-NLS-1$ //$NON-NLS-0$
+					dispatchModelEventOn({type: "modelChanged", action: "cherrypick", item: item, failed: jsonData.Result !== "OK"}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, displayErrorOnStatus);
 
 			},
@@ -1243,7 +1243,7 @@ var exports = {};
 				if (item.outgoing) {
 					return false;
 				}
-				return item.Type === "Commit"; //$NON-NLS-0$
+				return item.Type === "Commit" && explorer.repository.status.RepositoryState.indexOf("CHERRY_PICKING") === -1; //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(cherryPickCommand);
