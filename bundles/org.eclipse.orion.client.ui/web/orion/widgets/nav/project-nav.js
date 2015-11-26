@@ -11,7 +11,6 @@
 /*eslint-env browser, amd*/
 define([
 	'i18n!orion/edit/nls/messages',
-	'orion/commands',
 	'orion/i18nUtil',
 	'orion/objects',
 	'orion/webui/littlelib',
@@ -21,12 +20,11 @@ define([
 	'orion/PageUtil',
 	'orion/URITemplate',
 	'orion/Deferred',
-	'orion/fileUtils',
 	'orion/customGlobalCommands',
 	'orion/bidiUtils'
 ], function(
-	messages, mCommands, i18nUtil, objects, lib, mExplorer, mCommonNav, ProjectCommands,
-	PageUtil, URITemplate, Deferred, mFileUtils, mCustomGlobalCommands, bidiUtils
+	messages, i18nUtil, objects, lib, mExplorer, mCommonNav, ProjectCommands,
+	PageUtil, URITemplate, Deferred, mCustomGlobalCommands, bidiUtils
 ) {
 	
 	var CommonNavExplorer = mCommonNav.CommonNavExplorer;
@@ -145,30 +143,42 @@ define([
 		},
 		display: function(fileMetadata, redisplay){
 			if(!fileMetadata){
-				return;
+				return new Deferred().reject();
 			}
-			
-			this.fileMetadata = fileMetadata;
-			
-			var parentProject;
-			if (fileMetadata && fileMetadata.Parents && fileMetadata.Parents.length===0){
-				parentProject = fileMetadata;
-			} else if(fileMetadata && fileMetadata.Parents){
-				parentProject = fileMetadata.Parents[fileMetadata.Parents.length-1];
-			}
-			
-			if(!redisplay &&  parentProject && parentProject.Location === this.projectLocation){
-				return;
-			}
-			return this.projectClient.readProject(fileMetadata, this.workspaceMetadata).then(function(projectData){
-				this.projectLocation = parentProject ? parentProject.Location : null;
-				projectData.type = "Project"; //$NON-NLS-0$
-				projectData.Directory = true;
-				projectData.fileMetadata = fileMetadata;
-				return CommonNavExplorer.prototype.display.call(this, projectData, redisplay).then(function() {
-					return this.expandItem(fileMetadata);
-				}.bind(this)).then(function () {
-					this.sidebarNavInputManager.dispatchEvent({type:"projectDisplayed", item: fileMetadata}); //$NON-NLS-0$
+
+			var metadata = fileMetadata;
+			return getProject(this.fileClient, fileMetadata).then(function(project) {
+				fileMetadata = project;
+				this.fileMetadata = fileMetadata;
+				
+				var parentProject;
+				if (fileMetadata && fileMetadata.Parents && fileMetadata.Parents.length===0){
+					parentProject = fileMetadata;
+				} else if(fileMetadata && fileMetadata.Parents){
+					parentProject = fileMetadata.Parents[fileMetadata.Parents.length-1];
+				}
+				
+				if(!redisplay &&  parentProject && parentProject.Location === this.projectLocation){
+					return;
+				}
+				var sidebar = this.sidebar;
+				var handleDisplay = function (event) {
+					if(event.item === metadata) {
+						sidebar.sidebarNavInputManager.removeEventListener("projectDisplayed", handleDisplay); //$NON-NLS-0$
+						sidebar.sidebarNavInputManager.dispatchEvent({type:"projectOpened", item: metadata}); //$NON-NLS-0$
+					}
+				};
+				sidebar.sidebarNavInputManager.addEventListener("projectDisplayed", handleDisplay); //$NON-NLS-0$
+				return this.projectClient.readProject(fileMetadata, this.workspaceMetadata).then(function(projectData){
+					this.projectLocation = parentProject ? parentProject.Location : null;
+					projectData.type = "Project"; //$NON-NLS-0$
+					projectData.Directory = true;
+					projectData.fileMetadata = fileMetadata;
+					return CommonNavExplorer.prototype.display.call(this, projectData, redisplay).then(function() {
+						return this.expandItem(fileMetadata);
+					}.bind(this)).then(function () {
+						this.sidebarNavInputManager.dispatchEvent({type:"projectDisplayed", item: fileMetadata}); //$NON-NLS-0$
+					}.bind(this));
 				}.bind(this));
 			}.bind(this));
 		},
@@ -336,27 +346,8 @@ define([
 					sidebar.setViewMode(sidebar.getDefaultViewModeId());
 				}
 			}
-			var oldProject = _self.project;
-			_self.project = null;
  			_self.showViewMode(event.metadata && !event.metadata.Projects);
-			getProject(_self.fileClient, event.metadata).then(function(project) {
-				_self.project = project;
-				if (oldProject && project) {
-					if (oldProject.Location === project.Location) return;
-				}
-				openDefaultMode();
-				var id = sidebar.getActiveViewModeId();
-				if (id === _self.id) {
-					var metadata = event.metadata;
-					var handleDisplay = function (event) {
-						if(event.item === metadata) {
-							sidebar.sidebarNavInputManager.removeEventListener("projectDisplayed", handleDisplay); //$NON-NLS-0$
-							sidebar.sidebarNavInputManager.dispatchEvent({type:"projectOpened", item: metadata}); //$NON-NLS-0$
-						}
-					};
-					sidebar.sidebarNavInputManager.addEventListener("projectDisplayed", handleDisplay); //$NON-NLS-0$
-				}
-			}, openDefaultMode);
+			openDefaultMode();
 		});
 	}
 	objects.mixin(ProjectNavViewMode.prototype, {
@@ -385,7 +376,7 @@ define([
 				progressService: this.progressService
 			});
 			this.explorer.workspaceMetadata = this.workspaceMetadata;
-			this.explorer.display(this.project);
+			this.explorer.display(this.editorInputManager.getFileMetadata());
 			this.toolbarNode.parentNode.classList.add("projectNavSidebarWrapper"); //$NON-NLS-0$
 		},
 		destroy: function() {
