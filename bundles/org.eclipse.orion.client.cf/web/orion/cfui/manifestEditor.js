@@ -82,7 +82,7 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 
 	var isEnabled = function(){
 		var fileName = settings.filePath ? settings.filePath.split('/').pop() : null;
-		return fileName.indexOf(".yml") !== -1;
+		return fileName.toLowerCase() === "manifest.yml";
 	};
 
 	var proposalCmp = function(p, q){
