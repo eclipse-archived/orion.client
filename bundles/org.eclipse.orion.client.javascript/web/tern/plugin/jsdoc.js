@@ -73,7 +73,7 @@ define([
 		var proposals = [];
 		var prefix = getPrefix(options.end, file.text), char = file.text.charAt(options.end-prefix.length-1);
 		if(char === '{') {
-			proposals = computeTypeCompletions(prefix, file);
+			proposals = computeTypeCompletions(prefix, comment, file);
 		}
 		return {completions: proposals};
 
@@ -91,7 +91,8 @@ define([
 		var proposals = [];
 		var prefix = getPrefix(options.end, file.text), char = file.text.charAt(options.end-prefix.length-1);
 		if(char === '{') {
-			proposals = computeTypeCompletions(prefix, file);
+			// TODO When to use @link vs {}
+			proposals = computeTypeCompletions(prefix, comment, file);
 		} else if(char === '.') {
 			proposals = computeMemberCompletions(prefix, comment, options);
 		} else if(char === '*' || char === ' ') {
@@ -139,28 +140,43 @@ define([
 	 * @param {String} prefix The prefix
 	 * @returns {Array.<Object>} The array of completion objects
 	 */
-	function computeTypeCompletions(prefix, file) {
-		var cx = infer.cx();
+	function computeTypeCompletions(prefix, comment, file) {
 		var theType, proposal, key;
 		var proposals = [];
-		// TODO Check if we are in an HTML file and if so add browser: true
-		var envs = getActiveEnvironments(file.ast, {ecma5: true, ecma6: true});
-		var existingCompletions = Object.create(null); // Tern separates proto and non-proto props into two entries, we only want to see one
-		for (key in cx.protos){
-			theType = cx.protos[key];
-			proposal = getProposalForType(theType, envs, existingCompletions, prefix);
-			if (proposal){
-				proposals.push(proposal);
-			}
+		
+		var defaultEnvs = {ecma5: true, ecma6: true};
+		if (isHTML(file.name)){
+			defaultEnvs.browser = true;
 		}
-		for (key in cx.paths) {
-			theType = cx.paths[key];
-			proposal = getProposalForType(theType, envs, existingCompletions, prefix);
-			if (proposal){
-				proposals.push(proposal);
+		var envs = getActiveEnvironments(file.ast, defaultEnvs);
+		var existingCompletions = Object.create(null); // Tern separates proto and non-proto props into two entries, we only want to see one
+
+		var node = Finder.findNode(comment.range[0], file.ast);		
+		var scope = node ? node.scope : file.scope;
+		while (scope){
+			for (key in scope.props){
+				theType = scope.props[key];
+				// TODO How to handle union types?
+				if (theType && theType.types && theType.types.length > 0){
+					proposal = getProposalForType(theType.types[0], envs, existingCompletions, prefix);
+					if (proposal){
+						proposals.push(proposal);
+					}
+				}
+	
 			}
+			scope = scope.prev;
 		}
 		return proposals;
+	}
+	
+	/**
+	 * Return whether the given file name is an html file
+	 * @param name file name to look at
+	 * @returns returns whether the file name is html
+	 */
+	function isHTML(name) {
+		return /(?:html|htm|xhtml)$/g.test(name);
 	}
 	
 	/**
@@ -173,32 +189,35 @@ define([
 	 * @returns returns a proposal or null
 	 */
 	function getProposalForType(theType, envs, existingCompletions, prefix){
-		// TODO This will skip Events, Extracts, IRoute and many others which are null
-		if (theType && typeof theType === 'object' && theType.name){
-			if (!theType.origin || envs[theType.origin]){
+		if (theType && typeof theType === 'object' && theType.name && theType.origin){
+			if (envs[theType.origin] || theType.origin.indexOf('/') >= 0){
 				var name = theType.name;
-				if (name.indexOf('.prototype') === (name.length-10)){
-					name = name.substring(0, name.length-10);
-				}
-				if (existingCompletions[name.toLowerCase()]){
+				
+				// Top level scope can't be a return type in Browser or Node
+				if (name === '<top>'){
 					return null;
 				}
-				existingCompletions[name.toLowerCase()] = true;
-				// TODO Check if the following character is already a close }, check if we should add @link
-				var _p = createProposal(name, '', prefix);
+				var prims = ['bool', 'string', 'number'];
+				// We only want type completions not functions returning primitives
+				if (theType.retval && prims.indexOf(theType.retval.name) >= 0){
+					return null;
+				}
+				// Different scopes may have same properties
+				if (existingCompletions[name]){
+					return null;
+				}
 				
-				if (theType.origin){
-					_p.origin = theType.origin;
-				}
-				if (theType.hasCtor){
-					_p.doc = theType.hasCtor.doc;
-					_p.url = theType.hasCtor.url;
-				}
+				existingCompletions[name] = true;
+				var _p = createProposal(name, '', prefix);
+				_p.origin = theType.origin;
+				_p.doc = theType.doc;
+				_p.url = theType.url;
 				return _p;
 			}
 		}
 		return null;
 	}
+	
 	
 	
 	/**
@@ -236,8 +255,6 @@ define([
 		}
 	    return env;
 	}
-	
-	
 	
 	/**
 	 * @description Computes the reachable type member names for completions
