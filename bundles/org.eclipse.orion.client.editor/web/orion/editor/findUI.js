@@ -125,6 +125,7 @@ define([
 		},
 		_createButton: function(document, parent, text, callback, checked, tooltip) {
 			var button  = document.createElement("button"); //$NON-NLS-0$
+			button.type = "button"; //$NON-NLS-0$
 			this._checked(checked, button);
 			if (tooltip) button.title = tooltip;
 			textUtil.addEventListener(button, "click", function(evt) { callback.call(this, evt); }, false); //$NON-NLS-0$
