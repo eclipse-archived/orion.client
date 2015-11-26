@@ -309,6 +309,7 @@ define({//Default message bundle
 	"Removing remote branch: ": "Removing remote branch: ", //$NON-NLS-0$  //$NON-NLS-1$
 	"Delete Remote Branch": "Delete Remote Branch", //$NON-NLS-0$  //$NON-NLS-1$
 	"New Remote": "New Remote", //$NON-NLS-0$  //$NON-NLS-1$
+	"Gerrit": "Gerrit", //$NON-NLS-0$  //$NON-NLS-1$
 	"Git Remote": "Git Remote", //$NON-NLS-0$  //$NON-NLS-1$
 	"Go to Git Remote": "Open the remote Git Log page for this file or folder.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Add a new remote to the repository": "Add a new remote to the repository", //$NON-NLS-0$  //$NON-NLS-1$

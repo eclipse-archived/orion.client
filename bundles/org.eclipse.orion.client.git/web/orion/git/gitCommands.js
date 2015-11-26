@@ -353,7 +353,8 @@ var exports = {};
 	
 		var addRemoteParameters = new mCommandRegistry.ParametersDescription([
 			new mCommandRegistry.CommandParameter('name', 'text', messages['Name:'],null,null,null,function(name){  return !(name.indexOf(' ') >= 0);}),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			new mCommandRegistry.CommandParameter('url', 'url', messages['URL:'])
+			new mCommandRegistry.CommandParameter('url', 'url', messages['URL:']), //$NON-NLS-1$ //$NON-NLS-0$
+			new mCommandRegistry.CommandParameter('isGerrit', 'boolean', messages['Gerrit']) //$NON-NLS-1$ //$NON-NLS-0$
 		]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var addRemoteCommand = new mCommands.Command({
@@ -364,10 +365,9 @@ var exports = {};
 			callback : function(data) {
 				var item = data.items;
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				
-				var createRemoteFunction = function(remoteLocation, name, url) {
+				var createRemoteFunction = function(remoteLocation, name, url, isGerrit) {
 					var msg = i18nUtil.formatMessage(messages["Adding remote ${0}..."], remoteLocation);
-					progress.progress(serviceRegistry.getService("orion.git.provider").addRemote(remoteLocation, name, url), msg).then(function() { //$NON-NLS-0$
+					progress.progress(serviceRegistry.getService("orion.git.provider").addRemote(remoteLocation, name, url, isGerrit), msg).then(function() { //$NON-NLS-0$
 						dispatchModelEventOn({type: "modelChanged", action: "addRemote", remote: name}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus);
 				};
@@ -380,7 +380,7 @@ var exports = {};
 				}
 				
 				if (data.parameters.valueFor("name") && data.parameters.valueFor("url")) { //$NON-NLS-1$ //$NON-NLS-0$
-					createRemoteFunction(remoteLocation, data.parameters.valueFor("name"), data.parameters.valueFor("url")); //$NON-NLS-1$ //$NON-NLS-0$
+					createRemoteFunction(remoteLocation, data.parameters.valueFor("name"), data.parameters.valueFor("url"),  data.parameters.valueFor("isGerrit")); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			},
 			visibleWhen: function(item) {
