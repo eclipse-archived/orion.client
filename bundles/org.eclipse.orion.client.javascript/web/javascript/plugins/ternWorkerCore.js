@@ -25,7 +25,7 @@ if(sear) {
 requirejs.config({locale: lang});
 require([
 	'tern/lib/tern',
-	'json!javascript/plugins/ternDefaults.json',
+	'javascript/plugins/ternDefaults',
 	'orion/Deferred',
 	'orion/serialize',
 	'i18n!javascript/nls/workermessages',
@@ -34,7 +34,6 @@ require([
 /* @callback */ function(Tern, defaultOptions, Deferred, Serialize, Messages, i18nUtil) {
 
     var ternserver = null;
-	nlsDefaultPlugins(defaultOptions.plugins);
 	
     /**
      * @param {Object} jsonOptions The optional map of JSON options to start the server with
@@ -50,12 +49,11 @@ require([
                 async: true,
                 debug: false,
                 projectDir: '/', //$NON-NLS-1$
-                plugins: defaultOptions.plugins,
                 getFile: _getFile
             };
         var pluginsDir = defaultOptions.pluginsDir;
         var defsDir = defaultOptions.defsDir;
-        var defNames = defaultOptions.defs;
+        var defNames = [];
         if (jsonOptions) {
 			if (jsonOptions.plugins){
         		options.plugins = jsonOptions.plugins;
@@ -81,18 +79,13 @@ require([
         function defaultStartUp(err) {
         	options.plugins = defaultOptions.plugins;
         	options.defs = defaultOptions.defs;
-        	Deferred.all(loadPlugins(options.plugins, defaultOptions.pluginsDir)).then(/* @callback */ function(plugins) {
-	        	Deferred.all(loadDefs(defaultOptions.defs, defaultOptions.defsDir)).then(function(json) {
-	        			options.defs = json;
-	        			ternserver = new Tern.Server(options);
-				        callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
-				        if(err) {
-				        	post(Serialize.serializeError(err));
-				        }
-	        		});
-	        });
+			ternserver = new Tern.Server(options);
+	        callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
+	        if(err) {
+	        	post(Serialize.serializeError(err));
+	        }
         }
-        if(!options.plugins && !defNames) {
+        if(!options.plugins && (!defNames || defNames.length < 1)) {
         	defaultStartUp();
         } else {
         	Deferred.all(loadPlugins(options.plugins, pluginsDir)).then(/* @callback */ function(plugins) {
@@ -544,32 +537,34 @@ require([
      */
     function loadPlugins(plugins, pluginsDir) {
     	var promises = [];
-    	Object.keys(plugins).forEach(function(key) {
-    		var plugin = plugins[key];
-    		var loc = plugin.location;
-    		if(typeof(loc) !== 'string') {
-    			if(typeof(pluginsDir) === 'string') {
-	    			loc = pluginsDir + key;
-				} else {
-					//assume it is in /tern/plugin/
-					loc = 'tern/plugin/' + key; //$NON-NLS-1$
+    	if(plugins) {
+	    	Object.keys(plugins).forEach(function(key) {
+	    		var plugin = plugins[key];
+	    		var loc = plugin.location;
+	    		if(typeof(loc) !== 'string') {
+	    			if(typeof(pluginsDir) === 'string') {
+		    			loc = pluginsDir + key;
+					} else {
+						//assume it is in /tern/plugin/
+						loc = 'tern/plugin/' + key; //$NON-NLS-1$
+					}
+	    		}
+	    		var deferred = new Deferred();
+	    		try {
+					promises.push(deferred);    		
+	    			requirejs([loc], function(_) {
+		    			deferred.resolve(_);
+	    			},
+	    			function(err) {
+	    				deferred.reject(err);
+	    			});
 				}
-    		}
-    		var deferred = new Deferred();
-    		try {
-				promises.push(deferred);    		
-    			requirejs([loc], function(_) {
-	    			deferred.resolve(_);
-    			},
-    			function(err) {
-    				deferred.reject(err);
-    			});
-			}
-			catch(err) {
-				post(err);
-				deferred.reject(err);
-			}
-    	});
+				catch(err) {
+					post(err);
+					deferred.reject(err);
+				}
+	    	});
+		}
     	return promises;
     }
     

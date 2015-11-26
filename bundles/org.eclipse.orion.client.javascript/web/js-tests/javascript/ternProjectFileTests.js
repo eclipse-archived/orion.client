@@ -41,7 +41,8 @@ define([
 	var defaultDefs = [
 		"ecma5", 
 		"ecma6", 
-		"browser"
+		"browser",
+		"chai"
 	];
 	
 	function checkServerState(expectedPlugins, expectedDefs, callback) {
