@@ -81,11 +81,12 @@ var Found = function Found(node, state) {
   _classCallCheck(this, Found);
 
   this.node = node;this.state = state;
-};
+}
 
 // Find a node with a given start, end, and type (all are optional,
 // null can be used as wildcard). Returns a {node, state} object, or
 // undefined when it doesn't find a matching node.
+;
 
 function findNodeAt(node, start, end, test, base, state) {
   test = makeTest(test);
@@ -94,7 +95,7 @@ function findNodeAt(node, start, end, test, base, state) {
     ;(function c(node, st, override) {
       var type = override || node.type;
       if ((start == null || node.start <= start) && (end == null || node.end >= end)) base[type](node, st, c);
-      if (test(type, node) && (start == null || node.start == start) && (end == null || node.end == end)) throw new Found(node, st);
+      if ((start == null || node.start == start) && (end == null || node.end == end) && test(type, node)) throw new Found(node, st);
     })(node, state);
   } catch (e) {
     if (e instanceof Found) return e;
@@ -246,19 +247,27 @@ base.FunctionDeclaration = function (node, st, c) {
 };
 base.VariableDeclaration = function (node, st, c) {
   for (var i = 0; i < node.declarations.length; ++i) {
-    var decl = node.declarations[i];
-    c(decl.id, st, "Pattern");
-    if (decl.init) c(decl.init, st, "Expression");
+    c(node.declarations[i], st);
   }
+};
+base.VariableDeclarator = function (node, st, c) {
+  c(node.id, st, "Pattern");
+  if (node.init) c(node.init, st, "Expression");
 };
 
 base.Function = function (node, st, c) {
+  if (node.id) c(node.id, st, "Pattern");
   for (var i = 0; i < node.params.length; i++) {
     c(node.params[i], st, "Pattern");
-  }c(node.body, st, "ScopeBody");
+  }c(node.body, st, node.expression ? "ScopeExpression" : "ScopeBody");
 };
+// FIXME drop these node types in next major version
+// (They are awkward, and in ES6 every block can be a scope.)
 base.ScopeBody = function (node, st, c) {
   return c(node, st, "Statement");
+};
+base.ScopeExpression = function (node, st, c) {
+  return c(node, st, "Expression");
 };
 
 base.Pattern = function (node, st, c) {
@@ -327,12 +336,16 @@ base.MemberExpression = function (node, st, c) {
   if (node.computed) c(node.property, st, "Expression");
 };
 base.ExportNamedDeclaration = base.ExportDefaultDeclaration = function (node, st, c) {
-  if (node.declaration) c(node.declaration, st);
+  if (node.declaration) c(node.declaration, st, node.type == "ExportNamedDeclaration" || node.declaration.id ? "Statement" : "Expression");
+  if (node.source) c(node.source, st, "Expression");
+};
+base.ExportAllDeclaration = function (node, st, c) {
+  c(node.source, st, "Expression");
 };
 base.ImportDeclaration = function (node, st, c) {
   for (var i = 0; i < node.specifiers.length; i++) {
     c(node.specifiers[i], st);
-  }
+  }c(node.source, st, "Expression");
 };
 base.ImportSpecifier = base.ImportDefaultSpecifier = base.ImportNamespaceSpecifier = base.Identifier = base.Literal = ignore;
 
@@ -362,6 +375,6 @@ base.ComprehensionExpression = function (node, st, c) {
 
 //ORION
 base.RecoveredNode = ignore;
-    
+
 },{}]},{},[1])(1)
 });
