@@ -18,8 +18,9 @@ define([
 	"json!javascript/rules.json",
 	"orion/i18nUtil",
 	"i18n!javascript/nls/problems",
-	"orion/metrics"
-], function(eslint, Objects, ASTManager, Finder, Rules, i18nUtil, messages, Metrics) {
+	"orion/metrics",
+	"eslint/lib/source-code"
+], function(eslint, Objects, ASTManager, Finder, Rules, i18nUtil, messages, Metrics, SourceCode) {
 	var config = {
 		// 0:off, 1:warning, 2:error
 		defaults: Rules.rules,
@@ -141,25 +142,28 @@ define([
 		var descriptionArgs = e.args || Object.create(null);
 		var description = e.message;
 		if (descriptionKey && messages[descriptionKey]) {
-           description = i18nUtil.formatMessage.call(null, messages[descriptionKey], descriptionArgs);
+			description = i18nUtil.formatMessage.call(null, messages[descriptionKey], descriptionArgs);
 		}
 		var prob = {
-		    id: getProblemId(e),
+			id: getProblemId(e),
 			description: description,
 			severity: getSeverity(e)
 		};
-		if(typeof(start) !== 'undefined') {
-		    prob.start = start;
-		    prob.end = end;
+		if (e.node && e.nodeType === "Program" && typeof(e.line) !== 'undefined') {
+			prob.line = e.line;
+			prob.start = e.column;
+		} else if(typeof(start) !== 'undefined') {
+			prob.start = start;
+			prob.end = end;
 		} else if(typeof(e.index) === 'number') {
 			prob.start = end;
 			prob.end = e.index;
 		} else if(typeof(e.lineNumber) !== 'undefined') {
-		    prob.line = e.lineNumber;
-		    prob.start = e.column;
+			prob.line = e.lineNumber;
+			prob.start = e.column;
 		} else {
-		    prob.start = 0;
-		    prob.end = 0;
+			prob.start = 0;
+			prob.end = 0;
 		}
 		if (e.args && e.args.data){
 			// Pass along any additional data to the problem annotation (Bug 464538)
@@ -289,7 +293,8 @@ define([
 			
 			try {
 			    config.env = env;
-				eslintErrors = eslint.verify(ast, config);
+			    var text = ast.source !== null ? ast.source : "";
+				eslintErrors = eslint.verify(new SourceCode(text, ast), config);
 			} catch (e) {
 				if(parseErrors.length < 1) {
 					eslintErrors.push({

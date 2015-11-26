@@ -20,6 +20,15 @@ var exports = {
             globalReturn: true
         }
     },
+    commonjs: {
+        globals: globals.commonjs,
+        ecmaFeatures: {
+            globalReturn: true
+        }
+    },
+    worker: {
+        globals: globals.worker
+    },
     amd: {
         globals: globals.amd
     },
@@ -29,11 +38,17 @@ var exports = {
     jasmine: {
         globals: globals.jasmine
     },
+    jest: {
+        globals: globals.jest
+    },
     phantomjs: {
         globals: globals.phantom
     },
     jquery: {
         globals: globals.jquery
+    },
+    qunit: {
+        globals: globals.qunit
     },
     prototypejs: {
         globals: globals.prototypejs
@@ -43,6 +58,52 @@ var exports = {
     },
     meteor: {
         globals: globals.meteor
+    },
+    mongo: {
+        globals: globals.mongo
+    },
+    protractor: {
+        globals: globals.protractor
+    },
+    applescript: {
+        globals: globals.applescript
+    },
+    nashorn: {
+        globals: globals.nashorn
+    },
+    serviceworker: {
+        globals: globals.serviceworker
+    },
+    embertest: {
+        globals: globals.embertest
+    },
+    webextensions: {
+        globals: globals.webextensions
+    },
+    es6: {
+        ecmaFeatures: {
+            arrowFunctions: true,
+            blockBindings: true,
+            regexUFlag: true,
+            regexYFlag: true,
+            templateStrings: true,
+            binaryLiterals: true,
+            octalLiterals: true,
+            unicodeCodePointEscapes: true,
+            superInFunctions: true,
+            defaultParams: true,
+            restParams: true,
+            forOf: true,
+            objectLiteralComputedProperties: true,
+            objectLiteralShorthandMethods: true,
+            objectLiteralShorthandProperties: true,
+            objectLiteralDuplicateProperties: true,
+            generators: true,
+            destructuring: true,
+            classes: true,
+            spread: true,
+            newTarget: true
+        }
     }
 };
 

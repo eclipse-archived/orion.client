@@ -1481,6 +1481,115 @@ define([
                 };
             }
         },
+		"no-mixed-spaces-and-tabs": {
+			description: ProblemMessages['no-mixed-spaces-and-tabs-description'],
+			url: 'http://eslint.org/docs/rules/no-mixed-spaces-and-tabs', //$NON-NLS-1$
+			rule: function(context) {
+				var ignoredLocations = [];
+				// we define a regular expression that matches any line that starts with spaces after tabs before any other character
+				// any space after a tab \            (not a problem with smart-tabs)
+				//                        after any number of tabs or space at the beginning of the line (^)
+				// any tab after a space /
+				var lineStart = /^(?=[\t ]* \t)/; // smart-tabs enabled
+				//var lineStart = /^(?=[\t ]*( \t|\t ))/; // smart-tabs disabled
+
+				function rememberIgnoreElement(node) {
+					ignoredLocations.push(node.loc);
+				}
+
+				function checkProgram(node) {
+					var lines = context.getSourceLines();
+					var allComments = context.getAllComments();
+					
+					// add all comments to the ignored elements
+					allComments.forEach(rememberIgnoreElement);
+					
+					// now we check if the lines starts with a mix of tabs and spaces
+					lines.forEach(function(line, index) {
+						var match = lineStart.exec(line);
+						if (match !== null) {
+							// we got a match on the corresponding line
+							// we need to see if the match is within an existing comment or a literal
+							var currentLine = index + 1; // index is 0-based
+							var currentColumn = match.index + 1; // column is 1-based
+							if (searchInsideComments(ignoredLocations, { line: currentLine, column: currentColumn}) !== null) {
+								// the position is inside a comment so we ignore it - move to the next one
+								return;
+							}
+							context.report(node, { line: currentLine, column: currentColumn}, ProblemMessages['no-mixed-spaces-and-tabs']);
+						}
+					});
+				}
+				
+				function searchInsideComments(locations, loc) {
+					var min = 0;
+					var max = locations.length - 1;
+					var guess;
+				
+					while (min <= max) {
+						guess = Math.floor(min + (max - min) / 2);
+				
+						var currentLocation = locations[guess];
+						if (isLocationInside(loc, currentLocation)) {
+							return currentLocation;
+						}
+						else if (isBefore(loc, currentLocation)) {
+							max = guess - 1;
+						} else {
+							min = guess + 1;
+						}
+					}
+					return null;
+				}
+				
+				function isLocationInside(givenLocation, locations) {
+					/**
+					 * Return true if the given location is inside the locations, false otherwise 
+					 */
+					var start = locations.start;
+					var end = locations.end;
+					var line = givenLocation.line;
+					var column = givenLocation.column;
+					
+					if (start.line < line) {
+						if (end.line > line) {
+							return true;
+						} else if (end.line === line) {
+							return end.column > column;
+						}
+					} else if (start.line === line) {
+						if (start.column < column) {
+							if (end.line > line) {
+								return true;
+							} else if (end.line === line) {
+								return end.column > column;
+							}
+						}
+					}
+					return false;
+				}
+				
+				function isBefore(givenLocation, locations) {
+					/**
+					 * Return true if the given location is before locations
+					 */
+					var start = locations.start;
+					var line = givenLocation.line;
+					var column = givenLocation.column;
+					
+					if (line < start.line) {
+						return true;
+					} else if (line === start.line) {
+						return column < start.column;
+					}
+					return false;
+				}
+
+				return {
+					"Program:exit": checkProgram, //$NON-NLS-1$
+				};
+			}
+		},
 		"semi": {
 		    description: ProblemMessages['semi-description'],
 		    url: 'http://eslint.org/docs/rules/semi', //$NON-NLS-1$
@@ -1560,16 +1669,17 @@ define([
         			'UnaryExpression' : function(node){
         			    if(node.operator === 'typeof') {
         			        var parent = node.parent;
-        			        var val = parent.left === node ? parent.right : parent.left;
         			        if(parent && parent.type === 'BinaryExpression' &&
-        			             ops.indexOf(parent.operator) > -1 &&
-        			             (val.type !== 'Literal' || symbols.indexOf(val.value) < 0)) {
-        			            context.report(val, ProblemMessages['valid-typeof']);
+        			            ops.indexOf(parent.operator) > -1) {
+           			            var val = parent.left === node ? parent.right : parent.left;
+        			            if (val.type !== 'Literal' || symbols.indexOf(val.value) < 0) {
+        			                context.report(val, ProblemMessages['valid-typeof']);
+        			            }
         			        }
         			    }
         			}
         		};
-        	}
+			}
         }
     };
 

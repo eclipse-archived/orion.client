@@ -53,6 +53,7 @@ define({//Default message bundle
 	'noNewFunc': 'Discouraged \'new Function()\':',
 	'noNewObject': 'Discouraged \'new Object()\':',
 	'noNewWrappers': 'Discouraged wrapper objects:',
+	'noMixedSpacesAndTabs' : 'Mixed spaces and tabs:',
 	'missingSemi' : 'Missing semicolons:',
 	'unusedVars' : 'Unused variables:',
 	'varRedecl' : 'Variable re-declarations:',

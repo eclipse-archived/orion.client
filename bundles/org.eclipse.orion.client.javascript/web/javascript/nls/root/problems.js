@@ -100,5 +100,7 @@ define({
 	'use-isnan': 'Use the isNaN function to compare with NaN.',
 	'use-isnan-description': 'Disallow comparison to the value NaN.',
 	'valid-typeof' : 'Invalid typeof comparison.',
-	'valid-typeof-description': 'Warn when incorrectly comparing the result of a typeof expression.'
+	'valid-typeof-description': 'Warn when incorrectly comparing the result of a typeof expression.',
+	'no-mixed-spaces-and-tabs': 'Mixed spaces and tabs.',
+	'no-mixed-spaces-and-tabs-description': 'Warn about mixed spaces and tabs.'
 });

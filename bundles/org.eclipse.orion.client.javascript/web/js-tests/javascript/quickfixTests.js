@@ -93,7 +93,7 @@ define([
                             break;
                         }
                     }
-                    assert(i !== pbs.length, "Did not find any problems for the expcted id: "+ options.pid);
+                    assert(i !== pbs.length, "Did not find any problems for the expected id: "+ options.pid);
                 } else {
                     assert(pbs, "There should always be problems");
                     assert.equal(pbs.length, 1, 'There should only be one problem per test');
