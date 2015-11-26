@@ -171,6 +171,12 @@ define([
 				ternWorker.postMessage({request: 'start_server', args: {options: {}}}, /* @callback */ function(response) { //$NON-NLS-1$
 					serverReady();
 				});
+			},
+			/**
+			 * @callback
+			 */
+			'start_server': function(response) {
+				serverReady();
 			}
 		};
 
