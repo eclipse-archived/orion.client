@@ -303,7 +303,7 @@ define([
 		                });
                     }
                 } else if(parent.type === 'CallExpression') {
-                    var path = node.value;
+                    path = node.value;
                     switch(parent.callee.name) {
                         case 'require': {
                             return that.resolver.getWorkspaceFile(path).then(function(files) {
@@ -318,7 +318,7 @@ define([
                         }
                         //$FALLTHROUGH$
                         case 'importScripts': {
-                            var path = node.value;
+                            path = node.value;
 	                        return that.resolver.getWorkspaceFile(path).then(function(files) {
 	                            if(!/\.js$/.test(path)) {
 	                                path += '.js'; //$NON-NLS-1$
@@ -368,9 +368,6 @@ define([
 		            var file = files[i];
 		            if(file.name && file.path && file.contentType) {
 		                hover += '[';
-		                if(file.contentType.icon) {
-		                    hover += '!['+file.contentType.name+']('+file.contentType.icon+')'; //$NON-NLS-1$ //$NON-NLS-2$
-		                }
 		                var href = new URITemplate("#{,resource,params*}").expand( //$NON-NLS-1$
     		                      {
     		                      resource: file.location,
