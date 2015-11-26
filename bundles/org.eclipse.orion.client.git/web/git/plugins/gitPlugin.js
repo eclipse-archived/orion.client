@@ -490,6 +490,8 @@ define([
 					if(clone.GitUrl){
 						var gitInfo = parseGitUrl(clone.GitUrl);
 						deferred.resolve({Type: "git", Location: removeUserInformation(clone.GitUrl), Name: (gitInfo.repoName || clone.Name) + " at " + gitInfo.serverName});
+					} else {
+						deferred.reject();
 					}
 				},deferred.reject, deferred.progress
 			);
