@@ -222,7 +222,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'],
 				if (parameters.message) {
 					var label = document.createElement("div"); //$NON-NLS-0$
 					label.classList.add("parameterMessage"); //$NON-NLS-0$
-					label.textContent = parameters.message;
+					label.textContent = typeof parameters.message === "function" ? parameters.message(commandInvocation) : parameters.message;
 					parameterArea.appendChild(label);
 				}
 				

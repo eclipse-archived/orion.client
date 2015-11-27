@@ -1080,7 +1080,9 @@ var exports = {};
 
 		var okCancelOptions = {getSubmitName: function(){return messages.OK;}, getCancelName: function(){return messages.Cancel;}};
 		
-		var resetParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('soft', 'boolean', messages.KeepWorkDir)], objects.mixin({}, okCancelOptions)); //$NON-NLS-1$ //$NON-NLS-0$
+		var resetParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('soft', 'boolean', messages.KeepWorkDir)], objects.mixin({
+			message: function (data) { return i18nUtil.formatMessage(messages.GitResetIndexConfirm, mGitUtil.shortenRefName(data.items), messages.KeepWorkDir); }
+		}, okCancelOptions)); //$NON-NLS-1$ //$NON-NLS-0$
 
 		var resetIndexCommand = new mCommands.Command({
 			name : messages['Reset'],
@@ -1093,13 +1095,14 @@ var exports = {};
 				resetCallback(data, data.items.Name, data.parameters.valueFor("soft") ? "SOFT" : "HARD"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
-				resetParameters.message = i18nUtil.formatMessage(messages.GitResetIndexConfirm, mGitUtil.shortenRefName(item), messages.KeepWorkDir);
 				return item.Type === "Commit";  //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(resetIndexCommand);
 
-		var undoParameters = new mCommandRegistry.ParametersDescription([],objects.mixin({}, okCancelOptions)); //$NON-NLS-1$ //$NON-NLS-0$
+		var undoParameters = new mCommandRegistry.ParametersDescription([],objects.mixin({
+			message: function (data) { return i18nUtil.formatMessage(messages.UndoConfirm, mGitUtil.shortenRefName(data.items)); }
+		}, okCancelOptions)); //$NON-NLS-1$ //$NON-NLS-0$
 
 		var undoCommand = new mCommands.Command({
 			name : messages['Undo'],
@@ -1112,7 +1115,6 @@ var exports = {};
 				resetCallback(data, "HEAD^", "SOFT"); //$NON-NLS-1$ //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
-				undoParameters.message  = i18nUtil.formatMessage(messages.UndoConfirm, mGitUtil.shortenRefName(item));
 				return item.Type === "Commit" && item.parent && item.parent.Type === "Outgoing" && item.parent.children && item.parent.children[0].Name === item.Name; //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		});
