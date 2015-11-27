@@ -104,6 +104,7 @@ define([
 			case "rebase": //$NON-NLS-0$
 			case "merge": //$NON-NLS-0$
 			case "mergeSquash": //$NON-NLS-0$
+			case "cherrypick": //$NON-NLS-0$
 				if (event.failed || event.rebaseAction) {
 					that.changedItem();
 				}
