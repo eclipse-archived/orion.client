@@ -1093,9 +1093,6 @@ var exports = {};
 				resetCallback(data, data.items.Name, data.parameters.valueFor("soft") ? "SOFT" : "HARD"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
-				if (item.outgoing && item.top) {
-					return false;
-				}
 				resetParameters.message = i18nUtil.formatMessage(messages.GitResetIndexConfirm, mGitUtil.shortenRefName(item), messages.KeepWorkDir);
 				return item.Type === "Commit";  //$NON-NLS-0$
 			}
