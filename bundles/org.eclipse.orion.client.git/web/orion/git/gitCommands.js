@@ -766,7 +766,7 @@ var exports = {};
 					}
 
 					progressService.setProgressResult(display);
-					dispatchModelEventOn({type: "modelChanged", action: "merge", item: item}); //$NON-NLS-1$ //$NON-NLS-0$
+					dispatchModelEventOn({type: "modelChanged", action: "merge", item: item, failed: display.Severity !== "Ok"}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function (error, ioArgs) {
 					error = null;//hide warning
 					var display = {};

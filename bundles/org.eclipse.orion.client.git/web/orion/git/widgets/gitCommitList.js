@@ -167,6 +167,10 @@ define([
 			var repository = this.root.repository;
 			return repository && repository.status && repository.status.RepositoryState && repository.status.RepositoryState.indexOf("REBASING") === 0; //$NON-NLS-0$
 		},
+		isMerging: function() {
+			var repository = this.root.repository;
+			return repository && repository.status && repository.status.RepositoryState && repository.status.RepositoryState.indexOf("MERGING") === 0; //$NON-NLS-0$
+		},
 		isCherryPicking: function() {
 			var repository = this.root.repository;
 			return repository && repository.status && repository.status.RepositoryState && repository.status.RepositoryState.indexOf("CHERRY_PICKING") === 0; //$NON-NLS-0$
@@ -219,7 +223,9 @@ define([
 						var activeBranch = that.getActiveBranch();
 						var targetRef = that.getTargetReference();
 						if (section) {
-							if (that.isCherryPicking()) {
+							if (that.isMerging()) {
+								section.setTitle(messages["MergeProgress"]);
+							} else if (that.isCherryPicking()) {
 								section.setTitle(messages["CherryPickProgress"]);
 							} else if (that.simpleLog && targetRef) {
 								section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef))); //$NON-NLS-1$
@@ -1000,7 +1006,7 @@ define([
 			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.sync", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 				
-			if (currentBranch && !this.model.simpleLog && targetRef && !model.isCherryPicking()) {
+			if (currentBranch && !this.model.simpleLog && targetRef && !model.isCherryPicking() && !model.isMerging()) {
 				var incomingActionScope = this.incomingActionScope;
 				var outgoingActionScope = this.outgoingActionScope;
 				

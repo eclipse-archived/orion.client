@@ -617,5 +617,6 @@ define({//Default message bundle
 	"MorePullRequests": "More pull requests for \"${0}\"", //$NON-NLS-0$  //$NON-NLS-1$
 	"MorePullRequestsProgress": "Loading more pull requests for \"${0}\"...", //$NON-NLS-0$  //$NON-NLS-1$
 	"Authorize to get pull requests": "Authorize to get pull requests", //$NON-NLS-0$  //$NON-NLS-1$
-	"CherryPickProgress": "Cherry Pick in progress" //$NON-NLS-0$  //$NON-NLS-1$
+	"CherryPickProgress": "Cherry Pick in progress", //$NON-NLS-0$  //$NON-NLS-1$
+	"MergeProgress": "Merge in progress" //$NON-NLS-0$  //$NON-NLS-1$
 });
