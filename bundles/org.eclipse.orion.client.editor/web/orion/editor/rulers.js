@@ -495,10 +495,16 @@ define("orion/editor/rulers", [
 		_getAnnotationsAtLineIndex: function _getAnnotationsAtLineIndex(lineIndex){
 			if (lineIndex === undefined) { return; }
 			var view = this._view;
-			var model = view.getModel();
 			var annotationModel = this._annotationModel;
 			var annotations = [];
-			if (annotationModel) {
+			var model;
+			
+			//check if the current view exists, if not return empty array
+			if (view) { model = view.getModel(); }
+			else { return []; }
+			
+			// check if both model exists
+			if (annotationModel && model) {
 				var start = model.getLineStart(lineIndex);
 				var end = model.getLineEnd(lineIndex);
 				if (model.getBaseModel) {
