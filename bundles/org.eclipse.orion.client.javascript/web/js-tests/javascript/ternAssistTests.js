@@ -3223,7 +3223,10 @@ define([
 				testProposals(options, []);
 			});
 			/**
-			 * Tests that eslint* templates will be proposed further in comment with no content beforehand
+			 * Tests that eslint* templates will be proposed further in comment with no content beforehand.
+			 * 
+			 * This test does not test a scenario from the real world - you can never activate assist past the end of a file. 
+			 * i.e. the offset of 10 is 2 past the end of the file
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
 			 * @since 7.0
 			 */
@@ -3240,24 +3243,42 @@ define([
 				    ['/* eslint rule-id:0/1*/', 'eslint - ESLint rule enable / disable directive'],
 				    ['/* eslint-disable rule-id */', 'eslint-disable - ESLint rule disablement directive'],
 				    ['/* eslint-enable rule-id */', 'eslint-enable - ESLint rule enablement directive'],
-				    ['/* eslint-env library*/', 'eslint-env - ESLint environment directive']]
-				);
+				    ['/* eslint-env library*/', 'eslint-env - ESLint environment directive']
+				]);
+			});
+			
+			/**
+			 * Tests that eslint* templates will be proposed further in comment with no content beforehand.
+			 * This test actually tests the real world behavior
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+			 * @since 7.0
+			 */
+			it("test eslint* template 6a", function(done) {
+				var options = {
+					buffer: "/* \n\n es",
+					prefix: "es",
+					offset: 8,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, [
+				]);
 			});
 			/**
 			 * Tests that no eslint* templates are in comments after other content
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
 			 * @since 7.0
 			 */
-//			it("test eslint* template 7", function(done) {
-//				var options = {
-//					buffer: "/* foo \n\n es",
-//					prefix: "es",
-//					offset: 10,
-//					callback: done,
-//					templates: true
-//				};
-//				testProposals(options, []);
-//			});
+			it.skip("test eslint* template 7", function(done) {
+				var options = {
+					buffer: "/* foo \n\n es",
+					prefix: "es",
+					offset: 10,
+					callback: done,
+					templates: true
+				};
+				testProposals(options, []);
+			});
 			/**
 			 * Tests that no eslint* templates are proposed when there is already one
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569

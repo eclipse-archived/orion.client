@@ -18,23 +18,25 @@ define([
 	'json!tern/defs/browser.json',
 	'json!tern/defs/chai.json',
 	
-	//required to load them
-	'tern/plugin/doc_comment',
-	'tern/plugin/orionAmqp',
-	'tern/plugin/angular',
-	'tern/plugin/orionExpress',
-	'tern/plugin/orionMongoDB',
-	'tern/plugin/orionMySQL',
+	//tern defaults
+	"tern/plugin/angular",
+	"tern/plugin/doc_comment",
 	'tern/plugin/node',
-	'tern/plugin/orionPostgres',
-	'tern/plugin/orionRedis',
 	'tern/plugin/requirejs',
-	'tern/plugin/plugins',
-	'tern/plugin/openImplementation',
-	'tern/plugin/htmlDependencies',
-	'tern/plugin/refs',
-	'tern/plugin/jsdoc',
-	'tern/plugin/eslint',
+	
+	//orion defaults
+	"javascript/ternPlugins/amqp",
+	"javascript/ternPlugins/eslint",
+	"javascript/ternPlugins/express",
+	"javascript/ternPlugins/html",
+	"javascript/ternPlugins/jsdoc",
+	"javascript/ternPlugins/mongodb",
+	"javascript/ternPlugins/mysql",
+	"javascript/ternPlugins/open_impl",
+	"javascript/ternPlugins/plugins",
+	"javascript/ternPlugins/postgres",
+	"javascript/ternPlugins/redis",
+	"javascript/ternPlugins/refs"
 ], function(Messages, ecma5, ecma6, browser, chai) {
 	
 	var defs = [ecma5, ecma6, browser, chai];
@@ -47,7 +49,7 @@ define([
 			"version": "0.12.0",
 			"removable": false
 		},
-		"orionAmqp": {
+		"amqp": {
 			"name": Messages["orionAMQPPluginName"],
 			"description": Messages["orionAMQPPluginDescription"],
 			"version": "0.9.1",
@@ -60,21 +62,21 @@ define([
 			"version": "0.12.0",
 			"removable": true
 		},
-		"orionExpress": {
+		"express": {
 			"name": Messages["orionExpressPluginName"],
 			"description": Messages["orionExpressPluginDescription"],
 			"version": "4.12.4",
 			"removable": true,
 			"env": "express"
 		},
-		"orionMongoDB": {
+		"mongodb": {
 			"name": Messages["orionMongoDBPluginName"],
 			"description": Messages["orionMongoDBPluginDescription"],
 			"version": "1.1.21",
 			"removable": true,
 			"env": "mongodb"
 		},
-		"orionMySQL": {
+		"mysql": {
 			"name": Messages["orionMySQLPluginName"],
 			"description": Messages["orionMySQLPluginDescription"],
 			"version": "2.7.0",
@@ -87,14 +89,14 @@ define([
 			"version": "0.12.0",
 			"removable": true
 		},
-		"orionPostgres": {
+		"postgres": {
 			"name": Messages["orionPostgresPluginName"],
 			"description": Messages["orionPostgresPluginDescription"],
 			"version": "4.4.0",
 			"removable": true,
 			"env": "pg"
 		},
-		"orionRedis": {
+		"redis": {
 			"name": Messages["orionRedisPluginName"],
 			"description": Messages["orionRedisPluginDescription"],
 			"version": "0.12.1",
@@ -114,13 +116,13 @@ define([
 			"version": "1.0",
 			"removable": false
 		},
-		"openImplementation": {
+		"open_impl": {
 			"name": Messages["openImplPluginName"],
 			"description": Messages["openImplPluginDescription"],
 			"version": "1.0",
 			"removable": false
 		},
-		"htmlDependencies": {
+		"html": {
 			"name": Messages["htmlDepPluginName"],
 			"description": Messages["htmlDepPluginDescription"],
 			"version": "1.0",

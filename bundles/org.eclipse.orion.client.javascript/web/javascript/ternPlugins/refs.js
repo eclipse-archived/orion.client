@@ -12,8 +12,8 @@
 /*eslint-env node, amd*/
 /*globals infer tern walk*/
 define([
-	"../lib/infer", 
-	"../lib/tern", 
+	"tern/lib/infer", 
+	"tern/lib/tern", 
 	"acorn/dist/walk",
 	"javascript/finder"
 ],/* @callback */ function(infer, tern, walk, finder) {

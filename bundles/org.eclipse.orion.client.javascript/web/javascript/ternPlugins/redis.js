@@ -11,13 +11,11 @@
  *******************************************************************************/
 /*eslint-env node, amd*/
 /*globals infer tern resolver*/
-(function(mod) {
-  if (typeof exports === "object" && typeof module === "object") // CommonJS
-    return mod(require("../lib/infer"), require("../lib/tern"), require);
-  if (typeof define === "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", './resolver'], mod);
-  mod(infer, tern, resolver);
-})(/* @callback */ function(infer, tern, resolver) {
+define([
+	"tern/lib/infer", 
+	"tern/lib/tern", 
+	"./resolver"
+], /* @callback */ function(infer, tern, resolver) {
 
 	var templates = [
 	/* eslint-disable missing-nls */
@@ -96,7 +94,7 @@
 	    }
 	} 
 	
-	tern.registerPlugin("orionRedis", /* @callback */ function(server, options) { //$NON-NLS-1$
+	tern.registerPlugin("redis", /* @callback */ function(server, options) { //$NON-NLS-1$
 	    return {
 	      defs : defs,
 	      passes: {

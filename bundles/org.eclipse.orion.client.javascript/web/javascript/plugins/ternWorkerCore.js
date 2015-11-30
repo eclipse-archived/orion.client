@@ -539,6 +539,10 @@ require([
     	var promises = [];
     	if(plugins) {
 	    	Object.keys(plugins).forEach(function(key) {
+	    		if(defaultOptions.plugins[key]) {
+	    			//default plugins are statically loaded
+	    			return;
+	    		}
 	    		var plugin = plugins[key];
 	    		var loc = plugin.location;
 	    		if(typeof(loc) !== 'string') {
@@ -630,19 +634,5 @@ require([
 			deferred.reject(err);
 		}
 		return deferred;
-    }
-    
-    function nlsDefaultPlugins(plugins) {
-    	Object.keys(plugins).forEach(function(key) {
-    		var plugin = plugins[key];
-    		var nls = Messages[plugin.name];
-    		if(nls) {
-    			plugins[key].name = nls;
-    		}
-    		nls = Messages[plugin.description];
-    		if(nls) {
-    			plugins[key].description = nls;
-    		}
-    	});
     }
 });

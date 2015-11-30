@@ -13,8 +13,8 @@
 /*eslint-env node, amd*/
 /*globals tern tern */
 define([
-	"../lib/infer", 
-	"../lib/tern",
+	"tern/lib/infer", 
+	"tern/lib/tern",
 	"orion/objects",
 	"javascript/finder",
 	"javascript/signatures",
@@ -36,5 +36,5 @@ define([
 		run: function(server, query, file) {
 			
 		}
-	})
+	});
 });

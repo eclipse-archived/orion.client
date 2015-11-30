@@ -14,13 +14,11 @@
 /**
  * Tern type index and templates for ExpressJS node support
  */
-(function(mod) {
-  if (typeof exports === "object" && typeof module === "object") // CommonJS
-    return mod(require("../lib/infer"), require("../lib/tern"), require);
-  if (typeof define === "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", './resolver'], mod);
-  mod(infer, tern, resolver);
-})(/* @callback */ function(infer, tern, resolver) {
+define([
+	"tern/lib/infer", 
+	"tern/lib/tern", 
+	"./resolver"
+], /* @callback */ function(infer, tern, resolver) {
 
 	var templates = [
 	/* eslint-disable missing-nls */
@@ -126,7 +124,7 @@
 	}
 	
 	/* eslint-enable missing-nls */
-	tern.registerPlugin("orionExpress", /* @callback */ function(server, options) { //$NON-NLS-1$
+	tern.registerPlugin("express", /* @callback */ function(server, options) { //$NON-NLS-1$
 	    return {
 	      defs : defs,
 	      passes: {

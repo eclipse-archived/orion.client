@@ -11,15 +11,14 @@
  *******************************************************************************/
 /*eslint-env node, amd*/
 /*globals infer tern resolver*/
-(function(mod) {
-  if (typeof exports === "object" && typeof module === "object") // CommonJS
-    return mod(require("../lib/infer"), require("../lib/tern"), require);
-  if (typeof define === "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", './resolver', "javascript/finder"], mod);
-  mod(infer, tern, resolver);
-})(/* @callback */ function(infer, tern, resolver, Finder) {
+define([
+	"tern/lib/infer", 
+	"tern/lib/tern", 
+	"./resolver", 
+	"javascript/finder"
+], /* @callback */ function(infer, tern, resolver, Finder) {
 	
-	tern.registerPlugin("openImplementation", /* @callback */ function(server, options) { //$NON-NLS-1$
+	tern.registerPlugin("open_impl", /* @callback */ function(server, options) { //$NON-NLS-1$
 	    return {};
 	});
 	

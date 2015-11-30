@@ -2,7 +2,7 @@
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require);
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", "./resolver"], mod);
+    return define(["../lib/infer", "../lib/tern", "javascript/ternPlugins/resolver"], mod);
   mod(tern, tern);
 })(function(infer, tern, resolver, require) {
   "use strict";

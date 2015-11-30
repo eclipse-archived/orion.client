@@ -12,16 +12,16 @@
 /* eslint-disable missing-nls */
 /*eslint-env node, amd*/
 /*globals tern tern*/
-(function(mod) {
-  if (typeof exports === "object" && typeof module === "object") // CommonJS
-    return mod(require("../lib/infer"), require("../lib/tern"));
-  if (typeof define === "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", "./resolver", "javascript/compilationUnit", "javascript/finder"], mod);
-  mod(tern, tern);
-})(function(infer, tern, resolver, CU, Finder) {
+define([
+	"tern/lib/infer", 
+	"tern/lib/tern", 
+	"./resolver", 
+	"javascript/compilationUnit", 
+	"javascript/finder"
+], function(infer, tern, resolver, CU, Finder) {
   "use strict";
 
-  tern.registerPlugin("htmlDependencies", /* @callback */ function(server, options) {
+  tern.registerPlugin("html", /* @callback */ function(server, options) {
 	server._htmlDeps = Object.create(null);
 	server._htmlDeps.map = Object.create(null);
 	
