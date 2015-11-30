@@ -41,11 +41,11 @@ define([
 		});
 
 		after(function() {
-//			var divParent = document.getElementById("divParent");
-//			if (divParent) {
-//				divParent.parentNode.removeChild(divParent);
-//			}
-//			tooltip.hide();
+			var divParent = document.getElementById("divParent");
+			if (divParent) {
+				divParent.parentNode.removeChild(divParent);
+			}
+			tooltip.hide();
 		});
 		
 		/**
@@ -74,10 +74,12 @@ define([
 			assert.equal(awidth, width, result);
 			assert.equal(aheight, height, result);
 			// IE will create a text view with a floating point, 499.99969
-			var remainingViewHeight = Math.round(viewBounds.height-area.top+viewBounds.top);
-			var remainingViewWidth = Math.round(viewBounds.width-area.left+viewBounds.left);
-			assert.equal(Math.round(area.maxHeight), remainingViewHeight, "Max height should be remaining view area" + result);
-			assert.equal(Math.round(area.maxWidth), remainingViewWidth, "Max width should be remaining view area" + result);
+			if (area.maxHeight || area.maxWidth){
+				var remainingViewHeight = Math.round(viewBounds.height-area.top+viewBounds.top);
+				var remainingViewWidth = Math.round(viewBounds.width-area.left+viewBounds.left);
+				assert.equal(Math.round(area.maxHeight), remainingViewHeight, "Max height should be remaining view area" + result);
+				assert.equal(Math.round(area.maxWidth), remainingViewWidth, "Max width should be remaining view area" + result);
+			}
 		}
 		
 		function checkAnchorArea(area, left, top, width, height){
@@ -120,29 +122,6 @@ define([
 			assert.notEqual(tooltip._tooltipDiv.style.visibility, "visible", "Tooltip should not be visible");
 			assert(!tooltip.isVisible(), "Tooltip should know it is not visible");
 		});
-		
-		/*
-		 * TODO
-		 * 
-		 * Check show/hide on onHover call
-		 * - with focus
-		 * - with locked
-		 * Check behaviour of update call
-		 * - with justPosition
-		 * 
-		 * Minimum size
-		 * Maximum size
-		 * All above with non-zero anchor area
-		 * Specified size and place
-		 * Zoom levels?
-		 * 
-		 * Hover contents?
-		 * - annotations
-		 * - rulers
-		 * - contributed providers
-		 * 
-		 */
-		
 		
 		it("Tooltip within editor border", function(){
 			var info = {
@@ -386,10 +365,512 @@ define([
 			tooltip.hide();
 		});
 		
-		// Increase size at all positions
-		// Increase size at all positions to maxWidth
+		it("Anchored tooltip position below wider than available space", function(){
+			var documentElement = tooltip._tooltipDiv.ownerDocument.documentElement;
+			var viewBounds = (tooltip._view._rootDiv ? tooltip._view._rootDiv : documentElement).getBoundingClientRect();
+			var viewLeft = Math.round(viewBounds.left);
+			var viewTop = Math.round(viewBounds.top);
+			var viewWidth = Math.round(viewBounds.width);
+			var viewHeight = Math.round(viewBounds.height);
+			
+			var anchorArea = {left: viewLeft + Math.round(viewWidth / 3), top: viewTop + Math.round(viewHeight / 3), width: 10, height: 10};
+			
+			var info = {
+				getTooltipInfo: function(){
+					return {
+						anchorArea: anchorArea,
+						allowFullWidth: true,
+						position: 'below',
+						contents: "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+					};
+				}
+			};
+			tooltip.show(info);
+			
+			var divBounds = tooltip._tooltipDiv.getBoundingClientRect();
+			var left = Math.round(0);
+			var top = Math.round(anchorArea.top-viewBounds.top+anchorArea.height); // Position below aligns to bottom left of anchor
+			var width = Math.round(viewBounds.width);
+			var height = Math.round(divBounds.height);
+			checkAnchorArea(tooltip._anchorArea, anchorArea.left, anchorArea.top, anchorArea.width, anchorArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left, top, width, height);
+			tooltip.hide();
+		});
 		
-		// Anchor via info.context.offsetStart, offsetEnd
+		it("Anchored tooltip position above wider than available space", function(){
+			var documentElement = tooltip._tooltipDiv.ownerDocument.documentElement;
+			var viewBounds = (tooltip._view._rootDiv ? tooltip._view._rootDiv : documentElement).getBoundingClientRect();
+			var viewLeft = Math.round(viewBounds.left);
+			var viewTop = Math.round(viewBounds.top);
+			var viewWidth = Math.round(viewBounds.width);
+			var viewHeight = Math.round(viewBounds.height);
+			
+			var anchorArea = {left: viewLeft + Math.round(viewWidth / 3), top: viewTop + Math.round(viewHeight / 3), width: 10, height: 10};
+			
+			var info = {
+				getTooltipInfo: function(){
+					return {
+						anchorArea: anchorArea,
+						allowFullWidth: true,
+						position: 'above',
+						contents: "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+					};
+				}
+			};
+			tooltip.show(info);
+			
+			var divBounds = tooltip._tooltipDiv.getBoundingClientRect();
+			var width = Math.round(viewBounds.width);
+			var height = Math.round(divBounds.height);
+			var left = Math.round(0);
+			var top = Math.round(anchorArea.top-viewBounds.top-height); // Position above aligns to top left of anchor
+			checkAnchorArea(tooltip._anchorArea, anchorArea.left, anchorArea.top, anchorArea.width, anchorArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left, top, width, height);
+			tooltip.hide();
+		});
+		
+		it("Anchored tooltip position right taller than available space", function(){
+			var documentElement = tooltip._tooltipDiv.ownerDocument.documentElement;
+			var viewBounds = (tooltip._view._rootDiv ? tooltip._view._rootDiv : documentElement).getBoundingClientRect();
+			var viewLeft = Math.round(viewBounds.left);
+			var viewTop = Math.round(viewBounds.top);
+			var viewWidth = Math.round(viewBounds.width);
+			var viewHeight = Math.round(viewBounds.height);
+			
+			var anchorArea = {left: viewLeft + Math.round(viewWidth / 3), top: viewTop + Math.round(viewHeight / 3), width: 10, height: 10};
+			
+			var paragraph = document.createElement('p');
+			paragraph.innerHTML = '1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>';
+			var info = {
+				getTooltipInfo: function(){
+					return {
+						anchorArea: anchorArea,
+						allowFullWidth: true,
+						position: 'right',
+						contents: paragraph
+					};
+				}
+			};
+			tooltip.show(info);
+			
+			var divBounds = tooltip._tooltipDiv.getBoundingClientRect();
+			var left = Math.round(anchorArea.left-viewBounds.left+anchorArea.width); // Position right aligns to top right of anchor
+			var top = Math.round(0); 
+			var width = Math.round(divBounds.width);
+			var height = Math.round(viewBounds.height);
+			checkAnchorArea(tooltip._anchorArea, anchorArea.left, anchorArea.top, anchorArea.width, anchorArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left, top, width, height);
+			tooltip.hide();
+		});
+		
+		it("Anchored tooltip position left taller than available space", function(){
+			var documentElement = tooltip._tooltipDiv.ownerDocument.documentElement;
+			var viewBounds = (tooltip._view._rootDiv ? tooltip._view._rootDiv : documentElement).getBoundingClientRect();
+			var viewLeft = Math.round(viewBounds.left);
+			var viewTop = Math.round(viewBounds.top);
+			var viewWidth = Math.round(viewBounds.width);
+			var viewHeight = Math.round(viewBounds.height);
+			
+			var anchorArea = {left: viewLeft + Math.round(viewWidth / 3), top: viewTop + Math.round(viewHeight / 3), width: 10, height: 10};
+			
+			var paragraph = document.createElement('p');
+			paragraph.innerHTML = '1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>1<br/>';
+			var info = {
+				getTooltipInfo: function(){
+					return {
+						anchorArea: anchorArea,
+						allowFullWidth: true,
+						position: 'left',
+						contents: paragraph
+					};
+				}
+			};
+			tooltip.show(info);
+			
+			var divBounds = tooltip._tooltipDiv.getBoundingClientRect();
+			var width = Math.round(divBounds.width);
+			var height = Math.round(viewBounds.height);
+			var left = Math.round(anchorArea.left-viewBounds.left-width); // Position left aligns to top left of anchor
+			var top = Math.round(0); 
+			checkAnchorArea(tooltip._anchorArea, anchorArea.left, anchorArea.top, anchorArea.width, anchorArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left, top, width, height);
+			tooltip.hide();
+		});
+		
+		it("Tooltip with set position", function(){
+			var documentElement = tooltip._tooltipDiv.ownerDocument.documentElement;
+			var viewBounds = (tooltip._view._rootDiv ? tooltip._view._rootDiv : documentElement).getBoundingClientRect();
+			var viewLeft = Math.round(viewBounds.left);
+			var viewTop = Math.round(viewBounds.top);
+			var viewWidth = Math.round(viewBounds.width);
+			var viewHeight = Math.round(viewBounds.height);
+			var tooltipArea = {left: viewLeft + Math.round(viewWidth / 3), top: viewTop + Math.round(viewHeight / 3), width: 50, height: 50};
+			var info = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: tooltipArea,
+						contents: "Simple String"
+					};
+				}
+			};
+			tooltip.show(info);
+			
+			var left = Math.round(tooltipArea.left-viewBounds.left);
+			var top = Math.round(tooltipArea.top-viewBounds.top);
+			var width = Math.round(tooltipArea.width);
+			var height = Math.round(tooltipArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left, top, width, height);
+			
+			assert.equal(tooltip._tooltipDiv.style.resize, 'none', 'Tooltips with set position should not be resizeable');
+			tooltip.hide();
+		});
+		
+		it("Tooltip with set position wider than view is allowed", function(){
+			var documentElement = tooltip._tooltipDiv.ownerDocument.documentElement;
+			var viewBounds = (tooltip._view._rootDiv ? tooltip._view._rootDiv : documentElement).getBoundingClientRect();
+			var viewLeft = Math.round(viewBounds.left);
+			var viewTop = Math.round(viewBounds.top);
+			var viewWidth = Math.round(viewBounds.width);
+			var viewHeight = Math.round(viewBounds.height);
+			var tooltipArea = {left: viewLeft + Math.round(viewWidth / 3), top: viewTop + Math.round(viewHeight / 3), width: 50000, height: 50};
+			var info = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: tooltipArea,
+						contents: "Simple String"
+					};
+				}
+			};
+			tooltip.show(info);
+			
+			var left = Math.round(tooltipArea.left-viewBounds.left);
+			var top = Math.round(tooltipArea.top-viewBounds.top);
+			var width = Math.round(tooltipArea.width); // Not limited to viewBounds
+			var height = Math.round(tooltipArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left, top, width, height);
+			
+			assert.equal(tooltip._tooltipDiv.style.resize, 'none', 'Tooltips with set position should not be resizeable');
+			tooltip.hide();
+		});
+		
+		it("Tooltip with set position taller than view is allowed", function(){
+			var documentElement = tooltip._tooltipDiv.ownerDocument.documentElement;
+			var viewBounds = (tooltip._view._rootDiv ? tooltip._view._rootDiv : documentElement).getBoundingClientRect();
+			var viewLeft = Math.round(viewBounds.left);
+			var viewTop = Math.round(viewBounds.top);
+			var viewWidth = Math.round(viewBounds.width);
+			var viewHeight = Math.round(viewBounds.height);
+			var tooltipArea = {left: viewLeft + Math.round(viewWidth / 3), top: viewTop + Math.round(viewHeight / 3), width: 50, height: 50000};
+			
+			var info = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: tooltipArea,
+						contents: "Simple String"
+					};
+				}
+			};
+			tooltip.show(info);
+			
+			var left = Math.round(tooltipArea.left-viewBounds.left);
+			var top = Math.round(tooltipArea.top-viewBounds.top);
+			var width = Math.round(tooltipArea.width);
+			var height = Math.round(tooltipArea.height); // Not limited to viewBounds
+			checkTooltipArea(tooltip._tooltipArea, left, top, width, height);
+			
+			assert.equal(tooltip._tooltipDiv.style.resize, 'none', 'Tooltips with set position should not be resizeable');
+			tooltip.hide();
+		});
+		
+		it("Update contents in open tooltip", function(){
+			var documentElement = tooltip._tooltipDiv.ownerDocument.documentElement;
+			var viewBounds = (tooltip._view._rootDiv ? tooltip._view._rootDiv : documentElement).getBoundingClientRect();
+			var viewLeft = Math.round(viewBounds.left);
+			var viewTop = Math.round(viewBounds.top);
+			var viewWidth = Math.round(viewBounds.width);
+			var viewHeight = Math.round(viewBounds.height);
+			var tooltipArea = {left: viewLeft + Math.round(viewWidth / 3), top: viewTop + Math.round(viewHeight / 3), width: 50, height: 50};
+			var info = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: tooltipArea,
+						contents: "Simple String"
+					};
+				}
+			};
+			tooltip.show(info);
+			
+			var left = Math.round(tooltipArea.left-viewBounds.left);
+			var top = Math.round(tooltipArea.top-viewBounds.top);
+			var width = Math.round(tooltipArea.width);
+			var height = Math.round(tooltipArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left, top, width, height);
+			assert.equal(tooltip._tooltipDiv.textContent, "Simple String", "Contents should match tooltip info");
+			
+			info = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: {left: tooltipArea.left - 5, top: tooltipArea.top - 5, width: tooltipArea.width + 5, height: tooltipArea.height + 5},
+						contents: "New String"
+					};
+				}
+			};
+			tooltip.update(info);
+			assert.equal(tooltip._tooltipDiv.textContent, "New String", "Contents should have been updated");
+			
+			left = Math.round(tooltipArea.left-viewBounds.left);
+			top = Math.round(tooltipArea.top-viewBounds.top);
+			width = Math.round(tooltipArea.width);
+			height = Math.round(tooltipArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left-5, top-5, width+5, height+5);
+			
+			tooltip.hide();
+		});
+		
+		it("Update position only in open tooltip", function(){
+			var documentElement = tooltip._tooltipDiv.ownerDocument.documentElement;
+			var viewBounds = (tooltip._view._rootDiv ? tooltip._view._rootDiv : documentElement).getBoundingClientRect();
+			var viewLeft = Math.round(viewBounds.left);
+			var viewTop = Math.round(viewBounds.top);
+			var viewWidth = Math.round(viewBounds.width);
+			var viewHeight = Math.round(viewBounds.height);
+			var tooltipArea = {left: viewLeft + Math.round(viewWidth / 3), top: viewTop + Math.round(viewHeight / 3), width: 50, height: 50};
+			var info = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: tooltipArea,
+						contents: "Simple String"
+					};
+				}
+			};
+			tooltip.show(info);
+			
+			var left = Math.round(tooltipArea.left-viewBounds.left);
+			var top = Math.round(tooltipArea.top-viewBounds.top);
+			var width = Math.round(tooltipArea.width);
+			var height = Math.round(tooltipArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left, top, width, height);
+			assert.equal(tooltip._tooltipDiv.textContent, "Simple String", "Contents should match tooltip info");
+			
+			info = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: {left: tooltipArea.left - 5, top: tooltipArea.top - 5, width: tooltipArea.width + 5, height: tooltipArea.height + 5},
+						contents: "New String"
+					};
+				}
+			};
+			tooltip.update(info, true);
+			assert.equal(tooltip._tooltipDiv.textContent, "Simple String", "Contents should not have been updated");
+			
+			left = Math.round(tooltipArea.left-viewBounds.left);
+			top = Math.round(tooltipArea.top-viewBounds.top);
+			width = Math.round(tooltipArea.width);
+			height = Math.round(tooltipArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left-5, top-5, width+5, height+5);
+			
+			tooltip.hide();
+		});
+		
+		it("onHover with set position - inside tooltip", function(){
+			var documentElement = tooltip._tooltipDiv.ownerDocument.documentElement;
+			var viewBounds = (tooltip._view._rootDiv ? tooltip._view._rootDiv : documentElement).getBoundingClientRect();
+			var viewLeft = Math.round(viewBounds.left);
+			var viewTop = Math.round(viewBounds.top);
+			var viewWidth = Math.round(viewBounds.width);
+			var viewHeight = Math.round(viewBounds.height);
+			var tooltipArea = {left: viewLeft + Math.round(viewWidth / 3), top: viewTop + Math.round(viewHeight / 3), width: 50, height: 50};
+			var info = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: tooltipArea,
+						contents: "Simple String"
+					};
+				}
+			};
+			tooltip.show(info);
+			
+			var left = Math.round(tooltipArea.left-viewBounds.left);
+			var top = Math.round(tooltipArea.top-viewBounds.top);
+			var width = Math.round(tooltipArea.width);
+			var height = Math.round(tooltipArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left, top, width, height);
+			assert.equal(tooltip._tooltipDiv.style.visibility, "visible", "Tooltip should be visible");
+			assert(tooltip.isVisible(), "Tooltip should know it is visible");
+			
+			var newInfo = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: {left: tooltipArea.left - 5, top: tooltipArea.top - 5, width: tooltipArea.width + 5, height: tooltipArea.height + 5},
+						contents: "New String"
+					};
+				}
+			};
+			
+			tooltip.onHover(newInfo, tooltipArea.left + 5, tooltipArea.top + 5);
+			assert.equal(tooltip._tooltipDiv.textContent, "Simple String", "Contents should not have been updated");
+			tooltip.hide();
+		});
+		
+		it("onHover with set position - left of tooltip", function(){
+			var documentElement = tooltip._tooltipDiv.ownerDocument.documentElement;
+			var viewBounds = (tooltip._view._rootDiv ? tooltip._view._rootDiv : documentElement).getBoundingClientRect();
+			var viewLeft = Math.round(viewBounds.left);
+			var viewTop = Math.round(viewBounds.top);
+			var viewWidth = Math.round(viewBounds.width);
+			var viewHeight = Math.round(viewBounds.height);
+			var tooltipArea = {left: viewLeft + Math.round(viewWidth / 3), top: viewTop + Math.round(viewHeight / 3), width: 50, height: 50};
+			var info = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: tooltipArea,
+						contents: "Simple String"
+					};
+				}
+			};
+			tooltip.show(info);
+			
+			var left = Math.round(tooltipArea.left-viewBounds.left);
+			var top = Math.round(tooltipArea.top-viewBounds.top);
+			var width = Math.round(tooltipArea.width);
+			var height = Math.round(tooltipArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left, top, width, height);
+			assert.equal(tooltip._tooltipDiv.style.visibility, "visible", "Tooltip should be visible");
+			assert(tooltip.isVisible(), "Tooltip should know it is visible");
+			
+			var newInfo = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: {left: tooltipArea.left - 5, top: tooltipArea.top - 5, width: tooltipArea.width + 5, height: tooltipArea.height + 5},
+						contents: "New String"
+					};
+				}
+			};
+			
+			tooltip.onHover(newInfo, tooltipArea.left - 5, tooltipArea.top + 5);
+			assert.equal(tooltip._tooltipDiv.textContent, "New String", "Contents should have been updated");
+			tooltip.hide();
+		});
+		
+		it("onHover with set position - right of tooltip", function(){
+			var documentElement = tooltip._tooltipDiv.ownerDocument.documentElement;
+			var viewBounds = (tooltip._view._rootDiv ? tooltip._view._rootDiv : documentElement).getBoundingClientRect();
+			var viewLeft = Math.round(viewBounds.left);
+			var viewTop = Math.round(viewBounds.top);
+			var viewWidth = Math.round(viewBounds.width);
+			var viewHeight = Math.round(viewBounds.height);
+			var tooltipArea = {left: viewLeft + Math.round(viewWidth / 3), top: viewTop + Math.round(viewHeight / 3), width: 50, height: 50};
+			var info = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: tooltipArea,
+						contents: "Simple String"
+					};
+				}
+			};
+			tooltip.show(info);
+			
+			var left = Math.round(tooltipArea.left-viewBounds.left);
+			var top = Math.round(tooltipArea.top-viewBounds.top);
+			var width = Math.round(tooltipArea.width);
+			var height = Math.round(tooltipArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left, top, width, height);
+			assert.equal(tooltip._tooltipDiv.style.visibility, "visible", "Tooltip should be visible");
+			assert(tooltip.isVisible(), "Tooltip should know it is visible");
+			
+			var newInfo = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: {left: tooltipArea.left - 5, top: tooltipArea.top - 5, width: tooltipArea.width + 5, height: tooltipArea.height + 5},
+						contents: "New String"
+					};
+				}
+			};
+			
+			tooltip.onHover(newInfo ,tooltipArea.left + tooltipArea.width + 5);
+			assert.equal(tooltip._tooltipDiv.textContent, "New String", "Contents should have been updated");
+			tooltip.hide();
+		});
+
+		it("onHover with set position - above of tooltip", function(){
+			var documentElement = tooltip._tooltipDiv.ownerDocument.documentElement;
+			var viewBounds = (tooltip._view._rootDiv ? tooltip._view._rootDiv : documentElement).getBoundingClientRect();
+			var viewLeft = Math.round(viewBounds.left);
+			var viewTop = Math.round(viewBounds.top);
+			var viewWidth = Math.round(viewBounds.width);
+			var viewHeight = Math.round(viewBounds.height);
+			var tooltipArea = {left: viewLeft + Math.round(viewWidth / 3), top: viewTop + Math.round(viewHeight / 3), width: 50, height: 50};
+			var info = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: tooltipArea,
+						contents: "Simple String"
+					};
+				}
+			};
+			tooltip.show(info);
+			
+			var left = Math.round(tooltipArea.left-viewBounds.left);
+			var top = Math.round(tooltipArea.top-viewBounds.top);
+			var width = Math.round(tooltipArea.width);
+			var height = Math.round(tooltipArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left, top, width, height);
+			assert.equal(tooltip._tooltipDiv.style.visibility, "visible", "Tooltip should be visible");
+			assert(tooltip.isVisible(), "Tooltip should know it is visible");
+			
+			var newInfo = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: {left: tooltipArea.left - 5, top: tooltipArea.top - 5, width: tooltipArea.width + 5, height: tooltipArea.height + 5},
+						contents: "New String"
+					};
+				}
+			};
+			
+			tooltip.onHover(newInfo, tooltipArea.left + 5, tooltipArea.top - 5);
+			assert.equal(tooltip._tooltipDiv.textContent, "New String", "Contents should have been updated");
+			tooltip.hide();
+		});
+		
+		it("onHover with set position - below of tooltip", function(){
+			var documentElement = tooltip._tooltipDiv.ownerDocument.documentElement;
+			var viewBounds = (tooltip._view._rootDiv ? tooltip._view._rootDiv : documentElement).getBoundingClientRect();
+			var viewLeft = Math.round(viewBounds.left);
+			var viewTop = Math.round(viewBounds.top);
+			var viewWidth = Math.round(viewBounds.width);
+			var viewHeight = Math.round(viewBounds.height);
+			var tooltipArea = {left: viewLeft + Math.round(viewWidth / 3), top: viewTop + Math.round(viewHeight / 3), width: 50, height: 50};
+			var info = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: tooltipArea,
+						contents: "Simple String"
+					};
+				}
+			};
+			tooltip.show(info);
+			
+			var left = Math.round(tooltipArea.left-viewBounds.left);
+			var top = Math.round(tooltipArea.top-viewBounds.top);
+			var width = Math.round(tooltipArea.width);
+			var height = Math.round(tooltipArea.height);
+			checkTooltipArea(tooltip._tooltipArea, left, top, width, height);
+			assert.equal(tooltip._tooltipDiv.style.visibility, "visible", "Tooltip should be visible");
+			assert(tooltip.isVisible(), "Tooltip should know it is visible");
+			
+			var newInfo = {
+				getTooltipInfo: function(){
+					return {
+						tooltipArea: {left: tooltipArea.left - 5, top: tooltipArea.top - 5, width: tooltipArea.width + 5, height: tooltipArea.height + 5},
+						contents: "New String"
+					};
+				}
+			};
+			
+			tooltip.onHover(newInfo, tooltipArea.left + 5, tooltipArea.top + tooltipArea.height + 5);
+			assert.equal(tooltip._tooltipDiv.textContent, "New String", "Contents should have been updated");
+			tooltip.hide();
+		});
 		
 	});
 

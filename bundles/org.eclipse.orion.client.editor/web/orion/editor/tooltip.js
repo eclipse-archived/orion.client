@@ -37,8 +37,8 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
  * 	Contents {string, html element, annotation array, etc.} Contents to display, if undefined, the hover service will be asked for content
  * 	Context {source, offset, offsetStart, offsetEnd}} Information used to modify the tooltip position or contents
  * 	Position {String} One of left, right, top, bottom used to position the tooltip relative to the anchor area
- * 	AnchorArea {x, y, width, height} rectangle defining the source of the tooltip and where to position relative to
- * 	TooltipArea {x, y, width, height} rectangle to define the tooltip's exact placement rather than a relative position to the anchor
+ * 	AnchorArea {top, left, width, height} rectangle defining the source of the tooltip and where to position relative to
+ * 	TooltipArea {top, left, width, height} rectangle to define the tooltip's exact placement rather than a relative position to the anchor
  * 	TooltipOffsetX {Number} Hint to move the tooltip position horizontally
  * 	TooltipOffsetY {Number} Hint to move the tooltip position vertically
  * 
@@ -463,13 +463,13 @@ function Tooltip (view) {
 			
 			// Callers can specify the exact placement of the tooltip
 			if (info.tooltipArea && info.tooltipArea.top && info.tooltipArea.left && info.tooltipArea.height && info.tooltipArea.width){										 
-					tooltipDiv.style.overflowY = "auto"; //$NON-NLS-0$ // If caller specifies a height, allow scrolling
-					tooltipDiv.style.resize = "none"; //$NON-NLS-0$
-					tooltipDiv.style.top = (info.tooltipArea.top) + "px"; //$NON-NLS-0$
-					tooltipDiv.style.left = (info.tooltipArea.left) + "px"; //$NON-NLS-0$
-					tooltipDiv.style.height = (info.tooltipArea.height - padding) + "px"; //$NON-NLS-0$
-					tooltipDiv.style.width = (info.tooltipArea.width - padding) + "px"; //$NON-NLS-0$
-					return info.tooltipArea;
+				tooltipDiv.style.overflowY = "auto"; //$NON-NLS-0$ // If caller specifies a height, allow scrolling
+				tooltipDiv.style.resize = "none"; //$NON-NLS-0$
+				tooltipDiv.style.top = (info.tooltipArea.top) + "px"; //$NON-NLS-0$
+				tooltipDiv.style.left = (info.tooltipArea.left) + "px"; //$NON-NLS-0$
+				tooltipDiv.style.height = (info.tooltipArea.height - padding) + "px"; //$NON-NLS-0$
+				tooltipDiv.style.width = (info.tooltipArea.width - padding) + "px"; //$NON-NLS-0$
+				return info.tooltipArea;
 			}
 			
 			var divBounds = tooltipDiv.getBoundingClientRect();
