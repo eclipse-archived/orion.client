@@ -1053,10 +1053,16 @@ objects.mixin(EditorSetup.prototype, {
 	}
 });
 
+var setup;
+exports.getEditorViewers = function() {
+	if (!setup) return [];
+	return setup.editorViewers;
+}
+
 exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, readonly) {
 	enableSplitEditor = localStorage.enableSplitEditor !== "false"; //$NON-NLS-0$
 	
-	var setup = new EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly);
+	setup = new EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly);
 	Deferred.when(setup.createBanner(), function() {
 		setup.createMenuBar().then(function() {
 			setup.createSideBar();
