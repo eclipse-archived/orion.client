@@ -323,6 +323,7 @@ define([
 			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.checkoutBranch", 100); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.fetchRemote", 100); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.checkoutPullRequest", 100); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.openGithub", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 			if (root.Type === "RemoteRoot") { //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.addBranch", 200); //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.addRemote", 100); //$NON-NLS-0$

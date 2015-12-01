@@ -1368,6 +1368,26 @@ var exports = {};
 		});
 		commandService.addCommand(checkoutPullRequestCommand);
 
+		var openGithubCommand = new mCommands.Command({
+			name: messages['OpenGithubPage'],
+			tooltip: messages["OpenGithubPageMsg"],
+			imageClass: "git-sprite-open", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			id: "eclipse.openGithub", //$NON-NLS-0$
+			callback: function(data) {
+				var item = data.items;
+				var win = window.open(item.HtmlUrl, "_blank"); //$NON-NLS-1$
+				if (win){
+    				win.focus();
+				} else {
+    				alert(messages["AllowPopUpMsg"]);
+				}
+			},
+			visibleWhen: function(item) {
+				return item.Type === "PullRequest"; //$NON-NLS-1$ //$NON-NLS-0$
+			}
+		});
+		commandService.addCommand(openGithubCommand);
 		
 	};
 	
