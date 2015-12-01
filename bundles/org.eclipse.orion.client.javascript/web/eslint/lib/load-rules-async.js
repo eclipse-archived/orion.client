@@ -771,137 +771,170 @@ define([
         		};
         	}
         },
-        "missing-nls": {
+		"missing-nls": {
         	description: ProblemMessages['missing-nls-description'],
         	rule: function(context){
-        		function reportNonNLS(node, index){
+        		function reportMissingNLS(node, index){
         			var data = Object.create(null);
         			data.indexOnLine = index;
         			context.report(node, ProblemMessages['missing-nls'], {0:node.value, data: data});
         		}
+        		
+        		return {
+                    'Literal': function(node) {
+                    	_collectLinesWithStringLiterals(node, context._linesWithStringLiterals);
+                    },
+                    /**
+                     * @callback
+                     */
+                    'Program': function(node){
+                    	context._linesWithStringLiterals = Object.create(null);
+                    	context._isMissingNLSActive = true;
+                    },
+                    /**
+                     * @callback
+                     */
+                    'Program:exit': function(node){
+                    	context._isMissingNLSActive = false;
+                    	// Read each line in the map and check if there are non-nls statements
+                    	if (context._linesWithStringLiterals){
+                    		for (var lineNumber in context._linesWithStringLiterals) {
+                    			var nodes = context._linesWithStringLiterals[lineNumber];
+							    if (nodes) {
+							    	
+							    	// 0 based line count
+							        var line = context.getSourceLines()[lineNumber-1];
+							        var nonNlsRegExp = /\/\/\$NON-NLS-([0-9])+\$/g;
+							        var match;
+							        var comments = [];
+							        while ((match = nonNlsRegExp.exec(line)) != null){
+							        	comments.push(match[1]);
+							        }
 
-        		function mapCallees(arr, obj) {
-        			for(var i = 0; i < arr.length; i++) {
-        				obj[arr[i]] = true;
-        			}
+							        for (var i=0; i<nodes.length; i++) {
+							        	match = false;
+							        	for (var j=0; j<comments.length; j++) {
+
+							        		// NON-NLS comments start at 1
+							        		if (comments[j] === (""+(i+1))){
+							        			comments[j] = null;
+							        			match = true;
+							        			break;
+							        		}
+							        		// For now allow NON-NLS-0 comments
+							        		if (i===0 && comments[j] === '0'){
+							        			comments[j] = null;
+							        			match = true;
+							        			break;
+							        		}
+							        	}
+							        	if (!match){
+							        		reportMissingNLS(nodes[i], i);
+							        	}
+							        }
+							    }
+							}
+                    	}
+                    }
+				};
+        	}
+        },
+        "unnecessary-nls": {
+        	description: ProblemMessages['unnecessary-nls-description'],
+        	rule: function(context){
+        		function reportUnusedNLS(range, value, nlsCommentValue){
+					context.report({range: range, loc: {start: range[0], end: range[1]}, value: value}, ProblemMessages['unnecessary-nls'], {data: {nlsComment: nlsCommentValue}});
         		}
-
-        		var callees = Object.create(null);
-        		mapCallees(['require', 'requirejs', 'importScripts', 'define', 'Worker', 'SharedWorker', 'addEventListener', 'RegExp', //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
-        		'removeEventListener'], callees);  //$NON-NLS-1$
 
         		return {
                     'Literal': function(node) {
-        				// Create a map of line numbers to a list of literal nodes
-                    	if (typeof node.value === 'string' && node.value.length > 0){
-                    		if (node.value.toLowerCase() === 'use strict'){
-                    			return;
-                    		}
-                    		if(/^(?:[\.,-\/#!$%\^&\*;:{}=\-_`~()@\+\?><\[\]\+])$/.test(node.value)) {
-                    			return; //don't nag about punctuation
-                    		} else if(/^(?:==|!=|===|!==|=>)$/.test(node.value)) {
-                    			return; //don't nag about operators
-                    		}
-                    		if (node.parent){
-                    			switch(node.parent.type) {
-                    				case 'UnaryExpression':
-                    				case 'MemberExpression':
-                    				case 'SwitchCase': {
-                    					return;
-                    				}
-                    				case 'BinaryExpression': {
-                    					if(node.parent.operator !== '+') {
-                    						return;
-                    					}
-                    					break;
-                    				}
-                    				case 'Property': {
-                    					if(node.parent.key === node) {
-                    						return;
-                    					}
-                						var _p = node.parent.parent.parent;
-                						if(_p && _p.type === 'CallExpression' && _p.callee && _p.callee.name === 'define') {
-                							return;
-                						}
-                    					break;
-                    				}
-                    				case 'NewExpression':
-                    				case 'CallExpression': {
-                    					var callee = node.parent.callee;
-                    					if(callee) {
-                    						if(callee.type === 'MemberExpression' && callee.property && callees[callee.property.name]) {
-                    							return;
-                    						} else if(callees[callee.name]) {
-                    							return;
-                    						}
-                    					}
-                    					break;
-                    				}
-                    				case 'ArrayExpression': {
-                    					_p = node.parent.parent;
-                    					if(_p.type === 'CallExpression' && (_p.callee.name === 'define' || _p.callee.name === 'require' || _p.callee.name === 'requirejs')) {
-                    						return;
-                    					}
-                    					break;
-                    				}
-                    			}
-                    		}
-                    		var lineNum = node.loc.end.line-1;
-                    		if (!context._linesWithStringLiterals[lineNum]){
-                    			context._linesWithStringLiterals[lineNum] = [];
-                    		}
-                    		context._linesWithStringLiterals[lineNum].push(node);
+                    	if (!context._isMissingNLSActive){
+                    		_collectLinesWithStringLiterals(node, context._linesWithStringLiterals);
                     	}
                     },
                     /**
                      * @callback
                      */
                     'Program': function(node){
-                    	context._linesWithStringLiterals = {};
+                    	context._linesWithStringLiterals = Object.create(null);
                     },
                     /**
                      * @callback
                      */
                     'Program:exit': function(node){
+                    	var start, value, lineNumber, match, nlsComments;
+                    	var comments = node.comments;
+                    	var linesWithComments = {};
+                    	if (Array.isArray(comments)){
+                    		for (var f=0; f<comments.length; f++) {
+                    			var comment = comments[f];
+                    			if (comment.type.toLowerCase() === 'line'){
+                    				lineNumber = comment.loc.end.line;
+							        linesWithComments[lineNumber] = comment;
+                    			}
+                    		}
+                    	}
+                    	
+                    	// NLS tag must start with // (or be start of line comment) and can be numbered 0 to 9
+                    	var nonNlsRegExp = /(?:^|(\/\/))\$NON-NLS-([0-9])+\$/g;
+
                     	// Read each line in the map and check if there are non-nls statements
                     	if (context._linesWithStringLiterals){
-                    		for (var lineNumber in context._linesWithStringLiterals) {
-							    if (context._linesWithStringLiterals.hasOwnProperty(lineNumber)) {
-							        var line = context.getSourceLines()[lineNumber];
-							        var nodes = context._linesWithStringLiterals[lineNumber];
-
-							        if (nodes){
-								        var nonNlsRegExp = /\/\/\$NON-NLS-([0-9])+\$/g;
-								        var match;
-								        var comments = [];
-								        while ((match = nonNlsRegExp.exec(line)) != null){
-								        	comments.push(match[1]);
+                    		for (lineNumber in context._linesWithStringLiterals) {
+                    			var nodes = context._linesWithStringLiterals[lineNumber];
+							    if (nodes) {
+							    	comment = linesWithComments[lineNumber];
+							    	delete linesWithComments[lineNumber];
+								    nlsComments = [];
+							        if (comment) {
+								        while ((match = nonNlsRegExp.exec(comment.value)) != null){
+								        	nlsComments.push(match);
 								        }
+						        	}
+						        	
+						        	// TODO Disallow duplicate comments "//$NON-NLS-0$ //$NON-NLS-1$" and "//$NON-NLS-1$ //$NON-NLS-1$""
 
-								        for (var i=0; i<nodes.length; i++) {
-								        	match = false;
-								        	for (var j=0; j<comments.length; j++) {
-
-								        		// NON-NLS comments start at 1
-								        		if (comments[j] === (""+(i+1))){
-								        			match = true;
-								        			break;
-								        		}
-								        		// For now allow NON-NLS-0 comments
-								        		if (i===0 && comments[j] === '0'){
-								        			match = true;
-								        			break;
-								        		}
-								        	}
-								        	if (!match){
-								        		reportNonNLS(nodes[i], i);
-								        	}
-								        }
-								    }
-
-								    // TODO Report unused non-nls comments
+									for (var j=0; j<nlsComments.length; j++) {
+										match = nlsComments[j];
+							        	var hasMatch = false;
+							        	for (var i=0; i<nodes.length; i++) {
+							        		// NON-NLS comments start at 1
+							        		if (match[2] === (""+(i+1))){
+							        			hasMatch = true;
+							        			break;
+							        		}
+							        		// For now allow NON-NLS-0 comments
+							        		if (i===0 && match[2] === '0'){
+							        			hasMatch = true;
+							        			break;
+							        		}
+							        	}
+							        	if (!hasMatch){
+							        		value = match[1] ? match[0] : '//' + match[0]; //$NON-NLS-1$
+											start = comment.range[0] + match.index;
+											if (match[1]){
+												start += 2; // Comment range doesn't include line comment prefix
+											}
+                    						reportUnusedNLS([start, start+value.length], value, match[0]);	        		
+							        	}
+							        }
 							    }
 							}
+                    	}
+                    	
+                    	// Find comments on lines with no string literals
+                    	for (lineNumber in linesWithComments){
+                    		comment = linesWithComments[lineNumber];
+                    		if (comment){
+                    			while ((match = nonNlsRegExp.exec(comment.value)) != null){
+                    				value = match[1] ? match[0] : '//' + match[0]; //$NON-NLS-1$
+									start = comment.range[0] + match.index;
+									if (match[1]){
+										start += 2; // Comment range doesn't include line comment prefix
+									}
+            						reportUnusedNLS([start, start+value.length], value, match[0]);	
+            					}
+                			}
                     	}
                     }
 				};
@@ -1682,6 +1715,80 @@ define([
 			}
         }
     };
+    
+    function _mapCallees(arr, obj) {
+		for(var i = 0; i < arr.length; i++) {
+			obj[arr[i]] = true;
+		}
+	}
+
+	var _callees = Object.create(null);
+	_mapCallees(['require', 'requirejs', 'importScripts', 'define', 'Worker', 'SharedWorker', 'addEventListener', 'RegExp', //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+	'removeEventListener'], _callees);  //$NON-NLS-1$
+    
+    function _collectLinesWithStringLiterals(node, lineMap){
+    	
+    	// Create a map of line numbers to a list of literal nodes
+    	if (typeof node.value === 'string' && node.value.length > 0){
+    		if (node.value.toLowerCase() === 'use strict'){
+    			return;
+    		}
+    		if(/^(?:[\.,-\/#!$%\^&\*;:{}=\-_`~()@\+\?><\[\]\+])$/.test(node.value)) {
+    			return; //don't nag about punctuation
+    		} else if(/^(?:==|!=|===|!==|=>)$/.test(node.value)) {
+    			return; //don't nag about operators
+    		}
+    		if (node.parent){
+    			switch(node.parent.type) {
+    				case 'UnaryExpression':
+    				case 'MemberExpression':
+    				case 'SwitchCase': {
+    					return;
+    				}
+    				case 'BinaryExpression': {
+    					if(node.parent.operator !== '+') {
+    						return;
+    					}
+    					break;
+    				}
+    				case 'Property': {
+    					if(node.parent.key === node) {
+    						return;
+    					}
+						var _p = node.parent.parent.parent;
+						if(_p && _p.type === 'CallExpression' && _p.callee && _p.callee.name === 'define') {
+							return;
+						}
+    					break;
+    				}
+    				case 'NewExpression':
+    				case 'CallExpression': {
+    					var callee = node.parent.callee;
+    					if(callee) {
+    						if(callee.type === 'MemberExpression' && callee.property && _callees[callee.property.name]) {
+    							return;
+    						} else if(_callees[callee.name]) {
+    							return;
+    						}
+    					}
+    					break;
+    				}
+    				case 'ArrayExpression': {
+    					_p = node.parent.parent;
+    					if(_p.type === 'CallExpression' && (_p.callee.name === 'define' || _p.callee.name === 'require' || _p.callee.name === 'requirejs')) {
+    						return;
+    					}
+    					break;
+    				}
+    			}
+    		}
+    		var lineNum = node.loc.end.line;
+    		if (!lineMap[lineNum]){
+    			lineMap[lineNum] = [];
+    		}
+    		lineMap[lineNum].push(node);
+    	}
+    }
 
     /**
      * @name getRules

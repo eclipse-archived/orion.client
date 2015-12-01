@@ -295,6 +295,20 @@ define([
 		    var expected = /^.*\'(\!==|===)\'/.exec(annotation.title);
             return editorContext.setText(expected[1], annotation.start, annotation.end);
 		},
+		/** fix for the missing-nls rule */
+        "missing-nls": function(editorContext, annotation, astManager){
+        	// We depend on the validator rule in eslint to count the number of literals on the line
+        	if (annotation.data && typeof annotation.data.indexOnLine === 'number'){
+	        	return astManager.getAST(editorContext).then(function(ast) {
+	                // Insert the correct non nls comment
+	                var end = getLineEnd(ast.source, annotation.end);
+	                // indexOnLine starts at 0, non-nls comments start at one
+	                var comment = " //$NON-NLS-" + (annotation.data.indexOnLine + 1) + "$"; //$NON-NLS-1$
+	                return editorContext.setText(comment, end, end);
+	            });
+			}
+			return null;
+        },
 		/** fix for the no-comma-dangle linting rule */
 		"no-comma-dangle": function(editorContext, annotation) {
 		    return editorContext.setText('', annotation.start, annotation.end);
@@ -667,19 +681,35 @@ define([
         "semi": function(editorContext, annotation) {
             return editorContext.setText(';', annotation.end, annotation.end);
         },
-        /** fix for the missing-nls rule */
-        "missing-nls": function(editorContext, annotation, astManager){
-        	// We depend on the validator rule in eslint to count the number of literals on the line
-        	if (annotation.data && typeof annotation.data.indexOnLine === 'number'){
-	        	return astManager.getAST(editorContext).then(function(ast) {
-	                // Insert the correct non nls comment
-	                var end = getLineEnd(ast.source, annotation.end);
-	                // indexOnLine starts at 0, non-nls comments start at one
-	                var comment = " //$NON-NLS-" + (annotation.data.indexOnLine + 1) + "$"; //$NON-NLS-1$
-	                return editorContext.setText(comment, end, end);
-	            });
-			}
-			return null;
+        /** fix for the unnecessary-nls rule */
+        "unnecessary-nls": function(editorContext, annotation, astManager){
+        	return astManager.getAST(editorContext).then(function(ast) {
+        		var comment = Finder.findComment(annotation.start + 2, ast); // Adjust for leading //
+        		var nlsTag = annotation.data.nlsComment; // We store the nls tag in the annotation
+        		if (comment && comment.type.toLowerCase() === 'line' && nlsTag){
+					var index = comment.value.indexOf(nlsTag);
+					if (index >= 0){
+						var newComment = comment.value.substring(0,index) + comment.value.substring(index+nlsTag.length);
+						if (newComment.match(/^((\/\/)|[\s])*$/)){
+							var start = comment.range[0];
+							while (ast.source.charAt(start-1) === ' ' || ast.source.charAt(start-1) === '\t'){
+								start--;
+							}
+							return editorContext.setText('', start, comment.range[1]);
+						} else {
+							start = annotation.start;
+							if (nlsTag.indexOf('//') !== 0){ //$NON-NLS-1$
+								start += 2;
+							}
+							while (ast.source.charAt(start-1) === ' ' || ast.source.charAt(start-1) === '\t'){
+								start--;
+							}
+							return editorContext.setText('', start, annotation.end);
+						}
+					}
+        		}
+        		return null;
+    		});
         }
 	});
 	

@@ -775,6 +775,19 @@ define([
                     ]
                 }
         );
+        
+        provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+                quickFixComputer,
+                {
+                    name: javascriptMessages["unnecessaryNlsFixName"],  //$NON-NLS-1$
+                    scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+                    id : "unnecessary.nls.fix",  //$NON-NLS-1$
+                    contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-1$ //$NON-NLS-2$
+                    validationProperties: [
+                        {source: "annotation:id", match: "^(?:unnecessary-nls)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                    ]
+                }
+        );
 
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
@@ -1080,6 +1093,12 @@ define([
 				 	        	                },
 				 	        	                {	id: "missing-nls",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["missingNls"],  //$NON-NLS-1$
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: ignore,
+				 	        	                	options: severities
+				 	        	                },
+				 	        	                {	id: "unnecessary-nls",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["unnecessaryNls"],  //$NON-NLS-1$
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities

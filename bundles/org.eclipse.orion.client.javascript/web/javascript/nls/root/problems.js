@@ -53,6 +53,8 @@ define({
 	'no-proto-description': 'Warn when the __proto__ property is used.',
 	'no-jslint' : 'The \'${0}\' directive is unsupported, please use eslint-env.',
 	'no-jslint-description': 'Warn when the jslint/jshint directive is used.',
+	'no-mixed-spaces-and-tabs': 'Mixed spaces and tabs.',
+	'no-mixed-spaces-and-tabs-description': 'Warn about mixed spaces and tabs.',
 	'no-new-array' : 'Use the array literal notation \'[]\'.',
 	'no-new-array-description': 'Disallow use of the Array constructor.',
 	'no-new-func' : 'The Function constructor is eval.',
@@ -97,10 +99,10 @@ define({
 	'radix-description': 'Warn when parseInt() is called without the \'radix\' parameter.',
 	'semi': 'Missing semicolon.',
 	'semi-description': 'Warn about missing semicolons.',
+	'unnecessary-nls' : 'Unecessary $NON-NLS$ tag.',
+	'unnecessary-nls-description': 'Disallow unecessary non-NLS comments.',
 	'use-isnan': 'Use the isNaN function to compare with NaN.',
 	'use-isnan-description': 'Disallow comparison to the value NaN.',
 	'valid-typeof' : 'Invalid typeof comparison.',
-	'valid-typeof-description': 'Warn when incorrectly comparing the result of a typeof expression.',
-	'no-mixed-spaces-and-tabs': 'Mixed spaces and tabs.',
-	'no-mixed-spaces-and-tabs-description': 'Warn about mixed spaces and tabs.'
+	'valid-typeof-description': 'Warn when incorrectly comparing the result of a typeof expression.'
 });

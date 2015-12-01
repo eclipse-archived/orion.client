@@ -1521,7 +1521,7 @@ define([
 		                      pid: 'no-unused-vars-unused-funcdecl',
 		                      contentType: 'text/html'});
 		});
-	//NO-UNUSED-VARS-UNUSED
+	//NO-MISSING-NLS
 	    it("Test missing-nls-1", function() {
 		    var rule = createTestRule('missing-nls');
 		    var expected = {value: " //$NON-NLS-1$",
@@ -1551,6 +1551,67 @@ define([
 		                      rule: rule,
 		                      expected: expected,
 		                      pid: 'missing-nls'});
+		});
+	//NO-UNNECESSARY-NLS
+	    it("Test unnecessary-nls-1", function() {
+		    var rule = createTestRule('unnecessary-nls');
+		    var expected = {value: "",
+		                    start: 10, 
+		                    end: 24};
+		    return getFixes({buffer: 'var a = 1; //$NON-NLS-0$', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'unnecessary-nls'});
+		});
+		it("Test unnecessary-nls-2", function() {
+		    var rule = createTestRule('unnecessary-nls');
+		    var expected = {value: "",
+		                    start: 10, 
+		                    end: 24};
+		    return getFixes({buffer: 'var a = 1; //$NON-NLS-1$', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'unnecessary-nls'});
+		});
+		it("Test unnecessary-nls-3", function() {
+		    var rule = createTestRule('unnecessary-nls');
+		    var expected = {value: "",
+		                    start: 10, 
+		                    end: 24};
+		    return getFixes({buffer: 'var a = 1; //$NON-NLS-2$', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'unnecessary-nls'});
+		});
+		it("Test unnecessary-nls-4", function() {
+		    var rule = createTestRule('unnecessary-nls');
+		    var expected = {value: "",
+		                    start: 13, 
+		                    end: 24};
+		    return getFixes({buffer: 'var a = 1; //$NON-NLS-1$ foo', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'unnecessary-nls'});
+		});
+		it("Test unnecessary-nls-5", function() {
+		    var rule = createTestRule('unnecessary-nls');
+		    var expected = {value: "",
+		                    start: 26, 
+		                    end: 40};
+		    return getFixes({buffer: 'var a = "a"; //$NON-NLS-1$ //$NON-NLS-2$', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'unnecessary-nls'});
+		});
+		it("Test unnecessary-nls-6", function() {
+		    var rule = createTestRule('unnecessary-nls');
+		    var expected = {value: "",
+		                    start: 15, 
+		                    end: 26};
+		    return getFixes({buffer: 'var a = "a"; //$NON-NLS-2$ //$NON-NLS-1$', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'unnecessary-nls'});
 		});
 	//USE-ISNAN
 	    it("Test use-isnan-1", function() {
