@@ -2962,12 +2962,12 @@ define([
 					callback: done};
 				return testProposals(options, [
 						//proposal, description
-						['', 'Keywords'],
-						["function", "function - Keyword"],
 						['', 'ecma5'],
 						['Function(body)', 'Function(body) : fn()'],
 						["", "Templates"],
-						["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"]
+						["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
+						['', 'Keywords'],
+						["function", "function - Keyword"]
 						]);
 			});
 			/**
@@ -2985,12 +2985,12 @@ define([
 				};
 				return testProposals(options, [
 						//proposal, description
-						['', 'Keywords'],
-						["function", "function - Keyword"],
 						['', 'ecma5'],
 						['Function(body)', 'Function(body) : fn()'],
 						["", "Templates"],
 						["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
+						['', 'Keywords'],
+						["function", "function - Keyword"]
 						]);
 			});
 			/**
@@ -3008,12 +3008,12 @@ define([
 				};
 				return testProposals(options, [
 						//proposal, description
-						['', 'Keywords'],
-						["function", "function - Keyword"],
 						['', 'ecma5'],
 						['Function(body)', 'Function(body) : fn()'],
 						["", "Templates"],
 						['ction(parameter) {\n\t\n}', 'function - member function expression'],
+						['', 'Keywords'],
+						["function", "function - Keyword"]
 						]);
 			});
 			/**
@@ -3031,12 +3031,12 @@ define([
 				};
 				return testProposals(options, [
 						//proposal, description
-						['', 'Keywords'],
-						["function", "function - Keyword"],
 						['', 'ecma5'],
 						['Function(body)', 'Function(body) : fn()'],
 						["", "Templates"],
 						['ction(parameter) {\n\t\n}', 'function - member function expression'],
+						['', 'Keywords'],
+						["function", "function - Keyword"]
 						]);
 			});
 			/**
@@ -3054,12 +3054,12 @@ define([
 				};
 				return testProposals(options, [
 						//proposal, description
-						['', 'Keywords'],
-						["function", "function - Keyword"],
 						['', 'ecma5'],
 						['Function(body)', 'Function(body) : fn()'],
 						["", "Templates"],
 						["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
+						['', 'Keywords'],
+						["function", "function - Keyword"]
 						]);
 			});
 			/*
@@ -3077,17 +3077,17 @@ define([
 				};
 				return testProposals(options, [
 						//proposal, description
-						['', 'Keywords'],
-						["this", "this - Keyword"],
-						['throw', 'throw - Keyword'],
-						['try', 'try - Keyword'],
-						["typeof", "typeof - Keyword"],
 						['', 'ecma5'],
 						['TypeError(message)', 'TypeError(message)'],
 						["toLocaleString()", "toLocaleString() : string"],
 						["toString()", "toString() : string"],
 						['', 'ecma6'],
-						['TypedArray(length)', 'TypedArray(length)']
+						['TypedArray(length)', 'TypedArray(length)'],
+						['', 'Keywords'],
+						["this", "this - Keyword"],
+						['throw', 'throw - Keyword'],
+						['try', 'try - Keyword'],
+						["typeof", "typeof - Keyword"]
 						]);
 			});
 			/**
@@ -3124,11 +3124,11 @@ define([
 				};
 				return testProposals(options, [
 						//proposal, description
-						['', 'Keywords'],
-						["new", "new - Keyword"],
 						['', 'ecma5'],
 						['Number(value)', 'Number(value) : number'],
-						['NaN', 'NaN : number']
+						['NaN', 'NaN : number'],
+						['', 'Keywords'],
+						["new", "new - Keyword"]
 						]);
 			});
 		});

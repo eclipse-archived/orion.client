@@ -31,7 +31,12 @@ define([
 				query.start = query.end;
 			}
 			var theFile = server.fileMap[query.file];
-			return this.findImplRecurse(query.end, theFile, {implementation: {}}, server);
+			var impl = this.findImplRecurse(query.end, theFile, {implementation: {}}, server);
+			if(!query.guess && infer.didGuess()) {
+				return null;
+			}
+			impl.implementation.guess = infer.didGuess();
+			return impl;
 		},
 		
 		/**
@@ -46,13 +51,13 @@ define([
 		 */
 		findImplRecurse: function findImplRecurse(offset, serverFile, candidateImpl, server){
 			var query, typeDef, newServerFile;
-			if (serverFile){
+			if (serverFile) {
 				var node = Finder.findNode(offset, serverFile.ast, {parents: true});
 				if (node){
-					if (node.type === 'Identifier'){
+					if (node.type === 'Identifier') {
 						var parent = node.parents[node.parents.length-1];
 						if (parent){
-							if (parent.type === 'MemberExpression' && node.parents.length >= 2){
+							if (parent.type === 'MemberExpression' && node.parents.length >= 2) {
 								// See if the member expression is an assignment a.b=1 that we can follow, otherwise fallthrough and lookup typeDef for the property node
 								parent = node.parents[node.parents.length-2];
 							}
@@ -66,14 +71,14 @@ define([
 								rhs = parent.value;
 							}
 							if (rhs){
-								if (rhs.type === 'Literal' || rhs.type === 'FunctionExpression'){
+								if (rhs.type === 'Literal' || rhs.type === 'FunctionExpression') {
 									// Literals count as implementations
 									// Function expressions are implementations of a function
 									// Short circuit and use the current node
 									return {implementation: {start: node.start, end: node.end, file: serverFile.name}};
 								}
 								// Find the implementation of the RHS identifier
-								query = {start: rhs.start, end: rhs.end, file: serverFile.name};
+								query = {start: rhs.start, end: rhs.end, file: serverFile.name, guess: true};
 								typeDef = tern.findDef(server, query, serverFile);
 								if (typeDef && typeof typeDef.start === 'number' && typeof typeDef.end === 'number' && (typeDef.start !== node.start || typeDef.end !== node.end)){
 									newServerFile = server.fileMap[typeDef.file];
@@ -82,7 +87,7 @@ define([
 							}
 						}
 						// There are many parents of an identifier, rather than list them all, default to look up the typeDef of the identifier
-						query = {start: node.start, end: node.end, file: serverFile.name};
+						query = {start: node.start, end: node.end, file: serverFile.name, guess: true};
 						typeDef = tern.findDef(server, query, serverFile);
 						if (typeDef && typeof typeDef.start === 'number' && typeof typeDef.end === 'number' && (typeDef.start !== node.start || typeDef.end !== node.end)){
 							newServerFile = server.fileMap[typeDef.file];

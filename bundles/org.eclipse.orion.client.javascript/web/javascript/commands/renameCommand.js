@@ -14,8 +14,9 @@ define([
 'orion/objects',
 'javascript/finder',
 'orion/Deferred',
-'i18n!javascript/nls/messages'
-], function(Objects, Finder, Deferred, Messages) {
+'i18n!javascript/nls/messages',
+"orion/i18nUtil"
+], function(Objects, Finder, Deferred, Messages, i18nUtil) {
 
 	/**
 	 * @description Creates a new rename command
@@ -107,12 +108,25 @@ define([
 								editorContext.enterLinkedMode(linkModel).then(deferred.resolve, deferred.reject);
 							}, deferred.reject);
 						} else if(typeof(response.error) === 'string') {
-							deferred.reject({Severity: 'Warning', Message: response.error}); //$NON-NLS-1$
+							deferred.reject({Severity: 'Warning', Message: badRename(response.error)}); //$NON-NLS-1$
 						}
 					});
 			}, deferred.reject);
 		}
 	});
+
+	/**
+	 * @description Shims the default reason for not doing an inline rename, or returns the original error message if
+	 * not the default
+	 * @param {String} original The original message
+	 * @returns {String} The message to present to the user
+	 */
+	function badRename(original) {
+		if("Not at a variable." === original) {
+			return Messages["badInlineRename"];
+		}
+		return i18nUtil.formatMessage(Messages["failedRename"], original);
+	}
 
 	return {
 		RenameCommand : RenameCommand

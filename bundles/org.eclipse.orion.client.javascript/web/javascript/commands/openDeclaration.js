@@ -55,10 +55,13 @@ define([
 			}, 5000);
 			var files = [{type: 'full', name: options.input, text: text}]; //$NON-NLS-1$
 			this.ternworker.postMessage(
-				{request:'definition', args:{params:{offset: options.offset}, files: files, meta:{location: options.input}}}, //$NON-NLS-1$
+				{request:'definition', args:{params:{offset: options.offset}, guess: true, files: files, meta:{location: options.input}}}, //$NON-NLS-1$
 				function(response) {
 					if(response.request === 'definition') {
 						if(response.declaration && (typeof(response.declaration.start) === 'number' && typeof(response.declaration.end) === 'number')) {
+							if(response.declaration.guess) {
+								//TODO handle it being a guess, for now fall through
+							}
 							var opts = Object.create(null);
 							opts.start = response.declaration.start;
 							opts.end = response.declaration.end;

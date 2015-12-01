@@ -131,6 +131,8 @@ define({//Default message bundle
 	"seeAlsoHoverTitle": "See Also:", // the in-line title for the since section. The word is used alone in a sentence with no further punctuation
 	"openFileForTitle": "Open file for", // the in-line title for the 'open file hover'. The sentence is used as-is and is followed only by a OS file path
 	"failedToReadFile": "Failed to read file: ${0}",
+	"badInlineRename": "In-line rename is only available for local variables and declarations.",
+	"failedRename": "In-line rename failed: ${0}",
 	
 	//All refs
 	"functionDecls": "Function Declarations",

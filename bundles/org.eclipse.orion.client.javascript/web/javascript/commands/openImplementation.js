@@ -54,7 +54,7 @@ define([
 			}, 5000);
 			var files = [{type: 'full', name: options.input, text: text}]; //$NON-NLS-1$
 			this.ternworker.postMessage(
-				{request:'implementation', args:{params:{offset: options.offset}, files: files, meta:{location: options.input}}}, //$NON-NLS-1$
+				{request:'implementation', args:{params:{offset: options.offset}, guess: true, files: files, meta:{location: options.input}}}, //$NON-NLS-1$
 				function(response) {
 					if(response.implementation && (typeof(response.implementation.start) === 'number' && typeof(response.implementation.end) === 'number')) {
 						var opts = Object.create(null);

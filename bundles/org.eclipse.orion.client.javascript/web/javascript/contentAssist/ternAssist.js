@@ -71,14 +71,6 @@ define([
 					}
 					return 0;
 				});
-				// if any templates were added to the list of
-				// proposals, add a title as the first element
-				proposals.splice(0, 0, {
-					proposal: '',
-					description: Messages['templateAssistHeader'],
-					style: 'noemphasis_title', //$NON-NLS-1$
-					unselectable: true
-				});
 			}
 			return proposals;
 		},
@@ -220,8 +212,7 @@ define([
 			});
 		},
 
-		doAssist: function(ast, params, meta, envs, farts, htmlsource) {
-       		var proposals = [];
+		doAssist: function(ast, params, meta, envs, pluginenvs, htmlsource) {
        		var templates = createTemplateProposals(params, ast);
    			var env = this.getActiveEnvironments(ast, envs);
 		    var files = [
@@ -232,17 +223,11 @@ define([
 		    }
 		    var args = {params: params, meta: meta, envs:env, files: files};
 			var deferred = new Deferred();
-			deferred.proposals = proposals;
-			deferred.args = args;
 			var that = this;
 			this.ternworker.postMessage({request: 'completions', args: args}, //$NON-NLS-1$
 				function(response) {
 					clearTimeout(that.timeout);
-					if(deferred.proposals) {
-		        		deferred.resolve([].concat(sortProposals(response.proposals ? response.proposals : [], templates, deferred.args), deferred.proposals));
-		        	} else {
-		        		deferred.resolve(sortProposals(response.proposals, templates, deferred.args));
-		        	}
+		        	deferred.resolve(sortProposals(response.proposals, templates, args));
 				}
         	);
 			
@@ -254,7 +239,7 @@ define([
 					// In the editor we can't return an error message here or it will be treated as a proposal and inserted into text
 					deferred.resolve(params.timeoutReturn ? params.timeoutReturn : []);
 				}
-				this.timeout = null;
+				that.timeout = null;
 			}, params.timeout ? params.timeout : 5000);
 			return deferred;
 		},
@@ -579,16 +564,6 @@ define([
 				});
 	        proposals = proposals.concat(_d[key].sort(sorter));
 	    }
-	    if(keywords.length > 0) {
-	    	keywords.sort(sorter);
-	    	keywords.splice(0, 0, {
-					proposal: '',
-					description: Messages['keywordAssistHeader'],
-					style: 'noemphasis_title', //$NON-NLS-1$
-					unselectable: true
-				});
-			proposals = proposals.concat(keywords);
-	    } 
 	    keys = Object.keys(_p);
 	    for(i = 0; i < keys.length; i++) {
 	        key = keys[i];
@@ -610,16 +585,24 @@ define([
 				}
 				return 0;
 			});
-			if(!tmplateHeader) {
-				templates.splice(0, 0, {
+			templates.splice(0, 0, {
+				proposal: '',
+				description: Messages['templateAssistHeader'],
+				style: 'noemphasis_title', //$NON-NLS-1$
+				unselectable: true
+			});
+			proposals = proposals.concat(templates);
+	    }
+	    if(keywords.length > 0) {
+	    	keywords.sort(sorter);
+	    	keywords.splice(0, 0, {
 					proposal: '',
-					description: Messages['templateAssistHeader'],
+					description: Messages['keywordAssistHeader'],
 					style: 'noemphasis_title', //$NON-NLS-1$
 					unselectable: true
 				});
-			}
-			proposals = proposals.concat(templates);
-	    }
+			proposals = proposals.concat(keywords);
+	    } 
 	    return proposals;
 	}
 

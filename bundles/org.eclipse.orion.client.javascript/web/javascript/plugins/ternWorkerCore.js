@@ -125,7 +125,7 @@ require([
 		           files: args.files},
 		           function(error, comps) {
 		               if(error) {
-		               		callback({request: 'completions', error: error.message, message: Messages['failedToComputeProposals']}); //$NON-NLS-1$
+		               		callback({request: 'completions', proposals:[], error: error.message, message: Messages['failedToComputeProposals']}); //$NON-NLS-1$
 		               } else if(comps && comps.completions) {
 	               			callback({request: 'completions', proposals: comps.completions}); //$NON-NLS-1$
 		               } else {
@@ -143,7 +143,8 @@ require([
 		           query: {
 			           type: "definition",  //$NON-NLS-1$
 			           file: args.meta.location,
-			           end: args.params.offset
+			           end: args.params.offset,
+			           guess: args.guess
 		           },
 		           files: args.files},
 		           function(error, decl) {
@@ -220,7 +221,8 @@ require([
 		           query: {
 			           type: "implementation",  //$NON-NLS-1$
 			           file: args.meta.location,
-			           end: args.params.offset
+			           end: args.params.offset,
+			           guess: args.guess
 		           },
 		           files: args.files},
 		           function(error, impl) {
@@ -409,6 +411,7 @@ require([
 
 	var ternID = 0;
 	var reads = Object.create(null);
+	var resolverReads = Object.create(null);
 
     /**
      * @description Worker callback when a message is sent to the worker
@@ -433,6 +436,15 @@ require([
 				});
 			} else if(_d.request === 'read') {
             	var _read = reads[_d.ternID];
+				if(typeof(_read) === 'function') {
+					var text = '';
+					if(_d.args && _d.args.contents) {
+						text = _d.args.contents;
+					}
+					_read(_d.args.error, text);//{contents: _d.args.contents ? _d.args.contents : '', file:_d.args.file, logical: _d.args.logical});
+					delete reads[_d.ternID];
+				}
+				_read = resolverReads[_d.ternID];
 				if(typeof(_read) === 'function') {
 					_read(_d.args.error, {contents: _d.args.contents ? _d.args.contents : '', file:_d.args.file, logical: _d.args.logical});
 					delete reads[_d.ternID];
@@ -521,7 +533,11 @@ require([
     function _getFile(file, callback) {
     	if(ternserver) {
            var request = {request: 'read', ternID: ternID++, args: {file:file}}; //$NON-NLS-1$
-           reads[request.ternID] = callback;
+           if(file != null && typeof(file) === 'object') {
+				resolverReads[request.ternID] = callback;
+           } else {
+	           reads[request.ternID] = callback;
+	       }
            post(request, null);
 	    } else {
 	       post(i18nUtil.formatMessage(Messages['failedReadRequest'], typeof(file) === 'object' ? file.logical : file)); //$NON-NLS-1$
