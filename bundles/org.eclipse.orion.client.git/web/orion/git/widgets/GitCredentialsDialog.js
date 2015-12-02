@@ -58,7 +58,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 			+ '<td align="right"><label id="gitPassphraseLabel" for="gitPassphrase">${Passphrase (optional):}</label></td>'
 			+ '<td><input type="password" id="gitPassphrase" value="" style="margin: 0;"></td>' + '</tr>'
 
-			+ '<tr id="gitSaveCredentialsRow">' + '<td align="right"><img id="gitSaveCredentialsInfo" src="/images/info.gif"">'
+			+ '<tr id="gitSaveCredentialsRow">' + '<td align="right"><img id="gitSaveCredentialsInfo" src="../images/info.gif"">'
 			+ '<input id="gitSaveCredentials" type="checkbox" name="gitSaveCredentials"></td>'
 			+ '<td><label id="gitSaveCredentialsLabel" for="gitSaveCredentials">${Don\'t prompt me again}</label></td>' + '</tr></tbody></table>';
 
