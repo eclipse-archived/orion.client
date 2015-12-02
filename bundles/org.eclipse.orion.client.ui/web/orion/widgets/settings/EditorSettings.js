@@ -238,7 +238,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				if (sections.hasOwnProperty(section)) {
 					if (!this.local) {
 						sectionWidget = new mSection.Section(this.sections, {
-							id: section,
+							id: section + "Section", //$NON-NLS-1$
 							title: messages[section],
 							slideout: true
 						});
@@ -369,7 +369,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			}
 		},
 		createToolbar: function() {
-			var toolbar = lib.node( 'editorSettingsToolActionsArea' ); //$NON-NLS-0$
+			var toolbar = lib.node( 'editorSettingsSectionToolActionsArea' ); //$NON-NLS-0$
 			var restoreCommand = new commands.Command({
 				name: messages.Restore,
 				tooltip: messages["Restore default Editor Settings"],
