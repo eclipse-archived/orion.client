@@ -118,7 +118,7 @@ define([
 				
 			case "pullRequestCheckout": //$NON-NLS-0$
 				if(event.pullRequest){
-					var base = event.pullRequest.Base;
+					var base = event.pullRequest.PullRequest.base;
 					var elementPos = that.branchesNavigator.model.root.children.map(function(x) {return x.Type; }).indexOf("Remote");
 					if(elementPos>-1){
 						var remote = that.branchesNavigator.model.root.children[elementPos];

@@ -613,10 +613,12 @@ define({//Default message bundle
 	"Checking out pull request...": "Checking out pull request", //$NON-NLS-0$  //$NON-NLS-1$
 	"Pull Request checked out.": "Pull Request checked out.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Getting pull requests...": "Getting pull requests...", //$NON-NLS-0$  //$NON-NLS-1$
-	"PullRequestTreeItem":"${0}/${1} => ${2}/${3}", //$NON-NLS-0$  //$NON-NLS-1$
 	"MorePullRequests": "More pull requests for \"${0}\"", //$NON-NLS-0$  //$NON-NLS-1$
 	"MorePullRequestsProgress": "Loading more pull requests for \"${0}\"...", //$NON-NLS-0$  //$NON-NLS-1$
 	"Authorize to get pull requests": "Authorize to get pull requests", //$NON-NLS-0$  //$NON-NLS-1$
 	"CherryPickProgress": "Cherry Pick in progress", //$NON-NLS-0$  //$NON-NLS-1$
-	"MergeProgress": "Merge in progress" //$NON-NLS-0$  //$NON-NLS-1$
+	"MergeProgress": "Merge in progress", //$NON-NLS-0$  //$NON-NLS-1$
+	"OpenGithubPage": "Open Github Page", //$NON-NLS-0$  //$NON-NLS-1$
+	"OpenGithubPageMsg": "Open the Github page for this Pull Request.", //$NON-NLS-0$  //$NON-NLS-1$
+	"AllowPopUpMsg": "Please allow popups for this site." //$NON-NLS-0$  //$NON-NLS-1$
 });
