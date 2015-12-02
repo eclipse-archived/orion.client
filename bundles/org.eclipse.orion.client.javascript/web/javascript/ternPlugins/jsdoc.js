@@ -151,8 +151,20 @@ define([
 		var envs = getActiveEnvironments(file.ast, defaultEnvs);
 		var existingCompletions = Object.create(null); // Tern separates proto and non-proto props into two entries, we only want to see one
 
-		var node = Finder.findNode(comment.range[0], file.ast);		
-		var scope = node ? node.scope : file.scope;
+		var node = Finder.findNodeAfterComment(comment, file.ast);
+		var scope = file.scope;
+		if (node){
+			if (node.scope){
+				scope = node.scope;
+			} else if (node.parents) {
+				for (var i=node.parents.length-1; i>=0; i--) {
+					if (node.parents[i] && node.parents[i].scope){
+						scope = node.parents[i].scope;
+						break;
+					}
+				}
+			}
+		}
 		while (scope){
 			for (key in scope.props){
 				theType = scope.props[key];
@@ -197,9 +209,9 @@ define([
 				if (name === '<top>'){
 					return null;
 				}
-				var prims = ['bool', 'string', 'number'];
-				// We only want type completions not functions returning primitives
-				if (theType.retval && prims.indexOf(theType.retval.name) >= 0){
+				// We only want type completions not functions returning primitives, but include the actual primitive types
+				var prims = ['bool', 'boolean', 'string', 'number', 'regexp'];
+				if (theType.retval && prims.indexOf(theType.retval.name) >= 0 && prims.indexOf(theType.name.toLowerCase()) < 0){
 					return null;
 				}
 				// Different scopes may have same properties
@@ -297,7 +309,7 @@ define([
 					proposals.push(createProposal(_name, Messages['funcProposalDescription'], prefix));
 				}
 			}
-		} else if((val = /\s*\*\s*\@param\s*(?:\{\w*\})?\s*(\w*)/ig.exec(line.line)) !== null) {
+		} else if((val = /\s*\*\s*\@param\s*(?:\{[\w.]*\})?\s*(\w*)/ig.exec(line.line)) !== null) {
 			if(val[1] === prefix) {
 				node = Finder.findNodeAfterComment(comment, file.ast);
 				if(node) {

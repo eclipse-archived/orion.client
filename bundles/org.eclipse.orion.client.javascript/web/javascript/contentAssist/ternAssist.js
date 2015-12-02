@@ -371,14 +371,18 @@ define([
             	//TODO proposal.tags = [{content: 'F', cssClass: 'iconTagPurple'}]; //$NON-NLS-1$ //$NON-NLS-2$
             	calculateFunctionProposal(completion, args, proposal);
             } else if(completion.type === 'template' || completion.type === 'jsdoc_template') {
-            	var _t = new mTemplates.Template(args.params.prefix, completion.description, completion.template, completion.name);
-            	var _prop = _t.getProposal(args.params.prefix, args.params.offset, {});
+            	var prefix = proposal.prefix;
+            	if (!prefix){
+            		prefix = args.params.prefix;
+            	}
+            	var _t = new mTemplates.Template(prefix, completion.description, completion.template, completion.name);
+            	var _prop = _t.getProposal(prefix, args.params.offset, {});
             	var obj = Object.create(null);
 		        obj.type = 'markdown'; //$NON-NLS-1$
 		        obj.content = Messages['templateHoverHeader'];
 		        obj.content += _prop.proposal;
 		        _prop.hover = obj;
-		        provider.removePrefix(args.params.prefix, _prop);
+		        provider.removePrefix(prefix, _prop);
 		        _prop.style = 'emphasis'; //$NON-NLS-1$
 		        _prop.kind = 'js'; //$NON-NLS-1$
 		        if(typeof(completion.prefix) === 'string') {

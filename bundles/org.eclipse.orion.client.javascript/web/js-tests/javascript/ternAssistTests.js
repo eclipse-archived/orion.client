@@ -142,10 +142,19 @@ define([
 							assert.equal(ap.description, description, "Invalid proposal description"); //$NON-NLS-0$
 						}
 					}
-					if(ep.length === 3 && !ap.unselectable /*headers have no hover*/) {
+					if(ep.length >= 3 && !ap.unselectable /*headers have no hover*/) {
 					    //check for doc hover
 					    assert(ap.hover, 'There should be a hover entry for the proposal');
 					    assert(ap.hover.content.indexOf(ep[2]) === 0, "The doc should have started with the given value.\nActual: " + ap.hover.content + '\nExpected: ' + ep[2]);
+					}
+					if (ep.length >= 4 && typeof(ep[3]) === 'object'){
+						assert(ap.groups, "Expected template proposal with selection group");
+						assert(ap.groups[0].positions, "Expected template proposal with selection group")
+						var offset = ap.groups[0].positions[0].offset;
+						var length = ap.groups[0].positions[0].length;
+						assert.equal(offset, ep[3].offset, "Template proposal had different offset for selection group");
+						assert.equal(offset, ep[3].offset, "Template proposal had different offset for selection group");
+						assert.equal(length, ep[3].length, "Template proposal had different length for selection group");						
 					}
 				}
 				testworker.getTestState().callback();
@@ -3920,6 +3929,42 @@ define([
 				testProposals(options, []);
 			});
 			/**
+			 * Tests @param tag template proposal
+			 * @since 11.0
+			 */
+			it("test param tag template completion 1", function(done) {
+				var options = {
+					buffer: "/**\n* @param\n@return nothing \n*/function foo(aa){}",
+					line: '* @param',
+					prefix: "@param",
+					offset: 12,
+					callback: done};
+					
+				testProposals(options, [
+					['@param', '@param'],
+				    ['', 'Templates'],
+				    ['am {type} ', '@param', 'Template source code:', {length: 4, offset: 14}]  // Check that the selection offset is right
+				]);
+			});
+			/**
+			 * Tests @param tag template proposal
+			 * @since 11.0
+			 */
+			it("test param tag template completion 2", function(done) {
+				var options = {
+					buffer: "/**\n* @par\n@return nothing \n*/function foo(aa){}",
+					line: '* @par',
+					prefix: "@par",
+					offset: 10,
+					callback: done};
+					
+				testProposals(options, [
+					['@param', '@param'],
+				    ['', 'Templates'],
+				    ['am {type} ', '@param', 'Template source code:', {length: 4, offset: 14}]  // Check that the selection offset is right
+				]);
+			});
+			/**
 			 * Tests func decl param name proposals no prefix, no type
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
 			 * @since 7.0
@@ -4167,21 +4212,34 @@ define([
 					['aa', 'aa - Function parameter']
 				]);
 			});
-
 			/**
-			 * Tests var decl func expr name proposals
-			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473425
-			 * @since 10.0
+			 * Tests var decl func expr param name proposals
+			 * @since 11.0
 			 */
-			it("test param name completion 14", function(done) {
+			it("test param name completion 14 - period in type name", function(done) {
 				var options = {
-					buffer: "/**\n* @name \n*/var baz = function baz(aa, bb, cc){}",
-					line: '* @name ',
-					prefix: "",
-					offset: 12,
+					buffer: "/**\n* @param {type.atype} a\n*/var baz = function a(aa, bb, cc){}",
+					line: '* @param {type.atype} a',
+					prefix: "a",
+					offset: 27,
 					callback: done};
 				testProposals(options, [
-					['baz', 'baz - The name of the function']
+					['aa', 'aa - Function parameter']
+				]);
+			});
+			/**
+			 * Tests var decl func expr param name proposals
+			 * @since 11.0
+			 */
+			it("test param name completion 15 - with prefix, period in type name", function(done) {
+				var options = {
+					buffer: "/**\n* @param {type.atype} a\n*/var baz = function a(aa, bb, cc){}",
+					line: '* @param {type.atype} a',
+					prefix: "a",
+					offset: 27,
+					callback: done};
+				testProposals(options, [
+					['aa', 'aa - Function parameter']
 				]);
 			});
 
@@ -4190,7 +4248,26 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473425
 			 * @since 10.0
 			 */
-			it("test param name completion 15", function(done) {
+			it("test param name completion 16 - no prefix, period in type name", function(done) {
+				var options = {
+					buffer: "/**\n* @param {type.atype} \n*/var baz = function a(aa, bb, cc){}",
+					line: '* @param {type.atype} a',
+					prefix: "a",
+					offset: 26,
+					callback: done};
+				testProposals(options, [
+					['aa', 'aa - Function parameter'],
+					['bb', 'bb - Function parameter'],
+					['cc', 'cc - Function parameter']
+				]);
+			});
+
+			/**
+			 * Tests var decl func expr name proposals
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473425
+			 * @since 10.0
+			 */
+			it("test param name completion 17", function(done) {
 				var options = {
 					buffer: "/**\n* @name \n*/var baz = function foo(aa, bb, cc){}",
 					line: '* @name ',
@@ -4207,7 +4284,7 @@ define([
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473425
 			 * @since 10.0
 			 */
-			it("test param name completion 16", function(done) {
+			it("test param name completion 18", function(done) {
 				var options = {
 					buffer: "/**\n* @name b\n*/var baz = function foo(aa, bb, cc){}",
 					line: '* @name ',
@@ -4301,6 +4378,40 @@ define([
 					['DOMTokenList', 'DOMTokenList', 'This type represents a set of space-separated tokens.'],
 					['Document', 'Document', 'Each web page loaded in the browser has its own document object.'],
 					['DocumentFragment', 'DocumentFragment', 'Creates a new empty DocumentFragment.'],
+				]);
+			});
+			
+			/**
+			 * Tests object JSDoc completions
+			 * @since 11.0
+			 */
+			it("test object doc completion 4", function(done) {
+				var options = {
+					buffer: "/**\n* @param {N \n*/function foo(aa, bb, cc) {};",
+					line: '* @param {N ',
+					prefix: "N",
+					offset: 15,
+					callback: done};
+				testProposals(options, [
+					['', 'ecma5'],
+					['Number', 'Number', 'The Number JavaScript object is a wrapper']
+				]);
+			});
+			
+			/**
+			 * Tests object JSDoc completions
+			 * @since 11.0
+			 */
+			it("test object doc completion 5", function(done) {
+				var options = {
+					buffer: "/**\n* @returns {N} \n*/",
+					line: '* @returns {N} ',
+					prefix: "I",
+					offset: 17,
+					callback: done};
+				testProposals(options, [
+					['', 'ecma5'],
+					['Number', 'Number', 'The Number JavaScript object is a wrapper']
 				]);
 			});
 		});
