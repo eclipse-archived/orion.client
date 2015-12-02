@@ -4260,12 +4260,11 @@ define([
 			});
 
 			/**
-			 * TODO
 			 * Tests object JSDoc completions
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
 			 * @since 7.0
 			 */
-			it.skip("test object doc completion 2", function(done) {
+			it("test object doc completion 2", function(done) {
 				var options = {
 					buffer: "/**\n* @returns {I} \n*/",
 					line: '* @returns {I} ',
@@ -4273,26 +4272,35 @@ define([
 					offset: 17,
 					callback: done};
 				testProposals(options, [
-					['nfinity', 'Infinity', 'Infinity'],
+					['', 'ecma6'],
+					['Int16Array', 'Int16Array', 'The Int16Array typed array represents'],
+					['Int32Array', 'Int32Array', 'The Int32Array typed array represents'],
+					['Int8Array', 'Int8Array', 'The Int8Array typed array represents']
 				]);
 			});
 
 			/**
-			 * TODO
 			 * Tests object JSDoc completions
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
 			 * @since 7.0
 			 */
-			it.skip("test object doc completion 3", function(done) {
+			it("test object doc completion 3", function(done) {
 				var options = {
-					buffer: "/*eslint-env amd*//**\n* @returns {I} \n*/",
+					buffer: "/*eslint-env browser*//**\n* @returns {D} \n*/",
 					line: '* @returns {I} ',
 					prefix: "I",
-					offset: 35,
+					offset: 39,
 					callback: done};
 				testProposals(options, [
-					['mage', 'Image', 'Image'],
-					['nfinity', 'Infinity', 'Infinity']
+					['', 'ecma5'],
+					['Date', 'Date', 'Creates JavaScript Date'],
+					['', 'ecma6'],
+					['DataView', 'DataView', 'The DataView view provides'],
+					['', 'browser'],
+					['DOMParser', 'DOMParser', 'DOMParser can parse XML or HTML'],
+					['DOMTokenList', 'DOMTokenList', 'This type represents a set of space-separated tokens.'],
+					['Document', 'Document', 'Each web page loaded in the browser has its own document object.'],
+					['DocumentFragment', 'DocumentFragment', 'Creates a new empty DocumentFragment.'],
 				]);
 			});
 		});
