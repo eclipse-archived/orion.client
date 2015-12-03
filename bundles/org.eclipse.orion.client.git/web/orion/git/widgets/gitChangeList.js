@@ -576,8 +576,7 @@ define([
 			return this.prefix === "all" ? false : mGitUIUtil.isChange(modelItem); //$NON-NLS-0$
 		},
 		isRebasing: function() {
-			var repository = this.model.repository;
-			return repository && repository.status && repository.status.RepositoryState.indexOf("REBASING") === 0; //$NON-NLS-0$
+			return mGitUtil.isRebasing(this.model.repository);
 		},
 		getItemCount: function() {
 			var result = 0;

@@ -164,16 +164,13 @@ define([
 			return this.filterQuery || this.authorQuery || this.committerQuery || this.sha1Query || this.repositoryPath || this.fromDateQuery || this.toDateQuery;
 		},
 		isRebasing: function() {
-			var repository = this.root.repository;
-			return repository && repository.status && repository.status.RepositoryState && repository.status.RepositoryState.indexOf("REBASING") === 0; //$NON-NLS-0$
+			return util.isRebasing(this.root.repository);
 		},
 		isMerging: function() {
-			var repository = this.root.repository;
-			return repository && repository.status && repository.status.RepositoryState && repository.status.RepositoryState.indexOf("MERGING") === 0; //$NON-NLS-0$
+			return util.isMerging(this.root.repository);
 		},
 		isCherryPicking: function() {
-			var repository = this.root.repository;
-			return repository && repository.status && repository.status.RepositoryState && repository.status.RepositoryState.indexOf("CHERRY_PICKING") === 0; //$NON-NLS-0$
+			return util.isCherryPicking(this.root.repository);
 		},
 		isNewBranch: function(branch) {
 			return util.isNewBranch(branch);

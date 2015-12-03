@@ -216,7 +216,35 @@ define([
 		return branch && branch.RemoteLocation && branch.RemoteLocation[0] && !isNewBranch(branch.RemoteLocation[0].Children[0]);
 	}
 	
+	function isSafe(item) {
+		if (!item) return false;
+		var state = item.status.RepositoryState || item.RepositoryState;
+		return state && state === "SAFE"; //$NON-NLS-0$
+	}
+	
+	function isMerging(item) {
+		if (!item) return false;
+		var state = item.status.RepositoryState || item.RepositoryState;
+		return state && state.indexOf("MERGING") === 0; //$NON-NLS-0$
+	}
+	
+	function isRebasing(item) {
+		if (!item) return false;
+		var state = item.status.RepositoryState || item.RepositoryState;
+		return state && state.indexOf("REBASING") === 0; //$NON-NLS-0$
+	}
+	
+	function isCherryPicking(item) {
+		if (!item) return false;
+		var state = item.status.RepositoryState || item.RepositoryState;
+		return state && state.indexOf("CHERRY_PICKING") === 0; //$NON-NLS-0$
+	}
+	
 	return {
+		isSafe: isSafe,
+		isRebasing: isRebasing,
+		isMerging: isMerging,
+		isCherryPicking: isCherryPicking,
 		isStaged: isStaged,
 		isUnstaged: isUnstaged,
 		isChange: isChange,

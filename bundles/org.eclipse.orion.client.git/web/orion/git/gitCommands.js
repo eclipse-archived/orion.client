@@ -1242,7 +1242,7 @@ var exports = {};
 				if (item.outgoing) {
 					return false;
 				}
-				return item.Type === "Commit" && explorer.repository.status.RepositoryState.indexOf("CHERRY_PICKING") === -1; //$NON-NLS-0$
+				return item.Type === "Commit" && mGitUtil.isSafe(explorer.repository);
 			}
 		});
 		commandService.addCommand(cherryPickCommand);
@@ -2256,7 +2256,7 @@ var exports = {};
 			},
 			
 			visibleWhen: function(item) {
-				return item.RepositoryState && item.RepositoryState.indexOf("REBASING") !== -1; //$NON-NLS-0$
+				return mGitUtil.isRebasing(item);
 			}
 		});
 		
@@ -2272,7 +2272,7 @@ var exports = {};
 			},
 			
 			visibleWhen: function(item) {
-				return item.RepositoryState && item.RepositoryState.indexOf("REBASING") !== -1; //$NON-NLS-0$
+				return mGitUtil.isRebasing(item);
 			}
 		});
 		
@@ -2288,7 +2288,7 @@ var exports = {};
 			},
 			
 			visibleWhen: function(item) {
-				return item.RepositoryState && item.RepositoryState.indexOf("REBASING") !== -1; //$NON-NLS-0$
+				return mGitUtil.isRebasing(item);
 			}
 		});
 		
