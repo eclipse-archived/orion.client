@@ -106,7 +106,7 @@ define([
 							assert(pbs, "There should always be problems");
 							assert.equal(pbs.length, 1, 'There should only be one problem per test');
 							assert(annot.id, "No problem id is reported");
-							assert(annot.id.startsWith(options.rule.id), "The only problem should have the same id as the enabled rule");
+							assert(annot.id.indexOf(options.rule.id) === 0, "The problem id should start with the enabled rule id");
 						}
 						annot.title = annot.description;
 						if(options.fixid) {
