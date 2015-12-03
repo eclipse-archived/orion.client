@@ -144,7 +144,7 @@ define([
 						if(node.arguments.length > 0) {
 							for(i = 0, len = node.arguments.length; i < len; i++) {
 								var param = node.arguments[i];
-								if(encloses(query.end, param))	{
+								if(encloses(query.end, param)) {
 									if(param.type === 'Identifier') {
 										result.category = 'varaccess'; //$NON-NLS-1$
 									} else if(param.type === 'MemberExpression') {
@@ -313,7 +313,7 @@ define([
 	function checkNode(query, node, result) {
 		switch(node.type) {
 			case 'FunctionDeclaration':
-			case 'FucntionExpression':
+			case 'FunctionExpression':
 			case 'VariableDeclarator': 
 			case 'Literal': {
 				//a re-decl cannot be a reference

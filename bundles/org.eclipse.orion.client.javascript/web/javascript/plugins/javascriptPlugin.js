@@ -367,7 +367,7 @@ define([
     		contentType: ["application/javascript", "text/html"]	//$NON-NLS-1$ //$NON-NLS-2$
     			});
 
-    	var validator = new EslintValidator(astManager, CUProvider);
+    	var validator = new EslintValidator(ternWorker, astManager, CUProvider);
 
     	/**
     	 * Register the ESLint validator

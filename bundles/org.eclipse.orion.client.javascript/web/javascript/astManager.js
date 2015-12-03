@@ -105,6 +105,15 @@ define([
 			} catch (e) {
 				ast = emptyAST;
 				ast.range[1] = (text && typeof text.length === "number") ? text.length : 0;  //$NON-NLS-0$
+				ast.loc = Object.create(null);
+				ast.loc.start = {
+					line: e.lineNumber,
+					column: 0
+				};
+				ast.loc.end = {
+					line: e.lineNumber,
+					column: e.column
+				};
 				ast.errors = [e];
 			}
 			var end = Date.now() - start;
