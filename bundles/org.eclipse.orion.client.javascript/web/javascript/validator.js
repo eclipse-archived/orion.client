@@ -11,16 +11,13 @@
  *******************************************************************************/
 /*eslint-env amd*/
 define([
-	"eslint/lib/eslint",
 	"orion/objects",
-	"javascript/astManager",
-	"javascript/finder",
 	"json!javascript/rules.json",
 	"orion/i18nUtil",
 	"i18n!javascript/nls/problems",
-	"orion/metrics",
-	"eslint/lib/source-code"
-], function(eslint, Objects, ASTManager, Finder, Rules, i18nUtil, messages, Metrics, SourceCode) {
+	'orion/Deferred',
+	"javascript/finder"
+], function(Objects, Rules, i18nUtil, messages, Deferred, Finder) {
 	var config = {
 		// 0:off, 1:warning, 2:error
 		defaults: Rules.rules,
@@ -68,8 +65,8 @@ define([
 	 * @param {javascript.CUProvider} cuProvider
 	 * @returns {ESLintValidator} Returns a new validator
 	 */
-	function ESLintValidator(astManager, cuProvider) {
-		this.astManager = astManager;
+	function ESLintValidator(ternWorker, cuProvider) {
+		this.ternWorker = ternWorker;
 		this.cuprovider = cuProvider;
 		config.setDefaults();
 	}
@@ -174,71 +171,6 @@ define([
 
 	Objects.mixin(ESLintValidator.prototype, {
 		/**
-		 * @description Extracts any errors captured by the tolerant Esprima parser and returns them
-		 * @function
-		 * @private
-		 * @param {esprima.AST} ast The AST
-		 * @returns {esprima.Error[]} The array of AST errors (if any)
-		 */
-		_extractParseErrors: function(ast) {
-			var errors = [], errorMap = Object.create(null);
-			var asterrors = ast.errors;
-			if(asterrors) {
-				var len = asterrors.length;
-				for(var i = 0; i < len; i++) {
-					var error = asterrors[i];
-					var token = null;
-					if(error.end && error.token) {
-						token = {range: [error.index, error.end], value: error.token};
-					}
-					else if(ast.tokens.length > 0) {
-						//error object did not contain the token infos, try to find it
-						token = Finder.findToken(error.index, ast.tokens);	
-					}
-					var msg = error.message;
-					if(errorMap[error.index] === msg) {
-						continue;
-					}
-					errorMap[error.index] = msg;
-					if(error.type) {
-						switch(error.type) {
-							case ASTManager.ErrorTypes.Unexpected:
-							    if(token) {
-    								error.args = {0: token.value, nls: "syntaxErrorBadToken"}; //$NON-NLS-0$
-    								error.message = msg = error.args.nls;
-								}
-								break;
-							case ASTManager.ErrorTypes.EndOfInput:
-								error.args = {nls: "syntaxErrorIncomplete"}; //$NON-NLS-0$
-								error.message = error.args.nls;
-								break;
-						}
-					} else if(!error.token) {
-					    //an untyped error with no tokens, report the failure
-					    error.args = {0: error.message, nls: 'esprimaParseFailure'}; //$NON-NLS-1$
-					    error.message = error.args.nls;
-					    //use the line number / column
-				       delete error.start;
-				       delete error.end;
-					}
-					if(token) {
-					   error.node = token;
-					   if(token.value) {
-					   		if(!error.args) {
-					   			error.args = Object.create(null);
-					   		}
-					   		if(!error.args.data) {
-					   			error.args.data = Object.create(null);
-					   		}
-					   		error.args.data.tokenValue = token.value;
-					   }
-					}
-					errors.push(error);
-				}
-			}
-			return errors;
-		},
-		/**
 		 * @description Callback to create problems from orion.edit.validator
 		 * @function
 		 * @public
@@ -248,102 +180,77 @@ define([
 		 */
 		computeProblems: function(editorContext /*, context*/) {
 			var _self = this;
-			return editorContext.getFileMetadata().then(function(meta) {
-			    if(meta.contentType.id === 'text/html') {
-			        return editorContext.getText().then(function(text) {
-		            	var cu = _self.cuprovider.getCompilationUnit(function(){
-		            			return Finder.findScriptBlocks(text);
-		            		}, meta);
-		                return _self.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-		                    //auto-assume browser env - https://bugs.eclipse.org/bugs/show_bug.cgi?id=458676
-		                    var env = Object.create(null);
-		                    env.browser = true;
-        					return _self._validateAst(ast, env, true);
-        				});
-			        });
-			    } else {
-    			    return _self.astManager.getAST(editorContext).then(function(ast) {
-    					return _self._validateAst(ast);
-    				});
+			var deferred = new Deferred();
+			editorContext.getFileMetadata().then(function(meta) {
+				if(meta.contentType.id === 'text/html') {
+					editorContext.getText().then(function(text) {
+						//auto-assume browser env - https://bugs.eclipse.org/bugs/show_bug.cgi?id=458676
+						var env = Object.create(null);
+						env.browser = true;
+						// need to extract all scripts from the html text
+						var cu = _self.cuprovider.getCompilationUnit(function(){
+							return Finder.findScriptBlocks(text);
+						}, meta);
+						var cuText = cu.getEditorContext().getText();
+						cuText.then(function(cuSource) {
+							_self._validate(meta, cuSource, env, true, deferred);
+						});
+					});
+				} else {
+					editorContext.getText().then(function(text) {
+						_self._validate(meta, text, null, false, deferred);
+					});
 				}
 			});
+			return deferred;
 		},
 		
 		/**
 		 * @description Validates the given AST
 		 * @function
 		 * @private
-		 * @param {Object} ast The AST
+		 * @param {Object} text The given text
 		 * @param {Object} env An environment object to set in the config
 		 * @param {Boolean} htmlMode Set to <code>true</code> to ignore rules that are inaccurate for html script snippets
 		 * @returns {Array|Object} The array of problem objects
 		 * @since 6.0
 		 */
-		_validateAst: function(ast, env, htmlMode) {
-			var eslintErrors = [], 
-				parseErrors = this._extractParseErrors(ast);
-			var start = Date.now();
-			
+		_validate: function(meta, text, env, htmlMode, deferred) {
 			// When validating snippets in an html file ignore undefined rule because other scripts may add to the window object
 			var undefRuleValue;
-		    if (htmlMode){
-		    	undefRuleValue = config.rules['no-undef'];
-		    	config.rules['no-undef'] = 0;
-		    }
-			
-			try {
-			    config.env = env;
-			    var text = ast.source !== null ? ast.source : "";
-				eslintErrors = eslint.verify(new SourceCode(text, ast), config);
-			} catch (e) {
-				if(parseErrors.length < 1) {
-					eslintErrors.push({
-						start: 0,
-						args: {0: e.toString(), nls: "eslintValidationFailure" }, //$NON-NLS-0$
-						severity: "error" //$NON-NLS-0$
-					});
-				}
+			if (htmlMode) {
+				undefRuleValue = config.rules['no-undef'];
+				config.rules['no-undef'] = 0;
 			}
-			if (htmlMode){
+			
+			config.env = env;
+			var files = [{type: 'full', name: meta.location, text: text}]; //$NON-NLS-1$
+			var request = {request: 'lint', args: {meta: {location: meta.location}, files: files, rules: config.rules}}; //$NON-NLS-1$
+			if(env) {
+				request.env = config.env;
+			}
+			this.ternWorker.postMessage(
+				request, 
+				/* @callback */ function(type, err) {
+						var eslintErrors = []; 
+						if(err) {
+							eslintErrors.push({
+								start: 0,
+								args: {0: err.error, nls: "eslintValidationFailure" }, //$NON-NLS-0$
+								severity: "error" //$NON-NLS-0$
+							});
+						} else if (type.problems) {
+							type.problems.forEach(function(element) {
+								eslintErrors.push(element);
+							});
+						}
+						deferred.resolve({ problems: eslintErrors.map(toProblem) });
+				});
+			if (htmlMode) {
 				config.rules['no-undef'] = undefRuleValue;
 			}
-			
-			var end = Date.now() - start;
-			Metrics.logTiming('language tools', 'validation', end, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			return { problems: this._filterProblems(parseErrors, eslintErrors).map(toProblem) };
 		},
-		
-		/**
-		 * @description Post-processes the ESLint generated problems to determine if there are any linting issues reported for the same 
-		 * nodes as parse errors. If there are we discard those problems.
-		 * @function
-		 * @private
-		 * @param {Array} parseErrors The array of parse errors, never <code>null</code>
-		 * @param {Array} eslintErrors The array of eslint computed errors, never <code>null</code>
-		 * @returns {Array} The filtered list of errors to report to the editor
-		 * @since 6.0
-		 */
-		_filterProblems: function(parseErrors, eslintErrors) {
-			var len = parseErrors.length;
-			if(len < 1) {
-				return eslintErrors;
-			}
-			var filtered = [].concat(parseErrors);
-			var len2 = eslintErrors.length;
-			filter: for(var i = 0; i < len2; i++) {
-				var ee = eslintErrors[i];
-				for(var j = 0; j < len; j++) {
-					var pe = parseErrors[j];
-					var node = ee.node;
-					if(node && node.range[0] >= pe.index && node.range[0] <= pe.end) {
-						continue filter;
-					}
-				}
-				filtered.push(ee);
-			}
-			return filtered;
-		},
-		
+
 		/**
 		 * @description Callback from orion.cm.managedservice
 		 * @function

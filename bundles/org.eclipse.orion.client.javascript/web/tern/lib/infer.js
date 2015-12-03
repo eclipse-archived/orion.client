@@ -1288,7 +1288,6 @@
     }
     var ast;
     try {
-        //TODO ORION we need to hook in the AST manager here
         options.tolerant = true;
         options.tokens = true;
         options.comment = true;
@@ -1306,6 +1305,15 @@
     catch(e) {
     	ast = emptyAST;
 		ast.range[1] = typeof(text) === "string" ? text.length : 0;
+		ast.loc = Object.create(null);
+		ast.loc.start = {
+			line: e.lineNumber,
+			column: 0
+		};
+		ast.loc.end = {
+			line: e.lineNumber,
+			column: e.column
+		};
 		ast.errors = [e];
 		if(typeof ast.sourceFile !== "object") {
 	        ast.sourceFile  = Object.create(null);

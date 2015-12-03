@@ -406,6 +406,34 @@ require([
 		               	   callback({request: 'checkRef', type: type}); //$NON-NLS-1$
 		               }
 		           });
+		},
+		'lint': function(args, callback) {
+			var query =
+				{
+					type: "lint",  //$NON-NLS-1$
+					file: args.meta.location,
+					config: {
+						rules: args.rules
+					}
+				};
+
+			if (args.env) {
+				query.env = args.env;
+			}
+			ternserver.request(
+				{
+					query: query,
+					files: args.files
+				},
+				function(error, problems) {
+					if(error) {
+						callback({request: 'lint', error: error.message, message: Messages['failedToComputeProblems']}); //$NON-NLS-1$
+					} else if(problems && Array.isArray(problems)) {
+						callback({request: 'lint', problems: problems}); //$NON-NLS-1$
+					} else {
+						callback({request: 'lint', problems: []}); //$NON-NLS-1$
+					}
+				});
 		}
 	};
 

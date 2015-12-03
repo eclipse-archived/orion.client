@@ -84,5 +84,6 @@ define({
 	'eslintRuleEnableDisable': ' - ESLint rule enable or disable',
 	'eslintEnvDirective': ' - ESLint environment directive',
 	'eslintRuleEnable': ' - ESLint rule enablement directive',
-	'eslintRuleDisable': ' - ESLint rule disablement directive'
+	'eslintRuleDisable': ' - ESLint rule disablement directive',
+	'failedToComputeProblems': 'Failed to compute eslint problems/markers'
 });
