@@ -3178,7 +3178,7 @@ define([
 				    ['lint rule-id:0/1 ', 'eslint - ESLint rule enable or disable'],
 				    ['lint-disable rule-id ', 'eslint-disable - ESLint rule disablement directive'],
 				    ['lint-enable rule-id ', 'eslint-enable - ESLint rule enablement directive'],
-				    ['lint-env library', 'eslint-env - ESLint environment directive']]
+				    ['lint-env amd', 'eslint-env - ESLint environment directive']]  // When inside a comment we auto open content assist, selecting the first value
 				);
 			});
 			/**
@@ -3197,7 +3197,7 @@ define([
 				    ['lint rule-id:0/1 ', 'eslint - ESLint rule enable or disable'],
 				    ['lint-disable rule-id ', 'eslint-disable - ESLint rule disablement directive'],
 				    ['lint-enable rule-id ', 'eslint-enable - ESLint rule enablement directive'],
-				    ['lint-env library', 'eslint-env - ESLint environment directive']]
+				    ['lint-env amd', 'eslint-env - ESLint environment directive']]  // When inside a comment we auto open content assist, selecting the first value
 				);
 			});
 			/**
@@ -3303,7 +3303,7 @@ define([
 				    [' rule-id:0/1 ', 'eslint - ESLint rule enable or disable'],
 				    ['-disable rule-id ', 'eslint-disable - ESLint rule disablement directive'],
 				    ['-enable rule-id ', 'eslint-enable - ESLint rule enablement directive'],
-				    ['-env library', 'eslint-env - ESLint environment directive']]
+				    ['-env amd', 'eslint-env - ESLint environment directive']] // When inside a comment we auto open content assist, selecting the first value
 				);
 			});
 			/**

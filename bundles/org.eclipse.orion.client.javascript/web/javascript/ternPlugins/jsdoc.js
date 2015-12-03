@@ -285,15 +285,23 @@ define([
 	 */
 	function computeBlockCompletions(prefix, comment, options, file) {
 		var proposals = [];
-		var val;
+		var keys, val, _p;
 		var line = getLine(options.end, file);
 		var preamble = line.line.slice(0, options.end-line.start-prefix.length-1);
+		
 		if(/^\/\*$/.test(preamble.trim())) {
-			var keys = Object.keys(block);
+			// Provide a eslint-env template with set list of environments for the user to choose from
+			if (Util.looselyMatches(prefix, "eslint-env")){
+				var envsListTemplate = getEnvsListForTemplate();
+				var template = "eslint-env ${library:" + envsListTemplate +"}";
+				_p = createProposal("eslint-env", Messages['eslintEnvDirective'], prefix, template);
+				proposals.push(_p);
+			}
+			keys = Object.keys(block);
 			for(var len = keys.length, i = 0; i < len; i++) {
 				var tag = block[keys[i]];
 				if(Util.looselyMatches(prefix, tag.name)) {
-					var _p = createProposal(tag.name, tag.desc, prefix, tag.template);
+					_p = createProposal(tag.name, tag.desc, prefix, tag.template);
 					_p.url = tag.url;
 					_p.doc = tag.desc;
 					proposals.push(_p);
@@ -481,6 +489,29 @@ define([
 	}
 	
 	/**
+	 * Takes the allEnvs object, extracts the envs list and formats it into a JSON string that the template
+	 * computer will accept.
+	 * @returns {String} A string list of eslint environment directives that the template computer will accept
+	 */
+	function getEnvsListForTemplate(){
+		var envsList = [];
+		var keys = Object.keys(allEnvs).sort();
+		for(var j = 0; j < keys.length; j++) {
+			var key = keys[j];
+			if(key !== 'builtin'){
+				envsList.push(key);
+			}
+		}
+		var templateList = {
+			type: "link", //$NON-NLS-0$
+			values: envsList,
+			title: 'ESLint Environments',
+			style: 'no_emphasis' //$NON-NLS-1$
+		};
+		return JSON.stringify(templateList).replace("}", "\\}");
+	}
+	
+	/**
 	 * @description Helper function to create a new proposal object
 	 * @param {String} name The name of the proposal
 	 * @param {String} description The description
@@ -514,11 +545,6 @@ define([
 			name: "eslint",  //$NON-NLS-0$
 			desc: Messages['eslintRuleEnableDisable'],
 			template: "eslint ${rule-id}:${0/1} ${cursor}" //$NON-NLS-0$  
-	    },
-	    "eslint-env": {
-			name: "eslint-env",  //$NON-NLS-0$
-			desc: Messages['eslintEnvDirective'],
-			template: "eslint-env ${library}" //$NON-NLS-0$  
 	    },
 	    "eslint-enable": {
 			name: "eslint-enable",  //$NON-NLS-0$
