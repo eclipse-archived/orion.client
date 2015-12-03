@@ -98,7 +98,7 @@ define([
 			var f = callbacks[id];
 			if(typeof(f) === 'function') {
 				if(_d.error) {
-					f(null, _d);
+					f(_d, _d.error);
 				} else {
 					f(_d);
 				}
