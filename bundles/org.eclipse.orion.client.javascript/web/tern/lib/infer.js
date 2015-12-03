@@ -1285,6 +1285,7 @@
         options.range = true;
         options.deps = true;
         options.loc = true;
+        options.attachComment = true;
         ast = acorn.parse(text, options);
         if(typeof ast.sourceFile !== "object") {
 	        ast.sourceFile  = Object.create(null);
