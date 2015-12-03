@@ -174,7 +174,7 @@ define([
 			return fullList;
 		},
 		getId: function(/* item */ item){
-			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : ""); //$NON-NLS-0$
+			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : "") + (item.PullRequest ? item.PullRequest.id : ""); //$NON-NLS-0$
 		}
 	});
 	
