@@ -97,7 +97,11 @@ define([
 			var id  = _d.messageID;
 			var f = callbacks[id];
 			if(typeof(f) === 'function') {
-				f(_d);
+				if(_d.error) {
+					f(null, _d);
+				} else {
+					f(_d);
+				}
 				delete callbacks[id];
 			} else if(_d.request === "worker_ready") {
     			if(typeof(_state.workerReady) === 'function') {
