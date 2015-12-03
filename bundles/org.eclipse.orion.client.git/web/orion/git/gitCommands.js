@@ -1301,8 +1301,8 @@ var exports = {};
 			id: "eclipse.checkoutPullRequest", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
-				var base = item.Base;
-				var head = item.Head;
+				var base = item.PullRequest.base;
+				var head = item.PullRequest.head;
 				var remote = item.RemoteLocation;
 				var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 				var messageService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
@@ -1320,8 +1320,8 @@ var exports = {};
 					
 				var addMsg;
 				var localBranchCheckOut = function(remote){
-					addMsg = i18nUtil.formatMessage(messages["Adding branch ${0}..."], remote+"/"+item.Head.ref);//$NON-NLS-0$
-					progressService.progress(service.addBranch(branchLocation, null, remote+"/"+item.Head.ref), addMsg).then(//$NON-NLS-0$
+					addMsg = i18nUtil.formatMessage(messages["Adding branch ${0}..."], remote+"/"+item.PullRequest.head.ref);//$NON-NLS-0$
+					progressService.progress(service.addBranch(branchLocation, null, remote+"/"+item.PullRequest.head.ref), addMsg).then(//$NON-NLS-0$
 						function(branch){
 							progressService.progress(service.checkoutBranch(branch.CloneLocation, branch.Name), msg).then(
 								function(){
@@ -1368,6 +1368,26 @@ var exports = {};
 		});
 		commandService.addCommand(checkoutPullRequestCommand);
 
+		var openGithubCommand = new mCommands.Command({
+			name: messages['OpenGithubPage'],
+			tooltip: messages["OpenGithubPageMsg"],
+			imageClass: "git-sprite-open", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			id: "eclipse.openGithub", //$NON-NLS-0$
+			callback: function(data) {
+				var item = data.items;
+				var win = window.open(item.PullRequest.html_url, "_blank"); //$NON-NLS-1$
+				if (win){
+    				win.focus();
+				} else {
+    				alert(messages["AllowPopUpMsg"]);
+				}
+			},
+			visibleWhen: function(item) {
+				return item.Type === "PullRequest"; //$NON-NLS-1$ //$NON-NLS-0$
+			}
+		});
+		commandService.addCommand(openGithubCommand);
 		
 	};
 	
