@@ -56,7 +56,7 @@ define([
 	}
 
 	describe('.tern-project Tests', function() {
-		this.timeout(10000);
+		this.timeout(20000);
 		before('Start the testing worker', function(callback) {
 			testworker = TestWorker.instance({callback: callback});
 		});

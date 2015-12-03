@@ -288,7 +288,7 @@ define([
 	                }
 	            });
 	        }
-		    return null;
+		    return new Deferred().resolve(null) ;
 		},
 		/** fix for eqeqeq linting rule */
 		"eqeqeq": function(editorContext, annotation) {
@@ -637,8 +637,8 @@ define([
                     	}
                     	case 'VariableDeclarator': {
                     		var oldp = p;
-                			p = p.parent;
-                			if((p.declarations[0].range[0] == oldp.range[0]) && (p.declarations[0].range[1] === oldp.range[1])) {
+                			p = node.parents.pop();
+                			if((p.declarations[0].range[0] === oldp.range[0]) && (p.declarations[0].range[1] === oldp.range[1])) {
                 				//insert at the var keyword level to not mess up the code
                 				promise = updateCallback(p, ast, oldp.id.leadingComments);
                 			} else if(!hasDocTag('@callback', oldp.id)) { //$NON-NLS-1$
