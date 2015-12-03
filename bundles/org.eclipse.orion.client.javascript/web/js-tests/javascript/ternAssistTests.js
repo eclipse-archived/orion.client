@@ -3934,16 +3934,16 @@ define([
 			 */
 			it("test param tag template completion 1", function(done) {
 				var options = {
-					buffer: "/**\n* @param\n@return nothing \n*/function foo(aa){}",
-					line: '* @param',
-					prefix: "@param",
-					offset: 12,
+					buffer: "/**\n* @para\n@return nothing \n*/function foo(aa){}",
+					line: '* @para',
+					prefix: "@para",
+					offset: 11,
 					callback: done};
 					
 				testProposals(options, [
 					['@param', '@param'],
 				    ['', 'Templates'],
-				    ['am {type} ', '@param', 'Template source code:', {length: 4, offset: 14}]  // Check that the selection offset is right
+				    ['m {type} ', '@param', 'Template source code:', {length: 4, offset: 14}]  // Check that the selection offset is right
 				]);
 			});
 			/**
