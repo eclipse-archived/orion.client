@@ -833,89 +833,89 @@ define([
  				 	        	   properties: [{	id: "no-cond-assign",  //$NON-NLS-1$
     			 	        	                	name: javascriptMessages["noCondAssign"],
     			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: error, //$NON-NLS-1$
-    			 	        	                	options: severities //$NON-NLS-1$
+    			 	        	                	defaultValue: error,
+    			 	        	                	options: severities
     			 	        	                },
     			 	        	                {	id: "no-constant-condition",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noConstantCondition"], //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noConstantCondition"],
     			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: error, //$NON-NLS-1$
-    			 	        	                	options: severities //$NON-NLS-1$
+    			 	        	                	defaultValue: error,
+    			 	        	                	options: severities
     			 	        	                },
     			 	        	                {   id: "no-console",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noConsole"], //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noConsole"],
     			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: error, //$NON-NLS-1$
-    			 	        	                	options: severities //$NON-NLS-1$
+    			 	        	                	defaultValue: error,
+    			 	        	                	options: severities
     			 	        	                },
      				 	        	            {	id: "no-debugger",  //$NON-NLS-1$
- 				 	        	                	name: javascriptMessages["noDebugger"],  //$NON-NLS-1$
+ 				 	        	                	name: javascriptMessages["noDebugger"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-dupe-keys",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["noDupeKeys"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["noDupeKeys"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "valid-typeof",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["validTypeof"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["validTypeof"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-regex-spaces",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["noRegexSpaces"], //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["noRegexSpaces"],
 				 	        	                	type: "number", //$NON-NLS-1$
-				 	        	                	defaultValue: error, //$NON-NLS-1$
-				 	        	                	options: severities //$NON-NLS-1$
+				 	        	                	defaultValue: error,
+				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "use-isnan",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["useIsNaN"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["useIsNaN"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-reserved-keys", //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["noReservedKeys"], //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["noReservedKeys"],
 				 	        	                	type: "number", //$NON-NLS-1$
-				 	        	                	defaultValue: error, //$NON-NLS-1$
-				 	        	                	options: severities //$NON-NLS-1$
+				 	        	                	defaultValue: error,
+				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-sparse-arrays", //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["noSparseArrays"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["noSparseArrays"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-fallthrough",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["noFallthrough"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["noFallthrough"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-comma-dangle", //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["noCommaDangle"], //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["noCommaDangle"],
 				 	        	                	type: "number", //$NON-NLS-1$
-				 	        	                	defaultValue: ignore, //$NON-NLS-1$
-				 	        	                	options: severities //$NON-NLS-1$
+				 	        	                	defaultValue: ignore,
+				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-empty-block",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["noEmptyBlock"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["noEmptyBlock"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-extra-semi",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["unnecessarySemis"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["unnecessarySemis"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-unreachable",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["noUnreachable"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["noUnreachable"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
@@ -923,133 +923,133 @@ define([
 				 	        	},
 				 	        	{  pid: "eslint.config.practices",  //$NON-NLS-1$
 				 	        	   order: 2,
-				 	        	   name: javascriptMessages['prefBestPractices'],  //$NON-NLS-1$
+				 	        	   name: javascriptMessages['prefBestPractices'],
 				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-1$  //$NON-NLS-1$
 				 	        	   category: 'javascript', //$NON-NLS-1$
  				 	        	   categoryLabel: javascriptMessages['javascriptValidation'],
 				 	        	   properties: [
 				 	        	   				{	id: "no-caller",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["noCaller"], //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["noCaller"],
 				 	        	                	type: "number", //$NON-NLS-1$
-				 	        	                	defaultValue: warning, //$NON-NLS-1$
-				 	        	                	options: severities //$NON-NLS-1$
+				 	        	                	defaultValue: warning,
+				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "eqeqeq",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["noEqeqeq"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["noEqeqeq"],
  				 	        	                	type: "number",  //$NON-NLS-1$
  				 	        	                	defaultValue: warning,
  				 	        	                	options: severities
  				 	        	                },
  				 	        	                {	id: "no-eval",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noEval"],  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noEval"],
     			 	        	                	type: "number",  //$NON-NLS-1$
     			 	        	                	defaultValue: ignore,
     			 	        	                	options: severities
     			 	        	                },
     			 	        	                {	id: "no-implied-eval",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noImpliedEval"],  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noImpliedEval"],
     			 	        	                	type: "number",  //$NON-NLS-1$
     			 	        	                	defaultValue: ignore,
     			 	        	                	options: severities
     			 	        	                },
     			 	        	                {	id: "no-iterator",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noIterator"], //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noIterator"],
     			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: error, //$NON-NLS-1$
-    			 	        	                	options: severities //$NON-NLS-1$
+    			 	        	                	defaultValue: error,
+    			 	        	                	options: severities
     			 	        	                },
  				 	        	                {
     			 	        	                	id: "no-new-array", //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noNewArray"], //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noNewArray"],
     			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: warning, //$NON-NLS-1$
-    			 	        	                	options: severities //$NON-NLS-1$
+    			 	        	                	defaultValue: warning,
+    			 	        	                	options: severities
     			 	        	                },
     			 	        	                {
     			 	        	                	id: "no-new-func", //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noNewFunc"], //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noNewFunc"],
     			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: warning, //$NON-NLS-1$
-    			 	        	                	options: severities //$NON-NLS-1$
+    			 	        	                	defaultValue: warning,
+    			 	        	                	options: severities
     			 	        	                },
     			 	        	                {
     			 	        	                	id: "no-new-object", //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noNewObject"], //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noNewObject"],
     			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: warning, //$NON-NLS-1$
-    			 	        	                	options: severities //$NON-NLS-1$
+    			 	        	                	defaultValue: warning,
+    			 	        	                	options: severities
     			 	        	                },
     			 	        	                {	id: "no-proto",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noProto"], //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noProto"],
     			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: error, //$NON-NLS-1$
-    			 	        	                	options: severities //$NON-NLS-1$
+    			 	        	                	defaultValue: error,
+    			 	        	                	options: severities
     			 	        	                },
     			 	        	                {
     			 	        	                	id: "no-with", //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noWith"], //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noWith"],
     			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: warning, //$NON-NLS-1$
-    			 	        	                	options: severities //$NON-NLS-1$
+    			 	        	                	defaultValue: warning,
+    			 	        	                	options: severities
     			 	        	                },
     			 	        	                {
     			 	        	                	id: "no-new-wrappers", //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noNewWrappers"], //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noNewWrappers"],
     			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: warning, //$NON-NLS-1$
-    			 	        	                	options: severities //$NON-NLS-1$
+    			 	        	                	defaultValue: warning,
+    			 	        	                	options: severities
     			 	        	                },
     			 	        	                {	id: "no-undef-init",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["noUndefInit"], //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["noUndefInit"],
 				 	        	                	type: "number", //$NON-NLS-1$
-				 	        	                	defaultValue: warning, //$NON-NLS-1$
-				 	        	                	options: severities //$NON-NLS-1$
+				 	        	                	defaultValue: warning,
+				 	        	                	options: severities
 				 	        	                },
  				 	        	                {
  				 	        	                	id: "no-shadow-global", //$NON-NLS-1$
- 				 	        	                	name: javascriptMessages["noShadowGlobals"], //$NON-NLS-1$
- 				 	        	                	defaultValue: warning, //$NON-NLS-1$
+ 				 	        	                	name: javascriptMessages["noShadowGlobals"],
+ 				 	        	                	defaultValue: warning,
  				 	        	                	type: "number",  //$NON-NLS-1$
- 				 	        	                	options: severities //$NON-NLS-1$
+ 				 	        	                	options: severities
  				 	        	                },
  				 	        	                {	id: "no-use-before-define",  //$NON-NLS-1$
- 				 	        	                	name: javascriptMessages["useBeforeDefine"],  //$NON-NLS-1$
+ 				 	        	                	name: javascriptMessages["useBeforeDefine"],
  				 	        	                	type: "number",  //$NON-NLS-1$
  				 	        	                	defaultValue: warning,
  				 	        	                	options: severities
  				 	        	                },
  				 	        	                {	id: "radix",  //$NON-NLS-1$
- 				 	        	                    name: javascriptMessages['radix'],  //$NON-NLS-1$
+ 				 	        	                    name: javascriptMessages['radix'],
  				 	        	                    type: 'number',  //$NON-NLS-1$
  				 	        	                	defaultValue: warning,
  				 	        	                	options: severities
  				 	        	                },
  				 	        	                {	id: "no-throw-literal",  //$NON-NLS-1$
- 				 	        	                	name: javascriptMessages["noThrowLiteral"],  //$NON-NLS-1$
+ 				 	        	                	name: javascriptMessages["noThrowLiteral"],
  				 	        	                	type: "number",  //$NON-NLS-1$
  				 	        	                	defaultValue: warning,
  				 	        	                	options: severities
  				 	        	                },
  				 	        	                {	id: "curly",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["missingCurly"],  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["missingCurly"],
     			 	        	                	type: "number",  //$NON-NLS-1$
     			 	        	                	defaultValue: ignore,
     			 	        	                	options: severities
     			 	        	                },
  				 	        	                {	id: "no-undef",  //$NON-NLS-1$
- 				 	        	                	name: javascriptMessages["undefMember"],  //$NON-NLS-1$
+ 				 	        	                	name: javascriptMessages["undefMember"],
  				 	        	                	type: "number",  //$NON-NLS-1$
  				 	        	                	defaultValue: error,
  				 	        	                	options: severities
  				 	        	                },
  				 	        	                {	id: "no-unused-params",  //$NON-NLS-1$
- 				 	        	                	name: javascriptMessages["unusedParams"],  //$NON-NLS-1$
+ 				 	        	                	name: javascriptMessages["unusedParams"],
  				 	        	                	type: "number",  //$NON-NLS-1$
  				 	        	                	defaultValue: warning,
  				 	        	                	options: severities
  				 	        	                },
  				 	        	                {	id: "no-unused-vars",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["unusedVars"],  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["unusedVars"],
     			 	        	                	type: "number",  //$NON-NLS-1$
     			 	        	                	defaultValue: warning,
     			 	        	                	options: severities
@@ -1061,7 +1061,7 @@ define([
  				 	        	                	options: severities
  				 	        	                },
  				 	        	                {	id: "no-shadow",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["varShadow"],  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["varShadow"],
     			 	        	                	type: "number",  //$NON-NLS-1$
     			 	        	                	defaultValue: warning,
     			 	        	                	options: severities
@@ -1069,48 +1069,48 @@ define([
 				 	            },
 				 	        	{  pid: "eslint.config.codestyle",  //$NON-NLS-1$
 				 	        	   order: 3,
-				 	        	   name: javascriptMessages['prefCodeStyle'],  //$NON-NLS-1$
+				 	        	   name: javascriptMessages['prefCodeStyle'],
 				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-1$  //$NON-NLS-1$
 				 	        	   category: 'javascript', //$NON-NLS-1$
  				 	        	   categoryLabel: javascriptMessages['javascriptValidation'],
 				 	        	   properties: [{	id: "missing-doc", //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["missingDoc"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["missingDoc"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "new-parens",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["newParens"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["newParens"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "semi",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["missingSemi"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["missingSemi"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "missing-nls",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["missingNls"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["missingNls"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "unnecessary-nls",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["unnecessaryNls"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["unnecessaryNls"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-jslint",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["unsupportedJSLint"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["unsupportedJSLint"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-mixed-spaces-and-tabs",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["noMixedSpacesAndTabs"],  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["noMixedSpacesAndTabs"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
