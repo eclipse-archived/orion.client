@@ -224,19 +224,19 @@ define([
 	
 	function isMerging(item) {
 		if (!item) return false;
-		var state = item.status.RepositoryState || item.RepositoryState;
+		var state = (item.status && item.status.RepositoryState) || item.RepositoryState;
 		return state && state.indexOf("MERGING") === 0; //$NON-NLS-0$
 	}
 	
 	function isRebasing(item) {
 		if (!item) return false;
-		var state = item.status.RepositoryState || item.RepositoryState;
+		var state = (item.status && item.status.RepositoryState) || item.RepositoryState;
 		return state && state.indexOf("REBASING") === 0; //$NON-NLS-0$
 	}
 	
 	function isCherryPicking(item) {
 		if (!item) return false;
-		var state = item.status.RepositoryState || item.RepositoryState;
+		var state = (item.status && item.status.RepositoryState) || item.RepositoryState;
 		return state && state.indexOf("CHERRY_PICKING") === 0; //$NON-NLS-0$
 	}
 	
