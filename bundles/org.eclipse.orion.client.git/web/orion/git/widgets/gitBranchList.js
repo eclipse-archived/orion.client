@@ -323,6 +323,7 @@ define([
 			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.checkoutBranch", 100); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.fetchRemote", 100); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.checkoutPullRequest", 100); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.openGithubPullRequest", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 			if (root.Type === "RemoteRoot") { //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.addBranch", 200); //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.addRemote", 100); //$NON-NLS-0$
@@ -421,8 +422,12 @@ define([
 						}
 						actionsID = "remoteActionsArea"; //$NON-NLS-0$
 					} else if (item.parent.Type === "PullRequestRoot") { //$NON-NLS-0$
-						var baseRoot = (item.Head.user.login !== item.Base.user.login)?item.Head.user.login:"origin";//$NON-NLS-0$
-						title = i18nUtil.formatMessage(messages["PullRequestTreeItem"], baseRoot, item.Head.ref, "origin", item.Base.ref); //$NON-NLS-0$
+						var head = item.PullRequest.head;
+						var base = item.PullRequest.base;
+						item.GitUrl = head.repo.clone_url;
+						var baseRoot = (head.user.login !== base.user.login)?head.user.login:"origin";//$NON-NLS-0$
+						title = i18nUtil.formatMessage(messages["PullRequestTreeItem"], baseRoot, head.ref, "origin", base.ref); //$NON-NLS-0$
+						description = item.PullRequest.title;
 					}  else if (item.parent.Type === "Remote") { //$NON-NLS-0$
 						if (explorer.showHistory) createExpand();
 						actionsID = "branchActionsArea"; //$NON-NLS-0$
