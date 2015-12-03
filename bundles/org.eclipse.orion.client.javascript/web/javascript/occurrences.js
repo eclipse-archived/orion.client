@@ -47,10 +47,12 @@ define([
 		 * @private
 		 * @memberof javascript.Visitor.prototype
 		 * @param {Object} node The AST node currently being visited
+		 * @param {Object} parent The last node we visited
 		 * @returns The status if we should continue visiting
 		 */
-		enter: function(node) {
+		enter: function(node, parent) {
 			var len, idx;
+			node.parent = parent;
 			switch(node.type) {
 				case Estraverse.Syntax.Program:
 					this.occurrences = [];
@@ -59,7 +61,7 @@ define([
 					this.skipScope = null;
 					break;
 				case Estraverse.Syntax.FunctionDeclaration:
-					this.checkId(node.id, true);
+					this.checkId(node.id, node, true);
 					this._enterScope(node);
 					if (this.skipScope){
 						// If the function decl was a redefine, checkId may set skipScope and we can skip processing the contents
@@ -69,7 +71,7 @@ define([
 					if (node.params) {
 						len = node.params.length;
 						for (idx = 0; idx < len; idx++) {
-							if(this.checkId(node.params[idx], true)) {
+							if(this.checkId(node.params[idx], node, true)) {
 								return Estraverse.VisitorOption.Skip;
 							}
 						}
@@ -80,68 +82,68 @@ define([
 					if(this._enterScope(node)) {
 						return Estraverse.VisitorOption.Skip;
 					}
-					this.checkId(node.id, true); // Function expressions can be named expressions
+					this.checkId(node.id, node, true); // Function expressions can be named expressions
 					if (node.params) {
 						len = node.params.length;
 						for (idx = 0; idx < len; idx++) {
-							if(this.checkId(node.params[idx], true)) {
+							if(this.checkId(node.params[idx], node, true)) {
 								return Estraverse.VisitorOption.Skip;
 							}
 						}
 					}
 					break;
 				case Estraverse.Syntax.AssignmentExpression:
-					this.checkId(node.left);
-					this.checkId(node.right);
+					this.checkId(node.left, node);
+					this.checkId(node.right, node);
 					break;
 				case Estraverse.Syntax.ExpressionStatement:
-					this.checkId(node.expression);
+					this.checkId(node.expression, node);
 					break;
 				case Estraverse.Syntax.ArrayExpression: 
 					if (node.elements) {
 						len = node.elements.length;
 						for (idx = 0; idx < len; idx++) {
-							this.checkId(node.elements[idx]);
+							this.checkId(node.elements[idx], node);
 						}
 					}
 					break;
 				case Estraverse.Syntax.MemberExpression:
-					this.checkId(node.object);
+					this.checkId(node.object, node);
 					if (node.computed) { //computed = true for [], false for . notation
-						this.checkId(node.property);
+						this.checkId(node.property, node);
 					} else {
-						this.checkId(node.property, false, true);
+						this.checkId(node.property, node, false, true);
 					}
 					break;
 				case Estraverse.Syntax.BinaryExpression:
-					this.checkId(node.left);
-					this.checkId(node.right);
+					this.checkId(node.left, node);
+					this.checkId(node.right, node);
 					break;
 				case Estraverse.Syntax.UnaryExpression:
-					this.checkId(node.argument);
+					this.checkId(node.argument, node);
 					break;
 				case Estraverse.Syntax.SwitchStatement:
-					this.checkId(node.discriminant);
+					this.checkId(node.discriminant, node);
 					break;
 				case Estraverse.Syntax.UpdateExpression:
-					this.checkId(node.argument);
+					this.checkId(node.argument, node);
 					break;
 				case Estraverse.Syntax.ConditionalExpression:
-					this.checkId(node.test);
-					this.checkId(node.consequent);
-					this.checkId(node.alternate);
+					this.checkId(node.test, node);
+					this.checkId(node.consequent, node);
+					this.checkId(node.alternate, node);
 					break;
 				case Estraverse.Syntax.CallExpression:
-					this.checkId(node.callee, false);
+					this.checkId(node.callee, node, false);
 					if (node.arguments) {
 						len = node.arguments.length;
 						for (idx = 0; idx < len; idx++) {
-							this.checkId(node.arguments[idx]);
+							this.checkId(node.arguments[idx], node);
 						}
 					}
 					break;
 				case Estraverse.Syntax.ReturnStatement:
-					this.checkId(node.argument);
+					this.checkId(node.argument, node);
 					break;
 				case Estraverse.Syntax.ObjectExpression:
 					if(this._enterScope(node)) {
@@ -156,30 +158,30 @@ define([
 									//tag it 
 									prop.value.isprop = true;
 								} else {
-									this.checkId(prop.value.id, false, true);
+									this.checkId(prop.value.id, node, false, true);
 								}
 							}
-							this.checkId(prop.key, true, true);
-							this.checkId(prop.value);
+							this.checkId(prop.key, node, true, true);
+							this.checkId(prop.value, node);
 						}
 					}
 					break;
 				case Estraverse.Syntax.VariableDeclarator:
-					this.checkId(node.id, true);
-					this.checkId(node.init);
+					this.checkId(node.id, node, true);
+					this.checkId(node.init, node);
 					break;
 				case Estraverse.Syntax.NewExpression:
-					this.checkId(node.callee, false);
+					this.checkId(node.callee, node, false);
 					if(node.arguments) {
 						len = node.arguments.length;
 						for(idx = 0; idx < len; idx++) {
-							this.checkId(node.arguments[idx]);
+							this.checkId(node.arguments[idx], node);
 						}
 					}
 					break;
 				case Estraverse.Syntax.LogicalExpression:
-					this.checkId(node.left);
-					this.checkId(node.right);
+					this.checkId(node.left, node);
+					this.checkId(node.right, node);
 					break;
 				case Estraverse.Syntax.ThisExpression:
 					if(this.thisCheck) {
@@ -197,30 +199,30 @@ define([
 				case Estraverse.Syntax.IfStatement:
 				case Estraverse.Syntax.DoWhileStatement:
 				case Estraverse.Syntax.WhileStatement:
-					this.checkId(node.test);
+					this.checkId(node.test, node);
 					break;
 				case Estraverse.Syntax.ForStatement:
-					this.checkId(node.init);
+					this.checkId(node.init, node);
 					break;
 				case Estraverse.Syntax.ForInStatement:
-                    this.checkId(node.left);
-                    this.checkId(node.right);
+                    this.checkId(node.left, node);
+                    this.checkId(node.right, node);
                     break;
 				case Estraverse.Syntax.WithStatement:
-                    this.checkId(node.object);
+                    this.checkId(node.object, node);
                     break;
                 case Estraverse.Syntax.ThrowStatement:
-                    this.checkId(node.argument);
+                    this.checkId(node.argument, node);
                     break;
                 case Estraverse.Syntax.LabeledStatement:
                		this._enterScope(node);
-                    this.checkId(node.label, true, false, true);
+                    this.checkId(node.label, node, true, false, true);
                     break;
                 case Estraverse.Syntax.ContinueStatement :
-                    this.checkId(node.label, false, false, true);
+                    this.checkId(node.label, node, false, false, true);
                     break;
                 case Estraverse.Syntax.BreakStatement:
-                    this.checkId(node.label, false, false, true);
+                    this.checkId(node.label, node, false, false, true);
                     break;
 			}
 		},
@@ -412,12 +414,9 @@ define([
 		 * @param {Array} occurrencesList The array of occurrences to add the new occurrence to
 		 */
 		_markDefineStatementOccurrences: function(node, occurrencesList){
-			// If ESLint verify has been run on the AST, the nodes will have their parent marked
-			// If the cursor is on this node, it will have a parents array added by Finder.findNode()
-			// If no parent can be found, we cannot mark the matching define argument
-			var parent = node.parent ? node.parent : (node.parents && node.parents.length > 0 ? node.parents[node.parents.length-1] : null);
-			if (parent && parent.type === Estraverse.Syntax.FunctionExpression){
-				var parent2 = parent.parent ? parent.parent : (node.parents && node.parents.length > 1 ? node.parents[node.parents.length-2] : null);
+			var parent = node.parent;
+			if (parent && parent.type === Estraverse.Syntax.FunctionExpression) {
+				var parent2 = parent.parent;
 				if (parent2 && parent2.type === Estraverse.Syntax.CallExpression && parent2.callee && parent2.callee.name === "define"){
 					var funcExpression = parent;
 					for (var i=0; i<funcExpression.params.length; i++) {
@@ -445,12 +444,13 @@ define([
 		 * @private
 		 * @memberof javascript.JavaScriptOccurrences.prototype
 		 * @param {Object} node The AST node we are inspecting
+		 * @param {Object} parent The parent for the node we are currently going to visit 
 		 * @param {Boolean} candefine If the given node can define the word we are looking for
 		 * @param {Boolean} isObjectProp Whether the given node is only an occurrence if we are searching for object property occurrences
 		 * @param {Boolean} isLabeledStatement Whether the given node is only an occurrence if we are searching for labeled statements
 		 * @returns {Boolean} <code>true</code> if we should skip the next nodes, <code>false</code> otherwise
 		 */
-		checkId: function(node, candefine, isObjectProp, isLabeledStatement) {
+		checkId: function(node, parent, candefine, isObjectProp, isLabeledStatement) {
 			if (this.skipScope){
 				return true;
 			}
@@ -462,7 +462,11 @@ define([
 			}
 			if ((isLabeledStatement && !this.labeledStatementCheck) || (!isLabeledStatement && this.labeledStatementCheck)){
 				return false;
-			}			
+			}
+			if(node) {
+				//have to tag the node here since we don't visit these nodes via the estraverse API
+				node.parent = parent;
+			}
 			if (node && node.type === Estraverse.Syntax.Identifier) {
 				if (node.name === this.context.word) {
 					var scope = this.scopes[this.scopes.length-1]; // Always will have at least the program scope
