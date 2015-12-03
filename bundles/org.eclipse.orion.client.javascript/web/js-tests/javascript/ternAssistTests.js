@@ -3175,7 +3175,6 @@ define([
 					templates: true
 				};
 				testProposals(options, [
-					['', 'Templates'],
 				    ['lint rule-id:0/1 ', 'eslint - ESLint rule enable or disable'],
 				    ['lint-disable rule-id ', 'eslint-disable - ESLint rule disablement directive'],
 				    ['lint-enable rule-id ', 'eslint-enable - ESLint rule enablement directive'],
@@ -3195,7 +3194,6 @@ define([
 					templates: true
 				};
 				testProposals(options, [
-					['', 'Templates'],
 				    ['lint rule-id:0/1 ', 'eslint - ESLint rule enable or disable'],
 				    ['lint-disable rule-id ', 'eslint-disable - ESLint rule disablement directive'],
 				    ['lint-enable rule-id ', 'eslint-enable - ESLint rule enablement directive'],
@@ -3302,7 +3300,6 @@ define([
 					templates: true
 				};
 	            testProposals(options, [
-	            	['', 'Templates'],
 				    [' rule-id:0/1 ', 'eslint - ESLint rule enable or disable'],
 				    ['-disable rule-id ', 'eslint-disable - ESLint rule disablement directive'],
 				    ['-enable rule-id ', 'eslint-enable - ESLint rule enablement directive'],
@@ -3776,8 +3773,6 @@ define([
 					['@access', '@access'],
 					['@alias', '@alias'],
 					['@augments', '@augments'],
-					['@author', '@author'],
-					['', 'Templates'],
 				    ['uthor ', '@author']
 				]);
 			});
@@ -3794,12 +3789,9 @@ define([
 					templates: true,
 					callback: done};
 				testProposals(options, [
-					['@lends', '@lends'],
-					['@license', '@license'],
+					['ends ', '@lends'],
+					['icense ', '@license'],
 					['@listens', '@listens'],
-					['', 'Templates'],
-				    ['ends ', '@lends'],
-				    ['icense ', '@license']
 				]);
 			});
 			/**
@@ -3941,9 +3933,7 @@ define([
 					callback: done};
 					
 				testProposals(options, [
-					['@param', '@param'],
-				    ['', 'Templates'],
-				    ['m {type} ', '@param', 'Template source code:', {length: 4, offset: 14}]  // Check that the selection offset is right
+				    ['m {type} ', '@param', 'Document the parameter', {length: 4, offset: 14}]  // Check that the selection offset is right
 				]);
 			});
 			/**
@@ -3959,9 +3949,7 @@ define([
 					callback: done};
 					
 				testProposals(options, [
-					['@param', '@param'],
-				    ['', 'Templates'],
-				    ['am {type} ', '@param', 'Template source code:', {length: 4, offset: 14}]  // Check that the selection offset is right
+				    ['am {type} ', '@param', 'Document the parameter', {length: 4, offset: 14}]  // Check that the selection offset is right
 				]);
 			});
 			/**
@@ -4309,12 +4297,9 @@ define([
 					templates: true,
 					callback: done};
 				testProposals(options, [
-					['@lends', '@lends'],
-					['@license', '@license'],
-					['@listens', '@listens'],
-					 ['', 'Templates'],
-				     ['ends ', '@lends'],
-				     ['icense ', '@license']
+				    ['ends ', '@lends'],
+				    ['icense ', '@license'],
+					['@listens', '@listens']
 				]);
 			});
 

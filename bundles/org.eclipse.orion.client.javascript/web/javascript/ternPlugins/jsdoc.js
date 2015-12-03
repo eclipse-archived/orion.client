@@ -230,8 +230,6 @@ define([
 		return null;
 	}
 	
-	
-	
 	/**
 	 * @name getActiveEnvironments
 	 * @description Return an {Object} containing all active environments in the given ast based on eslint env and global settings
@@ -355,16 +353,14 @@ define([
 				for(len = keys.length, i = 0; i < len; i++) {
 					tag = tags[keys[i]];
 					if(Util.looselyMatches(prefix, tag.name)) {
-						_p = createProposal(tag.name, "", prefix);
+						if(tag.template) {
+							_p = createProposal(tag.name, "", prefix, tag.template);
+						} else {
+							_p = createProposal(tag.name, "", prefix);
+						}
 						_p.url = tag.url;
 						_p.doc = tag.desc;
 						proposals.push(_p);
-						if(tag.template) {
-							_p = createProposal(tag.name, "", prefix, tag.template);
-							_p.url = tag.url;
-							_p.doc = tag.desc;
-							proposals.push(_p);
-						}
 					}
 				}
 		}

@@ -368,7 +368,7 @@ define([
         proposal.name = proposal.proposal = completion.name;
         if(typeof(completion.type) !== 'undefined') {
             if(/^fn/.test(completion.type)) {
-            	//TODO proposal.tags = [{content: 'F', cssClass: 'iconTagPurple'}]; //$NON-NLS-1$ //$NON-NLS-2$
+            	//TODO proposal.tags = [{content: 'F', cssClass: 'iconTagPurple'}];
             	calculateFunctionProposal(completion, args, proposal);
             } else if(completion.type === 'template' || completion.type === 'jsdoc_template') {
             	var prefix = proposal.prefix;
@@ -379,8 +379,22 @@ define([
             	var _prop = _t.getProposal(prefix, args.params.offset, {});
             	var obj = Object.create(null);
 		        obj.type = 'markdown'; //$NON-NLS-1$
-		        obj.content = Messages['templateHoverHeader'];
-		        obj.content += _prop.proposal;
+		        
+		        obj.content = '';
+			    if(!completion.doc) {
+			        obj.content += Messages['templateHoverHeader'];
+		        	obj.content += _prop.proposal;
+			    } else {
+			    	var _h = Hover.formatMarkdownHover(completion.doc);
+			    	if(_h) {
+			    		obj.content += _h.content;
+			    	} else {
+			    		obj.content += proposal.name;
+			    	}
+			    }
+			    if(completion.url) {
+			        obj.content += i18nUtil.formatMessage.call(null, Messages['onlineDocumentationProposalEntry'], completion.url);
+			    }
 		        _prop.hover = obj;
 		        provider.removePrefix(prefix, _prop);
 		        _prop.style = 'emphasis'; //$NON-NLS-1$
@@ -515,7 +529,6 @@ define([
 	function sortProposals(completions, templates, args) {
 		var envs = args.envs ? args.envs : {};
 	    //bucket them by origin
-	    var tmplateHeader = templates.length > 0;
 	    var _p = Object.create(null); // Grouped proposals from env and indexes
 	    var _d = Object.create(null); // Grouped proposals from dependencies 
 	    var locals = []; // Proposals from local scope
@@ -528,7 +541,7 @@ define([
     	        if(_c.isKeyword) {
     	        	keywords.push(_formatTernProposal(_c, args));
     	        } else if(typeof(_o) === 'undefined') {
-    	        	if(_c.isTemplate) {
+    	        	if(_c.isTemplate && _c.type !== 'jsdoc_template') {
     	        		templates.push(_formatTernProposal(_c, args));
     	        	} else {
 	    	        	locals.push(_formatTernProposal(_c, args));
