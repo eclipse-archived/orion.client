@@ -13,10 +13,10 @@
 define([
 	'orion/Deferred',
 	'orion/objects',
-	'orion/serialize',
 	'javascript/lru',
-	'orion/metrics'
-], function(Deferred, Objects, Serialize, LRU, Metrics) {
+	'orion/metrics',
+	"javascript/util"
+], function(Deferred, Objects, LRU, Metrics, Util) {
 	/**
 	 * @description Object of error types
 	 * @since 5.0
@@ -31,13 +31,6 @@ define([
 		 */
 		EndOfInput: 2
 	};
-
-	var emptyAST = Object.create(null);
-	emptyAST.type = "Program"; //$NON-NLS-0$
-	emptyAST.body = [];
-	emptyAST.comments = [];
-	emptyAST.tokens = [];
-	emptyAST.range = [0, 0];
 
 	/**
 	 * Provides a shared AST.
@@ -103,42 +96,16 @@ define([
 					deps: true
 				});
 			} catch (e) {
-				ast = emptyAST;
-				ast.range[1] = (text && typeof text.length === "number") ? text.length : 0;  //$NON-NLS-0$
-				ast.errors = [e];
+				ast = Util.errorAST(e, file, text);
 			}
 			var end = Date.now() - start;
 			Metrics.logTiming('language tools', 'parse', end, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			if (ast.errors) {
-				this._computeErrorTypes(ast.errors);
-				ast.errors = ast.errors.map(Serialize.serializeError);
-			}
+			ast.errors = Util.serializeAstErrors(ast);
 		    ast.fileLocation = file;
 			ast.source = text;
 			return ast;
 		},
-		/**
-		 * @description Computes the problem type from the error and sets a 'type' property
-		 * on the error object
-		 * @function
-		 * @private
-		 * @param {Array} errors The error array from Esprima
-		 */
-		_computeErrorTypes: function(errors) {
-			if(errors && Array.isArray(errors)) {
-				errors.forEach(function(error) {
-					var msg = error.message;
-					//first sanitize it
-					error.message = msg = msg.replace(/^Line \d+: /, '');
-					if(/^Unexpected/.test(msg)) {
-						error.type = ErrorTypes.Unexpected;
-						if(/end of input$/.test(msg)) {
-							error.type = ErrorTypes.EndOfInput;
-						}
-					}
-				});
-			}
-		},
+		
 		/**
 		 * Callback from the orion.edit.model service
 		 * @param {Object} event An <tt>orion.edit.model</tt> event.

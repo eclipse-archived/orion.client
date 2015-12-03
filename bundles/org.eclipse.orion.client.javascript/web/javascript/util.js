@@ -117,10 +117,78 @@ define([
 		return parts.reverse();
 	}
 	
+	var emptyAST = {
+		type: "Program", //$NON-NLS-0$
+		body: [],
+		comments: [],
+		tokens: [],
+		range: [0, 0],
+		loc: {
+			start: {},
+			end: {}
+		}
+	};
+	
+	/**
+	 * @description Creates a new empty AST for the fatal thrown error case
+	 * @param {Object} error The fatal error thrown while trying to parse
+	 * @param {String} name The name of the file we tried to parse
+	 * @param {String} text The text we tried to parse
+	 * @returns {Object} An empty AST with the fatal error attached in the errors array
+	 * @since 11.0
+	 */
+	function errorAST(error, name, text) {
+		var ast = emptyAST;
+		ast.range[1] = typeof(text) === 'string' ? text.length : 0;
+		ast.loc.start.line = error.lineNumber;
+		ast.loc.start.column = 0;
+		ast.loc.end.line = error.lineNumber;
+		ast.loc.end.column = error.column;
+		ast.errors = [error];
+        ast.sourceFile  = Object.create(null);
+        ast.sourceFile.text = text;
+        ast.sourceFile.name = name;
+        return ast;
+	}
+	
+	/**
+	 * @description Makes the errors from the given AST safe to transport (using postMessage for example)
+	 * @param {Object} ast The AST to serialize errors for
+	 * @returns {Array.<Object>} The searialized errors
+	 * @since 11.0
+	 */
+	function serializeAstErrors(ast) {
+		var errors = [];
+		if(ast && ast.errors) {
+			ast.errors.forEach(function(error) {
+				var result = error ? JSON.parse(JSON.stringify(error)) : error; // sanitizing Error object
+				if (error instanceof Error) {
+					result.__isError = true;
+					result.lineNumber = typeof(result.lineNumber) === 'number' ? result.lineNumber : error.lineNumber; //FF fails to include the line number from JSON.stringify
+					result.message = result.message || error.message;
+					result.name = result.name || error.name;
+					result.stack = result.stack || error.stack;
+				}
+				var msg = error.message;
+				result.message = msg = msg.replace(/^Line \d+: /, '');
+				if(/^Unexpected/.test(msg)) {
+					result.type = 1;
+					if(/end of input$/.test(msg)) {
+						result.type = 2;
+					}
+				}
+				errors.push(result);
+			});
+		}
+		return errors;
+	}
+
 	return {
 		isUpperCase: isUpperCase,
 		looselyMatches: looselyMatches,
 		startsWith: startsWith,
-		toCamelCaseParts: toCamelCaseParts
+		toCamelCaseParts: toCamelCaseParts,
+		errorAST: errorAST,
+		serializeAstErrors: serializeAstErrors
 	};
 });
