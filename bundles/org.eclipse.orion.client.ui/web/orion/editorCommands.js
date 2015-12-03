@@ -646,7 +646,7 @@ define([
 					var searchString = "";
 					var parsedParam = null;
 					var selection = editor.getSelection();
-					if (selection.end > selection.start && data.parameters.valueFor('useEditorSelection')) {//$NON-NLS-0$ If there is selection from editor, we want to use it as the default keyword
+					if (selection.end > selection.start) {//$NON-NLS-0$ If there is selection from editor, we want to use it as the default keyword
 						var model = editor.getModel();
 						searchString = model.getText(selection.start, selection.end);
 						if (textSearcher.getOptions().regex) {
