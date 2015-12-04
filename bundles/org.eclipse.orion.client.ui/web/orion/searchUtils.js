@@ -35,7 +35,8 @@ function _generateSearchHelperRegEx(inFileQuery, searchParams, fromStart){
 	if(fromStart){
 		prefix = "^"; //$NON-NLS-0$
 	}
-	var regexp = mRegex.parse("/" + prefix + inFileQuery.searchStr + "/"); //$NON-NLS-1$ //$NON-NLS-0$
+	var searchStr = searchParams.wholeWord ? "\\b" + inFileQuery.searchStr + "\\b" : inFileQuery.searchStr;
+	var regexp = mRegex.parse("/" + prefix + searchStr + "/"); //$NON-NLS-1$ //$NON-NLS-0$
 	if (regexp) {
 		var pattern = regexp.pattern;
 		var flags = regexp.flags;
@@ -96,7 +97,11 @@ searchUtils.generateSearchHelper = function(searchParams, fromStart) {
 		if(hasQMark){
 			searchStr = searchStr.split("?").join("."); //$NON-NLS-1$ //$NON-NLS-0$
 		}
-		if(!hasStar && !hasQMark && !searchParams.nameSearch){
+		if(searchParams.wholeWord){
+			//escape all meta characters in string literal search except for * and .(when * or ? present)
+			searchStr = hasStar || hasQMark ? searchStr.replace(/[-[\]{}()+,\\^$|#\s]/g, "\\$&") : searchStr.replace(/[-[\]{}()+.,\\^$|#\s]/g, "\\$&") ;
+		}
+		if(!hasStar && !hasQMark && !searchParams.nameSearch && !searchParams.wholeWord){
 			inFileQuery.searchStr = searchParams.caseSensitive ? searchStr.split("\\").join("") : searchStr.split("\\").join("").toLowerCase(); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			inFileQuery.wildCard = false;
 		} else {
@@ -171,6 +176,7 @@ searchUtils.generateFindURLBinding = function(searchParams, inFileQuery, lineNum
 		find: inFileQuery.searchStr,
 		regEx: inFileQuery.wildCard ? true : undefined,
 		caseSensitive: searchParams.caseSensitive ? true : undefined,
+		wholeWord: searchParams.wholeWord ? true : undefined,
 		replaceWith: typeof(replaceStr) === "string" ? replaceStr : undefined, //$NON-NLS-0$
 		atLine: typeof(lineNumber) === "number" ? lineNumber : undefined //$NON-NLS-0$
 	};
@@ -189,6 +195,9 @@ searchUtils.convertFindURLBinding = function(findParams) {
 	}
 	if(typeof findParams.caseSensitive === "string"){ //$NON-NLS-0$
 		findParams.caseSensitive = (findParams.caseSensitive.toLowerCase() === "true"); //$NON-NLS-0$
+	}
+	if(typeof findParams.wholeWord === "string"){ //$NON-NLS-0$
+		findParams.wholeWord = (findParams.wholeWord.toLowerCase() === "true"); //$NON-NLS-0$
 	}
 	if(typeof findParams.atLine === "string"){ //$NON-NLS-0$
 		findParams.atLine = parseInt(findParams.atLine, 10);
