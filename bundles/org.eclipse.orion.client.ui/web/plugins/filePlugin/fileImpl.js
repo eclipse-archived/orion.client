@@ -112,9 +112,12 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 
 	function _generateLuceneQuery(searchParams){
 		var newKeyword = searchParams.keyword;
-		var caseSensitiveFlag = "", regExFlag = "";
+		var caseSensitiveFlag = "", wholeWordFlag = "", regExFlag = "";
 		if(searchParams.caseSensitive) {
 			caseSensitiveFlag = "+CaseSensitive:" + searchParams.caseSensitive;
+		}
+		if(searchParams.wholeWord) {
+			wholeWordFlag = "+WholeWord:" + searchParams.wholeWord;
 		}
 		if(searchParams.regEx) {
 			regExFlag = "+RegEx:" + searchParams.regEx;
@@ -156,7 +159,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			}
 		}
 		return "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + 
-		caseSensitiveFlag + regExFlag  + "+Location:" + searchParams.resource + "*";
+		caseSensitiveFlag + wholeWordFlag + regExFlag  + "+Location:" + searchParams.resource + "*";
 	}
 	
 	/**

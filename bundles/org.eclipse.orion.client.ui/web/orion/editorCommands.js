@@ -660,7 +660,7 @@ define([
 						}
 					}
 					if(parsedParam){
-						textSearcher.setOptions({regex: parsedParam.regEx, caseInsensitive: !parsedParam.caseSensitive});
+						textSearcher.setOptions({regex: parsedParam.regEx, caseInsensitive: !parsedParam.caseSensitive, wholeWord: parsedParam.wholeWord});
 						var tempOptions = {};
 						if(parsedParam.atLine){
 							tempOptions.start = editor.getModel().getLineStart(parsedParam.atLine-1);
