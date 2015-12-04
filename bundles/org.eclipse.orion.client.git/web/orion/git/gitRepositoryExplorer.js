@@ -334,9 +334,7 @@ define([
 			that.repository = repository;
 			that.initTitleBar(repository || {});
 			if (repository) {
-				that.preferencesService.getPreferences("/git/settings").then(function(prefs) {  //$NON-NLS-0$
-					prefs.put("lastRepo", {Location: that.repository.Location});  //$NON-NLS-0$
-				});
+				that.preferencesService.put("/git/settings", {lastRepo: {Location: that.repository.Location}}); //$NON-NLS-1$
 				that.repositoriesNavigator.select(that.repository);
 				that.repositoriesSection.setTitle(repository.Name);
 				that.displayBranches(repository); 
@@ -349,8 +347,8 @@ define([
 		};
 	
 		if (!repository && this.repositoriesNavigator && this.repositoriesNavigator.model) {
-			this.preferencesService.getPreferences("/git/settings").then(function(prefs) {  //$NON-NLS-0$
-				var lastRepo = prefs.get("lastRepo"); //$NON-NLS-0$
+			this.preferencesService.get("/git/settings").then(function(prefs) {  //$NON-NLS-0$
+				var lastRepo = prefs["lastRepo"]; //$NON-NLS-0$
 				if (lastRepo) {
 					that.repositoriesNavigator.model.repositories.some(function(repo){
 						if (repo.Location === lastRepo.Location) {

@@ -147,20 +147,22 @@ define([
 		var mode = "inline";  //$NON-NLS-0$
 		if (preferencesService) {
 			cmdProvider.addEventListener("compareConfigChanged", function(e) { //$NON-NLS-0$
-				preferencesService.getPreferences("/git/compareSettings").then(function(prefs) {  //$NON-NLS-0$
-					switch (e.name) {
-						case "mode":  //$NON-NLS-0$
-							prefs.put("mode", e.value);  //$NON-NLS-0$
-						break;
-						case "ignoreWhiteSpace":  //$NON-NLS-0$
-							prefs.put("ignoreWhitespace", e.value);  //$NON-NLS-0$
-						break;
-					}
-				});
+				var data;
+				switch (e.name) {
+					case "mode":  //$NON-NLS-0$
+						data = {mode: e.value};
+					break;
+					case "ignoreWhiteSpace":  //$NON-NLS-0$
+						data = {ignoreWhitespace: e.value};
+					break;
+				}
+				if (data) {
+					preferencesService.put("/git/compareSettings", data); //$NON-NLS-1$
+				}
 			}.bind(this));
-			preferencesService.getPreferences("/git/compareSettings").then(function(prefs) {  //$NON-NLS-0$
-				ignoreWhitespace = prefs.get("ignoreWhitespace") || ignoreWhitespace; //$NON-NLS-0$
-				mode =  prefs.get("mode") || mode; //$NON-NLS-0$
+			preferencesService.get("/git/compareSettings").then(function(prefs) {  //$NON-NLS-0$
+				ignoreWhitespace = prefs["ignoreWhitespace"] || ignoreWhitespace; //$NON-NLS-0$
+				mode =  prefs["mode"] || mode; //$NON-NLS-0$
 				setCompareSelection(diffProvider, cmdProvider, ignoreWhitespace, mode);
 			});
 		} else {

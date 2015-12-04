@@ -19,6 +19,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/ex
 			this.parentId = parentId;
 			this.registry = registry;
 			this.commandRegistry = commandRegistry;
+			this.preferences = registry.getService("orion.core.preference"); //$NON-NLS-1$
 			this.selection = selection;
 			this.toolbarId = toolbarId;
 			this.selectionToolsId = selectionToolsId;
@@ -45,17 +46,18 @@ define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/ex
 				
 				that.serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 			}
+			var preferences = this.preferences;
 			this.operationsClient.getOperations().then(function(globalOperations){
-				var operationLocations = globalOperations.keys();
+				var operationLocations = Object.keys(globalOperations);
 				var operations = {};
 				for(var i=0; i<operationLocations.length; i++){
 					var operationLocation = operationLocations[i];
-					var operation = globalOperations.get(operationLocation);
+					var operation = globalOperations[operationLocation];
 					operation.Location = operationLocation;
 					operations[operationLocation]= operation;
 					if(operation.expires && new Date().getTime()>operation.expires){
 						//operations expired
-						globalOperations.remove(operationLocation);
+						preferences.remove("/operations", operationLocation); //$NON-NLS-1$
 						delete operations[operationLocation];
 						continue;
 					}
@@ -75,7 +77,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/ex
 							return;
 						}
 						if(error.HttpCode===404 && error.JsonData && error.JsonData.taskNotFound){
-							globalOperations.remove(this);
+							preferences.remove("/operations", String(this)); //$NON-NLS-1$
 							delete operations[this];
 							that._loadOperationsList.bind(that)(operations);
 							return;

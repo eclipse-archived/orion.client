@@ -61,9 +61,8 @@ define([
 		show: function() {
 			var _self = this;
 
-			Deferred.all([this.preferences.getPreferences('/settingsContainer')]).then(function(results){
-				var prefs = results[0];
-				var categories = prefs.get( 'categories' ) || {};
+			this.preferences.get('/settingsContainer').then(function(prefs){ //$NON-NLS-1$
+				var categories = prefs[ 'categories' ] || {};
 				if (categories.showUserSettings === undefined || categories.showUserSettings) {
 					_self.settingsCategories.push({
 						id: "userSettings", //$NON-NLS-0$
@@ -157,9 +156,9 @@ define([
 		processHash: function() {
 			var pageParams = PageUtil.matchResourceParameters();
 			
-			this.preferences.getPreferences('/settingsContainer').then(function(prefs){
+			this.preferences.get('/settingsContainer').then(function(prefs){ //$NON-NLS-1$
 
-				var selection = prefs.get( 'selection' );
+				var selection = prefs['selection'];
 
 				var category = pageParams.category || selection; //$NON-NLS-0$
 
@@ -448,9 +447,7 @@ define([
 		},
 		
 		selectCategory: function(id) {
-			this.preferences.getPreferences('/settingsContainer').then(function(prefs){
-				prefs.put( 'selection', id );
-			} );
+			this.preferences.put('/settingsContainer', {selection: id}); //$NON-NLS-1$
 
 			superPrototype.selectCategory.apply(this, arguments);
 

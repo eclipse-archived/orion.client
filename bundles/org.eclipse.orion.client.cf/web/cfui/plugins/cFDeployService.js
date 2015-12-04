@@ -79,7 +79,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 
 		var service = new PreferencesProvider(location);
 		serviceRegistry.registerService("orion.core.preference.provider", service, {}); //$NON-NLS-0$
-		preferences = new mPreferences.PreferencesService(serviceRegistry);
+		preferences = core.preferences;
 
 		/* used to interact with launch configurations */
 		projectClient = new mProjectClient.ProjectClient(serviceRegistry, fileClient);

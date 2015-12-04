@@ -189,8 +189,7 @@ define([
 			function(){that.hide();});
 		},
 		_storeRecentFind: function(recentFinds, eventTarget, deleting){
-			this._serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
-				prefs.put("recentFind", recentFinds); //$NON-NLS-0$
+			this._serviceRegistry.getService("orion.core.preference").put("/window/favorites", {recentFind: recentFinds}).then(function() {  //$NON-NLS-1$ //$NON-NLS-2$
 				if(eventTarget) {
 					window.setTimeout(function() {
 						eventTarget.dispatchEvent({type:"inputDataListChanged", deleting: deleting}); //$NON-NLS-0$
@@ -206,9 +205,9 @@ define([
 			if(this._completion && this._completion.hasValueOf(findString)){
 				return;
 			}
-			this._serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
+			this._serviceRegistry.getService("orion.core.preference").get("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-2$
 				var i;
-				var searches = prefs.get("recentFind"); //$NON-NLS-0$
+				var searches = prefs["recentFind"]; //$NON-NLS-0$
 				if (typeof searches === "string") { //$NON-NLS-0$
 					searches = JSON.parse(searches);
 				}
@@ -233,9 +232,9 @@ define([
 			if(typeof searchName !== "string" || !searchName ){ //$NON-NLS-0$
 				return;
 			}
-			this._serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
+			this._serviceRegistry.getService("orion.core.preference").get("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-2$
 				var i;
-				var searches = prefs.get("recentFind"); //$NON-NLS-0$
+				var searches = prefs["recentFind"]; //$NON-NLS-0$
 				if (typeof searches === "string") { //$NON-NLS-0$
 					searches = JSON.parse(searches);
 				}
@@ -256,8 +255,8 @@ define([
 			} else { //Create the inputCompletion lazily.
 				//Required. Reading recent&saved search from user preference. Once done call the uiCallback
 				var defaultProposalProvider = function(uiCallback){
-					this._serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
-						var searches = prefs.get("recentFind"); //$NON-NLS-0$
+					this._serviceRegistry.getService("orion.core.preference").get("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-2$
+						var searches = prefs["recentFind"]; //$NON-NLS-0$
 						if (typeof searches === "string") { //$NON-NLS-0$
 							searches = JSON.parse(searches);
 						}

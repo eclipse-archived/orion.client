@@ -42,9 +42,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', '
 			tooltip: messages['clearThemeAndEditorSettings.tooltip'],  //$NON-NLS-0$
 			id: "orion.clearThemes", //$NON-NLS-0$
 			callback: function(data) {
-				preferences.getPreferences('/themes', 2).then(function(prefs) { //$NON-NLS-0$
-					prefs.put("styles", null); //$NON-NLS-0$
-					prefs.put("selected", null); //$NON-NLS-0$
+				preferences.put('/themes', {styles: null, selected: null}).then(function() { //$NON-NLS-0$
 					preferencesStatusService.setMessage("Theme settings have been cleared.");
 				});
 			}});

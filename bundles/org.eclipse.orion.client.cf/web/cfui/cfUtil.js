@@ -25,8 +25,8 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 	return {
 
 		getTargets : function(preferences) {
-			return preferences.getPreferences('/cm/configurations').then(function(settings){ //$NON-NLS-0$
-				var cloud = settings.get("org.eclipse.orion.client.cf.settings"); //$NON-NLS-0$
+			return preferences.get('/cm/configurations').then(function(settings){ //$NON-NLS-0$
+				var cloud = settings["org.eclipse.orion.client.cf.settings"]; //$NON-NLS-0$
 				if (cloud && cloud.targetUrl){
 					var Target = {};
 					Target.clouds = [];

@@ -256,9 +256,9 @@ function(messages, lib, mOperationsDialog) {
 				this._operations[operationIndex] = operation;
 				this._operationDeferrds[operationIndex] = deferred;
 				if(operation.Location){
-					this._serviceRegistry.getService("orion.core.preference").getPreferences("/operations").then(function(globalOperations){ //$NON-NLS-1$ //$NON-NLS-2$
-						globalOperations.put(operation.Location, {Name: operation.Name, expires: operation.expires});
-					});
+					var data = {};
+					data[operation.Location] = {Name: operation.Name, expires: operation.expires};
+					this._serviceRegistry.getService("orion.core.preference").put("/operations", data); //$NON-NLS-2$ //$NON-NLS-1$
 				}
 				if(operation.progressMonitor){
 					operation.progressMonitor.progress(operation.Name);

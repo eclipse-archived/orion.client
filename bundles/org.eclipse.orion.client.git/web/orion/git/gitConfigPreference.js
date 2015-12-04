@@ -28,9 +28,9 @@
 		 */
 		getConfig : function(){
 			var d = new Deferred();
-			this._preferenceService.getPreferences(this._prefix).then(
+			this._preferenceService.get(this._prefix).then(
 				function(pref){
-					var userInfo = pref.get("userInfo"); //$NON-NLS-0$
+					var userInfo = pref["userInfo"]; //$NON-NLS-0$
 					d.resolve(userInfo);
 				}
 			);
@@ -41,14 +41,7 @@
 		 * Set the {GitMail, GitName} object into the user preference.
 		 */
 		setConfig : function(userInfo){
-			var d = new Deferred();
-			this._preferenceService.getPreferences(this._prefix).then(
-				function(pref){
-					pref.put("userInfo", userInfo); //$NON-NLS-0$
-					d.resolve();
-				}
-			);
-			return d;
+			return this._preferenceService.put(this._prefix, {userInfo: userInfo});
 		}
 	};
 	

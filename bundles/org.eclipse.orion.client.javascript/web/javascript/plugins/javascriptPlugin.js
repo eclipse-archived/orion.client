@@ -17,7 +17,6 @@
 define([
 'orion/plugin',
 'orion/serviceregistry',
-'orion/preferences',
 'orion/Deferred',
 'orion/fileClient',
 'orion/metrics',
@@ -49,12 +48,11 @@ define([
 'i18n!javascript/nls/messages',
 'orion/i18nUtil',
 'orion/URL-shim'
-], function(PluginProvider, mServiceRegistry, mPreferences, Deferred, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist,
+], function(PluginProvider, mServiceRegistry, Deferred, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist,
 			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, TernProjectManager, Util, Logger, AddToTernCommand, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 			RenameCommand, RefsCommand, mGSearchClient, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
-	var preferences = new mPreferences.PreferencesService(serviceRegistry);
     var provider = new PluginProvider({
 		name: javascriptMessages['pluginName'], //$NON-NLS-1$
 		version: "1.0", //$NON-NLS-1$
@@ -277,19 +275,19 @@ define([
 			}
 			messageQueue = [];
 			function cleanPrefs(prefs) {
-				var all = prefs.keys();
+				var all = Object.keys(prefs);
 				for(i = 0, len = all.length; i < len; i++) {
 					var id = all[i];
 					if(/^tern.$/.test(id)) {
-						prefs.remove(all[i]);
+						delete prefs[id];
 					}
 				}
-				prefs.sync(true);
 			}
 			ternWorker.postMessage({request: 'installed_plugins'}, function(response) { //$NON-NLS-1$
 				var plugins = response.plugins;
- 				return preferences ? preferences.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
-					var props = prefs.get("tern"); //$NON-NLS-1$
+				var preferences = serviceRegistry.getService("orion.core.preference"); //$NON-NLS-1$
+ 				return preferences ? preferences.get("/cm/configurations").then(function(prefs){ //$NON-NLS-2$ //$NON-NLS-1$
+					var props = prefs["tern"]; //$NON-NLS-1$
 					cleanPrefs(prefs);
 					if (!props) {
 						props = Object.create(null);
@@ -306,8 +304,8 @@ define([
 						plugs[key] = plugins[key];
 					}
 					props.plugins = plugs;
-					prefs.put("tern", JSON.stringify(props)); //$NON-NLS-1$
-					prefs.sync(true);
+					prefs["tern"] = JSON.stringify(props); //$NON-NLS-1$
+					return preferences.put("/cm/configurations", prefs, {clear: true}); //$NON-NLS-1$
 				}) : new Deferred().resolve();
 			});
 		}

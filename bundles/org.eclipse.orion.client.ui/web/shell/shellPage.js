@@ -449,9 +449,9 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 				function(plugin) {
 					plugin.start({lazy:true}).then(
 						function() {
-							preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
-								plugins.put(url, true);
-							});
+							var data = {};
+							data[url] = true;
+							preferences.put("/plugins", data); //$NON-NLS-1$
 							result.resolve(messages.Succeeded);
 						},
 						function(error) {
@@ -490,14 +490,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 			}
 			args.plugin.uninstall().then(
 				function() {
-					preferences.getPreferences("/plugins").then( //$NON-NLS-0$
-						function(plugins) {
-							var locations = args.plugin.getPluginLocations();
-							for (var i = 0; i < locations.length; i++) {
-								plugins.remove(locations[i]);
-							}
-						}.bind(this) /* force a sync */
-					);
+					preferences.remove("/plugins", args.plugin.getPluginLocations()); //$NON-NLS-1$
 					result.resolve(messages.Succeeded);
 				},
 				function(error) {
@@ -509,11 +502,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 			var plugin = pluginRegistry.getPlugin(location);
 			plugin.uninstall().then(
 				function() {
-					preferences.getPreferences("/plugins").then( //$NON-NLS-0$
-						function(plugins) {
-							plugins.remove(location);
-						}.bind(this) /* force a sync */
-					);
+					preferences.remove("/plugins", location); //$NON-NLS-1$
 					result.resolve(messages.Succeeded);
 				},
 				function(error) {

@@ -357,9 +357,9 @@ define([
 		}
 
 			var sectionsOrder = ["projectInfo", "additionalInfo", "dependencies"];
-			this.preferences.getPreferences("/sectionsOrder").then(function(sectionsOrderPrefs){
-				sectionsOrder = sectionsOrderPrefs.get("projectView") || sectionsOrder;
-				var sectionsNames = sectionsOrderPrefs.get("projectViewNames") || [];
+			this.preferences.get("/sectionsOrder").then(function(sectionsOrderPrefs){
+				sectionsOrder = sectionsOrderPrefs["projectView"] || sectionsOrder;
+				var sectionsNames = sectionsOrderPrefs["projectViewNames"] || [];
 				renderSections.apply(this, [sectionsOrder, sectionsNames]);
 			}.bind(this), function(error){
 				renderSections.apply(this, [sectionsOrder, {}]);

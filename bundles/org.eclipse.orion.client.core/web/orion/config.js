@@ -208,8 +208,8 @@ ConfigStore = /** @ignore */ (function() {
 		this.pref = null; // Preferences node. Maps String PID -> Object properties
 		var _self = this;
 		this.initPromise = Deferred.all([
-			this.prefsService.getPreferences(PREF_NAME, DEFAULT_SCOPE), // default scope only
-			this.prefsService.getPreferences(PREF_NAME)
+			this.prefsService.get(PREF_NAME, undefined, {scope: DEFAULT_SCOPE}), // default scope only
+			this.prefsService.get(PREF_NAME)
 		]).then(function(result) {
 			var defaultPref = result[0];
 			_self.pref = result[1];
@@ -220,9 +220,9 @@ ConfigStore = /** @ignore */ (function() {
 	ConfigStore.prototype = {
 		_toConfigs: function(pref, isReadOnly, inheritPref) {
 			var configs = Object.create(null), _self = this;
-			pref.keys().forEach(function(pid) {
+			Object.keys(pref).forEach(function(pid) {
 				if (!configs[pid]) {
-					var properties = pref.get(pid), inheritProps = inheritPref && inheritPref.get(pid);
+					var properties = pref[pid], inheritProps = inheritPref && inheritPref[pid];
 					if (typeof properties === 'object' && properties !== null && Object.keys(properties).length > 0) { //$NON-NLS-0$
 						properties[PROPERTY_PID] = pid;
 						configs[pid] = new ConfigImpl(_self.factory, _self, properties, isReadOnly, inheritProps);
@@ -252,7 +252,7 @@ ConfigStore = /** @ignore */ (function() {
 		list: function() {
 			var self = this;
 			var currentConfigs = [];
-			this.pref.keys().forEach(function(pid) {
+			Object.keys(this.pref).forEach(function(pid) {
 				var config = self._find(pid);
 				if (config && config.getProperties() !== null) {
 					currentConfigs.push(config);
@@ -261,8 +261,9 @@ ConfigStore = /** @ignore */ (function() {
 			return currentConfigs;
 		},
 		remove: function(pid) {
-			this.pref.remove(pid);
 			delete this.configs[pid];
+			delete this.pref[pid];
+			return this.prefsService.remove(PREF_NAME, pid);
 		},
 		save: function(pid, configuration) {
 			var props = configuration.getProperties(true) || {};
@@ -275,7 +276,10 @@ ConfigStore = /** @ignore */ (function() {
 						delete props[key];
 				});
 			}
-			this.pref.put(pid, props);
+			var data = {};
+			data[pid] = props;
+			this.pref[pid] = props;
+			return this.prefsService.put(PREF_NAME, data);
 		}
 	};
 	return ConfigStore;
@@ -344,16 +348,18 @@ ConfigImpl = /** @ignore */ (function() {
 		remove: function() {
 			this._checkReadOnly();
 			this._checkRemoved();
-			this.factory.notifyDeleted(this);
-			this.store.remove(this.pid);
-			this.removed = true;
+			return this.store.remove(this.pid).then(function() {
+				this.factory.notifyDeleted(this);
+				this.removed = true;
+			}.bind(this));
 		},
 		update: function(props) {
 			this._checkReadOnly();
 			this._checkRemoved();
 			setProperties(this, props);
-			this.store.save(this.pid, this);
-			this.factory.notifyUpdated(this);
+			return this.store.save(this.pid, this).then(function() {
+				this.factory.notifyUpdated(this);
+			}.bind(this));
 		},
 		toString: function() {
 			return '[ConfigImpl pid: ' + this.pid + ', properties: ' + JSON.stringify(this.properties) + ']';

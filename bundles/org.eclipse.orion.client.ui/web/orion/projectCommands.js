@@ -19,6 +19,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		var projectCommandUtils = {};
 
 		var progress;
+		var preferences;
 		var deployStore;
 
 
@@ -146,7 +147,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			} else {
 				action = "orion.project.deploy." + deployService.id;
 			}
-			deployStore.put(projectName, action);
+			deployStore[projectName] = action;
+			preferences.put('/deploy/project', deployStore);
 		}
 		if(sharedLaunchConfigurationDispatcher){
 			sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changedDefault", newValue: action });
@@ -155,7 +157,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 
 	projectCommandUtils.getDefaultLaunchCommand = function(projectName){
 		if(deployStore){
-			return deployStore.get(projectName);
+			return deployStore[projectName];
 		}
 	};
 
@@ -897,8 +899,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 	 */
 	projectCommandUtils.createProjectCommands = function(serviceRegistry, commandService, fileClient, projectClient, dependencyTypes, deploymentTypes) {
 		if(!deployStore){
-			var preferences = new mPreferences.PreferencesService(serviceRegistry);
-			preferences.getPreferences('/deploy/project').then(
+			preferences = serviceRegistry.getService("orion.core.preference");
+			preferences.get('/deploy/project').then(
 				function(deploySettings){
 					deployStore = deploySettings;
 				}

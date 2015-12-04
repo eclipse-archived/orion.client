@@ -686,7 +686,6 @@ define([
 		this._preferences = options.preferences;
 		EventTarget.attach(this);
 		this._serviceRegistration = this._serviceRegistry.registerService("orion.edit.outline", this); //$NON-NLS-0$
-		this._outlinePref = this._preferences.getPreferences("/edit/outline"); //$NON-NLS-0$
 		this._provider = new Deferred();
 		this._providerResolved = false;
 
@@ -698,11 +697,11 @@ define([
 			this.providers = providers;
 			// Check pref to see if user has chosen a preferred outline provider
 			var self = this;
-			Deferred.when(this._outlinePref, function(pref) {
+			this._preferences.get("/edit/outline").then(function(pref) { //$NON-NLS-1$
 				var provider;
 				for (var i=0; i < providers.length; i++) {
 					provider = providers[i];
-					if (pref.get("outlineProvider") === providers[i].getProperty("id")) { //$NON-NLS-1$ //$NON-NLS-0$
+					if (pref["outlineProvider"] === providers[i].getProperty("id")) { //$NON-NLS-1$ //$NON-NLS-0$
 						break;
 					}
 				}
@@ -719,9 +718,7 @@ define([
 			this._providerResolved = true;
 			var id = provider.getProperty("id"); //$NON-NLS-0$
 			if (id) {
-				this._outlinePref.then(function(pref) {
-					pref.put("outlineProvider", id); //$NON-NLS-0$
-				});
+				this._preferences.put("/edit/outline", {outlineProvider: id}); //$NON-NLS-1$
 			}
 		},
 

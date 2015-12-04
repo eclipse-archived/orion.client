@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['orion/Deferred'], function(Deferred) {
+define([], function() {
 
 	function ThemePreferences(preferences, themeData) {
 		this._preferences = preferences;
@@ -18,22 +18,18 @@ define(['orion/Deferred'], function(Deferred) {
 		var themeInfo = themeData.getThemeStorageInfo();
 		this._themeVersion = themeInfo.version;
 		var that = this;
-		var storageKey = preferences.listenForChangedSettings(themeInfo.storage, function(e) {
-			if (e.key === storageKey) {
-				Deferred.when(that._themePreferences, function(prefs) {
-					// Need to sync because the memory cached is out of date.
-					prefs.sync().then(function() { that.apply(); });
-				});
+		preferences.addEventListener("changed", function (e) {
+			if (e.namespace === themeInfo.storage) {
+				that.apply();
 			}
 		});
-		this._themePreferences = this._preferences.getPreferences(themeInfo.storage);
 	}
 
 	ThemePreferences.prototype = /** @lends orion.editor.ThemePreferences.prototype */ {
 		_initialize: function(themeInfo, themeData, prefs) {
 			var styles, selected;
 			var versionKey = themeInfo.styleset + "Version"; //$NON-NLS-0$
-			var prefsVer = prefs.get(versionKey);
+			var prefsVer = prefs[versionKey];
 			var currentVer = 0;
 			try {
 				prefsVer = parseFloat(prefsVer);
@@ -43,8 +39,8 @@ define(['orion/Deferred'], function(Deferred) {
 			
 			if (prefsVer === currentVer || prefsVer > currentVer) {
 				// Version matches (or ThemeData hasn't provided an expected version). Trust prefs
-				styles = prefs.get(themeInfo.styleset);
-				selected = prefs.get('selected'); //$NON-NLS-0$
+				styles = prefs[themeInfo.styleset];
+				selected = prefs['selected']; //$NON-NLS-0$
 				if (selected) {
 					selected = this._parse(selected);
 				}
@@ -57,15 +53,15 @@ define(['orion/Deferred'], function(Deferred) {
 
 			if (!styles){
 				styles = themeData.getStyles();
-				prefs.put(themeInfo.styleset, JSON.stringify(styles));
+				prefs[themeInfo.styleset] = JSON.stringify(styles);
 			}
 			if (!selected || selected[themeInfo.selectedKey] === undefined) {
 				selected = selected || {};
 				selected[themeInfo.selectedKey] = themeInfo.defaultTheme;
-				prefs.put('selected', JSON.stringify(selected)); //$NON-NLS-0$
+				prefs['selected'] = JSON.stringify(selected); //$NON-NLS-0$
 			}
 			// prefs have now been updated
-			prefs.put(versionKey, this._themeVersion);
+			prefs[versionKey] = this._themeVersion;
 		},
 		_convertThemeStylesToHierarchicalFormat: function(styles) {
 			return {
@@ -245,10 +241,10 @@ define(['orion/Deferred'], function(Deferred) {
 		getTheme: function(callback) {
 			var themeData = this._themeData;
 			var themeInfo = themeData.getThemeStorageInfo();
-			Deferred.when(this._themePreferences, function(prefs) {
+			return this._preferences.get(themeInfo.storage).then(function(prefs) {
 				this._initialize(themeInfo, themeData, prefs);
-				var selected = this._parse(prefs.get('selected')); //$NON-NLS-0$
-				var styles = this._parse(prefs.get(themeInfo.styleset)), style;
+				var selected = this._parse(prefs['selected']); //$NON-NLS-0$
+				var styles = this._parse(prefs[themeInfo.styleset]), style;
 				if (styles) {
 					/*
 					 * Convert the read theme info into the new supported format if the
@@ -270,39 +266,41 @@ define(['orion/Deferred'], function(Deferred) {
 		setTheme: function(name, styles) {
 			var themeData = this._themeData;
 			var themeInfo = themeData.getThemeStorageInfo();
-			Deferred.when(this._themePreferences, function(prefs) {
+			return this._preferences.get(themeInfo.storage).then(function(prefs) {
 				this._initialize(themeInfo, themeData, prefs);
-				var selected = this._parse(prefs.get('selected')); //$NON-NLS-0$
+				var selected = this._parse(prefs['selected']); //$NON-NLS-0$
 				if (!name) {
 					name = selected[themeInfo.selectedKey];
 				}
 				selected[themeInfo.selectedKey] = name;
-				prefs.put('selected', JSON.stringify(selected)); //$NON-NLS-0$
+				prefs['selected'] = JSON.stringify(selected); //$NON-NLS-0$
 				if (styles) {
-					prefs.put(themeInfo.styleset, JSON.stringify(styles));
+					prefs[themeInfo.styleset] = JSON.stringify(styles);
 				} else {
-					styles = this._parse(prefs.get(themeInfo.styleset));
+					styles = this._parse(prefs[themeInfo.styleset]);
 				}
 				themeData.processSettings(this._getCurrentStyle(styles, selected[themeInfo.selectedKey]));
 				var versionKey = themeInfo.styleset + "Version"; //$NON-NLS-0$
-				prefs.put(versionKey, this._themeVersion);
+				prefs[versionKey] = this._themeVersion;
+				return this._preferences.put(themeInfo.storage, prefs);
 			}.bind(this));
 		},
 		setFontSize: function(size) {
 			var themeData = this._themeData;
 			var themeInfo = themeData.getThemeStorageInfo();
-			Deferred.when(this._themePreferences, function(prefs) {
+			return this._preferences.get(themeInfo.storage).then(function(prefs) {
 				this._initialize(themeInfo, themeData, prefs);
-				var selected = this._parse(prefs.get('selected')); //$NON-NLS-0$
-				var styles = this._parse(prefs.get(themeInfo.styleset)), style;
+				var selected = this._parse(prefs['selected']); //$NON-NLS-0$
+				var styles = this._parse(prefs[themeInfo.styleset]), style;
 				if (styles) {
 					for( var s = 0; s < styles.length; s++ ){
 						styles[s].styles.fontSize = size;
 					}
 					style = this._getCurrentStyle(styles, selected[themeInfo.selectedKey]);
 				}
-				prefs.put(themeInfo.styleset , JSON.stringify(styles));
+				prefs[themeInfo.styleset] = JSON.stringify(styles);
 				themeData.processSettings(style);
+				return this._preferences.put(themeInfo.storage, prefs);
 			}.bind(this));
 		}
 	};

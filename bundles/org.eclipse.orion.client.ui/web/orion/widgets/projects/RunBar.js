@@ -794,8 +794,8 @@ define([
 				this._updateLaunchConfiguration(launchConfiguration);
 			}.bind(this);
 			
-			this._preferences.getPreferences("/RunBar").then(function(prefs) { //$NON-NLS-0$
-				var redeployWithoutConfirming = prefs.get(REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING);
+			this._preferences.get("/RunBar").then(function(prefs) { //$NON-NLS-0$
+				var redeployWithoutConfirming = prefs[REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING];
 				if (redeployWithoutConfirming) {
 					deployFunction(); //user does not want a confirmation dialog, just deploy again
 				} else {
@@ -814,7 +814,7 @@ define([
 						launchConfiguration.status = _status;
 						
 						if (_status && ("STARTED" === _status.State)) { //$NON-NLS-0$
-							this._confirmBeforeRedeploy(prefs, dialogTitle, confirmMessage, REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING, deployFunction, cancelFunction);
+							this._confirmBeforeRedeploy(dialogTitle, confirmMessage, REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING, deployFunction, cancelFunction);
 						} else {
 							// app is not running, just deploy again
 							deployFunction();
@@ -824,7 +824,7 @@ define([
 			}.bind(this));
 		},
 		
-		_confirmBeforeRedeploy: function(prefs, dialogTitle, confirmMessage, preferenceName, deployFunction, cancelFunction){
+		_confirmBeforeRedeploy: function(dialogTitle, confirmMessage, preferenceName, deployFunction, cancelFunction){
 			// app is running, confirm with user if they wish to stop it and redeploy
 			var confirmDialog = new mConfirmDialog.ConfirmDialog({
 				title: dialogTitle,
@@ -838,7 +838,9 @@ define([
 				
 				if (doNotConfirmAnymore) {
 					// save user preference to no longer display confirmation dialog
-					prefs.put(preferenceName, true);
+					var data = {};
+					data[preferenceName] = true;
+					this._preferences.put("/RunBar", data); //$NON-NLS-1$
 				}
 				
 				if (confirmed) {

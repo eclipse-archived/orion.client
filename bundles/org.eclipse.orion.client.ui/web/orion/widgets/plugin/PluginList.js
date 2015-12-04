@@ -355,11 +355,11 @@ define(['i18n!orion/settings/nls/messages', 'orion/i18nUtil', 'require', 'orion/
 		
 		addPlugin: function( pluginUrl ){
 			this.statusService.setMessage(i18nUtil.formatMessage(messages["Installed"], pluginUrl), 5000, true);
-			this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
-				plugins.put(pluginUrl, true);
-			}); // this will force a sync
-			
-			this.render();
+			var data = {};
+			data[pluginUrl] = true;
+			this.settings.preferences.put("/plugins", data).then(function() { //$NON-NLS-0$
+				this.render();
+			}.bind(this)); // this will force a sync
 		},
 		
 		getPluginsLink: function( data ){		
@@ -409,8 +409,9 @@ define(['i18n!orion/settings/nls/messages', 'orion/i18nUtil', 'require', 'orion/
 			if (plugin) {
 				plugin.stop();
 				this.statusService.setMessage(i18nUtil.formatMessage(messages["Disabled"], url), 5000, true);
-				this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
-					plugins.put(url, false);
+				var data = {};
+				data[url] = false;
+				this.settings.preferences.put("/plugins", data).then(function() { //$NON-NLS-0$
 					this.render(this);
 				}.bind(this)); // this will force a sync
 				this.render();
@@ -422,8 +423,9 @@ define(['i18n!orion/settings/nls/messages', 'orion/i18nUtil', 'require', 'orion/
 			if (plugin) {
 				plugin.start({lazy:true});
 				this.statusService.setMessage(i18nUtil.formatMessage(messages["Enabled"], url), 5000, true);
-				this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
-					plugins.put(url, false);
+				var data = {};
+				data[url] = true;
+				this.settings.preferences.put("/plugins", data).then(function() { //$NON-NLS-0$
 					this.render(this);
 				}.bind(this)); // this will force a sync
 				this.render();
@@ -456,13 +458,13 @@ define(['i18n!orion/settings/nls/messages', 'orion/i18nUtil', 'require', 'orion/
 			if (plugin) {
 				plugin.uninstall().then(function() {
 					this.statusService.setMessage(i18nUtil.formatMessage(messages["Uninstalled"], url), 5000, true);
-					this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
-						plugins.keys().some(function(key) {
+					this.settings.preferences.get("/plugins").then(function(plugins) { //$NON-NLS-0$
+						Object.keys(plugins).some(function(key) {
 							if (_normalizeURL(require.toUrl(key)) === _normalizeURL(url)) {
-								plugins.remove(key);
+								this.settings.preferences.remove("/plugins", key); //$NON-NLS-1$
 								return true;
 							}
-						});
+						}.bind(this));
 					}.bind(this)); // this will force a sync
 					this.render();
 				}.bind(this));

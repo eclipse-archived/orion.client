@@ -161,7 +161,8 @@ define([
 		this.messageService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 		this.updateMessage = i18nUtil.formatMessage(messages["SettingUpdateSuccess"], this.categoryTitle);
 		var configAdmin = this.serviceRegistry.getService('orion.cm.configadmin'); //$NON-NLS-0$
-		this.controller = new ConfigController(configAdmin, this.setting.getPid());
+		var preferences = this.serviceRegistry.getService('orion.core.preference'); //$NON-NLS-0$
+		this.controller = new ConfigController(preferences, configAdmin, this.setting.getPid());
 	};
 	objects.mixin(PropertiesWidget.prototype, { //$NON-NLS-0$
 		createElements: function() {
@@ -227,7 +228,8 @@ define([
 	/**
 	 * Controller for modifying a configuration
 	 */
-	function ConfigController(configAdmin, pid) {
+	function ConfigController(preferences, configAdmin, pid) {
+		this.preferences = preferences;
 		this.configAdmin = configAdmin;
 		this.pid = pid;
 		this.config = this.defaultConfig = this.configPromise = null;
@@ -260,8 +262,11 @@ define([
 				var defaultProps = this.getDefaultProps();
 				var isNoop = setting.isDefaults(props, defaultProps);
 				if (isNoop) {
+					//TODO stop reaching into preferences service
+					var data = {};
+					data[props.pid] = props;
+					this.preferences._valueChanged("/cm/configurations", data); //$NON-NLS-1$
 					// Entire configuration is a no-op (i.e. it equals its default values) so remove it entirely
-					configuration.store.pref.valueChanged(props.pid, props);
 					return this.remove();
 				} else {
 					configuration.update(props);
@@ -412,12 +417,13 @@ define([
 			var deferreds = [];
 			for(var i = 0; i < this.settings.length; i++) {
 			    var setting = this.settings[i];
+	        	    var preferences = this.serviceRegistry.getService('orion.core.preferences'); //$NON-NLS-1$
 			    if(pid) {
 			        if(setting.getPid() === pid) {
-				        deferreds.push(new ConfigController(this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
+				        deferreds.push(new ConfigController(preferences, this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
 				    }
 				} else {
-				    deferreds.push(new ConfigController(this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
+				    deferreds.push(new ConfigController(preferences, this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
 				}
 			}
 			if(deferreds.length > 0) { 

@@ -521,9 +521,7 @@ define([
 			// Update the preference store
 			if (this._prefService) {
 				var overridesStr = JSON.stringify(this._bindingOverrides);
-				this._prefService.getPreferences("/KeyBindings").then(function(prefs) { //$NON-NLS-1$
-					prefs.put("overridesJSON", overridesStr); //$NON-NLS-1$
-				});
+				this._prefService.put("/KeyBindings", {overridesJSON: overridesStr}); //$NON-NLS-1$
 			}
 			
 			// Handle the change locally
@@ -554,11 +552,10 @@ define([
 		
 		_getBindingOverrides: function() {
 			// Get the key binding overrides from the preference store
-			return this._prefService.getPreferences("/KeyBindings").then(function(bindingPrefs) { //$NON-NLS-1$
+			return this._prefService.get("/KeyBindings").then(function(bindingPrefs) { //$NON-NLS-1$
 				var overrides = [];
-				this.bindingPrefs = bindingPrefs;
 				
-				var prefVal = bindingPrefs.get("overridesJSON"); //$NON-NLS-1$
+				var prefVal = bindingPrefs["overridesJSON"]; //$NON-NLS-1$
 				if (prefVal) {
 					// Sometimes we get the parsing done for us, sometimes not...wtf?
 					if (typeof prefVal === "string") {
@@ -753,9 +750,8 @@ define([
 				}.bind(this));
 	
 				// listen for changes form other pages
-				var storageKey;
-				this._prefService.listenForChangedSettings("/KeyBindings", function (e) { //$NON-NLS-1$
-					if (e.key === storageKey) {
+				this._prefService.addEventListener("changed", function (e) {
+					if (e.namespace === "/KeyBindings") { //$NON-NLS-1$
 						// Refresh the binding overrides
 						this._getBindingOverrides().then(function(overrides) {
 							if (overrides.length > this._bindingOverrides.length) {
@@ -770,8 +766,6 @@ define([
 							this._bindingOverrides = overrides;
 						}.bind(this));
 					}
-				}.bind(this)).then(function(key) {
-					storageKey = key;
 				}.bind(this));
 			}
 		},

@@ -243,8 +243,8 @@ define([
 			// should we consult a preference?
 			if (this._preferenceService) {
 				var self = this;
-				this._preferenceService.getPreferences("/window/views").then(function(prefs) {  //$NON-NLS-0$
-					var isExpanded = prefs.get(self.id);
+				this._preferenceService.get("/window/views").then(function(prefs) {  //$NON-NLS-0$
+					var isExpanded = prefs[self.id];
 					
 					if (isExpanded === undefined){
 						// pref not found, check options
@@ -529,9 +529,9 @@ define([
 			}
 			// if a preference service was specified, we remember the state.
 			if (this._preferenceService && storeValue) {
-				this._preferenceService.getPreferences("/window/views").then(function(prefs){ //$NON-NLS-0$
-					prefs.put(id, isExpanded);
-				}); 
+				var data = {};
+				data[id] = isExpanded;
+				this._preferenceService.put("/window/views", data); //$NON-NLS-1$
 			}
 			
 			// notify the client

@@ -19,7 +19,7 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 		if (once) {
 			return once;
 		}
-		var pageLoader = require.specified("orion/splash") && require("orion/splash");
+		var pageLoader = require.specified("orion/splash") && require("orion/splash"); //$NON-NLS-1$
 		if (pageLoader) pageLoader.nextStep();
 		once = new Deferred();
 		
@@ -29,9 +29,9 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 		// This is code to ensure the first visit to orion works
 		// we read settings and wait for the plugin registry to fully startup before continuing
 		var preferences = new mPreferences.PreferencesService(serviceRegistry);
-		return preferences.getPreferences("/plugins").then(function(pluginsPreference) { //$NON-NLS-0$
+		return preferences.get("/plugins").then(function(pluginsPreference) { //$NON-NLS-0$
 			var configuration = {plugins:{}};
-			pluginsPreference.keys().forEach(function(key) {
+			Object.keys(pluginsPreference).forEach(function(key) {
 				var url = require.toUrl(key);
 				configuration.plugins[url] = pluginsPreference[key];
 			});
@@ -41,12 +41,12 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 			}
 			return pluginRegistry.start().then(function() {
 				if (serviceRegistry.getServiceReferences("orion.core.preference.provider").length > 0) { //$NON-NLS-0$
-					return preferences.getPreferences("/plugins", mPreferences.PreferencesService.USER_SCOPE).then(function(pluginsPreference) { //$NON-NLS-0$
+					return preferences.get("/plugins", undefined, {scope: mPreferences.PreferencesService.USER_SCOPE}).then(function(pluginsPreference) { //$NON-NLS-0$
 						var installs = [];
-						pluginsPreference.keys().forEach(function(key) {
+						Object.keys(pluginsPreference).forEach(function(key) {
 							var url = require.toUrl(key);
 							if (!pluginRegistry.getPlugin(url)) {
-								installs.push(pluginRegistry.installPlugin(url,{autostart: "lazy"}).then(function(plugin) {
+								installs.push(pluginRegistry.installPlugin(url,{autostart: "lazy"}).then(function(plugin) { //$NON-NLS-1$
 									return plugin.start({lazy:true});
 								}));
 							}
@@ -74,7 +74,7 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 							localStorage.setItem("lastLogin", new Date().getTime()); //$NON-NLS-0$
 						}
 					});
-					var lastLogin = localStorage.getItem("lastLogin");
+					var lastLogin = localStorage.getItem("lastLogin"); //$NON-NLS-1$
 					if (!lastLogin || lastLogin < (new Date().getTime() - (15 * 60 * 1000))) { // 15 minutes
 						return authPromise; // if returned waits for auth check before continuing
 					}

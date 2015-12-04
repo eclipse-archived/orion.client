@@ -187,8 +187,8 @@ define([
 			this.commandService.registerCommandContribution("ternPluginCommand", "javascript.reloadTernPlugin", 1); //$NON-NLS-1$ //$NON-NLS-2$
 
 			var _self = this;
-			return this.preferences.getPreferences("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
-					var props = prefs.get("tern"); //$NON-NLS-1$
+			return this.preferences.get("/cm/configurations").then(function(prefs){ //$NON-NLS-1$
+					var props = prefs["tern"]; //$NON-NLS-1$
 					var tern = props;
 					if(typeof(props) === 'string') {
 						tern = JSON.parse(props);

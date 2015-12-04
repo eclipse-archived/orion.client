@@ -61,7 +61,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cf
 		if(relativeFilePath.indexOf(orionHomeUrl.pathname) === 0)
 			relativeFilePath = relativeFilePath.substring(orionHomeUrl.pathname.length);
 
-		var preferences = new Preferences.PreferencesService(serviceRegistry);
+		var preferences = core.preferences;
 
 		/* built-in wizard error handler */
 		var handleError = mCfUtil.buildDefaultErrorHandler({

@@ -285,9 +285,9 @@ define([
 			var sectionsOrder = ["project", "folderNav", "readme"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var	sectionNames = {};
 			if(this.preferences) {
-				this.preferences.getPreferences("/sectionsOrder").then(function(sectionsOrderPrefs){ //$NON-NLS-0$
-					sectionNames = sectionsOrderPrefs.get("folderViewNames") || sectionNames; //$NON-NLS-0$
-					sectionsOrder = sectionsOrderPrefs.get("folderView") || sectionsOrder; //$NON-NLS-0$
+				this.preferences.get("/sectionsOrder").then(function(sectionsOrderPrefs){ //$NON-NLS-0$
+					sectionNames = sectionsOrderPrefs["folderViewNames"] || sectionNames; //$NON-NLS-0$
+					sectionsOrder = sectionsOrderPrefs["folderView"] || sectionsOrder; //$NON-NLS-0$
 					renderSections.apply(this, [sectionsOrder, sectionNames]);
 				}.bind(this), function(error){
 					renderSections.apply(this, [sectionsOrder, sectionNames]);

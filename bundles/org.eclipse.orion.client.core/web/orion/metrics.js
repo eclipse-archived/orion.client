@@ -24,7 +24,7 @@ define([], function() {
 		_services.forEach(function(current) {
 			current.pageLoad(href, page, title, args);
 		});
-	};
+	}
 
 	function initFromRegistry(serviceRegistry, args) {
 		var refs = serviceRegistry.getServiceReferences("orion.metrics"); //$NON-NLS-0$
@@ -33,7 +33,7 @@ define([], function() {
 			services.push(serviceRegistry.getService(current));
 		});
 		init(services, args);
-	};
+	}
 
 	function logEvent(category, action, label, value) {
 		_services.forEach(function(current) {

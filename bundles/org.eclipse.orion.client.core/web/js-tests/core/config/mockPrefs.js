@@ -11,71 +11,11 @@
 /*eslint-env browser, amd, mocha*/
 define([
 	"orion/Deferred",
-	"orion/preferences", // Only used for constant field values, no API calls
-], function(Deferred, mPreferences) {
-	var RealPrefsService = mPreferences.PreferencesService;
+], function(Deferred) {
 
-	function Preferences(name, providers) {
-		this.name = name;
-		this.providers = providers;
-	}
-	Preferences.prototype = {
-		clear: function() {
-			// Clear all stores
-			this.providers.forEach(function(provider) {
-				provider.clear();
-			});
-		},
-		keys: function() {
-			var keySet = Object.create(null);
-			this.providers.forEach(function(provider) {
-				var providerMap = provider.map;
-				Object.keys(providerMap).forEach(function(key) {
-					keySet[key] = 1;
-				});
-			});
-			return Object.keys(keySet);
-		},
-		get: function(key) {
-			// Get key the first provider that has it defined
-			var value;
-			this.providers.some(function(provider) {
-				value = provider.get(key);
-				if (typeof value === "undefined")
-					return false;
-				return true;
-			});
-			return value; // undefined or value
-		},
-		put: function(key, value) {
-			// Put into the first provider
-			this.providers[0].put(key, value);
-		},
-		remove: function(key) {
-			// Remove from the first provider
-			this.providers[0].remove(key);
-		},
-		_all: function() {
-			var _self = this, result = Object.create(null);
-			this.keys().forEach(function(key) {
-				var value = _self.get(key);
-				if (typeof result[key] === "undefined")
-					result[key] = value;
-			});
-			return result;
-		},
-		/**
-		 * Search for a string in the entire preferences JSON blob
-		 * @internal
-		 */
-		_contains: function(str) {
-			return JSON.stringify(this._all()).indexOf(str) !== -1;
-		}
-	};
-
-	// Mock preferences Provider, written synchronously
+	// Mock preferences Provider
 	function Provider(map) {
-		this.map = map;
+		this.map = map || Object.create(null);
 	}
 	Provider.prototype = {
 		clear: function() {
@@ -83,53 +23,24 @@ define([
 		},
 		get: function(key) {
 			var value = this.map[key];
-			return value && typeof value === 'string' ? JSON.parse(value) : undefined;
+			return new Deferred().resolve(value && typeof value === 'string' ? JSON.parse(value) : value);
 		},
 		put: function(key, value) {
 			if (value === null) {
 				throw new Error('Preferences does not allow null values');
 			}
 			this.map[key] = JSON.stringify(value);
+			return new Deferred().resolve();
 		},
 		remove: function(key) {
 			delete this.map[key];
+			return new Deferred().resolve();
 		},
-	};
-
-	function MockPrefsService() {
-		// This is the fake back-end storage shared among providers of the same scope
-		var defaultData = Object.create(null),
-		    localData = Object.create(null),
-		    userData = Object.create(null);
-
-		this._defaultsProvider = new Provider(defaultData);
-		this._localProvider = new Provider(localData);
-		this._userProvider = new Provider(userData);
-	}
-	MockPrefsService.DEFAULT_SCOPE = RealPrefsService.DEFAULT_SCOPE;
-	MockPrefsService.LOCAL_SCOPE = RealPrefsService.LOCAL_SCOPE;
-	MockPrefsService.USER_SCOPE = RealPrefsService.USER_SCOPE;
-	MockPrefsService.prototype = {
-		getPreferences: function(name, optScope) {
-			if (!optScope || typeof(optScope) !== "number" || optScope > 7 || optScope < 1) { //$NON-NLS-0$
-				optScope = MockPrefsService.DEFAULT_SCOPE | MockPrefsService.LOCAL_SCOPE | MockPrefsService.USER_SCOPE;
-			}
-			var providers = [];
-			if ((MockPrefsService.USER_SCOPE & optScope)) {
-				providers.push(this._userProvider);
-			}
-			if (MockPrefsService.LOCAL_SCOPE & optScope) {
-				providers.push(this._localProvider);
-			}
-			if (MockPrefsService.DEFAULT_SCOPE & optScope) {
-				providers.push(this._defaultsProvider);
-			}
-			var d = new Deferred();
-			setTimeout(function() {
-				d.resolve(new Preferences(name, providers));
-			}, 0);
-			return d;
+		available: function() {
+			return true;
 		}
 	};
-	return MockPrefsService;
+
+	
+	return Provider;
 });

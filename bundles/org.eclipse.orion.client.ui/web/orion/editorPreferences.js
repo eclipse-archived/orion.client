@@ -88,8 +88,8 @@ define([
 	function EditorPreferences(preferences, callback) {
 		this._preferences = preferences;
 		EventTarget.attach(this);
-		var storageKey = preferences.listenForChangedSettings(SETTINGS_SECTION, function (e) {
-			if (e.key === storageKey) {
+		preferences.addEventListener("changed", function (e) {
+			if (e.namespace === SETTINGS_SECTION) {
 				this.dispatchEvent({type: "Changed"}); //$NON-NLS-0$
 			}
 		}.bind(this));
@@ -102,7 +102,7 @@ define([
 
 	EditorPreferences.prototype = /** @lends edit.EditorPreferences.prototype */ {
 		_initialize: function(prefs) {
-			var settings = prefs.get(SETTINGS_KEY) || {};
+			var settings = prefs[SETTINGS_KEY] || {};
 			for (var property in defaults) {
 				if (!settings.hasOwnProperty(property)) {
 					settings[property] = defaults[property];
@@ -111,7 +111,7 @@ define([
 			return settings;
 		},
 		getPrefs: function(callback) {
-			this._preferences.getPreferences(SETTINGS_SECTION).then(function(prefs) {
+			this._preferences.get(SETTINGS_SECTION).then(function(prefs) {
 				var object = this._initialize(prefs);
 				if (typeof object === "string") { //$NON-NLS-0$
 					object = JSON.parse(object);
@@ -120,9 +120,10 @@ define([
 			}.bind(this));
 		},
 		setPrefs: function(object, callback) {
-			this._preferences.getPreferences(SETTINGS_SECTION).then(function(prefs) {
-				prefs.put(SETTINGS_KEY, object);
-				object = this._initialize(prefs);
+			var data = {};
+			data[SETTINGS_KEY] = object;
+			this._preferences.put(SETTINGS_SECTION, data).then(function() {
+				object = this._initialize(data);
 				if (callback) {
 					callback(object);
 				}
