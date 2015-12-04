@@ -170,5 +170,279 @@ define([
 	
 	//return module exports
 	exports.createCompareWidget = createCompareWidget;
+	
+
+	function getCommitSvgs(commits) {
+
+		var COLUMN_SPACING = 15;
+		var COLUMN_LENGTH = 100;
+		var NODE_SIZE = 8;
+
+		var columnInfo = {
+			branchCount :0,
+			columnReserve : []
+		};
+		
+
+		
+		// only dark colors for the white background
+		var distinguishableColors = [
+			"#000000", "#1CE6FF", "#008941",
+			"#006FA6", "#A30059", "#456D75",
+			"#0000A6", "#63FFAC", "#004D43",
+			"#5A0007", "#809693", "#1B4400",
+			"#4FC601", "#3B5DFF", "#4A3B53",
+			"#61615A", "#6B7900", "#00C2A0",
+			"#D16100", "#222800", "#012C58",
+			"#000035", "#A1C299", "#300018",
+			"#0AA6D8", "#013349", "#00846F",
+			"#372101", "#C2FFED", "#A079BF",
+			"#C0B9B2", "#C2FF99", "#001E09",
+			"#00489C", "#6F0062", "#0CBD66",
+			"#D157A0", "#456648", "#0086ED",
+			
+			"#34362D", "#B4A8BD", "#00A6AA",
+			"#452C2C", "#636375", "#A3C8C9",
+			"#575329", "#00FECF", "#B05B6F",
+			"#3B9700", "#04F757", "#1E6E00",
+			"#6367A9", "#A05837", "#6B002C",
+			"#549E79", "#201625", "#72418F",
+			"#3A2465", "#922329", "#938A81",
+			"#5B4534", "#404E55", "#0089A3",
+			"#A4E804", "#324E72", "#6A3A4C",
+			"#83AB58", "#001C1E", "#D1F7CE",
+			"#004B28", "#A3A489", "#806C66",
+			"#66796D", "#1E0200", "#5B4E51",
+			"#320033", "#66E1D3", "#D0AC94"
+		];
+		
+		var distinguishableColorIndex = 0;
+		
+		var getDistinguishableColor = function(){
+			distinguishableColorIndex++;
+			if(distinguishableColorIndex>76)distinguishableColorIndex=0;
+			return distinguishableColors[distinguishableColorIndex];
+		};
+
+
+		var makeSVG = function(tag, attrs) {
+			var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+			for (var k in attrs)
+				el.setAttribute(k, attrs[k]);
+			return el;
+		};
+
+		var addToReserve = function(columnInfo, columnItem){
+			var firstEmpty = -1;
+			for(var i =0;i<columnInfo.columnReserve.length;i++){
+				if(!columnInfo.columnReserve[i].Name){
+					firstEmpty = i;
+					break;
+				}
+			}
+			if(firstEmpty<0){
+				columnInfo.columnReserve.push(columnItem);
+				firstEmpty = columnInfo.columnReserve.length-1;
+			}else{
+				columnInfo.columnReserve[firstEmpty]=columnItem;
+			}
+			columnInfo.branchCount++;
+			return firstEmpty;
+		};
+		
+		var updateColumnReserve = function(commit, columnInfo, row) {
+			var drawingUpdate = [];
+			var index = columnInfo.columnReserve.map(function(x) {
+				return x.Name;
+			}).indexOf(commit.Name);
+			if (!commit.Parents || commit.Parents.length === 0) {
+				if (index > -1) {
+					columnInfo.columnReserve.splice(index, 1);
+				}
+			} else {
+				if (index > -1) {
+					var parentInReserve = columnInfo.columnReserve.map(function(x) {
+						return x.Name;
+					}).indexOf(commit.Parents[0].Name);
+					// if parent 1 is in reserve
+					if (parentInReserve > -1) {
+						drawingUpdate.push({
+							type: "branchOut",
+							fromColumn: index,
+							toColumn: parentInReserve,
+							row: row,
+							Color: columnInfo.columnReserve[parentInReserve].Color
+						});
+
+						
+						if(index===columnInfo.columnReserve.length-1){
+							columnInfo.columnReserve.splice(index, 1);
+						}else{
+							columnInfo.columnReserve[index] = {
+							};
+						}
+						columnInfo.branchCount--;
+					}
+					// if not, add it in reserve
+					else {
+						columnInfo.columnReserve[index] = {
+							Name: commit.Parents[0].Name,
+							Color: getDistinguishableColor()
+						};
+					}
+				}
+				else {
+					index = addToReserve(columnInfo, {
+						Name: commit.Parents[0].Name,
+						Color: getDistinguishableColor()
+					});
+				}
+				if (commit.Parents.length > 1) {
+					for (var k = 1; k < commit.Parents.length; k++) {
+						var parentIndex = columnInfo.columnReserve.map(function(x) {
+							return x.Name;
+						}).indexOf(commit.Parents[k].Name);
+						if (parentIndex < 0) {
+							parentIndex = addToReserve(columnInfo, {
+								Name: commit.Parents[k].Name,
+								Color: getDistinguishableColor()
+							});
+						}
+						drawingUpdate.push({
+							type: "merge",
+							fromColumn: index,
+							toColumn: parentIndex,
+							row: row,
+							Color: columnInfo.columnReserve[parentIndex].Color
+						});
+						
+					}
+				}
+
+			}
+			return drawingUpdate;
+		};
+
+		
+		var updateDrawingForCommit = function(drawingUpdate, svg) {
+			if (drawingUpdate) {
+				var x2Adjust = 0;
+				if(drawingUpdate.type ==="merge"){x2Adjust = 2;} 
+				else if(drawingUpdate.type ==="branchOut"){x2Adjust = -2;} 
+				var line = makeSVG('line', {
+					x1: COLUMN_SPACING * (drawingUpdate.fromColumn + 1),
+					y1: NODE_SIZE,
+					x2: COLUMN_SPACING * (drawingUpdate.toColumn + 1)+x2Adjust,
+					y2: NODE_SIZE + COLUMN_LENGTH,
+					stroke: drawingUpdate.Color||'black',
+					'stroke-width': 2
+				});
+				svg.appendChild(line);
+			}
+
+		};
+
+		var getIndexBy = function(array, name, value) {
+			for (var i = 0; i < array.length; i++) {
+				if (array[i][name] === value) {
+					return i;
+				}
+			}
+			return -1;
+		};
+
+		var commitSvgs = [];
+		var maxWidth = 0;
+
+		addToReserve(columnInfo,{
+			Name: commits[0].Name,
+			Color: getDistinguishableColor()
+		});
+		for (var i = 0; i < commits.length; i++) {
+			var svgDiv = document.createElement("div");
+			var linesSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			linesSvg.setAttribute("class","commitSvgGraphLines"); 
+			var commit = commits[i];
+			var columnIndex = getIndexBy(columnInfo.columnReserve, "Name", commit.Name);
+			var node, line;
+			var nodeSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			nodeSvg.setAttribute("class","commitSvgGraphNode"); 
+			if (columnIndex > -1) {
+				node = makeSVG('circle', {
+					Name: commit.Name + "_node",
+					cx: COLUMN_SPACING * (columnIndex + 1),
+					cy: NODE_SIZE-1,
+					r: NODE_SIZE-2,
+					stroke: columnInfo.columnReserve[columnIndex].Color||'black',
+					fill: 'white',
+					'stroke-width': 2
+				});
+				nodeSvg.appendChild(node);
+				svgDiv.appendChild(nodeSvg);
+			} 
+			var newWidth = (columnInfo.columnReserve.length + 1) * COLUMN_SPACING + 3;
+			if (newWidth > maxWidth) {
+				maxWidth = newWidth;
+			}
+			var drawingUpdates = updateColumnReserve(commits[i], columnInfo, i);
+			var hasMerge = getIndexBy(drawingUpdates, "type", "merge");
+
+			for (var j = 0, processedBranches = 0; j < columnInfo.columnReserve.length && processedBranches<(hasMerge?columnInfo.branchCount:columnInfo.branchCount-1); j++) {
+				if(columnInfo.columnReserve[j].Name){
+					line = makeSVG('line', {
+						x1: COLUMN_SPACING * (j + 1),
+						y1: 0,
+						x2: COLUMN_SPACING * (j + 1),
+						y2: NODE_SIZE + COLUMN_LENGTH,
+						stroke: columnInfo.columnReserve[j].Color||'black',
+						'stroke-width': 2
+					});
+
+					linesSvg.appendChild(line);
+					
+					processedBranches++;
+				}
+			}
+			for (j=0;j<drawingUpdates.length;j++){
+				updateDrawingForCommit(drawingUpdates[j], linesSvg);
+			}
+			
+
+			linesSvg.setAttribute("width", newWidth + "px");
+			//svg.setAttribute("height","100%");
+			linesSvg.setAttribute("preserveAspectRatio", "none");
+			linesSvg.setAttribute("viewBox","0 0 "+newWidth+" "+COLUMN_LENGTH);
+			svgDiv.setAttribute("class","commitSvgGraph"); 
+			svgDiv.style.width =  newWidth + "px";
+			svgDiv.appendChild(linesSvg);
+			if (columnIndex > -1) {
+				nodeSvg.setAttribute("width", newWidth + "px");
+				nodeSvg.setAttribute("height", NODE_SIZE*2 + "px");
+				svgDiv.appendChild(nodeSvg);
+			}
+			commits[i].graphSvg = svgDiv;
+			
+		}
+		return columnInfo;
+	}
+	
+
+	exports.getCommitSvgs = getCommitSvgs;
+	
+	function adjustCommitSvgHeight(svg, height) {
+		var NODE_SIZE = 8;
+		var lines = svg.getElementsByTagName('line');
+		
+		for(var i=0; i< lines.length; i++ )
+		{
+		 	var line = lines[i];
+		 	line.setAttribute("y2", NODE_SIZE + height);
+		}
+		svg.setAttribute("height", height + "px");
+	}
+	
+	exports.adjustCommitSvgHeight = adjustCommitSvgHeight;
+	
+	//return module exports
 	return exports;
 });

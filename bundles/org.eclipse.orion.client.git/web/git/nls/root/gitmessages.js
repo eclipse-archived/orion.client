@@ -621,5 +621,7 @@ define({//Default message bundle
 	"MergeProgress": "Merge in progress", //$NON-NLS-0$  //$NON-NLS-1$
 	"OpenGithubPullRequest": "Open Github Page", //$NON-NLS-0$  //$NON-NLS-1$
 	"OpenGithubPullRequestMsg": "Open the Github page for this Pull Request.", //$NON-NLS-0$  //$NON-NLS-1$
-	"AllowPopUpMsg": "Please allow popups for this site." //$NON-NLS-0$  //$NON-NLS-1$
+	"AllowPopUpMsg": "Please allow popups for this site.", //$NON-NLS-0$  //$NON-NLS-1$
+	"TurnOnTrainTrack":"Turn on 'train track' graph for the commit list", //$NON-NLS-0$  //$NON-NLS-1$
+	"TurnOffTrainTrack":"Turn off 'train track' graph for the commit list" //$NON-NLS-0$  //$NON-NLS-1$
 });
