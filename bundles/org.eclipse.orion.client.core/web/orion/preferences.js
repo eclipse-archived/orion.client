@@ -327,6 +327,7 @@ define(['require', 'orion/Deferred', 'orion/EventTarget', 'orion/xhr'], function
 				var result = {};
 				if (key && typeof key !== "string" && !Array.isArray(key)) result = _mixin(result, key);
 				stores.forEach(function(store) {
+					if (!store) return;
 					function addKey(key) {
 						if (key in store) {
 							result[key] = store[key];
