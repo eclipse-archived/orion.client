@@ -724,6 +724,7 @@ define([
 			targetRef: this.reference,
 			log: this.log,
 			simpleLog: !!this.log,
+			trainTrack : false,
 			autoFetch: this.autoFetch === undefined || this.autoFetch,
 			handleError: this.handleError.bind(this),
 			root: {

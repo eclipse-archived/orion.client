@@ -7,6 +7,36 @@
 	overflow-y:auto;
 }
 
+.commitInfoHolder{
+	display:flex;
+}
+
+.commitSvgGraph{
+	margin-left: -5px;
+	margin-top: 10px;
+    margin-bottom: -29px;
+    padding-right: 10px;
+    position: relative;
+}
+
+.commitSvgGraphHolder{
+	height:100%;
+}
+
+.commitSvgGraphNode{
+	position: absolute;
+    left: 0;
+}
+
+.commitSvgGraphLines{
+	left:0;
+	right:0;
+	bottom: 0;
+    position: absolute;
+    top: 0;
+    height: 100%;
+}
+
 .branchDropdownList {
 	height:calc(100% - 70px);
 	overflow-y:auto;
@@ -553,7 +583,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 .gitListCell {
 	padding-top: 6px;
 	padding-bottom: 4px;
-	overflow: hidden;
+	overflow: visible;
 }
 
 .gitCommitListSectionTitle {
