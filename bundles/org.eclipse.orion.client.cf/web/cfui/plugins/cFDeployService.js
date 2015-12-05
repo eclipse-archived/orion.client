@@ -11,87 +11,29 @@
 
 /*eslint-env browser,amd*/
 /*global URL confirm*/
-define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/objects', 'orion/Deferred', 'orion/cfui/cFClient',
-	'cfui/cfUtil', 'orion/fileClient', 'orion/URITemplate', 'orion/preferences', 'orion/PageLinks',
-	'orion/xhr', 'orion/i18nUtil', 'orion/projectClient'],
+define([
+	'i18n!cfui/nls/messages',
+	'orion/objects',
+	'orion/Deferred',
+	'cfui/cfUtil',
+	'orion/URITemplate',
+	'orion/PageLinks',
+	'orion/i18nUtil'
+], function(messages, objects, Deferred, mCfUtil, URITemplate, PageLinks, i18nUtil) {
 
-function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient, URITemplate, 
-		mPreferences, PageLinks, xhr, i18nUtil, mProjectClient) {
-
-	function PreferencesProvider(location) {
-		this.location = location;
+	function CFDeployService(options) {
+		options = options || {};
+		this.serviceRegistry = options.serviceRegistry;
+		this.projectClient = options.projectClient;
+		this.fileClient = options.fileClient;
+		this.cFService = options.cFService;
 	}
+	CFDeployService.prototype = {
 
-	PreferencesProvider.prototype = {
-		get: function(name) {
-			return xhr("GET", this.location + name, { //$NON-NLS-0$
-				headers: {
-					"Orion-Version": "1" //$NON-NLS-0$ //$NON-NLS-1$
-				},
-				timeout: 15000,
-				log: false
-			}).then(function(result) {
-				return result.response ? JSON.parse(result.response) : null;
-			});
-		},
-		put: function(name, data) {
-			return xhr("PUT", this.location + name, { //$NON-NLS-0$
-				data: JSON.stringify(data),
-				headers: {
-					"Orion-Version": "1" //$NON-NLS-0$ //$NON-NLS-1$
-				},
-				contentType: "application/json;charset=UTF-8", //$NON-NLS-0$
-				timeout: 15000
-			}).then(function(result) {
-				return result.response ? JSON.parse(result.response) : null;
-			});
-		},
-		remove: function(name, key) {
-			return xhr("DELETE", this.location + name + "?key=" + key, { //$NON-NLS-0$ //$NON-NLS-1$
-				headers: {
-					"Orion-Version": "1" //$NON-NLS-0$ //$NON-NLS-1$
-				},
-				contentType: "application/json;charset=UTF-8", //$NON-NLS-0$
-				timeout: 15000
-			}).then(function(result) {
-				return result.response ? JSON.parse(result.response) : null;
-			});
-		}
-	};
-
-	var serviceRegistry;
-	var fileClient;
-	var cFService;
-	var preferences;
-	var projectClient;
-
-	var init = mBootstrap.startup().then(function(core) {
-		serviceRegistry = core.serviceRegistry;
-		fileClient = new mFileClient.FileClient(serviceRegistry);
-
-		cFService = new CFClient.CFService();
-
-		/* register hacked pref service */
-		var temp = document.createElement('a'); //$NON-NLS-0$
-		temp.href = "../prefs/user"; //$NON-NLS-0$
-		var location = temp.href;
-
-
-		var service = new PreferencesProvider(location);
-		serviceRegistry.registerService("orion.core.preference.provider", service, {}); //$NON-NLS-0$
-		preferences = core.preferences;
-
-		/* used to interact with launch configurations */
-		projectClient = new mProjectClient.ProjectClient(serviceRegistry, fileClient);
-	});
-
-	function DeployService() {}
-	DeployService.prototype = {
-
-		constructor: DeployService,
+		constructor: CFDeployService,
 
 		_getTargets: function() {
-			return mCfUtil.getTargets(preferences);
+			return mCfUtil.getTargets(this.serviceRegistry.getService("orion.core.preference")); //$NON-NLS-1$
 		},
 
 		getDeployProgressMessage: function(project, launchConf) {
@@ -117,6 +59,9 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 		},
 
 		_getAdditionalLaunchConfigurations: function(launchConf, project, rawFile) {
+			var projectClient = this.projectClient;
+			var cFService = this.cFService;
+			var fileClient = this.fileClient;
 			return projectClient.getLaunchConfigurationsDir(project).then(function(launchConfDir) {
 				if (!launchConfDir) {
 					return null;
@@ -159,7 +104,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 			var pathToFile = location.substring(0, location.lastIndexOf("/") + 1);
 			
 			if(manifestFile == ""){
-				return fileClient.fetchChildren(location).then(function(children){
+				return this.fileClient.fetchChildren(location).then(function(children){
 					var manifests = children.filter(function(child) {
 						return child.Name === "manifest.yml"; //$NON-NLS-0$
 					});
@@ -170,7 +115,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 						return manifests[0];
 				});
 			} else {
-				return fileClient.fetchChildren(pathToFile).then(function(children){
+				return this.fileClient.fetchChildren(pathToFile).then(function(children){
 					var manifests = children.filter(function(child) {
 						return child.Name === manifestFile; //$NON-NLS-0$
 					});
@@ -195,7 +140,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 			}
 
 			if (params.user && params.password) {
-				cFService.login(target.Url, params.user, params.password).then(
+				this.cFService.login(target.Url, params.user, params.password).then(
 
 				function() {
 					that._deploy(project, target, launchConf, deferred);
@@ -284,7 +229,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 									}
 									
 								} else {
-									cFService.getManifestInfo(manifest.Location, true).then(function(manifest) {
+									self.cFService.getManifestInfo(manifest.Location, true).then(function(manifest) {
 										performPush(manifest.Contents);
 									}, deferred.reject);
 								}
@@ -303,7 +248,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 								objects.mixin(mergedInstrumentation, devInstrumentation);
 							}
 	
-							cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath), manifest, appPackager, mergedInstrumentation).then(function(result) {
+							self.cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath), manifest, appPackager, mergedInstrumentation).then(function(result) {
 								var expandedURL = new URITemplate("{+OrionHome}/edit/edit.html#{,ContentLocation}").expand({ //$NON-NLS-0$
 									OrionHome: PageLinks.getOrionHome(),
 									ContentLocation: project.ContentLocation,
@@ -318,6 +263,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 				}, errorHandler);
 
 			} else {
+				var serviceRegistry = this.serviceRegistry;
 				var wizardReferences = serviceRegistry.getServiceReferences("orion.project.deploy.wizard"); //$NON-NLS-0$
 				
 				var feasibleDeployments = [];
@@ -355,7 +301,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 			}
 
 			if (params.user && params.password) {
-				cFService.login(target.Url, params.user, params.password).then(
+				this.cFService.login(target.Url, params.user, params.password).then(
 
 				function() {
 					that._edit(project, target, launchConf, deferred);
@@ -378,6 +324,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 			var appPath = launchConf.Path;
 			var launchConfName = launchConf.ConfigurationName;
 			
+			var serviceRegistry = this.serviceRegistry;
 			var wizardReferences = serviceRegistry.getServiceReferences("orion.project.deploy.wizard"); //$NON-NLS-0$
 			
 			var feasibleDeployments = [];
@@ -404,7 +351,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 
 		_retryWithLogin: function(props, func) {
 			if (props.user && props.password) {
-				return cFService.login(props.Target.Url, props.user, props.password).then(function() {
+				return this.cFService.login(props.Target.Url, props.user, props.password).then(function() {
 					return func(props);
 				}, function(error) {
 					error.Retry = {
@@ -431,7 +378,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 
 		_getStateCF: function(params) {
 			if (params.Target && params.Name) {
-				return cFService.getApp(params.Target, params.Name).then(function(result) {
+				return this.cFService.getApp(params.Target, params.Name).then(function(result) {
 					var app = result;
 					var appState = {
 						Name: app.name,
@@ -474,7 +421,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 
 		_startCF: function(params) {
 			if (params.Target && params.Name) {
-				return cFService.startApp(params.Target, params.Name, undefined, params.Timeout).then(function(result) {
+				return this.cFService.startApp(params.Target, params.Name, undefined, params.Timeout).then(function(result) {
 					return {
 						CheckState: true
 					};
@@ -493,12 +440,12 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 
 		stop: function(launchConf) {
 			var params = launchConf.Params || {};
-			return this._retryWithLogin(params, this._stopCF);
+			return this._retryWithLogin(params, this._stopCF.bind(this));
 		},
 
 		_stopCF: function(params, deferred) {
 			if (params.Target && params.Name) {
-				return cFService.stopApp(params.Target, params.Name).then(function(result) {
+				return this.cFService.stopApp(params.Target, params.Name).then(function(result) {
 					return {
 						CheckState: true
 					};
@@ -520,27 +467,9 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 		 * Delegates to @ref cFClient.js->getDeploymentPlans()
 		 */
 		getDeploymentPlans: function(projectContentLocation) {
-			return cFService.getDeploymentPlans(projectContentLocation);
+			return this.cFService.getDeploymentPlans(projectContentLocation);
 		}
 	};
 
-	function createDeferredMethod(instance, method) {
-		return function() {
-			var args = arguments;
-			return init.then(function() {
-				return instance[method].apply(instance, Array.prototype.slice.call(args));
-			});
-		};
-	}
-
-	function CFDeployService() {
-		var deployService = new DeployService();
-		var method;
-		for (method in deployService) {
-			if (typeof deployService[method] === 'function') { //$NON-NLS-0$
-				this[method] = createDeferredMethod(deployService, method);
-			}
-		}
-	}
 	return CFDeployService;
 });

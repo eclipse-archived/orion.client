@@ -40,7 +40,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 		_init : function(options){
 			this._confName = options.ConfName || null,
 			this._clouds = options.Clouds || [];
-			this._defaultTarget = options.DefaultTarget;
+			this._defaultTarget = options.DefaultTarget || {};
 			this._filePath = options.FilePath;
 			this._projectLocation = options.ProjectLocation;
 			this._initManifestPath = options.InitManifestPath || ""; //$NON-NLS-0$
@@ -304,7 +304,9 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 
 				if(!self._manifestInputWrapper.classList.contains("correctPath")){
 					self._manifestInputWrapper.classList.add("correctPath");
-					self._manifestInputWrapper.tooltip.destroy();
+					if (self._manifestInputWrapper.tooltip) {
+						self._manifestInputWrapper.tooltip.destroy();
+					}
 				}
 			}
 			else if(result === false){

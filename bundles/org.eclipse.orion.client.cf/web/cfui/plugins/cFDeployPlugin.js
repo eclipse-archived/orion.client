@@ -10,16 +10,28 @@
  ******************************************************************************/
 
 /*eslint-env browser,amd*/
-require(["cfui/plugins/cFDeployService", "orion/plugin", "i18n!cfui/nls/messages"], function(CFDeployService, PluginProvider, messages){
+require([
+	"cfui/plugins/cFDeployService",
+	"orion/serviceregistry",
+	'orion/fileClient',
+	'orion/projectClient',
+	'orion/cfui/cFClient',
+	"orion/plugin", 
+	"i18n!cfui/nls/messages"
+], function(CFDeployService,  mServiceRegistry, mFileClient, mProjectClient, CFClient, PluginProvider, messages){
 	
+	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 	var provider = new PluginProvider({
 		name: "Cloud Foundry Deploy",
 		version: "1.0",
 		description: "This plug-in integrates with Cloud Foundry."
-	});
+	}, serviceRegistry);
 		
+	var fileClient = new mFileClient.FileClient(serviceRegistry);
+	var projectClient = new mProjectClient.ProjectClient(serviceRegistry, fileClient);
+	var cFService = new CFClient.CFService();
 	provider.registerServiceProvider("orion.project.deploy",
-		new CFDeployService(),
+		new CFDeployService({serviceRegistry: serviceRegistry, fileClient: fileClient, projectClient: projectClient, cFService: cFService}),
 		{
 			id: "org.eclipse.orion.client.cf.deploy",
 			deployTypes: ["Cloud Foundry"],
