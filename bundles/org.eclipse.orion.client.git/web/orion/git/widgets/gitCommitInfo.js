@@ -101,6 +101,8 @@ define([
 			row.appendChild(detailsDiv);
 	
 			var headerMessage = util.trimCommitMessage(commit.Message);
+			var headerMessageSplit = headerMessage.split(" ");
+			var bugID = headerMessageSplit[1];
 			var displayMessage = this.showMessage === undefined || this.showMessage;
 			if (displayMessage) {
 				var link;
@@ -141,6 +143,19 @@ define([
 				}
 				detailsDiv.appendChild(fullMessage);
 			}
+			
+			// TODO
+			// add bugzilla link to commit info for both compressed and full commit messages
+			var bugzillaLink = document.createElement("a");
+			bugzillaLink.className = "navlinkonpage";
+			bugzillaLink.href = "https://bugs.eclipse.org/bugs/show_bug.cgi?id=" + bugID;
+			bugzillaLink.appendChild(document.createTextNode("Bugzilla Link"));
+			detailsDiv.appendChild(bugzillaLink);
+			
+			// TODO: this is not working for me - Tony
+			// for both full and compressed message, add text link services - takes in text and parent DOM
+			// var bugTag = headerMessageSplit[0].concat(" ", headerMessageSplit[1]);
+			// this.tagsCommandHandler.registry.getService("orion.core.textlink").addLinks(bugTag, detailsDiv);
 			
 			var displayAuthor = this.showAuthor === undefined || this.showAuthor;
 			var displayCommitter = this.showCommitter === undefined || this.showCommitter;
