@@ -218,7 +218,7 @@ define([
 	
 	function isSafe(item) {
 		if (!item) return false;
-		var state = item.status.RepositoryState || item.RepositoryState;
+		var state = (item.status && item.status.RepositoryState) || item.RepositoryState;
 		return state && state === "SAFE"; //$NON-NLS-0$
 	}
 	
