@@ -82,9 +82,11 @@ define(["orion/xhr"], function(xhr) {
 					window[GA_ID]("set", "location", href); //$NON-NLS-1$ //$NON-NLS-0$
 
 					/* process events logged while initialization was occurring */
-					queue.forEach(function(current) {
-						window[GA_ID](current.command, current.arg0, current.arg1, current.arg2, current.arg3, current.arg4);
-					});
+					if (queue) {
+						queue.forEach(function(current) {
+							window[GA_ID](current.command, current.arg0, current.arg1, current.arg2, current.arg3, current.arg4);
+						});
+					}
 					queue = null; /* no longer needed */
 				},
 				/* @callback */ function(error) {
