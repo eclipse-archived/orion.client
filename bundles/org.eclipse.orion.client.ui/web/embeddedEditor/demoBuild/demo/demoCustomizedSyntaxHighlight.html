@@ -105,18 +105,17 @@
 			};			
 			window.onload=function(){
 				var codeEdit = new orion.codeEdit();
+				var cto = {
+					id: "text/myID",//use this MIME type ID to call create()
+					extension: ["myExt"],//file extension
+					name: 'My content type',
+					'extends': 'text/plain'//Your type has to extends 'text/plain'
+				};
+				codeEdit.serviceRegistry.registerService('orion.core.contenttype', {}, {contentTypes: [cto]});
 				codeEdit.create({parent: "embeddedEditor", userPlugins:["webEditingPlugin.html"]}).then(function(editorViewer) {
 					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
-					var cto = {
-						id: "foo/bar",
-						extension: ["bar"],
-						name: 'Xtext Language',
-						'extends': 'text/plain'
-					};
-					
-					//editorViewer.serviceRegistry.registerService('orion.core.contenttype', {}, {contentTypes: [cto]});
 					editorViewer.serviceRegistry.registerService("orion.edit.highlighter", {}, syntaxF().grammars[0]);
-					editorViewer.setContents(contents, "foo/bar");
+					editorViewer.setContents(contents, "text/myID");
 				});
 			};
 		</script>

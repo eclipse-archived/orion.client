@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+    <title>Pluggable Editor Demo</title>
+    <style type="text/css">
+        .demoBody{
+            height: 450px;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="editorBuild/code_edit/built-codeEdit.css"/>
+    <link rel="stylesheet" type="text/css" href="prospecto.css"/>
+    <script src="editorBuild/requirejs/require.min.js"></script>
+    <script>
+        /*globals orion */
+        window.onload=function(){
+            require.config({
+                bundles: {
+                    'editorBuild/code_edit/built-codeEdit-amd.js': ['orion/codeEdit', 'orion/editor/textTheme']
+                }
+            });
+            require(["orion/codeEdit", "orion/editor/textTheme"], function(mCodeEdit, mTextTheme) {
+                function loadTheme(themeName) {
+                    var theme = mTextTheme.TextTheme.getTheme(themeName);
+                    if (!theme.getThemeClass()) {
+                        theme.setThemeClass(themeName, { href: themeName });
+                    }
+                    return theme;
+                }
+
+                var theme = loadTheme('prospecto');
+
+                var codeEdit = new mCodeEdit();
+                var contents = 'var foo = "bar";';
+                codeEdit.create({parent: "embeddedEditor"}).then(function(editorViewer) {
+                    editorViewer.editor.getTextView().setOptions({
+                        theme: theme
+                    });
+
+                    editorViewer.setContents(contents, "application/javascript");
+
+                    window.editorViewer = editorViewer;
+                });
+            });
+        };
+        var fontSizeCounter = 13;
+        var themeClass = "prospecto";
+        var settings = {
+            "className": "prospecto",
+            "name": "prospecto",
+            "styles": {
+                "fontSize": "12px"
+            }
+        };
+        function changeFontDynamically() {
+            var theme = window.editorViewer.editor.getTextView().getOptions("theme");
+            settings["styles"]["fontSize"] = fontSizeCounter + "px";
+            theme.setThemeClass(themeClass, theme.buildStyleSheet(themeClass, settings));
+            fontSizeCounter++;
+        }
+    </script>
+</head>
+<body id="orion-browser" spellcheck="false" class="orionPage">
+<button onclick="changeFontDynamically();">Test</button>
+<div class="demoBody" id="embeddedEditor">
+</div>
+</body>
+</html>
+
+
