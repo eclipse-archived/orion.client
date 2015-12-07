@@ -47,6 +47,7 @@ define([
 		this.pluginRegistry = options.pluginRegistry;
 		this.statusService = options.statusService;
 		this.inputManager = options.inputManager;
+		this.activate = options.activate;
 		this.editModelContextServiceID = options.editModelContextServiceID;
 	}
 		
@@ -98,6 +99,7 @@ define([
 				});
 				service.registerKeys(keys);
 			}
+			this.activate();
 		},
 		install: function() {
 			var parent = lib.node(this._domNode); //$NON-NLS-0$
@@ -169,6 +171,9 @@ define([
 				domNode: this._parent,
 				model: this.model,
 				undoStack: this.undoStack,
+				activate: function() {
+					this.editorCommands.updateCommands(this);
+				}.bind(this),
 				serviceRegistry: this.serviceRegistry,
 				pluginRegistry: this.pluginRegistry,
 				editorService: this.editorService,
