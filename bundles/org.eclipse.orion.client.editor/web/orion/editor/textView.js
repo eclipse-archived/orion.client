@@ -445,7 +445,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			this._divs[0].style.zIndex = visible && cursor ? "2" : "0"; //$NON-NLS-1$ //$NON-NLS-2$
 			this._divs.forEach(function(div) {
 				div.className = className;
-				if (util.isWebkit && primary) {
+				if (util.isWebkit < 537.36 && primary) {
 					div.style.background = focused ? "transparent" : ""; //$NON-NLS-1$
 				}
 			});
@@ -7040,7 +7040,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 		},
 		_setFullSelection: function(fullSelection, init) {
 			this._fullSelection = fullSelection;
-			if (util.isWebkit) {
+			if (util.isWebkit < 537.36) {
 				this._fullSelection = fullSelection = true;
 			}
 			if (!this._domSelection) {
