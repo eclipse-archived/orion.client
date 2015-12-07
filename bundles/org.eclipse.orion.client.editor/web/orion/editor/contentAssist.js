@@ -977,6 +977,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			return true;
 		},
 		
+		/**
+		 * Opens the tooltip for the selected proposal beside the content assist window
+		 * @param update if false, the tooltip will be hidden then reopened with the new contents
+		 * @param noContent if true the current tooltip contents will not be replaced, just size and position updated
+		 */
 		_showTooltip: function(update, noContent) {
 			var tooltip = mTooltip.Tooltip.getTooltip(this.contentAssist.textView);
 			var self = this;
