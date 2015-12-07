@@ -28,8 +28,9 @@ define([
 	'orion/git/util',
 	'orion/webui/littlelib',
 	'orion/objects',
-	'orion/bidiUtils'
-], function(messages, KeyBinding, mGitChangeList, mGitFileList, mGitCommitInfo, mSection, mSelection, mCommands, Deferred, mExplorer, mHTMLFragments, mGitCommands, i18nUtil, util, lib, objects, bidiUtils) {
+	'orion/bidiUtils',
+	'orion/git/uiUtil'
+], function(messages, KeyBinding, mGitChangeList, mGitFileList, mGitCommitInfo, mSection, mSelection, mCommands, Deferred, mExplorer, mHTMLFragments, mGitCommands, i18nUtil, util, lib, objects, bidiUtils, uiUtil) {
 
 	var pageQuery = "page=1&pageSize=20"; //$NON-NLS-0$
 
@@ -43,6 +44,7 @@ define([
 		this.statusService = options.statusService;
 		this.gitClient = options.gitClient;
 		this.simpleLog = options.simpleLog;
+		this.graph = options.graph||false;
 		this.parentId = options.parentId;
 		this.targetRef = options.targetRef;
 		this.log = options.log;
@@ -376,6 +378,8 @@ define([
 		processChildren: function(parentItem, items) {
 			if (items.length === 0) {
 				items = [{Type: "NoCommits", selectable: false, isNotSelectable: true}]; //$NON-NLS-0$
+			}else if(this.graph){
+				uiUtil.getCommitSvgs(items);
 			}
 			items.forEach(function(item) {
 				item.parent = parentItem;
@@ -413,6 +417,7 @@ define([
 		this.targetRef = options.targetRef;
 		this.log = options.log;
 		this.simpleLog = options.simpleLog;
+		this.graph = options.graph||false;
 		this.autoFetch = options.autoFetch;
 		this.slideout = options.slideout;
 		this.selectionPolicy = options.selectionPolicy;
@@ -802,7 +807,8 @@ define([
 				repositoryPath: this.repositoryPath,
 				log: this.log,
 				targetRef: this.targetRef,
-				simpleLog: this.simpleLog
+				simpleLog: this.simpleLog,
+				graph:this.graph
 			});
 			this.createFilter(this.parentId);
 			this.createTree(this.parentId, model, {
@@ -929,6 +935,21 @@ define([
 				}
 			});
 			commandService.addCommand(clearFilterCommand);
+			
+			var graphCommand = new mCommands.Command({
+				id: "eclipse.orion.git.commit.graph", //$NON-NLS-0$
+				callback: function(data) {
+					var model = that.model;
+					model.graph = that.graph = !that.graph;
+					data.handler.changedItem();
+				},
+				imageClass:"git-sprite-train-track",
+				tooltip: messages["ToggleGraph"],
+				spriteClass: "gitCommandSprite", //$NON-NLS-0$
+				type: "toggle" //$NON-NLS-0$		
+			});
+			commandService.addCommand(graphCommand);
+			
 		},
 		fetch: function() {
 			var model = this.model;
@@ -999,7 +1020,8 @@ define([
 			var targetRef = model.getTargetReference();
 			
 			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.toggleFilter", 20, null, false, new KeyBinding.KeyBinding('h', true, true)); //$NON-NLS-1$ //$NON-NLS-0$
-			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.simpleLog", 50); //$NON-NLS-0$
+			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.graph", 50); //$NON-NLS-0$
+			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.simpleLog", 70); //$NON-NLS-0$
 			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.sync", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 				
@@ -1085,6 +1107,9 @@ define([
 				td.appendChild(sectionItem);
 				var horizontalBox = document.createElement("div"); //$NON-NLS-0$
 				horizontalBox.classList.add("gitListCell"); //$NON-NLS-0$
+				if(item.parent.children[item.parent.children.length-1]===item||(item.parent.children[item.parent.children.length-1].Type==="MoreCommits"&&item.parent.children[item.parent.children.length-2]===item)){
+					horizontalBox.classList.add("lastGitListCell");
+				}
 				sectionItem.appendChild(horizontalBox);	
 				var that = this;
 				function createExpand() {

@@ -7,6 +7,36 @@
 	overflow-y:auto;
 }
 
+.commitInfoHolder{
+	display:flex;
+}
+
+.commitSvgGraph{
+	margin-left: -5px;
+	margin-top: 10px;
+    margin-bottom: -29px;
+    padding-right: 10px;
+    position: relative;
+}
+
+.commitSvgGraphHolder{
+	height:100%;
+}
+
+.commitSvgGraphNode{
+	position: absolute;
+    left: 0;
+}
+
+.commitSvgGraphLines{
+	left:0;
+	right:0;
+	bottom: 0;
+    position: absolute;
+    top: 0;
+    height: 100%;
+}
+
 .branchDropdownList {
 	height:calc(100% - 70px);
 	overflow-y:auto;
@@ -553,7 +583,11 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 .gitListCell {
 	padding-top: 6px;
 	padding-bottom: 4px;
-	overflow: hidden;
+	overflow: visible;
+}
+
+.lastGitListCell{
+	overflow:hidden;
 }
 
 .gitCommitListSectionTitle {
@@ -877,6 +911,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 .git-sprite-stash-changes,
 .git-sprite-pop-changes,
 .git-sprite-commit,
+.git-sprite-train-track,
 .git-sprite-stash
 {
 	font-size: 16px;
@@ -955,6 +990,15 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	padding: 0;
 }
 
+.git-sprite-train-track{
+	padding: 0 0 2px 2px;
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+	-ms-transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
+    transform: rotate(90deg);
+}
+
 .git-sprite-apply-patch:before{ content:'\E048'; }
 .git-sprite-save-patch:before{ content:'\E047'; }
 .git-sprite-cherry-pick:before{ content:'\E019'; }
@@ -995,3 +1039,4 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 .git-sprite-pop-changes:before{ content: '\E03F'; }
 .git-sprite-stash:before{ content: '\E035'; }
 .git-sprite-commit:before{ content: '\E045'; }
+.git-sprite-train-track:before{ content: '\E045'; }
