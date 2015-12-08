@@ -32,20 +32,6 @@ define([
 	var FileModel = mExplorer.FileModel;
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 
-	function getProject (fileClient, metadata) {
-		while (metadata.parent && metadata.parent.parent && metadata.parent.parent.type !== "ProjectRoot") {
-			metadata = metadata.parent;
-		}
-		if (metadata.Parents && metadata.Parents.length > 0) {
-			var topParent = metadata.Parents[metadata.Parents.length - 1];
-			if (topParent.Children) {
-				return new Deferred().resolve(topParent);
-			}
-			return fileClient.read(topParent.Location, true);
-		}
-		return new Deferred().resolve(metadata);
-	}
-		
 	function ProjectNavModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders, projectClient, fileMetadata){
 		this.projectClient = projectClient;
 		this.project = root;
@@ -123,8 +109,6 @@ define([
 		this._dependenciesEventTypes.forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
 			_self.dependenciesDisplatcher.addEventListener(eventType, _self.dependneciesListener);
 		});
-		
-		this._createRunBar();
 	}
 	ProjectNavExplorer.prototype = Object.create(CommonNavExplorer.prototype);
 	objects.mixin(ProjectNavExplorer.prototype, /** @lends orion.sidebar.ProjectNavExplorer.prototype */ {
@@ -147,7 +131,7 @@ define([
 			}
 
 			var metadata = fileMetadata;
-			return getProject(this.fileClient, fileMetadata).then(function(project) {
+			return this.projectClient.getProject(fileMetadata).then(function(project) {
 				fileMetadata = project;
 				this.fileMetadata = fileMetadata;
 				
@@ -197,10 +181,10 @@ define([
 		},
 		reroot: function(item) {
 			var defer = new Deferred();
-			getProject(this.fileClient, item).then(function(project) {
+			this.projectClient.getProject(item).then(function(project) {
 				this.display(project);
 				defer.resolve(item);
-			}.bind(this), function () {		
+			}.bind(this), function () {
 				this.scopeUp(item.Location);
 				defer.reject();
 			}.bind(this));
@@ -253,33 +237,7 @@ define([
 					_self.launchConfigurationDispatcher.removeEventListener(eventType, _self.launchConfigurationListener);
 				});
 			}
-			if (this._runBar) {
-				this._runBar.destroy();
-				this._runBar = null;
-			}
 			CommonNavExplorer.prototype.destroy.call(this);
-		},
-		_createRunBar: function() {
-			var menuBar = this.sidebar.menuBar;
-			var runBarParent = menuBar.runBarNode;
-			lib.empty(runBarParent);
-			
-			mCustomGlobalCommands.createRunBar({
-				parentNode: runBarParent,
-				projectExplorer: this,
-				serviceRegistry: this.serviceRegistry,
-				commandRegistry: this.commandRegistry,
-				fileClient: this.fileClient,
-				projectCommands: ProjectCommands,
-				projectClient: this.projectClient,
-				progressService: this.progressService,
-				preferences: this.preferences
-			}).then(function(runBar){
-				if (runBar) {
-					// runBar successfully created, set local reference to it
-					this._runBar = runBar;
-				}
-			}.bind(this));
 		}
 	});
 
@@ -341,13 +299,10 @@ define([
 		var sidebar = this.sidebar;
 		
 		this.editorInputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
-			function openDefaultMode() {
-				if (!sidebar.getActiveViewModeId()) {
-					sidebar.setViewMode(sidebar.getDefaultViewModeId());
-				}
-			}
  			_self.showViewMode(event.metadata && !event.metadata.Projects);
-			openDefaultMode();
+			if (!sidebar.getActiveViewModeId()) {
+				sidebar.setViewMode(sidebar.getDefaultViewModeId());
+			}
 		});
 	}
 	objects.mixin(ProjectNavViewMode.prototype, {

@@ -1380,8 +1380,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					tootlip: deployService.tooltip,
 					id: "orion.project.deploy." + deployService.id,
 					callback: function(data){
-						var item = explorer.treeRoot;
-						var project = item.Project;
+						var project = data.items;
 
 						var func = arguments.callee;
 						var params = handleParamsInCommand(func, data, deployService.tooltip);
@@ -1401,11 +1400,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					},
 					visibleWhen: function(item) {
 						if (!(command.showCommand == undefined || command.showCommand)) return false;
-						item = explorer.treeRoot;
-						if(!item.Project || !item.children || item.children.length === 0){
-							return false;
-						}
-						return projectClient.matchesDeployService(item.children[0], deployService);
+						return projectClient.matchesDeployService(item, deployService);
 					}
 				};
 
