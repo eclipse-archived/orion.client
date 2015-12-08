@@ -427,7 +427,7 @@ define([
 						item.GitUrl = head.repo.clone_url;
 						var baseRoot = (head.user.login !== base.user.login)?head.user.login:"origin";//$NON-NLS-0$
 						title = i18nUtil.formatMessage(messages["PullRequestTreeItem"], baseRoot, head.ref, "origin", base.ref); //$NON-NLS-0$
-						description = item.PullRequest.title;
+						description = i18nUtil.formatMessage(messages["PullRequestDescription"], item.PullRequest.number, item.PullRequest.title);
 					}  else if (item.parent.Type === "Remote") { //$NON-NLS-0$
 						if (explorer.showHistory) createExpand();
 						actionsID = "branchActionsArea"; //$NON-NLS-0$
