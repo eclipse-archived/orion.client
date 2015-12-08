@@ -435,24 +435,8 @@ define([
 		}
 		return columnInfo;
 	}
-	
-
 	exports.getCommitSvgs = getCommitSvgs;
-	
-	function adjustCommitSvgHeight(svg, height) {
-		var NODE_SIZE = 8;
-		var lines = svg.getElementsByTagName('line');
-		
-		for(var i=0; i< lines.length; i++ )
-		{
-		 	var line = lines[i];
-		 	line.setAttribute("y2", NODE_SIZE + height);
-		}
-		svg.setAttribute("height", height + "px");
-	}
-	
-	exports.adjustCommitSvgHeight = adjustCommitSvgHeight;
-	
+
 	//return module exports
 	return exports;
 });
