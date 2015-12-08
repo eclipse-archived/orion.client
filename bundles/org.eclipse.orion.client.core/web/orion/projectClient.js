@@ -91,6 +91,29 @@ define([
             }
             return deferred;
         },
+        
+		getProject: function (metadata) {
+			if (!metadata || metadata.Projects) {
+				return new Deferred().resolve(null);
+			}
+			while (metadata.parent && metadata.parent.parent && metadata.parent.parent.type !== "ProjectRoot") {
+				metadata = metadata.parent;
+			}
+			if (metadata.Parents && metadata.Parents.length > 0) {
+				var topParent = metadata.Parents[metadata.Parents.length - 1];
+				if (topParent.Children) {
+					topParent.ContentLocation = topParent.Location;
+					return new Deferred().resolve(topParent);
+				}
+				return this.fileClient.read(topParent.Location, true).then(function(project) {
+					project.ContentLocation = project.Location;
+					return project;
+				});
+			}
+			metadata.ContentLocation = metadata.Location;
+			return new Deferred().resolve(metadata);
+		},
+		
         readAllProjects : function(workspaceMetadata){
 			var deferred = new Deferred();
 

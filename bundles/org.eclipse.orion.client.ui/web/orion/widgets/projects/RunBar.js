@@ -42,8 +42,8 @@ define([
 	 * @param options.actionScopeId
 	 */
 	function RunBar(options) {
+		this._project = null;
 		this._parentNode = options.parentNode;
-		this._projectExplorer = options.projectExplorer;
 		this._serviceRegistry = options.serviceRegistry;
 		this._commandRegistry = options.commandRegistry;
 		this._fileClient = options.fileClient;
@@ -54,6 +54,7 @@ define([
 		this._projectCommands = options.projectCommands;
 		this._projectClient = options.projectClient;
 		this._preferences = options.preferences;
+		this._editorInputManager = options.editorInputManager;
 		
 		this._initialize();
 		this._disableAllControls(); // start with controls disabled until a launch configuration is selected
@@ -106,23 +107,30 @@ define([
 				this._logsLink.addEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
 				this._setNodeTooltip(this._logsLink, messages["openLogsTooltip"]); //$NON-NLS-0$
 				this._disableLink(this._logsLink);
-				
-				if (this._projectExplorer.treeRoot && this._projectExplorer.treeRoot.Project) {
-					this.loadLaunchConfigurations(this._projectExplorer.treeRoot.Project);
-				} else {
-					// the Project has not yet been fully loaded into the explorer, wait until that happens 
-					this._projectExplorer.addEventListener("rootChanged", function(evnt){ //$NON-NLS-0$
-						var root = evnt.root;
-						if (root && root.Project) {
-							this.loadLaunchConfigurations(root.Project);
-						}
+
+				this._editorInputManager.addEventListener("InputChanged", function(e) { //$NON-NLS-0$
+					this._projectClient.getProject(e.metadata).then(function(project) {
+						this.setProject (project);
 					}.bind(this));
-				}
+				}.bind(this));
 			} else {
 				throw new Error("this._domNode is null"); //$NON-NLS-0$
 			}
 		},
-				
+		
+		getProject: function () {
+			return this._project;
+		},
+		
+		setProject: function (project) {
+			if (this._project === project) return;
+			if (!this._project && !project) return;
+			if (this._project && project) {
+				if (this._project.Location === project.Location) return;
+			}
+			this.loadLaunchConfigurations(this._project = project);
+		},
+	
 		_createLaunchConfigurationsDropdown: function() {
 			this._launchConfigurationsWrapper = lib.$(".launchConfigurationsWrapper", this._domNode); //$NON-NLS-0$
 			this._cachedLaunchConfigurations = {};
@@ -204,7 +212,7 @@ define([
 					if (defaultDeployCommand) {
 						this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommand.id, 1); //$NON-NLS-0$
 						domNodeWrapperList = [];
-						this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._projectExplorer.treeRoot, this, "button", null, domNodeWrapperList); //$NON-NLS-0$
+						this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._project, this, "button", null, domNodeWrapperList); //$NON-NLS-0$
 						domNodeWrapperList[0].domNode.textContent = "+"; //$NON-NLS-0$
 						this._setNodeTooltip(domNodeWrapperList[0].domNode, messages["createNewTooltip"]); //$NON-NLS-0$
 					}
@@ -518,14 +526,13 @@ define([
 				this._setText(this._appInfoSpan, null);
 			}
 			
-			
-			if (_status && _status.Url) {
-				this._enableLink(this._appLink, _status.Url);
-			}
-			
-			if (logLocationTemplate) {
-				uriTemplate = new URITemplate(logLocationTemplate);
-				uriParams = {
+			if (this._project) {
+				if (_status && _status.Url) {
+					this._enableLink(this._appLink, _status.Url);
+				}
+				if (logLocationTemplate) {
+					uriTemplate = new URITemplate(logLocationTemplate);
+					uriParams = {
 						OrionHome: PageLinks.getOrionHome(),
 						Name: "",
 						Target: {
@@ -533,13 +540,13 @@ define([
 						}
 					};
 					this._enableLink(this._logsLink, uriTemplate.expand(uriParams));
-			} else {
-				var service = this._serviceRegistry.getService("orion.project.deploy"); //$NON-NLS-1$
-				if (service.getLogLocationTemplate) {
-					service.getLogLocationTemplate(this._selectedLaunchConfiguration).then(function(result){
-						uriTemplate = new URITemplate(result);
-						var config = this._selectedLaunchConfiguration ? this._selectedLaunchConfiguration.File.Location : '';
-						uriParams = {
+				} else {
+					var service = this._serviceRegistry.getService("orion.project.deploy"); //$NON-NLS-1$
+					if (service.getLogLocationTemplate) {
+						service.getLogLocationTemplate(this._selectedLaunchConfiguration).then(function(result){
+							uriTemplate = new URITemplate(result);
+							var config = this._selectedLaunchConfiguration ? this._selectedLaunchConfiguration.File.Location : '';
+							uriParams = {
 								OrionHome: PageLinks.getOrionHome(),
 								Name: "",
 								Target: {
@@ -547,7 +554,8 @@ define([
 								}
 							};
 							this._enableLink(this._logsLink, uriTemplate.expand(uriParams));
-					}.bind(this));
+						}.bind(this));
+					}
 				}
 			}
 		},
@@ -588,9 +596,14 @@ define([
 		 * @param[in] {Object} project The project from which to load the launch configurations
 		 */
 		loadLaunchConfigurations: function (project) {
-			this._projectClient.getProjectLaunchConfigurations(project).then(function(launchConfigurations){
-				this._setLaunchConfigurations(launchConfigurations);
-			}.bind(this));
+			if (project) {
+				this._projectClient.getProjectLaunchConfigurations(project).then(function(launchConfigurations){
+					if (project !== this._project) return;
+					this._setLaunchConfigurations(launchConfigurations);
+				}.bind(this));
+			} else {
+				this._setLaunchConfigurations(null);
+			}
 		},
 		
 		/**
@@ -601,12 +614,15 @@ define([
 		 * @param {Array} launchConfigurations An array of launch configurations
 		 */
 		_setLaunchConfigurations: function(launchConfigurations) {
-			this._enableLaunchConfigurationsDropdown();
-
-			launchConfigurations.sort(function(launchConf1, launchConf2) {
-				return launchConf1.Name.localeCompare(launchConf2.Name);
-			});
-
+			if (launchConfigurations) {
+				this._enableLaunchConfigurationsDropdown();
+				launchConfigurations.sort(function(launchConf1, launchConf2) {
+					return launchConf1.Name.localeCompare(launchConf2.Name);
+				});
+			} else {
+				this._disableLaunchConfigurationsDropdown();
+			}
+			
 			this._cacheLaunchConfigurations(launchConfigurations);
 			
 			if (launchConfigurations && launchConfigurations[0]) {
@@ -621,9 +637,11 @@ define([
 		
 		_cacheLaunchConfigurations: function(launchConfigurations) {
 			this._cachedLaunchConfigurations = {};
-			launchConfigurations.forEach(function(launchConfig){
-				this._putInLaunchConfigurationsCache(launchConfig);
-			}, this);
+			if (launchConfigurations) {
+				launchConfigurations.forEach(function(launchConfig){
+					this._putInLaunchConfigurationsCache(launchConfig);
+				}, this);
+			}
 		},
 		
 		_getHash: function(launchConfiguration) {
@@ -638,7 +656,7 @@ define([
 			var hash = this._getHash(launchConfiguration);
 			if (!launchConfiguration.project) {
 				// TODO Find a better way to get this info
-				launchConfiguration.project = this._projectExplorer.treeRoot.Project;
+				launchConfiguration.project = this._project;
 			}
 			this._cachedLaunchConfigurations[hash] = launchConfiguration;
 		},
@@ -779,7 +797,7 @@ define([
 				this._launchConfigurationsLabel.appendChild(this._appName);
 				this._launchConfigurationsLabel.appendChild(this._appInfoSpan);
 			} else {
-				this._setText(this._launchConfigurationsLabel, messages["selectLaunchConfig"]); //$NON-NLS-0$
+				this._setText(this._launchConfigurationsLabel, this._project ? messages["selectLaunchConfig"] : null); //$NON-NLS-0$
 			}
 		},
 		
