@@ -333,9 +333,7 @@ define([
 							that.textSearcher.show(data);
 							return true;
 						}
-						that.commandService.runCommand("orion.edit.find", null, null, new mCommandRegistry.ParametersDescription( //$NON-NLS-0$
-							[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
-							{clientCollect: true}));
+						that.commandService.runCommand("orion.edit.find"); //$NON-NLS-0$
 						return true;
 					}, that.commandService.findCommand("orion.edit.find")); //$NON-NLS-0$
 				}
@@ -697,17 +695,15 @@ define([
 					var searchString = "";
 					var parsedParam = null;
 					var selection = editor.getSelection();
-					if (selection.end > selection.start) {//$NON-NLS-0$ If there is selection from editor, we want to use it as the default keyword
+					if (data.parameters && data.parameters.valueFor('find')) { //$NON-NLS-0$
+						searchString = data.parameters.valueFor('find'); //$NON-NLS-0$
+						parsedParam = mPageUtil.matchResourceParameters();
+						mSearchUtils.convertFindURLBinding(parsedParam);
+					} else if (selection.end > selection.start) {//$NON-NLS-0$ If there is selection from editor, we want to use it as the default keyword
 						var model = editor.getModel();
 						searchString = model.getText(selection.start, selection.end);
 						if (textSearcher.getOptions().regex) {
 							searchString = regex.escape(searchString);
-						}
-					} else {//If there is no selection from editor, we want to parse the parameter from URL binding
-						if (data.parameters && data.parameters.valueFor('find')) { //$NON-NLS-0$
-							searchString = data.parameters.valueFor('find'); //$NON-NLS-0$
-							parsedParam = mPageUtil.matchResourceParameters();
-							mSearchUtils.convertFindURLBinding(parsedParam);
 						}
 					}
 					if(parsedParam){
