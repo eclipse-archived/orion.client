@@ -174,6 +174,7 @@ define([
 			this._createShowTooltipCommand();
 			this._createUndoStackCommands();
 			this._createClipboardCommands();
+			this._createLineEndingCommands();
 			this._createEncodingCommand();
 			this._createSaveCommand();
 			return this._createEditCommands();
@@ -243,6 +244,13 @@ define([
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(113), null, this);//$NON-NLS-1$ //$NON-NLS-2$ 
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 2, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 3, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+
+			// 'Line Endings' cascade
+			var index = 0;
+			commandRegistry.addCommandGroup(this.toolbarId, "orion.editorMenuBarMenuLineEndingsGroup", 999, messages["Convert Line Delimiters"], "orion.menuBarToolsGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.toolbarId, "orion.edit.convert.crlf", index++, "orion.menuBarToolsGroup/orion.editorMenuBarMenuLineEndingsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.toolbarId, "orion.edit.convert.lf", index++, "orion.menuBarToolsGroup/orion.editorMenuBarMenuLineEndingsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
+
 			commandRegistry.registerCommandContribution(this.toolbarId, "orion.edit.reloadWithEncoding", 1000, "orion.menuBarToolsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			this._registerCommandGroups(this.toolbarId, "orion.menuBarToolsGroup"); //$NON-NLS-1$
@@ -289,9 +297,14 @@ define([
 
 			// 'Tools' cascade
 			commandRegistry.addCommandGroup(this.editorContextMenuId, "orion.editorContextMenuToolsGroup", 400, messages["Tools"], "orion.editorContextMenuGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.reloadWithEncoding", 1000, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
-			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.blame", 1, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
-			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.diff", 2, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.blame", index++, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.diff", index++, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.reloadWithEncoding", 400, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
+
+			// 'Line Endings' cascade
+			commandRegistry.addCommandGroup(this.editorContextMenuId, "orion.editorContextMenuLineEndingsGroup", 399, messages["Convert Line Delimiters"], "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.convert.crlf", index++, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup/orion.editorContextMenuLineEndingsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.convert.lf", index++, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup/orion.editorContextMenuLineEndingsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
 
 			this._registerCommandGroups(this.editorContextMenuId, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-1$
 
@@ -446,6 +459,44 @@ define([
 			});
 			this.commandService.addCommand(settingsCommand);
 		},
+		
+		_createLineEndingCommands: function() {
+			
+			var visibleWhen = /* @callback */ function(items, data) {
+				var editor = /*data.handler.editor ||*/ this.editor;
+				return editor && editor.installed;
+			}.bind(this);
+			var convert = function (delimiter) {
+				var editor = this.editor;
+				if (editor && editor.getTextView && editor.getTextView()) {
+					var textModel = editor.getModel();
+					textModel.setLineDelimiter(delimiter, true);
+					var progress = this.serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+					if (progress) progress.setProgressResult( {Message: messages.ConversionComplete});
+				}
+			}.bind(this);
+			
+			var convertToCrLfCommand = new mCommands.Command({
+				name: messages["Windows (CR/LF)"],  //$NON-NLS-0$
+				id: "orion.edit.convert.crlf", //$NON-NLS-0$
+				visibleWhen: visibleWhen,
+				callback: function() {
+					convert ("\r\n");
+				}
+			});
+			this.commandService.addCommand(convertToCrLfCommand);
+			
+			var convertToLfCommand = new mCommands.Command({
+				name: messages["Unix (LF)"], //$NON-NLS-0$
+				id: "orion.edit.convert.lf", //$NON-NLS-0$
+				visibleWhen: visibleWhen,
+				callback: function() {
+					convert ("\n");
+				}
+			});
+			this.commandService.addCommand(convertToLfCommand);
+		},
+		
 		_createClipboardCommands: function() {
 			
 			//TODO - test to see whether copy/cut/paste is supported instead of IE
