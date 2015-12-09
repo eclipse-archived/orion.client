@@ -362,7 +362,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @returns {orion.editor.Tooltip}
 		*/
 		getTooltip: function() {
-			return mTooltip.Tooltip.getTooltip(this._textView);
+			return mTooltip.Tooltip.getTooltip(this._textView, this);
 		},
 		/**
 		 * Returns the zoom ruler of the editor.
@@ -803,7 +803,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				this._contentAssist = contentAssistMode.getContentAssist();
 			}
 
-			var tooltip = mTooltip.Tooltip.getTooltip(this._textView);
+			var tooltip = mTooltip.Tooltip.getTooltip(this._textView, this);
 			if (this._hoverFactory) {
 				this._hover = this._hoverFactory.createHover(this);
 				tooltip.hover = this._hover;

@@ -978,7 +978,7 @@ define([
 						};
 						
 						// TODO: Make this more generic
-						if (info.scopeId === "orion.edit.quickfix") { //$NON-NLS-0$
+						if (info.scopeId === "orion.edit.quickfix") {
 							context.annotation = {
 								start: data.userData.start,
 								end: data.userData.end,
@@ -986,6 +986,26 @@ define([
 								id: data.userData.id,
 								data: data.userData.data
 							};
+						} else if (info.scopeId === "orion.edit.quickfixAll"){
+							context.annotations = [];
+							for (var i=0; i<data.userData.annotations.length; i++) {
+								context.annotations.push(
+								{
+									start: data.userData.annotations[i].start,
+									end: data.userData.annotations[i].end,
+									title: data.userData.annotations[i].title,
+									id: data.userData.annotations[i].id,
+									data: data.userData.annotations[i].data
+								}
+								);
+							}
+							context.annotation = {
+								start: data.userData.annotation.start,
+								end: data.userData.annotation.end,
+								title: data.userData.annotation.title,
+								id: data.userData.annotation.id,
+								data: data.userData.annotation.data
+							}
 						}
 						var editorContext = editor.getEditorContext();
 						// Hook up delegated UI and Status handling

@@ -88,6 +88,7 @@ define({//Default message bundle
 	'javascriptValidation': 'Javascript Validation',
 	'jsHover': 'JavaScript Hover Provider',
 	'removeExtraSemiFixName': 'Remove extra semicolon',
+	'removeExtraSemiFixAllName': 'Remove all extra semicolons (${0} in file)',
 	'addFallthroughCommentFixName': 'Add $FALLTHROUGH$ comment',
 	'addEmptyCommentFixName': 'Comment empty block',
 	'addESLintEnvFixName': 'Add to eslint-env directive',

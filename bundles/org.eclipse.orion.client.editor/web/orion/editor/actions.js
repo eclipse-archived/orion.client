@@ -500,8 +500,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					}
 				}
 				var view = editor.getTextView();
-				var nextLine = model.getLineAtOffset(foundAnnotation.start);
-				var tooltip = mTooltip.Tooltip.getTooltip(view);
+				var tooltip = mTooltip.Tooltip.getTooltip(view, editor);
 				if (!tooltip) {
 					editor.moveSelection(foundAnnotation.start);
 					return true;

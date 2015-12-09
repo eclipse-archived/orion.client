@@ -10,14 +10,14 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd, node*/
-define("orion/editor/tooltip", [ //$NON-NLS-0$
-	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
-	'orion/editor/textView', //$NON-NLS-0$
-	'orion/editor/projectionTextModel', //$NON-NLS-0$
-	'orion/Deferred', //$NON-NLS-0$
-	'orion/editor/util', //$NON-NLS-0$
-	'orion/webui/littlelib', //$NON-NLS-0$
-	'orion/util' //$NON-NLS-0$
+define("orion/editor/tooltip", [
+	'i18n!orion/editor/nls/messages',
+	'orion/editor/textView',
+	'orion/editor/projectionTextModel',
+	'orion/Deferred',
+	'orion/editor/util',
+	'orion/webui/littlelib',
+	'orion/util'
 ], function(messages, mTextView, mProjectionTextModel, Deferred, textUtil, lib, util) {
 
 /**
@@ -44,14 +44,20 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
  * 
  * @param view
  */
-function Tooltip (view) {
+function Tooltip (view, editor) {
 		this._view = view;
+		this._editor = editor;
 		var parent = view.getOptions("parent"); //$NON-NLS-0$
 		this._create(parent ? parent.ownerDocument : document);
 	}
-	Tooltip.getTooltip = function(view) {
+	/**
+	 * Creates a new tooltip for the given text view.
+	 * @param view {TextView} the text view the tooltip belongs to
+	 * @param editor {Editor} the editor the tooltip belongs to, optional, allows quick fixes in tooltip to run on all annotations in the editor
+	 */
+	Tooltip.getTooltip = function(view, editor) {
 		if (!view._tooltip) {
-			 view._tooltip = new Tooltip(view);
+			 view._tooltip = new Tooltip(view, editor);
 		}
 		return view._tooltip;
 	};
@@ -61,21 +67,23 @@ function Tooltip (view) {
 			var tooltipDiv = this._tooltipDiv = util.createElement(document, "div"); //$NON-NLS-0$
 			tooltipDiv.tabIndex = 0;
 			tooltipDiv.className = "textviewTooltip"; //$NON-NLS-0$
-			tooltipDiv.setAttribute("aria-live", "assertive"); //$NON-NLS-1$ //$NON-NLS-0$
-			tooltipDiv.setAttribute("aria-atomic", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			tooltipDiv.setAttribute("aria-live", "assertive"); //$NON-NLS-1$ //$NON-NLS-2$
+			tooltipDiv.setAttribute("aria-atomic", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 			this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
 			this._tipShowing = false;
 			document.body.appendChild(tooltipDiv);
 			var self = this;
-			textUtil.addEventListener(document, "mousedown", this._mouseDownHandler = function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(document, "mousedown", this._mouseDownHandler = function(event) {
 				if (!self.isVisible()) { return; }
 				if (textUtil.contains(tooltipDiv, event.target || event.srcElement)) { return; }
 				if (!self._locked){
 					self.hide();
 				}
 			}, true);
-			textUtil.addEventListener(document, "scroll", this._scrollHandler = function(event) { //$NON-NLS-0$
-				if (!self.isVisible()) return;
+			textUtil.addEventListener(document, "scroll", this._scrollHandler = function(event) {
+				if (!self.isVisible()){
+					return;	
+				} 
 
 				// Make sure the scroll isn't *inside* the tooltip...
 				if (textUtil.contains(tooltipDiv, event.target || event.srcElement)) { return; }
@@ -84,7 +92,7 @@ function Tooltip (view) {
 					self.hide();
 				}
 			}, true);
-			textUtil.addEventListener(document, "mousemove", this._mouseMoveHandler = function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(document, "mousemove", this._mouseMoveHandler = function(event) {
 				// Ignore spurious mousemove events
 				if (self._prevX && self._prevX === event.clientX && self._prevY && self._prevY === event.clientY) {
 					return;
@@ -96,32 +104,32 @@ function Tooltip (view) {
 				if (self._isInRect(self._outerArea, event.clientX, event.clientY)){ return; }
 				self.hide();
 			}, true);
-			textUtil.addEventListener(tooltipDiv, "focus", /* @callback */ function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(tooltipDiv, "focus", /* @callback */ function(event) {
 				if (!self._locked){
 					self._tooltipDiv.classList.add('textViewTooltipOnFocus'); //$NON-NLS-0$
 				}
 			}, false);
-			textUtil.addEventListener(tooltipDiv, "blur", /* @callback */ function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(tooltipDiv, "blur", /* @callback */ function(event) {
 				self._tooltipDiv.classList.remove('textViewTooltipOnFocus'); //$NON-NLS-0$
 			}, false);
-			textUtil.addEventListener(tooltipDiv, "mouseenter", /* @callback */ function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(tooltipDiv, "mouseenter", /* @callback */ function(event) {
 				if (!self._locked){
 					self._tooltipDiv.classList.add('textViewTooltipOnHover'); //$NON-NLS-0$
 				}
 			}, false);
-			textUtil.addEventListener(tooltipDiv, "mouseleave", /* @callback */ function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(tooltipDiv, "mouseleave", /* @callback */ function(event) {
 				if (!self._hasFocus()){
 					self._tooltipDiv.classList.remove('textViewTooltipOnHover'); //$NON-NLS-0$
 				}
 			}, false);
-			textUtil.addEventListener(tooltipDiv, "keydown", function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(tooltipDiv, "keydown", function(event) {
 				if (event.keyCode === 27) {
 					if (!self._locked){
 						self.hide();
 					}
 				}
 			}, false);
-			this._view.addEventListener("Destroy", function() { //$NON-NLS-0$
+			this._view.addEventListener("Destroy", function() {
 				self.destroy();
 			});
 		},
@@ -131,9 +139,9 @@ function Tooltip (view) {
 			var parent = this._tooltipDiv.parentNode;
 			if (parent) { parent.removeChild(this._tooltipDiv); }
 			var doc = this._tooltipDiv.ownerDocument;
-			textUtil.removeEventListener(doc, "mousedown", this._mouseDownHandler, true); //$NON-NLS-0$
-			textUtil.removeEventListener(doc, "scroll", this._scrollHandler, true); //$NON-NLS-0$
-			textUtil.removeEventListener(doc, "mousemove", this._mouseMoveHandler, true); //$NON-NLS-0$
+			textUtil.removeEventListener(doc, "mousedown", this._mouseDownHandler, true);
+			textUtil.removeEventListener(doc, "scroll", this._scrollHandler, true);
+			textUtil.removeEventListener(doc, "mousemove", this._mouseMoveHandler, true);
 			this._tooltipDiv = null;
 		},
 		
@@ -237,9 +245,9 @@ function Tooltip (view) {
 			this._tooltipDiv.style.width = "auto";		 //$NON-NLS-0$
 			this._tooltipDiv.style.maxWidth = "";
 			this._tooltipDiv.style.height = "auto";		 //$NON-NLS-0$	
-			this._tooltipDiv.style.maxHeight = "";		 //$NON-NLS-0$
-			this._tooltipDiv.style.overflowX = "";		 //$NON-NLS-0$	
-			this._tooltipDiv.style.overflowY = "";		 //$NON-NLS-0$	
+			this._tooltipDiv.style.maxHeight = "";
+			this._tooltipDiv.style.overflowX = "";
+			this._tooltipDiv.style.overflowY = "";
 			
 			this._giveFocus = undefined;
 			
@@ -343,7 +351,7 @@ function Tooltip (view) {
 									}
 								}
 							}, function(error) {
-								if (console && error && error.name !== 'Cancel') { //$NON-NLS-0$ //$NON-NLS-1$
+								if (console && error && error.name !== 'Cancel') {
 									console.log("Error computing hover tooltip"); //$NON-NLS-0$
 									console.log(error && error.stack);
 								}
@@ -520,9 +528,9 @@ function Tooltip (view) {
 			var spaceRight = viewportWidth - (anchorArea.left + anchorArea.width - viewportLeft);
 			
 			// If there is not enough space above or below, swap the position.  Can't do the same for right/left because rulers are at client bounds
-			if (position === "above" && tipRect.height > spaceAbove && tipRect.height <= spaceBelow){ //$NON-NLS-0$
+			if (position === "above" && tipRect.height > spaceAbove && tipRect.height <= spaceBelow){
 				position = "below"; //$NON-NLS-0$
-			} else if (position === "below" && tipRect.height > spaceBelow && tipRect.height <= spaceAbove){ //$NON-NLS-0$
+			} else if (position === "below" && tipRect.height > spaceBelow && tipRect.height <= spaceAbove){
 				position = "above"; //$NON-NLS-0$
 			}
 			
@@ -534,7 +542,7 @@ function Tooltip (view) {
 			// Force the tooltip to start within the viewport area
 			// Set maximum sizes for remaining area in the viewport area
 			switch (position){
-				case "left": //$NON-NLS-0$
+				case "left":
 					if ((tipRect.height + offsetY) > (spaceBelow + anchorArea.height)){
 						// Shift the top of the tooltip upwards to fit, ignore the offset value
 						tipRect.top = viewportHeight + viewportTop - tipRect.height;
@@ -544,7 +552,7 @@ function Tooltip (view) {
 					tipRect.top = Math.max(tipRect.top, viewportTop);
 					tipRect.left = Math.max(anchorArea.left - tipRect.width + offsetX, viewportLeft);
 				break;
-				case "right": //$NON-NLS-0$
+				case "right":
 					if ((tipRect.height + offsetY) > (spaceBelow + anchorArea.height)){
 						// Shift the top of the tooltip upwards to fit, ignore the offset value
 						tipRect.top = viewportHeight + viewportTop - tipRect.height;
@@ -554,7 +562,7 @@ function Tooltip (view) {
 					tipRect.top = Math.max(tipRect.top, viewportTop);
 					tipRect.left = Math.max(anchorArea.left + anchorArea.width + offsetX, viewportLeft);
 				break;
-				case "above": //$NON-NLS-0$
+				case "above":
 					if ((tipRect.width + offsetX) > (spaceRight + anchorArea.width)){
 						// Shift the left side of the tooltip to the left, ignore the offset value
 						tipRect.left = viewportWidth + viewportLeft - tipRect.width;
@@ -564,7 +572,7 @@ function Tooltip (view) {
 					tipRect.left = Math.max(tipRect.left, viewportLeft);
 					tipRect.top = Math.max(anchorArea.top - tipRect.height + offsetY, viewportTop);
 				break;
-				case "below": //$NON-NLS-0$
+				case "below":
 					if ((tipRect.width + offsetX) > (spaceRight + anchorArea.width)){
 						// Shift the left side of the tooltip to the left, ignore the offset value
 						tipRect.left = viewportWidth + viewportLeft - tipRect.width;
@@ -872,8 +880,12 @@ function Tooltip (view) {
 				return newModel;
 			}
 			
+			var allAnnotations;
+			if (annotations.length > 0 && this._editor){
+				allAnnotations = this._editor.getAnnotationModel().getAnnotations();
+			}
 			if (annotations.length === 1) {
-				html = getAnnotationHTML(annotations[0], inEditor);
+				html = getAnnotationHTML(annotations[0], allAnnotations, inEditor);
 				if (html && html.firstChild) {
 					var className = html.firstChild.className;
 					if (className) { className += " "; } //$NON-NLS-0$
@@ -887,7 +899,7 @@ function Tooltip (view) {
 				em.appendChild(document.createTextNode(messages.multipleAnnotations));
 				tooltipHTML.appendChild(em);
 				for (var i = 0; i < annotations.length; i++) {
-					html = getAnnotationHTML(annotations[i], inEditor);
+					html = getAnnotationHTML(annotations[i], allAnnotations, inEditor);
 					if (html) {
 						tooltipHTML.appendChild(html);
 					}
@@ -895,7 +907,7 @@ function Tooltip (view) {
 				return tooltipHTML;
 			}
 			
-			function getAnnotationHTML(annotation, inEditor) {
+			function getAnnotationHTML(annotation, allAnnotations, inEditor) {
 				var title = annotation.title;
 				var result = util.createElement(document, "div"); //$NON-NLS-0$
 				result.className = "tooltipRow"; //$NON-NLS-0$
@@ -933,7 +945,7 @@ function Tooltip (view) {
 				
 				// Handle quick fixes
 				if (inEditor) {
-					self.hover.renderQuickFixes(annotation, result);
+					self.hover.renderQuickFixes(annotation, allAnnotations, result);
 				}
 				if (context){	
 					// Set the hover area to the annotation if it's not already set

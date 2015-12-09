@@ -524,6 +524,18 @@ define([
                     ]
     			}
     	);
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+    			quickFixComputer,
+    			{
+        			name: javascriptMessages["removeExtraSemiFixAllName"],
+        			scopeId: "orion.edit.quickfixAll", //$NON-NLS-1$
+        			id : "rm.extra.semi.fixAll",  //$NON-NLS-1$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-extra-semi)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                    ]
+    			}
+    	);
 
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,

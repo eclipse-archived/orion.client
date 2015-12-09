@@ -14,6 +14,7 @@ define([
 	'orion/commands',
 	'orion/keyBinding',
 	'orion/explorers/navigationUtils',
+	'orion/i18nUtil',
 	'orion/PageUtil',
 	'orion/uiUtils',
 	'orion/webui/littlelib',
@@ -23,7 +24,7 @@ define([
 	'orion/metrics',
 	'orion/Deferred',
 	'orion/EventTarget'
-], function(Commands, mKeyBinding, mNavUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, SubMenuButtonFragment, mMetrics, mDeferred, mEventTarget) {
+], function(Commands, mKeyBinding, mNavUtils, i18nUtil, PageUtil, UIUtil, lib, mDropdown, mTooltip, SubMenuButtonFragment, mMetrics, mDeferred, mEventTarget) {
 
 	/**
 	 * Constructs a new command registry with the given options.
@@ -1215,7 +1216,7 @@ define([
 							var onClick = function(event) {
 								self._invoke(invocation);
 							};
-							if (renderType === "menu") { //$NON-NLS-0$
+							if (renderType === "menu") {
 								var bindingString = null;
 								if (keyBinding && keyBinding.keyBinding) {
 									bindingString = UIUtil.getUserKeyString(keyBinding.keyBinding);
@@ -1225,14 +1226,20 @@ define([
 								// Register this command as being rendered (do we want to register all the commands ?)
 								invocation.onClick = onClick;  // cache the handler
 								self._registerRenderedCommand(command.id, scopeId, invocation);
-							} else if (renderType === "quickfix") { //$NON-NLS-0$
-								id = renderType + command.id + index; //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item
+							} else if (renderType === "quickfix") {
+								id = renderType + command.id + index; // using the index ensures unique ids within the DOM when a command repeats for each item
 								var commandDiv = document.createElement("div"); //$NON-NLS-0$
 								parent.appendChild(commandDiv);
-								element = Commands.createCommandItem(commandDiv, command, invocation, id, null, renderType === "button", onClick); //$NON-NLS-0$
+								element = Commands.createCommandItem(commandDiv, command, invocation, id, null, renderType === "button", onClick);
+							} else if (renderType === "quickfixAll") {
+								id = renderType + command.id + index + 'All'; // using the index ensures unique ids within the DOM when a command repeats for each item
+								commandDiv = document.createElement("div"); //$NON-NLS-0$
+								parent.appendChild(commandDiv);
+								command.name =  i18nUtil.formatMessage(command.name, userData.annotations.length);
+								element = Commands.createCommandItem(commandDiv, command, invocation, id, null, renderType === "button", onClick);
 							} else {
-								id = renderType + command.id + index;  //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item
-								element = Commands.createCommandItem(parent, command, invocation, id, null, renderType === "tool", onClick); //$NON-NLS-0$
+								id = renderType + command.id + index;  // // using the index ensures unique ids within the DOM when a command repeats for each item
+								element = Commands.createCommandItem(parent, command, invocation, id, null, renderType === "tool", onClick);
 							} 
 							mNavUtils.generateNavGrid(domNodeWrapperList, element);
 							invocation.domNode = element;
