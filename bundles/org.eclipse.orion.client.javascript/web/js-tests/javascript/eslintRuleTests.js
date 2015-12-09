@@ -3438,7 +3438,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "$NON-NLS-0$");
     		});
     		it("No literals single tag 1", function() {
@@ -3450,7 +3450,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "$NON-NLS-1$");
     		});
     		it("No literals single tag 2", function() {
@@ -3462,7 +3462,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "$NON-NLS-2$");
     		});
     		it("No literals with tags 0,1", function() {
@@ -3474,10 +3474,10 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 2);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "$NON-NLS-0$");
     			assert.equal(messages[1].ruleId, RULE_ID);
-    			assert.equal(messages[1].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[1].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[1].args.data.nlsComment, "//$NON-NLS-1$");
     		});
     		it("No literals with tags 2,2", function() {
@@ -3489,10 +3489,10 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 2);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "$NON-NLS-2$");
     			assert.equal(messages[1].ruleId, RULE_ID);
-    			assert.equal(messages[1].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[1].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[1].args.data.nlsComment, "//$NON-NLS-2$");
     		});
     		it("No literals with tags 0,1,2", function() {
@@ -3504,13 +3504,13 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 3);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "$NON-NLS-0$");
     			assert.equal(messages[1].ruleId, RULE_ID);
-    			assert.equal(messages[1].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[1].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[1].args.data.nlsComment, "//$NON-NLS-1$");
     			assert.equal(messages[2].ruleId, RULE_ID);
-    			assert.equal(messages[2].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[2].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[2].args.data.nlsComment, "//$NON-NLS-2$");
     		});
     		it("No literals with tags 2,2,2", function() {
@@ -3522,13 +3522,13 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 3);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "$NON-NLS-2$");
     			assert.equal(messages[1].ruleId, RULE_ID);
-    			assert.equal(messages[1].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[1].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[1].args.data.nlsComment, "//$NON-NLS-2$");
     			assert.equal(messages[2].ruleId, RULE_ID);
-    			assert.equal(messages[2].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[2].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[2].args.data.nlsComment, "//$NON-NLS-2$");
     		});
     		it("No literals single tag 0 extra characters", function() {
@@ -3540,7 +3540,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "//$NON-NLS-0$");
     		});
     		it("No literals and block comment with tags 1,2", function() {
@@ -3552,10 +3552,10 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 2);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "$NON-NLS-1$");
     			assert.equal(messages[1].ruleId, RULE_ID);
-    			assert.equal(messages[1].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[1].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[1].args.data.nlsComment, "//$NON-NLS-2$");    			
     		});
     		
@@ -3568,7 +3568,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "//$NON-NLS-2$");
     		});
     		it("Single literal with tags 2,1", function() {
@@ -3580,7 +3580,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "$NON-NLS-2$");
     		});
     		// TODO We currently allow 0 and 1 tags
@@ -3593,7 +3593,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "$NON-NLS-0$");
     		});
     		it.skip("Single literal with tags 0,0", function() {
@@ -3605,7 +3605,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "$NON-NLS-0$");
     		});
     		it("Single literal and block comment with tags 1,2", function() {
@@ -3617,7 +3617,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "//$NON-NLS-2$");
     		});
     		
@@ -3630,7 +3630,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "//$NON-NLS-9$");
     		});
     		it("Multiple literal with tags 9,3,2,1", function() {
@@ -3642,7 +3642,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Unecessary $NON-NLS$ tag.");
+    			assert.equal(messages[0].message, "Unnecessary $NON-NLS$ tag.");
     			assert.equal(messages[0].args.data.nlsComment, "$NON-NLS-9$");
     		});
     		
