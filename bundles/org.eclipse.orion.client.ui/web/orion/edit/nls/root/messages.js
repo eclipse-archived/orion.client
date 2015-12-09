@@ -30,6 +30,11 @@ define({//Default message bundle
 	"ReadingMetadataError": "Cannot get metadata of ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"Reading": "Reading ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"ReloadWith": "Reload With", //$NON-NLS-1$ //$NON-NLS-0$
+	"Convert Line Delimiters": "Convert Line Delimiters", //$NON-NLS-1$ //$NON-NLS-0$
+	"Windows (CR/LF)": "Windows (CR/LF)", //$NON-NLS-1$ //$NON-NLS-0$
+	"Unix (LF)": "Unix (LF)", //$NON-NLS-1$ //$NON-NLS-0$
+	"ConversionCompleteCRLF": "Line delimiters have been converted to CR/LF", //$NON-NLS-1$ //$NON-NLS-0$
+	"ConversionCompleteLF": "Line delimiters have been converted to LF", //$NON-NLS-1$ //$NON-NLS-0$
 	"readonly": "Read Only.", //$NON-NLS-1$ //$NON-NLS-0$
 	"saveFile": "Save this file", //$NON-NLS-1$ //$NON-NLS-0$
 	"toggleZoomRuler": "Toggle Zoom Ruler", //$NON-NLS-1$ //$NON-NLS-0$
