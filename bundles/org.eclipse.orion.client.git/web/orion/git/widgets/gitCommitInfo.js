@@ -86,6 +86,24 @@ define([
 				}
 			}
 			
+			// retrieves bug ID from header message
+			function getBugID(headerMessage) {
+				var headerMessageSplit = headerMessage.split(" ");
+				var bugNumber;
+ 
+				for (var i = 0; i<headerMessageSplit.length; i++) {
+					bugNumber = headerMessageSplit[i];
+
+					// valid bug id ranges from 1000 to 999999
+					if (Number(bugNumber) >= 1000 && Number(bugNumber) <= 999999) {
+						return bugNumber;
+					}
+				}
+
+				// return null if a valid bug ID is not found
+				return null;
+			}
+			
 			var table = document.createElement("table"); //$NON-NLS-0$
 			var tableBody = document.createElement("tbody"); //$NON-NLS-0$
 			var row = document.createElement("tr"); //$NON-NLS-0$
@@ -101,6 +119,7 @@ define([
 			row.appendChild(detailsDiv);
 	
 			var headerMessage = util.trimCommitMessage(commit.Message);
+			var bugID = getBugID(headerMessage);
 			var displayMessage = this.showMessage === undefined || this.showMessage;
 			if (displayMessage) {
 				var link;
@@ -141,6 +160,20 @@ define([
 				}
 				detailsDiv.appendChild(fullMessage);
 			}
+			
+			// add Bugzilla link to commit info if bugID exists and is valid
+			if (bugID) {
+				var bugzillaLink = document.createElement("a");
+				bugzillaLink.className = "navlinkonpage";
+				bugzillaLink.href = "https://bugs.eclipse.org/bugs/show_bug.cgi?id=" + bugID;
+				bugzillaLink.appendChild(document.createTextNode("View on Bugzilla"));
+				detailsDiv.appendChild(bugzillaLink);
+			}
+
+			// TODO: this is not working for me - Tony
+			// for both full and compressed message, add text link services - takes in text and parent DOM
+			// var bugTag = headerMessageSplit[0].concat(" ", headerMessageSplit[1]);
+			// this.tagsCommandHandler.registry.getService("orion.core.textlink").addLinks(bugTag, detailsDiv);
 			
 			var displayAuthor = this.showAuthor === undefined || this.showAuthor;
 			var displayCommitter = this.showCommitter === undefined || this.showCommitter;
