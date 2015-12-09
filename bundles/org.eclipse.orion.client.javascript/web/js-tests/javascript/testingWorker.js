@@ -32,13 +32,14 @@ define([
     	worker = new Worker(wUrl.href);
     	worker.onmessage = onmessage.bind(this);
     	worker.onerror = onerror.bind(this);
-    	worker.postMessage({request: 'start_worker'}); 
+    	if(!state.delayedStart) {
+	    	worker.postMessage({request: 'start_worker'}); 
+		}
     	messageID = 0;
     	callbacks = Object.create(null);
     	if(state) {
     		_state = state;
 		} else {
-	
 	    	_state = Object.create(null);
 		}
 	}
@@ -69,6 +70,17 @@ define([
 	 */
 	WrappedWorker.prototype.terminate = function() {
 		worker.terminate();
+	};
+	
+	/**
+	 * @description Starts the worker
+	 * @function
+	 * @param {Function} callback The callback to call when done starting worker and server
+	 * @since 11.0
+	 */
+	WrappedWorker.prototype.start = function(callback) {
+		_state.callback = callback;
+		worker.postMessage("start_worker");
 	};
 	
 	/**
@@ -160,8 +172,13 @@ define([
 				} else if(err && typeof(err.message) === 'string') {
 					_state.callback(new Error(err.message));
 				}
+			} else if(_d.__isError && _d.xhr) {
+				//these are reports from failing to load a definition file or plugin via a tern-project file
+				//they are a delayed XHR that will not fail a test - a normal XHR fail from the tests will hit the rejjection
+				//functions in the read callback above
+				return;
 			} else {
-				_state.callback(new Error('Got message I don\'t know'));
+				_state.callback(new Error('Got message I don\'t know: '+JSON.stringify(_d)));
 			}
 		}
 	}
@@ -202,7 +219,11 @@ define([
 	
 	return {
 		instance:  function(state) {
-			return new WrappedWorker('../../javascript/plugins/ternWorker.js', state);
+			var path = "../../javascript/plugins/ternWorker.js";
+			if(typeof(state.path) === 'string') {
+				path = state.path;
+			}
+			return new WrappedWorker(path, state);
 		}
 	};
 });

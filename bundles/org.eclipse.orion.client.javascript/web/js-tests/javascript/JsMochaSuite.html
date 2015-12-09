@@ -20,6 +20,7 @@
 	require(['mocha/sauce'], function(mocha) {
 		mocha.setup('bdd');
 		require([
+				"js-tests/javascript/testingWorker",
 				'js-tests/javascript/crossFileTests',
 				'js-tests/javascript/astManagerTests',
 				'js-tests/javascript/ternAssistTests',
@@ -37,8 +38,37 @@
 				'js-tests/javascript/scriptResolverTests',
 				'js-tests/javascript/sigparserTests',
 				'js-tests/javascript/ternProjectFileTests'
-				], function(){
-			mocha.run();
+				], function(worker, crossFileTests, astManagerTests, ternAssistTests, ternCommandTests, esprimaTolerantTests, dependencyTests, finderTests, occurrencesTests, outlinerTests, validatorTests, lruTests, quickfixTests, 
+							eslintCoreTests, eslintRuleTests, scriptResolverTests, sigparserTests, ternProjectTests){
+					var testworker;
+					before("reset timeout", function(done) {
+						this.timeout(20000);
+						testworker.start(done);
+					})
+					after("stop the worker", function() {
+						if(testworker) {
+							testworker.terminate();
+						}
+					});
+					testworker = worker.instance({delayedStart: true});
+					crossFileTests(testworker);
+					astManagerTests(testworker);
+					dependencyTests(testworker);
+					eslintCoreTests(testworker);
+					eslintRuleTests(testworker);
+					esprimaTolerantTests(testworker);
+					finderTests(testworker);
+					lruTests(testworker);
+					occurrencesTests(testworker);
+					outlinerTests(testworker);
+					quickfixTests(testworker);
+					scriptResolverTests(testworker);
+					sigparserTests(testworker);
+					ternAssistTests(testworker);
+					ternCommandTests(testworker);
+					ternProjectTests(testworker);
+					validatorTests(testworker);
+					mocha.run()
 		});
 	});
   </script>
