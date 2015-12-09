@@ -54,9 +54,9 @@ define([
 
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
     var provider = new PluginProvider({
-		name: javascriptMessages['pluginName'], //$NON-NLS-1$
+		name: javascriptMessages['pluginName'],
 		version: "1.0", //$NON-NLS-1$
-		description: javascriptMessages['pluginDescription'] //$NON-NLS-1$
+		description: javascriptMessages['pluginDescription']
 	}, serviceRegistry);
 
     	/**
@@ -286,8 +286,8 @@ define([
 			ternWorker.postMessage({request: 'installed_plugins'}, function(response) { //$NON-NLS-1$
 				var plugins = response.plugins;
 				var preferences = serviceRegistry.getService("orion.core.preference"); //$NON-NLS-1$
- 				return preferences ? preferences.get("/cm/configurations").then(function(prefs){ //$NON-NLS-2$ //$NON-NLS-1$
-					var props = prefs["tern"]; //$NON-NLS-1$
+ 				return preferences ? preferences.get("/cm/configurations").then(function(prefs){ // //$NON-NLS-1$
+					var props = prefs["tern"];
 					cleanPrefs(prefs);
 					if (!props) {
 						props = Object.create(null);
@@ -304,7 +304,7 @@ define([
 						plugs[key] = plugins[key];
 					}
 					props.plugins = plugs;
-					prefs["tern"] = JSON.stringify(props); //$NON-NLS-1$
+					prefs["tern"] = JSON.stringify(props);
 					return preferences.put("/cm/configurations", prefs, {clear: true}); //$NON-NLS-1$
 				}) : new Deferred().resolve();
 			});
@@ -341,10 +341,10 @@ define([
     	/**
     	 * Register the jsdoc-based outline
     	 */
-    	provider.registerService("orion.edit.outliner", new Outliner.JSOutliner(astManager),  //$NON-NLS-1$
+    	provider.registerService("orion.edit.outliner", new Outliner.JSOutliner(ternWorker),  //$NON-NLS-1$
     			{ contentType: ["application/javascript"],  //$NON-NLS-1$
-    		name: javascriptMessages["sourceOutline"],  //$NON-NLS-1$
-    		title: javascriptMessages['sourceOutlineTitle'],  //$NON-NLS-1$
+    		name: javascriptMessages["sourceOutline"],
+    		title: javascriptMessages['sourceOutlineTitle'],
     		id: "orion.javascript.outliner.source"  //$NON-NLS-1$
     			});
 
@@ -370,7 +370,7 @@ define([
     	/**
     	 * Register the ESLint validator
     	 */
-    	provider.registerService("orion.edit.validator", validator,  //$NON-NLS-1$  //$NON-NLS-2$
+    	provider.registerService("orion.edit.validator", validator,  //$NON-NLS-1$
     			{
     		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
     		pid: 'eslint.config'  //$NON-NLS-1$
@@ -385,7 +385,7 @@ define([
     	},
     	{
     		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
-    		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+    		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$
     	});
     	
     	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, fileClient);
@@ -404,8 +404,8 @@ define([
 	    	provider.registerServiceProvider("orion.navigate.command",  //$NON-NLS-1$
 	    			new AddToTernCommand.AddToTernCommand(ternProjectManager),
 	    			{
-			    		name: javascriptMessages["addToTernCommand"],  //$NON-NLS-1$
-			    		tooltip : javascriptMessages['addToTernCommandTooltip'],  //$NON-NLS-1$
+			    		name: javascriptMessages["addToTernCommand"],
+			    		tooltip : javascriptMessages['addToTernCommandTooltip'],
 			    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
 			    		id : "add.js.tern"  //$NON-NLS-1$
 	    			}
@@ -420,15 +420,15 @@ define([
     		onInputChanged: CUProvider.onInputChanged.bind(CUProvider)
     	},
     	{
-    		contentType: ["text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
-    		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+    		contentType: ["text/html"],  //$NON-NLS-1$
+    		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$
     	});
     	
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			new GenerateDocCommand.GenerateDocCommand(astManager, CUProvider),
     			{
-    		name: javascriptMessages["generateDocName"],  //$NON-NLS-1$
-    		tooltip : javascriptMessages['generateDocTooltip'],  //$NON-NLS-1$
+    		name: javascriptMessages["generateDocName"],
+    		tooltip : javascriptMessages['generateDocTooltip'],
     		id : "generate.js.doc.comment",  //$NON-NLS-1$
     		key : [ "j", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-1$
     		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
@@ -438,10 +438,10 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			new OpenDeclCommand.OpenDeclarationCommand(astManager, ternWorker, CUProvider, "replace"),  //$NON-NLS-1$
     			{
-    		name: javascriptMessages["openDeclName"],  //$NON-NLS-1$
-    		tooltip : javascriptMessages['openDeclTooltip'],  //$NON-NLS-1$
+    		name: javascriptMessages["openDeclName"],
+    		tooltip : javascriptMessages['openDeclTooltip'],
     		id : "open.js.decl",  //$NON-NLS-1$
-    		key : [ 114, false, false, false, false],  //$NON-NLS-1$
+    		key : [ 114, false, false, false, false],
     		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
     			}
     	);
@@ -464,8 +464,8 @@ define([
 					}
 				},
     			{
-    		name: javascriptMessages["projectRefsName"],  //$NON-NLS-1$
-    		tooltip : javascriptMessages['projectRefsTooltip'],  //$NON-NLS-1$
+    		name: javascriptMessages["projectRefsName"],
+    		tooltip : javascriptMessages['projectRefsTooltip'],
     		parentPath: "js.references", //$NON-NLS-1$
     		id : "project.js.refs",  //$NON-NLS-1$
     		key : [ "y", true, true, false, false],  //$NON-NLS-1$
@@ -480,30 +480,30 @@ define([
 					}
 				},
     			{
-    		name: javascriptMessages["workspaceRefsName"],  //$NON-NLS-1$
-    		tooltip : javascriptMessages['workspaceRefsTooltip'],  //$NON-NLS-1$
+    		name: javascriptMessages["workspaceRefsName"],
+    		tooltip : javascriptMessages['workspaceRefsTooltip'],
     		parentPath: "js.references", //$NON-NLS-1$
     		id : "workspace.js.refs",  //$NON-NLS-1$
-    		//key : [ "g", true, true, false, false],  //$NON-NLS-1$
+    		//key : [ "g", true, true, false, false],
     		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
     			}
     	);
 
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    			new OpenImplCommand.OpenImplementationCommand(astManager, ternWorker, CUProvider),  //$NON-NLS-1$
+    			new OpenImplCommand.OpenImplementationCommand(astManager, ternWorker, CUProvider),
     			{
-    		name: javascriptMessages["openImplName"],  //$NON-NLS-1$
-    		tooltip : javascriptMessages['openImplTooltip'],  //$NON-NLS-1$
+    		name: javascriptMessages["openImplName"],
+    		tooltip : javascriptMessages['openImplTooltip'],
     		id : "open.js.impl",  //$NON-NLS-1$
     		contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
-			key : [ 114, true, false, false, false]  //$NON-NLS-1$
+			key : [ 114, true, false, false, false]
     			}
     	);
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			new RenameCommand.RenameCommand(astManager, ternWorker, scriptresolver, CUProvider),
     			{
-    		name: javascriptMessages['renameElement'],  //$NON-NLS-1$
-    		tooltip : javascriptMessages['renameElementTooltip'],  //$NON-NLS-1$
+    		name: javascriptMessages['renameElement'],
+    		tooltip : javascriptMessages['renameElementTooltip'],
     		id : "rename.js.element",  //$NON-NLS-1$
     		key : [ 'R', false, true, !Util.isMac, Util.isMac],  //$NON-NLS-1$
     		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
@@ -515,7 +515,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["removeExtraSemiFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["removeExtraSemiFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "rm.extra.semi.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -528,7 +528,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["addFallthroughCommentFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["addFallthroughCommentFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "add.fallthrough.comment.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -548,7 +548,7 @@ define([
         			}
     		    },
     			{
-        			name: javascriptMessages["addBBreakFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["addBBreakFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "add.fallthrough.break.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -561,7 +561,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["addEmptyCommentFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["addEmptyCommentFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "add.empty.comment.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -574,7 +574,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["addESLintEnvFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["addESLintEnvFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "add.eslint-env.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -587,7 +587,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["noReservedKeysFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["noReservedKeysFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "update.reserved.property.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -600,7 +600,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["useIsNanFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["useIsNanFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "use.isnan.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -613,7 +613,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["addESLintGlobalFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["addESLintGlobalFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "add.eslint-global.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -634,7 +634,7 @@ define([
     		}
     			},
     			{
-    				name: javascriptMessages["removeUnusedParamsFixName"],  //$NON-NLS-1$
+    				name: javascriptMessages["removeUnusedParamsFixName"],
     				scopeId: "orion.edit.quickfix", //$NON-NLS-1$
     				id : "remove.unused.param.fix",  //$NON-NLS-1$
     				contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -647,7 +647,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["commentCallbackFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["commentCallbackFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "comment.callback.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -660,7 +660,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["eqeqeqFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["eqeqeqFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "eqeqeq.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -673,7 +673,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["unreachableFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["unreachableFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "remove.unreachable.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -686,7 +686,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["sparseArrayFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["sparseArrayFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "sparse.array.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -699,7 +699,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["semiFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["semiFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "semi.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -712,7 +712,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["unusedVarsUnusedFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["unusedVarsUnusedFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "unused.var.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -725,7 +725,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["unusedFuncDeclFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["unusedFuncDeclFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "unused.func.decl.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -738,7 +738,7 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["noCommaDangleFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["noCommaDangleFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "no.comma.dangle.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -751,7 +751,7 @@ define([
         provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
                 quickFixComputer,
                 {
-                    name: javascriptMessages["noThrowLiteralFixName"],  //$NON-NLS-1$
+                    name: javascriptMessages["noThrowLiteralFixName"],
                     scopeId: "orion.edit.quickfix", //$NON-NLS-1$
                     id : "no.throw.literal.fix",  //$NON-NLS-1$
                     contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -764,7 +764,7 @@ define([
         provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
                 quickFixComputer,
                 {
-                    name: javascriptMessages["missingNlsFixName"],  //$NON-NLS-1$
+                    name: javascriptMessages["missingNlsFixName"],
                     scopeId: "orion.edit.quickfix", //$NON-NLS-1$
                     id : "missing.nls.fix",  //$NON-NLS-1$
                     contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-1$ //$NON-NLS-2$
@@ -777,7 +777,7 @@ define([
         provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
                 quickFixComputer,
                 {
-                    name: javascriptMessages["unnecessaryNlsFixName"],  //$NON-NLS-1$
+                    name: javascriptMessages["unnecessaryNlsFixName"],
                     scopeId: "orion.edit.quickfix", //$NON-NLS-1$
                     id : "unnecessary.nls.fix",  //$NON-NLS-1$
                     contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-1$ //$NON-NLS-2$
@@ -790,7 +790,7 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
-        			name: javascriptMessages["noNewArrayFixName"],  //$NON-NLS-1$
+        			name: javascriptMessages["noNewArrayFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "no.new.array.literal.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -815,9 +815,9 @@ define([
     	 * ESLint settings
     	 */
     	var ignore = 0, warning = 1, error = 2, severities = [
-    	                                                      {label: javascriptMessages.ignore,  value: ignore},  //$NON-NLS-1$
-    	                                                      {label: javascriptMessages.warning, value: warning},  //$NON-NLS-1$
-    	                                                      {label: javascriptMessages.error,   value: error}  //$NON-NLS-1$
+    	                                                      {label: javascriptMessages.ignore,  value: ignore},
+    	                                                      {label: javascriptMessages.warning, value: warning},
+    	                                                      {label: javascriptMessages.error,   value: error}
     	                                                      ];
     	provider.registerService("orion.core.setting",  //$NON-NLS-1$
     			{},

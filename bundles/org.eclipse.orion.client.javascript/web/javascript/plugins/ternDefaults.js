@@ -33,10 +33,11 @@ define([
 	"javascript/ternPlugins/mongodb",
 	"javascript/ternPlugins/mysql",
 	"javascript/ternPlugins/open_impl",
+	"javascript/ternPlugins/outliner",
 	"javascript/ternPlugins/plugins",
 	"javascript/ternPlugins/postgres",
 	"javascript/ternPlugins/redis",
-	"javascript/ternPlugins/refs"
+	"javascript/ternPlugins/refs",
 ], function(Messages, ecma5, ecma6, browser, chai) {
 	
 	var defs = [ecma5, ecma6, browser, chai];
@@ -145,6 +146,12 @@ define([
 			"description": Messages["eslintPluginDescription"],
 			"version": "1.0",
 			"removeable": true
+		},
+		"outliner": {
+			"name": Messages["outlinerPluginName"],
+			"description": Messages["outlinerPluginDescription"],
+			"version": "1.0",
+			"removable": false
 		}
 	};
 	return {

@@ -44,7 +44,9 @@ define({
 	'eslintPluginDescription': 'Provides ESLint linting for Tern',
 	'jsdocPluginName': 'JSDoc types and completion support',
 	'jsdocPluginDescription': 'Provides auto-complete and type information for JSDoc',
-
+	'outlinerPluginName': 'JavaScript outlining',
+	'outlinerPluginDescription': 'Provides JavaScript outlining',
+	
 	// Other messages
 	'unknownError': 'An unknown error occurred.',
 	'failedDeleteRequest': 'Failed to delete file from Tern: ${0}',
@@ -85,5 +87,6 @@ define({
 	'eslintEnvDirective': ' - ESLint environment directive',
 	'eslintRuleEnable': ' - ESLint rule enablement directive',
 	'eslintRuleDisable': ' - ESLint rule disablement directive',
-	'failedToComputeProblems': 'Failed to compute eslint problems/markers'
+	'failedToComputeProblems': 'Failed to compute ESLint problems/markers',
+	'failedToComputeOutline': 'Failed to compute outline'
 });

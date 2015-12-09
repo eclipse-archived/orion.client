@@ -41,14 +41,14 @@ require([
      * @description Start up the Tern server, send a message after trying
      */
     function startServer(jsonOptions, callback) {
-    	if (ternserver){
-    		ternserver.reset();
-    		ternserver = null;
-    	}
+		if (ternserver){
+			ternserver.reset();
+			ternserver = null;
+		}
         var options = {
                 async: true,
                 debug: false,
-                projectDir: '/', //$NON-NLS-1$
+                projectDir: '/',
                 getFile: _getFile
             };
         var pluginsDir = defaultOptions.pluginsDir;
@@ -56,48 +56,48 @@ require([
         var defNames = [];
         if (jsonOptions) {
 			if (jsonOptions.plugins){
-        		options.plugins = jsonOptions.plugins;
-        	}
-        	if(jsonOptions.pluginDir) {
-        		pluginsDir = jsonOptions.pluginsDir;
-        	}
-        	if (Array.isArray(jsonOptions.libs)){
-        		defNames = jsonOptions.libs;
-        		defsDir = jsonOptions.defsDir;
-        	}
-        	if (Array.isArray(jsonOptions.defs)){
-        		defNames = jsonOptions.defs;
-        		defsDir = jsonOptions.defsDir;
-        	}
-        	if (typeof jsonOptions.ecmaVersion === 'number'){
-        		options.ecmaVersion = jsonOptions.ecmaVersion;
-        	}
-        	if (typeof jsonOptions.dependencyBudget === 'number'){
-        		options.dependencyBudget = jsonOptions.dependencyBudget;
-        	}
+				options.plugins = jsonOptions.plugins;
+			}
+			if(jsonOptions.pluginDir) {
+				pluginsDir = jsonOptions.pluginsDir;
+			}
+			if (Array.isArray(jsonOptions.libs)){
+				defNames = jsonOptions.libs;
+				defsDir = jsonOptions.defsDir;
+			}
+			if (Array.isArray(jsonOptions.defs)){
+				defNames = jsonOptions.defs;
+				defsDir = jsonOptions.defsDir;
+			}
+			if (typeof jsonOptions.ecmaVersion === 'number'){
+				options.ecmaVersion = jsonOptions.ecmaVersion;
+			}
+			if (typeof jsonOptions.dependencyBudget === 'number'){
+				options.dependencyBudget = jsonOptions.dependencyBudget;
+			}
         }
         function defaultStartUp(err) {
-        	options.plugins = defaultOptions.plugins;
-        	options.defs = defaultOptions.defs;
+			options.plugins = defaultOptions.plugins;
+			options.defs = defaultOptions.defs;
 			ternserver = new Tern.Server(options);
 	        callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
 	        if(err) {
-	        	post(Serialize.serializeError(err));
+				post(Serialize.serializeError(err));
 	        }
         }
         if(!options.plugins && (!defNames || defNames.length < 1)) {
-        	defaultStartUp();
+			defaultStartUp();
         } else {
-        	Deferred.all(loadPlugins(options.plugins, pluginsDir)).then(/* @callback */ function(plugins) {
-	        	Deferred.all(loadDefs(defNames, defsDir)).then(function(json) {
-	        			options.defs = json;
-	        			ternserver = new Tern.Server(options);
-				        callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
-	        		}, defaultStartUp);
+			Deferred.all(loadPlugins(options.plugins, pluginsDir)).then(/* @callback */ function(plugins) {
+				Deferred.all(loadDefs(defNames, defsDir)).then(function(json) {
+						options.defs = json;
+						ternserver = new Tern.Server(options);
+						callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
+					}, defaultStartUp);
 	        }, defaultStartUp);
         }
     }
-	post({request: "worker_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
+	post({request: "worker_ready"}); //$NON-NLS-1$
 
 	var handlers = {
 		'start_server': function(args, callback){
@@ -125,11 +125,11 @@ require([
 		           files: args.files},
 		           function(error, comps) {
 		               if(error) {
-		               		callback({request: 'completions', proposals:[], error: error.message, message: Messages['failedToComputeProposals']}); //$NON-NLS-1$
+							callback({request: 'completions', proposals:[], error: error.message, message: Messages['failedToComputeProposals']}); //$NON-NLS-1$
 		               } else if(comps && comps.completions) {
-	               			callback({request: 'completions', proposals: comps.completions}); //$NON-NLS-1$
+							callback({request: 'completions', proposals: comps.completions}); //$NON-NLS-1$
 		               } else {
-		               		callback({request: 'completions', proposals:[]}); //$NON-NLS-1$
+							callback({request: 'completions', proposals:[]}); //$NON-NLS-1$
 		               }
 		           });
 	
@@ -152,10 +152,10 @@ require([
 		                  callback({request: 'definition', error: error.message, message: Messages['failedToComputeDecl']}); //$NON-NLS-1$
 		               }
 		               if(decl && typeof(decl.start) === 'number' && typeof(decl.end) === "number") {
-		               		callback({request: 'definition', declaration:decl}); //$NON-NLS-1$
-	       			   } else {
-	       			   		callback({request: 'definition', declaration: null}); //$NON-NLS-1$
-	       			   }
+							callback({request: 'definition', declaration:decl}); //$NON-NLS-1$
+						} else {
+							callback({request: 'definition', declaration: null}); //$NON-NLS-1$
+						}
 		           });
 		   } else {
 		       callback({request: 'definition', message: Messages['failedToComputeDeclNoServer']}); //$NON-NLS-1$
@@ -166,7 +166,7 @@ require([
 	            ternserver.delFile(args.file);
 	            callback({request: 'delFile'}); //$NON-NLS-1$
 	        } else {
-	        	callback({request: 'delFile', message: i18nUtil.formatMessage(Messages['failedDeleteRequest'], args.file)}); //$NON-NLS-1$
+				callback({request: 'delFile', message: i18nUtil.formatMessage(Messages['failedDeleteRequest'], args.file)}); //$NON-NLS-1$
 	        }
 		},
 		'documentation': function(args, callback) {
@@ -183,7 +183,7 @@ require([
 		               if(error) {
 		                   callback({request: 'documentation', error: error.message, message: Messages['failedToComputeDoc']}); //$NON-NLS-1$
 		               } else if(doc && doc.doc) {
-	        			   callback({request: 'documentation', doc:doc}); //$NON-NLS-1$
+							callback({request: 'documentation', doc:doc}); //$NON-NLS-1$
 		               } else {
 							callback({request: 'documentation', doc: null}); //$NON-NLS-1$
 		               }
@@ -191,7 +191,7 @@ require([
 		   } else {
 		       callback({request: 'documentation', message: Messages['failedToComputeDocNoServer']}); //$NON-NLS-1$
 		   }
-	   	},
+		},
 		/**
 		 * @callback
 		 */
@@ -206,10 +206,10 @@ require([
 		                   callback({request: 'environments', error: error.message, message: Messages['failedGetEnvs']}); //$NON-NLS-1$
 		               }
 		               if(typeof(envs) === 'object') {
-		               		callback({request: 'environments', envs:envs}); //$NON-NLS-1$
-	       			   } else {
-	       			   		callback({request: 'environments', envs: null}); //$NON-NLS-1$
-	       			   }
+							callback({request: 'environments', envs:envs}); //$NON-NLS-1$
+						} else {
+							callback({request: 'environments', envs: null}); //$NON-NLS-1$
+						}
 		           });
 		   } else {
 		       callback({request: 'environments', message: Messages['failedGetEnvsNoServer']}); //$NON-NLS-1$
@@ -230,10 +230,10 @@ require([
 		                   callback({request: 'implementation', error: error.message, message: Messages['failedToComputeImpl']}); //$NON-NLS-1$
 		               }
 		               if(impl && impl.implementation && typeof(impl.implementation.start) === 'number' && typeof(impl.implementation.end) === "number") {
-		               		callback({request: 'implementation', implementation:impl.implementation}); //$NON-NLS-1$
-	       			   } else {
-	       			   		callback({request: 'implementation', implementation: null}); //$NON-NLS-1$
-	       			   }
+							callback({request: 'implementation', implementation:impl.implementation}); //$NON-NLS-1$
+						} else {
+							callback({request: 'implementation', implementation: null}); //$NON-NLS-1$
+						}
 		           });
 		   } else {
 		       callback({request: 'implementation', message: Messages['failedToComputeImplNoServer']}); //$NON-NLS-1$
@@ -253,10 +253,10 @@ require([
 		                   callback({request: 'install_plugins', error: error.message, message: Messages['failedInstallPlugins']}); //$NON-NLS-1$
 		               }
 		               if(typeof(res) === 'object') {
-		               		callback({request: 'install_plugins', status:res}); //$NON-NLS-1$
-	       			   } else {
-	       			   		callback({request: 'install_plugins', status: {state: -1}}); //$NON-NLS-1$
-	       			   }
+							callback({request: 'install_plugins', status:res}); //$NON-NLS-1$
+						} else {
+							callback({request: 'install_plugins', status: {state: -1}}); //$NON-NLS-1$
+						}
 		           });
 		   } else {
 		       callback({request: 'install_plugins', message: Messages['failedInstallPluginsNoServer']}); //$NON-NLS-1$
@@ -273,13 +273,13 @@ require([
 		           }}, 
 		           function(error, plugins) {
 		               if(error) {
-		                   callback({request: 'installed_plugins', error: error.message, message: Messages['failedGetInstalledPlugins']}); //$NON-NLS-1$
+							callback({request: 'installed_plugins', error: error.message, message: Messages['failedGetInstalledPlugins']}); //$NON-NLS-1$
 		               }
 		               if(typeof(plugins) === 'object') {
-		               		callback({request: 'installed_plugins', plugins:plugins}); //$NON-NLS-1$
-	       			   } else {
-	       			   		callback({request: 'installed_plugins', plugins: null}); //$NON-NLS-1$
-	       			   }
+							callback({request: 'installed_plugins', plugins:plugins}); //$NON-NLS-1$
+						} else {
+							callback({request: 'installed_plugins', plugins: null}); //$NON-NLS-1$
+						}
 		           });
 		   } else {
 		       callback({request: 'installed_plugins', message: Messages['failedGetInstalledPluginsNoServer']}); //$NON-NLS-1$
@@ -295,11 +295,11 @@ require([
 		           }},
 		           function(error, refs) {
 		               if(error) {
-		                   callback({request: 'occurrences', error: error.message, message: Messages['failedToComputeOccurrences']}); //$NON-NLS-1$
+							callback({request: 'occurrences', error: error.message, message: Messages['failedToComputeOccurrences']}); //$NON-NLS-1$
 		               } else if(refs && Array.isArray(refs)) {
-	        			   callback({request: 'occurrences', refs:refs}); //$NON-NLS-1$
+							callback({request: 'occurrences', refs:refs}); //$NON-NLS-1$
 		               } else {
-		               		callback({request: 'occurrences', refs:[]}); //$NON-NLS-1$
+							callback({request: 'occurrences', refs:[]}); //$NON-NLS-1$
 		               }
 		           });
 		   } else {
@@ -320,10 +320,10 @@ require([
 		                   callback({request: 'plugin_enablement', error: error.message, message: Messages['failedEnablementPlugins']}); //$NON-NLS-1$
 		               }
 		               if(typeof(res) === 'object') {
-		               		callback({request: 'plugin_enablement', status:res}); //$NON-NLS-1$
-	       			   } else {
-	       			   		callback({request: 'plugin_enablement', status: {state: -1}}); //$NON-NLS-1$
-	       			   }
+							callback({request: 'plugin_enablement', status:res}); //$NON-NLS-1$
+						} else {
+							callback({request: 'plugin_enablement', status: {state: -1}}); //$NON-NLS-1$
+						}
 		           });
 		   } else {
 		       callback({request: 'plugin_enablement', message: Messages['failedEnablementPluginsNoServer']}); //$NON-NLS-1$
@@ -343,10 +343,10 @@ require([
 		                   callback({request: 'remove_plugins', error: error.message, message: Messages['failedRemovePlugins']}); //$NON-NLS-1$
 		               }
 		               if(typeof(res) === 'object') {
-		               		callback({request: 'remove_plugins', status:res}); //$NON-NLS-1$
-	       			   } else {
-	       			   		callback({request: 'remove_plugins', status: {state: -1}}); //$NON-NLS-1$
-	       			   }
+							callback({request: 'remove_plugins', status:res}); //$NON-NLS-1$
+						} else {
+							callback({request: 'remove_plugins', status: {state: -1}}); //$NON-NLS-1$
+						}
 		           });
 		   } else {
 		       callback({request: 'remove_plugins', message: Messages['failedRemovePluginsNoServer']}); //$NON-NLS-1$
@@ -364,11 +364,11 @@ require([
 		           files: args.files},
 		           function(error, changes) {
 		               if(error) {
-		                   callback({request: 'rename', error: error.message, message: Messages['failedRename']}); //$NON-NLS-1$
+							callback({request: 'rename', error: error.message, message: Messages['failedRename']}); //$NON-NLS-1$
 		               } else if(changes && Array.isArray(changes.changes)) {
-	        			   callback({request: 'rename', changes:changes}); //$NON-NLS-1$
+							callback({request: 'rename', changes:changes}); //$NON-NLS-1$
 		               } else {
-		               		callback({request: 'rename', changes:[]}); //$NON-NLS-1$
+							callback({request: 'rename', changes:[]}); //$NON-NLS-1$
 		               }
 		           });
 		   } else {
@@ -386,7 +386,7 @@ require([
 		               if(error) {
 		                   callback({request: 'type', error: typeof(error) === 'string' ? error : error.message, message: Messages['failedType']}); //$NON-NLS-1$
 		               } else {
-		               	   callback({request: 'type', type: type}); //$NON-NLS-1$
+							callback({request: 'type', type: type}); //$NON-NLS-1$
 		               }
 		           });
 		},
@@ -403,7 +403,7 @@ require([
 		               if(error) {
 		                   callback({request: 'checkRef', error: typeof(error) === 'string' ? error : error.message, message: Messages['failedType']}); //$NON-NLS-1$
 		               } else {
-		               	   callback({request: 'checkRef', type: type}); //$NON-NLS-1$
+						callback({request: 'checkRef', type: type}); //$NON-NLS-1$
 		               }
 		           });
 		},
@@ -434,6 +434,25 @@ require([
 						callback({request: 'lint', problems: []}); //$NON-NLS-1$
 					}
 				});
+		},
+		'outline': function(args, callback) {
+			ternserver.request({
+					query: {
+						type: "outline", //$NON-NLS-1$
+						file: args.meta.location
+					},
+					files: args.files
+				},
+				function(error, outline) {
+					if(error) {
+						callback({request: 'outline', error: error.message, message: Messages['failedToComputeOutline']}); //$NON-NLS-1$
+					} else if(outline && Array.isArray(outline)) {
+						callback({request: 'outline', outline: outline}); //$NON-NLS-1$
+					} else {
+						callback({request: 'outline', outline: []}); //$NON-NLS-1$
+					}
+				}
+			);
 		}
 	};
 
@@ -449,7 +468,7 @@ require([
         if(typeof(evnt.data) === 'object') {
             var _d = evnt.data;
             if (!ternserver && _d.request !== 'start_server'){
-            	serverNotReady(_d);
+				serverNotReady(_d);
             }
             var _handler = handlers[_d.request];
 			if(typeof(_handler) === 'function') {
@@ -459,11 +478,11 @@ require([
 					} else if(typeof(_d.ternID) === 'number') {
 						response.ternID = _d.ternID;
 					}
-                	post(response);
-                	return;
+					post(response);
+					return;
 				});
 			} else if(_d.request === 'read') {
-            	var _read = reads[_d.ternID];
+				var _read = reads[_d.ternID];
 				if(typeof(_read) === 'function') {
 					var text = '';
 					if(_d.args && _d.args.contents) {
@@ -477,7 +496,7 @@ require([
 					_read(_d.args.error, {contents: _d.args.contents ? _d.args.contents : '', file:_d.args.file, logical: _d.args.logical});
 					delete reads[_d.ternID];
 				}
-            	return;
+				return;
             } else {
 	            //no one handled the request, report back an error
 	            unknownRequest(_d);
@@ -521,8 +540,8 @@ require([
      * @description Worker callback when an error occurs
      * @callback
      */
-   	onerror = function(evnt) {
-    	post(evnt);
+	onerror = function(evnt) {
+		post(evnt);
     };
 
     /**
@@ -530,9 +549,9 @@ require([
      * @callback
      */
     onconnect = function(evnt) {
-    	this.port = evnt.ports[0];
-    	this.port.onmessage = onmessage;
-    	this.port.start();
+		this.port = evnt.ports[0];
+		this.port.onmessage = onmessage;
+		this.port.start();
     };
 
     /**
@@ -542,14 +561,14 @@ require([
      * @param {String} errormsg The optional error message to send back to the client if the main message is null
      */
     function post(msg, errormsg) {
-    	if(!msg) {
-    		msg = new Error(errormsg ? errormsg : Messages['unknownError']);
-    	}
-    	if(this.port) {
-    		this.port.postMessage(msg);
-    	} else {
-    		postMessage(msg);
-    	}
+		if(!msg) {
+			msg = new Error(errormsg ? errormsg : Messages['unknownError']);
+		}
+		if(this.port) {
+			this.port.postMessage(msg);
+		} else {
+			postMessage(msg);
+		}
     }
 
     /**
@@ -559,7 +578,7 @@ require([
      * @param {Function} callback The callback once the file has been read or failed to read
      */
     function _getFile(file, callback) {
-    	if(ternserver) {
+		if(ternserver) {
            var request = {request: 'read', ternID: ternID++, args: {file:file}}; //$NON-NLS-1$
            if(file != null && typeof(file) === 'object') {
 				resolverReads[request.ternID] = callback;
@@ -568,7 +587,7 @@ require([
 	       }
            post(request, null);
 	    } else {
-	       post(i18nUtil.formatMessage(Messages['failedReadRequest'], typeof(file) === 'object' ? file.logical : file)); //$NON-NLS-1$
+	       post(i18nUtil.formatMessage(Messages['failedReadRequest'], typeof(file) === 'object' ? file.logical : file));
 	    }
     }
     
@@ -580,40 +599,40 @@ require([
      * @since 11.0
      */
     function loadPlugins(plugins, pluginsDir) {
-    	var promises = [];
-    	if(plugins) {
-	    	Object.keys(plugins).forEach(function(key) {
-	    		if(defaultOptions.plugins[key]) {
-	    			//default plugins are statically loaded
-	    			return;
-	    		}
-	    		var plugin = plugins[key];
-	    		var loc = plugin.location;
-	    		if(typeof(loc) !== 'string') {
-	    			if(typeof(pluginsDir) === 'string') {
-		    			loc = pluginsDir + key;
+		var promises = [];
+		if(plugins) {
+			Object.keys(plugins).forEach(function(key) {
+				if(defaultOptions.plugins[key]) {
+					//default plugins are statically loaded
+					return;
+				}
+				var plugin = plugins[key];
+				var loc = plugin.location;
+				if(typeof(loc) !== 'string') {
+					if(typeof(pluginsDir) === 'string') {
+						loc = pluginsDir + key;
 					} else {
 						//assume it is in /tern/plugin/
 						loc = 'tern/plugin/' + key; //$NON-NLS-1$
 					}
-	    		}
-	    		var deferred = new Deferred();
-	    		try {
+				}
+				var deferred = new Deferred();
+				try {
 					promises.push(deferred);    		
-	    			requirejs([loc], function(_) {
-		    			deferred.resolve(_);
-	    			},
-	    			function(err) {
-	    				deferred.reject(err);
-	    			});
+					requirejs([loc], function(_) {
+						deferred.resolve(_);
+					},
+					function(err) {
+						deferred.reject(err);
+					});
 				}
 				catch(err) {
 					post(err);
 					deferred.reject(err);
 				}
-	    	});
+			});
 		}
-    	return promises;
+		return promises;
     }
     
     /**
@@ -624,20 +643,20 @@ require([
      * @since 11.0
      */
     function loadDefs(defs, defsDir) {
-    	var _defs = [];
-    	if(Array.isArray(defs)) {
-	    	defs.forEach(function(_def) {
-	    		_defs.push(_loadDef(_def, defsDir, _defs));
-	    	});
-    	} else if(defs && typeof(defs) === 'object') {
-	     	Object.keys(defs).forEach(function(key) {
-	    		var def = defs[key];
-	    		if(typeof(def.location) === 'string') {
-		    		_defs.push(_loadDef(def.location, defsDir, _defs));
-	    		} else {
-	    			_defs.push(_loadDef(key, defsDir, _defs));
-	    		}
-	     	});
+		var _defs = [];
+		if(Array.isArray(defs)) {
+			defs.forEach(function(_def) {
+				_defs.push(_loadDef(_def, defsDir, _defs));
+			});
+		} else if(defs && typeof(defs) === 'object') {
+			Object.keys(defs).forEach(function(key) {
+				var def = defs[key];
+				if(typeof(def.location) === 'string') {
+					_defs.push(_loadDef(def.location, defsDir, _defs));
+				} else {
+					_defs.push(_loadDef(key, defsDir, _defs));
+				}
+			});
 		}
 		return _defs;
     }
@@ -651,7 +670,7 @@ require([
      * @since 11.0
      */
     function _loadDef(def, defsDir) {
-    	var loc = def;
+		var loc = def;
 		if(typeof(defsDir) === 'string') {
 			loc = defsDir + def;
 		} else {
