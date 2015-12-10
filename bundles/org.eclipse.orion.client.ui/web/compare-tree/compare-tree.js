@@ -31,7 +31,7 @@ define(['i18n!orion/compare/nls/messages', 'orion/bootstrap', 'orion/status', 'o
 
 		var startWidget = function(){
 			var compareParams = PageUtil.matchResourceParameters();
-			var compareTreeExplorer = new mCompareTreeExplorer.CompareTreeExplorer(serviceRegistry, "compare-tree-results", commandRegistry); //$NON-NLS-0$
+			var compareTreeExplorer = new mCompareTreeExplorer.CompareTreeExplorer(serviceRegistry, "compare-tree-results", commandRegistry, fileClient); //$NON-NLS-0$
 			compareTreeExplorer.startup(compareParams);
 			mGlobalCommands.setPageTarget({
 				task: messages.compareTreeTitle

@@ -20,27 +20,6 @@ define([
 	'orion/Deferred'
 ], function(messages, lib, i18nUtil, mSearchUtils, mSearchCrawler, Deferred){
 
-	function _convert(jsonData, rootURL, folderKeyword) {
-		var converted = [];
-		if (jsonData.response.numFound > 0) {
-			for (var i=0; i < jsonData.response.docs.length; i++) {
-				var hit = jsonData.response.docs[i];
-				if (!hit.Directory) {
-					var loc = hit.Location;
-					var path = hit.Path;
-					if (!path) {
-						path = loc.substring(rootURL ? rootURL.length : 0); //remove file service root from path
-					}
-					//If folderKeyword is defined then we filter on the keyword on path
-					var folderCheck = folderKeyword ? (path.indexOf(folderKeyword) >= 0) : true;
-					if(folderCheck) {
-						converted.push({location: loc, path: path, name: hit.Name});
-					}
-				}
-			}
-		}
-		return converted;
-	}
 	/**
 	 * Creates a new search client.
 	 * @param {Object} options The options object
@@ -52,10 +31,12 @@ define([
 		this._registry= options.serviceRegistry;
 		this._commandService = options.commandService;
 		this._fileClient = options.fileService;
+		//TODO clean up the search client API. Make any helper private
+		this._registry.registerService("orion.core.search.client", this); //$NON-NLS-1$
 	}
 	Searcher.prototype = /**@lends orion.searchClient.Searcher.prototype*/ {
 		getFileService: function(){
-			return this._fileClient;
+			return this.getFileClient();
 		},
 		setLocationByMetaData: function(meta, useParentLocation){
 			var locationName = "";
@@ -131,6 +112,137 @@ define([
 				return this._fileClient.fileServiceRootURL();
 			}
 		},
+		
+		/**
+		 * @name getFileClient
+		 * @description Get the file client;
+		 * @function
+		 * @returns {orion.FileClient} returns a file client
+		 */
+		getFileClient: function() {
+			return this._fileClient ? this._fileClient : this._registry.getService("orion.core.file.client"); //$NON-NLS-1$
+		},
+		/**
+		 * Runs a search and displays the results under the given DOM node.
+		 * @public
+		 * @param {Object} searchParams The search parameters.
+		 * @param {Function(JSONObject)} Callback function that receives the results of the query.
+		 */
+		search: function(searchParams, generateMatches, generateMeta) {
+			var result = new Deferred();
+			try {
+				this._searchDeferred = this.getFileClient().search(searchParams);
+				this._searchDeferred.then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
+					this._searchDeferred = null;
+					var searchResult = this.convert(jsonData, searchParams);
+					this._generateMatches(searchParams, searchResult, generateMatches).then(function() {
+						this._generateMeta(searchResult, generateMeta).then(function() {
+							result.resolve(searchResult);
+						});
+					}.bind(this));
+				}.bind(this), function(error) {
+					this._searchDeferred = null;
+					result.reject(error);
+				}.bind(this));
+			}
+			catch(err){
+				var error = err.message || err;
+				if(typeof(error) === "string" && error.toLowerCase().indexOf("search") > -1){ //$NON-NLS-1$ //$NON-NLS-0$
+					if(!this._crawler) {
+						this._crawler = this._createCrawler(searchParams);
+					}
+					if(searchParams.nameSearch) {
+						this._crawler.searchName(searchParams).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
+							this._searchDeferred = null;
+							result.resolve(this.convert(jsonData, searchParams));
+						}.bind(this));
+					} else {
+						this._crawler.search(function() {
+							result.progress(arguments[0], arguments[1]);
+						}).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
+							this._searchDeferred = null;
+							result.resolve(this.convert(jsonData, searchParams));
+						}.bind(this));
+					}
+				} else {
+					throw error;
+				}
+			}
+			return result;
+		},
+		_generateSingle: function(sResult, searchHelper) {
+			return this.getFileClient().read(sResult.location).then(function(jsonData) {
+				mSearchUtils.searchWithinFile(searchHelper.inFileQuery, sResult, jsonData, false, searchHelper.params.caseSensitive, true);
+				return sResult;
+			}.bind(this),
+			function(error) {
+				var statusService = this._registry.getService("orion.page.message"); //$NON-NLS-1$
+				if (statusService) {
+					statusService.setProgressResult({Message: error.message, Severity: "Error"}); //$NON-NLS-1$
+				}
+			}.bind(this));
+		},
+		_generateMatches: function(searchParams, searchResult, generateMatches) {
+			if(!generateMatches || searchResult.length === 0) {
+				return new Deferred().resolve(searchResult);
+			}
+			var searchHelper = mSearchUtils.generateSearchHelper(searchParams);
+			var promises = [];
+			searchResult.forEach(function(sResult) {
+				promises.push(this._generateSingle(sResult, searchHelper));
+			}.bind(this)); 
+			return Deferred.all(promises, function(error) { return {_error: error}; });
+		},
+		_generateSingleMeta: function(sResult) {
+			return this.getFileClient().read(sResult.location, true).then(function(jsonData) {
+				sResult.metadata = jsonData;
+				return sResult;
+			}.bind(this), function(error) {
+				var statusService = this._registry.getService("orion.page.message"); //$NON-NLS-1$
+				if (statusService) {
+					statusService.setProgressResult({Message: error.message, Severity: "Error"}); //$NON-NLS-1$
+				}
+			}.bind(this));
+		},
+		_generateMeta: function(searchResult, generateMeta) {
+			if(!generateMeta || searchResult.length === 0) {
+				return new Deferred().resolve(searchResult);
+			}
+			var promises = [];
+			searchResult.forEach(function(sResult) {
+				promises.push(this._generateSingleMeta(sResult));
+			}.bind(this)); 
+			return Deferred.all(promises, function(error) { return {_error: error}; });
+		},
+		convert: function(jsonData, searchParams) {
+			var converted = [];
+			var rootURL = this._fileClient.fileServiceRootURL(searchParams.resource);
+			if (jsonData.response.numFound > 0) {
+				for (var i=0; i < jsonData.response.docs.length; i++) {
+					var hit = jsonData.response.docs[i];
+					if (!hit.Directory) {
+						var loc = hit.Location;
+						var path = hit.Path;
+						if (!path) {
+							path = loc.substring(rootURL ? rootURL.length : 0); //remove file service root from path
+						}
+						converted.push({location: loc, path: path, name: hit.Name});
+					}
+				}
+			}
+			return converted;
+		},
+		cancel: function() {
+			if(this._searchDeferred) {
+				return this._searchDeferred.cancel();
+			}
+			return new Deferred().resolve();
+		},
+		_createCrawler: function(searchParams, options) {
+			this._crawler = new mSearchCrawler.SearchCrawler(this._registry, this.getFileClient(), searchParams, options);
+			return this._crawler;
+		},
+		
 		/**
 		 * Returns a query object for search. The return value has the propertyies of resource and parameters.
 		 * @param {String} keyword The text to search for, or null when searching purely on file name

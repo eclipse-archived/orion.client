@@ -26,12 +26,12 @@ define([
 	 * @returns {javascript.commands.RenameCommand} A new command
 	 * @since 10.0
 	 */
-	function RefsCommand(ternWorker, astManager, scriptResolver, cuProvider, searchClient) {
+	function RefsCommand(ternWorker, astManager, scriptResolver, cuProvider, serviceRegistry) {
 		this.ternworker = ternWorker;
 		this.scriptresolver = scriptResolver;
 		this.astmanager = astManager;
 		this.cuprovider = cuProvider;
-		this.searchclient = searchClient;
+		this.serviceRegistry = serviceRegistry;
 	}
 
 	/**
@@ -183,7 +183,7 @@ define([
 								expected.params = searchParams;
 								expected.deferred = deferred;
 								var srcCache = {};
-								that.searchclient.search(searchParams, true, true).then(function(searchResult) {
+								that.serviceRegistry.getService("orion.core.search.client").search(searchParams, true, true).then(function(searchResult) { //$NON-NLS-1$
 									expected.result = searchResult;
 									for (var h = 0, l1 = searchResult.length; h < l1; h++) {
 										var file = searchResult[h];

@@ -14,13 +14,13 @@
 
 /*eslint-env browser */
 define(['i18n!orion/search/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 
-	'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/compare/compareView', 
+	'orion/commands', 'orion/searchUtils', 'orion/compare/compareView', 
 	'orion/highlight', 'orion/webui/tooltip', 'orion/explorers/navigatorRenderer', 'orion/extensionCommands',
-	'orion/searchModel', 'orion/gSearchClient', 'orion/explorers/fileDetailRenderer'
+	'orion/searchModel', 'orion/explorers/fileDetailRenderer'
 ],
-function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClient, mCommands, 
+function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands, 
 	mSearchUtils, mCompareView, mHighlight, mTooltip, 
-	navigatorRenderer, extensionCommands, mSearchModel, mGSearchClient, mFileDetailRenderer
+	navigatorRenderer, extensionCommands, mSearchModel, mFileDetailRenderer
 ) {
     /* Internal wrapper functions*/
     function _empty(nodeToEmpty) {
@@ -384,14 +384,15 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
      * Creates a new search result explorer.
      * @name orion.InlineSearchResultExplorer
      */
-    function InlineSearchResultExplorer(registry, commandService, inlineSearchPane, preferences) {
+    function InlineSearchResultExplorer(registry, commandService, inlineSearchPane, preferences, fileClient, searcher) {
         this.registry = registry;
         this._commandService = commandService;
-        this.fileClient = new mFileClient.FileClient(this.registry);
+        this.fileClient = fileClient;
         this.defaulRows = 40;
 		this._contentTypeService = new mContentTypes.ContentTypeRegistry(this.registry);
 		this._inlineSearchPane = inlineSearchPane;
 		this._preferences = preferences;
+		this._searcher = searcher;
 		this._replaceRenderer =  new SearchResultRenderer({
             checkbox: true,
             highlightSelection: false,
@@ -1243,8 +1244,8 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 			return;
 		}
 		this.registry.getService("orion.page.message").setProgressMessage(messages["Searching..."]); //$NON-NLS-0$
-		var gSearchClient = new mGSearchClient.GSearchClient({serviceRegistry: this.registry, fileClient: this.fileClient});
-		gSearchClient.search(searchParams).then(function(searchResult) {
+		var searchClient = this._searcher;
+		searchClient.search(searchParams).then(function(searchResult) {
 			this.registry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-0$
 			if(searchResult) {
 				this._renderSearchResult(resultsNode, searchParams, searchResult);
@@ -1253,7 +1254,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClien
 			var message = i18nUtil.formatMessage(messages["${0}. Try your search again."], error && error.error ? error.error : "Error"); //$NON-NLS-0$
 			this.registry.getService("orion.page.message").setProgressResult({Message: message, Severity: "Error"}); //$NON-NLS-1$ //$NON-NLS-2$
 		}.bind(this), function(jsonData, incremental) {
-			this._renderSearchResult(resultsNode, searchParams, gSearchClient.convert(jsonData, searchParams), incremental);
+			this._renderSearchResult(resultsNode, searchParams, searchClient.convert(jsonData, searchParams), incremental);
 		}.bind(this));
 	};
 

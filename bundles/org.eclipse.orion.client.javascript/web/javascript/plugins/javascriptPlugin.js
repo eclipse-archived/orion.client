@@ -18,7 +18,6 @@ define([
 'orion/plugin',
 'orion/serviceregistry',
 'orion/Deferred',
-'orion/fileClient',
 'orion/metrics',
 'esprima/esprima',
 'estraverse/estraverse',
@@ -40,7 +39,6 @@ define([
 'javascript/commands/openImplementation',
 'javascript/commands/renameCommand',
 'javascript/commands/refsCommand',
-'orion/gSearchClient',
 'orion/editor/stylers/application_javascript/syntax',
 'orion/editor/stylers/application_json/syntax',
 'orion/editor/stylers/application_schema_json/syntax',
@@ -48,9 +46,9 @@ define([
 'i18n!javascript/nls/messages',
 'orion/i18nUtil',
 'orion/URL-shim'
-], function(PluginProvider, mServiceRegistry, Deferred, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist,
+], function(PluginProvider, mServiceRegistry, Deferred, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist,
 			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, TernProjectManager, Util, Logger, AddToTernCommand, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
-			RenameCommand, RefsCommand, mGSearchClient, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
+			RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
     var provider = new PluginProvider({
@@ -88,16 +86,12 @@ define([
     	 * @since 9.0
     	 */
     	Estraverse.VisitorKeys.RecoveredNode = []; //do not visit
-    	/**
-    	 * Create the file client early
-    	 */
-    	var fileClient = new FileClient.FileClient(serviceRegistry);
     	
     	/**
     	 * Create the script resolver
     	 * @since 8.0
     	 */
-    	var scriptresolver = new ScriptResolver.ScriptResolver(fileClient);
+    	var scriptresolver = new ScriptResolver.ScriptResolver(serviceRegistry);
     	/**
     	 * Create the AST manager
     	 */
@@ -209,6 +203,7 @@ define([
 		 */
 		function doRead(request) {
 			var response = {request: 'read', ternID: request.ternID, args: {}}; //$NON-NLS-1$
+			var fileClient = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
 			if(typeof(request.args.file) === 'object') {
 				var _l = request.args.file.logical;
 				response.args.logical = _l;
@@ -388,7 +383,7 @@ define([
     		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$
     	});
     	
-    	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, fileClient);
+    	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver);
     	/**
     	 * Register Tern project manager as input changed listener
     	 */
@@ -455,7 +450,7 @@ define([
 						astManager,
 						scriptresolver,
 						CUProvider,
-						new mGSearchClient.GSearchClient({serviceRegistry: serviceRegistry, fileClient: fileClient}));
+						serviceRegistry);
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			{
 					execute: function(editorContext, options) {

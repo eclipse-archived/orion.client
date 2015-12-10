@@ -13,7 +13,6 @@ define([
 	'orion/objects',
 	'orion/webui/littlelib',
 	'text!orion/search/InlineSearchPane.html',
-	'orion/searchClient',
 	'orion/inlineSearchResultExplorer',
 	'orion/searchUtils',
 	'orion/Deferred', 
@@ -22,7 +21,7 @@ define([
 	'i18n!orion/search/nls/messages',
 	'orion/webui/Slideout'
 ], function(
-	objects, lib, InlineSearchPaneTemplate, mSearchClient, InlineSearchResultExplorer, 
+	objects, lib, InlineSearchPaneTemplate, InlineSearchResultExplorer, 
 	mSearchUtils, Deferred, DirectoryPrompterDialog, ComboTextInput, messages, mSlideout
 ) {
 	var SlideoutViewMode = mSlideout.SlideoutViewMode;
@@ -35,6 +34,7 @@ define([
 		this._serviceRegistry = options.serviceRegistry;
 		this._commandRegistry = options.commandRegistry;
 		this._fileClient = options.fileClient;
+		this._searcher = options.searcher;
 		this._preferences = options.preferences;
 		this._initialize();
 	}
@@ -68,8 +68,7 @@ define([
 			this._replaceCompareTitleDiv = lib.node("replaceCompareTitleDiv"); //$NON-NLS-0$
 			this._replaceCompareDiv = lib.node("replaceCompareDiv"); //$NON-NLS-0$
 
-			this._searcher = new mSearchClient.Searcher({serviceRegistry: this._serviceRegistry, commandService: this._commandRegistry, fileService: this._fileClient});
-			this._searchResultExplorer = new InlineSearchResultExplorer(this._serviceRegistry, this._commandRegistry, this, this._preferences);
+			this._searchResultExplorer = new InlineSearchResultExplorer(this._serviceRegistry, this._commandRegistry, this, this._preferences, this._fileClient, this._searcher);
 			
 			this._initControls();
 			this._initHTMLLabels();

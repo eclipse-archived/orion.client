@@ -25,15 +25,23 @@ define([
 	 * @returns {javascript.commands.OpenDeclarationCommand} A new command
 	 * @since 8.0
 	 */
-	function TernProjectManager(ternWorker, scriptResolver, fileClient) {
+	function TernProjectManager(ternWorker, scriptResolver) {
 		this.ternWorker = ternWorker;
 		this.scriptResolver = scriptResolver;
-		this.fileClient = fileClient;
 		this.currentProjectLocation = null;
 		this.timeout = null;
 	}
 
 	Objects.mixin(TernProjectManager.prototype, {
+		/**
+		 * @name getFileClient
+		 * @description Get the file client;
+		 * @function
+		 * @returns {orion.FileClient} returns a file client
+		 */
+		getFileClient: function() {
+			return this.scriptResolver.getFileClient();
+		},
 		
 		/**
 		 * Returns the top level file folder representing the project that contains the given file.
@@ -65,7 +73,7 @@ define([
 			if(projectFile.Children){
 				 deferred = new Deferred().resolve(projectFile.Children);
 			} else if(projectFile.ChildrenLocation) {
-				deferred = this.fileClient.fetchChildren(projectFile.ChildrenLocation);
+				deferred = this.getFileClient().fetchChildren(projectFile.ChildrenLocation);
 			}
 			return deferred.then(function(children){
 				for(var i=0; i<children.length; i++){
@@ -87,7 +95,7 @@ define([
 		enureTernProjectFileLocation: function(projectFile){
 			return this.getTernProjectFileLocation(projectFile).then(function(ternFileLocation){
 				if (!ternFileLocation){
-					return this.fileClient.createFile(projectFile.Location, '.tern-project').then(function(){ //$NON-NLS-1$
+					return this.getFileClient().createFile(projectFile.Location, '.tern-project').then(function(){ //$NON-NLS-1$
 						return ternFileLocation;
 					});
 				} else {
@@ -102,7 +110,7 @@ define([
 		 * @returns {Deferred} Deferred to get a parsed JSON object or an empty object if there is an error
 		 */
 		parseTernJSON: function(fileLocation){
-			return this.fileClient.read(fileLocation).then(function(content) {
+			return this.getFileClient().read(fileLocation).then(function(content) {
 				try {
 					return content ? JSON.parse(content) : {};
 				} catch(e) {

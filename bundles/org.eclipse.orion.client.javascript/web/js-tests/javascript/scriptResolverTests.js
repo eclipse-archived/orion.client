@@ -15,8 +15,9 @@ define([
 	'chai/chai',
 	'javascript/scriptResolver',
 	'orion/Deferred',
+	'orion/serviceregistry',
 	'mocha/mocha', //must stay at the end, not a module
-], function(chai, Resolver, Deferred) {
+], function(chai, Resolver, Deferred, mServiceRegistry) {
 
 	var assert = chai.assert;
 
@@ -57,7 +58,9 @@ define([
 			}
 		};
 	
-		var resolver = new Resolver.ScriptResolver(testFileClient);
+		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
+		serviceRegistry.registerService("orion.core.file.client", testFileClient);
+		var resolver = new Resolver.ScriptResolver(serviceRegistry);
 	
 		describe('Script resolver tests', function() {
 			it('Test getWorkspaceFile 1', function() {

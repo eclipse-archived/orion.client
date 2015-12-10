@@ -12,7 +12,6 @@
 /*eslint-env browser, amd*/
 define(['orion/plugin',
 'orion/serviceregistry',
-'orion/fileClient',
 'orion/metrics',
 'javascript/scriptResolver',
 'webtools/htmlAstManager',
@@ -28,7 +27,7 @@ define(['orion/plugin',
 'webtools/cssResultManager',
 'orion/editor/stylers/text_css/syntax',
 'i18n!webtools/nls/messages'
-], function(PluginProvider, mServiceRegistry, FileClient, Metrics, ScriptResolver, HtmlAstManager, htmlHover, htmlContentAssist, htmlOutliner,
+], function(PluginProvider, mServiceRegistry, Metrics, ScriptResolver, HtmlAstManager, htmlHover, htmlContentAssist, htmlOutliner,
             mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, messages) {
 
 	/**
@@ -61,10 +60,6 @@ define(['orion/plugin',
     			}
     		]
     	});
-    	/**
-    	 * load file client early
-    	 */
-    	var fileClient = new FileClient.FileClient(serviceRegistry);
         var cssResultMgr = new cssResultManager();
 
     	/**
@@ -152,7 +147,7 @@ define(['orion/plugin',
       		}
         }
 
-        var resolver = new ScriptResolver.ScriptResolver(fileClient);
+        var resolver = new ScriptResolver.ScriptResolver(serviceRegistry);
 
         /**
     	 * Register the hover support

@@ -664,6 +664,7 @@ objects.mixin(EditorSetup.prototype, {
 			outlineService: this.outlineService,
 			parent: this.sidebarDomNode,
 			progressService: this.progressService,
+			searcher: this.searcher,
 			selection: this.selection,
 			serviceRegistry: this.serviceRegistry,
 			sidebarNavInputManager: this.sidebarNavInputManager,

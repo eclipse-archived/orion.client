@@ -16,7 +16,6 @@ define([
 	'i18n!orion/widgets/nls/messages', 
 	'i18n!orion/search/nls/messages',
 	'orion/extensionCommands', 
-	'orion/gSearchClient',
 	'orion/i18nUtil', 
 	'orion/searchUtils', 
 	'orion/explorers/navigatorRenderer', 
@@ -27,7 +26,7 @@ define([
 	'orion/webui/dialog', 
 	'orion/metrics', 
 	'orion/Deferred'
-], function(messages, searchMSG, extensionCommands, mGSearchClient, i18nUtil, mSearchUtils, navigatorRenderer, mContentTypes, require, lib, util, dialog, mMetrics, Deferred) {
+], function(messages, searchMSG, extensionCommands, i18nUtil, mSearchUtils, navigatorRenderer, mContentTypes, require, lib, util, dialog, mMetrics, Deferred) {
 	//default search renderer until we factor this out completely
 	function DefaultSearchRenderer(serviceRegistry, commandRegistry) {
 		this.serviceRegistry = serviceRegistry;
@@ -234,7 +233,6 @@ define([
 		if (!this._fileClient) {
 			throw new Error(messages['Missing required argument: fileService']);
 		}
-		this._gSearchClient = new mGSearchClient.GSearchClient({serviceRegistry: this.serviceRegistry, fileClient: this._fileClient});
 		this._searchRenderer = new DefaultSearchRenderer(this.serviceRegistry, this.commandRegistry);
 		this._initialize();
 	};
@@ -339,7 +337,7 @@ define([
 		setTimeout(function() {
 			if(self._forceUseCrawler || !self._fileClient.getService(self._searcher.getSearchLocation())["search"]){//$NON-NLS-0$
 				var searchLoc = self._searchOnRoot ? self._searcher.getSearchRootLocation() : self._searcher.getChildrenLocation();
-				self._crawler = self._gSearchClient._createCrawler({resource: searchLoc}, {searchOnName: true}); 
+				self._crawler = self._searcher._createCrawler({resource: searchLoc}, {searchOnName: true}); 
 				self._crawler.buildSkeleton(function() {
 					self.$crawlingProgress.style.display = "inline"; //$NON-NLS-0$
 					self.$progress.appendChild(document.createTextNode(messages['Building file skeleton...']));
@@ -450,14 +448,14 @@ define([
 			this.$results.appendChild(div);
 			var deferredSearch;
 			if(this._searchPending) {
-				deferredSearch = this._gSearchClient.cancel();
+				deferredSearch = this._searcher.cancel();
 				this.cancelled = true;
 			} else {
 				deferredSearch = new Deferred().resolve();
 			}
 			deferredSearch.then(function(/*result*/) {
 				this._searchPending = true;
-				this._gSearchClient.search(searchParams).then(function(searchResult) {
+				this._searcher.search(searchParams).then(function(searchResult) {
 					this._searchPending = false;
 					if (renderFunction === this.currentSearch || this.cancelled) {
 						this.cancelled = false;

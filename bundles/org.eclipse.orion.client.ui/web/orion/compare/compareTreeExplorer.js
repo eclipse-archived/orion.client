@@ -186,11 +186,11 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 	
 	CompareTreeExplorerRenderer.prototype.constructor = CompareTreeExplorerRenderer;
 	
-	function CompareTreeExplorer(registry, parentId, commandService){
+	function CompareTreeExplorer(registry, parentId, commandService, fileClient){
 		this.selection = new mSelection.Selection(registry, "orion.compare.selection"); //$NON-NLS-0$
 		this.registry = registry;
 		this._commandService = commandService;
-		this._fileClient = new mFileClient.FileClient(this.registry);
+		this._fileClient = fileClient;
 		this._progress = registry.getService("orion.page.progress"); //$NON-NLS-0$
 		this.parentId = parentId;
 		this.renderer = new CompareTreeExplorerRenderer({checkbox: false}, this);

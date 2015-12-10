@@ -217,6 +217,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 			var i = this._getServiceIndex(location);
 			return i === -1 ? _allFileSystemsService.Location : _fileSystemsRoots[i].Location;
 		};
+		serviceRegistry.registerService("orion.core.file.client", this); //$NON-NLS-1$
 	}
 	
 	FileClient.prototype = /**@lends orion.fileClient.FileClient.prototype */ {

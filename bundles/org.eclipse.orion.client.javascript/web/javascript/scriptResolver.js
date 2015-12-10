@@ -23,12 +23,12 @@ define([
      * @name ScriptResolver
      * @description Creates a new script resolver for finding workspace file based
      * on a given logical path and search options
-     * @param {orion.FileClient} fileclient The bootstrap object
+     * @param {orion.ServiceRegistry} serviceRegistry The service registry object
      * @constructor
      * @since 8.0
      */
-    function ScriptResolver(fileclient) {
-        this.fileclient = fileclient;
+    function ScriptResolver(serviceRegistry) {
+        this.serviceRegistry = serviceRegistry;
         this.cache = new LRU(10);
     }
 
@@ -56,7 +56,7 @@ define([
        		this.searchLocation = searchLocation;
        },
 	   getSearchLocation: function() {
-	   		return this.searchLocation || this.fileclient.fileServiceRootURL();
+	   		return this.searchLocation || "";
 	   },
        _getFile : function _getFile(name, options) {
            var files = this.cache.get(name);
@@ -75,9 +75,9 @@ define([
            var searchname = filename.slice(idx+1);
 
            // Search for it
-           return this.fileclient.search(
+           return this.serviceRegistry.getService("orion.core.file.client").search( //$NON-NLS-1$
                 {
-                	'resource': that.searchLocation || this.fileclient.fileServiceRootURL(),
+                	'resource': that.searchLocation || "",
                     'keyword': searchname,
                     'sort': 'Name asc', //$NON-NLS-1$
                     'nameSearch': true,
@@ -263,10 +263,10 @@ define([
            return name.replace(/^(?:org\.eclipse\.orion\.client)?(?:\/)?bundles\//, '');
        },
 
-       _newFileObj: function _newFileObj(name, location, path, icon, type, fileClient) {
+       _newFileObj: function _newFileObj(name, location, path, icon, type) {
            var meta = Object.create(null);
            meta.name = name;
-           meta.location = location ? location : fileClient.getServiceRootURL() + '/' + path;
+           meta.location = location;
            meta.path = path;
            meta.contentType = Object.create(null);
            if(icon) {
