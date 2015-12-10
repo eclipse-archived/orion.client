@@ -728,36 +728,49 @@ define([
 			"eqeqeq": function(editorContext, annotation, annotations) {
 			    var textEdits = [];
 				var rangeEdits = [];
+				var annotationIndex = 0;
 				for (var i=0; i<annotations.length; i++) {
 					var current = annotations[i];
 					if (current.id === "eqeqeq"){
 						var expected = /^.*\'(\!==|===)\'/.exec(current.title);
 						textEdits.push(expected[1]);
 						rangeEdits.push({start: current.start, end: current.end});
+						if (current.start === annotation.start && current.end === annotation.end){
+							annotationIndex = i;
+						}
         			}
 				}
             	return editorContext.setText({text: textEdits, selection: rangeEdits}).then(function(){
-            		// TODO Every modified line will still be marked as the current line
-            		// TODO This offset may no longer be accurate after multiple edits
-            		// TODO Maybe we ca use the callback and see what changed and adjust accordingly
-            		editorContext.setSelection(annotation.start, annotation.start, true);
+            		return editorContext.getSelections().then(function(selections){
+            			if (selections.length > 0){
+            				var selection = selections[selections.length > annotationIndex ? annotationIndex : 0]
+            				return editorContext.setSelection(selection.start, selection.end, true);	
+        				}
+
+            		});
             	});
 			},
 			"no-extra-semi": function(editorContext, annotation, annotations){
 				var textEdits = [];
 				var rangeEdits = [];
+				var annotationIndex = 0;
 				for (var i=0; i<annotations.length; i++) {
 					var current = annotations[i];
 					if (current.id === "no-extra-semi"){
 						textEdits.push('');
 						rangeEdits.push({start: current.start, end: current.end});
+						if (current.start === annotation.start && current.end === annotation.end){
+							annotationIndex = i;
+						}
         			}
 				}
             	return editorContext.setText({text: textEdits, selection: rangeEdits}).then(function(){
-            		// TODO Every modified line will still be marked as the current line
-            		// TODO This offset may no longer be accurate after multiple edits
-            		// TODO Maybe we ca use the callback and see what changed and adjust accordingly
-            		editorContext.setSelection(annotation.start, annotation.start, true);
+	            	return editorContext.getSelections().then(function(selections){
+	            		if (selections.length > 0){
+	        				var selection = selections[selections.length > annotationIndex ? annotationIndex : 0]
+	        				return editorContext.setSelection(selection.start, selection.end, true);	
+	    				}
+    				});
             	});
         	}
 

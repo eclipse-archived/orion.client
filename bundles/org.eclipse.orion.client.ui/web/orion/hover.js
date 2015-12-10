@@ -61,7 +61,7 @@ define ([
 			actionsDiv.className = "commandList"; //$NON-NLS-0$ 
 			parentDiv.appendChild(actionsDiv);
 			
-			// TODO IF there are multiple quickfixes, the quickfix all commands will always be at the bottom
+			// TODO If there are multiple quickfixes, the quickfix all commands will always be at the bottom
 			var nodeList = [];
 			var metadata = this.inputManager.getFileMetadata();
 			metadata.annotation = annotation;
@@ -74,6 +74,12 @@ define ([
 						annotations.push(current);
 					}
 				}
+				// TODO The annotation model iterator is not guaranteed to be in order (though it is currently), sort them to make sure
+				annotations = annotations.sort(function(a, b){
+					return a.start - b.start;
+				});
+				
+				
 				if (annotations.length > 1){
 					actionsDiv = document.createElement("div"); //$NON-NLS-0$
 					actionsDiv.className = "commandList"; //$NON-NLS-0$ 
