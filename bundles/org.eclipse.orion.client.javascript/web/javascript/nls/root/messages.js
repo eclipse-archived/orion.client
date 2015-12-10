@@ -96,6 +96,7 @@ define({//Default message bundle
 	'removeUnusedParamsFixName': 'Remove parameter',
 	'commentCallbackFixName': 'Add @callback to function',
 	'eqeqeqFixName': 'Update operator',
+	'eqeqeqFixAllName': 'Update all operators (${0} in file)',
 	'unreachableFixName': 'Remove unreachable code',
 	'sparseArrayFixName': 'Convert to normal array',
 	'semiFixName': 'Add missing \';\'',

@@ -725,6 +725,24 @@ define([
 		},
 		
 		multiFixes: {
+			"eqeqeq": function(editorContext, annotation, annotations) {
+			    var textEdits = [];
+				var rangeEdits = [];
+				for (var i=0; i<annotations.length; i++) {
+					var current = annotations[i];
+					if (current.id === "eqeqeq"){
+						var expected = /^.*\'(\!==|===)\'/.exec(current.title);
+						textEdits.push(expected[1]);
+						rangeEdits.push({start: current.start, end: current.end});
+        			}
+				}
+            	return editorContext.setText({text: textEdits, selection: rangeEdits}).then(function(){
+            		// TODO Every modified line will still be marked as the current line
+            		// TODO This offset may no longer be accurate after multiple edits
+            		// TODO Maybe we ca use the callback and see what changed and adjust accordingly
+            		editorContext.setSelection(annotation.start, annotation.start, true);
+            	});
+			},
 			"no-extra-semi": function(editorContext, annotation, annotations){
 				var textEdits = [];
 				var rangeEdits = [];

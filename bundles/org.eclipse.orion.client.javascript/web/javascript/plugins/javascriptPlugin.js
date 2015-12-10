@@ -681,6 +681,19 @@ define([
                     ]
     			}
     	);
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+    			quickFixComputer,
+    			{
+        			name: javascriptMessages["eqeqeqFixAllName"],
+        			scopeId: "orion.edit.quickfixAll", //$NON-NLS-1$
+        			id : "eqeqeq.fixAll",  //$NON-NLS-1$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:eqeqeq)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                    ]
+    			}
+    	);
+    	
 
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
