@@ -19,7 +19,6 @@ define([
 	"javascript/finder",
 	"javascript/signatures",
 	"javascript/util",
-	"json!javascript/rules.json",
 	"eslint/conf/environments",
 	"orion/i18nUtil",
 	"i18n!javascript/nls/workermessages",
@@ -27,7 +26,7 @@ define([
 	"eslint/lib/source-code",
 	"orion/metrics",
 	"javascript/astManager",
-], /* @callback */ function(infer, tern, objects, Finder, Signatures, Util, Rules, ESLintEnvs, i18nUtil, Messages, Eslint, SourceCode, Metrics, ASTManager) {
+], /* @callback */ function(infer, tern, objects, Finder, Signatures, Util, ESLintEnvs, i18nUtil, Messages, Eslint, SourceCode, Metrics, ASTManager) {
 
 	tern.registerPlugin("eslint", /* @callback */ function(server, options) {
 		return {
@@ -139,7 +138,7 @@ define([
 		 */
 		run: function(server, query, file) {
 			var start = Date.now();
-			var messages = Eslint.verify(new SourceCode(file.text, file.ast), query.config);
+			var messages = Eslint.verify(new SourceCode(file.text, file.ast), query.config, file.name);
 			var end = Date.now() - start;
 			Metrics.logTiming('language tools', 'validation', end, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			var strippedMessages = [];
@@ -147,9 +146,6 @@ define([
 				var strippedMessage =
 					{
 						args: element.args,
-						node: {
-							range: element.node.range
-						},
 						severity: element.severity,
 						column: element.column,
 						line: element.line,
@@ -158,6 +154,11 @@ define([
 						ruleId: element.ruleId,
 						source: element.source
 					};
+					if (element.node.range) {
+						strippedMessage.node = {
+							range: element.node.range
+						};
+					}
 					if (element.related) {
 						strippedMessage.related = {
 							range: element.related.range

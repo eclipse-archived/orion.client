@@ -15,9 +15,8 @@ define([
 	"json!javascript/rules.json",
 	"orion/i18nUtil",
 	"i18n!javascript/nls/problems",
-	'orion/Deferred',
-	"javascript/finder"
-], function(Objects, Rules, i18nUtil, messages, Deferred, Finder) {
+	'orion/Deferred'
+], function(Objects, Rules, i18nUtil, messages, Deferred) {
 	var config = {
 		// 0:off, 1:warning, 2:error
 		defaults: Rules.rules,
@@ -90,7 +89,8 @@ define([
 			}
 		}
 		else {
-			val = ruleConfig;
+			// TODO why we are overriding the severity computed by eslint based on the global config
+			val = prob.severity;
 		}
 		switch (val) {
 			case 1: return "warning"; //$NON-NLS-0$
@@ -146,6 +146,9 @@ define([
 			description: description,
 			severity: getSeverity(e)
 		};
+		if (e.nodeType) {
+			prob.nodeType = e.nodeType;
+		}
 		if (e.node && e.nodeType === "Program" && typeof(e.line) !== 'undefined') {
 			prob.line = e.line;
 			prob.start = e.column;
@@ -177,30 +180,23 @@ define([
 		 * @param {orion.edit.EditorContext} editorContext The editor context
 		 * @param {Object} context The in-editor context (selection, offset, etc)
 		 * @returns {orion.Promise} A promise to compute some problems
+		 * @callback
 		 */
-		computeProblems: function(editorContext /*, context*/) {
+		computeProblems: function(editorContext , context, config) {
 			var _self = this;
 			var deferred = new Deferred();
 			editorContext.getFileMetadata().then(function(meta) {
-				if(meta.contentType.id === 'text/html') {
-					editorContext.getText().then(function(text) {
+				editorContext.getText().then(function(text) {
+					var env = null;
+					var isHtml = meta.contentType.id === 'text/html';
+					if(isHtml) {
 						//auto-assume browser env - https://bugs.eclipse.org/bugs/show_bug.cgi?id=458676
-						var env = Object.create(null);
+						env = Object.create(null);
 						env.browser = true;
-						// need to extract all scripts from the html text
-						var cu = _self.cuprovider.getCompilationUnit(function(){
-							return Finder.findScriptBlocks(text);
-						}, meta);
-						var cuText = cu.getEditorContext().getText();
-						cuText.then(function(cuSource) {
-							_self._validate(meta, cuSource, env, true, deferred);
-						});
-					});
-				} else {
-					editorContext.getText().then(function(text) {
-						_self._validate(meta, text, null, false, deferred);
-					});
-				}
+					}
+					// need to extract all scripts from the html text
+					_self._validate(meta, text, env, isHtml, deferred, config);
+				});
 			});
 			return deferred;
 		},
@@ -215,18 +211,21 @@ define([
 		 * @returns {Array|Object} The array of problem objects
 		 * @since 6.0
 		 */
-		_validate: function(meta, text, env, htmlMode, deferred) {
+		_validate: function(meta, text, env, htmlMode, deferred, configuration) {
 			// When validating snippets in an html file ignore undefined rule because other scripts may add to the window object
 			var undefRuleValue;
+			if (configuration) {
+				config.rules = configuration.rules;
+			}
 			if (htmlMode) {
 				undefRuleValue = config.rules['no-undef'];
 				config.rules['no-undef'] = 0;
 			}
 			
-			config.env = env;
 			var files = [{type: 'full', name: meta.location, text: text}]; //$NON-NLS-1$
 			var request = {request: 'lint', args: {meta: {location: meta.location}, files: files, rules: config.rules}}; //$NON-NLS-1$
 			if(env) {
+				config.env = env;
 				request.env = config.env;
 			}
 			this.ternWorker.postMessage(

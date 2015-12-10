@@ -36,8 +36,7 @@ var PASSTHROUGHS = [
 		"getTokensBefore",
 		"getTokensBetween",
 		"markVariableAsUsed",
-		"isMarkedAsUsed",
-		"getSourceCode" // ORION
+		"isMarkedAsUsed"
 ];
 
 //------------------------------------------------------------------------------
@@ -152,13 +151,12 @@ function RuleContext(ruleId, eslint, severity, options, settings, ecmaFeatures, 
     };
 
     /**
-     * ORION remove this function definition - it is done as part of the passthrough copy line 117
      * Passthrough to eslint.getSourceCode().
      * @returns {SourceCode} The SourceCode object for the code.
      */
-    /*this.getSourceCode = function() {
+    this.getSourceCode = function() {
         return eslint.getSourceCode();
-    };*/
+    };
 
 }
 

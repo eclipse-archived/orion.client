@@ -62,6 +62,9 @@ define([
 						o.contentType = Object.create(null);
 						o.contentType.id = contentType;
 						o.location = 'quickfix_test_script.js';
+						if (contentType === 'text/html'){
+							o.location = 'quickfix_test_script.html';
+						}
 						return new Deferred().resolve(o);
 					}
 					
@@ -79,6 +82,7 @@ define([
 			 */
 			afterEach(function() {
 				CUProvider.onModelChanging({file: {location: 'quickfix_test_script.js'}});
+				CUProvider.onModelChanging({file: {location: 'quickfix_test_script.html'}});
 			});
 		
 			/**

@@ -1,20 +1,23 @@
 /* eslint-env amd */
 define([
-'esprima/esprima', 
 'estraverse/estraverse', 
 'escope/escope', 
 'eslint/conf/environments', 
 './rules', 
-'./util', 
-'./rule-context', 
+'./util',
+'./rule-context',
 './events',
-'./token-store',
 'require', 
 'module',
 './source-code',
+'./timing',
 './node-event-generator',
-'./comment-event-generator'
-], function(esprima, estraverse, escope, environments, rules, util, RuleContext, events, createTokenStore, require, module, SourceCode,NodeEventGenerator,CommentEventGenerator) {
+'./comment-event-generator',
+'./config-validator',
+'json!eslint/conf/replacements.json',
+'json!eslint/conf/blank-script.json',
+'json!eslint/conf/eslint.json'
+], function(estraverse, escope, environments, rules, util, RuleContext, events, require, module, SourceCode, timing, NodeEventGenerator,CommentEventGenerator, validator, Replacements, blankScriptAST,eslintConf) {
 
 /**
  * @fileoverview Main ESLint object.
@@ -22,20 +25,14 @@ define([
  */
 "use strict";
 var EventEmitter = events.EventEmitter;
-
+var assign = util.mixin;
+var replacements = Replacements;
+var DEFAULT_PARSER = eslintConf.parser;
 
 //------------------------------------------------------------------------------
 // Helpers
 //------------------------------------------------------------------------------
 
-/***
- * ORION
- */
-function assign(o1, o2) {
-    Object.keys(o2).forEach(function(name) {
-        o1[name] = o2[name];
-    });
-}
 /**
  * Parses a list of "name:boolean_value" or/and "name" options divided by comma or
  * whitespace.
@@ -261,13 +258,14 @@ function enableReporting(reportingConfig, start, rulesToEnable) {
  * Parses comments in file to extract file-specific config of rules, globals
  * and environments and merges them with global config; also code blocks
  * where reporting is disabled or enabled and merges them with reporting config.
+ * @param {string} filename The file being checked.
  * @param {ASTNode} ast The top node of the AST.
  * @param {Object} config The existing configuration data.
  * @param {Object[]} reportingConfig The existing reporting configuration data.
  * @param {Object[]} messages The messages queue.
  * @returns {object} Modified config object
  */
-function modifyConfigsFromComments(ast, config, reportingConfig, messages) { // ORION - remove filename variable
+function modifyConfigsFromComments(filename, ast, config, reportingConfig, messages) {
 
     var commentConfig = {
         exported: {},
@@ -288,16 +286,16 @@ function modifyConfigsFromComments(ast, config, reportingConfig, messages) { // 
             if (comment.type === "Block") {
                 switch (match[1]) {
                     case "exported":
-                        util.mixin(commentConfig.exported, parseBooleanConfig(value, comment)); //ORION - replace assign with util.mixin
+                        assign(commentConfig.exported, parseBooleanConfig(value, comment));
                         break;
 
                     case "globals":
                     case "global":
-                        util.mixin(commentConfig.astGlobals, parseBooleanConfig(value, comment));
+                        assign(commentConfig.astGlobals, parseBooleanConfig(value, comment));
                         break;
 
                     case "eslint-env":
-                        util.mixin(commentConfig.env, parseListConfig(value));
+                        assign(commentConfig.env, parseListConfig(value));
                         break;
 
                     case "eslint-disable":
@@ -312,10 +310,7 @@ function modifyConfigsFromComments(ast, config, reportingConfig, messages) { // 
                         var items = parseJsonConfig(value, comment.loc, messages);
                         Object.keys(items).forEach(function(name) {
                             var ruleValue = items[name];
-                            // ORION
-                            if (typeof ruleValue === "number" || (Array.isArray(ruleValue) && typeof ruleValue[0] === "number")) {
-                                commentRules[name] = ruleValue;
-                            }
+                            validator.validateRuleOptions(name, ruleValue, filename + " line " + comment.loc.start.line);
                             commentRules[name] = ruleValue;
                         });
                         break;
@@ -404,7 +399,7 @@ function prepareConfig(config) {
 
     preparedConfig = {
         rules: copiedRules,
-        parser: config.parser || esprima,
+        parser: config.parser || DEFAULT_PARSER,
         globals: util.mergeConfigs({}, config.globals),
         env: util.mergeConfigs({}, config.env || {}),
         settings: util.mergeConfigs({}, config.settings || {}),
@@ -443,6 +438,18 @@ function createStubRule(message) {
         return createRuleModule;
     } else {
         throw new Error("No message passed to stub rule");
+    }
+}
+
+/**
+ * Provide a rule replacement message
+ * @param  {string} ruleId Name of the rule
+ * @returns {string}       Message detailing rule replacement
+ */
+function getRuleReplacementMessage(ruleId) {
+    if (ruleId in replacements.rules) {
+        var newRules = replacements.rules[ruleId];
+        return "Rule \'" + ruleId + "\' was removed and replaced by: " + newRules.join(", ");
     }
 }
 
@@ -495,7 +502,23 @@ module.exports = (function() {
      * @private
      */
     function parse(text, config) {
-    	// ORION - call esprima parsing
+
+        var parser;
+
+        try {
+            parser = require(config.parser);
+        } catch (ex) {
+            messages.push({
+                fatal: true,
+                severity: 2,
+                message: ex.message,
+                line: 0,
+                column: 0
+            });
+
+            return null;
+        }
+
         /*
          * Check for parsing errors first. If there's a parsing error, nothing
          * else can happen. However, a parsing error does not throw an error
@@ -503,27 +526,28 @@ module.exports = (function() {
          * problem that ESLint identified just like any other.
          */
         try {
-            return esprima.parse(text, {
+            return parser.parse(text, {
                 loc: true,
                 range: true,
                 raw: true,
                 tokens: true,
                 comment: true,
-                tolerant: true, //ORION
                 attachComment: true,
                 ecmaFeatures: config.ecmaFeatures
             });
         } catch (ex) {
 
+            // If the message includes a leading line number, strip it:
+            var message = ex.message.replace(/^line \d+:/i, "").trim();
+
             messages.push({
                 fatal: true,
                 severity: 2,
 
-                // messages come as "Line X: Unexpected token foo", so strip off leading part
-                message: ex.message.substring(ex.message.indexOf(":") + 1).trim(),
+                message: "Parsing error: " + message,
 
                 line: ex.lineNumber,
-                column: ex.column
+                column: ex.column + 1
             });
 
             return null;
@@ -622,28 +646,7 @@ module.exports = (function() {
 
             // there's no input, just exit here
             if (text.trim().length === 0) {
-                sourceCode = new SourceCode(text, {
-					  "type": "Program",
-					  "body": [],
-					  "sourceType": "script",
-					  "range": [
-					    0,
-					    0
-					  ],
-					  "loc": {
-					    "start": {
-					      "line": 0,
-					      "column": 0
-					    },
-					    "end": {
-					      "line": 0,
-					      "column": 0
-					    }
-					  },
-					  "comments": [],
-					  "tokens": []
-					}
-				);
+                sourceCode = new SourceCode(text, blankScriptAST);
                 return messages;
             }
 
@@ -665,37 +668,47 @@ module.exports = (function() {
         if (ast) {
 
             // parse global comments and modify config
-            // ORION remove filename argument
-            config = modifyConfigsFromComments(ast, config, reportingConfig, messages);
+            config = modifyConfigsFromComments(filename, ast, config, reportingConfig, messages);
 
             // enable appropriate rules
-            // ORION - changes the way the rules are used
             Object.keys(config.rules).filter(function(key) {
-                return rules.get(key) &&  getRuleSeverity(config.rules[key]) > 0; // ORION
+                return getRuleSeverity(config.rules[key]) > 0;
             }).forEach(function(key) {
-                var ruleCreator = rules.get(key),
-                    severity = getRuleSeverity(config.rules[key]),
-                    options = getRuleOptions(config.rules[key]),
+                var ruleCreator,
+                    severity,
+                    options,
                     rule;
 
-                if (ruleCreator) {
-                    try {
-                        rule = ruleCreator(new RuleContext(
-                            key, api, severity, options,
-                            config.settings, config.ecmaFeatures, config.env //ORION
-                        ));
-
-                        // add all the node types as listeners
-                        Object.keys(rule).forEach(function(nodeType) {
-                            api.on(nodeType, rule[nodeType]);
-                        });
-                    } catch(ex) {
-                        ex.message = "Error while loading rule '" + key + "': " + ex.message;
-                        throw ex;
+                ruleCreator = rules.get(key);
+                if (!ruleCreator) {
+                    var replacementMsg = getRuleReplacementMessage(key);
+                    if (replacementMsg) {
+                        ruleCreator = createStubRule(replacementMsg);
+                    } else {
+                        ruleCreator = createStubRule("Definition for rule '" + key + "' was not found");
                     }
+                    rules.define(key, ruleCreator);
+                }
 
-                } else {
-                    throw new Error("Definition for rule '" + key + "' was not found.");
+                severity = getRuleSeverity(config.rules[key]);
+                options = getRuleOptions(config.rules[key]);
+
+                try {
+                    rule = ruleCreator(new RuleContext(
+                        key, api, severity, options,
+                        config.settings, config.ecmaFeatures, config.env // ORION
+                    ));
+
+                    // add all the node types as listeners
+                    Object.keys(rule).forEach(function(nodeType) {
+                        api.on(nodeType, timing.enabled
+                            ? timing.time(key, rule[nodeType])
+                            : rule[nodeType]
+                        );
+                    });
+                } catch (ex) {
+                    ex.message = "Error while loading rule '" + key + "': " + ex.message;
+                    throw ex;
                 }
             });
 
@@ -793,41 +806,43 @@ module.exports = (function() {
      * @param {Object} fix A fix command description.
      * @returns {void}
      */
-    api.report = function(ruleId, severity, node, location, message, opts, fix, related) {
-    	// ORION change the report method
+    api.report = function(ruleId, severity, node, location, message, opts, fix, related) { //ORION add related
 
         if (typeof location === "string") {
-        	fix = opts;
+            fix = opts;
             related = opts;
             opts = message;
             message = location;
             location = node.loc.start;
         }
 
+		// ORION
 		message = message.replace(/\$\{([^\}]+)\}/g, function(str, key) {
 			return opts[key];
 		});
-		
+
         if (isDisabledByReportingConfig(reportingConfig, ruleId, location)) {
             return;
         }
 
-		var problem = {
+        var problem = {
             ruleId: ruleId,
             severity: severity,
-            node: node,
             message: message,
-            args: opts, // ORION
+            node: node, //ORION
+            args: opts, //ORION
             line: location.line,
-            column: location.column,
+            column: location.column, //ORION
             nodeType: node.type,
             source: sourceCode.lines[location.line - 1] || "",
-            related: typeof related !== "undefined" ? related : null
+            related: typeof related !== "undefined" ? related : null // ORION
         };
+
         // ensure there's range and text properties, otherwise it's not a valid fix
         if (fix && Array.isArray(fix.range) && (typeof fix.text === "string")) {
             problem.fix = fix;
         }
+
         messages.push(problem);
     };
 
@@ -988,7 +1003,7 @@ module.exports = (function() {
      * @returns {Object} Object mapping rule IDs to their default configurations
      */
     api.defaults = function() {
-        return require("../conf/eslint.json"); //ORION this file is missing on purpose as we never use this function
+        return {};
     };
 
     /**
