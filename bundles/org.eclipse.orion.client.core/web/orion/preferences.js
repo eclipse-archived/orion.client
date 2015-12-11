@@ -276,7 +276,7 @@ define(['require', 'orion/Deferred', 'orion/EventTarget', 'orion/xhr'], function
 		window.addEventListener("storage", function(evt) {
 			var key = evt.key;
 			var prefix = "/orion/preferences/"; //$NON-NLS-1$
-			if (key.indexOf(prefix) !== 0) return;
+			if (!key || key.indexOf(prefix) !== 0) return;
 			var index = key.indexOf("/", prefix.length);
 			var namespace = key.substring(index);
 			var scope = {"default": PreferencesService.DEFAULT_SCOPE, local: PreferencesService.LOCAL_SCOPE, user: PreferencesService.USER_SCOPE}[key.substring(prefix.length, index)];
