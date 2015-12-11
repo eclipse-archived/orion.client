@@ -37,6 +37,17 @@ define([
 			"eslint"
 		];
 		
+		var requiredPlugins = [
+			"doc_comment", 
+			"jsdoc", 
+			"html", 
+			"open_impl",
+			"plugins",
+			"refs",
+			"eslint",
+			"outliner"
+		];
+		
 		var defaultDefs = [
 			"ecma5", 
 			"ecma6", 
@@ -45,6 +56,7 @@ define([
 		];
 		
 		function checkServerState(expectedPlugins, expectedDefs, callback) {
+			//TODO we need a server message to ask for all defs loaded
 			worker.postMessage({request: "installed_plugins"}, function(plugins) {
 				assert(plugins.plugins, "Tern returned no installed plugins");
 				expectedPlugins.forEach(function(plugin) {
@@ -80,7 +92,14 @@ define([
 				worker.postMessage({request: "start_server", args:{options: {plugins: {}}}}, /* @callback */ function(response) {
 					assert(response, "We should have gotten a response");
 					assert.equal("server_ready", response.state, "The server was not ready");
-					checkServerState([], defaultDefs, callback);
+					checkServerState(requiredPlugins, defaultDefs, callback);
+				});
+			});
+			it("undefined plugins contents", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, defaultDefs, callback);
 				});
 			});
 			it("empty defs contents", function(callback) {
@@ -94,7 +113,7 @@ define([
 				worker.postMessage({request: "start_server", args:{options: {defs: [], plugins: {}}}}, /* @callback */ function(response) {
 					assert(response, "We should have gotten a response");
 					assert.equal("server_ready", response.state, "The server was not ready");
-					checkServerState([], [], callback);
+					checkServerState(requiredPlugins, [], callback);
 				});
 			});
 			it("unknown def", function(callback) {
@@ -116,6 +135,223 @@ define([
 					assert(response, "We should have gotten a response");
 					assert.equal("server_ready", response.state, "The server was not ready");
 					checkServerState([], ["ecma5", "browser"], callback);
+				});
+			});
+			it("bad ecmaVersion 1", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {ecmaVersion: "3"}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("bad ecmaVersion 2", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {ecmaVersion: {}}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("bad ecmaVersion 3", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {ecmaVersion: true}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("ecmaVersion", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {ecmaVersion: 5}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("bad dependencyBudget 1", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {dependencyBudget: {}}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("bad dependencyBudget 2", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {dependencyBudget: "34"}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("bad dependencyBudget 3", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {dependencyBudget: false}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("dependencyBudget", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {dependencyBudget: 3100}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("bad plugins 1", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: []}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("bad plugins 2", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: true}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("bad plugins 3", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: 1}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("bad plugins 4", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: "hello"}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("bad plugins decl 1", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {foo: true}}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(requiredPlugins, [], callback);
+				});
+			});
+			it("bad plugins decl 2", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {foo: null}}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(requiredPlugins, [], callback);
+				});
+			});
+			it("bad plugins decl 3", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {foo: undefined}}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(requiredPlugins, [], callback);
+				});
+			});
+			it("bad plugins decl 4", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {foo: ""}}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(requiredPlugins, [], callback);
+				});
+			});
+			it("bad plugins decl 5", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {foo: []}}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(requiredPlugins, [], callback);
+				});
+			});
+			it("bad defs 1", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {defs: "hello"}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("bad defs 2", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {defs: true}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("bad defs 3", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {defs: []}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("bad defs 4", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {defs: 1}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
+				});
+			});
+			it("plugins and bad defs 1", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {}, defs: 1}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(requiredPlugins, [], callback);
+				});
+			});
+			it("plugins and bad defs 2", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {}, defs: "hello"}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(requiredPlugins, [], callback);
+				});
+			});
+			it("plugins and bad defs 3", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {}, defs: true}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(requiredPlugins, [], callback);
+				});
+			});
+			it("plugins and bad defs entry 1", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {}, defs: [1]}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(requiredPlugins, [], callback);
+				});
+			});
+			it("plugins and bad defs entry 2", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {}, defs: ["hello"]}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(requiredPlugins, [], callback);
+				});
+			});
+			it("plugins and bad defs entry 3", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {}, defs: [null]}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(requiredPlugins, [], callback);
+				});
+			});
+			it("plugins and bad defs entry 4", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {}, defs: [undefined]}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(requiredPlugins, [], callback);
+				});
+			});
+			it("plugins and bad defs entry 5", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {}, defs: [{}]}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(requiredPlugins, [], callback);
+				});
+			});
+			it("plugins and bad defs entry 6", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {}, defs: [[]]}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(requiredPlugins, [], callback);
+				});
+			});
+			it("bad plugins and bad defs 1", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: true, defs: true}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(defaultPlugins, [], callback);
 				});
 			});
 		});

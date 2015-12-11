@@ -27,11 +27,12 @@ require([
 	'tern/lib/tern',
 	'javascript/plugins/ternDefaults',
 	'orion/Deferred',
+	"orion/objects",
 	'orion/serialize',
 	'i18n!javascript/nls/workermessages',
 	'orion/i18nUtil'
 ],
-/* @callback */ function(Tern, defaultOptions, Deferred, Serialize, Messages, i18nUtil) {
+/* @callback */ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil) {
 
     var ternserver = null;
 	
@@ -49,51 +50,69 @@ require([
                 async: true,
                 debug: false,
                 projectDir: '/',
-                getFile: _getFile
+                getFile: _getFile,
+                plugins: defaultOptions.plugins.required,
+                defs: defaultOptions.defs,
+                ecmaVersion: 6
             };
         var pluginsDir = defaultOptions.pluginsDir;
         var defsDir = defaultOptions.defsDir;
-        var defNames = [];
+        var defNames, plugins;
         if (jsonOptions) {
-			if (jsonOptions.plugins){
-				options.plugins = jsonOptions.plugins;
-			}
-			if(jsonOptions.pluginDir) {
-				pluginsDir = jsonOptions.pluginsDir;
-			}
-			if (Array.isArray(jsonOptions.libs)){
-				defNames = jsonOptions.libs;
-				defsDir = jsonOptions.defsDir;
-			}
-			if (Array.isArray(jsonOptions.defs)){
-				defNames = jsonOptions.defs;
-				defsDir = jsonOptions.defsDir;
-			}
-			if (typeof jsonOptions.ecmaVersion === 'number'){
+        	plugins = jsonOptions.plugins;
+			pluginsDir = jsonOptions.pluginsDir;
+			defNames = jsonOptions.libs;
+			defsDir = jsonOptions.defsDir;
+			if (typeof jsonOptions.ecmaVersion === 'number') {
 				options.ecmaVersion = jsonOptions.ecmaVersion;
 			}
-			if (typeof jsonOptions.dependencyBudget === 'number'){
+			if (typeof jsonOptions.dependencyBudget === 'number') {
 				options.dependencyBudget = jsonOptions.dependencyBudget;
 			}
         }
+        if(typeof(plugins) !== 'object') {
+        	plugins = null;
+        }
+        if(!Array.isArray(defNames)) {
+        	defNames = null;
+        }
+        /**
+         * A subtlety - if the user provides no plugins entry at all, they get all the defaults,
+         * if they provide an empty object they still need the required ones only for a default startup
+         */
+        var requiredOnly = plugins && Object.keys(plugins).length < 1; 
         function defaultStartUp(err) {
-			options.plugins = defaultOptions.plugins;
+        	options.plugins = defaultOptions.plugins.required;
+        	if(!requiredOnly) {
+				Objects.mixin(options.plugins, defaultOptions.plugins.optional);
+			}
 			options.defs = defaultOptions.defs;
-			ternserver = new Tern.Server(options);
-	        callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
+			startAndMessage(options);
 	        if(err) {
 				post(Serialize.serializeError(err));
 	        }
         }
-        if(!options.plugins && (!defNames || defNames.length < 1)) {
+        function startAndMessage(options) {
+        	ternserver = new Tern.Server(options);
+			callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
+        
+        }
+        if((!plugins || requiredOnly) && !defNames) {
 			defaultStartUp();
         } else {
 			Deferred.all(loadPlugins(options.plugins, pluginsDir)).then(/* @callback */ function(plugins) {
-				Deferred.all(loadDefs(defNames, defsDir)).then(function(json) {
-						options.defs = json;
-						ternserver = new Tern.Server(options);
-						callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
-					}, defaultStartUp);
+				if(defNames) {
+					if(defNames.length < 1) {
+						startAndMessage(options);
+					} else {
+						Deferred.all(loadDefs(defNames, defsDir)).then(function(json) {
+								options.defs = json;
+								startAndMessage(options);
+							}, defaultStartUp);
+					}
+				} else {
+					startAndMessage(options);
+				}
 	        }, defaultStartUp);
         }
     }
@@ -602,11 +621,14 @@ require([
 		var promises = [];
 		if(plugins) {
 			Object.keys(plugins).forEach(function(key) {
-				if(defaultOptions.plugins[key]) {
+				if(defaultOptions.plugins.required[key] || defaultOptions.plugins.optional[key]) {
 					//default plugins are statically loaded
 					return;
 				}
 				var plugin = plugins[key];
+				if(!plugin || typeof(plugin) !== 'object') {
+					return;
+				}
 				var loc = plugin.location;
 				if(typeof(loc) !== 'string') {
 					if(typeof(pluginsDir) === 'string') {
@@ -646,15 +668,8 @@ require([
 		var _defs = [];
 		if(Array.isArray(defs)) {
 			defs.forEach(function(_def) {
-				_defs.push(_loadDef(_def, defsDir, _defs));
-			});
-		} else if(defs && typeof(defs) === 'object') {
-			Object.keys(defs).forEach(function(key) {
-				var def = defs[key];
-				if(typeof(def.location) === 'string') {
-					_defs.push(_loadDef(def.location, defsDir, _defs));
-				} else {
-					_defs.push(_loadDef(key, defsDir, _defs));
+				if(typeof(_def) === 'string') {
+					_defs.push(_loadDef(_def, defsDir, _defs));
 				}
 			});
 		}
