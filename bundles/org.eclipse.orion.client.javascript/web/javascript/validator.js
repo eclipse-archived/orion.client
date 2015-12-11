@@ -61,12 +61,10 @@ define([
 	 * @constructor
 	 * @public
 	 * @param {javascript.ASTManager} astManager The AST manager backing this validator
-	 * @param {javascript.CUProvider} cuProvider
 	 * @returns {ESLintValidator} Returns a new validator
 	 */
-	function ESLintValidator(ternWorker, cuProvider) {
+	function ESLintValidator(ternWorker) {
 		this.ternWorker = ternWorker;
-		this.cuprovider = cuProvider;
 		config.setDefaults();
 	}
 	
@@ -244,10 +242,10 @@ define([
 							});
 						}
 						deferred.resolve({ problems: eslintErrors.map(toProblem) });
+						if (htmlMode) {
+							config.rules['no-undef'] = undefRuleValue;
+						}
 				});
-			if (htmlMode) {
-				config.rules['no-undef'] = undefRuleValue;
-			}
 		},
 
 		/**

@@ -15,11 +15,10 @@ define([
 	'javascript/validator',
 	'chai/chai',
 	'orion/Deferred',
-	'javascript/cuProvider',
 	"orion/i18nUtil",
 	"i18n!javascript/nls/problems",
 	'mocha/mocha', //must stay at the end, not a module
-], function(Validator, chai, Deferred, CUProvider, i18nUtil, messages) {
+], function(Validator, chai, Deferred, i18nUtil, messages) {
 	var assert = chai.assert;
 
 	return function(worker) {
@@ -33,7 +32,7 @@ define([
 			function setup(options) {
 				var buffer = options.buffer;
 				var contentType = options.contentType ? options.contentType : 'application/javascript';
-				var validator = new Validator(worker, CUProvider);
+				var validator = new Validator(worker);
 				var state = Object.create(null);
 				assert(options.callback, "You must provide a callback for a worker-based test");
 				state.callback = options.callback;
@@ -61,14 +60,6 @@ define([
 					contentType: contentType
 				};
 			}
-			
-			/**
-			 * @callback from Mocha after each test run
-			 */
-			afterEach(function() {
-				CUProvider.onModelChanging({file: {location: 'validator_test_script.js'}});
-				CUProvider.onModelChanging({file: {location: 'validator_test_script.html'}});
-			});
 			
 			/**
 			 * @name validate
@@ -413,7 +404,7 @@ define([
 									{id: RULE_ID,
 									 severity: 'warning',
 									 description: "Statement should be enclosed in braces.",
-									 nodeType: "VariableDeclaration",
+									 nodeType: "VariableDeclaration"
 									}
 								]);
 							}, function (error) {
@@ -3702,111 +3693,111 @@ define([
 				//NO-ITERATOR ----------------------------------------------------
 				describe('no-iterator', function() {
 					var RULE_ID = "no-iterator";
-					it("should flag __iterator__ 1", function(callback) {
-						var topic = "a.__iterator__ = function() {};";
-						var config = { rules: {} };
-						config.rules[RULE_ID] = 1;
-						validate({buffer: topic, callback: callback, config: config}).then(
-							function (problems) {
-								assertProblems(problems, [{
-									id: RULE_ID,
-									severity: 'warning',
-									description: "Discouraged __iterator__ property use.",
-									nodeType: "Identifier"
-								}]);
-							},
-							function (error) {
-								worker.getTestState().callback(error);
-							});
-					});
-					it("should flag __iterator__ 2", function(callback) {
-						var topic = "a.b.c.__iterator__ = function() {};";
-						var config = { rules: {} };
-						config.rules[RULE_ID] = 1;
-						validate({buffer: topic, callback: callback, config: config}).then(
-							function (problems) {
-								assertProblems(problems, [{
-									id: RULE_ID,
-									severity: 'warning',
-									description: "Discouraged __iterator__ property use.",
-									nodeType: "Identifier"
-								}]);
-							},
-							function (error) {
-								worker.getTestState().callback(error);
-							});
-					});
-					it("should flag __iterator__ 3", function(callback) {
-						var topic = "a['__iterator__'] = function() {};";
-						var config = { rules: {} };
-						config.rules[RULE_ID] = 1;
-						validate({buffer: topic, callback: callback, config: config}).then(
-							function (problems) {
-								assertProblems(problems, [{
-									id: RULE_ID,
-									severity: 'warning',
-									description: "Discouraged __iterator__ property use.",
-									nodeType: "Literal"
-								}]);
-							},
-							function (error) {
-								worker.getTestState().callback(error);
-							});
-					});
-					it("should flag __iterator__ 4", function(callback) {
-						var topic = "a.b[\"__iterator__\"] = function() {};";
-						var config = { rules: {} };
-						config.rules[RULE_ID] = 1;
-						validate({buffer: topic, callback: callback, config: config}).then(
-							function (problems) {
-								assertProblems(problems, [{
-									id: RULE_ID,
-									severity: 'warning',
-									description: "Discouraged __iterator__ property use.",
-									nodeType: "Literal"
-								}]);
-							},
-							function (error) {
-								worker.getTestState().callback(error);
-							});
-					});
-			
-					it("should not flag __iterator__ 1", function(callback) {
-						var topic = "var __iterator__ = function() {};";
-						var config = { rules: {} };
-						config.rules[RULE_ID] = 1;
-						validate({buffer: topic, callback: callback, config: config}).then(
-							function (problems) {
-								assertProblems(problems, []);
-							},
-							function (error) {
-								worker.getTestState().callback(error);
-							});
-					});
-					it("should not flag __iterator__ 2", function(callback) {
-						var topic = "var a = __iterator__ = function() {};";
-						var config = { rules: {} };
-						config.rules[RULE_ID] = 1;
-						validate({buffer: topic, callback: callback, config: config}).then(
-							function (problems) {
-								assertProblems(problems, []);
-							},
-							function (error) {
-								worker.getTestState().callback(error);
-							});
-					});
-					it("should not flag __iterator__ 3", function(callback) {
-						var topic = "var a = __iterator__;";
-						var config = { rules: {} };
-						config.rules[RULE_ID] = 1;
-						validate({buffer: topic, callback: callback, config: config}).then(
-							function (problems) {
-								assertProblems(problems, []);
-							},
-							function (error) {
-								worker.getTestState().callback(error);
-							});
-					});
+//					it("should flag __iterator__ 1", function(callback) {
+//						var topic = "a.__iterator__ = function() {};";
+//						var config = { rules: {} };
+//						config.rules[RULE_ID] = 1;
+//						validate({buffer: topic, callback: callback, config: config}).then(
+//							function (problems) {
+//								assertProblems(problems, [{
+//									id: RULE_ID,
+//									severity: 'warning',
+//									description: "Discouraged __iterator__ property use.",
+//									nodeType: "Identifier"
+//								}]);
+//							},
+//							function (error) {
+//								worker.getTestState().callback(error);
+//							});
+//					});
+//					it("should flag __iterator__ 2", function(callback) {
+//						var topic = "a.b.c.__iterator__ = function() {};";
+//						var config = { rules: {} };
+//						config.rules[RULE_ID] = 1;
+//						validate({buffer: topic, callback: callback, config: config}).then(
+//							function (problems) {
+//								assertProblems(problems, [{
+//									id: RULE_ID,
+//									severity: 'warning',
+//									description: "Discouraged __iterator__ property use.",
+//									nodeType: "Identifier"
+//								}]);
+//							},
+//							function (error) {
+//								worker.getTestState().callback(error);
+//							});
+//					});
+//					it("should flag __iterator__ 3", function(callback) {
+//						var topic = "a['__iterator__'] = function() {};";
+//						var config = { rules: {} };
+//						config.rules[RULE_ID] = 1;
+//						validate({buffer: topic, callback: callback, config: config}).then(
+//							function (problems) {
+//								assertProblems(problems, [{
+//									id: RULE_ID,
+//									severity: 'warning',
+//									description: "Discouraged __iterator__ property use.",
+//									nodeType: "Literal"
+//								}]);
+//							},
+//							function (error) {
+//								worker.getTestState().callback(error);
+//							});
+//					});
+//					it("should flag __iterator__ 4", function(callback) {
+//						var topic = "a.b[\"__iterator__\"] = function() {};";
+//						var config = { rules: {} };
+//						config.rules[RULE_ID] = 1;
+//						validate({buffer: topic, callback: callback, config: config}).then(
+//							function (problems) {
+//								assertProblems(problems, [{
+//									id: RULE_ID,
+//									severity: 'warning',
+//									description: "Discouraged __iterator__ property use.",
+//									nodeType: "Literal"
+//								}]);
+//							},
+//							function (error) {
+//								worker.getTestState().callback(error);
+//							});
+//					});
+//			
+//					it("should not flag __iterator__ 1", function(callback) {
+//						var topic = "var __iterator__ = function() {};";
+//						var config = { rules: {} };
+//						config.rules[RULE_ID] = 1;
+//						validate({buffer: topic, callback: callback, config: config}).then(
+//							function (problems) {
+//								assertProblems(problems, []);
+//							},
+//							function (error) {
+//								worker.getTestState().callback(error);
+//							});
+//					});
+//					it("should not flag __iterator__ 2", function(callback) {
+//						var topic = "var a = __iterator__ = function() {};";
+//						var config = { rules: {} };
+//						config.rules[RULE_ID] = 1;
+//						validate({buffer: topic, callback: callback, config: config}).then(
+//							function (problems) {
+//								assertProblems(problems, []);
+//							},
+//							function (error) {
+//								worker.getTestState().callback(error);
+//							});
+//					});
+//					it("should not flag __iterator__ 3", function(callback) {
+//						var topic = "var a = __iterator__;";
+//						var config = { rules: {} };
+//						config.rules[RULE_ID] = 1;
+//						validate({buffer: topic, callback: callback, config: config}).then(
+//							function (problems) {
+//								assertProblems(problems, []);
+//							},
+//							function (error) {
+//								worker.getTestState().callback(error);
+//							});
+//					});
 					/**
 					 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461461
 					 */
