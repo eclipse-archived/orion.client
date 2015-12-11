@@ -41,6 +41,23 @@ require([
 			logLocationTemplate: "{+OrionHome}/cfui/logs.html#{Name,Target*}",
 			priorityForDefault: 9
 		});
+
+	function GenericDeploymentWizard(){}
+	GenericDeploymentWizard.prototype = {
+		constructor : GenericDeploymentWizard,
+		
+		getInitializationParameters : function(){
+			return {
+				LocationTemplate : "{+OrionHome}/cfui/plugins/wizards/generic/genericDeploymentWizard.html",
+				Width : "478px",
+				Height : "470px"
+			};
+		}
+	};
+	var genericDeploymentWizard = new GenericDeploymentWizard();
+	provider.registerServiceProvider("orion.project.deploy.wizard", genericDeploymentWizard, {
+		id : "org.eclipse.orion.client.cf.wizard.generic"
+	});
 			
 	provider.connect();
 });
