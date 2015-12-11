@@ -62,6 +62,7 @@
             { name: "index" },
             { name: "cfui/apps" },
             { name: "cfui/logs" },
+            { name: "cfui/plugins/cFDeployPlugin" },
             { name: "cfui/plugins/cFDeployService" },
             { name: "cfui/plugins/cFPlugin" },
             { name: "cfui/plugins/wizards/generic/genericDeploymentWizard" },
