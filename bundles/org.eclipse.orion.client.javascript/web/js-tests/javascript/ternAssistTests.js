@@ -148,12 +148,12 @@ define([
 						}
 						if (ep.length >= 4 && typeof(ep[3]) === 'object'){
 							assert(ap.groups, "Expected template proposal with selection group");
-							assert(ap.groups[0].positions, "Expected template proposal with selection group")
+							assert(ap.groups[0].positions, "Expected template proposal with selection group");
 							var offset = ap.groups[0].positions[0].offset;
-							var length = ap.groups[0].positions[0].length;
+							var len = ap.groups[0].positions[0].length;
 							assert.equal(offset, ep[3].offset, "Template proposal had different offset for selection group");
 							assert.equal(offset, ep[3].offset, "Template proposal had different offset for selection group");
-							assert.equal(length, ep[3].length, "Template proposal had different length for selection group");						
+							assert.equal(len, ep[3].length, "Template proposal had different length for selection group");						
 						}
 					}
 					worker.getTestState().callback();
@@ -1469,6 +1469,466 @@ define([
 						callback: done};
 					return testProposals(options, [
 						["xx", "xx : any"],
+					]);
+				});
+				it("test get local var", function(done) {
+					var options = {
+						buffer: "var xxx = 9;\nfunction fff(xxx) { xxx.toF}",
+						prefix: "toF",
+						offset: 40,
+						callback: done};
+					// should infer that we are referring to the locally defined xxx, not the global
+					return testProposals(options, [
+						["", "ecma5"],
+						["toFixed(digits)", "toFixed(digits) : string"]
+					]);
+				});
+			
+				it("test Math 1", function(done) {
+					var options = {
+						buffer: "Mat",
+						prefix: "Mat",
+						offset: 3,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["Math", "Math : Math"]
+					]);
+				});
+				it("test Math 2", function(done) {
+					var options = {
+						buffer: "this.Mat",
+						prefix: "Mat",
+						offset: 8,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["Math", "Math : Math"]
+					]);
+				});
+				it("test Math 3", function(done) {
+					var options = {
+						buffer: "var ff = { f: this.Mat }",
+						prefix: "Mat",
+						offset: 22,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["Math", "Math : Math"]
+					]);
+				});
+				it("test Math 4", function(done) {
+					var options = {
+						buffer: "this.Math.E",
+						prefix: "E",
+						offset: 11,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["exp()", "exp()"],
+						["E", "E : number"],
+						["", "ecma6"],
+						["expm1(x)", "expm1(x) : number"]
+					]);
+				});
+				it("test JSON 4", function(done) {
+					var options = {
+						buffer: "this.JSON.st",
+						prefix: "st",
+						offset: 12,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["stringify(value)", "stringify(value) : string"]
+					]);
+				});
+				it("test multi-dot inferencing 1", function(done) {
+					var options = {
+						buffer: "var a = '';a.charAt().charAt().charAt().ch",
+						prefix: "ch",
+						offset: 42,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["charAt(i)", "charAt(i) : string"],
+						["charCodeAt(i)", "charCodeAt(i) : number"]
+					]);
+				});
+				it("test multi-dot inferencing 2", function(done) {
+					var options = {
+						buffer: "var zz = {};zz.zz = zz;zz.zz.zz.z",
+						prefix: "z",
+						offset: 33,
+						callback: done};
+					return testProposals(options, [
+						["zz", "zz : zz"]
+					]);
+				});
+				it("test multi-dot inferencing 3", function(done) {
+					var options = {
+						buffer: "var x = { yy : { } };x.yy.zz = 1;x.yy.z",
+						prefix: "z",
+						offset: 39,
+						callback: done};
+					return testProposals(options, [
+						["zz", "zz : number"]
+					]);
+				});
+				it("test multi-dot inferencing 4", function(done) {
+					var options = {
+						buffer: "var x = { yy : { } };x.yy.zz = 1;x.yy.zz.toF",
+						prefix: "toF",
+						offset: 44,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["toFixed(digits)", "toFixed(digits) : string"]
+					]);
+				});
+				it("test constructor 1", function(done) {
+					var options = {
+						buffer: "function Fun() {this.xxx = 9;this.uuu = this.x;}",
+						prefix: "x",
+						offset: 46,
+						callback: done};
+					return testProposals(options, [
+						["xxx", "xxx"]
+					]);
+				});
+				it("test constructor 2", function(done) {
+					var options = {
+						buffer: "function Fun() {	this.xxx = 9;this.uuu = this.xxx; }var y = new Fun();y.x",
+						prefix: "x",
+						offset: 73,
+						callback: done};
+					return testProposals(options, [
+						["xxx", "xxx : number"]
+					]);
+				});
+				it("test constructor 3", function(done) {
+					var options = {
+						buffer: "function Fun() {	this.xxx = 9;	this.uuu = this.xxx; }var y = new Fun();y.xxx.toF",
+						prefix: "toF",
+						offset: 80,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["toFixed(digits)", "toFixed(digits) : string"]
+					]);
+				});
+				it("test constructor 3", function(done) {
+					var options = {
+						buffer: "function Fun() {	this.xxx = 9;	this.uuu = this.xxx; }var y = new Fun();y.uuu.toF",
+						prefix: "toF",
+						offset: 80,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["toFixed(digits)", "toFixed(digits) : string"]
+					]);
+				});
+			
+				it("test constructor 4", function(done) {
+					var options = {
+						buffer: "var Fun = function () {	this.xxx = 9;	this.uuu = this.xxx; }var y = new Fun();y.uuu.toF",
+						prefix: "toF",
+						offset: 87,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["toFixed(digits)", "toFixed(digits) : string"]
+					]);
+				});
+			
+				it("test constructor 5", function(done) {
+					var options = {
+						buffer: "var x = { Fun : function () { this.xxx = 9;	this.uuu = this.xxx; } }var y = new x.Fun();y.uuu.toF",
+						prefix: "toF",
+						offset: 97,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["toFixed(digits)", "toFixed(digits) : string"]
+					]);
+				});
+			
+				it("test constructor 6", function(done) {
+					var options = {
+						buffer: "var x = { Fun : function () { this.xxx = 9;	this.uuu = this.xxx; } }var y = new x.Fun().uuu.toF",
+						prefix: "toF",
+						offset: 95,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["toFixed(digits)", "toFixed(digits) : string"]
+					]);
+				});
+			
+				it("test constructor 7", function(done) {
+					var options = {
+						buffer: "var Fun = function () {	this.xxx = 9;	this.uuu = this.xxx; }var x = { Fun : Fun };var y = new x.Fun();y.uuu.toF",
+						prefix: "toF",
+						offset: 111,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["toFixed(digits)", "toFixed(digits) : string"]
+					]);
+				});
+			
+				it("test constructor 8", function(done) {
+					var options = {
+						buffer: "var FunOrig = function () {	this.xxx = 9;	this.uuu = this.xxx; }var x = { Fun : FunOrig };var y = new x.Fun();y.uuu.toF",
+						prefix: "toF",
+						offset: 119,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["toFixed(digits)", "toFixed(digits) : string"]
+					]);
+				});
+			
+				// functions should not be available outside the scope that declares them
+				it("test constructor 9", function(done) {
+					var options = {
+						buffer: "function outer() { function Inner() { }}Inn",
+						prefix: "Inn",
+						offset: 43,
+						callback: done};
+					return testProposals(options, [
+						["Inner()", "Inner()"]
+					]);
+				});
+			
+				// should be able to reference functions using qualified name
+				it("test constructor 10", function(done) {
+					var options = {
+						buffer: "var outer = { Inner : function() { }}outer.Inn",
+						prefix: "Inn",
+						offset: 46,
+						callback: done};
+					return testProposals(options, [
+						["Inner()", "Inner()"]
+					]);
+				});
+				it("test function args 4", function(done) {
+					var options = {
+						buffer: "function tt(aaa, bbb) { aaa.foo = 9;bbb.foo = ''aaa.f}",
+						prefix: "f",
+						offset: 53,
+						callback: done};
+					return testProposals(options, [
+						["foo", "foo"]
+					]);
+				});
+				// check that function args don't get assigned the same type
+				it("test function args 5", function(done) {
+					var options = {
+						buffer: "function tt(aaa, bbb) { aaa.foo = 9;bbb.foo = ''bbb.f}",
+						prefix: "f",
+						offset: 53,
+						callback: done};
+					return testProposals(options, [
+						["foo", "foo"]
+					]);
+				});
+				it("test nested object expressions 1", function(done) {
+					var options = {
+						buffer: "var ttt = { xxx : { yyy : { zzz : 1} } };ttt.xxx.y",
+						prefix: "y",
+						offset: 50,
+						callback: done};
+					return testProposals(options, [
+						["yyy", "yyy : yyy"]
+					]);
+				});
+				it("test nested object expressions 2", function(done) {
+					var options = {
+						buffer: "var ttt = { xxx : { yyy : { zzz : 1} } };ttt.xxx.yyy.z",
+						prefix: "z",
+						offset: 54,
+						callback: done};
+					return testProposals(options, [
+						["zzz", "zzz : number"]
+					]);
+				});
+				it("test nested object expressions 3", function(done) {
+					var options = {
+						buffer: "var ttt = { xxx : { yyy : { zzz : 1} } };ttt.xxx.yyy.zzz.toF",
+						prefix: "toF",
+						offset: 60,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["toFixed(digits)", "toFixed(digits) : string"]
+					]);
+				});
+				it("test function expression 1", function(done) {
+					var options = {
+						buffer: "var ttt = function(a, b, c) { };tt",
+						prefix: "tt",
+						offset: 34,
+						callback: done};
+					return testProposals(options, [
+						["ttt(a, b, c)", "ttt(a, b, c)"]
+					]);
+				});
+				it("test function expression 2", function(done) {
+					var options = {
+						buffer: "ttt = function(a, b, c) { };tt",
+						prefix: "tt",
+						offset: 30,
+						callback: done};
+					return testProposals(options, [
+						["ttt(a, b, c)", "ttt(a, b, c)"]
+					]);
+				});
+				it("test function expression 3", function(done) {
+					var options = {
+						buffer: "ttt = { rrr : function(a, b, c) { } };ttt.rr",
+						prefix: "rr",
+						offset: 44,
+						callback: done};
+					return testProposals(options, [
+						["rrr(a, b, c)", "rrr(a, b, c)"]
+					]);
+				});
+				it("test function expression 4", function(done) {
+					var options = {
+						buffer: "var ttt = function(a, b) { };var hhh = ttt;hhh",
+						prefix: "hhh",
+						offset: 46,
+						callback: done};
+					return testProposals(options, [
+						["hhh(a, b)", "hhh(a, b)"]
+					]);
+				});
+				it("test function expression 4a", function(done) {
+					var options = {
+						buffer: "function ttt(a, b) { };var hhh = ttt;hhh",
+						prefix: "hhh",
+						offset: 40,
+						callback: done};
+					return testProposals(options, [
+						["hhh(a, b)", "hhh(a, b)"]
+					]);
+				});
+				it("test function expression 5", function(done) {
+					var options = {
+						buffer: "var uuu = { flart : function (a,b) { } };hhh = uuu.flart;hhh",
+						prefix: "hhh",
+						offset: 60,
+						callback: done};
+					return testProposals(options, [
+						["hhh(a, b)", "hhh(a, b)"]
+					]);
+				});
+				it("test function expression 6", function(done) {
+					var options = {
+						buffer: "var uuu = { flart : function (a,b) { } };hhh = uuu.flart;hhh.app",
+						prefix: "app",
+						offset: 64,
+						callback: done};
+					return testProposals(options, [
+						["", "ecma5"],
+						["apply(this, args)", "apply(this, args)"]
+					]);
+				});
+				it("test globals 1", function(done) {
+					var options = {
+						buffer: "/*global faaa */fa",
+						prefix: "fa",
+						offset: 18,
+						callback: done};
+					return testProposals(options, [
+					]);
+				});
+				it("test globals 2", function(done) {
+					var options = {
+						buffer: "/*global faaa faaa2 */fa",
+						prefix: "fa",
+						offset: 24,
+						callback: done};
+					return testProposals(options, [
+					]);
+				});
+				it("test globals 3", function(done) {
+					var options = {
+						buffer: "/*global faaa fass2  */var t = 1;t.fa",
+						prefix: "fa",
+						offset: 37,
+						callback: done};
+					return testProposals(options, [
+					]);
+				});
+				it("test globals 4", function(done) {
+					var options = {
+						buffer: "/*global faaa:true faaa2:false  */fa",
+						prefix: "fa",
+						offset: 36,
+						callback: done};
+					return testProposals(options, [
+					]);
+				});
+				it("test globals 5", function(done) {
+					var options = {
+						buffer: "/*global faaa:true, faaa2:false */fa",
+						prefix: "fa",
+						offset: 36,
+						callback: done};
+					return testProposals(options, [
+					]);
+				});
+				it("test complex name 1", function(done) {
+					var options = {
+						buffer: "function Ttt() { }var ttt = new Ttt();tt",
+						prefix: "tt",
+						offset: 40,
+						callback: done};
+					return testProposals(options, [
+						["Ttt()", "Ttt()"],
+						["ttt", "ttt : any"]
+					]);
+				});
+				it("test complex name 2", function(done) {
+					var options = {
+						buffer: "var Ttt = function() { };var ttt = new Ttt();tt",
+						prefix: "tt",
+						offset: 47,
+						callback: done};
+					return testProposals(options, [
+						["Ttt()", "Ttt()"],
+						["ttt", "ttt : any"]
+					]);
+				});
+				it("test complex name 3", function(done) {
+					var options = {
+						buffer: "var ttt = { };tt",
+						prefix: "tt",
+						offset: 16,
+						callback: done};
+					return testProposals(options, [
+						["ttt", "ttt : ttt"]
+					]);
+				});
+				it("test complex name 4", function(done) {
+					var options = {
+						buffer: "var ttt = { aa: 1, bb: 2 };tt",
+						prefix: "tt",
+						offset: 29,
+						callback: done};
+					return testProposals(options, [
+						["ttt", "ttt : ttt"]
+					]);
+				});
+				it("test complex name 5", function(done) {
+					var options = {
+						buffer: "var ttt = { aa: 1, bb: 2 };ttt.cc = 9;tt",
+						prefix: "tt",
+						offset: 40,
+						callback: done};
+					return testProposals(options, [
+						["ttt", "ttt : ttt"]
 					]);
 				});
 			});
