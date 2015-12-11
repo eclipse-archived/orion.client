@@ -506,6 +506,19 @@ define([
 				}
 
 			}
+			if(Array.isArray(attrs.aria)) {
+				arr = this.addProposals(node, attrs.aria, params);
+				if(arr.length > 0) {
+					proposals.push({
+							proposal: '',
+							description: 'ARIA', //$NON-NLS-1$
+							style: 'noemphasis_title', //$NON-NLS-1$
+							unselectable: true,
+							kind: 'html' //$NON-NLS-1$
+					});
+					proposals = proposals.concat(arr);
+				}
+			}
 			return proposals;	
 		},
 		
