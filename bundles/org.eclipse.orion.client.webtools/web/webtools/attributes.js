@@ -21,12 +21,6 @@ define([
 	 */
 	attributes.globals = [
 			{
-				name: "aria",
-				category: "Global attribute",
-				url: "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA",
-				doc: "Accessible Rich Internet Applications (ARIA) defines ways to make Web content and Web applications (especially those developed with Ajax and JavaScript) more accessible to people with disabilities. For example, ARIA enables accessible navigation landmarks, JavaScript widgets, form hints and error messages, live content updates, and more."
-			},
-			{
 				name : "accesskey",
 				category: "Global attribute",
 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/accesskey",
@@ -2230,6 +2224,494 @@ define([
 		}
 	];
 	
+	var aria = Object.create(null);
+	aria.globalAttributes = [
+		{
+			name: "aria-atomic",
+			doc: "Indicates whether assistive technologies will present all, or only parts of, the changed region based on the change notifications defined by the aria-relevant attribute. See related aria-relevant. Possible values are:"
+				+ "\n* true: Assistive technologies will present the entire region as a whole."
+				+ "\n* false: A change within the region may be processed by the assistive technologies on its own.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-atomic"
+		},
+		{
+			name: "aria-busy",
+			doc: "Indicates whether an element, and its subtree, are currently being updated. Possible values are:"
+				+ "\n* true: The live region is still being updated."
+				+ "\n* false: There are no more expected updates for that live region.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-busy"
+		},
+		{
+			name: "aria-controls",
+			doc: "Identifies the element (or elements) whose contents or presence are controlled by the current element. See related aria-owns.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-controls"
+		},
+		{
+			name: "aria-describedby",
+			doc: "Identifies the element (or elements) that describes the object. See related aria-labelledby.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-describedby"
+		},
+		{
+			name: "aria-disabled",
+			doc: "Indicates that the element is perceivable but disabled, so it is not editable or otherwise operable. See related aria-hidden and aria-readonly. Possible values are:"
+				+ "\n* true: The element and all focusable descendants are disabled and its value cannot be changed by the user."
+				+ "\n* false: The element is enabled.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-disabled"
+		},
+		{
+			name: "aria-dropeffect",
+			doc: "Indicates what functions can be performed when the dragged object is released on the drop target. This allows assistive technologies to convey the possible drag options available to users, including whether a pop-up menu of choices is provided by the application. Typically, drop effect functions can only be provided once an object has been grabbed for a drag operation as the drop effect functions available are dependent on the object being dragged. Possible values are:"
+				+ "\n* copy: A duplicate of the source object will be dropped into the target."
+				+ "\n* move: The source object will be removed from its current location and dropped into the target."
+				+ "\n* link: A reference or shortcut to the dragged object will be created in the target object."
+				+ "\n* execute: A function supported by the drop target is executed, using the drag source as an input."
+				+ "\n* popup: There is a popup menu or dialog that allows the user to choose one of the drag operations (copy, move, link, execute) and any other drag functionality, such as cancel."
+				+ "\n* none: No operation can be performed; effectively cancels the drag operation if an attempt is made to drop on this object. Ignored if combined with any other token value. e.g. 'none copy' is equivalent to a 'copy' value.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-dropeffect"
+		},
+		{
+			name: "aria-flowto",
+			doc: "Identifies the next element (or elements) in an alternate reading order of content which, at the user's discretion, allows assistive technology to override the general default of reading in document source order.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-flowto"
+		},
+		{
+			name: "aria-grabbed",
+			doc: "Indicates an element's 'grabbed' state in a drag-and-drop operation. Possible values are:"
+				+ "\n* true: Indicates that the element has been 'grabbed' for dragging."
+				+ "\n* false: Indicates that the element supports being dragged."
+				+ "\n* undefined: Indicates that the element does not support being dragged.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-grabbed"
+		},
+		{
+			name: "aria-haspopup",
+			doc: "Indicates that the element has a popup context menu or sub-level menu. Possible values are:"
+				+ "\n* true: Indicates the object has a popup, either as a descendant or pointed to by aria-owns."
+				+ "\n* false: The object has no popup.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-haspopup"
+		},
+		{
+			name: "aria-hidden",
+			doc: "Indicates that the element and all of its descendants are not visible or perceivable to any user as implemented by the author. See related aria-disabled. Possible values are:"
+				+ "\n* true: Indicates that this section of the document and its children are hidden from the rendered view."
+				+ "\n* false: Indicates that this section of the document is rendered.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-hidden"
+		},
+		{
+			name: "aria-invalid",
+			doc: "Indicates the entered value does not conform to the format expected by the application. Possible values are:"
+				+ "\n* grammar: A grammatical error was detected."
+				+ "\n* false: There are no detected errors in the value."
+				+ "\n* spelling: A spelling error was detected."
+				+ "\n* true: The value entered by the user has failed validation.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-invalid"
+		},
+		{
+			name: "aria-label",
+			doc: "Defines a string value that labels the current element. See related aria-labelledby.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-label"
+		},
+		{
+			name: "aria-labelledby",
+			doc: "Identifies the element (or elements) that labels the current element. See related aria-label and aria-describedby.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-labelledby"
+		},
+		{
+			name: "aria-live",
+			doc: "Indicates that an element will be updated, and describes the types of updates the user agents, assistive technologies, and user can expect from the live region. Possible values are:"
+				+ "\n* off: Updates to the region will not be presented to the user unless the assistive technology is currently focused on that region."
+				+ "\n* polite: (Background change) Assistive technologies SHOULD announce updates at the next graceful opportunity, such as at the end of speaking the current sentence or when the user pauses typing."
+				+ "\n* assertive: This information has the highest priority and assistive technologies SHOULD notify the user immediately. Because an interruption may disorient users or cause them to not complete their current task, authors SHOULD NOT use the assertive value unless the interruption is imperative.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-live"
+		},
+		{
+			name: "aria-owns",
+			doc: "Identifies an element (or elements) in order to define a visual, functional, or contextual parent/child relationship between DOM elements where the DOM hierarchy cannot be used to represent the relationship. See related aria-controls.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-owns"
+		},
+		{
+			name: "aria-relevant",
+			doc: "Indicates what user agent change notifications (additions, removals, etc.) assistive technologies will receive within a live region. See related aria-atomic. Possible values are:"
+				+ "\n* additions: Element nodes are added to the DOM within the live region."
+				+ "\n* removals: Text or element nodes within the live region are removed from the DOM."
+				+ "\n* text: Text is added to any DOM descendant nodes of the live region."
+				+ "\n* all: Equivalent to the combination of all values, 'additions removals text'."
+				+ "\n* additions text: Equivalent to the combination of values, 'additions text'.",
+			url: "http://www.w3.org/TR/wai-aria/complete#aria-relevant"
+		},
+		{
+			name: "role",
+			doc: "Describes the role(s) the current element plays in the context of the document. This can be used, for example, by applications and assistive technologies to determine the purpose of an element. Possible values are:"
+				+ "\n* alert: A message with important, and usually time-sensitive, information. See related alertdialog and status."
+				+ "\n* alertdialog: A type of dialog that contains an alert message, where initial focus goes to an element within the dialog. See related alert and dialog."
+				+ "\n* application: A region declared as a web application, as opposed to a web document."
+				+ "\n* article: A section of a page that consists of a composition that forms an independent part of a document, page, or site."
+				+ "\n* banner: A region that contains mostly site-oriented content, rather than page-specific content."
+				+ "\n* button: An input that allows for user-triggered actions when clicked or pressed. See related link."
+				+ "\n* checkbox: A checkable input that has three possible values: true, false, or mixed."
+				+ "\n* columnheader: A cell containing header information for a column."
+				+ "\n* combobox: A presentation of a select; usually similar to a textbox where users can type ahead to select an option, or type to enter arbitrary text as a new item in the list. See related listbox."
+				+ "\n* complementary: A supporting section of the document, designed to be complementary to the main content at a similar level in the DOM hierarchy, but remains meaningful when separated from the main content."
+				+ "\n* contentinfo: A large perceivable region that contains information about the parent document."
+				+ "\n* definition: A definition of a term or concept."
+				+ "\n* dialog: A dialog is an application window that is designed to interrupt the current processing of an application in order to prompt the user to enter information or require a response. See related alertdialog."
+				+ "\n* directory: A list of references to members of a group, such as a static table of contents."
+				+ "\n* document: A region containing related information that is declared as document content, as opposed to a web application."
+				+ "\n* form: A landmark region that contains a collection of items and objects that, as a whole, combine to create a form. See related search."
+				+ "\n* grid: A grid is an interactive control which contains cells of tabular data arranged in rows and columns, like a table."
+				+ "\n* gridcell: A cell in a grid or treegrid."
+				+ "\n* group: A set of user interface objects which are not intended to be included in a page summary or table of contents by assistive technologies."
+				+ "\n* heading: A heading for a section of the page."
+				+ "\n* img: A container for a collection of elements that form an image."
+				+ "\n* link: An interactive reference to an internal or external resource that, when activated, causes the user agent to navigate to that resource. See related button."
+				+ "\n* list: A group of non-interactive list items. See related listbox."
+				+ "\n* listbox: A widget that allows the user to select one or more items from a list of choices. See related combobox and list."
+				+ "\n* listitem: A single item in a list or directory."
+				+ "\n* log: A type of live region where new information is added in meaningful order and old information may disappear. See related marquee."
+				+ "\n* main: The main content of a document."
+				+ "\n* marquee: A type of live region where non-essential information changes frequently. See related log."
+				+ "\n* math: Content that represents a mathematical expression."
+				+ "\n* menu: A type of widget that offers a list of choices to the user."
+				+ "\n* menubar: A presentation of menu that usually remains visible and is usually presented horizontally."
+				+ "\n* menuitem: An option in a set of choices contained by a menu or menubar."
+				+ "\n* menuitemcheckbox: A menuitem with a checkable state whose possible values are true, false, or mixed."
+				+ "\n* menuitemradio: A checkable menuitem in a set of elements with role menuitemradio, only one of which can be checked at a time."
+				+ "\n* navigation: A collection of navigational elements (usually links) for navigating the document or related documents."
+				+ "\n* note: A section whose content is parenthetic or ancillary to the main content of the resource."
+				+ "\n* option: A selectable item in a select list."
+				+ "\n* presentation: An element whose implicit native role semantics will not be mapped to the accessibility API."
+				+ "\n* progressbar: An element that displays the progress status for tasks that take a long time."
+				+ "\n* radio: A checkable input in a group of radio roles, only one of which can be checked at a time."
+				+ "\n* radiogroup: A group of radio buttons."
+				+ "\n* region: A large perceivable section of a web page or document, that is important enough to be included in a page summary or table of contents, for example, an area of the page containing live sporting event statistics."
+				+ "\n* row: A row of cells in a grid."
+				+ "\n* rowgroup: A group containing one or more row elements in a grid."
+				+ "\n* rowheader: A cell containing header information for a row in a grid."
+				+ "\n* search: A landmark region that contains a collection of items and objects that, as a whole, combine to create a search facility. See related form."
+				+ "\n* separator: A divider that separates and distinguishes sections of content or groups of menuitems."
+				+ "\n* scrollbar: A graphical object that controls the scrolling of content within a viewing area, regardless of whether the content is fully displayed within the viewing area."
+				+ "\n* slider: A user input where the user selects a value from within a given range."
+				+ "\n* spinbutton: A form of range that expects the user to select from among discrete choices."
+				+ "\n* status: A container whose content is advisory information for the user but is not important enough to justify an alert, often but not necessarily presented as a status bar. See related alert."
+				+ "\n* tab: A grouping label providing a mechanism for selecting the tab content that is to be rendered to the user."
+				+ "\n* tablist: A list of tab elements, which are references to tabpanel elements."
+				+ "\n* tabpanel: A container for the resources associated with a tab, where each tab is contained in a tablist."
+				+ "\n* textbox: Input that allows free-form text as its value."
+				+ "\n* timer: A type of live region containing a numerical counter which indicates an amount of elapsed time from a start point, or the time remaining until an end point."
+				+ "\n* toolbar: A collection of commonly used function buttons or controls represented in compact visual form."
+				+ "\n* tooltip: A contextual popup that displays a description for an element."
+				+ "\n* tree: A type of list that may contain sub-level nested groups that can be collapsed and expanded."
+				+ "\n* treegrid: A grid whose rows can be expanded and collapsed in the same manner as for a tree."
+				+ "\n* treeitem: An option item of a tree. This is an element within a tree that may be expanded or collapsed if it contains a sub-level group of treeitem elements.",
+			url: "http://www.w3.org/TR/role-attribute/"
+		}
+	];
+
+	aria.tags = Object.create(null);
+	aria.tags.a = ["button", "checkbox", "link", "menuitem", "menuitemcheckbox", "menuitemradio", 
+		"tab", "treeitem"];
+	aria.tags.abbr = ["all"];
+	aria.tags.address = ["contentinfo"];
+	aria.tags.area = ["link"];
+	aria.tags.article = ["application", "article", "document", "main"];
+	aria.tags.aside = ["complementary", "note", "presentation", "search"];
+	aria.tags.audio = ["application"];
+	aria.tags.b = ["all"];
+	aria.tags.bdi = ["all"];
+	aria.tags.bdo = ["all"];
+	aria.tags.blockquote = ["all"];
+	aria.tags.body = ["application", "document"];
+	aria.tags.br = ["all"];
+	aria.tags.button = ["button", "link", "menuitem", "menuitemcheckbox", "menuitemradio", "radio"];
+	aria.tags.canvas = ["all"];
+	aria.tags.caption = ["all"];
+	aria.tags.cite = ["all"];
+	aria.tags.code = ["all"];
+	aria.tags.data = ["all"];
+	aria.tags.datalist = ["listbox"];
+	aria.tags.dd = ["all"];
+	aria.tags.del = ["all"];
+	aria.tags.details = ["alert", "alertdialog", "application", "article", "banner", "button", 
+		"columnheader", "complementary", "contentinfo", "definition", "dialog", "directory", "document", "form", 
+		"grid", "gridcell", "group", "heading", "img", "link", "list", "listbox", 
+		"listitem", "log", "main", "marquee", "math", "menu", "menubar", "navigation", 
+		"note", "radiogroup", "region", "row", "rowgroup", "rowheader", "search", "separator", 
+		"status", "tab", "tablist", "tabpanel", "timer", "toolbar", "tooltip", "tree", 
+		"treegrid", "treeitem"];
+	aria.tags.dfn = ["all"];
+	aria.tags.dialog = ["alert", "alertdialog", "application", "dialog", "log", "marquee", 
+		"status"];
+	aria.tags.div = ["all"];
+	aria.tags.dl = ["all"];
+	aria.tags.dt = ["all"];
+	aria.tags.em = ["all"];
+	aria.tags.embed = ["application", "document", "img", "presentation"];
+	aria.tags.fieldset = ["group", "presentation"];
+	aria.tags.figcaption = ["all"];
+	aria.tags.figure = ["all"];
+	aria.tags.footer = ["contentinfo", "presentation"];
+	aria.tags.form = ["all"];
+	aria.tags.h1 = ["heading", "presentation", "tab"];
+	aria.tags.h2 = ["heading", "presentation", "tab"];
+	aria.tags.h3 = ["heading", "presentation", "tab"];
+	aria.tags.h4 = ["heading", "presentation", "tab"];
+	aria.tags.h5 = ["heading", "presentation", "tab"];
+	aria.tags.h6 = ["heading", "presentation", "tab"];
+	aria.tags.header = ["banner", "presentation"];
+	aria.tags.hr = ["presentation", "separator"];
+	aria.tags.i = ["all"];
+	aria.tags.iframe = ["application", "document", "img", "presentation"];
+	aria.tags.img = ["all"];
+	aria.tags.input = ["button", "checkbox", "combobox", "link", "menuitem", "menuitemcheckbox", 
+		"menuitemradio", "radio", "searchbox", "slider", "spinbutton", "switch", "textbox"];
+	aria.tags.ins = ["all"];
+	aria.tags.kbd = ["all"];
+	aria.tags.legend = ["all"];
+	aria.tags.li = ["listitem", "menuitem", "menuitemcheckbox", "menuitemradio", "option", "presentation", 
+		"radio", "tab", "treeitem"];
+	aria.tags.link = ["link"];
+	aria.tags.main = ["main", "presentation"];
+	aria.tags.mark = ["all"];
+	aria.tags.menu = ["directory", "list", "listbox", "menu", "menubar", "tablist", 
+		"tabpanel", "tree"];
+	aria.tags.menuitem = ["menuitem"];
+	aria.tags.nav = ["navigation", "presentation"];
+	aria.tags.object = ["application", "document", "img", "presentation"];
+	aria.tags.ol = ["directory", "group", "list", "listbox", "menu", "menubar", 
+		"presentation", "radiogroup", "tablist", "toolbar", "tree"];
+	aria.tags.option = ["menuitem", "menuitemradio", "option", "separator"];
+	aria.tags.output = ["all"];
+	aria.tags.p = ["all"];
+	aria.tags.pre = ["all"];
+	aria.tags.progress = ["progressbar"];
+	aria.tags.q = ["all"];
+	aria.tags.rb = ["all"];
+	aria.tags.rp = ["all"];
+	aria.tags.rt = ["all"];
+	aria.tags.rtc = ["all"];
+	aria.tags.ruby = ["all"];
+	aria.tags.s = ["all"];
+	aria.tags.samp = ["all"];
+	aria.tags.section = ["alert", "alertdialog", "application", "contentinfo", "dialog", "document", 
+		"log", "main", "marquee", "presentation", "region", "search", "status"];
+	aria.tags.select = ["listbox", "menu"];
+	aria.tags.small = ["all"];
+	aria.tags.span = ["all"];
+	aria.tags.strong = ["all"];
+	aria.tags.sub = ["all"];
+	aria.tags.summary = ["button"];
+	aria.tags.table = ["all"];
+	aria.tags.tbody = ["all"];
+	aria.tags.td = ["all"];
+	aria.tags.textarea = ["textbox"];
+	aria.tags.tfoot = ["all"];
+	aria.tags.th = ["all"];
+	aria.tags.thead = ["all"];
+	aria.tags.time = ["all"];
+	aria.tags.tr = ["all"];
+	aria.tags.u = ["all"];
+	aria.tags.ul = ["directory", "group", "list", "listbox", "menu", "menubar", 
+		"presentation", "radiogroup", "tablist", "toolbar", "tree"];
+	aria.tags.var = ["all"];
+	aria.tags.video = ["application"];
+	aria.tags.wbr = ["all"];
+
+	aria.roles = Object.create(null);
+	aria.roles.all = ["alert", "alertdialog", "application", "article", "banner", "button", 
+		"checkbox", "columnheader", "combobox", "complementary", "contentinfo", "definition", "dialog", "directory", 
+		"document", "form", "grid", "gridcell", "group", "heading", "img", "link", 
+		"list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", 
+		"menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "navigation", "note", "option", "presentation", 
+		"progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", 
+		"search", "separator", "slider", "spinbutton", "status", "tab", "tablist", "tabpanel", 
+		"textbox", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"];
+	aria.roles.alert = ["aria-expanded"];
+	aria.roles.alertdialog = ["aria-expanded"];
+	aria.roles.application = ["aria-expanded"];
+	aria.roles.article = ["aria-expanded"];
+	aria.roles.banner = ["aria-expanded"];
+	aria.roles.button = ["aria-expanded", "aria-pressed"];
+	aria.roles.checkbox = ["aria-checked"];
+	aria.roles.columnheader = ["aria-expanded", "aria-readonly", "aria-required", "aria-selected", "aria-sort"];
+	aria.roles.combobox = ["aria-activedescendant", "aria-autocomplete", "aria-expanded", "aria-required"];
+	aria.roles.complementary = ["aria-expanded"];
+	aria.roles.contentinfo = ["aria-expanded"];
+	aria.roles.definition = ["aria-expanded"];
+	aria.roles.dialog = ["aria-expanded"];
+	aria.roles.directory = ["aria-expanded"];
+	aria.roles.document = ["aria-expanded"];
+	aria.roles.form = ["aria-expanded"];
+	aria.roles.grid = ["aria-activedescendant", "aria-expanded", "aria-level", "aria-multiselectable", "aria-readonly"];
+	aria.roles.gridcell = ["aria-expanded", "aria-readonly", "aria-required", "aria-selected"];
+	aria.roles.group = ["aria-activedescendant", "aria-expanded"];
+	aria.roles.heading = ["aria-expanded", "aria-level"];
+	aria.roles.img = ["aria-expanded"];
+	aria.roles.link = ["aria-expanded"];
+	aria.roles.list = ["aria-expanded"];
+	aria.roles.listbox = ["aria-activedescendant", "aria-expanded", "aria-multiselectable", "aria-required"];
+	aria.roles.listitem = ["aria-expanded", "aria-level", "aria-posinset", "aria-setsize"];
+	aria.roles.log = ["aria-expanded"];
+	aria.roles.main = ["aria-expanded"];
+	aria.roles.marquee = ["aria-expanded"];
+	aria.roles.math = ["aria-expanded"];
+	aria.roles.menu = ["aria-activedescendant", "aria-expanded"];
+	aria.roles.menubar = ["aria-activedescendant", "aria-expanded"];
+	aria.roles.menuitemcheckbox = ["aria-checked"];
+	aria.roles.menuitemradio = ["aria-checked", "aria-posinset", "aria-selected", "aria-setsize"];
+	aria.roles.navigation = ["aria-expanded"];
+	aria.roles.note = ["aria-expanded"];
+	aria.roles.option = ["aria-checked", "aria-posinset", "aria-selected", "aria-setsize"];
+	aria.roles.progressbar = ["aria-valuemax", "aria-valuemin", "aria-valuenow", "aria-valuetext"];
+	aria.roles.radio = ["aria-checked", "aria-posinset", "aria-selected", "aria-setsize"];
+	aria.roles.radiogroup = ["aria-activedescendant", "aria-expanded", "aria-required"];
+	aria.roles.region = ["aria-expanded"];
+	aria.roles.row = ["aria-activedescendant", "aria-expanded", "aria-level", "aria-selected"];
+	aria.roles.rowgroup = ["aria-activedescendant", "aria-expanded"];
+	aria.roles.rowheader = ["aria-expanded", "aria-readonly", "aria-required", "aria-selected", "aria-sort"];
+	aria.roles.scrollbar = ["aria-orientation", "aria-valuemax", "aria-valuemin", "aria-valuenow", "aria-valuetext"];
+	aria.roles.search = ["aria-expanded"];
+	aria.roles.separator = ["aria-expanded", "aria-orientation"];
+	aria.roles.slider = ["aria-orientation", "aria-valuemax", "aria-valuemin", "aria-valuenow", "aria-valuetext"];
+	aria.roles.spinbutton = ["aria-required", "aria-valuemax", "aria-valuemin", "aria-valuenow", "aria-valuetext"];
+	aria.roles.status = ["aria-expanded"];
+	aria.roles.tab = ["aria-expanded", "aria-selected"];
+	aria.roles.tablist = ["aria-activedescendant", "aria-expanded", "aria-level", "aria-multiselectable"];
+	aria.roles.tabpanel = ["aria-expanded"];
+	aria.roles.textbox = ["aria-activedescendant", "aria-autocomplete", "aria-multiline", "aria-readonly", "aria-required"];
+	aria.roles.timer = ["aria-expanded"];
+	aria.roles.toolbar = ["aria-activedescendant", "aria-expanded"];
+	aria.roles.tooltip = ["aria-expanded"];
+	aria.roles.tree = ["aria-activedescendant", "aria-expanded", "aria-multiselectable", "aria-required"];
+	aria.roles.treegrid = ["aria-activedescendant", "aria-expanded", "aria-level", "aria-multiselectable", "aria-readonly", "aria-required"];
+	aria.roles.treeitem = ["aria-checked", "aria-expanded", "aria-level", "aria-posinset", "aria-selected", "aria-setsize"];
+
+	aria.attributes = Object.create(null);
+	aria.attributes.activedescendant = {
+		name: "aria-activedescendant",
+		doc: "Identifies the currently active descendant of a composite widget.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-activedescendant"
+	};
+	aria.attributes.autocomplete = {
+		name: "aria-autocomplete",
+		doc: "Indicates whether user input completion suggestions are provided. Possible values are:"
+			+ "\n* inline: The system provides text after the caret as a suggestion for how to complete the field."
+			+ "\n* list: A list of choices appears from which the user can choose."
+			+ "\n* both: A list of choices appears and the currently selected suggestion also appears inline."
+			+ "\n* none: No input completion suggestions are provided.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-autocomplete"
+	};
+	aria.attributes.checked = {
+		name: "aria-checked",
+		doc: "Indicates the current 'checked' state of checkboxes, radio buttons, and other widgets. See related aria-pressed and aria-selected. Possible values are:"
+			+ "\n* true: The element is checked."
+			+ "\n* false: The element supports being checked but is not currently checked."
+			+ "\n* mixed: Indicates a mixed mode value for a tri-state checkbox or menuitemcheckbox."
+			+ "\n* undefined: The element does not support being checked.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-checked"
+	};
+	aria.attributes.expanded = {
+		name: "aria-expanded",
+		doc: "Indicates whether the element, or another grouping element it controls, is currently expanded or collapsed. Possible values are:"
+			+ "\n* true: The element, or another grouping element it controls, is expanded."
+			+ "\n* false: The element, or another grouping element it controls, is collapsed."
+			+ "\n* undefined: The element, or another grouping element it controls, is neither expandable nor collapsible; all its child elements are shown or there are no child elements.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-expanded"
+	};
+	aria.attributes.level = {
+		name: "aria-level",
+		doc: "Defines the hierarchical level of an element within a structure.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-level"
+	};
+	aria.attributes.multiline = {
+		name: "aria-multiline",
+		doc: "Indicates whether a text box accepts multiple lines of input or only a single line. Possible values are:"
+			+ "\n* true: This is a multi-line text box."
+			+ "\n* false: This is a single-line text box.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-multiline"
+	};
+	aria.attributes.multiselectable = {
+		name: "aria-multiselectable",
+		doc: "Indicates that the user may select more than one item from the current selectable descendants. Possible values are:"
+			+ "\n* true: More than one item in the widget may be selected at a time."
+			+ "\n* false: Only one item can be selected.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-multiselectable"
+	};
+	aria.attributes.orientation = {
+		name: "aria-orientation",
+		doc: "Indicates whether the element and orientation is horizontal or vertical. Possible values are:"
+			+ "\n* vertical: The element is oriented vertically."
+			+ "\n* horizontal: The element is oriented horizontally.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-orientation"
+	};
+	aria.attributes.posinset = {
+		name: "aria-posinset",
+		doc: "Defines an element's number or position in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM. See related aria-setsize.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-posinset"
+	};
+	aria.attributes.pressed = {
+		name: "aria-pressed",
+		doc: "Indicates the current 'pressed' state of toggle buttons. See related aria-checked and aria-selected. Possible values are:"
+			+ "\n* true: The element is pressed."
+			+ "\n* false: The element supports being pressed but is not currently pressed."
+			+ "\n* mixed: Indicates a mixed mode value for a tri-state toggle button."
+			+ "\n* undefined: The element does not support being pressed.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-pressed"
+	};
+	aria.attributes.readonly = {
+		name: "aria-readonly",
+		doc: "Indicates that the element is not editable, but is otherwise operable. See related aria-disabled. Possible values are:"
+			+ "\n* true: The user cannot change the value of the element."
+			+ "\n* false: The user can set the value of the element.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-readonly"
+	};
+	aria.attributes.required = {
+		name: "aria-required",
+		doc: "Indicates that user input is required on the element before a form may be submitted. Possible values are:"
+			+ "\n* true: Users need to provide input on an element before a form is submitted."
+			+ "\n* false: User input is not necessary to submit the form.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-required"
+	};
+	aria.attributes.selected = {
+		name: "aria-selected",
+		doc: "Indicates the current 'selected' state of various widgets. See related aria-checked and aria-pressed. Possible values are:"
+			+ "\n* true: The selectable element is selected."
+			+ "\n* false: The selectable element is not selected."
+			+ "\n* undefined: The element is not selectable.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-selected"
+	};
+	aria.attributes.setsize = {
+		name: "aria-setsize",
+		doc: "Defines the number of items in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM. See related aria-posinset.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-setsize"
+	};
+	aria.attributes.sort = {
+		name: "aria-sort",
+		doc: "Indicates if items in a table or grid are sorted in ascending or descending order. Possible values are:"
+			+ "\n* ascending: Items are sorted in ascending order by this column."
+			+ "\n* descending: Items are sorted in descending order by this column."
+			+ "\n* none: There is no defined sort applied to the column."
+			+ "\n* other: A sort algorithm other than ascending or descending has been applied.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-sort"
+	};
+	aria.attributes.valuemax = {
+		name: "aria-valuemax",
+		doc: "Defines the maximum allowed value for a range widget.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-valuemax"
+	};
+	aria.attributes.valuemin = {
+		name: "aria-valuemin",
+		doc: "Defines the minimum allowed value for a range widget.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-valuemin"
+	};
+	aria.attributes.valuenow = {
+		name: "aria-valuenow",
+		doc: "Defines the current value for a range widget. See related aria-valuetext.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-valuenow"
+	};
+	aria.attributes.valuetext = {
+		name: "aria-valuetext",
+		doc: "Defines the human readable text alternative of aria-valuenow for a range widget.",
+		url: "http://www.w3.org/TR/wai-aria/complete#aria-valuetext"
+	};
+
 	/**
 	 * @description Returns the set of attributes that apply to the given DOM node
 	 * @param {Object} node The DOM node to get attributes for
@@ -2239,6 +2721,7 @@ define([
 	function getAttributesForNode(node) {
 		var ret = Object.create(null);
 		var attrs = [].concat(attributes.globals);
+		var ariaattrs = [];
 		if (node){
 			var testNode = node;
 			if (node.type === 'attr'){
@@ -2249,9 +2732,40 @@ define([
 				if(Array.isArray(tags) && tags.length > 0) {
 					attrs = attrs.concat(tags);
 				}
+				// Determine ARIA attributes for node
+				tags = aria.tags[testNode.name];
+				if (Array.isArray(tags) && tags.length > 0) {
+					var roles = [];
+					if (tags[0] === "all") {
+						roles = aria.roles.all;
+					} else {
+						roles = tags; // tag-specific roles
+					}
+					for (var i = 0; i < roles.length; i++) {
+						var attrlist = aria.roles[roles[i]];
+						if (Array.isArray(attrlist) && attrlist.length > 0) {
+							for (var j = 0; j < attrlist.length; j++) {
+								var attrkey = attrlist[j].substring(5); // strip off the "aria-"
+								var attr = aria.attributes[attrkey];
+								var found = false;
+								for (var k = 0; k < ariaattrs.length; k++) {
+									if (ariaattrs[k].name === attr.name) {
+										found = true;
+										break;
+									}
+								}
+								if (!found) {
+									ariaattrs.push(attr);
+								}
+							}
+						}
+					}
+					ariaattrs = ariaattrs.concat(aria.globalAttributes);
+				}
 			}
 		}
 		ret.global = attrs;
+		ret.aria = ariaattrs;
 		ret.formevents = attributes.formevents.slice(0);
 		ret.keyboardevents = attributes.keyboardevents.slice(0);
 		ret.mouseevents = attributes.mouseevents.slice(0);
