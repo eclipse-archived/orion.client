@@ -208,15 +208,16 @@ The Git page currently allows users to *push* and *fetch* patches from a Gerrit.
 ### Adding a Remote
  
 The first thing you need to do is add a Gerrit remote to an existing repo. 
-Name the remote 'Gerrit' and copy corresponding url from git.eclipse.org/r/.
+Name the remote 'Gerrit' and copy corresponding url from git.eclipse.org/r/, then select the **Gerrit** checkbox to indicate is is a new gerrit remote.
 This can be done from the References dropdown. For the purpose of this example, we will be setting up a remote to allow us to push patches for the Orion client project.
-
 
 <pic>
 
 ### Editing Git Config entry
 
-Next thing to do is to edit your new remote fetch config entry to add the appopriate refspecs for pushing to Gerrit/getting patch sets. To do this:
+If the new remote which have created is a gerrit remote, selecting the **Gerrit** checkbox will automatically add the appropriate configuration settings.
+
+To manually edit your new remote fetch config entry to add the appopriate refspecs for pushing to Gerrit/getting patch sets, follow the steps below:
 
 1. Click on the config wrench - and find your new fetch key (hint: you can use the filter, just type 'fetch' anh hit enter)
 2. You need to add the following entries to the fetch key (you can alter the value of the existing key and create a **New Configuration Entry** the same name for the other value).
