@@ -51,7 +51,12 @@ define([
           }
           return new Deferred().resolve(null);
        },
-
+	   getFileClient: function() {
+	   		if(!this.fileclient) {
+	   			this.fileclient = this.serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
+	   		}
+	   		return this.fileclient;
+	   },
        setSearchLocation: function(searchLocation) {
        		this.searchLocation = searchLocation;
        },
@@ -75,7 +80,7 @@ define([
            var searchname = filename.slice(idx+1);
 
            // Search for it
-           return this.serviceRegistry.getService("orion.core.file.client").search( //$NON-NLS-1$
+           return this.getFileClient().search(
                 {
                 	'resource': that.searchLocation || "",
                     'keyword': searchname,
