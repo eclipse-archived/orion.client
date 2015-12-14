@@ -1,0 +1,9 @@
+{
+	"plugins": {
+		"requirejs": {}
+	},
+	"libs": [
+		"ecma5",
+		"browser"
+	]
+}
