@@ -19,22 +19,18 @@ define([
 	 * @description Creates a new open declaration command
 	 * @constructor
 	 * @public
-	 * @param {javascript.ASTManager} ASTManager The backing AST manager
 	 * @param {TernWorker} ternWorker The running Tern worker
-	 * @param {javascript.CUProvider} cuProvider
-	 * @returns {javascript.commands.OpenDeclarationCommand} A new command
+	 * @param {ScriptResolver} scriptResolver The backing script resolver
 	 * @since 8.0
 	 */
 	function TernProjectManager(ternWorker, scriptResolver) {
 		this.ternWorker = ternWorker;
 		this.scriptResolver = scriptResolver;
 		this.currentProjectLocation = null;
-		this.timeout = null;
 	}
 
 	Objects.mixin(TernProjectManager.prototype, {
 		/**
-		 * @name getFileClient
 		 * @description Get the file client;
 		 * @function
 		 * @returns {orion.FileClient} returns a file client
@@ -49,7 +45,7 @@ define([
 		 * @param file {Object} file to lookup the project for
 		 * @returns returns the top level project file or <code>null</code>
 		 */
-		getProjectFile: function(file){
+		getProjectFile: function(file) {
 			// file will have different properties depending on whether it came from an editor event or a command
 			if(file){
 				var parents = file.parents ? file.parents : file.Parents;
@@ -65,7 +61,7 @@ define([
 		 * @param projectFile {Object} the project container
 		 * @returns returns {Deferred} Deferred to get the string file location or <code>null</code> if there is no .tern-project file
 		 */
-		getTernProjectFileLocation: function(projectFile){
+		getTernProjectFileLocation: function(projectFile) {
 			if (!projectFile){
 				return null;
 			}
@@ -92,7 +88,7 @@ define([
 		 * @param projectFile {Object} the project container
 		 * @returns returns {Deferred} Deferred to get the location of the .tern-project file or <code>null</code> if there was a probem creating one
 		 */
-		enureTernProjectFileLocation: function(projectFile){
+		enureTernProjectFileLocation: function(projectFile) {
 			return this.getTernProjectFileLocation(projectFile).then(function(ternFileLocation){
 				if (!ternFileLocation){
 					return this.getFileClient().createFile(projectFile.Location, '.tern-project').then(function(){ //$NON-NLS-1$
@@ -106,15 +102,18 @@ define([
 		
 		/**
 		 * Returns a deferred that reads the file at the given location and returns the parsed JSON contents
-		 * @param fileLocation {String} The location of the file to parse
+		 * @param {String} fileLocation The location of the file to parse
 		 * @returns {Deferred} Deferred to get a parsed JSON object or an empty object if there is an error
 		 */
-		parseTernJSON: function(fileLocation){
+		parseTernJSON: function(fileLocation) {
+			if(!fileLocation) {
+				return new Deferred().resolve({});
+			}
 			return this.getFileClient().read(fileLocation).then(function(content) {
 				try {
 					return content ? JSON.parse(content) : {};
 				} catch(e) {
-					console.log("Error parsing JSON in .tern-project file")
+					console.log("Error parsing JSON in .tern-project file") //$NON-NLS-1$
 					return {};
 				}
 			});
@@ -128,14 +127,12 @@ define([
 		 * @param jsonOptions {Object} options to write into the file
 		 * @returns returns {Deferred} Deferred to write the options into the file or <code>null</code> on error
 		 */
-		writeTernFile: function(fileLocation, jsonOptions){
+		writeTernFile: function(fileLocation, jsonOptions) {
 			try {
-				// TODO Should we only allow writing of known options?
-				// TODO Should we add proper whitespace?
-				var jsonString = JSON.stringify(jsonOptions);
+				var jsonString = JSON.stringify(jsonOptions, null, 4);
 				return this.fileClient.write(fileLocation, jsonString);
 			} catch(e) {
-				console.log("Error writing JSON to .tern-project file: " + e);
+				console.log("Error writing JSON to .tern-project file: " + e); //$NON-NLS-1$
 			}
 		},
 				
@@ -145,42 +142,27 @@ define([
 		 * asynchronously and will not be complete when this function returns.
 		 * @param jsonOptions {Object} options to load into Tern
 		 */
-		loadTernProjectOptions: function(jsonOptions){
-			if (jsonOptions){
-				
-				// TODO Remove console
-//				console.log('Loading the following options from .tern-project:');
-//				console.log(jsonOptions);
-				
-				if (jsonOptions.plugins || Array.isArray(jsonOptions.libs) || jsonOptions.dependencyBudget || jsonOptions.ecmaVersion){
-					this.ternWorker.postMessage({request: "start_server", args: {options: jsonOptions}}); //$NON-NLS-1$
-				}
-
-				if (Array.isArray(jsonOptions.loadEagerly)){
-					for (var i=0; i<jsonOptions.loadEagerly.length; i++) {
-						var filename = jsonOptions.loadEagerly[i];
-						var ext = 'js'; //$NON-NLS-1$
-						if (filename.match(/\.html$/)){
-							ext = 'html'; //$NON-NLS-1$
-						} else if (filename.match(/\.htm$/)){
-							ext = 'htm'; //$NON-NLS-1$
-						}
-						
-						// TODO Can't provide error messages once the deferred is resolved.
-						this.scriptResolver.getWorkspaceFile(filename, {ext: ext}).then(function(files){
-							if (Array.isArray(files) && files.length > 0){
-								// TODO If more than one file satisfies script resolver, do we load the first, the last or them all?  Warn the user?
-								if (files.length > 1){
-									console.log('Tern-Project File: Found multiple potential files for: ' + filename);
-								}
-								this.ternWorker.postMessage(
-									{request:'addFile', args:{file: files[0].location}} //$NON-NLS-1$
-								);
-							} else {
-								console.log("Tern-Project File: Could not find any matching files for: " + filename);
-							}
-						}.bind(this));
+		loadTernProjectOptions: function(jsonOptions) {
+			this.ternWorker.postMessage({request: "start_server", args: {options: jsonOptions}}); //$NON-NLS-1$
+			if (Array.isArray(jsonOptions.loadEagerly)) {
+				for (var i = 0; i < jsonOptions.loadEagerly.length; i++) {
+					var filename = jsonOptions.loadEagerly[i];
+					var ext = 'js'; //$NON-NLS-1$
+					if (filename.match(/\.html$/)){
+						ext = 'html'; //$NON-NLS-1$
+					} else if (filename.match(/\.htm$/)){
+						ext = 'htm'; //$NON-NLS-1$
 					}
+					this.scriptResolver.getWorkspaceFile(filename, {ext: ext}).then(function(files) {
+						if (Array.isArray(files) && files.length > 0){
+							if (files.length > 1){
+								console.log('Tern-Project File: Found multiple potential files for: ' + filename); //$NON-NLS-1$
+							}
+							this.ternWorker.postMessage(
+								{request:'addFile', args:{file: files[0].location}} //$NON-NLS-1$
+							);
+						}
+					}.bind(this));
 				}
 			}
 		},
@@ -190,37 +172,18 @@ define([
 		 * @param {Object} event An <tt>orion.edit.model</tt> event.
 		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
 		 */
-		onInputChanged: function onInputChanged(event) {
-//			console.log("Tern Project Manager: On Input Changed");
-
-			// TODO We also want to listen to .tern-project file creation/modification/deletion
-			// TODO On startup we start Tern, then restart it with loaded options
-
-			// Get the project
-			var file = event.file;
+		onInputChanged: function onInputChanged(evnt) {
+			var file = evnt.file;
 			var projectFile = this.getProjectFile(file);
-			
 			if (projectFile && (!this.currentProjectLocation || projectFile.Location !== this.currentProjectLocation)){
-					
-//				console.log("Tern Project Manager: Project changed, check for .tern-project");
 				this.currentProjectLocation = projectFile.Location;
 				this.scriptResolver.setSearchLocation(projectFile.Location);
-				
 				return this.getTernProjectFileLocation(projectFile).then(function(ternFileLocation){
-					if (ternFileLocation){
-						return this.parseTernJSON(ternFileLocation).then(function(jsonOptions){
-							if (jsonOptions){
-								this.loadTernProjectOptions(jsonOptions);
-							}
-						}.bind(this));
-					} else {
-//						console.log("No .tern-project file found at project root");
-					}
-					return null;
+					return this.parseTernJSON(ternFileLocation).then(function(jsonOptions){
+						this.loadTernProjectOptions(jsonOptions);
+					}.bind(this));
 				}.bind(this));
 			}
-
-			// If the user opened the .tern-project file assume that it was edited
 			if (file.name === '.tern-project'){
 				this.currentProjectLocation = null;
 			}		

@@ -98,33 +98,29 @@ define([
     	var astManager = new ASTManager.ASTManager(Esprima);
 
 		var ternReady = false;
+		var workerReady = false;
+		var pendingStart = Object.create(null);
 		var messageQueue = [];
 
     	function WrappedWorker(script, onMessage, onError) {
-    		/*if(typeof(SharedWorker) === 'function') {
-    			this.shared = true;
-    			var wUrl = new URL(script, window.location.href);
-    			wUrl.query.set("worker-language", navigator.language);
-    			this.worker = new SharedWorker(wUrl.href);
-    			this.worker.port.onmessage = onMessage;
-    			this.worker.port.onerror = onError;
-    			this.worker.port.start();
-    			this.worker.postMessage({request: "start_worker"}); //$NON-NLS-1$
-    		} else { */
- 				var wUrl = new URL(script, window.location.href);
-    			wUrl.query.set("worker-language", navigator.language); //$NON-NLS-1$
-    			this.worker = new Worker(wUrl.href);
-    			this.worker.onmessage = onMessage.bind(this);
-    			this.worker.onerror = onError.bind(this);
-    			this.worker.postMessage({request: "start_worker"}); //$NON-NLS-1$
-    			this.messageId = 0;
-    			this.callbacks = Object.create(null);
-    	//	}
+ 			var wUrl = new URL(script, window.location.href);
+    		wUrl.query.set("worker-language", navigator.language); //$NON-NLS-1$
+    		this.worker = new Worker(wUrl.href);
+    		this.worker.onmessage = onMessage.bind(this);
+    		this.worker.onerror = onError.bind(this);
+    		this.worker.postMessage({request: "start_worker"}); //$NON-NLS-1$
+    		this.messageId = 0;
+    		this.callbacks = Object.create(null);
     	}
     	
     	WrappedWorker.prototype.postMessage = function(msg, f) {
-    		var starting = msg.request === 'start_server';
+    		var starting = msg.request === "start_server";
     		if(starting) {
+    			if(!workerReady) {
+	    			pendingStart.msg = msg;
+	    			pendingStart.f = f;
+	    			return; //don't queue start_server requests
+				}
     			ternReady = false;
     		}
     		if(ternReady || starting) {
@@ -135,11 +131,7 @@ define([
 						this.callbacks[msg.messageID] = f;
 					}
 				}
-	    		if(this.shared) {
-	    			this.worker.port.postMessage(msg);
-	    		} else {
-	    			this.worker.postMessage(msg);
-	    		}
+	    		this.worker.postMessage(msg);
 			} else {
 				messageQueue.push({msg: msg, f: f});
 			}
@@ -159,10 +151,8 @@ define([
 			 * @callback
 			 */
 			'worker_ready': function(response) {
-				ternReady = false;
-				ternWorker.postMessage({request: 'start_server', args: {options: {}}}, /* @callback */ function(response) { //$NON-NLS-1$
-					serverReady();
-				});
+				workerReady = true;
+				ternWorker.postMessage(pendingStart.msg, pendingStart.f);
 			},
 			/**
 			 * @callback
