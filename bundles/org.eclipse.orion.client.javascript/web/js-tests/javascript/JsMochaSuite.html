@@ -43,14 +43,14 @@
 					before("reset timeout", function(done) {
 						this.timeout(20000);
 						testworker.start(done);
-					})
+					});
 					after("stop the worker", function() {
 						if(testworker) {
 							testworker.terminate();
 						}
 					});
 					testworker = worker.instance({delayedStart: true});
-					crossFileTests(testworker);
+/*					crossFileTests(testworker);
 					astManagerTests(testworker);
 					dependencyTests(testworker);
 					eslintCoreTests(testworker);
@@ -63,10 +63,10 @@
 					scriptResolverTests(testworker);
 					sigparserTests(testworker);
 					ternAssistTests(testworker);
-					ternCommandTests(testworker);
+					ternCommandTests(testworker);*/
 					validatorTests(testworker);
-					ternProjectTests(testworker);
-					mocha.run()
+//					ternProjectTests(testworker);
+					mocha.run();
 		});
 	});
   </script>

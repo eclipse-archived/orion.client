@@ -124,41 +124,52 @@ define({//Default message bundle
 	'ternPlugins': 'Tern Plug-ins',
 	'noTernPluginsAvailable': 'No Tern plug-ins are currently loaded. This may be because you have not yet activated content assist in a JavaScript file. Tern plug-ins provide type information and code templates for JavaScript.',
 	'noDeclFound': 'Could not find declaration',
-	"deprecatedHoverTitle": "Deprecated.", // the in-line title for deprecated memebers. The word is used alone in a sentence with no further punctuation
-	"parametersHoverTitle": "Parameters:", // the in-line title for the parameters section. The word is used alone in a sentence with no further punctuation
-	"returnsHoverTitle": "Returns:", // the in-line title for the returns section. The word is used alone in a sentence with no further punctuation
-	"throwsHoverTitle": "Throws:", // the in-line title for the throws section. The word is used alone in a sentence with no further punctuation
-	"callbackHoverTitle": "Callback:", // the in-line title for the callback section. The word is used alone in a sentence with no further punctuation
-	"sinceHoverTitle": "Since:", // the in-line title for the since section. The word is used alone in a sentence with no further punctuation
-	"seeAlsoHoverTitle": "See Also:", // the in-line title for the since section. The word is used alone in a sentence with no further punctuation
-	"openFileForTitle": "Open file for", // the in-line title for the 'open file hover'. The sentence is used as-is and is followed only by a OS file path
-	"failedToReadFile": "Failed to read file: ${0}",
-	"badInlineRename": "In-line rename is only available for local variables and declarations.",
-	"failedRename": "In-line rename failed: ${0}",
+	'deprecatedHoverTitle': 'Deprecated.', // the in-line title for deprecated memebers. The word is used alone in a sentence with no further punctuation
+	'parametersHoverTitle': 'Parameters:', // the in-line title for the parameters section. The word is used alone in a sentence with no further punctuation
+	'returnsHoverTitle': 'Returns:', // the in-line title for the returns section. The word is used alone in a sentence with no further punctuation
+	'throwsHoverTitle': 'Throws:', // the in-line title for the throws section. The word is used alone in a sentence with no further punctuation
+	'callbackHoverTitle': 'Callback:', // the in-line title for the callback section. The word is used alone in a sentence with no further punctuation
+	'sinceHoverTitle': 'Since:', // the in-line title for the since section. The word is used alone in a sentence with no further punctuation
+	'seeAlsoHoverTitle': 'See Also:', // the in-line title for the since section. The word is used alone in a sentence with no further punctuation
+	'openFileForTitle': 'Open file for', // the in-line title for the 'open file hover'. The sentence is used as-is and is followed only by a OS file path
+	'failedToReadFile': 'Failed to read file: ${0}',
+	'badInlineRename': 'In-line rename is only available for local variables and declarations.',
+	'failedRename': 'In-line rename failed: ${0}',
 	
 	//All refs
-	"functionDecls": "Function Declarations",
-	"functionCalls": "Function Calls",
-	"propAccess": "Property Access",
-	"propWrite": "Property Write",
-	"varAccess": "Variable Access",
-	"varWrite": "Variable Write",
-	"varDecls": "Variable Declarations",
-	"regex": "Regular Expressions",
-	"strings": "Strings",
-	"blockComments": "Block Comments",
-	"lineComments": "Line Comments",
-	"partial": "Partial Matches",
-	"uncategorized": "Uncategorized",
-	"parseErrors": "Parse Errors",
-	"noFileContents": "Could not compute references: failed to compute file text content",
-	"noFileMeta": "Could not compute references: failed to compute file metadata",
-	"cannotComputeRefs": "Cannot compute references: ${0}",
-	"notAnIdentifier": "Cannot compute references at the selected location: Location is not an identifier",
-	"notHtmlOffset": "Not a valid offset in HTML",
-	"allProjectRefs": "Finding all project references...",
-	"allWorkspaceRefs": "Finding all workspace references...",
-	"refsFoundIn": "References found in file: \'${0}\' (${1}/${2})",
-	"addToTernCommand": "Add to .tern-project",
-	"addToTernCommandTooltip": "The JavaScript tooling will always load the contents of this file to Tern"
+	'functionDecls': 'Function Declarations',
+	'functionCalls': 'Function Calls',
+	'propAccess': 'Property Access',
+	'propWrite': 'Property Write',
+	'varAccess': 'Variable Access',
+	'varWrite': 'Variable Write',
+	'varDecls': 'Variable Declarations',
+	'regex': 'Regular Expressions',
+	'strings': 'Strings',
+	'blockComments': 'Block Comments',
+	'lineComments': 'Line Comments',
+	'partial': 'Partial Matches',
+	'uncategorized': 'Uncategorized',
+	'parseErrors': 'Parse Errors',
+	'noFileContents': 'Could not compute references: failed to compute file text content',
+	'noFileMeta': 'Could not compute references: failed to compute file metadata',
+	'cannotComputeRefs': 'Cannot compute references: ${0}',
+	'notAnIdentifier': 'Cannot compute references at the selected location: Location is not an identifier',
+	'notHtmlOffset': 'Not a valid offset in HTML',
+	'allProjectRefs': 'Finding all project references...',
+	'allWorkspaceRefs': 'Finding all workspace references...',
+	'refsFoundIn': 'References found in file: \'${0}\' (${1}/${2})',
+	'addToTernCommand': 'Add to .tern-project',
+	'addToTernCommandTooltip': 'The JavaScript tooling will always load the contents of this file to Tern',
+	'accessor-pairs' : 'Discourage getter/setter not in pairs',
+	'no-control-regex' : 'Disallow controls characters in regular expressions:',
+	'no-duplicate-case' : 'Duplicate case:',
+	'no-empty-character-class' : 'Disallow empty character classes:',
+	'no-extra-boolean-cast' : 'Discourage redundant double negation:',
+	'no-extra-parens' : 'Discourage redundant parentheses:',
+	'no-invalid-regexp' : 'Invalid regular expressions:',
+	'no-negated-in-lhs' : 'Disallow negated left operand of in operator:',
+	'no-obj-calls' : 'Disallow global object as function calls:',
+	'no-eq-null' : 'Disallow null comparisons:',
+	'no-else-return' : 'Report else after return:'
 });

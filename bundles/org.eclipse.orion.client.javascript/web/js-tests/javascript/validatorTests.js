@@ -9951,6 +9951,1027 @@ define([
 								});
 						});
 					});
+					// accessor-pairs --------------------------------------------
+					describe('accessor-pairs', function() {
+						var RULE_ID = "accessor-pairs";
+						it("flag missing getter", function(callback) {
+							var topic = "var o = {\n" +
+										"	set a(value) {\n" +
+										"		this.val = value;\n" +
+										" 	}\n" +
+										"};";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Getter is not present"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag missing getter", function(callback) {
+							var topic = "var o = {d: 1};\n" +
+										"Object.defineProperty(o, 'c', {\n" +
+										"    set: function(value) {\n" +
+										"        this.val = value;\n" +
+										"    }\n" +
+										"});";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Getter is not present"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag missing getter or setter", function(callback) {
+							var topic = "var o = {\n" +
+										"    set a(value) {\n" +
+										"        this.val = value;\n" +
+										"    },\n" +
+										"    get a() {\n" +
+										"        return this.val;\n" +
+										"    }\n" +
+										"};";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag missing getter or setter", function(callback) {
+							var topic = "var o = {d: 1};\n" +
+										"Object.defineProperty(o, 'c', {\n" +
+										"    set: function(value) {\n" +
+										"        this.val = value;\n" +
+										"    },\n" +
+										"    get: function() {\n" +
+										"        return this.val;\n" +
+										"    }\n" +
+										"});";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag missing getter", function(callback) {
+							var topic = "var o = {d: 1};\n" +
+										"Object.defineProperty(o, 'c', {\n" +
+										"    set: function(value) {\n" +
+										"        this.val = value;\n" +
+										"    }\n" +
+										"});";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [1, { setWithoutGet: false }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag missing setter", function(callback) {
+							var topic = "var o = {d: 1};\n" +
+										"Object.defineProperty(o, 'c', {\n" +
+										"    get: function() {\n" +
+										"        return this.val;\n" +
+										"    }\n" +
+										"});";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [1, { getWithoutSet: false }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
+					// no-control-regex --------------------------------------------
+					describe('no-control-regex', function() {
+						var RULE_ID = "no-control-regex";
+						it("flag control character", function(callback) {
+							var topic = "var pattern1 = /\\\\x1f/;\n" +
+										"var pattern2 = new RegExp(\"\\x1f\");";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Unexpected control character in regular expression.",
+										start: 50,
+										end: 56
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag spaces", function(callback) {
+							var topic = "var pattern1 = /\\\\x20/;\n" +
+										"var pattern2 = new RegExp(\"\\x20\");";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
+					// no-duplicate-case --------------------------------------------
+					describe('no-duplicate-case', function() {
+						var RULE_ID = "no-duplicate-case";
+						it("flag duplicate case", function(callback) {
+							var topic = "var a = 1;\n" +
+										"switch (a) {\n" +
+										"    case 1:\n" +
+										"        break;\n" +
+										"    case 2:\n" +
+										"        break;\n" +
+										"    case 2:\n" +
+										"        break;\n" +
+										"    default:\n" +
+										"        break;\n" +
+										"}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'error',
+										description: "Duplicate case label.",
+										start: 82,
+										end: 104
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
+					// no-empty-character-class --------------------------------------------
+					describe('no-empty-character-class', function() {
+						var RULE_ID = "no-empty-character-class";
+						it("flag empty character class", function(callback) {
+							var topic = "var foo = /^abc[]/;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Empty class."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag empty character class 2", function(callback) {
+							var topic = "/^abc[]/.test(foo);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Empty class."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag empty character class 3", function(callback) {
+							var topic = "bar.match(/^abc[]/);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Empty class."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag character class", function(callback) {
+							var topic = "var foo = /^abc/;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag character class 2", function(callback) {
+							var topic = "var foo = /^abc[a-z]/;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag character class 3", function(callback) {
+							var topic = "var bar = new RegExp(\"^abc[]\");";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
+					// no-extra-boolean cast --------------------------------------------
+					describe('no-extra-boolean-cast', function() {
+						var RULE_ID = "no-extra-boolean-cast";
+						it("flag redundant multiple negation", function(callback) {
+							var topic = "var foo = !!!bar;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Redundant multiple negation."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag redundant double negation in ternary", function(callback) {
+							var topic = "var foo = !!bar ? baz : bat;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Redundant double negation in a ternary condition."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag redundant double negation in call to Boolean", function(callback) {
+							var topic = "var foo = Boolean(!!bar);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Redundant double negation in call to Boolean()."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag redundant double negation in Boolean constructor call", function(callback) {
+							var topic = "var foo = new Boolean(!!bar);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Redundant double negation in Boolean constructor call."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag redundant double negation in if statement condition", function(callback) {
+							var topic = "if (!!foo) { }";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Redundant double negation in an if statement condition."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag redundant double negation in while statement condition", function(callback) {
+							var topic = "while (!!foo) { }";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Redundant double negation in a while loop condition."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag redundant double negation in do/while statement condition", function(callback) {
+							var topic = "do {} while(!!foo);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Redundant double negation in a do while loop condition."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag redundant double negation in for statement condition", function(callback) {
+							var topic = "for (; !!foo; ) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Redundant double negation in a for loop condition."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag multiple redundant negation", function(callback) {
+							var topic = "var foo = !!bar;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag multiple redundant negation 2", function(callback) {
+							var topic = "function foo() {return !!bar;}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag multiple redundant negation 3", function(callback) {
+							var topic = "var foo = bar ? !!baz : !!bat;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
+					// no-extra-parens --------------------------------------------
+					describe('no-extra-parens', function() {
+						var RULE_ID = "no-extra-parens";
+						it("flag redundant parentheses", function(callback) {
+							var topic = "var a = (b * c);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Gratuitous parentheses around expression."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag redundant parentheses 2", function(callback) {
+							var topic = "(a * b) + c;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Gratuitous parentheses around expression."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag redundant parentheses 3", function(callback) {
+							var topic = "typeof (a);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Gratuitous parentheses around expression."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses", function(callback) {
+							var topic = "(0).toString();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 2", function(callback) {
+							var topic = "({}.toString.call());";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 3", function(callback) {
+							var topic = "(function(){} ? a() : b())";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 4", function(callback) {
+							var topic = "(/^a$/).test(x);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 5", function(callback) {
+							var topic = "((function foo() {}))();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [1, "functions"];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Gratuitous parentheses around expression."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 6", function(callback) {
+							var topic = "var y = (function () {return 1;});";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [1, "functions"];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Gratuitous parentheses around expression."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 7", function(callback) {
+							var topic = "(0).toString();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [1, "functions"];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 8", function(callback) {
+							var topic = "({}.toString.call());";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [1, "functions"];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 9", function(callback) {
+							var topic = "(function(){} ? a() : b());";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [1, "functions"];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 10", function(callback) {
+							var topic = "(/^a$/).test(x);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [1, "functions"];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 11", function(callback) {
+							var topic = "a = (b * c);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [1, "functions"];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 12", function(callback) {
+							var topic = "(a * b) + c;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [1, "functions"];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 13", function(callback) {
+							var topic = "typeof (a);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [1, "functions"];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
+					// no-invalid-regexp --------------------------------------------
+					describe('no-invalid-regexp', function() {
+						var RULE_ID = "no-invalid-regexp";
+						it("flag invalid regexp", function(callback) {
+							var topic = "RegExp('[')";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Invalid regular expression: /[/: Unterminated character class"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid regexp - invalid flags", function(callback) {
+							var topic = "RegExp('.', 'z')";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Invalid flags supplied to RegExp constructor \'z\'"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid regexp - new RegExp", function(callback) {
+							var topic = "new RegExp('\\\\')";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Invalid regular expression: /\\/: \\ at end of pattern"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
+					// no-negated-in-lhs --------------------------------------------
+					describe('no-negated-in-lhs', function() {
+						var RULE_ID = "no-negated-in-lhs";
+						it("flag negated in lhs", function(callback) {
+							var topic = "if(!a in b) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "The `in` expression\'s left operand is negated"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag negated in lhs 2", function(callback) {
+							var topic = "if(!(a in b)) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag negated in lhs 3", function(callback) {
+							var topic = "if(('' + !a) in b) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
+					// no-obj-calls --------------------------------------------
+					describe('no-obj-calls', function() {
+						var RULE_ID = "no-obj-calls";
+						it("flag Math used as a function", function(callback) {
+							var topic = "var x = Math();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "\'Math\' is not a function."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag JSON used as a function", function(callback) {
+							var topic = "var y = JSON();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "\'JSON\' is not a function."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag math() call", function(callback) {
+							var topic = "var x = math();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag json() call", function(callback) {
+							var topic = "var x = json();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
+					// no-eq-null --------------------------------------------
+					describe('no-eq-null', function() {
+						var RULE_ID = "no-eq-null";
+						it("flag == null", function(callback) {
+							var topic = "if (foo == null) { bar(); }";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Use ‘===’ to compare with ‘null’."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag != null", function(callback) {
+							var topic = "while (qux != null) { bar(); }";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Use ‘===’ to compare with ‘null’."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag !== null", function(callback) {
+							var topic = "while (qux !== null) { bar(); }";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag === null", function(callback) {
+							var topic = "if (foo === null) { bar(); }";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
+					// no-else-return --------------------------------------------
+					describe('no-else-return', function() {
+						var RULE_ID = "no-else-return";
+						it("flag else after return", function(callback) {
+							var topic = 	"function foo() {\n" +
+										"    if (x) {\n" +
+										"        return y;\n" +
+										"    } else {\n" +
+										"        return z;\n" +
+										"    }\n" +
+										"}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Report else after return"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag else after return 2", function(callback) {
+							var topic = 	"function foo() {\n" +
+										"    if (x) {\n" +
+										"        return y;\n" +
+										"    } else {\n" +
+										"        var f = 2;\n" +
+										"    }\n" +
+										"}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Report else after return"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag else after return 3", function(callback) {
+							var topic = "function foo() {\n" +
+										"    if (x) {\n" +
+										"        if (y) {\n" +
+										"            return y;\n" +
+										"        } else {\n" +
+										"            return x;\n" +
+										"        }\n" +
+										"    } else {\n" +
+										"        return z;\n" +
+										"    }\n" +
+										"}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Report else after return"
+									},
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Report else after return"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag else after return 3", function(callback) {
+							var topic = "function foo() {\n" +
+										"    if (x) {\n" +
+										"        if (y) {\n" +
+										"            return y;\n" +
+										"        }\n" +
+										"        return x;\n" +
+										"    }\n" +
+										"    return z;\n" +
+										"}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag else after return", function(callback) {
+							var topic = 	"function foo() {\n" +
+										"    if (x) {\n" +
+										"        return y;\n" +
+										"    }\n" +
+										"    return z;\n" +
+										"}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};
