@@ -815,96 +815,168 @@ define([
  				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-1$  //$NON-NLS-1$
  				 	        	   category: 'javascript', //$NON-NLS-1$
  				 	        	   categoryLabel: javascriptMessages['javascriptValidation'],
- 				 	        	   properties: [{	id: "no-cond-assign",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noCondAssign"],
-    			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: error,
-    			 	        	                	options: severities
+ 				 	        	   properties: [{
+	 				 	        	   			id: "no-cond-assign",  //$NON-NLS-1$
+	    			 	        	                	name: javascriptMessages["noCondAssign"],
+	    			 	        	                	type: "number", //$NON-NLS-1$
+	    			 	        	                	defaultValue: error,
+	    			 	        	                	options: severities
     			 	        	                },
-    			 	        	                {	id: "no-constant-condition",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noConstantCondition"],
-    			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: error,
-    			 	        	                	options: severities
+    			 	        	                {
+	    			 	        	                	id: "no-constant-condition",  //$NON-NLS-1$
+	    			 	        	                	name: javascriptMessages["noConstantCondition"],
+	    			 	        	                	type: "number", //$NON-NLS-1$
+	    			 	        	                	defaultValue: error,
+	    			 	        	                	options: severities
     			 	        	                },
-    			 	        	                {   id: "no-console",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noConsole"],
-    			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: error,
-    			 	        	                	options: severities
+    			 	        	                {
+	    			 	        	                	id: "no-console",  //$NON-NLS-1$
+	    			 	        	                	name: javascriptMessages["noConsole"],
+	    			 	        	                	type: "number", //$NON-NLS-1$
+	    			 	        	                	defaultValue: error,
+	    			 	        	                	options: severities
     			 	        	                },
-     				 	        	            {	id: "no-debugger",  //$NON-NLS-1$
+    			 	        	                {
+	    			 	        	                	id: "no-control-regex",  //$NON-NLS-1$
+	    			 	        	                	name: javascriptMessages["no-control-regex"],
+	    			 	        	                	type: "number", //$NON-NLS-1$
+	    			 	        	                	defaultValue: error,
+	    			 	        	                	options: severities
+    			 	        	                },
+										{
+     				 	        	            	id: "no-debugger",  //$NON-NLS-1$
  				 	        	                	name: javascriptMessages["noDebugger"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "no-dupe-keys",  //$NON-NLS-1$
+										},
+				 	        	            {
+				 	        	                	id: "no-dupe-keys",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noDupeKeys"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "valid-typeof",  //$NON-NLS-1$
+				 	        	            },
+				 	        	            {
+				 	        	                	id: "no-duplicate-case",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["no-duplicate-case"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: error,
+				 	        	                	options: severities
+				 	        	            },
+				 	        	            {
+				 	        	            		id: "valid-typeof",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["validTypeof"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "no-regex-spaces",  //$NON-NLS-1$
+				 	        	            },
+				 	        	            {
+				 	        	            		id: "no-regex-spaces",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noRegexSpaces"],
 				 	        	                	type: "number", //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "use-isnan",  //$NON-NLS-1$
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "use-isnan",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["useIsNaN"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "no-reserved-keys", //$NON-NLS-1$
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-reserved-keys", //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noReservedKeys"],
 				 	        	                	type: "number", //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "no-sparse-arrays", //$NON-NLS-1$
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-sparse-arrays", //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noSparseArrays"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "no-fallthrough",  //$NON-NLS-1$
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-fallthrough",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noFallthrough"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "no-comma-dangle", //$NON-NLS-1$
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-comma-dangle", //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noCommaDangle"],
 				 	        	                	type: "number", //$NON-NLS-1$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "no-empty-block",  //$NON-NLS-1$
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-empty-block",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noEmptyBlock"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "no-extra-semi",  //$NON-NLS-1$
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-extra-semi",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["unnecessarySemis"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "no-unreachable",  //$NON-NLS-1$
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-unreachable",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noUnreachable"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
-				 	        	                }]
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-empty-character-class",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["no-empty-character-class"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: error,
+				 	        	                	options: severities
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-extra-boolean-cast",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["no-extra-boolean-cast"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: error,
+				 	        	                	options: severities
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-extra-parens",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["no-extra-parens"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: error,
+				 	        	                	options: severities
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-invalid-regexp",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["no-invalid-regexp"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: error,
+				 	        	                	options: severities
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-negated-in-lhs",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["no-negated-in-lhs"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: error,
+				 	        	                	options: severities
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-obj-calls",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["no-obj-calls"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: error,
+				 	        	                	options: severities
+			 	        	                }
+			 	        	                ]
 				 	        	},
 				 	        	{  pid: "eslint.config.practices",  //$NON-NLS-1$
 				 	        	   order: 2,
@@ -1045,12 +1117,35 @@ define([
  				 	        	                    defaultValue: warning,
  				 	        	                	options: severities
  				 	        	                },
- 				 	        	                {	id: "no-shadow",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["varShadow"],
-    			 	        	                	type: "number",  //$NON-NLS-1$
-    			 	        	                	defaultValue: warning,
-    			 	        	                	options: severities
-    			 	        	                }]
+ 				 	        	            {
+	 				 	        	            	id: "no-shadow",  //$NON-NLS-1$
+	    			 	        	                	name: javascriptMessages["varShadow"],
+	    			 	        	                	type: "number",  //$NON-NLS-1$
+	    			 	        	                	defaultValue: warning,
+	    			 	        	                	options: severities
+    			 	        	                },
+    			 	        	                {
+    			 	        	                		id: "accessor-pairs",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["accessor-pairs"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: warning,
+				 	        	                	options: severities
+ 				 	        	            },
+			 	        	                {
+			 	        	                		id: "no-eq-null",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["no-eq-null"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: error,
+				 	        	                	options: severities
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-else-return",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["no-else-return"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: warning,
+				 	        	                	options: severities
+			 	        	                }
+ 				 	        	            ]
 				 	            },
 				 	        	{  pid: "eslint.config.codestyle",  //$NON-NLS-1$
 				 	        	   order: 3,
@@ -1099,7 +1194,8 @@ define([
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
- 				 	        	                }]
+ 				 	        	                }
+]
 				 	        	}]
     			});
 

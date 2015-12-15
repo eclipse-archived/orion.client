@@ -233,7 +233,7 @@ define([
 						if(err) {
 							eslintErrors.push({
 								start: 0,
-								args: {0: err.error, nls: "eslintValidationFailure" }, //$NON-NLS-0$
+								args: {0: type.error, nls: "eslintValidationFailure" }, //$NON-NLS-0$
 								severity: "error" //$NON-NLS-0$
 							});
 						} else if (type.problems) {

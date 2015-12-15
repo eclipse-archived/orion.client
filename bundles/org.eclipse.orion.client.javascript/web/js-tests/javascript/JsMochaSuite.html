@@ -43,7 +43,7 @@
 					before("reset timeout", function(done) {
 						this.timeout(20000);
 						testworker.start(done);
-					})
+					});
 					after("stop the worker", function() {
 						if(testworker) {
 							testworker.terminate();
@@ -66,7 +66,7 @@
 					ternCommandTests(testworker);
 					validatorTests(testworker);
 					ternProjectTests(testworker);
-					mocha.run()
+					mocha.run();
 		});
 	});
   </script>
