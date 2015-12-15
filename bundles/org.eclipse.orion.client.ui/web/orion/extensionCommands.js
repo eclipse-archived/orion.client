@@ -485,8 +485,11 @@ define(["orion/Deferred", "orion/commands", "orion/contentTypes", "orion/URITemp
 			isEditor: info.isEditor,
 			showGlobally: info.showGlobally
 		};
+		// Quickfixes for annotations are handled via commands, this option enable quickfixes to apply to all annotations
+		if (info.fixAllEnabled){
+			commandOptions.fixAllEnabled = true;
+		}
 		enhanceCommandOptions(commandOptions, deferred);
-		
 		return deferred;
 	};
 

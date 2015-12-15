@@ -501,20 +501,9 @@ define([
     			quickFixComputer,
     			{
         			name: javascriptMessages["removeExtraSemiFixName"],
+        			fixAllEnabled: true,
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "rm.extra.semi.fix",  //$NON-NLS-1$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
-        			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-extra-semi)$"} //$NON-NLS-1$ //$NON-NLS-2$
-                    ]
-    			}
-    	);
-    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    			quickFixComputer,
-    			{
-        			name: javascriptMessages["removeExtraSemiFixAllName"],
-        			scopeId: "orion.edit.quickfixAll", //$NON-NLS-1$
-        			id : "rm.extra.semi.fixAll",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-extra-semi)$"} //$NON-NLS-1$ //$NON-NLS-2$
@@ -658,6 +647,7 @@ define([
     			quickFixComputer,
     			{
         			name: javascriptMessages["eqeqeqFixName"],
+        			fixAllEnabled: true,
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "eqeqeq.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
@@ -666,19 +656,6 @@ define([
                     ]
     			}
     	);
-    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    			quickFixComputer,
-    			{
-        			name: javascriptMessages["eqeqeqFixAllName"],
-        			scopeId: "orion.edit.quickfixAll", //$NON-NLS-1$
-        			id : "eqeqeq.fixAll",  //$NON-NLS-1$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
-        			validationProperties: [
-                        {source: "annotation:id", match: "^(?:eqeqeq)$"} //$NON-NLS-1$ //$NON-NLS-2$
-                    ]
-    			}
-    	);
-    	
 
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,

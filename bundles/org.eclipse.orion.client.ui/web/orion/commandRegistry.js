@@ -1230,13 +1230,7 @@ define([
 								id = renderType + command.id + index; // using the index ensures unique ids within the DOM when a command repeats for each item
 								var commandDiv = document.createElement("div"); //$NON-NLS-0$
 								parent.appendChild(commandDiv);
-								element = Commands.createCommandItem(commandDiv, command, invocation, id, null, renderType === "button", onClick);
-							} else if (renderType === "quickfixAll") {
-								id = renderType + command.id + index + 'All'; // using the index ensures unique ids within the DOM when a command repeats for each item
-								commandDiv = document.createElement("div"); //$NON-NLS-0$
-								parent.appendChild(commandDiv);
-								command.name =  i18nUtil.formatMessage(command.name, userData.annotations.length);
-								element = Commands.createCommandItem(commandDiv, command, invocation, id, null, renderType === "button", onClick);
+								element = Commands.createQuickfixItem(commandDiv, command, invocation, onClick);
 							} else {
 								id = renderType + command.id + index;  // // using the index ensures unique ids within the DOM when a command repeats for each item
 								element = Commands.createCommandItem(parent, command, invocation, id, null, renderType === "tool", onClick);

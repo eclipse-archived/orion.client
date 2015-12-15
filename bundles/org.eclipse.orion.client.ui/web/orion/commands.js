@@ -225,6 +225,79 @@ define([
 		return checkbox;
 	}
 
+	function createQuickfixItem(parent, command, commandInvocation, callback) {
+		var element;
+		var button;
+		var clickTarget;
+		var fixAllCheckbox;
+		var fixAllLabel;
+		
+		element = document.createElement("div"); //$NON-NLS-1$
+		
+		button = clickTarget = document.createElement("button"); //$NON-NLS-1$
+		button.className = "orionButton"; //$NON-NLS-1$
+		if (command.extraClass) {
+			button.classList.add(command.extraClass);
+		}
+		button.classList.add("commandButton"); //$NON-NLS-1$
+		var text = document.createTextNode(command.name);
+		button.appendChild(text);
+		
+		var onClick = callback || command.callback;
+		if (onClick) {
+			var done = function() {
+				if (fixAllCheckbox && fixAllCheckbox.checked){
+					commandInvocation.userData.doFixAll = true;
+				}
+				onClick.call(commandInvocation.handler, commandInvocation);
+			};
+			command.onClick = onClick;
+			clickTarget.addEventListener("click", function(e) {
+				var onClickThen;
+				onClickThen = function (doIt) { if(doIt) {
+						done();
+					}
+				};
+				if(command.preCallback) {
+					command.preCallback(commandInvocation).then( function(doIt) {
+						onClickThen(doIt);
+					});
+				} else {
+					onClickThen(true);
+				}
+				e.stopPropagation();
+			}, false);
+		}
+		if (parent.nodeName.toLowerCase() === "ul") {
+			var li = document.createElement("li"); //$NON-NLS-0$
+			parent.appendChild(li);
+			parent = li;
+		} else {
+			button.classList.add("commandMargins"); //$NON-NLS-0$
+		}
+		element.appendChild(button);
+		
+		// TODO We check that the internal access to annotation model exists so if it breaks we don't show the checkbox at all
+		if (command.fixAllEnabled && commandInvocation.userData._annotationModel){
+			var id = command.name + 'fixAll'; //$NON-NLS-1$
+			fixAllCheckbox = document.createElement('input'); //$NON-NLS-1$
+			fixAllCheckbox.type = 'checkbox'; //$NON-NLS-1$
+			fixAllCheckbox.className = "quickfixAllParameter"; //$NON-NLS-1$
+			fixAllCheckbox.id = id;
+			
+			fixAllLabel = document.createElement('label'); //$NON-NLS-1$
+			fixAllLabel.htmlFor = id;
+			fixAllLabel.className = "quickfixAllParameter"; //$NON-NLS-1$
+			fixAllLabel.appendChild(document.createTextNode('Fix all in file'));  // TODO NLS this string
+			
+			element.appendChild(fixAllCheckbox);
+			element.appendChild(fixAllLabel);
+		}
+		
+		parent.appendChild(element);
+		return element;
+	}
+	
 	function createCommandItem(parent, command, commandInvocation, id, keyBinding, useImage, callback) {
 		var element;
 		var clickTarget;
@@ -453,7 +526,6 @@ define([
 
 		return element;
 	}
-	
 
 	/**
 	 * CommandInvocation is a data structure that carries all relevant information about a command invocation.
@@ -587,6 +659,7 @@ define([
 			this.id = options.id;  // unique id
 			this.name = options.name;
 			this.tooltip = options.tooltip;
+			this.fixAllEnabled = options.fixAllEnabled; // optional toggle for quickfix command to apply to all annotations
 			this.callback = options.callback; // optional callback that should be called when command is activated (clicked)
 			this.preCallback = options.preCallback; // optional callback that should be called when command is activated (clicked)
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
@@ -701,6 +774,7 @@ define([
 		CommandInvocation: CommandInvocation,
 		createDropdownMenu: createDropdownMenu,
 		createCheckedMenuItem: createCheckedMenuItem,
+		createQuickfixItem: createQuickfixItem,
 		createCommandItem: createCommandItem,
 		createCommandMenuItem: createCommandMenuItem,
 		executeBinding: executeBinding,

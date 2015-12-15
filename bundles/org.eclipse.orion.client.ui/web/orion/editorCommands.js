@@ -974,7 +974,7 @@ define([
 							offset: editor.getCaretOffset()
 						};
 						
-						// TODO: Make this more generic
+						// Provide the quick fix command with the selected annotation
 						if (info.scopeId === "orion.edit.quickfix") {
 							context.annotation = {
 								start: data.userData.start,
@@ -983,25 +983,26 @@ define([
 								id: data.userData.id,
 								data: data.userData.data
 							};
-						} else if (info.scopeId === "orion.edit.quickfixAll"){
-							context.annotations = [];
-							for (var i=0; i<data.userData.annotations.length; i++) {
-								context.annotations.push(
-								{
-									start: data.userData.annotations[i].start,
-									end: data.userData.annotations[i].end,
-									title: data.userData.annotations[i].title,
-									id: data.userData.annotations[i].id,
-									data: data.userData.annotations[i].data
+							// Also include other annotations with the same id
+							// TODO: We are using the internals of the annotation model here
+							// TODO We also check the model existence in commands.js
+							if (data.userData.doFixAll && data.userData._annotationModel){
+								context.doFixAll = true;
+								context.annotations = [];
+								var allAnnotations = data.userData._annotationModel._annotations;
+								for (var i=0; i<allAnnotations.length; i++) {
+									if (allAnnotations[i].id === data.userData.id){
+										context.annotations.push(
+											{
+												start: allAnnotations[i].start,
+												end: allAnnotations[i].end,
+												title: allAnnotations[i].title,
+												id: allAnnotations[i].id,
+												data: allAnnotations[i].data
+											}
+										);
+									}
 								}
-								);
-							}
-							context.annotation = {
-								start: data.userData.annotation.start,
-								end: data.userData.annotation.end,
-								title: data.userData.annotation.title,
-								id: data.userData.annotation.id,
-								data: data.userData.annotation.data
 							}
 						}
 						var editorContext = editor.getEditorContext();

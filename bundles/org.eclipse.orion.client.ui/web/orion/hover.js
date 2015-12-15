@@ -51,8 +51,9 @@ define ([
 			});
 			this._qfToolbars = [];
 		},
-				
-		renderQuickFixes: function(annotation, annotationIterator, parentDiv) {
+		
+		// TODO The allAnnotations iterator was collected using editor API, currently unused as we instead just get the annotation model from the annotation itself (not official API)
+		renderQuickFixes: function(annotation, allAnnotations, parentDiv) {
 			if  (!annotation || !parentDiv){
 				return;
 			}
@@ -61,32 +62,10 @@ define ([
 			actionsDiv.className = "commandList"; //$NON-NLS-0$ 
 			parentDiv.appendChild(actionsDiv);
 			
-			// TODO If there are multiple quickfixes, the quickfix all commands will always be at the bottom
 			var nodeList = [];
 			var metadata = this.inputManager.getFileMetadata();
 			metadata.annotation = annotation;
-			this.commandRegistry.renderCommands("orion.edit.quickfix", actionsDiv, metadata, this.editor, 'quickfix', annotation, nodeList); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
-			var annotations = [];
-			if (annotationIterator){
-				while (annotationIterator.hasNext()){
-					var current = annotationIterator.next();
-					if (current.id === annotation.id){
-						annotations.push(current);
-					}
-				}
-				// TODO The annotation model iterator is not guaranteed to be in order (though it is currently), sort them to make sure
-				annotations = annotations.sort(function(a, b){
-					return a.start - b.start;
-				});
-				
-				
-				if (annotations.length > 1){
-					actionsDiv = document.createElement("div"); //$NON-NLS-0$
-					actionsDiv.className = "commandList"; //$NON-NLS-0$ 
-					this.commandRegistry.renderCommands("orion.edit.quickfixAll", actionsDiv, metadata, this.editor, 'quickfixAll', {annotation: annotation, annotations: annotations}, nodeList); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
-					parentDiv.appendChild(actionsDiv);
-				}
-			}
+			this.commandRegistry.renderCommands("orion.edit.quickfix", actionsDiv, metadata, this.editor, 'quickfix', annotation, nodeList); //$NON-NLS-1$ //$NON-NLS-2$
 			delete metadata.annotation;
 		}
 

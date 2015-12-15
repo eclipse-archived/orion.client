@@ -83,9 +83,14 @@
 .textviewTooltip .commandButton:not(.dropdownTrigger){ /* In certain themes command buttons are set to all caps */
   text-transform: initial; 
 }
-
 .textviewTooltip .commandList > li {
 	margin: 0;
+}
+/* Reuse font from command buttons but no border */
+.textviewTooltip .quickfixAllParameter {
+	vertical-align: middle;
+	font-weight: normal;
+	font-family: "HelveticaNeue", "Helvetica Neue", "HelveticaNeueRoman", "HelveticaNeue-Roman", "Helvetica Neue Roman", 'TeXGyreHerosRegular', "Helvetica", "Tahoma", "Geneva", "Arial", sans-serif;
 }
 
 /* Styles for custom behaviour */
