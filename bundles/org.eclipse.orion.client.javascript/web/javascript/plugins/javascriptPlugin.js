@@ -952,7 +952,7 @@ define([
 			 	        	                		id: "no-extra-parens",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["no-extra-parens"],
 				 	        	                	type: "number",  //$NON-NLS-1$
-				 	        	                	defaultValue: error,
+				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 			 	        	                },
 			 	        	                {

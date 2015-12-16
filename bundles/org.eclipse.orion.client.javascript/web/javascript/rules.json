@@ -22,6 +22,7 @@
 		"no-eq-null" : 2,
 		"no-eval" : 0,
 		"no-extra-boolean-cast" : 2,
+		"no-extra-parens" : 1,
 		"no-extra-semi": 1,
 		"no-fallthrough" : 2, 
 		"no-implied-eval" : 0,
