@@ -537,12 +537,8 @@ var exports = {};
 		});
 		commandService.addCommand(openGitDiff);
 		
-		var fetchCallback = function(data, force, confirmMsg) {
+		var fetchCallback = function(data, force) {
 			var d = new Deferred();
-			if (confirmMsg && !confirm(confirmMsg)) {
-				d.reject();
-				return d;
-			}
 
 			var item = data.items;
 			var noAuth = false;
@@ -718,8 +714,11 @@ var exports = {};
 			id : "eclipse.orion.git.fetchForce", //$NON-NLS-0$
 			callback: function(data) {
 				var confirm = messages["OverrideContentRemoteTrackingBr"]+"\n\n"+messages['Are you sure?']; //$NON-NLS-0$
-				fetchCallback(data, true, confirm).then(function() {
-					dispatchModelEventOn({type: "modelChanged", action: "fetch", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
+				commandService.confirm(data.domNode, confirm, messages.OK, messages.Cancel, false, function(doit) {
+					if (!doit) return;
+					fetchCallback(data, true).then(function() {
+						dispatchModelEventOn({type: "modelChanged", action: "fetch", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
+					});
 				});
 			},
 			visibleWhen : fetchVisibleWhen
@@ -1175,13 +1174,14 @@ var exports = {};
 				if (bidiUtils.isBidiEnabled) {
 					itemName = bidiUtils.enforceTextDirWithUcc(itemName);
 				}
-				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete tag ${0}?"], itemName))) {
+				commandService.confirm(data.domNode?data.domNode:item.domNode, i18nUtil.formatMessage(messages["Are you sure you want to delete tag ${0}?"], itemName), messages.OK, messages.Cancel, false, function(doit) {
+					if (!doit) return;
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 					var msg = i18nUtil.formatMessage(messages["Removing tag {$0}"], itemName);
 					progress.progress(serviceRegistry.getService("orion.git.provider").doRemoveTag(item.Location), msg).then(function() { //$NON-NLS-0$
-						dispatchModelEventOn({type: "modelChanged", action: "removeTag", tag: item}); //$NON-NLS-1$ //$NON-NLS-0$
+						dispatchModelEventOn({type: "modelChanged", action: "removeTag", tag: item}); //$NON-NLS-1$ //$NON-NLS-2$
 					}, displayErrorOnStatus);
-				}
+				});
 			},
 			visibleWhen: function(item) {
 				return item.Type === "Tag"; //$NON-NLS-0$

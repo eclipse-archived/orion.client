@@ -20,8 +20,9 @@ define([
 	'orion/git/gitPreferenceStorage',
 	'orion/git/logic/gitCommon',
 	'orion/Deferred',
-	'orion/objects'
-], function(messages,i18nUtil,mCommandRegistry,GitPreferenceStorage, mGitCommon, Deferred, objects) {
+	'orion/objects',
+	'orion/progress'
+], function(messages,i18nUtil,mCommandRegistry,GitPreferenceStorage, mGitCommon, Deferred, objects, mProgress) {
 	
 	var handleGitServiceResponse = mGitCommon.handleGitServiceResponse;
 	var gatherSshCredentials = mGitCommon.gatherSshCredentials;
@@ -55,20 +56,27 @@ define([
 			};
 				
 			function command(data) {
+				var confirmedWarnings = data.confirmedWarnings;
+				if(force && !confirmedWarnings){
+					commandService.confirm(data.domNode, messages["OverrideContentOfRemoteBr"]+"\n\n"+messages['Are you sure?'], messages.OK, messages.Cancel, false, function(doit) { //$NON-NLS-1$
+						if (!doit) {
+							d.reject();
+							return;
+						}
+						data.confirmedWarnings = true;
+						confirmedWarnings = true;
+						doCommand(data);
+					});
+				} else {
+					doCommand(data);
+				}
+			}
+
+			
+			function doCommand(data) {
 				//previously saved target branch
 				var itemTargetBranch = data.targetBranch;
 				
-				var confirmedWarnings = data.confirmedWarnings;
-				if(force && !confirmedWarnings){
-					if(!confirm(messages["OverrideContentOfRemoteBr"]+"\n\n"+messages['Are you sure?'])){ //$NON-NLS-0$
-						d.reject();
-						return;
-					} else {
-						data.confirmedWarnings = true;
-						confirmedWarnings = true;
-					}
-				}
-			
 				var item = data.items;
 				if (item.Remote) {
 					itemTargetBranch = item.Remote;
