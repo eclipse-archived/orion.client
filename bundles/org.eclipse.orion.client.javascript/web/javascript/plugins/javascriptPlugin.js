@@ -975,6 +975,13 @@ define([
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-irregular-whitespace",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["no-irregular-whitespace"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: ignore,
+				 	        	                	options: severities
 			 	        	                }
 			 	        	                ]
 				 	        	},

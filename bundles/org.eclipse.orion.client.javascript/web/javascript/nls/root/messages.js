@@ -173,5 +173,6 @@ define({//Default message bundle
 	'no-eq-null' : 'Disallow null comparisons:',
 	'no-else-return' : 'Report else after return:',
 	'no-empty-label' : 'No empty labels:',
-	'no-self-compare' : 'Disallow self compare:'
+	'no-self-compare' : 'Disallow self compare:',
+	'no-irregular-whitespace' : 'No irregular whitespace:'
 });

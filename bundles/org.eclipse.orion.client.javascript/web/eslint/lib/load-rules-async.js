@@ -1767,6 +1767,10 @@ define([
 		'no-self-compare' : {
 			description: ProblemMessages['no-self-compare-description'],
 			url: 'http://eslint.org/docs/rules/no-self-compare', //$NON-NLS-1$
+		},
+		'no-irregular-whitespace' : {
+			description: ProblemMessages['no-irregular-whitespace-description'],
+			url: 'http://eslint.org/docs/rules/no-irregular-whitespace', //$NON-NLS-1$
 		}
 	};
 
