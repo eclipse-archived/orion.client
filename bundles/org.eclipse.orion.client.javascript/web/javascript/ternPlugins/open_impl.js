@@ -95,7 +95,7 @@ define([
 						}
 						
 						// The typeDef couldn't be found or matches the current node, just return the node
-						return {implementation: {start: node.start, end: node.end, file: serverFile.name}};
+						return {implementation: {start: node.start, end: node.end, file: serverFile.name, notFound: true}};
 					}
 				}
 			}

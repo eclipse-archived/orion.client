@@ -56,11 +56,14 @@ define([
 			this.ternworker.postMessage(
 				{request:'implementation', args:{params:{offset: options.offset}, guess: true, files: files, meta:{location: options.input}}}, //$NON-NLS-1$
 				function(response) {
-					if(response.implementation && (typeof(response.implementation.start) === 'number' && typeof(response.implementation.end) === 'number')) {
-						var opts = Object.create(null);
-						opts.start = response.implementation.start;
-						opts.end = response.implementation.end;
-						deferred.resolve(editorContext.openEditor(response.implementation.file, opts));
+					if(response.implementation
+						&& (typeof response.implementation.start === 'number'
+						&& typeof response.implementation.end === 'number')
+						&& typeof response.implementation.notFound === 'undefined') {
+							var opts = Object.create(null);
+							opts.start = response.implementation.start;
+							opts.end = response.implementation.end;
+							deferred.resolve(editorContext.openEditor(response.implementation.file, opts));
 					} else {
 						deferred.reject({Severity: 'Warning', Message: Messages['noImplFound']}); //$NON-NLS-1$
 					}
