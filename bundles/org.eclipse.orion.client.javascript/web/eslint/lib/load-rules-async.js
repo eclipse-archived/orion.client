@@ -1763,6 +1763,10 @@ define([
 		'no-empty-label' : {
 			description: ProblemMessages['no-empty-label-description'],
 			url: 'http://eslint.org/docs/rules/no-empty-label', //$NON-NLS-1$
+		},
+		'no-self-compare' : {
+			description: ProblemMessages['no-self-compare-description'],
+			url: 'http://eslint.org/docs/rules/no-self-compare', //$NON-NLS-1$
 		}
 	};
 

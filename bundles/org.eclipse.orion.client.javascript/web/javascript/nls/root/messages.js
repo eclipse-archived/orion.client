@@ -172,5 +172,6 @@ define({//Default message bundle
 	'no-obj-calls' : 'Disallow global object as function calls:',
 	'no-eq-null' : 'Disallow null comparisons:',
 	'no-else-return' : 'Report else after return:',
-	'no-empty-label' : 'No empty labels:'
+	'no-empty-label' : 'No empty labels:',
+	'no-self-compare' : 'Disallow self compare:'
 });
