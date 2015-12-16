@@ -9933,7 +9933,7 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
-						it("flag mixed spaces and tabs outside of comments", function(callback) {
+						it("flag mixed spaces and tabs outside of comments with newlines", function(callback) {
 							var topic = "	 	\n/* 	 	 */\nvar a;";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
@@ -9975,7 +9975,7 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
-						it("flag missing getter", function(callback) {
+						it("flag missing getter with object expression", function(callback) {
 							var topic = "var o = {d: 1};\n" +
 										"Object.defineProperty(o, 'c', {\n" +
 										"    set: function(value) {\n" +
@@ -9997,7 +9997,7 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
-						it("should not flag missing getter or setter", function(callback) {
+						it("should not flag existing getter or setter", function(callback) {
 							var topic = "var o = {\n" +
 										"    set a(value) {\n" +
 										"        this.val = value;\n" +
@@ -10016,7 +10016,7 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
-						it("should not flag missing getter or setter", function(callback) {
+						it("should not flag existing getter or setter with object expression", function(callback) {
 							var topic = "var o = {d: 1};\n" +
 										"Object.defineProperty(o, 'c', {\n" +
 										"    set: function(value) {\n" +

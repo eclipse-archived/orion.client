@@ -105,8 +105,10 @@ define({
 	'use-isnan-description': 'Disallow comparison to the value NaN.',
 	'valid-typeof' : 'Invalid typeof comparison.',
 	'valid-typeof-description': 'Warn when incorrectly comparing the result of a typeof expression.',
+	
+	// Rules consumed from ESLint
 	'accessor-pairs-description' : "Report when accessors don't come in pairs (getter, setter)",
-	'no-control-regex-description' : "Disallow controls characters in regular expressions",
+	'no-control-regex-description' : "Disallow control characters in regular expressions",
 	'no-duplicate-case-description' : 'Disallow a duplicate case label',
 	'no-empty-character-class-description' : 'Disallow empty character classes',
 	'no-extra-boolean-cast-description' : 'Discourage redundant double negation',
