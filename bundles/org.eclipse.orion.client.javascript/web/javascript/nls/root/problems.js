@@ -104,5 +104,17 @@ define({
 	'use-isnan': 'Use the isNaN function to compare with NaN.',
 	'use-isnan-description': 'Disallow comparison to the value NaN.',
 	'valid-typeof' : 'Invalid typeof comparison.',
-	'valid-typeof-description': 'Warn when incorrectly comparing the result of a typeof expression.'
+	'valid-typeof-description': 'Warn when incorrectly comparing the result of a typeof expression.',
+	'accessor-pairs-description' : "Report when accessors don't come in pairs (getter, setter)",
+	'no-control-regex-description' : "Disallow controls characters in regular expressions",
+	'no-duplicate-case-description' : 'Disallow a duplicate case label',
+	'no-empty-character-class-description' : 'Disallow empty character classes',
+	'no-extra-boolean-cast-description' : 'Discourage redundant double negation',
+	'no-extra-parens-description' : 'Discourage redundant parentheses',
+	'no-invalid-regexp-description' : 'Report invalid regular expressions',
+	'no-negated-in-lhs-description' : 'Disallow negated left operand of in operator',
+	'no-obj-calls-description' : 'Disallow global object as function calls',
+	'no-eq-null-description' : 'Disallow null comparisons',
+	'no-else-return-description' : 'Report else after return',
+	'no-empty-label-description' : 'No empty labels'
 });

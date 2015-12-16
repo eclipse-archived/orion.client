@@ -38,10 +38,11 @@ exports.define = define;
  * @returns {void}
  */
 function load() {
-    var newRules = Rules.getESLintRules();
-    Object.keys(newRules).forEach(function(ruleId) {
-        define(ruleId, newRules[ruleId]);
-    });
+   Rules.getESLintRules().then(function(rules) {
+      Object.keys(rules).forEach(function (ruleId) {
+           define(ruleId, rules[ruleId]);
+       });
+   });
 }
 
 exports.load = load;

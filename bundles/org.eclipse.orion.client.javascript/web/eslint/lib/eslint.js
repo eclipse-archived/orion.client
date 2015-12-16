@@ -810,14 +810,20 @@ module.exports = (function() {
             location = node.loc.start;
         }
 
-		// ORION
-		message = message.replace(/\$\{([^\}]+)\}/g, function(str, key) {
-			return opts[key];
-		});
-
         if (isDisabledByReportingConfig(reportingConfig, ruleId, location)) {
             return;
         }
+
+		if (opts) {
+	        message = message.replace(/\{\{\s*(.+?)\s*\}\}/g, function(fullMatch, term) {
+	            if (term in opts) {
+	                return opts[term];
+	            }
+	
+	            // Preserve old behavior: If parameter name not provided, don't replace it.
+	            return fullMatch;
+	        });
+	    }
 
         var problem = {
             ruleId: ruleId,
