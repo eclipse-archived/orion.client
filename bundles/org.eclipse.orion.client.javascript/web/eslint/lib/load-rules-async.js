@@ -21,8 +21,21 @@ define([
 'i18n!javascript/nls/problems',
 'estraverse/estraverse',
 'orion/editor/stylers/application_javascript/syntax',
-'orion/Deferred'
-], function(util, Logger, Finder, ProblemMessages, Estraverse, JsSyntax, Deferred) {
+'/eslint/lib/rules/accessor-pairs.js',
+'/eslint/lib/rules/no-control-regex.js',
+'/eslint/lib/rules/no-duplicate-case.js',
+'/eslint/lib/rules/no-else-return.js',
+'/eslint/lib/rules/no-empty-character-class.js',
+'/eslint/lib/rules/no-empty-label.js',
+'/eslint/lib/rules/no-eq-null.js',
+'/eslint/lib/rules/no-extra-boolean-cast.js',
+'/eslint/lib/rules/no-extra-parens.js',
+'/eslint/lib/rules/no-invalid-regexp.js',
+'/eslint/lib/rules/no-negated-in-lhs.js',
+'/eslint/lib/rules/no-obj-calls.js',
+], function(util, Logger, Finder, ProblemMessages, Estraverse, JsSyntax, 
+		accessorPairs, noControlRegex, noDuplicateCase, noElseReturn, noEmptyCharClasses, 
+		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs, noObjCalls) {
 
     var rules = {
         "curly" : {
@@ -1716,53 +1729,67 @@ define([
         		};
 			}
         },
+        
+        // Rules consumed from ESLint 3rd party library
 		'accessor-pairs' : {
 			description: ProblemMessages['accessor-pairs-description'],
 			url: 'http://eslint.org/docs/rules/accessor-pairs', //$NON-NLS-1$
+			rule: accessorPairs
 		},
 		'no-control-regex' : {
 			description: ProblemMessages['no-control-regex-description'],
 			url: 'http://eslint.org/docs/rules/no-control-regex', //$NON-NLS-1$
+			rule: noControlRegex
 		},
 		'no-duplicate-case' : {
 			description: ProblemMessages['no-duplicate-case-description'],
 			url: 'http://eslint.org/docs/rules/no-duplicate-case', //$NON-NLS-1$
+			rule: noDuplicateCase
 		},
 		'no-empty-character-class' : {
 			description: ProblemMessages['no-empty-character-class-description'],
 			url: 'http://eslint.org/docs/rules/no-empty-character-class', //$NON-NLS-1$
+			rule: noEmptyCharClasses
 		},
 		'no-extra-boolean-cast' : {
 			description: ProblemMessages['no-extra-boolean-cast-description'],
 			url: 'http://eslint.org/docs/rules/no-extra-boolean-cast', //$NON-NLS-1$
+			rule: noExtraBoolCast
 		},
 		'no-extra-parens' : {
 			description: ProblemMessages['no-extra-parens-description'],
 			url: 'http://eslint.org/docs/rules/no-extra-parens', //$NON-NLS-1$
+			rule: noExtraParens
 		},
 		'no-invalid-regexp' : {
 			description: ProblemMessages['no-invalid-regexp-description'],
 			url: 'http://eslint.org/docs/rules/no-invalid-regexp', //$NON-NLS-1$
+			rule: noInvalidRegExp
 		},
 		'no-negated-in-lhs' : {
 			description: ProblemMessages['no-negated-in-lhs-description'],
 			url: 'http://eslint.org/docs/rules/no-negated-in-lhs', //$NON-NLS-1$
+			rule: noNegatedInLhs
 		},
 		'no-obj-calls' : {
 			description: ProblemMessages['no-obj-calls-description'],
 			url: 'http://eslint.org/docs/rules/no-obj-calls', //$NON-NLS-1$
+			rule: noObjCalls
 		},
 		'no-eq-null' : {
 			description: ProblemMessages['no-eq-null-description'],
 			url: 'http://eslint.org/docs/rules/no-eq-null', //$NON-NLS-1$
+			rule: noEqNull
 		},
 		'no-else-return' : {
 			description: ProblemMessages['no-else-return-description'],
 			url: 'http://eslint.org/docs/rules/no-else-return', //$NON-NLS-1$
+			rule: noElseReturn
 		},
 		'no-empty-label' : {
 			description: ProblemMessages['no-empty-label-description'],
 			url: 'http://eslint.org/docs/rules/no-empty-label', //$NON-NLS-1$
+			rule: noEmptyLabel
 		}
 	};
 
@@ -1847,64 +1874,23 @@ define([
      */
     function getRules() {
         return rules;
-    }
-
-    /**
+	}
+	
+	/**
      * @name getESLintRules
      * @description Returns the rule object for ESLint
      * @returns {Object} The rule object
      * @since 7.0
      */
-	function getESLintRules() {
-	       var ruleobj = Object.create(null);
-	       return Deferred.all(loadRules(rules)).then(
-	           /* @callback */
-	           function(all_loaded_rules) {
-	               var keys = Object.keys(rules);
-	                for (var i=0; i<keys.length; i++) {
-	                    var key = keys[i];
-	                    if (rules[key] && rules[key].rule) {
-	                        ruleobj[key] = rules[key].rule;
-	                    }
-	                }
-	                return ruleobj;
-	           },
-	           /* @callback */
-	           function(err) {
-	           });
-	   }
-
-	/**
-	 * @description Loads the rules listed in the given rules array
-	 * @param {Object} rules the given rules
-	 * @since 11.0
-	 */
-	function loadRules(rules) {
-		var promises = [];
-		var keys = Object.keys(rules);
-		if(keys) {
-			keys.forEach(function(key) {
-				if (!rules[key].rule) {
-					var name = '/eslint/lib/rules/' + key + '.js';
-					var deferred = new Deferred();
-					try {
-						promises.push(deferred);
-						requirejs([name], function(_) {
-							rules[key].rule = _;
-							deferred.resolve(_);
-						},
-						function(err) {
-							deferred.reject(err);
-						});
-					}
-					catch(err) {
-						deferred.reject(err);
-					}
-				}
-			});
-		}
-		return promises;
-	}
+    function getESLintRules() {
+        var ruleobj = Object.create(null);
+        var keys = Object.keys(rules);
+        for (var i=0; i<keys.length; i++) {
+            var rule = keys[i];
+            ruleobj[rule] = rules[rule].rule;
+        }
+        return ruleobj;
+    }
 
 	return {
 		getRules: getRules,
