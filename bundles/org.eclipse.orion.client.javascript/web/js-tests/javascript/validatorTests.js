@@ -10642,7 +10642,7 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "Invalid regular expression: /[/: Unterminated character class"
+										start: 0
 									}]);
 								},
 								function (error) {
@@ -10676,7 +10676,7 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "Invalid regular expression: /\\/: \\ at end of pattern"
+										start: 0
 									}]);
 								},
 								function (error) {
