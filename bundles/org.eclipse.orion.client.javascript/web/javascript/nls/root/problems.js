@@ -119,5 +119,6 @@ define({
 	'no-eq-null-description' : 'Disallow null comparisons',
 	'no-else-return-description' : 'Report else after return',
 	'no-empty-label-description' : 'No empty labels',
-	'no-self-compare-description' : 'Disallow self compare'
+	'no-self-compare-description' : 'Disallow self compare',
+	'no-irregular-whitespace-description' : 'No irregular whitespace:'
 });
