@@ -27,6 +27,7 @@
 		"no-fallthrough" : 2, 
 		"no-implied-eval" : 0,
 		"no-invalid-regexp": 2,
+		"no-irregular-whitespace" : 0,
 		"no-iterator": 2, 
 		"no-jslint" : 1, 
 		"no-mixed-spaces-and-tabs" : 0,

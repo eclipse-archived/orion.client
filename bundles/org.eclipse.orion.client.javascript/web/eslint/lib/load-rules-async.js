@@ -34,9 +34,10 @@ define([
 './rules/no-negated-in-lhs',
 './rules/no-obj-calls',
 './rules/no-self-compare',
+'./rules/no-irregular-whitespace',
 ], function(util, Logger, Finder, ProblemMessages, Estraverse, JsSyntax, 
 		accessorPairs, noControlRegex, noDuplicateCase, noElseReturn, noEmptyCharClasses, 
-		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs, noObjCalls, noSelfCompare) {
+		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs, noObjCalls, noSelfCompare, noIrregularWhitespace) {
 
     var rules = {
         "curly" : {
@@ -1796,7 +1797,12 @@ define([
 			description: ProblemMessages['no-self-compare-description'],
 			url: 'http://eslint.org/docs/rules/no-self-compare', //$NON-NLS-1$
 			rule: noSelfCompare
-		}
+		},
+		'no-irregular-whitespace' : {
+			description: ProblemMessages['no-irregular-whitespace-description'],
+			url: 'http://eslint.org/docs/rules/no-irregular-whitespace', //$NON-NLS-1$
+			rule: noIrregularWhitespace
+		},
 	};
 
 	function _mapCallees(arr, obj) {
