@@ -42,6 +42,7 @@
 		"no-regex-spaces" : 2,
 		"no-reserved-keys" : 2,
 		"no-self-compare" : 2,
+		"no-self-assign" : 2,
 		"no-shadow" : 1,
 		"no-shadow-global" : 1,
 		"no-sparse-arrays" : 1, 

@@ -120,5 +120,7 @@ define({
 	'no-else-return-description' : 'Report else after return',
 	'no-empty-label-description' : 'No empty labels',
 	'no-self-compare-description' : 'Disallow self compare',
-	'no-irregular-whitespace-description' : 'No irregular whitespace:'
+	'no-irregular-whitespace-description' : 'No irregular whitespace:',
+	'no-self-assign-description' : 'Disallow self assignment',
+	'no-self-assign' : 'Assigning to itself is pointless.'
 });

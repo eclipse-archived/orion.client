@@ -1803,6 +1803,35 @@ define([
 			url: 'http://eslint.org/docs/rules/no-irregular-whitespace', //$NON-NLS-1$
 			rule: noIrregularWhitespace
 		},
+		'no-self-assign' :  {
+			description: ProblemMessages['no-self-assign-description'],
+//			url: 'http://eslint.org/docs/rules/no-self-assign', //$NON-NLS-1$
+			rule: function(context) {
+					function checkVariableDeclarator(variableDeclarator) {
+						var init = variableDeclarator.init;
+						var id = variableDeclarator.id;
+						if (init
+								&& init.type === 'Identifier'
+								&& id.type === 'Identifier'
+								&& id.name === init.name) {
+							context.report(variableDeclarator, ProblemMessages['no-self-assign']);
+						}
+					}
+					function checkAssignmentExpression(assignment) {
+						var left = assignment.left;
+						var right = assignment.right;
+						if (left.type === 'Identifier'
+								&& right.type === 'Identifier'
+								&& left.name === right.name) {
+							context.report(assignment, ProblemMessages['no-self-assign']);
+						}
+					}
+					return {
+						"AssignmentExpression" : checkAssignmentExpression,
+						"VariableDeclarator" : checkVariableDeclarator
+					};
+			}
+		}
 	};
 
 	function _mapCallees(arr, obj) {

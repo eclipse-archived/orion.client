@@ -47,7 +47,7 @@ define([
 'orion/i18nUtil',
 'orion/URL-shim'
 ], function(PluginProvider, mServiceRegistry, Deferred, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist,
-			EslintValidator, Occurrences, Hover, Outliner,	CUProvider, TernProjectManager, Util, Logger, AddToTernCommand, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
+			EslintValidator, Occurrences, Hover, Outliner, CUProvider, TernProjectManager, Util, Logger, AddToTernCommand, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 			RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
@@ -1168,7 +1168,14 @@ define([
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
-			 	        	                }
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-self-assign",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["no-self-assign"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: error,
+				 	        	                	options: severities
+ 			 	        	                }
  				 	        	            ]
 				 	            },
 				 	        	{  pid: "eslint.config.codestyle",  //$NON-NLS-1$

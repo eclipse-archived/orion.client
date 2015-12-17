@@ -11105,6 +11105,68 @@ define([
 								});
 						});
 					});
+					// no-self-assign  --------------------------------------------
+					describe('no-self-assign', function() {
+						var RULE_ID = "no-self-assign";
+						it("flag self in variable declarator", function(callback) {
+							var topic = 	"var x = 10, b = b;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Assigning to itself is pointless."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag self assign in assignment expression", function(callback) {
+							var topic = 	"var x = 10; x =x;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Assigning to itself is pointless."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag assign in assignment expression", function(callback) {
+							var topic = 	"var x = 10, X = 9; x = X;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag assign in assignment expression 2", function(callback) {
+							var topic = 	"var y, X = 9; y = X;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};
