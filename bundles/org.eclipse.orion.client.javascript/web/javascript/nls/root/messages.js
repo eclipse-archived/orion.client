@@ -174,5 +174,6 @@ define({//Default message bundle
 	'no-else-return' : 'Report else after return:',
 	'no-empty-label' : 'No empty labels:',
 	'no-self-compare' : 'Disallow self compare:',
-	'no-irregular-whitespace' : 'No irregular whitespace:'
+	'no-irregular-whitespace' : 'No irregular whitespace:',
+	'no-self-assign' : 'Disallow self assignment:'
 });
