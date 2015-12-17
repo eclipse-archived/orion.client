@@ -33,9 +33,10 @@ define([
 '/eslint/lib/rules/no-invalid-regexp.js',
 '/eslint/lib/rules/no-negated-in-lhs.js',
 '/eslint/lib/rules/no-obj-calls.js',
+'/eslint/lib/rules/no-self-compare.js',
 ], function(util, Logger, Finder, ProblemMessages, Estraverse, JsSyntax, 
 		accessorPairs, noControlRegex, noDuplicateCase, noElseReturn, noEmptyCharClasses, 
-		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs, noObjCalls) {
+		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs, noObjCalls, noSelfCompare) {
 
     var rules = {
         "curly" : {
@@ -1790,6 +1791,11 @@ define([
 			description: ProblemMessages['no-empty-label-description'],
 			url: 'http://eslint.org/docs/rules/no-empty-label', //$NON-NLS-1$
 			rule: noEmptyLabel
+		},
+		'no-self-compare' : {
+			description: ProblemMessages['no-self-compare-description'],
+			url: 'http://eslint.org/docs/rules/no-self-compare', //$NON-NLS-1$
+			rule: noSelfCompare
 		}
 	};
 

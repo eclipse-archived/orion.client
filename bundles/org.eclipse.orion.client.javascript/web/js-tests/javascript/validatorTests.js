@@ -11005,6 +11005,39 @@ define([
 								});
 						});
 					});
+					// no-self-compare  --------------------------------------------
+					describe('no-self-compare', function() {
+						var RULE_ID = "no-self-compare";
+						it("flag self compare", function(callback) {
+							var topic = 	"var x = 10; if (x === x) {x = 20;}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Comparing to itself is potentially pointless."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag compare", function(callback) {
+							var topic = 	"var x = 10; var y = 9; if (x === y) {x = 20;}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};
