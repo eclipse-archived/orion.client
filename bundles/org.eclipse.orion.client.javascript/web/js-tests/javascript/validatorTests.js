@@ -11167,6 +11167,109 @@ define([
 								});
 						});
 					});
+					// type-checked-consistent-return --------------------------------------------
+					describe('type-checked-consistent-return', function() {
+						var RULE_ID = "type-checked-consistent-return";
+						it("flag return boolean and return no value", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return true; } else { return; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Inconsistent type are returned"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag return no value and boolean", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return; } else { return false; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Inconsistent type are returned"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag return booleans", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return true; } else { return false; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag simple return", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return; } else { return; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag simple return", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return null; } else { return {}; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag simple return", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return null; } else { return \"\" + 15; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag number and boolean returns", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return 3; } else { return false; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Inconsistent type are returned"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};

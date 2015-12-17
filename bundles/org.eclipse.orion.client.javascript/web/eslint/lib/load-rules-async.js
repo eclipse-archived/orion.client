@@ -1831,7 +1831,79 @@ define([
 						"VariableDeclarator" : checkVariableDeclarator
 					};
 			}
-		}
+		},
+		'type-checked-consistent-return' : {
+			description: ProblemMessages['type-checked-consistent-return-description'],
+//			url: 'http://eslint.org/docs/rules/type-checked-consistent-return', //$NON-NLS-1$
+			rule: function(context) {
+				var functions = [];
+			
+				//--------------------------------------------------------------------------
+				// Helpers
+				//--------------------------------------------------------------------------
+			
+				/**
+				 * Marks entrance into a function by pushing a new object onto the functions
+				 * stack.
+				 * @returns {void}
+				 * @private
+				 */
+				function enterFunction() {
+					functions.push({});
+				}
+			
+				/**
+				 * Marks exit of a function by popping off the functions stack.
+				 * @returns {void}
+				 * @private
+				 */
+				function exitFunction() {
+					functions.pop();
+				}
+			
+				function getValue(node) {
+					if (node.argument) {
+						if (node.argument.type === "Literal") {
+							return typeof node.argument.value;
+						}
+						return "object";
+					}
+					return typeof undefined;
+				}
+			
+				//--------------------------------------------------------------------------
+				// Public
+				//--------------------------------------------------------------------------
+			
+				return {
+			
+					"Program": enterFunction,
+					"FunctionDeclaration": enterFunction,
+					"FunctionExpression": enterFunction,
+					"ArrowFunctionExpression": enterFunction,
+			
+					"Program:exit": exitFunction,
+					"FunctionDeclaration:exit": exitFunction,
+					"FunctionExpression:exit": exitFunction,
+					"ArrowFunctionExpression:exit": exitFunction,
+			
+					"ReturnStatement": function(node) {
+			
+						var returnInfo = functions[functions.length - 1];
+						var returnTypeDefined = "type" in returnInfo;
+			
+						if (returnTypeDefined) {
+							var typeOfReturnStatement = getValue(node);
+							if (returnInfo.type !== typeOfReturnStatement) {
+								context.report(node, "Inconsistent type are returned");
+							}
+						} else {
+							returnInfo.type = getValue(node);
+						}
+					}
+				};
+			}
+		},
 	};
 
 	function _mapCallees(arr, obj) {

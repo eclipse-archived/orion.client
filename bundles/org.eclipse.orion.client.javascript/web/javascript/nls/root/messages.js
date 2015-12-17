@@ -175,5 +175,6 @@ define({//Default message bundle
 	'no-empty-label' : 'No empty labels:',
 	'no-self-compare' : 'Disallow self compare:',
 	'no-irregular-whitespace' : 'No irregular whitespace:',
-	'no-self-assign' : 'Disallow self assignment:'
+	'no-self-assign' : 'Disallow self assignment:',
+	'type-checked-consistent-return' : 'Report return inconsistent types'
 });
