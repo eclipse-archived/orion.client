@@ -42,7 +42,7 @@ module.exports = function(context) {
             try {
                 void new RegExp(node.arguments[0].value);
             } catch (e) {
-                context.report(node, e.message);
+                context.report(node, "Invalid regular expression");
             }
 
             if (flags) {
