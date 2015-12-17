@@ -1151,6 +1151,13 @@ define([
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "no-self-compare",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["no-self-compare"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: error,
+				 	        	                	options: severities
 			 	        	                }
  				 	        	            ]
 				 	            },
