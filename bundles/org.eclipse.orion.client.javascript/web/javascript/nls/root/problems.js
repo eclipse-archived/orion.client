@@ -118,5 +118,6 @@ define({
 	'no-obj-calls-description' : 'Disallow global object as function calls',
 	'no-eq-null-description' : 'Disallow null comparisons',
 	'no-else-return-description' : 'Report else after return',
-	'no-empty-label-description' : 'No empty labels'
+	'no-empty-label-description' : 'No empty labels',
+	'no-self-compare-description' : 'Disallow self compare'
 });
