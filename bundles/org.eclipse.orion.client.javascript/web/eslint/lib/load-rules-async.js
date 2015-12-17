@@ -105,7 +105,7 @@ define([
 	            	}
 	            	function isNullness(node) {
 	            		if(node && node.type) {
-	            			return (node.type === 'Literal' && node.value == null) || (node.type === 'Identifier' && node.name === 'undefined');  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+	            			return (node.type === 'Literal' && node.value === null) || (node.type === 'Identifier' && node.name === 'undefined');  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
 	            		}
 	            		return false;
 	            	}
@@ -650,7 +650,7 @@ define([
             rule: function(context) {
                 return {
                     'MemberExpression': function(node) {
-                        if(node.property != null) {
+                        if(node.property !== null) {
                             if(node.computed) {
                                 if(node.property.value === '__iterator__') {
                                     context.report(node.property, ProblemMessages['no-iterator']);
@@ -669,7 +669,7 @@ define([
             rule: function(context) {
                 return {
                     'MemberExpression': function(node) {
-                        if(node.property != null) {
+                        if(node.property !== null) {
                             if(node.computed) {
                                 if(node.property.value === '__proto__') {
                                     context.report(node.property, ProblemMessages['no-proto']);
@@ -824,7 +824,7 @@ define([
 							        var nonNlsRegExp = /\/\/\$NON-NLS-([0-9])+\$/g;
 							        var match;
 							        var comments = [];
-							        while ((match = nonNlsRegExp.exec(line)) != null){
+							        while ((match = nonNlsRegExp.exec(line)) !== null){
 							        	comments.push(match[1]);
 							        }
 
@@ -904,7 +904,7 @@ define([
 							    	delete linesWithComments[lineNumber];
 								    nlsComments = [];
 							        if (comment) {
-								        while ((match = nonNlsRegExp.exec(comment.value)) != null){
+								        while ((match = nonNlsRegExp.exec(comment.value)) !== null){
 								        	nlsComments.push(match);
 								        }
 						        	}
@@ -943,7 +943,7 @@ define([
                     	for (lineNumber in linesWithComments){
                     		comment = linesWithComments[lineNumber];
                     		if (comment){
-                    			while ((match = nonNlsRegExp.exec(comment.value)) != null){
+                    			while ((match = nonNlsRegExp.exec(comment.value)) !== null){
                     				value = match[1] ? match[0] : '//' + match[0]; //$NON-NLS-1$
 									start = comment.range[0] + match.index;
 									if (match[1]){
@@ -996,7 +996,7 @@ define([
                 function reportSpaces(node) {
                     var regex = /( {2,})/g;
                     var val = null;
-                    while((val = regex.exec(node.raw)) != null) {
+                    while((val = regex.exec(node.raw)) !== null) {
                         var start = node.range[0]+val.index;
                         var len = val[0].length;
                         context.report({type: 'Literal', range:[start, start+len], loc: node.loc},  //$NON-NLS-1$
