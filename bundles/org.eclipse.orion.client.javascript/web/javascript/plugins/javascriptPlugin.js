@@ -152,6 +152,9 @@ define([
 			 */
 			'worker_ready': function(response) {
 				workerReady = true;
+				if (!pendingStart.msg || !pendingStart.msg.request){
+					pendingStart.msg = {request: "start_server", args: {}};
+				}
 				ternWorker.postMessage(pendingStart.msg, pendingStart.f);
 			},
 			/**
