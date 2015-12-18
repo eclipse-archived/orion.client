@@ -72,8 +72,13 @@ define([
 					that.timeout = null;
 				}, 5000);
 				var files = [{type:'full', name:params.input, text:text}]; //$NON-NLS-1$
+				var offset = params.offset;
+				if (params.annotation) {
+					// this is used in the quickfix to get the right offset
+					offset = params.annotation.start;
+				}
 				that.ternworker.postMessage(
-					{request:'rename', args:{params:{offset: params.offset}, files: files, meta:{location: params.input}, newname:''}}, //$NON-NLS-1$
+					{request:'rename', args:{params:{offset: offset}, files: files, meta:{location: params.input}, newname:''}}, //$NON-NLS-1$
 					function(response) {
 						var changes = response.changes;
 						if(changes && changes.changes && changes.changes.length > 0) {
