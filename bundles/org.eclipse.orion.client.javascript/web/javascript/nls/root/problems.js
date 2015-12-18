@@ -122,5 +122,8 @@ define({
 	'no-self-compare-description' : 'Disallow self compare',
 	'no-irregular-whitespace-description' : 'No irregular whitespace:',
 	'no-self-assign-description' : 'Disallow self assignment',
-	'no-self-assign' : 'Assigning to itself is pointless.'
+	'no-self-assign' : 'Assigning to itself is pointless.',
+	'type-checked-consistent-return-description' : 'Detect inconsistent return values',
+	'inconsistent-return' : 'Inconsistent return types: \'{{type1}}\', \'{{type2}}\'',
+	'expected-no-return-value' : 'Expected no return value.'
 });
