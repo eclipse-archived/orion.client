@@ -55,18 +55,35 @@ define([
 			"chai"
 		];
 		
+		function hasDef(defs, defName) {
+			if(defs && Array.isArray(defs.defs)) {
+				var _defs = defs.defs;
+				for(var i = 0, len = _defs.length; i< len; i++) {
+					if(_defs[i]["!name"] === defName) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+		
 		function checkServerState(expectedPlugins, expectedDefs, callback) {
-			//TODO we need a server message to ask for all defs loaded
 			worker.postMessage({request: "installed_plugins"}, function(plugins) {
 				assert(plugins.plugins, "Tern returned no installed plugins");
 				expectedPlugins.forEach(function(plugin) {
-					assert(plugins.plugins[plugin], "The expected plugin '"+plugin+"' was not loaded"); 
+					assert(plugins.plugins[plugin], "The expected plugin '"+plugin+"' was not loaded");
 				});
-				callback();
+				worker.postMessage({request: "installed_defs"}, function(defs) {
+					expectedDefs.forEach(function(def) {
+						assert(hasDef(defs, def), "The expected definition file '"+def+"' was not loaded");							
+					});
+					callback();
+				});
 			});
 		}
 	
 		describe('.tern-project Tests', function() {
+		this.timeout(100000);
 			it("non-existent contents", function(callback) {
 				worker.postMessage({request: "start_server", args:{}}, /* @callback */ function(response) {
 					assert(response, "We should have gotten a response");

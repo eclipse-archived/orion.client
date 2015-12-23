@@ -282,6 +282,29 @@ require([
 		       callback({request: 'installed_plugins', message: Messages['failedGetInstalledPluginsNoServer']}); //$NON-NLS-1$
 		   }
 		},
+		/**
+		 * @callback
+		 */
+		'installed_defs': function(args, callback) {
+			if(ternserver) {
+		       ternserver.request({
+		           query: {
+			           type: 'installed_defs' //$NON-NLS-1$
+		           }}, 
+		           function(error, defs) {
+		               if(error) {
+							callback({request: 'installed_defs', error: error.message, message: Messages['failedGetInstalledDefs']}); //$NON-NLS-1$
+		               }
+		               if(typeof defs === 'object') {
+							callback({request: 'installed_defs', defs:defs}); //$NON-NLS-1$
+						} else {
+							callback({request: 'installed_defs', defs: null}); //$NON-NLS-1$
+						}
+		           });
+		   } else {
+		       callback({request: 'installed_defs', message: Messages['failedGetInstalledDefsNoServer']}); //$NON-NLS-1$
+		   }
+		},
 		'rename': function(args, callback) {
 			if(ternserver) {
 		       ternserver.request({

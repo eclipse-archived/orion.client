@@ -63,6 +63,8 @@ define({
 	'failedToComputeOccurrencesNoServer': 'failed to compute occurrences, server not started',
 	'failedGetInstalledPlugins': 'Failed to get installed plug-ins',
 	'failedGetInstalledPluginsNoServer': 'Failed to get installed plug-ins, server not started',
+	'failedGetInstalledDefs': 'Failed to get installed Tern definitions',
+	'failedGetInstalledDefsNoServer': 'Failed to get installed Tern definitions, server not started',
 	'failedInstallPlugins': 'Failed to install plug-ins',
 	'failedInstallPluginsNoServer': 'Failed to install plug-ins, server not started',
 	'failedRemovePlugins': 'Failed to remove plug-ins',

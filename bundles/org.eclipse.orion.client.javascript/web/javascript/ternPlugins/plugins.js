@@ -30,6 +30,18 @@ define([
 		}
 	});
 	
+	tern.defineQueryType('installed_defs', { //$NON-NLS-1$
+		/**
+		 * @callback
+		 */
+		run: function run(server, query) {
+			if(server.options && typeof server.options.defs === 'object') {
+				return server.options.defs;
+			}
+			return null;
+		}
+	});
+	
 	tern.defineQueryType('environments', { //$NON-NLS-1$
 		/**
 		 * @callback
