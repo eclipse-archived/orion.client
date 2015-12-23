@@ -69,7 +69,7 @@ require([
 				options.dependencyBudget = jsonOptions.dependencyBudget;
 			}
         }
-        if(typeof(plugins) !== 'object') {
+        if(typeof plugins !== 'object') {
         	plugins = null;
         } else {
         	Objects.mixin(options.plugins, plugins);
@@ -171,7 +171,7 @@ require([
 		               if(error) {
 		                  callback({request: 'definition', error: error.message, message: Messages['failedToComputeDecl']}); //$NON-NLS-1$
 		               }
-		               if(decl && typeof(decl.start) === 'number' && typeof(decl.end) === "number") {
+		               if(decl && typeof decl.start === 'number' && typeof decl.end === "number") {
 							callback({request: 'definition', declaration:decl}); //$NON-NLS-1$
 						} else {
 							callback({request: 'definition', declaration: null}); //$NON-NLS-1$
@@ -182,7 +182,7 @@ require([
 		   }
 		},
 		'delFile': function(args, callback) {
-			if(ternserver && typeof(args.file) === 'string') {
+			if(ternserver && typeof args.file === 'string') {
 	            ternserver.delFile(args.file);
 	            callback({request: 'delFile'}); //$NON-NLS-1$
 	        } else {
@@ -225,7 +225,7 @@ require([
 		               if(error) {
 		                   callback({request: 'environments', error: error.message, message: Messages['failedGetEnvs']}); //$NON-NLS-1$
 		               }
-		               if(typeof(envs) === 'object') {
+		               if(typeof envs === 'object') {
 							callback({request: 'environments', envs:envs}); //$NON-NLS-1$
 						} else {
 							callback({request: 'environments', envs: null}); //$NON-NLS-1$
@@ -249,7 +249,7 @@ require([
 		               if(error) {
 		                   callback({request: 'implementation', error: error.message, message: Messages['failedToComputeImpl']}); //$NON-NLS-1$
 		               }
-		               if(impl && impl.implementation && typeof(impl.implementation.start) === 'number' && typeof(impl.implementation.end) === "number") {
+		               if(impl && impl.implementation && typeof impl.implementation.start === 'number' && typeof impl.implementation.end === "number") {
 							callback({request: 'implementation', implementation:impl.implementation}); //$NON-NLS-1$
 						} else {
 							callback({request: 'implementation', implementation: null}); //$NON-NLS-1$
@@ -257,29 +257,6 @@ require([
 		           });
 		   } else {
 		       callback({request: 'implementation', message: Messages['failedToComputeImplNoServer']}); //$NON-NLS-1$
-		   }
-		},
-		/**
-		 * @callback
-		 */
-		'install_plugins': function(args, callback) {
-			if(ternserver) {
-		       ternserver.request({
-		           query: {
-			           type: 'install_plugins' //$NON-NLS-1$
-		           }}, 
-		           function(error, res) {
-		               if(error) {
-		                   callback({request: 'install_plugins', error: error.message, message: Messages['failedInstallPlugins']}); //$NON-NLS-1$
-		               }
-		               if(typeof(res) === 'object') {
-							callback({request: 'install_plugins', status:res}); //$NON-NLS-1$
-						} else {
-							callback({request: 'install_plugins', status: {state: -1}}); //$NON-NLS-1$
-						}
-		           });
-		   } else {
-		       callback({request: 'install_plugins', message: Messages['failedInstallPluginsNoServer']}); //$NON-NLS-1$
 		   }
 		},
 		/**
@@ -295,7 +272,7 @@ require([
 		               if(error) {
 							callback({request: 'installed_plugins', error: error.message, message: Messages['failedGetInstalledPlugins']}); //$NON-NLS-1$
 		               }
-		               if(typeof(plugins) === 'object') {
+		               if(typeof plugins === 'object') {
 							callback({request: 'installed_plugins', plugins:plugins}); //$NON-NLS-1$
 						} else {
 							callback({request: 'installed_plugins', plugins: null}); //$NON-NLS-1$
@@ -303,73 +280,6 @@ require([
 		           });
 		   } else {
 		       callback({request: 'installed_plugins', message: Messages['failedGetInstalledPluginsNoServer']}); //$NON-NLS-1$
-		   }
-		},
-		'occurrences': function(args, callback) {
-			if(ternserver) {
-		       ternserver.request({
-		           query: {
-			           type: "refs",  //$NON-NLS-1$
-			           file: args.meta.location,
-			           end: args.params.selection.start
-		           }},
-		           function(error, refs) {
-		               if(error) {
-							callback({request: 'occurrences', error: error.message, message: Messages['failedToComputeOccurrences']}); //$NON-NLS-1$
-		               } else if(refs && Array.isArray(refs)) {
-							callback({request: 'occurrences', refs:refs}); //$NON-NLS-1$
-		               } else {
-							callback({request: 'occurrences', refs:[]}); //$NON-NLS-1$
-		               }
-		           });
-		   } else {
-		       callback({request: 'occurrences', message: Messages['failedToComputeOccurrencesNoServer']}); //$NON-NLS-1$
-		   }
-		},
-		/**
-		 * @callback
-		 */
-		'plugin_enablement': function(args, callback) {
-			if(ternserver) {
-		       ternserver.request({
-		           query: {
-			           type: 'plugin_enablement' //$NON-NLS-1$
-		           }}, 
-		           function(error, res) {
-		               if(error) {
-		                   callback({request: 'plugin_enablement', error: error.message, message: Messages['failedEnablementPlugins']}); //$NON-NLS-1$
-		               }
-		               if(typeof(res) === 'object') {
-							callback({request: 'plugin_enablement', status:res}); //$NON-NLS-1$
-						} else {
-							callback({request: 'plugin_enablement', status: {state: -1}}); //$NON-NLS-1$
-						}
-		           });
-		   } else {
-		       callback({request: 'plugin_enablement', message: Messages['failedEnablementPluginsNoServer']}); //$NON-NLS-1$
-		   }
-		},
-		/**
-		 * @callback
-		 */
-		'remove_plugins': function(args, callback) {
-			if(ternserver) {
-		       ternserver.request({
-		           query: {
-			           type: 'remove_plugins' //$NON-NLS-1$
-		           }}, 
-		           function(error, res) {
-		               if(error) {
-		                   callback({request: 'remove_plugins', error: error.message, message: Messages['failedRemovePlugins']}); //$NON-NLS-1$
-		               }
-		               if(typeof(res) === 'object') {
-							callback({request: 'remove_plugins', status:res}); //$NON-NLS-1$
-						} else {
-							callback({request: 'remove_plugins', status: {state: -1}}); //$NON-NLS-1$
-						}
-		           });
-		   } else {
-		       callback({request: 'remove_plugins', message: Messages['failedRemovePluginsNoServer']}); //$NON-NLS-1$
 		   }
 		},
 		'rename': function(args, callback) {
@@ -404,7 +314,7 @@ require([
 		           }},
 		           function(error, type) {
 		               if(error) {
-		                   callback({request: 'type', error: typeof(error) === 'string' ? error : error.message, message: Messages['failedType']}); //$NON-NLS-1$
+		                   callback({request: 'type', error: typeof error === 'string' ? error : error.message, message: Messages['failedType']}); //$NON-NLS-1$
 		               } else {
 							callback({request: 'type', type: type}); //$NON-NLS-1$
 		               }
@@ -421,7 +331,7 @@ require([
 		           files: args.files},
 		           function(error, type) {
 		               if(error) {
-		                   callback({request: 'checkRef', error: typeof(error) === 'string' ? error : error.message, message: Messages['failedType']}); //$NON-NLS-1$
+		                   callback({request: 'checkRef', error: typeof error === 'string' ? error : error.message, message: Messages['failedType']}); //$NON-NLS-1$
 		               } else {
 						callback({request: 'checkRef', type: type}); //$NON-NLS-1$
 		               }
@@ -485,18 +395,18 @@ require([
      * @callback
      */
     onmessage = function(evnt) {
-        if(typeof(evnt.data) === 'object') {
+        if(typeof evnt.data === 'object') {
             var _d = evnt.data;
             var _handler = handlers[_d.request];
-			if(typeof(_handler) === 'function') {
+			if(typeof _handler === 'function') {
 				if (!ternserver && _d.request !== 'start_server'){
 					serverNotReady(_d);
 					return;
 	            }
 				_handler(_d.args, function(response) {
-					if(typeof(_d.messageID) === 'number') {
+					if(typeof _d.messageID === 'number') {
 						response.messageID = _d.messageID;
-					} else if(typeof(_d.ternID) === 'number') {
+					} else if(typeof _d.ternID === 'number') {
 						response.ternID = _d.ternID;
 					}
 					post(response);
@@ -504,7 +414,7 @@ require([
 				});
 			} else if(_d.request === 'read') {
 				var _read = reads[_d.ternID];
-				if(typeof(_read) === 'function') {
+				if(typeof _read === 'function') {
 					var text = '';
 					if(_d.args && _d.args.contents) {
 						text = _d.args.contents;
@@ -513,7 +423,7 @@ require([
 					delete reads[_d.ternID];
 				}
 				_read = resolverReads[_d.ternID];
-				if(typeof(_read) === 'function') {
+				if(typeof _read === 'function') {
 					_read(_d.args.error, {contents: _d.args.contents ? _d.args.contents : '', file:_d.args.file, logical: _d.args.logical});
 					delete reads[_d.ternID];
 				}
@@ -600,7 +510,7 @@ require([
      */
     function _getFile(file, callback) {
        var request = {request: 'read', ternID: ternID++, args: {file:file}}; //$NON-NLS-1$
-       if(file !== null && typeof(file) === 'object') {
+       if(file !== null && typeof file === 'object') {
 			resolverReads[request.ternID] = callback;
        } else {
            reads[request.ternID] = callback;
@@ -624,12 +534,12 @@ require([
 					return;
 				}
 				var plugin = plugins[key];
-				if(!plugin || typeof(plugin) !== 'object') {
+				if(!plugin || typeof plugin !== 'object') {
 					return;
 				}
 				var loc = plugin.location;
-				if(typeof(loc) !== 'string') {
-					if(typeof(pluginsDir) === 'string') {
+				if(typeof loc !== 'string') {
+					if(typeof pluginsDir === 'string') {
 						loc = pluginsDir + key;
 					} else {
 						//assume it is in /tern/plugin/
@@ -667,7 +577,7 @@ require([
 		if(Array.isArray(defs)) {
 			defs.forEach(function(_def) {
 				if(/^\.definitions/.test(_def)) {
-					if(typeof(_def) === 'string') {
+					if(typeof _def === 'string') {
 						var deferred = _loadDef(_def, projectLoc);
 						if(deferred) {
 							_defs.push(deferred);
@@ -703,8 +613,8 @@ require([
 			loc = loc + '.json'; //$NON-NLS-1$
 		}
 		var deferred = new Deferred();
-		_getFile(loc, function(err, contents) {
-			if(typeof(contents) === 'string') {
+		_getFile(loc, /* @callback */ function(err, contents) {
+			if(typeof contents === 'string') {
 				deferred.resolve(JSON.parse(contents));
 			} else {
 				deferred.reject();

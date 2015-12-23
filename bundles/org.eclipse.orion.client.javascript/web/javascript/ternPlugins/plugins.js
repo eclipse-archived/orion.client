@@ -9,16 +9,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env node, amd*/
-/*globals infer tern walk*/
+/*eslint-env amd*/
 define([
-	"tern/lib/infer", 
-	"tern/lib/tern", 
-	"acorn/dist/walk"
-],/* @callback */ function(infer, tern, walk) {
+	"tern/lib/tern"
+], function(tern) {
 	
 	tern.registerPlugin('plugins', /* @callback */ function(server, options) { //$NON-NLS-1$
-		return {}; //TODO I don't think we need to hook any phases
+		return {};
 	});
 	
 	tern.defineQueryType('installed_plugins', { //$NON-NLS-1$
@@ -26,7 +23,7 @@ define([
 		 * @callback
 		 */
 		run: function run(server, query) {
-			if(server.options && typeof(server.options.plugins) === 'object') {
+			if(server.options && typeof server.options.plugins === 'object') {
 				return server.options.plugins;
 			}
 			return null;
@@ -38,7 +35,7 @@ define([
 		 * @callback
 		 */
 		run: function run(server, query) {
-			if(server.options && typeof(server.options.plugins) === 'object') {
+			if(server.options && typeof server.options.plugins === 'object') {
 				var plugins = server.options.plugins;
 				var keys = Object.keys(plugins);
 				var envs = Object.create(null);
@@ -52,33 +49,6 @@ define([
 				return envs;
 			}
 			return null;
-		}
-	});
-	
-	tern.defineQueryType('install_plugins', { //$NON-NLS-1$
-		/**
-		 * @callback
-		 */
-		run: function run(server, query) {
-			//TODO
-		}
-	});
-	
-	tern.defineQueryType('remove_plugins', { //$NON-NLS-1$
-		/**
-		 * @callback
-		 */
-		run: function run(server, query) {
-			//TODO			
-		}
-	});
-	
-	tern.defineQueryType('plugin_enablement', { //$NON-NLS-1$
-		/**
-		 * @callback
-		 */
-		run: function run(server, query) {
-			//TODO
 		}
 	});
 }); 
