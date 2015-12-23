@@ -42,7 +42,7 @@ define([
 				}
 				
 				if (projectFile && files.length > 0){
-					ternProjectManager.enureTernProjectFileLocation(projectFile).then(function(ternFileLocation){
+					ternProjectManager.ensureTernProjectFileLocation(projectFile).then(function(ternFileLocation){
 						// TODO Need to mark the Tern settings dirty
 						if (ternFileLocation){
 							return ternProjectManager.parseTernJSON(ternFileLocation).then(function(jsonOptions){

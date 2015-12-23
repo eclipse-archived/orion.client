@@ -88,7 +88,7 @@ define([
 		 * @param projectFile {Object} the project container
 		 * @returns returns {Deferred} Deferred to get the location of the .tern-project file or <code>null</code> if there was a probem creating one
 		 */
-		enureTernProjectFileLocation: function(projectFile) {
+		ensureTernProjectFileLocation: function(projectFile) {
 			return this.getTernProjectFileLocation(projectFile).then(function(ternFileLocation){
 				if (!ternFileLocation){
 					return this.getFileClient().createFile(projectFile.Location, '.tern-project').then(function(){ //$NON-NLS-1$
@@ -111,7 +111,9 @@ define([
 			}
 			return this.getFileClient().read(fileLocation).then(function(content) {
 				try {
-					return content ? JSON.parse(content) : {};
+					var json = content ? JSON.parse(content) : {};
+					json.projectLoc = fileLocation.slice(0, fileLocation.lastIndexOf('/')+1);
+					return json;
 				} catch(e) {
 					console.log("Error parsing JSON in .tern-project file") //$NON-NLS-1$
 					return {};
