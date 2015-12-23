@@ -56,13 +56,12 @@ require([
                 ecmaVersion: 6
             };
         var pluginsDir = defaultOptions.pluginsDir;
-        var defsDir = defaultOptions.defsDir;
-        var defNames, plugins;
+        var defNames, plugins, projectLoc;
         if (jsonOptions) {
+        	projectLoc = jsonOptions.projectLoc;
         	plugins = jsonOptions.plugins;
 			pluginsDir = jsonOptions.pluginsDir;
 			defNames = jsonOptions.libs;
-			defsDir = jsonOptions.defsDir;
 			if (typeof jsonOptions.ecmaVersion === 'number') {
 				options.ecmaVersion = jsonOptions.ecmaVersion;
 			}
@@ -72,6 +71,8 @@ require([
         }
         if(typeof(plugins) !== 'object') {
         	plugins = null;
+        } else {
+        	Objects.mixin(options.plugins, plugins);
         }
         if(!Array.isArray(defNames)) {
         	defNames = null;
@@ -105,7 +106,7 @@ require([
 					if(defNames.length < 1) {
 						startAndMessage(options);
 					} else {
-						Deferred.all(loadDefs(defNames, defsDir)).then(function(json) {
+						Deferred.all(loadDefs(defNames, projectLoc)).then(function(json) {
 								options.defs = json;
 								startAndMessage(options);
 							}, defaultStartUp);
@@ -486,11 +487,12 @@ require([
     onmessage = function(evnt) {
         if(typeof(evnt.data) === 'object') {
             var _d = evnt.data;
-            if (!ternserver && _d.request !== 'start_server'){
-				serverNotReady(_d);
-            }
             var _handler = handlers[_d.request];
 			if(typeof(_handler) === 'function') {
+				if (!ternserver && _d.request !== 'start_server'){
+					serverNotReady(_d);
+					return;
+	            }
 				_handler(_d.args, function(response) {
 					if(typeof(_d.messageID) === 'number') {
 						response.messageID = _d.messageID;
@@ -597,17 +599,13 @@ require([
      * @param {Function} callback The callback once the file has been read or failed to read
      */
     function _getFile(file, callback) {
-		if(ternserver) {
-           var request = {request: 'read', ternID: ternID++, args: {file:file}}; //$NON-NLS-1$
-           if(file != null && typeof(file) === 'object') {
-				resolverReads[request.ternID] = callback;
-           } else {
-	           reads[request.ternID] = callback;
-	       }
-           post(request, null);
-	    } else {
-	       post(i18nUtil.formatMessage(Messages['failedReadRequest'], typeof(file) === 'object' ? file.logical : file));
-	    }
+       var request = {request: 'read', ternID: ternID++, args: {file:file}}; //$NON-NLS-1$
+       if(file !== null && typeof(file) === 'object') {
+			resolverReads[request.ternID] = callback;
+       } else {
+           reads[request.ternID] = callback;
+       }
+       post(request, null);
     }
     
     /**
@@ -660,16 +658,29 @@ require([
     /**
      * @description Load any defs from the .tern-project file
      * @param {Array.<String>|Object} defs The definitions, either from an array of names or an object of names with additional metadata
-     * @param {String} defsDir The optional directory where to find the definitions. If not given the 'tern/defs' directory is assumed
+     * @param {String} projectLoc The location of the project we are reading configs from
      * @returns {Promise} Returns a promise to resolve all def loads
      * @since 11.0
      */
-    function loadDefs(defs, defsDir) {
+    function loadDefs(defs, projectLoc) {
 		var _defs = [];
 		if(Array.isArray(defs)) {
 			defs.forEach(function(_def) {
-				if(typeof(_def) === 'string') {
-					_defs.push(_loadDef(_def, defsDir, _defs));
+				if(/^\.definitions/.test(_def)) {
+					if(typeof(_def) === 'string') {
+						var deferred = _loadDef(_def, projectLoc);
+						if(deferred) {
+							_defs.push(deferred);
+						}
+					}
+				} else {
+					var idx = defaultOptions.defNames.indexOf(_def);
+					if(idx > -1) {
+						//a default def, get it
+						_defs.push(new Deferred().resolve(defaultOptions.defs[idx]));
+					} else {
+						//TODO do we want to support loading defs from arbitrary locations?
+					}
 				}
 			});
 		}
@@ -680,37 +691,25 @@ require([
      * @description Delegate to actually load a definition
      * @private
      * @param {String} def The name of the definition load try and load
-     * @param {String} defsDir The optional base directory to load from
-     * @param {Array.<Object>} defs The collector array for loaded defs
+     * @param {String} projectLoc The location of the project we are reading configs from
      * @since 11.0
      */
-    function _loadDef(def, defsDir) {
+    function _loadDef(def, projectLoc) {
 		var loc = def;
-		if(typeof(defsDir) === 'string') {
-			loc = defsDir + def;
-		} else {
-			//assume it is in /tern/defs/
-			loc = 'json!tern/defs/' + def; //$NON-NLS-1$
-		}
-		if(!/^json!/i.test(loc)) {
-			loc = 'json!'+loc; //$NON-NLS-1$
+		if(projectLoc) {
+			loc = projectLoc + loc;
 		}
 		if(!/$.json/i.test(def)) {
 			loc = loc + '.json'; //$NON-NLS-1$
 		}
 		var deferred = new Deferred();
-		try {
-			requirejs([loc], function(_) {
-				deferred.resolve(_);
-			},
-			function(err) {
-				deferred.reject(err);
-			});
-		}
-		catch(err) {
-			post(err);
-			deferred.reject(err);
-		}
+		_getFile(loc, function(err, contents) {
+			if(typeof(contents) === 'string') {
+				deferred.resolve(JSON.parse(contents));
+			} else {
+				deferred.reject();
+			}
+		});
 		return deferred;
     }
 });

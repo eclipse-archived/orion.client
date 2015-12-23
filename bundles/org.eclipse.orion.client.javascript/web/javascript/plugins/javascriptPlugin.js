@@ -123,8 +123,8 @@ define([
 				}
     			ternReady = false;
     		}
-    		if(ternReady || starting) {
-				if(msg != null && typeof(msg) === 'object') {
+    		if(ternReady || starting || msg.request === 'read') { //configuration reads can happen while the server is starting
+				if(msg !== null && typeof(msg) === 'object') {
 					if(typeof(msg.messageID) !== 'number' && typeof(msg.ternID) !== 'number') {
 						//don't overwrite an id from a tern-side request
 						msg.messageID = this.messageId++;
@@ -153,7 +153,7 @@ define([
 			'worker_ready': function(response) {
 				workerReady = true;
 				if (!pendingStart.msg || !pendingStart.msg.request){
-					pendingStart.msg = {request: "start_server", args: {}};
+					pendingStart.msg = {request: "start_server", args: {}}; //$NON-NLS-1$
 				}
 				ternWorker.postMessage(pendingStart.msg, pendingStart.f);
 			},

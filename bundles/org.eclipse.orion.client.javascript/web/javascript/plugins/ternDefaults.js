@@ -41,6 +41,7 @@ define([
 ], function(Messages, ecma5, ecma6, browser, chai) {
 	
 	var defs = [ecma5, ecma6, browser, chai];
+	var defNames = ["ecma5", "ecma6", "browser", "chai"]; //these are in the same order to avoid a walk of the array
 	
 	var plugins = {
 		required: {
@@ -144,7 +145,7 @@ define([
 	return {
 		plugins: plugins,
 		defs: defs,
-		pluginsDir: 'tern/plugin/',
-		defsDir: 'tern/defs/'
+		defNames: defNames,
+		pluginsDir: 'tern/plugin/'
 	};
 });

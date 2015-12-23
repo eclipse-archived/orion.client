@@ -354,6 +354,61 @@ define([
 					checkServerState(defaultPlugins, [], callback);
 				});
 			});
+			/**
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=484832
+			 */
+			it("plugins mixed in 1", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {"node": {}}}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(["doc_comment", 
+										"jsdoc", 
+										"html", 
+										"open_impl",
+										"plugins",
+										"refs",
+										"eslint",
+										"outliner", 
+										"node"], [], callback);
+				});
+			});
+			/**
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=484832
+			 */
+			it("plugins mixed in 2", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {"node": {}, "requirejs": {}}}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(["doc_comment", 
+										"jsdoc", 
+										"html", 
+										"open_impl",
+										"plugins",
+										"refs",
+										"eslint",
+										"outliner", 
+										"node", 
+										"requirejs"], [], callback);
+				});
+			});
+			/**
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=484832
+			 */
+			it("plugins mixed in 3", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {plugins: {"node": {}, "foobar": {}}}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState(["doc_comment", 
+										"jsdoc", 
+										"html", 
+										"open_impl",
+										"plugins",
+										"refs",
+										"eslint",
+										"outliner", 
+										"node"], [], callback);
+				});
+			});
 		});
 	};
 });
