@@ -140,7 +140,8 @@ require([
 		           end: args.params.offset,
 		           sort:true,
 		           includeKeywords: args.params.keywords,
-		           caseInsensitive: true
+		           caseInsensitive: true,
+		           docFormat: "full" //$NON-NLS-1$
 		           },
 		           files: args.files},
 		           function(error, comps) {
