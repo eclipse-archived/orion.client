@@ -424,7 +424,7 @@ define([
     	);
 
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    			new OpenDeclCommand.OpenDeclarationCommand(astManager, ternWorker, CUProvider, "replace"),  //$NON-NLS-1$
+    			new OpenDeclCommand.OpenDeclarationCommand(ternWorker, "replace"),  //$NON-NLS-1$
     			{
     		name: javascriptMessages["openDeclName"],
     		tooltip : javascriptMessages['openDeclTooltip'],
@@ -478,7 +478,7 @@ define([
     	);
 
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    			new OpenImplCommand.OpenImplementationCommand(astManager, ternWorker, CUProvider),
+    			new OpenImplCommand.OpenImplementationCommand(ternWorker),
     			{
     		name: javascriptMessages["openImplName"],
     		tooltip : javascriptMessages['openImplTooltip'],
@@ -488,7 +488,7 @@ define([
     			}
     	);
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    			new RenameCommand.RenameCommand(astManager, ternWorker, scriptresolver, CUProvider),
+    			new RenameCommand.RenameCommand(ternWorker, scriptresolver),
     			{
     		name: javascriptMessages['renameElement'],
     		tooltip : javascriptMessages['renameElementTooltip'],

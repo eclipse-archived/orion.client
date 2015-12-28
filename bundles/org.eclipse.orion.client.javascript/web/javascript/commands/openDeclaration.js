@@ -20,16 +20,12 @@ define([
 	 * @description Creates a new open declaration command
 	 * @constructor
 	 * @public
-	 * @param {javascript.ASTManager} ASTManager The backing AST manager
 	 * @param {TernWorker} ternWorker The running Tern worker
-	 * @param {javascript.CUProvider} cuProvider
 	 * @returns {javascript.commands.OpenDeclarationCommand} A new command
 	 * @since 8.0
 	 */
-	function OpenDeclarationCommand(ASTManager, ternWorker, cuProvider, openMode) {
-		this.astManager = ASTManager;
+	function OpenDeclarationCommand(ternWorker, openMode) {
 		this.ternworker = ternWorker;
-		this.cuprovider = cuProvider;
 		this.openMode = openMode;
 		this.timeout = null;
 	}
@@ -58,14 +54,14 @@ define([
 				{request:'definition', args:{params:{offset: options.offset}, guess: true, files: files, meta:{location: options.input}}}, //$NON-NLS-1$
 				function(response) {
 					if(response.request === 'definition') {
-						if(response.declaration && (typeof(response.declaration.start) === 'number' && typeof(response.declaration.end) === 'number')) {
+						if(response.declaration && (typeof response.declaration.start  === 'number' && typeof response.declaration.end === 'number')) {
 							if(response.declaration.guess) {
 								//TODO handle it being a guess, for now fall through
 							}
 							var opts = Object.create(null);
 							opts.start = response.declaration.start;
 							opts.end = response.declaration.end;
-							if(this.openMode != null && typeof(this.openMode) !== 'undefined') {
+							if(this.openMode !== null && typeof this.openMode !== 'undefined') {
 								opts.mode = this.openMode;
 							}
 							deferred.resolve(editorContext.openEditor(response.declaration.file, opts));
@@ -73,7 +69,7 @@ define([
 							deferred.reject({Severity: 'Warning', Message: Messages['noDeclFound']}); //$NON-NLS-1$
 						}
 					}
-				}.bind(this)); //$NON-NLS-1$
+				}.bind(this));
 		}
 	});
 

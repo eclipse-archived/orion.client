@@ -198,7 +198,7 @@ define([
 												if(v === node.name) {
 													//XXX do not send the full source more than once
 													//until bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=474420 is fixed
-													var req = {request: 'checkRef', args: {meta:{location: file.metadata.Location}, params: {offset: match.end}, origin: type}} //$NON-NLS-1$
+													var req = {request: 'checkRef', args: {meta:{location: file.metadata.Location}, params: {offset: match.end}, origin: type}}; //$NON-NLS-1$
 													if(!srcCache[file.metadata.Location].src) {
 														srcCache[file.metadata.Location].src = true;
 														req.files = [{type: 'full', name: file.metadata.Location, text: source}]; //$NON-NLS-1$;

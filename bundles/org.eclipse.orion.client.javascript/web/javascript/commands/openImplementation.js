@@ -20,16 +20,12 @@ define([
 	 * @description Creates a new open declaration command
 	 * @constructor
 	 * @public
-	 * @param {javascript.ASTManager} ASTManager The backing AST manager
 	 * @param {TernWorker} ternWorker The running Tern worker
-	 * @param {javascript.CUProvider} cuProvider
 	 * @returns {javascript.commands.OpenImplementationCommand} A new command
 	 * @since 10.0
 	 */
-	function OpenImplementationCommand(ASTManager, ternWorker, cuProvider) {
-		this.astManager = ASTManager;
+	function OpenImplementationCommand(ternWorker) {
 		this.ternworker = ternWorker;
-		this.cuprovider = cuProvider;
 		this.timeout = null;
 	}
 
@@ -56,7 +52,7 @@ define([
 			this.ternworker.postMessage(
 				{request:'implementation', args:{params:{offset: options.offset}, guess: true, files: files, meta:{location: options.input}}}, //$NON-NLS-1$
 				function(response) {
-					if(response.implementation && (typeof(response.implementation.start) === 'number' && typeof(response.implementation.end) === 'number')) {
+					if(response.implementation && (typeof response.implementation.start === 'number' && typeof response.implementation.end === 'number')) {
 						var opts = Object.create(null);
 						opts.start = response.implementation.start;
 						opts.end = response.implementation.end;

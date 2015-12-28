@@ -136,8 +136,8 @@ define([
 		describe('Tern based commands tests', function() {
 			before('Message the server for warm up', function() {
 				CUProvider.setUseCache(false);
-				openImplCommand = new OpenImplementation.OpenImplementationCommand(astManager, worker, CUProvider);
-				openDeclCommand = new OpenDeclaration.OpenDeclarationCommand(astManager, worker, CUProvider);
+				openImplCommand = new OpenImplementation.OpenImplementationCommand(worker);
+				openDeclCommand = new OpenDeclaration.OpenDeclarationCommand(worker);
 			});
 			this.timeout(10000);
 			

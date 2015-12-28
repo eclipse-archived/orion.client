@@ -30,7 +30,7 @@ define([
 	}
 	
 	Objects.mixin(GenerateDocCommand.prototype, {
-		/* override
+		/**
 		 * @callback
 		 */
 		execute: function(editorContext, options) {
@@ -43,22 +43,21 @@ define([
 					]).then(function(results) {
 						that._doCommand(editorContext, results[0], results[1]);
 					});
-				} else {
-					return Deferred.all([
-						editorContext.getText(),
-						editorContext.getCaretOffset()
-					]).then(function(results) {
-						var offset = results[1];
-						var cu = that.cuprovider.getCompilationUnit(function(){
-							return Finder.findScriptBlocks(results[0]);
-						}, meta);
-						if(cu.validOffset(offset)) {
-							 return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-								  that._doCommand(editorContext, ast, offset); 
-							 });
-						}
-					});
-				}
+				} 
+				return Deferred.all([
+					editorContext.getText(),
+					editorContext.getCaretOffset()
+				]).then(function(results) {
+					var offset = results[1];
+					var cu = that.cuprovider.getCompilationUnit(function(){
+						return Finder.findScriptBlocks(results[0]);
+					}, meta);
+					if(cu.validOffset(offset)) {
+						 return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+							  that._doCommand(editorContext, ast, offset); 
+						 });
+					}
+				});
 			});
 		},
 
@@ -78,11 +77,11 @@ define([
 					//don't monkey with existing comments
 					var template;
 					var start = parent.range[0];
-					if(parent.type === 'FunctionDeclaration') {  //$NON-NLS-0$
+					if(parent.type === 'FunctionDeclaration') {
 						template = this._genTemplate(parent.id.name, parent.params, false, parent.range[0], text);
-					} else if(parent.type === 'Property') {  //$NON-NLS-0$
-						template = this._genTemplate((parent.key.name ? parent.key.name : parent.key.value), parent.value.params, true, parent.range[0], text);
-					} else if(parent.type === 'VariableDeclarator') {  //$NON-NLS-0$
+					} else if(parent.type === 'Property') {
+						template = this._genTemplate(parent.key.name ? parent.key.name : parent.key.value, parent.value.params, true, parent.range[0], text);
+					} else if(parent.type === 'VariableDeclarator') {
 						start = parent.range[0];
 						if(parent.decl) {
 							if(parent.decl.leadingComments) {
@@ -189,7 +188,7 @@ define([
 					}
 					//$FALLTHROUGH$
 				case 'AssignmentExpression':
-					if((node.left && node.left.type === 'MemberExpression') && 
+					if(node.left && node.left.type === 'MemberExpression' && 
 						(node.right && node.right.type === 'FunctionExpression')) {
 						return node;
 					}
