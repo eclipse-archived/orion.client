@@ -16,7 +16,14 @@ define([
 	/* eslint-disable missing-nls */
 	// Scraped from http://www.w3.org/TR/html4/index/attributes.html
 	// and http://www.w3.org/TR/html5/obsolete.html#non-conforming-features
+	// Microdata deprecated attributes (itemid, itemprop, itemref, itemscope, and itemtype) determined from http://manu.sporny.org/2013/microdata-downward-spiral/
 	var deprecated = Object.create(null);
+	deprecated.global = Object.create(null);
+	deprecated.global.itemid = "HTML 5";
+	deprecated.global.itemprop = "HTML 5";
+	deprecated.global.itemref = "HTML 5";
+	deprecated.global.itemscope = "HTML 5";
+	deprecated.global.itemtype = "HTML 5";
 	deprecated.a = Object.create(null);
 	deprecated.a.charset = "HTML 5";
 	deprecated.a.coords = "HTML 5";
@@ -301,6 +308,10 @@ define([
 			if (dep){
 				return dep;
 			}
+		}
+		dep = deprecated.global[attributeName];
+		if (dep){
+			return dep;
 		}
 		return null;
 	}
