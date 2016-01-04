@@ -3599,10 +3599,10 @@ define([
 					};
 					testProposals(options, [
 						['', 'Templates'],
-					    ['/* eslint rule-id:0/1*/', 'eslint - ESLint rule enable / disable directive'],
-					    ['/* eslint-disable rule-id */', 'eslint-disable - ESLint rule disablement directive'],
-					    ['/* eslint-enable rule-id */', 'eslint-enable - ESLint rule enablement directive'],
-					    ['/* eslint-env library*/', 'eslint-env - ESLint environment directive']]
+					    ['/* eslint rule-id:0/1*/', 'eslint'],
+					    ['/* eslint-disable rule-id */', 'eslint-disable'],
+					    ['/* eslint-enable rule-id */', 'eslint-enable'],
+					    ['/* eslint-env library*/', 'eslint-env']]
 					);
 				});
 				/**
@@ -3618,10 +3618,10 @@ define([
 						templates: true
 					};
 					testProposals(options, [
-					    ['lint rule-id:0/1 ', 'eslint - ESLint rule enable or disable'],
-					    ['lint-disable rule-id ', 'eslint-disable - ESLint rule disablement directive'],
-					    ['lint-enable rule-id ', 'eslint-enable - ESLint rule enablement directive'],
-					    ['lint-env amd', 'eslint-env - ESLint environment directive']]  // When inside a comment we auto open content assist, selecting the first value
+					    ['lint rule-id:0/1 ', 'eslint'],
+					    ['lint-disable rule-id ', 'eslint-disable'],
+					    ['lint-enable rule-id ', 'eslint-enable'],
+					    ['lint-env amd', 'eslint-env']]  // When inside a comment we auto open content assist, selecting the first value
 					);
 				});
 				/**
@@ -3637,10 +3637,10 @@ define([
 						templates: true
 					};
 					testProposals(options, [
-					    ['lint rule-id:0/1 ', 'eslint - ESLint rule enable or disable'],
-					    ['lint-disable rule-id ', 'eslint-disable - ESLint rule disablement directive'],
-					    ['lint-enable rule-id ', 'eslint-enable - ESLint rule enablement directive'],
-					    ['lint-env amd', 'eslint-env - ESLint environment directive']]  // When inside a comment we auto open content assist, selecting the first value
+					    ['lint rule-id:0/1 ', 'eslint'],
+					    ['lint-disable rule-id ', 'eslint-disable'],
+					    ['lint-enable rule-id ', 'eslint-enable'],
+					    ['lint-env amd', 'eslint-env']]  // When inside a comment we auto open content assist, selecting the first value
 					);
 				});
 				/**
@@ -3690,10 +3690,10 @@ define([
 					};
 					testProposals(options, [
 						['','Templates'],
-					    ['/* eslint rule-id:0/1*/', 'eslint - ESLint rule enable / disable directive'],
-					    ['/* eslint-disable rule-id */', 'eslint-disable - ESLint rule disablement directive'],
-					    ['/* eslint-enable rule-id */', 'eslint-enable - ESLint rule enablement directive'],
-					    ['/* eslint-env library*/', 'eslint-env - ESLint environment directive']
+					    ['/* eslint rule-id:0/1*/', 'eslint'],
+					    ['/* eslint-disable rule-id */', 'eslint-disable'],
+					    ['/* eslint-enable rule-id */', 'eslint-enable'],
+					    ['/* eslint-env library*/', 'eslint-env']
 					]);
 				});
 				
@@ -3743,10 +3743,10 @@ define([
 						templates: true
 					};
 		            testProposals(options, [
-					    [' rule-id:0/1 ', 'eslint - ESLint rule enable or disable'],
-					    ['-disable rule-id ', 'eslint-disable - ESLint rule disablement directive'],
-					    ['-enable rule-id ', 'eslint-enable - ESLint rule enablement directive'],
-					    ['-env amd', 'eslint-env - ESLint environment directive']] // When inside a comment we auto open content assist, selecting the first value
+					    [' rule-id:0/1 ', 'eslint'],
+					    ['-disable rule-id ', 'eslint-disable'],
+					    ['-enable rule-id ', 'eslint-enable'],
+					    ['-env amd', 'eslint-env']] // When inside a comment we auto open content assist, selecting the first value
 					);
 				});
 				/**
@@ -3763,34 +3763,34 @@ define([
 						templates: true
 					};
 					testProposals(options, [
-					     ['amd', 'amd - ESLint environment name'],
-					     ['amqp', 'amqp - ESLint environment name'],
-					     ['applescript' , 'applescript - ESLint environment name'],
-					     ['browser', 'browser - ESLint environment name'],
-					     ['commonjs', 'commonjs - ESLint environment name'],
-					     ['embertest', 'embertest - ESLint environment name'],
-					     ['es6', 'es6 - ESLint environment name'],
-					     ['express', 'express - ESLint environment name'],
-					     ['jasmine', 'jasmine - ESLint environment name'],
-					     ['jest', 'jest - ESLint environment name'],
-						 ['jquery', 'jquery - ESLint environment name'],
-						 ['meteor', 'meteor - ESLint environment name'],
-					     ['mocha', 'mocha - ESLint environment name'],
-					     ['mongo', 'mongo - ESLint environment name'],
-					     ['mongodb', 'mongodb - ESLint environment name'],
-					     ['mysql', 'mysql - ESLint environment name'],
-					     ['nashorn', 'nashorn - ESLint environment name'],
-					     ['node', 'node - ESLint environment name'],
-					     ['pg', 'pg - ESLint environment name'],
-					     ['phantomjs', 'phantomjs - ESLint environment name'],
-						 ['prototypejs', 'prototypejs - ESLint environment name'],
-						 ['protractor', 'protractor - ESLint environment name'],
-					     ['qunit', 'qunit - ESLint environment name'],
-						 ['redis', 'redis - ESLint environment name'],
-						 ['serviceworker', 'serviceworker - ESLint environment name'],
-						 ['shelljs', 'shelljs - ESLint environment name'],
-						 ['webextensions', 'webextensions - ESLint environment name'],
-						 ['worker', 'worker - ESLint environment name']
+					     ['amd', 'amd'],
+					     ['amqp', 'amqp'],
+					     ['applescript' , 'applescript'],
+					     ['browser', 'browser'],
+					     ['commonjs', 'commonjs'],
+					     ['embertest', 'embertest'],
+					     ['es6', 'es6'],
+					     ['express', 'express'],
+					     ['jasmine', 'jasmine'],
+					     ['jest', 'jest'],
+						 ['jquery', 'jquery'],
+						 ['meteor', 'meteor'],
+					     ['mocha', 'mocha'],
+					     ['mongo', 'mongo'],
+					     ['mongodb', 'mongodb'],
+					     ['mysql', 'mysql'],
+					     ['nashorn', 'nashorn'],
+					     ['node', 'node'],
+					     ['pg', 'pg'],
+					     ['phantomjs', 'phantomjs'],
+						 ['prototypejs', 'prototypejs'],
+						 ['protractor', 'protractor'],
+					     ['qunit', 'qunit'],
+						 ['redis', 'redis'],
+						 ['serviceworker', 'serviceworker'],
+						 ['shelljs', 'shelljs'],
+						 ['webextensions', 'webextensions'],
+						 ['worker', 'worker']
 					     ]);
 				});
 				/**
@@ -3807,9 +3807,9 @@ define([
 						templates: true
 					};
 					testProposals(options, [
-					     ['amd', 'amd - ESLint environment name'],
-					     ['amqp', 'amqp - ESLint environment name'],
-					     ['applescript', 'applescript - ESLint environment name']
+					     ['amd', 'amd'],
+					     ['amqp', 'amqp'],
+					     ['applescript', 'applescript']
 					     ]);
 				});
 				/**
@@ -3826,7 +3826,7 @@ define([
 						templates: true
 					};
 					testProposals(options, [
-					     ['curly', 'curly - ESLint rule']
+					     ['curly', 'curly']
 					     ]);
 				});
 				/**
@@ -3843,7 +3843,7 @@ define([
 						templates: true
 					};
 					testProposals(options, [
-					     ['no-jslint', 'no-jslint - ESLint rule'],
+					     ['no-jslint', 'no-jslint'],
 					     ]);
 				});
 				/**
@@ -3860,7 +3860,7 @@ define([
 						templates: true
 					};
 					testProposals(options, [
-					     ['no-jslint', 'no-jslint - ESLint rule'],
+					     ['no-jslint', 'no-jslint'],
 					     ]);
 				});
 				/**
@@ -3877,7 +3877,7 @@ define([
 						templates: true
 					};
 					testProposals(options, [
-					     ['no-jslint', 'no-jslint - ESLint rule'],
+					     ['no-jslint', 'no-jslint'],
 					     ]);
 				});
 				/**
@@ -3894,7 +3894,7 @@ define([
 						templates: true
 					};
 					testProposals(options, [
-					     ['curly', 'curly - ESLint rule']
+					     ['curly', 'curly']
 					     ]);
 				});
 			});

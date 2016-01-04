@@ -38,7 +38,7 @@ exports.define = define;
  * @returns {void}
  */
 function load() {
-    var newRules = Rules.getESLintRules();
+    var newRules = Rules.rules;
     Object.keys(newRules).forEach(function(ruleId) {
         define(ruleId, newRules[ruleId]);
     });

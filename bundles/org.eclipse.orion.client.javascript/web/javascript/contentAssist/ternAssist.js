@@ -48,11 +48,19 @@ define([
 				var template = templates[t];
 				if (this.templateMatches(template, prefix, k, context)) {
 					var proposal = template.getProposal(prefix, offset, context);
-					var obj = Object.create(null);
-			        obj.type = 'markdown'; //$NON-NLS-1$
-			        obj.content = Messages['templateHoverHeader'];
-			        obj.content += proposal.proposal;
-			        proposal.hover = obj;
+					var _h;
+					if(template.doc) {
+						_h = Hover.formatMarkdownHover(template.doc);
+					} else {
+						_h = Object.create(null);
+				        _h.type = 'markdown'; //$NON-NLS-1$
+				        _h.content = Messages['templateHoverHeader'];
+				        _h.content += proposal.proposal;
+			        }
+			        if(template.url) {
+				        _h.content += i18nUtil.formatMessage.call(null, Messages['onlineDocumentationProposalEntry'], template.url);
+				    }
+			        proposal.hover = _h;
 			        proposal.style = 'emphasis'; //$NON-NLS-1$
 					this.removePrefix(prefix, proposal);
 					proposal.kind = 'js'; //$NON-NLS-1$
@@ -202,13 +210,12 @@ define([
     			        }
     			        return [];
 			        });
-			    } else {
-			        return that.astManager.getAST(editorContext).then(function(ast) {
-			        	return that.pluginenvs().then(function(envs) {
-			        		return that.doAssist(ast, params, meta, {ecma5: true, ecma6: true}, envs);
-			        	});
-        			});
-			    }
+			    } 
+		        return that.astManager.getAST(editorContext).then(function(ast) {
+		        	return that.pluginenvs().then(function(envs) {
+		        		return that.doAssist(ast, params, meta, {ecma5: true, ecma6: true}, envs);
+		        	});
+    			});
 			});
 		},
 

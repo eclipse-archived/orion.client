@@ -19,13 +19,37 @@ define([
 	"javascript/finder",
 	"javascript/signatures",
 	"javascript/util",
-	"json!javascript/rules.json",
+	"javascript/ruleData",
 	"eslint/conf/environments",
 	"orion/i18nUtil",
 	"i18n!javascript/nls/workermessages"
 ], /* @callback */ function(infer, tern, objects, Finder, Signatures, Util, Rules, ESLintEnvs, i18nUtil, Messages) {
 	
 	var allEnvs = {};
+	var envNames = {
+		browser: Messages['browser'],
+		node: Messages['node'],
+		commonjs: Messages['commonjs'],
+		worker: Messages['worker'],
+		amd: Messages['amd'],
+		mocha: Messages['mocha'],
+		jasmine: Messages['jasmine'],
+		jest: Messages['jest'],
+		phantomjs: Messages['phantomjs'],
+		protractor: Messages['protractor'],
+		qunit: Messages['qunit'],
+		jquery: Messages['jquery'],
+		prototypejs: Messages['prototypejs'],
+		shelljs: Messages['shelljs'],
+		meteor: Messages['meteor'],
+		mongo: Messages['mongo'],
+		applescript: Messages['applescript'],
+		nashorn: Messages['nashorn'],
+		serviceworker: Messages['serviceworker'],
+		embertest: Messages['embertest'],
+		webextensions: Messages['webextension'],
+		es6: Messages['es6']
+	};
 	
 	tern.registerPlugin("jsdoc", /* @callback */ function(server, options) {
 		return {
@@ -294,14 +318,16 @@ define([
 			if (Util.looselyMatches(prefix, "eslint-env")){
 				var envsListTemplate = getEnvsListForTemplate();
 				var template = "eslint-env ${library:" + envsListTemplate +"}";
-				_p = createProposal("eslint-env", Messages['eslintEnvDirective'], prefix, template);
+				_p = createProposal("eslint-env", "", prefix, template);
+				_p.doc = Messages['eslintEnvDirective'];
+				_p.url = "http://eslint.org/docs/user-guide/configuring.html#specifying-environments";
 				proposals.push(_p);
 			}
 			keys = Object.keys(block);
 			for(var len = keys.length, i = 0; i < len; i++) {
 				var tag = block[keys[i]];
 				if(Util.looselyMatches(prefix, tag.name)) {
-					_p = createProposal(tag.name, tag.desc, prefix, tag.template);
+					_p = createProposal(tag.name, '', prefix, tag.template);
 					_p.url = tag.url;
 					_p.doc = tag.desc;
 					proposals.push(_p);
@@ -332,18 +358,17 @@ define([
 			}
 		} else if(/^\s*(?:\/\*)?\s*eslint(?:-enable|-disable)?\s+/gi.test(line.line)) {
 			//eslint eslint-enable eslint-disable
-			var rules = Rules.rules;
+			var rules = Rules.metadata;
 			var rulekeys = Object.keys(rules).sort();
 			for(i = 0; i < rulekeys.length; i++) {
 				var rulekey = rulekeys[i];
 				if(Util.looselyMatches(prefix, rulekey)) {
 					var rule = rules[rulekey];
-					_p = createProposal(rulekey, Messages['eslintRuleProposalDescripton'], prefix);
-					var hover = rule.description ? rule.description : '';
+					_p = createProposal(rulekey, '', prefix);
+					_p.doc = rule.description ? rule.description : Messages['eslintRuleProposalDescripton'];
 					if(rule.url) {
-						hover += i18nUtil.formatMessage.call(null, Messages['onlineDocumentationProposalEntry'], rule.url);
+						_p.url = rule.url;
 					}
-					_p.hover = {content: hover, type: 'markdown'}; //$NON-NLS-1$
 					proposals.push(_p);
 				}
 			}
@@ -353,7 +378,13 @@ define([
 			for(i = 0; i < keys.length; i++) {
 				var key = keys[i];
 				if(key !== 'builtin' && Util.looselyMatches(prefix, key)) {
-					proposals.push(createProposal(key, Messages['eslintEnvProposalDescription'], prefix));
+					_p = createProposal(key, "", prefix);
+					_p.doc = envNames[key];
+					if(!_p.doc) {
+						_p.doc = Messages['eslintEnvProposalDescription'];
+					}
+					_p.url = "http://eslint.org/docs/user-guide/configuring.html#specifying-environments";
+					proposals.push(_p);
 				}
 			}
 		} else {
@@ -544,17 +575,20 @@ define([
 		"eslint": {
 			name: "eslint",  //$NON-NLS-0$
 			desc: Messages['eslintRuleEnableDisable'],
-			template: "eslint ${rule-id}:${0/1} ${cursor}" //$NON-NLS-0$  
+			template: "eslint ${rule-id}:${0/1} ${cursor}", //$NON-NLS-0$  
+			url: "http://eslint.org/docs/user-guide/configuring.html#configuring-rules"
 	    },
 	    "eslint-enable": {
 			name: "eslint-enable",  //$NON-NLS-0$
 			desc: Messages['eslintRuleEnable'],
-			template: "eslint-enable ${rule-id} ${cursor}" //$NON-NLS-0$  
+			template: "eslint-enable ${rule-id} ${cursor}", //$NON-NLS-0$  
+			url: "http://eslint.org/docs/user-guide/configuring.html#configuring-rules"
 	    },
 	    "eslint-disable": {
 			name: "eslint-disable",  //$NON-NLS-0$
 			desc: Messages['eslintRuleDisable'],
-			template: "eslint-disable ${rule-id} ${cursor}" //$NON-NLS-0$  
+			template: "eslint-disable ${rule-id} ${cursor}", //$NON-NLS-0$
+			url: "http://eslint.org/docs/user-guide/configuring.html#configuring-rules"
 	    }
 	};
 	

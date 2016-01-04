@@ -12,14 +12,14 @@
 /*eslint-env amd*/
 define([
 	"orion/objects",
-	"json!javascript/rules.json",
+	"javascript/ruleData",
 	"orion/i18nUtil",
 	"i18n!javascript/nls/problems",
 	'orion/Deferred'
 ], function(Objects, Rules, i18nUtil, messages, Deferred) {
 	var config = {
 		// 0:off, 1:warning, 2:error
-		defaults: Rules.rules,
+		defaults: Rules.defaults,
 		
 		/**
 		 * @description Sets the given rule to the given enabled value
@@ -147,16 +147,16 @@ define([
 		if (e.nodeType) {
 			prob.nodeType = e.nodeType;
 		}
-		if (e.node && e.nodeType === "Program" && typeof(e.line) !== 'undefined') {
+		if (e.node && e.nodeType === "Program" && typeof e.line !== 'undefined') {
 			prob.line = e.line;
 			prob.start = e.column;
-		} else if(typeof(start) !== 'undefined') {
+		} else if(typeof start !== 'undefined') {
 			prob.start = start;
 			prob.end = end;
-		} else if(typeof(e.index) === 'number') {
+		} else if(typeof e.index === 'number') {
 			prob.start = end;
 			prob.end = e.index;
-		} else if(typeof(e.lineNumber) !== 'undefined') {
+		} else if(typeof e.lineNumber !== 'undefined') {
 			prob.line = e.lineNumber;
 			prob.start = e.column;
 		} else {
@@ -269,7 +269,7 @@ define([
 		            continue;
 			    }
 			    var legacy = this._legacy[ruleId];
-			    if(typeof(legacy) === 'string') {
+			    if(typeof legacy === 'string') {
 			        ruleId = legacy;
 			        if(seen[ruleId]) {
 			            //don't overwrite a new pref name with a legacy one
