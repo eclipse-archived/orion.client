@@ -260,6 +260,40 @@ define([
         return -1;
 	}
 	
+	function applySingleFixToAll(editorContext, annotation, annotations, createTextChange){
+		if (!annotations){
+			var change = createTextChange(annotation);
+			if (change){
+				return editorContext.setText(change.text, change.start, change.end);
+			}
+		} else {
+			var textEdits = [];
+			var rangeEdits = [];
+			var annotationIndex = 0;
+			for (var i=0; i<annotations.length; i++) {
+				var current = annotations[i];
+				if (current.id === annotation.id){
+					var currentChange = createTextChange(current);
+					if (currentChange){
+						textEdits.push(currentChange.text);
+						rangeEdits.push({start: currentChange.start, end: currentChange.end});
+						if (current.start === annotation.start && current.end === annotation.end){
+							annotationIndex = i;
+						}
+					}
+				}
+			}
+	    	return editorContext.setText({text: textEdits, selection: rangeEdits}).then(function(){
+	    		return editorContext.getSelections().then(function(selections){
+	    			if (selections.length > 0){
+	    				var selection = selections[selections.length > annotationIndex ? annotationIndex : 0];
+	    				return editorContext.setSelection(selection.start, selection.end, true);	
+					}
+	    		});
+	    	});
+    	}
+	}
+	
 	Objects.mixin(JavaScriptQuickfixes.prototype, /** @lends javascript.JavaScriptQuickfixes.prototype*/ {
 		/**
 		 * @description Editor command callback
@@ -271,8 +305,8 @@ define([
 		    var id = context.annotation.fixid ? context.annotation.fixid : context.annotation.id;
 		    delete context.annotation.fixid;
 		    Metrics.logEvent('language tools', 'quickfix', id, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		    var fixes = context.annotations ? this.multiFixes[id] : this.singleFixes[id];
-		    if (fixes){
+		    var fixFunc = this.fixes[id];
+		    if (fixFunc){
 	            var that = this;
 	            return editorContext.getFileMetadata().then(function(meta) {
 	                if(meta.contentType.id === 'text/html') {
@@ -280,34 +314,30 @@ define([
                            var blocks = Finder.findScriptBlocks(text);
                            if(blocks && blocks.length > 0) {
                                var cu = new CU(blocks, meta, editorContext);
-                               if (context.annotations){
-                               		return fixes(cu.getEditorContext(), context.annotation, context.annotations, that.astManager);
-                               } else {
-                               		return fixes(cu.getEditorContext(), context.annotation, that.astManager);
-                           		}
-
+                               return fixFunc(cu.getEditorContext(), context.annotation, context.annotations, that.astManager);
                            }
 	                    });
-	                } else {
-	                    if (context.annotations){
-                       		return fixes(editorContext, context.annotation, context.annotations, that.astManager);
-                       } else {
-                       		return fixes(editorContext, context.annotation, that.astManager);
-                   		}
 	                }
+	                return fixFunc(editorContext, context.annotation, context.annotations, that.astManager);
 	            });
 	        }
 		    return new Deferred().resolve(null) ;
 		},
 		
-		singleFixes : {
+		fixes : {
 			/** fix for eqeqeq linting rule */
-			"eqeqeq": function(editorContext, annotation) {
-			    var expected = /^.*\'(\!==|===)\'/.exec(annotation.title);
-	            return editorContext.setText(expected[1], annotation.start, annotation.end);
+			"eqeqeq": function(editorContext, annotation, annotations) {
+				return applySingleFixToAll(editorContext, annotation, annotations, function(currentAnnotation){
+					var expected = /^.*\'(\!==|===)\'/.exec(currentAnnotation.title);
+					return {
+						text: expected[1],
+						start: currentAnnotation.start,
+						end: currentAnnotation.end
+					};
+				});
 			},
 			/** fix for the missing-nls rule */
-	        "missing-nls": function(editorContext, annotation, astManager){
+	        "missing-nls": function(editorContext, annotation, annotations, astManager){
 	        	// We depend on the validator rule in eslint to count the number of literals on the line
 	        	if (annotation.data && typeof annotation.data.indexOnLine === 'number'){
 		        	return astManager.getAST(editorContext).then(function(ast) {
@@ -321,11 +351,11 @@ define([
 				return null;
 	        },
 			/** fix for the no-comma-dangle linting rule */
-			"no-comma-dangle": function(editorContext, annotation) {
+			"no-comma-dangle": function(editorContext, annotation, annotations) {
 			    return editorContext.setText('', annotation.start, annotation.end);
 			},
 			/** fix for the no-empty-block linting rule */
-			"no-empty-block": function(editorContext, annotation) {
+			"no-empty-block": function(editorContext, annotation, annotations) {
 	            return editorContext.getText().then(function(text) {
 	                var linestart = getLineStart(text, annotation.start);
 	                var fix = '//TODO empty block'; //$NON-NLS-1$
@@ -336,11 +366,17 @@ define([
 	            });
 	        },
 			/** fix for the no-extra-semi linting rule */
-			"no-extra-semi": function(editorContext, annotation) {
-	            return editorContext.setText('', annotation.start, annotation.end);
+			"no-extra-semi": function(editorContext, annotation, annotations) {
+				return applySingleFixToAll(editorContext, annotation, annotations, function(currentAnnotation){
+		            return {
+		            	text: '',
+		            	start: currentAnnotation.start,
+		            	end: currentAnnotation.end
+		            };
+	            });
 	        },
 	        /** fix for the no-fallthrough linting rule */
-	        "no-fallthrough": function(editorContext, annotation) {
+	        "no-fallthrough": function(editorContext, annotation, annotations) {
 	            return editorContext.getText().then(function(text) {
 	                var linestart = getLineStart(text, annotation.start);
 	                var fix = '//$FALLTHROUGH$'; //$NON-NLS-1$
@@ -350,7 +386,7 @@ define([
 	            });
 	        },
 	        /** alternate fix for the no-fallthrough linting rule */
-	        "no-fallthrough-break": function(editorContext, annotation) {
+	        "no-fallthrough-break": function(editorContext, annotation, annotations) {
 	            return editorContext.getText().then(function(text) {
 	                var linestart = getLineStart(text, annotation.start);
 	                var fix = 'break;'; //$NON-NLS-1$
@@ -359,7 +395,7 @@ define([
 	                return editorContext.setText(fix, annotation.start, annotation.start);
 	            });
 	        },
-	        "no-new-array": function(editorContext, annotation, astManager) {
+	        "no-new-array": function(editorContext, annotation, annotations, astManager) {
 	        	return astManager.getAST(editorContext).then(function(ast) {
 	       			var node = Finder.findNode(annotation.start, ast, {parents:true});
 	       			if(node && node.parents) {
@@ -378,7 +414,7 @@ define([
 	   			});
 	        },
 	        /** for for the no-reserved-keys linting rule */
-	       "no-reserved-keys": function(editorContext, annotation, astManager) {
+	       "no-reserved-keys": function(editorContext, annotation, annotations, astManager) {
 	       		return astManager.getAST(editorContext).then(function(ast) {
 	       			var node = Finder.findNode(annotation.start, ast, {parents:true});
 	                if(node && node.type === 'Identifier') {
@@ -387,7 +423,7 @@ define([
 	       		});
 	        },
 	        /** fix for the no-sparse-arrays linting rule */
-	        "no-sparse-arrays": function(editorContext, annotation, astManager) {
+	        "no-sparse-arrays": function(editorContext, annotation, annotations, astManager) {
 	            return astManager.getAST(editorContext).then(function(ast) {
 	                var node = Finder.findNode(annotation.start, ast, {parents:true});
 	                if(node && node.type === 'ArrayExpression') {
@@ -433,7 +469,7 @@ define([
 	            });
 	        },
 	        /** fix for the no-throw-literal linting rule */
-	        "no-throw-literal": function(editorContext, annotation, astManager) {
+	        "no-throw-literal": function(editorContext, annotation, annotations, astManager) {
 	            return astManager.getAST(editorContext).then(function(ast) {
 	                var node = Finder.findNode(annotation.start, ast, {parents:true});
 	                var source = node.raw || ast.source.slice(node.range[0], node.range[1]);
@@ -441,7 +477,7 @@ define([
 	            });
 	        },
 	        /** fix for the no-undef-defined linting rule */
-	        "no-undef-defined": function(editorContext, annotation, astManager) {
+	        "no-undef-defined": function(editorContext, annotation, annotations, astManager) {
 	            function assignLike(node) {
 	                if(node && node.parents && node.parents.length > 0 && node.type === 'Identifier') {
 	                    var parent = node.parents.pop();
@@ -475,7 +511,7 @@ define([
 	            return null;
 	        },
 	        /** alternate id for no-undef-defined linting fix */
-	        "no-undef-defined-inenv": function(editorContext, annotation, astManager) {
+	        "no-undef-defined-inenv": function(editorContext, annotation, annotations, astManager) {
 	            var name = /^'(.*)'/.exec(annotation.title);
 	            if(name != null && typeof name !== 'undefined') {
 	                return astManager.getAST(editorContext).then(function(ast) {
@@ -504,11 +540,11 @@ define([
 	            return null;
 	        },
 	        /** fix for the no-unreachable linting rule */
-			"no-unreachable": function(editorContext, annotation) {
+			"no-unreachable": function(editorContext, annotation, annotations) {
 	            return editorContext.setText('', annotation.start, annotation.end);    
 	        },
 	        /** fix for the no-unused-params linting rule */
-	        "no-unused-params": function(editorContext, annotation, astManager) {
+	        "no-unused-params": function(editorContext, annotation, annotations, astManager) {
 	            return astManager.getAST(editorContext).then(function(ast) {
 	                var node = Finder.findNode(annotation.start, ast, {parents:true});
 	                if(node) {
@@ -563,7 +599,7 @@ define([
 	            });
 	        },
 	        /** easter is here */
-	        "no-unused-vars-unused": function(editorContext, annotation, astManager) {
+	        "no-unused-vars-unused": function(editorContext, annotation, annotations, astManager) {
 	            return astManager.getAST(editorContext).then(function(ast) {
 	                var node = Finder.findNode(annotation.start, ast, {parents:true});
 	                if(node && node.parents && node.parents.length > 0) {
@@ -591,7 +627,7 @@ define([
 	                return null;
 	            });
 	        },
-	        "no-unused-vars-unused-funcdecl": function(editorContext, annotation, astManager) {
+	        "no-unused-vars-unused-funcdecl": function(editorContext, annotation, annotations, astManager) {
 	            return astManager.getAST(editorContext).then(function(ast) {
 	                var node = Finder.findNode(annotation.start, ast, {parents:true});
 	                if(node && node.parents && node.parents.length > 0) {
@@ -604,7 +640,7 @@ define([
 	            });
 	        },
 	        /** alternate id for the no-unsed-params linting fix */
-	        "no-unused-params-expr": function(editorContext, annotation, astManager) {
+	        "no-unused-params-expr": function(editorContext, annotation, annotations, astManager) {
 	        	function updateCallback(node, ast, comments) {
 	                if(Array.isArray(comments)) {
 	                    //attach it to the last one
@@ -667,7 +703,7 @@ define([
 	            });
 	        },
 	        /** fix for use-isnan linting rule */
-	       "use-isnan": function(editorContext, annotation, astManager) {
+	       "use-isnan": function(editorContext, annotation, annotations, astManager) {
 	       		return astManager.getAST(editorContext).then(function(ast) {
 	       			var node = Finder.findNode(annotation.start, ast, {parents:true});
 	                if(node && node.parents && node.parents.length > 0) {
@@ -689,11 +725,11 @@ define([
 	       		});	
 	       },
 	        /** fix for the semi linting rule */
-	        "semi": function(editorContext, annotation) {
+	        "semi": function(editorContext, annotation, annotations) {
 	            return editorContext.setText(';', annotation.end, annotation.end);
 	        },
 	        /** fix for the unnecessary-nls rule */
-	        "unnecessary-nls": function(editorContext, annotation, astManager){
+	        "unnecessary-nls": function(editorContext, annotation, annotations, astManager){
 	        	return astManager.getAST(editorContext).then(function(ast) {
 	        		var comment = Finder.findComment(annotation.start + 2, ast); // Adjust for leading //
 	        		var nlsTag = annotation.data.nlsComment; // We store the nls tag in the annotation
@@ -722,58 +758,6 @@ define([
 	        		return null;
 	    		});
     		}
-		},
-		
-		multiFixes: {
-			"eqeqeq": function(editorContext, annotation, annotations) {
-			    var textEdits = [];
-				var rangeEdits = [];
-				var annotationIndex = 0;
-				for (var i=0; i<annotations.length; i++) {
-					var current = annotations[i];
-					if (current.id === "eqeqeq"){
-						var expected = /^.*\'(\!==|===)\'/.exec(current.title);
-						textEdits.push(expected[1]);
-						rangeEdits.push({start: current.start, end: current.end});
-						if (current.start === annotation.start && current.end === annotation.end){
-							annotationIndex = i;
-						}
-        			}
-				}
-            	return editorContext.setText({text: textEdits, selection: rangeEdits}).then(function(){
-            		return editorContext.getSelections().then(function(selections){
-            			if (selections.length > 0){
-            				var selection = selections[selections.length > annotationIndex ? annotationIndex : 0]
-            				return editorContext.setSelection(selection.start, selection.end, true);	
-        				}
-
-            		});
-            	});
-			},
-			"no-extra-semi": function(editorContext, annotation, annotations){
-				var textEdits = [];
-				var rangeEdits = [];
-				var annotationIndex = 0;
-				for (var i=0; i<annotations.length; i++) {
-					var current = annotations[i];
-					if (current.id === "no-extra-semi"){
-						textEdits.push('');
-						rangeEdits.push({start: current.start, end: current.end});
-						if (current.start === annotation.start && current.end === annotation.end){
-							annotationIndex = i;
-						}
-        			}
-				}
-            	return editorContext.setText({text: textEdits, selection: rangeEdits}).then(function(){
-	            	return editorContext.getSelections().then(function(selections){
-	            		if (selections.length > 0){
-	        				var selection = selections[selections.length > annotationIndex ? annotationIndex : 0]
-	        				return editorContext.setSelection(selection.start, selection.end, true);	
-	    				}
-    				});
-            	});
-        	}
-
 		}
 	});
 	
