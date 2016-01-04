@@ -29,12 +29,9 @@ module.exports = function(context) {
 
         "BinaryExpression": function(node) {
             var badOperator = node.operator === "==" || node.operator === "!=";
-
             if (node.right.type === "Literal" && node.right.raw === "null" && badOperator ||
                     node.left.type === "Literal" && node.left.raw === "null" && badOperator) {
-                var tok = getOperatorToken(context, node);
-                var expected = "==" === node.operator ? "===" : "!==";
-                context.report(node, "Use ‘"+expected+"’ to compare with ‘null’.", null, tok); //$NON-NLS-1$ //$NON-NLS-2$
+                context.report(node, "Use ‘"+node.operator+"=’ to compare with ‘null’.", null, getOperatorToken(context, node)); //$NON-NLS-1$ //$NON-NLS-2$
             }
         }
     };
