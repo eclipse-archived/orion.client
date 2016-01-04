@@ -61,7 +61,6 @@ define([
  				doc: "Is an enumerated attribute indicating whether the element can be dragged, using the Drag and Drop API. It can have the following values:"
 						+"\n* true, which indicates that the element may be dragged"
 						+"\n* false, which indicates that the element may not be dragged",
- 				experimental: true
  			},
  			{
  				name: "dropzone",
@@ -86,31 +85,26 @@ define([
 // 				name: "itemid",
 // 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemid",
 // 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
-// 				experimental: true
 // 			},
 // 			{
 // 				name: "itemprop",
 // 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemprop",
 // 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
-// 				experimental: true
 // 			},
 // 			{
 // 				name: "itemref",
 // 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemref",
 // 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
-// 				experimental: true
 // 			},
 // 			{
 // 				name: "itemscope",
 // 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemscope",
 // 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
-// 				experimental: true
 // 			},
 // 			{
 // 				name: "itemtype",
 // 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemtype",
 // 				doc: "This attribute is related to the WHATWG HTML Microdata feature.",
-// 				experimental: true
 // 			},
  			{
  				name: "lang",
@@ -123,7 +117,6 @@ define([
 				doc: "Is an enumerated attribute defines whether the element may be checked for spelling errors. It may have the following values:"
 	 					+ "\n* true, which indicates that the element should be, if possible, checked for spelling errors"
   						+ "\n* false, which indicates that the element should not be checked for spelling errors",
-  				experimental: true
  			},
  			{
  				name: "style",
@@ -447,31 +440,26 @@ define([
 //			name: "charset",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#Obsolete",
 //			doc: "This attribute defines the character encoding of the linked resource. The value is a space- and/or comma-delimited list of character sets as defined in RFC 2045. The default value is ISO-8859-1.",
-//			obsolete: "HTML 5"
 //		},
 //		{
 //			name: "coords",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#Obsolete",
 //			doc: "For use with object shapes, this attribute uses a comma-separated list of numbers to define the coordinates of the object on the page.",
-//			obsolete: "HTML 5"
 //		},
 //		{
 //			name: "name",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#Obsolete",
 //			doc: "This attribute is required in an anchor defining a target location within a page. A value for name is similar to a value for the id core attribute and should be an alphanumeric identifier unique to the document. Under the HTML 4.01 specification, id and name both can be used with the <a> element as long as they have identical values.",
-//			obsolete: "HTML 5"
 //		},
 //		{
 //			name: "rev",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#Obsolete",
 //			doc: "This attribute specifies a reverse link, the inverse relationship of the rel attribute. It is useful for indicating where an object came from, such as the author of a document.",
-//			obsolete: "HTML 5"
 //		},
 //		{
 //			name: "shape",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#Obsolete",
 //			doc: "This attribute is used to define a selectable region for hypertext source links associated with a figure to create an image map. The values for the attribute are circle, default, polygon, and rect. The format of the coords attribute depends on the value of shape. For circle, the value is x,y,r where x and y are the pixel coordinates for the center of the circle and r is the radius value in pixels. For rect, the coords attribute should be x,y,w,h. The x,y values define the upper-left-hand corner of the rectangle, while w and h define the width and height respectively. A value of polygon for shape requires x1,y1,x2,y2,... values for coords. Each of the x,y pairs defines a point in the polygon, with successive points being joined by straight lines and the last point joined to the first. The value default for shape requires that the entire enclosed area, typically an image, be used.",
-//			obsolete: "HTML 5"
 //		}
 	];
 
@@ -616,61 +604,51 @@ define([
 //			name: "alink",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body#Attributes",
 //			doc: "Color of text for hyperlinks when selected. This method is non-conforming, use CSS color property in conjunction with the :active pseudo-class instead.",
-//			obsolete: true
 //		},
 //		{
 //			name: "background",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body#Attributes",
 //			doc: "URI of a image to use as a background. This method is non-conforming, use CSS background property on the element instead.",
-//			obsolete: true
 //		},
 //		{
 //			name: "bgcolor",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body#Attributes",
 //			doc: "Background color for the document. This method is non-conforming, use CSS background-color property on the element instead.",
-//			obsolete: true
 //		},
 //		{
 //			name: "bottommargin",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body#Attributes",
 //			doc: "The margin of the bottom of the body. This method is non-conforming, use CSS margin-bottom property on the element instead.",
-//			obsolete: true
 //		},
 //		{
 //			name: "leftmargin",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body#Attributes",
 //			doc: "The margin of the left of the body. This method is non-conforming, use CSS margin-left property on the element instead.",
-//			obsolete: true
 //		},
 //		{
 //			name: "link",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body#Attributes",
 //			doc: "Color of text for unvisited hypertext links. This method is non-conforming, use CSS color property in conjunction with the :link pseudo-class instead.",
-//			obsolete: true
 //		},
 //		{
 //			name: "rightmargin",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body#Attributes",
 //			doc: "The margin of the right of the body. This method is non-conforming, use CSS margin-right property on the element instead.",
-//			obsolete: true
 //		},
 //		{
 //			name: "text",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body#Attributes",
 //			doc: "Foreground color of text. This method is non-conforming, use CSS color property on the element instead.",
-//			obsolete: true
 //		},
 //		{
 //			name: "topmargin",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body#Attributes",
 //			doc: "The margin of the top of the body. This method is non-conforming, use CSS margin-top property on the element instead.",
-//			obsolete: true
 //		},
 //		{
 //			name: "vlink",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body#Attributes",
 //			doc: "Color of text for visited hypertext links. This method is non-conforming, use CSS color property in conjunction with the :visited pseudo-class instead.",
-//			obsolete: true
 //		}
 	];
 	
@@ -680,7 +658,6 @@ define([
 //			name: "clear",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/br#Attributes",
 //			doc: "Indicates where to begin the next line after the break.",
-//			obsolete: "HTML 5"
 //		}
 //	];
 
@@ -919,43 +896,30 @@ define([
 	];
 
 	attributes.tags.hr = [
-		{
-			name: "align",
-			doc: "Specifies the horizontal alignment of the element.",
-			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr#attr-align"
-		},
-		{
-			name: "color",
-			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr#attr-color"
-		},
-		{
-			name: "align",
-			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr#Attributes",
-			doc: "Sets the alignment of the rule on the page. If no value is specified, the default value is left.",
-			deprecated: "HTML 4.01",
-			obsolete: "HTML 5"
-		}
-		// Obsolete tags
+		// Deprecated attributes
+//		{
+//			name: "align",
+//			doc: "Specifies the horizontal alignment of the element.",
+//			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr#attr-align"
+//		},
+//		{
+//			name: "color",
+//			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr#attr-color"
+//		},
 //		{
 //			name: "noshade",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr#Attributes",
 //			doc: "Sets the rule to have no shading.",
-//			deprecated: "HTML 4.01",
-//			obsolete: "HTML 5"
 //		},
 //		{
 //			name: "size",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr#Attributes",
 //			doc: "Sets the height, in pixels, of the rule.",
-//			deprecated: "HTML 4.01",
-//			obsolete: "HTML 5"
 //		},
 //		{
 //			name: "width",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr#Attributes",
 //			doc: "Sets the length of the rule on the page through a pixel or percentage value.",
-//			deprecated: "HTML 4.01",
-//			obsolete: "HTML 5"
 //		}
 	];
 
@@ -970,7 +934,6 @@ define([
 //			name: "version",
 //			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/html#Attributes",
 //			doc: "Specifies the version of the HTML Document Type Definition that governs the current document. This attribute is not needed, because it is redundant with the version information in the document type declaration.",
-//			deprecated: "HTML 4.01"
 //		},
 		{
 			name: "xmlns",
