@@ -68,6 +68,18 @@ require([
 			if (typeof jsonOptions.dependencyBudget === 'number') {
 				options.dependencyBudget = jsonOptions.dependencyBudget;
 			}
+			if(Array.isArray(jsonOptions.dontLoad)) {
+				var valid = true;
+				for(var i = 0, len = jsonOptions.dontLoad.length; i < len; i++) {
+					if(typeof jsonOptions.dontLoad[i] !== 'string') {
+						valid = false;
+						break;
+					}
+				}
+				if(valid) {
+					options.dontLoad = jsonOptions.dontLoad;
+				}
+			}
         }
         if(typeof plugins !== 'object') {
         	plugins = null;
