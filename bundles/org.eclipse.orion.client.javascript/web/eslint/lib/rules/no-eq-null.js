@@ -14,6 +14,17 @@ define(function (module) {
 
 module.exports = function(context) {
 
+	function getOperatorToken(context, node) {
+		var tokens = context.getTokens(node), len = tokens.length, operator = node.operator;
+		for (var i=0; i < len; i++) {
+			var t = tokens[i];
+			if (t.value === operator) {
+				return t;
+			}
+		}
+		return null;
+	}
+
     return {
 
         "BinaryExpression": function(node) {
@@ -21,7 +32,9 @@ module.exports = function(context) {
 
             if (node.right.type === "Literal" && node.right.raw === "null" && badOperator ||
                     node.left.type === "Literal" && node.left.raw === "null" && badOperator) {
-                context.report(node, "Use ‘===’ to compare with ‘null’.");
+                var tok = getOperatorToken(context, node);
+                var expected = "==" === node.operator ? "===" : "!==";
+                context.report(node, "Use ‘"+expected+"’ to compare with ‘null’.", null, tok); //$NON-NLS-1$ //$NON-NLS-2$
             }
         }
     };
