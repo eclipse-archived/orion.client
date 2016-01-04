@@ -791,7 +791,7 @@ define([
     		);
 
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-			new RenameCommand.RenameCommand(astManager, ternWorker, scriptresolver, CUProvider),
+			new RenameCommand.RenameCommand(ternWorker, scriptresolver),
 			{
 				name: javascriptMessages["noShadowFixName"],
 				scopeId: "orion.edit.quickfix", //$NON-NLS-1$
@@ -800,7 +800,7 @@ define([
 				validationProperties: [
 					{
 						source: "annotation:id", //$NON-NLS-1$
-						match: "^(?:no-shadow)$" //$NON-NLS-1$
+						match: "^(?:no-shadow)$|^(?:no-shadow-global)$" //$NON-NLS-1$
 					} 
 				]
 			}
