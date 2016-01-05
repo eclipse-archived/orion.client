@@ -588,7 +588,7 @@ define([
 		}, {});
 		mMetrics.initFromRegistry(serviceRegistry);
 		prefsService.addChangeListener(function(name, value) {
-			if (value.length < METRICS_MAXLENGTH && name.indexOf("/git/credentials/")) { //$NON-NLS-0$
+			if (value.length < METRICS_MAXLENGTH && name.indexOf("/git/credentials/") !== 0) { //$NON-NLS-0$
 				mMetrics.logEvent("preferenceChange", name, value); //$NON-NLS-0$
 			}
 		});
