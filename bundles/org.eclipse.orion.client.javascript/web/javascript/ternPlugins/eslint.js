@@ -122,7 +122,7 @@ define([
 			for(var j = 0; j < len; j++) {
 				var pe = parseErrors[j];
 				var node = ee.node;
-				if(node && node.range[0] >= pe.index && node.range[0] <= pe.end) {
+				if(node && node.range && node.range[0] >= pe.index && node.range[0] <= pe.end) {
 					continue filter;
 				}
 			}
@@ -154,7 +154,7 @@ define([
 						ruleId: element.ruleId,
 						source: element.source
 					};
-					if (element.node.range) {
+					if (element.node && element.node.range) {
 						strippedMessage.node = {
 							range: element.node.range
 						};

@@ -159,6 +159,9 @@ define([
 		} else if(typeof e.lineNumber !== 'undefined') {
 			prob.line = e.lineNumber;
 			prob.start = e.column;
+		} else if (e.line && e.column) {
+			prob.line = e.line;
+			prob.start = e.column;
 		} else {
 			prob.start = 0;
 			prob.end = 0;
@@ -229,7 +232,7 @@ define([
 			this.ternWorker.postMessage(
 				request, 
 				/* @callback */ function(type, err) {
-						var eslintErrors = []; 
+						var eslintErrors = [];
 						if(err) {
 							eslintErrors.push({
 								start: 0,
