@@ -421,7 +421,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/i18nUtil', 'require', 'orion/
 		enablePlugin: function(url){
 			var plugin = this.settings.pluginRegistry.getPlugin(url);
 			if (plugin) {
-				plugin.start({lazy:true});
+				/* Start the plug-in as non-lazy in case it has a settings category to contribute */
+				plugin.start({lazy: false});
 				this.statusService.setMessage(i18nUtil.formatMessage(messages["Enabled"], url), 5000, true);
 				var data = {};
 				data[url] = true;

@@ -15,7 +15,6 @@
 
 define([
 	'i18n!orion/settings/nls/messages',
-	'orion/Deferred',
 	'orion/globalCommands',
 	'orion/PageUtil',
 	'orion/webui/littlelib',
@@ -36,7 +35,7 @@ define([
 	'orion/widgets/settings/GlobalizationSettings',
 	'orion/editorPreferences',
 	'orion/metrics'
-], function(messages, Deferred, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
+], function(messages, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
 		ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, editorThemeImporter, SplitSelectionLayout, PluginList, 
 		GitSettings, EditorSettings, TernSettings, ThemeSettings, UserSettings, GlobalizationSettings, mEditorPreferences, mMetrics) {
 
@@ -52,6 +51,15 @@ define([
 		this.pluginsUri = getPluginsRefs[0] && getPluginsRefs[0].getProperty("uri"); //$NON-NLS-0$
 
 		this.settingsCategories = [];
+		
+		var pluginsUpdated = function() {
+			this.settingsCategories = [];
+			this.show();
+		}.bind(this);
+
+		this.settingsCore.pluginRegistry.addEventListener("started", pluginsUpdated);
+		this.settingsCore.pluginRegistry.addEventListener("stopped", pluginsUpdated);
+		this.settingsCore.pluginRegistry.addEventListener("updated", pluginsUpdated);
 	}
 	SettingsContainer.prototype = Object.create(superPrototype);
 	objects.mixin(SettingsContainer.prototype, {
@@ -147,7 +155,7 @@ define([
 				window.addEventListener("hashchange", _self.processHash.bind(_self)); //$NON-NLS-0$
 	
 				mGlobalCommands.setPageTarget({task: messages['Settings'], serviceRegistry: _self.registry, commandService: _self.commandService});
-				
+
 				mMetrics.logPageLoadTiming("interactive", window.location.pathname); //$NON-NLS-0$
 				mMetrics.logPageLoadTiming("complete", window.location.pathname); //$NON-NLS-0$
 			});
@@ -161,14 +169,6 @@ define([
 				var selection = prefs['selection'];
 
 				var category = pageParams.category || selection; //$NON-NLS-0$
-
-				if(this.selectedCategory){
-					if( this.selectedCategory.id === category){
-						//No need to reselect the category
-						return;
-					}
-				}
-				
 				if (!category) {
 					// no selection exists, select the first one
 					category = this.settingsCategories[0].id;
@@ -499,8 +499,8 @@ define([
 			this.processHash();
 		},
 		
-		handleError: function( error ){
-			window.console.log( error );
+		handleError: function(error){
+			window.console.log(error);
 		}
 	});
 	return SettingsContainer;
