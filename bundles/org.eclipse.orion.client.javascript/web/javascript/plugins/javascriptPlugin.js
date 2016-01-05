@@ -787,8 +787,24 @@ define([
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-new-array)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
-    			}
-    	);
+   			}
+    		);
+
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+			new RenameCommand.RenameCommand(ternWorker, scriptresolver),
+			{
+				name: javascriptMessages["noShadowFixName"],
+				scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+				id : "no.shadow.fix",  //$NON-NLS-1$
+				contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+				validationProperties: [
+					{
+						source: "annotation:id", //$NON-NLS-1$
+						match: "^(?:no-shadow)$|^(?:no-shadow-global)$" //$NON-NLS-1$
+					} 
+				]
+			}
+		);
 
     	/**
     	 * legacy pref id
