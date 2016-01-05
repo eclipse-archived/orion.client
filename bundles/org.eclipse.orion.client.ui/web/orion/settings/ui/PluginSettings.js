@@ -250,9 +250,8 @@ define([
 						return self.config;
 					});
 				return this.configPromise;
-			} else {
-				return new Deferred().resolve(configuration);
 			}
+			return new Deferred().resolve(configuration);
 		},
 		changeProperty: function(setting, attributeId, value) {
 			return this.initConfiguration().then(function(configuration) {
@@ -268,9 +267,8 @@ define([
 					this.preferences._valueChanged("/cm/configurations", data); //$NON-NLS-1$
 					// Entire configuration is a no-op (i.e. it equals its default values) so remove it entirely
 					return this.remove();
-				} else {
-					configuration.update(props);
 				}
+				configuration.update(props);
 			}.bind(this));
 		},
 		getDefaultProps: function() {
@@ -282,9 +280,8 @@ define([
 				var defaultProps = this.getDefaultProps();
 				if (!defaultProps) {
 					return this.remove();
-				} else {
-					configuration.update(defaultProps);
 				}
+				configuration.update(defaultProps);
 			}.bind(this));
 		},
 		/** Remove the configuration */
@@ -306,6 +303,7 @@ define([
 		SelectionRenderer.call(this, {cachePrefix: 'pluginSettings', noRowHighlighting: true}, settingsListExplorer); //$NON-NLS-0$
 	}
 	SettingsRenderer.prototype = Object.create(SelectionRenderer.prototype);
+	/** @callback */
 	SettingsRenderer.prototype.getCellElement = function(col_no, /*Setting*/ setting, rowElement) {
 		var sectionId = setting.getPid(), headerId = sectionId + 'header'; //$NON-NLS-0$
 		
@@ -336,6 +334,7 @@ define([
 	SettingsRenderer.prototype.createPropertiesWidget = function(parent, setting, serviceRegistry) {
 		return new PropertiesWidget({serviceRegistry: this.serviceRegistry, setting: setting, categoryTitle: this.explorer.categoryTitle}, parent);
 	};
+	/** @callback */
 	SettingsRenderer.prototype.renderTableHeader = function(tableNode) {
 		return document.createElement('div'); //$NON-NLS-0$
 	};
