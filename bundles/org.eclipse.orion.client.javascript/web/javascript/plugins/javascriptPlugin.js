@@ -750,6 +750,7 @@ define([
     			quickFixComputer,
     			{
         			name: javascriptMessages["noCommaDangleFixName"],
+        			fixAllEnabled: true,
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "no.comma.dangle.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$

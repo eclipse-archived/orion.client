@@ -195,6 +195,7 @@ define([
 				return rule;
 			}
 		//NO-COMMA-DANGLE
+		describe('no-comma-dangle', function(){
 			it("Test no-comma-dangle-1", function(callback) {
 				var rule = createTestRule('no-comma-dangle');
 				var expected = {value: "",
@@ -269,6 +270,55 @@ define([
 								  callback: callback,
 								  contentType: 'text/html'});
 			});
+			it("Test no-comma-dangle fix all 1", function(callback) {
+				var rule = createTestRule('no-comma-dangle');
+				var expected = [
+								{value: "",
+								start: 15, 
+								end: 16},
+								{value: "",
+								start: 35, 
+								end: 36}
+								];
+				return getFixes({buffer: 'f({one:1, two:2,}); f({one:1, two:2,});', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			it("Test no-comma-dangle fix all 2", function(callback) {
+				var rule = createTestRule('no-comma-dangle');
+				var expected = [
+								{value: "",
+								start: 15, 
+								end: 16},
+								{value: "",
+								start: 41, 
+								end: 42}
+								];
+				return getFixes({buffer: 'f({one:1, two:2,});\nvar f = {one:1, two:2,};', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			it("Test no-comma-dangle fix all 3", function(callback) {
+				var rule = createTestRule('no-comma-dangle');
+				var expected = [
+								{value: "",
+								start: 15, 
+								end: 16},
+								{value: "",
+								start: 41, 
+								end: 42},
+								{value: "",
+								start: 67, 
+								end: 68}
+								];
+				return getFixes({buffer: 'f({one:1, two:2,}); var f = {one:1, two:2,}; var f = [{one:1, two:2,}];', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+		});
 		//NO-EMPTY-BLOCK
 			it("Test no-empty-block-1", function(callback) {
 				var rule = createTestRule('no-empty-block');

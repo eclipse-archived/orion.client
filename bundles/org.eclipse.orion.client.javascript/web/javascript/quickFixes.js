@@ -356,7 +356,13 @@ define([
 	        },
 			/** fix for the no-comma-dangle linting rule */
 			"no-comma-dangle": function(editorContext, annotation, annotations) {
-			    return editorContext.setText('', annotation.start, annotation.end);
+				return applySingleFixToAll(editorContext, annotation, annotations, function(currentAnnotation){
+					return {
+						text: '',
+						start: currentAnnotation.start,
+						end: currentAnnotation.end
+					};
+				});
 			},
 			/** fix for the no-empty-block linting rule */
 			"no-empty-block": function(editorContext, annotation, annotations) {
