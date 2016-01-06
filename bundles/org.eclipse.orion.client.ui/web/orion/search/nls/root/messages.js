@@ -7,8 +7,8 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
  ******************************************************************************/
-/*eslint-env browser, amd*/
-define({//Default message bundle
+/*eslint-env amd */
+define({
 	"Find:": "Find:",
 	"Find With": "Find With",
 	"ReplaceWith:": "ReplaceWith:",
@@ -107,14 +107,17 @@ define({//Default message bundle
 	"switchFullPath": "Show/hide full path",
 	"refsInProject": "${0} references to \'${1}\' in ${2}",
 	"refsInWorkspace": "${0} references to \'${1}\' in the workspace",
-	"viewByTypes" : "By types", //$NON-NLS-1$ //$NON-NLS-0$
-	"viewByFiles" : "By files", //$NON-NLS-1$ //$NON-NLS-0$
-	"viewByTypesTooltip": "View references grouped by categories", //$NON-NLS-1$ //$NON-NLS-0$
-	"viewByFilesTooltip": "View references grouped by files", //$NON-NLS-1$ //$NON-NLS-0$
-	"hidePerfectMatch": "Hide perfect matches", //$NON-NLS-1$ //$NON-NLS-0$
-	"showPerfectMatch": "Show perfect matches", //$NON-NLS-1$ //$NON-NLS-0$
-	"hideNonMatch": "Hide non-matches", //$NON-NLS-1$ //$NON-NLS-0$
-	"showNonMatch": "Show non-matches", //$NON-NLS-1$ //$NON-NLS-0$
-	"hidePossibleMatch": "Hide possible matches", //$NON-NLS-1$ //$NON-NLS-0$
-	"showPossibleMatch": "Show possible matches" //$NON-NLS-1$ //$NON-NLS-0$
+	"viewByTypes" : "By types",
+	"viewByFiles" : "By files",
+	"viewByTypesTooltip": "View references grouped by categories",
+	"viewByFilesTooltip": "View references grouped by files",
+	"hidePerfectMatch": "Hide perfect matches",
+	"showPerfectMatch": "Show perfect matches",
+	"hideNonMatch": "Hide non-matches",
+	"showNonMatch": "Show non-matches",
+	"hidePossibleMatch": "Hide possible matches",
+	"showPossibleMatch": "Show possible matches",
+	"perfectMatch": "Perfect match",
+	"notAMatch": "Not a match",
+	"couldBeMatch": "Could be a match"
 });
