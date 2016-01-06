@@ -760,15 +760,15 @@ define([
 								var end = currentAnnotation.end;
 								if (!newComment.match(/^(\s*|\s*\/\/.*)$/)){
 									start += 2; // Only remove leading // if additional comments start with another //
+								} else {
+									while (ast.source.charAt(start-1) === ' ' || ast.source.charAt(start-1) === '\t'){
+										start--;
+									}
 								}
 								if (newComment.match(/^\s*$/)){
 									end = comment.range[1]; // If there is only whitespace left in the comment, delete it entirely
 									while (ast.source.charAt(start-1) === ' ' || ast.source.charAt(start-1) === '\t'){
 										start--;
-									}
-								} else {
-									while (ast.source.charAt(end) === ' ' || ast.source.charAt(end) === '\t'){
-										end++;
 									}
 								}
 								return {

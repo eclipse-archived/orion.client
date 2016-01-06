@@ -2000,7 +2000,7 @@ define([
 				var rule = createTestRule('unnecessary-nls');
 				var expected = {value: "",
 								start: 13, 
-								end: 25};
+								end: 24};
 				return getFixes({buffer: 'var a = 1; //$NON-NLS-1$ foo', 
 								  rule: rule,
 								  expected: expected,
@@ -2021,8 +2021,8 @@ define([
 			it("Test unnecessary-nls-6", function(callback) {
 				var rule = createTestRule('unnecessary-nls');
 				var expected = {value: "",
-								start: 13, 
-								end: 27};
+								start: 12, 
+								end: 26};
 				return getFixes({buffer: 'var a = "a"; //$NON-NLS-2$ //$NON-NLS-1$', 
 								  rule: rule,
 								  expected: expected,
@@ -2050,8 +2050,8 @@ define([
 				var rule = createTestRule('unnecessary-nls');
 				var expected = [
 								{value: "",
-								start: 11, 
-								end: 25},
+								start: 10, 
+								end: 24},
 								{value: "",
 								start: 24, 
 								end: 38},
@@ -2067,14 +2067,48 @@ define([
 				var rule = createTestRule('unnecessary-nls');
 				var expected = [
 								{value: "",
-								start: 13, 
-								end: 27},
+								start: 12, 
+								end: 26},
 								{value: "",
 								start: 40, 
 								end: 54},
 								];
 
 				return getFixes({buffer: 'var a = "a"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-9$', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback,
+								  pid: 'unnecessary-nls'});
+			});
+			it("Test unnecessary-nls fix all 4 - careful whitespace removal", function(callback) {
+				var rule = createTestRule('unnecessary-nls');
+				var expected = [
+								{value: "",
+								start: 11, 
+								end: 25},
+								{value: "",
+								start: 25, 
+								end: 40},
+								];
+
+				return getFixes({buffer: 'var v = 10; //$NON-NLS-1$  //$NON-NLS-2$\nvar v2;', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback,
+								  pid: 'unnecessary-nls'});
+			});
+			it("Test unnecessary-nls fix all 5 - careful whitespace removal", function(callback) {
+				var rule = createTestRule('unnecessary-nls');
+				var expected = [
+								{value: "",
+								start: 11, 
+								end: 25},
+								{value: "",
+								start: 25, 
+								end: 40},
+								];
+
+				return getFixes({buffer: 'var v = 10; //$NON-NLS-1$  //$NON-NLS-2$     \nvar v2;', 
 								  rule: rule,
 								  expected: expected,
 								  callback: callback,
