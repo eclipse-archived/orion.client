@@ -51,7 +51,7 @@ module.exports = function(grunt) {
 	    helpers = require("./test-helpers");
 
 	var env = process.env,
-	    orionClient = nodePath.join(__dirname, (env.VCAP_APPLICATION ? "/" : "../../../")), // Allow us to run outside cf
+	    orionClient = nodePath.join(__dirname, env.VCAP_APPLICATION ? "/" : "../../../"), // Allow us to run outside cf
 	    packageRoot = __dirname + "/",
 	    util = require(orionClient + "modules/orionode/build/utils")(grunt);
 
@@ -143,7 +143,7 @@ module.exports = function(grunt) {
 			tags: [env.BUILD_TAG || "master"], // FIXME tags seem to be ignored
 			onTestComplete: onTestComplete,
 			maxRetries: 1, // retry once on timeout
-			"max-duration":    120, // default: 180
+			"max-duration":    200,
 			testname: suiteURLShort,
 			urls: [suiteURL]
 		});
@@ -152,12 +152,12 @@ module.exports = function(grunt) {
 	// Register tasks
 	grunt.registerTask("check", "Check prerequisites", function() {
 		grunt.verbose.subhead("Checking environment vars...");
-		!(env.SAUCE_USERNAME)   && grunt.fatal("Required environment variable not set: SAUCE_USERNAME");
-		!(env.SAUCE_ACCESS_KEY) && grunt.fatal("Required environment variable not set: SAUCE_ACCESS_KEY");
+		!env.SAUCE_USERNAME   && grunt.fatal("Required environment variable not set: SAUCE_USERNAME");
+		!env.SAUCE_ACCESS_KEY && grunt.fatal("Required environment variable not set: SAUCE_ACCESS_KEY");
 		grunt.verbose.write("OK");
 		grunt.verbose.write("Checking package.json...");
-		!(pkg.results) && grunt.fatal("Required property `results` not found in package.json");
-		!(pkg.browsers) && grunt.fatal("Required property `browsers` not found in package.json");
+		!pkg.results && grunt.fatal("Required property `results` not found in package.json");
+		!pkg.browsers && grunt.fatal("Required property `browsers` not found in package.json");
 		grunt.verbose.write("OK");
 	});
 	grunt.registerTask("wait", "Wait for exit", function() {
