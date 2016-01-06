@@ -36,9 +36,10 @@
 				'js-tests/javascript/eslintCoreTests',
 				'js-tests/javascript/scriptResolverTests',
 				'js-tests/javascript/sigparserTests',
-				'js-tests/javascript/ternProjectFileTests'
+				'js-tests/javascript/ternProjectFileTests',
+				'js-tests/javascript/ternProjectValidatorTests'
 				], function(worker, crossFileTests, astManagerTests, ternAssistTests, ternCommandTests, esprimaTolerantTests, dependencyTests, finderTests, occurrencesTests, outlinerTests, validatorTests, lruTests, quickfixTests, 
-							eslintCoreTests, scriptResolverTests, sigparserTests, ternProjectTests){
+							eslintCoreTests, scriptResolverTests, sigparserTests, ternProjectTests, ternProjectValidatorTests) {
 					var testworker;
 					before("reset timeout", function(done) {
 						this.timeout(20000);
@@ -66,6 +67,7 @@
 					ternCommandTests(testworker);
 					validatorTests(testworker);
 					ternProjectTests(testworker);
+					ternProjectValidatorTests(testworker);
 					mocha.run();
 		});
 	});

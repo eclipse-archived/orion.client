@@ -122,5 +122,20 @@ define({
 	'no-self-compare-description' : 'Disallow self compare',
 	'no-irregular-whitespace-description' : 'No irregular whitespace:',
 	'no-self-assign-description' : 'Disallow self assignment',
-	'no-self-assign' : 'Assigning to itself is pointless.'
+	'no-self-assign' : 'Assigning to itself is pointless.',
+	
+	//.tern-project file validation messages
+	'notNum': "'${0}' must be a number",
+	'notArray': "'${0}' must be an array of strings",
+	'notEmpty': "'${0}' should not be empty",
+	'onlyStrings': "'${0}' entries can only be strings",
+	'notObject': "'${0}' must be an object",
+	'pluginNotObject': "plugin '${0}' must be an object",
+	'problemInFile': "There is a problem with your .tern-project-file.",
+	'openFile': "Open the .tern-project file",
+	'errorParsing': "There was an error parsing the JSON in your .tern-project file",
+	'multiAttrProblems': "Multiple problems were found with attributes in your .tern-project file.",
+	'attrProblem': "A problem with one of the attributes in your .tern-project file was found.",
+	'failedWrite': "There was a problem writing to your .tern-project file.",
+	'noDupes': "Duplicate entries are not allowed"
 });

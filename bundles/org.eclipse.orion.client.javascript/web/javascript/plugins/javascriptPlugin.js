@@ -26,6 +26,7 @@ define([
 'javascript/quickFixes',
 'javascript/contentAssist/ternAssist',
 'javascript/validator',
+'javascript/ternProjectValidator',
 'javascript/occurrences',
 'javascript/hover',
 'javascript/outliner',
@@ -47,7 +48,7 @@ define([
 'orion/i18nUtil',
 'orion/URL-shim'
 ], function(PluginProvider, mServiceRegistry, Deferred, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist,
-			EslintValidator, Occurrences, Hover, Outliner, CUProvider, TernProjectManager, Util, Logger, AddToTernCommand, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
+			EslintValidator, TernProjectValidator, Occurrences, Hover, Outliner, CUProvider, TernProjectManager, Util, Logger, AddToTernCommand, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 			RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
@@ -363,6 +364,26 @@ define([
     		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
     		pid: 'eslint.config'  //$NON-NLS-1$
     			});
+    			
+    	provider.registerService("orion.edit.validator",  //$NON-NLS-1$
+    		{
+    			/**
+    			 * @callback
+    			 */
+    			computeProblems: function(editorContext , context, config) {
+    				return editorContext.getFileMetadata().then(function(meta) {
+    					if(meta.name === '.tern-project') {
+							return editorContext.getText().then(function(text) {
+								return TernProjectValidator.validateAST(text);
+							});
+						}
+						return null;
+					});
+    			}
+    		},
+    			{
+    		contentType: ["application/json"]  //$NON-NLS-1$
+    	});
 
     	/**
     	 * Register AST manager as Model Change listener
@@ -376,7 +397,7 @@ define([
     		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$
     	});
     	
-    	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver);
+    	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, serviceRegistry);
     	/**
     	 * Register Tern project manager as input changed listener
     	 */

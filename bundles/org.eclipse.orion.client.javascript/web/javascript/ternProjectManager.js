@@ -12,8 +12,11 @@
  /*eslint-env amd, browser*/
 define([
 'orion/objects',
-'orion/Deferred'
-], function(Objects, Deferred) {
+'orion/Deferred',
+'orion/URITemplate',
+'javascript/ternProjectValidator',
+'i18n!javascript/nls/problems'
+], function(Objects, Deferred, URITemplate, Validator, Messages) {
 
 	/**
 	 * @description Creates a new open declaration command
@@ -21,15 +24,45 @@ define([
 	 * @public
 	 * @param {TernWorker} ternWorker The running Tern worker
 	 * @param {ScriptResolver} scriptResolver The backing script resolver
+	 * @param {ServiceRegistry} serviceRegistry The service registry 
 	 * @since 8.0
 	 */
-	function TernProjectManager(ternWorker, scriptResolver) {
+	function TernProjectManager(ternWorker, scriptResolver, serviceRegistry) {
 		this.ternWorker = ternWorker;
 		this.scriptResolver = scriptResolver;
 		this.currentProjectLocation = null;
+		this.currentFile = null;
+		this.registry = serviceRegistry;
 	}
 
 	Objects.mixin(TernProjectManager.prototype, {
+		/**
+		 * @description Report a problem with the file to the page status
+		 * @function
+		 * @private
+		 */
+		_report: function _report(heading, message) {
+			if(!this.inEditor) {
+				var head = heading;
+				if(!head) {
+					head = Messages['problemInFile'];
+				}
+				var msg = Object.create(null);
+				msg.HTML = true;
+				msg.Severity = "Error"; //$NON-NLS-1$
+				msg.Message = "<b>"+head+"</b>" + //$NON-NLS-1$ //$NON-NLS-2$
+							  "<p>"+message+"</p>"; //$NON-NLS-1$ //$NON-NLS-2$
+				if(this.currentFile) {
+					var href = new URITemplate("#{,resource,params*}").expand( //$NON-NLS-1$
+		    		                      {
+		    		                      resource: this.currentFile,
+		    		                      params: {}
+		    		                      });
+					msg.Message += "<p><a href=\""+href+"\" alt=\""+Messages['openFile']+"\">"+Messages['openFile']+"</a></p>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				}
+				this.registry.getService("orion.page.message").setProgressResult(msg); //$NON-NLS-1$
+			}
+		},
 		/**
 		 * @description Get the file client;
 		 * @function
@@ -62,6 +95,7 @@ define([
 		 * @returns returns {Deferred} Deferred to get the string file location or <code>null</code> if there is no .tern-project file
 		 */
 		getTernProjectFileLocation: function(projectFile) {
+			this.currentFile = null;
 			if (!projectFile){
 				return null;
 			}
@@ -74,11 +108,12 @@ define([
 			return deferred.then(function(children){
 				for(var i=0; i<children.length; i++){
 					if(children[i].Name === ".tern-project"){
-						return children[i].Location;
+						this.currentFile = children[i].Location;
+						return this.currentFile;
 					}
 				}
 				return null;
-			});
+			}.bind(this));
 		},
 		
 		/**
@@ -90,13 +125,12 @@ define([
 		 */
 		ensureTernProjectFileLocation: function(projectFile) {
 			return this.getTernProjectFileLocation(projectFile).then(function(ternFileLocation){
-				if (!ternFileLocation){
+				if (!ternFileLocation) {
 					return this.getFileClient().createFile(projectFile.Location, '.tern-project').then(function(){ //$NON-NLS-1$
 						return ternFileLocation;
 					});
-				} else {
-					return ternFileLocation;
-				}
+				} 
+				return ternFileLocation;
 			}.bind(this));
 		},
 		
@@ -113,12 +147,36 @@ define([
 				try {
 					var json = content ? JSON.parse(content) : {};
 					json.projectLoc = fileLocation.slice(0, fileLocation.lastIndexOf('/')+1);
+					this._simpleValidate(json);
 					return json;
 				} catch(e) {
-					console.log("Error parsing JSON in .tern-project file") //$NON-NLS-1$
+					this._report(Messages['errorParsing'], e);
 					return {};
 				}
-			});
+			}.bind(this));
+		},
+		
+		/**
+		 * @description description
+		 * @function
+		 * @private
+		 * @param {Object} json
+		 * @returns returns
+		 */
+		_simpleValidate: function _simpleValidate(json) {
+			if(!this.inEditor) {
+				var problems = Validator.validate(json);
+				if(problems.length > 1) {
+					var pbString = '<ul>'; //$NON-NLS-1$
+					problems.forEach(function(pb) {
+						pbString += "<li>"+pb+"</li>"; //$NON-NLS-1$ //$NON-NLS-2$
+					});
+					pbString += "</ul>"; //$NON-NLS-1$
+					this._report(Messages['multiAttrProblems'], pbString);
+				} else if(problems.length === 1) {
+					this._report(Messages['attrProblem'], problems[0]);
+				}
+			}
 		},
 		
 		/**
@@ -130,11 +188,12 @@ define([
 		 * @returns returns {Deferred} Deferred to write the options into the file or <code>null</code> on error
 		 */
 		writeTernFile: function(fileLocation, jsonOptions) {
+			this.currentFile = fileLocation;
 			try {
 				var jsonString = JSON.stringify(jsonOptions, null, 4);
 				return this.fileClient.write(fileLocation, jsonString);
 			} catch(e) {
-				console.log("Error writing JSON to .tern-project file: " + e); //$NON-NLS-1$
+				this._report(Messages['failedWrite'], e);
 			}
 		},
 				
@@ -157,9 +216,10 @@ define([
 					}
 					this.scriptResolver.getWorkspaceFile(filename, {ext: ext}).then(function(files) {
 						if (Array.isArray(files) && files.length > 0){
-							if (files.length > 1){
-								console.log('Tern-Project File: Found multiple potential files for: ' + filename); //$NON-NLS-1$
-							}
+//							if (files.length > 1) {
+//								this._report("Mutiple matches were found eagerly loading file: "+filename, 
+//								files[0].location+" was chosen and loaded.");							
+//							}
 							this.ternWorker.postMessage(
 								{request:'addFile', args:{file: files[0].location}} //$NON-NLS-1$
 							);
@@ -175,21 +235,23 @@ define([
 		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
 		 */
 		onInputChanged: function onInputChanged(evnt) {
-			var file = evnt.file;
-			var projectFile = this.getProjectFile(file);
-			if (projectFile && (!this.currentProjectLocation || projectFile.Location !== this.currentProjectLocation)){
-				this.currentProjectLocation = projectFile.Location;
-				this.scriptResolver.setSearchLocation(projectFile.Location);
-				return this.getTernProjectFileLocation(projectFile).then(function(ternFileLocation){
-					return this.parseTernJSON(ternFileLocation).then(function(jsonOptions){
-						this.loadTernProjectOptions(jsonOptions);
-					}.bind(this));
-				}.bind(this));
-			}
-			if (file.name === '.tern-project'){
+			this.inEditor = ".tern-project" === evnt.file.name;
+			if(this.inEditor) {
 				this.currentProjectLocation = null;
-			}		
-		}		
+			} else {
+				var file = evnt.file;
+				var projectFile = this.getProjectFile(file);
+				if (projectFile && (!this.currentProjectLocation || projectFile.Location !== this.currentProjectLocation)){
+					this.currentProjectLocation = projectFile.Location;
+					this.scriptResolver.setSearchLocation(projectFile.Location);
+					return this.getTernProjectFileLocation(projectFile).then(function(ternFileLocation){
+						return this.parseTernJSON(ternFileLocation).then(function(jsonOptions){
+							this.loadTernProjectOptions(jsonOptions);
+						}.bind(this));
+					}.bind(this));
+				}
+			}
+		}
 	});
 
 	return {
