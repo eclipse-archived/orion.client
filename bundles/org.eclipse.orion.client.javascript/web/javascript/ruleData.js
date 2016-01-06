@@ -73,6 +73,7 @@ define([
 			"no-with" : 1,
 			"radix" : 1,
 			"semi" : 1,
+			"type-checked-consistent-return" : 0,
 			"unnecessary-nls" : 0,
 			"use-isnan" : 2,
 			"valid-typeof" : 2
@@ -310,6 +311,9 @@ define([
 			"valid-typeof" : {
 				description: Messages['valid-typeof-description'],
 			    url: 'http://eslint.org/docs/rules/valid-typeof'
+			},
+			"type-checked-consistent-return" : {
+				description: Messages['type-checked-consistent-return-description'],
 			}
 		}
 	};

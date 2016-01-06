@@ -11167,6 +11167,174 @@ define([
 								});
 						});
 					});
+					// type-checked-consistent-return --------------------------------------------
+					describe('type-checked-consistent-return', function() {
+						var RULE_ID = "type-checked-consistent-return";
+						it("flag return boolean and return no value", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return true; } else { return; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Inconsistent return types: 'boolean', 'undefined'"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag return boolean and return number", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return true; } else { return 2; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Inconsistent return types: 'boolean', 'number'"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag return no value and boolean", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return; } else { return false; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Inconsistent return types: 'undefined', 'boolean'"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag return booleans", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return true; } else { return false; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag return with no values", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return; } else { return; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag return null and object", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return null; } else { return {}; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag return null and string concatenation", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return null; } else { return \"\" + 15; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag return null and string", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return null; } else { return \"\"; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag number and boolean returns", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return 3; } else { return false; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Inconsistent return types: \'number\', \'boolean\'"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag return string and string concatenation", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return \"\"; } else { return \"\" + 15; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag return number and number addition", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return 9; } else { return 15 + 6; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag return number and number substraction", function(callback) {
+							var topic = 	"function doSomething(condition) { if (condition) { return 9; } else { return 15 - 6; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};
