@@ -138,6 +138,7 @@ define([
 				CUProvider.setUseCache(false);
 				openImplCommand = new OpenImplementation.OpenImplementationCommand(worker);
 				openDeclCommand = new OpenDeclaration.OpenDeclarationCommand(worker);
+				worker.start();
 			});
 			this.timeout(10000);
 			

@@ -33,7 +33,7 @@ define([
     	worker.onmessage = onmessage.bind(this);
     	worker.onerror = onerror.bind(this);
     	if(!state.delayedStart) {
-	    	worker.postMessage({request: 'start_worker'}); 
+	    	worker.postMessage({request: 'start_server', args: {}}); 
 		}
     	messageID = 0;
     	callbacks = Object.create(null);
@@ -80,7 +80,7 @@ define([
 	 */
 	WrappedWorker.prototype.start = function(callback) {
 		_state.callback = callback;
-		worker.postMessage("start_worker");
+		worker.postMessage({request: 'start_server', args: {}});
 	};
 	
 	/**
@@ -125,6 +125,8 @@ define([
 							_state.callback();
 						});
 				}
+			} else if(_d.request === "start_server") {
+				return;
 			} else if(_d.request === 'read') {
 				var url, filePath;
 				if(_d.args && _d.args.file) {
