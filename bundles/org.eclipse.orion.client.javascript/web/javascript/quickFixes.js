@@ -145,12 +145,10 @@ define([
         if(usecommas) {
 	        if(text.slice(directive.length).trim() !== '') {
 	            return text.trim() + ', '+name; //$NON-NLS-1$
-	        } else {
-	            return text.trim() + ' '+name;  //$NON-NLS-1$
 	        }
-        } else {
-	       return text.trim() + ' '+name;  //$NON-NLS-1$
-	    }
+	        return text.trim() + ' '+name;  //$NON-NLS-1$
+        }
+	    return text.trim() + ' '+name;  //$NON-NLS-1$
     }
 	
 	function indexOf(list, item) {
@@ -215,12 +213,11 @@ define([
                     val = getCommentStart(n);
                     if(val > -1) {
                         return val;
-                    } else {
-                        //TODO see https://github.com/jquery/esprima/issues/1071
-                        val = getCommentStart(n.id);
-                        if(val > -1) {
-                            return val;
-                        }
+                    }
+                    //TODO see https://github.com/jquery/esprima/issues/1071
+                    val = getCommentStart(n.id);
+                    if(val > -1) {
+                        return val;
                     }
                     break;
                 }
@@ -229,12 +226,11 @@ define([
                         val = getCommentStart(n);
                         if(val > -1) {
                             return val;
-                        } else {
-                            //TODO see https://github.com/jquery/esprima/issues/1071
-                            val = getCommentStart(n.expression.left);
-                            if(val > -1) {
-                                return val;
-                            }
+                        }
+                        //TODO see https://github.com/jquery/esprima/issues/1071
+                        val = getCommentStart(n.expression.left);
+                        if(val > -1) {
+                            return val;
                         }
                     }   
                 }
@@ -260,6 +256,14 @@ define([
         return -1;
 	}
 	
+	/**
+	 * Takes a quickfix implementation that can be applied to all fixes in a file and applies it to either all annotations (if multiple annotations provided) or
+	 * just to the single annotation.  Handles applying all edits in a single UNDO step as well as setting the caret to the single selected annotation afterward.
+	 * @param editorContext context to apply text edits to
+	 * @param annotation the selected annotation
+	 * @param annotations Array of annotations to apply the fix to
+	 * @param createTextChange {Function} function to create a text edit object (text, start, end) for a given annotation
+	 */
 	function applySingleFixToAll(editorContext, annotation, annotations, createTextChange){
 		if (!annotations){
 			var change = createTextChange(annotation);
@@ -499,13 +503,12 @@ define([
 	                    if(comment) {
 	                        start = comment.range[0]+2;
 	                        return editorContext.setText(updateDirective(comment.value, 'globals', insert), start, start+comment.value.length); //$NON-NLS-1$
-	                    } else {
-	                        var point = getDirectiveInsertionPoint(ast);
-	                    	var linestart = getLineStart(ast.source, point);
-	                    	var indent = computeIndent(ast.source, linestart, false);
-	               			var fix = '/*globals '+insert+' */\n' + indent; //$NON-NLS-1$ //$NON-NLS-2$
-	                        return editorContext.setText(fix, point, point);
 	                    }
+                        var point = getDirectiveInsertionPoint(ast);
+                    	var linestart = getLineStart(ast.source, point);
+                    	var indent = computeIndent(ast.source, linestart, false);
+               			var fix = '/*globals '+insert+' */\n' + indent; //$NON-NLS-1$ //$NON-NLS-2$
+                        return editorContext.setText(fix, point, point);
 	                });
 	            }
 	            return null;
@@ -527,13 +530,12 @@ define([
 	                        if(comment) {
 	                            start = getDocOffset(ast.source, comment.range[0]) + comment.range[0];
 	    	                    return editorContext.setText(updateDirective(comment.value, 'eslint-env', env, true), start, start+comment.value.length); //$NON-NLS-1$
-	                        } else {
-	                            var point = getDirectiveInsertionPoint(ast);
-	                    		var linestart = getLineStart(ast.source, point);
-	                    		var indent = computeIndent(ast.source, linestart, false);
-	               				var fix = '/*eslint-env '+env+' */\n' + indent; //$NON-NLS-1$ //$NON-NLS-2$
-	                            return editorContext.setText(fix, point, point);
 	                        }
+                            var point = getDirectiveInsertionPoint(ast);
+                    		var linestart = getLineStart(ast.source, point);
+                    		var indent = computeIndent(ast.source, linestart, false);
+               				var fix = '/*eslint-env '+env+' */\n' + indent; //$NON-NLS-1$ //$NON-NLS-2$
+                            return editorContext.setText(fix, point, point);
 	                    }
 	                });
 	            }
@@ -609,12 +611,11 @@ define([
 	                        if(decl.type === 'VariableDeclaration') {
 	                            if(decl.declarations.length === 1) {
 	                                return editorContext.setText('', decl.range[0], decl.range[1]);
-	                            } else {
-	                                var idx = indexOf(decl.declarations, declr);
-	                                if(idx > -1) {
-	                                    return removeIndexedItem(decl.declarations, idx, editorContext);
-	                                }
 	                            }
+                                var idx = indexOf(decl.declarations, declr);
+                                if(idx > -1) {
+                                    return removeIndexedItem(decl.declarations, idx, editorContext);
+                                }
 	                           /* var start = declr.range[1];
 	                            var lstart = getLineStart(ast.source, start);
 	                            var indent = computeIndent(ast.source, lstart);
@@ -669,7 +670,7 @@ define([
 	                    switch(p.type) {
 	                    	case 'Property': {
 	                    		if(!hasDocTag('@callback', p) && !hasDocTag('@callback', p.key)) { //$NON-NLS-1$ //$NON-NLS-2$
-	                    			promise = updateCallback(p, ast, (p.leadingComments ? p.leadingComments : p.key.leadingComments));
+	                    			promise = updateCallback(p, ast, p.leadingComments ? p.leadingComments : p.key.leadingComments);
 	                			}
 	                    		break;
 	                    	}
@@ -731,32 +732,49 @@ define([
 	        /** fix for the unnecessary-nls rule */
 	        "unnecessary-nls": function(editorContext, annotation, annotations, astManager){
 	        	return astManager.getAST(editorContext).then(function(ast) {
-	        		var comment = Finder.findComment(annotation.start + 2, ast); // Adjust for leading //
-	        		var nlsTag = annotation.data.nlsComment; // We store the nls tag in the annotation
-	        		if (comment && comment.type.toLowerCase() === 'line' && nlsTag){
-						var index = comment.value.indexOf(nlsTag);
-						if (index >= 0){
-							var newComment = comment.value.substring(0,index) + comment.value.substring(index+nlsTag.length);
-							if (newComment.match(/^((\/\/)|[\s])*$/)){
-								var start = comment.range[0];
+		        	return applySingleFixToAll(editorContext, annotation, annotations, function(currentAnnotation){
+		        		var comment = Finder.findComment(currentAnnotation.start + 2, ast); // Adjust for leading //
+		        		var nlsTag = currentAnnotation.data.nlsComment; // We store the nls tag in the annotation
+		        		if (comment && comment.type.toLowerCase() === 'line' && nlsTag){
+							var index = comment.value.indexOf(nlsTag);
+							// Check if we can delete the whole comment
+							if (index > 0){
+								var start = currentAnnotation.start;
 								while (ast.source.charAt(start-1) === ' ' || ast.source.charAt(start-1) === '\t'){
 									start--;
 								}
-								return editorContext.setText('', start, comment.range[1]);
-							} else {
-								start = annotation.start;
-								if (nlsTag.indexOf('//') !== 0){ //$NON-NLS-1$
-									start += 2;
+								return {
+									text: '',
+									start: start,
+									end: currentAnnotation.end
+								};
+							} else if (index === 0){
+								var newComment = comment.value.substring(index+nlsTag.length);
+								start = currentAnnotation.start;
+								var end = currentAnnotation.end;
+								if (!newComment.match(/^(\s*|\s*\/\/.*)$/)){
+									start += 2; // Only remove leading // if additional comments start with another //
 								}
-								while (ast.source.charAt(start-1) === ' ' || ast.source.charAt(start-1) === '\t'){
-									start--;
+								if (newComment.match(/^\s*$/)){
+									end = comment.range[1]; // If there is only whitespace left in the comment, delete it entirely
+									while (ast.source.charAt(start-1) === ' ' || ast.source.charAt(start-1) === '\t'){
+										start--;
+									}
+								} else {
+									while (ast.source.charAt(end) === ' ' || ast.source.charAt(end) === '\t'){
+										end++;
+									}
 								}
-								return editorContext.setText('', start, annotation.end);
+								return {
+									text: '',
+									start: start,
+									end: end
+								};
 							}
 						}
-	        		}
-	        		return null;
-	    		});
+		        		return null;
+					});
+        		});
     		}
 		}
 	});

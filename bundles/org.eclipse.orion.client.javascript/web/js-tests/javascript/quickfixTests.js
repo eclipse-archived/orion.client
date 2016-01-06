@@ -48,13 +48,16 @@ define([
 					getText: function(start, end) {
 						if(typeof(start) === 'undefined' && typeof(end) === 'undefined') {
 							return new Deferred().resolve(buffer);
-						} else {
-							return new Deferred().resolve(buffer.slice(start, end));
 						}
+						return new Deferred().resolve(buffer.slice(start, end));
 					},
 					
 					setText: function(text, start, end) {
 						return new Deferred().resolve(assertFixes(text, start, end, options.expected));
+					},
+					
+					getSelections: function(){
+						return new Deferred().resolve([]);
 					},
 					
 					getFileMetadata:function() {
@@ -107,7 +110,11 @@ define([
 								assert(i !== pbs.length, "Did not find any problems for the expected id: "+ options.pid);
 							} else {
 								assert(pbs, "There should always be problems");
-								assert.equal(pbs.length, 1, 'There should only be one problem per test');
+								if (Array.isArray(options.expected)){
+									assert.equal(pbs.length, options.expected.length, 'Number of problems found (' + pbs.length + ') does not match expected');
+								} else {
+									assert.equal(pbs.length, 1, 'Expected only one problem per test');
+								}
 								assert(annot.id, "No problem id is reported");
 								assert(annot.id.indexOf(options.rule.id) === 0, "The problem id should start with the enabled rule id");
 							}
@@ -115,7 +122,14 @@ define([
 							if(options.fixid) {
 								annot.fixid = options.fixid;
 							}
-							return obj.fixComputer.execute(obj.editorContext, {annotation: annot}).then(function(result) {
+							var annotations;
+							if (Array.isArray(options.expected)){
+								annotations = pbs;
+								for (i=0; i<annotations.length; i++) {
+									annotations[i].title = annotations[i].description;
+								}
+							}
+							return obj.fixComputer.execute(obj.editorContext, {annotation: annot, annotations: annotations}).then(function(result) {
 									if (result === null) {
 										worker.getTestState().callback();
 									}
@@ -141,9 +155,21 @@ define([
 			function assertFixes(computed, start, end, expected) {
 				try {
 					assert(computed !== null && typeof computed !== 'undefined', 'There should be fixes');
-					assert(computed.indexOf(expected.value) > -1, 'The fix: '+computed+' does not match the expected fix of: '+expected.value);
-					assert.equal(start, expected.start, 'The fix starts do not match');
-					assert.equal(end, expected.end, 'The fix ends do not match');
+					if (Array.isArray(expected)){
+						assert(Array.isArray(computed.text), "Expected multiple quick fix text edits")
+						assert(Array.isArray(computed.selection), "Expected multiple quick fix selections");
+						assert.equal(computed.text.length, expected.length, "Wrong number of quick fix text edits");
+						assert.equal(computed.selection.length, expected.length, "Wrong number of quick fix selections");						
+						for (var i=0; i<expected.length; i++) {
+							assert(computed.text[i].indexOf(expected[i].value) > -1, 'The fix: '+computed[i]+' does not match the expected fix of: '+expected[i].value);
+							assert.equal(computed.selection[i].start, expected[i].start, 'The fix starts do not match');
+							assert.equal(computed.selection[i].end, expected[i].end, 'The fix ends do not match');
+						}
+					} else {
+						assert(computed.indexOf(expected.value) > -1, 'The fix: '+computed+' does not match the expected fix of: '+expected.value);
+						assert.equal(start, expected.start, 'The fix starts do not match');
+						assert.equal(end, expected.end, 'The fix ends do not match');
+					}
 					worker.getTestState().callback();
 				}
 				catch(err) {
@@ -385,6 +411,7 @@ define([
 								  contentType: 'text/html'});
 			});
 		//NO-EXTRA-SEMI
+		describe('no-extra-semi', function(){
 			it("Test no-extra-semi-1",function(callback) {
 				var rule = createTestRule('no-extra-semi');
 				 var expected = {value: "",
@@ -480,6 +507,114 @@ define([
 								  callback: callback,
 								  contentType: 'text/html'});
 			});
+			it("Test no-extra-semi fix all 1",function(callback) {
+				var rule = createTestRule('no-extra-semi');
+				 var expected = [
+				 				{value: "",
+								start: 15, 
+								end: 16},
+								{value: "",
+								start: 32, 
+								end: 33}
+								];
+				return getFixes({buffer: 'function f() {}; function g() {};', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			it("Test no-extra-semi fix all 2",function(callback) {
+				var rule = createTestRule('no-extra-semi');
+				 var expected = [
+				 				{value: "",
+								start: 11, 
+								end: 12},
+								{value: "",
+								start: 12, 
+								end: 13},
+								{value: "",
+								start: 13, 
+								end: 14}
+								];
+				return getFixes({buffer: 'var a = 10;;;;', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			it("Test no-extra-semi fix all 3",function(callback) {
+				var rule = createTestRule('no-extra-semi');
+				 var expected = [
+				 				{value: "",
+								start: 14, 
+								end: 15},
+								{value: "",
+								start: 15, 
+								end: 16},
+								{value: "",
+								start: 16, 
+								end: 17}
+								];
+				return getFixes({buffer: 'function f(){};;;', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			it("Test no-extra-semi fix all 4",function(callback) {
+				var rule = createTestRule('no-extra-semi');
+				 var expected = [
+				 				{value: "",
+								start: 0, 
+								end: 1},
+								{value: "",
+								start: 17, 
+								end: 18},
+								{value: "",
+								start: 29, 
+								end: 30},
+								{value: "",
+								start: 42, 
+								end: 43}
+								];
+				return getFixes({buffer: '; function f() {}; var a = 0;; var b = {};;', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			
+			
+			it("Test no-extra-semi-2",function(callback) {
+				var rule = createTestRule('no-extra-semi');
+				var expected = {value: "",
+								start: 13, 
+								end: 14};
+				return getFixes({buffer: 'var foo = 10;;', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			it("Test no-extra-semi-3",function(callback) {
+				var rule = createTestRule('no-extra-semi');
+				var expected = {value: "",
+								start: 13, 
+								end: 14};
+				return getFixes({buffer: 'var foo = {};;', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			it("Test no-extra-semi-4",function(callback) {
+				var rule = createTestRule('no-extra-semi');
+				var expected = {value: "",
+								start: 0, 
+								end: 1};
+				return getFixes({buffer: ';', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			
+			
+			
+		});
 		//NO-FALLTHROUGH
 			it("Test no-fallthrough-1",function(callback) {
 				var rule = createTestRule('no-fallthrough');
@@ -1155,6 +1290,7 @@ define([
 			});
 	
 		//EQEQEQ
+		describe('EQEQEQ', function(){
 			it("Test eqeqeq-1",function(callback) {
 				var rule = createTestRule('eqeqeq');
 				var expected = {value: "===",
@@ -1250,6 +1386,49 @@ define([
 								  callback: callback,
 								  contentType: 'text/html'});
 			});
+			it("Test eqeqeq fix all 1",function(callback) {
+				var rule = createTestRule('eqeqeq');
+				var expected = [{value: "===",
+								start: 5, 
+								end: 7},
+								{value: "===",
+								start: 20,
+								end: 22}
+								];
+				return getFixes({buffer: 'if(1 == 3) {} if (1 == 4) {}', 
+								  rule: rule,
+								  expected: expected,
+								callback: callback});
+			});
+			it("Test eqeqeq fix all 2",function(callback) {
+				var rule = createTestRule('eqeqeq');
+				var expected = [{value: "!==",
+								start: 5, 
+								end: 7},
+								{value: "!==",
+								start: 20,
+								end: 22}
+								];
+				return getFixes({buffer: 'if(1 != 3) {} if (1 != 4) {}', 
+								  rule: rule,
+								  expected: expected,
+								callback: callback});
+			});
+			it("Test eqeqeq fix all 3",function(callback) {
+				var rule = createTestRule('eqeqeq');
+				var expected = [{value: "===",
+								start: 5, 
+								end: 7},
+								{value: "!==",
+								start: 20,
+								end: 22}
+								];
+				return getFixes({buffer: 'if(1 == 3) {} if (1 != 4) {}', 
+								  rule: rule,
+								  expected: expected,
+								callback: callback});
+			});
+		});
 		//NO-UNREACHABLE
 			it("Test no-unreachable-1",function(callback) {
 				var rule = createTestRule('no-unreachable');
@@ -1729,7 +1908,8 @@ define([
 								callback: callback,
 								  pid: 'missing-nls'});
 			});
-		//NO-UNNECESSARY-NLS
+		//UNNECESSARY-NLS
+		describe('unnecessary-nls', function(){
 			it("Test unnecessary-nls-1", function(callback) {
 				var rule = createTestRule('unnecessary-nls');
 				var expected = {value: "",
@@ -1767,7 +1947,7 @@ define([
 				var rule = createTestRule('unnecessary-nls');
 				var expected = {value: "",
 								start: 13, 
-								end: 24};
+								end: 25};
 				return getFixes({buffer: 'var a = 1; //$NON-NLS-1$ foo', 
 								  rule: rule,
 								  expected: expected,
@@ -1788,14 +1968,66 @@ define([
 			it("Test unnecessary-nls-6", function(callback) {
 				var rule = createTestRule('unnecessary-nls');
 				var expected = {value: "",
-								start: 15, 
-								end: 26};
+								start: 13, 
+								end: 27};
 				return getFixes({buffer: 'var a = "a"; //$NON-NLS-2$ //$NON-NLS-1$', 
 								  rule: rule,
 								  expected: expected,
 								  callback: callback,
 								  pid: 'unnecessary-nls'});
 			});
+			it("Test unnecessary-nls fix all 1", function(callback) {
+				var rule = createTestRule('unnecessary-nls');
+				var expected = [
+								{value: "",
+								start: 10, 
+								end: 24},
+								{value: "",
+								start: 35, 
+								end: 49},
+								];
+
+				return getFixes({buffer: 'var a = 1; //$NON-NLS-0$\nvar b = 1; //$NON-NLS-0$', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback,
+								  pid: 'unnecessary-nls'});
+			});
+			it("Test unnecessary-nls fix all 2", function(callback) {
+				var rule = createTestRule('unnecessary-nls');
+				var expected = [
+								{value: "",
+								start: 11, 
+								end: 25},
+								{value: "",
+								start: 24, 
+								end: 38},
+								];
+
+				return getFixes({buffer: 'var a = 1; //$NON-NLS-0$ //$NON-NLS-1$', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback,
+								  pid: 'unnecessary-nls'});
+			});
+			it("Test unnecessary-nls fix all 3", function(callback) {
+				var rule = createTestRule('unnecessary-nls');
+				var expected = [
+								{value: "",
+								start: 13, 
+								end: 27},
+								{value: "",
+								start: 40, 
+								end: 54},
+								];
+
+				return getFixes({buffer: 'var a = "a"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-9$', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback,
+								  pid: 'unnecessary-nls'});
+			});
+		});
 		//USE-ISNAN
 			it("Test use-isnan-1",function(callback) {
 				var rule = createTestRule('use-isnan');

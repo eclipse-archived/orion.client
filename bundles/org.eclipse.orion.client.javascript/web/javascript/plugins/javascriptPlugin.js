@@ -768,6 +768,7 @@ define([
                 quickFixComputer,
                 {
                     name: javascriptMessages["unnecessaryNlsFixName"],
+                    fixAllEnabled: true,
                     scopeId: "orion.edit.quickfix", //$NON-NLS-1$
                     id : "unnecessary.nls.fix",  //$NON-NLS-1$
                     contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-1$ //$NON-NLS-2$
