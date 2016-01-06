@@ -11,6 +11,7 @@
 /*eslint-env browser, amd*/
  
 define([
+	'i18n!orion/nls/messages',
 	'orion/webui/littlelib',
 	'orion/commandsProxy',
 	'orion/webui/dropdown',
@@ -19,7 +20,7 @@ define([
 	'text!orion/webui/checkedmenuitem.html',
 	'orion/webui/tooltip',
 	'orion/metrics'
-], function(lib, mCommandsProxy, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, CheckedMenuItemFragment, Tooltip, mMetrics) {
+], function(messages, lib, mCommandsProxy, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, CheckedMenuItemFragment, Tooltip, mMetrics) {
 		/**
 		 * @name orion.commands.NO_IMAGE
 		 * @description Image data for 16x16 transparent png.
@@ -288,7 +289,7 @@ define([
 			fixAllLabel = document.createElement('label'); //$NON-NLS-1$
 			fixAllLabel.htmlFor = id;
 			fixAllLabel.className = "quickfixAllParameter"; //$NON-NLS-1$
-			fixAllLabel.appendChild(document.createTextNode('Fix all in file'));  // TODO NLS this string
+			fixAllLabel.appendChild(document.createTextNode(messages['fixAll'])); 
 			
 			element.appendChild(fixAllCheckbox);
 			element.appendChild(fixAllLabel);

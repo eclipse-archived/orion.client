@@ -88,6 +88,7 @@
 }
 /* Reuse font from command buttons but no border */
 .textviewTooltip .quickfixAllParameter {
+	margin-bottom: 4px;
 	vertical-align: middle;
 	font-weight: normal;
 	font-family: "HelveticaNeue", "Helvetica Neue", "HelveticaNeueRoman", "HelveticaNeue-Roman", "Helvetica Neue Roman", 'TeXGyreHerosRegular', "Helvetica", "Tahoma", "Geneva", "Arial", sans-serif;
