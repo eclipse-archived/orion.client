@@ -1748,6 +1748,7 @@ define([
 								  contentType: 'text/html'});
 			});
 		//SEMI
+		describe("semi", function(){
 			it("Test semi-1",function(callback) {
 				var rule = createTestRule('semi');
 				var expected = {value: ";",
@@ -1811,6 +1812,70 @@ define([
 								callback: callback,
 								  contentType: 'text/html'});
 			});
+			it("Test semi fix all 1",function(callback) {
+				var rule = createTestRule('semi');
+				var expected = [
+								{value: ";",
+								start: 14, 
+								end: 14},
+								{value: ";",
+								start: 29, 
+								end: 29}
+								];
+				return getFixes({buffer: 'var a = [1, 2]\nvar b = [1, 2]', 
+								  rule: rule,
+								  expected: expected,
+								callback: callback});
+			});
+			it("Test semi fix all 2",function(callback) {
+				var rule = createTestRule('semi');
+				var expected = [
+								{value: ";",
+								start: 5, 
+								end: 5},
+								{value: ";",
+								start: 11, 
+								end: 11}
+								];
+				return getFixes({buffer: 'foo()\nfoo()', 
+								  rule: rule,
+								  expected: expected,
+								callback: callback});
+			});
+			it("Test semi fix all 3",function(callback) {
+				var rule = createTestRule('semi');
+				var expected = [
+								{value: ";",
+								start: 10, 
+								end: 10},
+								{value: ";",
+								start: 21, 
+								end: 21}
+								];
+				return getFixes({buffer: 'var a = {}\nvar a = {}', 
+								  rule: rule,
+								  expected: expected,
+								callback: callback});
+			});
+			it("Test semi fix all 3",function(callback) {
+				var rule = createTestRule('semi');
+				var expected = [
+								{value: ";",
+								start: 14, 
+								end: 14},
+								{value: ";",
+								start: 20, 
+								end: 20},
+								{value: ";",
+								start: 31, 
+								end: 31}
+								];
+				return getFixes({buffer: 'var a = [1, 2]\nfoo()\nvar a = {}', 
+								  rule: rule,
+								  expected: expected,
+								callback: callback});
+			});
+		});
 		//NO-UNUSED-VARS-UNUSED
 			it("Test no-unused-vars-unused-1",function(callback) {
 				var rule = createTestRule('no-unused-vars');

@@ -733,7 +733,13 @@ define([
 	       },
 	        /** fix for the semi linting rule */
 	        "semi": function(editorContext, annotation, annotations) {
-	            return editorContext.setText(';', annotation.end, annotation.end);
+	        	return applySingleFixToAll(editorContext, annotation, annotations, function(currentAnnotation){
+		            return {
+		            	text: ';',
+		            	start: currentAnnotation.end,
+		            	end: currentAnnotation.end
+		            };
+	            });
 	        },
 	        /** fix for the unnecessary-nls rule */
 	        "unnecessary-nls": function(editorContext, annotation, annotations, astManager){

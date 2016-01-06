@@ -711,6 +711,7 @@ define([
     			quickFixComputer,
     			{
         			name: javascriptMessages["semiFixName"],
+        			fixAllEnabled: true,
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "semi.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
