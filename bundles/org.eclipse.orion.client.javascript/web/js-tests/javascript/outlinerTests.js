@@ -22,6 +22,11 @@ define([
 	return function(worker) {
 		describe('Outliner Tests', function() {
 			this.timeout(10000);
+			
+			before('Reset Tern Server', function() {
+				worker.start(); // Reset the tern server state to remove any prior files
+			});
+			
 		    function setup(callback, text, contentType) {
 		    	worker.setTestState({callback: callback});
 		        return {

@@ -83,7 +83,12 @@ define([
 		}
 	
 		describe('.tern-project Tests', function() {
-		this.timeout(100000);
+			this.timeout(100000);
+			
+			before('Reset Tern Server', function() {
+				worker.start(); // Reset the tern server state to remove any prior files
+			});
+			
 			it("non-existent contents", function(callback) {
 				worker.postMessage({request: "start_server", args:{}}, /* @callback */ function(response) {
 					assert(response, "We should have gotten a response");

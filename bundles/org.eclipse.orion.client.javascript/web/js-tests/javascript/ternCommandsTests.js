@@ -138,7 +138,7 @@ define([
 				CUProvider.setUseCache(false);
 				openImplCommand = new OpenImplementation.OpenImplementationCommand(worker);
 				openDeclCommand = new OpenDeclaration.OpenDeclarationCommand(worker);
-				worker.start();
+				worker.start(); // Reset the tern server state to remove any prior files
 			});
 			this.timeout(10000);
 			

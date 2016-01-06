@@ -173,6 +173,7 @@ define([
 				assist = new TernAssist.TernContentAssist(astManager, worker, function() {
 					return new Deferred().resolve(envs);
 				}, CUProvider);
+				worker.start(); // Reset the tern server state to remove any prior files
 			});
 			describe("Content assist tests", function() {
 				/**

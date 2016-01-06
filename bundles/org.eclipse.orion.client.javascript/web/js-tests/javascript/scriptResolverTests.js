@@ -113,7 +113,7 @@ define([
 			it('Test getWorkspaceFile 6 - nothing found simple', function() {
 				testFileClient.createTestFiles(['foo/bar/lib/esprima.js', 'foo/bar/test/esprima/esprima.js']);
 				return resolver.getWorkspaceFile('bar').then(function(files) {
-					assert(files == null, 'There should have been no files array returned');
+					assert(files === null, 'There should have been no files array returned');
 				});
 	
 			});
@@ -121,7 +121,7 @@ define([
 			it('Test getWorkspaceFile 7 - nothing found sibling', function() {
 				testFileClient.createTestFiles(['foo/bar/lib/esprima.js', 'foo/bar/test/esprima/esprima.js']);
 				return resolver.getWorkspaceFile('./bar').then(function(files) {
-					assert(files == null, 'There should have been no files array returned');
+					assert(files === null, 'There should have been no files array returned');
 				});
 	
 			});
@@ -129,7 +129,7 @@ define([
 			it('Test getWorkspaceFile 8 - nothing found parental', function() {
 				testFileClient.createTestFiles(['foo/bar/lib/esprima.js', 'foo/bar/test/esprima/esprima.js']);
 				return resolver.getWorkspaceFile('../bar').then(function(files) {
-					assert(files == null, 'There should have been a files array returned');
+					assert(files === null, 'There should have been a files array returned');
 				});
 	
 			});

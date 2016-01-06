@@ -25,6 +25,9 @@ define([
 	
 	return function(worker) {
 		describe('Quick Fix Tests',function() {
+			before('Reset Tern Server', function() {
+				worker.start(); // Reset the tern server state to remove any prior files
+			});
 			
 			/**
 			 * @description Sets up the test
