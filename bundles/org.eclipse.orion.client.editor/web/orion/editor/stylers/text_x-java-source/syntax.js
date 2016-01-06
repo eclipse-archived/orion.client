@@ -10,74 +10,74 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) {
 	var keywords = [
-		"abstract", //$NON-NLS-0$
-		"boolean", "byte", //$NON-NLS-1$ //$NON-NLS-0$
-		"char", "class", //$NON-NLS-1$ //$NON-NLS-0$
-		"double", //$NON-NLS-0$
-		"extends", //$NON-NLS-0$
-		"final", "float", //$NON-NLS-1$ //$NON-NLS-0$
-		"implements", "import", "instanceof", "int", "interface", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"long", //$NON-NLS-0$
-		"native", "new", //$NON-NLS-1$ //$NON-NLS-0$
-		"package", "private", "protected", "public", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"short", "static", "synchronized", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"throws", "transient", //$NON-NLS-1$ //$NON-NLS-0$
-		"void", "volatile" //$NON-NLS-1$ //$NON-NLS-0$
+		"abstract",
+		"boolean", "byte",
+		"char", "class",
+		"double",
+		"extends",
+		"final", "float",
+		"implements", "import", "instanceof", "int", "interface",
+		"long",
+		"native", "new",
+		"package", "private", "protected", "public",
+		"short", "static", "synchronized",
+		"throws", "transient",
+		"void", "volatile"
 	];
 	var controlKeywords = [
-		"break", //$NON-NLS-0$
-		"case", "catch", "continue", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"default", "do", //$NON-NLS-1$ //$NON-NLS-0$
-		"else", //$NON-NLS-0$
-		"finally", "for", //$NON-NLS-1$ //$NON-NLS-0$
-		"if", //$NON-NLS-0$
-		"return", //$NON-NLS-0$
-		"switch", //$NON-NLS-0$
-		"throw", "try", //$NON-NLS-1$ //$NON-NLS-0$
-		"while" //$NON-NLS-0$
+		"break",
+		"case", "catch", "continue",
+		"default", "do",
+		"else",
+		"finally", "for",
+		"if",
+		"return",
+		"switch",
+		"throw", "try",
+		"while"
 	];
 	var constants = [
-		"false", "null", "true" //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"false", "null", "true"
 	];
-	var languageVariables = ["this", "super"]; //$NON-NLS-1$ //$NON-NLS-0$
+	var languageVariables = ["this", "super"];
 
 	var grammars = [];
 	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
-		id: "orion.java", //$NON-NLS-0$
-		contentTypes: ["text/x-java-source"], //$NON-NLS-0$
+		id: "orion.java",
+		contentTypes: ["text/x-java-source"],
 		patterns: [
-			{include: "orion.lib#string_doubleQuote"}, //$NON-NLS-0$
-			{include: "orion.lib#string_singleQuote"}, //$NON-NLS-0$
-			{include: "orion.c-like#comment_singleLine"}, //$NON-NLS-0$
-			{include: "orion.lib#doc_block"}, //$NON-NLS-0$
-			{include: "orion.c-like#comment_block"}, //$NON-NLS-0$
-			{include: "orion.lib#brace_open"}, //$NON-NLS-0$
-			{include: "orion.lib#brace_close"}, //$NON-NLS-0$
-			{include: "orion.lib#bracket_open"}, //$NON-NLS-0$
-			{include: "orion.lib#bracket_close"}, //$NON-NLS-0$
-			{include: "orion.lib#parenthesis_open"}, //$NON-NLS-0$
-			{include: "orion.lib#parenthesis_close"}, //$NON-NLS-0$
-			{include: "orion.lib#operator"}, //$NON-NLS-0$
-			{include: "orion.lib#number_decimal"}, //$NON-NLS-0$
-			{include: "orion.lib#number_hex"}, //$NON-NLS-0$
+			{include: "orion.lib#string_doubleQuote"},
+			{include: "orion.lib#string_singleQuote"},
+			{include: "orion.c-like#comment_singleLine"},
+			{include: "orion.lib#doc_block"},
+			{include: "orion.c-like#comment_block"},
+			{include: "orion.lib#brace_open"},
+			{include: "orion.lib#brace_close"},
+			{include: "orion.lib#bracket_open"},
+			{include: "orion.lib#bracket_close"},
+			{include: "orion.lib#parenthesis_open"},
+			{include: "orion.lib#parenthesis_close"},
+			{include: "orion.lib#operator"},
+			{include: "orion.lib#number_decimal"},
+			{include: "orion.lib#number_hex"},
 			{
-				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.operator.java" //$NON-NLS-0$
+				match: "\\b(?:" + keywords.join("|") + ")\\b",
+				name: "keyword.operator.java"
 			},
 			{
-				match: "\\b(?:" + controlKeywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control.java" //$NON-NLS-0$
+				match: "\\b(?:" + controlKeywords.join("|") + ")\\b",
+				name: "keyword.control.java"
 			},
 			{
-				match: "\\b(?:" + constants.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "constant.language.java" //$NON-NLS-0$
+				match: "\\b(?:" + constants.join("|") + ")\\b",
+				name: "constant.language.java"
 			},
 			{
-				match: "\\b(?:" + languageVariables.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "variable.language.java" //$NON-NLS-0$
+				match: "\\b(?:" + languageVariables.join("|") + ")\\b",
+				name: "variable.language.java"
 			}
 		]
 	});

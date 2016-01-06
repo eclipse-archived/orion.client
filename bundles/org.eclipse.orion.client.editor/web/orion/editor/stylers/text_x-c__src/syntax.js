@@ -10,69 +10,69 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/stylers/text_x-c__src/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/stylers/text_x-c__src/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) {
 	var keywords = [
-		"alignas", "alignof", "asm", "and_eq", "and", "auto", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"bitand", "bitor", "bool", "break", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"case", "catch", "char16_t", "char32_t", "char", "class", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"compl", "constexpr", "const_cast", "const", "continue", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"decltype", "default", "delete", "double", "do", "dynamic_cast", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"else", "enum", "explicit", "export", "extern", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"false", "float", "for", "friend", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"goto", //$NON-NLS-0$
-		"if", "inline", "int", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"long", //$NON-NLS-0$
-		"mutable", //$NON-NLS-0$
-		"namespace", "new", "noexcept", "not_eq", "not", "nullptr", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"operator", "or_eq", "or", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"private", "protected", "public", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"register", "reinterpret_cast", "return", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"short", "signed", "sizeof", "static_assert", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"static_cast", "static", "struct", "switch", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"template", "this", "thread_local", "throw", "true", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"try", "typedef", "typeid", "typename", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"union", "unsigned", "using", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"virtual", "void", "volatile", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"wchar_t", "while", //$NON-NLS-1$ //$NON-NLS-0$
-		"xor_eq", "xor", //$NON-NLS-1$ //$NON-NLS-0$
-		"_Bool", "_Complex", "_Imaginary" //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"alignas", "alignof", "asm", "and_eq", "and", "auto",
+		"bitand", "bitor", "bool", "break",
+		"case", "catch", "char16_t", "char32_t", "char", "class",
+		"compl", "constexpr", "const_cast", "const", "continue",
+		"decltype", "default", "delete", "double", "do", "dynamic_cast",
+		"else", "enum", "explicit", "export", "extern",
+		"false", "float", "for", "friend",
+		"goto",
+		"if", "inline", "int",
+		"long",
+		"mutable",
+		"namespace", "new", "noexcept", "not_eq", "not", "nullptr",
+		"operator", "or_eq", "or",
+		"private", "protected", "public",
+		"register", "reinterpret_cast", "return",
+		"short", "signed", "sizeof", "static_assert",
+		"static_cast", "static", "struct", "switch",
+		"template", "this", "thread_local", "throw", "true",
+		"try", "typedef", "typeid", "typename",
+		"union", "unsigned", "using",
+		"virtual", "void", "volatile",
+		"wchar_t", "while",
+		"xor_eq", "xor",
+		"_Bool", "_Complex", "_Imaginary"
 	];
 
 	var directives = [
-		"define", "elif", "else", "endif", "error", "ifdef", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"ifndef", "if", "include", "line", "pragma", "undef" //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"define", "elif", "else", "endif", "error", "ifdef",
+		"ifndef", "if", "include", "line", "pragma", "undef"
 	];
 
 	var grammars = [];
 	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
-		id: "orion.cpp", //$NON-NLS-0$
-		contentTypes: ["text/x-c++src", "text/x-c++"], //$NON-NLS-1$ //$NON-NLS-0$
+		id: "orion.cpp",
+		contentTypes: ["text/x-c++src", "text/x-c++"],
 		patterns: [
-			{include: "orion.lib#string_doubleQuote"}, //$NON-NLS-0$
-			{include: "orion.lib#string_singleQuote"}, //$NON-NLS-0$
-			{include: "orion.c-like#comment_singleLine"}, //$NON-NLS-0$
-			{include: "orion.lib#doc_block"}, //$NON-NLS-0$
-			{include: "orion.c-like#comment_block"}, //$NON-NLS-0$
-			{include: "#directive"}, //$NON-NLS-0$
-			{include: "orion.lib#brace_open"}, //$NON-NLS-0$
-			{include: "orion.lib#brace_close"}, //$NON-NLS-0$
-			{include: "orion.lib#bracket_open"}, //$NON-NLS-0$
-			{include: "orion.lib#bracket_close"}, //$NON-NLS-0$
-			{include: "orion.lib#parenthesis_open"}, //$NON-NLS-0$
-			{include: "orion.lib#parenthesis_close"}, //$NON-NLS-0$
-			{include: "orion.lib#operator"}, //$NON-NLS-0$
-			{include: "orion.lib#number_decimal"}, //$NON-NLS-0$
-			{include: "orion.lib#number_hex"}, //$NON-NLS-0$
+			{include: "orion.lib#string_doubleQuote"},
+			{include: "orion.lib#string_singleQuote"},
+			{include: "orion.c-like#comment_singleLine"},
+			{include: "orion.lib#doc_block"},
+			{include: "orion.c-like#comment_block"},
+			{include: "#directive"},
+			{include: "orion.lib#brace_open"},
+			{include: "orion.lib#brace_close"},
+			{include: "orion.lib#bracket_open"},
+			{include: "orion.lib#bracket_close"},
+			{include: "orion.lib#parenthesis_open"},
+			{include: "orion.lib#parenthesis_close"},
+			{include: "orion.lib#operator"},
+			{include: "orion.lib#number_decimal"},
+			{include: "orion.lib#number_hex"},
 			{
-				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.operator.cpp" //$NON-NLS-0$
+				match: "\\b(?:" + keywords.join("|") + ")\\b",
+				name: "keyword.operator.cpp"
 			}
 		],
 		repository: {
 			directive: {
-				match: "#\\s*(?:" + directives.join("|") + ")\\b[^$]*", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "meta.preprocessor.cpp" //$NON-NLS-0$
+				match: "#\\s*(?:" + directives.join("|") + ")\\b[^$]*",
+				name: "meta.preprocessor.cpp"
 			}
 		}
 	});

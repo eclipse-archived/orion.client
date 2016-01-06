@@ -10,91 +10,91 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/stylers/text_x-haml/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/text_x-ruby/syntax"], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/stylers/text_x-haml/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/text_x-ruby/syntax"],
 	function(mLib, mRuby) {
 
 	var grammars = [];
 	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push.apply(grammars, mRuby.grammars);
 	grammars.push({
-		id: "orion.haml", //$NON-NLS-0$
-		contentTypes: ["text/x-haml"], //$NON-NLS-0$
+		id: "orion.haml",
+		contentTypes: ["text/x-haml"],
 		patterns: [
-			{include: "#inlineRuby"}, //$NON-NLS-0$
-			{include: "#interpolatedRuby"}, //$NON-NLS-0$
-			{include: "#tagWithRubySymbols"}, //$NON-NLS-0$
-			{include: "#tagWithHTMLAttributes"}, //$NON-NLS-0$
-			{include: "#doctype"}, //$NON-NLS-0$
-			{include: "#tag"}, //$NON-NLS-0$
-			{include: "#htmlComment"}, //$NON-NLS-0$
-			{include: "#hamlComment"}, //$NON-NLS-0$
+			{include: "#inlineRuby"},
+			{include: "#interpolatedRuby"},
+			{include: "#tagWithRubySymbols"},
+			{include: "#tagWithHTMLAttributes"},
+			{include: "#doctype"},
+			{include: "#tag"},
+			{include: "#htmlComment"},
+			{include: "#hamlComment"},
 		],
 		repository: {
 			doctype: {
-				match: "^!!!.*$", //$NON-NLS-0$
-				name: "meta.tag.doctype.haml", //$NON-NLS-0$
+				match: "^!!!.*$",
+				name: "meta.tag.doctype.haml",
 			},
 			hamlComment: {
 				// TODO multi-line comments
-				match: {match: "\\-#.*$", literal: "-#"}, //$NON-NLS-1$ //$NON-NLS-0$
-				name: "comment.line.haml", //$NON-NLS-0$
+				match: {match: "\\-#.*$", literal: "-#"},
+				name: "comment.line.haml",
 				patterns: [
 					{
-						include: "orion.lib#todo_comment_singleLine" //$NON-NLS-0$
+						include: "orion.lib#todo_comment_singleLine"
 					}
 				]
 			},
 			htmlComment: {
 				// TODO multi-line comments
-				match: "/[^[].*$", //$NON-NLS-0$
-				name: "comment.line.html.haml" //$NON-NLS-0$
+				match: "/[^[].*$",
+				name: "comment.line.html.haml"
 			},
 			inlineRuby: {
 				// TODO end match should not eat the last content character, really need a negative look-behind
-				begin: "(?:^|[^\\\\])(?:=|-|~|&==?|!==?)", //$NON-NLS-0$
-				end: "(?:^|[^,])$", //$NON-NLS-0$
+				begin: "(?:^|[^\\\\])(?:=|-|~|&==?|!==?)",
+				end: "(?:^|[^,])$",
 				patterns: [
-					{include: "orion.ruby"}, //$NON-NLS-0$
+					{include: "orion.ruby"},
 				]
 			},
 			interpolatedRuby: {
-				begin: "#{", //$NON-NLS-0$
-				end: "}", //$NON-NLS-0$
+				begin: "#{",
+				end: "}",
 				patterns: [
-					{include: "orion.ruby"}, //$NON-NLS-0$
+					{include: "orion.ruby"},
 				]
 			},
 			tag: {
-				match: "^\\s*%[^\\b]+?\\b", //$NON-NLS-0$
-				name: "meta.tag.haml", //$NON-NLS-0$
+				match: "^\\s*%[^\\b]+?\\b",
+				name: "meta.tag.haml",
 			},
 			tagWithHTMLAttributes: {
-				begin: "(^\\s*)(%[^\\s(]+?)\\(", //$NON-NLS-0$
-				end: "\\)\\s*$", //$NON-NLS-0$
+				begin: "(^\\s*)(%[^\\s(]+?)\\(",
+				end: "\\)\\s*$",
 				beginCaptures: {
-					2: {name: "meta.tag.haml"} //$NON-NLS-0$
+					2: {name: "meta.tag.haml"}
 				},
 				patterns: [
 					{
-						match: "[^\\s=]+(?==)", //$NON-NLS-0$
-						name: "entity.name.attribute.html.haml" //$NON-NLS-0$
+						match: "[^\\s=]+(?==)",
+						name: "entity.name.attribute.html.haml"
 					},
-					{include: "orion.ruby#variable"}, //$NON-NLS-0$
-					{include: "orion.lib#string_doubleQuote"}, //$NON-NLS-0$
-					{include: "orion.lib#string_singleQuote"}, //$NON-NLS-0$
+					{include: "orion.ruby#variable"},
+					{include: "orion.lib#string_doubleQuote"},
+					{include: "orion.lib#string_singleQuote"},
 				]
 			},
 			tagWithRubySymbols: {
-				begin: "(^\\s*)(%[^\\b]+?)\\b{", //$NON-NLS-0$
-				end: "}\\s*$", //$NON-NLS-0$
+				begin: "(^\\s*)(%[^\\b]+?)\\b{",
+				end: "}\\s*$",
 				beginCaptures: {
-					2: {name: "meta.tag.haml"} //$NON-NLS-0$
+					2: {name: "meta.tag.haml"}
 				},
 				patterns: [
-					{include: "orion.ruby#symbol"}, //$NON-NLS-0$
-					{include: "orion.ruby#variable"}, //$NON-NLS-0$
-					{include: "orion.lib#string_doubleQuote"}, //$NON-NLS-0$
-					{include: "orion.lib#string_singleQuote"}, //$NON-NLS-0$
+					{include: "orion.ruby#symbol"},
+					{include: "orion.ruby#variable"},
+					{include: "orion.lib#string_doubleQuote"},
+					{include: "orion.lib#string_singleQuote"},
 				]
 			}
 		}

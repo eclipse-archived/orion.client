@@ -10,109 +10,109 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/stylers/lib/syntax", [], function() { //$NON-NLS-0$
+define("orion/editor/stylers/lib/syntax", [], function() {
 	return {
-		id: "orion.lib", //$NON-NLS-0$
+		id: "orion.lib",
 		grammars: [{
-			id: "orion.lib", //$NON-NLS-0$
+			id: "orion.lib",
 			repository: {
 				brace_open: {
-					match: "{", //$NON-NLS-0$
-					name: "punctuation.section.block.begin" //$NON-NLS-0$
+					match: "{",
+					name: "punctuation.section.block.begin"
 				},
 				brace_close: {
-					match: "}", //$NON-NLS-0$
-					name: "punctuation.section.block.end" //$NON-NLS-0$
+					match: "}",
+					name: "punctuation.section.block.end"
 				},
 				bracket_open: {
-					match: "\\[", //$NON-NLS-0$
-					name: "punctuation.section.bracket.begin" //$NON-NLS-0$
+					match: "\\[",
+					name: "punctuation.section.bracket.begin"
 				},
 				bracket_close: {
-					match: "\\]", //$NON-NLS-0$
-					name: "punctuation.section.bracket.end" //$NON-NLS-0$
+					match: "\\]",
+					name: "punctuation.section.bracket.end"
 				},
 				parenthesis_open: {
-					match: "\\(", //$NON-NLS-0$
-					name: "punctuation.section.parens.begin" //$NON-NLS-0$
+					match: "\\(",
+					name: "punctuation.section.parens.begin"
 				},
 				parenthesis_close: {
-					match: "\\)", //$NON-NLS-0$
-					name: "punctuation.section.parens.end" //$NON-NLS-0$
+					match: "\\)",
+					name: "punctuation.section.parens.end"
 				},
 				operator: {
-					match: "(\\+|-|!|=|>|<|&|(\\|\\|))+", //$NON-NLS-0$
-					name: "punctuation.operator" //$NON-NLS-0$
+					match: "(\\+|-|!|=|>|<|&|(\\|\\|))+",
+					name: "punctuation.operator"
 				},
 				doc_block: {
-					begin: {match: "/\\*\\*", literal: "/**"}, //$NON-NLS-1$ //$NON-NLS-0$
-					end: {match: "\\*/", literal: "*/"}, //$NON-NLS-1$ //$NON-NLS-0$
-					name: "comment.block.documentation", //$NON-NLS-0$
+					begin: {match: "/\\*\\*", literal: "/**"},
+					end: {match: "\\*/", literal: "*/"},
+					name: "comment.block.documentation",
 					patterns: [
 						{
-							match: "@(?:(?!\\*/)\\S)*", //$NON-NLS-0$
-							name: "meta.documentation.annotation" //$NON-NLS-0$
+							match: "@(?:(?!\\*/)\\S)*",
+							name: "meta.documentation.annotation"
 						}, {
-							match: "<[^\\s>]*>", //$NON-NLS-0$
-							name: "meta.documentation.tag" //$NON-NLS-0$
+							match: "<[^\\s>]*>",
+							name: "meta.documentation.tag"
 						}, {
-							match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)", //$NON-NLS-0$
-							name: "meta.annotation.task.todo", //$NON-NLS-0$
+							match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)",
+							name: "meta.annotation.task.todo",
 							captures: {
-								2: {name: "keyword.other.documentation.task"}, //$NON-NLS-0$
-								4: {name: "comment.block"} //$NON-NLS-0$
+								2: {name: "keyword.other.documentation.task"},
+								4: {name: "comment.block"}
 							}
 						}
 					]
 				},
 				number_decimal: {
-					match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:[eE][+-]?\\d+)?\\b", //$NON-NLS-0$
-					name: "constant.numeric.number" //$NON-NLS-0$
+					match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:[eE][+-]?\\d+)?\\b",
+					name: "constant.numeric.number"
 				},
 				number_hex: {
-					match: "\\b0[xX][0-9A-Fa-f]+\\b", //$NON-NLS-0$
-					name: "constant.numeric.hex" //$NON-NLS-0$
+					match: "\\b0[xX][0-9A-Fa-f]+\\b",
+					name: "constant.numeric.hex"
 				},
 				string_doubleQuote: {
-					match: '"(?:\\\\.|[^"])*"?', //$NON-NLS-0$
-					name: "string.quoted.double" //$NON-NLS-0$
+					match: '"(?:\\\\.|[^"])*"?',
+					name: "string.quoted.double"
 				},
 				string_singleQuote: {
-					match: "'(?:\\\\.|[^'])*'?", //$NON-NLS-0$
-					name: "string.quoted.single" //$NON-NLS-0$
+					match: "'(?:\\\\.|[^'])*'?",
+					name: "string.quoted.single"
 				},
 				todo_comment_singleLine: {
-					match: "(\\b)(TODO)(\\b)(.*)", //$NON-NLS-0$
-					name: "meta.annotation.task.todo", //$NON-NLS-0$
+					match: "(\\b)(TODO)(\\b)(.*)",
+					name: "meta.annotation.task.todo",
 					captures: {
-						2: {name: "keyword.other.documentation.task"}, //$NON-NLS-0$
-						4: {name: "comment.line"} //$NON-NLS-0$
+						2: {name: "keyword.other.documentation.task"},
+						4: {name: "comment.line"}
 					}
 				}
 			}
 		}, {
-			id: "orion.c-like", //$NON-NLS-0$
+			id: "orion.c-like",
 			repository: {
 				comment_singleLine: {
-					match: {match: "//.*", literal: "//"}, //$NON-NLS-1$ //$NON-NLS-0$
-					name: "comment.line.double-slash", //$NON-NLS-0$
+					match: {match: "//.*", literal: "//"},
+					name: "comment.line.double-slash",
 					patterns: [
 						{
-							include: "orion.lib#todo_comment_singleLine" //$NON-NLS-0$
+							include: "orion.lib#todo_comment_singleLine"
 						}
 					]
 				},
 				comment_block: {
-					begin: {match: "/\\*", literal: "/*"}, //$NON-NLS-1$ //$NON-NLS-0$
-					end: {match: "\\*/", literal: "*/"}, //$NON-NLS-1$ //$NON-NLS-0$ 
-					name: "comment.block", //$NON-NLS-0$
+					begin: {match: "/\\*", literal: "/*"},
+					end: {match: "\\*/", literal: "*/"}, 
+					name: "comment.block",
 					patterns: [
 						{
-							match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)", //$NON-NLS-0$
-							name: "meta.annotation.task.todo", //$NON-NLS-0$
+							match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)",
+							name: "meta.annotation.task.todo",
 							captures: {
-								2: {name: "keyword.other.documentation.task"}, //$NON-NLS-0$
-								4: {name: "comment.block"} //$NON-NLS-0$
+								2: {name: "keyword.other.documentation.task"},
+								4: {name: "comment.block"}
 							}
 						}
 					]

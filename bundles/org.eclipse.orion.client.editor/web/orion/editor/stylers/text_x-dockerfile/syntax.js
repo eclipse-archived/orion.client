@@ -10,44 +10,44 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/stylers/text_x-dockerfile/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/stylers/text_x-dockerfile/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) {
 	var keywords = [
-		"add", //$NON-NLS-0$
-		"cmd", "copy", //$NON-NLS-1$ //$NON-NLS-0$
-		"entrypoint", "env", "expose", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"from", //$NON-NLS-0$
-		"maintainer", //$NON-NLS-0$
-		"onbuild", //$NON-NLS-0$
-		"run", //$NON-NLS-0$
-		"user", //$NON-NLS-0$
-		"volume", //$NON-NLS-0$
-		"workdir" //$NON-NLS-0$
+		"add",
+		"cmd", "copy",
+		"entrypoint", "env", "expose",
+		"from",
+		"maintainer",
+		"onbuild",
+		"run",
+		"user",
+		"volume",
+		"workdir"
 	];
 
-	var id = "orion.dockerfile"; //$NON-NLS-0$
+	var id = "orion.dockerfile";
 	var grammars = [];
 	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: id,
-		contentTypes: ["text/x-dockerfile"], //$NON-NLS-0$
+		contentTypes: ["text/x-dockerfile"],
 		patterns: [
-			{include: "orion.lib#string_doubleQuote"}, //$NON-NLS-0$
-			{include: "#numberSignComment"}, //$NON-NLS-0$
+			{include: "orion.lib#string_doubleQuote"},
+			{include: "#numberSignComment"},
 			{
-				match: "\\b-?[0-9]+(\\.[0-9]+)?\\b", //$NON-NLS-0$
-				name: "constant.numeric.dockerfile" //$NON-NLS-0$
+				match: "\\b-?[0-9]+(\\.[0-9]+)?\\b",
+				name: "constant.numeric.dockerfile"
 			}, {
-				match: "(?i)^\\s*(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.operator.dockerfile" //$NON-NLS-0$
+				match: "(?i)^\\s*(?:" + keywords.join("|") + ")\\b",
+				name: "keyword.operator.dockerfile"
 			}
 		],
 		repository: {
 			numberSignComment: {
-				begin: {match: "^\\s*#", literal: "#"}, //$NON-NLS-1$ //$NON-NLS-0$
-				end: {match: "$", literal: ""}, //$NON-NLS-0$
-				name: "comment.line.number-sign.dockerfile", //$NON-NLS-0$
+				begin: {match: "^\\s*#", literal: "#"},
+				end: {match: "$", literal: ""},
+				name: "comment.line.number-sign.dockerfile",
 				patterns: [
-					{include: "orion.lib#todo_comment_singleLine"} //$NON-NLS-0$
+					{include: "orion.lib#todo_comment_singleLine"}
 				]
 			}
 		}

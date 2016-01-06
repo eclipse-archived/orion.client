@@ -10,74 +10,74 @@
  ******************************************************************************/
  
 /*eslint-env browser, amd*/
-define("orion/editor/stylers/application_xquery/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/stylers/application_xquery/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) {
 	var keywords = [
-		"zero-digit", //$NON-NLS-0$
-		"xquery", //$NON-NLS-0$
-		"window", "where", "when", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"version", "variable", "validate", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"unordered", "union", //$NON-NLS-1$ //$NON-NLS-0$
-		"typeswitch", "type", "tumbling", "try", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"treat", "to", "then", "text", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"switch","strip", "strict", "start", "stable", "some", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"sliding", "self", "schema-element", "schema-attribute", "schema", "satisfies", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"return", //$NON-NLS-0$
-		"processing-instruction", "previous", "preserve", "preceding-sibling", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"preceding", "percent", "per-mille", "pattern-separator", "parent", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"ordering", "order", "or", "option", "only", "of", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"node", "no-preserve", "no-inherit", "next", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"ne", "NaN", "namespace-node", "namespace", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"module", "mod", "minus-sign", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"lt", "let", "least", "le", "lax", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"item", "is", "intersect", "instance", "inherit", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"infinity", "in", "import", "if", "idiv", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"gt", "grouping-separator", "group", "greatest", "ge", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"function", "for", "following-sibling", "following", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"external", "except", "every", "eq", "end", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"encoding", "empty-sequence", "empty", "else", "element", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"document-node", "div", "digit", "descending", "descendant-or-self", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"descendant", "default", "declare", "decimal-separator", "decimal-format", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"count", "copy-namespaces", "context", "construction", "comment", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"collation", "child", "catch", "castable", "cast", "case", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"by", "boundary-space", "base-uri", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"attribute", "at", "ascending", "as", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"and", "ancestor-or-self", "ancestor", "allowing" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"zero-digit",
+		"xquery",
+		"window", "where", "when",
+		"version", "variable", "validate",
+		"unordered", "union",
+		"typeswitch", "type", "tumbling", "try",
+		"treat", "to", "then", "text",
+		"switch","strip", "strict", "start", "stable", "some",
+		"sliding", "self", "schema-element", "schema-attribute", "schema", "satisfies",
+		"return",
+		"processing-instruction", "previous", "preserve", "preceding-sibling",
+		"preceding", "percent", "per-mille", "pattern-separator", "parent",
+		"ordering", "order", "or", "option", "only", "of",
+		"node", "no-preserve", "no-inherit", "next",
+		"ne", "NaN", "namespace-node", "namespace",
+		"module", "mod", "minus-sign",
+		"lt", "let", "least", "le", "lax",
+		"item", "is", "intersect", "instance", "inherit",
+		"infinity", "in", "import", "if", "idiv",
+		"gt", "grouping-separator", "group", "greatest", "ge",
+		"function", "for", "following-sibling", "following",
+		"external", "except", "every", "eq", "end",
+		"encoding", "empty-sequence", "empty", "else", "element",
+		"document-node", "div", "digit", "descending", "descendant-or-self",
+		"descendant", "default", "declare", "decimal-separator", "decimal-format",
+		"count", "copy-namespaces", "context", "construction", "comment",
+		"collation", "child", "catch", "castable", "cast", "case",
+		"by", "boundary-space", "base-uri",
+		"attribute", "at", "ascending", "as",
+		"and", "ancestor-or-self", "ancestor", "allowing"
 	];
 
 	var grammars = [];
 	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
-		id: "orion.xquery", //$NON-NLS-0$
-		contentTypes: ["application/xquery"], //$NON-NLS-0$ // Connection to xqueryPlugin.js
+		id: "orion.xquery",
+		contentTypes: ["application/xquery"],
 		patterns: [
 			{include: "#comment"},
 			{include: "#variable"},
 			{include: "#multiLineDoubleQuote"}, 
 			{include: "#multiLineSingleQuote"}, 
 			{include: "orion.xml#tag"}, 
-			{include: "orion.lib#brace_open"}, //$NON-NLS-0$
-			{include: "orion.lib#brace_close"}, //$NON-NLS-0$
-			{include: "orion.lib#bracket_open"}, //$NON-NLS-0$
-			{include: "orion.lib#bracket_close"}, //$NON-NLS-0$
-			{include: "orion.lib#parenthesis_open"}, //$NON-NLS-0$
-			{include: "orion.lib#parenthesis_close"}, //$NON-NLS-0$
+			{include: "orion.lib#brace_open"},
+			{include: "orion.lib#brace_close"},
+			{include: "orion.lib#bracket_open"},
+			{include: "orion.lib#bracket_close"},
+			{include: "orion.lib#parenthesis_open"},
+			{include: "orion.lib#parenthesis_close"},
 			{
-				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.operator.js" //$NON-NLS-0$
+				match: "\\b(?:" + keywords.join("|") + ")\\b",
+				name: "keyword.operator.js"
 			}
 		],
 		repository: {
 			comment: {
-				begin: {match: "\\(:", literal: "(:"}, //$NON-NLS-0$
-				end: {match: ":\\)", literal: ":)"}, //$NON-NLS-0$ 
-				name: "comment.block.xquery", //$NON-NLS-0$
+				begin: {match: "\\(:", literal: "(:"},
+				end: {match: ":\\)", literal: ":)"}, 
+				name: "comment.block.xquery",
 				patterns: [
 					{
-						match: "(\\b)(TODO)(\\b)(((?!:\\)).)*)", //$NON-NLS-0$ // match: "(\\b)(TODO)(\\b)(((?!-->).)*)", //$NON-NLS-0$
-						name: "meta.annotation.task.todo", //$NON-NLS-0$
+						match: "(\\b)(TODO)(\\b)(((?!:\\)).)*)", // match: "(\\b)(TODO)(\\b)(((?!-->).)*)",
+						name: "meta.annotation.task.todo",
 						captures: {
-							2: {name: "keyword.other.documentation.task"}, //$NON-NLS-0$
-							4: {name: "comment.block"} //$NON-NLS-0$
+							2: {name: "keyword.other.documentation.task"},
+							4: {name: "comment.block"}
 						}
 					}
 				]

@@ -10,67 +10,67 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-0$
+define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) {
 	var keywords = [
-		"and", "as", "assert", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"break", //$NON-NLS-0$
-		"class", "continue", //$NON-NLS-1$ //$NON-NLS-0$
-		"def", "del", //$NON-NLS-1$ //$NON-NLS-0$
-		"exec", "elif", "else", "except", "Ellipsis", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"False", "finally", "for", "from", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"global", //$NON-NLS-0$
-		"if", "import", "in", "is", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"lambda", //$NON-NLS-0$
-		"not", "None", "NotImplemented", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"or", //$NON-NLS-0$
-		"pass", "print", //$NON-NLS-1$ //$NON-NLS-0$
-		"raise", "return", //$NON-NLS-1$ //$NON-NLS-0$
-		"try", "True", //$NON-NLS-1$ //$NON-NLS-0$
-		"while", "with", //$NON-NLS-1$ //$NON-NLS-0$
-		"yield" //$NON-NLS-0$
+		"and", "as", "assert",
+		"break",
+		"class", "continue",
+		"def", "del",
+		"exec", "elif", "else", "except", "Ellipsis",
+		"False", "finally", "for", "from",
+		"global",
+		"if", "import", "in", "is",
+		"lambda",
+		"not", "None", "NotImplemented",
+		"or",
+		"pass", "print",
+		"raise", "return",
+		"try", "True",
+		"while", "with",
+		"yield"
 	];
 
 	var grammars = [];
 	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
-		id: "orion.python", //$NON-NLS-0$
-		contentTypes: ["text/x-python"], //$NON-NLS-0$
+		id: "orion.python",
+		contentTypes: ["text/x-python"],
 		patterns: [
 			{
-				begin: "(['\"])\\1\\1", //$NON-NLS-0$
-				end: "\\1\\1\\1", //$NON-NLS-0$
-				name: "string.quoted.triple.python" //$NON-NLS-0$
+				begin: "(['\"])\\1\\1",
+				end: "\\1\\1\\1",
+				name: "string.quoted.triple.python"
 			}, 
-			{include: "orion.lib#string_doubleQuote"}, //$NON-NLS-0$
-			{include: "orion.lib#string_singleQuote"}, //$NON-NLS-0$
+			{include: "orion.lib#string_doubleQuote"},
+			{include: "orion.lib#string_singleQuote"},
 			{
-				begin: {match: "#", literal: "#"}, //$NON-NLS-0$
-				end: {match: "$", literal: ""}, //$NON-NLS-0$
-				name: "comment.line.number-sign.python", //$NON-NLS-0$
+				begin: {match: "#", literal: "#"},
+				end: {match: "$", literal: ""},
+				name: "comment.line.number-sign.python",
 				patterns: [
 					{
-						include: "orion.lib#todo_comment_singleLine" //$NON-NLS-0$
+						include: "orion.lib#todo_comment_singleLine"
 					}
 				]
 			},
-			{include: "orion.lib#brace_open"}, //$NON-NLS-0$
-			{include: "orion.lib#brace_close"}, //$NON-NLS-0$
-			{include: "orion.lib#bracket_open"}, //$NON-NLS-0$
-			{include: "orion.lib#bracket_close"}, //$NON-NLS-0$
-			{include: "orion.lib#parenthesis_open"}, //$NON-NLS-0$
-			{include: "orion.lib#parenthesis_close"}, //$NON-NLS-0$
-			{include: "orion.lib#operator"}, //$NON-NLS-0$
-			{include: "#number_decimal"}, //$NON-NLS-0$
-			{include: "orion.lib#number_hex"}, //$NON-NLS-0$ 
+			{include: "orion.lib#brace_open"},
+			{include: "orion.lib#brace_close"},
+			{include: "orion.lib#bracket_open"},
+			{include: "orion.lib#bracket_close"},
+			{include: "orion.lib#parenthesis_open"},
+			{include: "orion.lib#parenthesis_close"},
+			{include: "orion.lib#operator"},
+			{include: "#number_decimal"},
+			{include: "orion.lib#number_hex"}, 
 			{
-				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.operator.python" //$NON-NLS-0$
+				match: "\\b(?:" + keywords.join("|") + ")\\b",
+				name: "keyword.operator.python"
 			}
 		],
 		repository: {
 			number_decimal: {
-				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)[lL]?\\b", //$NON-NLS-0$
-				name: "constant.numeric.number.python" //$NON-NLS-0$
+				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)[lL]?\\b",
+				name: "constant.numeric.number.python"
 			}
 		}
 	});

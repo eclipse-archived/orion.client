@@ -10,198 +10,198 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/stylers/text_x-jade/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/application_javascript/syntax"], function(mLib, mJS) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/stylers/text_x-jade/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/application_javascript/syntax"], function(mLib, mJS) {
 	var keywords = [
-		"&attributes", //$NON-NLS-0$
-		"block", //$NON-NLS-0$
-		"case", //$NON-NLS-0$
-		"default", "doctype", //$NON-NLS-1$ //$NON-NLS-0$
-		"each", "else", "extends", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"for", //$NON-NLS-0$
+		"&attributes",
+		"block",
+		"case",
+		"default", "doctype",
+		"each", "else", "extends",
+		"for",
 		"if", "include",
-		"mixin", //$NON-NLS-0$
-		"unless", //$NON-NLS-0$
-		"when", "while" //$NON-NLS-1$ //$NON-NLS-0$
+		"mixin",
+		"unless",
+		"when", "while"
 	];
 
 	var grammars = [];
 	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push.apply(grammars, mJS.grammars);
 	grammars.push({
-		id: "orion.jade", //$NON-NLS-0$
-		contentTypes: ["text/x-jade"], //$NON-NLS-0$
+		id: "orion.jade",
+		contentTypes: ["text/x-jade"],
 		patterns: [
-			{include: "#comment_singleLine"}, //$NON-NLS-0$
-			{include: "#code"}, //$NON-NLS-0$
-			{include: "#control"}, //$NON-NLS-0$
-			{include: "#caseBranch"}, //$NON-NLS-0$
-			{include: "#mixinWithParameters"}, //$NON-NLS-0$
-			{include: "#mixinRefWithArguments"}, //$NON-NLS-0$
-			{include: "#tagWithAttributes"}, //$NON-NLS-0$
-			{include: "#interpolatedJS"}, //$NON-NLS-0$
-			{include: "#interpolatedTag"}, //$NON-NLS-0$
-			{include: "#mixin"}, //$NON-NLS-0$
-			{include: "#mixinRef"}, //$NON-NLS-0$
-			{include: "#doctype"}, //$NON-NLS-0$
-			{include: "#filter"}, //$NON-NLS-0$
-			{include: "#case"}, //$NON-NLS-0$
-			{include: "#andAttributes"}, //$NON-NLS-0$
-			{include: "#otherKeywords"}, //$NON-NLS-0$
-			{include: "#tag"}, //$NON-NLS-0$
+			{include: "#comment_singleLine"},
+			{include: "#code"},
+			{include: "#control"},
+			{include: "#caseBranch"},
+			{include: "#mixinWithParameters"},
+			{include: "#mixinRefWithArguments"},
+			{include: "#tagWithAttributes"},
+			{include: "#interpolatedJS"},
+			{include: "#interpolatedTag"},
+			{include: "#mixin"},
+			{include: "#mixinRef"},
+			{include: "#doctype"},
+			{include: "#filter"},
+			{include: "#case"},
+			{include: "#andAttributes"},
+			{include: "#otherKeywords"},
+			{include: "#tag"},
 		],
 		repository: {
 			andAttributes: {
-				match: "&attributes\\b", //$NON-NLS-0$
-				name: "keyword.operator.jade" //$NON-NLS-0$
+				match: "&attributes\\b",
+				name: "keyword.operator.jade"
 			},
-			"case": { //$NON-NLS-0$
-				match: "(^\\s*)(case)\\b", //$NON-NLS-0$
+			"case": {
+				match: "(^\\s*)(case)\\b",
 				captures: {
-					2: {name: "keyword.control.jade"} //$NON-NLS-0$
+					2: {name: "keyword.control.jade"}
 				}				
 			},
 			caseBranch: {
-				begin: "(^\\s*)(when|default)\\s*", //$NON-NLS-0$
-				end: ":|$", //$NON-NLS-0$
+				begin: "(^\\s*)(when|default)\\s*",
+				end: ":|$",
 				patterns: [
-					{include: "orion.js"} //$NON-NLS-0$
+					{include: "orion.js"}
 				],
 				beginCaptures: {
-					2: {name: "keyword.control.jade"} //$NON-NLS-0$
+					2: {name: "keyword.control.jade"}
 				},
 			},
 			code: {
-				match: "(^\\s*- |= |!= ).*$", //$NON-NLS-0$
+				match: "(^\\s*- |= |!= ).*$",
 				patterns: [
-					{include: "orion.js"} //$NON-NLS-0$
+					{include: "orion.js"}
 				]
 			},
 			comment_singleLine: {
-				match: {match: "^\\s*//.*", literal: "//"}, //$NON-NLS-1$ //$NON-NLS-0$
-				name: "comment.line.double-slash.jade", //$NON-NLS-0$
+				match: {match: "^\\s*//.*", literal: "//"},
+				name: "comment.line.double-slash.jade",
 				patterns: [
 					{
-						include: "orion.lib#todo_comment_singleLine" //$NON-NLS-0$
+						include: "orion.lib#todo_comment_singleLine"
 					}
 				]
 			},
 			control: {
-				begin: "(^\\s*)(if|else( if)?|each|for|unless|while)\\b", //$NON-NLS-0$
-				end: "$", //$NON-NLS-0$
+				begin: "(^\\s*)(if|else( if)?|each|for|unless|while)\\b",
+				end: "$",
 				beginCaptures: {
-					2: {name: "keyword.control.jade"} //$NON-NLS-0$
+					2: {name: "keyword.control.jade"}
 				},
 				patterns: [
-					{include: "orion.js"} //$NON-NLS-0$
+					{include: "orion.js"}
 				]
 			},
 			doctype: {
-				match: "(^\\s*)(doctype.+$)", //$NON-NLS-0$
+				match: "(^\\s*)(doctype.+$)",
 				captures: {
-					2: {name: "meta.tag.doctype.jade"} //$NON-NLS-0$
+					2: {name: "meta.tag.doctype.jade"}
 				}
 			},
 			filter: {
-				match: "(^\\s*)(:\\w+)", //$NON-NLS-0$
+				match: "(^\\s*)(:\\w+)",
 				captures: {
-					2: {name: "entity.other.filter.jade"} //$NON-NLS-0$
+					2: {name: "entity.other.filter.jade"}
 				}
 			},
 			interpolatedJS: {
-				begin: "(#{)", //$NON-NLS-0$
-				end: "(})", //$NON-NLS-0$
+				begin: "(#{)",
+				end: "(})",
 				captures: {
-					1: {name: "string.interpolated.js.jade"} //$NON-NLS-0$
+					1: {name: "string.interpolated.js.jade"}
 				},
 				patterns: [
-					{include: "orion.js"} //$NON-NLS-0$
+					{include: "orion.js"}
 				]
 			},
 			interpolatedTag: {
-				begin: "(#\\[)", //$NON-NLS-0$
-				end: "(\\])", //$NON-NLS-0$
+				begin: "(#\\[)",
+				end: "(\\])",
 				captures: {
-					1: {name: "string.interpolated.tag.jade"} //$NON-NLS-0$
+					1: {name: "string.interpolated.tag.jade"}
 				},
 				patterns: [
 					{
-						begin: "(\\.|\\w+)\\s*\\(", //$NON-NLS-0$
-						end: "(\\))(/)?", //$NON-NLS-0$
+						begin: "(\\.|\\w+)\\s*\\(",
+						end: "(\\))(/)?",
 						beginCaptures: {
-							1: {name: "meta.tag.jade"} //$NON-NLS-0$
+							1: {name: "meta.tag.jade"}
 						},
 						endCaptures: {
-							2: {name: "meta.tag.jade"} //$NON-NLS-0$
+							2: {name: "meta.tag.jade"}
 						},
 						patterns: [
-							{include: "orion.js"} //$NON-NLS-0$
+							{include: "orion.js"}
 						]
 					}
 				]
 			},
 			mixin: {
-				match: "(^\\s*)(mixin)(\\s+)(\\w+)", //$NON-NLS-0$
+				match: "(^\\s*)(mixin)(\\s+)(\\w+)",
 				captures: {
-					2: {name: "keyword.operator.jade"}, //$NON-NLS-0$
-					4: {name: "entity.name.mixin.jade"} //$NON-NLS-0$
+					2: {name: "keyword.operator.jade"},
+					4: {name: "entity.name.mixin.jade"}
 				}
 			},
 			mixinRef: {
-				match: "(^\\s*)(\\+\\w+)", //$NON-NLS-0$
+				match: "(^\\s*)(\\+\\w+)",
 				captures: {
-					2: {name: "entity.name.mixin.jade"} //$NON-NLS-0$
+					2: {name: "entity.name.mixin.jade"}
 				}
 			},
 			mixinRefWithArguments: {
-				begin: "(^\\s*)(\\+\\w+)\\s*\\(", //$NON-NLS-0$
-				end: "\\)|$", //$NON-NLS-0$
+				begin: "(^\\s*)(\\+\\w+)\\s*\\(",
+				end: "\\)|$",
 				captures: {
-					2: {name: "entity.name.mixin.jade"} //$NON-NLS-0$
+					2: {name: "entity.name.mixin.jade"}
 				},
 				patterns: [
-					{include: "orion.lib#string_doubleQuote"}, //$NON-NLS-0$
-					{include: "orion.lib#string_singleQuote"}, //$NON-NLS-0$
-					{include: "orion.lib#number_decimal"} //$NON-NLS-0$
+					{include: "orion.lib#string_doubleQuote"},
+					{include: "orion.lib#string_singleQuote"},
+					{include: "orion.lib#number_decimal"}
 				]
 			},
 			mixinWithParameters: {
-				begin: "(^\\s*)(mixin)(\\s+)(\\w+)\\s*\\(", //$NON-NLS-0$
-				end: "\\)|$", //$NON-NLS-0$
+				begin: "(^\\s*)(mixin)(\\s+)(\\w+)\\s*\\(",
+				end: "\\)|$",
 				beginCaptures: {
-					2: {name: "keyword.operator.jade"}, //$NON-NLS-0$
-					4: {name: "entity.name.mixin.jade"} //$NON-NLS-0$
+					2: {name: "keyword.operator.jade"},
+					4: {name: "entity.name.mixin.jade"}
 				},
 				patterns: [
 					{
-						match: "[^\\s,]+", //$NON-NLS-0$
-						name: "variable.parameter.jade" //$NON-NLS-0$
+						match: "[^\\s,]+",
+						name: "variable.parameter.jade"
 					}	
 				]
 			},
 			otherKeywords: {
-				match: "(^\\s*)(block|extends|include)\\b", //$NON-NLS-0$
+				match: "(^\\s*)(block|extends|include)\\b",
 				captures: {
-					2: {name: "keyword.operator.jade"} //$NON-NLS-0$
+					2: {name: "keyword.operator.jade"}
 				}
 			},
 			tag: {
-				match: "(^\\s*)(\\w+|(?=\\.)|(?=#))(#\\w*|\\.\\w*)*(/?)", //$NON-NLS-0$
+				match: "(^\\s*)(\\w+|(?=\\.)|(?=#))(#\\w*|\\.\\w*)*(/?)",
 				captures: {
-					2: {name: "meta.tag.jade"}, //$NON-NLS-0$
-					4: {name: "meta.tag.jade"} //$NON-NLS-0$
+					2: {name: "meta.tag.jade"},
+					4: {name: "meta.tag.jade"}
 				}
 			},
 			tagWithAttributes: {
-				begin: "(^\\s*)(\\w+|(?=\\.)|(?=#))(#\\w*|\\.\\w*)*\\s*\\(", //$NON-NLS-0$
-				end: "(\\))(/)?", //$NON-NLS-0$
+				begin: "(^\\s*)(\\w+|(?=\\.)|(?=#))(#\\w*|\\.\\w*)*\\s*\\(",
+				end: "(\\))(/)?",
 				beginCaptures: {
-					2: {name: "meta.tag.jade"} //$NON-NLS-0$
+					2: {name: "meta.tag.jade"}
 				},
 				endCaptures: {
-					2: {name: "meta.tag.jade"} //$NON-NLS-0$
+					2: {name: "meta.tag.jade"}
 				},
 				patterns: [
-					{include: "orion.js"} //$NON-NLS-0$
+					{include: "orion.js"}
 				]
 			}
 		}

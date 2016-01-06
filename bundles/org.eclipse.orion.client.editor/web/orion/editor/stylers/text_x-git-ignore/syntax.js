@@ -11,21 +11,21 @@
 
 /*eslint-env browser, amd*/
 
-define("orion/editor/stylers/text_x-git-ignore/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/stylers/text_x-git-ignore/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) {
 
 	var grammars = [];
 	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
-		id: "orion.gitignore", //$NON-NLS-0$
-		contentTypes: ["text/x-git-ignore"], //$NON-NLS-1$
+		id: "orion.gitignore",
+		contentTypes: ["text/x-git-ignore"],
 		patterns: [
 			// http://git-scm.com/docs/gitignore
 			{
-				match: {match: "^\\s*#[^$]*", literal: "#"}, //$NON-NLS-1$
-				name: "comment.line.number-sign.ignore" //$NON-NLS-1$
+				match: {match: "^\\s*#[^$]*", literal: "#"},
+				name: "comment.line.number-sign.ignore"
 			}, {
-				match: "^\\s*!", //$NON-NLS-0$
-				name: "punctuation.operator.negation.ignore" //$NON-NLS-0$
+				match: "^\\s*!",
+				name: "punctuation.operator.negation.ignore"
 			}
 		]
 	});

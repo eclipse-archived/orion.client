@@ -10,61 +10,61 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/stylers/text_x-csrc/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/stylers/text_x-csrc/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) {
 	var keywords = [
-		"auto", //$NON-NLS-0$
-		"break", //$NON-NLS-0$
-		"case", "char", "const", "continue", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"default", "double", "do", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"else", "enum", "extern", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"float", "for", //$NON-NLS-1$ //$NON-NLS-0$
-		"goto", //$NON-NLS-0$
-		"if", "inline", "int", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"long", //$NON-NLS-0$
-		"register", "return", //$NON-NLS-1$ //$NON-NLS-0$
-		"short", "signed", "sizeof", "static", "struct", "switch", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"typedef", //$NON-NLS-0$
-		"union", "unsigned", //$NON-NLS-1$ //$NON-NLS-0$
-		"void", "volatile", //$NON-NLS-1$ //$NON-NLS-0$
-		"while", //$NON-NLS-0$
-		"_Bool", "_Complex", "_Imaginary" //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"auto",
+		"break",
+		"case", "char", "const", "continue",
+		"default", "double", "do",
+		"else", "enum", "extern",
+		"float", "for",
+		"goto",
+		"if", "inline", "int",
+		"long",
+		"register", "return",
+		"short", "signed", "sizeof", "static", "struct", "switch",
+		"typedef",
+		"union", "unsigned",
+		"void", "volatile",
+		"while",
+		"_Bool", "_Complex", "_Imaginary"
 	];
 
 	var directives = [
-		"define", "elif", "else", "endif", "error", "ifdef", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"ifndef", "if", "include", "line", "pragma", "undef" //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"define", "elif", "else", "endif", "error", "ifdef",
+		"ifndef", "if", "include", "line", "pragma", "undef"
 	];
 
 	var grammars = [];
 	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
-		id: "orion.c", //$NON-NLS-0$
-		contentTypes: ["text/x-csrc", "text/x-c"], //$NON-NLS-1$ //$NON-NLS-0$
+		id: "orion.c",
+		contentTypes: ["text/x-csrc", "text/x-c"],
 		patterns: [
-			{include: "orion.lib#string_doubleQuote"}, //$NON-NLS-0$
-			{include: "orion.lib#string_singleQuote"}, //$NON-NLS-0$
-			{include: "orion.c-like#comment_singleLine"}, //$NON-NLS-0$
-			{include: "orion.lib#doc_block"}, //$NON-NLS-0$
-			{include: "orion.c-like#comment_block"}, //$NON-NLS-0$
-			{include: "#directive"}, //$NON-NLS-0$
-			{include: "orion.lib#brace_open"}, //$NON-NLS-0$
-			{include: "orion.lib#brace_close"}, //$NON-NLS-0$
-			{include: "orion.lib#bracket_open"}, //$NON-NLS-0$
-			{include: "orion.lib#bracket_close"}, //$NON-NLS-0$
-			{include: "orion.lib#parenthesis_open"}, //$NON-NLS-0$
-			{include: "orion.lib#parenthesis_close"}, //$NON-NLS-0$
-			{include: "orion.lib#operator"}, //$NON-NLS-0$
-			{include: "orion.lib#number_decimal"}, //$NON-NLS-0$
-			{include: "orion.lib#number_hex"}, //$NON-NLS-0$
+			{include: "orion.lib#string_doubleQuote"},
+			{include: "orion.lib#string_singleQuote"},
+			{include: "orion.c-like#comment_singleLine"},
+			{include: "orion.lib#doc_block"},
+			{include: "orion.c-like#comment_block"},
+			{include: "#directive"},
+			{include: "orion.lib#brace_open"},
+			{include: "orion.lib#brace_close"},
+			{include: "orion.lib#bracket_open"},
+			{include: "orion.lib#bracket_close"},
+			{include: "orion.lib#parenthesis_open"},
+			{include: "orion.lib#parenthesis_close"},
+			{include: "orion.lib#operator"},
+			{include: "orion.lib#number_decimal"},
+			{include: "orion.lib#number_hex"},
 			{
-				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.operator.c" //$NON-NLS-0$
+				match: "\\b(?:" + keywords.join("|") + ")\\b",
+				name: "keyword.operator.c"
 			}
 		],
 		repository: {
 			directive: {
-				match: "#\\s*(?:" + directives.join("|") + ")\\b[^$]*", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "meta.preprocessor.c" //$NON-NLS-0$
+				match: "#\\s*(?:" + directives.join("|") + ")\\b[^$]*",
+				name: "meta.preprocessor.c"
 			}
 		}
 	});
