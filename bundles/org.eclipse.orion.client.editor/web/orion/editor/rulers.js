@@ -528,7 +528,7 @@ define("orion/editor/rulers", [
 			hoverArea.height = this._curElementBounds.height;
 			hoverArea.width = this._curElementBounds.width;
 			
-			if (typeof contents === 'string' && y) { //$NON-NLS-0$
+			if (typeof contents === 'string' && y) {
 				// Hack for line numbers
 				hoverArea.top = y;
 				hoverArea.height = 1;
@@ -539,13 +539,16 @@ define("orion/editor/rulers", [
 			// The tooltip is positioned opposite to where the ruler is
 			var position = rulerLocation === "left" ? "right" : "left"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 			
-			
-			var viewRect = this._view._clientDiv.getBoundingClientRect();
 			var offsetX = 0;
 			var offsetY = 0;
-			offsetX = viewRect.left - (hoverArea.left + hoverArea.width);
+			if (this._view){
+				var viewRect = this._view._clientDiv.getBoundingClientRect();
+				offsetX = viewRect.left - (hoverArea.left + hoverArea.width);
+			} else {
+				offsetX = hoverArea.width;
+			}
 			offsetY = hoverArea.height;
-			if (position === "left") { //$NON-NLS-0$
+			if (position === "left") {
 				offsetX = -25;
 				// Hack for when the hoverArea is a sliver of the ruler, ruler is 2px wider than annotations
 				if (hoverArea.height === 1){
@@ -596,11 +599,15 @@ define("orion/editor/rulers", [
 				anchorArea: hoverArea
 			};
 			
-			var viewRect = view._clientDiv.getBoundingClientRect();
+			if (view){
+				var viewRect = view._clientDiv.getBoundingClientRect();
+				info.offsetX = viewRect.left - (hoverArea.left + hoverArea.width);
+			} else {
+				info.offsetX = hoverArea.width;
+			}
 
-			info.offsetX = viewRect.left - (hoverArea.left + hoverArea.width);
 			info.offsetY = hoverArea.height;
-			if (info.position === "left") { //$NON-NLS-0$
+			if (info.position === "left") {
 				info.offsetX = 20;
 			}
 			return info;
