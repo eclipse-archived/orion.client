@@ -1025,6 +1025,13 @@ define([
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
+			 	        	                },
+			 	        	                {
+			 	        	                		id: "type-checked-consistent-return",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["type-checked-consistent-return"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: ignore,
+				 	        	                	options: severities
 			 	        	                }
 			 	        	                ]
 				 	        	},

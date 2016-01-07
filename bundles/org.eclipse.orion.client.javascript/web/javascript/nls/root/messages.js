@@ -176,5 +176,6 @@ define({//Default message bundle
 	'no-self-compare' : 'Disallow self compare:',
 	'no-irregular-whitespace' : 'No irregular whitespace:',
 	'no-self-assign' : 'Disallow self assignment:',
-	'noShadowFixName' : 'Rename in scope'
+	'noShadowFixName' : 'Rename in scope',
+	'type-checked-consistent-return' : 'Detect inconsistent returns:'
 });
