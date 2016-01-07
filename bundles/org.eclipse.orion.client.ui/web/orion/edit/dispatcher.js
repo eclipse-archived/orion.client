@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/edit/dispatcher'], function() {
+define([], function() {
 	/**
 	 * @name orion.edit.Dispatcher
 	 * @class Forwards events from an {@link orion.editor.Editor} to interested services.
@@ -26,20 +26,20 @@ define(['orion/edit/dispatcher'], function() {
 		this.serviceReferences = {};
 
 		var that = this;
-		this.inputManager.addEventListener("InputChanged", function(e) { //$NON-NLS-0$
+		this.inputManager.addEventListener("InputChanged", function(e) {
 			that.contentType = e.contentType;
 			that.updateListeners();
 		}.bind(this));
 		this.listener = {
-			onServiceAdded: function(event) {
-				that._onServiceAdded(event.serviceReference);
+			onServiceAdded: function(evnt) {
+				that._onServiceAdded(evnt.serviceReference);
 			},
-			onServiceRemoved: function(event) {
-				that._onServiceRemoved(event.serviceReference);
+			onServiceRemoved: function(evnt) {
+				that._onServiceRemoved(evnt.serviceReference);
 			}
 		};
-		this.serviceRegistry.addEventListener("registered", this.listener.onServiceAdded); //$NON-NLS-0$
-		this.serviceRegistry.addEventListener("unregistering", this.listener.onServiceRemoved); //$NON-NLS-0$
+		this.serviceRegistry.addEventListener("registered", this.listener.onServiceAdded);
+		this.serviceRegistry.addEventListener("unregistering", this.listener.onServiceRemoved);
 	}
 	Dispatcher.prototype = /** @lends orion.edit.Dispatcher.prototype */ {
 		updateListeners: function() {
@@ -53,36 +53,39 @@ define(['orion/edit/dispatcher'], function() {
 		},
 		_wireServiceReference: function(serviceRef) {
 			var refContentType = serviceRef.getProperty("contentType"); //$NON-NLS-0$
-			if (typeof refContentType !== "undefined" && refContentType !== null) { //$NON-NLS-0$
+			if (typeof refContentType !== "undefined" && refContentType !== null) {
 				// See if the registered service is interested in the current ContentType.
-				var self = this;
+				var _self = this;
 				var inputContentType = this.contentType;
 				if (this.ctRegistry.isSomeExtensionOf(inputContentType, refContentType)) {
-					self._wireService(serviceRef, self.serviceRegistry.getService(serviceRef));
+					_self._wireService(serviceRef, _self.serviceRegistry.getService(serviceRef));
 				}
 			}
 		},
 		_wireService: function(serviceReference, service) {
 			var textView = this.editor.getTextView();
 			if (!textView)
-				throw new Error("TextView not installed");
+				throw new Error("TextView not installed"); //$NON-NLS-1$
 			var keys = Object.keys(service);
 			for (var i=0; i < keys.length; i++) {
 				var key = keys[i], method = service[key];
-				if (key.substr(0, 2) !== "on" || typeof method !== "function") {//$NON-NLS-1$ //$NON-NLS-0$
+				if (key.substr(0, 2) !== "on" || typeof method !== "function") {
 					continue;
 				}
 				var type = key.substr(2);
 				this._wireServiceMethod(serviceReference, service, method, textView, type);
 			}
 		},
+		/**
+		 * @callback
+		 */
 		_wireServiceMethod: function(serviceReference, service, serviceMethod, textView, type) {
 //			console.log("  Add listener " + type + " for " + serviceReference.getProperty('service.id'));
 			var _self = this;
-			var listener = function(event) {
+			var listener = function(evnt) {
 				// Inject metadata about the file being edited into the event.
-				event.file = _self.getServiceFileObject();
-				serviceMethod(event).then(/*No return value*/);
+				evnt.file = _self.getServiceFileObject();
+				serviceMethod(evnt).then(/*No return value*/);
 			};
 			var serviceId = serviceReference.getProperty('service.id'); //$NON-NLS-0$
 			this.serviceReferences[serviceId] = this.serviceReferences[serviceId] || [];
@@ -90,11 +93,11 @@ define(['orion/edit/dispatcher'], function() {
 			textView.addEventListener(type, listener);
 		},
 		_onServiceRemoved: function(serviceReference) {
-			var serviceId = serviceReference.getProperty('service.id');
+			var serviceId = serviceReference.getProperty('service.id'); //$NON-NLS-1$
 			this._removeListeners(serviceId);
 		},
 		_onServiceAdded: function(serviceReference) {
-			if (serviceReference.getProperty("objectClass").indexOf("orion.edit.model") !== -1) { //$NON-NLS-0$
+			if (serviceReference.getProperty("objectClass").indexOf("orion.edit.model") !== -1) { //$NON-NLS-0$ //$NON-NLS-2$
 				this._wireServiceReference(serviceReference);
 			}
 		},
@@ -125,7 +128,7 @@ define(['orion/edit/dispatcher'], function() {
 				return null;
 			}
 			return Dispatcher.toServiceFileObject(metadata, this.inputManager.getContentType());
-		},
+		}
 	};
 
 	/**
