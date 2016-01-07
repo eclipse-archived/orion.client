@@ -32,7 +32,6 @@ define([
 	'orion/globalCommands',
 	'orion/edit/dispatcher',
 	'orion/edit/editorContext',
-	'orion/edit/typedefs',
 	'orion/highlight',
 	'orion/markOccurrences',
 	'orion/syntaxchecker',
@@ -51,12 +50,12 @@ define([
 	mEditor, mEventTarget, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mHoverFactory, mContentAssist,
 	mEmacs, mVI, mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands, mGlobalCommands,
-	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
+	mDispatcher, EditorContext, Highlight,
 	mMarkOccurrences, mSyntaxchecker, LiveEditSession,
 	mProblems, mBlamer, mDiffer,
 	mKeyBinding, util, Deferred, mContextMenu, mMetrics, objects
 ) {
-	var fPattern = "/__embed/";
+	var fPattern = "/__embed/"; //$NON-NLS-1$
 	var Dispatcher = mDispatcher.Dispatcher;
 
 	function parseNumericParams(input, params) {
@@ -102,21 +101,20 @@ define([
 		this.problemsServiceID = options.problemsServiceID || "orion.core.marker"; //$NON-NLS-0$
 		this.editContextServiceID = options.editContextServiceID || "orion.edit.context"; //$NON-NLS-0$
 		this.syntaxHighlighter = new Highlight.SyntaxHighlighter(this.serviceRegistry);
-		this.typeDefRegistry = new TypeDefRegistry(this.serviceRegistry);
 		var keyAssist = mGlobalCommands.getKeyAssist ? mGlobalCommands.getKeyAssist() : null;
 		if(keyAssist) {
 			keyAssist.addProvider(this.editorCommands);
 		}
 		var mainSplitter = mGlobalCommands.getMainSplitter ? mGlobalCommands.getMainSplitter() : null;
 		if(mainSplitter) {
-			mainSplitter.splitter.addEventListener("resize", function (evt) { //$NON-NLS-0$
+			mainSplitter.splitter.addEventListener("resize", function (evt) {
 				if (this.editor && evt.node === mainSplitter.main) {
 					this.editor.resize();
 				}
 			}.bind(this));
 		}
 		if(mGlobalCommands.getGlobalEventTarget) {
-			mGlobalCommands.getGlobalEventTarget().addEventListener("toggleTrim", function() { //$NON-NLS-0$
+			mGlobalCommands.getGlobalEventTarget().addEventListener("toggleTrim", function() {
 				if (this.editor) {
 					this.editor.resize();
 				}
@@ -133,12 +131,12 @@ define([
 			if (this.vi) {
 				textView.removeKeyMode(this.vi);
 			}
-			if (prefs.keyBindings === "Emacs") { //$NON-NLS-0$
+			if (prefs.keyBindings === "Emacs") {
 				if (!this.emacs) {
 					this.emacs = new mEmacs.EmacsMode(textView);
 				}
 				textView.addKeyMode(this.emacs);
-			} else if (prefs.keyBindings === "vi") { //$NON-NLS-0$
+			} else if (prefs.keyBindings === "vi") {
 				if (!this.vi) {
 					this.vi = new mVI.VIMode(textView, this.statusReporter);
 				}
@@ -147,11 +145,11 @@ define([
 		},
 		setContents: function(contents, contentType) {
 			var cType = this.contentTypeRegistry.getContentType(contentType);
-			var fileExt = "txt";
+			var fileExt = "txt"; //$NON-NLS-1$
 			if(cType && cType.extension && cType.extension.length > 0) {
 				fileExt = cType.extension[0];
 			}
-			var currentLocation = fPattern + this.id + "/foo." + fileExt;
+			var currentLocation = fPattern + this.id + "/foo." + fileExt; //$NON-NLS-1$
 			var def;
 			var sameFile = currentLocation === this.lastFileLocation;
 			if(sameFile || !this.lastFileLocation) {
@@ -194,7 +192,7 @@ define([
 			var marginOffset = 0;
 			if (prefs.showMargin) {
 				marginOffset = prefs.marginOffset;
-				if (typeof marginOffset !== "number") { //$NON-NLS-0$
+				if (typeof marginOffset !== "number") {
 					marginOffset = prefs.marginOffset = parseInt(marginOffset, 10);
 				}
 			}
@@ -289,7 +287,7 @@ define([
 			if (this.preferences) {
 				// There should be only one editor preferences
 				this.editorCommands.editorPreferences = this.editorPreferences = this.editorCommands.editorPreferences || new mEditorPreferences.EditorPreferences(this.preferences);
-				this.editorPreferences.addEventListener("Changed", function (evt) { //$NON-NLS-0$
+				this.editorPreferences.addEventListener("Changed", function (evt) {
 					var prefs = evt.preferences;
 					if (!prefs) {
 						this.editorPreferences.getPrefs(this.updateSettings.bind(this));
@@ -324,9 +322,12 @@ define([
 				return textView;
 			};
 
+			/**
+			 * @callback
+			 */
 			var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 
-				var localSearcher = that.textSearcher = (mSearcher.TextSearcher ? new mSearcher.TextSearcher(editor, serviceRegistry, commandRegistry, undoStack) : null);
+				var localSearcher = that.textSearcher = mSearcher.TextSearcher ? new mSearcher.TextSearcher(editor, serviceRegistry, commandRegistry, undoStack) : null;
 
 				var keyBindings = new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
 				that.updateSourceCodeActions(that.settings, keyBindings.sourceCodeActions);
@@ -361,12 +362,12 @@ define([
 			};
 
 			// Content Assist
-			var setContentAssistProviders = function(editor, contentAssist, event) {
+			var setContentAssistProviders = function(editor, contentAssist, evnt) {
 				// Content assist is about to be activated; set its providers.
 				var fileContentType = inputManager.getContentType();
 				var fileName = editor.getTitle();
 				var serviceRefs = serviceRegistry.getServiceReferences("orion.edit.contentAssist").concat(serviceRegistry.getServiceReferences("orion.edit.contentassist")); //$NON-NLS-1$ //$NON-NLS-2$
-				var providerInfoArray = event && event.providers;
+				var providerInfoArray = evnt && evnt.providers;
 				if (!providerInfoArray) {
 					providerInfoArray = serviceRefs.map(function(serviceRef) {
 						var contentTypeIds = serviceRef.getProperty("contentType"), //$NON-NLS-0$
@@ -397,7 +398,7 @@ define([
 				// Produce a bound EditorContext that contentAssist can invoke with no knowledge of ServiceRegistry.
 				var boundEditorContext = {};
 				Object.keys(EditorContext).forEach(function(key) {
-					if (typeof EditorContext[key] === "function") { //$NON-NLS-0$
+					if (typeof EditorContext[key] === "function") {
 						boundEditorContext[key] = EditorContext[key].bind(null, serviceRegistry, that.editContextServiceID);
 					}
 				});
@@ -412,7 +413,7 @@ define([
 				createContentAssistMode: function(editor) {
 					var contentAssist = new mContentAssist.ContentAssist(editor.getTextView(), serviceRegistry);
 
-					contentAssist.addEventListener("Activating", setContentAssistProviders.bind(null, editor, contentAssist)); //$NON-NLS-0$
+					contentAssist.addEventListener("Activating", setContentAssistProviders.bind(null, editor, contentAssist));
 					var widget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist"); //$NON-NLS-0$
 					var result = new mContentAssist.ContentAssistMode(contentAssist, widget);
 					contentAssist.setMode(result);
@@ -456,23 +457,23 @@ define([
 				this.localSettings = EditorSettings ? new EditorSettings({local: true, editor: editor, themePreferences: this.themePreferences, preferences: this.editorPreferences}) : null;
 			}
 			var liveEditSession = new LiveEditSession(serviceRegistry, editor);
-			inputManager.addEventListener("InputChanging", function(evt) { //$NON-NLS-0$
+			inputManager.addEventListener("InputChanging", function(evt) {
 				that.createSession(evt);
 			});
-			window.addEventListener("beforeunload", function(evt) { //$NON-NLS-0$
+			window.addEventListener("beforeunload", function(evt) {
 				that.createSession(evt);
 				if (evt.session) {
 					evt.session.save();
 				}
 			});
-			inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
-				that.createSession(event);
+			inputManager.addEventListener("InputChanged", function(evnt) {
+				that.createSession(evnt);
 				var textView = editor.getTextView();
 				if (textView) {
-					liveEditSession.start(inputManager.getContentType(), event.title);
+					liveEditSession.start(inputManager.getContentType(), evnt.title);
 					textView.setOptions(this.updateViewOptions(this.settings));
 					this.markOccurrences.setOccurrencesVisible(this.settings.showOccurrences);
-					this.syntaxHighlighter.setup(event.contentType, editor.getTextView(), editor.getAnnotationModel(), event.title, true).then(function() {
+					this.syntaxHighlighter.setup(evnt.contentType, editor.getTextView(), editor.getAnnotationModel(), evnt.title, true).then(function() {
 						this.updateStyler(this.settings);
 						if (editor.getContentAssist()) {
 							// the file changed, we need to figure out the correct auto triggers to use
@@ -480,19 +481,19 @@ define([
 						}
 					}.bind(this));
 					if(textView.onInputChanged) {
-						textView.onInputChanged({type:event.type});
+						textView.onInputChanged({type:evnt.type});
 					}
 				} else {
 					liveEditSession.start();
 				}
 			}.bind(this));
-			inputManager.addEventListener("Saving", function(event) { //$NON-NLS-0$
+			inputManager.addEventListener("Saving", function(evnt) {
 				if (that.settings.trimTrailingWhiteSpace) {
 					editor.getTextView().invokeAction("trimTrailingWhitespaces"); //$NON-NLS-0$
 				}
 				var textView = editor.getTextView();
 				if(textView && textView.onSaving) {
-					textView.onSaving({type:event.type});
+					textView.onSaving({type:evnt.type});
 				}
 			});
 
@@ -502,7 +503,7 @@ define([
 			this.problemService = new mProblems.ProblemService(serviceRegistry, this.problemsServiceID);
 			var markerService = serviceRegistry.getService(this.problemsServiceID);
 			if(markerService) {
-				markerService.addEventListener("problemsChanged", function(evt) { //$NON-NLS-0$
+				markerService.addEventListener("problemsChanged", function(evt) {
 					editor.showProblems(evt.problems);
 				});
 			}
@@ -512,7 +513,7 @@ define([
 			markOccurrences.findOccurrences();
 			
 			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor.getModel());
-			editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
+			editor.addEventListener("InputChanged", function(evt) {
 				syntaxChecker.setTextModel(editor.getModel());
 				var input = inputManager.getInput();
 				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents, editor.getEditorContext()).then(function(problems) {
@@ -528,7 +529,7 @@ define([
 			var contextImpl = Object.create(null);
 			[
 				"getCaretOffset", "setCaretOffset", //$NON-NLS-1$ //$NON-NLS-2$
-				"getSelection", "getSelectionText", "setSelection", //$NON-NLS-1$ //$NON-NLS-2$
+				"getSelection", "getSelectionText", "setSelection", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"getSelections", "setSelections", //$NON-NLS-1$ //$NON-NLS-2$
 				"getText", "setText", //$NON-NLS-1$ //$NON-NLS-2$
 				"getLineAtOffset", //$NON-NLS-0$
@@ -620,7 +621,7 @@ define([
 					mMetrics.logEvent("contextMenu", "opened", "editor"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 			}.bind(this);
-			contextMenu.addEventListener("triggered", contextMenuTriggered); //$NON-NLS-0$
+			contextMenu.addEventListener("triggered", contextMenuTriggered);
 		}
 	};
 	mEventTarget.EventTarget.addMixin(EditorView.prototype);

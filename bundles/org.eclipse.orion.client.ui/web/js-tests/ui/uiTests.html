@@ -7,14 +7,14 @@
 	<script>
 		/*eslint-env browser,amd*/
 		require({
-		baseUrl: "../../",
+		baseUrl: "../../", //$NON-NLS-1$
 		paths: {
-			text: "requirejs/text",
-			i18n: "requirejs/i18n",
+			text: "requirejs/text", //$NON-NLS-1$
+			i18n: "requirejs/i18n", //$NON-NLS-1$
 		}
 	});
 	require(["mocha/sauce"], function(mocha) {
-		mocha.setup("bdd");
+		mocha.setup("bdd"); //$NON-NLS-1$
 
 		// The commented-out test cases below need to be converted to use Mocha.
 		require([
@@ -34,7 +34,6 @@
 			"js-tests/ui/pageUtil/pageUtilTests",
 			"js-tests/ui/searchCrawler/searchCrawlerTests",
 			"js-tests/ui/settings/settingsTests",
-			"js-tests/ui/typedefs/typedefsTests",
 			"js-tests/ui/urlUtils/urlUtils",
 //			"js-tests/ui/webdav/testcase",
 //			"js-tests/ui/commonjs-unittesting/test.html",
