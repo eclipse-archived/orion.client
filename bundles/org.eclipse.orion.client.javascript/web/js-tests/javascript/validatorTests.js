@@ -5002,6 +5002,111 @@ define([
 								worker.getTestState().callback(error);
 							});
 					});
+					it("HTML Mark missing", function(callback) {
+						var topic = "<script>var a = \"a\"; var b = \"bb\";</script>";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, contentType: 'text/html', callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [{
+									id: RULE_ID,
+									severity: 'warning',
+									description: "Non-externalized string literal 'a'.",
+									nodeType: "Literal"
+								},
+								{
+									id: RULE_ID,
+									severity: 'warning',
+									description: "Non-externalized string literal 'bb'.",
+									nodeType: "Literal"
+								}]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					it("HTML Mark missing multiple script blocks", function(callback) {
+						var topic = "<script>var a = \"a\";</script>\n<script>var b = \"bb\";</script>";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, contentType: 'text/html', callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [{
+									id: RULE_ID,
+									severity: 'warning',
+									description: "Non-externalized string literal 'a'.",
+									nodeType: "Literal"
+								},
+								{
+									id: RULE_ID,
+									severity: 'warning',
+									description: "Non-externalized string literal 'bb'.",
+									nodeType: "Literal"
+								}]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					it("HTML Mark missing additional lines", function(callback) {
+						var topic = "<html>/nTitle here\n<script>var a = \"a\"; var b = \"bb\";</script>\nPost text\n</html>";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, contentType: 'text/html', callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [{
+									id: RULE_ID,
+									severity: 'warning',
+									description: "Non-externalized string literal 'a'.",
+									nodeType: "Literal"
+								},
+								{
+									id: RULE_ID,
+									severity: 'warning',
+									description: "Non-externalized string literal 'bb'.",
+									nodeType: "Literal"
+								}]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					it("HTML Ignore commented", function(callback) {
+						var topic = "<script>var a = 'a'; var b = 'bb'; //$NON-NLS-1$ //$NON-NLS-2$</script>";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, contentType: 'text/html', callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					it("HTML Ignore commented additional lines", function(callback) {
+						var topic = "<html>\nTitle text\n<script>var a = 'a'; var b = 'bb'; //$NON-NLS-1$ //$NON-NLS-2$</script>\nPost text\n</html>";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, contentType: 'text/html', callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					it("HTML Ignore commented multiple script blocks", function(callback) {
+						var topic = "<script>var a = 'a';</script><script>var b = 'bb'; //$NON-NLS-1$ //$NON-NLS-2$</script>";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, contentType: 'text/html', callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
 				});
 				
 				//UNNECESSARY-NLS -------------------------------------------------------

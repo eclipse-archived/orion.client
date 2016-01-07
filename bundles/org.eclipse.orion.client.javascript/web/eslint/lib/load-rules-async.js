@@ -719,17 +719,32 @@ define([
                     	context._isMissingNLSActive = false;
                     	// Read each line in the map and check if there are non-nls statements
                     	if (context._linesWithStringLiterals){
-                    		for (var lineNumber in context._linesWithStringLiterals) {
+                    		
+                    		var comments = node.comments;
+	                    	var linesWithComments = {};
+	                    	if (Array.isArray(comments)){
+	                    		for (var f=0; f<comments.length; f++) {
+	                    			var comment = comments[f];
+	                    			if (comment.type.toLowerCase() === 'line'){
+	                    				var lineNumber = comment.loc.end.line;
+								        linesWithComments[lineNumber] = "//" + comment.value; // Add in leading // to simply regex //$NON-NLS-1$
+	                    			}
+	                    		}
+	                    	}
+                    		
+                    		for (lineNumber in context._linesWithStringLiterals) {
                     			var nodes = context._linesWithStringLiterals[lineNumber];
 							    if (nodes) {
 							    	
 							    	// 0 based line count
-							        var line = context.getSourceLines()[lineNumber-1];
+									comment = linesWithComments[lineNumber];
 							        var nonNlsRegExp = /\/\/\$NON-NLS-([0-9])+\$/g;
 							        var match;
-							        var comments = [];
-							        while ((match = nonNlsRegExp.exec(line)) !== null){
-							        	comments.push(match[1]);
+							        comments = [];
+							    	if (comment){
+								        while ((match = nonNlsRegExp.exec(comment)) !== null){
+								        	comments.push(match[1]);
+								        }
 							        }
 
 							        for (var i=0; i<nodes.length; i++) {
@@ -774,7 +789,9 @@ define([
                      * @callback
                      */
                     'Program': function(node){
-                    	context._linesWithStringLiterals = Object.create(null);
+                    	if (!context._isMissingNLSActive){
+                    		context._linesWithStringLiterals = Object.create(null);
+                		}
                     },
                     /**
                      * @callback
