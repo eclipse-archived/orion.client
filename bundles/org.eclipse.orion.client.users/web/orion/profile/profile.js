@@ -225,7 +225,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 				for(var i=0; i<content.sections.length; i++){
 					var sectionDescription = content.sections[i];
 					var contentId = sectionDescription.id + "_Content";
-					var section = new mSection.Section(placeholder, {
+					new mSection.Section(placeholder, {
 						id: sectionDescription.id,
 						title: sectionDescription.name,
 						content: '<div id="' + contentId + '"></div>', //$NON-NLS-1$ //$NON-NLS-0$
