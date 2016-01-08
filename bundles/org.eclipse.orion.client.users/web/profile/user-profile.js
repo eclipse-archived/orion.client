@@ -27,7 +27,6 @@ define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/commandRegistry', 'or
 		new mSshTools.SshService(serviceRegistry);
 		var commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
 		new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
-		var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
 		var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
 	
 		// Git operations
