@@ -45,8 +45,8 @@ define("orion/editor/stylers/lib/syntax", [], function() {
 					name: "punctuation.operator"
 				},
 				doc_block: {
-					begin: {match: "/\\*\\*", literal: "/**"},
-					end: {match: "\\*/", literal: "*/"},
+					begin: "/\\*\\*",
+					end: "\\*/",
 					name: "comment.block.documentation",
 					patterns: [
 						{

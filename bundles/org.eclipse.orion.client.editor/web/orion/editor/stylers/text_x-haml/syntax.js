@@ -27,32 +27,22 @@ define("orion/editor/stylers/text_x-haml/syntax", ["orion/editor/stylers/lib/syn
 			{include: "#doctype"},
 			{include: "#tag"},
 			{include: "#htmlComment"},
-			{include: "#hamlComment"},
 		],
 		repository: {
 			doctype: {
 				match: "^!!!.*$",
 				name: "meta.tag.doctype.haml",
 			},
-			hamlComment: {
-				// TODO multi-line comments
-				match: {match: "\\-#.*$", literal: "-#"},
-				name: "comment.line.haml",
-				patterns: [
-					{
-						include: "orion.lib#todo_comment_singleLine"
-					}
-				]
-			},
 			htmlComment: {
 				// TODO multi-line comments
-				match: "/[^[].*$",
+				match: {match: "/[^[].*$", literal: "/"},
 				name: "comment.line.html.haml"
 			},
 			inlineRuby: {
 				// TODO end match should not eat the last content character, really need a negative look-behind
 				begin: "(?:^|[^\\\\])(?:=|-|~|&==?|!==?)",
 				end: "(?:^|[^,])$",
+				contentName: "source.ruby.embedded.haml",
 				patterns: [
 					{include: "orion.ruby"},
 				]
@@ -60,6 +50,7 @@ define("orion/editor/stylers/text_x-haml/syntax", ["orion/editor/stylers/lib/syn
 			interpolatedRuby: {
 				begin: "#{",
 				end: "}",
+				contentName: "source.ruby.embedded.haml",
 				patterns: [
 					{include: "orion.ruby"},
 				]

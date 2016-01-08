@@ -63,6 +63,7 @@ define("orion/editor/stylers/text_x-jade/syntax", ["orion/editor/stylers/lib/syn
 			caseBranch: {
 				begin: "(^\\s*)(when|default)\\s*",
 				end: ":|$",
+				contentName: "source.js.embedded.jade",
 				patterns: [
 					{include: "orion.js"}
 				],
@@ -72,6 +73,7 @@ define("orion/editor/stylers/text_x-jade/syntax", ["orion/editor/stylers/lib/syn
 			},
 			code: {
 				match: "(^\\s*- |= |!= ).*$",
+				name: "source.js.embedded.jade",
 				patterns: [
 					{include: "orion.js"}
 				]
@@ -91,6 +93,7 @@ define("orion/editor/stylers/text_x-jade/syntax", ["orion/editor/stylers/lib/syn
 				beginCaptures: {
 					2: {name: "keyword.control.jade"}
 				},
+				contentName: "source.js.embedded.jade",
 				patterns: [
 					{include: "orion.js"}
 				]
@@ -113,6 +116,7 @@ define("orion/editor/stylers/text_x-jade/syntax", ["orion/editor/stylers/lib/syn
 				captures: {
 					1: {name: "string.interpolated.js.jade"}
 				},
+				contentName: "source.js.embedded.jade",
 				patterns: [
 					{include: "orion.js"}
 				]
@@ -133,6 +137,7 @@ define("orion/editor/stylers/text_x-jade/syntax", ["orion/editor/stylers/lib/syn
 						endCaptures: {
 							2: {name: "meta.tag.jade"}
 						},
+						contentName: "source.js.embedded.jade",
 						patterns: [
 							{include: "orion.js"}
 						]
@@ -200,6 +205,7 @@ define("orion/editor/stylers/text_x-jade/syntax", ["orion/editor/stylers/lib/syn
 				endCaptures: {
 					2: {name: "meta.tag.jade"}
 				},
+				contentName: "source.js.embedded.jade",
 				patterns: [
 					{include: "orion.js"}
 				]

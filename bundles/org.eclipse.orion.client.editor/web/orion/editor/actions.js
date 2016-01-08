@@ -820,26 +820,37 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var textView = editor.getTextView();
 			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 			var model = editor.getModel();
-			var open = "/*", close = "*/", commentTags = new RegExp("/\\*" + "|" + "\\*/", "g"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-2$
-			var self = this;
+			var styleAccessor = editor.getStyleAccessor();
 			forEachSelection(this, false, function(selection, setText) {
-				var result = self._findEnclosingComment(model, selection.start, selection.end);
+				var open, close;
+				if (styleAccessor) {
+					var delimiters = styleAccessor.getBlockCommentDelimiters(selection.start);
+					open = delimiters[0];
+					close = delimiters[1];
+				} else {
+					/* fallback values */
+					open = "/*"; //$NON-NLS-0$
+					close = "*/"; //$NON-NLS-0$
+				}
+
+				var result = this._findEnclosingComment(model, selection.start, selection.end, open, close);
 				if (result.commentStart !== undefined && result.commentEnd !== undefined) {
 					return; // Already in a comment
 				}
-	
+
 				var text = model.getText(selection.start, selection.end);
 				if (text.length === 0) { return; }
 	
 				var oldLength = text.length;
-				text = text.replace(commentTags, "");
+				text = text.replace(open, "");
+				text = text.replace(close, "");
 				var newLength = text.length;
 				text = open + text + close;
 	
 				setText(text, selection.start, selection.end);
 				selection.start += open.length;
-				selection.end +=  open.length + (newLength-oldLength);
-			});
+				selection.end +=  open.length + (newLength - oldLength);
+			}.bind(this));
 			return true;
 		},
 		/**
@@ -996,43 +1007,44 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				var prevChar = (selection.start === 0) ? "" : model.getText(selection.start - 1, selection.start); //$NON-NLS-0$
 				var nextChar = (selection.start === model.getCharCount()) ? "" : model.getText(selection.start, selection.start + 1); //$NON-NLS-0$
 	
-				if ((prevChar === "(" && nextChar === ")") || //$NON-NLS-1$ //$NON-NLS-2$
-					(prevChar === "[" && nextChar === "]") || //$NON-NLS-1$ //$NON-NLS-2$
-					(prevChar === "{" && nextChar === "}") || //$NON-NLS-1$ //$NON-NLS-2$
-					(prevChar === "<" && nextChar === ">") || //$NON-NLS-1$ //$NON-NLS-2$
-					(prevChar === '"' && nextChar === '"') || //$NON-NLS-1$ //$NON-NLS-2$
-					(prevChar === "'" && nextChar === "'")) { //$NON-NLS-1$ //$NON-NLS-2$
+				if (prevChar === "(" && nextChar === ")" || //$NON-NLS-1$ //$NON-NLS-2$
+					prevChar === "[" && nextChar === "]" || //$NON-NLS-1$ //$NON-NLS-2$
+					prevChar === "{" && nextChar === "}" || //$NON-NLS-1$ //$NON-NLS-2$
+					prevChar === "<" && nextChar === ">" || //$NON-NLS-1$ //$NON-NLS-2$
+					prevChar === '"' && nextChar === '"' || //$NON-NLS-1$ //$NON-NLS-2$
+					prevChar === "'" && nextChar === "'") { //$NON-NLS-1$ //$NON-NLS-2$
 					setText("", selection.start, selection.start + 1); //$NON-NLS-0$
 				}
 			}, true);
 			return false;
 		},
-		_findEnclosingComment: function(model, start, end) {
-			var open = "/*", close = "*/"; //$NON-NLS-1$ //$NON-NLS-2$
+		_findEnclosingComment: function(model, start, end, open, close) {
 			var firstLine = model.getLineAtOffset(start);
 			var lastLine = model.getLineAtOffset(end);
 			var i, line, extent, openPos, closePos;
 			var commentStart, commentEnd;
-			for (i=firstLine; i >= 0; i--) {
+			for (i = firstLine; i >= 0; i--) {
 				line = model.getLine(i);
 				extent = (i === firstLine) ? start - model.getLineStart(firstLine) : line.length;
 				openPos = line.lastIndexOf(open, extent);
 				closePos = line.lastIndexOf(close, extent);
 				if (closePos > openPos) {
 					break; // not inside a comment
-				} else if (openPos !== -1) {
+				}
+				if (openPos !== -1) {
 					commentStart = model.getLineStart(i) + openPos;
 					break;
 				}
 			}
-			for (i=lastLine; i < model.getLineCount(); i++) {
+			for (i = lastLine; i < model.getLineCount(); i++) {
 				line = model.getLine(i);
 				extent = (i === lastLine) ? end - model.getLineStart(lastLine) : 0;
 				openPos = line.indexOf(open, extent);
 				closePos = line.indexOf(close, extent);
 				if (openPos !== -1 && openPos < closePos) {
 					break;
-				} else if (closePos !== -1) {
+				}
+				if (closePos !== -1) {
 					commentEnd = model.getLineStart(i) + closePos;
 					break;
 				}
@@ -1068,15 +1080,24 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var textView = editor.getTextView();
 			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 			var model = editor.getModel();
-			var open = "/*", close = "*/"; //$NON-NLS-1$ //$NON-NLS-2$
-			var self  = this;
+			var styleAccessor = editor.getStyleAccessor();
 			forEachSelection(this, false, function(selection, setText) {
+				var open, close;
+				if (styleAccessor) {
+					var delimiters = styleAccessor.getBlockCommentDelimiters(selection.start);
+					open = delimiters[0];
+					close = delimiters[1];
+				} else {
+					/* fallback values, should not be needed */
+					open = "/*"; //$NON-NLS-0$
+					close = "*/"; //$NON-NLS-0$
+				}
 
 				// Try to shrink selection to a comment block
 				var selectedText = model.getText(selection.start, selection.end);
 				var newStart, newEnd;
 				var i;
-				for(i=0; i < selectedText.length; i++) {
+				for (i = 0; i < selectedText.length; i++) {
 					if (selectedText.substring(i, i + open.length) === open) {
 						newStart = selection.start + i;
 						break;
@@ -1097,7 +1118,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					selection.end = newEnd;
 				} else {
 					// Otherwise find enclosing comment block
-					var result = self._findEnclosingComment(model, selection.start, selection.end);
+					var result = this._findEnclosingComment(model, selection.start, selection.end, open, close);
 					if (!(result.commentStart === undefined || result.commentEnd === undefined)) {
 						text = model.getText(result.commentStart + open.length, result.commentEnd);
 						setText(text, result.commentStart, result.commentEnd + close.length);
@@ -1105,19 +1126,27 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 						selection.end = selection.end - close.length;
 					}
 				}
-			});
+			}.bind(this));
 			return true;
 		},
 		toggleLineComment: function() {
 			var editor = this.editor;
 			var textView = editor.getTextView();
 			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-			var comment = this.lineComment || "//"; //$NON-NLS-0$
 			var model = editor.getModel();
+			var styleAccessor = editor.getStyleAccessor();
 			textView.setRedraw(false);
 			forEachSelection(this, true, function(selection, setText) {
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+
+				var comment;
+				if (styleAccessor) {
+					comment = styleAccessor.getLineCommentDelimiter(model.getLineStart(firstLine));
+				} else {
+					comment = "//"; /* fallback value */ //$NON-NLS-0$
+				}
+
 				var uncomment = true, lineIndices = [], index;
 				for (var i = firstLine; i <= lastLine; i++) {
 					var lineText = model.getLine(i, true);
@@ -1128,7 +1157,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					} else {
 						if (index !== 0) {
 							var j;
-							for (j=0; j<index; j++) {
+							for (j = 0; j < index; j++) {
 								var c = lineText.charCodeAt(j);
 								if (!(c === 32 || c === 9)) {
 									break;
@@ -1147,7 +1176,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					}
 					var lastLineStart = model.getLineStart(lastLine);
 					selStart = lineStart === selection.start ? selection.start : selection.start - l;
-					selEnd = selection.end - (l * (lastLine - firstLine + 1)) + (selection.end === lastLineStart+1 ? l : 0);
+					selEnd = selection.end - (l * (lastLine - firstLine + 1)) + (selection.end === lastLineStart + 1 ? l : 0);
 				} else {
 					for (k = lineIndices.length - 1; k >= 0; k--) {
 						index = model.getLineStart(firstLine + k);
@@ -1272,9 +1301,6 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		},
 		setAutoCompleteComments: function(enabled) {
 			this.autoCompleteComments = enabled;
-		},
-		setLineComment: function(lineComment) {
-			this.lineComment = lineComment;
 		},
 		setSmartIndentation: function(enabled) {
 			this.smartIndentation = enabled;

@@ -71,8 +71,8 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 					{include: "orion.lib#todo_comment_singleLine"}
 				]
 			}, {
-				begin: {match: "^=begin\\b", literal: "=begin"},
-				end: {match: "^=end\\b", literal: "=end"},
+				begin: {match: "^=begin\\b", literal: "\n=begin "},
+				end: {match: "^=end\\b", literal: "\n=end "},
 				name: "comment.block.ruby",
 				patterns: [
 					{

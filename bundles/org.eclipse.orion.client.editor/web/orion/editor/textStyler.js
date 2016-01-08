@@ -246,6 +246,23 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 					this._initPatterns(this._patternManager, newBlock);
 				}.bind(this));
 		},
+		getBlockCommentDelimiters: function(index) {
+			var languageBlock = this._getLanguageBlock(index);
+			var blockPatterns = languageBlock.blockPatterns;
+			if (blockPatterns) {
+				var COMMENT_BLOCK = "comment.block"; //$NON-NLS-0$
+				for (var i = 0; i < blockPatterns.length; i++) {
+					var current = blockPatterns[i].pattern;
+					var name = current.name || current.contentName;
+					if (name && name.indexOf(COMMENT_BLOCK) !== -1) {
+						if (current.begin && current.end && current.begin.literal && current.end.literal) {
+							return [current.begin.literal, current.end.literal];
+						}
+					}
+				}
+			}
+			return ["", ""];
+		},
 		getBlockContentStyleName: function(block) {
 			return block.pattern.pattern.contentName || block.pattern.pattern.name;
 		},
@@ -318,6 +335,35 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		},
 		getContentType: function() {
 			return this._contentType;
+		},
+		getLineCommentDelimiter: function(index) {
+			var COMMENT_LINE = "comment.line"; //$NON-NLS-0$
+			var languageBlock = this._getLanguageBlock(index);
+			var linePatterns = languageBlock.linePatterns;
+			if (linePatterns) {
+				for (var i = 0; i < linePatterns.length; i++) {
+					var current = linePatterns[i].pattern;
+					var name = current.name;
+					if (name && name.indexOf(COMMENT_LINE) !== -1) {
+						if (current.match && current.match.literal) {
+							return current.match.literal;
+						}
+					}
+				}
+			}
+			var blockPatterns = languageBlock.blockPatterns;
+			if (blockPatterns) {
+				for (i = 0; i < blockPatterns.length; i++) {
+					current = blockPatterns[i].pattern;
+					name = current.name || current.contentName;
+					if (name && name.indexOf(COMMENT_LINE) !== -1) {
+						if (current.begin && current.begin.literal) {
+							return current.begin.literal;
+						}
+					}
+				}
+			}
+			return "";
 		},
 		parse: function(text, offset, startIndex, block, _styles, ignoreCaptures) {
 			if (!text) {
@@ -413,8 +459,8 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				regex.lastIndex = regex.oldLastIndex;
 			});
 		},
-		/** @callback */
 		setStyler: function(styler) {
+			this._styler = styler;
 		},
 		verifyBlock: function(baseModel, text, ancestorBlock, changeCount) {
 			var result = null;
@@ -577,6 +623,21 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 					stringIndex += result[i].length;
 				}
 			}
+		},
+		_getLanguageBlock: function(index) {
+			/* Returns the parent block that dictates the language in effect at index */
+			var block = this._styler.getBlockAtIndex(index);
+			var embeddedNameRegex = /^source\..+\.embedded/;
+			while (block) {
+				if (block.pattern) {
+					var pattern = block.pattern.pattern;
+					if (embeddedNameRegex.test(pattern.name || pattern.contentName)) {
+						return block;
+					}
+				}
+				block = block.parent;
+			}
+			return this._styler.getRootBlock();
 		},
 		_initPatterns: function(patternManager, block) {
 			if (block.pattern && block.pattern.pattern.linePatterns) {
@@ -822,6 +883,12 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		this._styler = styler;
 	}
 	TextStylerAccessor.prototype = {
+		getBlockCommentDelimiters: function(offset) {
+			return this._styler.getBlockCommentDelimiters(offset);
+		},
+		getLineCommentDelimiter: function(offset) {
+			return this._styler.getLineCommentDelimiter(offset);
+		},
 		getStyles: function(offset) {
 			return this._styler.getStyles(offset);
 		}
@@ -924,6 +991,12 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		},
 		getBlockAtIndex: function(index) {
 			return this._findBlock(this._rootBlock, index);
+		},
+		getBlockCommentDelimiters: function(index) {
+			return this._stylerAdapter.getBlockCommentDelimiters(index);
+		},
+		getLineCommentDelimiter: function(index) {
+			return this._stylerAdapter.getLineCommentDelimiter(index);
 		},
 		getRootBlock: function() {
 			return this._rootBlock;

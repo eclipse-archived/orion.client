@@ -52,6 +52,7 @@ define("orion/editor/stylers/text_x-smarty/syntax", ["orion/editor/stylers/lib/s
 					1: "punctuation.brace.begin.smarty",
 					2: "punctuation.brace.end.smarty"
 				},
+				contentName: "source.php.embedded.smarty",
 				patterns: [
 					{include: "orion.php-core"}
 				]

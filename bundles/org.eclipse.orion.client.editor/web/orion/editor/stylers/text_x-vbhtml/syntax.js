@@ -50,6 +50,7 @@ define("orion/editor/stylers/text_x-vbhtml/syntax", [
 			},
 			expression: {
 				match: "(?i)^\\s*@(?!code)[^$]*",
+				name: "source.vb.embedded.vbhtml",
 				patterns: [
 				    {include: "#reference"},
 					{include: "orion.vb"},

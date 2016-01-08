@@ -460,6 +460,10 @@ define([
 			this._blocksCache[result.elementId] = result;
 			return result;
 		},
+		/** @callback */
+		getBlockCommentDelimiters: function(index) {
+			return ["", ""];
+		},
 		getBlockContentStyleName: function(block) {
 			return block.name;
 		},
@@ -508,6 +512,10 @@ define([
 					return classList[i];
 				}
 			}
+			return "";
+		},
+		/** @callback */
+		getLineCommentDelimiter: function(index) {
 			return "";
 		},
 		initialPopulatePreview: function() {

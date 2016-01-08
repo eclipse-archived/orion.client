@@ -441,7 +441,8 @@ define([
 				contentAssistFactory: contentAssistFactory,
 				keyBindingFactory: keyBindingFactory,
 				statusReporter: this.statusReporter,
-				domNode: this._parent
+				domNode: this._parent,
+				syntaxHighlighter: this.syntaxHighlighter
 			});
 			editor.id = "orion.editor"; //$NON-NLS-0$
 			editor.processParameters = function(params) {

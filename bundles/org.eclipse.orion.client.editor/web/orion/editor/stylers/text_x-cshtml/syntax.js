@@ -50,6 +50,7 @@ define("orion/editor/stylers/text_x-cshtml/syntax", [
 			},
 			expression: {
 				match: "^\\s*@[^{]*$",
+				name: "source.csharp.embedded.cshtml",
 				patterns: [
 				    {include: "#reference"},
 					{include: "orion.csharp"},

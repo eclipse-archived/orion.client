@@ -75,7 +75,7 @@ define("orion/editor/stylers/text_x-erlang/syntax", ["orion/editor/stylers/lib/s
 		],
 		repository: {
 			comment: {
-				match: "%.*",
+				match: {match: "%.*", literal: "%"},
 				name: "comment.line.erlang",
 				patterns: [
 					{

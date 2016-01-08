@@ -77,8 +77,8 @@ define("orion/editor/stylers/text_x-csharp/syntax", ["orion/editor/stylers/lib/s
 		],
 		repository: {
 			doc_block: {
-				begin: {match: "/\\*\\*", literal: "/**"},
-				end: {match: "\\*/", literal: "*/"},
+				begin: "/\\*\\*",
+				end: "\\*/",
 				name: "comment.block.documentation.csharp",
 				patterns: [
 					{
@@ -95,7 +95,7 @@ define("orion/editor/stylers/text_x-csharp/syntax", ["orion/editor/stylers/lib/s
 				]
 			},
 			doc_line: {
-				match: {match: "// /.*", literal: "// /"},
+				match: "// /.*",
 				name: "comment.line.documentation.csharp",
 				patterns: [
 					{
