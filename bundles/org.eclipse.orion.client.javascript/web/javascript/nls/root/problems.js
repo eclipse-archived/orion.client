@@ -123,7 +123,9 @@ define({
 	'no-irregular-whitespace-description' : 'No irregular whitespace:',
 	'no-self-assign-description' : 'Disallow self assignment',
 	'no-self-assign' : 'Assigning to itself is pointless.',
-	
+	'type-checked-consistent-return-description' : 'Detect inconsistent return values',
+	'inconsistent-return' : 'Inconsistent return types: \'{{type1}}\', \'{{type2}}\'',
+
 	//.tern-project file validation messages
 	'notNum': "'${0}' must be a number",
 	'notArray': "'${0}' must be an array of strings",
