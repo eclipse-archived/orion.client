@@ -94,10 +94,7 @@ define([
 	            this.registry.getService("orion.page.progress"). progress(this.fileClient.read(parentItem.location), "Getting file contents " + parentItem.name).then( //$NON-NLS-1$ //$NON-NLS-2$
 	
 	            function(jsonData) {
-	                mSearchUtils.searchWithinFile(this._searchHelper.inFileQuery, parentItem, jsonData, this.replaceMode(), this._searchHelper.params.caseSensitive);
-	                if (this.onMatchNumberChanged) {
-	                    this.onMatchNumberChanged(parentItem);
-	                }
+	            	this._generateChildren(parentItem, jsonData);
 	                onComplete(parentItem.children);
 	            }.bind(this),
 	            function(error) {
@@ -226,9 +223,8 @@ define([
 	 					if(aC === bC) {
 	 						if(a.location === b.location) {
 	 							return a.lineNumber - b.lineNumber;
-	 						} else {
-	 							return a.logicalParent.name - b.logicalParent.name;
 	 						}
+	 						return a.logicalParent.name - b.logicalParent.name;
 	 					}
 						return bC - aC;
 					});
@@ -279,12 +275,11 @@ define([
             	fileNode.children = newChildren;
             }
             //this._location2ModelMap[fileNode.location] = fileNode;
-            if(!children || (fileNode.children && fileNode.children.length > 0)) {
+            if(fileNode.children && fileNode.children.length > 0 || !children ) {
 	            this.getListRoot().children.push(fileNode);
 	            this._indexedFileItems.push(fileNode);
         	}
 	    },
-	    
 	    _match2Category: function _match2Category(match) {
 			var hasOne = this.getListRoot().children[0];
 			this.getListRoot().children.some(function(element){
@@ -296,7 +291,6 @@ define([
 			}, this);
 	    	return hasOne;
 	    },
-	    
 	    _getLogicalFileNode: function _getLogicalFileNode(fileResult) {
 			var hasOne = null;
 			this._indexedFileItems.some(function(element){
@@ -320,6 +314,53 @@ define([
 	            this._indexedFileItems.push(hasOne);
 	    	}
 	    	return hasOne;
+	    },
+	    _generateChildren: function _generateChildren(fileNode, fileContents){
+            mSearchUtils.searchWithinFile(this._searchHelper.inFileQuery, fileNode, fileContents, this.replaceMode(), this._searchHelper.params.caseSensitive, false, !this.replaceMode());
+        	if(!this.replaceMode()) {
+	        	var children = fileNode.children;
+	        	var newChildren = [];
+	        	children.forEach(function(child) {
+					for(var j = 0; j < child.matches.length; j++){
+	    				if(!this._filterOnMatch(child.matches[j])) {
+	    					continue;
+	    				}
+						var matchNumber = j+1;
+						var newMatch = {parent: fileNode, matches: child.matches, lineNumber: child.lineNumber, matchNumber: matchNumber, 
+							type: "detail", //$NON-NLS-1$
+							start: child.matches[j].start, end: child.matches[j].end, name: child.name, location: fileNode.location
+						};
+						newChildren.push(newMatch);
+					}
+	        	}.bind(this));
+	            fileNode.children = newChildren;
+        	}
+            if (this.onMatchNumberChanged) {
+                this.onMatchNumberChanged(fileNode);
+            }
+	    },
+	    _findFileNode: function _findFileNode(fileLocation) {
+	    	var fileNode;
+	    	if(this._indexedFileItems) {
+				this._indexedFileItems.some(function(element){
+					if (element.location === fileLocation) {
+						fileNode = element;
+						return true;
+					}				
+					return false;
+				});
+	    	}
+	    	if(fileNode && !fileNode.children) {
+	            return this.fileClient.read(fileLocation).then(
+		            function(jsonData) {
+		            	this._generateChildren(fileNode, jsonData);
+		                return new Deferred().resolve(fileNode);
+		            }.bind(this),
+		            function(error) {
+		            	this.registry.getService("orion.page.message").setProgressResult({Message: error.message, Severity: "Error"}); //$NON-NLS-1$ //$NON-NLS-2$
+		            }.bind(this));
+	    	}
+	    	return new Deferred().resolve(fileNode);
 	    },
 	    _filterOnMatch: function _filterOnMatch(match) {
 	    	if(!this._matchFilter) {
@@ -377,7 +418,7 @@ define([
     	 * @override
     	 */
     	replaceMode: function replaceMode() {
-	        return (typeof this._searchHelper.params.replace === "string"); //$NON-NLS-0$
+	        return typeof this._searchHelper.params.replace === "string"; //$NON-NLS-0$
 	    },
 	    /**
     	 * @description Get the paging paramerterss. Required function.
@@ -392,8 +433,8 @@ define([
     	getPagingParams: function getPagingParams() {
 	        return {
 	            totalNumber: this._totalNumber,
-	            start: (typeof this._searchHelper.params.start === "undefined" ? 0 : this._searchHelper.params.start),
-	            rows: (typeof this._searchHelper.params.rows === "undefined" ? this._totalNumber : this._searchHelper.params.rows),
+	            start: typeof this._searchHelper.params.start === "undefined" ? 0 : this._searchHelper.params.start,
+	            rows: typeof this._searchHelper.params.rows === "undefined" ? this._totalNumber : this._searchHelper.params.rows,
 	            numberOnPage: this._numberOnPage
 	        };
 	    },
@@ -440,7 +481,7 @@ define([
     	getDetailInfo: function getDetailInfo(modelItem) {
     		var lineString = modelItem.lineString ? modelItem.lineString : modelItem.name;
     		var matches = Array.isArray(modelItem.matches) ? modelItem.matches : modelItem.parent.children;
-			return {lineString: lineString, lineNumber: modelItem.lineNumber-1, matches: matches, matchNumber: (modelItem.matchNumber ? modelItem.matchNumber - 1 : 0)};
+			return {lineString: lineString, lineNumber: modelItem.lineNumber-1, matches: matches, matchNumber: modelItem.matchNumber ? modelItem.matchNumber - 1 : 0};
 	    },
 	    /**
     	 * @description Returns the file name from the given item or undefined if one has not been set
@@ -532,32 +573,30 @@ define([
     					res = res.substring(idx+1);
     				}
     				return i18nUtil.formatMessage(messages['refsInProject'], {0: total, 1: this._searchHelper.displayedSearchTerm, 2: decodeURIComponent(res)});
-    			} else {
-    				return i18nUtil.formatMessage(messages['refsInWorkspace'], {0: total, 1: this._searchHelper.displayedSearchTerm});
     			}
-    		} else {
-		        var headerStr = messages["Results"]; //$NON-NLS-0$
-		        if (this._searchHelper.displayedSearchTerm) {
-		            var pagingParams = this.getPagingParams();
-		            if (pagingParams.numberOnPage > 0) {
-		                var startNumber = pagingParams.start + 1;
-		                var endNumber = startNumber + pagingParams.numberOnPage - 1;
-		                headerStr = "";
-		                if (!this.replaceMode()) {
-		                    headerStr = i18nUtil.formatMessage(messages["FilesAofBmatchingC"],
-		                    startNumber + "-" + endNumber, pagingParams.totalNumber, this._searchHelper.displayedSearchTerm); //$NON-NLS-0$
-		                } else {
-		                    headerStr = i18nUtil.formatMessage(messages["ReplaceAwithBforCofD"],
-		                    this._searchHelper.displayedSearchTerm,
-		                    this._searchHelper.params.replace,
-		                    startNumber + "-" + endNumber, //$NON-NLS-0$
-		                    pagingParams.totalNumber);
-		                }
-		            }
-		        }
-		        return headerStr;
-        	}	
-	    },
+    			return i18nUtil.formatMessage(messages['refsInWorkspace'], {0: total, 1: this._searchHelper.displayedSearchTerm});
+    		}
+	        var headerStr = messages["Results"]; //$NON-NLS-0$
+	        if (this._searchHelper.displayedSearchTerm) {
+	            var pagingParams = this.getPagingParams();
+	            if (pagingParams.numberOnPage > 0) {
+	                var startNumber = pagingParams.start + 1;
+	                var endNumber = startNumber + pagingParams.numberOnPage - 1;
+	                headerStr = "";
+	                if (!this.replaceMode()) {
+	                    headerStr = i18nUtil.formatMessage(messages["FilesAofBmatchingC"],
+	                    startNumber + "-" + endNumber, pagingParams.totalNumber, this._searchHelper.displayedSearchTerm); //$NON-NLS-0$
+	                } else {
+	                    headerStr = i18nUtil.formatMessage(messages["ReplaceAwithBforCofD"],
+	                    this._searchHelper.displayedSearchTerm,
+	                    this._searchHelper.params.replace,
+	                    startNumber + "-" + endNumber, //$NON-NLS-0$
+	                    pagingParams.totalNumber);
+	                }
+	            }
+	        }
+	        return headerStr;
+ 	    },
 	    /**
     	 * @description The function to return the list of valid files. Optional.
      	 * If not defined, this.getListRoot().children is used.
@@ -645,19 +684,18 @@ define([
     SearchResultModel.prototype._provideFileContent = function(fileItem) {
         if (fileItem.contents) {
             return new Deferred().resolve(fileItem);
-        } else {
-            return this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location), "Getting file contents " + fileItem.Name).then( //$NON-NLS-1$ //$NON-NLS-2$
-
-            function(jsonData) {
-                mSearchUtils.searchWithinFile(this._searchHelper.inFileQuery, fileItem, jsonData, this.replaceMode(), this._searchHelper.params.caseSensitive);
-                return fileItem;
-            }.bind(this),
-
-            function(error) {
-                this.registry.getService("orion.page.message").setProgressResult({Message: error.message, Severity: "Error"}); //$NON-NLS-1$ //$NON-NLS-2$
-                return fileItem;
-            }.bind(this));
         }
+        return this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location), "Getting file contents " + fileItem.Name).then( //$NON-NLS-1$ //$NON-NLS-2$
+
+        function(jsonData) {
+            mSearchUtils.searchWithinFile(this._searchHelper.inFileQuery, fileItem, jsonData, this.replaceMode(), this._searchHelper.params.caseSensitive);
+            return fileItem;
+        }.bind(this),
+
+        function(error) {
+            this.registry.getService("orion.page.message").setProgressResult({Message: error.message, Severity: "Error"}); //$NON-NLS-1$ //$NON-NLS-2$
+            return fileItem;
+        }.bind(this));
     };    
 
     /*** Internal model functions ***/
@@ -668,7 +706,7 @@ define([
 
     SearchResultModel.prototype._filterSingleString = function(stringToFilter, keyword) {
         var lowerCaseStr = stringToFilter.toLowerCase();
-        return (lowerCaseStr.indexOf(keyword) >= 0 );
+        return lowerCaseStr.indexOf(keyword) >= 0;
     };
 
     SearchResultModel.prototype._model2Index = function(model, list) {
@@ -694,7 +732,7 @@ define([
                 this.defaultReplaceStr = defaultReplaceStr;
             }
         }
-        this.sortByName = (this._provideSearchHelper().params.sort.indexOf("Name") > -1); //$NON-NLS-0$
+        this.sortByName = this._provideSearchHelper().params.sort.indexOf("Name") > -1; //$NON-NLS-0$
     };
 
     SearchResultModel.prototype._storeGlobalStatus = function(replacingStr) {
@@ -745,9 +783,8 @@ define([
                    }
                }.bind(this));
            }.bind(this));
-       } else {
-           return new Deferred().resolve(fileItem);
-       }	
+       }
+       return new Deferred().resolve(fileItem);
 	};    
    
     SearchResultModel.prototype._matchesReplaced = function(model) {
@@ -771,6 +808,12 @@ define([
         	model.children.splice(index, 1);
         	item.stale = true;
         }
+    };
+
+    SearchResultModel.prototype.findFileNode = function(fileLocation) {
+    	return this._findFileNode(fileLocation).then(function(fileNode){
+    		return fileNode;
+    	});
     };
 
     SearchResultModel.prototype.constructor = SearchResultModel;

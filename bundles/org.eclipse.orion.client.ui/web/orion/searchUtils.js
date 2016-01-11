@@ -430,9 +430,9 @@ searchUtils.splitFile = function(text) {
 	return splitLines;
 };
 
-searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContentText, replacing, caseSensitive, noContext){
+searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContentText, replacing, caseSensitive, noContext, useTextModel){
 	var textModel;
-	if(noContext) {
+	if(noContext || useTextModel) {
 		textModel = new mTextModel.TextModel(fileContentText);
 	}
 	var fileContents = searchUtils.splitFile(fileContentText);

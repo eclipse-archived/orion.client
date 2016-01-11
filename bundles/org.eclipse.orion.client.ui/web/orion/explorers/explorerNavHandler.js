@@ -809,7 +809,7 @@ exports.ExplorerNavHandler = (function() {
 		 * 			"disabledNavRow" class, false otherwise
 		 */
 		isDisabled: function(rowDiv) {
-			return rowDiv.classList.contains("disabledNavRow"); //$NON-NLS-0$
+			return rowDiv ? rowDiv.classList.contains("disabledNavRow") : true; //$NON-NLS-0$
 		},
 		
 		/**

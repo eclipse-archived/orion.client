@@ -320,7 +320,8 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				commandRegistry: this.commandRegistry,
 				fileClient: this.fileClient,
 				searcher: this.searcher,
-				preferences: this.preferences
+				preferences: this.preferences,
+				inputManager: this.editorInputManager
 			});
 			
 			this._lastSearchRoot = null;

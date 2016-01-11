@@ -12,12 +12,16 @@
 define(['i18n!orion/search/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 
 	'orion/commands', 'orion/searchUtils', 'orion/compare/compareView', 
 	'orion/highlight', 'orion/webui/tooltip', 'orion/explorers/navigatorRenderer', 'orion/extensionCommands',
-	'orion/searchModel', 'orion/explorers/fileDetailRenderer'
+	'orion/searchModel', 'orion/explorers/fileDetailRenderer',
+	'orion/extensionCommands',
+	'orion/objects'
 ],
 function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands, 
 	mSearchUtils, mCompareView, mHighlight, mTooltip, 
-	navigatorRenderer, extensionCommands, mSearchModel, mFileDetailRenderer
+	navigatorRenderer, extensionCommands, mSearchModel, mFileDetailRenderer,
+	mExtensionCommands, objects
 ) {
+	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
     /* Internal wrapper functions*/
     function _empty(nodeToEmpty) {
         var node = lib.node(nodeToEmpty);
@@ -150,32 +154,84 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
 		}
 	};
 	
+	SearchResultRenderer.prototype._ctrlKeyOn = function(e){
+		return isMac ? e.metaKey : e.ctrlKey;
+	};
+	
+	SearchResultRenderer.prototype._createLink = function(modelItem, item, commandService, openWithCommands, linkProperties, helper) {
+		// TODO FIXME folderPageURL is bad; need to use URITemplates here.
+		// TODO FIXME refactor the async href calculation portion of this function into a separate function, for clients who do not want the <A> created.
+		item = objects.clone(item);
+		var link;
+		var linkName = item.Name || '';
+		if (!openWithCommands) {
+			openWithCommands = mExtensionCommands.getOpenWithCommands(commandService);
+		}
+		link = document.createElement("a"); //$NON-NLS-0$
+		link.className= "navlink targetSelector"; //$NON-NLS-0$
+		if (linkProperties && typeof linkProperties === "object") { //$NON-NLS-0$
+			Object.keys(linkProperties).forEach(function(property) {
+				link[property] = linkProperties[property];
+			});
+		}
+		if(item.Name){
+			link.appendChild(document.createTextNode(linkName));
+		}
+		link.href = "javascript:void(0)";
+		link.addEventListener("click", function(evt) { //$NON-NLS-0$
+			var href = item.Location;
+			var uriParams; 
+	        if(typeof modelItem.start === "number" && typeof modelItem.end === "number") {
+	        	uriParams = {start: modelItem.start, end: modelItem.end};
+	        } else {
+				uriParams = helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, modelItem.lineNumber, helper.params.replace, true) : null;
+			}
+			if (uriParams && typeof uriParams === "object") { //$NON-NLS-0$
+				item.params = {};
+				objects.mixin(item.params, uriParams);
+			}
+			var openWithCommand = mExtensionCommands.getOpenWithCommand(commandService, item, openWithCommands);
+			if (openWithCommand && typeof openWithCommand.hrefCallback === 'function') {
+				href = openWithCommand.hrefCallback({items: item});
+			}
+			if(this._ctrlKeyOn(evt)){
+				window.open(href);
+			} else {
+				window.location.href = href;
+			}
+		}.bind(this), false);
+		return link;
+	};
+        
     SearchResultRenderer.prototype.generateDetailLink = function(item) {
         var helper = null;
         if (this.explorer.model._provideSearchHelper) {
             helper = this.explorer.model._provideSearchHelper();
         }
-       
-        var params;
-        if(typeof item.start === "number" && typeof item.end === "number") {
-        	params = {start: item.start, end: item.end};
-        } else {
-			params = helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, item.lineNumber, helper.params.replace, true) : null;
-		}
-		//var name = item.parent.name;
 		var loc = item.location;
 		if(!loc) {
 			item.parent.location ? item.parent.location : '#';
 		}
-		var link = navigatorRenderer.createLink(null, 
+//      var params;
+//      if(typeof item.start === "number" && typeof item.end === "number") {
+//        	params = {start: item.start, end: item.end};
+//      } else {
+//			params = helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, item.lineNumber, helper.params.replace, true) : null;
+//		}
+//		var link = navigatorRenderer.createLink(null, 
+//			{Location: loc/*, Name: name*/}, 
+//			this.explorer._commandService, 
+//			this.explorer._contentTypeService,
+//			this.explorer._openWithCommands, 
+//			{id:this.getItemLinkId(item)}, 
+//			params, 
+//			{});
+		var link = this._createLink(item, 
 			{Location: loc/*, Name: name*/}, 
 			this.explorer._commandService, 
-			this.explorer._contentTypeService,
 			this.explorer._openWithCommands, 
 			{id:this.getItemLinkId(item)}, 
-			params, 
-			{});
-		//link.removeChild(link.firstChild); //remove file name from link
+			helper);
 		return link;
 	};
 	
@@ -1230,25 +1286,27 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
 			window.setTimeout(function() {
 				this.expandAll(null, ["partial"]); //$NON-NLS-1$
 			}.bind(this), 10);
-			return;
+			return new Deferred().resolve(searchResult);
 		}
 		this._cacheSearchResult = null;
 		//If there is no search keyword defined, then we treat the search just as the scope change.
 		if(typeof searchParams.keyword === "undefined"){
-			return;
+			return new Deferred().resolve([]);
 		}
 		this.registry.getService("orion.page.message").setProgressMessage(messages["Searching..."]); //$NON-NLS-1$
 		var searchClient = this._searcher;
-		searchClient.search(searchParams).then(function(searchResult) {
+		return searchClient.search(searchParams).then(function(searchResult) {
 			this.registry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-1$
 			if(searchResult) {
 				this._renderSearchResult(resultsNode, searchParams, searchResult);
 			}
+			return searchResult;
 		}.bind(this), function(error) {
 			var message = i18nUtil.formatMessage(messages["${0}. Try your search again."], error && error.error ? error.error : "Error"); //$NON-NLS-1$
 			this.registry.getService("orion.page.message").setProgressResult({Message: message, Severity: "Error"}); //$NON-NLS-1$ //$NON-NLS-2$
 		}.bind(this), function(jsonData, incremental) {
 			this._renderSearchResult(resultsNode, searchParams, searchClient.convert(jsonData, searchParams), incremental);
+			return searchResult;
 		}.bind(this));
 	};
 
@@ -1261,9 +1319,18 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
 	 */
 	InlineSearchResultExplorer.prototype.runSearch = function(searchParams, parentNode, searchResult) {
 		var _parent = lib.node(parentNode);
-		this._search(_parent, searchParams, searchResult);
+		return this._search(_parent, searchParams, searchResult);
 	};
 
+    InlineSearchResultExplorer.prototype.findFileNode = function(fileLocation) {
+    	if(this.model) {
+	    	return this.model.findFileNode(fileLocation).then(function(fileNode){
+	    		return fileNode;
+	    	});
+    	}
+		return new Deferred().resolve();
+    };
+    
     InlineSearchResultExplorer.prototype.constructor = InlineSearchResultExplorer;
     
     //return module exports

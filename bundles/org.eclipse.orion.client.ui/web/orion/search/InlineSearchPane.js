@@ -24,6 +24,8 @@ define([
 	objects, lib, InlineSearchPaneTemplate, InlineSearchResultExplorer, 
 	mSearchUtils, Deferred, DirectoryPrompterDialog, ComboTextInput, messages, mSlideout
 ) {
+	var SearchAnnoTypes = {};
+	SearchAnnoTypes.ANNO_SEARCH_HIT = "orion.annotation.search.hit"; //$NON-NLS-0$
 	var SlideoutViewMode = mSlideout.SlideoutViewMode;
 	/**
 	 * @param {orion.webui.Slideout} slideout
@@ -36,6 +38,7 @@ define([
 		this._fileClient = options.fileClient;
 		this._searcher = options.searcher;
 		this._preferences = options.preferences;
+		this._inputManager = options.inputManager;
 		this._initialize();
 	}
 	InlineSearchPane.prototype = Object.create(SlideoutViewMode.prototype);
@@ -74,6 +77,11 @@ define([
 			this._initHTMLLabels();
 			
 			this._slideout.getContentNode().removeChild(this._searchWrapper); // detach wrapper now that initialization is done, see getContentNode().appendChild() call above
+			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
+				if(evt.metadata && !evt.metadata.Directory) {
+					this._generateAnnotations(evt.metadata.Location, evt.editor);
+				}
+			}.bind(this));
 		},
 		
 		isVisible: function() {
@@ -91,7 +99,7 @@ define([
 				window.document.title = this.previousDocumentTitle;
 			}
 			SlideoutViewMode.prototype.hide.call(this);
-			if(this._filledResult) {
+			//if(this._filledResult) {
 				this._showSearchOptBLocks();	
 				this._hideReplaceField();
 				this._searchBox.show();
@@ -101,7 +109,7 @@ define([
 				lib.empty(lib.node("searchPageActions"));
 				lib.empty(lib.node("searchPageActionsRight"));
 				lib.empty(this._searchResultsWrapperDiv);
-			}
+			//}
 			this.hideReplacePreview();
 		},
 		
@@ -139,11 +147,35 @@ define([
 			this._submitSearch();
 		},
 		
+		_generateAnnotations: function(fileLocation, editor) {
+			this._searchResultExplorer.findFileNode(fileLocation).then(function(fileNode) {
+				if(fileNode && fileNode.children && editor) {
+					var annotationModel = editor.getAnnotationModel();
+					annotationModel.removeAnnotations(SearchAnnoTypes.ANNO_SEARCH_HIT);
+					fileNode.children.forEach(function(match) {
+						match.type = SearchAnnoTypes.ANNO_SEARCH_HIT;
+						annotationModel.addAnnotation(match);
+					});
+				}
+			}.bind(this));
+		},
+		
+		_initAnnotations: function() {
+			if(this._inputManager && this._inputManager.inputManager) {
+				var fMeta = this._inputManager.inputManager.getFileMetadata();
+				if(fMeta && !fMeta.Directory) {
+					this._generateAnnotations(fMeta.Location, this._inputManager.inputManager.editor);
+				}
+			}
+		},
+		
 		fillSearchResult: function(searchResult) {
 			this._filledResult = searchResult;
 			this._showReplaceField();
 			this._hideSearchOptBLocks();	
-			this._searchResultExplorer.runSearch(searchResult.searchParams, this._searchResultsWrapperDiv, searchResult);
+			this._searchResultExplorer.runSearch(searchResult.searchParams, this._searchResultsWrapperDiv, searchResult).then(function() {
+				this._initAnnotations();
+			}.bind(this));
 		},
 				
 		_submitSearch: function(){
@@ -153,7 +185,9 @@ define([
 				this._searchBox.addTextInputValueToRecentEntries();
 				this._fileNamePatternsBox.addTextInputValueToRecentEntries();
 				var searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
-				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv);
+				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv).then(function() {
+					this._initAnnotations();
+				}.bind(this));
 				this._hideSearchOptions();
 			}
 		},
