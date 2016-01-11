@@ -102,8 +102,14 @@ define([
 			var detailsDiv = document.createElement("td"); //$NON-NLS-0$
 			detailsDiv.className = "gitCommitDetailsCell"; //$NON-NLS-0$
 			row.appendChild(detailsDiv);
-	
+
 			var headerMessage = util.trimCommitMessage(commit.Message);
+			var headerMessageSplit = headerMessage.split(" ");
+			var bugID ="null";
+			if(headerMessageSplit[0] === "Bug"){
+				bugID = headerMessageSplit[1];
+			}
+
 			var displayMessage = this.showMessage === undefined || this.showMessage;
 			if (displayMessage) {
 				var link;
@@ -144,6 +150,16 @@ define([
 				}
 				detailsDiv.appendChild(fullMessage);
 			}
+			
+
+			if(bugID !== "null"){
+				var bugzillaLink = document.createElement("a");
+				bugzillaLink.className = "navlinkonpage";
+				bugzillaLink.href = "https://bugs.eclipse.org/bugs/show_bug.cgi?id=" + bugID;
+				bugzillaLink.appendChild(document.createTextNode("Bugzilla Link"));
+				detailsDiv.appendChild(bugzillaLink);						
+			}
+
 			
 			var displayAuthor = this.showAuthor === undefined || this.showAuthor;
 			var displayCommitter = this.showCommitter === undefined || this.showCommitter;
