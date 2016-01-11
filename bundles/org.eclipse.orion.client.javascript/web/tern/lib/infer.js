@@ -185,7 +185,11 @@
           matches.push(obj);
         }
         var canon = canonicalType(matches);
-        if (canon) {guessing = true; return canon;}
+        if (canon) {
+        		guessing = true;
+        		canon.potentialMatches = matches; //ORION
+        		return canon;
+        	}
       }
     },
 
@@ -1463,7 +1467,23 @@
     },
     MemberExpression: function(node, scope) {
       var propN = propName(node, scope), obj = findType(node.object, scope).getType();
-      if (obj) return obj.getProp(propN);
+      if (obj) {
+      	//ORION
+    		var currentMatch = obj.getProp(propN);
+      	if (guessing && typeof obj.potentialMatches !== "undefined") {
+      		var potentialMatches = obj.potentialMatches;
+      		var matchesProp = [];
+        		for(var i = 0; i < potentialMatches.length; i++) {
+        			var match = potentialMatches[i];
+        			var propMatch = match.getProp(propN);
+        			if (typeof propMatch !== "undefined") {
+        				matchesProp.push(propMatch);
+        			}
+        		}
+ 			currentMatch.potentialMatches = matchesProp;
+      	}
+      	return currentMatch;
+      }
       if (propN == "<i>") return ANull;
       return findByPropertyName(propN);
     },
