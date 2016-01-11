@@ -128,9 +128,9 @@ define([
 	            if(typeof item.matchNumber === "number") {
 	            	result = result + "-" + item.matchNumber;
 	            }
-	            if(typeof item.start === "number") {
-	            	result = result + "-" + item.start;
-	            }
+//	            if(typeof item.start === "number") {
+//	            	result = result + "-" + item.start;
+//	            }
 	        }
 	        return result;
 	    },
