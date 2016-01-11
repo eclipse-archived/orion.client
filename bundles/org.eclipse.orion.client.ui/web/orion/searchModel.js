@@ -254,14 +254,23 @@ define([
             	var newChildren = [];
             	children.forEach(function(child) {
 					for(var j = 0; j < child.matches.length; j++){
-	    				if(!this._filterOnMatch(child.matches[j])) {
+						var newMatch = child.matches[j];
+	    				if(!this._filterOnMatch(newMatch)) {
 	    					continue;
 	    				}
 						var matchNumber = j+1;
-						var newMatch = {confidence: child.matches[j].confidence, parent: fileNode, matches: child.matches, lineNumber: child.lineNumber, matchNumber: matchNumber, 
-							checked: child.matches[j].confidence === 100 ? true: false, type: "detail", //$NON-NLS-1$
-							start: child.matches[j].start, end: child.matches[j].end, name: child.name, location: fileNode.location
-						};
+						newMatch.parent = fileNode;
+						newMatch.matches = child.matches;
+						newMatch.lineNumber = child.lineNumber;
+						newMatch.matchNumber = matchNumber;
+						newMatch.checked = newMatch.confidence === 100 ? true: false	;
+						newMatch.type = "detail";
+						newMatch.name = child.name;
+						newMatch.location = fileNode.location;
+//						var newMatch = {confidence: child.matches[j].confidence, parent: fileNode, matches: child.matches, lineNumber: child.lineNumber, matchNumber: matchNumber, 
+//							checked: child.matches[j].confidence === 100 ? true: false, type: "detail", //$NON-NLS-1$
+//							start: child.matches[j].start, end: child.matches[j].end, name: child.name, location: fileNode.location
+//						};
 						newChildren.push(newMatch);
 					}
             	}.bind(this));
