@@ -342,9 +342,16 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
         if (state.pos + match[0].length !== Parser.re_parseAttr_findValue.lastIndex) {
             return null;
         }
+        
+        // TODO ORION 11.0 Mark an empty attribute value as empty string, not undefined (Bug 483924)
+        var value = match[1] || match[2] || match[3];
+        if (!value && typeof match[2] === 'string'){
+        	value = "";
+    	}
+
         return {
               match: match[0]
-            , value: match[1] || match[2] || match[3]
+            , value: value
             };
     };
     Parser.re_parseAttr_splitValue = /\s*=\s*['"]?/g;

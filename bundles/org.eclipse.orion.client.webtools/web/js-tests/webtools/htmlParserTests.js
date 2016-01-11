@@ -117,6 +117,57 @@ define([
 		    	'[{"type":"tag","range":[1,59],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,22],"type":"attr"},"alt":{"value":"foo","range":[26,35],"type":"attr"},"bogus":{"value":"bogus","range":[41,52],"type":"attr"}}}]'
 		    );
 		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=483294
+		 * @since 11.0
+		 */
+		it("Parse attribute value - text value", function() {
+			var results = parse('<img src="test"/>');
+		    assertResults(results, 
+		    	'[{"type":"tag","range":[1,16],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,15],"type":"attr"}}}]'
+		    );
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=483294
+		 * @since 11.0
+		 */
+		it("Parse attribute value - empty string", function() {
+			var results = parse('<img src=""/>');
+		    assertResults(results, 
+		    	'[{"type":"tag","range":[1,12],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"","range":[5,11],"type":"attr"}}}]'
+		    );
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=483294
+		 * @since 11.0
+		 */
+		it("Parse attribute value - no quotes", function() {
+			var results = parse('<img src=test/>');
+		    assertResults(results, 
+		    	'[{"type":"tag","range":[1,14],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,13],"type":"attr"}}}]'
+		    );
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=483294
+		 * @since 11.0
+		 * TODO Note that the lack of quotes means the tag close gets treated as the value, not optimal
+		 */
+		it("Parse attribute value - only equals", function() {
+			var results = parse('<img src= />');
+		    assertResults(results, 
+		    	'[{"type":"tag","range":[1,5],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"/>","range":[5,12],"type":"attr"}}}]'
+		    );
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=483294
+		 * @since 11.0
+		 */
+		it("Parse attribute value - no value", function() {
+			var results = parse('<img src/>');
+		    assertResults(results, 
+		    	'[{"type":"tag","range":[1,9],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":null,"range":[5,8],"type":"attr"}}}]'
+		    );
+		});
 	});
 	
 	describe("HTML Recoverable Parsing Tests", function() {

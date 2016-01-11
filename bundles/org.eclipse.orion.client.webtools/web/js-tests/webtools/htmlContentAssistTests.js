@@ -887,6 +887,61 @@ define([
 //    		});
 //    	});
     	// TODO HTML5 does not require lower case tags/attributes, our templates require lower case
+    	/*
+    	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=483924
+    	 */
+    	it('Attribute completions ignore existing value entries 1', function() {
+    		var _o = setup({buffer: '<html><a styl="blah"></a></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 13, prefix: 'styl'}).then(function(proposals) {
+    			assertProposals(proposals, [
+    			{proposal: 'style', prefix: 'styl'},
+    			]);
+    		});
+    	});
+    	/*
+    	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=483924
+    	 */
+    	it('Attribute completions ignore existing value entries 2', function() {
+    		var _o = setup({buffer: '<html><a styl=""></a></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 13, prefix: 'styl'}).then(function(proposals) {
+    			assertProposals(proposals, [
+    			{proposal: 'style', prefix: 'styl'},
+    			]);
+    		});
+    	});
+    	/*
+    	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=483924
+    	 */
+    	it('Attribute completions ignore existing value entries 3', function() {
+    		var _o = setup({buffer: '<html><a styl=blah></a></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 13, prefix: 'styl'}).then(function(proposals) {
+    			assertProposals(proposals, [
+    			{proposal: 'style', prefix: 'styl'},
+    			]);
+    		});
+    	});
+    	/*
+    	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=483924
+    	 */
+    	it('Attribute completions ignore existing value entries 4', function() {
+    		var _o = setup({buffer: '<html><a styl=></a></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 13, prefix: 'styl'}).then(function(proposals) {
+    			assertProposals(proposals, [
+    			{proposal: 'style', prefix: 'styl'},
+    			]);
+    		});
+    	});
+    	/*
+    	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=483924
+    	 */
+    	it('Attribute completions ignore existing value entries 5', function() {
+    		var _o = setup({buffer: '<html><a styl></a></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 13, prefix: 'styl'}).then(function(proposals) {
+    			assertProposals(proposals, [
+    			{proposal: 'style=""', prefix: 'styl'},
+    			]);
+    		});
+    	});
     });
     
 
