@@ -13,8 +13,9 @@
 define([
 'orion/objects',
 'orion/Deferred',
-'i18n!javascript/nls/messages'
-], function(Objects, Deferred, Messages) {
+'i18n!javascript/nls/messages',
+'orion/URITemplate',
+], function(Objects, Deferred, Messages, URITemplate) {
 
 	/**
 	 * @description Creates a new open declaration command
@@ -24,10 +25,11 @@ define([
 	 * @returns {javascript.commands.OpenDeclarationCommand} A new command
 	 * @since 8.0
 	 */
-	function OpenDeclarationCommand(ternWorker, openMode) {
+	function OpenDeclarationCommand(ternWorker, openMode, registry) {
 		this.ternworker = ternWorker;
 		this.openMode = openMode;
 		this.timeout = null;
+		this.registry = registry;
 	}
 
 	Objects.mixin(OpenDeclarationCommand.prototype, {
@@ -54,21 +56,40 @@ define([
 				{request:'definition', args:{params:{offset: options.offset}, guess: true, files: files, meta:{location: options.input}}}, //$NON-NLS-1$
 				function(response) {
 					if(response.request === 'definition') {
-						if(response.declaration && (typeof response.declaration.start  === 'number' && typeof response.declaration.end === 'number')) {
-							if(response.declaration.guess) {
-								//TODO handle it being a guess, for now fall through
+						if(response.declaration) {
+							if (response.declaration.results) {
+								// build up the message based on potential matches
+								var display = {};
+								display.HTML = true;
+								display.Severity = 'Warning'; //$NON-NLS-0$
+								var message = "Potential matches:<\br><ol>";
+								var declarations = response.declaration.results;
+								declarations.forEach(function(decl) {
+									if (typeof decl.start  === 'number' && typeof decl.end === 'number') {
+										var href = new URITemplate("#{,resource,params*}").expand( //$NON-NLS-1$
+										{
+											resource: decl.file,
+											params: {start:decl.start, end: decl.end}
+										});
+										message += '<li><a href="' + href + '">' + decl.file + '</a></li>\n';
+									}
+								});
+								message += "</ol>";
+								display.Message = message;
+								this.registry.getService("orion.page.message").setProgressResult(display);
+								deferred.reject({Severity: 'Warning', Message: Messages['noDeclFound']});
+							} else if (typeof response.declaration.start  === 'number' && typeof response.declaration.end === 'number') {
+								var opts = Object.create(null);
+								opts.start = response.declaration.start;
+								opts.end = response.declaration.end;
+								if(this.openMode !== null && typeof this.openMode !== 'undefined') {
+									opts.mode = this.openMode;
+								}
+								deferred.resolve(editorContext.openEditor(response.declaration.file, opts));
 							}
-							var opts = Object.create(null);
-							opts.start = response.declaration.start;
-							opts.end = response.declaration.end;
-							if(this.openMode !== null && typeof this.openMode !== 'undefined') {
-								opts.mode = this.openMode;
-							}
-							deferred.resolve(editorContext.openEditor(response.declaration.file, opts));
-						} else {
-							deferred.reject({Severity: 'Warning', Message: Messages['noDeclFound']}); //$NON-NLS-1$
 						}
 					}
+					deferred.reject({Severity: 'Warning', Message: Messages['noDeclFound']}); //$NON-NLS-1$
 				}.bind(this));
 		}
 	});
