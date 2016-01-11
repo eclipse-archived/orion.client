@@ -163,7 +163,7 @@ define({
 	'refsFoundIn': 'References found in file: \'${0}\' (${1}/${2})',
 	'addToTernCommand': 'Add to .tern-project',
 	'addToTernCommandTooltip': 'The JavaScript tooling will always load the contents of this file to Tern',
-	'accessor-pairs' : 'Discourage getter/setter not in pairs',
+	'accessor-pairs' : 'Getter and setter accessors not in pairs:',
 	'no-control-regex' : 'Disallow controls characters in regular expressions:',
 	'no-duplicate-case' : 'Duplicate case:',
 	'no-empty-character-class' : 'Disallow empty character classes:',
@@ -173,11 +173,11 @@ define({
 	'no-negated-in-lhs' : 'Disallow negated left operand of in operator:',
 	'no-obj-calls' : 'Disallow global object as function calls:',
 	'no-eq-null' : 'Disallow null comparisons:',
-	'no-else-return' : 'Report else after return:',
+	'no-else-return' : 'Unnecessary else after return:',
 	'no-empty-label' : 'No empty labels:',
 	'no-self-compare' : 'Disallow self compare:',
-	'no-irregular-whitespace' : 'No irregular whitespace:',
+	'no-irregular-whitespace' : 'Disallow irregular whitespace:',
 	'no-self-assign' : 'Disallow self assignment:',
 	'noShadowFixName' : 'Rename in scope',
-	'type-checked-consistent-return' : 'Detect inconsistent returns:'
+	'type-checked-consistent-return' : 'Discouraged inconsistent returns:'
 });
