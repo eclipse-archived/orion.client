@@ -8,13 +8,15 @@
  *
  ******************************************************************************/
 /* eslint-env amd */
-define({//Default message bundle
+define({
     'pluginName': 'Orion JavaScript Tool Support',
     'pluginDescription': 'This plug-in provides JavaScript tools support for Orion, like editing, search, navigation, validation, and code completion.',
 	'error': 'Error',
 	'warning' : 'Warning',
 	'ignore' : 'Ignore',
 	'ternContentAssist' : 'Tern JavaScript content assist',
+	'ternProjectAssist': 'Tern project file content assist',
+	'emptyFileTemplateDoc': 'Create new default contents for the .tern-project file',
 	'prefCodeStyle':'Code Style',
 	'prefBestPractices':'Best Practices',
 	'prefPotentialProblems':'Potential Programming Problems',

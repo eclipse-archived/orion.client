@@ -25,6 +25,7 @@ define([
 'javascript/astManager',
 'javascript/quickFixes',
 'javascript/contentAssist/ternAssist',
+'javascript/contentAssist/ternProjectAssist',
 'javascript/validator',
 'javascript/ternProjectValidator',
 'javascript/occurrences',
@@ -47,7 +48,7 @@ define([
 'i18n!javascript/nls/messages',
 'orion/i18nUtil',
 'orion/URL-shim'
-], function(PluginProvider, mServiceRegistry, Deferred, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist,
+], function(PluginProvider, mServiceRegistry, Deferred, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, TernProjectAssist,
 			EslintValidator, TernProjectValidator, Occurrences, Hover, Outliner, CUProvider, TernProjectManager, Util, Logger, AddToTernCommand, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 			RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
@@ -326,6 +327,25 @@ define([
     				charTriggers: "[.]",  //$NON-NLS-1$
     				excludedStyles: "(string.*)"  //$NON-NLS-1$
     		});
+		
+		provider.registerService("orion.edit.contentassist",  //$NON-NLS-1$
+				{
+					computeContentAssist: function(editorContext, params) {
+						return editorContext.getFileMetadata().then(function(meta) {
+							if(meta.name === ".tern-project") {
+								return editorContext.getText().then(function(text) {
+									return TernProjectAssist.getProposals(text, params);
+								});
+							}
+						});
+					}
+				}, 
+    			{
+    				contentType: ["application/json"],  //$NON-NLS-1$
+    				nls: 'javascript/nls/messages',  //$NON-NLS-1$
+    				name: 'ternProjectAssist',  //$NON-NLS-1$
+    				id: "orion.edit.contentassist.javascript.tern.project"  //$NON-NLS-1$
+    	});
 
     	/**
     	 * Register the jsdoc-based outline
