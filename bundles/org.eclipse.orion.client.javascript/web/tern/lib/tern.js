@@ -872,34 +872,50 @@
     }
   };
 
-  function findDef(srv, query, file) {
-    var expr = findExpr(file, query);
-    var type = findExprType(srv, query, file, expr);
-    if (infer.didGuess() && !query.guess) return {}; //ORION
-
-    var span = getSpan(type);
-    var result = {url: type.url, doc: parseDoc(query, type.doc), origin: type.origin, guess: infer.didGuess()}; //ORION
-
-    if (type.types) for (var i = type.types.length - 1; i >= 0; --i) {
-      var tp = type.types[i];
-      storeTypeDocs(query, tp, result);
-      if (!span) span = getSpan(tp);
-    }
-
-    if (span && span.node) { // refers to a loaded file
-      var spanFile = span.node.sourceFile || srv.findFile(span.origin);
-      var start = outputPos(query, spanFile, span.node.start), end = outputPos(query, spanFile, span.node.end);
-      result.start = start; result.end = end;
-      result.file = span.origin;
-      var cxStart = Math.max(0, span.node.start - 50);
-      result.contextOffset = span.node.start - cxStart;
-      result.context = spanFile.text.slice(cxStart, cxStart + 50);
-    } else if (span) { // external
-      result.file = span.origin;
-      storeSpan(srv, query, span, result);
-    }
-    return clean(result);
-  }
+	function findDef(srv, query, file) {
+	    var expr = findExpr(file, query);
+	    var type = findExprType(srv, query, file, expr);
+	    if (infer.didGuess() && !query.guess) return {}; //ORION
+	    
+	    //ORION
+	    var result = getResult(type, srv, query);
+	    if (infer.didGuess()) {
+	    	   if (type.potentialMatches) {
+	    	      var temp = [];
+	    	      for (var i = 0; i < type.potentialMatches.length; i++) {
+				temp.push(getResult(type.potentialMatches[i], srv, query));
+	    	      }
+	    	      result.results = temp;
+	    	   }
+	    	}
+	    	return result;
+    	};
+    	
+    	function getResult(type, srv, query) {
+    		//ORION
+	    var span = getSpan(type);
+	    var result = {url: type.url, doc: parseDoc(query, type.doc), origin: type.origin, guess: infer.didGuess()}; //ORION
+	
+	    if (type.types) for (var i = type.types.length - 1; i >= 0; --i) {
+	      var tp = type.types[i];
+	      storeTypeDocs(query, tp, result);
+	      if (!span) span = getSpan(tp);
+	    }
+	
+	    if (span && span.node) { // refers to a loaded file
+	      var spanFile = span.node.sourceFile || srv.findFile(span.origin);
+	      var start = outputPos(query, spanFile, span.node.start), end = outputPos(query, spanFile, span.node.end);
+	      result.start = start; result.end = end;
+	      result.file = span.origin;
+	      var cxStart = Math.max(0, span.node.start - 50);
+	      result.contextOffset = span.node.start - cxStart;
+	      result.context = spanFile.text.slice(cxStart, cxStart + 50);
+	    } else if (span) { // external
+	      result.file = span.origin;
+	      storeSpan(srv, query, span, result);
+	    }
+	    return clean(result);
+	}
 
   function findRefsToVariable(srv, query, file, expr, checkShadowing) {
     var name = expr.node.name;

@@ -346,9 +346,11 @@ define([
 				msgNode.innerHTML = html;
 				// All status links open in new window
 				links = lib.$$("a", msgNode); //$NON-NLS-0$
-				Array.prototype.forEach.call(links, function(link) { //$NON-NLS-0$
-					link.target = "_blank"; //$NON-NLS-0$
-				});
+				if(!_status.stayOnTarget) {
+					Array.prototype.forEach.call(links, function(link) {
+						link.target = "_blank"; //$NON-NLS-0$
+					});
+				}
 			} else {
 				// Treat as plain text
 				msgNode = document.createTextNode(msg);
