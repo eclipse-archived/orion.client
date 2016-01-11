@@ -102,8 +102,14 @@ define([
 			var detailsDiv = document.createElement("td"); //$NON-NLS-0$
 			detailsDiv.className = "gitCommitDetailsCell"; //$NON-NLS-0$
 			row.appendChild(detailsDiv);
-	
+
 			var headerMessage = util.trimCommitMessage(commit.Message);
+			var headerMessageSplit = headerMessage.split(" ");
+			var bugID ="null";
+			if(headerMessageSplit[0] === "Bug"){
+				bugID = headerMessageSplit[1];
+			}
+
 			var displayMessage = this.showMessage === undefined || this.showMessage;
 			if (displayMessage) {
 				var link;
@@ -144,6 +150,14 @@ define([
 				}
 				detailsDiv.appendChild(fullMessage);
 			}
+			
+
+			if(bugID !== "null"){
+				var bugTag = detailsDiv.getElementsByClassName("gitCommitTitle")[0].innerHTML;
+				detailsDiv.getElementsByClassName("gitCommitTitle")[0].innerHTML = "";
+				this.tagsCommandHandler.registry.getService("orion.core.textlink").addLinks(bugTag, detailsDiv.getElementsByClassName("gitCommitTitle")[0]);
+			}
+
 			
 			var displayAuthor = this.showAuthor === undefined || this.showAuthor;
 			var displayCommitter = this.showCommitter === undefined || this.showCommitter;
