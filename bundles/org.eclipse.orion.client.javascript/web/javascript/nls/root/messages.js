@@ -137,6 +137,8 @@ define({
 	'failedToReadFile': 'Failed to read file: ${0}',
 	'badInlineRename': 'In-line rename is only available for local variables and declarations.',
 	'failedRename': 'In-line rename failed: ${0}',
+	'declDisplayName': '${0} (start: ${1}, end: ${2})', // ${0} is the fully qualified file path of the decl, ${1} and ${2} are the numerical start and end offsets of the decl, respectively
+	'declPotentialHeader': '**Potential matches:**\n',
 	
 	//All refs
 	'functionDecls': 'Function Declarations',

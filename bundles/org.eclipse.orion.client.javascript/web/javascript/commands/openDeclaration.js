@@ -14,8 +14,9 @@ define([
 'orion/objects',
 'orion/Deferred',
 'i18n!javascript/nls/messages',
+'orion/i18nUtil',
 'orion/URITemplate',
-], function(Objects, Deferred, Messages, URITemplate) {
+], function(Objects, Deferred, Messages, i18nUtil, URITemplate) {
 	
 	var registry, ternworker;
 
@@ -34,11 +35,17 @@ define([
 		registry = serviceRegistry;
 	}
 
+	/**
+	 * @description Create a human-readable name to display for the file in the declaration object
+	 * @param {Object} declaration The decl
+	 * @returns {String} The formatted string of the file the declaration references
+	 * @since 11.0
+	 */
 	function displayFileName(declaration) {
 		var fileName = declaration.file;
 		fileName = fileName.replace(/^\/file\//, "");
 		fileName = fileName.substring(fileName.indexOf("/")+1, fileName.length);
-		return fileName + ' (start: ' + declaration.start + ', end: ' + declaration.end + ')';
+		return i18nUtil.formatMessage(Messages['declDisplayName'], fileName, declaration.start, declaration.end);
 	}
 
 	Objects.mixin(OpenDeclarationCommand.prototype, {
@@ -67,10 +74,9 @@ define([
 					if(response.declaration) {
 						if (response.declaration.results) {
 							// build up the message based on potential matches
-							var display = {};
-							display.HTML = false;
+							var display = Object.create(null);
 							display.Severity = 'Status'; //$NON-NLS-0$
-							var message = "**Potential matches:**\n";
+							var message = Messages['declPotentialHeader'];
 							var declarations = response.declaration.results;
 							declarations.forEach(function(decl) {
 								if (typeof decl.start  === 'number' && typeof decl.end === 'number') {
@@ -80,13 +86,13 @@ define([
 											params: {start:decl.start, end: decl.end}
 										});
 									var fName = decl.file.substring(decl.file.lastIndexOf('/')+1);
-									message += '*    ['+fName+ '](' + href + ') - '+displayFileName(decl)+'\n';
+									message += '*    ['+fName+ '](' + href + ') - '+displayFileName(decl)+'\n'; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 								}
 							}, this);
 							display.stayOnTarget = true;
 							display.Message = message;
-							registry.getService("orion.page.message").setProgressResult(display);
-							deferred.reject(display);
+							registry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-1$
+							return deferred.reject(display);
 						} else if (typeof response.declaration.start  === 'number' && typeof response.declaration.end === 'number') {
 							var opts = Object.create(null);
 							opts.start = response.declaration.start;
@@ -94,7 +100,7 @@ define([
 							if(this.openMode !== null && typeof this.openMode !== 'undefined') {
 								opts.mode = this.openMode;
 							}
-							deferred.resolve(editorContext.openEditor(response.declaration.file, opts));
+							return deferred.resolve(editorContext.openEditor(response.declaration.file, opts));
 						}
 					}
 					deferred.reject({Severity: 'Warning', Message: Messages['noDeclFound']}); //$NON-NLS-1$
