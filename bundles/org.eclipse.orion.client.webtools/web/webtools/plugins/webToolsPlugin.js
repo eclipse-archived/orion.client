@@ -17,6 +17,7 @@ define(['orion/plugin',
 'webtools/htmlAstManager',
 'webtools/htmlHover',
 'webtools/htmlContentAssist',
+'webtools/htmlOccurrences',
 'webtools/htmlOutliner',
 'orion/editor/stylers/text_html/syntax',
 'webtools/cssContentAssist',
@@ -27,16 +28,16 @@ define(['orion/plugin',
 'webtools/cssResultManager',
 'orion/editor/stylers/text_css/syntax',
 'i18n!webtools/nls/messages'
-], function(PluginProvider, mServiceRegistry, Metrics, ScriptResolver, HtmlAstManager, htmlHover, htmlContentAssist, htmlOutliner,
+], function(PluginProvider, mServiceRegistry, Metrics, ScriptResolver, HtmlAstManager, htmlHover, htmlContentAssist, htmlOccurrences, htmlOutliner,
             mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, messages) {
 
 	/**
 	 * Plug-in headers
 	 */
 	var headers = {
-		name: messages["pluginName"], //$NON-NLS-1$
+		name: messages["pluginName"],
 		version: "1.0", //$NON-NLS-1$
-		description: messages["pluginDescription"] //$NON-NLS-1$
+		description: messages["pluginDescription"]
 	};
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 	var provider = new PluginProvider(headers, serviceRegistry);
@@ -98,9 +99,20 @@ define(['orion/plugin',
     		new htmlContentAssist.HTMLContentAssistProvider(htmlAstManager),
     		{	name: messages['htmlContentAssist'],
     			contentType: ["text/html"], //$NON-NLS-1$
-    			charTriggers: "<", //$NON-NLS-1$
+    			charTriggers: "<",
     			excludedStyles: "(comment.*|string.*)" //$NON-NLS-1$
-    		});
+    		}
+    	);
+    	
+	  	/**
+    	 * Register occurrence providers
+    	 */
+    	provider.registerService("orion.edit.occurrences", //$NON-NLS-1$
+    		new htmlOccurrences.HTMLOccurrences(htmlAstManager),
+    		{
+    			contentType: ["text/html"] //$NON-NLS-1$
+    		}
+    	);
 
     	/**
     	 * Register AST manager as Model Change listener
