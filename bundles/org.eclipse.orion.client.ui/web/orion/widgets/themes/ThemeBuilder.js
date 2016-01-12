@@ -554,9 +554,10 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup,
 				themeStyles.styles.push(style);
 			}
 
-			this.preferences.setTheme(themeName, themeStyles.styles);
-			this.select(themeName, themeStyles.styles);
-			this.populateThemes();
+			this.preferences.setTheme(themeName, themeStyles.styles).then(function() {
+				this.select(themeName, themeStyles.styles);
+				this.populateThemes();
+			}.bind(this));
 		}.bind(this));
 	}
 	ThemeBuilder.prototype.addTheme = addTheme;
@@ -580,8 +581,9 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup,
 					}
 				}
 				// show the first theme
-				this.preferences.setTheme(themeStyles.styles[0].name, themeStyles.styles);
-				this.populateThemes();
+				this.preferences.setTheme(themeStyles.styles[0].name, themeStyles.styles).then(function() {
+					this.populateThemes();
+				}.bind(this));
 			}.bind(this));
 		}
 	}
