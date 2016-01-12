@@ -102,11 +102,18 @@ define([
 			var detailsDiv = document.createElement("td"); //$NON-NLS-0$
 			detailsDiv.className = "gitCommitDetailsCell"; //$NON-NLS-0$
 			row.appendChild(detailsDiv);
-	
+
 			var headerMessage = util.trimCommitMessage(commit.Message);
+			var headerMessageSplit = headerMessage.split(" ");
+			var bugID ="null";
+			if(headerMessageSplit[0] === "Bug"){
+				bugID = headerMessageSplit[1];
+			}
+
 			var displayMessage = this.showMessage === undefined || this.showMessage;
 			if (displayMessage) {
 				var link;
+				
 				if (this.commitLink) {
 					link = document.createElement("a"); //$NON-NLS-0$
 					link.className = "navlinkonpage"; //$NON-NLS-0$
@@ -122,18 +129,34 @@ define([
 				if (headerMessage.length < commit.Message.length) {
 					 text += "..."; //$NON-NLS-0$
 				}
+				
 				link.appendChild(document.createTextNode(text));
-				detailsDiv.appendChild(link);
+				if(bugID !== "null"){
+					//This leads to a conflict when commitLink is true and bugID is not "null": 
+					//it will ignore the commitLink and just add the bugzilla link. 
+					//(I also don't know which one we should display in this case)
+					this.registry.getService("orion.core.textlink").addLinks(text, detailsDiv);
+				} else {
+					detailsDiv.appendChild(link);
+				}		
 			}
 			if (this.fullMessage && (this.onlyFullMessage || headerMessage.length < commit.Message.length)) {
 				var fullMessage = document.createElement("div"); //$NON-NLS-0$
 				fullMessage.className = "gitCommitFullMessage"; //$NON-NLS-0$
 				if (this.simple) {
-					fullMessage.textContent = commit.Message;
+					if(bugID !== "null"){
+						this.registry.getService("orion.core.textlink").addLinks(commit.Message, fullMessage);
+					} else {
+						fullMessage.textContent = commit.Message;	
+					}
 				} else {
 					var headerSpan = document.createElement("span"); //$NON-NLS-0$
 					headerSpan.className = "gitCommitTitle"; //$NON-NLS-0$
-					headerSpan.textContent = headerMessage;
+					if(bugID !== "null"){
+						this.registry.getService("orion.core.textlink").addLinks(headerMessage, headerSpan);
+					} else {
+						headerSpan.textContent = headerMessage;
+					}
 					fullMessage.appendChild(headerSpan);
 					var restSpan = document.createElement("span"); //$NON-NLS-0$
 					restSpan.textContent = commit.Message.substring(headerMessage.length);
@@ -144,6 +167,7 @@ define([
 				}
 				detailsDiv.appendChild(fullMessage);
 			}
+
 			
 			var displayAuthor = this.showAuthor === undefined || this.showAuthor;
 			var displayCommitter = this.showCommitter === undefined || this.showCommitter;
