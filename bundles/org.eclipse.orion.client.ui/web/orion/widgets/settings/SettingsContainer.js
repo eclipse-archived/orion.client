@@ -53,7 +53,6 @@ define([
 		this.settingsCategories = [];
 		
 		var pluginsUpdated = function() {
-			this.settingsCategories = [];
 			this.show();
 		}.bind(this);
 
@@ -70,6 +69,8 @@ define([
 			var _self = this;
 
 			this.preferences.get('/settingsContainer').then(function(prefs){ //$NON-NLS-1$
+				_self.settingsCategories = [];
+			
 				var categories = prefs[ 'categories' ] || {};
 				if (categories.showUserSettings === undefined || categories.showUserSettings) {
 					_self.settingsCategories.push({
