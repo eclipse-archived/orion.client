@@ -1469,17 +1469,17 @@
       var propN = propName(node, scope), obj = findType(node.object, scope).getType();
       if (obj) {
       	//ORION
-    		var currentMatch = obj.getProp(propN);
-      	if (guessing && typeof obj.potentialMatches !== "undefined") {
+    	var currentMatch = obj.getProp(propN);
+      	if (guessing && Array.isArray(obj.potentialMatches)) {
       		var potentialMatches = obj.potentialMatches;
       		var matchesProp = [];
-        		for(var i = 0; i < potentialMatches.length; i++) {
-        			var match = potentialMatches[i];
-        			var propMatch = match.getProp(propN);
-        			if (typeof propMatch !== "undefined") {
-        				matchesProp.push(propMatch);
-        			}
-        		}
+    		for(var i = 0, len = potentialMatches.length; i < len; i++) {
+    			var match = potentialMatches[i];
+    			var propMatch = match.getProp(propN);
+    			if (typeof propMatch !== "undefined") {
+    				matchesProp.push(propMatch);
+    			}
+    		}
  			currentMatch.potentialMatches = matchesProp;
       	}
       	return currentMatch;

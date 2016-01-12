@@ -465,7 +465,7 @@ define([
     	);
 
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    			new OpenDeclCommand.OpenDeclarationCommand(ternWorker, "replace", serviceRegistry),  //$NON-NLS-1$
+    			new OpenDeclCommand.OpenDeclarationCommand(ternWorker, "replace"),  //$NON-NLS-1$
     			{
     		name: javascriptMessages["openDeclName"],
     		tooltip : javascriptMessages['openDeclTooltip'],
@@ -844,7 +844,7 @@ define([
 				validationProperties: [
 					{
 						source: "annotation:id", //$NON-NLS-1$
-						match: "^(?:no-shadow)$|^(?:no-shadow-global)$" //$NON-NLS-1$
+						match: "^(?:no-shadow|no-shadow-global)$" //$NON-NLS-1$
 					} 
 				]
 			}

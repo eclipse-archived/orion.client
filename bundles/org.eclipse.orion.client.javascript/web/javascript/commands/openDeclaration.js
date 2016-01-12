@@ -18,7 +18,7 @@ define([
 'orion/URITemplate',
 ], function(Objects, Deferred, Messages, i18nUtil, URITemplate) {
 	
-	var registry, ternworker;
+	var ternworker;
 
 	/**
 	 * @description Creates a new open declaration command
@@ -28,11 +28,10 @@ define([
 	 * @returns {javascript.commands.OpenDeclarationCommand} A new command
 	 * @since 8.0
 	 */
-	function OpenDeclarationCommand(ternWorker, openMode, serviceRegistry) {
+	function OpenDeclarationCommand(ternWorker, openMode) {
 		ternworker = ternWorker;
 		this.openMode = openMode;
 		this.timeout = null;
-		registry = serviceRegistry;
 	}
 
 	/**
@@ -91,7 +90,6 @@ define([
 							}, this);
 							display.stayOnTarget = true;
 							display.Message = message;
-							registry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-1$
 							return deferred.reject(display);
 						} else if (typeof response.declaration.start  === 'number' && typeof response.declaration.end === 'number') {
 							var opts = Object.create(null);
