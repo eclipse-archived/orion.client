@@ -187,7 +187,9 @@
         var canon = canonicalType(matches);
         if (canon) {
         		guessing = true;
-        		canon.potentialMatches = matches; //ORION
+        		if (matches.length > 0) {
+        			canon.potentialMatches = matches; //ORION
+        		}
         		return canon;
         	}
       }
@@ -1465,28 +1467,37 @@
         return f.retval;
       }
     },
-    MemberExpression: function(node, scope) {
-      var propN = propName(node, scope), obj = findType(node.object, scope).getType();
-      if (obj) {
-      	//ORION
-    	var currentMatch = obj.getProp(propN);
-      	if (guessing && Array.isArray(obj.potentialMatches)) {
-      		var potentialMatches = obj.potentialMatches;
-      		var matchesProp = [];
-    		for(var i = 0, len = potentialMatches.length; i < len; i++) {
-    			var match = potentialMatches[i];
-    			var propMatch = match.getProp(propN);
-    			if (typeof propMatch !== "undefined") {
-    				matchesProp.push(propMatch);
-    			}
-    		}
- 			currentMatch.potentialMatches = matchesProp;
-      	}
-      	return currentMatch;
-      }
-      if (propN == "<i>") return ANull;
-      return findByPropertyName(propN);
-    },
+	MemberExpression: function(node, scope) {
+		var propN = propName(node, scope), obj = findType(node.object, scope).getType();
+		if (obj) {
+			//ORION
+			var currentMatch = obj.getProp(propN);
+			if (guessing && Array.isArray(obj.potentialMatches)) {
+				var potentialMatches = obj.potentialMatches;
+				var matchesProp = [];
+				for(var i = 0, len = potentialMatches.length; i < len; i++) {
+					var match = potentialMatches[i];
+					var propMatch = match.getProp(propN);
+					if (typeof propMatch !== "undefined") {
+						if (typeof propMatch.originNode !== "undefined"
+								&& typeof propMatch.origin !== "undefined") {
+							if (propMatch.originNode.sourceFile) {
+								if (propMatch.originNode.sourceFile.name === propMatch.origin) {
+									matchesProp.push(propMatch);
+								}
+							}
+						}
+					}
+				}
+				if (matchesProp.length > 0) {
+					currentMatch.potentialMatches = matchesProp;
+				}
+			}
+			return currentMatch;
+		}
+		if (propN == "<i>") return ANull;
+		return findByPropertyName(propN);
+	},
     Identifier: function(node, scope) {
       return scope.hasProp(node.name) || ANull;
     },
