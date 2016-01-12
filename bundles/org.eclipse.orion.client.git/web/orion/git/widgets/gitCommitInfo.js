@@ -102,11 +102,18 @@ define([
 			var detailsDiv = document.createElement("td"); //$NON-NLS-0$
 			detailsDiv.className = "gitCommitDetailsCell"; //$NON-NLS-0$
 			row.appendChild(detailsDiv);
-	
+
 			var headerMessage = util.trimCommitMessage(commit.Message);
+			var headerMessageSplit = headerMessage.split(" ");
+			var bugID ="null";
+			if(headerMessageSplit[0] === "Bug"){
+				bugID = headerMessageSplit[1];
+			}
+
 			var displayMessage = this.showMessage === undefined || this.showMessage;
 			if (displayMessage) {
 				var link;
+				
 				if (this.commitLink) {
 					link = document.createElement("a"); //$NON-NLS-0$
 					link.className = "navlinkonpage"; //$NON-NLS-0$
@@ -122,8 +129,13 @@ define([
 				if (headerMessage.length < commit.Message.length) {
 					 text += "..."; //$NON-NLS-0$
 				}
+				
 				link.appendChild(document.createTextNode(text));
-				detailsDiv.appendChild(link);
+				if(bugID !== "null"){
+					this.registry.getService("orion.core.textlink").addLinks(text, detailsDiv);
+				} else {
+					detailsDiv.appendChild(link);
+				}		
 			}
 			if (this.fullMessage && (this.onlyFullMessage || headerMessage.length < commit.Message.length)) {
 				var fullMessage = document.createElement("div"); //$NON-NLS-0$
@@ -144,6 +156,7 @@ define([
 				}
 				detailsDiv.appendChild(fullMessage);
 			}
+
 			
 			var displayAuthor = this.showAuthor === undefined || this.showAuthor;
 			var displayCommitter = this.showCommitter === undefined || this.showCommitter;
