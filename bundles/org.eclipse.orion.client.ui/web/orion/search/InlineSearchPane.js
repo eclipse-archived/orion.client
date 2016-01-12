@@ -79,7 +79,7 @@ define([
 			this._slideout.getContentNode().removeChild(this._searchWrapper); // detach wrapper now that initialization is done, see getContentNode().appendChild() call above
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				if(evt.metadata && !evt.metadata.Directory) {
-					this._generateAnnotations(evt.metadata.Location, evt.editor);
+					this._generateAnnotations(decodeURIComponent(evt.metadata.Location), evt.editor);
 				}
 			}.bind(this));
 		},
@@ -164,7 +164,7 @@ define([
 			if(this._inputManager && this._inputManager.inputManager) {
 				var fMeta = this._inputManager.inputManager.getFileMetadata();
 				if(fMeta && !fMeta.Directory) {
-					this._generateAnnotations(fMeta.Location, this._inputManager.inputManager.editor);
+					this._generateAnnotations(decodeURIComponent(fMeta.Location), this._inputManager.inputManager.editor);
 				}
 			}
 		},

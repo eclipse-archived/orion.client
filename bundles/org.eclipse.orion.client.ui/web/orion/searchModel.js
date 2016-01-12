@@ -352,7 +352,7 @@ define([
 	    	var fileNode;
 	    	if(this._indexedFileItems) {
 				this._indexedFileItems.some(function(element){
-					if (element.location === fileLocation) {
+					if (decodeURIComponent(element.location) === fileLocation) {
 						fileNode = element;
 						return true;
 					}				
