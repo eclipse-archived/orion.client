@@ -22,11 +22,13 @@ define([
 	/**
 	 * @description Creates a new JavaScript quick fix computer
 	 * @param {javascript.ASTManager} astManager The AST manager
+	 * @param {javascript.RenammeCommand} renameCommand The rename command 
 	 * @returns {javascript.JavaScriptQuickfixes} The new quick fix computer instance
 	 * @since 8.0
 	 */
-	function JavaScriptQuickfixes(astManager) {
+	function JavaScriptQuickfixes(astManager, renameCommand) {
 	   this.astManager = astManager;
+	   this.renamecommand = renameCommand;
 	}
 	
 	/**
@@ -310,28 +312,35 @@ define([
 		    delete context.annotation.fixid;
 		    Metrics.logEvent('language tools', 'quickfix', id, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		    var fixFunc = this.fixes[id];
-		    if (fixFunc){
-	            var that = this;
+		    if (fixFunc) {
 	            return editorContext.getFileMetadata().then(function(meta) {
 	                if(meta.contentType.id === 'text/html') {
 	                    return editorContext.getText().then(function(text) {
                            var blocks = Finder.findScriptBlocks(text);
                            if(blocks && blocks.length > 0) {
                                var cu = new CU(blocks, meta, editorContext);
-                               return fixFunc(cu.getEditorContext(), context.annotation, context.annotations, that.astManager);
+                               return fixFunc.call(this, cu.getEditorContext(), context, this.astManager);
                            }
-	                    });
+	                    }.bind(this));
 	                }
-	                return fixFunc(editorContext, context.annotation, context.annotations, that.astManager);
-	            });
+	                return fixFunc.call(this, editorContext, context, this.astManager);
+	            }.bind(this));
 	        }
 		    return new Deferred().resolve(null) ;
 		},
-		
 		fixes : {
+			"no-shadow": function(editorContext, context) {
+				return this.renamecommand.execute.call(this.renamecommand, editorContext, context);
+			},
+			"no-shadow-global": function(editorContext, context) {
+				return this.renamecommand.execute.call(this.renamecommand, editorContext, context);
+			},
+			"no-shadow-global-param": function(editorContext, context) {
+				return this.renamecommand.execute.call(this.renamecommand, editorContext, context);
+			},
 			/** fix for eqeqeq linting rule */
-			"eqeqeq": function(editorContext, annotation, annotations) {
-				return applySingleFixToAll(editorContext, annotation, annotations, function(currentAnnotation){
+			"eqeqeq": function(editorContext, context) {
+				return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation){
 					var expected = /^.*\'(\!==|===)\'/.exec(currentAnnotation.title);
 					return {
 						text: expected[1],
@@ -340,23 +349,26 @@ define([
 					};
 				});
 			},
-			/** fix for the missing-nls rule */
-	        "missing-nls": function(editorContext, annotation, annotations, astManager){
+			/** 
+			 * fix for the missing-nls rule
+			 * @callback
+			 */
+	        "missing-nls": function(editorContext, context, astManager){
 	        	// We depend on the validator rule in eslint to count the number of literals on the line
-	        	if (annotation.data && typeof annotation.data.indexOnLine === 'number'){
+	        	if (context.annotation.data && typeof context.annotation.data.indexOnLine === 'number'){
 		        	return astManager.getAST(editorContext).then(function(ast) {
 		                // Insert the correct non nls comment
-		                var end = getLineEnd(ast.source, annotation.end);
+		                var end = getLineEnd(ast.source, context.annotation.end);
 		                // indexOnLine starts at 0, non-nls comments start at one
-		                var comment = " //$NON-NLS-" + (annotation.data.indexOnLine + 1) + "$"; //$NON-NLS-1$
+		                var comment = " //$NON-NLS-" + (context.annotation.data.indexOnLine + 1) + "$"; //$NON-NLS-1$
 		                return editorContext.setText(comment, end, end);
 		            });
 				}
 				return null;
 	        },
 			/** fix for the no-comma-dangle linting rule */
-			"no-comma-dangle": function(editorContext, annotation, annotations) {
-				return applySingleFixToAll(editorContext, annotation, annotations, function(currentAnnotation){
+			"no-comma-dangle": function(editorContext, context) {
+				return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation){
 					return {
 						text: '',
 						start: currentAnnotation.start,
@@ -364,20 +376,23 @@ define([
 					};
 				});
 			},
-			/** fix for the no-empty-block linting rule */
-			"no-empty-block": function(editorContext, annotation, annotations) {
+			/** 
+			 * fix for the no-empty-block linting rule
+			 * @callback
+			 */
+			"no-empty-block": function(editorContext, context) {
 	            return editorContext.getText().then(function(text) {
-	                var linestart = getLineStart(text, annotation.start);
+	                var linestart = getLineStart(text, context.annotation.start);
 	                var fix = '//TODO empty block'; //$NON-NLS-1$
 	                var indent = computeIndent(text, linestart, true);
 	                fix = '\n' + indent + fix; //$NON-NLS-1$
-	                fix += computePostfix(text, annotation);
-	                return editorContext.setText(fix, annotation.start+1, annotation.start+1);
+	                fix += computePostfix(text, context.annotation);
+	                return editorContext.setText(fix, context.annotation.start+1, context.annotation.start+1);
 	            });
 	        },
 			/** fix for the no-extra-semi linting rule */
-			"no-extra-semi": function(editorContext, annotation, annotations) {
-				return applySingleFixToAll(editorContext, annotation, annotations, function(currentAnnotation){
+			"no-extra-semi": function(editorContext, context) {
+				return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation){
 		            return {
 		            	text: '',
 		            	start: currentAnnotation.start,
@@ -385,29 +400,38 @@ define([
 		            };
 	            });
 	        },
-	        /** fix for the no-fallthrough linting rule */
-	        "no-fallthrough": function(editorContext, annotation, annotations) {
+	        /** 
+	         * fix for the no-fallthrough linting rule
+	         * @callback
+	         */
+	        "no-fallthrough": function(editorContext, context) {
 	            return editorContext.getText().then(function(text) {
-	                var linestart = getLineStart(text, annotation.start);
+	                var linestart = getLineStart(text, context.annotation.start);
 	                var fix = '//$FALLTHROUGH$'; //$NON-NLS-1$
 	                var indent = computeIndent(text, linestart);
-	                fix += computePostfix(text, annotation, indent);
-	                return editorContext.setText(fix, annotation.start, annotation.start);
+	                fix += computePostfix(text, context.annotation, indent);
+	                return editorContext.setText(fix, context.annotation.start, context.annotation.start);
 	            });
 	        },
-	        /** alternate fix for the no-fallthrough linting rule */
-	        "no-fallthrough-break": function(editorContext, annotation, annotations) {
+	        /** 
+	         * alternate fix for the no-fallthrough linting rule
+	         * @callback
+	         */
+	        "no-fallthrough-break": function(editorContext, context) {
 	            return editorContext.getText().then(function(text) {
-	                var linestart = getLineStart(text, annotation.start);
+	                var linestart = getLineStart(text, context.annotation.start);
 	                var fix = 'break;'; //$NON-NLS-1$
 	                var indent = computeIndent(text, linestart);
-	                fix += computePostfix(text, annotation, indent);
-	                return editorContext.setText(fix, annotation.start, annotation.start);
+	                fix += computePostfix(text, context.annotation, indent);
+	                return editorContext.setText(fix, context.annotation.start, context.annotation.start);
 	            });
 	        },
-	        "no-new-array": function(editorContext, annotation, annotations, astManager) {
+	        /**
+	         * @callback
+	         */
+	        "no-new-array": function(editorContext, context, astManager) {
 	        	return astManager.getAST(editorContext).then(function(ast) {
-	       			var node = Finder.findNode(annotation.start, ast, {parents:true});
+	       			var node = Finder.findNode(context.annotation.start, ast, {parents:true});
 	       			if(node && node.parents) {
 	       				var p = node.parents[node.parents.length-1];
 	       				if(p.type === 'CallExpression' || p.type === 'NewExpression') {
@@ -423,21 +447,27 @@ define([
 	       			}
 	   			});
 	        },
-	        /** for for the no-reserved-keys linting rule */
-	       "no-reserved-keys": function(editorContext, annotation, annotations, astManager) {
+	        /** 
+	         * for for the no-reserved-keys linting rule
+	         * @callback
+	         */
+	       "no-reserved-keys": function(editorContext, context, astManager) {
 	       		return astManager.getAST(editorContext).then(function(ast) {
-	       			var node = Finder.findNode(annotation.start, ast, {parents:true});
+	       			var node = Finder.findNode(context.annotation.start, ast, {parents:true});
 	                if(node && node.type === 'Identifier') {
 	                	return editorContext.setText('"'+node.name+'"', node.range[0], node.range[1]); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 	       		});
 	        },
-	        /** fix for the no-sparse-arrays linting rule */
-	        "no-sparse-arrays": function(editorContext, annotation, annotations, astManager) {
+	        /** 
+	         * fix for the no-sparse-arrays linting rule
+	         * @callback
+	         */
+	        "no-sparse-arrays": function(editorContext, context, astManager) {
 	            return astManager.getAST(editorContext).then(function(ast) {
-	                var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                var node = Finder.findNode(context.annotation.start, ast, {parents:true});
 	                if(node && node.type === 'ArrayExpression') {
-	                    var model = new TextModel.TextModel(ast.source.slice(annotation.start, annotation.end));
+	                    var model = new TextModel.TextModel(ast.source.slice(context.annotation.start, context.annotation.end));
 	                    var len = node.elements.length;
 	                    var idx = len-1;
 	                    var item = node.elements[idx];
@@ -456,9 +486,9 @@ define([
 	                        }
 	                        if(item === null) {
 	                            //whole array is sparse - wipe it
-	                            return editorContext.setText(model.getText(), annotation.start+1, annotation.end-1);
+	                            return editorContext.setText(model.getText(), context.annotation.start+1, context.annotation.end-1);
 	                        }
-	                        model.setText('', item.range[1]-annotation.start, end.range[0]-annotation.start);
+	                        model.setText('', item.range[1]-context.annotation.start, end.range[0]-context.annotation.start);
 	                    }
 	                    var prev = item;
 	                    for(; idx > -1; idx--) {
@@ -466,28 +496,34 @@ define([
 	                        if(item === null || item.range[0] === prev.range[0]) {
 	                            continue;
 	                        }
-	                        model.setText(', ', item.range[1]-annotation.start, prev.range[0]-annotation.start); //$NON-NLS-1$
+	                        model.setText(', ', item.range[1]-context.annotation.start, prev.range[0]-context.annotation.start); //$NON-NLS-1$
 	                        prev = item;
 	                    }
 	                    if(item === null && prev !== null) {
 	                        //need to wipe the front of the array
-	                        model.setText('', node.range[0]+1-annotation.start, prev.range[0]-annotation.start);
+	                        model.setText('', node.range[0]+1-context.annotation.start, prev.range[0]-context.annotation.start);
 	                    }
-	                    return editorContext.setText(model.getText(), annotation.start, annotation.end);
+	                    return editorContext.setText(model.getText(), context.annotation.start, context.annotation.end);
 	                }
 	                return null;
 	            });
 	        },
-	        /** fix for the no-throw-literal linting rule */
-	        "no-throw-literal": function(editorContext, annotation, annotations, astManager) {
+	        /** 
+	         * fix for the no-throw-literal linting rule
+	         * @callback
+	         */
+	        "no-throw-literal": function(editorContext, context, astManager) {
 	            return astManager.getAST(editorContext).then(function(ast) {
-	                var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                var node = Finder.findNode(context.annotation.start, ast, {parents:true});
 	                var source = node.raw || ast.source.slice(node.range[0], node.range[1]);
-	                return editorContext.setText('new Error(' + source + ')', annotation.start, annotation.end); //$NON-NLS-1$
+	                return editorContext.setText('new Error(' + source + ')', context.annotation.start, context.annotation.end); //$NON-NLS-1$
 	            });
 	        },
-	        /** fix for the no-undef-defined linting rule */
-	        "no-undef-defined": function(editorContext, annotation, annotations, astManager) {
+	        /** 
+	         * fix for the no-undef-defined linting rule
+	         * @callback
+	         */
+	        "no-undef-defined": function(editorContext, context, astManager) {
 	            function assignLike(node) {
 	                if(node && node.parents && node.parents.length > 0 && node.type === 'Identifier') {
 	                    var parent = node.parents.pop();
@@ -495,13 +531,13 @@ define([
 	                }
 	                return false;
 	            }
-	            var name = /^'(.*)'/.exec(annotation.title);
-	            if(name != null && typeof name !== 'undefined') {
+	            var name = /^'(.*)'/.exec(context.annotation.title);
+	            if(name !== null && typeof name !== 'undefined') {
 	                return astManager.getAST(editorContext).then(function(ast) {
 	                    var comment = null;
 	                    var start = 0;
 	                    var insert = name[1];
-	                    var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                    var node = Finder.findNode(context.annotation.start, ast, {parents:true});
 	                    if(assignLike(node)) {
 	                        insert += ':true'; //$NON-NLS-1$
 	                    }
@@ -519,10 +555,13 @@ define([
 	            }
 	            return null;
 	        },
-	        /** alternate id for no-undef-defined linting fix */
-	        "no-undef-defined-inenv": function(editorContext, annotation, annotations, astManager) {
-	            var name = /^'(.*)'/.exec(annotation.title);
-	            if(name != null && typeof name !== 'undefined') {
+	        /** 
+	         * alternate id for no-undef-defined linting fix
+	         * @callback
+	         */
+	        "no-undef-defined-inenv": function(editorContext, context, astManager) {
+	            var name = /^'(.*)'/.exec(context.annotation.title);
+	            if(name !== null && typeof name !== 'undefined') {
 	                return astManager.getAST(editorContext).then(function(ast) {
 	                    var comment = null;
 	                    var start = 0;
@@ -547,14 +586,20 @@ define([
 	            }
 	            return null;
 	        },
-	        /** fix for the no-unreachable linting rule */
-			"no-unreachable": function(editorContext, annotation, annotations) {
-	            return editorContext.setText('', annotation.start, annotation.end);    
+	        /** 
+	         * fix for the no-unreachable linting rule
+	         * @callback
+	         */
+			"no-unreachable": function(editorContext, context) {
+	            return editorContext.setText('', context.annotation.start, context.annotation.end);    
 	        },
-	        /** fix for the no-unused-params linting rule */
-	        "no-unused-params": function(editorContext, annotation, annotations, astManager) {
+	        /** 
+	         * fix for the no-unused-params linting rule 
+	         * @callback
+	         */
+	        "no-unused-params": function(editorContext, context, astManager) {
 	            return astManager.getAST(editorContext).then(function(ast) {
-	                var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                var node = Finder.findNode(context.annotation.start, ast, {parents:true});
 	                if(node) {
 	                    var promises = [];
 	                    var parent = node.parents.pop();
@@ -606,10 +651,13 @@ define([
 	                return null;
 	            });
 	        },
-	        /** easter is here */
-	        "no-unused-vars-unused": function(editorContext, annotation, annotations, astManager) {
+	        /** 
+	         * easter is here
+	         * @callback
+	         */
+	        "no-unused-vars-unused": function(editorContext, context, astManager) {
 	            return astManager.getAST(editorContext).then(function(ast) {
-	                var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                var node = Finder.findNode(context.annotation.start, ast, {parents:true});
 	                if(node && node.parents && node.parents.length > 0) {
 	                    var declr = node.parents.pop();
 	                    if(declr.type === 'VariableDeclarator') {
@@ -622,21 +670,23 @@ define([
                                 if(idx > -1) {
                                     return removeIndexedItem(decl.declarations, idx, editorContext);
                                 }
-	                           /* var start = declr.range[1];
-	                            var lstart = getLineStart(ast.source, start);
-	                            var indent = computeIndent(ast.source, lstart);
-	                            var fix = '\n'+indent+'console.log("Variable '+node.name+' is unused: "+'+node.name+');';
-	                            return editorContext.setText(fix, start, start);
-	                            */
+//	                            var start = declr.range[1];
+//	                            var lstart = getLineStart(ast.source, start);
+//	                            var indent = computeIndent(ast.source, lstart);
+//	                            var fix = '\n'+indent+'console.log("Variable '+node.name+' is unused: "+'+node.name+');';
+//	                            return editorContext.setText(fix, start, start);
 	                        }
 	                    }
 	                }
 	                return null;
 	            });
 	        },
-	        "no-unused-vars-unused-funcdecl": function(editorContext, annotation, annotations, astManager) {
+	        /**
+	         * @callback
+	         */
+	        "no-unused-vars-unused-funcdecl": function(editorContext, context, astManager) {
 	            return astManager.getAST(editorContext).then(function(ast) {
-	                var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                var node = Finder.findNode(context.annotation.start, ast, {parents:true});
 	                if(node && node.parents && node.parents.length > 0) {
 	                    var decl = node.parents.pop();
 	                    if(decl.type === 'FunctionDeclaration') {
@@ -646,8 +696,11 @@ define([
 	                return null;
 	            });
 	        },
-	        /** alternate id for the no-unsed-params linting fix */
-	        "no-unused-params-expr": function(editorContext, annotation, annotations, astManager) {
+	        /** 
+	         * alternate id for the no-unsed-params linting fix 
+	         * @callback
+	         */
+	        "no-unused-params-expr": function(editorContext, context, astManager) {
 	        	function updateCallback(node, ast, comments) {
 	                if(Array.isArray(comments)) {
 	                    //attach it to the last one
@@ -668,7 +721,7 @@ define([
 	                return editorContext.setText("/**\n"+indent+" * @callback\n"+indent+" */\n"+indent, node.range[0], node.range[0]); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	        	}
 	            return astManager.getAST(editorContext).then(function(ast) {
-	                var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                var node = Finder.findNode(context.annotation.start, ast, {parents:true});
 	                if(node && node.parents && node.parents.length > 0) {
 	                    var func = node.parents.pop();
 	                    var p = node.parents.pop();
@@ -709,10 +762,13 @@ define([
 	                return promise;
 	            });
 	        },
-	        /** fix for use-isnan linting rule */
-	       "use-isnan": function(editorContext, annotation, annotations, astManager) {
+	        /** 
+	         * fix for use-isnan linting rule
+	         * @callback
+	         */
+	       "use-isnan": function(editorContext, context, astManager) {
 	       		return astManager.getAST(editorContext).then(function(ast) {
-	       			var node = Finder.findNode(annotation.start, ast, {parents:true});
+	       			var node = Finder.findNode(context.annotation.start, ast, {parents:true});
 	                if(node && node.parents && node.parents.length > 0) {
 	                    var bin = node.parents.pop();
 	                    if(bin.type === 'BinaryExpression') {
@@ -732,8 +788,8 @@ define([
 	       		});	
 	       },
 	        /** fix for the semi linting rule */
-	        "semi": function(editorContext, annotation, annotations) {
-	        	return applySingleFixToAll(editorContext, annotation, annotations, function(currentAnnotation){
+	        "semi": function(editorContext, context) {
+	        	return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation){
 		            return {
 		            	text: ';',
 		            	start: currentAnnotation.end,
@@ -742,9 +798,9 @@ define([
 	            });
 	        },
 	        /** fix for the unnecessary-nls rule */
-	        "unnecessary-nls": function(editorContext, annotation, annotations, astManager){
+	        "unnecessary-nls": function(editorContext, context, astManager){
 	        	return astManager.getAST(editorContext).then(function(ast) {
-		        	return applySingleFixToAll(editorContext, annotation, annotations, function(currentAnnotation){
+		        	return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation){
 		        		var comment = Finder.findComment(currentAnnotation.start + 2, ast); // Adjust for leading //
 		        		var nlsTag = currentAnnotation.data.nlsComment; // We store the nls tag in the annotation
 		        		if (comment && comment.type.toLowerCase() === 'line' && nlsTag){

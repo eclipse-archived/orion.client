@@ -126,8 +126,8 @@ define([
     			ternReady = false;
     		}
     		if(ternReady || starting || msg.request === 'read') { //configuration reads can happen while the server is starting
-				if(msg !== null && typeof(msg) === 'object') {
-					if(typeof(msg.messageID) !== 'number' && typeof(msg.ternID) !== 'number') {
+				if(msg !== null && typeof msg === 'object') {
+					if(typeof msg.messageID !== 'number' && typeof msg.ternID !== 'number') {
 						//don't overwrite an id from a tern-side request
 						msg.messageID = this.messageId++;
 						this.callbacks[msg.messageID] = f;
@@ -174,15 +174,15 @@ define([
 	    		if(_d.__isError) {
 	    			//TODO log using the new platform hooks when available
 	    			Logger.log(_d.message);
-	    		} else if(typeof(_d) === 'object') {
+	    		} else if(typeof _d === 'object') {
 					var id  = _d.messageID;
 					var f = this.callbacks[id];
-					if(typeof(f) === 'function') {
+					if(typeof f === 'function') {
 						f(_d, _d.error);
 						delete this.callbacks[id];
 					}
 					var _handler = handlers[_d.request];
-					if(typeof(_handler) === 'function') {
+					if(typeof _handler === 'function') {
 						_handler(_d);
 					}
 				}
@@ -199,7 +199,7 @@ define([
 		function doRead(request) {
 			var response = {request: 'read', ternID: request.ternID, args: {}}; //$NON-NLS-1$
 			var fileClient = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
-			if(typeof(request.args.file) === 'object') {
+			if(typeof request.args.file === 'object') {
 				var _l = request.args.file.logical;
 				response.args.logical = _l;
 				scriptresolver.getWorkspaceFile(_l).then(function(files) {
@@ -281,7 +281,7 @@ define([
 					cleanPrefs(prefs);
 					if (!props) {
 						props = Object.create(null);
-					} else if(typeof(props) === 'string') {
+					} else if(typeof props === 'string') {
 						props = JSON.parse(props);
 					}
 					var keys = Object.keys(plugins);
@@ -528,8 +528,9 @@ define([
 			key : [ 114, true, false, false, false]
     			}
     	);
+    	var renameCommand = new RenameCommand.RenameCommand(ternWorker, scriptresolver);
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    			new RenameCommand.RenameCommand(ternWorker, scriptresolver),
+    			renameCommand,
     			{
     		name: javascriptMessages['renameElement'],
     		tooltip : javascriptMessages['renameElementTooltip'],
@@ -539,7 +540,7 @@ define([
     			}
     	);
 
-    	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager);
+    	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand);
 
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
@@ -835,19 +836,19 @@ define([
     		);
 
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-			new RenameCommand.RenameCommand(ternWorker, scriptresolver),
-			{
-				name: javascriptMessages["noShadowFixName"],
-				scopeId: "orion.edit.quickfix", //$NON-NLS-1$
-				id : "no.shadow.fix",  //$NON-NLS-1$
-				contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
-				validationProperties: [
-					{
-						source: "annotation:id", //$NON-NLS-1$
-						match: "^(?:no-shadow|no-shadow-global)$" //$NON-NLS-1$
-					} 
-				]
-			}
+				quickFixComputer,
+				{
+					name: javascriptMessages["noShadowFixName"],
+					scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+					id : "no.shadow.fix",  //$NON-NLS-1$
+					contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+					validationProperties: [
+						{
+							source: "annotation:id", //$NON-NLS-1$
+							match: "^(?:no-shadow|no-shadow-global|no-shadow-global-param)$" //$NON-NLS-1$
+						} 
+					]
+				}
 		);
 
     	/**

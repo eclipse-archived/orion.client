@@ -159,7 +159,7 @@ define([
 				try {
 					assert(computed !== null && typeof computed !== 'undefined', 'There should be fixes');
 					if (Array.isArray(expected)){
-						assert(Array.isArray(computed.text), "Expected multiple quick fix text edits")
+						assert(Array.isArray(computed.text), "Expected multiple quick fix text edits");
 						assert(Array.isArray(computed.selection), "Expected multiple quick fix selections");
 						assert.equal(computed.text.length, expected.length, "Wrong number of quick fix text edits");
 						assert.equal(computed.selection.length, expected.length, "Wrong number of quick fix selections");						
