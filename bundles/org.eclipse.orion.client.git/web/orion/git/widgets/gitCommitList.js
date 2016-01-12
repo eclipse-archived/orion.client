@@ -1140,6 +1140,7 @@ define([
 						showAuthor: false,
 						showParentLink: false
 					});
+					info.registry = this.explorer.registry;
 					info.display();
 					horizontalBox.appendChild(commitDetails);
 
@@ -1270,6 +1271,7 @@ define([
 						showMore: true,
 						simple: simple
 					});
+					commitInfo.registry = this.explorer.registry;
 					commitInfo.display();
 					
 					commitInfo.moreButton.addEventListener("click", function() { //$NON-NLS-0$
