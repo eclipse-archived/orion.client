@@ -858,7 +858,24 @@ define([
                     	for (lineNumber in linesWithComments){
                     		comment = linesWithComments[lineNumber];
                     		if (comment){
+                    			// See if there is any code on the line before the comment
+                    			var index = comment.range[0]-1;
+                    			var text = node.sourceFile.text;
+                    			var isBlank = index < 0;  //If we happen to be at the start of the file treat as newline
+                    			var prevChar;
+                    			if (text){
+	                    			while (index >= 0 && (prevChar = text.charAt(index)).match(/\s/)){
+	                    				if (prevChar === '\n' || index === 0){
+	                    					isBlank = true;
+	                    					break;
+	                    				}
+	                    				index--;
+	                    			}
+                				}
                     			while ((match = nonNlsRegExp.exec(comment.value)) !== null){
+                    				if (isBlank && match.index > 0){
+                    					break; // We are on a commented out line of code, skip marking non-nls messages
+                    				}
                     				value = match[1] ? match[0] : '//' + match[0]; //$NON-NLS-1$
 									start = comment.range[0] + match.index;
 									if (match[1]){

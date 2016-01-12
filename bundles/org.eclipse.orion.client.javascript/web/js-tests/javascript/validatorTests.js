@@ -5562,6 +5562,177 @@ define([
 								worker.getTestState().callback(error);
 							});
 					});
+					it("Ignore commented out code lines 1", function(callback) {
+						var topic = "var a = 1; //$NON-NLS-1$";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [
+								{
+									id: RULE_ID,
+									severity: 'warning',
+									description: "Unnecessary $NON-NLS$ tag.",
+									nlsComment: "$NON-NLS-1$"
+								
+								}]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							}
+						);
+					});
+					it("Ignore commented out code lines 2", function(callback) {
+						var topic = "//var a = 1; //$NON-NLS-1$";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							}
+						);
+					});
+					it("Ignore commented out code lines 3", function(callback) {
+						var topic = " //var a = 1; //$NON-NLS-1$";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							}
+						);
+					});
+					it("Ignore commented out code lines 4", function(callback) {
+						var topic = "var b = 2;\n \t\t //var a = 1; //$NON-NLS-1$";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							}
+						);
+					});
+					it("Ignore commented out code lines 5", function(callback) {
+						var topic = " //    var a = 1;        //$NON-NLS-1$";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							}
+						);
+					});
+					it("Ignore commented out code lines 6", function(callback) {
+						var topic = " // //$NON-NLS-1$";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							}
+						);
+					});
+					it("Ignore commented out code lines 7", function(callback) {
+						var topic = " // $NON-NLS-1$";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							}
+						);
+					});
+					it("Ignore commented out code lines 8", function(callback) {
+						var topic = "//$NON-NLS-1$";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [
+								{
+									id: RULE_ID,
+									severity: 'warning',
+									description: "Unnecessary $NON-NLS$ tag.",
+									nlsComment: "$NON-NLS-1$"
+								
+								}]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							}
+						);
+					});
+					it("Ignore commented out code lines 9", function(callback) {
+						var topic = " \t \t//$NON-NLS-1$";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [
+								{
+									id: RULE_ID,
+									severity: 'warning',
+									description: "Unnecessary $NON-NLS$ tag.",
+									nlsComment: "$NON-NLS-1$"
+								
+								}]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							}
+						);
+					});
+					it("Ignore commented out code lines 10 - HTML", function(callback) {
+						var topic = "<html>\n<script>\n//var a = 1; //$NON-NLS-1$\n</script>\n</html>";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, contentType: 'text/html', callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							}
+						);
+					});
+					it("Ignore commented out code lines 11", function(callback) {
+						var topic = "<html>\n<script>\n//$NON-NLS-1$\n</script>\n</html>";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, contentType: 'text/html', callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [
+								{
+									id: RULE_ID,
+									severity: 'warning',
+									description: "Unnecessary $NON-NLS$ tag.",
+									nlsComment: "$NON-NLS-1$"
+								
+								}]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							}
+						);
+					});
 				});
 			
 			//NO-REDECLARE -------------------------------------------------------
