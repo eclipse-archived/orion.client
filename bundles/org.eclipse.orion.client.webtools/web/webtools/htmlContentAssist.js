@@ -26,7 +26,7 @@ define([
 		"<!DOCTYPE html>\n" + //$NON-NLS-0$
 		"<html lang=\"en\">\n" + //$NON-NLS-0$
 		"<head>\n" + //$NON-NLS-0$
-		"\t<meta charset=\"utf-8\"/>\n" + //$NON-NLS-0$
+		"\t<meta charset=\"utf-8\">\n" + //$NON-NLS-0$
 		"\t<title>${title}</title>\n" + //$NON-NLS-0$
 		"</head>\n" + //$NON-NLS-0$
 		"<body>\n" + //$NON-NLS-0$
