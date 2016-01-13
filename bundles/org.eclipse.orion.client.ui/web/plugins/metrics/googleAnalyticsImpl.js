@@ -21,7 +21,8 @@ define(["orion/xhr"], function(xhr) {
 	}
 
 	GoogleAnalyticsImpl.prototype = {
-		logEvent: function(category, action, label, value) {
+		logEvent: function(category, action, label, value, details) {
+			/* details are not to be sent to GA */
 			if (window[GA_ID]) {
 				window[GA_ID]("send", "event", category, action, label, value); //$NON-NLS-1$ //$NON-NLS-0$
 			} else if (queue) {

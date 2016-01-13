@@ -35,9 +35,9 @@ define([], function() {
 		init(services, args);
 	}
 
-	function logEvent(category, action, label, value) {
+	function logEvent(category, action, label, value, details) {
 		_services.forEach(function(current) {
-			current.logEvent(category, action, label || "", value);
+			current.logEvent(category, action, label || "", value, details);
 		});
 	}
 

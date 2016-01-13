@@ -589,7 +589,7 @@ define([
 					}
 				}
 			}
-			mMetrics.logEvent("editor", type, label); //$NON-NLS-1$ //$NON-NLS-0$
+			mMetrics.logEvent("editor", type, label, null, {path: metadata.Location}); //$NON-NLS-0$
 		},
 		_unknownContentTypeAsText: function() {// Return true if we think unknown content type is text type
 			return true;
