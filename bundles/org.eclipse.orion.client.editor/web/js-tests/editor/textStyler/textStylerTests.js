@@ -9,6 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 /*eslint-env amd, browser, mocha*/
+/* eslint-disable missing-nls */
 define([
 	"chai/chai",
 	"js-tests/editor/mockTextView",
@@ -69,7 +70,7 @@ define([
 //		swiftTests,
 //		vbTests,
 //		vbhtmlTests,
-//		xmlTests,
+		xmlTests,
 //		xqueryTests,
 //		yamlTests
 	];
@@ -146,6 +147,17 @@ define([
 	function teardown() {
 		view = null;
 	}
+	
+	function printStyles(styles) {
+		var result = "";
+		for (var i=0; i<styles.length; i++) {
+			// Use the following to output in the styles.txt format
+			result += '{"start":' + styles[i].start + ',"end":' + styles[i].end + ',"style":{"styleClass":"' + styles[i].style.styleClass + '"}}\n';
+			// Use the following to switch the output to something easier to read
+//			result += "[" + styles[i].start + "-" + styles[i].end + " " + styles[i].style.styleClass + "]";
+		}
+		return result;
+	}
 
 	function testInitialStyles(test) {
 		it("Initial Styles", function() {
@@ -154,9 +166,9 @@ define([
 			view.setText(test.testText);
 			var styles = getStyles(styler, test.outputStyles);
 			if (!test.outputStyles) {
-				assert.equal(compareStyles(styles, test.expectedStyles), true);
+				assert(compareStyles(styles, test.expectedStyles), "The output styles did not match the expected styles.\nOutput:\n" + printStyles(styles) + "\nExpected:\n" + printStyles(test.expectedStyles));
 			} else {
-				assert.equal(false, true, "Computed styles were output, so no expected style comparisons were made");
+				assert(false, "Computed styles were output, so no expected style comparisons were made");
 			}
 		});
 	}

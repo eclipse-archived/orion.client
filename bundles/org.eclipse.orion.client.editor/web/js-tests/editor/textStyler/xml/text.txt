@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="none.xsl" type="text/xsl"?>
+<!DOCTYPE textXML>
+<!-- A comment -->
+<test>
+   <ONE description="one" tooltip="two">
+   	  <_TWO/>
+   	  <:THREE>
+   	  	text content
+   	  </:THREE>
+   	  <FOUR1:_-./>
+   </ONE>
+   <ONE>
+   	more text
+   </ONE>
+</test>

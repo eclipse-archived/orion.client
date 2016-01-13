@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-
+/* eslint-disable missing-nls */
 define("orion/editor/stylers/application_xml/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) {
 
 	var grammars = [];
@@ -50,7 +50,7 @@ define("orion/editor/stylers/application_xml/syntax", ["orion/editor/stylers/lib
 				end: ">",
 				name: "meta.tag.doctype.xml",
 				captures: {
-					0: {name: "meta.tag.doctype.xml"},
+					0: {name: "meta.tag.doctype.xml"}
 				},
 				patterns: [
 					{include: "#comment"},
@@ -59,10 +59,11 @@ define("orion/editor/stylers/application_xml/syntax", ["orion/editor/stylers/lib
 				]
 			},
 			tag: {
-				begin: "</?[A-Za-z0-9]+",
+				// https://www.w3.org/TR/2006/REC-xml11-20060816/#sec-common-syn
+				begin: "</?[A-Za-z:_][A-Za-z0-9:_\\-.]*",
 				end: "/?>",
 				captures: {
-					0: {name: "meta.tag.xml"},
+					0: {name: "meta.tag.xml"}
 				},
 				patterns: [
 					{include: "#comment"},
@@ -74,7 +75,7 @@ define("orion/editor/stylers/application_xml/syntax", ["orion/editor/stylers/lib
 				begin: "<\\?xml",
 				end: "\\?>",
 				captures: {
-					0: {name: "meta.tag.declaration.xml"},
+					0: {name: "meta.tag.declaration.xml"}
 				},
 				patterns: [
 					{include: "#comment"},

@@ -1,0 +1,23 @@
+{"start":0,"end":14,"style":{"styleClass":"meta tag declaration xml"}}
+{"start":14,"end":19,"style":{"styleClass":"string quoted double"}}
+{"start":19,"end":21,"style":{"styleClass":"meta tag declaration xml"}}
+{"start":23,"end":45,"style":{"styleClass":"meta tag declaration xml"}}
+{"start":45,"end":55,"style":{"styleClass":"string quoted double"}}
+{"start":55,"end":61,"style":{"styleClass":"meta tag declaration xml"}}
+{"start":61,"end":71,"style":{"styleClass":"string quoted double"}}
+{"start":71,"end":73,"style":{"styleClass":"meta tag declaration xml"}}
+{"start":75,"end":93,"style":{"styleClass":"meta tag doctype xml"}}
+{"start":95,"end":113,"style":{"styleClass":"comment block xml"}}
+{"start":115,"end":121,"style":{"styleClass":"meta tag xml"}}
+{"start":126,"end":130,"style":{"styleClass":"meta tag xml"}}
+{"start":143,"end":148,"style":{"styleClass":"string quoted double"}}
+{"start":157,"end":162,"style":{"styleClass":"string quoted double"}}
+{"start":162,"end":163,"style":{"styleClass":"meta tag xml"}}
+{"start":171,"end":178,"style":{"styleClass":"meta tag xml"}}
+{"start":186,"end":194,"style":{"styleClass":"meta tag xml"}}
+{"start":223,"end":232,"style":{"styleClass":"meta tag xml"}}
+{"start":240,"end":252,"style":{"styleClass":"meta tag xml"}}
+{"start":257,"end":263,"style":{"styleClass":"meta tag xml"}}
+{"start":268,"end":273,"style":{"styleClass":"meta tag xml"}}
+{"start":293,"end":299,"style":{"styleClass":"meta tag xml"}}
+{"start":301,"end":308,"style":{"styleClass":"meta tag xml"}}
