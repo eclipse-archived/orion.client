@@ -108,63 +108,54 @@ define([
 		it('Matching tags selection 1', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 0, end: 0}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
 				assertOccurrences(results, []);
 			});
 		});
 		it('Matching tags selection 2', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 1, end: 1}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
 				assertOccurrences(results, [{start: 1, end: 5}, {start: 28, end: 33}]);
 			});
 		});
 		it('Matching tags selection 3', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 29, end: 32}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
 				assertOccurrences(results, [{start: 1, end: 5}, {start: 28, end: 33}]);
 			});
 		});
 		it('Matching tags selection 4', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 29, end: 35}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
-				assertOccurrences(results, [{start: 1, end: 5}, {start: 28, end: 33}]);
+				assertOccurrences(results, []);
 			});
 		});
 		it('Matching tags selection 5', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 0, end: 1}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
 				assertOccurrences(results, []);
 			});
 		});
 		it('Matching tags selection 6', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 18, end: 18}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
-				assertOccurrences(results, []);
+				assertOccurrences(results, [{start: 8, end: 9}, {start: 15, end: 17}]);
 			});
 		});
 		it('Matching tags selection 7', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 19, end: 19}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
+				assertOccurrences(results, [{start: 1, end: 5}, {start: 28, end: 33}]);
+			});
+		});
+		it('Matching tags selection 8', function() {
+			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 18, end: 19}}).then(function(results) {
 				assertOccurrences(results, []);
 			});
 		});
 		it('Matching tags selection 8', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 18, end: 19}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
-				assertOccurrences(results, []);
-			});
-		});
-		it('Matching tags selection 8', function() {
-			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
-			return occurrences.computeOccurrences(editorContext, {selection: {start: 18, end: 19}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
 				assertOccurrences(results, []);
 			});
 		});
@@ -172,14 +163,12 @@ define([
 		it('Matching duplicate tags 1', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 12, end: 12}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
-				assertOccurrences(results, []);
+				assertOccurrences(results, [{start: 8, end: 9}, {start: 15, end: 17}]);
 			});
 		});
 		it('Matching duplicate tags 2', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 15, end: 17}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
 				assertOccurrences(results, [{start: 8, end: 9}, {start: 15, end: 17}]);
 			});
 		});
@@ -187,14 +176,12 @@ define([
 		it('Matching no content tags 1', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 20, end: 20}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
 				assertOccurrences(results, [{start: 20, end: 21}, {start: 23, end: 25}]);
 			});
 		});
 		it('Matching no content tags 2', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 24, end: 24}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
 				assertOccurrences(results, [{start: 20, end: 21}, {start: 23, end: 25}]);
 			});
 		});
@@ -202,28 +189,24 @@ define([
 		it('Matching inline tags 1', function() {
 			editorContext.text = "<html>\n<a src=\"foo\"/>\n<a/>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 8, end: 8}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
 				assertOccurrences(results, [{start: 8, end: 9}, {start: 19, end: 20}]);
 			});
 		});
 		it('Matching inline tags 2', function() {
 			editorContext.text = "<html>\n<a src=\"foo\"/>\n<a/>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 20, end: 20}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
 				assertOccurrences(results, [{start: 8, end: 9}, {start: 19, end: 20}]);
 			});
 		});
 		it('Matching inline tags 3', function() {
 			editorContext.text = "<html>\n<a src=\"foo\"/>\n<a/>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 23, end: 23}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
 				assertOccurrences(results, [{start: 23, end: 24}, {start: 24, end: 25}]);
 			});
 		});
 		it('Matching inline tags 4', function() {
 			editorContext.text = "<html>\n<a src=\"foo\"/>\n<a/>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 25, end: 25}}).then(function(results) {
-				//expected to fail until https://bugs.eclipse.org/bugs/show_bug.cgi?id=423634 is fixed
 				assertOccurrences(results, [{start: 23, end: 24}, {start: 24, end: 25}]);
 			});
 		});

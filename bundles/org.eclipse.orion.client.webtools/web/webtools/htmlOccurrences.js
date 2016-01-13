@@ -54,9 +54,12 @@ define([
 	function findOccurrences(ast, ctxt) {
 		if(ast && ctxt) {
 			var start = ctxt.selection.start;
+			var end = ctxt.selection.end;
 			var node = util.findNodeAtOffset(ast, start);
-			// TODO Do we care about the selection end
 			if(node) {
+				if ((node.type === 'attr' || node.type === 'text') && node.parent){
+					node = node.parent;
+				}
 				if (node.type === 'tag'){
 					var occurrences = [];
 					var tagName = node.name;
@@ -86,14 +89,19 @@ define([
 						return []; // Unexpected character, abort
 					}
 					
-					if(start <= openTagEnd && start >= openTagStart) {
+					if (start >= node.range[0] && end <= node.range[1]){
 						occurrences.push({start: openTagStart, end: openTagEnd});
 						occurrences.push({start: closeTagStart, end: closeTagEnd});
 					}
-					if(start >= closeTagStart && start <= closeTagEnd) {
-						occurrences.push({start: openTagStart, end: openTagEnd});
-						occurrences.push({start: closeTagStart, end: closeTagEnd});
-					}
+					// The following marks tags when caret is in the name
+//					if(start <= openTagEnd && start >= openTagStart) {
+//						occurrences.push({start: openTagStart, end: openTagEnd});
+//						occurrences.push({start: closeTagStart, end: closeTagEnd});
+//					}
+//					if(start >= closeTagStart && start <= closeTagEnd) {
+//						occurrences.push({start: openTagStart, end: openTagEnd});
+//						occurrences.push({start: closeTagStart, end: closeTagEnd});
+//					}
 						
 					return occurrences;
 				}
