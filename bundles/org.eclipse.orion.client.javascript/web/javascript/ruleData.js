@@ -26,7 +26,7 @@ define([
 			"no-caller": 1,
 			"no-comma-dangle" : 0, 
 			"no-cond-assign" : 2,
-			"no-console" : 2, 
+			"no-console" : 1, 
 			"no-constant-condition" : 2,
 			"no-control-regex" : 2,
 			"no-debugger" : 1,
