@@ -166,7 +166,7 @@ define({
 	'addToTernCommand': 'Add to .tern-project',
 	'addToTernCommandTooltip': 'The JavaScript tooling will always load the contents of this file to Tern',
 	'accessor-pairs' : 'Getter and setter accessors not in pairs:',
-	'no-control-regex' : 'Disallow controls characters in regular expressions:',
+	'no-control-regex' : 'Disallow control characters in regular expressions:',
 	'no-duplicate-case' : 'Duplicate case:',
 	'no-empty-character-class' : 'Disallow empty character classes:',
 	'no-extra-boolean-cast' : 'Discourage redundant double negation:',
