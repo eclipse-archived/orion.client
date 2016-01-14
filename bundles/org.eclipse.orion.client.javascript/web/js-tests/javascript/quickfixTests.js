@@ -19,18 +19,27 @@ define([
 	'esprima/esprima',
 	'javascript/astManager',
 	'javascript/cuProvider',
+	'javascript/commands/renameCommand',
 	'mocha/mocha', //must stay at the end, not a module
-], function(QuickFixes, Validator, chai, Deferred, Esprima, ASTManager, CUProvider) {
+], function(QuickFixes, Validator, chai, Deferred, Esprima, ASTManager, CUProvider, RenameCommand) {
 	var assert = chai.assert;
 	
 	return function(worker) {
 		describe('Quick Fix Tests',function() {
+			this.timeout(100000);
 			before('Reset Tern Server', function() {
 				worker.start(); // Reset the tern server state to remove any prior files
 			});
 			
 			/**
 			 * @description Sets up the test
+			 * 
+			 * Supported options include:
+			 * -    `buffer` - the source to process
+			 * -    `contentType` - the content type to load, defaults to application/javascript if not specified
+			 * -    `callback` - the 'done' param from the tests, its required for all worker-based tests
+			 * -    `rule` - the rule object. {@link #createTestRule(...)}
+			 * -    `expected` - the array of expected fixes
 			 * @param {Object} options {buffer, contentType}
 			 * @returns {Object} The object with the initialized values
 			 */
@@ -40,16 +49,18 @@ define([
 				var astManager = new ASTManager.ASTManager(Esprima);
 				var validator = new Validator(worker, CUProvider);
 				var state = Object.create(null);
+				var loc = contentType === 'text/html' ? 'quickfix_test_script.html' : 'quickfix_test_script.js';
 				assert(options.callback, "You must provide a callback for a worker-based test");
 				state.callback = options.callback;
 				worker.setTestState(state);
 				var rule = options.rule;
 				validator._enableOnly(rule.id, rule.severity, rule.opts);
-				var fixComputer = new QuickFixes.JavaScriptQuickfixes(astManager);
+				var renameCommand = new RenameCommand.RenameCommand(worker, {setSearchLocation: function(){}});
+				var fixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand);
 				var editorContext = {
 					/*override*/
 					getText: function(start, end) {
-						if(typeof(start) === 'undefined' && typeof(end) === 'undefined') {
+						if(typeof start === 'undefined' && typeof end === 'undefined') {
 							return new Deferred().resolve(buffer);
 						}
 						return new Deferred().resolve(buffer.slice(start, end));
@@ -67,19 +78,22 @@ define([
 						var o = Object.create(null);
 						o.contentType = Object.create(null);
 						o.contentType.id = contentType;
-						o.location = 'quickfix_test_script.js';
-						if (contentType === 'text/html'){
-							o.location = 'quickfix_test_script.html';
-						}
+						o.location = loc;
 						return new Deferred().resolve(o);
+					},
+					exitLinkedMode: function() {
+						return new Deferred().resolve();
+					},
+					enterLinkedMode: function(linkModel) {
+						return new Deferred().resolve(assertLinkedModel(linkModel, options.expected));
 					}
-					
 				};
 				return {
 					validator: validator,
 					fixComputer: fixComputer,
 					editorContext: editorContext,
-					contentType: contentType
+					contentType: contentType,
+					loc: loc
 				};
 			}
 		
@@ -90,6 +104,42 @@ define([
 				CUProvider.onModelChanging({file: {location: 'quickfix_test_script.js'}});
 				CUProvider.onModelChanging({file: {location: 'quickfix_test_script.html'}});
 			});
+		
+			/**
+			 * @description Checks the state of the linked models
+			 * @param {Object} linkedModel The linked model from the platform
+			 * @param {Object} expected The expected linked model from the test
+			 * @since 11.0
+			 */
+			function assertLinkedModel(linkedModel, expected) {
+				try {
+					assert(expected, "There must be an expected linkedModel");
+					assert(expected.groups, "There must be a groups node in the expected linked model");
+					assert(Array.isArray(expected.groups), "Groups must be an array in the expected linked model");
+					assert(linkedModel, "There must be a linkedModel");
+					assert(linkedModel.groups, "There must be a groups node in the linked model");
+					assert(Array.isArray(linkedModel.groups), "Groups must be an array in the linked model");
+					assert.equal(linkedModel.groups.length, expected.groups.length, "The linked mode groups should be the same length");
+					expected.groups.forEach(function(group, index) {
+						//groups have data and positions: [{offset, length}]
+						var g = linkedModel.groups[index];
+						assert.equal(typeof g.data, typeof group.data, "The type of the data of the groups is not the same");
+						assert(Array.isArray(g.positions), "There should be a positions array");
+						assert(Array.isArray(group.positions), "There must be an expected positions array");
+						assert.equal(g.positions.length, group.positions.length, "The position arrays should be the same size");
+						group.positions.forEach(function(pos, index2) {
+							var p = g.positions[index2];
+							assert(p, "There should be a position");
+							assert.equal(p.offset, pos.offset, "The position offsets do not match");
+							assert.equal(p.length, pos.length, "The position lengths do not match");
+						});
+					});
+					worker.getTestState().callback();
+				}
+				catch(err) {
+					worker.getTestState().callback(err);
+				}
+			}
 		
 			/**
 			 * @description Runs the validator on the given options and computes fixes for those problems
@@ -132,13 +182,19 @@ define([
 									annotations[i].title = annotations[i].description;
 								}
 							}
-							return obj.fixComputer.execute(obj.editorContext, {annotation: annot, annotations: annotations}).then(function(result) {
+							return obj.fixComputer.execute(obj.editorContext, {annotation: annot, annotations: annotations, input: obj.loc}).then(function(result) {
 									if (result === null) {
 										worker.getTestState().callback();
 									}
 								},
-								function(err){
-									worker.getTestState().callback(err);
+								function(err) {
+									if(err instanceof Error) {
+										worker.getTestState().callback(err);
+									} else if(typeof err.Message === 'string') {
+										worker.getTestState().callback(err.Message);
+									} else {
+										worker.getTestState().callback("Test rejected with unknown error");
+									}
 								});
 						}
 						catch(err) {
@@ -148,7 +204,7 @@ define([
 					function (error) {
 							worker.getTestState().callback(error);
 					});
-		}
+			}
 		
 			/**
 			 * @description Compares the computed fixes set against the expected ones
@@ -179,7 +235,7 @@ define([
 					worker.getTestState().callback(err);
 				}
 			}
-	
+
 			/**
 			 * @description Creates a test rule object for the test set up
 			 * @param {String} id The id of the rule used to update the preferences in javascript/validator#updated
@@ -194,6 +250,72 @@ define([
 				rule.opts = opts;
 				return rule;
 			}
+		//NO-SHADOW
+		describe("no-shadow", function() {
+			it("no-shadow 1", function(done) {
+				var rule = createTestRule("no-shadow");
+				var expected = {
+					groups: [
+						{data: {}, positions: [{offset: 25, length: 1}]}
+					]
+				};
+				return getFixes({
+					buffer: "var a; function f() {var a;}",
+					rule: rule,
+					expected: expected,
+					callback: done,
+					delegate: true
+				});
+			});
+			it("no-shadow 2", function(done) {
+				var rule = createTestRule("no-shadow");
+				var expected = {
+					groups: [
+						{data: {}, positions: [{offset: 31, length: 1}, {offset: 34, length: 1}]},
+					]
+				};
+				return getFixes({
+					buffer: "var a = 1; function foo() {var a; a = 10}",
+					rule: rule,
+					expected: expected,
+					callback: done,
+					delegate: true
+				});
+			});
+		});
+		//NO-SHADOW-GLOBAL
+		describe("no-shadow-global", function() {
+			it("no-shadow-global 1", function(done) {
+				var rule = createTestRule("no-shadow-global");
+				var expected = {
+					groups: [
+						{data: {}, positions: [{offset: 27, length: 8}]}
+					]
+				};
+				return getFixes({
+					buffer: "/*eslint-env browser*/ var document = 1;",
+					rule: rule,
+					expected: expected,
+					callback: done,
+					delegate: true
+				});
+			});
+			it("no-shadow-global 2", function(done) {
+				var rule = createTestRule("no-shadow-global");
+				var expected = {
+					groups: [
+						{data: {}, positions: [{offset: 27, length: 8}, {offset: 53, length: 8}]}
+					]
+				};
+				return getFixes({
+					buffer: "/*eslint-env browser*/ var document = 1; console.log(document);",
+					rule: rule,
+					expected: expected,
+					callback: done,
+					delegate: true
+				});
+			});
+		});
 		//NO-COMMA-DANGLE
 		describe('no-comma-dangle', function(){
 			it("Test no-comma-dangle-1", function(callback) {
@@ -669,6 +791,7 @@ define([
 			
 		});
 		//NO-FALLTHROUGH
+		describe("no-fallthrough", function() {
 			it("Test no-fallthrough-1",function(callback) {
 				var rule = createTestRule('no-fallthrough');
 				var expected = {value: "//$FALLTHROUGH$",
@@ -780,7 +903,9 @@ define([
 								  fixid: 'no-fallthrough-break',
 								  contentType: 'text/html'});
 			});
+		});
 		//NO-NEW-ARRAY
+		describe("no-new-array", function() {
 			it("test no-new-array single non-number literal param",function(callback) {
 				var rule = createTestRule('no-new-array');
 				return getFixes({
@@ -835,7 +960,9 @@ define([
 					callback: callback
 				});
 			});
+		});
 		//NO-THROW-LITERAL
+		describe("no-throw-literal", function() {
 			it("Test no-throw-literal-number",function(callback) {
 				var rule = createTestRule('no-throw-literal');
 				return getFixes({
@@ -863,7 +990,9 @@ define([
 					callback: callback
 				});
 		   });
+		});
 		//NO-RESERVED-KEYS
+		describe("no-reserved-keys", function() {
 			/**
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=469966
 			 */
@@ -906,7 +1035,9 @@ define([
 									expected: expected,
 									callback: callback});
 			});
+		});
 		//NO-UNDEF
+		describe("no-undef", function() {
 			 /**
 			  * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=458567
 			  */
@@ -1082,8 +1213,9 @@ define([
 								  expected: expected,
 								callback: callback});
 			});
-					
+		});	
 		//NO-UNUSED-PARAMS
+		describe("no-unused-params", function() {
 			it("Test no-unused-params-1",function(callback) {
 				var rule = createTestRule('no-unused-params');
 				var expected = {value: "",
@@ -1341,9 +1473,9 @@ define([
 								callback: callback,
 								  contentType: 'text/html'});
 			});
-	
+		});
 		//EQEQEQ
-		describe('EQEQEQ', function(){
+		describe('eqeqeq', function(){
 			it("Test eqeqeq-1",function(callback) {
 				var rule = createTestRule('eqeqeq');
 				var expected = {value: "===",
@@ -1482,6 +1614,7 @@ define([
 								callback: callback});
 			});
 		});
+		describe("no-unreachable", function() {
 		//NO-UNREACHABLE
 			it("Test no-unreachable-1",function(callback) {
 				var rule = createTestRule('no-unreachable');
@@ -1525,7 +1658,9 @@ define([
 								callback: callback,
 								  contentType: 'text/html'});
 			});
+		});
 		//NO-SPARSE-ARRAYS
+		describe("no-sparse-arrays", function() {
 			it("Test no-sparse-arrays-1",function(callback) {
 				var rule = createTestRule('no-sparse-arrays');
 				var expected = {value: "[1, 2]",
@@ -1747,6 +1882,7 @@ define([
 								callback: callback,
 								  contentType: 'text/html'});
 			});
+		});
 		//SEMI
 		describe("semi", function(){
 			it("Test semi-1",function(callback) {
@@ -1877,6 +2013,7 @@ define([
 			});
 		});
 		//NO-UNUSED-VARS-UNUSED
+		describe("no-unused-vars-unused", function() {
 			it("Test no-unused-vars-unused-1",function(callback) {
 				var rule = createTestRule('no-unused-vars');
 				var expected = {value: "",
@@ -1992,7 +2129,9 @@ define([
 								  pid: 'no-unused-vars-unused-funcdecl',
 								  contentType: 'text/html'});
 			});
+		});
 		//NO-MISSING-NLS
+		describe("no-missing-nls", function() {
 			it("Test missing-nls-1", function(callback) {
 				var rule = createTestRule('missing-nls');
 				var expected = {value: " //$NON-NLS-1$",
@@ -2026,6 +2165,7 @@ define([
 								callback: callback,
 								  pid: 'missing-nls'});
 			});
+		});
 		//UNNECESSARY-NLS
 		describe('unnecessary-nls', function(){
 			it("Test unnecessary-nls-1", function(callback) {
@@ -2181,6 +2321,7 @@ define([
 			});
 		});
 		//USE-ISNAN
+		describe("use-isnan", function() {
 			it("Test use-isnan-1",function(callback) {
 				var rule = createTestRule('use-isnan');
 				var expected = {value: "isNaN(foo)",
@@ -2236,6 +2377,7 @@ define([
 								  callback: callback,
 								  pid: 'use-isnan'});
 			});
+		});
 		});
 	};
 });

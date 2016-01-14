@@ -330,7 +330,7 @@ require([
 		           files: args.files},
 		           function(error, changes) {
 		               if(error) {
-							callback({request: 'rename', error: error.message, message: Messages['failedRename']}); //$NON-NLS-1$
+							callback({request: 'rename', error: typeof error === 'string' ? error : error.message, message: Messages['failedRename']}); //$NON-NLS-1$
 		               } else if(changes && Array.isArray(changes.changes)) {
 							callback({request: 'rename', changes:changes}); //$NON-NLS-1$
 		               } else {
