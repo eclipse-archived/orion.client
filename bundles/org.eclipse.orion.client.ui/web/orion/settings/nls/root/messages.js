@@ -143,7 +143,7 @@ define({//Default message bundle
 	"textTheme": "...or paste editor styles here",
 	"Import": "Import",
 	"Import a theme": "Import a theme",
-	"ImportThemeDialogMessage": "You can import a previously exported Orion theme here. If you would like to import a Sublime Text, Brackets or an Eclipse theme, please see this <a href='https://wiki.eclipse.org/Orion/How_Tos/Import_Theme' target='_blank' tabindex='-1'>page</a>.",
+	"ImportThemeDialogMessage": "You can import a previously-exported Orion theme here. If you would like to import a Sublime Text, Brackets or an Eclipse theme, please see this <a href='https://wiki.eclipse.org/Orion/How_Tos/Import_Theme' target='_blank' tabindex='-1'>page</a>.",
 	"ImportThemeError": "Ooops! The imported content does not appear to be a valid theme definition.",
 	"Export": "Export",
 	"Export a theme": "Export a theme",

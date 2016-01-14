@@ -23,6 +23,7 @@ define([
 	'plugins/languages/haml/hamlPlugin',
 	'plugins/languages/jade/jadePlugin',
 	'plugins/languages/java/javaPlugin',
+	'plugins/languages/jsx/jsxPlugin',
 	'plugins/languages/launch/launchPlugin',
 	'plugins/languages/lua/luaPlugin',
 	'plugins/languages/markdown/markdownPlugin',

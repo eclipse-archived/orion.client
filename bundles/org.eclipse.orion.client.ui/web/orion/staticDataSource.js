@@ -19,6 +19,7 @@ define([
 	"orion/editor/stylers/application_xquery/syntax",
 	"orion/editor/stylers/text_css/syntax",
 	"orion/editor/stylers/text_html/syntax",
+	"orion/editor/stylers/text_jsx/syntax",
 	"orion/editor/stylers/application_json/syntax",
 	"orion/editor/stylers/text_x-csrc/syntax",
 	"orion/editor/stylers/text_x-csharp/syntax",
@@ -42,7 +43,7 @@ define([
 	'orion/editor/stylers/application_x-ejs/syntax',
 	'orion/editor/stylers/application_xml/syntax',
 	'orion/editor/stylers/text_x-yaml/syntax',
-], function(Deferred, mStyler, mJS, mJSP, mXQuery, mCss, mHtml, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mSmarty, mSwift, mVB, mVBHTML, mEJS, mXml, mYaml) {
+], function(Deferred, mStyler, mJS, mJSP, mXQuery, mCss, mHtml, mJSX, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mSmarty, mSwift, mVB, mVBHTML, mEJS, mXml, mYaml) {
 	var ContentTypes = [
 		{	id: "text/plain",
 			name: "Text",
@@ -54,6 +55,11 @@ define([
 			name: "JavaScript",
 			extension: ["js"],
 			imageClass: "file-sprite-javascript modelDecorationSprite"
+		},
+		{	id: "text/jsx",
+			"extends": "text/plain",
+			name: "JSX",
+			extension: ["jsx"]
 		},
 		{	id: "text/html",
 			"extends": "text/plain",
@@ -308,6 +314,9 @@ define([
 						break;
 					case "text/html": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mHtml.grammars, "orion.html", fileContentType.id); //$NON-NLS-0$
+						break;
+					case "text/jsx": //$NON-NLS-0$
+						stylerAdapter = new mStyler.createPatternBasedAdapter(mJSX.grammars, "orion.jsx", fileContentType.id); //$NON-NLS-0$
 						break;
 					case "text/x-java-source": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mJava.grammars, "orion.java", fileContentType.id); //$NON-NLS-0$
