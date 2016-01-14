@@ -316,6 +316,77 @@ define([
 				});
 			});
 		});
+		//NO-DEBUGGER
+		describe("no-debugger", function() {
+			it("no-debugger no semicolon", function(done) {
+				var rule = createTestRule("no-debugger");
+				var expected = {
+					value: "",
+					start: 0,
+					end: 8
+				};
+				return getFixes({
+					buffer: "debugger",
+					rule: rule, 
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-debugger semicolon", function(done) {
+				var rule = createTestRule("no-debugger");
+				var expected = {
+					value: "",
+					start: 0,
+					end: 9
+				};
+				return getFixes({
+					buffer: "debugger;",
+					rule: rule, 
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-debugger no semicolon multi", function(done) {
+				var rule = createTestRule("no-debugger");
+				var expected = [
+						{value: "", start: 0, end: 8},
+						{value: "", start: 9, end: 17}
+				];
+				return getFixes({
+					buffer: "debugger\ndebugger",
+					rule: rule, 
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-debugger semicolon multi", function(done) {
+				var rule = createTestRule("no-debugger");
+				var expected = [
+						{value: "", start: 0, end: 9},
+						{value: "", start: 10, end: 19}
+				];
+				return getFixes({
+					buffer: "debugger;\ndebugger;",
+					rule: rule, 
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-debugger semicolon mixed multi", function(done) {
+				var rule = createTestRule("no-debugger");
+				var expected = [
+						{value: "",	start: 0, end: 8}, 
+						{value: "", 	start: 9, end: 18},
+						{value: "", 	start: 19, end: 27}
+				];
+				return getFixes({
+					buffer: "debugger\ndebugger;\ndebugger",
+					rule: rule, 
+					expected: expected,
+					callback: done
+				});
+			});
+		});
 		//NO-COMMA-DANGLE
 		describe('no-comma-dangle', function(){
 			it("Test no-comma-dangle-1", function(callback) {

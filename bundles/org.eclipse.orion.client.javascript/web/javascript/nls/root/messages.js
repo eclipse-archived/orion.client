@@ -35,6 +35,7 @@ define({
     'noReservedKeysFixName': 'Surround key with quotes',
 	'noEqeqeq' : 'Discouraged \'==\' use:',
 	'noDebugger' : 'Discouraged \'debugger\' statement use:',
+	'noDebuggerFixName': 'Remove statement',
 	'noWith': 'Discouraged \'with\' statement use:',
 	'noEval' : 'Discouraged \'eval()\' use:',
 	'noImpliedEval' : 'Discouraged implied \'eval()\' use:',

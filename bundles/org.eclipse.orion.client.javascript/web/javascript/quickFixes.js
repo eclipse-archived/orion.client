@@ -329,6 +329,22 @@ define([
 		    return new Deferred().resolve(null) ;
 		},
 		fixes : {
+			"no-debugger" : function(editorContext, context, astManager) {
+				return astManager.getAST(editorContext).then(function(ast) {
+					return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation) {
+						var end = currentAnnotation.end;
+						var tok = Finder.findToken(currentAnnotation.end, ast.tokens);
+						if(tok && tok.type === 'Punctuator' && tok.value === ';') {
+							end = tok.range[1];
+						} 
+						return {
+							text: '',
+							start: currentAnnotation.start,
+							end: end
+						};
+					});
+				});
+			},
 			"no-shadow": function(editorContext, context) {
 				return this.renamecommand.execute.call(this.renamecommand, editorContext, context);
 			},
