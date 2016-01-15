@@ -264,8 +264,7 @@ define([
 					buffer: "var a; function f() {var a;}",
 					rule: rule,
 					expected: expected,
-					callback: done,
-					delegate: true
+					callback: done
 				});
 			});
 			it("no-shadow 2", function(done) {
@@ -279,8 +278,7 @@ define([
 					buffer: "var a = 1; function foo() {var a; a = 10}",
 					rule: rule,
 					expected: expected,
-					callback: done,
-					delegate: true
+					callback: done
 				});
 			});
 		});
@@ -297,8 +295,7 @@ define([
 					buffer: "/*eslint-env browser*/ var document = 1;",
 					rule: rule,
 					expected: expected,
-					callback: done,
-					delegate: true
+					callback: done
 				});
 			});
 			it("no-shadow-global 2", function(done) {
@@ -312,8 +309,52 @@ define([
 					buffer: "/*eslint-env browser*/ var document = 1; console.log(document);",
 					rule: rule,
 					expected: expected,
-					callback: done,
-					delegate: true
+					callback: done
+				});
+			});
+		});
+		//NO-DUPE-KEYS
+		describe("no-dupe-keys", function() {
+			it("no-dupe-keys - rename 1", function(done) {
+				var rule = createTestRule("no-dupe-keys");
+				var expected = {
+					groups: [
+						{data: {}, positions: [{offset: 18, length: 3}]}
+					]
+				};
+				return getFixes({
+					buffer: "var v = {one: {}, one:{}};",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-dupe-keys - rename 2", function(done) {
+				var rule = createTestRule("no-dupe-keys");
+				var expected = {
+					groups: [
+						{data: {}, positions: [{offset: 20, length: 5}]}
+					]
+				};
+				return getFixes({
+					buffer: "var v = {'one': {}, 'one':{}};",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-dupe-keys - rename 3", function(done) {
+				var rule = createTestRule("no-dupe-keys");
+				var expected = {
+					groups: [
+						{data: {}, positions: [{offset: 27, length: 5}]}
+					]
+				};
+				return getFixes({
+					buffer: "var v = {one: {}, two: {}, 'one':{}};",
+					rule: rule,
+					expected: expected,
+					callback: done
 				});
 			});
 		});

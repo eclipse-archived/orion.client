@@ -329,6 +329,14 @@ define([
 		    return new Deferred().resolve(null) ;
 		},
 		fixes : {
+			"no-dupe-keys": function(editorContext, context) {
+				var start = context.annotation.start,
+					groups = [{data: {}, positions: [{offset: start, length: context.annotation.end-start}]}],
+					linkModel = {groups: groups};
+				return editorContext.exitLinkedMode().then(function() {
+					return editorContext.enterLinkedMode(linkModel);
+				});
+			},
 			"no-new-wrappers": function(editorContext, context, astManager) {
 				return astManager.getAST(editorContext).then(function(ast) {
 					var node = Finder.findNode(context.annotation.start, ast, {parents:true});
