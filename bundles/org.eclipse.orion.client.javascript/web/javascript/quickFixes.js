@@ -904,24 +904,29 @@ define([
 	         */
 	       "use-isnan": function(editorContext, context, astManager) {
 	       		return astManager.getAST(editorContext).then(function(ast) {
-	       			var node = Finder.findNode(context.annotation.start, ast, {parents:true});
-	                if(node && node.parents && node.parents.length > 0) {
-	                    var bin = node.parents.pop();
-	                    if(bin.type === 'BinaryExpression') {
-	                    	var tomove;
-	                    	if(bin.left.type === 'Identifier' && bin.left.name === 'NaN') {
-	                    		tomove = bin.right;
-	                    	} else if(bin.right.type === 'Identifier' && bin.right.name === 'NaN') {
-	                    		tomove = bin.left;
-	                    	}
-	                    	if(tomove) {
-		                    	return editorContext.getText(tomove.range[0], tomove.range[1]).then(function(text) {
-		                    		return editorContext.setText('isNaN('+text+')', bin.range[0], bin.range[1]);	 //$NON-NLS-1$
-		                    	});
-	                    	}
-	                    }
-	                }
-	       		});	
+		       		return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation){
+		       			var node = Finder.findNode(currentAnnotation.start, ast, {parents:true});
+		                if(node && node.parents && node.parents.length > 0) {
+		                    var bin = node.parents.pop();
+		                    if(bin.type === 'BinaryExpression') {
+		                    	var tomove;
+		                    	if(bin.left.type === 'Identifier' && bin.left.name === 'NaN') {
+		                    		tomove = bin.right;
+		                    	} else if(bin.right.type === 'Identifier' && bin.right.name === 'NaN') {
+		                    		tomove = bin.left;
+		                    	}
+		                    	if(tomove) {
+			                    	var src = ast.source.slice(tomove.range[0], tomove.range[1]);
+			                    	return {
+			                    		text: 'isNaN('+src+')', //$NON-NLS-1$
+			                    		start: bin.range[0],
+			                    		end: bin.range[1]
+			                    	};
+		                    	}
+		                    }
+		                }
+		       		});	
+	       		});
 	       },
 	        /** fix for the semi linting rule */
 	        "semi": function(editorContext, context) {

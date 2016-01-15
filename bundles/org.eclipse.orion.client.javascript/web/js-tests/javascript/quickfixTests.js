@@ -3008,6 +3008,32 @@ define([
 		});
 		//USE-ISNAN
 		describe("use-isnan", function() {
+			it("Test use-isnan multi fix 1", function(done) {
+				var rule = createTestRule("use-isnan");
+				var expected = [
+					{value: "isNaN(foo)", start: 3,	end: 14},
+					{value: "isNaN(bar)", start: 21,	end: 32}
+				];
+				return getFixes({
+					buffer: "if(foo === NaN){} if(NaN === bar){}",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("Test use-isnan multi fix 2", function(done) {
+				var rule = createTestRule("use-isnan");
+				var expected = [
+					{value: "isNaN(foo)", start: 3,	end: 14},
+					{value: "isNaN(bar)", start: 18,	end: 29}
+				];
+				return getFixes({
+					buffer: "if(foo === NaN || NaN === bar){}",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
 			it("Test use-isnan-1",function(callback) {
 				var rule = createTestRule('use-isnan');
 				var expected = {value: "isNaN(foo)",

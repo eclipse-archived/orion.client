@@ -633,6 +633,7 @@ define([
     			{
         			name: javascriptMessages["useIsNanFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+        			fixAllEnabled: true,
         			id : "use.isnan.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
