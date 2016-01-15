@@ -26,7 +26,7 @@ define([
 	
 	return function(worker) {
 		describe('Quick Fix Tests',function() {
-			this.timeout(100000);
+			this.timeout(10000);
 			before('Reset Tern Server', function() {
 				worker.start(); // Reset the tern server state to remove any prior files
 			});
@@ -40,6 +40,7 @@ define([
 			 * -    `callback` - the 'done' param from the tests, its required for all worker-based tests
 			 * -    `rule` - the rule object. {@link #createTestRule(...)}
 			 * -    `expected` - the array of expected fixes
+			 * -    `fixid` - the id of the rule to use if not the same as the one created by default - allows testing multifixes
 			 * @param {Object} options {buffer, contentType}
 			 * @returns {Object} The object with the initialized values
 			 */
@@ -387,8 +388,581 @@ define([
 				});
 			});
 		});
+		describe("no-new-wrappers", function() {
+			it("no-new-wrapper remove new, Math", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'Math',
+					start: 8,
+					end: 18
+				};
+				return getFixes({
+					buffer: "var n = new Math();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper remove new, JSON", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'JSON',
+					start: 8,
+					end: 18
+				};
+				return getFixes({
+					buffer: "var n = new JSON();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper remove new, String 1", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '',
+					start: 8,
+					end: 12
+				};
+				return getFixes({
+					buffer: "var n = new String(\"one\");",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper remove new, String spaces 1", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '',
+					start: 8,
+					end: 15
+				};
+				return getFixes({
+					buffer: "var n = new    String(\"one\");",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper remove new, String spaces 2", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '',
+					start: 8,
+					end: 15
+				};
+				return getFixes({
+					buffer: "var n =    new String(\"one\");",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper remove new, String spaces 3", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '',
+					start: 7,
+					end: 10
+				};
+				return getFixes({
+					buffer: "var n =new String(\"one\");",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper remove new, Number 1", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '',
+					start: 8,
+					end: 12
+				};
+				return getFixes({
+					buffer: "var n = new Number(12);",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper remove new, Number spaces 1", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '',
+					start: 8,
+					end: 15
+				};
+				return getFixes({
+					buffer: "var n = new    Number(12);",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper remove new, Number spaces 2", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '',
+					start: 8,
+					end: 15
+				};
+				return getFixes({
+					buffer: "var n =    new Number(12);",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper remove new, Number spaces 3", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '',
+					start: 7,
+					end: 10
+				};
+				return getFixes({
+					buffer: "var n =new Number(12);",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper remove new, Boolean 1", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '',
+					start: 8,
+					end: 12
+				};
+				return getFixes({
+					buffer: "var n = new Boolean(true);",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper remove new, Boolean spaces 1", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '',
+					start: 8,
+					end: 15
+				};
+				return getFixes({
+					buffer: "var n = new    Boolean(false);",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper remove new, Boolean spaces 2", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '',
+					start: 8,
+					end: 15
+				};
+				return getFixes({
+					buffer: "var n =    new Boolean(true);",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper remove new, Boolean spaces 3", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '',
+					start: 7,
+					end: 10
+				};
+				return getFixes({
+					buffer: "var n =new Boolean(false);",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, String 1", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '"one"',
+					start: 8,
+					end: 25
+				};
+				return getFixes({
+					buffer: 'var n = new String("one");',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, String 2", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '""',
+					start: 8,
+					end: 22
+				};
+				return getFixes({
+					buffer: 'var n = new String("");',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Math", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'Math',
+					start: 8,
+					end: 18
+				};
+				return getFixes({
+					buffer: 'var n = new Math();',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Math", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'JSON',
+					start: 8,
+					end: 18
+				};
+				return getFixes({
+					buffer: 'var n = new JSON();',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Number 1", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '13',
+					start: 8,
+					end: 22
+				};
+				return getFixes({
+					buffer: 'var n = new Number(13);',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Number 2", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '0',
+					start: 8,
+					end: 20
+				};
+				return getFixes({
+					buffer: 'var n = new Number();',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, non-number to Number 1", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'NaN',
+					start: 8,
+					end: 29
+				};
+				return getFixes({
+					buffer: 'var n = new Number(undefined);',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, non-number to Number 2", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'NaN',
+					start: 8,
+					end: 23
+				};
+				return getFixes({
+					buffer: 'var n = new Number(NaN);',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, non-number to Number 3", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '0',
+					start: 8,
+					end: 22
+				};
+				return getFixes({
+					buffer: 'var n = new Number("");',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, non-number to Number 4", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '0',
+					start: 8,
+					end: 23
+				};
+				return getFixes({
+					buffer: 'var n = new Number("0");',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, non-number to Number 5", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '1234',
+					start: 8,
+					end: 26
+				};
+				return getFixes({
+					buffer: 'var n = new Number("1234");',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, non-number to Number 6", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: '0',
+					start: 8,
+					end: 24
+				};
+				return getFixes({
+					buffer: 'var n = new Number(null);',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Boolean 1", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'true',
+					start: 8,
+					end: 25
+				};
+				return getFixes({
+					buffer: 'var n = new Boolean(true);',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Boolean 2", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'false',
+					start: 8,
+					end: 21
+				};
+				return getFixes({
+					buffer: 'var n = new Boolean();',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Boolean falsey 1", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'false',
+					start: 8,
+					end: 22
+				};
+				return getFixes({
+					buffer: 'var n = new Boolean(0);',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Boolean falsey 2", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'false',
+					start: 8,
+					end: 23
+				};
+				return getFixes({
+					buffer: 'var n = new Boolean(-0);',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Boolean falsey 2", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'false',
+					start: 8,
+					end: 25
+				};
+				return getFixes({
+					buffer: 'var n = new Boolean(null);',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Boolean falsey 3", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'false',
+					start: 8,
+					end: 23
+				};
+				return getFixes({
+					buffer: 'var n = new Boolean("");',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Boolean falsey 4", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'false',
+					start: 8,
+					end: 23
+				};
+				return getFixes({
+					buffer: "var n = new Boolean('');",
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Boolean falsey 5", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'false',
+					start: 8,
+					end: 30
+				};
+				return getFixes({
+					buffer: 'var n = new Boolean(undefined);',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Boolean falsey 6", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'false',
+					start: 8,
+					end: 24
+				};
+				return getFixes({
+					buffer: 'var n = new Boolean(NaN);',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Boolean truthy 1", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'true',
+					start: 8,
+					end: 25
+				};
+				return getFixes({
+					buffer: 'var n = new Boolean(true);',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Boolean truthy 2", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'true',
+					start: 8,
+					end: 23
+				};
+				return getFixes({
+					buffer: 'var n = new Boolean(12);',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Boolean truthy 3", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'true',
+					start: 8,
+					end: 23
+				};
+				return getFixes({
+					buffer: 'var n = new Boolean({});',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-new-wrapper convert to literal, Boolean truthy 4", function(done) {
+				var rule = createTestRule("no-new-wrappers");
+				var expected = {
+					value: 'true',
+					start: 8,
+					end: 26
+				};
+				return getFixes({
+					buffer: 'var n = new Boolean("one");',
+					rule: rule,
+					fixid: 'no-new-wrappers-literal',
+					expected: expected,
+					callback: done
+				});
+			});
+		});
 		//NO-COMMA-DANGLE
-		describe('no-comma-dangle', function(){
+		describe('no-comma-dangle', function() {
 			it("Test no-comma-dangle-1", function(callback) {
 				var rule = createTestRule('no-comma-dangle');
 				var expected = {value: "",

@@ -867,6 +867,45 @@ define([
 					]
 				}
 		);
+		
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+				quickFixComputer,
+				{
+					name: javascriptMessages["noNewWrappersFixName"],
+					scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+					id : "no.new.wrappers.fix",  //$NON-NLS-1$
+					contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+					validationProperties: [
+						{
+							source: "annotation:id", //$NON-NLS-1$
+							match: "^(?:no-new-wrappers)$" //$NON-NLS-1$
+						} 
+					]
+				}
+		);
+		
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+				{
+    				execute: function(editorContext, context) {
+		    			if(context.annotation.id === 'no-new-wrappers') {
+		    			    context.annotation.fixid = 'no-new-wrappers-literal'; //$NON-NLS-1$
+		    			}
+		    			return quickFixComputer.execute(editorContext, context);
+		    		}
+    			},
+				{
+					name: javascriptMessages["noNewWrappersLiteralFixName"],
+					scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+					id : "no.new.wrappers.literal.fix",  //$NON-NLS-1$
+					contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+					validationProperties: [
+						{
+							source: "annotation:id", //$NON-NLS-1$
+							match: "^(?:no-new-wrappers)$" //$NON-NLS-1$
+						} 
+					]
+				}
+		);
 
     	/**
     	 * legacy pref id

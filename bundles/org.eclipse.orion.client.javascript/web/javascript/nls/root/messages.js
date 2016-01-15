@@ -56,6 +56,8 @@ define({
 	'noNewFunc': 'Discouraged \'new Function()\':',
 	'noNewObject': 'Discouraged \'new Object()\':',
 	'noNewWrappers': 'Discouraged wrapper objects:',
+	'noNewWrappersLiteralFixName': 'Convert to literal',
+	'noNewWrappersFixName': 'Remove \'new\' keyword',
 	'noMixedSpacesAndTabs' : 'Mixed spaces and tabs:',
 	'missingSemi' : 'Missing semicolons:',
 	'unusedVars' : 'Unused variables:',
