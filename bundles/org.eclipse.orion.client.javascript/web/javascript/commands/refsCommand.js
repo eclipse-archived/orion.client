@@ -169,54 +169,56 @@ define([
 							if(err) {
 								deferred.reject({Severity: 'Error', Message: err}); //$NON-NLS-1$
 							} else {
-								var expected = Object.create(null);
-								expected.total = 0;
-								expected.done = 0;
-								expected.result = [];
-								var searchParams = {keyword: node.name, 
-									resource: that.scriptresolver.getSearchLocation(), 
-									fileNamePatterns: ["*.js", "*.html", "*.htm"],  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-									caseSensitive: true, 
-									incremental:false, 
-									shape: 'group' //$NON-NLS-1$
-								};
-								expected.params = searchParams;
-								expected.deferred = deferred;
-								var srcCache = {};
-								that.serviceRegistry.getService("orion.core.search.client").search(searchParams, true, true).then(function(searchResult) { //$NON-NLS-1$
-									expected.result = searchResult;
-									for (var h = 0, l1 = searchResult.length; h < l1; h++) {
-										var file = searchResult[h];
-										var source = Array.isArray(file.contents) ? file.contents.join("") : null;
-										srcCache[file.metadata.Location] = {};
-										for(var i = 0, l2 = file.children.length; i < l2; i++) {
-											var line = file.children[i];
-											expected.total += line.matches.length;
-											for(var j = 0, l3 = line.matches.length; j < l3; j++) {
-												var match = line.matches[j];
-												var v = Finder.findWord(line.name, match.startIndex);
-												if(v === node.name) {
-													//XXX do not send the full source more than once
-													//until bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=474420 is fixed
-													var req = {request: 'checkRef', args: {meta:{location: file.metadata.Location}, params: {offset: match.end}, origin: type}}; //$NON-NLS-1$
-													if(!srcCache[file.metadata.Location].src) {
-														srcCache[file.metadata.Location].src = true;
-														req.files = [{type: 'full', name: file.metadata.Location, text: source}]; //$NON-NLS-1$;
-													}													
-													that._checkType(type, file.metadata, match, expected, req);
-												} else {
-													match.category = categories.partial.category;
-													match.confidence = 0;
-													expected.done++;
+								that.scriptresolver.getSearchLocation().then(function(searchLocation) {
+									var expected = Object.create(null);
+									expected.total = 0;
+									expected.done = 0;
+									expected.result = [];
+									var searchParams = {keyword: node.name, 
+										resource: searchLocation, 
+										fileNamePatterns: ["*.js", "*.html", "*.htm"],  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+										caseSensitive: true, 
+										incremental:false, 
+										shape: 'group' //$NON-NLS-1$
+									};
+									expected.params = searchParams;
+									expected.deferred = deferred;
+									var srcCache = {};
+									that.serviceRegistry.getService("orion.core.search.client").search(searchParams, true, true).then(function(searchResult) { //$NON-NLS-1$
+										expected.result = searchResult;
+										for (var h = 0, l1 = searchResult.length; h < l1; h++) {
+											var file = searchResult[h];
+											var source = Array.isArray(file.contents) ? file.contents.join("") : null;
+											srcCache[file.metadata.Location] = {};
+											for(var i = 0, l2 = file.children.length; i < l2; i++) {
+												var line = file.children[i];
+												expected.total += line.matches.length;
+												for(var j = 0, l3 = line.matches.length; j < l3; j++) {
+													var match = line.matches[j];
+													var v = Finder.findWord(line.name, match.startIndex);
+													if(v === node.name) {
+														//XXX do not send the full source more than once
+														//until bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=474420 is fixed
+														var req = {request: 'checkRef', args: {meta:{location: file.metadata.Location}, params: {offset: match.end}, origin: type}}; //$NON-NLS-1$
+														if(!srcCache[file.metadata.Location].src) {
+															srcCache[file.metadata.Location].src = true;
+															req.files = [{type: 'full', name: file.metadata.Location, text: source}]; //$NON-NLS-1$;
+														}													
+														that._checkType(type, file.metadata, match, expected, req);
+													} else {
+														match.category = categories.partial.category;
+														match.confidence = 0;
+														expected.done++;
+													}
 												}
 											}
 										}
-									}
-									that._checkDone(expected);
-								}, /* @callback */ function(err) {
-									deferred.reject({Severity: 'Error', Message: i18nUtil.formatMessage(Messages['cannotComputeRefs'], err.message)}); //$NON-NLS-1$
-								}, /* @callback */ function(result) {
-									//TODO progress
+										that._checkDone(expected);
+									}, /* @callback */ function(err) {
+										deferred.reject({Severity: 'Error', Message: i18nUtil.formatMessage(Messages['cannotComputeRefs'], err.message)}); //$NON-NLS-1$
+									}, /* @callback */ function(result) {
+										//TODO progress
+									});
 								});
 						  }
 					});

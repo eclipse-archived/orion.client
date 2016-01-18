@@ -61,7 +61,10 @@ define([
        		this.searchLocation = searchLocation;
        },
 	   getSearchLocation: function() {
-	   		return this.searchLocation || "";
+	   		if(typeof this.searchLocation === 'string' && this.searchLocation.length > 0) {
+	   			return new Deferred().resolve(this.searchLocation);
+	   		}
+	   		return this.getFileClient().fileServiceRootURL();
 	   },
        _getFile : function _getFile(name, options) {
            var files = this.cache.get(name);
