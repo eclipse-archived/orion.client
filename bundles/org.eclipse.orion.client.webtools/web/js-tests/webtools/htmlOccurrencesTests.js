@@ -108,7 +108,7 @@ define([
 		it('Matching tags selection 1', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 0, end: 0}}).then(function(results) {
-				assertOccurrences(results, []);
+				assertOccurrences(results, [{start: 1, end: 5}, {start: 28, end: 33}]);
 			});
 		});
 		it('Matching tags selection 2', function() {
@@ -132,7 +132,7 @@ define([
 		it('Matching tags selection 5', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 0, end: 1}}).then(function(results) {
-				assertOccurrences(results, []);
+				assertOccurrences(results, [{start: 1, end: 5}, {start: 28, end: 33}]);
 			});
 		});
 		it('Matching tags selection 6', function() {
@@ -144,18 +144,18 @@ define([
 		it('Matching tags selection 7', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 19, end: 19}}).then(function(results) {
+				assertOccurrences(results, [{start: 20, end: 21}, {start: 23, end: 25}]);
+			});
+		});
+		it('Matching tags selection 8', function() {
+			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 18, end: 19}}).then(function(results) {
 				assertOccurrences(results, [{start: 1, end: 5}, {start: 28, end: 33}]);
 			});
 		});
-		it('Matching tags selection 8', function() {
+		it('Matching tags selection - bogus selection', function() {
 			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
-			return occurrences.computeOccurrences(editorContext, {selection: {start: 18, end: 19}}).then(function(results) {
-				assertOccurrences(results, []);
-			});
-		});
-		it('Matching tags selection 8', function() {
-			editorContext.text = "<html>\n<a>test</a>\n<a></a>\n</html>";
-			return occurrences.computeOccurrences(editorContext, {selection: {start: 18, end: 19}}).then(function(results) {
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 500, end: 500}}).then(function(results) {
 				assertOccurrences(results, []);
 			});
 		});

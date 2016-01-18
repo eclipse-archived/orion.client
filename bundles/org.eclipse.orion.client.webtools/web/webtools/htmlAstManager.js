@@ -17,30 +17,25 @@ define([
 	'javascript/lru',
 	'orion/metrics',
 	'htmlparser2/parser',
-	'htmlparser/htmlparser'  //stays last, exports into global scope
 ], function(Deferred, Objects, LRU, Metrics, HtmlParser2) {
 
 	var handler = {
 		ast: null,
 		tagstack: [],
-		comments: [],
 		errors: [],
-		attribstack: [],
+		attribstack: Object.create(null),
 	    onopentag: function(name, attribs, range){
+	    	this.trailingTag = null;
 	    	var node = Object.create(null);
 	    	node.range = [0, 0];
 	    	if(Array.isArray(range)) {
 	    		node.range[0] = range[0];
+	    		node.range[1] = range[1]; // Inline tags don't have separate onclosetag calls
 	    		node.openrange = range;
 	    	} 
 	    	node.name = name;
 	    	node.type = 'tag'; //$NON-NLS-1$
-	    	node.attributes = [];
-	    	if(Array.isArray(this.attribstack)) {
-	    		for (var i = 0; i < this.attribstack.length; i++) {
-	    			node.attributes[i] = this.attribstack[i];
-	    		}	
-	    	}
+	    	node.attributes = this.attribstack;
  	    	node.children = [];
 	    	var tag = this._getLastTag();
 	    	if(tag) {
@@ -48,7 +43,7 @@ define([
 	    	} else {
 	    		this.ast.children.push(node);
 	    	}
-	    	this.attribstack = [];
+	    	this.attribstack = Object.create(null);
 	    	this.tagstack.push(node);
 	    },
 	    onclosetag: function(tagname, range){
@@ -58,7 +53,7 @@ define([
 	    			tag.range[1] = range[1];
 	    			tag.endrange = range;
     			} else {
-    				// No matching closing tag
+    				// No matching closing tag or void element
     				// TODO Need to add tests for this, can it have children as well as text?
     				if (tag.openrange && tag.text){
     					tag.range[1] = tag.openrange[1] + tag.text.value.length;
@@ -68,15 +63,20 @@ define([
 	    		this.tagstack.pop();
 	    	}
 	    },
-	    onopentagname: function(name) {
+	    onopentagname: function(name, rangeStart) {
+	    	this.trailingTag = {name: name, start: rangeStart};
+	    },
+	    onattribname: function(name, rangeStart) {
+	    	this.trailingAttrib = {name: name, start: rangeStart};
 	    },
 	    onattribute: function(name, value, range) {
+	    	this.trailingAttrb = null;
 	    	var node = Object.create(null);
 	    	node.range = Array.isArray(range) ? range : [0, 0];
 	    	node.name = name;
 	    	node.type = 'attr'; //$NON-NLS-1$
 	    	node.value = value;
-	    	this.attribstack.push(node);
+	    	this.attribstack[node.name] = node;
 	    },
 	    onprocessinginstruction: function(name, data, range) {
 	    	var node = Object.create(null);
@@ -95,13 +95,19 @@ define([
 	    	var node = Object.create(null);
 	    	node.range = Array.isArray(range) ? range : [0, 0];
 	    	node.type = 'comment'; //$NON-NLS-1$
-	    	node.value = data;
-	    	this.comments.push(node);
+	    	node.data = data;
+	    	
+	    	var tag = this._getLastTag();
+	    	if(tag) {
+	    		tag.children.push(node);
+	    	} else {
+	    		this.ast.children.push(node);
+	    	}
 	    },
 	    oncommentend: function(range) {
-	    	if(Array.isArray(range)) {
-	    		this.comments[this.comments.length-1].range[1] = range[1];
-	    	}
+//	    	if(Array.isArray(range)) {
+//	    		this.comments[this.comments.length-1].range[1] = range[1];
+//	    	}
 	    },
 	    oncdatastart: function() {
 	    	var node = Object.create(null);
@@ -128,6 +134,15 @@ define([
 	    	this.errors.push(err);
 	    },
 	    onend: function(range) {
+	    	// The ordering is important here as trailing attributes need to be added to the tag
+	    	if (this.trailingAttrib){
+	    		// TODO Recover trailing value
+	    		this.onattribute(this.trailingAttrib.name, null, [this.trailingAttrib.start,range[1]]);
+	    	}
+	    	if (this.trailingTag){
+	    		this.onopentag(this.trailingTag.name, null, [this.trailingTag.start,range[1]]);
+	    	}
+	    	
 	    	if(Array.isArray(range)) {
 	    		this.ast.range[0] = this.ast.children.length > 0 ? this.ast.children[0].range[0] : 0;
 	    		this.ast.range[1] = range[1];
@@ -202,27 +217,16 @@ define([
 		 */
 		parse: function(text) {
 			var parser = new HtmlParser2(handler, {decodeEntities: true, recognizeSelfClosing: true});
+			var start = Date.now();
 			parser.reset();
 			parser.write(text);
 			parser.done();
+			var end = Date.now()-start;
 			if(handler.ast) {
 				handler.ast.source = text;
-				//return handler.ast;
 			}
-		    var domResult;
-			var _handler = new Tautologistics.NodeHtmlParser.HtmlBuilder(function(error, dom) {
-				if (!error) {
-					//parsing done
-					domResult = dom;
-				}
-			}, {ignoreWhitespace: true, includeLocation: true, verbose: false});
-			var parser = new Tautologistics.NodeHtmlParser.Parser(_handler);
-			var start = Date.now();
-			parser.parseComplete(text);
-			var end = Date.now()-start;
 			Metrics.logTiming('language tools', 'parse', end, 'text/html'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			domResult.source = text;
-			return domResult;
+			return handler.ast;
 		},
 
 		/**

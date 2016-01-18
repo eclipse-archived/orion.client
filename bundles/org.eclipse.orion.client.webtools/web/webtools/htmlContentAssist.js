@@ -178,7 +178,6 @@ define([
 		 * @since 10.0 
 		 */
 		computeProposalsFromAst: function(ast, params) {
-			var proposals = [];
 			var node = util.findNodeAtOffset(ast, params.offset);
 			if(node) {
 				if(this.inScriptOrStyle(node, params.offset, ast.source) || this.inClosingTag(node, params.offset, ast.source)) {
@@ -198,12 +197,9 @@ define([
 				}
 				return this.getProposalsForTextContent(node, ast.source, params);
 			}
-			// If the user has no completed tags, still offer tag templates
-			// TODO Can be removed if the parser creates text node for unfinished tags Bug 472659
-			if (ast.source.match(/^\s*<?\s*$/)) {
-				return this.getTags(ast.source, params);
-			}
-			return proposals;
+			
+			// If we have a non-empty source file with no valid tags, still offer tag completions
+			return this.getTags(ast.source, params);
 		},
 		
 		/**
@@ -257,6 +253,11 @@ define([
 			if(node && source) {
 				switch(node.type) {
 					case 'tag': {
+						// Smarter way now that we have end ranges
+						if (node.endrange){
+							return offset > node.endrange[0] && offset < node.endrange[1];
+						}
+						// TODO Delete the old way
 						var _s = source.slice(node.range[0], node.range[1]);
 						var _r = new RegExp("<\\s*\/\\s*"+node.name+"\\s*>$"); //$NON-NLS-1$ //$NON-NLS-2$
 						var _m = _r.exec(_s);
@@ -268,7 +269,7 @@ define([
 					default: {
 						var _p = node.parent;
 						if(_p && _p.type === 'tag') {
-							return Array.isArray(_p.children) && (offset > _p.children[_p.children.length-1].range[1]) && offset <= _p.range[1];
+							return Array.isArray(_p.children) && _p.children.length > 0 && (offset > _p.children[_p.children.length-1].range[1]) && offset <= _p.range[1];
 						}
 						break;
 					}
@@ -343,7 +344,11 @@ define([
 			if(node) {
 				var offset = params.offset;
 				if(node.type === 'tag') {
-					if (offset >= node.range[0] && offset <= node.range[1]){
+					if (node.openrange){
+						if (offset >= node.openrange[0] && offset <= node.openrange[1]){
+							return true;
+						}
+					} else if (offset >= node.range[0] && offset <= node.range[1]){
 						return true;
 					}
  				}
@@ -361,13 +366,25 @@ define([
 		getTags: function(source, params) {
 			var tags = Tags.tagTemplates;
 			var proposals = [];
+			var namePrefix = params.prefix ? params.prefix : "";
+			var precedingChar = source.charAt(params.offset - namePrefix.length - 1);
+			if (namePrefix.length === 0){
+				while (precedingChar === '!' || precedingChar === '-'){
+					namePrefix = precedingChar + namePrefix;
+					precedingChar = source.charAt(params.offset - namePrefix.length - 1);
+				}
+				if (namePrefix.match(/^!-?$/)){
+					var prefix = '<' + namePrefix;
+					proposals.push(this.makeComputedProposal("<!-- ", Messages['openCommentName'], " - <!-- -->", null, prefix)); //$NON-NLS-1$ //$NON-NLS-2$
+					return proposals;
+				}
+			}
+			var leadingBracket = false;
+			if (precedingChar === '<'){
+				leadingBracket = true;
+			}
 			for(var j = 0; j < tags.length; j++) {
 				var tag = tags[j];
-				var namePrefix = params.prefix ? params.prefix : "";
-				var leadingBracket = false;
-				if (source.charAt(params.offset - namePrefix.length - 1) === '<'){
-					leadingBracket = true;
-				}
 				if(jsUtil.looselyMatches(namePrefix, tag.name)) {
 					var hover = Object.create(null);
 					hover.type = 'markdown'; //$NON-NLS-1$
@@ -520,6 +537,7 @@ define([
 		},
 		
 		addProposals: function addProposals(node, attrs, params) {
+			// TODO Try adding spaces ahead of the attribute if previous attribute had no trailing whitespace
 			var proposals = [];
 			var tagNode = node;
 			if (node.type === 'attr' && node.parent){
@@ -644,6 +662,8 @@ define([
 				// If we have an uncompleted tag '</' offer to complete the tag
 				if (node.type === 'text' && node.parent && node.parent.type === 'tag'){
 					startTag = node.parent;
+				} else if (node.type === 'tag' && node.openrange && params.offset > node.openrange[1]){
+					startTag = node;
 				} else if (node.type === 'tag' && (params.offset > node.range[1] || params.offset < node.range[0])){
 					startTag = node;
 				}
@@ -669,6 +689,7 @@ define([
 		 * @since 10.0 
 		 */
 		isCompletingAttributeValue: function(node, source, params) {
+			// TODO We can do better with the new parser, handle no quotes cases too
 			if(node && node.type === 'attr') {
 				return this.within('"', '"', source, params.offset, node.range) || //$NON-NLS-1$ //$NON-NLS-2$
 						this.within("'", "'", source, params.offset, node.range); //$NON-NLS-1$ //$NON-NLS-2$

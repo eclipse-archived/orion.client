@@ -187,7 +187,7 @@ define([
 	};
 	
 	Tokenizer.prototype._stateInTagName = function(c){
-		if(c === "/" || c === ">" || whitespace(c)){
+		if(c === "/" || c === ">" || c === '<' || whitespace(c)){
 			this._emitToken("onopentagname");
 			this._state = BEFORE_ATTRIBUTE_NAME;
 			this._index--;
@@ -232,6 +232,12 @@ define([
 			this._cbs.onopentagend();
 			this._state = TEXT;
 			this._sectionStart = this._index + 1;
+		} else if(c === "<"){
+			// TODO Orion 11.0 This case allows parsing of incomplete tags as tags not attrs
+			this._cbs.onopentagend();
+			this._state = BEFORE_TAG_NAME;
+			this._sectionStart = this._index;
+			this._index--;
 		} else if(c === "/"){
 			this._state = IN_SELF_CLOSING_TAG;
 		} else if(!whitespace(c)){
@@ -804,7 +810,7 @@ define([
 	
 			this._index++;
 		}
-	
+		this._eof = this._index; // TODO Orion 11.0 Track the end of file for recovery
 		this._cleanup();
 	};
 	

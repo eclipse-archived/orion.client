@@ -649,13 +649,13 @@ define([
     			assertProposals(proposals, []);
     		});
     	});
-    	// TODO: This returns 0 proposals. Shouldn't this propose href=""?
-//    	it('Attribute value proposals 3', function() {
-//    		var _o = setup({buffer: '<a href=></a>'});
-//    		return assist.computeContentAssist(_o.editorContext, {offset: 8, prefix: 'href='}).then(function(proposals) {
-//    			assertProposals(proposals, [{proposal: 'href=""', prefix: 'href='}]);
-//    		});
-//    	});
+    	// TODO: This returns 0 proposals. Shouldn't this propose href=""?  No proposals because = isn't a valid content assist character
+    	it.skip('Attribute value proposals 3', function() {
+    		var _o = setup({buffer: '<a href=></a>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 8, prefix: 'href='}).then(function(proposals) {
+    			assertProposals(proposals, [{proposal: 'href=""', prefix: 'href='}]);
+    		});
+    	});
     	it('Attribute value proposals incomplete tag 1', function() {
     		var _o = setup({buffer: '<a href=""'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 9}).then(function(proposals) {

@@ -36,7 +36,7 @@ define(['orion/Deferred'], function(Deferred) {
         "git"		: {source: "org.eclipse.orion.client.git/web/git"},
         "help"		: {source: "org.eclipse.orion.client.help/web/help"},
         "helpContent": {source: "org.eclipse.orion.client.help/web/helpContent"},
-        "htmlparser": {source: "org.eclipse.orion.client.webtools/web/htmlparser"},
+        "htmlparser2": {source: "org.eclipse.orion.client.webtools/web/htmlparser2"},
         "images"	: {source: "org.eclipse.orion.client.ui/web/images"},
         "javascript": {source: "org.eclipse.orion.client.javascript/web/javascript"},
         "jsdiff"	: {source: "org.eclipse.orion.client.ui/web/jsdiff"},

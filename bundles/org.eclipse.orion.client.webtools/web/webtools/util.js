@@ -12,7 +12,7 @@
  *******************************************************************************/
 /*eslint-env amd*/
 define([
-'htmlparser/visitor'
+'htmlparser2/visitor'
 ], function(Visitor) {
 
 	var Util = {
@@ -28,7 +28,11 @@ define([
 		 */
 		findNodeAtOffset: function(ast, offset) {
 			var found = null;
-			 Visitor.visit(ast, {
+			var dom = ast;
+			if (!Array.isArray(ast) && ast.children){
+				dom = ast.children;
+			}
+			 Visitor.visit(dom, {
 	            visitNode: function(node) {
 					if(node.range[0] <= offset) {
 						found = node;
@@ -37,7 +41,7 @@ define([
 					}      
 	            },
 	            endVisitNode: function(node) {
-	            	if(found && offset > found.range[1] && offset > node.range[0]) {
+	            	if(found && offset >= found.range[1] && offset > node.range[0]) {
 	            		found = node;
 	            	}
 	            }

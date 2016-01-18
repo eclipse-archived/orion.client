@@ -55,6 +55,18 @@ define([
 		if(ast && ctxt) {
 			var start = ctxt.selection.start;
 			var end = ctxt.selection.end;
+			var source = ast.source;
+			
+			// If caret is beside a tag, mark it rather than the parent
+			if (start === end){
+				if ('<' === source[start]){
+					start++;
+					end++;
+				} else if ('>' === source[start-1]){
+					start--;
+					end--;
+				}
+			}
 			var node = util.findNodeAtOffset(ast, start);
 			if(node) {
 				if ((node.type === 'attr' || node.type === 'text') && node.parent){
@@ -64,28 +76,28 @@ define([
 					var occurrences = [];
 					var tagName = node.name;
 					var openTagStart = node.range[0];
+					openTagStart++; // after the open bracket <
 					var openTagEnd = openTagStart+tagName.length;
-					var closeTagEnd = node.range[1];
+					var closeTagEnd = node.range[1] - 1;
 					var closeTagStart = closeTagEnd;
-					closeTagStart--; // before the close bracket >
 					
 					// Since the parser does not handle incorrect HTML well, we do some sanity checking here
-					var source = ast.source;
-					
 					if(tagName !== source.substring(openTagStart, openTagEnd)){
 						return []; // Unexpected open tag, abort
 					}
 					
 					var char = source[closeTagStart];
 					if (char === '>'){
-						closeTagEnd--;
-						closeTagStart -= tagName.length;
 						closeTagStart--;
-						if ('/' + tagName !== source.substring(closeTagStart,closeTagEnd)){
-							return []; // Unexpected end tag, abort
+						// With htmlParser2 we could check existence of closeTagRange instead
+						// Check for inline tag format <body/>
+						if ('/' !== source[closeTagStart]){
+							closeTagStart -= tagName.length;
+							if ('/' + tagName !== source.substring(closeTagStart,closeTagEnd)){
+								return []; // Unexpected end tag, abort
+							}
 						}
-					} else if (char !== '/'){
-						// Inline tags <a /> don't include the closing bracket in their offset
+					} else {
 						return []; // Unexpected character, abort
 					}
 					

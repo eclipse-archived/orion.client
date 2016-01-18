@@ -388,7 +388,7 @@ define([
 			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
 				var node = Util.findNodeAtOffset(ast, 4);
 				assert(node, 'we should have found a node');
-				assert.equal(node.type, 'text', 'We should have found a tag node');
+				assert.equal(node.type, 'tag', 'We should have found a tag node');
 			});
 		});
 		/**
@@ -400,7 +400,7 @@ define([
 			return htmlAstManager.getAST(getEditorContext(text)).then(function(ast) {
 				var node = Util.findNodeAtOffset(ast, 15);
 				assert(node, 'we should have found a node');
-				assert.equal(node.type, 'text', 'We should have found a tag node');
+				assert.equal(node.type, 'tag', 'We should have found a tag node');
 			});
 		});
 		/**

@@ -103,7 +103,8 @@ define([
 	
 		this._tagname = "";
 		this._attribname = "";
-		this._attribvalue = "";
+		this._attribvalue = null; // TODO Orion 11.0 Make null to distinguish between no value and =""
+		this._attribrange = [];
 		this._attribs = null;
 		this._stack = [];
 	
@@ -172,7 +173,7 @@ define([
 			this._stack.push(name);
 		}
 	
-		if(this._cbs.onopentagname) this._cbs.onopentagname(name);
+		if(this._cbs.onopentagname) this._cbs.onopentagname(name, this._tokenizer._sectionStart-1);
 		if(this._cbs.onopentag) this._attribs = {};
 	};
 	
@@ -180,12 +181,12 @@ define([
 		this._updatePosition(1);
 	
 		if(this._attribs){
-			if(this._cbs.onopentag) this._cbs.onopentag(this._tagname, this._attribs, [this.startIndex, this.endIndex]); //ORION
+			if(this._cbs.onopentag) this._cbs.onopentag(this._tagname, this._attribs, [this.startIndex, this.endIndex+1]); //ORION
 			this._attribs = null;
 		}
 	
 		if(!this._options.xmlMode && this._cbs.onclosetag && this._tagname in voidElements){
-			this._cbs.onclosetag(this._tagname, [this.startIndex, this.endIndex]); //ORION
+			this._cbs.onclosetag(this._tagname);
 		}
 	
 		this._tagname = "";
@@ -203,7 +204,7 @@ define([
 			if(pos !== -1){
 				if(this._cbs.onclosetag){
 					pos = this._stack.length - pos;
-					while(pos--) this._cbs.onclosetag(this._stack.pop(), [this.startIndex, this.endIndex]); //ORION
+					while(pos--) this._cbs.onclosetag(this._stack.pop(), [this.startIndex, this.endIndex+1]); //ORION
 				}
 				else this._stack.length = pos;
 			} else if(name === "p" && !this._options.xmlMode){
@@ -240,6 +241,8 @@ define([
 	};
 	
 	Parser.prototype.onattribname = function(name){
+		this._attribrange[0] = this._tokenizer._sectionStart; // TODO Orion 11.0 Collect attribute ranges
+		if (this._cbs.onattribname) this._cbs.onattribname(name, this._attribrange[0]); // TODO Orion 11.0 Collect open tags to recover
 		if(this._lowerCaseAttributeNames){
 			name = name.toLowerCase();
 		}
@@ -247,11 +250,17 @@ define([
 	};
 	
 	Parser.prototype.onattribdata = function(value){
-		this._attribvalue += value;
+		if (this._attribvalue){
+			this._attribvalue += value;
+		} else {
+			this._attribvalue = value; // TODO Orion 11.0 Distinguish between no value and =""
+		}
+
 	};
 	
 	Parser.prototype.onattribend = function(){
-		if(this._cbs.onattribute) this._cbs.onattribute(this._attribname, this._attribvalue, [this.startIndex, this._tokenizer.getAbsoluteIndex()]); //ORION
+		this._attribrange[1] = this._tokenizer.getAbsoluteIndex()+1;  // TODO Orion 11.0 Collect attribute ranges
+		if(this._cbs.onattribute) this._cbs.onattribute(this._attribname, this._attribvalue, this._attribrange);
 		if(
 			this._attribs &&
 			!Object.prototype.hasOwnProperty.call(this._attribs, this._attribname)
@@ -259,7 +268,7 @@ define([
 			this._attribs[this._attribname] = this._attribvalue;
 		}
 		this._attribname = "";
-		this._attribvalue = "";
+		this._attribvalue = null;
 	};
 	
 	Parser.prototype._getInstructionName = function(value){
@@ -318,7 +327,7 @@ define([
 				this._cbs.onclosetag(this._stack[--i])
 			);
 		}
-		if(this._cbs.onend) this._cbs.onend([this.startIndex, this.endIndex]); //ORION
+		if(this._cbs.onend) this._cbs.onend([this.startIndex, this._tokenizer._eof]); //ORION
 	};
 	
 	
