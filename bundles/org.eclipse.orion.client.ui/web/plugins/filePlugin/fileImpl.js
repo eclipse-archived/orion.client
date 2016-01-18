@@ -626,7 +626,30 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				}
 				return result;
 			}.bind(this));
-		}
+		},
+
+		/**
+		 * Performs a quick check on the existence of given path
+		 * @param {String} loc The location of the file to check for
+		 * @param {String} sourceLoc The Location of the folder where the check is performed
+		 */
+		 checkExistence: function(loc, sourceLoc){
+			 var url = new URL(loc, self.location);
+			 return _xhr("GET", url.href, {
+				 timeout: 15000,
+				 headers: { "Orion-Version": "1", "checkExistence" : "on" },
+				 log: false
+			 }).then(function(result) {
+				 if(result.response === "" && result.status === 200){
+					 //If the response is empty, it means the server has the file/folder
+					 return true;
+				 } else {
+					 //If server reponsde with a JSON object, it means the loc is not existed
+					 //Extra info can be found in the object (like whether it is 404 or 403) after parsing (like JSON.parse(result.response)).
+					 return false;
+				 }
+			 }.bind(this));
+		 }
 	};
 	
 	function _handleError(error) {
