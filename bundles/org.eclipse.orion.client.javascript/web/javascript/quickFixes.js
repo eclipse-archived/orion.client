@@ -593,10 +593,16 @@ define([
 	         */
 	       "no-reserved-keys": function(editorContext, context, astManager) {
 	       		return astManager.getAST(editorContext).then(function(ast) {
-	       			var node = Finder.findNode(context.annotation.start, ast, {parents:true});
-	                if(node && node.type === 'Identifier') {
-	                	return editorContext.setText('"'+node.name+'"', node.range[0], node.range[1]); //$NON-NLS-1$ //$NON-NLS-2$
-					}
+	       			return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation) {
+	       				var node = Finder.findNode(currentAnnotation.start, ast, {parents:true});
+		                if(node && node.type === 'Identifier') {
+			                return {
+			                	text: '"'+node.name+'"', //$NON-NLS-2$ //$NON-NLS-1$
+			                	start: node.range[0],
+			                	end: node.range[1]
+			                };
+						}
+	       			});
 	       		});
 	        },
 	        /** 

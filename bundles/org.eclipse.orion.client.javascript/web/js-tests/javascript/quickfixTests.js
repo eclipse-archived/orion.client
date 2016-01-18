@@ -1721,6 +1721,19 @@ define([
 									expected: expected,
 									callback: callback});
 			});
+			it("Test no-reserved-keys multi 1", function(done) {
+				var rule = createTestRule("no-reserved-keys");
+				var expected = [
+					{value: '"void"', start: 9, end: 13},
+					{value: '"in"', start: 18, end: 20}
+				];
+				return getFixes({
+					buffer: "var v = {void: {},in: {}};",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
 		});
 		//NO-UNDEF
 		describe("no-undef", function() {
