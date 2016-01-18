@@ -1210,7 +1210,7 @@ define([
                         var len = node.leadingComments.length;
                         for(var i = 0; i < len; i++) {
                             var comment = node.leadingComments[i];
-                            if(comment.type === 'Block' && /\s*(?:@callback)\s+/.test(comment.value)) {
+                            if (comment.type === 'Block' && /\s*(?:@(callback|public))\s+/.test(comment.value)) {
                                 return true;
                             }
                         }
