@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2010, 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /* eslint-disable missing-nls */
@@ -13,7 +13,7 @@
 define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "orion/form"], function(Deferred, xhr, _, operation, form) {
 
 	/**
-	 * An implementation of the file service that understands the Orion 
+	 * An implementation of the file service that understands the Orion
 	 * server file API. This implementation is suitable for invocation by a remote plugin.
 	 */
 	function makeAbsolute(loc) {
@@ -33,7 +33,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		}
 		return data;
 	}
-	
+
 	function _copyLocation(loc, remove, append) {
 		var result = loc;
 		if (remove) {
@@ -44,7 +44,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		}
 		return result;
 	}
-	
+
 	//Note: this is very dependent on the server side code
 	function _copyLocations(target, source, remove, append) {
 		["Location", "ImportLocation", "ExportLocation"].forEach(function(key) {
@@ -66,7 +66,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			target.JazzHub = source.JazzHub;
 		}
 	}
-	
+
 	function expandLocations(metadata) {
 		if (!metadata.Parents) return;
 		var temp = metadata;
@@ -82,7 +82,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			temp = p;
 		});
 	}
-	
+
 	// java servers are semi-colon challenged
 	function cleanseUrl(path) {
 		if (path) {
@@ -127,11 +127,11 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			var wildcard= (/\*$/.test(searchParams.keyword) ? "" : "*"); //$NON-NLS-0$
 			newKeyword = "NameLower:" + newKeyword + wildcard;
 		} else {
-			//If searching on a specific file type, we want to inject the file type into the query string so that it will be passed to the search engine. 
+			//If searching on a specific file type, we want to inject the file type into the query string so that it will be passed to the search engine.
 			if(searchParams.fileType && searchParams.fileType !== "*.*"){
 				//If the search string is not empty, we just combine the file type.
 				if(newKeyword !== ""){
-					//If the search string contains white space, we should add double quato at both end. 
+					//If the search string contains white space, we should add double quato at both end.
 					if(newKeyword.indexOf(" ") >= 0){
 						newKeyword = "\"" + newKeyword + "\"";
 					}
@@ -143,7 +143,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			} else if (searchParams.fileNamePatterns && (searchParams.fileNamePatterns.length > 0)) {
 				//If the search string is not empty, we just combine the file type.
 				if(newKeyword !== ""){
-					//If the search string contains white space, we should add double quotes at both ends. 
+					//If the search string contains white space, we should add double quotes at both ends.
 					if(newKeyword.indexOf(" ") >= 0){
 						newKeyword = "\"" + newKeyword + "\"";
 					}
@@ -158,10 +158,10 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				newKeyword = encodeURIComponent(newKeyword);
 			}
 		}
-		return "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + 
+		return "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword +
 		caseSensitiveFlag + wholeWordFlag + regExFlag  + "+Location:" + searchParams.resource + "*";
 	}
-	
+
 	/**
 	 * @class Provides operations on files, folders, and projects.
 	 * @name FileServiceImpl
@@ -171,7 +171,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		this.workspaceBase = workspaceBase;
 		this.makeAbsolute = workspaceBase && workspaceBase.indexOf("://") !== -1;
 	}
-	
+
 	FileServiceImpl.prototype = /**@lends eclipse.FileServiceImpl.prototype */
 	{
 		/**
@@ -245,7 +245,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				return result;
 			}.bind(this));
 		},
-		
+
 		/**
 		 * Loads the workspace with the given id and sets it to be the current
 		 * workspace for the IDE. The workspace is created if none already exists.
@@ -284,7 +284,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				return result;
 			}.bind(this));
 		},
-		
+
 		/**
 		 * Adds a project to a workspace.
 		 * @param {String} loc The workspace location
@@ -323,7 +323,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				return result;
 			}.bind(this));
 		},
-		
+
 		/**
 		 * Creates a folder.
 		 * @param {String} parentLocation The location of the parent folder
@@ -402,7 +402,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				return result;
 			}.bind(this));
 		},
-		
+
 		/**
 		 * Moves a file or directory.
 		 * @param {String} sourceLocation The location of the file or directory to move.
@@ -417,7 +417,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				return result;
 			}.bind(this));
 		},
-		 
+
 		/**
 		 * Copies a file or directory.
 		 * @param {String} sourceLocation The location of the file or directory to copy.
@@ -432,7 +432,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				return result;
 			}.bind(this));
 		},
-		
+
 		_doCopyMove: function(sourceLocation, targetLocation, isMove, _name) {
 			if (!_name) {
 				//take the last segment (trailing slash will product an empty segment)
@@ -459,7 +459,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 * Returns the contents or metadata of the file at the given location.
 		 *
 		 * @param {String} loc The location of the file to get contents for
-		 * @param {Boolean} [isMetadata] If defined and true, returns the file metadata, 
+		 * @param {Boolean} [isMetadata] If defined and true, returns the file metadata,
 		 *   otherwise file contents are returned
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
@@ -498,12 +498,12 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 *
 		 * @param {String} location The location of the file to set contents for
 		 * @param {String|Object} contents The content string, object describing the location of content, or a metadata object to write
-		 * @param {String|Object} args Additional arguments used during write operation (i.e. ETag) 
+		 * @param {String|Object} args Additional arguments used during write operation (i.e. ETag)
 		 * @return A deferred for chaining events after the write completes with new metadata object
-		 */		
+		 */
 		write: function(loc, contents, args) {
 			var url = new URL(loc, self.location);
-			
+
 			var headerData = {
 					"Orion-Version": "1",
 					"Content-Type": "text/plain;charset=UTF-8"
@@ -517,7 +517,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				data: contents,
 				log: false
 			};
-						
+
 			// check if we have raw contents or something else
 			var method = "PUT";
 			if (typeof contents !== "string") {
@@ -550,7 +550,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 * @param {String} targetLocation The location of the folder to import into
 		 * @param {Object} options An object specifying the import parameters
 		 * @return A deferred for chaining events after the import completes
-		 */		
+		 */
 		remoteImport: function(targetLocation, options) {
 			var headerData = {
 				"Orion-Version": "1"
@@ -576,7 +576,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 * @param {String} sourceLocation The location of the folder to export from
 		 * @param {Object} options An object specifying the export parameters
 		 * @return A deferred for chaining events after the export completes
-		 */		
+		 */
 		remoteExport: function(sourceLocation, options) {
 			var headerData = {
 				"Orion-Version": "1"
@@ -596,19 +596,19 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				return result;
 			}.bind(this));
 		},
-		
+
 		/**
 		 * Performs a search with the given search parameters.
 		 * @param {Object} searchParams The JSON object that describes all the search parameters.
 		 * @param {String} searchParams.resource Required. The location where search is performed. Required. Normally a sub folder of the file system. Empty string means the root of the file system.
-		 * @param {String} searchParams.keyword The search keyword. Required but can be empty string.  If fileType is a specific type and the keyword is empty, then list up all the files of that type. If searchParams.regEx is true then the keyword has to be a valid regular expression. 
-		 * @param {String} searchParams.sort Required. Defines the order of the return results. Should be either "Path asc" or "Name asc". Extensions are possible but not currently supported.  
-		 * @param {boolean} searchParams.nameSearch Optional. If true, the search performs only file name search. 
+		 * @param {String} searchParams.keyword The search keyword. Required but can be empty string.  If fileType is a specific type and the keyword is empty, then list up all the files of that type. If searchParams.regEx is true then the keyword has to be a valid regular expression.
+		 * @param {String} searchParams.sort Required. Defines the order of the return results. Should be either "Path asc" or "Name asc". Extensions are possible but not currently supported.
+		 * @param {boolean} searchParams.nameSearch Optional. If true, the search performs only file name search.
 		 * @param {String} searchParams.fileType Optional. The file type. If specified, search will be performed under this file type. E.g. "*.*" means all file types. "html" means html files.
 		 * @param {Boolean} searchParams.regEx Optional. The option of regular expression search.
 		 * @param {integer} searchParams.start Optional. The zero based strat number for the range of the returned hits. E.g if there are 1000 hits in total, then 5 means the 6th hit.
 		 * @param {integer} searchParams.rows Optional. The number of hits of the range. E.g if there are 1000 hits in total and start=5 and rows=40, then the return range is 6th-45th.
-		 * @param {String} searchParams.fileNamePatterns Optional. The file name patterns within which to search. If specified, search will be performed under files which match the provided patterns. Patterns should be comma-separated and may use "*" and "?" as wildcards. 
+		 * @param {String} searchParams.fileNamePatterns Optional. The file name patterns within which to search. If specified, search will be performed under files which match the provided patterns. Patterns should be comma-separated and may use "*" and "?" as wildcards.
 		 *															E.g. "*" means all files. "*.html,test*.js" means all html files html files and all .js files that start with "test".
 		 */
 		search: function(searchParams) {
@@ -626,9 +626,32 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				}
 				return result;
 			}.bind(this));
-		}
+		},
+
+		/**
+		 * Performs a quick check on the existence of given path
+		 * @param {String} loc The location of the file to check for
+		 * @param {String} sourceLoc The Location of the folder where the check is performed
+		 */
+		 checkExistence: function(loc, sourceLoc){
+			 var url = new URL(loc, self.location);
+			 return _xhr("GET", url.href, {
+				 timeout: 15000,
+				 headers: { "Orion-Version": "1", "checkExistence" : "on" },
+				 log: false
+			 }).then(function(result) {
+				 if(result.response === "" && result.status === 200){
+					 //If the response is empty, it means the server has the file/folder
+					 return true;
+				 } else {
+					 //If server reponsde with a JSON object, it means the loc is not existed
+					 //Extra info can be found in the object (like whether it is 404 or 403) after parsing (like JSON.parse(result.response)).
+					 return false;
+				 }
+			 }.bind(this));
+		 }
 	};
-	
+
 	function _handleError(error) {
 		var errorMessage = "Unknown Error";
 		if(error.status && error.status === 404) {
@@ -640,7 +663,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		error.responseText = JSON.stringify(errorObj);
 		return new Deferred().reject(error);
 	}
-	
+
 	function _call2(method, url, headerData, body) {
 		var options = {
 			//timeout: 15000,
@@ -674,6 +697,6 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			return _call2("PUT", loc, headerData, contents);
 		};
 	}
-	
+
 	return FileServiceImpl;
 });
