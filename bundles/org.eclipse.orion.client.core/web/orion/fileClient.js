@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2010, 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
@@ -25,9 +25,9 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		}
 		return fileService[funcName].apply(fileService, funcArgs);
 	}
-	
+
 	function _copy(sourceService, sourceLocation, targetService, targetLocation) {
-		
+
 		if (!sourceService.readBlob) {
 			throw new Error(messages["SrcNotSupportBinRead"]);
 		}
@@ -35,7 +35,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		if (!targetService.writeBlob) {
 			throw new Error(messages["TargetNotSupportBinWrite"]);
 		}
-	
+
 		if (sourceLocation[sourceLocation.length -1] !== "/") { //$NON-NLS-0$
 			return _doServiceCall(sourceService, "readBlob", [sourceLocation]).then(function(contents) { //$NON-NLS-0$
 				return _doServiceCall(targetService, "writeBlob", [targetLocation, contents]); //$NON-NLS-0$
@@ -60,7 +60,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 						childTemp = childSourceLocation.substring(0, childSourceLocation.length - 1);
 					}
 					var childName = decodeURIComponent(childTemp.substring(childTemp.lastIndexOf("/")+1)); //$NON-NLS-0$
-					
+
 					var childTargetLocation = targetLocation + encodeURIComponent(childName);
 					if (children[i].Directory) {
 						childTargetLocation += "/"; //$NON-NLS-0$
@@ -71,8 +71,8 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 			});
 		});
 	}
-	
-	
+
+
 	/**
 	 * Creates a new file client.
 	 * @class The file client provides a convenience API for interacting with file services
@@ -84,13 +84,13 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		var _patterns;
 		var _services;
 		var _names;
-		
+
 		function _noMatch(location) {
 			var d = new Deferred();
 			d.reject(messages["No Matching FileService for location:"] + location);
 			return d;
 		}
-		
+
 		var _fileSystemsRoots = [];
 		var _allFileSystemsService = {
 			fetchChildren: function() {
@@ -112,8 +112,8 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 				var d = new Deferred();
 				window.setTimeout(function() {
 					d.resolve({
-						Directory: true, 
-						Length: 0, 
+						Directory: true,
+						Length: 0,
 						LocalTimeStamp: 0,
 						Name: messages["File Servers"],
 						Location: "/",  //$NON-NLS-0$
@@ -133,13 +133,13 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 			read: _noMatch,
 			write: _noMatch
 		};
-			
+
 		function init() {
 			if (_services) return;
 			_patterns = [];
 			_services = [];
 			_names = [];
-			
+
 			var allReferences = serviceRegistry.getServiceReferences("orion.core.file"); //$NON-NLS-0$
 			var _references = allReferences;
 			if (filter) {
@@ -157,14 +157,14 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 			});
 			for(var j = 0; j < _references.length; ++j) {
 				_fileSystemsRoots[j] = {
-					Directory: true, 
-					Length: 0, 
+					Directory: true,
+					Length: 0,
 					LocalTimeStamp: 0,
 					Location: _references[j].getProperty("top"), //$NON-NLS-0$
 					ChildrenLocation: _references[j].getProperty("top"), //$NON-NLS-0$
 					Name: _references[j].getProperty("Name") || _references[j].getProperty("NameKey")		 //$NON-NLS-0$
 				};
-	
+
 				var filetop = _references[j].getProperty("top");
 				var patternStringArray = _references[j].getProperty("pattern") || (filetop ? filetop.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1") : ""); //$NON-NLS-1$ //$NON-NLS-0$
 				if (!Array.isArray(patternStringArray)) {
@@ -178,12 +178,12 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 					}
 					patterns.push(new RegExp(patternString));
 				}
-				_patterns[j] = patterns;			
+				_patterns[j] = patterns;
 				_services[j] = serviceRegistry.getService(_references[j]);
 				_names[j] = _references[j].getProperty("Name") || _references[j].getProperty("NameKey"); //$NON-NLS-0$
 			}
 		}
-				
+
 		this._getServiceIndex = function(location) {
 			init();
 			// client must specify via "/" when a multi file service tree is truly wanted
@@ -202,49 +202,49 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 			}
 			throw new Error(i18nUtil.formatMessage(messages['NoFileSrv'], location));
 		};
-		
+
 		this._getService = function(location) {
 			var i = this._getServiceIndex(location);
 			return i === -1 ? _allFileSystemsService : _services[i];
 		};
-		
+
 		this._getServiceName = function(location) {
 			var i = this._getServiceIndex(location);
 			return i === -1 ? _allFileSystemsService.Name : _names[i];
 		};
-		
+
 		this._getServiceRootURL = function(location) {
 			var i = this._getServiceIndex(location);
 			return i === -1 ? _allFileSystemsService.Location : _fileSystemsRoots[i].Location;
 		};
 		serviceRegistry.registerService("orion.core.file.client", this); //$NON-NLS-1$
 	}
-	
+
 	FileClient.prototype = /**@lends orion.fileClient.FileClient.prototype */ {
 		/**
 		 * Returns the file service managing this location
-		 * @param location The location of the item 
+		 * @param location The location of the item
 		 */
 		getService: function(location) {
 			return this._getService(location);
 		},
-		 
+
 		/**
 		 * Returns the name of the file service managing this location
-		 * @param location The location of the item 
+		 * @param location The location of the item
 		 */
 		fileServiceName: function(location) {
 			return this._getServiceName(location);
 		},
-		 
+
 		/**
 		 * Returns the root url of the file service managing this location
-		 * @param location The location of the item 
+		 * @param location The location of the item
 		 */
 		fileServiceRootURL: function(location) {
 			return this._getServiceRootURL(location);
 		},
-		 
+
 		/**
 		 * Obtains the children of a remote resource
 		 * @param location The location of the item to obtain children for
@@ -270,7 +270,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		loadWorkspaces: function() {
 			return _doServiceCall(this._getService(), "loadWorkspaces", arguments); //$NON-NLS-0$
 		},
-		
+
 		/**
 		 * Loads the workspace with the given id and sets it to be the current
 		 * workspace for the IDE. The workspace is created if none already exists.
@@ -280,7 +280,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		loadWorkspace: function(location) {
 			return _doServiceCall(this._getService(location), "loadWorkspace", arguments); //$NON-NLS-0$
 		},
-		
+
 		/**
 		 * Adds a project to a workspace.
 		 * @param {String} url The workspace location
@@ -317,8 +317,8 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		deleteFile: function(location) {
 			return _doServiceCall(this._getService(location), "deleteFile", arguments); //$NON-NLS-0$
 		},
-		
-		/**		 
+
+		/**
 		 * Moves a file or directory.
 		 * @param {String} sourceLocation The location of the file or directory to move.
 		 * @param {String} targetLocation The location of the target folder.
@@ -327,18 +327,18 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		moveFile: function(sourceLocation, targetLocation, name) {
 			var sourceService = this._getService(sourceLocation);
 			var targetService = this._getService(targetLocation);
-			
+
 			if (sourceService === targetService) {
 				return _doServiceCall(sourceService, "moveFile", arguments);				 //$NON-NLS-0$
 			}
-			
+
 			var isDirectory = sourceLocation[sourceLocation.length -1] === "/"; //$NON-NLS-0$
 			var target = targetLocation;
-			
+
 			if (target[target.length -1] !== "/") { //$NON-NLS-0$
 				target += "/"; //$NON-NLS-0$
 			}
-			
+
 			if (name) {
 				target += encodeURIComponent(name);
 			} else {
@@ -348,17 +348,17 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 				}
 				target += temp.substring(temp.lastIndexOf("/")+1); //$NON-NLS-0$
 			}
-			
+
 			if (isDirectory && target[target.length -1] !== "/") { //$NON-NLS-0$
 				target += "/"; //$NON-NLS-0$
 			}
-	
+
 			return _copy(sourceService, sourceLocation, targetService, target).then(function() {
 				return _doServiceCall(sourceService, "deleteFile", [sourceLocation]); //$NON-NLS-0$
 			});
-			
+
 		},
-				
+
 		/**
 		 * Copies a file or directory.
 		 * @param {String} sourceLocation The location of the file or directory to copy.
@@ -368,18 +368,18 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		copyFile: function(sourceLocation, targetLocation, name) {
 			var sourceService = this._getService(sourceLocation);
 			var targetService = this._getService(targetLocation);
-			
+
 			if (sourceService === targetService) {
 				return _doServiceCall(sourceService, "copyFile", arguments);				 //$NON-NLS-0$
 			}
-			
+
 			var isDirectory = sourceLocation[sourceLocation.length -1] === "/"; //$NON-NLS-0$
 			var target = targetLocation;
-			
+
 			if (target[target.length -1] !== "/") { //$NON-NLS-0$
 				target += "/"; //$NON-NLS-0$
 			}
-			
+
 			if (name) {
 				target += encodeURIComponent(name);
 			} else {
@@ -389,7 +389,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 				}
 				target += temp.substring(temp.lastIndexOf("/")+1); //$NON-NLS-0$
 			}
-			
+
 			if (isDirectory && target[target.length -1] !== "/") { //$NON-NLS-0$
 				target += "/"; //$NON-NLS-0$
 			}
@@ -401,7 +401,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		 * Returns the contents or metadata of the file at the given location.
 		 *
 		 * @param {String} location The location of the file to get contents for
-		 * @param {Boolean} [isMetadata] If defined and true, returns the file metadata, 
+		 * @param {Boolean} [isMetadata] If defined and true, returns the file metadata,
 		 *   otherwise file contents are returned
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
@@ -424,9 +424,9 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		 *
 		 * @param {String} location The location of the file to set contents for
 		 * @param {String|Object} contents The content string, or metadata object to write
-		 * @param {String|Object} args Additional arguments used during write operation (i.e. ETag) 
+		 * @param {String|Object} args Additional arguments used during write operation (i.e. ETag)
 		 * @return A deferred for chaining events after the write completes with new metadata object
-		 */		
+		 */
 		write: function(location, contents, args) {
 			return _doServiceCall(this._getService(location), "write", arguments); //$NON-NLS-0$
 		},
@@ -437,7 +437,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		 * @param {String} targetLocation The location of the folder to import into
 		 * @param {Object} options An object specifying the import parameters
 		 * @return A deferred for chaining events after the import completes
-		 */		
+		 */
 		remoteImport: function(targetLocation, options) {
 			return _doServiceCall(this._getService(targetLocation), "remoteImport", arguments); //$NON-NLS-0$
 		},
@@ -448,18 +448,18 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		 * @param {String} sourceLocation The location of the folder to export from
 		 * @param {Object} options An object specifying the export parameters
 		 * @return A deferred for chaining events after the export completes
-		 */		
+		 */
 		remoteExport: function(sourceLocation, options) {
 			return _doServiceCall(this._getService(sourceLocation), "remoteExport", arguments); //$NON-NLS-0$
 		},
-		
+
 		/**
 		 * Performs a search with the given search parameters.
 		 * @param {Object} searchParams The JSON object that describes all the search parameters.
 		 * @param {String} searchParams.resource Required. The location where search is performed. Required. Normally a sub folder of the file system. Empty string means the root of the file system.
-		 * @param {String} searchParams.keyword The search keyword. Required but can be empty string.  If fileType is a specific type and the keyword is empty, then list up all the files of that type. If searchParams.regEx is true then the keyword has to be a valid regular expression. 
-		 * @param {String} searchParams.sort Required. Defines the order of the return results. Should be either "Path asc" or "Name asc". Extensions are possible but not currently supported.  
-		 * @param {boolean} searchParams.nameSearch Optional. If true, the search performs only file name search. 
+		 * @param {String} searchParams.keyword The search keyword. Required but can be empty string.  If fileType is a specific type and the keyword is empty, then list up all the files of that type. If searchParams.regEx is true then the keyword has to be a valid regular expression.
+		 * @param {String} searchParams.sort Required. Defines the order of the return results. Should be either "Path asc" or "Name asc". Extensions are possible but not currently supported.
+		 * @param {boolean} searchParams.nameSearch Optional. If true, the search performs only file name search.
 		 * @param {String} searchParams.fileType Optional. The file type. If specified, search will be performed under this file type. E.g. "*.*" means all file types. "html" means html files.
 		 * @param {Boolean} searchParams.regEx Optional. The option of regular expression search.
 		 * @param {integer} searchParams.start Optional. The zero based start number for the range of the returned hits. E.g if there are 1000 hits in total, then 5 means the 6th hit.
@@ -467,7 +467,17 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		 */
 		search: function(searchParams) {
 			return _doServiceCall(this._getService(searchParams.resource), "search", arguments); //$NON-NLS-0$
-		}
+		},
+
+		/**
+		 * Performs a quick check on the existence of given path
+		 * @param {String} loc The location of the file to check for
+		 * @param {String} sourceLoc The location where the check is performed
+		 */
+		 checkExistence: function(loc, sourceLoc){
+			 return _doServiceCall(this.getService(sourceLoc), "checkExistence", arguments);
+		 }
+
 	};//end FileClient prototype
 	FileClient.prototype.constructor = FileClient;
 
