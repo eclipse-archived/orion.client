@@ -442,6 +442,85 @@ define([
 				});
 			});
 		});
+		//NO-SELF-ASSIGN
+		describe("no-self-assign", function() {
+			it("no-self-assign single 1", function(done) {
+				var rule = createTestRule("no-self-assign");
+				var expected = {value:'', start: 14, end: 23};
+				return getFixes({
+					buffer: "var foo = 10; foo = foo;",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-self-assign single 2", function(done) {
+				var rule = createTestRule("no-self-assign");
+				var expected = {value:'', start: 14, end: 26};
+				return getFixes({
+					buffer: "var foo = 10; foo = foo  ;",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-self-assign single rename 1", function(done) {
+				var rule = createTestRule("no-self-assign");
+				var expected = {
+					groups: [
+						{data: {}, positions: [{offset: 20, length: 3}]}
+					]
+				};
+				return getFixes({
+					buffer: "var foo = 10; foo = foo;",
+					rule: rule,
+					fixid: 'no-self-assign-rename',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-self-assign single rename 2", function(done) {
+				var rule = createTestRule("no-self-assign");
+				var expected = {
+					groups: [
+						{data: {}, positions: [{offset: 20, length: 3}]}
+					]
+				};
+				return getFixes({
+					buffer: "var foo = 10; foo = foo  ;",
+					rule: rule,
+					fixid: 'no-self-assign-rename',
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-self-assign multi 1", function(done) {
+				var rule = createTestRule("no-self-assign");
+				var expected = [
+					{value:'', start: 14, end: 23},
+					{value:'', start: 40, end: 49}
+				];
+				return getFixes({
+					buffer: "var foo = 10; foo = foo; var bar = foo; bar = bar;",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-self-assign multi 2", function(done) {
+				var rule = createTestRule("no-self-assign");
+				var expected = [
+					{value:'', start: 14, end: 27},
+					{value:'', start: 43, end: 55}
+				];
+				return getFixes({
+					buffer: "var foo = 10; foo = foo   ; var bar = foo; bar = bar  ;",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+		});
 		//NO-DUPE-KEYS
 		describe("no-dupe-keys", function() {
 			it("no-dupe-keys - rename 1", function(done) {

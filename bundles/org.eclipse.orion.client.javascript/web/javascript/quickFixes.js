@@ -517,6 +517,45 @@ define([
 					});
 				});
 			},
+			"no-self-assign": function(editorContext, context, astManager) {
+				return astManager.getAST(editorContext).then(function(ast) {
+					return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation) {
+						var node = Finder.findNode(currentAnnotation.start, ast, {parents:true});
+						if(node) {
+							var p = node.parents[node.parents.length-1];
+							if(p.type === 'AssignmentExpression') {
+								var end = p.range[1];
+								var tok = Finder.findToken(end, ast.tokens);
+								if(tok) {
+									//we want the next one, ignoring whitespace
+									tok = ast.tokens[tok.index+1];
+									if(tok &&  tok.type === 'Punctuator' && tok.value === ';') {
+										end = tok.range[1]; //clean up trailing semicolons
+									}
+								}
+								return {
+									text: '',
+									start: p.range[0],
+									end: end
+								};
+							}
+						}
+					});
+				});
+			},
+			"no-self-assign-rename": function(editorContext, context, astManager) {
+				return astManager.getAST(editorContext).then(function(ast) {
+					var node = Finder.findNode(context.annotation.end, ast);
+					if(node && node.type === 'Identifier') {
+						var start = node.range[0],
+							groups = [{data: {}, positions: [{offset: start, length: node.range[1]-start}]}],
+							linkModel = {groups: groups};
+						return editorContext.exitLinkedMode().then(function() {
+							return editorContext.enterLinkedMode(linkModel);
+						});
+					}
+				});
+			},
 			/** 
 			 * fix for the missing-nls rule
 			 * @callback

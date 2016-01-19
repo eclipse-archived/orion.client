@@ -731,6 +731,40 @@ define([
                     ]
     			}
     	);
+    	
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+    			quickFixComputer,
+    			{
+        			name: javascriptMessages["noselfassignFixName"],
+        			fixAllEnabled: true,
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+        			id : "no.self.assign.fix",  //$NON-NLS-1$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-self-assign)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                    ]
+    			}
+    	);
+    	
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+    			{
+    				execute: function(editorContext, context) {
+		    			if(context.annotation.id === 'no-self-assign') {
+		    			    context.annotation.fixid = 'no-self-assign-rename'; //$NON-NLS-1$
+		    			}
+		    			return quickFixComputer.execute(editorContext, context);
+		    		}
+    			},
+    			{
+        			name: javascriptMessages["noselfassignRenameFixName"],
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+        			id : "no.self.assign.rename.fix",  //$NON-NLS-1$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-self-assign)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                    ]
+    			}
+    	);
 
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,

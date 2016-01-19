@@ -70,6 +70,8 @@ define({
 	'unusedParams' : 'Unused parameters:',
 	'unsupportedJSLint' : 'Unsupported environment directive:',
 	'noThrowLiteral': 'Literal used in \'throw\':',
+	'noselfassignFixName': 'Remove assignment',
+	'noselfassignRenameFixName': 'Rename right hand variable',
 	'missingNls': 'Non-externalized string literals (missing $NON-NLS$ tag):',
 	'unnecessaryNls': 'Unnecessary $NON-NLS$ tags:',
 	'generateDocName' : 'Generate Element Comment',
