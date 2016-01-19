@@ -210,6 +210,53 @@ define([
 				assertOccurrences(results, [{start: 23, end: 24}, {start: 24, end: 25}]);
 			});
 		});
-			
+		it('Matching with duplicate attributes in 2 tags 1', function() {
+			editorContext.text = '<html width="100%"><body width="100%"></body></html>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 3, end: 3}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 5}, {start: 46, end: 51}]);
+			});
+		});
+		it('Matching with duplicate attributes in 2 tags 2', function() {
+			editorContext.text = '<html width="100%"><body width="100%"></body></html>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 48, end: 48}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 5}, {start: 46, end: 51}]);
+			});
+		});
+		it('Matching with duplicate attributes in 2 tags 3', function() {
+			editorContext.text = '<html width="100%"><body width="100%"></body></html>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 9, end: 9}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 5}, {start: 46, end: 51}]);
+			});
+		});
+		it('Matching with duplicate attributes in 2 tags 4', function() {
+			editorContext.text = '<html width="100%"><body width="100%"></body></html>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 14, end: 14}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 5}, {start: 46, end: 51}]);
+			});
+		});
+		it('Matching with duplicate attributes in 2 tags 5', function() {
+			editorContext.text = '<html width="100%"><body width="100%"></body></html>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 23, end: 23}}).then(function(results) {
+				assertOccurrences(results, [{start: 20, end: 24}, {start: 39, end: 44}]);
+			});
+		});
+		it('Matching with duplicate attributes in 2 tags 6', function() {
+			editorContext.text = '<html width="100%"><body width="100%"></body></html>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 40, end: 41}}).then(function(results) {
+				assertOccurrences(results, [{start: 20, end: 24}, {start: 39, end: 44}]);
+			});
+		});
+		it('Matching with duplicate attributes in 2 tags 7', function() {
+			editorContext.text = '<html width="100%"><body width="100%"></body></html>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 28, end: 28}}).then(function(results) {
+				assertOccurrences(results, [{start: 20, end: 24}, {start: 39, end: 44}]);
+			});
+		});
+		it('Matching with duplicate attributes in 2 tags 8', function() {
+			editorContext.text = '<html width="100%"><body width="100%"></body></html>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 34, end: 34}}).then(function(results) {
+				assertOccurrences(results, [{start: 20, end: 24}, {start: 39, end: 44}]);
+			});
+		});
 	});
 });

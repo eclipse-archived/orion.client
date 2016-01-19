@@ -355,6 +355,44 @@ define([
 	    		}
 		    ]);
 		});
+		/*
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=486134
+		 */
+		it("Parse attributes - duplicates in two different tags", function() {
+			var results = parse('<html width="100%"><body width="100%"></body></html>');
+		    assertResults(results.children, [
+		    	{
+		    		type: 'tag',
+		    		name: 'html',
+		    		range: [0,52],
+		    		openrange: [0,19],
+		    		endrange: [45,52],
+		    		attributes: [
+		    			{
+    						name: 'width',
+    						value: '100%',
+    						range: [6,18]
+						}
+    				],
+    				children: [
+    					{
+	    					type: 'tag',
+				    		name: 'body',
+				    		range: [19,45],
+				    		openrange: [19,38],
+				    		endrange: [38,45],
+				    		attributes: [
+				    			{
+		    						name: 'width',
+		    						value: '100%',
+		    						range: [25,37]
+								}
+		    				]
+	    				}
+    				]
+	    		}
+		    ]);
+		});
 		// TODO Duplicate attributes only show up once in the AST, this works fine for our current tooling
 		it("Parse attributes - single quotes", function() {
 			var results = parse('<a src=\'test\'></a>');
