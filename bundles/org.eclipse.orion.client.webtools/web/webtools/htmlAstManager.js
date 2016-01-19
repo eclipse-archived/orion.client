@@ -23,7 +23,7 @@ define([
 		ast: null,
 		tagstack: [],
 		errors: [],
-		attribstack: Object.create(null),
+		attribstack: [],
 	    onopentag: function(name, attribs, range){
 	    	this.trailingTag = null;
 	    	var node = Object.create(null);
@@ -31,11 +31,18 @@ define([
 	    	if(Array.isArray(range)) {
 	    		node.range[0] = range[0];
 	    		node.range[1] = range[1]; // Inline tags don't have separate onclosetag calls
-	    		node.openrange = range;
+	    		node.openrange = [range[0], range[1]];
 	    	} 
 	    	node.name = name;
 	    	node.type = 'tag'; //$NON-NLS-1$
-	    	node.attributes = this.attribstack;
+	    	
+	    	node.attributes = Object.create(null);
+	    	for (var i=0; i<this.attribstack.length; i++){
+	    		var attrib = this.attribstack[i];
+	    		if (attrib.name){
+	    			node.attributes[attrib.name] = attrib;
+	    		}
+	    	}
  	    	node.children = [];
 	    	var tag = this._getLastTag();
 	    	if(tag) {
@@ -43,7 +50,7 @@ define([
 	    	} else {
 	    		this.ast.children.push(node);
 	    	}
-	    	this.attribstack = Object.create(null);
+	    	this.attribstack = [];
 	    	this.tagstack.push(node);
 	    },
 	    onclosetag: function(tagname, range){
@@ -51,7 +58,7 @@ define([
 	    	if(tag && tag.name === tagname) {
 	    		if (range){
 	    			tag.range[1] = range[1];
-	    			tag.endrange = range;
+	    			tag.endrange = [range[0], range[1]];
     			} else {
     				// No matching closing tag or void element
     				// TODO Need to add tests for this, can it have children as well as text?
@@ -70,17 +77,17 @@ define([
 	    	this.trailingAttrib = {name: name, start: rangeStart};
 	    },
 	    onattribute: function(name, value, range) {
-	    	this.trailingAttrb = null;
+	    	this.trailingAttrib = null;
 	    	var node = Object.create(null);
-	    	node.range = Array.isArray(range) ? range : [0, 0];
+	    	node.range = Array.isArray(range) ? [range[0], range[1]] : [0, 0];
 	    	node.name = name;
 	    	node.type = 'attr'; //$NON-NLS-1$
 	    	node.value = value;
-	    	this.attribstack[node.name] = node;
+	    	this.attribstack.push(node);
 	    },
 	    onprocessinginstruction: function(name, data, range) {
 	    	var node = Object.create(null);
-	    	node.range = Array.isArray(range) ? range : [0, 0];
+	    	node.range = Array.isArray(range) ? [range[0], range[1]] : [0, 0];
 	    	node.name = name;
 	    	node.type = 'instr'; //$NON-NLS-1$
 	    	node.value = data;
@@ -93,7 +100,7 @@ define([
 	    },
 	    oncomment: function(data, range) {
 	    	var node = Object.create(null);
-	    	node.range = Array.isArray(range) ? range : [0, 0];
+	    	node.range = Array.isArray(range) ? [range[0], range[1]] : [0, 0];
 	    	node.type = 'comment'; //$NON-NLS-1$
 	    	node.data = data;
 	    	
@@ -113,9 +120,6 @@ define([
 	    	var node = Object.create(null);
 	    	node.range = [0, 0];
 	    	node.type = 'cdata'; //$NON-NLS-1$
-	    },
-	    oncdataend: function() {
-	    	
 	    },
 	    ontext: function(text) {
 	    	var node = Object.create(null);
