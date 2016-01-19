@@ -31,7 +31,7 @@ module.exports = function(context) {
             var badOperator = node.operator === "==" || node.operator === "!=";
             if (node.right.type === "Literal" && node.right.raw === "null" && badOperator ||
                     node.left.type === "Literal" && node.left.raw === "null" && badOperator) {
-                context.report(node, "Use ‘"+node.operator+"=’ to compare with ‘null’.", null, getOperatorToken(context, node)); //$NON-NLS-1$ //$NON-NLS-2$
+                context.report(node, "Use '"+node.operator+"=' to compare with 'null'.", null, getOperatorToken(context, node)); //$NON-NLS-1$ //$NON-NLS-2$
             }
         }
     };

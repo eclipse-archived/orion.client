@@ -489,6 +489,17 @@ define([
 					};
 				});
 			},
+			/** fix for eqeqeq linting rule */
+			"no-eq-null": function(editorContext, context) {
+				return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation){
+					var expected = /^.*\'(\!==|===)\'/.exec(currentAnnotation.title);
+					return {
+						text: expected[1],
+						start: currentAnnotation.start,
+						end: currentAnnotation.end
+					};
+				});
+			},
 			/** 
 			 * fix for the missing-nls rule
 			 * @callback
@@ -874,16 +885,16 @@ define([
 	                    var promise;
 	                    switch(p.type) {
 	                    	case 'Property': {
-	                    		if(!hasDocTag(['@callback', '@public'], p) && !hasDocTag(['@callback', '@public'], p.key)) { //$NON-NLS-1$ //$NON-NLS-2$
+	                    		if(!hasDocTag(['@callback', '@public'], p) && !hasDocTag(['@callback', '@public'], p.key)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	                    			promise = updateCallback(p, ast, p.leadingComments ? p.leadingComments : p.key.leadingComments);
 	                			}
 	                    		break;
 	                    	}
 	                    	case 'AssignmentExpression': {
 	                    		var left = p.left;
-	                    		if(left.type === 'MemberExpression' && !hasDocTag(['@callback', '@public'], left)) { //$NON-NLS-1$
+	                    		if(left.type === 'MemberExpression' && !hasDocTag(['@callback', '@public'], left)) { //$NON-NLS-1$ //$NON-NLS-2$
 					        		promise = updateCallback(left, ast, left.leadingComments);
-					        	} else if(left.type === 'Identifier' && !hasDocTag(['@callback', '@public'], left)) { //$NON-NLS-1$
+					        	} else if(left.type === 'Identifier' && !hasDocTag(['@callback', '@public'], left)) { //$NON-NLS-1$ //$NON-NLS-2$
 					        		promise = updateCallback(p.left, ast, left.leadingComments);	        		
 					        	}
 	                			break;
@@ -894,14 +905,14 @@ define([
 	                			if(p.declarations[0].range[0] === oldp.range[0] && p.declarations[0].range[1] === oldp.range[1]) {
 	                				//insert at the var keyword level to not mess up the code
 	                				promise = updateCallback(p, ast, oldp.id.leadingComments);
-	                			} else if(!hasDocTag(['@callback', '@public'], oldp.id)) { //$NON-NLS-1$
+	                			} else if(!hasDocTag(['@callback', '@public'], oldp.id)) { //$NON-NLS-1$ //$NON-NLS-2$
 	                    			promise = updateCallback(oldp, ast, oldp.id.leadingComments);
 	                			} 
 	                			
 	                    		break;
 	                    	}
 	                    }
-	                    if(!promise && !hasDocTag(['@callback', '@public'], func)) { //$NON-NLS-1$
+	                    if(!promise && !hasDocTag(['@callback', '@public'], func)) { //$NON-NLS-1$ //$NON-NLS-2$
 	                        return editorContext.setText("/* @callback */ ", func.range[0], func.range[0]); //$NON-NLS-1$
 	                    }
 	                }

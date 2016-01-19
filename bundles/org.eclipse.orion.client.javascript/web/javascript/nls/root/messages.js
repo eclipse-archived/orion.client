@@ -179,6 +179,7 @@ define({
 	'no-negated-in-lhs' : 'Disallow negated left operand of in operator:',
 	'no-obj-calls' : 'Disallow global object as function calls:',
 	'no-eq-null' : 'Disallow null comparisons:',
+	'noeqnullFixName': 'Update operator',
 	'no-else-return' : 'Unnecessary else after return:',
 	'no-empty-label' : 'No empty labels:',
 	'no-self-compare' : 'Disallow self compare:',

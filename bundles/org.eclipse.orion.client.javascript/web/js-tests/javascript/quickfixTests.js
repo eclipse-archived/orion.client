@@ -313,6 +313,91 @@ define([
 				});
 			});
 		});
+		//NO-EQ-NULL
+		describe("no-eq-null", function(){
+			it("no-eq-null single 1", function(done) {
+				var rule = createTestRule("no-eq-null");
+				var expected = {
+					value: "!==",
+					start: 7,
+					end: 9
+				};
+				return getFixes({
+					buffer: "if(foo != null) {}",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-eq-null single 2", function(done) {
+				var rule = createTestRule("no-eq-null");
+				var expected = {
+					value: "!==",
+					start: 8,
+					end: 10
+				};
+				return getFixes({
+					buffer: "if(null != foo) {}",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-eq-null single 3", function(done) {
+				var rule = createTestRule("no-eq-null");
+				var expected = {
+					value: "===",
+					start: 8,
+					end: 10
+				};
+				return getFixes({
+					buffer: "if(null == foo) {}",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-eq-null single 4", function(done) {
+				var rule = createTestRule("no-eq-null");
+				var expected = {
+					value: "===",
+					start: 7,
+					end: 9
+				};
+				return getFixes({
+					buffer: "if(foo == null) {}",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-eq-null multi 1", function(done) {
+				var rule = createTestRule("no-eq-null");
+				var expected = [
+						{value: "===", start: 7, end: 9},
+						{value: "!==", start: 31, end: 33}
+					];
+				return getFixes({
+					buffer: "if(foo == null) {} else if(bar != null) {}",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-eq-null multi 2", function(done) {
+				var rule = createTestRule("no-eq-null");
+				var expected = [
+						{value: "===", start: 8, end: 10},
+						{value: "!==", start: 32, end: 34}
+					];
+				return getFixes({
+					buffer: "if(null == foo) {} else if(null != bar) {}",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+		});
 		//NO-DUPE-KEYS
 		describe("no-dupe-keys", function() {
 			it("no-dupe-keys - rename 1", function(done) {

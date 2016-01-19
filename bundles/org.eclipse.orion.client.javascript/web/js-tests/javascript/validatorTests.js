@@ -11224,7 +11224,7 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "Use ‘===’ to compare with ‘null’."
+										description: "Use '===' to compare with 'null'."
 									}]);
 								},
 								function (error) {
@@ -11241,7 +11241,7 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "Use ‘!==’ to compare with ‘null’."
+										description: "Use '!==' to compare with 'null'."
 									}]);
 								},
 								function (error) {
