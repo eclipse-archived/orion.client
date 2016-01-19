@@ -111,11 +111,6 @@ define([
 	    		this.ast.children.push(node);
 	    	}
 	    },
-	    oncommentend: function(range) {
-//	    	if(Array.isArray(range)) {
-//	    		this.comments[this.comments.length-1].range[1] = range[1];
-//	    	}
-	    },
 	    oncdatastart: function() {
 	    	var node = Object.create(null);
 	    	node.range = [0, 0];
