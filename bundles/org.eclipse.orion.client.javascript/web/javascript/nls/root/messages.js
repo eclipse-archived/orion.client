@@ -53,6 +53,7 @@ define({
 	'useBeforeDefine' : 'Member used before definition:',
 	'noEmptyBlock' : 'Undocumented empty block:',
 	'newParens' : 'Missing parentheses in constructor call:',
+	'newparensFixName': 'Add parentheses',
 	'noNewArray': 'Discouraged \'new Array()\':',
 	'noNewArrayFixName': 'Convert to array literal',
 	'noNewFunc': 'Discouraged \'new Function()\':',

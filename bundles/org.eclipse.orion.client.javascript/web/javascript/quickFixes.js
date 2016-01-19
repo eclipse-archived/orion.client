@@ -556,6 +556,14 @@ define([
 					}
 				});
 			},
+			"new-parens": function(editorContext, context, astManager) {
+				return astManager.getAST(editorContext).then(function(ast) {
+					var node = Finder.findNode(context.annotation.start, ast, {parents:true});
+					if(node && node.type === 'Identifier') {
+						return editorContext.setText('()', node.range[1], node.range[1]); //$NON-NLS-1$
+					}
+				});
+			},
 			/** 
 			 * fix for the missing-nls rule
 			 * @callback

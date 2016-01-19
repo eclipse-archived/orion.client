@@ -521,6 +521,49 @@ define([
 				});
 			});
 		});
+		//NEW-PARENS
+		describe("new-parens", function() {
+			it("new-parens 1", function(done) {
+				var rule = createTestRule("new-parens");
+				var expected = {value: "()", start: 15, end: 15};
+				return getFixes({
+					buffer: "var v = new Obj;",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("new-parens 2", function(done) {
+				var rule = createTestRule("new-parens");
+				var expected = {value: "()", start: 12, end: 12};
+				return getFixes({
+					buffer: "with(new Obj) {}",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("new-parens 3", function(done) {
+				var rule = createTestRule("new-parens");
+				var expected = {value: "()", start: 15, end: 15};
+				return getFixes({
+					buffer: "var v = new Obj.one;",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("new-parens 4", function(done) {
+				var rule = createTestRule("new-parens");
+				var expected = {value: "()", start: 23, end: 23};
+				return getFixes({
+					buffer: "var v = new Obj(new Obj).one;",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+		});
 		//NO-DUPE-KEYS
 		describe("no-dupe-keys", function() {
 			it("no-dupe-keys - rename 1", function(done) {
