@@ -3115,6 +3115,33 @@ define([
 								callback: callback,
 								  pid: 'missing-nls'});
 			});
+			it("Test missing-nls multi 1",function(callback) {
+				var rule = createTestRule('missing-nls');
+				var expected = [
+					{value: " //$NON-NLS-1$", start: 33, end: 33},
+					{value: " //$NON-NLS-2$", start: 33, end: 33}
+				];
+				return getFixes({
+					buffer: 'var two = "two", three = "three";',
+					rule: rule,
+					expected: expected,
+					callback: callback
+				});
+			});
+			it("Test missing-nls multi 2",function(callback) {
+				var rule = createTestRule('missing-nls');
+				var expected = [
+					{value: " //$NON-NLS-1$", start: 45, end: 45},
+					{value: " //$NON-NLS-2$", start: 45, end: 45},
+					{value: " //$NON-NLS-3$", start: 45, end: 45}
+				];
+				return getFixes({
+					buffer: 'var four = "four", five ="five", six = "six";',
+					rule: rule,
+					expected: expected,
+					callback: callback
+				});
+			});
 		});
 		//UNNECESSARY-NLS
 		describe('unnecessary-nls', function(){

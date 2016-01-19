@@ -569,17 +569,21 @@ define([
 			 * @callback
 			 */
 	        "missing-nls": function(editorContext, context, astManager){
-	        	// We depend on the validator rule in eslint to count the number of literals on the line
-	        	if (context.annotation.data && typeof context.annotation.data.indexOnLine === 'number'){
-		        	return astManager.getAST(editorContext).then(function(ast) {
-		                // Insert the correct non nls comment
-		                var end = getLineEnd(ast.source, context.annotation.end);
-		                // indexOnLine starts at 0, non-nls comments start at one
-		                var comment = " //$NON-NLS-" + (context.annotation.data.indexOnLine + 1) + "$"; //$NON-NLS-1$
-		                return editorContext.setText(comment, end, end);
-		            });
-				}
-				return null;
+	        	return astManager.getAST(editorContext).then(function(ast) {
+	        		return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation) {
+		                if(currentAnnotation.data && typeof currentAnnotation.data.indexOnLine === 'number') {
+			                // Insert the correct non nls comment
+			                var end = getLineEnd(ast.source, currentAnnotation.end);
+			                // indexOnLine starts at 0, non-nls comments start at one
+			                var comment = " //$NON-NLS-" + (currentAnnotation.data.indexOnLine + 1) + "$"; //$NON-NLS-1$
+			                return {
+			                	text: comment,
+			                	start: end,
+			                	end: end
+			                };
+		                }
+	                });
+	            });
 	        },
 			/** fix for the no-comma-dangle linting rule */
 			"no-comma-dangle": function(editorContext, context) {
