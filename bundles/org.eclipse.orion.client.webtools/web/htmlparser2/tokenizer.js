@@ -297,7 +297,7 @@ define([
 	Tokenizer.prototype._stateInAttributeValueDoubleQuotes = function(c){
 		if(c === "\""){
 			this._emitToken("onattribdata");
-			this._cbs.onattribend();
+			this._cbs.onattribend(true);
 			this._state = BEFORE_ATTRIBUTE_NAME;
 		} else if(this._decodeEntities && c === "&"){
 			this._emitToken("onattribdata");
@@ -310,7 +310,7 @@ define([
 	Tokenizer.prototype._stateInAttributeValueSingleQuotes = function(c){
 		if(c === "'"){
 			this._emitToken("onattribdata");
-			this._cbs.onattribend();
+			this._cbs.onattribend(true);
 			this._state = BEFORE_ATTRIBUTE_NAME;
 		} else if(this._decodeEntities && c === "&"){
 			this._emitToken("onattribdata");
@@ -323,7 +323,7 @@ define([
 	Tokenizer.prototype._stateInAttributeValueNoQuotes = function(c){
 		if(whitespace(c) || c === ">"){
 			this._emitToken("onattribdata");
-			this._cbs.onattribend();
+			this._cbs.onattribend(false);
 			this._state = BEFORE_ATTRIBUTE_NAME;
 			this._index--;
 		} else if(this._decodeEntities && c === "&"){

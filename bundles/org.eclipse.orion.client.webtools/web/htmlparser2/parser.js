@@ -258,8 +258,13 @@ define([
 
 	};
 	
-	Parser.prototype.onattribend = function(){
-		this._attribrange[1] = this._tokenizer.getAbsoluteIndex()+1;  // TODO Orion 11.0 Collect attribute ranges
+	Parser.prototype.onattribend = function(isQuoted){
+		// TODO Orion 11.0 Collect attribute ranges
+		this._attribrange[1] = this._tokenizer.getAbsoluteIndex();
+		// If the attribute is in quotes include them in the range
+		if (isQuoted){
+			this._attribrange[1]++;
+		}
 		if(this._cbs.onattribute) this._cbs.onattribute(this._attribname, this._attribvalue, this._attribrange);
 		if(
 			this._attribs &&
