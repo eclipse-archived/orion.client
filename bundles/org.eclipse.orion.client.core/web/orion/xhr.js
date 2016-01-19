@@ -59,6 +59,9 @@ define([
 			url: url,
 			xhr: xhr
 		};
+		if(xhr.getResponseHeader("checkExistence") !== null){
+			result.response = xhr.getResponseHeader("checkExistence");
+		}
 		if (typeof error !== 'undefined') { //$NON-NLS-0$
 			result.error = error;
 		}

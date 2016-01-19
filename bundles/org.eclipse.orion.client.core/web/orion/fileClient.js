@@ -467,7 +467,17 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		 */
 		search: function(searchParams) {
 			return _doServiceCall(this._getService(searchParams.resource), "search", arguments); //$NON-NLS-0$
-		}
+		},
+
+		/**
+		 * Performs a quick check on the existence of given path
+		 * @param {String} loc The location of the file to check for
+		 * @param {String} sourceLoc The location where the check is performed
+		 */
+		 checkExistence: function(loc, sourceLoc){
+			 return _doServiceCall(this._getService(sourceLoc), "checkExistence", arguments);
+		 }
+		 
 	};//end FileClient prototype
 	FileClient.prototype.constructor = FileClient;
 
