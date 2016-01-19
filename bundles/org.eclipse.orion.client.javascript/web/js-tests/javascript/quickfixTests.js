@@ -398,6 +398,50 @@ define([
 				});
 			});
 		});
+		//NO-UNDEF-INIT
+		describe("no-undef-init", function() {
+			it("no-undef-init single 1", function(done) {
+				var rule = createTestRule("no-undef-init");
+				var expected = {
+					value: '',
+					start: 7,
+					end: 19
+				};
+				return getFixes({
+					buffer: "var foo = undefined;",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-undef-init single 2", function(done) {
+				var rule = createTestRule("no-undef-init");
+				var expected = {
+					value: '',
+					start: 17,
+					end: 29
+				};
+				return getFixes({
+					buffer: "var foo = 10, bar = undefined;",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-undef-init multi", function(done) {
+				var rule = createTestRule("no-undef-init");
+				var expected = [
+						{value: '', start: 17, end: 29},
+						{value: '', start: 44, end: 56}
+					];
+				return getFixes({
+					buffer: "var foo = 10, bar = undefined, boz = [], baz = undefined;",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+		});
 		//NO-DUPE-KEYS
 		describe("no-dupe-keys", function() {
 			it("no-dupe-keys - rename 1", function(done) {

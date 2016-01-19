@@ -500,6 +500,23 @@ define([
 					};
 				});
 			},
+			"no-undef-init": function(editorContext, context, astManager) {
+				return astManager.getAST(editorContext).then(function(ast) {
+					return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation){
+						var node = Finder.findNode(currentAnnotation.start, ast, {parents:true});
+						if(node) {
+							var p = node.parents[node.parents.length-1];
+							if(p.type === 'VariableDeclarator') {
+								return {
+									text: '',
+									start: p.id.range[1],
+									end: p.range[1]
+								};									
+							}
+						}
+					});
+				});
+			},
 			/** 
 			 * fix for the missing-nls rule
 			 * @callback

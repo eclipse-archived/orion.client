@@ -44,6 +44,7 @@ define({
 	'noIterator': 'Discouraged __iterator__ property use:',
 	'noProto': 'Discouraged __proto__ property use:',
 	'noUndefInit': 'Explicitly initializing variables to undefined:',
+	'noundefinitFixName': 'Remove assignment',
 	'useIsNaN' : 'NaN not compared with isNaN():',
 	'useIsNanFixName': 'Use isNaN()',
 	'missingDoc' : 'Missing JSDoc:',
