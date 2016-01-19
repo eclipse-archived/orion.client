@@ -20,173 +20,635 @@ define([
     var astManager = new HtmlAstManager.HtmlAstManager();
 	
 	function assertResults(results, expected) {
-		assert(results, 'the parser did not return an AST');
-		var str = JSON.stringify(results);
-		assert(str, 'Failed to stringify the results');
-		assert.equal(expected, str, 'The produced AST does not match the expected results.\nOutput:\n' + str + '\nExpected:\n' + expected + '\n');
+		assert(results, 'No results array found - Parser may not have returned an AST');
+		var resultString = JSON.stringify(results);
+		var expectedString = JSON.stringify(expected);
+		assert.equal(expected.length, results.length, 'Different number of nodes. \nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+		for (var i=0; i<results.length; i++) {
+			var eString = JSON.stringify(expected[i]);
+			var rString = JSON.stringify(results[i]);
+			if (expected[i].name || expected[i].name === ''){
+				assert.equal(expected[i].name, results[i].name, 'Different node name. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+			}
+			if (expected[i].type || expected[i].type === ''){
+				assert.equal(expected[i].type, results[i].type, 'Different node type. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+			}
+			if (expected[i].value || expected[i].value === ''){
+				assert.equal(expected[i].value, results[i].value, 'Different node value. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+			}
+			if (expected[i].data || expected[i].data === ''){
+				assert.equal(expected[i].data, results[i].data, 'Different node data. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+			}
+			if (expected[i].range){
+				assert(results[i].range, 'Missing node range. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+				assert.equal(expected[i].range[0], results[i].range[0], 'Different node range. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+				assert.equal(expected[i].range[1], results[i].range[1], 'Different node range. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+			}
+			if (expected[i].openrange){
+				assert(results[i].openrange, 'Missing node openrange. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+				assert.equal(expected[i].openrange[0], results[i].openrange[0], 'Different node openrange. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+				assert.equal(expected[i].openrange[1], results[i].openrange[1], 'Different node openrange. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+			}
+			if (expected[i].endrange){
+				assert(results[i].endrange, 'Missing node endrange. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+				assert.equal(expected[i].endrange[0], results[i].endrange[0], 'Different node endrange. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+				assert.equal(expected[i].endrange[1], results[i].endrange[1], 'Different node endrange. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+			}
+			if (expected[i].attributes){
+				var rAttributes = [];
+				for (var attrib in results[i].attributes) {
+					rAttributes.push(results[i].attributes[attrib]);
+				}
+				assertResults(rAttributes, expected[i].attributes);
+			} else if (results[i].attributes && results[i].attributes.length > 0){
+				assert(false, 'Node has attributes when no attributes expected. \nResult node:\n' + rString + '\nExpected node:\n' + eString);
+			}
+
+			if (expected[i].children){
+				assertResults(results[i].children, expected[i].children);
+			} else if (results[i].children && results[i].children.length > 0){
+				assert(false, 'Node has children when no children expected. \nResult node:\n' + rString + '\nExpected node:\n' + eString);
+			}
+		}
 	}
 	
 	function parse(text) {
 		return astManager.parse(text);
 	}
 
-
-	// TODO None of the parser tests are accurate with htmlparser2 because the shape of the ast changed
-	describe.skip("HTML parser tests", function() {
-
-		/**
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=463519
-		 */
-		it("parse !doctype 1", function() {
+	describe("HTML parser tests", function() {
+		// Tags
+		it("Parse tags - simple", function() {
+			var results = parse('<html></html>');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,13],
+	    			openrange: [0,6],
+	    			endrange: [6,13]
+	    		}
+		    ]);
+		});
+		it("Parse tags - mismatched case", function() {
+			var results = parse('<hTmL></HtMl>');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,13],
+	    			openrange: [0,6],
+	    			endrange: [6,13]
+	    		}
+		    ]);
+		});
+		it("Parse tags - upper case", function() {
+			var results = parse('<HTML></HTML>');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,13],
+	    			openrange: [0,6],
+	    			endrange: [6,13]
+	    		}
+		    ]);
+		});
+		it("Parse tags - empty contents", function() {
+			var results = parse('<html> \n\t </html>');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,17],
+	    			openrange: [0,6],
+	    			endrange: [10,17]
+	    		}
+		    ]);
+		});
+		it("Parse tags - text contents", function() {
+			var results = parse('<html>html</html>');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,17],
+	    			openrange: [0,6],
+	    			endrange: [10,17]
+	    		}
+		    ]);
+		});
+		it("Parse tags - missing end tag", function() {
+			var results = parse('<html>');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,6],
+	    			openrange: [0,6]
+	    		}
+		    ]);
+		});
+		it("Parse tags - missing end tag with text", function() {
+			var results = parse('<html> /html ');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,13],
+	    			openrange: [0,6]
+	    		}
+		    ]);
+		});
+		it("Parse tags - only close tag", function() {
+			var results = parse('</html>');
+		    assertResults(results.children, [
+	        ]);
+		});
+		it("Parse tags - mismatched tags", function() {
+			var results = parse('<html></nothtml>');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,6],
+	    			openrange: [0,6]
+	    		}
+		    ]);
+		});
+		it("Parse tags - multiple tags", function() {
+			var results = parse('<html></html><a></a>');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,13],
+	    			openrange: [0,6],
+	    			endrange: [6,13]
+	    		},
+	    		{
+	    			name: 'a',
+	    			type: 'tag',
+	    			range: [13,20],
+	    			openrange: [13,16],
+	    			endrange: [16,20]
+	    		}
+		    ]);
+		});
+		it("Parse tags - multiple tags with text", function() {
+			var results = parse('<html> html </html> foo <a> a </a>');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,19],
+	    			openrange: [0,6],
+	    			endrange: [12,19]
+	    		},
+	    		{
+	    			name: 'a',
+	    			type: 'tag',
+	    			range: [24,34],
+	    			openrange: [24,27],
+	    			endrange: [30,34]
+	    		}
+		    ]);
+		});
+		it("Parse tags - nested", function() {
+			var results = parse('<html><a></a></html>');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,20],
+	    			openrange: [0,6],
+	    			endrange: [13,20],
+	    			children: [
+	    				{
+			    			name: 'a',
+			    			type: 'tag',
+			    			range: [6,13],
+			    			openrange: [6,9],
+			    			endrange: [9,13]
+	    				}
+	    			]
+	    		}
+		    ]);
+		});
+		it("Parse tags - nested two deep", function() {
+			var results = parse('<html><a><p></p></a></html>');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,27],
+	    			openrange: [0,6],
+	    			endrange: [20,27],
+	    			children: [
+	    				{
+			    			name: 'a',
+			    			type: 'tag',
+			    			range: [6,20],
+			    			openrange: [6,9],
+			    			endrange: [16,20],
+			    			children: [
+			    				{
+			    					name: 'p',
+					    			type: 'tag',
+					    			range: [9,16],
+					    			openrange: [9,12],
+					    			endrange: [12,16]
+			    				}
+			    			]
+	    				}
+	    			]
+	    		}
+		    ]);
+		});
+		
+		it("Parse tags - inline", function() {
+			var results = parse('<html/>');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,7],
+	    			openrange: [0,7]
+	    		}
+		    ]);
+		});
+		
+		it("Parse tags - void tag", function() {
+			var results = parse('<img>');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'img',
+	    			type: 'tag',
+	    			range: [0,5],
+	    			openrange: [0,5]
+	    		}
+		    ]);
+		});
+		it("Parse tags - void tag with unnecessary closing tag", function() {
+			var results = parse('<img></img>');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'img',
+	    			type: 'tag',
+	    			range: [0,5],
+	    			openrange: [0,5]
+	    		}
+		    ]);
+		});
+		
+		// Attributes
+		it("Parse attributes - simple", function() {
+			var results = parse('<a src="test"></a>');
+		    assertResults(results.children, [
+		    	{
+		    		type: 'tag',
+		    		name: 'a',
+		    		attributes: [
+		    			{
+    						name: 'src',
+    						value: 'test',
+    						range: [3,13]
+						}
+    				]
+	    		}
+		    ]);
+		});
+		it("Parse attributes - multiple", function() {
+			var results = parse('<a src="test" width="test2"></a>');
+		    assertResults(results.children, [
+		    	{
+		    		type: 'tag',
+		    		name: 'a',
+		    		attributes: [
+		    			{
+    						name: 'src',
+    						value: 'test',
+    						range: [3,13]
+						},
+						{
+    						name: 'width',
+    						value: 'test2',
+    						range: [14,27]
+						}
+    				]
+	    		}
+		    ]);
+		});
+		it("Parse attributes - duplicate", function() {
+			var results = parse('<a src="test" src="test2"></a>');
+		    assertResults(results.children, [
+		    	{
+		    		type: 'tag',
+		    		name: 'a',
+		    		attributes: [
+		    			{
+    						name: 'src',
+    						value: 'test2',
+    						range: [14,25]
+						}
+    				]
+	    		}
+		    ]);
+		});
+		// TODO Duplicate attributes only show up once in the AST, this works fine for our current tooling
+		it("Parse attributes - single quotes", function() {
+			var results = parse('<a src=\'test\'></a>');
+		    assertResults(results.children, [
+		    	{
+		    		type: 'tag',
+		    		name: 'a',
+		    		attributes: [
+		    			{
+    						name: 'src',
+    						value: 'test',
+    						range: [3,13]
+						}
+    				]
+	    		}
+		    ]);
+		});
+		it("Parse attributes - no quotes", function() {
+			var results = parse('<a src=test></a>');
+		    assertResults(results.children, [
+		    	{
+		    		type: 'tag',
+		    		name: 'a',
+		    		attributes: [
+		    			{
+    						name: 'src',
+    						value: 'test',
+    						range: [3,11]
+    						
+						}
+    				]
+	    		}
+		    ]);
+		});
+		it("Parse attributes - whitespace", function() {
+			var results = parse('<a \t\n src \t\n= \t\n"test" \t\n></a>');
+		    assertResults(results.children, [
+		    	{
+		    		type: 'tag',
+		    		name: 'a',
+		    		attributes: [
+		    			{
+    						name: 'src',
+    						value: 'test',
+    						range: [6,22]
+						}
+    				]
+	    		}
+		    ]);
+		});
+		it("Parse attributes - no value", function() {
+			var results = parse('<a src></a>');
+		    assertResults(results.children, [
+		    	{
+		    		type: 'tag',
+		    		name: 'a',
+		    		attributes: [
+		    			{
+    						name: 'src',
+    						range: [3,6]
+						}
+    				]
+	    		}
+		    ]);
+		});
+		it("Parse attributes - no value 2", function() {
+			var results = parse('<a src=></a>');
+		    assertResults(results.children, [
+		    	{
+		    		type: 'tag',
+		    		name: 'a',
+		    		attributes: [
+		    			{
+    						name: 'src',
+    						value: '',
+    						range: [3,7]
+						}
+    				]
+	    		}
+		    ]);
+		});
+		it("Parse attributes - no value 3", function() {
+			var results = parse('<a src=""></a>');
+		    assertResults(results.children, [
+		    	{
+		    		type: 'tag',
+		    		name: 'a',
+		    		attributes: [
+		    			{
+    						name: 'src',
+    						value: '',
+    						range: [3,9]
+						}
+    				]
+	    		}
+		    ]);
+		});
+		
+		// Instructions
+		it("Parse !doctype instruction", function() {
 			var results = parse('<!doctype html><html></html>');
-		    assertResults(results.children, 
-		    	'[{"range":[0,14],"name":"!doctype","type":"instr","value":"!doctype html"}]'
-		    );
+		    assertResults(results.children, [
+		    	{
+		    		name: '!doctype',
+		    		type: 'instr',
+		    		value: '!doctype html',
+		    		range: [0, 14]
+	    		},
+	    		{
+	    			name: 'html',
+	    			type: 'tag'
+	    		}
+		    ]);
 		});
-		/**
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=463519
-		 */
-		it("parse !doctype public... 2", function() {
-			var results = parse('<!doctype PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"><html></html>');
-		    assertResults(results.children, 
-		    	'[{"type":"doctype","range":[9,84],"data":" PUBLIC \\"-//W3C//DTD HTML 4.01//EN\\" \\"http://www.w3.org/TR/html4/strict.dtd\\"","location":{"line":1,"col":1}}]'
-		    );
+		it("Parse !doctype instruction 2", function() {
+			var results = parse('<!doctype PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd><html></html>');
+		    assertResults(results.children, [
+		    	{
+		    		name: '!doctype',
+		    		type: 'instr',
+		    		value: '!doctype PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd',
+		    		range: [0, 83]
+	    		},
+	    		{
+	    			name: 'html',
+	    			type: 'tag'
+	    		}
+		    ]);
 		});
-		/**
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=463519
-		 */
-		it("parse !doCtypE public... 3", function() {
-			var results = parse('<!doCtypE PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"><html></html>');
-		    assertResults(results.children, 
-		    	'[{"type":"doctype","range":[9,84],"data":" PUBLIC \\"-//W3C//DTD HTML 4.01//EN\\" \\"http://www.w3.org/TR/html4/strict.dtd\\"","location":{"line":1,"col":1}}]');
+		it("Parse !doctype instruction 3 - mixed case gets lower cased", function() {
+			var results = parse('<!doCtypE PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd><html></html>');
+		    assertResults(results.children, [
+		    	{
+		    		name: '!doctype',
+		    		type: 'instr',
+		    		value: '!doCtypE PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd',
+		    		range: [0, 83]
+	    		},
+	    		{
+	    			name: 'html',
+	    			type: 'tag'
+	    		}
+		    ]);
 		});
-		/**
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=463519
-		 */
-		it("parse !Doctype 4", function() {
-			var results = parse('<!Doctype html><html></html>');
-		    assertResults(results.children, 
-		    	'[{"type":"doctype","range":[9,14],"data":" html","location":{"line":1,"col":1}}]'
-		    );
+		it("Parse !doctype instruction 4 - upper case gets lower cased", function() {
+			var results = parse('<!DOCTYPE PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd><html></html>');
+		    assertResults(results.children, [
+		    	{
+		    		name: '!doctype',
+		    		type: 'instr',
+		    		value: '!DOCTYPE PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd',
+		    		range: [0, 83]
+	    		},
+	    		{
+	    			name: 'html',
+	    			type: 'tag'
+	    		}
+		    ]);
 		});
-		/**
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=463519
-		 */
-		it("parse !DOCTYPE 5", function() {
-			var results = parse('<!DOCTYPE html></html>');
-		    assertResults(results.children, 
-		    	'[{"type":"doctype","range":[9,14],"data":" html","location":{"line":1,"col":1}}]'
-		    );
+		
+		// Comments
+		it("Parse comment - simple", function() {
+			var results = parse('<!-- comment -->');
+		    assertResults(results.children, [
+		    	{
+		    		type: 'comment',
+		    		range: [0, 15]
+	    		}
+		    ]);
 		});
-		/**
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471382
-		 * @since 10.0
-		 */
-		it("parse attributes 1", function() {
-			var results = parse('<img src="test" alt="foo" bogus=bogus/>');
-		    assertResults(results.children, 
-		    	'[{"type":"tag","range":[1,38],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,15],"type":"attr"},"alt":{"value":"foo","range":[16,25],"type":"attr"},"bogus":{"value":"bogus","range":[26,37],"type":"attr"}}}]'
-		    );
+		it("Parse comment - commented out tag", function() {
+			var results = parse('<!-- <a></a> -->');
+		    assertResults(results.children, [
+		    	{
+		    		type: 'comment',
+		    		range: [0, 15]
+	    		}
+		    ]);
 		});
-		/**
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471382
-		 * @since 10.0
-		 */
-		it("parse attributes 2", function() {
-			var results = parse('<img src="test" alt="foo" bogus=bogus> </img>');
-		    assertResults(results.children, 
-		    	'[{"type":"tag","range":[1,45],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,15],"type":"attr"},"alt":{"value":"foo","range":[16,25],"type":"attr"},"bogus":{"value":"bogus","range":[26,37],"type":"attr"}}}]'
-		    );
+		
+		// Text
+		it("Parse text - empty", function() {
+			var results = parse('');
+		    assertResults(results.children, [
+		    ]);
 		});
-		/**
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471382
-		 * @since 10.0
-		 */
-		it("parse attributes 3 - whitespace", function() {
-			var results = parse('<img src   =    "test"    alt="foo"   \t\t\tbogus=bogus      />');
-		    assertResults(results.children, 
-		    	'[{"type":"tag","range":[1,59],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,22],"type":"attr"},"alt":{"value":"foo","range":[26,35],"type":"attr"},"bogus":{"value":"bogus","range":[41,52],"type":"attr"}}}]'
-		    );
+		it("Parse text - text", function() {
+			var results = parse('This is a test html file');
+		    assertResults(results.children, [
+		    ]);
 		});
-		/**
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=483294
-		 * @since 11.0
-		 */
-		it("Parse attribute value - text value", function() {
-			var results = parse('<img src="test"/>');
-		    assertResults(results.children, 
-		    	'[{"type":"tag","range":[1,16],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,15],"type":"attr"}}}]'
-		    );
-		});
-		/**
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=483294
-		 * @since 11.0
-		 */
-		it("Parse attribute value - empty string", function() {
-			var results = parse('<img src=""/>');
-		    assertResults(results.children, 
-		    	'[{"type":"tag","range":[1,12],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"","range":[5,11],"type":"attr"}}}]'
-		    );
-		});
-		/**
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=483294
-		 * @since 11.0
-		 */
-		it("Parse attribute value - no quotes", function() {
-			var results = parse('<img src=test/>');
-		    assertResults(results.children, 
-		    	'[{"type":"tag","range":[1,14],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"test","range":[5,13],"type":"attr"}}}]'
-		    );
-		});
-		/**
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=483294
-		 * @since 11.0
-		 * TODO Note that the lack of quotes means the tag close gets treated as the value, not optimal
-		 */
-		it("Parse attribute value - only equals", function() {
-			var results = parse('<img src= />');
-		    assertResults(results.children, 
-		    	'[{"type":"tag","range":[1,5],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":"/>","range":[5,12],"type":"attr"}}}]'
-		    );
-		});
-		/**
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=483294
-		 * @since 11.0
-		 */
-		it("Parse attribute value - no value", function() {
-			var results = parse('<img src/>');
-		    assertResults(results.children, 
-		    	'[{"type":"tag","range":[1,9],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":null,"range":[5,8],"type":"attr"}}}]'
-		    );
-		});
-		it("Parse incomplete tag open followed by tag close", function() {
-			var results = parse('<html><ar</html>');
-		    assertResults(results.children, 
-		    	'[{"type":"tag","range":[1,9],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":null,"range":[5,8],"type":"attr"}}}]'
-		    );
-		});
-		it("Parse incomplete tag open blank space", function() {
-			var results = parse('<html><ar </html>');
-		    assertResults(results.children, 
-		    	'[{"type":"tag","range":[1,9],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":null,"range":[5,8],"type":"attr"}}}]'
-		    );
-		});
-		it("Parse incomplete tag open followed by new inline tag", function() {
-			var results = parse('<html><ar<a/></html>');
-		    assertResults(results.children, 
-		    	'[{"type":"tag","range":[1,9],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":null,"range":[5,8],"type":"attr"}}}]'
-		    );
-		});		
-		it("Parse incomplete tag open followed by new tag", function() {
-			var results = parse('<html><ar<a></a></html>');
-		    assertResults(results.children, 
-		    	'[{"type":"tag","range":[1,9],"name":"img","location":{"line":1,"col":1},"attributes":{"src":{"value":null,"range":[5,8],"type":"attr"}}}]'
-		    );
+		it("Parse text - whitespace", function() {
+			var results = parse('  \t\t\n\n');
+		    assertResults(results.children, [
+		    ]);
 		});
 
 	});
 	
 	describe("HTML Recoverable Parsing Tests", function() {
-		//TODO
+		it("Parse tolerant - open tag with attribute 1", function() {
+			var results = parse('<html width="10');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,15],
+	    			openrange: [0,15],
+	    			attributes: [
+	    				{
+	    					name: 'width',
+//	    					value: '10', // TODO No value recovery yet
+	    					range: [6,15]
+	    				}
+	    			]
+	    		}
+		    ]);
+		});
+		it("Parse tolerant - open tag with attribute 2", function() {
+			var results = parse('<html width="100%"');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,18],
+	    			openrange: [0,18],
+	    			attributes: [
+	    				{
+	    					name: 'width',
+	    					value: '100%',
+	    					range: [6,18]
+	    				}
+	    			]
+	    		}
+		    ]);
+		});
+		it("Parse tolerant - open tag with attribute 3", function() {
+			var results = parse('<html width="100%" ');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,19],
+	    			openrange: [0,19],
+	    			attributes: [
+	    				{
+	    					name: 'width',
+	    					value: '100%',
+	    					range: [6,18]
+	    				}
+	    			]
+	    		}
+		    ]);
+		});
+		it("Parse tolerant - open tag with attribute 4", function() {
+			var results = parse('<html width="100%" height=');
+		    assertResults(results.children, [
+	    		{
+	    			name: 'html',
+	    			type: 'tag',
+	    			range: [0,26],
+	    			openrange: [0,26],
+	    			attributes: [
+	    				{
+	    					name: 'width',
+	    					value: '100%',
+	    					range: [6,18]
+	    				},
+	    				{
+	    					name: 'height',
+	    					range: [19,26]
+	    				}
+	    			]
+	    		}
+		    ]);
+		});
+			
+//		it("Parse tolerant - open tag", function() {
+//			var results = parse('<html');
+//		    assertResults(results.children, [
+//	    		{
+//	    			name: 'html',
+//	    			type: 'tag',
+//	    			range: [0,5],
+//	    			openrange: [0,5]
+//	    		}
+//		    ]);
+//		});
+		
+//		<html><ar</html>
+//		<html><ar </html>
+//		<ar<a/>
+//		<html><ar<a></a></html>
+//		<!-- comment
+//		<html></html
 	});
 });
