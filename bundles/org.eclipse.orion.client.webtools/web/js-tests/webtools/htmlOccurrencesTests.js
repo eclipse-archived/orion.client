@@ -258,5 +258,89 @@ define([
 				assertOccurrences(results, [{start: 20, end: 24}, {start: 39, end: 44}]);
 			});
 		});
+		it('Matching void element tags - simple 1', function() {
+			editorContext.text = '<img src="test">';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 0, end: 0}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 4}]);
+			});
+		});
+		it('Matching void element tags - simple 2', function() {
+			editorContext.text = '<img src="test">';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 3, end: 3}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 4}]);
+			});
+		});
+		it('Matching void element tags - simple 3', function() {
+			editorContext.text = '<img src="test">';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 11, end: 11}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 4}]);
+			});
+		});
+		it('Matching void element tags - simple 4', function() {
+			editorContext.text = '<img src="test">';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 16, end: 16}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 4}]);
+			});
+		});
+		it('Matching void element tags - unnecessary close tag 1', function() {
+			editorContext.text = '<img src="test"></img>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 0, end: 0}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 4}]);
+			});
+		});
+		it('Matching void element tags - unnecessary close tag 2', function() {
+			editorContext.text = '<img src="test"></img>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 3, end: 3}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 4}]);
+			});
+		});
+		it('Matching void element tags - unnecessary close tag 3', function() {
+			editorContext.text = '<img src="test"></img>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 11, end: 11}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 4}]);
+			});
+		});
+		it('Matching void element tags - unnecessary close tag 4', function() {
+			editorContext.text = '<img src="test"></img>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 16, end: 16}}).then(function(results) {
+				assertOccurrences(results, []);
+			});
+		});
+		it('Matching void element tags - unnecessary close tag 5', function() {
+			editorContext.text = '<img src="test"></img>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 18, end: 18}}).then(function(results) {
+				assertOccurrences(results, []);
+			});
+		});
+		it('Matching void element tags - unnecessary inline 1', function() {
+			editorContext.text = '<img src="test"/>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 0, end: 0}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 4},{start: 15, end: 16}]);
+			});
+		});
+		it('Matching void element tags - unnecessary inline 2', function() {
+			editorContext.text = '<img src="test"/>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 3, end: 3}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 4},{start: 15, end: 16}]);
+			});
+		});
+		it('Matching void element tags - unnecessary inline 3', function() {
+			editorContext.text = '<img src="test"/>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 11, end: 11}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 4},{start: 15, end: 16}]);
+			});
+		});
+		it('Matching void element tags - unnecessary inline 4', function() {
+			editorContext.text = '<img src="test"/>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 16, end: 16}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 4},{start: 15, end: 16}]);
+			});
+		});
+		it('Matching void element tags - unnecessary inline 5', function() {
+			editorContext.text = '<img src="test"/>';
+			return occurrences.computeOccurrences(editorContext, {selection: {start: 17, end: 17}}).then(function(results) {
+				assertOccurrences(results, [{start: 1, end: 4},{start: 15, end: 16}]);
+			});
+		});
 	});
 });

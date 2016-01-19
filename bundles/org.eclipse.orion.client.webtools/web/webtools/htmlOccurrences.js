@@ -89,12 +89,16 @@ define([
 					var char = source[closeTagStart];
 					if (char === '>'){
 						closeTagStart--;
-						// With htmlParser2 we could check existence of closeTagRange instead
 						// Check for inline tag format <body/>
 						if ('/' !== source[closeTagStart]){
 							closeTagStart -= tagName.length;
 							if ('/' + tagName !== source.substring(closeTagStart,closeTagEnd)){
-								return []; // Unexpected end tag, abort
+								if (node.openrange && !node.endrange){
+									// Void tag or some element with only an opening tag, only mark the open tag
+									closeTagStart = closeTagEnd = -1;
+								} else {
+									return []; // Unexpected end tag, abort
+								}
 							}
 						}
 					} else {
@@ -103,7 +107,10 @@ define([
 					
 					if (start >= node.range[0] && end <= node.range[1]){
 						occurrences.push({start: openTagStart, end: openTagEnd});
-						occurrences.push({start: closeTagStart, end: closeTagEnd});
+						if (closeTagStart >= 0){
+							occurrences.push({start: closeTagStart, end: closeTagEnd});
+						}
+
 					}
 					// The following marks tags when caret is in the name
 //					if(start <= openTagEnd && start >= openTagStart) {
