@@ -142,7 +142,7 @@
 }
 
 .searchWrapper.searchOptParamBlockHidden > .searchResultsWrapperDiv{
-	height: calc(100% - 120px);
+	height: calc(100% - 124px);
 }
 
 .searchWrapper.searchOptParamBlockHidden > .searchOptWrapperDiv > .searchMainOptionBlock > .toggleDisplayLink{
@@ -150,15 +150,14 @@
 }
 
 .searchResultsWrapperDiv {
-	height: calc(100% - 220px - 54px); /* subtract height of search options*/
+	height: calc(100% - 220px - 46px); /* subtract height of search options*/
 	transition: height 0.2s ease; /* avoid extra scroll bar while switching between search and replace modes */
 	width: 100%;
+	overflow: auto;
 }
 
 .searchResultsWrapperDiv > div {
-	border-top: 1px solid lightgray;
 	height: 100%;
-	overflow: auto;
 	width: 100%;
 }
 
@@ -168,6 +167,7 @@
 
 .searchWrapper.searchOptionsHidden > .searchResultsWrapperDiv{
 	height: calc(100% - 70px);
+	overflow: auto;
 }
 
 .replaceModeActive > .searchResultsWrapperDiv {
