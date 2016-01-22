@@ -1075,7 +1075,7 @@ define([
     			 	        	                	id: "no-console",  //$NON-NLS-1$
     			 	        	                	name: javascriptMessages["noConsole"],
     			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: warning,
+    			 	        	                	defaultValue: ignore,
     			 	        	                	options: severities
     			 	        	                },
 												{
