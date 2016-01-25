@@ -142,7 +142,7 @@ define([
         					case 'Property':
         						if(node.value && node.value.type === 'FunctionExpression') {
         							comments = context.getComments(node);
-        							if(comments.leading.length < 1 && comments.trailing.length < 1) {
+        							if(!comments || comments.leading.length < 1) {
         							    //TODO see https://github.com/jquery/esprima/issues/1071
     							        comments = context.getComments(node.key);
         							}
@@ -161,10 +161,10 @@ define([
         						break;
         					case 'FunctionDeclaration':
     							comments = context.getComments(node);
-    							if(comments.leading.length < 1 && comments.trailing.length < 1) {
+    							if(!comments || comments.leading.length < 1) {
     							    //TODO see https://github.com/jquery/esprima/issues/1071
 							        comments = context.getComments(node.id);
-    							}
+    							} 
     							if(!validComment(comments)) {
     								context.report(node.id, ProblemMessages['missing-doc'], {0:node.id.name}, { type: 'decl' });  //$NON-NLS-1$
     							}
