@@ -49,6 +49,7 @@ define({
 	'useIsNaN' : 'NaN not compared with isNaN():',
 	'useIsNanFixName': 'Use isNaN()',
 	'missingDoc' : 'Missing JSDoc:',
+	'missingDocFixName': 'Generate element JSDoc',
 	'noUnreachable' : 'Unreachable code:',
 	'noFallthrough' : 'Switch case fall-through:',
 	'useBeforeDefine' : 'Member used before definition:',

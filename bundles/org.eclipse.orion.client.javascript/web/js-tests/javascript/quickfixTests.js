@@ -20,8 +20,9 @@ define([
 	'javascript/astManager',
 	'javascript/cuProvider',
 	'javascript/commands/renameCommand',
+	'javascript/commands/generateDocCommand',
 	'mocha/mocha', //must stay at the end, not a module
-], function(QuickFixes, Validator, chai, Deferred, Esprima, ASTManager, CUProvider, RenameCommand) {
+], function(QuickFixes, Validator, chai, Deferred, Esprima, ASTManager, CUProvider, RenameCommand, GenerateDocCommand) {
 	var assert = chai.assert;
 	
 	return function(worker) {
@@ -57,7 +58,8 @@ define([
 				var rule = options.rule;
 				validator._enableOnly(rule.id, rule.severity, rule.opts);
 				var renameCommand = new RenameCommand.RenameCommand(worker, {setSearchLocation: function(){}});
-				var fixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand);
+				var generateDocCommand = new GenerateDocCommand.GenerateDocCommand(astManager, CUProvider);
+				var fixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand);
 				var editorContext = {
 					/*override*/
 					getText: function(start, end) {
@@ -87,6 +89,9 @@ define([
 					},
 					enterLinkedMode: function(linkModel) {
 						return new Deferred().resolve(assertLinkedModel(linkModel, options.expected));
+					},
+					setCaretOffset: function(caretOffset) {
+						return new Deferred().resolve(caretOffset);
 					}
 				};
 				return {
@@ -251,6 +256,191 @@ define([
 				rule.opts = opts;
 				return rule;
 			}
+		//MISSING-DOC
+		describe("missing-doc", function() {
+			it("function declaration no params", function(done) {
+				var rule = createTestRule("missing-doc");
+				var expected = {
+					value: "\**\n"+
+							" * @name a\n"+
+							" * @description description\n"+
+							" * @returns returns\n"+
+							" */\n",
+					start: 0,
+					end: 0
+				};
+				return getFixes({
+					buffer: "function a() {}",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			}); 
+			it("function declaration params", function(done) {
+				var rule = createTestRule("missing-doc");
+				var expected = {
+					value: "/**\n"+
+							" * @name a\n"+
+							" * @description description\n"+
+							" * @param arg1\n"+
+							" * @param arg2\n"+
+							" * @returns returns\n"+
+							" */\n",
+					start: 0,
+					end: 0
+				};
+				return getFixes({
+					buffer: "function a(arg1, arg2) {}",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("function declaration params - underscore", function(done) {
+				var rule = createTestRule("missing-doc");
+				var expected = {
+					value: "/**\n"+
+							" * @name _a\n"+
+							" * @description description\n"+
+							" * @private\n"+
+							" * @param arg1\n"+
+							" * @returns returns\n"+
+							" */\n",
+					start: 0,
+					end: 0
+				};
+				return getFixes({
+					buffer: "function _a(arg1) {}",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("function expression - member expression", function(done) {
+				var rule = createTestRule("missing-doc");
+				var expected = {
+					value: "/**\n"+
+							" * @name f.g\n"+
+							" * @description description\n"+
+							" * @function\n"+
+							" * @returns returns\n"+
+							" */\n",
+					start: 0,
+					end: 0
+				};
+				return getFixes({
+					buffer: "f.g = function() {};",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("function expression - member expression params", function(done) {
+				var rule = createTestRule("missing-doc");
+				var expected = {
+					value: "/**\n"+
+							" * @name f.g\n"+
+							" * @description description\n"+
+							" * @function\n"+
+							" * @param arg1\n"+
+							" * @param arg2\n"+
+							" * @returns returns\n"+
+							" */\n",
+					start: 0,
+					end: 0
+				};
+				return getFixes({
+					buffer: "f.g = function(arg1, arg2) {};",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("function expression - member expression params underscore", function(done) {
+				var rule = createTestRule("missing-doc");
+				var expected = {
+					value: "/**\n"+
+							" * @name f._g\n"+
+							" * @description description\n"+
+							" * @function\n"+
+							" * @private\n"+
+							" * @param arg1\n"+
+							" * @param arg2\n"+
+							" * @returns returns\n"+
+							" */\n",
+					start: 0,
+					end: 0
+				};
+				return getFixes({
+					buffer: "f._g = function(arg1, arg2) {};",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("function expression - object decl", function(done) {
+				var rule = createTestRule("missing-doc");
+				var expected = {
+					value: "/**\n"+
+							" * @name one\n"+
+							" * @description description\n"+
+							" * @function\n"+
+							" * @returns returns\n"+
+							" */\n",
+					start: 9,
+					end: 9
+				};
+				return getFixes({
+					buffer: "var o = {one: function() {}};",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("function expression - object decl params", function(done) {
+				var rule = createTestRule("missing-doc");
+				var expected = {
+					value: "/**\n"+
+							" * @name one\n"+
+							" * @description description\n"+
+							" * @function\n"+
+							" * @param arg1\n"+
+							" * @param arg2\n"+
+							" * @returns returns\n"+
+							" */\n",
+					start: 9,
+					end: 9
+				};
+				return getFixes({
+					buffer: "var o = {one: function(arg1, arg2) {}};",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("function expression - object decl params underscore", function(done) {
+				var rule = createTestRule("missing-doc");
+				var expected = {
+					value: "/**\n"+
+							" * @name _one\n"+
+							" * @description description\n"+
+							" * @function\n"+
+							" * @private\n"+
+							" * @param arg1\n"+
+							" * @param arg2\n"+
+							" * @returns returns\n"+
+							" */\n",
+					start: 9,
+					end: 9
+				};
+				return getFixes({
+					buffer: "var o = {_one: function(arg1, arg2) {}};",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+		});
 		//CURLY
 		describe("curly", function() {
 			it("simple if", function(done) {
@@ -1859,6 +2049,7 @@ define([
 			});
 		});
 		//NO-EMPTY-BLOCK
+		describe("no-empty-block", function() {
 			it("Test no-empty-block-1", function(callback) {
 				var rule = createTestRule('no-empty-block');
 				var expected = {value: "//TODO empty block",
@@ -2002,6 +2193,7 @@ define([
 								  callback: callback,
 								  contentType: 'text/html'});
 			});
+		});
 		//NO-EXTRA-SEMI
 		describe('no-extra-semi', function(){
 			it("Test no-extra-semi-1",function(callback) {

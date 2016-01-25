@@ -22,13 +22,15 @@ define([
 	/**
 	 * @description Creates a new JavaScript quick fix computer
 	 * @param {javascript.ASTManager} astManager The AST manager
-	 * @param {javascript.RenammeCommand} renameCommand The rename command 
+	 * @param {javascript.RenammeCommand} renameCommand The rename command
+	 * @param {javascript.GenerateDocCommand} generateDocCommand The doc generation command 
 	 * @returns {javascript.JavaScriptQuickfixes} The new quick fix computer instance
 	 * @since 8.0
 	 */
-	function JavaScriptQuickfixes(astManager, renameCommand) {
+	function JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand) {
 	   this.astManager = astManager;
 	   this.renamecommand = renameCommand;
+	   this.generatedoc = generateDocCommand;
 	}
 	
 	/**
@@ -537,6 +539,10 @@ define([
 						};
 					});
 				});
+			},
+			"missing-doc": function(editorContext, context) {
+				context.offset = context.annotation.start;
+				return this.generatedoc.execute.call(this.generatedoc, editorContext, context);
 			},
 			"no-shadow": function(editorContext, context) {
 				return this.renamecommand.execute.call(this.renamecommand, editorContext, context);

@@ -37,20 +37,14 @@ define([
 			var that = this;
 			return editorContext.getFileMetadata().then(function(meta) {
 				if(meta.contentType.id === 'application/javascript') {
-					return Deferred.all([
-						that.astManager.getAST(editorContext),
-						editorContext.getCaretOffset()
-					]).then(function(results) {
-						that._doCommand(editorContext, results[0], results[1]);
+					return that.astManager.getAST(editorContext).then(function(ast) {
+						that._doCommand(editorContext, ast, options.offset);
 					});
 				} 
-				return Deferred.all([
-					editorContext.getText(),
-					editorContext.getCaretOffset()
-				]).then(function(results) {
-					var offset = results[1];
-					var cu = that.cuprovider.getCompilationUnit(function(){
-						return Finder.findScriptBlocks(results[0]);
+				return editorContext.getText().then(function(text) {
+					var offset = options.offset;
+					var cu = that.cuprovider.getCompilationUnit(function() {
+						return Finder.findScriptBlocks(text);
 					}, meta);
 					if(cu.validOffset(offset)) {
 						 return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
@@ -136,8 +130,15 @@ define([
 				parts.push(preamble+' * @function\n'); //$NON-NLS-1$
 			}
 			if(name.charAt(0) === '_') {
+				parts.push(preamble+' * @private\n'); //$NON-NLS-1$
+			} 
+			var idx = name.lastIndexOf('.');
+			if(idx > -1) {
+				//might be member expression, take the last segment and see if it starts wth an underscore
+				if(name.slice(idx+1).charAt(0) === '_') {
 					parts.push(preamble+' * @private\n'); //$NON-NLS-1$
 				}
+			}
 			if(params) {
 				var  len = params.length;
 				for(var i = 0; i < len; i++) {

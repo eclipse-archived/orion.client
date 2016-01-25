@@ -453,8 +453,10 @@ define([
     		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$
     	});
     	
+    	var generateDocCommand = new GenerateDocCommand.GenerateDocCommand(astManager, CUProvider);
+    	
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-    			new GenerateDocCommand.GenerateDocCommand(astManager, CUProvider),
+    			generateDocCommand,
     			{
     		name: javascriptMessages["generateDocName"],
     		tooltip : javascriptMessages['generateDocTooltip'],
@@ -540,7 +542,7 @@ define([
     			}
     	);
 
-    	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand);
+    	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand);
 
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
@@ -895,6 +897,19 @@ define([
                     contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-1$ //$NON-NLS-2$
                     validationProperties: [
                         {source: "annotation:id", match: "^(?:missing-nls)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                    ]
+                }
+        );
+        
+        provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+                quickFixComputer,
+                {
+                    name: javascriptMessages["missingDocFixName"],
+                    scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+                    id : "missing.doc.fix",  //$NON-NLS-1$
+                    contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-1$ //$NON-NLS-2$
+                    validationProperties: [
+                        {source: "annotation:id", match: "^(?:missing-doc)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
                 }
         );
