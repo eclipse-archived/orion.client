@@ -262,6 +262,30 @@ define([
         return -1;
 	}
 	
+	var controlStatements = ['IfStatement', 'WhileStatement', 'ForStatement', 'ForInStatement', 'WithStatement', 'DoWhileStatement', 'ForOfStatement']; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+	
+	/**
+	 * @description Walks the parents array and checks to see if there is a control statement as a direct parent
+	 * @param {Object} node The AST node to check
+	 * @returns {Object} The AST node that is a direct control statement parent of the given node, or null
+	 * @since 11.0
+	 */
+	function getControlStatementParent(node) {
+		if(node && node.parents) {
+			var i = node.parents.length-1,
+				p = node.parents[i];
+			while(p && i > -1) {
+				if(controlStatements.indexOf(p.type) > -1) {
+					return p;
+				}
+				p = node.parents[--i];
+			}
+		}
+		else {
+			return null;
+		}
+	}
+	
 	/**
 	 * Takes a quickfix implementation that can be applied to all fixes in a file and applies it to either all annotations (if multiple annotations provided) or
 	 * just to the single annotation.  Handles applying all edits in a single UNDO step as well as setting the caret to the single selected annotation afterward.
@@ -333,6 +357,51 @@ define([
 		    return new Deferred().resolve(null) ;
 		},
 		fixes : {
+			"curly": function(editorContext, context, astManager) {
+				return astManager.getAST(editorContext).then(function(ast) {
+					var tok = Finder.findToken(context.annotation.start, ast.tokens);
+					if(tok) {
+						tok = ast.tokens[tok.index-1];
+						var idx = tok.range[1],
+							start = tok.range[1],
+							end = context.annotation.end,
+							lineBreak = false;
+						while(idx < context.annotation.start) {
+							if(ast.source.charAt(idx) === '\n') {
+								lineBreak = true;
+								break;
+							}
+							idx++;
+						}
+						var text = ' {'+ast.source.slice(start, end); //$NON-NLS-1$
+						if(lineBreak) {
+							var node = Finder.findNode(context.annotation.start, ast, {parents: true});
+							if(node) {
+								var p = node.parents[node.parents.length-1];
+								var lineStart = getLineStart(ast.source, p.range[0]);
+								var ctrl = getControlStatementParent(node);
+								if(ctrl) {
+									//compute the offset based on the control statement start if we can
+									lineStart = getLineStart(ast.source, ctrl.range[0]);
+								}
+								//only preserve comments and whitespace at the end of the line
+								//erroneous statements should not be enclosed
+								var lineEnd = getLineEnd(ast.source, end);
+								var preserved = '';
+								var nodes = Finder.findNodesForRange(ast, end, lineEnd);
+								if(lineEnd > end && nodes.length < 1) {
+									preserved += ast.source.slice(end, lineEnd);
+									end = lineEnd;
+								}
+								text += preserved+'\n'+computeIndent(ast.source, lineStart, 0)+'}'; //$NON-NLS-1$
+							}
+						} else {
+							text += ' }'; //$NON-NLS-1$
+						}
+						return editorContext.setText(text, start, end);
+					}
+				});
+			},
 			"no-dupe-keys": function(editorContext, context) {
 				var start = context.annotation.start,
 					groups = [{data: {}, positions: [{offset: start, length: context.annotation.end-start}]}],

@@ -251,6 +251,486 @@ define([
 				rule.opts = opts;
 				return rule;
 			}
+		//CURLY
+		describe("curly", function() {
+			it("simple if", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { foo(); }",
+					start: 11,
+					end: 18
+				};
+				return getFixes({
+					buffer: "if(foo > 2) foo();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple if line break", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " {\nfoo();\n}",
+					start: 11,
+					end: 18
+				};
+				return getFixes({
+					buffer: "if(foo > 2)\nfoo();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple if line break and spacing", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " {\n\tfoo();\n}",
+					start: 11,
+					end: 19
+				};
+				return getFixes({
+					buffer: "if(foo > 2)\n\tfoo();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple if line break and tabs", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " {\n\t\tfoo();\n\t}",
+					start: 12,
+					end: 21
+				};
+				return getFixes({
+					buffer: "\tif(foo > 2)\n\t\tfoo();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple if trailing same line statements", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { foo(); }",
+					start: 11,
+					end: 18
+				};
+				return getFixes({
+					buffer: "if(foo > 2) foo(); bar();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple if trailing same line comments", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: "{ foo(); }",
+					start: 11,
+					end: 18
+				};
+				return getFixes({
+					buffer: "if(foo > 2) foo(); //comment",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple if trailing statements", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " {\nfoo(); //comment\n}",
+					start: 11,
+					end: 28
+				};
+				return getFixes({
+					buffer: "if(foo > 2)\nfoo(); //comment",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple if-else", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { bar(); }",
+					start: 20,
+					end: 27
+				};
+				return getFixes({
+					buffer: "if(foo) {foo()} else bar();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple if-else trailing statements", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { bar(); }",
+					start: 20,
+					end: 27
+				};
+				return getFixes({
+					buffer: "if(foo) {foo()} else bar(); foo();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple if-else trailing same line comments", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { bar(); }",
+					start: 20,
+					end: 27
+				};
+				return getFixes({
+					buffer: "if(foo) {foo()} else bar(); foo(); //comment",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple if-else trailing line statements", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " {\nbar();\n}",
+					start: 20,
+					end: 27
+				};
+				return getFixes({
+					buffer: "if(foo) {foo()} else\nbar(); foo(); //comment",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple with", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { bar(); }",
+					start: 9,
+					end: 16
+				};
+				return getFixes({
+					buffer: "with(foo) bar();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple with trailing statements", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " {\nbar();\n}",
+					start: 9,
+					end: 16
+				};
+				return getFixes({
+					buffer: "with(foo)\nbar(); foo();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple with trailing comment", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " {\nbar(); //comment\n}",
+					start: 9,
+					end: 26
+				};
+				return getFixes({
+					buffer: "with(foo)\nbar(); //comment",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple with trailing same line statements", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { v = 34*34/34; }",
+					start: 9,
+					end: 23
+				};
+				return getFixes({
+					buffer: "with(foo) v = 34*34/34; foo();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple with trailing same line comments", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { v = 34*34/34; }",
+					start: 9,
+					end: 23
+				};
+				return getFixes({
+					buffer: "with(foo) v = 34*34/34; //comment",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple for", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { if(foo) {foo();} }",
+					start: 7,
+					end: 24
+				};
+				return getFixes({
+					buffer: "for(;;) if(foo) {foo();}",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple for trailing statements", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " {\nif(foo) {foo();}\n}",
+					start: 7,
+					end: 24
+				};
+				return getFixes({
+					buffer: "for(;;)\nif(foo) {foo();} bar();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple for trailing comments", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " {\nif(foo) {foo();} //comment\n}",
+					start: 7,
+					end: 34
+				};
+				return getFixes({
+					buffer: "for(;;)\nif(foo) {foo();} //comment",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple for trailing same line comments", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: "",
+					start: 7,
+					end: 24
+				};
+				return getFixes({
+					buffer: "for(;;) if(foo) {foo();} //comment",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple for trailing same line statements", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { if(foo) {foo();} }",
+					start: 7,
+					end: 24
+				};
+				return getFixes({
+					buffer: "for(;;) if(foo) {foo();} bar();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple for-in", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { foo(); }",
+					start: 11,
+					end: 18
+				};
+				return getFixes({
+					buffer: "for(w in T) foo();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple for-in trailing statements", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " {\nfoo();\n}",
+					start: 11,
+					end: 18
+				};
+				return getFixes({
+					buffer: "for(w in T)\nfoo(); bar();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple for-in trailing comments", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " {\nfoo(); //comment\n}",
+					start: 11,
+					end: 28
+				};
+				return getFixes({
+					buffer: "for(w in T)\nfoo(); //comment",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple for-in trailing same line comments", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { foo(); }",
+					start: 11,
+					end: 18
+				};
+				return getFixes({
+					buffer: "for(w in T) foo(); //comment",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple for-in trailing same line statements", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { foo(); }",
+					start: 11,
+					end: 18
+				};
+				return getFixes({
+					buffer: "for(w in T) foo(); bar();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple while", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { foo(); }",
+					start: 11,
+					end: 18
+				};
+				return getFixes({
+					buffer: "while(true) foo();",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple while trailing statements", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " {\nfoo();\n}",
+					start: 11,
+					end: 18
+				};
+				return getFixes({
+					buffer: "while(true)\nfoo(); v = 12*12",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple while trailing comments", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " {\nfoo(); //comment\n}",
+					start: 11,
+					end: 28
+				};
+				return getFixes({
+					buffer: "while(true)\nfoo(); //comment",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple while trailing same line statements", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { foo(); }",
+					start: 11,
+					end: 18
+				};
+				return getFixes({
+					buffer: "while(true) foo(); v = 12*12;",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple while trailing same line comments", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { foo(); }",
+					start: 11,
+					end: 18
+				};
+				return getFixes({
+					buffer: "while(true) foo(); //comment",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("simple do-while", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " { foo(); }",
+					start: 2,
+					end: 9
+				};
+				return getFixes({
+					buffer: "do foo(); while(true)",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			//this does not work since we have no recovery support for this kind of broken do-while statement
+//			it("simple do-while trailing statements", function(done) {
+//				var rule = createTestRule("curly");
+//				var expected = {
+//					value: "",
+//					start: -1,
+//					end: -1
+//				};
+//				return getFixes({
+//					buffer: "do foo(); bar(); while(true)",
+//					rule: rule,
+//					expected: expected,
+//					callback: done
+//				});
+//			});
+			it("simple do-while trailing line comments", function(done) {
+				var rule = createTestRule("curly");
+				var expected = {
+					value: " {\nfoo(); // comment\n}",
+					start: 2,
+					end: 20
+				};
+				return getFixes({
+					buffer: "do\nfoo(); // comment\nwhile(true)",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+		});
 		//NO-SHADOW
 		describe("no-shadow", function() {
 			it("no-shadow 1", function(done) {

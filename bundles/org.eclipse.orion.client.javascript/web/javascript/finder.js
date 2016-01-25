@@ -82,7 +82,7 @@ define([
 			var found = null;
 			var parents = options && options.parents ? [] : null;
 			var next = options && options.next ? options.next : false;
-			if(offset != null && offset > -1 && ast) {
+			if(typeof offset === 'number' && offset > -1 && ast) {
 				Estraverse.traverse(ast, {
 					/**
 					 * start visiting an AST node
@@ -125,7 +125,7 @@ define([
 			}
 			if(found && parents && parents.length > 0) {
 				var p = parents[parents.length-1];
-				if(p.type !== 'Program' && p.range[0] === found.range[0] && p.range[1] === found.range[1]) {  //$NON-NLS-0$
+				if(p.type !== 'Program' && p.range[0] === found.range[0] && p.range[1] === found.range[1]) {
 					//a node can't be its own parent
 					parents.pop();
 				}
@@ -174,6 +174,32 @@ define([
 		},
 		
 		/**
+		 * @description Finds all of the AST nodes that start within the given range
+		 * @function
+		 * @param {Object} ast The AST to inspect
+		 * @param {Number} start The starting offset
+		 * @param {Number} end The ending offset
+		 * @returns {Array.<Object>} Returns the array of AST nodes that start within the given range
+		 * @since 11.0
+		 */
+		findNodesForRange: function findeNodesForRange(ast, start, end) {
+			var nodes = [];
+			if(ast) {
+				Estraverse.traverse(ast, {
+					enter: function(node) {
+						if(node.range[0] >= start && node.range[0] < end) {
+							nodes.push(node);
+						}
+						if(node.range[0] >= end) {
+							return Estraverse.VisitorOption.BREAK;
+						}
+					}
+				});
+			}
+			return nodes;
+		},
+		
+		/**
 		 * @name findToken
 		 * @description Finds the token in the given token stream for the given start offset
 		 * @function
@@ -184,7 +210,7 @@ define([
 		 * @returns {Object} The AST token that starts at the given start offset
 		 */
 		findToken: function(offset, tokens) {
-			if(offset != null && offset > -1 && tokens && tokens.length > 0) {
+			if(typeof offset === 'number' && offset > -1 && tokens && tokens.length > 0) {
 				var min = 0,
 					max = tokens.length-1,
 					token, 
@@ -284,7 +310,7 @@ define([
 			var langRegex = /(type|language)\s*=\s*"([^"]*)"/i;
 			var srcRegex = /src\s*=\s*"([^"]*)"/i;			
 			var comments = this.findHtmlCommentBlocks(buffer, offset);
-			loop: while((val = regex.exec(buffer)) != null) {
+			loop: while((val = regex.exec(buffer)) !== null) {
 				var attributes = val[1];
 				var text = val[2];
 				var deps = null;
@@ -314,8 +340,8 @@ define([
 					// Inline script blocks with no dependents are not valid i.e. <script/>
 					continue;
 				}
-				var index = val.index+val[0].indexOf('>')+1;  //$NON-NLS-0$
-				if((offset == null || (index <= offset && index+text.length >= offset))) {
+				var index = val.index+val[0].indexOf('>')+1;
+				if(typeof offset !== 'number' || (index <= offset && index+text.length >= offset)) {
 					for(var i = 0; i < comments.length; i++) {
 						if(comments[i].start <= index && comments[i].end >= index) {
 							continue loop;
@@ -334,7 +360,7 @@ define([
 			var eventAttributes = {'blur':true, 'change':true, 'click':true, 'dblclick':true, 'focus':true, 'keydown':true, 'keypress':true, 'keyup':true, 'load':true, 'mousedown':true, 'mousemove':true, 'mouseout':true, 'mouseover':true, 'mouseup':true, 'reset':true, 'select':true, 'submit':true, 'unload':true};
 			var eventRegex = /(\s+)on(\w*)(\s*=\s*")([^"]*)"/ig;
 			var count = 0;
-			loop: while((val = eventRegex.exec(buffer)) != null) {
+			loop: while((val = eventRegex.exec(buffer)) !== null) {
 				count++;
 				var leadingWhitespace = val[1];
 				var attribute = val[2];
@@ -345,7 +371,7 @@ define([
 						text = "";
 					}
 					index = val.index + leadingWhitespace.length + 2 + attribute.length + assignment.length;
-					if((offset == null || (index <= offset && index+text.length >= offset))) {
+					if(typeof offset !== 'number' || (index <= offset && index+text.length >= offset)) {
 						for(var j = 0; j < comments.length; j++) {
 							if(comments[j].start <= index && comments[j].end >= index) {
 								continue loop;
@@ -379,7 +405,7 @@ define([
 				if(text.length < 1) {
 					continue;
 				}
-				if((offset == null || (val.index <= offset && val.index+text.length >= val.index))) {
+				if(typeof offset !== 'number' || (val.index <= offset && val.index+text.length >= val.index)) {
 					blocks.push({
 						text: text,
 						start: val.index,
@@ -408,7 +434,7 @@ define([
 						return keys[i];
 					}
 					var globals = env['globals'];
-					if(globals && (typeof globals[name] !== 'undefined')) {
+					if(globals && typeof globals[name] !== 'undefined') {
 						return keys[i];
 					}
 				}
@@ -425,11 +451,11 @@ define([
 		 * @since 8.0
 		 */
 		findDirective: function findDirective(ast, name) {
-			if(ast && (typeof name !== 'undefined')) {
+			if(ast && typeof name !== 'undefined') {
 				var len = ast.comments.length;
 				for(var i = 0; i < len; i++) {
 					var match = /^\s*(eslint-\w+|eslint|globals?)(\s|$)/.exec(ast.comments[i].value);
-					if(match != null && typeof match !== 'undefined' && match[1] === name) {
+					if(match !== null && typeof match !== 'undefined' && match[1] === name) {
 						return ast.comments[i];
 					}
 				}
@@ -497,7 +523,7 @@ define([
 					}
 				} else if(node.parent) {
 					//eslint has tagged the AST with herarchy infos
-					var parent = node.parent;
+					parent = node.parent;
 					while(parent) {
 						if(parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression') {
 							return parent;

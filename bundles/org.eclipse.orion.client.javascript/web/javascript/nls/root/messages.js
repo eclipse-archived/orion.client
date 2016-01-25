@@ -25,6 +25,7 @@ define({
 	'contentAssist' : 'JavaScript content assist',
 	'eslintValidator' : 'JavaScript Validator',
 	'missingCurly' : 'Statements not enclosed in braces:',
+	'curlyFixName': 'Enclose statement in braces',
 	'noCaller' : 'Discouraged \'arguments.caller\' or \'arguments.callee\' use:',
 	'noCommaDangle' : 'Trailing commas in object expressions:',
     'noCondAssign' : 'Assignments in conditional expressions:',

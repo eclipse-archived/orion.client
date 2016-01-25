@@ -62,7 +62,8 @@ define([
 	        				    case 'WhileStatement':
 	        				    case 'WithStatement':
 	        				    case 'ForStatement':
-	                            case 'ForInStatement': {
+	                            case 'ForInStatement': 
+	                            case 'ForOfStatement': {
 	            					if(node.body && node.body.type !== 'BlockStatement') {
 	            						//flag the first token of the statement that should be in the block
 	            						context.report(node.body, ProblemMessages['curly'], null /*, context.getTokens(node.body)[0]*/);
@@ -81,6 +82,7 @@ define([
 	        			'WhileStatement' : checkBlock,
 	        			'ForStatement' : checkBlock,
 	        			'ForInStatement' : checkBlock,
+	        			'ForOfStatement': checkBlock,
 	        			'WithStatement': checkBlock,
 	        			'DoWhileStatement': checkBlock
 	        		};

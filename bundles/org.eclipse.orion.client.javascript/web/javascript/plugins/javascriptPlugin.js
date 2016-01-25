@@ -542,6 +542,19 @@ define([
 
     	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand);
 
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+    			quickFixComputer,
+    			{
+        			name: javascriptMessages["curlyFixName"],
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+        			id : "curly.fix",  //$NON-NLS-1$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:curly)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                    ]
+    			}
+    	);
+
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
