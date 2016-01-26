@@ -18,9 +18,9 @@ define([
 	'orion/objects',
 	'orion/Deferred',
 	'esprima/esprima',
+	'doctrine/doctrine',
 	'mocha/mocha', //mjust stay at the end, not a module
-	'doctrine/doctrine' //must stay at the end, does not export a module 
-], function(ContentAssist, chai, objects, Deferred, Esprima) {
+], function(ContentAssist, chai, objects, Deferred, Esprima, doctrine) {
 	var assert = chai.assert;
 /* eslint-disable missing-nls */
 	describe('Content Assist Tests', function() {

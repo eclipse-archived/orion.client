@@ -18,8 +18,8 @@ define([
 'orion/Deferred',
 'i18n!javascript/nls/messages',
 'orion/i18nUtil',
-'doctrine/doctrine' //last, exports into global
-], function(Objects, Finder, URITemplate, Deferred, Messages, i18nUtil) {
+'doctrine/doctrine'
+], function(Objects, Finder, URITemplate, Deferred, Messages, i18nUtil, doctrine) {
 
 	/**
 	 * @description Formats the hover info as markdown text
@@ -37,7 +37,7 @@ define([
 		        format.params = [];
 		        format.throws = [];
 		        format.see = [];
-		        format.desc = (doc.description ? doc.description : '');
+		        format.desc = doc.description ? doc.description : '';
 		        if(doc.tags) {
 		            var len = doc.tags.length;
 		            for(var i = 0; i < len; i++) {
@@ -51,20 +51,20 @@ define([
 		                    }
 		                    case 'description': {
 		                        if(tag.description !== null) {
-		                          format.desc = (format.desc === '' ? tag.description : format.desc+'\n'+tag.description);
+		                          format.desc = format.desc === '' ? tag.description : format.desc+'\n'+tag.description; //$NON-NLS-1$
 		                        }
 		                        break;
 		                    }
 		                    case 'param': {
 		                        format.params.push(_convertTagType(tag.type) +
-		                                  (tag.name ? '__'+tag.name+'__ ' : '') +
-		                                  (tag.description ? tag.description+'\n' : ''));
+		                                  (tag.name ? '__'+tag.name+'__ ' : '') + //$NON-NLS-1$ //$NON-NLS-2$
+		                                  (tag.description ? tag.description+'\n' : '')); //$NON-NLS-1$
 		                        break;
 		                    }
 		                    case 'returns':
 		                    case 'return': {
 		                        format.returns = _convertTagType(tag.type) +
-		                              (tag.description ? tag.description+'\n' : '');
+		                              (tag.description ? tag.description+'\n' : ''); //$NON-NLS-1$
 		                         break;
 		                    }
 		                    case 'since': {
@@ -97,7 +97,7 @@ define([
 		        }
 	        }
 	        var hover = '';
-	        if(typeof(format.deprecated) !== 'undefined') {
+	        if(typeof format.deprecated !== 'undefined') {
 	        	hover += i18nUtil.formatMessage('__${0}__ ', Messages['deprecatedHoverTitle'])+format.deprecated+'\n\n'; //$NON-NLS-2$ //$NON-NLS-1$
 	        }
 	        if(format.desc !== '') {
@@ -127,7 +127,7 @@ define([
 	        if(format.see.length > 0) {
 	        	hover += i18nUtil.formatMessage('__${0}__\n\n', Messages['seeAlsoHoverTitle']); //$NON-NLS-1$
 	        	for(i = 0; i < format.see.length; i++) {
-	        		hover += '>'+format.see[i]; //$NON-NLS-1$
+	        		hover += '>'+format.see[i];
 	        		if(i < format.see.length-1) {
 	        			hover += '\n\n'; //$NON-NLS-1$
 	        		}
@@ -195,11 +195,9 @@ define([
                             return '*('+val.name+'[])* '; //$NON-NLS-1$ //$NON-NLS-2$
                         } else if(val.fields && val.fields.length > 0) {
                             return _convertTagType(val.fields[0]);
-                        } else {
-                            //fallback to trying to format the raw value
-                            return _convertTagType(val);
                         }
-
+                        //fallback to trying to format the raw value
+                        return _convertTagType(val);
 	                }
                 }
                 return _convertTagType(type.expression);
@@ -361,7 +359,7 @@ define([
 		    if(path && files) {
 		        var title = null;
 		        if(files.length > 1) {
-		             title = i18nUtil.formatMessage('###${0} \'${1}\'###', Messages['openFileForTitle'], path); //$NON-NLS-1$ //$NON-NLS-2$
+		             title = i18nUtil.formatMessage('###${0} \'${1}\'###', Messages['openFileForTitle'], path); //$NON-NLS-1$
 		        }
 		        var hover = '';
 		        for(var i = 0; i < files.length; i++) {
@@ -372,7 +370,7 @@ define([
     		                      {
     		                      resource: file.location,
     		                      params: {}
-    		                      }); //$NON-NLS-0$
+    		                      });
 		                hover += file.name + ']('+href+') - '+file.path+'\n\n'; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		            }
 
