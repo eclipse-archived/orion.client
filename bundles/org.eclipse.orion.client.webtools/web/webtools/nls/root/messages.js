@@ -77,6 +77,8 @@ define({//Default message bundle
 	'obsoleteTagDesc': ' [Obsolete]',
 	'obsoleteAttr': '*Obsolete: This attribute is obsolete since ${0}. Its use is discouraged.*\n\n',
 	'obsoleteAttrDesc': ' [Obsolete]',
+	'possibleValues': ' Possible values are:',
+	'valueNameDocMarkdown': '\n* ${0}: ${1}',
 	'formeventsHeader': 'Form Events',
 	'keyboardeventsHeader': 'Keyboard Events',
 	'mouseeventsHeader': 'Mouse Events',

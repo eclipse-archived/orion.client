@@ -33,10 +33,12 @@ define([
  			{
  				name: "contenteditable",
  				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable",
- 				doc: "Is an enumerated attribute indicating if the element should be editable by the user. If so, the browser modifies its widget to allow editing. The attribute must take one of the following values:"
-						+ "\n* true or the empty string, which indicates that the element must be editable"
-						+ "\n* false, which indicates that the element must not be editable."
- 			},
+ 				doc: "Is an enumerated attribute indicating if the element should be editable by the user. If so, the browser modifies its widget to allow editing.",
+				values: [
+					{name: "true", doc: "(or empty string) indicates that the element must be editable"},
+					{name: "false", doc: "the element must not be editable"}
+				]
+			},
  			{
  				name: "contextmenu",
  				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu",
@@ -50,26 +52,31 @@ define([
  			{
  				name: "dir",
  				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/dir",
- 				doc: "Is an enumerated attribute indicating the directionality of the element's text. It can have the following values:"
-						+"\n* ltr, which means left to right and is to be used for languages that are written from the left to the right (like English)"
-						+"\n* rtl, which means right to left and is to be used for languages that are written from the right to the left (like Arabic)"
-						+"\n* auto, which let the user agent decides. It uses a basic algorithm as it parses the characters inside the element until it finds a character with a strong directionality, then apply that directionality to the whole element"
- 			},
+ 				doc: "Is an enumerated attribute indicating the directionality of the element's text.",
+				values: [
+					{name: "ltr", doc: "means left to right and is to be used for languages that are written from the left to the right (like English)"},
+					{name: "rtl", doc: "means right to left and is to be used for languages that are written from the right to the left (like Arabic)"},
+					{name: "auto", doc: "lets the user agent decide. It uses a basic algorithm as it parses the characters inside the element until it finds a character with a strong directionality, then apply that directionality to the whole element"}
+				]
+			},
  			{
  				name: "draggable",
  				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/draggable",
- 				doc: "Is an enumerated attribute indicating whether the element can be dragged, using the Drag and Drop API. It can have the following values:"
-						+"\n* true, which indicates that the element may be dragged"
-						+"\n* false, which indicates that the element may not be dragged",
+ 				doc: "Is an enumerated attribute indicating whether the element can be dragged, using the Drag and Drop API.",
+				values: [
+					{name: "true", doc: "the element may be dragged"},
+					{name: "false", doc: "the element may not be dragged"}
+				]
  			},
  			{
  				name: "dropzone",
  				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/dropzone",
- 				doc: "Is an enumerated attribute indicating what types of content can be dropped on an element, using the Drag and Drop API. It can have the following values:"
-						+"\n* copy, which indicates that dropping will create a copy of the element that was dragged"
-						+"\n* move, which indicates that the element that was dragged will be moved to this new location"
-						+"\n* link, will create a link to the dragged data",
- 				experimental: true
+ 				doc: "Is an enumerated attribute indicating what types of content can be dropped on an element, using the Drag and Drop API.",
+				values: [
+					{name: "copy", doc: "dropping will create a copy of the element that was dragged"},
+					{name: "move", doc: "the element that was dragged will be moved to this new location"},
+					{name: "link", doc: "create a link to the dragged data"}
+				]
  			},
  			{
  				name: "hidden",
@@ -114,9 +121,11 @@ define([
  			{
  				name: "spellcheck",
 				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/spellcheck",
-				doc: "Is an enumerated attribute defines whether the element may be checked for spelling errors. It may have the following values:"
-	 					+ "\n* true, which indicates that the element should be, if possible, checked for spelling errors"
-  						+ "\n* false, which indicates that the element should not be checked for spelling errors",
+				doc: "Is an enumerated attribute that defines whether the element may be checked for spelling errors.",
+				values: [
+					{name: "true", doc: "the element should be, if possible, checked for spelling errors"},
+  					{name: "false", doc: "the element should not be checked for spelling errors"}
+  				]
  			},
  			{
  				name: "style",
@@ -126,10 +135,12 @@ define([
  			{
  				name: "tabindex",
  				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/tabindex",
- 				doc: "Is an integer attribute indicates if the element can take input focus (is focusable), if it should participate to sequential keyboard navigation, and if so, at what position. It can takes several values:"
-						+"\n* a negative value means that the element should be focusable, but should not be reachable via sequential keyboard navigation"
-						+"\n* 0 means that the element should be focusable and reachable via sequential keyboard navigation, but its relative order is defined by the platform convention"
-						+"\n* a positive value which means should be focusable and reachable via sequential keyboard navigation; its relative order is defined by the value of the attribute: the sequential follow the increasing number of the tabindex. If several elements share the same tabindex, their relative order follows their relative position in the document)"
+ 				doc: "Is an integer attribute that indicates if the element can take input focus (is focusable), if it should participate in sequential keyboard navigation, and if so, at what position.",
+				values: [
+					{name: "-1", doc: "a negative value means that the element should be focusable, but should not be reachable via sequential keyboard navigation"},
+					{name: "0", doc: "the element should be focusable and reachable via sequential keyboard navigation, but its relative order is defined by the platform convention"},
+					{name: "positiveInteger", doc: "a positive value means that the element should be focusable and reachable via sequential keyboard navigation; its relative order is defined by the value of the attribute: the sequential follow the increasing number of the tabindex. If several elements share the same tabindex, their relative order follows their relative position in the document"}
+				]
 			},
 			{
 	 			name: "title",
@@ -139,9 +150,11 @@ define([
  			{
  				name: "translate",
  				url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/translate",
- 				doc: "Is an enumerated attribute that is used to specify whether an element's attribute values and the values of its Text node children are to be translated when the page is localized, or whether to leave them unchanged. It can have the following values:"
-						+"\n* empty string and \"yes\", which indicates that the element will be translated"
-						+"\n* \"no\", which indicates that the element will not be translated"
+ 				doc: "Is an enumerated attribute that is used to specify whether an element's attribute values and the values of its Text node children are to be translated when the page is localized, or whether to leave them unchanged.",
+				values: [
+					{name: "yes", doc: "empty string and \"yes\" indicate that the element will be translated"},
+					{name: "no", doc: "the element will not be translated"}
+				]
  			}
 	];
 	
@@ -423,11 +436,13 @@ define([
 		},
 		{
 			name: "target",
-			doc: "This attribute specifies where to display the linked resource. In HTML4, this is the name of, or a keyword for, a frame. In HTML5, it is a name of, or keyword for, a browsing context (for example, tab, window, or inline frame). The following keywords have special meanings:"
-					+"* _self: Load the response into the same HTML4 frame (or HTML5 browsing context) as the current one. This value is the default if the attribute is not specified"
-					+"* _blank: Load the response into a new unnamed HTML4 window or HTML5 browsing context"
-					+"* _parent: Load the response into the HTML4 frameset parent of the current frame or HTML5 parent browsing context of the current one. If there is no parent, this option behaves the same way as _self"
-					+"* _top: In HTML4: Load the response into the full, original window, canceling all other frames. In HTML5: Load the response into the top-level browsing context (that is, the browsing context that is an ancestor of the current one, and has no parent). If there is no parent, this option behaves the same way as _self",
+			doc: "This attribute specifies where to display the linked resource. In HTML4, this is the name of, or a keyword for, a frame. In HTML5, it is a name of, or keyword for, a browsing context (for example, tab, window, or inline frame). The following keywords have special meanings:",
+			values: [
+				{name: "_self", doc: "Load the response into the same HTML4 frame (or HTML5 browsing context) as the current one. This value is the default if the attribute is not specified"},
+				{name: "_blank", doc: "Load the response into a new unnamed HTML4 window or HTML5 browsing context"},
+				{name: "_parent", doc: "Load the response into the HTML4 frameset parent of the current frame or HTML5 parent browsing context of the current one. If there is no parent, this option behaves the same way as _self"},
+				{name: "_top", doc: "In HTML4: Load the response into the full, original window, canceling all other frames. In HTML5: Load the response into the top-level browsing context (that is, the browsing context that is an ancestor of the current one, and has no parent). If there is no parent, this option behaves the same way as _self"}
+			],
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#attr-target"
 		},
 		{
@@ -960,14 +975,16 @@ define([
 		},
 		{
 			name: "sandbox",
-			doc: "If specified as an empty string, this attribute enables extra restrictions on the content that can appear in the inline frame. The value of the attribute can either be an empty string (all the restrictions are applied), or a space-separated list of tokens that lift particular restrictions. Valid tokens are:"
-					+"* allow-same-origin: Allows the content to be treated as being from its normal origin. If this keyword is not used, the embedded content is treated as being from a unique origin"
-					+"* allow-top-navigation: Allows the embedded browsing context to navigate (load) content to the top-level browsing context. If this keyword is not used, this operation is not allowed"
-					+"* allow-forms: Allows the embedded browsing context to submit forms. If this keyword is not used, this operation is not allowed"
-					+"* allow-popups: Allows popups (like from window.open, target=\"_blank\", showModalDialog). If this keyword is not used, that functionality will silently fail"
-					+"* allow-scripts: Allows the embedded browsing context to run scripts (but not create pop-up windows). If this keyword is not used, this operation is not allowed"
-					+"* allow-pointer-lock: Allows the embedded browsing context to use the Pointer Lock API"
-					+"* allow-unsandboxed-auxiliary: (Chrome only) Allows a sandboxed document to open new windows without forcing the sandboxing flags upon them. This will allow, for example, a third-party advertisement to be safely sandboxed without forcing the same restrictions upon a landing page",
+			doc: "If specified as an empty string, this attribute enables extra restrictions on the content that can appear in the inline frame. The value of the attribute can either be an empty string (all the restrictions are applied), or a space-separated list of tokens that lift particular restrictions.",
+			values: [
+				{name: "allow-same-origin", doc: "Allows the content to be treated as being from its normal origin. If this keyword is not used, the embedded content is treated as being from a unique origin"},
+				{name: "allow-top-navigation", doc: "Allows the embedded browsing context to navigate (load) content to the top-level browsing context. If this keyword is not used, this operation is not allowed"},
+				{name: "allow-forms", doc: "Allows the embedded browsing context to submit forms. If this keyword is not used, this operation is not allowed"},
+				{name: "allow-popups", doc: "Allows popups (like from window.open, target=\"_blank\", showModalDialog). If this keyword is not used, that functionality will silently fail"},
+				{name: "allow-scripts", doc: "Allows the embedded browsing context to run scripts (but not create pop-up windows). If this keyword is not used, this operation is not allowed"},
+				{name: "allow-pointer-lock", doc: "Allows the embedded browsing context to use the Pointer Lock API"},
+				{name: "allow-unsandboxed-auxiliary", doc: "(Chrome only) Allows a sandboxed document to open new windows without forcing the sandboxing flags upon them. This will allow, for example, a third-party advertisement to be safely sandboxed without forcing the same restrictions upon a landing page"}
+			],
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox"
 		},
 		{
@@ -1026,13 +1043,13 @@ define([
 		{
 			name: "srcset",
 			doc: "A list of one or more strings separated by commas indicating a set of possible image sources for the user agent to use. Each string is composed of:"
-					+"* a URL to an image"
-					+"* optionally, whitespace followed by one of:"
-					+"** a width descriptor, that is a positive integer directly followed by 'w'. The width descriptor is divided by the source size given in the sizes attribute to calculate the effective pixel density"
-					+"** a pixel density descriptor, that is a positive floating point number directly followed by 'x'"
-					+"If no descriptor is specified, the source is assigned the default descriptor: 1x.\n"
-					+"It is invalid to mix width descriptors and pixel density descriptors in the same srcset attribute. Duplicate descriptors (for instance, two sources in the same srcset which are both described with '2x') are invalid, too."
-					+"User agents are given discretion to choose any one of the available sources. This provides them with significant leeway to tailor their selection based on things like user preferences or bandwidth conditions.",
+					+ "\n* a URL to an image"
+					+ "\n* optionally, whitespace followed by one of:"
+					+ "\n * a width descriptor, that is a positive integer directly followed by 'w'. The width descriptor is divided by the source size given in the sizes attribute to calculate the effective pixel density"
+					+ "\n * a pixel density descriptor, that is a positive floating point number directly followed by 'x'"
+					+ "\nIf no descriptor is specified, the source is assigned the default descriptor: 1x.\n"
+					+ "\nIt is invalid to mix width descriptors and pixel density descriptors in the same srcset attribute. Duplicate descriptors (for instance, two sources in the same srcset which are both described with '2x') are invalid, too."
+					+ "\nUser agents are given discretion to choose any one of the available sources. This provides them with significant leeway to tailor their selection based on things like user preferences or bandwidth conditions.",
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-srcset"
 		},
 		{
@@ -1163,7 +1180,35 @@ define([
 		},
 		{
 			name: "type",
-			doc: "Defines the type of the element.",
+			doc: "The type of control to display. The default type is text, if this attribute is not specified.",
+			values: [
+				{name: "button", doc: "A push button with no default behavior."},
+				{name: "checkbox", doc: "A check box. You must use the value attribute to define the value submitted by this item. Use the checked attribute to indicate whether this item is selected. You can also use the indeterminate attribute to indicate that the checkbox is in an indeterminate state (on most platforms, this draws a horizontal line across the checkbox)."},
+				{name: "color", doc: "A control for specifying a color. A color picker's UI has no required features other than accepting simple colors as text (more info)."},
+				{name: "date", doc: "A control for entering a date (year, month, and day, with no time)."},
+				{name: "datetime-local", doc: "A control for entering a date and time, with no time zone."},
+				{name: "email", doc: "A field for editing an e-mail address. The input value is validated to contain either the empty string or a single valid e-mail address before submitting. The :valid and :invalid CSS pseudo-classes are applied as appropriate."},
+				{name: "file", doc: "A control that lets the user select a file. Use the accept attribute to define the types of files that the control can select."},
+				{name: "hidden", doc: "A control that is not displayed, but whose value is submitted to the server."},
+				{name: "image", doc: "A graphical submit button. You must use the src attribute to define the source of the image and the alt attribute to define alternative text. You can use the height and width attributes to define the size of the image in pixels."},
+				{name: "month", doc: "A control for entering a month and year, with no time zone."},
+				{name: "number", doc: "A control for entering a floating point number."},
+				{name: "password", doc: "A single-line text field whose value is obscured. Use the maxlength attribute to specify the maximum length of the value that can be entered."},
+				{name: "radio", doc: "A radio button. You must use the value attribute to define the value submitted by this item. Use the checked attribute to indicate whether this item is selected by default. Radio buttons that have the same value for the name attribute are in the same \"radio button group\"; only one radio button in a group can be selected at a time."},
+				{name: "range", doc: "A control for entering a number whose exact value is not important. This type control uses the following default values if the corresponding attributes are not specified:"
+					+ "\n * min: 0"
+					+ "\n * max: 100"
+					+ "\n * value: min + (max-min)/2, or min if max is less than min"
+					+ "\n * step: 1"},
+				{name: "reset", doc: "A button that resets the contents of the form to default values."},
+				{name: "search", doc: "A single-line text field for entering search strings; line-breaks are automatically removed from the input value."},
+				{name: "submit", doc: "A button that submits the form."},
+				{name: "tel", doc: "A control for entering a telephone number; line-breaks are automatically removed from the input value, but no other syntax is enforced. You can use attributes such as pattern and maxlength to restrict values entered in the control. The :valid and :invalid CSS pseudo-classes are applied as appropriate."},
+				{name: "text", doc: "A single-line text field; line-breaks are automatically removed from the input value."},
+				{name: "time", doc: "A control for entering a time value with no time zone."},
+				{name: "url", doc: "A field for editing a URL. The input value is validated to contain either the empty string or a valid absolute URL before submitting. Line-breaks and leading or trailing whitespace are automatically removed from the input value. You can use attributes such as pattern and maxlength to restrict values entered in the control. The :valid and :invalid CSS pseudo-classes are applied as appropriate."},
+				{name: "week", doc: "A control for entering a date consisting of a week-year number and a week number with no time zone."}
+			],
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-type"
 		},
 		{
@@ -1859,11 +1904,12 @@ define([
 		},
 		{
 			name: "preload",
-			doc: "This enumerated attribute is intended to provide a hint to the browser about what the author thinks will lead to the best user experience. It may have one of the following values:"
-					+"* none: hints that either the author thinks that the user won't need to consult that video or that the server wants to minimize its traffic; in others terms this hint indicates that the video should not be cached"
-					+"* metadata: hints that though the author thinks that the user won't need to consult that video, fetching the metadata (e.g. length) is reasonable"
-					+"* auto: hints that the user needs have priority; in others terms this hint indicated that, if needed, the whole video could be downloaded, even if the user is not expected to use it"
-					+"* the empty string: which is a synonym of the auto value",
+			doc: "This enumerated attribute is intended to provide a hint to the browser about what the author thinks will lead to the best user experience.",
+			values: [
+				{name: "none", doc: "hints that either the author thinks that the user won't need to consult that video or that the server wants to minimize its traffic; in others terms this hint indicates that the video should not be cached"},
+				{name: "metadata", doc: "hints that though the author thinks that the user won't need to consult that video, fetching the metadata (e.g. length) is reasonable"},
+				{name: "auto", doc: "(or empty string) hints that the user needs have priority; in others terms this hint indicated that, if needed, the whole video could be downloaded, even if the user is not expected to use it"},
+			],
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video#attr-preload"
 		},
 		{
@@ -1877,21 +1923,25 @@ define([
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video#attr-width"
 		}
 	];
-	
+
 	var aria = Object.create(null);
 	aria.globalAttributes = [
 		{
 			name: "aria-atomic",
-			doc: "Indicates whether assistive technologies will present all, or only parts of, the changed region based on the change notifications defined by the aria-relevant attribute. See related aria-relevant. Possible values are:"
-				+ "\n* true: Assistive technologies will present the entire region as a whole."
-				+ "\n* false: A change within the region may be processed by the assistive technologies on its own.",
+			doc: "Indicates whether assistive technologies will present all, or only parts of, the changed region based on the change notifications defined by the aria-relevant attribute. See related aria-relevant.",
+			values: [
+				{name: "true", doc: "Assistive technologies will present the entire region as a whole."},
+				{name: "false", doc: "A change within the region may be processed by the assistive technologies on its own."}
+			],
 			url: "http://www.w3.org/TR/wai-aria/complete#aria-atomic"
 		},
 		{
 			name: "aria-busy",
-			doc: "Indicates whether an element, and its subtree, are currently being updated. Possible values are:"
-				+ "\n* true: The live region is still being updated."
-				+ "\n* false: There are no more expected updates for that live region.",
+			doc: "Indicates whether an element, and its subtree, are currently being updated.",
+			values: [
+				{name: "true", doc: "The live region is still being updated."},
+				{name: "false", doc: "There are no more expected updates for that live region."}
+			],
 			url: "http://www.w3.org/TR/wai-aria/complete#aria-busy"
 		},
 		{
@@ -1906,20 +1956,24 @@ define([
 		},
 		{
 			name: "aria-disabled",
-			doc: "Indicates that the element is perceivable but disabled, so it is not editable or otherwise operable. See related aria-hidden and aria-readonly. Possible values are:"
-				+ "\n* true: The element and all focusable descendants are disabled and its value cannot be changed by the user."
-				+ "\n* false: The element is enabled.",
+			doc: "Indicates that the element is perceivable but disabled, so it is not editable or otherwise operable. See related aria-hidden and aria-readonly.",
+			values: [
+				{name: "true", doc: "The element and all focusable descendants are disabled and its value cannot be changed by the user."},
+				{name: "false", doc: "The element is enabled."}
+			],
 			url: "http://www.w3.org/TR/wai-aria/complete#aria-disabled"
 		},
 		{
 			name: "aria-dropeffect",
-			doc: "Indicates what functions can be performed when the dragged object is released on the drop target. This allows assistive technologies to convey the possible drag options available to users, including whether a pop-up menu of choices is provided by the application. Typically, drop effect functions can only be provided once an object has been grabbed for a drag operation as the drop effect functions available are dependent on the object being dragged. Possible values are:"
-				+ "\n* copy: A duplicate of the source object will be dropped into the target."
-				+ "\n* move: The source object will be removed from its current location and dropped into the target."
-				+ "\n* link: A reference or shortcut to the dragged object will be created in the target object."
-				+ "\n* execute: A function supported by the drop target is executed, using the drag source as an input."
-				+ "\n* popup: There is a popup menu or dialog that allows the user to choose one of the drag operations (copy, move, link, execute) and any other drag functionality, such as cancel."
-				+ "\n* none: No operation can be performed; effectively cancels the drag operation if an attempt is made to drop on this object. Ignored if combined with any other token value. e.g. 'none copy' is equivalent to a 'copy' value.",
+			doc: "Indicates what functions can be performed when the dragged object is released on the drop target. This allows assistive technologies to convey the possible drag options available to users, including whether a pop-up menu of choices is provided by the application. Typically, drop effect functions can only be provided once an object has been grabbed for a drag operation as the drop effect functions available are dependent on the object being dragged.",
+			values: [
+				{name: "copy", doc: "A duplicate of the source object will be dropped into the target."},
+				{name: "move", doc: "The source object will be removed from its current location and dropped into the target."},
+				{name: "link", doc: "A reference or shortcut to the dragged object will be created in the target object."},
+				{name: "execute", doc: "A function supported by the drop target is executed, using the drag source as an input."},
+				{name: "popup", doc: "There is a popup menu or dialog that allows the user to choose one of the drag operations (copy, move, link, execute) and any other drag functionality, such as cancel."},
+				{name: "none", doc: "No operation can be performed; effectively cancels the drag operation if an attempt is made to drop on this object. Ignored if combined with any other token value. e.g. 'none copy' is equivalent to a 'copy' value."}
+			],
 			url: "http://www.w3.org/TR/wai-aria/complete#aria-dropeffect"
 		},
 		{
@@ -1929,33 +1983,41 @@ define([
 		},
 		{
 			name: "aria-grabbed",
-			doc: "Indicates an element's 'grabbed' state in a drag-and-drop operation. Possible values are:"
-				+ "\n* true: Indicates that the element has been 'grabbed' for dragging."
-				+ "\n* false: Indicates that the element supports being dragged."
-				+ "\n* undefined: Indicates that the element does not support being dragged.",
+			doc: "Indicates an element's 'grabbed' state in a drag-and-drop operation.",
+			values: [
+				{name: "true", doc: "Indicates that the element has been 'grabbed' for dragging."},
+				{name: "false", doc: "Indicates that the element supports being dragged."},
+				{name: "undefined", doc: "Indicates that the element does not support being dragged."}
+			],
 			url: "http://www.w3.org/TR/wai-aria/complete#aria-grabbed"
 		},
 		{
 			name: "aria-haspopup",
-			doc: "Indicates that the element has a popup context menu or sub-level menu. Possible values are:"
-				+ "\n* true: Indicates the object has a popup, either as a descendant or pointed to by aria-owns."
-				+ "\n* false: The object has no popup.",
+			doc: "Indicates that the element has a popup context menu or sub-level menu.",
+			values: [
+				{name: "true", doc: "Indicates the object has a popup, either as a descendant or pointed to by aria-owns."},
+				{name: "false", doc: "The object has no popup."}
+			],
 			url: "http://www.w3.org/TR/wai-aria/complete#aria-haspopup"
 		},
 		{
 			name: "aria-hidden",
-			doc: "Indicates that the element and all of its descendants are not visible or perceivable to any user as implemented by the author. See related aria-disabled. Possible values are:"
-				+ "\n* true: Indicates that this section of the document and its children are hidden from the rendered view."
-				+ "\n* false: Indicates that this section of the document is rendered.",
+			doc: "Indicates that the element and all of its descendants are not visible or perceivable to any user as implemented by the author. See related aria-disabled.",
+			values: [
+				{name: "true", doc: "Indicates that this section of the document and its children are hidden from the rendered view."},
+				{name: "false", doc: "Indicates that this section of the document is rendered."}
+			],
 			url: "http://www.w3.org/TR/wai-aria/complete#aria-hidden"
 		},
 		{
 			name: "aria-invalid",
-			doc: "Indicates the entered value does not conform to the format expected by the application. Possible values are:"
-				+ "\n* grammar: A grammatical error was detected."
-				+ "\n* false: There are no detected errors in the value."
-				+ "\n* spelling: A spelling error was detected."
-				+ "\n* true: The value entered by the user has failed validation.",
+			doc: "Indicates the entered value does not conform to the format expected by the application.",
+			values: [
+				{name: "grammar", doc: "A grammatical error was detected."},
+				{name: "false", doc: "There are no detected errors in the value."},
+				{name: "spelling", doc: "A spelling error was detected."},
+				{name: "true", doc: "The value entered by the user has failed validation."}
+			],
 			url: "http://www.w3.org/TR/wai-aria/complete#aria-invalid"
 		},
 		{
@@ -1970,10 +2032,12 @@ define([
 		},
 		{
 			name: "aria-live",
-			doc: "Indicates that an element will be updated, and describes the types of updates the user agents, assistive technologies, and user can expect from the live region. Possible values are:"
-				+ "\n* off: Updates to the region will not be presented to the user unless the assistive technology is currently focused on that region."
-				+ "\n* polite: (Background change) Assistive technologies SHOULD announce updates at the next graceful opportunity, such as at the end of speaking the current sentence or when the user pauses typing."
-				+ "\n* assertive: This information has the highest priority and assistive technologies SHOULD notify the user immediately. Because an interruption may disorient users or cause them to not complete their current task, authors SHOULD NOT use the assertive value unless the interruption is imperative.",
+			doc: "Indicates that an element will be updated, and describes the types of updates the user agents, assistive technologies, and user can expect from the live region.",
+			values: [
+				{name: "off", doc: "Updates to the region will not be presented to the user unless the assistive technology is currently focused on that region."},
+				{name: "polite", doc: "(Background change) Assistive technologies SHOULD announce updates at the next graceful opportunity, such as at the end of speaking the current sentence or when the user pauses typing."},
+				{name: "assertive", doc: "This information has the highest priority and assistive technologies SHOULD notify the user immediately. Because an interruption may disorient users or cause them to not complete their current task, authors SHOULD NOT use the assertive value unless the interruption is imperative."}
+			],
 			url: "http://www.w3.org/TR/wai-aria/complete#aria-live"
 		},
 		{
@@ -1983,12 +2047,14 @@ define([
 		},
 		{
 			name: "aria-relevant",
-			doc: "Indicates what user agent change notifications (additions, removals, etc.) assistive technologies will receive within a live region. See related aria-atomic. Possible values are:"
-				+ "\n* additions: Element nodes are added to the DOM within the live region."
-				+ "\n* removals: Text or element nodes within the live region are removed from the DOM."
-				+ "\n* text: Text is added to any DOM descendant nodes of the live region."
-				+ "\n* all: Equivalent to the combination of all values, 'additions removals text'."
-				+ "\n* additions text: Equivalent to the combination of values, 'additions text'.",
+			doc: "Indicates what user agent change notifications (additions, removals, etc.) assistive technologies will receive within a live region. See related aria-atomic.",
+			values: [
+				{name: "additions", doc: "Element nodes are added to the DOM within the live region."},
+				{name: "removals", doc: "Text or element nodes within the live region are removed from the DOM."},
+				{name: "text", doc: "Text is added to any DOM descendant nodes of the live region."},
+				{name: "all", doc: "Equivalent to the combination of all values, 'additions removals text'."},
+				{name: "additions text", doc: "Equivalent to the combination of values, 'additions text'."}
+			],
 			url: "http://www.w3.org/TR/wai-aria/complete#aria-relevant"
 		}
 	];
@@ -2179,28 +2245,34 @@ define([
 	};
 	aria.attributes.autocomplete = {
 		name: "aria-autocomplete",
-		doc: "Indicates whether user input completion suggestions are provided. Possible values are:"
-			+ "\n* inline: The system provides text after the caret as a suggestion for how to complete the field."
-			+ "\n* list: A list of choices appears from which the user can choose."
-			+ "\n* both: A list of choices appears and the currently selected suggestion also appears inline."
-			+ "\n* none: No input completion suggestions are provided.",
+		doc: "Indicates whether user input completion suggestions are provided.",
+		values: [
+			{name: "inline", doc: "The system provides text after the caret as a suggestion for how to complete the field."},
+			{name: "list", doc: "A list of choices appears from which the user can choose."},
+			{name: "both", doc: "A list of choices appears and the currently selected suggestion also appears inline."},
+			{name: "none", doc: "No input completion suggestions are provided."}
+		],
 		url: "http://www.w3.org/TR/wai-aria/complete#aria-autocomplete"
 	};
 	aria.attributes.checked = {
 		name: "aria-checked",
-		doc: "Indicates the current 'checked' state of checkboxes, radio buttons, and other widgets. See related aria-pressed and aria-selected. Possible values are:"
-			+ "\n* true: The element is checked."
-			+ "\n* false: The element supports being checked but is not currently checked."
-			+ "\n* mixed: Indicates a mixed mode value for a tri-state checkbox or menuitemcheckbox."
-			+ "\n* undefined: The element does not support being checked.",
+		doc: "Indicates the current 'checked' state of checkboxes, radio buttons, and other widgets. See related aria-pressed and aria-selected.",
+		values: [
+			{name: "true", doc: "The element is checked."},
+			{name: "false", doc: "The element supports being checked but is not currently checked."},
+			{name: "mixed", doc: "Indicates a mixed mode value for a tri-state checkbox or menuitemcheckbox."},
+			{name: "undefined", doc: "The element does not support being checked."}
+		],
 		url: "http://www.w3.org/TR/wai-aria/complete#aria-checked"
 	};
 	aria.attributes.expanded = {
 		name: "aria-expanded",
-		doc: "Indicates whether the element, or another grouping element it controls, is currently expanded or collapsed. Possible values are:"
-			+ "\n* true: The element, or another grouping element it controls, is expanded."
-			+ "\n* false: The element, or another grouping element it controls, is collapsed."
-			+ "\n* undefined: The element, or another grouping element it controls, is neither expandable nor collapsible; all its child elements are shown or there are no child elements.",
+		doc: "Indicates whether the element, or another grouping element it controls, is currently expanded or collapsed.",
+		values: [
+			{name: "true", doc: "The element, or another grouping element it controls, is expanded."},
+			{name: "false", doc: "The element, or another grouping element it controls, is collapsed."},
+			{name: "undefined", doc: "The element, or another grouping element it controls, is neither expandable nor collapsible; all its child elements are shown or there are no child elements."}
+		],
 		url: "http://www.w3.org/TR/wai-aria/complete#aria-expanded"
 	};
 	aria.attributes.level = {
@@ -2210,23 +2282,29 @@ define([
 	};
 	aria.attributes.multiline = {
 		name: "aria-multiline",
-		doc: "Indicates whether a text box accepts multiple lines of input or only a single line. Possible values are:"
-			+ "\n* true: This is a multi-line text box."
-			+ "\n* false: This is a single-line text box.",
+		doc: "Indicates whether a text box accepts multiple lines of input or only a single line.",
+		values: [
+			{name: "true", doc: "This is a multi-line text box."},
+			{name: "false", doc: "This is a single-line text box."}
+		],
 		url: "http://www.w3.org/TR/wai-aria/complete#aria-multiline"
 	};
 	aria.attributes.multiselectable = {
 		name: "aria-multiselectable",
-		doc: "Indicates that the user may select more than one item from the current selectable descendants. Possible values are:"
-			+ "\n* true: More than one item in the widget may be selected at a time."
-			+ "\n* false: Only one item can be selected.",
+		doc: "Indicates that the user may select more than one item from the current selectable descendants.",
+		values: [
+			{name: "true", doc: "More than one item in the widget may be selected at a time."},
+			{name: "false", doc: "Only one item can be selected."}
+		],
 		url: "http://www.w3.org/TR/wai-aria/complete#aria-multiselectable"
 	};
 	aria.attributes.orientation = {
 		name: "aria-orientation",
-		doc: "Indicates whether the element and orientation is horizontal or vertical. Possible values are:"
-			+ "\n* vertical: The element is oriented vertically."
-			+ "\n* horizontal: The element is oriented horizontally.",
+		doc: "Indicates whether the element and orientation is horizontal or vertical.",
+		values: [
+			{name: "vertical", doc: "The element is oriented vertically."},
+			{name: "horizontal", doc: "The element is oriented horizontally."}
+		],
 		url: "http://www.w3.org/TR/wai-aria/complete#aria-orientation"
 	};
 	aria.attributes.posinset = {
@@ -2236,33 +2314,41 @@ define([
 	};
 	aria.attributes.pressed = {
 		name: "aria-pressed",
-		doc: "Indicates the current 'pressed' state of toggle buttons. See related aria-checked and aria-selected. Possible values are:"
-			+ "\n* true: The element is pressed."
-			+ "\n* false: The element supports being pressed but is not currently pressed."
-			+ "\n* mixed: Indicates a mixed mode value for a tri-state toggle button."
-			+ "\n* undefined: The element does not support being pressed.",
+		doc: "Indicates the current 'pressed' state of toggle buttons. See related aria-checked and aria-selected.",
+		values: [
+			{name: "true", doc: "The element is pressed."},
+			{name: "false", doc: "The element supports being pressed but is not currently pressed."},
+			{name: "mixed", doc: "Indicates a mixed mode value for a tri-state toggle button."},
+			{name: "undefined", doc: "The element does not support being pressed."}
+		],
 		url: "http://www.w3.org/TR/wai-aria/complete#aria-pressed"
 	};
 	aria.attributes.readonly = {
 		name: "aria-readonly",
-		doc: "Indicates that the element is not editable, but is otherwise operable. See related aria-disabled. Possible values are:"
-			+ "\n* true: The user cannot change the value of the element."
-			+ "\n* false: The user can set the value of the element.",
+		doc: "Indicates that the element is not editable, but is otherwise operable. See related aria-disabled.",
+		values: [
+			{name: "true", doc: "The user cannot change the value of the element."},
+			{name: "false", doc: "The user can set the value of the element."}
+		],
 		url: "http://www.w3.org/TR/wai-aria/complete#aria-readonly"
 	};
 	aria.attributes.required = {
 		name: "aria-required",
-		doc: "Indicates that user input is required on the element before a form may be submitted. Possible values are:"
-			+ "\n* true: Users need to provide input on an element before a form is submitted."
-			+ "\n* false: User input is not necessary to submit the form.",
+		doc: "Indicates that user input is required on the element before a form may be submitted.",
+		values: [
+			{name: "true", doc: "Users need to provide input on an element before a form is submitted."},
+			{name: "false", doc: "User input is not necessary to submit the form."}
+		],
 		url: "http://www.w3.org/TR/wai-aria/complete#aria-required"
 	};
 	aria.attributes.selected = {
 		name: "aria-selected",
-		doc: "Indicates the current 'selected' state of various widgets. See related aria-checked and aria-pressed. Possible values are:"
-			+ "\n* true: The selectable element is selected."
-			+ "\n* false: The selectable element is not selected."
-			+ "\n* undefined: The element is not selectable.",
+		doc: "Indicates the current 'selected' state of various widgets. See related aria-checked and aria-pressed.",
+		values: [
+			{name: "true", doc: "The selectable element is selected."},
+			{name: "false", doc: "The selectable element is not selected."},
+			{name: "undefined", doc: "The element is not selectable."}
+		],
 		url: "http://www.w3.org/TR/wai-aria/complete#aria-selected"
 	};
 	aria.attributes.setsize = {
@@ -2272,11 +2358,13 @@ define([
 	};
 	aria.attributes.sort = {
 		name: "aria-sort",
-		doc: "Indicates if items in a table or grid are sorted in ascending or descending order. Possible values are:"
-			+ "\n* ascending: Items are sorted in ascending order by this column."
-			+ "\n* descending: Items are sorted in descending order by this column."
-			+ "\n* none: There is no defined sort applied to the column."
-			+ "\n* other: A sort algorithm other than ascending or descending has been applied.",
+		doc: "Indicates if items in a table or grid are sorted in ascending or descending order.",
+		values: [
+			{name: "ascending", doc: "Items are sorted in ascending order by this column."},
+			{name: "descending", doc: "Items are sorted in descending order by this column."},
+			{name: "none", doc: "There is no defined sort applied to the column."},
+			{name: "other", doc: "A sort algorithm other than ascending or descending has been applied."}
+		],
 		url: "http://www.w3.org/TR/wai-aria/complete#aria-sort"
 	};
 	aria.attributes.valuemax = {
@@ -2301,68 +2389,70 @@ define([
 	};
 	aria.attributes.role = {
 		name: "role",
-		doc: "Describes the role(s) the current element plays in the context of the document. This can be used, for example, by applications and assistive technologies to determine the purpose of an element. Possible values are:"
-			+ "\n* alert: A message with important, and usually time-sensitive, information. See related alertdialog and status."
-			+ "\n* alertdialog: A type of dialog that contains an alert message, where initial focus goes to an element within the dialog. See related alert and dialog."
-			+ "\n* application: A region declared as a web application, as opposed to a web document."
-			+ "\n* article: A section of a page that consists of a composition that forms an independent part of a document, page, or site."
-			+ "\n* banner: A region that contains mostly site-oriented content, rather than page-specific content."
-			+ "\n* button: An input that allows for user-triggered actions when clicked or pressed. See related link."
-			+ "\n* checkbox: A checkable input that has three possible values: true, false, or mixed."
-			+ "\n* columnheader: A cell containing header information for a column."
-			+ "\n* combobox: A presentation of a select; usually similar to a textbox where users can type ahead to select an option, or type to enter arbitrary text as a new item in the list. See related listbox."
-			+ "\n* complementary: A supporting section of the document, designed to be complementary to the main content at a similar level in the DOM hierarchy, but remains meaningful when separated from the main content."
-			+ "\n* contentinfo: A large perceivable region that contains information about the parent document."
-			+ "\n* definition: A definition of a term or concept."
-			+ "\n* dialog: A dialog is an application window that is designed to interrupt the current processing of an application in order to prompt the user to enter information or require a response. See related alertdialog."
-			+ "\n* directory: A list of references to members of a group, such as a static table of contents."
-			+ "\n* document: A region containing related information that is declared as document content, as opposed to a web application."
-			+ "\n* form: A landmark region that contains a collection of items and objects that, as a whole, combine to create a form. See related search."
-			+ "\n* grid: A grid is an interactive control which contains cells of tabular data arranged in rows and columns, like a table."
-			+ "\n* gridcell: A cell in a grid or treegrid."
-			+ "\n* group: A set of user interface objects which are not intended to be included in a page summary or table of contents by assistive technologies."
-			+ "\n* heading: A heading for a section of the page."
-			+ "\n* img: A container for a collection of elements that form an image."
-			+ "\n* link: An interactive reference to an internal or external resource that, when activated, causes the user agent to navigate to that resource. See related button."
-			+ "\n* list: A group of non-interactive list items. See related listbox."
-			+ "\n* listbox: A widget that allows the user to select one or more items from a list of choices. See related combobox and list."
-			+ "\n* listitem: A single item in a list or directory."
-			+ "\n* log: A type of live region where new information is added in meaningful order and old information may disappear. See related marquee."
-			+ "\n* main: The main content of a document."
-			+ "\n* marquee: A type of live region where non-essential information changes frequently. See related log."
-			+ "\n* math: Content that represents a mathematical expression."
-			+ "\n* menu: A type of widget that offers a list of choices to the user."
-			+ "\n* menubar: A presentation of menu that usually remains visible and is usually presented horizontally."
-			+ "\n* menuitem: An option in a set of choices contained by a menu or menubar."
-			+ "\n* menuitemcheckbox: A menuitem with a checkable state whose possible values are true, false, or mixed."
-			+ "\n* menuitemradio: A checkable menuitem in a set of elements with role menuitemradio, only one of which can be checked at a time."
-			+ "\n* navigation: A collection of navigational elements (usually links) for navigating the document or related documents."
-			+ "\n* note: A section whose content is parenthetic or ancillary to the main content of the resource."
-			+ "\n* option: A selectable item in a select list."
-			+ "\n* presentation: An element whose implicit native role semantics will not be mapped to the accessibility API."
-			+ "\n* progressbar: An element that displays the progress status for tasks that take a long time."
-			+ "\n* radio: A checkable input in a group of radio roles, only one of which can be checked at a time."
-			+ "\n* radiogroup: A group of radio buttons."
-			+ "\n* region: A large perceivable section of a web page or document, that is important enough to be included in a page summary or table of contents, for example, an area of the page containing live sporting event statistics."
-			+ "\n* row: A row of cells in a grid."
-			+ "\n* rowgroup: A group containing one or more row elements in a grid."
-			+ "\n* rowheader: A cell containing header information for a row in a grid."
-			+ "\n* search: A landmark region that contains a collection of items and objects that, as a whole, combine to create a search facility. See related form."
-			+ "\n* separator: A divider that separates and distinguishes sections of content or groups of menuitems."
-			+ "\n* scrollbar: A graphical object that controls the scrolling of content within a viewing area, regardless of whether the content is fully displayed within the viewing area."
-			+ "\n* slider: A user input where the user selects a value from within a given range."
-			+ "\n* spinbutton: A form of range that expects the user to select from among discrete choices."
-			+ "\n* status: A container whose content is advisory information for the user but is not important enough to justify an alert, often but not necessarily presented as a status bar. See related alert."
-			+ "\n* tab: A grouping label providing a mechanism for selecting the tab content that is to be rendered to the user."
-			+ "\n* tablist: A list of tab elements, which are references to tabpanel elements."
-			+ "\n* tabpanel: A container for the resources associated with a tab, where each tab is contained in a tablist."
-			+ "\n* textbox: Input that allows free-form text as its value."
-			+ "\n* timer: A type of live region containing a numerical counter which indicates an amount of elapsed time from a start point, or the time remaining until an end point."
-			+ "\n* toolbar: A collection of commonly used function buttons or controls represented in compact visual form."
-			+ "\n* tooltip: A contextual popup that displays a description for an element."
-			+ "\n* tree: A type of list that may contain sub-level nested groups that can be collapsed and expanded."
-			+ "\n* treegrid: A grid whose rows can be expanded and collapsed in the same manner as for a tree."
-			+ "\n* treeitem: An option item of a tree. This is an element within a tree that may be expanded or collapsed if it contains a sub-level group of treeitem elements.",
+		doc: "Describes the role(s) the current element plays in the context of the document. This can be used, for example, by applications and assistive technologies to determine the purpose of an element.",
+		values: [
+			{name: "alert", doc: "A message with important, and usually time-sensitive, information. See related alertdialog and status.", url: "https://www.w3.org/TR/wai-aria/complete#alert"},
+			{name: "alertdialog", doc: "A type of dialog that contains an alert message, where initial focus goes to an element within the dialog. See related alert and dialog.", url: "https://www.w3.org/TR/wai-aria/complete#alertdialog"},
+			{name: "application", doc: "A region declared as a web application, as opposed to a web document.", url: "https://www.w3.org/TR/wai-aria/complete#application"},
+			{name: "article", doc: "A section of a page that consists of a composition that forms an independent part of a document, page, or site.", url: "https://www.w3.org/TR/wai-aria/complete#article"},
+			{name: "banner", doc: "A region that contains mostly site-oriented content, rather than page-specific content.", url: "https://www.w3.org/TR/wai-aria/complete#banner"},
+			{name: "button", doc: "An input that allows for user-triggered actions when clicked or pressed. See related link.", url: "https://www.w3.org/TR/wai-aria/complete#button"},
+			{name: "checkbox", doc: "A checkable input that has three possible values: true, false, or mixed.", url: "https://www.w3.org/TR/wai-aria/complete#checkbox"},
+			{name: "columnheader", doc: "A cell containing header information for a column.", url: "https://www.w3.org/TR/wai-aria/complete#columnheader"},
+			{name: "combobox", doc: "A presentation of a select; usually similar to a textbox where users can type ahead to select an option, or type to enter arbitrary text as a new item in the list. See related listbox.", url: "https://www.w3.org/TR/wai-aria/complete#combobox"},
+			{name: "complementary", doc: "A supporting section of the document, designed to be complementary to the main content at a similar level in the DOM hierarchy, but remains meaningful when separated from the main content.", url: "https://www.w3.org/TR/wai-aria/complete#complementary"},
+			{name: "contentinfo", doc: "A large perceivable region that contains information about the parent document.", url: "https://www.w3.org/TR/wai-aria/complete#contentinfo"},
+			{name: "definition", doc: "A definition of a term or concept.", url: "https://www.w3.org/TR/wai-aria/complete#definition"},
+			{name: "dialog", doc: "A dialog is an application window that is designed to interrupt the current processing of an application in order to prompt the user to enter information or require a response. See related alertdialog.", url: "https://www.w3.org/TR/wai-aria/complete#dialog"},
+			{name: "directory", doc: "A list of references to members of a group, such as a static table of contents.", url: "https://www.w3.org/TR/wai-aria/complete#directory"},
+			{name: "document", doc: "A region containing related information that is declared as document content, as opposed to a web application.", url: "https://www.w3.org/TR/wai-aria/complete#document"},
+			{name: "form", doc: "A landmark region that contains a collection of items and objects that, as a whole, combine to create a form. See related search.", url: "https://www.w3.org/TR/wai-aria/complete#form"},
+			{name: "grid", doc: "A grid is an interactive control which contains cells of tabular data arranged in rows and columns, like a table.", url: "https://www.w3.org/TR/wai-aria/complete#grid"},
+			{name: "gridcell", doc: "A cell in a grid or treegrid.", url: "https://www.w3.org/TR/wai-aria/complete#gridcell"},
+			{name: "group", doc: "A set of user interface objects which are not intended to be included in a page summary or table of contents by assistive technologies.", url: "https://www.w3.org/TR/wai-aria/complete#group"},
+			{name: "heading", doc: "A heading for a section of the page.", url: "https://www.w3.org/TR/wai-aria/complete#heading"},
+			{name: "img", doc: "A container for a collection of elements that form an image.", url: "https://www.w3.org/TR/wai-aria/complete#img"},
+			{name: "link", doc: "An interactive reference to an internal or external resource that, when activated, causes the user agent to navigate to that resource. See related button.", url: "https://www.w3.org/TR/wai-aria/complete#link"},
+			{name: "list", doc: "A group of non-interactive list items. See related listbox.", url: "https://www.w3.org/TR/wai-aria/complete#list"},
+			{name: "listbox", doc: "A widget that allows the user to select one or more items from a list of choices. See related combobox and list.", url: "https://www.w3.org/TR/wai-aria/complete#listbox"},
+			{name: "listitem", doc: "A single item in a list or directory.", url: "https://www.w3.org/TR/wai-aria/complete#listitem"},
+			{name: "log", doc: "A type of live region where new information is added in meaningful order and old information may disappear. See related marquee.", url: "https://www.w3.org/TR/wai-aria/complete#log"},
+			{name: "main", doc: "The main content of a document.", url: "https://www.w3.org/TR/wai-aria/complete#main"},
+			{name: "marquee", doc: "A type of live region where non-essential information changes frequently. See related log.", url: "https://www.w3.org/TR/wai-aria/complete#marquee"},
+			{name: "math", doc: "Content that represents a mathematical expression.", url: "https://www.w3.org/TR/wai-aria/complete#math"},
+			{name: "menu", doc: "A type of widget that offers a list of choices to the user.", url: "https://www.w3.org/TR/wai-aria/complete#menu"},
+			{name: "menubar", doc: "A presentation of menu that usually remains visible and is usually presented horizontally.", url: "https://www.w3.org/TR/wai-aria/complete#menubar"},
+			{name: "menuitem", doc: "An option in a set of choices contained by a menu or menubar.", url: "https://www.w3.org/TR/wai-aria/complete#menuitem"},
+			{name: "menuitemcheckbox", doc: "A menuitem with a checkable state whose possible values are true, false, or mixed.", url: "https://www.w3.org/TR/wai-aria/complete#menuitemcheckbox"},
+			{name: "menuitemradio", doc: "A checkable menuitem in a set of elements with role menuitemradio, only one of which can be checked at a time.", url: "https://www.w3.org/TR/wai-aria/complete#menuitemradio"},
+			{name: "navigation", doc: "A collection of navigational elements (usually links) for navigating the document or related documents.", url: "https://www.w3.org/TR/wai-aria/complete#navigation"},
+			{name: "note", doc: "A section whose content is parenthetic or ancillary to the main content of the resource.", url: "https://www.w3.org/TR/wai-aria/complete#note"},
+			{name: "option", doc: "A selectable item in a select list.", url: "https://www.w3.org/TR/wai-aria/complete#option"},
+			{name: "presentation", doc: "An element whose implicit native role semantics will not be mapped to the accessibility API.", url: "https://www.w3.org/TR/wai-aria/complete#presentation"},
+			{name: "progressbar", doc: "An element that displays the progress status for tasks that take a long time.", url: "https://www.w3.org/TR/wai-aria/complete#progressbar"},
+			{name: "radio", doc: "A checkable input in a group of radio roles, only one of which can be checked at a time.", url: "https://www.w3.org/TR/wai-aria/complete#radio"},
+			{name: "radiogroup", doc: "A group of radio buttons.", url: "https://www.w3.org/TR/wai-aria/complete#radiogroup"},
+			{name: "region", doc: "A large perceivable section of a web page or document, that is important enough to be included in a page summary or table of contents, for example, an area of the page containing live sporting event statistics.", url: "https://www.w3.org/TR/wai-aria/complete#region"},
+			{name: "row", doc: "A row of cells in a grid.", url: "https://www.w3.org/TR/wai-aria/complete#row"},
+			{name: "rowgroup", doc: "A group containing one or more row elements in a grid.", url: "https://www.w3.org/TR/wai-aria/complete#rowgroup"},
+			{name: "rowheader", doc: "A cell containing header information for a row in a grid.", url: "https://www.w3.org/TR/wai-aria/complete#rowheader"},
+			{name: "search", doc: "A landmark region that contains a collection of items and objects that, as a whole, combine to create a search facility. See related form.", url: "https://www.w3.org/TR/wai-aria/complete#search"},
+			{name: "separator", doc: "A divider that separates and distinguishes sections of content or groups of menuitems.", url: "https://www.w3.org/TR/wai-aria/complete#separator"},
+			{name: "scrollbar", doc: "A graphical object that controls the scrolling of content within a viewing area, regardless of whether the content is fully displayed within the viewing area.", url: "https://www.w3.org/TR/wai-aria/complete#scrollbar"},
+			{name: "slider", doc: "A user input where the user selects a value from within a given range.", url: "https://www.w3.org/TR/wai-aria/complete#slider"},
+			{name: "spinbutton", doc: "A form of range that expects the user to select from among discrete choices.", url: "https://www.w3.org/TR/wai-aria/complete#spinbutton"},
+			{name: "status", doc: "A container whose content is advisory information for the user but is not important enough to justify an alert, often but not necessarily presented as a status bar. See related alert.", url: "https://www.w3.org/TR/wai-aria/complete#status"},
+			{name: "tab", doc: "A grouping label providing a mechanism for selecting the tab content that is to be rendered to the user.", url: "https://www.w3.org/TR/wai-aria/complete#tab"},
+			{name: "tablist", doc: "A list of tab elements, which are references to tabpanel elements.", url: "https://www.w3.org/TR/wai-aria/complete#tablist"},
+			{name: "tabpanel", doc: "A container for the resources associated with a tab, where each tab is contained in a tablist.", url: "https://www.w3.org/TR/wai-aria/complete#tabpanel"},
+			{name: "textbox", doc: "Input that allows free-form text as its value.", url: "https://www.w3.org/TR/wai-aria/complete#textbox"},
+			{name: "timer", doc: "A type of live region containing a numerical counter which indicates an amount of elapsed time from a start point, or the time remaining until an end point.", url: "https://www.w3.org/TR/wai-aria/complete#timer"},
+			{name: "toolbar", doc: "A collection of commonly used function buttons or controls represented in compact visual form.", url: "https://www.w3.org/TR/wai-aria/complete#toolbar"},
+			{name: "tooltip", doc: "A contextual popup that displays a description for an element.", url: "https://www.w3.org/TR/wai-aria/complete#tooltip"},
+			{name: "tree", doc: "A type of list that may contain sub-level nested groups that can be collapsed and expanded.", url: "https://www.w3.org/TR/wai-aria/complete#tree"},
+			{name: "treegrid", doc: "A grid whose rows can be expanded and collapsed in the same manner as for a tree.", url: "https://www.w3.org/TR/wai-aria/complete#treegrid"},
+			{name: "treeitem", doc: "An option item of a tree. This is an element within a tree that may be expanded or collapsed if it contains a sub-level group of treeitem elements.", url: "https://www.w3.org/TR/wai-aria/complete#treeitem"}
+		],
 		url: "http://www.w3.org/TR/role-attribute/"
 	};
 
@@ -2428,7 +2518,64 @@ define([
 		return ret;
 	}
 	
+	function getValuesForAttribute(node) {
+		var values = null;
+		var url = null;
+		if (node.type === 'attr') {
+			var attr = null;
+			var name = node.name;
+			if (name.indexOf("aria-") === 0 || name === "role") {
+				// ARIA attribute
+				if (name === "role") {
+					values = aria.attributes.role.values;
+				} else {
+					var key = name.substring(5); // strip off the "aria-"
+					attr = aria.attributes[key];
+					if (!attr) {
+						attr = findAttribute(name, aria.globalAttributes);
+					}
+				}
+			} else {
+				// HTML attribute
+				var tagAttrs = null;
+				var testNode = node.parent;
+				if (testNode && testNode.type === 'tag') {
+					tagAttrs = attributes.tags[testNode.name];
+				}
+				if (Array.isArray(tagAttrs)) {
+					attr = findAttribute(name, tagAttrs);
+				} else {
+					attr = findAttribute(name, attributes.globals);
+				}
+			}
+			if (attr) {
+				values = attr.values;
+				url = attr.url;
+			}
+		}
+		if (values && url) {
+			for (var i = 0; i < values.length; i++) {
+				if (!values[i].url) {
+					values[i]["url"] = url;
+				}
+			}
+		}
+		return values;
+	}
+	
+	function findAttribute(name, attributes) {
+		var attr = null;
+		for (var i = 0; i < attributes.length; i++) {
+			if (attributes[i].name === name) {
+				attr = attributes[i];
+				break;
+			}
+		}
+		return attr;
+	}
+
 	return {
-		getAttributesForNode: getAttributesForNode
+		getAttributesForNode: getAttributesForNode,
+		getValuesForAttribute: getValuesForAttribute
 	};
 });

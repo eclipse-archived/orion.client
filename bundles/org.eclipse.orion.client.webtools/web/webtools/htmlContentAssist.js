@@ -560,6 +560,13 @@ define([
 					if (attr.doc){
 						hover.content += attr.doc;
 					}
+					if (Array.isArray(attr.values)) {
+						hover.content += Messages['possibleValues'];
+						for(var v = 0; v < attr.values.length; v++) {
+							var val = attr.values[v];
+							hover.content += i18nUtil.formatMessage(Messages['valueNameDocMarkdown'], val.name, val.doc);
+						}
+					}
 					if(attr.url) {
 						hover.content += i18nUtil.formatMessage(Messages['onlineDocumentation'], attr.url);
 					}
@@ -643,8 +650,12 @@ define([
 		 * @since 10.0 
 		 */
 		getValuesForAttribute: function(node, params) {
-			//TODO compute the options for the given attribute
-			return [];	
+			var vals = Attributes.getValuesForAttribute(node);
+			var proposals = [];
+			if(Array.isArray(vals)) {
+				proposals = proposals.concat(this.addProposals(node, vals, params));
+			}
+			return proposals;	
 		},
 		/**
 		 * Returns any proposals (if any) for when the user is editing text contents based upon

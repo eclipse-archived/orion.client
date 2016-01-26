@@ -668,6 +668,20 @@ define([
     			assertProposals(proposals, []);
     		});
     	});
+    	it('Attribute value proposals for input type', function() {
+    		var _o = setup({buffer: '<body><input type=""></input></body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 19}).then(function(proposals) {
+    			var expectedCount = 22;
+    			assert(proposals.length === expectedCount, "Incorrect number of proposals for input type attribute values. Proposal count: " + proposals.length + " Expected count: " + expectedCount);
+    		});
+    	});
+    	it('Attribute value proposals for input type starting with t', function() {
+    		var _o = setup({buffer: '<body><input type="t"></input></body>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 20, prefix: 't'}).then(function(proposals) {
+    			var expectedCount = 3;
+    			assert(proposals.length === expectedCount, "Incorrect number of proposals for input type attribute values starting with t. Proposal count: " + proposals.length + " Expected count: " + expectedCount);
+    		});
+    	});
     	it('Offsets within tags proposals 1', function() {
     		var _o = setup({buffer: '<zzz href="" ></zzz>'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 13}).then(function(proposals) {
@@ -1024,6 +1038,13 @@ define([
     				}
     			}
     			assert(knownProp, "Could not find expected proposal role");
+    		});
+    	});
+    	// TODO: What should happen here? I think it should insert ="" after role
+    	it.skip('The role attribute with div. Prefix role. <div role>', function() {
+    		var _o = setup({buffer: '<html><body><div role></div></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 21, prefix: 'role'}).then(function(proposals) {
+				assertProposals(proposals, [{proposal: 'role=""', prefix: 'role'}]);
     		});
     	});
     	it('Tags that support the attributes of all roles: div. Filter existing. <div role="dialog">', function() {
@@ -1839,73 +1860,93 @@ define([
     	});
 
 		// ARIA attribute value proposals
-     	// TODO: The following 2 tests should pass after we implement attribute value proposals
-//    	it('ARIA attribute value proposals: role can have 61 different values. <div role="|">', function() {
-//    		var _o = setup({buffer: '<html><body><div role=""></div></body></html>'});
-//    		return assist.computeContentAssist(_o.editorContext, {offset: 23}).then(function(proposals) {
-//    			var expectedCount = 61; // ARIA role attribute can have 61 possible values
-//    			assert(proposals.length === expectedCount, "Incorrect number of proposals for role attribute values. Proposal count: " + proposals.length + " Expected count: " + expectedCount);
-//    			var knownProp;
-//    			for (var i=0; i<proposals.length; i++) {
-//    				if (proposals[i].name === "alert"){
-//    					knownProp = proposals[i];
-//    				}
-//    			}
-//    			assert(knownProp, "Could not find expected proposal alert");
-//    			knownProp = null;
-//    			for (i=0; i<proposals.length; i++) {
-//    				if (proposals[i].name === "menubar"){
-//    					knownProp = proposals[i];
-//    				}
-//    			}
-//    			assert(knownProp, "Could not find expected proposal menubar");
-//    			knownProp = null;
-//    			for (i=0; i<proposals.length; i++) {
-//    				if (proposals[i].name === "treeitem"){
-//    					knownProp = proposals[i];
-//    				}
-//    			}
-//    			assert(knownProp, "Could not find expected proposal treeitem");
-//    		});
-//    	});
-//    	it('ARIA attribute value proposals: autocomplete can have 4 values: inline, list, both, none. <div autocomplete="|">', function() {
-//    		var _o = setup({buffer: '<html><body><div autocomplete=""></div></body></html>'});
-//    		return assist.computeContentAssist(_o.editorContext, {offset: 31}).then(function(proposals) {
-//    			var expectedCount = 4; // ARIA autocomplete attribute can have 4 possible values
-//    			assert(proposals.length === expectedCount, "Incorrect number of proposals for autocomplete attribute values. Proposal count: " + proposals.length + " Expected count: " + expectedCount);
-//    			var knownProp;
-//    			for (var i=0; i<proposals.length; i++) {
-//    				if (proposals[i].name === "inline"){
-//    					knownProp = proposals[i];
-//    				}
-//    			}
-//    			assert(knownProp, "Could not find expected proposal inline");
-//    			knownProp = null;
-//    			for (i=0; i<proposals.length; i++) {
-//    				if (proposals[i].name === "list"){
-//    					knownProp = proposals[i];
-//    				}
-//    			}
-//    			assert(knownProp, "Could not find expected proposal list");
-//    			knownProp = null;
-//    			for (i=0; i<proposals.length; i++) {
-//    				if (proposals[i].name === "both"){
-//    					knownProp = proposals[i];
-//    				}
-//    			}
-//    			assert(knownProp, "Could not find expected proposal both");
-//    			knownProp = null;
-//    			for (i=0; i<proposals.length; i++) {
-//    				if (proposals[i].name === "none"){
-//    					knownProp = proposals[i];
-//    				}
-//    			}
-//    			assert(knownProp, "Could not find expected proposal none");
-//    		});
-//    	});
+    	it('ARIA attribute value proposals: role can have 61 different values. <div role="|">', function() {
+    		var _o = setup({buffer: '<html><body><div role=""></div></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 23}).then(function(proposals) {
+    			var expectedCount = 61; // ARIA role attribute can have 61 possible values
+    			assert(proposals.length === expectedCount, "Incorrect number of proposals for role attribute values. Proposal count: " + proposals.length + " Expected count: " + expectedCount);
+    			var knownProp;
+    			for (var i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "alert"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal alert");
+    			knownProp = null;
+    			for (i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "menubar"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal menubar");
+    			knownProp = null;
+    			for (i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "treeitem"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal treeitem");
+    		});
+    	});
+    	it('ARIA attribute value proposals: role can have 10 different values that start with t. <div role="t|">', function() {
+    		var _o = setup({buffer: '<html><body><div role="t"></div></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 24, prefix: 't'}).then(function(proposals) {
+    			var expectedCount = 10; // ARIA role attribute can have 10 possible values that start with 't'
+    			assert(proposals.length === expectedCount, "Incorrect number of proposals for role attribute values that start with 't'. Proposal count: " + proposals.length + " Expected count: " + expectedCount);
+    			var knownProp;
+    			for (var i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "tree"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal tree");
+    			knownProp = null;
+    			for (i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "treeitem"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal treeitem");
+    		});
+    	});
+    	it('ARIA attribute value proposals: aria-autocomplete can have 4 values: inline, list, both, none. <div aria-autocomplete="|">', function() {
+    		var _o = setup({buffer: '<html><body><div aria-autocomplete=""></div></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 36}).then(function(proposals) {
+    			var expectedCount = 4; // ARIA autocomplete attribute can have 4 possible values
+    			assert(proposals.length === expectedCount, "Incorrect number of proposals for aria-autocomplete attribute values. Proposal count: " + proposals.length + " Expected count: " + expectedCount);
+    			var knownProp;
+    			for (var i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "inline"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal inline");
+    			knownProp = null;
+    			for (i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "list"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal list");
+    			knownProp = null;
+    			for (i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "both"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal both");
+    			knownProp = null;
+    			for (i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "none"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal none");
+    		});
+    	});
 
 		// Tag-specific ARIA roles.
-		// TODO: The following test should pass after we implement value proposals and the cool allowed-role-for-tag feature
+		// TODO: The following test should pass after we implement the cool allowed-role-for-tag feature
 //    	it('Tag-specific ARIA roles: ul can have 11 possible role values. <ul role="|">', function() {
 //    		var _o = setup({buffer: '<html><body><ul role=""></ul></body></html>'});
 //    		return assist.computeContentAssist(_o.editorContext, {offset: 22}).then(function(proposals) {
