@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others 
+ * Copyright (c) 2010, 2015 IBM Corporation and others 
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -43,7 +43,7 @@ define([
 			var noneRootMeta = null;
 			this._searchRootLocation = this._fileClient.fileServiceRootURL(meta.Location);
 			if(useParentLocation && meta && meta.Parents && meta.Parents.length > 0){
-				if(useParentLocation.index === "last"){ //$NON-NLS-0$
+				if(useParentLocation.index === "last"){
 					noneRootMeta = meta.Parents[meta.Parents.length-1];
 				} else {
 					noneRootMeta = meta.Parents[0];
@@ -91,9 +91,8 @@ define([
 		getSearchLocation: function(){
 			if(this._searchLocation){
 				return this._searchLocation;
-			} else {
-				return this._fileClient.fileServiceRootURL();
 			}
+			return this._fileClient.fileServiceRootURL();
 		},
 		getSearchLocationName: function(){
 			return this._searchLocationName;
@@ -101,16 +100,14 @@ define([
 		getSearchRootLocation: function(){
 			if(this._searchRootLocation){
 				return this._searchRootLocation;
-			} else {
-				return this._fileClient.fileServiceRootURL();
 			}
+			return this._fileClient.fileServiceRootURL();
 		},
 		getChildrenLocation: function(){
 			if(this._childrenLocation){
 				return this._childrenLocation;
-			} else {
-				return this._fileClient.fileServiceRootURL();
 			}
+			return this._fileClient.fileServiceRootURL();
 		},
 		
 		/**
@@ -132,7 +129,7 @@ define([
 			var result = new Deferred();
 			try {
 				this._searchDeferred = this.getFileClient().search(searchParams);
-				this._searchDeferred.then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
+				this._searchDeferred.then(function(jsonData) {
 					this._searchDeferred = null;
 					var searchResult = this.convert(jsonData, searchParams);
 					this._generateMatches(searchParams, searchResult, generateMatches).then(function() {
@@ -147,19 +144,19 @@ define([
 			}
 			catch(err){
 				var error = err.message || err;
-				if(typeof(error) === "string" && error.toLowerCase().indexOf("search") > -1){ //$NON-NLS-1$ //$NON-NLS-0$
+				if(typeof error === "string" && error.toLowerCase().indexOf("search") > -1){ //$NON-NLS-1$ //$NON-NLS-0$
 					if(!this._crawler) {
 						this._crawler = this._createCrawler(searchParams);
 					}
 					if(searchParams.nameSearch) {
-						this._crawler.searchName(searchParams).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
+						this._crawler.searchName(searchParams).then(function(jsonData) {
 							this._searchDeferred = null;
 							result.resolve(this.convert(jsonData, searchParams));
 						}.bind(this));
 					} else {
 						this._crawler.search(function() {
 							result.progress(arguments[0], arguments[1]);
-						}).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
+						}).then(function(jsonData) {
 							this._searchDeferred = null;
 							result.resolve(this.convert(jsonData, searchParams));
 						}.bind(this));
