@@ -344,6 +344,19 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				return "";
 			}.bind(this);
 			
+			var recordDefaultSearchResource = function (data) {
+			  //Similar mechanism to the setLocationByMetaData method in searchClient.js with meta = data.items[0]
+			  //and useParentLocation = {index: "last"} to retrieve project scope info.
+			  var searchLoc = null;
+			  if(data.items[0].Parents.length){
+			    searchLoc = data.items[0].Parents[data.items[0].Parents.length - 1];
+			  } else {
+			    searchLoc = data.items[0];
+			  }
+			  this._inlineSearchPane._defaultSearchResource = searchLoc;
+			  return searchLoc;
+			}.bind(this);
+			
 			var searchInFolderCommand = new mCommands.Command({
 				name: messages["searchInFolder"], //$NON-NLS-0$
 				id: "orion.searchInFolder", //$NON-NLS-0$
@@ -357,6 +370,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				},
 				callback: function (data) {
 					var item = data.items[0];
+					recordDefaultSearchResource(data);
 					this._inlineSearchPane.setSearchText(getSearchText());
 					this._inlineSearchPane.setSearchScope(item);
 					this._inlineSearchPane.show();
@@ -370,7 +384,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				visibleWhen: function() {
 					return true;
 				},
-				callback: function () {
+				callback: function (data) {
 					if (this._inlineSearchPane.isVisible()) {
 						this._inlineSearchPane.hide();
 					} else {
@@ -378,6 +392,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 						if (mainSplitter.splitter.isClosed()) {
 							mainSplitter.splitter.toggleSidePanel();
 						}
+						recordDefaultSearchResource(data);
 						this._inlineSearchPane.setSearchText(getSearchText());
 						this._inlineSearchPane.setSearchScope(this._lastSearchRoot); //reset search scope
 						this._inlineSearchPane.show();
@@ -393,8 +408,8 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				visibleWhen: /** @callback */ function(items, data) {
 					return true;
 				},
-				callback: function() {
-					this.fillSearchPane(getSearchText(), this._lastSearchRoot);
+				callback: function(data) {
+					this.fillSearchPane(getSearchText(), recordDefaultSearchResource(data));
 				}.bind(this)
 			});
 			
