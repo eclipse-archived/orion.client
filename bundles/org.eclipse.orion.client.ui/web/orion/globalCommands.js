@@ -778,7 +778,7 @@ define([
 		};
 
 
-		var noTrim = window.orionNoTrim || false;
+		var noTrim = window.orionNoTrim || localStorage.orionNoTrim || false;
 		if (noTrim) {
 			toggleBannerFunc();
 			noBanner = true;
