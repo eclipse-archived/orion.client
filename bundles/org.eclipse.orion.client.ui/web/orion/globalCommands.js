@@ -782,7 +782,7 @@ define([
 		if (noTrim) {
 			toggleBannerFunc();
 			noBanner = true;
-			this.sideMenu.hide();
+			if (noTrim !== "bannerOnly") this.sideMenu.hide();
 		} else {
 			// Toggle trim command
 			var toggleBanner = new mCommands.Command({
