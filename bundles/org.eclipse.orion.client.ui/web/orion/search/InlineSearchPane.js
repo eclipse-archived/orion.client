@@ -95,6 +95,10 @@ define([
 		},
 		
 		hide: function() {
+			if(this._defaultSearchResource){
+  				this.setSearchScope(this._defaultSearchResource);//reset search scope when the InlineSearchPane is hide
+			}
+
 			if(window.document.title === this.newDocumentTitle){
 				window.document.title = this.previousDocumentTitle;
 			}

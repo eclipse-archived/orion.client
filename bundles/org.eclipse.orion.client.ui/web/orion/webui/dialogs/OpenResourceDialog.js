@@ -493,6 +493,7 @@ define([
 	
 	OpenResourceDialog.prototype._afterHiding = function() {
 		if (this._onHide) {
+			this._searcher.setLocationbyURL(this._searcher.getSearchLocation());
 			this._onHide();
 		}
 	};
