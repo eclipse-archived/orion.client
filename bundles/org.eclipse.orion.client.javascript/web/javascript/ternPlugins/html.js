@@ -19,7 +19,6 @@ define([
 	"javascript/compilationUnit", 
 	"javascript/finder"
 ], function(infer, tern, resolver, CU, Finder) {
-  "use strict";
 
   tern.registerPlugin("html", /* @callback */ function(server, options) {
 	server._htmlDeps = Object.create(null);

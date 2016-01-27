@@ -108,7 +108,6 @@ var folderTemplate = [
 	'org.eclipse.orion.client.users/web/profile/nls/dummy_language/messages',
 	'org.eclipse.orion.client.javascript/web/javascript/nls/dummy_language/messages',
 	'org.eclipse.orion.client.javascript/web/javascript/nls/dummy_language/problems',
-	'org.eclipse.orion.client.javascript/web/javascript/nls/dummy_language/workermessages',
 	'org.eclipse.orion.client.help/web/orion/help/nls/dummy_language/messages',
 	'org.eclipse.orion.client.editor/web/orion/editor/nls/dummy_language/messages',
 	'org.eclipse.orion.client.git/web/git/nls/dummy_language/gitmessages',

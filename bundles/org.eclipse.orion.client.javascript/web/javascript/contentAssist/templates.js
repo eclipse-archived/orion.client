@@ -12,8 +12,8 @@
 /*eslint-env amd*/
 define([
 'orion/editor/templates',
-"i18n!javascript/nls/workermessages"
-], function(mTemplates, WorkerMessages) {
+"i18n!javascript/nls/messages"
+], function(mTemplates, Messages) {
 
 	var typeofValues = {
 		type: "link", //$NON-NLS-0$
@@ -26,7 +26,7 @@ define([
 			"symbol", //$NON-NLS-1$
 			"undefined" //$NON-NLS-0$
 		],
-		title: 'Typeof Options',
+		title: Messages['typeofOptions'],
 		style: 'emphasis' //$NON-NLS-1$
 	};
 
@@ -106,7 +106,7 @@ define([
 			description: "",
 			template: "/* eslint ${rule-id}:${0/1}*/", //$NON-NLS-0$
 			url: "http://eslint.org/docs/user-guide/configuring.html#configuring-rules", //$NON-NLS-1$
-			doc: WorkerMessages['eslintRuleEnableDisable']
+			doc: Messages['eslintRuleEnableDisable']
 		},
 		{
 		    prefix: "eslint-env", //$NON-NLS-0$
@@ -115,7 +115,7 @@ define([
 			description: "",
 			template: "/* eslint-env ${library}*/", //$NON-NLS-0$
 			url: "http://eslint.org/docs/user-guide/configuring.html#specifying-environments", //$NON-NLS-1$
-			doc: WorkerMessages['eslintEnvDirective']
+			doc: Messages['eslintEnvDirective']
 		},
 		{
 		    prefix: "eslint-enable", //$NON-NLS-0$
@@ -124,7 +124,7 @@ define([
 			description: "",
 			template: "/* eslint-enable ${rule-id} */", //$NON-NLS-0$
 			url: "http://eslint.org/docs/user-guide/configuring.html#configuring-rule", //$NON-NLS-1$
-			doc: WorkerMessages['eslintRuleEnable']
+			doc: Messages['eslintRuleEnable']
 		},
 		{
 		    prefix: "eslint-disable", //$NON-NLS-0$
@@ -133,7 +133,7 @@ define([
 			description: "",
 			template: "/* eslint-disable ${rule-id} */", //$NON-NLS-0$
 			url: "http://eslint.org/docs/user-guide/configuring.html#configuring-rules", //$NON-NLS-1$
-			doc: WorkerMessages['eslintRuleDisable']
+			doc: Messages['eslintRuleDisable']
 		},
 		{
 			prefix: "switch", //$NON-NLS-0$

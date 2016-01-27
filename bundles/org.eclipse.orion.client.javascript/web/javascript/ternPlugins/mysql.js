@@ -18,7 +18,7 @@ define([
 	"tern/lib/infer", 
 	"tern/lib/tern", 
 	"./resolver"
-], /* @callback */ function(infer, tern, resolver) {
+], function(infer, tern, resolver) {
 
 	var templates = [
 	/* eslint-disable missing-nls */
@@ -70,7 +70,7 @@ define([
 	 */
 	function getTemplates(file, wordStart, wordEnd, gather) {  //file, start, end, completions) {
 		var expr = infer.findExpressionAround(file.ast, wordStart, wordEnd, file.scope);
-		var tmps = resolver.getTemplatesForNode(templates, expr);
+		var tmps = resolver.getTemplatesForNode(templates, expr, wordStart);
 		if(tmps) {
 			tmps.forEach(function(template) {
 				gather(template.name, null, 0, function(c) {

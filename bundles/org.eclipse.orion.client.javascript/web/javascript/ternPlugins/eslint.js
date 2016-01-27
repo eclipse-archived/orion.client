@@ -13,20 +13,13 @@
 /*eslint-env node, amd*/
 /*globals tern tern */
 define([
-	"tern/lib/infer", 
 	"tern/lib/tern",
-	"orion/objects",
 	"javascript/finder",
-	"javascript/signatures",
-	"javascript/util",
-	"eslint/conf/environments",
-	"orion/i18nUtil",
-	"i18n!javascript/nls/workermessages",
 	"eslint/lib/eslint",
 	"eslint/lib/source-code",
 	"orion/metrics",
 	"javascript/astManager",
-], /* @callback */ function(infer, tern, objects, Finder, Signatures, Util, ESLintEnvs, i18nUtil, Messages, Eslint, SourceCode, Metrics, ASTManager) {
+], function(tern, Finder, Eslint, SourceCode, Metrics, ASTManager) {
 
 	tern.registerPlugin("eslint", /* @callback */ function(server, options) {
 		return {

@@ -9,14 +9,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env node, amd*/
+/*eslint-env amd*/
 /*globals infer tern resolver*/
 define([
 	"tern/lib/infer", 
 	"tern/lib/tern", 
-	"./resolver", 
 	"javascript/finder"
-], /* @callback */ function(infer, tern, resolver, Finder) {
+], function(infer, tern, Finder) {
 	
 	tern.registerPlugin("open_impl", /* @callback */ function(server, options) { //$NON-NLS-1$
 	    return {};

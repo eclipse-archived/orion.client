@@ -12,7 +12,7 @@
 /* eslint-env amd*/
 /* eslint-disable missing-nls */
 define([
-	'i18n!javascript/nls/workermessages',
+	'i18n!javascript/nls/messages',
 	'json!tern/defs/ecma5.json',
 	'json!tern/defs/ecma6.json',
 	'json!tern/defs/browser.json',

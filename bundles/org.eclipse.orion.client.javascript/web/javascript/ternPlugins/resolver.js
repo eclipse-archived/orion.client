@@ -62,7 +62,7 @@ define([
 		server.options.getFile({logical: key, file: loc}, function(err, _file) {
 			clearTimeout(_resolved[key].timeout);
 			_resolved[key].file = _file.file;
-	   		_resolved[key].contents = typeof(_file.contents) === 'string' ? _file.contents : '';
+	   		_resolved[key].contents = typeof _file.contents === 'string' ? _file.contents : '';
 	   		_resolved[key].logical = _file.logical;
 	   		_resolved[key].err = err;
 	   		delete _resolved[key].pending;
@@ -118,17 +118,17 @@ define([
 			for(var i = 0; i < ast.dependencies.length; i++) {
 				var _d = _getDependencyName(ast.dependencies[i]);
 				if(_d) {
-					if(typeof(_resolved[_d]) === 'object') {
+					if(typeof _resolved[_d] === 'object') {
 						continue; //we already resolved it or are trying, keep going
 					}
-					if(typeof(ignores) === 'object') {
+					if(typeof ignores === 'object') {
 						if(ignores[_d]) {
 							continue;
 						}
-						if(typeof(ignores.node) === 'object' && ignores.node[_d]) {
+						if(typeof ignores.node === 'object' && ignores.node[_d]) {
 							continue;
 						}
-						if(typeof(ignores.requirejs) === 'object' && ignores.requirejs[_d]) {
+						if(typeof ignores.requirejs === 'object' && ignores.requirejs[_d]) {
 							continue;
 						}
 					}
@@ -136,7 +136,7 @@ define([
 					 * @since 11.0
 					 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481271
 					 */
-					if(typeof(test) === 'function' && !test(_d)) {
+					if(typeof test === 'function' && !test(_d)) {
 						continue;
 					}
 					_resolved[_d] = Object.create(null);
@@ -152,9 +152,9 @@ define([
 	 * @since 10.0
 	 */
 	function _getDependencyName(dep) {
-		if(typeof(dep) === 'string') {
+		if(typeof dep === 'string') {
 			return dep;
-		} else if(dep != null && typeof(dep) === 'object') {
+		} else if(dep && typeof dep === 'object') {
 			return dep.value;
 		}
 		return null;
@@ -188,14 +188,15 @@ define([
 	/**
 	 * @description Gets the template kind of node
 	 * @param {Object} node The AST node
+	 * @param {Number} offset The offset into the AST 
 	 * @returns {Object} The kind object or null
 	 * @since 9.0
 	 */
-	function _getKind(node) {
+	function _getKind(node, offset) {
 		if(node) {
     		if(node.parents && node.parents.length > 0) {
-	    		var parent = node.parents.pop();
-	    		switch(parent.type) {
+	    		var prnt = node.parents.pop();
+	    		switch(prnt.type) {
 					case 'MemberExpression': {
 						return { kind : 'member'}; //$NON-NLS-1$
 					}
@@ -204,13 +205,13 @@ define([
 					}
 					case 'FunctionDelcaration':
 					case 'FunctionExpression': {
-						if(offset < parent.body.range[0]) {
+						if(offset < prnt.body.range[0]) {
 							return null;						
 						}
 						break;
 					}
 					case 'Property': {
-						if(offset-1 >= parent.value.range[0] && offset-1 <= parent.value.range[1]) {
+						if(offset-1 >= prnt.value.range[0] && offset-1 <= prnt.value.range[1]) {
 							return { kind : 'prop'}; //$NON-NLS-1$
 						}
 						return null;
@@ -229,11 +230,12 @@ define([
 	 * @public
 	 * @param {Array.<Object>} templates The array of raw template data 
 	 * @param {String} kind The kind of the completion
+	 * @param {Number} offset The offset to get the templates for
 	 * @returns {Array} The array of templates that apply to the given completion kind
 	 * @since 9.0
 	 */
-	function getTemplatesForNode(templates, node) {
-		var kind = _getKind(node);
+	function getTemplatesForNode(templates, node, offset) {
+		var kind = _getKind(node, offset);
 		if(kind && kind.kind) {
 			var tmplates = [];
 			var len = templates.length;

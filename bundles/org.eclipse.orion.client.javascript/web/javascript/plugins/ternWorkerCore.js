@@ -29,10 +29,10 @@ require([
 	'orion/Deferred',
 	"orion/objects",
 	'orion/serialize',
-	'i18n!javascript/nls/workermessages',
+	'i18n!javascript/nls/messages',
 	'orion/i18nUtil'
 ],
-/* @callback */ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil) {
+function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil) {
 
     var ternserver = null;
 	
@@ -330,7 +330,7 @@ require([
 		           files: args.files},
 		           function(error, changes) {
 		               if(error) {
-							callback({request: 'rename', error: typeof error === 'string' ? error : error.message, message: Messages['failedRename']}); //$NON-NLS-1$
+							callback({request: 'rename', error: typeof error === 'string' ? error : error.message, message: Messages['failedRenameTern']}); //$NON-NLS-1$
 		               } else if(changes && Array.isArray(changes.changes)) {
 							callback({request: 'rename', changes:changes}); //$NON-NLS-1$
 		               } else {

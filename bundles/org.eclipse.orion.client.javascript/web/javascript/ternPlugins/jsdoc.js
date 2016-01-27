@@ -13,7 +13,6 @@
 /*eslint-env node, amd*/
 /*globals tern tern */
 define([
-	"tern/lib/infer", 
 	"tern/lib/tern",
 	"orion/objects",
 	"javascript/finder",
@@ -21,9 +20,8 @@ define([
 	"javascript/util",
 	"javascript/ruleData",
 	"eslint/conf/environments",
-	"orion/i18nUtil",
-	"i18n!javascript/nls/workermessages"
-], /* @callback */ function(infer, tern, objects, Finder, Signatures, Util, Rules, ESLintEnvs, i18nUtil, Messages) {
+	"i18n!javascript/nls/messages"
+], function(tern, objects, Finder, Signatures, Util, Rules, ESLintEnvs, Messages) {
 	
 	var allEnvs = {};
 	var envNames = {
@@ -552,7 +550,7 @@ define([
 	 */
 	function createProposal(name, description, prefix, template) {
 		var p = Object.create(null);
-		if(typeof(template) === 'string') {
+		if(typeof template === 'string') {
 			p.type = 'jsdoc_template';
 			p.template = template;
 			p.isTemplate = true;
@@ -562,7 +560,7 @@ define([
 		p.name = name;
 		p.proposal = name.slice(prefix.length);
 		p.description = description;
-		if(typeof(prefix) === 'string') {
+		if(typeof prefix === 'string') {
 			p.prefix = prefix;
 		}
 		return p;

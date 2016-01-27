@@ -11,11 +11,10 @@
  *******************************************************************************/
 /*eslint-env amd*/
 define([
-	"tern/lib/infer", 
 	"tern/lib/tern", 
 	"estraverse/estraverse",
 	"javascript/signatures"
-], /* @callback */ function(infer, tern, Estraverse, Signatures) {
+], function(tern, Estraverse, Signatures) {
 
 	tern.registerPlugin("outliner", /* @callback */ function(server, options) { //$NON-NLS-1$
 		return {}; //no phases
