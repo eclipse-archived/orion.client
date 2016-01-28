@@ -535,6 +535,16 @@
                 addEventListener("message", _handleMessage, false);
                 _publish(message);
             }
+            if (typeof(window) !== "undefined") {
+            	var head = document.getElementsByTagName("head")[0] || document.documentElement;
+            	var title = head.getElementsByTagName("title")[0];
+            	if (!title) {
+	            	title = document.createElement("title");
+	            	title.textContent = _headers.name;
+	            	head.appendChild(title);
+	        	}
+        	}
+
             _ports.forEach(function(port) {
                 _publish(message, port);
             });
