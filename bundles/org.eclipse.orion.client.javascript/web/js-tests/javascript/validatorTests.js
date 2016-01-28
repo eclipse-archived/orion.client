@@ -10552,8 +10552,8 @@ define([
 										id: RULE_ID,
 										severity: 'error',
 										description: "Duplicate case label.",
-										start: 82,
-										end: 104
+										start: 87,
+										end: 88
 									}]);
 								},
 								function (error) {

@@ -4053,6 +4053,33 @@ define([
 								  pid: 'use-isnan'});
 			});
 		});
+		//NO-DUPLICATE-CASE
+		describe("no-duplicate-case", function() {
+			it("no-duplicate-case - rename 1", function(done) {
+				var rule = createTestRule("no-duplicate-case");
+				var expected = {
+					groups: [
+						{data: {}, positions: [{offset: 66, length: 1}]}
+					]
+				};
+				return getFixes({
+					buffer: "var a = 1;\n" +
+							"switch (a) {\n" +
+							"	case 1:\n" +
+							"		break;\n" +
+							"	case 2:\n" +
+							"		break;\n" +
+							"	case 1:\n" +
+							"		break;\n" +
+							"	default:\n" +
+							"		break;\n" +
+							"}",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+		});
 		});
 	};
 });
