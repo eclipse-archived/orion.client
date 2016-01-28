@@ -42,6 +42,7 @@ define({
 	'noImpliedEval' : 'Discouraged implied \'eval()\' use:',
 	'noDupeKeys' : 'Duplicate object keys:',
 	'noDupeKeysFixName': 'Rename key',
+	'noDuplicateCaseFixName' : 'Rename case',
 	'noIterator': 'Discouraged __iterator__ property use:',
 	'noProto': 'Discouraged __proto__ property use:',
 	'noUndefInit': 'Explicitly initializing variables to undefined:',
