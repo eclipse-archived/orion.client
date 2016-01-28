@@ -36,7 +36,7 @@ define([
 			"no-empty-block" : 0,
 			"no-empty-character-class" : 2,
 			"no-empty-label" : 2,
-			"no-eq-null" : 2,
+			"no-eq-null" : 1,
 			"no-eval" : 0,
 			"no-extra-boolean-cast" : 2,
 			"no-extra-parens" : 1,

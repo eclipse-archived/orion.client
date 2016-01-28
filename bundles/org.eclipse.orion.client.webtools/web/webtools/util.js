@@ -167,7 +167,7 @@ define([
 					continue;
 				}
 				var index = val.index+val[0].indexOf('>')+1;  //$NON-NLS-0$
-				if(offset === null || (index <= offset && index+text.length >= offset)) {
+				if(typeof offset !== 'number' || (index <= offset && index+text.length >= offset)) {
 					for(var i = 0; i < comments.length; i++) {
 						if(comments[i].start <= index && comments[i].end >= index) {
 							continue loop;
@@ -199,7 +199,7 @@ define([
 				if(text.length < 1) {
 					continue;
 				}
-				if(offset === null || (val.index <= offset && val.index+text.length >= val.index)) {
+				if(typeof offset !== 'number' || (val.index <= offset && val.index+text.length >= val.index)) {
 					blocks.push({
 						text: text,
 						start: val.index,
