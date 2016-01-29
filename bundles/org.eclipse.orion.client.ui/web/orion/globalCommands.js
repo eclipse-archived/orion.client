@@ -755,12 +755,16 @@ define([
 			}
 			var header = lib.node("banner"); //$NON-NLS-0$
 			var footer = lib.node("footer"); //$NON-NLS-0$
+			var innerPanels = lib.node("innerPanels"); //$NON-NLS-0$
+			innerPanels.classList.add("generalAnimation"); //$NON-NLS-0$
 			var sideMenuNode = lib.node("sideMenu"); //$NON-NLS-0$
 			var content = lib.$(".content-fixedHeight"); //$NON-NLS-0$
 			var maximized = header.style.visibility === "hidden"; //$NON-NLS-0$
 			if (maximized) {
 				header.style.visibility = "visible"; //$NON-NLS-0$
 				footer.style.visibility = "visible"; //$NON-NLS-0$
+				innerPanels.style.top = "50px"; //$NON-NLS-0$
+				innerPanels.style.zIndex = "";
 				content.classList.remove("content-fixedHeight-maximized"); //$NON-NLS-0$
 				if (sideMenuNode) {
 					sideMenuNode.classList.remove("sideMenu-maximized"); //$NON-NLS-0$
@@ -768,6 +772,8 @@ define([
 			} else {
 				header.style.visibility = "hidden"; //$NON-NLS-0$
 				footer.style.visibility = "hidden"; //$NON-NLS-0$
+				innerPanels.style.top = "0"; //$NON-NLS-0$
+				innerPanels.style.zIndex = 70;
 				content.classList.add("content-fixedHeight-maximized"); //$NON-NLS-0$
 				if (sideMenuNode) {
 					sideMenuNode.classList.add("sideMenu-maximized"); //$NON-NLS-0$
