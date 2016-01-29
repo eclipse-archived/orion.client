@@ -122,15 +122,6 @@ define([
 			var folder = event.item;
 			navHandler.cursorOn(folder);
 			navHandler.setSelection(folder, false);
-			// now toggle its expand/collapse state
-			var curModel = navHandler._modelIterator.cursor();
-			if (navHandler.isExpandable(curModel)){
-				if (!navHandler.isExpanded(curModel)){
-					this.myTree.expand(curModel);
-				} else {
-					this.myTree.collapse(curModel);
-				}
-			}
 		},
 		onModelCreate: function(event) {
 			return FileExplorer.prototype.onModelCreate.call(this, event).then(function () {
