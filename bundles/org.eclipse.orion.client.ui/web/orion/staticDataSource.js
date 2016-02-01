@@ -181,7 +181,7 @@ define([
 		{	id: "application/zip",
 			"extends": "application/octet-stream",
 			name: "ZIP",
-			extension: ["war", "jar", "zip", "rar"]
+			extension: ["war", "jar", "zip", "rar", "gz", "tar"]
 		},
 		{	id: "text/x-arduino",
 			"extends": "text/x-csrc",
