@@ -59,7 +59,13 @@ define([
 		}
 		
 		var _prefix = prefix.toLowerCase();
-		
+
+		var equalIndex = prefix.indexOf("=");
+		if (equalIndex !== -1) {
+			if (startsWith(target, prefix.substring(0, equalIndex))) {
+				return true;
+			}
+		}
 		// Test for camel characters in the prefix.
 		if (prefix === _prefix) {
 			return false;

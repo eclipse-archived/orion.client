@@ -941,7 +941,7 @@ define([
     		var _o = setup({buffer: '<html><a styl=></a></html>'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 13, prefix: 'styl'}).then(function(proposals) {
     			assertProposals(proposals, [
-    			{proposal: 'style', prefix: 'styl'},
+    			{proposal: 'style=""', prefix: 'styl'},
     			]);
     		});
     	});

@@ -258,12 +258,21 @@ define([
 
 	};
 	
-	Parser.prototype.onattribend = function(isQuoted){
+	Parser.prototype.onattribend = function(isQuoted, valueStart){
 		// TODO Orion 11.0 Collect attribute ranges
-		this._attribrange[1] = this._tokenizer.getAbsoluteIndex();
-		// If the attribute is in quotes include them in the range
-		if (isQuoted){
-			this._attribrange[1]++;
+		if (valueStart) {
+			this._attribrange[1] = valueStart;
+			this._attribrange[2] = this._tokenizer.getAbsoluteIndex();
+			// If the attribute is in quotes include them in the range
+			if (isQuoted){
+				this._attribrange[2]++;
+			}
+		} else {
+			this._attribrange[1] = this._tokenizer.getAbsoluteIndex();
+			// If the attribute is in quotes include them in the range
+			if (isQuoted){
+				this._attribrange[1]++;
+			}
 		}
 		if(this._cbs.onattribute) this._cbs.onattribute(this._attribname, this._attribvalue, this._attribrange);
 		if(
@@ -332,7 +341,9 @@ define([
 				this._cbs.onclosetag(this._stack[--i])
 			);
 		}
-		if(this._cbs.onend) this._cbs.onend([this.startIndex, this._tokenizer._eof]); //ORION
+		if(this._cbs.onend) {
+			this._cbs.onend([this.startIndex, this._tokenizer._eof]); //ORION
+		}
 	};
 	
 	

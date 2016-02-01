@@ -467,7 +467,7 @@ define([
 		    		attributes: [
 		    			{
     						name: 'src',
-    						value: '',
+    						value: null,
     						range: [3,7]
 						}
     				]

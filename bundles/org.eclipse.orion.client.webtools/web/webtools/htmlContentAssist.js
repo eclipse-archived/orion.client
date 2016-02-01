@@ -571,20 +571,31 @@ define([
 						hover.content += i18nUtil.formatMessage(Messages['onlineDocumentation'], attr.url);
 					}
 					var proposalText = attr.name;
-					if (typeof node.value !== 'string'){
-						proposalText += '=""'; //$NON-NLS-1$
+					var caretOffset = 0;
+					if (!Array.isArray(node.valueRange)
+							|| (node.valueRange[0] > params.offset || node.valueRange[1] < params.offset)) {
+						if (typeof node.value !== 'string') {
+							proposalText += '=""'; //$NON-NLS-1$
+							caretOffset = 2; // 2 to put the caret between the two quotes
+						} else if (proposalText.indexOf(prefix) === -1) {
+							proposalText += '=""'; //$NON-NLS-1$
+							caretOffset = 2; // 2 to put the caret between the two quotes
+						} else if (prefix.length === 0 || (prefix.length !== 0 && proposalText.indexOf(prefix) === -1)) {
+							proposalText += '=""'; //$NON-NLS-1$
+							caretOffset = 2; // 2 to put the caret between the two quotes
+						}
 					}
 					var proposal = this.makeComputedProposal(proposalText, attr.name, desc, hover, prefix);
-					proposal.escapePosition = params.offset - prefix.length + attr.name.length + 2;
+					proposal.escapePosition = params.offset - prefix.length + attr.name.length + caretOffset; 
 					proposals.push(proposal);
 				}
 			}
 			proposals.sort(function(l,r) {
 				//sort by relevance and then by name
-				if(typeof(l.relevance) === 'undefined') {
+				if(typeof l.relevance === 'undefined') {
 					l.relevance = 1;
 				}
-				if(typeof(r.relevance) === 'undefined') {
+				if(typeof r.relevance === 'undefined') {
 					r.relevance = 1;
 				}
 				if (l.relevance > r.relevance) {
@@ -639,7 +650,12 @@ define([
 		 * @returns {Boolean} True if the node has the given attribute, false otherwise
 		 */
 		_hasAttribute: function(node, attribute) {
-			return node && node.type === 'tag' && typeof(node.attributes) === 'object' && attribute && !!node.attributes[attribute];			
+			return node
+					&& node.type === 'tag'
+					&& typeof node.attributes === 'object'
+					&& attribute
+					&& !!node.attributes[attribute]
+					&& node.attributes[attribute].value !== null; // a complete attribute needs a value
 		},
 		
 		/**

@@ -79,10 +79,24 @@ define([
 	    onattribute: function(name, value, range) {
 	    	this.trailingAttrib = null;
 	    	var node = Object.create(null);
-	    	node.range = Array.isArray(range) ? [range[0], range[1]] : [0, 0];
+	    	node.value = value;
+	    	if (Array.isArray(range)) {
+			if (range.length === 3) {
+				node.range = [range[0], range[2]];
+				if ((range[2] - range[1]) <= 1) {
+					// no actual value was specified
+					node.value = null;
+				} else {
+					node.valueRange = [range[1], range[2]];
+				}
+			} else {
+				node.range = [range[0], range[1]];
+			}
+		} else {
+			node.range = [0, 0];
+		}
 	    	node.name = name;
 	    	node.type = 'attr'; //$NON-NLS-1$
-	    	node.value = value;
 	    	this.attribstack.push(node);
 	    },
 	    onprocessinginstruction: function(name, data, range) {
