@@ -1348,7 +1348,7 @@ define([
         			"Program": check,
         			"FunctionDeclaration": check,
         			"FunctionExpression": check,
-        			"ArrowFunctonExpression": check
+        			"ArrowFunctionExpression": check
         		};
         },
 		"no-use-before-define": function(context) {
