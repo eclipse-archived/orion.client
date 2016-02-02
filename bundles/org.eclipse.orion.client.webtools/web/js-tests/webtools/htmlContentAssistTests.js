@@ -2027,7 +2027,7 @@ define([
     	});
 
 		// Tag-specific ARIA roles.
-		// TODO: The following test should pass after we implement the cool allowed-role-for-tag feature
+		// TODO: The following test should pass after we implement the cool allowed-role-for-tag feature (https://bugs.eclipse.org/bugs/show_bug.cgi?id=484255)
 //    	it('Tag-specific ARIA roles: ul can have 11 possible role values. <ul role="|">', function() {
 //    		var _o = setup({buffer: '<html><body><ul role=""></ul></body></html>'});
 //    		return assist.computeContentAssist(_o.editorContext, {offset: 22}).then(function(proposals) {
@@ -2073,7 +2073,7 @@ define([
 
 		// Role-specific aria-* attributes: aria-activedescendant, aria-autocomplete, aria-checked, aria-expanded, aria-level, aria-multiline, aria-multiselectable, aria-orientation,
 		//     aria-posinset, aria-pressed, aria-readonly, aria-required, aria-selected, aria-setsize, aria-sort, aria-valuemax, aria-valuemin, aria-valuenow, aria-valuetext
-		// TODO: The following test should pass after we implement the cool allowed-attributes-for-role feature
+		// TODO: The following test should pass after we implement the cool allowed-attributes-for-role feature (https://bugs.eclipse.org/bugs/show_bug.cgi?id=484254)
 //    	it('Role-specific aria-* attributes. Filter role. <span role="checkbox" >', function() {
 //    		var _o = setup({buffer: '<html><body><span role="checkbox" ></span></body></html>'});
 //    		return assist.computeContentAssist(_o.editorContext, {offset: 34}).then(function(proposals) {
