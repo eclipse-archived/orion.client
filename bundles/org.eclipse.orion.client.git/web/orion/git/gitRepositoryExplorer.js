@@ -1,11 +1,11 @@
-/******************************************************************************* 
+/*******************************************************************************
  * @license
  * Copyright (c) 2011, 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
@@ -30,9 +30,9 @@ define([
 	'orion/Deferred',
 	'orion/metrics'
 ], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mSection, mSelection, lib, URITemplate, PageUtil, util, mFileUtils, i18nUtil, mGlobalCommands, mGitCommands, Deferred, mMetrics) {
-	
+
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
-	
+
 	function compare(s1, s2, props) {
 		if (s1 === s2) { return true; }
 		if (s1 && !s2 || !s1 && s2) { return false; }
@@ -62,7 +62,7 @@ define([
 		}
 		return true;
 	}
-	
+
 	function compareLocation(s1, s2) {
 		return compare(s1, s2, {Location: ""});
 	}
@@ -97,7 +97,7 @@ define([
 		this.pageNavId = options.pageNavId;
 		this.actionScopeId = options.actionScopeId;
 		this.checkbox = false;
-		
+
 		var that = this;
 		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", function(event) { //$NON-NLS-0$
 			switch (event.action) {
@@ -115,7 +115,7 @@ define([
 				}
 				that.changedItem();
 				break;
-				
+
 			case "pullRequestCheckout": //$NON-NLS-0$
 				if(event.pullRequest){
 					var base = event.pullRequest.PullRequest.base;
@@ -133,13 +133,13 @@ define([
 								var basePos = children.map(function(x) {return x.Name; }).indexOf("origin/"+base.ref);
 								if(basePos>-1){
 									that.reference = children[basePos];
-								}								
+								}
 							})
 						}
-						
+
 					}
 				}
-				
+
 				if (that.repository) {
 					window.location.href = require.toUrl(repoTemplate.expand({resource: that.lastResource = that.repository.Location}));
 				}
@@ -189,7 +189,7 @@ define([
 			}
 		});
 	}
-	
+
 	GitRepositoryExplorer.prototype.handleError = function(error) {
 		var display = {};
 		display.Severity = "Error"; //$NON-NLS-0$
@@ -201,22 +201,22 @@ define([
 			display.Message = error.DetailedMessage || error.Message || error.message;
 		}
 		this.statusService.setProgressResult(display);
-		
+
 		if (error.status === 404) {
 			this.initTitleBar();
 			this.displayRepositories();
 		}
 	};
-	
+
 	GitRepositoryExplorer.prototype.setDefaultPath = function(defaultPath){
 		this.defaultPath = defaultPath;
 	};
-	
+
 	GitRepositoryExplorer.prototype.changedItem = function() {
 		// An item changed so we do not need to process any URLs
 		this.redisplay(false, true);
 	};
-	
+
 	GitRepositoryExplorer.prototype.redisplay = function(processURLs, force) {
 		// make sure to have this flag
 		if (processURLs === undefined) {
@@ -229,15 +229,22 @@ define([
 		var selection = pageParams.resource;
 		var path = this.defaultPath;
 		var relativePath = mFileUtils.makeRelative(path);
-		
+
 		//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
 		var gitapiCloneUrl = require.toUrl("gitapi/clone._"); //$NON-NLS-0$
 		gitapiCloneUrl = gitapiCloneUrl.substring(0, gitapiCloneUrl.length-2);
-		
+
 		var location = relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath; //$NON-NLS-1$ //$NON-NLS-0$
+		if(selection){
+			var selectionSplits = selection.split("/");
+			if(selectionSplits[selectionSplits.length - 2] === ".git"){
+				selectionSplits.splice(selectionSplits.length - 2, 1);
+				selection = selectionSplits.join("/");
+			}
+		}
 		this.display(location, selection, processURLs);
 	};
-	
+
 	GitRepositoryExplorer.prototype.destroyRepositories = function() {
 		if (this.repositoriesLabel) {
 			var parent = this.repositoriesLabel.parentNode;
@@ -253,7 +260,7 @@ define([
 			this.repositoriesSection = null;
 		}
 	};
-	
+
 	GitRepositoryExplorer.prototype.destroyBranches = function() {
 		if (this.branchesLabel) {
 			var parent = this.branchesLabel.parentNode;
@@ -269,7 +276,7 @@ define([
 			this.branchesSection = null;
 		}
 	};
-	
+
 	GitRepositoryExplorer.prototype.destroyStatus = function() {
 		if (this.statusNavigator) {
 			this.statusNavigator.destroy();
@@ -280,7 +287,7 @@ define([
 			this.statusSection = null;
 		}
 	};
-	
+
 	GitRepositoryExplorer.prototype.destroyCommits = function() {
 		if (this.commitsNavigator) {
 			this.commitsNavigator.destroy();
@@ -291,7 +298,7 @@ define([
 			this.commitsSection = null;
 		}
 	};
-	
+
 	GitRepositoryExplorer.prototype.destroyConfig = function() {
 		if (this.configNavigator) {
 			this.configNavigator.destroy();
@@ -324,7 +331,7 @@ define([
 		this.destroyConfig();
 		this.destroyDiffs();
 	};
-	
+
 	GitRepositoryExplorer.prototype.setSelectedRepository = function(repository, force) {
 		var that = this;
 		var setRepoSelection =  function(repository, force) {
@@ -337,7 +344,7 @@ define([
 				that.preferencesService.put("/git/settings", {lastRepo: {Location: that.repository.Location}}); //$NON-NLS-1$
 				that.repositoriesNavigator.select(that.repository);
 				that.repositoriesSection.setTitle(repository.Name);
-				that.displayBranches(repository); 
+				that.displayBranches(repository);
 				that.displayConfig(repository, "full"); //$NON-NLS-0$
 				that.setSelectedReference(that.reference);
 			} else {
@@ -345,7 +352,7 @@ define([
 				mMetrics.logPageLoadTiming("complete", window.location.pathname);
 			}
 		};
-	
+
 		if (!repository && this.repositoriesNavigator && this.repositoriesNavigator.model) {
 			this.preferencesService.get("/git/settings").then(function(prefs) {  //$NON-NLS-0$
 				var lastRepo = prefs["lastRepo"]; //$NON-NLS-0$
@@ -366,15 +373,15 @@ define([
 		} else {
 			setRepoSelection (repository, force);
 		}
-		
+
 	};
-	
+
 	GitRepositoryExplorer.prototype.setSelectedReference = function(ref) {
 		this.reference = ref;
 		this.setSelectedChanges(this.changes);
 		this.displayCommits(this.repository);
 	};
-	
+
 	GitRepositoryExplorer.prototype.setSelectedChanges = function(changes) {
 		lib.empty(lib.node('table')); //$NON-NLS-0$
 		var title;
@@ -385,7 +392,7 @@ define([
 				this.displayDiffs(this.repository, null, changes[0].DiffLocation, changes[1].Name, title);
 			} else {
 				var status = changes[0].Type === "Status"; //$NON-NLS-0$
-				title = i18nUtil.formatMessage(messages["CompareChanges"], util.shortenRefName(changes[status ? 1 : 0]), messages["Working Directory"]); 
+				title = i18nUtil.formatMessage(messages["CompareChanges"], util.shortenRefName(changes[status ? 1 : 0]), messages["Working Directory"]);
 				this.displayDiffs(this.repository, null, status ? changes[1].DiffLocation : changes[0].DiffLocation, null, title);
 			}
 			return;
@@ -449,7 +456,7 @@ define([
 			that.handleError(error);
 		});
 	};
-	
+
 	GitRepositoryExplorer.prototype.initTitleBar = function(resource) {
 		var item = {};
 		var task = messages.Repo;
@@ -468,7 +475,7 @@ define([
 			commandService: this.commandService
 		});
 	};
-	
+
 	GitRepositoryExplorer.prototype.createLabel = function(parent, str, sibling) {
 		var label = document.createElement("div"); //$NON-NLS-0$
 		label.className = "gitSectionLabel"; //$NON-NLS-0$
@@ -480,14 +487,14 @@ define([
 		}
 		return label;
 	};
-	
+
 	GitRepositoryExplorer.prototype.displayRepositories = function(location, mode, links) {
 		this.destroyRepositories();
 		var parent = lib.node('pageToolbar'); //$NON-NLS-0$
 		var sibling = lib.node('pageActions'); //$NON-NLS-0$
-		
+
 		this.repositoriesLabel = this.createLabel(parent, messages["Repository:"], sibling);
-		
+
 		var section = this.repositoriesSection = new mSection.Section(parent, {
 			id: "repoSection", //$NON-NLS-0$
 			title: messages["Repo"],
@@ -501,7 +508,7 @@ define([
 			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
-		
+
 		var selection = this.repositoriesSelection = new mSelection.Selection(this.registry, "orion.selection.repo"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 			var selected = e.selection;
@@ -536,14 +543,14 @@ define([
 		});
 		return explorer.display();
 	};
-	
+
 	GitRepositoryExplorer.prototype.displayBranches = function(repository) {
 		this.destroyBranches();
 		var parent = lib.node('pageToolbar'); //$NON-NLS-0$
 		var sibling = lib.node('pageActions'); //$NON-NLS-0$
-		
+
 		this.branchesLabel = this.createLabel(parent, messages["Reference:"], sibling);
-		
+
 		var section = this.branchesSection = new mSection.Section(parent, {
 			id: "branchSection", //$NON-NLS-0$
 			title: this.previousBranchTitle || "\u00A0", //$NON-NLS-0$
@@ -626,7 +633,7 @@ define([
 			}
 		}.bind(this));
 	};
-	
+
 	GitRepositoryExplorer.prototype.setBranchesTitle = function() {
 		var title = this.showTagsSeparately ? messages["Branches"] : messages['BranchesTags'];
 		var explorer = this.commitsNavigator;
@@ -645,7 +652,7 @@ define([
 		this.branchesSection.setTitle(this.previousBranchTitle = title);
 	};
 
-	GitRepositoryExplorer.prototype.displayStatus = function(repository) {	
+	GitRepositoryExplorer.prototype.displayStatus = function(repository) {
 		this.destroyStatus();
 		var parent = lib.node('table'); //$NON-NLS-0$
 		var section = this.statusSection = new mSection.Section(parent, {
@@ -657,7 +664,7 @@ define([
 			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
-		
+
 		var explorer  = this.statusNavigator = new mGitChangeList.GitChangeListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
@@ -674,7 +681,7 @@ define([
 		return explorer.display();
 	};
 
-	GitRepositoryExplorer.prototype.displayCommits = function(repository) {	
+	GitRepositoryExplorer.prototype.displayCommits = function(repository) {
 		this.destroyCommits();
 		var parent = lib.node('sidebar'); //$NON-NLS-0$
 		var section = this.commitsSection = new mSection.Section(parent, {
@@ -686,7 +693,7 @@ define([
 			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
-		
+
 		// Set the branches section title when the active and target references are available
 		var that = this;
 		var oldSetTitle = section.setTitle;
@@ -694,7 +701,7 @@ define([
 			oldSetTitle.call(section, str);
 			that.setBranchesTitle();
 		};
-		
+
 		var selection = this.commitsSelection = new mSelection.Selection(this.registry, "orion.selection.commit"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			var selected = event.selections;
@@ -783,11 +790,11 @@ define([
 		});
 		return explorer.display();
 	};
-	
+
 	GitRepositoryExplorer.prototype.displayConfig = function(repository, mode) {
 		this.destroyConfig();
 		var parent = lib.node('settingsActions'); //$NON-NLS-0$
-		
+
 		var section = this.configSection = new mSection.Section(parent, {
 			id: "configSection", //$NON-NLS-0$
 			title: "\u200B", //$NON-NLS-0$
@@ -802,7 +809,7 @@ define([
 			tooltip: messages["Configurations"],
 			preferenceService: this.preferencesService
 		});
-			
+
 		var configNavigator = this.configNavigator = new mGitConfigList.GitConfigListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
