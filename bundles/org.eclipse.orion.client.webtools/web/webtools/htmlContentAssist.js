@@ -184,14 +184,14 @@ define([
 					return [];
 				}
 				if (this.isCompletingCommentClose(node, params.offset)){
-					return this.getComment(node, false);
+					return this.getComment(node, params.offset, ast.source, false);
 				} else if (this.isCompletingAttributeValue(node, ast.source, params)) {
 					return this.getValuesForAttribute(node, params);
 				} else if (this.isCompletingTagAttribute(node, ast.source, params)) {
 					return this.getAttributesForNode(node, params);
 				} else if (this.isCompletingTag(node, params)){
 					if (this.isCompletingCommentOpen(node)){
-						return this.getComment(node, true);
+						return this.getComment(node, params.offset, ast.source, true);
 					} 
 					return this.getTags(ast.source, params);
 				}
@@ -602,11 +602,13 @@ define([
 		/**
 		 * Returns a comment open/close proposal or an empty array
 		 * @param {Object} node The AST node for the tag we are completing within
+		 * @param {Number} offset The offset content assist was activated at
+		 * @param {String} source The source of the file
 		 * @param {Boolean} open If true will propose open comment proposals, otherwise return close comment
 		 * @returns {Array.<Object>} The array of proposals
 		 * @since 10.0 
 		 */
-		getComment: function(node, open) {
+		getComment: function(node, offset, source, open) {
 			var proposals = [];
 			if (open){
 				var prefix = '<' + node.name;
@@ -614,9 +616,10 @@ define([
 			} else {
 				if (node.data.length > 0){
 					prefix = "";
-					if (node.data.charAt(node.data.length-1) === '-'){
+					// Check if user has typed dashes (not including the leading <!--)
+					if (source.charAt(offset-1) === '-' && offset > node.range[0]+4){
 						prefix += '-';
-						if (node.data.charAt(node.data.length-2) === '-'){
+						if (source.charAt(offset-2) === '-'){
 							prefix += '-';
 						}
 					}
