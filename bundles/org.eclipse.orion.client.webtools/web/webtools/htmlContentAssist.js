@@ -210,33 +210,17 @@ define([
 		 */
 		inScriptOrStyle: function(node, offset, source) {
 			if (node){
-				if(node.type === 'text' && node.parent && node.parent.type === 'tag'){
-					var name = node.parent.name ? node.parent.name.toLowerCase() : '';
+				if (node.type === 'tag'){
+					var name = node.name ? node.name.toLowerCase() : '';
 					if (name === 'script' || name === 'style') {
-						return true;
-					}
-				} else if (node.type === 'tag'){
-					name = node.name ? node.name.toLowerCase() : '';
-					if (name === 'script' || name === 'style') {
-						if (!node.children || !node.children.length > 0){
-							// Empty <script></script>, see if the previous non-whitespace character is '>'
-							if (offset > node.range[0] && offset < node.range[1]){
-								var whitespace = '\t\r\n '; //$NON-NLS-1$
-								var pos = offset;
-								var posChar;
-								var inwhite = true;
-								while (inwhite && pos > node.range[0]){
-									pos--;
-									posChar = source.charAt(pos);
-									inwhite = whitespace.indexOf(posChar) >= 0;
-								}
-								if (posChar === '>'){
-									return true;
-								}
+						if (node.openrange && node.endrange){
+							// If we are in the tag itself we are not actually in the script block
+							if (offset < node.openrange[1] || offset > node.endrange[0]){
+								return false;
 							}
 						}
+						return true;
 					}
-
 				}
 			}
 			return false;
@@ -687,9 +671,7 @@ define([
 				var startTag;
 				// If text content is a '/' offer to close the tag
 				// If we have an uncompleted tag '</' offer to complete the tag
-				if (node.type === 'text' && node.parent && node.parent.type === 'tag'){
-					startTag = node.parent;
-				} else if (node.type === 'tag' && node.openrange && params.offset > node.openrange[1]){
+				if (node.type === 'tag' && node.openrange && params.offset > node.openrange[1]){
 					startTag = node;
 				} else if (node.type === 'tag' && (params.offset > node.range[1] || params.offset < node.range[0])){
 					startTag = node;

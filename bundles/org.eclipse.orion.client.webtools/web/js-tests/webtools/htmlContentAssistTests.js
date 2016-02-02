@@ -956,8 +956,34 @@ define([
     			]);
     		});
     	});
+    	/*
+    	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=486676
+    	 */
+    	it('Inside script block - text, no children', function() {
+    		var _o = setup({buffer: '<script>x</script>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 9, prefix: 'x'}).then(function(proposals) {
+    			assertProposals(proposals, [	]);
+    		});
+    	});
+    	/*
+    	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=486676
+    	 */
+    	it('Inside script block - no text, children', function() {
+    		var _o = setup({buffer: '<script><a></a></script>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 11}).then(function(proposals) {
+    			assertProposals(proposals, [	]);
+    		});
+    	});
+    	/*
+    	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=486676
+    	 */
+    	it('Inside script block - no text, no children', function() {
+    		var _o = setup({buffer: '<script></script>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 8}).then(function(proposals) {
+    			assertProposals(proposals, [	]);
+    		});
+    	});
     });
-    
 
 	describe('ARIA Content Assist Tests', function() {
 		// Global aria-* attributes: aria-atomic, aria-busy, aria-controls, aria-describedby, aria-disabled, aria-dropeffect, aria-flowto, aria-grabbed,
