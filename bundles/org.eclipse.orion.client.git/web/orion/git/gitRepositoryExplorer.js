@@ -235,6 +235,14 @@ define([
 		gitapiCloneUrl = gitapiCloneUrl.substring(0, gitapiCloneUrl.length-2);
 		
 		var location = relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath; //$NON-NLS-1$ //$NON-NLS-0$
+		
+		if(selection){
+			var selectionSplits = selection.split("/");
+			if(selectionSplits[selectionSplits.length - 2] === ".git"){
+				selectionSplits.splice(selectionSplits.length - 2, 1);
+				selection = selectionSplits.join("/");
+			}
+		}
 		this.display(location, selection, processURLs);
 	};
 	
