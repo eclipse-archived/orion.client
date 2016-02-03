@@ -173,13 +173,15 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 	function createProviderLink(name, imageUrl, clazz, onclick) {
 		var img = document.createElement("img");
 		img.className = "loginWindow " + clazz;
-		img.id = img.alt = img.title = name;
+		img.alt = img.title = name;
 		img.src = imageUrl;
 
 		var a = document.createElement("a");
 		a.className = "loginWindow " + clazz;
 		a.onclick = onclick;
-		a.setAttribute("aria-labelledby", "addExternalAccount " + name);
+		a.id = name.replace(' ', ''); //$NON-NLS-1$
+		a.setAttribute("aria-label", name);
+		a.setAttribute("aria-labelledby", "addExternalAccount " + a.id);
 		a.appendChild(img);
 		return a;
 	}
