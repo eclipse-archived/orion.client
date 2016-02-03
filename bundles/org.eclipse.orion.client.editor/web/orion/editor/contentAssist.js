@@ -104,7 +104,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 	
 	/**
 	 * @name ContentAssist
-	 * @description Creates a new content assist manager for the given text ciew
+	 * @description Creates a new content assist manager for the given text view
 	 * @param textView The text view to provide content assist for
 	 * @param serviceRegistry Optional, used to look up page message service for status
 	 */

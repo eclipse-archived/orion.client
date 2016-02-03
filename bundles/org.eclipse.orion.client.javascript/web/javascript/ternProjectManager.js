@@ -121,7 +121,7 @@ define([
 		 * does not exist, an empty file will be created at the returned location. The deferred returns <code>null</code>
 		 * if there is a problem creating the file.
 		 * @param projectFile {Object} the project container
-		 * @returns returns {Deferred} Deferred to get the location of the .tern-project file or <code>null</code> if there was a probem creating one
+		 * @returns returns {Deferred} Deferred to get the location of the .tern-project file or <code>null</code> if there was a problem creating one
 		 */
 		ensureTernProjectFileLocation: function(projectFile) {
 			return this.getTernProjectFileLocation(projectFile).then(function(ternFileLocation){
