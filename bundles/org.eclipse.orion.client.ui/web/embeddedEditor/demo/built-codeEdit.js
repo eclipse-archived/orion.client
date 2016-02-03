@@ -28,7 +28,7 @@ Deferred) {
 						 "function test(){\n" + 
 						 "	var foo1 = bar.lastIndexOf(char, from);\n" + 
 						 "}\n" + 
-						"//Keep editting in this demo and try the content assit, probem validations and hover service!\n" +
+						"//Keep editing in this demo and try the content assist, problem validations and hover service!\n" +
 						 "var foo2 = foo."; 
 	var contents1 = 
 						 '<div class="embeddedEditorParentOuter" id="embeddedEditor1">\n' + 
