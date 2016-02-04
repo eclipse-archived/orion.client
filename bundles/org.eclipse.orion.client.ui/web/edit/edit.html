@@ -12,7 +12,10 @@
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
 				var deps = ["edit/edit"];
-				if (localStorage.showSplash) deps.splice(0, 0, "orion/splash");
+				if (!sessionStorage.editSplashShown) {
+					sessionStorage.editSplashShown = true;
+					deps.splice(0, 0, "orion/splash");
+				}
 				require(deps, null, config.errback);
 			});
 		</script>
@@ -46,7 +49,7 @@
 		</div>
 		<div id="contentassist" class="contentassist" role="listbox" tabindex="-1"></div>
 		<script>
-			if (localStorage.showSplash) {
+			if (!sessionStorage.editSplashShown) {
 				var splash = document.createElement("div");
 				splash.id = splash.className = "splash";
 				document.body.appendChild(splash);

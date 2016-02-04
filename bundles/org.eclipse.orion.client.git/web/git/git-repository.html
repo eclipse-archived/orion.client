@@ -12,7 +12,8 @@
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
 				var deps = ["git/git-repository"];
-				if (localStorage.showSplash) {
+				if (!sessionStorage.gitSplashShown) {
+					sessionStorage.gitSplashShown = true;
 					require.config({config: {"orion/splash": {splashID: "Git"}}});
 					deps.splice(0, 0, "orion/splash");
 				}
@@ -41,7 +42,7 @@
 		</div>
 		<div class="footer-fixed-bottom footer" id="footer"></div>
 		<script>
-			if (localStorage.showSplash) {
+			if (!sessionStorage.gitSplashShown) {
 				var splash = document.createElement("div");
 				splash.id = splash.className = "splash";
 				document.body.appendChild(splash);

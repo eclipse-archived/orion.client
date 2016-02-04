@@ -12,7 +12,8 @@
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
 				var deps = ["settings/settings"];
-				if (localStorage.showSplash) {
+				if (!sessionStorage.settingsSplashShown) {
+					sessionStorage.settingsSplashShown = true;
 					require.config({config: {"orion/splash": {splashID: "Settings"}}});
 					deps.splice(0, 0, "orion/splash");
 				}
@@ -45,7 +46,7 @@
 		<div class="footer-fixed-bottom footer" id="footer"></div>
 		</div>
 		<script>
-			if (localStorage.showSplash) {
+			if (!sessionStorage.settingsSplashShown) {
 				var splash = document.createElement("div");
 				splash.id = splash.className = "splash";
 				document.body.appendChild(splash);
