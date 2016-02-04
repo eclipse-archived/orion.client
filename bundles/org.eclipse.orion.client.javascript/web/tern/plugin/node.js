@@ -43,8 +43,8 @@
     return scope;
   }
 
-  function resolveModule(server, name, _parent) {
-    server.addFile(name, null, server._node.currentOrigin);
+  function resolveModule(server, name, _parent, text) { // ORION 11.0 Avoid loading file contents twice
+    server.addFile(name, text, server._node.currentOrigin);
     return getModule(server._node, name);
   }
 
@@ -119,7 +119,7 @@
 	        if (!currentFile) return argNodes[0].required || infer.ANull;
 	        name = resolvePath(currentFile, name);
 	      }
-	      result = resolveModule(server, name, currentFile);
+	      result = resolveModule(server, name, currentFile, _f.content); // ORION 11.0 Avoid loading file contents twice
 		} else {
 			result = new infer.AVal(); //ORION
 		}
