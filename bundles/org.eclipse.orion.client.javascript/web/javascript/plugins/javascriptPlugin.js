@@ -102,7 +102,8 @@ define([
 		var ternReady = false;
 		var workerReady = false;
 		var pendingStart = Object.create(null);
-		var messageQueue = [];
+		var messageQueue = []; // for all other requests
+		var modifyQueue = []; // for add and removes only
 
     	function WrappedWorker(script, onMessage, onError) {
  			var wUrl = new URL(script, window.location.href);
@@ -115,29 +116,31 @@ define([
     		this.callbacks = Object.create(null);
     	}
     	
-    	WrappedWorker.prototype.postMessage = function(msg, f) {
-    		var starting = msg.request === "start_server";
-    		if(starting) {
-    			if(!workerReady) {
-	    			pendingStart.msg = msg;
-	    			pendingStart.f = f;
-	    			return; //don't queue start_server requests
-				}
-    			ternReady = false;
-    		}
-    		if(ternReady || starting || msg.request === 'read') { //configuration reads can happen while the server is starting
-				if(msg !== null && typeof msg === 'object') {
-					if(typeof msg.messageID !== 'number' && typeof msg.ternID !== 'number') {
-						//don't overwrite an id from a tern-side request
-						msg.messageID = this.messageId++;
-						this.callbacks[msg.messageID] = f;
-					}
-				}
-	    		this.worker.postMessage(msg);
-			} else {
-				messageQueue.push({msg: msg, f: f});
+	WrappedWorker.prototype.postMessage = function(msg, f) {
+		var starting = msg.request === "start_server";
+		if(starting) {
+			if(!workerReady) {
+				pendingStart.msg = msg;
+				pendingStart.f = f;
+				return; //don't queue start_server requests
 			}
-    	};
+			ternReady = false;
+		}
+		if(ternReady || starting || msg.request === 'read') { //configuration reads can happen while the server is starting
+			if(msg !== null && typeof msg === 'object') {
+				if(typeof msg.messageID !== 'number' && typeof msg.ternID !== 'number') {
+					//don't overwrite an id from a tern-side request
+					msg.messageID = this.messageId++;
+					this.callbacks[msg.messageID] = f;
+				}
+			}
+			this.worker.postMessage(msg);
+		} else if (msg.request === "addFile" || msg.request === "delFile") {
+			modifyQueue.push({msg: msg, f: f});
+		} else {
+			messageQueue.push({msg: msg, f: f});
+		}
+	};
 
     	/**
     	 * Object of contributed environments
@@ -259,8 +262,15 @@ define([
 		 */
 		function serverReady() {
 			ternReady = true;
-			for(var i = 0, len = messageQueue.length; i < len; i++) {
-				var item = messageQueue[i];
+			// process all add/remove first
+			for(var i = 0, len = modifyQueue.length; i < len; i++) {
+				var item = modifyQueue[i];
+				ternWorker.postMessage(item.msg, item.f);
+			}
+			modifyQueue = [];
+			// process remaining pending requests
+			for(i = 0, len = messageQueue.length; i < len; i++) {
+				item = messageQueue[i];
 				ternWorker.postMessage(item.msg, item.f);
 			}
 			messageQueue = [];
