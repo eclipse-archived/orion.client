@@ -757,17 +757,17 @@ define([
 			var footer = lib.node("footer"); //$NON-NLS-0$
 			var sideMenuNode = lib.node("sideMenu"); //$NON-NLS-0$
 			var content = lib.$(".content-fixedHeight"); //$NON-NLS-0$
-			var maximized = header.style.visibility === "hidden"; //$NON-NLS-0$
+			var maximized = header.classList.contains("banner-maximized"); //$NON-NLS-0$
 			if (maximized) {
-				header.style.visibility = "visible"; //$NON-NLS-0$
-				footer.style.visibility = "visible"; //$NON-NLS-0$
+				header.classList.remove("banner-maximized"); //$NON-NLS-0$
+				footer.classList.remove("footer-maximized"); //$NON-NLS-0$
 				content.classList.remove("content-fixedHeight-maximized"); //$NON-NLS-0$
 				if (sideMenuNode) {
 					sideMenuNode.classList.remove("sideMenu-maximized"); //$NON-NLS-0$
 				}
 			} else {
-				header.style.visibility = "hidden"; //$NON-NLS-0$
-				footer.style.visibility = "hidden"; //$NON-NLS-0$
+				header.classList.add("banner-maximized"); //$NON-NLS-0$
+				footer.classList.add("footer-maximized"); //$NON-NLS-0$
 				content.classList.add("content-fixedHeight-maximized"); //$NON-NLS-0$
 				if (sideMenuNode) {
 					sideMenuNode.classList.add("sideMenu-maximized"); //$NON-NLS-0$

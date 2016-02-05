@@ -119,6 +119,14 @@ hard-coded numbers elsewhere.
     padding-right:5px;
 }
 
+.banner-maximized {
+	display: none;
+}
+
+.footer-maximized {
+	display: none;
+}
+
 .content-fixedHeight {
 	clear: both;
 	overflow: hidden;
