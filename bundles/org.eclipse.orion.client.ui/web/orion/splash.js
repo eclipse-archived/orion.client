@@ -260,9 +260,11 @@ loader.prototype.update = function(){
 
 loader.prototype.takeDown = function() {
 	if (!pageLoader) return;
-	this.pluginRegistry.addEventListener("started", this._pluginListener);
-	this.pluginRegistry.addEventListener("lazy activation", this._pluginListener);
-	this.pluginRegistry.addEventListener("starting", this._pluginListener);
+	if (this.pluginRegistry) {
+		this.pluginRegistry.removeEventListener("started", this._pluginListener);
+		this.pluginRegistry.removeEventListener("lazy activation", this._pluginListener);
+		this.pluginRegistry.removeEventListener("starting", this._pluginListener);		
+	}
 	this.nextStep();
 	var splash = document.getElementById("splash");
 	if (splash && splash.parentNode) {

@@ -72,7 +72,7 @@ define([
 		},
 		
 		_takeDownSplash: function() {
-			var pageLoader = require.specified("orion/splash") && require("orion/splash"); //$NON-NLS-1$
+			var pageLoader = require.defined("orion/splash") && require("orion/splash"); //$NON-NLS-1$
 			if (pageLoader) {
 				pageLoader.takeDown();
 			}

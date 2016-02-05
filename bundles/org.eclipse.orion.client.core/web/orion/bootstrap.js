@@ -19,7 +19,7 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 		if (once) {
 			return once;
 		}
-		var pageLoader = require.specified("orion/splash") && require("orion/splash"); //$NON-NLS-1$
+		var pageLoader = require.defined("orion/splash") && require("orion/splash"); //$NON-NLS-1$
 		if (pageLoader) pageLoader.nextStep();
 		once = new Deferred();
 		
