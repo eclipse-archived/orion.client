@@ -814,7 +814,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		mGlobalCommands.generateBanner("orion-helpPage", serviceRegistry, commandRegistry, core.preferences); //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({task: messages.Help, serviceRegistry: serviceRegistry, commandService: commandRegistry});
 
-		var sideBar = lib.node("sidebar"); //$NON-NLS-0$
+		var sideBar = lib.$("#sidebar", lib.node("pageContent")); //$NON-NLS-0$
 		var outputDiv = lib.node("output"); //$NON-NLS-0$
 
 		var treeDiv = document.createElement("div"); //$NON-NLS-0$

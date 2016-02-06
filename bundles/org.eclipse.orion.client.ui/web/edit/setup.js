@@ -543,7 +543,7 @@ function EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly) {
 	this.modelPool = new TextModelPool({serviceRegistry: this.serviceRegistry});
 
 	this.editorDomNode = lib.node("editor"); //$NON-NLS-0$
-	this.sidebarDomNode = lib.node("sidebar"); //$NON-NLS-0$
+	this.sidebarDomNode = lib.$("#sidebar", lib.node("pageContent")); //$NON-NLS-0$
 	this.sidebarToolbar = lib.node("sidebarToolbar"); //$NON-NLS-0$
 	this.pageToolbar = lib.node("pageToolbar"); //$NON-NLS-0$
 

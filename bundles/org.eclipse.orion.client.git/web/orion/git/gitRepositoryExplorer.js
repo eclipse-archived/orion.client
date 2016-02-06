@@ -676,7 +676,7 @@ define([
 
 	GitRepositoryExplorer.prototype.displayCommits = function(repository) {	
 		this.destroyCommits();
-		var parent = lib.node('sidebar'); //$NON-NLS-0$
+		var parent = lib.$("#sidebar", lib.node("pageContent")); //$NON-NLS-0$
 		var section = this.commitsSection = new mSection.Section(parent, {
 			id: "commitsSection", //$NON-NLS-0$
 			title: messages["Diffs"],
