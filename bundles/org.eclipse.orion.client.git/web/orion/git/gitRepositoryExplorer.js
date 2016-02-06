@@ -315,7 +315,7 @@ define([
 	};
 
 	GitRepositoryExplorer.prototype.destroy = function() {
-		lib.empty(lib.node('sidebar')); //$NON-NLS-0$
+		lib.empty(lib.node("pageSidebar")); //$NON-NLS-0$
 		lib.empty(lib.node('table')); //$NON-NLS-0$
 		this.destroyRepositories();
 		this.destroyBranches();
@@ -676,7 +676,7 @@ define([
 
 	GitRepositoryExplorer.prototype.displayCommits = function(repository) {	
 		this.destroyCommits();
-		var parent = lib.$("#sidebar", lib.node("pageContent")); //$NON-NLS-0$
+		var parent = lib.node("pageSidebar"); //$NON-NLS-0$
 		var section = this.commitsSection = new mSection.Section(parent, {
 			id: "commitsSection", //$NON-NLS-0$
 			title: messages["Diffs"],
