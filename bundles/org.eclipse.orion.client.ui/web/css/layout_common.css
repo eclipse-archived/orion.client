@@ -898,12 +898,12 @@ and (max-device-width : 1024px)  {
 
 .splashMessage {
 	color: white;
-	font-size: 12px;
+	font-size: 14px;
 }
 
 .splashDetailedMessage {
 	color: white;
-	font-size: 12px;
+	font-size: 14px;
 }
 
 .splashVisual {

@@ -21,6 +21,10 @@ define([
 	// this is a cheat, all dom ids should be passed in
 	var closeButtonDomId = "closeNotifications"; //$NON-NLS-0$
 
+	function getPageLoader() {
+		return require.specified("orion/splash") && require("orion/splash"); //$NON-NLS-1$
+	}
+
 	/**
 	 * Service for reporting status
 	 * @class Service for reporting status
@@ -72,7 +76,7 @@ define([
 		},
 		
 		_takeDownSplash: function() {
-			var pageLoader = require.defined("orion/splash") && require("orion/splash"); //$NON-NLS-1$
+			var pageLoader = getPageLoader();
 			if (pageLoader) {
 				pageLoader.takeDown();
 			}
@@ -192,6 +196,22 @@ define([
 			this._clickToDisMiss = false;
 			this._init();
 			this.progressMessage = message;
+			
+			var pageLoader = getPageLoader();
+			if (pageLoader) {
+				
+				var step = pageLoader.getStep();
+				if (typeof message === "object") {
+					step.message = message.message;
+					step.detailedMessage = message.detailedMessage;
+				} else {
+					step.message = message;
+					step.detailedMessage = "";
+				}
+				pageLoader.update();
+				
+				return;
+			}
 			
 			var node = lib.node(this.progressDomId);
 			lib.empty(node);
@@ -400,8 +420,10 @@ define([
 		},
 		
 		_renderOngoingMonitors: function(){
+			var msg = "";
+			var title = "";
 			if(this._progressMonitors.length > 0){
-				var msg = "";
+				msg = "";
 				var isFirst = true;
 				for(var progressMonitorId in this._progressMonitors){
 					if(this._progressMonitors[progressMonitorId].status){
@@ -410,11 +432,16 @@ define([
 						msg+=this._progressMonitors[progressMonitorId].status;
 						isFirst = false;
 					}
+					var t = this._progressMonitors[progressMonitorId].title;
+					if (t) title = this._progressMonitors[progressMonitorId].title;
 				}
-				this.setProgressMessage(msg);
-			} else {
-				this.setProgressMessage("");
 			}
+			var pageLoader = getPageLoader();
+			if (pageLoader) {
+				this.setProgressMessage({message: title, detailedMessage: msg});			
+				return;
+			}
+			this.setProgressMessage(msg);
 		},
 		
 		_beginProgressMonitor: function(monitor){
@@ -444,6 +471,7 @@ define([
 	function ProgressMonitor(statusService, progressId, deferred, message){
 		this.statusService = statusService;
 		this.progressId = progressId;
+		this.title = message;
 		if(deferred){
 			this.deferred = deferred;
 			this.begin(message);
@@ -459,6 +487,7 @@ define([
 						if (progress.message) {
 							var msg = progress.message;
 							if (typeof progress.loaded === "number" && typeof progress.total === "number") {
+								if (progress.loaded > progress.total) progress.loaded = progress.total;
 								msg = i18nUtil.formatMessage(messages["workedProgress"], msg, progress.loaded, progress.total);
 							}
 							that.worked(msg);
