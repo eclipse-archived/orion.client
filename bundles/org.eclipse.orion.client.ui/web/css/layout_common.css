@@ -858,18 +858,12 @@ and (max-device-width : 1024px)  {
     display: flex;
 	display: -webkit-flex;
     height:300px;
-    width:400px;
+    width:100%;
     flex-direction: column;
     -webkit-flex-direction: column;
     align-items: center;
     -webkit-align-items: center;
 	background-color: rgb(57,75,84);
-	padding: 20px;
-	padding-top: 60px;
-	padding-bottom: 0px;
-	border-radius: 4px;
-	Xbox-shadow: 5px 5px 5px 0 rgba(0,0,0,0.2);
-	Xborder-bottom: 1px solid rgb(59,222,255);
 }
 
 .splashAbout {
