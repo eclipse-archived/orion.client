@@ -272,7 +272,7 @@ define([
 						checkdefs.push(def);
 						(function(i, def){
 							def.then(function(matches){
-								if(matches && matches.Location === dependency.Location){
+								if(matches && (matches.Location === dependency.Location || matches.Location === dependency.Location + "/")){
 									found = true;
 									deferred.resolve(workspace.Children[i]);
 								}
