@@ -1,12 +1,16 @@
 /*eslint-env node */
 /* eslint-disable missing-nls */
 var path = require('path');
+var name = "./build/orionJavaScript.js";
+if(process.argv.indexOf('-p') > -1) {
+	name = "./build/orionJavaScript.min.js"
+}
 
 module.exports = {
     entry: './web/javascript/api/javaScript.js',
     output: {
     	libraryTarget: 'umd',
-        filename: 'orionJavaScript.js',
+        filename: name,
         sourceMapFilename: '[file].map'
     },
     resolve: {
@@ -24,5 +28,5 @@ module.exports = {
     	}
     },
     //debug: true,
-    devtool: "#inline-source-map"
+    devtool: "source-map"
 };
