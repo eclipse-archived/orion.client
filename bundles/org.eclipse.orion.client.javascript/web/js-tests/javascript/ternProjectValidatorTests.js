@@ -47,7 +47,7 @@ define([
 			return pb;
 		}
 	
-		describe("Tern project file validator tests", function() {
+		describe(".tern-project validator tests", function() {
 			it("test empty", function() {
 				var problems = Validator.validateAST('');
 				assertProblems(problems, []);

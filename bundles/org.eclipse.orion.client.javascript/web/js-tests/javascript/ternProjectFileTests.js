@@ -82,7 +82,7 @@ define([
 			});
 		}
 	
-		describe('.tern-project Tests', function() {
+		describe('.tern-project start server options tests', function() {
 			this.timeout(100000);
 			
 			before('Reset Tern Server', function() {

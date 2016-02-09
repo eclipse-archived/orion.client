@@ -91,7 +91,7 @@ define([
 			}.bind(ternManager));
 		}
 	
-		describe("Tern project file manager tests", function() {
+		describe(".tern-project loadEagerly attribute tests", function() {
 			before('Reset Tern Server', function() {
 				worker.start(); // Reset the tern server state to remove any prior files
 			});
@@ -136,6 +136,10 @@ define([
 			it("Test loadEagerly 8 - file exists and found in folder", function() {
 				testFileClient.createTestFiles(['a/b/c/test8.js']);
 				return testLoadOptions({loadEagerly: ["a/b/c/test8.js"]}, null);
+			});
+			it("Test loadEagerly 9 - multiple file matches but exact path specified", function() {
+				testFileClient.createTestFiles(['test9.js', 'a/test9.js', 'a/b/c/test9.js']);
+				return testLoadOptions({loadEagerly: ["a/test9.js"]}, null);
 			});
 		});
 	};
