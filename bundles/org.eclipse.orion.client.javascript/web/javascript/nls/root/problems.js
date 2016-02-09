@@ -133,11 +133,16 @@ define({
 	'onlyStrings': "'${0}' entries can only be strings",
 	'notObject': "'${0}' must be an object",
 	'pluginNotObject': "plugin '${0}' must be an object",
+	'noDupes': "Duplicate entries are not allowed",
 	'problemInFile': "There is a problem with your .tern-project-file.",
 	'openFile': "Open the .tern-project file",
 	'errorParsing': "There was an error parsing the JSON in your .tern-project file",
 	'multiAttrProblems': "Multiple problems were found with attributes in your .tern-project file.",
 	'attrProblem': "A problem with one of the attributes in your .tern-project file was found.",
-	'failedWrite': "There was a problem writing to your .tern-project file.",
-	'noDupes': "Duplicate entries are not allowed"
+	'multipleFileMatchesProblem': 'Multiple file matches found for: ${0}. Defaulting to: ${1}.',
+	'noFileMatchProblem': 'No file match found for: ${0}.',
+	'tooManyFileMatchProblems': '... (${0} more)',
+	'fileMatchProblems': 'Problems found in the loadEagerly attribute of your .tern-project file.',
+	'fileMatchProgress': 'Validating loadEagerly paths in your .tern-project file.',
+	'failedWrite': "There was a problem writing to your .tern-project file."
 });

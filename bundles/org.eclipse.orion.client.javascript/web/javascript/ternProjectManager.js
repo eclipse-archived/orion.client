@@ -14,9 +14,11 @@ define([
 'orion/objects',
 'orion/Deferred',
 'orion/URITemplate',
+'orion/i18nUtil',
 'javascript/ternProjectValidator',
 'i18n!javascript/nls/problems'
-], function(Objects, Deferred, URITemplate, Validator, Messages) {
+
+], function(Objects, Deferred, URITemplate, i18nUtil, Validator, Messages) {
 
 	/**
 	 * @description Creates a new open declaration command
@@ -164,6 +166,7 @@ define([
 		 * @returns returns
 		 */
 		_simpleValidate: function _simpleValidate(json) {
+			this._hasValidationProblem = false;
 			if(!this.inEditor) {
 				var problems = Validator.validate(json);
 				if(problems.length > 1) {
@@ -172,8 +175,10 @@ define([
 						pbString += "<li>"+pb+"</li>"; //$NON-NLS-1$ //$NON-NLS-2$
 					});
 					pbString += "</ul>"; //$NON-NLS-1$
+					this._hasValidationProblem = true;
 					this._report(Messages['multiAttrProblems'], pbString);
 				} else if(problems.length === 1) {
+					this._hasValidationProblem = true;
 					this._report(Messages['attrProblem'], problems[0]);
 				}
 			}
@@ -206,6 +211,8 @@ define([
 		loadTernProjectOptions: function(jsonOptions) {
 			this.ternWorker.postMessage({request: "start_server", args: {options: jsonOptions}}); //$NON-NLS-1$
 			if (Array.isArray(jsonOptions.loadEagerly)) {
+				var fileLoadPromises = [];
+				this._fileLoadWarnings = [];
 				for (var i = 0; i < jsonOptions.loadEagerly.length; i++) {
 					var filename = jsonOptions.loadEagerly[i];
 					var ext = 'js'; //$NON-NLS-1$
@@ -214,18 +221,38 @@ define([
 					} else if (filename.match(/\.htm$/)){
 						ext = 'htm'; //$NON-NLS-1$
 					}
-					this.scriptResolver.getWorkspaceFile(filename, {ext: ext}).then(function(files) {
+					fileLoadPromises.push(this.scriptResolver.getWorkspaceFile(filename, {ext: ext}).then(function(_filename, files) {
 						if (Array.isArray(files) && files.length > 0){
-//							if (files.length > 1) {
-//								this._report("Mutiple matches were found eagerly loading file: "+filename, 
-//								files[0].location+" was chosen and loaded.");							
-//							}
+							if (files.length > 1) {
+								this._fileLoadWarnings.push(i18nUtil.formatMessage(Messages['multipleFileMatchesProblem'], _filename, files[0].location));
+							}
 							this.ternWorker.postMessage(
 								{request:'addFile', args:{file: files[0].location}} //$NON-NLS-1$
 							);
+						} else {
+							this._fileLoadWarnings.push(i18nUtil.formatMessage(Messages['noFileMatchProblem'], _filename));
 						}
-					}.bind(this));
+					}.bind(this, filename)));
 				}
+				if (!this._hasValidationProblem){
+					this.registry.getService("orion.page.message").setProgressMessage(Messages['fileMatchProgress']); //$NON-NLS-1$
+				}
+				return Deferred.all(fileLoadPromises).then(function(){
+					if (!this._hasValidationProblem){  // Don't hide validation warnings
+						this.registry.getService("orion.page.message").close(); //$NON-NLS-1$
+						if (this._fileLoadWarnings.length > 0){
+							var message = "";
+							for (var j=0; j<this._fileLoadWarnings.length && j<10; j++) {
+								message += this._fileLoadWarnings[j] + '<br>'; //$NON-NLS-1$
+							}
+							if (this._fileLoadWarnings.length > 10){
+								message += i18nUtil.formatMessage(Messages['tooManyFileMatchProblems'],this._fileLoadWarnings.length-10) + '<br>'; //$NON-NLS-1$
+							}
+							this._report(Messages['fileMatchProblems'], message);
+						}
+					}
+					this._fileLoadWarnings = [];
+				}.bind(this));
 			}
 		},
 		
@@ -246,7 +273,7 @@ define([
 					this.scriptResolver.setSearchLocation(projectFile.Location);
 					return this.getTernProjectFileLocation(projectFile).then(function(ternFileLocation){
 						return this.parseTernJSON(ternFileLocation).then(function(jsonOptions){
-							this.loadTernProjectOptions(jsonOptions);
+							return this.loadTernProjectOptions(jsonOptions);
 						}.bind(this));
 					}.bind(this));
 				}

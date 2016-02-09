@@ -154,8 +154,7 @@ define([
 				} else {
 					this.postMessage({request: 'read', ternID: _d.ternID, args: {contents: _state.buffer, file: _state.file}});
 				}
-			} else if(_d.request === 'delFile') {
-				//don't process the ack
+			} else if(_d.request === 'delFile' || _d.request === 'addFile') {
 				return;
 			} else if(typeof(_d.request) === 'string') {
 				//don't process requests other than the ones we want
