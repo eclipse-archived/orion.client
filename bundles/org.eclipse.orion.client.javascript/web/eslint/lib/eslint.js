@@ -643,7 +643,7 @@ module.exports = (function() {
 
             // there's no input, just exit here
             if (text.trim().length === 0) {
-                sourceCode = new SourceCode(text, require("../conf/blank-script.json")); // ORION this code is never used as we always get an ast from tern
+                //sourceCode = new SourceCode(text, require("../conf/blank-script.json")); // ORION this code is never used as we always get an ast from tern
                 return messages;
             }
 

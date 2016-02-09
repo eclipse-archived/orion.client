@@ -3,7 +3,7 @@
 var path = require('path');
 
 module.exports = {
-    entry: './web/javascript/javaScript.js',
+    entry: './web/javascript/api/javaScript.js',
     output: {
     	libraryTarget: 'umd',
         filename: 'orionJavaScript.js',
