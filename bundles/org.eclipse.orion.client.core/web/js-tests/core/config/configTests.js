@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -9,6 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd, mocha*/
+/* eslint-disable missing-nls */
 define([
 	'chai/chai',
 	'js-tests/core/config/mockPrefs',
@@ -33,7 +34,7 @@ define([
 		factories = factories || {};
 		var storageFactory = factories.storage || Object.create.bind(Object, Object.prototype);
 		var pluginRegistryFactory = factories.pluginRegistry || function(storage) {
-			return (window.pluginregistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {storage: storage}));
+			return window.pluginregistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {storage: storage});
 		};
 		var prefsServiceFactory = factories.prefs || function(serviceRegistry) {
 			return new mPreferences.PreferencesService(serviceRegistry, {userProvider: new MockPrefsProvider(), localProvider: new MockPrefsProvider(), defaultsProvider: new MockPrefsProvider()});
@@ -47,8 +48,9 @@ define([
 		return pluginRegistry.start().then(function() {
 			prefsService = prefsServiceFactory(serviceRegistry);
 			var configAdminFactory = configAdminFactoryFactory(serviceRegistry, pluginRegistry, prefsService);
-			if (!configAdminFactory)
+			if (!configAdminFactory) {
 				return new Deferred().resolve();
+			}
 			return configAdminFactory.getConfigurationAdmin().then(
 				function(createdConfigAdmin) {
 					configAdmin = createdConfigAdmin;
@@ -59,8 +61,9 @@ define([
 
 	// Hook for before/beforeEach. MUST have 0 declared params, otherwise Mocha thinks you want an async callback
 	function setUp() {
-		if (arguments.length)
+		if (arguments.length) {
 			throw new Error("Do not call this function with parameters, they won't work");
+		}
 		return doSetUp();
 	}
 
@@ -82,7 +85,34 @@ define([
 			prefs: prefsServiceFactory
 		});
 	}
-
+	/**
+	 * Test the prefs service directly
+	 * @since 11.0
+	 */
+    describe("pref service", function() {
+    	beforeEach(setUp);
+		afterEach(tearDown);
+		it("service#get", function() {
+			return setUpWithPrefs({
+				defaults: {
+					"/git/user": {
+						userInfo: { one: 1 }
+					}
+				},
+				user: {
+					"/git/user": {
+						userInfo: { two: 2 }
+					}
+				}
+			}).then(function() {
+				return prefsService.get("/git/user").then(function(prefs) {
+					assert(prefs.userInfo, "The userInfo object should be present in the returned prefs");
+					assert(prefs.userInfo.one === 1, "The userInfo item 'one' should exist and be equal to '1'");
+					assert(prefs.userInfo.two === 2, "The userInfo item 'two' should exist and be equal to '2'");
+				});
+			});
+		});
+    });
 	describe("config", function() {
 		describe("ConfigurationAdmin", function() {
 			beforeEach(setUp);
@@ -96,9 +126,9 @@ define([
 			it("#listConfigurations()", function() {
 				var createdConfigs = [];
 				for (var i=0; i < 5; i++) {
-					var config = configAdmin.getConfiguration('orion.test.pid' + (i+1));
-					config.update({foo: (i+1)});
-					createdConfigs.push(config);
+					var cnfg = configAdmin.getConfiguration('orion.test.pid' + (i+1));
+					cnfg.update({foo: i+1});
+					createdConfigs.push(cnfg);
 				}
 				var listedConfigs = configAdmin.listConfigurations();
 				assert.equal(createdConfigs.length, 5);
@@ -160,7 +190,7 @@ define([
 						return prefsService.get(configAdmin._prefName).then(function(preferences) {
 							assert.equal(_contains(preferences, pid), true, 'config data exists in Prefs');
 						});
-					})
+					});
 				});
 			});
 		}); // ConfigurationAdmin
@@ -179,8 +209,8 @@ define([
 					var defaultConfig = configAdmin.getDefaultConfiguration("some_pid");
 					assert.equal(defaultConfig.getProperties().gak, 42, "Found the default config");
 					// The same value should be observable as a regular configuration also
-					var config = configAdmin.getConfiguration("some_pid");
-					assert.equal(config.getProperties().gak, 42, "Found the regular config");
+					var cnfg = configAdmin.getConfiguration("some_pid");
+					assert.equal(cnfg.getProperties().gak, 42, "Found the regular config");
 				});
 			});
 			it("a config obtained from #getDefaultConfiguration() should not be #update()-able", function() {
@@ -205,8 +235,8 @@ define([
 						}
 					}
 				}).then(function() {
-					var config = configAdmin.getConfiguration("foo");
-					return config.update({ qux: 11011 }).then(function() {
+					var cnfg = configAdmin.getConfiguration("foo");
+					return cnfg.update({ qux: 11011 }).then(function() {
 						return prefsService.get(configAdmin._prefName).then(function(prefs) {
 							assert.equal(_contains(prefs, "11011"), true, "config data was persisted");
 						});
@@ -254,15 +284,17 @@ define([
 					var config1, config2;
 
 					configs.some(function(config) {
-						if (config.getPid() === "pid1")
-							return (config1 = config);
+						if (config.getPid() === "pid1") {
+							return config1 = config;
+						}
 					});
 					assert.ok(config1, "config1 was found");
 					assert.equal(config1.getProperties().a, 1);
 
 					configs.some(function(config) {
-						if (config.getPid() === "pid2")
-							return (config2 = config);
+						if (config.getPid() === "pid2") {
+							return config2 = config;
+						}
 					});
 					assert.ok(config2, "config2 was found");
 					assert.equal(config2.getProperties().b, 2);
@@ -281,8 +313,8 @@ define([
 						}
 					}
 				}).then(function() {
-					var config = configAdmin.getConfiguration("some_pid");
-					var props = config.getProperties();
+					var cnfg = configAdmin.getConfiguration("some_pid");
+					var props = cnfg.getProperties();
 					assert.equal(props.gak, 42);
 				});
 			});
@@ -299,8 +331,8 @@ define([
 						}
 					}
 				}).then(function() {
-					var config = configAdmin.getConfiguration("some_pid"),
-					    props = config.getProperties();
+					var cnfg = configAdmin.getConfiguration("some_pid"),
+					    props = cnfg.getProperties();
 					assert.equal(props.gak, 42, "inherited prop 'gak' is visible");
 					assert.equal(props.buzz, 0, "own prop 'buzz' is visible");
 				});
@@ -318,8 +350,8 @@ define([
 						}
 					}
 				}).then(function() {
-					var config = configAdmin.getConfiguration("some_pid"),
-					    props = config.getProperties();
+					var cnfg = configAdmin.getConfiguration("some_pid"),
+					    props = cnfg.getProperties();
 					assert.equal(props.gak, 1, "user overrides default");
 				});
 			});
@@ -331,15 +363,15 @@ define([
 						}
 					}
 				}).then(function() {
-					var config = configAdmin.getConfiguration("some_pid");
-					return config.update({ gak: 42, fizz: 313 }).then(function() {
-						return prefsService.get(configAdmin._prefName, undefined, {scope: prefsService.USER_SCOPE}).then(function(userPrefs) {
+					var cnfg = configAdmin.getConfiguration("some_pid");
+					return cnfg.update({ gak: 42, fizz: 313 }).then(function() {
+						return prefsService.get(configAdmin._prefName, undefined, {scope: mPreferences.PreferencesService.USER_SCOPE}).then(function(userPrefs) {
 							assert.equal(_contains(userPrefs, "gak"), false, "Unchanged field not persisted");
 							assert.equal(_contains(userPrefs, "42"), false, "Unchanged field not persisted");
 							assert.equal(_contains(userPrefs, "fizz"), true);
 							assert.equal(_contains(userPrefs, "313"), true);
 						});
-					})
+					});
 				});
 			});
 		}); // cascading
@@ -412,9 +444,9 @@ define([
 						},
 						{	pid: pid
 						});
-					var config = configAdmin.getConfiguration(pid);
+					var cnfg = configAdmin.getConfiguration(pid);
 					// 2nd call happens after this:
-					config.update({
+					cnfg.update({
 						'test': 'whee'
 					});
 					return d;
@@ -438,13 +470,13 @@ define([
 						},
 						{	pid: pid
 						});
-					var config = configAdmin.getConfiguration(pid);
+					var cnfg = configAdmin.getConfiguration(pid);
 					// 2nd call updated(..) happens after this:
-					config.update({
+					cnfg.update({
 						'test': 'whee'
 					}).then(function() {
 						// 3rd call happens after this
-						config.remove();
+						cnfg.remove();
 					});
 					return d;
 				});

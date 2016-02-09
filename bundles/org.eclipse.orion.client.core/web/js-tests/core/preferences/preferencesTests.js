@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,6 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd, mocha*/
+/* eslint-disable missing-nls */
 define([
 	"chai/chai",
 	"orion/Deferred",
@@ -18,8 +19,8 @@ define([
 
 	function saveStorage(storage) {
 		storage = storage || localStorage;
-		var stash = [], i, length, key;
-		for (i = 0, length = storage.length; i < length; i++) {
+		var stash = [], i, len, key;
+		for (i = 0, len = storage.length; i < len; i++) {
 			key = storage.key(i);
 			stash.push({key:key, value:storage.getItem(key)});
 		}
@@ -27,9 +28,9 @@ define([
 	}
 
 	function restoreStorage(stash, storage) {
-		var i, length;
+		var i, len;
 		storage = storage || localStorage;
-		for (i = 0, length = stash.length; i < length; i++) {
+		for (i = 0, len = stash.length; i < len; i++) {
 			storage.setItem(stash[i].key, stash[i].value);
 		}
 	}
@@ -69,13 +70,13 @@ define([
 
 		describe.skip("DISABLING FOR NOW test storage eventing", function() {
 			var d = new Deferred();	
-			function handleStorage(event) {
-				event = event || window.event;
-				if (!event.key) {
+			function handleStorage(evnt) {
+				evnt = evnt || window.event;
+				if (!evnt.key) {
 					return;
 				}
-				console.log("key=" + event.key + ", oldValue=" + event.oldValue + ", newValue=" + event.newValue);
-				if (event.newValue === null) {
+				console.log("key=" + evnt.key + ", oldValue=" + evnt.oldValue + ", newValue=" + evnt.newValue);
+				if (evnt.newValue === null) {
 					d.resolve(true);
 				}
 			}

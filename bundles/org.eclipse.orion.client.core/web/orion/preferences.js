@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -325,12 +325,20 @@ define(['require', 'orion/Deferred', 'orion/EventTarget', 'orion/xhr'], function
 			});
 			return Deferred.all(gets).then(function(stores) {
 				var result = {};
-				if (key && typeof key !== "string" && !Array.isArray(key)) result = _mixin(result, key);
+				if (key && typeof key !== "string" && !Array.isArray(key)) { result = _mixin(result, key); }
 				stores.forEach(function(store) {
-					if (!store) return;
+					if (!store) { return; }
 					function addKey(key) {
 						if (key in store) {
-							result[key] = store[key];
+							if(typeof store[key] === 'object' && store[key] !== null) {
+								if(typeof result[key] === 'undefined') {
+									result[key] = store[key];
+								} else {
+									result[key] = _mixin(result[key], store[key]);
+								}
+							} else {
+								result[key] = store[key];
+							}
 						}
 					}
 					if (!key) {
