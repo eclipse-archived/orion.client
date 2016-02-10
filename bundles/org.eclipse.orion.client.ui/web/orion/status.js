@@ -201,16 +201,17 @@ define([
 			if (pageLoader) {
 				
 				var step = pageLoader.getStep();
-				if (typeof message === "object") {
-					step.message = message.message;
-					step.detailedMessage = message.detailedMessage;
-				} else {
-					step.message = message;
-					step.detailedMessage = "";
+				if(step) {
+					if (typeof message === "object") {
+						step.message = message.message;
+						step.detailedMessage = message.detailedMessage;
+					} else {
+						step.message = message;
+						step.detailedMessage = "";
+					}
+					pageLoader.update();
+					return;
 				}
-				pageLoader.update();
-				
-				return;
 			}
 			
 			var node = lib.node(this.progressDomId);
