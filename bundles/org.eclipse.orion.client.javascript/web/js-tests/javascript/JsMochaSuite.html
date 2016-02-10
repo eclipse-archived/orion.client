@@ -43,7 +43,7 @@
 							eslintCoreTests, scriptResolverTests, sigparserTests, ternProjectTests, ternProjectValidatorTests) {
 					var testworker;
 					before("reset timeout", function(done) {
-						this.timeout(20000);
+						this.timeout(30000);
 						testworker.start(done);
 					});
 					after("stop the worker", function() {

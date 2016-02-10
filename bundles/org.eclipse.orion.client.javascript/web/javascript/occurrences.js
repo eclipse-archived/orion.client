@@ -537,7 +537,7 @@ define([
 						
 						// Check if the user has selected a AMD define statement dependency path.  If so run findOccurrences on matching dependency param instead
 						if (node.type === Estraverse.Syntax.Literal){
-							var amdNode = checkNodeDefineStatement(node);
+							var amdNode = checkNodeDefineStatement(node, ast);
 							if (amdNode){
 								node = amdNode;
 								start = node.range[0];
@@ -562,31 +562,30 @@ define([
 			}
 		}
 		return [];
-		
-		function checkNodeDefineStatement(node){
-			var parent = node.parent ? node.parent : (node.parents && node.parents.length > 0 ? node.parents[node.parents.length-1] : null);
-			if (parent && parent.type === Estraverse.Syntax.ArrayExpression){
-				var parent2 = parent.parent ? parent.parent : (node.parents && node.parents.length > 1 ? node.parents[node.parents.length-2] : null);
-				if (parent2 && parent2.type === Estraverse.Syntax.CallExpression && parent2.callee && parent2.callee.name === "define"){
-					var elements = parent.elements;
-					for (var i=0; i<elements.length; i++) {
-						if (elements[i] === node){
-							var deps = parent2;
-							if (deps && deps.arguments && (deps.arguments.length === 2 || deps.arguments.length === 3)){
-								deps = deps.arguments[deps.arguments.length-1];
-								if (deps.params && deps.params.length > i){
-									return Finder.findNode(deps.params[i].range[0], ast, {parents: true});
-								}
+	}
+
+	function checkNodeDefineStatement(node, ast) {
+		var parent = node.parent ? node.parent : (node.parents && node.parents.length > 0 ? node.parents[node.parents.length-1] : null);
+		if (parent && parent.type === Estraverse.Syntax.ArrayExpression){
+			var parent2 = parent.parent ? parent.parent : (node.parents && node.parents.length > 1 ? node.parents[node.parents.length-2] : null);
+			if (parent2 && parent2.type === Estraverse.Syntax.CallExpression && parent2.callee && parent2.callee.name === "define"){
+				var elements = parent.elements;
+				for (var i=0; i<elements.length; i++) {
+					if (elements[i] === node){
+						var deps = parent2;
+						if (deps && deps.arguments && (deps.arguments.length === 2 || deps.arguments.length === 3)){
+							deps = deps.arguments[deps.arguments.length-1];
+							if (deps.params && deps.params.length > i){
+								return Finder.findNode(deps.params[i].range[0], ast, {parents: true});
 							}
-							break;
 						}
+						break;
 					}
 				}
 			}
-			return null;
 		}
+		return null;
 	}
-
 	
 	/**
 	 * @description Gets the token from the given offset or the proceeding token if the found token 
@@ -738,31 +737,31 @@ define([
 		 * @param {Object} ctxt The current selection context
 		 */
 		computeOccurrences: function(editorContext, ctxt) {
-			var that = this;
 			return editorContext.getFileMetadata().then(function(meta) {
 			    if(meta.contentType.id === 'application/javascript') {
-			        return that.astManager.getAST(editorContext).then(function(ast) {
+			        return this.astManager.getAST(editorContext).then(function(ast) {
 						return findOccurrences(ast, ctxt);
 					});
 			    }
 			    return editorContext.getText().then(function(text) {
-		            var cu = that.cuprovider.getCompilationUnit(function(){
+		            var cu = this.cuprovider.getCompilationUnit(function(){
 		            		return Finder.findScriptBlocks(text);
 		            	}, meta);
 		            if(cu.validOffset(ctxt.selection.start)) {
-    		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+    		            return this.astManager.getAST(cu.getEditorContext()).then(function(ast) {
             				return findOccurrences(ast, ctxt);
             			});
         			}
         			return [];
-    			});
-			});
+    			}.bind(this));
+			}.bind(this));
 		}
 	});
 	
 	JavaScriptOccurrences.prototype.contructor = JavaScriptOccurrences;
 	
 	return {
+		findOccurrences: findOccurrences,
 		JavaScriptOccurrences: JavaScriptOccurrences
-		};
+	};
 });
