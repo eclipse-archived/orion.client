@@ -22,7 +22,7 @@ define([
 	var closeButtonDomId = "closeNotifications"; //$NON-NLS-0$
 
 	function getPageLoader() {
-		return require.specified("orion/splash") && require("orion/splash"); //$NON-NLS-1$
+		return require.specified("orion/splash") && require("orion/splash").getPageLoader(); //$NON-NLS-1$
 	}
 
 	/**

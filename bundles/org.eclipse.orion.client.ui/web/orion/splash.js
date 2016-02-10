@@ -331,5 +331,7 @@ function start() {
 
 start();
 
-return pageLoader; 
+return {
+	getPageLoader: function() { return pageLoader; }
+};
 });

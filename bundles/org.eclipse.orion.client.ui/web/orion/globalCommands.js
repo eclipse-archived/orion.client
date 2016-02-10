@@ -569,7 +569,7 @@ define([
 	 * @param {Boolean} closeSplitter true to make the splitter's initial state "closed".
 	 */
 	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, closeSplitter, fileClient) {
-		var pageLoader = require.defined("orion/splash") && require("orion/splash");
+		var pageLoader = require.defined("orion/splash") && require("orion/splash").getPageLoader();
 		serviceRegistry.registerService("orion.metrics", {
 			/** @callback */
 			logEvent: function(category, action, label, value) {
