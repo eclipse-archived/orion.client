@@ -15,7 +15,7 @@
 (function(root, mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(exports, require("esprima/esprima"), require("acorn/dist/walk"),
-               require("./def"), require("./signal"));
+               require("./def"), require("./signal"), require("javascript/util"));
   if (typeof define == "function" && define.amd) // AMD
     return define(["exports", "esprima/esprima" /*ORION*/, "acorn/dist/walk", "./def", "./signal", "javascript/util"], mod);
   mod(root.tern || (root.tern = {}), acorn, acorn.walk, tern.def, tern.signal, Util); // Plain browser env
