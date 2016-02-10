@@ -1,9 +1,9 @@
 /*eslint-env node */
 /* eslint-disable missing-nls */
 var path = require('path');
-var name = "./build/orionJavaScript.js";
+var name = "./built-js/orionJavaScript.js";
 if(process.argv.indexOf('-p') > -1) {
-	name = "./build/orionJavaScript.min.js"
+	name = "./built-js/orionJavaScript.min.js"
 }
 
 module.exports = {
