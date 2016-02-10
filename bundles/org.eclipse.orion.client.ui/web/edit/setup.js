@@ -1085,7 +1085,11 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, rea
 	enableSplitEditor = localStorage.enableSplitEditor !== "false"; //$NON-NLS-0$
 	
 	setup = new EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly);
-	Deferred.when(setup.createBanner(), function() {
+	Deferred.when(setup.createBanner(), function(result) {
+		if (result && result.navSelection) {
+			//TODO find a better way to give the selection to the navigator
+			sessionStorage.navSelection = JSON.stringify(result.navSelection);
+		}
 		setup.createMenuBar().then(function() {
 			setup.createSideBar();
 			setup.createRunBar().then(function() {

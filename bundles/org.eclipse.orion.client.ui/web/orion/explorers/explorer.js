@@ -247,11 +247,11 @@ exports.Explorer = (function() {
 			return this._navDict;
 		},
 		
-		select: function(item) {
+		select: function(item, toggle) {
 			var navHandler = this.getNavHandler();
 			if (navHandler) {
 				navHandler.cursorOn(item, true);
-				navHandler.setSelection(item);
+				navHandler.setSelection(item, toggle);
 			}
 		},
 		
