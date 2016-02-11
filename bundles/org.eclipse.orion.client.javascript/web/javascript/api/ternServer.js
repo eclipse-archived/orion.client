@@ -414,6 +414,17 @@ define([
 						if(error) {
 							callback(null, {error: error.message, message: Messages['failedToComputeProblems']});
 						} else if(problems && Array.isArray(problems)) {
+							for (var i = 0; i < problems.length; i++) {
+								if (typeof problems[i].lineNumber === 'number'){
+									problems[i].line = problems[i].lineNumber;
+								}
+								if (typeof problems[i].description === 'string'){
+									problems[i].message = problems[i].description;
+								} else if (typeof problems[i].message === 'string' && problems[i].args){
+									var message = i18nUtil.formatMessage(problems[i].message, problems[i].args);
+									problems[i].message = message;
+								}
+							}
 							callback(problems);
 						} else {
 							callback([]);
