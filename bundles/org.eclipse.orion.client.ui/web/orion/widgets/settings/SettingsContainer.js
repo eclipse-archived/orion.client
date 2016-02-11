@@ -29,7 +29,6 @@ define([
 	'orion/widgets/plugin/PluginList',
 	'orion/widgets/settings/GitSettings',
 	'orion/widgets/settings/EditorSettings',
-	'javascript/ternSettings',
 	'orion/widgets/settings/ThemeSettings',
 	'orion/widgets/settings/UserSettings',
 	'orion/widgets/settings/GlobalizationSettings',
@@ -37,7 +36,7 @@ define([
 	'orion/metrics'
 ], function(messages, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
 		ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, editorThemeImporter, SplitSelectionLayout, PluginList, 
-		GitSettings, EditorSettings, TernSettings, ThemeSettings, UserSettings, GlobalizationSettings, mEditorPreferences, mMetrics) {
+		GitSettings, EditorSettings, ThemeSettings, UserSettings, GlobalizationSettings, mEditorPreferences, mMetrics) {
 
 	/**
 	 * @param {Object} options
@@ -112,14 +111,6 @@ define([
 					});
 				}
 				
-				if (categories.showTernSettings === undefined || categories.showTernSettings) {
-					_self.settingsCategories.push({
-						id: "ternSettings", //$NON-NLS-0$
-						textContent: messages["JavascriptAssist"],
-						show: _self.showTernSettings
-					});
-				}
-				
 				if (categories.showGlobalizationSettings === undefined || categories.showGlobalizationSettings) {
 					_self.settingsCategories.push({
 						id: "Globalization", //$NON-NLS-0$
@@ -153,7 +144,7 @@ define([
 				
 				_self.drawUserInterface();
 	
-				window.addEventListener("hashchange", _self.processHash.bind(_self)); //$NON-NLS-0$
+				window.addEventListener("hashchange", _self.processHash.bind(_self));
 	
 				mGlobalCommands.setPageTarget({task: messages['Settings'], serviceRegistry: _self.registry, commandService: _self.commandService});
 
@@ -169,7 +160,7 @@ define([
 
 				var selection = prefs['selection'];
 
-				var category = pageParams.category || selection; //$NON-NLS-0$
+				var category = pageParams.category || selection;
 				if (!category) {
 					// no selection exists, select the first one
 					category = this.settingsCategories[0].id;
@@ -290,11 +281,11 @@ define([
 			var command = {
 				name:messages.Import,
 				tip:messages['Import a theme'],
-				id: "orion.importTheme",
+				id: "orion.importTheme", //$NON-NLS-1$
 				callback: themeImporter.showImportThemeDialog.bind(themeImporter)
 			};
 			this.commandService.addCommand(command);
-			this.commandService.registerCommandContribution('themeCommands', "orion.importTheme", 4); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution('themeCommands', "orion.importTheme", 4); //$NON-NLS-1$ //$NON-NLS-2$
 			var editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences);
 
 			this.themeSettings = new ThemeSettings({
@@ -309,34 +300,6 @@ define([
 			}, themeSettingsNode);
 
 			this.themeSettings.show();
-		},
-		
-		showTernSettings: function(id){
-		
-			this.selectCategory(id);
-
-			lib.empty(this.table);
-
-			if (this.ternWidget) {
-				this.ternWidget.destroy();
-			}
-
-			this.updateToolbar(id);
-			
-			var userNode = document.createElement('div'); //$NON-NLS-0$
-			this.table.appendChild(userNode);
-
-			this.ternWidget = new TernSettings({
-				registry: this.registry,
-				settings: this.settingsCore,
-				preferences: this.preferences,
-				statusService: this.preferencesStatusService,
-				dialogService: this.preferenceDialogService,
-				commandService: this.commandService,
-				userClient: this.userClient
-			}, userNode);
-			
-			this.ternWidget.show();
 		},
 		
 		showGlobalizationSettings: function(id){
@@ -482,7 +445,7 @@ define([
 			category['class'] = (category['class'] || '') + ' navbar-item'; //$NON-NLS-1$ //$NON-NLS-0$
 			category.role = "tab"; //$NON-NLS-1$
 			category.tabindex = -1;
-			category["aria-selected"] = "false"; //$NON-NLS-2$ //$NON-NLS-1$
+			category["aria-selected"] = "false"; //$NON-NLS-1$
 			category.onclick = category.show;
 			superPrototype.addCategory.apply(this, arguments);
 		},
@@ -494,6 +457,9 @@ define([
 			});
 		},
 
+		/**
+		 * @callback
+		 */
 		drawUserInterface: function(settings) {
 			superPrototype.drawUserInterface.apply(this, arguments);
 			this.addCategories();
