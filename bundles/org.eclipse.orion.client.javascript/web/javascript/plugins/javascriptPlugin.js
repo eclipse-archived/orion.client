@@ -35,7 +35,6 @@ define([
 'javascript/ternProjectManager',
 'orion/util',
 'javascript/logger',
-'javascript/commands/addToTernCommand',
 'javascript/commands/generateDocCommand',
 'javascript/commands/openDeclaration',
 'javascript/commands/openImplementation',
@@ -49,7 +48,7 @@ define([
 'orion/i18nUtil',
 'orion/URL-shim'
 ], function(PluginProvider, mServiceRegistry, Deferred, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, TernProjectAssist,
-			EslintValidator, TernProjectValidator, Occurrences, Hover, Outliner, CUProvider, TernProjectManager, Util, Logger, AddToTernCommand, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
+			EslintValidator, TernProjectValidator, Occurrences, Hover, Outliner, CUProvider, TernProjectManager, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 			RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
@@ -274,40 +273,40 @@ define([
 				ternWorker.postMessage(item.msg, item.f);
 			}
 			messageQueue = [];
-			function cleanPrefs(prefs) {
-				var all = Object.keys(prefs);
-				for(i = 0, len = all.length; i < len; i++) {
-					var id = all[i];
-					if(/^tern.$/.test(id)) {
-						delete prefs[id];
-					}
-				}
-			}
-			ternWorker.postMessage({request: 'installed_plugins'}, function(response) { //$NON-NLS-1$
-				var plugins = response.plugins;
-				var preferences = serviceRegistry.getService("orion.core.preference"); //$NON-NLS-1$
- 				return preferences ? preferences.get("/cm/configurations").then(function(prefs){ // //$NON-NLS-1$
-					var props = prefs["tern"];
-					cleanPrefs(prefs);
-					if (!props) {
-						props = Object.create(null);
-					} else if(typeof props === 'string') {
-						props = JSON.parse(props);
-					}
-					var keys = Object.keys(plugins);
-					var plugs = props.plugins ? props.plugins : Object.create(null);
-					for(i = 0; i < keys.length; i++) {
-						var key = keys[i];
-						if(/^orion/.test(key)) {
-							delete plugs[key]; //make sure only the latest of Orion builtins are shown
-						}
-						plugs[key] = plugins[key];
-					}
-					props.plugins = plugs;
-					prefs["tern"] = JSON.stringify(props);
-					return preferences.put("/cm/configurations", prefs, {clear: true}); //$NON-NLS-1$
-				}) : new Deferred().resolve();
-			});
+//			function cleanPrefs(prefs) {
+//				var all = Object.keys(prefs);
+//				for(i = 0, len = all.length; i < len; i++) {
+//					var id = all[i];
+//					if(/^tern.$/.test(id)) {
+//						delete prefs[id];
+//					}
+//				}
+//			}
+//			ternWorker.postMessage({request: 'installed_plugins'}, function(response) { //$NON-NLS-1$
+//				var plugins = response.plugins;
+//				var preferences = serviceRegistry.getService("orion.core.preference"); //$NON-NLS-1$
+// 				return preferences ? preferences.get("/cm/configurations").then(function(prefs){ // //$NON-NLS-1$
+//					var props = prefs["tern"];
+//					cleanPrefs(prefs);
+//					if (!props) {
+//						props = Object.create(null);
+//					} else if(typeof props === 'string') {
+//						props = JSON.parse(props);
+//					}
+//					var keys = Object.keys(plugins);
+//					var plugs = props.plugins ? props.plugins : Object.create(null);
+//					for(i = 0; i < keys.length; i++) {
+//						var key = keys[i];
+//						if(/^orion/.test(key)) {
+//							delete plugs[key]; //make sure only the latest of Orion builtins are shown
+//						}
+//						plugs[key] = plugins[key];
+//					}
+//					props.plugins = plugs;
+//					prefs["tern"] = JSON.stringify(props);
+//					return preferences.put("/cm/configurations", prefs, {clear: true}); //$NON-NLS-1$
+//				}) : new Deferred().resolve();
+//			});
 		}
 
     	/**
@@ -439,18 +438,6 @@ define([
     		types: ['onInputChanged']  //$NON-NLS-1$
     	});
 	    
-	    if ("true" === localStorage.getItem("darklaunch")) {
-	    	provider.registerServiceProvider("orion.navigate.command",  //$NON-NLS-1$
-	    			new AddToTernCommand.AddToTernCommand(ternProjectManager),
-	    			{
-			    		name: javascriptMessages["addToTernCommand"],
-			    		tooltip : javascriptMessages['addToTernCommandTooltip'],
-			    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
-			    		id : "add.js.tern"  //$NON-NLS-1$
-	    			}
-	    	);
-    	}
-
     	/**
     	 * register the compilation unit provider as a listener
     	 */

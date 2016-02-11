@@ -65,14 +65,6 @@ define([
 				this.registry.getService("orion.page.message").setProgressResult(msg); //$NON-NLS-1$
 			}
 		},
-		/**
-		 * @description Get the file client;
-		 * @function
-		 * @returns {orion.FileClient} returns a file client
-		 */
-		getFileClient: function() {
-			return this.scriptResolver.getFileClient();
-		},
 		
 		/**
 		 * Returns the top level file folder representing the project that contains the given file.
@@ -105,7 +97,7 @@ define([
 			if(projectFile.Children){
 				 deferred = new Deferred().resolve(projectFile.Children);
 			} else if(projectFile.ChildrenLocation) {
-				deferred = this.getFileClient().fetchChildren(projectFile.ChildrenLocation);
+				deferred = this.scriptResolver.getFileClient().fetchChildren(projectFile.ChildrenLocation);
 			}
 			return deferred.then(function(children){
 				for(var i=0; i<children.length; i++){
@@ -119,24 +111,6 @@ define([
 		},
 		
 		/**
-		 * Returns a deferred to find the location of the .tern-project file for the given project. If a .tern-project file
-		 * does not exist, an empty file will be created at the returned location. The deferred returns <code>null</code>
-		 * if there is a problem creating the file.
-		 * @param projectFile {Object} the project container
-		 * @returns returns {Deferred} Deferred to get the location of the .tern-project file or <code>null</code> if there was a problem creating one
-		 */
-		ensureTernProjectFileLocation: function(projectFile) {
-			return this.getTernProjectFileLocation(projectFile).then(function(ternFileLocation){
-				if (!ternFileLocation) {
-					return this.getFileClient().createFile(projectFile.Location, '.tern-project').then(function(){ //$NON-NLS-1$
-						return ternFileLocation;
-					});
-				} 
-				return ternFileLocation;
-			}.bind(this));
-		},
-		
-		/**
 		 * Returns a deferred that reads the file at the given location and returns the parsed JSON contents
 		 * @param {String} fileLocation The location of the file to parse
 		 * @returns {Deferred} Deferred to get a parsed JSON object or an empty object if there is an error
@@ -145,7 +119,7 @@ define([
 			if(!fileLocation) {
 				return new Deferred().resolve({});
 			}
-			return this.getFileClient().read(fileLocation).then(function(content) {
+			return this.scriptResolver.getFileClient().read(fileLocation).then(function(content) {
 				try {
 					var json = content ? JSON.parse(content) : {};
 					json.projectLoc = fileLocation.slice(0, fileLocation.lastIndexOf('/')+1);
@@ -184,24 +158,6 @@ define([
 			}
 		},
 		
-		/**
-		 * Returns a deferred to write the stringified JSON options into the .tern-project file at the given
-		 * location.  The file must already exist (use ensureTernProjectFileLocation).  Returns <code>null</code>
-		 * if there is a problem stringifying the JSON.
-		 * @param fileLocation {String} location of the .tern-project file to write to
-		 * @param jsonOptions {Object} options to write into the file
-		 * @returns returns {Deferred} Deferred to write the options into the file or <code>null</code> on error
-		 */
-		writeTernFile: function(fileLocation, jsonOptions) {
-			this.currentFile = fileLocation;
-			try {
-				var jsonString = JSON.stringify(jsonOptions, null, 4);
-				return this.fileClient.write(fileLocation, jsonString);
-			} catch(e) {
-				this._report(Messages['failedWrite'], e);
-			}
-		},
-				
 		/**
 		 * Loads the given jsonOptions into Tern, either by restarting the Tern server with new initialization options
 		 * or by adding additional type information to the running Tern server.  The messages sent to Tern are processed
