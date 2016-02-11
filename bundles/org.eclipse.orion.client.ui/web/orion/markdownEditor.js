@@ -645,6 +645,13 @@ define([
 						index = text.indexOf(current, index) + current.length;
 					}
 				});
+
+				if (token.type === "code" && token.hasOwnProperty("lang")) { //$NON-NLS-1$ //$NON-NLS-0$
+					/* a gfm fenced code block, need to claim more characters */
+					this._fencedCodeBlockRegex.lastIndex = index;
+					var match = this._fencedCodeBlockRegex.exec(text);
+					index = match.index + match[0].length;
+				}
 			} else if (token.type === "blockquote_start") { //$NON-NLS-0$
 				this._blockquoteStartRegex.lastIndex = index;
 				var match = this._blockquoteStartRegex.exec(text);
@@ -1225,6 +1232,7 @@ define([
 		_atxDetectRegex: /[>\s]*#/g,
 		_blockquoteRemoveMarkersRegex: /^[ \t]*>[ \t]?/gm,
 		_blockquoteStartRegex: /[ \t]*>[ \t]?/g,
+		_fencedCodeBlockRegex: /```/g,
 		_elementCounter: 0,
 		_hrRegex: /([ \t]*[-*_]){3,}/g,
 		_htmlNewlineRegex: /\n\s*\S[\s\S]*$/g,
