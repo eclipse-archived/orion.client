@@ -1,6 +1,6 @@
  /*******************************************************************************
  * @license
- * Copyright (c) 2014, 2015 IBM Corporation and others.
+ * Copyright (c) 2014, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -359,6 +359,24 @@ define([
 		    return new Deferred().resolve(null) ;
 		},
 		fixes : {
+			"radix": function(editorContext, context, astManager) {
+				return astManager.getAST(editorContext).then(function(ast) {
+					return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation) {
+						var node = Finder.findNode(currentAnnotation.start, ast, {parents:true});
+						if(node && node.type === 'Identifier') {
+							node = node.parents[node.parents.length-1];
+							if(node.type === 'CallExpression' && Array.isArray(node.arguments)) {
+								var arg = node.arguments[node.arguments.length-1];
+								return {
+									text: ", 10", //$NON-NLS-1$
+									start: arg.range[1],
+									end: arg.range[1]
+								};
+							}
+						}
+					});
+				});
+			},
 			"curly": function(editorContext, context, astManager) {
 				return astManager.getAST(editorContext).then(function(ast) {
 					var tok = Finder.findToken(context.annotation.start, ast.tokens);

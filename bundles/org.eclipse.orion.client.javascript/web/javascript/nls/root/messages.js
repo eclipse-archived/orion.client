@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014, 2015 IBM Corporation and others.
+ * Copyright (c) 2014, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -112,6 +112,7 @@ define({
 	'sparseArrayFixName': 'Convert to normal array',
 	'semiFixName': 'Add missing \';\'',
 	'radix': 'Missing radix parameter to parseInt():',
+	'radixFixName': 'Add default radix',
 	'unusedVarsUnusedFixName': 'Remove unused variable',
 	'unusedFuncDeclFixName': 'Remove unused function',
 	'noCommaDangleFixName': 'Remove extra \',\'',

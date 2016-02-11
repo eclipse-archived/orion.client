@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014, 2015 IBM Corporation and others.
+ * Copyright (c) 2014, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -256,6 +256,23 @@ define([
 				rule.opts = opts;
 				return rule;
 			}
+		//RADIX
+		describe("radix", function() {
+			it("parseInt radix", function(done) {
+				var rule = createTestRule("radix");
+				var expected = {
+					value: ", 10",
+					start: 23,
+					end: 23
+				};
+				return getFixes({
+					buffer: "var four = parseInt('4');",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+		});
 		//MISSING-DOC
 		describe("missing-doc", function() {
 			it("function declaration no params", function(done) {
