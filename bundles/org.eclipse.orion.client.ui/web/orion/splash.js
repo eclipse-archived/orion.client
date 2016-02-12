@@ -281,7 +281,7 @@ loader.prototype.setPluginRegistry = function(pluginRegistry) {
 	this.pluginRegistry = pluginRegistry; 
 	var listener = this._pluginListener = function(evt) {
 		var s = this.getStep();
-		if (!s) return;
+		if (!s || s.id != "orion.splash.plugins") return;
 		var pluginName = evt.plugin.getName();
 		if (!pluginName) return;
 		s.message = i18nUtil.formatMessage(messages["plugin_" + evt.type], pluginName);
