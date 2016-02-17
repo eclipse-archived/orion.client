@@ -150,13 +150,6 @@ loader.prototype.nextStep = function(){
 				myStep.complete();
 				break;
 		}
-	
-		if (window.performance && window.performance.getEntriesByName && window.performance.mark) {
-			var timingVar = "splash step done - " + myStep.id;
-			if (!window.performance.getEntriesByName(timingVar).length) {
-				window.performance.mark(timingVar);
-			}
-		}
 	}
 	
 	/* initaliate next step */
