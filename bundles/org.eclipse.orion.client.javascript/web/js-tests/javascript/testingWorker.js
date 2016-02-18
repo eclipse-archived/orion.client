@@ -53,7 +53,7 @@ define([
 	 * @param {Function} f The callback function to call when the Tern server responds
 	 */
 	WrappedWorker.prototype.postMessage = function(msg, f) {
-		if(msg != null && typeof(msg) === 'object') {
+		if(msg !== null && typeof(msg) === 'object') {
 			if(typeof(msg.messageID) !== 'number') {
 				//don't overwrite an id from a tern-side request
 				msg.messageID = messageID++;
@@ -79,7 +79,9 @@ define([
 	 * @since 11.0
 	 */
 	WrappedWorker.prototype.start = function(callback) {
-		_state.callback = callback;
+		if (callback){
+			_state.callback = callback;
+		}
 		worker.postMessage({request: 'start_server', args: {}});
 	};
 	
