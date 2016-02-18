@@ -1130,10 +1130,28 @@ define([
             	                var variable = getDeclaredGlobalVariable(globalScope, ref),
             	                    name = ref.identifier.name;
             	                if (!variable) {
-            	                    var env = Finder.findESLintEnvForMember(name);
-            	                    var inenv = env ? '-inenv' : ''; //$NON-NLS-1$
-            	                    var nls = 'no-undef-defined'; //$NON-NLS-1$
-            	                    context.report(ref.identifier, ProblemMessages['no-undef-defined'], {0:name, nls: nls, pid: nls+inenv});
+            	                	// Check if Tern knows about a definition in another file
+            	                	var env = Finder.findESLintEnvForMember(name);
+            	                    var tern = context.getTern();
+									var query = tern.query;
+									query.end = ref.identifier.start;
+									var foundType = null;
+									try {
+										var expr = tern.findExpr(tern.file, query);
+										var type = tern.findExprType(tern.server, query, tern.file, expr);
+										// The origin could be a primitive in the same file (a=1;) which we still want to mark
+										// The origin could be an environment, which we still want to mark (eslint-env directive is handled separately)
+										if (type && type.origin && type.origin !== tern.file.name && type.origin !== env){
+											foundType = type;
+										}
+									} catch(e) {
+										//ignore
+									}
+	            	                if (!foundType){
+	            	                    var inenv = env ? '-inenv' : ''; //$NON-NLS-1$
+	            	                    var nls = 'no-undef-defined'; //$NON-NLS-1$
+	            	                    context.report(ref.identifier, ProblemMessages['no-undef-defined'], {0:name, nls: nls, pid: nls+inenv});
+            	                    }
             	                } else if (ref.isWrite() && variable.writeable === false) {
             	                    context.report(ref.identifier, ProblemMessages['no-undef-readonly'], {0:name, nls: 'no-undef-readonly'}); //$NON-NLS-1$
             	                }

@@ -7462,6 +7462,52 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
+						
+						//------------------------------------------------------------------------------
+						// Test references to globals in other files that Tern knows about
+						//------------------------------------------------------------------------------
+						it("no-undef cross file 1 - should not report undefined function when defined in a known file", function(callback) {
+							worker.postMessage({request: 'addFile', args: {file: "noUndefTest1.js", source: "function noUndefTest1(){}"}}); 
+							var topic = "noUndefTest1();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								}
+							);
+						});
+						it("no-undef cross file 2 - should not report undefined var when defined in a known file", function(callback) {
+							worker.postMessage({request: 'addFile', args: {file: "noUndefTest2.js", source: "var noUndefTest2;"}}); 
+							var topic = "noUndefTest2++;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								}
+							);
+						});
+						it("no-undef cross file 3 - should not report undefined property when defined in a known file", function(callback) {
+							worker.postMessage({request: 'addFile', args: {file: "noUndefTest3.js", source: "this.noUndefTest3 = function(){};"}}); 
+							var topic = "noUndefTest3();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								}
+							);
+						});
 					});
 					//NO-UNDEF-INIT -------------------------------------------------
 					describe('no-unreachable', function() {
