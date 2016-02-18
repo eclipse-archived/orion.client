@@ -1030,4 +1030,8 @@
   exports.resolveFile = resolveFile; //ORION
   exports.storeTypeDocs = storeTypeDocs; //ORION
   exports.parseDoc = parseDoc; //ORION
+  exports.findRefs = findRefs; // ORION
+  exports.findRefsToProperty = findRefsToProperty; // ORION
+  exports.findRefsToVariable = findRefsToVariable; // ORION
+  exports.ternError = ternError; // ORION
 });

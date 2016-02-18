@@ -47,7 +47,7 @@ define([
 				}
 				else if(ast.tokens.length > 0) {
 					//error object did not contain the token infos, try to find it
-					token = Finder.findToken(error.index, ast.tokens);	
+					token = Finder.findToken(error.index, ast.tokens);
 				}
 				var msg = error.message;
 				if(errorMap[error.index] === msg) {
@@ -131,7 +131,33 @@ define([
 		 */
 		run: function(server, query, file) {
 			var start = Date.now();
-			var messages = Eslint.verify(new SourceCode(file.text, file.ast), query.config, file.name);
+			var config = query.config;
+			var _tern = Object.create(null);
+			// delegate tern functions
+			_tern.findRefs = function(srv, query, file) {
+				return tern.findRefs(srv, query, file);
+			};
+			_tern.findRefsToVariable = function(srv, query, file, expr, checkShadowing) {
+				return tern.findRefsToVariable(srv, query, file, expr, checkShadowing);
+			};
+			_tern.findRefsToProperty = function(srv, query, expr, prop) {
+				return tern.findRefsToProperty(srv, query, expr, prop);
+			};
+			_tern.ternError = function(msg) {
+				return tern.ternError(msg);
+			};
+			_tern.findExpr = function(file, query, wide) {
+				return tern.findExpr(file, query, wide);
+			};
+			_tern.findExprType = function(srv, query, file, expr) {
+				return tern.findExprType(srv, query, file, expr);
+			};
+			_tern.server = server;
+			_tern.query = query;
+			_tern.file = file;
+			config.tern = _tern;
+			
+			var messages = Eslint.verify(new SourceCode(file.text, file.ast), config, file.name);
 			var end = Date.now() - start;
 			Metrics.logTiming('language tools', 'validation', end, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			var strippedMessages = [];
