@@ -429,21 +429,23 @@ define([
 		_renderOngoingMonitors: function(){
 			var msg = "";
 			var title = "";
+			var pageLoader = getPageLoader();
 			if(this._progressMonitors.length > 0){
-				msg = "";
-				var isFirst = true;
+				var msgs = [], titles = [];
 				for(var progressMonitorId in this._progressMonitors){
 					if(this._progressMonitors[progressMonitorId].status){
-						if(!isFirst)
-							msg+=", "; //$NON-NLS-0$
-						msg+=this._progressMonitors[progressMonitorId].status;
-						isFirst = false;
+						msgs.push(this._progressMonitors[progressMonitorId].status);
 					}
-					var t = this._progressMonitors[progressMonitorId].title;
-					if (t) title = this._progressMonitors[progressMonitorId].title;
+					titles.push(this._progressMonitors[progressMonitorId].title);
+				}
+				if (pageLoader) {
+					msg = msgs;
+					title = titles;
+				} else {
+					msg = msgs.join(", ");
+					title = titles[0] || "";
 				}
 			}
-			var pageLoader = getPageLoader();
 			if (pageLoader) {
 				this.setProgressMessage({message: title, detailedMessage: msg});			
 				return;
