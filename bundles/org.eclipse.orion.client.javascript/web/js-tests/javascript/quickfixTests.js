@@ -4063,7 +4063,7 @@ define([
 				var expected = {value: "isNaN(45 === (foo+23))",
 								start: 3, 
 								end: 28};
-				return getFixes({buffer: 'if(NaN === (45 === (foo+23)){}', 
+				return getFixes({buffer: 'if(NaN === (45 === (foo+23))){}', 
 								  rule: rule,
 								  expected: expected,
 								  callback: callback,

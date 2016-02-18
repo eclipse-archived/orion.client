@@ -328,7 +328,7 @@ define([
 				});
 			});
 			
-			describe('ESLint Rule Tests', function(){
+			describe('ESLint Rule Tests', function() {
 				/**
 				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481045
 				 */
@@ -11797,6 +11797,28 @@ define([
 						});
 						it("should not flag return number and number substraction", function(callback) {
 							var topic = 	"function doSomething(condition) { if (condition) { return 9; } else { return 15 - 6; }}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag return number and variable number type)", function(callback) {
+							var topic = 
+								"/**\n" +
+								" * @param {Number} one\n" +
+								" */\n" +
+								"function foo(one) {\n" +
+								"	if(one === 10) {\n" +
+								"		return 0;\n" +
+								"	}\n" +
+								"	var two = one;\n" +
+								"	return two;\n" +
+								"}";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
 							validate({buffer: topic, callback: callback, config: config}).then(

@@ -172,7 +172,7 @@ define([
         					case 'ExpressionStatement':
         						if(node.expression && node.expression.type === 'AssignmentExpression') {
         							var anode = node.expression;
-        							if(anode.right && (anode.right.type === 'FunctionExpression') && anode.left && (anode.left.type === 'MemberExpression')) {
+        							if(anode.right && anode.right.type === 'FunctionExpression' && anode.left && anode.left.type === 'MemberExpression') {
         								//comments are attached to the enclosing expression statement
         								comments = context.getComments(node);
         								if(!comments || comments.leading.length < 1) {
@@ -1330,7 +1330,31 @@ define([
         					var references = getReferences(scope, variable), id = node.id;
         					if (!references.length) {
         					    if(node.type === 'FunctionDeclaration') {
-        					       context.report(id, ProblemMessages['no-unused-vars-unused-funcdecl'], {0:id.name, nls: 'no-unused-vars-unused-funcdecl'}); //$NON-NLS-1$
+        					    	   var tern = context.getTern();
+        					    	   var refQuery = tern.query;
+        					    	   if (typeof refQuery.end === "undefined") {
+									refQuery.end = node.id.end;
+        					    	   }
+        					    	   var refs = null;
+        					    	   var filename = tern.file.name;
+        					    	   try {
+        					    	       refs = tern.findRefs(tern.server, refQuery, tern.file);
+        					    	   } catch(e) {
+        					    	      //ignore
+        					    	   }
+        					    	   var result = [];
+        					    	   if (refs && Array.isArray(refs.refs)) {
+        					    	   		// filtering the refs from the current file - remove the one that matches the current node
+        					    	   		refs.refs.forEach(function(match) {
+        					    	   			if (match.file !== filename) {
+        					    	   				// any match in a different file is a good match
+        					    	   				result.push(match);
+        					    	   			}
+        					    	   		});
+        					    	   }
+        					    	   if (result === null || result.length === 0) {
+        					           context.report(id, ProblemMessages['no-unused-vars-unused-funcdecl'], {0:id.name, nls: 'no-unused-vars-unused-funcdecl'}); //$NON-NLS-1$
+        					       }
         					    } else {
         						   context.report(id, ProblemMessages['no-unused-vars-unused'], {0:id.name, nls: 'no-unused-vars-unused'}); //$NON-NLS-1$
         						}
@@ -1662,47 +1686,33 @@ define([
 			
 				function getValue(node) {
 					if (node.argument) {
-						var type = node.argument.type;
-						switch(type) {
-							case "Literal" :
-								if (node.argument.value === null) {
-									return "null";
-								}
-								return typeof node.argument.value;
-							case "BinaryExpression" :
-								// walk the node to find out if one of the operand is a string
-								var foundType = null;
-								Estraverse.traverse(node.argument, {
-									enter: /** @callback */function(n, parent) {
-										if (n.type === "Literal") {
-											if (n.value !== null) {
-												if (foundType === null) {
-													// get the type of the current Literal
-													foundType = typeof n.value;
-												} else {
-													switch(foundType) {
-														case "object" :
-															return Estraverse.VisitorOption.Break;
-														case "string" :
-															return Estraverse.VisitorOption.Break;
-														case "number" :
-															var nodeType = typeof n.value;
-															if (nodeType !== "number") {
-																foundType = nodeType;
-															}
-													}
-												}
-											}
-										}
-									}
-								});
-								if(foundType !== null) {
-									return foundType;
-								}
-								return "object";
-							default:
-								return "object";
+						var tern = context.getTern();
+						var query = tern.query;
+						query.end = node.argument.start;
+						var foundType = null;
+						try {
+							var expr = tern.findExpr(tern.file, query);
+							var type = tern.findExprType(tern.server, query, tern.file, expr);
+							if (type) {
+								foundType = type;
+							}
+						} catch(e) {
+							//ignore
 						}
+						if (foundType) {
+							var typeString = foundType.toString();
+							switch(typeString) {
+								case "bool" :
+									return "boolean";
+								case "{}" :
+									return "object";
+								case "?" :
+									return "null";
+								default :
+									return typeString;
+							}
+						}
+						return "object";
 					}
 					return "undefined";
 				}
@@ -1724,7 +1734,6 @@ define([
 					"ArrowFunctionExpression:exit": exitFunction,
 			
 					"ReturnStatement": function(node) {
-			
 						var returnInfo = functions[functions.length - 1];
 						var returnTypeDefined = "type" in returnInfo;
 			
