@@ -16,18 +16,16 @@ var async = require('async');
 
 function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
 	var repoPath = rest.replace("branch/file/", "");
-	var fileDir = repoPath;
-	var gitPath;
+	var fileDir = /file/ + repoPath;
     repoPath = api.join(workspaceDir, repoPath);
 
     var theRepo;
-	var remotes = [];
 	var branches = [];
 
 	git.Repository.open(repoPath)
 	.then(function(repo) {
 		theRepo = repo;
-		return repo.getReferences(null);
+		return repo.getReferences(git.Reference.TYPE.LISTALL);
 	})		
 	.then(function(referenceList) {
  		referenceList.forEach(function(ref) {
@@ -37,20 +35,26 @@ function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
  				var isCurrent = ref.isHead() ? true : false;
 
  				branches.push({
-		 			"CloneLocation": "/gitapi/clone/file/"+ fileDir,
-		 			"CommitLocation": "/gitapi/commit/" + branchURL + "/file/" + fileDir,
+		 			"CloneLocation": "/gitapi/clone"+ fileDir,
+		 			"CommitLocation": "/gitapi/commit/" + branchURL + fileDir,
 		 			"Current": isCurrent,
-		 			"DiffLocation": "/gitapi/diff/" + branchName + "/file/" + fileDir,
+		 			"DiffLocation": "/gitapi/diff/" + branchName + fileDir,
 		 			"FullName": "refs/heads/" + branchName,
-		 			"HeadLocation": "/gitapi/commit/HEAD/file/" + fileDir,
+		 			"HeadLocation": "/gitapi/commit/HEAD" + fileDir,
 		 			"LocalTimeStamp": 1424471958000, //hardcoded local timestamp
-		 			"Location": "/gitapi/branch/" + branchName + "/file/" + fileDir,
+		 			"Location": "/gitapi/branch/" + branchName + fileDir,
 		 			"Name": branchName,
 		 			"RemoteLocation": [],
-		 			"TreeLocation": "/gitapi/tree/file/" + fileDir + "/" + branchName,
+		 			"TreeLocation": "/gitapi/tree" + fileDir + "/" + branchName,
 		 			"Type": "Branch"
 	 			});
  			}
+		});
+		
+		branches.sort(function(a, b) {
+			if (a.Current) return -1;
+			if (b.Current) return 1;
+			return a.LocalTimeStamp < b.LocalTimeStamp ? 1 : a.LocalTimeStamp > b.LocalTimeStamp ? -1 : b.Name.localeCompare(a.Name);
 		});
 
 		return git.Remote.list(theRepo);
@@ -65,30 +69,32 @@ function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
 
 				branches.forEach(function(branch) {
 					var remoteBranchName = api.join(remoteName, branch["Name"]);
+					var remoteBranchUrl = remoteBranchName.split("/").join("%252F");
+					var fullName = "refs/remotes/" + remoteBranchName;
 
 					branch["RemoteLocation"].push({
 				        "Children": [{
-				          // "CloneLocation": branch["CloneLocation"],
-				          // "CommitLocation": "/gitapi/commit/" + remoteBranchName + "/file/" + fileDir,
-				          // "DiffLocation": "/gitapi/diff/" + remoteBranchName + "/file/" + fileDir,
-				          "FullName": "refs/remotes/" + remoteName,
+				          "CloneLocation": branch["CloneLocation"],
+				          "CommitLocation": "/gitapi/commit/" + fullName.split("/").join("%252F") + fileDir,
+				          "DiffLocation": "/gitapi/diff/" + remoteBranchUrl + fileDir,
+				          "FullName": fullName,
 				          "GitUrl": remote.url(),
-				          // "HeadLocation": "/gitapi/commit/HEAD/" + fileDir,
-				          //"Id": id, is listed in wiki, but not in Java server
-				          // "IndexLocation": "/gitapi/index/" + fileDir,
-				          "Location": "/gitapi/remote/" + remoteBranchName + "/file/" + fileDir,
+				          "HeadLocation": "/gitapi/commit/HEAD" + fileDir,
+				          "Id": fullName, //For now
+				          "IndexLocation": "/gitapi/index" + fileDir,
+				          "Location": "/gitapi/remote/" + remoteBranchName + fileDir,
 				          "Name": remoteBranchName,
-				          // "TreeLocation": "/gitapi/tree/file/" + fileDir + "/" + remoteBranchName,
+				          "TreeLocation": "/gitapi/tree" + fileDir + "/" + remoteBranchUrl,
 				          "Type": "RemoteTrackingBranch"
 				        }],
 				        "CloneLocation": branch["CloneLocation"],
 				        "GitUrl": remote.url(),
 				        "IsGerrit": false, //hardcoded
-				        "Location": "/gitapi/remote/" + remoteName + "/file/" + fileDir,
+				        "Location": "/gitapi/remote/" + remoteName + fileDir,
 				        "Name": remoteName,
 				        "Type": "Remote"
-					})
-				})
+					});
+				});
 
 				cb();
 			})

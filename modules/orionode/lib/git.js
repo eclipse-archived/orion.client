@@ -15,7 +15,6 @@ var api = require('./api');
 var fileUtil = require('./fileUtil');
 var resource = require('./resource');
 var rmdir = require('rimraf');
-var url = require('url');
 var redirect = require('connect-redirection');
 var writeError = api.writeError;
 
@@ -59,8 +58,6 @@ function Git(options) {
 	.use(redirect())
 	.use(resource(workspaceRoot, {
 		GET: function(req, res, next, rest) {
-			var query = url.parse(req.url, true).query;
-			var diffOnly, uriOnly;
 			if (rest === '') {
 				writeError(400, res);
 			} else if (rest.indexOf("clone/workspace/") === 0) {
@@ -96,21 +93,8 @@ function Git(options) {
 				blame.getBlame(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("commit/") === 0) {
 				commit.getCommit(workspaceDir, fileRoot, req, res, next, rest);
-			} else if (rest.indexOf("diff/Default/file/") === 0) {
-				diffOnly = query.parts === 'diff';
-				uriOnly = query.parts === 'uris';
-
-				diff.getDiffBetweenWorkingTreeAndHead(workspaceDir, fileRoot, req, res, next, rest, diffOnly, uriOnly);
-			} else if (rest.indexOf("diff/Cached/file/") === 0) {
-				diffOnly = query.parts === 'diff';
-				uriOnly = query.parts === 'uris';
-
-				diff.getDiffBetweenIndexAndHead(workspaceDir, fileRoot, req, res, next, rest, diffOnly, uriOnly);
 			} else if (rest.indexOf("diff/") === 0) {
-				diffOnly = query.parts === 'diff';
-				uriOnly = query.parts === 'uris';
-
-				diff.getDiffBetweenTwoCommits(workspaceDir, fileRoot, req, res, next, rest, diffOnly, uriOnly);
+				diff.getDiff(workspaceDir, fileRoot, req, res, next, rest);
 			} else {
 				writeError(403, res);
 			}

@@ -181,11 +181,11 @@ function fetchRemote(repoPath, res, remote) {
 		return git.Remote.lookup(repo, remote);
 	})
 	.then(function(remote) {
-		remote.setCallbacks({
-			certificateCheck: function() {
-				return 1; // Continues connection even if SSL certificate check fails. 
-			}
-		});
+//		remote.setCallbacks({
+//			certificateCheck: function() {
+//				return 1; // Continues connection even if SSL certificate check fails. 
+//			}
+//		});
 
 		var refSpec = "+refs/heads/*:refs/remotes/" + remote.name() + "/*";
 
