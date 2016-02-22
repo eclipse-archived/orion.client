@@ -11885,7 +11885,8 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
-						it("should not flag return number and variable number type)", function(callback) {
+						it("should not flag return number and variable number type - this is using the tern object to resolve type", function(callback) {
+							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=485693
 							var topic = 
 								"/**\n" +
 								" * @param {Number} one\n" +
