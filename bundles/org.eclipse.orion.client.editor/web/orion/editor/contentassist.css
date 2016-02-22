@@ -49,12 +49,12 @@
 
 .contentassist .proposal-noemphasis-title-keywords {
 	background-color: aliceblue;
-	color: gray;
+	color: #717171;  /* slightly darker than 'gray', to meet WCAG 2.0 AA minimum contrast on aliceblue. */
 }
 
 .contentassist .proposal-noemphasis-title {
 	background-color: aliceblue;
-	color: gray;
+	color: #717171;  /* slightly darker than 'gray', to meet WCAG 2.0 AA minimum contrast on aliceblue. */
 	padding-top: 5px;
 }
 
