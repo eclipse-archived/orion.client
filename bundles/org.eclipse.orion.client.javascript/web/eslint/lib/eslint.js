@@ -687,11 +687,17 @@ module.exports = (function() {
 
                 severity = getRuleSeverity(config.rules[key]);
                 options = getRuleOptions(config.rules[key]);
+                
+                var settings = config.settings;
+                if (!settings) {
+                		settings = Object.create(null);
+                	}
+                	settings.tern = config.tern;
 
                 try {
                     rule = ruleCreator(new RuleContext(
                         key, api, severity, options,
-                        config.settings, config.ecmaFeatures, config.env, config.tern // ORION
+                        settings, config.ecmaFeatures, config.env // ORION
                     ));
 
                     // add all the node types as listeners
