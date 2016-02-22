@@ -56,51 +56,65 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 }
 
 function getRemotesBranches(workspaceDir, fileRoot, req, res, next, rest) {
-	var remoteName = rest.replace("remote/", "").substring(0, rest.lastIndexOf("/file/")-"/file/".length-1);
-	var repoPath = rest.substring(rest.lastIndexOf("/file/")).replace("/file/","");
-	var fileDir = repoPath;
+	var segments = rest.split("/");
+	var remoteName = segments[1];
+	var repoPath = segments[3];
+	var fileDir = api.join(fileRoot, repoPath);
+	var theRepo, theRemote;
 	repoPath = api.join(workspaceDir, repoPath);
 	git.Repository.open(repoPath)
 	.then(function(repo) {
-		repo.getReferences(git.Reference.TYPE.OID)
-		.then(function(referenceList) {
-			var branches = [];
-			async.each(referenceList, iterator, function(err) {
-				if (err) {
-					return writeError(403, res);
-				}
-				var resp = JSON.stringify({
-					"Children": branches,
-					"Location": "/gitapi/remote/" + remoteName + "/file/" + fileDir,
-					"Name": remoteName
-				});
-				res.statusCode = 200;
-				res.setHeader('Content-Type', 'application/json');
-				res.setHeader('Content-Length', resp.length);
-				res.end(resp);
-			});
-
-			function iterator(ref, callback) {
-				if (ref.isRemote()) {
-					var rName = ref.name().replace("refs/remotes/", "");
-					if (rName.indexOf(remoteName) === 0) {
-						repo.getBranchCommit(ref)
-						.then(function(commit) {
-							branches.push({
-								"CommitLocation": "/gitapi/commit/" + commit.sha() + "/file/" + fileDir,
-								"Id": commit.sha(),
-								"Location": "/gitapi/remote/" + remoteName + "/file/" + fileDir,
-								"Name": rName
-							});
-							callback();
+		theRepo = repo;
+		return repo.getRemote(remoteName)
+	})
+	.then(function(remote) {
+		theRemote = remote
+		return theRepo.getReferences(git.Reference.TYPE.OID);
+	})
+	.then(function(referenceList) {
+		var branches = [];
+		async.each(referenceList, function(ref,callback) {
+			if (ref.isRemote()) {
+				var rName = ref.name().replace("refs/remotes/", "");
+				if (rName.indexOf(remoteName) === 0) {
+					theRepo.getBranchCommit(ref)
+					.then(function(commit) {
+						branches.push({
+							"CloneLocation": "/gitapi/clone" + fileDir,
+							"CommitLocation": "/gitapi/commit/" + ref.name().replace(/\//g, '%252F') + fileDir,
+							"DiffLocation": "/gitapi/diff/" + rName.replace(/\//g, '%252F') + fileDir,
+							"FullName": ref.name(),
+							"GitUrl": theRemote.url(),
+							"HeadLocation": "/gitapi/commit/HEAD" + fileDir,
+							"Id": commit.sha(),
+							"IndexLocation": "/gitapi/index" + fileDir,
+							"Location": "/gitapi/remote/" + rName + fileDir,
+							"Name": rName,
+							"TreeLocation": "/gitapi/tree" + fileDir + "/" + rName.replace(/\//g, '%252F'),
+							"Type": "RemoteTrackingBranch"
 						});
-					} else {
 						callback();
-					}					
+					});
 				} else {
-					callback();
+					callback(); 
 				}
+			} else {
+				callback();
 			}
+
+		}, function(err) {
+			if (err) {
+				return writeError(403, res);
+			}
+			var resp = JSON.stringify({
+				"Children": branches,
+				"Location": "/gitapi/remote/" + remoteName + "/file/" + fileDir,
+				"Name": remoteName
+			});
+			res.statusCode = 200;
+			res.setHeader('Content-Type', 'application/json');
+			res.setHeader('Content-Length', resp.length);
+			res.end(resp);
 		});
 	});
 }
