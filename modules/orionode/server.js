@@ -9,7 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var express = require('express'),
+var auth = require('./lib/middleware/auth'),
+	express = require('express'),
 	http = require('http'),
 	compression = require('compression'),
     path = require('path'),
@@ -17,50 +18,7 @@ var express = require('express'),
     util = require('util'),
     appSocket = require('./lib/node_app_socket'),
     argslib = require('./lib/args'),
-    orion = require('./index.js'),
-    basicAuth = require('basic-auth');
-
-function noop(req, res, next) { next(); }
-
-//might need to add a username argument too. 
-/*function auth(pwd) {
-	return function(req,res,next){
-		function unauthorized(res) {
-			//redirect to login page
-			return next();
-		};
-		
-		var user = basicAuth(req)
-		if(!user || !user.name || !user.pass)
-		{
-			return unauthorized(res);
-		}
-		
-		//need to change to do proper check
-		if (user.name === 'some username' && user.pass === 'some password') {
-	    	return next();
-	  	}else
-	  	{
-	  		//redirect to login page
-	  	}
-  		return noop();
-  	}
-}*/
-
-function auth(pwd) {
-    if (typeof pwd === 'string' && pwd.length > 0) {
-        return function checkAuth(req, res, next) {
-            var credentials = basicAuth(req);
-            if (!credentials || credentials.pass !== pwd ) {
-                res.statusCode = 401;
-                res.setHeader('WWW-Authenticate', 'Basic realm="example"');
-                res.end('Access denied');
-             }
-             return next();
-         };
-    }
-    return noop;
-}
+    orion = require('./index.js');
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
@@ -97,25 +55,33 @@ argslib.readConfigFile(configFile, function(configParams) {
 			console.log(util.format('Using workspace: %s', workspaceDir));
 			console.log(util.format('Listening on port %d...', port));
 
-			// create web server
-			var orionMiddleware = orion({
-				workspaceDir: dirs[0],
-				configParams: configParams,
-				maxAge: (dev ? 0 : undefined),
-			}), appContext = orionMiddleware.appContext;
-			
-			// add socketIO and app support
-			var app = express();
-			var server = http.createServer(app);
-			app.use(log ? express.logger('tiny') : noop);
-			app.use(auth(password || configParams.pwd));
-			app.use(compression());
-			app.use(orionMiddleware);
-			server.listen(port);
-			
-			
-			var io = socketio.listen(server, { 'log level': 1 });
-			appSocket.install({ io: io, appContext: appContext });
+			try {
+				// create web server
+				var orionMiddleware = orion({
+					workspaceDir: dirs[0],
+					configParams: configParams,
+					maxAge: (dev ? 0 : undefined),
+				}), appContext = orionMiddleware.appContext;
+				
+				// add socketIO and app support
+				var app = express();
+				var server = http.createServer(app);
+				if (log) {
+					app.use(express.logger('tiny'));
+				}
+				if (password || configParams.pwd) {
+					app.use(auth(password || configParams.pwd));
+				}
+				app.use(compression());
+				app.use(orionMiddleware);
+				server.listen(port);
+				
+				
+				var io = socketio.listen(server, { 'log level': 1 });
+				appSocket.install({ io: io, appContext: appContext });
+			} catch (e) {
+				console.error(e && e.stack);
+			}
 			server.on('error', function(err) {
 				console.log(err);
 			});
