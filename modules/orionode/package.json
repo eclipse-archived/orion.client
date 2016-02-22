@@ -35,7 +35,8 @@
     "grunt-contrib-requirejs": "~0.4.3",
     "grunt-string-replace": "~0.2.7",
     "grunt-simple-mocha": "~0.4.0",
-    "grunt-contrib-clean": "~0.5.0"
+    "grunt-contrib-clean": "~0.5.0",
+    "nodemon": "^1.8.1"
   },
   "engines": {
     "node": ">=0.8.0"
@@ -43,7 +44,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec",
-    "optimize": "grunt"
+    "optimize": "grunt",
+    "watch-server": "nodemon --debug server.js"
   },
   "repository": {
     "type": "git",

@@ -11,42 +11,90 @@
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
+var async = require('async');
+var url = require('url');
 
 function getTags(workspaceDir, fileRoot, req, res, next, rest) {
-	var repoPath = rest.replace("tag/file/", "");
-	var tags = [];
-  
+  var segments = rest.split("/");
+  var remoteName = segments[1];
+  var repoPath = segments[2];
+  var fileDir = api.join(fileRoot, repoPath);
+  var theRepo;
   repoPath = api.join(workspaceDir, repoPath);
-	
+  var query = url.parse(req.url, true).query;
+  var page = Number(query.page) || 1;
+  var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
+  var tags = [];
+  var count = 0;
+  
   git.Repository.open(repoPath)
 	.then(function(repo) {
-    git.Reference.list(repo)
-  	.then(function(refNames) { // all of the refs names, as strings.
-      var counts = 0;
-      var total = refNames.length;
-      refNames.forEach(function(refName) { 
-        git.Reference.lookup(repo, refName)
-        .then(function(ref) {
-          if (ref.isTag()) {
+    theRepo = repo;
+    return theRepo.getReferences(git.Reference.TYPE.OID);
+  })
+  .then(function(refList) {
+    async.each(refList, function(ref,callback) {
+        if (ref.isTag()) {
+        //   theRepo.getReferenceCommit(ref.name())
+        // .then(function(commit) {
+          if (!page || count++ >= (page-1)*pageSize && tags.length <= pageSize) {
+            var refName = ref.name();
+            var rName = refName.replace("refs/tags/", "");
             tags.push({
               "FullName": refName,
-              "Name": refName.replace("refs/tags/", "")
+              "Name": rName,
+              "CloneLocation": "/gitapi/clone" + fileDir,
+              // "CommitLocation": "/gitapi/commit/af23d5d2cf5d9acbc27974627a39abe7bbd8662c/file/silenio-OrionContent/org.eclipse.orion.client/",
+              // "LocalTimeStamp": 1393368341000,
+              "Location": "/gitapi/tag/" + rName + fileDir,
+              "TagType": "LIGHTWEIGHT",
+              "TreeLocation": "/gitapi/tree" + fileDir + "/" + rName,
+              "Type": "Tag"
             });
           }
-          counts++;
 
-          if (counts === total) {
-            var resp = JSON.stringify({
-              "Children": tags
-            });
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.setHeader('Content-Length', resp.length);
-            res.end(resp);
-          }
-        });
-    	});
-  	});
+         callback();
+       //  })
+       // .catch(function(err) {
+       //  writeError(400,res,err.message);
+       // });
+      } else {
+        callback();
+      }
+    }, function(err) {
+      if (err) {
+        return writeError(403, res);
+      }
+
+
+      var resp = {
+        "Children": tags,
+        "Type": "Tag",
+      }
+
+      if (page && page*pageSize < count) {
+        var nextLocation = url.parse(req.url, true);
+        nextLocation.query.page = page + 1 + "";
+        nextLocation.search = null; //So that query object will be used for format
+        nextLocation = url.format(nextLocation);
+        resp['NextLocation'] = nextLocation;
+      }
+
+      if (page && page > 1) {
+        var prevLocation = url.parse(req.url, true);
+        prevLocation.query.page = page - 1 + "";
+        prevLocation.search = null;
+        prevLocation = url.format(prevLocation);
+        resp['PreviousLocation'] = prevLocation;
+      }
+
+
+      resp = JSON.stringify(resp);
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Length', resp.length);
+      res.end(resp);
+    });
   });
 }
 

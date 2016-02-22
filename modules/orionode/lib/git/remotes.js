@@ -108,8 +108,12 @@ function getRemotesBranches(workspaceDir, fileRoot, req, res, next, rest) {
 			}
 			var resp = JSON.stringify({
 				"Children": branches,
-				"Location": "/gitapi/remote/" + remoteName + "/file/" + fileDir,
-				"Name": remoteName
+				"Location": "/gitapi/remote/" + remoteName + fileDir,
+				"Name": remoteName,
+				"Type": "Remote",
+				"GitUrl": theRemote.url(),
+				"CloneLocation": "/gitapi/clone" + fileDir
+
 			});
 			res.statusCode = 200;
 			res.setHeader('Content-Type', 'application/json');
