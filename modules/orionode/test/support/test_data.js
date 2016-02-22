@@ -11,10 +11,6 @@
 /*eslint-env node*/
 var child_process = require('child_process');
 var fs = require('fs');
-var path = require('path');
-//var connect = require('connect');
-var express = require('express');
-var request = require('supertest');
 var rimraf = require('rimraf');
 
 function debug(msg) {
@@ -95,19 +91,6 @@ function setUp(dir, callback) {
 	});
 }
 
-/**
- * @returns A new connect app that has a #request() method. The #request method returns a supertest request
- * for the app, equivalent to calling require('supertest')(app).
- * This allows you to test the app in a convenient chain of calls like this:
- * <code>createApp().request().get('/foobar.txt').expect(...)</code>
- */
-function createApp() {
-	var app = express();
-	app.request = request.bind(null, app);
-	return app;
-}
-
 exports.DEBUG = process.env.DEBUG_TESTS || false;
-exports.createApp = createApp;
 exports.setUp = setUp;
 exports.tearDown = tearDown;

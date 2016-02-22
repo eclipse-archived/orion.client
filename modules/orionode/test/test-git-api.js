@@ -11,7 +11,9 @@
 /*eslint-env node, mocha*/
 /*eslint no-shadow:0*/
 var assert = require('assert');
+var express = require('express');
 var path = require('path');
+var supertest = require('supertest');
 var testData = require('./support/test_data');
 var git = require('nodegit');
 var fs = require('fs');
@@ -20,25 +22,27 @@ var CONTEXT_PATH = '/orionn';
 var PREFIX = CONTEXT_PATH + '/workspace';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
 
-var app = testData.createApp()
-		.use(CONTEXT_PATH, require('../lib/tasks').orionTasksAPI({
-			root: '/task',
-		}))
-		.use(CONTEXT_PATH, require('../lib/workspace')({
-			root: '/workspace',
-			fileRoot: '/file',
-			workspaceDir: WORKSPACE
-		}))
-		.use(CONTEXT_PATH, require('../lib/file')({
-			root: '/file',
-			workspaceRoot: '/workspace',
-			workspaceDir: WORKSPACE
-		}))
-		.use(CONTEXT_PATH, require('../lib/git')({
-			root: '/gitapi',
-			fileRoot: '/file',
-			workspaceDir: WORKSPACE
-		}));
+var app = express();
+app.use(CONTEXT_PATH, require('../lib/tasks').orionTasksAPI({
+	root: '/task',
+}))
+.use(CONTEXT_PATH, require('../lib/workspace')({
+	root: '/workspace',
+	fileRoot: '/file',
+	workspaceDir: WORKSPACE
+}))
+.use(CONTEXT_PATH, require('../lib/file')({
+	root: '/file',
+	workspaceRoot: '/workspace',
+	workspaceDir: WORKSPACE
+}))
+.use(CONTEXT_PATH, require('../lib/git')({
+	root: '/gitapi',
+	fileRoot: '/file',
+	workspaceDir: WORKSPACE
+}));
+
+var request = supertest.bind(null, app);
 
 var TEST_REPO_NAME, repoPath;
 
@@ -65,7 +69,7 @@ describe("git", function() {
 
 		describe('Creates a new directory and init repository', function() {
 			it('GET clone (initializes a git repo)', function(finished) {
-				app.request()
+				request()
 				.post(CONTEXT_PATH + "/gitapi/clone/")
 				.send({
 					"Name":  TEST_REPO_NAME,
@@ -112,7 +116,7 @@ describe("git", function() {
 				})
 
 				it('PUT index (staging a file)', function(finished) {
-					app.request()
+					request()
 					.put(CONTEXT_PATH + "/gitapi/index/file/" + TEST_REPO_NAME + "/" + filename)
 					.expect(200)
 					.end(function(err, res) {
@@ -121,7 +125,7 @@ describe("git", function() {
 				})
 
 				it('GET status (check status for git repo)', function(finished) {
-					app.request()
+					request()
 					.get(CONTEXT_PATH + "/gitapi/status/file/"+ TEST_REPO_NAME + "/")
 					.expect(200)
 					.end(function(err, res) {
@@ -140,7 +144,7 @@ describe("git", function() {
 				var committerEmail = "test@test.com"
 
 				it('POST commit (committing all files in the index)', function(finished) {
-					app.request()
+					request()
 					.post(CONTEXT_PATH + "/gitapi/commit/HEAD/file/" + TEST_REPO_NAME)
 					.send({
 						Message: message,
@@ -161,7 +165,7 @@ describe("git", function() {
 				});
 
 				it('GET commit (listing commits revision)', function(finished) {
-					app.request()
+					request()
 					.get(CONTEXT_PATH + '/gitapi/commit/master..master/file/' + TEST_REPO_NAME)
 					.expect(200)
 					.end(function(err, res) {
@@ -194,7 +198,7 @@ describe("git", function() {
 				var remoteURI = "https://github.com/eclipse/sketch.git"; // small example repo from Eclipse
 
 				it('POST remote (adding a new remote)', function(finished) {
-					app.request()
+					request()
 					.post(CONTEXT_PATH + "/gitapi/remote/file/" + TEST_REPO_NAME)
 					.send({
 						Remote: remoteName,
@@ -213,7 +217,7 @@ describe("git", function() {
 				var numRemotes;
 
 				it('GET remote (getting the list of remotes)', function(finished) {
-					app.request()
+					request()
 					.get(CONTEXT_PATH + "/gitapi/remote/file/" + TEST_REPO_NAME)
 					.expect(200)
 					.end(function(err, res) {
@@ -246,7 +250,7 @@ describe("git", function() {
 
 				it('POST remote (fetching changes from a remote)', function(finished) {
 					this.timeout(20000); // increase timeout for fetching from remote
-					app.request()
+					request()
 					.post(CONTEXT_PATH + "/gitapi/remote/" + remoteName + "/file/" + TEST_REPO_NAME)
 					.send({
 						Fetch: "true"
@@ -263,7 +267,7 @@ describe("git", function() {
 			describe ('Deleting a remote', function() {
 
 				it('DELETE remote (removing a remote)', function(finished) {
-					app.request()
+					request()
 					.delete(CONTEXT_PATH + "/gitapi/remote/" + remoteName + "/file/" + TEST_REPO_NAME)
 					.expect(200)
 					.end(finished);
@@ -295,7 +299,7 @@ describe("git", function() {
 				var password = "testpassword1";
 
 				it('POST remote (adding a new remote)', function(finished) {
-					app.request()
+					request()
 					.post(CONTEXT_PATH + "/gitapi/remote/file/" + TEST_REPO_NAME)
 					.send({
 						Remote: remoteName,
@@ -313,7 +317,7 @@ describe("git", function() {
 
 					this.timeout(5000);
 
-					app.request()
+					request()
 					.post(CONTEXT_PATH + "/gitapi/remote/" + remoteName + "/" + branchName + "/file/" + TEST_REPO_NAME)
 					.send({
 						Force: true, // force push so it doesn't matter what's on the repo.
@@ -331,7 +335,7 @@ describe("git", function() {
 						// Pushing a remote returns a task. Poll the task location
 						// until it completes.
 						function checkComplete() {
-							app.request()
+							request()
 							.get(CONTEXT_PATH + location)
 							.expect(200)
 							.end(function(err, res) {
@@ -355,7 +359,7 @@ describe("git", function() {
 			describe('Removing a repository', function() {
 
 				it('DELETE clone (delete a repository)', function(finished) {
-					app.request()
+					request()
 					.delete(CONTEXT_PATH + "/gitapi/clone/file/" + TEST_REPO_NAME)
 					.expect(200)
 					.end(finished);
@@ -389,7 +393,7 @@ describe("git", function() {
 			it('POST clone (creating a respository clone)', function(finished) {
 				var gitURL = "https://github.com/eclipse/sketch.git"
 				this.timeout(20000); // increase timeout for cloning from repo
-				app.request()
+				request()
 				.post(CONTEXT_PATH + "/gitapi/clone/")
 				.send({
 					GitUrl: gitURL
@@ -413,7 +417,7 @@ describe("git", function() {
 
 			it('GET tag (listing tags)', function(finished) {
 				this.timeout(20000);
-				app.request()
+				request()
 				.get(CONTEXT_PATH + "/gitapi/tag/file/" + "sketch")
 				.expect(200)
 				.end(function(err, res) {
@@ -430,7 +434,7 @@ describe("git", function() {
 		describe('Removing a repository', function() {
 
 			it('DELETE clone (delete a repository)', function(finished) {
-				app.request()
+				request()
 				.delete(CONTEXT_PATH + "/gitapi/clone/file/" + TEST_REPO_NAME)
 				.expect(200)
 				.end(finished);
@@ -461,7 +465,7 @@ describe("git", function() {
 
 		describe('Creates a new directory and init repository', function() {
 			it('GET clone (initializes a git repo)', function(finished) {
-				app.request()
+				request()
 				.post(CONTEXT_PATH + "/gitapi/clone/")
 				.send({
 					"Name":  TEST_REPO_NAME,
@@ -503,7 +507,7 @@ describe("git", function() {
 			var remoteURI = "https://github.com/albertcui/orion-test-repo.git"; // small example repo from Eclipse
 
 			it('POST remote (adding a new remote)', function(finished) {
-				app.request()
+				request()
 				.post(CONTEXT_PATH + "/gitapi/remote/file/" + TEST_REPO_NAME)
 				.send({
 					Remote: remoteName,
@@ -523,7 +527,7 @@ describe("git", function() {
 		describe('Adding a branch', function() {
 
 			it('POST branch (creating a branch)', function(finished) {
-				app.request()
+				request()
 				.post(CONTEXT_PATH + "/gitapi/branch/file/" + TEST_REPO_NAME)
 				.send({
 					Name: branchName
@@ -557,7 +561,7 @@ describe("git", function() {
 		describe('Getting list of branches', function() {
 
 			it('GET branch (listing branches)', function(finished) {
-				app.request()
+				request()
 				.get(CONTEXT_PATH + "/gitapi/branch/file/" + TEST_REPO_NAME)
 				.expect(200)
 				.end(function(err, res) {
@@ -572,7 +576,7 @@ describe("git", function() {
 		describe('Deleting a branch', function() {
 
 			it('DELETE branch (removing a branch)', function(finished) {
-				app.request()
+				request()
 				.delete(CONTEXT_PATH + "/gitapi/branch/" + branchName + "/file/" + TEST_REPO_NAME)
 				.expect(200)
 				.end(finished);
@@ -596,7 +600,7 @@ describe("git", function() {
 		describe('Removing a repository', function() {
 
 			it('DELETE clone (delete a repository)', function(finished) {
-				app.request()
+				request()
 				.delete(CONTEXT_PATH + "/gitapi/clone/file/" + TEST_REPO_NAME)
 				.expect(200)
 				.end(finished);
@@ -620,7 +624,7 @@ describe("git", function() {
 		this.timeout(10000);
 
 		function repoConfig() {
-			return app.request()
+			return request()
 			.get(CONTEXT_PATH + "/gitapi/config/clone/file/" + TEST_REPO_NAME);
 		}
 
@@ -655,7 +659,7 @@ describe("git", function() {
 				// Ensure we can GET a child's Location to retrieve it individually
 				var child = res.body.Children[0];
 
-				app.request()
+				request()
 				.get(CONTEXT_PATH + child.Location)
 				.expect(200)
 				.expect(function(res2) {
@@ -672,7 +676,7 @@ describe("git", function() {
 				var child = find(res.body.Children, function(c) { return c.Key === "core.filemode"; });
 				var newValue = String(!(child.Value));
 
-				app.request()
+				request()
 				.put(CONTEXT_PATH + child.Location)
 				.send({ Value: [newValue] })
 				.expect(200)

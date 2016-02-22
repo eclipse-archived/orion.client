@@ -10,21 +10,34 @@
  *******************************************************************************/
 /*eslint-env node, mocha*/
 var assert = require('assert');
+var express = require('express');
 var path = require('path');
+var supertest = require('supertest');
 var testData = require('./support/test_data');
 
 var CONTEXT_PATH = '/orion', PREFIX = CONTEXT_PATH + '/file';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
 
-var app = testData.createApp()
+var app = express()
 			.use(CONTEXT_PATH, require('../lib/file')({
 				root: '/file',
 				workspaceRoot: '/workspace',
 				workspaceDir: WORKSPACE
 			}));
+var request = supertest.bind(null, app);
 
 function byName(a, b) {
 	return String.prototype.localeCompare.call(a.Name, b.Name);
+}
+
+// Like `assert.ifError` but allows the message to be overridden
+function throwIfError(cause, message) {
+	if (!cause || !cause instanceof Error && Object.prototype.toString.call(cause) !== '[object Error]' && cause !== 'error') {
+		return;
+	}
+	var err = new Error(message + ": " + cause.message);
+	err.cause = cause;
+	throw err;
 }
 
 /**
@@ -37,11 +50,11 @@ describe('File API', function() {
 	});
 
 	describe('get /file', function(done) {
-		app.request()
+		request()
 			.get(PREFIX)
 			.expect(403, function(err, res) {
-				assert.ifError(err);
-				app.request()
+				throwIfError(err);
+				request()
 					.get(PREFIX)
 					.expect(403, done);
 			});
@@ -53,27 +66,27 @@ describe('File API', function() {
 	describe('files', function() {
 		describe('contents', function() {
 			it('get file contents', function(done) {
-				app.request()
+				request()
 				.get(PREFIX + '/project/fizz.txt')
 				.expect(200, 'hello world', done);
 			});
 			it('file contents has ETag header', function(done) {
-				app.request()
+				request()
 				.get(PREFIX + '/project/fizz.txt')
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					assert.notEqual(res.headers.etag, null);
 					done();
 				});
 			});
 			it('put file contents', function(done) {
 				var newContents = 'The time is now ' + new Date().getTime();
-				app.request()
+				request()
 				.put(PREFIX + '/project/fizz.txt')
 				.send(newContents)
 				.expect(200)
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					var body = res.body;
 					assert.equal(body.Directory, false);
 					assert.ok(body.ETag, 'has an ETag');
@@ -84,20 +97,20 @@ describe('File API', function() {
 			});
 			it('conditionally overwrite contents using If-Match', function(done) {
 				var url = PREFIX + '/project/fizz.txt';
-				app.request()
+				request()
 				.get(url)
 				.query({ parts: 'meta' })
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					var etag = res.body.ETag;
 					assert.notEqual(res.body.ETag, null);
-					app.request()
+					request()
 					.put(url)
 					.set('If-Match', etag + '_blort')
 					.expect(412)
 					.end(function(err, res) {
-						assert.ifError(err);
-						app.request(url)
+						throwIfError(err, "Failed to PUT " + url);
+						request(url)
 						.put(url)
 						.set('If-Match', etag)
 						.expect(200)
@@ -108,59 +121,59 @@ describe('File API', function() {
 			describe('diff', function() {
 				it('applies a patch with JSON Content-Type', function(done) {
 					var url = PREFIX + '/project/fizz.txt';
-					app.request()
+					request()
 					.post(url)
 					.set('X-HTTP-Method-Override', 'PATCH')
 					.type('json')
 					.send({ diff: [{ start: 0, end: 1, text: "j" }] })
 					.expect(200)
 					.end(function(err, res) {
-						assert.ifError(err);
-						app.request().get(url).expect(200, 'jello world', done);
+						throwIfError(err);
+						request().get(url).expect(200, 'jello world', done);
 					});
 				});
 				it('applies a patch with JSON + charset Content-Type', function(done) {
 					var url = PREFIX + '/project/fizz.txt';
-					app.request()
+					request()
 					.post(url)
 					.set('X-HTTP-Method-Override', 'PATCH')
 					.type('application/json;charset=UTF-8')
 					.send({ diff: [{ start: 0, end: 1, text: "j" }] })
 					.expect(200)
 					.end(function(err, res) {
-						assert.ifError(err);
-						app.request().get(url).expect(200, 'jello world', done);
+						throwIfError(err);
+						request().get(url).expect(200, 'jello world', done);
 					});
 				});
 				it('applies a patch with text Content-Type', function(done) {
 					var url = PREFIX + '/project/fizz.txt';
-					app.request()
+					request()
 					.post(url)
 					.set('X-HTTP-Method-Override', 'PATCH')
 					.type('text')
 					.send(JSON.stringify({ diff: [{ start: 0, end: 1, text: "j" }] }))
 					.expect(200)
 					.end(function(err, res) {
-						assert.ifError(err);
-						app.request().get(url).expect(200, 'jello world', done);
+						throwIfError(err);
+						request().get(url).expect(200, 'jello world', done);
 					});
 				});
 				it('tolerates an empty patch', function(done) {
 					var url = PREFIX + '/project/fizz.txt';
-					app.request()
+					request()
 					.post(url)
 					.set('X-HTTP-Method-Override', 'PATCH')
 					.type('text')
 					.send(JSON.stringify({}))
 					.expect(200)
 					.end(function(err, res) {
-						assert.ifError(err);
+						throwIfError(err);
 						done();
 					});
 				});
 				it('gives consistent ETag between POST and GET', function(done) {
 					var url = PREFIX + '/project/fizz.txt';
-					app.request()
+					request()
 					.post(url)
 					.set('X-HTTP-Method-Override', 'PATCH')
 					.type('text')
@@ -174,14 +187,14 @@ describe('File API', function() {
 					}))
 					.expect(200)
 					.end(function(err, res) {
-						assert.ifError(err);
+						throwIfError(err);
 						var etag = res.headers.etag;
-						app.request()
+						request()
 						.get(url)
 						.query({ parts: 'meta' })
 						.expect(200)
 						.end(function(err, res) {
-							assert.ifError(err);
+							throwIfError(err);
 							assert.equal(etag, res.headers.etag, "Expect same ETag we got from the POST");
 							done();
 						});
@@ -191,12 +204,12 @@ describe('File API', function() {
 		});
 		describe('metadata', function() {
 			it('get file metadata', function(done) {
-				app.request()
+				request()
 				.get(PREFIX + '/project/fizz.txt')
 				.query({ parts: 'meta' })
 				.expect(200)
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					var body = res.body;
 					assert.deepEqual(body.Attributes, {ReadOnly: false, Executable: false});
 					assert.equal(body.Directory, false);
@@ -214,23 +227,23 @@ describe('File API', function() {
 				});
 			});
 			it('file metadata has ETag header', function(done) {
-				app.request()
+				request()
 				.get(PREFIX + '/project/fizz.txt')
 				.query({ parts: 'meta' })
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					assert.notEqual(res.headers.etag, null);
 					done();
 				});
 			});
 		});
 		it('has a correct "Parents" field', function(done) {
-			app.request()
+			request()
 			.get(PREFIX + '/project/my%20folder/my%20subfolder/quux.txt')
 			.query({ parts: 'meta' })
 			.expect(200)
 			.end(function(err, res) {
-				assert.ifError(err);
+				throwIfError(err);
 				assert.ok(res.body.Parents);
 				assert.equal(res.body.Parents.length, 3);
 				assert.equal(res.body.Parents[0].ChildrenLocation, PREFIX + '/project/my%20folder/my%20subfolder?depth=1');
@@ -246,24 +259,24 @@ describe('File API', function() {
 		 */
 		describe('creating', function() {
 			it('works with Slug header', function(done) {
-				app.request()
+				request()
 				.post(PREFIX + '/project')
 				.set('Slug', 'newfile.txt')
 				.expect(201)
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					assert.equal(res.body.Name, 'newfile.txt');
 					assert.equal(res.body.Directory, false);
 					done();
 				});
 			});
 			it('works with "Name" field', function(done) {
-				app.request()
+				request()
 				.post(PREFIX + '/project')
 				.send({ Name: 'newfile.txt' })
 				.expect(201)
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					assert.equal(res.body.Name, 'newfile.txt');
 					assert.equal(res.body.Directory, false);
 					done();
@@ -282,11 +295,11 @@ describe('File API', function() {
 	describe('directories', function() {
 		describe('metadata', function() {
 			it('get directory metadata', function(done) {
-				app.request()
+				request()
 				.get(PREFIX + '/project/my%20folder')
 				.expect(200)
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					var body = res.body;
 					assert.equal(body.Children, null, 'Children should be absent');
 					assert.equal(body.ChildrenLocation, PREFIX + '/project/my%20folder?depth=1');
@@ -297,11 +310,11 @@ describe('File API', function() {
 				});
 			});
 			it('has a correct "Parents" field', function(done) {
-				app.request()
+				request()
 				.get(PREFIX + '/project/my%20folder/my%20subfolder')
 				.expect(200)
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					assert.ok(res.body.Parents);
 					assert.equal(res.body.Parents.length, 2);
 					assert.equal(res.body.Parents[0].ChildrenLocation, PREFIX + '/project/my%20folder?depth=1');
@@ -315,12 +328,12 @@ describe('File API', function() {
 
 		describe('contents', function() {
 			it('get directory contents', function(done) {
-				app.request()
+				request()
 				.get(PREFIX + '/project/my%20folder')
 				.query({ depth: 1 })
 				.expect(200)
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					var body = res.body;
 					assert.equal(body.ChildrenLocation, PREFIX + '/project/my%20folder?depth=1');
 					assert.equal(Array.isArray(body.Children), true);
@@ -344,14 +357,14 @@ describe('File API', function() {
 		 */
 		describe('creating', function() {
 			it('works with Slug header', function(done) {
-				app.request()
+				request()
 				.post(PREFIX + '/project')
 				.type('json')
 				.set('Slug', 'new directory')
 				.send({ Directory: true })
 				.expect(201)
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					assert.equal(res.body.Directory, true);
 					assert.equal(res.body.Location, PREFIX + '/project/new%20directory/'); //FIXME
 					assert.equal(res.body.Name, 'new directory');
@@ -359,13 +372,13 @@ describe('File API', function() {
 				});
 			});
 			it('works with "Name" field', function(done) {
-				app.request()
+				request()
 				.post(PREFIX + '/project')
 				.type('json')
 				.send({ Name: 'new directory', Directory: true })
 				.expect(201)
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					assert.equal(res.body.Directory, true);
 					assert.equal(res.body.Location, PREFIX + '/project/new%20directory/'); // FIXME
 					assert.equal(res.body.Name, 'new directory');
@@ -373,13 +386,13 @@ describe('File API', function() {
 				});
 			});
 			it('works when a string-typed Directory "true" is provided', function(done) {
-				app.request()
+				request()
 				.post(PREFIX + '/project')
 				.type('json')
 				.send({ Name: 'new directory', Directory: 'true' })
 				.expect(201)
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					assert.equal(res.body.Directory, true);
 					assert.equal(res.body.Location, PREFIX + '/project/new%20directory/'); // FIXME
 					assert.equal(res.body.Name, 'new directory');
@@ -387,14 +400,14 @@ describe('File API', function() {
 				});
 			});
 			it('works when a string-typed Directory "false" is provided', function(done) {
-				app.request()
+				request()
 				.post(PREFIX + '/project')
 				.type('json')
 				.set('Slug', 'Not a directory')
 				.send({ Directory: "false" })
 				.expect(201)
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					assert.equal(res.body.Directory, false);
 					assert.equal(res.body.Location, PREFIX + '/project/Not%20a%20directory'); //FIXME
 					assert.equal(res.body.Name, 'Not a directory');
@@ -411,31 +424,32 @@ describe('File API', function() {
 	 */
 	describe('delete', function() {
 		it('delete a file', function(done) {
-			app.request()
+			request()
 			.del(PREFIX + '/project/my%20folder/buzz.txt')
 			.expect(204)
 			.end(function(err, res) {
+				throwIfError(err, "failed to DELETE file");
 				// subsequent requests should 404
-				app.request()
+				request()
 				.get(PREFIX + '/project/my%20folder/buzz.txt')
 				.expect(404)
 				.end(done);
 			});
 		});
 		it('delete a directory', function(done) {
-			app.request()
+			request()
 			.del(PREFIX + '/project/my%20folder')
 			.expect(204)
 			.end(function(err, res) {
-				assert.ifError(err);
+				throwIfError(err, "Failed to DELETE folder");
 				// the directory is gone:
-				app.request()
+				request()
 				.get(PREFIX + '/project/my%20folder')
 				.expect(404)
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					// and its contents are gone:
-					app.request()
+					request()
 					.get(PREFIX + '/project/my%20folder/buzz.txt')
 					.expect(404)
 					.end(done);
@@ -444,20 +458,20 @@ describe('File API', function() {
 		});
 		it('conditional delete using If-Match', function(done) {
 			var url = PREFIX + '/project/fizz.txt';
-			app.request()
+			request()
 			.get(url)
 			.query({ parts: 'meta' })
 			.end(function(err, res) {
-				assert.ifError(err);
+				throwIfError(err, "Failed to get folder");
 				var etag = res.body.ETag;
 				assert.notEqual(res.body.ETag, null);
-				app.request()
+				request()
 				.del(url)
 				.set('If-Match', etag + '_blort')
 				.expect(412)
 				.end(function(err, res) {
-					assert.ifError(err);
-					app.request(url)
+					throwIfError(err, "Expected precondition to fail");
+					request(url)
 					.del(url)
 					.set('If-Match', etag)
 					.expect(204)
@@ -473,53 +487,53 @@ describe('File API', function() {
 	 */
 	describe('copy', function() {
 		it('copy a file', function(done) {
-			app.request()
+			request()
 			.post(PREFIX + '/project/my%20folder')
 			.set('Slug', 'copy_of_fizz.txt')
 			.set('X-Create-Options', 'copy')
 			.send({ Location: PREFIX + '/project/fizz.txt' })
 			.expect(201)
 			.end(function(err, res) {
-				assert.ifError(err);
+				throwIfError(err);
 				assert.equal(res.body.Name, 'copy_of_fizz.txt');
 				done();
 			});
 		});
 		it('copy a file overwrites when "no-overwrite" is not set', function(done) {
 			// cp project/fizz.txt "project/my folder/buzz.txt"
-			app.request()
+			request()
 			.post(PREFIX + '/project/my%20folder')
 			.set('Slug', 'buzz.txt')
 			.set('X-Create-Options', 'copy')
 			.send({ Location: PREFIX + '/project/fizz.txt' })
 			.expect(200) // 200 means overwritten
 			.end(function(err, res) {
-				assert.ifError(err);
+				throwIfError(err, "Failed to overwrite");
 				// It's in the expected place:
 				assert.equal(res.body.Name, 'buzz.txt');
 				assert.equal(res.body.Parents[0].Name, 'my folder');
 				// And has the expected contents:
-				app.request()
+				request()
 				.get(res.body.Location)
 				.expect(200, 'hello world', done);
 			});
 		});
 		it('copy a directory', function(done) {
-			app.request()
+			request()
 			.post(PREFIX + '/project/')
 			.set('Slug', 'copy_of_my_folder')
 			.set('X-Create-Options', 'copy')
 			.send({ Location: PREFIX + '/project/my%20folder' })
 			.expect(201)
 			.end(function(err, res) {
-				assert.ifError(err);
+				throwIfError(err);
 				// Ensure the copy has the expected children
 				assert.ok(res.body.ChildrenLocation);
-				app.request()
+				request()
 				.get(res.body.ChildrenLocation)
 				.expect(200)
 				.end(function(err, res) {
-					assert.ifError(err);
+					throwIfError(err);
 					res.body.Children.sort(byName);
 					assert.equal(res.body.Children[0].Name, 'buzz.txt');
 					assert.equal(res.body.Children[1].Name, 'my subfolder');
@@ -534,28 +548,28 @@ describe('File API', function() {
 	describe('move/rename', function() {
 		it('move & rename a file', function(done) {
 			// mv "project/my folder/my subfolder/fizz.txt" "project/my folder/fizz_moved.txt"
-			app.request()
+			request()
 			.post(PREFIX + '/project/my%20folder')
 			.set('Slug', 'fizz_moved.txt')
 			.set('X-Create-Options', 'move')
 			.send({ Location: PREFIX + '/project/fizz.txt' })
 			.expect(201)
 			.end(function(err, res) {
-				assert.ifError(err);
+				throwIfError(err);
 				assert.equal(res.body.Name, 'fizz_moved.txt');
 				done();
 			});
 		});
 		it('move & rename a directory', function(done) {
 			// mv "project/my folder/my subfolder/fizz.txt" "project/my folder/fizz_moved.txt"
-			app.request()
+			request()
 			.post(PREFIX + '/project/my%20folder')
 			.set('Slug', 'fizz_moved.txt')
 			.set('X-Create-Options', 'move')
 			.send({ Location: PREFIX + '/project/fizz.txt' })
 			.expect(201)
 			.end(function(err, res) {
-				assert.ifError(err);
+				throwIfError(err);
 				assert.equal(res.body.Name, 'fizz_moved.txt');
 				done();
 			});
