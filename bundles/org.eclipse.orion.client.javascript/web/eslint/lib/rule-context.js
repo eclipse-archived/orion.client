@@ -69,7 +69,7 @@ var PASSTHROUGHS = [
  * @param {object} ecmaFeatures The ecmaFeatures settings passed from the config file.
  * @param {Object} env The backing environment 
  */
-function RuleContext(ruleId, eslint, severity, options, settings, ecmaFeatures, env, tern) { //ORION
+function RuleContext(ruleId, eslint, severity, options, settings, ecmaFeatures, env) { //ORION
     /**
      * ORION
      */
@@ -159,7 +159,7 @@ function RuleContext(ruleId, eslint, severity, options, settings, ecmaFeatures, 
     };
 
     this.getTern = function() {
-    	    return tern;
+    	    return settings.tern;
     	};
 }
 
