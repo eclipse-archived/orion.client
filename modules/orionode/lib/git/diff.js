@@ -19,11 +19,11 @@ function getDiff(workspaceDir, fileRoot, req, res, next, rest) {
 	var paths = query.Path;
 	var segments = rest.split("/");
 	var hasScope = segments[1] !== "file";
-	var scope = (hasScope ? segments[1] : "").replace(new RegExp("%252F", 'g'), "/");
+	var scope = hasScope ? segments[1].replace(/%252F/g, '/') : "";
 	var pattern = (hasScope ? segments.slice(4) : segments.slice(3)).join("/");
-	var fileDir = hasScope ? segments[3] : segments[2];
-	var repoPath = api.join(workspaceDir, fileDir);
-	console.log("scope=" + scope + " pattern=" + pattern + " paths=" + query.Path + " parts=" + query.parts);
+	var repoPath = hasScope ? segments[3] : segments[2];
+	var fileDir = api.join(fileRoot, repoPath);
+	repoPath = api.join(workspaceDir, repoPath);
 	
 	var diff;
 	if (scope.indexOf("..") !== -1) {
@@ -33,8 +33,7 @@ function getDiff(workspaceDir, fileRoot, req, res, next, rest) {
 	} else if (scope === "Cached") {
 		diff = getDiffBetweenIndexAndHead(repoPath);
 	} else {
-		//TODO
-		console.log("BAD");
+		diff = getDiffBetweenWorkingTreeAndHead(repoPath);
 	}
 	return diff
 	.then(function(diff) {
@@ -56,7 +55,7 @@ function changeType(patch, status) {
 }
 
 function processDiff(diff, filePath, paths, fileDir, res, includeDiff, includeURIs, includeDiffs, query, scope) {
-	var page = Number(query.page) || 0;
+	var page = Number(query.page) || 1;
 	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
 	var URIs = [], diffContents = [], diffs = [], patches = [], i;
 	diff.patches()
@@ -75,11 +74,11 @@ function processDiff(diff, filePath, paths, fileDir, res, includeDiff, includeUR
 				
 				if (includeURIs) {
 		            URIs.push({
-		                "Base": "/gitapi/index/file/" + fileDir + "/" + newFilePath,
-		                "CloneLocation": "/gitapi/clone/file/" + fileDir + "/",
-		                "Location": "/gitapi/diff/Default/file/" + fileDir + "/" + newFilePath,
-		                "New": "/file/" + fileDir + "/" + newFilePath,
-		                "Old": "/gitapi/index/file/" + fileDir + "/" + newFilePath,
+		                "Base": "/gitapi/index" + fileDir + "/" + newFilePath,
+		                "CloneLocation": "/gitapi/clone" + fileDir,
+		                "Location": "/gitapi/diff/Default" + fileDir + "/" + newFilePath,
+		                "New": fileDir + "/" + newFilePath,
+		                "Old": "/gitapi/index" + fileDir + "/" + newFilePath,
 		                "Type": "Diff"
 		            });
 		        }
@@ -90,8 +89,8 @@ function processDiff(diff, filePath, paths, fileDir, res, includeDiff, includeUR
 		        	var path = type !== "Deleted" ? newFilePath : oldFilePath;
 		        	diffs.push({
 		        		"ChangeType": type,
-				        "ContentLocation": "/file/" + fileDir + "/" + path,
-				        "DiffLocation": "/gitapi/diff/" + scope + "/file/" + fileDir + "/" + path,
+				        "ContentLocation": fileDir + "/" + path,
+				        "DiffLocation": "/gitapi/diff/" + scope + fileDir + "/" + path,
 				        "NewPath": newFilePath,
 				        "OldPath": oldFilePath,
 				        "Type": "Diff"
@@ -241,20 +240,20 @@ function getDiffBetweenTwoCommits(repoPath, commits) {
 }
 
 function getDiffLocation(workspaceDir, fileRoot, req, res, next, rest) {
-	rest = rest.replace("diff/", "");
-    var repoPath = rest.substring(rest.indexOf("/")+1).replace("file/", "");
-    var oldCommit = rest.substring(0, rest.indexOf("/"));
-    var fileDir = repoPath;
-    repoPath = api.join(workspaceDir, repoPath);
+	var segments = rest.split("/");
+	var oldCommit = segments[1];
     var newCommit = req.body.New;
-    var URL = "/gitapi/diff/" + oldCommit + ".." + newCommit + "/file/" + fileDir;
+    segments[1] = oldCommit + ".." + newCommit.replace(/\//g, '%252F');
+    var location = "/gitapi/" + segments.join("/");
+    location = url.format({pathname: location, query: url.parse(req.url, true).query});
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Location', URL);
-    res.end(JSON.stringify({Location: URL}));
+    res.setHeader('Location', location);
+    res.end(JSON.stringify({Location: location}));
 }
 
 module.exports = {
 	getDiff: getDiff,
+    changeType: changeType,
     getDiffLocation: getDiffLocation
 };

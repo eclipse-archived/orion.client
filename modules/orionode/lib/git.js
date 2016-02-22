@@ -125,6 +125,8 @@ function Git(options) {
 				add.putStage(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("config/") === 0) {
 				config.putConfig(workspaceDir, fileRoot, req, res, next, rest);
+			} else if (rest.indexOf("commit/") === 0) {
+				commit.putCommit(workspaceDir, fileRoot, req, res, next, rest);
 			} else {
 				// Would 501 be more appropriate?
 				writeError(403, res);

@@ -14,9 +14,30 @@ var git = require('nodegit');
 var fs = require('fs');
 var async = require('async');
 
+function branchJSON(ref, fileDir) {
+	var branchURL = ref.name().split("/").join("%252F");
+	var branchName = ref.name().replace("refs/heads/", "");
+	var isCurrent = ref.isHead() ? true : false;
+
+	return {
+		"CloneLocation": "/gitapi/clone"+ fileDir,
+		"CommitLocation": "/gitapi/commit/" + branchURL + fileDir,
+		"Current": isCurrent,
+		"DiffLocation": "/gitapi/diff/" + branchName + fileDir,
+		"FullName": "refs/heads/" + branchName,
+		"HeadLocation": "/gitapi/commit/HEAD" + fileDir,
+		"LocalTimeStamp": 1424471958000, //hardcoded local timestamp
+		"Location": "/gitapi/branch/" + branchURL + fileDir,
+		"Name": branchName,
+		"RemoteLocation": [],
+		"TreeLocation": "/gitapi/tree" + fileDir + "/" + branchURL,
+		"Type": "Branch"
+	};
+}
+
 function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
 	var repoPath = rest.replace("branch/file/", "");
-	var fileDir = /file/ + repoPath;
+	var fileDir = api.join(fileRoot, repoPath);
     repoPath = api.join(workspaceDir, repoPath);
 
     var theRepo;
@@ -30,24 +51,7 @@ function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
 	.then(function(referenceList) {
  		referenceList.forEach(function(ref) {
  			if (ref.isBranch()) {
- 				var branchURL = ref.name().split("/").join("%252F");
- 				var branchName = ref.name().replace("refs/heads/", "");
- 				var isCurrent = ref.isHead() ? true : false;
-
- 				branches.push({
-		 			"CloneLocation": "/gitapi/clone"+ fileDir,
-		 			"CommitLocation": "/gitapi/commit/" + branchURL + fileDir,
-		 			"Current": isCurrent,
-		 			"DiffLocation": "/gitapi/diff/" + branchName + fileDir,
-		 			"FullName": "refs/heads/" + branchName,
-		 			"HeadLocation": "/gitapi/commit/HEAD" + fileDir,
-		 			"LocalTimeStamp": 1424471958000, //hardcoded local timestamp
-		 			"Location": "/gitapi/branch/" + branchName + fileDir,
-		 			"Name": branchName,
-		 			"RemoteLocation": [],
-		 			"TreeLocation": "/gitapi/tree" + fileDir + "/" + branchName,
-		 			"Type": "Branch"
-	 			});
+ 				branches.push(branchJSON(ref, fileDir));
  			}
 		});
 		

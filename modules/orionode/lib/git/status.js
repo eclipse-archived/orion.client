@@ -34,12 +34,13 @@ function getStatus(workspaceDir, fileRoot, req, res, next, rest) {
 	            removed = [], 
 	            untracked = [];
 	
-	        function returnContent(file) {
+	        function returnContent(file, diffType) {
+	        	diffType = diffType || "Default";
 	        	var orionFilePath = api.join(fileDir, file.path());
 	            return {
 	                "Git": {
 	                    "CommitLocation": "/gitapi/commit/HEAD/file/" + orionFilePath,
-	                    "DiffLocation": "/gitapi/diff/Default/file/"+ orionFilePath,
+	                    "DiffLocation": "/gitapi/diff/" + diffType + "/file/"+ orionFilePath,
 	                    "IndexLocation": "/gitapi/index/file/" + orionFilePath
 	                },
 	                "Location": "/file/" + orionFilePath,
@@ -56,10 +57,10 @@ function getStatus(workspaceDir, fileRoot, req, res, next, rest) {
 	                    modified.push(returnContent(file));
 	                    break;
 	                case git.Status.STATUS.WT_DELETED:
-	                    removed.push(returnContent(file));
+	                    removed.push(returnContent(file, "Cached"));
 	                    break;
 	                case git.Status.STATUS.WT_TYPECHANGE:
-	                    changed.push(returnContent(file));
+	                    changed.push(returnContent(file, "Cached"));
 	                    break;
 	                case git.Status.STATUS.WT_NEW:
 	                    untracked.push(returnContent(file));
