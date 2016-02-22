@@ -8958,6 +8958,38 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
+						it("no-unused var cross file 1 - should not report unused function when used in a known html file", function(callback) {
+							worker.postMessage(
+								{
+									request: 'addFile',
+									args: {
+										file: "noUndefTest1.html",
+										source:
+											"<html>\n" +
+											"<body onload=\"main()\">\n" +
+											"	<div>\n" +
+											"		Test page\n" +
+											"	</div>\n" +
+											"</body>\n" +
+											"</html>"
+									}
+								}); 
+							var topic = 
+								"/*eslint-env browser */\n" +
+								"function main() {\n" +
+								"	alert (\"Hello\");\n" +
+								"}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								}
+							);
+						});
 					});
 			
 				//NO-USE-BEFORE-DEFINE ----------------------------------------------------
