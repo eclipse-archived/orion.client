@@ -105,8 +105,9 @@ function loader( domNode, title ){
 						'</div>' +
 						'<div id="steps" class="splashSteps">' +
 						'</div>' +
-						'<div id="stepMessages" class="stepMessages">' +
+						'<div id="stepMessage" class="splashMessage">' +
 						'</div>' +
+						'<div id="stepDetailedMessage" class="splashDetailedMessage">' +
 						'</div>' +
 					'</div>';   
 	
@@ -119,10 +120,6 @@ function loader( domNode, title ){
 
 loader.prototype.showFillerProgress = function(){
 	var cs = this.getStep();
-	if (!cs) {
-		this.stopFillerProgress();
-		return;
-	}
 	var increment = (cs.total - cs.worked)/10;
 	cs.worked = Math.min(cs.worked + increment, cs.total);
 	this.update();
@@ -130,7 +127,7 @@ loader.prototype.showFillerProgress = function(){
 
 loader.prototype.startFillerProgress = function() {
 	var cs = this.getStep();
-	if (!cs || cs.type !== cs.TYPE_FILLER) return;
+	if (cs.type !== cs.TYPE_FILLER) return;
 	this.interval = setInterval(function(){ this.showFillerProgress(); }.bind(this), this.FILLER_TIMEOUT);
 };
 	
@@ -192,7 +189,8 @@ loader.prototype.initialize = function(){
 	this.content = document.getElementById( this.domNode );
 	this.content.innerHTML = this.template;
 	this.splashProgress = document.getElementById( "progressbar" );
-	this.stepMessages = document.getElementById( "stepMessages" );
+	this.stepMessage = document.getElementById( "stepMessage" );
+	this.stepDetailedMessage = document.getElementById( "stepDetailedMessage" );
 	this.splashProgress.value = 0;
 };
 
@@ -258,21 +256,8 @@ loader.prototype.update = function(){
 		total += this.steps[s].total;
 	}
 	
-	this.stepMessages.innerHTML = "";
-	var message = cs.message || "";
-	var detailedMessage = cs.detailedMessage || "";
-	if (!Array.isArray(message)) message = [message];
-	if (!Array.isArray(detailedMessage)) detailedMessage = [detailedMessage];
-	message.forEach(function(msg, i) {
-		var msgDiv = document.createElement("div");
-		msgDiv.className = "splashMessage";
-		msgDiv.textContent = msg;
-		this.stepMessages.appendChild(msgDiv);
-		msgDiv = document.createElement("div");
-		msgDiv.className = "splashDetailedMessage";
-		msgDiv.textContent = (msg !== detailedMessage[i] ? detailedMessage[i] : null) || '\u00A0';
-		this.stepMessages.appendChild(msgDiv);
-	}.bind(this));
+	this.stepMessage.textContent = cs.message || "";
+	this.stepDetailedMessage.textContent = cs.detailedMessage || "";
 
 	var splashProgress = this.splashProgress;
 	if (splashProgress) {
