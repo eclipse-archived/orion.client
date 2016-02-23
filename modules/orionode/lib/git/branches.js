@@ -215,24 +215,28 @@ function createBranch(workspaceDir, fileRoot, req, res, next, rest) {
 }
 
 function deleteBranch(workspaceDir, fileRoot, req, res, next, rest) {
-	var repoPath = rest.replace("branch/", "");
-	var branchName = repoPath.substring(0, repoPath.indexOf("/"));
-	repoPath = repoPath.substring(repoPath.indexOf("/")+1).replace("file/", "");
-	repoPath = api.join(workspaceDir, repoPath);
+	var segments = rest.split("/");
+	var repoPath = segments[3];
+	var fileDir = api.join(fileRoot, repoPath);
+    repoPath = api.join(workspaceDir, repoPath);
+    var branchName = segments[1].replace(/%252F/g, '/');
+	var theRepo, theRef;
+
+
 	git.Repository.open(repoPath)
 	.then(function(repo) {
-		git.Branch.lookup(repo, branchName,	git.Branch.BRANCH.ALL)
-		.then(function(ref) {
-			if (git.Branch.delete(ref) === 0) {
-				res.statusCode = 200;
-				res.end();
-			} else {
-				writeError(403, res);
-		    } 
-		})
-		.catch(function(reasonForFailure) {
+		return git.Reference.lookup(repo, branchName);
+	})
+	.then(function(ref) {
+		if (git.Branch.delete(ref) === 0) {
+			res.statusCode = 200;
+			res.end();
+		} else {
 			writeError(403, res);
-		});
+	    } 
+	})
+	.catch(function(reasonForFailure) {
+		writeError(403, res);
 	});
 }
 
