@@ -11,7 +11,7 @@
 /*eslint-env node*/
 //var connect = require('connect');
 var express = require('express');
-var json = require('express-json');
+var bodyParser = require('body-parser');
 var url = require('url');
 var fs = require('fs');
 var fileUtil = require('./fileUtil');
@@ -173,7 +173,7 @@ module.exports = function(options) {
 	}
 
 	return express()
-	.use(json())
+	.use(bodyParser.json())
 	.use(resource(workspaceRoot, {
 		GET: function(req, res, next, rest) {
 			var searchOpt = new SearchOptions(req, res);

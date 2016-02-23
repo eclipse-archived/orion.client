@@ -11,13 +11,12 @@
 /*eslint-env node*/
 
 var express = require('express');
-var json = require('express-json');
+var bodyParser = require('body-parser');
 var api = require('./api');
 var fileUtil = require('./fileUtil');
 var resource = require('./resource');
 var rmdir = require('rimraf');
 var url = require('url');
-var redirect = require('connect-redirection');
 var writeError = api.writeError;
 
 // Handle optional nodegit dependency
@@ -56,8 +55,7 @@ function Git(options) {
 	var fileRoot = options.fileRoot;
 	if (!workspaceRoot) { throw new Error('options.root path required'); }
 	return express()
-	.use(json())
-	.use(redirect())
+	.use(bodyParser.json())
 	.use(resource(workspaceRoot, {
 		GET: function(req, res, next, rest) {
 			var query = url.parse(req.url, true).query;

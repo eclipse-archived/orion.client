@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*eslint-env node*/
 var express = require('express');
-var json = require('express-json');
+var bodyParser = require('body-parser');
 var fs = require('fs');
 var path = require('path');
 var url = require('url');
@@ -190,7 +190,7 @@ module.exports = function(options) {
 	 * Handler begins here
 	 */
 	return express()
-	.use(json())
+	.use(bodyParser.json())
 	.use(resource(fileRoot, {
 		GET: function(req, res, next, rest) {
 			if (writeEmptyFilePathError(res, rest)) {

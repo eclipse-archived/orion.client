@@ -11,7 +11,7 @@
 /*eslint-env node*/
 
 var express = require('express');
-var json = require('express-json');
+var bodyParser = require('body-parser');
 var resource = require('./resource');
 var api = require('./api'), writeError = api.writeError;
 
@@ -22,7 +22,7 @@ function orionTasksAPI(options) {
     if (!workspaceRoot) { throw new Error('options.root path required'); }
 
     return express()
-    .use(json())
+    .use(bodyParser.json())
     .use(resource(workspaceRoot, {
         GET: function(req, res, next, rest) {
 

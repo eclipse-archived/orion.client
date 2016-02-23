@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*eslint-env node*/
 var express = require('express');
-var json = require('express-json');
+var bodyParser = require('body-parser');
 var fs = require('fs');
 var util = require('util');
 var api = require('./api'), writeError = api.writeError;
@@ -43,7 +43,7 @@ module.exports = function(options) {
 	}
 
 	return express()
-	.use(json())
+	.use(bodyParser.json())
 	.use(resource(workspaceRoot, {
 		GET: function(req, res, next, rest) {
 			var workspaceRootUrl = originalWorkspaceRoot(req);
