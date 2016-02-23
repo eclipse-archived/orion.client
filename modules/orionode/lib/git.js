@@ -62,16 +62,8 @@ function Git(options) {
 				writeError(400, res);
 			} else if (rest.indexOf("clone/") === 0) {
 				clone.getClone(workspaceDir, fileRoot, req, res, next, rest);
-			} else if (rest.indexOf("remote/file/") === 0) {
+			} else if (rest.indexOf("remote/") === 0) {
 				remotes.getRemotes(workspaceDir, fileRoot, req, res, next, rest);
-			} else if (rest.indexOf("remote/") === 0 ) {
-				var remote = rest.replace("remote/", "").substring(0, rest.lastIndexOf("/file/")-"/file/".length-1);
-				if (remote.indexOf("/") === -1) {
-					remotes.getRemotesBranches(workspaceDir, fileRoot, req, res, next, rest);
-				}
-				else {
-					remotes.getRemotesBranchDetail(workspaceDir, fileRoot, req, res, next, rest);
-				}
 			} else if (rest.indexOf("branch/")===0) {
 				branches.getBranches(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("status/file/") === 0) {
