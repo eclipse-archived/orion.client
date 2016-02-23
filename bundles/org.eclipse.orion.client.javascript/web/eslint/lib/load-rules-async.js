@@ -175,7 +175,7 @@ define([
         							if(anode.right && (anode.right.type === 'FunctionExpression') && anode.left && (anode.left.type === 'MemberExpression')) {
         								//comments are attached to the enclosing expression statement
         								comments = context.getComments(node);
-        								if(comments.leading.length < 1 && comments.trailing.length < 1) {
+        								if(!comments || comments.leading.length < 1) {
             							    //TODO see https://github.com/jquery/esprima/issues/1071
         							        comments = context.getComments(anode.left);
             							}

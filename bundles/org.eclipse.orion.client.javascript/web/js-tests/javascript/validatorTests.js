@@ -942,7 +942,60 @@ define([
 					var flagExpr = { rules: {} };
 					flagDecl.rules[RULE_ID] = [1, {decl: 1}];
 					flagExpr.rules[RULE_ID] = [1, {expr: 1}];
-	
+					
+					/**
+					 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=488261
+					 */
+					it("should not flag for function expression assignment 1", function(callback) {
+						var config = flagExpr;
+						validate({buffer: "/** */Foo.bar.baz = function() {};", callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					/**
+					 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=488261
+					 */
+					it("should not flag for function expression assignment 2", function(callback) {
+						var config = flagExpr;
+						validate({buffer: "/** */Foo.bar.baz = function baz() {};", callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					/**
+					 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=488261
+					 */
+					it("should not flag for function expression assignment 3", function(callback) {
+						var config = flagExpr;
+						validate({buffer: "/** */Foo.bar['baz'] = function() {};", callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					/**
+					 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=488261
+					 */
+					it("should not flag for function expression assignment 3", function(callback) {
+						var config = flagExpr;
+						validate({buffer: "/** */Foo['bar']['baz'] = function() {};", callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					
 					it("should not flag for object property function expression", function(callback) {
 						var config = flagExpr;
 						validate({buffer: "var foo = {/**foo*/f: function() {}};", callback: callback, config: config}).then(
