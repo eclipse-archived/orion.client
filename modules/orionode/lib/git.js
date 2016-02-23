@@ -72,10 +72,8 @@ function Git(options) {
 				else {
 					remotes.getRemotesBranchDetail(workspaceDir, fileRoot, req, res, next, rest);
 				}
-			} else if (rest.indexOf("branch/file/")===0) {
-				branches.getBranches(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("branch/")===0) {
-				branches.getBranchMetadata(workspaceDir, fileRoot, req, res, next, rest);
+				branches.getBranches(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("status/file/") === 0) {
 				status.getStatus(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("config/clone/file/") === 0) {
