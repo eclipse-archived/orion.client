@@ -60,7 +60,7 @@ function Git(options) {
 		GET: function(req, res, next, rest) {
 			if (rest === '') {
 				writeError(400, res);
-			} else if (rest.indexOf("clone/workspace/") === 0) {
+			} else if (rest.indexOf("clone/") === 0) {
 				clone.getClone(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("remote/file/") === 0) {
 				remotes.getRemotes(workspaceDir, fileRoot, req, res, next, rest);
@@ -85,7 +85,7 @@ function Git(options) {
 			} else if (rest.indexOf("index/file/") === 0) {
 				// I think this is working, but I'm not 100%, leave it out for now.
 				add.getFileIndex(workspaceDir, fileRoot, req, res, next, rest);
-			} else if (rest.indexOf("tag/file/") === 0) {
+			} else if (rest.indexOf("tag/") === 0) {
 				tags.getTags(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("stash/file") === 0) {
 				stash.getStash(workspaceDir, fileRoot, req, res, next, rest);

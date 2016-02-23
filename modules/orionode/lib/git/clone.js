@@ -18,26 +18,26 @@ var async = require('async');
 
 function getClone(workspaceDir, fileRoot, req, res, next, rest) {
 	var repos = [];
-
-	fs.readdir(workspaceDir, function(err, files) {
-		if (err) return writeError(500);
+	
+	var rootDir;
+	var segments = rest.split("/");
+	if (segments[1] === "workspace") {
+		rootDir = workspaceDir;
+	} else if (segments[1] === "file") {
+		rootDir = api.join(workspaceDir, segments.slice(2).join("/"));
+	}
 		
-		files = files.map(function(file) {
-			return path.join(workspaceDir, file);
+	checkDirectory(rootDir, function(err) {
+		if (err) return writeError(403, res, err.message);
+		var resp = JSON.stringify({
+			"Children": repos,
+			"Type": "Clone"
 		});
 
-		async.each(files, checkDirectory, function(err) {
-			if (err) return writeError(403);
-			var resp = JSON.stringify({
-				"Children": repos,
-				"Type": "Clone"
-			});
-
-			res.statusCode = 200;
-			res.setHeader('Content-Type', 'application/json');
-			res.setHeader('Content-Length', resp.length);
-			res.end(resp);	
-		});
+		res.statusCode = 200;
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);	
 	});
 
 	function checkDirectory(dir, cb) {

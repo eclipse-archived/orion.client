@@ -14,113 +14,141 @@ var git = require('nodegit');
 var async = require('async');
 var url = require('url');
 
+function tagJSON(ref, commit, fileDir) {
+	var refName = ref.name();
+	var rName = refName.replace("refs/tags/", "");
+	return {
+		"FullName": refName,
+		"Name": rName,
+		"CloneLocation": "/gitapi/clone" + fileDir,
+		"CommitLocation": "/gitapi/commit/" + commit.sha() + fileDir,
+		"LocalTimeStamp": commit.timeMs(),
+		"Location": "/gitapi/tag/" + rName + fileDir,
+		"TagType": "LIGHTWEIGHT",//TODO
+		"TreeLocation": "/gitapi/tree" + fileDir + "/" + rName,
+		"Type": "Tag"
+	};
+}
+
 function getTags(workspaceDir, fileRoot, req, res, next, rest) {
-  var segments = rest.split("/");
-  var remoteName = segments[1];
-  var repoPath = segments[2];
-  var fileDir = api.join(fileRoot, repoPath);
-  var theRepo;
-  repoPath = api.join(workspaceDir, repoPath);
-  var query = url.parse(req.url, true).query;
-  var page = Number(query.page) || 1;
-  var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
-  var tags = [];
-  var count = 0;
-  
-  git.Repository.open(repoPath)
+	var segments = rest.split("/");
+	var hasTag = segments[1] !== "file";
+	var tagName = hasTag ? segments[1] : "";
+	var repoPath = segments[hasTag ? 3 : 2];
+	var fileDir = api.join(fileRoot, repoPath);
+	repoPath = api.join(workspaceDir, repoPath);
+	var query = url.parse(req.url, true).query;
+	var page = Number(query.page) || 1;
+	var filter = query.filter;
+	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
+
+	var theRepo, theRef;
+	var tags = [];
+	var count = 0, tagCount = 0;
+
+	if (tagName) {
+		git.Repository.open(repoPath)
+		.then(function(repo) {
+			theRepo = repo;
+			return git.Reference.lookup(theRepo, "refs/tags/" + tagName);
+		})
+		.then(function(ref) {
+			theRef = ref;
+			return theRepo.getReferenceCommit(ref);
+		})
+		.then(function(commit) {
+			var resp = JSON.stringify(tagJSON(theRef, commit, fileDir));
+			res.statusCode = 200;
+			res.setHeader('Content-Type', 'application/json');
+			res.setHeader('Content-Length', resp.length);
+			res.end(resp);
+		})
+		.catch(function(err) {
+			writeError(404, res, err.message);
+		});
+		return;
+	}
+
+	git.Repository.open(repoPath)
 	.then(function(repo) {
-    theRepo = repo;
-    return theRepo.getReferences(git.Reference.TYPE.OID);
-  })
-  .then(function(refList) {
-    async.each(refList, function(ref,callback) {
-        if (ref.isTag()) {
-        //   theRepo.getReferenceCommit(ref.name())
-        // .then(function(commit) {
-          if (!page || count++ >= (page-1)*pageSize && tags.length <= pageSize) {
-            var refName = ref.name();
-            var rName = refName.replace("refs/tags/", "");
-            tags.push({
-              "FullName": refName,
-              "Name": rName,
-              "CloneLocation": "/gitapi/clone" + fileDir,
-              // "CommitLocation": "/gitapi/commit/af23d5d2cf5d9acbc27974627a39abe7bbd8662c/file/silenio-OrionContent/org.eclipse.orion.client/",
-              // "LocalTimeStamp": 1393368341000,
-              "Location": "/gitapi/tag/" + rName + fileDir,
-              "TagType": "LIGHTWEIGHT",
-              "TreeLocation": "/gitapi/tree" + fileDir + "/" + rName,
-              "Type": "Tag"
-            });
-          }
+		theRepo = repo;
+		return theRepo.getReferences(git.Reference.TYPE.OID);
+	})
+	.then(function(refList) {
+		async.each(refList, function(ref,callback) {
+			if (ref.isTag()) {
+				if (!filter || ref.name().replace("refs/tags/", "").indexOf(filter) !== -1) {
+					if (!page || count++ >= (page-1)*pageSize && tagCount <= pageSize) {
+						tagCount++;
+						theRepo.getReferenceCommit(ref)
+						.then(function(commit) {
+							tags.push(tagJSON(ref, commit, fileDir));
+							callback();
+						})
+						.catch(function() {
+							// ignore errors looking up commits
+							callback();
+						});
+						return;
+					}
+				}
+			}
+			callback();
+		}, function(err) {
+			if (err) {
+				return writeError(403, res);
+			}
+			var resp = {
+				"Children": tags,
+				"Type": "Tag",
+			};
 
-         callback();
-       //  })
-       // .catch(function(err) {
-       //  writeError(400,res,err.message);
-       // });
-      } else {
-        callback();
-      }
-    }, function(err) {
-      if (err) {
-        return writeError(403, res);
-      }
+			if (page && page*pageSize < count) {
+				var nextLocation = url.parse(req.url, true);
+				nextLocation.query.page = page + 1 + "";
+				nextLocation.search = null; //So that query object will be used for format
+				nextLocation = url.format(nextLocation);
+				resp['NextLocation'] = nextLocation;
+			}
 
+			if (page && page > 1) {
+				var prevLocation = url.parse(req.url, true);
+				prevLocation.query.page = page - 1 + "";
+				prevLocation.search = null;
+				prevLocation = url.format(prevLocation);
+				resp['PreviousLocation'] = prevLocation;
+			}
 
-      var resp = {
-        "Children": tags,
-        "Type": "Tag",
-      }
-
-      if (page && page*pageSize < count) {
-        var nextLocation = url.parse(req.url, true);
-        nextLocation.query.page = page + 1 + "";
-        nextLocation.search = null; //So that query object will be used for format
-        nextLocation = url.format(nextLocation);
-        resp['NextLocation'] = nextLocation;
-      }
-
-      if (page && page > 1) {
-        var prevLocation = url.parse(req.url, true);
-        prevLocation.query.page = page - 1 + "";
-        prevLocation.search = null;
-        prevLocation = url.format(prevLocation);
-        resp['PreviousLocation'] = prevLocation;
-      }
-
-
-      resp = JSON.stringify(resp);
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Content-Length', resp.length);
-      res.end(resp);
-    });
-  });
+			resp = JSON.stringify(resp);
+			res.statusCode = 200;
+			res.setHeader('Content-Type', 'application/json');
+			res.setHeader('Content-Length', resp.length);
+			res.end(resp);
+		});
+	});
 }
 
 function deleteTags(workspaceDir, fileRoot, req, res, next, rest) {
-  var restOfTheUrl = rest.replace("tag/", "");
-  var index = restOfTheUrl.indexOf("/");
-  var tag = restOfTheUrl.substring(0, index);
-  var repoPath = restOfTheUrl.substring(index+1).replace("file/", "");
-  
-  repoPath = api.join(workspaceDir, repoPath);
+	var segments = rest.split("/");
+	var tagName = segments[1];
+	var repoPath = segments[3];
+	repoPath = api.join(workspaceDir, repoPath);
 
-  git.Repository.open(repoPath)
-  .then(function(repo) {
-    if (repo) {
-      var resp = git.Tag.delete(repo, tag);
-      if (resp === 0) {
-        res.statusCode = 200;
-        res.end();
-      } else {
-        writeError(403, res);
-      } 
-    }
-  });
+	git.Repository.open(repoPath)
+	.then(function(repo) {
+		return git.Tag.delete(repo, tagName);
+	})
+	.then(function(resp) {
+		if (!resp) {
+			res.statusCode = 200;
+			res.end();
+		} else {
+			writeError(403, res);
+		} 
+	});
 }
 
 module.exports = {
 	getTags: getTags,
-  deleteTags: deleteTags
+	deleteTags: deleteTags
 };
