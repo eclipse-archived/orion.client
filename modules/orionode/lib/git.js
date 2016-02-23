@@ -111,7 +111,9 @@ function Git(options) {
 			}
 		},
 		PUT: function(req, res, next, rest) {
-			if (rest.indexOf("index/") === 0) {
+			if (rest.indexOf("clone/") === 0) {
+				clone.putClone(workspaceDir, fileRoot, req, res, next, rest);
+			} else if (rest.indexOf("index/") === 0) {
 				add.putStage(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("config/") === 0) {
 				config.putConfig(workspaceDir, fileRoot, req, res, next, rest);

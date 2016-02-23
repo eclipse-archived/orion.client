@@ -154,6 +154,35 @@ function postInit(workspaceDir, fileRoot, req, res, next, rest) {
 	}
 }
 
+function putClone(workspaceDir, fileRoot, req, res, next, rest) {
+	var segments = rest.split("/");
+	if (!(segments[1] === "file" && segments.length > 2)) {
+		return writeError(404, res);
+	}
+
+	var paths = req.body.Path;
+	var branch = req.body.Branch;
+	var tag = req.body.Tag;
+	var removeUntracked = req.body.RemoveUntracked;
+	if ((!paths || !paths.length) && !branch && !tag) {
+		return writeError(400, "Invalid parameters");
+	}
+
+	//
+	var repoPath = segments[2];
+	repoPath = api.join(workspaceDir, repoPath);
+	var repo;
+	git.Repository.open(repoPath)
+	.then(function(r) {
+		repo = r;
+		return git.Checkout.tree(r, branch);
+	})
+	.then(function(result){
+		console.log(result)
+	});
+	//
+}
+
 function postClone(workspaceDir, fileRoot, req, res, next, rest) {
 	var url = req.body.GitUrl;
 	var dirName = url.substring(url.lastIndexOf("/") + 1).replace(".git", "")
@@ -192,5 +221,6 @@ function postClone(workspaceDir, fileRoot, req, res, next, rest) {
 module.exports = {
 	getClone: getClone,
 	postClone: postClone,
-	postInit: postInit
+	postInit: postInit,
+	putClone: putClone	
 };

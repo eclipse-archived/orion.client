@@ -174,42 +174,43 @@ function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
 }
 
 function createBranch(workspaceDir, fileRoot, req, res, next, rest) {
-	var repoPath = rest.replace("branch/file/", "");
-	var fileDir = repoPath;
-	var gitPath;
+	var segments = rest.split("/");
+	var repoPath = segments[2];
+	var fileDir = api.join(fileRoot, repoPath);
     repoPath = api.join(workspaceDir, repoPath);
+    var branchName = req.body.Name;
+	var startPoint = req.body.Branch;
+	var theRepo, theRef;
+
+	if (!branchName) {
+		if (!startPoint) {
+			return writeError(400, res, "Branch name must be provided.");
+		}
+	}
 	git.Repository.open(repoPath)
 	.then(function(repo) {
-		repo.getCurrentBranch()
-		.then(function(reference) {
-			repo.getBranchCommit(reference)
-			.then(function(commit) {
-				var branchName = req.body.Name;
-				var signature = git.Signature.default(repo);
-				git.Branch.create(repo, branchName, commit, 0, signature, null)
-				.then(function(ref) {
-					var resp = JSON.stringify({
-						"CloneLocation": "/gitapi/clone/file/" + fileDir,
-						"CommitLocation": "/gitapi/commit/" + branchName + "/file/" + fileDir,
-						"Current": git.Branch.isHead(ref) ? true : false,
-						"DiffLocation": "/gitapi/diff/" + branchName + "/file/" + fileDir,
-						"FullName": ref.name(),
-						"HeadLocation": "/gitapi/commit/HEAD/file/" + fileDir,
-						"LocalTimeStamp": 1234567890000, //hardcoded
-						"Location": "/gitapi/branch/" + branchName + "/file/" + fileDir,
-						"Name": branchName,
-						"RemoteLocation": [],
-						"TreeLocation": "/gitapi/tree/file/" + fileDir + "/" + branchName,
-						"Type": "Branch"
-					});
-					
-					res.statusCode = 201;
-					res.setHeader('Content-Type', 'application/json');
-					res.setHeader('Content-Length', resp.length);
-					res.end(resp);
-				});
-			});
-		});
+		theRepo = repo;
+		return startPoint ? git.Reference.lookup(repo, "refs/remotes/" + startPoint) : repo.getCurrentBranch();
+	})
+	.then(function(reference) {
+		theRef = reference;
+		return theRepo.getReferenceCommit(reference);
+	})
+	.then(function(commit) {
+		if (!branchName) {
+			branchName = theRef.shorthand().split("/").slice(1).join("/");
+		}
+		return git.Branch.create(theRepo, branchName, commit, 0);
+	})
+	.then(function(ref) {
+		var resp = JSON.stringify(branchJSON(ref, fileDir));
+		res.statusCode = 201;
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
+	})
+	.catch(function(err) {
+		writeError(500, res, err.message);
 	});
 }
 
