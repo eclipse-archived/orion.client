@@ -24,12 +24,6 @@ define([
 	function getPageLoader() {
 		return require.specified("orion/splash") && require("orion/splash").getPageLoader(); //$NON-NLS-1$
 	}
-	
-	function mark(name) {
-		if (window.performance && window.performance.mark) {
-			window.performance.mark("orion-" + name);
-		}
-	}
 
 	/**
 	 * Service for reporting status
@@ -508,7 +502,6 @@ define([
 	 * @param {String} message
 	 */
 	ProgressMonitor.prototype.begin = function(message){
-				mark("start " + this.progressId + ": " + this.title);
 				this.status = message;
 				this.statusService._beginProgressMonitor(this);
 			};
@@ -520,7 +513,6 @@ define([
 	 * from the Orion server.
 	 */
 	ProgressMonitor.prototype.done = function(_status){
-				mark("end " + this.progressId + ": " + this.title);
 				this.status = _status;
 				this.statusService._doneProgressMonitor(this);
 			};

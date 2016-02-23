@@ -34,20 +34,12 @@ function step(id, description, type, total) {
 	this.domNode;
 }
 
-function mark(name) {
-	if (window.performance && window.performance.mark) {
-		window.performance.mark("orion-" + name);
-	}
-}
-
 step.prototype.complete = function() {
-	mark("end splash step " + this.id);
 	this.state = this.COMPLETED;
 	this.domNode.className = 'splashSuccessImage';
 };
 
 step.prototype.spin = function(){
-	mark("start splash step " + this.id);
 	this.state = this.HAPPENING;
 	this.domNode.className = 'splashLoadingImage';
 };
