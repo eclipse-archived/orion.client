@@ -168,19 +168,48 @@ function putClone(workspaceDir, fileRoot, req, res, next, rest) {
 		return writeError(400, "Invalid parameters");
 	}
 
-	//
 	var repoPath = segments[2];
 	repoPath = api.join(workspaceDir, repoPath);
-	var repo;
+	var theRepo, theRef, theCommit;
+	var checkOptions = {
+		checkoutStrategy: git.Checkout.STRATEGY.FORCE,
+	};
 	git.Repository.open(repoPath)
-	.then(function(r) {
-		repo = r;
-		return git.Checkout.tree(r, branch);
+	.then(function(repo) {
+		theRepo = repo;
+		if (paths) {
+			//TODO: handle untracked files
+			checkOptions.paths = paths;
+			return git.Checkout.head(theRepo, checkOptions);
+		} else if (tag && typeof(branch) === "string") {
+			if (!branch) {
+
+				return git.Reference.lookup(theRepo, "refs/tags/" + tag)
+				.then(function(reference) {
+					theRef = reference;
+					return theRepo.getReferenceCommit(reference);
+				})
+				.then(function(commit) {
+					theCommit = commit;
+				 	return git.Checkout.tree(theRepo, commit, checkOptions);
+				})
+				.then(function() {
+					return theRepo.setHeadDetached(theCommit);
+				});
+			} else {
+				theRepo.checkoutBranch(branch, checkOptions);
+			}
+		} else {
+			return theRepo.checkoutBranch(branch, checkOptions);
+		}
 	})
 	.then(function(result){
-		console.log(result)
-	});
-	//
+		res.statusCode = 200;
+		res.end();
+	})
+	.catch(function(err){
+    	writeError(403, res);
+    });
 }
 
 function postClone(workspaceDir, fileRoot, req, res, next, rest) {
