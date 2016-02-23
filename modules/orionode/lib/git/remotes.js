@@ -53,6 +53,8 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 	var allRemotes = segments[1] === "file";
 	var allRemoteBranches = segments[2] === "file";
 	var oneRemoteBranch = segments[3] === "file";
+	var query = url.parse(req.url, true).query;
+	var filter = query.filter;
 
 	if (allRemotes) {
 		var repoPath = segments[2];
@@ -107,7 +109,7 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 			async.each(referenceList, function(ref,callback) {
 				if (ref.isRemote()) {
 					var rName = ref.name().replace("refs/remotes/", "");
-					if (rName.indexOf(remoteName) === 0) {
+					if (rName.indexOf(remoteName) === 0 && (!filter || rName.indexOf(filter) !== -1)) {
 						theRepo.getBranchCommit(ref)
 						.then(function(commit) {
 							branches.push(remoteBranchJSON(ref, commit, theRemote, fileDir));
