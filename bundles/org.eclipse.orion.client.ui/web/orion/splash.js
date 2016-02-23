@@ -105,7 +105,7 @@ function loader( domNode, title ){
 						'</div>' +
 						'<div id="steps" class="splashSteps">' +
 						'</div>' +
-						'<div id="stepMessages" class="splashMessages">' +
+						'<div id="stepMessages" class="stepMessages">' +
 						'</div>' +
 						'</div>' +
 					'</div>';   
