@@ -11,7 +11,7 @@
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
-//var url = require('url');
+var url = require('url');
 var async = require('async');
 
 function branchJSON(ref, fileDir) {
@@ -72,8 +72,8 @@ function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
 	var repoPath = segments[branchName ? 3 : 2];
 	var fileDir = api.join(fileRoot, repoPath);
 	repoPath = api.join(workspaceDir, repoPath);
-//	var query = url.parse(req.url, true).query;
-//	var filter = query.filter;
+	var query = url.parse(req.url, true).query;
+	var filter = query.filter;
 	
     var theRepo;
 	if (branchName) {
@@ -126,7 +126,9 @@ function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
 	.then(function(referenceList) {
  		referenceList.forEach(function(ref) {
  			if (ref.isBranch()) {
- 				branches.push(branchJSON(ref, fileDir));
+ 				if (!filter || ref.name().replace("refs/heads/", "").indexOf(filter) !== -1) {
+ 					branches.push(branchJSON(ref, fileDir));
+ 				}
  			}
 		});
 		
