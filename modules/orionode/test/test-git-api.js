@@ -9,14 +9,18 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node, mocha*/
-/*eslint no-shadow:0*/
+/*eslint-disable no-shadow, no-sync*/
 var assert = require('assert');
 var express = require('express');
 var path = require('path');
 var supertest = require('supertest');
 var testData = require('./support/test_data');
-var git = require('nodegit');
 var fs = require('fs');
+var git;
+try {
+	git = require('nodegit');
+} catch (e) {
+}
 
 var CONTEXT_PATH = '/orionn';
 var PREFIX = CONTEXT_PATH + '/workspace';
@@ -60,7 +64,16 @@ function setupRepo(done) {
 	});
 }
 
-describe("git", function() {
+// Skip tests if nodegit is not installed
+function maybeDescribe() {
+	return git ? describe.apply(null, arguments) : describe.skip.apply(null, arguments);
+}
+
+maybeDescribe("git", function() {
+	if (!git) {
+		it("*** nodegit is not installed -- git tests skipped", Function.prototype);
+	}
+
 	/**
 	 * init repo, add file, commit file, add remote, get list of remotes, fetch from remote, delete repo
 	 */
