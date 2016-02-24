@@ -340,10 +340,11 @@ function merge(req, res, next, rest, repoPath, commit, squash) {
 }
 
 function createCommit(repo, committerName, committerEmail, authorName, authorEmail, message){
+	var index, oid, author, committer;
 	return repo.index()
-    .then(function(indexResult) {
-    	index = indexResult;
-    	return index.read(1);
+	.then(function(indexResult) {
+		index = indexResult;
+		return index.read(1);
 	})
 	.then(function() {
 		return index.writeTree();

@@ -21,7 +21,7 @@ var writeError = api.writeError;
 // Handle optional nodegit dependency
 var hasNodegit = true;
 try {
-	var add = require('./git/add');
+	var index = require('./git/index');
 	var clone = require('./git/clone');
 	var remotes = require('./git/remotes');
 	var branches = require('./git/branches');
@@ -72,9 +72,8 @@ function Git(options) {
 				config.getConfig(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("config/") === 0) {
 				config.getAConfig(workspaceDir, fileRoot, req, res, next, rest);
-			} else if (rest.indexOf("index/file/") === 0) {
-				// I think this is working, but I'm not 100%, leave it out for now.
-				add.getFileIndex(workspaceDir, fileRoot, req, res, next, rest);
+			} else if (rest.indexOf("index/") === 0) {
+				index.getIndex(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("tag/") === 0) {
 				tags.getTags(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("stash/file") === 0) {
@@ -93,7 +92,7 @@ function Git(options) {
 			if (rest.indexOf("clone/") === 0){
 				clone.postInit(workspaceDir, fileRoot, req, res, next, rest);
 			} else if(rest.indexOf("index/") === 0) {
-				add.postStage(workspaceDir, fileRoot, req, res, next, rest);
+				index.postIndex(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("config/") === 0) {
 				config.postConfig(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("commit/") === 0) {
@@ -114,7 +113,7 @@ function Git(options) {
 			if (rest.indexOf("clone/") === 0) {
 				clone.putClone(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("index/") === 0) {
-				add.putStage(workspaceDir, fileRoot, req, res, next, rest);
+				index.putIndex(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("config/") === 0) {
 				config.putConfig(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("commit/") === 0) {
