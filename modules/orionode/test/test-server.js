@@ -48,7 +48,6 @@ describe("orion", function() {
 			.get("/index.html")
 			.expect("cache-control", /max-age=31337/, done); //seconds
 		});
-		// TODO test configParams once they are cleaned up/merged with options
 	});
 
 	describe("middleware", function() {

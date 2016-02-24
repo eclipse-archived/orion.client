@@ -13,10 +13,8 @@
 var express = require('express'),
 	http = require('http'),
     path = require('path'),
-    AppContext = require('./lib/node_apps').AppContext,
     orionFile = require('./lib/file'),
     orionLogin = require('./lib/login'),
-    orionNode = require('./lib/node'),
     orionWorkspace = require('./lib/workspace'),
     orionGit = require('./lib/git'),
     orionNodeStatic = require('./lib/orionode_static'),
@@ -37,8 +35,6 @@ function startServer(options) {
 	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : undefined;
 	var workspaceDir = options.workspaceDir, configParams = options.configParams;
 	try {
-		var appContext = new AppContext({fileRoot: '/file', workspaceDir: workspaceDir, configParams: configParams});
-
 		//http server
 		var app = express();
 		var server = http.createServer(app);
@@ -72,12 +68,6 @@ function startServer(options) {
 				fileRoot: '/file',
 				workspaceDir: workspaceDir
 			}))
-		app.use(orionNode({
-				appContext: appContext,
-				root: '/node'
-			}));
-
-		app.appContext = appContext;
 		return app;
 	} catch (e) {
 		handleError(e);
