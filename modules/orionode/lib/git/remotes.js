@@ -115,7 +115,7 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 			var branches = [];
 			async.each(referenceList, function(ref,callback) {
 				if (ref.isRemote()) {
-					var rName = ref.name().replace("refs/remotes/", "");
+					var rName = ref.shorthand();
 					if (rName.indexOf(remoteName) === 0 && (!filter || rName.indexOf(filter) !== -1)) {
 						theRepo.getBranchCommit(ref)
 						.then(function(commit) {

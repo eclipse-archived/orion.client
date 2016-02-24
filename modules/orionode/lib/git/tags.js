@@ -15,17 +15,17 @@ var async = require('async');
 var url = require('url');
 
 function tagJSON(ref, commit, fileDir) {
-	var refName = ref.name();
-	var rName = refName.replace("refs/tags/", "");
+	var fullName = ref.name();
+	var shortName = ref.shorthand();
 	return {
-		"FullName": refName,
-		"Name": rName,
+		"FullName": fullName,
+		"Name": shortName,
 		"CloneLocation": "/gitapi/clone" + fileDir,
 		"CommitLocation": "/gitapi/commit/" + commit.sha() + fileDir,
 		"LocalTimeStamp": commit.timeMs(),
-		"Location": "/gitapi/tag/" + rName + fileDir,
+		"Location": "/gitapi/tag/" + shortName + fileDir,
 		"TagType": "LIGHTWEIGHT",//TODO
-		"TreeLocation": "/gitapi/tree" + fileDir + "/" + rName,
+		"TreeLocation": "/gitapi/tree" + fileDir + "/" + shortName,
 		"Type": "Tag"
 	};
 }
@@ -77,7 +77,7 @@ function getTags(workspaceDir, fileRoot, req, res, next, rest) {
 	.then(function(refList) {
 		async.each(refList, function(ref,callback) {
 			if (ref.isTag()) {
-				if (!filter || ref.name().replace("refs/tags/", "").indexOf(filter) !== -1) {
+				if (!filter || ref.shorthand().indexOf(filter) !== -1) {
 					if (!page || count++ >= (page-1)*pageSize && tagCount <= pageSize) {
 						tagCount++;
 						theRepo.getReferenceCommit(ref)

@@ -113,7 +113,7 @@ function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
 	.then(function(referenceList) {
  		referenceList.forEach(function(ref) {
  			if (ref.isBranch()) {
- 				if (!filter || ref.name().replace("refs/heads/", "").indexOf(filter) !== -1) {
+ 				if (!filter || ref.shorthand().indexOf(filter) !== -1) {
  					branches.push(branchJSON(theRepo, ref, fileDir));
  				}
  			}
