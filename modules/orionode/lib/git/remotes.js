@@ -101,7 +101,7 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 			return repo.getRemote(remoteName);
 		})
 		.then(function(remote) {
-			theRemote = remote
+			theRemote = remote;
 			return theRepo.getReferences(git.Reference.TYPE.OID);
 		})
 		.then(function(referenceList) {
@@ -169,7 +169,7 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 		});
 		return;
 	}
-	
+	return writeError(404, res);
 }
 
 function addRemote(workspaceDir, fileRoot, req, res, next, rest) {

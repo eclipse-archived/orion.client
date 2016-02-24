@@ -24,6 +24,7 @@ function generateCommitObject(commit, fileDir, diffs) {
 		"ContentLocation": "/gitapi/commit/" + commit.sha() + fileDir + "?parts=body",
 		"DiffLocation": "/gitapi/diff/" + commit.sha() + fileDir,
 		"Location": "/gitapi/commit/" + commit.sha() + fileDir,
+		"CloneLocation": "/gitapi/clone" + fileDir,
 		"Diffs": diffs,
 		"Message": commit.message(),
 		"Name": commit.sha(),

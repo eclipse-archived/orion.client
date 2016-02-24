@@ -181,34 +181,34 @@ function putClone(workspaceDir, fileRoot, req, res, next, rest) {
 			//TODO: handle untracked files
 			checkOptions.paths = paths;
 			return git.Checkout.head(theRepo, checkOptions);
-		} else if (tag && typeof(branch) === "string") {
-			if (!branch) {
-
-				return git.Reference.lookup(theRepo, "refs/tags/" + tag)
-				.then(function(reference) {
-					theRef = reference;
-					return theRepo.getReferenceCommit(reference);
-				})
-				.then(function(commit) {
-					theCommit = commit;
-				 	return git.Checkout.tree(theRepo, commit, checkOptions);
-				})
-				.then(function() {
+		} else if (tag && typeof branch === "string") {
+			return git.Reference.lookup(theRepo, "refs/tags/" + tag)
+			.then(function(reference) {
+				theRef = reference;
+				return theRepo.getReferenceCommit(reference);
+			}).catch(function() {
+				return theRepo.getCommit(tag);
+			})
+			.then(function(commit) {
+				theCommit = commit;
+				if (branch) {
+					return git.Branch.create(theRepo, branch, commit, 0).then(function() {
+						return theRepo.checkoutBranch(branch, checkOptions);
+					});
+				}
+			 	return git.Checkout.tree(theRepo, commit, checkOptions).then(function() {
 					return theRepo.setHeadDetached(theCommit);
 				});
-			} else {
-				theRepo.checkoutBranch(branch, checkOptions);
-			}
-		} else {
-			return theRepo.checkoutBranch(branch, checkOptions);
+			});
 		}
+		return theRepo.checkoutBranch(branch, checkOptions);
 	})
-	.then(function(result){
+	.then(function(){
 		res.statusCode = 200;
 		res.end();
 	})
 	.catch(function(err){
-    	writeError(403, res);
+    	writeError(403, res, err.message);
     });
 }
 

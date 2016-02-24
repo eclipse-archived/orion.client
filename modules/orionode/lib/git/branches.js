@@ -217,10 +217,8 @@ function createBranch(workspaceDir, fileRoot, req, res, next, rest) {
 function deleteBranch(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
 	var repoPath = segments[3];
-	var fileDir = api.join(fileRoot, repoPath);
     repoPath = api.join(workspaceDir, repoPath);
     var branchName = segments[1].replace(/%252F/g, '/');
-	var theRepo, theRef;
 
 
 	git.Repository.open(repoPath)
@@ -235,7 +233,7 @@ function deleteBranch(workspaceDir, fileRoot, req, res, next, rest) {
 			writeError(403, res);
 	    } 
 	})
-	.catch(function(reasonForFailure) {
+	.catch(function() {
 		writeError(403, res);
 	});
 }
