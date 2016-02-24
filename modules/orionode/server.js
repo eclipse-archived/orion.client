@@ -16,8 +16,8 @@ var auth = require('./lib/middleware/auth'),
     path = require('path'),
     socketio = require('socket.io'),
     util = require('util'),
-    appSocket = require('./lib/node_app_socket'),
     argslib = require('./lib/args'),
+    ttyShell = require('./lib/tty_shell'),
     orion = require('./index.js');
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
@@ -55,17 +55,18 @@ argslib.readConfigFile(configFile, function(configParams) {
 			console.log(util.format('Using workspace: %s', workspaceDir));
 			console.log(util.format('Listening on port %d...', port));
 
+			var server;
 			try {
 				// create web server
 				var orionMiddleware = orion({
 					workspaceDir: dirs[0],
 					configParams: configParams,
 					maxAge: (dev ? 0 : undefined),
-				}), appContext = orionMiddleware.appContext;
+				});
 				
 				// add socketIO and app support
 				var app = express();
-				var server = http.createServer(app);
+				server = http.createServer(app);
 				if (log) {
 					app.use(express.logger('tiny'));
 				}
@@ -76,9 +77,8 @@ argslib.readConfigFile(configFile, function(configParams) {
 				app.use(orionMiddleware);
 				server.listen(port);
 				
-				
 				var io = socketio.listen(server, { 'log level': 1 });
-				appSocket.install({ io: io, appContext: appContext });
+				ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
 			} catch (e) {
 				console.error(e && e.stack);
 			}
