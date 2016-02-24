@@ -52,7 +52,7 @@ describe("orion", function() {
 	});
 
 	describe("middleware", function() {
-		// Make sure that we can .use() the orion server as a connect module.
+		// Make sure that we can .use() the orion server as an Express middleware
 		it("exports #createServer", function(done) {
 			app.use(orion({
 				workspaceDir: WORKSPACE

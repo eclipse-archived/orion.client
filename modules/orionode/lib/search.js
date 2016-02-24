@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-//var connect = require('connect');
 var express = require('express');
 var bodyParser = require('body-parser');
 var url = require('url');

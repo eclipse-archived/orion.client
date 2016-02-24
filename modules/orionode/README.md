@@ -52,12 +52,12 @@ This is a brand new feature, so expect some incomplete workflows and rough edges
 * Outoging commit log shows "More commits" link even when the end has been reached.
 
 ### Using Orion within a larger app
-Use `require('orion')` to get access to our startServer function, which is suitable for use within a larger [connect](https://github.com/senchalabs/connect/) project:
+Use `require('orion')` to get access to our startServer function, which is suitable for use within a larger [Express](http://expressjs.com/) project:
 
 ```js
 var orion = require('orion');
-var connect = require('connect');
-var myapp = connect()
+var express = require('express');
+var myapp = express()
 			.use(orion({ workspaceDir: '.myworkspace' }))
 			/* .use( additional handlers ) */
 ```
