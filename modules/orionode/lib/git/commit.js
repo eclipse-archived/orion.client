@@ -301,23 +301,31 @@ function revert(req, res, next, rest, repoPath, commit) {
 }
 
 function cherryPick(req, res, next, rest, repoPath, commit) {
-	var theRepo;
+	var theRepo, theCommit, theRC;
 	git.Repository.open(repoPath)
 	.then(function(repo) {
 		theRepo = repo;
 		return git.Commit.lookup(repo, commit);
 	})
     .then(function(commit) {
-    	return git.Cherrypick.cherrypick(theRepo, commit, new git.CherrypickOptions()).then(function(rc) {
+    	theCommit = commit;
+    	return git.Cherrypick.cherrypick(theRepo, commit, new git.CherrypickOptions())
+    })
+    .then(function(rc) {
+    	theRC = rc;
+    	if (rc) return;
+    	return createCommit(theRepo, null, null, theCommit.author().name(), theCommit.author().email(), theCommit.message());
+    	//TODO: Update Reflog to Cherry-Pick
+ 	})
+    .then(function() {
 	    	res.statusCode = 200;
 		  	var resp = JSON.stringify({
-				"Result": rc ? "Failed" : "Ok"
+				"Result": theRC ? "Failed" : "Ok"
 			});
 			res.setHeader('Content-Type', 'application/json');
 			res.setHeader('Content-Length', resp.length);
 			res.end(resp);
-	    });
-    })
+	})
     .catch(function(err) {
     	writeError(400, res, err.message);
     });
@@ -329,6 +337,41 @@ function rebase(req, res, next, rest, repoPath, commit, operation) {
 
 function merge(req, res, next, rest, repoPath, commit, squash) {
 	//TODO merge
+}
+
+function createCommit(repo, committerName, committerEmail, authorName, authorEmail, message){
+	return repo.index()
+    .then(function(indexResult) {
+    	index = indexResult;
+    	return index.read(1);
+	})
+	.then(function() {
+		return index.writeTree();
+	})
+	.then(function(oidResult) {
+		oid = oidResult;
+		return git.Reference.nameToId(repo, "HEAD");
+	})
+	.then(function(head) {
+		return repo.getCommit(head);
+	})
+	.then(function(parent) {
+		if (authorEmail) {
+			author = git.Signature.now(authorName, authorEmail);
+		} else {
+			author = git.Signature.default(repo);	
+		}
+
+		if (committerEmail) {
+			committer = git.Signature.now(committerName, committerEmail);
+		} else {
+			committer = git.Signature.default(repo);
+		}
+		return repo.createCommit("HEAD", author, committer, message, oid, [parent]);
+	})
+	.then(function(id) {
+		return git.Commit.lookup(repo, id);
+	});
 }
 
 function tag(req, res, next, rest, repoPath, fileDir, commitId, name) {
@@ -415,35 +458,7 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 		return repo;
 	})
 	.then(function(repo) {
-		return repo.openIndex();
-	})
-    .then(function(indexResult) {
-    	index = indexResult;
-    	return index.read(1);
-	})
-	.then(function() {
-		return index.writeTree();
-	})
-	.then(function(oidResult) {
-		oid = oidResult;
-		return git.Reference.nameToId(theRepo, "HEAD");
-	})
-	.then(function(head) {
-		return theRepo.getCommit(head);
-	})
-	.then(function(parent) {
-		if (req.body.AuthorEmail) {
-			author = git.Signature.now(req.body.AuthorName, req.body.AuthorEmail);
-			committer = git.Signature.now(req.body.CommitterName, req.body.CommitterEmail);
-		} else {
-			author = git.Signature.default(theRepo);	
-			committer = git.Signature.default(theRepo);
-		}
-		
-		return theRepo.createCommit(commit, author, committer, req.body.Message, oid, [parent]);
-	})
-	.then(function(id) {
-		return git.Commit.lookup(theRepo, id);
+		return createCommit(theRepo, req.body.CommitterName, req.body.CommitterEmail, req.body.AuthorName, req.body.AuthorEmail, req.body.Message);
 	})
 	.then(function(commit) {
 		thisCommit = commit;
