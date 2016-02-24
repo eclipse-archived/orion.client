@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+/*eslint-env node*/
 var path = require('path');
 var argsLib = require('../lib/args');
 var orion = require("../index.js");
@@ -38,7 +38,7 @@ if(argv.length == 2) {
 		}
 		workspaceDir = argsW || cwd;
 	}
-	port = args.port || args.p || 8081;
+	port = args.port || args.p || process.env.PORT || 8081;
 }
 
 // set up all parameters for startServer

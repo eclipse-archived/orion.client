@@ -22,7 +22,7 @@ var auth = require('./lib/middleware/auth'),
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
-var port = args.port || args.p || 8081;
+var port = args.port || args.p || process.env.PORT || 8081;
 var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
 
 argslib.readConfigFile(configFile, function(configParams) {

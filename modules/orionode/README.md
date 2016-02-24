@@ -1,4 +1,4 @@
-# Orion (10.0)
+# Orion
 A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orion/). Orion provides an extensible IDE that runs in your browser. It's particularly good for writing Javascript.
 
 ## Features
@@ -27,7 +27,7 @@ For full instructions, see the [Getting Started guide](http://wiki.eclipse.org/O
 3. Run `npm start orion` or `node [node_modules]/orion/server.js`.
 4. Go to **[http://localhost:8081](http://localhost:8081)** to use Orion. You will be prompted with a basic auth dialog; enter the password you chose earlier.
 
-The port number can be changed by passing the `-p` argument.
+The port number can be changed by passing the `--port` argument or setting the `PORT` environment variable.
 
 ### Global installation
 If you installed Orion as a global package with `npm install -g orion`, you can run the command `orion` from any directory (rather than `npm start orion` as outlined above.)
