@@ -44,14 +44,10 @@ function getCommit(workspaceDir, fileRoot, req, res, next, rest) {
 
 function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 	var segments = rest.split("/");
-	var scope = segments[1];
+	var scope = segments[1].replace(/%252F/g, '/');
 	var repoPath = segments[3];
 	var fileDir = api.join(fileRoot, repoPath);
 	repoPath = api.join(workspaceDir, repoPath);
-
-	scope = scope.replace(/%252F/g, '/');
-	scope = scope.replace("refs/remotes/", "");
-	scope = scope.replace("refs/heads/", "");
 
 	var page = Number(query.page) || 1;
 	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
@@ -105,7 +101,11 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 	    if (ref.indexOf("..") !== -1) {
 		    revWalk.pushRange(ref);
 	    } else {
-	    	revWalk.push(ref);
+	    	try {
+	    		revWalk.push(ref);
+    		} catch (ex) {
+	    		revWalk.pushRef(ref);
+    		}
 	    }
 
 		var count = 0;
@@ -140,7 +140,7 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 		      if (error.errno === git.Error.CODE.ITEROVER) {
 		        writeResponse(true);
 		      } else {
-		      	writeError(404, res, error);
+		      	writeError(404, res, error.message);
 		      }
 		    });
 		}
@@ -154,8 +154,14 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 			var commit0;
 			repo.getReferenceCommit(names[0])
 			.then(function(commit) {
+				return commit;
+			}).catch(function() {
+				return repo.getCommit(names[0]);
+			}).then(function(commit) {
 				commit0 = commit;
 				return repo.getReferenceCommit(names[1]);
+			}).catch(function() {
+				return repo.getCommit(names[1]);
 			})
 			.then(function(commit1) {
 				git.Merge.base(repo, commit0, commit1).then(function(oid) {
@@ -165,10 +171,14 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 						writeResponse(true);
 					}
 				});
+			}).catch(function(err) {
+				writeError(400, res, err.message);
 			});
 		} else {
 			log(repo, scope);
 		}
+	}).catch(function(err) {
+		writeError(400, res, err.message);
 	});
 }
 
@@ -286,7 +296,7 @@ function revert(req, res, next, rest, repoPath, commit) {
 	    });
     })
     .catch(function(err) {
-    	writeError(404, res);
+    	writeError(404, res, err.message);
     });
 }
 
@@ -339,8 +349,7 @@ function tag(req, res, next, rest, repoPath, fileDir, commitId, name) {
 		theDiffs = diffs;
 	})
 	.catch(function(err) {
-		console.log(err);
-		writeError(403, res);
+		writeError(403, res, err.message);
 	})
 	.done(function() {
         res.statusCode = 200;
@@ -393,7 +402,7 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 	
 	//TODO create commit -> amend, empty message, change id
 	if (commit !== "HEAD") {
-		writeError(404, res);
+		writeError(404, res, "Needs to be HEAD");
 		return;
 	}
 
@@ -444,8 +453,7 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 		theDiffs = diffs;
 	})
 	.catch(function(err) {
-		console.log(err);
-		writeError(403, res);
+		writeError(403, res, err.message);
 	})
 	.done(function() {
         res.statusCode = 200;

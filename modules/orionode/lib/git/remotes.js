@@ -15,24 +15,31 @@ var git = require('nodegit');
 var url = require('url');
 var tasks = require('../tasks');
 
-function remoteBranchJSON(ref, commit, remote, fileDir){
-	var rName = ref.name().replace("refs/remotes/", "");
-	var segments = rName.split("/");
-	var remoteName = segments[0] + "/" + segments.slice(1).join("%252F");
+function remoteBranchJSON(remoteBranch, commit, remote, fileDir, branch){
+	var fullName, shortName;
+	if (remoteBranch) {
+		fullName = remoteBranch.name();
+		shortName = remoteBranch.shorthand();
+	} else {// remote branch does not exists
+		shortName = api.join(remote.name(), branch.Name);
+		fullName = "refs/remotes/" + shortName;
+	}
+	var segments = shortName.split("/");
+	var remoteURL = segments[0] + "/" + segments.slice(1).join("%252F");
 	return {
 		"CloneLocation": "/gitapi/clone" + fileDir,
-		"CommitLocation": "/gitapi/commit/" + ref.name().replace(/\//g, '%252F') + fileDir,
-		"DiffLocation": "/gitapi/diff/" + rName.replace(/\//g, '%252F') + fileDir,
-		"FullName": ref.name(),
+		"CommitLocation": "/gitapi/commit/" + fullName.replace(/\//g, '%252F') + fileDir,
+		"DiffLocation": "/gitapi/diff/" + shortName.replace(/\//g, '%252F') + fileDir,
+		"FullName": fullName,
 		"GitUrl": remote.url(),
 		"HeadLocation": "/gitapi/commit/HEAD" + fileDir,
-		"Id": commit.sha(),
+		"Id": remoteBranch && commit ? commit.sha() : undefined,
 		"IndexLocation": "/gitapi/index" + fileDir,
-		"Location": "/gitapi/remote/" + remoteName + fileDir,
-		"Name": rName,
-		"TreeLocation": "/gitapi/tree" + fileDir + "/" + rName.replace(/\//g, '%252F'),
+		"Location": "/gitapi/remote/" + remoteURL + fileDir,
+		"Name": shortName,
+		"TreeLocation": "/gitapi/tree" + fileDir + "/" + shortName.replace(/\//g, '%252F'),
 		"Type": "RemoteTrackingBranch"
-	}
+	};
 }
 
 function remoteJSON(remote, fileDir, branches) {
@@ -45,7 +52,7 @@ function remoteJSON(remote, fileDir, branches) {
 		"Location": "/gitapi/remote/" + name + fileDir,
 		"Type": "Remote",
 		"Children": branches
-	}
+	};
 }
 
 function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
@@ -404,6 +411,8 @@ function deleteRemote(workspaceDir, fileRoot, req, res, next, rest) {
 }
 
 module.exports = {
+	remoteBranchJSON: remoteBranchJSON,
+	remoteJSON: remoteJSON,
 	getRemotes: getRemotes,
 	addRemote: addRemote,
 	postRemote: postRemote,

@@ -170,7 +170,7 @@ function putClone(workspaceDir, fileRoot, req, res, next, rest) {
 
 	var repoPath = segments[2];
 	repoPath = api.join(workspaceDir, repoPath);
-	var theRepo, theRef, theCommit;
+	var theRepo, theCommit;
 	var checkOptions = {
 		checkoutStrategy: git.Checkout.STRATEGY.FORCE,
 	};
@@ -184,7 +184,6 @@ function putClone(workspaceDir, fileRoot, req, res, next, rest) {
 		} else if (tag && typeof branch === "string") {
 			return git.Reference.lookup(theRepo, "refs/tags/" + tag)
 			.then(function(reference) {
-				theRef = reference;
 				return theRepo.getReferenceCommit(reference);
 			}).catch(function() {
 				return theRepo.getCommit(tag);
