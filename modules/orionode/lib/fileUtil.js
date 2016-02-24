@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var crypto = require('crypto');
+var ETag = require('./util/etag');
 var fs = require('fs');
 var dfs = require('deferred-fs'), Deferred = dfs.Deferred;
 var path = require('path');
@@ -260,35 +260,6 @@ var withStats = exports.withStats = function(filepath, callback) {
 };
 
 /**
- * @name orion.node.ETag
- * @class Represents an ETag for a stream.
- * @param input A stream or a string.
- */
-function ETag(input) {
-	var hash = crypto.createHash('sha1'), _this = this;
-	var update = function(data) {
-		hash.update(data);
-	};
-	var end = function() {
-		_this.value = hash.digest('base64');
-	};
-
-	if (typeof input === "string") {
-		update(input);
-		end();
-		return;
-	}
-	input.on('data', update);
-	input.on('end', end);
-}
-ETag.prototype = /** @lends orion.node.ETag.prototype */ {
-	getValue: function() {
-		return this.value;
-	}
-};
-exports.ETag = ETag;
-
-/**
  * Gets the stats for filepath and calculates the ETag based on the bytes in the file.
  * @param {Function} callback Invoked as callback(error, stats, etag) -- the etag can be null if filepath represents a directory.
  */
@@ -296,19 +267,20 @@ exports.withStatsAndETag = function(filepath, callback) {
 	fs.stat(filepath, function(error, stats) {
 		if (error) {
 			callback(error);
-		} else if (stats.isFile()) {
-			var stream = fs.createReadStream(filepath);
-			var etag = new ETag(stream);
-			stream.on('error', function(error) {
-				callback(error);
-			});
-			stream.on('end', function() {
-				callback(null, stats, etag.getValue());
-			});
-		} else {
+			return;
+		}
+		if (!stats.isFile()) {
 			// no etag
 			callback(null, stats, null);
+			return;
 		}
+		var etag = ETag();
+		var stream = fs.createReadStream(filepath);
+		stream.pipe(etag);
+		stream.on('error', callback);
+		stream.on('end', function() {
+			callback(null, stats, etag.read());
+		});
 	});
 };
 

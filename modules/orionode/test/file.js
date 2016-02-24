@@ -11,7 +11,9 @@
 /*eslint-env node, mocha*/
 var assert = require('assert');
 var express = require('express');
+var nodeUtil = require('util');
 var path = require('path');
+var stream = require('stream');
 var supertest = require('supertest');
 var testData = require('./support/test_data');
 
@@ -39,6 +41,20 @@ function throwIfError(cause, message) {
 	err.cause = cause;
 	throw err;
 }
+
+// Writeable stream that buffers everything sent to it
+function BufStream() {
+	this.bufs = [];
+	stream.Writable.apply(this, arguments);
+}
+nodeUtil.inherits(BufStream, stream.Writable);
+BufStream.prototype._write = function(chunk, enc, cb) {
+	this.bufs.push(Buffer.isBuffer(chunk) ? chunk : new Buffer(chunk, enc));
+	cb();
+}
+BufStream.prototype.data = function() {
+	return Buffer.concat(this.bufs);
+};
 
 /**
  * Unit test for the file REST API.
@@ -95,6 +111,34 @@ describe('File API', function() {
 					done();
 				});
 			});
+			it('put binary file', function(done) {
+				var newContents = new Buffer([0x42, 0xff]); // this is an invalid UTF-8 sequence
+				request()
+				.put(PREFIX + '/project/fizz.raw')
+				.type('application/octet-stream')
+				.send(newContents)
+				.expect(200)
+				.end(function(err, res) {
+					throwIfError(err, "Failed to PUT");
+					var body = res.body;
+					assert.ok(body.ETag, 'has an ETag');
+					assert.equal(body.Location, PREFIX + '/project/fizz.raw');
+					assert.equal(body.Name, 'fizz.raw');
+
+					// GET the file and ensure its contents are what was sent
+					var bufStream = new BufStream();
+					var req = request()
+					.get(body.Location)
+					.pipe(bufStream);
+					req.on("finish", function() {
+						var data = bufStream.data();
+						assert.equal(data.length, newContents.length);
+						assert.ok(data.equals(newContents), "Buffers are identical");
+						done();
+					});
+					req.on("error", done);
+				});
+			});
 			it('conditionally overwrite contents using If-Match', function(done) {
 				var url = PREFIX + '/project/fizz.txt';
 				request()
@@ -139,19 +183,6 @@ describe('File API', function() {
 					.set('X-HTTP-Method-Override', 'PATCH')
 					.type('application/json;charset=UTF-8')
 					.send({ diff: [{ start: 0, end: 1, text: "j" }] })
-					.expect(200)
-					.end(function(err, res) {
-						throwIfError(err);
-						request().get(url).expect(200, 'jello world', done);
-					});
-				});
-				it('applies a patch with text Content-Type', function(done) {
-					var url = PREFIX + '/project/fizz.txt';
-					request()
-					.post(url)
-					.set('X-HTTP-Method-Override', 'PATCH')
-					.type('text')
-					.send(JSON.stringify({ diff: [{ start: 0, end: 1, text: "j" }] }))
 					.expect(200)
 					.end(function(err, res) {
 						throwIfError(err);

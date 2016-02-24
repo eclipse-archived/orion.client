@@ -9,22 +9,19 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
+var apiPath = require('./middleware/api_path');
 var express = require('express');
 var bodyParser = require('body-parser');
+var ETag = require('./util/etag');
+var etagParser = require('./middleware/request_etag');
 var fs = require('fs');
-var path = require('path');
-var url = require('url');
+var nodePath = require('path');
 var api = require('./api');
 var fileUtil = require('./fileUtil');
-var resource = require('./resource');
-var  write = api.write, writeError = api.writeError, ETag = fileUtil.ETag;
-
-//var USER_WRITE_FLAG = parseInt('0200', 8);
-//var USER_EXECUTE_FLAG = parseInt('0100', 8);
+var writeError = api.writeError;
 
 function getParam(req, paramName) {
-	var parsedUrl = url.parse(req.url, true);
-	return parsedUrl && parsedUrl.query && parsedUrl.query[paramName];
+	return req.query[paramName];
 }
 
 function writeEmptyFilePathError(res, rest) {
@@ -36,11 +33,6 @@ function writeEmptyFilePathError(res, rest) {
 	return false;
 }
 
-/*
- *
- * Module begins here
- *
- */
 module.exports = function(options) {
 	var fileRoot = options.root;
 	var workspaceDir = options.workspaceDir;
@@ -65,28 +57,21 @@ module.exports = function(options) {
 			res.setHeader('Accept-Patch', 'application/json-patch; charset=UTF-8');
 			stream.pipe(res);
 			stream.on('error', function(e) {
+				// FIXME this is wrong, headers have likely been committed at this point
 				res.writeHead(500, e.toString());
 				res.end();
 			});
-			stream.on('end', function() {
-				res.statusCode = 200;
-				res.end();
-			});
+			stream.on('end', res.end.bind(res));
 		}
 	}
 
 	function handleDiff(req, res, rest, body) {
-		try {
-			body = typeof body === "string" ? JSON.parse(body) : body;
-		} catch (e) {
-			writeError(500, res, e.toString());
-		}
 		var diffs = body.diff || [];
 		var contents = body.contents;
 		var patchPath = getSafeFilePath(rest);
 		fs.exists(patchPath, function(destExists) {
 			if (destExists) {
-				fs.readFile(patchPath,function (error, data) {
+				fs.readFile(patchPath, function (error, data) {
 					if (error) {
 						writeError(500, res, error);
 						return;
@@ -147,7 +132,7 @@ module.exports = function(options) {
 							return;
 						}
 						if (failed) {
-							write(406, res, 'Bad file diffs. Please paste this content in a bug report: \u00A0\u00A0 \t' + JSON.stringify(body));
+							writeError(406, res, new Error('Bad file diffs. Please paste this content in a bug report: \u00A0\u00A0 \t' + JSON.stringify(body)))
 							return;
 						}
 						fs.stat(patchPath, function(error, stats) {
@@ -155,8 +140,7 @@ module.exports = function(options) {
 								writeError(500, res, error);
 								return;
 							}
-							var etag = new ETag(newContents);
-							writeFileMetadata(req, res, rest, patchPath, stats, etag.getValue() /*the new ETag*/);
+							writeFileMetadata(req, res, rest, patchPath, stats, ETag.fromString(newContents) /*the new ETag*/);
 						});
 					});
 					
@@ -167,155 +151,141 @@ module.exports = function(options) {
 		});
 	}
 
-	function writeDiffContents(req, res, next, rest) {
-		var requestBody = new Buffer(0);
-		req.on('error', function(e) {
-			writeError(500, res, e.toString());
+	var router = express.Router();
+	var jsonParser = bodyParser.json();
+
+	router.get('*', jsonParser, function(req, res, next) { //eslint-disable-line no-unused-vars
+		var rest = req.pathSuffix;
+		if (writeEmptyFilePathError(res, rest)) {
+			return;
+		}
+		var filepath = getSafeFilePath(rest);
+		fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
+			if (error && error.code === 'ENOENT') {
+				writeError(404, res, 'File not found: ' + rest);
+			} else if (error) {
+				writeError(500, res, error);
+			} else if (stats.isFile() && getParam(req, 'parts') !== 'meta') {
+				// GET file contents
+				writeFileContents(res, rest, filepath, stats, etag);
+			} else {
+				// TODO handle depth > 1 for directories
+				var includeChildren = (stats.isDirectory() && getParam(req, 'depth') === '1');
+				writeFileMetadata(req, res, rest, filepath, stats, etag, includeChildren);
+			}
 		});
-		// Check for a body already parsed
-		if (/^application\/json/.test(req.headers['content-type'])) {
+	});
+
+	// PUT: parse body as raw Buffer (we need to handle binary uploads), and calculate ETag for the
+	// request body since it's needed for If-Match check later.
+	var rawParser = bodyParser.raw({
+		type: function(/*req*/) {
+			// Force any content type to be buffered
+			return true;
+		}
+	});
+	router.put('*', rawParser, etagParser(), function(req, res, next) { //eslint-disable-line no-unused-vars
+		var rest = req.pathSuffix;
+		if (writeEmptyFilePathError(res, rest)) {
+			return;
+		}
+		var filepath = getSafeFilePath(rest);
+		if (getParam(req, 'parts') === 'meta') {
+			// TODO implement put of file attributes
+			res.sendStatus(501);
+			return;
+		}
+		var requestBody = req.body;
+		var requestBodyETag = req.etag;
+		var ifMatchHeader = req.headers['if-match'];
+		if(!ifMatchHeader){
+			// Etag is not defined, we are writing blob. In this case the file does not exist yet so we need create it.
+			fs.writeFile(filepath, requestBody, function(error) {
+				if (error) {
+					writeError(500, res, error);
+					return;
+				}
+				fs.stat(filepath, function(error, stats) {
+					writeFileMetadata(req, res, rest, filepath, stats, requestBodyETag /*the new ETag*/);
+				});
+			});
+			return;
+		}
+		fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
+			if (error && error.code === 'ENOENT') {
+				res.statusCode = 404;
+				res.end();
+			} else if (ifMatchHeader && ifMatchHeader !== etag) {
+				res.statusCode = 412;
+				res.end();
+			} else {
+				// write buffer into file
+				fs.writeFile(filepath, requestBody, function(error) {
+					if (error) {
+						writeError(500, res, error);
+						return;
+					}
+					writeFileMetadata(req, res, rest, filepath, stats, requestBodyETag /*the new ETag*/);
+				});
+			}
+		});
+	});
+
+	// POST - parse json body
+	router.post('*', jsonParser, function(req, res, next) { //eslint-disable-line no-unused-vars
+		var rest = req.pathSuffix;
+		if (writeEmptyFilePathError(res, rest)) {
+			return;
+		}
+		var diffPatch = req.headers['x-http-method-override'];
+		if (diffPatch === "PATCH") {
 			handleDiff(req, res, rest, req.body);
 			return;
 		}
-		// Otherwise buffer it
-		req.on('data', function(data) {
-			requestBody = Buffer.concat([requestBody,data]);
-		});
-		req.on('end', function(event) {
-			handleDiff(req, res, rest, requestBody.toString());
-		});
-	}
-
-	/*
-	 * Handler begins here
-	 */
-	return express()
-	.use(bodyParser.json())
-	.use(resource(fileRoot, {
-		GET: function(req, res, next, rest) {
-			if (writeEmptyFilePathError(res, rest)) {
-				return;
-			}
-			var filepath = getSafeFilePath(rest);
-			fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
-				if (error && error.code === 'ENOENT') {
-					writeError(404, res, 'File not found: ' + rest);
-				} else if (error) {
-					writeError(500, res, error);
-				} else if (stats.isFile() && getParam(req, 'parts') !== 'meta') {
-					// GET file contents
-					writeFileContents(res, rest, filepath, stats, etag);
-				} else {
-					// TODO handle depth > 1 for directories
-					var includeChildren = (stats.isDirectory() && getParam(req, 'depth') === '1');
-					writeFileMetadata(req, res, rest, filepath, stats, etag, includeChildren);
-				}
-			});
-		},
-		PUT: function(req, res, next, rest) {
-			if (writeEmptyFilePathError(res, rest)) {
-				return;
-			}
-			var filepath = getSafeFilePath(rest);
-			if (getParam(req, 'parts') === 'meta') {
-				// TODO implement put of file attributes
-				res.statusCode = 501;
-				return;
-			} else {
-				// The ETag for filepath's current contents is computed asynchronously -- so buffer the request body
-				// to memory, then write it into the real file once ETag is available.
-				var requestBody = new Buffer(0);
-				var requestBodyETag = new ETag(req);
-				req.on('data', function(data) {
-					requestBody = Buffer.concat([requestBody, data]);
-				});
-				req.on('error', function(e) {
-					console.warn(e);
-				});
-				req.on('end', function(e) {
-					var ifMatchHeader = req.headers['if-match'];
-					if(!ifMatchHeader){//If etag is not defined, we are writing blob. In this case the file does not exist yet so we need create it.
-						fs.writeFile(filepath, requestBody, function(error) {
-							if (error) {
-								writeError(500, res, error);
-								return;
-							}
-							fs.stat(filepath, function(error, stats) {
-								writeFileMetadata(req, res, rest, filepath, stats, requestBodyETag.getValue() /*the new ETag*/);
-							});
-						});
-					} else {
-						fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
-							if (error && error.code === 'ENOENT') {
-								res.statusCode = 404;
-								res.end();
-							} else if (ifMatchHeader && ifMatchHeader !== etag) {
-								res.statusCode = 412;
-								res.end();
-							} else {
-								// write buffer into file
-								fs.writeFile(filepath, requestBody, function(error) {
-									if (error) {
-										writeError(500, res, error);
-										return;
-									}
-									writeFileMetadata(req, res, rest, filepath, stats, requestBodyETag.getValue() /*the new ETag*/);
-								});
-							}
-						});
-					}
-				});
-			}
-		},
-		POST: function(req, res, next, rest) {
-			if (writeEmptyFilePathError(res, rest)) {
-				return;
-			}
-			var diffPatch = req.headers['x-http-method-override'];
-			if (diffPatch === "PATCH") {
-				writeDiffContents(req, res, next, rest);
-				return;
-			}
-			var name = req.headers.slug || (req.body && req.body.Name);
-			if (!name) {
-				write(400, res, 'Missing Slug header or Name property');
-				return;
-			}
-
-			var wwwpath = api.join(rest, encodeURIComponent(name)),
-			    filepath = getSafeFilePath(path.join(rest, name));
-
-			fileUtil.handleFilePOST(workspaceDir, fileRoot, req, res, wwwpath, filepath);
-		},
-		DELETE: function(req, res, next, rest) {
-			if (writeEmptyFilePathError(res, rest)) {
-				return;
-			}
-			var filepath = getSafeFilePath(rest);
-			fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
-				var ifMatchHeader = req.headers['if-match'];
-				if (error && error.code === 'ENOENT') {
-					res.statusCode = 204;
-					res.end();
-				} else if (ifMatchHeader && ifMatchHeader !== etag) {
-					write(412, res);
-				} else {
-					var callback = function(error) {
-						if (error) {
-							writeError(500, res, error);
-							return;
-						}
-						res.statusCode = 204;
-						res.end();
-					};
-					if (stats.isDirectory()) {
-						fileUtil.rumRuff(filepath, callback);
-					} else {
-						fs.unlink(filepath, callback);
-					}
-				}
-			});
+		var name = req.headers.slug || (req.body && req.body.Name);
+		if (!name) {
+			writeError(400, res, new Error('Missing Slug header or Name property'));
+			return;
 		}
-	}));
+
+		var wwwpath = api.join(rest, encodeURIComponent(name)),
+		    filepath = getSafeFilePath(nodePath.join(rest, name));
+
+		fileUtil.handleFilePOST(workspaceDir, fileRoot, req, res, wwwpath, filepath);
+	});
+
+	// DELETE - no request body
+	router.delete('*', function(req, res, next) { //eslint-disable-line no-unused-vars
+		var rest = req.pathSuffix;
+		if (writeEmptyFilePathError(res, rest)) {
+			return;
+		}
+		var filepath = getSafeFilePath(rest);
+		fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
+			var ifMatchHeader = req.headers['if-match'];
+			if (error && error.code === 'ENOENT') {
+				return res.sendStatus(204);
+			} else if (ifMatchHeader && ifMatchHeader !== etag) {
+				return res.sendStatus(412);
+			} else {
+				var callback = function(error) {
+					if (error) {
+						writeError(500, res, error);
+						return;
+					}
+					res.sendStatus(204);
+				};
+				if (stats.isDirectory()) {
+					fileUtil.rumRuff(filepath, callback);
+				} else {
+					fs.unlink(filepath, callback);
+				}
+			}
+		});
+	});
+
+	return express()
+	.use(apiPath(fileRoot))
+	.use(router);
 };
 
