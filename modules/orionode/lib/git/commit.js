@@ -356,8 +356,8 @@ function cherryPick(req, res, next, rest, repoPath, commitToCherrypick) {
 }
 
 function rebase(req, res, next, rest, repoPath, commitToRebase, rebaseOperation) {
-	//TODO rebase
 	var repo, head, commit, oid, paths;
+	
 	git.Repository.open(repoPath)
 	.then(function(_repo) {
 		repo = _repo;
@@ -365,15 +365,36 @@ function rebase(req, res, next, rest, repoPath, commitToRebase, rebaseOperation)
 	})
 	.then(function(_head) {
 		head = _head;
-		return repo.getReferenceCommit(commitToRebase);
+		return commitToRebase ? repo.getReferenceCommit(commitToRebase) : head;
 	})
 	.then(function(_commit) {
 		commit = _commit;
-		return repo.rebaseBranches("HEAD", "refs/heads/" + commitToRebase, null, null, null)
+		var work;
+		switch (rebaseOperation) {
+			case "ABORT":
+				work = git.Rebase.open(repo, {}).then(function(rebase){
+					return rebase.abort();
+				});
+				break;
+				
+			case "CONTINUE":
+				work = repo.continueRebase();
+				break;
+				
+			case "SKIP":
+				throw new Error("not supported");
+				
+			default:
+				work = repo.rebaseBranches("HEAD", "refs/heads/" + commitToRebase, null, null, null);
+		}
+		return work
 		.then(function(_oid) {
 			oid = _oid;
 		})
 		.catch(function(index) {
+			if (rebaseOperation === "ABORT") {
+				throw index;
+			}
 			paths = {};
 			index.entries().forEach(function(entry) {
 				if (git.Index.entryIsConflict(entry)) {
@@ -389,14 +410,20 @@ function rebase(req, res, next, rest, repoPath, commitToRebase, rebaseOperation)
 	})
 	.then(function() {
 		res.statusCode = 200;
-		var mergeResult = "MERGED";
-		if (!paths) {
-			if (oid && oid.toString() === head.id().toString()) mergeResult = "ALREADY_UPDATE";
-			else if (oid && oid.toString() === commit.id().toString()) mergeResult = "FAST_FORWARD";
+		var rebaseResult = rebaseOperation && paths ? "STOPPED" : "OK";
+		
+		if (rebaseOperation !== "ABORT") {
+			if (!paths) {
+				if (oid && oid.toString() === head.id().toString()) rebaseResult = "UP_TO_DATE";
+				else if (oid && oid.toString() === commit.id().toString()) rebaseResult = "FAST_FORWARD";
+			} else if (rebaseOperation !== "BEGIN") {
+				rebaseResult = "FAILED_UNMERGED_PATHS";
+			}
+		} else if (rebaseOperation === "ABORT") {
+			rebaseResult = "ABORTED";
 		}
 		var result = {
-			"Result": paths ? "CONFLICTING" : mergeResult,
-			"FailingPaths": paths
+			"Result": rebaseResult
 		};
 		var resp = JSON.stringify(result);
 		res.setHeader('Content-Type', 'application/json');
@@ -545,23 +572,23 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 	var repoPath = segments[3];
 	var fileDir = api.join(fileRoot, repoPath);
 	repoPath = api.join(workspaceDir, repoPath);
-	if (req.body.Merge) {
+	if (typeof req.body.Merge === "string") {
 		merge(req, res, next, rest, repoPath, req.body.Merge, req.body.Squash);
 		return;
 	}
-	if (req.body.Rebase) {
+	if (typeof req.body.Rebase === "string") {
 		rebase(req, res, next, rest, repoPath, req.body.Rebase, req.body.Operation);
 		return;
 	}
-	if (req.body["Cherry-Pick"]) {
+	if (typeof req.body["Cherry-Pick"] === "string") {
 		cherryPick(req, res, next, rest, repoPath, req.body["Cherry-Pick"]);
 		return;
 	}
-	if (req.body.Revert) {
+	if (typeof req.body.Revert === "string") {
 		revert(req, res, next, rest, repoPath, req.body.Revert);
 		return;
 	}
-	if (req.body.New) {
+	if (typeof req.body.New === "string") {
 		identifyNewCommitResource(req, res, next, rest, commit, req.body.New, segments);
 		return;
 	}
