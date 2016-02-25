@@ -13,11 +13,13 @@ var api = require('../api'), writeError = api.writeError;
 var diff = require("./diff");
 var git = require('nodegit');
 var url = require('url');
+var crypto = require('crypto');
 
 function generateCommitObject(commit, fileDir, diffs) {
 	return {
 		"AuthorEmail": commit.author().email(), 
 		"AuthorName": commit.author().name(),
+		"AuthorImage": "https://www.gravatar.com/avatar/" + crypto.createHash('md5').update(commit.author().email()).digest("hex") + "?d=mm",
 		"Children":[],
 		"CommitterEmail": commit.committer().email(),
 		"CommitterName": commit.committer().name(),
