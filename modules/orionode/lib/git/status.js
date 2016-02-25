@@ -6,108 +6,117 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
 var api = require('../api'),
-    writeError = api.writeError;
+	writeError = api.writeError;
 var git = require('nodegit');
 
 function getStatus(workspaceDir, fileRoot, req, res, next, rest) {
-    var repoPath = rest.replace("status/file/", "");
-    var fileDir = repoPath;
-    repoPath = api.join(workspaceDir, repoPath);
+	var segments = rest.split("/");
+	var repoPath = segments[2];
+	var fileDir = api.join(fileRoot, repoPath);
+	repoPath = api.join(workspaceDir, repoPath);
 
-    git.Repository.open(repoPath)
-    .then(function(repo) {
-        repo.getStatusExt({
-            flags: 
-                git.Status.OPT.INCLUDE_UNTRACKED | 
-                git.Status.OPT.RECURSE_UNTRACKED_DIRS
-        }).then(function(statuses) {
+	git.Repository.open(repoPath)
+	.then(function(repo) {
+		repo.getStatusExt({
+			flags: 
+				git.Status.OPT.INCLUDE_UNTRACKED | 
+				git.Status.OPT.RECURSE_UNTRACKED_DIRS
+		}).then(function(statuses) {
 
-	        var added = [],
-	            changed = [], // no idea
-	            conflicting = [], // merge conflict??
-	            missing = [], // no idea
-	            modified = [],
-	            removed = [], 
-	            untracked = [];
+			var added = [],
+				changed = [],
+				conflicting = [],
+				missing = [],
+				modified = [],
+				removed = [], 
+				untracked = [];
 	
-	        function returnContent(file, diffType) {
-	        	diffType = diffType || "Default";
-	        	var orionFilePath = api.join(fileDir, file.path());
-	            return {
-	                "Git": {
-	                    "CommitLocation": "/gitapi/commit/HEAD/file/" + orionFilePath,
-	                    "DiffLocation": "/gitapi/diff/" + diffType + "/file/"+ orionFilePath,
-	                    "IndexLocation": "/gitapi/index/file/" + orionFilePath
-	                },
-	                "Location": "/file/" + orionFilePath,
-	                "Name": file.path(),
-	                "Path": file.path()
-	            };
-	        }
-        
-	        statuses.forEach(function(file) {
-	            var bit = file.statusBit();
-	
-	            switch(bit) {
-	                case git.Status.STATUS.WT_MODIFIED:
-	                    modified.push(returnContent(file));
-	                    break;
-	                case git.Status.STATUS.WT_DELETED:
-	                    removed.push(returnContent(file, "Cached"));
-	                    break;
-	                case git.Status.STATUS.WT_TYPECHANGE:
-	                    changed.push(returnContent(file, "Cached"));
-	                    break;
-	                case git.Status.STATUS.WT_NEW:
-	                    untracked.push(returnContent(file));
-	                    break;
-	                default:
-	                    added.push(returnContent(file));
-	                    break;
-	            }
-	           
-	            //		        if (status.isRenamed()) { words.push("RENAMED"); }
-	            //		        if (status.isIgnored()) { words.push("IGNORED"); }
-	        });
-	    
+			function returnContent(file, diffType) {
+				diffType = diffType || "Default";
+				var orionFilePath = api.join(fileDir, file.path());
+				return {
+					"Git": {
+						"CommitLocation": "/gitapi/commit/HEAD" + orionFilePath,
+						"DiffLocation": "/gitapi/diff/" + diffType + orionFilePath,
+						"IndexLocation": "/gitapi/index" + orionFilePath
+					},
+					"Location": orionFilePath,
+					"Name": file.path(),
+					"Path": file.path()
+				};
+			}
+		
+			statuses.forEach(function(file) {
+				var bit = file.statusBit();
+				
+				if (bit & git.Status.STATUS.CONFLICTED) {
+					conflicting.push(returnContent(file));
+				}
+				
+				if (bit & git.Status.STATUS.WT_MODIFIED) {
+					modified.push(returnContent(file));
+				}
+				
+				if (bit & git.Status.STATUS.WT_DELETED) {
+					missing.push(returnContent(file));
+				}
+				
+				if (bit & git.Status.STATUS.WT_NEW) {
+					untracked.push(returnContent(file));
+				}
+				
+				if (bit & git.Status.STATUS.INDEX_NEW) {
+					added.push(returnContent(file));
+				}
+				
+				if (bit & git.Status.STATUS.INDEX_MODIFIED) {
+					changed.push(returnContent(file));
+				}
+				
+				if (bit & git.Status.STATUS.INDEX_DELETED) {
+					removed.push(returnContent(file));
+				}
+				
+			});
+		
 
-	        var resp = JSON.stringify({
-	            "Added": added,
-	            "Changed": changed,
-	            "CloneLocation": "/gitapi/clone/file/" + rest.replace("status/file/", ""),
-	            "CommitLocation": "/gitapi/commit/HEAD/file/" + rest.replace("status/file/", ""),
-	            "Conflicting": conflicting,
-	            "IndexLocation": "/gitapi/index/file/" + rest.replace("status/file/", ""),
-	            "Location": "/gitapi/status/file/" + rest.replace("status/file/", ""),
-	            "Missing": missing,
-	            "Modified": modified,
-	            "Removed": removed,
-	            "RepositoryState": "SAFE",
-	            "Type": "Status",
-	            "Untracked": untracked   
-	        });
+			var resp = JSON.stringify({
+				"Added": added,
+				"Changed": changed,
+				"CloneLocation": "/gitapi/clone/file/" + rest.replace("status/file/", ""),
+				"CommitLocation": "/gitapi/commit/HEAD/file/" + rest.replace("status/file/", ""),
+				"Conflicting": conflicting,
+				"IndexLocation": "/gitapi/index/file/" + rest.replace("status/file/", ""),
+				"Location": "/gitapi/status/file/" + rest.replace("status/file/", ""),
+				"Missing": missing,
+				"Modified": modified,
+				"Removed": removed,
+				"RepositoryState": "SAFE",
+				"Type": "Status",
+				"Untracked": untracked   
+			});
 	
-	        res.statusCode = 200;
-	        res.setHeader('Content-Type', 'application/json');
-	        res.setHeader('Content-Length', resp.length);
-	        res.end(resp);
+			res.statusCode = 200;
+			res.setHeader('Content-Type', 'application/json');
+			res.setHeader('Content-Length', resp.length);
+			res.end(resp);
 		})
 		.catch(function(err) {
-	        console.log(err);
-	        writeError(403, res);
-	    });
-    })
-    .catch(function(err) {
-        console.log(err);
-        writeError(403, res);
-    });
+			console.log(err);
+			writeError(403, res);
+		});
+	})
+	.catch(function(err) {
+		console.log(err);
+		writeError(403, res);
+	});
 
 }
 
 module.exports = {
-    getStatus: getStatus
+	getStatus: getStatus
 };

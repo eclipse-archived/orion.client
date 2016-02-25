@@ -382,6 +382,11 @@ function merge(req, res, next, rest, repoPath, commitToMerge, squash) {
 					paths[entry.path] = "";
 				}
 			});
+			return git.Checkout.index(repo, index, {
+				checkoutStrategy: git.Checkout.STRATEGY.ALLOW_CONFLICTS,
+				ourLabel: "HEAD",
+				theirLabel: commit.sha()
+			});
 		});
 	})
 	.then(function() {
