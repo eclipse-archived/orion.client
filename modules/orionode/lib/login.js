@@ -9,21 +9,19 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-function login() {
-    return function(req, res, next) {
-        // Fake login response
-        if (req.url === "/login" && req.method === "POST") {
-            return res.end(JSON.stringify({
-                "EmailConfirmed": false,
-                "FullName": "anonymous",
-                "HasPassword": true,
-                "LastLoginTimestamp": "1416865840208",
-                "Location": "/workspace/orionode",
-                "UserName": "anonymous"
-            }));
-        }
-        next();
-    };
-}
+var express = require("express");
 
-module.exports = login;
+module.exports = function login() {
+    return express.Router()
+    .post("/", function(req, res/*, next*/) {
+        // Fake login response
+        res.json({
+            "EmailConfirmed": false,
+            "FullName": "anonymous",
+            "HasPassword": true,
+            "LastLoginTimestamp": "1416865840208",
+            "Location": "/workspace/orionode",
+            "UserName": "anonymous"
+        });
+    })
+};
