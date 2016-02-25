@@ -9,19 +9,22 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
+var apiPath = require('./middleware/api_path');
 var express = require('express');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 var util = require('util');
-var api = require('./api'), writeError = api.writeError;
+var api = require('./api');
 var fileUtil = require('./fileUtil');
-var resource = require('./resource');
+var writeError = api.writeError;
 
 module.exports = function(options) {
 	var workspaceRoot = options.root;
 	var fileRoot = options.fileRoot;
 	var workspaceDir = options.workspaceDir;
-	if (!workspaceRoot) { throw 'options.root path required'; }
+	if (!workspaceRoot) {
+		throw new Error('options.root path required');
+	}
 
 	var workspaceId = 'orionode';
 	var workspaceName = 'Orionode Workspace';
@@ -30,70 +33,73 @@ module.exports = function(options) {
 	 * @returns {String} The URL of the workspace middleware, with context path.
 	 */
 	function originalWorkspaceRoot(req) {
-		return fileUtil.getContextPath(req) + workspaceRoot;
+		return req.contextPath + workspaceRoot;
 	}
 	function originalFileRoot(req) {
-		return fileUtil.getContextPath(req) + fileRoot;
+		return req.contextPath + fileRoot;
 	}
 	function makeProjectContentLocation(req, projectName) {
 		return api.join(originalFileRoot(req), projectName);
 	}
 	function makeProjectLocation(req, projectName) {
-		return api.join(originalWorkspaceRoot(req), 'project', projectName);
+		return api.join(req.contextPath, 'project', projectName);
 	}
 
-	return express()
-	.use(bodyParser.json())
-	.use(resource(workspaceRoot, {
-		GET: function(req, res, next, rest) {
-			var workspaceRootUrl = originalWorkspaceRoot(req);
-			if (rest === '') {
-				// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_the_list_of_available_workspaces
-				fileUtil.withStats(workspaceDir, function(err, stats) {
-					if (err) {
-						throw err;
-					}
-					var ws = JSON.stringify({
-						Id: 'anonymous',
-						Name: 'anonymous',
-						UserName: 'anonymous',
-						Workspaces: [{
-							Id: workspaceId,
-							LastModified: stats.mtime.getTime(),
-							Location: api.join(workspaceRootUrl, workspaceId),
-							Name: workspaceName
-						}]
-					});
-					res.setHeader('Content-Type', 'application/json');
-					res.setHeader('Content-Length', ws.length);
-					res.end(ws);
-				});
-			} else if (rest === workspaceId) {
-				// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_workspace_metadata
-				var parentFileLocation = originalFileRoot(req);
-				fileUtil.getChildren(workspaceDir, parentFileLocation, function(children) {
-					// TODO this is basically a File object with 1 more field. Should unify the JSON between workspace.js and file.js
-					var ws = JSON.stringify({
-						Directory: true,
+	var router = express.Router();
+	router.use(bodyParser.json());
+	router.use(apiPath(workspaceRoot));
+
+	router.get('*', function(req, res, next) {
+		var rest = req.pathSuffix;
+		var workspaceRootUrl = originalWorkspaceRoot(req);
+		//var workspaceRootUrl = req.pathPrefix;
+		if (rest === '') {
+			// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_the_list_of_available_workspaces
+			fileUtil.withStats(workspaceDir, function(err, stats) {
+				if (err) {
+					throw err;
+				}
+				var ws = JSON.stringify({
+					Id: 'anonymous',
+					Name: 'anonymous',
+					UserName: 'anonymous',
+					Workspaces: [{
 						Id: workspaceId,
-						Name: workspaceName,
+						LastModified: stats.mtime.getTime(),
 						Location: api.join(workspaceRootUrl, workspaceId),
-						ChildrenLocation: api.join(workspaceRootUrl, workspaceId), // ?? // api.join(fileRoot, workspaceId, '?depth=1'),
-						Children: children
-	//					Projects: [
-	//						// TODO projects -- does anything care about these?
-	//					]
-					});
-					res.setHeader('Content-Type', 'application/json');
-					res.setHeader('Content-Length', ws.length);
-					res.end(ws);
+						Name: workspaceName
+					}]
 				});
-			} else {
-				res.statusCode = 400;
-				res.end(util.format('workspace not found: %s', rest));
-			}
-		},
-		POST: function(req, res, next, rest) {
+				res.setHeader('Content-Type', 'application/json');
+				res.setHeader('Content-Length', ws.length);
+				res.end(ws);
+			});
+		} else if (rest === workspaceId) {
+			// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_workspace_metadata
+			var parentFileLocation = originalFileRoot(req);
+			fileUtil.getChildren(workspaceDir, parentFileLocation, function(children) {
+				// TODO this is basically a File object with 1 more field. Should unify the JSON between workspace.js and file.js
+				var ws = JSON.stringify({
+					Directory: true,
+					Id: workspaceId,
+					Name: workspaceName,
+					Location: api.join(workspaceRootUrl, workspaceId),
+					ChildrenLocation: api.join(workspaceRootUrl, workspaceId), // ?? // api.join(fileRoot, workspaceId, '?depth=1'),
+					Children: children
+//					Projects: [] // TODO projects -- does anything care about these?
+				});
+				res.setHeader('Content-Type', 'application/json');
+				res.setHeader('Content-Length', ws.length);
+				res.end(ws);
+			});
+		} else {
+			res.statusCode = 400;
+			res.end(util.format('workspace not found: %s', rest));
+		}
+	});
+
+	router.post('*', function(req, res, next) {
+			var rest = req.pathSuffix;
 			var err;
 			if (rest === '') {
 				// Create workspace. unsupported
@@ -112,7 +118,7 @@ module.exports = function(options) {
 				// Move/Rename a project
 				var location = req.body && req.body.Location;
 				if (location) {
-					var wwwpath = api.rest(fileRoot, location.substr(fileUtil.getContextPath(req).length)),
+					var wwwpath = api.rest(fileRoot, location.substr(req.contextPath.length)),
 					    filepath = fileUtil.safeFilePath(workspaceDir, projectName);
 
 					// Call the File POST helper to handle the filesystem operation. We inject the Project-specific metadata
@@ -143,14 +149,17 @@ module.exports = function(options) {
 					}
 				});
 			}
-		},
-		PUT: function(req, res, next, rest) {
-			// Would 501 be more appropriate?
-			writeError(403, res);
-		},
-		DELETE: function(req, res, next, rest) {
-			// Would 501 be more appropriate?
-			writeError(403, res);
-		}
-	}));
+	});
+
+	router.put('*', function(req, res, next) {
+		// Would 501 be more appropriate?
+		writeError(403, res);
+	});
+
+	router.delete('*', function(req, res) {
+		// Would 501 be more appropriate?
+		writeError(403, res);
+	});
+
+	return router;
 };

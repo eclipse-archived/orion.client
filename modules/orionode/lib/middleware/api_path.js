@@ -9,19 +9,38 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var api = require("../api"),
-    nodeUrl = require("url");
+var nodeUrl = require("url");
 
 // Express middleware that consumes the Orion servlet prefix from the request URL.
-// Sets the `req.pathSuffix` property to the remainder of the path.
+// Sets `req.contextPath` to the portion of the path preceding the servlet prefix,
+// and `req.pathSuffix` property to the portion of the path following the servlet prefix.
 //
 // @param root The root servlet prefix (/file, /workspace, etc)
 module.exports = function(root) {
-	if (!root) { throw "Orion root path required"; }
+	if (!root) {
+		throw new Error("Orion root path required");
+	}
 
 	return function(req, res, next) {
-		var urlObj = req._parsedUrl || nodeUrl.parse(req.url);
-		req.pathSuffix = api.rest(root, urlObj.pathname);
+		if (!req._parsedOriginalUrl) {
+			req._parsedOriginalUrl = nodeUrl.parse(req.originalUrl);
+		}
+		var urlObj = req._parsedOriginalUrl;
+		var idx = urlObj.pathname.indexOf(root);
+		if (idx === -1) {
+			req.pathSuffix = req.contextPath = null;
+			return next();
+		}
+		// Split url into: {contextPath}/{root}/{pathSuffix}
+		req.contextPath = urlObj.pathname.substr(0, idx);
+		var suffix = urlObj.pathname.substr(idx + root.length);
+		if (suffix[0] === "/") {
+			// TODO: controllers should tolerate pathPuffix with a leading slash, but for now we strip it off
+			suffix = suffix.substr(1);
+		}
+		req.pathSuffix = suffix;
+
+		//console.log("URL:", req.url, "-> suffix:", "'" + req.pathSuffix + "'", "root:", root, "baseUrl:", req.baseUrl, "originalUrl:", req.originalUrl)
 		next();
 	};
 };
