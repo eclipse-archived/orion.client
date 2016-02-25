@@ -36,12 +36,12 @@ function writeEmptyFilePathError(res, rest) {
 module.exports = function(options) {
 	var fileRoot = options.root;
 	var workspaceDir = options.workspaceDir;
-	if (!fileRoot) { throw 'options.root is required'; }
-	if (!workspaceDir) { throw 'options.workspaceDir is required'; }
+	if (!fileRoot) { throw new Error('options.root is required'); }
+	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 
 	var writeFileMetadata = function(req /*, args.. */) {
 		var args = Array.prototype.slice.call(arguments, 1);
-		var originalFileUrl = fileUtil.getContextPath(req) + fileRoot;
+		var originalFileUrl = req.contextPath + fileRoot;
 		return fileUtil.writeFileMetadata.apply(null, [originalFileUrl].concat(args));
 	};
 	var getSafeFilePath = fileUtil.safeFilePath.bind(null, workspaceDir);
@@ -152,8 +152,9 @@ module.exports = function(options) {
 	}
 
 	var router = express.Router();
-	var jsonParser = bodyParser.json();
+	router.use(apiPath(fileRoot));
 
+	var jsonParser = bodyParser.json();
 	router.get('*', jsonParser, function(req, res, next) { //eslint-disable-line no-unused-vars
 		var rest = req.pathSuffix;
 		if (writeEmptyFilePathError(res, rest)) {
@@ -234,6 +235,7 @@ module.exports = function(options) {
 	// POST - parse json body
 	router.post('*', jsonParser, function(req, res, next) { //eslint-disable-line no-unused-vars
 		var rest = req.pathSuffix;
+		debugger;
 		if (writeEmptyFilePathError(res, rest)) {
 			return;
 		}
@@ -284,8 +286,5 @@ module.exports = function(options) {
 		});
 	});
 
-	return express()
-	.use(apiPath(fileRoot))
-	.use(router);
+	return router;
 };
-

@@ -21,12 +21,12 @@ var WORKSPACE = path.join(__dirname, '.test_workspace');
 var DEFAULT_WORKSPACE_NAME = 'Orionode Workspace';
 
 var app = express();
-app.use(CONTEXT_PATH, require('../lib/workspace')({
+app.use(PREFIX, require('../lib/workspace')({
 	root: '/workspace',
 	fileRoot: '/file',
 	workspaceDir: WORKSPACE
 }));
-app.use(CONTEXT_PATH, require('../lib/file')({
+app.use(PREFIX_FILE, require('../lib/file')({
 	root: '/file',
 	workspaceRoot: '/workspace',
 	workspaceDir: WORKSPACE
@@ -43,13 +43,13 @@ function withDefaultWorkspace(callback) {
 	request()
 	.get(PREFIX)
 	.end(function(err, res) {
-		throwifError(err);
+		throwIfError(err);
 		callback(res.body.Workspaces[0]);
 	});
 }
 
 // Like `assert.ifError` but allows the message to be overridden
-function throwifError(cause, message) {
+function throwIfError(cause, message) {
 	if (!cause || !cause instanceof Error && Object.prototype.toString.call(cause) !== '[object Error]' && cause !== 'error') {
 		return;
 	}
@@ -75,12 +75,13 @@ describe('Workspace API', function() {
 			.get(PREFIX)
 			.expect(200)
 			.end(function(e, res) {
-				throwifError(e, "Failed to get workspace")
+				throwIfError(e, "Failed to get workspace")
 				assert.ok(Array.isArray(res.body.Workspaces));
 				// In Orionode, we have just a single workspace.
 				assert.equal(res.body.Workspaces.length, 1);
 				assert.ok(res.body.Workspaces[0].Id);
 				assert.ok(res.body.Workspaces[0].Location);
+				assert.equal(res.body.Workspaces[0].Location, PREFIX + "/orionode");
 				assert.equal(res.body.Workspaces[0].Name, DEFAULT_WORKSPACE_NAME);
 				done();
 			});
@@ -97,7 +98,7 @@ describe('Workspace API', function() {
 				.get(workspace.Location)
 				.expect(200)
 				.end(function(e, res) {
-					throwifError(e, "Failed to get metadata")
+					throwIfError(e, "Failed to get metadata from " + workspace.Location)
 					assert.ok(res.body.Id);
 					assert.equal(res.body.Name, DEFAULT_WORKSPACE_NAME);
 					// Orionode doesn't have "projects" so don't check res.body.Projects
@@ -106,13 +107,14 @@ describe('Workspace API', function() {
 					assert.equal(res.body.Children.length, 1);
 					assert.equal(res.body.Children[0].Name, "project");
 					assert.equal(res.body.Children[0].Directory, true);
-					assert.ok(res.body.Children[0].ChildrenLocation);
+					var childrenLoc = res.body.Children[0].ChildrenLocation;
+					assert.ok(childrenLoc);
 					// Ensure that GET ChildrenLocation returns the child File objects.. mini /file test
 					request()
-					.get(res.body.Children[0].ChildrenLocation)
+					.get(childrenLoc)
 					.expect(200)
 					.end(function(err, res) {
-						assert.ifError(err);
+						throwIfError(err, "Failed to get ChildrenLocation: " + childrenLoc);
 						assert.ok(Array.isArray(res.body.Children));
 						res.body.Children.sort(byName);
 						assert.equal(res.body.Children.length, 2);
@@ -156,7 +158,7 @@ describe('Workspace API', function() {
 				.send({Location: oldProjectLocation, Name: 'project_renamed'})
 				.expect(200)
 				.end(function(e, res) {
-					throwifError(e, "Failed to rename project");
+					throwIfError(e, "Failed to rename project at " + oldProjectLocation);
 					assert.equal(res.body.Name, 'project_renamed');
 
 					// GETting the new ContentLocation should return the project metadata
@@ -164,7 +166,7 @@ describe('Workspace API', function() {
 					.get(res.body.ContentLocation)
 					.expect(200)
 					.end(function(err, res) {
-						throwifError(err, "Failed to get ContentLocation");
+						throwIfError(err, "Failed to get ContentLocation");
 
 						// and GETting the ChildrenLocation should return the children
 						request()

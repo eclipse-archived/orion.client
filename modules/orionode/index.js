@@ -48,16 +48,16 @@ function startServer(options) {
         app.use(orionTasks.orionTasksAPI({
                 root: '/task'
             }))
-			// API handlers
-		app.use(orionFile({
-				root: '/file',
-				workspaceDir: workspaceDir
-			}))
-		app.use(orionWorkspace({
-				root: '/workspace',
-				fileRoot: '/file',
-				workspaceDir: workspaceDir
-			}))
+		// API handlers
+		app.use('/file', orionFile({
+			root: '/file',
+			workspaceDir: workspaceDir
+		}))
+		app.use('/workspace', orionWorkspace({
+			root: '/workspace',
+			fileRoot: '/file',
+			workspaceDir: workspaceDir
+		}))
 		app.use(orionGit({ 
 				root: '/gitapi',
 				fileRoot: '/file',

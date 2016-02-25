@@ -369,16 +369,6 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, res, wwwp
 };
 
 /**
- * The connect framework removes leading path segments that precede the path Orion is mounted at. This function
- * returns the leading segments.
- * @param {Request} req Request object.
- */
-var getContextPath = exports.getContextPath = function(req) {
-	var orig = req.originalUrl, _url = req.url;
-	return orig.substr(0, orig.length - _url.length);
-};
-
-/**
  * Helper for fulfilling a file POST request (for example, copy, move, or create).
  * @param {String} fileRoot The route of the /file handler (not including context path)
  * @param {Object} req
@@ -392,7 +382,10 @@ var getContextPath = exports.getContextPath = function(req) {
 exports.handleFilePOST = function(workspaceDir, fileRoot, req, res, wwwpath, destFilepath, metadataMixins, statusCode) {
 	var getSafeFilePath = safeFilePath.bind(null, workspaceDir);
 	var isDirectory = req.body && getBoolean(req.body, 'Directory');
-	var fileRootUrl = getContextPath(req) + fileRoot;
+	if (typeof req.contextPath !== "string") {
+		throw new Error("Missing context path");
+	}
+	var fileRootUrl = req.contextPath + fileRoot;
 
 	fs.exists(destFilepath, function(destExists) {
 		function checkXCreateOptions(opts) {
