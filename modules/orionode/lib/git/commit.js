@@ -357,8 +357,39 @@ function rebase(req, res, next, rest, repoPath, commit, operation) {
 	//TODO rebase
 }
 
-function merge(req, res, next, rest, repoPath, commit, squash) {
-	//TODO merge
+function merge(req, res, next, rest, repoPath, commitToMerge, squash) {
+	//TODO squash
+	var theRepo, paths;
+	git.Repository.open(repoPath)
+	.then(function(repo) {
+		theRepo = repo;
+		return repo.mergeBranches("HEAD", commitToMerge);
+	})
+	.then(function(oid) {
+		//TODO detect FAST_FORWARD (i.e. oid == to branch) vs ALREADY_UP_TO_DATE (i.e. oid == to branch)
+	})
+	.catch(function(index) {
+		paths = {};
+		index.entries().forEach(function(entry) {
+			if (git.Index.entryIsConflict(entry)) {
+				paths[entry.path] = "";
+			}
+		});
+	})
+	.then(function() {
+		res.statusCode = 200;
+		var result = {
+			"Result": paths ? "CONFLICTING" : "FAST_FORWARD",
+			"FailingPaths": paths
+		};
+		var resp = JSON.stringify(result);
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
+	})
+	.catch(function(err) {
+		writeError(400, res, err.message);
+	});
 }
 
 function createCommit(repo, committerName, committerEmail, authorName, authorEmail, message){
