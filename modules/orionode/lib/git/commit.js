@@ -359,27 +359,40 @@ function rebase(req, res, next, rest, repoPath, commit, operation) {
 
 function merge(req, res, next, rest, repoPath, commitToMerge, squash) {
 	//TODO squash
-	var theRepo, paths;
+	var repo, head, commit, oid, paths;
 	git.Repository.open(repoPath)
-	.then(function(repo) {
-		theRepo = repo;
-		return repo.mergeBranches("HEAD", commitToMerge);
+	.then(function(_repo) {
+		repo = _repo;
+		return repo.getHeadCommit();
 	})
-	.then(function(oid) {
-		//TODO detect FAST_FORWARD (i.e. oid == to branch) vs ALREADY_UP_TO_DATE (i.e. oid == to branch)
+	.then(function(_head) {
+		head = _head;
+		return repo.getReferenceCommit(commitToMerge);
 	})
-	.catch(function(index) {
-		paths = {};
-		index.entries().forEach(function(entry) {
-			if (git.Index.entryIsConflict(entry)) {
-				paths[entry.path] = "";
-			}
+	.then(function(_commit) {
+		commit = _commit;
+		return repo.mergeBranches("HEAD", commitToMerge)
+		.then(function(_oid) {
+			oid = _oid;
+		})
+		.catch(function(index) {
+			paths = {};
+			index.entries().forEach(function(entry) {
+				if (git.Index.entryIsConflict(entry)) {
+					paths[entry.path] = "";
+				}
+			});
 		});
 	})
 	.then(function() {
 		res.statusCode = 200;
+		var mergeResult = "MERGED";
+		if (!paths) {
+			if (oid && oid.toString() === head.id().toString()) mergeResult = "ALREADY_UPDATE";
+			else if (oid && oid.toString() === commit.id().toString()) mergeResult = "FAST_FORWARD";
+		}
 		var result = {
-			"Result": paths ? "CONFLICTING" : "FAST_FORWARD",
+			"Result": paths ? "CONFLICTING" : mergeResult,
 			"FailingPaths": paths
 		};
 		var resp = JSON.stringify(result);
