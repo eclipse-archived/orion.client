@@ -114,13 +114,11 @@ function postIndex(workspaceDir, fileRoot, req, res, next, rest) {
 	})
 	.then(function(commit) {
 		if (req.body.Path) {
-			if (typeof req.body.Path === "string") {
-				return git.Reset.default(repo, commit, req.body.Path);
+			var paths = req.body.Path;
+			if (typeof paths === "string") {
+				paths = [paths];
 			}
-			
-			return Promise.all(req.body.Path.map(function(path) {
-				return git.Reset.default(repo, commit, path);
-			}));
+			return git.Reset.default(repo, commit, paths);
 		} else if (resetType) {
 			var reset_type = git.Reset.TYPE.HARD;
 			switch (resetType) {
@@ -137,7 +135,7 @@ function postIndex(workspaceDir, fileRoot, req, res, next, rest) {
 			return git.Reset.reset(repo, commit, reset_type, {});
 		} 
 			
-		return git.Reset.default(repo, commit, filePath);
+		return git.Reset.default(repo, commit, [filePath]);
 	})
 	.done(function() {
 		res.statusCode = 200;

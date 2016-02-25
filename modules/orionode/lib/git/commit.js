@@ -95,21 +95,21 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 	}
 
 	function log(repo, ref) {
-	 	var revWalk = repo.createRevWalk();
-	    revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
-	    
-	    if (ref.indexOf("..") !== -1) {
-		    revWalk.pushRange(ref);
-	    } else {
-	    	try {
-	    		revWalk.push(ref);
-    		} catch (ex) {
-	    		revWalk.pushRef(ref);
-    		}
-	    }
+		var revWalk = repo.createRevWalk();
+		revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
+		
+		if (ref.indexOf("..") !== -1) {
+			revWalk.pushRange(ref);
+		} else {
+			try {
+				revWalk.push(ref);
+			} catch (ex) {
+				revWalk.pushRef(ref);
+			}
+		}
 
 		var count = 0;
-	    function walk() {
+		function walk() {
 			return revWalk.next()
 			.then(function(oid) {
 				if (!oid) {
@@ -136,16 +136,16 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 					walk();
 				});
 			})
-		    .catch(function(error) {
-		      if (error.errno === git.Error.CODE.ITEROVER) {
-		        writeResponse(true);
-		      } else {
-		      	writeError(404, res, error.message);
-		      }
-		    });
+			.catch(function(error) {
+			if (error.errno === git.Error.CODE.ITEROVER) {
+				writeResponse(true);
+			} else {
+				writeError(404, res, error.message);
+			}
+			});
 		}
 
-    	walk();
+		walk();
 	}
 	git.Repository.open(repoPath)
 	.then(function(repo) {
@@ -183,57 +183,57 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 }
 
 function getDiff(repo, commit, fileDir) {
-    var tree1;
-    var tree2;
-    var _parent;
+	var tree1;
+	var tree2;
+	var _parent;
 
-    return commit.getTree()
-    .then(function(tree) {
-        tree2 = tree;
-    })
-    .then(function() {
-        return commit.getParents(1);
-    })
-    .then(function(parents) {
-        return parents && parents[0] ? (_parent = parents[0]).getTree() : null;
-    })
-    .then(function(tree) {
-        tree1 = tree;
-    })
-    .then(function() {
-        return git.Diff.treeToTree(repo, tree2, tree1, null);
-    })
-    .then(function(diff) {
-    	return diff.patches();
+	return commit.getTree()
+	.then(function(tree) {
+		tree2 = tree;
+	})
+	.then(function() {
+		return commit.getParents(1);
+	})
+	.then(function(parents) {
+		return parents && parents[0] ? (_parent = parents[0]).getTree() : null;
+	})
+	.then(function(tree) {
+		tree1 = tree;
+	})
+	.then(function() {
+		return git.Diff.treeToTree(repo, tree2, tree1, null);
+	})
+	.then(function(diff) {
+		return diff.patches();
 	})
 	.then(function(patches) {
 		var range = commit.id().toString();
-      	if (_parent) range += ".." + _parent.id().toString();
+		if (_parent) range += ".." + _parent.id().toString();
 		var page = 1, pageSize = 100;
 		var diffs = patches.slice(0, pageSize).map(function(patch) {
-	        var newFile = patch.newFile();
-	        var newFilePath = newFile.path();
+			var newFile = patch.newFile();
+			var newFilePath = newFile.path();
 			var oldFile = patch.oldFile();
 			var oldFilePath = oldFile.path();
-        	var type = diff.changeType(patch);
-        	var path1 = type !== "Deleted" ? newFilePath : oldFilePath;
-        	return {
-        		"ChangeType": type,
-		        "ContentLocation": fileDir + "/" + path1,
-		        "DiffLocation": "/gitapi/diff/" + range + fileDir + "/" + path1,
-		        "NewPath": newFilePath,
-		        "OldPath": oldFilePath,
-		        "Type": "Diff"
-        	};
-    	});
+			var type = diff.changeType(patch);
+			var path1 = type !== "Deleted" ? newFilePath : oldFilePath;
+			return {
+				"ChangeType": type,
+				"ContentLocation": fileDir + "/" + path1,
+				"DiffLocation": "/gitapi/diff/" + range + fileDir + "/" + path1,
+				"NewPath": newFilePath,
+				"OldPath": oldFilePath,
+				"Type": "Diff"
+			};
+		});
 		var result = {
-        	"Type": "Diff",
-        	"Length": patches.length,
-        	"Children": diffs
-        };
-        if (patches.length > 100) {
-        	result.NextLocation = "/gitapi/diff/" + range + fileDir + "?pageSize=" + pageSize + "&page=" + (page + 1);
-        }
+			"Type": "Diff",
+			"Length": patches.length,
+			"Children": diffs
+		};
+		if (patches.length > 100) {
+			result.NextLocation = "/gitapi/diff/" + range + fileDir + "?pageSize=" + pageSize + "&page=" + (page + 1);
+		}
 		return result;
 	});
 }
@@ -264,11 +264,11 @@ function getCommitBody(workspaceDir, fileRoot, req, res, next, rest) {
 }
 
 function identifyNewCommitResource(req, res, next, rest, commit, newCommit, segments) {
-    segments[1] = (commit + ".." + newCommit).replace(/\//g, "%252F");
-    var location = "/gitapi/" + segments.join("/");
-    location = url.format({pathname: location, query: url.parse(req.url, true).query});
+	segments[1] = (commit + ".." + newCommit).replace(/\//g, "%252F");
+	var location = "/gitapi/" + segments.join("/");
+	location = url.format({pathname: location, query: url.parse(req.url, true).query});
 	res.statusCode = 200;
-  	var resp = JSON.stringify({
+	var resp = JSON.stringify({
 		"Location": location
 	});
 	res.setHeader('Content-Type', 'application/json');
@@ -276,59 +276,73 @@ function identifyNewCommitResource(req, res, next, rest, commit, newCommit, segm
 	res.end(resp);
 }
 
-function revert(req, res, next, rest, repoPath, commit) {
-	//TODO revert -> needs to commit
-	var theRepo;
-	git.Repository.open(repoPath)
-	.then(function(repo) {
-		theRepo = repo;
-		return git.Commit.lookup(repo, commit);
-	})
-    .then(function(commit) {
-    	return git.Revert(theRepo, commit, new git.RevertOptions()).then(function(rc) {
-	    	res.statusCode = 200;
-		  	var resp = JSON.stringify({
-				"Result": rc ? "FAILURE" : "OK"
-			});
-			res.setHeader('Content-Type', 'application/json');
-			res.setHeader('Content-Length', resp.length);
-			res.end(resp);
-	    });
-    })
-    .catch(function(err) {
-    	writeError(404, res, err.message);
-    });
-}
-
-function cherryPick(req, res, next, rest, repoPath, commit) {
+function revert(req, res, next, rest, repoPath, commitToRevert) {
 	var theRepo, theCommit, theRC;
 	git.Repository.open(repoPath)
 	.then(function(repo) {
 		theRepo = repo;
-		return git.Commit.lookup(repo, commit);
+		return git.Commit.lookup(repo, commitToRevert);
 	})
-    .then(function(commit) {
-    	theCommit = commit;
-    	return git.Cherrypick.cherrypick(theRepo, commit, new git.CherrypickOptions())
-    })
-    .then(function(rc) {
-    	theRC = rc;
-    	if (rc) return;
-    	return createCommit(theRepo, null, null, theCommit.author().name(), theCommit.author().email(), theCommit.message());
-    	//TODO: Update Reflog to Cherry-Pick
+	.then(function(commit) {
+		theCommit = commit;
+		return git.Revert(theRepo, commit, new git.RevertOptions());
+	})
+	.then(function(rc) {
+		theRC = rc;
+		if (rc) return;
+		var msg = 'Revert "' + theCommit.summary() + '"\n\nThis reverts commit ' + theCommit.sha() + '\n';
+		return createCommit(theRepo, null, null, theCommit.author().name(), theCommit.author().email(), msg);
+		//TODO: Update Reflog to Revert
+	})
+ 	.then(function() {
+		return theRepo.stateCleanup();
+	})
+	.then(function() {
+		res.statusCode = 200;
+		var resp = JSON.stringify({
+			"Result": theRC ? "FAILURE" : "OK"
+		});
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
+	})
+	.catch(function(err) {
+		writeError(404, res, err.message);
+	});
+}
+
+function cherryPick(req, res, next, rest, repoPath, commitToCherrypick) {
+	var theRepo, theCommit, theRC;
+	git.Repository.open(repoPath)
+	.then(function(repo) {
+		theRepo = repo;
+		return git.Commit.lookup(repo, commitToCherrypick);
+	})
+	.then(function(commit) {
+		theCommit = commit;
+		return git.Cherrypick.cherrypick(theRepo, commit, {});
+	})
+	.then(function(rc) {
+		theRC = rc;
+		if (rc) return;
+		return createCommit(theRepo, null, null, theCommit.author().name(), theCommit.author().email(), theCommit.message());
+		//TODO: Update Reflog to Cherry-Pick
  	})
-    .then(function() {
-	    	res.statusCode = 200;
-		  	var resp = JSON.stringify({
-				"Result": theRC ? "Failed" : "Ok"
-			});
-			res.setHeader('Content-Type', 'application/json');
-			res.setHeader('Content-Length', resp.length);
-			res.end(resp);
+ 	.then(function() {
+		return theRepo.stateCleanup();
 	})
-    .catch(function(err) {
-    	writeError(400, res, err.message);
-    });
+	.then(function() {
+		res.statusCode = 200;
+		var resp = JSON.stringify({
+			"Result": theRC ? "FAILED" : "OK"
+		});
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
+	})
+	.catch(function(err) {
+		writeError(400, res, err.message);
+	});
 }
 
 function rebase(req, res, next, rest, repoPath, commit, operation) {
@@ -362,7 +376,6 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 		} else {
 			author = git.Signature.default(repo);	
 		}
-
 		if (committerEmail) {
 			committer = git.Signature.now(committerName, committerEmail);
 		} else {
@@ -382,10 +395,10 @@ function tag(req, res, next, rest, repoPath, fileDir, commitId, name) {
 		theRepo = repo;
 		return git.Commit.lookup(repo, commitId);
 	})
-    .then(function(commit) {
-    	thisCommit = commit;
-    	return theRepo.createLightweightTag(commit, name);
-    })
+	.then(function(commit) {
+		thisCommit = commit;
+		return theRepo.createLightweightTag(commit, name);
+	})
 	.then(function() {
 		return getDiff(theRepo, thisCommit, fileDir);
 	})
@@ -396,12 +409,12 @@ function tag(req, res, next, rest, repoPath, fileDir, commitId, name) {
 		writeError(403, res, err.message);
 	})
 	.done(function() {
-        res.statusCode = 200;
-        var resp = generateCommitObject(thisCommit, fileDir, theDiffs);
-        resp = JSON.stringify(resp);
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Content-Length', resp.length);
-        res.end(resp);
+		res.statusCode = 200;
+		var resp = generateCommitObject(thisCommit, fileDir, theDiffs);
+		resp = JSON.stringify(resp);
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
 	});
 }
 
@@ -441,7 +454,7 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 	}
 	if (req.body.New) {
 		identifyNewCommitResource(req, res, next, rest, commit, req.body.New, segments);
-        return;
+		return;
 	}
 	
 	//TODO create commit -> amend, empty message, change id
@@ -450,16 +463,13 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 		return;
 	}
 
-	var theRepo, index, oid, author, committer, thisCommit;
+	var theRepo, thisCommit;
 	var theDiffs = [];
 
 	git.Repository.open(repoPath)
 	.then(function(repo) {
 		theRepo = repo;
-		return repo;
-	})
-	.then(function(repo) {
-		return createCommit(theRepo, req.body.CommitterName, req.body.CommitterEmail, req.body.AuthorName, req.body.AuthorEmail, req.body.Message);
+		return createCommit(repo, req.body.CommitterName, req.body.CommitterEmail, req.body.AuthorName, req.body.AuthorEmail, req.body.Message);
 	})
 	.then(function(commit) {
 		thisCommit = commit;
@@ -472,17 +482,17 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 		writeError(403, res, err.message);
 	})
 	.done(function() {
-        res.statusCode = 200;
-        var resp = generateCommitObject(thisCommit, fileDir, theDiffs);
-        resp = JSON.stringify(resp);
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Content-Length', resp.length);
-        res.end(resp);
+		res.statusCode = 200;
+		var resp = generateCommitObject(thisCommit, fileDir, theDiffs);
+		resp = JSON.stringify(resp);
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
 	});
 }
 
 module.exports = {
 	getCommit: getCommit,
 	putCommit: putCommit,
-    postCommit: postCommit
+	postCommit: postCommit
 };
