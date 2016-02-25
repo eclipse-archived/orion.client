@@ -294,7 +294,7 @@ function revert(req, res, next, rest, repoPath, commitToRevert) {
 		return createCommit(theRepo, null, null, theCommit.author().name(), theCommit.author().email(), msg);
 		//TODO: Update Reflog to Revert
 	})
- 	.then(function() {
+	.then(function() {
 		return theRepo.stateCleanup();
 	})
 	.then(function() {
@@ -312,11 +312,15 @@ function revert(req, res, next, rest, repoPath, commitToRevert) {
 }
 
 function cherryPick(req, res, next, rest, repoPath, commitToCherrypick) {
-	var theRepo, theCommit, theRC;
+	var theRepo, theCommit, theRC, theHead;
 	git.Repository.open(repoPath)
 	.then(function(repo) {
 		theRepo = repo;
-		return git.Commit.lookup(repo, commitToCherrypick);
+		return git.Reference.nameToId(theRepo, "HEAD");
+	})
+	.then(function(head) {
+		theHead = head;
+		return git.Commit.lookup(theRepo, commitToCherrypick);
 	})
 	.then(function(commit) {
 		theCommit = commit;
@@ -327,14 +331,18 @@ function cherryPick(req, res, next, rest, repoPath, commitToCherrypick) {
 		if (rc) return;
 		return createCommit(theRepo, null, null, theCommit.author().name(), theCommit.author().email(), theCommit.message());
 		//TODO: Update Reflog to Cherry-Pick
- 	})
- 	.then(function() {
+	})
+	.then(function() {
 		return theRepo.stateCleanup();
 	})
 	.then(function() {
+		return git.Reference.nameToId(theRepo, "HEAD");
+	})
+	.then(function(newHead) {
 		res.statusCode = 200;
 		var resp = JSON.stringify({
-			"Result": theRC ? "FAILED" : "OK"
+			"Result": theRC ? "FAILED" : "OK",
+			"HeadUpdated": !theRC && theHead !== newHead
 		});
 		res.setHeader('Content-Type', 'application/json');
 		res.setHeader('Content-Length', resp.length);
