@@ -83,7 +83,21 @@ function getStatus(workspaceDir, fileRoot, req, res, next, rest) {
 				
 			});
 		
-
+			var repoState = "SAFE";
+			
+			if (repo.isRebasing()) {
+				repoState = "REBASING";
+			} 
+			else if (repo.isReverting()) {
+				repoState = "REVERTING";
+			}
+			else if (repo.isMerging()) {
+				repoState = "MERGING";
+			}
+			else if (repo.isCherrypicking()){
+				repoState = "CHERRY_PICKING";
+			}
+			
 			var resp = JSON.stringify({
 				"Added": added,
 				"Changed": changed,
@@ -95,7 +109,7 @@ function getStatus(workspaceDir, fileRoot, req, res, next, rest) {
 				"Missing": missing,
 				"Modified": modified,
 				"Removed": removed,
-				"RepositoryState": "SAFE",
+				"RepositoryState": repoState,
 				"Type": "Status",
 				"Untracked": untracked   
 			});

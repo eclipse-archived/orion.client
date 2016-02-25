@@ -353,8 +353,58 @@ function cherryPick(req, res, next, rest, repoPath, commitToCherrypick) {
 	});
 }
 
-function rebase(req, res, next, rest, repoPath, commit, operation) {
+function rebase(req, res, next, rest, repoPath, commitToRebase, rebaseOperation) {
 	//TODO rebase
+	var repo, head, commit, oid, paths;
+	git.Repository.open(repoPath)
+	.then(function(_repo) {
+		repo = _repo;
+		return repo.getHeadCommit();
+	})
+	.then(function(_head) {
+		head = _head;
+		return repo.getReferenceCommit(commitToRebase);
+	})
+	.then(function(_commit) {
+		commit = _commit;
+		return repo.rebaseBranches("HEAD", "refs/heads/" + commitToRebase, null, null, null)
+		.then(function(_oid) {
+			oid = _oid;
+		})
+		.catch(function(index) {
+			paths = {};
+			index.entries().forEach(function(entry) {
+				if (git.Index.entryIsConflict(entry)) {
+					paths[entry.path] = "";
+				}
+			});
+			return git.Checkout.index(repo, index, {
+				checkoutStrategy: git.Checkout.STRATEGY.ALLOW_CONFLICTS,
+				ourLabel: "HEAD",
+				theirLabel: commit.sha()
+			});
+		});
+	})
+	.then(function() {
+		res.statusCode = 200;
+		var mergeResult = "MERGED";
+		if (!paths) {
+			if (oid && oid.toString() === head.id().toString()) mergeResult = "ALREADY_UPDATE";
+			else if (oid && oid.toString() === commit.id().toString()) mergeResult = "FAST_FORWARD";
+		}
+		var result = {
+			"Result": paths ? "CONFLICTING" : mergeResult,
+			"FailingPaths": paths
+		};
+		var resp = JSON.stringify(result);
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
+	})
+	.catch(function(err) {
+		writeError(400, res, err.message);
+	});
+
 }
 
 function merge(req, res, next, rest, repoPath, commitToMerge, squash) {
