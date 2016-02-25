@@ -44,11 +44,11 @@ function startServer(options) {
 				orionClientRoot: ORION_CLIENT,
 				maxAge: options.maxAge
 			}))
-		app.use(orionLogin())
-        app.use(orionTasks.orionTasksAPI({
-                root: '/task'
-            }))
 		// API handlers
+		app.use('/login', orionLogin())
+		app.use('/task', orionTasks.orionTasksAPI({
+			root: '/task'
+		}))
 		app.use('/file', orionFile({
 			root: '/file',
 			workspaceDir: workspaceDir
@@ -63,11 +63,11 @@ function startServer(options) {
 				fileRoot: '/file',
 				workspaceDir: workspaceDir
 			}))
-		app.use(orionSearch({
-				root: '/filesearch',
-				fileRoot: '/file',
-				workspaceDir: workspaceDir
-			}))
+		app.use('/filesearch', orionSearch({
+			root: '/filesearch',
+			fileRoot: '/file',
+			workspaceDir: workspaceDir
+		}))
 		return app;
 	} catch (e) {
 		handleError(e);

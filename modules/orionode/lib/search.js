@@ -9,24 +9,24 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
+var apiPath = require('./middleware/api_path');
 var express = require('express');
 var bodyParser = require('body-parser');
 var url = require('url');
 var fs = require('fs');
 var fileUtil = require('./fileUtil');
-var resource = require('./resource');
 
 module.exports = function(options) {
-	var workspaceRoot = options.root;
+	var root = options.root;
 	var fileRoot = options.fileRoot;
 	var workspaceDir = options.workspaceDir;
-	if (!workspaceRoot) { throw 'options.root path required'; }
+	if (!root) { throw new Error('options.root path required'); }
 	var workspaceId = 'orionode';
 	var workspaceName = 'Orionode Workspace';
 	var fieldList = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive".split(",");
 
 	function originalFileRoot(req) {
-		return fileUtil.getContextPath(req) + fileRoot;
+		return req.contextPath + fileRoot;
 	}
 
 	function isSearchField(term) {
@@ -71,7 +71,7 @@ module.exports = function(options) {
 						this.filenamePatternCaseSensitive = false;
 						this.filenamePattern = term.substring(10);
 					} else if (term.lastIndexOf("Location:", 0) === 0) {
-						this.location = term.substring(9 + fileUtil.getContextPath(req).length);
+						this.location = term.substring(9 + req.contextPath.length);
 					} else if (term.lastIndexOf("Name:", 0) === 0) {
 						this.filenamePatternCaseSensitive = true;
 						this.filenamePattern = term.substring(5);
@@ -171,57 +171,53 @@ module.exports = function(options) {
 		return results;
 	}
 
-	return express()
+	return express.Router()
 	.use(bodyParser.json())
-	.use(resource(workspaceRoot, {
-		GET: function(req, res, next, rest) {
-			var searchOpt = new SearchOptions(req, res);
-			searchOpt.buildSearchOptions();
+	.use(apiPath(root))
+	.get('*', function(req, res, next) {
+		var searchOpt = new SearchOptions(req, res);
+		searchOpt.buildSearchOptions();
 
-			var searchPattern = buildSearchPattern(searchOpt);
-			var filenamePattern = buildFilenamePattern(searchOpt);
+		var searchPattern = buildSearchPattern(searchOpt);
+		var filenamePattern = buildFilenamePattern(searchOpt);
 
-			var parentFileLocation = originalFileRoot(req);
-			var endOfFileRootIndex = 5;
+		var parentFileLocation = originalFileRoot(req);
+		var endOfFileRootIndex = 5;
 
-			var searchScope = workspaceDir + searchOpt.location.substring(endOfFileRootIndex, searchOpt.location.length - 1);
-			if (searchScope.charAt(searchScope.length - 1) != "/") searchScope = searchScope + "/";
+		var searchScope = workspaceDir + searchOpt.location.substring(endOfFileRootIndex, searchOpt.location.length - 1);
+		if (searchScope.charAt(searchScope.length - 1) != "/") searchScope = searchScope + "/";
 
-			fileUtil.getChildren(searchScope, parentFileLocation, function(children) {
-				var results = [];
-				for (var i = 0; i < children.length; i++){
-					var child = children[i];
-					var childName = child.Location.substring(endOfFileRootIndex + 1);
+		fileUtil.getChildren(searchScope, parentFileLocation, function(children) {
+			var results = [];
+			for (var i = 0; i < children.length; i++){
+				var child = children[i];
+				var childName = child.Location.substring(endOfFileRootIndex + 1);
 
-					var matches = searchFile(searchScope, childName, searchPattern, filenamePattern, []);
-					if (matches) results = results.concat(matches);
-				};
+				var matches = searchFile(searchScope, childName, searchPattern, filenamePattern, []);
+				if (matches) results = results.concat(matches);
+			};
 
-				var ws = JSON.stringify({
-				  "response": {
-				    "docs": results,
-				    "numFound": results.length,
-				    "start": 0
-				  },
-				  "responseHeader": {
-				    "params": {
-				      "fl": "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive",
-				      "fq": [
-				        "Location:"+searchOpt.location,
-				        "UserName:anonymous"
-				      ],
-				      "rows": "10000",
-				      "sort": "Path asc",
-				      "start": "0",
-				      "wt": "json"
-				    },
-				    "status": 0
-				  }
-				});
-
-				res.setHeader('Content-Type', 'application/json');
-				res.end(ws);
+			res.json({
+			  "response": {
+			    "docs": results,
+			    "numFound": results.length,
+			    "start": 0
+			  },
+			  "responseHeader": {
+			    "params": {
+			      "fl": "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive",
+			      "fq": [
+			        "Location:"+searchOpt.location,
+			        "UserName:anonymous"
+			      ],
+			      "rows": "10000",
+			      "sort": "Path asc",
+			      "start": "0",
+			      "wt": "json"
+			    },
+			    "status": 0
+			  }
 			});
-		}
-	}));
+		});
+	});
 };

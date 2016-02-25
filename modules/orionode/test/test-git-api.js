@@ -27,7 +27,7 @@ var PREFIX = CONTEXT_PATH + '/workspace';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
 
 var app = express();
-app.use(CONTEXT_PATH, require('../lib/tasks').orionTasksAPI({
+app.use(CONTEXT_PATH + '/task', require('../lib/tasks').orionTasksAPI({
 	root: '/task',
 }))
 .use(CONTEXT_PATH, require('../lib/workspace')({
