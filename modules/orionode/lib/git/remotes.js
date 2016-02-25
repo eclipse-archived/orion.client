@@ -216,19 +216,22 @@ function addRemote(workspaceDir, fileRoot, req, res, next, rest) {
 }
 
 function postRemote(workspaceDir, fileRoot, req, res, next, rest) {
-	rest = rest.replace("remote/", "");
-	var split = rest.split("/file/"); //If the branch name is /file/, this is kind of a problem.
-	var repoPath = api.join(workspaceDir, split[1]);
-	var remote = split[0];
+	var segments = rest.split("/");
+	var repoPath = segments[2] === "file" ? segments[3] : segments[4];
+	repoPath = api.join(workspaceDir, repoPath);
+	var remote = segments[1];
+	var branch = segments[2] === "file" ? "" : segments[2];
 
 	if (req.body.Fetch) {
-		fetchRemote(repoPath, res, remote)
+		fetchRemote(repoPath, req, res, rest, remote, branch, req.body.Force)
+	} else if (req.body.PushSrcRef) {
+		pushRemote(repoPath, req, res, rest, remote, branch, req.body.PushSrcRef, req.body.PushTags, req.body.Force)
 	} else {
-		pushRemote(repoPath, req, res, remote)
+		writeError(400, res);
 	}
 }
 
-function fetchRemote(repoPath, res, remote) {
+function fetchRemote(repoPath, req, res, rest, remote, branch, force) {
 	var repo;
 	git.Repository.open(repoPath)
 	.then(function(r) {
@@ -236,17 +239,25 @@ function fetchRemote(repoPath, res, remote) {
 		return git.Remote.lookup(repo, remote);
 	})
 	.then(function(remote) {
-//		remote.setCallbacks({
-//			certificateCheck: function() {
-//				return 1; // Continues connection even if SSL certificate check fails. 
-//			}
-//		});
-
-		var refSpec = "+refs/heads/*:refs/remotes/" + remote.name() + "/*";
-
+		var refSpec = null;
+		if (branch) {
+			var remoteBranch = branch;
+			if (branch.indexOf("for/") === 0) {
+				remoteBranch = branch.substr(4);
+			}
+			refSpec = "refs/heads/" + remoteBranch + ":refs/remotes/" + remote.name() + "/" + branch;
+			if (force) refSpec = "+" + refSpec;
+		}
+		
 		return remote.fetch(
-			[refSpec],
-			git.Signature.default(repo),
+			refSpec ? [refSpec] : null,
+			{callbacks:
+				{
+					certificateCheck: function() {
+						return 1;
+					}
+				}
+			},
 			"fetch"	
 		);
 	})
@@ -276,11 +287,8 @@ function fetchRemote(repoPath, res, remote) {
 	})
 }
 
-function pushRemote(repoPath, req, res, remote) {
+function pushRemote(repoPath, req, res, rest, remote, branch, pushSrcRef, tags, force) {
 	var taskID = (new Date).getTime(); // Just use the current time
-	var split = remote.split("/"); // remote variable should be [remote]/[branch]
-	var remote = split[0];
-	var branch = split[1];
 	var repo;
 	var remoteObj;
 
@@ -300,7 +308,7 @@ function pushRemote(repoPath, req, res, remote) {
 	})
 	.then(function(r) {
 		remoteObj = r;
-		return repo.getReference(req.body.PushSrcRef);
+		return repo.getReference(pushSrcRef);
 	})
 	.then(function(ref) {
 
@@ -308,27 +316,24 @@ function pushRemote(repoPath, req, res, remote) {
 			throw new Error(remoteObj.url() + ": not authorized");
 		}
 
-		remoteObj.setCallbacks({
-			certificateCheck: function() {
-				return 1; // Continues connection even if SSL certificate check fails. 
-			},
-			credentials: function() {
-				return git.Cred.userpassPlaintextNew(
-					req.body.GitSshUsername,
-					req.body.GitSshPassword
-				);
-			}
-		});
+		var pushToGerrit = branch.indexOf("for/") === 0;
+		var refSpec = ref.name() + ":" + (pushToGerrit ? "refs/" : "refs/heads/") + branch;
 
-		var refSpec = ref.name() + ":refs/heads/" + branch;
-
-		if (req.body.Force) refSpec = "+" + refSpec;
+		if (force) refSpec = "+" + refSpec;
 
 		return remoteObj.push(
-			[refSpec],
-			null,
-			repo.defaultSignature(),
-			"Push to " + branch
+			tags & false ? [refSpec, "refs/tags/*:refs/tags/*"] : [refSpec],
+			{callbacks: {
+				certificateCheck: function() {
+					return 1; // Continues connection even if SSL certificate check fails. 
+				},
+				credentials: function() {
+					return git.Cred.userpassPlaintextNew(
+						req.body.GitSshUsername,
+						req.body.GitSshPassword
+					);
+				}
+			}}
 		);
 	})
 	.then(function(err) {

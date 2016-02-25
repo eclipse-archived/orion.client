@@ -382,7 +382,7 @@ function rebase(req, res, next, rest, repoPath, commitToRebase, rebaseOperation)
 				break;
 				
 			case "SKIP":
-				throw new Error("not supported");
+				throw new Error("Not implemented yet");
 				
 			default:
 				work = repo.rebaseBranches("HEAD", "refs/heads/" + commitToRebase, null, null, null);
@@ -437,7 +437,7 @@ function rebase(req, res, next, rest, repoPath, commitToRebase, rebaseOperation)
 }
 
 function merge(req, res, next, rest, repoPath, commitToMerge, squash) {
-	//TODO squash
+	
 	var repo, head, commit, oid, paths;
 	git.Repository.open(repoPath)
 	.then(function(_repo) {
@@ -450,6 +450,9 @@ function merge(req, res, next, rest, repoPath, commitToMerge, squash) {
 	})
 	.then(function(_commit) {
 		commit = _commit;
+		if (squash) {
+			throw new Error("Not implemented yet");
+		}
 		return repo.mergeBranches("HEAD", commitToMerge)
 		.then(function(_oid) {
 			oid = _oid;
