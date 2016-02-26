@@ -15,7 +15,7 @@ var git = require('nodegit');
 var url = require('url');
 var crypto = require('crypto');
 
-function commitJSON(commit, fileDir, diffs) {
+function commitJSON(commit, fileDir, diffs, parents) {
 	return {
 		"AuthorEmail": commit.author().email(), 
 		"AuthorName": commit.author().name(),
@@ -28,6 +28,7 @@ function commitJSON(commit, fileDir, diffs) {
 		"Location": "/gitapi/commit/" + commit.sha() + fileDir,
 		"CloneLocation": "/gitapi/clone" + fileDir,
 		"Diffs": diffs,
+		"Parents": parents,
 		"Message": commit.message(),
 		"Name": commit.sha(),
 		"Time": commit.timeMs(),
@@ -121,13 +122,14 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 
 				return repo.getCommit(oid)
 				.then(function(commit) {
-					return Promise.all([commit, getDiff(repo, commit, fileDir)]);
+					return Promise.all([commit, getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)]);
 				})
 				.then(function(commitAndDiffs) {
 					var commit = commitAndDiffs[0];
 					var diffs = commitAndDiffs[1];
+					var parents = commitAndDiffs[2];
 					if (!page || count++ >= (page-1)*pageSize) {
-						commits.push(commitJSON(commit, fileDir, diffs));
+						commits.push(commitJSON(commit, fileDir, diffs, parents));
 					}
 
 					if (pageSize && commits.length === pageSize) {
@@ -181,6 +183,18 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 		}
 	}).catch(function(err) {
 		writeError(400, res, err.message);
+	});
+}
+
+function getCommitParents(repo, commit, fileDir) {
+	return commit.getParents()
+	.then(function(parents) {
+		return parents.map(function(parent) {
+			return {
+				"Location": "/gitapi/commit/" + parent.sha() + fileDir,
+				"Name": parent.sha()
+			};
+		});
 	});
 }
 
@@ -528,7 +542,7 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 }
 
 function tag(req, res, next, rest, repoPath, fileDir, commitId, name) {
-	var theRepo, theDiffs, thisCommit;
+	var theRepo, theDiffs, thisCommit, theParents;
 	git.Repository.open(repoPath)
 	.then(function(repo) {
 		theRepo = repo;
@@ -544,12 +558,18 @@ function tag(req, res, next, rest, repoPath, fileDir, commitId, name) {
 	.then(function(diffs){
 		theDiffs = diffs;
 	})
+	.then(function() {
+		return getCommitParents(theRepo, thisCommit, fileDir);
+	})
+	.then(function(parents){
+		theParents = parents;
+	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
 	})
 	.done(function() {
 		res.statusCode = 200;
-		var resp = commitJSON(thisCommit, fileDir, theDiffs);
+		var resp = commitJSON(thisCommit, fileDir, theDiffs, theParents);
 		resp = JSON.stringify(resp);
 		res.setHeader('Content-Type', 'application/json');
 		res.setHeader('Content-Length', resp.length);
@@ -603,7 +623,7 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 	}
 
 	var theRepo, thisCommit;
-	var theDiffs = [];
+	var theDiffs = [], theParents;
 
 	git.Repository.open(repoPath)
 	.then(function(repo) {
@@ -617,12 +637,18 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 	.then(function(diffs){
 		theDiffs = diffs;
 	})
+	.then(function(commit) {
+		return getCommitParents(theRepo, commit, fileDir);
+	})
+	.then(function(parents){
+		theParents = parents;
+	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
 	})
 	.done(function() {
 		res.statusCode = 200;
-		var resp = commitJSON(thisCommit, fileDir, theDiffs);
+		var resp = commitJSON(thisCommit, fileDir, theDiffs, theParents);
 		resp = JSON.stringify(resp);
 		res.setHeader('Content-Type', 'application/json');
 		res.setHeader('Content-Length', resp.length);
@@ -637,4 +663,5 @@ module.exports = {
 	
 	commitJSON: commitJSON,
 	getDiff: getDiff,
+	getCommitParents: getCommitParents
 };

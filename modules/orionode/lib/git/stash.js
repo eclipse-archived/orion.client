@@ -32,12 +32,13 @@ function getStash(workspaceDir, fileRoot, req, res, next, rest) {
 			if (filter && message.indexOf(filter) === -1) return;
 			stashesPromises.push(repo.getCommit(oid)
 			.then(function(commit) {
-				return Promise.all([commit, mCommit.getDiff(repo, commit, fileDir)]);
+				return Promise.all([commit, mCommit.getDiff(repo, commit, fileDir), mCommit.getCommitParents(repo, commit, fileDir)]);
 			})
 			.then(function(commitAndDiffs) {
 				var commit = commitAndDiffs[0];
 				var diffs = commitAndDiffs[1];
-				var stashCommit = mCommit.commitJSON(commit, fileDir, diffs);
+				var parents = commitAndDiffs[2];
+				var stashCommit = mCommit.commitJSON(commit, fileDir, diffs, parents);
 				stashCommit["ApplyLocation"] = "/gitapi/stash/" + oid + fileDir;
 				stashCommit["DropLocation"] = "/gitapi/stash/" + oid + fileDir;
 				stashCommit["Type"] = "StashCommit";
