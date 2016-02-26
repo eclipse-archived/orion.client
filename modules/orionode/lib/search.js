@@ -98,14 +98,14 @@ module.exports = function(options) {
 			}
 
 			searchTerm = undoLuceneEscape(searchTerm);
-			if (searchTerm.indexOf("?") != -1 || searchTerm.indexOf("*") != -1) {
+			if (searchTerm.indexOf("?") !== -1 || searchTerm.indexOf("*") !== -1) {
 				if (searchTerm.indexOf("*") === 0) {
 					searchTerm = searchTerm.substring(1);
 				}
-				if (searchTerm.indexOf("?") != -1) {
-					searchTerm = searchTerm.replace("?",".");
+				if (searchTerm.indexOf("?") !== -1) {
+					searchTerm = searchTerm.replace("?", ".");
 				}
-				if (searchTerm.indexOf("*") != -1) {
+				if (searchTerm.indexOf("*") !== -1) {
 					searchTerm = searchTerm.replace("*", ".*");
 				}
 			}
@@ -121,14 +121,18 @@ module.exports = function(options) {
 
 	function buildFilenamePattern(searchOpts){
 		var filenamePattern = searchOpts.filenamePattern;
-		if (filenamePattern.indexOf("?") != -1 || filenamePattern.indexOf("*") != -1) {
+		//Default File Pattern
+		if(filenamePattern === null){
+			filenamePattern = ".*";
+		}
+		if (filenamePattern.indexOf("?") !== -1 || filenamePattern.indexOf("*") !== -1) {
 			if (filenamePattern.indexOf("*") === 0) {
 				filenamePattern = filenamePattern.substring(1);
 			}
-			if (filenamePattern.indexOf("?") != -1) {
-				filenamePattern = filenamePattern.replace("?",".");
+			if (filenamePattern.indexOf("?") !== -1) {
+				filenamePattern = filenamePattern.replace("?", ".");
 			}
-			if (filenamePattern.indexOf("*") != -1) {
+			if (filenamePattern.indexOf("*") !== -1) {
 				filenamePattern = filenamePattern.replace("*", ".*");
 			}
 		}
@@ -145,7 +149,7 @@ module.exports = function(options) {
 		var stats = fs.statSync(filePath);
 
 		if (stats.isDirectory()) {
-			if (filePath.substring(filePath.length-1) != "/") filePath = filePath + "/";
+			if (filePath.substring(filePath.length-1) !== "/") filePath = filePath + "/";
 
 			var directoryFiles = fs.readdirSync(filePath);
 			directoryFiles.forEach(function (directoryFile) {
@@ -185,7 +189,7 @@ module.exports = function(options) {
 		var endOfFileRootIndex = 5;
 
 		var searchScope = workspaceDir + searchOpt.location.substring(endOfFileRootIndex, searchOpt.location.length - 1);
-		if (searchScope.charAt(searchScope.length - 1) != "/") searchScope = searchScope + "/";
+		if (searchScope.charAt(searchScope.length - 1) !== "/") searchScope = searchScope + "/";
 
 		fileUtil.getChildren(searchScope, parentFileLocation, function(children) {
 			var results = [];
