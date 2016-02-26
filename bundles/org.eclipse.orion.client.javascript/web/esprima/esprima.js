@@ -1948,7 +1948,7 @@ parseStatement: true, parseSourceElement: true */
 
         finishIfStatement: function (test, consequent, alternate) {
             this.type = Syntax.IfStatement;
-            this.test = test;
+            this.test = typeof test !== 'undefined' && test !== null ? test : recoveredNode(this, 'Expression'); //ORION
             this.consequent = consequent ? consequent : recoveredNode(this, 'Statement'); //ORION
             this.alternate = alternate;
             this.finish();
