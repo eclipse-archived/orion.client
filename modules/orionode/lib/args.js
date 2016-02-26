@@ -9,11 +9,11 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var async = require('../lib/async');
 var fs = require('fs');
-var path = require('path');
-var dfs = require('deferred-fs'), Deferred = dfs.Deferred;
-var PATH_TO_NODE = process.execPath;
+var nodePath = require('path');
+var Promise = require('bluebird');
+var mkdirp = require('mkdirp');
+var mkdirpAsync = Promise.promisify(mkdirp);
 
 /**
  * @param {Array} argv
@@ -35,30 +35,8 @@ exports.parseArgs = function(argv) {
  * @param {Array} Directories to be created. They're created serially to allow subdirs of an earlier entry to appear later in the list.
  */
 exports.createDirs = function(dirs, callback) {
-	var promises = dirs.map(function(dir) {
-		var d = new Deferred();
-		fs.exists(dir, function(error, exists) {
-			if (!exists) {
-				fs.mkdir(dir, function(error) {
-					d.resolve(dir);
-				});
-			} else {
-				d.resolve(dir);
-			}
-		});
-		return d;
-	});
-	var results = [];
-	(function next(i) {
-		if (i === promises.length) {
-			callback(results);
-		} else {
-			promises[i].then(function(dir) {
-				results.push(dir);
-				next(i + 1);
-			});
-		}
-	}(0));
+	var path = nodePath.join.apply(null, dirs);
+	return mkdirpAsync(path, {}).asCallback(callback);
 };
 
 /**

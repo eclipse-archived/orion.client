@@ -10,13 +10,14 @@
  *******************************************************************************/
 /*eslint-env node*/
 var ETag = require('./util/etag');
-var fs = require('fs');
-var dfs = require('deferred-fs'), Deferred = dfs.Deferred;
 var path = require('path');
+var Promise = require('bluebird');
 var rimraf = require('rimraf');
 var url = require('url');
 var api = require('./api');
 var async = require('./async');
+
+var fs = Promise.promisifyAll(require('fs'));
 
 /*
  * Utils for representing files as objects in the Orion File API
@@ -34,18 +35,18 @@ var async = require('./async');
 var getChildren = exports.getChildren = function(directory, parentLocation, excludes, callback) {
 	// If 'excludes' is omitted, the callback can be given as the 3rd argument
 	callback = excludes || callback;
-	dfs.readdir(directory).then(function(files) {
+	fs.readdirAsync(directory).then(function(files) {
 		// stat each file to find if it's a Directory -- ugh
 		var childStatPromises = files.map(function(file) {
 			if (Array.isArray(excludes) && excludes.indexOf(file) !== -1) {
 				return null; // omit
 			}
 			var filepath = path.join(directory, file);
-			return dfs.stat(filepath).then(function(stat) {
+			return fs.statAsync(filepath).then(function(stat) {
 				return [filepath, stat];
 			});
 		}).filter(function(f) { return f; }); // skip omitted stuff
-		Deferred.all(childStatPromises).then(function(childStats) {
+		Promise.all(childStatPromises).then(function(childStats) {
 			var children = childStats.map(function(cs) {
 				var childname = path.basename(cs[0]);
 				var isDirectory = cs[1].isDirectory();
@@ -151,17 +152,17 @@ function _copyDir(srcPath, destPath, callback) {
 	 */
 	_copyRecursive = function(root, dirlist) {
 		var stack = [{path: root, dir: true}];
-		var treeDone = new Deferred();
-		(function handleNextDir() {
-			if (!stack.length) {
-				treeDone.resolve();
-				return;
-			}
-			var dir = stack.shift();
-			dirlist.push(dir);
-			processDir(stack, dir, dirlist).then(handleNextDir);
-		}());
-		return treeDone;
+		return new Promise(function(resolve) {
+			(function handleNextDir() {
+				if (!stack.length) {
+					resolve();
+					return;
+				}
+				var dir = stack.shift();
+				dirlist.push(dir);
+				processDir(stack, dir, dirlist).then(handleNextDir);
+			}());
+		});
 	};
 	/** @returns A promise that resolves once all items in 'dir' have been either: deleted (if simple file) or 
 	 * pushed to 'stack' for later handling (if directory).
@@ -170,16 +171,16 @@ function _copyDir(srcPath, destPath, callback) {
 	 * @param {Array} List of the mix of files and directories, in the top down order, that will be copied first for all folders then files.
 	 */
 	processDir = function(stack, dir, dirlist) {
-		return dfs.readdir(dir.path).then(function(files) {
-			return Deferred.all(files.map(function(filename) {
+		return fs.readdirAsync(dir.path).then(function(files) {
+			return Promise.all(files.map(function(filename) {
 				var fullpath = path.join(dir.path, filename);
-				return dfs.stat(fullpath).then(function(stat) {
+				return fs.statAsync(fullpath).then(function(stat) {
 					if (stat.isDirectory()) {
 						stack.push({path: fullpath, dir: true});
 					} else {
 						dirlist.push({path: fullpath, dir: false});
 					}
-					return new Deferred().resolve();
+					return Promise.resolve();
 				});
 			}));
 		});
@@ -189,13 +190,13 @@ function _copyDir(srcPath, destPath, callback) {
 			if(d.dir){
 				var currentDestFolderPath = d.path.replace(srcPath, destPath);
 				return function() {
-					return dfs.mkdir(currentDestFolderPath);
+					return fs.mkdirAsync(currentDestFolderPath);
 				};
 			} else {
 				return function(){
 					var currentDestFolderPath = d.path.replace(srcPath, destPath);
-					var rs = dfs.createReadStream(d.path);
-					var ws = dfs.createWriteStream(currentDestFolderPath);
+					var rs = fs.createReadStream(d.path);
+					var ws = fs.createWriteStream(currentDestFolderPath);
 					rs.pipe(ws);
 				};
 			}
@@ -326,8 +327,8 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, res, wwwp
 		//Charset: "UTF-8",
 		Attributes: {
 			// TODO fix this
-			ReadOnly: false,//!(stats.mode & USER_WRITE_FLAG === USER_WRITE_FLAG),
-			Executable: false//!(stats.mode & USER_EXECUTE_FLAG === USER_EXECUTE_FLAG)
+			ReadOnly: false, //!(stats.mode & USER_WRITE_FLAG === USER_WRITE_FLAG),
+			Executable: false //!(stats.mode & USER_EXECUTE_FLAG === USER_EXECUTE_FLAG)
 		}
 	};
 	if (metadataMixins) {

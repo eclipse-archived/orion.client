@@ -41,7 +41,7 @@ argslib.readConfigFile(configFile, function(configParams) {
 		workspaceDir = path.join(__dirname, '.workspace');
 	}
 
-	argslib.createDirs([workspaceDir], function(dirs) {
+	argslib.createDirs([workspaceDir], function() {
 		var passwordFile = args.password || args.pwd;
 		argslib.readPasswordFile(passwordFile, function(password) {
 			var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
@@ -59,7 +59,7 @@ argslib.readConfigFile(configFile, function(configParams) {
 			try {
 				// create web server
 				var orionMiddleware = orion({
-					workspaceDir: dirs[0],
+					workspaceDir: workspaceDir,
 					configParams: configParams,
 					maxAge: (dev ? 0 : undefined),
 				});

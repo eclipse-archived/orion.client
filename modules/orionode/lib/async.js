@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env node*/
-var Deferred = require('deferred-fs').Deferred;
+var Promise = require("bluebird");
 
 /**
  * Runs several promise-producing functions in sequence. Fulfillment values are passed to the next function in the chain.
@@ -19,7 +19,8 @@ var Deferred = require('deferred-fs').Deferred;
  * @returns {orion.Promise} A promise
  */
 exports.sequence = function(funcs, initialValue) {
+	// TODO refactor callers to use Bluebird directly
 	return Array.prototype.reduce.call(funcs, function(previousPromise, func, i) {
-		return Deferred.when(previousPromise, func);
-	}, new Deferred().resolve(initialValue));
+		return Promise.resolve(previousPromise).then(func);
+	}, Promise.resolve(initialValue));
 };

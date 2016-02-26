@@ -10,9 +10,8 @@
  *******************************************************************************/
 /*eslint-env node, mocha*/
 var assert = require('assert');
-var mocha = require('mocha');
+var Promise = require('bluebird');
 var async = require('../lib/async');
-var Deferred = require('deferred-fs').Deferred;
 
 describe('async', function() {
 	describe('#sequence', function() {
@@ -27,18 +26,14 @@ describe('async', function() {
 				function() {
 					assert.deepEqual(events, [0, 0, 0]);
 					events[0] = 1;
-					var d = new Deferred();
-					setTimeout(function() {
+					return Promise.delay(50).then(function() {
 						assert.deepEqual(events, [1, 0, 0]);
 						events[1] = 1;
-						d.resolve();
-					}, 50);
-					return d;
+					});
 				},
 				function() {
 					assert.deepEqual(events, [1, 1, 0]);
 					events[2] = 1;
-					return;
 				},
 				function() {
 					assert.deepEqual(events, [1, 1, 1]);
@@ -61,9 +56,9 @@ describe('async', function() {
 				},
 				function(val) {
 					assert.equal(val, 'hello');
-					var d = new Deferred();
-					setTimeout(d.resolve.bind(null, 'world'), 50);
-					return d;
+					return Promise.delay(50).then(function() {
+						return 'world';
+					});
 				},
 				function(val) {
 					assert.equal(val, 'world');
@@ -75,14 +70,12 @@ describe('async', function() {
 			var deepestRan = false;
 			async.sequence([
 				function() {
-					return new Deferred().resolve()
+					return Promise.resolve()
 						.then(function() {
-							var d = new Deferred();
-							setTimeout(function() {
+							return Promise.resolve().delay(60).then(function() {
 								deepestRan = true;
-								d.resolve('foo');
-							}, 60);
-							return d;
+								return 'foo';
+							});
 						});
 				},
 				function(val) {
