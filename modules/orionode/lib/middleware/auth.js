@@ -21,11 +21,10 @@ module.exports = function auth(pwd) {
 	}
 	return function checkAuth(req, res, next) {
 		var credentials = basicAuth(req);
-		if (!credentials || credentials.pass !== pwd ) {
-			res.statusCode = 401;
-			res.setHeader('WWW-Authenticate', 'Basic realm="example"');
-			res.end('Access denied');
-		 }
-		 return next();
+		if (!credentials || credentials.pass !== pwd) {
+			res.set('WWW-Authenticate', 'Basic realm="example"');
+			return res.sendStatus(401);
+		}
+		return next();
 	 };
 }
