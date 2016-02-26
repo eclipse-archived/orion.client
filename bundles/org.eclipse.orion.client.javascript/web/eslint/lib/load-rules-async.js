@@ -1350,9 +1350,7 @@ define([
         					    if(node.type === 'FunctionDeclaration') {
         					    	   var tern = context.getTern();
         					    	   var refQuery = tern.query;
-        					    	   if (typeof refQuery.end === "undefined") {
-									refQuery.end = node.id.end;
-        					    	   }
+							   refQuery.end = node.id.end;
         					    	   var refs = null;
         					    	   var filename = tern.file.name;
         					    	   try {
