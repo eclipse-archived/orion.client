@@ -186,9 +186,9 @@ define([
 				if (this.isCompletingCommentClose(node, params.offset)){
 					return this.getComment(node, params.offset, ast.source, false);
 				} else if (this.isCompletingAttributeValue(node, ast.source, params)) {
-					return this.getValuesForAttribute(node, params);
+					return this.getValuesForAttribute(node, ast.source, params);
 				} else if (this.isCompletingTagAttribute(node, ast.source, params)) {
-					return this.getAttributesForNode(node, params);
+					return this.getAttributesForNode(node, ast.source, params);
 				} else if (this.isCompletingTag(node, params)){
 					if (this.isCompletingCommentOpen(node)){
 						return this.getComment(node, params.offset, ast.source, true);
@@ -442,9 +442,38 @@ define([
 		 * @returns {Array.<Object>} The array of proposals
 		 * @since 10.0 
 		 */
-		getAttributesForNode: function(node, params) {
-			var attrs = Attributes.getAttributesForNode(node);
+		getAttributesForNode: function(node, source, params) {
 			var proposals = [];
+			var prefix = params.prefix ? params.prefix : "";
+			// we need to check if we need to rebuild the prefix for completion that contains a '-'
+			var index = params.offset - prefix.length - 1;
+			if (index > 0 && index < source.length) {
+				var precedingChar = source.charAt(index);
+				if (precedingChar === '-') {
+					index--;
+					if (index !== 0) {
+						// rebuild a prefix based on what characters (letter only) are before the '-'
+						precedingChar = source.charAt(index);
+						var currentPrefix = "-" + prefix;
+						loop: while (index > 0 && /[A-Za-z0-9_-]/.test(precedingChar)) {
+							index--;
+							currentPrefix = precedingChar + currentPrefix;
+							if (index === 0) {
+								break loop;
+							}
+							precedingChar = source.charAt(index);
+						}
+						params.prefix = currentPrefix;
+					}
+				} else if (precedingChar === '=' && prefix.length === 0 && (index - 1) > 0) {
+					precedingChar = source.charAt(index - 1);
+					if (/[A-Za-z0-9_]/.test(precedingChar)) {
+						proposals.push(this.makeComputedProposal("\"\"",  Messages['addQuotesToAttributes'], " - \"\"", null, prefix)); //$NON-NLS-1$ //$NON-NLS-2$
+						return proposals;
+					}
+				}
+			}
+			var attrs = Attributes.getAttributesForNode(node);
 			if(Array.isArray(attrs.global)) {
 				proposals = proposals.concat(this.addProposals(node, attrs.global, params));
 			}
@@ -460,7 +489,6 @@ define([
 					});
 					proposals = proposals.concat(arr);
 				}
-
 			}
 			if(Array.isArray(attrs.keyboardevents)) {
 				arr = this.addProposals(node, attrs.keyboardevents, params);
@@ -474,7 +502,6 @@ define([
 					});
 					proposals = proposals.concat(arr);
 				}
-
 			}
 			if(Array.isArray(attrs.mouseevents)) {
 				arr = this.addProposals(node, attrs.mouseevents, params);
@@ -488,7 +515,6 @@ define([
 						});
 					proposals = proposals.concat(arr);
 				}
-
 			}
 			if(Array.isArray(attrs.windowevents) && attrs.windowevents.length > 0) {
 				arr = this.addProposals(node, attrs.windowevents, params);
@@ -502,7 +528,6 @@ define([
 						});
 					proposals = proposals.concat(arr);
 				}
-
 			}
 			if(Array.isArray(attrs.aria)) {
 				arr = this.addProposals(node, attrs.aria, params);
@@ -517,7 +542,7 @@ define([
 					proposals = proposals.concat(arr);
 				}
 			}
-			return proposals;	
+			return proposals;
 		},
 		
 		addProposals: function addProposals(node, attrs, params) {
@@ -652,9 +677,24 @@ define([
 		 * @returns {Array.<Object>} The array of proposals
 		 * @since 10.0 
 		 */
-		getValuesForAttribute: function(node, params) {
-			var vals = Attributes.getValuesForAttribute(node);
+		getValuesForAttribute: function(node, source, params) {
 			var proposals = [];
+			var prefix = params.prefix ? params.prefix : "";
+			// we need to check if we need to rebuild the prefix for completion that contains a '-'
+			var index = params.offset - prefix.length - 1;
+			if (index > 0 && index < source.length) {
+				var precedingChar = source.charAt(index);
+				if (precedingChar === '=' && prefix.length === 0 && (index - 1) > 0) {
+					precedingChar = source.charAt(index - 1);
+					if (/[A-Za-z0-9_]/.test(precedingChar)) {
+						if (index + 1 >= source.length || 
+								(source.charAt(index + 1) !== '\"' && source.charAt(index + 1) !== "'")) {
+							proposals.push(this.makeComputedProposal("\"\"",  Messages['addQuotesToAttributes'], " - \"\"", null, prefix)); //$NON-NLS-1$ //$NON-NLS-2$
+						}
+					}
+				}
+			}
+			var vals = Attributes.getValuesForAttribute(node);
 			if(Array.isArray(vals)) {
 				proposals = proposals.concat(this.addProposals(node, vals, params));
 			}
@@ -703,6 +743,10 @@ define([
 		isCompletingAttributeValue: function(node, source, params) {
 			// TODO We can do better with the new parser, handle no quotes cases too
 			if(node && node.type === 'attr') {
+				if (node.valueRange) {
+					var range = node.valueRange;
+					return range[0] <= params.offset && range[1] >= params.offset;
+				}
 				return this.within('"', '"', source, params.offset, node.range) || //$NON-NLS-1$ //$NON-NLS-2$
 						this.within("'", "'", source, params.offset, node.range); //$NON-NLS-1$ //$NON-NLS-2$
 			}

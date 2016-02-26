@@ -22,7 +22,7 @@ define([
     var astmanager = new ASTManager.HtmlAstManager();
     var assist = new HTMLAssist.HTMLContentAssistProvider(astmanager);
     var tagTemplates = assist.getTags("", "");
-    var globalTagAttributes = assist.getAttributesForNode({name: "zzz", type: "tag"}, {offset: 0, prefix: ""});
+    var globalTagAttributes = assist.getAttributesForNode({name: "zzz", type: "tag"}, "", {offset: 0, prefix: ""});
     
     /**
      * Set up the test and return an object for the test context
@@ -1730,6 +1730,97 @@ define([
     				}
     			}
     			assert(knownProp, "Could not find expected proposal role");
+    		});
+    	});
+    	it('Tags that support the attributes of many roles: details (13). Prefix role. <details r>', function() {
+    		var _o = setup({buffer: '<html><body><details role></details></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 25, prefix: 'role'}).then(function(proposals) {
+    			var expectedCount = 2; // "ARIA title" + role
+    			assert(proposals.length === expectedCount, "Incorrect number of proposals for details tag attributes. Proposal count: " + proposals.length + " Expected count: " + expectedCount);
+    			var knownProp;
+    			for (var i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "role"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal role");
+    		});
+    	});
+    	it('Tags that support the attributes of many roles: details (13). Prefix empty. <details r>', function() {
+    		var _o = setup({buffer: '<html><body><details role=></details></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 26, prefix: ''}).then(function(proposals) {
+    			var expectedCount = 1; // "ARIA title" + role
+    			assert(proposals.length === expectedCount, "Incorrect number of proposals for details tag attributes. Proposal count: " + proposals.length + " Expected count: " + expectedCount);
+    			var knownProp;
+    			for (var i=0; i<proposals.length; i++) {
+    				if (proposals[i].proposal === "\"\""){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal role");
+    		});
+    	});
+    	it('Tags that support the attributes of many roles: details (13). Empty prefix. <details aria->', function() {
+    		var _o = setup({buffer: '<html><body><details aria-></details></body></html>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 26, prefix: ''}).then(function(proposals) {
+    			var expectedCount = 17 + 13; // "ARIA title" + 16 aria-* globals + 13 role-specific aria-* attributes
+    			assert(proposals.length === expectedCount, "Incorrect number of proposals for details tag attributes. Proposal count: " + proposals.length + " Expected count: " + expectedCount);
+    			var knownProp;
+    			for (var i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "aria-checked"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal aria-checked");
+    			knownProp = null;
+    			for (i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "aria-expanded"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal aria-expanded");
+    			knownProp = null;
+    			for (i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "aria-activedescendant"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal aria-activedescendant");
+    			knownProp = null;
+    			for (i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "aria-multiselectable"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal aria-multiselectable");
+    			knownProp = null;
+    			for (i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "aria-pressed"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal aria-pressed");
+    			knownProp = null;
+    			for (i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "aria-required"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal aria-required");
+    			knownProp = null;
+    			for (i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "aria-posinset"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal aria-posinset");
+    			knownProp = null;
+    			for (i=0; i<proposals.length; i++) {
+    				if (proposals[i].name === "aria-setsize"){
+    					knownProp = proposals[i];
+    				}
+    			}
+    			assert(knownProp, "Could not find expected proposal aria-setsize");
     		});
     	});
     	it('Tags that support the attributes of many roles: details (13). Prefix ar. <details ar>', function() {

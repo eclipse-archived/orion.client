@@ -307,6 +307,12 @@ define([
 			this._baseState = this._state;
 			this._state = BEFORE_ENTITY;
 			this._sectionStart = this._index;
+		} else if (c === '<') {
+			valueStart = this._quoteStart;
+			this._emitToken("onattribdata");
+			this._cbs.onattribend(false, valueStart);
+			this._state = BEFORE_ATTRIBUTE_NAME;
+			this._index--;
 		}
 	};
 	
@@ -321,6 +327,12 @@ define([
 			this._baseState = this._state;
 			this._state = BEFORE_ENTITY;
 			this._sectionStart = this._index;
+		} else if (c === '<') {
+			valueStart = this._quoteStart;
+			this._emitToken("onattribdata");
+			this._cbs.onattribend(false, valueStart);
+			this._state = BEFORE_ATTRIBUTE_NAME;
+			this._index--;
 		}
 	};
 	

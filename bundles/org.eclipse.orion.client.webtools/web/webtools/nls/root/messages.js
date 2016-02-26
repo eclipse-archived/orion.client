@@ -83,6 +83,7 @@ define({//Default message bundle
 	'keyboardeventsHeader': 'Keyboard Events',
 	'mouseeventsHeader': 'Mouse Events',
 	'windoweventsHeader': 'Window Events',
+	'addQuotesToAttributes': ' - Add quotes to the current attribute',
 	
 	//CSS content assist
 	'ruleTemplateDescription': 'rule - class selector rule',

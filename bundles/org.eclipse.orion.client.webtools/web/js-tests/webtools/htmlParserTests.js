@@ -490,7 +490,74 @@ define([
 	    		}
 		    ]);
 		});
-		
+		it("Parse attributes - unclosed value, unclosed tag", function() {
+			var results = parse('<a src="</a>');
+			assertResults(results.children, [
+				{
+					type: 'tag',
+					name: 'a',
+					range: [0,12],
+					attributes: [
+						{
+							name: 'src',
+							value: null,
+							range: [3,8]
+						}
+					]
+				}
+			]);
+		});
+		it("Parse attributes - unclosed value, closed tag", function() {
+			var results = parse('<a src="></a>');
+			assertResults(results.children, [
+				{
+					type: 'tag',
+					name: 'a',
+					range: [0,13],
+					attributes: [
+						{
+							name: 'src',
+							value: ">",
+							range: [3,9]
+						}
+					]
+				}
+			]);
+		});
+		it("Parse attributes - unclosed value, unclosed tag", function() {
+			var results = parse("<a src='</a>");
+			assertResults(results.children, [
+				{
+					type: 'tag',
+					name: 'a',
+					range: [0,12],
+					attributes: [
+						{
+							name: 'src',
+							value: null,
+							range: [3,8]
+						}
+					]
+				}
+			]);
+		});
+		it("Parse attributes - unclosed value, closed tag", function() {
+			var results = parse("<a src='></a>");
+			assertResults(results.children, [
+				{
+					type: 'tag',
+					name: 'a',
+					range: [0,13],
+					attributes: [
+						{
+							name: 'src',
+							value: ">",
+							range: [3,9]
+						}
+					]
+				}
+			]);
+		});
 		// Instructions
 		it("Parse !doctype instruction", function() {
 			var results = parse('<!doctype html><html></html>');
