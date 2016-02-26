@@ -1195,7 +1195,7 @@ html[dir="rtl"] .modifiedFileMarker{ /* ACGC */
 	border-collapse: collapse;
 	border-spacing: 0;
 	padding: 0;
-	margin-top: 40px;
+	margin-top: 5px;
 	overflow-y: hidden; /* prevent vertical scrollbar from showing during expand/collapse */
 }
 
@@ -1216,8 +1216,8 @@ html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{ /* ACGC */
 
 .sectionTable {
 	margin-top: 0;
-	margin-left: 8%;
-	margin-right: 8%;
+	margin-left: 5px;
+	margin-right: 5px;
 	border: 1px solid #f1f3f4;
 	-webkit-transition: all 0.1s ease, left 0;
 	transition: all 0.1s ease, left 0;
@@ -1232,7 +1232,7 @@ html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{ /* ACGC */
 }
 
 .sectionTable:last-child {
-	margin-bottom: 20px;
+	margin-bottom: 5px;
 }
 
 .sectionTable.sectionClosed {
@@ -1244,8 +1244,8 @@ html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{ /* ACGC */
 
 .sectionWrapper{
 	border: 1px solid;
-	margin-left: 8%;
-	margin-right: 8%;
+	margin-left: 5px;
+	margin-right: 5px;
 	background: none repeat scroll 0 0 #f4f4f4;
 	vertical-align: middle;
 	font-weight: bold;

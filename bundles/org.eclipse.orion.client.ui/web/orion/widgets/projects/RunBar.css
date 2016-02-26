@@ -24,7 +24,6 @@
 	border-radius: 5px;
 	display: inline-block;
 	margin: 0 8px 0 0;
-	min-height: 20px;
 	min-width: 270px;
 	transition: opacity 0.3s ease;
 	z-index: 60;
