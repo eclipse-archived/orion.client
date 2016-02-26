@@ -10,21 +10,25 @@
  *******************************************************************************/
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
+var diff = require("./diff");
 var git = require('nodegit');
-var path = require("path");
 var url = require('url');
+var crypto = require('crypto');
 
-function generateCommitObject(commit, fileDir) {
+function commitJSON(commit, fileDir, diffs, parents) {
 	return {
 		"AuthorEmail": commit.author().email(), 
 		"AuthorName": commit.author().name(),
+		"AuthorImage": "https://www.gravatar.com/avatar/" + crypto.createHash('md5').update(commit.author().email()).digest("hex") + "?d=mm",
 		"Children":[],
 		"CommitterEmail": commit.committer().email(),
 		"CommitterName": commit.committer().name(),
-		"ContentLocation": "/gitapi/commit/" + commit.sha() + "/file/" + fileDir + "?parts=body",
-		"DiffLocation": "/gitapi/diff/" + commit.sha() + "/file/" + fileDir,
-		"Diffs":[],
-		"Location": "/gitapi/commit/" + commit.sha() + "/file/" + fileDir,
+		"ContentLocation": "/gitapi/commit/" + commit.sha() + fileDir + "?parts=body",
+		"DiffLocation": "/gitapi/diff/" + commit.sha() + fileDir,
+		"Location": "/gitapi/commit/" + commit.sha() + fileDir,
+		"CloneLocation": "/gitapi/clone" + fileDir,
+		"Diffs": diffs,
+		"Parents": parents,
 		"Message": commit.message(),
 		"Name": commit.sha(),
 		"Time": commit.timeMs(),
@@ -33,147 +37,99 @@ function generateCommitObject(commit, fileDir) {
 }
 
 function getCommit(workspaceDir, fileRoot, req, res, next, rest) {
-	rest = rest.replace("commit/", "");
 	var query = url.parse(req.url, true).query;
-
-	var commit = rest.substring(0, rest.indexOf("/"));
-
-	if (query.parts === "log" || (query.page && query.pageSize)) { //Need to figure out how to parse between getting file from head!
-		if (commit.indexOf("..") === -1) {
-			getCommitLog(workspaceDir, fileRoot, req, res, next, rest);
-		} else {
-			getCommitRevision(workspaceDir, fileRoot, req, res, next, rest);
-		}
-	} else  {
-		if (commit.indexOf("..") === -1) {
-			if (query.parts) {
-				getFileContent(workspaceDir, fileRoot, req, res, next, rest);
-			} else {
-				getCommitMetadata(workspaceDir, fileRoot, req, res, next, rest);
-			}
-		} else {
-			getCommitRevision(workspaceDir, fileRoot, req, res, next, rest);
-		}
+	if (query.parts === "body") {
+		getCommitBody(workspaceDir, fileRoot, req, res, next, rest, query);
+	} else {
+		getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query);
 	}
 }
 
-function getCommitRevision(workspaceDir, fileRoot, req, res, next, rest) {
-	var branches = rest.substring(0, rest.indexOf("/"));
-	var repoPath = rest.replace(branches, "").replace("/file/", "");
-	var fileDir = repoPath;
+function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
+	var segments = rest.split("/");
+	var scope = segments[1].replace(/%252F/g, '/');
+	var repoPath = segments[3];
+	var fileDir = api.join(fileRoot, repoPath);
 	repoPath = api.join(workspaceDir, repoPath);
 
-	branches = branches.replace("%252F", "/").split("..");
+	var page = Number(query.page) || 1;
+	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
+	var mergeBase = "true" === query.mergeBase;
 
-	var numToReturn = null;
+	var commits = [];
+	function writeResponse(over) {
+		var referenceName = scope;
+		var resp = {
+			"Children": commits,
+			"RepositoryPath": "",
+			"toRef": {
+				"CloneLocation": "/gitapi/clone" + fileDir,
+				"CommitLocation": "/gitapi/commit/" + referenceName + fileDir,
+				"Current": true,
+				"HeadLocation": "/gitapi/commit/HEAD" + fileDir,
+				"Location": "/gitapi/branch/" + referenceName + fileDir,
+				"Name": referenceName,
+				"Type": "Branch"
+			}
+		};
+	
+		if (page && !over) {
+			var nextLocation = url.parse(req.url, true);
+			nextLocation.query.page = page + 1 + "";
+			nextLocation.search = null; //So that query object will be used for format
+			nextLocation = url.format(nextLocation);
+			resp['NextLocation'] = nextLocation;
+		}
 
-	var query = url.parse(req.url, true).query;
-	var pageSize = Number(query.pageSize);
-	var page = Number(query.page);
-	var nextLocation, prevLocation;
+		if (page && page > 1) {
+			var prevLocation = url.parse(req.url, true);
+			prevLocation.query.page = page - 1 + "";
+			prevLocation.search = null;
+			prevLocation = url.format(prevLocation);
+			resp['PreviousLocation'] = prevLocation;
+		}
 
-	if (page && page > 1) {
-		prevLocation = url.parse(req.url, true);
-		prevLocation.query.page = page - 1 + "";
-		prevLocation.search = null;
-		prevLocation = url.format(prevLocation);
+		resp = JSON.stringify(resp);
+		
+		res.statusCode = 200;
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
 	}
 
-	nextLocation = url.parse(req.url, true);
-	nextLocation.query.page = page + 1 + "";
-	nextLocation.search = null; //So that query object will be used for format
-	nextLocation = url.format(nextLocation);
-
-	if (branches[0].indexOf("~") !== -1) {
-		var split = branches[0].split("~");
-		numToReturn = Number(split[1]);
-		branches[0] = split[0];
-	}
-
-	var theRepo, finalCommit;
-
-	git.Repository.open(repoPath)
-	.then(function(repo) {
-		theRepo = repo;
-		return theRepo.getReferenceCommit(branches[0]);
-	})
-	.then(function(commit) {
-		finalCommit = commit;
-		return theRepo.getReferenceCommit(branches[1]);
-	})
-	.then(function(commit) {
-		var oid = commit.id();
-		var hideOid = finalCommit.id();
-
-	    var revWalk = theRepo.createRevWalk();
-
-	    revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
-
-	    revWalk.push(oid);
-
-	    if (oid.toString() !== hideOid.toString()) { // Only hide if the reference commits aren't the same
-	    	revWalk.hide(hideOid);
-	    }
-	    
-		var commits = [];
-
-		function writeResponse() {
-			var referenceName = branches[0];
-			var resp = {
-				"Children": commits,
-				"RepositoryPath": "",
-				"toRef": {
-					"CloneLocation": "/gitapi/clone/file/" + fileDir,
-					"CommitLocation": "/gitapi/commit/" + referenceName + "/file/" + fileDir,
-					"Current": true,
-					"HeadLocation": "/gitapi/commit/HEAD/file/" + fileDir,
-					"Location": "/gitapi/branch/" + referenceName + "/file/" + fileDir,
-					"Name": referenceName,
-					"Type": "Branch"
-				}
-			};
-
-			if (page) {
-				resp['NextLocation'] = nextLocation;
+	function log(repo, ref) {
+		var revWalk = repo.createRevWalk();
+		revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
+		
+		if (ref.indexOf("..") !== -1) {
+			revWalk.pushRange(ref);
+		} else {
+			try {
+				revWalk.push(ref);
+			} catch (ex) {
+				revWalk.pushRef(ref);
 			}
-
-			if (page && prevLocation) {
-				resp['PreviousLocation'] = prevLocation;
-			}
-
-			resp = JSON.stringify(resp);
-			
-			res.statusCode = 200;
-			res.setHeader('Content-Type', 'application/json');
-			res.setHeader('Content-Length', resp.length);
-			res.end(resp);
 		}
 
 		var count = 0;
-
-	    function walk() {
+		function walk() {
 			return revWalk.next()
 			.then(function(oid) {
 				if (!oid) {
-					if (numToReturn && commits.length < numToReturn) {
-						writeError(400, res);
-						return;
-					}
-
-					writeResponse();
+					writeResponse(true);
 					return;
 				}
 
-				return theRepo.getCommit(oid)
+				return repo.getCommit(oid)
 				.then(function(commit) {
-
+					return Promise.all([commit, getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)]);
+				})
+				.then(function(commitAndDiffs) {
+					var commit = commitAndDiffs[0];
+					var diffs = commitAndDiffs[1];
+					var parents = commitAndDiffs[2];
 					if (!page || count++ >= (page-1)*pageSize) {
-						commits.push(generateCommitObject(commit, fileDir));
-					}
-
-					if (numToReturn && commits.length === numToReturn) {
-						writeResponse();
-						return;
+						commits.push(commitJSON(commit, fileDir, diffs, parents));
 					}
 
 					if (pageSize && commits.length === pageSize) {
@@ -181,129 +137,132 @@ function getCommitRevision(workspaceDir, fileRoot, req, res, next, rest) {
 						return;
 					}
 
-					return walk();
+					walk();
 				});
+			})
+			.catch(function(error) {
+			if (error.errno === git.Error.CODE.ITEROVER) {
+				writeResponse(true);
+			} else {
+				writeError(404, res, error.message);
+			}
 			});
 		}
 
-    	return walk();
-	});
-
-}
-
-function getCommitLog(workspaceDir, fileRoot, req, res, next, rest) {
-	var reference = rest.substring(0, rest.indexOf("/"));
-	var repoPath = rest.replace(reference, "").replace("/file/", "");
-	var fileDir = repoPath;
-	repoPath = api.join(workspaceDir, repoPath);
-	reference = reference.split("%252F").join("/");
-
-	var query = url.parse(req.url, true).query;
-	var pageSize = Number(query.pageSize);
-	var page = Number(query.page);
-	var nextLocation, prevLocation;
-
-	if (page && page > 1) {
-		prevLocation = url.parse(req.url, true);
-		prevLocation.query.page = page - 1 + "";
-		prevLocation.search = null;
-		prevLocation = url.format(prevLocation);
+		walk();
 	}
-
-	nextLocation = url.parse(req.url, true);
-	nextLocation.query.page = page + 1 + "";
-	nextLocation.search = null; //So that query object will be used for format
-	nextLocation = url.format(nextLocation);
-
 	git.Repository.open(repoPath)
 	.then(function(repo) {
-		return repo.getReferenceCommit(reference);
-	})
-	.then(function(commit) {
-		var commits = [];
-		var history = commit.history();
-		var count = 0;
-		history.on("commit", function(commit) {
-			if (++count > pageSize*page) {
-				sendResponse();
-			} else if (count >= (page-1)*pageSize) {
-				commits.push(generateCommitObject(commit, fileDir));
-			}
-		});
-
-		history.on('end', function(/*commits*/) {
-			sendResponse();
-		});
-		history.start();
-
-		function sendResponse() {
-			var resp = {
-				"Children": commits,
-				"RepositoryPath": "",
-				"NextLocation": nextLocation,
-				"toRef": {
-					"CloneLocation": "/gitapi/clone/file/" + fileDir,
-					"CommitLocation": "/gitapi/commit/" + reference + "/file/" + fileDir,
-					"Current": true,
-					"HeadLocation": "/gitapi/commit/HEAD/file/" + fileDir,
-					"Location": "/gitapi/branch/" + reference + "/file/" + fileDir,
-					"Name": reference,
-					"Type": "Branch"
-				}
-			};
-
-			if (prevLocation) {
-				resp["PreviousLocation"] = prevLocation;
-			}
-
-			resp = JSON.stringify(resp);
-			
-			res.statusCode = 200;
-			res.setHeader('Content-Type', 'application/json');
-			res.setHeader('Content-Length', resp.length);
-			res.end(resp);
-			return;
+		if (mergeBase) {
+			var names = scope.split("..");
+			var commit0;
+			repo.getReferenceCommit(names[0])
+			.then(function(commit) {
+				return commit;
+			}).catch(function() {
+				return repo.getCommit(names[0]);
+			}).then(function(commit) {
+				commit0 = commit;
+				return repo.getReferenceCommit(names[1]);
+			}).catch(function() {
+				return repo.getCommit(names[1]);
+			})
+			.then(function(commit1) {
+				git.Merge.base(repo, commit0, commit1).then(function(oid) {
+					if (oid) {
+						log(repo, oid.tostrS());
+					} else {
+						writeResponse(true);
+					}
+				});
+			}).catch(function(err) {
+				writeError(400, res, err.message);
+			});
+		} else {
+			log(repo, scope);
 		}
+	}).catch(function(err) {
+		writeError(400, res, err.message);
 	});
 }
 
-function getCommitMetadata(workspaceDir, fileRoot, req, res, next, rest) {
-	var repoPath = rest;
-	var commitID = repoPath.substring(0, repoPath.indexOf("/"));
-	repoPath = repoPath.substring(repoPath.indexOf("/")+1).replace("file/", "");
-	var fileDir = repoPath;
-	repoPath = api.join(workspaceDir, repoPath);
-	git.Repository.open(repoPath)
-	.then(function(repo) {
-		git.Commit.lookup(repo, commitID)
-		.then(function(commit) {
-			var commitResp = {
-				"Children": [generateCommitObject(commit, fileDir)],
-				"RepositoryPath": ""
+function getCommitParents(repo, commit, fileDir) {
+	return commit.getParents()
+	.then(function(parents) {
+		return parents.map(function(parent) {
+			return {
+				"Location": "/gitapi/commit/" + parent.sha() + fileDir,
+				"Name": parent.sha()
 			};
-			var resp = JSON.stringify(commitResp);
-
-			res.statusCode = 200;
-			res.setHeader('Content-Type', 'application/json');
-			res.setHeader('Content-Length', resp.length);
-			res.end(resp);
 		});
 	});
 }
 
-function getFileContent(workspaceDir, fileRoot, req, res, next, rest) {
-	var repoPath = rest;
-	var commitID = repoPath.substring(0, repoPath.indexOf("/"));
-	repoPath = repoPath.substring(repoPath.indexOf("/")+1).replace("file/", "");
-	var filePath = repoPath.substring(repoPath.indexOf("/")+1).replace("Folder/", "");
-	repoPath = repoPath.substring(0, repoPath.indexOf("/"));
-	var fileDir = repoPath;
-	repoPath = api.join(workspaceDir, repoPath);
-	filePath = filePath.replace(fileDir + "/", "");
+function getDiff(repo, commit, fileDir) {
+	var tree1;
+	var tree2;
+	var _parent;
 
+	return commit.getTree()
+	.then(function(tree) {
+		tree2 = tree;
+	})
+	.then(function() {
+		return commit.getParents(1);
+	})
+	.then(function(parents) {
+		return parents && parents[0] ? (_parent = parents[0]).getTree() : null;
+	})
+	.then(function(tree) {
+		tree1 = tree;
+	})
+	.then(function() {
+		return git.Diff.treeToTree(repo, tree2, tree1, null);
+	})
+	.then(function(diff) {
+		return diff.patches();
+	})
+	.then(function(patches) {
+		var range = commit.id().toString();
+		if (_parent) range += ".." + _parent.id().toString();
+		var page = 1, pageSize = 100;
+		var diffs = patches.slice(0, pageSize).map(function(patch) {
+			var newFile = patch.newFile();
+			var newFilePath = newFile.path();
+			var oldFile = patch.oldFile();
+			var oldFilePath = oldFile.path();
+			var type = diff.changeType(patch);
+			var path1 = type !== "Deleted" ? newFilePath : oldFilePath;
+			return {
+				"ChangeType": type,
+				"ContentLocation": fileDir + "/" + path1,
+				"DiffLocation": "/gitapi/diff/" + range + fileDir + "/" + path1,
+				"NewPath": newFilePath,
+				"OldPath": oldFilePath,
+				"Type": "Diff"
+			};
+		});
+		var result = {
+			"Type": "Diff",
+			"Length": patches.length,
+			"Children": diffs
+		};
+		if (patches.length > 100) {
+			result.NextLocation = "/gitapi/diff/" + range + fileDir + "?pageSize=" + pageSize + "&page=" + (page + 1);
+		}
+		return result;
+	});
+}
+
+function getCommitBody(workspaceDir, fileRoot, req, res, next, rest) {
+	var segments = rest.split("/");
+	var scope = segments[1];
+	var repoPath = segments[3];
+	repoPath = api.join(workspaceDir, repoPath);
+	var filePath = segments.slice(4).join("/");
 	git.Repository.open(repoPath)
 	.then(function(repo) {
-		git.Commit.lookup(repo, commitID)
+		git.Commit.lookup(repo, scope)
 		.then(function(commit) {
 			commit.getEntry(filePath)
 			.then(function(treeEntry) {
@@ -311,7 +270,7 @@ function getFileContent(workspaceDir, fileRoot, req, res, next, rest) {
 				.then(function(blob) {
 					var resp = JSON.stringify(blob.toString());
 					res.statusCode = 200;
-					res.setHeader('Content-Type', 'application/json');
+					res.setHeader('Content-Type', 'application/octect-stream');
 					res.setHeader('Content-Length', resp.length);
 					res.end(resp);
 				});
@@ -320,127 +279,389 @@ function getFileContent(workspaceDir, fileRoot, req, res, next, rest) {
 	});
 }
 
-function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
-	var repoPath;
-	if (req.body.New) { //This is a weird route. Placeholder code so server doesn't crash.
-		repoPath = rest.replace("commit/", "");
-		var branch = repoPath.substring(0, repoPath.indexOf("/"));
-		var location = "/gitapi/commit/" + branch + ".." + req.body.New + repoPath.replace(branch, "");
-		res.statusCode = 200;
-  //       var resp = JSON.stringify({
-		// 	"Location": location
-		// });
-        res.setHeader('Content-Type', 'application/json');
-        // res.setHeader('Content-Length', resp.length);
-        res.setHeader('Location', url.format({
-        	pathname: location,
-        	query: url.parse(req.url, true).query
-        }));
-        // res.end(resp);
-        res.end();
-        return;
-	}
+function identifyNewCommitResource(req, res, next, rest, commit, newCommit, segments) {
+	segments[1] = (commit + ".." + newCommit).replace(/\//g, "%252F");
+	var location = "/gitapi/" + segments.join("/");
+	location = url.format({pathname: location, query: url.parse(req.url, true).query});
+	res.statusCode = 200;
+	var resp = JSON.stringify({
+		"Location": location
+	});
+	res.setHeader('Content-Type', 'application/json');
+	res.setHeader('Content-Length', resp.length);
+	res.end(resp);
+}
 
-	repoPath = rest.replace("commit/HEAD/file/", "");
-	repoPath = repoPath.indexOf("/") === -1 ? repoPath : repoPath.substring(0, repoPath.indexOf("/"));
-	var fileDir = repoPath;
-	repoPath = api.join(workspaceDir, repoPath);
-
-	var theRepo, index, oid, author, committer, thisCommit, parentCommit;
-	var diffs = [];
-	var tree1, tree2;
-
+function revert(req, res, next, rest, repoPath, commitToRevert) {
+	var theRepo, theCommit, theRC;
 	git.Repository.open(repoPath)
 	.then(function(repo) {
 		theRepo = repo;
-		return repo;
+		return git.Commit.lookup(repo, commitToRevert);
 	})
+	.then(function(commit) {
+		theCommit = commit;
+		return git.Revert(theRepo, commit, new git.RevertOptions());
+	})
+	.then(function(rc) {
+		theRC = rc;
+		if (rc) return;
+		var msg = 'Revert "' + theCommit.summary() + '"\n\nThis reverts commit ' + theCommit.sha() + '\n';
+		return createCommit(theRepo, null, null, theCommit.author().name(), theCommit.author().email(), msg);
+		//TODO: Update Reflog to Revert
+	})
+	.then(function() {
+		return theRepo.stateCleanup();
+	})
+	.then(function() {
+		res.statusCode = 200;
+		var resp = JSON.stringify({
+			"Result": theRC ? "FAILURE" : "OK"
+		});
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
+	})
+	.catch(function(err) {
+		writeError(404, res, err.message);
+	});
+}
+
+function cherryPick(req, res, next, rest, repoPath, commitToCherrypick) {
+	var theRepo, theCommit, theRC, theHead;
+	git.Repository.open(repoPath)
 	.then(function(repo) {
-		return repo.openIndex();
+		theRepo = repo;
+		return git.Reference.nameToId(theRepo, "HEAD");
 	})
-    .then(function(indexResult) {
-    	index = indexResult;
-    	return index.read(1);
+	.then(function(head) {
+		theHead = head;
+		return git.Commit.lookup(theRepo, commitToCherrypick);
+	})
+	.then(function(commit) {
+		theCommit = commit;
+		return git.Cherrypick.cherrypick(theRepo, commit, {});
+	})
+	.then(function(rc) {
+		theRC = rc;
+		if (rc) return;
+		return createCommit(theRepo, null, null, theCommit.author().name(), theCommit.author().email(), theCommit.message());
+		//TODO: Update Reflog to Cherry-Pick
+	})
+	.then(function() {
+		return theRepo.stateCleanup();
+	})
+	.then(function() {
+		return git.Reference.nameToId(theRepo, "HEAD");
+	})
+	.then(function(newHead) {
+		res.statusCode = 200;
+		var resp = JSON.stringify({
+			"Result": theRC ? "FAILED" : "OK",
+			"HeadUpdated": !theRC && theHead !== newHead
+		});
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
+	})
+	.catch(function(err) {
+		writeError(400, res, err.message);
+	});
+}
+
+function rebase(req, res, next, rest, repoPath, commitToRebase, rebaseOperation) {
+	var repo, head, commit, oid, paths;
+	
+	git.Repository.open(repoPath)
+	.then(function(_repo) {
+		repo = _repo;
+		return repo.getHeadCommit();
+	})
+	.then(function(_head) {
+		head = _head;
+		return commitToRebase ? repo.getReferenceCommit(commitToRebase) : head;
+	})
+	.then(function(_commit) {
+		commit = _commit;
+		var work;
+		switch (rebaseOperation) {
+			case "ABORT":
+				work = git.Rebase.open(repo, {}).then(function(rebase){
+					return rebase.abort();
+				});
+				break;
+				
+			case "CONTINUE":
+				work = repo.continueRebase();
+				break;
+				
+			case "SKIP":
+				throw new Error("Not implemented yet");
+				
+			default:
+				work = repo.rebaseBranches("HEAD", "refs/heads/" + commitToRebase, null, null, null);
+		}
+		return work
+		.then(function(_oid) {
+			oid = _oid;
+		})
+		.catch(function(index) {
+			if (rebaseOperation === "ABORT") {
+				throw index;
+			}
+			paths = {};
+			index.entries().forEach(function(entry) {
+				if (git.Index.entryIsConflict(entry)) {
+					paths[entry.path] = "";
+				}
+			});
+			return git.Checkout.index(repo, index, {
+				checkoutStrategy: git.Checkout.STRATEGY.ALLOW_CONFLICTS,
+				ourLabel: "HEAD",
+				theirLabel: commit.sha()
+			});
+		});
+	})
+	.then(function() {
+		res.statusCode = 200;
+		var rebaseResult = rebaseOperation && paths ? "STOPPED" : "OK";
+		
+		if (rebaseOperation !== "ABORT") {
+			if (!paths) {
+				if (oid && oid.toString() === head.id().toString()) rebaseResult = "UP_TO_DATE";
+				else if (oid && oid.toString() === commit.id().toString()) rebaseResult = "FAST_FORWARD";
+			} else if (rebaseOperation !== "BEGIN") {
+				rebaseResult = "FAILED_UNMERGED_PATHS";
+			}
+		} else if (rebaseOperation === "ABORT") {
+			rebaseResult = "ABORTED";
+		}
+		var result = {
+			"Result": rebaseResult
+		};
+		var resp = JSON.stringify(result);
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
+	})
+	.catch(function(err) {
+		writeError(400, res, err.message);
+	});
+
+}
+
+function merge(req, res, next, rest, repoPath, commitToMerge, squash) {
+	
+	var repo, head, commit, oid, paths;
+	git.Repository.open(repoPath)
+	.then(function(_repo) {
+		repo = _repo;
+		return repo.getHeadCommit();
+	})
+	.then(function(_head) {
+		head = _head;
+		return repo.getReferenceCommit(commitToMerge);
+	})
+	.then(function(_commit) {
+		commit = _commit;
+		if (squash) {
+			throw new Error("Not implemented yet");
+		}
+		return repo.mergeBranches("HEAD", commitToMerge)
+		.then(function(_oid) {
+			oid = _oid;
+		})
+		.catch(function(index) {
+			paths = {};
+			index.entries().forEach(function(entry) {
+				if (git.Index.entryIsConflict(entry)) {
+					paths[entry.path] = "";
+				}
+			});
+			return git.Checkout.index(repo, index, {
+				checkoutStrategy: git.Checkout.STRATEGY.ALLOW_CONFLICTS,
+				ourLabel: "HEAD",
+				theirLabel: commit.sha()
+			});
+		});
+	})
+	.then(function() {
+		res.statusCode = 200;
+		var mergeResult = "MERGED";
+		if (!paths) {
+			if (oid && oid.toString() === head.id().toString()) mergeResult = "ALREADY_UPDATE";
+			else if (oid && oid.toString() === commit.id().toString()) mergeResult = "FAST_FORWARD";
+		}
+		var result = {
+			"Result": paths ? "CONFLICTING" : mergeResult,
+			"FailingPaths": paths
+		};
+		var resp = JSON.stringify(result);
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
+	})
+	.catch(function(err) {
+		writeError(400, res, err.message);
+	});
+}
+
+function createCommit(repo, committerName, committerEmail, authorName, authorEmail, message){
+	var index, oid, author, committer;
+	return repo.index()
+	.then(function(indexResult) {
+		index = indexResult;
+		return index.read(1);
 	})
 	.then(function() {
 		return index.writeTree();
 	})
 	.then(function(oidResult) {
 		oid = oidResult;
-		return git.Reference.nameToId(theRepo, "HEAD");
+		return git.Reference.nameToId(repo, "HEAD");
 	})
 	.then(function(head) {
-		return theRepo.getCommit(head);
+		return repo.getCommit(head);
 	})
 	.then(function(parent) {
-		parentCommit = parent;
-
-		if (req.body.AuthorEmail) {
-			author = git.Signature.now(req.body.AuthorName, req.body.AuthorEmail);
-			committer = git.Signature.now(req.body.CommitterName, req.body.CommitterEmail);
+		if (authorEmail) {
+			author = git.Signature.now(authorName, authorEmail);
 		} else {
-			author = git.Signature.default(theRepo);	
-			committer = git.Signature.default(theRepo);
+			author = git.Signature.default(repo);	
 		}
-		
-		return theRepo.createCommit("HEAD", author, committer, req.body.Message, oid, [parent]);
+		if (committerEmail) {
+			committer = git.Signature.now(committerName, committerEmail);
+		} else {
+			committer = git.Signature.default(repo);
+		}
+		return repo.createCommit("HEAD", author, committer, message, oid, [parent]);
 	})
 	.then(function(id) {
-		return git.Commit.lookup(theRepo, id);
+		return git.Commit.lookup(repo, id);
+	});
+}
+
+function tag(req, res, next, rest, repoPath, fileDir, commitId, name) {
+	var theRepo, theDiffs, thisCommit, theParents;
+	git.Repository.open(repoPath)
+	.then(function(repo) {
+		theRepo = repo;
+		return git.Commit.lookup(repo, commitId);
 	})
 	.then(function(commit) {
 		thisCommit = commit;
-		return thisCommit.getTree();
+		return theRepo.createLightweightTag(commit, name);
 	})
-	.then(function(tree){
-		tree2 = tree;
-		return parentCommit.getTree();
+	.then(function() {
+		return getDiff(theRepo, thisCommit, fileDir);
 	})
-	.then(function(tree) {
-		tree1 = tree;
-		return git.Diff.treeToTree(theRepo, tree1, tree2, null);
+	.then(function(diffs){
+		theDiffs = diffs;
 	})
-	.then(function(diff) {
-		var patches = diff.patches();
-	    patches.forEach(function(patch) {
-	        var oldFile = patch.oldFile();
-	        var newFile = patch.newFile();
-	        var newFilePath = newFile.path();
-	        var change = patch.isCopied() ? "COPY" : 
-	        			 patch.isDeleted() ? "DELETE" :
-	        			 patch.isIgnored() ? "IGNORE" :
-	        			 patch.isModified() ? "MODIFY" :
-	        			 patch.isRenamed() ? "RENAME" :
-	     				 patch.isTypeChange() ? "TYPECHANGE" :
-	     				 patch.isUnmodified() ? "UNMODIFY" :
-	     				 patch.isAdded() ? "ADDED" :
-	     				 patch.isUntracked() ? "UNTRACKED" : "NONE";
-	        
-	        diffs.push({
-				"ChangeType": change,
-				"DiffLocation": "/gitapi/diff/" + parentCommit.sha() + ".." + thisCommit.sha() + "/file/" + path.join(fileDir, newFilePath),
-				"NewPath": newFilePath,
-				"OldPath": oldFile.path(),
-				"Type": "Diff"
-			});
-	    });
+	.then(function() {
+		return getCommitParents(theRepo, thisCommit, fileDir);
+	})
+	.then(function(parents){
+		theParents = parents;
 	})
 	.catch(function(err) {
-		console.log(err);
-		writeError(403, res);
+		writeError(403, res, err.message);
 	})
 	.done(function() {
-        res.statusCode = 200;
-        var resp = generateCommitObject(thisCommit, fileDir);
-        resp["Diffs"] = diffs;
-        resp = JSON.stringify(resp);
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Content-Length', resp.length);
-        res.end(resp);
+		res.statusCode = 200;
+		var resp = commitJSON(thisCommit, fileDir, theDiffs, theParents);
+		resp = JSON.stringify(resp);
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
+	});
+}
+
+function putCommit(workspaceDir, fileRoot, req, res, next, rest) {
+	var segments = rest.split("/");
+	var commit = segments[1].replace(/%252F/g, '/');
+	var repoPath = segments[3];
+	var fileDir = api.join(fileRoot, repoPath);
+	repoPath = api.join(workspaceDir, repoPath);
+	var tagName = req.body.Name;
+	if (tagName) {
+		tag(req, res, next, rest, repoPath, fileDir, commit, tagName);
+	}
+}
+
+function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
+	var segments = rest.split("/");
+	var commit = segments[1].replace(/%252F/g, '/');
+	var repoPath = segments[3];
+	var fileDir = api.join(fileRoot, repoPath);
+	repoPath = api.join(workspaceDir, repoPath);
+	if (typeof req.body.Merge === "string") {
+		merge(req, res, next, rest, repoPath, req.body.Merge, req.body.Squash);
+		return;
+	}
+	if (typeof req.body.Rebase === "string") {
+		rebase(req, res, next, rest, repoPath, req.body.Rebase, req.body.Operation);
+		return;
+	}
+	if (typeof req.body["Cherry-Pick"] === "string") {
+		cherryPick(req, res, next, rest, repoPath, req.body["Cherry-Pick"]);
+		return;
+	}
+	if (typeof req.body.Revert === "string") {
+		revert(req, res, next, rest, repoPath, req.body.Revert);
+		return;
+	}
+	if (typeof req.body.New === "string") {
+		identifyNewCommitResource(req, res, next, rest, commit, req.body.New, segments);
+		return;
+	}
+	
+	//TODO create commit -> amend, empty message, change id
+	if (commit !== "HEAD") {
+		writeError(404, res, "Needs to be HEAD");
+		return;
+	}
+
+	var theRepo, thisCommit;
+	var theDiffs = [], theParents;
+
+	git.Repository.open(repoPath)
+	.then(function(repo) {
+		theRepo = repo;
+		return createCommit(repo, req.body.CommitterName, req.body.CommitterEmail, req.body.AuthorName, req.body.AuthorEmail, req.body.Message);
+	})
+	.then(function(commit) {
+		thisCommit = commit;
+		return getDiff(theRepo, commit, fileDir);
+	})
+	.then(function(diffs){
+		theDiffs = diffs;
+	})
+	.then(function(commit) {
+		return getCommitParents(theRepo, commit, fileDir);
+	})
+	.then(function(parents){
+		theParents = parents;
+	})
+	.catch(function(err) {
+		writeError(403, res, err.message);
+	})
+	.done(function() {
+		res.statusCode = 200;
+		var resp = commitJSON(thisCommit, fileDir, theDiffs, theParents);
+		resp = JSON.stringify(resp);
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
 	});
 }
 
 module.exports = {
 	getCommit: getCommit,
-    postCommit: postCommit
+	putCommit: putCommit,
+	postCommit: postCommit,
+	
+	commitJSON: commitJSON,
+	getDiff: getDiff,
+	getCommitParents: getCommitParents
 };

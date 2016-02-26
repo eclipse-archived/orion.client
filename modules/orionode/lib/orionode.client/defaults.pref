@@ -16,8 +16,7 @@
 	},
 	"/settingsContainer":{
 		"categories":{
-			"showUserSettings":false,
-			"showGitSettings":false
+			"showUserSettings":false
 		}
 	}
 }

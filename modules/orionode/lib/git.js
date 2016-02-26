@@ -16,13 +16,12 @@ var api = require('./api');
 var fileUtil = require('./fileUtil');
 var resource = require('./resource');
 var rmdir = require('rimraf');
-var url = require('url');
 var writeError = api.writeError;
 
 // Handle optional nodegit dependency
 var hasNodegit = true;
 try {
-	var add = require('./git/add');
+	var index = require('./git/index');
 	var clone = require('./git/clone');
 	var remotes = require('./git/remotes');
 	var branches = require('./git/branches');
@@ -58,36 +57,23 @@ function Git(options) {
 	.use(bodyParser.json())
 	.use(resource(workspaceRoot, {
 		GET: function(req, res, next, rest) {
-			var query = url.parse(req.url, true).query;
-			var diffOnly, uriOnly;
 			if (rest === '') {
 				writeError(400, res);
-			} else if (rest.indexOf("clone/workspace/") === 0) {
+			} else if (rest.indexOf("clone/") === 0) {
 				clone.getClone(workspaceDir, fileRoot, req, res, next, rest);
-			} else if (rest.indexOf("remote/file/") === 0) {
+			} else if (rest.indexOf("remote/") === 0) {
 				remotes.getRemotes(workspaceDir, fileRoot, req, res, next, rest);
-			} else if (rest.indexOf("remote/") === 0 ) {
-				var remote = rest.replace("remote/", "").substring(0, rest.lastIndexOf("/file/")-"/file/".length-1);
-				if (remote.indexOf("/") === -1) {
-					remotes.getRemotesBranches(workspaceDir, fileRoot, req, res, next, rest);
-				}
-				else {
-					remotes.getRemotesBranchDetail(workspaceDir, fileRoot, req, res, next, rest);
-				}
-			} else if (rest.indexOf("branch/file/")===0) {
-				branches.getBranches(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("branch/")===0) {
-				branches.getBranchMetadata(workspaceDir, fileRoot, req, res, next, rest);
+				branches.getBranches(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("status/file/") === 0) {
 				status.getStatus(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("config/clone/file/") === 0) {
 				config.getConfig(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("config/") === 0) {
 				config.getAConfig(workspaceDir, fileRoot, req, res, next, rest);
-			} else if (rest.indexOf("index/file/") === 0) {
-				// I think this is working, but I'm not 100%, leave it out for now.
-				add.getFileIndex(workspaceDir, fileRoot, req, res, next, rest);
-			} else if (rest.indexOf("tag/file/") === 0) {
+			} else if (rest.indexOf("index/") === 0) {
+				index.getIndex(workspaceDir, fileRoot, req, res, next, rest);
+			} else if (rest.indexOf("tag/") === 0) {
 				tags.getTags(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("stash/file") === 0) {
 				stash.getStash(workspaceDir, fileRoot, req, res, next, rest);
@@ -95,21 +81,8 @@ function Git(options) {
 				blame.getBlame(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("commit/") === 0) {
 				commit.getCommit(workspaceDir, fileRoot, req, res, next, rest);
-			} else if (rest.indexOf("diff/Default/file/") === 0) {
-				diffOnly = query.parts === 'diff';
-				uriOnly = query.parts === 'uris';
-
-				diff.getDiffBetweenWorkingTreeAndHead(workspaceDir, fileRoot, req, res, next, rest, diffOnly, uriOnly);
-			} else if (rest.indexOf("diff/Cached/file/") === 0) {
-				diffOnly = query.parts === 'diff';
-				uriOnly = query.parts === 'uris';
-
-				diff.getDiffBetweenIndexAndHead(workspaceDir, fileRoot, req, res, next, rest, diffOnly, uriOnly);
 			} else if (rest.indexOf("diff/") === 0) {
-				diffOnly = query.parts === 'diff';
-				uriOnly = query.parts === 'uris';
-
-				diff.getDiffBetweenTwoCommits(workspaceDir, fileRoot, req, res, next, rest, diffOnly, uriOnly);
+				diff.getDiff(workspaceDir, fileRoot, req, res, next, rest);
 			} else {
 				writeError(403, res);
 			}
@@ -118,7 +91,7 @@ function Git(options) {
 			if (rest.indexOf("clone/") === 0){
 				clone.postInit(workspaceDir, fileRoot, req, res, next, rest);
 			} else if(rest.indexOf("index/") === 0) {
-				add.postStage(workspaceDir, fileRoot, req, res, next, rest);
+				index.postIndex(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("config/") === 0) {
 				config.postConfig(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("commit/") === 0) {
@@ -131,15 +104,23 @@ function Git(options) {
 				remotes.addRemote(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("remote/") === 0) {
 				remotes.postRemote(workspaceDir, fileRoot, req, res, next, rest);
+			} else if (rest.indexOf("stash/") === 0) {
+				stash.postStash(workspaceDir, fileRoot, req, res, next, rest);
 			} else {	
 				writeError(403, res);
 			}
 		},
 		PUT: function(req, res, next, rest) {
-			if (rest.indexOf("index/") === 0) {
-				add.putStage(workspaceDir, fileRoot, req, res, next, rest);
+			if (rest.indexOf("clone/") === 0) {
+				clone.putClone(workspaceDir, fileRoot, req, res, next, rest);
+			} else if (rest.indexOf("index/") === 0) {
+				index.putIndex(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("config/") === 0) {
 				config.putConfig(workspaceDir, fileRoot, req, res, next, rest);
+			} else if (rest.indexOf("commit/") === 0) {
+				commit.putCommit(workspaceDir, fileRoot, req, res, next, rest);
+			} else if (rest.indexOf("stash/") === 0) {
+				stash.putStash(workspaceDir, fileRoot, req, res, next, rest);
 			} else {
 				// Would 501 be more appropriate?
 				writeError(403, res);
@@ -149,19 +130,23 @@ function Git(options) {
 			if(rest.indexOf("clone/file/") === 0) {
 				var configPath = rest.replace("clone/file", "");
 				rmdir(fileUtil.safeFilePath(workspaceDir, configPath), function(err) {
-					if (err) return writeError(500, res, err)
+					if (err) return writeError(500, res, err);
 					res.statusCode = 200;
 					res.end();
 				});
+			} else if (rest.indexOf("config/") === 0) {
+				config.deleteConfig(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("tag/") === 0) {
 				tags.deleteTags(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("branch/") === 0) {
 				branches.deleteBranch(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("remote/") === 0) {
 				remotes.deleteRemote(workspaceDir, fileRoot, req, res, next, rest);
+			} else if (rest.indexOf("stash/") === 0) {
+				stash.deleteStash(workspaceDir, fileRoot, req, res, next, rest);
 			} else {
 				writeError(403, res);
 			}
 		}
 	}));
-};
+}

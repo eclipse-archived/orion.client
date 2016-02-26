@@ -23,7 +23,7 @@
     "mkdirp": "*"
   },
   "experimentalDependencies": {
-    "nodegit": "~0.4.0"
+    "nodegit": "~3.6.0"
   },
   "devDependencies": {
     "bluebird": "^2.9.34",
@@ -37,7 +37,8 @@
     "mocha": "~2.4.5",
     "requirejs": "~2.1.14",
     "superagent": "^1.7.2",
-    "supertest": "^1.2.0"
+    "supertest": "^1.2.0",
+    "nodemon": "^1.8.1"
   },
   "engines": {
     "node": ">=0.8.0"
@@ -45,7 +46,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec",
-    "optimize": "grunt"
+    "optimize": "grunt",
+    "watch-server": "nodemon --debug server.js"
   },
   "repository": {
     "type": "git",

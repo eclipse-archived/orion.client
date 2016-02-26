@@ -18,26 +18,26 @@ var async = require('async');
 
 function getClone(workspaceDir, fileRoot, req, res, next, rest) {
 	var repos = [];
-
-	fs.readdir(workspaceDir, function(err, files) {
-		if (err) return writeError(500);
+	
+	var rootDir;
+	var segments = rest.split("/");
+	if (segments[1] === "workspace") {
+		rootDir = workspaceDir;
+	} else if (segments[1] === "file") {
+		rootDir = api.join(workspaceDir, segments.slice(2).join("/"));
+	}
 		
-		files = files.map(function(file) {
-			return path.join(workspaceDir, file);
+	checkDirectory(rootDir, function(err) {
+		if (err) return writeError(403, res, err.message);
+		var resp = JSON.stringify({
+			"Children": repos,
+			"Type": "Clone"
 		});
 
-		async.each(files, checkDirectory, function(err) {
-			if (err) return writeError(403);
-			var resp = JSON.stringify({
-				"Children": repos,
-				"Type": "Clone"
-			});
-
-			res.statusCode = 200;
-			res.setHeader('Content-Type', 'application/json');
-			res.setHeader('Content-Length', resp.length);
-			res.end(resp);	
-		});
+		res.statusCode = 200;
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);	
 	});
 
 	function checkDirectory(dir, cb) {
@@ -154,6 +154,63 @@ function postInit(workspaceDir, fileRoot, req, res, next, rest) {
 	}
 }
 
+function putClone(workspaceDir, fileRoot, req, res, next, rest) {
+	var segments = rest.split("/");
+	if (!(segments[1] === "file" && segments.length > 2)) {
+		return writeError(404, res);
+	}
+
+	var paths = req.body.Path;
+	var branch = req.body.Branch;
+	var tag = req.body.Tag;
+	var removeUntracked = req.body.RemoveUntracked;
+	if ((!paths || !paths.length) && !branch && !tag) {
+		return writeError(400, "Invalid parameters");
+	}
+
+	var repoPath = segments[2];
+	repoPath = api.join(workspaceDir, repoPath);
+	var theRepo, theCommit;
+	var checkOptions = {
+		checkoutStrategy: git.Checkout.STRATEGY.FORCE,
+	};
+	git.Repository.open(repoPath)
+	.then(function(repo) {
+		theRepo = repo;
+		if (paths) {
+			//TODO: handle untracked files
+			checkOptions.paths = paths;
+			return git.Checkout.head(theRepo, checkOptions);
+		} else if (tag && typeof branch === "string") {
+			return git.Reference.lookup(theRepo, "refs/tags/" + tag)
+			.then(function(reference) {
+				return theRepo.getReferenceCommit(reference);
+			}).catch(function() {
+				return theRepo.getCommit(tag);
+			})
+			.then(function(commit) {
+				theCommit = commit;
+				if (branch) {
+					return git.Branch.create(theRepo, branch, commit, 0).then(function() {
+						return theRepo.checkoutBranch(branch, checkOptions);
+					});
+				}
+			 	return git.Checkout.tree(theRepo, commit, checkOptions).then(function() {
+					return theRepo.setHeadDetached(theCommit);
+				});
+			});
+		}
+		return theRepo.checkoutBranch(branch, checkOptions);
+	})
+	.then(function(){
+		res.statusCode = 200;
+		res.end();
+	})
+	.catch(function(err){
+    	writeError(403, res, err.message);
+    });
+}
+
 function postClone(workspaceDir, fileRoot, req, res, next, rest) {
 	var url = req.body.GitUrl;
 	var dirName = url.substring(url.lastIndexOf("/") + 1).replace(".git", "")
@@ -192,5 +249,6 @@ function postClone(workspaceDir, fileRoot, req, res, next, rest) {
 module.exports = {
 	getClone: getClone,
 	postClone: postClone,
-	postInit: postInit
+	postInit: postInit,
+	putClone: putClone	
 };
