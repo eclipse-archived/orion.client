@@ -23,7 +23,7 @@
     "mkdirp": "*"
   },
   "experimentalDependencies": {
-    "nodegit": "~3.6.0"
+    "nodegit": "~0.11.3"
   },
   "devDependencies": {
     "bluebird": "^2.9.34",
