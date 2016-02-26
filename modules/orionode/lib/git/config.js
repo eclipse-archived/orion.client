@@ -112,8 +112,7 @@ function getConfig(workspaceDir, fileRoot, req, res, next, rest) {
 	});
 }
 
-function setString(repoPath, fileDir, req, res, key) {
-	var value = req.body.Value;
+function setString(repoPath, fileDir, req, res, key, value) {
 	git.Repository.open(repoPath)
 	.then(function(repo) {
 		return repo.config();
@@ -138,7 +137,7 @@ function postConfig(workspaceDir, fileRoot, req, res, next, rest) {
 	var repoPath = segments[3];
 	var fileDir = api.join(fileRoot, repoPath);
 	repoPath = api.join(workspaceDir, repoPath);
-	setString(repoPath, fileDir, req, res, req.body.Key);
+	setString(repoPath, fileDir, req, res, req.body.Key, req.body.Value);
 }
 
 function putConfig(workspaceDir, fileRoot, req, res, next, rest) {
@@ -158,12 +157,23 @@ function putConfig(workspaceDir, fileRoot, req, res, next, rest) {
 		return writeError(501, res, "Multivar config entries are not implemented");
 	}
 		
-	setString(repoPath, fileDir, req, res, key);
+	setString(repoPath, fileDir, req, res, key, req.body.Value);
+}
+
+function deleteConfig(workspaceDir, fileRoot, req, res, next, rest) {
+	var segments = rest.split("/");
+	var key = segments[1];
+	var repoPath = segments[4];
+	var fileDir = api.join(fileRoot, repoPath);
+	repoPath = api.join(workspaceDir, repoPath);
+	
+	setString(repoPath, fileDir, req, res, key, "");
 }
 
 module.exports = {
 	getConfig: getConfig, 
 	getAConfig: getAConfig,
+	deleteConfig: deleteConfig,
 	putConfig: putConfig,
 	postConfig: postConfig
 };

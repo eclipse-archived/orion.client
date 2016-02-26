@@ -135,6 +135,8 @@ function Git(options) {
 					res.statusCode = 200;
 					res.end();
 				});
+			} else if (rest.indexOf("config/") === 0) {
+				config.deleteConfig(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("tag/") === 0) {
 				tags.deleteTags(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("branch/") === 0) {
