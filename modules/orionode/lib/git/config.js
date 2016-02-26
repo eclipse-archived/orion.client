@@ -13,6 +13,7 @@
 var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
 var ini = require('ini');
+var url = require('url');
 var fs = require('fs');
 
 function configJSON(key, value, fileDir) {
@@ -71,6 +72,8 @@ function getConfig(workspaceDir, fileRoot, req, res, next, rest) {
 	var repoPath = segments[3];
 	var fileDir = api.join(fileRoot, repoPath);
 	repoPath = api.join(workspaceDir, repoPath);
+	var query = url.parse(req.url, true).query;
+	var filter = query.filter;
 	git.Repository.open(repoPath)
 	.then(function(repo) {
 		if (repo) {
@@ -93,7 +96,9 @@ function getConfig(workspaceDir, fileRoot, req, res, next, rest) {
 
 				function getFullPath(config, prefix) {
 					if (typeof config !== "object") {
-						configs.push(configJSON(prefix, config, fileDir));
+						if (!filter || prefix.indexOf(filter) !== -1) {
+							configs.push(configJSON(prefix, config, fileDir));
+						}
 					} else {
 						for (var property in config) {
 							if (config.hasOwnProperty(property)) {
