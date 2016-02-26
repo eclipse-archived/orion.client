@@ -1,25 +1,32 @@
-/*global define window URL*/
-/*jslint browser:true sub:true*/
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2013 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
+ * Contributors: IBM Corporation - initial API and implementation
+ ******************************************************************************/
+/*eslint-env browser, amd*/
 
-define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegistry", 
-		"orion/fileClient", "orion/searchClient", "orion/globalCommands"],
-	function(messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands) {
-
-	var fileClient, commandRegistry;
-	var contentTypeService, openWithCommands = [], serviceRegistry;
-	var pluginRegistry, pluginType, preferences, serviceElementCounter = 0;
-
+define([
+	"i18n!orion/shell/nls/messages",
+	"orion/bootstrap",
+	"orion/commandRegistry",
+	"orion/fileClient",
+	"orion/searchClient",
+	"orion/globalCommands"
+], function(messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands) {
 
 	mBootstrap.startup().then(function(core) {
-		pluginRegistry = core.pluginRegistry;
-		serviceRegistry = core.serviceRegistry;
-		preferences = core.preferences;
+		var serviceRegistry = core.serviceRegistry;
+		var preferences = core.preferences;
 
-		commandRegistry = new mCommandRegistry.CommandRegistry({});
-		fileClient = new mFileClient.FileClient(serviceRegistry);
+		var commandRegistry = new mCommandRegistry.CommandRegistry({});
+		var fileClient = new mFileClient.FileClient(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		mGlobalCommands.generateBanner("orion-shellPage", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({task: messages.Shell, serviceRegistry: serviceRegistry, commandService: commandRegistry});
-
 	});
 });

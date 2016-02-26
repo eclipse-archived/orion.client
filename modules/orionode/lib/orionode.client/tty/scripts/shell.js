@@ -79,6 +79,7 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js",
     });
 
     var schemeButton = document.getElementById("color-scheme-dropdown");
+    if (!schemeButton) return;
     schemeButton.onchange = changeScheme;
 
     var wrenchButton = document.getElementById("menuWrench");
