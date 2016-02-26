@@ -11,8 +11,12 @@
 
 /*eslint-env browser, amd*/
 /** @namespace The global container for eclipse APIs. */
-
-define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"], function(messages, Deferred, i18nUtil){
+define([
+	'i18n!orion/navigate/nls/messages', 
+	"orion/Deferred", 
+	"orion/i18nUtil",
+	'orion/EventTarget'
+], function(messages, Deferred, i18nUtil, EventTarget) {
 	/**
 	 * This helper method implements invocation of the service call,
 	 * with retry on authentication error if needed.
@@ -85,6 +89,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		var _services;
 		var _names;
 		
+		EventTarget.attach(this);
 		function _noMatch(location) {
 			var d = new Deferred();
 			d.reject(messages["No Matching FileService for location:"] + location);

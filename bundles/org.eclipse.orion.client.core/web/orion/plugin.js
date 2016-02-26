@@ -332,7 +332,7 @@
                         var object = _objectReferences[message.objectId];
                         if (!object) {
                             _throwError(message.id, "object not found", target);
-                        } else if (!method in object) {
+                        } else if (method in object) {
                             _callMethod(message.id, object, object[method], params, target);
                         } else {
                             _throwError(message.id, "method not found", target);

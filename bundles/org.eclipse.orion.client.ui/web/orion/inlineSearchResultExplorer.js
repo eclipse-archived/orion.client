@@ -716,6 +716,21 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             reporter.report();
             this._inlineSearchPane.hideReplacePreview();
             this.reportStatus("");
+            //reportList is the result after all files are writen to hte file service. Prepare a "FileContentChanged" event from here
+            var files = [];
+            reportList.forEach(function(fileItem){
+            	var contentType = this._contentTypeService.getFilenameContentType(fileItem.model.name);
+            	files.push({
+            		name: fileItem.model.name,
+            		location: fileItem.model.location,
+            		metadata: {
+            			contentType: contentType ? contentType.id : ""
+            		}
+            	});
+            }.bind(this));
+            if(files.length > 0) {
+				this.fileClient.dispatchEvent({ type: "FileContentChanged", files: files}); //$NON-NLS-0$
+			}
         }.bind(this));
     };
 
