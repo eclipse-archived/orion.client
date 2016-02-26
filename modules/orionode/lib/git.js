@@ -105,6 +105,8 @@ function Git(options) {
 				remotes.addRemote(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("remote/") === 0) {
 				remotes.postRemote(workspaceDir, fileRoot, req, res, next, rest);
+			} else if (rest.indexOf("stash/") === 0) {
+				stash.postStash(workspaceDir, fileRoot, req, res, next, rest);
 			} else {	
 				writeError(403, res);
 			}
@@ -118,6 +120,8 @@ function Git(options) {
 				config.putConfig(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("commit/") === 0) {
 				commit.putCommit(workspaceDir, fileRoot, req, res, next, rest);
+			} else if (rest.indexOf("stash/") === 0) {
+				stash.putStash(workspaceDir, fileRoot, req, res, next, rest);
 			} else {
 				// Would 501 be more appropriate?
 				writeError(403, res);
@@ -137,6 +141,8 @@ function Git(options) {
 				branches.deleteBranch(workspaceDir, fileRoot, req, res, next, rest);
 			} else if (rest.indexOf("remote/") === 0) {
 				remotes.deleteRemote(workspaceDir, fileRoot, req, res, next, rest);
+			} else if (rest.indexOf("stash/") === 0) {
+				stash.deleteStash(workspaceDir, fileRoot, req, res, next, rest);
 			} else {
 				writeError(403, res);
 			}

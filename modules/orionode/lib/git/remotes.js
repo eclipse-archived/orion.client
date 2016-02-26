@@ -6,7 +6,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
@@ -63,9 +63,10 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 	var query = url.parse(req.url, true).query;
 	var filter = query.filter;
 
+	var repoPath, fileDir, theRepo, theRemote, remoteName;
 	if (allRemotes) {
-		var repoPath = segments[2];
-		var fileDir = api.join(fileRoot, repoPath);
+		repoPath = segments[2];
+		fileDir = api.join(fileRoot, repoPath);
 		repoPath = api.join(workspaceDir, repoPath);
 		var repo;
 
@@ -82,7 +83,7 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 					r.push(remoteJSON(remote, fileDir));
 					cb();
 				});
-			}, function(err) {
+			}, function() {
 				var resp = JSON.stringify({
 					"Children": r,
 					"Type": "Remote"
@@ -94,13 +95,12 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 			});
 		});
 		return;
-	}  
+	}
 
 	if (allRemoteBranches) {
-		var remoteName = segments[1];
-		var repoPath = segments[3];
-		var fileDir = api.join(fileRoot, repoPath);
-		var theRepo, theRemote;
+		remoteName = segments[1];
+		repoPath = segments[3];
+		fileDir = api.join(fileRoot, repoPath);
 		repoPath = api.join(workspaceDir, repoPath);
 		git.Repository.open(repoPath)
 		.then(function(repo) {
@@ -144,11 +144,11 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 	} 
 
 	if (oneRemoteBranch) {
-		var remoteName = segments[1];
+		remoteName = segments[1];
 		var branchName = segments[2].replace(/%252F/g, '/');
-		var repoPath = segments[4];
-		var fileDir = api.join(fileRoot, repoPath);
-		var theRepo, theRemote, theBranch;
+		repoPath = segments[4];
+		fileDir = api.join(fileRoot, repoPath);
+		var theBranch;
 		repoPath = api.join(workspaceDir, repoPath);
 		git.Repository.open(repoPath)
 		.then(function(repo) {
@@ -171,8 +171,8 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 			res.end(resp);
 		
 		})
-		.catch(function(err) {
-				return writeError(403, res);
+		.catch(function() {
+			return writeError(403, res);
 		});
 		return;
 	}
@@ -277,18 +277,17 @@ function fetchRemote(repoPath, req, res, rest, remote, branch, force) {
 			res.setHeader('Content-Length', resp.length);
 			res.end(resp);
 		} else {
-			console.log("fetch failed")
 			writeError(403, res);
 		}
 	})
 	.catch(function(err) {
 		console.log(err);
 		writeError(403, res);
-	})
+	});
 }
 
 function pushRemote(repoPath, req, res, rest, remote, branch, pushSrcRef, tags, force) {
-	var taskID = (new Date).getTime(); // Just use the current time
+	var taskID = new Date().getTime(); // Just use the current time
 	var repo;
 	var remoteObj;
 
@@ -322,7 +321,7 @@ function pushRemote(repoPath, req, res, rest, remote, branch, pushSrcRef, tags, 
 		if (force) refSpec = "+" + refSpec;
 
 		return remoteObj.push(
-			tags & false ? [refSpec, "refs/tags/*:refs/tags/*"] : [refSpec],
+			tags && false ? [refSpec, "refs/tags/*:refs/tags/*"] : [refSpec],
 			{callbacks: {
 				certificateCheck: function() {
 					return 1; // Continues connection even if SSL certificate check fails. 
@@ -404,11 +403,11 @@ function deleteRemote(workspaceDir, fileRoot, req, res, next, rest) {
 		return git.Remote.delete(repo, remoteName).then(function(resp) {
 			// Docs claim this resolves 0 on success, but in practice we get undefined
 			if (resp === 0 || typeof resp === "undefined") {
-		        res.statusCode = 200;
-		        res.end();
-		    } else {
-		        writeError(403, res);
-		    }
+				res.statusCode = 200;
+				res.end();
+			} else {
+				writeError(403, res);
+			}
 		}).catch(function(error) {
 			writeError(500, error);
 		});

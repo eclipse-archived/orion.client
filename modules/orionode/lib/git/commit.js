@@ -15,7 +15,7 @@ var git = require('nodegit');
 var url = require('url');
 var crypto = require('crypto');
 
-function generateCommitObject(commit, fileDir, diffs) {
+function commitJSON(commit, fileDir, diffs) {
 	return {
 		"AuthorEmail": commit.author().email(), 
 		"AuthorName": commit.author().name(),
@@ -127,7 +127,7 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 					var commit = commitAndDiffs[0];
 					var diffs = commitAndDiffs[1];
 					if (!page || count++ >= (page-1)*pageSize) {
-						commits.push(generateCommitObject(commit, fileDir, diffs));
+						commits.push(commitJSON(commit, fileDir, diffs));
 					}
 
 					if (pageSize && commits.length === pageSize) {
@@ -549,7 +549,7 @@ function tag(req, res, next, rest, repoPath, fileDir, commitId, name) {
 	})
 	.done(function() {
 		res.statusCode = 200;
-		var resp = generateCommitObject(thisCommit, fileDir, theDiffs);
+		var resp = commitJSON(thisCommit, fileDir, theDiffs);
 		resp = JSON.stringify(resp);
 		res.setHeader('Content-Type', 'application/json');
 		res.setHeader('Content-Length', resp.length);
@@ -622,7 +622,7 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 	})
 	.done(function() {
 		res.statusCode = 200;
-		var resp = generateCommitObject(thisCommit, fileDir, theDiffs);
+		var resp = commitJSON(thisCommit, fileDir, theDiffs);
 		resp = JSON.stringify(resp);
 		res.setHeader('Content-Type', 'application/json');
 		res.setHeader('Content-Length', resp.length);
@@ -633,5 +633,8 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 module.exports = {
 	getCommit: getCommit,
 	putCommit: putCommit,
-	postCommit: postCommit
+	postCommit: postCommit,
+	
+	commitJSON: commitJSON,
+	getDiff: getDiff,
 };
