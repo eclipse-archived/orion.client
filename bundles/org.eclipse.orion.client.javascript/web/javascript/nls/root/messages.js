@@ -114,6 +114,7 @@ define({
 	'radix': 'Missing radix parameter to parseInt():',
 	'radixFixName': 'Add default radix',
 	'unusedVarsUnusedFixName': 'Remove unused variable',
+	'unreadVarsFixName': 'Remove unread variable',
 	'unusedFuncDeclFixName': 'Remove unused function',
 	'noCommaDangleFixName': 'Remove extra \',\'',
 	'addBBreakFixName': 'Add break statement',

@@ -977,8 +977,7 @@ define([
 	                return null;
 	            });
 	        },
-	        /** 
-	         * easter is here
+	        /**
 	         * @callback
 	         */
 	        "no-unused-vars-unused": function(editorContext, context, astManager) {
@@ -996,11 +995,30 @@ define([
                                 if(idx > -1) {
                                     return removeIndexedItem(decl.declarations, idx, editorContext);
                                 }
-//	                            var start = declr.range[1];
-//	                            var lstart = getLineStart(ast.source, start);
-//	                            var indent = computeIndent(ast.source, lstart);
-//	                            var fix = '\n'+indent+'console.log("Variable '+node.name+' is unused: "+'+node.name+');';
-//	                            return editorContext.setText(fix, start, start);
+	                        }
+	                    }
+	                }
+	                return null;
+	            });
+	        },
+	        /**
+	         * @callback
+	         */
+	        "no-unused-vars-unread": function(editorContext, context, astManager) {
+	            return astManager.getAST(editorContext).then(function(ast) {
+	                var node = Finder.findNode(context.annotation.start, ast, {parents:true});
+	                if(node && node.parents && node.parents.length > 0) {
+	                    var declr = node.parents.pop();
+	                    if(declr.type === 'VariableDeclarator') {
+	                        var decl = node.parents.pop();
+	                        if(decl.type === 'VariableDeclaration') {
+	                            if(decl.declarations.length === 1) {
+	                                return editorContext.setText('', decl.range[0], decl.range[1]);
+	                            }
+                                var idx = indexOf(decl.declarations, declr);
+                                if(idx > -1) {
+                                    return removeIndexedItem(decl.declarations, idx, editorContext);
+                                }
 	                        }
 	                    }
 	                }

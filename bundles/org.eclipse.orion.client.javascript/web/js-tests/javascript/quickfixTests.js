@@ -3769,6 +3769,41 @@ define([
 								  contentType: 'text/html'});
 			});
 		});
+		describe("no-unused-vars-unread", function() {
+			it("Test no-unused-vars-unread-1",function(callback) {
+				var rule = createTestRule('no-unused-vars');
+				var expected = {value: "",
+								start: 0, 
+								end: 10};
+				return getFixes({buffer: 'var a = 4;', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback,
+								  pid: 'no-unused-vars-unread'});
+			});
+			it("Test no-unused-vars-unread-2",function(callback) {
+				var rule = createTestRule('no-unused-vars');
+				var expected = {value: "",
+								start: 4, 
+								end: 12};
+				return getFixes({buffer: 'var a = 10, b;', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback,
+								  pid: 'no-unused-vars-unread'});
+			});
+			it("Test no-unused-vars-unread-3",function(callback) {
+				var rule = createTestRule('no-unused-vars');
+				var expected = {value: "",
+								start: 5, 
+								end: 12};
+				return getFixes({buffer: 'var a, b = 4;', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback,
+								  pid: 'no-unused-vars-unread'});
+			});
+		});
 		//NO-MISSING-NLS
 		describe("no-missing-nls", function() {
 			it("Test missing-nls-1", function(callback) {
