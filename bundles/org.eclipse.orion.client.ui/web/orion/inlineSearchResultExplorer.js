@@ -720,13 +720,13 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             var files = [];
             reportList.forEach(function(fileItem){
             	var contentType = this._contentTypeService.getFilenameContentType(fileItem.model.name);
-            	files.push({
-            		name: fileItem.model.name,
-            		location: fileItem.model.location,
-            		metadata: {
-            			contentType: contentType ? contentType.id : ""
-            		}
-            	});
+            	var fileObj = Object.create(null);
+            	var metadata = Object.create(null);
+            	metadata.contentType =  contentType ? contentType.id : "";
+            	fileObj.name = fileItem.model.name;
+            	fileObj.location = fileItem.model.location;
+            	fileObj.metadata = metadata;
+            	files.push(fileObj);
             }.bind(this));
             if(files.length > 0) {
 				this.fileClient.dispatchEvent({ type: "FileContentChanged", files: files}); //$NON-NLS-0$
