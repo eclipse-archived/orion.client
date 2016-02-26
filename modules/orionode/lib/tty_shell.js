@@ -33,7 +33,7 @@ exports.install = function(options) {
 	}
 
 	function resolvePath(wwwPath) {
-		var filePath = api.rest(fileRoot, wwwPath);
+		var filePath = api.rest(fileRoot, wwwPath || "");
 		if(!filePath){
 			filePath = api.rest(fileRoot, fileRoot);
 		}
