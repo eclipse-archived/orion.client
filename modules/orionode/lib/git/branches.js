@@ -133,7 +133,9 @@ function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
 		return theRepo.getReferences(git.Reference.TYPE.LISTALL);
 	})
 	.then(function(referenceList) {
-		referenceList.unshift(theHead);
+		if (theRepo.headDetached()) {
+			referenceList.unshift(theHead);
+		}
 		referenceList.forEach(function(ref) {
 			if (ref.isBranch() || theRepo.headDetached() && ref === theHead) {
 				if (!filter || ref.shorthand().indexOf(filter) !== -1) {
