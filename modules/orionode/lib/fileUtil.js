@@ -15,7 +15,6 @@ var Promise = require('bluebird');
 var rimraf = require('rimraf');
 var url = require('url');
 var api = require('./api');
-var async = require('./async');
 
 var fs = Promise.promisifyAll(require('fs'));
 
@@ -186,21 +185,19 @@ function _copyDir(srcPath, destPath, callback) {
 		});
 	};
 	cpDir = function(dirlist) {
-		return async.sequence(dirlist.map(function(d) {
-			if(d.dir){
-				var currentDestFolderPath = d.path.replace(srcPath, destPath);
-				return function() {
-					return fs.mkdirAsync(currentDestFolderPath);
-				};
-			} else {
-				return function(){
-					var currentDestFolderPath = d.path.replace(srcPath, destPath);
-					var rs = fs.createReadStream(d.path);
-					var ws = fs.createWriteStream(currentDestFolderPath);
-					rs.pipe(ws);
-				};
+		return Promise.each(dirlist, function(d) {
+			var currentDestFolderPath = d.path.replace(srcPath, destPath)
+			if (d.dir) {
+				return fs.mkdirAsync(currentDestFolderPath);
 			}
-		}));
+			// file
+			var rs = fs.createReadStream(d.path);
+			var ws = fs.createWriteStream(currentDestFolderPath);
+			rs.pipe(ws);
+			// TODO resolve once writing has finished?
+			// return new Promise((resolve) => rs.on('end', resolve))
+			return Promise.resolve();
+		});
 	};
 	cpFile = function(dirlist) {
 		dirlist.forEach(function(item) {
