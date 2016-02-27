@@ -33,8 +33,8 @@ module.exports = function(options) {
 		for (var i = 0; i < fieldList.length; i++) {
 			if (term.lastIndexOf(fieldList[i] + ":", 0) === 0) {
 				return true;
-			};
-		};
+			}
+		}
 		return false;
 	}
 
@@ -44,7 +44,7 @@ module.exports = function(options) {
 			var character = specialChars.substring(i,i+1);
 			var escaped = "\\" + character;
 			searchTerm = searchTerm.replace(new RegExp(escaped,"g"), character);
-		};
+		}
 		return searchTerm;
 	}
 
@@ -57,7 +57,7 @@ module.exports = function(options) {
 		this.regEx = false;
 		this.rows = 10000;
 		this.scopes = [];
-		this.searchTerm = null;
+		this.searchTerm = "*";
 		this.searchTermCaseSensitive = false;
 		this.username = null;
 
@@ -88,7 +88,7 @@ module.exports = function(options) {
 
 			this.defaultLocation = "/file/" + workspaceId;
 		};
-	};
+	}
 
 	function buildSearchPattern(searchOpts){
 		var searchTerm = searchOpts.searchTerm;
@@ -149,14 +149,15 @@ module.exports = function(options) {
 		var stats = fs.statSync(filePath);
 
 		if (stats.isDirectory()) {
-			if (filePath.substring(filePath.length-1) !== "/") filePath = filePath + "/";
-
-			var directoryFiles = fs.readdirSync(filePath);
-			directoryFiles.forEach(function (directoryFile) {
-				var fileResults = searchFile(filePath, directoryFile, searchPattern, filenamePattern, results);
-				if (fileResults) results.concat(fileResults);
-			});
-
+			if (filename.indexOf(".") !== 0) {// do not hidden dirs like .git
+				if (filePath.substring(filePath.length-1) !== "/") filePath = filePath + "/";
+	
+				var directoryFiles = fs.readdirSync(filePath);
+				directoryFiles.forEach(function (directoryFile) {
+					var fileResults = searchFile(filePath, directoryFile, searchPattern, filenamePattern, results);
+					if (fileResults) results.concat(fileResults);
+				});
+			}
 		} else {
 			var file = fs.readFileSync(filePath, 'utf8');
 			if (filename.match(filenamePattern) && file.match(searchPattern)){
@@ -199,7 +200,7 @@ module.exports = function(options) {
 
 				var matches = searchFile(searchScope, childName, searchPattern, filenamePattern, []);
 				if (matches) results = results.concat(matches);
-			};
+			}
 
 			res.json({
 			  "response": {
