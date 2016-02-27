@@ -263,20 +263,23 @@ function getCommitBody(workspaceDir, fileRoot, req, res, next, rest) {
 	var filePath = segments.slice(4).join("/");
 	git.Repository.open(repoPath)
 	.then(function(repo) {
-		git.Commit.lookup(repo, scope)
-		.then(function(commit) {
-			commit.getEntry(filePath)
-			.then(function(treeEntry) {
-				treeEntry.getBlob()
-				.then(function(blob) {
-					var resp = blob.toString();
-					res.statusCode = 200;
-					res.setHeader('Content-Type', 'application/octect-stream');
-					res.setHeader('Content-Length', resp.length);
-					res.end(resp);
-				});
-			});
-		});
+		return git.Commit.lookup(repo, scope);
+	})
+	.then(function(commit) {
+		return commit.getEntry(filePath);
+	})
+	.then(function(treeEntry) {
+		return treeEntry.getBlob();
+	})
+	.then(function(blob) {
+		var resp = blob.toString();
+		res.statusCode = 200;
+		res.setHeader('Content-Type', 'application/octect-stream');
+		res.setHeader('Content-Length', resp.length);
+		res.end(resp);
+	}).catch(function() {
+		res.statusCode = 404;
+		res.end();
 	});
 }
 

@@ -266,7 +266,7 @@ function getDiffBetweenTwoCommits(repoPath, commits) {
 		tree2 = tree;
 	})
 	.then(function() {
-		return git.Diff.treeToTree(repo, tree2, tree1, null);
+		return git.Diff.treeToTree(repo, tree1, tree2, null);
 	});
 }
 
