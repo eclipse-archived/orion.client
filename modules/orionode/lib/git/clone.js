@@ -207,8 +207,8 @@ function putClone(workspaceDir, fileRoot, req, res, next, rest) {
 		res.end();
 	})
 	.catch(function(err){
-    	writeError(403, res, err.message);
-    });
+		writeError(403, res, err.message);
+	});
 }
 
 function postClone(workspaceDir, fileRoot, req, res, next, rest) {

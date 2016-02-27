@@ -399,7 +399,7 @@ function rebase(req, res, next, rest, repoPath, commitToRebase, rebaseOperation)
 				throw new Error("Not implemented yet");
 				
 			default:
-				work = repo.rebaseBranches("HEAD", "refs/heads/" + commitToRebase, null, null, null);
+				work = repo.rebaseBranches("HEAD", commitToRebase, null, null, null);
 		}
 		return work
 		.then(function(_oid) {
@@ -637,8 +637,8 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 	.then(function(diffs){
 		theDiffs = diffs;
 	})
-	.then(function(commit) {
-		return getCommitParents(theRepo, commit, fileDir);
+	.then(function() {
+		return getCommitParents(theRepo, thisCommit, fileDir);
 	})
 	.then(function(parents){
 		theParents = parents;
