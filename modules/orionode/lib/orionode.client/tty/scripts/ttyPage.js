@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -16,8 +16,10 @@ define([
 	"orion/commandRegistry",
 	"orion/fileClient",
 	"orion/searchClient",
-	"orion/globalCommands"
-], function(messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands) {
+	"orion/globalCommands",
+	'orion/webui/littlelib',
+	"tty/scripts/shell"
+], function(messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, lib, shell) {
 
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
@@ -28,5 +30,15 @@ define([
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		mGlobalCommands.generateBanner("orion-shellPage", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({task: messages.Shell, serviceRegistry: serviceRegistry, commandService: commandRegistry});
+		
+		shell.createCommands(serviceRegistry, commandRegistry, preferences);
+		
+		["pageActions", "pageNavigationActions", "settingsActions"].forEach(function(id) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$
+			var toolbar = lib.node(id);
+			if (toolbar) {
+				commandRegistry.destroy(toolbar);
+				commandRegistry.renderCommands(toolbar.id, toolbar, this, this, "button"); //$NON-NLS-0$
+			}
+		});
 	});
 });
