@@ -193,8 +193,8 @@ function putClone(workspaceDir, fileRoot, req, res, next, rest) {
 			})
 			.then(function() {
 				return Promise.all(toRemove.map(function(p) {
-					var filepath = api.join(repoPath, p);
 					return new Promise(function(fulfill, reject) {
+						var filepath = api.join(repoPath, p);
 						fileUtil.withStats(filepath, function(error, stats) {
 							if (error) return reject();
 							function done(err) {

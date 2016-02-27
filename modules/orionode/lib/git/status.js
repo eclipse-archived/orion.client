@@ -74,11 +74,11 @@ function getStatus(workspaceDir, fileRoot, req, res, next, rest) {
 				}
 				
 				if (bit & git.Status.STATUS.INDEX_MODIFIED) {
-					changed.push(returnContent(file));
+					changed.push(returnContent(file, "Cached"));
 				}
 				
 				if (bit & git.Status.STATUS.INDEX_DELETED) {
-					removed.push(returnContent(file));
+					removed.push(returnContent(file, "Cached"));
 				}
 				
 			});

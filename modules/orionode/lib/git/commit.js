@@ -19,7 +19,7 @@ function commitJSON(commit, fileDir, diffs, parents) {
 	return {
 		"AuthorEmail": commit.author().email(), 
 		"AuthorName": commit.author().name(),
-		"AuthorImage": "https://www.gravatar.com/avatar/" + crypto.createHash('md5').update(commit.author().email()).digest("hex") + "?d=mm",
+		"AuthorImage": "https://www.gravatar.com/avatar/" + crypto.createHash('md5').update(commit.author().email().toLowerCase()).digest("hex") + "?d=mm",
 		"Children":[],
 		"CommitterEmail": commit.committer().email(),
 		"CommitterName": commit.committer().name(),

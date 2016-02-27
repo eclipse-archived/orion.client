@@ -38,8 +38,8 @@ define([
 				charHeight = rect.bottom - rect.top + 2;
 				termContainer.removeChild(span);
 			}
-			var newRows = newHeight / (charHeight || 12);
-			var newCols = Math.max(80, newWidth / (charWidth || 12));
+			var newRows = (newHeight - 10) / (charHeight || 12);
+			var newCols = Math.max(80, (newWidth - 10) / (charWidth || 12));
 			if (newRows === rows && newCols !== cols) return;
 			rows = newRows;
 			cols = newCols;
