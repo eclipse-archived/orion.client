@@ -15,6 +15,7 @@ var git = require('nodegit');
 var path = require("path");
 var fs = require('fs');
 var async = require('async');
+var fileUtil = require('../fileUtil');
 
 function getClone(workspaceDir, fileRoot, req, res, next, rest) {
 	var repos = [];
@@ -178,9 +179,37 @@ function putClone(workspaceDir, fileRoot, req, res, next, rest) {
 	.then(function(repo) {
 		theRepo = repo;
 		if (paths) {
-			//TODO: handle untracked files
 			checkOptions.paths = paths;
-			return git.Checkout.head(theRepo, checkOptions);
+			var toRemove = [];
+			return repo.index()
+			.then(function(index) {
+				if (!removeUntracked) return;
+				paths.forEach(function(path) {
+					if (!index.getByPath(path)) toRemove.push(path);
+				});
+			})
+			.then(function() {
+				return git.Checkout.head(theRepo, checkOptions);
+			})
+			.then(function() {
+				return Promise.all(toRemove.map(function(p) {
+					var filepath = api.join(repoPath, p);
+					return new Promise(function(fulfill, reject) {
+						fileUtil.withStats(filepath, function(error, stats) {
+							if (error) return reject();
+							function done(err) {
+								if (err) reject();
+								fulfill();
+							}
+							if (stats.isDirectory()) {
+								fileUtil.rumRuff(filepath, done);
+							} else {
+								fs.unlink(filepath, done);
+							}
+						});
+					});
+				}));
+			});
 		} else if (tag && typeof branch === "string") {
 			return git.Reference.lookup(theRepo, "refs/tags/" + tag)
 			.then(function(reference) {
