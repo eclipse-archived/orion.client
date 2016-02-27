@@ -217,14 +217,15 @@ function getDiff(repo, commit, fileDir) {
 		tree1 = tree;
 	})
 	.then(function() {
-		return git.Diff.treeToTree(repo, tree2, tree1, null);
+		return git.Diff.treeToTree(repo, tree1, tree2, null);
 	})
 	.then(function(diff) {
 		return diff.patches();
 	})
 	.then(function(patches) {
-		var range = commit.id().toString();
-		if (_parent) range += ".." + _parent.id().toString();
+		var range = "";
+		if (_parent) range = _parent.id().toString() + "..";
+		range += commit.id().toString();
 		var page = 1, pageSize = 100;
 		var diffs = patches.slice(0, pageSize).map(function(patch) {
 			var newFile = patch.newFile();
@@ -268,7 +269,7 @@ function getCommitBody(workspaceDir, fileRoot, req, res, next, rest) {
 			.then(function(treeEntry) {
 				treeEntry.getBlob()
 				.then(function(blob) {
-					var resp = JSON.stringify(blob.toString());
+					var resp = blob.toString();
 					res.statusCode = 200;
 					res.setHeader('Content-Type', 'application/octect-stream');
 					res.setHeader('Content-Length', resp.length);
