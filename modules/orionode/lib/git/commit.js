@@ -261,9 +261,14 @@ function getCommitBody(workspaceDir, fileRoot, req, res, next, rest) {
 	var repoPath = segments[3];
 	repoPath = api.join(workspaceDir, repoPath);
 	var filePath = segments.slice(4).join("/");
+	var theRepo;
 	git.Repository.open(repoPath)
 	.then(function(repo) {
-		return git.Commit.lookup(repo, scope);
+		theRepo = repo;
+		return repo.getReferenceCommit(scope);
+	})
+	.catch(function() {
+		return theRepo.getCommit(scope);
 	})
 	.then(function(commit) {
 		return commit.getEntry(filePath);
