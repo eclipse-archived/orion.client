@@ -105,7 +105,7 @@ define("orion/editor/linkedMode", [
 			return true;
 		}.bind(this));
 		textView.setAction("linkedModeCancel", function() { //$NON-NLS-0$
-			this.exitLinkedMode(false);
+			this.exitLinkedMode(true);
 			return true;
 		}.bind(this));
 		textView.setAction("linkedModeNextGroup", function() { //$NON-NLS-0$
