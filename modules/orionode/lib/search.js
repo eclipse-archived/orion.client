@@ -124,28 +124,30 @@ module.exports = function(options) {
 	}
 
 	function buildFilenamePattern(searchOpts){
-		var filenamePattern = searchOpts.filenamePattern;
+		var filenamePatterns = searchOpts.filenamePattern;
 		//Default File Pattern
-		if(filenamePattern === null){
-			filenamePattern = ".*";
+		if(filenamePatterns === null){
+			filenamePatterns = ".*";
 		}
-		if (filenamePattern.indexOf("?") !== -1 || filenamePattern.indexOf("*") !== -1) {
-			if (filenamePattern.indexOf("*") === 0) {
-				filenamePattern = filenamePattern.substring(1);
+		return filenamePatterns.split("/").map(function(filenamePattern) {
+			if (filenamePattern.indexOf("?") !== -1 || filenamePattern.indexOf("*") !== -1) {
+				if (filenamePattern.indexOf("*") === 0) {
+					filenamePattern = filenamePattern.substring(1);
+				}
+				if (filenamePattern.indexOf("?") !== -1) {
+					filenamePattern = filenamePattern.replace("?", ".");
+				}
+				if (filenamePattern.indexOf("*") !== -1) {
+					filenamePattern = filenamePattern.replace("*", ".*");
+				}
 			}
-			if (filenamePattern.indexOf("?") !== -1) {
-				filenamePattern = filenamePattern.replace("?", ".");
+	
+			if (!searchOpts.filenamePatternCaseSensitive) {
+				return new RegExp(filenamePattern, "i");
+			} else {
+				return new RegExp(filenamePattern);
 			}
-			if (filenamePattern.indexOf("*") !== -1) {
-				filenamePattern = filenamePattern.replace("*", ".*");
-			}
-		}
-
-		if (!searchOpts.filenamePatternCaseSensitive) {
-			return new RegExp(filenamePattern, "i");
-		} else {
-			return new RegExp(filenamePattern);
-		}
+		});
 	}
 
 	// @returns promise that resolves once all hits have been added to the `results` object.
@@ -155,7 +157,7 @@ module.exports = function(options) {
 	// Note that while this function creates and returns many promises, they fulfill to undefined,
 	// and are used only for flow control.
 	// TODO clean up
-	function searchFile(dirLocation, filename, searchPattern, filenamePattern, results){
+	function searchFile(dirLocation, filename, searchPattern, filenamePatterns, results){
 		var filePath = dirLocation + filename;
 		return fs.statAsync(filePath)
 		.then(function(stats) {
@@ -170,12 +172,15 @@ module.exports = function(options) {
 				return fs.readdirAsync(filePath)
 				.then(function(directoryFiles) {
 					return Promise.map(directoryFiles, function(entry) {
-						return searchFile(filePath, entry, searchPattern, filenamePattern, results);
+						return searchFile(filePath, entry, searchPattern, filenamePatterns, results);
 					}, { concurrency: SUBDIR_SEARCH_CONCURRENCY });
 				});
 			}
 			// File case
-			if (!filename.match(filenamePattern)){
+			
+			if (!filenamePatterns.some(function(filenamePattern) {
+				return filename.match(filenamePattern);
+			})){
 				return;
 			}
 			return fs.readFileAsync(filePath, 'utf8')
