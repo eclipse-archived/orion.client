@@ -108,12 +108,17 @@ define([
 		            return null;
 		        }
 		        return editorContext.getFileMetadata().then(function(meta) {
-    		          return that.resolver.getWorkspaceFile(path, opts).then(function(files) {
-    		            var rels  = that.resolver.resolveRelativeFiles(path, files, meta);
-        		        if(rels && rels.length > 0) {
-        		            return that._formatFilesHover(path, rels);
-        		        }
-    		          });    
+		        	if(Array.isArray(meta.parents) && meta.parents.length > 0) {
+						that.resolver.setSearchLocation(meta.parents[meta.parents.length - 1].Location);
+					} else {
+						that.resolver.setSearchLocation(null);	
+					}
+    		        return that.resolver.getWorkspaceFile(path, opts).then(function(files) {
+    		        	var rels  = that.resolver.resolveRelativeFiles(path, files, meta);
+        		    	if(rels && rels.length > 0) {
+        		        	return that._formatFilesHover(path, rels);
+        		    	}
+    		        });    
 		        });
 		    }
 		    return null;
@@ -202,16 +207,21 @@ define([
 	                  var ext = path.slice(idx+1);
 	                  var that = this;
 	                  return editorContext.getFileMetadata().then(function(meta) {
-	                      return that.resolver.getWorkspaceFile(path, {ext:ext, type:'Image', icon:'../webtools/images/file.png'}).then(function(files) {
-                		        if(files && files.length > 0) {
-                		            var resolved = that.resolver.resolveRelativeFiles(path, files, meta);
-                		            if(resolved && resolved.length > 0) {
-                		                 var html = '<html><body style="margin:1px;"><img src="'+resolved[0].location+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
-    			                         return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
-                		            }
-                		        }
-            	           });
-	                  });
+	                  	if(Array.isArray(meta.parents) && meta.parents.length > 0) {
+							that.resolver.setSearchLocation(meta.parents[meta.parents.length - 1].Location);
+						} else {
+							that.resolver.setSearchLocation(null);	
+						}
+	                    return that.resolver.getWorkspaceFile(path, {ext:ext, type:'Image', icon:'../webtools/images/file.png'}).then(function(files) {
+                			if(files && files.length > 0) {
+                		    	var resolved = that.resolver.resolveRelativeFiles(path, files, meta);
+                		        if(resolved && resolved.length > 0) {
+                		        	var html = '<html><body style="margin:1px;"><img src="'+resolved[0].location+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
+    			                    return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+                		       	}
+                		    }
+            	        });
+	              	});
 	              }
 		      }
 		},

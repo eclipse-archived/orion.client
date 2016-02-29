@@ -19,7 +19,7 @@ define([
 ], function(chai, HTMLHover, ASTManager, Deferred) {
     var assert = chai.assert;
     var astManager = new ASTManager.HtmlAstManager();
-    var hover = new HTMLHover.HTMLHover(astManager, {resolveRelativeFiles: function(){return [{name: 'name', path: 'path', contentType: 'cType', location: 'hover.test'}]; }, getWorkspaceFile: function(){return new Deferred().resolve([1,2,3]);}});
+    var hover = new HTMLHover.HTMLHover(astManager, {resolveRelativeFiles: function(){return [{name: 'name', path: 'path', contentType: 'cType', location: 'hover.test'}]; }, getWorkspaceFile: function(){return new Deferred().resolve([1,2,3]);}, setSearchLocation: function(){}});
     var editorContext = {
 		text: "",
 		contentTypeId: "text/html",
