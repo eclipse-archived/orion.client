@@ -213,32 +213,30 @@ define([
        		if(typeof(path2) === 'undefined') {
        			return typeof(file) === 'undefined';
        		}
-       		if(file.contentType && meta.contentType && file.contentType.name === meta.contentType.name) {
-       			//get rid of extensions and compare the names
-       			var loc = file.location ? file.location : file.Location;
-       			if(!loc) {
-       				return false;
-       			}
-       			var idx = loc.lastIndexOf('.');
-       			var p1 = loc;
-       			if(idx > -1) {
-	      			p1 = loc.slice(0, idx);
-	      		}
-	      		if(path2 === p1) {
-	      			return true; //could be that only the extension was missing from the other path
-	      		}
-	      		idx = path2.lastIndexOf('.');
-       			var p2 = path2;
-       			if(idx > -1) {
-	      			p2 = path2.slice(0, idx);
-	      		}
-	      		if(p1 === p2) {
-	      			return true;
-	      		} else if(p1 === decodeURIComponent(p2)) {
-	      			return true;
-	      		}
-	      		return false;
-       		}
+   			//get rid of extensions and compare the names
+   			var loc = file.location ? file.location : file.Location;
+   			if(!loc) {
+   				return false;
+   			}
+   			var idx = loc.lastIndexOf('.');
+   			var p1 = loc;
+   			if(idx > -1) {
+      			p1 = loc.slice(0, idx);
+      		}
+      		if(path2 === p1) {
+      			return true; //could be that only the extension was missing from the other path
+      		}
+      		idx = path2.lastIndexOf('.');
+   			var p2 = path2;
+   			if(idx > -1) {
+      			p2 = path2.slice(0, idx);
+      		}
+      		if(p1 === p2) {
+      			return true;
+      		} else if(p1 === decodeURIComponent(p2)) {
+      			return true;
+      		}
+      		return false;
        },
 
        /**
