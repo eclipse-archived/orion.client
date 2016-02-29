@@ -5,6 +5,8 @@
 
 .pageLayoutTarget {
 	padding: 0;
+	background: transparent;
+	box-shadow: none;
 }
 
 .terminal {
