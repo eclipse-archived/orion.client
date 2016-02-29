@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -127,6 +127,20 @@ define([
 		 */
 		onInputChanged: function(event) {
 		    this.inputChanged = event;
+		},
+		/**
+		 * Callback from the FileClient
+		 * @param {Object} event a <tt>fileChanged</tt> event
+		 */
+		onFileChanged: function(event) {
+			if(event && event.type === 'FileContentChanged' && Array.isArray(event.files)) {
+				//event = {type, files: [{name, location, metadata: {contentType}}]}
+				event.files.forEach(function(file) {
+					if(file.metadata && file.metadata.contentType === 'application/javascript') {
+						this.cache.remove(this._getKey(file));
+					}
+				}.bind(this));
+			}
 		}
 	});
 	return {

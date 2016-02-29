@@ -1539,10 +1539,10 @@ define([
 	    	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=462878
 	    	 */
 	    	Metrics.initFromRegistry(serviceRegistry);
-//			var fClient = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
-//			fClient.addEventListener("FileContentChanged", function(evt) { //$NON-NLS-0$
-//				console.log(evt.files);
-//			});
+	    	
+	    	var fc = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
+	    	fc.addEventListener("FileContentChanged", astManager.onFileChanged.bind(astManager));
+	    	fc.addEventListener("FileContentChanged", CUProvider.onFileChanged.bind(CUProvider));
     	});
 });
 
