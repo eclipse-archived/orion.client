@@ -12,9 +12,13 @@
 var apiPath = require('./middleware/api_path');
 var express = require('express');
 var bodyParser = require('body-parser');
+var Promise = require('bluebird');
 var url = require('url');
-var fs = require('fs');
 var fileUtil = require('./fileUtil');
+
+var fs = Promise.promisifyAll(require('fs'));
+
+var SUBDIR_SEARCH_CONCURRENCY = 10;
 
 module.exports = function(options) {
 	var root = options.root;
@@ -144,25 +148,43 @@ module.exports = function(options) {
 		}
 	}
 
+	// @returns promise that resolves once all hits have been added to the `results` object.
+	// This is a basically a parallel reduce operation implemented by recursive calls to searchFile()
+	// that push the search hits into the `results` array.
+	//
+	// Note that while this function creates and returns many promises, they fulfill to undefined,
+	// and are used only for flow control.
+	// TODO clean up
 	function searchFile(dirLocation, filename, searchPattern, filenamePattern, results){
 		var filePath = dirLocation + filename;
-		var stats = fs.statSync(filePath);
-
-		if (stats.isDirectory()) {
-			if (filename.indexOf(".") !== 0) {// do not hidden dirs like .git
+		return fs.statAsync(filePath)
+		.then(function(stats) {
+			/*eslint consistent-return:0*/
+			if (stats.isDirectory()) {
+				if (filename[0] === ".") {
+					// do not search hidden dirs like .git
+					return;
+				}
 				if (filePath.substring(filePath.length-1) !== "/") filePath = filePath + "/";
-	
-				var directoryFiles = fs.readdirSync(filePath);
-				directoryFiles.forEach(function (directoryFile) {
-					var fileResults = searchFile(filePath, directoryFile, searchPattern, filenamePattern, results);
-					if (fileResults) results.concat(fileResults);
+
+				return fs.readdirAsync(filePath)
+				.then(function(directoryFiles) {
+					return Promise.map(directoryFiles, function(entry) {
+						return searchFile(filePath, entry, searchPattern, filenamePattern, results);
+					}, { concurrency: SUBDIR_SEARCH_CONCURRENCY });
 				});
 			}
-		} else {
-			var file = fs.readFileSync(filePath, 'utf8');
-			if (filename.match(filenamePattern) && file.match(searchPattern)){
+			// File case
+			if (!filename.match(filenamePattern)){
+				return;
+			}
+			return fs.readFileAsync(filePath, 'utf8')
+			.then(function(file) {
+				if (!file.match(searchPattern)) {
+					return;
+				}
+				// We found a hit
 				var filePathFromWorkspace = filePath.substring(workspaceDir.length);
-
 				results.push({
 					"Directory": stats.isDirectory(),
 					"LastModified": stats.mtime.getTime(),
@@ -171,9 +193,8 @@ module.exports = function(options) {
 					"Name": filename,
 					"Path": workspaceName + filePathFromWorkspace
 				});
-			}
-		}
-		return results;
+			});
+		});
 	}
 
 	return express.Router()
@@ -194,34 +215,33 @@ module.exports = function(options) {
 
 		fileUtil.getChildren(searchScope, parentFileLocation, function(children) {
 			var results = [];
-			for (var i = 0; i < children.length; i++){
-				var child = children[i];
+
+			Promise.map(children, function(child) {
 				var childName = child.Location.substring(endOfFileRootIndex + 1);
-
-				var matches = searchFile(searchScope, childName, searchPattern, filenamePattern, []);
-				if (matches) results = results.concat(matches);
-			}
-
-			res.json({
-			  "response": {
-			    "docs": results,
-			    "numFound": results.length,
-			    "start": 0
-			  },
-			  "responseHeader": {
-			    "params": {
-			      "fl": "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive",
-			      "fq": [
-			        "Location:"+searchOpt.location,
-			        "UserName:anonymous"
-			      ],
-			      "rows": "10000",
-			      "sort": "Path asc",
-			      "start": "0",
-			      "wt": "json"
-			    },
-			    "status": 0
-			  }
+				return searchFile(searchScope, childName, searchPattern, filenamePattern, results);
+			}, { concurrency: SUBDIR_SEARCH_CONCURRENCY })
+			.then(function() {
+				res.json({
+					"response": {
+						"docs": results,
+						"numFound": results.length,
+						"start": 0
+					},
+					"responseHeader": {
+						"params": {
+							"fl": "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive",
+							"fq": [
+								"Location:"+searchOpt.location,
+								"UserName:anonymous"
+							],
+							"rows": "10000",
+							"sort": "Path asc",
+							"start": "0",
+							"wt": "json"
+						},
+						"status": 0
+					}
+				});
 			});
 		});
 	});
