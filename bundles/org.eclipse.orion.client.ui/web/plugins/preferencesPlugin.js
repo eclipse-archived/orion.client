@@ -30,9 +30,9 @@ define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider)
 			return xhr("PUT", this.location + name, {
 				data: JSON.stringify(data),
 				headers: {
+					"Content-Type": "application/json;charset=UTF-8",
 					"Orion-Version": "1"
 				},
-				contentType: "application/json;charset=UTF-8",
 				timeout: 15000
 			}).then(function(result) {
 				return result.response ? JSON.parse(result.response) : null;
@@ -43,7 +43,6 @@ define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider)
 				headers: {
 					"Orion-Version": "1"
 				},
-				contentType: "application/json;charset=UTF-8",
 				timeout: 15000
 			}).then(function(result) {
 				return result.response ? JSON.parse(result.response) : null;
