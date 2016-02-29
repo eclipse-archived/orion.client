@@ -1143,27 +1143,6 @@ define([
 				 	        	                	options: severities
 			 	        	                	},
 			 	        	                	{
-    			 	        	                	id: "no-console",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noConsole"],
-    			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: ignore,
-    			 	        	                	options: severities
-    			 	        	                },
-												{
-     				 	        	            	id: "no-debugger",  //$NON-NLS-1$
- 				 	        	                	name: javascriptMessages["noDebugger"],
-				 	        	                	type: "number",  //$NON-NLS-1$
-				 	        	                	defaultValue: warning,
-				 	        	                	options: severities
-												},
-												{
-			 	        	                		id: "type-checked-consistent-return",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["type-checked-consistent-return"],
-				 	        	                	type: "number",  //$NON-NLS-1$
-				 	        	                	defaultValue: ignore,
-				 	        	                	options: severities
-			 	        	                	},
-			 	        	                	{
 			 	        	                		id: "no-extra-boolean-cast",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["no-extra-boolean-cast"],
 				 	        	                	type: "number",  //$NON-NLS-1$
@@ -1177,6 +1156,34 @@ define([
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 			 	        	                	},
+												{
+     				 	        	            	id: "no-debugger",  //$NON-NLS-1$
+ 				 	        	                	name: javascriptMessages["noDebugger"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: warning,
+				 	        	                	options: severities
+												},		 	        	                	
+			 	        	                	{
+    			 	        	                	id: "no-console",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noConsole"],
+    			 	        	                	type: "number", //$NON-NLS-1$
+    			 	        	                	defaultValue: ignore,
+    			 	        	                	options: severities
+    			 	        	                },
+												{
+			 	        	                		id: "type-checked-consistent-return",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["type-checked-consistent-return"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: ignore,
+				 	        	                	options: severities
+			 	        	                	},
+				 	        	            	{
+				 	        	                	id: "no-duplicate-case",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["no-duplicate-case"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: error,
+				 	        	                	options: severities
+				 	        	            	},
 				 	        	            	{
 				 	        	                	id: "no-dupe-keys",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noDupeKeys"],
@@ -1185,8 +1192,8 @@ define([
 				 	        	                	options: severities
 				 	        	            	},
 				 	        	            	{
-				 	        	                	id: "no-duplicate-case",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["no-duplicate-case"],
+				 	        	            		id: "valid-typeof",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["validTypeof"],
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
@@ -1198,13 +1205,6 @@ define([
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 			 	        	                	},
-				 	        	            	{
-				 	        	            		id: "valid-typeof",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["validTypeof"],
-				 	        	                	type: "number",  //$NON-NLS-1$
-				 	        	                	defaultValue: error,
-				 	        	                	options: severities
-				 	        	            	},
 				 	        	            	{
 				 	        	            		id: "no-regex-spaces",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noRegexSpaces"],
@@ -1298,34 +1298,22 @@ define([
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 			 	        	                	},
-				 	        	   				{	id: "no-caller",  //$NON-NLS-1$
-				 	        	                	name: javascriptMessages["noCaller"],
-				 	        	                	type: "number", //$NON-NLS-1$
-				 	        	                	defaultValue: warning,
-				 	        	                	options: severities
-				 	        	                },
 				 	        	                {	id: "eqeqeq",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noEqeqeq"],
  				 	        	                	type: "number",  //$NON-NLS-1$
  				 	        	                	defaultValue: warning,
  				 	        	                	options: severities
  				 	        	                },
+				 	        	   				{	id: "no-caller",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["noCaller"],
+				 	        	                	type: "number", //$NON-NLS-1$
+				 	        	                	defaultValue: warning,
+				 	        	                	options: severities
+				 	        	                },
  				 	        	                {	id: "no-eval",  //$NON-NLS-1$
     			 	        	                	name: javascriptMessages["noEval"],
     			 	        	                	type: "number",  //$NON-NLS-1$
     			 	        	                	defaultValue: ignore,
-    			 	        	                	options: severities
-    			 	        	                },
-    			 	        	                {	id: "no-implied-eval",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noImpliedEval"],
-    			 	        	                	type: "number",  //$NON-NLS-1$
-    			 	        	                	defaultValue: ignore,
-    			 	        	                	options: severities
-    			 	        	                },
-    			 	        	                {	id: "no-iterator",  //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noIterator"],
-    			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: error,
     			 	        	                	options: severities
     			 	        	                },
  				 	        	                {
@@ -1349,17 +1337,29 @@ define([
     			 	        	                	defaultValue: warning,
     			 	        	                	options: severities
     			 	        	                },
+    			 	        	                {
+    			 	        	                	id: "no-with", //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noWith"],
+    			 	        	                	type: "number", //$NON-NLS-1$
+    			 	        	                	defaultValue: warning,
+    			 	        	                	options: severities
+    			 	        	                },
+    			 	        	                {	id: "no-iterator",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noIterator"],
+    			 	        	                	type: "number", //$NON-NLS-1$
+    			 	        	                	defaultValue: error,
+    			 	        	                	options: severities
+    			 	        	                },
     			 	        	                {	id: "no-proto",  //$NON-NLS-1$
     			 	        	                	name: javascriptMessages["noProto"],
     			 	        	                	type: "number", //$NON-NLS-1$
     			 	        	                	defaultValue: error,
     			 	        	                	options: severities
     			 	        	                },
-    			 	        	                {
-    			 	        	                	id: "no-with", //$NON-NLS-1$
-    			 	        	                	name: javascriptMessages["noWith"],
-    			 	        	                	type: "number", //$NON-NLS-1$
-    			 	        	                	defaultValue: warning,
+    			 	        	                {	id: "no-implied-eval",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noImpliedEval"],
+    			 	        	                	type: "number",  //$NON-NLS-1$
+    			 	        	                	defaultValue: ignore,
     			 	        	                	options: severities
     			 	        	                },
     			 	        	                {
@@ -1389,6 +1389,12 @@ define([
  				 	        	                	type: "number",  //$NON-NLS-1$
  				 	        	                	options: severities
  				 	        	                },
+ 				 	        	                {	id: "no-throw-literal",  //$NON-NLS-1$
+ 				 	        	                	name: javascriptMessages["noThrowLiteral"],
+ 				 	        	                	type: "number",  //$NON-NLS-1$
+ 				 	        	                	defaultValue: warning,
+ 				 	        	                	options: severities
+ 				 	        	                },
  				 	        	                {	id: "no-use-before-define",  //$NON-NLS-1$
  				 	        	                	name: javascriptMessages["useBeforeDefine"],
  				 	        	                	type: "number",  //$NON-NLS-1$
@@ -1408,12 +1414,6 @@ define([
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 			 	        	                	},
- 				 	        	                {	id: "no-throw-literal",  //$NON-NLS-1$
- 				 	        	                	name: javascriptMessages["noThrowLiteral"],
- 				 	        	                	type: "number",  //$NON-NLS-1$
- 				 	        	                	defaultValue: warning,
- 				 	        	                	options: severities
- 				 	        	                },
  				 	        	                {	id: "curly",  //$NON-NLS-1$
     			 	        	                	name: javascriptMessages["missingCurly"],
     			 	        	                	type: "number",  //$NON-NLS-1$
