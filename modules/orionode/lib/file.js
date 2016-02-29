@@ -235,7 +235,6 @@ module.exports = function(options) {
 	// POST - parse json body
 	router.post('*', jsonParser, function(req, res, next) { //eslint-disable-line no-unused-vars
 		var rest = req.pathSuffix;
-		debugger;
 		if (writeEmptyFilePathError(res, rest)) {
 			return;
 		}
