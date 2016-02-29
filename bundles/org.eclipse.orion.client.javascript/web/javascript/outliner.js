@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -12,7 +12,7 @@
 /*eslint-env amd*/
 define([
 "orion/Deferred"
-], function(Defered) {
+], function(Deferred) {
 	
 	/**
 	 * @name javascript.JSOutliner
@@ -20,7 +20,7 @@ define([
 	 * @param {Worker} ternWorker The backing Tern worker 
 	 * @constructor
 	 * @public
-	 * @param {javascript.ASTManager} astManager
+	 * @param {Worker} ternWorker
 	 */
 	function JSOutliner(ternWorker) {
 		this.ternWorker = ternWorker;
@@ -39,7 +39,7 @@ define([
 	 * @callback 
 	 */
 	JSOutliner.prototype.computeOutline = function(editorContext, options) {
-		var deferred = new Defered();
+		var deferred = new Deferred();
 		editorContext.getFileMetadata().then(function(meta) {
 			editorContext.getText().then(function(text) {
 				var files = [{type: "full", name: meta.location, text: text}]; //$NON-NLS-1$
