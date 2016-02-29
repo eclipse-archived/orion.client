@@ -348,10 +348,12 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			  //Similar mechanism to the setLocationByMetaData method in searchClient.js with meta = data.items[0]
 			  //and useParentLocation = {index: "last"} to retrieve project scope info.
 			  var searchLoc = null;
-			  if(data.items[0].Parents.length){
+			  if(data.items[0] && data.items[0].Parents && data.items[0].Parents.length){
 			    searchLoc = data.items[0].Parents[data.items[0].Parents.length - 1];
-			  } else {
+			  } else if(data.items[0]) {
 			    searchLoc = data.items[0];
+			  } else {
+			  	searchLoc = data.items;
 			  }
 			  this._inlineSearchPane._defaultSearchResource = searchLoc;
 			  return searchLoc;
