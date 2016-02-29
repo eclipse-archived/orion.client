@@ -18,6 +18,7 @@ var express = require('express'),
     orionWorkspace = require('./lib/workspace'),
     orionGit = require('./lib/git'),
     orionNodeStatic = require('./lib/orionode_static'),
+    orionPrefs = require('./lib/controllers/prefs'),
     orionStatic = require('./lib/orion_static'),
     orionTasks = require('./lib/tasks'),
     orionSearch = require('./lib/search'),
@@ -66,6 +67,9 @@ function startServer(options) {
 		app.use('/filesearch', orionSearch({
 			root: '/filesearch',
 			fileRoot: '/file',
+			workspaceDir: workspaceDir
+		}))
+		app.use('/prefs', orionPrefs({
 			workspaceDir: workspaceDir
 		}))
 		return app;

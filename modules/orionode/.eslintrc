@@ -8,6 +8,7 @@ rules:
   eqeqeq: 2
   no-bitwise: 1
   no-caller: 2
+  no-debugger: 2
   no-cond-assign: 2
   no-extra-semi: 1
   no-mixed-requires: 1
