@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,13 +10,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define("orion/editor/linkedMode", [ //$NON-NLS-0$
-	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
-	'orion/keyBinding', //$NON-NLS-0$
-	'orion/editor/keyModes', //$NON-NLS-0$
-	'orion/editor/annotations', //$NON-NLS-0$
-	'orion/objects', //$NON-NLS-0$
-	'orion/util' //$NON-NLS-0$
+define("orion/editor/linkedMode", [
+	'i18n!orion/editor/nls/messages',
+	'orion/keyBinding',
+	'orion/editor/keyModes',
+	'orion/editor/annotations',
+	'orion/objects',
+	'orion/util'
 ], function(messages, mKeyBinding, mKeyModes, mAnnotations, objects) {
 
 	var exports = {};
@@ -34,6 +34,13 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 	}
 	
 	LinkedContentAssist.prototype = {
+		/**
+		 * @description Removes the prefix from the given string
+		 * @function
+		 * @param {String} prefix
+		 * @param {String} string
+		 * @returns {String} The substring after removing the prefix
+		 */
 		chop: function(prefix, string) {
 			return string.substring(prefix.length);
 		},
@@ -45,17 +52,17 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 			var prefix = context.prefix;
 			var proposals = [];
 			var linkedstyle = this._data.style ? this._data.style : null;
-			linkedstyle = linkedstyle ? linkedstyle : 'emphasis';
+			linkedstyle = linkedstyle ? linkedstyle : 'emphasis'; //$NON-NLS-1$
 			var values = this._data.values;
 			for (var i = 0; i < values.length; i++) {
 				var val = values[i];
-				if(typeof(val) === 'string' && val.indexOf(prefix) === 0) {
+				if(typeof val === 'string' && val.indexOf(prefix) === 0) {
 					proposals.push({proposal: this.chop(prefix, val), 
 						description: val,
 						hover: val,
 						style: linkedstyle
 					});
-				} else if(typeof(val) === 'object' && val.proposal) {
+				} else if(typeof val === 'object' && val.proposal) {
 					proposals.push({proposal: this.chop(prefix, val.proposal), 
 						description: val.description ? val.description : val.proposal,
 						hover: val.hover ? val.hover : val.proposal,
@@ -76,6 +83,14 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 		}
 	};
 
+	/**
+	 * @name LinkedMode
+	 * @description Create a new LinkedMode
+	 * @param {Editor} editor The backing editor
+	 * @param {UndoStack} undoStack The undo stack
+	 * @param contentAssist
+	 * @returns returns
+	 */
 	function LinkedMode(editor, undoStack, contentAssist) {
 		var textView = editor.getTextView();
 		mKeyModes.KeyMode.call(this, textView);
@@ -110,21 +125,21 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 		 */
 		this.linkedModeListener = {
 		
-			onActivating: function(event) {
+			onActivating: /* @callback */ function(evnt) {
 				if (this._groupContentAssistProvider) {
 					this.contentAssist.setProviders([this._groupContentAssistProvider]);
 					this.contentAssist.setProgress(null);
 				}
 			}.bind(this),
 			
-			onModelChanged: function(event) {
+			onModelChanged: function(evnt) {
 				if (this.ignoreVerify) { return; }
 
 				// Get the position being modified
-				var start = this.editor.mapOffset(event.start);
+				var start = this.editor.mapOffset(evnt.start);
 				var model = this.linkedModeModel, positionChanged, changed;
 				while (model) {
-					positionChanged = this._getPositionChanged(model, start, start + event.removedCharCount);
+					positionChanged = this._getPositionChanged(model, start, start + evnt.removedCharCount);
 					changed = positionChanged.position;
 					if (changed === undefined || changed.model !== model) {
 						// The change has been done outside of the positions, exit the Linked Mode
@@ -138,7 +153,7 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 
 				// Update position offsets for this change. Group changes are done in #onVerify
 				var deltaCount = 0;
-				var changeCount = event.addedCharCount - event.removedCharCount;
+				var changeCount = evnt.addedCharCount - evnt.removedCharCount;
 				var sortedPositions = positionChanged.positions, position, pos;
 				for (var i = 0; i < sortedPositions.length; ++i) {
 					pos = sortedPositions[i];
@@ -161,13 +176,12 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 				this._updateAnnotations(sortedPositions);
 			}.bind(this),
 
-			onVerify: function(event) {
+			onVerify: function(evnt) {
 				if (this.ignoreVerify) { return; }
 
 				// Get the position being modified
-				var editor = this.editor;
-				var start = editor.mapOffset(event.start);
-				var end = this.editor.mapOffset(event.end);
+				var start = this.editor.mapOffset(evnt.start);
+				var end = this.editor.mapOffset(evnt.end);
 				var model = this.linkedModeModel, positionChanged, changed;
 				while (model) {
 					positionChanged = this._getPositionChanged(model, start, end);
@@ -197,7 +211,7 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 				
 				// Update position offsets taking into account all positions in the same changing group
 				var deltaCount = 0;
-				var changeCount = event.text.length - (end - start);
+				var changeCount = evnt.text.length - (end - start);
 				var sortedPositions = positionChanged.positions, position, pos;
 				var deltaStart = start - changed.position.offset, deltaEnd = end - changed.position.offset;
 				for (var i = 0; i < sortedPositions.length; ++i) {
@@ -224,17 +238,22 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 				for (i = sortedPositions.length - 1; i >= 0; i--) {
 					pos = sortedPositions[i];
 					if (pos.model === model && pos.group === changed.group) {
-						editor.setText(event.text, pos.oldOffset + deltaStart , pos.oldOffset + deltaEnd, false);
+						this.editor.setText(evnt.text, pos.oldOffset + deltaStart , pos.oldOffset + deltaEnd, false);
 					}
 				}
 				this.ignoreVerify = false;
-				event.text = null;
+				evnt.text = null;
 				this._updateAnnotations(sortedPositions);
 			}.bind(this)
 		};
 	}
 	LinkedMode.prototype = new mKeyModes.KeyMode();
 	objects.mixin(LinkedMode.prototype, {
+		/**
+		 * @description Create the keybindings
+		 * @function
+		 * @returns {Array.<Object>} The keybindings
+		 */
 		createKeyBindings: function() {
 			var KeyBinding = mKeyBinding.KeyBinding;
 			var bindings = [];
@@ -282,10 +301,10 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 			if (!this.linkedModeModel) {
 				var textView = this.editor.getTextView();
 				textView.addKeyMode(this);
-				textView.addEventListener("Verify", this.linkedModeListener.onVerify); //$NON-NLS-0$
-				textView.addEventListener("ModelChanged", this.linkedModeListener.onModelChanged); //$NON-NLS-0$
+				textView.addEventListener("Verify", this.linkedModeListener.onVerify);
+				textView.addEventListener("ModelChanged", this.linkedModeListener.onModelChanged);
 				var contentAssist = this.contentAssist;
-				contentAssist.addEventListener("Activating", this.linkedModeListener.onActivating); //$NON-NLS-0$
+				contentAssist.addEventListener("Activating", this.linkedModeListener.onActivating);
 				this.editor.reportStatus(messages.linkedModeEntered, null, true);
 			}
 			this._sortedPositions = null;
@@ -320,42 +339,65 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 				var editor = this.editor;
 				var textView = editor.getTextView();
 				textView.removeKeyMode(this);
-				textView.removeEventListener("Verify", this.linkedModeListener.onVerify); //$NON-NLS-0$
-				textView.removeEventListener("ModelChanged", this.linkedModeListener.onModelChanged); //$NON-NLS-0$
+				textView.removeEventListener("Verify", this.linkedModeListener.onVerify);
+				textView.removeEventListener("ModelChanged", this.linkedModeListener.onModelChanged);
 				var contentAssist = this.contentAssist;
-				contentAssist.removeEventListener("Activating", this.linkedModeListener.onActivating); //$NON-NLS-0$
+				contentAssist.removeEventListener("Activating", this.linkedModeListener.onActivating);
 				contentAssist.offset = undefined;
 				this.editor.reportStatus(messages.linkedModeExited, null, true);
-				if (escapePosition && typeof model.escapePosition === "number") { //$NON-NLS-0$
-					editor.setCaretOffset(model.escapePosition, false);
-				}
+			}
+			if (escapePosition && typeof model.escapePosition === "number") {
+				editor.setCaretOffset(model.escapePosition, false);
 			}
 			this.selectLinkedGroup(0);
 		},
+		/**
+		 * @description Start undoing
+		 */
 		startUndo: function() {
 			if (this.undoStack) {
-				var self = this;
+				var slf = this;
 				var model = this.linkedModeModel;
 				this._compoundChange = this.undoStack.startCompoundChange({
 					model: model,
 					group: model.selectedGroupIndex,
+					/**
+					 * @callback 
+					 */
 					end: function() {
-						self._compoundChange = null;
+						slf._compoundChange = null;
 					}
 				});
 			}
 		}, 
+		/**
+		 * @description Ends the undo
+		 */
 		endUndo: function() {
 			if (this.undoStack) {
 				this.undoStack.endCompoundChange();
 			}
 		},
+		/**
+		 * @description Returns if linked mode is active in the current editor
+		 * @function
+		 * @returns {Boolean} If linked mode is active
+		 */
 		isActive: function() {
 			return !!this.linkedModeModel;
 		},
+		/**
+		 * @description Returns if linked mode status is active in the current editor
+		 * @function
+		 * @returns {Boolean} If linked mode status is active
+		 */
 		isStatusActive: function() {
 			return !!this.linkedModeModel;
 		},
+		/**
+		 * @description Selects the group of the given index from the currently active model
+		 * @param {Number} index The group index to select
+		 */
 		selectLinkedGroup: function(index) {
 			var model = this.linkedModeModel;
 			if (model) {
@@ -367,8 +409,11 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 				var contentAssist = this.contentAssist;
 				if (contentAssist) {
 					contentAssist.offset = undefined;
-					if (group.data && group.data.type === "link" && group.data.values) { //$NON-NLS-0$
+					if (group.data && group.data.type === "link" && group.data.values) {
 						var provider = this._groupContentAssistProvider = new LinkedContentAssist(group.data);
+						/**
+						 * @callback 
+						 */
 						provider.getPrefix = function() {
 							var selection = editor.getSelection();
 							if (selection.start === selection.end) {
@@ -390,6 +435,14 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 			}
 			this._updateAnnotations();
 		},
+		/**
+		 * @description Collect all model positions into the <code>all</code> array
+		 * @function
+		 * @private
+		 * @param {Array.<Object>} all The collector for the position objects
+		 * @param {Object} model The linked model to collect all positions from
+		 * @param {Object} delta The change in position
+		 */
 		_getModelPositions: function(all, model, delta) {
 			var groups = model.groups;
 			for (var i = 0; i < groups.length; i++) {
@@ -414,6 +467,13 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 				}
 			}
 		},
+		/**
+		 * @description Returns an array of all of the positions sorted 
+		 * @function
+		 * @private
+		 * @param {Object} model The linked model to get and sort positions from
+		 * @returns {Array.<Object>} The sorted array of positions from the given model
+		 */
 		_getSortedPositions: function(model) {
 			var all = this._sortedPositions;
 			if (!all) {
@@ -426,7 +486,7 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 				this._getModelPositions(all, model);
 				// Add escape position for all models
 				while (model) {
-					if (typeof model.escapePosition === "number") { //$NON-NLS-0$
+					if (typeof model.escapePosition === "number") {
 						all.push({
 							escape: true,
 							model: model,
@@ -442,12 +502,22 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 			}
 			return all;
 		},
+		/**
+		 * @description Returns if the given start - end position has changed in the given model
+		 * @function
+		 * @private
+		 * @param {Object} model The model to check
+		 * @param {Number} start The start
+		 * @param {Number} end The end
+		 * @returns {Object} The changed position
+		 */
 		_getPositionChanged: function(model, start, end) {
 			var changed;
 			var sortedPositions = this._getSortedPositions(model);
 			for (var i = sortedPositions.length - 1; i >= 0; i--) {
-				if (sortedPositions[i].escape)
+				if (sortedPositions[i].escape) {
 					continue;
+				}
 				var position = sortedPositions[i].position;
 				if (position.offset <= start && end <= position.offset + position.length) {
 					changed = sortedPositions[i];
@@ -456,6 +526,12 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 			}
 			return {position: changed, positions: sortedPositions};
 		},
+		/**
+		 * @description Updates the editor annotations based on the given positions
+		 * @function
+		 * @private
+		 * @param {Array.<Object>} positions The positions
+		 */
 		_updateAnnotations: function(positions) {
 			var annotationModel = this.editor.getAnnotationModel();
 			if (!annotationModel) { return; }
