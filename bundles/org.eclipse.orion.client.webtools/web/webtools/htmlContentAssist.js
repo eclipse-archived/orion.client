@@ -192,7 +192,7 @@ define([
 				} else if (this.isCompletingTag(node, params)){
 					if (this.isCompletingCommentOpen(node)){
 						return this.getComment(node, params.offset, ast.source, true);
-					} 
+					}
 					return this.getTags(ast.source, params);
 				}
 				return this.getProposalsForTextContent(node, ast.source, params);
@@ -297,8 +297,8 @@ define([
 			if(node) {
 				var offset = params.offset;
 				if(node.type === 'tag') {
-					var _n = node.name;
-					if(node.range[0]+_n.length < offset) {
+					var tagNameEnd = node.range[0] + 1 + node.name.length;
+					if(tagNameEnd < offset) {
 						var idx = offset;
 						while(idx < node.range[1]) {
 							var char = source[idx];
