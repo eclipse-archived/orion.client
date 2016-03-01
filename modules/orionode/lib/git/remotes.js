@@ -223,15 +223,16 @@ function postRemote(workspaceDir, fileRoot, req, res, next, rest) {
 	var branch = segments[2] === "file" ? "" : segments[2];
 
 	if (req.body.Fetch) {
-		fetchRemote(repoPath, req, res, rest, remote, branch, req.body.Force)
+		fetchRemote(repoPath, req, res, rest, remote, branch, req.body.Force);
 	} else if (req.body.PushSrcRef) {
-		pushRemote(repoPath, req, res, rest, remote, branch, req.body.PushSrcRef, req.body.PushTags, req.body.Force)
+		pushRemote(repoPath, req, res, rest, remote, branch, req.body.PushSrcRef, req.body.PushTags, req.body.Force);
 	} else {
 		writeError(400, res);
 	}
 }
 
 function fetchRemote(repoPath, req, res, rest, remote, branch, force) {
+	var task = new tasks.Task(res);
 	var repo;
 	git.Repository.open(repoPath)
 	.then(function(r) {
@@ -263,26 +264,24 @@ function fetchRemote(repoPath, req, res, rest, remote, branch, force) {
 	})
 	.then(function(err) {
 		if (!err) {
-			// This returns when the task completes, so just give it a fake task.
-			var resp = JSON.stringify({
-				"Id": "11111",
-				"Location": "/task/id/THISISAPLACEHOLDER",
-				"Message": "Fetching " + remote + "...",
-				"PercentComplete": 100,
-				"Running": false
+			task.done({
+				HttpCode: 200,
+				Code: 0,
+				DetailedMessage: "OK",
+				Message: "OK",
+				Severity: "Ok"
 			});
-
-			res.statusCode = 201;
-			res.setHeader('Content-Type', 'application/json');
-			res.setHeader('Content-Length', resp.length);
-			res.end(resp);
 		} else {
-			writeError(403, res);
+			throw err;
 		}
 	})
 	.catch(function(err) {
-		console.log(err);
-		writeError(403, res);
+		task.done({
+			HttpCode: 403,
+			Code: 0,
+			Message: err.message,
+			Severity: "Error"
+		});
 	});
 }
 
@@ -380,8 +379,7 @@ function deleteRemote(workspaceDir, fileRoot, req, res, next, rest) {
 	return git.Repository.open(repoPath)
 	.then(function(repo) {
 		return git.Remote.delete(repo, remoteName).then(function(resp) {
-			// Docs claim this resolves 0 on success, but in practice we get undefined
-			if (resp === 0 || typeof resp === "undefined") {
+			if (!resp) {
 				res.statusCode = 200;
 				res.end();
 			} else {
