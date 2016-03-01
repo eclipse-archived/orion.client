@@ -45,19 +45,25 @@ function Task(res, cancelable, lengthComputable) {
 	this.timestamp = this.id;
 	this.total = this.loaded = 0;
 	this.type = "loadstart";
-	this.start(res);//TODO only start after 100 ms
+	this.res = res;
+	this.timeout = setTimeout(function() {
+		delete this.timeout;
+		this.start();
+	}.bind(this), 100);
 }
 Task.prototype = {
-	start: function(res) {
+	start: function() {
+		if (!this.isRunning()) return;
 		this.started = true;
 		taskList[this.id] = this;
 		var resp = JSON.stringify(this.toJSON());
+		var res = this.res;
 		res.statusCode = 202;
 		res.setHeader('Content-Type', 'application/json');
 		res.setHeader('Content-Length', resp.length);
 		res.end(resp);
 	},
-	done: function(res, result) {
+	done: function(result) {
 		this.result = result;
 		switch (result.Severity) {
 			case "Ok":
@@ -72,6 +78,11 @@ Task.prototype = {
 				this.type = "abort";
 		}
 		if (!this.started) {
+			if (this.timeout) {
+				clearTimeout(this.timeout);
+				delete this.timeout;
+			}
+			var res = this.res;
 			if (this.result.JsonData) {
 				res.statusCode = this.result.HttpCode;
 				var resp = JSON.stringify(this.result.JsonData);
@@ -83,6 +94,10 @@ Task.prototype = {
 				res.end();
 			}
 		}
+		delete this.res;
+	},
+	isRunning: function() {
+		return this.type !== "error" && this.type !== "abort";
 	},
 	updateProgress: function(message, loaded, total) {
 		if (!this.lengthComputable) return;

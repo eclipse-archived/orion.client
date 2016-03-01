@@ -330,7 +330,7 @@ function pushRemote(repoPath, req, res, rest, remote, branch, pushSrcRef, tags, 
 	.then(function(err) {
 		if (!err) {
 			var parsedUrl = url.parse(remoteObj.url(), true);
-			task.done(res, {
+			task.done({
 				HttpCode: 200,
 				Code: 0,
 				DetailedMessage: "OK",
@@ -356,7 +356,7 @@ function pushRemote(repoPath, req, res, rest, remote, branch, pushSrcRef, tags, 
 	})
 	.catch(function(err) {
 		var parsedUrl = url.parse(remoteObj.url(), true);
-		tasks.done(res, {
+		tasks.done({
 			HttpCode: 401,
 			Code: 0,
 			DetailedMessage: err.message,

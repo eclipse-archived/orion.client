@@ -257,7 +257,7 @@ function postClone(workspaceDir, fileRoot, req, res, next, rest) {
 		}
 	})
 	.then(function() {
-		task.done(res, {
+		task.done({
 			HttpCode: 200,
 			Code: 0,
 			DetailedMessage: "OK",
@@ -269,7 +269,7 @@ function postClone(workspaceDir, fileRoot, req, res, next, rest) {
 		});
 	})
 	.catch(function(err) {
-		task.done(res, {
+		task.done({
 			HttpCode: 403,
 			Code: 0,
 			DetailedMessage: err.message,
