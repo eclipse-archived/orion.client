@@ -6,7 +6,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
 /*eslint no-console:1*/
@@ -16,6 +16,7 @@ var path = require("path");
 var fs = require('fs');
 var async = require('async');
 var fileUtil = require('../fileUtil');
+var tasks = require('../tasks');
 
 function getClone(workspaceDir, fileRoot, req, res, next, rest) {
 	var repos = [];
@@ -107,17 +108,17 @@ function postInit(workspaceDir, fileRoot, req, res, next, rest) {
 		var initDir = workspaceDir + '/' + req.body.Name;
 		var theRepo, index, author, committer;
 
-	    fs.mkdir(initDir, function(err){
+		fs.mkdir(initDir, function(err){
 			if (err) {
-		    	return writeError(409, res);
-	        }
+				return writeError(409, res);
+			}
 
-	        git.Repository.init(initDir, 0)
-		    .then(function(repo) {
-		    	theRepo = repo;
-		    	return repo;
-		    })
-		    .then(function(repo){
+			git.Repository.init(initDir, 0)
+			.then(function(repo) {
+				theRepo = repo;
+				return repo;
+			})
+			.then(function(repo){
 				return repo.openIndex();
 			})
 			.then(function(idx) {
@@ -137,21 +138,21 @@ function postInit(workspaceDir, fileRoot, req, res, next, rest) {
 			})
 			.then(function(id) {
 				var response = {
-			       	"Location": "/gitapi/clone/file/" + req.body.Name
-			    }
-			    var resp = JSON.stringify(response)
-			    res.statusCode = 201;
+				   	"Location": "/gitapi/clone/file/" + req.body.Name
+				}
+				var resp = JSON.stringify(response)
+				res.statusCode = 201;
 				res.setHeader('Content-Type', 'application/json');
 				res.setHeader('Content-Length', resp.length);
 				res.end(resp);
 
-		    })
-		    .catch(function(err){
-		    	console.log(err);
-		    	writeError(403, res);
-		    });
+			})
+			.catch(function(err){
+				console.log(err);
+				writeError(403, res);
+			});
 
-	    });
+		});
 	}
 }
 
@@ -242,36 +243,39 @@ function putClone(workspaceDir, fileRoot, req, res, next, rest) {
 
 function postClone(workspaceDir, fileRoot, req, res, next, rest) {
 	var url = req.body.GitUrl;
-	var dirName = url.substring(url.lastIndexOf("/") + 1).replace(".git", "")
-
-	git.Clone.clone(url, path.join(workspaceDir, dirName),
-		{
-    		remoteCallbacks: {
-	        	certificateCheck: function() {
-	        		return 1; //Ignore SSL certificate check
-        		}
-        	}
-		})
+	var dirName = url.substring(url.lastIndexOf("/") + 1).replace(".git", "");
+	
+	var task = new tasks.Task(res);
+	
+	git.Clone.clone(url, path.join(workspaceDir, dirName), {
+		fetchOpts: {
+			callbacks: {
+				certificateCheck: function() {
+					return 1; //Ignore SSL certificate check
+				}
+			}
+		}
+	})
 	.then(function() {
-		// I think clone will return when it finishes cloning, so we just give it a fake task and 100%
-		var resp = JSON.stringify({
-			"Id": "11111",
-			"Location": "/task/id/THISISAPLACEHOLDER",
-			"Message": "Cloning " + workspaceDir + " @ " + url,
-			"PercentComplete": 100,
-			"Running": false
+		task.done(res, {
+			HttpCode: 200,
+			Code: 0,
+			DetailedMessage: "OK",
+			JsonData: {
+				Location: "/gitapi/clone" + fileRoot + "/" + dirName
+			},
+			Message: "OK",
+			Severity: "Ok"
 		});
-
-		res.statusCode = 201;
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', resp.length);
-		res.end(resp);
 	})
 	.catch(function(err) {
-		// some kind of error with cloning a repo
-		console.log("POST git/clone: failure!");
-		console.log(err);
-		writeError(403, res);
+		task.done(res, {
+			HttpCode: 403,
+			Code: 0,
+			DetailedMessage: err.message,
+			Message: err.message,
+			Severity: "Error"
+		});
 	});
 }
 

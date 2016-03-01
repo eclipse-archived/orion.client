@@ -287,18 +287,10 @@ function fetchRemote(repoPath, req, res, rest, remote, branch, force) {
 }
 
 function pushRemote(repoPath, req, res, rest, remote, branch, pushSrcRef, tags, force) {
-	var taskID = new Date().getTime(); // Just use the current time
 	var repo;
 	var remoteObj;
 
-	var task = tasks.addTask(taskID, "Pushing " + remote + "...", true, 0);
-
-	var resp = JSON.stringify(task);
-
-	res.statusCode = 202;
-	res.setHeader('Content-Type', 'application/json');
-	res.setHeader('Content-Length', resp.length);
-	res.end(resp);
+	var task = new tasks.Task(res);
 
 	git.Repository.open(repoPath)
 	.then(function(r) {
@@ -336,60 +328,47 @@ function pushRemote(repoPath, req, res, rest, remote, branch, pushSrcRef, tags, 
 		);
 	})
 	.then(function(err) {
-
 		if (!err) {
 			var parsedUrl = url.parse(remoteObj.url(), true);
-			tasks.updateTask(
-				taskID, 
-				100,
-				{
-					HttpCode: 200,
-					Code: 0,
-					DetailedMessage: "OK",
-					JsonData: {
-						"Host": parsedUrl.host,
-						"Scheme": parsedUrl.protocol.replace(":", ""),
-						"Url": remoteObj.url(),
-						"HumanishName": parsedUrl.pathname.substring(parsedUrl.pathname.lastIndexOf("/") + 1).replace(".git", ""),
-						"Message": "",
-						"Severity": "Normal",
-						Updates: [{
-							LocalName: req.body.PushSrcRef,
-							RemoteName: remote + "/" + branch,
-							Result: "UP_TO_DATE"
-						}]
-					},
-					Message: "OK",
-					Severity: "OK"
+			task.done(res, {
+				HttpCode: 200,
+				Code: 0,
+				DetailedMessage: "OK",
+				JsonData: {
+					"Host": parsedUrl.host,
+					"Scheme": parsedUrl.protocol.replace(":", ""),
+					"Url": remoteObj.url(),
+					"HumanishName": parsedUrl.pathname.substring(parsedUrl.pathname.lastIndexOf("/") + 1).replace(".git", ""),
+					"Message": "",
+					"Severity": "Normal",
+					Updates: [{
+						LocalName: req.body.PushSrcRef,
+						RemoteName: remote + "/" + branch,
+						Result: "UP_TO_DATE"
+					}]
 				},
-				"loadend"
-			);
+				Message: "OK",
+				Severity: "Ok"
+			});
 		} else {
 			throw new Error("Push failed.");
 		}
 	})
 	.catch(function(err) {
-		console.log(err);
 		var parsedUrl = url.parse(remoteObj.url(), true);
-
-		tasks.updateTask(
-			taskID, 
-			100,
-			{
-				HttpCode: 401,
-				Code: 0,
-				DetailedMessage: err.message,
-				JsonData: {
-					"Host": parsedUrl.host,
-					"Scheme": parsedUrl.protocol.replace(":", ""),
-					"Url": remoteObj.url(),
-					"HumanishName": parsedUrl.pathname.substring(parsedUrl.pathname.lastIndexOf("/") + 1).replace(".git", "")
-				},
-				Message: err.message,
-				Severity: "Error"
+		tasks.done(res, {
+			HttpCode: 401,
+			Code: 0,
+			DetailedMessage: err.message,
+			JsonData: {
+				"Host": parsedUrl.host,
+				"Scheme": parsedUrl.protocol.replace(":", ""),
+				"Url": remoteObj.url(),
+				"HumanishName": parsedUrl.pathname.substring(parsedUrl.pathname.lastIndexOf("/") + 1).replace(".git", "")
 			},
-			"error"
-		);
+			Message: err.message,
+			Severity: "Error"
+		});
 	});
 }
 
