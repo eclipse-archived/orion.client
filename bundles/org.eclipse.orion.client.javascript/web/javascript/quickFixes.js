@@ -956,8 +956,8 @@ define([
 	                                        break;
 	                                    }
 	                                }
-	                            } else if(funcparent.type === 'Property' && funcparent.leadingComments && funcparent.leadingComments.length > 0) {
-	                                promise = updateDoc(funcparent, ast.source, editorContext, parent.params[paramindex].name);
+	                            } else if(funcparent.type === 'Property' && funcparent.key.leadingComments && funcparent.key.leadingComments.length > 0) {
+	                                promise = updateDoc(funcparent.key, ast.source, editorContext, parent.params[paramindex].name);
 	                                if(promise) {
 	                                    promises.push(promise);
 	                                }
