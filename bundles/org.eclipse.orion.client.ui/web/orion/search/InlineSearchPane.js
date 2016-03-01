@@ -413,6 +413,7 @@ define([
 		},
 		
 		setSearchScope: function(targetFolder) {
+			this._targetFolder = targetFolder;
 			if (targetFolder && targetFolder.fileMetadata) {
 				targetFolder = targetFolder.fileMetadata;
 			}
@@ -448,7 +449,8 @@ define([
 				var searchScopeDialog = new DirectoryPrompterDialog.DirectoryPrompterDialog({
 					title: messages["Choose a Folder"], //$NON-NLS-0$
 					serviceRegistry: this._serviceRegistry,
-					fileClient: this._fileClient,				
+					fileClient: this._fileClient,
+					targetFolder: this._targetFolder,
 					func: this.setSearchScope.bind(this)
 				});
 				searchScopeDialog.show();

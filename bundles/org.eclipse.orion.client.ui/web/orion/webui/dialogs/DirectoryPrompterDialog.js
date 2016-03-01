@@ -25,7 +25,8 @@ function(messages, dialog, mFileUtils, mSelection, mExplorer, mExplorerTable, bi
 		var col = document.createElement("td"); //$NON-NLS-0$
 		tableRow.appendChild(col);
 		var span = document.createElement("span"); //$NON-NLS-0$
-		span.id = tableRow.id+"navSpan"; //$NON-NLS-0$
+		span.id = this.explorer.model.getId(item);
+		//span.id = tableRow.id+"navSpan"; //$NON-NLS-0$
 		col.appendChild(span);
 		span.className = "mainNavColumn singleNavColumn"; //$NON-NLS-0$
 		this.getExpandImage(tableRow, span);
@@ -62,6 +63,7 @@ function(messages, dialog, mFileUtils, mSelection, mExplorer, mExplorerTable, bi
 		this.customFocus = true;
 		this.root = options.root||"/";
 		this._fileClient = options.fileClient;
+		this._targetFolder = options.targetFolder;
 		this._serviceRegistry = options.serviceRegistry;
 		this._message = options.message || "";
 		this._func = options.func;
@@ -81,13 +83,20 @@ function(messages, dialog, mFileUtils, mSelection, mExplorer, mExplorerTable, bi
 		
 	DirectoryPrompterDialog.prototype.loadFolderList = function(path) {
 		path = mFileUtils.makeRelative(path);
+		if(this._targetFolder) {
+			path = this._fileClient.fileServiceRootURL(this._targetFolder.Location);
+		}
 		this.selection = new mSelection.Selection(this._serviceRegistry, "orion.directoryPrompter.selection"); //$NON-NLS-0$
 
 		this.explorer = new mExplorerTable.FileExplorer({treeRoot: {children:[]}, selection: this.selection, serviceRegistry: this._serviceRegistry,
 				fileClient: this._fileClient, parentId: "directoryTree", excludeFiles: true, rendererFactory: function(explorer) {  //$NON-NLS-0$
 					return new DirectoryPrompterRenderer({checkbox: false, singleSelection: true, treeTableClass: "directoryPrompter" }, explorer);   //$NON-NLS-0$
 				}}); //$NON-NLS-0$
-		this.explorer.loadResourceList(path, true, null);
+		this.explorer.loadResourceList(path, true, null).then(function() {
+			if(this._targetFolder) {
+				this.explorer.reveal(this._targetFolder);
+			}
+		}.bind(this));
 	};
 		
 	DirectoryPrompterDialog.prototype.done = function() {
