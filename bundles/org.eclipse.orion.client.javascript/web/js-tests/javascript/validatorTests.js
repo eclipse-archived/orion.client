@@ -299,6 +299,11 @@ define([
 						{buffer: '<html><head><script></script></head><body><a onclick="xx;;"></a></body></html>', contentType: 'text/html', callback: callback}).then(
 						function (problems) {
 							assertProblems(problems, [
+								{start: 54,
+								 end: 56,
+								 severity: 'error',
+								 description: i18nUtil.formatMessage.call(null, messages['no-undef-defined'], {0: 'xx'})
+								},
 								{start: 57,
 								 end: 58,
 								 severity: 'warning',

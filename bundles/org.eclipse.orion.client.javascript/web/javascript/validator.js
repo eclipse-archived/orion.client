@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -46,6 +46,10 @@ define([
 			}
 		},
 		
+		/**
+		 * @description Resets the rules to their default values
+		 * @function
+		 */
 		setDefaults: function setDefaults() {
 		    this.rules = Object.create(null);
 		    var keys = Object.keys(this.defaults);
@@ -87,7 +91,6 @@ define([
 			}
 		}
 		else {
-			// TODO why we are overriding the severity computed by eslint based on the global config
 			val = prob.severity;
 		}
 		switch (val) {
@@ -196,7 +199,7 @@ define([
 						env.browser = true;
 					}
 					// need to extract all scripts from the html text
-					_self._validate(meta, text, env, isHtml, deferred, config);
+					_self._validate(meta, text, env, deferred, config);
 				});
 			});
 			return deferred;
@@ -212,17 +215,11 @@ define([
 		 * @returns {Array|Object} The array of problem objects
 		 * @since 6.0
 		 */
-		_validate: function(meta, text, env, htmlMode, deferred, configuration) {
+		_validate: function(meta, text, env, deferred, configuration) {
 			// When validating snippets in an html file ignore undefined rule because other scripts may add to the window object
-			var undefRuleValue;
 			if (configuration) {
 				config.rules = configuration.rules;
 			}
-			if (htmlMode) {
-				undefRuleValue = config.rules['no-undef'];
-				config.rules['no-undef'] = 0;
-			}
-			
 			var files = [{type: 'full', name: meta.location, text: text}]; //$NON-NLS-1$
 			var request = {request: 'lint', args: {meta: {location: meta.location}, files: files, rules: config.rules}}; //$NON-NLS-1$
 			if(env) {
@@ -245,9 +242,6 @@ define([
 							});
 						}
 						deferred.resolve({ problems: eslintErrors.map(toProblem) });
-						if (htmlMode) {
-							config.rules['no-undef'] = undefRuleValue;
-						}
 				});
 		},
 
