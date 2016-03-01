@@ -981,15 +981,27 @@ define([
     	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=488254
     	 */
     	it('Complete tag name should have no proposals', function() {
+    		var _o = setup({buffer: '<style>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 6, prefix: 'style'}).then(function(proposals) {
+    			assertProposals(proposals, [	]);
+    		});
+    	});
+    	/*
+    	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=488726
+    	 */
+    	it('Complete tag name with matching end tag should no proposals', function() {
     		var _o = setup({buffer: '<style></style>'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 6, prefix: 'style'}).then(function(proposals) {
-    			// TODO It would be better to check that we already have an end tag and not insert anything
-//    			assertProposals(proposals, [	]);
-				assertProposals(proposals, [
-					{
-						proposal: 'style></style>', prefix: 'style'
-					}
-				]);
+    			assertProposals(proposals, [	]);
+    		});
+    	});
+    	/*
+    	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=488726
+    	 */
+    	it('Invalid tag name with matching end tag should no proposals', function() {
+    		var _o = setup({buffer: '<sty></sty>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 6, prefix: 'style'}).then(function(proposals) {
+    			assertProposals(proposals, [	]);
     		});
     	});
     });

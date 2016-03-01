@@ -193,6 +193,9 @@ define([
 					if (this.isCompletingCommentOpen(node)){
 						return this.getComment(node, params.offset, ast.source, true);
 					}
+					if (this.isCompletingTagWithMatchingClose(node, ast.source)){
+						return [];
+					}
 					return this.getTags(ast.source, params);
 				}
 				return this.getProposalsForTextContent(node, ast.source, params);
@@ -338,6 +341,22 @@ define([
  				}
 			}
 			return false;
+		},
+		
+		/**
+		 * Computes if we are completing a tag that already has a matching close tag
+		 * @param {Object} node The AST node to check with the offset
+		 * @param {String} source The source of the file
+		 * @returns {Boolean} True if we are completing a tag with a matching close tag, false otherwise 
+		 * @since 11.0 
+		 */
+		isCompletingTagWithMatchingClose: function(node, source) {
+			if(node && node.type === 'tag' && node.name) {
+				if (node.endrange && node.endrange.length === 2){
+					// If the HTML is incomplete, the parser recovery sometimes uses the end range of the parent element
+					return node.name === source.substring(node.endrange[0]+2, node.endrange[1]-1);
+				}
+ 			}
 		},
 		
 		/**
