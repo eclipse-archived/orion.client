@@ -87,6 +87,11 @@ define([
 		return problems;
 	}	
 
+	/**
+	 * @description Validates the given source after parsing it to an AST
+	 * @param {String} source The source to parse and check
+	 * @returns returns
+	 */
 	function validateAST(source) {
 		var problems = [];
 		if(typeof source === 'string' && source.trim().length > 0) {
@@ -99,6 +104,9 @@ define([
 				if(ast && ast.body && ast.body.length > 0) {
 					var root = true;
 					Estraverse.traverse(ast, {
+						/**
+						 * @callback 
+						 */
 						enter: function(node) {
 							if(node.type === 'ObjectExpression') {
 								var props = node.properties, 
@@ -166,11 +174,20 @@ define([
 		return problems;
 	}
 	
-	function _reportAstError(problems, message, range) {
+	/**
+	 * @description Creates a new problem object and adds it to the given problems collector
+	 * @private
+	 * @param {Array.<Object>} problems The collector for the new problem
+	 * @param {String} message The human-readable message for the problem
+	 * @param {Array.<Number>} range The start / end range array
+	 * @param {String} id The internal id for the problem
+	 * @returns returns
+	 */
+	function _reportAstError(problems, message, range, id) {
 		var pb = Object.create(null);
 		pb.start = range[0]-6;
 		pb.end = range[1]-6;
-		pb.id = 'tern-project-pb'; //$NON-NLS-1$
+		pb.id = typeof id === 'string' && id.length > 0 ? id : 'tern-project-pb'; //$NON-NLS-1$
 		pb.description = message;
 		pb.severity = 'error'; //$NON-NLS-1$
 		problems.push(pb);

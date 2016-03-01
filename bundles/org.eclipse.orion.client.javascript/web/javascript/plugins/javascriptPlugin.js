@@ -877,7 +877,7 @@ define([
         			fixAllEnabled: true,
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
         			id : "no.comma.dangle.fix",  //$NON-NLS-1$
-        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+        			contentType: ['application/javascript', 'text/html', "application/json"],  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-comma-dangle)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
