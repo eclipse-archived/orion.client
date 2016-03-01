@@ -312,10 +312,25 @@ define([
 	            }.bind(this)
 	        });
 	        
+	        var refreshCommand = new mCommands.Command({
+	        	name: messages["Refresh"],
+	            tooltip: messages["RefreshTooltip"],
+	            //imageClass: "core-sprite-move-down", //$NON-NLS-0$
+	            id: "orion.problemsView.refresh", //$NON-NLS-0$
+	            groupId: "orion.problemsViewGroup", //$NON-NLS-0$
+	            visibleWhen: function(/*item*/) {
+	                return true;
+	            }.bind(this),
+	            callback: function() {
+	                this.validate();
+	            }.bind(this)
+	        });
+	        
 	        this.commandService.addCommand(switchViewCommand);
 	        this.commandService.addCommand(nextResultCommand);
 	        this.commandService.addCommand(prevResultCommand);
 	        this.commandService.addCommand(switchFullPathCommand);
+	        this.commandService.addCommand(refreshCommand);
 	        
 	        this.commandService.addCommandGroup("problemsViewActions", "orion.problemsViewActions.unlabeled", 200); //$NON-NLS-1$ //$NON-NLS-0$
 	        
@@ -329,6 +344,7 @@ define([
 	        this.commandService.registerCommandContribution("problemsViewActions", "orion.problemsView.nextResult", 4); //$NON-NLS-1$ //$NON-NLS-0$
 	        this.commandService.registerCommandContribution("problemsViewActions", "orion.problemsView.prevResult", 5); //$NON-NLS-1$ //$NON-NLS-0$
 	        this.commandService.registerCommandContribution("problemsViewActions", "orion.problemsView.switchFullPath", 6); //$NON-NLS-1$ //$NON-NLS-0$
+	        this.commandService.registerCommandContribution("problemsViewActions", "orion.problemsView.refresh", 7); //$NON-NLS-1$ //$NON-NLS-0$
 	    },
 	    refreshCommands:function() {
 	        this.commandService.destroy("problemsViewActionsContainer"); //$NON-NLS-0$
@@ -353,11 +369,16 @@ define([
 	       		mFileDetailRenderer.showFullPath(lib.node(this.parentId), this._shouldShowFullPath);
 	     	}.bind(this));
 	    },
-		validate: function(location, postValidate) {
-			this._postValidate = postValidate;
+		validate: function(locationParam, postValidate) {
+			if(postValidate) {
+				this._postValidate = postValidate;
+			}
+			if(locationParam) {
+				this._location = locationParam;
+			}
 			this._initSpinner();
 			var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileClient, null, 
-				{location: location,
+				{location: this._location,
 				cancelMessage: messages["computeCancelled"],
 				visitSingleFile: this._visitFile.bind(this)});
 			crawler.search(function(jsonData, incremental) {

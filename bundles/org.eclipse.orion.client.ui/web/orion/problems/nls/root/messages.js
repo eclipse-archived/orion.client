@@ -18,5 +18,7 @@ define({//Default message bundle
 	"viewByTypes" : "By types", //$NON-NLS-1$ //$NON-NLS-0$
 	"viewByFiles" : "By files", //$NON-NLS-1$ //$NON-NLS-0$
 	"viewByTypesTooltip": "View problems grouped by errors and warnings", //$NON-NLS-1$ //$NON-NLS-0$
-	"viewByFilesTooltip": "View problems grouped by files" //$NON-NLS-1$ //$NON-NLS-0$
+	"viewByFilesTooltip": "View problems grouped by files", //$NON-NLS-1$ //$NON-NLS-0$
+	"Refresh": "Refresh", //$NON-NLS-1$ //$NON-NLS-0$
+	"RefreshTooltip": "Recalculate the problems" //$NON-NLS-1$ //$NON-NLS-0$
 });
