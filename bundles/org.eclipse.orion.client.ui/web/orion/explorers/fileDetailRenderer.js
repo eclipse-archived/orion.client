@@ -103,6 +103,19 @@ define([
 			return new Deferred().resolve();
 		});
     }
+    
+    function wrapDetailElement(item, spanHolder, link, explorer) {
+        spanHolder.appendChild(link);
+        link.classList.add("searchDetailLink"); //$NON-NLS-0$
+       
+       	mNavUtils.addNavGrid(explorer.getNavDict(), item, link);
+       	//trigger a click on the span when the link is clicked to set the selection cursor
+       	_connect(link, "click", function() { //$NON-NLS-0$
+       		spanHolder.click();
+        });
+        var span = _createElement('span', null, null, link); //$NON-NLS-0$
+        return span;
+    }
 
 	function FileDetailRenderer(options, explorer) {
 		mExplorer.SelectionRenderer.call(this, options, explorer);
@@ -319,20 +332,10 @@ define([
 	    },
 	    getDetailElement: function(item, spanHolder) {
 	    	var link = this.generateDetailLink(item);
-	        spanHolder.appendChild(link);
-	        link.classList.add("searchDetailLink"); //$NON-NLS-0$
-	       
-	       	mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
-	       	//trigger a click on the span when the link is clicked to set the selection cursor
-	       	_connect(link, "click", function() { //$NON-NLS-0$
-	       		spanHolder.click();
-	        });
-	        
-	        var span = _createElement('span', null, null, link); //$NON-NLS-0$
-	        return span;
+	    	return wrapDetailElement(item, spanHolder, link, this.explorer);
 	    },
 	    enableCheckbox: function(item) {
-	    	return (typeof this.explorer.model.enableCheckbox === "function" && this.explorer.model.enableCheckbox(item)); //$NON-NLS-0$
+	    	return typeof this.explorer.model.enableCheckbox === "function" && this.explorer.model.enableCheckbox(item); //$NON-NLS-0$
 	    },
 	    generateDetailDecorator: function(/*item, col*/) {
 	    },
@@ -456,7 +459,8 @@ define([
 		FileDetailRenderer: FileDetailRenderer,
 		togglePrefs: togglePrefs,
 		getPrefs: getPrefs,
-		showFullPath: showFullPath
+		showFullPath: showFullPath,
+		wrapDetailElement: wrapDetailElement
 	};
 
 });

@@ -594,8 +594,7 @@ define([
 	objects.mixin(ProblemsRenderer.prototype, {
 	    renderProblemsElement: function(item, spanHolder) {
 			var link = generateProblemsLink(this.explorer, item, true);
-       		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
-	        spanHolder.appendChild(link);
+			mFileDetailRenderer.wrapDetailElement(item, spanHolder, link, this.explorer);
 	    },
 	    renderDetailLineNumber: function(item, spanHolder) {
 	        _place(document.createTextNode(item.line + ":"), spanHolder, "last"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -643,7 +642,7 @@ define([
 						td.appendChild(div);
 						//this.getExpandImage(tableRow, div);
 						itemLabel = document.createElement("span"); //$NON-NLS-0$
-						itemLabel.textContent = item.fileName;
+						itemLabel.textContent = item.fileName + "@" + item.line;
 						div.appendChild(itemLabel);
 					} 
 					return td;
