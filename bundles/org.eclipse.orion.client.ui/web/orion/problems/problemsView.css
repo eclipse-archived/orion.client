@@ -33,6 +33,13 @@
 	height: 20px;
 }
 
+.problemsCommandsContainerRight {
+	padding-right: 5px;
+}
+
+.problemsCommandsContainerLeft {
+}
+
 .problemsCommandsContainer {
 	display: block;
 	margin: 5px 0;
@@ -40,7 +47,7 @@
 	overflow: hidden;
 }
 
-.problemsCommandsContainer > .orionSwitch {
+.problemsCommandsContainerLeft > .orionSwitch {
 	display: inline-block;
 	margin-bottom: 1px;
 	vertical-align: bottom;

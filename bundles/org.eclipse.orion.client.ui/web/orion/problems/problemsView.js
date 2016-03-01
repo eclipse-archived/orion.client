@@ -60,10 +60,19 @@ define([
 																			preferences: this.preferences, contentTypeRegistry: this.contentTypeRegistry, fileClient: this.fileClient});
 		},
 		_createCommandsContainer: function() {
+			var CommandsContainerNodeCore = document.createElement("div"); //$NON-NLS-0$
+			CommandsContainerNodeCore.classList.add("problemsCommandsContainer"); //$NON-NLS-0$
+			this._inner_node.appendChild(CommandsContainerNodeCore);
 			var CommandsContainerNode = document.createElement("div"); //$NON-NLS-0$
-			CommandsContainerNode.id = "problemsViewActionsContainer"; //$NON-NLS-0$
-			CommandsContainerNode.classList.add("problemsCommandsContainer"); //$NON-NLS-0$
-			this._inner_node.appendChild(CommandsContainerNode);
+			CommandsContainerNode.id = "problemsViewActionsContainerLeft"; //$NON-NLS-0$
+			CommandsContainerNode.classList.add("problemsCommandsContainerLeft"); //$NON-NLS-0$
+			CommandsContainerNode.classList.add("layoutLeft"); //$NON-NLS-0$
+			CommandsContainerNodeCore.appendChild(CommandsContainerNode);
+			var CommandsContainerNodeRight = document.createElement("div"); //$NON-NLS-0$
+			CommandsContainerNodeRight.id = "problemsViewActionsContainerRight"; //$NON-NLS-0$
+			CommandsContainerNodeRight.classList.add("problemsCommandsContainerRight"); //$NON-NLS-0$
+			CommandsContainerNodeRight.classList.add("layoutRight"); //$NON-NLS-0$
+			CommandsContainerNodeCore.appendChild(CommandsContainerNodeRight);
 		},
 		_createFilterInput: function() {
 			var input = document.createElement("input"); //$NON-NLS-0$

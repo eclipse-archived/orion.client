@@ -344,11 +344,13 @@ define([
 	        this.commandService.registerCommandContribution("problemsViewActions", "orion.problemsView.nextResult", 4); //$NON-NLS-1$ //$NON-NLS-0$
 	        this.commandService.registerCommandContribution("problemsViewActions", "orion.problemsView.prevResult", 5); //$NON-NLS-1$ //$NON-NLS-0$
 	        this.commandService.registerCommandContribution("problemsViewActions", "orion.problemsView.switchFullPath", 6); //$NON-NLS-1$ //$NON-NLS-0$
-	        this.commandService.registerCommandContribution("problemsViewActions", "orion.problemsView.refresh", 7); //$NON-NLS-1$ //$NON-NLS-0$
+	        this.commandService.registerCommandContribution("problemsViewActionsRight", "orion.problemsView.refresh", 7); //$NON-NLS-1$ //$NON-NLS-0$
 	    },
 	    refreshCommands:function() {
-	        this.commandService.destroy("problemsViewActionsContainer"); //$NON-NLS-0$
-	        this.commandService.renderCommands("problemsViewActions", "problemsViewActionsContainer", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	        this.commandService.destroy("problemsViewActionsContainerLeft"); //$NON-NLS-0$
+	        this.commandService.renderCommands("problemsViewActions", "problemsViewActionsContainerLeft", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	        this.commandService.destroy("problemsViewActionsContainerRight"); //$NON-NLS-0$
+	        this.commandService.renderCommands("problemsViewActionsRight", "problemsViewActionsContainerRight", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	    },
 	    getItemCount: function() {
 			return this.totalProblems.length;
