@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -73,14 +73,8 @@ define([
 			if(typeof json.loadEagerly !== 'undefined') {
 				if(!Array.isArray(json.loadEagerly)) {
 					problems.push(i18nUtil.formatMessage(Messages['notArray'], "loadEagerly")); //$NON-NLS-1$
-				} else {
-					if(json.loadEagerly.length < 1) {
-						problems.push(i18nUtil.formatMessage(Messages['notEmpty'], "loadEagerly")); //$NON-NLS-1$
-					} else {
-						if(!json.loadEagerly.every(function(entry) { return typeof entry === 'string';})) {
-							problems.push(i18nUtil.formatMessage(Messages['onlyStrings'], "loadEagerly")); //$NON-NLS-1$
-						}
-					}
+				} else if(!json.loadEagerly.every(function(entry) { return typeof entry === 'string';})) {
+					problems.push(i18nUtil.formatMessage(Messages['onlyStrings'], "loadEagerly")); //$NON-NLS-1$
 				}
 			}
 		}
@@ -135,11 +129,11 @@ define([
 												if(arr.type !== 'ArrayExpression') {
 													_reportAstError(problems, i18nUtil.formatMessage(Messages['notArray'], key), arr.range);
 												} else if(arr.elements) {
-													if(arr.elements.length < 1) {
+													if(arr.elements.length < 1 && key !== 'loadEagerly') {
 														_reportAstError(problems, i18nUtil.formatMessage(Messages['notEmpty'], key), arr.range);
 													}
 													arr.elements.forEach(function(entry) { 
-														if(entry.type !== 'Literal' || (entry.type === "Literal" && typeof entry.value !== 'string')) {
+														if(entry.type !== 'Literal' || entry.type === "Literal" && typeof entry.value !== 'string') {
 															_reportAstError(problems, i18nUtil.formatMessage(Messages['onlyStrings'], key), entry.range);
 														}
 													});
@@ -181,15 +175,16 @@ define([
 	 * @param {String} message The human-readable message for the problem
 	 * @param {Array.<Number>} range The start / end range array
 	 * @param {String} id The internal id for the problem
+	 * @param {String} severity The severity of the problem
 	 * @returns returns
 	 */
-	function _reportAstError(problems, message, range, id) {
+	function _reportAstError(problems, message, range, id, severity) {
 		var pb = Object.create(null);
 		pb.start = range[0]-6;
 		pb.end = range[1]-6;
 		pb.id = typeof id === 'string' && id.length > 0 ? id : 'tern-project-pb'; //$NON-NLS-1$
 		pb.description = message;
-		pb.severity = 'error'; //$NON-NLS-1$
+		pb.severity = typeof severity === 'string' && severity.length > 0 ? severity : 'error'; //$NON-NLS-1$
 		problems.push(pb);
 	}
 

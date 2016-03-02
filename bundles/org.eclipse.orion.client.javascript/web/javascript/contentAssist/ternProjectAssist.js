@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation, Inc. and others.
+ * Copyright (c) 2016 IBM Corporation, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -20,6 +20,11 @@ define([
 	'esprima/esprima'
 ], function(Messages, i18nUtil, Finder, Hover, Util, mTemplates, Esprima) {
 	
+	/**
+	 * @description Parse the source to an ESTree AST
+	 * @param {String} source The source
+	 * @returns {Object} The AST
+	 */
 	function parse(source) {
 		try {
 			var ast = Esprima.parse(source, {
@@ -41,13 +46,18 @@ define([
 							'\t"plugins": {},\n'+ //$NON-NLS-1$
 							'\t"libs": ["ecma5"],\n'+ //$NON-NLS-1$
 							'\t"ecmaVersion": 5,\n'+ //$NON-NLS-1$
-							'\t"dependencyBudget": 20000\n'+ //$NON-NLS-1$
+							'\t"loadEagerly": [\n\t\t\n\t]\n'+ //$NON-NLS-1$
 					   '}',
 			doc: Messages['emptyFileTemplateDoc'],
 			url: "http://ternjs.net/doc/manual.html#configuration" //$NON-NLS-1$
 		}
 	];
 	
+	/**
+	 * @description Collects the templates for the given prefix
+	 * @param {String} prefix The prefix or the empty string
+	 * @returns {Array.<mTemplates.Template>} The array of template objects
+	 */
 	function getTemplatesForPrefix(prefix) {
 		var ts = [];
 		templates.forEach(function(entry) {
@@ -65,6 +75,13 @@ define([
 		return ts;
 	} 
 	
+	/**
+	 * @description Returns the Orion completion prposal from the given template and params
+	 * @param {mTemplate.Template} template The template
+	 * @param {Object} params The params
+	 * @returns {Object} The Orion completion proposal
+	 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#The_Proposal_object
+	 */
 	function getProposalFromTemplate(template, params) {
 		var proposal = template.getProposal(params.prefix, params.offset, params);
 		var _h;
@@ -86,6 +103,11 @@ define([
 		return proposal;
 	}
 	
+	/**
+	 * @description Remove the prefix from the proposal
+	 * @param {String} prefix the prefix to remove
+	 * @param {Object} proposal The proposal to remove the prefix from
+	 */
 	function removePrefix(prefix, proposal) {
 		var overwrite = proposal.overwrite = proposal.proposal.substring(0, prefix.length) !== prefix;
 		if (!overwrite) {
