@@ -63,9 +63,9 @@ define([
 					function(serviceRefs) {
 						var capableServiceRefs = [];
 						for (var i=0; i < serviceRefs.length; i++) {
-							var serviceRef = serviceRefs[i];
-							if (serviceRef && !serviceRef._error) {
-								capableServiceRefs.push(serviceRef);
+							var currentServiceRef = serviceRefs[i];
+							if (currentServiceRef && !currentServiceRef._error) {
+								capableServiceRefs.push(currentServiceRef);
 							}
 						}
 						return capableServiceRefs;
@@ -91,26 +91,43 @@ define([
 						selection: selections[0],
 						contentType: that.inputManager.getContentType().id
 					};
-					if(that.occurrencesService) {
-						that.occurrencesService.computeOccurrences(editor.getEditorContext(), context).then(function (occurrences) {
-							that.editor.showOccurrences(occurrences);
-						});	
+					
+					if(Array.isArray(that.occurrencesServices) && that.occurrencesServices.length > 0) {
+						var servicePromises = [];
+						var allOccurrences = [];
+						for (var i=0; i<that.occurrencesServices.length; i++) {
+							var serviceEntry = that.occurrencesServices[i];
+							if (serviceEntry){
+								servicePromises.push(serviceEntry.computeOccurrences(editor.getEditorContext(), context).then(function (occurrences) {
+									allOccurrences = allOccurrences.concat(occurrences);
+								}));	
+							}
+						}
+						Deferred.all(servicePromises).then(function(){
+							that.editor.showOccurrences(allOccurrences);
+						});
 					}
 				}, 500);
 			};
 						
-			that.inputManager.addEventListener("InputChanged", function(evt) {//$NON-NLS-0$
+			that.inputManager.addEventListener("InputChanged", function(evt) {
 				var textView = that.editor.getTextView();
 				if (textView) {
-					textView.removeEventListener("Selection", selectionListener); //$NON-NLS-0$
+					textView.removeEventListener("Selection", selectionListener);
 					getServiceRefs(that.registry, evt.contentType, evt.title).then(function(serviceRefs) {
 						if (!serviceRefs || serviceRefs.length === 0) {
 							if (occurrenceTimer) {
 								window.clearTimeout(occurrenceTimer);
 							}
 						} else {
-							that.occurrencesService = that.registry.getService(serviceRefs[0]);
-							textView.addEventListener("Selection", selectionListener); //$NON-NLS-0$
+							that.occurrencesServices = [];
+							for (var a=0; a<serviceRefs.length; a++) {
+								var service = that.registry.getService(serviceRefs[a]);
+								if (service){
+									that.occurrencesServices.push(service);
+								}
+							}
+							textView.addEventListener("Selection", selectionListener);
 						}
 					});
 				}
