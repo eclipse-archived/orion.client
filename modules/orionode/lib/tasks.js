@@ -38,7 +38,7 @@ function orionTasksAPI(options) {
 	});
 }
 
-function Task(res, cancelable, lengthComputable) {
+function Task(res, cancelable, lengthComputable, wait) {
 	this.id = Date.now();
 	this.cancelable = !!cancelable;
 	this.lengthComputable = !!lengthComputable;
@@ -46,10 +46,14 @@ function Task(res, cancelable, lengthComputable) {
 	this.total = this.loaded = 0;
 	this.type = "loadstart";
 	this.res = res;
-	this.timeout = setTimeout(function() {
-		delete this.timeout;
+	if (wait === 0) {
 		this.start();
-	}.bind(this), 100);
+	} else {
+		this.timeout = setTimeout(function() {
+			delete this.timeout;
+			this.start();
+		}.bind(this), typeof wait === "number" ? wait : 100);
+	}
 }
 Task.prototype = {
 	start: function() {

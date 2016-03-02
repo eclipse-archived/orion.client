@@ -289,7 +289,7 @@ function pushRemote(repoPath, req, res, rest, remote, branch, pushSrcRef, tags, 
 	var repo;
 	var remoteObj;
 
-	var task = new tasks.Task(res);
+	var task = new tasks.Task(res, false, false, 0);//TODO start task right away to work around bug in client code
 
 	git.Repository.open(repoPath)
 	.then(function(r) {
