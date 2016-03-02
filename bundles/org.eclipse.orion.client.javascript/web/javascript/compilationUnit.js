@@ -128,10 +128,14 @@ define([
         proxy.setText = function(text, start, end) {
             if(that._ec) {
                 return that._ec.setText(text, start, end);
-            } else {
-                return new Deferred().resolve(null);
             }
+            return new Deferred().resolve(null);
         };
+        // Our tooling needs access to other functions on the editorContext so copy them here
+        if (that._ec){
+        	proxy.getSelections = that._ec.getSelections;
+        	proxy.setSelection = that._ec.setSelection;
+    	}
         return proxy;
     };
 

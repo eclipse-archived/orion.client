@@ -140,7 +140,6 @@ define([
 							assert.equal(p.length, pos.length, "The position lengths do not match");
 						});
 					});
-					worker.getTestState().callback();
 				}
 				catch(err) {
 					worker.getTestState().callback(err);
@@ -169,9 +168,8 @@ define([
 								assert(i !== pbs.length, "Did not find any problems for the expected id: "+ options.pid);
 							} else {
 								assert(pbs, "There should always be problems");
-								if (Array.isArray(options.expected)){
-									assert.equal(pbs.length, options.expected.length, 'Number of problems found (' + pbs.length + ') does not match expected');
-								} else {
+								// Some quick fixes may provide multiple expected text edits per problem
+								if (!Array.isArray(options.expected)){
 									assert.equal(pbs.length, 1, 'Expected only one problem per test');
 								}
 								assert(annot.id, "No problem id is reported");
@@ -188,10 +186,8 @@ define([
 									annotations[i].title = annotations[i].description;
 								}
 							}
-							return obj.fixComputer.execute(obj.editorContext, {annotation: annot, annotations: annotations, input: obj.loc}).then(function(result) {
-									if (result === null) {
-										worker.getTestState().callback();
-									}
+							return obj.fixComputer.execute(obj.editorContext, {annotation: annot, annotations: annotations, input: obj.loc}).then(function() {
+									worker.getTestState().callback();
 								},
 								function(err) {
 									if(err instanceof Error) {
@@ -230,12 +226,17 @@ define([
 							assert.equal(computed.selection[i].start, expected[i].start, 'The fix starts do not match');
 							assert.equal(computed.selection[i].end, expected[i].end, 'The fix ends do not match');
 						}
+					} else if (typeof computed === 'object' && Array.isArray(computed.text)){
+						assert.equal(computed.text.length, 1, 'Was expecting one quick fix text edit');
+						assert.equal(computed.selection.length, 1, 'Was expected one quick fix selection range');
+						assert(computed.text[0].indexOf(expected.value) > -1, 'The fix: '+computed.text[0]+' does not match the expected fix of: '+expected.value);
+						assert.equal(computed.selection[0].start, expected.start, 'The fix starts do not match');
+						assert.equal(computed.selection[0].end, expected.end, 'The fix ends do not match');
 					} else {
 						assert(computed.indexOf(expected.value) > -1, 'The fix: '+computed+' does not match the expected fix of: '+expected.value);
 						assert.equal(start, expected.start, 'The fix starts do not match');
 						assert.equal(end, expected.end, 'The fix ends do not match');
 					}
-					worker.getTestState().callback();
 				}
 				catch(err) {
 					worker.getTestState().callback(err);
@@ -2380,8 +2381,25 @@ define([
 								  expected: expected,
 								  callback: callback});
 			});
-			
-			
+			it("Test no-extra-semi fix all inside html",function(callback) {
+				var rule = createTestRule('no-extra-semi');
+				var expected = [
+				 				{value: "",
+								start: 18, 
+								end: 19},
+								{value: "",
+								start: 19, 
+								end: 20},
+								{value: "",
+								start: 20, 
+								end: 21},
+								];
+				return getFixes({buffer: '<script>var a = 0;;;;</script>', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback,
+								  contentType: 'text/html'});
+			});
 			it("Test no-extra-semi-2",function(callback) {
 				var rule = createTestRule('no-extra-semi');
 				var expected = {value: "",
