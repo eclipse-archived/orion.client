@@ -560,6 +560,20 @@ define([
                     ]
     			}
     	);
+    	
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+    			quickFixComputer,
+    			{
+        			name: javascriptMessages["removeExtraParensFixName"],
+        			fixAllEnabled: true,
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+        			id : "rm.extra.parens.fix",  //$NON-NLS-1$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-extra-parens)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                    ]
+    			}
+    	);
 
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,

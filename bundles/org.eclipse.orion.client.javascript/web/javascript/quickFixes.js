@@ -298,36 +298,48 @@ define([
 	 */
 	function applySingleFixToAll(editorContext, annotation, annotations, createTextChange){
 		if (!annotations){
-			var change = createTextChange(annotation);
-			if (change){
-				return editorContext.setText(change.text, change.start, change.end);
-			}
-		} else {
-			var textEdits = [];
-			var rangeEdits = [];
-			var annotationIndex = 0;
-			for (var i=0; i<annotations.length; i++) {
-				var current = annotations[i];
-				if (current.id === annotation.id){
-					var currentChange = createTextChange(current);
-					if (currentChange){
-						textEdits.push(currentChange.text);
-						rangeEdits.push({start: currentChange.start, end: currentChange.end});
-						if (current.start === annotation.start && current.end === annotation.end){
-							annotationIndex = i;
-						}
+			annotations = [annotation];
+		}
+		var edits = [];
+		var annotationIndex = 0;
+		for (var i=0; i<annotations.length; i++) {
+			var current = annotations[i];
+			if (current.id === annotation.id){
+				var currentChange = createTextChange(current);
+				if (Array.isArray(currentChange)){
+					if (current.start === annotation.start && current.end === annotation.end){
+						annotationIndex = i;
 					}
+					for (var j=0; j<currentChange.length; j++) {
+						var theChange = currentChange[j];
+						edits.push({text: theChange.text, range: {start: theChange.start, end: theChange.end}});
+					}
+				} else if (typeof currentChange === 'object'){
+					edits.push({text: currentChange.text, range: {start: currentChange.start, end: currentChange.end}});
+					if (current.start === annotation.start && current.end === annotation.end){
+						annotationIndex = i;
+					}
+				} 
+			}
+		}
+		// To use setText() with multiple selections they must be in range order
+		edits = edits.sort(function(a, b){
+			return a.range.start - b.range.start;
+		});
+		var textEdits = [];
+		var rangeEdits = [];
+		for (i=0; i<edits.length; i++) {
+			textEdits.push(edits[i].text);
+			rangeEdits.push(edits[i].range);
+		}
+    	return editorContext.setText({text: textEdits, selection: rangeEdits}).then(function(){
+    		return editorContext.getSelections().then(function(selections){
+    			if (selections.length > 0){
+    				var selection = selections[selections.length > annotationIndex ? annotationIndex : 0];
+    				return editorContext.setSelection(selection.start, selection.end, true);	
 				}
-			}
-	    	return editorContext.setText({text: textEdits, selection: rangeEdits}).then(function(){
-	    		return editorContext.getSelections().then(function(selections){
-	    			if (selections.length > 0){
-	    				var selection = selections[selections.length > annotationIndex ? annotationIndex : 0];
-	    				return editorContext.setSelection(selection.start, selection.end, true);	
-					}
-	    		});
-	    	});
-    	}
+    		});
+    	});
 	}
 	
 	Objects.mixin(JavaScriptQuickfixes.prototype, /** @lends javascript.JavaScriptQuickfixes.prototype*/ {
@@ -710,10 +722,36 @@ define([
 	                return editorContext.setText(fix, context.annotation.start+1, context.annotation.start+1);
 	            });
 	        },
+	        /** fix for the no-extra-parens linting rule */
+			"no-extra-parens": function(editorContext, context, astManager) {
+				return astManager.getAST(editorContext).then(function(ast) {
+					return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation){
+			            var token = Finder.findToken(currentAnnotation.start, ast.tokens);
+			            var openBracket = ast.tokens[token.index-1];
+			            if (openBracket.value === '('){
+			            	var closeBracket = Finder.findToken(currentAnnotation.end, ast.tokens);
+			            	if (closeBracket.value === ')'){
+					            return [
+						            {
+						            	text: '',
+						            	start: openBracket.range[0],
+						            	end: openBracket.range[1]
+						            },
+						            {
+						            	text: '',
+						            	start: closeBracket.range[0],
+						            	end: closeBracket.range[1]
+						            }
+				            	];
+			            	}
+		            	}
+		            });
+	            });
+	        },
 			/** fix for the no-extra-semi linting rule */
 			"no-extra-semi": function(editorContext, context) {
 				return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation){
-		            return {
+		           return {
 		            	text: '',
 		            	start: currentAnnotation.start,
 		            	end: currentAnnotation.end

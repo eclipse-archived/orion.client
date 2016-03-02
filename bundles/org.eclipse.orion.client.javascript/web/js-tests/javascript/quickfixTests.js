@@ -2212,6 +2212,185 @@ define([
 								  contentType: 'text/html'});
 			});
 		});
+		//NO-EXTRA-PARENS
+		describe('no-extra-parens', function(){
+			it("no-extra-parens - if statement",function(callback) {
+				var rule = createTestRule('no-extra-parens');
+				 var expected = [
+				 				{value: "",
+								start: 10, 
+								end: 11},
+								{value: "",
+								start: 12, 
+								end: 13}
+								];
+				return getFixes({buffer: 'if (a === (b)){}', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			it("no-extra-parens - typeof",function(callback) {
+				var rule = createTestRule('no-extra-parens');
+				 var expected = [
+				 				{value: "",
+								start: 10, 
+								end: 11},
+								{value: "",
+								start: 12, 
+								end: 13}
+								];
+				return getFixes({buffer: 'if (typeof(a) === "object"){}', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			it("no-extra-parens - fix all not nested",function(callback) {
+				var rule = createTestRule('no-extra-parens');
+				 var expected = [
+				 				{value: "",
+								start: 8, 
+								end: 9},
+								{value: "",
+								start: 12, 
+								end: 13},
+								{value: "",
+								start: 23, 
+								end: 24},
+								{value: "",
+								start: 27, 
+								end: 28}
+								];
+				return getFixes({buffer: 'var a = (1+1);\nvar b = (1-1);', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			it("no-extra-parens - fix all nested",function(callback) {
+				var rule = createTestRule('no-extra-parens');
+				 var expected = [
+				 				{value: "",
+								start: 8, 
+								end: 9},
+								{value: "",
+								start: 9, 
+								end: 10},
+								{value: "",
+								start: 11, 
+								end: 12},
+								{value: "",
+								start: 13, 
+								end: 14},
+								{value: "",
+								start: 15, 
+								end: 16},
+								{value: "",
+								start: 16, 
+								end: 17},
+								];
+				return getFixes({buffer: 'var a = ((1)+(1));', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			// The no-extra-parens rule will not create two annotations for duplicate parentheses ((a)) meaning the user has to run the quickfix all twice
+			it("no-extra-parens - fix all nested, hiding another extra paren",function(callback) {
+				var rule = createTestRule('no-extra-parens');
+				 var expected = [
+				 				{value: "",
+								start: 10, 
+								end: 11},
+								{value: "",
+								start: 12, 
+								end: 13},
+								];
+				return getFixes({buffer: 'var a = (((1)));', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			it("no-extra-parens - in HTML if statement",function(callback) {
+				var rule = createTestRule('no-extra-parens');
+				 var expected = [
+				 				{value: "",
+								start: 18, 
+								end: 19},
+								{value: "",
+								start: 20, 
+								end: 21}
+								];
+				return getFixes({buffer: '<script>if (a === (b)){}</script>', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback,
+								  contentType: 'text/html'});
+			});
+			it("no-extra-parens - in HTML typeof",function(callback) {
+				var rule = createTestRule('no-extra-parens');
+				 var expected = [
+				 				{value: "",
+								start: 18, 
+								end: 19},
+								{value: "",
+								start: 20, 
+								end: 21}
+								];
+				return getFixes({buffer: '<script>if (typeof(a) === "object"){}</script>', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback,
+								  contentType: 'text/html'});
+			});
+			it("no-extra-parens - in HTML fix all not nested",function(callback) {
+				var rule = createTestRule('no-extra-parens');
+				 var expected = [
+				 				{value: "",
+								start: 16, 
+								end: 17},
+								{value: "",
+								start: 20, 
+								end: 21},
+								{value: "",
+								start: 31, 
+								end: 32},
+								{value: "",
+								start: 35, 
+								end: 36}
+								];
+				return getFixes({buffer: '<script>var a = (1+1);\nvar b = (1-1);</script>', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback,
+								  contentType: 'text/html'});
+			});
+			it("no-extra-parens - in HTML fix all nested",function(callback) {
+				var rule = createTestRule('no-extra-parens');
+				 var expected = [
+				 				{value: "",
+								start: 16, 
+								end: 17},
+								{value: "",
+								start: 17, 
+								end: 18},
+								{value: "",
+								start: 19, 
+								end: 20},
+								{value: "",
+								start: 21, 
+								end: 22},
+								{value: "",
+								start: 23, 
+								end: 24},
+								{value: "",
+								start: 24, 
+								end: 25},
+								];
+				return getFixes({buffer: '<script>var a = ((1)+(1));</script>', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback,
+								  contentType: 'text/html'});
+			});
+		});
 		//NO-EXTRA-SEMI
 		describe('no-extra-semi', function(){
 			it("Test no-extra-semi-1",function(callback) {
