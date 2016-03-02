@@ -18,8 +18,9 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 		'orion/search/InlineSearchPane',
 		'orion/keyBinding',
 		'orion/problems/problemsView',
+		'orion/keyBinding',
 		'orion/webui/Slideout'],
-		function(objects, mCommands, mOutliner, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages, InlineSearchPane, mKeyBinding, mProblemsView, mSlideout) {
+		function(objects, mCommands, mOutliner, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages, InlineSearchPane, mKeyBinding, mProblemsView, KeyBinding, mSlideout) {
 
 	/**
 	 * @name orion.sidebar.Sidebar
@@ -57,6 +58,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 		this.activeViewMode = null;
 		this.switcherScope = params.switcherScope;
 		this.editScope = params.editScope;
+		this.toolsScope = params.toolsScope;
 		this.switcherNode = null;
 		this.progressService = params.progressService;
 	}
@@ -279,23 +281,26 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				name: messages["showProblems"], //$NON-NLS-0$
 				id: "orion.problemsInFolder", //$NON-NLS-0$
 				visibleWhen: function(item) {
-					if (Array.isArray(item)) {
-						if(item.length === 1 && item[0].Directory){
-							return true;
-						}
+					if (item && item.Location && item.Parents) {
+						return true;
 					}
 					return false;
 				},
 				callback: function (data) {
-					var item = data.items[0];
+					var item = data.items;
 					this._problemsPane.show();
-					//var problemsView = new mProblemsView.ProblemsView({serviceRegistry: this.serviceRegistry, commandRegistry: this.commandRegistry, contentTypeRegistry: this.contentTypeRegistry, fileClient: this.fileClient});
-					this._problemsPane.validate(item.Location);
+					var location;
+					if(item.Directory) {
+						location = item.Location;
+					} else {
+						location = item.Parents[0] ? item.Parents[0].Location : item.Location;
+					}
+					this._problemsPane.validate(location);
 				}.bind(this)
 			});
 			
 			this.commandRegistry.addCommand(problemsInFolderCommand);
-			this.commandRegistry.registerCommandContribution(this.editScope, "orion.problemsInFolder", 101, "orion.menuBarEditGroup/orion.findGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandRegistry.registerCommandContribution(this.toolsScope, "orion.problemsInFolder", 2, "orion.menuBarToolsGroup"/*, false, new KeyBinding.KeyBinding('p', true, false, true)*/);  //$NON-NLS-1$ //$NON-NLS-0$
  		},
  		fillSearchPane: function(searchText, searchScope, searchResult) {
  			var mainSplitter = mGlobalCommands.getMainSplitter();

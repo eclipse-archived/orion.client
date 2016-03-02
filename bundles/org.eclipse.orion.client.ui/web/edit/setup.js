@@ -670,6 +670,7 @@ objects.mixin(EditorSetup.prototype, {
 			sidebarNavInputManager: this.sidebarNavInputManager,
 			switcherScope: "viewActions", //$NON-NLS-0$
 			editScope: "editActions", //$NON-NLS-0$
+			toolsScope: "toolsActions", //$NON-NLS-0$
 			menuBar: this.menuBar,
 			toolbar: this.sidebarToolbar
 		});
