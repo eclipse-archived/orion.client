@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -29,12 +29,13 @@ define([
 	 * @param {ServiceRegistry} serviceRegistry The service registry 
 	 * @since 8.0
 	 */
-	function TernProjectManager(ternWorker, scriptResolver, serviceRegistry) {
+	function TernProjectManager(ternWorker, scriptResolver, serviceRegistry, setStarting) {
 		this.ternWorker = ternWorker;
 		this.scriptResolver = scriptResolver;
 		this.currentProjectLocation = null;
 		this.currentFile = null;
 		this.registry = serviceRegistry;
+		this.starting = setStarting;
 	}
 
 	Objects.mixin(TernProjectManager.prototype, {
@@ -165,10 +166,10 @@ define([
 		 * @param jsonOptions {Object} options to load into Tern
 		 */
 		loadTernProjectOptions: function(jsonOptions) {
-			this.ternWorker.postMessage({request: "start_server", args: {options: jsonOptions}}); //$NON-NLS-1$
-			if (Array.isArray(jsonOptions.loadEagerly)) {
+			if (Array.isArray(jsonOptions.loadEagerly) && jsonOptions.loadEagerly.length > 0) {
 				var fileLoadPromises = [];
 				this._fileLoadWarnings = [];
+				var filesToLoad = [];
 				for (var i = 0; i < jsonOptions.loadEagerly.length; i++) {
 					var filename = jsonOptions.loadEagerly[i];
 					var ext = 'js'; //$NON-NLS-1$
@@ -182,9 +183,7 @@ define([
 							if (files.length > 1) {
 								this._fileLoadWarnings.push(i18nUtil.formatMessage(Messages['multipleFileMatchesProblem'], _filename, files[0].location));
 							}
-							this.ternWorker.postMessage(
-								{request:'addFile', args:{file: files[0].location}} //$NON-NLS-1$
-							);
+							filesToLoad.push(files[0].location);
 						} else {
 							this._fileLoadWarnings.push(i18nUtil.formatMessage(Messages['noFileMatchProblem'], _filename));
 						}
@@ -193,22 +192,30 @@ define([
 				if (!this._hasValidationProblem){
 					this.registry.getService("orion.page.message").setProgressMessage(Messages['fileMatchProgress']); //$NON-NLS-1$
 				}
-				return Deferred.all(fileLoadPromises).then(function(){
-					if (!this._hasValidationProblem){  // Don't hide validation warnings
-						this.registry.getService("orion.page.message").close(); //$NON-NLS-1$
-						if (this._fileLoadWarnings.length > 0){
-							var message = "";
-							for (var j=0; j<this._fileLoadWarnings.length && j<10; j++) {
-								message += this._fileLoadWarnings[j] + '<br>'; //$NON-NLS-1$
+				var currentOptions = jsonOptions;
+				currentOptions.loadEagerly = filesToLoad;
+				if(fileLoadPromises.length > 0) {
+					return Deferred.all(fileLoadPromises).then(function(){
+						if (!this._hasValidationProblem){  // Don't hide validation warnings
+							this.registry.getService("orion.page.message").close(); //$NON-NLS-1$
+							if (this._fileLoadWarnings.length > 0){
+								var message = "";
+								for (var j=0; j<this._fileLoadWarnings.length && j<10; j++) {
+									message += this._fileLoadWarnings[j] + '<br>'; //$NON-NLS-1$
+								}
+								if (this._fileLoadWarnings.length > 10){
+									message += i18nUtil.formatMessage(Messages['tooManyFileMatchProblems'],this._fileLoadWarnings.length-10) + '<br>'; //$NON-NLS-1$
+								}
+								this._report(Messages['fileMatchProblems'], message);
 							}
-							if (this._fileLoadWarnings.length > 10){
-								message += i18nUtil.formatMessage(Messages['tooManyFileMatchProblems'],this._fileLoadWarnings.length-10) + '<br>'; //$NON-NLS-1$
-							}
-							this._report(Messages['fileMatchProblems'], message);
 						}
-					}
-					this._fileLoadWarnings = [];
-				}.bind(this));
+						this._fileLoadWarnings = [];
+						this.ternWorker.postMessage({request: "start_server", args: {options: currentOptions}}); //$NON-NLS-1$
+					}.bind(this));
+				}
+				this.ternWorker.postMessage({request: "start_server", args: {options: currentOptions}}); //$NON-NLS-1$
+			} else {
+				this.ternWorker.postMessage({request: "start_server", args: {options: currentOptions}}); //$NON-NLS-1$
 			}
 		},
 		
@@ -227,6 +234,7 @@ define([
 				if (projectFile && (!this.currentProjectLocation || projectFile.Location !== this.currentProjectLocation)){
 					this.currentProjectLocation = projectFile.Location;
 					this.scriptResolver.setSearchLocation(projectFile.Location);
+					this.starting();
 					return this.getTernProjectFileLocation(projectFile).then(function(ternFileLocation){
 						return this.parseTernJSON(ternFileLocation).then(function(jsonOptions){
 							return this.loadTernProjectOptions(jsonOptions);

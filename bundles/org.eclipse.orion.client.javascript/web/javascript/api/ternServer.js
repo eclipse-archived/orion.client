@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -527,6 +527,9 @@ define([
 					defNames = jsonOptions.defs;
 					ddir = jsonOptions.defsDir;
 				}
+				if(Array.isArray(jsonOptions.loadEagerly) && jsonOptions.loadEagerly.length > 0) {
+					options.loadEagerly = jsonOptions.loadEagerly;
+				}
 				if (typeof jsonOptions.ecmaVersion === 'number'){
 					options.ecmaVersion = jsonOptions.ecmaVersion;
 				}
@@ -534,10 +537,18 @@ define([
 					options.dependencyBudget = jsonOptions.dependencyBudget;
 				}
 	        }
+	        function _loadFiles(ternserver, options) {
+	        	if(Array.isArray(options.loadEagerly)) {
+	        		options.loadEagerly.forEach(function(file) {
+	        			ternserver.addFile(file);
+	        		});
+	        	}
+	        }
 	        function defaultStartUp(err) {
 				options.plugins = plugins;
 				options.defs = defs;
 				ternserver = new Tern.Server(options);
+				_loadFiles(ternserver, options);
 				callback(err);
 	        }
 	        if(!options.plugins && (!defNames || defNames.length < 1)) {
@@ -547,6 +558,7 @@ define([
 					Deferred.all(loadDefs(defNames, ddir)).then(function(json) {
 							options.defs = json;
 							ternserver = new Tern.Server(options);
+							_loadFiles(ternserver, options);
 							callback();
 						}, defaultStartUp);
 		        }, defaultStartUp);

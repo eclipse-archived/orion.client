@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -58,10 +58,13 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
         var pluginsDir = defaultOptions.pluginsDir;
         var defNames, plugins, projectLoc;
         if (jsonOptions) {
-        	projectLoc = jsonOptions.projectLoc;
-        	plugins = jsonOptions.plugins;
+			projectLoc = jsonOptions.projectLoc;
+			plugins = jsonOptions.plugins;
 			pluginsDir = jsonOptions.pluginsDir;
 			defNames = jsonOptions.libs;
+			if(Array.isArray(jsonOptions.loadEagerly) && jsonOptions.loadEagerly.length > 0) {
+				options.loadEagerly = jsonOptions.loadEagerly;
+			}
 			if (typeof jsonOptions.ecmaVersion === 'number') {
 				options.ecmaVersion = jsonOptions.ecmaVersion;
 			}
@@ -82,21 +85,25 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 			}
         }
         if(typeof plugins !== 'object') {
-        	plugins = null;
+			plugins = null;
         } else {
-        	Objects.mixin(options.plugins, plugins);
+			Objects.mixin(options.plugins, plugins);
         }
         if(!Array.isArray(defNames)) {
-        	defNames = null;
+			defNames = null;
         }
         /**
          * A subtlety - if the user provides no plugins entry at all, they get all the defaults,
          * if they provide an empty object they still need the required ones only for a default startup
          */
         var requiredOnly = plugins && Object.keys(plugins).length < 1; 
+        /**
+         * @description Start the server with the default options
+         * @param {Error} err The error object from the failed deferred
+         */
         function defaultStartUp(err) {
-        	options.plugins = defaultOptions.plugins.required;
-        	if(!requiredOnly) {
+        		options.plugins = defaultOptions.plugins.required;
+        		if(!requiredOnly) {
 				Objects.mixin(options.plugins, defaultOptions.plugins.optional);
 			}
 			options.defs = defaultOptions.defs;
@@ -105,40 +112,51 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 				post(Serialize.serializeError(err));
 	        }
         }
+        /**
+         * @description Starts the tern server wit the given options
+         * @param {Object} options The options to start the server with
+         */
         function startAndMessage(options) {
-        	ternserver = new Tern.Server(options);
+			ternserver = new Tern.Server(options);
+			if(Array.isArray(options.loadEagerly) && options.loadEagerly.length > 0) {
+				options.loadEagerly.forEach(function(file) {
+					ternserver.addFile(file);
+				});
+			}
 			callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
-        
-        }
-        if((!plugins || requiredOnly) && !defNames) {
+		}
+		if((!plugins || requiredOnly) && !defNames) {
 			defaultStartUp();
-        } else {
+		} else {
 			Deferred.all(loadPlugins(options.plugins, pluginsDir)).then(/* @callback */ function(plugins) {
 				if(defNames) {
 					if(defNames.length < 1) {
 						startAndMessage(options);
 					} else {
 						Deferred.all(loadDefs(defNames, projectLoc)).then(function(json) {
-								options.defs = json;
-								startAndMessage(options);
-							}, defaultStartUp);
+							options.defs = json;
+							startAndMessage(options);
+						}, defaultStartUp);
 					}
 				} else {
 					startAndMessage(options);
 				}
-	        }, defaultStartUp);
-        }
-    }
+			}, defaultStartUp);
+		}
+	}
 	post({request: "worker_ready"}); //$NON-NLS-1$
 
 	var handlers = {
+		/* start_server message handler */
 		'start_server': function(args, callback){
 			startServer(args.options, callback);	
 		},
+		/* addFile message handler */
 		'addFile': function(args, callback) {
 			ternserver.addFile(args.file, args.source);
 			callback({request: 'addFile'}); //$NON-NLS-1$
 		},
+		/* completions message handler */
 		'completions': function(args, callback) {
 			if(ternserver) {
 		       ternserver.request({
@@ -170,6 +188,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		       callback({request: 'completions', message: Messages['failedToComputeProposalsNoServer']}); //$NON-NLS-1$
 		   }
 		},
+		/* definition message handler */
 		'definition': function(args, callback) {
 			if(ternserver) {
 		       ternserver.request({
@@ -194,6 +213,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		       callback({request: 'definition', message: Messages['failedToComputeDeclNoServer']}); //$NON-NLS-1$
 		   }
 		},
+		/* delFile message handler */
 		'delFile': function(args, callback) {
 			if(ternserver && typeof args.file === 'string') {
 	            ternserver.delFile(args.file);
@@ -202,6 +222,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 				callback({request: 'delFile', message: i18nUtil.formatMessage(Messages['failedDeleteRequest'], args.file)}); //$NON-NLS-1$
 	        }
 		},
+		/* documentation message handler */
 		'documentation': function(args, callback) {
 			if(ternserver) {
 		       ternserver.request({
@@ -225,9 +246,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		       callback({request: 'documentation', message: Messages['failedToComputeDocNoServer']}); //$NON-NLS-1$
 		   }
 		},
-		/**
-		 * @callback
-		 */
+		/* environments message handler */
 		'environments': function(args, callback) {
 			if(ternserver) {
 		       ternserver.request({
@@ -248,6 +267,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		       callback({request: 'environments', message: Messages['failedGetEnvsNoServer']}); //$NON-NLS-1$
 		   }
 		},
+		/* implementation message handler */
 		'implementation': function(args, callback) {
 			if(ternserver) {
 		       ternserver.request({
@@ -272,9 +292,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		       callback({request: 'implementation', message: Messages['failedToComputeImplNoServer']}); //$NON-NLS-1$
 		   }
 		},
-		/**
-		 * @callback
-		 */
+		/* installed_plugins message handler */
 		'installed_plugins': function(args, callback) {
 			if(ternserver) {
 		       ternserver.request({
@@ -295,9 +313,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		       callback({request: 'installed_plugins', message: Messages['failedGetInstalledPluginsNoServer']}); //$NON-NLS-1$
 		   }
 		},
-		/**
-		 * @callback
-		 */
+		/* installed_defs message handler */
 		'installed_defs': function(args, callback) {
 			if(ternserver) {
 		       ternserver.request({
@@ -318,6 +334,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		       callback({request: 'installed_defs', message: Messages['failedGetInstalledDefsNoServer']}); //$NON-NLS-1$
 		   }
 		},
+		/* rename message handler */
 		'rename': function(args, callback) {
 			if(ternserver) {
 		       ternserver.request({
@@ -341,6 +358,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		       callback({request: 'rename', message: Messages['failedRenameNoServer']}); //$NON-NLS-1$
 		   }
 		},
+		/* type message handler */
 		'type': function(args, callback) {
 			ternserver.request({
 		           query: {
@@ -356,6 +374,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		               }
 		           });
 		},
+		/* checkRef message handler */
 		'checkRef': function(args, callback) {
 			ternserver.request({
 		           query: {
@@ -373,6 +392,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		               }
 		           });
 		},
+		/* lint message handler */
 		'lint': function(args, callback) {
 			var query =
 				{
@@ -401,6 +421,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 					}
 				});
 		},
+		/* outline message handler */
 		'outline': function(args, callback) {
 			ternserver.request({
 					query: {
@@ -632,7 +653,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		}
 		return _defs;
     }
-    
+
     /**
      * @description Delegate to actually load a definition
      * @private

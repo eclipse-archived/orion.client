@@ -114,7 +114,15 @@ define([
     		this.messageId = 0;
     		this.callbacks = Object.create(null);
     	}
-    	
+	
+	/**
+	 * Use to reset the tern server when the .tern-project file is found and used.
+	 */
+	function setStarting() {
+		ternReady = false;
+	}
+
+
 	WrappedWorker.prototype.postMessage = function(msg, f) {
 		var starting = msg.request === "start_server";
 		if(starting) {
@@ -214,10 +222,9 @@ define([
 								response.args.path = rel[0].path;
 								ternWorker.postMessage(response);
 							});
-						} else {
-							response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-							ternWorker.postMessage(response);
 						}
+						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
+						ternWorker.postMessage(response);
 					} else {
 						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
 						ternWorker.postMessage(response);
@@ -426,7 +433,7 @@ define([
     		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$
     	});
     	
-    	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, serviceRegistry);
+    	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, serviceRegistry, setStarting);
     	/**
     	 * Register Tern project manager as input changed listener
     	 */
