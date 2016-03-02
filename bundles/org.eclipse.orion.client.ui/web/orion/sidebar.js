@@ -271,6 +271,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				null, 
 				"dropdownSelection"); //$NON-NLS-0$
 		},
+		
 		_createProblemsPane: function() {
 			this._problemsPane = new mProblemsView.ProblemsView({serviceRegistry: this.serviceRegistry, 
 				commandRegistry: this.commandRegistry, 
@@ -281,26 +282,35 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				name: messages["showProblems"], //$NON-NLS-0$
 				id: "orion.problemsInFolder", //$NON-NLS-0$
 				visibleWhen: function(item) {
-					if (item && item.Location && item.Parents) {
+					if (Array.isArray(item)) {
+						if(item.length === 1 && item[0].Location && item[0].Parents){
+							return true;
+						}
+					} else if (item && item.Location && item.Parents) {
 						return true;
 					}
 					return false;
 				},
 				callback: function (data) {
-					var item = data.items;
 					this._problemsPane.show();
-					var location;
-					if(item.Directory) {
-						location = item.Location;
+					var item;
+					if (Array.isArray(data.items)) {
+						item = data.items[0];
 					} else {
-						location = item.Parents[0] ? item.Parents[0].Location : item.Location;
+						item = data.items;
 					}
-					this._problemsPane.validate(location);
+					var loc;
+					if(item.Directory) {
+						loc = item.Location;
+					} else {
+						loc = item.Parents[0] ? item.Parents[0].Location : item.Location;
+					}
+					this._problemsPane.validate(loc);
 				}.bind(this)
 			});
 			
 			this.commandRegistry.addCommand(problemsInFolderCommand);
-			this.commandRegistry.registerCommandContribution(this.toolsScope, "orion.problemsInFolder", 2, "orion.menuBarToolsGroup"/*, false, new KeyBinding.KeyBinding('p', true, false, true)*/);  //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandRegistry.registerCommandContribution(this.toolsScope, "orion.problemsInFolder", 2, "orion.menuBarToolsGroup", false, new KeyBinding.KeyBinding('p', true, false, true));  //$NON-NLS-1$ //$NON-NLS-0$
  		},
  		fillSearchPane: function(searchText, searchScope, searchResult) {
  			var mainSplitter = mGlobalCommands.getMainSplitter();
