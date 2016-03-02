@@ -355,7 +355,7 @@ function pushRemote(repoPath, req, res, rest, remote, branch, pushSrcRef, tags, 
 	})
 	.catch(function(err) {
 		var parsedUrl = url.parse(remoteObj.url(), true);
-		tasks.done({
+		task.done({
 			HttpCode: 401,
 			Code: 0,
 			DetailedMessage: err.message,
