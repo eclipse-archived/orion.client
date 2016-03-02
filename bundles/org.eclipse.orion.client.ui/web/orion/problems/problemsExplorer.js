@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @license Copyright (c) 2014 IBM Corporation and others. All rights
+ * @license Copyright (c) 2014, 2016 IBM Corporation and others. All rights
  *          reserved. This program and the accompanying materials are made
  *          available under the terms of the Eclipse Public License v1.0
  *          (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse
@@ -479,7 +479,8 @@ define([
 				getFileMetadata: function(){
 					return {
 						contentType: cType,
-						location: fileObj.Location
+						location: fileObj.Location,
+						name: fileObj.Name
 					};
 				},
 				getText: function(){return fileContentText;}
