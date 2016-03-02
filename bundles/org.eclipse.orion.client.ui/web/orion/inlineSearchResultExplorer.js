@@ -1061,11 +1061,14 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
     };
 
     InlineSearchResultExplorer.prototype.onReplaceCursorChanged = function(currentModel) {
+    	if(currentModel && currentModel.type === "group") {
+    		return;
+    	}
     	this._inlineSearchPane.showReplacePreview();
         if (!_onSameFile(this._currentPreviewModel, currentModel)) {
             this.buildPreview();
         }
-        if (this.compareView && currentModel.type === "detail") {
+        if (this.compareView && ( currentModel.type === "detail" || currentModel.type === "orion.annotation.search.hit")) {
         	if(currentModel.checked) {//If the change is checked we highlight the pair of the diff
 	        	// Figure out change index. Unchecked elements are 
 	        	// removed from diffs and must therefore be skipped.

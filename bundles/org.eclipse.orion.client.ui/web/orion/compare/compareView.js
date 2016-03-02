@@ -942,7 +942,9 @@ exports.InlineCompareView = (function() {
 		}
 		var mergedNumber = mCompareUtils.convertMergedLineNumber(this._mapper, lineNumber);
 		var gotoLineCallback = function() {
-			callback(mergedNumber);
+			if(callback) {
+				callback(mergedNumber);
+			}
 		}.bind(this);
 		this._editor.onGotoLine(mergedNumber, start, end, gotoLineCallback);
 	};
