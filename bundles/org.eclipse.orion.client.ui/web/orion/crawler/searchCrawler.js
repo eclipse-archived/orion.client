@@ -14,7 +14,7 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 		function(messages, i18nUtil, mSearchUtils, mContentTypes, mUiUtils, Deferred) {
 	
 	var DEBUG = false;
-	var _folderFilter = [".git"];
+	var _folderFilter = [".git", "node_modules"];
 	/**
 	 * SearchCrawler is an alternative when a file service does not provide the search API.
 	 * It assumes that the file client at least provides the fetchChildren and read APIs.
