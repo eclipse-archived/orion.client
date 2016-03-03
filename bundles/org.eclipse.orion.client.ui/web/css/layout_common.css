@@ -653,7 +653,7 @@ and (max-device-width : 1024px)  {
 	text-decoration:none !important;
 	width: 100%;
 	display: inline-block;
-	padding: 9px 0px 12px 0px;
+	padding: 4px 0 4px 0;
 }
 .sideMenuItem>.submenu-trigger:hover, .sideMenuItem.expanded>.submenu-trigger{
 	text-decoration:none;
