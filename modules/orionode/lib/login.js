@@ -14,14 +14,15 @@ var express = require("express");
 module.exports = function login() {
     return express.Router()
     .post("/", function(req, res/*, next*/) {
-        // Fake login response
-        res.json({
-            "EmailConfirmed": false,
-            "FullName": "anonymous",
-            "HasPassword": true,
-            "LastLoginTimestamp": "1416865840208",
-            "Location": "/workspace/orionode",
-            "UserName": "anonymous"
-        });
+    	    return res.json(req.user);
+//        // Fake login response
+//        res.json({
+//            "EmailConfirmed": false,
+//            "FullName": "anonymous",
+//            "HasPassword": true,
+//            "LastLoginTimestamp": "1416865840208",
+//            "Location": "/workspace/orionode",
+//            "UserName": "anonymous"
+//        });
     })
 };

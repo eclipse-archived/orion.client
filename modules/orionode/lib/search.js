@@ -157,7 +157,7 @@ module.exports = function(options) {
 	// Note that while this function creates and returns many promises, they fulfill to undefined,
 	// and are used only for flow control.
 	// TODO clean up
-	function searchFile(dirLocation, filename, searchPattern, filenamePatterns, results){
+	function searchFile(workspaceDir, dirLocation, filename, searchPattern, filenamePatterns, results){
 		var filePath = dirLocation + filename;
 		return fs.statAsync(filePath)
 		.then(function(stats) {
@@ -172,7 +172,7 @@ module.exports = function(options) {
 				return fs.readdirAsync(filePath)
 				.then(function(directoryFiles) {
 					return Promise.map(directoryFiles, function(entry) {
-						return searchFile(filePath, entry, searchPattern, filenamePatterns, results);
+						return searchFile(workspaceDir, filePath, entry, searchPattern, filenamePatterns, results);
 					}, { concurrency: SUBDIR_SEARCH_CONCURRENCY });
 				});
 			}
@@ -215,7 +215,8 @@ module.exports = function(options) {
 		var parentFileLocation = originalFileRoot(req);
 		var endOfFileRootIndex = 5;
 
-		var searchScope = workspaceDir + searchOpt.location.substring(endOfFileRootIndex, searchOpt.location.length - 1);
+		var ws = workspaceDir + (req.user && req.user.workspace || "");
+		var searchScope = ws + searchOpt.location.substring(endOfFileRootIndex, searchOpt.location.length - 1);
 		if (searchScope.charAt(searchScope.length - 1) !== "/") searchScope = searchScope + "/";
 
 		fileUtil.getChildren(searchScope, parentFileLocation, function(children) {
@@ -223,7 +224,7 @@ module.exports = function(options) {
 
 			Promise.map(children, function(child) {
 				var childName = child.Location.substring(endOfFileRootIndex + 1);
-				return searchFile(searchScope, childName, searchPattern, filenamePattern, results);
+				return searchFile(ws, searchScope, childName, searchPattern, filenamePattern, results);
 			}, { concurrency: SUBDIR_SEARCH_CONCURRENCY })
 			.then(function() {
 				res.json({

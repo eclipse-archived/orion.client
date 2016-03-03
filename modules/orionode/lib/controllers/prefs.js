@@ -42,7 +42,6 @@ function PrefsController(options) {
 	var ttl = options.ttl || 5000; // default is 5 seconds
 	var ws = options.workspaceDir;
 	if (!ws) throw new Error('Missing required option: workspaceDir');
-	var prefFile = nodePath.join(ws, PREF_FILENAME);
 
 	var router = express.Router()
 	.use(bodyParser.json())
@@ -81,9 +80,10 @@ function PrefsController(options) {
 	function acquirePrefs(req) {
 		var app = req.app, prefs = app.locals.prefs;
 		var getPrefs;
+		var prefFile = nodePath.join(nodePath.join(ws, req.user && req.user.workspace || ""), PREF_FILENAME);
 		if (prefs) {
 			debug('Using prefs from memory');
-			scheduleFlush(app);
+			scheduleFlush(app, prefFile);
 			getPrefs = Promise.resolve(prefs);
 		} else {
 			getPrefs = fs.readFileAsync(prefFile, 'utf8')
@@ -100,7 +100,7 @@ function PrefsController(options) {
 					debug('No pref file exists, creating new');
 				}
 				app.locals.prefs = new Preference(contents || null);
-				scheduleFlush(app);
+				scheduleFlush(app, prefFile);
 			});
 		}
 		return getPrefs
@@ -112,7 +112,7 @@ function PrefsController(options) {
 		});
 	}
 
-	function scheduleFlush(app) {
+	function scheduleFlush(app, prefFile) {
 		var prefs = app.locals.prefs;
 		if (!prefs) {
 			debug('scheduleFlush(): WARNING, no prefs to flush'); // should never hpapen
@@ -120,11 +120,11 @@ function PrefsController(options) {
 		}
 		// Reset the clock
 		clearTimeout(prefs.timerId);
-		prefs.timerId = setTimeout(flushJob.bind(null, app), ttl);
+		prefs.timerId = setTimeout(flushJob.bind(null, app, prefFile), ttl);
 	}
 
 	// Deletes the cache and writes prefs back to disk if they were changed.
-	function flushJob(app) {
+	function flushJob(app, prefFile) {
 		var prefs = app.locals.prefs;
 		if (!prefs) {
 			debug('flushJob(): WARNING: no pref data to write'); // should never happen

@@ -44,7 +44,10 @@ module.exports = function(options) {
 		var originalFileUrl = req.contextPath + fileRoot;
 		return fileUtil.writeFileMetadata.apply(null, [originalFileUrl].concat(args));
 	};
-	var getSafeFilePath = fileUtil.safeFilePath.bind(null, workspaceDir);
+	var getSafeFilePath = function(req, rest) {
+		return fileUtil.safeFilePath(workspaceDir + (req.user && req.user.workspace || ""), rest);
+	};
+
 
 	function writeFileContents(res, rest, filepath, stats, etag) {
 		if (stats.isDirectory()) {
@@ -68,7 +71,7 @@ module.exports = function(options) {
 	function handleDiff(req, res, rest, body) {
 		var diffs = body.diff || [];
 		var contents = body.contents;
-		var patchPath = getSafeFilePath(rest);
+		var patchPath = getSafeFilePath(req, rest);
 		fs.exists(patchPath, function(destExists) {
 			if (destExists) {
 				fs.readFile(patchPath, function (error, data) {
@@ -160,7 +163,7 @@ module.exports = function(options) {
 		if (writeEmptyFilePathError(res, rest)) {
 			return;
 		}
-		var filepath = getSafeFilePath(rest);
+		var filepath = getSafeFilePath(req, rest);
 		fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
 			if (error && error.code === 'ENOENT') {
 				writeError(404, res, 'File not found: ' + rest);
@@ -190,7 +193,7 @@ module.exports = function(options) {
 		if (writeEmptyFilePathError(res, rest)) {
 			return;
 		}
-		var filepath = getSafeFilePath(rest);
+		var filepath = getSafeFilePath(req, rest);
 		if (getParam(req, 'parts') === 'meta') {
 			// TODO implement put of file attributes
 			res.sendStatus(501);
@@ -250,9 +253,9 @@ module.exports = function(options) {
 		}
 
 		var wwwpath = api.join(rest, encodeURIComponent(name)),
-		    filepath = getSafeFilePath(nodePath.join(rest, name));
+		    filepath = getSafeFilePath(req, nodePath.join(rest, name));
 
-		fileUtil.handleFilePOST(workspaceDir, fileRoot, req, res, wwwpath, filepath);
+		fileUtil.handleFilePOST(getSafeFilePath(req, workspaceDir, ""), fileRoot, req, res, wwwpath, filepath);
 	});
 
 	// DELETE - no request body
@@ -261,7 +264,7 @@ module.exports = function(options) {
 		if (writeEmptyFilePathError(res, rest)) {
 			return;
 		}
-		var filepath = getSafeFilePath(rest);
+		var filepath = getSafeFilePath(req, rest);
 		fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
 			var ifMatchHeader = req.headers['if-match'];
 			if (error && error.code === 'ENOENT') {
