@@ -149,6 +149,7 @@ function deleteTags(workspaceDir, fileRoot, req, res, next, rest) {
 }
 
 module.exports = {
+	tagJSON: tagJSON,
 	getTags: getTags,
 	deleteTags: deleteTags
 };

@@ -11,11 +11,13 @@
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
 var diff = require("./diff");
+var mTags = require("./tags");
 var git = require('nodegit');
 var url = require('url');
 var crypto = require('crypto');
+var async = require('async');
 
-function commitJSON(commit, fileDir, diffs, parents) {
+function commitJSON(commit, fileDir, diffs, parents, tags) {
 	return {
 		"AuthorEmail": commit.author().email(), 
 		"AuthorName": commit.author().name(),
@@ -29,6 +31,7 @@ function commitJSON(commit, fileDir, diffs, parents) {
 		"CloneLocation": "/gitapi/clone" + fileDir,
 		"Diffs": diffs,
 		"Parents": parents,
+		"Tags": tags,
 		"Message": commit.message(),
 		"Name": commit.sha(),
 		"Time": commit.timeMs(),
@@ -97,6 +100,7 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 		res.end(resp);
 	}
 
+	var tagsMap;
 	function log(repo, ref) {
 		var revWalk = repo.createRevWalk();
 		revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
@@ -129,7 +133,7 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 					var diffs = commitAndDiffs[1];
 					var parents = commitAndDiffs[2];
 					if (!page || count++ >= (page-1)*pageSize) {
-						commits.push(commitJSON(commit, fileDir, diffs, parents));
+						commits.push(commitJSON(commit, fileDir, diffs, parents, tagsMap[oid.toString()] || []));
 					}
 
 					if (pageSize && commits.length === pageSize) {
@@ -151,8 +155,15 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 
 		walk();
 	}
+	
+	var repo;
 	git.Repository.open(repoPath)
-	.then(function(repo) {
+	.then(function(_repo) {
+		repo = _repo;
+		return getCommitTagsMap(repo, fileDir);
+	})
+	.then(function(map) {
+		tagsMap = map;
 		if (mergeBase) {
 			var names = scope.split("..");
 			var commit0;
@@ -194,6 +205,36 @@ function getCommitParents(repo, commit, fileDir) {
 				"Location": "/gitapi/commit/" + parent.sha() + fileDir,
 				"Name": parent.sha()
 			};
+		});
+	});
+}
+
+function getCommitTagsMap(repo, fileDir) {
+	var map = {};
+	//TODO improve performance
+//	var time = Date.now();
+	return new Promise(function (fulfill){
+		repo.getReferences(git.Reference.TYPE.OID)
+		.then(function(refList) {
+			async.each(refList, function(ref, cb) {
+				if (ref.isTag()) {
+					repo.getReferenceCommit(ref)
+					.then(function(commit) {
+						var id = commit.id().toString();
+						var tags = map[id] || (map[id] = []);
+						tags.push(mTags.tagJSON(ref, commit, fileDir));
+						cb();
+					})
+					.catch(function() {
+						// ignore errors looking up commits
+						cb();
+					});
+				}
+				cb();
+			}, function() {
+//				console.log("done0=" + (Date.now() - time));
+				fulfill(map);
+			});
 		});
 	});
 }
