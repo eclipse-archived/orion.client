@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -40,6 +40,7 @@ define([
 		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs, noObjCalls, noSelfCompare, noIrregularWhitespace) {
 
     var rules = {
+    	/** @callback */
         "curly": function(context) {
 	        		/**
 	        		 * Checks the following AST element for a BlockStatement
@@ -87,6 +88,7 @@ define([
 	        			'DoWhileStatement': checkBlock
 	        		};
         },
+        /** @callback */
 		"eqeqeq": function(context) {
 			        function getOperatorToken(context, node) {
 	            		var tokens = context.getTokens(node), len = tokens.length, operator = node.operator;
@@ -126,6 +128,7 @@ define([
 	        			}
 	        		};
         },
+        /** @callback */
 		"missing-doc": function(context) {
                 function validComment(comments) {
                     if(comments && comments.leading) {
@@ -199,6 +202,7 @@ define([
         			"ExpressionStatement": checkDoc
         		};
         },
+        /** @callback */
 		"new-parens": function(context) {
         		return {
         			'NewExpression' : function(node) {
@@ -220,6 +224,7 @@ define([
         			}
         		};
         },
+        /** @callback */
         "no-caller": function(context) {
                 return {
                     "MemberExpression": function(node) {
@@ -238,6 +243,7 @@ define([
                     }
                 };
         },
+        /** @callback */
         "no-comma-dangle": function(context) {
                 return {
                     'ObjectExpression': function(node) {
@@ -320,6 +326,7 @@ define([
                   'DoWhileStatement': checkForAssignment
                 };
         },
+        /** @callback */
         "no-console": function(context) {
                 return {
                     'MemberExpression': function(node) {
@@ -332,6 +339,7 @@ define([
                     }
                 };
         },
+        /** @callback */
         "no-constant-condition": function(context) {
                 /**
                  * @param {Object} node The AST node
@@ -369,6 +377,7 @@ define([
                     'ConditionalExpression': checkCondition
                 };
         },
+        /** @callback */
 		"no-debugger": function(context) {
         		return {
         			"DebuggerStatement": function(node) {
@@ -381,6 +390,7 @@ define([
         			}
         		};
         },
+        /** @callback */
 		"no-dupe-keys": function(context) {
         		return {
         			"ObjectExpression": function(node) {
@@ -412,6 +422,7 @@ define([
         			}
         		};
         },
+        /** @callback */
 		'no-empty-block': function(context) {
         		var comments;
 
@@ -438,6 +449,7 @@ define([
         			}
         		};
         },
+        /** @callback */
 		"no-eval": function(context) {
         		return {
         			"CallExpression": function(node) {
@@ -456,6 +468,7 @@ define([
         			}
         		};
         },
+        /** @callback */
 		"no-extra-semi": function(context) {
         		return {
         			"EmptyStatement": function(node) {
@@ -472,6 +485,7 @@ define([
         			}
         		};
         },
+        /** @callback */
 		'no-fallthrough': function(context) {
         		function fallsthrough(node) {
         		    // cases with no statements or only a single case are implicitly fall-through
@@ -546,6 +560,7 @@ define([
         			 }
         		};
         },
+        /** @callback */
         "no-implied-eval": function(context) {
         		return {
         			"CallExpression": function(node) {
@@ -582,6 +597,7 @@ define([
         			}
         		};
         },
+        /** @callback */
         "no-iterator": function(context) {
                 return {
                     'MemberExpression': function(node) {
@@ -597,6 +613,7 @@ define([
                     }
                 };
         },
+        /** @callback */
         "no-proto": function(context) {
                 return {
                     'MemberExpression': function(node) {
@@ -612,6 +629,7 @@ define([
                     }
                 };
         },
+        /** @callback */
 		'no-jslint': function(context) {
         		return {
         			'Program' : function(node) {
@@ -642,6 +660,7 @@ define([
         			 }
         		};
         },
+        /** @callback */
 		"no-new-array": function(context) {
 		    	function checkNode(node) {
 		    		var callee = node.callee;
@@ -659,6 +678,7 @@ define([
         			'CallExpression': checkNode
         		};
         },
+        /** @callback */
 		"no-new-func": function(context) {
         		return {
         			'NewExpression': function(node) {
@@ -669,6 +689,7 @@ define([
         			}
         		};
         },
+        /** @callback */
 		"no-new-object": function(context) {
 		   		return {
         			'NewExpression': function(node) {
@@ -679,6 +700,7 @@ define([
         			}
         		};
         },
+        /** @callback */
 		"no-new-wrappers": function(context) {
         		var wrappers = ["String", "Number", "Math", "Boolean", "JSON"]; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-5$
 				return {
@@ -690,12 +712,14 @@ define([
         			}
         		};
         },
+        /** @callback */
         "no-with": function(context) {
         		return {'WithStatement': function(node) {
 	        			context.report(node, ProblemMessages['no-with'], null, context.getFirstToken(node));
 	        		}
         		};
         },
+        /** @callback */
 		"missing-nls": function(context){
         		function reportMissingNLS(node, index){
         			var data = Object.create(null);
@@ -776,6 +800,7 @@ define([
                     }
 				};
         },
+        /** @callback */
         "unnecessary-nls": function(context){
         		function reportUnusedNLS(range, value, nlsCommentValue){
 					context.report({range: range, loc: {start: range[0], end: range[1]}, value: value}, ProblemMessages['unnecessary-nls'], {data: {nlsComment: nlsCommentValue}});
@@ -890,6 +915,7 @@ define([
                     }
 				};
         },
+        /** @callback */
 		"no-redeclare": function(context) {
                 function reportRedeclaration(node, name) {
                     context.report(node, ProblemMessages['no-redeclare'], {0:name});
@@ -917,6 +943,7 @@ define([
                     "ArrowFunctionExpression": checkScope
                 };
         },
+        /** @callback */
         "no-regex-spaces": function(context) {
 
                 function reportSpaces(node) {
@@ -944,6 +971,7 @@ define([
                     }
                 };
         },
+        /** @callback */
         "no-reserved-keys": function(context) {
                 return {
                     'ObjectExpression': function(node) {
@@ -958,6 +986,7 @@ define([
                     }
                 };
         },
+        /** @callback */
         "no-shadow": function(context) {
                 function addVariables(map, scope) {
                     scope.variables.forEach(function(variable) {
@@ -1034,6 +1063,7 @@ define([
                     "ArrowFunctionExpression": checkScope
                 };
         },
+        /** @callback */
         "no-shadow-global": function(context) {
 
                 function checkShadow(node) {
@@ -1066,6 +1096,7 @@ define([
                     'VariableDeclarator': checkShadow
                 };
         },
+        /** @callback */
 		'no-sparse-arrays': function(context) {
         		return {
         			'ArrayExpression' : function(node){
@@ -1075,6 +1106,7 @@ define([
         			}
         		};
         },
+        /** @callback */
         "no-throw-literal": function(context) {
                 return {
                     "ThrowStatement": function(node) {
@@ -1099,6 +1131,7 @@ define([
                     }
                 };
         },
+        /** @callback */
 		"no-undef": function(context) {
                 function isImplicitGlobal(variable) {
                     return variable.defs.every(function(def) {
@@ -1163,6 +1196,7 @@ define([
                     }
                 };
         },
+        /** @callback */
         'no-undef-init': function(context) {
         		return {
         			'VariableDeclarator': function(node) {
@@ -1172,6 +1206,7 @@ define([
         			}
         		};
         },
+        /** @callback */
 		'no-unreachable': function(context) {
                 /**
                  * @description Returns if the statement is 'hoisted'
@@ -1224,6 +1259,7 @@ define([
                     }
                 };
         },
+        /** @callback */
 		"no-unused-params" : function(context) {
                 function hasCallbackComment(node) {
                     if(node && node.leadingComments) {
@@ -1320,6 +1356,7 @@ define([
         			"ArrowFunctionExpression": check
         		};
         },
+        /** @callback */
 		"no-unused-vars": function(context) {
         		function isRead(ref) {
         			return ref.isRead();
@@ -1391,6 +1428,7 @@ define([
         			"ArrowFunctionExpression": check
         		};
         },
+        /** @callback */
 		"no-use-before-define": function(context) {
                 function booleanOption(b, defaultValue) {
             		return typeof b === "boolean" ? b : defaultValue;
@@ -1425,6 +1463,7 @@ define([
         			"FunctionDeclaration": check
         		};
         },
+        /** @callback */
         "radix": function(context) {
                 function checkParseInt(call) {
                     var callee = call.callee;
@@ -1449,6 +1488,7 @@ define([
                     "CallExpression": checkParseInt
                 };
         },
+        /** @callback */
 		"no-mixed-spaces-and-tabs": function(context) {
 				var ignoredLocations = [];
 				// we define a regular expression that matches any line that starts with spaces after tabs before any other character
@@ -1554,6 +1594,7 @@ define([
 					"Program:exit": checkProgram
 				};
 		},
+		/** @callback */
 		"semi": function(context) {
         		function checkForSemicolon(node) {
         			try {
@@ -1597,6 +1638,7 @@ define([
         			"ContinueStatement": checkForSemicolon
         		};
         },
+        /** @callback */
 		"use-isnan": function(context) {
         		return {
         			'BinaryExpression' : function(node) {
@@ -1613,6 +1655,7 @@ define([
         			}
         		};
         },
+        /** @callback */
 		'valid-typeof': function(context) {
         		//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof
         		var symbols = ['undefined', 'object', 'function', 'boolean', 'number', 'string', 'symbol']; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
@@ -1649,6 +1692,7 @@ define([
 		'no-empty-label': noEmptyLabel,
 		'no-self-compare': noSelfCompare,
 		'no-irregular-whitespace': noIrregularWhitespace,
+		/** @callback */
 		'no-self-assign': function(context) {
 				function checkVariableDeclarator(variableDeclarator) {
 					var init = variableDeclarator.init;
@@ -1674,6 +1718,7 @@ define([
 					"VariableDeclarator" : checkVariableDeclarator
 				};
 			},
+		/** @callback */
 		'type-checked-consistent-return' : function(context) {
 				var functions = [];
 			
@@ -1795,6 +1840,8 @@ define([
 	var _callees = Object.create(null);
 	_mapCallees(['require', 'requirejs', 'importScripts', 'define', 'Worker', 'SharedWorker', 'addEventListener', 'RegExp', //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 	'removeEventListener'], _callees);  //$NON-NLS-1$
+    var _documentCallees = Object.create(null);
+    _mapCallees(['createElement'], _documentCallees); //$NON-NLS-1$
     
     function _collectLinesWithStringLiterals(node, lineMap){
     	
@@ -1835,8 +1882,12 @@ define([
     				case 'CallExpression': {
     					var callee = node.parent.callee;
     					if(callee) {
-    						if(callee.type === 'MemberExpression' && callee.property && _callees[callee.property.name]) {
-    							return;
+    						if(callee.type === 'MemberExpression' && callee.property) {
+    							if(callee.object && callee.object.type === "Identifier" && callee.object.name === "document" && _documentCallees[callee.property.name]) {
+    								return;
+    							} else if(_callees[callee.property.name]) {
+	    							return;
+								}
     						} else if(_callees[callee.name]) {
     							return;
     						}

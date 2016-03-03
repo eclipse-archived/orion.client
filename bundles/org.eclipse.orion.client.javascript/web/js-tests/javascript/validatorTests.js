@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014, 2015 IBM Corporation and others.
+ * Copyright (c) 2014, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -46,7 +46,7 @@ define([
 					getText: function() {
 						return new Deferred().resolve(buffer);
 					},
-					
+					/*override*/
 					getFileMetadata: function() {
 						var o = Object.create(null);
 						o.contentType = Object.create(null);
@@ -4493,7 +4493,9 @@ define([
 				//NO-NEW-WRAPPERS --------------------------------------------------------
 				describe('no-new-wrappers', function() {
 					var RULE_ID = "no-new-wrappers";
-			
+					/**
+					 * Checks the Object constructor message
+					 */
 					function assertMessages(messages, size) {
 							try {
 								var temp = messages.problems;
@@ -4690,6 +4692,146 @@ define([
 						validate({buffer: topic, callback: callback, config: config}).then(
 							function (problems) {
 								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					/**
+					 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=487677
+					 */
+					it("Ignore createElement 1", function(callback) {
+						var topic = "document.createElement('span');";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					/**
+					 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=487677
+					 */
+					it("Ignore createElement 2", function(callback) {
+						var topic = "if(true) {document.createElement('span');}";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					/**
+					 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=487677
+					 */
+					it("Mark non-document createElement 1", function(callback) {
+						var topic = "if(true) {foo.document.createElement('span');}";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Non-externalized string literal 'span'.",
+										nodeType: "Literal"
+									}
+								]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					/**
+					 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=487677
+					 */
+					it("Mark non-document createElement 2", function(callback) {
+						var topic = "if(true) {foo.createElement('span');}";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Non-externalized string literal 'span'.",
+										nodeType: "Literal"
+									}
+								]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					/**
+					 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=487677
+					 */
+					it("Mark non-document createElement 3", function(callback) {
+						var topic = "if(true) {createElement('span');}";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Non-externalized string literal 'span'.",
+										nodeType: "Literal"
+									}
+								]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					/**
+					 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=487677
+					 */
+					it("Mark non-document createElement 4", function(callback) {
+						var topic = "createElement('span');";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Non-externalized string literal 'span'.",
+										nodeType: "Literal"
+									}
+								]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					/**
+					 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=487677
+					 */
+					it("Mark non-document createElement 5", function(callback) {
+						var topic = "document.delegate.createElement('span');";
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Non-externalized string literal 'span'.",
+										nodeType: "Literal"
+									}
+								]);
 							},
 							function (error) {
 								worker.getTestState().callback(error);
