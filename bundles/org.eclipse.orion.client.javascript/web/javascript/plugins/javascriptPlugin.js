@@ -100,6 +100,7 @@ define([
 
 		var ternReady = false;
 		var workerReady = false;
+		var TRACE = localStorage.js_message_trace === "true";
 		var pendingStart = Object.create(null);
 		var messageQueue = []; // for all other requests
 		var modifyQueue = []; // for add and removes only
@@ -124,6 +125,9 @@ define([
 
 
 	WrappedWorker.prototype.postMessage = function(msg, f) {
+		if(TRACE) {
+			console.log("postMessage ("+this.messageId+"): "+JSON.stringify(msg));
+		}
 		var starting = msg.request === "start_server";
 		if(starting) {
 			if(!workerReady) {
@@ -143,8 +147,14 @@ define([
 			}
 			this.worker.postMessage(msg);
 		} else if (msg.request === "addFile" || msg.request === "delFile") {
+			if(TRACE) {
+				console.log("postMessage ("+this.messageId+") - MODIFY QUEUED: "+JSON.stringify(msg));
+			}
 			modifyQueue.push({msg: msg, f: f});
 		} else {
+			if(TRACE) {
+				console.log("postMessage ("+this.messageId+") - QUEUED: "+JSON.stringify(msg));
+			}
 			messageQueue.push({msg: msg, f: f});
 		}
 	};
@@ -154,8 +164,8 @@ define([
     	 *
     	 * TODO will need to listen to updated tern plugin settings once enabled to clear this cache
     	 */
-    	var contributedEnvs;
-		var ternWorker;
+    	var contributedEnvs,
+			ternWorker;
 		
 		var handlers ={
 			'read': doRead,
@@ -163,6 +173,9 @@ define([
 			 * @callback
 			 */
 			'worker_ready': function(response) {
+				if(TRACE) {
+					console.log("worker_ready ("+this.messageId+"): "+JSON.stringify(response));
+				}
 				workerReady = true;
 				if (!pendingStart.msg || !pendingStart.msg.request){
 					pendingStart.msg = {request: "start_server", args: {}}; //$NON-NLS-1$
@@ -173,6 +186,9 @@ define([
 			 * @callback
 			 */
 			'start_server': function(response) {
+				if(TRACE) {
+					console.log("server_ready ("+this.messageId+"): "+JSON.stringify(response));
+				}
 				serverReady();
 			}
 		};
@@ -280,40 +296,6 @@ define([
 				ternWorker.postMessage(item.msg, item.f);
 			}
 			messageQueue = [];
-//			function cleanPrefs(prefs) {
-//				var all = Object.keys(prefs);
-//				for(i = 0, len = all.length; i < len; i++) {
-//					var id = all[i];
-//					if(/^tern.$/.test(id)) {
-//						delete prefs[id];
-//					}
-//				}
-//			}
-//			ternWorker.postMessage({request: 'installed_plugins'}, function(response) { //$NON-NLS-1$
-//				var plugins = response.plugins;
-//				var preferences = serviceRegistry.getService("orion.core.preference"); //$NON-NLS-1$
-// 				return preferences ? preferences.get("/cm/configurations").then(function(prefs){ // //$NON-NLS-1$
-//					var props = prefs["tern"];
-//					cleanPrefs(prefs);
-//					if (!props) {
-//						props = Object.create(null);
-//					} else if(typeof props === 'string') {
-//						props = JSON.parse(props);
-//					}
-//					var keys = Object.keys(plugins);
-//					var plugs = props.plugins ? props.plugins : Object.create(null);
-//					for(i = 0; i < keys.length; i++) {
-//						var key = keys[i];
-//						if(/^orion/.test(key)) {
-//							delete plugs[key]; //make sure only the latest of Orion builtins are shown
-//						}
-//						plugs[key] = plugins[key];
-//					}
-//					props.plugins = plugs;
-//					prefs["tern"] = JSON.stringify(props);
-//					return preferences.put("/cm/configurations", prefs, {clear: true}); //$NON-NLS-1$
-//				}) : new Deferred().resolve();
-//			});
 		}
 
     	/**
