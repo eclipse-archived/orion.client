@@ -19,12 +19,13 @@ define(['i18n!orion/compare/nls/messages',
         'orion/editor/editor',
         'orion/editor/editorFeatures',
         'orion/keyBinding',
+        'orion/editor/textTheme',
         'orion/editor/textView',
         'orion/compare/compareUIFactory',
         'orion/compare/compareUtils',
         'orion/compare/jsdiffAdapter',
         'orion/compare/diffTreeNavigator'],
-function(messages, Deferred, mEventTarget, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mKeyBinding, mTextView,
+function(messages, Deferred, mEventTarget, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mKeyBinding, mTextTheme, mTextView,
 		 mCompareUIFactory, mCompareUtils, mJSDiffAdapter, mDiffTreeNavigator,  mTextMateStyler, mHtmlGrammar, mTextStyler) {
 var exports = {};
 /**
@@ -446,6 +447,7 @@ exports.TwoWayCompareView = (function() {
 			var view = new mTextView.TextView({
 				parent: parentDiv,
 				readonly: readonly,
+				theme: mTextTheme.TextTheme.getTheme("nothing"),
 				tabSize: 4
 			});
 			this._viewLoadedCounter++;
@@ -802,6 +804,7 @@ exports.InlineCompareView = (function() {
 			var textView = new mTextView.TextView({
 				parent: parentDiv,
 				readonly: true,
+				theme: mTextTheme.TextTheme.getTheme("nothing"),
 				tabSize: 4
 			});
 			return textView;
