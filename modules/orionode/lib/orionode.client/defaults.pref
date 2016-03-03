@@ -1,6 +1,7 @@
 {
 	"/plugins":{
 		"plugins/fileClientPlugin.html":true,
+		"plugins/authenticationPlugin.html":true,
 		"plugins/jslintPlugin.html":true,
 		"edit/content/imageViewerPlugin.html":true,
 		"edit/content/jsonEditorPlugin.html":true,
