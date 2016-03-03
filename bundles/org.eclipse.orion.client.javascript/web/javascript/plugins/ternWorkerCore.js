@@ -67,6 +67,30 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 			}
 			if (typeof jsonOptions.ecmaVersion === 'number') {
 				options.ecmaVersion = jsonOptions.ecmaVersion;
+				if(options.ecmaVersion === 5) {
+					if(Array.isArray(defNames)) {
+						if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
+							defNames.push("ecma5"); //$NON-NLS-1$
+						}
+						var e6 = defNames.indexOf("ecma6"); //$NON-NLS-1$
+						if(e6 > -1) {
+							defNames.slice(e6, e6+1);
+						}
+					} else {
+						defNames = ["ecma5"]; //$NON-NLS-1$
+					}
+				} else if(options.ecmaVersion === 6) {
+					if(Array.isArray(defNames)) {
+						if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
+							defNames.push("ecma5"); //$NON-NLS-1$
+						}
+						if(defNames.indexOf("ecma6") < 0) { //$NON-NLS-1$
+							defNames.push("ecma6"); //$NON-NLS-1$
+						}
+					} else {
+						defNames = ["ecma5", "ecma6"]; //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				}
 			}
 			if (typeof jsonOptions.dependencyBudget === 'number') {
 				options.dependencyBudget = jsonOptions.dependencyBudget;
@@ -133,6 +157,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 					if(defNames.length < 1) {
 						startAndMessage(options);
 					} else {
+						defNames = defNames.sort();
 						Deferred.all(loadDefs(defNames, projectLoc)).then(function(json) {
 							options.defs = json;
 							startAndMessage(options);
