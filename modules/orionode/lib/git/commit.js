@@ -515,7 +515,7 @@ function merge(req, res, next, rest, repoPath, commitToMerge, squash) {
 	});
 }
 
-function createCommit(repo, committerName, committerEmail, authorName, authorEmail, message){
+function createCommit(repo, committerName, committerEmail, authorName, authorEmail, message, amend){
 	var index, oid, author, committer;
 	return repo.index()
 	.then(function(indexResult) {
@@ -542,6 +542,9 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 			committer = git.Signature.now(committerName, committerEmail);
 		} else {
 			committer = git.Signature.default(repo);
+		}
+		if (amend) {
+			return parent.amend("HEAD",  author, committer, null, message, oid);
 		}
 		return repo.createCommit("HEAD", author, committer, message, oid, [parent]);
 	})
@@ -625,19 +628,24 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 		return;
 	}
 	
-	//TODO create commit -> amend, empty message, change id
+	//TODO create commit -> change id
 	if (commit !== "HEAD") {
 		writeError(404, res, "Needs to be HEAD");
+		return;
+	}
+	
+	if (!req.body.Message) {
+		writeError(404, res, "Commit message cannot be empty.");
 		return;
 	}
 
 	var theRepo, thisCommit;
 	var theDiffs = [], theParents;
-
+	
 	git.Repository.open(repoPath)
 	.then(function(repo) {
 		theRepo = repo;
-		return createCommit(repo, req.body.CommitterName, req.body.CommitterEmail, req.body.AuthorName, req.body.AuthorEmail, req.body.Message);
+		return createCommit(repo, req.body.CommitterName, req.body.CommitterEmail, req.body.AuthorName, req.body.AuthorEmail, req.body.Message, req.body.Amend);
 	})
 	.then(function(commit) {
 		thisCommit = commit;
