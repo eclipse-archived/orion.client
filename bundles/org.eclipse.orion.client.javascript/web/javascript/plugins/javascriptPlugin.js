@@ -132,6 +132,10 @@ define([
 				pendingStart.f = f;
 				return; //don't queue start_server requests
 			}
+			if(startCount > 0 && msg.args.initial) {
+				return;
+			}
+			startCount++;
 			ternReady = false;
 		}
 		if(ternReady || starting || msg.request === 'read') { //configuration reads can happen while the server is starting
@@ -165,7 +169,8 @@ define([
     	 * TODO will need to listen to updated tern plugin settings once enabled to clear this cache
     	 */
     	var contributedEnvs,
-			ternWorker;
+			ternWorker,
+			startCount = 0;
 		
 		var handlers ={
 			'read': doRead,
@@ -178,7 +183,7 @@ define([
 				}
 				workerReady = true;
 				if (!pendingStart.msg || !pendingStart.msg.request){
-					pendingStart.msg = {request: "start_server", args: {}}; //$NON-NLS-1$
+					pendingStart.msg = {request: "start_server", args: {initial: true}}; //$NON-NLS-1$
 				}
 				ternWorker.postMessage(pendingStart.msg, pendingStart.f);
 			},
@@ -283,25 +288,28 @@ define([
 		 * @since 10.0
 		 */
 		function serverReady() {
-			ternReady = true;
-			// process all add/remove first
-			for(var i = 0, len = modifyQueue.length; i < len; i++) {
-				var item = modifyQueue[i];
-				if(TRACE) {
-					console.log("clearing MODIFY queue: "+JSON.stringify(item.msg));
+			startCount--;
+			if(startCount === 0) {
+				ternReady = true;
+				// process all add/remove first
+				for(var i = 0, len = modifyQueue.length; i < len; i++) {
+					var item = modifyQueue[i];
+					if(TRACE) {
+						console.log("clearing MODIFY queue: "+JSON.stringify(item.msg));
+					}
+					ternWorker.postMessage(item.msg, item.f);
 				}
-				ternWorker.postMessage(item.msg, item.f);
-			}
-			modifyQueue = [];
-			// process remaining pending requests
-			for(i = 0, len = messageQueue.length; i < len; i++) {
-				item = messageQueue[i];
-				if(TRACE) {
-					console.log("clearing MESSAGE queue: "+JSON.stringify(item.msg));
+				modifyQueue = [];
+				// process remaining pending requests
+				for(i = 0, len = messageQueue.length; i < len; i++) {
+					item = messageQueue[i];
+					if(TRACE) {
+						console.log("clearing MESSAGE queue: "+JSON.stringify(item.msg));
+					}
+					ternWorker.postMessage(item.msg, item.f);
 				}
-				ternWorker.postMessage(item.msg, item.f);
+				messageQueue = [];
 			}
-			messageQueue = [];
 		}
 
     	/**
