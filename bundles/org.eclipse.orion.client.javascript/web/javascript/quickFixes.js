@@ -182,6 +182,21 @@ define([
         }
         return null;
     }
+
+    function removeIndexedItemPos(list, index, editorContext) {
+        if(index < 0 || index > list.length) {
+	            return;
+        }
+        var node = list[index];
+        if(list.length === 1) {
+            return { "start" : node.range[0], "end" : node.range[1], "text" : "" };
+        } else if(index === list.length-1) {
+            return { "start" : list[index-1].range[1], "end" : node.range[1], "text" : ""};
+        } else if(node) {
+            return { "start" : node.range[0], "end" : list[index+1].range[0], "text" : ""};
+        }
+        return null;
+    }
     
     function updateDoc(node, source, editorContext, name) {
         if(node.leadingComments && node.leadingComments.length > 0) {
@@ -190,7 +205,22 @@ define([
                 var edit = new RegExp("(\\s*[*]+\\s*(?:@param)\\s*(?:\\{.*\\})?\\s*(?:"+name+")+.*)").exec(comment.value); //$NON-NLS-1$ //$NON-NLS-2$
                 if(edit) {
                     var start = comment.range[0] + edit.index + getDocOffset(source, comment.range[0]);
+                    console.log(editorContext.setText)
                     return editorContext.setText('', start, start+edit[1].length);
+                }
+            }
+        }
+        return null;
+    }
+
+    function updateDocPos(node, source, name) {
+        if(node.leadingComments && node.leadingComments.length > 0) {
+            for(var i = node.leadingComments.length-1; i > -1; i--) {
+                var comment = node.leadingComments[i];
+                var edit = new RegExp("(\\s*[*]+\\s*(?:@param)\\s*(?:\\{.*\\})?\\s*(?:"+name+")+.*)").exec(comment.value); //$NON-NLS-1$ //$NON-NLS-2$
+                if(edit) {
+                    var start = comment.range[0] + edit.index + getDocOffset(source, comment.range[0]);
+                    return {"start" : start, "end" :start+edit[1].length, "text" : ''};
                 }
             }
         }
@@ -975,56 +1005,59 @@ define([
 	         */
 	        "no-unused-params": function(editorContext, context, astManager) {
 	            return astManager.getAST(editorContext).then(function(ast) {
-	                var node = Finder.findNode(context.annotation.start, ast, {parents:true});
-	                if(node) {
-	                    var promises = [];
-	                    var parent = node.parents.pop();
-	                    var paramindex = -1;
-	                    for(var i = 0; i < parent.params.length; i++) {
-	                        var p = parent.params[i];
-	                        if(node.range[0] === p.range[0] && node.range[1] === p.range[1]) {
-	                            paramindex = i;
-	                            break;
-	                        }
-	                    }
-	                    var promise = removeIndexedItem(parent.params, paramindex, editorContext);
-	                    if(promise) {
-	                        promises.push(promise);
-	                    }
-	                    switch(parent.type) {
-	                        case 'FunctionExpression': {
-	                            var funcparent = node.parents.pop();
-	                            if(funcparent.type === 'CallExpression' && (funcparent.callee.name === 'define' || funcparent.callee.name === 'require')) {
-	                                var args = funcparent.arguments;
-	                                for(i = 0; i < args.length; i++) {
-	                                    var arg = args[i];
-	                                    if(arg.type === 'ArrayExpression') {
-	                                        promise = removeIndexedItem(arg.elements, paramindex, editorContext);
-	                                        if(promise) {
-	                                            promises.push(promise);
-	                                        }
-	                                        break;
-	                                    }
-	                                }
-	                            } else if(funcparent.type === 'Property' && funcparent.leadingComments && funcparent.leadingComments.length > 0) {
-	                                promise = updateDoc(funcparent, ast.source, editorContext, parent.params[paramindex].name);
-	                                if(promise) {
-	                                    promises.push(promise);
-	                                }
-	                            }
-	                            break;
-	                        }
-	                        case 'FunctionDeclaration': {
-	                           promise = updateDoc(parent, ast.source, editorContext, parent.params[paramindex].name);
-	                           if(promise) {
-	                               promises.push(promise);
-	                           }
-	                           break;
-	                        }
-	                    }
-	                    return Deferred.all(promises);
-	                }
-	                return null;
+	            	return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation){
+		                var node = Finder.findNode(context.annotation.start, ast, {parents:true});
+		                if(node) {
+		                    var changes = [];
+		                    var parent = node.parents.pop();
+		                    var paramindex = -1;
+		                    for(var i = 0; i < parent.params.length; i++) {
+		                        var p = parent.params[i];
+		                        if(node.range[0] === p.range[0] && node.range[1] === p.range[1]) {
+		                            paramindex = i;
+		                            break;
+		                        }
+		                    }
+		                    var change = removeIndexedItemPos(parent.params, paramindex, editorContext);
+		                    console.log(paramindex)
+		                    if(change) {
+		                        changes.push(change);
+		                    }
+		                    switch(parent.type) {
+		                        case 'FunctionExpression': {
+		                            var funcparent = node.parents.pop();
+		                            if(funcparent.type === 'CallExpression' && (funcparent.callee.name === 'define' || funcparent.callee.name === 'require')) {
+		                                var args = funcparent.arguments;
+		                                for(i = 0; i < args.length; i++) {
+		                                    var arg = args[i];
+		                                    if(arg.type === 'ArrayExpression') {
+		                                        change = removeIndexedItemPos(arg.elements, paramindex, editorContext);
+		                                        if(change) {
+		                                            changes.push(change);
+		                                        }
+		                                        break;
+		                                    }
+		                                }
+		                            } else if(funcparent.type === 'Property' && funcparent.key.leadingComments && funcparent.key.leadingComments.length > 0) {
+		                                change = updateDocPos(funcparent.key, ast.source, parent.params[paramindex].name);
+		                                if(change) {
+		                                    changes.push(change);
+		                                }
+		                            }
+		                            break;
+		                        }
+		                        case 'FunctionDeclaration': {
+		                           change = updateDocPos(parent, ast.source, parent.params[paramindex].name);
+		                           if(change) {
+		                               changes.push(change);
+		                           }
+		                           break;
+		                        }
+		                    }
+		                    return changes;
+		                }
+		                return null;
+		            });
 	            });
 	        },
 	        /**
