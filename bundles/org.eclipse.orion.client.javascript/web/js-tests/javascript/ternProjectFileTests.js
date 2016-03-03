@@ -231,6 +231,26 @@ define([
 					checkServerState([], ["ecma5", "ecma6"], callback);
 				});
 			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=488989
+			 */
+			it("mixed ecmaVersion 7", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {ecmaVersion: 5, libs: ["ecma6", "ecma5"], plugins: {}}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState([], ["ecma5"], callback);
+				});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=488989
+			 */
+			it("mixed ecmaVersion 8", function(callback) {
+				worker.postMessage({request: "start_server", args:{options: {ecmaVersion: 5, libs: ["ecma5", "ecma6"], plugins: {}}}}, /* @callback */ function(response) {
+					assert(response, "We should have gotten a response");
+					assert.equal("server_ready", response.state, "The server was not ready");
+					checkServerState([], ["ecma5"], callback);
+				});
+			});
 			it("bad ecmaVersion 1", function(callback) {
 				worker.postMessage({request: "start_server", args:{options: {ecmaVersion: "3"}}}, /* @callback */ function(response) {
 					assert(response, "We should have gotten a response");
