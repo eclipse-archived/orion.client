@@ -212,6 +212,7 @@ function getCommitParents(repo, commit, fileDir) {
 function getCommitTagsMap(repo, fileDir) {
 	var map = {};
 	//TODO improve performance
+	if (true) return map;
 //	var time = Date.now();
 	return new Promise(function (fulfill){
 		repo.getReferences(git.Reference.TYPE.OID)
