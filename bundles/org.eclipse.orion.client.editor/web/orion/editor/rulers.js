@@ -227,7 +227,7 @@ define("orion/editor/rulers", [
 		 */
 		setAnnotationModel: function (annotationModel) {
 			if (this._annotationModel) {
-				this._annotationModel.removEventListener("Changed", this._listener.onAnnotationModelChanged); //$NON-NLS-0$
+				this._annotationModel.removeEventListener("Changed", this._listener.onAnnotationModelChanged); //$NON-NLS-0$
 			}
 			this._annotationModel = annotationModel;
 			if (this._annotationModel) {
