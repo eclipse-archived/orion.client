@@ -11,7 +11,6 @@
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
-var url = require('url');
 var mCommit = require('./commit');
 var clone = require('./clone');
 var express = require('express');
@@ -27,27 +26,21 @@ module.exports.router = function(options) {
 	
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', function(req, res) {
-		return getStash(req, res, req.urlPath);
-	})
-	.delete('*', function(req, res) {
-		return deleteStash(req, res, req.urlPath);
-	})
-	.put('*', function(req, res) {
-		return putStash(req, res, req.urlPath);
-	})
-	.post('*', function(req, res) {
-		return postStash(req, res, req.urlPath);
-	});
+	.get('*', getStash)
+	.delete('/file*', deleteStash)
+	.delete('/:stashRev*', deleteStash)
+	.put('/file*', putStash)
+	.put('/:stashRev*', putStash)
+	.post('*', postStash);
 
-function getStash(req, res, rest) {
-	var query = url.parse(req.url, true).query;
+function getStash(req, res) {
+	var query = req.query;
 	var filter = query.filter;
 	var page = Number(query.page) || 1;
 	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
 	var fileDir;
 	var stashesPromises = [];
-	return clone.getRepo(rest)
+	return clone.getRepo(req.urlPath)
 	.then(function(repo) {
 		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 		return git.Stash.foreach(repo, function(index, message, oid) {
@@ -88,12 +81,10 @@ function getStash(req, res, rest) {
 	});
 }
 
-function putStash(req, res, rest) {
-	var segments = rest.split("/");
-	var stashRev = segments[1] === "file" ? "" : segments[1];
-
+function putStash(req, res) {
+	var stashRev = req.params.stashRev;
 	var repo;
-	return clone.getRepo(rest)
+	return clone.getRepo(req.urlPath)
 	.then(function(_repo) {
 		repo = _repo;
 		if (stashRev) {
@@ -118,12 +109,10 @@ function putStash(req, res, rest) {
 	});
 }
 
-function deleteStash(req, res, rest) {
-	var segments = rest.split("/");
-	var stashRev = segments[1] === "file" ? "" : segments[1];
-
+function deleteStash(req, res) {
+	var stashRev = req.params.stashRev;
 	var repo;
-	return clone.getRepo(rest)
+	return clone.getRepo(req.urlPath)
 	.then(function(_repo) {
 		repo = _repo;
 		var index, all = [];
@@ -150,13 +139,13 @@ function deleteStash(req, res, rest) {
 	});
 }
 
-function postStash(req, res, rest) {
+function postStash(req, res) {
 	var flags = git.Stash.FLAGS.DEFAULT;
 	if (req.body.IncludeUntracked) flags |= git.Stash.FLAGS.INCLUDE_UNTRACKED;
 	var message = req.body.IndexMessage || req.body.WorkingDirectoryMessage || "";
 
 	var repo;
-	return clone.getRepo(rest)
+	return clone.getRepo(req.urlPath)
 	.then(function(_repo) {
 		repo = _repo;
 		return git.Stash.save(repo, git.Signature.default(repo), message, flags);

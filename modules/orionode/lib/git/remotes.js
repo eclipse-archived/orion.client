@@ -31,15 +31,13 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', function(req, res) {
-		return getRemotes(req, res, req.urlPath);
-	})
-	.delete('*', function(req, res) {
-		return deleteRemote(req, res, req.urlPath);
-	})
-	.post('*', function(req, res) {
-		return postRemote(req, res, req.urlPath);
-	});
+	.get('/file*', getRemotes)
+	.get('/:remoteName/file*', getRemotes)
+	.get('/:remoteName/:branchName/file*', getRemotes)
+	.delete('/:remoteName*', deleteRemote)
+	.post('/file*', addRemote)
+	.post('/:remoteName/file*', postRemote)
+	.post('/:remoteName/:branchName/file*', postRemote);
 	
 function remoteBranchJSON(remoteBranch, commit, remote, fileDir, branch){
 	var fullName, shortName;
@@ -81,19 +79,16 @@ function remoteJSON(remote, fileDir, branches) {
 	};
 }
 
-function getRemotes(req, res, rest) {
-	var segments = rest.split("/");
-	var allRemotes = segments[1] === "file";
-	var allRemoteBranches = segments[2] === "file";
-	var oneRemoteBranch = segments[3] === "file";
-	var query = url.parse(req.url, true).query;
-	var filter = query.filter;
+function getRemotes(req, res) {
+	var remoteName = req.params.remoteName;
+	var branchName = req.params.branchName;
+	var filter = req.query.filter;
 
-	var fileDir, theRepo, theRemote, remoteName;
-	if (allRemotes) {
+	var fileDir, theRepo, theRemote;
+	if (!remoteName && !branchName) {
 		var repo;
 
-		return clone.getRepo(rest)
+		return clone.getRepo(req.urlPath)
 		.then(function(r) {
 			repo = r;
 			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -120,9 +115,8 @@ function getRemotes(req, res, rest) {
 		});
 	}
 
-	if (allRemoteBranches) {
-		remoteName = segments[1];
-		return clone.getRepo(rest)
+	if (remoteName && !branchName) {
+		return clone.getRepo(req.urlPath)
 		.then(function(repo) {
 			theRepo = repo;
 			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -163,11 +157,10 @@ function getRemotes(req, res, rest) {
 		});
 	} 
 
-	if (oneRemoteBranch) {
-		remoteName = segments[1];
-		var branchName = segments[2].replace(/%252F/g, '/');
+	if (remoteName && branchName) {
+		branchName = branchName.replace(/%2F/g, '/');
 		var theBranch;
-		return clone.getRepo(rest)
+		return clone.getRepo(req.urlPath)
 		.then(function(repo) {
 			theRepo = repo;
 			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -196,7 +189,7 @@ function getRemotes(req, res, rest) {
 	return writeError(404, res);
 }
 
-function addRemote(req, res, rest) {
+function addRemote(req, res) {
 	var fileDir;
 	
 	if (!req.body.Remote || !req.body.RemoteURI) {
@@ -211,7 +204,7 @@ function addRemote(req, res, rest) {
 		writeError(403, res);
 	}
 
-	return clone.getRepo(rest)
+	return clone.getRepo(req.urlPath)
 	.then(function(repo) {
 		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 		return git.Remote.create(repo, req.body.Remote, req.body.RemoteURI);
@@ -231,27 +224,20 @@ function addRemote(req, res, rest) {
 	});
 }
 
-function postRemote(req, res, rest) {
-	var segments = rest.split("/");
-	var remote = segments[1];
-	if (remote === "file") {
-		return addRemote(req, res, rest);
-	}
-	var branch = segments[2] === "file" ? "" : segments[2];
-
-	if (req.body.Fetch) {
-		fetchRemote(req, res, rest, remote, branch, req.body.Force);
+function postRemote(req, res) {
+	if (req.body.Fetch === "true") {
+		fetchRemote(req, res, req.params.remoteName, req.params.branchName, req.body.Force);
 	} else if (req.body.PushSrcRef) {
-		pushRemote(req, res, rest, remote, branch, req.body.PushSrcRef, req.body.PushTags, req.body.Force);
+		pushRemote(req, res, req.params.remoteName, req.params.branchName, req.body.PushSrcRef, req.body.PushTags, req.body.Force);
 	} else {
 		writeError(400, res);
 	}
 }
 
-function fetchRemote(req, res, rest, remote, branch, force) {
+function fetchRemote(req, res, remote, branch, force) {
 	var task = new tasks.Task(res);
 	var repo;
-	return clone.getRepo(rest)
+	return clone.getRepo(req.urlPath)
 	.then(function(r) {
 		repo = r;
 		return git.Remote.lookup(repo, remote);
@@ -302,13 +288,13 @@ function fetchRemote(req, res, rest, remote, branch, force) {
 	});
 }
 
-function pushRemote(req, res, rest, remote, branch, pushSrcRef, tags, force) {
+function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	var repo;
 	var remoteObj;
 
 	var task = new tasks.Task(res, false, false, 0);//TODO start task right away to work around bug in client code
 
-	return clone.getRepo(rest)
+	return clone.getRepo(req.urlPath)
 	.then(function(r) {
 		repo = r;
 		return git.Remote.lookup(repo, remote);
@@ -388,10 +374,9 @@ function pushRemote(req, res, rest, remote, branch, pushSrcRef, tags, force) {
 	});
 }
 
-function deleteRemote(req, res, rest) {
-	var segments = rest.split("/");
-	var remoteName = segments[1];
-	return clone.getRepo(rest)
+function deleteRemote(req, res) {
+	var remoteName = req.params.remoteName;
+	return clone.getRepo(req.urlPath)
 	.then(function(repo) {
 		return git.Remote.delete(repo, remoteName).then(function(resp) {
 			if (!resp) {

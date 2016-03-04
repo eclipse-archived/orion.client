@@ -29,12 +29,9 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', function(req, res) {
-		return getTags(req, res, req.urlPath);
-	})
-	.delete('*', function(req, res) {
-		return deleteTag(req, res, req.urlPath);
-	});
+	.get('/file*', getTags)
+	.get('/:branchName*', getTags)
+	.delete('/:tagName*', deleteTag);
 
 function tagJSON(ref, commit, fileDir) {
 	var fullName = ref.name();
@@ -52,12 +49,10 @@ function tagJSON(ref, commit, fileDir) {
 	};
 }
 
-function getTags(req, res, rest) {
-	var segments = rest.split("/");
-	var hasTag = segments[1] !== "file";
-	var tagName = hasTag ? segments[1] : "";
+function getTags(req, res) {
+	var tagName = req.params.tagName	;
 	var fileDir;
-	var query = url.parse(req.url, true).query;
+	var query = req.query;
 	var page = Number(query.page) || 1;
 	var filter = query.filter;
 	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
@@ -67,7 +62,7 @@ function getTags(req, res, rest) {
 	var count = 0, tagCount = 0;
 
 	if (tagName) {
-		return clone.getRepo(rest)
+		return clone.getRepo(req.urlPath)
 		.then(function(repo) {
 			theRepo = repo;
 			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -89,7 +84,7 @@ function getTags(req, res, rest) {
 		});
 	}
 
-	return clone.getRepo(rest)
+	return clone.getRepo(req.urlPath)
 	.then(function(repo) {
 		theRepo = repo;
 		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -149,11 +144,9 @@ function getTags(req, res, rest) {
 	});
 }
 
-function deleteTag(req, res, rest) {
-	var segments = rest.split("/");
-	var tagName = segments[1];
-
-	return clone.getRepo(rest)
+function deleteTag(req, res) {
+	var tagName = req.params.tagName;
+	return clone.getRepo(req.urlPath)
 	.then(function(repo) {
 		return git.Tag.delete(repo, tagName);
 	})

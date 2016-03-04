@@ -24,12 +24,10 @@ function router(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', function(req, res) {
-		return getStatus(req, res, req.urlPath);
-	});
+	.get('*', getStatus);
 	
-	function getStatus(req, res, rest) {
-		return clone.getRepo(rest)
+	function getStatus(req, res) {
+		return clone.getRepo(req.urlPath)
 		.then(function(repo) {
 			var fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 			repo.getStatusExt({
@@ -112,11 +110,11 @@ function router(options) {
 				var resp = JSON.stringify({
 					"Added": added,
 					"Changed": changed,
-					"CloneLocation": "/gitapi/clone/file/" + rest.replace("status/file/", ""),
-					"CommitLocation": "/gitapi/commit/HEAD/file/" + rest.replace("status/file/", ""),
+					"CloneLocation": "/gitapi/clone" + fileDir,
+					"CommitLocation": "/gitapi/commit/HEAD" + fileDir,
 					"Conflicting": conflicting,
-					"IndexLocation": "/gitapi/index/file/" + rest.replace("status/file/", ""),
-					"Location": "/gitapi/status/file/" + rest.replace("status/file/", ""),
+					"IndexLocation": "/gitapi/index" + fileDir,
+					"Location": "/gitapi/status/file" + fileDir,
 					"Missing": missing,
 					"Modified": modified,
 					"Removed": removed,
