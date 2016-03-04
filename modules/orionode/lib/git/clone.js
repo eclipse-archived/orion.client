@@ -18,6 +18,29 @@ var async = require('async');
 var fileUtil = require('../fileUtil');
 var tasks = require('../tasks');
 
+function cloneJSON(base, location, url, parents, submodules) {
+	return {
+		"BranchLocation": "/gitapi/branch" + location,
+		"CommitLocation": "/gitapi/commit" + location,
+		"ConfigLocation": "/gitapi/config/clone" + location,
+		"ContentLocation": location,
+		"DiffLocation": "/gitapi/diff/Default" + location,
+		"HeadLocation": "/gitapi/commit/HEAD" + location,
+		"IndexLocation": "/gitapi/index" + location,
+		"Location": "/gitapi/clone" + location,
+		"Name": base,
+		"GitUrl": url,
+		"Children": submodules && submodules.length ? submodules : undefined,
+		"Parents": parents && parents.length ? parents : undefined,
+		"RemoteLocation": "/gitapi/remote" + location,
+		"StashLocation": "/gitapi/stash" + location,
+		"StatusLocation": "/gitapi/status" + location,
+		"SubmoduleLocation": "/gitapi/submodule" + location,
+		"TagLocation": "/gitapi/tag" + location,
+		"Type": "Clone"
+	};
+}
+
 function getClone(workspaceDir, fileRoot, req, res, next, rest) {
 	var repos = [];
 	
@@ -41,56 +64,89 @@ function getClone(workspaceDir, fileRoot, req, res, next, rest) {
 		res.setHeader('Content-Length', resp.length);
 		res.end(resp);	
 	});
+	
+	function pushRepo(repos, repo, base, location, url, parents, cb) {
+		Promise.all([url || getURL(repo), getSubmodules(repo, location, parents.slice(0).concat(["/gitapi/clone" + location]))]).then(function(results) {
+			var json = cloneJSON(base, location, results[0], parents, results[1]);
+			repos.push(json);
+			cb(json);
+		});
+	}
+	
+	function getSubmodules(repo, location, parents) {
+		return new Promise(function(fulfill) {
+			var modules = [];
+			return repo.getSubmoduleNames()
+			.then(function(names) {
+				async.each(names, function(name, callback) {
+					git.Submodule.lookup(repo, name)
+					.then(function(submodule) {
+						var sublocation = api.join(location, submodule.path());
+						function done(json, unitialized) {
+							json.SubmoduleStatus = {
+								Type: unitialized ? "UNINITIALIZED" : "INITIALIZED",
+								HeadSHA: submodule.headId() ? submodule.headId().toString() : "",
+								Path: submodule.path()
+							};
+							callback();
+						}
+						submodule.open()
+						.then(function(subrepo) {
+							pushRepo(modules, subrepo, name, sublocation, submodule.url(), parents, done);
+						}).catch(function() {
+							var json = cloneJSON(name, sublocation, submodule.url(), parents);
+							modules.push(json);
+							done(json, true);
+						});
+					}).catch(function() {
+						callback();
+					});
+				}, function() {
+					fulfill(modules);
+				});
+			});
+		});
+	}
+	
+	function getURL(repo) {
+		return new Promise(function(fulfill) {
+			repo.getRemotes()
+			.then(function(remotes){
+				var url;
+				async.each(remotes, function(remote, callback) {
+					if (remote === "origin") {
+						repo.getRemote(remote)
+						.then(function(remote){
+							url = remote.url();
+							callback();
+						}).catch(function() {
+							callback();
+						});
+					} else {
+						callback();
+					}
+				}, function() {
+					return fulfill(url);	
+				});
+			});
+		});
+	}
 
 	function checkDirectory(dir, cb) {
 		//Check if the dir is a directory
 		fs.lstat(dir, function(err, stat) {
 			if (err || !stat.isDirectory()) return cb(err);
-			var base = path.basename(dir);
 			git.Repository.open(dir)
 			.then(function(repo) {
+				var base = path.basename(dir);
 				var location = api.join(fileRoot, dir.replace(workspaceDir + "/", ""));
-				var repoInfo = {
-					"BranchLocation": "/gitapi/branch" + location,
-					"CommitLocation": "/gitapi/commit" + location,
-					"ConfigLocation": "/gitapi/config/clone" + location,
-					"ContentLocation": location,
-					"DiffLocation": "/gitapi/diff/Default" + location,
-					"HeadLocation": "/gitapi/commit/HEAD" + location,
-					"IndexLocation": "/gitapi/index" + location,
-					"Location": "/gitapi/clone" + location,
-					"Name": base,
-					"RemoteLocation": "/gitapi/remote" + location,
-					"StashLocation": "/gitapi/stash" + location,
-					"StatusLocation": "/gitapi/status" + location,
-					"TagLocation": "/gitapi/tag" + location,
-					"Type": "Clone"
-				};
-
-				repo.getRemotes()
-				.then(function(remotes){
-					async.each(remotes, function(remote, callback) {
-						if (remote === "origin") {
-							repo.getRemote(remote)
-							.then(function(remote){
-								repoInfo.GitUrl = remote.url();
-								callback();
-							});
-						} else {
-							callback();
-						}
-					}, function(err) {
-						repos.push(repoInfo);
-						return cb();	
-					});
-				});
+				pushRepo(repos, repo, base, location, null, [], function() { cb(); });
 	 		})
-			.catch(function(err) {
+			.catch(function() {
 				fs.readdir(dir, function(err, files) {
 					if (err) {
 						return cb(err);
 					}
-
 					files = files.map(function(file) {
 						return path.join(dir, file);
 					});
@@ -138,8 +194,8 @@ function postInit(workspaceDir, fileRoot, req, res, next, rest) {
 			})
 			.then(function(id) {
 				var response = {
-				   	"Location": "/gitapi/clone/file/" + req.body.Name
-				}
+					"Location": "/gitapi/clone/file/" + req.body.Name
+				};
 				var resp = JSON.stringify(response)
 				res.statusCode = 201;
 				res.setHeader('Content-Type', 'application/json');
