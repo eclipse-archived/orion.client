@@ -56,7 +56,7 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 	repoPath = api.join(workspaceDir, repoPath);
 
 	var page = Number(query.page) || 1;
-	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
+	var pageSize = Number(query.pageSize) || 20;
 	var mergeBase = "true" === query.mergeBase;
 	var skipCount = (page-1)*pageSize;
 	var filter = query.filter;
