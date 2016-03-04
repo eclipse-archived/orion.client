@@ -14,6 +14,27 @@ var git = require('nodegit');
 var async = require('async');
 var url = require('url');
 var clone = require('./clone');
+var express = require('express');
+var bodyParser = require('body-parser');
+
+module.exports = {};
+
+module.exports.router = function(options) {
+	var fileRoot = options.fileRoot;
+	var workspaceDir = options.workspaceDir;
+	if (!fileRoot) { throw new Error('options.root is required'); }
+	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
+	
+	module.exports.tagJSON = tagJSON;
+
+	return express.Router()
+	.use(bodyParser.json())
+	.get('*', function(req, res) {
+		return getTags(req, res, req.urlPath);
+	})
+	.delete('*', function(req, res) {
+		return deleteTag(req, res, req.urlPath);
+	});
 
 function tagJSON(ref, commit, fileDir) {
 	var fullName = ref.name();
@@ -31,7 +52,7 @@ function tagJSON(ref, commit, fileDir) {
 	};
 }
 
-function getTags(workspaceDir, fileRoot, req, res, next, rest) {
+function getTags(req, res, rest) {
 	var segments = rest.split("/");
 	var hasTag = segments[1] !== "file";
 	var tagName = hasTag ? segments[1] : "";
@@ -46,7 +67,7 @@ function getTags(workspaceDir, fileRoot, req, res, next, rest) {
 	var count = 0, tagCount = 0;
 
 	if (tagName) {
-		return clone.getRepo(segments, workspaceDir)
+		return clone.getRepo(rest)
 		.then(function(repo) {
 			theRepo = repo;
 			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -66,10 +87,9 @@ function getTags(workspaceDir, fileRoot, req, res, next, rest) {
 		.catch(function(err) {
 			writeError(404, res, err.message);
 		});
-		return;
 	}
 
-	return clone.getRepo(segments, workspaceDir)
+	return clone.getRepo(rest)
 	.then(function(repo) {
 		theRepo = repo;
 		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -129,11 +149,11 @@ function getTags(workspaceDir, fileRoot, req, res, next, rest) {
 	});
 }
 
-function deleteTags(workspaceDir, fileRoot, req, res, next, rest) {
+function deleteTag(req, res, rest) {
 	var segments = rest.split("/");
 	var tagName = segments[1];
 
-	return clone.getRepo(segments, workspaceDir)
+	return clone.getRepo(rest)
 	.then(function(repo) {
 		return git.Tag.delete(repo, tagName);
 	})
@@ -146,9 +166,4 @@ function deleteTags(workspaceDir, fileRoot, req, res, next, rest) {
 		} 
 	});
 }
-
-module.exports = {
-	tagJSON: tagJSON,
-	getTags: getTags,
-	deleteTags: deleteTags
 };

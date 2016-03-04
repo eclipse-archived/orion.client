@@ -12,16 +12,37 @@
 var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
 var clone = require('./clone');
+var express = require('express');
+var bodyParser = require('body-parser');
 
+module.exports = {};
 
-function getIndex(workspaceDir, fileRoot, req, res, next, rest) {
+module.exports.router = function(options) {
+	var fileRoot = options.fileRoot;
+	var workspaceDir = options.workspaceDir;
+	if (!fileRoot) { throw new Error('options.root is required'); }
+	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
+
+	return express.Router()
+	.use(bodyParser.json())
+	.get('*', function(req, res) {
+		return getIndex(req, res, req.urlPath);
+	})
+	.put('*', function(req, res) {
+		return putIndex(req, res, req.urlPath);
+	})
+	.post('*', function(req, res) {
+		return postIndex(req, res, req.urlPath);
+	});
+
+function getIndex(req, res, rest) {
 	var repo;
 	var index;
 
 	var segments = rest.split("/");
-	var filePath = segments.slice(2).join("/");
+	var filePath = api.join(workspaceDir, segments.slice(2).join("/"));
 
-	return clone.getRepo(segments, workspaceDir)
+	return clone.getRepo(rest)
 	.then(function(repoResult) {
 		repo = repoResult;
 		filePath = filePath.substring(repo.workdir());
@@ -49,12 +70,12 @@ function getIndex(workspaceDir, fileRoot, req, res, next, rest) {
 	});
 }
 
-function putIndex(workspaceDir, fileRoot, req, res, next, rest) {
+function putIndex(req, res, rest) {
 	var index;
 	var segments = rest.split("/");
-	var filePath = segments.slice(2).join("/");
+	var filePath = api.join(workspaceDir, segments.slice(2).join("/"));
 
-	return clone.getRepo(segments, workspaceDir)
+	return clone.getRepo(rest)
 	.then(function(repo) {
 		filePath = filePath.substring(repo.workdir());
 		return repo.openIndex();
@@ -79,19 +100,19 @@ function putIndex(workspaceDir, fileRoot, req, res, next, rest) {
 	.then(function() {
 		return index.writeTree();
 	})
-	.done(function(tree) {
+	.done(function() {
 		res.statusCode = 200;
 		res.end();
 	});
 }
 
-function postIndex(workspaceDir, fileRoot, req, res, next, rest) {
+function postIndex(req, res, rest) {
 	var segments = rest.split("/");
-	var filePath = segments.slice(2).join("/");
+	var filePath = api.join(workspaceDir, segments.slice(2).join("/"));
 	var repo;
 	var resetType = req.body.Reset;
 	
-	return clone.getRepo(segments, workspaceDir)
+	return clone.getRepo(rest)
 	.then(function(_repo) {
 		repo = _repo;
 		filePath = filePath.substring(repo.workdir());
@@ -135,9 +156,4 @@ function postIndex(workspaceDir, fileRoot, req, res, next, rest) {
 		res.end();
 	});
 }
-
-module.exports = {
-		putIndex: putIndex,
-		postIndex: postIndex,
-		getIndex: getIndex
 };

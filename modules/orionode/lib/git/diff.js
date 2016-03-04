@@ -13,8 +13,30 @@ var git = require('nodegit');
 var url = require('url');
 var clone = require('./clone');
 var api = require('../api');
+var express = require('express');
+var bodyParser = require('body-parser');
 
-function getDiff(workspaceDir, fileRoot, req, res, next, rest) {
+module.exports = {};
+
+module.exports.router = function(options) {
+	var fileRoot = options.fileRoot;
+	var workspaceDir = options.workspaceDir;
+	if (!fileRoot) { throw new Error('options.root is required'); }
+	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
+
+	module.exports.changeType = changeType;
+	module.exports.getDiffLocation = getDiffLocation;
+
+	return express.Router()
+	.use(bodyParser.json())
+	.get('*', function(req, res) {
+		return getDiff(req, res, req.urlPath);
+	})
+	.post('*', function(req, res) {
+		return getDiffLocation(req, res, req.urlPath);
+	});
+
+function getDiff(req, res, rest) {
 	var query = url.parse(req.url, true).query;
 	var parts = (query.parts || "").split(",");
 	var paths = query.Path;
@@ -24,7 +46,7 @@ function getDiff(workspaceDir, fileRoot, req, res, next, rest) {
 	var pattern = (hasScope ? segments.slice(4) : segments.slice(3)).join("/");
 	
 	var diff, repo;
-	return clone.getRepo(segments, workspaceDir)
+	return clone.getRepo(rest)
 	.then(function(r) {
 		repo = r;
 		var fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -257,21 +279,15 @@ function getDiffBetweenTwoCommits(repo, commits) {
 	});
 }
 
-function getDiffLocation(workspaceDir, fileRoot, req, res, next, rest) {
-	var segments = rest.split("/");
-	var oldCommit = segments[1];
+function getDiffLocation(req, res, rest) {
 	var newCommit = req.body.New;
-	segments[1] = oldCommit + ".." + newCommit.replace(/\//g, '%252F');
-	var location = "/gitapi/" + segments.join("/");
-	location = url.format({pathname: location, query: url.parse(req.url, true).query});
+	var originalUrl = url.parse(req.originalUrl, true);
+	var segments = originalUrl.pathname.split("/");
+	segments[3] = (segments[3] + ".." + newCommit).replace(/\//g, "%252F");
+	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
 	res.statusCode = 200;
 	res.setHeader('Content-Type', 'application/json');
 	res.setHeader('Location', location);
 	res.end(JSON.stringify({Location: location}));
 }
-
-module.exports = {
-	getDiff: getDiff,
-	changeType: changeType,
-	getDiffLocation: getDiffLocation
 };

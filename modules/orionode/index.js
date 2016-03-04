@@ -59,7 +59,7 @@ function startServer(options) {
 			fileRoot: '/file',
 			workspaceDir: workspaceDir
 		}))
-		app.use(orionGit({ 
+		app.use('/gitapi', orionGit({ 
 				root: '/gitapi',
 				fileRoot: '/file',
 				workspaceDir: workspaceDir

@@ -14,16 +14,40 @@ var git = require('nodegit');
 var url = require('url');
 var mCommit = require('./commit');
 var clone = require('./clone');
+var express = require('express');
+var bodyParser = require('body-parser');
 
-function getStash(workspaceDir, fileRoot, req, res, next, rest) {
-	var segments = rest.split("/");
+module.exports = {};
+
+module.exports.router = function(options) {
+	var fileRoot = options.fileRoot;
+	var workspaceDir = options.workspaceDir;
+	if (!fileRoot) { throw new Error('options.root is required'); }
+	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
+	
+	return express.Router()
+	.use(bodyParser.json())
+	.get('*', function(req, res) {
+		return getStash(req, res, req.urlPath);
+	})
+	.delete('*', function(req, res) {
+		return deleteStash(req, res, req.urlPath);
+	})
+	.put('*', function(req, res) {
+		return putStash(req, res, req.urlPath);
+	})
+	.post('*', function(req, res) {
+		return postStash(req, res, req.urlPath);
+	});
+
+function getStash(req, res, rest) {
 	var query = url.parse(req.url, true).query;
 	var filter = query.filter;
 	var page = Number(query.page) || 1;
 	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
 	var fileDir;
 	var stashesPromises = [];
-	return clone.getRepo(segments, workspaceDir)
+	return clone.getRepo(rest)
 	.then(function(repo) {
 		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 		return git.Stash.foreach(repo, function(index, message, oid) {
@@ -64,12 +88,12 @@ function getStash(workspaceDir, fileRoot, req, res, next, rest) {
 	});
 }
 
-function putStash(workspaceDir, fileRoot, req, res, next, rest) {
+function putStash(req, res, rest) {
 	var segments = rest.split("/");
 	var stashRev = segments[1] === "file" ? "" : segments[1];
 
 	var repo;
-	return clone.getRepo(segments, workspaceDir)
+	return clone.getRepo(rest)
 	.then(function(_repo) {
 		repo = _repo;
 		if (stashRev) {
@@ -94,12 +118,12 @@ function putStash(workspaceDir, fileRoot, req, res, next, rest) {
 	});
 }
 
-function deleteStash(workspaceDir, fileRoot, req, res, next, rest) {
+function deleteStash(req, res, rest) {
 	var segments = rest.split("/");
 	var stashRev = segments[1] === "file" ? "" : segments[1];
 
 	var repo;
-	return clone.getRepo(segments, workspaceDir)
+	return clone.getRepo(rest)
 	.then(function(_repo) {
 		repo = _repo;
 		var index, all = [];
@@ -126,15 +150,13 @@ function deleteStash(workspaceDir, fileRoot, req, res, next, rest) {
 	});
 }
 
-function postStash(workspaceDir, fileRoot, req, res, next, rest) {
-	var segments = rest.split("/");
-
+function postStash(req, res, rest) {
 	var flags = git.Stash.FLAGS.DEFAULT;
 	if (req.body.IncludeUntracked) flags |= git.Stash.FLAGS.INCLUDE_UNTRACKED;
 	var message = req.body.IndexMessage || req.body.WorkingDirectoryMessage || "";
 
 	var repo;
-	return clone.getRepo(segments, workspaceDir)
+	return clone.getRepo(rest)
 	.then(function(_repo) {
 		repo = _repo;
 		return git.Stash.save(repo, git.Signature.default(repo), message, flags);
@@ -147,10 +169,4 @@ function postStash(workspaceDir, fileRoot, req, res, next, rest) {
 		writeError(404, res, err.message);
 	});
 }
-
-module.exports = {
-	getStash: getStash,
-	putStash: putStash,
-	deleteStash: deleteStash,
-	postStash: postStash
 };

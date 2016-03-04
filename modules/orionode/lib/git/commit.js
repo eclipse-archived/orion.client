@@ -17,6 +17,32 @@ var git = require('nodegit');
 var url = require('url');
 var crypto = require('crypto');
 var async = require('async');
+var express = require('express');
+var bodyParser = require('body-parser');
+
+module.exports = {};
+
+module.exports.router = function(options) {
+	var fileRoot = options.fileRoot;
+	var workspaceDir = options.workspaceDir;
+	if (!fileRoot) { throw new Error('options.root is required'); }
+	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
+
+	module.exports.commitJSON = commitJSON;
+	module.exports.getDiff = getDiff;
+	module.exports.getCommitParents = getCommitParents;
+
+	return express.Router()
+	.use(bodyParser.json())
+	.get('*', function(req, res) {
+		return getCommit(req, res, req.urlPath);
+	})
+	.put('*', function(req, res) {
+		return putCommit(req, res, req.urlPath);
+	})
+	.post('*', function(req, res) {
+		return postCommit(req, res, req.urlPath);
+	});
 
 function commitJSON(commit, fileDir, diffs, parents, tags) {
 	return {
@@ -40,16 +66,16 @@ function commitJSON(commit, fileDir, diffs, parents, tags) {
 	};
 }
 
-function getCommit(workspaceDir, fileRoot, req, res, next, rest) {
+function getCommit(req, res, rest) {
 	var query = url.parse(req.url, true).query;
 	if (query.parts === "body") {
-		getCommitBody(workspaceDir, fileRoot, req, res, next, rest, query);
+		getCommitBody(req, res, rest, query);
 	} else {
-		getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query);
+		getCommitLog(req, res, rest, query);
 	}
 }
 
-function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
+function getCommitLog(req, res, rest, query) {
 	var segments = rest.split("/");
 	var scope = segments[1].replace(/%252F/g, '/');
 	var fileDir;
@@ -166,7 +192,7 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 	}
 	
 	var repo;
-	clone.getRepo(segments, workspaceDir)
+	clone.getRepo(rest)
 	.then(function(_repo) {
 		repo = _repo;
 		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -307,12 +333,12 @@ function getDiff(repo, commit, fileDir) {
 	});
 }
 
-function getCommitBody(workspaceDir, fileRoot, req, res, next, rest) {
+function getCommitBody(req, res, rest) {
 	var segments = rest.split("/");
 	var scope = segments[1];
-	var filePath = segments.slice(3).join("/");
+	var filePath = api.join(workspaceDir, segments.slice(3).join("/"));
 	var theRepo;
-	clone.getRepo(segments, workspaceDir)
+	clone.getRepo(rest)
 	.then(function(repo) {
 		theRepo = repo;
 		filePath = filePath.substring(repo.workdir().length);
@@ -339,10 +365,11 @@ function getCommitBody(workspaceDir, fileRoot, req, res, next, rest) {
 	});
 }
 
-function identifyNewCommitResource(req, res, next, rest, commit, newCommit, segments) {
-	segments[1] = (commit + ".." + newCommit).replace(/\//g, "%252F");
-	var location = "/gitapi/" + segments.join("/");
-	location = url.format({pathname: location, query: url.parse(req.url, true).query});
+function identifyNewCommitResource(req, res, rest, newCommit) {
+	var originalUrl = url.parse(req.originalUrl, true);
+	var segments = originalUrl.pathname.split("/");
+	segments[3] = (segments[3] + ".." + newCommit).replace(/\//g, "%252F");
+	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
 	res.statusCode = 200;
 	var resp = JSON.stringify({
 		"Location": location
@@ -352,9 +379,9 @@ function identifyNewCommitResource(req, res, next, rest, commit, newCommit, segm
 	res.end(resp);
 }
 
-function revert(req, res, next, rest, segments, workspaceDir, commitToRevert) {
+function revert(req, res, rest, commitToRevert) {
 	var theRepo, theCommit, theRC;
-	clone.getRepo(segments, workspaceDir)
+	clone.getRepo(rest)
 	.then(function(repo) {
 		theRepo = repo;
 		return git.Commit.lookup(repo, commitToRevert);
@@ -387,9 +414,9 @@ function revert(req, res, next, rest, segments, workspaceDir, commitToRevert) {
 	});
 }
 
-function cherryPick(req, res, next, rest, segments, workspaceDir, commitToCherrypick) {
+function cherryPick(req, res, rest, commitToCherrypick) {
 	var theRepo, theCommit, theRC, theHead;
-	clone.getRepo(segments, workspaceDir)
+	clone.getRepo(rest)
 	.then(function(repo) {
 		theRepo = repo;
 		return git.Reference.nameToId(theRepo, "HEAD");
@@ -429,10 +456,10 @@ function cherryPick(req, res, next, rest, segments, workspaceDir, commitToCherry
 	});
 }
 
-function rebase(req, res, next, rest, segments, workspaceDir, commitToRebase, rebaseOperation) {
+function rebase(req, res, rest, commitToRebase, rebaseOperation) {
 	var repo, head, commit, oid, paths;
 	
-	clone.getRepo(segments, workspaceDir)
+	clone.getRepo(rest)
 	.then(function(_repo) {
 		repo = _repo;
 		return repo.getHeadCommit();
@@ -510,10 +537,10 @@ function rebase(req, res, next, rest, segments, workspaceDir, commitToRebase, re
 
 }
 
-function merge(req, res, next, rest, segments, workspaceDir, commitToMerge, squash) {
+function merge(req, res, rest, commitToMerge, squash) {
 	
 	var repo, head, commit, oid, paths;
-	clone.getRepo(segments, workspaceDir)
+	clone.getRepo(rest)
 	.then(function(_repo) {
 		repo = _repo;
 		return repo.getHeadCommit();
@@ -604,9 +631,9 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 	});
 }
 
-function tag(req, res, next, rest, fileRoot, segments, workspaceDir, commitId, name) {
+function tag(req, res, rest, commitId, name) {
 	var theRepo, theDiffs, thisCommit, theParents, fileDir;
-	clone.getRepo(segments, workspaceDir)
+	clone.getRepo(rest)
 	.then(function(repo) {
 		theRepo = repo;
 		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -641,41 +668,41 @@ function tag(req, res, next, rest, fileRoot, segments, workspaceDir, commitId, n
 	});
 }
 
-function putCommit(workspaceDir, fileRoot, req, res, next, rest) {
+function putCommit(req, res, rest) {
 	var segments = rest.split("/");
 	var commit = segments[1].replace(/%252F/g, '/');
 	var tagName = req.body.Name;
 	if (tagName) {
-		tag(req, res, next, rest, fileRoot, segments, workspaceDir, commit, tagName);
+		tag(req, res, rest, commit, tagName);
 	}
 }
 
-function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
-	var segments = rest.split("/");
-	var commit = segments[1].replace(/%252F/g, '/');
+function postCommit(req, res, rest) {
 	var fileDir;
 	if (typeof req.body.Merge === "string") {
-		merge(req, res, next, rest, segments, workspaceDir, req.body.Merge, req.body.Squash);
+		merge(req, res, rest, req.body.Merge, req.body.Squash);
 		return;
 	}
 	if (typeof req.body.Rebase === "string") {
-		rebase(req, res, next, rest, segments, workspaceDir, req.body.Rebase, req.body.Operation);
+		rebase(req, res, rest, req.body.Rebase, req.body.Operation);
 		return;
 	}
 	if (typeof req.body["Cherry-Pick"] === "string") {
-		cherryPick(req, res, next, rest, segments, workspaceDir, req.body["Cherry-Pick"]);
+		cherryPick(req, res, rest, req.body["Cherry-Pick"]);
 		return;
 	}
 	if (typeof req.body.Revert === "string") {
-		revert(req, res, next, rest, segments, workspaceDir, req.body.Revert);
+		revert(req, res, rest, req.body.Revert);
 		return;
 	}
 	if (typeof req.body.New === "string") {
-		identifyNewCommitResource(req, res, next, rest, commit, req.body.New, segments);
+		identifyNewCommitResource(req, res, rest, req.body.New);
 		return;
 	}
 	
 	//TODO create commit -> change id
+	var segments = rest.split("/");
+	var commit = segments[1].replace(/%252F/g, '/');
 	if (commit !== "HEAD") {
 		writeError(404, res, "Needs to be HEAD");
 		return;
@@ -689,7 +716,7 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 	var theRepo, thisCommit;
 	var theDiffs = [], theParents;
 	
-	clone.getRepo(segments, workspaceDir)
+	clone.getRepo(rest)
 	.then(function(repo) {
 		theRepo = repo;
 		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -720,13 +747,4 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 		res.end(resp);
 	});
 }
-
-module.exports = {
-	getCommit: getCommit,
-	putCommit: putCommit,
-	postCommit: postCommit,
-	
-	commitJSON: commitJSON,
-	getDiff: getDiff,
-	getCommitParents: getCommitParents
 };

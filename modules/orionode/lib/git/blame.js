@@ -9,29 +9,38 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api');
 var git = require('nodegit');
 var finder = require('findit');
+var express = require('express');
+var bodyParser = require('body-parser');
 
-function getBlame(workspaceDir, fileRoot, req, res, next, rest) {
+module.exports = {};
 
-    finder(workspaceDir).on('directory', function (dir, stat, stop) {
-        git.Repository.open(dir)
-        .then(function(repo) {
-            git.Blame.file(repo, dir).then(function(blame) {
-                var resp = JSON.stringify(blame);
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.setHeader('Content-Length', resp.length);
-                res.end(resp);
+module.exports.router = function(options) {
+	var fileRoot = options.fileRoot;
+	var workspaceDir = options.workspaceDir;
+	if (!fileRoot) { throw new Error('options.root is required'); }
+	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 
-                return blame;
-            });
-        });
-
-    });
+	return express.Router()
+	.use(bodyParser.json())
+	.get('*', function(req, res) {
+		return getBlame(req, res, req.url.split("?")[0]);
+	});
+	
+function getBlame(req, res, rest) {
+	finder(workspaceDir).on('directory', function (dir, stat, stop) {
+		git.Repository.open(dir)
+		.then(function(repo) {
+			git.Blame.file(repo, dir).then(function(blame) {
+				var resp = JSON.stringify(blame);
+				res.statusCode = 200;
+				res.setHeader('Content-Type', 'application/json');
+				res.setHeader('Content-Length', resp.length);
+				res.end(resp);
+				return blame;
+			});
+		});
+	});
 }
-
-module.exports = {
-    getBlame: getBlame
 };

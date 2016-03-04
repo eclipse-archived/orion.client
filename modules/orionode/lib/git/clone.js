@@ -17,6 +17,34 @@ var fs = require('fs');
 var async = require('async');
 var fileUtil = require('../fileUtil');
 var tasks = require('../tasks');
+var express = require('express');
+var bodyParser = require('body-parser');
+var rmdir = require('rimraf');
+
+module.exports = {};
+
+module.exports.router = function(options) {
+	var fileRoot = options.fileRoot;
+	var workspaceDir = options.workspaceDir;
+	if (!fileRoot) { throw new Error('options.root is required'); }
+	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
+
+	module.exports.getRepo = getRepo;
+
+	return express.Router()
+	.use(bodyParser.json())
+	.get('*', function(req, res) {
+		return getClone(req, res, req.urlPath);
+	})
+	.put('*', function(req, res) {
+		return putClone(req, res, req.urlPath);
+	})
+	.delete('*', function(req, res) {
+		return deleteClone(req, res, req.urlPath);
+	})
+	.post('*', function(req, res) {
+		return postInit(req, res, req.urlPath);
+	});
 
 function cloneJSON(base, location, url, parents, submodules) {
 	return {
@@ -40,14 +68,16 @@ function cloneJSON(base, location, url, parents, submodules) {
 		"Type": "Clone"
 	};
 }
-
-function getRepo(segments, ws) {
-	return git.Repository.discover(api.join(ws, segments.slice(segments.indexOf("file") + 1).join("/")), 0, ws).then(function(buf) {
+	
+function getRepo(path) {
+	var restpath = path.split(fileRoot)[1];
+	if (!restpath) return "";
+	return git.Repository.discover(api.join(workspaceDir, restpath), 0, workspaceDir).then(function(buf) {
 		return git.Repository.open(buf.toString());
 	});
 }
 
-function getClone(workspaceDir, fileRoot, req, res, next, rest) {
+function getClone(req, res, rest) {
 	var repos = [];
 	
 	var rootDir;
@@ -163,9 +193,9 @@ function getClone(workspaceDir, fileRoot, req, res, next, rest) {
 	}
 }
 
-function postInit(workspaceDir, fileRoot, req, res, next, rest) {
+function postInit(req, res, rest) {
 	if (req.body.GitUrl) {
-		postClone(workspaceDir, fileRoot, req, res, next, rest);
+		postClone(req, res, rest);
 	} else {
 		var initDir = workspaceDir + '/' + req.body.Name;
 		var theRepo, index, author, committer;
@@ -218,7 +248,7 @@ function postInit(workspaceDir, fileRoot, req, res, next, rest) {
 	}
 }
 
-function putClone(workspaceDir, fileRoot, req, res, next, rest) {
+function putClone(req, res, rest) {
 	var segments = rest.split("/");
 	if (!(segments[1] === "file" && segments.length > 2)) {
 		return writeError(404, res);
@@ -236,7 +266,7 @@ function putClone(workspaceDir, fileRoot, req, res, next, rest) {
 	var checkOptions = {
 		checkoutStrategy: git.Checkout.STRATEGY.FORCE,
 	};
-	getRepo(segments, workspaceDir)
+	getRepo(rest)
 	.then(function(repo) {
 		theRepo = repo;
 		if (paths) {
@@ -301,7 +331,16 @@ function putClone(workspaceDir, fileRoot, req, res, next, rest) {
 	});
 }
 
-function postClone(workspaceDir, fileRoot, req, res, next, rest) {
+function deleteClone(req, res, rest) {
+	var configPath = rest.replace("clone/file", "");
+	rmdir(fileUtil.safeFilePath(workspaceDir, configPath), function(err) {
+		if (err) return writeError(500, res, err);
+		res.statusCode = 200;
+		res.end();
+	});
+}
+
+function postClone(req, res, rest) {
 	var url = req.body.GitUrl;
 	var dirName = url.substring(url.lastIndexOf("/") + 1).replace(".git", "");
 	
@@ -338,11 +377,4 @@ function postClone(workspaceDir, fileRoot, req, res, next, rest) {
 		});
 	});
 }
-
-module.exports = {
-	getRepo: getRepo,
-	getClone: getClone,
-	postClone: postClone,
-	postInit: postInit,
-	putClone: putClone	
 };
