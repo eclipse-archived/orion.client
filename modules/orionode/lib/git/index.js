@@ -11,19 +11,20 @@
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
+var clone = require('./clone');
+
 
 function getIndex(workspaceDir, fileRoot, req, res, next, rest) {
 	var repo;
 	var index;
 
 	var segments = rest.split("/");
-	var repoPath = segments[2];
-	repoPath = api.join(workspaceDir, repoPath);
-	var filePath = segments.slice(3).join("/");
+	var filePath = segments.slice(2).join("/");
 
-	git.Repository.open(repoPath)
+	return clone.getRepo(segments, workspaceDir)
 	.then(function(repoResult) {
 		repo = repoResult;
+		filePath = filePath.substring(repo.workdir());
 		return repo;
 	})
 	.then(function(repo) {
@@ -51,15 +52,11 @@ function getIndex(workspaceDir, fileRoot, req, res, next, rest) {
 function putIndex(workspaceDir, fileRoot, req, res, next, rest) {
 	var index;
 	var segments = rest.split("/");
-	var repoPath = segments[2];
-	repoPath = api.join(workspaceDir, repoPath);
-	var filePath = segments.slice(3).join("/");
+	var filePath = segments.slice(2).join("/");
 
-	git.Repository.open(repoPath)
-	.then(function(repoResult) {
-		return repoResult;
-	})
+	return clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
+		filePath = filePath.substring(repo.workdir());
 		return repo.openIndex();
 	})
 	.then(function(indexResult) {
@@ -90,18 +87,14 @@ function putIndex(workspaceDir, fileRoot, req, res, next, rest) {
 
 function postIndex(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
-	var repoPath = segments[2];
-	repoPath = api.join(workspaceDir, repoPath);
-	var filePath = segments.slice(3).join("/");
+	var filePath = segments.slice(2).join("/");
 	var repo;
 	var resetType = req.body.Reset;
 	
-	git.Repository.open(repoPath)
+	return clone.getRepo(segments, workspaceDir)
 	.then(function(_repo) {
 		repo = _repo;
-		return _repo;
-	})
-	.then(function(repo) {
+		filePath = filePath.substring(repo.workdir());
 		return repo.getReferenceCommit(req.body.Commit || "HEAD")
 		.then(function(commit) {
 			return commit;

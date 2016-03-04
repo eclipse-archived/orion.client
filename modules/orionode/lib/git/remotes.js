@@ -14,6 +14,7 @@ var async = require('async');
 var git = require('nodegit');
 var url = require('url');
 var tasks = require('../tasks');
+var clone = require('./clone');
 
 function remoteBranchJSON(remoteBranch, commit, remote, fileDir, branch){
 	var fullName, shortName;
@@ -63,16 +64,14 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 	var query = url.parse(req.url, true).query;
 	var filter = query.filter;
 
-	var repoPath, fileDir, theRepo, theRemote, remoteName;
+	var fileDir, theRepo, theRemote, remoteName;
 	if (allRemotes) {
-		repoPath = segments[2];
-		fileDir = api.join(fileRoot, repoPath);
-		repoPath = api.join(workspaceDir, repoPath);
 		var repo;
 
-		git.Repository.open(repoPath)
+		return clone.getRepo(segments, workspaceDir)
 		.then(function(r) {
 			repo = r;
+			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 			return git.Remote.list(r);
 		})
 		.then(function(remotes){
@@ -94,17 +93,14 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 				res.end(resp);
 			});
 		});
-		return;
 	}
 
 	if (allRemoteBranches) {
 		remoteName = segments[1];
-		repoPath = segments[3];
-		fileDir = api.join(fileRoot, repoPath);
-		repoPath = api.join(workspaceDir, repoPath);
-		git.Repository.open(repoPath)
+		return clone.getRepo(segments, workspaceDir)
 		.then(function(repo) {
 			theRepo = repo;
+			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 			return repo.getRemote(remoteName);
 		})
 		.then(function(remote) {
@@ -140,19 +136,16 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 				res.end(resp);
 			});
 		});
-		return;
 	} 
 
 	if (oneRemoteBranch) {
 		remoteName = segments[1];
 		var branchName = segments[2].replace(/%252F/g, '/');
-		repoPath = segments[4];
-		fileDir = api.join(fileRoot, repoPath);
 		var theBranch;
-		repoPath = api.join(workspaceDir, repoPath);
-		git.Repository.open(repoPath)
+		return clone.getRepo(segments, workspaceDir)
 		.then(function(repo) {
 			theRepo = repo;
+			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 			return repo.getRemote(remoteName);
 		})
 		.then(function(remote) {
@@ -174,15 +167,13 @@ function getRemotes(workspaceDir, fileRoot, req, res, next, rest) {
 		.catch(function() {
 			return writeError(403, res);
 		});
-		return;
 	}
 	return writeError(404, res);
 }
 
 function addRemote(workspaceDir, fileRoot, req, res, next, rest) {
-	var repoPath = rest.replace("remote/file/", "");
-	var fileDir = repoPath;
-	repoPath = api.join(workspaceDir, repoPath);
+	var fileDir;
+	var segments = rest.split("/");
 	
 	if (!req.body.Remote || !req.body.RemoteURI) {
 		return writeError(500, res);
@@ -196,8 +187,9 @@ function addRemote(workspaceDir, fileRoot, req, res, next, rest) {
 		writeError(403, res);
 	}
 
-	git.Repository.open(repoPath)
+	return clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
+		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 		return git.Remote.create(repo, req.body.Remote, req.body.RemoteURI);
 	})
 	.then(function(remote) {
@@ -217,24 +209,22 @@ function addRemote(workspaceDir, fileRoot, req, res, next, rest) {
 
 function postRemote(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
-	var repoPath = segments[2] === "file" ? segments[3] : segments[4];
-	repoPath = api.join(workspaceDir, repoPath);
 	var remote = segments[1];
 	var branch = segments[2] === "file" ? "" : segments[2];
 
 	if (req.body.Fetch) {
-		fetchRemote(repoPath, req, res, rest, remote, branch, req.body.Force);
+		fetchRemote(segments, workspaceDir, fileRoot, req, res, rest, remote, branch, req.body.Force);
 	} else if (req.body.PushSrcRef) {
-		pushRemote(repoPath, req, res, rest, remote, branch, req.body.PushSrcRef, req.body.PushTags, req.body.Force);
+		pushRemote(segments, workspaceDir, fileRoot, req, res, rest, remote, branch, req.body.PushSrcRef, req.body.PushTags, req.body.Force);
 	} else {
 		writeError(400, res);
 	}
 }
 
-function fetchRemote(repoPath, req, res, rest, remote, branch, force) {
+function fetchRemote(segments, workspaceDir, fileRoot, req, res, rest, remote, branch, force) {
 	var task = new tasks.Task(res);
 	var repo;
-	git.Repository.open(repoPath)
+	return clone.getRepo(segments, workspaceDir)
 	.then(function(r) {
 		repo = r;
 		return git.Remote.lookup(repo, remote);
@@ -285,13 +275,13 @@ function fetchRemote(repoPath, req, res, rest, remote, branch, force) {
 	});
 }
 
-function pushRemote(repoPath, req, res, rest, remote, branch, pushSrcRef, tags, force) {
+function pushRemote(segments, workspaceDir, fileRoot, req, res, rest, remote, branch, pushSrcRef, tags, force) {
 	var repo;
 	var remoteObj;
 
 	var task = new tasks.Task(res, false, false, 0);//TODO start task right away to work around bug in client code
 
-	git.Repository.open(repoPath)
+	return clone.getRepo(segments, workspaceDir)
 	.then(function(r) {
 		repo = r;
 		return git.Remote.lookup(repo, remote);
@@ -372,11 +362,9 @@ function pushRemote(repoPath, req, res, rest, remote, branch, pushSrcRef, tags, 
 }
 
 function deleteRemote(workspaceDir, fileRoot, req, res, next, rest) {
-	rest = rest.replace("remote/", "");
-	var split = rest.split("/file/");
-	var repoPath = api.join(workspaceDir, split[1]);
-	var remoteName = split[0];
-	return git.Repository.open(repoPath)
+	var segments = rest.split("/");
+	var remoteName = segments[2];
+	return clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
 		return git.Remote.delete(repo, remoteName).then(function(resp) {
 			if (!resp) {

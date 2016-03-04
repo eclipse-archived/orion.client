@@ -41,6 +41,12 @@ function cloneJSON(base, location, url, parents, submodules) {
 	};
 }
 
+function getRepo(segments, ws) {
+	return git.Repository.discover(api.join(ws, segments.slice(segments.indexOf("file") + 1).join("/")), 0, ws).then(function(buf) {
+		return git.Repository.open(buf.toString());
+	});
+}
+
 function getClone(workspaceDir, fileRoot, req, res, next, rest) {
 	var repos = [];
 	
@@ -226,13 +232,11 @@ function putClone(workspaceDir, fileRoot, req, res, next, rest) {
 		return writeError(400, "Invalid parameters");
 	}
 
-	var repoPath = segments[2];
-	repoPath = api.join(workspaceDir, repoPath);
 	var theRepo, theCommit;
 	var checkOptions = {
 		checkoutStrategy: git.Checkout.STRATEGY.FORCE,
 	};
-	git.Repository.open(repoPath)
+	getRepo(segments, workspaceDir)
 	.then(function(repo) {
 		theRepo = repo;
 		if (paths) {
@@ -251,7 +255,7 @@ function putClone(workspaceDir, fileRoot, req, res, next, rest) {
 			.then(function() {
 				return Promise.all(toRemove.map(function(p) {
 					return new Promise(function(fulfill, reject) {
-						var filepath = api.join(repoPath, p);
+						var filepath = api.join(repo.workdir(), p);
 						fileUtil.withStats(filepath, function(error, stats) {
 							if (error) return reject();
 							function done(err) {
@@ -336,6 +340,7 @@ function postClone(workspaceDir, fileRoot, req, res, next, rest) {
 }
 
 module.exports = {
+	getRepo: getRepo,
 	getClone: getClone,
 	postClone: postClone,
 	postInit: postInit,

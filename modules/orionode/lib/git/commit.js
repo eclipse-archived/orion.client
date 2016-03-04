@@ -12,6 +12,7 @@
 var api = require('../api'), writeError = api.writeError;
 var diff = require("./diff");
 var mTags = require("./tags");
+var clone = require("./clone");
 var git = require('nodegit');
 var url = require('url');
 var crypto = require('crypto');
@@ -51,9 +52,7 @@ function getCommit(workspaceDir, fileRoot, req, res, next, rest) {
 function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 	var segments = rest.split("/");
 	var scope = segments[1].replace(/%252F/g, '/');
-	var repoPath = segments[3];
-	var fileDir = api.join(fileRoot, repoPath);
-	repoPath = api.join(workspaceDir, repoPath);
+	var fileDir;
 
 	var page = Number(query.page) || 1;
 	var pageSize = Number(query.pageSize) || 20;
@@ -167,9 +166,10 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 	}
 	
 	var repo;
-	git.Repository.open(repoPath)
+	clone.getRepo(segments, workspaceDir)
 	.then(function(_repo) {
 		repo = _repo;
+		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 		return getCommitTagsMap(repo, fileDir);
 	})
 	.then(function(map) {
@@ -310,13 +310,12 @@ function getDiff(repo, commit, fileDir) {
 function getCommitBody(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
 	var scope = segments[1];
-	var repoPath = segments[3];
-	repoPath = api.join(workspaceDir, repoPath);
-	var filePath = segments.slice(4).join("/");
+	var filePath = segments.slice(3).join("/");
 	var theRepo;
-	git.Repository.open(repoPath)
+	clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
 		theRepo = repo;
+		filePath = filePath.substring(repo.workdir().length);
 		return repo.getReferenceCommit(scope);
 	})
 	.catch(function() {
@@ -353,9 +352,9 @@ function identifyNewCommitResource(req, res, next, rest, commit, newCommit, segm
 	res.end(resp);
 }
 
-function revert(req, res, next, rest, repoPath, commitToRevert) {
+function revert(req, res, next, rest, segments, workspaceDir, commitToRevert) {
 	var theRepo, theCommit, theRC;
-	git.Repository.open(repoPath)
+	clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
 		theRepo = repo;
 		return git.Commit.lookup(repo, commitToRevert);
@@ -388,9 +387,9 @@ function revert(req, res, next, rest, repoPath, commitToRevert) {
 	});
 }
 
-function cherryPick(req, res, next, rest, repoPath, commitToCherrypick) {
+function cherryPick(req, res, next, rest, segments, workspaceDir, commitToCherrypick) {
 	var theRepo, theCommit, theRC, theHead;
-	git.Repository.open(repoPath)
+	clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
 		theRepo = repo;
 		return git.Reference.nameToId(theRepo, "HEAD");
@@ -430,10 +429,10 @@ function cherryPick(req, res, next, rest, repoPath, commitToCherrypick) {
 	});
 }
 
-function rebase(req, res, next, rest, repoPath, commitToRebase, rebaseOperation) {
+function rebase(req, res, next, rest, segments, workspaceDir, commitToRebase, rebaseOperation) {
 	var repo, head, commit, oid, paths;
 	
-	git.Repository.open(repoPath)
+	clone.getRepo(segments, workspaceDir)
 	.then(function(_repo) {
 		repo = _repo;
 		return repo.getHeadCommit();
@@ -511,10 +510,10 @@ function rebase(req, res, next, rest, repoPath, commitToRebase, rebaseOperation)
 
 }
 
-function merge(req, res, next, rest, repoPath, commitToMerge, squash) {
+function merge(req, res, next, rest, segments, workspaceDir, commitToMerge, squash) {
 	
 	var repo, head, commit, oid, paths;
-	git.Repository.open(repoPath)
+	clone.getRepo(segments, workspaceDir)
 	.then(function(_repo) {
 		repo = _repo;
 		return repo.getHeadCommit();
@@ -605,11 +604,12 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 	});
 }
 
-function tag(req, res, next, rest, repoPath, fileDir, commitId, name) {
-	var theRepo, theDiffs, thisCommit, theParents;
-	git.Repository.open(repoPath)
+function tag(req, res, next, rest, fileRoot, segments, workspaceDir, commitId, name) {
+	var theRepo, theDiffs, thisCommit, theParents, fileDir;
+	clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
 		theRepo = repo;
+		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 		return git.Commit.lookup(repo, commitId);
 	})
 	.then(function(commit) {
@@ -644,35 +644,30 @@ function tag(req, res, next, rest, repoPath, fileDir, commitId, name) {
 function putCommit(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
 	var commit = segments[1].replace(/%252F/g, '/');
-	var repoPath = segments[3];
-	var fileDir = api.join(fileRoot, repoPath);
-	repoPath = api.join(workspaceDir, repoPath);
 	var tagName = req.body.Name;
 	if (tagName) {
-		tag(req, res, next, rest, repoPath, fileDir, commit, tagName);
+		tag(req, res, next, rest, fileRoot, segments, workspaceDir, commit, tagName);
 	}
 }
 
 function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
 	var commit = segments[1].replace(/%252F/g, '/');
-	var repoPath = segments[3];
-	var fileDir = api.join(fileRoot, repoPath);
-	repoPath = api.join(workspaceDir, repoPath);
+	var fileDir;
 	if (typeof req.body.Merge === "string") {
-		merge(req, res, next, rest, repoPath, req.body.Merge, req.body.Squash);
+		merge(req, res, next, rest, segments, workspaceDir, req.body.Merge, req.body.Squash);
 		return;
 	}
 	if (typeof req.body.Rebase === "string") {
-		rebase(req, res, next, rest, repoPath, req.body.Rebase, req.body.Operation);
+		rebase(req, res, next, rest, segments, workspaceDir, req.body.Rebase, req.body.Operation);
 		return;
 	}
 	if (typeof req.body["Cherry-Pick"] === "string") {
-		cherryPick(req, res, next, rest, repoPath, req.body["Cherry-Pick"]);
+		cherryPick(req, res, next, rest, segments, workspaceDir, req.body["Cherry-Pick"]);
 		return;
 	}
 	if (typeof req.body.Revert === "string") {
-		revert(req, res, next, rest, repoPath, req.body.Revert);
+		revert(req, res, next, rest, segments, workspaceDir, req.body.Revert);
 		return;
 	}
 	if (typeof req.body.New === "string") {
@@ -694,9 +689,10 @@ function postCommit(workspaceDir, fileRoot, req, res, next, rest) {
 	var theRepo, thisCommit;
 	var theDiffs = [], theParents;
 	
-	git.Repository.open(repoPath)
+	clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
 		theRepo = repo;
+		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 		return createCommit(repo, req.body.CommitterName, req.body.CommitterEmail, req.body.AuthorName, req.body.AuthorEmail, req.body.Message, req.body.Amend);
 	})
 	.then(function(commit) {

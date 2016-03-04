@@ -13,21 +13,19 @@ var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
 var url = require('url');
 var mCommit = require('./commit');
+var clone = require('./clone');
 
 function getStash(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
-	var repoPath = segments[2];
-	var fileDir = api.join(fileRoot, repoPath);
-	repoPath = api.join(workspaceDir, repoPath);
-
 	var query = url.parse(req.url, true).query;
-	var page = Number(query.page) || 1;
 	var filter = query.filter;
+	var page = Number(query.page) || 1;
 	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
-
+	var fileDir;
 	var stashesPromises = [];
-	git.Repository.open(repoPath)
+	return clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
+		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 		return git.Stash.foreach(repo, function(index, message, oid) {
 			if (filter && message.indexOf(filter) === -1) return;
 			stashesPromises.push(repo.getCommit(oid)
@@ -69,11 +67,9 @@ function getStash(workspaceDir, fileRoot, req, res, next, rest) {
 function putStash(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
 	var stashRev = segments[1] === "file" ? "" : segments[1];
-	var repoPath = segments[stashRev ? 3: 2];
-	repoPath = api.join(workspaceDir, repoPath);
 
 	var repo;
-	git.Repository.open(repoPath)
+	return clone.getRepo(segments, workspaceDir)
 	.then(function(_repo) {
 		repo = _repo;
 		if (stashRev) {
@@ -101,11 +97,9 @@ function putStash(workspaceDir, fileRoot, req, res, next, rest) {
 function deleteStash(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
 	var stashRev = segments[1] === "file" ? "" : segments[1];
-	var repoPath = segments[stashRev ? 3: 2];
-	repoPath = api.join(workspaceDir, repoPath);
 
 	var repo;
-	git.Repository.open(repoPath)
+	return clone.getRepo(segments, workspaceDir)
 	.then(function(_repo) {
 		repo = _repo;
 		var index, all = [];
@@ -134,20 +128,18 @@ function deleteStash(workspaceDir, fileRoot, req, res, next, rest) {
 
 function postStash(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
-	var repoPath = segments[2];
-	repoPath = api.join(workspaceDir, repoPath);
 
 	var flags = git.Stash.FLAGS.DEFAULT;
 	if (req.body.IncludeUntracked) flags |= git.Stash.FLAGS.INCLUDE_UNTRACKED;
 	var message = req.body.IndexMessage || req.body.WorkingDirectoryMessage || "";
 
 	var repo;
-	git.Repository.open(repoPath)
+	return clone.getRepo(segments, workspaceDir)
 	.then(function(_repo) {
 		repo = _repo;
 		return git.Stash.save(repo, git.Signature.default(repo), message, flags);
 	})
-	.then(function(oid) {
+	.then(function() {
 		res.statusCode = 200;
 		res.end();
 	})

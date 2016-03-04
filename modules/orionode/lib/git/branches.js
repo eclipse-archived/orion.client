@@ -14,6 +14,7 @@ var git = require('nodegit');
 var url = require('url');
 var async = require('async');
 var mRemotes = require('./remotes');
+var clone = require('./clone');
 
 function branchJSON(repo, ref, fileDir) {
 	var fullName = ref.name();
@@ -84,18 +85,17 @@ function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
 	var hasBranch = segments[1] !== "file";
 	var branchName = hasBranch ? segments[1].replace(/%252F/g, '/') : "";
 	branchName = branchName.replace("refs/heads/", "");
-	var repoPath = segments[branchName ? 3 : 2];
-	var fileDir = api.join(fileRoot, repoPath);
-	repoPath = api.join(workspaceDir, repoPath);
+	var fileDir;
 	var query = url.parse(req.url, true).query;
 	var filter = query.filter;
 	
 	var theRepo;
 	if (branchName) {
 		var theBranch;
-		git.Repository.open(repoPath)
+		clone.getRepo(segments, workspaceDir)
 		.then(function(repo) {
 			theRepo = repo;
+			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 			return git.Branch.lookup(repo, branchName, git.Branch.BRANCH.LOCAL);
 		})
 		.then(function(ref) {
@@ -123,9 +123,10 @@ function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
 	
 	var branches = [], theHead;
 
-	git.Repository.open(repoPath)
+	clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
 		theRepo = repo;
+		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 		return repo.head();
 	})
 	.then(function(head) {
@@ -174,21 +175,19 @@ function getBranches(workspaceDir, fileRoot, req, res, next, rest) {
 
 function createBranch(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
-	var repoPath = segments[2];
-	var fileDir = api.join(fileRoot, repoPath);
-	repoPath = api.join(workspaceDir, repoPath);
 	var branchName = req.body.Name;
 	var startPoint = req.body.Branch;
-	var theRepo, theRef;
+	var theRepo, theRef, fileDir;
 
 	if (!branchName) {
 		if (!startPoint) {
 			return writeError(400, res, "Branch name must be provided.");
 		}
 	}
-	git.Repository.open(repoPath)
+	clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
 		theRepo = repo;
+		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 		return startPoint ? git.Reference.lookup(repo, "refs/remotes/" + startPoint) : repo.getCurrentBranch();
 	})
 	.then(function(reference) {
@@ -222,11 +221,9 @@ function createBranch(workspaceDir, fileRoot, req, res, next, rest) {
 
 function deleteBranch(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
-	var repoPath = segments[3];
-	repoPath = api.join(workspaceDir, repoPath);
 	var branchName = segments[1].replace(/%252F/g, '/');
 
-	git.Repository.open(repoPath)
+	clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
 		return git.Reference.lookup(repo, branchName);
 	})

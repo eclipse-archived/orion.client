@@ -9,9 +9,10 @@
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api');
 var git = require('nodegit');
 var url = require('url');
+var clone = require('./clone');
+var api = require('../api');
 
 function getDiff(workspaceDir, fileRoot, req, res, next, rest) {
 	var query = url.parse(req.url, true).query;
@@ -21,23 +22,25 @@ function getDiff(workspaceDir, fileRoot, req, res, next, rest) {
 	var hasScope = segments[1] !== "file";
 	var scope = hasScope ? segments[1].replace(/%252F/g, '/') : "";
 	var pattern = (hasScope ? segments.slice(4) : segments.slice(3)).join("/");
-	var repoPath = hasScope ? segments[3] : segments[2];
-	var fileDir = api.join(fileRoot, repoPath);
-	repoPath = api.join(workspaceDir, repoPath);
 	
-	var diff;
-	if (scope.indexOf("..") !== -1) {
-		diff = getDiffBetweenTwoCommits(repoPath, scope.split(".."));
-	} else if (scope === "Default") {
-		diff = getDiffBetweenWorkingTreeAndHead(repoPath);
-	} else if (scope === "Cached") {
-		diff = getDiffBetweenIndexAndHead(repoPath);
-	} else {
-		diff = getDiffBetweenWorkingTreeAndHead(repoPath);
-	}
-	return diff
-	.then(function(diff) {
-		processDiff(diff, pattern, paths, fileDir, res, rest, parts.indexOf("diff") !== -1, parts.indexOf("uris") !== -1, parts.indexOf("diffs") !== -1, query, scope);
+	var diff, repo;
+	return clone.getRepo(segments, workspaceDir)
+	.then(function(r) {
+		repo = r;
+		var fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+		if (scope.indexOf("..") !== -1) {
+			diff = getDiffBetweenTwoCommits(repo, scope.split(".."));
+		} else if (scope === "Default") {
+			diff = getDiffBetweenWorkingTreeAndHead(repo);
+		} else if (scope === "Cached") {
+			diff = getDiffBetweenIndexAndHead(repo);
+		} else {
+			diff = getDiffBetweenWorkingTreeAndHead(repo);
+		}
+		return diff
+		.then(function(diff) {
+			processDiff(diff, pattern, paths, fileDir, res, rest, parts.indexOf("diff") !== -1, parts.indexOf("uris") !== -1, parts.indexOf("diffs") !== -1, query, scope);
+		});
 	});
 }
 
@@ -205,28 +208,19 @@ function processDiff(diff, filePath, paths, fileDir, res, rest, includeDiff, inc
 	});
 }
 
-function getDiffBetweenWorkingTreeAndHead(repoPath) {
-	return git.Repository.open(repoPath)
-	.then(function(repo) {
-		return git.Diff.indexToWorkdir(repo, null, {
-			flags: 
-				git.Diff.OPTION.SHOW_UNTRACKED_CONTENT |
-				git.Diff.OPTION.INCLUDE_UNTRACKED | 
-				git.Diff.OPTION.RECURSE_UNTRACKED_DIRS |
-				git.Diff.OPTION.IGNORE_SUBMODULES,
-			contextLines: 0
-		});
+function getDiffBetweenWorkingTreeAndHead(repo) {
+	return git.Diff.indexToWorkdir(repo, null, {
+		flags: 
+			git.Diff.OPTION.SHOW_UNTRACKED_CONTENT |
+			git.Diff.OPTION.INCLUDE_UNTRACKED | 
+			git.Diff.OPTION.RECURSE_UNTRACKED_DIRS |
+			git.Diff.OPTION.IGNORE_SUBMODULES,
+		contextLines: 0
 	});
 }
 
-function getDiffBetweenIndexAndHead(repoPath) {
-	var repo;
-
-	return git.Repository.open(repoPath)
-	.then(function(r) {
-		repo = r;
-		return repo.head();
-	})
+function getDiffBetweenIndexAndHead(repo) {
+	return repo.head()
 	.then(function(ref) {
 		return repo.getReferenceCommit(ref);
 	})
@@ -238,18 +232,11 @@ function getDiffBetweenIndexAndHead(repoPath) {
 	});
 }
 
-function getDiffBetweenTwoCommits(repoPath, commits) {
-	var repo;
+function getDiffBetweenTwoCommits(repo, commits) {
 	var tree1;
 	var tree2;
 
-	return git.Repository.open(repoPath)
-	.then(function(r) {
-		repo = r;
-	})
-	.then(function() {
-		return repo.getCommit(commits[0]);
-	})
+	return repo.getCommit(commits[0])
 	.then(function(commit) {
 		return commit.getTree();
 	})

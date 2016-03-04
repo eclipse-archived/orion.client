@@ -12,15 +12,14 @@
 var api = require('../api'),
 	writeError = api.writeError;
 var git = require('nodegit');
+var clone = require('./clone');
 
 function getStatus(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
-	var repoPath = segments[2];
-	var fileDir = api.join(fileRoot, repoPath);
-	repoPath = api.join(workspaceDir, repoPath);
 
-	git.Repository.open(repoPath)
+	return clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
+		var fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 		repo.getStatusExt({
 			flags: 
 				git.Status.OPT.INCLUDE_UNTRACKED | 

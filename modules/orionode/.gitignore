@@ -13,5 +13,5 @@ target/
 lib/orion.client/
 
 # Ignore per-user Orionode data
-.workspace/
+.workspace*/
 test/.test_workspace/

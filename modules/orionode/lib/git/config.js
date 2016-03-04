@@ -15,6 +15,7 @@ var git = require('nodegit');
 var ini = require('ini');
 var url = require('url');
 var fs = require('fs');
+var clone = require('./clone');
 
 function configJSON(key, value, fileDir) {
 	return {
@@ -28,13 +29,11 @@ function configJSON(key, value, fileDir) {
 function getAConfig(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
 	var key = segments[1];
-	var repoPath = segments[4];
-	var fileDir = api.join(fileRoot, repoPath);
-	repoPath = api.join(workspaceDir, repoPath);
-	git.Repository.open(repoPath)
+	clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
 		if (repo) {
-			fs.readFile(api.join(repoPath, ".git/config"), {encoding:'utf-8'}, function(err, config){
+			var fileDir = repo.workdir().substring(workspaceDir.length);
+			fs.readFile(api.join(repo.path(), "config"), {encoding:'utf-8'}, function(err, config){
 				config = ini.parse(config);
 				val = undefined;
 				findInPath(config, "", key);
@@ -69,15 +68,13 @@ function getAConfig(workspaceDir, fileRoot, req, res, next, rest) {
 
 function getConfig(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
-	var repoPath = segments[3];
-	var fileDir = api.join(fileRoot, repoPath);
-	repoPath = api.join(workspaceDir, repoPath);
 	var query = url.parse(req.url, true).query;
 	var filter = query.filter;
-	git.Repository.open(repoPath)
+	clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
 		if (repo) {
-			fs.readFile(api.join(repoPath, ".git/config"), {encoding:'utf-8'}, function(err, config){
+			var fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+			fs.readFile(api.join(repo.path(), "config"), {encoding:'utf-8'}, function(err, config){
 				config = ini.parse(config);
 				configs = [];
 
@@ -117,9 +114,11 @@ function getConfig(workspaceDir, fileRoot, req, res, next, rest) {
 	});
 }
 
-function setString(repoPath, fileDir, req, res, key, value) {
-	git.Repository.open(repoPath)
+function setString(segments, workspaceDir, fileRoot, req, res, key, value) {
+	var fileDir;
+	clone.getRepo(segments, workspaceDir)
 	.then(function(repo) {
+		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 		return repo.config();
 	})
 	.then(function(config) {
@@ -139,18 +138,12 @@ function setString(repoPath, fileDir, req, res, key, value) {
 
 function postConfig(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
-	var repoPath = segments[3];
-	var fileDir = api.join(fileRoot, repoPath);
-	repoPath = api.join(workspaceDir, repoPath);
-	setString(repoPath, fileDir, req, res, req.body.Key, req.body.Value);
+	setString(segments, workspaceDir, fileRoot, req, res, req.body.Key, req.body.Value);
 }
 
 function putConfig(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
 	var key = segments[1];
-	var repoPath = segments[4];
-	var fileDir = api.join(fileRoot, repoPath);
-	repoPath = api.join(workspaceDir, repoPath);
 	
 	var values = req.body.Value;
 	if (!values) {
@@ -162,17 +155,13 @@ function putConfig(workspaceDir, fileRoot, req, res, next, rest) {
 		return writeError(501, res, "Multivar config entries are not implemented");
 	}
 		
-	setString(repoPath, fileDir, req, res, key, req.body.Value);
+	setString(segments, workspaceDir, fileRoot, req, res, key, req.body.Value);
 }
 
 function deleteConfig(workspaceDir, fileRoot, req, res, next, rest) {
 	var segments = rest.split("/");
 	var key = segments[1];
-	var repoPath = segments[4];
-	var fileDir = api.join(fileRoot, repoPath);
-	repoPath = api.join(workspaceDir, repoPath);
-	
-	setString(repoPath, fileDir, req, res, key, "");
+	setString(segments, workspaceDir, fileRoot, req, res, key, "");
 }
 
 module.exports = {
