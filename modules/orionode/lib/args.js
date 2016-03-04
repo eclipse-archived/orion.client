@@ -73,6 +73,12 @@ exports.readConfigFile = function(configFile, callback) {
 			var parsed = /([^=]*)(=?)(.*)/.exec(pair);
 			var name = (parsed[1] || "").trim();
 			var value = (parsed[3] || "").trim();
+			if (value === "true") {
+				value = true
+			}
+			if (value === "false") {
+				value = false
+			}
 			if (name !== "") {
 				result[name] = value;
 			}

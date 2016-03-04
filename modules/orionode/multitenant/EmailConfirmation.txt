@@ -1,0 +1,15 @@
+Confirm your email address for Orion
+Hello, we need to verify your email address <EMAIL> for the Orion account for username <USER>.
+
+Once you verify your email address you will be able to login into Orion.
+
+If you wish to continue, please follow the link below:
+
+<URL>
+
+If you're not this user or didn't request an Orion account, you may ignore this email.
+
+Thanks
+The Eclipse Orion Team.
+
+NOTE: This is a machine generated email. Please do not reply to this message.
