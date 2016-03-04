@@ -11,7 +11,6 @@
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
-var url = require('url');
 var async = require('async');
 var mRemotes = require('./remotes');
 var clone = require('./clone');
@@ -28,15 +27,10 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', function(req, res) {
-		return getBranches(req, res, req.urlPath);
-	})
-	.delete('*', function(req, res) {
-		return deleteBranch(req, res, req.urlPath);
-	})
-	.post('*', function(req, res) {
-		return createBranch(req, res, req.urlPath);
-	});
+	.get('/file*', getBranches)
+	.get('/:branchName*', getBranches)
+	.delete('/:branchName*', deleteBranch)
+	.post('*', createBranch);
 
 	function branchJSON(repo, ref, fileDir) {
 		var fullName = ref.name();
@@ -102,19 +96,15 @@ module.exports.router = function(options) {
 		});
 	}
 	
-	function getBranches(req, res, rest) {
-		var segments = rest.split("/");
-		var hasBranch = segments[1] !== "file";
-		var branchName = hasBranch ? segments[1].replace(/%252F/g, '/') : "";
-		branchName = branchName.replace("refs/heads/", "");
+	function getBranches(req, res) {
+		var branchName = req.param("branchName");
 		var fileDir;
-		var query = url.parse(req.url, true).query;
-		var filter = query.filter;
 		
 		var theRepo;
 		if (branchName) {
+			branchName = branchName.replace(/%2F/g, '/');
 			var theBranch;
-			clone.getRepo(rest)
+			clone.getRepo(req.urlPath)
 			.then(function(repo) {
 				theRepo = repo;
 				fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -144,8 +134,9 @@ module.exports.router = function(options) {
 		}
 		
 		var branches = [], theHead;
+		var filter = req.query.filter;
 	
-		clone.getRepo(rest)
+		clone.getRepo(req.urlPath)
 		.then(function(repo) {
 			theRepo = repo;
 			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -195,7 +186,7 @@ module.exports.router = function(options) {
 		});
 	}
 	
-	function createBranch(req, res, rest) {
+	function createBranch(req, res) {
 		var branchName = req.body.Name;
 		var startPoint = req.body.Branch;
 		var theRepo, theRef, fileDir;
@@ -205,7 +196,7 @@ module.exports.router = function(options) {
 				return writeError(400, res, "Branch name must be provided.");
 			}
 		}
-		clone.getRepo(rest)
+		clone.getRepo(req.urlPath)
 		.then(function(repo) {
 			theRepo = repo;
 			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -240,11 +231,9 @@ module.exports.router = function(options) {
 		});
 	}
 	
-	function deleteBranch(req, res, rest) {
-		var segments = rest.split("/");
-		var branchName = segments[1].replace(/%252F/g, '/');
-	
-		clone.getRepo(rest)
+	function deleteBranch(req, res) {
+		var branchName = req.param("branchName").replace(/%2F/g, '/');
+		clone.getRepo(req.urlPath)
 		.then(function(repo) {
 			return git.Reference.lookup(repo, branchName);
 		})

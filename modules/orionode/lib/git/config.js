@@ -87,6 +87,9 @@ function getAConfig(req, res, rest) {
 		else {
 			writeError(403, res);
 		}
+	})
+	.catch(function(err) {
+		writeError(404, res, err.message);
 	});
 }
 
@@ -138,6 +141,9 @@ function getConfig(req, res, rest) {
 		else {
 			writeError(403, res);
 		}
+	})
+	.catch(function(err) {
+		writeError(404, res, err.message);
 	});
 }
 
