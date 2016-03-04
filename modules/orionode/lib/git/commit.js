@@ -58,7 +58,23 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 	var page = Number(query.page) || 1;
 	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
 	var mergeBase = "true" === query.mergeBase;
-
+	var skipCount = (page-1)*pageSize;
+	var filter = query.filter;
+	var authoFilter = query.author;
+	var committerFilter = query.committer;
+	var sha1Filter = query.sha1;
+	var fromDateFilter = query.fromDate ? parseInt(query.fromDate, 10) : 0;
+	var toDateFilter = query.toDate ? parseInt(query.toDate, 10) : 0;
+	function filterCommit(commit) {
+		if (sha1Filter && commit.sha() !== sha1Filter) return true;
+		if (filter && commit.message().toLowerCase().indexOf(filter.toLowerCase()) === -1) return true;
+		if (authoFilter && commit.author().toString().toLowerCase().indexOf(authoFilter.toLowerCase()) === -1) return true;
+		if (committerFilter && commit.committer().toString().toLowerCase().indexOf(committerFilter.toLowerCase()) === -1) return true;
+		if (fromDateFilter && commit.timeMs() < fromDateFilter) return true;
+		if (toDateFilter && commit.timeMs() > toDateFilter) return true;
+		return false;
+	}
+	
 	var commits = [];
 	function writeResponse(over) {
 		var referenceName = scope;
@@ -123,36 +139,30 @@ function getCommitLog(workspaceDir, fileRoot, req, res, next, rest, query) {
 					writeResponse(true);
 					return;
 				}
-
 				return repo.getCommit(oid)
 				.then(function(commit) {
-					return Promise.all([commit, getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)]);
-				})
-				.then(function(commitAndDiffs) {
-					var commit = commitAndDiffs[0];
-					var diffs = commitAndDiffs[1];
-					var parents = commitAndDiffs[2];
-					if (!page || count++ >= (page-1)*pageSize) {
-						commits.push(commitJSON(commit, fileDir, diffs, parents, tagsMap[oid.toString()] || []));
+					if (filterCommit(commit) || page && count++ < skipCount) {//skip pages
+						return walk();
 					}
-
-					if (pageSize && commits.length === pageSize) {
-						writeResponse();
-						return;
-					}
-
-					walk();
+					return Promise.all([getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
+					.then(function(stuff) {
+						commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1], tagsMap[oid.toString()] || []));
+						if (pageSize && commits.length === pageSize) {//page done
+							writeResponse();
+							return;
+						}
+						walk();
+					});
 				});
 			})
 			.catch(function(error) {
-			if (error.errno === git.Error.CODE.ITEROVER) {
-				writeResponse(true);
-			} else {
-				writeError(404, res, error.message);
-			}
+				if (error.errno === git.Error.CODE.ITEROVER) {
+					writeResponse(true);
+				} else {
+					writeError(404, res, error.message);
+				}
 			});
 		}
-
 		walk();
 	}
 	
