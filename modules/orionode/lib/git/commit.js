@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
-var path = require('path')
+var path = require('path');
 var diff = require("./diff");
 var mTags = require("./tags");
 var clone = require("./clone");
@@ -485,7 +485,7 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 			oid = _oid;
 		})
 		.catch(function(index) {
-			if (rebaseOperation === "ABORT") {
+			if (rebaseOperation === "ABORT" || !index.entries) {
 				throw index;
 			}
 			paths = {};
