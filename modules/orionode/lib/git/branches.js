@@ -35,7 +35,7 @@ module.exports.router = function(options) {
 	function branchJSON(repo, ref, fileDir) {
 		var fullName = ref.name();
 		var shortName = ref.shorthand();
-		var branchURL = fullName.split("/").join("%252F");
+		var branchURL = fullName.split("/").join("%2F");
 		var current = !!ref.isHead() || repo.headDetached() && ref.name() === "HEAD";
 		return {
 			"CloneLocation": "/gitapi/clone"+ fileDir,
@@ -119,11 +119,7 @@ module.exports.router = function(options) {
 							console.log(err);
 							return writeError(500, res);
 						}
-						var resp = JSON.stringify(branch);
-						res.statusCode = 200;
-						res.setHeader('Content-Type', 'application/json');
-						res.setHeader('Content-Length', resp.length);
-						res.end(resp);
+						res.status(200).json(branch);
 					});
 				});
 			})
@@ -170,14 +166,10 @@ module.exports.router = function(options) {
 						console.log(err);
 						return writeError(500, res);
 					}
-					var resp = JSON.stringify({
+					res.status(200).json({
 						"Children": branches,
 						"Type": "Branch"
 					});
-					res.statusCode = 200;
-					res.setHeader('Content-Type', 'application/json');
-					res.setHeader('Content-Length', resp.length);
-					res.end(resp);
 				});
 			});
 		})
@@ -219,11 +211,7 @@ module.exports.router = function(options) {
 					console.log(err);
 					return writeError(500, res);
 				}
-				var resp = JSON.stringify(branch);
-				res.statusCode = 200;
-				res.setHeader('Content-Type', 'application/json');
-				res.setHeader('Content-Length', resp.length);
-				res.end(resp);
+				res.status(200).json(branch);
 			});
 		})
 		.catch(function(err) {
@@ -239,8 +227,7 @@ module.exports.router = function(options) {
 		})
 		.then(function(ref) {
 			if (git.Branch.delete(ref) === 0) {
-				res.statusCode = 200;
-				res.end();
+				res.status(200).end();
 			} else {
 				writeError(403, res);
 			}

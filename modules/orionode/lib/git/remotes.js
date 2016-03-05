@@ -49,11 +49,11 @@ function remoteBranchJSON(remoteBranch, commit, remote, fileDir, branch){
 		fullName = "refs/remotes/" + shortName;
 	}
 	var segments = shortName.split("/");
-	var remoteURL = segments[0] + "/" + segments.slice(1).join("%252F");
+	var remoteURL = segments[0] + "/" + segments.slice(1).join("%2F");
 	return {
 		"CloneLocation": "/gitapi/clone" + fileDir,
-		"CommitLocation": "/gitapi/commit/" + fullName.replace(/\//g, '%252F') + fileDir,
-		"DiffLocation": "/gitapi/diff/" + shortName.replace(/\//g, '%252F') + fileDir,
+		"CommitLocation": "/gitapi/commit/" + fullName.replace(/\//g, '%2F') + fileDir,
+		"DiffLocation": "/gitapi/diff/" + shortName.replace(/\//g, '%2F') + fileDir,
 		"FullName": fullName,
 		"GitUrl": remote.url(),
 		"HeadLocation": "/gitapi/commit/HEAD" + fileDir,
@@ -61,7 +61,7 @@ function remoteBranchJSON(remoteBranch, commit, remote, fileDir, branch){
 		"IndexLocation": "/gitapi/index" + fileDir,
 		"Location": "/gitapi/remote/" + remoteURL + fileDir,
 		"Name": shortName,
-		"TreeLocation": "/gitapi/tree" + fileDir + "/" + shortName.replace(/\//g, '%252F'),
+		"TreeLocation": "/gitapi/tree" + fileDir + "/" + shortName.replace(/\//g, '%2F'),
 		"Type": "RemoteTrackingBranch"
 	};
 }
@@ -103,14 +103,10 @@ function getRemotes(req, res) {
 					cb();
 				});
 			}, function() {
-				var resp = JSON.stringify({
+				res.status(200).json({
 					"Children": r,
 					"Type": "Remote"
 				});
-				res.statusCode = 200;
-				res.setHeader('Content-Type', 'application/json');
-				res.setHeader('Content-Length', resp.length);
-				res.end(resp);
 			});
 		});
 	}
@@ -148,11 +144,7 @@ function getRemotes(req, res) {
 				if (err) {
 					return writeError(403, res);
 				}
-				var resp = JSON.stringify(remoteJSON(theRemote, fileDir, branches));
-				res.statusCode = 200;
-				res.setHeader('Content-Type', 'application/json');
-				res.setHeader('Content-Length', resp.length);
-				res.end(resp);
+				res.status(200).json(remoteJSON(theRemote, fileDir, branches));
 			});
 		});
 	} 
@@ -175,12 +167,7 @@ function getRemotes(req, res) {
 			return theRepo.getBranchCommit(branch);
 		})
 		.then(function(commit) {
-			var resp = JSON.stringify(remoteBranchJSON(theBranch, commit, theRemote, fileDir));
-			res.statusCode = 200;
-			res.setHeader('Content-Type', 'application/json');
-			res.setHeader('Content-Length', resp.length);
-			res.end(resp);
-		
+			res.status(200).json(remoteBranchJSON(theBranch, commit, theRemote, fileDir));
 		})
 		.catch(function() {
 			return writeError(403, res);
@@ -210,17 +197,12 @@ function addRemote(req, res) {
 		return git.Remote.create(repo, req.body.Remote, req.body.RemoteURI);
 	})
 	.then(function(remote) {
-		var resp = JSON.stringify({
+		res.status(201).json({
 			"Location": "/gitapi/remote/" + remote.name() + "/file/" + fileDir
 		});
-		res.statusCode = 201;
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', resp.length);
-		res.end(resp);
 	})
 	.catch(function(err) {
-		console.log(err);
-		writeError(403, res);
+		writeError(403, res, err.message);
 	});
 }
 
@@ -380,8 +362,7 @@ function deleteRemote(req, res) {
 	.then(function(repo) {
 		return git.Remote.delete(repo, remoteName).then(function(resp) {
 			if (!resp) {
-				res.statusCode = 200;
-				res.end();
+				res.status(200).end();
 			} else {
 				writeError(403, res);
 			}

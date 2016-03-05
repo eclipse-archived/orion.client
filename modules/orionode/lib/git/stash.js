@@ -65,16 +65,12 @@ function getStash(req, res) {
 		return Promise.all(stashesPromises);
 	})
 	.then(function(stashes) {
-		var resp = JSON.stringify({
+		res.status(200).json({
 			"Children" : stashes,
 			"Location" : "/gitapi/stash" + fileDir,
 			"CloneLocation" : "/gitapi/clone" + fileDir,
 			"Type" : "StashCommit"
 		});
-		res.statusCode = 200;
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', resp.length);
-		res.end(resp);
 	})
 	.catch(function(err) {
 		writeError(500, res, err.message);
@@ -101,8 +97,7 @@ function putStash(req, res) {
 		return git.Stash.pop(repo, 0, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX);
 	})
 	.then(function() {
-		res.statusCode = 200;
-		res.end();
+		res.status(200).end();
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
@@ -131,8 +126,7 @@ function deleteStash(req, res) {
 		});
 	})
 	.then(function() {
-		res.statusCode = 200;
-		res.end();
+		res.status(200).end();
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
@@ -151,8 +145,7 @@ function postStash(req, res) {
 		return git.Stash.save(repo, git.Signature.default(repo), message, flags);
 	})
 	.then(function() {
-		res.statusCode = 200;
-		res.end();
+		res.status(200).end();
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);

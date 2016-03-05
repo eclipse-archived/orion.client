@@ -219,9 +219,8 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 			body += JSON.stringify(URIs[0]);
 			res.setHeader('Content-Type', 'application/json');
 		}
-		res.statusCode = 200;
 		res.setHeader('Content-Length', body.length);
-		return res.end(body);
+		return res.status(200).end(body);
 	});
 }
 
@@ -278,11 +277,9 @@ function postDiff(req, res) {
 	var newCommit = req.body.New;
 	var originalUrl = url.parse(req.originalUrl, true);
 	var segments = originalUrl.pathname.split("/");
-	segments[3] = (segments[3] + ".." + newCommit).replace(/\//g, "%252F");
+	segments[3] = (segments[3] + ".." + newCommit).replace(/\//g, "%2F");
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
-	res.statusCode = 200;
-	res.setHeader('Content-Type', 'application/json');
 	res.setHeader('Location', location);
-	res.end(JSON.stringify({Location: location}));
+	res.status(200).json({Location: location});
 }
 };

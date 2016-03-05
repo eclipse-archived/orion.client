@@ -126,13 +126,7 @@ function getCommitLog(req, res) {
 			prevLocation = url.format(prevLocation);
 			resp['PreviousLocation'] = prevLocation;
 		}
-
-		resp = JSON.stringify(resp);
-		
-		res.statusCode = 200;
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', resp.length);
-		res.end(resp);
+		res.status(200).json(resp);
 	}
 
 	var tagsMap;
@@ -348,28 +342,22 @@ function getCommitBody(req, res) {
 	})
 	.then(function(blob) {
 		var resp = blob.toString();
-		res.statusCode = 200;
 		res.setHeader('Content-Type', 'application/octect-stream');
 		res.setHeader('Content-Length', resp.length);
-		res.end(resp);
-	}).catch(function() {
-		res.statusCode = 404;
-		res.end();
+		res.status(200).end(resp);
+	}).catch(function(err) {
+		writeError(404, res, err.message);
 	});
 }
 
 function identifyNewCommitResource(req, res, newCommit) {
 	var originalUrl = url.parse(req.originalUrl, true);
 	var segments = originalUrl.pathname.split("/");
-	segments[3] = (segments[3] + ".." + newCommit).replace(/\//g, "%252F");
+	segments[3] = (segments[3] + ".." + newCommit).replace(/\//g, "%2F");
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
-	res.statusCode = 200;
-	var resp = JSON.stringify({
+	res.status(200).json({
 		"Location": location
 	});
-	res.setHeader('Content-Type', 'application/json');
-	res.setHeader('Content-Length', resp.length);
-	res.end(resp);
 }
 
 function revert(req, res, commitToRevert) {
@@ -394,13 +382,9 @@ function revert(req, res, commitToRevert) {
 		return theRepo.stateCleanup();
 	})
 	.then(function() {
-		res.statusCode = 200;
-		var resp = JSON.stringify({
+		res.status(200).json({
 			"Result": theRC ? "FAILURE" : "OK"
 		});
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', resp.length);
-		res.end(resp);
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
@@ -435,14 +419,10 @@ function cherryPick(req, res, commitToCherrypick) {
 		return git.Reference.nameToId(theRepo, "HEAD");
 	})
 	.then(function(newHead) {
-		res.statusCode = 200;
-		var resp = JSON.stringify({
+		res.status(200).json({
 			"Result": theRC ? "FAILED" : "OK",
 			"HeadUpdated": !theRC && theHead !== newHead
 		});
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', resp.length);
-		res.end(resp);
 	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
@@ -502,9 +482,7 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 		});
 	})
 	.then(function() {
-		res.statusCode = 200;
 		var rebaseResult = rebaseOperation && paths ? "STOPPED" : "OK";
-		
 		if (rebaseOperation !== "ABORT") {
 			if (!paths) {
 				if (oid && oid.toString() === head.id().toString()) rebaseResult = "UP_TO_DATE";
@@ -515,13 +493,9 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 		} else if (rebaseOperation === "ABORT") {
 			rebaseResult = "ABORTED";
 		}
-		var result = {
+		res.status(200).json({
 			"Result": rebaseResult
-		};
-		var resp = JSON.stringify(result);
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', resp.length);
-		res.end(resp);
+		});
 	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
@@ -564,20 +538,15 @@ function merge(req, res, commitToMerge, squash) {
 		});
 	})
 	.then(function() {
-		res.statusCode = 200;
 		var mergeResult = "MERGED";
 		if (!paths) {
 			if (oid && oid.toString() === head.id().toString()) mergeResult = "ALREADY_UPDATE";
 			else if (oid && oid.toString() === commit.id().toString()) mergeResult = "FAST_FORWARD";
 		}
-		var result = {
+		res.status(200).json({
 			"Result": paths ? "CONFLICTING" : mergeResult,
 			"FailingPaths": paths
-		};
-		var resp = JSON.stringify(result);
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', resp.length);
-		res.end(resp);
+		});
 	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
@@ -650,17 +619,12 @@ function tag(req, res, commitId, name) {
 		writeError(403, res, err.message);
 	})
 	.done(function() {
-		res.statusCode = 200;
-		var resp = commitJSON(thisCommit, fileDir, theDiffs, theParents);
-		resp = JSON.stringify(resp);
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', resp.length);
-		res.end(resp);
+		res.status(200).json(commitJSON(thisCommit, fileDir, theDiffs, theParents));
 	});
 }
 
 function putCommit(req, res) {
-	var commit = req.params.commit.replace(/%252F/g, '/');
+	var commit = req.params.commit.replace(/%2F/g, '/');
 	var tagName = req.body.Name;
 	if (tagName) {
 		tag(req, res, commit, tagName);
@@ -691,7 +655,7 @@ function postCommit(req, res) {
 	}
 	
 	//TODO create commit -> change id
-	var commit = req.params.commit.replace(/%252F/g, '/');
+	var commit = req.params.commit.replace(/%2F/g, '/');
 	if (commit !== "HEAD") {
 		writeError(404, res, "Needs to be HEAD");
 		return;
@@ -728,12 +692,7 @@ function postCommit(req, res) {
 		writeError(403, res, err.message);
 	})
 	.done(function() {
-		res.statusCode = 200;
-		var resp = commitJSON(thisCommit, fileDir, theDiffs, theParents);
-		resp = JSON.stringify(resp);
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', resp.length);
-		res.end(resp);
+		res.status(200).json(commitJSON(thisCommit, fileDir, theDiffs, theParents));
 	});
 }
 };

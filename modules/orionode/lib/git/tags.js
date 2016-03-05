@@ -73,11 +73,7 @@ function getTags(req, res) {
 			return theRepo.getReferenceCommit(ref);
 		})
 		.then(function(commit) {
-			var resp = JSON.stringify(tagJSON(theRef, commit, fileDir));
-			res.statusCode = 200;
-			res.setHeader('Content-Type', 'application/json');
-			res.setHeader('Content-Length', resp.length);
-			res.end(resp);
+			res.status(200).json(tagJSON(theRef, commit, fileDir));
 		})
 		.catch(function(err) {
 			writeError(404, res, err.message);
@@ -135,11 +131,7 @@ function getTags(req, res) {
 				resp['PreviousLocation'] = prevLocation;
 			}
 
-			resp = JSON.stringify(resp);
-			res.statusCode = 200;
-			res.setHeader('Content-Type', 'application/json');
-			res.setHeader('Content-Length', resp.length);
-			res.end(resp);
+			res.status(200).json(resp);
 		});
 	});
 }
@@ -152,8 +144,7 @@ function deleteTag(req, res) {
 	})
 	.then(function(resp) {
 		if (!resp) {
-			res.statusCode = 200;
-			res.end();
+			res.status(200).end();
 		} else {
 			writeError(403, res);
 		} 

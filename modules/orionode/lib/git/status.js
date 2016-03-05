@@ -107,7 +107,7 @@ function router(options) {
 					repoState = "CHERRY_PICKING";
 				}
 				
-				var resp = JSON.stringify({
+				res.status(200).json({
 					"Added": added,
 					"Changed": changed,
 					"CloneLocation": "/gitapi/clone" + fileDir,
@@ -122,11 +122,6 @@ function router(options) {
 					"Type": "Status",
 					"Untracked": untracked   
 				});
-		
-				res.statusCode = 200;
-				res.setHeader('Content-Type', 'application/json');
-				res.setHeader('Content-Length', resp.length);
-				res.end(resp);
 			})
 			.catch(function(err) {
 				console.log(err);

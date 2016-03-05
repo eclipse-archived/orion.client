@@ -77,15 +77,10 @@ function getClone(req, res) {
 		
 	checkDirectory(rootDir, function(err) {
 		if (err) return writeError(403, res, err.message);
-		var resp = JSON.stringify({
+		res.status(200).json({
 			"Children": repos,
 			"Type": "Clone"
 		});
-
-		res.statusCode = 200;
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', resp.length);
-		res.end(resp);	
 	});
 	
 	function pushRepo(repos, repo, base, location, url, parents, cb) {
@@ -216,15 +211,9 @@ function postInit(req, res) {
 				return theRepo.createCommit("HEAD", author, committer, "Initial commit", oid, []);
 			})
 			.then(function() {
-				var response = {
+				res.status(201).json({
 					"Location": "/gitapi/clone/file/" + req.body.Name
-				};
-				var resp = JSON.stringify(response);
-				res.statusCode = 201;
-				res.setHeader('Content-Type', 'application/json');
-				res.setHeader('Content-Length', resp.length);
-				res.end(resp);
-
+				});
 			})
 			.catch(function(err){
 				console.log(err);
@@ -305,8 +294,7 @@ function putClone(req, res) {
 		return theRepo.checkoutBranch(branch, checkOptions);
 	})
 	.then(function(){
-		res.statusCode = 200;
-		res.end();
+		res.status(200).end();
 	})
 	.catch(function(err){
 		writeError(403, res, err.message);
@@ -317,8 +305,7 @@ function deleteClone(req, res) {
 	var clonePath = req.params["0"];
 	rmdir(fileUtil.safeFilePath(workspaceDir, clonePath), function(err) {
 		if (err) return writeError(500, res, err);
-		res.statusCode = 200;
-		res.end();
+		res.status(200).end();
 	});
 }
 

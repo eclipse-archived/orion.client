@@ -54,12 +54,10 @@ function getIndex(req, res) {
 	})
 	.then(function(blob) {
 		res.write(blob.toString());
-		res.statusCode = 200;
-		res.end();
+		res.status(200).end();
 	})
 	.catch(function(err) {
-		console.log(err);
-		writeError(404, res);
+		writeError(404, res, err.message);
 	});
 }
 
@@ -93,8 +91,7 @@ function putIndex(req, res) {
 		return index.writeTree();
 	})
 	.done(function() {
-		res.statusCode = 200;
-		res.end();
+		res.status(200).end();
 	});
 }
 
@@ -143,8 +140,7 @@ function postIndex(req, res) {
 		return git.Reset.default(repo, commit, [filePath]);
 	})
 	.done(function() {
-		res.statusCode = 200;
-		res.end();
+		res.status(200).end();
 	});
 }
 };

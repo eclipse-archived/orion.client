@@ -52,11 +52,7 @@ function getAConfig(req, res) {
 				config = ini.parse(config);
 				val = undefined;
 				findInPath(config, "", key);
-				var resp = JSON.stringify(configJSON(key, val, fileDir));
-				res.statusCode = 200;
-				res.setHeader('Content-Type', 'application/json');
-				res.setHeader('Content-Length', resp.length);
-				res.end(resp);
+				res.status(200).json(configJSON(key, val, fileDir));
 			});
 
 			function findInPath(config, prefix, key) {
@@ -96,16 +92,12 @@ function getConfig(req, res) {
 
 				getFullPath(config, "");
 
-				var resp = JSON.stringify({
+				res.status(200).json({
 					"Children": configs,
 					"CloneLocation": "/gitapi/clone" + fileDir,
 					"Location": "/gitapi/config/clone"+ fileDir,
 					"Type": "Config"
 				});
-				res.statusCode = 200;
-				res.setHeader('Content-Type', 'application/json');
-				res.setHeader('Content-Length', resp.length);
-				res.end(resp);
 
 				function getFullPath(config, prefix) {
 					if (typeof config !== "object") {
@@ -144,11 +136,7 @@ function setString(req, res, key, value) {
 		return config.setString(key, Array.isArray(value) ? value[0] : value);
 	})
 	.then(function(rc) {
-		var resp = JSON.stringify(configJSON(key, value, fileDir));
-		res.statusCode = rc ? 400 : 201;
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', resp.length);
-		res.end(resp);
+		res.status(rc ? 400 : 201).json(configJSON(key, value, fileDir));
 	})
 	.catch(function(err) {
 		writeError(500, res, err.message);

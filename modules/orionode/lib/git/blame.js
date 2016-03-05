@@ -13,6 +13,7 @@ var git = require('nodegit');
 var finder = require('findit');
 var express = require('express');
 var bodyParser = require('body-parser');
+var clone = require('./clone');
 
 module.exports = {};
 
@@ -25,19 +26,15 @@ module.exports.router = function(options) {
 	return express.Router()
 	.use(bodyParser.json())
 	.get('*', function(req, res) {
-		return getBlame(req, res, req.url.split("?")[0]);
+		return getBlame(req, res);
 	});
 	
-function getBlame(req, res, rest) {
+function getBlame(req, res) {
 	finder(workspaceDir).on('directory', function (dir, stat, stop) {
-		git.Repository.open(dir)
+		clone.getRepo(req.urlPath)
 		.then(function(repo) {
 			git.Blame.file(repo, dir).then(function(blame) {
-				var resp = JSON.stringify(blame);
-				res.statusCode = 200;
-				res.setHeader('Content-Type', 'application/json');
-				res.setHeader('Content-Length', resp.length);
-				res.end(resp);
+				res.status(200).json(blame);
 				return blame;
 			});
 		});
