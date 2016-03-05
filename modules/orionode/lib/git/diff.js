@@ -203,6 +203,8 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 			res.setHeader('Content-Type', 'multipart/related; boundary="BOUNDARY"');
 		} else if (includeDiff) {
 			body += diffContents.join("");
+			res.setHeader("Cache-Control", "no-cache");
+			res.setHeader("Content-Disposition", "attachment; filename=\"changes.patch\"");
 			res.setHeader('Content-Type', 'plain/text');
 		} else if (includeDiffs) {
 			var result = {
