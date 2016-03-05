@@ -37,13 +37,13 @@ function configJSON(key, value, fileDir) {
 	return {
 		"Key": key,
 		"CloneLocation": "/gitapi/clone" + fileDir,
-		"Location": "/gitapi/config/" + key + "/clone" + fileDir,
+		"Location": "/gitapi/config/" + encodeURIComponent(key) + "/clone" + fileDir,
 		"Value": [value]
 	};
 }
 
 function getAConfig(req, res) {
-	var key = req.params.key;
+	var key = decodeURIComponent(req.params.key);
 	clone.getRepo(req.urlPath)
 	.then(function(repo) {
 		if (repo) {

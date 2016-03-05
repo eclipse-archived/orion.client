@@ -42,15 +42,15 @@ function tagJSON(ref, commit, fileDir) {
 		"CloneLocation": "/gitapi/clone" + fileDir,
 		"CommitLocation": "/gitapi/commit/" + commit.sha() + fileDir,
 		"LocalTimeStamp": commit.timeMs(),
-		"Location": "/gitapi/tag/" + shortName + fileDir,
+		"Location": "/gitapi/tag/" + encodeURIComponent(shortName) + fileDir,
 		"TagType": "LIGHTWEIGHT",//TODO
-		"TreeLocation": "/gitapi/tree" + fileDir + "/" + shortName,
+		"TreeLocation": "/gitapi/tree" + fileDir + "/" + encodeURIComponent(shortName),
 		"Type": "Tag"
 	};
 }
 
 function getTags(req, res) {
-	var tagName = req.params.tagName	;
+	var tagName = decodeURIComponent(req.params.tagName || "");
 	var fileDir;
 	var query = req.query;
 	var page = Number(query.page) || 1;
@@ -137,7 +137,7 @@ function getTags(req, res) {
 }
 
 function deleteTag(req, res) {
-	var tagName = req.params.tagName;
+	var tagName = decodeURIComponent(req.params.tagName);
 	return clone.getRepo(req.urlPath)
 	.then(function(repo) {
 		return git.Tag.delete(repo, tagName);

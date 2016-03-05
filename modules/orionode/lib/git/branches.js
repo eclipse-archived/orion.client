@@ -35,7 +35,7 @@ module.exports.router = function(options) {
 	function branchJSON(repo, ref, fileDir) {
 		var fullName = ref.name();
 		var shortName = ref.shorthand();
-		var branchURL = fullName.split("/").join("%2F");
+		var branchURL = encodeURIComponent(fullName);
 		var current = !!ref.isHead() || repo.headDetached() && ref.name() === "HEAD";
 		return {
 			"CloneLocation": "/gitapi/clone"+ fileDir,
@@ -97,12 +97,11 @@ module.exports.router = function(options) {
 	}
 	
 	function getBranches(req, res) {
-		var branchName = req.param.branchName;
+		var branchName = decodeURIComponent(req.param.branchName || "");
 		var fileDir;
 		
 		var theRepo;
 		if (branchName) {
-			branchName = branchName.replace(/%2F/g, '/');
 			var theBranch;
 			clone.getRepo(req.urlPath)
 			.then(function(repo) {
@@ -220,7 +219,7 @@ module.exports.router = function(options) {
 	}
 	
 	function deleteBranch(req, res) {
-		var branchName = req.param.branchName.replace(/%2F/g, '/');
+		var branchName = decodeURIComponent(req.param.branchName);
 		clone.getRepo(req.urlPath)
 		.then(function(repo) {
 			return git.Reference.lookup(repo, branchName);

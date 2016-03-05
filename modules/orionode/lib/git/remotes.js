@@ -40,20 +40,21 @@ module.exports.router = function(options) {
 	.post('/:remoteName/:branchName/file*', postRemote);
 	
 function remoteBranchJSON(remoteBranch, commit, remote, fileDir, branch){
-	var fullName, shortName;
+	var fullName, shortName, remoteURL;
 	if (remoteBranch) {
 		fullName = remoteBranch.name();
 		shortName = remoteBranch.shorthand();
+		var branchName = shortName.replace(remote.name() + "/", "");
+		remoteURL = api.join(encodeURIComponent(remote.name()), encodeURIComponent(branchName));
 	} else {// remote branch does not exists
 		shortName = api.join(remote.name(), branch.Name);
 		fullName = "refs/remotes/" + shortName;
+		remoteURL = api.join(encodeURIComponent(remote.name()), encodeURIComponent(branch.Name));
 	}
-	var segments = shortName.split("/");
-	var remoteURL = segments[0] + "/" + segments.slice(1).join("%2F");
 	return {
 		"CloneLocation": "/gitapi/clone" + fileDir,
-		"CommitLocation": "/gitapi/commit/" + fullName.replace(/\//g, '%2F') + fileDir,
-		"DiffLocation": "/gitapi/diff/" + shortName.replace(/\//g, '%2F') + fileDir,
+		"CommitLocation": "/gitapi/commit/" + encodeURIComponent(fullName) + fileDir,
+		"DiffLocation": "/gitapi/diff/" + encodeURIComponent(shortName) + fileDir,
 		"FullName": fullName,
 		"GitUrl": remote.url(),
 		"HeadLocation": "/gitapi/commit/HEAD" + fileDir,
@@ -61,7 +62,7 @@ function remoteBranchJSON(remoteBranch, commit, remote, fileDir, branch){
 		"IndexLocation": "/gitapi/index" + fileDir,
 		"Location": "/gitapi/remote/" + remoteURL + fileDir,
 		"Name": shortName,
-		"TreeLocation": "/gitapi/tree" + fileDir + "/" + shortName.replace(/\//g, '%2F'),
+		"TreeLocation": "/gitapi/tree" + fileDir + "/" + encodeURIComponent(shortName),
 		"Type": "RemoteTrackingBranch"
 	};
 }
@@ -69,19 +70,19 @@ function remoteBranchJSON(remoteBranch, commit, remote, fileDir, branch){
 function remoteJSON(remote, fileDir, branches) {
 	var name = remote.name();
 	return {
-		"CloneLocation": "/gitapi/clone/" + fileDir,
+		"CloneLocation": "/gitapi/clone" + fileDir,
 		"IsGerrit": false, // should check 
 		"GitUrl": remote.url(),
 		"Name": name,
-		"Location": "/gitapi/remote/" + name + fileDir,
+		"Location": "/gitapi/remote/" + encodeURIComponent(name) + fileDir,
 		"Type": "Remote",
 		"Children": branches
 	};
 }
 
 function getRemotes(req, res) {
-	var remoteName = req.params.remoteName;
-	var branchName = req.params.branchName;
+	var remoteName = decodeURIComponent(req.params.remoteName || "");
+	var branchName = decodeURIComponent(req.params.branchName || "");
 	var filter = req.query.filter;
 
 	var fileDir, theRepo, theRemote;
@@ -150,7 +151,6 @@ function getRemotes(req, res) {
 	} 
 
 	if (remoteName && branchName) {
-		branchName = branchName.replace(/%2F/g, '/');
 		var theBranch;
 		return clone.getRepo(req.urlPath)
 		.then(function(repo) {
@@ -198,7 +198,7 @@ function addRemote(req, res) {
 	})
 	.then(function(remote) {
 		res.status(201).json({
-			"Location": "/gitapi/remote/" + remote.name() + "/file/" + fileDir
+			"Location": "/gitapi/remote/" + encodeURIComponent(remote.name()) + fileDir
 		});
 	})
 	.catch(function(err) {
@@ -208,9 +208,9 @@ function addRemote(req, res) {
 
 function postRemote(req, res) {
 	if (req.body.Fetch === "true") {
-		fetchRemote(req, res, req.params.remoteName, req.params.branchName, req.body.Force);
+		fetchRemote(req, res, decodeURIComponent(req.params.remoteName), decodeURIComponent(req.params.branchName || ""), req.body.Force);
 	} else if (req.body.PushSrcRef) {
-		pushRemote(req, res, req.params.remoteName, req.params.branchName, req.body.PushSrcRef, req.body.PushTags, req.body.Force);
+		pushRemote(req, res, decodeURIComponent(req.params.remoteName), decodeURIComponent(req.params.branchName || ""), req.body.PushSrcRef, req.body.PushTags, req.body.Force);
 	} else {
 		writeError(400, res);
 	}
@@ -357,7 +357,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 }
 
 function deleteRemote(req, res) {
-	var remoteName = req.params.remoteName;
+	var remoteName = decodeURIComponent(req.params.remoteName);
 	return clone.getRepo(req.urlPath)
 	.then(function(repo) {
 		return git.Remote.delete(repo, remoteName).then(function(resp) {
