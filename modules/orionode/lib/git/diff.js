@@ -12,7 +12,7 @@
 var git = require('nodegit');
 var url = require('url');
 var clone = require('./clone');
-var api = require('../api');
+var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
 
@@ -25,31 +25,26 @@ module.exports.router = function(options) {
 	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 
 	module.exports.changeType = changeType;
-	module.exports.getDiffLocation = getDiffLocation;
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', function(req, res) {
-		return getDiff(req, res, req.urlPath);
-	})
-	.post('*', function(req, res) {
-		return getDiffLocation(req, res, req.urlPath);
-	});
+	.get('/file*', getDiff)
+	.get('/:scope/file*', getDiff)
+	.post('/:scope/file*', postDiff);
 
-function getDiff(req, res, rest) {
-	var query = url.parse(req.url, true).query;
+function getDiff(req, res) {
+	var query = req.query;
 	var parts = (query.parts || "").split(",");
 	var paths = query.Path;
-	var segments = rest.split("/");
-	var hasScope = segments[1] !== "file";
-	var scope = hasScope ? segments[1].replace(/%252F/g, '/') : "";
-	var pattern = (hasScope ? segments.slice(4) : segments.slice(3)).join("/");
+	var scope = (req.params.scope || "").replace(/%2F/g, '/');
+	var filePath = path.join(workspaceDir, req.params["0"]);
 	
 	var diff, repo;
-	return clone.getRepo(rest)
+	return clone.getRepo(req.urlPath)
 	.then(function(r) {
 		repo = r;
-		var fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+		filePath = filePath.substring(repo.workdir().length);
+		var fileDir = path.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 		if (scope.indexOf("..") !== -1) {
 			diff = getDiffBetweenTwoCommits(repo, scope.split(".."));
 		} else if (scope === "Default") {
@@ -61,7 +56,7 @@ function getDiff(req, res, rest) {
 		}
 		return diff
 		.then(function(diff) {
-			processDiff(diff, pattern, paths, fileDir, res, rest, parts.indexOf("diff") !== -1, parts.indexOf("uris") !== -1, parts.indexOf("diffs") !== -1, query, scope);
+			processDiff(diff, filePath, paths, fileDir, req, res, parts.indexOf("diff") !== -1, parts.indexOf("uris") !== -1, parts.indexOf("diffs") !== -1, query, scope);
 		});
 	});
 }
@@ -106,7 +101,7 @@ function getBaseLocation(scope, path) {
 	return "/gitapi/index" + path;
 }
 
-function processDiff(diff, filePath, paths, fileDir, res, rest, includeDiff, includeURIs, includeDiffs, query, scope) {
+function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, includeURIs, includeDiffs, query, scope) {
 	var page = Number(query.page) || 1;
 	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
 	var URIs = [], diffContents = [], diffs = [], patches = [], i;
@@ -125,11 +120,11 @@ function processDiff(diff, filePath, paths, fileDir, res, rest, includeDiff, inc
 				patches.push(patch);
 				
 				if (includeURIs) {
-					var p = fileDir + "/" + newFilePath;
+					var p = path.join(fileDir, newFilePath);
 					URIs.push({
 						"Base": getBaseLocation(scope, p),
 						"CloneLocation": "/gitapi/clone" + fileDir,
-						"Location": "/gitapi/" + rest,
+						"Location": "/gitapi/diff" + req.urlPath,
 						"New": getNewLocation(scope, p),
 						"Old": getOldLocation(scope, p),
 						"Type": "Diff"
@@ -139,11 +134,11 @@ function processDiff(diff, filePath, paths, fileDir, res, rest, includeDiff, inc
 				if (includeDiffs && (start <= pi && pi < end)) {
 					i = pi;
 					var type = changeType(patch);
-					var path = type !== "Deleted" ? newFilePath : oldFilePath;
+					var p1 = path.join(fileDir, type !== "Deleted" ? newFilePath : oldFilePath);
 					diffs.push({
 						"ChangeType": type,
-						"ContentLocation": fileDir + "/" + path,
-						"DiffLocation": "/gitapi/diff/" + scope + fileDir + "/" + path,
+						"ContentLocation": p1,
+						"DiffLocation": "/gitapi/diff/" + scope + p1,
 						"NewPath": newFilePath,
 						"OldPath": oldFilePath,
 						"Type": "Diff"
@@ -279,7 +274,7 @@ function getDiffBetweenTwoCommits(repo, commits) {
 	});
 }
 
-function getDiffLocation(req, res, rest) {
+function postDiff(req, res) {
 	var newCommit = req.body.New;
 	var originalUrl = url.parse(req.originalUrl, true);
 	var segments = originalUrl.pathname.split("/");

@@ -33,18 +33,11 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', function(req, res) {
-		return getClone(req, res, req.urlPath);
-	})
-	.put('*', function(req, res) {
-		return putClone(req, res, req.urlPath);
-	})
-	.delete('*', function(req, res) {
-		return deleteClone(req, res, req.urlPath);
-	})
-	.post('*', function(req, res) {
-		return postInit(req, res, req.urlPath);
-	});
+	.get('/workspace*', getClone)
+	.get('/file/:rootDir*', getClone)
+	.put('/file*', putClone)
+	.delete('/file*', deleteClone)
+	.post('*', postInit);
 
 function cloneJSON(base, location, url, parents, submodules) {
 	return {
@@ -77,16 +70,10 @@ function getRepo(path) {
 	});
 }
 
-function getClone(req, res, rest) {
+function getClone(req, res) {
 	var repos = [];
 	
-	var rootDir;
-	var segments = rest.split("/");
-	if (segments[1] === "workspace") {
-		rootDir = workspaceDir;
-	} else if (segments[1] === "file") {
-		rootDir = api.join(workspaceDir, segments.slice(2).join("/"));
-	}
+	var rootDir = path.join(workspaceDir, req.params.rootDir || "");
 		
 	checkDirectory(rootDir, function(err) {
 		if (err) return writeError(403, res, err.message);
@@ -193,9 +180,9 @@ function getClone(req, res, rest) {
 	}
 }
 
-function postInit(req, res, rest) {
+function postInit(req, res) {
 	if (req.body.GitUrl) {
-		postClone(req, res, rest);
+		postClone(req, res);
 	} else {
 		var initDir = workspaceDir + '/' + req.body.Name;
 		var theRepo, index, author, committer;
@@ -228,11 +215,11 @@ function postInit(req, res, rest) {
 				// normal we don't get the head either, because there isn't one yet.
 				return theRepo.createCommit("HEAD", author, committer, "Initial commit", oid, []);
 			})
-			.then(function(id) {
+			.then(function() {
 				var response = {
 					"Location": "/gitapi/clone/file/" + req.body.Name
 				};
-				var resp = JSON.stringify(response)
+				var resp = JSON.stringify(response);
 				res.statusCode = 201;
 				res.setHeader('Content-Type', 'application/json');
 				res.setHeader('Content-Length', resp.length);
@@ -248,12 +235,7 @@ function postInit(req, res, rest) {
 	}
 }
 
-function putClone(req, res, rest) {
-	var segments = rest.split("/");
-	if (!(segments[1] === "file" && segments.length > 2)) {
-		return writeError(404, res);
-	}
-
+function putClone(req, res) {
 	var paths = req.body.Path;
 	var branch = req.body.Branch;
 	var tag = req.body.Tag;
@@ -266,7 +248,7 @@ function putClone(req, res, rest) {
 	var checkOptions = {
 		checkoutStrategy: git.Checkout.STRATEGY.FORCE,
 	};
-	getRepo(rest)
+	getRepo(req.urlPath)
 	.then(function(repo) {
 		theRepo = repo;
 		if (paths) {
@@ -331,16 +313,16 @@ function putClone(req, res, rest) {
 	});
 }
 
-function deleteClone(req, res, rest) {
-	var configPath = rest.replace("clone/file", "");
-	rmdir(fileUtil.safeFilePath(workspaceDir, configPath), function(err) {
+function deleteClone(req, res) {
+	var clonePath = req.params["0"];
+	rmdir(fileUtil.safeFilePath(workspaceDir, clonePath), function(err) {
 		if (err) return writeError(500, res, err);
 		res.statusCode = 200;
 		res.end();
 	});
 }
 
-function postClone(req, res, rest) {
+function postClone(req, res) {
 	var url = req.body.GitUrl;
 	var dirName = url.substring(url.lastIndexOf("/") + 1).replace(".git", "");
 	

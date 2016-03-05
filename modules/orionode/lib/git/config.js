@@ -12,7 +12,6 @@
 /*globals configs:true val:true*/
 var api = require('../api'), writeError = api.writeError;
 var ini = require('ini');
-var url = require('url');
 var fs = require('fs');
 var clone = require('./clone');
 var express = require('express');
@@ -28,18 +27,11 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', function(req, res) {
-		return getConfig(req, res, req.urlPath);
-	})
-	.delete('*', function(req, res) {
-		return deleteConfig(req, res, req.urlPath);
-	})
-	.put('*', function(req, res) {
-		return putConfig(req, res, req.urlPath);
-	})
-	.post('*', function(req, res) {
-		return postConfig(req, res, req.urlPath);
-	});
+	.get('/clone/file*', getConfig)
+	.get('/:key/clone/file*', getAConfig)
+	.delete('/:key/clone/file*', deleteConfig)
+	.put('/:key/clone/file*', putConfig)
+	.post('/clone/file*', postConfig);
 
 function configJSON(key, value, fileDir) {
 	return {
@@ -50,10 +42,9 @@ function configJSON(key, value, fileDir) {
 	};
 }
 
-function getAConfig(req, res, rest) {
-	var segments = rest.split("/");
-	var key = segments[1];
-	clone.getRepo(rest)
+function getAConfig(req, res) {
+	var key = req.params.key;
+	clone.getRepo(req.urlPath)
 	.then(function(repo) {
 		if (repo) {
 			var fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -93,14 +84,9 @@ function getAConfig(req, res, rest) {
 	});
 }
 
-function getConfig(req, res, rest) {
-	var segments = rest.split("/");
-	if (segments[1] !== "clone") {
-		return getAConfig(req, res, rest);
-	}
-	var query = url.parse(req.url, true).query;
-	var filter = query.filter;
-	clone.getRepo(rest)
+function getConfig(req, res) {
+	var filter = req.query.filter;
+	clone.getRepo(req.urlPath)
 	.then(function(repo) {
 		if (repo) {
 			var fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
@@ -147,9 +133,9 @@ function getConfig(req, res, rest) {
 	});
 }
 
-function setString(req, res, rest, key, value) {
+function setString(req, res, key, value) {
 	var fileDir;
-	clone.getRepo(rest)
+	clone.getRepo(req.urlPath)
 	.then(function(repo) {
 		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
 		return repo.config();
@@ -169,14 +155,11 @@ function setString(req, res, rest, key, value) {
 	});
 }
 
-function postConfig(req, res, rest) {
-	setString(req, res, rest, req.body.Key, req.body.Value);
+function postConfig(req, res) {
+	setString(req, res, req.body.Key, req.body.Value);
 }
 
-function putConfig(req, res, rest) {
-	var segments = rest.split("/");
-	var key = segments[1];
-	
+function putConfig(req, res) {
 	var values = req.body.Value;
 	if (!values) {
 		return writeError(400, res, "Config entry value must be provided");
@@ -187,12 +170,11 @@ function putConfig(req, res, rest) {
 		return writeError(501, res, "Multivar config entries are not implemented");
 	}
 		
-	setString(req, res, rest, key, req.body.Value);
+	setString(req, res, req.params.key, req.body.Value);
 }
 
-function deleteConfig(req, res, rest) {
-	var segments = rest.split("/");
-	var key = segments[1];
-	setString(req, res, key, "");
+function deleteConfig(req, res) {
+	//TODO - delete config
+	setString(req, res, req.params.key, "");
 }
 };

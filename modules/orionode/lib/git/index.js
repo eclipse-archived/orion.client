@@ -12,6 +12,7 @@
 var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
 var clone = require('./clone');
+var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
 
@@ -25,27 +26,19 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', function(req, res) {
-		return getIndex(req, res, req.urlPath);
-	})
-	.put('*', function(req, res) {
-		return putIndex(req, res, req.urlPath);
-	})
-	.post('*', function(req, res) {
-		return postIndex(req, res, req.urlPath);
-	});
+	.get('/file*', getIndex)
+	.put('/file*', putIndex)
+	.post('/file*', postIndex);
 
-function getIndex(req, res, rest) {
+function getIndex(req, res) {
 	var repo;
 	var index;
+	var filePath = path.join(workspaceDir, req.params["0"]);
 
-	var segments = rest.split("/");
-	var filePath = api.join(workspaceDir, segments.slice(2).join("/"));
-
-	return clone.getRepo(rest)
+	return clone.getRepo(req.urlPath)
 	.then(function(repoResult) {
 		repo = repoResult;
-		filePath = filePath.substring(repo.workdir());
+		filePath = filePath.substring(repo.workdir().length);
 		return repo;
 	})
 	.then(function(repo) {
@@ -70,14 +63,13 @@ function getIndex(req, res, rest) {
 	});
 }
 
-function putIndex(req, res, rest) {
+function putIndex(req, res) {
 	var index;
-	var segments = rest.split("/");
-	var filePath = api.join(workspaceDir, segments.slice(2).join("/"));
+	var filePath = path.join(workspaceDir, req.params["0"]);
 
-	return clone.getRepo(rest)
+	return clone.getRepo(req.urlPath)
 	.then(function(repo) {
-		filePath = filePath.substring(repo.workdir());
+		filePath = filePath.substring(repo.workdir().length);
 		return repo.openIndex();
 	})
 	.then(function(indexResult) {
@@ -106,16 +98,15 @@ function putIndex(req, res, rest) {
 	});
 }
 
-function postIndex(req, res, rest) {
-	var segments = rest.split("/");
-	var filePath = api.join(workspaceDir, segments.slice(2).join("/"));
+function postIndex(req, res) {
 	var repo;
 	var resetType = req.body.Reset;
+	var filePath = path.join(workspaceDir, req.params["0"]);
 	
-	return clone.getRepo(rest)
+	return clone.getRepo(req.urlPath)
 	.then(function(_repo) {
 		repo = _repo;
-		filePath = filePath.substring(repo.workdir());
+		filePath = filePath.substring(repo.workdir().length);
 		return repo.getReferenceCommit(req.body.Commit || "HEAD")
 		.then(function(commit) {
 			return commit;
