@@ -30,6 +30,7 @@ module.exports.router = function(options) {
 	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 
 	module.exports.getRepo = getRepo;
+	module.exports.foreachSubmodule = foreachSubmodule;
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -99,22 +100,29 @@ function getClone(req, res) {
 				async.each(names, function(name, callback) {
 					git.Submodule.lookup(repo, name)
 					.then(function(submodule) {
+						var status, subrepo;
 						var sublocation = api.join(location, submodule.path());
 						function done(json, unitialized) {
 							json.SubmoduleStatus = {
-								Type: unitialized ? "UNINITIALIZED" : "INITIALIZED",
+								Type: unitialized || status & git.Submodule.STATUS.WD_UNINITIALIZED || subrepo.isEmpty() ?
+									"UNINITIALIZED" : "INITIALIZED",
 								HeadSHA: submodule.headId() ? submodule.headId().toString() : "",
 								Path: submodule.path()
 							};
 							callback();
 						}
-						submodule.open()
-						.then(function(subrepo) {
+						git.Submodule.status(repo, submodule.name(), -1)
+						.then(function(_status) {
+							status = _status;
+							return submodule.open();
+						})
+						.then(function(_subrepo) {
+							subrepo = _subrepo;
 							pushRepo(modules, subrepo, name, sublocation, submodule.url(), parents, done);
 						}).catch(function() {
 							var json = cloneJSON(name, sublocation, submodule.url(), parents);
 							modules.push(json);
-							done(json, true);
+							done(json, true || subrepo.isEmpty());
 						});
 					}).catch(function() {
 						callback();
@@ -309,6 +317,51 @@ function deleteClone(req, res) {
 	});
 }
 
+function foreachSubmodule(repo, operation, recursive) {
+	return repo.getSubmoduleNames()
+	.then(function(names) {
+		return new Promise(function(fulfill, reject) {
+			async.series(names.map(function(name) {
+				return function(cb) {
+					git.Submodule.lookup(repo, name)
+					.then(function(submodule) {
+						var op;
+						if (operation === "sync") {
+							op = submodule.sync();
+						} else if (operation === "update") {
+							op = submodule.init(1)
+							.then(function() {
+								return submodule.update(1, new git.SubmoduleUpdateOptions());
+							});
+						}
+						return op
+						.then(function() {
+							if (recursive) {
+								return submodule.open()
+								.then(function(subrepo) {
+									return foreachSubmodule(subrepo, operation, recursive);
+								});
+							}
+						});
+					})
+					.then(function() {
+						cb();
+					})
+					.catch(function(err) {
+						cb(err);
+					});
+				};
+			}), function(err) {
+				if (err) {
+					reject(err);
+				} else {
+					fulfill();
+				}
+			});
+		});
+	});
+}
+
 function postClone(req, res) {
 	var url = req.body.GitUrl;
 	var dirName = url.substring(url.lastIndexOf("/") + 1).replace(".git", "");
@@ -322,6 +375,11 @@ function postClone(req, res) {
 					return 1; //Ignore SSL certificate check
 				}
 			}
+		}
+	})
+	.then(function(repo) {
+		if (req.body.cloneSubmodules) {
+			return foreachSubmodule(repo, "update", true);
 		}
 	})
 	.then(function() {

@@ -27,6 +27,7 @@ try {
 	var stash = require('./git/stash');
 	var blame = require('./git/blame');
 	var diff = require('./git/diff');
+	var submodule = require('./git/submodule');
 } catch (e) {
 	if (e.code === "MODULE_NOT_FOUND" && e.message.indexOf("nodegit") >= 0) {
 		hasNodegit = false;
@@ -68,6 +69,7 @@ function Git(options) {
 	router.use("/blame", computePaths, blame.router(options));
 	router.use("/stash", computePaths, stash.router(options));
 	router.use("/diff", computePaths, diff.router(options));
+	router.use("/submodule", computePaths, submodule.router(options));
 
 	return router;
 }

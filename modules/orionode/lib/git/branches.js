@@ -97,7 +97,7 @@ module.exports.router = function(options) {
 	}
 	
 	function getBranches(req, res) {
-		var branchName = decodeURIComponent(req.param.branchName || "");
+		var branchName = decodeURIComponent(req.params.branchName || "");
 		var fileDir;
 		
 		var theRepo;
@@ -219,7 +219,7 @@ module.exports.router = function(options) {
 	}
 	
 	function deleteBranch(req, res) {
-		var branchName = decodeURIComponent(req.param.branchName);
+		var branchName = decodeURIComponent(req.params.branchName);
 		clone.getRepo(req.urlPath)
 		.then(function(repo) {
 			return git.Reference.lookup(repo, branchName);

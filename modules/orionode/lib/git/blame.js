@@ -25,9 +25,7 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', function(req, res) {
-		return getBlame(req, res);
-	});
+	.get('*', getBlame);
 	
 function getBlame(req, res) {
 	finder(workspaceDir).on('directory', function (dir, stat, stop) {
