@@ -17,13 +17,13 @@
 	background-color: white;
 }
 .prospecto .rulerLines {
-	color: silver;
+	color: #767676; /* slightly darker than 'silver', to meet WCAG 2.0 AA minimum contrast on white. */
 }
 .prospecto .rulerLines.even {
-	color: silver;
+	color: #767676; /* slightly darker than 'silver', to meet WCAG 2.0 AA minimum contrast on white. */
 }
 .prospecto .rulerLines.odd {
-	color: silver;
+	color: #767676; /* slightly darker than 'silver', to meet WCAG 2.0 AA minimum contrast on white. */
 }
 .prospecto .annotationLine.currentLine {
 	background-color: #EAF2FE;
