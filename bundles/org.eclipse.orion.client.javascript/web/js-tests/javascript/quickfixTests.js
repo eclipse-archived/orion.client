@@ -3718,6 +3718,51 @@ define([
 								callback: callback,
 								  contentType: 'text/html'});
 			});
+
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=489146
+			 */
+			it("Test no-sparse-arrays-empty-array-1",function(callback) {
+				var rule = createTestRule('no-sparse-arrays');
+				var expected = {value: "",
+								start: 9, 
+								end: 24};
+				return getFixes({buffer: 'var a = [, , \n, \n, , \n, ];', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+
+			it("Test no-sparse-arrays-empty-array-2",function(callback) {
+				var rule = createTestRule('no-sparse-arrays');
+				var expected = {value: "",
+								start: 9, 
+								end: 13};
+				return getFixes({buffer: 'var a = [, , ]', 
+								  rule: rule,
+								  expected: expected,
+								callback: callback});
+			});
+			it("Test no-sparse-arrays-empty-array-3",function(callback) {
+				var rule = createTestRule('no-sparse-arrays');
+				var expected = {value: "",
+								start: 10, 
+								end: 22};
+				return getFixes({buffer: 'var a = \n[, , , , , , ]', 
+								  rule: rule,
+								  expected: expected,
+								callback: callback});
+			});
+			it("Test no-sparse-arrays-empty-array-4",function(callback) {
+				var rule = createTestRule('no-sparse-arrays');
+				var expected = {value: "",
+								start: 9, 
+								end: 24};
+				return getFixes({buffer: 'var a = [, , \n, \n, , \n, ]\n;', 
+								  rule: rule,
+								  expected: expected,
+								callback: callback});
+			});
 		});
 		//SEMI
 		describe("semi", function(){

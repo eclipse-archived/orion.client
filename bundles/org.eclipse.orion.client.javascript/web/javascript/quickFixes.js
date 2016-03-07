@@ -850,7 +850,7 @@ define([
 	                        }
 	                        if(item === null) {
 	                            //whole array is sparse - wipe it
-	                            return editorContext.setText(model.getText(), context.annotation.start+1, context.annotation.end-1);
+	                            return editorContext.setText('', context.annotation.start+1, context.annotation.end-1);
 	                        }
 	                        model.setText('', item.range[1]-context.annotation.start, end.range[0]-context.annotation.start);
 	                    }
