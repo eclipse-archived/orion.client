@@ -20,7 +20,7 @@
 
 /* Styles for the line number ruler */
 .rulerLines {
-	color: silver;
+	color: #767676; /* slightly darker than 'silver', to meet WCAG 2.0 AA minimum contrast on white. */
 }
 .rulerLines.even
 .rulerLines.odd {

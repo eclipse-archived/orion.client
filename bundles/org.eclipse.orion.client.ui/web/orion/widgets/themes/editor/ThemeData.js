@@ -192,7 +192,7 @@ define([
 						}
 					},
 					"rulerLines": {
-						"color": "#CCCCCC"
+						"color": "#767676"
 					},
 					"string": {
 						"color": "#446FBD",
