@@ -34,6 +34,15 @@ define([
 	}
 	
 	/**
+	 * @description Creates a new JavaScript quick fix computer for external uses (ie. Sublime plugins)
+	 * @param {javascript.ASTManager} astManager The AST manager
+	 * @returns {javascript.JavaScriptQuickfixesExternalLib} The new quick fix computer instance for external uses
+	 * @since 11.0
+	 */
+	function JavaScriptQuickfixesExternalLib(astManager) {
+	   this.astManager = astManager;
+	}
+	/**
     * @description Finds the start of the line in the given text starting at the given offset
     * @param {String} text The text
     * @param {Number} offset The offset
@@ -181,6 +190,21 @@ define([
         }
         return null;
     }
+
+	function removeIndexedItemExternalLib(list, index) {
+        if(index < 0 || index > list.length) {
+            return;
+        }
+        var node = list[index];
+        if(list.length === 1) {
+            return { "start" : node.range[0], "end" : node.range[1] };
+        } else if(index === list.length-1) {
+            return { "start" : list[index-1].range[1], "end" : node.range[1]};
+        } else if(node) {
+            return { "start" : node.range[0], "end" : list[index+1].range[0]};
+        }
+        return null;
+    }
     
     function updateDoc(node, source, editorContext, name) {
         if(node.leadingComments && node.leadingComments.length > 0) {
@@ -190,6 +214,20 @@ define([
                 if(edit) {
                     var start = comment.range[0] + edit.index + getDocOffset(source, comment.range[0]);
                     return editorContext.setText('', start, start+edit[1].length);
+                }
+            }
+        }
+        return null;
+    }
+
+    function updateDocExternalLib(node, source, name) {
+        if(node.leadingComments && node.leadingComments.length > 0) {
+            for(var i = node.leadingComments.length-1; i > -1; i--) {
+                var comment = node.leadingComments[i];
+                var edit = new RegExp("(\\s*[*]+\\s*(?:@param)\\s*(?:\\{.*\\})?\\s*(?:"+name+")+.*)").exec(comment.value); //$NON-NLS-1$ //$NON-NLS-2$
+                if(edit) {
+                    var start = comment.range[0] + edit.index + getDocOffset(source, comment.range[0]);
+                    return {"start" : start, "end" :start+edit[1].length};
                 }
             }
         }
@@ -1245,9 +1283,790 @@ define([
 		}
 	});
 	
-	JavaScriptQuickfixes.prototype.contructor = JavaScriptQuickfixes;
+	JavaScriptQuickfixes.prototype.constructor = JavaScriptQuickfixes;
 	
+	Objects.mixin(JavaScriptQuickfixesExternalLib.prototype, /** @lends javascript.JavaScriptQuickfixes.prototype*/ {
+		retrieveFix : function(ruleID) {
+				return this.fixes[ruleID].bind(this);
+		},
+		fixes : {
+				"radix": function(data) {
+					text = data["text"];
+					currentAnnotation = data["annotation"];
+					ast = this.astManager.parse(text, 'unknown');
+					var node = Finder.findNode(currentAnnotation.start, ast, {parents:true});
+					if(node && node.type === 'Identifier') {
+						node = node.parents[node.parents.length-1];
+						if(node.type === 'CallExpression' && Array.isArray(node.arguments)) {
+							var arg = node.arguments[node.arguments.length-1];
+							return {
+								text: ", 10", //$NON-NLS-1$
+								start: arg.range[1],
+								end: arg.range[1]
+							};
+						}
+					}
+					return {};
+				},
+				"missing-nls": function(data){
+					text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+		        		
+	                if(annotation.data && typeof annotation.data.indexOnLine === 'number') {
+		                // Insert the correct non nls comment
+		                var end = getLineEnd(ast.source, annotation.end);
+		                // indexOnLine starts at 0, non-nls comments start at one
+		                var comment = " //$NON-NLS-" + (annotation.data.indexOnLine + 1) + "$"; //$NON-NLS-1$
+		                return {
+		                	text: comment,
+		                	start: end,
+		                	end: end
+		                };
+	                }
+		        },
+				"new-parens": function(data) {
+					text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+					var node = Finder.findNode(annotation.start, ast, {parents:true});
+					if(node && node.type === 'Identifier') {
+						return { "text" : '()', "start" : node.range[1], "end" : node.range[1]}; //$NON-NLS-1$
+					}
+				},
+				"no-debugger" : function(data) {
+					text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+					var end = annotation.end;
+					var tok = Finder.findToken(annotation.end, ast.tokens);
+					if(tok && tok.type === 'Punctuator' && tok.value === ';') {
+						end = tok.range[1];
+					} 
+					return {
+						text: '',
+						start: annotation.start,
+						end: end
+					};
+				},
+				"no-duplicate-case": function(data) {
+					annotation = data["annotation"]
+					var start = annotation.start,
+						groups = [{data: {}, positions: [{offset: start, length: annotation.end-start}]}],
+						linkModel = {groups: groups};
+					return linkModel;
+				},
+				/** 
+				 * fix for the no-empty-block linting rule
+				 * @callback
+				 */
+				"no-empty-block": function(data) {
+		            text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+	                var linestart = getLineStart(text, annotation.start);
+	                var fix = '//TODO empty block'; //$NON-NLS-1$
+	                var indent = computeIndent(text, linestart, true);
+	                fix = '\n' + indent + fix; //$NON-NLS-1$
+	                fix += computePostfix(text, annotation);
+	                return { "text" : fix, "start" : annotation.start+1, "end" : annotation.start+1};
+		        },
+		        /** fix for the no-extra-parens linting rule */
+				"no-extra-parens": function(data) {
+					text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+		            var token = Finder.findToken(annotation.start, ast.tokens);
+		            var openBracket = ast.tokens[token.index-1];
+		            if (openBracket.value === '('){
+		            	var closeBracket = Finder.findToken(annotation.end, ast.tokens);
+		            	if (closeBracket.value === ')'){
+				            return [
+					            {
+					            	text: '',
+					            	start: openBracket.range[0],
+					            	end: openBracket.range[1]
+					            },
+					            {
+					            	text: '',
+					            	start: closeBracket.range[0],
+					            	end: closeBracket.range[1]
+					            }
+			            	];
+		            	}
+	            	}
+	            	return ast.tokens;
+		        },
+				"no-dupe-keys": function(data) {
+					annotation = data["annotation"]
+					var start = annotation.start,
+						groups = [{data: {}, positions: [{offset: start, length: annotation.end-start}]}],
+						linkModel = {groups: groups};
+					return linkModel;
+				},
+				/** 
+		         * fix for the no-fallthrough linting rule
+		         * @callback
+		         */
+		        "no-fallthrough": function(data) {
+		            text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+	                var linestart = getLineStart(text, annotation.start);
+	                var fix = '//$FALLTHROUGH$'; //$NON-NLS-1$
+	                var indent = computeIndent(text, linestart);
+	                fix += computePostfix(text, annotation, indent);
+	                return { "text" : fix, "start" : annotation.start, "end" : annotation.start};
+		        },
+		        /** 
+		         * alternate fix for the no-fallthrough linting rule
+		         * @callback
+		         */
+		        "no-fallthrough-break": function(data) {
+		        	text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+	                var linestart = getLineStart(text, annotation.start);
+	                var fix = 'break;'; //$NON-NLS-1$
+	                var indent = computeIndent(text, linestart);
+	                fix += computePostfix(text, annotation, indent);
+	                return { "text" : fix, "start" : annotation.start, "end" : annotation.start};
+		        },
+		        /** 
+		         * for for the no-reserved-keys linting rule
+		         * @callback
+		         */
+		        "no-reserved-keys": function(data) {
+		       		text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+       				var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                if(node && node.type === 'Identifier') {
+		                return {
+		                	text: '"'+node.name+'"', //$NON-NLS-2$ //$NON-NLS-1$
+		                	start: node.range[0],
+		                	end: node.range[1]
+		                };
+					}
+		        },
+				"no-self-assign": function(data) {
+					text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+					var node = Finder.findNode(annotation.start, ast, {parents:true});
+					if(node) {
+						var p = node.parents[node.parents.length-1];
+						if(p.type === 'AssignmentExpression') {
+							var end = p.range[1];
+							var tok = Finder.findToken(end, ast.tokens);
+							if(tok) {
+								//we want the next one, ignoring whitespace
+								if(tok &&  tok.type === 'Punctuator' && tok.value === ';') {
+									end = tok.range[1]; //clean up trailing semicolons
+								}
+								tok = ast.tokens[tok.index+1];
+								if(tok &&  tok.type === 'Punctuator' && tok.value === ';') {
+									end = tok.range[1]; //clean up trailing semicolons
+								}
+							}
+							return {
+								text: '',
+								start: p.range[0],
+								end: end
+							};
+						}
+					}
+				},
+				"no-self-assign-rename": function(data) {
+					text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+					var node = Finder.findNode(annotation.end, ast);
+					if(node && node.type === 'Identifier') {
+						var start = node.range[0],
+							groups = [{data: {}, positions: [{offset: start, length: node.range[1]-start}]}],
+							linkModel = {groups: groups};
+						return linkModel;
+					}
+				},
+				/** 
+		         * fix for the no-sparse-arrays linting rule
+		         * @callback
+		         */
+		        "no-sparse-arrays": function(data) {
+		        	text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+	                var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                if(node && node.type === 'ArrayExpression') {
+	                    var model = new TextModel.TextModel(ast.source.slice(annotation.start, annotation.end));
+	                    var len = node.elements.length;
+	                    var idx = len-1;
+	                    var item = node.elements[idx];
+	                    if(item === null) {
+	                        var end = Finder.findToken(node.range[1], ast.tokens);
+	                        if(end.value !== ']') {
+	                            //for a follow-on token we want the previous - i.e. a token immediately following the ']' that has no space
+	                            end = ast.tokens[end.index-1];
+	                        }
+	                        //wipe all trailing entries first using the ']' token start as the end
+	                        for(; idx > -1; idx--) {
+	                            item = node.elements[idx];
+	                            if(item !== null) {
+	                                break;
+	                            }
+	                        }
+	                        if(item === null) {
+	                            //whole array is sparse - wipe it
+	                            return { "text" : '', "start" : annotation.start+1, "end" : annotation.end-1};
+	                        }
+	                        model.setText('', item.range[1]-annotation.start, end.range[0]-annotation.start);
+	                    }
+	                    var prev = item;
+	                    for(; idx > -1; idx--) {
+	                        item = node.elements[idx];
+	                        if(item === null || item.range[0] === prev.range[0]) {
+	                            continue;
+	                        }
+	                        model.setText(', ', item.range[1]-annotation.start, prev.range[0]-annotation.start); //$NON-NLS-1$
+	                        prev = item;
+	                    }
+	                    if(item === null && prev !== null) {
+	                        //need to wipe the front of the array
+	                        model.setText('', node.range[0]+1-annotation.start, prev.range[0]-annotation.start);
+	                    }
+	                    return { "text" : model.getText(), "start" : annotation.start, "end" : annotation.end};
+	                }
+	                return null;
+		        },
+		        /** 
+		         * fix for the no-throw-literal linting rule
+		         * @callback
+		         */
+		        "no-throw-literal": function(data) {
+		            text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+	                var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                var source = node.raw || ast.source.slice(node.range[0], node.range[1]);
+	                return { "text" : 'new Error(' + source + ')', "start" : annotation.start, "end" : annotation.end}; //$NON-NLS-1$
+
+		        },
+				/**
+		         * @callback
+		         */
+		        "no-new-array": function(data) {
+		        	text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+	       			var node = Finder.findNode(annotation.start, ast, {parents:true});
+	       			if(node && node.parents) {
+	       				var p = node.parents[node.parents.length-1];
+	       				if(p.type === 'CallExpression' || p.type === 'NewExpression') {
+	       					var fix = '';
+	       					if(p.arguments.length > 0) {
+	       						var start = p.arguments[0].range[0], end = p.arguments[p.arguments.length-1].range[1];
+	       						fix += '[' + ast.source.substring(start, end) + ']';
+	       					} else {
+	       						fix += '[]'; //$NON-NLS-1$
+	       					}
+	       					return { "text" : fix, "start" : p.start, "end" : p.end };
+	       				}
+	       			}
+		        },
+				"no-new-wrappers": function(data) {
+					text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+					var node = Finder.findNode(annotation.start, ast, {parents:true});
+					if(node) {
+						var parent = node.parents[node.parents.length-1];
+						if(parent.type === 'NewExpression') {
+							var tok = Finder.findToken(parent.range[0], ast.tokens);
+							if(tok && tok.type === 'Keyword' && tok.value === 'new') {
+								var text = '';
+								var end = tok.range[1],
+									start = tok.range[0],
+									prev = ast.tokens[tok.index-1];
+								if(prev.range[1] < tok.range[0]) {
+									end = node.range[0];
+									start = prev.range[1]+1;
+								} else if(node.range[0] - end > 1) {
+									end += node.range[0] - end - 1;
+								}
+								if(parent.callee.name === 'Math' || parent.callee.name === 'JSON') {
+									//also get rid of the params - these two have no functional equivilent
+									end = parent.range[1];
+									text = parent.callee.name;
+								}
+								return { "text" : text, "start" : start, "end" : end };
+							}
+						}
+					}	
+				},
+				"no-new-wrappers-literal": function(data) {
+					text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+					var node = Finder.findNode(annotation.start, ast, {parents:true});
+					if(node) {
+						var parent = node.parents[node.parents.length-1];
+						if(parent.type === 'NewExpression') {
+							switch(parent.callee.name) {
+								case 'Math':
+								case 'JSON': {
+									return { "text" : parent.callee.name, "start" : parent.range[0], "end" : parent.range[1]};
+								}
+								case 'String': {
+									var s = '';
+									if(parent.arguments.length > 0) {
+										var str = parent.arguments[0];
+										if(str.type === 'Literal') {
+											s = String(str.value);	
+										} else if(str.type === 'Identifier') {
+											if(str.name === 'undefined') {
+												s = String(undefined);
+											} else if(str.name === 'NaN') {
+												s = String(NaN);
+											} else {
+												s = String(str.name);
+											}
+										}
+									} else {
+										s = String();
+									}
+									return { "text" : '"'+s.toString()+'"', "start" : parent.range[0], "end" : parent.range[1]}; //$NON-NLS-1$ //$NON-NLS-2$
+								}
+								case 'Number': {
+									var nu;
+									if(parent.arguments.length > 0) {
+										var num = parent.arguments[0];
+										if(num.type === 'Literal') {
+											nu = Number(num.value);
+										} else if(num.type === 'Identifier') {
+											if(num.name === 'undefined') {
+												nu = Number(undefined);
+											} else if(num.name === 'NaN') {
+												nu = Number(NaN);
+											} else {
+												nu = Number(num.name);
+											}
+										} else {
+											nu = Number(num);
+										}
+									} else {
+										nu = Number();
+									}
+									return { "text" : nu.toString(), "start" : parent.range[0], "end" : parent.range[1]};
+								}
+								case 'Boolean': {
+									var b;
+									if(parent.arguments.length > 0) {
+										var arg = parent.arguments[0];
+										if(arg.type === 'ObjectExpression') {
+											b = true;
+										} else if(arg.type === 'Literal') {
+											b = Boolean(arg.value);
+										} else if(arg.type === 'Identifier') {
+											if(arg.name === 'undefined') {
+												b = Boolean(undefined);
+											} else if(arg.name === 'NaN') {
+												b = Boolean(NaN);
+											} else {
+												b = Boolean(arg.name);
+											}
+										} else if(arg.type === 'UnaryExpression' && arg.operator === '-' && 
+											arg.argument.type === 'Literal' && typeof arg.argument.value === 'number') {
+											b = false;
+										}
+									} else {
+										b = false;
+									}
+									return { "text" : b.toString(), "start" : parent.range[0], "end" : parent.range[1] };
+								}
+							}
+						}
+					}	
+				},
+				"no-undef": function(data){
+					text = data["text"];
+					annotation = data["annotation"];	
+					function assignLike(node) {
+		                if(node && node.parents && node.parents.length > 0 && node.type === 'Identifier') {
+		                    var parent = node.parents.pop();
+		                    return parent && (parent.type === 'AssignmentExpression' || parent.type === 'UpdateExpression'); 
+		                }
+		                return false;
+	            	}
+	            	var name = /'(.*)'/.exec(annotation.title);
+	            	if(name !== null && typeof name !== 'undefined') {
+	                	ast = this.astManager.parse(text, "unknown");
+                    	var comment = null;
+                    	var start = 0;
+                    	var insert = name[1];
+                    	var node = Finder.findNode(annotation.start, ast, {parents:true});
+                    	if(assignLike(node)) {
+                        	insert += ':true'; //$NON-NLS-1$
+                    	}
+	                    comment = Finder.findDirective(ast, 'globals'); //$NON-NLS-1$
+	                    if(comment) {
+	                        start = comment.range[0]+2;
+	                        return {"start" : start+comment.value.length, "end" : start+comment.value.length, "text" : insert+" ", }; //$NON-NLS-1$
+	                    }
+                        var point = getDirectiveInsertionPoint(ast);
+                    	var linestart = getLineStart(ast.source, point);
+                    	var indent = computeIndent(ast.source, linestart, false);
+               			var fix = '/*globals '+insert+' */\n' + indent; //$NON-NLS-1$ //$NON-NLS-2$
+                        return {"start" : point, "end" : point, "text" : fix};
+	            	}
+	            	return name;
+				},
+				/** 
+		         * alternate id for no-undef-defined linting fix
+		         * @callback
+		         */
+		        "no-undef-defined-inenv": function(data) {
+		        	text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+		            var name = /'(.*)'/.exec(annotation.title);
+
+		            if(name !== null && typeof name !== 'undefined') {
+	                    var comment = null;
+	                    var start = 0;
+	                    if(name[1] === 'console') {
+	                        var env = 'node'; //$NON-NLS-1$
+	                    } else {
+	                        env = Finder.findESLintEnvForMember(name[1]);
+	                    }
+	                    if(env) {
+	                        comment = Finder.findDirective(ast, 'eslint-env'); //$NON-NLS-1$
+	                        if(comment) {
+	                            start = getDocOffset(ast.source, comment.range[0]) + comment.range[0];
+	    	                    return editorContext.setText(updateDirective(comment.value, 'eslint-env', env, true), start, start+comment.value.length); //$NON-NLS-1$
+	                        }
+                            var point = getDirectiveInsertionPoint(ast);
+                    		var linestart = getLineStart(ast.source, point);
+                    		var indent = computeIndent(ast.source, linestart, false);
+               				var fix = '/*eslint-env '+env+' */\n' + indent; //$NON-NLS-1$ //$NON-NLS-2$
+                            return {"text" : fix, "start" : point, "end" : point};
+	                    }
+		            }
+		            return null;
+		        },
+		        "no-undef-init": function(data) {
+		        	text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+
+					var node = Finder.findNode(annotation.start, ast, {parents:true});
+					if(node) {
+						var p = node.parents[node.parents.length-1];
+						if(p.type === 'VariableDeclarator') {
+							return {
+								text: '',
+								start: p.id.range[1],
+								end: p.range[1]
+							};									
+						}
+					}
+				},
+				/** 
+		         * fix for the no-unused-params linting rule 
+		         * @callback
+		         */
+		        "no-unused-params": function(data) {
+		        	text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+	                var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                if(node) {
+	                    var fixes = [];
+	                    var parent = node.parents.pop();
+	                    var paramindex = -1;
+	                    for(var i = 0; i < parent.params.length; i++) {
+	                        var p = parent.params[i];
+	                        if(node.range[0] === p.range[0] && node.range[1] === p.range[1]) {
+	                            paramindex = i;
+	                            break;
+	                        }
+	                    }
+	                    var fix = removeIndexedItemExternalLib(parent.params, paramindex);
+	                    if(fix) {
+	                        fixes.push(fix);
+	                    }
+	                    switch(parent.type) {
+	                        case 'FunctionExpression': {
+	                            var funcparent = node.parents.pop();
+	                            if(funcparent.type === 'CallExpression' && (funcparent.callee.name === 'define' || funcparent.callee.name === 'require')) {
+	                                var args = funcparent.arguments;
+	                                for(i = 0; i < args.length; i++) {
+	                                    var arg = args[i];
+	                                    if(arg.type === 'ArrayExpression') {
+	                                        fix = removeIndexedItemExternalLib(arg.elements, paramindex);
+	                                        if(fix) {
+	                                            fixes.push(fix);
+	                                        }
+	                                        break;
+	                                    }
+	                                }
+	                            } else if(funcparent.type === 'Property' && funcparent.key.leadingComments && funcparent.key.leadingComments.length > 0) {
+	                                fix = updateDocExternalLib(funcparent.key, ast.source, parent.params[paramindex].name);
+	                                if(fix) {
+	                                    fixes.push(fix);
+	                                }
+	                            }
+	                            break;
+	                        }
+	                        case 'FunctionDeclaration': {
+	                           fix = updateDocExternalLib(parent, ast.source, parent.params[paramindex].name);
+	                           if(fix) {
+	                               fixes.push(fix);
+	                           }
+	                           break;
+	                        }
+	                    }
+	                    return fixes;
+	                }
+	                return null;
+		        },
+		        /** 
+		         * alternate id for the no-unsed-params linting fix 
+		         * @callback
+		         */
+		        "no-unused-params-expr": function(data) {
+		        	text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+		        	function updateCallback(node, ast, comments) {
+		                if(Array.isArray(comments)) {
+		                    //attach it to the last one
+		                    var comment = comments[comments.length-1];
+		                    if(comment.type === 'Block') {
+		                        var valueend = comment.range[0]+comment.value.length+getDocOffset(ast.source, comment.range[0]);
+		                        var start = getLineStart(ast.source, valueend);
+		                        var indent = computeIndent(ast.source, start);
+		                        var fix = "* @callback\n"+indent; //$NON-NLS-1$
+		                        /*if(comment.value.charAt(valueend) !== '\n') {
+		                            fix = '\n' + fix;
+		                        }*/
+		                        return {"text" : fix, "start" : valueend-1, "end" : valueend-1};
+		                    }
+		                }
+		                start = getLineStart(ast.source, node.range[0]);
+		                indent = computeIndent(ast.source, start);
+		                return { "text": "/**\n"+indent+" * @callback\n"+indent+" */\n"+indent, "start" : node.range[0], "end" : node.range[0]}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		        	}
+	                var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                if(node && node.parents && node.parents.length > 0) {
+	                    var func = node.parents.pop();
+	                    var p = node.parents.pop();
+	                    var fix;
+	                    switch(p.type) {
+	                    	case 'Property': {
+	                    		if(!hasDocTag(['@callback', '@public'], p) && !hasDocTag(['@callback', '@public'], p.key)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	                    			fix = updateCallback(p, ast, p.leadingComments ? p.leadingComments : p.key.leadingComments);
+	                			}
+	                    		break;
+	                    	}
+	                    	case 'AssignmentExpression': {
+	                    		var left = p.left;
+	                    		if(left.type === 'MemberExpression' && !hasDocTag(['@callback', '@public'], left)) { //$NON-NLS-1$ //$NON-NLS-2$
+					        		fix = updateCallback(left, ast, left.leadingComments);
+					        	} else if(left.type === 'Identifier' && !hasDocTag(['@callback', '@public'], left)) { //$NON-NLS-1$ //$NON-NLS-2$
+					        		fix = updateCallback(p.left, ast, left.leadingComments);	        		
+					        	}
+	                			break;
+	                    	}
+	                    	case 'VariableDeclarator': {
+	                    		var oldp = p;
+	                			p = node.parents.pop();
+	                			if(p.declarations[0].range[0] === oldp.range[0] && p.declarations[0].range[1] === oldp.range[1]) {
+	                				//insert at the var keyword level to not mess up the code
+	                				fix = updateCallback(p, ast, oldp.id.leadingComments);
+	                			} else if(!hasDocTag(['@callback', '@public'], oldp.id)) { //$NON-NLS-1$ //$NON-NLS-2$
+	                    			fix = updateCallback(oldp, ast, oldp.id.leadingComments);
+	                			} 
+	                			
+	                    		break;
+	                    	}
+	                    }
+	                    if(!fix && !hasDocTag(['@callback', '@public'], func)) { //$NON-NLS-1$ //$NON-NLS-2$
+	                        return {"text" : "/* @callback */ ", "start": func.range[0], "end" : func.range[0]}; //$NON-NLS-1$
+	                    }
+	                }
+	                return fix;
+				},
+				/** 
+		         * fix for use-isnan linting rule
+		         * @callback
+		         */
+		        "use-isnan": function(data) {
+		        	text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+		       		
+		       		
+	       			var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                if(node && node.parents && node.parents.length > 0) {
+	                    var bin = node.parents.pop();
+	                    if(bin.type === 'BinaryExpression') {
+	                    	var tomove;
+	                    	if(bin.left.type === 'Identifier' && bin.left.name === 'NaN') {
+	                    		tomove = bin.right;
+	                    	} else if(bin.right.type === 'Identifier' && bin.right.name === 'NaN') {
+	                    		tomove = bin.left;
+	                    	}
+	                    	if(tomove) {
+		                    	var src = ast.source.slice(tomove.range[0], tomove.range[1]);
+		                    	return {
+		                    		text: 'isNaN('+src+')', //$NON-NLS-1$
+		                    		start: bin.range[0],
+		                    		end: bin.range[1]
+		                    	};
+	                    	}
+	                    }
+	                }
+		        },
+		        /**
+		         * @callback
+		         */
+		        "no-unused-vars-unused": function(data) {
+		        	text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+		       		
+	                var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                if(node && node.parents && node.parents.length > 0) {
+	                    var declr = node.parents.pop();
+	                    if(declr.type === 'VariableDeclarator') {
+	                        var decl = node.parents.pop();
+	                        if(decl.type === 'VariableDeclaration') {
+	                            if(decl.declarations.length === 1) {
+	                                return {"start" : decl.range[0], "end" : decl.range[1]};
+	                            }
+                                var idx = indexOf(decl.declarations, declr);
+                                if(idx > -1) {
+                                    return removeIndexedItemExternalLib(decl.declarations, idx, editorContext);
+                                }
+	                        }
+	                    }
+	                }
+	                return null;
+		        },
+		        /**
+		         * @callback
+		         */
+		        "no-unused-vars-unread": function(data) {
+		        	text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+		       		
+	                var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                if(node && node.parents && node.parents.length > 0) {
+	                    var declr = node.parents.pop();
+	                    if(declr.type === 'VariableDeclarator') {
+	                        var decl = node.parents.pop();
+	                        if(decl.type === 'VariableDeclaration') {
+	                            if(decl.declarations.length === 1) {
+	                                return {"start" : decl.range[0], "end" : decl.range[1]};
+	                            }
+                                var idx = indexOf(decl.declarations, declr);
+                                if(idx > -1) {
+                                    return removeIndexedItemExternalLib(decl.declarations, idx, editorContext);
+                                }
+	                        }
+	                    }
+	                }
+	                return null;
+		        },
+		        /**
+		         * @callback
+		         */
+		        "no-unused-vars-unused-funcdecl": function(data) {
+		        	text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+		       		
+	                var node = Finder.findNode(annotation.start, ast, {parents:true});
+	                if(node && node.parents && node.parents.length > 0) {
+	                    var decl = node.parents.pop();
+	                    if(decl.type === 'FunctionDeclaration') {
+	                        return { "start" : decl.range[0], "end" : decl.range[1]};
+	                    }
+	                }
+	                return null;
+		        },
+		        /** fix for the unnecessary-nls rule */
+		        "unnecessary-nls": function(data){
+		        	text = data["text"];
+					annotation = data["annotation"];
+					ast = this.astManager.parse(text, "unknown");
+		       		
+		        	
+	        		var comment = Finder.findComment(annotation.start + 2, ast); // Adjust for leading //
+	        		var nlsTag = annotation.data.nlsComment; // We store the nls tag in the annotation
+	        		if (comment && comment.type.toLowerCase() === 'line' && nlsTag){
+						var index = comment.value.indexOf(nlsTag);
+						// Check if we can delete the whole comment
+						if (index > 0){
+							var start = annotation.start;
+							while (ast.source.charAt(start-1) === ' ' || ast.source.charAt(start-1) === '\t'){
+								start--;
+							}
+							return {
+								text: '',
+								start: start,
+								end: annotation.end
+							};
+						} else if (index === 0){
+							var newComment = comment.value.substring(index+nlsTag.length);
+							start = annotation.start;
+							var end = annotation.end;
+							if (!newComment.match(/^(\s*|\s*\/\/.*)$/)){
+								start += 2; // Only remove leading // if additional comments start with another //
+							} else {
+								while (ast.source.charAt(start-1) === ' ' || ast.source.charAt(start-1) === '\t'){
+									start--;
+								}
+							}
+							if (newComment.match(/^\s*$/)){
+								end = comment.range[1]; // If there is only whitespace left in the comment, delete it entirely
+								while (ast.source.charAt(start-1) === ' ' || ast.source.charAt(start-1) === '\t'){
+									start--;
+								}
+							}
+							return {
+								text: '',
+								start: start,
+								end: end
+							};
+						}
+					}
+	        		return null;
+	    		}
+		}
+	})
+
+ 	JavaScriptQuickfixesExternalLib.prototype.constructor = JavaScriptQuickfixesExternalLib;
 	return {
-		JavaScriptQuickfixes: JavaScriptQuickfixes
+		JavaScriptQuickfixes: JavaScriptQuickfixes,
+		JavaScriptQuickfixesExternalLib : JavaScriptQuickfixesExternalLib
 	};
 });
