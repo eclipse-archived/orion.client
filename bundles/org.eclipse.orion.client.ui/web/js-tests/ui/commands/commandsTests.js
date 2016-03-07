@@ -9,8 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd, mocha*/
+/*eslint-disable missing-nls */
 define(['chai/chai', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/commands', 'orion/keyBinding', 'orion/selection', 'orion/Deferred', 'orion/webui/littlelib', 'orion/webui/dropdown'], 
 			function(chai, mServiceregistry, mCommandRegistry, mCommands, mKeyBinding, mSelection, Deferred, lib, mDropdown) {
+	
 	var assert = chai.assert;		
 	/**
 	 * dom elements we need
@@ -36,6 +38,7 @@ define(['chai/chai', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/co
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
 	var selectionService = new mSelection.Selection(serviceRegistry);
 	var commandRegistry = new mCommandRegistry.CommandRegistry({selection: selectionService});
+	var quickfixSettings = '/orion/languageTools/quickfix'; //$NON-NLS-1$
 	
 	/**
 	 * mock items
@@ -197,8 +200,29 @@ define(['chai/chai', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/co
 		}
 	});
 	commandRegistry.addCommand(commandWithParameters);
-
-	var tests = {};
+	
+	var quickFixCommand = new mCommands.Command({
+		name: "Quick Fix",
+		id: "test.quickfix",
+		scopeId: 'orion.edit.quickfix',
+	});
+	commandRegistry.addCommand(quickFixCommand);
+	
+	var quickFixCommand2 = new mCommands.Command({
+		name: "Quick Fix 2",
+		id: "test.quickfix2",
+		fixAllEnabled: true,
+		scopeId: 'orion.edit.quickfix',
+	});
+	commandRegistry.addCommand(quickFixCommand2);
+	
+	var quickFixCommand3 = new mCommands.Command({
+		name: "Quick Fix 3",
+		id: "test.quickfix3",
+		fixAllEnabled: true,
+		scopeId: 'orion.edit.quickfix',
+	});
+	commandRegistry.addCommand(quickFixCommand3);	
 
 	var contributionId;
 	
@@ -531,6 +555,80 @@ define(['chai/chai', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/co
 				}
 			}, 500);
 			return d;
-		});	
+		});
+		
+		describe('Quick Fix Commands', function(){
+			it("Render a quickfix button", function() {
+				init("testRenderAtomicButtons");
+				commandRegistry.registerCommandContribution("orion.edit.quickfix", "test.quickfix", 1);
+				try {
+					commandRegistry.renderCommands("orion.edit.quickfix", parentDiv, null, null, 'quickfix', {_annotationModel: {}}, null); //$NON-NLS-1$ //$NON-NLS-2$
+					assert.equal(parentDiv.childNodes.length, 1);
+					assert.equal(parentDiv.childNodes[0].childNodes.length, 1);
+					assert.equal(parentDiv.childNodes[0].childNodes[0].childNodes.length, 1);
+					var fix = parentDiv.childNodes[0].childNodes[0].childNodes;
+					assert.equal(fix[0].textContent, 'Quick Fix');
+				} finally {
+					commandRegistry.unregisterCommandContribution("orion.edit.quickfix", "test.quickfix");
+				}
+			});
+			it("Render a quickfix button with fix all", function() {
+				init("testRenderAtomicButtons");
+
+				commandRegistry.registerCommandContribution("orion.edit.quickfix", "test.quickfix2", 1);
+				try {
+					var fixAllSettings = localStorage.getItem(quickfixSettings);
+					fixAllSettings = JSON.parse(fixAllSettings);
+					if (fixAllSettings){
+						fixAllSettings['test.quickfix2'] = undefined;
+						fixAllSettings = JSON.stringify(fixAllSettings);
+						localStorage.setItem(quickfixSettings, fixAllSettings);
+					}
+					
+					commandRegistry.renderCommands("orion.edit.quickfix", parentDiv, null, null, 'quickfix', {_annotationModel: {}}, null); //$NON-NLS-1$ //$NON-NLS-2$
+					assert.equal(parentDiv.childNodes.length, 1);
+					assert.equal(parentDiv.childNodes[0].childNodes.length, 1);
+					assert.equal(parentDiv.childNodes[0].childNodes[0].childNodes.length, 3);
+					var fix = parentDiv.childNodes[0].childNodes[0].childNodes;
+					assert.equal(fix[0].textContent, 'Quick Fix 2');
+					assert.equal(fix[1].id, 'test.quickfix2fixAll');
+					assert(fix[1].checked, 'Fix all should be checked by default');
+				} finally {
+					commandRegistry.unregisterCommandContribution("orion.edit.quickfix", "test.quickfix2");
+				}
+			});
+			it("Render a quickfix button with fix all - save check state", function() {
+				init("testRenderAtomicButtons");
+
+				commandRegistry.registerCommandContribution("orion.edit.quickfix", "test.quickfix3", 1);
+				try {
+					var fixAllSettings = localStorage.getItem(quickfixSettings);
+					fixAllSettings = JSON.parse(fixAllSettings);
+					if (fixAllSettings){
+						fixAllSettings['test.quickfix3'] = false;
+						fixAllSettings = JSON.stringify(fixAllSettings);
+						localStorage.setItem(quickfixSettings, fixAllSettings);
+					}
+					
+					commandRegistry.renderCommands("orion.edit.quickfix", parentDiv, null, null, 'quickfix', {_annotationModel: {}}, null); //$NON-NLS-1$ //$NON-NLS-2$
+					assert.equal(parentDiv.childNodes.length, 1);
+					assert.equal(parentDiv.childNodes[0].childNodes.length, 1);
+					assert.equal(parentDiv.childNodes[0].childNodes[0].childNodes.length, 3);
+					var fix = parentDiv.childNodes[0].childNodes[0].childNodes;
+					assert.equal(fix[0].textContent, 'Quick Fix 3');
+					assert.equal(fix[1].id, 'test.quickfix3fixAll');
+					assert(!fix[1].checked, 'Fix all should be checked by default');
+				} finally {
+					commandRegistry.unregisterCommandContribution("orion.edit.quickfix", "test.quickfix3");
+					fixAllSettings = localStorage.getItem(quickfixSettings);
+					fixAllSettings = JSON.parse(fixAllSettings);
+					if (fixAllSettings){
+						fixAllSettings['test.quickfix3'] = undefined;
+						fixAllSettings = JSON.stringify(fixAllSettings);
+						localStorage.setItem(quickfixSettings, fixAllSettings);
+					}
+				}
+			});
+		});
 	});	
 });
