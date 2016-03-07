@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -30,6 +30,15 @@ define([
 		return fileService[funcName].apply(fileService, funcArgs);
 	}
 	
+	/**
+	 * @description Copy 
+	 * @private
+	 * @param sourceService
+	 * @param sourceLocation
+	 * @param targetService
+	 * @param targetLocation
+	 * @returns returns
+	 */
 	function _copy(sourceService, sourceLocation, targetService, targetLocation) {
 		
 		if (!sourceService.readBlob) {
@@ -40,22 +49,22 @@ define([
 			throw new Error(messages["TargetNotSupportBinWrite"]);
 		}
 	
-		if (sourceLocation[sourceLocation.length -1] !== "/") { //$NON-NLS-0$
-			return _doServiceCall(sourceService, "readBlob", [sourceLocation]).then(function(contents) { //$NON-NLS-0$
-				return _doServiceCall(targetService, "writeBlob", [targetLocation, contents]); //$NON-NLS-0$
+		if (sourceLocation[sourceLocation.length -1] !== "/") {
+			return _doServiceCall(sourceService, "readBlob", [sourceLocation]).then(function(contents) { //$NON-NLS-1$
+				return _doServiceCall(targetService, "writeBlob", [targetLocation, contents]); //$NON-NLS-1$
 			});
 		}
 
 		var temp = targetLocation.substring(0, targetLocation.length - 1);
-		var name = decodeURIComponent(temp.substring(temp.lastIndexOf("/")+1)); //$NON-NLS-0$
-		var parentLocation = temp.substring(0, temp.lastIndexOf("/")+1);  //$NON-NLS-0$
+		var targetName = decodeURIComponent(temp.substring(temp.lastIndexOf("/")+1));
+		var parentLocation = temp.substring(0, temp.lastIndexOf("/")+1);
 
-		return _doServiceCall(targetService, "createFolder", [parentLocation, name]).then(function() { //$NON-NLS-0$
+		return _doServiceCall(targetService, "createFolder", [parentLocation, targetName]).then(function() { //$NON-NLS-1$
 			return;
 		}, function() {
 			return;
 		}).then(function() {
-			return _doServiceCall(sourceService, "fetchChildren", [sourceLocation]).then(function(children) { //$NON-NLS-0$
+			return _doServiceCall(sourceService, "fetchChildren", [sourceLocation]).then(function(children) { //$NON-NLS-1$
 				var results = [];
 				for(var i = 0; i < children.length; ++i) {
 					var childSourceLocation = children[i].Location;
@@ -63,11 +72,11 @@ define([
 					if (children[i].Directory) {
 						childTemp = childSourceLocation.substring(0, childSourceLocation.length - 1);
 					}
-					var childName = decodeURIComponent(childTemp.substring(childTemp.lastIndexOf("/")+1)); //$NON-NLS-0$
+					var childName = decodeURIComponent(childTemp.substring(childTemp.lastIndexOf("/")+1));
 					
 					var childTargetLocation = targetLocation + encodeURIComponent(childName);
 					if (children[i].Directory) {
-						childTargetLocation += "/"; //$NON-NLS-0$
+						childTargetLocation += "/";
 					}
 					results[i] = _copy(sourceService, childSourceLocation, targetService, childTargetLocation);
 				}
@@ -90,6 +99,7 @@ define([
 		var _names;
 		
 		EventTarget.attach(this);
+		/* @callback */
 		function _noMatch(location) {
 			var d = new Deferred();
 			d.reject(messages["No Matching FileService for location:"] + location);
@@ -98,21 +108,25 @@ define([
 		
 		var _fileSystemsRoots = [];
 		var _allFileSystemsService = {
+			/* @callback */
 			fetchChildren: function() {
 				var d = new Deferred();
 				d.resolve(_fileSystemsRoots);
 				return d;
 			},
+			/* @callback */
 			createWorkspace: function() {
 				var d = new Deferred();
 				d.reject(messages["no file service"]);
 				return d;
 			},
+			/* @callback */
 			loadWorkspaces: function() {
 				var d = new Deferred();
 				d.reject(messages['no file service']);
 				return d;
 			},
+			/* @callback */
 			loadWorkspace: function(location) {
 				var d = new Deferred();
 				window.setTimeout(function() {
@@ -121,9 +135,9 @@ define([
 						Length: 0, 
 						LocalTimeStamp: 0,
 						Name: messages["File Servers"],
-						Location: "/",  //$NON-NLS-0$
+						Location: "/",
 						Children: _fileSystemsRoots,
-						ChildrenLocation: "/" //$NON-NLS-0$
+						ChildrenLocation: "/"
 					});
 				}, 100);
 				return d;
@@ -139,13 +153,17 @@ define([
 			write: _noMatch
 		};
 			
+		/**
+		 * @description Initialize the service
+		 * @private 
+		 */
 		function init() {
-			if (_services) return;
+			if (_services) { return; }
 			_patterns = [];
 			_services = [];
 			_names = [];
 			
-			var allReferences = serviceRegistry.getServiceReferences("orion.core.file"); //$NON-NLS-0$
+			var allReferences = serviceRegistry.getServiceReferences("orion.core.file"); //$NON-NLS-1$
 			var _references = allReferences;
 			if (filter) {
 				_references = [];
@@ -156,8 +174,8 @@ define([
 				}
 			}
 			_references.sort(function (ref1, ref2) {
-				var ranking1 = ref1.getProperty("ranking") || 0;
-				var ranking2 = ref2.getProperty("ranking")  || 0;
+				var ranking1 = ref1.getProperty("ranking") || 0; //$NON-NLS-1$
+				var ranking2 = ref2.getProperty("ranking")  || 0; //$NON-NLS-1$
 				return ranking1 - ranking2;
 			});
 			for(var j = 0; j < _references.length; ++j) {
@@ -165,61 +183,83 @@ define([
 					Directory: true, 
 					Length: 0, 
 					LocalTimeStamp: 0,
-					Location: _references[j].getProperty("top"), //$NON-NLS-0$
-					ChildrenLocation: _references[j].getProperty("top"), //$NON-NLS-0$
-					Name: _references[j].getProperty("Name") || _references[j].getProperty("NameKey")		 //$NON-NLS-0$
+					Location: _references[j].getProperty("top"), //$NON-NLS-1$
+					ChildrenLocation: _references[j].getProperty("top"), //$NON-NLS-1$
+					Name: _references[j].getProperty("Name") || _references[j].getProperty("NameKey") //$NON-NLS-1$ //$NON-NLS-2$
 				};
 	
-				var filetop = _references[j].getProperty("top");
-				var patternStringArray = _references[j].getProperty("pattern") || (filetop ? filetop.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1") : ""); //$NON-NLS-1$ //$NON-NLS-0$
+				var filetop = _references[j].getProperty("top"); //$NON-NLS-1$
+				var patternStringArray = _references[j].getProperty("pattern") || (filetop ? filetop.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1") : ""); //$NON-NLS-1$ //$NON-NLS-2$
 				if (!Array.isArray(patternStringArray)) {
 					patternStringArray = [patternStringArray];
 				}
 				var patterns = [];
 				for (var k = 0; k < patternStringArray.length; k++) {
 					var patternString = patternStringArray[k];
-					if (patternString[0] !== "^") { //$NON-NLS-0$
-						patternString = "^" + patternString; //$NON-NLS-0$
+					if (patternString[0] !== "^") {
+						patternString = "^" + patternString;
 					}
 					patterns.push(new RegExp(patternString));
 				}
 				_patterns[j] = patterns;			
 				_services[j] = serviceRegistry.getService(_references[j]);
-				_names[j] = _references[j].getProperty("Name") || _references[j].getProperty("NameKey"); //$NON-NLS-0$
+				_names[j] = _references[j].getProperty("Name") || _references[j].getProperty("NameKey"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 				
-		this._getServiceIndex = function(location) {
+		/**
+		 * @description Returns the index of the service for the given item location
+		 * @function
+		 * @private
+		 * @param {String} itemLocation
+		 * @returns returns
+		 */
+		this._getServiceIndex = function(itemLocation) {
 			init();
 			// client must specify via "/" when a multi file service tree is truly wanted
-			if (location === "/") { //$NON-NLS-0$
+			if (itemLocation === "/") {
 				return -1;
-			} else if (!location || (location.length && location.length === 0)) {
+			} else if (!itemLocation || itemLocation.length && itemLocation.length === 0) {
 				// TODO we could make the default file service a preference but for now we use the first one
 				return _services[0] ? 0 : -1;
 			}
 			for(var i = 0; i < _patterns.length; ++i) {
 				for (var j = 0; j < _patterns[i].length; j++) {
-					if (_patterns[i][j].test(location)) {
+					if (_patterns[i][j].test(itemLocation)) {
 						return i;
 					}
 				}
 			}
-			throw new Error(i18nUtil.formatMessage(messages['NoFileSrv'], location));
+			throw new Error(i18nUtil.formatMessage(messages['NoFileSrv'], itemLocation));
 		};
-		
-		this._getService = function(location) {
-			var i = this._getServiceIndex(location);
+		/**
+		 * Returns the file service managing this location
+		 * @param {String} itemLocation The location of the item
+		 * @private
+		 * @returns {FileClient} The service for the given item
+		 */
+		this._getService = function(itemLocation) {
+			var i = this._getServiceIndex(itemLocation);
 			return i === -1 ? _allFileSystemsService : _services[i];
 		};
-		
-		this._getServiceName = function(location) {
-			var i = this._getServiceIndex(location);
+		/**
+		 * Returns the name of the file service managing this location
+		 * @param {String} itemLocation The location of the item
+		 * @private  
+		 * @return {String} The name of this file service
+		 */
+		this._getServiceName = function(itemLocation) {
+			var i = this._getServiceIndex(itemLocation);
 			return i === -1 ? _allFileSystemsService.Name : _names[i];
 		};
-		
-		this._getServiceRootURL = function(location) {
-			var i = this._getServiceIndex(location);
+		/**
+		 * Returns the root url of the file service managing this location
+		 * @param {String} itemLocation The location of the item
+		 * @private 
+		 * @return {String} The root URL of the given item
+		 */
+		this._getServiceRootURL = function(itemLocation) {
+			var i = this._getServiceIndex(itemLocation);
 			return i === -1 ? _allFileSystemsService.Location : _fileSystemsRoots[i].Location;
 		};
 		serviceRegistry.registerService("orion.core.file.client", this); //$NON-NLS-1$
@@ -228,62 +268,75 @@ define([
 	FileClient.prototype = /**@lends orion.fileClient.FileClient.prototype */ {
 		/**
 		 * Returns the file service managing this location
-		 * @param location The location of the item 
+		 * @param {String} itemLocation The location of the item
+		 * @public
+		 * @returns {FileClient} The service for the given item
 		 */
-		getService: function(location) {
-			return this._getService(location);
+		getService: function(itemLocation) {
+			return this._getService(itemLocation);
 		},
 		 
 		/**
 		 * Returns the name of the file service managing this location
-		 * @param location The location of the item 
+		 * @param {String} itemLocation The location of the item
+		 * @public 
+		 * @return {String} The name of this file service
 		 */
-		fileServiceName: function(location) {
-			return this._getServiceName(location);
+		fileServiceName: function(itemLocation) {
+			return this._getServiceName(itemLocation);
 		},
 		 
 		/**
 		 * Returns the root url of the file service managing this location
-		 * @param location The location of the item 
+		 * @param {String} itemLocation The location of the item
+		 * @public 
+		 * @return {String} The root URL of the given item
 		 */
-		fileServiceRootURL: function(location) {
-			return this._getServiceRootURL(location);
+		fileServiceRootURL: function(itemLocation) {
+			return this._getServiceRootURL(itemLocation);
 		},
 		 
 		/**
 		 * Obtains the children of a remote resource
-		 * @param location The location of the item to obtain children for
-		 * @return A deferred that will provide the array of child objects when complete
+		 * @param {string} parentLocation The location of the item to obtain children for
+		 * @public 
+		 * @return {Deferred} A deferred that will provide the array of child objects when complete
 		 */
-		fetchChildren: function(location) {
-			return _doServiceCall(this._getService(location), "fetchChildren", arguments); //$NON-NLS-0$
+		fetchChildren: function(parentLocation) {
+			return _doServiceCall(this._getService(parentLocation), "fetchChildren", arguments); //$NON-NLS-1$
 		},
 
 		/**
 		 * Creates a new workspace with the given name. The resulting workspace is
 		 * passed as a parameter to the provided onCreate function.
-		 * @param {String} name The name of the new workspace
+		 * @param {String} workspaceName The name of the new workspace
+		 * @public
+		 * @return {Deferred} A deferred that will create a workspace with the given name
 		 */
-		createWorkspace: function(name) {
-			return _doServiceCall(this._getService(), "createWorkspace", arguments); //$NON-NLS-0$
+		createWorkspace: function(workspaceName) {
+			return _doServiceCall(this._getService(), "createWorkspace", arguments); //$NON-NLS-1$
 		},
 
 		/**
 		 * Loads all the user's workspaces. Returns a deferred that will provide the loaded
 		 * workspaces when ready.
+		 * @public 
+		 * @return {Deferred} A deferred that will load all workspaces
 		 */
 		loadWorkspaces: function() {
-			return _doServiceCall(this._getService(), "loadWorkspaces", arguments); //$NON-NLS-0$
+			return _doServiceCall(this._getService(), "loadWorkspaces", arguments); //$NON-NLS-1$
 		},
 		
 		/**
 		 * Loads the workspace with the given id and sets it to be the current
 		 * workspace for the IDE. The workspace is created if none already exists.
-		 * @param {String} location the location of the workspace to load
+		 * @param {String} workspaceLocation the location of the workspace to load
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
+		 * @public
+		 * @return {Deferred} A deferred that will load the specified workspace
 		 */
-		loadWorkspace: function(location) {
-			return _doServiceCall(this._getService(location), "loadWorkspace", arguments); //$NON-NLS-0$
+		loadWorkspace: function(workspaceLocation) {
+			return _doServiceCall(this._getService(workspaceLocation), "loadWorkspace", arguments); //$NON-NLS-1$
 		},
 		
 		/**
@@ -292,74 +345,83 @@ define([
 		 * @param {String} projectName the human-readable name of the project
 		 * @param {String} serverPath The optional path of the project on the server.
 		 * @param {Boolean} create If true, the project is created on the server file system if it doesn't already exist
+		 * @public
+		 * @return {Deferred} A deferred that will create a new project in the workspace
 		 */
 		createProject: function(url, projectName, serverPath, create) {
-			return _doServiceCall(this._getService(url), "createProject", arguments); //$NON-NLS-0$
+			return _doServiceCall(this._getService(url), "createProject", arguments); //$NON-NLS-1$
 		},
 		/**
 		 * Creates a folder.
 		 * @param {String} parentLocation The location of the parent folder
 		 * @param {String} folderName The name of the folder to create
 		 * @return {Object} JSON representation of the created folder
+		 * @public
+		 * @return {Deferred} A deferred that will create a new folder in the workspace
 		 */
 		createFolder: function(parentLocation, folderName) {
-			return _doServiceCall(this._getService(parentLocation), "createFolder", arguments); //$NON-NLS-0$
+			return _doServiceCall(this._getService(parentLocation), "createFolder", arguments); //$NON-NLS-1$
 		},
 		/**
 		 * Create a new file in a specified location. Returns a deferred that will provide
 		 * The new file object when ready.
 		 * @param {String} parentLocation The location of the parent folder
 		 * @param {String} fileName The name of the file to create
-		 * @return {Object} A deferred that will provide the new file object
+		 * @public
+		 * @return {Deferred} A deferred that will provide the new file object
 		 */
 		createFile: function(parentLocation, fileName) {
-			return _doServiceCall(this._getService(parentLocation), "createFile", arguments); //$NON-NLS-0$
+			return _doServiceCall(this._getService(parentLocation), "createFile", arguments); //$NON-NLS-1$
 		},
 		/**
 		 * Deletes a file, directory, or project.
-		 * @param {String} location The location of the file or directory to delete.
+		 * @param {String} deleteLocation The location of the file or directory to delete.
+		 * @public
+		 * @returns {Deferred} A deferred that will delete the given file
 		 */
-		deleteFile: function(location) {
-			return _doServiceCall(this._getService(location), "deleteFile", arguments); //$NON-NLS-0$
+		deleteFile: function(deleteLocation) {
+			return _doServiceCall(this._getService(deleteLocation), "deleteFile", arguments); //$NON-NLS-1$
 		},
 		
 		/**		 
 		 * Moves a file or directory.
 		 * @param {String} sourceLocation The location of the file or directory to move.
 		 * @param {String} targetLocation The location of the target folder.
-		 * @param {String} [name] The name of the destination file or directory in the case of a rename
+		 * @param {String} targetName The name of the destination file or directory in the case of a rename
+		 * @public
+		 * @returns {Deferred} A deferred that will move the given file to its new location
 		 */
-		moveFile: function(sourceLocation, targetLocation, name) {
+		moveFile: function(sourceLocation, targetLocation, targetName) {
 			var sourceService = this._getService(sourceLocation);
 			var targetService = this._getService(targetLocation);
 			
 			if (sourceService === targetService) {
-				return _doServiceCall(sourceService, "moveFile", arguments);				 //$NON-NLS-0$
+				return _doServiceCall(sourceService, "moveFile", arguments);				 //$NON-NLS-1$
 			}
 			
-			var isDirectory = sourceLocation[sourceLocation.length -1] === "/"; //$NON-NLS-0$
+			var isDirectory = sourceLocation[sourceLocation.length -1] === "/";
 			var target = targetLocation;
 			
-			if (target[target.length -1] !== "/") { //$NON-NLS-0$
-				target += "/"; //$NON-NLS-0$
+			if (target[target.length -1] !== "/") {
+				target += "/";
 			}
 			
-			if (name) {
-				target += encodeURIComponent(name);
+			if (targetName) {
+				target += encodeURIComponent(targetName);
 			} else {
 				var temp = sourceLocation;
 				if (isDirectory) {
 					temp = temp.substring(0, temp.length - 1);
 				}
-				target += temp.substring(temp.lastIndexOf("/")+1); //$NON-NLS-0$
+				target += temp.substring(temp.lastIndexOf("/")+1);
 			}
 			
-			if (isDirectory && target[target.length -1] !== "/") { //$NON-NLS-0$
-				target += "/"; //$NON-NLS-0$
+			if (isDirectory && target[target.length -1] !== "/") {
+				target += "/";
 			}
 	
 			return _copy(sourceService, sourceLocation, targetService, target).then(function() {
-				return _doServiceCall(sourceService, "deleteFile", [sourceLocation]); //$NON-NLS-0$
+				return _doServiceCall(sourceService, "deleteFile", [sourceLocation]); //$NON-NLS-1$
 			});
 			
 		},
@@ -368,35 +430,37 @@ define([
 		 * Copies a file or directory.
 		 * @param {String} sourceLocation The location of the file or directory to copy.
 		 * @param {String} targetLocation The location of the target folder.
-		 * @param {String} [name] The name of the destination file or directory in the case of a rename
+		 * @param {String} targetName The name of the destination file or directory in the case of a rename
+		 * @public
+		 * @returns {Deferred} A deferred that will copy the given file to its new location
 		 */
-		copyFile: function(sourceLocation, targetLocation, name) {
+		copyFile: function(sourceLocation, targetLocation, targetName) {
 			var sourceService = this._getService(sourceLocation);
 			var targetService = this._getService(targetLocation);
 			
 			if (sourceService === targetService) {
-				return _doServiceCall(sourceService, "copyFile", arguments);				 //$NON-NLS-0$
+				return _doServiceCall(sourceService, "copyFile", arguments);				 //$NON-NLS-1$
 			}
 			
-			var isDirectory = sourceLocation[sourceLocation.length -1] === "/"; //$NON-NLS-0$
+			var isDirectory = sourceLocation[sourceLocation.length -1] === "/";
 			var target = targetLocation;
 			
-			if (target[target.length -1] !== "/") { //$NON-NLS-0$
-				target += "/"; //$NON-NLS-0$
+			if (target[target.length -1] !== "/") {
+				target += "/";
 			}
 			
-			if (name) {
-				target += encodeURIComponent(name);
+			if (targetName) {
+				target += encodeURIComponent(targetName);
 			} else {
 				var temp = sourceLocation;
 				if (isDirectory) {
 					temp = temp.substring(0, temp.length - 1);
 				}
-				target += temp.substring(temp.lastIndexOf("/")+1); //$NON-NLS-0$
+				target += temp.substring(temp.lastIndexOf("/")+1);
 			}
 			
-			if (isDirectory && target[target.length -1] !== "/") { //$NON-NLS-0$
-				target += "/"; //$NON-NLS-0$
+			if (isDirectory && target[target.length -1] !== "/") {
+				target += "/";
 			}
 
 			return _copy(sourceService, sourceLocation, targetService, target);
@@ -405,35 +469,38 @@ define([
 		/**
 		 * Returns the contents or metadata of the file at the given location.
 		 *
-		 * @param {String} location The location of the file to get contents for
+		 * @param {String} readLocation The location of the file to get contents for
 		 * @param {Boolean} [isMetadata] If defined and true, returns the file metadata, 
 		 *   otherwise file contents are returned
-		 * @return A deferred that will be provided with the contents or metadata when available
+		 * @public
+		 * @return {Deferred} A deferred that will be provided with the contents or metadata when available
 		 */
-		read: function(location, isMetadata) {
-			return _doServiceCall(this._getService(location), "read", arguments); //$NON-NLS-0$
+		read: function(readLocation, isMetadata) {
+			return _doServiceCall(this._getService(readLocation), "read", arguments); //$NON-NLS-1$
 		},
 
 		/**
 		 * Returns the blob contents of the file at the given location.
 		 *
-		 * @param {String} location The location of the file to get contents for
-		 * @return A deferred that will be provided with the blob contents when available
+		 * @param {String} readLocation The location of the file to get contents for
+		 * @public
+		 * @return {Deferred} A deferred that will be provided with the blob contents when available
 		 */
-		readBlob: function(location) {
-			return _doServiceCall(this._getService(location), "readBlob", arguments); //$NON-NLS-0$
+		readBlob: function(readLocation) {
+			return _doServiceCall(this._getService(readLocation), "readBlob", arguments); //$NON-NLS-1$
 		},
 
 		/**
 		 * Writes the contents or metadata of the file at the given location.
 		 *
-		 * @param {String} location The location of the file to set contents for
+		 * @param {String} writeLocation The location of the file to set contents for
 		 * @param {String|Object} contents The content string, or metadata object to write
 		 * @param {String|Object} args Additional arguments used during write operation (i.e. ETag) 
-		 * @return A deferred for chaining events after the write completes with new metadata object
+		 * @public
+		 * @return {Deferred} A deferred for chaining events after the write completes with new metadata object
 		 */		
-		write: function(location, contents, args) {
-			return _doServiceCall(this._getService(location), "write", arguments); //$NON-NLS-0$
+		write: function(writeLocation, contents, args) {
+			return _doServiceCall(this._getService(writeLocation), "write", arguments); //$NON-NLS-1$
 		},
 
 		/**
@@ -441,10 +508,11 @@ define([
 		 *
 		 * @param {String} targetLocation The location of the folder to import into
 		 * @param {Object} options An object specifying the import parameters
-		 * @return A deferred for chaining events after the import completes
+		 * @public
+		 * @return {Deferred} A deferred for chaining events after the import completes
 		 */		
 		remoteImport: function(targetLocation, options) {
-			return _doServiceCall(this._getService(targetLocation), "remoteImport", arguments); //$NON-NLS-0$
+			return _doServiceCall(this._getService(targetLocation), "remoteImport", arguments); //$NON-NLS-1$
 		},
 
 		/**
@@ -452,10 +520,11 @@ define([
 		 *
 		 * @param {String} sourceLocation The location of the folder to export from
 		 * @param {Object} options An object specifying the export parameters
-		 * @return A deferred for chaining events after the export completes
+		 * @public
+		 * @return {Deferred} A deferred for chaining events after the export completes
 		 */		
 		remoteExport: function(sourceLocation, options) {
-			return _doServiceCall(this._getService(sourceLocation), "remoteExport", arguments); //$NON-NLS-0$
+			return _doServiceCall(this._getService(sourceLocation), "remoteExport", arguments); //$NON-NLS-1$
 		},
 		
 		/**
@@ -469,13 +538,15 @@ define([
 		 * @param {Boolean} searchParams.regEx Optional. The option of regular expression search.
 		 * @param {integer} searchParams.start Optional. The zero based start number for the range of the returned hits. E.g if there are 1000 hits in total, then 5 means the 6th hit.
 		 * @param {integer} searchParams.rows Optional. The number of hits of the range. E.g if there are 1000 hits in total and start=5 and rows=40, then the return range is 6th-45th.
+		 * @public
 		 */
 		search: function(searchParams) {
-			return _doServiceCall(this._getService(searchParams.resource), "search", arguments); //$NON-NLS-0$
+			return _doServiceCall(this._getService(searchParams.resource), "search", arguments); //$NON-NLS-1$
 		}
-	};//end FileClient prototype
+	};
 	FileClient.prototype.constructor = FileClient;
 
-	//return the module exports
-	return {FileClient: FileClient};
+	return {
+		FileClient: FileClient
+	};
 });
