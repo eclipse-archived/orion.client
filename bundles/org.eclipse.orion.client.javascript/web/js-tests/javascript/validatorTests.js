@@ -400,6 +400,51 @@ define([
 							worker.getTestState().callback(error);
 						});
 					});
+					it("comment based problem (no AST node) - eslint-disable 1", function(callback) {
+						var config = { rules: {} };
+						config.rules['unnecessary-nls'] = 1;
+						validate({buffer: '/*eslint-disable unnecessary-nls */ var a = 1; //$NON-NLS-1$', callback: callback, config: config}).then(function (problems) {
+							try {
+								assert.equal(problems.problems.length, 0);
+								worker.getTestState().callback();
+							}
+							catch(err) {
+								worker.getTestState().callback(err);
+							}
+						}, function (error) {
+							worker.getTestState().callback(error);
+						});
+					});
+					it("comment based problem (no AST node) - eslint-disable 2", function(callback) {
+						var config = { rules: {} };
+						config.rules['unnecessary-nls'] = 1;
+						validate({buffer: '/*eslint-disable unnecessary-nls */ var a = "1"; //$NON-NLS-2$', callback: callback, config: config}).then(function (problems) {
+							try {
+								assert.equal(problems.problems.length, 0);
+								worker.getTestState().callback();
+							}
+							catch(err) {
+								worker.getTestState().callback(err);
+							}
+						}, function (error) {
+							worker.getTestState().callback(error);
+						});
+					});
+					it("comment based problem (no AST node) - eslint-enable/disable 3", function(callback) {
+						var config = { rules: {} };
+						config.rules['unnecessary-nls'] = 1;
+						validate({buffer: '/*eslint-disable unnecessary-nls */ var a = 1; //$NON-NLS-1$\n/*eslint-enable unnecessary-nls */ var a = 1; //$NON-NLS-1$', callback: callback, config: config}).then(function (problems) {
+							try {
+								assert.equal(problems.problems.length, 1);
+								worker.getTestState().callback();
+							}
+							catch(err) {
+								worker.getTestState().callback(err);
+							}
+						}, function (error) {
+							worker.getTestState().callback(error);
+						});
+					});
 				});		
 				// CURLY ---------------------------------------------
 				describe('curly', function() {

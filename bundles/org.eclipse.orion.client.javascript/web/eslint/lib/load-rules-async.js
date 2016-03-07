@@ -802,8 +802,15 @@ define([
         },
         /** @callback */
         "unnecessary-nls": function(context){
-        		function reportUnusedNLS(range, value, nlsCommentValue){
-					context.report({range: range, loc: {start: range[0], end: range[1]}, value: value}, ProblemMessages['unnecessary-nls'], {data: {nlsComment: nlsCommentValue}});
+        		/**
+		         * @name reportUnusedNLS
+		         * @description Reports unnecessary NLS problem, you must set both the range (index array) and the loc {start/end line/col} on the location argument
+		         * @param location
+		         * @param value
+		         * @param nlsCommentValue
+		         */
+		        function reportUnusedNLS(location, value, nlsCommentValue){
+					context.report({range: location.range, loc: location.loc, value: value}, ProblemMessages['unnecessary-nls'], {data: {nlsComment: nlsCommentValue}});
         		}
 
         		return {
@@ -874,7 +881,7 @@ define([
 											if (match[1]){
 												start += 2; // Comment range doesn't include line comment prefix
 											}
-                    						reportUnusedNLS([start, start+value.length], value, match[0]);	        		
+                    						reportUnusedNLS({range: [start, start+value.length], loc: comment.loc}, value, match[0]);	        		
 							        	}
 							        }
 							    }
@@ -908,7 +915,7 @@ define([
 									if (match[1]){
 										start += 2; // Comment range doesn't include line comment prefix
 									}
-            						reportUnusedNLS([start, start+value.length], value, match[0]);	
+            						reportUnusedNLS({range: [start, start+value.length], loc: comment.loc}, value, match[0]);	
             					}
                 			}
                     	}
