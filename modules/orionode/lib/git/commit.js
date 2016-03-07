@@ -112,7 +112,7 @@ function getCommitLog(req, res) {
 		};
 	
 		if (page && !over) {
-			var nextLocation = url.parse(req.url, true);
+			var nextLocation = url.parse(req.originalUrl, true);
 			nextLocation.query.page = page + 1 + "";
 			nextLocation.search = null; //So that query object will be used for format
 			nextLocation = url.format(nextLocation);
@@ -120,7 +120,7 @@ function getCommitLog(req, res) {
 		}
 
 		if (page && page > 1) {
-			var prevLocation = url.parse(req.url, true);
+			var prevLocation = url.parse(req.originalUrl, true);
 			prevLocation.query.page = page - 1 + "";
 			prevLocation.search = null;
 			prevLocation = url.format(prevLocation);
