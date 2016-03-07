@@ -222,14 +222,14 @@ define([
 						assert.equal(computed.text.length, expected.length, "Wrong number of quick fix text edits");
 						assert.equal(computed.selection.length, expected.length, "Wrong number of quick fix selections");						
 						for (var i=0; i<expected.length; i++) {
-							assert(computed.text[i].indexOf(expected[i].value) > -1, 'The fix: '+computed[i]+' does not match the expected fix of: '+expected[i].value);
+							assert(computed.text[i] === expected[i].value, 'The fix: \"'+computed.text[i]+'\" does not match the expected fix of: \"'+expected[i].value + '\"');
 							assert.equal(computed.selection[i].start, expected[i].start, 'The fix starts do not match');
 							assert.equal(computed.selection[i].end, expected[i].end, 'The fix ends do not match');
 						}
 					} else if (typeof computed === 'object' && Array.isArray(computed.text)){
 						assert.equal(computed.text.length, 1, 'Was expecting one quick fix text edit');
 						assert.equal(computed.selection.length, 1, 'Was expected one quick fix selection range');
-						assert(computed.text[0].indexOf(expected.value) > -1, 'The fix: '+computed.text[0]+' does not match the expected fix of: '+expected.value);
+						assert(computed.text[0].indexOf(expected.value) > -1, 'The fix: \"'+computed.text[0]+'\"" does not match the expected fix of: '+expected.value);
 						assert.equal(computed.selection[0].start, expected.start, 'The fix starts do not match');
 						assert.equal(computed.selection[0].end, expected.end, 'The fix ends do not match');
 					} else {
@@ -2232,7 +2232,7 @@ define([
 			it("no-extra-parens - typeof",function(callback) {
 				var rule = createTestRule('no-extra-parens');
 				 var expected = [
-				 				{value: "",
+				 				{value: " ",
 								start: 10, 
 								end: 11},
 								{value: "",
@@ -2240,6 +2240,36 @@ define([
 								end: 13}
 								];
 				return getFixes({buffer: 'if (typeof(a) === "object"){}', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			it("no-extra-parens - typeof 2",function(callback) {
+				var rule = createTestRule('no-extra-parens');
+				 var expected = [
+				 				{value: "",
+								start: 10, 
+								end: 11},
+								{value: "",
+								start: 13, 
+								end: 14}
+								];
+				return getFixes({buffer: 'if (typeof( a) === "object"){}', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			it("no-extra-parens - typeof 3",function(callback) {
+				var rule = createTestRule('no-extra-parens');
+				 var expected = [
+				 				{value: "",
+								start: 11, 
+								end: 12},
+								{value: "",
+								start: 13, 
+								end: 14}
+								];
+				return getFixes({buffer: 'if (typeof (a) === "object"){}', 
 								  rule: rule,
 								  expected: expected,
 								  callback: callback});
@@ -2327,7 +2357,7 @@ define([
 			it("no-extra-parens - in HTML typeof",function(callback) {
 				var rule = createTestRule('no-extra-parens');
 				 var expected = [
-				 				{value: "",
+				 				{value: " ",
 								start: 18, 
 								end: 19},
 								{value: "",

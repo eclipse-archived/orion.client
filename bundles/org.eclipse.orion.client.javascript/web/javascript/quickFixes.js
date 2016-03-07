@@ -722,32 +722,43 @@ define([
 	                return editorContext.setText(fix, context.annotation.start+1, context.annotation.start+1);
 	            });
 	        },
-	        /** fix for the no-extra-parens linting rule */
+			/** fix for the no-extra-parens linting rule */
 			"no-extra-parens": function(editorContext, context, astManager) {
 				return astManager.getAST(editorContext).then(function(ast) {
-					return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation){
-			            var token = Finder.findToken(currentAnnotation.start, ast.tokens);
-			            var openBracket = ast.tokens[token.index-1];
-			            if (openBracket.value === '('){
-			            	var closeBracket = Finder.findToken(currentAnnotation.end, ast.tokens);
-			            	if (closeBracket.value === ')'){
-					            return [
-						            {
-						            	text: '',
-						            	start: openBracket.range[0],
-						            	end: openBracket.range[1]
-						            },
-						            {
-						            	text: '',
-						            	start: closeBracket.range[0],
-						            	end: closeBracket.range[1]
-						            }
-				            	];
-			            	}
-		            	}
-		            });
-	            });
-	        },
+					return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation) {
+						var token = Finder.findToken(currentAnnotation.start, ast.tokens);
+						var openBracket = ast.tokens[token.index-1];
+						if (openBracket.value === '(') {
+							var closeBracket = Finder.findToken(currentAnnotation.end, ast.tokens);
+							if (closeBracket.value === ')') {
+								var replacementText = "";
+								if (token.index >= 2) {
+									var previousToken = ast.tokens[token.index - 2];
+									if (previousToken.range[1] === openBracket.range[0]
+											&& (previousToken.type === "Identifier" || previousToken.type === "Keyword")) {
+										// now we should also check if there is a space between the '(' and the next token
+										if (token.range[0] === openBracket.range[1]) {
+											replacementText = " ";
+										}
+									}
+								}
+								return [
+									{
+										text: replacementText,
+										start: openBracket.range[0],
+										end: openBracket.range[1]
+									},
+									{
+										text: '',
+										start: closeBracket.range[0],
+										end: closeBracket.range[1]
+									}
+								];
+							}
+						}
+					});
+				});
+			},
 			/** fix for the no-extra-semi linting rule */
 			"no-extra-semi": function(editorContext, context) {
 				return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation){
