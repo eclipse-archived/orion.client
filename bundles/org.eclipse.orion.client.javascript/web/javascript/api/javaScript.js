@@ -14,8 +14,10 @@ define([
 	"javascript/occurrences",
 	"esprima/esprima",
 	"javascript/astManager",
-	"javascript/cuProvider"
-], function(TernServer, Occurrences, Esprima, ASTManager, CUProvider) {
+	"javascript/cuProvider",
+    "javascript/quickFixes",
+    "javascript/commands/generateDocCommand"
+], function(TernServer, Occurrences, Esprima, ASTManager, CUProvider, quickFixes, generateDocCommand) {
 	
 	var useworker = false,
 		scriptresolver,
@@ -189,5 +191,14 @@ define([
     	ternserver.type(file, offset, callback);
     };
     
+    /**
+     * @name JavaScript.prototype.quickFixes
+     * @description Provides a quick fix computer instance
+     * @param {javascript.ASTManager} astManager The AST manager
+     * @param {javascript.GenerateDocCommand} generateDocCommand The doc generation command 
+     */
+
+     JavaScript.prototype.quickFixes = new quickFixes.JavaScriptQuickfixesExternalLib(new ASTManager.ASTManager(Esprima), new generateDocCommand.GenerateDocCommandExternalLib(new ASTManager.ASTManager(Esprima), CUProvider));
+
     return JavaScript;
 });
