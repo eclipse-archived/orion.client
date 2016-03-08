@@ -17,7 +17,6 @@
 	},
 	"/settingsContainer":{
 		"categories":{
-			"showUserSettings":false
 		}
 	}
 }

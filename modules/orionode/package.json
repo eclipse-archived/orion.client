@@ -21,6 +21,8 @@
     "mongoose": "^4.4.6",
     "nodemailer": "^2.3.0",
     "passport": "^0.3.2",
+    "passport-github2": "^0.1.10",
+    "passport-google-oauth": "^1.0.0",
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^4.0.0",
     "passport-local-mongoose-email": "^0.1.2",
