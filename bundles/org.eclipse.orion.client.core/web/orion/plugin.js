@@ -540,7 +540,7 @@
             	var title = head.getElementsByTagName("title")[0];
             	if (!title) {
 	            	title = document.createElement("title");
-	            	title.textContent = _headers.name;
+	            	title.textContent = _headers ? _headers.name : '';
 	            	head.appendChild(title);
 	        	}
         	}
