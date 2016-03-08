@@ -226,15 +226,14 @@ define([
 		return checkbox;
 	}
 
-	function createQuickfixItem(parentElement, command, commandInvocation, callback) {
+	function createQuickfixItem(parentElement, command, commandInvocation, callback, prefService) {
 		var element;
 		var button;
 		var clickTarget;
 		var fixAllCheckbox;
 		var fixAllLabel;
-		var fixAllSettings;
 		
-		var quickfixSettings = '/orion/languageTools/quickfix'; //$NON-NLS-1$
+		var quickfixSettings = '/languageTools/quickfix'; //$NON-NLS-1$
 		
 		element = document.createElement("div"); //$NON-NLS-1$
 		
@@ -254,17 +253,11 @@ define([
 					if (fixAllCheckbox.checked){
 						commandInvocation.userData.doFixAll = true;
 					}
-					try {
-						fixAllSettings = localStorage.getItem(quickfixSettings);
-						fixAllSettings = JSON.parse(fixAllSettings);
-						if (!fixAllSettings){
-							fixAllSettings = Object.create(null);
-						}
-						fixAllSettings[command.id] = fixAllCheckbox.checked;
-						fixAllSettings = JSON.stringify(fixAllSettings);
-						localStorage.setItem(quickfixSettings, fixAllSettings);
-					} catch (e){
-						// Ignore
+					if (prefService){
+						prefService.get(quickfixSettings).then(function(prefs) {
+							prefs[command.id] = fixAllCheckbox.checked;
+							prefService.put(quickfixSettings, prefs);
+						});
 					}
 				}
 				onClick.call(commandInvocation.handler, commandInvocation);
@@ -309,18 +302,17 @@ define([
 			fixAllLabel.className = "quickfixAllParameter"; //$NON-NLS-1$
 			fixAllLabel.appendChild(document.createTextNode(messages['fixAll'])); 
 			
+			if (prefService){
+				prefService.get(quickfixSettings).then(function(prefs) {
+					if (typeof prefs[command.id] === 'boolean'){
+						fixAllCheckbox.checked = prefs[command.id];
+					}
+					
+				});
+			}
+			
 			element.appendChild(fixAllCheckbox);
 			element.appendChild(fixAllLabel);
-			
-			try {
-				fixAllSettings = localStorage.getItem(quickfixSettings);
-				fixAllSettings = JSON.parse(fixAllSettings);
-				if (fixAllSettings && typeof fixAllSettings[command.id] === 'boolean'){
-					fixAllCheckbox.checked = fixAllSettings[command.id];
-				}
-			} catch (e){
-				// Ignore
-			}
 		}
 		parentElement.appendChild(element);
 		return element;

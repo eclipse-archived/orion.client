@@ -1230,7 +1230,7 @@ define([
 								id = renderType + command.id + index; // using the index ensures unique ids within the DOM when a command repeats for each item
 								var commandDiv = document.createElement("div"); //$NON-NLS-0$
 								parent.appendChild(commandDiv);
-								element = Commands.createQuickfixItem(commandDiv, command, invocation, onClick);
+								element = Commands.createQuickfixItem(commandDiv, command, invocation, onClick, self._prefService);
 							} else {
 								id = renderType + command.id + index;  // // using the index ensures unique ids within the DOM when a command repeats for each item
 								element = Commands.createCommandItem(parent, command, invocation, id, null, renderType === "tool", onClick);
