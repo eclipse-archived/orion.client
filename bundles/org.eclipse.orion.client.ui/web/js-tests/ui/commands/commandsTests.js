@@ -621,11 +621,11 @@ define(['chai/chai', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/co
 						var fix = parentDiv.childNodes[0].childNodes[0].childNodes;
 						assert.equal(fix[0].textContent, 'Quick Fix 3');
 						assert.equal(fix[1].id, 'test.quickfix3fixAll');
-						// Use timeout to allow renderer time to read the pref and set the checkbox state
+						// Use 200ms timeout to allow renderer time to read the pref and set the checkbox state
 						setTimeout(function() {
-							assert(!fix[1].checked, 'Fix all should be unchecked by default');
+							assert(!fix[1].checked, 'Fix all should be unchecked by preference');
 							promise.resolve();
-						});
+						}, 200);
 					} finally {
 						commandRegistry.unregisterCommandContribution("orion.edit.quickfix", "test.quickfix3");
 						prefService.get(quickfixSettings).then(function(prefs){
