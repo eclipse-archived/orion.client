@@ -298,6 +298,7 @@ function setupUser(opt) {
 		} else {
 			app.use(function(req,res,next){
 				req.user = {username: "anonymous"};
+				next();
 			});
 		}
 
