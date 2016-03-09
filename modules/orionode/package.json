@@ -33,7 +33,6 @@
   "optionalDependencies": {
     "pty.js": "~0.3.0",
     "findit": "~2.0.0",
-    "ini": "~1.3",
     "mkdirp": "*"
   },
   "experimentalDependencies": {

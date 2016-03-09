@@ -54,7 +54,7 @@ exports.readPasswordFile = function(passwordFile, callback) {
 };
 
 /**
- * @param {Function} callback Invoked as function(configObject), the configObject is null if the file couldn't be read.
+ * @param {Function} callback Invoked as function(err, configObject), the err param is not null if the file couldn't be read.
  */
 exports.readConfigFile = function(configFile, callback) {
 	if (!configFile) {
@@ -64,25 +64,84 @@ exports.readConfigFile = function(configFile, callback) {
 		if (err) {
 			return callback(err);
 		}
-		var params = content.toString().split(/\r?\n/);
-		var result = {};
-		params.forEach(function(pair) {
-			if (pair.trim().charAt(0) === '#') {
+		var lines = content.toString().split(/\r?\n/);
+		var result = {}, current = result;
+		lines.forEach(function(line) {
+			var first = line.trim().charAt(0);
+			if (first === '#' || first === ";") {
 				return;
 			}
-			var parsed = /([^=]*)(=?)(.*)/.exec(pair);
-			var name = (parsed[1] || "").trim();
-			var value = (parsed[3] || "").trim();
-			if (value === "true") {
-				value = true
-			}
-			if (value === "false") {
-				value = false
-			}
-			if (name !== "") {
-				result[name] = value;
+			var parsed = /^\[([^\]]*)\]|([^=]*)(=?)(.*)/.exec(line);
+			if (parsed[1]) {
+				var sectionKey = parsed[1].trim();
+				var subsection = /([^\s;#]+)\s*"(.*)"/.exec(sectionKey);
+				if (subsection) {
+					sectionKey = subsection[1].trim();
+					var subsectionKey = subsection[2].trim();
+					var section = result[sectionKey] = result[sectionKey] || {};
+					current = section[subsectionKey] = section[subsectionKey] || {};
+				} else {
+					current = result[sectionKey] = result[sectionKey] || {};
+				}
+			} else {
+				var name = (parsed[2] || "").trim();
+				var value = (parsed[4] || "").trim();
+				if (name !== "") {
+					if (value.charAt(0) === '"') {
+						value = value.substring(1);
+						if (value.charAt(value.length - 1) === '"') value = value.substring(0, value.length - 1);
+					}
+					if (value === "true") value = true;
+					if (value === "false") value = false;
+					if (current[name]) {
+						if (!Array.isArray(current[name])) current[name] = [current[name]];
+						current[name].push(value);
+					} else {
+						current[name] = value;
+					}
+				}
 			}
 		});
-		callback(result);
+		callback(null, result);
 	});
 };
+
+exports.writeConfigFile = function(configFile, contents, callback) {
+	var lines = [];
+	function writeSection(sectionKey, contents) {
+		var sections = [];
+		var sectionLines = [];
+		var indentation = sectionKey ? "        " : "";
+		Object.keys(contents).forEach(function(key) {
+			if (!key) return;
+			if (Array.isArray(contents[key])) {
+				contents[key].forEach(function(k) {
+					sectionLines.push(indentation + key + " = " + k);
+				});
+			} else if (typeof contents[key] !== "object") {
+				sectionLines.push(indentation + key + " = " + contents[key]);
+			} else {
+				sections.push(key);
+			}
+		});
+		if (sectionLines.length) {
+			if (sectionKey) {
+				lines.push("[" + sectionKey + "]");
+			}
+			sectionLines.forEach(function(l) {
+				lines.push(l);
+			});
+		}
+		sections.forEach(function(key) {
+			var title = key;
+			if (sectionKey) {
+				title = sectionKey + ' "' + title + '"';
+			}
+			writeSection(title, contents[key]);
+		});
+	}
+	writeSection("", contents);
+	fs.writeFile(configFile, lines.join("\n"), callback);
+};
+
+

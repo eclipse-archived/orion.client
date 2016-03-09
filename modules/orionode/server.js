@@ -25,7 +25,7 @@ var args = argslib.parseArgs(process.argv);
 var port = args.port || args.p || process.env.PORT || 8081;
 var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
 
-argslib.readConfigFile(configFile, function(configParams) {
+argslib.readConfigFile(configFile, function(err, configParams) {
 	configParams = configParams || {};
 
 	var workspaceArg = args.workspace || args.w;
