@@ -26,12 +26,9 @@ var express = require('express'),
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
     ORION_CLIENT = path.normalize(path.join(__dirname, '../../'));
 
-
 function handleError(err) {
 	throw err;
 }
-
-
 
 function startServer(options) {
 	options = options || {};
@@ -40,9 +37,9 @@ function startServer(options) {
 	
 	try {
 		var app = express();
-		 
+
 		orionUser({app: app, options: options});
-	
+
 		app.use(term.middleware());
 		app.use(orionNodeStatic(path.normalize(path.join(LIBS, 'orionode.client/'))));
 		app.use(orionStatic({
@@ -50,9 +47,6 @@ function startServer(options) {
 			maxAge: options.maxAge
 		}));
 
-		// API handlers
-	
-		
 		app.use(function (req, res, next) {
 			if (!req.user) {
 				res.writeHead(401, "Not authenticated");
@@ -62,6 +56,7 @@ function startServer(options) {
 			next();
 		});
 		
+		// API handlers
 		app.use('/task', orionTasks.orionTasksAPI({
 			root: '/task'
 		}));
