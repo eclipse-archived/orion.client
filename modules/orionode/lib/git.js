@@ -52,24 +52,18 @@ function Git(options) {
 	
 	var router = express.Router();
 	
-	function computePaths(req, res, next) {
-		var u = url.parse(req.url, true);
-		req.urlPath = u.pathname;
-		next();
-	}
-
-	router.use("/clone", computePaths, clone.router(options));
-	router.use("/status", computePaths, status.router(options));
-	router.use("/commit", computePaths, commit.router(options));
-	router.use("/index", computePaths, index.router(options));
-	router.use("/remote", computePaths, remotes.router(options));
-	router.use("/branch", computePaths, branches.router(options));
-	router.use("/config", computePaths, config.router(options));
-	router.use("/tag", computePaths, tags.router(options));
-	router.use("/blame", computePaths, blame.router(options));
-	router.use("/stash", computePaths, stash.router(options));
-	router.use("/diff", computePaths, diff.router(options));
-	router.use("/submodule", computePaths, submodule.router(options));
+	router.use("/clone", clone.router(options));
+	router.use("/status", status.router(options));
+	router.use("/commit", commit.router(options));
+	router.use("/index", index.router(options));
+	router.use("/remote", remotes.router(options));
+	router.use("/branch", branches.router(options));
+	router.use("/config", config.router(options));
+	router.use("/tag", tags.router(options));
+	router.use("/blame", blame.router(options));
+	router.use("/stash", stash.router(options));
+	router.use("/diff", diff.router(options));
+	router.use("/submodule", submodule.router(options));
 
 	return router;
 }

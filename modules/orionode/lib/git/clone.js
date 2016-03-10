@@ -12,6 +12,7 @@
 /*eslint no-console:1*/
 var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
+var url = require("url");
 var path = require("path");
 var fs = require('fs');
 var async = require('async');
@@ -62,7 +63,8 @@ function cloneJSON(base, location, url, parents, submodules) {
 }
 	
 function getRepo(req) {
-	var restpath = req.urlPath.split(fileRoot)[1];
+	var u = url.parse(req.url, true);
+	var restpath = u.pathname.split(fileRoot)[1];
 	if (!restpath) return "";
 	return git.Repository.discover(api.join(req.user.workspaceDir, restpath), 0, req.user.workspaceDir).then(function(buf) {
 		return git.Repository.open(buf.toString());

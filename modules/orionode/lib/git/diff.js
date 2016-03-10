@@ -122,7 +122,7 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 					URIs.push({
 						"Base": getBaseLocation(scope, p),
 						"CloneLocation": "/gitapi/clone" + fileDir,
-						"Location": "/gitapi/diff" + req.urlPath,
+						"Location": "/gitapi/diff/" + encodeURIComponent(scope) + fileDir + filePath,
 						"New": getNewLocation(scope, p),
 						"Old": getOldLocation(scope, p),
 						"Type": "Diff"
