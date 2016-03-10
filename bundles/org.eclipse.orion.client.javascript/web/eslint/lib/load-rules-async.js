@@ -1204,6 +1204,59 @@ define([
                 };
         },
         /** @callback */
+        'no-undef-expression': function(context){
+        	return {
+        		'MemberExpression': function(node){
+                	try {
+                    	if (node.property && node.object && node.object.type !== 'ThisExpression'){
+                    		if (node.parent && node.parent.type === 'CallExpression' && node.parent.callee && node.parent.callee === node){
+                    			 var tern = context.getTern();
+								var query = tern.query;
+								query.end = node.property.start;
+								var foundType = false;
+								try {
+									var expr = tern.findExpr(tern.file, query);
+									var type = tern.findExprType(tern.server, query, tern.file, expr);
+									if (type && type.origin){
+										foundType = true;
+									}
+								} catch(e) {
+									//ignore
+								}
+            	                if (!foundType){
+            	                	// If the object cannot be found, there is no way the property could be known
+            	                	query.end = node.object.end;
+            	                	try {
+            	                		expr = tern.findExpr(tern.file, query);
+            	                		type = tern.findExprType(tern.server, query, tern.file, expr);
+										if (type && type.types){
+            	                			// If the type has no known properties assume Tern doens't know enough about it to find the declaration
+            	                			foundType = true;
+            	                			for (var i=0; i<type.types.length; i++) {
+            	                				var currentProps = type.types[i].props;
+            	                				if (currentProps && Object.keys(currentProps).length > 0){
+            	                					foundType = false;
+            	                					break;
+            	                				}
+            	                			}
+            	                		}
+            	                	} catch (e) {
+            	                		//ignore
+            	                	}
+            	                	if (!foundType){
+										context.report(node.property, ProblemMessages['no-undef-defined'], {0:node.property.name, nls: 'no-undef-defined'}); //$NON-NLS-1$
+									}
+
+								}
+                    		}
+                    	}
+                	} catch (ex) {
+                		Logger.log(ex);
+                	}
+
+            	}
+        	};
+        },
         'no-undef-init': function(context) {
         		return {
         			'VariableDeclarator': function(node) {

@@ -3971,7 +3971,7 @@ define([
 				describe('no-proto', function() {
 					var RULE_ID = "no-proto";
 					it("should flag __proto__ 1", function(callback) {
-						var topic = "a.__proto__ = function() {};";
+						var topic = "myProto.__proto__ = function() {};";
 						var config = { rules: {} };
 						config.rules[RULE_ID] = 1;
 						validate({buffer: topic, callback: callback, config: config}).then(
@@ -3988,7 +3988,7 @@ define([
 							});
 					});
 					it("should flag __proto__ 2", function(callback) {
-						var topic = "a.b.c.__proto__ = function() {};";
+						var topic = "myProto.b.c.__proto__ = function() {};";
 						var config = { rules: {} };
 						config.rules[RULE_ID] = 1;
 						validate({buffer: topic, callback: callback, config: config}).then(
@@ -4005,7 +4005,7 @@ define([
 							});
 					});
 					it("should flag __proto__ 3", function(callback) {
-						var topic = "a['__proto__'] = function() {};";
+						var topic = "myProto['__proto__'] = function() {};";
 						var config = { rules: {} };
 						config.rules[RULE_ID] = 1;
 						validate({buffer: topic, callback: callback, config: config}).then(
@@ -4022,7 +4022,7 @@ define([
 							});
 					});
 					it("should flag __proto__ 4", function(callback) {
-						var topic = "a.b[\"__proto__\"] = function() {};";
+						var topic = "myProto.b[\"__proto__\"] = function() {};";
 						var config = { rules: {} };
 						config.rules[RULE_ID] = 1;
 						validate({buffer: topic, callback: callback, config: config}).then(
@@ -4052,7 +4052,7 @@ define([
 							});
 					});
 					it("should not flag __proto__ 2", function(callback) {
-						var topic = "var a = __proto__ = function() {};";
+						var topic = "var azzzzzz = __proto__ = function() {};";
 						var config = { rules: {} };
 						config.rules[RULE_ID] = 1;
 						validate({buffer: topic, callback: callback, config: config}).then(
@@ -4064,7 +4064,7 @@ define([
 							});
 					});
 					it("should not flag __proto__ 3", function(callback) {
-						var topic = "var a = __proto__;";
+						var topic = "var myProto = __proto__;";
 						var config = { rules: {} };
 						config.rules[RULE_ID] = 1;
 						validate({buffer: topic, callback: callback, config: config}).then(
@@ -7714,6 +7714,217 @@ define([
 						it("no-undef cross file 3 - should not report undefined property when defined in a known file", function(callback) {
 							worker.postMessage({request: 'addFile', args: {file: "noUndefTest3.js", source: "this.noUndefTest3 = function(){};"}}); 
 							var topic = "noUndefTest3();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								}
+							);
+						});
+					});
+                    //NO-UNDEF-EXPRESSION -----------------------------------------------------
+					describe('no-undef-expression', function() {
+						var RULE_ID = "no-undef-expression";
+						//------------------------------------------------------------------------------
+						// Test undeclared globals
+						//------------------------------------------------------------------------------
+						it("Single file undeclared member", function(callback) {
+							var topic = "var undefExpr = {a: function(){}}; undefExpr.b();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'b' is undefined.",
+										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+                        it("Single file declared member", function(callback) {
+							var topic = "var undefExpr = {a: function(){}}; undefExpr.a();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []
+									);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						// Right now we assume a type with no properties means that Tern is missing the necessary information
+                        it("Single file undeclared member object has no properties", function(callback) {
+							var topic = "var undefExpr = {}; undefExpr.a;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+                        it("Single file multiple undeclared members", function(callback) {
+							var topic = "var undefExpr = {a: function(){}}; undefExpr.b(); undefExpr.c()";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'b' is undefined.",
+										nodeType: "Identifier"
+									},
+                                    {
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'c' is undefined.",
+										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it.skip("Single file wrong  undeclared members", function(callback) {
+							var topic = "var undefExpr = {a: function(){}}; undefExpr.b(); undefExpr.c()";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'b' is undefined.",
+										nodeType: "Identifier"
+									},
+                                    {
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'c' is undefined.",
+										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+                        it("Single file multiple member expression", function(callback) {
+							var topic = "var undefExpr = {a: {b: {c: function(){}}}}; undefExpr.a.b.d(); undefExpr.b();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'d' is undefined.",
+										nodeType: "Identifier"
+									},
+                                    {
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'b' is undefined.",
+										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						// TODO Tern only finds the property of v if you run open Decl on a()
+                        it.skip("Single file member declared inline", function(callback) {
+							var topic = "var undefExpr = {}; undefExpr.a = function(){}; undefExpr.a();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'a' is undefined.",
+										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+                        // TODO We check that the property exists, not the actual property type
+                        it.skip("Single file declared property is wrong type", function(callback) {
+							var topic = "var undefExpr = {a: {}}; undefExpr.a();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'a' is undefined.",
+										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+                        //------------------------------------------------------------------------------
+						// Test references to globals in other files that Tern knows about
+						//------------------------------------------------------------------------------
+						it("Multi file 1 - undeclared member", function(callback) {
+							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest1.js", source: "var noUndefExpr1 = {a: function(){}};"}}); 
+							var topic = "noUndefExpr1.b();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'b' is undefined.",
+										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								}
+							);
+						});
+                        it("Multi file 2 - declared member", function(callback) {
+							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest2.js", source: "var noUndefExpr2 = {a: function(){}};"}}); 
+							var topic = "noUndefExpr2.a();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								}
+							);
+						});
+                        it("Multi file 3 - undeclared member no properties", function(callback) {
+							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest3.js", source: "var noUndefExpr3 = {};"}}); 
+							var topic = "noUndefExpr3.a();";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
 							validate({buffer: topic, callback: callback, config: config}).then(
