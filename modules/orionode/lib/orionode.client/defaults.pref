@@ -2,6 +2,7 @@
 	"/plugins":{
 		"plugins/fileClientPlugin.html":true,
 		"plugins/authenticationPlugin.html":true,
+		"profile/userservicePlugin.html":true,
 		"plugins/jslintPlugin.html":true,
 		"edit/content/imageViewerPlugin.html":true,
 		"edit/content/jsonEditorPlugin.html":true,
@@ -14,9 +15,5 @@
 		"plugins/consolePlugin.html":true,
 		"git/plugins/gitPlugin.html":true,
 		"plugins/preferencesPlugin.html": true
-	},
-	"/settingsContainer":{
-		"categories":{
-		}
 	}
 }
