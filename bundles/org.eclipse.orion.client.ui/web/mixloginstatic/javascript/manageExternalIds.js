@@ -166,7 +166,7 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 
 	function confirmOAuth(oauth) {
 		if (oauth !== "" && oauth !== null) {
-			window.open("../mixlogin/manageoauth/oauth?oauth=" + encodeURIComponent(oauth), "oauth_popup", "width=790,height=580");
+			window.open("../mixlogin/manageoauth/oauth/" + oauth + "?oauth=" + encodeURIComponent(oauth), "oauth_popup", "width=790,height=580");
 		}
 	}
 

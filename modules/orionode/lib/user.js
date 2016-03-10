@@ -23,12 +23,12 @@ var expressSession = require('express-session'),
 	args = require('./args'),
 	generator = require('generate-password');
 
-	var CONFIRM_MAIL = "./multitenant/EmailConfirmation.txt",
-		PWD_CONFIRM_RESET_MAIL = "./multitenant/EmailConfirmationPasswordReset.txt",
-		PWD_RESET_MAIL = "./multitenant/PasswordReset.txt";
+var CONFIRM_MAIL = "./multitenant/EmailConfirmation.txt",
+	PWD_CONFIRM_RESET_MAIL = "./multitenant/EmailConfirmationPasswordReset.txt",
+	PWD_RESET_MAIL = "./multitenant/PasswordReset.txt";
 
-	var CONFIRM_MAIL_AUTH = "/useremailconfirmation/verifyEmail?authToken=",
-		RESET_PWD_AUTH = "/useremailconfirmation/resetPwd?authToken=";
+var CONFIRM_MAIL_AUTH = "/useremailconfirmation/verifyEmail?authToken=",
+	RESET_PWD_AUTH = "/useremailconfirmation/resetPwd?authToken=";
 
 var orionAccountSchema = new mongoose.Schema({
 	username: {
@@ -113,6 +113,21 @@ function sendMail(opt){
 	});
 }
 
+function userJSON(user) {
+	return {
+		FullName: user.fullname,
+		UserName: user.username,
+		Location: "/users/" + user.username,
+		Email: user.email,
+		EmailConfirmed: user.isAuthenticated,
+		HasPassword: true,
+		OAuth: user.oauth,
+		LastLoginTimestamp: 0,
+		DiskUsageTimestamp: 0,
+		DiskUsage: 0 
+	};
+}
+
 module.exports = function(opt) {
 	var options = opt.options;
 	var singleUser = options.configParams["orion.single.user"];
@@ -132,8 +147,6 @@ module.exports = function(opt) {
 		passport.serializeUser(orionAccount.serializeUser());
 		passport.deserializeUser(orionAccount.deserializeUser());
 		mongoose.connect('mongodb://localhost/orion_multitenant');
-		
-		
 
 		passport.use(new GoogleStrategy({
 			clientID: options.configParams["orion.oauth.google.client"],
@@ -193,14 +206,20 @@ module.exports = function(opt) {
 			});
 		};
 
-		app.get('/login/oauth/google', passport.authenticate('google'));
+		var passportGoogle = passport.authenticate('google');
+		app.get('/login/oauth/google', passportGoogle);
+		app.get('/mixlogin/manageoauth/oauth/google', function(req, res) {
+			passportGoogle(req, res);
+		});
 		app.get('/auth/google/callback', function(req, res) {
 			return passport.authenticate('google', {}, function(err, user, info){
 				createNewUser(req,res,err,user,info);
 			})(req,res);
 		});
 
-		app.get('/login/oauth/github', passport.authenticate('github'));
+		var passportGithub = passport.authenticate('github');
+		app.get('/login/oauth/github', passportGithub);
+		app.get('/mixlogin/manageoauth/oauth/github', passportGithub);
 		app.get('/auth/github/callback', function(req, res) {
 			return passport.authenticate('github', {}, function(err, user, info){
 				createNewUser(req,res,err,user,info);
@@ -228,22 +247,32 @@ module.exports = function(opt) {
 			})(req, res, next);
 		});
 
+		app.get("/users", function(req,res){
+			orionAccount.find({}, function(err, users) {
+				if (err) {
+					return res.status(404).end();
+				}
+				var start = Math.min(users.length, Math.max(0, Number(req.query.start)) || 0);
+				var rows = Math.min(users.length, Math.max(0, Number(req.query.rows)) || 20);
+				var end = start + rows;
+				var result = [];
+				for (var i=start; i<end; i++) {
+					result.push(userJSON(users[i]));
+				}
+				return res.status(200).json({
+					Users: result,
+					UsersStart: start,
+					UsersRows: rows,
+					UsersLength: users.length
+				});
+			});
+		});
+
 		app.get("/users/:id", function(req,res){
 			if (!req.user) {
 				return res.status(404).end();
 			}
-			return res.status(200).json({
-				FullName: req.user.fullname,
-				UserName: req.user.username,
-				Location: "/users/" + req.user.username,
-				Email: req.user.email,
-				EmailConfirmed: req.user.isAuthenticated,
-				HasPassword: true,
-				OAuth: req.user.oauth,
-				LastLoginTimestamp: 0,
-				DiskUsageTimestamp: 0,
-				DiskUsage: 0 
-			});
+			return res.status(200).json(userJSON(req.user));
 		});
 
 		app.post('/users', function(req, res){
@@ -257,7 +286,7 @@ module.exports = function(opt) {
 						user.save(function(err) {
 							if (err) throw err;
 							console.log('Updated');
-						  });
+						});
 					}
 					return res.status(201).json({error: "Created"});
 				}
@@ -359,17 +388,8 @@ module.exports = function(opt) {
 		if (!req.user) {
 			return res.status(200).end();
 		}
-		return res.status(200).json({
-			FullName: req.user.fullname,
-			UserName: req.user.username,
-			Location: "/users/" + req.user.username,
-			Email: req.user.email,
-			EmailConfirmed: req.user.isAuthenticated,
-			HasPassword: true,
-			OAuth: req.user.oauth,
-			LastLoginTimestamp: 0,
-			DiskUsageTimestamp: 0,
-			DiskUsage: 0 });
+		return res.status(200).json(userJSON(req.user)
+		);
 	});
 
 	app.post('/login/canaddusers', function(req, res) {
