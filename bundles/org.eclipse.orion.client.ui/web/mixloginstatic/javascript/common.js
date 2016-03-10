@@ -112,9 +112,9 @@ define(['orion/PageUtil', 'orion/xsrfUtils', 'orion/PageLinks', './jquery'],func
         if (oauth !== "" && oauth !== null) {
             var redirect = getRedirect();
             if (redirect !== null && PageUtil.validateURLScheme(decodeURIComponent(redirect))) {
-                return "../login/oauth?oauth="+oauth+"&redirect=" + redirect;
+                return "../login/oauth/" + oauth + "?oauth="+oauth+"&redirect=" + redirect;
             } else {
-                return "../login/oauth?oauth="+oauth;
+                return "../login/oauth/" + oauth + "?oauth="+oauth;
             }
         }
     }

@@ -52,7 +52,7 @@ function startServer(options) {
 				res.writeHead(401, "Not authenticated");
 				res.end();
 			} else {
-				req.user.workspaceDir = workspaceDir;
+				req.user.workspaceDir = workspaceDir + (req.user.workspace ? "/" + req.user.workspace : "");
 			}
 			next();
 		});
