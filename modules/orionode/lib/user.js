@@ -6,43 +6,36 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
 
 var expressSession = require('express-session'),
-    passport = require('passport'),
-    GoogleStrategy = require('passport-google-oauth20').Strategy,
-    GithubStrategy = require('passport-github2').Strategy,
-    cookieParser = require('cookie-parser'),
-    bodyParser = require('body-parser'),
-    mongoose = require('mongoose'),
-    passportLocalMongooseEmail = require('passport-local-mongoose-email'),
-    nodemailer = require('nodemailer'),
-    fs = require('fs'),
-    args = require('./args'),
-    generator = require('generate-password');
+	passport = require('passport'),
+	GoogleStrategy = require('passport-google-oauth20').Strategy,
+	GithubStrategy = require('passport-github2').Strategy,
+	cookieParser = require('cookie-parser'),
+	bodyParser = require('body-parser'),
+	mongoose = require('mongoose'),
+	passportLocalMongooseEmail = require('passport-local-mongoose-email'),
+	nodemailer = require('nodemailer'),
+	fs = require('fs'),
+	args = require('./args'),
+	generator = require('generate-password');
 
-    var CONFIRM_MAIL = "./multitenant/EmailConfirmation.txt",
+	var CONFIRM_MAIL = "./multitenant/EmailConfirmation.txt",
 		PWD_CONFIRM_RESET_MAIL = "./multitenant/EmailConfirmationPasswordReset.txt",
 		PWD_RESET_MAIL = "./multitenant/PasswordReset.txt";
 
 	var CONFIRM_MAIL_AUTH = "/useremailconfirmation/verifyEmail?authToken=",
 		RESET_PWD_AUTH = "/useremailconfirmation/resetPwd?authToken=";
 
-	var GITHUB_CLIENT_ID = "dfb875039786a7c65c43";
-	var GITHUB_CLIENT_SECRET = "284f56b250a4b353b9ca3aea48879a716026179b";
-
-	var GOOGLE_CLIENT_ID = "548631316801-ojnibs648he2it9kaur1p7o8nn9roe75.apps.googleusercontent.com";
-	var GOOGLE_CLIENT_SECRET = "vo0Wit5_A3VbMmh_FBdiGYSf";
-
-
 var orionAccountSchema = new mongoose.Schema({
-    username: {
-    	type: String,
+	username: {
+		type: String,
 		unique: true,
 		required: true
-    },
+	},
 	email: {
 		type: String,
 		required: true,
@@ -61,7 +54,7 @@ var orionAccountSchema = new mongoose.Schema({
 	},
 	created_at: {
 		type: Date,
-		default: Date.now
+		"default": Date.now
 	}
 });
 
@@ -82,12 +75,9 @@ function sendMail(opt){
 			emailText  = emailText.replace(/<USER>/g, opt.user.username || "");
 			emailText  = emailText.replace(/<URL>/g, authUrl);
 			emailText  = emailText.replace(/<PASSWORD>/g, opt.pwd || "");
-		
-			
-
 			var subjLineIndex = emailText.indexOf("\n");
 			var subject = emailText.substr(0, subjLineIndex);
-			var body = emailText.substr(subjLineIndex)
+			var body = emailText.substr(subjLineIndex);
 			cb(null, subject, body);
 		});
 	};
@@ -106,19 +96,19 @@ function sendMail(opt){
 		var transport = nodemailer.createTransport(smtpConfig);
 
 		var mailOptions = {
-		    from: opt.options.configParams["mail.from"],
-		    to: opt.user.email,
-		    subject: subject,
-		    text: body, 
-		    //html: '<b>Orion</b>' // html body 
+			from: opt.options.configParams["mail.from"],
+			to: opt.user.email,
+			subject: subject,
+			text: body, 
+			//html: '<b>Orion</b>' // html body 
 		};
 		 
 		console.log(body);
 		// transport.sendMail(mailOptions, function(error, info){
-		//     if(error){
-		//        // return console.log(error);
-		//     }
-		//     //console.log('Message sent: ' + info.response);
+		//	 if(error){
+		//		// return console.log(error);
+		//	 }
+		//	 //console.log('Message sent: ' + info.response);
 		// });
 	});
 }
@@ -131,17 +121,21 @@ function setupUser(opt) {
 		app.use(bodyParser.json());
 		app.use(bodyParser.urlencoded({ extended: false }));
 		app.use(cookieParser());
-		app.use(expressSession({ secret: 'keyboard cat' }));
+		app.use(expressSession({
+			resave: false,
+			saveUninitialized: false,
+			secret: 'keyboard cat'
+		}));
 		app.use(passport.initialize());
 		app.use(passport.session());
 
 		passport.use(orionAccount.createStrategy());
 
 		passport.use(new GoogleStrategy({
-		    clientID: GOOGLE_CLIENT_ID,
-		    clientSecret: GOOGLE_CLIENT_SECRET,
-		    callbackURL: "http://127.0.0.1:8081/auth/google/callback",
-		    scope: "openid email"
+			clientID: options.configParams["orion.oauth.google.client"],
+			clientSecret: options.configParams["orion.oauth.google.secret"],
+			callbackURL: "http://127.0.0.1:8081/auth/google/callback",
+			scope: "openid email"
 		  },
 		  function(accessToken, refreshToken, profile, done){
 				orionAccount.find({oauth: profile.provider + "/" + profile.id}, function(err, user) {
@@ -164,10 +158,10 @@ function setupUser(opt) {
 		));
 
 		passport.use(new GithubStrategy({
-			clientID: GITHUB_CLIENT_ID,
-		    clientSecret: GITHUB_CLIENT_SECRET,
-		    callbackURL: "http://127.0.0.1:8081/auth/github/callback",
-		    scope: "user:email"
+			clientID: options.configParams["orion.oauth.github.client"],
+			clientSecret: options.configParams["orion.oauth.github.secret"],
+			callbackURL: "http://127.0.0.1:8081/auth/github/callback",
+			scope: "user:email"
 		}, function(accessToken, refreshToken, profile, done){
 			orionAccount.find({oauth: profile.provider + "/" + profile.id}, function(err, user) {
 				if (err) {
@@ -213,50 +207,38 @@ function setupUser(opt) {
 			})(req, res, next);
 		});
 
-
-		app.get('/login/oauth/google', passport.authenticate('google'));
-
 		var createNewUser = function(req, res, err,user,info) {
 			if (user && user.__newUser) {
-					//
-					var url = "/mixloginstatic/LoginWindow.html";
-		            url += "?oauth=create&email=" + user.email;
-		            url += "&username=" + user.username;
-		            url += "&identifier=" + user.id;
-		           
-					return res.redirect(url);
-				}
+				var url = "/mixloginstatic/LoginWindow.html";
+				url += "?oauth=create&email=" + user.email;
+				url += "&username=" + user.username;
+				url += "&identifier=" + user.id;
+				return res.redirect(url);
+			}
+			req.logIn(user, function(err) {
+				if (err) { return err; }
+				return res.redirect('/');
+			});
+		};
 
-				req.logIn(user, function(err) {
-					if (err) { return err; }
-					return res.redirect('/');
-				});
-			};
-
-		app.get('/auth/google/callback',
-		  function(req, res) {
+		app.get('/login/oauth/google', passport.authenticate('google'));
+		app.get('/auth/google/callback', function(req, res) {
 			return passport.authenticate('google', {}, function(err, user, info){
 				createNewUser(req,res,err,user,info);
-			})(req,res)}
-		);
-
+			})(req,res);
+		});
 
 		app.get('/login/oauth/github', passport.authenticate('github'));
-
-		
-
-		app.get('/auth/github/callback',
-		  function(req, res) {
+		app.get('/auth/github/callback', function(req, res) {
 			return passport.authenticate('github', {}, function(err, user, info){
 				createNewUser(req,res,err,user,info);
-			})(req,res)}
-		);
+			})(req,res);
+		});
 
 		app.get("/users/:id", function(req,res){
 			if (!req.user) {
 				return res.status(404).end();
 			}
-
 			return res.status(200).json({
 				FullName: req.user.fullname,
 				UserName: req.user.username,
@@ -270,7 +252,6 @@ function setupUser(opt) {
 				DiskUsage: 0 
 			});
 		});
-		
 
 		app.post('/users', function(req, res){
 			orionAccount.register(new orionAccount({username: req.body.UserName, email: req.body.Email, oauth: req.body.identifier}), req.body.Password ,function(err, user){
@@ -281,8 +262,8 @@ function setupUser(opt) {
 						user.isAuthenticated = true;
 						//remove auth token?
 						user.save(function(err) {
-						    if (err) throw err;
-						    console.log('Updated');
+							if (err) throw err;
+							console.log('Updated');
 						  });
 					}
 					return res.status(201).json({error: "Created"});
@@ -316,7 +297,7 @@ function setupUser(opt) {
 
 					return res.status(200).send("<html><body><p>Your email address has been confirmed. Thank you! <a href=\"" + ( req.protocol + '://' + req.get('host'))
 			+ "\">Click here</a> to continue and login to your account.</p></body></html>");
-				})
+				});
 			});
 		});
 
@@ -373,7 +354,7 @@ function setupUser(opt) {
 			if (req.body.UserName) {
 				orionAccount.findByUsername(req.body.UserName, resetPwd);
 			} else if (req.body.Email) {
-				orionAccount.find({email: req.body.Email}, function(err, user) {resetPwd(err, user[0])});
+				orionAccount.find({email: req.body.Email}, function(err, user) {resetPwd(err, user[0]);});
 			}
 
 		});
