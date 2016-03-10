@@ -21,15 +21,15 @@ var WORKSPACE = path.join(__dirname, '.test_workspace');
 var DEFAULT_WORKSPACE_NAME = 'Orionode Workspace';
 
 var app = express();
-app.use(PREFIX, require('../lib/workspace')({
+app.use(function() {
+	req.user = {workspace: WORKSPACE};
+}).use(PREFIX, require('../lib/workspace')({
 	root: '/workspace',
 	fileRoot: '/file',
-	workspaceDir: WORKSPACE
 }));
 app.use(PREFIX_FILE, require('../lib/file')({
 	root: '/file',
 	workspaceRoot: '/workspace',
-	workspaceDir: WORKSPACE
 }));
 
 var request = supertest.bind(null, app);

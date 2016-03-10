@@ -27,23 +27,23 @@ var PREFIX = CONTEXT_PATH + '/workspace';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
 
 var app = express();
-app.use(CONTEXT_PATH + '/task', require('../lib/tasks').orionTasksAPI({
+app.use(function() {
+	req.user = {workspace: WORKSPACE};
+})
+.use(CONTEXT_PATH + '/task', require('../lib/tasks').orionTasksAPI({
 	root: '/task',
 }))
 .use(CONTEXT_PATH, require('../lib/workspace')({
 	root: '/workspace',
 	fileRoot: '/file',
-	workspaceDir: WORKSPACE
 }))
 .use(CONTEXT_PATH, require('../lib/file')({
 	root: '/file',
 	workspaceRoot: '/workspace',
-	workspaceDir: WORKSPACE
 }))
 .use(CONTEXT_PATH, require('../lib/git')({
 	root: '/gitapi',
 	fileRoot: '/file',
-	workspaceDir: WORKSPACE
 }));
 
 var request = supertest.bind(null, app);

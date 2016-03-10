@@ -19,9 +19,7 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	var workspaceDir = options.workspaceDir;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -30,7 +28,7 @@ module.exports.router = function(options) {
 	.delete('/file*', deleteSubmodule);
 
 function putSubmodule(req, res) {
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(repo) {
 		return clone.foreachSubmodule(repo, req.body.Operation, false);
 	})
@@ -43,14 +41,14 @@ function putSubmodule(req, res) {
 }
 function postSubmodule(req, res) {
 	var repo, submodule, subrepo;
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
 		var url = req.body.GitUrl;
 		var path = req.body.Name;
 		if (!path && url) {
 			if (req.body.Path) {
-				path = api.join(workspaceDir, req.body.Path.slice(1)).substring(repo.workdir());
+				path = api.join(req.user.workspaceDir, req.body.Path.slice(1)).substring(repo.workdir());
 			} else if (req.body.Location) {
 				//TODO make unique
 				path = url.substring(url.lastIndexOf("/") + 1).replace(".git", "");

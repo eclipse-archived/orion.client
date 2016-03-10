@@ -40,8 +40,10 @@ describe("orion", function() {
 			done();
 		});
 		it("accepts cache-max-age", function(done) {
-			app.use(orion({
-				workspaceDir: WORKSPACE,
+			app
+			.use(function() {
+				req.user = {workspace: WORKSPACE};
+			}).use(orion({
 				maxAge: 31337 * 1000 // ms
 			}));
 			request()
@@ -53,8 +55,9 @@ describe("orion", function() {
 	describe("middleware", function() {
 		// Make sure that we can .use() the orion server as an Express middleware
 		it("exports #createServer", function(done) {
-			app.use(orion({
-				workspaceDir: WORKSPACE
+			app.use(function() {
+				req.user = {workspace: WORKSPACE};
+			}).use(orion({
 			}));
 			request()
 			.get("/file/project/fizz.txt")
@@ -63,8 +66,9 @@ describe("orion", function() {
 
 		// Sanity check to ensure the orion client code is being mounted correctly
 		it("finds the orion.client code", function(done) {
-			app.use(orion({
-				workspaceDir: WORKSPACE
+			app.use(function() {
+				req.user = {workspace: WORKSPACE};
+			}).use(orion({
 			}));
 			request()
 			.get("/index.html")
@@ -72,8 +76,9 @@ describe("orion", function() {
 		});
 
 		it("works at a non-server-root route", function(done) {
-			app.use("/wow/such/orion", orion({
-				workspaceDir: WORKSPACE
+			app.use(function() {
+				req.user = {workspace: WORKSPACE};
+			}).use("/wow/such/orion", orion({
 			}));
 			request()
 			.get("/wow/such/orion/index.html")

@@ -22,9 +22,7 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	var workspaceDir = options.workspaceDir;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 	
 	module.exports.remoteBranchJSON = remoteBranchJSON;
 	module.exports.remoteJSON = remoteJSON;
@@ -89,10 +87,10 @@ function getRemotes(req, res) {
 	if (!remoteName && !branchName) {
 		var repo;
 
-		return clone.getRepo(req.urlPath)
+		return clone.getRepo(req)
 		.then(function(r) {
 			repo = r;
-			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+			fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 			return git.Remote.list(r);
 		})
 		.then(function(remotes){
@@ -113,10 +111,10 @@ function getRemotes(req, res) {
 	}
 
 	if (remoteName && !branchName) {
-		return clone.getRepo(req.urlPath)
+		return clone.getRepo(req)
 		.then(function(repo) {
 			theRepo = repo;
-			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+			fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 			return repo.getRemote(remoteName);
 		})
 		.then(function(remote) {
@@ -152,10 +150,10 @@ function getRemotes(req, res) {
 
 	if (remoteName && branchName) {
 		var theBranch;
-		return clone.getRepo(req.urlPath)
+		return clone.getRepo(req)
 		.then(function(repo) {
 			theRepo = repo;
-			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+			fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 			return repo.getRemote(remoteName);
 		})
 		.then(function(remote) {
@@ -191,9 +189,9 @@ function addRemote(req, res) {
 		writeError(403, res);
 	}
 
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(repo) {
-		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 		return git.Remote.create(repo, req.body.Remote, req.body.RemoteURI);
 	})
 	.then(function(remote) {
@@ -219,7 +217,7 @@ function postRemote(req, res) {
 function fetchRemote(req, res, remote, branch, force) {
 	var task = new tasks.Task(res);
 	var repo;
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(r) {
 		repo = r;
 		return git.Remote.lookup(repo, remote);
@@ -276,7 +274,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 
 	var task = new tasks.Task(res, false, false, 0);//TODO start task right away to work around bug in client code
 
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(r) {
 		repo = r;
 		return git.Remote.lookup(repo, remote);
@@ -358,7 +356,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 
 function deleteRemote(req, res) {
 	var remoteName = decodeURIComponent(req.params.remoteName);
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(repo) {
 		return git.Remote.delete(repo, remoteName).then(function(resp) {
 			if (!resp) {

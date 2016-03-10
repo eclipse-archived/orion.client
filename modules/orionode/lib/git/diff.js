@@ -20,9 +20,7 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	var workspaceDir = options.workspaceDir;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 
 	module.exports.changeType = changeType;
 
@@ -37,14 +35,14 @@ function getDiff(req, res) {
 	var parts = (query.parts || "").split(",");
 	var paths = query.Path;
 	var scope = decodeURIComponent(req.params.scope || "");
-	var filePath = path.join(workspaceDir, req.params["0"]);
+	var filePath = path.join(req.user.workspaceDir, req.params["0"]);
 	
 	var diff, repo;
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(r) {
 		repo = r;
 		filePath = filePath.substring(repo.workdir().length);
-		var fileDir = path.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+		var fileDir = path.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 		if (scope.indexOf("..") !== -1) {
 			diff = getDiffBetweenTwoCommits(repo, scope.split(".."));
 		} else if (scope === "Default") {

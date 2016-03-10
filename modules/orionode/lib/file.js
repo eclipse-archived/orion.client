@@ -35,9 +35,7 @@ function writeEmptyFilePathError(res, rest) {
 
 module.exports = function(options) {
 	var fileRoot = options.root;
-	var workspaceDir = options.workspaceDir;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 
 	var writeFileMetadata = function(req /*, args.. */) {
 		var args = Array.prototype.slice.call(arguments, 1);
@@ -45,7 +43,7 @@ module.exports = function(options) {
 		return fileUtil.writeFileMetadata.apply(null, [originalFileUrl].concat(args));
 	};
 	var getSafeFilePath = function(req, rest) {
-		return fileUtil.safeFilePath(workspaceDir + (req.user && req.user.workspace || ""), rest);
+		return fileUtil.safeFilePath(req.user.workspaceDir, rest);
 	};
 
 
@@ -255,7 +253,7 @@ module.exports = function(options) {
 		var wwwpath = api.join(rest, encodeURIComponent(name)),
 		    filepath = getSafeFilePath(req, nodePath.join(rest, name));
 
-		fileUtil.handleFilePOST(getSafeFilePath(req, workspaceDir, ""), fileRoot, req, res, wwwpath, filepath);
+		fileUtil.handleFilePOST(getSafeFilePath(req, rest), fileRoot, req, res, wwwpath, filepath);
 	});
 
 	// DELETE - no request body

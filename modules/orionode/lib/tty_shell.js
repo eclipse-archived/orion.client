@@ -28,6 +28,7 @@ exports.install = function(options) {
 	if (!fileRoot) {
 		throw new Error('missing optons.fileRoot');
 	}
+	//TODO use user worspace
 	if (!workspaceDir) {
 		throw new Error('missing optons.workspaceDir');
 	}

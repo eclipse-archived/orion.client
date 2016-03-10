@@ -51,7 +51,8 @@ function startServer(options) {
 			if (!req.user) {
 				res.writeHead(401, "Not authenticated");
 				res.end();
-				return;
+			} else {
+				req.user.workspaceDir = workspaceDir;
 			}
 			next();
 		});
@@ -61,30 +62,25 @@ function startServer(options) {
 			root: '/task'
 		}));
 		app.use('/file', orionFile({
-			root: '/file',
-			workspaceDir: workspaceDir
+			root: '/file'
 		}));
 		app.use('/workspace', orionWorkspace({
 			root: '/workspace',
-			fileRoot: '/file',
-			workspaceDir: workspaceDir
+			fileRoot: '/file'
 		}));
-		app.use(orionGit({ 
+		app.use('/gitapi', orionGit({ 
 			root: '/gitapi',
-			fileRoot: '/file',
-			workspaceDir: workspaceDir
+			fileRoot: '/file'
 		}));
 		app.use('/filesearch', orionSearch({
 			root: '/filesearch',
-			fileRoot: '/file',
-			workspaceDir: workspaceDir
+			fileRoot: '/file'
 		}));
 		app.use('/prefs', orionPrefs({
-			workspaceDir: workspaceDir
 		}));
 
 		//error handling
-		app.use(function(req, res, next){
+		app.use(function(req, res){
 			res.status(404);
 
 			// respond with html page

@@ -21,9 +21,7 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	var workspaceDir = options.workspaceDir;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -103,10 +101,10 @@ module.exports.router = function(options) {
 		var theRepo;
 		if (branchName) {
 			var theBranch;
-			clone.getRepo(req.urlPath)
+			clone.getRepo(req)
 			.then(function(repo) {
 				theRepo = repo;
-				fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+				fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 				return git.Branch.lookup(repo, branchName, git.Branch.BRANCH.LOCAL);
 			})
 			.then(function(ref) {
@@ -131,10 +129,10 @@ module.exports.router = function(options) {
 		var branches = [], theHead;
 		var filter = req.query.filter;
 	
-		clone.getRepo(req.urlPath)
+		clone.getRepo(req)
 		.then(function(repo) {
 			theRepo = repo;
-			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+			fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 			return repo.head();
 		})
 		.then(function(head) {
@@ -187,10 +185,10 @@ module.exports.router = function(options) {
 				return writeError(400, res, "Branch name must be provided.");
 			}
 		}
-		clone.getRepo(req.urlPath)
+		clone.getRepo(req)
 		.then(function(repo) {
 			theRepo = repo;
-			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+			fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 			return startPoint ? git.Reference.lookup(repo, "refs/remotes/" + startPoint) : repo.getCurrentBranch();
 		})
 		.then(function(reference) {
@@ -220,7 +218,7 @@ module.exports.router = function(options) {
 	
 	function deleteBranch(req, res) {
 		var branchName = decodeURIComponent(req.params.branchName);
-		clone.getRepo(req.urlPath)
+		clone.getRepo(req)
 		.then(function(repo) {
 			return git.Reference.lookup(repo, branchName);
 		})

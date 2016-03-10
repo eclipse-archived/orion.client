@@ -25,9 +25,7 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	var workspaceDir = options.workspaceDir;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 
 	module.exports.getRepo = getRepo;
 	module.exports.foreachSubmodule = foreachSubmodule;
@@ -63,10 +61,10 @@ function cloneJSON(base, location, url, parents, submodules) {
 	};
 }
 	
-function getRepo(path) {
-	var restpath = path.split(fileRoot)[1];
+function getRepo(req) {
+	var restpath = req.urlPath.split(fileRoot)[1];
 	if (!restpath) return "";
-	return git.Repository.discover(api.join(workspaceDir, restpath), 0, workspaceDir).then(function(buf) {
+	return git.Repository.discover(api.join(req.user.workspaceDir, restpath), 0, req.user.workspaceDir).then(function(buf) {
 		return git.Repository.open(buf.toString());
 	});
 }
@@ -74,7 +72,7 @@ function getRepo(path) {
 function getClone(req, res) {
 	var repos = [];
 	
-	var rootDir = path.join(workspaceDir, req.params.rootDir || "");
+	var rootDir = path.join(req.user.workspaceDir, req.params.rootDir || "");
 		
 	checkDirectory(rootDir, function(err) {
 		if (err) return writeError(403, res, err.message);
@@ -165,7 +163,7 @@ function getClone(req, res) {
 			git.Repository.open(dir)
 			.then(function(repo) {
 				var base = path.basename(dir);
-				var location = api.join(fileRoot, dir.replace(workspaceDir + "/", ""));
+				var location = api.join(fileRoot, dir.replace(req.user.workspaceDir + "/", ""));
 				pushRepo(repos, repo, base, location, null, [], function() { cb(); });
 	 		})
 			.catch(function() {
@@ -187,7 +185,7 @@ function postInit(req, res) {
 	if (req.body.GitUrl) {
 		postClone(req, res);
 	} else {
-		var initDir = workspaceDir + '/' + req.body.Name;
+		var initDir = req.user.workspaceDir + '/' + req.body.Name;
 		var theRepo, index, author, committer;
 
 		fs.mkdir(initDir, function(err){
@@ -245,7 +243,7 @@ function putClone(req, res) {
 	var checkOptions = {
 		checkoutStrategy: git.Checkout.STRATEGY.FORCE,
 	};
-	getRepo(req.urlPath)
+	getRepo(req)
 	.then(function(repo) {
 		theRepo = repo;
 		if (paths) {
@@ -311,7 +309,7 @@ function putClone(req, res) {
 
 function deleteClone(req, res) {
 	var clonePath = req.params["0"];
-	rmdir(fileUtil.safeFilePath(workspaceDir, clonePath), function(err) {
+	rmdir(fileUtil.safeFilePath(req.user.workspaceDir, clonePath), function(err) {
 		if (err) return writeError(500, res, err);
 		res.status(200).end();
 	});
@@ -368,7 +366,7 @@ function postClone(req, res) {
 	
 	var task = new tasks.Task(res);
 	
-	git.Clone.clone(url, path.join(workspaceDir, dirName), {
+	git.Clone.clone(url, path.join(req.user.workspaceDir, dirName), {
 		fetchOpts: {
 			callbacks: {
 				certificateCheck: function() {

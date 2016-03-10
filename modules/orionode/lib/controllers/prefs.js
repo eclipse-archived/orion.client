@@ -40,8 +40,6 @@ var PREF_FILENAME = PrefsController.PREF_FILENAME = 'prefs.json';
 // https://wiki.eclipse.org/Orion/Server_API/Preference_API
 function PrefsController(options) {
 	var ttl = options.ttl || 5000; // default is 5 seconds
-	var ws = options.workspaceDir;
-	if (!ws) throw new Error('Missing required option: workspaceDir');
 
 	var router = express.Router()
 	.use(bodyParser.json())
@@ -80,7 +78,7 @@ function PrefsController(options) {
 	function acquirePrefs(req) {
 		var app = req.app, prefs = app.locals.prefs;
 		var getPrefs;
-		var prefFile = nodePath.join(nodePath.join(ws, req.user && req.user.workspace || ""), PREF_FILENAME);
+		var prefFile = nodePath.join(req.user.workspaceDir, PREF_FILENAME);
 		if (prefs) {
 			debug('Using prefs from memory');
 			scheduleFlush(app, prefFile);

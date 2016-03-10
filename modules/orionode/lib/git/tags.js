@@ -21,9 +21,7 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	var workspaceDir = options.workspaceDir;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 	
 	module.exports.tagJSON = tagJSON;
 
@@ -62,10 +60,10 @@ function getTags(req, res) {
 	var count = 0, tagCount = 0;
 
 	if (tagName) {
-		return clone.getRepo(req.urlPath)
+		return clone.getRepo(req)
 		.then(function(repo) {
 			theRepo = repo;
-			fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+			fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 			return git.Reference.lookup(theRepo, "refs/tags/" + tagName);
 		})
 		.then(function(ref) {
@@ -80,10 +78,10 @@ function getTags(req, res) {
 		});
 	}
 
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(repo) {
 		theRepo = repo;
-		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 		return theRepo.getReferences(git.Reference.TYPE.OID);
 	})
 	.then(function(refList) {
@@ -138,7 +136,7 @@ function getTags(req, res) {
 
 function deleteTag(req, res) {
 	var tagName = decodeURIComponent(req.params.tagName);
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(repo) {
 		return git.Tag.delete(repo, tagName);
 	})

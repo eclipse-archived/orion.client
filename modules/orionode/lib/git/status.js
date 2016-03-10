@@ -18,18 +18,16 @@ var bodyParser = require('body-parser');
 
 function router(options) {
 	var fileRoot = options.fileRoot;
-	var workspaceDir = options.workspaceDir;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 
 	return express.Router()
 	.use(bodyParser.json())
 	.get('*', getStatus);
 	
 	function getStatus(req, res) {
-		return clone.getRepo(req.urlPath)
+		return clone.getRepo(req)
 		.then(function(repo) {
-			var fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+			var fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 			repo.getStatusExt({
 				flags: 
 					git.Status.OPT.INCLUDE_UNTRACKED | 

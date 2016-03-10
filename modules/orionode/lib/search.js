@@ -23,7 +23,6 @@ var SUBDIR_SEARCH_CONCURRENCY = 10;
 module.exports = function(options) {
 	var root = options.root;
 	var fileRoot = options.fileRoot;
-	var workspaceDir = options.workspaceDir;
 	if (!root) { throw new Error('options.root path required'); }
 	var workspaceId = 'orionode';
 	var workspaceName = 'Orionode Workspace';
@@ -215,8 +214,7 @@ module.exports = function(options) {
 		var parentFileLocation = originalFileRoot(req);
 		var endOfFileRootIndex = 5;
 
-		var ws = workspaceDir + (req.user && req.user.workspace || "");
-		var searchScope = ws + searchOpt.location.substring(endOfFileRootIndex, searchOpt.location.length - 1);
+		var searchScope = req.user.workspaceDir + searchOpt.location.substring(endOfFileRootIndex, searchOpt.location.length - 1);
 		if (searchScope.charAt(searchScope.length - 1) !== "/") searchScope = searchScope + "/";
 
 		fileUtil.getChildren(searchScope, parentFileLocation, function(children) {
@@ -224,7 +222,7 @@ module.exports = function(options) {
 
 			Promise.map(children, function(child) {
 				var childName = child.Location.substring(endOfFileRootIndex + 1);
-				return searchFile(ws, searchScope, childName, searchPattern, filenamePattern, results);
+				return searchFile(req.user.workspaceDir, searchScope, childName, searchPattern, filenamePattern, results);
 			}, { concurrency: SUBDIR_SEARCH_CONCURRENCY })
 			.then(function() {
 				res.json({

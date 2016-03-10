@@ -20,9 +20,7 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	var workspaceDir = options.workspaceDir;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -33,9 +31,9 @@ module.exports.router = function(options) {
 function getIndex(req, res) {
 	var repo;
 	var index;
-	var filePath = path.join(workspaceDir, req.params["0"]);
+	var filePath = path.join(req.user.workspaceDir, req.params["0"]);
 
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(repoResult) {
 		repo = repoResult;
 		filePath = filePath.substring(repo.workdir().length);
@@ -63,9 +61,9 @@ function getIndex(req, res) {
 
 function putIndex(req, res) {
 	var index;
-	var filePath = path.join(workspaceDir, req.params["0"]);
+	var filePath = path.join(req.user.workspaceDir, req.params["0"]);
 
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(repo) {
 		filePath = filePath.substring(repo.workdir().length);
 		return repo.openIndex();
@@ -98,9 +96,9 @@ function putIndex(req, res) {
 function postIndex(req, res) {
 	var repo;
 	var resetType = req.body.Reset;
-	var filePath = path.join(workspaceDir, req.params["0"]);
+	var filePath = path.join(req.user.workspaceDir, req.params["0"]);
 	
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
 		filePath = filePath.substring(repo.workdir().length);

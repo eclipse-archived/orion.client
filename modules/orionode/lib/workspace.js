@@ -21,7 +21,6 @@ var writeError = api.writeError;
 module.exports = function(options) {
 	var workspaceRoot = options.root;
 	var fileRoot = options.fileRoot;
-	var workspaceDir = options.workspaceDir;
 	if (!workspaceRoot) {
 		throw new Error('options.root path required');
 	}
@@ -53,10 +52,9 @@ module.exports = function(options) {
 		var rest = req.pathSuffix;
 		var workspaceRootUrl = originalWorkspaceRoot(req);
 		//var workspaceRootUrl = req.pathPrefix;
-		var ws = workspaceDir + (req.user && req.user.workspace || "");
 		if (rest === '') {
 			// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_the_list_of_available_workspaces
-			fileUtil.withStats(ws, function(err, stats) {
+			fileUtil.withStats(req.user.workspaceDir, function(err, stats) {
 				if (err) {
 					throw err;
 				}
@@ -78,7 +76,7 @@ module.exports = function(options) {
 		} else if (rest === workspaceId) {
 			// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_workspace_metadata
 			var parentFileLocation = originalFileRoot(req);
-			fileUtil.getChildren(ws, parentFileLocation, function(children) {
+			fileUtil.getChildren(req.user.workspaceDir, parentFileLocation, function(children) {
 				// TODO this is basically a File object with 1 more field. Should unify the JSON between workspace.js and file.js
 				var ws = JSON.stringify({
 					Directory: true,
@@ -102,7 +100,6 @@ module.exports = function(options) {
 	router.post('*', function(req, res, next) {
 			var rest = req.pathSuffix;
 			var err;
-			var ws = workspaceDir + (req.user && req.user.workspace || "");
 			if (rest === '') {
 				// Create workspace. unsupported
 				err = {Message: 'Unsupported operation: create workspace'};
@@ -121,11 +118,11 @@ module.exports = function(options) {
 				var location = req.body && req.body.Location;
 				if (location) {
 					var wwwpath = api.rest(fileRoot, location.substr(req.contextPath.length)),
-					    filepath = fileUtil.safeFilePath(ws, projectName);
+					    filepath = fileUtil.safeFilePath(req.user.workspaceDir, projectName);
 
 					// Call the File POST helper to handle the filesystem operation. We inject the Project-specific metadata
 					// into the resulting File object.
-					fileUtil.handleFilePOST(ws, fileRoot, req, res, wwwpath, filepath, {
+					fileUtil.handleFilePOST(req.user.workspaceDir, fileRoot, req, res, wwwpath, filepath, {
 						Id: projectName,
 						ContentLocation: makeProjectContentLocation(req, projectName),
 						Location: makeProjectLocation(req, projectName)
@@ -133,7 +130,7 @@ module.exports = function(options) {
 					return;
 				}
 				// Create a project
-				fs.mkdir(fileUtil.safeFilePath(ws, projectName), parseInt('0755', 8), function(error) {
+				fs.mkdir(fileUtil.safeFilePath(req.user.workspaceDir, projectName), parseInt('0755', 8), function(error) {
 					if (error) {
 						err = {Message: error};
 						res.statusCode = 400;

@@ -19,17 +19,15 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	var workspaceDir = options.workspaceDir;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 
 	return express.Router()
 	.use(bodyParser.json())
 	.get('*', getBlame);
 	
 function getBlame(req, res) {
-	finder(workspaceDir).on('directory', function (dir, stat, stop) {
-		clone.getRepo(req.urlPath)
+	finder(req.user.workspaceDir).on('directory', function (dir, stat, stop) {
+		clone.getRepo(req)
 		.then(function(repo) {
 			git.Blame.file(repo, dir).then(function(blame) {
 				res.status(200).json(blame);

@@ -20,9 +20,7 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	var workspaceDir = options.workspaceDir;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 	
 	return express.Router()
 	.use(bodyParser.json())
@@ -40,9 +38,9 @@ function getStash(req, res) {
 	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
 	var fileDir;
 	var stashesPromises = [];
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(repo) {
-		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 		return git.Stash.foreach(repo, function(index, message, oid) {
 			if (filter && message.indexOf(filter) === -1) return;
 			stashesPromises.push(repo.getCommit(oid)
@@ -80,7 +78,7 @@ function getStash(req, res) {
 function putStash(req, res) {
 	var stashRev = req.params.stashRev;
 	var repo;
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
 		if (stashRev) {
@@ -107,7 +105,7 @@ function putStash(req, res) {
 function deleteStash(req, res) {
 	var stashRev = req.params.stashRev;
 	var repo;
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
 		var index, all = [];
@@ -139,7 +137,7 @@ function postStash(req, res) {
 	var message = req.body.IndexMessage || req.body.WorkingDirectoryMessage || "";
 
 	var repo;
-	return clone.getRepo(req.urlPath)
+	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
 		return git.Stash.save(repo, git.Signature.default(repo), message, flags);

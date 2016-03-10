@@ -20,9 +20,7 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	var workspaceDir = options.workspaceDir;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	if (!workspaceDir) { throw new Error('options.workspaceDir is required'); }
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -43,9 +41,9 @@ function configJSON(key, value, fileDir) {
 
 function getAConfig(req, res) {
 	var key = decodeURIComponent(req.params.key);
-	clone.getRepo(req.urlPath)
+	clone.getRepo(req)
 	.then(function(repo) {
-		var fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+		var fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
 			if (err) {
@@ -75,9 +73,9 @@ function getAConfig(req, res) {
 
 function getConfig(req, res) {
 	var filter = req.query.filter;
-	clone.getRepo(req.urlPath)
+	clone.getRepo(req)
 	.then(function(repo) {
-		var fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+		var fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
 			if (err) {
@@ -116,9 +114,9 @@ function getConfig(req, res) {
 	
 function updateConfig(req, res, key, value, callback) {
 	var fileDir;
-	clone.getRepo(req.urlPath)
+	clone.getRepo(req)
 	.then(function(repo) {
-		fileDir = api.join(fileRoot, repo.workdir().substring(workspaceDir.length + 1));
+		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
 			if (err) {
