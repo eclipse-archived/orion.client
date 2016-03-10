@@ -113,7 +113,7 @@ function sendMail(opt){
 	});
 }
 
-function setupUser(opt) {
+module.exports = function(opt) {
 	var options = opt.options;
 	var singleUser = options.configParams["orion.single.user"];
 	var app = opt.app;
@@ -128,25 +128,26 @@ function setupUser(opt) {
 		}));
 		app.use(passport.initialize());
 		app.use(passport.session());
-
 		passport.use(orionAccount.createStrategy());
+		passport.serializeUser(orionAccount.serializeUser());
+		passport.deserializeUser(orionAccount.deserializeUser());
+		mongoose.connect('mongodb://localhost/orion_multitenant');
+		
+		
 
 		passport.use(new GoogleStrategy({
 			clientID: options.configParams["orion.oauth.google.client"],
 			clientSecret: options.configParams["orion.oauth.google.secret"],
-			callbackURL: "http://127.0.0.1:8081/auth/google/callback",
+			callbackURL: "/auth/google/callback",
 			scope: "openid email"
-		  },
-		  function(accessToken, refreshToken, profile, done){
-				orionAccount.find({oauth: profile.provider + "/" + profile.id}, function(err, user) {
+		}, function(accessToken, refreshToken, profile, done){
+			orionAccount.find({oauth: profile.provider + "/" + profile.id}, function(err, user) {
 				if (err) {
 					return done(err, null);
 				}
-
 				if (user && user.length) {
 					return done(null, user[0]);
 				}
-				
 				return done(null, {
 					__newUser:true,
 					email: profile.emails[0].value,
@@ -154,24 +155,21 @@ function setupUser(opt) {
 					id: profile.provider + "/" + profile.id
 				});
 			});
-		  }
-		));
+		}));
 
 		passport.use(new GithubStrategy({
 			clientID: options.configParams["orion.oauth.github.client"],
 			clientSecret: options.configParams["orion.oauth.github.secret"],
-			callbackURL: "http://127.0.0.1:8081/auth/github/callback",
+			callbackURL: "/auth/github/callback",
 			scope: "user:email"
 		}, function(accessToken, refreshToken, profile, done){
 			orionAccount.find({oauth: profile.provider + "/" + profile.id}, function(err, user) {
 				if (err) {
 					return done(err, null);
 				}
-
 				if (user && user.length) {
 					return done(null, user[0]);
 				}
-				
 				return done(null, {
 					__newUser:true,
 					email: profile.emails[0].value,
@@ -180,32 +178,6 @@ function setupUser(opt) {
 				});
 			});
 		}));
-
-		passport.serializeUser(orionAccount.serializeUser());
-		passport.deserializeUser(orionAccount.deserializeUser());
-
-		mongoose.connect('mongodb://localhost/orion_multitenant');
-
-		app.post('/logout', function(req, res){
-			req.logout();
-			res.end();
-		});
-		
-		app.post('/login/form', function(req, res, next) {
-			passport.authenticate('local', function(err, user, info) {
-				if (err) { 
-					console.log("Auth err: " + err.message);
-					return next(err);  
-				}
-				if (!user) { 
-					return res.status(401).json({error: info.message});
-				 }
-				req.logIn(user, function(err) {
-					if (err) { return next(err); }
-					return res.sendStatus(200);
-				});
-			})(req, res, next);
-		});
 
 		var createNewUser = function(req, res, err,user,info) {
 			if (user && user.__newUser) {
@@ -233,6 +205,27 @@ function setupUser(opt) {
 			return passport.authenticate('github', {}, function(err, user, info){
 				createNewUser(req,res,err,user,info);
 			})(req,res);
+		});
+
+		app.post('/logout', function(req, res){
+			req.logout();
+			res.end();
+		});
+		
+		app.post('/login/form', function(req, res, next) {
+			passport.authenticate('local', function(err, user, info) {
+				if (err) { 
+					console.log("Auth err: " + err.message);
+					return next(err);  
+				}
+				if (!user) { 
+					return res.status(401).json({error: info.message});
+				 }
+				req.logIn(user, function(err) {
+					if (err) { return next(err); }
+					return res.sendStatus(200);
+				});
+			})(req, res, next);
 		});
 
 		app.get("/users/:id", function(req,res){
@@ -331,7 +324,6 @@ function setupUser(opt) {
 
 		//password reset verify
 		app.post('/useremailconfirmation', function(req,res){
-			
 			var resetPwd = function(err, user) {
 				if (err || !user) {
 					res.writeHead(404, "User " +  (req.body.UserName || req.body.Email) + " not found");
@@ -348,7 +340,6 @@ function setupUser(opt) {
 					});
 					
 				});
-				
 			};
 
 			if (req.body.UserName) {
@@ -356,11 +347,9 @@ function setupUser(opt) {
 			} else if (req.body.Email) {
 				orionAccount.find({email: req.body.Email}, function(err, user) {resetPwd(err, user[0]);});
 			}
-
 		});
-
 	} else {
-		app.use(function(req,res,next){
+		app.use(function(req, res, next){
 			req.user = {username: "anonymous"};
 			next();
 		});
@@ -370,7 +359,6 @@ function setupUser(opt) {
 		if (!req.user) {
 			return res.status(200).end();
 		}
-
 		return res.status(200).json({
 			FullName: req.user.fullname,
 			UserName: req.user.username,
@@ -390,9 +378,4 @@ function setupUser(opt) {
 			ForceEmail: options.configParams["orion.auth.user.creation.force.email"], 
 			RegistrationURI:options.configParams["orion.auth.registration.uri"] || undefined});
 	});
-}
-
-
-module.exports = function(options) {
-	setupUser(options);
-}
+};
