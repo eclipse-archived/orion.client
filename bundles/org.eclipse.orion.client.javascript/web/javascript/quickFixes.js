@@ -1,4 +1,4 @@
- /*******************************************************************************
+/*******************************************************************************
  * @license
  * Copyright (c) 2014, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
@@ -18,7 +18,7 @@ define([
 'javascript/compilationUnit',
 'orion/metrics'
 ], function(Objects, Deferred, TextModel, Finder, CU, Metrics) {
-	
+
 	/**
 	 * @description Creates a new JavaScript quick fix computer
 	 * @param {javascript.ASTManager} astManager The AST manager
@@ -27,10 +27,11 @@ define([
 	 * @returns {javascript.JavaScriptQuickfixes} The new quick fix computer instance
 	 * @since 8.0
 	 */
-	function JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand) {
+	function JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand, ternProjectManager) {
 	   this.astManager = astManager;
 	   this.renamecommand = renameCommand;
 	   this.generatedoc = generateDocCommand;
+	   this.ternProjectManager = ternProjectManager;
 	}
 	
 	/**
@@ -1241,7 +1242,66 @@ define([
 		        		return null;
 					});
         		});
-    		}
+    		},
+		/** @callback fix the check-tern-project rule */
+		"check-tern-project" :
+			function(editorContext, context, astManager) {
+				var self = this;
+				return astManager.getAST(editorContext).then(function(ast) {
+					var ternFileLocation = self.ternProjectManager.getTernProjectFileLocation();
+					var ternProjectFile = self.ternProjectManager.getProjectFile();
+					var json = self.ternProjectManager.getJSON();
+					var currentFileName = context.input.substring(ternProjectFile.length);
+					var noTernProjectFile = !ternFileLocation;
+					if(noTernProjectFile) {
+						ternFileLocation = ternProjectFile + ".tern-project";
+					}
+					if (!json) {
+						json = {
+								"plugins": {},
+								"libs": ["ecma5"],
+								"ecmaVersion": 5,
+								"loadEagerly": []
+						};
+					}
+					var loadEagerly = json.loadEagerly;
+					var updated = [];
+					if (!loadEagerly) {
+						loadEagerly = [];
+					}
+					var found = false;
+					loadEagerly.forEach(function(element) {
+						var currentElement = element.substring(ternProjectFile.length);
+						if (currentFileName !== currentElement) {
+							updated.push(currentElement);
+						} else {
+							found = true;
+						}
+					});
+					if (!found) {
+						// add the current file name
+						updated.push(currentFileName);
+						json.loadEagerly = updated;
+						// now we should find a way to save the updated contents
+						var contents = JSON.stringify(json, null, '\t');
+						var fileClient = self.ternProjectManager.scriptResolver.getFileClient();
+						if (noTernProjectFile) {
+							return fileClient.createFile(ternProjectFile, ".tern-project").then(function(fileMetadata) {
+								return fileClient.write(fileMetadata.Location, contents).then(/* @callback */ function(result) {
+									self.ternProjectManager.refresh(ternFileLocation);
+									// now we need to run the syntax checker on the current file to get rid of stale annotations
+									editorContext.syntaxCheck(ast.sourceFile, null, ast.source);
+								});
+							});
+						}
+						return fileClient.write(ternFileLocation, contents).then(/* @callback */ function(result) {
+							self.ternProjectManager.refresh(ternFileLocation);
+							// now we need to run the syntax checker on the current file to get rid of stale annotations
+							editorContext.syntaxCheck(ast.sourceFile, null, ast.source);
+						});
+					}
+				});
+			}
 		}
 	});
 	

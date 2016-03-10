@@ -386,17 +386,6 @@ define([
     		contentType: ["application/javascript", "text/html"]	//$NON-NLS-1$ //$NON-NLS-2$
     			});
 
-    	var validator = new EslintValidator(ternWorker);
-
-    	/**
-    	 * Register the ESLint validator
-    	 */
-    	provider.registerService("orion.edit.validator", validator,  //$NON-NLS-1$
-    			{
-    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
-    		pid: 'eslint.config'  //$NON-NLS-1$
-    			});
-    			
     	provider.registerService("orion.edit.validator",  //$NON-NLS-1$
     		{
     			/**
@@ -430,6 +419,18 @@ define([
     	});
     	
     	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, serviceRegistry, setStarting);
+
+    	var validator = new EslintValidator(ternWorker, ternProjectManager);
+
+    	/**
+    	 * Register the ESLint validator
+    	 */
+    	provider.registerService("orion.edit.validator", validator,  //$NON-NLS-1$
+    			{
+    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
+    		pid: 'eslint.config'  //$NON-NLS-1$
+    			});
+    			
     	/**
     	 * Register Tern project manager as input changed listener
     	 */
@@ -542,7 +543,7 @@ define([
     			}
     	);
 
-    	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand);
+    	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand, ternProjectManager);
 
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
@@ -1088,6 +1089,21 @@ define([
 					]
 				}
 		);
+		
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+			quickFixComputer,
+			{
+				name: javascriptMessages["checkTernProjectFixName"],
+				fixAllEnabled: false,
+				scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+				id : "check.tern.project.fix",  //$NON-NLS-1$
+				contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+				validationProperties: [
+					{source: "annotation:id", match: "^(?:check-tern-project)$"} //$NON-NLS-1$ //$NON-NLS-2$
+				]
+			}
+	);
+
 
     	/**
     	 * legacy pref id
@@ -1392,6 +1408,13 @@ define([
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
+										{
+											id: "check-tern-project",  //$NON-NLS-1$
+											name: javascriptMessages["check-tern-project"],
+											type: "number",  //$NON-NLS-1$
+											defaultValue: warning,
+											options: severities
+										},
 				 	        	                {
     			 	        	                	id: "accessor-pairs",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["accessor-pairs"],
@@ -1475,7 +1498,7 @@ define([
     			 	        	                	defaultValue: warning,
     			 	        	                	options: severities
     			 	        	                }
- 				 	        	            ]
+										]
 				 	            },
 				 	        	{  pid: "eslint.config.codestyle",  //$NON-NLS-1$
 				 	        	   order: 3,

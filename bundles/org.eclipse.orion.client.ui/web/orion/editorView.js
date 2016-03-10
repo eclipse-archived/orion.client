@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2014 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -514,10 +514,11 @@ define([
 			markOccurrences.findOccurrences();
 			
 			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor.getModel());
-			editor.addEventListener("InputChanged", function(evt) {
+
+			function syntaxCheck(title, message, contents) {
 				syntaxChecker.setTextModel(editor.getModel());
 				var input = inputManager.getInput();
-				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents, editor.getEditorContext()).then(function(problems) {
+				syntaxChecker.checkSyntax(inputManager.getContentType(), title, message, contents, editor.getEditorContext()).then(function(problems) {
 					if (input === inputManager.getInput() && problems) {
 						serviceRegistry.getService(that.problemsServiceID)._setProblems(problems);
 					}
@@ -525,6 +526,10 @@ define([
 				if (inputManager.getReadOnly()) {
 					editor.reportStatus(messages.readonly, "error"); //$NON-NLS-0$
 				}
+			}
+
+			editor.addEventListener("InputChanged", function(evt) {
+				syntaxCheck(evt.title, evt.message, evt.contents);
 			});
 
 			var contextImpl = Object.create(null);
@@ -549,6 +554,9 @@ define([
 			contextImpl.exitLinkedMode = function(escapePosition) {
 				editor.getLinkedMode().exitLinkedMode(escapePosition);
 			};
+			contextImpl.syntaxCheck = function(title, message, contents) {
+				syntaxCheck(title, message, contents);
+			}
 			/**
 			 * @description Opens the given location
 			 * @function

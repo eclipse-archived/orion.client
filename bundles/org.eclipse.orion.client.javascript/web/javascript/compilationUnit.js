@@ -133,9 +133,10 @@ define([
         };
         // Our tooling needs access to other functions on the editorContext so copy them here
         if (that._ec){
-        	proxy.getSelections = that._ec.getSelections;
-        	proxy.setSelection = that._ec.setSelection;
-    	}
+	        	proxy.getSelections = that._ec.getSelections;
+	        	proxy.setSelection = that._ec.setSelection;
+	        	proxy.syntaxCheck = that._ec.syntaxCheck;
+	    	}
         return proxy;
     };
 

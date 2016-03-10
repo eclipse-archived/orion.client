@@ -17,8 +17,12 @@ define([
 	'orion/Deferred',
 	"orion/i18nUtil",
 	"i18n!javascript/nls/problems",
+	"javascript/ruleData",
+	'orion/serviceregistry',
+	'javascript/scriptResolver',
+	'javascript/ternProjectManager',
 	'mocha/mocha', //must stay at the end, not a module
-], function(Validator, chai, Deferred, i18nUtil, messages) {
+], function(Validator, chai, Deferred, i18nUtil, messages, Rules, mServiceRegistry, Resolver, Manager) {
 	var assert = chai.assert;
 
 	return function(worker) {
@@ -34,9 +38,12 @@ define([
 			 * @returns {Object} The object with the initialized values
 			 */
 			function setup(options) {
+				var serviceRegistry = new mServiceRegistry.ServiceRegistry();
+				var resolver = new Resolver.ScriptResolver(serviceRegistry);
+				var ternProjectManager = new Manager.TernProjectManager(worker, resolver, serviceRegistry);
 				var buffer = options.buffer;
 				var contentType = options.contentType ? options.contentType : 'application/javascript';
-				var validator = new Validator(worker);
+				var validator = new Validator(worker, ternProjectManager);
 				var state = Object.create(null);
 				assert(options.callback, "You must provide a callback for a worker-based test");
 				state.callback = options.callback;
@@ -138,7 +145,8 @@ define([
 			});
 			
 			it("Test EOF 2", function(callback) {
-				validate({buffer: "var foo = 10;\nfunction", callback: callback}).then(function (problems) {
+				var config = { rules: {} };
+				validate({buffer: "var foo = 10;\nfunction", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
 							{start: 14,
 							 end: 22,
@@ -152,7 +160,8 @@ define([
 			});
 			
 			it("Test invalid regex 1", function(callback) {
-				validate({buffer: "/", callback: callback}).then(function (problems) {
+				var config = { rules: {} };
+				validate({buffer: "/", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
 							{start: 0, 
 							 end: 1, 
@@ -183,7 +192,9 @@ define([
 				 * @since 10.0
 				 */
 				it("HTML Script Block - simple block unused var", function(callback) {
-					validate({buffer: '<html><head><script>var xx = 0; this.x;</script></head></html>', contentType: 'text/html', callback: callback}).then(function (problems) {
+					var config = { rules: {} };
+					config.rules['no-unused-vars'] = 1;
+					validate({buffer: '<html><head><script>var xx = 0; this.x;</script></head></html>', contentType: 'text/html', callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
 							{start: 24,
 							 end: 26,
@@ -201,7 +212,9 @@ define([
 				 * @since 10.0
 				 */
 				it("HTML Script Block - simple block missing semi", function(callback) {
-					validate({buffer: '<html><head><script>var xx = 0; xx++; this.x</script></head></html>', contentType: 'text/html', callback: callback}).then(function (problems) {
+					var config = { rules: {} };
+					config.rules['semi'] = 1;
+					validate({buffer: '<html><head><script>var xx = 0; xx++; this.x</script></head></html>', contentType: 'text/html', callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
 							{start: 43,
 							 end: 44,
@@ -219,7 +232,9 @@ define([
 				 * @since 10.0
 				 */
 				it("HTML Script Block - empty block", function(callback) {
-					validate({buffer: '<html><head><script></script></head></html>', contentType: 'text/html', callback: callback}).then(function (problems) {
+					var config = { rules: Rules.defaults };
+					config.rules['check-tern-project'] = 0;
+					validate({buffer: '<html><head><script></script></head></html>', contentType: 'text/html', callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
 						]);
 					}, function (error) {
@@ -232,8 +247,10 @@ define([
 				 * @since 10.0
 				 */
 				it("HTML Script Block - multi block used var 1", function(callback) {
+					var config = { rules: Rules.defaults };
+					config.rules['check-tern-project'] = 0;
 					validate(
-						{buffer: '<html><head><script>var xx;</script></head><body><a>test</a><script>xx++;</script></body></html>', contentType: 'text/html', callback: callback}).then(
+						{buffer: '<html><head><script>var xx;</script></head><body><a>test</a><script>xx++;</script></body></html>', contentType: 'text/html', callback: callback, config: config}).then(
 						function (problems) {
 							assertProblems(problems, [
 							]);
@@ -248,8 +265,10 @@ define([
 				 * @since 10.0
 				 */
 				it("HTML Script Block - multi block used var 2", function(callback) {
+					var config = { rules: Rules.defaults };
+					config.rules['check-tern-project'] = 0;
 					validate(
-						{buffer: '<html><head><script>xx++;</script></head><body><a>test</a><script>var xx;</script></body></html>', contentType: 'text/html', callback: callback}).then(
+						{buffer: '<html><head><script>xx++;</script></head><body><a>test</a><script>var xx;</script></body></html>', contentType: 'text/html', callback: callback, config: config}).then(
 						function (problems) {
 							assertProblems(problems, [
 								{start: 20,
@@ -269,8 +288,10 @@ define([
 				 * @since 10.0
 				 */
 				it("HTML Script Block - multi block unused var", function(callback) {
+					var config = { rules: Rules.defaults };
+					config.rules['check-tern-project'] = 0;
 					validate(
-						{buffer: '<html><head><script>var xx;</script></head><body><a>test</a><script>var yy;</script></body></html>', contentType: 'text/html', callback: callback}).then(
+						{buffer: '<html><head><script>var xx;</script></head><body><a>test</a><script>var yy;</script></body></html>', contentType: 'text/html', callback: callback, config: config}).then(
 						function (problems) {
 							assertProblems(problems, [
 								{start: 24,
@@ -295,8 +316,10 @@ define([
 				 * @since 10.0
 				 */
 				it("HTML Wrapped Function - multi block unused var", function(callback) {
+					var config = { rules: Rules.defaults };
+					config.rules['check-tern-project'] = 0;
 					validate(
-						{buffer: '<html><head><script></script></head><body><a onclick="xx;;"></a></body></html>', contentType: 'text/html', callback: callback}).then(
+						{buffer: '<html><head><script></script></head><body><a onclick="xx;;"></a></body></html>', contentType: 'text/html', callback: callback, config: config}).then(
 						function (problems) {
 							assertProblems(problems, [
 								{start: 54,
@@ -321,8 +344,10 @@ define([
 				 * @since 10.0
 				 */
 				it("HTML - Empty array for empty blocks", function(callback) {
+					var config = { rules: Rules.defaults };
+					config.rules['check-tern-project'] = 0;
 					validate(
-						{buffer: '<html><head><script></script></head><body><a onclick=""></a></body></html>', contentType: 'text/html', callback: callback}).then(
+						{buffer: '<html><head><script></script></head><body><a onclick=""></a></body></html>', contentType: 'text/html', callback: callback, config: config}).then(
 						function (problems) {
 							assertProblems(problems, [
 							]);
@@ -12095,6 +12120,27 @@ define([
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
 									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
+					// check-tern-project --------------------------------------------
+					describe('check-tern-project', function() {
+						var RULE_ID = "check-tern-project";
+						it("flag lonely file", function(callback) {
+							var topic = 	"function foo() {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "File should be added to the .tern-project file"
+									}]);
 								},
 								function (error) {
 									worker.getTestState().callback(error);

@@ -67,8 +67,9 @@ define([
 	 * @param {javascript.ASTManager} astManager The AST manager backing this validator
 	 * @returns {ESLintValidator} Returns a new validator
 	 */
-	function ESLintValidator(ternWorker) {
+	function ESLintValidator(ternWorker, ternProjectManager) {
 		this.ternWorker = ternWorker;
+		this.projectManager = ternProjectManager;
 		config.setDefaults();
 	}
 	
@@ -226,6 +227,7 @@ define([
 				config.env = env;
 				request.env = config.env;
 			}
+			var ternProjectManager = this.projectManager;
 			this.ternWorker.postMessage(
 				request, 
 				/* @callback */ function(type, err) {
@@ -237,9 +239,37 @@ define([
 								severity: "error" //$NON-NLS-0$
 							});
 						} else if (type.problems) {
-							type.problems.forEach(function(element) {
-								eslintErrors.push(element);
-							});
+							var json = ternProjectManager.getJSON();
+							if(json) {
+								type.problems.forEach(function(element) {
+									// check the .tern-project file
+									if (element.ruleId === "check-tern-project") {
+										// check the .tern-project file
+										var loadEagerly = json.loadEagerly;
+										if(Array.isArray(loadEagerly) && loadEagerly.length > 0) {
+											var found = false;
+											loop: for (var j = 0, max2 = loadEagerly.length; j < max2;  j++) {
+												if (loadEagerly[j] === meta.location) {
+													found = true;
+													break loop;
+												}
+											}
+											if (!found) {
+												eslintErrors = eslintErrors.concat(element);
+											}
+										} else {
+											// in case of an empty loadEagerly file property
+											eslintErrors.push(element);
+										}
+									} else {
+										eslintErrors.push(element);
+									}
+								});
+							} else {
+								type.problems.forEach(function(element) {
+									eslintErrors.push(element);
+								});
+							}
 						}
 						deferred.resolve({ problems: eslintErrors.map(toProblem) });
 				});

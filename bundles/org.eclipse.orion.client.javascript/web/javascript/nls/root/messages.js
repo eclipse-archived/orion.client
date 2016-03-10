@@ -199,6 +199,8 @@ define({
 	'no-self-assign' : 'Disallow self assignment:',
 	'noShadowFixName' : 'Rename in scope',
 	'type-checked-consistent-return' : 'Discouraged inconsistent returns:',
+	'check-tern-project' : 'File should be added to .tern-project',
+	'checkTernProjectFixName' : 'Add to .tern-project file',
 	
 	//Tern Plugins
 	'ternDocPluginName': 'Doc Comments',

@@ -76,7 +76,7 @@ define([
 	} 
 	
 	/**
-	 * @description Returns the Orion completion prposal from the given template and params
+	 * @description Returns the Orion completion proposal from the given template and params
 	 * @param {mTemplate.Template} template The template
 	 * @param {Object} params The params
 	 * @returns {Object} The Orion completion proposal

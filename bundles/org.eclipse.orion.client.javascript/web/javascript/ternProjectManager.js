@@ -17,7 +17,6 @@ define([
 'orion/i18nUtil',
 'javascript/ternProjectValidator',
 'i18n!javascript/nls/problems'
-
 ], function(Objects, Deferred, URITemplate, i18nUtil, Validator, Messages) {
 
 	/**
@@ -32,10 +31,11 @@ define([
 	function TernProjectManager(ternWorker, scriptResolver, serviceRegistry, setStarting) {
 		this.ternWorker = ternWorker;
 		this.scriptResolver = scriptResolver;
-		this.currentProjectLocation = null;
+		this.projectLocation = null;
 		this.currentFile = null;
 		this.registry = serviceRegistry;
 		this.starting = setStarting;
+		this.json = null;
 	}
 
 	Objects.mixin(TernProjectManager.prototype, {
@@ -57,10 +57,10 @@ define([
 							  "<p>"+message+"</p>"; //$NON-NLS-1$ //$NON-NLS-2$
 				if(this.currentFile) {
 					var href = new URITemplate("#{,resource,params*}").expand( //$NON-NLS-1$
-		    		                      {
-		    		                      resource: this.currentFile,
-		    		                      params: {}
-		    		                      });
+							{
+								resource: this.currentFile,
+								params: {}
+							});
 					msg.Message += "<p><a href=\""+href+"\" alt=\""+Messages['openFile']+"\">"+Messages['openFile']+"</a></p>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				}
 				this.registry.getService("orion.page.message").setProgressResult(msg); //$NON-NLS-1$
@@ -68,49 +68,43 @@ define([
 		},
 		
 		/**
-		 * Returns the top level file folder representing the project that contains the given file.
-		 * The file must have a parents property (either parents or Parents).
-		 * @param file {Object} file to lookup the project for
-		 * @returns returns the top level project file or <code>null</code>
+		 * Returns a deferred to find the location of the .tern-project file for the given project if one exists
+		 * @returns {String} The fully qualified path to the .tern-project file
 		 */
-		getProjectFile: function(file) {
-			// file will have different properties depending on whether it came from an editor event or a command
-			if(file){
-				var parents = file.parents ? file.parents : file.Parents;
-				if (parents && parents.length>0){
-					return parents[parents.length-1];
-				}
-			}
-			return null;
+		getTernProjectFileLocation: function() {
+			return this.currentFile;
 		},
 		
 		/**
-		 * Returns a deferred to find the location of the .tern-project file for the given project if one exists
-		 * @param projectFile {Object} the project container
-		 * @returns returns {Deferred} Deferred to get the string file location or <code>null</code> if there is no .tern-project file
+		 * @description Returns the current project file path or null
+		 * @function
+		 * @returns {String} The current project file path, or null
 		 */
-		getTernProjectFileLocation: function(projectFile) {
-			this.currentFile = null;
-			if (!projectFile){
-				return null;
-			}
-			var deferred;
-			if(projectFile.Children){
-				 deferred = new Deferred().resolve(projectFile.Children);
-			} else if(projectFile.ChildrenLocation) {
-				deferred = this.scriptResolver.getFileClient().fetchChildren(projectFile.ChildrenLocation);
-			}
-			return deferred.then(function(children){
-				for(var i=0; i<children.length; i++){
-					if(children[i].Name === ".tern-project"){
-						this.currentFile = children[i].Location;
-						return this.currentFile;
-					}
-				}
-				return null;
-			}.bind(this));
+		getProjectFile: function() {
+			return this.projectLocation;
 		},
 		
+		/**
+		 * @description Returns the JSON parsed from the current project file or null
+		 * @function
+		 * @returns {Object} Returns the parsed JSON or null
+		 */
+		getJSON: function() {
+			return this.json;
+		},
+		
+		refresh : function(file) {
+			if(file) {
+				if (file.endsWith(".tern-project")) {
+					this.currentFile = file;
+				}
+				this.starting();
+				return this.parseTernJSON(file).then(function(jsonOptions){
+					this.json = jsonOptions;
+					return this.loadTernProjectOptions(jsonOptions);
+				}.bind(this));
+			}
+		},
 		/**
 		 * Returns a deferred that reads the file at the given location and returns the parsed JSON contents
 		 * @param {String} fileLocation The location of the file to parse
@@ -123,8 +117,16 @@ define([
 			return this.scriptResolver.getFileClient().read(fileLocation).then(function(content) {
 				try {
 					var json = content ? JSON.parse(content) : {};
-					json.projectLoc = fileLocation.slice(0, fileLocation.lastIndexOf('/')+1);
-					this._simpleValidate(json);
+					// create a copy of json in order to prevent the addition of the projectLoc property.
+					// the returned value is now cached into the getJSON() function.
+					var copyJson = Object.create(null);
+					for (var prop in json) {
+						if (json.hasOwnProperty(prop)) {
+							copyJson[prop] = json[prop];
+						}
+					}
+					copyJson.projectLoc = fileLocation.slice(0, fileLocation.lastIndexOf('/')+1);
+					this._simpleValidate(copyJson);
 					return json;
 				} catch(e) {
 					this._report(Messages['errorParsing'], e);
@@ -227,19 +229,25 @@ define([
 		onInputChanged: function onInputChanged(evnt) {
 			this.inEditor = ".tern-project" === evnt.file.name;
 			if(this.inEditor) {
-				this.currentProjectLocation = null;
+				this.projectLocation = null;
 			} else {
-				var file = evnt.file;
-				var projectFile = this.getProjectFile(file);
-				if (projectFile && (!this.currentProjectLocation || projectFile.Location !== this.currentProjectLocation)){
-					this.currentProjectLocation = projectFile.Location;
-					this.scriptResolver.setSearchLocation(projectFile.Location);
-					this.starting();
-					return this.getTernProjectFileLocation(projectFile).then(function(ternFileLocation){
-						return this.parseTernJSON(ternFileLocation).then(function(jsonOptions){
-							return this.loadTernProjectOptions(jsonOptions);
-						}.bind(this));
-					}.bind(this));
+				var file = evnt.file,
+					project;
+				if(file) {
+					var parents = file.parents ? file.parents : file.Parents;
+					if (parents && parents.length > 0){
+						project = parents[parents.length-1];
+					}
+				}
+				if (project && (!this.projectLocation || project.Location !== this.projectLocation)){
+					this.projectLocation = project.Location;
+					this.scriptResolver.setSearchLocation(project.Location);
+					var c = project.Children;
+					for(var i = 0, len = c.length; i < len; i++) {
+						if(".tern-project" === c[i].Name) {
+							return this.refresh(c[i].Location);
+						}
+					}
 				}
 			}
 		}
