@@ -9,15 +9,16 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
+/*global Terminal*/
 define([
 	"/socket.io/socket.io.js",
-	"scripts/term.js",
 	"/requirejs/domReady.js",
 	'orion/widgets/input/DropDownMenu',
 	'orion/widgets/input/SettingsSelect',
 	'orion/commands',
-	"orion/PageUtil"
-], function(io, Terminal, onReady, DropDownMenu, SettingsSelect, mCommands, PageUtil) {
+	"orion/PageUtil",
+	"/term.js"
+], function(io, onReady, DropDownMenu, SettingsSelect, mCommands, PageUtil/*, Terminal*/) {
 
 	var term, serviceRegistry;
 	var colorScheme = "Dark";
