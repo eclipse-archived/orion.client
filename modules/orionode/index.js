@@ -47,36 +47,36 @@ function startServer(options) {
 			maxAge: options.maxAge
 		}));
 
-		app.use(function (req, res, next) {
+		function checkAuthenticated(req, res, next) {
 			if (!req.user) {
 				res.writeHead(401, "Not authenticated");
 				res.end();
 			} else {
 				req.user.workspaceDir = workspaceDir + (req.user.workspace ? "/" + req.user.workspace : "");
+				next();
 			}
-			next();
-		});
+		}
 		
 		// API handlers
-		app.use('/task', orionTasks.orionTasksAPI({
+		app.use('/task', checkAuthenticated, orionTasks.orionTasksAPI({
 			root: '/task'
 		}));
-		app.use('/file', orionFile({
+		app.use('/file', checkAuthenticated, orionFile({
 			root: '/file'
 		}));
-		app.use('/workspace', orionWorkspace({
+		app.use('/workspace', checkAuthenticated, orionWorkspace({
 			root: '/workspace',
 			fileRoot: '/file'
 		}));
-		app.use('/gitapi', orionGit({ 
+		app.use('/gitapi', checkAuthenticated, orionGit({ 
 			root: '/gitapi',
 			fileRoot: '/file'
 		}));
-		app.use('/filesearch', orionSearch({
+		app.use('/filesearch', checkAuthenticated, orionSearch({
 			root: '/filesearch',
 			fileRoot: '/file'
 		}));
-		app.use('/prefs', orionPrefs({
+		app.use('/prefs', checkAuthenticated, orionPrefs({
 		}));
 
 		//error handling
