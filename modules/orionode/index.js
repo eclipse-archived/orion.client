@@ -19,6 +19,7 @@ var express = require('express'),
     orionStatic = require('./lib/orion_static'),
     orionTasks = require('./lib/tasks'),
     orionSearch = require('./lib/search'),
+    orionMetrics = require('./lib/metrics'),
     orionUser = require('./lib/user'),
    
     term = require('term.js');
@@ -77,6 +78,9 @@ function startServer(options) {
 			fileRoot: '/file'
 		}));
 		app.use('/prefs', checkAuthenticated, orionPrefs({
+		}));
+		app.use('/metrics', orionMetrics.router({
+			configParams: options
 		}));
 
 		//error handling
