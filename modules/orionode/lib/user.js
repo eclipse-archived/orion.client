@@ -20,6 +20,7 @@ var expressSession = require('express-session'),
 	passportLocalMongooseEmail = require('passport-local-mongoose-email'),
 	nodemailer = require('nodemailer'),
 	fs = require('fs'),
+	url = require('url'),
 	args = require('./args'),
 	generator = require('generate-password');
 
@@ -147,14 +148,17 @@ module.exports = function(opt) {
 		passport.serializeUser(orionAccount.serializeUser());
 		passport.deserializeUser(orionAccount.deserializeUser());
 		mongoose.connect('mongodb://localhost/orion_multitenant');
-
-		passport.use(new GoogleStrategy({
-			clientID: options.configParams["orion.oauth.google.client"],
-			clientSecret: options.configParams["orion.oauth.google.secret"],
-			callbackURL: "/auth/google/callback",
-			scope: "openid email"
-		}, function(accessToken, refreshToken, profile, done){
-			orionAccount.find({oauth: profile.provider + "/" + profile.id}, function(err, user) {
+		
+		function oauth(id, username, email, req, done) {
+			if (req.query.link === "true") {
+				return done(null, {
+					__linkUser:true,
+					email: email,
+					username: username,
+					id: id
+				});
+			}
+			orionAccount.find({oauth: new RegExp("^" + id + "$", "m")}, function(err, user) {
 				if (err) {
 					return done(err, null);
 				}
@@ -163,42 +167,24 @@ module.exports = function(opt) {
 				}
 				return done(null, {
 					__newUser:true,
-					email: profile.emails[0].value,
-					username: profile.emails[0].value.split("@")[0],
-					id: profile.provider + "/" + profile.id
+					email: email,
+					username: username,
+					id: id
 				});
 			});
-		}));
-
-		passport.use(new GithubStrategy({
-			clientID: options.configParams["orion.oauth.github.client"],
-			clientSecret: options.configParams["orion.oauth.github.secret"],
-			callbackURL: "/auth/github/callback",
-			scope: "user:email"
-		}, function(accessToken, refreshToken, profile, done){
-			orionAccount.find({oauth: profile.provider + "/" + profile.id}, function(err, user) {
-				if (err) {
-					return done(err, null);
+		}
+		var createNewUser = function(req, res, err, user, info) {
+			if (user) {
+				if (user.__newUser) {
+					var registerUrl = "/mixloginstatic/LoginWindow.html";
+					registerUrl += "?oauth=create&email=" + user.email;
+					registerUrl += "&username=" + user.username;
+					registerUrl += "&identifier=" + user.id;
+					return res.redirect(registerUrl);
+				} else if (user.__linkUser) {
+					res.setContentType("text/html; charset=UTF-8");
+					return res.status(200).send("<html><head></head><body onload=\"window.opener.handleOAuthResponse('" + user.id + "');window.close();\"></body></html>");
 				}
-				if (user && user.length) {
-					return done(null, user[0]);
-				}
-				return done(null, {
-					__newUser:true,
-					email: profile.emails[0].value,
-					username: profile.username,
-					id: profile.provider + "/" + profile.id
-				});
-			});
-		}));
-
-		var createNewUser = function(req, res, err,user,info) {
-			if (user && user.__newUser) {
-				var url = "/mixloginstatic/LoginWindow.html";
-				url += "?oauth=create&email=" + user.email;
-				url += "&username=" + user.username;
-				url += "&identifier=" + user.id;
-				return res.redirect(url);
 			}
 			req.logIn(user, function(err) {
 				if (err) { return err; }
@@ -206,20 +192,36 @@ module.exports = function(opt) {
 			});
 		};
 
-		var passportGoogle = passport.authenticate('google');
-		app.get('/login/oauth/google', passportGoogle);
-		app.get('/mixlogin/manageoauth/oauth/google', function(req, res) {
-			passportGoogle(req, res);
-		});
+		passport.use(new GoogleStrategy({
+			clientID: options.configParams["orion.oauth.google.client"],
+			clientSecret: options.configParams["orion.oauth.google.secret"],
+			passReqToCallback: true,
+			callbackURL: "/auth/google/callback",
+			scope: "openid email"
+		}, /* @callback */ function(req, accessToken, refreshToken, profile, done) {
+			var email = profile.emails[0].value;
+			oauth(profile.provider + "/" + profile.id, email.split("@")[0], email, req, done);
+		}));
+		app.get('/login/oauth/google', passport.authenticate('google'));
+		app.get('/mixlogin/manageoauth/oauth/google', passport.authenticate('google', {callbackURL: "/auth/google/callback?link=true"}));
 		app.get('/auth/google/callback', function(req, res) {
 			return passport.authenticate('google', {}, function(err, user, info){
 				createNewUser(req,res,err,user,info);
 			})(req,res);
 		});
 
-		var passportGithub = passport.authenticate('github');
-		app.get('/login/oauth/github', passportGithub);
-		app.get('/mixlogin/manageoauth/oauth/github', passportGithub);
+		passport.use(new GithubStrategy({
+			clientID: options.configParams["orion.oauth.github.client"],
+			clientSecret: options.configParams["orion.oauth.github.secret"],
+			passReqToCallback: true,
+			callbackURL: "/auth/github/callback",
+			scope: "user:email"
+		}, /* @callback */ function(req, accessToken, refreshToken, profile, done) {
+			var email = profile.emails[0].value;
+			oauth(profile.provider + "/" + profile.id, profile.username, email, req, done);
+		}));
+		app.get('/login/oauth/github', passport.authenticate('github'));
+		app.get('/mixlogin/manageoauth/oauth/github', passport.authenticate('github', {callbackURL: "/auth/github/callback?link=true"}));
 		app.get('/auth/github/callback', function(req, res) {
 			return passport.authenticate('github', {}, function(err, user, info){
 				createNewUser(req,res,err,user,info);
@@ -325,22 +327,41 @@ module.exports = function(opt) {
 				return res.status(200).end();
 			});
 		});
+		
+		app.post("/users/:id", function(req,res){
+			//TODO check access
+			orionAccount.findByUsername(req.params.id, function(err, user) {
+				if (err) return res.status(404).end();
+				if (!user) {
+					res.writeHead(400, "User not fount: " + req.params.id);
+					return res.end();
+				}
+				user.setPassword(req.body.Password, function(err, user) {
+					if (err) res.writeHead(400, "Failed to update: " + req.params.id);
+					user.save(function save(err) {
+						if (err) res.writeHead(400, "Failed to update: " + req.params.id);
+						return res.status(200).end();
+					});
+				});
+			});
+		});
 
 		app.post('/users', function(req, res){
 			orionAccount.register(new orionAccount({username: req.body.UserName, email: req.body.Email, oauth: req.body.identifier}), req.body.Password ,function(err, user){
-				if (!err) {
-					if (options.configParams["orion.auth.user.creation.force.email"]){
-						sendMail({user: user, options: options, template: CONFIRM_MAIL, auth: CONFIRM_MAIL_AUTH, req: req});
-					} else {
-						user.isAuthenticated = true;
-						//remove auth token?
-						user.save(function(err) {
-							if (err) throw err;
-							console.log('Updated');
-						});
-					}
-					return res.status(201).json({error: "Created"});
+				if (err) {
+					return res.status(404).json({Message: err.message});
 				}
+				if (options.configParams["orion.auth.user.creation.force.email"]) {
+					sendMail({user: user, options: options, template: CONFIRM_MAIL, auth: CONFIRM_MAIL_AUTH, req: req});
+				} else {
+					user.isAuthenticated = true;
+					//remove auth token?
+					user.save(function(err) {
+						if (err) throw err;
+						console.log('Updated');
+					});
+				}
+				return res.status(201).json({error: "Created"});
 			});
 		});
 
@@ -351,23 +372,16 @@ module.exports = function(opt) {
 				if (err) {
 					//log
 				}
-				//remove auth token?
-				// user.authToken = undefined;
-				// user.save(function (err) {
-				// 	//log err
-
 				var workspacePath = [options.workspaceDir, user.username.substring(0,2), user.username, "OrionContent"];
 				var localPath = workspacePath.slice(1).join("/");
 				args.createDirs(workspacePath, function(err) {
 					if (err) {
 						//do something
 					}
-
 					user.workspace = localPath;
 					user.save(function(err) {
 						if (err) throw err;
 					});
-
 					return res.status(200).send("<html><body><p>Your email address has been confirmed. Thank you! <a href=\"" + ( req.protocol + '://' + req.get('host'))
 			+ "\">Click here</a> to continue and login to your account.</p></body></html>");
 				});
@@ -427,7 +441,7 @@ module.exports = function(opt) {
 			}
 		});
 	} else {
-		app.use(function(req, res, next){
+		app.use(/* @callback */ function(req, res, next){
 			req.user = {username: "anonymous"};
 			next();
 		});
@@ -440,7 +454,7 @@ module.exports = function(opt) {
 		return res.status(200).json(userJSON(req.user));
 	});
 
-	app.post('/login/canaddusers', function(req, res) {
+	app.post('/login/canaddusers', /* @callback */ function(req, res) {
 		return res.status(200).json({
 			CanAddUsers: options.configParams["orion.auth.user.creation"], 
 			ForceEmail: options.configParams["orion.auth.user.creation.force.email"], 
