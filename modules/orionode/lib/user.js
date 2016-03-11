@@ -10,7 +10,8 @@
  *******************************************************************************/
 /*eslint-env node*/
 
-var expressSession = require('express-session'),
+var express = require('express'),
+	expressSession = require('express-session'),
 	passport = require('passport'),
 	GoogleStrategy = require('passport-google-oauth20').Strategy,
 	GithubStrategy = require('passport-github2').Strategy,
@@ -20,7 +21,6 @@ var expressSession = require('express-session'),
 	passportLocalMongooseEmail = require('passport-local-mongoose-email'),
 	nodemailer = require('nodemailer'),
 	fs = require('fs'),
-	url = require('url'),
 	args = require('./args'),
 	generator = require('generate-password');
 
@@ -129,10 +129,10 @@ function userJSON(user) {
 	};
 }
 
-module.exports = function(opt) {
-	var options = opt.options;
+module.exports = function(options) {
 	var singleUser = options.configParams["orion.single.user"];
-	var app = opt.app;
+	var app = express.Router();
+
 	if (!singleUser) {
 		app.use(bodyParser.json());
 		app.use(bodyParser.urlencoded({ extended: false }));
@@ -460,4 +460,6 @@ module.exports = function(opt) {
 			ForceEmail: options.configParams["orion.auth.user.creation.force.email"], 
 			RegistrationURI:options.configParams["orion.auth.registration.uri"] || undefined});
 	});
+	
+	return app;
 };

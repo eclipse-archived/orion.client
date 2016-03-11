@@ -6,26 +6,25 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
 var express = require('express'),
-    path = require('path'),
-    orionFile = require('./lib/file'),
-    orionWorkspace = require('./lib/workspace'),
-    orionGit = require('./lib/git'),
-    orionNodeStatic = require('./lib/orionode_static'),
-    orionPrefs = require('./lib/controllers/prefs'),
-    orionStatic = require('./lib/orion_static'),
-    orionTasks = require('./lib/tasks'),
-    orionSearch = require('./lib/search'),
-    orionMetrics = require('./lib/metrics'),
-    orionUser = require('./lib/user'),
-   
-    term = require('term.js');
+	path = require('path'),
+	orionFile = require('./lib/file'),
+	orionWorkspace = require('./lib/workspace'),
+	orionGit = require('./lib/git'),
+	orionNodeStatic = require('./lib/orionode_static'),
+	orionPrefs = require('./lib/controllers/prefs'),
+	orionStatic = require('./lib/orion_static'),
+	orionTasks = require('./lib/tasks'),
+	orionSearch = require('./lib/search'),
+	orionMetrics = require('./lib/metrics'),
+	orionUser = require('./lib/user'),
+	term = require('term.js');
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
-    ORION_CLIENT = path.normalize(path.join(__dirname, '../../'));
+	ORION_CLIENT = path.normalize(path.join(__dirname, '../../'));
 
 function handleError(err) {
 	throw err;
@@ -39,7 +38,7 @@ function startServer(options) {
 	try {
 		var app = express();
 
-		orionUser({app: app, options: options});
+		app.use(orionUser(options));
 
 		app.use(term.middleware());
 		app.use(orionNodeStatic(path.normalize(path.join(LIBS, 'orionode.client/'))));
