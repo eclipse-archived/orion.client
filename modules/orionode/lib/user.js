@@ -121,7 +121,7 @@ function userJSON(user) {
 		Email: user.email,
 		EmailConfirmed: user.isAuthenticated,
 		HasPassword: true,
-		OAuth: user.oauth,
+		OAuth: user.oauth || undefined,
 		LastLoginTimestamp: 0,
 		DiskUsageTimestamp: 0,
 		DiskUsage: 0 
@@ -234,20 +234,20 @@ module.exports = function(opt) {
 		app.post('/login/form', function(req, res, next) {
 			passport.authenticate('local', function(err, user, info) {
 				if (err) { 
-					console.log("Auth err: " + err.message);
 					return next(err);  
 				}
-				if (!user) { 
+				if (!user) {
 					return res.status(401).json({error: info.message});
-				 }
+				}
 				req.logIn(user, function(err) {
 					if (err) { return next(err); }
-					return res.sendStatus(200);
+					return res.status(200).end();
 				});
 			})(req, res, next);
 		});
 
 		app.get("/users", function(req,res){
+			//TODO check access
 			orionAccount.find({}, function(err, users) {
 				if (err) {
 					return res.status(404).end();
@@ -269,10 +269,61 @@ module.exports = function(opt) {
 		});
 
 		app.get("/users/:id", function(req,res){
-			if (!req.user) {
-				return res.status(404).end();
-			}
-			return res.status(200).json(userJSON(req.user));
+			//TODO check access
+			orionAccount.findByUsername(req.params.id, function(err, user) {
+				if (err) return res.status(404).end();
+				if (!user) {
+					res.writeHead(400, "User not fount: " + req.params.id);
+					return res.end();
+				}
+				return res.status(200).json(userJSON(user));
+			});
+		});
+		
+		function isAdmin(username) {
+			return (options.configParams["orion.auth.user.creation"]	 || "").split(",").some(function(user) {
+				return user === username;
+			});
+		}
+		
+		app.put("/users/:id", function(req,res){
+			//TODO check access
+			orionAccount.findByUsername(req.params.id, function(err, user) {
+				if (err) return res.status(404).end();
+				if (!user) {
+					res.writeHead(400, "User not fount: " + req.params.id);
+					return res.end();
+				}
+				var hasNewPassword = typeof req.body.Password !== "undefined";
+				// users other than admin have to know the old password to set a new one
+				if (!isAdmin(req.params.id)) {
+//					if (hasNewPassword) {}
+				}
+				if (typeof req.body.UserName !== "undefined") user.username = req.body.UserName;
+				if (typeof req.body.FullName !== "undefined") user.fullname = req.body.FullName;
+				if (typeof req.body.Email !== "undefined") user.email = req.body.Email;
+				if (typeof req.body.OAuth !== "undefined") user.oauth = req.body.OAuth;
+				function save(err) {
+					if (err) res.writeHead(400, "Failed to update: " + req.params.id);
+					return res.status(200).end();
+				}
+				if (hasNewPassword) {
+					user.setPassword(req.body.Password, function(err, user) {
+						if (err) res.writeHead(400, "Failed to update: " + req.params.id);
+						user.save(save);
+					});
+				} else {
+					user.save(save);
+				}
+			});
+		});
+		
+		app.delete("/users/:id", function(req,res){
+			//TODO check access
+			orionAccount.remove({username: req.params.id}, function(err) {
+				if (err) return res.status(400).end();
+				return res.status(200).end();
+			});
 		});
 
 		app.post('/users', function(req, res){
@@ -367,10 +418,8 @@ module.exports = function(opt) {
 						sendMail({user: user, options: options, template: PWD_CONFIRM_RESET_MAIL, auth: RESET_PWD_AUTH, req: req});
 						return res.status(200).json({"Severity":"Info","Message":"Confirmation email has been sent.","HttpCode":200,"BundleId":"org.eclipse.orion.server.core","Code":0});
 					});
-					
 				});
 			};
-
 			if (req.body.UserName) {
 				orionAccount.findByUsername(req.body.UserName, resetPwd);
 			} else if (req.body.Email) {
@@ -388,8 +437,7 @@ module.exports = function(opt) {
 		if (!req.user) {
 			return res.status(200).end();
 		}
-		return res.status(200).json(userJSON(req.user)
-		);
+		return res.status(200).json(userJSON(req.user));
 	});
 
 	app.post('/login/canaddusers', function(req, res) {
