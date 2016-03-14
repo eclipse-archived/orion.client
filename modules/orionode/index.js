@@ -20,6 +20,7 @@ var express = require('express'),
 	orionTasks = require('./lib/tasks'),
 	orionSearch = require('./lib/search'),
 	orionMetrics = require('./lib/metrics'),
+	orionSites = require('./lib/sites'),
 	orionUser = require('./lib/user'),
 	term = require('term.js');
 
@@ -38,14 +39,7 @@ function startServer(options) {
 	try {
 		var app = express();
 
-		app.use(orionUser(options));
-
-		app.use(term.middleware());
-		app.use(orionNodeStatic(path.normalize(path.join(LIBS, 'orionode.client/'))));
-		app.use(orionStatic({
-			orionClientRoot: ORION_CLIENT,
-			maxAge: options.maxAge
-		}));
+		options.app = app;
 
 		function checkAuthenticated(req, res, next) {
 			if (!req.user) {
@@ -56,6 +50,16 @@ function startServer(options) {
 				next();
 			}
 		}
+
+		app.use(orionUser(options));
+		app.use('/site', checkAuthenticated, orionSites(options));
+
+		app.use(term.middleware());
+		app.use(orionNodeStatic(path.normalize(path.join(LIBS, 'orionode.client/'))));
+		app.use(orionStatic({
+			orionClientRoot: ORION_CLIENT,
+			maxAge: options.maxAge
+		}));
 		
 		// API handlers
 		app.use('/task', checkAuthenticated, orionTasks.orionTasksAPI({
@@ -78,9 +82,7 @@ function startServer(options) {
 		}));
 		app.use('/prefs', checkAuthenticated, orionPrefs({
 		}));
-		app.use('/metrics', orionMetrics.router({
-			configParams: options
-		}));
+		app.use('/metrics', orionMetrics.router(options));
 
 		//error handling
 		app.use(function(req, res){
