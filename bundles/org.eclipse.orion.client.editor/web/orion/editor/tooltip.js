@@ -676,20 +676,35 @@ function Tooltip (view, editor) {
 			var curLine = tv.getLineAtOffset(start);
 			var endLine = tv.getLineAtOffset(end);
 			
-			// Adjust start / end to be on the current line if necessary
+			var height, viewRect;
+			
 			if (curLine !== endLine) {
-				// 'getLineEnd' isn't API in textView but is in textModel...
-				end = tv.getModel().getLineEnd(curLine);
+				var y = tv.getLocationAtOffset(start).y;
+				height = 0;
+				var maxX = 0;
+				while (curLine <= endLine){
+					height += tv.getLineHeight(curLine);
+					var lineEnd = tv.getModel().getLineEnd(curLine);
+					var possibleEnd = tv.getLocationAtOffset(lineEnd).x;
+					if (possibleEnd > end){
+						maxX = possibleEnd;
+					}
+					curLine++;
+				}
+				var lineStart = tv.getModel().getLineStart(endLine);
+				var x = tv.getLocationAtOffset(lineStart).x;
+				
+				viewRect = { x: x, y: y, width: maxX - x, height: height};
+				
+			} else {
+				var startPos = tv.getLocationAtOffset(start);
+				var endPos = tv.getLocationAtOffset(end);
+				height = tv.getLineHeight(curLine);
+				viewRect = { x: startPos.x, y: startPos.y, 
+							width: endPos.x - startPos.x, height: height};
 			}
-			
-			var height = tv.getLineHeight(curLine);
-			var startPos = tv.getLocationAtOffset(start);
-			var endPos = tv.getLocationAtOffset(end);
-			
-			var viewRect = { x: startPos.x, y: startPos.y, 
-								width: endPos.x - startPos.x, height: height};
 								
-			viewRect = this._view.convert(viewRect, "document", "page"); //$NON-NLS-0$ //$NON-NLS-1$
+			viewRect = this._view.convert(viewRect, "document", "page"); //$NON-NLS-1$ //$NON-NLS-2$
 			return {left: viewRect.x, top: viewRect.y, width: viewRect.width, height: viewRect.height};
 		},
 		/*
