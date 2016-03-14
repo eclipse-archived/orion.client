@@ -30,7 +30,8 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 			xhr("PUT", jsonData.Location, { //$NON-NLS-0$
 				data: JSON.stringify(jsonData),
 				headers: {
-					"Orion-Version": "1"
+					"Orion-Version": "1",
+					"Content-Type": "application/json;charset=utf-8"
 				},
 				timeout: 15000
 			}).then(function(xhrResult) {
@@ -154,7 +155,8 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 		xhr("PUT", jsonData.Location, { //$NON-NLS-0$
 			data: JSON.stringify(jsonData),
 			headers: {
-				"Orion-Version": "1"
+				"Orion-Version": "1",
+				"Content-Type": "application/json;charset=utf-8"
 			},
 			timeout: 15000
 		}).then(function(xhrResult) {

@@ -195,7 +195,6 @@ module.exports = function(options) {
 					registerUrl += "&identifier=" + user.id;
 					return res.redirect(registerUrl);
 				} else if (user.__linkUser) {
-					res.setContentType("text/html; charset=UTF-8");
 					return res.status(200).send("<html><head></head><body onload=\"window.opener.handleOAuthResponse('" + user.id + "');window.close();\"></body></html>");
 				}
 			}
