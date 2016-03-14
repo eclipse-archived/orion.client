@@ -61,12 +61,12 @@ define([
 			/**
 			 * @name addEventListener
 			 * 
-			 * @description  This is an override of the normal addEventListener to allow it to
+			 * @description This is an override of the normal addEventListener to allow it to
 			 * keep listeners synch'd with the current binding overrides whether or not they get added before or
 			 * after the actual binding overrides have been retrieved from the preference store.
 			 * 
 			 * Once the overrides preference is loaded any currently registered listeners are informed of the current
-			 * binding overrides. Subsequent listeners are also imformed when they get added.
+			 * binding overrides. Subsequent listeners are also informed when they get added.
 			 * @param eventType The type of event being listened on.
 			 * @param listener The listener to call when the event is dispatched.
 			 */
@@ -509,7 +509,7 @@ define([
 		 * @param id The id of the Command or Text Action being overridden
 		 * @param newBinding The new binding to use
 		 * @param prevBinding The binding (if any) being overridden. Note that this is needed to ensure that
-		 * we override the correct Text Action (which can havemultiple bindings for the same id).
+		 * we override the correct Text Action (which can have multiple bindings for the same id).
 		 */
 		createBindingOverride: function(id, newBinding, prevBinding) {
 			if (!this._bindingOverrides) {
@@ -532,12 +532,12 @@ define([
 
 		/**
 		 * @name _registerRenderedCommand
-		 * @description Keeps a record of the 'invocation' object for a renderred command. The invocation contains
+		 * @description Keeps a record of the 'invocation' object for a rendered command. The invocation contains
 		 * a lot of information about the rendered item (including the DOM element created to show it). This is currently
 		 * used to update the menu item's key binding info if its binding changes.
 		 * 
 		 * @param actionID The actionID of the menu item
-		 * @param scopeID The scopeID of this particular invocation (two different menus can be created using teh same commands)
+		 * @param scopeID The scopeID of this particular invocation (two different menus can be created using the same commands)
 		 * @param invocation The invocation record to store
 		 */
 		_registerRenderedCommand: function(actionID, scopeID, invocation) {
@@ -643,8 +643,8 @@ define([
 		 * the <code>title</code> will be used as the tooltip.
 		 * @param {String} [selectionClass] CSS class to be appended when the command button is selected. Optional.
 		 * @param {String} or {boolean} [defaultActionId] Id of an action from this group that should be invoked when the group is selected. This will add an
-		 * arrow to the grup that will open the dropdown. Optionally this can be set to <code>true</code> instead of adding a particular action.
-		 * If set to <code>true</code> the group will be renderer as if there was a default action, but instead of invoking the default action it will
+		 * arrow to the group that will open the dropdown. Optionally this can be set to <code>true</code> instead of adding a particular action.
+		 * If set to <code>true</code> the group will be rendered as if there was a default action, but instead of invoking the default action it will
 		 * open the dropdown. Optional.
 		 * @param {String} [extraClasses] A string containing space separated css classes that will be applied to group button
 		 */	
@@ -750,7 +750,7 @@ define([
 					this._updateBindingOverrides();
 				}.bind(this));
 	
-				// listen for changes form other pages
+				// listen for changes from other pages
 				this._prefService.addEventListener("changed", function (e) {
 					if (e.namespace === "/KeyBindings") { //$NON-NLS-1$
 						// Refresh the binding overrides
@@ -1399,7 +1399,7 @@ define([
 	 * @param {String} name the name of the event
 	 * @param {Function} handler the event handler function. The handler is provided two parameters on invocation, i. e.
 	 * 			the DOM event and the undergoing commandInvocation objects.
-	 * @param {Boolean} [capture] the (optional) flag used to determine whether to caputre the event or not
+	 * @param {Boolean} [capture] the (optional) flag used to determine whether to capture the event or not
 	 */
 	function CommandEventListener (event, handler, capture) {
 		this.event = event;
@@ -1450,7 +1450,7 @@ define([
 	 * A ParametersDescription defines the parameters required by a command, and whether there are additional
 	 * optional parameters that can be specified.  The command registry will attempt to collect required parameters
 	 * before calling a command callback.  The command is expected to provide UI for optional parameter, when the user has
-	 * signalled a desire to provide optional information.
+	 * signaled a desire to provide optional information.
 	 *
 	 * @param {orion.commands.CommandParameter[]} parameters an array of CommandParameters that are required
 	 * @param {Object} options The parameters description options object.
