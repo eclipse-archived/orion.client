@@ -1229,7 +1229,7 @@ define([
             	                	try {
             	                		expr = tern.findExpr(tern.file, query);
             	                		type = tern.findExprType(tern.server, query, tern.file, expr);
-										if (type && type.types){
+										if (type && type.types && type.types.length > 0){
             	                			// If the type has no known properties assume Tern doens't know enough about it to find the declaration
             	                			foundType = true;
             	                			for (var i=0; i<type.types.length; i++) {
