@@ -92,23 +92,24 @@ function sendMail(opt){
 			}
 		};
 
-		var transport = nodemailer.createTransport(smtpConfig);
-
-		var mailOptions = {
-			from: opt.options.configParams["mail.from"],
-			to: opt.user.email,
-			subject: subject,
-			text: body, 
-			//html: '<b>Orion</b>' // html body 
-		};
-		 
-		console.log(body);
-		// transport.sendMail(mailOptions, function(error, info){
-		//	 if(error){
-		//		// return console.log(error);
-		//	 }
-		//	 //console.log('Message sent: ' + info.response);
-		// });
+		if (opt.options.configParams["mail.from"]) {
+			var transport = nodemailer.createTransport(smtpConfig);
+			var mailOptions = {
+				from: opt.options.configParams["mail.from"],
+				to: opt.user.email,
+				subject: subject,
+				text: body, 
+			};
+			transport.sendMail(mailOptions, function(error, info){
+				if (error){
+					return console.log(error + " " + info);
+				}
+				//console.log('Message sent: ' + info.response);
+			});
+		} else {
+			// dev
+			console.log(body);
+		}
 	});
 }
 
