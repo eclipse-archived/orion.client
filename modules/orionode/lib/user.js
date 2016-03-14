@@ -131,6 +131,15 @@ module.exports = function(options) {
 	var singleUser = options.configParams["orion.single.user"];
 	var app = express.Router();
 
+	function canAddUsers() {
+		return !options.configParams["orion.auth.user.creation"];
+	}
+	function isAdmin(username) {
+		return (options.configParams["orion.auth.user.creation"]	 || "").split(",").some(function(user) {
+			return user === username;
+		});
+	}
+
 	if (!singleUser) {
 		app.use(bodyParser.json());
 		app.use(bodyParser.urlencoded({ extended: false }));
@@ -171,9 +180,6 @@ module.exports = function(options) {
 				});
 			});
 		}
-		function canAddUsers() {
-			return !options.configParams["orion.auth.user.creation"];
-		}
 		function createNewUser(req, res, err, user, info) {
 			if (user) {
 				if (user.__newUser) {
@@ -196,7 +202,7 @@ module.exports = function(options) {
 				if (err) { return err; }
 				return res.redirect('/');
 			});
-		};
+		}
 
 		passport.use(new GoogleStrategy({
 			clientID: options.configParams["orion.oauth.google.client"],
@@ -254,8 +260,14 @@ module.exports = function(options) {
 			})(req, res, next);
 		});
 
-		app.get("/users", function(req,res){
-			//TODO check access
+		function checkUserAccess(req, res, next) {
+			if (req.user === null || !(req.params.id === req.user.username || isAdmin(req.user.username))) {
+				return res.status(403).end();
+			}
+			next();
+		}
+
+		app.get("/users", checkUserAccess, function(req,res){
 			orionAccount.find({}, function(err, users) {
 				if (err) {
 					return res.status(404).end();
@@ -276,8 +288,7 @@ module.exports = function(options) {
 			});
 		});
 
-		app.get("/users/:id", function(req,res){
-			//TODO check access
+		app.get("/users/:id", checkUserAccess, function(req,res){
 			orionAccount.findByUsername(req.params.id, function(err, user) {
 				if (err) return res.status(404).end();
 				if (!user) {
@@ -288,14 +299,7 @@ module.exports = function(options) {
 			});
 		});
 		
-		function isAdmin(username) {
-			return (options.configParams["orion.auth.user.creation"]	 || "").split(",").some(function(user) {
-				return user === username;
-			});
-		}
-		
-		app.put("/users/:id", function(req,res){
-			//TODO check access
+		app.put("/users/:id", checkUserAccess, function(req,res){
 			orionAccount.findByUsername(req.params.id, function(err, user) {
 				if (err) return res.status(404).end();
 				if (!user) {
@@ -326,16 +330,14 @@ module.exports = function(options) {
 			});
 		});
 		
-		app.delete("/users/:id", function(req,res){
-			//TODO check access
+		app.delete("/users/:id", checkUserAccess, function(req,res){
 			orionAccount.remove({username: req.params.id}, function(err) {
 				if (err) return res.status(400).end();
 				return res.status(200).end();
 			});
 		});
 		
-		app.post("/users/:id", function(req,res){
-			//TODO check access
+		app.post("/users/:id", checkUserAccess, function(req,res){
 			orionAccount.findByUsername(req.params.id, function(err, user) {
 				if (err) return res.status(404).end();
 				if (!user) {
@@ -353,6 +355,7 @@ module.exports = function(options) {
 		});
 
 		app.post('/users', function(req, res){
+			// If there are admin accounts, only admin accounts can create users
 			if (options.configParams["orion.auth.user.creation"] && !isAdmin(req.user && req.user.username)) {
 				return res.status(403).end();
 			}
@@ -421,12 +424,11 @@ module.exports = function(options) {
 			});
 		});
 
-		app.post("/useremailconfirmation/cansendemails", function(req,res){
+		app.post("/useremailconfirmation/cansendemails", /* @callback */ function(req, res){
 			res.status(200).json({EmailConfigured: !!options.configParams["mail.smtp.host"]});
 		});
 
-		//password reset verify
-		app.post('/useremailconfirmation', function(req,res){
+		app.post('/useremailconfirmation', function(req, res){
 			var resetPwd = function(err, user) {
 				if (err || !user) {
 					res.writeHead(404, "User " +  (req.body.UserName || req.body.Email) + " not found");
