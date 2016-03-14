@@ -46,9 +46,7 @@ var orionAccountSchema = new mongoose.Schema({
 		type: String
 	},
 	oauth: {
-		type: String,
-		required: false,
-		unique: true
+		type: String
 	},
 	workspace: {
 		type: String
@@ -347,6 +345,9 @@ module.exports = function(options) {
 		});
 
 		app.post('/users', function(req, res){
+			if (options.configParams["orion.auth.user.creation"] && !isAdmin(req.user && req.user.username)) {
+				return res.status(403).end();
+			}
 			orionAccount.register(new orionAccount({username: req.body.UserName, email: req.body.Email, oauth: req.body.identifier}), req.body.Password ,function(err, user){
 				if (err) {
 					return res.status(404).json({Message: err.message});
@@ -456,7 +457,7 @@ module.exports = function(options) {
 
 	app.post('/login/canaddusers', /* @callback */ function(req, res) {
 		return res.status(200).json({
-			CanAddUsers: options.configParams["orion.auth.user.creation"], 
+			CanAddUsers: !options.configParams["orion.auth.user.creation"], 
 			ForceEmail: options.configParams["orion.auth.user.creation.force.email"], 
 			RegistrationURI:options.configParams["orion.auth.registration.uri"] || undefined});
 	});
