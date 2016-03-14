@@ -12,6 +12,8 @@
 var auth = require('./lib/middleware/auth'),
 	express = require('express'),
 	http = require('http'),
+	https = require('https'),
+	fs = require('fs'),
 	compression = require('compression'),
     path = require('path'),
     socketio = require('socket.io'),
@@ -66,7 +68,16 @@ argslib.readConfigFile(configFile, function(err, configParams) {
 				
 				// add socketIO and app support
 				var app = express();
-				server = http.createServer(app);
+				if (configParams["orion.https.key"] && configParams["orion.https.cert"]) {
+					server = https.createServer({
+						key: fs.readFileSync(configParams["orion.https.key"]),
+						cert: fs.readFileSync(configParams["orion.https.cert"])
+					}, app);
+				}
+				else {
+					server = http.createServer(app);
+				}
+
 				if (log) {
 					app.use(express.logger('tiny'));
 				}
