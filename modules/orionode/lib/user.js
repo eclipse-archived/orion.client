@@ -354,6 +354,21 @@ module.exports = function(options) {
 				});
 			});
 		});
+		
+		function createUserDir(user, callback) {
+			var workspacePath = [options.workspaceDir, user.username.substring(0,2), user.username, "OrionContent"];
+			var localPath = workspacePath.slice(1).join("/");
+			args.createDirs(workspacePath, function(err) {
+				if (err) {
+					//do something
+				}
+				user.workspace = localPath;
+				user.save(function(err) {
+					if (err) throw err;
+					callback(null, localPath);
+				});
+			});
+		}
 
 		app.post('/users', function(req, res){
 			// If there are admin accounts, only admin accounts can create users
@@ -368,10 +383,10 @@ module.exports = function(options) {
 					sendMail({user: user, options: options, template: CONFIRM_MAIL, auth: CONFIRM_MAIL_AUTH, req: req});
 				} else {
 					user.isAuthenticated = true;
-					//remove auth token?
-					user.save(function(err) {
-						if (err) throw err;
-						console.log('Updated');
+					createUserDir(user, function(err) {
+						if (err) {
+							//log
+						}
 					});
 				}
 				return res.status(201).json({error: "Created"});
@@ -385,18 +400,12 @@ module.exports = function(options) {
 				if (err) {
 					//log
 				}
-				var workspacePath = [options.workspaceDir, user.username.substring(0,2), user.username, "OrionContent"];
-				var localPath = workspacePath.slice(1).join("/");
-				args.createDirs(workspacePath, function(err) {
+				createUserDir(user, function(err) {
 					if (err) {
-						//do something
+						//log
 					}
-					user.workspace = localPath;
-					user.save(function(err) {
-						if (err) throw err;
-					});
 					return res.status(200).send("<html><body><p>Your email address has been confirmed. Thank you! <a href=\"" + ( req.protocol + '://' + req.get('host'))
-			+ "\">Click here</a> to continue and login to your account.</p></body></html>");
+					+ "\">Click here</a> to continue and login to your account.</p></body></html>");
 				});
 			});
 		});
