@@ -93,7 +93,8 @@ function siteJSON(site, req) {
 function loadSites(req, callback) {
 	fs.readFile(api.join(req.user.workspaceDir, SITES), 'utf8', function (err,data) {
 		if (err) {
-			return callback(err);
+			// assume that the file does not exits
+			return callback(null, {});
 		}
 		var sites = {};
 		try {
