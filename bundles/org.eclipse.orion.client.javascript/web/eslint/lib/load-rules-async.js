@@ -1238,15 +1238,21 @@ define([
             	                					foundType = false;
             	                					break;
             	                				}
+            	                				if (type.types[i].proto){
+            	                					currentProps = type.types[i].proto.props;
+            	                					if (currentProps && Object.keys(currentProps).length > 0){
+	            	                					foundType = false;
+	            	                					break;            	                						
+        	                						}
+    	                						}
             	                			}
+            	                			if (!foundType){
+												context.report(node.property, ProblemMessages['no-undef-defined'], {0:node.property.name, nls: 'no-undef-defined'}); //$NON-NLS-1$
+											}
             	                		}
             	                	} catch (e) {
             	                		//ignore
             	                	}
-            	                	if (!foundType){
-										context.report(node.property, ProblemMessages['no-undef-defined'], {0:node.property.name, nls: 'no-undef-defined'}); //$NON-NLS-1$
-									}
-
 								}
                     		}
                     	}

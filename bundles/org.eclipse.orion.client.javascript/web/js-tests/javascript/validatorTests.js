@@ -7750,6 +7750,36 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
+						it("Single file no declared members", function(callback) {
+							var topic = "var undefExpr = {}; undefExpr.b();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'b' is undefined.",
+										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("Single file object not defined", function(callback) {
+							var topic = "undefExpr.b();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
                         it("Single file declared member", function(callback) {
 							var topic = "var undefExpr = {a: function(){}}; undefExpr.a();";
 							var config = { rules: {} };
@@ -7800,7 +7830,7 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
-						it.skip("Single file wrong  undeclared members", function(callback) {
+						it.skip("Single file wrong undeclared members", function(callback) {
 							var topic = "var undefExpr = {a: function(){}}; undefExpr.b(); undefExpr.c()";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
@@ -7841,6 +7871,24 @@ define([
 										id: RULE_ID,
 										severity: 'warning',
 										description: "'b' is undefined.",
+										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("Single file browser environment member expression", function(callback) {
+							var topic = "/*eslint-env browser */\ndocument.getElementById('bar');\n document.getZZZ();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'getZZZ' is undefined.",
 										nodeType: "Identifier"
 									}]);
 								},
@@ -7925,6 +7973,25 @@ define([
                         it("Multi file 3 - undeclared member no properties", function(callback) {
 							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest3.js", source: "var noUndefExpr3 = {};"}}); 
 							var topic = "noUndefExpr3.a();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'a' is undefined.",
+										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								}
+							);
+						});
+						 it("Multi file 4 - no object declared", function(callback) {
+							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest4.js", source: "var noUndefExprZZZ4 = {};"}}); 
+							var topic = "noUndefExpr4.a();";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
 							validate({buffer: topic, callback: callback, config: config}).then(
