@@ -261,7 +261,7 @@ module.exports = function(options) {
 		});
 
 		function checkUserAccess(req, res, next) {
-			if (req.user === null || !(req.params.id === req.user.username || isAdmin(req.user.username))) {
+			if (!req.user || !(req.params.id === req.user.username || isAdmin(req.user.username))) {
 				return res.status(403).end();
 			}
 			next();
