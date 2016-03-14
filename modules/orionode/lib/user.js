@@ -171,9 +171,17 @@ module.exports = function(options) {
 				});
 			});
 		}
-		var createNewUser = function(req, res, err, user, info) {
+		function canAddUsers() {
+			return !options.configParams["orion.auth.user.creation"];
+		}
+		function createNewUser(req, res, err, user, info) {
 			if (user) {
 				if (user.__newUser) {
+					if (!canAddUsers()) {
+						var errorUrl = "/mixloginstatic/LoginWindow.html?error=" +
+							new Buffer("There is no Orion account associated with this Id. Please register or contact your system administrator for assistance.").toString('base64');
+						return res.redirect(errorUrl);
+					}
 					var registerUrl = "/mixloginstatic/LoginWindow.html";
 					registerUrl += "?oauth=create&email=" + user.email;
 					registerUrl += "&username=" + user.username;
@@ -457,8 +465,8 @@ module.exports = function(options) {
 
 	app.post('/login/canaddusers', /* @callback */ function(req, res) {
 		return res.status(200).json({
-			CanAddUsers: !options.configParams["orion.auth.user.creation"], 
-			ForceEmail: options.configParams["orion.auth.user.creation.force.email"], 
+			CanAddUsers: canAddUsers(), 
+			ForceEmail: !!options.configParams["orion.auth.user.creation.force.email"], 
 			RegistrationURI:options.configParams["orion.auth.registration.uri"] || undefined});
 	});
 	
