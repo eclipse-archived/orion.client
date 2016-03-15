@@ -35,12 +35,37 @@ You can use git command line, find the github page for your source and clone the
 From the node_modules folder where you installed Tern, run the tern condense utility with appropriate arguments.  You will have to adjust the file list to
 where you downloaded the source.  Because Win cmd can't handle wildcard file lists, you will need Cygwin or Git Bash to execute successfully on Windows.	
 
+If you are doing this in Windows using the Git Bash shell you may encounter an error: ``output is not a tty''.  This is because the node program is outputting to the console
+which is not the format Cygwin and Git Bash expect. The easiest workaround is to modify the condense application.  Add ''var fs = require('fs');'' to the file and at the
+end replace the call to console.log with ''fs.writeFile("output.json",''.
+
+### Manually fix indexes
+
+#### Express
+
+When the express index was run it did not include the !node entry for the top level express type resulting in no assist proposals for the created app object ''var app = express()''.
+Also, the static function was missing due to it being a re-export from another module.  We added the following to the index (under !define):
+
+	"!node": {
+	      "express": {
+	      	  "static" : {
+		    		"!type": "fn(name: string)",
+		    		"!doc": "Built-in middleware function.  Pass the name of the directory that contains the static assets."
+		    	},
+	          "!type": "fn() -> app",
+	          "!url": "http://expressjs.com",
+	          "!doc": "Express is a minimal and flexible Node.js web application framework that provides a robust set of features for web and mobile applications."
+          }
+      },
+     
+You must also remove the type information for toString() and hasOwnProperty() as these override the functions with the same name in the Object prototype.
+
 ### Indexes we provide
 
 	'tern/plugin/orionAMQP',
 	'tern/plugin/orionAngular',
 	'tern/plugin/orionComponent',
-	'tern/plugin/orionExpress',	
+	'tern/plugin/orionExpress',	(March 2016)
 	'tern/plugin/orionMongoDB',
 	'tern/plugin/orionMySQL',	
 	'tern/plugin/orionNode',
