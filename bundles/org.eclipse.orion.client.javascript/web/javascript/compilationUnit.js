@@ -28,6 +28,10 @@ define([
     function CompilationUnit(sourceblocks, metadata, editorContext) {
         this._blocks = sourceblocks;
         this._metadata = metadata;
+        if (metadata){
+        	// The context returned by getEditorContext only contains javascript text so set the content type to match
+        	this._metadata.contentType = {id: 'application/javascript'}; //$NON-NLS-1$
+        }
         this._ec = editorContext;
         this._deps = [];
     }
@@ -136,6 +140,7 @@ define([
 	        	proxy.getSelections = that._ec.getSelections;
 	        	proxy.setSelection = that._ec.setSelection;
 	        	proxy.syntaxCheck = that._ec.syntaxCheck;
+	        	proxy.setCaretOffset = that._ec.setCaretOffset;
 	    	}
         return proxy;
     };

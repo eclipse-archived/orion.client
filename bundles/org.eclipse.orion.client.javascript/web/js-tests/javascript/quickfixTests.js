@@ -464,6 +464,27 @@ define([
 					callback: done
 				});
 			});
+			it("function declaration params inside HTML", function(done) {
+				var rule = createTestRule("missing-doc");
+				var expected = {
+					value: "/**\n"+
+							" * @name a\n"+
+							" * @description description\n"+
+							" * @param arg1\n"+
+							" * @param arg2\n"+
+							" * @returns returns\n"+
+							" */\n",
+					start: 15,
+					end: 15
+				};
+				return getFixes({
+					buffer: "<html><script>\nfunction a(arg1, arg2) {}\n</script></html>",
+					rule: rule,
+					expected: expected,
+					callback: done,
+					contentType: 'text/html'
+				});
+			});
 		});
 		//CURLY
 		describe("curly", function() {
