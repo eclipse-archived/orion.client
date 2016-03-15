@@ -100,11 +100,11 @@ define([
 		var ternReady = false,
 			workerReady = false,
 			startCount = 0,
-			TRACE = localStorage.js_message_trace === "true",
+			TRACE,
 			pendingStart = Object.create(null),
 			messageQueue = [], // for all other requests
 			modifyQueue = []; // for add and removes only
-			
+		
 		/**
 		 * @description Make a new worker
 		 */
@@ -708,6 +708,7 @@ define([
     			{
     				name: javascriptMessages["removeUnusedParamsFixName"],
     				scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+    				fixAllEnabled: true,
     				id : "remove.unused.param.fix",  //$NON-NLS-1$
     				contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
     				validationProperties: [
@@ -1593,6 +1594,13 @@ define([
 	    	var fc = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
 	    	fc.addEventListener("FileContentChanged", astManager.onFileChanged.bind(astManager));
 	    	fc.addEventListener("FileContentChanged", CUProvider.onFileChanged.bind(CUProvider));
+	    	/*
+	    	var prefs = serviceRegistry.getService("orion.core.preference"); //$NON-NLS-1$ //$NON-NLS-1$
+			if(prefs) {
+  				prefs.get("/js", null, {scope: 2}).then(function(prefs) { //$NON-NLS-1$
+  					TRACE = prefs.message_trace === "true";
+  				});
+    		}*/	
     	});
 });
 

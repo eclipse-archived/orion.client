@@ -3366,6 +3366,54 @@ define([
 								callback: callback,
 								  contentType: 'text/html'});
 			});
+
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=488790
+			 */
+			 it("Test no-unused-params-update-doc-1", function(callback){
+			 	var rule = createTestRule('no-unused-params');
+			 	var expected = [{value: '',
+								start: 18, 
+								end: 72},
+								{value:'',
+								start: 94,
+								end:98 }];
+			 	return getFixes({buffer: 'var temp = {\n\t/**\n\t * @param {String} file The file name that we parsed\n\t */\n\tparse: function(file) {\n\t\treturn null;\n\t}\n}',
+			 					rule: rule,
+			 					expected: expected,
+			 					callback: callback,
+			 					fixid: "no-unused-params"});
+			 });
+
+			 it("Test no-unused-params-update-doc-2", function(callback){
+			 	var rule = createTestRule('no-unused-params');
+			 	var expected = [{value: '',
+								start: 12, 
+								end: 66},
+								{value:'',
+								start: 132,
+								end:138 }];
+			 	return getFixes({buffer: 'test({\n\t/**\n\t * @param {String} file The file name that we parsed\n\t * @param {String} text The text to return\n\t */\n\tparse: function(file, text) {\n\t\treturn text;\n\t}\n});',
+			 					rule: rule,
+			 					expected: expected,
+			 					callback: callback,
+			 					fixid: "no-unused-params"});
+			 });
+
+			 it("Test no-unused-params-update-doc-3", function(callback){
+			 	var rule = createTestRule('no-unused-params');
+			 	var expected = [{value: '',
+								start: 57, 
+								end: 100},
+								{value:'',
+								start: 123,
+								end:129 }];
+			 	return getFixes({buffer: '/**\n * @param {String} file The file name that we parsed\n * @param {String} text The text to return\n */\nfunction parse(file, text) {\n\treturn file;\n}',
+			 					rule: rule,
+			 					expected: expected,
+			 					callback: callback,
+			 					fixid: "no-unused-params"});
+			 });
 		});
 		//EQEQEQ
 		describe('eqeqeq', function(){

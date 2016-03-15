@@ -18,7 +18,7 @@ define([
 'javascript/compilationUnit',
 'orion/metrics'
 ], function(Objects, Deferred, TextModel, Finder, CU, Metrics) {
-
+/* eslint-disable missing-doc */
 	/**
 	 * @description Creates a new JavaScript quick fix computer
 	 * @param {javascript.ASTManager} astManager The AST manager
@@ -168,35 +168,42 @@ define([
         return -1;
 	}
 	
-	function removeIndexedItem(list, index, editorContext) {
+	/**
+	 * @description Remove the item from the list and return it as a change object
+	 * @param {Array.<Object>} list The list of items to remove from
+	 * @param {Number} index The index to remove
+	 * @returns {Object} A change object containg the properties text, start and end
+	 * @since 12.0  
+	 */
+    function removeIndexedItemChange(list, index) {
         if(index < 0 || index > list.length) {
-            return;
+	            return;
         }
         var node = list[index];
         if(list.length === 1) {
-            return editorContext.setText('', node.range[0], node.range[1]);
+            return { "start" : node.range[0], "end" : node.range[1], "text" : "" };
         } else if(index === list.length-1) {
-            return editorContext.setText('', list[index-1].range[1], node.range[1]);
+            return { "start" : list[index-1].range[1], "end" : node.range[1], "text" : ""};
         } else if(node) {
-            return editorContext.setText('', node.range[0], list[index+1].range[0]);
+            return { "start" : node.range[0], "end" : list[index+1].range[0], "text" : ""};
         }
         return null;
     }
     
-    function updateDoc(node, source, editorContext, name) {
+    function updateDoc(node, source, name) {
         if(node.leadingComments && node.leadingComments.length > 0) {
             for(var i = node.leadingComments.length-1; i > -1; i--) {
                 var comment = node.leadingComments[i];
                 var edit = new RegExp("(\\s*[*]+\\s*(?:@param)\\s*(?:\\{.*\\})?\\s*(?:"+name+")+.*)").exec(comment.value); //$NON-NLS-1$ //$NON-NLS-2$
                 if(edit) {
                     var start = comment.range[0] + edit.index + getDocOffset(source, comment.range[0]);
-                    return editorContext.setText('', start, start+edit[1].length);
+                    return {"start" : start, "end" :start+edit[1].length, "text" : ''};
                 }
             }
         }
         return null;
     }
-	
+
 	function hasDocTag(tags, node) {
 		// tags contains all tags that have to be checked
 	    if(node.leadingComments) {
@@ -739,7 +746,7 @@ define([
 											&& (previousToken.type === "Identifier" || previousToken.type === "Keyword")) {
 										// now we should also check if there is a space between the '(' and the next token
 										if (token.range[0] === openBracket.range[1]) {
-											replacementText = " ";
+											replacementText = " "; //$NON-NLS-1$
 										}
 									}
 								}
@@ -975,56 +982,58 @@ define([
 	         */
 	        "no-unused-params": function(editorContext, context, astManager) {
 	            return astManager.getAST(editorContext).then(function(ast) {
-	                var node = Finder.findNode(context.annotation.start, ast, {parents:true});
-	                if(node) {
-	                    var promises = [];
-	                    var parent = node.parents.pop();
-	                    var paramindex = -1;
-	                    for(var i = 0; i < parent.params.length; i++) {
-	                        var p = parent.params[i];
-	                        if(node.range[0] === p.range[0] && node.range[1] === p.range[1]) {
-	                            paramindex = i;
-	                            break;
-	                        }
-	                    }
-	                    var promise = removeIndexedItem(parent.params, paramindex, editorContext);
-	                    if(promise) {
-	                        promises.push(promise);
-	                    }
-	                    switch(parent.type) {
-	                        case 'FunctionExpression': {
-	                            var funcparent = node.parents.pop();
-	                            if(funcparent.type === 'CallExpression' && (funcparent.callee.name === 'define' || funcparent.callee.name === 'require')) {
-	                                var args = funcparent.arguments;
-	                                for(i = 0; i < args.length; i++) {
-	                                    var arg = args[i];
-	                                    if(arg.type === 'ArrayExpression') {
-	                                        promise = removeIndexedItem(arg.elements, paramindex, editorContext);
-	                                        if(promise) {
-	                                            promises.push(promise);
-	                                        }
-	                                        break;
-	                                    }
-	                                }
-	                            } else if(funcparent.type === 'Property' && funcparent.leadingComments && funcparent.leadingComments.length > 0) {
-	                                promise = updateDoc(funcparent, ast.source, editorContext, parent.params[paramindex].name);
-	                                if(promise) {
-	                                    promises.push(promise);
-	                                }
-	                            }
-	                            break;
-	                        }
-	                        case 'FunctionDeclaration': {
-	                           promise = updateDoc(parent, ast.source, editorContext, parent.params[paramindex].name);
-	                           if(promise) {
-	                               promises.push(promise);
-	                           }
-	                           break;
-	                        }
-	                    }
-	                    return Deferred.all(promises);
-	                }
-	                return null;
+	            	return applySingleFixToAll(editorContext, context.annotation, context.annotations, function(currentAnnotation){
+		                var node = Finder.findNode(currentAnnotation.start, ast, {parents:true});
+		                if(node) {
+		                    var changes = [];
+		                    var parent = node.parents.pop();
+		                    var paramindex = -1;
+		                    for(var i = 0; i < parent.params.length; i++) {
+		                        var p = parent.params[i];
+		                        if(node.range[0] === p.range[0] && node.range[1] === p.range[1]) {
+		                            paramindex = i;
+		                            break;
+		                        }
+		                    }
+		                    var change = removeIndexedItemChange(parent.params, paramindex, editorContext);
+		                    if(change) {
+		                        changes.push(change);
+		                    }
+		                    switch(parent.type) {
+		                        case 'FunctionExpression': {
+		                            var funcparent = node.parents.pop();
+		                            if(funcparent.type === 'CallExpression' && (funcparent.callee.name === 'define' || funcparent.callee.name === 'require')) {
+		                                var args = funcparent.arguments;
+		                                for(i = 0; i < args.length; i++) {
+		                                    var arg = args[i];
+		                                    if(arg.type === 'ArrayExpression') {
+		                                        change = removeIndexedItemChange(arg.elements, paramindex, editorContext);
+		                                        if(change) {
+		                                            changes.push(change);
+		                                        }
+		                                        break;
+		                                    }
+		                                }
+		                            } else if(funcparent.type === 'Property' && funcparent.key.leadingComments && funcparent.key.leadingComments.length > 0) {
+		                                change = updateDoc(funcparent.key, ast.source, parent.params[paramindex].name);
+		                                if(change) {
+		                                    changes.push(change);
+		                                }
+		                            }
+		                            break;
+		                        }
+		                        case 'FunctionDeclaration': {
+		                           change = updateDoc(parent, ast.source, parent.params[paramindex].name);
+		                           if(change) {
+		                               changes.push(change);
+		                           }
+		                           break;
+		                        }
+		                    }
+		                    return changes;
+		                }
+		                return null;
+		            });
 	            });
 	        },
 	        /**
@@ -1043,7 +1052,10 @@ define([
 	                            }
                                 var idx = indexOf(decl.declarations, declr);
                                 if(idx > -1) {
-                                    return removeIndexedItem(decl.declarations, idx, editorContext);
+                                	var change = removeIndexedItemChange(decl.declarations, idx);
+                                	if(change) {
+                                		return editorContext.setText(change.text, change.start, change.end);
+                                	}
                                 }
 	                        }
 	                    }
@@ -1067,7 +1079,10 @@ define([
 	                            }
                                 var idx = indexOf(decl.declarations, declr);
                                 if(idx > -1) {
-                                    return removeIndexedItem(decl.declarations, idx, editorContext);
+                                	var change = removeIndexedItemChange(decl.declarations, idx);
+                                	if(change) {
+                                		return editorContext.setText(change.text, change.start, change.end);
+                                	}
                                 }
 	                        }
 	                    }
@@ -1254,12 +1269,12 @@ define([
 					var currentFileName = context.input.substring(ternProjectFile.length);
 					var noTernProjectFile = !ternFileLocation;
 					if(noTernProjectFile) {
-						ternFileLocation = ternProjectFile + ".tern-project";
+						ternFileLocation = ternProjectFile + ".tern-project"; //$NON-NLS-1$
 					}
 					if (!json) {
 						json = {
 								"plugins": {},
-								"libs": ["ecma5"],
+								"libs": ["ecma5"], //$NON-NLS-1$
 								"ecmaVersion": 5,
 								"loadEagerly": []
 						};
@@ -1283,10 +1298,10 @@ define([
 						updated.push(currentFileName);
 						json.loadEagerly = updated;
 						// now we should find a way to save the updated contents
-						var contents = JSON.stringify(json, null, '\t');
+						var contents = JSON.stringify(json, null, '\t'); //$NON-NLS-1$
 						var fileClient = self.ternProjectManager.scriptResolver.getFileClient();
 						if (noTernProjectFile) {
-							return fileClient.createFile(ternProjectFile, ".tern-project").then(function(fileMetadata) {
+							return fileClient.createFile(ternProjectFile, ".tern-project").then(function(fileMetadata) { //$NON-NLS-1$
 								return fileClient.write(fileMetadata.Location, contents).then(/* @callback */ function(result) {
 									self.ternProjectManager.refresh(ternFileLocation);
 									// now we need to run the syntax checker on the current file to get rid of stale annotations
