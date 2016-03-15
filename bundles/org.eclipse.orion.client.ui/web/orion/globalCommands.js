@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * Copyright (c) 2011, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -83,15 +83,15 @@ define([
 				if (nav) {
 					new mTooltip.Tooltip({
 						node: nav,
-						text: messages["CentralNavTooltip"], //$NON-NLS-0$
+						text: messages["CentralNavTooltip"],
 						position: ["right"] //$NON-NLS-0$
 					});
-					nav.addEventListener("click", this.sideMenu.toggle.bind(this.sideMenu)); //$NON-NLS-0$
+					nav.addEventListener("click", this.sideMenu.toggle.bind(this.sideMenu));
 				}
 
 				var sideMenuToggle = lib.node("sideMenuToggle"); //$NON-NLS-0$
 				if (sideMenuToggle) {
-					sideMenuToggle.addEventListener("click", this.sideMenu.toggle.bind(this.sideMenu)); //$NON-NLS-0$
+					sideMenuToggle.addEventListener("click", this.sideMenu.toggle.bind(this.sideMenu));
 				}
 			}
 		},
@@ -143,7 +143,7 @@ define([
 					}, function (errorData, jsonData) {
 						menuGenerator.addUserItem(key, authService, label, jsonData);
 					});
-					window.addEventListener("storage", function (e) { //$NON-NLS-0$
+					window.addEventListener("storage", function (e) {
 						if (authRendered[key] === localStorage.getItem(key)) {
 							return;
 						}
@@ -219,7 +219,7 @@ define([
 			if (!command.visibleWhen || command.visibleWhen(item)) {
 				commandItem.invocation = new mCommands.CommandInvocation(item, item, null, command, commandRegistry);
 				return new Deferred().resolve(commandItem);
-			} else if (typeof alternateItem === "function") { //$NON-NLS-0$
+			} else if (typeof alternateItem === "function") {
 				if (!alternateItemDeferred) {
 					alternateItemDeferred = alternateItem();
 				}
@@ -339,11 +339,11 @@ define([
 	 */
 	function setDirtyIndicator(isDirty) {
 		if (title) {
-			if (title.charAt(0) === '*' && !isDirty) { //$NON-NLS-0$
+			if (title.charAt(0) === '*' && !isDirty) {
 				title = title.substring(1);
 			}
-			if (isDirty && title.charAt(0) !== '*') { //$NON-NLS-0$
-				title = '*' + title; //$NON-NLS-0$
+			if (isDirty && title.charAt(0) !== '*') {
+				title = '*' + title;
 			}
 			window.document.title = title;
 		}
@@ -351,9 +351,9 @@ define([
 		var dirty = lib.node("dirty"); //$NON-NLS-0$f
 		if (dirty) {
 			if (isDirty) {
-				dirty.textContent = "*"; //$NON-NLS-0$
+				dirty.textContent = "*";
 			} else {
-				dirty.textContent = ""; //$NON-NLS-0$
+				dirty.textContent = "";
 			}
 		}
 	}
@@ -420,7 +420,7 @@ define([
 		title = options.title;
 		if (!title) {
 			if (name) {
-				title = i18nUtil.formatMessage(messages["PageTitleFormat"], name, options.task); //$NON-NLS-0$
+				title = i18nUtil.formatMessage(messages["PageTitleFormat"], name, options.task);
 			} else {
 				title = options.task;
 			}
@@ -473,7 +473,7 @@ define([
 			return node;
 		}
 		var position = style.getPropertyValue("position"); //$NON-NLS-0$
-		if (position === "absolute" || !node.parentNode || node === document.body) { //$NON-NLS-0$
+		if (position === "absolute" || !node.parentNode || node === document.body) {
 			return node;
 		}
 		return boundingNode(node.parentNode);
@@ -482,7 +482,7 @@ define([
 	function getToolbarElements(toolNode) {
 		var elements = {};
 		var toolbarNode = null;
-		if (typeof toolNode === "string") { //$NON-NLS-0$
+		if (typeof toolNode === "string") {
 			toolNode = lib.node(toolNode);
 		}
 		// no reference node has been given, so use the main toolbar.
@@ -586,26 +586,26 @@ define([
 			pageLoad: function(href, page, title, args) {
 			}
 		}, {});
-		mMetrics.initFromRegistry(serviceRegistry);
+		var metrics = new mMetrics.Metrics(serviceRegistry);
 		prefsService.addChangeListener(function(name, value) {
 			if (value.length < METRICS_MAXLENGTH && name.indexOf("/git/credentials/") !== 0) { //$NON-NLS-0$
-				mMetrics.logEvent("preferenceChange", name, value); //$NON-NLS-0$
+				metrics.logEvent("preferenceChange", name, value); //$NON-NLS-0$
 			}
 		});
-		window.addEventListener("error", function(e) { //$NON-NLS-0$
-			var index = e.filename.lastIndexOf("/"); //$NON-NLS-0$
+		window.addEventListener("error", function(e) {
+			var index = e.filename.lastIndexOf("/");
 			var filename = e.filename.substring(index + 1);
 			if (filename) {
 				var errorString = e.message + " (" + filename + ": " + e.lineno + (e.colno ? ", " + e.colno : "") + ")"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				mMetrics.logEvent("runtime", "uncaughtError", errorString); //$NON-NLS-1$ //$NON-NLS-0$
+				metrics.logEvent("runtime", "uncaughtError", errorString); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
 				errorString = e.message + " (" + e.filename + ": " + e.lineno + (e.colno ? ", " + e.colno : "") + ")"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				mMetrics.logEvent("runtime", "uncaughtErrorUnknownFile", errorString); //$NON-NLS-1$ //$NON-NLS-0$
+				metrics.logEvent("runtime", "uncaughtErrorUnknownFile", errorString); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 
 			if (e.error) {
-				var stackString = e.error.stack.replace(new RegExp(window.location.origin, "g"), ""); //$NON-NLS-0$
-				mMetrics.logEvent("runtime", "uncaughtErrorStack", stackString); //$NON-NLS-1$ //$NON-NLS-0$
+				var stackString = e.error.stack.replace(new RegExp(window.location.origin, "g"), "");
+				metrics.logEvent("runtime", "uncaughtErrorStack", stackString); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		});
 
@@ -654,7 +654,7 @@ define([
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
 		commandRegistry.setParameterCollector(new mParameterCollectors.CommandParameterCollector(getToolbarElements, layoutToolbarElements));
 
-		document.addEventListener("keydown", function (e) { //$NON-NLS-0$
+		document.addEventListener("keydown", function (e) {
 			if (e.keyCode === lib.KEY.ESCAPE) {
 				var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 				if (statusService) {
@@ -850,7 +850,7 @@ define([
 		startProgressService(serviceRegistry);
 
 		// check for commands in the hash
-		window.addEventListener("hashchange", function () { //$NON-NLS-0$
+		window.addEventListener("hashchange", function () {
 			commandRegistry.processURL(window.location.href);
 		}, false);
 

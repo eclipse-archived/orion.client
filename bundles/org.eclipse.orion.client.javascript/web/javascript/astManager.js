@@ -14,9 +14,8 @@ define([
 	'orion/Deferred',
 	'orion/objects',
 	'javascript/lru',
-	'orion/metrics',
 	"javascript/util"
-], function(Deferred, Objects, LRU, Metrics, Util) {
+], function(Deferred, Objects, LRU, Util) {
 	/**
 	 * @description Object of error types
 	 * @since 5.0
@@ -31,21 +30,39 @@ define([
 		 */
 		EndOfInput: 2
 	};
-
+	
+	var registry;
+	
 	/**
 	 * Provides a shared AST.
 	 * @name javascript.ASTManager
 	 * @class Provides a shared AST.
 	 * @param {Object} esprima The esprima parser that this ASTManager will use.
+	 * @param {Object} serviceRegistry The platform service registry
 	 */
-	function ASTManager(esprima) {
+	function ASTManager(esprima, serviceRegistry) {
 		this.parser = esprima;
 		this.cache = new LRU(10);
 		if (!this.parser) {
 			throw new Error("Missing parser"); //$NON-NLS-1$
 		}
+		registry = serviceRegistry;
 	}
-
+	
+	/**
+	 * @description Delegate to log timings to the metrics service
+	 * @param {Number} end The end time
+	 * @since 12.0
+	 */
+	function logTiming(end) {
+		if(registry) {
+			var metrics = registry.getService("orion.core.metrics.client"); //$NON-NLS-1$
+			if(metrics) {
+				metrics.logTiming('language tools', 'parse', end, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+		}
+	}
+	
 	Objects.mixin(ASTManager.prototype, /** @lends javascript.ASTManager.prototype */ {
 		/**
 		 * @param {orion.editor.EditorContext} editorContext
@@ -99,7 +116,7 @@ define([
 				ast = Util.errorAST(e, file, text);
 			}
 			var end = Date.now() - start;
-			Metrics.logTiming('language tools', 'parse', end, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			logTiming(end);
 			ast.errors = Util.serializeAstErrors(ast);
 		    ast.fileLocation = file;
 			ast.source = text;

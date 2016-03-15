@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -17,9 +17,8 @@ define([
 	"javascript/finder",
 	"eslint/lib/eslint",
 	"eslint/lib/source-code",
-	"orion/metrics",
 	"javascript/astManager",
-], function(tern, Finder, Eslint, SourceCode, Metrics, ASTManager) {
+], function(tern, Finder, Eslint, SourceCode, ASTManager) {
 
 	tern.registerPlugin("eslint", /* @callback */ function(server, options) {
 		return {
@@ -130,7 +129,6 @@ define([
 		 * @callback
 		 */
 		run: function(server, query, file) {
-			var start = Date.now();
 			var config = query.config;
 			var _tern = Object.create(null);
 			// delegate tern functions
@@ -158,8 +156,6 @@ define([
 			config.tern = _tern;
 			
 			var messages = Eslint.verify(new SourceCode(file.text, file.ast), config, file.name);
-			var end = Date.now() - start;
-			Metrics.logTiming('language tools', 'validation', end, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			var strippedMessages = [];
 			messages.forEach(function(element) {
 				var strippedMessage =

@@ -60,18 +60,37 @@ define([
 		}
 	};
 
+	var registry;
+	
 	/**
 	 * @description Creates a new ESLintValidator
 	 * @constructor
 	 * @public
 	 * @param {javascript.ASTManager} astManager The AST manager backing this validator
+	 * @param {Object} ternProjectManager The backing Tern project manager instance
+	 * @param {Object} serviceRegistry The platform service registry
 	 * @returns {ESLintValidator} Returns a new validator
 	 */
-	function ESLintValidator(ternWorker, ternProjectManager) {
+	function ESLintValidator(ternWorker, ternProjectManager, serviceRegistry) {
 		this.ternWorker = ternWorker;
 		this.projectManager = ternProjectManager;
 		config.setDefaults();
+		registry = serviceRegistry
 	}
+	
+	/**
+	 * @description Log the given timing in the metrics service
+	 * @param {Number} end The total time to log
+	 * @since 12.0
+	 */
+	function logTiming(end) {
+		if(registry) {
+			var metrics = registry.getService("orion.core.metrics.client"); //$NON-NLS-1$
+			if(metrics) {
+				metrics.logTiming('language tools', 'validation', end, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+		}
+ 	}
 	
 	/**
 	 * @description Converts the configuration rule value to an Orion problem severity string. One of 'warning', 'error'.
@@ -228,9 +247,12 @@ define([
 				request.env = config.env;
 			}
 			var ternProjectManager = this.projectManager;
+			var start = Date.now();
 			this.ternWorker.postMessage(
 				request, 
 				/* @callback */ function(type, err) {
+						var end = Date.now() - start;
+						logTiming(end);
 						var eslintErrors = [];
 						if(err) {
 							eslintErrors.push({

@@ -12,7 +12,6 @@
 /*eslint-env browser, amd*/
 define(['orion/plugin',
 'orion/serviceregistry',
-'orion/metrics',
 'javascript/scriptResolver',
 'webtools/htmlAstManager',
 'webtools/htmlHover',
@@ -28,7 +27,7 @@ define(['orion/plugin',
 'webtools/cssResultManager',
 'orion/editor/stylers/text_css/syntax',
 'i18n!webtools/nls/messages'
-], function(PluginProvider, mServiceRegistry, Metrics, ScriptResolver, HtmlAstManager, htmlHover, htmlContentAssist, htmlOccurrences, htmlOutliner,
+], function(PluginProvider, mServiceRegistry, ScriptResolver, HtmlAstManager, htmlHover, htmlContentAssist, htmlOccurrences, htmlOutliner,
             mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, messages) {
 
 	/**
@@ -61,7 +60,7 @@ define(['orion/plugin',
     			}
     		]
     	});
-        var cssResultMgr = new cssResultManager();
+        var cssResultMgr = new cssResultManager(serviceRegistry);
 
     	/**
     	 * Register result manager as model changed listener
@@ -90,7 +89,7 @@ define(['orion/plugin',
     			pid: 'csslint.config'  //$NON-NLS-1$
     		});
 
-    	var htmlAstManager = new HtmlAstManager.HtmlAstManager();
+    	var htmlAstManager = new HtmlAstManager.HtmlAstManager(serviceRegistry);
 
     	/**
     	 * Register content assist providers
@@ -480,12 +479,6 @@ define(['orion/plugin',
     	);
 
     	provider.connect(function() {
-    		/**
-	    	 * Re-init
-	    	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=462878
-	    	 */
-			Metrics.initFromRegistry(serviceRegistry);
-			
 			var fc = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
 	    	fc.addEventListener("FileContentChanged", htmlAstManager.onFileChanged.bind(htmlAstManager));
  		});

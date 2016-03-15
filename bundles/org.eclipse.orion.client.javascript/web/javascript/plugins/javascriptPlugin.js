@@ -18,7 +18,6 @@ define([
 'orion/plugin',
 'orion/serviceregistry',
 'orion/Deferred',
-'orion/metrics',
 'esprima/esprima',
 'estraverse/estraverse',
 'javascript/scriptResolver',
@@ -47,7 +46,7 @@ define([
 'i18n!javascript/nls/messages',
 'orion/i18nUtil',
 'orion/URL-shim'
-], function(PluginProvider, mServiceRegistry, Deferred, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, TernProjectAssist,
+], function(PluginProvider, mServiceRegistry, Deferred, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, TernProjectAssist,
 			EslintValidator, TernProjectValidator, Occurrences, Hover, Outliner, CUProvider, TernProjectManager, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 			RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
@@ -96,15 +95,19 @@ define([
     	/**
     	 * Create the AST manager
     	 */
-    	var astManager = new ASTManager.ASTManager(Esprima);
+    	var astManager = new ASTManager.ASTManager(Esprima, serviceRegistry);
 
-		var ternReady = false;
-		var workerReady = false;
-		var TRACE = localStorage.js_message_trace === "true";
-		var pendingStart = Object.create(null);
-		var messageQueue = []; // for all other requests
-		var modifyQueue = []; // for add and removes only
-
+		var ternReady = false,
+			workerReady = false,
+			startCount = 0,
+			TRACE = localStorage.js_message_trace === "true",
+			pendingStart = Object.create(null),
+			messageQueue = [], // for all other requests
+			modifyQueue = []; // for add and removes only
+			
+		/**
+		 * @description Make a new worker
+		 */
     	function WrappedWorker(script, onMessage, onError) {
  			var wUrl = new URL(script, window.location.href);
     		wUrl.query.set("worker-language", navigator.language); //$NON-NLS-1$
@@ -123,7 +126,9 @@ define([
 		ternReady = false;
 	}
 
-
+	/**
+	 * @callback 
+	 */
 	WrappedWorker.prototype.postMessage = function(msg, f) {
 		var starting = msg.request === "start_server";
 		if(starting) {
@@ -147,17 +152,17 @@ define([
 				}
 			}
 			if(TRACE) {
-				console.log("postMessage ("+this.messageId+") - SENT "+JSON.stringify(msg));
+				console.log("postMessage ("+this.messageId+") - SENT "+JSON.stringify(msg)); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			this.worker.postMessage(msg);
 		} else if (msg.request === "addFile" || msg.request === "delFile") {
 			if(TRACE) {
-				console.log("postMessage ("+this.messageId+") - MODIFY QUEUED: "+JSON.stringify(msg));
+				console.log("postMessage ("+this.messageId+") - MODIFY QUEUED: "+JSON.stringify(msg)); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			modifyQueue.push({msg: msg, f: f});
 		} else {
 			if(TRACE) {
-				console.log("postMessage ("+this.messageId+") - MESSAGE QUEUED: "+JSON.stringify(msg));
+				console.log("postMessage ("+this.messageId+") - MESSAGE QUEUED: "+JSON.stringify(msg)); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			messageQueue.push({msg: msg, f: f});
 		}
@@ -169,8 +174,8 @@ define([
     	 * TODO will need to listen to updated tern plugin settings once enabled to clear this cache
     	 */
     	var contributedEnvs,
-			ternWorker,
-			startCount = 0;
+			ternWorker;
+			
 		
 		var handlers ={
 			'read': doRead,
@@ -179,7 +184,7 @@ define([
 			 */
 			'worker_ready': function(response) {
 				if(TRACE) {
-					console.log("worker_ready ("+ternWorker.messageId+"): "+JSON.stringify(response));
+					console.log("worker_ready ("+ternWorker.messageId+"): "+JSON.stringify(response)); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				workerReady = true;
 				if (!pendingStart.msg || !pendingStart.msg.request){
@@ -192,7 +197,7 @@ define([
 			 */
 			'start_server': function(response) {
 				if(TRACE) {
-					console.log("server_ready ("+ternWorker.messageId+"): "+JSON.stringify(response));
+					console.log("server_ready ("+ternWorker.messageId+"): "+JSON.stringify(response)); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				serverReady();
 			}
@@ -203,7 +208,6 @@ define([
 	    	function(evnt) {
 	    		var _d = evnt.data;
 	    		if(_d.__isError) {
-	    			//TODO log using the new platform hooks when available
 	    			Logger.log(_d.message);
 	    		} else if(typeof _d === 'object') {
 					var id  = _d.messageID;
@@ -295,7 +299,7 @@ define([
 				for(var i = 0, len = modifyQueue.length; i < len; i++) {
 					var item = modifyQueue[i];
 					if(TRACE) {
-						console.log("clearing MODIFY queue: "+JSON.stringify(item.msg));
+						console.log("clearing MODIFY queue: "+JSON.stringify(item.msg)); //$NON-NLS-1$
 					}
 					ternWorker.postMessage(item.msg, item.f);
 				}
@@ -304,7 +308,7 @@ define([
 				for(i = 0, len = messageQueue.length; i < len; i++) {
 					item = messageQueue[i];
 					if(TRACE) {
-						console.log("clearing MESSAGE queue: "+JSON.stringify(item.msg));
+						console.log("clearing MESSAGE queue: "+JSON.stringify(item.msg)); //$NON-NLS-1$
 					}
 					ternWorker.postMessage(item.msg, item.f);
 				}
@@ -342,6 +346,7 @@ define([
 		
 		provider.registerService("orion.edit.contentassist",  //$NON-NLS-1$
 				{
+					/** @callback */
 					computeContentAssist: function(editorContext, params) {
 						return editorContext.getFileMetadata().then(function(meta) {
 							if(meta.name === ".tern-project") {
@@ -420,7 +425,7 @@ define([
     	
     	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, serviceRegistry, setStarting);
 
-    	var validator = new EslintValidator(ternWorker, ternProjectManager);
+    	var validator = new EslintValidator(ternWorker, ternProjectManager, serviceRegistry);
 
     	/**
     	 * Register the ESLint validator
@@ -490,6 +495,7 @@ define([
 						serviceRegistry);
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			{
+    				/** @callback */
 					execute: function(editorContext, options) {
 						options.kind ='project'; //$NON-NLS-1$
 						return refscommand.execute(editorContext, options);
@@ -506,6 +512,7 @@ define([
     	);
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			{
+    				/** @callback */
 					execute: function(editorContext, options) {
 						options.kind ='workspace'; //$NON-NLS-1$
 						return refscommand.execute(editorContext, options);
@@ -601,6 +608,7 @@ define([
 
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			{
+    				/** @callback */
         			execute: function(editorContext, context) {
         				if(context.annotation.id === 'no-fallthrough') {
         				    context.annotation.fixid = 'no-fallthrough-break'; //$NON-NLS-1$
@@ -688,13 +696,14 @@ define([
 
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			{
-    		execute: function(editorContext, context) {
-    			if(context.annotation.id === 'no-unused-params-expr') {
-    			    context.annotation.fixid = 'no-unused-params'; //$NON-NLS-1$
-                    //return quickFixComputer['no-unused-params'](editorContext, context.annotation, astManager);
-    			}
-    			return quickFixComputer.execute(editorContext, context);
-    		}
+    				/** @callback */
+		    		execute: function(editorContext, context) {
+		    			if(context.annotation.id === 'no-unused-params-expr') {
+		    			    context.annotation.fixid = 'no-unused-params'; //$NON-NLS-1$
+		                    //return quickFixComputer['no-unused-params'](editorContext, context.annotation, astManager);
+		    			}
+		    			return quickFixComputer.execute(editorContext, context);
+		    		}
     			},
     			{
     				name: javascriptMessages["removeUnusedParamsFixName"],
@@ -778,6 +787,7 @@ define([
     	
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			{
+    				/** @callback */
     				execute: function(editorContext, context) {
 		    			if(context.annotation.id === 'no-self-assign') {
 		    			    context.annotation.fixid = 'no-self-assign-rename'; //$NON-NLS-1$
@@ -1037,6 +1047,7 @@ define([
 		
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
 				{
+					/** @callback */
     				execute: function(editorContext, context) {
 		    			if(context.annotation.id === 'no-new-wrappers') {
 		    			    context.annotation.fixid = 'no-new-wrappers-literal'; //$NON-NLS-1$
@@ -1579,12 +1590,6 @@ define([
     		}
     	}
     	provider.connect(function() {
-    		/**
-	    	 * Re-init
-	    	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=462878
-	    	 */
-	    	Metrics.initFromRegistry(serviceRegistry);
-	    	
 	    	var fc = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
 	    	fc.addEventListener("FileContentChanged", astManager.onFileChanged.bind(astManager));
 	    	fc.addEventListener("FileContentChanged", CUProvider.onFileChanged.bind(CUProvider));

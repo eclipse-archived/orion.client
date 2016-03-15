@@ -15,15 +15,15 @@ define([
 	'orion/Deferred',
 	'orion/objects',
 	'javascript/lru',
-	'orion/metrics',
 	'htmlparser2/parser',
-], function(Deferred, Objects, LRU, Metrics, HtmlParser2) {
+], function(Deferred, Objects, LRU, HtmlParser2) {
 
 	var handler = {
 		ast: null,
 		tagstack: [],
 		errors: [],
 		attribstack: [],
+		/** @callback */
 	    onopentag: function(name, attribs, range){
 	    	this.trailingTag = null;
 	    	var node = Object.create(null);
@@ -53,6 +53,7 @@ define([
 	    	this.attribstack = [];
 	    	this.tagstack.push(node);
 	    },
+	    /** @callback */
 	    onclosetag: function(tagname, range){
 	    	var tag = this._getLastTag();
 	    	if(tag && tag.name === tagname) {
@@ -70,12 +71,15 @@ define([
 	    		this.tagstack.pop();
 	    	}
 	    },
+	    /** @callback */
 	    onopentagname: function(name, rangeStart) {
 	    	this.trailingTag = {name: name, start: rangeStart};
 	    },
+	    /** @callback */
 	    onattribname: function(name, rangeStart) {
 	    	this.trailingAttrib = {name: name, start: rangeStart};
 	    },
+	    /** @callback */
 	    onattribute: function(name, value, range) {
 	    	this.trailingAttrib = null;
 	    	var node = Object.create(null);
@@ -99,6 +103,7 @@ define([
 	    	node.type = 'attr'; //$NON-NLS-1$
 	    	this.attribstack.push(node);
 	    },
+	    /** @callback *//** @callback */
 	    onprocessinginstruction: function(name, data, range) {
 	    	var node = Object.create(null);
 	    	node.range = Array.isArray(range) ? [range[0], range[1]] : [0, 0];
@@ -112,6 +117,7 @@ define([
 	    		this.ast.children.push(node);
 	    	}
 	    },
+	    /** @callback */
 	    oncomment: function(data, range) {
 	    	var node = Object.create(null);
 	    	node.range = Array.isArray(range) ? [range[0], range[1]] : [0, 0];
@@ -125,11 +131,13 @@ define([
 	    		this.ast.children.push(node);
 	    	}
 	    },
+	    /** @callback */
 	    oncdatastart: function() {
 	    	var node = Object.create(null);
 	    	node.range = [0, 0];
 	    	node.type = 'cdata'; //$NON-NLS-1$
 	    },
+	    /** @callback */
 	    ontext: function(text) {
 	    	var node = Object.create(null);
 	    	node.range = [0, 0];
@@ -140,12 +148,14 @@ define([
 	    		tag.text = node;
 	    	}
 	    },
+	    /** @callback */
 	    onerror: function(error) {
 	    	var err = Object.create(null);
 	    	err.error = error;
 	    	err.range = [0, 0];
 	    	this.errors.push(err);
 	    },
+	    /** @callback */
 	    onend: function(range) {
 	    	// The ordering is important here as trailing attributes need to be added to the tag
 	    	if (this.trailingAttrib){
@@ -161,6 +171,7 @@ define([
 	    		this.ast.range[1] = range[1];
 	    	}
 	    },
+	    /** @callback */
 	    onreset: function() {
 			this.ast = Object.create(null);
 			this.ast.range = [0,0];
@@ -170,6 +181,7 @@ define([
 			this.errors = [];
 			this.attribstack = [];
 	    },
+	    /** @callback */
 	    _getLastTag: function() {
 	    	if(this.tagstack && this.tagstack.length > 0) {
 	    		return this.tagstack[this.tagstack.length-1];
@@ -177,14 +189,32 @@ define([
 	    	return null;
 	    }
 	};
+	
+	var registry;
 
 	/**
 	 * Provides a shared AST.
 	 * @class Provides a shared parsed AST.
+	 * @param {Object} serviceRegistry The platform service registry
 	 * @since 8.0
 	 */
-	function HtmlAstManager() {
+	function HtmlAstManager(serviceRegistry) {
 		this.cache = new LRU(10);
+		registry = serviceRegistry;
+	}
+	
+	/**
+	 * @description Delegate to log timings to the metrics service
+	 * @param {Number} end The end time
+	 * @since 12.0
+	 */
+	function logTiming(end) {
+		if(registry) {
+			var metrics = registry.getService("orion.core.metrics.client"); //$NON-NLS-1$
+			if(metrics) {
+				metrics.logTiming('language tools', 'parse', end, 'text/html'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+		}
 	}
 
 	Objects.mixin(HtmlAstManager.prototype, /** @lends webtools.HtmlAstManager.prototype */ {
@@ -238,7 +268,7 @@ define([
 			if(handler.ast) {
 				handler.ast.source = text;
 			}
-			Metrics.logTiming('language tools', 'parse', end, 'text/html'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			logTiming(end);
 			return handler.ast;
 		},
 

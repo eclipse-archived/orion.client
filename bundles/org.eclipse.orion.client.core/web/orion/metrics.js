@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -8,13 +8,27 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
 /*eslint-env browser, amd*/
-define([], function() {
+define([
+], function() {
 
 	var _services = [];
+	var timingVars = Object.create(null);
 
-	function init(services, args) {
+	/**
+	 * @name Metrics
+	 * @description Creates a new instance of the metrics service
+	 * @param {Object} serviceRegistry The backing service registry to register the new service with
+	 * @param {Object} args An object of additional arguments
+	 * @returns {Metrics} A new Metrics instance
+	 * @since 12.0
+	 */
+	function Metrics(serviceRegistry, args) {
+		var refs = serviceRegistry.getServiceReferences("orion.metrics"); //$NON-NLS-0$
+		var services = [];
+		refs.forEach(function(current) {
+			services.push(serviceRegistry.getService(current));
+		});
 		/* the following definitions are from https://developers.google.com/analytics/devguides/collection/analyticsjs/pages */
 		var href = window.location.protocol + '//' + window.location.hostname + window.location.pathname + window.location.search; //$NON-NLS-0$
 		var page = window.location.pathname + window.location.search;
@@ -24,25 +38,23 @@ define([], function() {
 		_services.forEach(function(current) {
 			current.pageLoad(href, page, title, args);
 		});
+		serviceRegistry.registerService("orion.core.metrics.client", this); //$NON-NLS-1$
 	}
-
-	function initFromRegistry(serviceRegistry, args) {
-		var refs = serviceRegistry.getServiceReferences("orion.metrics"); //$NON-NLS-0$
-		var services = [];
-		refs.forEach(function(current) {
-			services.push(serviceRegistry.getService(current));
+	
+	/** @callback */
+	function _logTiming(timingCategory, timingVar, timingValue, timingLabel) {
+		_services.forEach(function(current) {
+			current.logTiming(timingCategory, timingVar, timingValue, timingLabel);
 		});
-		init(services, args);
 	}
-
-	function logEvent(category, action, label, value, details) {
+	/** @callback */
+	function _logEvent(category, action, label, value, details) {
 		_services.forEach(function(current) {
 			current.logEvent(category, action, label || "", value, details);
 		});
 	}
-
-	var timingVars = {};
-	function logPageLoadTiming(timingVar, timingLabel) {
+	/** @callback */
+	function _logPageLoadTiming(timingVar, timingLabel) {
 		/* 
 		 * The level of window.performance implementation varies across the browsers,
 		 * so check for the existence of all utilized functions up-front.
@@ -58,23 +70,51 @@ define([], function() {
 				if (timingVars[timingVar]) {
 					return;
 				}
-				timingVars[timingVar] = new Date();				
+				timingVars[timingVar] = Date.now();				
 			}
-			logTiming("page", timingVar, window.performance.now(), timingLabel); //$NON-NLS-0$
+			_logTiming("page", timingVar, window.performance.now(), timingLabel); //$NON-NLS-0$
 		}
 	}
-
-	function logTiming(timingCategory, timingVar, timingValue, timingLabel) {
-		_services.forEach(function(current) {
-			current.logTiming(timingCategory, timingVar, timingValue, timingLabel);
-		});
-	}
-
+	
+	Metrics.prototype = {
+		/**
+		 * @description Log a timing
+		 * @function
+		 * @param {String} timingCategory The name of the category to log to
+		 * @param {String} timingVar The name of the variable to log to
+		 * @param {Number} timingValue The timing to log
+		 * @param {String} timingLabel A label for the new timing
+		 */
+		logTiming: function(timingCategory, timingVar, timingValue, timingLabel) {
+			_logTiming(timingCategory, timingVar, timingValue, timingLabel);
+		},
+		/**
+		 * @description Log an event
+		 * @function
+		 * @param {String} category The name of the category to log to
+		 * @param {String} action The name of the action logged
+		 * @param {String} label A label for the event
+		 * @param {String} value The event value to log
+		 * @param {String} details Additional details about the event being logged
+		 */
+		logEvent: function(category, action, label, value, details) {
+			_logEvent(category, action, label, value, details);
+		},
+		/**
+		 * @description Log how long it took to load a page
+		 * @function
+		 * @param {Number} timingVar The timing to log
+		 * @param {String} timingLabel A label for the new timing
+		 */
+		logPageLoadTiming: function(timingVar, timingLabel) {
+			_logPageLoadTiming(timingVar, timingLabel);
+		}
+	};
+	
 	return {
-		init: init,
-		initFromRegistry: initFromRegistry,
-		logEvent: logEvent,
-		logPageLoadTiming: logPageLoadTiming,
-		logTiming: logTiming
+		Metrics: Metrics,
+		logTiming: _logTiming,
+		logEvent: _logEvent,
+		logPageLoadTiming: _logPageLoadTiming
 	};
 });

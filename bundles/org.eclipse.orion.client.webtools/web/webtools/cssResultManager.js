@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -15,17 +15,34 @@ define([
 	'orion/Deferred',
 	'orion/objects',
 	'javascript/lru',
-	'csslint/csslint',
-	'orion/metrics'
-], function(Deferred, Objects, LRU, CSSLint, Metrics) {
+	'csslint/csslint'
+], function(Deferred, Objects, LRU, CSSLint) {
 
+	var registry;
+	
 	/**
 	 * Provides a shared AST.
 	 * @class Provides a shared parsed AST.
+	 * @param {Object} serviceRegistry The platform service registry 
 	 * @since 8.0
 	 */
-	function CssResultManager() {
+	function CssResultManager(serviceRegistry) {
 		this.cache = new LRU(10);
+		registry = serviceRegistry;
+	}
+
+	/**
+	 * @description Delegate to log timings to the metrics service
+	 * @param {Number} end The end time
+	 * @since 12.0
+	 */
+	function logTiming(end) {
+		if(registry) {
+			var metrics = registry.getService("orion.core.metrics.client"); //$NON-NLS-1$
+			if(metrics) {
+				metrics.logTiming('language tools', 'parse', end, 'text/css'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+		}
 	}
 
 	Objects.mixin(CssResultManager.prototype, /** @lends webtools.CssResultManager.prototype */ {
@@ -35,10 +52,11 @@ define([
 		 * with an incomplete config
 		 */
 		getResult: function(editorContext, config) {
-		    if(typeof(config) === 'undefined') {
+		    if(typeof config === 'undefined') {
 		        config = Object.create(null);
 		    }
-		    if(typeof(config.getRuleSet) === 'undefined') {
+		    if(typeof config.getRuleSet === 'undefined') {
+		    	/** @callback */
 		        config.getRuleSet = function() {return null;};
 			}
 			var _self = this;
@@ -53,7 +71,7 @@ define([
 				    var start = Date.now();
 					result = CSSLint.verify(text, config.getRuleSet());
 					var end = Date.now() - start;
-					Metrics.logTiming('language tools', 'parse', end, 'text/css'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					logTiming(end);
 					_self.cache.put(loc, result);
 					if(metadata.location) {
 					    //only set this if the original metadata has a real location
