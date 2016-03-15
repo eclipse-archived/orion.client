@@ -51,6 +51,15 @@ var orionAccountSchema = new mongoose.Schema({
 	workspace: {
 		type: String
 	},
+	login_timestamp: {
+		type: Date
+	},
+	disk_usage: {
+		type: String
+	},
+	disk_usage_timestamp: {
+		type: Date
+	},
 	created_at: {
 		type: Date,
 		"default": Date.now
@@ -122,9 +131,9 @@ function userJSON(user) {
 		EmailConfirmed: user.isAuthenticated,
 		HasPassword: true,
 		OAuth: user.oauth || undefined,
-		LastLoginTimestamp: 0,
-		DiskUsageTimestamp: 0,
-		DiskUsage: 0 
+		LastLoginTimestamp: user.login_timestamp ? user.login_timestamp.getTime() : 0,
+		DiskUsageTimestamp: user.disk_usage_timestamp ? user.disk_usage_timestamp.getTime() : 0,
+		DiskUsage: user.disk_usage || 0 
 	};
 }
 
@@ -200,7 +209,12 @@ module.exports = function(options) {
 			}
 			req.logIn(user, function(err) {
 				if (err) { return err; }
-				return res.redirect('/');
+				user.login_timestamp = new Date();
+				user.save(function(err){
+					if (err) {
+					}
+					return res.redirect('/');
+				});
 			});
 		}
 
@@ -255,7 +269,12 @@ module.exports = function(options) {
 				}
 				req.logIn(user, function(err) {
 					if (err) { return next(err); }
-					return res.status(200).end();
+					user.login_timestamp = new Date();
+					user.save(function(err){
+						if (err) {
+						}
+						return res.status(200).end();
+					});
 				});
 			})(req, res, next);
 		});
