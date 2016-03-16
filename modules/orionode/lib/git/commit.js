@@ -23,6 +23,8 @@ var bodyParser = require('body-parser');
 
 module.exports = {};
 
+var pendingRefMap = {};
+
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
@@ -37,7 +39,7 @@ module.exports.router = function(options) {
 	.put('/:commit/file*', putCommit)
 	.post('/:commit/file*', postCommit);
 
-function commitJSON(commit, fileDir, diffs, parents, tags) {
+function commitJSON(commit, fileDir, diffs, parents, tags, branches) {
 	return {
 		"AuthorEmail": commit.author().email(), 
 		"AuthorName": commit.author().name(),
@@ -52,6 +54,7 @@ function commitJSON(commit, fileDir, diffs, parents, tags) {
 		"Diffs": diffs,
 		"Parents": parents,
 		"Tags": tags,
+		"Branches": branches,
 		"Message": commit.message(),
 		"Name": commit.sha(),
 		"Time": commit.timeMs(),
@@ -127,7 +130,7 @@ function getCommitLog(req, res) {
 		res.status(200).json(resp);
 	}
 
-	var tagsMap;
+	var refsMap;
 	function log(repo, ref) {
 		var revWalk = repo.createRevWalk();
 		revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
@@ -157,7 +160,8 @@ function getCommitLog(req, res) {
 					}
 					return Promise.all([getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
 					.then(function(stuff) {
-						commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1], tagsMap[oid.toString()] || []));
+						var map = refsMap[oid.toString()];
+						commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1], map ? map.tags : [], map ? map.branches : []));
 						if (pageSize && commits.length === pageSize) {//page done
 							writeResponse();
 							return;
@@ -182,10 +186,10 @@ function getCommitLog(req, res) {
 	.then(function(_repo) {
 		repo = _repo;
 		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
-		return getCommitTagsMap(repo, fileDir);
+		return getCommitRefMap(repo, fileDir);
 	})
 	.then(function(map) {
-		tagsMap = map;
+		refsMap = map;
 		if (mergeBase) {
 			var names = scope.split("..");
 			var commit0;
@@ -231,32 +235,36 @@ function getCommitParents(repo, commit, fileDir) {
 	});
 }
 
-function getCommitTagsMap(repo, fileDir) {
+function getCommitRefMap(repo, fileDir) {
 	var map = {};
-	//TODO improve performance
-	if (true) return map;
-//	var time = Date.now();
-	return new Promise(function (fulfill){
-		repo.getReferences(git.Reference.TYPE.OID)
+	var repoPath = repo.path();
+	if (pendingRefMap[repoPath]) {
+		return pendingRefMap[repoPath];
+	}
+	return pendingRefMap[repoPath] = new Promise(function (fulfill){
+		git.Reference.list(repo)
 		.then(function(refList) {
 			async.each(refList, function(ref, cb) {
-				if (ref.isTag()) {
-					repo.getReferenceCommit(ref)
-					.then(function(commit) {
-						var id = commit.id().toString();
-						var tags = map[id] || (map[id] = []);
-						tags.push(mTags.tagJSON(ref, commit, fileDir));
-						cb();
-					})
-					.catch(function() {
-						// ignore errors looking up commits
-						cb();
-					});
-				}
-				cb();
+				return git.Reference.nameToId(repo, ref)
+				.then(function(oid) {
+					var fullName = ref;
+					var shortName = ref.replace("refs/tags/", "").replace("refs/remotes/", "").replace("refs/heads/", "");
+					var id = oid.toString();
+					var m = map[id] || (map[id] = {tags: [], branches: []});
+					if (ref.indexOf("refs/tags/") === 0) {
+						m.tags.push(mTags.tagJSON(fullName, shortName, id, undefined, fileDir));
+					} else {
+						m.branches.push({FullName: ref});
+					}
+					cb();
+				})
+				.catch(function() {
+					// ignore errors looking up commits
+					cb();
+				});
 			}, function() {
-//				console.log("done0=" + (Date.now() - time));
 				fulfill(map);
+				delete pendingRefMap[repoPath];
 			});
 		});
 	});

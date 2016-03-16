@@ -11,7 +11,6 @@
 /*eslint-env node*/
 
 var express = require('express');
-var url = require('url');
 
 // Handle optional nodegit dependency
 var hasNodegit = true;

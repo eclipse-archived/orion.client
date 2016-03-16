@@ -31,17 +31,15 @@ module.exports.router = function(options) {
 	.get('/:branchName*', getTags)
 	.delete('/:tagName*', deleteTag);
 
-function tagJSON(ref, commit, fileDir) {
-	var fullName = ref.name();
-	var shortName = ref.shorthand();
+function tagJSON(fullName, shortName, sha, timestamp, fileDir) {
 	return {
 		"FullName": fullName,
 		"Name": shortName,
 		"CloneLocation": "/gitapi/clone" + fileDir,
-		"CommitLocation": "/gitapi/commit/" + commit.sha() + fileDir,
-		"LocalTimeStamp": commit.timeMs(),
+		"CommitLocation": "/gitapi/commit/" + sha + fileDir,
+		"LocalTimeStamp": timestamp,
 		"Location": "/gitapi/tag/" + encodeURIComponent(shortName) + fileDir,
-		"TagType": "LIGHTWEIGHT",//TODO
+		"TagType": "LIGHTWEIGHT",
 		"TreeLocation": "/gitapi/tree" + fileDir + "/" + encodeURIComponent(shortName),
 		"Type": "Tag"
 	};
@@ -71,7 +69,7 @@ function getTags(req, res) {
 			return theRepo.getReferenceCommit(ref);
 		})
 		.then(function(commit) {
-			res.status(200).json(tagJSON(theRef, commit, fileDir));
+			res.status(200).json(tagJSON(ref.name(), ref.shorthand(), commit.sha(), commit.timeMs(), fileDir));
 		})
 		.catch(function(err) {
 			writeError(404, res, err.message);
@@ -92,7 +90,7 @@ function getTags(req, res) {
 						tagCount++;
 						theRepo.getReferenceCommit(ref)
 						.then(function(commit) {
-							tags.push(tagJSON(ref, commit, fileDir));
+							tags.push(tagJSON(ref.name(), ref.shorthand(), commit.sha(), commit.timeMs(), fileDir));
 							callback();
 						})
 						.catch(function() {
