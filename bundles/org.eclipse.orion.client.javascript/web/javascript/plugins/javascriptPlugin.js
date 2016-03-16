@@ -1424,7 +1424,7 @@ define([
 											id: "check-tern-project",  //$NON-NLS-1$
 											name: javascriptMessages["check-tern-project"],
 											type: "number",  //$NON-NLS-1$
-											defaultValue: warning,
+											defaultValue: ignore,
 											options: severities
 										},
 				 	        	                {

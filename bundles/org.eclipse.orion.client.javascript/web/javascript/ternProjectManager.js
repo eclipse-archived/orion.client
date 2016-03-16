@@ -93,6 +93,16 @@ define([
 			return this.json;
 		},
 		
+		refresh : function(file) {
+			if(file && /\.tern-project$/g.test(file)) {
+				this.currentFile = file;
+				this.starting();
+				return this.parseTernJSON(file).then(function(jsonOptions){
+					this.json = jsonOptions;
+					return this.loadTernProjectOptions(jsonOptions);
+				}.bind(this));
+			}
+		},
 		/**
 		 * Returns a deferred that reads the file at the given location and returns the parsed JSON contents
 		 * @param {String} fileLocation The location of the file to parse
