@@ -422,6 +422,15 @@ function handleRemoteError(task, err, cloneUrl) {
 	});
 }
 
+function getUniqueFileName(folder, file) {
+	var result, counter = 0, name = file;
+	do {
+		result = path.join(folder, name);
+		name = file + "-" + ++counter;
+	} while (fs.existsSync(result));
+	return result;
+}
+
 function postClone(req, res) {
 	var cloneUrl = req.body.GitUrl;
 	var dirName = cloneUrl.substring(cloneUrl.lastIndexOf("/") + 1).replace(".git", "");
@@ -432,7 +441,7 @@ function postClone(req, res) {
 	
 	var task = new tasks.Task(res);
 	
-	git.Clone.clone(cloneUrl, path.join(folder, dirName), {
+	git.Clone.clone(cloneUrl, getUniqueFileName(folder, dirName), {
 		fetchOpts: {
 			callbacks: getRemoteCallbacks(req.body)
 		}

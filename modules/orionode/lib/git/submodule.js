@@ -52,8 +52,7 @@ function postSubmodule(req, res) {
 			if (req.body.Path) {
 				path = api.join(req.user.workspaceDir, req.body.Path.slice(1)).substring(repo.workdir());
 			} else if (req.body.Location) {
-				//TODO make unique
-				path = url.substring(url.lastIndexOf("/") + 1).replace(".git", "");
+				path = clone.getUniqueFileName(req.user.workspaceDir, url.substring(url.lastIndexOf("/") + 1).replace(".git", ""));
 			}
 		}
 		return git.Submodule.addSetup(repo, url, path, 1)
