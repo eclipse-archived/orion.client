@@ -23,8 +23,6 @@ var bodyParser = require('body-parser');
 
 module.exports = {};
 
-var pendingRefMap = {};
-
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
@@ -39,7 +37,7 @@ module.exports.router = function(options) {
 	.put('/:commit/file*', putCommit)
 	.post('/:commit/file*', postCommit);
 
-function commitJSON(commit, fileDir, diffs, parents, tags, branches) {
+function commitJSON(commit, fileDir, diffs, parents) {
 	return {
 		"AuthorEmail": commit.author().email(), 
 		"AuthorName": commit.author().name(),
@@ -53,11 +51,10 @@ function commitJSON(commit, fileDir, diffs, parents, tags, branches) {
 		"CloneLocation": "/gitapi/clone" + fileDir,
 		"Diffs": diffs,
 		"Parents": parents,
-		"Tags": tags,
-		"Branches": branches,
 		"Message": commit.message(),
 		"Name": commit.sha(),
 		"Time": commit.timeMs(),
+		"Id": commit.sha(),
 		"Type": "Commit"
 	};
 }
@@ -95,7 +92,7 @@ function getCommitLog(req, res) {
 		return false;
 	}
 	
-	var commits = [];
+	var commits = []	, repo;
 	function writeResponse(over) {
 		var referenceName = scope;
 		var resp = {
@@ -127,10 +124,13 @@ function getCommitLog(req, res) {
 			prevLocation = url.format(prevLocation);
 			resp['PreviousLocation'] = prevLocation;
 		}
-		res.status(200).json(resp);
+		
+		return getCommitRefs(repo, fileDir, commits)
+		.then(function() {
+			res.status(200).json(resp);
+		});
 	}
 
-	var refsMap;
 	function log(repo, ref) {
 		var revWalk = repo.createRevWalk();
 		revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
@@ -160,8 +160,7 @@ function getCommitLog(req, res) {
 					}
 					return Promise.all([getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
 					.then(function(stuff) {
-						var map = refsMap[oid.toString()];
-						commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1], map ? map.tags : [], map ? map.branches : []));
+						commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1]));
 						if (pageSize && commits.length === pageSize) {//page done
 							writeResponse();
 							return;
@@ -181,15 +180,10 @@ function getCommitLog(req, res) {
 		walk();
 	}
 	
-	var repo;
 	clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
 		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
-		return getCommitRefMap(repo, fileDir);
-	})
-	.then(function(map) {
-		refsMap = map;
 		if (mergeBase) {
 			var names = scope.split("..");
 			var commit0;
@@ -235,13 +229,13 @@ function getCommitParents(repo, commit, fileDir) {
 	});
 }
 
-function getCommitRefMap(repo, fileDir) {
-	var map = {};
-	var repoPath = repo.path();
-	if (pendingRefMap[repoPath]) {
-		return pendingRefMap[repoPath];
-	}
-	return pendingRefMap[repoPath] = new Promise(function (fulfill){
+function getCommitRefs(repo, fileDir, commits) {
+	return new Promise(function (fulfill){
+		if (!commits.length) return fulfill();
+		var map = {};
+		commits.forEach(function(commit) {
+			map[commit.Id] = commit;
+		});
 		git.Reference.list(repo)
 		.then(function(refList) {
 			async.each(refList, function(ref, cb) {
@@ -250,11 +244,15 @@ function getCommitRefMap(repo, fileDir) {
 					var fullName = ref;
 					var shortName = ref.replace("refs/tags/", "").replace("refs/remotes/", "").replace("refs/heads/", "");
 					var id = oid.toString();
-					var m = map[id] || (map[id] = {tags: [], branches: []});
-					if (ref.indexOf("refs/tags/") === 0) {
-						m.tags.push(mTags.tagJSON(fullName, shortName, id, undefined, fileDir));
-					} else {
-						m.branches.push({FullName: ref});
+					var commit = map[id];
+					if (commit) {
+						if (ref.indexOf("refs/tags/") === 0) {
+							var tags = commit.Tags || (commit.Tags = []);
+							tags.push(mTags.tagJSON(fullName, shortName, id, undefined, fileDir));
+						} else {
+							var branches = commit.Branches || (commit.Branches = []);
+							branches.push({FullName: ref});
+						}
 					}
 					cb();
 				})
@@ -264,7 +262,6 @@ function getCommitRefMap(repo, fileDir) {
 				});
 			}, function() {
 				fulfill(map);
-				delete pendingRefMap[repoPath];
 			});
 		});
 	});
