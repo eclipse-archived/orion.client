@@ -141,6 +141,8 @@ define({
 	'ternPlugins': 'Tern Plug-ins',
 	'noTernPluginsAvailable': 'No Tern plug-ins are currently loaded. This may be because you have not yet activated content assist in a JavaScript file. Tern plug-ins provide type information and code templates for JavaScript.',
 	'noDeclFound': 'Could not find declaration',
+	'declFoundInIndex': 'Declaration is not in your workspace. Found in \'${0}\' index.',
+	'implFoundInIndex': 'Implementation is not in your workspace. Found in \'${0}\' index.',
 	'deprecatedHoverTitle': 'Deprecated.', // the in-line title for deprecated memebers. The word is used alone in a sentence with no further punctuation
 	'parametersHoverTitle': 'Parameters:', // the in-line title for the parameters section. The word is used alone in a sentence with no further punctuation
 	'returnsHoverTitle': 'Returns:', // the in-line title for the returns section. The word is used alone in a sentence with no further punctuation

@@ -99,6 +99,8 @@ define([
 								opts.mode = this.openMode;
 							}
 							return deferred.resolve(editorContext.openEditor(response.declaration.file, opts));
+						} else if (response.declaration.origin) {
+							deferred.reject({Severity: 'Warning', Message: i18nUtil.formatMessage(Messages['declFoundInIndex'], response.declaration.origin)}); //$NON-NLS-1$
 						}
 					}
 					deferred.reject({Severity: 'Warning', Message: Messages['noDeclFound']}); //$NON-NLS-1$

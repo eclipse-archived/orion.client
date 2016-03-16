@@ -230,6 +230,8 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		               }
 		               if(decl && typeof decl.start === 'number' && typeof decl.end === "number") {
 							callback({request: 'definition', declaration:decl}); //$NON-NLS-1$
+						} else if (decl && decl.origin){
+							callback({request: 'definition', declaration: decl}); //$NON-NLS-1$
 						} else {
 							callback({request: 'definition', declaration: null}); //$NON-NLS-1$
 						}
@@ -308,6 +310,8 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		                   callback({request: 'implementation', error: error.message, message: Messages['failedToComputeImpl']}); //$NON-NLS-1$
 		               }
 		               if(impl && impl.implementation && typeof impl.implementation.start === 'number' && typeof impl.implementation.end === "number") {
+							callback({request: 'implementation', implementation:impl.implementation}); //$NON-NLS-1$
+						} else if (impl && impl.implementation && impl.implementation.origin) {
 							callback({request: 'implementation', implementation:impl.implementation}); //$NON-NLS-1$
 						} else {
 							callback({request: 'implementation', implementation: null}); //$NON-NLS-1$

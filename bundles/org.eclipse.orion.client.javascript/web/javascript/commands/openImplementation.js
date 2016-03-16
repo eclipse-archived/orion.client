@@ -13,8 +13,9 @@
 define([
 'orion/objects',
 'orion/Deferred',
+'orion/i18nUtil',
 'i18n!javascript/nls/messages'
-], function(Objects, Deferred, Messages) {
+], function(Objects, Deferred, i18nUtil, Messages) {
 
 	/**
 	 * @description Creates a new open declaration command
@@ -57,6 +58,8 @@ define([
 						opts.start = response.implementation.start;
 						opts.end = response.implementation.end;
 						deferred.resolve(editorContext.openEditor(response.implementation.file, opts));
+					} else if (response.implementation && response.implementation.origin){
+						deferred.reject({Severity: 'Warning', Message: i18nUtil.formatMessage(Messages['implFoundInIndex'], response.implementation.origin)}); //$NON-NLS-1$
 					} else {
 						deferred.reject({Severity: 'Warning', Message: Messages['noImplFound']}); //$NON-NLS-1$
 					}

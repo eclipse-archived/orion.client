@@ -124,9 +124,16 @@ define([
 						worker.getTestState().callback();
 						return;
 					}
+				} else if (typeof expected === 'string'){
+					if (error.Message.indexOf(expected) >= 0){
+						worker.getTestState().callback();
+						return;
+					}
 				}
 				if(error instanceof Error || toString.call(error) === '[object Error]') {
 					worker.getTestState().callback(error);
+				} else if (expected){
+					worker.getTestState().callback(new Error('Did not return a result when expected result was: ' + expected));
 				} else {
 					worker.getTestState().callback(new Error('Unknown error'));
 				}
@@ -529,6 +536,40 @@ define([
 					callback: done
 				};
 				testOpenImpl(options, {start: 19, end: 20});
+			});
+			it('Open Declaration - Indexed declaration', function(done) {
+				var options = {
+					buffer: "/* eslint-env express */\nvar app = new express(); express.static(); app.use();",
+					offset: 62,
+					callback: done
+				};
+				testOpenDecl(options, 'express');
+			});
+			it('Open Implementation - Indexed declaration', function(done) {
+				var options = {
+					buffer: "/* eslint-env express */\nvar app = new express(); express.static(); app.use();",
+					offset: 62,
+					callback: done
+				};
+				// TODO Bug 484510, expected result should be 'express'
+				testOpenImpl(options, {start: 58, end: 64});
+			});
+			it('Open Declaration - Indexed declaration 2', function(done) {
+				var options = {
+					buffer: "/* eslint-env express */\nvar app = new express(); express.static(); app.use();",
+					offset: 75,
+					callback: done
+				};
+				testOpenDecl(options, 'express');
+			});
+			it('Open Implementation - Indexed declaration 2', function(done) {
+				var options = {
+					buffer: "/* eslint-env express */\nvar app = new express(); express.static(); app.use();",
+					offset: 75,
+					callback: done
+				};
+				// TODO Bug 484510, expected result should be 'express'
+				testOpenImpl(options, {start: 72, end: 75});
 			});
 			// TODO Do we want Tern to guess in this case?
 			it.skip('Open Declaration - Tern didGuess() === true', function(done) {
