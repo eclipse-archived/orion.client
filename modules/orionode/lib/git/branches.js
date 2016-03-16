@@ -126,49 +126,53 @@ module.exports.router = function(options) {
 			return;
 		}
 		
-		var branches = [], theHead;
 		var filter = req.query.filter;
 	
 		clone.getRepo(req)
 		.then(function(repo) {
 			theRepo = repo;
 			fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
-			return repo.head();
-		})
-		.then(function(head) {
-			theHead = head;
-			return theRepo.getReferences(git.Reference.TYPE.LISTALL);
+			return git.Reference.list(theRepo);
 		})
 		.then(function(referenceList) {
 			if (theRepo.headDetached()) {
-				referenceList.unshift(theHead);
+				referenceList.unshift("HEAD");
 			}
-			referenceList.forEach(function(ref) {
-				if (ref.isBranch() || theRepo.headDetached() && ref === theHead) {
-					if (!filter || ref.shorthand().indexOf(filter) !== -1) {
-						branches.push(branchJSON(theRepo, ref, fileDir));
+			referenceList = referenceList.filter(function(ref) {
+				if (ref === "HEAD" || ref.indexOf("refs/heads/") === 0) {
+					if (!filter || ref.replace("refs/heads/", "").indexOf(filter) !== -1) {
+						return true;
 					}
 				}
 			});
-			
-			branches.sort(function(a, b) {
-				if (a.Current) return -1;
-				if (b.Current) return 1;
-				return a.LocalTimeStamp < b.LocalTimeStamp ? 1 : a.LocalTimeStamp > b.LocalTimeStamp ? -1 : b.Name.localeCompare(a.Name);
-			});
-	
-			return getBranchCommit(theRepo, branches, function() {
-				return getBranchRemotes(theRepo, branches, fileDir, function(err) {
-					if (err) {
-						console.log(err);
-						return writeError(500, res);
-					}
-					res.status(200).json({
-						"Children": branches,
-						"Type": "Branch"
+			return Promise.all(referenceList.map(function(ref) {
+				return git.Reference.lookup(theRepo, ref);
+			}))
+			.then(function(branches) {
+				branches = branches.map(function(ref) {
+					return branchJSON(theRepo, ref, fileDir);
+				});
+				
+				branches.sort(function(a, b) {
+					if (a.Current) return -1;
+					if (b.Current) return 1;
+					return a.LocalTimeStamp < b.LocalTimeStamp ? 1 : a.LocalTimeStamp > b.LocalTimeStamp ? -1 : b.Name.localeCompare(a.Name);
+				});
+		
+				return getBranchCommit(theRepo, branches, function() {
+					return getBranchRemotes(theRepo, branches, fileDir, function(err) {
+						if (err) {
+							console.log(err);
+							return writeError(500, res);
+						}
+						res.status(200).json({
+							"Children": branches,
+							"Type": "Branch"
+						});
 					});
 				});
 			});
+
 		})
 		.catch(function(err) {
 			writeError(500, res, err.message);
