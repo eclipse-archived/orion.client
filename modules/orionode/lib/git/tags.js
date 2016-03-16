@@ -69,7 +69,7 @@ function getTags(req, res) {
 			return theRepo.getReferenceCommit(ref);
 		})
 		.then(function(commit) {
-			res.status(200).json(tagJSON(ref.name(), ref.shorthand(), commit.sha(), commit.timeMs(), fileDir));
+			res.status(200).json(tagJSON(theRef.name(), theRef.shorthand(), commit.sha(), commit.timeMs(), fileDir));
 		})
 		.catch(function(err) {
 			writeError(404, res, err.message);
@@ -80,55 +80,63 @@ function getTags(req, res) {
 	.then(function(repo) {
 		theRepo = repo;
 		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
-		return theRepo.getReferences(git.Reference.TYPE.OID);
+		return git.Reference.list(theRepo);
 	})
-	.then(function(refList) {
-		async.each(refList, function(ref,callback) {
-			if (ref.isTag()) {
-				if (!filter || ref.shorthand().indexOf(filter) !== -1) {
+	.then(function(referenceList) {
+		referenceList = referenceList.filter(function(ref) {
+			if (ref.indexOf("refs/tags/") === 0) {
+				var shortname = ref.replace("refs/tags/", "");
+				if (!filter || shortname.indexOf(filter) !== -1) {
 					if (!page || count++ >= (page-1)*pageSize && tagCount <= pageSize) {
 						tagCount++;
-						theRepo.getReferenceCommit(ref)
-						.then(function(commit) {
-							tags.push(tagJSON(ref.name(), ref.shorthand(), commit.sha(), commit.timeMs(), fileDir));
-							callback();
-						})
-						.catch(function() {
-							// ignore errors looking up commits
-							callback();
-						});
-						return;
+						return true;
 					}
 				}
 			}
-			callback();
-		}, function(err) {
-			if (err) {
-				return writeError(403, res);
-			}
-			var resp = {
-				"Children": tags,
-				"Type": "Tag",
-			};
-
-			if (page && page*pageSize < count) {
-				var nextLocation = url.parse(req.originalUrl, true);
-				nextLocation.query.page = page + 1 + "";
-				nextLocation.search = null; //So that query object will be used for format
-				nextLocation = url.format(nextLocation);
-				resp['NextLocation'] = nextLocation;
-			}
-
-			if (page && page > 1) {
-				var prevLocation = url.parse(req.originalUrl, true);
-				prevLocation.query.page = page - 1 + "";
-				prevLocation.search = null;
-				prevLocation = url.format(prevLocation);
-				resp['PreviousLocation'] = prevLocation;
-			}
-
-			res.status(200).json(resp);
 		});
+		return Promise.all(referenceList.map(function(ref) {
+			return git.Reference.lookup(theRepo, ref);
+		}))
+		.then(function(referenceList) {
+			async.each(referenceList, function(ref,callback) {
+				theRepo.getReferenceCommit(ref)
+				.then(function(commit) {
+					tags.push(tagJSON(ref.name(), ref.shorthand(), commit.sha(), commit.timeMs(), fileDir));
+					callback();
+				})
+				.catch(function() {
+					// ignore errors looking up commits
+					callback();
+				});
+			}, function(err) {
+				if (err) {
+					return writeError(403, res);
+				}
+				var resp = {
+					"Children": tags,
+					"Type": "Tag",
+				};
+	
+				if (page && page*pageSize < count) {
+					var nextLocation = url.parse(req.originalUrl, true);
+					nextLocation.query.page = page + 1 + "";
+					nextLocation.search = null; //So that query object will be used for format
+					nextLocation = url.format(nextLocation);
+					resp['NextLocation'] = nextLocation;
+				}
+	
+				if (page && page > 1) {
+					var prevLocation = url.parse(req.originalUrl, true);
+					prevLocation.query.page = page - 1 + "";
+					prevLocation.search = null;
+					prevLocation = url.format(prevLocation);
+					resp['PreviousLocation'] = prevLocation;
+				}
+	
+				res.status(200).json(resp);
+			});
+		});
+
 	});
 }
 
