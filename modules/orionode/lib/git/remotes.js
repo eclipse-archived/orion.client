@@ -261,7 +261,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	var repo;
 	var remoteObj;
 
-	var task = new tasks.Task(res, false, false, 0);//TODO start task right away to work around bug in client code
+	var task = new tasks.Task(res);
 
 	return clone.getRepo(req)
 	.then(function(r) {
