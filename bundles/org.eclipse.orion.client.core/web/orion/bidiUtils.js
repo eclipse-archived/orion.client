@@ -18,7 +18,7 @@ define (function() { /* BDL */
     	if (!lang) {
       		lang = navigator.languages ? navigator.languages[0] : (navigator.language || navigator.userLanguage);
     	}
-    	var isBidi = 'ar iw he'.indexOf((lang).substring(0, 2)) != - 1;
+    	var isBidi = lang && 'ar iw he'.indexOf((lang).substring(0, 2)) != - 1;
 		
     	if (isBidi)
     	{
