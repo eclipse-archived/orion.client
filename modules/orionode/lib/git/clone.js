@@ -29,6 +29,8 @@ module.exports.router = function(options) {
 	if (!fileRoot) { throw new Error('options.root is required'); }
 
 	module.exports.getRepo = getRepo;
+	module.exports.getRemoteCallbacks = getRemoteCallbacks;
+	module.exports.handleRemoteError = handleRemoteError;
 	module.exports.foreachSubmodule = foreachSubmodule;
 
 	return express.Router()
@@ -362,19 +364,73 @@ function foreachSubmodule(repo, operation, recursive) {
 	});
 }
 
+function getRemoteCallbacks(creds) {
+	return {
+		certificateCheck: function() {
+			return 1; // Continues connection even if SSL certificate check fails. 
+		},
+		credentials: function() {
+			if (!creds.GitSshUsername && !creds.GitSshPrivateKey) {
+				return git.Cred.defaultNew();
+			}
+			if (creds.GitSshPrivateKey) {
+				var privateKey = creds.GitSshPrivateKey;
+				var passphrase = creds.GitSshPassphrase;
+				delete creds.GitSshPrivateKey;
+				delete creds.GitSshPassphrase;
+				return git.Cred.sshKeyMemoryNew(
+					creds.GitSshUsername,
+					"",
+					privateKey,
+					passphrase || ""
+				);
+			}
+			var username = creds.GitSshUsername;
+			var password = creds.GitSshPassword;
+			delete creds.GitSshUsername;
+			delete creds.GitSshPassword;
+			return git.Cred.userpassPlaintextNew(
+				username,
+				password
+			);
+		}
+	};
+}
+
+function handleRemoteError(task, err, cloneUrl) {
+	var u = url.parse(cloneUrl, true);
+	var code = 403;
+	var jsonData;
+	if (err.message && err.message.indexOf("credentials") !== -1) {
+		code = 401;
+		jsonData = {
+			"Host": u.hostname,
+			"HumanishName": u.pathname.substring(u.pathname.lastIndexOf("/") + 1).replace(".git", ""),
+			"Port": u.port,
+			"Scheme": u.protocol.replace(":", ""),
+			"Url": cloneUrl,
+			"User": u.auth
+		};
+	}
+	task.done({
+		HttpCode: code,
+		Code: 0,
+		JsonData: jsonData,
+		DetailedMessage: err.message,
+		Message: err.message,
+		Severity: "Error"
+	});
+}
+
 function postClone(req, res) {
-	var url = req.body.GitUrl;
-	var dirName = url.substring(url.lastIndexOf("/") + 1).replace(".git", "");
+	var cloneUrl = req.body.GitUrl;
+	var dirName = cloneUrl.substring(cloneUrl.lastIndexOf("/") + 1).replace(".git", "");
 	
 	var task = new tasks.Task(res);
 	
-	git.Clone.clone(url, path.join(req.user.workspaceDir, dirName), {
+	git.Clone.clone(cloneUrl, path.join(req.user.workspaceDir, dirName), {
 		fetchOpts: {
-			callbacks: {
-				certificateCheck: function() {
-					return 1; //Ignore SSL certificate check
-				}
-			}
+			callbacks: getRemoteCallbacks(req.body)
 		}
 	})
 	.then(function(repo) {
@@ -395,13 +451,7 @@ function postClone(req, res) {
 		});
 	})
 	.catch(function(err) {
-		task.done({
-			HttpCode: 403,
-			Code: 0,
-			DetailedMessage: err.message,
-			Message: err.message,
-			Severity: "Error"
-		});
+		handleRemoteError(task, err, cloneUrl);
 	});
 }
 };

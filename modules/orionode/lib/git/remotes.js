@@ -235,13 +235,7 @@ function fetchRemote(req, res, remote, branch, force) {
 		
 		return remote.fetch(
 			refSpec ? [refSpec] : null,
-			{callbacks:
-				{
-					certificateCheck: function() {
-						return 1;
-					}
-				}
-			},
+			{callbacks: clone.getRemoteCallbacks(req.body)},
 			"fetch"	
 		);
 	})
@@ -259,12 +253,7 @@ function fetchRemote(req, res, remote, branch, force) {
 		}
 	})
 	.catch(function(err) {
-		task.done({
-			HttpCode: 403,
-			Code: 0,
-			Message: err.message,
-			Severity: "Error"
-		});
+		clone.handleRemoteError(task, err, remoteObj.url());
 	});
 }
 
@@ -284,11 +273,6 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 		return repo.getReference(pushSrcRef);
 	})
 	.then(function(ref) {
-
-		if (!req.body.GitSshUsername || !req.body.GitSshPassword) {
-			throw new Error(remoteObj.url() + ": not authorized");
-		}
-
 		var pushToGerrit = branch.indexOf("for/") === 0;
 		var refSpec = ref.name() + ":" + (pushToGerrit ? "refs/" : "refs/heads/") + branch;
 
@@ -296,40 +280,25 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 
 		return remoteObj.push(
 			tags && false ? [refSpec, "refs/tags/*:refs/tags/*"] : [refSpec],
-			{callbacks: {
-				certificateCheck: function() {
-					return 1; // Continues connection even if SSL certificate check fails. 
-				},
-				credentials: function() {
-					return git.Cred.userpassPlaintextNew(
-						req.body.GitSshUsername,
-						req.body.GitSshPassword
-					);
-				}
-			}}
+			{callbacks: clone.getRemoteCallbacks(req.body)}
 		);
 	})
 	.then(function(err) {
 		if (!err) {
-			var parsedUrl = url.parse(remoteObj.url(), true);
 			task.done({
 				HttpCode: 200,
 				Code: 0,
 				DetailedMessage: "OK",
+				Message: "OK",
 				JsonData: {
-					"Host": parsedUrl.host,
-					"Scheme": parsedUrl.protocol.replace(":", ""),
-					"Url": remoteObj.url(),
-					"HumanishName": parsedUrl.pathname.substring(parsedUrl.pathname.lastIndexOf("/") + 1).replace(".git", ""),
-					"Message": "",
-					"Severity": "Normal",
+					Message: "",
+					Severity: "Ok",
 					Updates: [{
 						LocalName: req.body.PushSrcRef,
 						RemoteName: remote + "/" + branch,
 						Result: "UP_TO_DATE"
 					}]
 				},
-				Message: "OK",
 				Severity: "Ok"
 			});
 		} else {
@@ -337,20 +306,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 		}
 	})
 	.catch(function(err) {
-		var parsedUrl = url.parse(remoteObj.url(), true);
-		task.done({
-			HttpCode: 401,
-			Code: 0,
-			DetailedMessage: err.message,
-			JsonData: {
-				"Host": parsedUrl.host,
-				"Scheme": parsedUrl.protocol.replace(":", ""),
-				"Url": remoteObj.url(),
-				"HumanishName": parsedUrl.pathname.substring(parsedUrl.pathname.lastIndexOf("/") + 1).replace(".git", "")
-			},
-			Message: err.message,
-			Severity: "Error"
-		});
+		clone.handleRemoteError(task, err, remoteObj.url());
 	});
 }
 
