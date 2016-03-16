@@ -90,8 +90,8 @@ define([
 				}
 			}.bind(ternManager));
 		}
-	
-		describe(".tern-project loadEagerly attribute tests", function() {
+		
+		describe("Tern Project Manager tests", function() {
 			before('Reset Tern Server', function() {
 				worker.start(); // Reset the tern server state to remove any prior files
 			});
@@ -106,7 +106,6 @@ define([
 				// Loading options could affect worker state, reset after each test
 				worker.start(this); // Reset the tern server state to remove any prior files
 			});
-			
 			it("Test loadEagerly 1 - file exists", function() {
 				testFileClient.createTestFiles(['test1.js']);
 				return testLoadOptions({loadEagerly: ["test1.js"]}, null);

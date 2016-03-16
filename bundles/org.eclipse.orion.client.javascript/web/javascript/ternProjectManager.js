@@ -93,18 +93,6 @@ define([
 			return this.json;
 		},
 		
-		refresh : function(file) {
-			if(file) {
-				if (file.endsWith(".tern-project")) {
-					this.currentFile = file;
-				}
-				this.starting();
-				return this.parseTernJSON(file).then(function(jsonOptions){
-					this.json = jsonOptions;
-					return this.loadTernProjectOptions(jsonOptions);
-				}.bind(this));
-			}
-		},
 		/**
 		 * Returns a deferred that reads the file at the given location and returns the parsed JSON contents
 		 * @param {String} fileLocation The location of the file to parse
@@ -165,7 +153,7 @@ define([
 		 * Loads the given jsonOptions into Tern, either by restarting the Tern server with new initialization options
 		 * or by adding additional type information to the running Tern server.  The messages sent to Tern are processed
 		 * asynchronously and will not be complete when this function returns.
-		 * @param jsonOptions {Object} options to load into Tern
+		 * @param {Object} jsonOptions options to load into Tern
 		 */
 		loadTernProjectOptions: function(jsonOptions) {
 			if (Array.isArray(jsonOptions.loadEagerly) && jsonOptions.loadEagerly.length > 0) {
@@ -217,7 +205,7 @@ define([
 				}
 				this.ternWorker.postMessage({request: "start_server", args: {options: currentOptions}}); //$NON-NLS-1$
 			} else {
-				this.ternWorker.postMessage({request: "start_server", args: {options: currentOptions}}); //$NON-NLS-1$
+				this.ternWorker.postMessage({request: "start_server", args: {options: jsonOptions}}); //$NON-NLS-1$
 			}
 		},
 		
@@ -235,7 +223,7 @@ define([
 					project;
 				if(file) {
 					var parents = file.parents ? file.parents : file.Parents;
-					if (parents && parents.length > 0){
+					if (parents && parents.length > 0) {
 						project = parents[parents.length-1];
 					}
 				}
@@ -245,7 +233,12 @@ define([
 					var c = project.Children;
 					for(var i = 0, len = c.length; i < len; i++) {
 						if(".tern-project" === c[i].Name) {
-							return this.refresh(c[i].Location);
+							this.currentFile = c[i].Location;
+							this.starting();
+							return this.parseTernJSON(this.currentFile).then(function(jsonOptions){
+								this.json = jsonOptions;
+								return this.loadTernProjectOptions(jsonOptions);
+							}.bind(this));
 						}
 					}
 				}
