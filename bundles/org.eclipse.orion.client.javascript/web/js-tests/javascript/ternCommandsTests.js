@@ -129,11 +129,29 @@ define([
 						worker.getTestState().callback();
 						return;
 					}
+				} else if (Array.isArray(expected)){
+					for (var i=0; i<expected.length; i++) {
+						var current = expected[i];
+						var currentString = 'start='+current.start+',end='+current.end+')';
+						if (error.Message.indexOf(currentString) < 0){
+							worker.getTestState().callback(new Error('Expected potential match not found.\nExpected: ' + currentString + '\nMessage: ' + error.Message));
+							return;
+						}
+					}
+					var results = error.Message.split("\n*");
+					if (results.length -1 > expected.length){
+						worker.getTestState().callback(new Error('Expected fewer potential matches.\nExpected length: ' + expected.length + '\nMessage: ' + error.Message));
+						return;
+					}
+					worker.getTestState().callback();
+					return;
 				}
 				if(error instanceof Error || toString.call(error) === '[object Error]') {
 					worker.getTestState().callback(error);
 				} else if (expected){
 					worker.getTestState().callback(new Error('Did not return a result when expected result was: ' + expected));
+				} else if (error && error.Message) {
+					worker.getTestState().callback(new Error('Unknown error.  Message: ' + error.Message));
 				} else {
 					worker.getTestState().callback(new Error('Unknown error'));
 				}
@@ -571,22 +589,22 @@ define([
 				// TODO Bug 484510, expected result should be 'express'
 				testOpenImpl(options, {start: 72, end: 75});
 			});
-			// TODO Do we want Tern to guess in this case?
-			it.skip('Open Declaration - Tern didGuess() === true', function(done) {
+			it('Open Declaration - Multiple matches with Tern didGuess() === true', function(done) {
 				var options = {
 					buffer: "var a = {x: function() {}}; var b = {x: function() {}}; function test(z){ return z.x() }",
 					offset: 84,
 					callback: done
 				};
-				testOpenDecl(options, null);
+				testOpenDecl(options, [{start: 9, end: 10}, {start: 37, end: 38}]);
 			});
-			it.skip('Open Implementation - Tern didGuess() === true', function(done) {
+			// TODO Open implementation does not handle guessing, it chooses the first result
+			it.skip('Open Implementation -  Multiple matches with Tern didGuess() === true', function(done) {
 				var options = {
 					buffer: "var a = {x: function() {}}; var b = {x: function() {}}; function test(z){ return z.x() }",
 					offset: 84,
 					callback: done
 				};
-				testOpenImpl(options, null);
+				testOpenImpl(options, [{start: 9, end: 10}, {start: 37, end: 38}]);
 			});
 		});
 	};
