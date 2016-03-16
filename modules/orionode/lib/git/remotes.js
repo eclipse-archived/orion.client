@@ -119,31 +119,36 @@ function getRemotes(req, res) {
 		})
 		.then(function(remote) {
 			theRemote = remote;
-			return theRepo.getReferences(git.Reference.TYPE.OID);
+			return git.Reference.list(theRepo);
 		})
 		.then(function(referenceList) {
-			var branches = [];
-			async.each(referenceList, function(ref,callback) {
-				if (ref.isRemote()) {
-					var rName = ref.shorthand();
-					if (rName.indexOf(remoteName) === 0 && (!filter || rName.indexOf(filter) !== -1)) {
-						theRepo.getBranchCommit(ref)
-						.then(function(commit) {
-							branches.push(remoteBranchJSON(ref, commit, theRemote, fileDir));
-							callback();
-						});
-					} else {
-						callback(); 
+			referenceList = referenceList.filter(function(ref) {
+				if (ref.indexOf("refs/remotes/") === 0) {
+					var shortname = ref.replace("refs/remotes/", "");
+					if (shortname.indexOf(remoteName) === 0 && (!filter || shortname.indexOf(filter) !== -1)) {
+						return true;
 					}
-				} else {
-					callback();
 				}
-
-			}, function(err) {
-				if (err) {
-					return writeError(403, res);
-				}
-				res.status(200).json(remoteJSON(theRemote, fileDir, branches));
+			});
+			return Promise.all(referenceList.map(function(ref) {
+				return git.Reference.lookup(theRepo, ref);
+			}))
+			.then(function(referenceList) {
+				var branches = [];
+				async.each(referenceList, function(ref, callback) {
+					theRepo.getBranchCommit(ref)
+					.then(function(commit) {
+						branches.push(remoteBranchJSON(ref, commit, theRemote, fileDir));
+						callback();
+					}).catch(function(err) {
+						callback(err);
+					});
+				}, function(err) {
+					if (err) {
+						return writeError(403, res);
+					}
+					res.status(200).json(remoteJSON(theRemote, fileDir, branches));
+				});
 			});
 		});
 	} 
