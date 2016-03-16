@@ -545,7 +545,7 @@ define([
 	        	}
 	        }
 	        function defaultStartUp(err) {
-				options.plugins = plugins;
+				options.plugins = plugins.required;
 				options.defs = defs;
 				ternserver = new Tern.Server(options);
 				_loadFiles(ternserver, options);
@@ -578,13 +578,13 @@ define([
 			           file: file,
 			           end: offset
 		           }},
-		           function(error, type) {
+		            function(error, type) {
 		               if(error) {
 		                   callback(null, {error: typeof error === 'string' ? error : error.message, message: Messages['failedType']});
 		               } else {
 							callback(type);
 		               }
-		           });
+		            });
 		 	} else {
 		       callback(null, {message: Messages['failedTypeNoServer']});
 		   }
