@@ -167,7 +167,7 @@ function getClone(req, res) {
 			git.Repository.open(dir)
 			.then(function(repo) {
 				var base = path.basename(dir);
-				var location = api.join(fileRoot, dir.replace(req.user.workspaceDir + "/", ""));
+				var location = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 				pushRepo(repos, repo, base, location, null, [], function() { cb(); });
 	 		})
 			.catch(function() {
@@ -425,10 +425,14 @@ function handleRemoteError(task, err, cloneUrl) {
 function postClone(req, res) {
 	var cloneUrl = req.body.GitUrl;
 	var dirName = cloneUrl.substring(cloneUrl.lastIndexOf("/") + 1).replace(".git", "");
+	var folder = req.user.workspaceDir;
+	if (req.body.Path) {
+		folder = path.join(folder, req.body.Path.substring(fileRoot.length));
+	}
 	
 	var task = new tasks.Task(res);
 	
-	git.Clone.clone(cloneUrl, path.join(req.user.workspaceDir, dirName), {
+	git.Clone.clone(cloneUrl, path.join(folder, dirName), {
 		fetchOpts: {
 			callbacks: getRemoteCallbacks(req.body)
 		}
