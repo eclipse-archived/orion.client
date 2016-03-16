@@ -545,7 +545,7 @@ define([
 	        	}
 	        }
 	        function defaultStartUp(err) {
-				options.plugins = plugins;
+				options.plugins = plugins.required;
 				options.defs = defs;
 				ternserver = new Tern.Server(options);
 				_loadFiles(ternserver, options);
@@ -570,21 +570,23 @@ define([
 	     * @param {Number} offset The offset of the completion
 	     * @param {Function} callback The callback which is called to return the results
 	     */
-	    type: function type(file, offset, callback) {
+	    type: function type(file, offset, files, callback) {
 	    	if(ternserver) {
 	    		ternserver.request({
 		           query: {
 			           type: "type",  //$NON-NLS-1$
 			           file: file,
 			           end: offset
-		           }},
-		           function(error, type) {
+		           		},
+		       		files: files
+		       		},
+		            function(error, type) {
 		               if(error) {
 		                   callback(null, {error: typeof error === 'string' ? error : error.message, message: Messages['failedType']});
 		               } else {
 							callback(type);
 		               }
-		           });
+		            });
 		 	} else {
 		       callback(null, {message: Messages['failedTypeNoServer']});
 		   }

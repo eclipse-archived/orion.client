@@ -185,8 +185,8 @@ define([
      * @param {Number} offset The offset of the completion
      * @param {Function} callback The callback which is called to return the results
      */
-    JavaScript.prototype.Tern.type = function type(file, offset, callback) {
-    	ternserver.type(file, offset, callback);
+    JavaScript.prototype.Tern.type = function type(file, offset, files, callback) {
+    	ternserver.type(file, offset, files, callback);
     };
     
     return JavaScript;
