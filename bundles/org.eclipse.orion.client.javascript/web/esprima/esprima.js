@@ -30,7 +30,7 @@
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
+/* eslint-disable */
 /*jslint bitwise:true plusplus:true */
 /*global esprima:true, define:true, exports:true, window: true,
 throwError: true, generateStatement: true, peek: true,
@@ -1591,6 +1591,7 @@ parseStatement: true, parseSourceElement: true */
 	/**
 	 * @description Adds a dependency if it has not already been added
 	 * @param {Object} node The AST node
+	 * ORION
 	 */
 	function addDep(node) {
 		if(extra.deps && node.type === Syntax.Literal) {
@@ -1837,7 +1838,7 @@ parseStatement: true, parseSourceElement: true */
             this.type = Syntax.CallExpression;
             this.callee = callee;
             this.arguments = args;
-            collectDeps(callee, args);
+            collectDeps(callee, args); //ORION
             this.finish();
             return this;
         },
@@ -1888,7 +1889,7 @@ parseStatement: true, parseSourceElement: true */
 
         finishExpressionStatement: function (expression) {
             this.type = Syntax.ExpressionStatement;
-            this.expression = expression;
+            this.expression = expression ? expression : recoveredNode(this, 'Expression');
             this.finish();
             return this;
         },
@@ -1948,7 +1949,7 @@ parseStatement: true, parseSourceElement: true */
 
         finishIfStatement: function (test, consequent, alternate) {
             this.type = Syntax.IfStatement;
-            this.test = typeof test !== 'undefined' && test !== null ? test : recoveredNode(this, 'Expression'); //ORION
+            this.test = test ? test : recoveredNode(this, 'Expression'); //ORION
             this.consequent = consequent ? consequent : recoveredNode(this, 'Statement'); //ORION
             this.alternate = alternate;
             this.finish();
@@ -1958,7 +1959,7 @@ parseStatement: true, parseSourceElement: true */
         finishLabeledStatement: function (label, body) {
             this.type = Syntax.LabeledStatement;
             this.label = label;
-            this.body = body;
+            this.body = body ? body : recoveredNode(this, 'Statement'); //ORION
             this.finish();
             return this;
         },
@@ -1987,7 +1988,7 @@ parseStatement: true, parseSourceElement: true */
             this.type = Syntax.NewExpression;
             this.callee = callee;
             this.arguments = args;
-            collectDeps(callee, args);
+            collectDeps(callee, args); //ORION
             this.finish();
             return this;
         },
@@ -2621,7 +2622,7 @@ parseStatement: true, parseSourceElement: true */
             }
         }
 
-        expectSkipTo(')');
+        expectSkipTo(')'); //ORION
 
         return args;
     }
@@ -3128,7 +3129,7 @@ parseStatement: true, parseSourceElement: true */
 
         block = parseStatementList();
 
-        expectSkipTo('}');
+        expectSkipTo('}'); //ORION
 
         return node.finishBlockStatement(block);
     }
@@ -3227,9 +3228,6 @@ parseStatement: true, parseSourceElement: true */
     function parseExpressionStatement(node) {
         var expr = parseExpression();
         consumeSemicolon();
-        if(!expr) {
-        	expr = recoveredNode(node);  //ORION don't insert null expressions
-        }
         return node.finishExpressionStatement(expr);
     }
 
@@ -3244,7 +3242,7 @@ parseStatement: true, parseSourceElement: true */
 
         test = parseExpression();
 
-        expectSkipTo(')', '{');
+        expectSkipTo(')', '{'); //ORION
 
         consequent = parseStatement();
 		
@@ -3278,7 +3276,7 @@ parseStatement: true, parseSourceElement: true */
 
         test = parseExpression();
 
-        expectSkipTo(')', '{');
+        expectSkipTo(')', '{'); //ORION
 
         if (match(';')) {
             lex();
@@ -3296,7 +3294,7 @@ parseStatement: true, parseSourceElement: true */
 
         test = parseExpression();
 
-        expectSkipTo(')', '{');
+        expectSkipTo(')', '{'); //ORION
 
         oldInIteration = state.inIteration;
         state.inIteration = true;
@@ -3531,7 +3529,7 @@ parseStatement: true, parseSourceElement: true */
 
         object = parseExpression();
 
-        expectSkipTo(')', '{');
+        expectSkipTo(')', '{'); //ORION
 
         body = parseStatement();
 
@@ -3560,7 +3558,7 @@ parseStatement: true, parseSourceElement: true */
                 break;
             }
             statement = parseStatement();
-            if(typeof statement === 'undefined' || statement === null) {
+            if(!statement) {
                 break;
             }
             consequent.push(statement);
@@ -3774,10 +3772,7 @@ parseStatement: true, parseSourceElement: true */
         }
 
         consumeSemicolon();
-		if(!expr) {
-			expr = recoveredNode(node); //ORION do not set a null expression
-		}
-        return node.finishExpressionStatement(expr);
+		return node.finishExpressionStatement(expr);
     }
 
     // 13 Function Definition
@@ -3831,7 +3826,7 @@ parseStatement: true, parseSourceElement: true */
                 break;
             }
             sourceElement = parseSourceElement();
-            if (typeof sourceElement === 'undefined' || sourceElement == null) {
+            if (!sourceElement) {
                 break;
             }
             sourceElements.push(sourceElement);
@@ -3841,7 +3836,7 @@ parseStatement: true, parseSourceElement: true */
             start = index;
         }
 
-        expectSkipTo('}');
+        expectSkipTo('}'); //ORION
 
         state.labelSet = oldLabelSet;
         state.inIteration = oldInIteration;
@@ -4073,7 +4068,7 @@ parseStatement: true, parseSourceElement: true */
         while (startIndex < length) {
             sourceElement = parseSourceElement();
             /* istanbul ignore if */
-            if (typeof sourceElement === 'undefined' || sourceElement === null) {
+            if (!sourceElement) {
                 break;
             }
             sourceElements.push(sourceElement);
@@ -4290,6 +4285,7 @@ parseStatement: true, parseSourceElement: true */
             if (typeof extra.errors !== 'undefined') {
                 program.errors = extra.errors;
             }
+            //ORION
             if(typeof(extra.deps) !== 'undefined') {
             	program.dependencies = extra.deps;
             	program.environments = extra.envs;
