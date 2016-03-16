@@ -80,8 +80,7 @@ function startServer(options) {
 			root: '/filesearch',
 			fileRoot: '/file'
 		}));
-		app.use('/prefs', checkAuthenticated, orionPrefs({
-		}));
+		app.use('/prefs', checkAuthenticated, orionPrefs(options));
 		app.use('/metrics', orionMetrics.router(options));
 
 		//error handling

@@ -25,77 +25,100 @@ var auth = require('./lib/middleware/auth'),
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
 var port = args.port || args.p || process.env.PORT || 8081;
-var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
 
-argslib.readConfigFile(configFile, function(err, configParams) {
-	configParams = configParams || {};
+function startServer() {
+	var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
 
-	var workspaceArg = args.workspace || args.w;
-	var workspaceConfigParam = configParams.workspace;
-	var workspaceDir;
-	if (workspaceArg) {
-		// -workspace passed in command line is relative to cwd
-		workspaceDir = path.resolve(process.cwd(), workspaceArg);
-	} else if (workspaceConfigParam) {
-		 // workspace param in orion.conf is relative to the server install dir.
-		workspaceDir = path.resolve(__dirname, workspaceConfigParam);
-	} else {
-		workspaceDir = path.join(__dirname, '.workspace');
-	}
+	argslib.readConfigFile(configFile, function(err, configParams) {
+		configParams = configParams || {};
 
-	argslib.createDirs([workspaceDir], function() {
-		var passwordFile = args.password || args.pwd;
-		argslib.readPasswordFile(passwordFile, function(password) {
-			var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
-			var log = Object.prototype.hasOwnProperty.call(args, 'log');
-			if (dev) {
-				console.log('Development mode: client code will not be cached.');
-			}
-			if (passwordFile) {
-				console.log(util.format('Using password from file: %s', passwordFile));
-			}
-			console.log(util.format('Using workspace: %s', workspaceDir));
-			console.log(util.format('Listening on port %d...', port));
+		var workspaceArg = args.workspace || args.w;
+		var workspaceConfigParam = configParams.workspace;
+		var workspaceDir;
+		if (workspaceArg) {
+			// -workspace passed in command line is relative to cwd
+			workspaceDir = path.resolve(process.cwd(), workspaceArg);
+		} else if (workspaceConfigParam) {
+			 // workspace param in orion.conf is relative to the server install dir.
+			workspaceDir = path.resolve(__dirname, workspaceConfigParam);
+		} else {
+			workspaceDir = path.join(__dirname, '.workspace');
+		}
 
-			var server;
-			try {
-				// create web server
-				var orionMiddleware = orion({
-					workspaceDir: workspaceDir,
-					configParams: configParams,
-					maxAge: (dev ? 0 : undefined),
+		argslib.createDirs([workspaceDir], function() {
+			var passwordFile = args.password || args.pwd;
+			argslib.readPasswordFile(passwordFile, function(password) {
+				var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
+				var log = Object.prototype.hasOwnProperty.call(args, 'log');
+				if (dev) {
+					console.log('Development mode: client code will not be cached.');
+				}
+				if (passwordFile) {
+					console.log(util.format('Using password from file: %s', passwordFile));
+				}
+				console.log(util.format('Using workspace: %s', workspaceDir));
+				console.log(util.format('Listening on port %d...', port));
+
+				var server;
+				try {
+					// create web server
+					var orionMiddleware = orion({
+						workspaceDir: workspaceDir,
+						configParams: configParams,
+						maxAge: (dev ? 0 : undefined),
+					});
+					
+					// add socketIO and app support
+					var app = express();
+					if (configParams["orion.https.key"] && configParams["orion.https.cert"]) {
+						server = https.createServer({
+							key: fs.readFileSync(configParams["orion.https.key"]),
+							cert: fs.readFileSync(configParams["orion.https.cert"])
+						}, app);
+					}
+					else {
+						server = http.createServer(app);
+					}
+
+					if (log) {
+						app.use(express.logger('tiny'));
+					}
+					if (password || configParams.pwd) {
+						app.use(auth(password || configParams.pwd));
+					}
+					app.use(compression());
+					app.use(orionMiddleware);
+					server.listen(port);
+					
+					var io = socketio.listen(server, { 'log level': 1 });
+					ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
+				} catch (e) {
+					console.error(e && e.stack);
+				}
+				server.on('error', function(err) {
+					console.log(err);
 				});
-				
-				// add socketIO and app support
-				var app = express();
-				if (configParams["orion.https.key"] && configParams["orion.https.cert"]) {
-					server = https.createServer({
-						key: fs.readFileSync(configParams["orion.https.key"]),
-						cert: fs.readFileSync(configParams["orion.https.cert"])
-					}, app);
-				}
-				else {
-					server = http.createServer(app);
-				}
-
-				if (log) {
-					app.use(express.logger('tiny'));
-				}
-				if (password || configParams.pwd) {
-					app.use(auth(password || configParams.pwd));
-				}
-				app.use(compression());
-				app.use(orionMiddleware);
-				server.listen(port);
-				
-				var io = socketio.listen(server, { 'log level': 1 });
-				ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
-			} catch (e) {
-				console.error(e && e.stack);
-			}
-			server.on('error', function(err) {
-				console.log(err);
 			});
 		});
 	});
-});
+}
+
+if (args.ui) {
+	var electron = require('electron');
+	var mainWindow = null;
+	electron.app.on('ready', function() {
+		startServer();
+		function createWindow(url){
+			var nextWindow = new electron.BrowserWindow({width: 1024, height: 800, title: "Orion"});
+			nextWindow.loadURL("file:///" + __dirname + "/lib/main.html#" + encodeURI(url));
+			nextWindow.webContents.on("new-window", function(event, url, frameName, options){
+				event.preventDefault();
+				createWindow(url);
+			});
+			return nextWindow;
+		}
+		mainWindow = createWindow("http://localhost:" + port);
+	});
+} else {
+	startServer();
+}

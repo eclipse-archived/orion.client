@@ -11,11 +11,13 @@
 /*eslint-env node*/
 'use strict'
 var api = require('../api'),
+ 	args = require('../args'),
     bodyParser = require('body-parser'),
     express = require('express'),
     Debug = require('debug'),
     nodePath = require('path'),
     nodeUrl = require('url'),
+    os = require('os'), 
     Preference = require('../model/pref'),
     Promise = require('bluebird');
 
@@ -78,35 +80,38 @@ function PrefsController(options) {
 	function acquirePrefs(req) {
 		var app = req.app, prefs = app.locals.prefs;
 		var getPrefs;
-		var prefFile = nodePath.join(req.user.workspaceDir, PREF_FILENAME);
-		if (prefs) {
-			debug('Using prefs from memory');
-			scheduleFlush(app, prefFile);
-			getPrefs = Promise.resolve(prefs);
-		} else {
-			getPrefs = fs.readFileAsync(prefFile, 'utf8')
-			.catch(function(err) {
-				if (err.code === 'ENOENT') {
-					return; // New prefs file: suppress error
-				}
-				throw err;
-			})
-			.then(function(contents) {
-				if (contents) {
-					debug('Read pref file from disk (len: %d)', contents.length);
-				} else {
-					debug('No pref file exists, creating new');
-				}
-				app.locals.prefs = new Preference(contents || null);
+		var prefFolder = options.configParams["orion.single.user"] ? os.homedir() : req.user.workspaceDir;
+		return args.createDirs([prefFolder, ".orion"]).then(function() {
+			var prefFile = nodePath.join(prefFolder, ".orion", PREF_FILENAME);
+			if (prefs) {
+				debug('Using prefs from memory');
 				scheduleFlush(app, prefFile);
+				getPrefs = Promise.resolve(prefs);
+			} else {
+				getPrefs = fs.readFileAsync(prefFile, 'utf8')
+				.catch(function(err) {
+					if (err.code === 'ENOENT') {
+						return; // New prefs file: suppress error
+					}
+					throw err;
+				})
+				.then(function(contents) {
+					if (contents) {
+						debug('Read pref file from disk (len: %d)', contents.length);
+					} else {
+						debug('No pref file exists, creating new');
+					}
+					app.locals.prefs = new Preference(contents || null);
+					scheduleFlush(app, prefFile);
+				});
+			}
+			return getPrefs
+			.then(function() {
+				var urlObj = req._parsedUrl || nodeUrl.parse(req.url);
+				req.prefs = app.locals.prefs;
+				req.prefPath = urlObj.pathname;
+				req.prefNode = req.prefs.get(req.prefPath);
 			});
-		}
-		return getPrefs
-		.then(function() {
-			var urlObj = req._parsedUrl || nodeUrl.parse(req.url);
-			req.prefs = app.locals.prefs;
-			req.prefPath = urlObj.pathname;
-			req.prefNode = req.prefs.get(req.prefPath);
 		});
 	}
 
