@@ -241,15 +241,18 @@ define([
 					this.projectLocation = project.Location;
 					this.scriptResolver.setSearchLocation(project.Location);
 					var c = project.Children;
+					var tpf;
 					for(var i = 0, len = c.length; i < len; i++) {
 						if(".tern-project" === c[i].Name) {
-							this.currentFile = c[i].Location;
-							this.starting();
-							return this.parseTernJSON(this.currentFile).then(function(jsonOptions){
-								this.json = jsonOptions;
-								return this.loadTernProjectOptions(jsonOptions);
-							}.bind(this));
+							tpf = c[i].Location;
+							break;
 						}
+					}
+					if(typeof tpf === 'string') {
+						this.refresh(tpf);
+					} else {
+						//no .tern-project - request default startup
+						this.loadTernProjectOptions();
 					}
 				}
 			}

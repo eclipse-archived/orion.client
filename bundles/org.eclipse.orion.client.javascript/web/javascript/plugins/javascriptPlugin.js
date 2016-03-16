@@ -99,9 +99,8 @@ define([
 
 		var ternReady = false,
 			workerReady = false,
-			startCount = 0,
-			TRACE,
-			pendingStart = Object.create(null),
+			pendingStart,
+			TRACE = localStorage.js_message_trace === "true",
 			messageQueue = [], // for all other requests
 			modifyQueue = []; // for add and removes only
 		
@@ -130,20 +129,7 @@ define([
 	 * @callback 
 	 */
 	WrappedWorker.prototype.postMessage = function(msg, f) {
-		var starting = msg.request === "start_server";
-		if(starting) {
-			if(!workerReady) {
-				pendingStart.msg = msg;
-				pendingStart.f = f;
-				return; //don't queue start_server requests
-			}
-			if(startCount > 0 && msg.args.initial) {
-				return;
-			}
-			startCount++;
-			ternReady = false;
-		}
-		if(ternReady || starting || msg.request === 'read') { //configuration reads can happen while the server is starting
+		if(ternReady || msg.request === 'read') { //configuration reads can happen while the server is starting
 			if(msg !== null && typeof msg === 'object') {
 				if(typeof msg.messageID !== 'number' && typeof msg.ternID !== 'number') {
 					//don't overwrite an id from a tern-side request
@@ -152,17 +138,26 @@ define([
 				}
 			}
 			if(TRACE) {
-				console.log("postMessage ("+this.messageId+") - SENT "+JSON.stringify(msg)); //$NON-NLS-1$ //$NON-NLS-2$
+				console.log("postMessage ("+this.messageId+") - SENT "+msg.request); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			this.worker.postMessage(msg);
+		} else if(msg.request === "start_server") {
+			if(!workerReady) {
+				pendingStart = {msg: msg, f: f};
+			} else {
+				if(TRACE) {
+					console.log("postMessage ("+this.messageId+") - START "+JSON.stringify(msg.args)); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				this.worker.postMessage(msg);
+			}
 		} else if (msg.request === "addFile" || msg.request === "delFile") {
 			if(TRACE) {
-				console.log("postMessage ("+this.messageId+") - MODIFY QUEUED: "+JSON.stringify(msg)); //$NON-NLS-1$ //$NON-NLS-2$
+				console.log("postMessage ("+this.messageId+") - MODIFY QUEUED: "+msg.request); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			modifyQueue.push({msg: msg, f: f});
 		} else {
 			if(TRACE) {
-				console.log("postMessage ("+this.messageId+") - MESSAGE QUEUED: "+JSON.stringify(msg)); //$NON-NLS-1$ //$NON-NLS-2$
+				console.log("postMessage ("+this.messageId+") - MESSAGE QUEUED: "+msg.request); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			messageQueue.push({msg: msg, f: f});
 		}
@@ -184,20 +179,20 @@ define([
 			 */
 			'worker_ready': function(response) {
 				if(TRACE) {
-					console.log("worker_ready ("+ternWorker.messageId+"): "+JSON.stringify(response)); //$NON-NLS-1$ //$NON-NLS-2$
+					console.log("worker_ready ("+ternWorker.messageId+"): "+response.request); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				workerReady = true;
-				if (!pendingStart.msg || !pendingStart.msg.request){
-					pendingStart.msg = {request: "start_server", args: {initial: true}}; //$NON-NLS-1$
+				if(pendingStart) {
+					ternWorker.postMessage(pendingStart.msg, pendingStart.f);
+					pendingStart = null;
 				}
-				ternWorker.postMessage(pendingStart.msg, pendingStart.f);
 			},
 			/**
 			 * @callback
 			 */
 			'start_server': function(response) {
 				if(TRACE) {
-					console.log("server_ready ("+ternWorker.messageId+"): "+JSON.stringify(response)); //$NON-NLS-1$ //$NON-NLS-2$
+					console.log("server_ready ("+ternWorker.messageId+"): "+response.request); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				serverReady();
 			}
@@ -292,28 +287,25 @@ define([
 		 * @since 10.0
 		 */
 		function serverReady() {
-			startCount--;
-			if(startCount === 0) {
-				ternReady = true;
-				// process all add/remove first
-				for(var i = 0, len = modifyQueue.length; i < len; i++) {
-					var item = modifyQueue[i];
-					if(TRACE) {
-						console.log("clearing MODIFY queue: "+JSON.stringify(item.msg)); //$NON-NLS-1$
-					}
-					ternWorker.postMessage(item.msg, item.f);
+			ternReady = true;
+			// process all add/remove first
+			for(var i = 0, len = modifyQueue.length; i < len; i++) {
+				var item = modifyQueue[i];
+				if(TRACE) {
+					console.log("clearing MODIFY queue: "+item.msg.request); //$NON-NLS-1$
 				}
-				modifyQueue = [];
-				// process remaining pending requests
-				for(i = 0, len = messageQueue.length; i < len; i++) {
-					item = messageQueue[i];
-					if(TRACE) {
-						console.log("clearing MESSAGE queue: "+JSON.stringify(item.msg)); //$NON-NLS-1$
-					}
-					ternWorker.postMessage(item.msg, item.f);
-				}
-				messageQueue = [];
+				ternWorker.postMessage(item.msg, item.f);
 			}
+			modifyQueue = [];
+			// process remaining pending requests
+			for(i = 0, len = messageQueue.length; i < len; i++) {
+				item = messageQueue[i];
+				if(TRACE) {
+					console.log("clearing MESSAGE queue: "+item.msg.request); //$NON-NLS-1$
+				}
+				ternWorker.postMessage(item.msg, item.f);
+			}
+			messageQueue = [];
 		}
 
     	/**
