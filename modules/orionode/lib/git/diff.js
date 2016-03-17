@@ -11,6 +11,7 @@
 /*eslint-env node */
 var git = require('nodegit');
 var url = require('url');
+var api = require('../api'), writeError = api.writeError;
 var clone = require('./clone');
 var path = require('path');
 var express = require('express');
