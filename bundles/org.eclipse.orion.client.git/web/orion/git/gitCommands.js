@@ -1644,13 +1644,14 @@ var exports = {};
 					});
 				});
 			};
-			if (data.parameters.valueFor("url") && !data.parameters.optionsRequested) { //$NON-NLS-0$
-				cloneFunction(data.parameters.valueFor("url")); //$NON-NLS-0$
+			var url = data.parameters.valueFor("url").replace(/^git clone /, ""); //$NON-NLS-0$
+			if (url && !data.parameters.optionsRequested) {
+				cloneFunction(url); //$NON-NLS-0$
 			} else {
 				var dialog = new mCloneGitRepository.CloneGitRepositoryDialog({
 					serviceRegistry: serviceRegistry,
 					fileClient: fileClient,
-					url: data.parameters.valueFor("url"), //$NON-NLS-0$
+					url: url,
 					alwaysShowAdvanced: data.parameters.optionsRequested,
 					func: cloneFunction,
 					showSubmoduleOptions:true
