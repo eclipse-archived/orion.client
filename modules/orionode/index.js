@@ -21,7 +21,6 @@ var express = require('express'),
 	orionSearch = require('./lib/search'),
 	orionMetrics = require('./lib/metrics'),
 	orionSites = require('./lib/sites'),
-	orionUser = require('./lib/user'),
 	term = require('term.js');
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
@@ -51,7 +50,20 @@ function startServer(options) {
 			}
 		}
 
-		app.use(orionUser(options));
+		if (options.configParams["orion.single.user"]) {
+			app.use(/* @callback */ function(req, res, next){
+				req.user = {UserName: "anonymous"};
+				next();
+			});
+			app.post('/login', function(req, res) {
+				if (!req.user) {
+					return res.status(200).end();
+				}
+				return res.status(200).json(req.user);
+			});
+		} else {
+			app.use(require('./lib/user')(options));
+		}
 		app.use('/site', checkAuthenticated, orionSites(options));
 
 		app.use(term.middleware());
