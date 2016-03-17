@@ -17,8 +17,8 @@ define([
 	"javascript/finder",
 	"eslint/lib/eslint",
 	"eslint/lib/source-code",
-	"javascript/astManager",
-], function(tern, Finder, Eslint, SourceCode, ASTManager) {
+	"javascript/util",
+], function(tern, Finder, Eslint, SourceCode, Util) {
 
 	tern.registerPlugin("eslint", /* @callback */ function(server, options) {
 		return {
@@ -55,13 +55,13 @@ define([
 				errorMap[error.index] = msg;
 				if(error.type) {
 					switch(error.type) {
-						case ASTManager.ErrorTypes.Unexpected:
+						case Util.ErrorTypes.Unexpected:
 							if(token) {
 								error.args = {0: token.value, nls: "syntaxErrorBadToken"}; //$NON-NLS-0$
 								error.message = msg = error.args.nls;
 							}
 							break;
-						case ASTManager.ErrorTypes.EndOfInput:
+						case Util.ErrorTypes.EndOfInput:
 							error.args = {nls: "syntaxErrorIncomplete"}; //$NON-NLS-0$
 							error.message = error.args.nls;
 							break;
