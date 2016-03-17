@@ -13,6 +13,7 @@ var api = require('../api'), writeError = api.writeError;
 var git = require('nodegit');
 var clone = require('./clone');
 var path = require('path');
+var fs = require('fs');
 var express = require('express');
 var bodyParser = require('body-parser');
 
@@ -60,11 +61,12 @@ function getIndex(req, res) {
 }
 
 function putIndex(req, res) {
-	var index;
+	var index, repo;
 	var filePath = path.join(req.user.workspaceDir, req.params["0"]);
 
 	return clone.getRepo(req)
-	.then(function(repo) {
+	.then(function(_repo) {
+		repo = _repo;
 		filePath = filePath.substring(repo.workdir().length);
 		return repo.openIndex();
 	})
@@ -73,12 +75,17 @@ function putIndex(req, res) {
 		return index.read(1);
 	})
 	.then(function() {
+		function doPath(p) {
+			if (fs.existsSync(path.join(repo.workdir(), p))) {
+				index.addByPath(p);
+			} else {
+				index.removeByPath(p);
+			}
+		}
 		if (req.body.Path) {
-			req.body.Path.forEach(function(path) {
-				index.addByPath(path);
-			});
+			req.body.Path.forEach(doPath);
 		} else {
-			return index.addByPath(filePath);
+			return doPath(filePath);
 		}
 	})
 	.then(function() {
@@ -88,8 +95,10 @@ function putIndex(req, res) {
 	.then(function() {
 		return index.writeTree();
 	})
-	.done(function() {
+	.then(function() {
 		res.status(200).end();
+	}).catch(function(err) {
+		writeError(404, res, err.message);
 	});
 }
 
@@ -137,8 +146,10 @@ function postIndex(req, res) {
 			
 		return git.Reset.default(repo, commit, [filePath]);
 	})
-	.done(function() {
+	.then(function() {
 		res.status(200).end();
+	}).catch(function(err) {
+		writeError(404, res, err.message);
 	});
 }
 };

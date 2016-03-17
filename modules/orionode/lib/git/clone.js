@@ -67,8 +67,13 @@ function cloneJSON(base, location, url, parents, submodules) {
 function getRepo(req) {
 	var u = url.parse(req.url, true);
 	var restpath = u.pathname.split(fileRoot)[1];
-	if (!restpath) return "";
-	return git.Repository.discover(api.join(req.user.workspaceDir, restpath), 0, req.user.workspaceDir).then(function(buf) {
+	if (!restpath) return Promise.reject(new Error("Forbidden"));
+	var p = path.join(req.user.workspaceDir, restpath);
+	while (!fs.existsSync(p)) {
+		p = path.dirname(p);
+		if (p.length <= req.user.workspaceDir) return Promise.reject(new Error("Forbidden"));
+	}
+	return git.Repository.discover(p, 0, req.user.workspaceDir).then(function(buf) {
 		return git.Repository.open(buf.toString());
 	});
 }

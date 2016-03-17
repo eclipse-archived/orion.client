@@ -56,6 +56,9 @@ function getDiff(req, res) {
 		.then(function(diff) {
 			processDiff(diff, filePath, paths, fileDir, req, res, parts.indexOf("diff") !== -1, parts.indexOf("uris") !== -1, parts.indexOf("diffs") !== -1, query, scope);
 		});
+	})
+	.catch(function(err) {
+		writeError(404, res, err.message);
 	});
 }
 
