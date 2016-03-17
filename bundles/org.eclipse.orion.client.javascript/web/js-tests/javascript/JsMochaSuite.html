@@ -40,7 +40,7 @@
 				'js-tests/javascript/ternProjectFileTests',
 				'js-tests/javascript/ternProjectManagerTests',			
 				'js-tests/javascript/ternProjectValidatorTests'
-				], function(worker, crossFileTests, astManagerTests, ternAssistTests, ternCommandTests, esprimaTolerantTests, dependencyTests, finderTests, occurrencesTests, outlinerTests, validatorTests, lruTests, quickfixTests, 
+				], function(worker, crossFileTests, astManagerTests, ternAssistIndexTests, ternAssistTests, ternCommandTests, esprimaTolerantTests, dependencyTests, finderTests, occurrencesTests, outlinerTests, validatorTests, lruTests, quickfixTests, 
 							eslintCoreTests, scriptResolverTests, sigparserTests, ternProjectTests, ternProjectValidatorTests) {
 					var testworker;
 					before("reset timeout", function(done) {
@@ -65,6 +65,7 @@
 					quickfixTests(testworker);
 					scriptResolverTests(testworker);
 					sigparserTests(testworker);
+					ternAssistIndexTests(testworker);
 					ternAssistTests(testworker);
 					ternCommandTests(testworker);
 					validatorTests(testworker);
