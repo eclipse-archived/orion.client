@@ -23,15 +23,14 @@ define([
 	var templates = [
 	/* eslint-disable missing-nls */
 		{
-			prefix: "express",
-			name: "express",
+			name: "express require",
 			nodes: {top:true, member:false, prop:false},
 			description: " - Node.js require statement for Express",
-			template: "var ${name} = require('express');"
+			template: "var ${app} = require('express');"
 		},
 		{
-			prefix: "express",
 			name: "express app",
+			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Express app",
 			template: "var express = require('express');\n" +
 					  "var ${app} = express();\n" + 
@@ -39,7 +38,6 @@ define([
 					  "app.listen(${timeout});\n"
 		},
 		{
-			prefix: "express",
 			name: "express configure",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create an Express app configure statement",
@@ -48,7 +46,6 @@ define([
 					  "});"
 		},
 		{
-			prefix: "express",
 			name: "express specific configure",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a specific Express app configure statement",
@@ -57,7 +54,6 @@ define([
 					  "});"
 		},
 		{
-			prefix: "express",
 			name: "express app get",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Express app.get call",
@@ -65,35 +61,30 @@ define([
 					  "\t${cursor}\n});\n"
 		},
 		{
-			prefix: "express",
 			name: "express app set",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Express app set call",
 			template: "app.set(${id}, ${value});\n"
 		},
 		{
-			prefix: "express",
 			name: "express app use",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Express app use statement",
 			template: "app.use(${fnOrObject});\n"
 		},
 		{
-			prefix: "express",
 			name: "express app engine",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Express app engine statement",
 			template: "app.engine(${fnOrObject});\n"
 		},
 		{
-		    prefix: "express",
 			name: "express app param",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Express app param statement",
 			template: "app.param(${id}, ${value});\n"
 		},
 		{
-			prefix: "express",
 			name: "express app error use",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Express app error handling use statement",
@@ -119,7 +110,6 @@ define([
 		if(tmps) {
 			tmps.forEach(function(template) {
 				gather(template.name, null, 0, function(c) {
-					c.prefix = template.prefix;
 					c.description = template.description;
 					c.template = template.template;
 					c.segments = template.segments;

@@ -708,6 +708,9 @@
       });
       hookname = "variableCompletion";
     }
+    if (srv.passes[hookname])
+      srv.passes[hookname].forEach(function(hook) {hook(file, wordStart, wordEnd, gather);}); //ORION
+    
     if (query.sort !== false) completions.sort(compareCompletions);
     srv.cx.completingProperty = null;
 
