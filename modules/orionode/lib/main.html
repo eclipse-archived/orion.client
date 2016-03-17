@@ -14,6 +14,7 @@ body {
 }
 .tabs {
 	cursor: default;
+	display: flex;
 	position: absolute;
 	top: 0;
 	height: 30px;
@@ -23,10 +24,24 @@ body {
 	box-sizing: border-box;
 	background: #26343F;
 }
+.tabButtons {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+.tabButton {
+	background: transparent;
+	color: #676f73;
+	border: none;
+	font-size: 18px;
+	outline: none;
+}
+.tabButton:hover {
+	color: white;
+}
 .tabs ul {
 	list-style: none;
 	-webkit-margin-before: 0;
-	-webkit-padding-start: 15px;
+	-webkit-padding-start: 0;
 }
 .tabs li {
 	position: relative;
@@ -103,9 +118,46 @@ body {
 		});
 	}
 	
+	function redrawButtons() {
+		var bar = document.querySelector("#bar");
+		var buttons = document.createElement("span");
+		buttons.classList.add("tabButtons");
+		var back = document.createElement("button");
+		back.textContent = "<";
+		back.classList.add("tabButton");
+		back.addEventListener("click", function() {
+			var active = getActiveTab();
+			if (!active) return;
+			active.contentWindow.history.back();
+		});
+		buttons.appendChild(back);
+		var forward = document.createElement("button");
+		forward.textContent = ">";
+		forward.classList.add("tabButton");
+		forward.addEventListener("click", function() {
+			var active = getActiveTab();
+			if (!active) return;
+			active.contentWindow.history.forward();
+		});
+		buttons.appendChild(forward);
+		var refresh = document.createElement("button");
+		refresh.textContent = "\u27F2";
+		refresh.classList.add("tabButton");
+		refresh.addEventListener("click", function() {
+			var active = getActiveTab();
+			if (!active) return;
+			active.contentWindow.location.reload();
+		});
+		buttons.appendChild(refresh);
+		bar.appendChild(buttons);
+	}
+	
 	function redrawTabs() {
-		var bar = document.querySelector("#tabs");
-		bar.innerHTML = "";
+		var bar = document.querySelector("#bar");
+		var oldTabs = bar.querySelector("ul");
+		if (oldTabs) {
+			oldTabs.parentNode.removeChild(oldTabs);
+		}
 		var ul = document.createElement("ul");
 		var tabs = document.querySelectorAll(".tabContent");
 		if (!getActiveTab() && tabs.length) {
@@ -155,6 +207,7 @@ body {
 	
 	function load() {
 		createTab(window.location.hash.substr(1));
+		redrawButtons();
 	}
 	
 	function createTab(url) {
@@ -178,6 +231,6 @@ body {
 </script>
 </head>
 <body onload="load()">
-	<div class="tabs" id="tabs"></div>
+	<nav class="tabs" id="bar"></nav>
 </body>
 </html>
