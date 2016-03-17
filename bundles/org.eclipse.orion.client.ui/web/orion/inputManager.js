@@ -222,7 +222,7 @@ define([
 						statusService = this.statusService;
 					}
 					handleError(statusService, error);
-					this._setNoInput();
+					this._setNoInput(true);
 				}.bind(this);
 				this._acceptPatch = null;
 				// Read metadata
