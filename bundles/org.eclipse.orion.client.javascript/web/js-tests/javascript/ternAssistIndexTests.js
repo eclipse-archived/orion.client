@@ -229,26 +229,30 @@ define([
 						['app.configure(name, function() {\n	app.set(id, value);\n});', 'express specific configure - create a specific Express app configure statement']
 					]);
 				});
-//				it('Express completions - app.u', function(done) {
-//					var options = {
-//						buffer: "/* eslint-env node, express */\nvar express = require('express'); var app = express(); app.",
-//						prefix: "",
-//						offset: 91,
-//						callback: done
-//					};
-//					testProposals(options, [
-//					]);
-//				});
-//				it('Express completions - app.static', function(done) {
-//					var options = {
-//						buffer: "/* eslint-env node, express */\nvar express = require('express'); express.stati",
-//						prefix: "ex",
-//						offset: 79,
-//						callback: done
-//					};
-//					testProposals(options, [
-//					]);
-//				});
+				it('Express completions - app.u', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, express */\nvar express = require('express'); var app = express(); app.u",
+						prefix: "",
+						offset: 91,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'express'],
+						['use(fn)', 'use(fn)', 'Proxy `Router#use()`']
+					]);
+				});
+				it('Express completions - app.static', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, express */\nvar express = require('express'); express.stati",
+						prefix: "stati",
+						offset: 78,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'express'],
+						['static(name)', 'static(name)', 'Built-in middleware function.']
+					]);
+				});
 			});	
 		});
 	};
