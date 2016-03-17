@@ -25,7 +25,7 @@ define({
 	"Next": "Next",
 	"Previous": "Previous",
 	"Replace": "Replace",
-	"Replace...": "Preview Replacement",
+	"Replace...": "Preview",
 	"Replace All": "Replace All",
 	"Show Replace": "Switch to Replace Mode",
 	"Hide Replace": "Switch to Search Mode",
