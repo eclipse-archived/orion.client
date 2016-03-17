@@ -112,7 +112,6 @@ if (args.ui) {
 			nextWindow.loadURL("file:///" + __dirname + "/lib/main.html#" + encodeURI(url));
 			nextWindow.webContents.on("new-window", function(event, url, frameName, disposition, options){
 				event.preventDefault();
-				console.log(disposition);
 				if (false) {
 					createWindow(url);
 				} else {

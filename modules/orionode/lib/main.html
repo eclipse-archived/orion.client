@@ -16,11 +16,12 @@ body {
 	cursor: default;
 	position: absolute;
 	top: 0;
-	height: 25px;
+	height: 30px;
 	width: 100%;
 	color: #bdc1c3;
 	border-bottom: 1px solid #676f73;
 	box-sizing: border-box;
+	background: #26343F;
 }
 .tabs ul {
 	list-style: none;
@@ -33,31 +34,34 @@ body {
 	box-sizing: border-box;
 	top: 3px;
 	display: block;
-	border: 1px solid transparent;
-	height: 22px;
-	padding: 4px;
+	border: 1px solid #676f73;
+	border-right: none;
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	height: 26px;
+	padding: 6px;
 	padding-left: 5px;
 	padding-right: 5px;
 	float: left;
+	background: #3b4b54;
 }
 .tabs li.active {
 	color: white;
 	background: #26343F;	
-	border-color: #676f73;
 	border-bottom-color: transparent;
-	border-top-left-radius: 3px;
-	border-top-right-radius: 3px;
-
+}
+.tabs li:last-child {
+	border-right: 1px solid #676f73;
 }
 .tabs li:hover {
 	color: white;
 }
 .tabContent {
 	position: absolute;
-	top: 25px;
+	top: 30px;
 	left: 0;
 	width: 100%;
-	height: calc(100% - 25px);
+	height: calc(100% - 30px);
 	background: #26343F;
 	visibility: hidden;
 }
