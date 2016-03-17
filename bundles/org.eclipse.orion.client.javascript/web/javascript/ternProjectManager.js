@@ -166,7 +166,7 @@ define([
 		 * @param {Object} jsonOptions options to load into Tern
 		 */
 		loadTernProjectOptions: function(jsonOptions) {
-			if (Array.isArray(jsonOptions.loadEagerly) && jsonOptions.loadEagerly.length > 0) {
+			if (jsonOptions && Array.isArray(jsonOptions.loadEagerly) && jsonOptions.loadEagerly.length > 0) {
 				var fileLoadPromises = [];
 				this._fileLoadWarnings = [];
 				var filesToLoad = [];
