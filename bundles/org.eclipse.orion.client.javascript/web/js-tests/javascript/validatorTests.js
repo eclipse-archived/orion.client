@@ -158,7 +158,7 @@ define([
 						worker.getTestState().callback(error);
 					});
 			});
-			
+
 			it("Test invalid regex 1", function(callback) {
 				var config = { rules: {} };
 				validate({buffer: "/", callback: callback, config: config}).then(function (problems) {
@@ -184,7 +184,7 @@ define([
 						worker.getTestState().callback(error);
 					});
 			});
-			
+	
 			describe("HTML script block validation tests", function(){
 				/*
 				 * Tests that the validator runs correctly on script blocks and wrapped functions in HTML files
@@ -1745,7 +1745,7 @@ define([
 					it("should flag root assign in do-while statement ", function(callback) {
 						var config = { rules: {} };
 						config.rules[RULE_ID] = 1;
-						validate({buffer: "do {} while (a = b) {}", callback: callback, config: config}).then(
+						validate({buffer: "do {} while (a = b)", callback: callback, config: config}).then(
 							function (problems) {
 								assertProblems(problems, [{
 									id: RULE_ID,
@@ -1761,7 +1761,7 @@ define([
 					it("should flag follow-on assign in do-while statement ", function(callback) {
 						var config = { rules: {} };
 						config.rules[RULE_ID] = 1;
-						validate({buffer: "do {} while (a = b && (c = 10)) {}", callback: callback, config: config}).then(
+						validate({buffer: "do {} while (a = b && (c = 10))", callback: callback, config: config}).then(
 							function (problems) {
 								assertProblems(problems, [{
 									id: RULE_ID,
@@ -1777,7 +1777,7 @@ define([
 					it("should flag nested assign in do-while statement", function(callback) {
 						var config = { rules: {} };
 						config.rules[RULE_ID] = 1;
-						validate({buffer: "do {} while ((a = b = 10)) {}", callback: callback, config: config}).then(
+						validate({buffer: "do {} while ((a = b = 10))", callback: callback, config: config}).then(
 							function (problems) {
 								assertProblems(problems, [{
 									id: RULE_ID,
@@ -1912,7 +1912,7 @@ define([
 							});
 					});
 					it("should not flag root assign in do-while statement if parenthesised", function(callback) {
-						var topic = "do{}while ((a = b)) {}";
+						var topic = "do{}while ((a = b))";
 						var config = { rules: {} };
 						config.rules[RULE_ID] = 1;
 						validate({buffer: topic, callback: callback, config: config}).then(
@@ -1924,7 +1924,7 @@ define([
 							});
 					});
 					it("should not flag follow-on assign in do-while statement if parenthesised ", function(callback) {
-						var topic = "do{}while ((a = b) && (c = 10)) {}";
+						var topic = "do{}while ((a = b) && (c = 10))";
 						var config = { rules: {} };
 						config.rules[RULE_ID] = 1;
 						validate({buffer: topic, callback: callback, config: config}).then(
@@ -1936,7 +1936,7 @@ define([
 							});
 					});
 					it("should not flag nested assign in do-while statement if parenthesised", function(callback) {
-						var topic = "do{}while ((a = (b = 10))) {}";
+						var topic = "do{}while ((a = (b = 10)))";
 						var config = { rules: {} };
 						config.rules[RULE_ID] = 1;
 						validate({buffer: topic, callback: callback, config: config}).then(
@@ -2333,7 +2333,7 @@ define([
 							});
 					});
 					it("should flag do-while statement 3", function(callback) {
-						var topic = "do{}while(!true) {}";
+						var topic = "do{}while(!true)";
 						var config = { rules: {} };
 						config.rules[RULE_ID] = 1;
 						validate({buffer: topic, callback: callback, config: config}).then(
@@ -2638,7 +2638,7 @@ define([
 					});
 		
 					it("should not flag do-while statement", function(callback) {
-						var topic = "do{}while(x) {}";
+						var topic = "do{}while(x)";
 						var config = { rules: {} };
 						config.rules[RULE_ID] = 1;
 						validate({buffer: topic, callback: callback, config: config}).then(
