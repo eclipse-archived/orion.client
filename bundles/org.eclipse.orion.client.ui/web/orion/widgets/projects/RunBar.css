@@ -3,8 +3,8 @@
 .runBarWrapper {
 	-webkit-align-items: center;		 		 /* Safari */
 	align-items: center;
-	border-left: solid 1px #aaa;
-	border-right: solid 1px #aaa;
+	border-left: solid 1px #676f73;
+	border-right: solid 1px #676f73;
 	display: -webkit-inline-flex;		 /* Safari */
 	display: inline-flex;
 	overflow: visible;
@@ -177,7 +177,7 @@
 }
 
 .runBarSeparator {
-	background: #aaa;
+	background: #676f73;
 	display: inline-block;
 	height: 25px;
 	margin: 0 10px;
