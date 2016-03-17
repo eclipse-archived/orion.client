@@ -105,19 +105,23 @@ function startServer() {
 
 if (args.ui) {
 	var electron = require('electron');
-	var mainWindow = null;
 	electron.app.on('ready', function() {
 		startServer();
 		function createWindow(url){
 			var nextWindow = new electron.BrowserWindow({width: 1024, height: 800, title: "Orion"});
 			nextWindow.loadURL("file:///" + __dirname + "/lib/main.html#" + encodeURI(url));
-			nextWindow.webContents.on("new-window", function(event, url, frameName, options){
+			nextWindow.webContents.on("new-window", function(event, url, frameName, disposition, options){
 				event.preventDefault();
-				createWindow(url);
+				console.log(disposition);
+				if (false) {
+					createWindow(url);
+				} else {
+					nextWindow.webContents.executeJavaScript('createTab("' + url + '");');
+				}
 			});
 			return nextWindow;
 		}
-		mainWindow = createWindow("http://localhost:" + port);
+		createWindow("http://localhost:" + port);
 	});
 } else {
 	startServer();

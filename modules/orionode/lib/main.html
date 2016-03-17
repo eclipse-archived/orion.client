@@ -1,17 +1,179 @@
 <!DOCTYPE html>
 <html style="width:100%;height:100%;">
 <head>
+<style>
+body {
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	background: #3b4b54;
+	overflow: hidden;
+	font-family: "HelveticaNeue", "Helvetica Neue", "HelveticaNeueRoman", "HelveticaNeue-Roman", "Helvetica Neue Roman", 'TeXGyreHerosRegular', "Helvetica", "Tahoma", "Geneva", "Arial", sans-serif;
+	font-size: 9pt;
+}
+.tabs {
+	cursor: default;
+	position: absolute;
+	top: 0;
+	height: 25px;
+	width: 100%;
+	color: #bdc1c3;
+	border-bottom: 1px solid #676f73;
+	box-sizing: border-box;
+}
+.tabs ul {
+	list-style: none;
+	-webkit-margin-before: 0;
+	-webkit-padding-start: 15px;
+}
+.tabs li {
+	position: relative;
+	margin-top: 1px;
+	box-sizing: border-box;
+	top: 3px;
+	display: block;
+	border: 1px solid transparent;
+	height: 22px;
+	padding: 4px;
+	padding-left: 5px;
+	padding-right: 5px;
+	float: left;
+}
+.tabs li.active {
+	color: white;
+	background: #26343F;	
+	border-color: #676f73;
+	border-bottom-color: transparent;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+
+}
+.tabs li:hover {
+	color: white;
+}
+.tabContent {
+	position: absolute;
+	top: 25px;
+	left: 0;
+	width: 100%;
+	height: calc(100% - 25px);
+	background: #26343F;
+	visibility: hidden;
+}
+.tabContent.active {
+	visibility: visible;
+}
+.close {
+	margin-left: 3px;
+	border: 1px solid #676f73;
+	vertical-align: top;
+	border-radius: 10px;
+	padding-left: 3px;
+	padding-right: 3px;
+	box-sizing: border-box;
+	font-size: 9px;
+	line-height: 10px;
+	display: none;
+}
+.close:hover {
+	background: #7F0000;
+}
+.tabs li.active .close {
+	display: inline-block;
+}
+</style>
 <script type="text/javascript">
-	function createIFrame() {
-		var hash = window.location.hash.substr(1);
+	/*eslint-env browser */
+	
+	function addClose(tab, tabContent) {
+		var closeBt = document.createElement("span");
+		closeBt.classList.add("close");
+		closeBt.textContent = "x";
+		tab.appendChild(closeBt);
+		closeBt.addEventListener("click", function(evt) {
+			tabContent.parentNode.removeChild(tabContent);
+			redrawTabs();
+			evt.preventDefault();
+			evt.stopPropagation();
+		});
+	}
+	
+	function redrawTabs() {
+		var bar = document.querySelector("#tabs");
+		bar.innerHTML = "";
+		var ul = document.createElement("ul");
+		var tabs = document.querySelectorAll(".tabContent");
+		if (!getActiveTab() && tabs.length) {
+			tabs[0].classList.add("active");
+		}
+		Array.prototype.forEach.call(tabs, function(tabContent) {
+			var title = tabContent.contentDocument.title;
+			var tab = document.createElement("li");
+			var active = window.getComputedStyle(tabContent, null).visibility === "visible";
+			tab.className = active ? "active" : "";
+			var text = document.createElement("span");
+			text.textContent = title;
+			tab.appendChild(text);
+			tab.title = title;
+			tab.addEventListener("click", function(evt) {
+				var tabs1 = document.querySelectorAll(".tabContent");
+				var items1 = document.querySelectorAll("li");
+				for (var j=0; j<tabs1.length; j++) {
+					if (items1[j].contains(evt.target)) {
+						items1[j].classList.add("active");
+						tabs1[j].classList.add("active");
+					} else {
+						items1[j].classList.remove("active");
+						tabs1[j].classList.remove("active");
+					}
+				}
+				evt.preventDefault();
+				evt.stopPropagation();
+			});
+			if (tabs.length > 1) {
+				addClose(tab, tabContent);
+			}
+			ul.appendChild(tab);
+		});
+//		if (tabs.scrollWidth > tabs.clientWidth) {
+//			var items1 = document.querySelectorAll("li");
+//			Array.prototype.forEach.call(items1, function(tab) {
+//				tab.style.maxWidth = tabs.clientWidth / items1.length + "px";
+//			});
+//		}
+		bar.appendChild(ul);
+	}
+	
+	function getActiveTab() {
+		return document.querySelector(".tabContent.active");
+	}
+	
+	function load() {
+		createTab(window.location.hash.substr(1));
+	}
+	
+	function createTab(url) {
 		var iframe = document.createElement("iframe");
-		iframe.src = hash;
-		iframe.style = "width:100%;height:100%;"
-		iframe.frameBorder = 0;
+		iframe.frameBorder = "0";
+		iframe.classList.add("tabContent");
+		iframe.src = url;
+		iframe.addEventListener("load", function() {
+			var target = iframe.contentDocument.querySelector('head > title');
+			var observer = new window.WebKitMutationObserver(function(mutations) {
+				mutations.forEach(function() {
+					redrawTabs();
+				});
+			});
+			observer.observe(target, { subtree: true, characterData: true, childList: true });
+			redrawTabs();
+		});
 		document.body.appendChild(iframe);
+		redrawTabs();
 	}
 </script>
 </head>
-<body style="width:100%;height:100%;margin:0" onload="createIFrame()">
+<body onload="load()">
+	<div class="tabs" id="tabs"></div>
 </body>
 </html>
