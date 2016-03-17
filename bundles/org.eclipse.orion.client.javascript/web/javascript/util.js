@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -12,6 +12,20 @@
 /*eslint-env amd*/
 define([
 ], function() {
+	/**
+	 * @description Object of error types
+	 * @since 5.0
+	 */
+	var ErrorTypes = {
+		/**
+		 * @description Something unexpected has been found while parsing, most commonly a syntax error
+		 */
+		Unexpected: 1,
+		/**
+		 * @description A Syntax problem that reports the last entered token as the problem
+		 */
+		EndOfInput: 2
+	};
 	
 	/**
 	 * @description Returns if the given character is upper case or not considering the locale
@@ -145,7 +159,7 @@ define([
 	 */
 	function errorAST(error, name, text) {
 		var ast = emptyAST;
-		ast.range[1] = typeof(text) === 'string' ? text.length : 0;
+		ast.range[1] = typeof text === 'string' ? text.length : 0;
 		ast.loc.start.line = error.lineNumber;
 		ast.loc.start.column = 0;
 		ast.loc.end.line = error.lineNumber;
@@ -170,17 +184,19 @@ define([
 				var result = error ? JSON.parse(JSON.stringify(error)) : error; // sanitizing Error object
 				if (error instanceof Error) {
 					result.__isError = true;
-					result.lineNumber = typeof(result.lineNumber) === 'number' ? result.lineNumber : error.lineNumber; //FF fails to include the line number from JSON.stringify
+					result.lineNumber = typeof result.lineNumber === 'number' ? result.lineNumber : error.lineNumber; //FF fails to include the line number from JSON.stringify
 					result.message = result.message || error.message;
 					result.name = result.name || error.name;
 					result.stack = result.stack || error.stack;
 				}
 				var msg = error.message;
 				result.message = msg = msg.replace(/^Line \d+: /, '');
-				if(/^Unexpected/.test(msg)) {
-					result.type = 1;
-					if(/end of input$/.test(msg)) {
-						result.type = 2;
+				if (typeof result.type === "undefined") {
+					if(/^Unexpected/.test(msg)) {
+						result.type = ErrorTypes.Unexpected;
+						if(/end of input$/.test(msg)) {
+							result.type = ErrorTypes.EndOfInput;
+						}
 					}
 				}
 				errors.push(result);
@@ -195,6 +211,7 @@ define([
 		startsWith: startsWith,
 		toCamelCaseParts: toCamelCaseParts,
 		errorAST: errorAST,
-		serializeAstErrors: serializeAstErrors
+		serializeAstErrors: serializeAstErrors,
+		ErrorTypes : ErrorTypes
 	};
 });

@@ -16,21 +16,6 @@ define([
 	'javascript/lru',
 	"javascript/util"
 ], function(Deferred, Objects, LRU, Util) {
-	/**
-	 * @description Object of error types
-	 * @since 5.0
-	 */
-	var ErrorTypes = {
-		/**
-		 * @description Something unexpected has been found while parsing, most commonly a syntax error
-		 */
-		Unexpected: 1,
-		/**
-		 * @description A Syntax problem that reports the last entered token as the problem
-		 */
-		EndOfInput: 2
-	};
-	
 	var registry;
 	
 	/**
@@ -160,7 +145,5 @@ define([
 			}
 		}
 	});
-	return {
-			ASTManager : ASTManager,
-			ErrorTypes : ErrorTypes};
+	return { ASTManager : ASTManager };
 });
