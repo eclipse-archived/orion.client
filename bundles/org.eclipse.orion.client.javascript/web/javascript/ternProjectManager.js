@@ -240,7 +240,7 @@ define([
 				if (project && (!this.projectLocation || project.Location !== this.projectLocation)){
 					this.projectLocation = project.Location;
 					this.scriptResolver.setSearchLocation(project.Location);
-					var c = project.Children;
+					var c = project.Children || [];
 					var tpf;
 					for(var i = 0, len = c.length; i < len; i++) {
 						if(".tern-project" === c[i].Name) {
