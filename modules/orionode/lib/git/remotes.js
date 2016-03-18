@@ -220,6 +220,7 @@ function postRemote(req, res) {
 }
 
 function fetchRemote(req, res, remote, branch, force) {
+	var remoteObj;
 	var task = new tasks.Task(res);
 	var repo;
 	return clone.getRepo(req)
@@ -227,18 +228,19 @@ function fetchRemote(req, res, remote, branch, force) {
 		repo = r;
 		return git.Remote.lookup(repo, remote);
 	})
-	.then(function(remote) {
+	.then(function(r) {
+		remoteObj = r;
 		var refSpec = null;
 		if (branch) {
 			var remoteBranch = branch;
 			if (branch.indexOf("for/") === 0) {
 				remoteBranch = branch.substr(4);
 			}
-			refSpec = "refs/heads/" + remoteBranch + ":refs/remotes/" + remote.name() + "/" + branch;
+			refSpec = "refs/heads/" + remoteBranch + ":refs/remotes/" + remoteObj.name() + "/" + branch;
 			if (force) refSpec = "+" + refSpec;
 		}
 		
-		return remote.fetch(
+		return remoteObj.fetch(
 			refSpec ? [refSpec] : null,
 			{callbacks: clone.getRemoteCallbacks(req.body)},
 			"fetch"	
