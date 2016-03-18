@@ -93,6 +93,12 @@ define([
 			return this.json;
 		},
 		
+		/**
+		 * @description Refreshes the held info in the manager and sends out a server start request
+		 * as needed
+		 * @function
+		 * @param {String} file The fully qualified name of the file
+		 */
 		refresh : function(file) {
 			if(file && /\.tern-project$/g.test(file)) {
 				this.currentFile = file;
@@ -194,6 +200,7 @@ define([
 				}
 				var currentOptions = jsonOptions;
 				currentOptions.loadEagerly = filesToLoad;
+				currentOptions.projectLoc = this.projectLocation;
 				if(fileLoadPromises.length > 0) {
 					return Deferred.all(fileLoadPromises).then(function(){
 						if (!this._hasValidationProblem){  // Don't hide validation warnings
@@ -220,6 +227,33 @@ define([
 		},
 		
 		/**
+		 * @description Collects the children array from the given project. This is needed because the 
+		 * fileClient can't seem to return consistent results: project.Children vs. project.ChildrenLocation
+		 * @function
+		 * @param {Object} project The project location
+		 * @returns {Array.<Object>} The array of child objects
+		 */
+		getProjectChildren: function getProjectChildren(project) {
+			var deferred = new Deferred();
+			if(project) {
+				if(Array.isArray(project.Children)) {
+					deferred.resolve(project.Children);
+				} else if(project.ChildrenLocation) {
+					this.scriptResolver.getFileClient().fetchChildren(project.ChildrenLocation).then(function(children){
+						deferred.resolve(children);
+						},
+						deferred.reject,
+						deferred.progress);
+				} else {
+					deferred.resolve([]);
+				}
+			} else {
+				deferred.resolve([]);
+			}
+			return deferred;
+		},
+		
+		/**
 		 * Callback from the orion.edit.model service
 		 * @param {Object} event An <tt>orion.edit.model</tt> event.
 		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
@@ -240,20 +274,21 @@ define([
 				if (project && (!this.projectLocation || project.Location !== this.projectLocation)){
 					this.projectLocation = project.Location;
 					this.scriptResolver.setSearchLocation(project.Location);
-					var c = project.Children || [];
-					var tpf;
-					for(var i = 0, len = c.length; i < len; i++) {
-						if(".tern-project" === c[i].Name) {
-							tpf = c[i].Location;
-							break;
+					this.getProjectChildren(project).then(function(children) {
+						var tpf;
+						for(var i = 0, len = children.length; i < len; i++) {
+							if(".tern-project" === children[i].Name) {
+								tpf = children[i].Location;
+								break;
+							}
 						}
-					}
-					if(typeof tpf === 'string') {
-						this.refresh(tpf);
-					} else {
-						//no .tern-project - request default startup
-						this.loadTernProjectOptions();
-					}
+						if(typeof tpf === 'string') {
+							this.refresh(tpf);
+						} else {
+							//no .tern-project - request default startup
+							this.loadTernProjectOptions();
+						}
+					}.bind(this));
 				}
 			}
 		}
