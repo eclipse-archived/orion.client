@@ -27,6 +27,7 @@ body {
 .tabButtons {
 	margin-left: 10px;
 	margin-right: 10px;
+	flex-shrink: 0;
 }
 .tabButton {
 	background: transparent;
@@ -38,17 +39,24 @@ body {
 .tabButton:hover {
 	color: white;
 }
+.tabLabel {
+	overflow: hidden;
+	white-space: nowrap;
+}
 .tabs ul {
 	list-style: none;
 	-webkit-margin-before: 0;
 	-webkit-padding-start: 0;
+	-webkit-padding-end: 10px;
+	display: flex;
+	overflow: hidden;
+	height: calc(100% + 1px);
 }
 .tabs li {
 	position: relative;
-	margin-top: 1px;
 	box-sizing: border-box;
-	top: 3px;
-	display: block;
+	top: 4px;
+	display: flex;
 	border: 1px solid #676f73;
 	border-right: none;
 	border-top-left-radius: 4px;
@@ -57,7 +65,8 @@ body {
 	padding: 6px;
 	padding-left: 5px;
 	padding-right: 5px;
-	float: left;
+	flex: 1 0 auto;
+	overflow: hidden;
 	background: #3b4b54;
 }
 .tabs li.active {
@@ -169,6 +178,7 @@ body {
 			var active = window.getComputedStyle(tabContent, null).visibility === "visible";
 			tab.className = active ? "active" : "";
 			var text = document.createElement("span");
+			text.classList.add("tabLabel");
 			text.textContent = title;
 			tab.appendChild(text);
 			tab.title = title;
@@ -192,13 +202,25 @@ body {
 			}
 			ul.appendChild(tab);
 		});
-//		if (tabs.scrollWidth > tabs.clientWidth) {
-//			var items1 = document.querySelectorAll("li");
-//			Array.prototype.forEach.call(items1, function(tab) {
-//				tab.style.maxWidth = tabs.clientWidth / items1.length + "px";
-//			});
-//		}
 		bar.appendChild(ul);
+		checkWidth();
+	}
+	
+	function checkWidth(reset) {
+		var bar = document.querySelector("#bar");
+		var ul = bar.querySelector("ul");
+		if (!bar || !ul) return;
+		var items2 = ul.querySelectorAll("li");
+		if (reset) {
+			Array.prototype.forEach.call(items2, function(tab) {
+				tab.style.flexBasis = "";
+			});
+		}
+		if (bar.getBoundingClientRect().right < ul.lastChild.getBoundingClientRect().right) {
+			Array.prototype.forEach.call(items2, function(tab) {
+				tab.style.flexBasis = "0";
+			});
+		}
 	}
 	
 	function getActiveTab() {
@@ -207,6 +229,12 @@ body {
 	
 	function load() {
 		createTab(window.location.hash.substr(1));
+		window.addEventListener("resize", function() {
+			if (this.timeout) window.clearTimeout(this.timeout);
+			this.timeout = window.setTimeout(function() {
+				checkWidth(true);
+			}, 50);
+		});
 		redrawButtons();
 	}
 	
