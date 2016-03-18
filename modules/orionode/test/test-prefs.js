@@ -36,9 +36,9 @@ var samplePrefData = {
 };
 
 var app = express();
-app
-.use(function() {
-	req.user = {workspace: WORKSPACE};
+app.use(function(req, res, next) {
+	req.user = { workspaceDir: WORKSPACE_DIR };
+	next();
 })
 .use(PREFS_PREFIX, PrefsController({
 	ttl: 50 // flush after 50 ms

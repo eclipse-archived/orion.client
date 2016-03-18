@@ -21,13 +21,14 @@ var CONTEXT_PATH = '/orion', PREFIX = CONTEXT_PATH + '/file';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
 
 var app = express()
-			.use(function() {
-				req.user = {workspace: WORKSPACE};
-			})
-			.use(CONTEXT_PATH, require('../lib/file')({
-				root: '/file',
-				workspaceRoot: '/workspace',
-			}));
+.use(function(req, res, next) {
+	req.user = { workspaceDir: WORKSPACE };
+	next();
+})
+.use(CONTEXT_PATH, require('../lib/file')({
+	root: '/file',
+	workspaceRoot: '/workspace',
+}));
 var request = supertest.bind(null, app);
 
 function byName(a, b) {

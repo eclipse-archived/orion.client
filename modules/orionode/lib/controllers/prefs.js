@@ -41,6 +41,7 @@ var PREF_FILENAME = PrefsController.PREF_FILENAME = 'prefs.json';
 //
 // https://wiki.eclipse.org/Orion/Server_API/Preference_API
 function PrefsController(options) {
+	options.configParams = options.configParams || {};
 	var ttl = options.ttl || 5000; // default is 5 seconds
 
 	var router = express.Router()

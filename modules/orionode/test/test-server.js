@@ -20,6 +20,11 @@ var WORKSPACE = path.join(__dirname, ".test_workspace");
 
 var orion = require("../");
 
+var workspaceMiddleware = function(req, res, next) {
+	req.user = {workspaceDir: WORKSPACE};
+	next();
+};
+
 describe("orion", function() {
 	var app, request;
 	beforeEach(function(done) {
@@ -40,10 +45,8 @@ describe("orion", function() {
 			done();
 		});
 		it("accepts cache-max-age", function(done) {
-			app
-			.use(function() {
-				req.user = {workspace: WORKSPACE};
-			}).use(orion({
+			app.use(workspaceMiddleware)
+			.use(orion({
 				maxAge: 31337 * 1000 // ms
 			}));
 			request()
@@ -53,12 +56,13 @@ describe("orion", function() {
 	});
 
 	describe("middleware", function() {
+		beforeEach(function() {
+			app.use(workspaceMiddleware)
+		});
+
 		// Make sure that we can .use() the orion server as an Express middleware
 		it("exports #createServer", function(done) {
-			app.use(function() {
-				req.user = {workspace: WORKSPACE};
-			}).use(orion({
-			}));
+			app.use(orion({ }))
 			request()
 			.get("/file/project/fizz.txt")
 			.expect(200, "hello world", done);
@@ -66,20 +70,14 @@ describe("orion", function() {
 
 		// Sanity check to ensure the orion client code is being mounted correctly
 		it("finds the orion.client code", function(done) {
-			app.use(function() {
-				req.user = {workspace: WORKSPACE};
-			}).use(orion({
-			}));
+			app.use(orion({ }))
 			request()
 			.get("/index.html")
 			.expect(200, done);
 		});
 
 		it("works at a non-server-root route", function(done) {
-			app.use(function() {
-				req.user = {workspace: WORKSPACE};
-			}).use("/wow/such/orion", orion({
-			}));
+			app.use("/wow/such/orion", orion({ }));
 			request()
 			.get("/wow/such/orion/index.html")
 			.expect(200, done);

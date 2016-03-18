@@ -21,8 +21,9 @@ var WORKSPACE = path.join(__dirname, '.test_workspace');
 var DEFAULT_WORKSPACE_NAME = 'Orionode Workspace';
 
 var app = express();
-app.use(function() {
-	req.user = {workspace: WORKSPACE};
+app.use(function(req, res, next) {
+	req.user = { workspaceDir: WORKSPACE };
+	next();
 }).use(PREFIX, require('../lib/workspace')({
 	root: '/workspace',
 	fileRoot: '/file',
