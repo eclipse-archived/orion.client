@@ -72,7 +72,11 @@ body {
 .tabs li.active {
 	color: white;
 	background: #26343F;	
+	border-right: 1px solid #676f73;
 	border-bottom-color: transparent;
+}
+.tabs li.active + li {
+	border-left: none;
 }
 .tabs li:last-child {
 	border-right: 1px solid #676f73;
