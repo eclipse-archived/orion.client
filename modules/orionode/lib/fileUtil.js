@@ -353,7 +353,10 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, res, wwwp
 		if (!includeChildren) {
 			api.write(null, res, null, metaObj);
 		} else {
-			getChildren(filepath, api.join(fileRoot, wwwpath)/*this dir*/, null/*omit nothing*/, function(children) {
+			getChildren(filepath, api.join(fileRoot, wwwpath)/*this dir*/, null/*omit nothing*/, function(err, children) {
+				if (err) {
+					return api.writeError(500, res, err);
+				}
 				var name = path.basename(filepath);
 				if (name[name.length-1] === path.sep) {
 					name = name.substring(0, name.length-1);
