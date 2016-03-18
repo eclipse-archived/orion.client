@@ -656,6 +656,9 @@ define([
 				if (editor && editor.getTextView && editor.getTextView()) {
 					var textView = editor.getTextView();
 					textView.addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
+					if(editor.getModel() && typeof editor.getModel().setModelData === "function") {
+						editor.getModel().setModelData({metadata: metadata, fileClient: this.fileClient});
+					}
 				}
 				this._clearUnsavedChanges();
 				if (!this.processParameters(input)) {

@@ -16,8 +16,7 @@ define([
 	'orion/editor/editor',
 	'orion/editor/eventTarget',
 	'orion/editor/textView',
-	'orion/editor/textModel',
-	'orion/editor/projectionTextModel',
+	'orion/editor/textModelFactory',
 	'orion/editor/editorFeatures',
 	'orion/hover',
 	'orion/editor/contentAssist',
@@ -47,7 +46,7 @@ define([
 	'orion/objects'
 ], function(
 	messages,
-	mEditor, mEventTarget, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mHoverFactory, mContentAssist,
+	mEditor, mEventTarget, mTextView, mTextModelFactory, mEditorFeatures, mHoverFactory, mContentAssist,
 	mEmacs, mVI, mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands, mGlobalCommands,
 	mDispatcher, EditorContext, Highlight,
@@ -315,7 +314,7 @@ define([
 				var options = that.updateViewOptions(that.settings);
 				objects.mixin(options, {
 					parent: that._parent,
-					model: new mProjectionTextModel.ProjectionTextModel(that.model || new mTextModel.TextModel()),
+					model: new mTextModelFactory.TextModelFactory().createProjectionTextModel({baseModel: that.model}),
 					wrappable: true
 				});
 				var textView = new mTextView.TextView(options);

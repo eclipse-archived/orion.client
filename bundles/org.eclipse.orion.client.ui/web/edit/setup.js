@@ -17,7 +17,7 @@ define([
 	'orion/inputManager',
 	'orion/commands',
 	'orion/globalCommands',
-	'orion/editor/textModel',
+	'orion/editor/textModelFactory',
 	'orion/editor/undoStack',
 	'orion/folderView',
 	'orion/editorView',
@@ -52,7 +52,7 @@ define([
 	'orion/customGlobalCommands'
 ], function(
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
-	mTextModel, mUndoStack,
+	mTextModelFactory, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
 	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands
@@ -181,7 +181,7 @@ function TextModelPool(options) {
 TextModelPool.prototype = {};
 objects.mixin(TextModelPool.prototype, {
 	create: function(serviceID) {
-		var model = new mTextModel.TextModel();
+		var model = new mTextModelFactory.TextModelFactory().createTextModel();
 		var undoStack = new mUndoStack.UndoStack(model, 500);
 		var contextImpl = {};
 		[	
