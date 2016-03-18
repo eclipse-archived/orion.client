@@ -26,50 +26,58 @@ var fs = Promise.promisifyAll(require('fs'));
 /**
  * Builds up an array of a directory's children, as File objects.
  * @param {String} parentLocation Parent location in the file api for child items (ugh)
- * @param {Array} [exclude] Filenames of children to hide. If omitted, everything is included.
- * @param {Function} callback
- * @returns {Array}
+ * @param {Array} [exclude] Filenames of children to hide. If `null`, everything is included.
+ * @param {Function} callback Invoked as func(error?, children)
+ * @returns A promise
  */
 // TODO depth
 var getChildren = exports.getChildren = function(directory, parentLocation, excludes, callback) {
-	// If 'excludes' is omitted, the callback can be given as the 3rd argument
-	callback = excludes || callback;
-	fs.readdirAsync(directory).then(function(files) {
-		// stat each file to find if it's a Directory -- ugh
-		var childStatPromises = files.map(function(file) {
+	return fs.readdirAsync(directory)
+	.then(function(files) {
+		return Promise.map(files, function(file) {
 			if (Array.isArray(excludes) && excludes.indexOf(file) !== -1) {
 				return null; // omit
 			}
 			var filepath = path.join(directory, file);
-			return fs.statAsync(filepath).then(function(stat) {
+			return fs.statAsync(filepath)
+			.then(function(stat) {
 				return [filepath, stat];
+			})
+			.catch(function(err) {
+				return err; // suppress rejection
 			});
-		}).filter(function(f) { return f; }); // skip omitted stuff
-		Promise.all(childStatPromises).then(function(childStats) {
-			var children = childStats.map(function(cs) {
-				var childname = path.basename(cs[0]);
-				var isDirectory = cs[1].isDirectory();
-				var timeStamp = cs[1].mtime.getTime();
-				var size = cs[1].size;
-				var location = api.join(parentLocation, encodeURIComponent(childname));
-				if(isDirectory && location[location.length-1] !== "/"){
-					location = location +"/";
-				}
-				var child = {
-					Name: childname,
-					Id: childname,
-					Length: size,
-					LocalTimeStamp: timeStamp,
-					Directory: isDirectory,
-					Location: location
-				};
-				if (isDirectory)
-					child.ChildrenLocation = api.join(parentLocation, childname) + '?depth=1';
-				return child;
-			});
-			callback(children); //yay
 		});
-	});
+	})
+	.then(function(childStats) {
+		var results = [];
+		childStats.forEach(function(cs) { // cs is [filepath, stat] or Error
+			if (cs instanceof Error) {
+				// TODO return failures to caller via some side channel
+				return;
+			}
+			var childname = path.basename(cs[0]);
+			var isDirectory = cs[1].isDirectory();
+			var timeStamp = cs[1].mtime.getTime();
+			var size = cs[1].size;
+			var location = api.join(parentLocation, encodeURIComponent(childname));
+			if(isDirectory && location[location.length-1] !== "/"){
+				location = location +"/";
+			}
+			var child = {
+				Name: childname,
+				Id: childname,
+				Length: size,
+				LocalTimeStamp: timeStamp,
+				Directory: isDirectory,
+				Location: location
+			};
+			if (isDirectory)
+				child.ChildrenLocation = api.join(parentLocation, childname) + '?depth=1';
+			results.push(child);
+		});
+		return results;
+	})
+	.asCallback(callback);
 };
 
 /**

@@ -217,7 +217,10 @@ module.exports = function(options) {
 		var searchScope = req.user.workspaceDir + searchOpt.location.substring(endOfFileRootIndex, searchOpt.location.length - 1);
 		if (searchScope.charAt(searchScope.length - 1) !== "/") searchScope = searchScope + "/";
 
-		fileUtil.getChildren(searchScope, parentFileLocation, function(children) {
+		fileUtil.getChildren(searchScope, parentFileLocation, null, function(err, children) {
+			if (err) {
+				// ignore
+			}
 			var results = [];
 
 			Promise.map(children, function(child) {

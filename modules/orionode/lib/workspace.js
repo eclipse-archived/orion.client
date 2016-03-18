@@ -76,7 +76,10 @@ module.exports = function(options) {
 		} else if (rest === workspaceId) {
 			// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_workspace_metadata
 			var parentFileLocation = originalFileRoot(req);
-			fileUtil.getChildren(req.user.workspaceDir, parentFileLocation, function(children) {
+			fileUtil.getChildren(req.user.workspaceDir, parentFileLocation, null, function(err, children) {
+				if (err) {
+					return res.status(500).json({Message: err.message });
+				}
 				// TODO this is basically a File object with 1 more field. Should unify the JSON between workspace.js and file.js
 				var ws = JSON.stringify({
 					Directory: true,
