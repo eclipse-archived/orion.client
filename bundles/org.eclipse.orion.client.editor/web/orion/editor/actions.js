@@ -286,6 +286,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		},
 		expandAnnotation: function(expand) {
 			var editor = this.editor;
+			if (!editor.getFoldingRulerVisible()) return true;
 			var annotationModel = editor.getAnnotationModel();
 			if(!annotationModel) { return true; }
 			var model = editor.getModel();
@@ -318,6 +319,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		},
 		expandAnnotations: function(expand) {
 			var editor = this.editor;
+			if (!editor.getFoldingRulerVisible()) return true;
 			var textView = editor.getTextView();
 			var annotationModel = editor.getAnnotationModel();
 			if(!annotationModel) { return true; }
