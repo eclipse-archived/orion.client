@@ -194,6 +194,8 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		           docs: true,
 		           end: args.params.offset,
 		           sort:true,
+		           expandWordForward: false,
+		           omitObjectPrototype: false,
 		           includeKeywords: args.params.keywords,
 		           caseInsensitive: true,
 		           docFormat: "full" //$NON-NLS-1$

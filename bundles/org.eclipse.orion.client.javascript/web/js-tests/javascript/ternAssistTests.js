@@ -37,12 +37,12 @@ define([
 		 */
 		function setup(options) {
 			var state = Object.create(null);
-			var buffer = state.buffer = typeof(options.buffer) === 'undefined' ? '' : options.buffer;
-			var prefix = state.prefix = typeof(options.prefix) === 'undefined' ? '' : options.prefix;
-			var offset = state.offset = typeof(options.offset) === 'undefined' ? 0 : options.offset;
-			var line = state.line = typeof(options.line) === 'undefined' ? '' : options.line;
-			var keywords = typeof(options.keywords) === 'undefined' ? false : options.keywords;
-			var templates = typeof(options.templates) === 'undefined' ? false : options.templates;
+			var buffer = state.buffer = typeof options.buffer === 'undefined' ? '' : options.buffer;
+			var prefix = state.prefix = typeof options.prefix === 'undefined' ? '' : options.prefix;
+			var offset = state.offset = typeof options.offset === 'undefined' ? 0 : options.offset;
+			var line = state.line = typeof options.line === 'undefined' ? '' : options.line;
+			var keywords = typeof options.keywords === 'undefined' ? false : options.keywords;
+			var templates = typeof options.templates === 'undefined' ? false : options.templates;
 			
 			var contentType = options.contenttype ? options.contenttype : 'application/javascript';
 			var	file = state.file = jsFile;				
@@ -58,13 +58,13 @@ define([
 			worker.postMessage({request: 'delFile', args:{file: jsFile}});
 			worker.postMessage({request: 'delFile', args:{file: htmlFile}});
 			
-			envs = typeof(options.env) === 'object' ? options.env : Object.create(null);
+			envs = typeof options.env === 'object' ? options.env : Object.create(null);
 			var editorContext = {
 				/*override*/
 				getText: function() {
 					return new Deferred().resolve(buffer);
 				},
-	
+				/** @callback */
 				getFileMetadata: function() {
 				    var o = Object.create(null);
 				    o.contentType = Object.create(null);
@@ -146,7 +146,7 @@ define([
 						    assert(ap.hover, 'There should be a hover entry for the proposal');
 						    assert(ap.hover.content.indexOf(ep[2]) === 0, "The doc should have started with the given value.\nActual: " + ap.hover.content + '\nExpected: ' + ep[2]);
 						}
-						if (ep.length >= 4 && typeof(ep[3]) === 'object'){
+						if (ep.length >= 4 && typeof ep[3] === 'object'){
 							assert(ap.groups, "Expected template proposal with selection group");
 							assert(ap.groups[0].positions, "Expected template proposal with selection group");
 							var offset = ap.groups[0].positions[0].offset;
@@ -343,10 +343,16 @@ define([
 						['encodeURI(uri)', 'encodeURI(uri) : string'],
 						['encodeURIComponent(uri)', 'encodeURIComponent(uri) : string'],
 						['eval(code)', 'eval(code)'],
+						['hasOwnProperty(prop)', 'hasOwnProperty(prop) : bool'],
 						['isFinite(value)', 'isFinite(value) : bool'],
 						['isNaN(value)', 'isNaN(value) : bool'],
+						['isPrototypeOf(obj)', 'isPrototypeOf(obj) : bool'],
 						['parseFloat(string)', 'parseFloat(string) : number'],
 						['parseInt(string, radix?)', 'parseInt(string, radix?) : number'],
+						['propertyIsEnumerable(prop)', 'propertyIsEnumerable(prop) : bool'],
+						['toLocaleString()', 'toLocaleString() : string'],
+						['toString()', 'toString() : string'],
+						['valueOf()', 'valueOf() : number'],
 						['Infinity', 'Infinity : number'],
 						['JSON', 'JSON : JSON'],
 						['Math', 'Math : Math'],
@@ -2124,10 +2130,16 @@ define([
 						['encodeURI(uri)', 'encodeURI(uri) : string'],
 						['encodeURIComponent(uri)', 'encodeURIComponent(uri) : string'],
 						['eval(code)', 'eval(code)'],
+						['hasOwnProperty(prop)', 'hasOwnProperty(prop) : bool'],
 						['isFinite(value)', 'isFinite(value) : bool'],
 						['isNaN(value)', 'isNaN(value) : bool'],
+						['isPrototypeOf(obj)', 'isPrototypeOf(obj) : bool'],
 						['parseFloat(string)', 'parseFloat(string) : number'],
 						['parseInt(string, radix?)', 'parseInt(string, radix?) : number'],
+						['propertyIsEnumerable(prop)', 'propertyIsEnumerable(prop) : bool'],
+						['toLocaleString()', 'toLocaleString() : string'],
+						['toString()', 'toString() : string'],
+						['valueOf()', 'valueOf() : number'],
 						['Infinity', 'Infinity : number'],
 						['JSON', 'JSON : JSON'],
 						['Math', 'Math : Math'],
@@ -2185,10 +2197,16 @@ define([
 						['encodeURI(uri)', 'encodeURI(uri) : string'],
 						['encodeURIComponent(uri)', 'encodeURIComponent(uri) : string'],
 						['eval(code)', 'eval(code)'],
+						['hasOwnProperty(prop)', 'hasOwnProperty(prop) : bool'],
 						['isFinite(value)', 'isFinite(value) : bool'],
 						['isNaN(value)', 'isNaN(value) : bool'],
+						['isPrototypeOf(obj)', 'isPrototypeOf(obj) : bool'],
 						['parseFloat(string)', 'parseFloat(string) : number'],
 						['parseInt(string, radix?)', 'parseInt(string, radix?) : number'],
+						['propertyIsEnumerable(prop)', 'propertyIsEnumerable(prop) : bool'],
+						['toLocaleString()', 'toLocaleString() : string'],
+						['toString()', 'toString() : string'],
+						['valueOf()', 'valueOf() : number'],
 						['Infinity', 'Infinity : number'],
 						['JSON', 'JSON : JSON'],
 						['Math', 'Math : Math'],
@@ -2246,10 +2264,16 @@ define([
 						['encodeURI(uri)', 'encodeURI(uri) : string'],
 						['encodeURIComponent(uri)', 'encodeURIComponent(uri) : string'],
 						['eval(code)', 'eval(code)'],
+						['hasOwnProperty(prop)', 'hasOwnProperty(prop) : bool'],
 						['isFinite(value)', 'isFinite(value) : bool'],
 						['isNaN(value)', 'isNaN(value) : bool'],
+						['isPrototypeOf(obj)', 'isPrototypeOf(obj) : bool'],
 						['parseFloat(string)', 'parseFloat(string) : number'],
 						['parseInt(string, radix?)', 'parseInt(string, radix?) : number'],
+						['propertyIsEnumerable(prop)', 'propertyIsEnumerable(prop) : bool'],
+						['toLocaleString()', 'toLocaleString() : string'],
+						['toString()', 'toString() : string'],
+						['valueOf()', 'valueOf() : number'],
 						['Infinity', 'Infinity : number'],
 						['JSON', 'JSON : JSON'],
 						['Math', 'Math : Math'],
@@ -2309,10 +2333,16 @@ define([
 						['encodeURI(uri)', 'encodeURI(uri) : string'],
 						['encodeURIComponent(uri)', 'encodeURIComponent(uri) : string'],
 						['eval(code)', 'eval(code)'],
+						['hasOwnProperty(prop)', 'hasOwnProperty(prop) : bool'],
 						['isFinite(value)', 'isFinite(value) : bool'],
 						['isNaN(value)', 'isNaN(value) : bool'],
+						['isPrototypeOf(obj)', 'isPrototypeOf(obj) : bool'],
 						['parseFloat(string)', 'parseFloat(string) : number'],
 						['parseInt(string, radix?)', 'parseInt(string, radix?) : number'],
+						['propertyIsEnumerable(prop)', 'propertyIsEnumerable(prop) : bool'],
+						['toLocaleString()', 'toLocaleString() : string'],
+						['toString()', 'toString() : string'],
+						['valueOf()', 'valueOf() : number'],
 						['Infinity', 'Infinity : number'],
 						['JSON', 'JSON : JSON'],
 						['Math', 'Math : Math'],
@@ -2382,10 +2412,16 @@ define([
 						['encodeURI(uri)', 'encodeURI(uri) : string'],
 						['encodeURIComponent(uri)', 'encodeURIComponent(uri) : string'],
 						['eval(code)', 'eval(code)'],
+						['hasOwnProperty(prop)', 'hasOwnProperty(prop) : bool'],
 						['isFinite(value)', 'isFinite(value) : bool'],
 						['isNaN(value)', 'isNaN(value) : bool'],
+						['isPrototypeOf(obj)', 'isPrototypeOf(obj) : bool'],
 						['parseFloat(string)', 'parseFloat(string) : number'],
 						['parseInt(string, radix?)', 'parseInt(string, radix?) : number'],
+						['propertyIsEnumerable(prop)', 'propertyIsEnumerable(prop) : bool'],
+						['toLocaleString()', 'toLocaleString() : string'],
+						['toString()', 'toString() : string'],
+						['valueOf()', 'valueOf() : number'],
 						['Infinity', 'Infinity : number'],
 						['JSON', 'JSON : JSON'],
 						['Math', 'Math : Math'],
@@ -2444,10 +2480,16 @@ define([
 						['encodeURI(uri)', 'encodeURI(uri) : string'],
 						['encodeURIComponent(uri)', 'encodeURIComponent(uri) : string'],
 						['eval(code)', 'eval(code)'],
+						['hasOwnProperty(prop)', 'hasOwnProperty(prop) : bool'],
 						['isFinite(value)', 'isFinite(value) : bool'],
 						['isNaN(value)', 'isNaN(value) : bool'],
+						['isPrototypeOf(obj)', 'isPrototypeOf(obj) : bool'],
 						['parseFloat(string)', 'parseFloat(string) : number'],
 						['parseInt(string, radix?)', 'parseInt(string, radix?) : number'],
+						['propertyIsEnumerable(prop)', 'propertyIsEnumerable(prop) : bool'],
+						['toLocaleString()', 'toLocaleString() : string'],
+						['toString()', 'toString() : string'],
+						['valueOf()', 'valueOf() : number'],
 						['Infinity', 'Infinity : number'],
 						['JSON', 'JSON : JSON'],
 						['Math', 'Math : Math'],
@@ -4543,7 +4585,7 @@ define([
 						buffer: "var o = {/**\n* @param {type} a \n*/f: function a(aa, bb, cc){}}",
 						line: '* @param {type} a ',
 						prefix: "a",
-						ofset: 31,
+						offset: 31,
 						callback: done};
 					testProposals(options, []);
 				});
