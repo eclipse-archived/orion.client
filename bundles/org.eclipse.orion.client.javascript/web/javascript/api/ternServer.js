@@ -16,139 +16,13 @@ define([
 	"orion/objects",
 	"i18n!javascript/nls/messages",
 	"orion/i18nUtil",
-	
-	'json!tern/defs/ecma5.json',
-	'json!tern/defs/ecma6.json',
-	'json!tern/defs/browser.json',
-	'json!tern/defs/chai.json',
-	
-	//tern defaults
-	"tern/plugin/angular",
-	"tern/plugin/doc_comment",
-	'tern/plugin/node',
-	'tern/plugin/requirejs',
-	
-	//orion defaults
-	"javascript/ternPlugins/amqp",
-	"javascript/ternPlugins/eslint",
-	"javascript/ternPlugins/express",
-	"javascript/ternPlugins/html",
-	"javascript/ternPlugins/jsdoc",
-	"javascript/ternPlugins/mongodb",
-	"javascript/ternPlugins/mysql",
-	"javascript/ternPlugins/open_impl",
-	"javascript/ternPlugins/outliner",
-	"javascript/ternPlugins/plugins",
-	"javascript/ternPlugins/postgres",
-	"javascript/ternPlugins/redis",
-	"javascript/ternPlugins/refs",
-], function(requirejs, Tern, Deferred, Objects, Messages, i18nUtil, ecma5, ecma6, browser, chai) {
+	"javascript/plugins/ternDefaults"
+], function(requirejs, Tern, Deferred, Objects, Messages, i18nUtil, defaultOptions) {
 	
 	var ternserver, 
 		scriptresolver, 
-		fileclient,
-		defs = [ecma5, ecma6, browser, chai],
-		//these are in the same order as the array above to avoid a walk of the array
-		defNames = ["ecma5", "ecma6", "browser", "chai"]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		fileclient;
 	
-	var plugins = {
-		required: {
-			"doc_comment": {
-				"name": Messages["ternDocPluginName"],
-				"description": Messages["ternDocPluginDescription"],
-				"fullDocs": true,
-				"version": "0.12.0" //$NON-NLS-1$
-			},
-			"plugins": {
-				"name": Messages["ternPluginsPluginName"],
-				"description": Messages["ternPluginsPluginDescription"],
-				"version": "1.0" //$NON-NLS-1$
-			},
-			"open_impl": {
-				"name": Messages["openImplPluginName"],
-				"description": Messages["openImplPluginDescription"],
-				"version": "1.0" //$NON-NLS-1$
-			},
-			"html": {
-				"name": Messages["htmlDepPluginName"],
-				"description": Messages["htmlDepPluginDescription"],
-				"version": "1.0" //$NON-NLS-1$
-			},
-			"refs": {
-				"name": Messages["findTypesName"],
-				"description": Messages["findTypesDescription"],
-				"version": "1.0" //$NON-NLS-1$
-			},
-			"jsdoc": {
-				"name": Messages["jsdocPluginName"],
-				"description": Messages["jsdocPluginDescription"],
-				"version": "1.0" //$NON-NLS-1$
-			},
-			"eslint": {
-				"name": Messages["eslintPluginName"],
-				"description": Messages["eslintPluginDescription"],
-				"version": "1.0" //$NON-NLS-1$
-			},
-			"outliner": {
-				"name": Messages["outlinerPluginName"],
-				"description": Messages["outlinerPluginDescription"],
-				"version": "1.0" //$NON-NLS-1$
-			}
-		},
-		optional: {
-			"amqp": {
-				"name": Messages["orionAMQPPluginName"],
-				"description": Messages["orionAMQPPluginDescription"],
-				"version": "0.9.1", //$NON-NLS-1$
-				"env": "amqp" //$NON-NLS-1$
-			},
-			"angular": {
-				"name": Messages["orionAngularPluginName"],
-				"description": Messages["orionAngularPluginDescription"],
-				"version": "0.12.0" //$NON-NLS-1$
-			},
-			"express": {
-				"name": Messages["orionExpressPluginName"],
-				"description": Messages["orionExpressPluginDescription"],
-				"version": "4.12.4", //$NON-NLS-1$
-				"env": "express" //$NON-NLS-1$
-			},
-			"mongodb": {
-				"name": Messages["orionMongoDBPluginName"],
-				"description": Messages["orionMongoDBPluginDescription"],
-				"version": "1.1.21", //$NON-NLS-1$
-				"env": "mongodb" //$NON-NLS-1$
-			},
-			"mysql": {
-				"name": Messages["orionMySQLPluginName"],
-				"description": Messages["orionMySQLPluginDescription"],
-				"version": "2.7.0", //$NON-NLS-1$
-				"env": "mysql" //$NON-NLS-1$
-			},
-			"node": {
-				"name": Messages["orionNodePluginName"],
-				"description": Messages["orionNodePluginDescription"],
-				"version": "0.12.0" //$NON-NLS-1$
-			},
-			"postgres": {
-				"name": Messages["orionPostgresPluginName"],
-				"description": Messages["orionPostgresPluginDescription"],
-				"version": "4.4.0", //$NON-NLS-1$
-				"env": "pg" //$NON-NLS-1$
-			},
-			"redis": {
-				"name": Messages["orionRedisPluginName"],
-				"description": Messages["orionRedisPluginDescription"],
-				"version": "0.12.1", //$NON-NLS-1$
-				"env": "redis" //$NON-NLS-1$
-			},
-			"requirejs": {
-				"name": Messages["orionRequirePluginName"],
-				"description": Messages["orionRequirePluginDescription"],
-				"version": "0.12.0" //$NON-NLS-1$
-			}
-		}
-	};
 	/**
 	 * @name TernServer
 	 * @description Creates a new TernServer
@@ -221,6 +95,8 @@ define([
 		           docs: true,
 		           end: offset,
 		           sort:true,
+		           expandWordForward: false,
+		           omitObjectPrototype: false,
 		           includeKeywords: keywords,
 		           caseInsensitive: true
 		           },
@@ -504,65 +380,130 @@ define([
 				ternserver = null;
 			}
 	        var options = {
-	                async: true,
-	                debug: false,
-	                projectDir: '/',
-	                getFile: doRead
-			};
-	        var pdir = 'tern/plugin/'; //$NON-NLS-1$
-	        var ddir = '';
-	        var defNames = [];
+                async: true,
+                debug: false,
+                projectDir: '/',
+                getFile: doRead,
+                plugins: defaultOptions.plugins.required,
+                defs: defaultOptions.defs,
+                ecmaVersion: 6
+            };
+	        var pluginsDir = defaultOptions.pluginsDir;
+        	var defNames, plugins, projectLoc;
 	        if (jsonOptions) {
-				if (jsonOptions.plugins){
-					options.plugins = jsonOptions.plugins;
-				}
-				if(jsonOptions.pluginDir) {
-					pdir = jsonOptions.pluginsDir;
-				}
-				if (Array.isArray(jsonOptions.libs)){
-					defNames = jsonOptions.libs;
-					ddir = jsonOptions.defsDir;
-				}
-				if (Array.isArray(jsonOptions.defs)){
-					defNames = jsonOptions.defs;
-					ddir = jsonOptions.defsDir;
-				}
+				projectLoc = jsonOptions.projectLoc;
+				plugins = jsonOptions.plugins;
+				pluginsDir = jsonOptions.pluginsDir;
+				defNames = jsonOptions.libs;
 				if(Array.isArray(jsonOptions.loadEagerly) && jsonOptions.loadEagerly.length > 0) {
 					options.loadEagerly = jsonOptions.loadEagerly;
 				}
-				if (typeof jsonOptions.ecmaVersion === 'number'){
+				if (typeof jsonOptions.ecmaVersion === 'number') {
 					options.ecmaVersion = jsonOptions.ecmaVersion;
+					if(options.ecmaVersion === 5) {
+						if(Array.isArray(defNames)) {
+							if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
+								defNames.push("ecma5"); //$NON-NLS-1$
+							}
+							var e6 = defNames.indexOf("ecma6"); //$NON-NLS-1$
+							if(e6 > -1) {
+								defNames.slice(e6, e6+1);
+							}
+						} else {
+							defNames = ["ecma5"]; //$NON-NLS-1$
+						}
+					} else if(options.ecmaVersion === 6) {
+						if(Array.isArray(defNames)) {
+							if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
+								defNames.push("ecma5"); //$NON-NLS-1$
+							}
+							if(defNames.indexOf("ecma6") < 0) { //$NON-NLS-1$
+								defNames.push("ecma6"); //$NON-NLS-1$
+							}
+						} else {
+							defNames = ["ecma5", "ecma6"]; //$NON-NLS-1$ //$NON-NLS-2$
+						}
+					}
 				}
-				if (typeof jsonOptions.dependencyBudget === 'number'){
+				if (typeof jsonOptions.dependencyBudget === 'number') {
 					options.dependencyBudget = jsonOptions.dependencyBudget;
 				}
-	        }
-	        function _loadFiles(ternserver, options) {
-	        	if(Array.isArray(options.loadEagerly)) {
-	        		options.loadEagerly.forEach(function(file) {
-	        			ternserver.addFile(file);
-	        		});
-	        	}
-	        }
-	        function defaultStartUp(err) {
-				options.plugins = plugins.required;
-				options.defs = defs;
-				ternserver = new Tern.Server(options);
-				_loadFiles(ternserver, options);
-				callback(err);
+				if(Array.isArray(jsonOptions.dontLoad)) {
+					var valid = true;
+					for(var i = 0, len = jsonOptions.dontLoad.length; i < len; i++) {
+						if(typeof jsonOptions.dontLoad[i] !== 'string') {
+							valid = false;
+							break;
+						}
+					}
+					if(valid) {
+						options.dontLoad = jsonOptions.dontLoad;
+					}
+				}
 	        }
 	        if(!options.plugins && (!defNames || defNames.length < 1)) {
 				defaultStartUp();
+			}
+	        if(typeof plugins !== 'object') {
+				plugins = null;
 	        } else {
-				Deferred.all(loadPlugins(options.plugins, pdir)).then(/* @callback */ function(plugins) {
-					Deferred.all(loadDefs(defNames, ddir)).then(function(json) {
-							options.defs = json;
-							ternserver = new Tern.Server(options);
-							_loadFiles(ternserver, options);
-							callback();
-						}, defaultStartUp);
-		        }, defaultStartUp);
+				Objects.mixin(options.plugins, plugins);
 	        }
+	        if(!Array.isArray(defNames)) {
+				defNames = null;
+	        }
+	        /**
+	         * A subtlety - if the user provides no plugins entry at all, they get all the defaults,
+	         * if they provide an empty object they still need the required ones only for a default startup
+	         */
+	        var requiredOnly = plugins && Object.keys(plugins).length < 1; 
+	        /**
+	         * @description Start the server with the default options
+	         * @param {Error} err The error object from the failed deferred
+	         */
+	        function defaultStartUp(err) {
+        		options.plugins = defaultOptions.plugins.required;
+        		if(!requiredOnly) {
+					Objects.mixin(options.plugins, defaultOptions.plugins.optional);
+				}
+				options.defs = defaultOptions.defs;
+				startAndMessage(options);
+		        if(err) {
+					callback(null, err);
+		        }
+	        }
+	        /**
+	         * @description Starts the tern server wit the given options
+	         * @param {Object} options The options to start the server with
+	         */
+	        function startAndMessage(options) {
+				ternserver = new Tern.Server(options);
+				if(Array.isArray(options.loadEagerly) && options.loadEagerly.length > 0) {
+					options.loadEagerly.forEach(function(file) {
+						ternserver.addFile(file);
+					});
+				}
+				callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			if((!plugins || requiredOnly) && !defNames) {
+				defaultStartUp();
+			} else {
+				Deferred.all(loadPlugins(options.plugins, pluginsDir)).then(/* @callback */ function(plugins) {
+					if(defNames) {
+						if(defNames.length < 1) {
+							startAndMessage(options);
+						} else {
+							defNames = defNames.sort();
+							Deferred.all(loadDefs(defNames, projectLoc)).then(function(json) {
+								options.defs = json;
+								startAndMessage(options);
+							}, defaultStartUp);
+						}
+					} else {
+						startAndMessage(options);
+					}
+				}, defaultStartUp);
+			}
 	    },
 	    /**
 	     * @description Computes the type information at the given offset
@@ -657,10 +598,10 @@ define([
 						}
 					}
 				} else {
-					var idx = defNames.indexOf(_def);
+					var idx = defaultOptions.defNames.indexOf(_def);
 					if(idx > -1) {
 						//a default def, get it
-						_defs.push(new Deferred().resolve(defs[idx]));
+						_defs.push(new Deferred().resolve(defaultOptions.defs[idx]));
 					} else {
 						//TODO do we want to support loading defs from arbitrary locations?
 					}
