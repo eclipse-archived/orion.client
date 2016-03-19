@@ -379,7 +379,6 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, res, wwwp
  * a new resource was created, and and `200 OK` if an existing resource was overwritten.
  */
 exports.handleFilePOST = function(workspaceDir, fileRoot, req, res, wwwpath, destFilepath, metadataMixins, statusCode) {
-	var getSafeFilePath = safeFilePath.bind(null, workspaceDir);
 	var isDirectory = req.body && getBoolean(req.body, 'Directory');
 	if (typeof req.contextPath !== "string") {
 		throw new Error("Missing context path");
@@ -426,7 +425,7 @@ exports.handleFilePOST = function(workspaceDir, fileRoot, req, res, wwwpath, des
 				api.writeError(400, res, 'Missing Location property in request body');
 				return;
 			}
-			var sourceFilepath = getSafeFilePath(api.rest(fileRootUrl, api.matchHost(req, sourceUrl)));
+			var sourceFilepath = safeFilePath(req.user.workspaceDir, api.rest(fileRootUrl, api.matchHost(req, sourceUrl)));
 			fs.exists(sourceFilepath, function(sourceExists) {
 				if (!sourceExists) {
 					api.write(404, res, null, 'File not found: ' + sourceUrl);
