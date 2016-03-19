@@ -656,8 +656,14 @@ define([
 				if (editor && editor.getTextView && editor.getTextView()) {
 					var textView = editor.getTextView();
 					textView.addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
-					if(editor.getModel() && typeof editor.getModel().setModelData === "function") {
-						editor.getModel().setModelData({metadata: metadata, fileClient: this.fileClient});
+					if(editor.getModel() && typeof  editor.getModel().setModelData === "function") {
+						var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+						editor.getModel().setModelData({
+															metadata: metadata, 
+															fileClient: this.fileClient, 
+															statusService: statusService,//popup status message bar
+															statusReporter: this.reportStatus.bind(this)//static mini message bar on the top-right corner of the editor
+													   });
 					}
 				}
 				this._clearUnsavedChanges();
