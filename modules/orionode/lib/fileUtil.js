@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
+/*eslint-disable consistent-return*/
 var ETag = require('./util/etag');
 var path = require('path');
 var Promise = require('bluebird');
@@ -104,24 +105,6 @@ var safeFilePath = exports.safeFilePath = function(workspaceDir, filepath) {
 	return safePath(workspaceDir, path.join(workspaceDir, decodeURIComponent(filepath)));
 };
 
-/**
- * @param {Object} debugMeta The meta data of the debug URL
- * @param {String} hostName Optional If not defined use the debugMeta.hostname
- * @returns {String} The debug URL enclosed with "[" and "]".
- * The returned value is URL-decoded.
- * @throws {Error} If rest is outside of the workspaceDir (and thus is unsafe)
- */
-exports.generateDebugURL = function(debugMeta, hostName) {
-	var hName = hostName ? hostName : debugMeta.hostname;
-	return url.format({
-			protocol: debugMeta.protocol,
-			hostname: hName,
-			port:  debugMeta.port,
-			pathname: debugMeta.pathname,
-			query: debugMeta.query
-		});
-};
-
 var getParents = exports.getParents = function(fileRoot, relativePath) {
 	var segs = relativePath.split('/');
 	if(segs && segs.length > 0 && segs[segs.length-1] === ""){// pop the last segment if it is empty. In this case wwwpath ends with "/".
@@ -150,6 +133,7 @@ exports.rumRuff = function(dirpath, callback) {
 	rimraf(dirpath, callback);
 };
 
+// @returns promise or invokes callback
 function _copyDir(srcPath, destPath, callback) {
 	var _copyRecursive, processDir, cpDir, cpFile;
 	destPath = destPath[destPath.length-1] === path.sep ? destPath : destPath + path.sep;
@@ -214,49 +198,53 @@ function _copyDir(srcPath, destPath, callback) {
 				var rs = fs.createReadStream(item.path);
 				var ws = fs.createWriteStream(currentDestFolderPath);
 				rs.pipe(ws);
+				// TODO resolve once writing has finished?
 			}
 		});
 	};
 	// recursively copy directories, then copy all the files cached
 	var dirlist = [];
-	_copyRecursive(srcPath, dirlist).then(function() {
+	return _copyRecursive(srcPath, dirlist)
+	.then(function() {
 		return cpDir(dirlist);
 	}).then(function() {
-		cpFile(dirlist);
-		callback();
-	}, function(error) {
-		callback(error);
-	});
+		return cpFile(dirlist);
+	})
+	.thenReturn(null)
+	.asCallback(callback)
 }
-
 
 /**
  * Copy srcPath to destPath
  * @param {String} srcPath
  * @param {String} destPath
- * @param {Function} callback Invoked as callback(error, destPath)
+ * @param {Function} callback Invoked as callback(error?, destPath)
+ * @returns promise
  */
 var copy = exports.copy = function(srcPath, destPath, callback) {
-	fs.stat(srcPath, function(error, stats) {
-		if (error) { callback(error); }
-		else {
-			if (stats.isDirectory()) {
-				_copyDir( srcPath, destPath, callback);
-			} else if (stats.isFile()) {
+	return fs.statAsync(srcPath)
+	.then(function(stats) {
+		if (stats.isDirectory()) {
+			return _copyDir(srcPath, destPath);
+		} else if (stats.isFile()) {
+			return new Promise(function(resolve, reject) {
 				var rs = fs.createReadStream(srcPath);
-				var ws = fs.createWriteStream(destPath);
-				rs.pipe(ws);
-				rs.on('error', callback);
-				rs.on('end', callback.bind(null, null, destPath));
-			}
+				rs.pipe(fs.createWriteStream(destPath));
+				rs.on('error', reject);
+				rs.on('end', resolve);
+			});
 		}
-	});
+		throw new Error("Unknown file type"); // not a file or a directory
+	})
+	.thenReturn(destPath)
+	.asCallback(callback)
 };
 
 /**
  * @param {Function} callback Invoked as callback(error, stats)
+ * @deprecated just use Promise.promisify(fs).statAsync() instead
  */
-var withStats = exports.withStats = function(filepath, callback) {
+exports.withStats = function(filepath, callback) {
 	fs.stat(filepath, function(error, stats) {
 		if (error) { callback(error); }
 		else {
@@ -384,81 +372,61 @@ exports.handleFilePOST = function(workspaceDir, fileRoot, req, res, wwwpath, des
 		throw new Error("Missing context path");
 	}
 	var fileRootUrl = req.contextPath + fileRoot;
+	var writeResponse = function(isOverwrite) {
+		// TODO: maybe set ReadOnly and Executable based on fileAtts
+		if (typeof statusCode === 'number') {
+			res.status(statusCode);
+		} else {
+			// Status code 200 indicates that an existing resource was replaced, or we're POSTing to a URL
+			res.status(isOverwrite ? 200 : 201);
+		}
+		return fs.statAsync(destFilepath)
+		.then(function(stats) {
+			writeFileMetadata(fileRootUrl, res, wwwpath, destFilepath, stats, /*etag*/null, /*includeChildren*/false, metadataMixins);
+		})
+		.catch(api.writeError.bind(null, 500, res))
+	};
 
-	fs.exists(destFilepath, function(destExists) {
-		function checkXCreateOptions(opts) {
-			// Can't have both copy and move
-			return opts.indexOf('copy') === -1 || opts.indexOf('move') === -1;
-		}
-		function writeCreatedFile(error) {
-			if (error) {
-				api.writeError(500, res, error);
-				return;
-			} else if (req.body) {
-				// var fileAtts = req.body.Attributes;
-				// TODO: maybe set ReadOnly and Executable based on fileAtts
-			}
-			if (typeof statusCode === 'number') {
-				res.statusCode = statusCode;
-			} else {
-				// Status code 200 indicates that an existing resource was replaced, or we're POSTing to a URL
-				res.statusCode = destExists ? 200 : 201;
-			}
-			withStats(destFilepath, function(error, stats) {
-				if (error) {
-					api.writeError(500, res, error);
-					return;
-				}
-				writeFileMetadata(fileRootUrl, res, wwwpath, destFilepath, stats, /*etag*/null, /*includeChildren*/false, metadataMixins);
-			});
-		}
-		function createFile() {
-			if (isDirectory) {
-				fs.mkdir(destFilepath, writeCreatedFile);
-			} else {
-				fs.writeFile(destFilepath, '', writeCreatedFile);
-			}
-		}
-		function doCopyOrMove(isCopy) {
-			var sourceUrl = req.body.Location;
-			if (!sourceUrl) {
-				api.writeError(400, res, 'Missing Location property in request body');
-				return;
-			}
-			var sourceFilepath = safeFilePath(req.user.workspaceDir, api.rest(fileRootUrl, api.matchHost(req, sourceUrl)));
-			fs.exists(sourceFilepath, function(sourceExists) {
-				if (!sourceExists) {
-					api.write(404, res, null, 'File not found: ' + sourceUrl);
-					return;
-				}
-				if (isCopy) {
-					copy(sourceFilepath, destFilepath, writeCreatedFile);
-				} else {
-					fs.rename(sourceFilepath, destFilepath, writeCreatedFile);
-				}
-			});
-		}
-
+	fs.statAsync(destFilepath)
+	.catchReturn({ code: 'ENOENT' }, null) // suppress reject when file does not exist
+	.then(function(stats) {
+		return !!stats; // just return whether the file existed
+	})
+	.then(function(destExists) {
 		var xCreateOptions = (req.headers['x-create-options'] || "").split(",");
-		if (!checkXCreateOptions(xCreateOptions)) {
-			api.write(400, res, null, 'Illegal combination of X-Create-Options.');
-			return;
+		var isCopy = xCreateOptions.indexOf('copy') !== -1, isMove = xCreateOptions.indexOf('move') !== -1;
+		if (isCopy && isMove) {
+			return api.write(400, res, null, 'Illegal combination of X-Create-Options.');
 		}
 		if (xCreateOptions.indexOf('no-overwrite') !== -1 && destExists) {
-			res.setHeader('Content-Type', 'application/json');
-			res.statusCode = 412;
-			res.end(JSON.stringify({Message: 'A file or folder with the same name already exists at this location.'}));
-			return;
-		} 
-		var isCopy;
-		if ((isCopy = xCreateOptions.indexOf('copy') !== -1) || (xCreateOptions.indexOf('move') !== -1)) {
-			doCopyOrMove(isCopy);
-		} else {
-			if (destExists) {
-				fs.unlink(destFilepath, createFile);
-			} else {
-				createFile();
-			}
+			return api.writeError(412, res, new Error('A file or folder with the same name already exists at this location.'))
 		}
-	});	
+
+		if (isCopy || isMove) {
+			var sourceUrl = req.body.Location;
+			if (!sourceUrl) {
+				return api.writeError(400, res, 'Missing Location property in request body');
+			}
+			var sourceFilepath = safeFilePath(req.user.workspaceDir, api.rest(fileRootUrl, api.matchHost(req, sourceUrl)));
+			return fs.statAsync(sourceFilepath)
+			.then(function(/*stats*/) {
+				return isCopy ? copy(sourceFilepath, destFilepath) : fs.renameAsync(sourceFilepath, destFilepath);
+			})
+			.then(writeResponse.bind(null, destExists))
+			.catch(function(err) {
+				if (err.code === 'ENOENT') {
+					return api.writeError(404, res, 'File not found:' + sourceUrl);
+				}
+				return api.writeError(500, res, err);
+			})
+		}
+		// Just a regular file write
+		return Promise.resolve()
+		.then(destExists ? fs.unlinkAsync(destFilepath) : null)
+		.then(function() {
+			return isDirectory ? fs.mkdirAsync(destFilepath) : fs.writeFileAsync(destFilepath, '')
+		})
+		.then(writeResponse.bind(null, destExists))
+		.catch(api.writeError.bind(null, 500, res))
+	});
 };
