@@ -32,8 +32,12 @@ function handleError(err) {
 
 function startServer(options) {
 	options = options || {};
+	options.configParams = options.configParams || {};
 	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : undefined;
 	var workspaceDir = options.workspaceDir;
+	if (typeof workspaceDir !== "string") {
+		throw new Error("workspaceDir is required")
+	}
 	
 	try {
 		var app = express();

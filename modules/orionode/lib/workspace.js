@@ -56,7 +56,7 @@ module.exports = function(options) {
 			// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_the_list_of_available_workspaces
 			fileUtil.withStats(req.user.workspaceDir, function(err, stats) {
 				if (err) {
-					api.writeError(500, res, err);
+					api.writeError(500, res, "Could not open the workspace directory");
 					return;
 				}
 				res.json({

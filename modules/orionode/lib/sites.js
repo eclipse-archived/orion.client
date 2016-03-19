@@ -23,8 +23,11 @@ var vhosts = [];
 
 module.exports = function(options) {
 	vhosts = (options.configParams["orion.site.virtualHosts"] || "").split(",");
-	
+
 	vhosts.forEach(function(host) {
+		if (host === "") {
+			return;
+		}
 		options.app.use(vhost(host, virtualHost));
 	});
 
