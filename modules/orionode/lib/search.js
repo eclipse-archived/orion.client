@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
+var api = require('./api');
 var apiPath = require('./middleware/api_path');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -217,16 +218,17 @@ module.exports = function(options) {
 		var searchScope = req.user.workspaceDir + searchOpt.location.substring(endOfFileRootIndex, searchOpt.location.length - 1);
 		if (searchScope.charAt(searchScope.length - 1) !== "/") searchScope = searchScope + "/";
 
-		fileUtil.getChildren(searchScope, parentFileLocation, null, function(err, children) {
-			if (err) {
-				// ignore
-			}
+		fileUtil.getChildren(searchScope, parentFileLocation, null)
+		.then(function(children) {
 			var results = [];
 
-			Promise.map(children, function(child) {
+			return Promise.map(children, function(child) {
 				var childName = child.Location.substring(endOfFileRootIndex + 1);
 				return searchFile(req.user.workspaceDir, searchScope, childName, searchPattern, filenamePattern, results);
 			}, { concurrency: SUBDIR_SEARCH_CONCURRENCY })
+			.catch(function(/*err*/) {
+				// Probably an error reading some file or directory -- ignore
+			})
 			.then(function() {
 				res.json({
 					"response": {
@@ -250,6 +252,7 @@ module.exports = function(options) {
 					}
 				});
 			});
-		});
+		})
+		.catch(api.writeError.bind(null, 500, res));
 	});
 };

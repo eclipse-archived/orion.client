@@ -56,9 +56,10 @@ module.exports = function(options) {
 			// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_the_list_of_available_workspaces
 			fileUtil.withStats(req.user.workspaceDir, function(err, stats) {
 				if (err) {
-					throw err;
+					api.writeError(500, res, err);
+					return;
 				}
-				var ws = JSON.stringify({
+				res.json({
 					Id: 'anonymous',
 					Name: 'anonymous',
 					UserName: 'anonymous',
@@ -69,19 +70,14 @@ module.exports = function(options) {
 						Name: workspaceName
 					}]
 				});
-				res.setHeader('Content-Type', 'application/json');
-				res.setHeader('Content-Length', ws.length);
-				res.end(ws);
 			});
 		} else if (rest === workspaceId) {
 			// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_workspace_metadata
 			var parentFileLocation = originalFileRoot(req);
-			fileUtil.getChildren(req.user.workspaceDir, parentFileLocation, null, function(err, children) {
-				if (err) {
-					return res.status(500).json({Message: err.message });
-				}
+			fileUtil.getChildren(req.user.workspaceDir, parentFileLocation, null)
+			.then(function(children) {
 				// TODO this is basically a File object with 1 more field. Should unify the JSON between workspace.js and file.js
-				var ws = JSON.stringify({
+				res.json({
 					Directory: true,
 					Id: workspaceId,
 					Name: workspaceName,
@@ -90,10 +86,8 @@ module.exports = function(options) {
 					Children: children
 //					Projects: [] // TODO projects -- does anything care about these?
 				});
-				res.setHeader('Content-Type', 'application/json');
-				res.setHeader('Content-Length', ws.length);
-				res.end(ws);
-			});
+			})
+			.catch(api.writeError.bind(null, 500, res));
 		} else {
 			res.statusCode = 400;
 			res.end(util.format('workspace not found: %s', rest));

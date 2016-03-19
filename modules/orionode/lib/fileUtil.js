@@ -347,34 +347,24 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, res, wwwp
 	}
 	if (!isDir) {
 		api.write(null, res, null, metaObj);
-	} else {
-		// Orion's File Client expects ChildrenLocation to always be present
-		metaObj.ChildrenLocation = api.join(fileRoot, wwwpath) + '?depth=1';
-		if (!includeChildren) {
-			api.write(null, res, null, metaObj);
-		} else {
-			getChildren(filepath, api.join(fileRoot, wwwpath)/*this dir*/, null/*omit nothing*/, function(err, children) {
-				if (err) {
-					return api.writeError(500, res, err);
-				}
-				var name = path.basename(filepath);
-				if (name[name.length-1] === path.sep) {
-					name = name.substring(0, name.length-1);
-				}
-				metaObj.Children = children;
-//				var childrenJSON = JSON.stringify(children);
-//				var folder = JSON.stringify({
-//					ChildrenLocation: api.join(fileRoot, rest) + '?depth=1',
-//					LocalTimeStamp: stats.mtime.getTime(),
-//					Location: api.join(fileRoot, rest),
-//					Name: decodeURIComponent(name),
-//					Parents: getParents(filepath, rest)
-//				});
-//				api.write(200, res, null, folder)
-				api.write(null, res, null, metaObj);
-			});
-		}
+		return;
 	}
+	// Orion's File Client expects ChildrenLocation to always be present
+	metaObj.ChildrenLocation = api.join(fileRoot, wwwpath) + '?depth=1';
+	if (!includeChildren) {
+		api.write(null, res, null, metaObj);
+		return;
+	}
+	getChildren(filepath, api.join(fileRoot, wwwpath)/*this dir*/, null/*omit nothing*/)
+	.then(function(children) {
+		var name = path.basename(filepath);
+		if (name[name.length-1] === path.sep) {
+			name = name.substring(0, name.length-1);
+		}
+		metaObj.Children = children;
+		api.write(null, res, null, metaObj);
+	})
+	.catch(api.writeError.bind(null, 500, res))
 };
 
 /**
