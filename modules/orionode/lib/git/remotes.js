@@ -221,7 +221,7 @@ function postRemote(req, res) {
 
 function fetchRemote(req, res, remote, branch, force) {
 	var remoteObj;
-	var task = new tasks.Task(res);
+	var task = new tasks.Task(res, false, true);
 	var repo;
 	return clone.getRepo(req)
 	.then(function(r) {
@@ -242,7 +242,7 @@ function fetchRemote(req, res, remote, branch, force) {
 		
 		return remoteObj.fetch(
 			refSpec ? [refSpec] : null,
-			{callbacks: clone.getRemoteCallbacks(req.body)},
+			{callbacks: clone.getRemoteCallbacks(req.body, task)},
 			"fetch"	
 		);
 	})
@@ -268,7 +268,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	var repo;
 	var remoteObj;
 
-	var task = new tasks.Task(res);
+	var task = new tasks.Task(res, false, true);
 
 	return clone.getRepo(req)
 	.then(function(r) {
@@ -287,7 +287,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 
 		return remoteObj.push(
 			tags && false ? [refSpec, "refs/tags/*:refs/tags/*"] : [refSpec],
-			{callbacks: clone.getRemoteCallbacks(req.body)}
+			{callbacks: clone.getRemoteCallbacks(req.body, task)}
 		);
 	})
 	.then(function(err) {
