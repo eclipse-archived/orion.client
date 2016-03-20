@@ -29,6 +29,7 @@ module.exports.router = function(options) {
 	if (!fileRoot) { throw new Error('options.root is required'); }
 
 	module.exports.getRepo = getRepo;
+	module.exports.getClones = getClones;
 	module.exports.getRemoteCallbacks = getRemoteCallbacks;
 	module.exports.handleRemoteError = handleRemoteError;
 	module.exports.foreachSubmodule = foreachSubmodule;
@@ -79,16 +80,22 @@ function getRepo(req) {
 }
 
 function getClone(req, res) {
+	getClones(req, res, function(repos) {
+		res.status(200).json({
+			"Children": repos,
+			"Type": "Clone"
+		});
+	});
+}
+
+function getClones(req, res, callback) {
 	var repos = [];
 	
 	var rootDir = path.join(req.user.workspaceDir, req.params.rootDir || "");
 		
 	checkDirectory(rootDir, function(err) {
 		if (err) return writeError(403, res, err.message);
-		res.status(200).json({
-			"Children": repos,
-			"Type": "Clone"
-		});
+		callback(repos);
 	});
 	
 	function pushRepo(repos, repo, base, location, url, parents, cb) {
