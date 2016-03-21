@@ -96,7 +96,7 @@ function getTree(req, res) {
 			var refLocation = path.join(repoRoot, encodeURIComponent(ref));
 			function createParents(data) {
 				var parents = [], temp = data, l, end = "/gitapi/tree" + repoRoot;
-				while (temp.Location !== end) {
+				while (temp.Location.length > end.length) {
 					l = path.dirname(temp.Location).replace(/^\/gitapi\/tree/, "") + "/";
 					var dir = treeJSON(l, decodeURIComponent(path.basename(l)), 0, true, 0);
 					parents.push(dir);
