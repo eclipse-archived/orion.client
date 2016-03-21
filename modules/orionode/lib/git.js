@@ -29,8 +29,11 @@ try {
 	var submodule = require('./git/submodule');
 	var tree = require('./git/tree');
 } catch (e) {
+	hasNodegit = false;
 	if (e.code === "MODULE_NOT_FOUND" && e.message.indexOf("nodegit") >= 0) {
-		hasNodegit = false;
+		console.log("Nodegit not installed");
+	} else {
+		console.log(e.message);
 	}
 }
 

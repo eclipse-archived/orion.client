@@ -30,6 +30,7 @@
     "rimraf": "~2.2.6",
     "socket.io": "~1.0.4",
     "term.js": "0.0.3",
+    "nodegit": "~0.11.9",
     "vhost": "^3.0.2"
   },
   "optionalDependencies": {
@@ -38,7 +39,6 @@
     "mkdirp": "*"
   },
   "experimentalDependencies": {
-    "nodegit": "~0.11.3"
   },
   "devDependencies": {
     "chai": "^3.5.0",
