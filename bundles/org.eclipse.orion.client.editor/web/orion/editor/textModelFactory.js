@@ -23,16 +23,15 @@ define([
 		/**
 		 * Create a text model instance for editor. A customized TextModelFactory can return a sub class of mTextModel.TextModel.
 		 */
-		createTextModel: function(options) {
-			return options ? new mTextModel.TextModel(options.text, options.lineDelimiter) : new mTextModel.TextModel();
+		createTextModel: function(/*options*/) {
+			return new mTextModel.TextModel();
 		},
 		/**
 		 * Create a projection text model instance for editor. A customized TextModelFactory can create a sub class of mTextModel.TextModel 
 		 * or a sub class of mProjectionTextModel.ProjectionTextModel.
 		 */
-		createProjectionTextModel: function(options) {
-			var baseModel = options && options.baseModel ? options.baseModel : this.createTextModel(options);
-			return new mProjectionTextModel.ProjectionTextModel(baseModel);
+		createProjectionTextModel: function(baseModel, options) {
+			return new mProjectionTextModel.ProjectionTextModel(baseModel ? baseModel: this.createTextModel(options));
 		}
 	};
 	return {

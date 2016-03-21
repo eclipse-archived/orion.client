@@ -314,7 +314,7 @@ define([
 				var options = that.updateViewOptions(that.settings);
 				objects.mixin(options, {
 					parent: that._parent,
-					model: new mTextModelFactory.TextModelFactory().createProjectionTextModel({baseModel: that.model}),
+					model: new mTextModelFactory.TextModelFactory().createProjectionTextModel(that.model, {serviceRegistry: that.serviceRegistry}),
 					wrappable: true
 				});
 				var textView = new mTextView.TextView(options);

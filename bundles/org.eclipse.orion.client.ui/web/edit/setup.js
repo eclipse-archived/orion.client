@@ -181,7 +181,7 @@ function TextModelPool(options) {
 TextModelPool.prototype = {};
 objects.mixin(TextModelPool.prototype, {
 	create: function(serviceID) {
-		var model = new mTextModelFactory.TextModelFactory().createTextModel();
+		var model = new mTextModelFactory.TextModelFactory().createTextModel({serviceRegistry: this.serviceRegistry});
 		var undoStack = new mUndoStack.UndoStack(model, 500);
 		var contextImpl = {};
 		[	
