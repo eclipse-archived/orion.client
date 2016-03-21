@@ -141,7 +141,7 @@ function getHighlightingProxy(item, match, document) {
   if (typeof Proxy === 'undefined') {
     return item;
   }
-  return Proxy.create({
+  return new Proxy({}, {
     get: function(rcvr, name) {
       var value = item[name];
       if (name !== 'name') {
