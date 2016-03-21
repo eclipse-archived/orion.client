@@ -67,13 +67,15 @@ function getTree(req, res) {
 		return repo;
 	})
 	.then(function(repo) {
+		function shortName(refName) {
+			return refName.replace("refs/remotes/", "").replace("refs/heads/", "").replace("refs/", "");
+		}
 		if (!filePath) {
 			var location = fileRoot + req.params["0"];
 			return git.Reference.list(repo)
 			.then(function(refs) {
 				return refs.map(function(ref) {
-					var shortName = ref.replace("refs/remotes/", "").replace("refs/heads/", "").replace("refs/", "");
-					return treeJSON(path.join(location, encodeURIComponent(ref)), shortName, 0, true, 0);
+					return treeJSON(path.join(location, encodeURIComponent(ref)), shortName(ref), 0, true, 0);
 				});
 			})
 			.then(function(children) {
@@ -98,7 +100,7 @@ function getTree(req, res) {
 				var parents = [], temp = data, l, end = "/gitapi/tree" + repoRoot;
 				while (temp.Location.length > end.length) {
 					l = path.dirname(temp.Location).replace(/^\/gitapi\/tree/, "") + "/";
-					var dir = treeJSON(l, decodeURIComponent(path.basename(l)), 0, true, 0);
+					var dir = treeJSON(l, shortName(decodeURIComponent(path.basename(l))), 0, true, 0);
 					parents.push(dir);
 					temp = dir;
 				}
@@ -106,7 +108,7 @@ function getTree(req, res) {
 			}
 			function sendDir(tree) {
 				var l = path.join(refLocation, p);
-				var result = treeJSON(l, decodeURIComponent(path.basename(l)), 0, true, 0);
+				var result = treeJSON(l, shortName(decodeURIComponent(path.basename(l))), 0, true, 0);
 				result.Children = tree.entries().map(function(entry) {
 					return treeJSON(path.join(refLocation, entry.path()), git.Tree.entryName(entry), 0, entry.isDirectory(), 0);
 				});
