@@ -22,6 +22,8 @@ or fix them manually ('acorn/acorn' becomes 'acorn', etc.)
 
 You can use git command line, find the github page for your source and clone the repo.  Or you can use npm install to get the source.
 
+	npm installed amqp
+
 
 ### Run the Tern Condense utility
 
@@ -39,7 +41,28 @@ If you are doing this in Windows using the Git Bash shell you may encounter an e
 which is not the format Cygwin and Git Bash expect. The easiest workaround is to modify the condense application.  Add ''var fs = require('fs');'' to the file and at the
 end replace the call to console.log with ''fs.writeFile("output.json",''.
 
+	node tern/bin/condense --name amqp --no-spans --plugin doc_comment --def ecma5 --def browser amqp/lib/*.js amqp/*.js
+	node tern/bin/condense --name express --no-spans --plugin doc_comment --def ecma5 --def browser express/lib/*.js express/lib/middleware/*.js express/lib/router/*.js express/*.js
+
+
 ### Manually fix indexes
+
+#### AMQP
+
+Condense does not extract any useful information from the amqp.js file at the root.  We add in the contents there manually:
+
+	"!node": {
+	  "amqp": {
+	    "Connection" : "Connection",
+		"createConnection": "fn(options: Object, implOptions: Object, readyCallback: fn()) -> +Connection",
+      }
+    },
+
+The on() function is not defined.  Add it to the connection protoype:
+
+	"Connection": {
+      "prototype": {
+        "on": "fn(event: string, action: fn())",
 
 #### Express
 
@@ -62,13 +85,11 @@ You must also remove the type information for toString() and hasOwnProperty() as
 
 ### Indexes we provide
 
-	'tern/plugin/orionAMQP',
-	'tern/plugin/orionAngular',
-	'tern/plugin/orionComponent',
-	'tern/plugin/orionExpress',	(March 2016)
-	'tern/plugin/orionMongoDB',
-	'tern/plugin/orionMySQL',	
-	'tern/plugin/orionNode',
-	'tern/plugin/orionPostgres',
-	'tern/plugin/orionRedis',
-	'tern/plugin/orionRequire',
+Plugins found in `web/javascript/ternPlugins/`.
+
+* amqp.js (March 2016)
+* express.js (March 2016)
+* mongodb.js (March 2016)
+* mysql.js (March 2016)
+* postgres.js (March 2016)
+* redis.js (March 2016)

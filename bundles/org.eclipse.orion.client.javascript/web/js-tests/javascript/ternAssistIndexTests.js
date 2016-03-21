@@ -89,7 +89,9 @@ define([
 		function stringifyExpected(expectedProposals) {
 			var text = "";
 			for (var i = 0; i < expectedProposals.length; i++)  {
-				text += expectedProposals[i][0] + " : " + expectedProposals[i][1] + "\n";
+				var prop = expectedProposals[i][0].replace(/\n/g, "\\n");
+				prop = prop.replace(/\'/g, "\\'");
+				text += '[\'' + prop + "\', \'" + expectedProposals[i][1] + "\'],\n"; //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			return text;
 		}
@@ -102,10 +104,12 @@ define([
 		function stringifyActual(actualProposals) {
 			var text = "";
 			for (var i = 0; i < actualProposals.length; i++) {
+				var prop = actualProposals[i].proposal.replace(/\n/g, "\\n");
+				prop = prop.replace(/\'/g, "\\'");
 				if (actualProposals[i].name) {
-					text += actualProposals[i].proposal + " : " + actualProposals[i].name + actualProposals[i].description + "\n"; //$NON-NLS-1$ //$NON-NLS-0$
+					text += '[\'' + prop + "\', \'" + actualProposals[i].name + actualProposals[i].description + "\'],\n"; //$NON-NLS-1$ //$NON-NLS-0$
 				} else {
-					text += actualProposals[i].proposal + " : " + actualProposals[i].description + "\n"; //$NON-NLS-1$ //$NON-NLS-0$
+					text += '[\'' + prop + "\', \'" + actualProposals[i].description + "\'],\n"; //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
 			return text;
@@ -133,12 +137,12 @@ define([
 					    var ep = expectedProposals[i];
 						var text = ep[0];
 						var description = ep[1];
-						assert.equal(ap.proposal, text, "Invalid proposal text"); //$NON-NLS-0$
+						assert.equal(ap.proposal, text, "Invalid proposal text. Expected proposals:\n" + stringifyExpected(expectedProposals) +"\nActual proposals:\n" + stringifyActual(actualProposals)); //$NON-NLS-0$
 						if (description) {
 							if (ap.name) {
-								assert.equal(ap.name + ap.description, description, "Invalid proposal description"); //$NON-NLS-0$
+								assert.equal(ap.name + ap.description, description, "Invalid proposal description. Expected proposals:\n" + stringifyExpected(expectedProposals) +"\nActual proposals:\n" + stringifyActual(actualProposals)); //$NON-NLS-0$
 							} else {
-								assert.equal(ap.description, description, "Invalid proposal description"); //$NON-NLS-0$
+								assert.equal(ap.description, description, "Invalid proposal description. Expected proposals:\n" + stringifyExpected(expectedProposals) +"\nActual proposals:\n" + stringifyActual(actualProposals)); //$NON-NLS-0$
 							}
 						}
 						if(ep.length >= 3 && !ap.unselectable /*headers have no hover*/) {
@@ -176,6 +180,86 @@ define([
 				worker.start(); // Reset the tern server state to remove any prior files
 			});
 		
+			describe('AMQP', function() {
+				it('AMQP templates - no eslint-env', function(done) {
+					var options = {
+						buffer: "amq",
+						prefix: "amq",
+						offset: 3,
+						callback: done
+					};
+					testProposals(options, [
+					]);
+				});
+				it('AMQP templates - eslint-env set', function(done) {
+					var options = {
+						buffer: "/* eslint-env amqp */\namq",
+						prefix: "amq",
+						offset: 25,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'amqp'],
+						['AMQPParser(version, type)', 'AMQPParser(version, type)'],
+						['var amqp = require(\'amqp\');\n', 'amqp - Node.js require statement for AMQP framework'],
+						['var amqp = require(\'amqp\');\nvar connection = amqp.createConnection({\n	host: host,\n	port: port,\n	login: login,\n	password: password\n});\n', 'amqp connection - create a new AMQP connection '],
+						['var exchange = connection.exchange(id, {type: \'topic\'}, function(exchange) {\n	\n});\n', 'amqp exchange - create a new AMQP connection exchange'],
+						['connection.on(event, function() {\n	\n});\n', 'amqp on - create a new AMQP connection on statement'],
+						['connection.queue(id, function(queue) {\n	queue.bind(\'#\'); //catch all messages\n	queue.subscribe(function (message, headers, deliveryInfo) {\n		// Receive messages\n	});\n	\n});\n', 'amqp queue - create a new AMQP connection queue statement'],
+					]);
+				});
+				it('AMQP completions - amqp.cre', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, amqp */\nvar amqp = require('amqp'); var connection = amqp.cre",
+						prefix: "cre",
+						offset: 81,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'amqp'],
+						['createConnection(options, implOptions, readyCallback)', 'createConnection(options, implOptions, readyCallback) : Connection'],
+					]);
+				});
+				it('AMQP completions - connection.o', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, amqp */\nvar amqp = require('amqp'); var connection = amqp.createConnection({});\nconnection.o",
+						prefix: "o",
+						offset: 112,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'amqp'],
+						['on(event, action)', 'on(event, action)'],
+					]);
+				});
+				it('AMQP completions - connection.exch', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, amqp */\nvar amqp = require('amqp'); var connection = amqp.createConnection({});\nconnection.exch",
+						prefix: "exch",
+						offset: 115,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'amqp'],
+						['exchange(name, options, openCallback)', 'exchange(name, options, openCallback) : Exchange'],
+						['exchangeClosed(name)', 'exchangeClosed(name)'],
+					]);
+				});
+				it('AMQP completions - connection.queu', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, amqp */\nvar amqp = require('amqp'); var connection = amqp.createConnection({});\nconnection.queu",
+						prefix: "queu",
+						offset: 115,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'amqp'],
+						['queue(name)', 'queue(name) : Queue'],
+						['queueClosed(name)', 'queueClosed(name)'],
+					]);
+				});
+			});
+			
 			describe('Express', function() {
 				it('Express templates - no eslint-env', function(done) {
 					var options = {
@@ -253,7 +337,124 @@ define([
 						['static(name)', 'static(name)', 'Built-in middleware function.']
 					]);
 				});
-			});	
+			});
+			
+			describe('MongoDB', function() {
+				it('MongoDB templates - no eslint-env', function(done) {
+					var options = {
+						buffer: "mongo",
+						prefix: "mongo",
+						offset: 5,
+						callback: done
+					};
+					testProposals(options, [
+					]);
+				});
+				it('MongoDB templates - eslint-env set', function(done) {
+					var options = {
+						buffer: "/* eslint-env mongodb */\nmongo",
+						prefix: "mongo",
+						offset: 30,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'mongodb'],
+						['mongodb', 'mongodb : mongodb'],
+						['var MongoClient = require(\'mongodb\').MongoClient;\nvar Server = require(\'mongodb\').Server;\n', 'mongodb client - create a new MongoDB client'],
+						['db.collection(id, function(error, collection) {\n	\n});', 'mongodb collection - create a MongoDB database collection'],
+						['var MongoClient = require(\'mongodb\').MongoClient;\nMongoClient.connect(url, function(error, db) {\n	\n});\n', 'mongodb connect - connect to an existing MongoDB database'],
+						['if (process.env.VCAP_SERVICES) {\n	var env = JSON.parse(process.env.VCAP_SERVICES);\n	var mongo = env[\'mongo-version\'][0].credentials;\n} else {\n	var mongo = {\n		username : \'username\',\n		password : \'password\',\n		url : \'mongodb://username:password@localhost:27017/database\'\n	};\n}\nvar MongoClient = require(\'mongodb\').MongoClient;\nMongoClient.connect(mongo.url, function(error, db) {\n	\n});\n', 'mongodb connect (Cloud Foundry) - connect to an existing MongoDB database using Cloud Foundry'],
+						['var MongoClient = require(\'mongodb\').MongoClient;\nvar Server = require(\'mongodb\').Server;\nvar client = new MongoClient(new Server(host, port));\ntry {\n	client.open(function(error, client) {\n		var db = client.db(name);\n		\n	});\n} finally {\n	client.close();\n};', 'mongodb open - create a new MongoDB client and open a connection'],
+						['db.collection(id, {strict:true}, function(error, collection) {\n	\n});', 'mongodb strict collection - create a MongoDB database strict collection'],
+					]);
+				});
+			});
+			
+			describe('MySQL', function() {
+				it('MySQL templates - no eslint-env', function(done) {
+					var options = {
+						buffer: "mysq",
+						prefix: "mysq",
+						offset: 4,
+						callback: done
+					};
+					testProposals(options, [
+					]);
+				});
+				it('MySQL templates - eslint-env set', function(done) {
+					var options = {
+						buffer: "/* eslint-env mysql */\nmysq",
+						prefix: "mysq",
+						offset: 27,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'mysql'],
+						['mysql', 'mysql : mysql'],
+						['var mysql = require(\'mysql\');\nvar connection = mysql.createConnection({\n	host : host,\n	user : username,\n	password : password\n});\ntry {\n	connection.connect();\n	\n} finally {\n	connection.end();\n}', 'mysql connection - create a new MySQL DB connection'],
+						['connection.query(sql, function(error, rows, fields) {\n	\n});\n', 'mysql query - create a new MySQL DB query statement'],
+					]);
+				});
+			});
+			
+			describe('Postgres', function() {
+				it('Postgres templates - no eslint-env', function(done) {
+					var options = {
+						buffer: "postgre",
+						prefix: "postgre",
+						offset: 7,
+						callback: done
+					};
+					testProposals(options, [
+					]);
+				});
+				it('Postgres templates - eslint-env set', function(done) {
+					var options = {
+						buffer: "/* eslint-env postgres */\npostgre",
+						prefix: "postgre",
+						offset: 33,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'postgres'],
+						['var pg = require(\'pg\');\n', 'postgres - Node.js require statement for Postgres DB'],
+						['var pg = require(\'pg\');\nvar url = "postgres://postgres:port@host/database";\nvar client = new pg.Client(url);\n', 'postgres client - create a new Postgres DB client'],
+						['var pg = require(\'pg\');\nvar url = "postgres://postgres:port@host/database";\nvar client = new pg.Client(url);\nclient.connect(function(error) {\n	\n});\n', 'postgres connect - create a new Postgres DB client and connect'],
+						['client.query(sql, function(error, result) {\n	\n});\n', 'postgres query - create a new Postgres DB query statement'],
+					]);
+				});
+			});
+			
+			describe('Redis', function() {
+				it('Redis templates - no eslint-env', function(done) {
+					var options = {
+						buffer: "redi",
+						prefix: "redi",
+						offset: 4,
+						callback: done
+					};
+					testProposals(options, [
+					]);
+				});
+				it('Redis templates - eslint-env set', function(done) {
+					var options = {
+						buffer: "/* eslint-env redis */\nredi",
+						prefix: "redi",
+						offset: 27,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'redis'],
+						['RedisClient', 'RedisClient : RedisClient'],
+						['var name = require(\'redis\');\n', 'redis - Node.js require statement for Redis'],
+						['var name = require(\'redis\');\nvar client = name.createClient(port, host, options);\n', 'redis client - create a new Redis client'],
+						['var name = require(\'redis\');\nvar client = name.createClient(port, host, options);\ntry {\n	\n} finally {\n	client.close();\n}\n', 'redis connect - create a new Redis client and connect'],
+						['client.get(key, function(error, reply) {\n	\n});\n', 'redis get - create a new Redis client get call'],
+						['client.on(event, function(arg) {\n	});\n', 'redis on - create a new Redis client event handler'],
+						['client.set(key, value);\n', 'redis set - create a new Redis client set call'],
+					]);
+				});
+			});
 		});
 	};
 });
