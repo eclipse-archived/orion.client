@@ -10,6 +10,7 @@
  *******************************************************************************/
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
+var args = require('../args');
 var async = require('async');
 var git = require('nodegit');
 var url = require('url');
@@ -180,7 +181,7 @@ function getRemotes(req, res) {
 }
 
 function addRemote(req, res) {
-	var fileDir;
+	var fileDir, repo;
 	
 	if (!req.body.Remote || !req.body.RemoteURI) {
 		return writeError(500, res);
@@ -195,13 +196,51 @@ function addRemote(req, res) {
 	}
 
 	return clone.getRepo(req)
-	.then(function(repo) {
+	.then(function(_repo) {
+		repo = _repo;
 		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 		return git.Remote.create(repo, req.body.Remote, req.body.RemoteURI);
 	})
 	.then(function(remote) {
-		res.status(201).json({
-			"Location": "/gitapi/remote/" + encodeURIComponent(remote.name()) + fileDir
+		var remoteName = remote ? remote.name() : req.body.Remote;
+		var configFile = api.join(repo.path(), "config");
+		function done () {
+			res.status(201).json({
+				"Location": "/gitapi/remote/" + encodeURIComponent(remoteName) + fileDir
+			});
+		}
+		args.readConfigFile(configFile, function(err, config) {
+			if (err) {
+				return done();
+			}
+			var remoteConfig = config.remote[remoteName] || (config.remote[remoteName] = {});
+			if (!remoteConfig.url) {
+				remoteConfig.url = req.body.RemoteURI;
+			}
+			if (!remoteConfig.fetch) remoteConfig.fetch = [];
+			if (!Array.isArray(remoteConfig.fetch)) remoteConfig.fetch = [remoteConfig.fetch];
+			if (req.body.IsGerrit) {
+				remoteConfig.fetch.push("+refs/heads/*:refs/remotes/%s/for/*".replace(/%s/g, remoteName));
+				remoteConfig.fetch.push("+refs/changes/*:refs/remotes/%s/changes/*".replace(/%s/g, remoteName));
+			} else {
+				if (req.body.FetchRefSpec) {
+					remoteConfig.fetch.push(req.body.FetchRefSpec);
+				}
+			}
+			if (req.body.PushURI) {
+				remoteConfig.pushurl = req.body.PushURI;
+			}
+			if (!remoteConfig.push) remoteConfig.push = [];
+			if (!Array.isArray(remoteConfig.push)) remoteConfig.push = [remoteConfig.push];
+			if (req.body.PushRefSpec) {
+				remoteConfig.push.push(req.body.PushRefSpec);
+			}
+			args.writeConfigFile(configFile, config, function(err) {
+				if (err) {
+					// ignore errors
+				}
+				done();
+			});
 		});
 	})
 	.catch(function(err) {
