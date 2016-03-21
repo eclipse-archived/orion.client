@@ -23,14 +23,12 @@ define([
 	var templates = [
 	/* eslint-disable missing-nls */
 		{
-			prefix: "mysql", 
 			name: "mysql", 
 			nodes: {top:true, member:false, prop:false},
 			description: " - Node.js require statement for MySQL DB", 
 			template: "var mysql = require('mysql');\n"
 		},
 		{
-			prefix: "mysql", 
 			name: "mysql connection", 
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new MySQL DB connection", 
@@ -48,7 +46,6 @@ define([
 					  "}"
 		},
 		{
-			prefix: "mysql", 
 			name: "mysql query", 
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new MySQL DB query statement", 

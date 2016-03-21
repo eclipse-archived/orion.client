@@ -23,14 +23,12 @@ define([
 	var templates = [
 	/* eslint-disable missing-nls */
 		{
-			prefix: "mongodb",
 			name: "mongodb",
 			nodes: {top:true, member:false, prop:false},
 			description: " - Node.js require statement for MongoDB",
 			template: "var ${name} = require('mongodb');\n"
 		},
 		{
-			prefix: "mongodb",
 			name: "mongodb client",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new MongoDB client",
@@ -38,7 +36,6 @@ define([
 					  "var Server = require('mongodb').Server;\n${cursor}"
 		},
 		{
-			prefix: "mongodb",
 			name: "mongodb open",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new MongoDB client and open a connection",
@@ -55,7 +52,6 @@ define([
   					  "};"
 		},
 		{
-			prefix: "mongodb",
 			name: "mongodb connect",
 			nodes: {top:true, member:false, prop:false},
 			description: " - connect to an existing MongoDB database",
@@ -65,7 +61,6 @@ define([
   					  "});\n"
 		},
 		{
-			prefix: "mongodb",
 			name: "mongodb connect (Cloud Foundry)",
 			nodes: {top:true, member:false, prop:false},
 			description: " - connect to an existing MongoDB database using Cloud Foundry",
@@ -84,7 +79,6 @@ define([
   					  "});\n"
 		},
 		{
-			prefix: "mongodb",
 			name: "mongodb collection",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a MongoDB database collection",
@@ -93,7 +87,6 @@ define([
 				  "});"
 		},
 		{
-			prefix: "mongodb",
 			name: "mongodb strict collection",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a MongoDB database strict collection",

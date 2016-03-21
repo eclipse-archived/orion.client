@@ -20,14 +20,12 @@ define([
 	var templates = [
 	/* eslint-disable missing-nls */
 		{
-			prefix: "redis",
 			name: "redis",
 			nodes: {top:true, member:false, prop:false},
 			description: " - Node.js require statement for Redis",
 			template: "var ${name} = require('redis');\n"
 		},
 		{
-			prefix: "redis",
 			name: "redis client",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Redis client",
@@ -35,7 +33,6 @@ define([
 					  "var ${client} = ${name}.createClient(${port}, ${host}, ${options});\n"
 		},
 		{
-			prefix: "redis",
 			name: "redis connect",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Redis client and connect",
@@ -48,14 +45,12 @@ define([
 				  "}\n"
 		},
 		{
-			prefix: "redis",
 			name: "redis set",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Redis client set call",
 			template: "client.set(${key}, ${value});\n"
 		},
 		{
-			prefix: "redis",
 			name: "redis get",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Redis client get call",
@@ -64,7 +59,6 @@ define([
 					  "});\n"
 		},
 		{
-			prefix: "redis",
 			name: "redis on",
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Redis client event handler",
@@ -136,6 +130,7 @@ define([
 	      "auth_pass": "string"
 	    },
 	    "RedisClient": {
+	      "on": "fn(event: string, action: fn())",
 	      "connected": "bool",
 	      "retry_delay": "number",
 	      "retry_backoff": "number",

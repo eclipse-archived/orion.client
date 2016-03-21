@@ -23,14 +23,12 @@ define([
 	var templates = [
 	/* eslint-disable missing-nls */
 		{
-			prefix: "postgres", 
 			name: "postgres", 
 			nodes: {top:true, member:false, prop:false},
 			description: " - Node.js require statement for Postgres DB", 
 			template: "var pg = require('pg');\n"
 		},
 		{
-			prefix: "postgres", 
 			name: "postgres client", 
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Postgres DB client", 
@@ -39,7 +37,6 @@ define([
 					  "var ${client} = new pg.Client(url);\n"
 		},
 		{
-			prefix: "postgres", 
 			name: "postgres connect", 
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Postgres DB client and connect", 
@@ -51,7 +48,6 @@ define([
 					  "});\n"
 		},
 		{
-			prefix: "postgres", 
 			name: "postgres query", 
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Postgres DB query statement", 

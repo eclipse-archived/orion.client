@@ -368,6 +368,30 @@ define([
 						['db.collection(id, {strict:true}, function(error, collection) {\n	\n});', 'mongodb strict collection - create a MongoDB database strict collection'],
 					]);
 				});
+				it('MongoDB completions - require.MongoCli', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, mongodb */\nvar MongoClient = require('mongodb').MongoCli",
+						prefix: "MongoCli",
+						offset: 76,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'mongodb'],
+						['MongoClient(serverConfig, options)', 'MongoClient(serverConfig, options)'],
+					]);
+				});
+				it('MongoDB completions - MongoClient.con', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, mongodb */\nvar MongoClient = require('mongodb').MongoClient;\nMongoClient.con",
+						prefix: "con",
+						offset: 96,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'mongodb'],
+						['connect(uri, options, callback)', 'connect(uri, options, callback)']
+					]);
+				});
 			});
 			
 			describe('MySQL', function() {
@@ -393,6 +417,59 @@ define([
 						['mysql', 'mysql : mysql'],
 						['var mysql = require(\'mysql\');\nvar connection = mysql.createConnection({\n	host : host,\n	user : username,\n	password : password\n});\ntry {\n	connection.connect();\n	\n} finally {\n	connection.end();\n}', 'mysql connection - create a new MySQL DB connection'],
 						['connection.query(sql, function(error, rows, fields) {\n	\n});\n', 'mysql query - create a new MySQL DB query statement'],
+					]);
+				});
+				it('MySQL completions - mysql.createCon', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, mysql */\nvar mysql = require('mysql');\nvar connection = mysql.createCon",
+						prefix: "createCon",
+						offset: 91,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'mysql'],
+						['createConnection(connectionUri)', 'createConnection(connectionUri) : mysql.Connection'],
+					]);
+				});
+				it('MySQL completions - connection.c', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, mysql */\nvar mysql = require('mysql');\nvar connection = mysql.createConnection({});\nconnection.c",
+						prefix: "c",
+						offset: 116,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'mysql'],
+						['changeUser(options)', 'changeUser(options)'],
+						['commit(callback)', 'commit(callback)'],
+						['connect()', 'connect()'],
+						['config', 'config : any'],
+					]);
+				});
+				it('MySQL completions - connection.q', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, mysql */\nvar mysql = require('mysql');\nvar connection = mysql.createConnection({});\nconnection.q",
+						prefix: "q",
+						offset: 116,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'mysql'],
+						['query', 'query : any'],
+					]);
+				});
+				it('MySQL completions - connection.e', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, mysql */\nvar mysql = require('mysql');\nvar connection = mysql.createConnection({});\nconnection.e",
+						prefix: "e",
+						offset: 116,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'mysql'],
+						['end()', 'end()'],
+						['escape(value)', 'escape(value) : string'],
+						['escapeId(value)', 'escapeId(value) : string'],
 					]);
 				});
 			});
@@ -421,6 +498,19 @@ define([
 						['var pg = require(\'pg\');\nvar url = "postgres://postgres:port@host/database";\nvar client = new pg.Client(url);\n', 'postgres client - create a new Postgres DB client'],
 						['var pg = require(\'pg\');\nvar url = "postgres://postgres:port@host/database";\nvar client = new pg.Client(url);\nclient.connect(function(error) {\n	\n});\n', 'postgres connect - create a new Postgres DB client and connect'],
 						['client.query(sql, function(error, result) {\n	\n});\n', 'postgres query - create a new Postgres DB query statement'],
+					]);
+				});
+				it('Postgres completions - pg.c', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, pg */\nvar pg = require('pg');\npg.c",
+						prefix: "c",
+						offset: 54,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'pg'],
+						['Client(connection)', 'Client(connection)'],
+						['connect(connection, callback)', 'connect(connection, callback)'],
 					]);
 				});
 			});
@@ -452,6 +542,98 @@ define([
 						['client.get(key, function(error, reply) {\n	\n});\n', 'redis get - create a new Redis client get call'],
 						['client.on(event, function(arg) {\n	});\n', 'redis on - create a new Redis client event handler'],
 						['client.set(key, value);\n', 'redis set - create a new Redis client set call'],
+					]);
+				});
+				it('Redis completions - redis.cr', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, redis */\nvar redis = require('redis');\nredis.cr",
+						prefix: "cr",
+						offset: 67,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'redis'],
+						['createClient(port_arg, host_arg?, options?)', 'createClient(port_arg, host_arg?, options?) : RedisClient'],
+					]);
+				});
+				it('Redis completions - client.h', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, redis */\nvar redis = require('redis');\nvar client = redis.createClient();\nclient.h",
+						prefix: "h",
+						offset: 102,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'ecma5'],
+						['hasOwnProperty(prop)', 'hasOwnProperty(prop) : bool'],
+						['', 'redis'],
+						['hdel(args, callback?)', 'hdel(args, callback?)'],
+						['hexists(args, callback?)', 'hexists(args, callback?)'],
+						['hget(args, callback?)', 'hget(args, callback?)'],
+						['hgetall(args, callback?)', 'hgetall(args, callback?)'],
+						['hincrby(args, callback?)', 'hincrby(args, callback?)'],
+						['hkeys(args, callback?)', 'hkeys(args, callback?)'],
+						['hlen(args, callback?)', 'hlen(args, callback?)'],
+						['hmget(args, callback?)', 'hmget(args, callback?)'],
+						['hmset(args, callback?)', 'hmset(args, callback?)'],
+						['hset(args, callback?)', 'hset(args, callback?)'],
+						['hsetnx(args, callback?)', 'hsetnx(args, callback?)'],
+						['hvals(args, callback?)', 'hvals(args, callback?)'],
+					]);
+				});
+				it('Redis completions - client.s', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, redis */\nvar redis = require('redis');\nvar client = redis.createClient();\nclient.s",
+						prefix: "s",
+						offset: 102,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'redis'],
+						['sadd(args, callback?)', 'sadd(args, callback?)'],
+						['save(args, callback?)', 'save(args, callback?)'],
+						['scard(args, callback?)', 'scard(args, callback?)'],
+						['sdiff(args, callback?)', 'sdiff(args, callback?)'],
+						['sdiffstore(args, callback?)', 'sdiffstore(args, callback?)'],
+						['select(args, callback?)', 'select(args, callback?)'],
+						['set(key, value, callback?)', 'set(key, value, callback?)'],
+						['setbit(args, callback?)', 'setbit(args, callback?)'],
+						['setex(args, callback?)', 'setex(args, callback?)'],
+						['setnx(args, callback?)', 'setnx(args, callback?)'],
+						['setrange(args, callback?)', 'setrange(args, callback?)'],
+						['shutdown(args, callback?)', 'shutdown(args, callback?)'],
+						['sinter(args, callback?)', 'sinter(args, callback?)'],
+						['sinterstore(args, callback?)', 'sinterstore(args, callback?)'],
+						['sismember(args, callback?)', 'sismember(args, callback?)'],
+						['slaveof(args, callback?)', 'slaveof(args, callback?)'],
+						['smembers(args, callback?)', 'smembers(args, callback?)'],
+						['smove(args, callback?)', 'smove(args, callback?)'],
+						['sort(args, callback?)', 'sort(args, callback?)'],
+						['spop(args, callback?)', 'spop(args, callback?)'],
+						['srandmember(args, callback?)', 'srandmember(args, callback?)'],
+						['srem(args, callback?)', 'srem(args, callback?)'],
+						['strlen(args, callback?)', 'strlen(args, callback?)'],
+						['subscribe(channel)', 'subscribe(channel)'],
+						['substr(args, callback?)', 'substr(args, callback?)'],
+						['sunion(args, callback?)', 'sunion(args, callback?)'],
+						['sunionstore(args, callback?)', 'sunionstore(args, callback?)'],
+						['sync(args, callback?)', 'sync(args, callback?)'],
+						['server_info', 'server_info : ServerInfo'],
+					]);
+				});
+				it('Redis completions - client.o', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, redis */\nvar redis = require('redis');\nvar client = redis.createClient();\nclient.o",
+						prefix: "o",
+						offset: 102,
+						callback: done
+					};
+					// We manually add the on() function to the index
+					testProposals(options, [
+						['', 'redis'],
+						['object(args, callback?)', 'object(args, callback?)'],
+						['on(event, action)', 'on(event, action)'],
+						['offline_queue', 'offline_queue : [?]'],
 					]);
 				});
 			});

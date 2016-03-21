@@ -27,12 +27,12 @@ You can use git command line, find the github page for your source and clone the
 
 ### Run the Tern Condense utility
 
-	node tern/bin/condense --name redis --no-spans --plugin doc_comment --def ecma5 --def browser redis/lib/*.js redis/lib/parser/*.js redis/*.js > redis.json
 	node tern/bin/condense --name amqp --no-spans --plugin doc_comment --def ecma5 --def browser ../node-amqp/lib/*.js ../node-amqp/*.js > amqp.json
 	node tern/bin/condense --name express --no-spans --plugin doc_comment --def ecma5 --def browser ../express/lib/*.js ../express/lib/middleware/*.js ../express/lib/router/*.js ../express/*.js > express.json
-	node tern/bin/condense --name mysql --no-spans --plugin doc_comment --def ecma5 --def browser ../node-mysql/lib/*.js ../node-mysql/lib/protocol/*.js ../node-mysql/lib/protocol/constants/*.js ../node-mysql/lib/protocol/packets/*.js ../node-mysql/lib/protocol/sequences/*.js ../node-mysql/*.js > mysql.json
 	node tern/bin/condense --name mongodb --no-spans --plugin doc_comment --def ecma5 --def browser ../node-mongodb-native/lib/bulk/*.js ../node-mongodb-native/lib/gridfs/*.js ../node-mongodb-native/lib/*.js ../node-mongodb-native/*.js > mongodb.json
+	node tern/bin/condense --name mysql --no-spans --plugin doc_comment --def ecma5 --def browser ../node-mysql/lib/*.js ../node-mysql/lib/protocol/*.js ../node-mysql/lib/protocol/constants/*.js ../node-mysql/lib/protocol/packets/*.js ../node-mysql/lib/protocol/sequences/*.js ../node-mysql/*.js > mysql.json
 	node tern/bin/condense --name postgres --no-spans --plugin doc_comment --def ecma5 --def browser ../node-postgres/lib/native/*.js ../node-postgres/lib/*.js > postgres
+	node tern/bin/condense --name redis --no-spans --plugin doc_comment --def ecma5 --def browser redis/lib/*.js redis/lib/parser/*.js redis/*.js > redis.json
 	
 From the node_modules folder where you installed Tern, run the tern condense utility with appropriate arguments.  You will have to adjust the file list to
 where you downloaded the source.  Because Win cmd can't handle wildcard file lists, you will need Cygwin or Git Bash to execute successfully on Windows.	
@@ -41,9 +41,10 @@ If you are doing this in Windows using the Git Bash shell you may encounter an e
 which is not the format Cygwin and Git Bash expect. The easiest workaround is to modify the condense application.  Add ''var fs = require('fs');'' to the file and at the
 end replace the call to console.log with ''fs.writeFile("output.json",''.
 
+The follow commands were used to create indexes in March 2016
+
 	node tern/bin/condense --name amqp --no-spans --plugin doc_comment --def ecma5 --def browser amqp/lib/*.js amqp/*.js
 	node tern/bin/condense --name express --no-spans --plugin doc_comment --def ecma5 --def browser express/lib/*.js express/lib/middleware/*.js express/lib/router/*.js express/*.js
-
 
 ### Manually fix indexes
 
@@ -83,13 +84,20 @@ Also, the static function was missing due to it being a re-export from another m
      
 You must also remove the type information for toString() and hasOwnProperty() as these override the functions with the same name in the Object prototype.
 
+#### Redis
+
+The on() function is not defined.  Add it to the RedisClient type:
+
+	   "RedisClient": {
+	      "on": "fn(event: string, action: fn())",
+
 ### Indexes we provide
 
 Plugins found in `web/javascript/ternPlugins/`.
 
 * amqp.js (March 2016)
 * express.js (March 2016)
-* mongodb.js (March 2016)
-* mysql.js (March 2016)
-* postgres.js (March 2016)
-* redis.js (March 2016)
+* mongodb.js 
+* mysql.js 
+* postgres.js 
+* redis.js (on() manually added March 2016)
