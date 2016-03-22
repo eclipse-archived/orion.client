@@ -452,12 +452,13 @@ define([
 	
 	GitRepositoryExplorer.prototype.initTitleBar = function(resource) {
 		var item = {};
+		var task = messages.Repo;
 		var repository = resource;
 		item.Name = messages["Git"];
 		item.Parents = [];
 		mGitCommands.updateNavTools(this.registry, this.commandService, this, "pageActions", "selectionTools", this.repository, this.pageNavId); //$NON-NLS-1$ //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({
-			task: messages["Git"],
+			task: task,
 			target: repository,
 			breadcrumbTarget: item,
 			makeBreadcrumbLink: function(seg, location) {
