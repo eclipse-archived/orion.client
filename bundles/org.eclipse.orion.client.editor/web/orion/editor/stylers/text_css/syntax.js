@@ -77,7 +77,7 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/lib/syntax
 		"Wheat", "WhiteSmoke", "White",
 		"YellowGreen", "Yellow"
 	];
-	var directives = ["charset", "font-face", "import", "keyframes", "media", "namespace", "page", "supports"];
+	var directives = ["charset", "document", "font-face", "import", "keyframes", "media", "namespace", "page", "supports"];
 
 	var grammars = [];
 	grammars.push.apply(grammars, mLib.grammars);

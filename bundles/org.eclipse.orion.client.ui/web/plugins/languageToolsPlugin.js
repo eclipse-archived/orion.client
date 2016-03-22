@@ -25,6 +25,7 @@ define([
 	'plugins/languages/java/javaPlugin',
 	'plugins/languages/jsx/jsxPlugin',
 	'plugins/languages/launch/launchPlugin',
+	'plugins/languages/less/lessPlugin',
 	'plugins/languages/lua/luaPlugin',
 	'plugins/languages/markdown/markdownPlugin',
 	'plugins/languages/objectiveC/objectiveCPlugin',

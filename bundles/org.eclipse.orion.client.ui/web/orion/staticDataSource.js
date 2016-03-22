@@ -19,6 +19,7 @@ define([
 	"orion/editor/stylers/application_xquery/syntax",
 	"orion/editor/stylers/text_css/syntax",
 	"orion/editor/stylers/text_x-scss/syntax",
+	"orion/editor/stylers/text_x-less/syntax",
 	"orion/editor/stylers/text_html/syntax",
 	"orion/editor/stylers/text_jsx/syntax",
 	"orion/editor/stylers/application_json/syntax",
@@ -44,7 +45,7 @@ define([
 	'orion/editor/stylers/application_x-ejs/syntax',
 	'orion/editor/stylers/application_xml/syntax',
 	'orion/editor/stylers/text_x-yaml/syntax',
-], function(Deferred, mStyler, mJS, mJSP, mXQuery, mCss, mScss, mHtml, mJSX, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mSmarty, mSwift, mVB, mVBHTML, mEJS, mXml, mYaml) {
+], function(Deferred, mStyler, mJS, mJSP, mXQuery, mCss, mScss, mLess, mHtml, mJSX, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mSmarty, mSwift, mVB, mVBHTML, mEJS, mXml, mYaml) {
 	var ContentTypes = [
 		{	id: "text/plain",
 			name: "Text",
@@ -78,6 +79,11 @@ define([
 			"extends": "text/plain",
 			name: "SCSS",
 			extension: ["scss", "sass"]
+		},
+		{	id: "text/x-less",
+			"extends": "text/plain",
+			name: "Less",
+			extension: ["less"]
 		},
 		{	id: "application/json",
 			"extends": "text/plain",
@@ -320,6 +326,9 @@ define([
 						break;
 					case "text/x-scss": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mScss.grammars, "orion.scss", fileContentType.id); //$NON-NLS-0$
+						break;
+					case "text/x-less": //$NON-NLS-0$
+						stylerAdapter = new mStyler.createPatternBasedAdapter(mLess.grammars, "orion.less", fileContentType.id); //$NON-NLS-0$
 						break;
 					case "text/html": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mHtml.grammars, "orion.html", fileContentType.id); //$NON-NLS-0$

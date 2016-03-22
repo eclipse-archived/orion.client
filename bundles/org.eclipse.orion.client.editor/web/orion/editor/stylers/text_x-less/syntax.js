@@ -10,48 +10,42 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/stylers/text_x-scss/syntax", ["orion/editor/stylers/text_css/syntax", "orion/editor/stylers/lib/syntax"], function(mCSS, mLib) {
-	var flags = [
-		"default", "global", "optional"
-	];
-	var constants = [
-		"false", "null", "true"
-	];
-	var directives = [
-		"at-root",
-		"content",
-		"debug",
-		"each", "else", "error", "extend",
-		"for", "function",
-		"if", "include",
-		"mixin",
-		"return",
-		"warn", "while"
+define("orion/editor/stylers/text_x-less/syntax", ["orion/editor/stylers/text_css/syntax", "orion/editor/stylers/lib/syntax"], function(mCSS, mLib) {
+	var flags = ["important"];
+	var constants = ["true"];
+	var directives = ["arguments"];
+	var keywords = ["all", "and", "not", "when"];
+	var importKeywords = [
+		"css",
+		"inline",
+		"less",
+		"multiple",
+		"once", "optional",
+		"reference"
 	];
 
 	var grammars = [];
 	grammars.push.apply(grammars, mCSS.grammars);
 	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
-		id: "orion.scss",
-		contentTypes: ["text/x-scss"],
+		id: "orion.less",
+		contentTypes: ["text/x-less"],
 		patterns: [
 			{include: "orion.css#string_single_multiline"},
 			{include: "orion.css#string_double_multiline"},
 			{include: "orion.c-like#comment_block"},
-			{include: "#eachin"},
-			{include: "#forto"},
+			{include: "#string_doubleQuote"},
+			{include: "#string_singleQuote"},
 			{include: "orion.c-like#comment_singleLine"},
-			{include: "orion.lib#string_doubleQuote"},
-			{include: "orion.lib#string_singleQuote"},
-			{include: "#variable"},
-			{include: "#placeholder"},
-			{include: "#flag"},
-			{include: "#directive"},
+			{include: "#importDirective"},
 			{include: "orion.css#directive"},
-			{include: "#constant"},
+			{include: "#directive"},
+			{include: "#variable"},
 			{include: "#interpolated"},
+			{include: "#constant"},
+			{include: "#flag"},
 			{include: "#operator"},
+			{include: "#keyword"},
 			{include: "orion.lib#brace_open"},
 			{include: "orion.lib#brace_close"},
 			{include: "orion.lib#bracket_open"},
@@ -67,69 +61,60 @@ define("orion/editor/stylers/text_x-scss/syntax", ["orion/editor/stylers/text_cs
 		repository: {
 			constant: {
 				match: "\\b(?:" + constants.join("|") + ")\\b",
-				name: "constant.language.scss"
+				name: "constant.language.less"
 			},
 			directive: {
 				match: "(^|\\s)(@("  + directives.join("|") + "))\\b",
 				captures: {
-					2: {name: "keyword.other.directive.scss"}
+					2: {name: "keyword.other.directive.less"}
 				}
-			},
-			eachin: {
-				begin: "@each\\s",
-				end: "\\sin\\b",
-				captures: {
-					0: {name: "keyword.other.directive.scss"},
-				},
-				patterns: [
-					{include: "#variable"}
-				]
 			},
 			flag: {
 				match: "(^|\\s)(!("  + flags.join("|") + "))\\b",
 				captures: {
-					2: {name: "keyword.other.flag.scss"}
+					2: {name: "keyword.other.flag.less"}
 				}
 			},
-			forto: {
-				begin: "@for\\s",
-				end: "(^|\\s)(t(o|hrough))(\\s|$)",
+			importDirective: {
+				begin: "(@import)\\s*\\(",
+				end: "\\)",
 				beginCaptures: {
-					0: {name: "keyword.other.directive.scss"},
+					1: {name: "keyword.other.directive.less"}
 				},
-				endCaptures: {
-					2: {name: "keyword.other.directive.scss"}
-				},
-				patterns: [
-					{include: "#variable"},
-					{include: "orion.lib#number_decimal"},
-					{
-						match: "(^|\\s)(from)(\\s|$)",
-						name: "keyword.other.directive.scss"
-					}
-				]
+				patterns: [{
+					match: "\\b(?:" + importKeywords.join("|") + ")\\b",
+					name: "keyword.operator.less"
+				}]
 			},
 			interpolated: {
-				match: "#\\{[^}]*\\}",
-				name: "string.interpolated.scss"
+				match: "@\\{[^}]*\\}",
+				name: "string.interpolated.less"
+			},
+			keyword: {
+				match: "\\b(?:" + keywords.join("|") + ")\\b",
+				name: "keyword.operator.less"
 			},
 			operator: {
-				match: "\\+|\\*|\\/|%|==?|!=|&|<=?|=?>|!",
-				name: "punctuation.operator.scss"
+				match: "\\+_?|\\*|\\/|=|>=?|<=?|&",
+				name: "punctuation.operator.less"
 			},
-			placeholder: {
-				match: "%[\\w-]+",
-				name: "variable.other.placeholder.sas"
+			string_doubleQuote: {
+				match: '~?"(?:\\\\.|[^"])*"?',
+				name: "string.quoted.double"
+			},
+			string_singleQuote: {
+				match: "~?'(?:\\\\.|[^'])*'?",
+				name: "string.quoted.single"
 			},
 			variable: {
-				match: "\\$[\\w-]+(\\.{3})?",
-				name: "variable.other.scss"
+				match: "@[\\w-]+(\\.{3})?",
+				name: "variable.other.less"
 			}
 		}
 	});
 	return {
 		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
-		keywords: directives.concat(flags)
+		keywords: directives.concat(flags).concat(importKeywords).concat(keywords)
 	};
 });
