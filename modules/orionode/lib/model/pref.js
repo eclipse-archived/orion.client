@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*eslint-env node*/
 'use strict'
-var debug = require('Debug')('orion:prefs');
+var debug = require('debug')('orion:prefs');
 
 module.exports = Prefs;
 
