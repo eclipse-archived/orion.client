@@ -18,7 +18,7 @@ define([
 	"orion/editor/stylers/application_x-jsp/syntax",
 	"orion/editor/stylers/application_xquery/syntax",
 	"orion/editor/stylers/text_css/syntax",
-	"orion/editor/stylers/text_scss/syntax",
+	"orion/editor/stylers/text_x-scss/syntax",
 	"orion/editor/stylers/text_html/syntax",
 	"orion/editor/stylers/text_jsx/syntax",
 	"orion/editor/stylers/application_json/syntax",
