@@ -26,7 +26,7 @@ var auth = require('./lib/middleware/auth'),
 var args = argslib.parseArgs(process.argv);
 var port = args.port || args.p || process.env.PORT || 8081;
 
-function startServer() {
+function startServer(cb) {
 	var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
 
 	argslib.readConfigFile(configFile, function(err, configParams) {
@@ -92,6 +92,9 @@ function startServer() {
 					
 					var io = socketio.listen(server, { 'log level': 1 });
 					ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
+					if (cb) {
+						cb();
+					}
 				} catch (e) {
 					console.error(e && e.stack);
 				}
@@ -106,7 +109,6 @@ function startServer() {
 if (args.ui) {
 	var electron = require('electron');
 	electron.app.on('ready', function() {
-		startServer();
 		function createWindow(url){
 			var nextWindow = new electron.BrowserWindow({width: 1024, height: 800, title: "Orion"});
 			nextWindow.loadURL("file:///" + __dirname + "/lib/main.html#" + encodeURI(url));
@@ -120,7 +122,9 @@ if (args.ui) {
 			});
 			return nextWindow;
 		}
-		createWindow("http://localhost:" + port);
+		startServer(function() {
+			createWindow("http://localhost:" + port);
+		});
 	});
 } else {
 	startServer();
