@@ -20,17 +20,16 @@ define([
 	'orion/widgets/input/SettingsSelect',
 	'i18n!orion/settings/nls/messages',
 	'orion/i18nUtil',
-	'orion/metrics',
 	'orion/commands'
 ], function(mExplorer, mSection, Deferred, objects, mConfirmDialog, SettingsCheckbox, SettingsTextfield, 
-		SettingsSelect, messages, i18nUtil, mMetrics, Commands) {
+		SettingsSelect, messages, i18nUtil, Commands) {
 	var Explorer = mExplorer.Explorer,
 	    SelectionRenderer = mExplorer.SelectionRenderer,
 	    Section = mSection.Section,
 	    Command = Commands.Command,
 	    ConfirmDialog = mConfirmDialog.ConfirmDialog;
 
-	var METRICS_MAXLENGTH = 256;
+	var SECTION_HIDE = '/settings/sectionExpand'; //$NON-NLS-1$
 
 	/**
 	 * @name orion.settings.ui.PropertyWidget
@@ -50,12 +49,12 @@ define([
 		postCreate: function() {
 			var property = this.property, config = this.config, properties = config.getProperties();
 			var value;
-			if (properties && typeof properties[property.getId()] !== 'undefined') { //$NON-NLS-0$
+			if (properties && typeof properties[property.getId()] !== 'undefined') {
 				value = properties[property.getId()];
 			} else {
 				value = property.getDefaultValue();
 			}
-			if (typeof this.updateField === 'function') { //$NON-NLS-0$
+			if (typeof this.updateField === 'function') {
 				this.updateField(value);
 			}
 		},
@@ -73,6 +72,7 @@ define([
 
 	/**
 	 * Widget displaying a string-typed plugin setting. Mixes in SettingsTextfield and PropertyWidget.
+	 * @callback
 	 */
 	var PropertyTextField = function(options) {
 		PropertyWidget.apply(this, arguments);
@@ -83,12 +83,15 @@ define([
 			SettingsTextfield.prototype.postCreate.apply(this, arguments);
 			PropertyWidget.prototype.postCreate.apply(this, arguments);
 			var type = this.property.getType();
-			if (type === 'number') { //$NON-NLS-0$
+			if (type === 'number') {
 				this.textfield.type = 'number'; //$NON-NLS-0$
 			} else {
 				this.textfield.type = 'text'; //$NON-NLS-0$
 			}
 		},
+		/**
+		 * @callback
+		 */
 		change: function(event) {
 			this.changeProperty(this.textfield.value);
 		},
@@ -106,7 +109,7 @@ define([
 	};
 	objects.mixin(PropertyCheckbox.prototype, SettingsCheckbox.prototype, PropertyWidget.prototype, {
 		change: function(event) {
-			this.changeProperty(event.target.checked); //$NON-NLS-0$
+			this.changeProperty(event.target.checked);
 		},
 		postCreate: function() {
 			PropertyWidget.prototype.postCreate.call(this);
@@ -119,6 +122,7 @@ define([
 
 	/**
 	 * Widget displaying a plugin setting whose value is restricted to an enumerated set (options). Mixes in SettingsSelect and PropertyWidget.
+	 * @callback
 	 */
 	var PropertySelect = function(options) {
 		PropertyWidget.apply(this, arguments);
@@ -129,16 +133,19 @@ define([
 			var values = this.property.getOptionValues();
 			var labels = this.property.getOptionLabels(); // TODO nls
 			this.options = values.map(function(value, i) {
-				var label = (typeof labels[i] === 'string' ? labels[i] : value); //$NON-NLS-0$
+				var label = typeof labels[i] === 'string' ? labels[i] : value;
 				return {value: label, label: label};
 			});
 			SettingsSelect.prototype.postCreate.apply(this, arguments);
 			PropertyWidget.prototype.postCreate.apply(this, arguments);
 		},
+		/**
+		 * @callback
+		 */
 		change: function(event) {
 			SettingsSelect.prototype.change.apply(this, arguments);
 			var selectedOptionValue = this.property.getOptionValues()[this.getSelectedIndex()];
-			if (typeof selectedOptionValue !== 'undefined') { //$NON-NLS-0$
+			if (typeof selectedOptionValue !== 'undefined') {
 				this.changeProperty(selectedOptionValue);
 			}
 		},
@@ -164,7 +171,7 @@ define([
 		var preferences = this.serviceRegistry.getService('orion.core.preference'); //$NON-NLS-0$
 		this.controller = new ConfigController(preferences, configAdmin, this.setting.getPid());
 	};
-	objects.mixin(PropertiesWidget.prototype, { //$NON-NLS-0$
+	objects.mixin(PropertiesWidget.prototype, {
 		createElements: function() {
 			var self = this;
 			this.children = [];
@@ -202,11 +209,11 @@ define([
 					widget = new PropertySelect(options);
 				} else {
 					switch (property.getType()) {
-						case 'boolean': //$NON-NLS-0$
+						case 'boolean':
 							widget = new PropertyCheckbox(options);
 							break;
-						case 'number': //$NON-NLS-0$
-						case 'string': //$NON-NLS-0$
+						case 'number':
+						case 'string':
 							widget = new PropertyTextField(options);
 							break;
 					}
@@ -307,10 +314,10 @@ define([
 	SettingsRenderer.prototype.getCellElement = function(col_no, /*Setting*/ setting, rowElement) {
 		var sectionId = setting.getPid(), headerId = sectionId + 'header'; //$NON-NLS-0$
 		
-		var settingSection = document.createElement('section'); //$NON-NLS-0$
+		var settingSection = document.createElement('section');
 		settingSection.id = sectionId;
 		settingSection.className = 'setting-row'; //$NON-NLS-0$
-		settingSection.setAttribute('role', 'region'); //$NON-NLS-0$ //$NON-NLS-1$
+		settingSection.setAttribute('role', 'region'); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 		settingSection.setAttribute('aria-label', setting.getName()); //$NON-NLS-0$ // currently there's only one section, so just use setting name
 //		settingSection.setAttribute('aria-labelledby', headerId); //$NON-NLS-0$ // if there are ever multiple sections, use section header
 
@@ -320,7 +327,7 @@ define([
 		sectionHeader.className = 'setting-header setting-header-generated'; //$NON-NLS-0$
 //		sectionHeader.textContent = setting.getName(); // if there are ever multiple sections, use section header
 
-		var propertiesElement = document.createElement('div'); //$NON-NLS-0$
+		var propertiesElement = document.createElement('div');
 		propertiesElement.className = 'setting-content'; //$NON-NLS-0$
 		var propertiesWidget = this.createPropertiesWidget(propertiesElement, setting);
 		this.childWidgets.push(propertiesWidget);
@@ -331,12 +338,12 @@ define([
 		rowElement.appendChild(settingSection);
 //		mNavUtils.addNavGrid(this.explorer.getNavDict(), setting, link);
 	};
-	SettingsRenderer.prototype.createPropertiesWidget = function(parent, setting, serviceRegistry) {
+	SettingsRenderer.prototype.createPropertiesWidget = function(parent, setting) {
 		return new PropertiesWidget({serviceRegistry: this.serviceRegistry, setting: setting, categoryTitle: this.explorer.categoryTitle}, parent);
 	};
 	/** @callback */
 	SettingsRenderer.prototype.renderTableHeader = function(tableNode) {
-		return document.createElement('div'); //$NON-NLS-0$
+		return document.createElement('div');
 	};
 	SettingsRenderer.prototype.destroy = function() {
 		if (this.childWidgets) {
@@ -369,6 +376,7 @@ define([
 	 */
 	function SettingsList(options) {
 		this.serviceRegistry = options.serviceRegistry;
+		this.prefService = this.serviceRegistry.getService('orion.core.preference'); //$NON-NLS-1$
 		var commandRegistry = this.commandRegistry = options.commandRegistry;
 		this.settings = options.settings;
 		this.title = options.title;
@@ -379,15 +387,15 @@ define([
 
 		var restoreCommand = new Command({
 			id: "orion.pluginsettings.restore", //$NON-NLS-0$
-			name: messages["Restore"], //$NON-NLS-0$
+			name: messages["Restore"],
 			callback: function(data) {
 				var dialog = new ConfirmDialog({
-					confirmMessage: messages["ConfirmRestore"], //$NON-NLS-0$
-					title: messages["Restore"] //$NON-NLS-0$
+					confirmMessage: messages["ConfirmRestore"],
+					title: messages["Restore"]
 				});
 				dialog.show();
 				var _self = this;
-				dialog.addEventListener("dismiss", function(event) { //$NON-NLS-0$
+				dialog.addEventListener("dismiss", function(event) {
 					if (event.value) {
 					    if(data.items) {
 						    _self.restore(data.items.pid);
@@ -395,7 +403,7 @@ define([
 						    _self.restore();
 						}
 					}
-				}); //$NON-NLS-0$
+				});
 			}.bind(this)
 		});
 		commandRegistry.addCommand(restoreCommand);
@@ -404,9 +412,17 @@ define([
 		this.render(this.parent, this.serviceRegistry, this.settings, this.title);
 	}
 	SettingsList.prototype = {
-		_makeSection: function(parent, sectionId, setting, title, hasMultipleSections) {
-			var section = new Section(parent, { id: sectionId, title: title, useAuxStyle: true,
-				canHide: hasMultipleSections, onExpandCollapse: true});
+		_makeSection: function(parent, sectionId, title, hasMultipleSections) {
+			var that = this;
+			function updateHideSetting(newValue){
+				if (that.prefService){
+					that.prefService.get(SECTION_HIDE).then(function(prefs) {
+						prefs[sectionId] = !newValue;
+						that.prefService.put(SECTION_HIDE, prefs);
+					});
+				}
+			}
+			var section = new Section(parent, { id: sectionId, title: title, useAuxStyle: true, canHide: hasMultipleSections, onExpandCollapse: updateHideSetting});
 			return section;
 		},
 		destroy: function() {
@@ -420,9 +436,11 @@ define([
 			    if(pid) {
 			        if(setting.getPid() === pid) {
 				        deferreds.push(new ConfigController(preferences, this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
+				        deferreds.push(new ConfigController(this.prefService, this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
 				    }
 				} else {
 				    deferreds.push(new ConfigController(preferences, this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
+				    deferreds.push(new ConfigController(this.prefService, this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
 				}
 			}
 			if(deferreds.length > 0) { 
@@ -435,14 +453,16 @@ define([
 			}
 		},
 		render: function(parent, serviceRegistry, settings, categoryTitle) {
-			// FIXME Section forces a singleton id, bad
-			var idPrefix = 'pluginsettings-'; //$NON-NLS-0$
-			
 			for (var i=0; i<settings.length; i++) {
-				var sectionId = idPrefix + 'section' + i; //$NON-NLS-0$
 				var setting = settings[i];
-				var section = this._makeSection(parent, sectionId, setting, setting.getName() || "Unnamed", settings.length > 1); //$NON-NLS-0$
-				this.commandRegistry.renderCommands("restoreDefaults", section.getActionElement(), settings[i], this, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+				var sectionId = 'settings.section.'; //$NON-NLS-1$
+				if (setting.pid){
+					sectionId += setting.pid;
+				} else {
+					sectionId += i;
+				}
+				var section = this._makeSection(parent, sectionId, setting.getName() || "Unnamed", settings.length > 1); //$NON-NLS-0$
+				this.commandRegistry.renderCommands("restoreDefaults", section.getActionElement(), settings[i], this, "button"); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
 				
 				// Add a class name based on the category (all settings on the page have the same category currently)
 				if(setting.category){
@@ -461,6 +481,18 @@ define([
 						tableRowElement: 'div', //$NON-NLS-0$
 						noSelection: true // Until we support selection based commands, don't allow selection
 					});
+				
+				if (this.prefService && setting.pid && settings.length > 1){
+					this.prefService.get(SECTION_HIDE).then(function(theSection, prefs) {
+						if (typeof prefs[theSection.id] === 'boolean'){
+							theSection.setHidden(prefs[theSection.id]);
+						} else {
+							theSection.setHidden(true);
+						}
+					}.bind(null, section));
+				} else if (settings.length > 1) {
+					section.setHidden(true);
+				}
 			}
 		}
 	};
