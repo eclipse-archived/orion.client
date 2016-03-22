@@ -36,7 +36,7 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/lib/syntax
 		"line-stacking-shift", "line-stacking-strategy", "line-stacking", "list-style-image", "list-style-position", "list-style-type",
 		"list-style", "margin-bottom", "margin-left", "margin-right", "margin-top", "margin", "mark-after", "mark-before", "mark",
 		"marker-offset", "marks", "marquee-direction", "marquee-loop", "marquee-play-count", "marquee-speed", "marquee-style", "max-height",
-		"max-width", "min-height", "min-width", "move-to", "nav-down", "nav-index", "nav-left", "nav-right", "nav-up", "opacity", "orphans", //$NON-NLS-10$
+		"max-width", "min-height", "min-width", "move-to", "nav-down", "nav-index", "nav-left", "nav-right", "nav-up", "opacity", "orphans",
 		"outline-color", "outline-offset", "outline-style", "outline-width", "outline", "overflow-style", "overflow-x", "overflow-y",
 		"overflow", "padding-bottom", "padding-left", "padding-right", "padding-top", "padding", "page-break-after", "page-break-before", "page-break-inside",
 		"page-policy", "page", "pause-after", "pause-before", "pause", "perspective-origin", "perspective", "phonemes", "pitch-range",
@@ -50,6 +50,34 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/lib/syntax
 		"voice-pitch-range", "voice-pitch", "voice-rate", "voice-stress", "voice-volume", "volume", "white-space-collapse", "white-space",
 		"widows", "width", "word-break", "word-spacing", "word-wrap", "z-index"
 	];
+	var colors = [
+		"AliceBlue", "AntiqueWhite", "Aquamarine", "Aqua", "Azure",
+		"Beige", "Bisque", "Black", "BlanchedAlmond", "BlueViolet", "Blue", "Brown", "BurlyWood",
+		"CadetBlue", "Chartreuse", "Chocolate", "Coral", "CornflowerBlue", "Cornsilk", "Crimson", "Cyan",
+		"DarkBlue", "DarkCyan", "DarkGoldenRod", "DarkGray", "DarkGrey", "DarkGreen", "DarkKhaki", "DarkMagenta", "DarkOliveGreen",
+		"DarkOrange", "DarkOrchid", "DarkRed", "DarkSalmon", "DarkSeaGreen", "DarkSlateBlue", "DarkSlateGray", "DarkSlateGrey",
+		"DarkTurquoise", "DarkViolet", "DeepPink", "DeepSkyBlue", "DimGray", "DimGrey", "DodgerBlue",
+		"FireBrick", "FloralWhite", "ForestGreen", "Fuchsia",
+		"Gainsboro", "GhostWhite", "Gold", "GoldenRod", "Gray", "Grey", "GreenYellow", "Green",
+		"HoneyDew", "HotPink",
+		"IndianRed", "Indigo", "Ivory",
+		"Khaki",
+		"LavenderBlush", "Lavender", "LawnGreen", "LemonChiffon", "LightBlue", "LightCoral", "LightCyan", "LightGoldenRodYellow",
+		"LightGray", "LightGrey", "LightGreen", "LightPink", "LightSalmon", "LightSeaGreen", "LightSkyBlue", "LightSlateGray",
+		"LightSlateGrey", "LightSteelBlue", "LightYellow", "LimeGreen", "Lime", "Linen",
+		"Magenta", "Maroon", "MediumAquaMarine", "MediumBlue", "MediumOrchid", "MediumPurple", "MediumSeaGreen", "MediumSlateBlue",
+		"MediumSpringGreen", "MediumTurquoise", "MediumVioletRed", "MidnightBlue", "MintCream", "MistyRose", "Moccasin",
+		"NavajoWhite", "Navy",
+		"OldLace", "OliveDrab", "Olive", "OrangeRed", "Orange", "Orchid",
+		"PaleGoldenRod", "PaleGreen", "PaleTurquoise", "PaleVioletRed", "PapayaWhip", "PeachPuff", "Peru", "Pink", "Plum", "PowderBlue", "Purple",
+		"RebeccaPurple", "Red", "RosyBrown", "RoyalBlue",
+		"SaddleBrown", "Salmon", "SandyBrown", "SeaGreen", "SeaShell", "Sienna", "Silver", "SkyBlue", "SlateBlue", "SlateGray", "SlateGrey", "Snow", "SpringGreen", "SteelBlue",
+		"Tan", "Teal", "Thistle", "Tomato", "Turquoise",
+		"Violet",
+		"Wheat", "WhiteSmoke", "White",
+		"YellowGreen", "Yellow"
+	];
+	var directives = ["charset", "font-face", "import", "keyframes", "media", "namespace", "page", "supports"];
 
 	var grammars = [];
 	grammars.push.apply(grammars, mLib.grammars);
@@ -57,15 +85,8 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/lib/syntax
 		id: "orion.css",
 		contentTypes: ["text/css"],
 		patterns: [
-			{
-				begin: "'(?:\\\\.|[^\\\\'])*\\\\$",
-				end: "^(?:$|(?:\\\\.|[^\\\\'])*('|[^\\\\]$))",
-				name: "string.quoted.single.css"
-			}, {
-				begin: '"(?:\\\\.|[^\\\\"])*\\\\$',
-				end: '^(?:$|(?:\\\\.|[^\\\\"])*("|[^\\\\]$))',
-				name: "string.quoted.double.css"
-			},
+			{include: "#string_single_multiline"},
+			{include: "#string_double_multiline"},
 			{include: "orion.lib#string_doubleQuote"},
 			{include: "orion.lib#string_singleQuote"},
 			{include: "orion.c-like#comment_block"},
@@ -77,19 +98,43 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/lib/syntax
 			{include: "orion.lib#parenthesis_close"},
 			{include: "orion.lib#number_decimal"},
 			{include: "#number_hex"},
-			{
-				match: "(?i)\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?\\b",
-				name: "constant.numeric.value.css"
-			},
-			{			
-				match: "(?:-webkit-|-moz-|-ms-|-o-|\\b)(?:" + keywords.join("|") + ")\\b",
-				name: "support.type.propertyName.css"
-			}
+			{include: "#numeric_value"},
+			{include: "#color"},
+			{include: "#keyword"},
+			{include: "#directive"}
 		],
 		repository: {
+			color: {
+				match: "(?i)\\b(?:" + colors.join("|") + ")\\b",
+				name: "constant.other.color.css"
+			},
+			directive: {
+				match: "(^|\\s)(@("  + directives.join("|") + "))\\b",
+				captures: {
+					2: {name: "keyword.other.directive.css"}
+				}
+			},
+			keyword: {
+				match: "(?:-webkit-|-moz-|-ms-|-o-|\\b)(?:" + keywords.join("|") + ")\\b",
+				name: "support.type.propertyName.css"
+			},
 			number_hex: {
 				match: "#[0-9A-Fa-f]+\\b",
 				name: "constant.numeric.hex.css"
+			},
+			numeric_value: {
+				match: "(?i)\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?\\b",
+				name: "constant.numeric.value.css"
+			},
+			string_double_multiline: {
+				begin: '"(?:\\\\.|[^\\\\"])*\\\\$',
+				end: '^(?:$|(?:\\\\.|[^\\\\"])*("|[^\\\\]$))',
+				name: "string.quoted.double.css"
+			},
+			string_single_multiline: {
+				begin: "'(?:\\\\.|[^\\\\'])*\\\\$",
+				end: "^(?:$|(?:\\\\.|[^\\\\'])*('|[^\\\\]$))",
+				name: "string.quoted.single.css"
 			}
 		}
 	});

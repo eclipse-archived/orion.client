@@ -31,6 +31,7 @@ define([
 	'plugins/languages/php/phpPlugin',
 	'plugins/languages/python/pythonPlugin',
 	'plugins/languages/ruby/rubyPlugin',
+	'plugins/languages/scss/scssPlugin',
 	'plugins/languages/smarty/smartyPlugin',
 	'plugins/languages/swift/swiftPlugin',
 	'plugins/languages/vb/vbPlugin',
