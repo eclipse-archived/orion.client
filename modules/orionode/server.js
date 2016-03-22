@@ -24,7 +24,9 @@ var auth = require('./lib/middleware/auth'),
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
-var port = args.port || args.p || process.env.PORT || 8081;
+var PORT_LOW = 42000;
+var PORT_HIGH = 42500;
+var port = args.port || args.p || process.env.PORT;
 
 function startServer(cb) {
 	var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
@@ -57,8 +59,7 @@ function startServer(cb) {
 					console.log(util.format('Using password from file: %s', passwordFile));
 				}
 				console.log(util.format('Using workspace: %s', workspaceDir));
-				console.log(util.format('Listening on port %d...', port));
-
+				
 				var server;
 				try {
 					// create web server
@@ -88,7 +89,18 @@ function startServer(cb) {
 					}
 					app.use(compression());
 					app.use(orionMiddleware);
-					server.listen(port);
+					function portFound() {
+						console.log(util.format('Listening on port %d...', port));
+					}
+
+					function getPort() {
+						return Math.floor(Math.random() * (PORT_HIGH - PORT_LOW) + PORT_LOW);
+					}
+					if (!port) {
+						port = getPort();
+					}
+					server.listen(port, portFound);
+					
 					
 					var io = socketio.listen(server, { 'log level': 1 });
 					ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
@@ -99,7 +111,9 @@ function startServer(cb) {
 					console.error(e && e.stack);
 				}
 				server.on('error', function(err) {
-					console.log(err);
+					if (err.code === "EADDRINUSE") {
+						server.listen(getPort(), portFound);
+					}
 				});
 			});
 		});
@@ -108,6 +122,7 @@ function startServer(cb) {
 
 if (args.ui) {
 	var electron = require('electron');
+	var mainWindow = null;
 	electron.app.on('ready', function() {
 		function createWindow(url){
 			var nextWindow = new electron.BrowserWindow({width: 1024, height: 800, title: "Orion"});
@@ -123,8 +138,16 @@ if (args.ui) {
 			return nextWindow;
 		}
 		startServer(function() {
-			createWindow("http://localhost:" + port);
+			mainWindow = createWindow("http://localhost:" + port);
+			mainWindow.on('closed', function() {
+				mainWindow = null;
+			})
 		});
+
+	});
+
+	electron.app.on('window-all-closed', function() {
+		electron.app.quit();		
 	});
 } else {
 	startServer();
