@@ -41,7 +41,7 @@ module.exports = function(options) {
 		return api.join(originalFileRoot(req), projectName);
 	}
 	function makeProjectLocation(req, projectName) {
-		return api.join(req.contextPath, 'project', projectName);
+		return req.contextPath + api.join(fileRoot, projectName);
 	}
 
 	var router = express.Router();
@@ -83,8 +83,13 @@ module.exports = function(options) {
 					Name: workspaceName,
 					Location: api.join(workspaceRootUrl, workspaceId),
 					ChildrenLocation: api.join(workspaceRootUrl, workspaceId), // ?? // api.join(fileRoot, workspaceId, '?depth=1'),
-					Children: children
-//					Projects: [] // TODO projects -- does anything care about these?
+					Children: children,
+					Projects: children.map(function(c) {
+						return {
+							Id: c.Name,
+							Location:  api.join(parentFileLocation, c.Name),
+						};
+					})
 				});
 			})
 			.catch(api.writeError.bind(null, 500, res));
@@ -114,7 +119,7 @@ module.exports = function(options) {
 				// Move/Rename a project
 				var location = req.body && req.body.Location;
 				if (location) {
-					var wwwpath = api.rest(fileRoot, location.substr(req.contextPath.length)),
+					var wwwpath = encodeURIComponent(projectName),
 					    filepath = fileUtil.safeFilePath(req.user.workspaceDir, projectName);
 
 					// Call the File POST helper to handle the filesystem operation. We inject the Project-specific metadata
