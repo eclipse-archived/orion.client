@@ -331,7 +331,7 @@ function getCommitBody(req, res) {
 	clone.getRepo(req)
 	.then(function(repo) {
 		theRepo = repo;
-		filePath = filePath.substring(repo.workdir().length);
+		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
 		return repo.getReferenceCommit(scope);
 	})
 	.catch(function() {

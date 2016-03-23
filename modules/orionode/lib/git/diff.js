@@ -42,8 +42,8 @@ function getDiff(req, res) {
 	return clone.getRepo(req)
 	.then(function(r) {
 		repo = r;
-		filePath = filePath.substring(repo.workdir().length);
-		var fileDir = path.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
+		var fileDir = api.toURLPath(path.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1)));
 		if (scope.indexOf("..") !== -1) {
 			diff = getDiffBetweenTwoCommits(repo, scope.split(".."));
 		} else if (scope === "Default") {
@@ -122,7 +122,7 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 				patches.push(patch);
 				
 				if (includeURIs) {
-					var p = path.join(fileDir, newFilePath);
+					var p = api.toURLPath(path.join(fileDir, newFilePath));
 					URIs.push({
 						"Base": getBaseLocation(scope, p),
 						"CloneLocation": "/gitapi/clone" + fileDir,
@@ -136,7 +136,7 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 				if (includeDiffs && (start <= pi && pi < end)) {
 					i = pi;
 					var type = changeType(patch);
-					var p1 = path.join(fileDir, type !== "Deleted" ? newFilePath : oldFilePath);
+					var p1 = api.toURLPath(path.join(fileDir, type !== "Deleted" ? newFilePath : oldFilePath));
 					diffs.push({
 						"ChangeType": type,
 						"ContentLocation": p1,

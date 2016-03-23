@@ -37,7 +37,7 @@ function getIndex(req, res) {
 	return clone.getRepo(req)
 	.then(function(repoResult) {
 		repo = repoResult;
-		filePath = filePath.substring(repo.workdir().length);
+		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
 		return repo;
 	})
 	.then(function(repo) {
@@ -67,7 +67,7 @@ function putIndex(req, res) {
 	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
-		filePath = filePath.substring(repo.workdir().length);
+		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
 		return repo.openIndex();
 	})
 	.then(function(indexResult) {
@@ -110,7 +110,7 @@ function postIndex(req, res) {
 	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
-		filePath = filePath.substring(repo.workdir().length);
+		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
 		return repo.getReferenceCommit(req.body.Commit || "HEAD")
 		.then(function(commit) {
 			return commit;

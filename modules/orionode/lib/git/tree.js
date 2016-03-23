@@ -26,6 +26,7 @@ module.exports.router = function(options) {
 	.get('/file*', getTree);
 	
 function treeJSON(location, name, timestamp, dir, length) {
+	location = api.toURLPath(location);
 	return {
 		Name: name,
 		LocalTimeStamp: timestamp,
@@ -63,7 +64,7 @@ function getTree(req, res) {
 	return clone.getRepo(req)
 	.then(function(repoResult) {
 		repo = repoResult;
-		filePath = filePath.substring(repo.workdir().length);
+		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
 		return repo;
 	})
 	.then(function(repo) {

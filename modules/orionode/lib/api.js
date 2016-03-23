@@ -50,6 +50,10 @@ function join(/*varags*/) {
 	return path.join('/');
 }
 
+function toURLPath(p) {
+	return p.replace(/\\/g, "/");
+}
+
 /**
  * Helper for writing a JSON response.
  * @param {Number} code
@@ -120,6 +124,7 @@ function matchHost(req, aUrl) {
 	return aUrl;
 }
 
+exports.toURLPath = toURLPath;
 exports.pathMatch = pathMatch;
 exports.matchHost = matchHost;
 exports.rest = rest;
