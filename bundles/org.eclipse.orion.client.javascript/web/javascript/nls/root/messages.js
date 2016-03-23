@@ -298,6 +298,7 @@ define({
 	'failedRefs': 'Failed to find references',
 	'failedRefsNoServer': 'failed to find references - server not started',
 	'failedType': 'Failed to find type',
+	'failedQuickfixesNoServer': 'Failed to compute quick fixes, server not started',
 	'unknownRequest': 'The request \'${0}\' is unknown',
 	'serverNotStarted': 'The server has not been started. Request: \'${0}\'',
 	'eslintRuleEnableDisable': 'Enable or disable ESLint rule using the ```ruleid:0/1/2``` form.\n\nExample use:\n\n>```/* eslint semi:1, no-console:0, no-redeclare:2 */```',

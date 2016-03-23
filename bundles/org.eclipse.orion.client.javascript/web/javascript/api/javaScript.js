@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -85,6 +85,18 @@ define([
      */
     JavaScript.prototype.Tern.completions = function completions(file, offset, keywords, files, callback) {
     	ternserver.completions(file, offset, keywords, files, callback);
+    };
+    /**
+     * @description Computes the quickfixes for the given annotation, and optionally the list of similar annotations
+     * @param {String} file The fully qualified name of the file context
+     * @param {Number} offset The offset of the completion
+     * @param {Object} annotation The annotation from the editor which has the minimum form: {start, end, id, fixid}
+     * @param {Array.<Object>} annotations The array of similar annnotatons to the one the request is made to fix
+     * @param {Array.<Object>} files The optional array of file objects
+     * @param {Function} callback The callback which is called to return the results
+     */
+    JavaScript.prototype.Tern.fixes = function fixes(file, annotation, annotations, files, callback) {
+    	ternserver.fixes(file, annotation, annotations, files, callback);
     };
     /**
      * @description Computes the definition of the identifier at the given offset

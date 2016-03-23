@@ -339,6 +339,42 @@ define([
 		   }
 	    },
 	    /**
+	     * @description Computes the quickfixes for the given annotation, and optionally the list of similar annotations
+	     * @param {String} file The fully qualified name of the file context
+	     * @param {Number} offset The offset of the completion
+	     * @param {Object} annotation The annotation from the editor which has the minimum form: {start, end, id, fixid}
+	     * @param {Array.<Object>} annotations The optional array of similar annnotatons to the one the request is made to fix
+	     * @param {Array.<Object>} files The optional array of file objects
+	     * @param {Function} callback The callback which is called to return the results
+	     */
+	    fixes: function fixes(file, annotation, annotations, files, callback) {
+	    	if(ternserver) {
+	    		var id = annotation.fixid ? annotation.fixid : annotation.id;
+	    		ternserver.request({
+					query: {
+						type: "fixes", //$NON-NLS-1$
+						file: file,
+						problemId: id,
+						annotation: annotation,
+						annotations: annotations
+					},
+					files: files
+				},
+				function(error, fixes) {
+					if(error) {
+						callback({request: 'fixes', error: error.message, message: Messages['failedToComputeFixes']}); //$NON-NLS-1$
+					} else if(fixes && Array.isArray(fixes)) {
+						callback({request: 'fixes', fixes: fixes}); //$NON-NLS-1$
+					} else {
+						callback({request: 'fixes', fixes: []}); //$NON-NLS-1$
+					}
+				}
+			);
+	    	} else {
+	    		callback(null, {message: Messages['failedQuickfixesNoServer']});
+	    	}
+	    },
+	    /**
 	     * @description Computes a rename array for the identifier at the given offset
 	     * @param {String} file The fully qualified name of the file context
 	     * @param {Number} offset The offset of the completion
