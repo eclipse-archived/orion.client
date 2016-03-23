@@ -86,12 +86,12 @@ define([
 				"name": Messages["outlinerPluginName"],
 				"description": Messages["outlinerPluginDescription"],
 				"version": "1.0"
+			},
+			"fixes": {
+				"name": Messages["fixesPluginName"],
+				"description": Messages["fixesPluginDescription"],
+				"version": "1.0"
 			}
-//			"fixes": {
-//				"name": Messages["fixesPluginName"],
-//				"description": Messages["fixesPluginDescription"],
-//				"version": "1.0"
-//			}
 		},
 		optional: {
 			"amqp": {

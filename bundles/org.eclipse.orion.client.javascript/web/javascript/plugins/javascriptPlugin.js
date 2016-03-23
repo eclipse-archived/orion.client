@@ -542,7 +542,7 @@ define([
     			}
     	);
 
-    	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand, ternProjectManager);
+    	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand, ternProjectManager, ternWorker);
 
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,

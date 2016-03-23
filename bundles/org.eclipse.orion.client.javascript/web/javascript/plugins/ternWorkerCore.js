@@ -454,29 +454,29 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 					}
 				}
 			);
-		}
+		},
 		/* fixes message handler */
-//		'fixes': function(args, callback) {
-//			ternserver.request({
-//					query: {
-//						type: "fixes", //$NON-NLS-1$
-//						file: args.meta.location,
-//						problemId: args.problemId,
-//						annotation: args.annotation,
-//						annotations: args.annotations
-//					},
-//					files: args.files
-//				},
-//				function(error, fixes) {
-//					if(error) {
-//						callback({request: 'fixes', error: error.message, message: Messages['failedToComputeFixes']}); //$NON-NLS-1$
-//					} else if(fixes && Array.isArray(fixes)) {
-//						callback({request: 'fixes', fixes: fixes}); //$NON-NLS-1$
-//					} else {
-//						callback({request: 'fixes', fixes: []}); //$NON-NLS-1$
-//					}
-//				}
-//			);
+		'fixes': function(args, callback) {
+			ternserver.request({
+					query: {
+						type: "fixes", //$NON-NLS-1$
+						file: args.meta.location,
+						problemId: args.problemId,
+						annotation: args.annotation,
+						annotations: args.annotations
+					},
+					files: args.files
+				},
+				function(error, fixes) {
+					if(error) {
+						callback({request: 'fixes', error: error.message, message: Messages['failedToComputeFixes']}); //$NON-NLS-1$
+					} else if(fixes && Array.isArray(fixes)) {
+						callback({request: 'fixes', fixes: fixes}); //$NON-NLS-1$
+					} else {
+						callback({request: 'fixes', fixes: []}); //$NON-NLS-1$
+					}
+				}
+			);
 		}
 	};
 

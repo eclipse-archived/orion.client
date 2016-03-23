@@ -242,6 +242,8 @@ define({
 	'jsdocPluginDescription': 'Provides auto-complete and type information for JSDoc',
 	'outlinerPluginName': 'JavaScript outlining',
 	'outlinerPluginDescription': 'Provides JavaScript outlining',
+	"fixesPluginName": "JavaScript quick fixes",
+	"fixesPluginDescription": "Provides quick fixes for Orion ESLint problems",
 	'browser': 'Browser global variables.',
 	'node': 'Node.js global variables and Node.js scoping.',
 	'commonjs': 'CommonJS global variables and CommonJS scoping (use this for browser-only code that uses Browserify/WebPack).',
