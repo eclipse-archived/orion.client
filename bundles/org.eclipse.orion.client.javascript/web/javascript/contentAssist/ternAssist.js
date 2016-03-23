@@ -88,7 +88,7 @@ define([
 		        //must match the prefix always
 		        if(typeof context.line !== 'undefined') {
 			        var len = context.line.length - (typeof prefix !== 'undefined' ? prefix.length : 0);
-			        var line = context.line.slice(0, (len > -1 ? len : 0)).trim();
+			        var line = context.line.slice(0, len > -1 ? len : 0).trim();
 			        if(kind && kind.kind === 'jsdoc') {
 			            // don't propose tag templates when one exists already on the same line
 			            return !/^[\/]?[\*]+\s*[@]/ig.test(line);
@@ -225,16 +225,20 @@ define([
 		    var files = [
 		    	{type:'full', name: meta.location, text: htmlsource ? htmlsource : ast.source} //$NON-NLS-1$
 		    ];
-		    if(typeof(params.keywords) === 'undefined') {
+		    if(typeof params.keywords === 'undefined') {
 		    	params.keywords = true;
 		    }
 		    var args = {params: params, meta: meta, envs:env, files: files};
 			var deferred = new Deferred();
 			var that = this;
 			this.ternworker.postMessage({request: 'completions', args: args}, //$NON-NLS-1$
-				function(response) {
+				/* @callback */ function(response, err) {
 					clearTimeout(that.timeout);
-		        	deferred.resolve(sortProposals(response.proposals, templates, args));
+					var p = [];
+					if(Array.isArray(response.proposals)) {
+						p = response.proposals;
+					}
+		        	deferred.resolve(sortProposals(p, templates, args));
 				}
         	);
 			
@@ -365,15 +369,15 @@ define([
             overwrite: true,
             kind: 'js' //$NON-NLS-1$
         };
-        if(typeof(completion.overwrite) === 'boolean') {
+        if(typeof completion.overwrite === 'boolean') {
         	proposal.overwrite = completion.overwrite;
         }
-        if(typeof(completion.prefix) === 'string') {
+        if(typeof completion.prefix === 'string') {
         	//args.params.prefix = completion.prefix;
         	proposal.prefix = completion.prefix;
         }
         proposal.name = proposal.proposal = completion.name;
-        if(typeof(completion.type) !== 'undefined') {
+        if(typeof completion.type !== 'undefined') {
             if(/^fn/.test(completion.type)) {
             	//TODO proposal.tags = [{content: 'F', cssClass: 'iconTagPurple'}];
             	calculateFunctionProposal(completion, args, proposal);
@@ -406,12 +410,12 @@ define([
 		        provider.removePrefix(prefix, _prop);
 		        _prop.style = 'emphasis'; //$NON-NLS-1$
 		        _prop.kind = 'js'; //$NON-NLS-1$
-		        if(typeof(completion.prefix) === 'string') {
+		        if(typeof completion.prefix === 'string') {
 		        	_prop.prefix = completion.prefix;
 		        }
 		        return _prop;
             } else {
-            	if(typeof(completion.description) === 'string') {
+            	if(typeof completion.description === 'string') {
             		proposal.description = completion.description;
             	} else {
 	    		    proposal.description = convertTypes(' : ' + completion.type); //$NON-NLS-1$
@@ -473,7 +477,7 @@ define([
 		if(params) {
 			for(var i = 0; i < params.length; i++) {
 				var param = params[i];
-				positions.push({offset: (args.params.offset+_p.length)-args.params.prefix.length, length: param.value.length});
+				positions.push({offset: args.params.offset+_p.length-args.params.prefix.length, length: param.value.length});
 				_p += param.value;
 				if(i < params.length-1) {
 					_p += ', '; //$NON-NLS-1$
@@ -482,7 +486,7 @@ define([
 		}
 		_p += ')';
 		proposal.name = proposal.proposal = _p;
-		proposal.escapePosition = (args.params.offset - args.params.prefix.length) + _p.length;
+		proposal.escapePosition = args.params.offset - args.params.prefix.length + _p.length;
 		if(positions.length > 0) {
 			proposal.positions = positions;
 		}
@@ -542,12 +546,12 @@ define([
 	    var keywords = [];
 	    for(var i = 0; i < completions.length; i++) {
 	        var _c = completions[i];
-	        var _prefix = typeof(_c.prefix) === 'string' ? _c.prefix : args.params.prefix;
+	        var _prefix = typeof _c.prefix === 'string' ? _c.prefix : args.params.prefix;
 	        if(Util.looselyMatches(_prefix, _c.name)) {
     	        var _o = _c.origin;
     	        if(_c.isKeyword) {
     	        	keywords.push(_formatTernProposal(_c, args));
-    	        } else if(typeof(_o) === 'undefined') {
+    	        } else if(typeof _o === 'undefined') {
     	        	if(_c.isTemplate && _c.type !== 'jsdoc_template') {
     	        		templates.push(_formatTernProposal(_c, args));
     	        	} else {

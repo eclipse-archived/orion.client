@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation, Inc. and others.
+ * Copyright (c) 2015, 2016 IBM Corporation, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -159,11 +159,11 @@ define([
 		}
 		
 		describe('Tern based commands tests', function() {
-			before('Message the server for warm up', function() {
+			before('Message the server for warm up', function(done) {
 				CUProvider.setUseCache(false);
 				openImplCommand = new OpenImplementation.OpenImplementationCommand(worker);
 				openDeclCommand = new OpenDeclaration.OpenDeclarationCommand(worker);
-				worker.start(); // Reset the tern server state to remove any prior files
+				worker.start(done); // Reset the tern server state to remove any prior files
 			});
 			this.timeout(10000);
 			

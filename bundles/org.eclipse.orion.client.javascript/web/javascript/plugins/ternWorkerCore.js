@@ -46,15 +46,9 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 			ternserver.reset();
 			ternserver = null;
 		}
-        var options = {
-                async: true,
-                debug: false,
-                projectDir: '/',
-                getFile: _getFile,
-                plugins: defaultOptions.plugins.required,
-                defs: defaultOptions.defs,
-                ecmaVersion: 6
-            };
+        var options = defaultOptions.serverOptions();
+        options.getFile = _getFile;
+        
         var pluginsDir = defaultOptions.pluginsDir;
         var defNames, plugins, projectLoc;
         if (jsonOptions) {
@@ -108,29 +102,31 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 				}
 			}
         }
-        if(typeof plugins !== 'object') {
-			plugins = null;
+        ///plugins
+        if(plugins && typeof plugins === 'object') {
+        	if(Object.keys(plugins).length === 0) {
+        		Objects.mixin(options.plugins, defaultOptions.plugins.optional);
+        	} else {
+	        	Objects.mixin(options.plugins, plugins);
+	    	}
         } else {
-			Objects.mixin(options.plugins, plugins);
+			Objects.mixin(options.plugins, defaultOptions.plugins.optional);
         }
-        if(!Array.isArray(defNames)) {
-			defNames = null;
+        //definitions
+        if(!Array.isArray(defNames) || defNames.length < 1) {
+			defNames = defaultOptions.defNames;
+        } else {
+        	defNames = defNames.sort();
         }
+        
         /**
-         * A subtlety - if the user provides no plugins entry at all, they get all the defaults,
-         * if they provide an empty object they still need the required ones only for a default startup
-         */
-        var requiredOnly = plugins && Object.keys(plugins).length < 1; 
-        /**
-         * @description Start the server with the default options
+         * @description Start the server with the default options in the event a problem occurrs
          * @param {Error} err The error object from the failed deferred
          */
-        function defaultStartUp(err) {
-        		options.plugins = defaultOptions.plugins.required;
-        		if(!requiredOnly) {
-				Objects.mixin(options.plugins, defaultOptions.plugins.optional);
-			}
-			options.defs = defaultOptions.defs;
+        function fallback(err) {
+        	options = defaultOptions.serverOptions();
+        	options.getFile = _getFile;
+        	Objects.mixin(options.plugins, defaultOptions.plugins.optional);
 			startAndMessage(options);
 	        if(err) {
 				post(Serialize.serializeError(err));
@@ -149,25 +145,12 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 			}
 			callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		if((!plugins || requiredOnly) && !defNames) {
-			defaultStartUp();
-		} else {
-			Deferred.all(loadPlugins(options.plugins, pluginsDir)).then(/* @callback */ function(plugins) {
-				if(defNames) {
-					if(defNames.length < 1) {
-						startAndMessage(options);
-					} else {
-						defNames = defNames.sort();
-						Deferred.all(loadDefs(defNames, projectLoc)).then(function(json) {
-							options.defs = json;
-							startAndMessage(options);
-						}, defaultStartUp);
-					}
-				} else {
-					startAndMessage(options);
-				}
-			}, defaultStartUp);
-		}
+		Deferred.all(loadPlugins(options.plugins, pluginsDir)).then(/* @callback */ function(plugins) {
+			Deferred.all(loadDefs(defNames, projectLoc)).then(function(json) {
+				options.defs = json;
+				startAndMessage(options);
+			}, fallback);
+		}, fallback);
 	}
 	post({request: "worker_ready"}); //$NON-NLS-1$
 
@@ -471,6 +454,29 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 					}
 				}
 			);
+		}
+		/* fixes message handler */
+//		'fixes': function(args, callback) {
+//			ternserver.request({
+//					query: {
+//						type: "fixes", //$NON-NLS-1$
+//						file: args.meta.location,
+//						problemId: args.problemId,
+//						annotation: args.annotation,
+//						annotations: args.annotations
+//					},
+//					files: args.files
+//				},
+//				function(error, fixes) {
+//					if(error) {
+//						callback({request: 'fixes', error: error.message, message: Messages['failedToComputeFixes']}); //$NON-NLS-1$
+//					} else if(fixes && Array.isArray(fixes)) {
+//						callback({request: 'fixes', fixes: fixes}); //$NON-NLS-1$
+//					} else {
+//						callback({request: 'fixes', fixes: []}); //$NON-NLS-1$
+//					}
+//				}
+//			);
 		}
 	};
 

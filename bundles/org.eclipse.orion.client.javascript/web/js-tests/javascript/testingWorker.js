@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation, Inc. and others.
+ * Copyright (c) 2015, 2016 IBM Corporation, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -53,14 +53,7 @@ define([
 	 * @param {Function} f The callback function to call when the Tern server responds
 	 */
 	WrappedWorker.prototype.postMessage = function(msg, f) {
-		if(msg !== null && typeof(msg) === 'object') {
-			if(typeof(msg.messageID) !== 'number') {
-				//don't overwrite an id from a tern-side request
-				msg.messageID = messageID++;
-				callbacks[msg.messageID] = f;
-			}
-		}
-		worker.postMessage(msg);
+		message(msg, f);
 	};
 	
 	/**
@@ -72,6 +65,17 @@ define([
 		worker.terminate();
 	};
 	
+	function message(msg, f) {
+		if(msg !== null && typeof(msg) === 'object') {
+			if(typeof(msg.messageID) !== 'number') {
+				//don't overwrite an id from a tern-side request
+				msg.messageID = messageID++;
+				callbacks[msg.messageID] = f;
+			}
+		}
+		worker.postMessage(msg);	
+	}
+	
 	/**
 	 * @description Starts the worker
 	 * @function
@@ -79,10 +83,10 @@ define([
 	 * @since 11.0
 	 */
 	WrappedWorker.prototype.start = function(callback) {
-		if (callback){
-			_state.callback = callback;
-		}
-		worker.postMessage({request: 'start_server', args: {}});
+		_state.callback = callback;
+		message({request: 'start_server', args: {}}, function() {
+			callback();
+		});
 	};
 	
 	/**

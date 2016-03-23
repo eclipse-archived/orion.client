@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -23,8 +23,8 @@ define([
 		describe('Outliner Tests', function() {
 			this.timeout(10000);
 			
-			before('Reset Tern Server', function() {
-				worker.start(); // Reset the tern server state to remove any prior files
+			before('Reset Tern Server', function(done) {
+				worker.start(done); // Reset the tern server state to remove any prior files
 			});
 			
 		    function setup(callback, text, contentType) {

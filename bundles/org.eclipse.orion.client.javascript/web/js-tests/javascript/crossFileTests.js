@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation, Inc. and others.
+ * Copyright (c) 2015, 2016 IBM Corporation, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -168,12 +168,12 @@ define([
 		}
 	
 		describe("Cross-file Tests", function() {
-			before('Message the server for warm up on cross file tests', function() {
+			before('Message the server for warm up on cross file tests', function(done) {
 				CUProvider.setUseCache(false);
 				assist = new TernAssist.TernContentAssist(astManager, worker, function() {
 					return new Deferred().resolve(envs);
 				}, CUProvider);
-				worker.start(); // Reset the tern server state to remove any prior files
+				worker.start(done); // Reset the tern server state to remove any prior files
 			});
 			describe("Content assist tests", function() {
 				/**

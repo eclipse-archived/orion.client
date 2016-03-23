@@ -28,8 +28,8 @@ define([
 	return function(worker) {
 		describe('Validator Tests', function() {
 			
-			before('Reset Tern Server', function() {
-				worker.start(); // Reset the tern server state to remove any prior files
+			before('Reset Tern Server', function(done) {
+				worker.start(done); // Reset the tern server state to remove any prior files
 			});
 			
 			/**

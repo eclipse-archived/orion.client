@@ -37,7 +37,8 @@ define([
 	"javascript/ternPlugins/plugins",
 	"javascript/ternPlugins/postgres",
 	"javascript/ternPlugins/redis",
-	"javascript/ternPlugins/refs",
+	"javascript/ternPlugins/refs"
+	//"javascript/ternPlugins/quickfixes"
 ], function(Messages, ecma5, ecma6, browser, chai) {
 	
 	var defs = [ecma5, ecma6, browser, chai];
@@ -86,6 +87,11 @@ define([
 				"description": Messages["outlinerPluginDescription"],
 				"version": "1.0"
 			}
+//			"fixes": {
+//				"name": Messages["fixesPluginName"],
+//				"description": Messages["fixesPluginDescription"],
+//				"version": "1.0"
+//			}
 		},
 		optional: {
 			"amqp": {
@@ -142,10 +148,36 @@ define([
 		}
 	};
 	
+	var serverOptions = {
+		async: true,
+        debug: false,
+        projectDir: '/',
+        defs: defs,
+        ecmaVersion: 6
+	};
+	
+	/**
+	 * @description Returns a clone of the deafult server options
+	 * @private
+	 * @returns {Object} A clone the default server options
+	 */
+	function _serverOptions() {
+		var opts = {};
+		Object.keys(serverOptions).forEach(function(key) {
+			opts[key] = serverOptions[key];
+		});
+		opts.plugins = {};
+		Object.keys(plugins.required).forEach(function(key) {
+			opts.plugins[key] = plugins.required[key];
+		});
+		return opts;
+	}
+	
 	return {
 		plugins: plugins,
 		defs: defs,
 		defNames: defNames,
-		pluginsDir: 'tern/plugin/'
+		pluginsDir: 'tern/plugin/',
+		serverOptions: _serverOptions
 	};
 });

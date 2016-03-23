@@ -97,8 +97,8 @@ define([
 		describe('Tern Project File Tests', function() {
 			this.timeout(100000);
 			
-			before('Reset Tern Server', function() {
-				worker.start(); // Reset the tern server state to remove any prior files
+			before('Reset Tern Server', function(done) {
+				worker.start(done); // Reset the tern server state to remove any prior files
 			});
 			
 			it("non-existent contents", function(callback) {

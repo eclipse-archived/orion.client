@@ -31,8 +31,8 @@ define([
 	return function(worker) {
 		describe('Quick Fix Tests',function() {
 			this.timeout(10000);
-			before('Reset Tern Server', function() {
-				worker.start(); // Reset the tern server state to remove any prior files
+			before('Reset Tern Server', function(done) {
+				worker.start(done); // Reset the tern server state to remove any prior files
 			});
 			
 			/**
@@ -65,7 +65,7 @@ define([
 				validator._enableOnly(rule.id, rule.severity, rule.opts);
 				var renameCommand = new RenameCommand.RenameCommand(worker, {setSearchLocation: function(){}});
 				var generateDocCommand = new GenerateDocCommand.GenerateDocCommand(astManager, CUProvider);
-				var fixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand, ternProjectManager);
+				var fixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand, ternProjectManager, worker);
 				var editorContext = {
 					/*override*/
 					getText: function(start, end) {
