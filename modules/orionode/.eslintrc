@@ -1,3 +1,6 @@
+parserOptions:
+  ecmaVersion: 6
+
 rules:
   block-scoped-var: 1
   camelcase: 0
