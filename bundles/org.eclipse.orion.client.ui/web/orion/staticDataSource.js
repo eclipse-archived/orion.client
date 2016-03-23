@@ -17,6 +17,7 @@ define([
 	"orion/editor/stylers/application_javascript/syntax",
 	"orion/editor/stylers/application_x-jsp/syntax",
 	"orion/editor/stylers/application_xquery/syntax",
+	"orion/editor/stylers/application_sql/syntax",
 	"orion/editor/stylers/text_css/syntax",
 	"orion/editor/stylers/text_x-scss/syntax",
 	"orion/editor/stylers/text_x-less/syntax",
@@ -46,7 +47,7 @@ define([
 	'orion/editor/stylers/application_x-ejs/syntax',
 	'orion/editor/stylers/application_xml/syntax',
 	'orion/editor/stylers/text_x-yaml/syntax',
-], function(Deferred, mStyler, mJS, mJSP, mXQuery, mCss, mScss, mLess, mHtml, mJSX, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mSmarty, mSwift, mTypescript, mVB, mVBHTML, mEJS, mXml, mYaml) {
+], function(Deferred, mStyler, mJS, mJSP, mXQuery, mSQL, mCss, mScss, mLess, mHtml, mJSX, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mSmarty, mSwift, mTypescript, mVB, mVBHTML, mEJS, mXml, mYaml) {
 	var ContentTypes = [
 		{	id: "text/plain",
 			name: "Text",
@@ -91,6 +92,11 @@ define([
 			name: "JSON",
 			extension: ["json"],
 			imageClass: "file-sprite-text modelDecorationSprite"
+		},
+		{	id: "application/sql",
+			"extends": "text/plain",
+			name: "SQL",
+			extension: ["sql"]
 		},
 		{	id: "application/xml",
 			"extends": "text/plain",
@@ -351,6 +357,9 @@ define([
 					case "application/json": //$NON-NLS-0$
 					case "text/x-launch": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mJson.grammars, "orion.json", fileContentType.id); //$NON-NLS-0$
+						break;
+					case "application/sql": //$NON-NLS-0$
+						stylerAdapter = new mStyler.createPatternBasedAdapter(mSQL.grammars, "orion.sql", fileContentType.id); //$NON-NLS-0$
 						break;
 					case "text/x-jade": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mJade.grammars, "orion.jade", fileContentType.id); //$NON-NLS-0$

@@ -34,6 +34,7 @@ define([
 	'plugins/languages/ruby/rubyPlugin',
 	'plugins/languages/scss/scssPlugin',
 	'plugins/languages/smarty/smartyPlugin',
+	'plugins/languages/sql/sqlPlugin',
 	'plugins/languages/swift/swiftPlugin',
 	'plugins/languages/typescript/typescriptPlugin',
 	'plugins/languages/vb/vbPlugin',
