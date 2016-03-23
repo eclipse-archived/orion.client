@@ -251,6 +251,10 @@ body {
 		iframe.classList.add("tabContent");
 		iframe.src = url;
 		iframe.addEventListener("load", function() {
+			
+			iframe.contentWindow.confirm = window.confirm;
+			iframe.contentWindow.alert = window.alert;
+			
 			var target = iframe.contentDocument.querySelector('head > title');
 			var observer = new window.WebKitMutationObserver(function(mutations) {
 				mutations.forEach(function() {
