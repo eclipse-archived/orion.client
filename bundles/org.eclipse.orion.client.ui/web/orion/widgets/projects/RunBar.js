@@ -542,7 +542,7 @@ define([
 					this._enableLink(this._logsLink, uriTemplate.expand(uriParams));
 				} else {
 					var service = this._serviceRegistry.getService("orion.project.deploy"); //$NON-NLS-1$
-					if (service.getLogLocationTemplate) {
+					if (service && service.getLogLocationTemplate) {
 						service.getLogLocationTemplate(this._selectedLaunchConfiguration).then(function(result){
 							uriTemplate = new URITemplate(result);
 							var config = this._selectedLaunchConfiguration ? this._selectedLaunchConfiguration.File.Location : '';
