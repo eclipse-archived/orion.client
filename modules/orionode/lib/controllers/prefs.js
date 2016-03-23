@@ -11,18 +11,18 @@
 /*eslint-env node*/
 'use strict'
 var api = require('../api'),
- 	args = require('../args'),
     bodyParser = require('body-parser'),
     express = require('express'),
     Debug = require('debug'),
     nodePath = require('path'),
     nodeUrl = require('url'),
-    os = require('os'), 
+    os = require('os'),
     Preference = require('../model/pref'),
     Promise = require('bluebird');
 
 var debug = Debug('orion:prefs'),
-    fs = Promise.promisifyAll(require('fs'));
+    fs = Promise.promisifyAll(require('fs')),
+    mkdirpAsync = Promise.promisify(require('mkdirp'));
 
 module.exports = PrefsController;
 
@@ -81,38 +81,31 @@ function PrefsController(options) {
 	function acquirePrefs(req) {
 		var app = req.app, prefs = app.locals.prefs;
 		var getPrefs;
-		var prefFolder = options.configParams["orion.single.user"] ? os.homedir() : req.user.workspaceDir;
-		return args.createDirs([prefFolder, ".orion"]).then(function() {
-			var prefFile = nodePath.join(prefFolder, ".orion", PREF_FILENAME);
-			if (prefs) {
-				debug('Using prefs from memory');
+		var prefFolder = options.configParams['orion.single.user'] ? os.homedir() : req.user.workspaceDir;
+		var prefFile = nodePath.join(prefFolder, '.orion', PREF_FILENAME);
+		if (prefs) {
+			debug('Using prefs from memory');
+			scheduleFlush(app, prefFile);
+			getPrefs = Promise.resolve(prefs);
+		} else {
+			getPrefs = fs.readFileAsync(prefFile, 'utf8')
+			.catchReturn({ code: 'ENOENT' }, null) // New prefs file: suppress error
+			.then(function(contents) {
+				if (contents) {
+					debug('Read pref file %s from disk (len: %d)', prefFile, contents.length);
+				} else {
+					debug('No pref file %s exists, creating new', prefFile);
+				}
+				app.locals.prefs = new Preference(contents || null);
 				scheduleFlush(app, prefFile);
-				getPrefs = Promise.resolve(prefs);
-			} else {
-				getPrefs = fs.readFileAsync(prefFile, 'utf8')
-				.catch(function(err) {
-					if (err.code === 'ENOENT') {
-						return; // New prefs file: suppress error
-					}
-					throw err;
-				})
-				.then(function(contents) {
-					if (contents) {
-						debug('Read pref file from disk (len: %d)', contents.length);
-					} else {
-						debug('No pref file exists, creating new');
-					}
-					app.locals.prefs = new Preference(contents || null);
-					scheduleFlush(app, prefFile);
-				});
-			}
-			return getPrefs
-			.then(function() {
-				var urlObj = req._parsedUrl || nodeUrl.parse(req.url);
-				req.prefs = app.locals.prefs;
-				req.prefPath = urlObj.pathname;
-				req.prefNode = req.prefs.get(req.prefPath);
 			});
+		}
+		return getPrefs
+		.then(function() {
+			var urlObj = req._parsedUrl || nodeUrl.parse(req.url);
+			req.prefs = app.locals.prefs;
+			req.prefPath = urlObj.pathname;
+			req.prefNode = req.prefs.get(req.prefPath);
 		});
 	}
 
@@ -140,10 +133,11 @@ function PrefsController(options) {
 			debug('flushJob(): skipped writing prefs.json (no changes were made)');
 			return;
 		}
-		fs.writeFileAsync(prefFile, prefs.toJSON())
+		mkdirpAsync(nodePath.dirname(prefFile)) // create parent folder(s) if necessary
 		.then(function() {
-			debug('flushJob(): wrote prefs.json');
+			return fs.writeFileAsync(prefFile, prefs.toJSON());
 		})
+		.then(debug.bind(null, 'flushJob(): wrote prefs.json'))
 		.catch(function(err) {
 			debug('flushJob(): error writing prefs.json', err);
 		});
