@@ -235,6 +235,7 @@ body {
 	}
 	
 	function load() {
+		redrawButtons();
 		createTab(window.location.hash.substr(1));
 		window.addEventListener("resize", function() {
 			if (this.timeout) window.clearTimeout(this.timeout);
@@ -242,7 +243,6 @@ body {
 				checkWidth(true);
 			}, 50);
 		});
-		redrawButtons();
 	}
 	
 	function createTab(url) {
