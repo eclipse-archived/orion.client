@@ -35,6 +35,7 @@ define([
 	'plugins/languages/scss/scssPlugin',
 	'plugins/languages/smarty/smartyPlugin',
 	'plugins/languages/swift/swiftPlugin',
+	'plugins/languages/typescript/typescriptPlugin',
 	'plugins/languages/vb/vbPlugin',
 	'plugins/languages/xml/xmlPlugin',
 	'plugins/languages/xquery/xqueryPlugin',

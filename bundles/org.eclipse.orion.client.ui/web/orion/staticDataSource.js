@@ -40,12 +40,13 @@ define([
 	"orion/editor/stylers/text_x-objective-c/syntax",
 	"orion/editor/stylers/text_x-smarty/syntax",
 	"orion/editor/stylers/text_x-swift/syntax",
+	"orion/editor/stylers/text_x-typescript/syntax",
 	"orion/editor/stylers/text_x-vb/syntax",
 	"orion/editor/stylers/text_x-vbhtml/syntax",
 	'orion/editor/stylers/application_x-ejs/syntax',
 	'orion/editor/stylers/application_xml/syntax',
 	'orion/editor/stylers/text_x-yaml/syntax',
-], function(Deferred, mStyler, mJS, mJSP, mXQuery, mCss, mScss, mLess, mHtml, mJSX, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mSmarty, mSwift, mVB, mVBHTML, mEJS, mXml, mYaml) {
+], function(Deferred, mStyler, mJS, mJSP, mXQuery, mCss, mScss, mLess, mHtml, mJSX, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mSmarty, mSwift, mTypescript, mVB, mVBHTML, mEJS, mXml, mYaml) {
 	var ContentTypes = [
 		{	id: "text/plain",
 			name: "Text",
@@ -157,6 +158,11 @@ define([
 			"extends": "text/plain",
 			name: "Swift",
 			extension: ["swift"]
+		},
+		{	id: "text/x-typescript",
+			"extends": "text/plain",
+			name: "Typescript",
+			extension: ["typescript"]
 		},
 		{	id: "text/x-markdown",
 			"extends": "text/plain",
@@ -369,6 +375,9 @@ define([
 						break;
 					case "text/x-swift": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mSwift.grammars, "orion.swift", fileContentType.id); //$NON-NLS-0$
+						break;
+					case "text/x-typescript": //$NON-NLS-0$
+						stylerAdapter = new mStyler.createPatternBasedAdapter(mTypescript.grammars, "orion.typescript", fileContentType.id); //$NON-NLS-0$
 						break;
 					case "application/xml": //$NON-NLS-0$
 					case "application/xhtml+xml": //$NON-NLS-0$
