@@ -102,7 +102,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 				}
 			}
         }
-        ///plugins
+        //plugins
         if(plugins && typeof plugins === 'object') {
         	if(Object.keys(plugins).length === 0) {
         		Objects.mixin(options.plugins, defaultOptions.plugins.optional);

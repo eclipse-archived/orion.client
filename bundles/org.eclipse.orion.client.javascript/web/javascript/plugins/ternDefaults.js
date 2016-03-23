@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -37,8 +37,8 @@ define([
 	"javascript/ternPlugins/plugins",
 	"javascript/ternPlugins/postgres",
 	"javascript/ternPlugins/redis",
-	"javascript/ternPlugins/refs"
-	//"javascript/ternPlugins/quickfixes"
+	"javascript/ternPlugins/refs",
+	"javascript/ternPlugins/quickfixes"
 ], function(Messages, ecma5, ecma6, browser, chai) {
 	
 	var defs = [ecma5, ecma6, browser, chai];
