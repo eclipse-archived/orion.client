@@ -486,7 +486,7 @@ module.exports = function(options) {
 		if (!req.user) {
 			return res.status(200).end();
 		}
-		return res.status(200).json(req.user);
+		return res.status(200).json(userJSON(req.user));
 	});
 	
 	return app;
