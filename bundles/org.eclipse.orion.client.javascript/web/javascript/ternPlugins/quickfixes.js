@@ -584,6 +584,73 @@ define([
                 }
             });
         },
+        /** 
+		 * @description fix for the 'no-unused-params-expr' rule
+		 * @function 
+		 * @callback
+		 */
+        "no-unused-params-expr": function(annotation, annotations, file) {
+	        	/**
+	        	 * @callback 
+	        	 */
+	        	function updateCallback(node, ast, comments) {
+	                if(Array.isArray(comments)) {
+	                    //attach it to the last one
+	                    var comment = comments[comments.length-1];
+	                    if(comment.type === 'Block') {
+	                        var valueend = comment.range[0]+comment.value.length+getDocOffset(ast.sourceFile.text, comment.range[0]);
+	                        var start = getLineStart(ast.sourceFile.text, valueend);
+	                        var indent = computeIndent(ast.sourceFile.text, start);
+	                        var fix = "* @callback\n"+indent; //$NON-NLS-1$
+	                        /*if(comment.value.charAt(valueend) !== '\n') {
+	                            fix = '\n' + fix;
+	                        }*/
+	                        return {text: fix, start: valueend-1, end: valueend-1};
+	                    }
+	                }
+	                start = getLineStart(ast.sourceFile.text, node.range[0]);
+	                indent = computeIndent(ast.sourceFile.text, start);
+	                return {text: "/**\n"+indent+" * @callback\n"+indent+" */\n"+indent, start: node.range[0], end: node.range[0]}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	        	}
+                var node = Finder.findNode(annotation.start, file.ast, {parents:true});
+                if(node && node.parents && node.parents.length > 0) {
+                    var func = node.parents.pop();
+                    var p = node.parents.pop();
+                    var change;
+                    switch(p.type) {
+                    	case 'Property': {
+                    		if(!hasDocTag(['@callback', '@public'], p) && !hasDocTag(['@callback', '@public'], p.key)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+                    			change = updateCallback(p, file.ast, p.leadingComments ? p.leadingComments : p.key.leadingComments);
+                			}
+                    		break;
+                    	}
+                    	case 'AssignmentExpression': {
+                    		var left = p.left;
+                    		if(left.type === 'MemberExpression' && !hasDocTag(['@callback', '@public'], left)) { //$NON-NLS-1$ //$NON-NLS-2$
+				        		change = updateCallback(left, file.ast, left.leadingComments);
+				        	} else if(left.type === 'Identifier' && !hasDocTag(['@callback', '@public'], left)) { //$NON-NLS-1$ //$NON-NLS-2$
+				        		change = updateCallback(p.left, file.ast, left.leadingComments);	        		
+				        	}
+                			break;
+                    	}
+                    	case 'VariableDeclarator': {
+                    		var oldp = p;
+                			p = node.parents.pop();
+                			if(p.declarations[0].range[0] === oldp.range[0] && p.declarations[0].range[1] === oldp.range[1]) {
+                				//insert at the var keyword level to not mess up the code
+                				change = updateCallback(p, file.ast, oldp.id.leadingComments);
+                			} else if(!hasDocTag(['@callback', '@public'], oldp.id)) { //$NON-NLS-1$ //$NON-NLS-2$
+                    			change = updateCallback(oldp, file.ast, oldp.id.leadingComments);
+                			} 
+                    		break;
+                    	}
+                    }
+                    if(!change && !hasDocTag(['@callback', '@public'], func)) { //$NON-NLS-1$ //$NON-NLS-2$
+                        return {text: "/* @callback */ ", start: func.range[0], end: func.range[0]}; //$NON-NLS-1$
+                    }
+                }
+                return change;
+	        },
 	    /** 
 		 * @description fix for the 'no-unused-vars-unused' rule
 		 * @function 
