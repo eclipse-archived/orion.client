@@ -3343,7 +3343,7 @@ define([
 			});
 			it("Test no-unused-params-html-5",function(callback) {
 				var rule = createTestRule('no-unused-params');
-				var expected = {value: "/**\n                     * @callback\n                     */\n                    ",
+				var expected = {value: "/**\n * @callback\n */\n",
 								start: 30, 
 								end: 30};
 				return getFixes({buffer: '<html><head><script>var f = { one: function(p, p2, p3) {p(); p2();}};</script></head></html>', 
