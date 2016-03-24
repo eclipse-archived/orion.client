@@ -30,6 +30,7 @@ define([
 	'plugins/languages/markdown/markdownPlugin',
 	'plugins/languages/objectiveC/objectiveCPlugin',
 	'plugins/languages/php/phpPlugin',
+	'plugins/languages/properties/propertiesPlugin',
 	'plugins/languages/python/pythonPlugin',
 	'plugins/languages/ruby/rubyPlugin',
 	'plugins/languages/scss/scssPlugin',
