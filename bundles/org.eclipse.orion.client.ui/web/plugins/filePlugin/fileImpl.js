@@ -463,13 +463,24 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 *   otherwise file contents are returned
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
-		read: function(loc, isMetadata, acceptPatch) {
+		read: function(loc, isMetadata, acceptPatch, options) {
 			var url = new URL(loc, self.location);
 			if (isMetadata) {
-				url.query.set("parts", "meta");
+				if (options && options.parts !== undefined) {
+					url.query.set("parts", options.parts);
+				} else {
+					url.query.set("parts", "meta");
+				}
 			}
+			if (options && options.startLine !== undefined) {
+				url.query.set("start", options.startLine.toString());
+			}
+			if (options && options.pageSize !== undefined) {
+				url.query.set("count", options.pageSize.toString());
+			}
+			var timeout = options && options.timeout ? options.timeout : 15000;
 			return _xhr("GET", url.href, {
-				timeout: 15000,
+				timeout: timeout,
 				headers: { "Orion-Version": "1" },
 				log: false
 			}).then(function(result) {

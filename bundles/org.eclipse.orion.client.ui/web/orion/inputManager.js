@@ -19,8 +19,9 @@ define([
 	'orion/EventTarget',
 	'orion/objects',
 	'orion/PageUtil',
+	'orion/editor/textModelFactory',
 	'orion/metrics'
-], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mMetrics) {
+], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mTextModelFactory, mMetrics) {
 
 	function Idle(options){
 		this._document = options.document || document;
@@ -248,7 +249,13 @@ define([
 						var isText = this._isText(metadata);
 						if (isUTF8(charset) && isText) {
 							// Read text contents
-							progress(fileClient.read(resource, false, true), messages.Reading, fileURI).then(function(contents) {
+							var defaultReadOptions, textModelFactory = new mTextModelFactory.TextModelFactory();
+							//If textModelFactory support additional options for reading text contents, we need to use it.
+							//An example is to support large file, whose contents is read by segments
+							if(typeof textModelFactory.getDefaultReadOptions === "function") {
+								defaultReadOptions = textModelFactory.getDefaultReadOptions();
+							}
+							progress(fileClient.read(resource, false, true, defaultReadOptions), messages.Reading, fileURI).then(function(contents) {
 								clearProgressTimeout();
 								if (typeof contents !== "string") { //$NON-NLS-0$
 									this._acceptPatch = contents.acceptPatch;
