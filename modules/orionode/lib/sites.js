@@ -80,11 +80,17 @@ function siteJSON(site, req) {
 	site.Location = "/site/" + site.Id;
 	var siteURL = getHostedSiteURL(site);
 	if (siteURL) {
-		siteURL = req.protocol + "://" + siteURL;
-		var port = req.get("host").split(":")[1];
-		if (port) {
-			siteURL += ":" + port;
+		if (siteURL.indexOf("://") === -1) {
+			siteURL = req.protocol + "://" + siteURL;
 		}
+		var parsedURL = url.parse(siteURL);
+		if (!parsedURL.port) {
+			var port = req.get("host").split(":")[1];
+			if (port) {
+				siteURL += ":" + port;
+			}
+		}
+		siteURL = url.format(parsedURL);
 	}
 	site.HostingStatus = {
 		Status: siteURL ? "started" : "stopped",
