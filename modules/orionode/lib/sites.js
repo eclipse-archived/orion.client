@@ -87,7 +87,8 @@ function siteJSON(site, req) {
 		if (!parsedURL.port) {
 			var port = req.get("host").split(":")[1];
 			if (port) {
-				siteURL += ":" + port;
+				parsedURL.host = null;
+				parsedURL.port = port;
 			}
 		}
 		siteURL = url.format(parsedURL);
