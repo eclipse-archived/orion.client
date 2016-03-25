@@ -326,7 +326,12 @@ define([
 			 */
 			var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 
-				var localSearcher = that.textSearcher = mSearcher.TextSearcher ? new mSearcher.TextSearcher(editor, serviceRegistry, commandRegistry, undoStack) : null;
+				//Allow extended TextModelFactory to pass default find options
+				var defaultFindOptions, factory = new mTextModelFactory.TextModelFactory();
+				if(typeof factory.getDefaultFindOptions === "function") {
+					defaultFindOptions = factory.getDefaultFindOptions();
+				}
+				var localSearcher = that.textSearcher = mSearcher.TextSearcher ? new mSearcher.TextSearcher(editor, serviceRegistry, commandRegistry, undoStack, defaultFindOptions) : null;
 
 				var keyBindings = new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
 				that.updateSourceCodeActions(that.settings, keyBindings.sourceCodeActions);

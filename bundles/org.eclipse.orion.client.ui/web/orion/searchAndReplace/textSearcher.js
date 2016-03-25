@@ -155,11 +155,14 @@ define([
 						optionMenu.dropdown.close(true);
 					});
 					
-				mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Incremental search"], that._incremental,
-					function(event) {
-						that.setOptions({incremental: event.target.checked});
-						optionMenu.dropdown.close(true);
-					});
+				//Allow extended TextModelFactory to disable incremental find
+				if (!this._incrementalDisabled) {
+					mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Incremental search"], that._incremental,
+						function(event) {
+							that.setOptions({incremental: event.target.checked});
+							optionMenu.dropdown.close(true);
+						});
+				}
 					
 				mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Whole Word"], that._wholeWord,
 					function(event) {

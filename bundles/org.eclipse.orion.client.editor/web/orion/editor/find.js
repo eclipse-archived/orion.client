@@ -419,8 +419,14 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				if (options.wholeWord === true || options.wholeWord === false) {
 					this._wholeWord = options.wholeWord;
 				}
-				if (options.incremental === true || options.incremental === false) {
-					this._incremental = options.incremental;
+				//Allow extended TextModelFactory to disable incremental find
+				if (options.incremental === true || options.incremental === false || options.incremental === "disabled") {
+					if(options.incremental === "disabled") {
+						this._incremental = false;
+						this._incrementalDisabled = true;
+					} else {
+						this._incremental = options.incremental;
+					}
 				}
 				if (options.regex === true || options.regex === false) {
 					this._regex = options.regex;
