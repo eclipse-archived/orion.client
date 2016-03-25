@@ -54,7 +54,12 @@ function virtualHost(req, res, next) {
 			}
 			if (req.url.indexOf(mapping.Source) === 0) {
 				var relative  = urlPath.substring(mapping.Source.length);
-				var path = mPath.join(options.workspaceDir, username.substring(0, 2), username, "OrionContent", mapping.Target, relative);
+				var path;
+				if (options.configParams["orion.single.user"]) {
+					path = mPath.join(options.workspaceDir, mapping.Target, relative);
+				} else {
+					path = mPath.join(options.workspaceDir, username.substring(0, 2), username, "OrionContent", mapping.Target, relative);
+				}
 				if (fs.existsSync(path)) {
 					res.sendFile(path);
 					return true;
