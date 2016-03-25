@@ -3414,6 +3414,28 @@ define([
 			 					callback: callback,
 			 					fixid: "no-unused-params"});
 			 });
+
+			 /**
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=490109
+			 */
+			 it("Test no-unused-params-fix-all-1", function(callback){
+			 	var rule = createTestRule('no-unused-params');
+			 	var expected = [{
+			 		value: '',
+			 		start: 66,
+			 		end: 105
+			 	},{
+			 		value: '',
+			 		start: 142,
+			 		end: 152
+			 	}];
+			 	return getFixes({
+			 		buffer: '/*eslint-env node */\n/**\n * @name bar\n * @description description\n * @param p1\n * @param p2\n * @param p3\n * @returns returns\n */\nfunction bar(p1, p2, p3) {\n}',
+			 		rule: rule,
+			 		expected: expected,
+			 		callback: callback
+			 	});
+			 });
 		});
 		//EQEQEQ
 		describe('eqeqeq', function(){

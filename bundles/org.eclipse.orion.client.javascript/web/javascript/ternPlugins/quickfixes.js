@@ -983,6 +983,7 @@ define([
 	 * @returns {Object} A change object containg the properties text, start and end
 	 */
     function removeIndexedItemChange(list, index) {
+    	
         if(index < 0 || index > list.length) {
 	            return;
         }
@@ -1126,9 +1127,11 @@ define([
 	 * @param {Function} createTextChange function to create a text edit object (text, start, end) for a given annotation
 	 */
 	function applySingleFixToAll(annotations, createTextChange) {
+		// console.log(annotations);
 		var edits = [];
 		annotations.forEach(function(current) {
 			var change = createTextChange(current);
+			// console.log(change);
 			if(change) {
 				if(Array.isArray(change)) {
 					change.forEach(function(fix) {
@@ -1140,8 +1143,35 @@ define([
 			}
 		});
 		// To use setText() with multiple selections they must be in range order
-		return edits.sort(function(a, b){
+		var edits = edits.sort(function(a, b){
 			return a.start - b.start;
 		});
+
+		var temp = [];
+		var intersectedRange = false;
+		for (var i = 0; i < edits.length ; i++) {
+		    if(i === edits.length - 1 && !intersectedRange){
+		        temp.push(edits[i]);
+		        break;
+		    } else if (i === edits.length - 1) {
+		        break;
+		    }
+		    var element = intersectedRange ? temp.pop() : edits[i];
+		    var nextElement = edits[i+1];
+		    if (element.end >= nextElement.start){
+		        temp.push({
+		            start: element.start,
+		            end: nextElement.end,
+		            text: element.text + nextElement.text
+		        });
+		        intersectedRange = true;
+		    } else {
+		        temp.push(element);
+		        intersectedRange = false;
+		    }
+
+		}
+		console.log(temp);
+		return temp;
 	}
 });
