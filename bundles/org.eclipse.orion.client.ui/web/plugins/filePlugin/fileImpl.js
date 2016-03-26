@@ -607,7 +607,25 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				return result;
 			}.bind(this));
 		},
-		
+		/**
+		 * Find a string inside a file
+		 *
+		 * @param {String} sourceLocation The location of the folder to export from
+		 * @param {String} findStr The string to search
+		 * @public
+		 * @return {Deferred} A deferred for chaining events after the export completes
+		 */		
+		find: function(sourceLocation, findStr, option) {
+			var url = new URL(sourceLocation, self.location);
+			url.query.set("findStr", findStr);
+			return _xhr("GET", url.href,{
+				timeout: 120000,
+				headers: {"Orion-Version": "1"},
+				log: false
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
+			}.bind(this));			
+		},
 		/**
 		 * Performs a search with the given search parameters.
 		 * @param {Object} searchParams The JSON object that describes all the search parameters.
