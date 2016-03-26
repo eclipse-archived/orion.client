@@ -17,8 +17,9 @@ define("orion/editor/find", [ //$NON-NLS-0$
 	'orion/editor/annotations', //$NON-NLS-0$
 	'orion/regex', //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
+	'orion/Deferred', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mKeyBinding, mKeyModes, mAnnotations, mRegex, objects, util) {
+], function(messages, mKeyBinding, mKeyModes, mAnnotations, mRegex, objects, Deferred, util) {
 
 	var exports = {};
 	
@@ -105,23 +106,26 @@ define("orion/editor/find", [ //$NON-NLS-0$
 					start = model.getCharCount() - 1;
 				}
 			}
-			var result = editor.getModel().find({
+			Deferred.when(editor.getModel().find({
 				string: prefix,
 				start: start,
 				reverse: !forward,
-				caseInsensitive: prefix.toLowerCase() === prefix}).next();
-			if (result) {
-				if (!incremental) {
-					this._start = start;
-				}
-				this._success = true;
-				this._ignoreSelection = true;
-				editor.moveSelection(forward ? result.start : result.end, forward ? result.end : result.start);
-				this._ignoreSelection = false;
-			} else {
-				this._success = false;
-			}
-			this._status();
+				caseInsensitive: prefix.toLowerCase() === prefix}), 
+				function(iterator) {
+					var findResult = iterator.next();
+					if (findResult) {
+						if (!incremental) {
+							this._start = start;
+						}
+						this._success = true;
+						this._ignoreSelection = true;
+						editor.moveSelection(forward ? findResult.start : findResult.end, forward ? findResult.end : findResult.start);
+						this._ignoreSelection = false;
+					} else {
+						this._success = false;
+					}
+					this._status();
+			}.bind(this));
 			return true;
 		},
 		isActive: function() {
@@ -223,17 +227,18 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			var savedOptions = this.getOptions();
 			this.setOptions(tempOptions);
 			var startOffset = incremental ? this._startOffset : this.getStartOffset();
-			var result = this._doFind(string, startOffset, count);
-			if (result) {
-				if (!incremental) {
-					this._startOffset = result.start;
+			return this._doFind(string, startOffset, count).then(function(result) {
+				if (result) {
+					if (!incremental) {
+						this._startOffset = result.start;
+					}
 				}
-			}
-			this.setOptions(savedOptions);
-			if (this._hideAfterFind) {
-				this.hide();
-			}
-			return result;
+				this.setOptions(savedOptions);
+				if (this._hideAfterFind) {
+					this.hide();
+				}
+				return result;
+			}.bind(this));
 		},
 		getStartOffset: function() {
 			if (this._start !== undefined) {
@@ -326,7 +331,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				var replaceString = this._processReplaceString(this.getReplaceString());
 				var selection = editor.getSelection();
 				var start = selection.start;
-				var result = editor.getModel().find({
+				Deferred.when(this._editor.getModel().find({
 					string: string,
 					start: start,
 					reverse: false,
@@ -334,15 +339,20 @@ define("orion/editor/find", [ //$NON-NLS-0$
 					regex: this._regex,
 					wholeWord: this._wholeWord,
 					caseInsensitive: this._caseInsensitive
-				}).next();
-				if (result) {
-					this.startUndo();
-					this._doReplace(result.start, result.end, string, replaceString);
-					this.endUndo();
-				}
-			}
-			if (this._findAfterReplace && string){
-				this._doFind(string, this.getStartOffset());
+				})).then( function(iterator) {
+					if(!iterator) {
+						return;
+					}
+					var result = iterator.next();
+					if (result) {
+						this.startUndo();
+						this._doReplace(result.start, result.end, string, replaceString);
+						this.endUndo();
+					}
+					if (this._findAfterReplace){
+						this._doFind(string, this.getStartOffset());
+					}
+				}.bind(this));
 			}
 		},
 		replaceAll : function() {
@@ -360,7 +370,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 					while (true) {
 						//For replace all, we need to ignore the wrap search from the user option
 						//Otherwise the loop will be dead, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=411813
-						var result = self._doFind(string, startPos, null, true);
+						var result = self._doFindForReplaceAll(string, startPos, null, true);
 						if (!result) {
 							break;
 						}
@@ -479,19 +489,35 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				this._undoStack.endCompoundChange();
 			}
 		},
-		_find: function(string, startOffset, noWrap) {
+		_findFromModel: function(string, startOffset, noWrap) {
 			return this._editor.getModel().find({
 				string: string,
 				start: startOffset,
 				end: this._end,
 				reverse: this._reverse,
-				wrap: (noWrap ? false: this._wrap),
+				wrap: noWrap ? false: this._wrap,
 				regex: this._regex,
 				wholeWord: this._wholeWord,
 				caseInsensitive: this._caseInsensitive
 			});
 		},
-		_doFind: function(string, startOffset, count, noWrap) {
+		
+		_find: function(editor, string, startOffset, noWrap) {
+			var iterator;
+			if (this._regex) {
+				try {
+					iterator = this._findFromModel(string, startOffset, noWrap);
+				} catch (ex) {
+					editor.reportStatus(ex.message, "error"); //$NON-NLS-0$
+					return null;
+				}
+			} else {
+				iterator = this._findFromModel(string, startOffset, noWrap);
+			}
+			return iterator;
+		},
+		
+		_doFindForReplaceAll: function(string, startOffset, count, noWrap) {
 			count = count || 1;
 			var editor = this._editor;
 			if (!string) {
@@ -500,53 +526,70 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			}
 			this._lastString = string;
 			var result, iterator;
-			if (this._regex) {
-				try {
-					iterator = this._find(string, startOffset, noWrap);
-				} catch (ex) {
-					editor.reportStatus(ex.message, "error"); //$NON-NLS-0$
-					return;
-				}
-			} else {
-				iterator = this._find(string, startOffset, noWrap);
+			iterator = this._find(editor, string, startOffset, noWrap);
+			if(!iterator) {
+				return null;
+			}
+			if(!iterator.hasNext || !iterator.next) {
+				return null;
 			}
 			for (var i=0; i<count && iterator.hasNext(); i++) {
 				result = iterator.next();
 			}
-			if (!this._replacingAll) {
-				if (result) {
-					this._editor.reportStatus("");
-				} else {
-					this._editor.reportStatus(messages.notFound, "error"); //$NON-NLS-0$
-				}
-				if (this.isVisible()) {
-					var type = mAnnotations.AnnotationType.ANNOTATION_CURRENT_SEARCH;
-					var annotationModel = editor.getAnnotationModel();
-					if (annotationModel) {
-						annotationModel.removeAnnotations(type);
-						if (result) {
-							annotationModel.addAnnotation(mAnnotations.AnnotationType.createAnnotation(type, result.start, result.end));
-						}
-					}
-					if (this._showAll) {
-						if (this._timer) {
-							window.clearTimeout(this._timer);
-						}
-						var that = this;
-						this._timer = window.setTimeout(function(){
-							that._markAllOccurrences();
-							that._timer = null;
-						}, 500);
-					}
-				}
-				if (this._findCallback) {
-					this._findCallback(result);
-				}
-				else if (result) {
-					editor.moveSelection(result.start, result.end, null, false);
-				}
-			}
 			return result;
+		},
+		
+		_doFind: function(string, startOffset, count, noWrap) {
+			count = count || 1;
+			var editor = this._editor;
+			if (!string) {
+				this._removeAllAnnotations();
+				return new Deferred().resolve();
+			}
+			this._lastString = string;
+			var result;
+			return Deferred.when(this._find(editor, string, startOffset, noWrap)).then( function(iterator) {
+				if(!iterator) {
+					return;
+				}
+				for (var i=0; i<count && iterator.hasNext(); i++) {
+					result = iterator.next();
+				}
+				if (!this._replacingAll) {
+					if (result) {
+						this._editor.reportStatus("");
+					} else {
+						this._editor.reportStatus(messages.notFound, "error"); //$NON-NLS-0$
+					}
+					if (this.isVisible()) {
+						var type = mAnnotations.AnnotationType.ANNOTATION_CURRENT_SEARCH;
+						var annotationModel = editor.getAnnotationModel();
+						if (annotationModel) {
+							annotationModel.removeAnnotations(type);
+							if (result) {
+								annotationModel.addAnnotation(mAnnotations.AnnotationType.createAnnotation(type, result.start, result.end));
+							}
+						}
+						if (this._showAll) {
+							if (this._timer) {
+								window.clearTimeout(this._timer);
+							}
+							var that = this;
+							this._timer = window.setTimeout(function(){
+								that._markAllOccurrences();
+								that._timer = null;
+							}, 500);
+						}
+					}
+					if (this._findCallback) {
+						this._findCallback(result);
+					}
+					else if (result) {
+						editor.moveSelection(result.start, result.end, null, false);
+					}
+				}
+				return result;
+			}.bind(this));
 		},
 		_doReplace: function(start, end, searchStr, newStr) {
 			var editor = this._editor;
@@ -572,19 +615,25 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			}
 			if (this.isVisible()) {
 				var string = this.getFindString();
-				iter = this._editor.getModel().find({
+				Deferred.when(this._editor.getModel().find({
 					string: string,
 					regex: this._regex,
 					wholeWord: this._wholeWord,
 					caseInsensitive: this._caseInsensitive
-				});
-				add = [];
-				while (iter.hasNext()) {
-					var range = iter.next();
-					add.push(mAnnotations.AnnotationType.createAnnotation(type, range.start, range.end));
-				}
+				})).then( function(iterator) {
+					if(!iterator) {
+						return;
+					}
+					add = [];
+					while (iterator.hasNext()) {
+						var range = iterator.next();
+						add.push(mAnnotations.AnnotationType.createAnnotation(type, range.start, range.end));
+					}
+					annotationModel.replaceAnnotations(remove, add);
+				}.bind(this));
+			} else {
+				annotationModel.replaceAnnotations(remove, add);
 			}
-			annotationModel.replaceAnnotations(remove, add);
 		},
 		_removeAllAnnotations: function() {
 			var annotationModel = this._editor.getAnnotationModel();
