@@ -34,8 +34,7 @@ function startServer(options) {
 	options = options || {};
 	options.configParams = options.configParams || {};
 	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : undefined;
-	var workspaceDir = options.workspaceDir;
-	if (typeof workspaceDir !== "string") {
+	if (typeof options.workspaceDir !== "string") {
 		throw new Error("workspaceDir is required")
 	}
 	
@@ -49,7 +48,7 @@ function startServer(options) {
 				res.writeHead(401, "Not authenticated");
 				res.end();
 			} else {
-				req.user.workspaceDir = workspaceDir + (req.user.workspace ? "/" + req.user.workspace : "");
+				req.user.workspaceDir = options.workspaceDir + (req.user.workspace ? "/" + req.user.workspace : "");
 				next();
 			}
 		}
@@ -82,11 +81,13 @@ function startServer(options) {
 			root: '/task'
 		}));
 		app.use('/file', checkAuthenticated, orionFile({
-			root: '/file'
+			root: '/file',
+			options: options
 		}));
 		app.use('/workspace', checkAuthenticated, orionWorkspace({
 			root: '/workspace',
-			fileRoot: '/file'
+			fileRoot: '/file',
+			options: options
 		}));
 		app.use('/gitapi', checkAuthenticated, orionGit({ 
 			root: '/gitapi',

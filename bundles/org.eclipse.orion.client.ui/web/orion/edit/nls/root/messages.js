@@ -84,6 +84,8 @@ define({
 	"Export": "Export",
 	"OpenWith": "Open With",
 	"OpenRelated": "Open Related",
+	"OpenFolder": "Open Folder",
+	"OpenFolderTip": "Change the root folder",
 	"Dependency": "Dependency",
 	"UnnamedCommand": "Unnamed",
 	"searchInFolder": "Folder Search...",

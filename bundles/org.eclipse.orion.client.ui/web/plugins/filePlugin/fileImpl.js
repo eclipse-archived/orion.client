@@ -285,6 +285,25 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			}.bind(this));
 		},
 		
+		changeWorkspace: function(loc) {
+			return _xhr("PUT", this.workspaceBase, {
+				headers: {
+					"Orion-Version": "1",
+					"Content-Type": "application/json;charset=UTF-8"
+				},
+				timeout: 15000,
+				data: JSON.stringify({Location: loc})
+			}).then(function(result) {
+				var jsonData = result.response ? JSON.parse(result.response) : {};
+				return jsonData.Workspaces;
+			}).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
+		},
+		
 		/**
 		 * Adds a project to a workspace.
 		 * @param {String} loc The workspace location

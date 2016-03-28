@@ -339,6 +339,10 @@ define([
 			return _doServiceCall(this._getService(workspaceLocation), "loadWorkspace", arguments); //$NON-NLS-1$
 		},
 		
+		changeWorkspace: function(workspaceLocation) {
+			return _doServiceCall(this._getService(), "changeWorkspace", arguments); //$NON-NLS-1$
+		},
+		
 		/**
 		 * Adds a project to a workspace.
 		 * @param {String} url The workspace location

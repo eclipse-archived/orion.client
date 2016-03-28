@@ -127,11 +127,12 @@ if (args.ui) {
 		function createWindow(url){
 			var nextWindow = new electron.BrowserWindow({width: 1024, height: 800, title: "Orion"});
 			nextWindow.loadURL("file:///" + __dirname + "/lib/main.html#" + encodeURI(url));
-			nextWindow.webContents.on("new-window", function(event, url, frameName, disposition, options){
+			nextWindow.webContents.on("new-window", /* @callback */ function(event, url, frameName, disposition, options){
 				event.preventDefault();
-				if (false) {
+				if (false === undefined) {// Always open new tabs for now
 					createWindow(url);
 				} else {
+					nextWindow.webContents.executeJavaScript("__openFolder = require('dialog').showSaveDialog;");
 					nextWindow.webContents.executeJavaScript('createTab("' + url + '");');
 				}
 			});
@@ -141,7 +142,7 @@ if (args.ui) {
 			mainWindow = createWindow("http://localhost:" + port);
 			mainWindow.on('closed', function() {
 				mainWindow = null;
-			})
+			});
 		});
 
 	});
