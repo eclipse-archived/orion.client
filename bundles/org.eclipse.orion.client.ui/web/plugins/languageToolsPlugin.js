@@ -14,6 +14,7 @@ define([
 	'orion/plugin',
 	'plugins/languages/arduino/arduinoPlugin',
 	'plugins/languages/c/cPlugin',
+	'plugins/languages/coffeescript/coffeescriptPlugin',
 	'plugins/languages/cpp/cppPlugin',
 	'plugins/languages/csharp/csharpPlugin',
 	'plugins/languages/docker/dockerPlugin',

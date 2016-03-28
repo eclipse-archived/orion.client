@@ -92,6 +92,7 @@
             { name: "plugins/languageToolsPlugin" },
             { name: "plugins/languages/arduino/arduinoPlugin" },
             { name: "plugins/languages/c/cPlugin" },
+            { name: "plugins/languages/coffeescript/coffeescriptPlugin" },
             { name: "plugins/languages/cpp/cppPlugin" },
             { name: "plugins/languages/docker/dockerPlugin" },
             { name: "plugins/languages/erlang/erlangPlugin" },

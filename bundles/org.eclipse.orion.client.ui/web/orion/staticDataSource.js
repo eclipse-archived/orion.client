@@ -15,6 +15,7 @@ define([
 	'orion/Deferred',
 	"orion/editor/textStyler", 
 	"orion/editor/stylers/application_javascript/syntax",
+	"orion/editor/stylers/application_vnd.coffeescript/syntax",
 	"orion/editor/stylers/application_x-jsp/syntax",
 	"orion/editor/stylers/application_xquery/syntax",
 	"orion/editor/stylers/application_sql/syntax",
@@ -48,7 +49,7 @@ define([
 	'orion/editor/stylers/application_x-ejs/syntax',
 	'orion/editor/stylers/application_xml/syntax',
 	'orion/editor/stylers/text_x-yaml/syntax',
-], function(Deferred, mStyler, mJS, mJSP, mXQuery, mSQL, mCss, mScss, mLess, mHtml, mJSX, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mProperties, mSmarty, mSwift, mTypescript, mVB, mVBHTML, mEJS, mXml, mYaml) {
+], function(Deferred, mStyler, mJS, mCoffeescript, mJSP, mXQuery, mSQL, mCss, mScss, mLess, mHtml, mJSX, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mProperties, mSmarty, mSwift, mTypescript, mVB, mVBHTML, mEJS, mXml, mYaml) {
 	var ContentTypes = [
 		{	id: "text/plain",
 			name: "Text",
@@ -60,6 +61,11 @@ define([
 			name: "JavaScript",
 			extension: ["js"],
 			imageClass: "file-sprite-javascript modelDecorationSprite"
+		},
+		{	id: "application/vnd.coffeescript",
+			"extends": "text/plain",
+			name: "CoffeeScript",
+			extension: ["coffee"]
 		},
 		{	id: "text/jsx",
 			"extends": "text/plain",
@@ -335,6 +341,9 @@ define([
 				switch(fileContentType.id) {
 					case "application/javascript": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mJS.grammars, "orion.js", fileContentType.id); //$NON-NLS-0$
+						break;
+					case "application/vnd.coffeescript": //$NON-NLS-0$
+						stylerAdapter = new mStyler.createPatternBasedAdapter(mCoffeescript.grammars, "orion.coffeescript", fileContentType.id); //$NON-NLS-0$
 						break;
 					case "application/x-ejs": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mEJS.grammars, "orion.ejs", fileContentType.id); //$NON-NLS-0$
