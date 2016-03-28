@@ -532,12 +532,30 @@ define([
 		 * @callback
 		 */
         "no-unused-params": function(annotation, annotations, file) {
+        	var analyzed = false;
+        	var analyzeResult = {};
         	return applySingleFixToAll(annotations, function(annot){
+        		if (!analyzed){
+        			for (var i = annotations.length - 1; i >= 0; i--) {
+        				var element = annotations[i];
+        				var node = Finder.findNode(element.start, file.ast, {parents:true});
+        				var parent = node.parents.pop();
+        				if (parent){
+        					var parentLocation = parent.start.toString() + ":" + parent.end.toString();
+        					if (analyzeResult[parentLocation] || !(analyzeResult[parentLocation] = 0)){
+        						analyzeResult[parentLocation] += 1;
+        					}
+        				}
+        			}
+        			analyzed = true;
+        		}
                 var node = Finder.findNode(annot.start, file.ast, {parents:true});
                 if(node) {
                     var changes = [];
                     var parent = node.parents.pop();
+                    var parentLocation = parent.start.toString() + ":" + parent.end.toString();
                     var paramindex = -1;
+                    var greedy = false;
                     for(var i = 0; i < parent.params.length; i++) {
                         var p = parent.params[i];
                         if(node.range[0] === p.range[0] && node.range[1] === p.range[1]) {
@@ -545,7 +563,10 @@ define([
                             break;
                         }
                     }
-                    var change = removeIndexedItemChange(parent.params, paramindex);
+                    if (paramindex == 1 && analyzeResult[parentLocation] == parent.params.length - 1){
+                    	greedy = true;
+                    }
+                    var change = removeIndexedItemChange(parent.params, paramindex, greedy);
                     if(change) {
                         changes.push(change);
                     }
@@ -982,7 +1003,7 @@ define([
 	 * @param {Number} index The index to remove
 	 * @returns {Object} A change object containg the properties text, start and end
 	 */
-    function removeIndexedItemChange(list, index) {
+    function removeIndexedItemChange(list, index, greedy) {
         if(index < 0 || index > list.length) {
 	            return;
         }
@@ -992,7 +1013,9 @@ define([
         } else if(index === list.length-1) {
             return { "start" : list[index-1].range[1], "end" : node.range[1], "text" : ""};
         } else if(node) {
-            return { "start" : node.range[0], "end" : list[index+1].range[0], "text" : ""};
+        	return greedy ?
+        		{ "start" : list[index-1].range[1], "end" : list[index+1].range[0], "text" : ""}:
+            	{ "start" : node.range[0], "end" : list[index+1].range[0], "text" : ""};
         }
         return null;
     }
@@ -1140,8 +1163,33 @@ define([
 			}
 		});
 		// To use setText() with multiple selections they must be in range order
-		return edits.sort(function(a, b){
+		edits = edits.sort(function(a, b){
 			return a.start - b.start;
 		});
+		var mergedEdits = [];
+		var intersectedRange = false;
+		for (var i = 0; i < edits.length ; i++) {
+		    if(i === edits.length - 1 && !intersectedRange){
+		        mergedEdits.push(edits[i]);
+		        break;
+		    } else if (i === edits.length - 1) {
+		        break;
+		    }
+		    var element = intersectedRange ? mergedEdits.pop() : edits[i];
+		    var nextElement = edits[i+1];
+		    if (element.end >= nextElement.start){
+		        mergedEdits.push({
+		            start: element.start,
+		            end: nextElement.end,
+		            text: element.text + nextElement.text
+		        });
+		        intersectedRange = true;
+		    } else {
+		        mergedEdits.push(element);
+		        intersectedRange = false;
+		    }
+
+		}
+		return mergedEdits;
 	}
 });
