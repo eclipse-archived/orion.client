@@ -14,7 +14,6 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 var url = require('url');
-var vhost = require( 'vhost' );
 var mPath = require('path');
 
 var SITES = "sites.json";
@@ -39,8 +38,23 @@ module.exports = function(options) {
 	.post('/', postSite)
 	.delete('/:site', deleteSite);
 	
-function virtualHost(req, res, next) {
-	var host = hosts && hosts[req.vhost.hostname];
+function vhost(hostname, handler) {
+	var regex = new RegExp("^" + hostname.replace(/\*/g, "[^\/\:\.]+") + "$");
+	return function(req, res, next) {
+		if ([req.hostname, req.headers.host, req.protocol + "://" + req.headers.host].some(function(h) {
+			if (regex.exec(h)) {
+				handler(h, req, res, next);				
+				return true;
+			}
+		})) {
+			return;
+		}
+		next();
+	};
+}
+
+function virtualHost(vhost, req, res, next) {
+	var host = hosts && hosts[vhost];
 	if (host) {
 		var username = host.Id.split("-")[0];
 		var urlPath = url.parse(req.url).pathname;
@@ -67,7 +81,7 @@ function virtualHost(req, res, next) {
 			}
 		})) return;
 	}
-	res.status(404).send(host ? "Not found" : "Site stopped: " + req.vhost.host);
+	res.status(404).send(host ? "Not found" : "Site stopped: " + vhost);
 }
 
 function getHostedSiteURL(site) {
