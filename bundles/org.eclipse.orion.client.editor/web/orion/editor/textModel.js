@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -12,7 +12,7 @@
  ******************************************************************************/
  
 /*eslint-env browser, amd*/
-define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'orion/util'], function(mEventTarget, mRegex, util) { //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'orion/util'], function(mEventTarget, mRegex, util) {
 
 	/**
 	 * Constructs a new TextModel with the given text and default line delimiter.
@@ -102,7 +102,7 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 					* insensitive mode. The fix is to detect the presence of Turkish i's in the search pattern and 
 					* to modify the pattern to search for both upper and lower case.
 					*/
-					if (caseInsensitive) {  //$NON-NLS-1$ //$NON-NLS-0$
+					if (caseInsensitive) {
 						pattern = pattern.replace(/[iI\u0130\u0131]/g, "[Ii\u0130\u0131]"); //$NON-NLS-0$
 					}
 				}
@@ -114,14 +114,14 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 				var wholeWord = options.wholeWord;
 				var start = options.start || 0;
 				var end = options.end;
-				var isRange = (end !== null && end !== undefined);
-				if (flags.indexOf("g") === -1) { flags += "g"; } //$NON-NLS-1$ //$NON-NLS-0$
-				if (flags.indexOf("m") === -1) { flags += "m"; } //$NON-NLS-1$ //$NON-NLS-0$
+				var isRange = end !== null && end !== undefined;
+				if (flags.indexOf("g") === -1) { flags += "g"; } //$NON-NLS-1$ //$NON-NLS-2$
+				if (flags.indexOf("m") === -1) { flags += "m"; } //$NON-NLS-1$ //$NON-NLS-2$
 				if (caseInsensitive) {
-					if (flags.indexOf("i") === -1) { flags += "i"; } //$NON-NLS-1$ //$NON-NLS-0$
+					if (flags.indexOf("i") === -1) { flags += "i"; } //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				if (wholeWord) {
-					pattern = "\\b" + pattern + "\\b"; //$NON-NLS-1$ //$NON-NLS-0$
+					pattern = "\\b" + pattern + "\\b"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				var text = this._text[0], result, lastIndex, offset = 0;
 				if (isRange) {
@@ -185,11 +185,17 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 				current = skip();
 			}
 			return {
+				/**
+				 * @callback 
+				 */
 				next: function() {
 					var result = current;
 					if (result) { current = skip(); }
 					return result;					
 				},
+				/**
+				 * @callback 
+				 */
 				hasNext: function() {
 					return current !== null;
 				}
@@ -461,7 +467,7 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 		 * @param {Boolean} [all=false] whether or not the delimiter of existing lines are changed.
 		 */
 		setLineDelimiter: function(lineDelimiter, all) {
-			if (lineDelimiter === "auto") { //$NON-NLS-0$
+			if (lineDelimiter === "auto") {
 				lineDelimiter = undefined;
 				if (this.getLineCount() > 1) {
 					lineDelimiter = this.getText(this.getLineEnd(0), this.getLineEnd(0, true));
