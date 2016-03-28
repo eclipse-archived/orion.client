@@ -338,7 +338,7 @@ define([
 				function(response) {
 					var hover = '';
 					if(response.request === 'documentation') {
-						if(response.doc) {
+						if(response.doc && response.doc.type != "string") {
 							hover = formatMarkdownHover(response.doc.doc);
 						}
 						deferred.resolve(hover);
