@@ -16,6 +16,7 @@ var mRemotes = require('./remotes');
 var clone = require('./clone');
 var express = require('express');
 var bodyParser = require('body-parser');
+var util = require('./util');
 
 module.exports = {};
 
@@ -33,7 +34,7 @@ module.exports.router = function(options) {
 	function branchJSON(repo, ref, fileDir) {
 		var fullName = ref.name();
 		var shortName = ref.shorthand();
-		var branchURL = encodeURIComponent(fullName);
+		var branchURL = util.encodeURIComponent(fullName);
 		var current = !!ref.isHead() || repo.headDetached() && ref.name() === "HEAD";
 		return {
 			"CloneLocation": "/gitapi/clone"+ fileDir,
@@ -95,7 +96,7 @@ module.exports.router = function(options) {
 	}
 	
 	function getBranches(req, res) {
-		var branchName = decodeURIComponent(req.params.branchName || "");
+		var branchName = util.decodeURIComponent(req.params.branchName || "");
 		var fileDir;
 		
 		var theRepo;
@@ -221,7 +222,7 @@ module.exports.router = function(options) {
 	}
 	
 	function deleteBranch(req, res) {
-		var branchName = decodeURIComponent(req.params.branchName);
+		var branchName = util.decodeURIComponent(req.params.branchName);
 		clone.getRepo(req)
 		.then(function(repo) {
 			return git.Reference.lookup(repo, branchName);

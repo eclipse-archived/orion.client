@@ -15,6 +15,7 @@ var args = require('../args');
 var clone = require('./clone');
 var express = require('express');
 var bodyParser = require('body-parser');
+var util = require('./util');
 
 module.exports = {};
 
@@ -34,13 +35,13 @@ function configJSON(key, value, fileDir) {
 	return {
 		"Key": key,
 		"CloneLocation": "/gitapi/clone" + fileDir,
-		"Location": "/gitapi/config/" + encodeURIComponent(key) + "/clone" + fileDir,
+		"Location": "/gitapi/config/" + util.encodeURIComponent(key) + "/clone" + fileDir,
 		"Value": Array.isArray(value) ? value : [value]
 	};
 }
 
 function getAConfig(req, res) {
-	var key = decodeURIComponent(req.params.key);
+	var key = util.decodeURIComponent(req.params.key);
 	clone.getRepo(req)
 	.then(function(repo) {
 		var fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));

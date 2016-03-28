@@ -20,6 +20,7 @@ var crypto = require('crypto');
 var async = require('async');
 var express = require('express');
 var bodyParser = require('body-parser');
+var util = require('./util');
 
 module.exports = {};
 
@@ -68,7 +69,7 @@ function getCommit(req, res) {
 }
 
 function getCommitLog(req, res) {
-	var scope = decodeURIComponent(req.params.scope);
+	var scope = util.decodeURIComponent(req.params.scope);
 	var fileDir;
 
 	var query = req.query;
@@ -100,10 +101,10 @@ function getCommitLog(req, res) {
 			"RepositoryPath": "",
 			"toRef": {
 				"CloneLocation": "/gitapi/clone" + fileDir,
-				"CommitLocation": "/gitapi/commit/" + encodeURIComponent(referenceName) + fileDir,
+				"CommitLocation": "/gitapi/commit/" + util.encodeURIComponent(referenceName) + fileDir,
 				"Current": true,
 				"HeadLocation": "/gitapi/commit/HEAD" + fileDir,
-				"Location": "/gitapi/branch/" + decodeURIComponent(referenceName) + fileDir,
+				"Location": "/gitapi/branch/" + util.decodeURIComponent(referenceName) + fileDir,
 				"Name": referenceName,
 				"Type": "Branch"
 			}
@@ -356,7 +357,7 @@ function getCommitBody(req, res) {
 function identifyNewCommitResource(req, res, newCommit) {
 	var originalUrl = url.parse(req.originalUrl, true);
 	var segments = originalUrl.pathname.split("/");
-	segments[3] = segments[3] + ".." + encodeURIComponent(newCommit);
+	segments[3] = segments[3] + ".." + util.encodeURIComponent(newCommit);
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
 	res.status(200).json({
 		"Location": location
@@ -627,7 +628,7 @@ function tag(req, res, commitId, name) {
 }
 
 function putCommit(req, res) {
-	var commit = decodeURIComponent(req.params.commit);
+	var commit = util.decodeURIComponent(req.params.commit);
 	var tagName = req.body.Name;
 	if (tagName) {
 		tag(req, res, commit, tagName);
@@ -658,7 +659,7 @@ function postCommit(req, res) {
 	}
 	
 	//TODO create commit -> change id
-	var commit = decodeURIComponent(req.params.commit);
+	var commit = util.decodeURIComponent(req.params.commit);
 	if (commit !== "HEAD") {
 		writeError(404, res, "Needs to be HEAD");
 		return;

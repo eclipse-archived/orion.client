@@ -14,6 +14,7 @@ var git = require('nodegit');
 var clone = require('./clone');
 var path = require('path');
 var express = require('express');
+var util = require('./util');
 
 module.exports = {};
 
@@ -76,7 +77,7 @@ function getTree(req, res) {
 			return git.Reference.list(repo)
 			.then(function(refs) {
 				return refs.map(function(ref) {
-					return treeJSON(path.join(location, encodeURIComponent(ref)), shortName(ref), 0, true, 0);
+					return treeJSON(path.join(location, util.encodeURIComponent(ref)), shortName(ref), 0, true, 0);
 				});
 			})
 			.then(function(children) {
@@ -85,7 +86,7 @@ function getTree(req, res) {
 				res.status(200).json(tree);
 			});
 		}
-		var ref = decodeURIComponent(segments[2]);
+		var ref = util.decodeURIComponent(segments[2]);
 		var p = segments.slice(3).join("/");
 		return repo.getReferenceCommit(ref)
 		.then(function(commit) {
@@ -96,12 +97,12 @@ function getTree(req, res) {
 			return commit.getTree();
 		}).then(function(tree) {
 			var repoRoot = path.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
-			var refLocation = path.join(repoRoot, encodeURIComponent(ref));
+			var refLocation = path.join(repoRoot, util.encodeURIComponent(ref));
 			function createParents(data) {
 				var parents = [], temp = data, l, end = "/gitapi/tree" + repoRoot;
 				while (temp.Location.length > end.length) {
 					l = path.dirname(temp.Location).replace(/^\/gitapi\/tree/, "") + "/";
-					var dir = treeJSON(l, shortName(decodeURIComponent(path.basename(l))), 0, true, 0);
+					var dir = treeJSON(l, shortName(util.decodeURIComponent(path.basename(l))), 0, true, 0);
 					parents.push(dir);
 					temp = dir;
 				}
@@ -109,7 +110,7 @@ function getTree(req, res) {
 			}
 			function sendDir(tree) {
 				var l = path.join(refLocation, p);
-				var result = treeJSON(l, shortName(decodeURIComponent(path.basename(l))), 0, true, 0);
+				var result = treeJSON(l, shortName(util.decodeURIComponent(path.basename(l))), 0, true, 0);
 				result.Children = tree.entries().map(function(entry) {
 					return treeJSON(path.join(refLocation, entry.path()), git.Tree.entryName(entry), 0, entry.isDirectory(), 0);
 				});

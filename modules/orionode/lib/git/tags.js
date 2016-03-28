@@ -16,6 +16,7 @@ var url = require('url');
 var clone = require('./clone');
 var express = require('express');
 var bodyParser = require('body-parser');
+var util = require('./util');
 
 module.exports = {};
 
@@ -38,15 +39,15 @@ function tagJSON(fullName, shortName, sha, timestamp, fileDir) {
 		"CloneLocation": "/gitapi/clone" + fileDir,
 		"CommitLocation": "/gitapi/commit/" + sha + fileDir,
 		"LocalTimeStamp": timestamp,
-		"Location": "/gitapi/tag/" + encodeURIComponent(shortName) + fileDir,
+		"Location": "/gitapi/tag/" + util.encodeURIComponent(shortName) + fileDir,
 		"TagType": "LIGHTWEIGHT",
-		"TreeLocation": "/gitapi/tree" + fileDir + "/" + encodeURIComponent(shortName),
+		"TreeLocation": "/gitapi/tree" + fileDir + "/" + util.encodeURIComponent(shortName),
 		"Type": "Tag"
 	};
 }
 
 function getTags(req, res) {
-	var tagName = decodeURIComponent(req.params.tagName || "");
+	var tagName = util.decodeURIComponent(req.params.tagName || "");
 	var fileDir;
 	var query = req.query;
 	var page = Number(query.page) || 1;
@@ -141,7 +142,7 @@ function getTags(req, res) {
 }
 
 function deleteTag(req, res) {
-	var tagName = decodeURIComponent(req.params.tagName);
+	var tagName = util.decodeURIComponent(req.params.tagName);
 	return clone.getRepo(req)
 	.then(function(repo) {
 		return git.Tag.delete(repo, tagName);
