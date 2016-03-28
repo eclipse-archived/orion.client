@@ -1,10 +1,13 @@
 {
 	"plugins": {
-		"requirejs": {}
+		"requirejs": {},
+		"node": {},
+		"express": {}
 	},
 	"ecmaVersion": 5,
 	"libs": [
 		"ecma5",
-		"browser"
+		"browser",
+		"chai"
 	]
 }
