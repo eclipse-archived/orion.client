@@ -336,9 +336,10 @@ define([
 			this.ternworker.postMessage(
 				{request:'documentation', args:{params:{offset: ctxt.offset, docFormat: 'full'}, files: files, meta:{location: meta.location}}}, //$NON-NLS-1$ //$NON-NLS-2$
 				function(response) {
+					console.log(response);
 					var hover = '';
 					if(response.request === 'documentation') {
-						if(response.doc) {
+						if(response.doc && response.doc.type != "string") {
 							hover = formatMarkdownHover(response.doc.doc);
 						}
 						deferred.resolve(hover);
