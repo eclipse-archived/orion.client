@@ -223,7 +223,7 @@ define([
        		var templates = createTemplateProposals(params, ast);
    			var env = this.getActiveEnvironments(ast, envs);
 		    var files = [
-		    	{type:'full', name: meta.location, text: htmlsource ? htmlsource : ast.source} //$NON-NLS-1$
+		    	{type:'full', name: meta.location, text: htmlsource ? htmlsource : ast.sourceFile.text} //$NON-NLS-1$
 		    ];
 		    if(typeof params.keywords === 'undefined') {
 		    	params.keywords = true;
@@ -295,7 +295,7 @@ define([
 	 */
 	function createTemplateProposals (params, ast) {
 		if((typeof params.template === 'undefined' || params.template) &&
-				provider.isValid(params.prefix, ast.source, params.offset, params)) {
+				provider.isValid(params.prefix, ast.sourceFile.text, params.offset, params)) {
 			return provider.getTemplateProposals(params.prefix, params.offset, params, ast);
 		}
 		return [];
@@ -637,4 +637,4 @@ define([
 	return {
 		TernContentAssist : TernContentAssist
 	};
-});
+});

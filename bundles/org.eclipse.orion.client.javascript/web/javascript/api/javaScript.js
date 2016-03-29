@@ -12,10 +12,9 @@
 define([
 	"javascript/api/ternServer",
 	"javascript/occurrences",
-	"esprima/esprima",
 	"javascript/astManager",
 	"javascript/cuProvider"
-], function(TernServer, Occurrences, Esprima, ASTManager, CUProvider) {
+], function(TernServer, Occurrences, ASTManager, CUProvider) {
 	
 	var useworker = false,
 		scriptresolver,
@@ -39,7 +38,7 @@ define([
 				//just fire it up for now
 			});
 		}
-		occurrences = new Occurrences.JavaScriptOccurrences(new ASTManager.ASTManager(Esprima), CUProvider);
+		occurrences = new Occurrences.JavaScriptOccurrences(new ASTManager.ASTManager(), CUProvider);
 	}
 	
 	/**

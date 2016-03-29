@@ -151,7 +151,7 @@ define([
 	            return astManager.getAST(editorContext).then(function(ast) {
 	                var node = Finder.findNode(context.annotation.start, ast, {parents:true});
 	                if(node && node.type === 'ArrayExpression') {
-	                    var model = new TextModel.TextModel(ast.source.slice(context.annotation.start, context.annotation.end));
+	                    var model = new TextModel.TextModel(ast.sourceFile.text.slice(context.annotation.start, context.annotation.end));
 	                    var len = node.elements.length;
 	                    var idx = len-1;
 	                    var item = node.elements[idx];
@@ -239,14 +239,14 @@ define([
 								return fileClient.write(fileMetadata.Location, contents).then(/* @callback */ function(result) {
 									self.ternProjectManager.refresh(ternFileLocation);
 									// now we need to run the syntax checker on the current file to get rid of stale annotations
-									editorContext.syntaxCheck(ast.sourceFile, null, ast.source);
+									editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
 								});
 							});
 						}
 						return fileClient.write(ternFileLocation, contents).then(/* @callback */ function(result) {
 							self.ternProjectManager.refresh(ternFileLocation);
 							// now we need to run the syntax checker on the current file to get rid of stale annotations
-							editorContext.syntaxCheck(ast.sourceFile, null, ast.source);
+							editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
 						});
 					}
 				});

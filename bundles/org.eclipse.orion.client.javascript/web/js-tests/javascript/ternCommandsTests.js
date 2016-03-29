@@ -16,17 +16,16 @@ define([
 'javascript/commands/openDeclaration',
 'javascript/commands/openImplementation',
 'javascript/cuProvider',
-'esprima/esprima',
 'chai/chai',
 'orion/Deferred',
 'mocha/mocha' //must stay at the end, not a module
-], function(ASTManager, OpenDeclaration, OpenImplementation, CUProvider, Esprima, chai, Deferred) {
+], function(ASTManager, OpenDeclaration, OpenImplementation, CUProvider, chai, Deferred) {
 	var assert = chai.assert;
 
 	return function(worker) {
 		var openImplCommand;
 		var openDeclCommand;
-		var astManager = new ASTManager.ASTManager(Esprima);
+		var astManager = new ASTManager.ASTManager();
 		var jsFile = 'tern_content_assist_test_script.js';
 		var htmlFile = 'tern_content_assist_test_script.html';
 		var timeoutReturn = ['Content assist timed out'];

@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="../../mocha/mocha.css" />
   <script src="../../requirejs/require.js"></script>
   <script>
-	/*eslint-env amd*/
+	/*eslint-env amd, mocha*/
 	/* eslint-disable missing-nls */
 	require({
 		baseUrl: '../../',
@@ -17,13 +17,12 @@
 			domReady: 'requirejs/domReady'
 		}
 	});
-	require(['mocha/sauce'], function(mocha) {
+	require(['mocha/sauce'], function(testSuite) {
 		mocha.setup('bdd');
 		require([
 				"js-tests/javascript/testingWorker",
 				'js-tests/javascript/crossFileTests',
-				'js-tests/javascript/astManagerTests',
-				'js-tests/javascript/ternAssistIndexTests',				
+				'js-tests/javascript/ternAssistIndexTests',
 				'js-tests/javascript/ternAssistTests',
 				'js-tests/javascript/ternCommandsTests',
 				'js-tests/javascript/esprimaTolerantTests',
@@ -38,9 +37,9 @@
 				'js-tests/javascript/scriptResolverTests',
 				'js-tests/javascript/sigparserTests',
 				'js-tests/javascript/ternProjectFileTests',
-				'js-tests/javascript/ternProjectManagerTests',			
+				'js-tests/javascript/ternProjectManagerTests',
 				'js-tests/javascript/ternProjectValidatorTests'
-				], function(worker, crossFileTests, astManagerTests, ternAssistIndexTests, ternAssistTests, ternCommandTests, esprimaTolerantTests, dependencyTests, finderTests, occurrencesTests, outlinerTests, validatorTests, lruTests, quickfixTests, 
+				], function(worker, crossFileTests, ternAssistIndexTests, ternAssistTests, ternCommandTests, esprimaTolerantTests, dependencyTests, finderTests, occurrencesTests, outlinerTests, validatorTests, lruTests, quickfixTests, 
 							eslintCoreTests, scriptResolverTests, sigparserTests, ternProjectTests, ternProjectValidatorTests) {
 					var testworker;
 					before("reset timeout", function(done) {
@@ -54,7 +53,6 @@
 					});
 					testworker = worker.instance({delayedStart: true});
 					crossFileTests(testworker);
-					astManagerTests(testworker);
 					dependencyTests(testworker);
 					eslintCoreTests(testworker);
 					esprimaTolerantTests(testworker);
@@ -71,7 +69,7 @@
 					validatorTests(testworker);
 					ternProjectTests(testworker);
 					ternProjectValidatorTests(testworker);
-					mocha.run();
+					testSuite.run();
 		});
 	});
   </script>

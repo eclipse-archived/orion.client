@@ -16,7 +16,6 @@ define([
 	'javascript/validator',
 	'chai/chai',
 	'orion/Deferred',
-	'esprima/esprima',
 	'javascript/astManager',
 	'javascript/cuProvider',
 	'javascript/commands/renameCommand',
@@ -25,7 +24,7 @@ define([
 	'javascript/scriptResolver',
 	'javascript/ternProjectManager',
 	'mocha/mocha', //must stay at the end, not a module
-], function(QuickFixes, Validator, chai, Deferred, Esprima, ASTManager, CUProvider, RenameCommand, GenerateDocCommand, mServiceRegistry, Resolver, Manager) {
+], function(QuickFixes, Validator, chai, Deferred, ASTManager, CUProvider, RenameCommand, GenerateDocCommand, mServiceRegistry, Resolver, Manager) {
 	var assert = chai.assert;
 	
 	return function(worker) {
@@ -51,7 +50,7 @@ define([
 			function setup(options) {
 				var buffer = options.buffer;
 				var contentType = options.contentType ? options.contentType : 'application/javascript';
-				var astManager = new ASTManager.ASTManager(Esprima);
+				var astManager = new ASTManager.ASTManager();
 				var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 				var resolver = new Resolver.ScriptResolver(serviceRegistry);
 				var ternProjectManager = new Manager.TernProjectManager(worker, resolver, serviceRegistry);
@@ -2947,7 +2946,7 @@ define([
 			/**
 			  * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=458567
 			  */
-			 it("Test no-undef-defined-existing-doc",function(callback) {
+			 it("Test no-undef-defined-existing-doc 2",function(callback) {
 				var rule = createTestRule('no-undef');
 				var expected = {value: "/*globals aa:true */",
 								start: 25, 
@@ -2960,7 +2959,7 @@ define([
 			/**
 			  * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=458567
 			  */
-			 it("Test no-undef-defined-existing-doc",function(callback) {
+			 it("Test no-undef-defined-existing-doc 3",function(callback) {
 				var rule = createTestRule('no-undef');
 				var expected = {value: "/*globals Foo */",
 								start: 0, 
@@ -2973,7 +2972,7 @@ define([
 			/**
 			  * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=458567
 			  */
-			 it("Test no-undef-defined-existing-doc",function(callback) {
+			 it("Test no-undef-defined-existing-doc 4",function(callback) {
 				var rule = createTestRule('no-undef');
 				var expected = {value: "/*globals Foo */",
 								start: 25, 
@@ -3109,6 +3108,7 @@ define([
 		});	
 		//NO-UNUSED-PARAMS
 		describe("no-unused-params", function() {
+			this.timeout(1000000);
 			it("Test no-unused-params-1",function(callback) {
 				var rule = createTestRule('no-unused-params');
 				var expected = {value: "",

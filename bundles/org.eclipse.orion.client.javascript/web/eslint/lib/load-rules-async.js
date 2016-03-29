@@ -1140,6 +1140,10 @@ define([
         },
         /** @callback */
 		"no-undef": function(context) {
+				function isRecoveredNode(node) {
+					return node.range && node.range[0] === node.range[1];
+				}
+
                 function isImplicitGlobal(variable) {
                     return variable.defs.every(function(def) {
                         return def.type === "ImplicitGlobalVariable";
@@ -1167,26 +1171,29 @@ define([
             	            var globalScope = context.getScope();
 
             	            globalScope.through.forEach(function(ref) {
+            	            	    if (isRecoveredNode(ref.identifier)) {
+            	            	    		return;
+            	            	    	}
             	                var variable = getDeclaredGlobalVariable(globalScope, ref),
             	                    name = ref.identifier.name;
             	                if (!variable) {
             	                	// Check if Tern knows about a definition in another file
-            	                	var env = Finder.findESLintEnvForMember(name);
+            	                	    var env = Finder.findESLintEnvForMember(name);
             	                    var tern = context.getTern();
-									var query = tern.query;
-									query.end = ref.identifier.start;
-									var foundType = null;
-									try {
-										var expr = tern.findExpr(tern.file, query);
-										var type = tern.findExprType(tern.server, query, tern.file, expr);
-										// The origin could be a primitive in the same file (a=1;) which we still want to mark
-										// The origin could be an environment, which we still want to mark (eslint-env directive is handled separately)
-										if (type && type.origin && type.origin !== tern.file.name && type.origin !== env){
-											foundType = type;
-										}
-									} catch(e) {
-										//ignore
+								var query = tern.query;
+								query.end = ref.identifier.start;
+								var foundType = null;
+								try {
+									var expr = tern.findExpr(tern.file, query);
+									var type = tern.findExprType(tern.server, query, tern.file, expr);
+									// The origin could be a primitive in the same file (a=1;) which we still want to mark
+									// The origin could be an environment, which we still want to mark (eslint-env directive is handled separately)
+									if (type && type.origin && type.origin !== tern.file.name && type.origin !== env){
+										foundType = type;
 									}
+								} catch(e) {
+									//ignore
+								}
 	            	                if (!foundType){
 	            	                    var inenv = env ? '-inenv' : ''; //$NON-NLS-1$
 	            	                    var nls = 'no-undef-defined'; //$NON-NLS-1$
@@ -1388,11 +1395,23 @@ define([
 	        					        			return;
 	        					        		}
 	        					        	}
+	        					        	parent = parent.parent;
+	        					        	if (parent && parent.type === "ExpressionStatement") {
+	        					        		if (hasCallbackComment(parent)) {
+	        					        			return;
+	        					        		}
+	        					        	}
         					        		break;
         					        	}
         					        	case 'VariableDeclarator': {
-        					        		if(hasCallbackComment(parent.id)) {
+        					        		if(hasCallbackComment(parent.id) || hasCallbackComment(parent)) {
         					        			return;
+        					        		}
+        					        		parent = parent.parent;
+        					        		if (parent && parent.type === "VariableDeclaration") {
+        					        			if(hasCallbackComment(parent)) {
+        					        				return;
+        					        			}
         					        		}
         					        		break;
         					        	}
@@ -1449,6 +1468,10 @@ define([
         					}
         					var node = variable.defs[0].node;
         					var references = getReferences(scope, variable), id = node.id;
+        					if (id.range && id.range[0] === id.range[1]) {
+        						// recovered node - the range cannot be empty for a "real" node
+        						return;
+        					}
         					if (!references.length) {
         					    if(node.type === 'FunctionDeclaration') {
         					    	   var tern = context.getTern();

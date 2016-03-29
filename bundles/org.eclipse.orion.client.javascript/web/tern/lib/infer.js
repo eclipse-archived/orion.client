@@ -14,12 +14,12 @@
 /* eslint-disable  */
 (function(root, mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(exports, require("esprima/esprima"), require("acorn/dist/walk"),
-               require("./def"), require("./signal"), require("javascript/util"));
+    return mod(exports, require("acorn/dist/acorn"), require("acorn/dist/acorn_loose"), require("acorn/dist/walk"),
+               require("./def"), require("./signal"), require("javascript/util"), require("estraverse/estraverse"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["exports", "esprima/esprima" /*ORION*/, "acorn/dist/walk", "./def", "./signal", "javascript/util"], mod);
-  mod(root.tern || (root.tern = {}), acorn, acorn.walk, tern.def, tern.signal, Util); // Plain browser env
-})(this, function(exports, acorn, walk, def, signal, Util) {
+    return define(["exports", "acorn/dist/acorn", "acorn/dist/acorn_loose", "acorn/dist/walk", "./def", "./signal", "javascript/util", "estraverse/estraverse"], mod);
+  mod(root.tern || (root.tern = {}), acorn, acornloose, acorn.walk, tern.def, tern.signal, Util, traverse); // Plain browser env
+})(this, function(exports, acorn, acornloose, walk, def, signal, Util, traverse) {
   "use strict";
 
   var toString = exports.toString = function(type, maxDepth, parent) {
@@ -1209,6 +1209,7 @@
       return literalType(node);
     })
   };
+  inferExprVisitor.ArrowFunctionExpression = inferExprVisitor.FunctionExpression;
 
   function infer(node, scope, c, out, name) {
       //ORION
@@ -1277,36 +1278,20 @@
     if (arr) for (var i = 0; i < arr.length; ++i) arr[i].apply(null, args);
   }
 
-  var parse = exports.parse = function(text, passes, options) {
-    var ast;
-    if (passes.preParse) for (var i = 0; i < passes.preParse.length; i++) {
-      var result = passes.preParse[i](text, options);
-      if (typeof result == "string") text = result;
-    }
-    var ast;
-    try {
-        options.tolerant = true;
-        options.tokens = true;
-        options.comment = true;
-        options.range = true;
-        options.deps = true;
-        options.loc = true;
-        options.attachComment = true;
-        ast = acorn.parse(text, options);
-        if(typeof ast.sourceFile !== "object") {
-	        ast.sourceFile  = Object.create(null);
-	        ast.sourceFile.text = ast.source;
-	        ast.sourceFile.name = ast.fileLocation;
-        }
-    }
-    //ORION
-    catch(e) {
-    	ast = Util.errorAST(e, options.directSourceFile.name, text); //ORION
-    }
-	ast.errors = Util.serializeAstErrors(ast);
-    runPasses(passes, "postParse", ast, text);
-    return ast;
-  };
+	var parse = exports.parse = function(text, passes, options) {
+		var ast;
+		if (passes.preParse) for (var i = 0; i < passes.preParse.length; i++) {
+			var result = passes.preParse[i](text, options, acorn, acornloose);
+			if (typeof result == "string") text = result;
+		}
+		try {
+			ast = acorn.parse(text, options);
+		} catch(e) {
+			ast = acornloose.parse_dammit(text, options);
+		}
+		runPasses(passes, "postParse", ast, text);
+		return ast;
+	};
 
   // ANALYSIS INTERFACE
 

@@ -332,7 +332,7 @@ define([
                 return null;
 		    }
 			deferred = new Deferred();
-			var files = [{type: 'full', name: meta.location, text: htmlsource ? htmlsource : ast.source}]; //$NON-NLS-1$
+			var files = [{type: 'full', name: meta.location, text: htmlsource ? htmlsource : ast.sourceFile.text}]; //$NON-NLS-1$
 			this.ternworker.postMessage(
 				{request:'documentation', args:{params:{offset: ctxt.offset, docFormat: 'full'}, files: files, meta:{location: meta.location}}}, //$NON-NLS-1$ //$NON-NLS-2$
 				function(response) {

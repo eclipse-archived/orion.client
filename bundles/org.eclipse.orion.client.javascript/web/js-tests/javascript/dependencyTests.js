@@ -12,15 +12,14 @@
 /* eslint-disable missing-nls */
 define([
 	'chai/chai',
-	'esprima/esprima',
 	'javascript/astManager',
 	'orion/Deferred',
 	'mocha/mocha'  //must stay last, not a module
-], function(chai, Esprima, ASTManager, Deferred) {
+], function(chai, ASTManager, Deferred) {
 	var assert = chai.assert;
 
 	return /* @callback */ function(worker) {
-		var astManager = new ASTManager.ASTManager(Esprima);
+		var astManager = new ASTManager.ASTManager();
 	
 		/**
 		 * @description Sets up the test
@@ -65,7 +64,7 @@ define([
 			assert.equal(len, expected.length, 'The number of computed dependencies and expected ones differs');
 			for(var i = 0; i < len; i++) {
 				var dep = ast.dependencies[i];
-				assert.equal(dep.type, 'Literal', 'The type of the depenedent node is not Literal');
+				assert.equal(dep.type, 'Literal', 'The type of the dependent node is not Literal');
 				assert.equal(dep.value, expected[i], 'The name name of the dependent does not match');
 			}
 		}

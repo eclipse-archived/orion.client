@@ -7,11 +7,11 @@
 (function(root, mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(exports, require("./infer"), require("./signal"),
-               require("esprima/esprima"), require("acorn/dist/walk"));
+               require("acorn/dist/acorn"), require("acorn/dist/acorn_loose"), require("acorn/dist/walk"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["exports", "./infer", "./signal", "esprima/esprima", "acorn/dist/walk"], mod);
-  mod(root.tern || (root.tern = {}), tern, tern.signal, acorn, acorn.walk); // Plain browser env
-})(this, function(exports, infer, signal, acorn, walk) {
+    return define(["exports", "./infer", "./signal", "acorn/dist/acorn", "acorn/dist/acorn_loose", "acorn/dist/walk"], mod);
+  mod(root.tern || (root.tern = {}), tern, tern.signal, acorn, acornloose, acorn.walk); // Plain browser env
+})(this, function(exports, infer, signal, acorn, acornloose, walk) {
   "use strict";
 
   var plugins = Object.create(null);

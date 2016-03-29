@@ -166,17 +166,9 @@ define([
 							{start: 0, 
 							 end: 1, 
 							 severity: 'error', 
-							 description: 'Invalid regular expression: missing /' //i18nUtil.formatMessage.call(null, messages['esprimaParseFailure'], {
-									//0: "Invalid regular expression: missing /",
-									//nls: "esprimaParseFailure"
-								 //})
-							 },
-							{start: 0, 
-							 end: 1, 
-							 severity: 'error', 
-							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorBadToken'], {
+							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {
 								0: "/",
-								nls: "syntaxErrorBadToken"
+								nls: "syntaxErrorIncomplete"
 							 })
 							 }
 						]);
@@ -1002,6 +994,21 @@ define([
 										severity: 'warning',
 										description: "Missing documentation for function \'f\'.",
 										nodeType: "Identifier"
+								}]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					it("should not flag missing doc for property when there is a syntax error", function(callback) {
+						var config = { rules: {} };
+						config.rules[RULE_ID] = [1, {decl: 1}];
+						validate({buffer: "var f = { /** @return {Array.<String>} array or null */ one: function() {f.one. }}", callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [{
+										id: "syntaxErrorBadToken",
+										severity: 'error',
+										description: "Syntax error on token '}', delete this token."
 								}]);
 							},
 							function (error) {

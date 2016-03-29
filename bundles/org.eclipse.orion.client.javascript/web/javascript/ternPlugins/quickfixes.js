@@ -569,6 +569,11 @@ define([
                                 if(change) {
                                     changes.push(change);
                                 }
+                            } else if(funcparent.type === 'Property' && funcparent.leadingComments && funcparent.leadingComments.length > 0) {
+                                change = updateDoc(funcparent, file.ast.sourceFile.text, parent.params[paramindex].name);
+                                if(change) {
+                                    changes.push(change);
+                                }
                             }
                             break;
                         }
@@ -626,10 +631,17 @@ define([
                     	}
                     	case 'AssignmentExpression': {
                     		var left = p.left;
-                    		if(left.type === 'MemberExpression' && !hasDocTag(['@callback', '@public'], left)) { //$NON-NLS-1$ //$NON-NLS-2$
-				        		change = updateCallback(left, file.ast, left.leadingComments);
-				        	} else if(left.type === 'Identifier' && !hasDocTag(['@callback', '@public'], left)) { //$NON-NLS-1$ //$NON-NLS-2$
-				        		change = updateCallback(p.left, file.ast, left.leadingComments);	        		
+                    		var parent = null;
+                    		if (node.parents.length > 0) {
+                    			parent = node.parents.pop();
+                    		}
+                    		if (parent === null) {
+                    			parent = left;
+                    		}
+                    		if(left.type === 'MemberExpression' && !hasDocTag(['@callback', '@public'], parent)) { //$NON-NLS-1$ //$NON-NLS-2$
+                    			change = updateCallback(left, file.ast, parent.leadingComments);
+				        	} else if(left.type === 'Identifier' && !hasDocTag(['@callback', '@public'], parent)) { //$NON-NLS-1$ //$NON-NLS-2$
+				        		change = updateCallback(p.left, file.ast, parent.leadingComments);
 				        	}
                 			break;
                     	}
@@ -638,9 +650,13 @@ define([
                 			p = node.parents.pop();
                 			if(p.declarations[0].range[0] === oldp.range[0] && p.declarations[0].range[1] === oldp.range[1]) {
                 				//insert at the var keyword level to not mess up the code
-                				change = updateCallback(p, file.ast, oldp.id.leadingComments);
+             				var leadingComments = oldp.leadingComments;
+	            				if (!leadingComments) {
+	            					leadingComments = p.leadingComments;
+	            				}
+               				change = updateCallback(p, file.ast, leadingComments);
                 			} else if(!hasDocTag(['@callback', '@public'], oldp.id)) { //$NON-NLS-1$ //$NON-NLS-2$
-                    			change = updateCallback(oldp, file.ast, oldp.id.leadingComments);
+                    			change = updateCallback(oldp, file.ast, oldp.leadingComments);
                 			} 
                     		break;
                     	}
@@ -1060,7 +1076,7 @@ define([
                     if(val > -1) {
                         return val;
                     }
-                    break;
+                    return n.range[0];
                 }
                 case 'ExpressionStatement': {
                     if(n.expression && n.expression.right && n.expression.right.type === 'FunctionExpression') {
@@ -1073,7 +1089,9 @@ define([
                         if(val > -1) {
                             return val;
                         }
-                    }   
+                        return n.range[0];
+                    }
+                    return n.range[0];
                 }
             }
 	    }

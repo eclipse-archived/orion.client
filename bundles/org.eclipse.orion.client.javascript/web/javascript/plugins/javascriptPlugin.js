@@ -18,7 +18,6 @@ define([
 'orion/plugin',
 'orion/serviceregistry',
 'orion/Deferred',
-'esprima/esprima',
 'estraverse/estraverse',
 'javascript/scriptResolver',
 'javascript/astManager',
@@ -46,7 +45,7 @@ define([
 'i18n!javascript/nls/messages',
 'orion/i18nUtil',
 'orion/URL-shim'
-], function(PluginProvider, mServiceRegistry, Deferred, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, TernProjectAssist,
+], function(PluginProvider, mServiceRegistry, Deferred, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, TernProjectAssist,
 			EslintValidator, TernProjectValidator, Occurrences, Hover, Outliner, CUProvider, TernProjectManager, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 			RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
@@ -95,7 +94,7 @@ define([
     	/**
     	 * Create the AST manager
     	 */
-    	var astManager = new ASTManager.ASTManager(Esprima, serviceRegistry);
+    	var astManager = new ASTManager.ASTManager(serviceRegistry);
 
 		var ternReady = false,
 			workerReady = false,

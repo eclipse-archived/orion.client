@@ -12,12 +12,11 @@
 /* eslint-disable missing-nls */
 define([
 	'chai/chai',
-	'esprima/esprima',
 	'javascript/finder',
 	'javascript/astManager',
 	'orion/Deferred',
 	'mocha/mocha' // not a module, leave it at the end
-], function(chai, Esprima, Finder, ASTManager, Deferred) {
+], function(chai, Finder, ASTManager, Deferred) {
 	var assert = chai.assert;
 
 	return /* @callback */ function(worker) {
@@ -31,7 +30,7 @@ define([
 			function setup(text, contentType) {
 				return {
 					text: text,
-					astManager: new ASTManager.ASTManager(Esprima),
+					astManager: new ASTManager.ASTManager(),
 			        editorContext: {
 	        			text: "",
 	        			/**

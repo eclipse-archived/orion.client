@@ -26,6 +26,7 @@ define([
 	
 	//orion defaults
 	"javascript/ternPlugins/amqp",
+	"javascript/ternPlugins/ast",
 	"javascript/ternPlugins/eslint",
 	"javascript/ternPlugins/express",
 	"javascript/ternPlugins/html",
@@ -91,7 +92,12 @@ define([
 				"name": Messages["fixesPluginName"],
 				"description": Messages["fixesPluginDescription"],
 				"version": "1.0"
-			}
+			},
+			"ast": {
+				"name": Messages["astPluginName"],
+				"description": Messages["astPluginDescription"],
+				"version": "1.0"
+			},
 		},
 		optional: {
 			"amqp": {

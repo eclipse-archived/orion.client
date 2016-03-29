@@ -1,5 +1,5 @@
 /* eslint-disable  */
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}(g.acorn || (g.acorn = {})).loose = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define(['acorn/dist/acorn'],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}(g.acorn || (g.acorn = {})).loose = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 "use strict";
 
 module.exports = typeof acorn != 'undefined' ? acorn : require("acorn/dist/acorn");
@@ -318,6 +318,7 @@ lp.parseTemplate = function () {
       curElt = this.startNode();
       curElt.value = { cooked: '', raw: '' };
       curElt.tail = true;
+      this.finishNode(curElt, "TemplateElement");
     }
     node.quasis.push(curElt);
   }
@@ -785,10 +786,11 @@ lp.parseTopLevel = function () {
 
 lp.parseStatement = function () {
   var starttype = this.tok.type,
-      node = this.startNode();
+      node;
 
   switch (starttype) {
     case _.tokTypes._break:case _.tokTypes._continue:
+      node = this.startNode();
       this.next();
       var isBreak = starttype === _.tokTypes._break;
       if (this.semicolon() || this.canInsertSemicolon()) {
@@ -800,11 +802,13 @@ lp.parseStatement = function () {
       return this.finishNode(node, isBreak ? "BreakStatement" : "ContinueStatement");
 
     case _.tokTypes._debugger:
+    	  node = this.startNode();
       this.next();
       this.semicolon();
       return this.finishNode(node, "DebuggerStatement");
 
     case _.tokTypes._do:
+      node = this.startNode();
       this.next();
       node.body = this.parseStatement();
       node.test = this.eat(_.tokTypes._while) ? this.parseParenExpression() : this.dummyIdent();
@@ -812,6 +816,7 @@ lp.parseStatement = function () {
       return this.finishNode(node, "DoWhileStatement");
 
     case _.tokTypes._for:
+      node = this.startNode();
       this.next();
       this.pushCx();
       this.expect(_.tokTypes.parenL);
@@ -828,10 +833,12 @@ lp.parseStatement = function () {
       return this.parseFor(node, init);
 
     case _.tokTypes._function:
+      node = this.startNode();
       this.next();
       return this.parseFunction(node, true);
 
     case _.tokTypes._if:
+      node = this.startNode();
       this.next();
       node.test = this.parseParenExpression();
       node.consequent = this.parseStatement();
@@ -839,6 +846,7 @@ lp.parseStatement = function () {
       return this.finishNode(node, "IfStatement");
 
     case _.tokTypes._return:
+      node = this.startNode();
       this.next();
       if (this.eat(_.tokTypes.semi) || this.canInsertSemicolon()) node.argument = null;else {
         node.argument = this.parseExpression();this.semicolon();
@@ -846,6 +854,7 @@ lp.parseStatement = function () {
       return this.finishNode(node, "ReturnStatement");
 
     case _.tokTypes._switch:
+      node = this.startNode();
       var blockIndent = this.curIndent,
           line = this.curLineStart;
       this.next();
@@ -879,12 +888,14 @@ lp.parseStatement = function () {
       return this.finishNode(node, "SwitchStatement");
 
     case _.tokTypes._throw:
+      node = this.startNode();
       this.next();
       node.argument = this.parseExpression();
       this.semicolon();
       return this.finishNode(node, "ThrowStatement");
 
     case _.tokTypes._try:
+      node = this.startNode();
       this.next();
       node.block = this.parseBlock();
       node.handler = null;
@@ -907,12 +918,14 @@ lp.parseStatement = function () {
       return this.parseVar();
 
     case _.tokTypes._while:
+      node = this.startNode();
       this.next();
       node.test = this.parseParenExpression();
       node.body = this.parseStatement();
       return this.finishNode(node, "WhileStatement");
 
     case _.tokTypes._with:
+      node = this.startNode();
       this.next();
       node.object = this.parseParenExpression();
       node.body = this.parseStatement();
@@ -922,6 +935,7 @@ lp.parseStatement = function () {
       return this.parseBlock();
 
     case _.tokTypes.semi:
+      node = this.startNode();
       this.next();
       return this.finishNode(node, "EmptyStatement");
 
@@ -935,6 +949,7 @@ lp.parseStatement = function () {
       return this.parseExport();
 
     default:
+      node = this.startNode();
       var expr = this.parseExpression();
       if (_parseutil.isDummy(expr)) {
         this.next();
@@ -1235,7 +1250,7 @@ lp.readToken = function () {
           pos = e.raisedAt,
           replace = true;
       if (/unterminated/i.test(msg)) {
-        pos = this.lineEnd(e.pos + 1);
+        pos = this.lineEnd(e.pos); //ORION no need to add 1
         if (/string/.test(msg)) {
           replace = { start: e.pos, end: pos, type: _.tokTypes.string, value: this.input.slice(e.pos + 1, pos) };
         } else if (/regular expr/i.test(msg)) {
@@ -1243,7 +1258,8 @@ lp.readToken = function () {
           try {
             re = new RegExp(re);
           } catch (e) {}
-          replace = { start: e.pos, end: pos, type: _.tokTypes.regexp, value: re };
+          // ORION the e.pos position doesn't include the position of the starting /
+          replace = { start: e.pos - 1, end: pos, type: _.tokTypes.regexp, value: re };
         } else if (/template/.test(msg)) {
           replace = { start: e.pos, end: pos,
             type: _.tokTypes.template,
@@ -1270,6 +1286,11 @@ lp.readToken = function () {
       if (replace === true) replace = { start: pos, end: pos, type: _.tokTypes.name, value: "✖" };
       if (replace) {
         if (this.options.locations) replace.loc = new _.SourceLocation(this.toks, _.getLineInfo(this.input, replace.start), _.getLineInfo(this.input, replace.end));
+        //ORION
+        this.toks.start = replace.start;
+        this.toks.end = replace.end;
+        this.toks.type = replace.type;
+        this.toks.value = replace.value;
         return replace;
       }
     }

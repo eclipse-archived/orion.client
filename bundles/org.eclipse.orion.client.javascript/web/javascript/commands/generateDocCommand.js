@@ -65,7 +65,7 @@ define([
 		_doCommand: function _doCommand(editorContext, ast, offset) {
 			var node = Finder.findNode(offset, ast, {parents:true});
 			if(node) {
-				var text = ast.source;
+				var text = ast.sourceFile.text;
 				var parent = this._resolveParent(node);
 				if(parent) {
 					//don't monkey with existing comments

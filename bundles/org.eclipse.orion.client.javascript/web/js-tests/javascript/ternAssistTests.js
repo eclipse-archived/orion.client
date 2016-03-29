@@ -15,17 +15,16 @@ define([
 'javascript/astManager',
 'javascript/contentAssist/ternAssist',
 'javascript/cuProvider',
-'esprima/esprima',
 'chai/chai',
 'orion/Deferred',
 'mocha/mocha' //must stay at the end, not a module
-], function(ASTManager, TernAssist, CUProvider, Esprima, chai, Deferred) {
+], function(ASTManager, TernAssist, CUProvider, chai, Deferred) {
 	var assert = chai.assert;
 
 	return function(worker) {
 		var ternAssist;
 		var envs = Object.create(null);
-		var astManager = new ASTManager.ASTManager(Esprima);
+		var astManager = new ASTManager.ASTManager();
 		var jsFile = 'tern_content_assist_test_script.js';
 		var htmlFile = 'tern_content_assist_test_script.html';
 		var timeoutReturn = ['Content assist timed out'];

@@ -12,19 +12,18 @@
 /* eslint-disable missing-nls */
 define([
 	'chai/chai',
-	'esprima/esprima',
 	'orion/Deferred',
 	'javascript/astManager',
 	'javascript/cuProvider',
 	'javascript/occurrences',
 	'eslint/lib/eslint',
 	'mocha/mocha'  //must stay at the end, not a module
-], function(chai, Esprima, Deferred, ASTManager, CUProvider, Occurrences, ESLint) {
+], function(chai, Deferred, ASTManager, CUProvider, Occurrences, ESLint) {
 	var assert = chai.assert;
 
 	return /* @callback */ function(worker) {
 		describe('Occurrences Tests', function() {
-			var astManager = new ASTManager.ASTManager(Esprima);
+			var astManager = new ASTManager.ASTManager();
 			var occurrences = new Occurrences.JavaScriptOccurrences(astManager, CUProvider);
 			var editorContext = {
 				text: "",

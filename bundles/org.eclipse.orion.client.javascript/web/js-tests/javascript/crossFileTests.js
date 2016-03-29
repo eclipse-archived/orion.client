@@ -15,17 +15,16 @@ define([
 'javascript/contentAssist/ternAssist',
 'javascript/astManager',
 'javascript/cuProvider',
-'esprima/esprima',
 'chai/chai',
 'orion/Deferred',
 'mocha/mocha' //must stay at the end, not a module
-], function(TernAssist, ASTManager, CUProvider, Esprima, chai, Deferred) {
+], function(TernAssist, ASTManager, CUProvider, chai, Deferred) {
 	var assert = chai.assert;
 
 	return function(worker) {
 		var assist;
 		var envs = Object.create(null);
-		var astManager = new ASTManager.ASTManager(Esprima);
+		var astManager = new ASTManager.ASTManager();
 		var timeoutReturn = ['Content assist operation timed out'];
 	
 		/**
@@ -35,21 +34,21 @@ define([
 		 */
 		function setup(options) {
 			var state = Object.create(null);
-			var buffer = state.buffer = typeof(options.buffer) === 'undefined' ? '' : options.buffer,
-			    prefix = state.prefix = typeof(options.prefix) === 'undefined' ? '' : options.prefix,
-			    offset = state.offset = typeof(options.offset) === 'undefined' ? 0 : options.offset,
-			    line = state.line = typeof(options.line) === 'undefined' ? '' : options.line,
-			    keywords = typeof(options.keywords) === 'undefined' ? false : options.keywords,
-			    templates = typeof(options.templates) === 'undefined' ? false : options.templates,
+			var buffer = state.buffer = typeof options.buffer === 'undefined' ? '' : options.buffer,
+			    prefix = state.prefix = typeof options.prefix === 'undefined' ? '' : options.prefix,
+			    offset = state.offset = typeof options.offset === 'undefined' ? 0 : options.offset,
+			    line = state.line = typeof options.line === 'undefined' ? '' : options.line,
+			    keywords = typeof options.keywords === 'undefined' ? false : options.keywords,
+			    templates = typeof options.templates === 'undefined' ? false : options.templates,
 			    contentType = options.contenttype ? options.contenttype : 'application/javascript',
 			    timeout = 5000,
-			    guess = typeof(options.guess) !== 'boolean' ? true : options.guess, //default to true, backwards compat
+			    guess = typeof options.guess !== 'boolean' ? true : options.guess, //default to true, backwards compat
 				file = state.file = 'tern_crossfile_test_script.js';
 				assert(options.callback, 'You must provide a test callback for worker-based tests');
 				state.callback = options.callback;
 			worker.setTestState(state);
 			worker.postMessage({request: 'delFile', args:{file: file}});
-			envs = typeof(options.env) === 'object' ? options.env : Object.create(null);
+			envs = typeof options.env === 'object' ? options.env : Object.create(null);
 			var editorContext = {
 				/*override*/
 				getText: function() {
@@ -94,12 +93,12 @@ define([
 				var msg = _initMessage(type);
 				assert(_setup.file, 'You must specify a file for the completions message');
 				msg.args.meta.location = _setup.file;
-				if(typeof(_setup.params.keywords) === 'undefined') {
+				if(typeof _setup.params.keywords === 'undefined') {
 			    	msg.args.params.keywords = _setup.params.keywords;
 			    }
-			    assert(typeof(_setup.params.offset) === 'number', 'You have to specify an offset for a completion message');
+			    assert(typeof _setup.params.offset === 'number', 'You have to specify an offset for a completion message');
 			    msg.args.params.offset = _setup.params.offset;
-			    assert(typeof(_setup.buffer) === 'string', 'You must provide a buffer for the completion');
+			    assert(typeof _setup.buffer === 'string', 'You must provide a buffer for the completion');
 			    msg.args.files.push({type: 'full', name: _setup.file, text: _setup.buffer});
 				return msg;
 			},
@@ -107,9 +106,9 @@ define([
 				var msg = _initMessage(type);
 				assert(_setup.file, 'You must specify a file for the completions message');
 				msg.args.meta.location = _setup.file;
-				assert(typeof(_setup.params.offset) === 'number', 'You have to specify an offset for a definition message');
+				assert(typeof _setup.params.offset === 'number', 'You have to specify an offset for a definition message');
 			    msg.args.params.offset = _setup.params.offset;
-			    assert(typeof(_setup.buffer) === 'string', 'You must provide a buffer for the completion');
+			    assert(typeof _setup.buffer === 'string', 'You must provide a buffer for the completion');
 			    msg.args.files.push({type: 'full', name: _setup.file, text: _setup.buffer});
 			    msg.args.guess = _setup.params.guess;
 				return msg;
@@ -118,9 +117,9 @@ define([
 				var msg = _initMessage(type);
 				assert(_setup.file, 'You must specify a file for the completions message');
 				msg.args.meta.location = _setup.file;
-				assert(typeof(_setup.params.offset) === 'number', 'You have to specify an offset for a documentation message');
+				assert(typeof _setup.params.offset === 'number', 'You have to specify an offset for a documentation message');
 			    msg.args.params.offset = _setup.params.offset;
-			    assert(typeof(_setup.buffer) === 'string', 'You must provide a buffer for the completion');
+			    assert(typeof _setup.buffer === 'string', 'You must provide a buffer for the completion');
 			    msg.args.files.push({type: 'full', name: _setup.file, text: _setup.buffer});
 				return msg;
 			},
@@ -128,9 +127,9 @@ define([
 				var msg = _initMessage(type);
 				assert(_setup.file, 'You must specify a file for the completions message');
 				msg.args.meta.location = _setup.file;
-				assert(typeof(_setup.params.offset) === 'number', 'You have to specify an offset for an implementation message');
+				assert(typeof _setup.params.offset === 'number', 'You have to specify an offset for an implementation message');
 			    msg.args.params.offset = _setup.params.offset;
-			    assert(typeof(_setup.buffer) === 'string', 'You must provide a buffer for the completion');
+			    assert(typeof _setup.buffer === 'string', 'You must provide a buffer for the completion');
 			    msg.args.files.push({type: 'full', name: _setup.file, text: _setup.buffer});
 			    msg.args.guess = _setup.params.guess;
 				return msg;

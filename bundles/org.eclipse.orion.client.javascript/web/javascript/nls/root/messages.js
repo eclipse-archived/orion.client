@@ -266,6 +266,8 @@ define({
 	'embertest': 'Ember test helper globals.',
 	'webextensions': 'WebExtensions globals.',
 	'es6': 'Enable all ECMAScript 6 features except for modules.',
+	'astPluginName': 'AST (acorn) plugin for Tern',
+	'astPluginDescription': 'Provides AST (acorn) for Tern',
 	
 	// Other messages
 	'unknownError': 'An unknown error occurred.',
