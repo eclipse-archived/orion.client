@@ -31,8 +31,9 @@ try {
 } catch (e) {
 	hasNodegit = false;
 	if (e.code === "MODULE_NOT_FOUND" && e.message.indexOf("nodegit") >= 0) {
-		console.log("Nodegit not installed");
+		console.error("nodegit is not installed. Some features will be unavailable.");
 	} else {
+		console.error("nodegit failed to load");
 		console.log(e.message);
 	}
 }
