@@ -13,10 +13,13 @@ var api = require('./api'), writeError = api.writeError;
 var express = require('express');
 var bodyParser = require('body-parser');
 var fs = require('fs');
+var os = require('os');
+var Promise = require('bluebird');
+var mkdirpAsync = Promise.promisify(require('mkdirp'));
 var url = require('url');
 var mPath = require('path');
 
-var SITES = "sites.json";
+var SITES_FILENAME = "sites.json";
 var hosts = {};
 var vhosts = [];
 
@@ -119,8 +122,13 @@ function siteJSON(site, req) {
 	return site;
 }
 
+function getSitesFile(req) {
+	var folder = options.configParams['orion.single.user'] ? os.homedir() : req.user.workspaceDir;
+	return mPath.join(folder, '.orion', SITES_FILENAME);
+}
+
 function loadSites(req, callback) {
-	fs.readFile(api.join(req.user.workspaceDir, SITES), 'utf8', function (err,data) {
+	fs.readFile(getSitesFile(req), 'utf8', function (err,data) {
 		if (err) {
 			// assume that the file does not exits
 			return callback(null, {});
@@ -134,7 +142,11 @@ function loadSites(req, callback) {
 }
 
 function saveSites(req, sites, callback) {
-	fs.writeFile(api.join(req.user.workspaceDir, SITES), JSON.stringify(sites, null, "\t"), callback);
+	var file = getSitesFile(req);
+	mkdirpAsync(mPath.dirname(file)) // create parent folder(s) if necessary
+	.then(function() {
+		fs.writeFile(file, JSON.stringify(sites, null, "\t"), callback);
+	});
 }
 
 function getSite(req, res) {
