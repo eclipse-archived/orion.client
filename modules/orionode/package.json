@@ -33,9 +33,7 @@
     "nodegit": "~0.11.9"
   },
   "optionalDependencies": {
-    "pty.js": "~0.3.0",
-    "findit": "~2.0.0",
-    "mkdirp": "*"
+    "pty.js": "~0.3.0"
   },
   "experimentalDependencies": {
   },

@@ -10,7 +10,6 @@
  *******************************************************************************/
 /*eslint-env node */
 var git = require('nodegit');
-var finder = require('findit');
 var express = require('express');
 var bodyParser = require('body-parser');
 var clone = require('./clone');
@@ -23,16 +22,14 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', getBlame);
+	.get('/file/*', getBlame);
 	
 function getBlame(req, res) {
-	finder(req.user.workspaceDir).on('directory', function (dir, stat, stop) {
-		clone.getRepo(req)
-		.then(function(repo) {
-			git.Blame.file(repo, dir).then(function(blame) {
-				res.status(200).json(blame);
-				return blame;
-			});
+	clone.getRepo(req)
+	.then(function(repo) {
+		git.Blame.file(repo, req.params["0"]).then(function(blame) {
+			res.status(200).json(blame);
+			return blame;
 		});
 	});
 }
