@@ -207,7 +207,7 @@ define([
 											if(args){
 												messageService.setProgressResult(args);
 											} else {
-												messageService.setProgressResult( messages['User profile data successfully updated.'] ); //$NON-NLS-0$
+												messageService.setProgressResult( messages['UsrProfileUpdateSuccess'] ); //$NON-NLS-0$
 												currentPasswordTextField.classList.remove("setting-control-error"); //$NON-NLS-0$
 												passwordFields.forEach(function(passwordField){
 													passwordField.setValue(""); //$NON-NLS-0$
