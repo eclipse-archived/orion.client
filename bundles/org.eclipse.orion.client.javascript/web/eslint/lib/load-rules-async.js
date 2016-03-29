@@ -90,8 +90,16 @@ define([
         },
         /** @callback */
 		"eqeqeq": function(context) {
-			        function getOperatorToken(context, node) {
-	            		var tokens = context.getTokens(node), len = tokens.length, operator = node.operator;
+			        /**
+        			 * @description Find the token with the matching operator
+        			 * @param {Object} context The ESLint rule context
+        			 * @param {Object} node The AST node
+        			 * @returns {Object} The matching token or null
+        			 */
+        			function getOperatorToken(context, node) {
+	            		var tokens = context.getTokens(node), 
+	            			len = tokens.length, 
+	            			operator = node.operator;
 	            		for (var i=0; i < len; i++) {
 	            			var t = tokens[i];
 	            			if (t.value === operator) {
@@ -100,13 +108,19 @@ define([
 	            		}
 	            		return null;
 	            	}
+	            	/**
+	            	 * @description If the given node value is null or undefined
+	            	 * @param {Object} node The AST node
+	            	 * @returns {Boolean} if the node's value is null or undefined
+	            	 */
 	            	function isNullness(node) {
 	            		if(node && node.type) {
-	            			return (node.type === 'Literal' && node.value === null) || (node.type === 'Identifier' && node.name === 'undefined');
+	            			return node.type === 'Literal' && node.value === null || node.type === 'Identifier' && node.name === 'undefined';
 	            		}
 	            		return false;
 	            	}
 	        		return {
+	        			/* @callback */
 	        			"BinaryExpression": function(node) {
 	        				try {
 	        					if(isNullness(node.left) || isNullness(node.right)) {
@@ -130,6 +144,11 @@ define([
         },
         /** @callback */
 		"missing-doc": function(context) {
+                /**
+                 * @description If the comment is a block comment
+                 * @param {Array.<Object>} comments The array of AST comment nodes
+                 * @returns {Boolean} If the last comment is a block comment (this one that would be immediately preceeding the AST node)
+                 */
                 function validComment(comments) {
                     if(comments && comments.leading) {
                         var len = comments.leading.length;
@@ -137,7 +156,11 @@ define([
                     }
                     return false;
                 }
-        		function checkDoc(node) {
+        		/**
+		         * @description Checks the attached comments on the node
+		         * @param {Object} node The AST node
+		         */
+		        function checkDoc(node) {
         			try {
         				var comments;
         				var name;
@@ -205,6 +228,7 @@ define([
         /** @callback */
 		"new-parens": function(context) {
         		return {
+        			/* @callback */
         			'NewExpression' : function(node) {
         				try {
         					if(node.callee) {
@@ -227,6 +251,7 @@ define([
         /** @callback */
         "no-caller": function(context) {
                 return {
+                	/* @callback */
                     "MemberExpression": function(node) {
                         var func = Finder.findParentFunction(node);
                         if(func) {
@@ -246,6 +271,7 @@ define([
         /** @callback */
         "no-comma-dangle": function(context) {
                 return {
+                	/* @callback */
                     'ObjectExpression': function(node) {
                         var token  = context.getLastToken(node, 1);
                         if(token && token.value === ',') {
@@ -254,6 +280,7 @@ define([
                     }
                 };
         },
+        /* @callback */
         "no-cond-assign": function(context) {
 
                 var statements = {
@@ -263,6 +290,11 @@ define([
                     'ForStatement': true
                 };
 
+                /**
+                 * @description If the given node is surrounded by ()
+                 * @param {Object} node The AST node
+                 * @returns {Boolean} If the node is surrounded by ()
+                 */
                 function isParenthesised(node) {
                     var type = node.parent.type;
                     if(statements[type]) {
@@ -273,6 +305,11 @@ define([
                     }
                     return context.getTokenBefore(node).value === '(';
                 }
+                /**
+                 * @description If we should skip the node
+                 * @param {Object} node The AST node
+                 * @returns {Boolean} if we should skip checking the given node
+                 */
                 function skip(node) {
                     switch(node.type) {
                         case 'FunctionExpression':
@@ -284,6 +321,10 @@ define([
                         default: return false;
                     }
                 }
+                /**
+                 * @description Checks for assignment expressions
+                 * @param {Object} node The AST node
+                 */
                 function checkForAssignment(node) {
                     var assigns = [];
                     if(node.test === null) {
@@ -291,6 +332,7 @@ define([
                     }
                     node.test.parent = node;
                     Estraverse.traverse(node.test, {
+                    	/* @callback */
                         enter: function(n, parent) {
                             if(n.range[0] > node.test.range[1]) {
                                 //once we've left the test object
@@ -329,6 +371,7 @@ define([
         /** @callback */
         "no-console": function(context) {
                 return {
+                	/* @callback */
                     'MemberExpression': function(node) {
                         if(node.object.name === 'console') {
                             //are we using the browser env?
@@ -363,6 +406,10 @@ define([
                         default: return false;
                     }
                 }
+                /**
+                 * @description Check if the condition is a constant
+                 * @param {Object} node The AST node
+                 */
                 function checkCondition(node) {
                     if(node && node.test && isConst(node.test)) {
                         context.report(node.test, ProblemMessages['no-constant-condition']);
@@ -380,6 +427,7 @@ define([
         /** @callback */
 		"no-debugger": function(context) {
         		return {
+        			/* @callback */
         			"DebuggerStatement": function(node) {
         				try {
         					context.report(node, ProblemMessages['no-debugger'], null, context.getTokens(node)[0]);
@@ -393,6 +441,7 @@ define([
         /** @callback */
 		"no-dupe-keys": function(context) {
         		return {
+        			/* @callback */
         			"ObjectExpression": function(node) {
         				try {
         					var props = node.properties;
@@ -427,9 +476,11 @@ define([
         		var comments;
 
         		return {
+        			/* @callback */
         		    'Program' : function(node) {
         		          comments = node.comments;
         		    },
+        		    /* @callback */
         			'BlockStatement' : function(node) {
         			    try {
             			    if(node.body.length < 1) {
@@ -452,6 +503,7 @@ define([
         /** @callback */
 		"no-eval": function(context) {
         		return {
+        			/* @callback */
         			"CallExpression": function(node) {
         				try {
         					var name = node.callee.name;
@@ -471,6 +523,7 @@ define([
         /** @callback */
 		"no-extra-semi": function(context) {
         		return {
+        			/* @callback */
         			"EmptyStatement": function(node) {
         				try {
         					var tokens = context.getTokens(node);
@@ -487,7 +540,11 @@ define([
         },
         /** @callback */
 		'no-fallthrough': function(context) {
-        		function fallsthrough(node) {
+        		/**
+		         * @description Check if the AST node falls through
+		         * @param {Object} node The AST node
+		         */
+		        function fallsthrough(node) {
         		    // cases with no statements or only a single case are implicitly fall-through
         		    if(node.consequent) {
         		        var statements = node.consequent.slice(0);
@@ -513,6 +570,7 @@ define([
         		}
 
         		return {
+        			/* @callback */
         			'SwitchStatement' : function(node) {
         			    try {
             			    if(node.cases && node.cases.length > 1) {
@@ -563,6 +621,7 @@ define([
         /** @callback */
         "no-implied-eval": function(context) {
         		return {
+        			/* @callback */
         			"CallExpression": function(node) {
         				try {
         					var name = node.callee.name;
@@ -600,6 +659,7 @@ define([
         /** @callback */
         "no-iterator": function(context) {
                 return {
+                	/* @callback */
                     'MemberExpression': function(node) {
                         if(node.property !== null) {
                             if(node.computed) {
@@ -616,6 +676,7 @@ define([
         /** @callback */
         "no-proto": function(context) {
                 return {
+                	/* @callback */
                     'MemberExpression': function(node) {
                         if(node.property !== null) {
                             if(node.computed) {
@@ -632,6 +693,7 @@ define([
         /** @callback */
 		'no-jslint': function(context) {
         		return {
+        			/* @callback */
         			'Program' : function(node) {
         			    try {
             			    var comments = node.comments;
@@ -662,7 +724,11 @@ define([
         },
         /** @callback */
 		"no-new-array": function(context) {
-		    	function checkNode(node) {
+		    	/**
+	    		 * @description Check the given AST node for new Array(..) violations
+	    		 * @param {Object} node The AST node
+	    		 */
+	    		function checkNode(node) {
 		    		var callee = node.callee;
 	    			if (callee && callee.name === 'Array') {
 						var args = node.arguments;
@@ -681,6 +747,7 @@ define([
         /** @callback */
 		"no-new-func": function(context) {
         		return {
+        			/* @callback */
         			'NewExpression': function(node) {
         				var callee = node.callee;
 		    			if (callee && callee.name === 'Function') {
@@ -692,6 +759,7 @@ define([
         /** @callback */
 		"no-new-object": function(context) {
 		   		return {
+		   			/* @callback */
         			'NewExpression': function(node) {
         				var callee = node.callee;
 		    			if (callee && callee.name === 'Object') {
@@ -704,6 +772,7 @@ define([
 		"no-new-wrappers": function(context) {
         		var wrappers = ["String", "Number", "Math", "Boolean", "JSON"]; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-5$
 				return {
+					/* @callback */
         			'NewExpression': function(node) {
         				var callee = node.callee;
 		    			if (callee && wrappers.indexOf(callee.name) > -1) {
@@ -714,20 +783,28 @@ define([
         },
         /** @callback */
         "no-with": function(context) {
-        		return {'WithStatement': function(node) {
+        		return {
+        			/* @callback */
+        			'WithStatement': function(node) {
 	        			context.report(node, ProblemMessages['no-with'], null, context.getFirstToken(node));
 	        		}
         		};
         },
         /** @callback */
 		"missing-nls": function(context){
-        		function reportMissingNLS(node, index){
+        		/**
+		         * @description Reports missing NLS on the given node and offset
+		         * @param {Object} node The AST node
+		         * @param {Number} index The NLS index to use
+		         */
+		        function reportMissingNLS(node, index){
         			var data = Object.create(null);
         			data.indexOnLine = index;
         			context.report(node, ProblemMessages['missing-nls'], {0:node.value, data: data});
         		}
         		
         		return {
+        			/* @callback */
                     'Literal': function(node) {
                     	_collectLinesWithStringLiterals(node, context._linesWithStringLiterals);
                     },
@@ -778,7 +855,7 @@ define([
 							        	for (var j=0; j<comments.length; j++) {
 
 							        		// NON-NLS comments start at 1
-							        		if (comments[j] === (""+(i+1))){
+							        		if (comments[j] === ""+(i+1)){
 							        			comments[j] = null;
 							        			match = true;
 							        			break;
@@ -814,6 +891,7 @@ define([
         		}
 
         		return {
+        			/* @callback */
                     'Literal': function(node) {
                     	if (!context._isMissingNLSActive){
                     		_collectLinesWithStringLiterals(node, context._linesWithStringLiterals);
@@ -865,7 +943,7 @@ define([
 							        	var hasMatch = false;
 							        	for (var i=0; i<nodes.length; i++) {
 							        		// NON-NLS comments start at 1
-							        		if (match[2] === (""+(i+1))){
+							        		if (match[2] === ""+(i+1)){
 							        			hasMatch = true;
 							        			break;
 							        		}
@@ -924,10 +1002,17 @@ define([
         },
         /** @callback */
 		"no-redeclare": function(context) {
+                /**
+                 * @description Report the redeclare
+                 * @param {Object} node The AST node
+                 * @param {String} name The name of the redeclare
+                 */
                 function reportRedeclaration(node, name) {
                     context.report(node, ProblemMessages['no-redeclare'], {0:name});
                 }
-
+                /**
+                 * @description Check the backing scope for redeclares
+                 */
                 function checkScope() {
                     try {
                         var scope = context.getScope();
@@ -952,7 +1037,10 @@ define([
         },
         /** @callback */
         "no-regex-spaces": function(context) {
-
+                /**
+                 * @description Reports spaces used in the regex node
+                 * @param {Object} node The AST node
+                 */
                 function reportSpaces(node) {
                     var regex = /( {2,})/g;
                     var val = null;
@@ -965,6 +1053,7 @@ define([
                 }
 
                 return {
+                	/* @callback */
                     'Literal': function(node) {
                         if(node.parent && node.parent.type === 'NewExpression') {
                             if(node.parent.callee.name === 'RegExp') {
@@ -981,6 +1070,7 @@ define([
         /** @callback */
         "no-reserved-keys": function(context) {
                 return {
+                	/* @callback */
                     'ObjectExpression': function(node) {
                         if(node.properties) {
                             for(var i = 0; i < node.properties.length; i++) {
@@ -995,6 +1085,11 @@ define([
         },
         /** @callback */
         "no-shadow": function(context) {
+                /**
+                 * @description Collect all vars from the given scope into the map
+                 * @param {Object} map The collector map
+                 * @param {Object} scope The backing EScope scope
+                 */
                 function addVariables(map, scope) {
                     scope.variables.forEach(function(variable) {
                         var name = variable.name;
@@ -1026,17 +1121,20 @@ define([
                     scope._symbols = symbols;
                     return symbols;
                 }
-
-                function reportShadow(node, name) {
-                    context.report(node, ProblemMessages['no-shadow'], {0: name});
-                }
-
+                /**
+                 * @description Check if any of the variable defs are of type Parameter
+                 * @param {Object} variable The variable
+                 * @returns {Boolean} if the any of the defs are of type Parameter
+                 */
                 function isParameter(variable) {
                     return variable.defs.some(function(def) {
                         return def.type === "Parameter";
                     });
                 }
-
+                /**
+                 * @description Check the scope the encloses the given AST node
+                 * @param {Object} node The AST node
+                 */
                 function checkScope(node) {
                     try {
                         // Build map
@@ -1056,7 +1154,7 @@ define([
                             // flag it.
                             var bindingSource;
                             if ((bindingSource = symbolMap[variable.name]) && bindingSource !== scope && !isParameter(variable)) {
-                                reportShadow(variable.defs[0].name, variable.name);
+                            	context.report(variable.defs[0].name, ProblemMessages['no-shadow'], {0: variable.name});
                             }
                         });
                     } catch(ex) {
@@ -1072,7 +1170,10 @@ define([
         },
         /** @callback */
         "no-shadow-global": function(context) {
-
+                /**
+                 * @description Check if the given node is a shadow
+                 * @param {Object} node The AST node
+                 */
                 function checkShadow(node) {
                     var env = context.env ? context.env : {};
                     env.builtin = true;
@@ -1106,6 +1207,7 @@ define([
         /** @callback */
 		'no-sparse-arrays': function(context) {
         		return {
+        			/* @callback */
         			'ArrayExpression' : function(node){
         			    if(node.elements.indexOf(null) > -1) {
         			        context.report(node, ProblemMessages['no-sparse-arrays']);
@@ -1116,6 +1218,7 @@ define([
         /** @callback */
         "no-throw-literal": function(context) {
                 return {
+                	/* @callback */
                     "ThrowStatement": function(node) {
                         try {
                             var argument = node.argument;
@@ -1140,16 +1243,30 @@ define([
         },
         /** @callback */
 		"no-undef": function(context) {
+				/**
+				 * @description Checks if the node is a recovered node
+				 * @param {Object} node The AST node
+				 * @returns {Boolean} If the node is recovered
+				 */
 				function isRecoveredNode(node) {
 					return node.range && node.range[0] === node.range[1];
 				}
-
+                /**
+                 * @description If any of the variables defs are ImplicitGlobalVariable
+                 * @param {Object} variable The variable
+                 * @returns {Boolean} if any of the variable defs are ImplicitGlobalVariable
+                 */
                 function isImplicitGlobal(variable) {
                     return variable.defs.every(function(def) {
                         return def.type === "ImplicitGlobalVariable";
                     });
                 }
-
+                /**
+                 * @description description
+                 * @param scope
+                 * @param ref
+                 * @returns returns
+                 */
                 function getDeclaredGlobalVariable(scope, ref) {
                     var declaredGlobal = null;
                     scope.variables.some(function(variable) {
@@ -1166,34 +1283,35 @@ define([
                 }
 
                 return {
+                	/* @callback */
                     "Program": function(/*node*/) {
             			try {
             	            var globalScope = context.getScope();
 
             	            globalScope.through.forEach(function(ref) {
-            	            	    if (isRecoveredNode(ref.identifier)) {
-            	            	    		return;
-            	            	    	}
+        	            	    if (isRecoveredNode(ref.identifier)) {
+        	            	    	return;
+        	            	    }
             	                var variable = getDeclaredGlobalVariable(globalScope, ref),
             	                    name = ref.identifier.name;
             	                if (!variable) {
             	                	// Check if Tern knows about a definition in another file
-            	                	    var env = Finder.findESLintEnvForMember(name);
+            	                	var env = Finder.findESLintEnvForMember(name);
             	                    var tern = context.getTern();
-								var query = tern.query;
-								query.end = ref.identifier.start;
-								var foundType = null;
-								try {
-									var expr = tern.findExpr(tern.file, query);
-									var type = tern.findExprType(tern.server, query, tern.file, expr);
-									// The origin could be a primitive in the same file (a=1;) which we still want to mark
-									// The origin could be an environment, which we still want to mark (eslint-env directive is handled separately)
-									if (type && type.origin && type.origin !== tern.file.name && type.origin !== env){
-										foundType = type;
+									var query = tern.query;
+									query.end = ref.identifier.start;
+									var foundType = null;
+									try {
+										var expr = tern.findExpr(tern.file, query);
+										var type = tern.findExprType(tern.server, query, tern.file, expr);
+										// The origin could be a primitive in the same file (a=1;) which we still want to mark
+										// The origin could be an environment, which we still want to mark (eslint-env directive is handled separately)
+										if (type && type.origin && type.origin !== tern.file.name && type.origin !== env){
+											foundType = type;
+										}
+									} catch(e) {
+										//ignore
 									}
-								} catch(e) {
-									//ignore
-								}
 	            	                if (!foundType){
 	            	                    var inenv = env ? '-inenv' : ''; //$NON-NLS-1$
 	            	                    var nls = 'no-undef-defined'; //$NON-NLS-1$
@@ -1213,6 +1331,7 @@ define([
         /** @callback */
         'no-undef-expression': function(context){
         	return {
+        		/* @callback */
         		'MemberExpression': function(node){
                 	try {
                     	if (node.property && node.object && node.object.type !== 'ThisExpression'){
@@ -1270,8 +1389,10 @@ define([
             	}
         	};
         },
+        /* @callback */
         'no-undef-init': function(context) {
         		return {
+        			/* @callback */
         			'VariableDeclarator': function(node) {
         				if(node.init && node.init.type === 'Identifier' && node.init.name === 'undefined') {
     						context.report(node.init, ProblemMessages['no-undef-init']);
@@ -1323,10 +1444,11 @@ define([
                 }
 
                 return {
+                	/* @callback */
                     "BlockStatement": function(node) {
                         checkUnreachable(node.body);
                     },
-
+					/* @callback */
                     "SwitchCase": function(node) {
                         checkUnreachable(node.consequent);
                     }
@@ -1334,6 +1456,11 @@ define([
         },
         /** @callback */
 		"no-unused-params" : function(context) {
+                /**
+                 * @description If the node has an @callback comment
+                 * @param {Object} node The AST node
+                 * @returns {Boolean} If the node has an @callback comment
+                 */
                 function hasCallbackComment(node) {
                     if(node && node.leadingComments) {
                         var len = node.leadingComments.length;
@@ -1347,7 +1474,11 @@ define([
                     return false;
                 }
 
-        		function check(node) {
+        		/**
+		         * @description Check the given AST node 
+		         * @param {Object} node The AST node
+		         */
+		        function check(node) {
         			try {
         				var scope = context.getScope();
         				var kids = scope.childScopes;
@@ -1363,7 +1494,7 @@ define([
         					    var pid = 'no-unused-params'; //$NON-NLS-1$
         					    if(node.type === 'FunctionExpression') {
         					        pid += '-expr'; //$NON-NLS-1$
-        					        if(hasCallbackComment(node) || (node.params && node.params.length > 0 && hasCallbackComment(node.params[0]))) {
+        					        if(hasCallbackComment(node) || node.params && node.params.length > 0 && hasCallbackComment(node.params[0])) {
         					            return;
         					        }
         					        var parent = node.parent;
@@ -1443,11 +1574,22 @@ define([
         },
         /** @callback */
 		"no-unused-vars": function(context) {
-        		function isRead(ref) {
+        		/**
+		         * @description If the reference is read-only
+		         * @param {Object} ref 
+		         * @returns {Boolean} If the reference is read-only
+		         */
+		        function isRead(ref) {
         			return ref.isRead();
         		}
 
-        		function getReferences(scope, variable) {
+        		/**
+		         * @description Get all of the referenes to the givenvariable in the given scope
+		         * @param {Object} scope The scope to check
+		         * @param {Object} variable The variable to find refs to 
+		         * @returns {Array.<Object>} The array of references
+		         */
+		        function getReferences(scope, variable) {
         			var refs = variable.references;
         			if (scope.type === "global") {
         				// For whatever reason, a reference to some variable 'x' defined in global scope does not cause an entry
@@ -1458,8 +1600,10 @@ define([
         			}
         			return refs;
         		}
-
-        		function check(/**node*/) {
+        		/**
+		         * @description Check the current scope for unused vars 
+		         */
+		        function check(/**node*/) {
         			try {
         				var scope = context.getScope();
         				scope.variables.forEach(function(variable) {
@@ -1519,6 +1663,12 @@ define([
         },
         /** @callback */
 		"no-use-before-define": function(context) {
+                /**
+                 * @description Checks the option to make sure its a boolean, if not return the default
+                 * @param {Boolean|Any} b The option to check
+                 * @param {Boolean} defaultValue The default to return if the option is not of type boolean
+                 * @returns {Boolean} The given option or the default, if the option is not a boolean
+                 */
                 function booleanOption(b, defaultValue) {
             		return typeof b === "boolean" ? b : defaultValue;
             	}
@@ -1526,8 +1676,10 @@ define([
         		var options = context.options,
         		    flag_vars = booleanOption(options[0], true),   // by default, flag vars
         		    flag_funcs = booleanOption(options[1], false); // ... but not funcs
-
-        		function check(/**node*/) {
+        		/**
+		         * @description Check the current scope for use
+		         */
+		        function check(/**node*/) {
         				try {
         				var scope = context.getScope();
         				scope.references.forEach(function(ref) {
@@ -1554,27 +1706,27 @@ define([
         },
         /** @callback */
         "radix": function(context) {
-                function checkParseInt(call) {
-                    var callee = call.callee;
-                    if (callee.name === "parseInt" && callee.type === "Identifier" && call.arguments.length < 2) {
-                        // Ensure callee actually resolves to the global `parseInt`
-                        var shadowed = false;
-                        for (var scope = context.getScope(); scope; scope = scope.upper) {
-                            shadowed = scope.variables.some(function(variable) {
-                                // Found a `parseInt` that is not the builtin
-                                return variable.name === "parseInt" && variable.defs.length;
-                            });
-                            if (shadowed) {
-                                break;
-                            }
-                        }
-                        if (!shadowed) {
-                            context.report(callee, ProblemMessages['radix'], null);
-                        }
-                    }
-                }
                 return {
-                    "CallExpression": checkParseInt
+                	/* @callback */
+                    "CallExpression": function(call) {
+	                    var callee = call.callee;
+	                    if (callee.name === "parseInt" && callee.type === "Identifier" && call.arguments.length < 2) {
+	                        // Ensure callee actually resolves to the global `parseInt`
+	                        var shadowed = false;
+	                        for (var scope = context.getScope(); scope; scope = scope.upper) {
+	                            shadowed = scope.variables.some(function(variable) {
+	                                // Found a `parseInt` that is not the builtin
+	                                return variable.name === "parseInt" && variable.defs.length;
+	                            });
+	                            if (shadowed) {
+	                                break;
+	                            }
+	                        }
+	                        if (!shadowed) {
+	                            context.report(callee, ProblemMessages['radix'], null);
+	                        }
+	                    }
+	                }
                 };
         },
         /** @callback */
@@ -1587,16 +1739,18 @@ define([
 				var lineStart = /^(?=[\t ]* \t)/; // smart-tabs enabled
 				//var lineStart = /^(?=[\t ]*( \t|\t ))/; // smart-tabs disabled
 
-				function rememberIgnoreElement(node) {
-					ignoredLocations.push(node.loc);
-				}
-
+				/**
+				 * @description Check the Program node in the AST (the whole AST)
+				 * @param {Object} node The AST node
+				 */
 				function checkProgram(node) {
 					var lines = context.getSourceLines();
 					var allComments = context.getAllComments();
 					
 					// add all comments to the ignored elements
-					allComments.forEach(rememberIgnoreElement);
+					allComments.forEach(function(node) {
+						ignoredLocations.push(node.loc);
+					});
 					
 					// now we check if the lines starts with a mix of tabs and spaces
 					lines.forEach(function(line, index) {
@@ -1614,7 +1768,12 @@ define([
 						}
 					});
 				}
-				
+				/**
+				 * @description Look inside comment locations
+				 * @param {Array.<Object>} locations The locations
+				 * @param {Object} loc The location to check
+				 * @returns {object} If a location was found
+				 */
 				function searchInsideComments(locations, loc) {
 					var min = 0;
 					var max = locations.length - 1;
@@ -1635,7 +1794,12 @@ define([
 					}
 					return null;
 				}
-				
+				/**
+				 * @description If the given location is inside one of the locations
+				 * @param {Object} givenLocation The location to check
+				 * @param {Array.<Object>} locations The array of locations
+				 * @returns {Boolean} If the given location is in one of the locations in the array
+				 */
 				function isLocationInside(givenLocation, locations) {
 					/**
 					 * Return true if the given location is inside the locations, false otherwise 
@@ -1662,7 +1826,12 @@ define([
 					}
 					return false;
 				}
-				
+				/**
+				 * @description If the given location is before ny in the array
+				 * @param {Object} givenLocation The location to check
+				 * @param {Array.<Object>} locations The array of locations
+				 * @returns {Boolean} If the given location is before any in the array
+				 */
 				function isBefore(givenLocation, locations) {
 					/**
 					 * Return true if the given location is before locations
@@ -1685,7 +1854,11 @@ define([
 		},
 		/** @callback */
 		"semi": function(context) {
-        		function checkForSemicolon(node) {
+        		/**
+		         * @description Check the given node for a trailing semicolon
+		         * @param {Object} node The AST node
+		         */
+		        function checkForSemicolon(node) {
         			try {
         				var tokens = context.getTokens(node);
         				var len = tokens.length;
@@ -1699,8 +1872,11 @@ define([
         				Logger.log(ex);
         			}
         		}
-
-        		function checkVariableDeclaration(node) {
+        		/**
+		         * @description Check the variable decl node for trailing semicolon
+		         * @param {Object} node The AST node
+		         */
+		        function checkVariableDeclaration(node) {
         			try {
         				var ancestors = context.getAncestors(node),
         				    parent = ancestors[ancestors.length - 1],
@@ -1730,6 +1906,7 @@ define([
         /** @callback */
 		"use-isnan": function(context) {
         		return {
+        			/* @callback */
         			'BinaryExpression' : function(node) {
         				try {
         					if(node.left.type === 'Identifier' && node.left.name === 'NaN') {
@@ -1751,6 +1928,7 @@ define([
         		var ops = ['==', '===', '!=', '!=='];
 
         		return {
+        			/* @callback */
         			'UnaryExpression' : function(node){
         			    if(node.operator === 'typeof') {
         			        var parent = node.parent;
@@ -1783,6 +1961,10 @@ define([
 		'no-irregular-whitespace': noIrregularWhitespace,
 		/** @callback */
 		'no-self-assign': function(context) {
+				/**
+				 * @description Check the variable declarator node for self-assignment
+				 * @param {Object} variableDeclarator The AST node
+				 */
 				function checkVariableDeclarator(variableDeclarator) {
 					var init = variableDeclarator.init;
 					var id = variableDeclarator.id;
@@ -1793,6 +1975,10 @@ define([
 						context.report(variableDeclarator, ProblemMessages['no-self-assign']);
 					}
 				}
+				/**
+				 * @description Check the assingment expression node for self-assignment
+				 * @param {Object} assignment The AST node
+				 */
 				function checkAssignmentExpression(assignment) {
 					var left = assignment.left;
 					var right = assignment.right;
@@ -1833,7 +2019,11 @@ define([
 				function exitFunction() {
 					functions.pop();
 				}
-			
+				/**
+				 * @description Try to fetch the backing type value from Tern
+				 * @param {Object} node The AST node
+				 * @returns {String} The name of the type of the value
+				 */
 				function getValue(node) {
 					if (node.argument) {
 						var tern = context.getTern();
@@ -1853,18 +2043,18 @@ define([
 							var typeString = foundType.toString();
 							switch(typeString) {
 								case "bool" :
-									return "boolean";
+									return "boolean"; //$NON-NLS-1$
 								case "{}" :
-									return "object";
+									return "object"; //$NON-NLS-1$
 								case "?" :
-									return "null";
+									return "null"; //$NON-NLS-1$
 								default :
 									return typeString;
 							}
 						}
-						return "object";
+						return "object"; //$NON-NLS-1$
 					}
-					return "undefined";
+					return "undefined"; //$NON-NLS-1$
 				}
 			
 				//--------------------------------------------------------------------------
@@ -1882,7 +2072,7 @@ define([
 					"FunctionDeclaration:exit": exitFunction,
 					"FunctionExpression:exit": exitFunction,
 					"ArrowFunctionExpression:exit": exitFunction,
-			
+					/* @callback */
 					"ReturnStatement": function(node) {
 						var returnInfo = functions[functions.length - 1];
 						var returnTypeDefined = "type" in returnInfo;
@@ -1921,23 +2111,28 @@ define([
 			},
 		/** @callback */
 		"check-tern-project" : function(context) {
-				function checkProject(node) {
-					var env = node.environments;
-					if (env) {
-						if (typeof env === "object" && Object.keys(env).length !== 0) {
-							return;
-						}
-					}
-					// get the .tern-project file for the corresponding project
-					context.report(node, ProblemMessages['check-tern-project']);
-				}
-
 				return {
-					"Program": checkProject
+					/* @callback */
+					"Program": function(node) {
+						var env = node.environments;
+						if (env) {
+							if (typeof env === "object" && Object.keys(env).length !== 0) {
+								return;
+							}
+						}
+						// get the .tern-project file for the corresponding project
+						context.report(node, ProblemMessages['check-tern-project']);
+					}
 				};
 		}
 	};
 
+	/**
+	 * @description Map all of the callees in the given array into the obj map
+	 * @private
+	 * @param {Array.<Object>} arr The array of callees
+	 * @param {Object} obj The map
+	 */
 	function _mapCallees(arr, obj) {
 		for(var i = 0; i < arr.length; i++) {
 			obj[arr[i]] = true;
@@ -1950,6 +2145,12 @@ define([
     var _documentCallees = Object.create(null);
     _mapCallees(['createElement'], _documentCallees); //$NON-NLS-1$
     
+    /**
+     * @description Collects all the string literals and their location infos into the line mapping
+     * @private
+     * @param {Object} node The AST node to check
+     * @param {Object} lineMap The mapping of literals and line infos
+     */
     function _collectLinesWithStringLiterals(node, lineMap){
     	
     	// Create a map of line numbers to a list of literal nodes
