@@ -12410,6 +12410,25 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
+						it("should not flag return null and String", function(callback) {
+							var topic = 
+								"var getProjectName = function(name2) {\n" +
+								"	if(name2.indexOf(\" | \") !== -1) {\n" +
+								"		var s = name2.split(\" | \");\n" +
+								"		return s.length > 1 ?name2.split(\" | \")[1].trim() : name2;\n" +
+								"	}\n" +
+								"	return name2;\n" +
+								"};";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
 					});
 					// check-tern-project --------------------------------------------
 					describe('check-tern-project', function() {
