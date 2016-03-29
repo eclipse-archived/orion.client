@@ -268,7 +268,7 @@ define([
 		        }
 		        return editorContext.getText().then(function(text) {
 	            	var cu = that.cuprovider.getCompilationUnit(function(){
-	            			Finder.findScriptBlocks(text);
+	            			return Finder.findScriptBlocks(text);
 	            		}, meta);
 		            if(cu.validOffset(ctxt.offset)) {
     		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
