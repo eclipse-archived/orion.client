@@ -388,7 +388,7 @@ module.exports = function(options) {
 		if (options.configParams["orion.auth.user.creation"] && !isAdmin(req.user && req.user.username)) {
 			return res.status(403).end();
 		}
-		orionAccount.register(new orionAccount({username: req.body.UserName, email: req.body.Email, oauth: req.body.identifier}), req.body.Password ,function(err, user){
+		orionAccount.register(new orionAccount({username: req.body.UserName, email: req.body.Email, fullname: req.body.FullName, oauth: req.body.identifier}), req.body.Password ,function(err, user){
 			if (err) {
 				return res.status(404).json({Message: err.message});
 			}
