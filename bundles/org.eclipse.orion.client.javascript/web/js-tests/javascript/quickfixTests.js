@@ -2327,9 +2327,6 @@ define([
 				 var expected = [
 				 				{value: "",
 								start: 8, 
-								end: 9},
-								{value: "",
-								start: 9, 
 								end: 10},
 								{value: "",
 								start: 11, 
@@ -2339,9 +2336,6 @@ define([
 								end: 14},
 								{value: "",
 								start: 15, 
-								end: 16},
-								{value: "",
-								start: 16, 
 								end: 17},
 								];
 				return getFixes({buffer: 'var a = ((1)+(1));', 
@@ -2424,9 +2418,6 @@ define([
 				 var expected = [
 				 				{value: "",
 								start: 16, 
-								end: 17},
-								{value: "",
-								start: 17, 
 								end: 18},
 								{value: "",
 								start: 19, 
@@ -2436,9 +2427,6 @@ define([
 								end: 22},
 								{value: "",
 								start: 23, 
-								end: 24},
-								{value: "",
-								start: 24, 
 								end: 25},
 								];
 				return getFixes({buffer: '<script>var a = ((1)+(1));</script>', 
@@ -2565,12 +2553,6 @@ define([
 				 var expected = [
 				 				{value: "",
 								start: 11, 
-								end: 12},
-								{value: "",
-								start: 12, 
-								end: 13},
-								{value: "",
-								start: 13, 
 								end: 14}
 								];
 				return getFixes({buffer: 'var a = 10;;;;', 
@@ -2583,12 +2565,6 @@ define([
 				 var expected = [
 				 				{value: "",
 								start: 14, 
-								end: 15},
-								{value: "",
-								start: 15, 
-								end: 16},
-								{value: "",
-								start: 16, 
 								end: 17}
 								];
 				return getFixes({buffer: 'function f(){};;;', 
@@ -2622,13 +2598,7 @@ define([
 				var expected = [
 				 				{value: "",
 								start: 18, 
-								end: 19},
-								{value: "",
-								start: 19, 
-								end: 20},
-								{value: "",
-								start: 20, 
-								end: 21},
+								end: 21}
 								];
 				return getFixes({buffer: '<script>var a = 0;;;;</script>', 
 								  rule: rule,
@@ -3414,6 +3384,122 @@ define([
 			 					callback: callback,
 			 					fixid: "no-unused-params"});
 			 });
+
+			 /**
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=490109
+			 */
+			 it("Test no-unused-params-fix-all-1", function(callback){
+			 	var rule = createTestRule('no-unused-params');
+			 	var expected = [{
+			 		value: '',
+			 		start: 66,
+			 		end: 105
+			 	},{
+			 		value: '',
+			 		start: 142,
+			 		end: 152
+			 	}];
+			 	return getFixes({
+			 		buffer: '/*eslint-env node */\n/**\n * @name bar\n * @description description\n * @param p1\n * @param p2\n * @param p3\n * @returns returns\n */\nfunction bar(p1, p2, p3) {\n}',
+			 		rule: rule,
+			 		expected: expected,
+			 		callback: callback
+			 	});
+			 });
+
+			 it("Test no-unused-params-fix-all-2", function(callback){
+			 	var rule = createTestRule('no-unused-params');
+			 	var expected = [{
+			 		value: '',
+			 		start: 14,
+			 		end: 22
+			 	},{
+			 		value: '',
+			 		start: 52,
+			 		end: 62
+			 	}];
+			 	return getFixes({
+			 		buffer: 'function bar2(p1, p2, p3){\n\tp3();\n}\nfunction bar3(p1,   p2, p3){\n\tp1();\n}',
+			 		rule: rule,
+			 		expected: expected,
+			 		callback: callback
+			 	});
+			 });
+
+			 it("Test no-unused-params-fix-all-3", function(callback){
+			 	var rule = createTestRule('no-unused-params');
+			 	var expected = [{
+			 		value: '',
+			 		start: 14,
+			 		end: 24
+			 	},{
+			 		value: '',
+			 		start: 43,
+			 		end: 88
+			 	}];
+			 	return getFixes({
+			 		buffer: 'function bar2(p1, p2, p3){\n}\nfunction bar3(p1,   p2,                                  p3){\n}',
+			 		rule: rule,
+			 		expected: expected,
+			 		callback: callback
+			 	});
+			 });
+
+			 it("Test no-unused-params-fix-all-4", function(callback){
+			 	var rule = createTestRule('no-unused-params');
+			 	var expected = [{
+			 		value: '',
+			 		start: 20,
+			 		end: 59
+			 	}];
+			 	return getFixes({
+			 		buffer: 'var bar = function (p1,                \np2,                p3) {\n\tp3();\n}',
+			 		rule: rule,
+			 		expected: expected,
+			 		callback: callback,
+			 		fixid: "no-unused-params"
+			 	});
+			 });
+
+			 it("Test no-unused-params-fix-all-5", function(callback){
+			 	var rule = createTestRule('no-unused-params');
+			 	var expected = [{
+			 		value: '',
+			 		start: 45,
+			 		end: 97
+			 	},{
+			 		value: '',
+			 		start: 134,
+			 		end: 198
+			 	}];
+			 	return getFixes({
+			 		buffer: '/**\n * @name bar\n * @description description\n * @param p1\n * @param p2\n * @param p3\n * @param p4\n * @returns returns\n */\nfunction bar(p1,                               p2, \n p3,                   p4) {\n}',
+			 		rule: rule,
+			 		expected: expected,
+			 		callback: callback,
+			 		fixid: "no-unused-params"
+			 	});
+			 });
+
+			 it("Test no-unused-params-fix-all-6", function(callback){
+			 	var rule = createTestRule('no-unused-params');
+			 	var expected = [{
+			 		value: '',
+			 		start: 58,
+			 		end: 97
+			 	},{
+			 		value: '',
+			 		start: 136,
+			 		end: 198
+			 	}];
+			 	return getFixes({
+			 		buffer: '/**\n * @name bar\n * @description description\n * @param p1\n * @param p2\n * @param p3\n * @param p4\n * @returns returns\n */\nfunction bar(p1,                               p2, \n p3,                   p4) {\n \tp1();\n}',
+			 		rule: rule,
+			 		expected: expected,
+			 		callback: callback,
+			 		fixid: "no-unused-params"
+			 	});
+			 });
 		});
 		//EQEQEQ
 		describe('eqeqeq', function(){
@@ -4189,8 +4275,7 @@ define([
 			it("Test missing-nls multi 1",function(callback) {
 				var rule = createTestRule('missing-nls');
 				var expected = [
-					{value: " //$NON-NLS-1$", start: 33, end: 33},
-					{value: " //$NON-NLS-2$", start: 33, end: 33}
+					{value: " //$NON-NLS-1$ //$NON-NLS-2$", start: 33, end: 33}
 				];
 				return getFixes({
 					buffer: 'var two = "two", three = "three";',
@@ -4202,9 +4287,7 @@ define([
 			it("Test missing-nls multi 2",function(callback) {
 				var rule = createTestRule('missing-nls');
 				var expected = [
-					{value: " //$NON-NLS-1$", start: 45, end: 45},
-					{value: " //$NON-NLS-2$", start: 45, end: 45},
-					{value: " //$NON-NLS-3$", start: 45, end: 45}
+					{value: " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$", start: 45, end: 45}
 				];
 				return getFixes({
 					buffer: 'var four = "four", five ="five", six = "six";',
@@ -4304,10 +4387,7 @@ define([
 				var expected = [
 								{value: "",
 								start: 10, 
-								end: 24},
-								{value: "",
-								start: 24, 
-								end: 38},
+								end: 38}
 								];
 
 				return getFixes({buffer: 'var a = 1; //$NON-NLS-0$ //$NON-NLS-1$', 
@@ -4338,10 +4418,7 @@ define([
 				var expected = [
 								{value: "",
 								start: 11, 
-								end: 25},
-								{value: "",
-								start: 25, 
-								end: 40},
+								end: 40}
 								];
 
 				return getFixes({buffer: 'var v = 10; //$NON-NLS-1$  //$NON-NLS-2$\nvar v2;', 
@@ -4355,10 +4432,7 @@ define([
 				var expected = [
 								{value: "",
 								start: 11, 
-								end: 25},
-								{value: "",
-								start: 25, 
-								end: 40},
+								end: 40}
 								];
 
 				return getFixes({buffer: 'var v = 10; //$NON-NLS-1$  //$NON-NLS-2$     \nvar v2;', 
