@@ -46,7 +46,8 @@ function Task(res, cancelable, lengthComputable, wait) {
 	this.total = this.loaded = 0;
 	this.type = "loadstart";
 	this.res = res;
-	if (wait === 0) {
+	//TODO temporarily disabled timeout to work around client bug.
+	if (true || wait === 0) {
 		this.start();
 	} else {
 		this.timeout = setTimeout(function() {
