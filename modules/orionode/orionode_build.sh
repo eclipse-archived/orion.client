@@ -5,8 +5,8 @@ npm install
 ./node_modules/.bin/grunt
 rm -rf node_modules
 npm install --production
-rm -rf node_modules/nodegit
 rm -rf node_modules/pty.js
+rm -rf target
 cd ..
 DATE=`date +%Y%m%d%H%M%S`
 tar -czf "orionode_$DATE.tar.gz" orionode/
