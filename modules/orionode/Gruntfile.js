@@ -126,17 +126,6 @@ module.exports = function(grunt) {
 						replacement: "requirejs/require.min.js"
 					}]
 				}
-			},
-			orionclient: {
-				files: {
-					"index.js": "index.js"
-				},
-				options: {
-					replacements: [{
-						pattern: /(ORION_CLIENT.+)['""]\.\.\/\.\.\/['"]/,
-						replacement: "$1'./lib/orion.client/'"
-					}]
-				}
 			}
 		},
 		simplemocha: {

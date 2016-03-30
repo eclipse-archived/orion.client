@@ -11,6 +11,7 @@
 /*eslint-env node */
 var express = require('express'),
 	path = require('path'),
+	fs = require('fs'),
 	orionFile = require('./lib/file'),
 	orionWorkspace = require('./lib/workspace'),
 	orionGit = require('./lib/git'),
@@ -24,7 +25,8 @@ var express = require('express'),
 	term = require('term.js');
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
-	ORION_CLIENT = path.normalize(path.join(__dirname, '../../'));
+	ORION_CLIENT = path.normalize(path.join(__dirname,
+		fs.existsSync(path.join(__dirname, "lib/orion.client")) ? 'lib/orion.client/' : '../../'));
 
 function handleError(err) {
 	throw err;
