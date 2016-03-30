@@ -1028,7 +1028,6 @@
 
   exports.version = "0.12.0";
   exports.findDef = findDef; //ORION
-  exports.findExpr = findExpr; //ORION
   exports.findExprType = findExprType; //ORION
   exports.resolveFile = resolveFile; //ORION
   exports.storeTypeDocs = storeTypeDocs; //ORION

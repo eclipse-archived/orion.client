@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env node, amd*/
+/*eslint-env amd*/
 /*globals infer tern walk*/
 define([
 	"tern/lib/infer", 
@@ -41,7 +41,7 @@ define([
 		        category: comment.type === 'Block' ? 'blockcomments': 'linecomments' //$NON-NLS-1$ //$NON-NLS-2$
 		    };
 		} else {
-			var expr = tern.findExpr(file, query), exprName, type, exprType;
+			var expr = tern.findQueryExpr(file, query), exprName, type, exprType;
 			try {
 			    type = tern.findExprType(server, query, file, expr);
 			    exprType = type;

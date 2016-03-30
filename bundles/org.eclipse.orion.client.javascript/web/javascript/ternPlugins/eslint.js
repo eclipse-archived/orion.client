@@ -144,8 +144,8 @@ define([
 			_tern.ternError = function(msg) {
 				return tern.ternError(msg);
 			};
-			_tern.findExpr = function(file, query, wide) {
-				return tern.findExpr(file, query, wide);
+			_tern.findQueryExpr = function(file, query, wide) {
+				return tern.findQueryExpr(file, query, wide);
 			};
 			_tern.findExprType = function(srv, query, file, expr) {
 				return tern.findExprType(srv, query, file, expr);
