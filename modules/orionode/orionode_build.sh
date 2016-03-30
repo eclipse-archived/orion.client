@@ -6,6 +6,8 @@ npm install
 rm -rf node_modules
 npm install --production
 rm -rf node_modules/pty.js
+rm -rf node_modules/nodegit/vendor
+rm -rf node_modules/nodegit/build/Release/obj.target
 rm -rf target
 cd ..
 DATE=`date +%Y%m%d%H%M%S`
