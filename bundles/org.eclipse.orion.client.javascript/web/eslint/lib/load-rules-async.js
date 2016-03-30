@@ -35,11 +35,73 @@ define([
 './rules/no-obj-calls',
 './rules/no-self-compare',
 './rules/no-irregular-whitespace',
-], function(util, Logger, Finder, ProblemMessages, Estraverse, JsSyntax, 
+], function(util, Logger, Finder, ProblemMessages, Estraverse, JsSyntax,
 		accessorPairs, noControlRegex, noDuplicateCase, noElseReturn, noEmptyCharClasses, 
 		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs, noObjCalls, noSelfCompare, noIrregularWhitespace) {
-
+	
+	// TODO We want to load the plugin list from TernDefaults.js but end up with a circular dependency as TernDefaults loads the tern plugins including this one
+	var optionalPlugins = {'amqp': 'amqp', 'angular': 'angular', 'express': 'express', 'mongodb': 'mongodb', 'mysql': 'mysql', 'node': 'node', 'pg': 'postgres', 'redis': 'redis', 'amd': 'requirejs'}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
     var rules = {
+    	/** @callback */
+        "check-tern-plugin": function(context) {
+        	function checkProject(node) {
+                if(context.env){
+                	var envs = Object.create(null);
+                	var envKeys = Object.keys(context.env);
+                	envKeys.forEach(function(key){
+                		envs[key] = context.env[key];
+            		});
+                	if (envKeys.length > 0){
+                		var tern = context.getTern();
+                		if (tern){
+            			    tern.server.request({query: {
+			           			type: 'installed_plugins' //$NON-NLS-1$
+	           				}}, function(error, installedPlugins){
+	           					if (optionalPlugins && !error && typeof installedPlugins === 'object'){
+	           						Object.keys(envs).forEach(function(key){
+	           							var pluginName = optionalPlugins[key];
+	           							if (pluginName){
+	           								envs[key] = undefined;
+	           								if (!installedPlugins[pluginName]){
+	           									context.report(node, ProblemMessages['check-tern-plugin'], {0:key, 1:pluginName});
+	           								}
+	           							}
+	           							
+	           						})
+	           						// TODO We can tell the user that we don't know about their library, but there is no way for the user to fix the problem
+	           						// Note this behaviour is similar to the setting name for unsupportedJSHint rule
+//	           						Object.keys(envs).forEach(function(key){
+//	           							if (envs[key]){
+//	           								context.report(node, "Tern does not recognize environment " + key);
+//           								}
+//           							});
+	           					}
+	           				});
+        				}
+       				}
+   				}
+			}
+			return {
+				"Program": checkProject
+			};
+        },
+		/** @callback */
+		"check-tern-project" : function(context) {
+				function checkProject(node) {
+					var env = node.environments;
+					if (env) {
+						if (typeof env === "object" && Object.keys(env).length !== 0) {
+							return;
+						}
+					}
+					// get the .tern-project file for the corresponding project
+					context.report(node, ProblemMessages['check-tern-project']);
+				}
+
+				return {
+					"Program": checkProject
+				};
+		},
     	/** @callback */
         "curly": function(context) {
 	        		/**
@@ -2109,22 +2171,6 @@ define([
 					}
 				};
 			},
-		/** @callback */
-		"check-tern-project" : function(context) {
-				return {
-					/* @callback */
-					"Program": function(node) {
-						var env = node.environments;
-						if (env) {
-							if (typeof env === "object" && Object.keys(env).length !== 0) {
-								return;
-							}
-						}
-						// get the .tern-project file for the corresponding project
-						context.report(node, ProblemMessages['check-tern-project']);
-					}
-				};
-		}
 	};
 
 	/**

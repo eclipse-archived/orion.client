@@ -18,6 +18,7 @@ define([
 	var rules = {
 		defaults: {
 			"accessor-pairs" : 1,
+			"check-tern-plugin" : 0,
 			"check-tern-project" : 0,
 			"curly" : 0,
 			"eqeqeq": 1,

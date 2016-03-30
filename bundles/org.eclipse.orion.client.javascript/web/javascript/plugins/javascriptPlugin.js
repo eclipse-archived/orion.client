@@ -1411,13 +1411,13 @@ define([
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
-										{
-											id: "check-tern-project",  //$NON-NLS-1$
-											name: javascriptMessages["check-tern-project"],
-											type: "number",  //$NON-NLS-1$
-											defaultValue: ignore,
-											options: severities
-										},
+												{
+													id: "check-tern-project",  //$NON-NLS-1$
+													name: javascriptMessages["check-tern-project"],
+													type: "number",  //$NON-NLS-1$
+													defaultValue: ignore,
+													options: severities
+												},
 				 	        	                {
     			 	        	                	id: "accessor-pairs",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["accessor-pairs"],
@@ -1444,6 +1444,13 @@ define([
  				 	        	                	defaultValue: warning,
  				 	        	                	options: severities
  				 	        	                },
+												{
+													id: "check-tern-plugin",  //$NON-NLS-1$
+													name: javascriptMessages["check-tern-plugin"],
+													type: "number",  //$NON-NLS-1$
+													defaultValue: warning,
+													options: severities
+												},
  				 	        	                {	id: "radix",  //$NON-NLS-1$
  				 	        	                    name: javascriptMessages['radix'],
  				 	        	                    type: 'number',  //$NON-NLS-1$

@@ -13,6 +13,8 @@ define({
     'syntaxErrorBadToken': 'Syntax error on token \'${0}\', delete this token.',
     'esprimaParseFailure': 'Esprima failed to parse this file because an error occurred: ${0}',
     'eslintValidationFailure': 'ESLint failed to validate this file because an error occurred: ${0}',
+	'check-tern-plugin': 'To get tooling for the \'${0}\' environment, the \'${1}\' plugin must be started.  \'${1}\' has not been set in the plugins entry of your .tern-project file.',
+    'check-tern-project' : 'File should be added to the .tern-project file',
 	'curly': 'Statement should be enclosed in braces.',
 	'curly-description': 'Require curly braces for all control statements.',
 	'eqeqeq' : 'Expected \'${0}\' and instead saw \'${1}\'.',
@@ -125,7 +127,6 @@ define({
 	'no-self-assign' : 'Assigning to itself is pointless.',
 	'type-checked-consistent-return-description' : 'Detect inconsistent return values',
 	'inconsistent-return' : 'Inconsistent return types: \'{{type1}}\', \'{{type2}}\'',
-	'check-tern-project' : 'File should be added to the .tern-project file',
 
 	//.tern-project file validation messages
 	'notNum': "'${0}' must be a number",

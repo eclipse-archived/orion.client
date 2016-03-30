@@ -24,7 +24,6 @@ define([
 	'mocha/mocha', //must stay at the end, not a module
 ], function(Validator, chai, Deferred, i18nUtil, messages, Rules, mServiceRegistry, Resolver, Manager) {
 	var assert = chai.assert;
-
 	return function(worker) {
 		describe('Validator Tests', function() {
 			
@@ -462,7 +461,210 @@ define([
 							worker.getTestState().callback(error);
 						});
 					});
-				});		
+				});
+				// check-tern-plugin --------------------------------------------
+					describe('check-tern-plugin', function() {
+						var RULE_ID = "check-tern-plugin";
+						it("No eslint-env", function(callback) {
+							var topic = 	"function foo() {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("Empty eslint-env", function(callback) {
+							var topic = 	"/* eslint-env */\nfunction foo() {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("Bogus lib", function(callback) {
+							var topic = 	"/*eslint-env garbage*/\nfunction foo() {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("All plugins running - no plugins entry", function(callback) {
+							worker.postMessage({request: "start_server", args:{options: {}}}, /* @callback */ function(response) {
+								assert(response, "Tried to restart Tern server with specific options, did not receive response");
+								assert.equal("server_ready", response.state, "Tried to restart Tern server with specific options, the server was not ready");
+								var topic = 	"/*eslint-env amd, mongodb*/\nfunction foo() {}";
+								var config = { rules: {} };
+								config.rules[RULE_ID] = 1;
+								validate({buffer: topic, callback: callback, config: config}).then(
+									function (problems) {
+										assertProblems(problems, [
+										]);
+									},
+									function (error) {
+										worker.getTestState().callback(error);
+									});
+							});
+						});
+						it("All plugins running - empty plugins entry", function(callback) {
+							worker.postMessage({request: "start_server", args:{options: {plugins: {}}}}, /* @callback */ function(response) {
+								assert(response, "Tried to restart Tern server with specific options, did not receive response");
+								assert.equal("server_ready", response.state, "Tried to restart Tern server with specific options, the server was not ready");
+								var topic = 	"/*eslint-env amd, mongodb*/\nfunction foo() {}";
+								var config = { rules: {} };
+								config.rules[RULE_ID] = 1;
+								validate({buffer: topic, callback: callback, config: config}).then(
+									function (problems) {
+										assertProblems(problems, [
+										]);
+									},
+									function (error) {
+										worker.getTestState().callback(error);
+									});
+							});
+						});
+						it("RequireJS running", function(callback) {
+							worker.postMessage({request: "start_server", args:{options: {plugins: {"requirejs": {}}}}}, /* @callback */ function(response) {
+								assert(response, "Tried to restart Tern server with specific options, did not receive response");
+								assert.equal("server_ready", response.state, "Tried to restart Tern server with specific options, the server was not ready");
+								var topic = 	"/*eslint-env amd*/\nfunction foo() {}";
+								var config = { rules: {} };
+								config.rules[RULE_ID] = 1;
+								validate({buffer: topic, callback: callback, config: config}).then(
+									function (problems) {
+										assertProblems(problems, [
+										]);
+									},
+									function (error) {
+										worker.getTestState().callback(error);
+									});
+							});
+						});
+						it("RequireJS not running", function(callback) {
+							worker.postMessage({request: "start_server", args:{options: {plugins: {"node": {}}}}}, /* @callback */ function(response) {
+								assert(response, "Tried to restart Tern server with specific options, did not receive response");
+								assert.equal("server_ready", response.state, "Tried to restart Tern server with specific options, the server was not ready");
+								var topic = 	"/*eslint-env amd*/\nfunction foo() {}";
+								var config = { rules: {} };
+								config.rules[RULE_ID] = 1;
+								validate({buffer: topic, callback: callback, config: config}).then(
+									function (problems) {
+										assertProblems(problems, [
+										{id: RULE_ID,
+										 severity: 'warning',
+										 description: "To get tooling for the \'amd\' environment, the \'requirejs\' plugin must be started.  \'requirejs\' has not been set in the plugins entry of your .tern-project file.",
+										 nodeType: "Program"
+										}
+										]);
+									},
+									function (error) {
+										worker.getTestState().callback(error);
+									});
+							});
+						});
+						it("Postgres running", function(callback) {
+							worker.postMessage({request: "start_server", args:{options: {plugins: {"postgres": {}}}}}, /* @callback */ function(response) {
+								assert(response, "Tried to restart Tern server with specific options, did not receive response");
+								assert.equal("server_ready", response.state, "Tried to restart Tern server with specific options, the server was not ready");
+								var topic = 	"/*eslint-env pg*/\nfunction foo() {}";
+								var config = { rules: {} };
+								config.rules[RULE_ID] = 1;
+								validate({buffer: topic, callback: callback, config: config}).then(
+									function (problems) {
+										assertProblems(problems, [
+										]);
+									},
+									function (error) {
+										worker.getTestState().callback(error);
+									});
+							});
+						});
+						it("Postgres not running", function(callback) {
+							worker.postMessage({request: "start_server", args:{options: {plugins: {"node": {}}}}}, /* @callback */ function(response) {
+								assert(response, "Tried to restart Tern server with specific options, did not receive response");
+								assert.equal("server_ready", response.state, "Tried to restart Tern server with specific options, the server was not ready");
+								var topic = 	"/*eslint-env pg*/\nfunction foo() {}";
+								var config = { rules: {} };
+								config.rules[RULE_ID] = 1;
+								validate({buffer: topic, callback: callback, config: config}).then(
+									function (problems) {
+										assertProblems(problems, [
+										{id: RULE_ID,
+										 severity: 'warning',
+										 description: "To get tooling for the \'pg\' environment, the \'postgres\' plugin must be started.  \'postgres\' has not been set in the plugins entry of your .tern-project file.",
+										 nodeType: "Program"
+										}
+										]);
+									},
+									function (error) {
+										worker.getTestState().callback(error);
+									});
+							});
+						});
+						it("Multiple plugins not running", function(callback) {
+							worker.postMessage({request: "start_server", args:{options: {plugins: {"redis": {}}}}}, /* @callback */ function(response) {
+								assert(response, "Tried to restart Tern server with specific options, did not receive response");
+								assert.equal("server_ready", response.state, "Tried to restart Tern server with specific options, the server was not ready");
+								var topic = 	"/*eslint-env mongodb,redis,pg*/\nfunction foo() {}";
+								var config = { rules: {} };
+								config.rules[RULE_ID] = 1;
+								validate({buffer: topic, callback: callback, config: config}).then(
+									function (problems) {
+										assertProblems(problems, [
+										{id: RULE_ID,
+										 severity: 'warning',
+										 description: "To get tooling for the \'mongodb\' environment, the \'mongodb\' plugin must be started.  \'mongodb\' has not been set in the plugins entry of your .tern-project file.",
+										 nodeType: "Program"
+										},
+										{id: RULE_ID,
+										 severity: 'warning',
+										 description: "To get tooling for the \'pg\' environment, the \'postgres\' plugin must be started.  \'postgres\' has not been set in the plugins entry of your .tern-project file.",
+										 nodeType: "Program"
+										}
+										]);
+									},
+									function (error) {
+										worker.getTestState().callback(error);
+									});
+							});
+						});
+					});
+					// check-tern-project --------------------------------------------
+					describe('check-tern-project', function() {
+						var RULE_ID = "check-tern-project";
+						it("flag lonely file", function(callback) {
+							var topic = 	"function foo() {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "File should be added to the .tern-project file"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 				// CURLY ---------------------------------------------
 				describe('curly', function() {
 					var RULE_ID = 'curly';
@@ -12424,27 +12626,6 @@ define([
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
 									assertProblems(problems, []);
-								},
-								function (error) {
-									worker.getTestState().callback(error);
-								});
-						});
-					});
-					// check-tern-project --------------------------------------------
-					describe('check-tern-project', function() {
-						var RULE_ID = "check-tern-project";
-						it("flag lonely file", function(callback) {
-							var topic = 	"function foo() {}";
-							var config = { rules: {} };
-							config.rules[RULE_ID] = 1;
-							validate({buffer: topic, callback: callback, config: config}).then(
-								function (problems) {
-									assertProblems(problems, [
-									{
-										id: RULE_ID,
-										severity: 'warning',
-										description: "File should be added to the .tern-project file"
-									}]);
 								},
 								function (error) {
 									worker.getTestState().callback(error);
