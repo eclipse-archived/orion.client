@@ -22,7 +22,6 @@
     "mongodb": "^2.1.7",
     "mongoose": "^4.4.6",
     "multiparty": "^4.1.2",
-    "nodegit": "~0.11.9",
     "nodemailer": "^2.3.0",
     "passport": "^0.3.2",
     "passport-github2": "^0.1.10",
@@ -36,7 +35,8 @@
     "term.js": "0.0.3"
   },
   "optionalDependencies": {
-    "pty.js": "~0.3.0"
+    "pty.js": "~0.3.0",
+    "nodegit": "~0.11.9",
   },
   "experimentalDependencies": {},
   "devDependencies": {
