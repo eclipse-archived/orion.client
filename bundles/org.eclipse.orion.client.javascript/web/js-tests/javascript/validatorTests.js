@@ -7966,12 +7966,91 @@ define([
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
 									assertProblems(problems, [
+									// Bug 490737 We ignore empty objects
+//									{
+//										id: RULE_ID,
+//										severity: 'warning',
+//										description: "'b' is undefined.",
+//										nodeType: "Identifier"
+//									}
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("Single file object not documented but property set in function call", function(callback) {
+							var topic = "function foo(a){a.b();}\nfoo({b: function(){}});";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("Single file object not documented, different property set in function call", function(callback) {
+							var topic = "function foo(a){a.b();}\nfoo({c: function(){}});";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
 									{
 										id: RULE_ID,
 										severity: 'warning',
 										description: "'b' is undefined.",
 										nodeType: "Identifier"
-									}]);
+									}
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("Single file object not documented, no properties set", function(callback) {
+							var topic = "function foo(a){a.b();};";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("Single file object documented as {Object}, no properties set", function(callback) {
+							var topic = "/**\n * @param {Object} a\n */\nfunction foo(a){a.b();}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("Single file object documented as {Object}, different property set", function(callback) {
+							var topic = "/**\n * @param {Object} a\n */\nfunction foo(a){a.b();} foo({c: function(){}});";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'b' is undefined.",
+										nodeType: "Identifier"
+									}
+									]);
 								},
 								function (error) {
 									worker.getTestState().callback(error);
@@ -8186,12 +8265,9 @@ define([
 							config.rules[RULE_ID] = 1;
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
-									assertProblems(problems, [{
-										id: RULE_ID,
-										severity: 'warning',
-										description: "'a' is undefined.",
-										nodeType: "Identifier"
-									}]);
+									// Bug 490737 Ignore empty objects
+									assertProblems(problems, [
+									]);
 								},
 								function (error) {
 									worker.getTestState().callback(error);

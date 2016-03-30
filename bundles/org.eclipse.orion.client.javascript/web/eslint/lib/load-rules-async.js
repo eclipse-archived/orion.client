@@ -159,7 +159,7 @@ define([
         			 * @returns {Object} The matching token or null
         			 */
         			function getOperatorToken(context, node) {
-	            		var tokens = context.getTokens(node), 
+	            		var tokens = context.getTokens(node),
 	            			len = tokens.length, 
 	            			operator = node.operator;
 	            		for (var i=0; i < len; i++) {
@@ -1426,7 +1426,7 @@ define([
             	                					foundType = false;
             	                					break;
             	                				}
-            	                				if (type.types[i].proto){
+            	                				if (type.types[i].proto && type.types[i].proto.name !== 'Object.prototype'){
             	                					currentProps = type.types[i].proto.props;
             	                					if (currentProps && Object.keys(currentProps).length > 0){
 	            	                					foundType = false;
