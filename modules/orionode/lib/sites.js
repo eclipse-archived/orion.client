@@ -62,14 +62,12 @@ function virtualHost(vhost, req, res, next) {
 		var username = host.Id.split("-")[0];
 		var urlPath = url.parse(req.url).pathname;
 		if (host.Mappings.some(function(mapping) {
-			var u = url.parse(mapping.Target);
-			if (u.protocol) {
-				//TODO - not sure what to do with sites mapping that have protocol
-//				req.url = mapping.Source;
-				next();
-				return true;
-			}
 			if (req.url.indexOf(mapping.Source) === 0) {
+				var u = url.parse(mapping.Target);
+				if (u.protocol) {
+					next();
+					return true;
+				}
 				var relative  = urlPath.substring(mapping.Source.length);
 				var path;
 				if (options.configParams["orion.single.user"]) {
