@@ -10,5 +10,4 @@ rm -rf node_modules/nodegit/vendor
 rm -rf node_modules/nodegit/build/Release/obj.target
 rm -rf target
 cd ..
-DATE=`date +%Y%m%d%H%M%S`
-tar -czf "orionode_$DATE.tar.gz" orionode/
+tar -czf "orionode_$1.tar.gz" orionode/
