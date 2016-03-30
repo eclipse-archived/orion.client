@@ -70,7 +70,7 @@ define({
 	'varRedecl' : 'Variable re-declarations:',
 	'varShadow': 'Variable shadowing:',
 	'undefMember' : 'Undeclared global reference:',
-	'undefExpression' : 'Undeclared member expression reference:',
+	'undefExpression' : 'Undeclared function reference:',
 	'unnecessarySemis' : 'Unnecessary semicolons:',
 	'unusedParams' : 'Unused parameters:',
 	'unsupportedJSLint' : 'Unsupported environment directive:',

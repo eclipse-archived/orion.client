@@ -1484,16 +1484,16 @@ define([
     			 	        	                	defaultValue: ignore,
     			 	        	                	options: severities
     			 	        	                },
- 				 	        	                {	id: "no-undef",  //$NON-NLS-1$
- 				 	        	                	name: javascriptMessages["undefMember"],
- 				 	        	                	type: "number",  //$NON-NLS-1$
- 				 	        	                	defaultValue: error,
- 				 	        	                	options: severities
- 				 	        	                },
  				 	        	                {	id: "no-undef-expression",  //$NON-NLS-1$
  				 	        	                	name: javascriptMessages["undefExpression"],
  				 	        	                	type: "number",  //$NON-NLS-1$
  				 	        	                	defaultValue: ignore,
+ 				 	        	                	options: severities
+ 				 	        	                },
+ 				 	        	                {	id: "no-undef",  //$NON-NLS-1$
+ 				 	        	                	name: javascriptMessages["undefMember"],
+ 				 	        	                	type: "number",  //$NON-NLS-1$
+ 				 	        	                	defaultValue: error,
  				 	        	                	options: severities
  				 	        	                },
  				 	        	                {	id: "no-else-return",  //$NON-NLS-1$
