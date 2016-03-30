@@ -51,6 +51,14 @@ define([], function() {
 	];
 
 	return {
+		Config: {
+			folders: [
+				{
+					name: "org.eclipse.orion.client",
+					label: messages.orionClientLabel
+				}
+			]
+		},
 		Rules: SELF_HOSTING_TEMPLATE,
 		Types: {
 			File: FILE,

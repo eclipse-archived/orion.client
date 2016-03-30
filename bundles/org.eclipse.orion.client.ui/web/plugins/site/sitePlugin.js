@@ -119,14 +119,7 @@ define([
 				pattern: siteBase,
 				filePattern: fileBase,
 				canSelfHost: true,
-				selfHostingConfig: {
-					folders: [
-						{
-							name: "org.eclipse.orion.client",
-							label: messages.orionClientLabel
-						}
-					]
-				}
+				selfHostingConfig: mSelfHostingRules.Config
 			});
 	}
 
