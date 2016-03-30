@@ -204,6 +204,7 @@ define({
 	'type-checked-consistent-return' : 'Discouraged inconsistent returns:',
 	'check-tern-plugin' : 'Missing .tern-project plugins entry for environment directive:',
 	'check-tern-project' : 'File should be added to .tern-project',
+	'checkTernPluginFixName' : 'Add plugin to .tern-project file',
 	'checkTernProjectFixName' : 'Add to .tern-project file',
 	
 	//Tern Plugins

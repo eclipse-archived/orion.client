@@ -13,7 +13,7 @@ define({
     'syntaxErrorBadToken': 'Syntax error on token \'${0}\', delete this token.',
     'esprimaParseFailure': 'Esprima failed to parse this file because an error occurred: ${0}',
     'eslintValidationFailure': 'ESLint failed to validate this file because an error occurred: ${0}',
-	'check-tern-plugin': 'To get tooling for the \'${0}\' environment, the \'${1}\' plugin must be started.  \'${1}\' has not been set in the plugins entry of your .tern-project file.',
+	'check-tern-plugin': 'To get support for the \'${0}\' environment, the \'${1}\' plugin must be started.  \'${1}\' has not been set in the plugins entry of your .tern-project file.',
     'check-tern-project' : 'File should be added to the .tern-project file',
 	'curly': 'Statement should be enclosed in braces.',
 	'curly-description': 'Require curly braces for all control statements.',

@@ -192,9 +192,30 @@ define([
 	                return null;
 	            });
 	        },
-		/** @callback fix the check-tern-project rule */
-		"check-tern-project" :
-			function(editorContext, context, astManager) {
+	        /** @callback fix the check-tern-project rule */
+			"check-tern-plugin" : function(editorContext, context, astManager) {
+				var self = this;
+				return astManager.getAST(editorContext).then(function(ast) {
+					var ternFileLocation = self.ternProjectManager.getTernProjectFileLocation();
+					var json = self.ternProjectManager.getJSON();
+					var plugins = json.plugins;
+					var newPlugin = /, the '(.*)' plugin/.exec(context.annotation.title);
+					// The problem should only appear if there is a plugins entry that doesn't include the needed plugin
+					if (!ternFileLocation || !json || !plugins || !newPlugin || !newPlugin[1]){
+						return null;
+					}
+					plugins[newPlugin[1]] = {};
+					var contents = JSON.stringify(json, null, '\t'); //$NON-NLS-1$
+					var fileClient = self.ternProjectManager.scriptResolver.getFileClient();
+					return fileClient.write(ternFileLocation, contents).then(/* @callback */ function(result) {
+						self.ternProjectManager.refresh(ternFileLocation);
+						// now we need to run the syntax checker on the current file to get rid of stale annotations
+						editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
+					});
+				});
+			},
+			/** @callback fix the check-tern-project rule */
+			"check-tern-project" : function(editorContext, context, astManager) {
 				var self = this;
 				return astManager.getAST(editorContext).then(function(ast) {
 					var ternFileLocation = self.ternProjectManager.getTernProjectFileLocation();
