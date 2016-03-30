@@ -120,8 +120,7 @@ define([
 		if (this.currentOptions.locations) {
 			comment.loc = {
 				start: startLoc,
-				end: endLoc,
-				sourceFile: this.currentOptions.sourceFile
+				end: endLoc
 			};
 		}
 		if (this.currentOptions.ranges) {
@@ -321,6 +320,7 @@ define([
 					}
 					that.trailingCommentsIndex = i;
 				}
+				result.sourceFile = that.sourceFile;
 				return result;
 			};
 		});
@@ -389,16 +389,20 @@ define([
 		options.sourceFile = false;
 		options.sourceType = "script";
 		options.ecmaVersion = 6;
-		if (!options.directSourceFile && file) {
-			options.directSourceFile = {
-				name: file,
-				text: text
-			};
+		this.sourceFile = Object.create(null);
+		if (file) {
+			this.sourceFile.name = file;
+		} else {
+			this.sourceFile.name = options.directSourceFile.name;
+		}
+		if (options.directSourceFile) {
+			this.sourceFile.text = options.directSourceFile.text;
+		} else {
+			this.sourceFile.text  = text;
 		}
 
 		this.currentOptions = {
 			locations : options.locations,
-			sourceFile : options.sourceFile,
 			ranges : options.ranges
 		};
 	};
