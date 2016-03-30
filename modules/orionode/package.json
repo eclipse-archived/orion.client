@@ -36,7 +36,7 @@
   },
   "optionalDependencies": {
     "pty.js": "~0.3.0",
-    "nodegit": "~0.11.9",
+    "nodegit": "~0.11.9"
   },
   "experimentalDependencies": {},
   "devDependencies": {
