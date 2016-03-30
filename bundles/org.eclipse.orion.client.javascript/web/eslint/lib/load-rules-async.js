@@ -1364,7 +1364,7 @@ define([
 									query.end = ref.identifier.start;
 									var foundType = null;
 									try {
-										var expr = tern.findExpr(tern.file, query);
+										var expr = tern.findQueryExpr(tern.file, query);
 										var type = tern.findExprType(tern.server, query, tern.file, expr);
 										// The origin could be a primitive in the same file (a=1;) which we still want to mark
 										// The origin could be an environment, which we still want to mark (eslint-env directive is handled separately)
@@ -1403,7 +1403,7 @@ define([
 								query.end = node.property.start;
 								var foundType = false;
 								try {
-									var expr = tern.findExpr(tern.file, query);
+									var expr = tern.findQueryExpr(tern.file, query);
 									var type = tern.findExprType(tern.server, query, tern.file, expr);
 									if (type && type.origin){
 										foundType = true;
@@ -1415,7 +1415,7 @@ define([
             	                	// If the object cannot be found, there is no way the property could be known
             	                	query.end = node.object.end;
             	                	try {
-            	                		expr = tern.findExpr(tern.file, query);
+            	                		expr = tern.findQueryExpr(tern.file, query);
             	                		type = tern.findExprType(tern.server, query, tern.file, expr);
 										if (type && type.types && type.types.length > 0){
             	                			// If the type has no known properties assume Tern doens't know enough about it to find the declaration
@@ -2093,7 +2093,7 @@ define([
 						query.end = node.argument.start;
 						var foundType = null;
 						try {
-							var expr = tern.findExpr(tern.file, query);
+							var expr = tern.findQueryExpr(tern.file, query);
 							var type = tern.findExprType(tern.server, query, tern.file, expr);
 							if (type) {
 								foundType = type;
