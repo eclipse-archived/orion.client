@@ -336,6 +336,59 @@ define([
 						['static(name)', 'static(name)', 'Built-in middleware function.']
 					]);
 				});
+				it('Express completions - app.', function(done) {
+					var options = {
+						buffer: "/* eslint-env node, express */\nvar express = require('express'); var app = express(); app.",
+						prefix: "",
+						offset: 90,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'express'],
+						['METHOD()', 'METHOD()'],
+						['all(path)', 'all(path)'],
+						['compileETag(val)', 'compileETag(val)'],
+						['compileQueryParser(val)', 'compileQueryParser(val)'],
+						['compileTrust(val)', 'compileTrust(val)'],
+						['defaultConfiguration()', 'defaultConfiguration()'],
+						['delete()', 'delete()'],
+						['disable(setting)', 'disable(setting) : app'],
+						['disabled(setting)', 'disabled(setting) : bool'],
+						['enable(setting)', 'enable(setting) : app'],
+						['enabled(setting)', 'enabled(setting) : bool'],
+						['engine(ext, fn)', 'engine(ext, fn)'],
+						['etag(body, encoding?)', 'etag(body, encoding?) : string'],
+						['get()', 'get()'],
+						['handle(req, res, callback)', 'handle(req, res, callback)'],
+						['init(app)', 'init(app) : fn(req: any, res: any, next: any)|Function'],
+						['isAbsolute(path)', 'isAbsolute(path) : bool'],
+						['lazyrouter()', 'lazyrouter()'],
+						['listen()', 'listen()'],
+						['normalizeType(type)', 'normalizeType(type) : acceptParams.!ret'],
+						['normalizeTypes(types)', 'normalizeTypes(types) : [acceptParams.!ret]'],
+						['param(name, fn)', 'param(name, fn)'],
+						['path()', 'path() : string'],
+						['post()', 'post()'],
+						['put()', 'put()'],
+						['render(name, options, callback)', 'render(name, options, callback)'],
+						['route(path)', 'route(path)'],
+						['set(setting, val)', 'set(setting, val)'],
+						['setCharset(type, charset)', 'setCharset(type, charset)'],
+						['use(fn)', 'use(fn)'],
+						['wetag(body, encoding?)', 'wetag(body, encoding?) : string'],
+						['Route', 'Route : app.Route'],
+						['application', 'application : app.application'],
+						['request', 'request : app.request'],
+						['response', 'response : app.response'],
+						['', 'ecma5'],
+						['hasOwnProperty(prop)', 'hasOwnProperty(prop) : bool'],
+						['isPrototypeOf(obj)', 'isPrototypeOf(obj) : bool'],
+						['propertyIsEnumerable(prop)', 'propertyIsEnumerable(prop) : bool'],
+						['toLocaleString()', 'toLocaleString() : string'],
+						['toString()', 'toString() : string'],
+						['valueOf()', 'valueOf() : number'],
+					]);
+				});
 			});
 			
 			describe('MongoDB', function() {

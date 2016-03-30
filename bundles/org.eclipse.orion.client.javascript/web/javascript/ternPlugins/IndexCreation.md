@@ -84,6 +84,23 @@ Also, the static function was missing due to it being a re-export from another m
      
 You must also remove the type information for toString() and hasOwnProperty() as these override the functions with the same name in the Object prototype.
 
+Index does not include all of the API functions at http://expressjs.com/en/api.html.  The following were added under "app"
+	"delete": {
+  		"!type": "fn()",
+  	},
+  	"get": {
+  		"!type": "fn()",
+  	},
+  	"METHOD": {
+  		"!type": "fn()",
+  	},
+  	"post": {
+  		"!type": "fn()",
+  	},
+  	"put": {
+  		"!type": "fn()",
+  	},
+
 #### Redis
 
 The on() function is not defined.  Add it to the RedisClient type:

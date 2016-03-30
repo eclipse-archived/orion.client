@@ -302,6 +302,21 @@ define([
     "!doc": "Module variables.\n@private"
   },
   "app": {
+  	"delete": {
+  		"!type": "fn()",
+  	},
+  	"get": {
+  		"!type": "fn()",
+  	},
+  	"METHOD": {
+  		"!type": "fn()",
+  	},
+  	"post": {
+  		"!type": "fn()",
+  	},
+  	"put": {
+  		"!type": "fn()",
+  	},
     "init": {
       "!type": "fn(app: +Function) -> fn(req: ?, res: ?, next: ?)|+Function",
       "!doc": "Initialize the server.\n\n  - setup default configuration\n  - setup default middleware\n  - setup route reflection methods\n\n@private"
