@@ -12,6 +12,7 @@
     "compression": "^1.6.0",
     "cookie-parser": "^1.4.1",
     "debug": "^2.2.0",
+    "diff": "^2.2.2",
     "express": "^4.13.3",
     "express-session": "^1.13.0",
     "generate-password": "^1.1.1",
@@ -20,6 +21,8 @@
     "mkdirp": "^0.5.1",
     "mongodb": "^2.1.7",
     "mongoose": "^4.4.6",
+    "multiparty": "^4.1.2",
+    "nodegit": "~0.11.9",
     "nodemailer": "^2.3.0",
     "passport": "^0.3.2",
     "passport-github2": "^0.1.10",
@@ -27,16 +30,15 @@
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^4.0.0",
     "passport-local-mongoose-email": "^0.1.2",
+    "request": "^2.69.0",
     "rimraf": "~2.2.6",
     "socket.io": "~1.0.4",
-    "term.js": "0.0.3",
-    "nodegit": "~0.11.9"
+    "term.js": "0.0.3"
   },
   "optionalDependencies": {
     "pty.js": "~0.3.0"
   },
-  "experimentalDependencies": {
-  },
+  "experimentalDependencies": {},
   "devDependencies": {
     "chai": "^3.5.0",
     "grunt": "~0.4.5",

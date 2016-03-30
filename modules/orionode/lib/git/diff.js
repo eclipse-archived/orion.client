@@ -13,7 +13,11 @@ var git = require('nodegit');
 var url = require('url');
 var api = require('../api'), writeError = api.writeError;
 var clone = require('./clone');
+var fs = require('fs');
 var path = require('path');
+var mDiff = require('diff');
+var request = require('request');
+var multiparty = require('multiparty');
 var express = require('express');
 var bodyParser = require('body-parser');
 var util = require('./util');
@@ -278,7 +282,77 @@ function getDiffBetweenTwoCommits(repo, commits) {
 	});
 }
 
+function applyPatch(req, res) {
+	return clone.getRepo(req)
+	.then(function(repo) {
+		var radio = "", patchUrl = "", file = "";
+		var form = new multiparty.Form();
+		form.on("part", function(part) {
+			if (part.name === "radio") {
+				part.on("data", function(d) {
+					radio += d;
+				});
+			}
+			if (part.name === "url") {
+				part.on("data", function(d) {
+					patchUrl += d;
+				});
+			}
+			if (part.name === "uploadedfile") {
+				part.on("data", function(d) {
+					file += d;
+				});
+			}
+			part.resume();
+		});
+		form.on("error", function(err) {
+			writeError(404, res, err.message);
+		})
+		form.on('close', function() {
+			function apply() {
+				//TODO handle add/remove file
+				mDiff.applyPatches(file, {
+					getFile: function(f) {
+						return path.join(repo.workdir(), f.split("/").slice(1).join("/")	);
+					},
+					loadFile: function(index, cb) {
+						fs.readFile(this.getFile(index.oldFileName), "utf8", cb);
+					},
+					patched: function(index, content) {
+						fs.writeFile(this.getFile(index.newFileName), content, "utf8");
+					},
+					complete: function(err) {
+						if (err) return writeError(404, res, err.message);
+						res.status(200).json({JsonData: {
+							//TODO return apply patch status
+						}});
+					}
+				});
+			}
+			if (radio === "fileRadio") {
+				apply();
+			} else if (radio === "urlRadio") {
+				request(patchUrl, function (error, response, body) {
+					if (!error && response.statusCode == 200) {
+						file = body;
+						apply();
+					} else {
+						writeError(404, res, "Fail to fetch url");
+					}
+				});
+			}
+		});
+		form.parse(req);
+	})
+	.catch(function(err) {
+		writeError(404, res, err.message);
+	})
+}
+
 function postDiff(req, res) {
+	if (req.get('Content-Type').indexOf("multipart") === 0) {
+		return applyPatch(req, res);
+	}
 	var newCommit = req.body.New;
 	var originalUrl = url.parse(req.originalUrl, true);
 	var segments = originalUrl.pathname.split("/");
