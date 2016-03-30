@@ -310,15 +310,21 @@ function applyPatch(req, res) {
 		})
 		form.on('close', function() {
 			function apply() {
-				//TODO handle add/remove file
 				mDiff.applyPatches(file, {
 					getFile: function(f) {
 						return path.join(repo.workdir(), f.split("/").slice(1).join("/")	);
 					},
 					loadFile: function(index, cb) {
+						if (index.oldFileName === "/dev/null") {
+							return cb(null, "");
+						}
 						fs.readFile(this.getFile(index.oldFileName), "utf8", cb);
 					},
 					patched: function(index, content) {
+						if (index.newFileName === "/dev/null") {
+							fs.unlink(this.getFile(index.oldFileName));
+							return;
+						}
 						fs.writeFile(this.getFile(index.newFileName), content, "utf8");
 					},
 					complete: function(err) {
