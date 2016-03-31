@@ -212,19 +212,17 @@ module.exports = function(options) {
 		var searchPattern = buildSearchPattern(searchOpt);
 		var filenamePattern = buildFilenamePattern(searchOpt);
 
-		var parentFileLocation = originalFileRoot(req);
 		var endOfFileRootIndex = 5;
 
 		var searchScope = req.user.workspaceDir + searchOpt.location.substring(endOfFileRootIndex, searchOpt.location.length - 1);
 		if (searchScope.charAt(searchScope.length - 1) !== "/") searchScope = searchScope + "/";
 
-		fileUtil.getChildren(searchScope, parentFileLocation, null)
+		fs.readdirAsync(searchScope)
 		.then(function(children) {
 			var results = [];
 
 			return Promise.map(children, function(child) {
-				var childName = child.Location.substring(endOfFileRootIndex + 1);
-				return searchFile(req.user.workspaceDir, searchScope, childName, searchPattern, filenamePattern, results);
+				return searchFile(req.user.workspaceDir, searchScope, child, searchPattern, filenamePattern, results);
 			}, { concurrency: SUBDIR_SEARCH_CONCURRENCY })
 			.catch(function(/*err*/) {
 				// Probably an error reading some file or directory -- ignore
