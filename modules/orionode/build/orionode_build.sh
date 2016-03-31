@@ -1,6 +1,4 @@
 #!/bin/bash
-npm config set proxy http://proxy.eclipse.org:9898
-npm config set https-proxy http://proxy.eclipse.org:9898
 npm install
 ./node_modules/.bin/grunt
 rm -rf node_modules
@@ -11,3 +9,5 @@ rm -rf node_modules/nodegit/build/Release/obj.target
 rm -rf target
 cd ..
 tar -czf "orionode_$1.tar.gz" orionode/
+cp "orionode_$1.tar.gz" /home/data/httpd/download.eclipse.org/orion/orionode/ 
+ssh gheorghe@build.eclipse.org ./deploy.sh -archive 
