@@ -271,24 +271,28 @@ define([
 						project = parents[parents.length-1];
 					}
 				}
-				if (project && (!this.projectLocation || project.Location !== this.projectLocation)){
-					this.projectLocation = project.Location;
-					this.scriptResolver.setSearchLocation(project.Location);
-					this.getProjectChildren(project).then(function(children) {
-						var tpf;
-						for(var i = 0, len = children.length; i < len; i++) {
-							if(".tern-project" === children[i].Name) {
-								tpf = children[i].Location;
-								break;
+				if (project) { 
+					if(!this.projectLocation || project.Location !== this.projectLocation) {
+						this.projectLocation = project.Location;
+						this.scriptResolver.setSearchLocation(project.Location);
+						this.getProjectChildren(project).then(function(children) {
+							var tpf;
+							for(var i = 0, len = children.length; i < len; i++) {
+								if(".tern-project" === children[i].Name) {
+									tpf = children[i].Location;
+									break;
+								}
 							}
-						}
-						if(typeof tpf === 'string') {
-							this.refresh(tpf);
-						} else {
-							//no .tern-project - request default startup
-							this.loadTernProjectOptions();
-						}
-					}.bind(this));
+							if(typeof tpf === 'string') {
+								this.refresh(tpf);
+							} else {
+								//no .tern-project - request default startup
+								this.loadTernProjectOptions();
+							}
+						}.bind(this));
+					}
+				} else {
+					this.loadTernProjectOptions();
 				}
 			}
 		}
