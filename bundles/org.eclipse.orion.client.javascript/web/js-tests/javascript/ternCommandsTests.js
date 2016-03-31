@@ -37,10 +37,10 @@ define([
 		 */
 		function setup(options) {
 			var state = Object.create(null);
-			var buffer = state.buffer = typeof(options.buffer) === 'undefined' ? '' : options.buffer;
-			var offset = state.offset = typeof(options.offset) === 'undefined' ? 0 : options.offset;
-			var line = state.line = typeof(options.line) === 'undefined' ? '' : options.line;
-			var prefix = state.prefix = typeof(options.prefix) === 'undefined' ? '' : options.prefix;
+			var buffer = state.buffer = typeof options.buffer === 'undefined' ? '' : options.buffer;
+			var offset = state.offset = typeof options.offset === 'undefined' ? 0 : options.offset;
+			var line = state.line = typeof options.line === 'undefined' ? '' : options.line;
+			var prefix = state.prefix = typeof options.prefix === 'undefined' ? '' : options.prefix;
 			var contentType = options.contenttype ? options.contenttype : 'application/javascript';
 			var	file = state.file = jsFile;				
 			if (contentType === 'text/html'){
@@ -470,7 +470,6 @@ define([
 					offset: 63,
 					callback: done
 				};
-				// TODO This should take us to the implementation of the function
 				testOpenImpl(options, {start: 9, end: 10});
 			});
 			it('Open Declaration - Simple object property', function(done) {
@@ -568,8 +567,7 @@ define([
 					offset: 62,
 					callback: done
 				};
-				// TODO Bug 484510, expected result should be 'express'
-				testOpenImpl(options, {start: 58, end: 64});
+				testOpenImpl(options, 'express');
 			});
 			it('Open Declaration - Indexed declaration 2', function(done) {
 				var options = {
@@ -585,8 +583,39 @@ define([
 					offset: 75,
 					callback: done
 				};
-				// TODO Bug 484510, expected result should be 'express'
-				testOpenImpl(options, {start: 72, end: 75});
+				testOpenImpl(options, 'express');
+			});
+			it('Open Declaration - Bogus function expression', function(done) {
+				var options = {
+					buffer: "bogusFcnExp();",
+					offset: 6,
+					callback: done
+				};
+				testOpenDecl(options, 'Could not find declaration');
+			});
+			it('Open Implementation - Bogus function expression', function(done) {
+				var options = {
+					buffer: "bogusFcnExp();",
+					offset: 6,
+					callback: done
+				};
+				testOpenImpl(options, 'No implementation was found');
+			});
+			it('Open Declaration - Declaring node selected', function(done) {
+				var options = {
+					buffer: "var a = function(){};",
+					offset: 5,
+					callback: done
+				};
+				testOpenDecl(options, {start: 4, end: 5});
+			});
+			it('Open Implementation - Declaring node selected', function(done) {
+				var options = {
+					buffer: "var a = function(){};",
+					offset: 5,
+					callback: done
+				};
+				testOpenImpl(options, {start: 4, end: 5});
 			});
 			it('Open Declaration - Multiple matches with Tern didGuess() === true', function(done) {
 				var options = {

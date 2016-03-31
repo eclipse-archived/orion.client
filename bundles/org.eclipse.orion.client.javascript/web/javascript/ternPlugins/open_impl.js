@@ -30,9 +30,12 @@ define([
 				query.start = query.end;
 			}
 			var theFile = server.fileMap[query.file];
-			var impl = this.findImplRecurse(query.end, theFile, {implementation: {}}, server);
+			var impl = this.findImplRecurse(query.end, theFile, {}, server);
 			if(!query.guess && infer.didGuess()) {
 				return null;
+			}
+			if (!impl.implementation){
+				impl.implementation = {};
 			}
 			impl.implementation.guess = infer.didGuess();
 			return impl;
@@ -88,9 +91,20 @@ define([
 						// There are many parents of an identifier, rather than list them all, default to look up the typeDef of the identifier
 						query = {start: node.start, end: node.end, file: serverFile.name, guess: true};
 						typeDef = tern.findDef(server, query, serverFile);
-						if (typeDef && typeof typeDef.start === 'number' && typeof typeDef.end === 'number' && (typeDef.start !== node.start || typeDef.end !== node.end)){
-							newServerFile = server.fileMap[typeDef.file];
-							return this.findImplRecurse(typeDef.end, newServerFile, {implementation: {start: typeDef.start, end: typeDef.end, file: typeDef.file}}, server);
+						if (typeDef){
+							if (typeof typeDef.start === 'number' && typeof typeDef.end === 'number'){
+								if (typeDef.start !== node.start || typeDef.end !== node.end){
+									// Found a new node, recurse into the declaring node
+									newServerFile = server.fileMap[typeDef.file];
+									return this.findImplRecurse(typeDef.end, newServerFile, {implementation: {start: typeDef.start, end: typeDef.end, file: typeDef.file}}, server);
+								}
+							} else if (typeof typeDef.origin === 'string'){
+								// The declaration is in an index file
+								return {implementation: {origin: typeDef.origin}};
+							} else if (!candidateImpl.implementation){
+								// Could not find an implementation, still at the node we started at, tell the user we can't find an implementation	
+								return {};
+							}
 						}
 						
 						// The typeDef couldn't be found or matches the current node, just return the node
