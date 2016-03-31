@@ -112,6 +112,7 @@ function siteJSON(site, req) {
 			}
 		}
 		siteURL = url.format(parsedURL);
+		if (siteURL[siteURL.length - 1] === '/') siteURL = siteURL.substring(0, siteURL.length - 1);
 	}
 	site.HostingStatus = {
 		Status: siteURL ? "started" : "stopped",
