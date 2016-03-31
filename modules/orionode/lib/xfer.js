@@ -15,6 +15,7 @@ var express = require('express');
 var path = require('path');
 var Promise = require('bluebird');
 var fs = Promise.promisifyAll(require('fs'));
+var fileUtil = require('./fileUtil');
 
 module.exports = function(options) {
 
@@ -33,7 +34,7 @@ function getXfer(req, res) {
     // Send the file to the page output.
     zip.pipe(res);
     
-    filePath = path.join(req.user.workspaceDir, filePath.replace(/.zip$/, ""));
+    filePath = fileUtil.safeFilePath(req.user.workspaceDir, filePath.replace(/.zip$/, ""));
     write(zip, filePath, filePath)
     .then(function() {
     	zip.finalize();
