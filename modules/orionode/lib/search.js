@@ -66,26 +66,36 @@ module.exports = function(options) {
 		this.username = null;
 
 		this.buildSearchOptions = function() {
-			var queryObject = url.parse(req.url, true).query;
-			var terms = queryObject.q.split(" ");
+			function getEncodedParameter(param) {
+				var query = url.parse(req.originalUrl).search.substring(1), result = "";
+				query.split("&").some(function(p) {
+					var pair = p.split("=");
+					if (pair[0] === param) {
+						result = pair[1];
+						return true;
+					}
+				});
+				return result;
+			}
+			var terms = getEncodedParameter("q").split(/[\s\+]+/);
 			for (var i = 0; i < terms.length; i++) {
 				var term = terms[i];
 				if (isSearchField(term)) {
 					if (term.lastIndexOf("NameLower:", 0) === 0) {
 						this.filenamePatternCaseSensitive = false;
-						this.filenamePattern = term.substring(10);
+						this.filenamePattern = decodeURIComponent(term.substring(10));
 					} else if (term.lastIndexOf("Location:", 0) === 0) {
-						this.location = term.substring(9 + req.contextPath.length);
+						this.location = decodeURIComponent(term.substring(9 + req.contextPath.length));
 					} else if (term.lastIndexOf("Name:", 0) === 0) {
 						this.filenamePatternCaseSensitive = true;
-						this.filenamePattern = term.substring(5);
+						this.filenamePattern = decodeURIComponent(term.substring(5));
 					} else if (term.lastIndexOf("RegEx:", 0) === 0) {
 						this.regEx = true;
 					} else if (term.lastIndexOf("CaseSensitive:", 0) === 0) {
 						this.searchTermCaseSensitive = true;
 					}
 				} else {
-					this.searchTerm = term;
+					this.searchTerm = decodeURIComponent(term);
 					this.fileContentSearch = true;
 				}
 			}
