@@ -14,7 +14,6 @@ var ETag = require('./util/etag');
 var path = require('path');
 var Promise = require('bluebird');
 var rimraf = require('rimraf');
-var url = require('url');
 var api = require('./api');
 
 var fs = Promise.promisifyAll(require('fs'));
@@ -72,8 +71,10 @@ var getChildren = exports.getChildren = function(directory, parentLocation, excl
 				Directory: isDirectory,
 				Location: location
 			};
-			if (isDirectory)
-				child.ChildrenLocation = api.join(parentLocation, childname) + '?depth=1';
+			if (isDirectory) {
+				child.ChildrenLocation = location + '?depth=1';
+				child.ExportLocation = location.replace(/\/file/, "/xfer/export").replace(/\/$/, "") + ".zip";
+			}
 			results.push(child);
 		});
 		return results;
@@ -178,7 +179,7 @@ function _copyDir(srcPath, destPath, callback) {
 	};
 	cpDir = function(dirlist) {
 		return Promise.each(dirlist, function(d) {
-			var currentDestFolderPath = d.path.replace(srcPath, destPath)
+			var currentDestFolderPath = d.path.replace(srcPath, destPath);
 			if (d.dir) {
 				return fs.mkdirAsync(currentDestFolderPath);
 			}
@@ -211,7 +212,7 @@ function _copyDir(srcPath, destPath, callback) {
 		return cpFile(dirlist);
 	})
 	.thenReturn(null)
-	.asCallback(callback)
+	.asCallback(callback);
 }
 
 /**
@@ -237,7 +238,7 @@ var copy = exports.copy = function(srcPath, destPath, callback) {
 		throw new Error("Unknown file type"); // not a file or a directory
 	})
 	.thenReturn(destPath)
-	.asCallback(callback)
+	.asCallback(callback);
 };
 
 /**
@@ -338,7 +339,8 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, res, wwwp
 		return;
 	}
 	// Orion's File Client expects ChildrenLocation to always be present
-	metaObj.ChildrenLocation = api.join(fileRoot, wwwpath) + '?depth=1';
+	metaObj.ChildrenLocation = metaObj.Location + '?depth=1';
+	metaObj.ExportLocation = metaObj.Location.replace(/\/file/, "/xfer/export").replace(/\/$/, "") + ".zip";
 	if (!includeChildren) {
 		api.write(null, res, null, metaObj);
 		return;
@@ -352,7 +354,7 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, res, wwwp
 		metaObj.Children = children;
 		api.write(null, res, null, metaObj);
 	})
-	.catch(api.writeError.bind(null, 500, res))
+	.catch(api.writeError.bind(null, 500, res));
 };
 
 /**
@@ -384,7 +386,7 @@ exports.handleFilePOST = function(workspaceDir, fileRoot, req, res, wwwpath, des
 		.then(function(stats) {
 			writeFileMetadata(fileRootUrl, res, wwwpath, destFilepath, stats, /*etag*/null, /*includeChildren*/false, metadataMixins);
 		})
-		.catch(api.writeError.bind(null, 500, res))
+		.catch(api.writeError.bind(null, 500, res));
 	};
 
 	fs.statAsync(destFilepath)
@@ -399,7 +401,7 @@ exports.handleFilePOST = function(workspaceDir, fileRoot, req, res, wwwpath, des
 			return api.write(400, res, null, 'Illegal combination of X-Create-Options.');
 		}
 		if (xCreateOptions.indexOf('no-overwrite') !== -1 && destExists) {
-			return api.writeError(412, res, new Error('A file or folder with the same name already exists at this location.'))
+			return api.writeError(412, res, new Error('A file or folder with the same name already exists at this location.'));
 		}
 
 		if (isCopy || isMove) {
@@ -418,15 +420,15 @@ exports.handleFilePOST = function(workspaceDir, fileRoot, req, res, wwwpath, des
 					return api.writeError(404, res, 'File not found:' + sourceUrl);
 				}
 				return api.writeError(500, res, err);
-			})
+			});
 		}
 		// Just a regular file write
 		return Promise.resolve()
 		.then(destExists ? fs.unlinkAsync(destFilepath) : null)
 		.then(function() {
-			return isDirectory ? fs.mkdirAsync(destFilepath) : fs.writeFileAsync(destFilepath, '')
+			return isDirectory ? fs.mkdirAsync(destFilepath) : fs.writeFileAsync(destFilepath, '');
 		})
 		.then(writeResponse.bind(null, destExists))
-		.catch(api.writeError.bind(null, 500, res))
+		.catch(api.writeError.bind(null, 500, res));
 	});
 };

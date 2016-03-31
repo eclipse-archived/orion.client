@@ -134,6 +134,6 @@ Task.prototype = {
 };
 
 module.exports = {
-	orionTasksAPI: orionTasksAPI,
+	router: orionTasksAPI,
 	Task: Task,
 };

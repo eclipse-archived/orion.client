@@ -11,22 +11,12 @@
 /*eslint-env node */
 var express = require('express'),
 	path = require('path'),
-	fs = require('fs'),
-	orionFile = require('./lib/file'),
-	orionWorkspace = require('./lib/workspace'),
-	orionGit = require('./lib/git'),
-	orionNodeStatic = require('./lib/orionode_static'),
-	orionPrefs = require('./lib/controllers/prefs'),
-	orionStatic = require('./lib/orion_static'),
-	orionTasks = require('./lib/tasks'),
-	orionSearch = require('./lib/search'),
-	orionMetrics = require('./lib/metrics'),
-	orionSites = require('./lib/sites'),
-	term = require('term.js');
+	fs = require('fs');
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
+	MINIFIED_ORION_CLIENT = "lib/orion.client",
 	ORION_CLIENT = path.normalize(path.join(__dirname,
-		fs.existsSync(path.join(__dirname, "lib/orion.client")) ? 'lib/orion.client/' : '../../'));
+		fs.existsSync(path.join(__dirname, MINIFIED_ORION_CLIENT)) ? MINIFIED_ORION_CLIENT : '../../'));
 
 function handleError(err) {
 	throw err;
@@ -37,7 +27,7 @@ function startServer(options) {
 	options.configParams = options.configParams || {};
 	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : undefined;
 	if (typeof options.workspaceDir !== "string") {
-		throw new Error("workspaceDir is required")
+		throw new Error("workspaceDir is required");
 	}
 	
 	try {
@@ -57,60 +47,43 @@ function startServer(options) {
 
 		if (options.configParams["orion.single.user"]) {
 			app.use(/* @callback */ function(req, res, next){
-				req.user = {UserName: "anonymous"};
+				req.user = {username: "anonymous"};
 				next();
 			});
 			app.post('/login', function(req, res) {
 				if (!req.user) {
 					return res.status(200).end();
 				}
-				return res.status(200).json(req.user);
+				return res.status(200).json({UserName: req.user.username});
 			});
 		} else {
 			app.use(require('./lib/user')(options));
 		}
-		app.use('/site', checkAuthenticated, orionSites(options));
+		app.use('/site', checkAuthenticated, require('./lib/sites')(options));
 
-		app.use(term.middleware());
-		app.use(orionNodeStatic(path.normalize(path.join(LIBS, 'orionode.client/'))));
-		app.use(orionStatic({
-			orionClientRoot: ORION_CLIENT,
-			maxAge: options.maxAge
-		}));
+		app.use(require('term.js').middleware());
+		app.use(require('./lib/orionode_static')(path.normalize(path.join(LIBS, 'orionode.client/'))));
+		app.use(require('./lib/orion_static')({ orionClientRoot: ORION_CLIENT, maxAge: options.maxAge }));
 		
 		// API handlers
-		app.use('/task', checkAuthenticated, orionTasks.orionTasksAPI({
-			root: '/task'
-		}));
-		app.use('/file', checkAuthenticated, orionFile({
-			root: '/file',
-			options: options
-		}));
-		app.use('/workspace', checkAuthenticated, orionWorkspace({
-			root: '/workspace',
-			fileRoot: '/file',
-			options: options
-		}));
-		app.use('/gitapi', checkAuthenticated, orionGit({ 
-			root: '/gitapi',
-			fileRoot: '/file'
-		}));
-		app.use('/filesearch', checkAuthenticated, orionSearch({
-			root: '/filesearch',
-			fileRoot: '/file'
-		}));
-		app.use('/prefs', checkAuthenticated, orionPrefs(options));
-		app.use('/metrics', orionMetrics.router(options));
+		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ root: '/task' }));
+		app.use('/file', checkAuthenticated, require('./lib/file')({ root: '/file', options: options }));
+		app.use('/workspace', checkAuthenticated, require('./lib/workspace')({ root: '/workspace', fileRoot: '/file', options: options }));
+		app.use('/gitapi', checkAuthenticated, require('./lib/git')({ root: '/gitapi', fileRoot: '/file' }));
+		app.use('/filesearch', checkAuthenticated, require('./lib/search')({ root: '/filesearch',  fileRoot: '/file' }));
+		app.use('/prefs', checkAuthenticated, require('./lib/controllers/prefs')(options));
+		app.use('/xfer', checkAuthenticated, require('./lib/xfer')(options));
+		app.use('/metrics', require('./lib/metrics').router(options));
 
 		//error handling
 		app.use(function(req, res){
 			res.status(404);
 
 			// respond with html page
-			if (req.accepts('html')) {
-				//res.render('404', { url: req.url });
-				return;
-			}
+//			if (req.accepts('html')) {
+//				res.render('404', { url: req.url });
+//				return;
+//			}
 
 			// respond with json
 			if (req.accepts('json')) {
