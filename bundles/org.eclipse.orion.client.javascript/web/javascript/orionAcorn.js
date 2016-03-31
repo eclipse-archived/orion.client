@@ -422,7 +422,9 @@ define([
 		}
 		ast.comments = this.comments;
 		ast.tokens = this.tokens;
-		ast.dependencies = [];
+		if (!ast.dependencies) {
+			ast.dependencies = [];
+		}
 		for (var prop in this.dependencies) {
 			if (this.dependencies.hasOwnProperty(prop)) {
 				ast.dependencies.push(this.dependencies[prop]);

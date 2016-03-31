@@ -78,9 +78,10 @@ define([
 				var blocks = Finder.findScriptBlocks(text);
 				if(Array.isArray(blocks)) {
 					var cu = new CU(blocks, {location: f});
+					var source = cu.getSource(); // this also sets the dependencies from the blocks
 					server._htmlDeps.file = f;
 					server._htmlDeps.map[f] = cu.getDependencies(); 
-					return cu.getSource();
+					return source;
 				}
 			}
 		}
