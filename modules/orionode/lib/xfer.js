@@ -15,19 +15,21 @@ var unzip = require('unzip');
 var request = require('request');
 var express = require('express');
 var path = require('path');
+var os = require('os');
 //var Busboy = require('busboy');
 var Promise = require('bluebird');
 var mkdirp = require('mkdirp');
 var fs = Promise.promisifyAll(require('fs'));
 var fileUtil = require('./fileUtil');
 
-var UPLOADS_FOLDER = ".uploads";
-
 /**
  * @callback
  */
 module.exports = function(options) {
-	mkdirp(path.join(options.workspaceDir, UPLOADS_FOLDER), function (err) {
+	var UPLOADS_FOLDER = path.join(options.configParams['orion.single.user'] ?
+			path.join(os.homedir(), ".orion") : req.user.workspaceDir, ".uploads");
+	
+	mkdirp(UPLOADS_FOLDER, function (err) {
 		if (err) console.error(err);
 	});
 
@@ -45,7 +47,7 @@ function postImportXfer(req, res) {
 	filePath = fileUtil.safeFilePath(req.user.workspaceDir, filePath);
 	var xferOptions = getOptions(req);
 	var sourceURL = req.query.source;
-	var unzip = xferOptions.indexOf("raw") === -1;
+	var shouldUnzip = xferOptions.indexOf("raw") === -1;
 	var fileName = req.get("Slug");
 	if (!fileName) {
 		if (sourceURL) {
@@ -55,15 +57,15 @@ function postImportXfer(req, res) {
 	if (!fileName && !unzip) {
 		return writeError(400, res, "Transfer request must indicate target filename");
 	}
-	var length = -1;
 	function upload(request) {
-		var tempFile = path.join(options.workspaceDir, UPLOADS_FOLDER, Date.now() + fileName);
+		var tempFile = path.join(UPLOADS_FOLDER, Date.now() + fileName);
 		var ws = fs.createWriteStream(tempFile);
 		ws.on('finish', function() {
-			completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, unzip);
+			completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, shouldUnzip);
 		});
 		request.pipe(ws);
 	}
+	var length = -1;
 	if (!sourceURL) {
 		var lengthStr = req.get("X-Xfer-Content-Length") || req.get("Content-Length");
 		if (lengthStr) length = Number(lengthStr);
@@ -128,6 +130,7 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 			}
 		})
 		.on('close', function() {
+			fs.unlink(tempFile);
 			res.setHeader("Location", "/file" + filePath.substring(req.user.workspaceDir.length));
 			res.status(201).end();
 		});
