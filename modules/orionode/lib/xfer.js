@@ -12,6 +12,7 @@
 var api = require('./api'), writeError = api.writeError;
 var archiver = require('archiver');
 var unzip = require('unzip');
+var request = require('request');
 var express = require('express');
 var path = require('path');
 //var Busboy = require('busboy');
@@ -55,17 +56,23 @@ function postImportXfer(req, res) {
 		return writeError(400, res, "Transfer request must indicate target filename");
 	}
 	var length = -1;
-	if (!sourceURL) {
-		var lengthStr = req.get("X-Xfer-Content-Length") || req.get("Content-Length");
-		if (lengthStr) length = Number(lengthStr);
-	}
-	if (req.get("Content-Type") === "application/octet-stream") {
+	function upload(request) {
 		var tempFile = path.join(options.workspaceDir, UPLOADS_FOLDER, Date.now() + fileName);
 		var ws = fs.createWriteStream(tempFile);
 		ws.on('finish', function() {
 			completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, unzip);
 		});
-		req.pipe(ws);
+		request.pipe(ws);
+	}
+	if (!sourceURL) {
+		var lengthStr = req.get("X-Xfer-Content-Length") || req.get("Content-Length");
+		if (lengthStr) length = Number(lengthStr);
+	} else {
+		upload(request(sourceURL));
+		return;
+	}
+	if (req.get("Content-Type") === "application/octet-stream") {
+		upload(req);
 		return;
 	}
 	writeError(500, res, "Not implemented yet.");
@@ -100,7 +107,7 @@ function excluded(excludes, rootName, outputName) {
 function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, shouldUnzip) {
 	var overwrite = xferOptions.indexOf("overwrite-older") !== -1;
 	if (shouldUnzip) {
-		var excludes = [];
+		var excludes = (req.query.exclude || "").split(",");
 		if (fs.existsSync(path.join(filePath, ".git"))) {
 			excludes.push(".git");
 		}
