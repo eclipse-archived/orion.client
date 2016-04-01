@@ -6,21 +6,104 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ * IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
 var api = require('./api'), writeError = api.writeError;
 var archiver = require('archiver');
 var express = require('express');
 var path = require('path');
+//var Busboy = require('busboy');
 var Promise = require('bluebird');
+var mkdirp = require('mkdirp');
 var fs = Promise.promisifyAll(require('fs'));
 var fileUtil = require('./fileUtil');
 
+var UPLOADS_FOLDER = ".uploads";
+
+/**
+ * @callback
+ */
 module.exports = function(options) {
+	mkdirp(path.join(options.workspaceDir, UPLOADS_FOLDER), function (err) {
+		if (err) console.error(err);
+	});
 
 	return express.Router()
-	.get('/export*', getXfer);
+	.get('/export*', getXfer)
+	.post('/import*', postImportXfer);
+	
+	
+function getOptions(req) {
+	return req.get("X-Xfer-Options").split(",");
+}
+
+function postImportXfer(req, res) {
+	var filePath = req.params["0"];
+	filePath = fileUtil.safeFilePath(req.user.workspaceDir, filePath);
+	var xferOptions = getOptions(req);
+	var sourceURL = req.query.source;
+	var unzip = xferOptions.indexOf("raw") === -1;
+	var fileName = req.get("Slug");
+	if (!fileName) {
+		if (sourceURL) {
+			fileName = path.basename(sourceURL);
+		}
+	}
+	if (!fileName && !unzip) {
+		return writeError(400, res, "Transfer request must indicate target filename");
+	}
+	var length = -1;
+	if (!sourceURL) {
+		var lengthStr = req.get("X-Xfer-Content-Length") || req.get("Content-Length");
+		if (lengthStr) length = Number(lengthStr);
+	}
+	if (req.get("Content-Type") === "application/octet-stream") {
+		var tempFile = path.join(options.workspaceDir, UPLOADS_FOLDER, Date.now() + fileName);
+		var ws = fs.createWriteStream(tempFile);
+		ws.on('finish', function() {
+			completeTransfer(req, res, tempFile, filePath, fileName, xferOptions);
+		});
+		req.pipe(ws);
+		return;
+	}
+	writeError(500, res, "Not implemented yet.");
+//	var busboy = new Busboy({ headers: req.headers });
+//	busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+//		console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
+//		file.on('data', function(data) {
+//			console.log('File [' + fieldname + '] got ' + data.length + ' bytes');
+//		});
+//		file.on('end', function() {
+//			console.log('File [' + fieldname + '] Finished');
+//		});
+//	});
+//	busboy.on('finish', function() {
+//		console.log('Done parsing form!');
+//		res.writeHead(303, { Connection: 'close', Location: '/' });
+//		res.end();
+//	});
+//	req.pipe(busboy);
+}
+
+function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, unzip) {
+	var overwrite = xferOptions.indexOf("overwrite-older") !== -1;
+	if (unzip) {
+		writeError(500, res, "Not implemented yet.");
+	} else {
+		var file = path.join(filePath, fileName);
+		if (!overwrite && fs.existsSync(file)) {
+			return res.status(400).json({ExistingFiles: fileName});
+		}
+		fs.rename(tempFile, file, function(err) {
+			if (err) {
+				return writeError(400, res, "Transfer failed");
+			}
+			res.setHeader("Location", "/file" + file.substring(req.user.workspaceDir.length));
+			res.status(201).end();
+		});
+	}
+}
 	
 function getXfer(req, res) {
 	var filePath = req.params["0"];
@@ -30,18 +113,15 @@ function getXfer(req, res) {
 	}
 	
 	var zip = archiver('zip');
-
-    // Send the file to the page output.
-    zip.pipe(res);
-    
-    filePath = fileUtil.safeFilePath(req.user.workspaceDir, filePath.replace(/.zip$/, ""));
-    write(zip, filePath, filePath)
-    .then(function() {
-    	zip.finalize();
-    })
-    .catch(function(err) {
-    	writeError(500, res, err.message);
-    });
+	zip.pipe(res);
+	filePath = fileUtil.safeFilePath(req.user.workspaceDir, filePath.replace(/.zip$/, ""));
+	write(zip, filePath, filePath)
+	.then(function() {
+		zip.finalize();
+	})
+	.catch(function(err) {
+		writeError(500, res, err.message);
+	});
 }
 
 var SUBDIR_SEARCH_CONCURRENCY = 10;

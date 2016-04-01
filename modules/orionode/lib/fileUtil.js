@@ -73,6 +73,7 @@ var getChildren = exports.getChildren = function(directory, parentLocation, excl
 			};
 			if (isDirectory) {
 				child.ChildrenLocation = location + '?depth=1';
+				child.ImportLocation = location.replace(/\/file/, "/xfer/import").replace(/\/$/, "");
 				child.ExportLocation = location.replace(/\/file/, "/xfer/export").replace(/\/$/, "") + ".zip";
 			}
 			results.push(child);
@@ -340,6 +341,7 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, res, wwwp
 	}
 	// Orion's File Client expects ChildrenLocation to always be present
 	metaObj.ChildrenLocation = metaObj.Location + '?depth=1';
+	metaObj.ImportLocation = metaObj.Location.replace(/\/file/, "/xfer/import").replace(/\/$/, "");
 	metaObj.ExportLocation = metaObj.Location.replace(/\/file/, "/xfer/export").replace(/\/$/, "") + ".zip";
 	if (!includeChildren) {
 		api.write(null, res, null, metaObj);
