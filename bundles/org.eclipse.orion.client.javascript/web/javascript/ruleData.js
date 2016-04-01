@@ -78,6 +78,7 @@ define([
 			"semi" : 1,
 			"type-checked-consistent-return" : 0,
 			"unnecessary-nls" : 0,
+			"unknown-require": 1,
 			"use-isnan" : 2,
 			"valid-typeof" : 2
 		},

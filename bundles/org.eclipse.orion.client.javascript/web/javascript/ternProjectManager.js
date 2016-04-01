@@ -273,6 +273,7 @@ define([
 				}
 				if (project) { 
 					if(!this.projectLocation || project.Location !== this.projectLocation) {
+						this.starting();
 						this.projectLocation = project.Location;
 						this.scriptResolver.setSearchLocation(project.Location);
 						this.getProjectChildren(project).then(function(children) {

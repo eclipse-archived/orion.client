@@ -44,6 +44,44 @@ define([
 		}
 	}
 	
+	/**
+     * @description Computes the offset for the block comment. i.e. 2 if the block starts with /*, 3 if it starts with /**
+     * @param {String} text The file text
+     * @param {Number} offset The doc node offset
+     * @returns {Number} 2 or 3 depending on the start of the comment block
+     */
+    function getDocOffset(text, offset) {
+        if(text.charAt(offset+1) === '*') {
+            if(text.charAt(offset+2) === '*') {
+                return 3;
+            }
+            return 2;
+        }
+        return 0;
+    }
+    
+	/**
+	 * @description Updates the eslint directive
+	 * @param {String}] text The text of the source file
+	 * @param {String} directive The directive text
+	 * @param {String} name The name to add
+	 * @returns {String} The new directive text
+	 */
+	function updateDirective(ast, name) {
+		var comment = Finder.findDirective(ast, 'eslint-env'); //$NON-NLS-1$
+        if(comment && comment.value.indexOf(name) < 0) {
+            var start = getDocOffset(ast.sourceFile.text, comment.range[0]) + comment.range[0],
+            	newText;
+            if(comment.value.slice('eslint-env'.length).trim() !== '') {
+	            newText = comment.value.trim() + ', '+name; //$NON-NLS-1$
+	        } else {
+		        newText = comment.value.trim() + ' '+name;  //$NON-NLS-1$
+	        }
+            return {text: newText, start: start, end: start+comment.value.length}; //$NON-NLS-1$
+        }
+        return null;
+    }
+	
 	Objects.mixin(JavaScriptQuickfixes.prototype, /** @lends javascript.JavaScriptQuickfixes.prototype*/ {
 		/**
 		 * @description Editor command callback
@@ -210,7 +248,7 @@ define([
 					var plugins = json.plugins;
 					var newPlugin = ast.sourceFile.text.slice(context.annotation.start, context.annotation.end); ///, the '(.*)' plugin/.exec(context.annotation.title);
 					// The problem should only appear if there is a plugins entry that doesn't include the needed plugin
-					if (!ternFileLocation || !json || !plugins || !newPlugin || !newPlugin[1]){
+					if (!ternFileLocation || !json || !plugins || !newPlugin){
 						return null;
 					}
 					newPlugin = translatePluginName(newPlugin);
@@ -223,6 +261,52 @@ define([
 						editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
 					});
 				});
+			},
+			/** @callback fix the unknown-require-plugin problem */
+			"unknown-require-plugin": function(editorContext, context, astManager) {
+				return astManager.getAST(editorContext).then(function(ast) {
+					var ternFileLocation = this.ternProjectManager.getTernProjectFileLocation();
+					var json = this.ternProjectManager.getJSON();
+					if(!json) {
+						json = Object.create(null);
+					}
+					var newPlugin = translatePluginName(context.annotation.data);
+					if(!json.plugins) {
+						json.plugins = Object.create(null);
+					}
+					json.plugins[newPlugin] = Object.create(null);
+					var contents = JSON.stringify(json, null, '\t'); //$NON-NLS-1$
+					var fileClient = this.ternProjectManager.scriptResolver.getFileClient();
+					if(!ternFileLocation) {
+						//create a new one
+						return fileClient.createFile(this.ternProjectManager.getProjectFile(), '.tern-project').then(function(file) {
+							return fileClient.write(file.Location, contents).then(/* @callback */ function(result) {
+								this.ternProjectManager.refresh(ternFileLocation);
+								var newDirective = updateDirective(ast, context.annotation.data);
+								if(newDirective) {
+									return editorContext.setText(newDirective.text, newDirective.start, newDirective.end).then(function() {
+										return editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
+									});
+								} 
+								return editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
+							}.bind(this));
+						}.bind(this));
+					}
+					//update
+					return fileClient.write(ternFileLocation, contents).then(/* @callback */ function(result) {
+						this.ternProjectManager.refresh(ternFileLocation);
+						// now we need to run the syntax checker on the current file to get rid of stale annotations
+						var newDirective = updateDirective(ast, context.annotation.data);
+						if(newDirective) {
+							return editorContext.setText(newDirective.text, newDirective.start, newDirective.end).then(function() {
+								return editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
+							}, null, function() {
+								return "Updating project configuration..."
+							});
+						} 
+						return editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
+					}.bind(this));
+				}.bind(this));
 			},
 			/** @callback fix the check-tern-project rule */
 			"check-tern-project" : function(editorContext, context, astManager) {

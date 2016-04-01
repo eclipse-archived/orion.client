@@ -98,6 +98,8 @@ define({
 	'no-with': 'Discouraged use of \'with\' statement.',
 	'no-with-description': 'Warn when the with statement is used.',
 	'radix': 'Missing radix parameter.',
+	'unknown-require': 'This library could not be found, type information for it will be incomplete.',
+	'unknown-require-plugin': 'This library is available in a Tern plugin that is not currently loaded.',
 	'radix-description': 'Warn when parseInt() is called without the \'radix\' parameter.',
 	'semi': 'Missing semicolon.',
 	'semi-description': 'Warn about missing semicolons.',

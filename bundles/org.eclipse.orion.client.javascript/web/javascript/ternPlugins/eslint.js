@@ -151,7 +151,14 @@ define([
 				return tern.findExprType(server, query, file, expr);
 			};
 			_tern.plugins = server.options.plugins;
-			_tern.defs = server.options.defs;
+			_tern.getDef = function(defName) {
+				for(var i = 0, len = server.defs.length; i < len; i++) {
+					var def = server.defs[i];
+					if(def && (def['!name'] === defName || def[defName])) {
+						return def;
+					}
+				}
+			};
 			_tern.optionalPlugins = server.options.optionalPlugins;
 			_tern.query = query;
 			_tern.file = file;

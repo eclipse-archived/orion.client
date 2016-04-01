@@ -9,8 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env amd*/
-/*globals importScripts onmessage:true onconnect:true requirejs*/
+/*eslint-env amd, worker */
 /**
  * Implements eslint's load-rules API for AMD. Our rules are loaded as AMD modules.
  */
@@ -38,6 +37,33 @@ define([
 ], function(util, Logger, Finder, ProblemMessages, Estraverse, JsSyntax,
 		accessorPairs, noControlRegex, noDuplicateCase, noElseReturn, noEmptyCharClasses, 
 		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs, noObjCalls, noSelfCompare, noIrregularWhitespace) {
+	
+	var nodeModules = {
+		"buffer": true, 
+		"cluster": true, 
+		"crypto": true, 
+		"dns": true, 
+		"domain": true, 
+		"events": true, 
+		"fs": true, 
+		"http": true, 
+		"https": true, 
+		"net": true, 
+		"os": true, 
+		"path": true, 
+		"punycode": true, 
+		"readline": true, 
+		"stream": true, 
+		"string_decoder": true, 
+		"tls":true, 
+		"tty": true, 
+		"dgram": true, 
+		"url": true, 
+		"util": true, 
+		"v8": true, 
+		"vm": true, 
+		"zlib": true
+	};
 	
     var rules = {
     	/** @callback */
@@ -1957,6 +1983,48 @@ define([
         			"BreakStatement": checkForSemicolon,
         			"ContinueStatement": checkForSemicolon
         		};
+        },
+        /** @callback */
+        "unknown-require": function(context) {
+        	return {
+        		"CallExpression": function(node) {
+        			if(node.callee.name === "require") {
+        				var args = node.arguments;
+        				if(args.length === 1) {
+        					var lib = args[0];
+        					if(lib.type === "Literal" && lib.value.charAt(0) !== '.') { //we don't check relative libs
+        						var tern = context.getTern();
+        						if(tern.plugins[lib.value]) { //it has a named plugin
+        							return;
+        						}
+        						//check the defs
+    							if(tern.getDef(lib.value)) {
+    								return;
+    							}
+								//it might be a node built-in, this also confirms its in the running node def
+								var nodejs = tern.getDef('node');
+								if(nodejs) {
+									if(nodejs[lib.value]) {
+										return;
+									} else if(nodejs['!define'] && nodejs['!define'][lib.value]) {
+										return;
+									}
+								}
+								//TODO check for the module having been loaded via the graph
+								if(tern.optionalPlugins[lib.value]) {
+									//we known about it
+									context.report(lib, ProblemMessages['unknown-require-plugin'], {pid: 'unknown-require-plugin', nls: 'unknown-require-plugin', data: lib.value});
+								} else if(nodeModules[lib.value]) {
+									context.report(lib, ProblemMessages['unknown-require-plugin'], {pid: 'unknown-require-plugin', nls: 'unknown-require-plugin', data: 'node'});
+								} else {
+									//TODO hook in here to go fetch it
+									context.report(lib, ProblemMessages['unknown-require'], {data: lib.value});
+								}
+        					}
+        				}
+        			}
+        		}
+        	};
         },
         /** @callback */
 		"use-isnan": function(context) {

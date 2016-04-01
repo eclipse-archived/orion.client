@@ -734,6 +734,19 @@ define([
                     ]
     			}
     	);
+    	
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+    			quickFixComputer,
+    			{
+        			name: javascriptMessages["unknownRequirePluginFixName"],
+        			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+        			id : "unknown.require.plugin.fix",  //$NON-NLS-1$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:unknown-require-plugin)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                    ]
+    			}
+    	);
 
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
@@ -1494,6 +1507,12 @@ define([
  				 	        	                	name: javascriptMessages["undefMember"],
  				 	        	                	type: "number",  //$NON-NLS-1$
  				 	        	                	defaultValue: error,
+ 				 	        	                	options: severities
+ 				 	        	                },
+ 				 	        	                {	id: "unknown-require",  //$NON-NLS-1$
+ 				 	        	                	name: javascriptMessages["unknownRequire"],
+ 				 	        	                	type: "number",  //$NON-NLS-1$
+ 				 	        	                	defaultValue: warning,
  				 	        	                	options: severities
  				 	        	                },
  				 	        	                {	id: "no-else-return",  //$NON-NLS-1$
