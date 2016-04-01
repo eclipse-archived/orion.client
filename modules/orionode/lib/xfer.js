@@ -46,6 +46,9 @@ function postImportXfer(req, res) {
 	var filePath = req.params["0"];
 	filePath = fileUtil.safeFilePath(req.user.workspaceDir, filePath);
 	var xferOptions = getOptions(req);
+	if (xferOptions.indexOf("sftp") !== -1) {
+		return writeError(500, res, "Not implemented yet.");
+	}
 	var sourceURL = req.query.source;
 	var shouldUnzip = xferOptions.indexOf("raw") === -1;
 	var fileName = req.get("Slug");
