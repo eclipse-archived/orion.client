@@ -35,7 +35,8 @@
     "request": "^2.69.0",
     "rimraf": "~2.2.6",
     "socket.io": "~1.0.4",
-    "term.js": "0.0.3"
+    "term.js": "0.0.3",
+    "unzip": "^0.1.11"
   },
   "optionalDependencies": {
     "pty.js": "~0.3.0"

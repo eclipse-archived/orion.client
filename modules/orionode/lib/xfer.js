@@ -11,6 +11,7 @@
 /*eslint-env node */
 var api = require('./api'), writeError = api.writeError;
 var archiver = require('archiver');
+var unzip = require('unzip');
 var express = require('express');
 var path = require('path');
 //var Busboy = require('busboy');
@@ -62,7 +63,7 @@ function postImportXfer(req, res) {
 		var tempFile = path.join(options.workspaceDir, UPLOADS_FOLDER, Date.now() + fileName);
 		var ws = fs.createWriteStream(tempFile);
 		ws.on('finish', function() {
-			completeTransfer(req, res, tempFile, filePath, fileName, xferOptions);
+			completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, unzip);
 		});
 		req.pipe(ws);
 		return;
@@ -86,10 +87,43 @@ function postImportXfer(req, res) {
 //	req.pipe(busboy);
 }
 
-function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, unzip) {
+function excluded(excludes, rootName, outputName) {
+	if (rootName === outputName) {
+		return false;
+	}
+	if (excludes.indexOf(path.basename(outputName)) !== -1) {
+		return true;
+	}
+	return excluded(excludes, rootName, path.dirname(outputName));
+}
+
+function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, shouldUnzip) {
 	var overwrite = xferOptions.indexOf("overwrite-older") !== -1;
-	if (unzip) {
-		writeError(500, res, "Not implemented yet.");
+	if (shouldUnzip) {
+		var excludes = [];
+		if (fs.existsSync(path.join(filePath, ".git"))) {
+			excludes.push(".git");
+		}
+		fs.createReadStream(tempFile)
+		.pipe(unzip.Parse())
+		.on('entry', function (entry) {
+			var entryName = entry.path;
+			var type = entry.type; // 'Directory' or 'File' 
+			var outputName = path.join(filePath, entryName);
+			if (!excluded(excludes, filePath, outputName)) {
+				if (type === "File") {
+					entry.pipe(fs.createWriteStream(outputName));
+				} else if (type === "Directory") {
+					mkdirp.sync(outputName);
+				}
+			} else {
+				entry.autodrain();
+			}
+		})
+		.on('close', function() {
+			res.setHeader("Location", "/file" + filePath.substring(req.user.workspaceDir.length));
+			res.status(201).end();
+		});
 	} else {
 		var file = path.join(filePath, fileName);
 		if (!overwrite && fs.existsSync(file)) {
@@ -99,7 +133,7 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, u
 			if (err) {
 				return writeError(400, res, "Transfer failed");
 			}
-			res.setHeader("Location", "/file" + file.substring(req.user.workspaceDir.length));
+			res.setHeader("Location", "/file" + filePath.substring(req.user.workspaceDir.length));
 			res.status(201).end();
 		});
 	}
