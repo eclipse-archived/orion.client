@@ -108,11 +108,24 @@ function excluded(excludes, rootName, outputName) {
 
 function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, shouldUnzip) {
 	var overwrite = xferOptions.indexOf("overwrite-older") !== -1;
+	function overrideError(files) {
+		res.status(400).json({
+			Severity: "Error",
+			HttpCode:400,
+			Code: 0,
+			Message: "Failed to transfer all files to " + filePath.substring(req.user.workspaceDir.length) + 
+				", the following files could not be overwritten: " + files.join(","),
+			JsonData: {
+				ExistingFiles: files
+			}
+		});
+	}
 	if (shouldUnzip) {
 		var excludes = (req.query.exclude || "").split(",");
 		if (fs.existsSync(path.join(filePath, ".git"))) {
 			excludes.push(".git");
 		}
+		var failed = [];
 		fs.createReadStream(tempFile)
 		.pipe(unzip.Parse())
 		.on('entry', function (entry) {
@@ -121,6 +134,11 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 			var outputName = path.join(filePath, entryName);
 			if (!excluded(excludes, filePath, outputName)) {
 				if (type === "File") {
+					if (!overwrite && fs.existsSync(outputName)) {
+						failed.push(entryName);
+						entry.autodrain();
+						return;
+					}
 					entry.pipe(fs.createWriteStream(outputName));
 				} else if (type === "Directory") {
 					mkdirp.sync(outputName);
@@ -131,13 +149,16 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 		})
 		.on('close', function() {
 			fs.unlink(tempFile);
+			if (failed.length) {
+				return overrideError(failed);
+			}
 			res.setHeader("Location", "/file" + filePath.substring(req.user.workspaceDir.length));
 			res.status(201).end();
 		});
 	} else {
 		var file = path.join(filePath, fileName);
 		if (!overwrite && fs.existsSync(file)) {
-			return res.status(400).json({ExistingFiles: fileName});
+			return overrideError([fileName]);
 		}
 		fs.rename(tempFile, file, function(err) {
 			if (err) {
