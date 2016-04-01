@@ -1040,6 +1040,10 @@
       return new Arr(eltval);
     }),
     ObjectExpression: ret(function(node, scope, c, name) {
+      // ORION recovery
+      if (name === "✖") {
+      	return ANull;
+      }
       var obj = node.objType = new Obj(true, name);
       obj.originNode = node;
 

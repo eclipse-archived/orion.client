@@ -811,6 +811,17 @@ define([
 						//TODO bug in Tern? ["aaa", "aaa : string"]
 					]);
 				});
+				//https://bugs.eclipse.org/bugs/show_bug.cgi?id=490925
+				it("test full file inferencing 35", function(done) {
+					var options = {
+						buffer: "function foo(a, c) {var newB = a.slice(1, 2);newB = newB === 'a' ? 'b' : new 	c[\"\"] = {};};",
+						prefix: "new",
+						offset: 77,
+						callback: done};
+					return testProposals(options, [
+						["newB", "newB : string"]
+					]);
+				});
 				it("test property read before", function(done) {
 					var options = {
 						buffer: "var xxx; xxx.lll++; xxx.ll",
