@@ -53,6 +53,52 @@ exports.readPasswordFile = function(passwordFile, callback) {
 	}
 };
 
+function parseConfig(err, content) {
+	if (err) {
+		return null;
+	}
+	var lines = content.toString().split(/\r?\n/);
+	var result = {}, current = result;
+	lines.forEach(function(line) {
+		var first = line.trim().charAt(0);
+		if (first === '#' || first === ";") {
+			return;
+		}
+		var parsed = /^\[([^\]]*)\]|([^=]*)(=?)(.*)/.exec(line);
+		if (parsed[1]) {
+			var sectionKey = parsed[1].trim();
+			var subsection = /([^\s;#]+)\s*"(.*)"/.exec(sectionKey);
+			if (subsection) {
+				sectionKey = subsection[1].trim();
+				var subsectionKey = subsection[2].trim();
+				var section = result[sectionKey] = result[sectionKey] || {};
+				current = section[subsectionKey] = section[subsectionKey] || {};
+			} else {
+				current = result[sectionKey] = result[sectionKey] || {};
+			}
+		} else {
+			var name = (parsed[2] || "").trim();
+			var value = (parsed[4] || "").trim();
+			if (name !== "") {
+				if (value.charAt(0) === '"') {
+					value = value.substring(1);
+					if (value.charAt(value.length - 1) === '"') value = value.substring(0, value.length - 1);
+				}
+				if (value === "true") value = true;
+				if (value === "false") value = false;
+				if (current[name]) {
+					if (!Array.isArray(current[name])) current[name] = [current[name]];
+					current[name].push(value);
+				} else {
+					current[name] = value;
+				}
+			}
+		}
+	});
+	return result;
+}
+
+
 /**
  * @param {Function} callback Invoked as function(err, configObject), the err param is not null if the file couldn't be read.
  */
@@ -60,50 +106,20 @@ exports.readConfigFile = function(configFile, callback) {
 	if (!configFile) {
 		return callback(new Error());
 	}
+
 	fs.readFile(configFile, function(err, content) {
-		if (err) {
-			return callback(err);
-		}
-		var lines = content.toString().split(/\r?\n/);
-		var result = {}, current = result;
-		lines.forEach(function(line) {
-			var first = line.trim().charAt(0);
-			if (first === '#' || first === ";") {
-				return;
-			}
-			var parsed = /^\[([^\]]*)\]|([^=]*)(=?)(.*)/.exec(line);
-			if (parsed[1]) {
-				var sectionKey = parsed[1].trim();
-				var subsection = /([^\s;#]+)\s*"(.*)"/.exec(sectionKey);
-				if (subsection) {
-					sectionKey = subsection[1].trim();
-					var subsectionKey = subsection[2].trim();
-					var section = result[sectionKey] = result[sectionKey] || {};
-					current = section[subsectionKey] = section[subsectionKey] || {};
-				} else {
-					current = result[sectionKey] = result[sectionKey] || {};
-				}
-			} else {
-				var name = (parsed[2] || "").trim();
-				var value = (parsed[4] || "").trim();
-				if (name !== "") {
-					if (value.charAt(0) === '"') {
-						value = value.substring(1);
-						if (value.charAt(value.length - 1) === '"') value = value.substring(0, value.length - 1);
-					}
-					if (value === "true") value = true;
-					if (value === "false") value = false;
-					if (current[name]) {
-						if (!Array.isArray(current[name])) current[name] = [current[name]];
-						current[name].push(value);
-					} else {
-						current[name] = value;
-					}
-				}
-			}
-		});
-		callback(null, result);
+		callback(null, parseConfig(err, content));
 	});
+};
+
+/**
+ * @param {Function} callback Invoked as function(err, configObject), the err param is not null if the file couldn't be read.
+ */
+exports.readConfigFileSync = function(configFile) {
+	if (!configFile) {
+		return null;
+	}
+	return parseConfig(null, fs.readFileSync(configFile, "utf8"));
 };
 
 exports.writeConfigFile = function(configFile, contents, callback) {
