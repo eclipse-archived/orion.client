@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -446,7 +446,7 @@ define([
 		 * @description Find the directive comment with the given name in the given AST
 		 * @function
 		 * @param {Object} ast The AST to search
-		 * @param {String} name The name of the fdirective to look for. e.g. eslint-env
+		 * @param {String} name The name of the directive to look for. e.g. eslint-env
 		 * @returns {Object} The AST comment node or <code>null</code>
 		 * @since 8.0
 		 */
