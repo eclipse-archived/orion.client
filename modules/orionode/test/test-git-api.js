@@ -30,7 +30,7 @@ var app = express();
 app.use(function() {
 	req.user = {workspace: WORKSPACE};
 })
-.use(CONTEXT_PATH + '/task', require('../lib/tasks').orionTasksAPI({
+.use(CONTEXT_PATH + '/task', require('../lib/tasks').router({
 	root: '/task',
 }))
 .use(CONTEXT_PATH, require('../lib/workspace')({
