@@ -27,7 +27,7 @@ var fileUtil = require('./fileUtil');
  */
 module.exports = function(options) {
 	var UPLOADS_FOLDER = path.join(options.configParams['orion.single.user'] ?
-			path.join(os.homedir(), ".orion") : req.user.workspaceDir, ".uploads");
+			path.join(os.homedir(), ".orion") : options.workspaceDir, ".uploads");
 	
 	mkdirp(UPLOADS_FOLDER, function (err) {
 		if (err) console.error(err);
