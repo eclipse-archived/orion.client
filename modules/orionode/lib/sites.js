@@ -20,10 +20,13 @@ var url = require('url');
 var mPath = require('path');
 
 var SITES_FILENAME = "sites.json";
+var RUNNING_SITES_FILENAME = "runningSites.json";
 var hosts = {};
 var vhosts = [];
 
 module.exports = function(options) {
+	loadRunningSites();
+	
 	vhosts = (options.configParams["orion.site.virtualHosts"] || "").split(",");
 
 	vhosts.forEach(function(host) {
@@ -124,6 +127,18 @@ function siteJSON(site, req) {
 function getSitesFile(req) {
 	var folder = options.configParams['orion.single.user'] ? os.homedir() : req.user.workspaceDir;
 	return mPath.join(folder, '.orion', SITES_FILENAME);
+}
+
+function loadRunningSites() {
+	if (!options.configParams["orion.sites.save.running"]) return;
+	try {
+		hosts = JSON.parse(fs.readFileSync(mPath.join(options.workspaceDir, RUNNING_SITES_FILENAME), "utf8"));
+	} catch (e) {}
+}
+
+function saveRunningSites() {
+	if (!options.configParams["orion.sites.save.running"]) return;
+	fs.writeFile(mPath.join(options.workspaceDir, RUNNING_SITES_FILENAME), JSON.stringify(hosts), "utf8");
 }
 
 function loadSites(req, callback) {
@@ -254,6 +269,7 @@ function putSite(req, res) {
 			} else if (req.body.HostingStatus.Status === "stopped") {
 				site = stopSite(site);
 			}
+			saveRunningSites();
 		}
 		return site;
 	});
