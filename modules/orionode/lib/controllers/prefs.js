@@ -72,7 +72,6 @@ function PrefsController(options) {
 			return Promise.resolve()
 			.then(acquirePrefs.bind(null, req, res))
 			.then(handler.bind(null, req, res))
-			.then(next.bind(null, null))
 			.catch(next) // next(err)
 		};
 	}
