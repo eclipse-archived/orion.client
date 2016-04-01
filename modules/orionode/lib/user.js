@@ -12,6 +12,7 @@
 
 var express = require('express'),
 	expressSession = require('express-session'),
+	MongoStore = require('connect-mongo')(expressSession),
 	passport = require('passport'),
 	GoogleStrategy = require('passport-google-oauth20').Strategy,
 	GithubStrategy = require('passport-github2').Strategy,
@@ -138,20 +139,22 @@ module.exports = function(options) {
 		});
 	}
 	
+	mongoose.connect('mongodb://localhost/orion_multitenant');
+
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({ extended: false }));
 	app.use(cookieParser());
 	app.use(expressSession({
 		resave: false,
 		saveUninitialized: false,
-		secret: 'keyboard cat'
+		secret: 'keyboard cat',
+		store: new MongoStore({ mongooseConnection: mongoose.connection })
 	}));
 	app.use(passport.initialize());
 	app.use(passport.session());
 	passport.use(orionAccount.createStrategy());
 	passport.serializeUser(orionAccount.serializeUser());
 	passport.deserializeUser(orionAccount.deserializeUser());
-	mongoose.connect('mongodb://localhost/orion_multitenant');
 	
 	function canAddUsers() {
 		return !options.configParams["orion.auth.user.creation"];
