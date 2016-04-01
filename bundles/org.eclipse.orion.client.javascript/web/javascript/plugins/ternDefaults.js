@@ -159,7 +159,19 @@ define([
         debug: false,
         projectDir: '/',
         defs: defs,
-        ecmaVersion: 6
+        ecmaVersion: 6,
+        optionalPlugins: {
+        	'amqp': 'amqp', 
+        	'angular': 'angular', 
+        	'express': 'express', 
+        	'mongodb': 'mongodb',
+        	'mongo': 'mongodb', //ESlint provides mongo - map it to Tern
+        	'mysql': 'mysql', 
+        	'node': 'node', 
+        	'pg': 'postgres', 
+        	'redis': 'redis', 
+        	'amd': 'requirejs'
+        }
 	};
 	
 	/**

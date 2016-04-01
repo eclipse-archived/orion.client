@@ -132,14 +132,14 @@ define([
 			var config = query.config;
 			var _tern = Object.create(null);
 			// delegate tern functions
-			_tern.findRefs = function(srv, query, file) {
-				return tern.findRefs(srv, query, file);
+			_tern.findRefs = function(query, file) {
+				return tern.findRefs(server, query, file);
 			};
-			_tern.findRefsToVariable = function(srv, query, file, expr, checkShadowing) {
-				return tern.findRefsToVariable(srv, query, file, expr, checkShadowing);
+			_tern.findRefsToVariable = function(query, file, expr, checkShadowing) {
+				return tern.findRefsToVariable(server, query, file, expr, checkShadowing);
 			};
-			_tern.findRefsToProperty = function(srv, query, expr, prop) {
-				return tern.findRefsToProperty(srv, query, expr, prop);
+			_tern.findRefsToProperty = function(query, expr, prop) {
+				return tern.findRefsToProperty(server, query, expr, prop);
 			};
 			_tern.ternError = function(msg) {
 				return tern.ternError(msg);
@@ -147,10 +147,12 @@ define([
 			_tern.findQueryExpr = function(file, query, wide) {
 				return tern.findQueryExpr(file, query, wide);
 			};
-			_tern.findExprType = function(srv, query, file, expr) {
-				return tern.findExprType(srv, query, file, expr);
+			_tern.findExprType = function(query, file, expr) {
+				return tern.findExprType(server, query, file, expr);
 			};
-			_tern.server = server;
+			_tern.plugins = server.options.plugins;
+			_tern.defs = server.options.defs;
+			_tern.optionalPlugins = server.options.optionalPlugins;
 			_tern.query = query;
 			_tern.file = file;
 			config.tern = _tern;

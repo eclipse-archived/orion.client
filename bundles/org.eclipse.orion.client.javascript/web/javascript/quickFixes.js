@@ -35,6 +35,15 @@ define([
 	   this.ternworker = ternWorker;
 	}
 	
+	function translatePluginName(name) {
+		switch(name) {
+			case 'pg': return 'postgres';
+			case 'amd': return 'requirejs';
+			case 'mongo': return 'mongodb';
+			default: return name;
+		}
+	}
+	
 	Objects.mixin(JavaScriptQuickfixes.prototype, /** @lends javascript.JavaScriptQuickfixes.prototype*/ {
 		/**
 		 * @description Editor command callback
@@ -199,12 +208,13 @@ define([
 					var ternFileLocation = self.ternProjectManager.getTernProjectFileLocation();
 					var json = self.ternProjectManager.getJSON();
 					var plugins = json.plugins;
-					var newPlugin = /, the '(.*)' plugin/.exec(context.annotation.title);
+					var newPlugin = ast.sourceFile.text.slice(context.annotation.start, context.annotation.end); ///, the '(.*)' plugin/.exec(context.annotation.title);
 					// The problem should only appear if there is a plugins entry that doesn't include the needed plugin
 					if (!ternFileLocation || !json || !plugins || !newPlugin || !newPlugin[1]){
 						return null;
 					}
-					plugins[newPlugin[1]] = {};
+					newPlugin = translatePluginName(newPlugin);
+					plugins[newPlugin] = {};
 					var contents = JSON.stringify(json, null, '\t'); //$NON-NLS-1$
 					var fileClient = self.ternProjectManager.scriptResolver.getFileClient();
 					return fileClient.write(ternFileLocation, contents).then(/* @callback */ function(result) {

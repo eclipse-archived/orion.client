@@ -39,44 +39,37 @@ define([
 		accessorPairs, noControlRegex, noDuplicateCase, noElseReturn, noEmptyCharClasses, 
 		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs, noObjCalls, noSelfCompare, noIrregularWhitespace) {
 	
-	// TODO We want to load the plugin list from TernDefaults.js but end up with a circular dependency as TernDefaults loads the tern plugins including this one
-	var optionalPlugins = {'amqp': 'amqp', 'angular': 'angular', 'express': 'express', 'mongodb': 'mongodb', 'mysql': 'mysql', 'node': 'node', 'pg': 'postgres', 'redis': 'redis', 'amd': 'requirejs'}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
     var rules = {
     	/** @callback */
         "check-tern-plugin": function(context) {
         	function checkProject(node) {
+        		function getEnvNode(envname) {
+    				var comment = Finder.findDirective(node, "eslint-env");
+    				if(comment) {
+    					var idx = comment.value.indexOf(envname);
+    					if(idx > -1) {
+    						var start = comment.range[0]+idx+2, //add 2 because the spec says block value starts exclude /*
+    							end = start+envname.length;
+    						return {type: "EnvName", range: [start, end], loc: comment.loc};
+    					}
+    				}
+        		}
                 if(context.env){
-                	var envs = Object.create(null);
                 	var envKeys = Object.keys(context.env);
-                	envKeys.forEach(function(key){
-                		envs[key] = context.env[key];
-            		});
                 	if (envKeys.length > 0){
                 		var tern = context.getTern();
                 		if (tern){
-            			    tern.server.request({query: {
-			           			type: 'installed_plugins' //$NON-NLS-1$
-	           				}}, function(error, installedPlugins){
-	           					if (optionalPlugins && !error && typeof installedPlugins === 'object'){
-	           						Object.keys(envs).forEach(function(key){
-	           							var pluginName = optionalPlugins[key];
-	           							if (pluginName){
-	           								envs[key] = undefined;
-	           								if (!installedPlugins[pluginName]){
-	           									context.report(node, ProblemMessages['check-tern-plugin'], {0:key, 1:pluginName});
-	           								}
-	           							}
-	           							
-	           						})
-	           						// TODO We can tell the user that we don't know about their library, but there is no way for the user to fix the problem
-	           						// Note this behaviour is similar to the setting name for unsupportedJSHint rule
-//	           						Object.keys(envs).forEach(function(key){
-//	           							if (envs[key]){
-//	           								context.report(node, "Tern does not recognize environment " + key);
-//           								}
-//           							});
-	           					}
-	           				});
+       						envKeys.forEach(function(key) {
+   								var pluginName = tern.plugins[key] ? key : tern.optionalPlugins[key];
+   								if (pluginName && !tern.plugins[pluginName]) {
+   									var envnode = getEnvNode(key);
+   									if(envnode) {
+   										context.report(envnode, ProblemMessages['check-tern-plugin'], {0:key, 1:pluginName});
+   									} else {
+       									context.report(node, ProblemMessages['check-tern-plugin'], {0:key, 1:pluginName});
+   									}
+   								}
+       						});
         				}
        				}
    				}
@@ -1365,7 +1358,7 @@ define([
 									var foundType = null;
 									try {
 										var expr = tern.findQueryExpr(tern.file, query);
-										var type = tern.findExprType(tern.server, query, tern.file, expr);
+										var type = tern.findExprType(query, tern.file, expr);
 										// The origin could be a primitive in the same file (a=1;) which we still want to mark
 										// The origin could be an environment, which we still want to mark (eslint-env directive is handled separately)
 										if (type && type.origin && type.origin !== tern.file.name && type.origin !== env){
@@ -1404,7 +1397,7 @@ define([
 								var foundType = false;
 								try {
 									var expr = tern.findQueryExpr(tern.file, query);
-									var type = tern.findExprType(tern.server, query, tern.file, expr);
+									var type = tern.findExprType(query, tern.file, expr);
 									if (type && type.origin){
 										foundType = true;
 									}
@@ -1416,7 +1409,7 @@ define([
             	                	query.end = node.object.end;
             	                	try {
             	                		expr = tern.findQueryExpr(tern.file, query);
-            	                		type = tern.findExprType(tern.server, query, tern.file, expr);
+            	                		type = tern.findExprType(query, tern.file, expr);
 										if (type && type.types && type.types.length > 0){
             	                			// If the type has no known properties assume Tern doens't know enough about it to find the declaration
             	                			foundType = true;
@@ -1686,7 +1679,7 @@ define([
         					    	   var refs = null;
         					    	   var filename = tern.file.name;
         					    	   try {
-        					    	       refs = tern.findRefs(tern.server, refQuery, tern.file);
+        					    	       refs = tern.findRefs(refQuery, tern.file);
         					    	   } catch(e) {
         					    	      //ignore
         					    	   }
@@ -2094,7 +2087,7 @@ define([
 						var foundType = null;
 						try {
 							var expr = tern.findQueryExpr(tern.file, query);
-							var type = tern.findExprType(tern.server, query, tern.file, expr);
+							var type = tern.findExprType(query, tern.file, expr);
 							if (type) {
 								foundType = type;
 							}
