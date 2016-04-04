@@ -279,6 +279,15 @@ exports.withStatsAndETag = function(filepath, callback) {
 		});
 	});
 };
+exports.withETag = function(filepath, callback) {
+	var etag = ETag();
+	var stream = fs.createReadStream(filepath);
+	stream.pipe(etag);
+	stream.on('error', callback);
+	stream.on('end', function() {
+		callback(null, etag.read());
+	});
+};
 
 /**
  * @returns {String} The Location of for a file resource.

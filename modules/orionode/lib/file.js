@@ -13,7 +13,6 @@ var apiPath = require('./middleware/api_path');
 var express = require('express');
 var bodyParser = require('body-parser');
 var ETag = require('./util/etag');
-var etagParser = require('./middleware/request_etag');
 var fs = require('fs');
 var nodePath = require('path');
 var api = require('./api');
@@ -133,7 +132,7 @@ module.exports = function(options) {
 							return;
 						}
 						if (failed) {
-							writeError(406, res, new Error('Bad file diffs. Please paste this content in a bug report: \u00A0\u00A0 \t' + JSON.stringify(body)))
+							writeError(406, res, new Error('Bad file diffs. Please paste this content in a bug report: \u00A0\u00A0 \t' + JSON.stringify(body)));
 							return;
 						}
 						fs.stat(patchPath, function(error, stats) {
@@ -156,7 +155,7 @@ module.exports = function(options) {
 	router.use(apiPath(fileRoot));
 
 	var jsonParser = bodyParser.json();
-	router.get('*', jsonParser, function(req, res, next) { //eslint-disable-line no-unused-vars
+	router.get('*', jsonParser, function(req, res) {
 		var rest = req.pathSuffix;
 		if (writeEmptyFilePathError(res, rest)) {
 			return;
@@ -172,21 +171,13 @@ module.exports = function(options) {
 				writeFileContents(res, rest, filepath, stats, etag);
 			} else {
 				// TODO handle depth > 1 for directories
-				var includeChildren = (stats.isDirectory() && getParam(req, 'depth') === '1');
+				var includeChildren = stats.isDirectory() && getParam(req, 'depth') === '1';
 				writeFileMetadata(req, res, rest, filepath, stats, etag, includeChildren);
 			}
 		});
 	});
 
-	// PUT: parse body as raw Buffer (we need to handle binary uploads), and calculate ETag for the
-	// request body since it's needed for If-Match check later.
-	var rawParser = bodyParser.raw({
-		type: function(/*req*/) {
-			// Force any content type to be buffered
-			return true;
-		}
-	});
-	router.put('*', rawParser, etagParser(), function(req, res, next) { //eslint-disable-line no-unused-vars
+	router.put('*', function(req, res) {
 		var rest = req.pathSuffix;
 		if (writeEmptyFilePathError(res, rest)) {
 			return;
@@ -197,23 +188,27 @@ module.exports = function(options) {
 			res.sendStatus(501);
 			return;
 		}
-		var requestBody = req.body;
-		var requestBodyETag = req.etag;
-		var ifMatchHeader = req.headers['if-match'];
-		if(!ifMatchHeader){
-			// Etag is not defined, we are writing blob. In this case the file does not exist yet so we need create it.
-			fs.writeFile(filepath, requestBody, function(error) {
-				if (error) {
-					writeError(500, res, error);
-					return;
-				}
-				fs.stat(filepath, function(error, stats) {
-					writeFileMetadata(req, res, rest, filepath, stats, requestBodyETag /*the new ETag*/);
+		function write() {
+			var ws = fs.createWriteStream(filepath);
+			ws.on('finish', function() {
+				fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
+					if (error && error.code === 'ENOENT') {
+						res.statusCode = 404;
+						res.end();
+					}
+					writeFileMetadata(req, res, rest, filepath, stats, etag);
 				});
 			});
-			return;
+			ws.on('error', function(err) {
+				writeError(500, res, err);
+			});
+			req.pipe(ws);
 		}
-		fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
+		var ifMatchHeader = req.headers['if-match'];
+		if (!ifMatchHeader) {
+			return write();
+		}
+		fileUtil.withETag(filepath, function(error, etag) {
 			if (error && error.code === 'ENOENT') {
 				res.statusCode = 404;
 				res.end();
@@ -221,20 +216,13 @@ module.exports = function(options) {
 				res.statusCode = 412;
 				res.end();
 			} else {
-				// write buffer into file
-				fs.writeFile(filepath, requestBody, function(error) {
-					if (error) {
-						writeError(500, res, error);
-						return;
-					}
-					writeFileMetadata(req, res, rest, filepath, stats, requestBodyETag /*the new ETag*/);
-				});
+				write();
 			}
 		});
 	});
 
 	// POST - parse json body
-	router.post('*', jsonParser, function(req, res, next) { //eslint-disable-line no-unused-vars
+	router.post('*', jsonParser, function(req, res) {
 		var rest = req.pathSuffix;
 		if (writeEmptyFilePathError(res, rest)) {
 			return;
@@ -244,20 +232,20 @@ module.exports = function(options) {
 			handleDiff(req, res, rest, req.body);
 			return;
 		}
-		var name = req.headers.slug || (req.body && req.body.Name);
+		var name = req.headers.slug || req.body && req.body.Name;
 		if (!name) {
 			writeError(400, res, new Error('Missing Slug header or Name property'));
 			return;
 		}
 
 		var wwwpath = api.join(rest, encodeURIComponent(name)),
-		    filepath = getSafeFilePath(req, nodePath.join(rest, name));
+			filepath = getSafeFilePath(req, nodePath.join(rest, name));
 
 		fileUtil.handleFilePOST(getSafeFilePath(req, rest), fileRoot, req, res, wwwpath, filepath);
 	});
 
 	// DELETE - no request body
-	router.delete('*', function(req, res, next) { //eslint-disable-line no-unused-vars
+	router.delete('*', function(req, res) {
 		var rest = req.pathSuffix;
 		if (writeEmptyFilePathError(res, rest)) {
 			return;
@@ -269,19 +257,18 @@ module.exports = function(options) {
 				return res.sendStatus(204);
 			} else if (ifMatchHeader && ifMatchHeader !== etag) {
 				return res.sendStatus(412);
-			} else {
-				var callback = function(error) {
-					if (error) {
-						writeError(500, res, error);
-						return;
-					}
-					res.sendStatus(204);
-				};
-				if (stats.isDirectory()) {
-					fileUtil.rumRuff(filepath, callback);
-				} else {
-					fs.unlink(filepath, callback);
+			}
+			var callback = function(error) {
+				if (error) {
+					writeError(500, res, error);
+					return;
 				}
+				res.sendStatus(204);
+			};
+			if (stats.isDirectory()) {
+				fileUtil.rumRuff(filepath, callback);
+			} else {
+				fs.unlink(filepath, callback);
 			}
 		});
 	});
