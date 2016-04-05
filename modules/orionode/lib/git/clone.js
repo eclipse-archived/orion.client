@@ -397,8 +397,6 @@ function getRemoteCallbacks(creds, task) {
 			if (creds.GitSshPrivateKey) {
 				var privateKey = creds.GitSshPrivateKey;
 				var passphrase = creds.GitSshPassphrase;
-				delete creds.GitSshPrivateKey;
-				delete creds.GitSshPassphrase;
 				return git.Cred.sshKeyMemoryNew(
 					creds.GitSshUsername,
 					"",
@@ -408,6 +406,7 @@ function getRemoteCallbacks(creds, task) {
 			}
 			var username = creds.GitSshUsername;
 			var password = creds.GitSshPassword;
+			// clear username/password to avoid inifinite loop in nodegit
 			delete creds.GitSshUsername;
 			delete creds.GitSshPassword;
 			return git.Cred.userpassPlaintextNew(
