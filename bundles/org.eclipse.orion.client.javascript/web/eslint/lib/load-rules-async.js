@@ -1454,7 +1454,7 @@ define([
     	                						}
             	                			}
             	                			if (!foundType){
-												context.report(node.property, ProblemMessages['no-undef-defined'], {0:node.property.name, nls: 'no-undef-defined'}); //$NON-NLS-1$
+												context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
 											}
             	                		}
             	                	} catch (e) {
