@@ -315,12 +315,18 @@ function applyPatch(req, res) {
 						return path.join(repo.workdir(), f.split("/").slice(1).join("/")	);
 					},
 					loadFile: function(index, cb) {
+						if (!index.oldFileName) {
+							return cb({message: "Patch is not valid: missing old file name."});
+						}
 						if (index.oldFileName === "/dev/null") {
 							return cb(null, "");
 						}
 						fs.readFile(this.getFile(index.oldFileName), "utf8", cb);
 					},
 					patched: function(index, content) {
+						if (!index.newFileName) {
+							return cb({message: "Patch is not valid: missing new file name."});
+						}
 						if (index.newFileName === "/dev/null") {
 							fs.unlink(this.getFile(index.oldFileName));
 							return;
