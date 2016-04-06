@@ -310,9 +310,13 @@ function applyPatch(req, res) {
 		})
 		form.on('close', function() {
 			function apply() {
+				var failed = [], successed = [];
 				mDiff.applyPatches(file, {
+					getUnprefixFile: function(f) {
+						return f.split("/").slice(1).join("/");
+					},
 					getFile: function(f) {
-						return path.join(repo.workdir(), f.split("/").slice(1).join("/")	);
+						return path.join(repo.workdir(), this.getUnprefixFile(f));
 					},
 					loadFile: function(index, cb) {
 						if (!index.oldFileName) {
@@ -324,9 +328,14 @@ function applyPatch(req, res) {
 						fs.readFile(this.getFile(index.oldFileName), "utf8", cb);
 					},
 					patched: function(index, content) {
+						if (content === false) {
+							failed.push(index);
+							return;
+						}
 						if (!index.newFileName) {
 							return cb({message: "Patch is not valid: missing new file name."});
 						}
+						successed.push(index);
 						if (index.newFileName === "/dev/null") {
 							fs.unlink(this.getFile(index.oldFileName));
 							return;
@@ -335,9 +344,26 @@ function applyPatch(req, res) {
 					},
 					complete: function(err) {
 						if (err) return writeError(404, res, err.message);
-						res.status(200).json({JsonData: {
-							//TODO return apply patch status
-						}});
+						var jsonData = {
+							modifiedFiles: successed.map(function(index) {
+								return this.getUnprefixFile(index.oldFileName);
+							}.bind(this))
+						};
+						if (failed.length) {
+							return res.status(400).json({
+								Message: "Some files did not apply: " + failed.map(function(index) {
+									return this.getUnprefixFile(index.oldFileName);
+								}.bind(this)).join(","),
+								HttpCode: 400,
+								Code: 0,
+								JsonData: jsonData
+							})
+						}
+						res.status(200).json({
+							Message: "Ok",
+							HttpCode: 200,
+							JsonData: jsonData
+						});
 					}
 				});
 			}
