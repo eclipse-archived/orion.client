@@ -16,6 +16,7 @@ var git = require('nodegit');
 var url = require('url');
 var tasks = require('../tasks');
 var clone = require('./clone');
+var mConfig = require('./config');
 var express = require('express');
 var bodyParser = require('body-parser');
 var util = require('./util');
@@ -34,7 +35,7 @@ module.exports.router = function(options) {
 	.get('/file*', getRemotes)
 	.get('/:remoteName/file*', getRemotes)
 	.get('/:remoteName/:branchName/file*', getRemotes)
-	.delete('/:remoteName*', deleteRemote)
+	.delete('/:remoteName/file*', deleteRemote)
 	.post('/file*', addRemote)
 	.post('/:remoteName/file*', postRemote)
 	.post('/:remoteName/:branchName/file*', postRemote);
@@ -359,17 +360,26 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 
 function deleteRemote(req, res) {
 	var remoteName = util.decodeURIComponent(req.params.remoteName);
-	return clone.getRepo(req)
+	clone.getRepo(req)
 	.then(function(repo) {
-		return git.Remote.delete(repo, remoteName).then(function(resp) {
-			if (!resp) {
-				res.status(200).end();
-			} else {
-				writeError(403, res);
+		var configFile = api.join(repo.path(), "config");
+		args.readConfigFile(configFile, function(err, config) {
+			if (err) {
+				return writeError(403, res, err.message);
 			}
-		}).catch(function(error) {
-			writeError(500, error);
+			if (config.remote && config.remote[remoteName]) {
+				delete config.remote[remoteName];
+				args.writeConfigFile(configFile, config, function(err) {
+					if (err) {
+						return writeError(403, res, err.message);
+					}
+					res.status(200).end();
+				});
+			}
 		});
+	})
+	.catch(function(err) {
+		return writeError(400, res, err.message);
 	});
 }
 };
