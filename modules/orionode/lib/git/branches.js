@@ -17,6 +17,7 @@ var clone = require('./clone');
 var express = require('express');
 var bodyParser = require('body-parser');
 var util = require('./util');
+var args = require('../args');
 
 module.exports = {};
 
@@ -70,28 +71,38 @@ module.exports.router = function(options) {
 	
 	function getBranchRemotes(repo, branches, fileDir, callback) {
 		return git.Remote.list(repo)
-	 	.then(function(remotes) {
-			async.each(remotes, function(remote, cb) {
-				git.Remote.lookup(repo, remote)
-				.then(function(remote) {
-					return Promise.all(branches.map(function(branch) {
-						return git.Branch.lookup(repo, api.join(remote.name(), branch.Name), git.Branch.BRANCH.REMOTE).then(function(remoteBranch) {
-							return repo.getBranchCommit(remoteBranch).then(function(commit) {
-								branch["RemoteLocation"].push(mRemotes.remoteJSON(remote, fileDir, [mRemotes.remoteBranchJSON(remoteBranch, commit, remote, fileDir)]));
+		.then(function(remotes) {
+			var configFile = api.join(repo.path(), "config");
+			args.readConfigFile(configFile, function(err, config) {
+				config = config || {};
+				async.each(remotes, function(remote, cb) {
+					git.Remote.lookup(repo, remote)
+					.then(function(remote) {
+						return Promise.all(branches.map(function(branch) {
+							return git.Branch.lookup(repo, api.join(remote.name(), branch.Name), git.Branch.BRANCH.REMOTE).then(function(remoteBranch) {
+								return repo.getBranchCommit(remoteBranch).then(function(commit) {
+									var rJson = mRemotes.remoteJSON(remote, fileDir, [mRemotes.remoteBranchJSON(remoteBranch, commit, remote, fileDir)]);
+									var trackingRemote = config.branch && config.branch[branch.Name] && config.branch[branch.Name].remote;
+									if (trackingRemote === remote.name() || !trackingRemote) {
+										branch["RemoteLocation"].splice(0, 0, rJson);
+									} else {
+										branch["RemoteLocation"].push(rJson);
+									}
+								});
+							}).catch(function() {
+								//No remote tracking branch
+								branch["RemoteLocation"].push(mRemotes.remoteJSON(remote, fileDir, [mRemotes.remoteBranchJSON(null, null, remote, fileDir, branch)]));
 							});
-						}).catch(function() {
-							//No remote tracking branch
-							branch["RemoteLocation"].push(mRemotes.remoteJSON(remote, fileDir, [mRemotes.remoteBranchJSON(null, null, remote, fileDir, branch)]));
-						});
-					}));
-				})
-				.then(function() {
-					cb();
-				})
-				.catch(function(err) {
-					cb(err);
-				});
-			}, callback);
+						}));
+					})
+					.then(function() {
+						cb();
+					})
+					.catch(function(err) {
+						cb(err);
+					});
+				}, callback);
+			});
 		});
 	}
 	
