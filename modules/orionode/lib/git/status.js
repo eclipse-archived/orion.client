@@ -77,7 +77,7 @@ function router(options) {
 					}
 					
 					if (bit & git.Status.STATUS.INDEX_NEW) {
-						added.push(returnContent(file));
+						added.push(returnContent(file, "Cached"));
 					}
 					
 					if (bit & git.Status.STATUS.INDEX_MODIFIED) {

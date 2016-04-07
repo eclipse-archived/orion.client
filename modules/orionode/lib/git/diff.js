@@ -241,7 +241,7 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 	});
 }
 
-function getDiffBetweenWorkingTreeAndHead(repo, ignoreWS) {
+function getDiffBetweenWorkingTreeAndIndex(repo, ignoreWS) {
 	return git.Diff.indexToWorkdir(repo, null, {
 		flags: 
 			git.Diff.OPTION.SHOW_UNTRACKED_CONTENT |
@@ -263,6 +263,27 @@ function getDiffBetweenIndexAndHead(repo, ignoreWS) {
 	.then(function(tree) {
 		var options = {};
 		if (ignoreWS) options.flags = git.Diff.OPTION.IGNORE_WHITESPACE;
+		return git.Diff.treeToIndex(repo, tree, null, options);
+	});
+}
+
+function getDiffBetweenWorkingTreeAndHead(repo, ignoreWS) {
+	return repo.head()
+	.then(function(ref) {
+		return repo.getReferenceCommit(ref);
+	})
+	.then(function(commit) {
+		return commit.getTree();
+	})
+	.then(function(tree) {
+		var options = {
+			flags:
+				git.Diff.OPTION.SHOW_UNTRACKED_CONTENT |
+				git.Diff.OPTION.INCLUDE_UNTRACKED | 
+				git.Diff.OPTION.RECURSE_UNTRACKED_DIRS |
+				git.Diff.OPTION.IGNORE_SUBMODULES |
+				ignoreWS ? git.Diff.OPTION.IGNORE_WHITESPACE : 0
+		};
 		return git.Diff.treeToWorkdir(repo, tree, options);
 	});
 }
