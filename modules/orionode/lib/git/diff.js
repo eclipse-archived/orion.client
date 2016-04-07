@@ -156,9 +156,16 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 				if (includeDiff) {
 					var buffer = [];
 					buffer.push("diff --git a/" + oldFilePath + " b/" + newFilePath + "\n");
-					buffer.push("index " + oldFile.id().toString().substring(0, 7) + ".." + newFile.id().toString().substring(0, 7) + " " + newFile.mode().toString(8) + "\n");
-					buffer.push("--- a/" + oldFilePath + "\n");
-					buffer.push("+++ b/" + newFilePath + "\n"); 
+					if (patch.isAdded()) {
+						buffer.push("new file mode " + newFile.mode().toString(8) + "\n");
+					}
+					if (patch.isDeleted()) {
+						buffer.push("deleted file mode " + oldFile.mode().toString(8) + "\n");
+					}
+					buffer.push("index " + oldFile.id().toString().substring(0, 7) + ".." + newFile.id().toString().substring(0, 7)
+						+ (patch.isDeleted() || patch.isAdded() ? "" : " " + newFile.mode().toString(8)) + "\n");
+					buffer.push("--- " + (patch.isAdded() ? "/dev/null" : "a/" + oldFilePath) + "\n");
+					buffer.push("+++ " + (patch.isDeleted() ? "/dev/null" : "b/" + newFilePath) + "\n"); 
 		
 					result.push(patch.hunks()
 					.then(function(hunks) {
