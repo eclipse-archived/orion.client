@@ -39,6 +39,7 @@ module.exports.router = function(options) {
 function getDiff(req, res) {
 	var query = req.query;
 	var parts = (query.parts || "").split(",");
+	var ignoreWS = query.ignoreWS === "true";
 	var paths = query.Path;
 	var scope = util.decodeURIComponent(req.params.scope || "");
 	var filePath = path.join(req.user.workspaceDir, req.params["0"]);
@@ -50,13 +51,13 @@ function getDiff(req, res) {
 		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
 		var fileDir = api.toURLPath(path.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1)));
 		if (scope.indexOf("..") !== -1) {
-			diff = getDiffBetweenTwoCommits(repo, scope.split(".."));
+			diff = getDiffBetweenTwoCommits(repo, scope.split(".."), ignoreWS);
 		} else if (scope === "Default") {
-			diff = getDiffBetweenWorkingTreeAndHead(repo);
+			diff = getDiffBetweenWorkingTreeAndHead(repo, ignoreWS);
 		} else if (scope === "Cached") {
-			diff = getDiffBetweenIndexAndHead(repo);
+			diff = getDiffBetweenIndexAndHead(repo, ignoreWS);
 		} else {
-			diff = getDiffBetweenWorkingTreeAndHead(repo);
+			diff = getDiffBetweenWorkingTreeAndHead(repo, ignoreWS);
 		}
 		return diff
 		.then(function(diff) {
@@ -233,18 +234,18 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 	});
 }
 
-function getDiffBetweenWorkingTreeAndHead(repo) {
+function getDiffBetweenWorkingTreeAndHead(repo, ignoreWS) {
 	return git.Diff.indexToWorkdir(repo, null, {
 		flags: 
 			git.Diff.OPTION.SHOW_UNTRACKED_CONTENT |
 			git.Diff.OPTION.INCLUDE_UNTRACKED | 
 			git.Diff.OPTION.RECURSE_UNTRACKED_DIRS |
-			git.Diff.OPTION.IGNORE_SUBMODULES,
-		contextLines: 0
+			git.Diff.OPTION.IGNORE_SUBMODULES |
+			ignoreWS ? git.Diff.OPTION.IGNORE_WHITESPACE : 0
 	});
 }
 
-function getDiffBetweenIndexAndHead(repo) {
+function getDiffBetweenIndexAndHead(repo, ignoreWS) {
 	return repo.head()
 	.then(function(ref) {
 		return repo.getReferenceCommit(ref);
@@ -253,11 +254,13 @@ function getDiffBetweenIndexAndHead(repo) {
 		return commit.getTree();
 	})
 	.then(function(tree) {
-		return git.Diff.treeToWorkdir(repo, tree, null);
+		var options = {};
+		if (ignoreWS) options.flags = git.Diff.OPTION.IGNORE_WHITESPACE;
+		return git.Diff.treeToWorkdir(repo, tree, options);
 	});
 }
 
-function getDiffBetweenTwoCommits(repo, commits) {
+function getDiffBetweenTwoCommits(repo, commits, ignoreWS) {
 	var tree1;
 	var tree2;
 
@@ -278,7 +281,9 @@ function getDiffBetweenTwoCommits(repo, commits) {
 		tree2 = tree;
 	})
 	.then(function() {
-		return git.Diff.treeToTree(repo, tree1, tree2, null);
+		var options = {};
+		if (ignoreWS) options.flags = git.Diff.OPTION.IGNORE_WHITESPACE;
+		return git.Diff.treeToTree(repo, tree1, tree2, options);
 	});
 }
 
