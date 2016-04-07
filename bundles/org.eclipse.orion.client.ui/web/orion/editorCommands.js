@@ -787,6 +787,12 @@ define([
 						}
 					}
 					if(parsedParam){
+						//If the incoming resource does not match the current editor's, we should ignore it.
+						//This could happen when clicking on a file and then clicking on another in the global search result page.
+						//editor.getTitle() is returnig the fileURI that the current editor is using.
+						if(parsedParam.resource !== editor.getTitle()) {
+							return;
+						}
 						textSearcher.setOptions({regex: parsedParam.regEx, caseInsensitive: !parsedParam.caseSensitive, wholeWord: parsedParam.wholeWord});
 						var tempOptions = {};
 						if(parsedParam.atLine){
