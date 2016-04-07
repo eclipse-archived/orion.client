@@ -21,7 +21,8 @@ var fs = Promise.promisifyAll(require('fs'));
 var SUBDIR_SEARCH_CONCURRENCY = 10;
 
 module.exports = function(options) {
-	if (!options.root) { throw new Error('options.root path required'); }
+	var root = options.root;
+	if (!root) { throw new Error('options.root path required'); }
 	var workspaceId = 'orionode';
 	var workspaceName = 'Orionode Workspace';
 	var fieldList = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive".split(",");
