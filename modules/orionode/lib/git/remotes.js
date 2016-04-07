@@ -222,7 +222,7 @@ function addRemote(req, res) {
 			if (!Array.isArray(remoteConfig.fetch)) remoteConfig.fetch = [remoteConfig.fetch];
 			if (req.body.IsGerrit) {
 				remoteConfig.fetch.push("+refs/heads/*:refs/remotes/%s/for/*".replace(/%s/g, remoteName));
-				remoteConfig.fetch.push("+refs/changes/*:refs/remotes/%s/changes/*".replace(/%s/g, remoteName));
+				remoteConfig.fetch.push("+refs/changes/*:refs/remotes/%s/*".replace(/%s/g, remoteName));
 			} else {
 				if (req.body.FetchRefSpec) {
 					remoteConfig.fetch.push(req.body.FetchRefSpec);
