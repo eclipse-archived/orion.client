@@ -15,23 +15,16 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var Promise = require('bluebird');
 var url = require('url');
-var fileUtil = require('./fileUtil');
 
 var fs = Promise.promisifyAll(require('fs'));
 
 var SUBDIR_SEARCH_CONCURRENCY = 10;
 
 module.exports = function(options) {
-	var root = options.root;
-	var fileRoot = options.fileRoot;
-	if (!root) { throw new Error('options.root path required'); }
+	if (!options.root) { throw new Error('options.root path required'); }
 	var workspaceId = 'orionode';
 	var workspaceName = 'Orionode Workspace';
 	var fieldList = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive".split(",");
-
-	function originalFileRoot(req) {
-		return req.contextPath + fileRoot;
-	}
 
 	function isSearchField(term) {
 		for (var i = 0; i < fieldList.length; i++) {
@@ -52,7 +45,7 @@ module.exports = function(options) {
 		return searchTerm;
 	}
 
-	function SearchOptions(req, res){
+	function SearchOptions(req){
 		this.defaultLocation = null;
 		this.fileContentSearch = false;
 		this.filenamePattern = null;
@@ -61,7 +54,7 @@ module.exports = function(options) {
 		this.regEx = false;
 		this.rows = 10000;
 		this.scopes = [];
-		this.searchTerm = "*";
+		this.searchTerm;
 		this.searchTermCaseSensitive = false;
 		this.username = null;
 
@@ -106,7 +99,7 @@ module.exports = function(options) {
 
 	function buildSearchPattern(searchOpts){
 		var searchTerm = searchOpts.searchTerm;
-		if (!searchOpts.regEx) {
+		if (searchTerm && !searchOpts.regEx) {
 			if (searchTerm.indexOf("\"") === 0) {
 				searchTerm = searchTerm.substring(1, searchTerm.length - 1);
 			}
@@ -154,9 +147,8 @@ module.exports = function(options) {
 	
 			if (!searchOpts.filenamePatternCaseSensitive) {
 				return new RegExp(filenamePattern, "i");
-			} else {
-				return new RegExp(filenamePattern);
 			}
+			return new RegExp(filenamePattern);
 		});
 	}
 
@@ -193,11 +185,7 @@ module.exports = function(options) {
 			})){
 				return;
 			}
-			return fs.readFileAsync(filePath, 'utf8')
-			.then(function(file) {
-				if (!file.match(searchPattern)) {
-					return;
-				}
+			function add () {
 				// We found a hit
 				var filePathFromWorkspace = filePath.substring(workspaceDir.length);
 				results.push({
@@ -208,6 +196,16 @@ module.exports = function(options) {
 					"Name": filename,
 					"Path": workspaceName + filePathFromWorkspace
 				});
+			}
+			if (!searchPattern) {
+				return add();
+			}
+			return fs.readFileAsync(filePath, 'utf8')
+			.then(function(file) {
+				if (!file.match(searchPattern)) {
+					return;
+				}
+				add();
 			});
 		});
 	}
@@ -215,8 +213,8 @@ module.exports = function(options) {
 	return express.Router()
 	.use(bodyParser.json())
 	.use(apiPath(root))
-	.get('*', function(req, res, next) {
-		var searchOpt = new SearchOptions(req, res);
+	.get('*', function(req, res) {
+		var searchOpt = new SearchOptions(req);
 		searchOpt.buildSearchOptions();
 
 		var searchPattern = buildSearchPattern(searchOpt);
