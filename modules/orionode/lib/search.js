@@ -78,7 +78,7 @@ module.exports = function(options) {
 						this.filenamePatternCaseSensitive = false;
 						this.filenamePattern = decodeURIComponent(term.substring(10));
 					} else if (term.lastIndexOf("Location:", 0) === 0) {
-						this.location = decodeURIComponent(term.substring(9 + req.contextPath.length));
+						this.location = decodeURIComponent(term.substring(9 + (req.contextPath ? req.contextPath.length : 0)));
 					} else if (term.lastIndexOf("Name:", 0) === 0) {
 						this.filenamePatternCaseSensitive = true;
 						this.filenamePattern = decodeURIComponent(term.substring(5));
