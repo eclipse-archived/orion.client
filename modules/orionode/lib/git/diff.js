@@ -50,19 +50,75 @@ function getDiff(req, res) {
 		repo = r;
 		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
 		var fileDir = api.toURLPath(path.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1)));
-		if (scope.indexOf("..") !== -1) {
-			diff = getDiffBetweenTwoCommits(repo, scope.split(".."), ignoreWS);
-		} else if (scope === "Default") {
-			diff = getDiffBetweenWorkingTreeAndHead(repo, ignoreWS);
-		} else if (scope === "Cached") {
-			diff = getDiffBetweenIndexAndHead(repo, ignoreWS);
-		} else {
-			diff = getDiffBetweenWorkingTreeAndHead(repo, ignoreWS);
+		var includeURIs = parts.indexOf("uris") !== -1;
+		var includeDiff = parts.indexOf("diff") !== -1;
+		var includeDiffs = parts.indexOf("diffs") !== -1;
+		var URIs, diffContents = [], diffs = [];
+		if (includeURIs) {
+			var p = path.join(fileDir, filePath);
+			URIs = {
+				"Base": getBaseLocation(scope, p),
+				"CloneLocation": "/gitapi/clone" + fileDir,
+				"Location": "/gitapi/diff/" + util.encodeURIComponent(scope) + fileDir + filePath,
+				"New": getNewLocation(scope, p),
+				"Old": getOldLocation(scope, p),
+				"Type": "Diff"
+			};
 		}
-		return diff
-		.then(function(diff) {
-			processDiff(diff, filePath, paths, fileDir, req, res, parts.indexOf("diff") !== -1, parts.indexOf("uris") !== -1, parts.indexOf("diffs") !== -1, query, scope);
-		});
+		function done() {
+			var body = "";
+			if (includeDiff && includeURIs) {
+				body += "--BOUNDARY\n";
+				body += "Content-Type: application/json\n\n";
+				body += JSON.stringify(URIs);
+				body += "--BOUNDARY\n";
+				body += "Content-Type: plain/text\n\n";
+				body += diffContents.join("");
+				res.setHeader('Content-Type', 'multipart/related; boundary="BOUNDARY"');
+			} else if (includeDiff) {
+				body += diffContents.join("");
+				res.setHeader("Cache-Control", "no-cache");
+				res.setHeader("Content-Disposition", "attachment; filename=\"changes.patch\"");
+				res.setHeader('Content-Type', 'plain/text');
+			} else if (includeDiffs) {
+				var result = {
+					"Type": "Diff",
+					"Length": patches.length,
+					"Children": diffs
+				};
+				if (i < patches.length) {
+					result.NextLocation = "";
+				}
+				body += JSON.stringify(result);
+				res.setHeader('Content-Type', 'application/json');
+			} else if (includeURIs) {
+				body += JSON.stringify(URIs);
+				res.setHeader('Content-Type', 'application/json');
+			}
+			res.setHeader('Content-Length', body.length);
+			return res.status(200).end(body);
+		}
+		if (includeDiff || includeDiffs) {
+			if (scope.indexOf("..") !== -1) {
+				diff = getDiffBetweenTwoCommits(repo, scope.split(".."), ignoreWS);
+			} else if (scope === "Default") {
+				diff = getDiffBetweenWorkingTreeAndHead(repo, ignoreWS);
+			} else if (scope === "Cached") {
+				diff = getDiffBetweenIndexAndHead(repo, ignoreWS);
+			} else {
+				diff = getDiffBetweenWorkingTreeAndHead(repo, ignoreWS);
+			}
+			return diff
+			.then(function(diff) {
+				return processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, includeDiffs, query, scope, diffContents, diffs);
+			})
+			.then(done)
+			.catch(function(err) {
+				writeError(404, res, err.message);
+			});
+		} else {
+			done();
+		}
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
@@ -109,11 +165,11 @@ function getBaseLocation(scope, path) {
 	return "/gitapi/index" + path;
 }
 
-function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, includeURIs, includeDiffs, query, scope) {
+function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, includeDiffs, query, scope, diffContents, diffs) {
 	var page = Number(query.page) || 1;
 	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
-	var URIs = [], diffContents = [], diffs = [], patches = [], i;
-	diff.patches()
+	var patches = [], i;
+	return diff.patches()
 	.then(function(patches) {
 		var result = [];
 		var start = pageSize * (page - 1);
@@ -126,19 +182,7 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 			var oldFilePath = oldFile.path();
 			if ((!filePath || newFilePath.startsWith(filePath)) && (!paths || paths.indexOf(newFilePath) !== -1)) {
 				patches.push(patch);
-				
-				if (includeURIs) {
-					var p = api.toURLPath(path.join(fileDir, newFilePath));
-					URIs.push({
-						"Base": getBaseLocation(scope, p),
-						"CloneLocation": "/gitapi/clone" + fileDir,
-						"Location": "/gitapi/diff/" + util.encodeURIComponent(scope) + fileDir + filePath,
-						"New": getNewLocation(scope, p),
-						"Old": getOldLocation(scope, p),
-						"Type": "Diff"
-					});
-				}
-				
+
 				if (includeDiffs && (start <= pi && pi < end)) {
 					i = pi;
 					var type = changeType(patch);
@@ -205,39 +249,6 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 			}
 		});
 		return Promise.all(result);
-	})
-	.done(function() {
-		var body = "";
-		if (includeDiff && includeURIs) {
-			body += "--BOUNDARY\n";
-			body += "Content-Type: application/json\n\n";
-			body += JSON.stringify(URIs[0]);
-			body += "--BOUNDARY\n";
-			body += "Content-Type: plain/text\n\n";
-			body += diffContents.join("");
-			res.setHeader('Content-Type', 'multipart/related; boundary="BOUNDARY"');
-		} else if (includeDiff) {
-			body += diffContents.join("");
-			res.setHeader("Cache-Control", "no-cache");
-			res.setHeader("Content-Disposition", "attachment; filename=\"changes.patch\"");
-			res.setHeader('Content-Type', 'plain/text');
-		} else if (includeDiffs) {
-			var result = {
-				"Type": "Diff",
-				"Length": patches.length,
-				"Children": diffs
-			};
-			if (i < patches.length) {
-				result.NextLocation = "";
-			}
-			body += JSON.stringify(result);
-			res.setHeader('Content-Type', 'application/json');
-		} else if (includeURIs) {
-			body += JSON.stringify(URIs[0]);
-			res.setHeader('Content-Type', 'application/json');
-		}
-		res.setHeader('Content-Length', body.length);
-		return res.status(200).end(body);
 	});
 }
 
