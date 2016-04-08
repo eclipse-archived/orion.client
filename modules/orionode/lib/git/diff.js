@@ -99,14 +99,15 @@ function getDiff(req, res) {
 			return res.status(200).end(body);
 		}
 		if (includeDiff || includeDiffs) {
+			var options = getOptions(ignoreWS, filePath, paths);
 			if (scope.indexOf("..") !== -1) {
-				diff = getDiffBetweenTwoCommits(repo, scope.split(".."), ignoreWS);
+				diff = getDiffBetweenTwoCommits(repo, scope.split(".."), options);
 			} else if (scope === "Default") {
-				diff = getDiffBetweenWorkingTreeAndHead(repo, ignoreWS);
+				diff = getDiffBetweenWorkingTreeAndHead(repo, options);
 			} else if (scope === "Cached") {
-				diff = getDiffBetweenIndexAndHead(repo, ignoreWS);
+				diff = getDiffBetweenIndexAndHead(repo, options);
 			} else {
-				diff = getDiffBetweenWorkingTreeAndHead(repo, ignoreWS);
+				diff = getDiffBetweenWorkingTreeAndHead(repo, options);
 			}
 			return diff
 			.then(function(diff) {
@@ -180,6 +181,7 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 			var newFilePath = newFile.path();
 			var oldFile = patch.oldFile();
 			var oldFilePath = oldFile.path();
+			// Need when both filePath and paths are set, otherwise options.pathspec will take care of filtering the patches
 			if ((!filePath || newFilePath.startsWith(filePath)) && (!paths || paths.indexOf(newFilePath) !== -1)) {
 				patches.push(patch);
 
@@ -252,18 +254,28 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 	});
 }
 
-function getDiffBetweenWorkingTreeAndIndex(repo, ignoreWS) {
-	return git.Diff.indexToWorkdir(repo, null, {
-		flags: 
-			git.Diff.OPTION.SHOW_UNTRACKED_CONTENT |
-			git.Diff.OPTION.INCLUDE_UNTRACKED | 
-			git.Diff.OPTION.RECURSE_UNTRACKED_DIRS |
-			git.Diff.OPTION.IGNORE_SUBMODULES |
-			ignoreWS ? git.Diff.OPTION.IGNORE_WHITESPACE : 0
-	});
+function getOptions(ignoreWS, filePath, paths) {
+	var options = {
+		flags: ignoreWS ? git.Diff.OPTION.IGNORE_WHITESPACE : 0
+	};
+	if (filePath) {
+		options.pathspec = filePath;	
+	} else if (paths) {
+		options.pathspec = paths;
+	}
+	return options;
 }
 
-function getDiffBetweenIndexAndHead(repo, ignoreWS) {
+function getDiffBetweenWorkingTreeAndIndex(repo, options) {
+	options.flags |=
+		git.Diff.OPTION.SHOW_UNTRACKED_CONTENT |
+		git.Diff.OPTION.INCLUDE_UNTRACKED | 
+		git.Diff.OPTION.RECURSE_UNTRACKED_DIRS |
+		git.Diff.OPTION.IGNORE_SUBMODULES;
+	return git.Diff.indexToWorkdir(repo, null, options);
+}
+
+function getDiffBetweenIndexAndHead(repo, options) {
 	return repo.head()
 	.then(function(ref) {
 		return repo.getReferenceCommit(ref);
@@ -272,13 +284,16 @@ function getDiffBetweenIndexAndHead(repo, ignoreWS) {
 		return commit.getTree();
 	})
 	.then(function(tree) {
-		var options = {};
-		if (ignoreWS) options.flags = git.Diff.OPTION.IGNORE_WHITESPACE;
 		return git.Diff.treeToIndex(repo, tree, null, options);
 	});
 }
 
-function getDiffBetweenWorkingTreeAndHead(repo, ignoreWS) {
+function getDiffBetweenWorkingTreeAndHead(repo, options) {
+	options.flags |=
+		git.Diff.OPTION.SHOW_UNTRACKED_CONTENT |
+		git.Diff.OPTION.INCLUDE_UNTRACKED | 
+		git.Diff.OPTION.RECURSE_UNTRACKED_DIRS |
+		git.Diff.OPTION.IGNORE_SUBMODULES;
 	return repo.head()
 	.then(function(ref) {
 		return repo.getReferenceCommit(ref);
@@ -287,19 +302,11 @@ function getDiffBetweenWorkingTreeAndHead(repo, ignoreWS) {
 		return commit.getTree();
 	})
 	.then(function(tree) {
-		var options = {
-			flags:
-				git.Diff.OPTION.SHOW_UNTRACKED_CONTENT |
-				git.Diff.OPTION.INCLUDE_UNTRACKED | 
-				git.Diff.OPTION.RECURSE_UNTRACKED_DIRS |
-				git.Diff.OPTION.IGNORE_SUBMODULES |
-				ignoreWS ? git.Diff.OPTION.IGNORE_WHITESPACE : 0
-		};
 		return git.Diff.treeToWorkdir(repo, tree, options);
 	});
 }
 
-function getDiffBetweenTwoCommits(repo, commits, ignoreWS) {
+function getDiffBetweenTwoCommits(repo, commits, options) {
 	var tree1;
 	var tree2;
 
@@ -320,8 +327,6 @@ function getDiffBetweenTwoCommits(repo, commits, ignoreWS) {
 		tree2 = tree;
 	})
 	.then(function() {
-		var options = {};
-		if (ignoreWS) options.flags = git.Diff.OPTION.IGNORE_WHITESPACE;
 		return git.Diff.treeToTree(repo, tree1, tree2, options);
 	});
 }
