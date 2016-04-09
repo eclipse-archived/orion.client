@@ -232,7 +232,7 @@ module.exports = function(options) {
 			handleDiff(req, res, rest, req.body);
 			return;
 		}
-		var name = req.headers.slug || req.body && req.body.Name;
+		var name = decodeURIComponent(req.headers.slug) || req.body && req.body.Name;
 		if (!name) {
 			writeError(400, res, new Error('Missing Slug header or Name property'));
 			return;

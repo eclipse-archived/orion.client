@@ -48,7 +48,7 @@ module.exports = function(options) {
 	router.use(bodyParser.json());
 	router.use(apiPath(workspaceRoot));
 
-	router.get('*', function(req, res, next) {
+	router.get('*', function(req, res) {
 		var rest = req.pathSuffix;
 		var workspaceRootUrl = originalWorkspaceRoot(req);
 		//var workspaceRootUrl = req.pathPrefix;
@@ -99,7 +99,7 @@ module.exports = function(options) {
 		}
 	});
 
-	router.post('*', function(req, res, next) {
+	router.post('*', function(req, res) {
 			var rest = req.pathSuffix;
 			var err;
 			if (rest === '') {
@@ -108,7 +108,7 @@ module.exports = function(options) {
 				res.statusCode = 403;
 				res.end(JSON.stringify(err));
 			} else if (rest === workspaceId) {
-				var projectName = req.headers.slug || (req.body && req.body.Name);
+				var projectName = decodeURIComponent(req.headers.slug) || req.body && req.body.Name;
 				if (!projectName) {
 					err = {Message: 'Missing "Slug" header or "Name" parameter'};
 					res.statusCode = 400;
@@ -152,7 +152,7 @@ module.exports = function(options) {
 			}
 	});
 
-	router.put('*', function(req, res, next) {
+	router.put('*', function(req, res) {
 		if (req.body.Location && options.options.configParams["orion.single.user"]) {
 			options.options.workspaceDir = req.body.Location;
 			return res.status(200).end();
@@ -160,7 +160,7 @@ module.exports = function(options) {
 		writeError(403, res);
 	});
 
-	router.delete('*', function(req, res) {
+	router.delete('*', /* @callback */ function(req, res) {
 		// Would 501 be more appropriate?
 		writeError(403, res);
 	});

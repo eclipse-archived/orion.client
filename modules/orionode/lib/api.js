@@ -63,7 +63,7 @@ function toURLPath(p) {
  */
 function write(code, res, headers, body) {
 	if (typeof code === 'number') {
-		res.statusCode = code;
+		res.status(code);
 	}
 	if (headers && typeof headers === 'object') {
 		Object.keys(headers).forEach(function(header) {
@@ -71,11 +71,10 @@ function write(code, res, headers, body) {
 		});
 	}
 	if (typeof body !== 'undefined') {
-		var contentType = typeof body === 'object' ? 'application/json' : 'text/plain';
-		body = typeof body === 'object' ? body = JSON.stringify(body) : body;
-		res.setHeader('Content-Type', contentType);
-		res.setHeader('Content-Length', body.length);
-		res.end(body);
+		if (typeof body === 'object') {
+			return res.json(body);
+		}
+		res.send(body);
 	} else {
 		res.end();
 	}
