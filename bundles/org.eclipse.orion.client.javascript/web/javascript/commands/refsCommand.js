@@ -235,6 +235,14 @@ define([
 		 * @private
 		 */
 		_checkType: function _checkType(original, file, match, expected, request) {
+			if (original.type && original.type.doc && original.type.doc[0] === "{") {
+				var temp = JSON.parse(original.type.doc);
+				if (temp && typeof temp === "object"){
+					original.type.doc = temp.text;
+					original.type.docEnd = temp.end;
+					original.type.docStart = temp.start;
+				}				
+			}
 			var that = this;
 			that.ternworker.postMessage(
 					request, 
@@ -252,6 +260,12 @@ define([
 								match.confidence = _t.staticCheck.confidence;
 							} else if(_t.category === categories.strings.category ||	_t.category === categories.regex.category) {
 								match.confidence = 0;
+							} else if(_t.category === "blockcomments" && _ot.doc){
+								if(typeof _ot.docEnd === "number" && typeof _ot.docStart === "number"){
+									if (match.start >= _ot.docStart && match.end <= _ot.docEnd && _ot.doc.indexOf(_ot.name) !== -1){
+										match.confidence = 100;
+									}
+								}
 							} else {
 								match.confidence = -1;
 							}
