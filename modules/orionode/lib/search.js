@@ -115,6 +115,8 @@ module.exports = function(options) {
 				if (searchTerm.indexOf("*") !== -1) {
 					searchTerm = searchTerm.replace("*", ".*");
 				}
+			} else {
+				searchTerm = searchTerm.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
 			}
 
 			if (!searchOpts.searchTermCaseSensitive) {
