@@ -24,7 +24,7 @@ module.exports = function(options) {
 	if (!root) { throw new Error('options.root path required'); }
 	var workspaceId = 'orionode';
 	var workspaceName = 'Orionode Workspace';
-	var fieldList = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive".split(",");
+	var fieldList = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,WholeWord,CaseSensitive".split(",");
 
 	function isSearchField(term) {
 		for (var i = 0; i < fieldList.length; i++) {
@@ -86,6 +86,8 @@ module.exports = function(options) {
 						this.regEx = true;
 					} else if (term.lastIndexOf("CaseSensitive:", 0) === 0) {
 						this.searchTermCaseSensitive = true;
+					} else if (term.lastIndexOf("WholeWord:", 0) === 0) {
+						this.searchTermWholeWord = true;
 					}
 				} else {
 					this.searchTerm = decodeURIComponent(term);
@@ -119,6 +121,9 @@ module.exports = function(options) {
 				} else {
 					searchTerm = searchTerm.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
 				}
+			}
+			if (searchOpts.searchTermWholeWord){
+				searchTerm = "\\b" + searchTerm + "\\b";
 			}
 			if (!searchOpts.searchTermCaseSensitive) {
 				searchTerm = new RegExp(searchTerm, "i");
