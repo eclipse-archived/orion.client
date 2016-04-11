@@ -99,26 +99,27 @@ module.exports = function(options) {
 
 	function buildSearchPattern(searchOpts){
 		var searchTerm = searchOpts.searchTerm;
-		if (searchTerm && !searchOpts.regEx) {
-			if (searchTerm.indexOf("\"") === 0) {
-				searchTerm = searchTerm.substring(1, searchTerm.length - 1);
+		if (searchTerm) {
+			if (!searchOpts.regEx) {
+				if (searchTerm.indexOf("\"") === 0) {
+					searchTerm = searchTerm.substring(1, searchTerm.length - 1);
+				}
+	
+				searchTerm = undoLuceneEscape(searchTerm);
+				if (searchTerm.indexOf("?") !== -1 || searchTerm.indexOf("*") !== -1) {
+					if (searchTerm.indexOf("*") === 0) {
+						searchTerm = searchTerm.substring(1);
+					}
+					if (searchTerm.indexOf("?") !== -1) {
+						searchTerm = searchTerm.replace("?", ".");
+					}
+					if (searchTerm.indexOf("*") !== -1) {
+						searchTerm = searchTerm.replace("*", ".*");
+					}
+				} else {
+					searchTerm = searchTerm.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
+				}
 			}
-
-			searchTerm = undoLuceneEscape(searchTerm);
-			if (searchTerm.indexOf("?") !== -1 || searchTerm.indexOf("*") !== -1) {
-				if (searchTerm.indexOf("*") === 0) {
-					searchTerm = searchTerm.substring(1);
-				}
-				if (searchTerm.indexOf("?") !== -1) {
-					searchTerm = searchTerm.replace("?", ".");
-				}
-				if (searchTerm.indexOf("*") !== -1) {
-					searchTerm = searchTerm.replace("*", ".*");
-				}
-			} else {
-				searchTerm = searchTerm.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
-			}
-
 			if (!searchOpts.searchTermCaseSensitive) {
 				searchTerm = new RegExp(searchTerm, "i");
 			} else {
@@ -218,8 +219,13 @@ module.exports = function(options) {
 		var searchOpt = new SearchOptions(req);
 		searchOpt.buildSearchOptions();
 
-		var searchPattern = buildSearchPattern(searchOpt);
-		var filenamePattern = buildFilenamePattern(searchOpt);
+		var searchPattern, filenamePattern;
+		try {
+			searchPattern = buildSearchPattern(searchOpt);
+			filenamePattern = buildFilenamePattern(searchOpt);
+		} catch (err) {
+			return api.writeError(400, res, err);
+		}
 
 		var endOfFileRootIndex = 5;
 
