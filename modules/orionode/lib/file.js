@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var apiPath = require('./middleware/api_path');
 var express = require('express');
 var bodyParser = require('body-parser');
 var ETag = require('./util/etag');
@@ -23,30 +22,20 @@ function getParam(req, paramName) {
 	return req.query[paramName];
 }
 
-function writeEmptyFilePathError(res, rest) {
-	if (rest === '') {
-		// I think this is an implementation detail, not API, but emulate the Java Orion server's behavior here anyway.
-		writeError(403, res);
-		return true;
-	}
-	return false;
-}
-
 module.exports = function(options) {
 	var fileRoot = options.root;
 	if (!fileRoot) { throw new Error('options.root is required'); }
 
-	var writeFileMetadata = function(req /*, args.. */) {
-		var args = Array.prototype.slice.call(arguments, 1);
-		var originalFileUrl = req.contextPath + fileRoot;
+	var writeFileMetadata = function() {
+		var args = Array.prototype.slice.call(arguments, 0);
+		var originalFileUrl = fileRoot;
 		return fileUtil.writeFileMetadata.apply(null, [originalFileUrl].concat(args));
 	};
 	var getSafeFilePath = function(req, rest) {
 		return fileUtil.safeFilePath(req.user.workspaceDir, rest);
 	};
 
-
-	function writeFileContents(res, rest, filepath, stats, etag) {
+	function writeFileContents(res, filepath, stats, etag) {
 		if (stats.isDirectory()) {
 			//shouldn't happen
 			writeError(500, res, "Expected a file not a directory");
@@ -140,7 +129,7 @@ module.exports = function(options) {
 								writeError(500, res, error);
 								return;
 							}
-							writeFileMetadata(req, res, rest, patchPath, stats, ETag.fromString(newContents) /*the new ETag*/);
+							writeFileMetadata(req, res, patchPath, stats, ETag.fromString(newContents) /*the new ETag*/);
 						});
 					});
 					
@@ -151,15 +140,10 @@ module.exports = function(options) {
 		});
 	}
 
-	var router = express.Router();
-	router.use(apiPath(fileRoot));
-
+	var router = express.Router({mergeParams: true});
 	var jsonParser = bodyParser.json();
 	router.get('*', jsonParser, function(req, res) {
-		var rest = req.pathSuffix;
-		if (writeEmptyFilePathError(res, rest)) {
-			return;
-		}
+		var rest = req.params["0"].substring(1);
 		var filepath = getSafeFilePath(req, rest);
 		fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
 			if (error && error.code === 'ENOENT') {
@@ -168,20 +152,16 @@ module.exports = function(options) {
 				writeError(500, res, error);
 			} else if (stats.isFile() && getParam(req, 'parts') !== 'meta') {
 				// GET file contents
-				writeFileContents(res, rest, filepath, stats, etag);
+				writeFileContents(res, filepath, stats, etag);
 			} else {
-				// TODO handle depth > 1 for directories
-				var includeChildren = stats.isDirectory() && getParam(req, 'depth') === '1';
-				writeFileMetadata(req, res, rest, filepath, stats, etag, includeChildren);
+				var depth = stats.isDirectory() && Number(getParam(req, 'depth')) || 0;
+				writeFileMetadata(req, res, filepath, stats, etag, depth);
 			}
 		});
 	});
 
 	router.put('*', function(req, res) {
-		var rest = req.pathSuffix;
-		if (writeEmptyFilePathError(res, rest)) {
-			return;
-		}
+		var rest = req.params["0"].substring(1);
 		var filepath = getSafeFilePath(req, rest);
 		if (getParam(req, 'parts') === 'meta') {
 			// TODO implement put of file attributes
@@ -193,10 +173,10 @@ module.exports = function(options) {
 			ws.on('finish', function() {
 				fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
 					if (error && error.code === 'ENOENT') {
-						res.statusCode = 404;
-						res.end();
+						res.status(404).end();
+						return;
 					}
-					writeFileMetadata(req, res, rest, filepath, stats, etag);
+					writeFileMetadata(req, res, filepath, stats, etag);
 				});
 			});
 			ws.on('error', function(err) {
@@ -210,11 +190,9 @@ module.exports = function(options) {
 		}
 		fileUtil.withETag(filepath, function(error, etag) {
 			if (error && error.code === 'ENOENT') {
-				res.statusCode = 404;
-				res.end();
+				res.status(404).end();
 			} else if (ifMatchHeader && ifMatchHeader !== etag) {
-				res.statusCode = 412;
-				res.end();
+				res.status(412).end();
 			} else {
 				write();
 			}
@@ -223,33 +201,25 @@ module.exports = function(options) {
 
 	// POST - parse json body
 	router.post('*', jsonParser, function(req, res) {
-		var rest = req.pathSuffix;
-		if (writeEmptyFilePathError(res, rest)) {
-			return;
-		}
+		var rest = req.params["0"].substring(1);
 		var diffPatch = req.headers['x-http-method-override'];
 		if (diffPatch === "PATCH") {
 			handleDiff(req, res, rest, req.body);
 			return;
 		}
-		var name = decodeURIComponent(req.headers.slug) || req.body && req.body.Name;
+		var name = fileUtil.decodeSlug(req.headers.slug) || req.body && req.body.Name;
 		if (!name) {
 			writeError(400, res, new Error('Missing Slug header or Name property'));
 			return;
 		}
 
-		var wwwpath = api.join(rest, encodeURIComponent(name)),
-			filepath = getSafeFilePath(req, nodePath.join(rest, name));
-
-		fileUtil.handleFilePOST(getSafeFilePath(req, rest), fileRoot, req, res, wwwpath, filepath);
+		var filepath = getSafeFilePath(req, nodePath.join(rest, name));
+		fileUtil.handleFilePOST(fileRoot, req, res, filepath);
 	});
 
 	// DELETE - no request body
 	router.delete('*', function(req, res) {
-		var rest = req.pathSuffix;
-		if (writeEmptyFilePathError(res, rest)) {
-			return;
-		}
+		var rest = req.params["0"].substring(1);
 		var filepath = getSafeFilePath(req, rest);
 		fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
 			var ifMatchHeader = req.headers['if-match'];

@@ -45,6 +45,7 @@ function startServer(options) {
 			}
 		}
 
+		// API handlers
 		if (options.configParams["orion.single.user"]) {
 			app.use(/* @callback */ function(req, res, next){
 				req.user = {username: "anonymous"};
@@ -60,20 +61,19 @@ function startServer(options) {
 			app.use(require('./lib/user')(options));
 		}
 		app.use('/site', checkAuthenticated, require('./lib/sites')(options));
-
-		app.use(require('term.js').middleware());
-		app.use(require('./lib/orionode_static')(path.normalize(path.join(LIBS, 'orionode.client/'))));
-		app.use(require('./lib/orion_static')({ orionClientRoot: ORION_CLIENT, maxAge: options.maxAge }));
-		
-		// API handlers
 		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ root: '/task' }));
-		app.use('/file', checkAuthenticated, require('./lib/file')({ root: '/file', options: options }));
-		app.use('/workspace', checkAuthenticated, require('./lib/workspace')({ root: '/workspace', fileRoot: '/file', options: options }));
+		app.use('/file*', checkAuthenticated, require('./lib/file')({ root: '/file', options: options }));
+		app.use('/workspace*', checkAuthenticated, require('./lib/workspace')({ root: '/workspace', fileRoot: '/file', options: options }));
 		app.use('/gitapi', checkAuthenticated, require('./lib/git')({ root: '/gitapi', fileRoot: '/file' }));
 		app.use('/filesearch', checkAuthenticated, require('./lib/search')({ root: '/filesearch',  fileRoot: '/file' }));
 		app.use('/prefs', checkAuthenticated, require('./lib/controllers/prefs')(options));
 		app.use('/xfer', checkAuthenticated, require('./lib/xfer')(options));
 		app.use('/metrics', require('./lib/metrics').router(options));
+
+		// Static files
+		app.use(require('term.js').middleware());
+		app.use(require('./lib/orionode_static')(path.normalize(path.join(LIBS, 'orionode.client/'))));
+		app.use(require('./lib/orion_static')({ orionClientRoot: ORION_CLIENT, maxAge: options.maxAge }));
 
 		//error handling
 		app.use(function(req, res){

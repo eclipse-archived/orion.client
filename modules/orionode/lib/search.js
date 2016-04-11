@@ -10,7 +10,6 @@
  *******************************************************************************/
 /*eslint-env node*/
 var api = require('./api');
-var apiPath = require('./middleware/api_path');
 var express = require('express');
 var bodyParser = require('body-parser');
 var Promise = require('bluebird');
@@ -213,7 +212,6 @@ module.exports = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.use(apiPath(root))
 	.get('*', function(req, res) {
 		var searchOpt = new SearchOptions(req);
 		searchOpt.buildSearchOptions();

@@ -72,11 +72,23 @@ function write(code, res, headers, body) {
 	}
 	if (typeof body !== 'undefined') {
 		if (typeof body === 'object') {
+			encodeLocation(body);
 			return res.json(body);
 		}
 		res.send(body);
 	} else {
 		res.end();
+	}
+}
+
+var LocationRegex = /Location$/;
+function encodeLocation(obj) {
+	for (var p in obj) {
+		if (typeof obj[p] === "object") {
+			encodeLocation(obj[p]);
+		} else if (p.match(LocationRegex)) {
+			obj[p] = encodeURI(obj[p]);
+		}
 	}
 }
 
