@@ -11,7 +11,7 @@
 /*eslint-env node */
 var api = require('./api'), writeError = api.writeError;
 var archiver = require('archiver');
-var unzip = require('unzip');
+var unzip = require('unzip2');
 var request = require('request');
 var express = require('express');
 var path = require('path');
