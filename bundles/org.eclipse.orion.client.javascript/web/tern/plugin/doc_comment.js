@@ -149,12 +149,23 @@
       if (!(type instanceof infer.Obj) || type.origin != cx.curOrigin || type.doc)
         type = null;
     }
-
     for (var i = comments.length - 1; i >= 0; i--) {
       var text = stripLeadingChars(comments[i].split(/\r\n?|\n/)).join("\n");
       if (text) {
         if (aval instanceof infer.AVal) aval.doc = text;
-        if (type) type.doc = text;
+        if (type) {
+          var loc = node.leadingComments? node.leadingComments[i].end : -1;
+          var commentsLen = 0;
+          for (var i = comments.length - 1; i >= 0; i--) {
+            commentsLen += comments[i].length;
+          }
+          var temp = {
+            text: text,
+            start: loc - commentsLen - 4, // it seems the parser only exclude the leading/trailing (4) characters in jsdoc
+            end: loc
+          };
+          type.doc = JSON.stringify(temp); 
+        }
         break;
       }
     }
