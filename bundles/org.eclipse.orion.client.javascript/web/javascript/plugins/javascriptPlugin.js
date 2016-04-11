@@ -1500,7 +1500,7 @@ define([
  				 	        	                {	id: "no-undef-expression",  //$NON-NLS-1$
  				 	        	                	name: javascriptMessages["undefExpression"],
  				 	        	                	type: "number",  //$NON-NLS-1$
- 				 	        	                	defaultValue: ignore,
+ 				 	        	                	defaultValue: warning,
  				 	        	                	options: severities
  				 	        	                },
  				 	        	                {	id: "no-undef",  //$NON-NLS-1$

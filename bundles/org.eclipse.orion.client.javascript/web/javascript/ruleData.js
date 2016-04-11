@@ -67,7 +67,7 @@ define([
 			"no-sparse-arrays" : 1, 
 			"no-throw-literal" : 1,
 			"no-undef" : 2,
-			"no-undef-expression": 0,
+			"no-undef-expression": 1,
 			"no-undef-init" : 1,
 			"no-unreachable" : 1, 
 			"no-unused-params" : 1,
