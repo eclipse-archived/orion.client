@@ -90,7 +90,7 @@ var getParents = exports.getParents = function(fileRoot, relativePath) {
 		var location = loc + "/";
 		parents.push({
 			Name: seg,
-			ChildrenLocation: location + '?depth=1', 
+			ChildrenLocation: {pathname: location, query: {depth:1}}, 
 			Location: location
 		});
 	}
@@ -330,7 +330,7 @@ function fileJSON(fileRoot, workspaceDir, filepath, stats, depth, metadataMixins
 		return Promise.resolve(result);
 	}
 	// Orion's File Client expects ChildrenLocation to always be present
-	result.ChildrenLocation = result.Location + '?depth=1';
+	result.ChildrenLocation = {pathname: result.Location, query: {depth:1}};
 	result.ImportLocation = result.Location.replace(/\/file/, "/xfer/import").replace(/\/$/, "");
 	result.ExportLocation = result.Location.replace(/\/file/, "/xfer/export").replace(/\/$/, "") + ".zip";
 	if (depth <= 0) {

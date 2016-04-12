@@ -66,7 +66,7 @@ function startServer(cb) {
 				var orionMiddleware = orion({
 					workspaceDir: workspaceDir,
 					configParams: configParams,
-					maxAge: (dev ? 0 : undefined),
+					maxAge: dev ? 0 : undefined,
 				});
 				
 				// add socketIO and app support

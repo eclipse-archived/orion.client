@@ -82,12 +82,18 @@ function write(code, res, headers, body) {
 }
 
 var LocationRegex = /Location$/;
+var PercentReplaceRegex = /\%/g;
 function encodeLocation(obj) {
 	for (var p in obj) {
-		if (typeof obj[p] === "object") {
+		if (p.match(LocationRegex)) {
+			if (typeof obj[p] === "object") {
+				obj[p].pathname = obj[p].pathname.replace(PercentReplaceRegex, "%25");
+				obj[p] = url.format(obj[p]);
+			} else {
+				obj[p] = url.format({pathname: obj[p].replace(PercentReplaceRegex, "%25")});
+			}
+		} else if (typeof obj[p] === "object") {
 			encodeLocation(obj[p]);
-		} else if (p.match(LocationRegex)) {
-			obj[p] = encodeURI(obj[p]);
 		}
 	}
 }
