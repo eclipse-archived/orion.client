@@ -1,3 +1,4 @@
+/* eslint-disable */
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require);
@@ -110,16 +111,19 @@
         var _f = resolver.getResolved(name); //ORION
 		if(_f && _f.file) {
 			name = _f.file;
-			// data.currentFile is only available while analyzing a file; at query
-	      // time, determine the calling file from the caller's AST.
-	      var currentFile = data.currentFile || resolveProjectPath(server, argNodes[0].sourceFile.name);
-	
-	      var relative = /^\.{0,2}\//.test(name);
-	      if (relative) {
-	        if (!currentFile) return argNodes[0].required || infer.ANull;
-	        name = resolvePath(currentFile, name);
-	      }
-	      result = resolveModule(server, name, currentFile, _f.content); // ORION 11.0 Avoid loading file contents twice
+			if(name in data.modules) {
+				result = data.modules[name];
+			} else {
+				// data.currentFile is only available while analyzing a file; at query
+				// time, determine the calling file from the caller's AST.
+				var currentFile = data.currentFile || resolveProjectPath(server, argNodes[0].sourceFile.name);
+				var relative = /^\.{0,2}\//.test(name);
+				if (relative) {
+				  if (!currentFile) return argNodes[0].required || infer.ANull;
+				  name = resolvePath(currentFile, name);
+				}
+				result = resolveModule(server, name, currentFile, _f.contents); // ORION 11.0 Avoid loading file contents twice
+			}
 		} else {
 			result = new infer.AVal(); //ORION
 		}
@@ -192,7 +196,15 @@
 	 */
 	function usingNode(file) {
 		if(/\.js$/g.test(file.name) && file.ast && file.ast.environments) {
-      	  	return file.ast.environments.node;
+      	  	if(file.ast.environments.node) {
+      	  		return true;
+      	  	}
+      	  	if(typeof file.parent === 'string') {
+      	  		var p = server.fileMap[file.parent];
+      	  		if(p && p.ast && p.ast.environments) {
+      	  			return p.ast.environments.node;
+      	  		}
+      	  	}
       	}
       	return false;
 	}
@@ -231,9 +243,7 @@
                      */
                     postParse: function postParse(ast, text) {
                     	if(ast && ast.environments && ast.environments.node) {
-	                        resolver.doPostParse(server, ast, infer.cx().definitions, function(name) {
-	                        	return /^[.]+\//.test(name);
-	                        });
+	                        resolver.doPostParse(server, ast, infer.cx().definitions, null, {node:true});
 	                    }
                     },
                     /**

@@ -231,29 +231,62 @@ define([
 			if(typeof request.args.file === 'object') {
 				var _l = request.args.file.logical;
 				response.args.logical = _l;
-				scriptresolver.getWorkspaceFile(_l).then(function(files) {
-					if(files && files.length > 0) {
-						var rel = scriptresolver.resolveRelativeFiles(_l, files, {location: request.args.file.file, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
-						if(rel && rel.length > 0) {
-							return fileClient.read(rel[0].location).then(function(contents) {
-								response.args.contents = contents;
-								response.args.file = rel[0].location;
-								response.args.path = rel[0].path;
-								ternWorker.postMessage(response);
-							});
-						}
-						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-						ternWorker.postMessage(response);
+				if(request.args.file.node && !/^[\.]+/.test(_l)) {
+					//do node_modules read
+					var project = ternProjectManager.getProjectFile();
+					if(project) {
+						fileClient.read(project+"node_modules/"+_l+"/package.json").then(function(json) {
+							if(json) {
+								var val = JSON.parse(json);
+								var mainPath = project+"node_modules/"+_l+"/"+val.main;
+								fileClient.read(mainPath).then(function(contents) {
+									response.args.contents = contents;
+									response.args.file = mainPath;
+									response.args.path = val.main;
+									ternWorker.postMessage(response);
+								},
+								function(err) {
+									response.args.error = "Failed to read node_modules folder";
+									response.args.message = err.toString();
+									ternWorker.postMessage(response);
+								});
+							}
+						},
+						function(err) {
+							response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
+							response.args.message = err.toString();
+							ternWorker.postMessage(response);
+						});
 					} else {
+						//don't search for now
 						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
 						ternWorker.postMessage(response);
 					}
-				},
-				function(err) {
-					response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-					response.args.message = err.toString();
-					ternWorker.postMessage(response);
-				});
+				} else {
+					scriptresolver.getWorkspaceFile(_l).then(function(files) {
+						if(files && files.length > 0) {
+							var rel = scriptresolver.resolveRelativeFiles(_l, files, {location: request.args.file.file, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
+							if(rel && rel.length > 0) {
+								return fileClient.read(rel[0].location).then(function(contents) {
+									response.args.contents = contents;
+									response.args.file = rel[0].location;
+									response.args.path = rel[0].path;
+									ternWorker.postMessage(response);
+								});
+							}
+							response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
+							ternWorker.postMessage(response);
+						} else {
+							response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
+							ternWorker.postMessage(response);
+						}
+					},
+					function(err) {
+						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
+						response.args.message = err.toString();
+						ternWorker.postMessage(response);
+					});
+				}
 			} else {
 				var file = request.args.file;
 				response.args.file = file;

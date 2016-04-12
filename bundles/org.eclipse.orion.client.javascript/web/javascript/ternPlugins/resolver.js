@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -15,14 +15,13 @@ define([
 ], function(mTemplates) {
 	
 	var _resolved = Object.create(null);
-	
 	/**
 	 * @description Resolves the computed dependencies
 	 * @param {TernServer} server The Tern server
 	 * @param {String} loc The original file context location (from the AST)
 	 * @since 9.0
 	 */
-	function resolveDependencies(server, loc) {
+	function resolveDependencies(server, loc, options) {
 	    var keys = Object.keys(_resolved);
 	    for (var i = 0; i < keys.length; i++) {
 	        var key = keys[i];
@@ -31,7 +30,7 @@ define([
 	        if (dep && (dep.pending || dep.file)) {
 	      	  continue;
 	        }
-	  		resolve(server, key, loc);
+	  		resolve(server, key, loc, options);
 		}
 	}
 	
@@ -43,7 +42,7 @@ define([
 	 * @param {String} loc The original file context location (from the AST)
 	 * @since 9.0
 	 */
-	function resolve(server, key, loc) {
+	function resolve(server, key, loc, options) {
 		if(_resolved[key].pending || _resolved[key].err) {
 			//if we are waiting don't fire of another request
 			return;
@@ -59,7 +58,13 @@ define([
   		server.startAsyncAction();
   		_resolved[key].pending = true;
   		_resolved[key].timeout = setTimeout(resetPending, 4000, key);
-		server.options.getFile({logical: key, file: loc}, function(err, _file) {
+  		var opts = {logical: key, file: loc};
+  		if(options) {
+  			if(options.node) {
+  				opts.node = true;
+  			}
+  		}
+		server.options.getFile(opts, function(err, _file) {
 			clearTimeout(_resolved[key].timeout);
 			_resolved[key].file = _file.file;
 	   		_resolved[key].contents = typeof _file.contents === 'string' ? _file.contents : '';
@@ -113,7 +118,7 @@ define([
 	 * @param {Function} test An optional function callback to test the name of the dependency
 	 * @since 9.0
 	 */
-	function doPostParse(server, ast, ignores, test) {
+	function doPostParse(server, ast, ignores, test, options) {
 		if(Array.isArray(ast.dependencies) && ast.dependencies.length > 0) {
 			for(var i = 0; i < ast.dependencies.length; i++) {
 				var _d = _getDependencyName(ast.dependencies[i]);
@@ -141,8 +146,9 @@ define([
 					}
 					_resolved[_d] = Object.create(null);
 				}
+				
 			}
-			resolveDependencies(server, ast.sourceFile ? ast.sourceFile.name : null);
+			resolveDependencies(server, ast.sourceFile ? ast.sourceFile.name : null, options);
 		}  	
 	}
 	
