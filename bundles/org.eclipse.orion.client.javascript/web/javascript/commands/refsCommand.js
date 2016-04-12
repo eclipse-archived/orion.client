@@ -252,6 +252,12 @@ define([
 								match.confidence = _t.staticCheck.confidence;
 							} else if(_t.category === categories.strings.category ||	_t.category === categories.regex.category) {
 								match.confidence = 0;
+							} else if(_t.category === "blockcomments" && _ot.doc){
+								if(_t.comments_range && _t.comments_range.length === 2){
+									if (match.start >= _t.comments_range[0] && match.end <= _t.comments_range[1] && _ot.doc.indexOf(_ot.name) !== -1){
+										match.confidence = 100;
+									}
+								}
 							} else {
 								match.confidence = -1;
 							}
