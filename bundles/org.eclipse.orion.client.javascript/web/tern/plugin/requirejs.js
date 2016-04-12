@@ -93,6 +93,7 @@
 	      known = data.interfaces[stripJSExt(val.file)] = new infer.AVal();
 	      known.origin = val.file;
 	      known.contents = val.contents;
+	      known.reqName = name;
       }
     }
     return known;

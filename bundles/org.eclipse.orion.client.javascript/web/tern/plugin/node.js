@@ -109,6 +109,7 @@
       }
     } else {
         var _f = resolver.getResolved(name); //ORION
+        var modName = name;
 		if(_f && _f.file) {
 			name = _f.file;
 			if(name in data.modules) {
@@ -123,6 +124,7 @@
 				  name = resolvePath(currentFile, name);
 				}
 				result = resolveModule(server, name, currentFile, _f.contents); // ORION 11.0 Avoid loading file contents twice
+				result.modName = modName; //ORION tag the type with its original module name - used in linting
 			}
 		} else {
 			result = new infer.AVal(); //ORION

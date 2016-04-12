@@ -159,6 +159,27 @@ define([
 					}
 				}
 			};
+			_tern.libKnown = function libKnown(name) {
+				if(server._node && server._node.modules) {
+					var keys = Object.keys(server._node.modules);
+					for(var i = 0, len = keys.length; i < len; i++) {
+						var mod = server._node.modules[keys[i]];
+						if(mod && mod.modName === name) {
+							return true;
+						}
+					}
+				}
+				if(server._requireJS && server._requireJS.interfaces) {
+					keys = Object.keys(server._requireJS.interfaces);
+					for(i = 0, len = keys.length; i < len; i++) {
+						mod = server._requireJS.interfaces[keys[i]];
+						if(mod && mod.reqName === name) {
+							return true;
+						}
+					}
+				}
+				return false;
+			};
 			_tern.optionalPlugins = server.options.optionalPlugins;
 			_tern.query = query;
 			_tern.file = file;

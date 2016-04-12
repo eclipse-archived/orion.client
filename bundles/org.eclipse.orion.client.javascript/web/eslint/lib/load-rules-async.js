@@ -2010,6 +2010,9 @@ define([
 										return;
 									}
 								}
+								if(tern.libKnown(lib.value)) {
+									return;
+								}
 								//TODO check for the module having been loaded via the graph
 								if(tern.optionalPlugins[lib.value]) {
 									//we known about it
