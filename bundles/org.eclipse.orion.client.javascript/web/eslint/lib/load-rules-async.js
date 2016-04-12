@@ -789,7 +789,7 @@ define([
             			                    if(jslint.length < 1) {
             			                        continue;
             			                    }
-            			                    var start = 2 + comment.value.indexOf(jslint) + comment.range[0];
+            			                    var start = 2 + comment.value.indexOf(jslint) + comment.range[0]; 
             			                    var end = start + jslint.length;
             			                    context.report({type:'BlockComment', range:[start, end], loc: comment.loc}, ProblemMessages['no-jslint'], {0:jslint}); //$NON-NLS-1$
             			                }
@@ -1454,7 +1454,11 @@ define([
     	                						}
             	                			}
             	                			if (!foundType){
-												context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
+            	                				if (type.types.length === 1 && type.types[0].name && type.types[0].origin){
+													context.report(node.property, ProblemMessages['no-undef-expression-defined-object'], {0:node.property.name, 1: type.types[0].name, 2: type.types[0].origin, nls: 'no-undef-expression-defined-object'}); //$NON-NLS-1$
+												} else {
+													context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
+												}
 											}
             	                		}
             	                	} catch (e) {

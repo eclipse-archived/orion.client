@@ -7951,7 +7951,7 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "'b' is undefined.",
+										description: "'b' is undefined for 'undefExpr' in validator_test_script.js.",
 										nodeType: "Identifier"
 									}]);
 								},
@@ -8104,13 +8104,13 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "'b' is undefined.",
+										description: "'b' is undefined for \'undefExpr\' in validator_test_script.js.",
 										nodeType: "Identifier"
 									},
                                     {
 										id: RULE_ID,
 										severity: 'warning',
-										description: "'c' is undefined.",
+										description: "'c' is undefined for \'undefExpr\' in validator_test_script.js.",
 										nodeType: "Identifier"
 									}]);
 								},
@@ -8118,7 +8118,7 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
-						it.skip("Single file wrong undeclared members", function(callback) {
+						it("Single file wrong undeclared members", function(callback) {
 							var topic = "var undefExpr = {a: function(){}}; undefExpr.b(); undefExpr.c()";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
@@ -8128,13 +8128,13 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "'b' is undefined.",
+										description: "'b' is undefined for 'undefExpr' in validator_test_script.js.",
 										nodeType: "Identifier"
 									},
                                     {
 										id: RULE_ID,
 										severity: 'warning',
-										description: "'c' is undefined.",
+										description: "'c' is undefined for 'undefExpr' in validator_test_script.js.",
 										nodeType: "Identifier"
 									}]);
 								},
@@ -8152,13 +8152,13 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "'d' is undefined.",
+										description: "'d' is undefined for 'b' in validator_test_script.js.",
 										nodeType: "Identifier"
 									},
                                     {
 										id: RULE_ID,
 										severity: 'warning',
-										description: "'b' is undefined.",
+										description: "'b' is undefined for 'undefExpr' in validator_test_script.js.",
 										nodeType: "Identifier"
 									}]);
 								},
@@ -8176,7 +8176,7 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "'getZZZ' is undefined.",
+										description: "'getZZZ' is undefined for 'Document' in browser.",
 										nodeType: "Identifier"
 									}]);
 								},
@@ -8235,7 +8235,7 @@ define([
 									assertProblems(problems, [{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "'b' is undefined.",
+										description: "'b' is undefined for 'noUndefExpr1' in noUndefExprTest1.js.",
 										nodeType: "Identifier"
 									}]);
 								},
