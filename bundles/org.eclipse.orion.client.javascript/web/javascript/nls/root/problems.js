@@ -83,6 +83,7 @@ define({
 	'no-undef-defined' : '\'${0}\' is undefined.',
 	'no-undef-expression-defined' : '\'${0}\' is undefined.',
 	'no-undef-expression-defined-object' : '\'${0}\' is undefined for \'${1}\' in ${2}.',  // 0: member name 1: object name 2: file name
+	'no-undef-expression-defined-index' : '\'${0}\' is undefined for \'${1}\' in ${2}.',  // 0: member name 1: object name 2: library
 	'no-undef-init': 'Avoid explicitly initializing variables to \'undefined\'.',
 	'no-undef-init-description': 'Warn when variables are explicitly initialized to undefined.',
 	'no-undef-readonly': '\'${0}\' is read-only.',

@@ -108,6 +108,7 @@ define({
 	'addEmptyCommentFixName': 'Comment empty block',
 	'addESLintEnvFixName': 'Add to eslint-env directive',
 	'addESLintGlobalFixName': 'Add to globals directive',
+	'openDefinition': 'Go to definition...',
 	'removeUnusedParamsFixName': 'Remove parameter',
 	'commentCallbackFixName': 'Add @callback to function',
 	'eqeqeqFixName': 'Update operator',

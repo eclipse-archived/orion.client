@@ -1454,8 +1454,22 @@ define([
     	                						}
             	                			}
             	                			if (!foundType){
-            	                				if (type.types.length === 1 && type.types[0].name && type.types[0].origin){
-													context.report(node.property, ProblemMessages['no-undef-expression-defined-object'], {0:node.property.name, 1: type.types[0].name, 2: type.types[0].origin, nls: 'no-undef-expression-defined-object'}); //$NON-NLS-1$
+        	                					var name = type.types[0].name;
+        	                					if (!name && type.originNode){
+        	                						name = type.originNode.name;
+    	                						}
+        	                					var origin = type.types[0].origin;
+            	                				if (type.types.length === 1 && name && origin){
+            	                					if (/\./.test(origin)){
+        	                							var originNode = type.types[0].originNode ? type.types[0].originNode : null;
+        	                							var index = origin.lastIndexOf('/');
+        	                							if (index >= 0){
+        	                								origin = origin.substring(index+1);
+        	                							}
+														context.report(node.property, ProblemMessages['no-undef-expression-defined-object'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-object', data: {file: originNode.sourceFile.name, start: originNode.start, end: originNode.end}}); //$NON-NLS-1$
+													} else {
+														context.report(node.property, ProblemMessages['no-undef-expression-defined-index'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-index'}); //$NON-NLS-1$
+													}
 												} else {
 													context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
 												}

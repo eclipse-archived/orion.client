@@ -8002,7 +8002,7 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "'b' is undefined.",
+										description: "'b' is undefined for 'a' in validator_test_script.js.",
 										nodeType: "Identifier"
 									}
 									]);

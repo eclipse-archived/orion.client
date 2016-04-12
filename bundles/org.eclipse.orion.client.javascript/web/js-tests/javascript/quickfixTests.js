@@ -97,6 +97,9 @@ define([
 					},
 					setCaretOffset: function(caretOffset) {
 						return new Deferred().resolve(caretOffset);
+					},
+					openEditor: function(file, opts){
+						return new Deferred().resolve(assertFixes({file: file, start: opts.start, end: opts.end}, null, null, options.expected));
 					}
 				};
 				return {
@@ -231,6 +234,10 @@ define([
 							assert.equal(computed.selection[i].start, expected[i].start, 'The fix starts do not match');
 							assert.equal(computed.selection[i].end, expected[i].end, 'The fix ends do not match');
 						}
+					} else if (typeof computed === 'object' && computed.file && expected.file){
+						assert.equal(computed.file, expected.file, 'Navigation fix found but to wrong file.\nExpected: ' + expected.file +  ' (' + expected.start + ',' + expected.end + ')\nActual: ' + computed.file +  ' (' + computed.start + ',' + computed.end + ')');
+						assert.equal(computed.start, expected.start, 'Navigation fix found but to wrong start.\nExpected: ' + expected.file +  ' (' + expected.start + ',' + expected.end + ')\nActual: ' + computed.file +  ' (' + computed.start + ',' + computed.end + ')');
+						assert.equal(computed.end, expected.end, 'Navigation fix found but to wrong end.\nExpected: ' + expected.file +  ' (' + expected.start + ',' + expected.end + ')\nActual: ' + computed.file +  ' (' + computed.start + ',' + computed.end + ')');
 					} else if (typeof computed === 'object' && Array.isArray(computed.text)){
 						assert.equal(computed.text.length, 1, 'Was expecting one quick fix text edit');
 						assert.equal(computed.selection.length, 1, 'Was expected one quick fix selection range');
@@ -3075,7 +3082,20 @@ define([
 								  expected: expected,
 								callback: callback});
 			});
-		});	
+		});
+		//NO-UNDEF-EXPRESSION
+		describe("no-undef-expression", function() {
+			 it("Navigate to definition in file",function(callback) {
+				var rule = createTestRule('no-undef-expression');
+				var expected = {file: 'quickfix_test_script.js',
+								start: 8, 
+								end: 15};
+				return getFixes({buffer: 'var a = {b: ""}; var c = a; c.d();', 
+									rule: rule,
+									expected: expected,
+									callback: callback});
+			});
+		});
 		//NO-UNUSED-PARAMS
 		describe("no-unused-params", function() {
 			this.timeout(1000000);

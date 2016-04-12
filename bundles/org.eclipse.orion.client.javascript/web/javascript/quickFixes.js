@@ -239,6 +239,11 @@ define([
 	                return null;
 	            });
 	        },
+	        /** @callback fix the no-undef-expression rule */
+	        "no-undef-expression-defined-object": function(editorContext, context, astManager){
+	        	var data = context.annotation.data;
+				return editorContext.openEditor(data.file, {start: data.start, end: data.end});
+	        },
 	        /** @callback fix the check-tern-project rule */
 			"check-tern-plugin" : function(editorContext, context, astManager) {
 				var self = this;
