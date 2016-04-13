@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(messages, require, xhr, Deferred, operation) {
+define(['i18n!cfui/nls/messages', 'requirejs/require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(messages, require, xhr, Deferred, operation) {
 
 	var eclipse = eclipse || {};
 

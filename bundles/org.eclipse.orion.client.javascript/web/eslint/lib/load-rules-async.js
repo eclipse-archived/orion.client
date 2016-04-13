@@ -1459,9 +1459,9 @@ define([
         	                						name = type.originNode.name;
     	                						}
         	                					var origin = type.types[0].origin;
-            	                				if (type.types.length === 1 && name && origin){
+            	                				if (type.types.length === 1 && name && origin && (type.types[0].originNode || type.originNode)){
             	                					if (/\./.test(origin)){
-        	                							var originNode = type.types[0].originNode ? type.types[0].originNode : null;
+        	                							var originNode = type.types[0].originNode ? type.types[0].originNode : type.originNode;
         	                							var index = origin.lastIndexOf('/');
         	                							if (index >= 0){
         	                								origin = origin.substring(index+1);
