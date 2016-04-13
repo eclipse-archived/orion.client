@@ -135,7 +135,7 @@ define([
 									return null;
 								}
 								break;
-							case 'FunctionDelcaration':
+							case 'FunctionDeclaration':
 							case 'FunctionExpression':
 								if(offset < prent.body.range[0]) {
 									return null;

@@ -219,30 +219,44 @@ define([
 	    	function(err) {
 	    		Logger.log(err);
 	    });
+	
+	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, serviceRegistry, setStarting);
 
-		/**
-		 * @description Handler for Tern read requests
-		 * @param {Object} request Therequest from Tern
-		 * @since 10.0
-		 */
-		function doRead(request) {
-			var response = {request: 'read', ternID: request.ternID, args: {}}; //$NON-NLS-1$
-			var fileClient = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
-			if(typeof request.args.file === 'object') {
-				var _l = request.args.file.logical;
-				response.args.logical = _l;
-				if(request.args.file.node && !/^[\.]+/.test(_l)) {
+	/**
+	 * @description Handler for Tern read requests
+	 * @param {Object} request Therequest from Tern
+	 * @since 10.0
+	 */
+	function doRead(request) {
+		var response = {request: 'read', ternID: request.ternID, args: {}}; //$NON-NLS-1$
+		var fileClient = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
+		if(typeof request.args.file === 'object') {
+			var _l = request.args.file.logical;
+			response.args.logical = _l;
+			if(request.args.file.node) {
+				// only load modules
+				if (!/^[\.]+/.test(_l)) {
 					//do node_modules read
 					var project = ternProjectManager.getProjectFile();
 					if(project) {
 						fileClient.read(project+"node_modules/"+_l+"/package.json").then(function(json) {
 							if(json) {
 								var val = JSON.parse(json);
-								var mainPath = project+"node_modules/"+_l+"/"+val.main;
+								var mainPath = null;
+								var main = val.main;
+								if (main) {
+									if (!/(\.js)$/.test(main)) {
+										main += ".js";
+									}
+									mainPath = project + "node_modules/" + _l + "/" + main;
+								} else {
+									main = "index.js";
+									mainPath = project + "node_modules/" + _l + "/index.js";
+								}
 								fileClient.read(mainPath).then(function(contents) {
 									response.args.contents = contents;
 									response.args.file = mainPath;
-									response.args.path = val.main;
+									response.args.path = main;
 									ternWorker.postMessage(response);
 								},
 								function(err) {
@@ -263,55 +277,81 @@ define([
 						ternWorker.postMessage(response);
 					}
 				} else {
-					scriptresolver.getWorkspaceFile(_l).then(function(files) {
-						if(files && files.length > 0) {
-							var rel = scriptresolver.resolveRelativeFiles(_l, files, {location: request.args.file.file, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
-							if(rel && rel.length > 0) {
-								return fileClient.read(rel[0].location).then(function(contents) {
-									response.args.contents = contents;
-									response.args.file = rel[0].location;
-									response.args.path = rel[0].path;
-									ternWorker.postMessage(response);
-								});
-							}
-							response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-							ternWorker.postMessage(response);
-						} else {
-							response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-							ternWorker.postMessage(response);
+					// try to get the current folder from request.args.file.file
+					var currentFile = request.args.file.file;
+					if (currentFile) {
+						var lastIndex = currentFile.lastIndexOf('/');
+						var filePath = currentFile.substring(0, lastIndex + 1) + _l;
+						if (!/(\.js)$/.test(_l)) {
+							filePath += ".js";
 						}
-					},
-					function(err) {
+						fileClient.read(filePath).then(function(contents) {
+							response.args.contents = contents;
+							response.args.file = filePath;
+							response.args.path = _l;
+							ternWorker.postMessage(response);
+						},
+						function(err) {
+							response.args.error =  i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], filePath);
+							response.args.message = err.toString();
+							ternWorker.postMessage(response);
+						});
+					} else {
+						// could be a require('./....'); inside a module code
 						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-						response.args.message = err.toString();
 						ternWorker.postMessage(response);
-					});
+					}
 				}
 			} else {
-				var file = request.args.file;
-				response.args.file = file;
-				if(!/\.js|\.htm|\.htm$/ig.test(file)) {
-					//no extension given, guess at js
-					file += '.js'; //$NON-NLS-1$
-				}
-				try {
-					return fileClient.read(file).then(function(contents) {
+				scriptresolver.getWorkspaceFile(_l).then(function(files) {
+					if(files && files.length > 0) {
+						var rel = scriptresolver.resolveRelativeFiles(_l, files, {location: request.args.file.file, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
+						if(rel && rel.length > 0) {
+							return fileClient.read(rel[0].location).then(function(contents) {
 								response.args.contents = contents;
-								ternWorker.postMessage(response);
-							},
-							function(err) {
-								response.args.message = err.toString();
-								response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], file);
+								response.args.file = rel[0].location;
+								response.args.path = rel[0].path;
 								ternWorker.postMessage(response);
 							});
-				}
-				catch(err) {
+						}
+						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
+						ternWorker.postMessage(response);
+					} else {
+						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
+						ternWorker.postMessage(response);
+					}
+				},
+				function(err) {
+					response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
 					response.args.message = err.toString();
-					response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], file);
 					ternWorker.postMessage(response);
-				}
+				});
+			}
+		} else {
+			var file = request.args.file;
+			response.args.file = file;
+			if(!/\.js|\.htm|\.htm$/ig.test(file)) {
+				//no extension given, guess at js
+				file += '.js'; //$NON-NLS-1$
+			}
+			try {
+				return fileClient.read(file).then(function(contents) {
+							response.args.contents = contents;
+							ternWorker.postMessage(response);
+						},
+						function(err) {
+							response.args.message = err.toString();
+							response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], file);
+							ternWorker.postMessage(response);
+						});
+			}
+			catch(err) {
+				response.args.message = err.toString();
+				response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], file);
+				ternWorker.postMessage(response);
 			}
 		}
+	}
 		
 		/**
 		 * @description Handles the server being ready
@@ -446,8 +486,6 @@ define([
     		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
     		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$
     	});
-    	
-    	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, serviceRegistry, setStarting);
 
     	var validator = new EslintValidator(ternWorker, ternProjectManager, serviceRegistry);
 

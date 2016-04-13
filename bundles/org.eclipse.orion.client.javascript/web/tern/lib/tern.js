@@ -638,8 +638,18 @@
           maybeSet(rec, "doc", parseDoc(query, val.doc || type && type.doc));
         if (query.urls)
           maybeSet(rec, "url", val.url || type && type.url);
-        if (query.origins)
-          maybeSet(rec, "origin", val.origin || type && type.origin);
+        if (query.origins) {
+            if (srv._node && srv._node.modules) {
+    	            var module = srv._node.modules[val.origin];
+    	            if (module) {
+                    maybeSet(rec, "origin", module.modName || val.origin || type && type.origin);
+                } else {
+                   maybeSet(rec, "origin", val.origin || type && type.origin);
+                	}
+            } else {
+               maybeSet(rec, "origin", val.origin || type && type.origin);
+            }
+        }
       }
       if (query.depths) rec.depth = depth;
       if (wrapAsObjs && addInfo) addInfo(rec);
