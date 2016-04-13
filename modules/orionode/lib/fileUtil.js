@@ -283,9 +283,10 @@ exports.handleFilePOST = function(fileRoot, req, res, destFilepath, metadataMixi
 		.then(function(stats) {
 			writeFileMetadata(fileRoot, req, res, destFilepath, stats, /*etag*/null, /*depth*/0, metadataMixins);
 		})
-		.catch(api.writeError.bind(null, 500, res));
+		.catch(function(err) {
+			api.writeError(500, res, err.message);
+		});
 	};
-
 	fs.statAsync(destFilepath)
 	.catchReturn({ code: 'ENOENT' }, null) // suppress reject when file does not exist
 	.then(function(stats) {

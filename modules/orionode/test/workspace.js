@@ -15,13 +15,13 @@ var path = require('path');
 var supertest = require('supertest');
 var testData = require('./support/test_data');
 
-var CONTEXT_PATH = '/orionn';
+var CONTEXT_PATH = '';
 var PREFIX = CONTEXT_PATH + '/workspace', PREFIX_FILE = CONTEXT_PATH + '/file';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
 var DEFAULT_WORKSPACE_NAME = 'Orionode Workspace';
 
 var app = express();
-app.use(function(req, res, next) {
+app.use(/* @callback */ function(req, res, next) {
 	req.user = { workspaceDir: WORKSPACE };
 	next();
 }).use(PREFIX, require('../lib/workspace')({
@@ -76,7 +76,7 @@ describe('Workspace API', function() {
 			.get(PREFIX)
 			.expect(200)
 			.end(function(e, res) {
-				throwIfError(e, "Failed to get workspace")
+				throwIfError(e, "Failed to get workspace");
 				assert.ok(Array.isArray(res.body.Workspaces));
 				// In Orionode, we have just a single workspace.
 				assert.equal(res.body.Workspaces.length, 1);
@@ -99,7 +99,7 @@ describe('Workspace API', function() {
 				.get(workspace.Location)
 				.expect(200)
 				.end(function(e, res) {
-					throwIfError(e, "Failed to get metadata from " + workspace.Location)
+					throwIfError(e, "Failed to get metadata from " + workspace.Location);
 					assert.ok(res.body.Id);
 					assert.equal(res.body.Name, DEFAULT_WORKSPACE_NAME);
 					// Orionode doesn't have "projects" so don't check res.body.Projects
@@ -146,7 +146,7 @@ describe('Workspace API', function() {
 	 * see http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Actions_on_projects
 	 * Most Project actions are unsupported.
 	 */
-	describe('project', function(done) {
+	describe('project', /* @callback */ function(done) {
 		/**
 		 * Rename Project. The Orion UI requires this operation to support rename of top-level folders.
 		 */
@@ -173,7 +173,7 @@ describe('Workspace API', function() {
 						request()
 						.get(res.body.ChildrenLocation)
 						.expect(200)
-						.end(function(err, res){
+						.end(/* @callback */ function(err, res){
 							assert.ok(Array.isArray(res.body.Children), "has children");
 							var foundFizz = res.body.Children.some(function(child) {
 								return child.Name === 'fizz.txt';

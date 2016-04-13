@@ -21,7 +21,7 @@ var expect = chai.expect,
     fs = Promise.promisifyAll(require('fs')),
     mkdirpAsync = Promise.promisify(require('mkdirp'));
 
-var CONTEXT_PATH = '/orionn';
+var CONTEXT_PATH = '';
 var PREFS_PREFIX = CONTEXT_PATH + '/prefs';
 var WORKSPACE_DIR = nodePath.join(__dirname, '.test_workspace');
 
@@ -37,7 +37,7 @@ var samplePrefData = {
 };
 
 var app = express();
-app.use(function(req, res, next) {
+app.use(/* @callback */ function(req, res, next) {
 	req.user = { workspaceDir: WORKSPACE_DIR };
 	next();
 })
@@ -173,7 +173,7 @@ describe('prefs', function() {
 				.then(function(res) {
 					expect(res.body).to.deep.equal({ });
 				});
-			})
+			});
 		});
 
 		describe('and we DELETE a non-existent node', function() {

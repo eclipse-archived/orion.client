@@ -127,9 +127,9 @@ function getDiff(req, res) {
 }
 
 function changeType(patch) {
-	if (patch.isAdded()) return "Added";
-	if (patch.isDeleted()) return "Removed";
-	if (patch.isModified()) return "Changed";
+	if (patch.isAdded()) return "ADD";
+	if (patch.isDeleted()) return "DELETE";
+	if (patch.isModified()) return "MODIFY";
 	return "";
 }
 

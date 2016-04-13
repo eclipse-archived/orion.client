@@ -15,6 +15,7 @@ var git = require('nodegit');
 var url = require("url");
 var path = require("path");
 var fs = require('fs');
+var args = require('../args');
 var async = require('async');
 var fileUtil = require('../fileUtil');
 var tasks = require('../tasks');
@@ -197,6 +198,31 @@ function getClones(req, res, callback) {
 	}
 }
 
+function configRepo(repo, username, email) {
+	var configFile = api.join(repo.path(), "config");
+	return new Promise(function(fulfill, reject) {
+		args.readConfigFile(configFile, function(err, config) {
+			if (err) {
+				return reject(err);
+			}
+			var user = config.user || (config.user = {});
+			//TODO read user prefs if no username/email is specified -> git/config/userInfo (GitName && GitEmail)
+			if (username) {
+				user.name = username;
+			}
+			if (email) {
+				user.email = email;
+			}
+			args.writeConfigFile(configFile, config, function(err) {
+				if (err) {
+					return reject(err);
+				}
+				fulfill();
+			});
+		});
+	});
+}
+
 function postInit(req, res) {
 	if (req.body.GitUrl) {
 		postClone(req, res);
@@ -212,10 +238,10 @@ function postInit(req, res) {
 			git.Repository.init(initDir, 0)
 			.then(function(repo) {
 				theRepo = repo;
-				return repo;
+				return configRepo(repo, req.body.GitName, req.body.GitMail);
 			})
-			.then(function(repo){
-				return repo.openIndex();
+			.then(function(){
+				return theRepo.openIndex();
 			})
 			.then(function(idx) {
 				index = idx;
@@ -452,6 +478,7 @@ function getUniqueFileName(folder, file) {
 }
 
 function postClone(req, res) {
+	var repo;
 	var cloneUrl = req.body.GitUrl;
 	var dirName = cloneUrl.substring(cloneUrl.lastIndexOf("/") + 1).replace(".git", "");
 	var folder = req.user.workspaceDir;
@@ -465,6 +492,10 @@ function postClone(req, res) {
 		fetchOpts: {
 			callbacks: getRemoteCallbacks(req.body, task)
 		}
+	})
+	.then(function(_repo) {
+		repo = _repo;
+		return configRepo(repo, req.body.GitName, req.body.GitMail);
 	})
 	.then(function(repo) {
 		if (req.body.cloneSubmodules) {

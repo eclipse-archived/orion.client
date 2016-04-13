@@ -26,6 +26,9 @@ var orion = function(options) {
 	return orionMiddleware(options);
 }
 
+/**
+ * @callback
+ */
 var userMiddleware = function(req, res, next) {
 	req.user = {workspaceDir: WORKSPACE};
 	next();
@@ -62,12 +65,12 @@ describe("orion", function() {
 
 	describe("middleware", function() {
 		beforeEach(function() {
-			app.use(userMiddleware)
+			app.use(userMiddleware);
 		});
 
 		// Make sure that we can .use() the orion server as an Express middleware
 		it("exports #createServer", function(done) {
-			app.use(orion({ }))
+			app.use(orion({ }));
 			request()
 			.get("/workspace")
 			.expect(200, done);
@@ -75,7 +78,7 @@ describe("orion", function() {
 
 		// Sanity check to ensure the orion client code is being mounted correctly
 		it("finds the orion.client code", function(done) {
-			app.use(orion({ }))
+			app.use(orion({ }));
 			request()
 			.get("/index.html")
 			.expect(200, done);
