@@ -518,6 +518,28 @@ define([
                 }
             }
         },
+        /**
+         * @description Fix for the 'unknown-require-missing-env' rule
+         * @function 
+         * @callback 
+         * @since 12.0
+         */
+        "unknown-require-missing-env": function(annotation, annotations, file) {
+        	var name = annotation.data;
+        	if(typeof name === 'string') {
+        		var start,
+        			comment = Finder.findDirective(file.ast, 'eslint-env'); //$NON-NLS-1$
+                if(comment) {
+                    start = getDocOffset(file.ast.sourceFile.text, comment.range[0]) + comment.range[0];
+                    return {text: updateDirective(comment.value, 'eslint-env', name, true), start: start, end: start+comment.value.length}; //$NON-NLS-1$
+                }
+                var point = getDirectiveInsertionPoint(file.ast);
+        		var linestart = getLineStart(file.ast.sourceFile.text, point);
+        		var indent = computeIndent(file.ast.sourceFile.text, linestart, false);
+   				var fix = '/*eslint-env '+name+' */\n' + indent; //$NON-NLS-1$ //$NON-NLS-2$
+                return {text: fix, start: point, end: point};
+        	}
+        },
         /** 
 		 * @description fix for the 'no-unreachable' rule
 		 * @function 
@@ -865,7 +887,7 @@ define([
 		return [];
 	}
 	
-	/**
+   /**
     * @description Finds the start of the line in the given text starting at the given offset
     * @param {String} text The text
     * @param {Number} offset The offset

@@ -60,6 +60,107 @@ define([
         return 0;
     }
     
+    /**
+	 * @description Returns the offset to use when inserting a comment directive
+	 * @param {Object} node The node to check for comments
+	 * @returns {Number} The offset to insert the comment
+	 */
+	function getCommentStart(node) {
+	    if(node.leadingComments && node.leadingComments.length > 0) {
+            var comment = node.leadingComments[node.leadingComments.length-1];
+            if(/(?:@param|@return|@returns|@type|@constructor|@name|@description)/ig.test(comment.value)) {
+                //if the immediate comment has any of the tags we use for inferencing, add the directive before it instead of after
+                return comment.range[0];
+            }
+        }
+        return -1;
+	}
+    
+    /**
+	 * @description Computes where the eslint directive should be inserted relative to the given node
+	 * @param {Object} node The AST node
+	 * @returns {Number} The insertion point
+	 */
+	function getDirectiveInsertionPoint(node) {
+	    if(node.type === 'Program' && node.body && node.body.length > 0) {
+            var n = node.body[0];
+            var val = -1;
+            switch(n.type) {
+                case 'FunctionDeclaration': {
+                    val = getCommentStart(n);
+                    if(val > -1) {
+                        return val;
+                    }
+                    //TODO see https://github.com/jquery/esprima/issues/1071
+                    val = getCommentStart(n.id);
+                    if(val > -1) {
+                        return val;
+                    }
+                    return n.range[0];
+                }
+                case 'ExpressionStatement': {
+                    if(n.expression && n.expression.right && n.expression.right.type === 'FunctionExpression') {
+                        val = getCommentStart(n);
+                        if(val > -1) {
+                            return val;
+                        }
+                        //TODO see https://github.com/jquery/esprima/issues/1071
+                        val = getCommentStart(n.expression.left);
+                        if(val > -1) {
+                            return val;
+                        }
+                        return n.range[0];
+                    }
+                    return n.range[0];
+                }
+            }
+	    }
+	    return node.range[0];
+	}
+    
+    /**
+    * @description Finds the start of the line in the given text starting at the given offset
+    * @param {String} text The text
+    * @param {Number} offset The offset
+    * @returns {Number} The offset in the text of the new line
+    */
+   function getLineStart(text, offset) {
+       if(!text) {
+           return 0;
+       }
+       if(offset < 0) {
+           return 0;
+       }
+       var off = offset;
+       var char = text[off];
+       while(off > -1 && !/[\r\n]/.test(char)) {
+           char = text[--off];
+       }
+       return off+1; //last char inspected will be @ -1 or the new line char
+	}
+    
+    /**
+	 * @description Computes the indent to use in the editor
+	 * @param {String} text The editor text
+	 * @param {Number} linestart The start of the line
+	 * @param {Boolean} extraIndent If we should add an extra indent
+	 * @returns {String} The ammount of indent / formatting for the start of the string
+	 */
+	function computeIndent(text, linestart, extraIndent) {
+	    if(!text || linestart < 0) {
+	        return '';
+	    }
+	    var off = linestart;
+	    var char = text[off];
+	    var preamble = extraIndent ? '\t' : ''; //$NON-NLS-1$
+	    //walk the proceeding whitespace so we will insert formatted at the same level
+	    while(char === ' ' || char === '\t') {
+	       preamble += char;
+	       char = text[++off];
+	    }
+	    return preamble;
+	}
+	
 	/**
 	 * @description Updates the eslint directive
 	 * @param {String}] text The text of the source file
@@ -69,17 +170,24 @@ define([
 	 */
 	function updateDirective(ast, name) {
 		var comment = Finder.findDirective(ast, 'eslint-env'); //$NON-NLS-1$
-        if(comment && comment.value.indexOf(name) < 0) {
-            var start = getDocOffset(ast.sourceFile.text, comment.range[0]) + comment.range[0],
-            	newText;
-            if(comment.value.slice('eslint-env'.length).trim() !== '') {
-	            newText = comment.value.trim() + ', '+name; //$NON-NLS-1$
-	        } else {
-		        newText = comment.value.trim() + ' '+name;  //$NON-NLS-1$
+        if(comment) {
+        	if(comment.value.indexOf(name) < 0) {
+	            var start = getDocOffset(ast.sourceFile.text, comment.range[0]) + comment.range[0],
+	            	newText;
+	            if(comment.value.slice('eslint-env'.length).trim() !== '') {
+		            newText = comment.value.trim() + ', '+name; //$NON-NLS-1$
+		        } else {
+			        newText = comment.value.trim() + ' '+name;  //$NON-NLS-1$
+		        }
+	            return {text: newText, start: start, end: start+comment.value.length}; //$NON-NLS-1$
 	        }
-            return {text: newText, start: start, end: start+comment.value.length}; //$NON-NLS-1$
-        }
-        return null;
+        } else {
+         	var point = getDirectiveInsertionPoint(ast);
+        	var linestart = getLineStart(ast.sourceFile.text, point);
+        	var indent = computeIndent(ast.sourceFile.text, linestart, false);
+   			var fix = '/*eslint-env '+name+' */\n' + indent; //$NON-NLS-1$ //$NON-NLS-2$
+			return {text: fix, start: point, end: point};
+		}
     }
 	
 	Objects.mixin(JavaScriptQuickfixes.prototype, /** @lends javascript.JavaScriptQuickfixes.prototype*/ {

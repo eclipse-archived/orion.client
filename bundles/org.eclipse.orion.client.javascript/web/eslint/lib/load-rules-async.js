@@ -2008,7 +2008,22 @@ define([
         },
         /** @callback */
         "unknown-require": function(context) {
+        	var directive;
+        	function checkDirective(node) {
+        		if(directive) {
+        			var _name = node.value;
+        			if(nodeModules[_name]) {
+        				_name = 'node';
+        			}
+        			if(directive.value.indexOf(_name) < 0) {
+						context.report(node, ProblemMessages['unknown-require-missing-env'], {0: _name, pid: 'unknown-require-missing-env', nls: 'unknown-require-missing-env', data: _name});        				
+        			}
+        		}
+        	}
         	return {
+        		"Program": function(node) {
+        			directive = Finder.findDirective(node, 'eslint-env');
+        		},
         		"CallExpression": function(node) {
         			if(node.callee.name === "require") {
         				var args = node.arguments;
@@ -2017,22 +2032,27 @@ define([
         					if(lib.type === "Literal" && lib.value.charAt(0) !== '.') { //we don't check relative libs
         						var tern = context.getTern();
         						if(tern.plugins[lib.value]) { //it has a named plugin
+        							checkDirective(lib);
         							return;
         						}
         						//check the defs
     							if(tern.getDef(lib.value)) {
+    								checkDirective(lib);
     								return;
     							}
 								//it might be a node built-in, this also confirms its in the running node def
 								var nodejs = tern.getDef('node');
 								if(nodejs) {
 									if(nodejs[lib.value]) {
+										checkDirective(lib);
 										return;
 									} else if(nodejs['!define'] && nodejs['!define'][lib.value]) {
+										checkDirective(lib);
 										return;
 									}
 								}
 								if(tern.libKnown(lib.value)) {
+									checkDirective(lib);
 									return;
 								}
 								//TODO check for the module having been loaded via the graph
