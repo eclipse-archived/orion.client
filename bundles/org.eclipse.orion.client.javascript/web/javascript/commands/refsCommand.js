@@ -186,6 +186,7 @@ define([
 									var srcCache = {};
 									that.serviceRegistry.getService("orion.core.search.client").search(searchParams, true, true).then(function(searchResult) { //$NON-NLS-1$
 										expected.result = searchResult;
+										expected.result.docChecked = false;
 										for (var h = 0, l1 = searchResult.length; h < l1; h++) {
 											var file = searchResult[h];
 											var source = Array.isArray(file.contents) ? file.contents.join("") : null;
@@ -204,7 +205,7 @@ define([
 															srcCache[file.metadata.Location].src = true;
 															req.files = [{type: 'full', name: file.metadata.Location, text: source}]; //$NON-NLS-1$;
 														}													
-														that._checkType(type, file.metadata, match, expected, req);
+														that._checkType(type, file.metadata, match, expected, req, editorContext);
 													} else {
 														match.category = categories.partial.category;
 														match.confidence = 0;
@@ -234,8 +235,9 @@ define([
 		 * @function
 		 * @private
 		 */
-		_checkType: function _checkType(original, file, match, expected, request) {
+		_checkType: function _checkType(original, file, match, expected, request, editorContext) {
 			var that = this;
+			var contextHere = editorContext;
 			that.ternworker.postMessage(
 					request, 
 					/* @callback */ function(type, err) {
@@ -252,6 +254,84 @@ define([
 								match.confidence = _t.staticCheck.confidence;
 							} else if(_t.category === categories.strings.category ||	_t.category === categories.regex.category) {
 								match.confidence = 0;
+							} else if(_t.category === "blockcomments" && _ot.doc){
+								if(_t.comments_range && _t.comments_range.length === 2){
+									if (match.start >= _t.comments_range[0] && match.end <= _t.comments_range[1] && _ot.doc.indexOf(_ot.name) !== -1){
+										match.confidence = 100;
+									}
+									if (!expected.result.docChecked){
+										var resultIndex = -1;
+										for (var i = expected.result.length - 1; i >= 0; i--) {
+											if (expected.result[i] && expected.result[i].Location === file.location){
+												resultIndex = i;
+											}
+										}
+										if(resultIndex !== -1){
+
+											var currentLineNumber = -1;
+											for (var i = expected.result[resultIndex].children.length - 1; i >= 0; i--) {
+												var child = expected.result[resultIndex].children[i];
+												var found = false;
+												for (var p = child.matches.length - 1; p >= 0; p--) {
+													if (child.matches[p] === match){
+														currentLineNumber = child.lineNumber;
+														found = true;
+														break;
+													}
+												}
+												if (found) break;
+											}
+
+											var commentsToProcess = _t.comments_text.slice(match.end - _t.comments_range[0]);
+											var offset = match.end;
+											var offsetFound = false;
+											commentsToProcess = commentsToProcess.split("@");
+											commentsToProcess = commentsToProcess.filter(function(value){
+												for (var i = 0; i < value.length; i++) {
+													if (/[a-zA-Z]/.test(value[i])){
+														return value;
+													}
+													if (!offsetFound){
+														offset ++;
+														if(/\n/.test(value[i])){
+															currentLineNumber ++;
+														}
+													} else {
+														return value;
+													}												
+												}
+											});
+											for (var p = 0; p < commentsToProcess.length; p++) {
+												var comment = commentsToProcess[p];
+												var commentToShow = /^(?!name)[a-zA-z]+(\s+[^@\s\*]+)+/.exec(comment);
+												if (commentToShow) {
+													var temp = commentToShow[0]; //May has more than one match
+													var newChild = {
+														lineNumber: currentLineNumber,
+														name: "@"+temp,
+														matches: [{
+															start: offset,
+															length: temp.length+1,
+															end: offset+comment.length,
+															category: "blockcomments",
+															confidence: 100,
+															startIndex: 0
+														}]
+													};
+													expected.result[resultIndex].children.push(newChild);
+													expected.total++;
+													expected.done++;						
+												}
+												offset+=comment.length;
+												if((comment.match(/\n/g) || []).length){
+													currentLineNumber += (comment.match(/\n/g) || []).length;
+												}
+											}
+											expected.result.docChecked = true;
+										}
+									}
+									
+								}
 							} else {
 								match.confidence = -1;
 							}

@@ -38,6 +38,8 @@ define([
 		    	guess: false,
 		        type: undefined,
 		        name: undefined,
+		        comments_range: [comment.range[0]+2, comment.range[1]-2],
+		        comments_text: comment.value,
 		        category: comment.type === 'Block' ? 'blockcomments': 'linecomments' //$NON-NLS-1$ //$NON-NLS-2$
 		    };
 		} else {
