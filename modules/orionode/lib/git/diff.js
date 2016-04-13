@@ -230,16 +230,11 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 											prefix = "-";
 											break;
 										case git.Diff.LINE.DEL_EOFNL:
-											prefix = "\\ No newline at end of file";
-											break;
 										case git.Diff.LINE.ADD_EOFNL:
-											prefix = "\\ No newline at end of file";
+											prefix = "";
 											break;
 									}
-									var content = line.content();
-									var index = content.indexOf("\n");
-									if (index !== -1) content = content.substring(0, index  + 1); 
-									buffer.push(prefix + content);
+									buffer.push(prefix + line.content());
 								});
 							}));
 						});
