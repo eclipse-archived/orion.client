@@ -14,6 +14,7 @@ var ETag = require('./util/etag');
 var path = require('path');
 var Promise = require('bluebird');
 var rimraf = require('rimraf');
+var ncp = require('ncp');
 var api = require('./api');
 
 var fs = Promise.promisifyAll(require('fs'));
@@ -105,87 +106,6 @@ exports.rumRuff = function(dirpath, callback) {
 	rimraf(dirpath, callback);
 };
 
-// @returns promise or invokes callback
-function _copyDir(srcPath, destPath, callback) {
-	var _copyRecursive, processDir, cpDir, cpFile;
-	destPath = destPath[destPath.length-1] === path.sep ? destPath : destPath + path.sep;
-
-	/** @returns A promise that resolves once all directories in the tree rooted at 'root' have been copied.
-	 * @param {Array} List of the mix of files and directories, in the top down order, that will be copied first for all folders then files.
-	 */
-	_copyRecursive = function(root, dirlist) {
-		var stack = [{path: root, dir: true}];
-		return new Promise(function(resolve) {
-			(function handleNextDir() {
-				if (!stack.length) {
-					resolve();
-					return;
-				}
-				var dir = stack.shift();
-				dirlist.push(dir);
-				processDir(stack, dir, dirlist).then(handleNextDir);
-			}());
-		});
-	};
-	/** @returns A promise that resolves once all items in 'dir' have been either: deleted (if simple file) or 
-	 * pushed to 'stack' for later handling (if directory).
-	 * @param {Array} stack
-	 * @param {String} dir
-	 * @param {Array} List of the mix of files and directories, in the top down order, that will be copied first for all folders then files.
-	 */
-	processDir = function(stack, dir, dirlist) {
-		return fs.readdirAsync(dir.path).then(function(files) {
-			return Promise.all(files.map(function(filename) {
-				var fullpath = path.join(dir.path, filename);
-				return fs.statAsync(fullpath).then(function(stat) {
-					if (stat.isDirectory()) {
-						stack.push({path: fullpath, dir: true});
-					} else {
-						dirlist.push({path: fullpath, dir: false});
-					}
-					return Promise.resolve();
-				});
-			}));
-		});
-	};
-	cpDir = function(dirlist) {
-		return Promise.each(dirlist, function(d) {
-			var currentDestFolderPath = d.path.replace(srcPath, destPath);
-			if (d.dir) {
-				return fs.mkdirAsync(currentDestFolderPath);
-			}
-			// file
-			var rs = fs.createReadStream(d.path);
-			var ws = fs.createWriteStream(currentDestFolderPath);
-			rs.pipe(ws);
-			// TODO resolve once writing has finished?
-			// return new Promise((resolve) => rs.on('end', resolve))
-			return Promise.resolve();
-		});
-	};
-	cpFile = function(dirlist) {
-		dirlist.forEach(function(item) {
-			if(!item.dir){
-				var currentDestFolderPath = item.path.replace(srcPath, destPath);
-				var rs = fs.createReadStream(item.path);
-				var ws = fs.createWriteStream(currentDestFolderPath);
-				rs.pipe(ws);
-				// TODO resolve once writing has finished?
-			}
-		});
-	};
-	// recursively copy directories, then copy all the files cached
-	var dirlist = [];
-	return _copyRecursive(srcPath, dirlist)
-	.then(function() {
-		return cpDir(dirlist);
-	}).then(function() {
-		return cpFile(dirlist);
-	})
-	.thenReturn(null)
-	.asCallback(callback);
-}
-
 /**
  * Copy srcPath to destPath
  * @param {String} srcPath
@@ -194,22 +114,17 @@ function _copyDir(srcPath, destPath, callback) {
  * @returns promise
  */
 var copy = exports.copy = function(srcPath, destPath, callback) {
-	return fs.statAsync(srcPath)
-	.then(function(stats) {
-		if (stats.isDirectory()) {
-			return _copyDir(srcPath, destPath);
-		} else if (stats.isFile()) {
-			return new Promise(function(resolve, reject) {
-				var rs = fs.createReadStream(srcPath);
-				rs.pipe(fs.createWriteStream(destPath));
-				rs.on('error', reject);
-				rs.on('end', resolve);
-			});
-		}
-		throw new Error("Unknown file type"); // not a file or a directory
-	})
-	.thenReturn(destPath)
-	.asCallback(callback);
+	ncp.limit = 32;
+	return new Promise(function(fulfill, reject) {
+		return ncp(srcPath, destPath, function(err) {
+			if (err) {
+				if (callback) callback(err);
+				return reject(err);
+			}
+			if (callback) callback(null, destPath);
+			fulfill(destPath);
+		});
+	});
 };
 
 /**

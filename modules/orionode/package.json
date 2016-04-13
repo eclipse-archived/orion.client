@@ -25,6 +25,7 @@
     "mongodb": "^2.1.7",
     "mongoose": "^4.4.6",
     "multiparty": "^4.1.2",
+    "ncp": "^2.0.0",
     "nodegit": "~0.11.9",
     "nodemailer": "^2.3.0",
     "passport": "^0.3.2",
