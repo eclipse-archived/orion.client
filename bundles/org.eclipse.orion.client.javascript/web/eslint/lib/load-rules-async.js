@@ -1459,14 +1459,18 @@ define([
         	                						name = type.originNode.name;
     	                						}
         	                					var origin = type.types[0].origin;
-            	                				if (type.types.length === 1 && name && origin && (type.types[0].originNode || type.originNode)){
+            	                				if (type.types.length === 1 && name && origin){
             	                					if (/\./.test(origin)){
         	                							var originNode = type.types[0].originNode ? type.types[0].originNode : type.originNode;
-        	                							var index = origin.lastIndexOf('/');
-        	                							if (index >= 0){
-        	                								origin = origin.substring(index+1);
-        	                							}
-														context.report(node.property, ProblemMessages['no-undef-expression-defined-object'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-object', data: {file: originNode.sourceFile.name, start: originNode.start, end: originNode.end}}); //$NON-NLS-1$
+        	                							if (originNode){
+	        	                							var index = origin.lastIndexOf('/');
+	        	                							if (index >= 0){
+	        	                								origin = origin.substring(index+1);
+	        	                							}
+															context.report(node.property, ProblemMessages['no-undef-expression-defined-object'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-object', data: {file: originNode.sourceFile.name, start: originNode.start, end: originNode.end}}); //$NON-NLS-1$
+														} else {
+															context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
+														}
 													} else {
 														context.report(node.property, ProblemMessages['no-undef-expression-defined-index'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-index'}); //$NON-NLS-1$
 													}
