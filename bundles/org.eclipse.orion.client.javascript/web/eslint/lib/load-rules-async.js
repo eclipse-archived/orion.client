@@ -2010,14 +2010,16 @@ define([
         "unknown-require": function(context) {
         	var directive;
         	function checkDirective(node) {
+        		var _name = node.value;
+    			if(nodeModules[_name]) {
+    				_name = 'node';
+    			}
         		if(directive) {
-        			var _name = node.value;
-        			if(nodeModules[_name]) {
-        				_name = 'node';
-        			}
         			if(directive.value.indexOf(_name) < 0) {
 						context.report(node, ProblemMessages['unknown-require-missing-env'], {0: _name, pid: 'unknown-require-missing-env', nls: 'unknown-require-missing-env', data: _name});        				
         			}
+        		} else {
+        			context.report(node, ProblemMessages['unknown-require-missing-env'], {0: _name, pid: 'unknown-require-missing-env', nls: 'unknown-require-missing-env', data: _name});
         		}
         	}
         	return {
