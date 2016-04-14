@@ -30,6 +30,9 @@ define([
 		this.root = root;
 		this.fileClient = fileClient;
 		this.idPrefix = idPrefix || "";
+		if(typeof this.idPrefix !== "string") {
+			this.idPrefix = this.idPrefix.id;
+		}
 		this.excludeFiles = !!excludeFiles;
 		this.excludeFolders = !!excludeFolders;
 	}
@@ -182,12 +185,12 @@ define([
 		this._hookedDrag = false;
 		var modelEventDispatcher = options.modelEventDispatcher ? options.modelEventDispatcher : new EventTarget();
 		this.modelEventDispatcher = modelEventDispatcher;
-
+		//Listen to all resource changed events
+		this.fileClient.addEventListener("Changed", this._resourceChangedHandler = this.handleResourceChange.bind(this));
 		// Listen to model changes from fileCommands
 		var _self = this;
 		this._modelListeners = {};
-		["copy", "copyMultiple", "create", "delete", "deleteMultiple", "import", //$NON-NLS-5$//$NON-NLS-4$//$NON-NLS-3$//$NON-NLS-2$//$NON-NLS-1$//$NON-NLS-0$
-		 "move", "moveMultiple"].forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
+		["import"].forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
 				modelEventDispatcher.addEventListener(eventType, _self._modelListeners[eventType] = _self.modelHandler[eventType].bind(_self));
 			});
 			
@@ -229,11 +232,67 @@ define([
 			Object.keys(this._modelListeners).forEach(function(eventType) {
 				_self.modelEventDispatcher.removeEventListener(eventType, _self._modelListeners[eventType]);
 			});
-			var parent = lib.node(this.parentId);
-			if (parent) {
-				parent.removeEventListener("click", this._clickListener); //$NON-NLS-0$
+			var parentNode = lib.node(this.parentId);
+			if (parentNode) {
+				parentNode.removeEventListener("click", this._clickListener); //$NON-NLS-0$
 			}
+			this.fileClient.removeEventListener("Changed", this._resourceChangedHandler);
 			mExplorer.Explorer.prototype.destroy.call(this);
+		},
+		_getUIModel: function(loc) {
+			if(!this.model) {
+				return null;
+			}
+			var elementId = this.model.getId({Location: loc});
+			var elementNode = lib.node(elementId);
+			return elementNode ? elementNode._item : null;
+		},
+		handleResourceChange: function(evt) {
+			if(!this.model) {
+				return new Deferred().resolve();
+			}
+			if(evt && evt.deleted) {
+				return this._handleResourceDelete(evt);
+			}
+			if(evt && ( evt.moved || evt.copied)) {
+				return this._handleResourceMoveOrCopy(evt);
+			}
+			if(evt && evt.created) {
+				return this._handleResourceCreate(evt);
+			}
+			return new Deferred().resolve();
+		},
+		_handleResourceCreate: function(evt) {
+			//Convert the item array( {parent, result} ) to an array of {newValue, oldValue, parent}
+			var items = evt.created.map(function(createdItem){
+				return {type: "create", newValue: createdItem.result, parent: this._getUIModel(createdItem.parent)};
+			}.bind(this));
+			return this.onModelCreate(items[0]).then(function(/*result*/){
+				return items[0];
+			});
+		},
+		_handleResourceDelete: function(evt) {
+			//Convert the location array( a string array) to an array of {newValue, oldValue, parent}
+			var items = evt.deleted.map(function(loc){
+				var uiModel = this._getUIModel(loc);
+				return {oldValue: uiModel, newValue: null, parent: uiModel ? uiModel.parent : null};
+			}.bind(this));
+			var newEvent = {items: items};
+			return this.onModelDelete(newEvent).then(function(/*result*/){
+				return items[0];
+			});
+		},
+		_handleResourceMoveOrCopy: function(evt) {
+			//Convert the item array( {source, target, result} ) to an array of {newValue, oldValue, parent}
+			var itemArray = evt.moved ? evt.moved : evt.copied;
+			var items = itemArray.map(function(movedItem){
+				return {oldValue: this._getUIModel(movedItem.source), newValue: movedItem.result, parent: this._getUIModel(movedItem.target)};
+			}.bind(this));
+			var newEvent = {items: items};
+			var moveOrCopy = evt.moved ? this.onModelMove.bind(this) : this.onModelCopy.bind(this);
+			return moveOrCopy(newEvent).then(function(/*result*/){
+				return items[0];
+			});
 		},
 		_clickLink: function(linkElement) {
 			if (linkElement.tagName === "A") { //$NON-NLS-0$
@@ -270,7 +329,7 @@ define([
 			var ex = this, changedLocations = {};
 			(modelEvent.items || [modelEvent]).forEach(function(item) {
 				var treeRoot = ex.treeRoot;
-				if ((treeRoot.Location || treeRoot.ContentLocation) === item.oldValue.Location) {
+				if (item.oldValue && (treeRoot.Location || treeRoot.ContentLocation) === item.oldValue.Location) {
 					// the treeRoot was moved
 					var oldRoot = ex.treeRoot;
 					var newItem = item.newValue;
@@ -280,7 +339,7 @@ define([
 						ex.loadResourceList(newItem);
 					});
 				}
-				var itemParent = item.oldValue.parent;
+				var itemParent = item.oldValue ? item.oldValue.parent : null;
 				itemParent = itemParent || ex.treeRoot;
 				changedLocations[itemParent.Location] = itemParent;
 				
@@ -289,7 +348,7 @@ define([
 				changedLocations[itemParent.Location] = itemParent;
 				
 				// If the renamed item was an expanded directory, force an expand.
-				if (item.oldValue.Directory && item.newValue && ex.isExpanded(item.oldValue)) {
+				if (item.oldValue && item.oldValue.Directory && item.newValue && ex.isExpanded(item.oldValue)) {
 					changedLocations[item.newValue.Location] = item.newValue;
 				}
 			});
@@ -302,6 +361,9 @@ define([
 			var ex = this, treeRoot = ex.treeRoot;
 			var newRoot;
 			var treeRootDeleted = items.some(function(item) {
+				if(!item.oldValue) {
+					return false;
+				}
 				if (item.oldValue.Location === (treeRoot.Location || treeRoot.ContentLocation)) {
 					if (item.oldValue.Location !== (item.parent.Location || item.parent.ContentLocation)) {
 						newRoot = item.parent;
@@ -312,17 +374,18 @@ define([
 			});
 			if (treeRootDeleted) {
 				return this.loadResourceList(newRoot);
-			} else {
-				// Refresh every parent folder
-				var changedLocations = {};
-				items.forEach(function(item) {
-					var parent = item.parent;
+			} 
+			// Refresh every parent folder
+			var changedLocations = {};
+			items.forEach(function(item) {
+				var parent = item.parent;
+				if(parent) {
 					changedLocations[parent.Location] = parent;
-				});
-				return Deferred.all(Object.keys(changedLocations).map(function(loc) {
-					return ex.changedItem(changedLocations[loc], true);
-				}));
-			}
+				}
+			});
+			return Deferred.all(Object.keys(changedLocations).map(function(loc) {
+				return ex.changedItem(changedLocations[loc], true);
+			}));
 		},
 	
 		/**
@@ -458,7 +521,7 @@ define([
 				var dragEnter = function (evt) {
 					if (dragStartTarget) {
 						var copy = util.isMac ? evt.altKey : evt.ctrlKey;
-						dropEffect = evt.dataTransfer.dropEffect = (copy ? "copy" : "move"); //$NON-NLS-1$ //$NON-NLS-0$
+						dropEffect = evt.dataTransfer.dropEffect = copy ? "copy" : "move"; //$NON-NLS-1$ //$NON-NLS-0$
 					} else {
 						/* accessing dataTransfer.effectAllowed here throws an error on IE */
 						if (!util.isIE && (evt.dataTransfer.effectAllowed === "all" ||   //$NON-NLS-0$
@@ -482,7 +545,7 @@ define([
 				var dragOver = function (evt) {
 					if (dragStartTarget) {
 						var copy = util.isMac ? evt.altKey : evt.ctrlKey;
-						dropEffect = evt.dataTransfer.dropEffect = (copy ? "copy" : "move"); //$NON-NLS-1$ //$NON-NLS-0$
+						dropEffect = evt.dataTransfer.dropEffect = copy ? "copy" : "move"; //$NON-NLS-1$ //$NON-NLS-0$
 					} else {
 						// default behavior is to not trigger a drop, so we override the default
 						// behavior in order to enable drop.  
@@ -746,7 +809,7 @@ define([
 						progress: function(event) {
 							var percentageText = ""; //$NON-NLS-0$
 							if (event.lengthComputable) {
-								percentageText = Math.floor((event.loaded / event.total) * 100) + "%"; //$NON-NLS-0$
+								percentageText = Math.floor(event.loaded / event.total * 100) + "%"; //$NON-NLS-0$
 								progressBar.style.width = percentageText;
 								var loadedKB = Math.round(event.loaded / 1024);
 								var totalKB = Math.round(event.total / 1024);
@@ -873,19 +936,22 @@ define([
 		 * @param {Boolean} forceExpand
 		 * @returns {orion.Promise}
 		 */
-		changedItem: function(parent, forceExpand) {
-			if (this.treeRoot && this.treeRoot.Location === parent.Location) {
+		changedItem: function(parentItem, forceExpand) {
+			if(!parentItem) {
+				return new Deferred().resolve();
+			}
+			if (this.treeRoot && this.treeRoot.Location === parentItem.Location) {
 				return this.loadResourceList(this.treeRoot, forceExpand);
 			}
 			var that = this;
 			var deferred = new Deferred();
-			parent.children = parent.Children = null;
-			this.model.getChildren(parent, function(children) {
+			parentItem.children = parentItem.Children = null;
+			this.model.getChildren(parentItem, function(children) {
 				//If a key board navigator is hooked up, we need to sync up the model
 				if(that.getNavHandler()){
 					//that._initSelModel();
 				}
-				that.myTree.refresh.bind(that.myTree)(parent, children, forceExpand);
+				that.myTree.refresh.bind(that.myTree)(parentItem, children, forceExpand);
 				deferred.resolve(children);
 			});
 			return deferred;
@@ -1054,7 +1120,7 @@ define([
 			}
 			this._lastPath = path;
 			var self = this;
-			if (force || (path !== this.treeRoot.Path)) {
+			if (force || path !== this.treeRoot.Path) {
 				return this.load(this.fileClient.loadWorkspace(path), messages["Loading "] + path, postLoad).then(function(p) {
 					self.treeRoot.Path = path;
 					return new Deferred().resolve(self.treeRoot);
@@ -1111,7 +1177,7 @@ define([
 						} else {
 							// uses two different techniques from Modernizr
 							// first ascertain that drag and drop in general is supported
-							var supportsDragAndDrop = parent && (('draggable' in parent) || ('ondragstart' in parent && 'ondrop' in parent));  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$ 
+							var supportsDragAndDrop = parent && ('draggable' in parent || 'ondragstart' in parent && 'ondrop' in parent);  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$ 
 							// then check that file transfer is actually supported, since this is what we will be doing.
 							// For example IE9 has drag and drop but not file transfer
 							supportsDragAndDrop = supportsDragAndDrop && !!(window.File && window.FileList && window.FileReader);
@@ -1132,7 +1198,7 @@ define([
 						},
 						navHandlerFactory: self.navHandlerFactory,
 						showRoot: self.showRoot,
-						setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), //$NON-NLS-0$
+						setFocus: typeof self.setFocus === "undefined" ? true : self.setFocus, //$NON-NLS-0$
 						selectionPolicy: self.renderer.selectionPolicy, 
 						onCollapse: function(model) {
 							if(self.getNavHandler()){

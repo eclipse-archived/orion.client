@@ -135,6 +135,21 @@ define([
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.selection = options.selection;
 		this._input = this._title = "";
+		this.fileClient.addEventListener("Changed", function(evt) { //$NON-NLS-0$
+			if (this._fileMetadata && this._fileMetadata._saving) {
+				return;
+			}
+			if(evt && evt.modified) {
+				var metadata = this.getFileMetadata();
+				if(metadata && metadata.Location) {
+					if(evt.modified.some(function(loc){
+						return metadata.Location === loc;
+					})) {
+						this.load();
+					}
+				}
+			}
+		}.bind(this));
 	}
 	objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
 		/**

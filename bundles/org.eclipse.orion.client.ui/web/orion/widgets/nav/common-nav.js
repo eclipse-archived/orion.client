@@ -89,11 +89,6 @@ define([
 				sidebarNavInputManager.dispatchEvent(event);
 			});
 		}
-		var dispatcher = this.modelEventDispatcher;
-		var onChange = this._modelListener = this.onFileModelChange.bind(this);
-		["move", "delete"].forEach(function(type) { //$NON-NLS-1$ //$NON-NLS-0$
-			dispatcher.addEventListener(type, onChange);
-		});
 		this.selection = new Selection.Selection(this.registry, "commonNavFileSelection"); //$NON-NLS-0$
 		this._selectionListener = function(event) { //$NON-NLS-0$
 			_self.updateCommands(event.selections);
@@ -126,6 +121,14 @@ define([
 		onModelCreate: function(event) {
 			return FileExplorer.prototype.onModelCreate.call(this, event).then(function () {
 				this.sidebarNavInputManager.dispatchEvent(event);
+			}.bind(this));
+		},
+		// Override the same API from the super class to dispatch "editorInputMoved" event
+		handleResourceChange: function(evt) {
+			return FileExplorer.prototype.handleResourceChange.call(this, evt).then(function (newEvt) {
+				if((evt.deleted || evt.moved) && newEvt) {
+					this.onFileModelChange(newEvt);
+				}
 			}.bind(this));
 		},
 		onFileModelChange: function(event) {
@@ -177,10 +180,6 @@ define([
 		
 		destroy: function() {
 			var _self = this;
-			var dispatcher = this.modelEventDispatcher;
-			["move", "delete"].forEach(function(type) { //$NON-NLS-1$ //$NON-NLS-0$
-				dispatcher.removeEventListener(type, _self._modelListener);
-			});
 			FileExplorer.prototype.destroy.call(this);
 			[].forEach(function(id) {
 				delete _self[id];
