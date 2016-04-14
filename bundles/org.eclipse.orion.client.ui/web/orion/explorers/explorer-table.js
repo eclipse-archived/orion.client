@@ -190,7 +190,7 @@ define([
 		// Listen to model changes from fileCommands
 		var _self = this;
 		this._modelListeners = {};
-		["import"].forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
+		["create", "import"].forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
 				modelEventDispatcher.addEventListener(eventType, _self._modelListeners[eventType] = _self.modelHandler[eventType].bind(_self));
 			});
 			
