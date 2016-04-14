@@ -42,7 +42,9 @@ app.use(/* @callback */ function(req, res, next) {
 	next();
 })
 .use(PREFS_PREFIX, PrefsController({
-	'orion.single.user': false, // use workspaceDir from req.user
+	configParams: {
+		'orion.single.user': false, // use workspaceDir from req.user
+	},
 	ttl: 50, // flush after 50 ms
 }));
 

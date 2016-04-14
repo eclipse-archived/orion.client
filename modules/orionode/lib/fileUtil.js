@@ -14,7 +14,7 @@ var ETag = require('./util/etag');
 var path = require('path');
 var Promise = require('bluebird');
 var rimraf = require('rimraf');
-var ncp = require('ncp');
+var fse = require('fs-extra');
 var api = require('./api');
 
 var fs = Promise.promisifyAll(require('fs'));
@@ -114,9 +114,8 @@ exports.rumRuff = function(dirpath, callback) {
  * @returns promise
  */
 var copy = exports.copy = function(srcPath, destPath, callback) {
-	ncp.limit = 32;
 	return new Promise(function(fulfill, reject) {
-		return ncp(srcPath, destPath, function(err) {
+		return fse.copy(srcPath, destPath, {clobber: true, limit: 32}, function(err) {
 			if (err) {
 				if (callback) callback(err);
 				return reject(err);

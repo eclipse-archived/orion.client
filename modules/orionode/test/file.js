@@ -323,10 +323,10 @@ describe('File API', function() {
 					throwIfError(err);
 					var body = res.body;
 					assert.equal(body.Children, null, 'Children should be absent');
-					assert.equal(body.ChildrenLocation, PREFIX + '/project/my%20folder?depth=1');
+					assert.equal(body.ChildrenLocation, PREFIX + '/project/my folder/?depth=1');
 					assert.equal(body.Directory, true);
 					assert.equal(body.Name, 'my folder');
-					assert.equal(body.Location, PREFIX + '/project/my%20folder/');
+					assert.equal(body.Location, PREFIX + '/project/my folder/');
 					done();
 				});
 			});
@@ -338,8 +338,8 @@ describe('File API', function() {
 					throwIfError(err);
 					assert.ok(res.body.Parents);
 					assert.equal(res.body.Parents.length, 2);
-					assert.equal(res.body.Parents[0].ChildrenLocation, PREFIX + '/project/my%20folder?depth=1');
-					assert.equal(res.body.Parents[0].Location, PREFIX + '/project/my%20folder');
+					assert.equal(res.body.Parents[0].ChildrenLocation, PREFIX + '/project/my folder/?depth=1');
+					assert.equal(res.body.Parents[0].Location, PREFIX + '/project/my folder/');
 					assert.equal(res.body.Parents[0].Name, 'my folder');
 					assert.equal(res.body.Parents[1].Name, 'project');
 					done();
@@ -356,17 +356,17 @@ describe('File API', function() {
 				.end(function(err, res) {
 					throwIfError(err);
 					var body = res.body;
-					assert.equal(body.ChildrenLocation, PREFIX + '/project/my%20folder?depth=1');
+					assert.equal(body.ChildrenLocation, PREFIX + '/project/my folder/?depth=1');
 					assert.equal(Array.isArray(body.Children), true);
 					body.Children.sort(byName);
 					assert.equal(body.Children.length, 2);
 					assert.equal(body.Children[0].Name, 'buzz.txt');
 					assert.equal(body.Children[0].Directory, false);
-					assert.equal(body.Children[0].Location, PREFIX + '/project/my%20folder/buzz.txt');
+					assert.equal(body.Children[0].Location, PREFIX + '/project/my folder/buzz.txt');
 					assert.equal("ChildrenLocation" in body.Children[0], false, "Child file has no ChildrenLocation");
 					assert.equal(body.Children[1].Name, 'my subfolder');
 					assert.equal(body.Children[1].Directory, true);
-					assert.equal(body.Children[1].Location, PREFIX + '/project/my%20folder/my%20subfolder/');
+					assert.equal(body.Children[1].Location, PREFIX + '/project/my folder/my subfolder/');
 					assert.equal("ChildrenLocation" in body.Children[1], true, "Child folder has ChildrenLocation"); 
 					done();
 				});
@@ -387,7 +387,7 @@ describe('File API', function() {
 				.end(function(err, res) {
 					throwIfError(err);
 					assert.equal(res.body.Directory, true);
-					assert.equal(res.body.Location, PREFIX + '/project/new%20directory/'); //FIXME
+					assert.equal(res.body.Location, PREFIX + '/project/new directory/'); //FIXME
 					assert.equal(res.body.Name, 'new directory');
 					done();
 				});
@@ -401,7 +401,7 @@ describe('File API', function() {
 				.end(function(err, res) {
 					throwIfError(err);
 					assert.equal(res.body.Directory, true);
-					assert.equal(res.body.Location, PREFIX + '/project/new%20directory/'); // FIXME
+					assert.equal(res.body.Location, PREFIX + '/project/new directory/'); // FIXME
 					assert.equal(res.body.Name, 'new directory');
 					done();
 				});
@@ -415,7 +415,7 @@ describe('File API', function() {
 				.end(function(err, res) {
 					throwIfError(err);
 					assert.equal(res.body.Directory, true);
-					assert.equal(res.body.Location, PREFIX + '/project/new%20directory/'); // FIXME
+					assert.equal(res.body.Location, PREFIX + '/project/new directory/'); // FIXME
 					assert.equal(res.body.Name, 'new directory');
 					done();
 				});
@@ -430,7 +430,7 @@ describe('File API', function() {
 				.end(function(err, res) {
 					throwIfError(err);
 					assert.equal(res.body.Directory, false);
-					assert.equal(res.body.Location, PREFIX + '/project/Not%20a%20directory'); //FIXME
+					assert.equal(res.body.Location, PREFIX + '/project/Not a directory'); //FIXME
 					assert.equal(res.body.Name, 'Not a directory');
 					done();
 				});
@@ -520,33 +520,32 @@ describe('File API', function() {
 				done();
 			});
 		});
-		//TODO enable this test -> failing because of bug in ncp module
-//		it('copy a file overwrites when "no-overwrite" is not set', function(done) {
-//			// cp project/fizz.txt "project/my folder/buzz.txt"
-//			debugger;
-//			request()
-//			.post(PREFIX + '/project/my%20folder')
-//			.set('Slug', 'buzz.txt')
-//			.set('X-Create-Options', 'copy')
-//			.send({ Location: PREFIX + '/project/fizz.txt' })
-//			.expect(200) // 200 means overwritten
-//			.end(function(err, res) {
-//				throwIfError(err, "Failed to overwrite");
-//				// It's in the expected place:
-//				assert.equal(res.body.Name, 'buzz.txt');
-//				assert.equal(res.body.Parents[0].Name, 'my folder');
-//				// And has the expected contents:
-//				request()
-//				.get(res.body.Location)
-//				.expect(200, 'hello world', done);
-//			});
-//		});
+		it('copy a file overwrites when "no-overwrite" is not set', function(done) {
+			// cp project/fizz.txt "project/my folder/buzz.txt"
+			request()
+			.post(PREFIX + '/project/my%20folder')
+			.set('Slug', 'buzz.txt')
+			.set('X-Create-Options', 'copy')
+			.send({ Location: PREFIX + '/project/fizz.txt' })
+			.expect(200) // 200 means overwritten
+			.end(function(err, res) {
+				throwIfError(err, "Failed to overwrite");
+				// It's in the expected place:
+				assert.equal(res.body.Name, 'buzz.txt');
+				assert.equal(res.body.Parents[0].Name, 'my folder');
+				// And has the expected contents:
+				request()
+				.get(res.body.Location)
+				.expect(200, 'hello world', done);
+			});
+		});
 		it('copy a directory', function(done) {
+					debugger;
 			request()
 			.post(PREFIX + '/project/')
 			.set('Slug', 'copy_of_my_folder')
 			.set('X-Create-Options', 'copy')
-			.send({ Location: PREFIX + '/project/my%20folder' })
+			.send({ Location: PREFIX + '/project/my folder' })
 			.expect(201)
 			.end(function(err, res) {
 				throwIfError(err);

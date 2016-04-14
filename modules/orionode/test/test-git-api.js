@@ -63,6 +63,30 @@ function setupRepo(done) {
 		git.Clone.clone("https://github.com/octocat/Spoon-Knife.git", repoPath).then(done.bind(null, null), done);
 	});
 }
+		
+function getGitResponse(res2) {
+	return new Promise(function(fulfill, reject) {
+		function check(res) {
+			if (res.statusCode === 202 || !res.body.Result) {
+				return setTimeout(function() {
+					request()
+					.get(CONTEXT_PATH + res2.body.Location)
+					.end(function(err, res1) {
+						if (err) {
+							return reject(err);
+						}
+						check(res1);
+					});
+				}, 100);
+			} else if (res.statusCode === 200) {
+				fulfill(res.body.Result);
+			} else {
+				reject({message: "git response error"});
+			}
+		}
+		check(res2);
+	});
+}
 
 // Skip tests if nodegit is not installed
 function maybeDescribe() {
@@ -270,11 +294,16 @@ maybeDescribe("git", function() {
 				.send({
 					Fetch: "true"
 				})
-				.expect(201)
-				.end(function(err, res) {
+				.end(function(err, res2) {
 					assert.ifError(err);
-					assert.equal(res.body.Message, "Fetching " + remoteName + "...");
-					finished();
+					getGitResponse(res2).then(function(res) {
+						assert.equal(res.Message, "OK");
+						finished();
+					})
+					.catch(function(err) {
+						assert.ifError(err);
+						finished();
+					});
 				});
 			});
 		});
@@ -340,32 +369,16 @@ maybeDescribe("git", function() {
 					GitSshPassword: password,
 					PushSrcRef: "HEAD"
 				})
-				.expect(202)
-				.end(function(err, res) {
+				.end(function(err, res2) {
 					assert.ifError(err);
-					assert(res.body.Location);
-
-					var location = res.body.Location; 
-
-					// Pushing a remote returns a task. Poll the task location
-					// until it completes.
-					function checkComplete() {
-						request()
-						.get(CONTEXT_PATH + location)
-						.expect(200)
-						.end(function(err, res) {
-							assert.ifError(err);
-							assert(res.body);
-							if (res.body.type === "loadend") {
-								return finished();
-							}
-
-							location = res.body.Location; 
-							setTimeout(checkComplete, 500);
-						});
-					}
-
-					setTimeout(checkComplete, 500);
+					getGitResponse(res2).then(function(res) {
+						assert.equal(res.Message, "OK");
+						finished();
+					})
+					.catch(function(err) {
+						assert.ifError(err);
+						finished();
+					});
 				});
 			});
 
@@ -412,11 +425,16 @@ maybeDescribe("git", function() {
 				.send({
 					GitUrl: gitURL
 				})
-				.expect(201)
-				.end(function(err, res) {
+				.end(function(err, res2) {
 					assert.ifError(err);
-					assert.equal(res.body.Message, "Cloning " + WORKSPACE + " @ " + gitURL);
-					finished();
+					getGitResponse(res2).then(function(res) {
+						assert.equal(res.Message, "OK");
+						finished();
+					})
+					.catch(function(err) {
+						assert.ifError(err);
+						finished();
+					});
 				});
 			});
 
@@ -426,7 +444,7 @@ maybeDescribe("git", function() {
 			});
 
 		});
-
+		
 		describe('Listing tags', function() {
 
 			it('GET tag (listing tags)', function(finished) {

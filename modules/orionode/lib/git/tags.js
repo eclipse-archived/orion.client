@@ -107,6 +107,7 @@ function getTags(req, res) {
 				})
 				.catch(function() {
 					// ignore errors looking up commits
+					tags.push(tagJSON(ref.name(), ref.shorthand(), ref.target().toString(), 0, fileDir));
 					callback();
 				});
 			}, function(err) {
