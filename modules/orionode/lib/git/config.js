@@ -60,7 +60,7 @@ function getAConfig(req, res) {
 			} else {
 				value = config[section] && config[section][name];
 			}
-			if (value) {
+			if (value !== undefined) {
 				res.status(200).json(configJSON(key, value, fileDir));
 			} else {
 				writeError(404, res, "There is no config entry with key provided");

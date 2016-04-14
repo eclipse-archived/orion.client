@@ -482,7 +482,9 @@ maybeDescribe("git", function() {
 				.post(CONTEXT_PATH + "/gitapi/clone/")
 				.send({
 					"Name":  TEST_REPO_NAME,
-					"Location": CONTEXT_PATH + '/workspace'
+					"Location": CONTEXT_PATH + '/workspace',
+					"GitName": "test",
+					"GitMail": "test@test.com"
 				})
 				.expect(201)
 				.end(function(err, res) {
@@ -548,7 +550,7 @@ maybeDescribe("git", function() {
 				.expect(201)
 				.end(function(err, res) {
 					assert.ifError(err);
-					assert.equal(res.body.CommitLocation, "/gitapi/commit/" + branchName + "/file/" + TEST_REPO_NAME);
+					assert.equal(res.body.CommitLocation, "/gitapi/commit/refs%252Fheads%252F" + branchName + "/file/" + TEST_REPO_NAME);
 					assert.equal(res.body.Location, "/gitapi/branch/" + branchName + "/file/" + TEST_REPO_NAME);
 					finished();
 				});

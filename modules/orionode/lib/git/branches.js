@@ -45,7 +45,7 @@ module.exports.router = function(options) {
 			"DiffLocation": "/gitapi/diff/" + shortName + fileDir,
 			"FullName": fullName,
 			"HeadLocation": "/gitapi/commit/HEAD" + fileDir,
-			"Location": "/gitapi/branch/" + branchURL + fileDir,
+			"Location": "/gitapi/branch/" + shortName + fileDir,
 			"Name": shortName,
 			"RemoteLocation": [],
 			"TreeLocation": "/gitapi/tree" + fileDir + "/" + branchURL,
@@ -224,7 +224,7 @@ module.exports.router = function(options) {
 					console.log(err);
 					return writeError(500, res);
 				}
-				res.status(200).json(branch);
+				res.status(201).json(branch);
 			});
 		})
 		.catch(function(err) {
@@ -236,7 +236,7 @@ module.exports.router = function(options) {
 		var branchName = util.decodeURIComponent(req.params.branchName);
 		clone.getRepo(req)
 		.then(function(repo) {
-			return git.Reference.lookup(repo, branchName);
+			return git.Branch.lookup(repo, branchName, git.Branch.BRANCH.LOCAL);
 		})
 		.then(function(ref) {
 			if (git.Branch.delete(ref) === 0) {

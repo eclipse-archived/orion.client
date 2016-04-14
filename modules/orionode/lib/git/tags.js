@@ -29,7 +29,7 @@ module.exports.router = function(options) {
 	return express.Router()
 	.use(bodyParser.json())
 	.get('/file*', getTags)
-	.get('/:branchName*', getTags)
+	.get('/:tagName*', getTags)
 	.delete('/:tagName*', deleteTag);
 
 function tagJSON(fullName, shortName, sha, timestamp, fileDir) {
@@ -137,7 +137,9 @@ function getTags(req, res) {
 				res.status(200).json(resp);
 			});
 		});
-
+	})
+	.catch(function(err) {
+		writeError(403, res, err.message);
 	});
 }
 
@@ -153,6 +155,9 @@ function deleteTag(req, res) {
 		} else {
 			writeError(403, res);
 		} 
+	})
+	.catch(function(err) {
+		writeError(403, res, err.message);
 	});
 }
 };
