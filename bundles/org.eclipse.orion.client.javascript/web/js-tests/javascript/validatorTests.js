@@ -163,7 +163,7 @@ define([
 				validate({buffer: "/", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
 							{start: 0, 
-							 end: 1, 
+							 end: 2, 
 							 severity: 'error', 
 							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {
 								0: "/",
@@ -175,7 +175,110 @@ define([
 						worker.getTestState().callback(error);
 					});
 			});
-	
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=491727
+			 */
+			it("Test broken TemplateExpression 1", function(callback) {
+				var config = { rules: {} };
+				validate({buffer: "var v1 = foo(`bar),\n\tv2;", callback: callback, config: config}).then(function (problems) {
+						assertProblems(problems, [
+							{start: 0, 
+							 end: 24, 
+							 severity: 'error', 
+							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {
+								0: "/",
+								nls: "syntaxErrorIncomplete"
+							 })
+							 }
+						]);
+					}, function (error) {
+						worker.getTestState().callback(error);
+					});
+			});
+			/**
+			 * 
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=491727
+			 */
+			it("Test broken TemplateExpression 2", function(callback) {
+				var config = { rules: {} };
+				validate({buffer: "var v1 = foo(`bar),\nv2;", callback: callback, config: config}).then(function (problems) {
+						assertProblems(problems, [
+							{start: 0, 
+							 end: 23, 
+							 severity: 'error', 
+							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {
+								0: "/",
+								nls: "syntaxErrorIncomplete"
+							 })
+							 }
+						]);
+					}, function (error) {
+						worker.getTestState().callback(error);
+					});
+			});
+			/**
+			 * 
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=491727
+			 */
+			it("Test broken TemplateExpression 3", function(callback) {
+				var config = { rules: {} };
+				validate({buffer: "var v1 = foo(`bar),v2;", callback: callback, config: config}).then(function (problems) {
+						assertProblems(problems, [
+							{start: 0, 
+							 end: 22, 
+							 severity: 'error', 
+							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {
+								0: "/",
+								nls: "syntaxErrorIncomplete"
+							 })
+							 }
+						]);
+					}, function (error) {
+						worker.getTestState().callback(error);
+					});
+			});
+			/**
+			 * 
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=491727
+			 */
+			it("Test broken TemplateExpression 4", function(callback) {
+				var config = { rules: {} };
+				validate({buffer: "var v1 = foo(`bar),\n\t\tv2;", callback: callback, config: config}).then(function (problems) {
+						assertProblems(problems, [
+							{start: 0, 
+							 end: 25, 
+							 severity: 'error', 
+							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {
+								0: "/",
+								nls: "syntaxErrorIncomplete"
+							 })
+							 }
+						]);
+					}, function (error) {
+						worker.getTestState().callback(error);
+					});
+			});
+			/**
+			 * 
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=491727
+			 */
+			it("Test broken TemplateExpression 5", function(callback) {
+				var config = { rules: {} };
+				validate({buffer: "var v1 = foo(`bar);", callback: callback, config: config}).then(function (problems) {
+						assertProblems(problems, [
+							{start: 0, 
+							 end: 19, 
+							 severity: 'error', 
+							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {
+								0: "/",
+								nls: "syntaxErrorIncomplete"
+							 })
+							 }
+						]);
+					}, function (error) {
+						worker.getTestState().callback(error);
+					});
+			});
 			describe("HTML script block validation tests", function(){
 				/*
 				 * Tests that the validator runs correctly on script blocks and wrapped functions in HTML files

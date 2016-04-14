@@ -1250,7 +1250,7 @@ lp.readToken = function () {
           pos = e.raisedAt,
           replace = true;
       if (/unterminated/i.test(msg)) {
-        pos = this.lineEnd(e.pos); //ORION no need to add 1
+        pos = this.lineEnd(e.pos+1);
         if (/string/.test(msg)) {
           replace = { start: e.pos, end: pos, type: _.tokTypes.string, value: this.input.slice(e.pos + 1, pos) };
         } else if (/regular expr/i.test(msg)) {
@@ -1258,8 +1258,7 @@ lp.readToken = function () {
           try {
             re = new RegExp(re);
           } catch (e) {}
-          // ORION the e.pos position doesn't include the position of the starting /
-          replace = { start: e.pos - 1, end: pos, type: _.tokTypes.regexp, value: re };
+          replace = { start: e.pos, end: pos, type: _.tokTypes.regexp, value: re };
         } else if (/template/.test(msg)) {
           replace = { start: e.pos, end: pos,
             type: _.tokTypes.template,
@@ -1285,7 +1284,7 @@ lp.readToken = function () {
       this.resetTo(pos);
       if (replace === true) replace = { start: pos, end: pos, type: _.tokTypes.name, value: "✖" };
       if (replace) {
-        if (this.options.locations) replace.loc = new _.SourceLocation(this.toks, _.getLineInfo(this.input, replace.start), _.getLineInfo(this.input, replace.end));
+        if (this.options.locations) replace.loc = new _.SourceLocation(this.toks, _.getLineInfo(this.input, replace.start), 	_.getLineInfo(this.input, replace.end));
         //ORION
         this.toks.start = replace.start;
         this.toks.end = replace.end;
