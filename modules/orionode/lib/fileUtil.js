@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -222,7 +222,7 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, req, res,
 function fileJSON(fileRoot, workspaceDir, filepath, stats, depth, metadataMixins) {
 	depth = depth || 0;
 	var isDir = stats.isDirectory();
-	var wwwpath = filepath.substring(workspaceDir.length + 1);
+	var wwwpath = api.toURLPath(filepath.substring(workspaceDir.length + 1));
 	var result = {
 		Name: path.basename(filepath),
 		Location: getFileLocation(fileRoot, wwwpath, isDir),
