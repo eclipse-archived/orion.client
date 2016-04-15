@@ -190,17 +190,19 @@ define([
 		// Listen to model changes from fileCommands
 		var _self = this;
 		this._modelListeners = {};
+		//We still need to listen to the "create project" and "import from remote" events.
+		//Refer to projectCommnads.js and fileCommands.js for details on how special UI model calculation is done for theses 2 events.
 		["create", "import"].forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
 				modelEventDispatcher.addEventListener(eventType, _self._modelListeners[eventType] = _self.modelHandler[eventType].bind(_self));
 			});
 			
-		var parent = lib.node(this.parentId);
+		var parentNode = lib.node(this.parentId);
 		this._clickListener = function(evt) {
             if (!(evt.metaKey || evt.altKey || evt.shiftKey || evt.ctrlKey)) {
                 var navHandler = _self.getNavHandler();
                 if (navHandler && navHandler.getSelectionPolicy() !== "cursorOnly") {
                 	var temp = evt.target;
-					while (temp && temp !== parent) {
+					while (temp && temp !== parentNode) {
 						if (temp._item) {
 							break;
 						}
@@ -218,8 +220,8 @@ define([
             }
             _self._clickLink(evt.target);
 		};
-		if (parent) {
-			parent.addEventListener("click", this._clickListener); //$NON-NLS-0$
+		if (parentNode) {
+			parentNode.addEventListener("click", this._clickListener); //$NON-NLS-0$
 		}
 	}
 	

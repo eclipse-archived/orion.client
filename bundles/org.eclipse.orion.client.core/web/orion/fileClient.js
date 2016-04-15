@@ -383,8 +383,8 @@ define([
 		 * @return {Deferred} A deferred that will create a new project in the workspace
 		 */
 		createProject: function(url, projectName, serverPath, create) {
-			//return _doServiceCall(this._getService(url), "createProject", arguments); //$NON-NLS-1$
-			return this._createArtifact(url, "createProject", arguments);
+			return _doServiceCall(this._getService(url), "createProject", arguments); //$NON-NLS-1$
+			//return this._createArtifact(url, "createProject", arguments);
 		},
 		/**
 		 * Creates a folder.
