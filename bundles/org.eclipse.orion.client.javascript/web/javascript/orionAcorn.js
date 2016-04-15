@@ -42,6 +42,9 @@ define([
 		this.currentOptions = {};
 	};
 
+	OrionAcorn.prototype.attachTernServer = function attachTernServer(ternServer){
+		OrionAcorn.prototype.ternServer = ternServer;
+	};
 	/**
 	 * @name onToken
 	 * @description Function called when recording a token
@@ -275,6 +278,43 @@ define([
 				if(extra.deps && node.type === "Literal") {
 					if (!extra.deps[node.value]) {
 						extra.deps[node.value] = 1;
+						if (extra.envs.node === true) {
+							if (that.ternServer){
+								var sourceFile = node.sourceFile.name;
+								var folderLoc = sourceFile.slice(0, sourceFile.lastIndexOf("/")+1);
+								if (!/^[\.]+/.test(node.value)){
+									that.pendingNodeModules = that.pendingNodeModules || [];
+									if (!that.pendingNodeModules[node.value]){
+										that.pendingNodeModules[node.value] = 1;
+										var pacJsonLoc = folderLoc+"node_modules/"+node.value+"/package.json";
+										that.ternServer.startAsyncAction();
+										that.ternServer.options.getFile(pacJsonLoc, function(err, _file){
+											if(!err){
+												var val = JSON.parse(_file);
+												var mainPath = null;
+												var main = val.main;
+												if (main) {
+													if (!/(\.js)$/.test(main)) {
+														main += ".js";
+													}
+													mainPath = folderLoc + "node_modules/" + node.value + "/" + main;
+												} else {
+													main = "index.js";
+													mainPath = folderLoc + "node_modules/" + node.value + "/index.js";
+												}
+												that.dependencies[node.value] = {type: "Literal", value: mainPath };
+											} else {
+												that.error = err;
+											}
+											that.pendingNodeModules[node.value] = 0;
+											that.ternServer.finishAsyncAction(err);
+										});
+									};
+								} else {
+									that.dependencies[node.value] = {type: "Literal", value: folderLoc+node.value };
+								}							
+							}
+						}
 					}
 				}
 			}
@@ -413,6 +453,7 @@ define([
 	 * @param {String} text The given source code
 	 */
 	OrionAcorn.prototype.postParse = function postParse(ast, text) {
+		// if (this.environments.node && this.ternServer) this.preInfer(ast, text);
 		if (this.error) {
 			if (ast.errors) {
 				ast.errors.push(this.error);
@@ -434,5 +475,58 @@ define([
 		ast.errors = Util.serializeAstErrors(ast);
 	};
 
+	/**
+	 * @description Callback to cycle waiting for async jobs to finish
+	 * @param {TernServer} server The server
+	 */
+	OrionAcorn.prototype.waitOnResolve = function waitOnResolve(ast, text) {
+		var that = this;
+    	var done = function() {
+      		clearTimeout(timeout);
+      		that.preInfer(ast, text);
+    	};
+    	var timeout = setTimeout(done, this.ternServer.options.fetchTimeout);
+	}
+
+	/**
+	 * @description Default callback to be used durning the pre-infer phase of plugin loading
+	 * @param {TernServer} server The server
+	 * @param {Object} resolved The object containing names to be resolved
+	 * @since 9.0
+	 */
+	OrionAcorn.prototype.preInfer = function preInfer(ast, text) {
+		// if (!this.ternServer){
+		// 	this.ternServer = this.__proto__.ternServer;
+		// }
+
+		if (this.environments.node && this.ternServer){
+			if(this.ternServer.pending) {
+				return this.waitOnResolve(ast, text);
+			}
+			var done = true;
+			if(this.pendingNodeModules && this.pendingNodeModules.find(function(value){ return value === 1})){
+				done = false;
+			}
+			if(!done) {
+				return this.waitOnResolve(ast, text);
+			}
+			if (!ast.dependencies) {
+				ast.dependencies = [];
+			}
+			for (var prop in this.dependencies) {
+				if (this.dependencies.hasOwnProperty(prop)) {
+					function findExistence(dep){
+						return dep.value;
+					}
+					var index = ast.dependencies.map(findExistence).indexOf(prop);
+					if (index !== -1) {
+						ast.dependencies[index] = this.dependencies[prop];
+					} else {
+						ast.dependencies.push(this.dependencies[prop]);
+					}	
+				}
+			}
+		}
+	}
 	return OrionAcorn;
 });

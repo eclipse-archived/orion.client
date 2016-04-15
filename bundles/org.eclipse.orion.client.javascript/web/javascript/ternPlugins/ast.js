@@ -22,6 +22,7 @@ define([
 			orionAcorn.initialize();
 		});
 
+		orionAcorn.attachTernServer(server);
 		return {
 			passes: {
 				/**
@@ -31,7 +32,12 @@ define([
 				/**
 				 * @callback
 				 */
-				postParse: orionAcorn.postParse.bind(orionAcorn)
+				postParse: orionAcorn.postParse.bind(orionAcorn),
+				/**
+                 * @callback
+                 * Orion
+                 */
+                preInfer: orionAcorn.preInfer.bind(orionAcorn)
 			}
 		};
 	});
