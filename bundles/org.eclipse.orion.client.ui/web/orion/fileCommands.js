@@ -136,7 +136,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				}
 				if (!preventNotification) {
 					//TODO Not sure if we should send out event from file Client here
-					//dispatchModelEventOn({ type: "create", parent: targetFolder, newValue: null /* haven't fetched the new file in Orion yet */ }); //$NON-NLS-0$	
+					dispatchModelEventOn({ type: "create", parent: targetFolder, newValue: null /* haven't fetched the new file in Orion yet */ }); //$NON-NLS-0$	
 				}
 			}
 		}.bind(this);
@@ -299,7 +299,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 							populateFunction(folder);
 						}
 						//TODO Not sure if we should send out event from file Client here
-						//dispatchModelEventOn({type: "create", parent: loadedWorkspace, newValue: folder }); //$NON-NLS-0$
+						dispatchModelEventOn({type: "create", parent: loadedWorkspace, newValue: folder }); //$NON-NLS-0$
 					}, errorHandler);
 				}, 
 				function(error) {
@@ -617,8 +617,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 						if (!item.parent) {
 							item.parent = parent;
 						}
-						//TODO Not sure if we should send out event from file Client here
-						//dispatchModelEvent({ type: "move", oldValue: item, newValue: newItem, parent: parent }); //$NON-NLS-0$
 					},
 					errorHandler
 				);
