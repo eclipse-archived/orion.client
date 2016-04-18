@@ -127,7 +127,8 @@ Deferred) {
 		function execute(orionContext, params) {
 			//alert("foo");
 			//editorViewer.editor.getTextView()._setThemeClass("editorTheme");
-			editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
+			//editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
+			editorViewer.editor.getTextView().invokeAction("undo");
 		}
 		editorViewer.serviceRegistry.registerService('orion.edit.command', {execute: execute}, {
 			name: 'Xtext formatting service',
@@ -153,7 +154,8 @@ Deferred) {
 		function execute(orionContext, params) {
 			//alert("foo");
 			//editorViewer.editor.getTextView()._setThemeClass("editorTheme");
-			editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
+			//editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
+			editorViewer.editor.getTextView().invokeAction("undo");
 		}
 		editorViewer.serviceRegistry.registerService('orion.edit.command', {execute: execute}, {
 			name: 'Xtext formatting service',
