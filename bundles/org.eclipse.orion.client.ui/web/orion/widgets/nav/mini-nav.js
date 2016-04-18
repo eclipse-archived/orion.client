@@ -56,7 +56,15 @@ define([
 			return this.loadRoot(this.fileClient.fileServiceRootURL(item.Location)).then(function() {
 				return this.showItem(item, false); // call with reroot=false to avoid recursion
 			}.bind(this));
-		}
+		},
+		onModelCreate: function(evt) {
+			return CommonNavExplorer.prototype.onModelCreate.call(this, evt).then(function () {
+				if(evt && !evt.select) {
+					var fileMetadata = this.editorInputManager.getFileMetadata();
+					this.reveal(fileMetadata, true);
+				}
+			}.bind(this));
+		},
 	});
 
 	function MiniNavRenderer() {

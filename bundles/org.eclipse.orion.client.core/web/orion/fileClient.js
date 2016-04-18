@@ -359,15 +359,15 @@ define([
 			return _doServiceCall(this._getService(), "changeWorkspace", arguments); //$NON-NLS-1$
 		},
 		
-		_createArtifact: function(parentLocation, funcName, funcArgs) {
+		_createArtifact: function(parentLocation, funcName, select, funcArgs) {
 			return _doServiceCall(this._getService(parentLocation), funcName, funcArgs).then(function(result){ //$NON-NLS-0$
 				if(this.isEventFrozen()) {
 					if(!this._frozenEvent.created) {
 						this._frozenEvent.created = [];
 					}
-					this._frozenEvent.created.push({parent: parentLocation, result: result});
+					this._frozenEvent.created.push({parent: parentLocation, result: result, select: select});
 				} else {
-					this.dispatchEvent({ type: "Changed", created: [{parent: parentLocation, result: result}]}); //$NON-NLS-0$
+					this.dispatchEvent({ type: "Changed", created: [{parent: parentLocation, result: result, select: select}]}); //$NON-NLS-0$
 				}
 				return result;
 			}.bind(this));
@@ -390,25 +390,27 @@ define([
 		 * Creates a folder.
 		 * @param {String} parentLocation The location of the parent folder
 		 * @param {String} folderName The name of the folder to create
+		 * @param {Boolean} select If true, select the folder
 		 * @return {Object} JSON representation of the created folder
 		 * @public
 		 * @return {Deferred} A deferred that will create a new folder in the workspace
 		 */
-		createFolder: function(parentLocation, folderName) {
+		createFolder: function(parentLocation, folderName, select) {
 			//return _doServiceCall(this._getService(parentLocation), "createFolder", arguments); //$NON-NLS-1$
-			return this._createArtifact(parentLocation, "createFolder", arguments);
+			return this._createArtifact(parentLocation, "createFolder", select, arguments);
 		},
 		/**
 		 * Create a new file in a specified location. Returns a deferred that will provide
 		 * The new file object when ready.
 		 * @param {String} parentLocation The location of the parent folder
 		 * @param {String} fileName The name of the file to create
+		 * @param {Boolean} select If true, select the file
 		 * @public
 		 * @return {Deferred} A deferred that will provide the new file object
 		 */
-		createFile: function(parentLocation, fileName) {
+		createFile: function(parentLocation, fileName, select) {
 			//return _doServiceCall(this._getService(parentLocation), "createFile", arguments); //$NON-NLS-1$
-			return this._createArtifact(parentLocation, "createFile", arguments);
+			return this._createArtifact(parentLocation, "createFile", select, arguments);
 		},
 		/**
 		 * Deletes a file, directory, or project.

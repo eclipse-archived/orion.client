@@ -267,7 +267,7 @@ define([
 		_handleResourceCreate: function(evt) {
 			//Convert the item array( {parent, result} ) to an array of {newValue, oldValue, parent}
 			var items = evt.created.map(function(createdItem){
-				return {type: "create", newValue: createdItem.result, parent: this._getUIModel(createdItem.parent)};
+				return {type: "create", select: createdItem.select, newValue: createdItem.result, parent: this._getUIModel(createdItem.parent)};
 			}.bind(this));
 			return this.onModelCreate(items[0]).then(function(/*result*/){
 				return items[0];
@@ -408,6 +408,7 @@ define([
 			},
 			create: function(modelEvent) {
 				// refresh the node
+				modelEvent.select = true;
 				return this.onModelCreate(modelEvent);
 			},
 			"delete": function(modelEvent) { //$NON-NLS-0$

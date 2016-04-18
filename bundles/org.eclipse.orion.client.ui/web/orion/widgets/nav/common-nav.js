@@ -118,9 +118,11 @@ define([
 			navHandler.cursorOn(folder);
 			navHandler.setSelection(folder, false);
 		},
-		onModelCreate: function(event) {
-			return FileExplorer.prototype.onModelCreate.call(this, event).then(function () {
-				this.sidebarNavInputManager.dispatchEvent(event);
+		onModelCreate: function(evt) {
+			return FileExplorer.prototype.onModelCreate.call(this, evt).then(function () {
+				if(evt && evt.select) {
+					this.sidebarNavInputManager.dispatchEvent(evt);
+				}
 			}.bind(this));
 		},
 		// Override the same API from the super class to dispatch "editorInputMoved" event
