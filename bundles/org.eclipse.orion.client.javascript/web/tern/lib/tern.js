@@ -3,15 +3,15 @@
 // A server is a stateful object that manages the analysis for a
 // project, and defines an interface for querying the code in the
 // project.
-
+/* eslint-disable */
 (function(root, mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(exports, require("./infer"), require("./signal"),
                require("acorn"), require("acorn/dist/walk"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["exports", "./infer", "./signal", "acorn/dist/acorn", "acorn/dist/walk"], mod);
-  mod(root.tern || (root.tern = {}), tern, tern.signal, acorn, acorn.walk); // Plain browser env
-})(this, function(exports, infer, signal, acorn, walk) {
+    return define(["exports", "./infer", "./signal", "acorn/dist/acorn", "acorn/dist/acorn_loose", "acorn/dist/walk"], mod);
+  mod(root.tern || (root.tern = {}), tern, tern.signal, acorn, acornloose, acorn.walk); // Plain browser env
+})(this, function(exports, infer, signal, acorn, acornloose, walk) {
   "use strict";
 
   var plugins = Object.create(null);
@@ -84,7 +84,7 @@
       allowImportExportEverywhere: true,
       ecmaVersion: srv.options.ecmaVersion
     }
-    var text = srv.signalReturnFirst("preParse", file.text, options) || file.text
+    var text = srv.signalReturnFirst("preParse", file.text, options, acorn, acornloose) || file.text
     var ast = infer.parse(text, options)
     srv.signal("postParse", ast, text)
     return ast
@@ -1102,4 +1102,13 @@
   }
 
   exports.version = "0.18.0";
+  exports.findDef = findDef; //ORION
+  exports.findExprType = findExprType; //ORION
+  exports.resolveFile = resolveFile; //ORION
+  exports.storeTypeDocs = storeTypeDocs; //ORION
+  exports.parseDoc = parseDoc; //ORION
+  exports.findRefs = findRefs; // ORION
+  exports.findRefsToProperty = findRefsToProperty; // ORION
+  exports.findRefsToVariable = findRefsToVariable; // ORION
+  exports.ternError = ternError; // ORION
 });
