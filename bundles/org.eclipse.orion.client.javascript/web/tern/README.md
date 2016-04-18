@@ -1,6 +1,6 @@
 # Tern
 
-[![Build Status](https://secure.travis-ci.org/marijnh/tern.png)](http://travis-ci.org/marijnh/tern)
+[![Build Status](https://secure.travis-ci.org/ternjs/tern.png)](http://travis-ci.org/ternjs/tern)
 [![NPM version](https://img.shields.io/npm/v/tern.svg)](https://www.npmjs.org/package/tern)  
 [Funding status: ![maintainer happiness](https://marijnhaverbeke.nl/fund/status_s.png?again)](https://marijnhaverbeke.nl/fund/)
 
@@ -13,11 +13,14 @@ software, under an MIT license.
 
 There are currently plugins available for [Emacs][emacs] (and Emacs
 [company-mode][cmode]), [Vim][vim], [Sublime Text][st], [Eclipse (and general Java API)][ec],
-[Light Table][lt], and [gedit][gedit], and built-in support in
-[Brackets][brackets] and [Edge Code][edge_code].
+[Light Table][lt], [Atom][atom] and [gedit][gedit], and built-in support in
+[Brackets][brackets], [Edge Code][edge_code], and [CodeLite](http://codelite.org/).
 
 For further documentation, see the [project page][1] and the
-[manual][3].
+[manual][3]. To report issues, use the
+[issue tracker](https://github.com/ternjs/tern/issues). For questions
+and documentation, see the
+[discussion forum](https://discuss.ternjs.net).
 
 [1]: http://ternjs.net
 [2]: http://www.indiegogo.com/projects/tern-intelligent-javascript-editing
@@ -25,9 +28,10 @@ For further documentation, see the [project page][1] and the
 
 [emacs]: http://ternjs.net/doc/manual.html#emacs
 [ec]: https://github.com/angelozerr/tern.java
-[vim]: https://github.com/marijnh/tern_for_vim
-[st]: https://github.com/marijnh/tern_for_sublime
+[vim]: https://github.com/ternjs/tern_for_vim
+[st]: https://github.com/ternjs/tern_for_sublime
 [lt]: https://github.com/mortalapeman/LT-TernJS
+[atom]: https://atom.io/packages/atom-ternjs
 [gedit]: https://github.com/Swatinem/tern_for_gedit
 [brackets]: http://brackets.io
 [edge_code]: http://html.adobe.com/edge/code

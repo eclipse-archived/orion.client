@@ -5,9 +5,9 @@
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require("../lib/comment"),
-               require("esprima/esprima"), require("acorn/dist/walk"));
+               require("acorn"), require("acorn/dist/walk"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", "../lib/comment", "esprima/esprima" /*ORION*/, "acorn/dist/walk"], mod);
+    return define(["../lib/infer", "../lib/tern", "../lib/comment", "acorn/dist/acorn", "acorn/dist/walk"], mod);
   mod(tern, tern, tern.comment, acorn, acorn.walk);
 })(function(infer, tern, comment, acorn, walk) {
   "use strict";
@@ -15,22 +15,18 @@
   var WG_MADEUP = 1, WG_STRONG = 101;
 
   tern.registerPlugin("doc_comment", function(server, options) {
-    server.jsdocTypedefs = Object.create(null);
+    server.mod.jsdocTypedefs = Object.create(null);
     server.on("reset", function() {
-      server.jsdocTypedefs = Object.create(null);
+      server.mod.jsdocTypedefs = Object.create(null);
     });
-    server._docComment = {
+    server.mod.docComment = {
       weight: options && options.strong ? WG_STRONG : undefined,
       fullDocs: options && options.fullDocs
     };
 
-    return {
-      passes: {
-        postParse: postParse,
-        postInfer: postInfer,
-        postLoadDef: postLoadDef
-      }
-    };
+    server.on("postParse", postParse)
+    server.on("postInfer", postInfer)
+    server.on("postLoadDef", postLoadDef)
   });
 
   function postParse(ast, text) {
@@ -39,12 +35,10 @@
     walk.simple(ast, {
       VariableDeclaration: attachComments,
       FunctionDeclaration: attachComments,
+      MethodDefinition: attachComments,
+      Property: attachComments,
       AssignmentExpression: function(node) {
         if (node.operator == "=") attachComments(node);
-      },
-      ObjectExpression: function(node) {
-        for (var i = 0; i < node.properties.length; ++i)
-          attachComments(node.properties[i]);
       },
       CallExpression: function(node) {
         if (isDefinePropertyCall(node)) attachComments(node);
@@ -65,7 +59,8 @@
 
     walk.simple(ast, {
       VariableDeclaration: function(node, scope) {
-        if (node.commentsBefore)
+        var decl = node.declarations[0].id
+        if (node.commentsBefore && decl.type == "Identifier")
           interpretComments(node, node.commentsBefore, scope,
                             scope.getProp(node.declarations[0].id.name));
       },
@@ -73,7 +68,13 @@
         if (node.commentsBefore)
           interpretComments(node, node.commentsBefore, scope,
                             scope.getProp(node.id.name),
-                            node.body.scope.fnType);
+                            node.scope.fnType);
+      },
+      ClassDeclaration: function(node, scope) {
+        if (node.commentsBefore)
+          interpretComments(node, node.commentsBefore, scope,
+                            scope.getProp(node.id.name),
+                            node.objType);
       },
       AssignmentExpression: function(node, scope) {
         if (node.commentsBefore)
@@ -82,10 +83,21 @@
       },
       ObjectExpression: function(node, scope) {
         for (var i = 0; i < node.properties.length; ++i) {
-          var prop = node.properties[i];
-          if (prop.commentsBefore)
-            interpretComments(prop, prop.commentsBefore, scope,
-                              node.objType.getProp(prop.key.name));
+          var prop = node.properties[i], name = infer.propName(prop)
+          if (name != "<i>" && prop.commentsBefore)
+            interpretComments(prop, prop.commentsBefore, scope, node.objType.getProp(name))
+        }
+      },
+      Class: function(node, scope) {
+        var proto = node.objType.getProp("prototype").getObjType()
+        if (!proto) return
+        for (var i = 0; i < node.body.body.length; i++) {
+          var method = node.body.body[i], name
+          if (!method.commentsBefore) continue
+          if (method.kind == "constructor")
+            interpretComments(method, method.commentsBefore, scope, node.objType)
+          else if ((name = infer.propName(method)) != "<i>")
+            interpretComments(method, method.commentsBefore, scope, proto.getProp(name))
         }
       },
       CallExpression: function(node, scope) {
@@ -104,7 +116,7 @@
     var defs = data["!typedef"];
     var cx = infer.cx(), orig = data["!name"];
     if (defs) for (var name in defs)
-      cx.parent.jsdocTypedefs[name] =
+      cx.parent.mod.jsdocTypedefs[name] =
         maybeInstance(infer.def.parse(defs[name], orig, name), name);
   }
 
@@ -200,10 +212,18 @@
     return {labels: labels, types: types, end: pos, madeUp: madeUp};
   }
 
+  function parseTypeAtom(scope, str, pos) {
+    var result = parseTypeInner(scope, str, pos)
+    if (!result) return null
+    if (str.slice(result.end, result.end + 2) == "[]")
+      return {madeUp: result.madeUp, end: result.end + 2, type: new infer.Arr(result.type)}
+    else return result
+  }
+
   function parseType(scope, str, pos) {
     var type, union = false, madeUp = false;
     for (;;) {
-      var inner = parseTypeInner(scope, str, pos);
+      var inner = parseTypeAtom(scope, str, pos);
       if (!inner) return null;
       madeUp = madeUp || inner.madeUp;
       if (union) inner.type.propagate(union);
@@ -308,7 +328,7 @@
         while (str.charCodeAt(pos) == 46 ||
                acorn.isIdentifierChar(str.charCodeAt(pos))) ++pos;
         var path = str.slice(start, pos);
-        var cx = infer.cx(), defs = cx.parent && cx.parent.jsdocTypedefs, found;
+        var cx = infer.cx(), defs = cx.parent && cx.parent.mod.jsdocTypedefs, found;
         if (defs && (path in defs)) {
           type = defs[path];
         } else if (found = infer.def.parsePath(path, scope).getObjType()) {
@@ -328,7 +348,7 @@
   }
 
   function maybeInstance(type, path) {
-    if (type instanceof infer.Fn && /^[A-Z]/.test(path)) {
+    if (type instanceof infer.Fn && /(?:^|\.)[A-Z][^\.]*$/.test(path)) {
       var proto = type.getProp("prototype").getObjType();
       if (proto instanceof infer.Obj) return infer.getInstance(proto);
     }
@@ -349,10 +369,15 @@
   function jsdocInterpretComments(node, scope, aval, comments) {
     var type, args, ret, foundOne, self, parsed;
 
-    for (var i = comments.length-1; i >= 0; i--) { //ORION
+    for (var i = 0; i < comments.length; ++i) {
       var comment = comments[i];
-      var decl = /(?:\n|$|\*)\s*@(type|param|arg(?:ument)?|returns?|this)\s+(.*)/g, m;
+      var decl = /(?:\n|$|\*)\s*@(type|param|arg(?:ument)?|returns?|this|class|constructor)\s+(.*)/g, m;
       while (m = decl.exec(comment)) {
+        if (m[1] == "class" || m[1] == "constructor") {
+          self = foundOne = true;
+          continue;
+        }
+
         if (m[1] == "this" && (parsed = parseType(scope, m[2], 0))) {
           self = parsed;
           foundOne = true;
@@ -387,29 +412,39 @@
     while (m = re.exec(text)) {
       var parsed = parseTypeOuter(scope, m[1]);
       var name = parsed && m[1].slice(parsed.end).match(/^\s*(\S+)/);
-      if (name)
-        cx.parent.jsdocTypedefs[name[1]] = parsed.type;
+      if (name && parsed.type instanceof infer.Obj) {
+        var rest = text.slice(m.index + m[0].length)
+        while (m = /\s+@prop(?:erty)?\s+(.*)/.exec(rest)) {
+          var propType = parseTypeOuter(scope, m[1]), propName
+          if (propType && (propName = m[1].slice(propType.end).match(/^\s*(\S+)/)))
+            propType.type.propagate(parsed.type.defProp(propName[1]))
+          rest = rest.slice(m[0].length)
+        }
+        cx.parent.mod.jsdocTypedefs[name[1]] = parsed.type;
+      }
     }
   }
 
   function propagateWithWeight(type, target) {
-    var weight = infer.cx().parent._docComment.weight;
+    var weight = infer.cx().parent.mod.docComment.weight;
     type.type.propagate(target, weight || (type.madeUp ? WG_MADEUP : undefined));
   }
+
+  function isFunExpr(node) { return node.type == "FunctionExpression" || node.type == "ArrowFunctionExpression" }
 
   function applyType(type, self, args, ret, node, aval) {
     var fn;
     if (node.type == "VariableDeclaration") {
       var decl = node.declarations[0];
-      if (decl.init && decl.init.type == "FunctionExpression") fn = decl.init.body.scope.fnType;
+      if (decl.init && isFunExpr(decl.init)) fn = decl.init.scope.fnType;
     } else if (node.type == "FunctionDeclaration") {
-      fn = node.body.scope.fnType;
+      fn = node.scope.fnType;
     } else if (node.type == "AssignmentExpression") {
-      if (node.right.type == "FunctionExpression")
-        fn = node.right.body.scope.fnType;
+      if (isFunExpr(node.right))
+        fn = node.right.scope.fnType;
     } else if (node.type == "CallExpression") {
     } else { // An object property
-      if (node.value.type == "FunctionExpression") fn = node.value.body.scope.fnType;
+      if (isFunExpr(node.value)) fn = node.value.scope.fnType;
     }
 
     if (fn && (args || ret || self)) {
@@ -422,6 +457,10 @@
       if (ret) {
         if (fn.retval == infer.ANull) fn.retval = new infer.AVal;
         propagateWithWeight(ret, fn.retval);
+      }
+      if (self === true) {
+        var proto = fn.getProp("prototype").getObjType();
+        self = proto && {type: infer.getInstance(proto, fn)};
       }
       if (self) propagateWithWeight(self, fn.self);
     } else if (type) {

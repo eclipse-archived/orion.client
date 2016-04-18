@@ -108,22 +108,22 @@
         "!doc": "A collection of all attribute nodes registered to the specified node. It is a NamedNodeMap,not an Array, so it has no Array methods and the Attr nodes' indexes may differ among browsers."
       },
       "nextSibling": {
-        "!type": "+Element",
+        "!type": "+Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.nextSibling",
         "!doc": "Returns the node immediately following the specified one in its parent's childNodes list, or null if the specified node is the last node in that list."
       },
       "previousSibling": {
-        "!type": "+Element",
+        "!type": "+Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.previousSibling",
         "!doc": "Returns the node immediately preceding the specified one in its parent's childNodes list, null if the specified node is the first in that list."
       },
       "lastChild": {
-        "!type": "+Element",
+        "!type": "+Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.lastChild",
         "!doc": "Returns the last child of a node."
       },
       "firstChild": {
-        "!type": "+Element",
+        "!type": "+Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.firstChild",
         "!doc": "Returns the node's first child in the tree, or null if the node is childless. If the node is a Document, it returns the first node in the list of its direct children."
       },
@@ -133,7 +133,7 @@
         "!doc": "Returns a collection of child nodes of the given element."
       },
       "parentNode": {
-        "!type": "+Element",
+        "!type": "+Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.parentNode",
         "!doc": "Returns the parent of the specified node in the DOM tree."
       },
@@ -163,17 +163,17 @@
         "!doc": "Inserts the specified node before a reference element as a child of the current node."
       },
       "replaceChild": {
-        "!type": "fn(newElt: +Element, oldElt: +Element) -> +Element",
+        "!type": "fn(newChild: +Node, oldChild: +Node) -> +Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.replaceChild",
         "!doc": "Replaces one child node of the specified element with another."
       },
       "removeChild": {
-        "!type": "fn(oldElt: +Element) -> +Element",
+        "!type": "fn(oldNode: +Node) -> +Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.removeChild",
         "!doc": "Removes a child node from the DOM. Returns removed node."
       },
       "appendChild": {
-        "!type": "fn(newElt: +Element) -> +Element",
+        "!type": "fn(newNode: +Node) -> +Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.appendChild",
         "!doc": "Adds a node to the end of the list of children of a specified parent node. If the node already exists it is removed from current parent node, then added to new parent node."
       },
@@ -2668,27 +2668,72 @@
     "!doc": "Selection is the class of the object returned by window.getSelection() and other methods. It represents the text selection in the greater page, possibly spanning multiple elements, when the user drags over static text and other parts of the page. For information about text selection in an individual text editing element."
   },
   "console": {
+    "assert": {
+      "!type": "fn(assertion: bool, text: string)",
+      "!url": "https://developer.mozilla.org/en/docs/Web/API/Console.assert",
+      "!doc": "Writes an error message to the console if the assertion is false."
+    },
+    "count": {
+      "!type": "fn(label?: string)",
+      "!url": "https://developer.mozilla.org/en/docs/Web/API/Console.count",
+      "!doc": "Logs the number of times that this particular call to count() has been called."
+    },
+    "dir": {
+      "!type": "fn(object: ?)",
+      "!url": "https://developer.mozilla.org/en/docs/Web/API/Console.dir",
+      "!doc": "Displays an interactive list of the properties of the specified JavaScript object."
+    },
     "error": {
-      "!type": "fn(text: string)",
+      "!type": "fn(text: ?)",
       "!url": "https://developer.mozilla.org/en/docs/DOM/console.error",
       "!doc": "Outputs an error message to the Web Console."
     },
+    "group": {
+      "!type": "fn()",
+      "!url": "https://developer.mozilla.org/en/docs/Web/API/Console.group",
+      "!doc": "Creates a new inline group in the Web Console log."
+    },
+    "groupCollapsed": {
+      "!type": "fn()",
+      "!url": "https://developer.mozilla.org/en/docs/Web/API/Console.groupCollapsed",
+      "!doc": "Creates a new inline group in the Web Console log."
+    },
+    "groupEnd": {
+      "!type": "fn()",
+      "!url": "https://developer.mozilla.org/en/docs/Web/API/Console.groupEnd",
+      "!doc": "Exits the current inline group in the Web Console."
+    },
     "info": {
-      "!type": "fn(text: string)",
+      "!type": "fn(text: ?)",
       "!url": "https://developer.mozilla.org/en/docs/DOM/console.info",
       "!doc": "Outputs an informational message to the Web Console."
     },
     "log": {
-      "!type": "fn(text: string)",
+      "!type": "fn(text: ?)",
       "!url": "https://developer.mozilla.org/en/docs/DOM/console.log",
       "!doc": "Outputs a message to the Web Console."
     },
+    "time": {
+      "!type": "fn(timerName: string)",
+      "!url": "https://developer.mozilla.org/en/docs/Web/API/Console.time",
+      "!doc": "Starts a timer you can use to track how long an operation takes."
+    },
+    "timeEnd": {
+      "!type": "fn(timerName: string)",
+      "!url": "https://developer.mozilla.org/en/docs/Web/API/Console.timeEnd",
+      "!doc": "Stops a timer that was previously started by calling console.time()."
+    },
+    "trace": {
+      "!type": "fn()",
+      "!url": "https://developer.mozilla.org/en/docs/Web/API/Console.trace",
+      "!doc": "Outputs a stack trace to the Web Console."
+    },
     "warn": {
-      "!type": "fn(text: string)",
+      "!type": "fn(text: ?)",
       "!url": "https://developer.mozilla.org/en/docs/DOM/console.warn",
       "!doc": "Outputs a warning message to the Web Console."
     },
-    "!url": "https://developer.mozilla.org/en/docs/DOM/console",
+    "!url": "https://developer.mozilla.org/en/docs/Web/API/Console",
     "!doc": "The console object provides access to the browser's debugging console. The specifics of how it works vary from browser to browser, but there is a de facto set of features that are typically provided."
   },
   "top": {
@@ -3269,5 +3314,10 @@
     "rect": "fn(x: number, y: number, w: number, h: number)",
     "arc": "fn(x: number, y: number, radius: number, startAngle: number, endAngle: number, anticlockwise?: bool)",
     "ellipse": "fn(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, anticlockwise: bool)"
+  },
+  "Image": {
+    "!type": "fn(width?: number, height?: number) -> +HTMLImageElement",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/Image",
+    "!doc": "Image Element constructor. Accepts two optional parameters: Image([unsigned long width, unsigned long height]). Returns an HTMLImageElement instance just as document.createElement('img') would."
   }
 }
