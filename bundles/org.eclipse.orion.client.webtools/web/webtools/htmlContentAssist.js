@@ -153,6 +153,30 @@ define([
 	
 	Objects.mixin(HTMLContentAssistProvider.prototype, {
 		/**
+		 * @private
+		 */
+		_getPrefixStart: function(text, offset) {
+			var index = offset;
+			while (index > 0) {
+				var char = text.substring(index - 1, index);
+				if (/[A-Za-z0-9_-]/.test(char)) {
+					index--;
+				} else {
+					break;
+				}
+			}
+			return index;
+		},
+		/**
+		 * @callback 
+		 */
+		computePrefix(editorContext, offset) {
+			var that = this;
+			return editorContext.getText().then(function (text) {
+				return text.substring(that._getPrefixStart(text, offset), offset);
+			});
+		},
+		/**
 		 * @callback 
 		 */
 		computeContentAssist: function(editorContext, params) {
@@ -468,23 +492,7 @@ define([
 			var index = params.offset - prefix.length - 1;
 			if (index > 0 && index < source.length) {
 				var precedingChar = source.charAt(index);
-				if (precedingChar === '-') {
-					index--;
-					if (index !== 0) {
-						// rebuild a prefix based on what characters (letter only) are before the '-'
-						precedingChar = source.charAt(index);
-						var currentPrefix = "-" + prefix;
-						loop: while (index > 0 && /[A-Za-z0-9_-]/.test(precedingChar)) {
-							index--;
-							currentPrefix = precedingChar + currentPrefix;
-							if (index === 0) {
-								break loop;
-							}
-							precedingChar = source.charAt(index);
-						}
-						params.prefix = currentPrefix;
-					}
-				} else if (precedingChar === '=' && prefix.length === 0 && (index - 1) > 0) {
+				if (precedingChar === '=' && prefix.length === 0 && (index - 1) > 0) {
 					precedingChar = source.charAt(index - 1);
 					if (/[A-Za-z0-9_]/.test(precedingChar)) {
 						proposals.push(this.makeComputedProposal("\"\"",  Messages['addQuotesToAttributes'], " - \"\"", null, prefix)); //$NON-NLS-1$ //$NON-NLS-2$

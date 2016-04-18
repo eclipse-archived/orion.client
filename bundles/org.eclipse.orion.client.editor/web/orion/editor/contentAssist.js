@@ -348,30 +348,66 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var indentation = line.substring(0, index);
 			var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
 			var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
-			var params = {
-				line: line,
-				offset: mapOffset,
-				prefix: model.getText(this.getPrefixStart(model, mapOffset), mapOffset),
-				selection: sel,
-				delimiter: model.getLineDelimiter(),
-				tab: tab,
-				indentation: indentation
-			};
-			var self = this;
+			var lineDelimiter = model.getLineDelimiter();
+			var _self = this;
 			var promises = providerInfoArray.map(function(providerInfo) {
 				var provider = providerInfo.provider;
+				var computePrefixFunc = provider.computePrefix;
+				var ecProvider = _self.editorContextProvider, editorContext = ecProvider.getEditorContext();
+				if (computePrefixFunc) {
+					var result = computePrefixFunc.apply(provider, [editorContext, mapOffset]);
+					return result.then(function(prefix) {
+						var params = {
+							line: line,
+							offset: mapOffset,
+							prefix: prefix,
+							selection: sel,
+							delimiter: lineDelimiter,
+							tab: tab,
+							indentation: indentation
+						};
+						var proposals;
+						try {
+							var func, promise;
+							if ((func = provider.computeContentAssist)) {
+								params = objects.mixin(params, ecProvider.getOptions());
+								promise = func.apply(provider, [editorContext, params]);
+							} else if ((func = provider.getProposals || provider.computeProposals)) {
+								// old API
+								promise = func.apply(provider, [model.getText(), mapOffset, params]);
+							}
+							proposals = _self.progress ? _self.progress.progress(promise, "Generating content assist proposal") : promise; //$NON-NLS-0$
+						} catch (e) {
+							return new Deferred().reject(e);
+						}
+						return Deferred.when(proposals);
+					},
+					function(err) {
+						return new Deferred().reject(err);
+					});
+				}
+				// no computePrefix function is defined for the provider. Use the default prefix
+				var params = {
+					line: line,
+					offset: mapOffset,
+					prefix: model.getText(_self.getPrefixStart(model, mapOffset), mapOffset),
+					selection: sel,
+					delimiter: lineDelimiter,
+					tab: tab,
+					indentation: indentation
+				};
 				var proposals;
 				try {
 					var func, promise;
 					if ((func = provider.computeContentAssist)) {
-						var ecProvider = self.editorContextProvider, editorContext = ecProvider.getEditorContext();
+						var ecProvider = _self.editorContextProvider, editorContext = ecProvider.getEditorContext();
 						params = objects.mixin(params, ecProvider.getOptions());
 						promise = func.apply(provider, [editorContext, params]);
 					} else if ((func = provider.getProposals || provider.computeProposals)) {
 						// old API
 						promise = func.apply(provider, [model.getText(), mapOffset, params]);
 					}
-					proposals = self.progress ? self.progress.progress(promise, "Generating content assist proposal") : promise; //$NON-NLS-0$
+					proposals = _self.progress ? _self.progress.progress(promise, "Generating content assist proposal") : promise; //$NON-NLS-0$
 				} catch (e) {
 					return new Deferred().reject(e);
 				}
@@ -383,7 +419,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			
 			if (this.pageMessage){
 				allPromises = Deferred.when(allPromises, function(proposals){
-					self.pageMessage.close();					
+					_self.pageMessage.close();
 					var foundProposal = false;
 					if (proposals && proposals.length > 0){
 						for (var i=0; i<proposals.length; i++) {
@@ -394,13 +430,12 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 						}
 					}
 					if (!foundProposal){
-						self.pageMessage.setErrorMessage(messages["noProposals"]);
+						_self.pageMessage.setErrorMessage(messages["noProposals"]);
 					}
 					return proposals;
 				});
-				self.pageMessage.showWhile(allPromises, messages["computingProposals"]);
+				this.pageMessage.showWhile(allPromises, messages["computingProposals"]);
 			}
-			
 			return allPromises;
 		},
 
@@ -441,26 +476,25 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 									return false; // unknown format
 								}
 			
-								return (0 === proposalString.indexOf(prefixText + this._filterText));
+								return 0 === proposalString.indexOf(prefixText + this._filterText);
 								
 							} else if (proposal.name || proposal.proposal) {
 								var activated = false;
 								// try matching name
 								if (proposal.name) {
-									activated = (0 === proposal.name.indexOf(prefixText + this._filterText));	
+									activated = 0 === proposal.name.indexOf(prefixText + this._filterText);	
 								}
 								
 								// try matching proposal text
 								if (!activated && proposal.proposal) {
-									activated = (0 === proposal.proposal.indexOf(this._filterText));
+									activated = 0 === proposal.proposal.indexOf(this._filterText);
 								}
 								
 								return activated;
 							} else if (typeof proposal === "string") { //$NON-NLS-0$
 								return 0 === proposal.indexOf(this._filterText);
-							} else {
-								return false;
 							}
+							return false;
 						}, this);
 						
 						if (includedProposals.length > 0) {

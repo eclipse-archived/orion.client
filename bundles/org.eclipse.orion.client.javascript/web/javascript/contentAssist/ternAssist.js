@@ -184,6 +184,30 @@ define([
 	Objects.mixin(TernContentAssist.prototype, {
 
 		/**
+		 * @private
+		 */
+		_getPrefixStart: function(text, offset) {
+			var index = offset;
+			while (index > 0) {
+				var char = text.substring(index - 1, index);
+				if (/[A-Za-z0-9_]/.test(char)) {
+					index--;
+				} else {
+					break;
+				}
+			}
+			return index;
+		},
+		/**
+		 * @callback 
+		 */
+		computePrefix(editorContext, offset) {
+			var that = this;
+			return editorContext.getText().then(function (text) {
+				return text.substring(that._getPrefixStart(text, offset), offset);
+			});
+		},
+		/**
 		 * Called by the framework to initialize this provider before any <tt>computeContentAssist</tt> calls.
 		 */
 		initialize: function() {
