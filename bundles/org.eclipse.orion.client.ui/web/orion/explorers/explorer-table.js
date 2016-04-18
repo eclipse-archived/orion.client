@@ -190,9 +190,9 @@ define([
 		// Listen to model changes from fileCommands
 		var _self = this;
 		this._modelListeners = {};
-		//We still need to listen to the "create project" and "import from remote" events.
-		//Refer to projectCommnads.js and fileCommands.js for details on how special UI model calculation is done for theses 2 events.
-		["create", "import"].forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
+		//We still need to listen to the "create project" events.
+		//Refer to projectCommnads.js for details on how special UI model calculation is done for the event.
+		["create"].forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
 				modelEventDispatcher.addEventListener(eventType, _self._modelListeners[eventType] = _self.modelHandler[eventType].bind(_self));
 			});
 			
@@ -242,7 +242,7 @@ define([
 			mExplorer.Explorer.prototype.destroy.call(this);
 		},
 		_getUIModel: function(loc) {
-			if(!this.model) {
+			if(!this.model || !loc) {
 				return null;
 			}
 			var elementId = this.model.getId({Location: loc});

@@ -985,11 +985,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					var importURL = targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")=== -1 ? "?":"&") + "source="+sourceURL; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					var expandZip = data.parameters && data.parameters.valueFor("unzip") && (sourceURL.indexOf(".zip") === sourceURL.length-4); //$NON-NLS-1$ //$NON-NLS-0$
 					var optionHeader = expandZip ? "" : "raw"; //$NON-NLS-1$ //$NON-NLS-0$
-					var deferred = fileClient.remoteImport(importURL, {"OptionHeader":optionHeader}); //$NON-NLS-0$
+					var deferred = fileClient.remoteImport(importURL, {"OptionHeader":optionHeader}, targetFolder.Location); //$NON-NLS-0$
 					progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Importing from ${0}"], sourceURL)).then(
 						function() {
-							//TODO Should send out event from fileClient.remoteImport
-							dispatchModelEvent({ type: "import", target: targetFolder }); //$NON-NLS-0$
 						}
 					);
 				}
@@ -1134,11 +1132,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					func:  function(host,port,path,user,password, overwriteOptions){
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
 						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Port":port,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
+						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions, item.Location);
 						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Importing from ${0}"], host)).then(
 							function(result) {
-								//TODO Should send out event from fileClinet
-								dispatchModelEvent({ type: "import", target: item }); //$NON-NLS-0$
 								errorHandler(result);
 							},
 							errorHandler

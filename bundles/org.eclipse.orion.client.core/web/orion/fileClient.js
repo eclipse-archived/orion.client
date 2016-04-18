@@ -587,8 +587,19 @@ define([
 		 * @public
 		 * @return {Deferred} A deferred for chaining events after the import completes
 		 */		
-		remoteImport: function(targetLocation, options) {
-			return _doServiceCall(this._getService(targetLocation), "remoteImport", arguments); //$NON-NLS-1$
+		remoteImport: function(targetLocation, options, parentLocation) {
+			//return _doServiceCall(this._getService(targetLocation), "remoteImport", arguments); //$NON-NLS-1$
+			return _doServiceCall(this._getService(targetLocation), "remoteImport", arguments).then(function(result){ //$NON-NLS-0$
+				if(this.isEventFrozen()) {
+					if(!this._frozenEvent.copied) {
+						this._frozenEvent.copied = [];
+					}
+					this._frozenEvent.copied.push({target: parentLocation});
+				} else {
+					this.dispatchEvent({ type: "Changed", copied: [{target: parentLocation}]}); //$NON-NLS-0$
+				}
+				return result;
+			}.bind(this));
 		},
 
 		/**
