@@ -853,6 +853,7 @@
   function storeTypeDocs(query, type, out) {
     if (!out.url) out.url = type.url;
     if (!out.doc) out.doc = parseDoc(query, type.doc);
+    if (!out.docRange && type.docRange) out.docRange = type.docRange;
     if (!out.origin) out.origin = type.origin;
     var ctor, boring = infer.cx().protos;
     if (!out.url && !out.doc && type.proto && (ctor = type.proto.hasCtor) &&
