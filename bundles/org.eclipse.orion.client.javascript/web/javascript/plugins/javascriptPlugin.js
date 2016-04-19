@@ -1720,8 +1720,8 @@ define([
     	}
     	provider.connect(function() {
 	    	var fc = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
-	    	fc.addEventListener("FileContentChanged", astManager.onFileChanged.bind(astManager));
-	    	fc.addEventListener("FileContentChanged", CUProvider.onFileChanged.bind(CUProvider));
+	    	fc.addEventListener("Changed", astManager.onFileChanged.bind(astManager));
+	    	fc.addEventListener("Changed", CUProvider.onFileChanged.bind(CUProvider));
 	    	/*
 	    	var prefs = serviceRegistry.getService("orion.core.preference"); //$NON-NLS-1$ //$NON-NLS-1$
 			if(prefs) {
