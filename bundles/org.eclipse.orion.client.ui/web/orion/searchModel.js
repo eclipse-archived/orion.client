@@ -247,6 +247,7 @@ define([
 	                children: children,
 	                contents: result.contents,
 	                location: result.location,
+	                totalMatches: result.totalMatches,
 	                parentLocation: mUiUtils.path2FolderName(result.location, result.name, true),
 	                fullPathName: mUiUtils.path2FolderName(result.path, result.name)
 	            };
@@ -317,6 +318,7 @@ define([
 	                children: [],
 	                contents: fileResult.contents,
 	                location: fileResult.location,
+	                totalMatches: fileResult.totalMatches,
 	                parentLocation: mUiUtils.path2FolderName(fileResult.location, fileResult.name, true),
 	                fullPathName: mUiUtils.path2FolderName(fileResult.path, fileResult.name)
 	            };

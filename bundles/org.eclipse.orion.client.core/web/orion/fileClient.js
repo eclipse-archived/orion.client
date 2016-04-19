@@ -574,7 +574,14 @@ define([
 		write: function(writeLocation, contents, args) {
 			//return _doServiceCall(this._getService(writeLocation), "write", arguments); //$NON-NLS-1$
 			return _doServiceCall(this._getService(writeLocation), "write", arguments).then(function(result){ //$NON-NLS-0$
-				this.dispatchEvent({ type: "Changed", modified: [writeLocation]}); //$NON-NLS-0$
+				if(this.isEventFrozen()) {
+					if(!this._frozenEvent.modified) {
+						this._frozenEvent.modified = [];
+					}
+					this._frozenEvent.modified.push(writeLocation);
+				} else {
+					this.dispatchEvent({ type: "Changed", modified: [writeLocation]}); //$NON-NLS-0$
+				}
 				return result;
 			}.bind(this));
 		},
