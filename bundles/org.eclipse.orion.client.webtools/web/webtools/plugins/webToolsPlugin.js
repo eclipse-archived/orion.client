@@ -480,6 +480,6 @@ define(['orion/plugin',
 
     	provider.connect(function() {
 			var fc = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
-	    	fc.addEventListener("FileContentChanged", htmlAstManager.onFileChanged.bind(htmlAstManager));
+	    	fc.addEventListener("Changed", htmlAstManager.onFileChanged.bind(htmlAstManager));
  		});
 });
