@@ -1042,6 +1042,7 @@ a.breadcrumb.currentLocation {
 	visibility: hidden;
 	z-index: 175;  /* less than tooltips, more than the rest */
 	position: absolute;
+	color: #222;
 	background-color: #fbfbfb;
 	border-radius: 2px;
 	border: 1px solid #BBB;
