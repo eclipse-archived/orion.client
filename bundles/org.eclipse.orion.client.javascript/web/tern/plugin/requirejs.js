@@ -2,10 +2,19 @@
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern"], mod);
+    return define(["../lib/infer", "../lib/tern", "javascript/ternPlugins/resolver"], mod);
   mod(tern, tern);
-})(function(infer, tern) {
+})(function(infer, tern, resolver) {
   "use strict";
+  
+  //ORION
+  function addInterfaceDep(inter, deps) {
+  	if(inter) {
+    	deps.push(inter);
+    } else {
+    	deps.push(infer.ANull);
+    }
+  }
 
   function flattenPath(path) {
     if (!/(^|\/)(\.\/|[^\/]+\/\.\.\/)/.test(path)) return path;
@@ -45,7 +54,12 @@
       data.require = new infer.Fn("require", infer.ANull, [infer.cx().str], ["module"], new infer.AVal);
       data.require.computeRet = function(_self, _args, argNodes) {
         if (argNodes.length && argNodes[0].type == "Literal" && typeof argNodes[0].value == "string")
-          return getInterface(path.join(path.dirname(data.currentFile), argNodes[0].value), data);
+          // ORION
+          var _i = getInterface(argNodes[0].value, data); //ORION
+          if(_i) {
+          	return _i;
+          }
+        // Before Orion: return getInterface(path.join(path.dirname(data.currentFile), argNodes[0].value), data);
         return infer.ANull;
       };
     }
@@ -55,15 +69,31 @@
   function getModuleInterface(data, exports) {
     var mod = new infer.Obj(infer.cx().definitions.requirejs.module, "module");
     var expProp = mod.defProp("exports");
-    expProp.propagate(getModule(data.currentFile, data));
+    
+    // ORION
+    var _m = getModule(stripJSExt(data.currentFile), data); //ORION
+    if(_m) {
+ 	   expProp.propagate(_m);
+	}
+	// Before Orion: expProp.propagate(getModule(data.currentFile, data));
     exports.propagate(expProp, EXPORT_OBJ_WEIGHT);
     return mod;
   }
 
   function getExports(data) {
-    var exports = new infer.Obj(true, "exports");
+    //ORION
+    var _exports = new infer.Obj(true, "exports");
+    var mod = getModule(stripJSExt(data.currentFile), data);
+    if(mod) {
+    	mod.addType(_exports, EXPORT_OBJ_WEIGHT);
+    }
+    return _exports;
+    
+    /* Before Orion
+     var exports = new infer.Obj(true, "exports");
     getModule(data.currentFile, data).addType(exports, EXPORT_OBJ_WEIGHT);
     return exports;
+    */
   }
 
   function getInterface(name, data) {
@@ -80,28 +110,44 @@
       name = over;
     }
 
-    if (!/^(https?:|\/)|\.js$/.test(name))
-      name = resolveName(name, data);
+//    if (!/^(https?:|\/)|\.js$/.test(name))
+//      name = resolveName(name, data);
     name = flattenPath(name);
 
-    var known = getKnownModule(name, data);
-
-    if (!known) {
-      known = getModule(name, data);
-      data.server.addFile(name, null, data.currentFile);
-    }
+    known = getModule(name, data);
+    // ORION
+    if (known){
+      data.server.addFile(known.origin, known.contents, data.currentFile);
+  	}
+	// Before Orion:     data.server.addFile(name, null, data.currentFile);
     return known;
   }
 
   function getKnownModule(name, data) {
-    return data.interfaces[stripJSExt(name)];
+  	// ORION
+  	var val = resolver.getResolved(name); //ORION
+  	if(val && val.file) {
+    	return data.interfaces[stripJSExt(val.file)];
+    }
+    return null;
+//   Before Orion: return data.interfaces[stripJSExt(name)];
   }
 
   function getModule(name, data) {
-    var known = getKnownModule(name, data);
+  	var known = getKnownModule(name, data);
     if (!known) {
+  	  // ORION
+      var val = resolver.getResolved(name); //ORION
+      if(val && val.file) {
+	      known = data.interfaces[stripJSExt(val.file)] = new infer.AVal();
+	      known.origin = val.file;
+	      known.contents = val.contents;
+	      known.reqName = name;
+      }
+      /* Before Orion
       known = data.interfaces[stripJSExt(name)] = new infer.AVal;
       known.origin = name;
+      */
     }
     return known;
   }
@@ -143,20 +189,31 @@
       var node = argNodes[args.length == 2 ? 0 : 1];
       var base = path.relative(server.projectDir, path.dirname(node.sourceFile.name));
       if (node.type == "Literal" && typeof node.value == "string") {
+      	addInterfaceDep(interf(node.value), deps); //ORION
+      	/* Before Orion:
         node.required = interf(path.join(base, node.value), data);
         deps.push(node.required);
+        */
       } else if (node.type == "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
         if (elt.type == "Literal" && typeof elt.value == "string") {
+          addInterfaceDep(interf(elt.value), deps); //ORION
+          /* Before Orion:
           elt.required = interf(path.join(base, elt.value), data);
           deps.push(elt.required);
+          */
         }
       }
     } else if (argNodes && args.length == 1 &&
                /FunctionExpression/.test(argNodes[0].type) &&
                argNodes[0].params.length) {
       // Simplified CommonJS call
+      addInterfaceDep(interf("require", data), deps); //ORION
+      addInterfaceDep(interf("exports", data), deps); //ORION
+      addInterfaceDep(interf("module", data), deps); //ORION
+      /* Before Orion:
       deps.push(interf("require", data), interf("exports", data), interf("module", data));
+      */
       fn = args[0];
     }
 
@@ -259,6 +316,14 @@
     server.on("postLoadDef", postLoadDef)
     server.on("typeAt", findTypeAt)
     server.on("completion", findCompletions)
+    
+    // ORION Hook into postParse, preInfer events
+    server.on("postParse", function(ast, text){
+    	resolver.doPostParse(server, ast, infer.cx().definitions);
+    });
+    server.on("preInfer", function(ast, scope){
+    	resolver.doPreInfer(server);
+    });
 
     server.addDefs(defs)
   });

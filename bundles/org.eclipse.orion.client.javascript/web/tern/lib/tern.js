@@ -184,7 +184,11 @@
     },
     finishAsyncAction: function(err) {
       if (err) this.asyncError = err;
-      if (--this.pending === 0) this.signal("everythingFetched");
+      if(this.pending > 0) {
+      	this.pending--;
+      }
+      if (this.pending === 0) this.signal("everythingFetched");
+      // Before Orion: if (--this.pending === 0) this.signal("everythingFetched");
     },
 
     addDefs: function(defs, toFront) {
@@ -297,6 +301,9 @@
       if (parentDepth(srv, known.parent) > parentDepth(srv, parent)) {
         known.parent = parent;
         if (known.excluded) known.excluded = null;
+        
+      } else if (!known.parent) {
+      	known.parent = parent; // ORION - Allow a parent to be assigned to an existing file if it had no parent
       }
       return;
     }
@@ -953,10 +960,30 @@
   function findDef(srv, query, file) {
     var expr = findExpr(file, query);
     var type = findExprType(srv, query, file, expr);
-    if (infer.didGuess()) return {};
+    if (infer.didGuess() && !query.guess) return {};
+    // Before Orion: if (infer.didGuess()) return {};
+    
+    // TODO ORION We used to look at potential matches
+    /*
+    //ORION
+	    var result = getResult(type, srv, query);
+	    if (infer.didGuess()) {
+	    	   if (type.potentialMatches) {
+	    	      var temp = [];
+	    	      for (var i = 0; i < type.potentialMatches.length; i++) {
+				temp.push(getResult(type.potentialMatches[i], srv, query));
+	    	      }
+	    	      result.results = temp;
+	    	   }
+	    	}
+	    	return result;
+    	};
+    	
+    	*/
 
     var span = getSpan(type);
-    var result = {url: type.url, doc: parseDoc(query, type.doc), origin: type.origin};
+    var result = {url: type.url, doc: parseDoc(query, type.doc), origin: type.origin, guess: infer.didGuess()}; // ORION
+// Before Orion:   var result = {url: type.url, doc: parseDoc(query, type.doc), origin: type.origin};
 
     if (type.types) for (var i = type.types.length - 1; i >= 0; --i) {
       var tp = type.types[i];

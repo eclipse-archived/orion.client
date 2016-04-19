@@ -1,4 +1,4 @@
-// Main type inference engine
+(// Main type inference engine
 
 // Walks an AST, building up a graph of abstract values and constraints
 // that cause types to flow from one node to another. Also defines a
@@ -198,7 +198,16 @@
           matches.push(obj);
         }
         var canon = canonicalType(matches);
-        if (canon) {guessing = true; return canon;}
+        if (canon) {
+        	guessing = true;
+        	
+        	// ORION
+        	if (matches.length > 0) {
+        		canon.potentialMatches = matches;
+        	}
+        	
+        	return canon;
+        }
       }
     },
 
@@ -1373,10 +1382,21 @@
   }
 
   var inferExprVisitor = exports.inferExprVisitor = {
+  	// ORION Add recovered node
+  	RecoveredNode: ret(function(node, scope, c, out, name) {
+  		return new AVal;
+  	}),
     ArrayExpression: ret(function(node, scope) {
       return arrayLiteralType(node.elements, scope, infer)
     }),
     ObjectExpression: ret(function(node, scope, name) {
+      // ORION recovery
+      if (name === "✖") {
+      	return ANull;
+      }
+      // TODO Possibly more ORION changes for recovery
+      
+      
       var proto = true, waitForProto
       for (var i = 0; i < node.properties.length; ++i) {
         var prop = node.properties[i]
