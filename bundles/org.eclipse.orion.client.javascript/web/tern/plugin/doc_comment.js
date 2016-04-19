@@ -154,7 +154,17 @@
       var text = stripLeadingChars(comments[i].split(/\r\n?|\n/)).join("\n");
       if (text) {
         if (aval instanceof infer.AVal) aval.doc = text;
-        if (type) type.doc = text;
+        if (type) {
+          type.doc = text;
+
+          if(node.leadingComments && node.leadingComments[i]){
+            var temp = {
+              start: node.leadingComments[i].start+2, // it seems that comments automatically removed
+              end: node.leadingComments[i].end-2      // its leading/trailing '/*' and '*/' without updating the start and end.
+            };
+            type.docRange = JSON.stringify(temp); 
+          }
+        };
         break;
       }
     }

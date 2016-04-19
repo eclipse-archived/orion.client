@@ -186,6 +186,7 @@ define([
 									var srcCache = {};
 									that.serviceRegistry.getService("orion.core.search.client").search(searchParams, true, true).then(function(searchResult) { //$NON-NLS-1$
 										expected.result = searchResult;
+										expected.result.docChecked = false;
 										for (var h = 0, l1 = searchResult.length; h < l1; h++) {
 											var file = searchResult[h];
 											var source = Array.isArray(file.contents) ? file.contents.join("") : null;
@@ -204,7 +205,7 @@ define([
 															srcCache[file.metadata.Location].src = true;
 															req.files = [{type: 'full', name: file.metadata.Location, text: source}]; //$NON-NLS-1$;
 														}													
-														that._checkType(type, file.metadata, match, expected, req);
+														that._checkType(type, file.metadata, match, expected, req, ast);
 													} else {
 														match.category = categories.partial.category;
 														match.confidence = 0;
@@ -234,13 +235,14 @@ define([
 		 * @function
 		 * @private
 		 */
-		_checkType: function _checkType(original, file, match, expected, request) {
+		_checkType: function _checkType(original, file, match, expected, request, ast) {
 			var that = this;
 			that.ternworker.postMessage(
 					request, 
 					/* @callback */ function(type, err) {
 						if(type && type.type) {
-							var _t = type.type, _ot = original.type;
+							var _t = type.type, _ot = original.type, _docRange;
+							if (_ot.docRange) _docRange = JSON.parse(_ot.docRange);
 							if(_t.name === _ot.name && _t.type === _ot.type && that._sameOrigin(_t.origin, _ot.origin)) {
 								if(_t.guess) {
 									//we took a stab at it, not 100% sure
@@ -252,6 +254,95 @@ define([
 								match.confidence = _t.staticCheck.confidence;
 							} else if(_t.category === categories.strings.category ||	_t.category === categories.regex.category) {
 								match.confidence = 0;
+							} else if(_t.category === "blockcomments" && _ot.doc){
+								if (_docRange && match.start >= _docRange.start && match.end <= _docRange.end && that._sameOrigin(file.Location, _ot.origin)){
+									var comment = Finder.findComment(_docRange.end, ast);
+									if (comment && comment.value[0] === "*"){
+										var commentsToProcess = comment.value;
+										var offset = _docRange.start;
+										var jsdocReg = /@[a-zA-z]+/g;
+										var temp;
+										var positionsFound = [];
+										while ((temp = jsdocReg.exec(commentsToProcess)) !== null) {
+											  positionsFound.push(temp.index);
+										}
+										if (positionsFound.length > 0){
+											match.confidence = 0;
+											positionsFound.forEach(function(value){
+												if (commentsToProcess.slice(value, match.start)){
+													match.confidence = 100;
+												}
+											})
+											if (!expected.result.docChecked){
+												var resultIndex = -1;
+												for (var i = expected.result.length - 1; i >= 0; i--) {
+													if (expected.result[i] && expected.result[i].Location === original.origin){
+														resultIndex = i;
+													}
+												}
+												if(resultIndex !== -1){
+													var currentLineNumber = -1;
+													for (var i = expected.result[resultIndex].children.length - 1; i >= 0; i--) {
+														var child = expected.result[resultIndex].children[i];
+														var found = false;
+														for (var p = child.matches.length - 1; p >= 0; p--) {
+															if (child.matches[p] === match){
+																currentLineNumber = child.lineNumber;
+																found = true;
+																break;
+															}
+														}
+														if (found) break;
+													}
+
+													
+													temp = commentsToProcess.slice(0, positionsFound[0]);
+													offset += positionsFound[0];
+													currentLineNumber += temp.split('\n').length;
+													commentsToProcess.slice(positionsFound[0]);
+													commentsToProcess = commentsToProcess.split("@");
+													for (var p = 0; p < commentsToProcess.length; p++) {
+														var comment = commentsToProcess[p];
+														var commentToShow = /^(?!name)[a-zA-z]+(\s+[^@\s\*]+)+/.exec(comment);
+														if (commentToShow) {
+															var temp = commentToShow[0]; //May has more than one match
+															var newChild = {
+																lineNumber: currentLineNumber,
+																name: "@"+temp,
+																matches: [{
+																	start: offset,
+																	length: temp.length+1,
+																	end: offset+comment.length,
+																	category: "blockcomments",
+																	confidence: 100,
+																	startIndex: 0
+																}]
+															};
+															expected.result[resultIndex].children.push(newChild);
+															expected.total++;
+															expected.done++;						
+														}
+														offset+=comment.length;
+														if((comment.match(/\n/g) || []).length){
+															currentLineNumber += (comment.match(/\n/g) || []).length;
+														}
+													}
+													
+													expected.result.docChecked = true;
+												} else {
+													match.confidence = 0;
+												}
+											}
+										} else {
+											match.confidence = 0;
+										}
+									} else {
+										match.confidence = 0;
+									}									
+								} else {
+									match.confidence = 0;
+								}
+
 							} else {
 								match.confidence = -1;
 							}
