@@ -718,6 +718,21 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             this._inlineSearchPane.hideReplacePreview();
             this.reportStatus("");
             this.fileClient.thawChangeEvents();
+//            //reportList is the result after all files are writen to hte file service. Prepare a "FileContentChanged" event from here
+//            var files = [];
+//            reportList.forEach(function(fileItem){
+//            	var contentType = this._contentTypeService.getFilenameContentType(fileItem.model.name);
+//            	var fileObj = Object.create(null);
+//            	var metadata = Object.create(null);
+//            	metadata.contentType =  contentType ? contentType.id : "";
+//            	fileObj.name = fileItem.model.name;
+//            	fileObj.location = fileItem.model.location;
+//            	fileObj.metadata = metadata;
+//            	files.push(fileObj);
+//            }.bind(this));
+//            if(files.length > 0) {
+//				this.fileClient.dispatchEvent({ type: "FileContentChanged", files: files}); //$NON-NLS-0$
+//			}
         }.bind(this));
     };
 
