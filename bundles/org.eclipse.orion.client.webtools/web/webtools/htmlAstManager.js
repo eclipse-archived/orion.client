@@ -244,16 +244,13 @@ define([
 		},
 		/**
 		 * Returns the key to use when caching
-		 * @param {Object|String} metadata The file infos
+		 * @param {Object} metadata The file infos
 		 */
 		_getKey: function _getKey(metadata) {
-			if(typeof metadata === 'string') {
-				return metadata;
-			}
-			if(!metadata.location) {
-				return 'unknown'; //$NON-NLS-1$
-			}
-			return metadata.location;
+		      if(!metadata.location) {
+		          return 'unknown'; //$NON-NLS-1$
+		      }
+		      return metadata.location;
 		},
 
 		/**
@@ -302,9 +299,10 @@ define([
 		 * @param {Object} event a <tt>fileChanged</tt> event
 		 */
 		onFileChanged: function(event) {
-			if(event && event.type === 'Changed' && Array.isArray(event.modified)) {
-				event.modified.forEach(function(file) {
-					if(typeof file === 'string') {
+			if(event && event.type === 'FileContentChanged' && Array.isArray(event.files)) {
+				//event = {type, files: [{name, location, metadata: {contentType}}]}
+				event.files.forEach(function(file) {
+					if(file.metadata && file.metadata.contentType === 'text/html') {
 						this.cache.remove(this._getKey(file));
 					}
 				}.bind(this));

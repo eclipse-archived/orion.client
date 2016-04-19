@@ -14,10 +14,11 @@ define([
 	'orion/Deferred',
 	'orion/objects',
 	'javascript/lru',
+	"javascript/util",
 	"acorn/dist/acorn",
 	"acorn/dist/acorn_loose",
 	"javascript/orionAcorn",
-], function(Deferred, Objects, LRU, acorn, acorn_loose, OrionAcorn) {
+], function(Deferred, Objects, LRU, Util, acorn, acorn_loose, OrionAcorn) {
 	var registry;
 
 	/**
@@ -69,13 +70,10 @@ define([
 		},
 		/**
 		 * Returns the key to use when caching
-		 * @param {Object|String} metadata The file infos
+		 * @param {Object} metadata The file infos
 		 * @since 8.0
 		 */
 		_getKey: function _getKey(metadata) {
-			if(typeof metadata === 'string') {
-				return metadata;
-			}
 			if(!metadata || !metadata.location) {
 				return 'unknown'; //$NON-NLS-1$
 			}
@@ -127,12 +125,13 @@ define([
 		},
 		/**
 		 * Callback from the FileClient
-		 * @param {Object} event a <tt>Changed</tt> event
+		 * @param {Object} event a <tt>fileChanged</tt> event
 		 */
 		onFileChanged: function(event) {
-			if(event && event.type === 'Changed' && Array.isArray(event.modified)) {
-				event.modified.forEach(function(file) {
-					if(typeof file === 'string') {
+			if(event && event.type === 'FileContentChanged' && Array.isArray(event.files)) {
+				//event = {type, files: [{name, location, metadata: {contentType}}]}
+				event.files.forEach(function(file) {
+					if(file.metadata && file.metadata.contentType === 'application/javascript') {
 						this.cache.remove(this._getKey(file));
 					}
 				}.bind(this));
