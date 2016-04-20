@@ -353,11 +353,18 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var promises = providerInfoArray.map(function(providerInfo) {
 				var provider = providerInfo.provider;
 				var computePrefixFunc = provider.computePrefix;
-				var ecProvider = _self.editorContextProvider, editorContext = ecProvider.getEditorContext();
+				var ecProvider;
+				var editorContext;
+				var proposals;
+				var func;
+				var promise;
+				var params;
 				if (computePrefixFunc) {
+					ecProvider = _self.editorContextProvider;
+					editorContext = ecProvider.getEditorContext();
 					var result = computePrefixFunc.apply(provider, [editorContext, mapOffset]);
 					return result.then(function(prefix) {
-						var params = {
+						params = {
 							line: line,
 							offset: mapOffset,
 							prefix: prefix,
@@ -366,9 +373,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 							tab: tab,
 							indentation: indentation
 						};
-						var proposals;
 						try {
-							var func, promise;
 							if ((func = provider.computeContentAssist)) {
 								params = objects.mixin(params, ecProvider.getOptions());
 								promise = func.apply(provider, [editorContext, params]);
@@ -387,7 +392,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					});
 				}
 				// no computePrefix function is defined for the provider. Use the default prefix
-				var params = {
+				params = {
 					line: line,
 					offset: mapOffset,
 					prefix: model.getText(_self.getPrefixStart(model, mapOffset), mapOffset),
@@ -396,11 +401,10 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					tab: tab,
 					indentation: indentation
 				};
-				var proposals;
 				try {
-					var func, promise;
 					if ((func = provider.computeContentAssist)) {
-						var ecProvider = _self.editorContextProvider, editorContext = ecProvider.getEditorContext();
+						ecProvider = _self.editorContextProvider;
+						editorContext = ecProvider.getEditorContext();
 						params = objects.mixin(params, ecProvider.getOptions());
 						promise = func.apply(provider, [editorContext, params]);
 					} else if ((func = provider.getProposals || provider.computeProposals)) {
@@ -489,7 +493,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 								// try matching proposal text
 								if (!activated && proposal.proposal) {
 									pattern = new RegExp("^" + this._filterText, "i");
-									activated = pattern.test(proposal);
+									activated = pattern.test(proposal.proposal);
 								}
 								
 								return activated;
