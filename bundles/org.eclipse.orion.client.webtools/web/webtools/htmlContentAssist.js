@@ -170,7 +170,7 @@ define([
 		/**
 		 * @callback 
 		 */
-		computePrefix(editorContext, offset) {
+		computePrefix: function(editorContext, offset) {
 			var that = this;
 			return editorContext.getText().then(function (text) {
 				return text.substring(that._getPrefixStart(text, offset), offset);
