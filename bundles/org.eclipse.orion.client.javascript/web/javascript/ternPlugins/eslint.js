@@ -62,8 +62,13 @@ define([
 							}
 							break;
 						case Util.ErrorTypes.EndOfInput:
-							error.args = {nls: "syntaxErrorIncomplete"}; //$NON-NLS-0$
-							error.message = error.args.nls;
+							// we should trim the location at the end of the error message
+							var index = msg.lastIndexOf(" (");
+							var message = msg;
+							if (index !== -1) {
+								message = msg.substr(0, index);
+							}
+							error.message = message;
 							break;
 					}
 				} else if(!error.token) {

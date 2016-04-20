@@ -9,7 +9,6 @@
  ******************************************************************************/
 /* eslint-env amd */
 define({
-    'syntaxErrorIncomplete': 'Syntax error, incomplete statement.',
     'syntaxErrorBadToken': 'Syntax error on token \'${0}\', delete this token.',
     'esprimaParseFailure': 'Esprima failed to parse this file because an error occurred: ${0}',
     'eslintValidationFailure': 'ESLint failed to validate this file because an error occurred: ${0}',

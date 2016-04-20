@@ -135,7 +135,7 @@ define([
 							{start: 0,
 							 end: 8,
 							 severity: 'error',
-							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {nls: 'syntaxErrorIncomplete'})
+							 description: 'Unexpected token'
 							}
 						]);
 					}, function (error) {
@@ -150,7 +150,7 @@ define([
 							{start: 14,
 							 end: 22,
 							 severity: 'error',
-							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {nls: 'syntaxErrorIncomplete'})
+							 description: 'Unexpected token'
 							}
 						]);
 					}, function (error) {
@@ -165,10 +165,7 @@ define([
 							{start: 0, 
 							 end: 2, 
 							 severity: 'error', 
-							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {
-								0: "/",
-								nls: "syntaxErrorIncomplete"
-							 })
+							 description: "Unterminated regular expression"
 							 }
 						]);
 					}, function (error) {
@@ -182,13 +179,15 @@ define([
 				var config = { rules: {} };
 				validate({buffer: "var v1 = foo(`bar),\n\tv2;", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
-							{start: 0, 
+							{start: 14, 
+							 end: 19, 
+							 severity: 'error', 
+							 description: "Unterminated template"
+							 },
+							{start: 19, 
 							 end: 24, 
 							 severity: 'error', 
-							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {
-								0: "/",
-								nls: "syntaxErrorIncomplete"
-							 })
+							 description: "Unterminated template"
 							 }
 						]);
 					}, function (error) {
@@ -203,13 +202,15 @@ define([
 				var config = { rules: {} };
 				validate({buffer: "var v1 = foo(`bar),\nv2;", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
-							{start: 0, 
+							{start: 14, 
+							 end: 19, 
+							 severity: 'error', 
+							 description:"Unterminated template"
+							 },
+							{start: 19, 
 							 end: 23, 
 							 severity: 'error', 
-							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {
-								0: "/",
-								nls: "syntaxErrorIncomplete"
-							 })
+							 description: "Unterminated template"
 							 }
 						]);
 					}, function (error) {
@@ -224,13 +225,11 @@ define([
 				var config = { rules: {} };
 				validate({buffer: "var v1 = foo(`bar),v2;", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
-							{start: 0, 
+							{
+							 start: 14, 
 							 end: 22, 
 							 severity: 'error', 
-							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {
-								0: "/",
-								nls: "syntaxErrorIncomplete"
-							 })
+							 description: "Unterminated template"
 							 }
 						]);
 					}, function (error) {
@@ -245,14 +244,16 @@ define([
 				var config = { rules: {} };
 				validate({buffer: "var v1 = foo(`bar),\n\t\tv2;", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
-							{start: 0, 
-							 end: 25, 
+							{start: 14, 
+							 end: 19, 
 							 severity: 'error', 
-							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {
-								0: "/",
-								nls: "syntaxErrorIncomplete"
-							 })
-							 }
+							 description: "Unterminated template"
+							},
+							{start: 19, 
+							 end: 25, 
+							 severity: 'error',
+							 description: "Unterminated template"
+							}
 						]);
 					}, function (error) {
 						worker.getTestState().callback(error);
@@ -266,13 +267,10 @@ define([
 				var config = { rules: {} };
 				validate({buffer: "var v1 = foo(`bar);", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
-							{start: 0, 
+							{start: 14, 
 							 end: 19, 
 							 severity: 'error', 
-							 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {
-								0: "/",
-								nls: "syntaxErrorIncomplete"
-							 })
+							 description: "Unterminated template"
 							 }
 						]);
 					}, function (error) {

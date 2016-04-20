@@ -21,7 +21,7 @@ define([
 		this.tokens = [];
 		this.leadingCommentsIndex = 0;
 		this.trailingCommentsIndex = 0;
-		this.error = null;
+		this.errors = [];
 		this.needReset = true;
 		this.currentOptions = {};
 	}
@@ -37,7 +37,7 @@ define([
 		this.dependencies = {};
 		this.environments = {};
 		this.reset();
-		this.error = null;
+		this.errors = [];
 		this.needReset = true;
 		this.currentOptions = {};
 	};
@@ -173,7 +173,7 @@ define([
 							that.needReset = false;
 						}
 					}
-					that.error = err;
+					that.errors.push(err);
 					err.index = pos;
 					throw err;
 				}
@@ -416,11 +416,11 @@ define([
 	 * @param {String} text The given source code
 	 */
 	OrionAcorn.prototype.postParse = function postParse(ast, text) {
-		if (this.error) {
+		if (Array.isArray(this.errors) && this.errors.length !== 0) {
 			if (ast.errors) {
-				ast.errors.push(this.error);
+				ast.errors.concat(this.errors);
 			} else {
-				ast.errors = [this.error];
+				ast.errors = this.errors;
 			}
 		}
 		ast.comments = this.comments;
