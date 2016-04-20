@@ -282,7 +282,7 @@ define([
 					if (currentFile) {
 						var lastIndex = currentFile.lastIndexOf('/');
 						var filePath = currentFile.substring(0, lastIndex + 1) + _l;
-						if (!/(\.js)$/.test(_l)) {
+						if (!/\.js|\.json$/ig.test(_l)) {
 							filePath += ".js";
 						}
 						fileClient.read(filePath).then(function(contents) {
