@@ -157,7 +157,7 @@ define([
 	var serverOptions = {
 		async: true,
         debug: false,
-        projectDir: '/',
+        projectDir: 'orionFakeProjectDir', // Tern strips the project dir from any file paths it finds and defaults to '/' so this must be set
         defs: defs,
         ecmaVersion: 6,
         optionalPlugins: {

@@ -55,30 +55,15 @@
     var mod = new infer.Obj(infer.cx().definitions.requirejs.module, "module");
     var expProp = mod.defProp("exports");
     
-    // ORION
-    var _m = getModule(stripJSExt(data.currentFile), data); //ORION
-    if(_m) {
- 	   expProp.propagate(_m);
-	}
-	// Before Orion: expProp.propagate(getModule(data.currentFile, data));
+    expProp.propagate(getModule(data.currentFile, data));
     exports.propagate(expProp, EXPORT_OBJ_WEIGHT);
     return mod;
   }
 
   function getExports(data) {
-    //ORION
-    var _exports = new infer.Obj(true, "exports");
-    var mod = getModule(stripJSExt(data.currentFile), data);
-    if(mod) {
-    	mod.addType(_exports, EXPORT_OBJ_WEIGHT);
-    }
-    return _exports;
-    
-    /* Before Orion
-     var exports = new infer.Obj(true, "exports");
+    var exports = new infer.Obj(true, "exports");
     getModule(data.currentFile, data).addType(exports, EXPORT_OBJ_WEIGHT);
     return exports;
-    */
   }
 
   function getInterface(name, data) {
@@ -95,42 +80,42 @@
       name = over;
     }
 
-    if (!/^(https?:|\/)|\.js$/.test(name))
-      name = resolveName(name, data);
-    name = flattenPath(name);
+	// Cannot flatten/modify the path as it has to match what resolver.js caches
+//    if (!/^(https?:|\/)|\.js$/.test(name))
+//      name = resolveName(name, data);
+//    name = flattenPath(name);
 
-    known = getModule(name, data);
-    // ORION
-    if (known){
-      data.server.addFile(known.origin, known.contents, data.currentFile);
-  	}
-	// Before Orion:     data.server.addFile(name, null, data.currentFile);
-    return known || infer.ANull;
+    var known = getKnownModule(name, data);
+
+    if (!known) {
+      known = getModule(name, data);
+      // ORION
+      if (known.origin){
+        data.server.addFile(known.origin, known.contents, data.currentFile);
+      }
+      /* Before Orion:
+      data.server.addFile(name, null, data.currentFile);
+      */
+    }
+    return known;
   }
 
   function getKnownModule(name, data) {
-  	// ORION
-  	var val = resolver.getResolved(name); //ORION
-  	if(val && val.file) {
-    	return data.interfaces[stripJSExt(val.file)];
-    }
-    return null;
-//   Before Orion: return data.interfaces[stripJSExt(name)];
+    return data.interfaces[stripJSExt(name)];
   }
 
   function getModule(name, data) {
-  	var known = getKnownModule(name, data);
+    var known = getKnownModule(name, data);
     if (!known) {
-  	  // ORION
-      var val = resolver.getResolved(name); //ORION
-      if(val && val.file) {
-	      known = data.interfaces[stripJSExt(val.file)] = new infer.AVal();
-	      known.origin = val.file;
-	      known.contents = val.contents;
-	      known.reqName = name;
+      known = new infer.AVal();
+      // ORION
+      var resolvedFile = resolver.getResolved(stripJSExt(name)); // ORION
+      if (resolvedFile){
+      	data.interfaces[stripJSExt(name)] = known; // Only cache the interface if a file was found, allows checking for the file existence later
+        known.origin = resolvedFile.file;
+        known.contents = resolvedFile.contents;
       }
       /* Before Orion
-      known = data.interfaces[stripJSExt(name)] = new infer.AVal;
       known.origin = name;
       */
     }
