@@ -7,15 +7,6 @@
 })(function(infer, tern, resolver) {
   "use strict";
   
-  //ORION
-  function addInterfaceDep(inter, deps) {
-  	if(inter) {
-    	deps.push(inter);
-    } else {
-    	deps.push(infer.ANull);
-    }
-  }
-
   function flattenPath(path) {
     if (!/(^|\/)(\.\/|[^\/]+\/\.\.\/)/.test(path)) return path;
     var parts = path.split("/");
@@ -42,7 +33,7 @@
       if (known) return flattenPath(base + known + ".js");
       var dir = name.match(/^([^\/]+)(\/.*)$/);
       if (dir) {
-        var known = opts.paths[dir[1]];
+        known = opts.paths[dir[1]];
         if (known) return flattenPath(base + known + dir[2] + ".js");
       }
     }
@@ -54,13 +45,7 @@
       data.require = new infer.Fn("require", infer.ANull, [infer.cx().str], ["module"], new infer.AVal);
       data.require.computeRet = function(_self, _args, argNodes) {
         if (argNodes.length && argNodes[0].type == "Literal" && typeof argNodes[0].value == "string")
-          // ORION
-          var _i = getInterface(argNodes[0].value, data); //ORION
-          if(_i) {
-          	return _i;
-          }
-        // Before Orion: return getInterface(path.join(path.dirname(data.currentFile), argNodes[0].value), data);
-        return infer.ANull;
+        	return getInterface(argNodes[0].value, data); //ORION
       };
     }
     return data.require;
@@ -110,8 +95,8 @@
       name = over;
     }
 
-//    if (!/^(https?:|\/)|\.js$/.test(name))
-//      name = resolveName(name, data);
+    if (!/^(https?:|\/)|\.js$/.test(name))
+      name = resolveName(name, data);
     name = flattenPath(name);
 
     known = getModule(name, data);
@@ -120,7 +105,7 @@
       data.server.addFile(known.origin, known.contents, data.currentFile);
   	}
 	// Before Orion:     data.server.addFile(name, null, data.currentFile);
-    return known;
+    return known || infer.ANull;
   }
 
   function getKnownModule(name, data) {
@@ -189,31 +174,20 @@
       var node = argNodes[args.length == 2 ? 0 : 1];
       var base = path.relative(server.projectDir, path.dirname(node.sourceFile.name));
       if (node.type == "Literal" && typeof node.value == "string") {
-      	addInterfaceDep(interf(node.value), deps); //ORION
-      	/* Before Orion:
-        node.required = interf(path.join(base, node.value), data);
+        node.required = interf(node.value); //ORION
         deps.push(node.required);
-        */
       } else if (node.type == "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
         if (elt.type == "Literal" && typeof elt.value == "string") {
-          addInterfaceDep(interf(elt.value), deps); //ORION
-          /* Before Orion:
-          elt.required = interf(path.join(base, elt.value), data);
+          elt.required = interf(elt.value); //ORION
           deps.push(elt.required);
-          */
         }
       }
     } else if (argNodes && args.length == 1 &&
                /FunctionExpression/.test(argNodes[0].type) &&
                argNodes[0].params.length) {
       // Simplified CommonJS call
-      addInterfaceDep(interf("require", data), deps); //ORION
-      addInterfaceDep(interf("exports", data), deps); //ORION
-      addInterfaceDep(interf("module", data), deps); //ORION
-      /* Before Orion:
       deps.push(interf("require", data), interf("exports", data), interf("module", data));
-      */
       fn = args[0];
     }
 

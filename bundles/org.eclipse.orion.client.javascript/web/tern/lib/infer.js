@@ -1,4 +1,4 @@
-(// Main type inference engine
+// Main type inference engine
 
 // Walks an AST, building up a graph of abstract values and constraints
 // that cause types to flow from one node to another. Also defines a
@@ -11,10 +11,10 @@
 // similar to abstract values (which can hold multiple types), and can
 // thus be used in place abstract values that only ever contain a
 // single type.
-
+/* eslint-disable */
 (function(root, mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(exports, require("acorn"), require("acorn/dist/acorn_loose"), require("acorn/dist/walk"),
+    return mod(exports, require("acorn/dist/acorn"), require("acorn/dist/acorn_loose"), require("acorn/dist/walk"),
                require("./def"), require("./signal"));
   if (typeof define == "function" && define.amd) // AMD
     return define(["exports", "acorn/dist/acorn", "acorn/dist/acorn_loose", "acorn/dist/walk", "./def", "./signal"], mod);
