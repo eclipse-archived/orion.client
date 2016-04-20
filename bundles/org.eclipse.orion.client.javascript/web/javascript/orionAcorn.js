@@ -389,7 +389,9 @@ define([
 		options.ranges = true;
 		options.sourceFile = false;
 		options.sourceType = "script";
-		options.ecmaVersion = 6;
+		if(typeof options.ecmaVersion !== 'number' || (options.ecmaVersion < 3 || options.ecmaVersion > 7)) {
+			options.ecmaVersion = 6; //don't stomp on the value set in Tern
+		}
 		this.sourceFile = Object.create(null);
 		if (file) {
 			this.sourceFile.name = file;
