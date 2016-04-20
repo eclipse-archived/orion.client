@@ -453,16 +453,17 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				this._computedProposals.forEach(function(proposalArray) {
 					if (proposalArray && Array.isArray(proposalArray)) {
 						var includedProposals = proposalArray.filter(function(proposal) {
+							var pattern;
 							if (!proposal) {
 								return false;
 							}
 							if(typeof proposal.prefix === 'string') {
-							    prefixText = proposal.prefix;
+								prefixText = proposal.prefix;
 							} else {
-							    prefixText = defaultPrefix;
+								prefixText = defaultPrefix;
 							}
-							if ((STYLES[proposal.style] === STYLES.hr)
-								|| (STYLES[proposal.style] === STYLES.noemphasis_title)) {
+							if (STYLES[proposal.style] === STYLES.hr
+								|| STYLES[proposal.style] === STYLES.noemphasis_title) {
 								return true;
 							}
 							
@@ -475,30 +476,32 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 								} else {
 									return false; // unknown format
 								}
-			
-								return 0 === proposalString.indexOf(prefixText + this._filterText);
-								
+								pattern = new RegExp("^" + prefixText + this._filterText, "i");
+								return pattern.test(proposalString);
 							} else if (proposal.name || proposal.proposal) {
 								var activated = false;
 								// try matching name
 								if (proposal.name) {
-									activated = 0 === proposal.name.indexOf(prefixText + this._filterText);	
+									pattern = new RegExp("^" + prefixText + this._filterText, "i");
+									activated = pattern.test(proposal.name);
 								}
 								
 								// try matching proposal text
 								if (!activated && proposal.proposal) {
-									activated = 0 === proposal.proposal.indexOf(this._filterText);
+									pattern = new RegExp("^" + this._filterText, "i");
+									activated = pattern.test(proposal);
 								}
 								
 								return activated;
 							} else if (typeof proposal === "string") { //$NON-NLS-0$
-								return 0 === proposal.indexOf(this._filterText);
+								pattern = new RegExp("^" + this._filterText, "i");
+								return pattern.test(proposal);
 							}
 							return false;
 						}, this);
 						
 						if (includedProposals.length > 0) {
-							proposals.push(includedProposals);	
+							proposals.push(includedProposals);
 						}
 					}
 				}, this);
