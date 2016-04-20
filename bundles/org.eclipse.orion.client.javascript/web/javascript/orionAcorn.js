@@ -214,6 +214,7 @@ define([
 			function collectDeps(callee, args, extra) {
 				if(extra.deps) {
 					var len = args.length;
+					if (len === 0) return;
 					if(callee.name === 'importScripts') {
 						addArrayDeps(args, extra); //importScripts('foo', 'bar'...)
 					} else if(callee.name === 'Worker') {

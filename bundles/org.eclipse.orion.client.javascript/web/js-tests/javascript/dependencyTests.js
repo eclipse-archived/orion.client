@@ -136,6 +136,12 @@ define([
 					assertDeps(ast, ['a', 'b', 'c']);
 				});
 			});
+			it("Collect deps require 5", function() {
+				var _s = setup({buffer: 'var _r = require();'}); //requirejs
+				return astManager.getAST(_s.editorContext).then(function(ast) {
+					assertDeps(ast, []);
+				});
+			});
 			it("Collect deps requirejs 1", function() {
 				var _s = setup({buffer: 'var _r = requirejs(["a", "b", "c"], function(){});'}); //requirejs
 				return astManager.getAST(_s.editorContext).then(function(ast) {
