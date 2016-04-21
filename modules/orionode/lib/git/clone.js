@@ -283,7 +283,7 @@ function putClone(req, res) {
 
 	var theRepo, theCommit;
 	var checkOptions = {
-		checkoutStrategy: git.Checkout.STRATEGY.FORCE,
+		checkoutStrategy: git.Checkout.STRATEGY.SAFE,
 	};
 	getRepo(req)
 	.then(function(repo) {
