@@ -457,6 +457,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				this._computedProposals.forEach(function(proposalArray) {
 					if (proposalArray && Array.isArray(proposalArray)) {
 						var includedProposals = proposalArray.filter(function(proposal) {
+							function getRegexp(prefix, filter) {
+								var modifiedFilter = filter.replace(/([.+^=!:${}()|\[\]\/\\])/g, "\\$1"); //add start of line character and escape all special characters except * and ? //$NON-NLS-1$ //$NON-NLS-0$
+								modifiedFilter = modifiedFilter.replace(/([*?])/g, ".$1"); //convert user input * and ? to .* and .? //$NON-NLS-0$
+								return new RegExp("^" + prefix + modifiedFilter, "i");
+							}
 							var pattern;
 							if (!proposal) {
 								return false;
@@ -480,25 +485,25 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 								} else {
 									return false; // unknown format
 								}
-								pattern = new RegExp("^" + prefixText + this._filterText, "i");
+								pattern = getRegexp(prefixText, this._filterText);
 								return pattern.test(proposalString);
 							} else if (proposal.name || proposal.proposal) {
 								var activated = false;
 								// try matching name
 								if (proposal.name) {
-									pattern = new RegExp("^" + prefixText + this._filterText, "i");
+									pattern = getRegexp(prefixText, this._filterText);
 									activated = pattern.test(proposal.name);
 								}
 								
 								// try matching proposal text
 								if (!activated && proposal.proposal) {
-									pattern = new RegExp("^" + this._filterText, "i");
+									pattern = getRegexp("", this._filterText);
 									activated = pattern.test(proposal.proposal);
 								}
 								
 								return activated;
 							} else if (typeof proposal === "string") { //$NON-NLS-0$
-								pattern = new RegExp("^" + this._filterText, "i");
+								pattern = getRegexp("", this._filterText);
 								return pattern.test(proposal);
 							}
 							return false;
