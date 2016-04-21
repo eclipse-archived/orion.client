@@ -290,6 +290,7 @@ function putClone(req, res) {
 		theRepo = repo;
 		if (paths) {
 			checkOptions.paths = paths;
+			checkOptions.checkoutStrategy = git.Checkout.STRATEGY.FORCE;
 			var toRemove = [];
 			return repo.index()
 			.then(function(index) {
