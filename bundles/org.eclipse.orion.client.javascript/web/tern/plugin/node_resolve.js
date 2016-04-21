@@ -1,17 +1,24 @@
+/*eslint-disable */ 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require("./commonjs"), require)
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", "./commonjs"], mod)
+    return define(["../lib/infer", "../lib/tern", "./commonjs",  "javascript/ternPlugins/resolver"], mod)
   mod(tern, tern)
-})(function(infer, tern, _, require) {
+})(function(infer, tern, _, resolver, require) {
   "use strict"
 
   function resolve(name, parentFile) {
+  	 
+  	 // ORION Get the resolved file from Orion resolver plugin
+  	 var resolvedFile = resolver.getResolved(name);
+  	 if (resolvedFile){
+  	 	return resolvedFile.file;
+  	 }
+  	
     var resolved = resolveToFile(name, parentFile)
     return resolved && infer.cx().parent.normalizeFilename(resolved)
   }
-
   function findDeclaredDeps() {}
 
   var resolveToFile

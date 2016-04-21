@@ -69,9 +69,31 @@ RequireJS plugin needs to use the Orion 'resolver' plugin to resolve file paths
 		});
 - Check that the paths used are correct.  For Tern 0.18.0 the projectDir was stripped from the path resulting in file names not matching.  Also remember to strip the extension from the name.
 
-Reduce the plugins to what we need.  Even though only a certain set of plugins will be started, having the plugins around can still cause problems.
-
-- Remove commonjs
+Fixing node/modules/node_resolve/commonjs
+- All of these plugins have dependencies on each other
+- TODO: node_resolve is using script resolver to get the file, but doesn't pass the file contents onto Tern
+- TODO : Do we want to prevent node plugin from running? Call this function in the beforeLoad/afterLoad events
+        /**
+		 * @description If we should be using the node plugin
+		 * @param {Object} file The file object
+		 * @returns {Boolean} If we should do any work in the node plugin
+		 * @since 10.0
+		 * Orion
+		 */
+		function usingNode(file) {
+			if(/\.js$/g.test(file.name) && file.ast && file.ast.environments) {
+	      	  	if(file.ast.environments.node) {
+	      	  		return true;
+	      	  	}
+	      	  	if(typeof file.parent === 'string') {
+	      	  		var p = server.fileMap[file.parent];
+	      	  		if(p && p.ast && p.ast.environments) {
+	      	  			return p.ast.environments.node;
+	      	  		}
+	      	  	}
+	      	}
+	      	return false;
+		}
 
 Alter the requrejs plugin to use the resolver plugin
 
