@@ -233,100 +233,29 @@ define([
 		if(typeof request.args.file === 'object') {
 			var _l = request.args.file.logical;
 			response.args.logical = _l;
-			if(request.args.file.node) {
-				// only load modules
-				if (!/^[\.]+/.test(_l)) {
-					//do node_modules read
-					var project = ternProjectManager.getProjectFile();
-					if(project) {
-						fileClient.read(project+"node_modules/"+_l+"/package.json").then(function(json) {
-							if(json) {
-								var val = JSON.parse(json);
-								var mainPath = null;
-								var main = val.main;
-								if (main) {
-									if (!/(\.js)$/.test(main)) {
-										main += ".js";
-									}
-									mainPath = project + "node_modules/" + _l + "/" + main;
-								} else {
-									main = "index.js";
-									mainPath = project + "node_modules/" + _l + "/index.js";
-								}
-								fileClient.read(mainPath).then(function(contents) {
-									response.args.contents = contents;
-									response.args.file = mainPath;
-									response.args.path = main;
-									ternWorker.postMessage(response);
-								},
-								function(err) {
-									response.args.error = "Failed to read node_modules folder";
-									response.args.message = err.toString();
-									ternWorker.postMessage(response);
-								});
-							}
-						},
-						function(err) {
-							response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-							response.args.message = err.toString();
-							ternWorker.postMessage(response);
-						});
-					} else {
-						//don't search for now
-						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-						ternWorker.postMessage(response);
-					}
-				} else {
-					// try to get the current folder from request.args.file.file
-					var currentFile = request.args.file.file;
-					if (currentFile) {
-						var lastIndex = currentFile.lastIndexOf('/');
-						var filePath = currentFile.substring(0, lastIndex + 1) + _l;
-						if (!/(\.js)$/.test(_l)) {
-							filePath += ".js";
-						}
-						fileClient.read(filePath).then(function(contents) {
+			scriptresolver.getWorkspaceFile(_l).then(function(files) {
+				if(files && files.length > 0) {
+					var rel = scriptresolver.resolveRelativeFiles(_l, files, {location: request.args.file.file, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
+					if(rel && rel.length > 0) {
+						return fileClient.read(rel[0].location).then(function(contents) {
 							response.args.contents = contents;
-							response.args.file = filePath;
-							response.args.path = _l;
-							ternWorker.postMessage(response);
-						},
-						function(err) {
-							response.args.error =  i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], filePath);
-							response.args.message = err.toString();
+							response.args.file = rel[0].location;
+							response.args.path = rel[0].path;
 							ternWorker.postMessage(response);
 						});
-					} else {
-						// could be a require('./....'); inside a module code
-						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-						ternWorker.postMessage(response);
 					}
-				}
-			} else {
-				scriptresolver.getWorkspaceFile(_l).then(function(files) {
-					if(files && files.length > 0) {
-						var rel = scriptresolver.resolveRelativeFiles(_l, files, {location: request.args.file.file, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
-						if(rel && rel.length > 0) {
-							return fileClient.read(rel[0].location).then(function(contents) {
-								response.args.contents = contents;
-								response.args.file = rel[0].location;
-								response.args.path = rel[0].path;
-								ternWorker.postMessage(response);
-							});
-						}
-						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-						ternWorker.postMessage(response);
-					} else {
-						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-						ternWorker.postMessage(response);
-					}
-				},
-				function(err) {
 					response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-					response.args.message = err.toString();
 					ternWorker.postMessage(response);
-				});
-			}
+				} else {
+					response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
+					ternWorker.postMessage(response);
+				}
+			},
+			function(err) {
+				response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
+				response.args.message = err.toString();
+				ternWorker.postMessage(response);
+			});
 		} else {
 			var file = request.args.file;
 			response.args.file = file;

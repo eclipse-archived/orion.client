@@ -108,7 +108,7 @@
         result = data.modules[name] = scope.exports;
       }
     } else {
-        var _f = resolver.getResolved(name); //ORION
+        var _f = argNodes[0].resolved; //ORION
         var modName = name;
 		if(_f && _f.file) {
 			name = _f.file;
@@ -238,25 +238,8 @@
             passes: {preCondenseReach: preCondenseReach,
                      postLoadDef: postLoadDef,
                      completion: findCompletions,
-                     typeAt: findTypeAt,
-                    /**
-                     * @callback
-                     * Orion
-                     */
-                    postParse: function postParse(ast, text) {
-                    	if(ast && ast.environments && ast.environments.node) {
-	                        resolver.doPostParse(server, ast, infer.cx().definitions, null, {node:true});
-	                    }
-                    },
-                    /**
-                     * @callback
-                     * Orion
-                     */
-                    preInfer: function preInfer(ast, scope) {
-                    	if(ast && ast.environments && ast.environments.node) {
-	                        resolver.doPreInfer(server);
-	                    }
-                    }}};
+                     typeAt: findTypeAt
+                    }};
   });
 
   // Completes CommonJS module names in strings passed to require

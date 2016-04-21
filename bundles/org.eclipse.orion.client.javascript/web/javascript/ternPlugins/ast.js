@@ -22,6 +22,7 @@ define([
 			orionAcorn.initialize();
 		});
 
+		orionAcorn.attachTernServer(server);
 		return {
 			passes: {
 				/**

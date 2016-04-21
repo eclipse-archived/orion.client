@@ -42,6 +42,9 @@ define([
 		this.currentOptions = {};
 	};
 
+	OrionAcorn.prototype.attachTernServer = function attachTernServer(ternServer){
+		OrionAcorn.prototype.ternServer = ternServer;
+	};
 	/**
 	 * @name onToken
 	 * @description Function called when recording a token
@@ -275,6 +278,87 @@ define([
 				if(extra.deps && node.type === "Literal") {
 					if (!extra.deps[node.value]) {
 						extra.deps[node.value] = 1;
+						var resetPending = function(key) {
+							clearTimeout(that.pendingModules[key].timeout);
+							delete that.pendingModules[key].pending;
+							that.ternServer.finishAsyncAction("Read operation timed out.");
+						};
+						if (extra.envs.node === true) {
+							if (that.ternServer){
+								var sourceFile = node.sourceFile.name;
+								var folderLoc = sourceFile.slice(0, sourceFile.lastIndexOf("/")+1);
+								var nativeModulesWithNode = [ '_debug_agent','_debugger','_linklist','assert','buffer','child_process','console','constants','crypto','cluster','dgram','dns','domain','events','freelist','fs','http','_http_agent','_http_client','_http_common','_http_incoming','_http_outgoing','_http_server','https','module','net','os','path','process','punycode','querystring','readline','repl','stream','_stream_readable','_stream_writable','_stream_duplex','_stream_transform','_stream_passthrough','_stream_wrap','string_decoder','sys','timers','tls','_tls_common','_tls_legacy','_tls_wrap','tty','url','util','v8','vm','zlib','internal/child_process','internal/cluster','internal/freelist','internal/module','internal/socket_list','internal/repl','internal/util','internal/streams/lazy_transform'];
+								if (!/^[\.]+/.test(node.value) && nativeModulesWithNode.indexOf(node.value) === -1){
+									var pacJsonLoc = folderLoc+"node_modules/"+node.value+"/package.json";
+									that.ternServer.startAsyncAction();
+									if (!that.pendingModules) that.pendingModules=[];
+							  		var index = that.pendingModules.length;
+							  		that.pendingModules.push({
+							  			pending: true,
+							  			timeout: setTimeout(resetPending, 4000, index)
+							  		});
+									that.ternServer.options.getFile(pacJsonLoc, function(err, _file){
+										clearTimeout(that.pendingModules[index].timeout);
+							   			delete that.pendingModules[index].pending;
+										if(!err){
+											var val = JSON.parse(_file);
+											var mainPath = null;
+											var main = val.main;
+											if (main) {
+												if (!/(\.js)$/.test(main)) {
+													main += ".js";
+												}
+												mainPath = folderLoc + "node_modules/" + node.value + "/" + main;
+											} else {
+												main = "index.js";
+												mainPath = folderLoc + "node_modules/" + node.value + "/index.js";
+											}
+											node.resolved = {
+												file: mainPath,
+												contents: null,
+												logical: node.value,
+												err: err
+											};
+											that.ternServer.startAsyncAction();
+											index = that.pendingModules.length;
+									  		that.pendingModules.push({
+									  			pending: true,
+									  			timeout: setTimeout(resetPending, 4000, index)
+									  		});
+											that.ternServer.options.getFile(mainPath, function(err, contents) {
+												clearTimeout(that.pendingModules[index].timeout);
+												node.resolved.contents = contents;
+										   		delete that.pendingModules[index].pending;
+										   		that.ternServer.finishAsyncAction(err);
+											});
+										}
+										that.ternServer.finishAsyncAction(err);
+									});
+								}					
+							}
+						} else if (extra.envs.amd === true){
+							if (that.ternServer){
+						  		that.ternServer.startAsyncAction();
+						  		if (!that.pendingModules) that.pendingModules=[];
+						  		var index = that.pendingModules.length;
+						  		that.pendingModules.push({
+						  			pending: true,
+						  			timeout: setTimeout(resetPending, 4000, index)
+						  		});
+						  		var opts = {logical: node.value, file: node.sourceFile ? node.sourceFile.name : null};
+								that.ternServer.options.getFile(opts, function(err, _file) {
+									clearTimeout(that.pendingModules[index].timeout);
+									node.resolved = {
+										file: _file.file,
+										contents: typeof _file.contents === 'string' ? _file.contents : '',
+										logical: _file.logical,
+										err: err
+									};
+							   		delete that.pendingModules[index].pending;
+							   		that.ternServer.finishAsyncAction(err);
+								});
+							}
+						}
 					}
 				}
 			}
@@ -433,6 +517,5 @@ define([
 		ast.environments = this.environments;
 		ast.errors = Util.serializeAstErrors(ast);
 	};
-
 	return OrionAcorn;
 });

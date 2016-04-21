@@ -20,7 +20,7 @@ define([
 'orion/i18nUtil',
 'doctrine/doctrine'
 ], function(Objects, Finder, URITemplate, Deferred, Messages, i18nUtil, doctrine) {
-
+	
 	/**
 	 * @description Formats the hover info as markdown text
 	 * @param {String} node The text to format

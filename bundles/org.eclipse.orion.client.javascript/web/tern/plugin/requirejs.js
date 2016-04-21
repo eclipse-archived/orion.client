@@ -4,9 +4,9 @@
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", "javascript/ternPlugins/resolver"], mod);
+    return define(["../lib/infer", "../lib/tern"], mod);
   mod(tern, tern);
-})(function(infer, tern, resolver) {
+})(function(infer, tern) {
   "use strict";
 
   //ORION
@@ -57,7 +57,7 @@
     return _exports;
   }
 
-  function getInterface(name, data) {
+  function getInterface(name, data, resolved) {
     if (data.options.override && Object.prototype.hasOwnProperty.call(data.options.override, name)) {
       var over = data.options.override[name];
       if (typeof over === "string" && over.charAt(0) === "=") return infer.def.parsePath(over.slice(1));
@@ -70,25 +70,25 @@
       }
       name = over;
     }
-    known = getModule(name, data);
+    known = getModule(name, data, resolved);
     if (known) {
       data.server.addFile(known.origin, known.contents, data.currentFile);
     }
     return known;
   }
 
-  function getKnownModule(name, data) {
-    var val = resolver.getResolved(name); //ORION
+  function getKnownModule(name, data, resolved) {
+    var val = resolved; //ORION
   	if(val && val.file) {
     	return data.interfaces[stripJSExt(val.file)];
     }
     return null;
   }
 
-  function getModule(name, data) {
-    var known = getKnownModule(name, data);
+  function getModule(name, data, resolved) {
+    var known = getKnownModule(name, data, resolved);
     if (!known) {
-      var val = resolver.getResolved(name); //ORION
+      var val = resolved; //ORION
       if(val && val.file) {
 	      known = data.interfaces[stripJSExt(val.file)] = new infer.AVal();
 	      known.origin = val.file;
@@ -113,11 +113,11 @@
 
     var deps = [], fn, _exports, mod;
 
-    function interf(name) {
+    function interf(name, resolved) {
       if (name == "require") return getRequire(data);
       if (name == "exports") return _exports || (_exports = getExports(data));
       if (name == "module") return mod || (mod = getModuleInterface(data, _exports || (_exports = getExports(data))));
-      return getInterface(name, data);
+      return getInterface(name, data, resolved);
     }
 
     if (argNodes && args.length > 1) {
@@ -127,7 +127,7 @@
       } else if (node.type == "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
         if (elt.type == "Literal" && typeof elt.value == "string") {
-          addInterfaceDep(interf(elt.value), deps); //ORION
+          addInterfaceDep(interf(elt.value, elt.resolved), deps); //ORION
         }
       }
     } else if (argNodes && args.length == 1 && argNodes[0].type == "FunctionExpression" && argNodes[0].params.length) {
@@ -223,21 +223,7 @@
       passes: {
         preCondenseReach: preCondenseReach,
         postLoadDef: postLoadDef,
-        typeAt: findTypeAt,
-        /**
-		 * @callback
-		 * Orion
-		 */
-		postParse: function postParse(ast, text) {
-			resolver.doPostParse(server, ast, infer.cx().definitions);
-		},
-		/**
-		 * @callback
-		 * Orion
-		 */
-		preInfer: function preInfer(ast, scope) {
-			resolver.doPreInfer(server);
-		}
+        typeAt: findTypeAt
       }
     };
   });
