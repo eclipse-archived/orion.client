@@ -33,7 +33,7 @@ var PREF_FILENAME = PrefsController.PREF_FILENAME = 'prefs.json';
 //
 // The strategy is to parse prefs from prefs.json, then cache in `app.locals` until no prefs
 // requests have occurred for `ttl` ms. After that, prefs are flushed to disk and the
-// cache is cleared.
+// cache is cleared. This strategy is only used in single user mode.
 //
 // This avoids needless file I/O and makes a best-effort attempt to pick up external
 // edits made to prefs.json without restarting the server. Note however that external edits
@@ -43,6 +43,7 @@ var PREF_FILENAME = PrefsController.PREF_FILENAME = 'prefs.json';
 function PrefsController(options) {
 	options.configParams = options.configParams || {};
 	var ttl = options.ttl || 5000; // default is 5 seconds
+	var useCache = options.configParams['orion.single.user'];
 
 	var router = express.Router()
 	.use(bodyParser.json())
@@ -64,6 +65,11 @@ function PrefsController(options) {
 	return router;
 
 	// Helper functions
+	
+	function getPrefsFileName(req) {
+		var prefFolder = options.configParams['orion.single.user'] ? os.homedir() : req.user.workspaceDir;
+		return nodePath.join(prefFolder, '.orion', PREF_FILENAME);
+	}
 
 	// Wraps a promise-returning handler, that needs access to prefs, into an Express middleware.
 	function wrapAsMiddleware(handler) {
@@ -72,7 +78,12 @@ function PrefsController(options) {
 			return Promise.resolve()
 			.then(acquirePrefs.bind(null, req, res))
 			.then(handler.bind(null, req, res))
-			.catch(next) // next(err)
+			.then(function() {
+				if (!useCache) {
+					return savePrefs(req.prefs, req.prefFile);
+				}
+			})
+			.catch(next); // next(err)
 		};
 	}
 
@@ -80,8 +91,7 @@ function PrefsController(options) {
 	function acquirePrefs(req) {
 		var app = req.app, prefs = app.locals.prefs;
 		var getPrefs;
-		var prefFolder = options.configParams['orion.single.user'] ? os.homedir() : req.user.workspaceDir;
-		var prefFile = nodePath.join(prefFolder, '.orion', PREF_FILENAME);
+		var prefFile = req.prefFile = getPrefsFileName(req);
 		if (prefs) {
 			debug('Using prefs from memory');
 			scheduleFlush(app, prefFile);
@@ -95,14 +105,18 @@ function PrefsController(options) {
 				} else {
 					debug('No pref file %s exists, creating new', prefFile);
 				}
-				app.locals.prefs = new Preference(contents || null);
-				scheduleFlush(app, prefFile);
+				prefs = new Preference(contents || null);
+				if (useCache) {
+					app.locals.prefs = prefs;
+					scheduleFlush(app, prefFile);
+				}
+				return prefs;
 			});
 		}
 		return getPrefs
-		.then(function() {
+		.then(function(prefs) {
 			var urlObj = req._parsedUrl || nodeUrl.parse(req.url);
-			req.prefs = app.locals.prefs;
+			req.prefs = prefs;
 			req.prefPath = urlObj.pathname;
 			req.prefNode = req.prefs.get(req.prefPath);
 		});
@@ -128,11 +142,15 @@ function PrefsController(options) {
 		}
 
 		app.locals.prefs = null;
+		savePrefs(prefs, prefFile);
+	}
+	
+	// writes prefs to disk
+	function savePrefs(prefs, prefFile) {
 		if (!prefs.modified()) {
-			debug('flushJob(): skipped writing prefs.json (no changes were made)');
 			return;
 		}
-		mkdirpAsync(nodePath.dirname(prefFile)) // create parent folder(s) if necessary
+		return mkdirpAsync(nodePath.dirname(prefFile)) // create parent folder(s) if necessary
 		.then(function() {
 			return fs.writeFileAsync(prefFile, prefs.toJSON());
 		})
