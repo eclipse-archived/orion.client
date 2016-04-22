@@ -9,11 +9,12 @@
  * Contributors:  IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-
 define([
-	'orion/EventTarget',
-], function(EventTarget) {
-
+	'orion/objects',
+	'orion/commonPreferences'
+], function(objects, mCommonPreferences) {
+	var CommonPreferences = mCommonPreferences.CommonPreferences;
+	
 	var SETTINGS_SECTION = "/editor/settings"; //$NON-NLS-0$
 	var SETTINGS_KEY = "editorSettings"; //$NON-NLS-0$
 
@@ -86,51 +87,19 @@ define([
 	};
 
 	function EditorPreferences(preferences, callback) {
-		this._preferences = preferences;
-		EventTarget.attach(this);
-		preferences.addEventListener("changed", function (e) {
-			if (e.namespace === SETTINGS_SECTION) {
-				this.dispatchEvent({type: "Changed"}); //$NON-NLS-0$
-			}
-		}.bind(this));
-		if (callback) {
-			this.addEventListener("Changed", function(evt) { //$NON-NLS-0$
-				callback(evt.preferences);
-			});
-		}
+		CommonPreferences.apply(this, arguments);
 	}
-
-	EditorPreferences.prototype = /** @lends edit.EditorPreferences.prototype */ {
-		_initialize: function(prefs) {
-			var settings = prefs[SETTINGS_KEY] || {};
-			for (var property in defaults) {
-				if (!settings.hasOwnProperty(property)) {
-					settings[property] = defaults[property];
-				}
-			}
-			return settings;
+	EditorPreferences.prototype = Object.create(CommonPreferences.prototype);
+	objects.mixin(EditorPreferences.prototype, /** @lends edit.GeneralPreferences.prototype */ {
+		getDefaults: function() {
+			return defaults;
 		},
-		getPrefs: function(callback) {
-			this._preferences.get(SETTINGS_SECTION).then(function(prefs) {
-				var object = this._initialize(prefs);
-				if (typeof object === "string") { //$NON-NLS-0$
-					object = JSON.parse(object);
-				}
-				callback(object);
-			}.bind(this));
+		getPrefsSection: function() {
+			return SETTINGS_SECTION;
 		},
-		setPrefs: function(object, callback) {
-			var data = {};
-			data[SETTINGS_KEY] = object;
-			this._preferences.put(SETTINGS_SECTION, data).then(function() {
-				object = this._initialize(data);
-				if (callback) {
-					callback(object);
-				}
-				this.dispatchEvent({type: "Changed", preferences: object}); //$NON-NLS-0$
-			}.bind(this));
+		getPrefsKey: function() {
+			return SETTINGS_KEY;
 		}
-	};
-
+	});
 	return { EditorPreferences: EditorPreferences };
 });

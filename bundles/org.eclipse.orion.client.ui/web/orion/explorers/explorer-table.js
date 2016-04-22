@@ -212,13 +212,12 @@ define([
 	                    var link = lib.$("a", evt.target);
 	                    if (link) {
 	            			window.location.href = link.href;
-            				_self._clickLink(link);
+            				//_self._clickLink(link);
             				return;
 	                    }
                 	}
                 }
             }
-            _self._clickLink(evt.target);
 		};
 		if (parentNode) {
 			parentNode.addEventListener("click", this._clickListener); //$NON-NLS-0$
@@ -296,23 +295,23 @@ define([
 				return items[0];
 			});
 		},
-		_clickLink: function(linkElement) {
-			if (linkElement.tagName === "A") { //$NON-NLS-0$
-				var temp = linkElement;
-				while (temp) {
-					if (temp._item) {
-						break;
-					}
-					temp = temp.parentNode;
-				}
-				if (temp && temp._item) {
-					this.onLinkClick({type: "linkClick", item: temp._item}); //$NON-NLS-0$
-				}
-			}
-		},
-		onLinkClick: function(clickEvent) {
-			this.dispatchEvent(clickEvent);
-		},
+//		_clickLink: function(linkElement) {
+//			if (linkElement.tagName === "A") { //$NON-NLS-0$
+//				var temp = linkElement;
+//				while (temp) {
+//					if (temp._item) {
+//						break;
+//					}
+//					temp = temp.parentNode;
+//				}
+//				if (temp && temp._item) {
+//					this.onLinkClick({type: "linkClick", item: temp._item}); //$NON-NLS-0$
+//				}
+//			}
+//		},
+//		onLinkClick: function(clickEvent) {
+//			this.dispatchEvent(clickEvent);
+//		},
 		onModelCreate: function(modelEvent) {
 			return this.changedItem(modelEvent.parent, true);
 		},

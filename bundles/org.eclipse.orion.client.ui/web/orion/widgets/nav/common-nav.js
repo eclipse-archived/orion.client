@@ -25,10 +25,11 @@ define([
 	'orion/URITemplate',
 	'orion/PageUtil',
 	'orion/webui/contextmenu',
+	'orion/generalPreferences',
 	'orion/metrics'
 ], function(
 	messages, objects, lib, mExplorer, mNavigatorRenderer, mKeyBinding,
-	FileCommands, ProjectCommands, ExtensionCommands, mGlobalCommands, Selection, URITemplate, PageUtil, mContextMenu, mMetrics
+	FileCommands, ProjectCommands, ExtensionCommands, mGlobalCommands, Selection, URITemplate, PageUtil, mContextMenu, mGeneralPreferences, mMetrics
 ) {
 	var FileExplorer = mExplorer.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
@@ -47,6 +48,7 @@ define([
 		params.dragAndDrop = FileCommands.uploadFile;
 		FileExplorer.apply(this, arguments);
 		this.preferences = params.preferences;
+		this.generalPreferences = new mGeneralPreferences.GeneralPreferences(this.preferences);
 		this.commandRegistry = params.commandRegistry;
 		this.serviceRegistry = params.serviceRegistry;
 		this.editorInputManager = params.editorInputManager;
@@ -106,17 +108,22 @@ define([
 	}
 	CommonNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(CommonNavExplorer.prototype, /** @lends orion.sidebar.CommonNavExplorer.prototype */ {
-		onLinkClick: function(event) {
-			FileExplorer.prototype.onLinkClick.call(this, event);
-			//Redispatch to nav input manager
-			this.sidebarNavInputManager.dispatchEvent(event);
-			var navHandler = this.getNavHandler();
-			if (!navHandler || !event.item.Directory) {
-				return;
-			}
-			var folder = event.item;
-			navHandler.cursorOn(folder);
-			navHandler.setSelection(folder, false);
+//		onLinkClick: function(event) {
+//			FileExplorer.prototype.onLinkClick.call(this, event);
+//			//Redispatch to nav input manager
+//			this.sidebarNavInputManager.dispatchEvent(event);
+//			var navHandler = this.getNavHandler();
+//			if (!navHandler || !event.item.Directory) {
+//				return;
+//			}
+//			var folder = event.item;
+//			navHandler.cursorOn(folder);
+//			navHandler.setSelection(folder, false);
+//		},
+		isDesktopSelectionMode: function() {
+			return	this.generalPreferences.getPrefs().then(function (genealPrefs) {
+				return genealPrefs.desktopSelectionPolicy;
+			}.bind(this));
 		},
 		onModelCreate: function(evt) {
 			return FileExplorer.prototype.onModelCreate.call(this, evt).then(function () {
@@ -473,6 +480,16 @@ define([
 	objects.mixin(CommonNavRenderer.prototype, {
 		showFolderLinks: true,
 		oneColumn: true,
+		
+		_preventLinkBehavior: function(linkNode) {
+			linkNode.addEventListener("click", function(evt) {
+	            this.explorer.isDesktopSelectionMode().then(function(desktopMode){
+	            	if(desktopMode && (evt.shiftKey || evt.ctrlKey)) {
+	            		evt.preventDefault();
+	            	}
+	            });
+			}.bind(this));
+		},
 		createFolderNode: function(folder) {
 			var folderNode = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
 			if (this.showFolderLinks && folderNode.tagName === "A") { //$NON-NLS-0$
@@ -481,7 +498,11 @@ define([
 			} else {
 				folderNode.classList.add("nav_fakelink"); //$NON-NLS-0$
 			}
+			this._preventLinkBehavior(folderNode);
 			return folderNode;
+		},
+		updateFileNode: function(file, fileNode, isImage) {
+			this._preventLinkBehavior(fileNode);
 		},
 		/**
 		 * Overrides NavigatorRenderer.prototype.rowCallback

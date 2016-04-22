@@ -15,9 +15,10 @@ define([
 	'orion/webui/littlelib',
 	'orion/webui/treetable',
 	'orion/explorers/explorerNavHandler',
+	'orion/Deferred',
 	'orion/uiUtils',
 	'orion/commands'
-], function(messages, lib, mTreeTable, mNavHandler, UiUtils, mCommands){
+], function(messages, lib, mTreeTable, mNavHandler, Deferred, UiUtils, mCommands){
 
 var exports = {};
 
@@ -65,6 +66,9 @@ exports.Explorer = (function() {
 			this.destroyed = true;
 		},
 		
+		isDesktopSelectionMode: function() {
+			return new Deferred().resolve(false);
+		},
 		// we have changed an item on the server at the specified parent node
 		changedItem: function(parent, children) {
 			if (this.myTree) {

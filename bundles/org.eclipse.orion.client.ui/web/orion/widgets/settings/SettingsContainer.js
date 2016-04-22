@@ -32,11 +32,13 @@ define([
 	'orion/widgets/settings/ThemeSettings',
 	'orion/widgets/settings/UserSettings',
 	'orion/widgets/settings/GlobalizationSettings',
+	'orion/widgets/settings/GeneralSettings',
 	'orion/editorPreferences',
+	'orion/generalPreferences',
 	'orion/metrics'
 ], function(messages, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
 		ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, editorThemeImporter, SplitSelectionLayout, PluginList, 
-		GitSettings, EditorSettings, ThemeSettings, UserSettings, GlobalizationSettings, mEditorPreferences, mMetrics) {
+		GitSettings, EditorSettings, ThemeSettings, UserSettings, GlobalizationSettings, GeneralSettings, mEditorPreferences, mGeneralPreferences, mMetrics) {
 
 	/**
 	 * @param {Object} options
@@ -116,6 +118,14 @@ define([
 						id: "Globalization", //$NON-NLS-0$
 						textContent: messages.Globalization,
 						show: _self.showGlobalizationSettings
+					});
+				}
+
+				if (categories.showGeneralSettings === undefined || categories.showGeneralSettings) {
+					_self.settingsCategories.push({
+						id: "General", //$NON-NLS-0$
+						textContent: messages.General,
+						show: _self.showGeneralSettings
 					});
 				}
 
@@ -328,6 +338,36 @@ define([
 			}, userNode);
 			
 			this.globalizationWidget.show();
+		},
+		
+		showGeneralSettings: function(id){
+
+			this.selectCategory(id);
+
+			lib.empty(this.table);
+
+			if (this.generalWidget) {
+				this.generalWidget.destroy();
+			}
+
+			this.updateToolbar(id);
+			
+			var userNode = document.createElement('div'); //$NON-NLS-0$
+			this.table.appendChild(userNode);
+			
+			var generalPreferences = new mGeneralPreferences.GeneralPreferences (this.preferences);
+
+			this.generalWidget = new GeneralSettings({
+				registry: this.registry,
+				settings: this.settingsCore,
+				preferences: generalPreferences,
+				statusService: this.preferencesStatusService,
+				dialogService: this.preferenceDialogService,
+				commandService: this.commandService,
+				userClient: this.userClient	
+			}, userNode);
+			
+			this.generalWidget.show();
 		},
 		
 		initPlugins: function(id){

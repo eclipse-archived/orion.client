@@ -609,25 +609,27 @@ exports.ExplorerNavHandler = (function() {
 				if(mouseEvt.target === twistieSpan){
 					return;
 				}
-				if(this.gridClickSelectionPolicy === "none" && this._onModelGrid(model, mouseEvt)){ //$NON-NLS-0$
-					return;
-				}
-				this.cursorOn(model, true, false, true);
-				if(isPad){
-					this.setSelection(model, true);
-				} else if(this._ctrlKeyOn(mouseEvt)){
-					this.setSelection(model, true, true);
-				} else if(mouseEvt.shiftKey && this._shiftSelectionAnchor){
-					var scannedSel = this._modelIterator.scan(this._shiftSelectionAnchor, model);
-					if(scannedSel){
-						this._clearSelection(true);
-						for(var i = 0; i < scannedSel.length; i++){
-							this.setSelection(scannedSel[i], true);
-						}
+				this.explorer.isDesktopSelectionMode().then(function(desktopMode) {
+					if(!desktopMode && this.gridClickSelectionPolicy === "none" && this._onModelGrid(model, mouseEvt)){ //$NON-NLS-0$
+						return;
 					}
-				} else {
-					this.setSelection(model, false, true);
-				}
+					this.cursorOn(model, true, false, true);
+					if(isPad){
+						this.setSelection(model, true);
+					} else if(this._ctrlKeyOn(mouseEvt)){
+						this.setSelection(model, true, true);
+					} else if(mouseEvt.shiftKey && this._shiftSelectionAnchor){
+						var scannedSel = this._modelIterator.scan(this._shiftSelectionAnchor, model);
+						if(scannedSel){
+							this._clearSelection(true);
+							for(var i = 0; i < scannedSel.length; i++){
+								this.setSelection(scannedSel[i], true);
+							}
+						}
+					} else {
+						this.setSelection(model, false, true);
+					}
+				}.bind(this));
 			}
 		},
 		

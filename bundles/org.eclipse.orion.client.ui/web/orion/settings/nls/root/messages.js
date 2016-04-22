@@ -32,6 +32,7 @@ define({//Default message bundle
 	"Editor Theme":"Editor Styles:",
 	"Theme Settings": "Theme Settings",
 	"General": "General",
+	"desktopSelectionPolicy": "Desktop selection policy",
 	"Navigation": "Navigation",
 	"Font": "Font",
 	"Family": "Family",
