@@ -110,9 +110,9 @@ define([
        
        	mNavUtils.addNavGrid(explorer.getNavDict(), item, link);
        	//trigger a click on the span when the link is clicked to set the selection cursor
-       	_connect(link, "click", function() { //$NON-NLS-0$
-       		spanHolder.click();
-        });
+//       	_connect(link, "click", function() { //$NON-NLS-0$
+//       		spanHolder.click();
+//        });
         var span = _createElement('span', null, null, link); //$NON-NLS-0$
         return span;
     }
@@ -211,9 +211,9 @@ define([
 			link.appendChild(fileSpan);
 	
 			//trigger a click on the span when the link is clicked to set the selection cursor
-			link.addEventListener("click", function(){ //$NON-NLS-0$
-				spanHolder.click();
-			});
+//			link.addEventListener("click", function(){ //$NON-NLS-0$
+//				spanHolder.click();
+//			});
 	
 			// append link to parent span
 	        spanHolder.appendChild(link);

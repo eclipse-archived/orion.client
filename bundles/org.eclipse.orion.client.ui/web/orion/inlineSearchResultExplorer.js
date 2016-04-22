@@ -1130,6 +1130,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             _empty(this.getParentDivId());
             this.createTree(this.getParentDivId(), this.model, {
 				selectionPolicy: "singleSelection", //$NON-NLS-1$
+	            gridClickSelectionPolicy: "true", //$NON-NLS-1$
                 indent: 0,
 				getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
 				setFocus: true,
@@ -1159,6 +1160,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
         this.model.buildResultModel();
         this.createTree(this.getParentDivId(), this.model, {
             selectionPolicy: "singleSelection", //$NON-NLS-1$
+	        gridClickSelectionPolicy: "true", //$NON-NLS-1$
             getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
             indent: 0,
             setFocus: true,

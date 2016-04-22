@@ -652,6 +652,7 @@ define([
 	    	}
 	        this.createTree(this.parentId, model, {
 	            selectionPolicy: "singleSelection", //$NON-NLS-1$
+	            gridClickSelectionPolicy: "true", //$NON-NLS-1$
 	            indent: 18,
 	            setFocus: false
 	        });

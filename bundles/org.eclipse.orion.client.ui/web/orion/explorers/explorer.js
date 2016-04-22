@@ -298,7 +298,9 @@ exports.Explorer = (function() {
 					this._navHandler = options.navHandlerFactory.createNavHandler(this, this._navDict, options);
 				} else {
 					var getChildrenFunc = options ? options.getChildrenFunc : null;
-					this._navHandler = new mNavHandler.ExplorerNavHandler(this, this._navDict, {getChildrenFunc: getChildrenFunc, setFocus: options && options.setFocus, selectionPolicy: (options ? options.selectionPolicy : null)});
+					this._navHandler = new mNavHandler.ExplorerNavHandler(this, this._navDict, {getChildrenFunc: getChildrenFunc, setFocus: options && options.setFocus, 
+														selectionPolicy: (options ? options.selectionPolicy : null),
+														gridClickSelectionPolicy: (options ? options.gridClickSelectionPolicy : null)});
 				}
 			}
 			var that = this;
@@ -869,10 +871,17 @@ exports.SelectionRenderer = (function(){
 	};
 	
 	SelectionRenderer.prototype.initSelectableRow = function(item, tableRow) {
-		var self = this;
+		var _self = this;
 		tableRow.addEventListener("click", function(evt) { //$NON-NLS-0$
-			if(self.explorer.getNavHandler()){
-				self.explorer.getNavHandler().onClick(item, evt);
+			var navHandler = _self.explorer.getNavHandler();
+			if(navHandler){
+				navHandler.onClick(item, evt);
+				if(navHandler.gridClickSelectionPolicy === "true") {
+                    var link = lib.$("a", tableRow);
+                    if (link && link !== evt.target) {
+                    		link.click();
+                    }
+				}
 			}
 		}, false);
 	};
