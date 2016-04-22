@@ -110,16 +110,10 @@ function postIndex(req, res) {
 	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
-		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
-		return repo.getReferenceCommit(req.body.Commit || "HEAD")
-		.then(function(commit) {
-			return commit;
-		}).catch(function() {
-			return repo.getCommit(req.body.Commit || "HEAD");
-		});
+		return git.AnnotatedCommit.fromRevspec(repo, req.body.Commit || "HEAD");
 	})
 	.then(function(commit) {
-		return repo.getCommit(commit);
+		return repo.getCommit(commit.id());
 	})
 	.then(function(commit) {
 		if (req.body.Path) {
