@@ -253,7 +253,7 @@ function addRemote(req, res) {
 function postRemote(req, res) {
 	if (req.body.Fetch === "true") {
 		fetchRemote(req, res, util.decodeURIComponent(req.params.remoteName), util.decodeURIComponent(req.params.branchName || ""), req.body.Force);
-	} else if (req.body.PushSrcRef) {
+	} else if (typeof req.body.PushSrcRef === "string") {
 		pushRemote(req, res, util.decodeURIComponent(req.params.remoteName), util.decodeURIComponent(req.params.branchName || ""), req.body.PushSrcRef, req.body.PushTags, req.body.Force);
 	} else {
 		writeError(400, res);
@@ -318,11 +318,8 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	})
 	.then(function(r) {
 		remoteObj = r;
-		return repo.getReference(pushSrcRef);
-	})
-	.then(function(ref) {
 		var pushToGerrit = branch.indexOf("for/") === 0;
-		var refSpec = ref.name() + ":" + (pushToGerrit ? "refs/" : "refs/heads/") + branch;
+		var refSpec = pushSrcRef + ":" + (pushToGerrit ? "refs/" : "refs/heads/") + branch;
 
 		if (force) refSpec = "+" + refSpec;
 
