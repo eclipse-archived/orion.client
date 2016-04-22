@@ -115,12 +115,12 @@ function deleteStash(req, res) {
 					index = i;
 				}
 			} else {
-				all.push(git.Stash.drop(repo, index, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX));				
+				all.push(git.Stash.drop(repo, index));				
 			} 
 		})
 		.then(function() {
 			if (all.length) return Promise.all(all);
-			return git.Stash.drop(repo, index, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX);
+			return git.Stash.drop(repo, index);
 		});
 	})
 	.then(function() {
