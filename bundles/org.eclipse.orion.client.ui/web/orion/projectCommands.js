@@ -920,15 +920,15 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		function dispatchNewProject(workspace, project){
 			var dispatcher = FileCommands.getModelEventDispatcher();
 			if(project.ContentLocation){
-				fileClient.read(project.ContentLocation, true).then(function(folder){
+				return fileClient.read(project.ContentLocation, true).then(function(folder){
 					dispatcher.dispatchEvent( { type: "create", parent: workspace, newValue: folder});
+					return folder;
 				},
 				function(){
 					dispatcher.dispatchEvent( { type: "create", parent: workspace, newValue: null});
 				});
-			} else {
-				dispatcher.dispatchEvent( { type: "create", parent: workspace, newValue: null});
 			}
+			dispatcher.dispatchEvent( { type: "create", parent: workspace, newValue: null});
 		}
 
 		dependencyTypes =  dependencyTypes || [];
@@ -1263,20 +1263,13 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 
 					var handleOk = function(event) { //$NON-NLS-0$
 						var projectName = event.value;
-						var handleOpen = function (event) {
-							if (projectName == event.item.Name && fileInput.files && fileInput.files.length > 0) {
-								for (var i = 0; i < fileInput.files.length; i++) {
-									explorer._uploadFile(event.item, fileInput.files.item(i), false);
-								}
-								explorer.sidebarNavInputManager.removeEventListener("projectOpened", handleOpen); //$NON-NLS-0$
-							}
-						};
-						// Add listener to wait for the project to open
-
 						fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
 							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: projectName}),i18nUtil.formatMessage( messages["Creating project ${0}"], projectName)).then(function(project){
-								explorer.sidebarNavInputManager.addEventListener("projectOpened", handleOpen); //$NON-NLS-0$
-								dispatchNewProject(workspace, project);
+								dispatchNewProject(workspace, project).then(function(fileMetadata) {
+									for (var i = 0; i < fileInput.files.length; i++) {
+										explorer._uploadFile(fileMetadata, fileInput.files.item(i), false);
+									}
+								});
 							}, function(error) {
 								var response = JSON.parse(error.response);
 								var projectNameDialogRetry = new PromptDialog.PromptDialog({

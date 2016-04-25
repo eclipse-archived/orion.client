@@ -145,14 +145,6 @@ define([
 				if(!redisplay &&  parentProject && parentProject.Location === this.projectLocation){
 					return;
 				}
-				var sidebar = this.sidebar;
-				var handleDisplay = function (event) {
-					if(event.item === metadata) {
-						sidebar.sidebarNavInputManager.removeEventListener("projectDisplayed", handleDisplay); //$NON-NLS-0$
-						sidebar.sidebarNavInputManager.dispatchEvent({type:"projectOpened", item: metadata}); //$NON-NLS-0$
-					}
-				};
-				sidebar.sidebarNavInputManager.addEventListener("projectDisplayed", handleDisplay); //$NON-NLS-0$
 				return this.projectClient.readProject(fileMetadata, this.workspaceMetadata).then(function(projectData){
 					this.projectLocation = parentProject ? parentProject.Location : null;
 					projectData.type = "Project"; //$NON-NLS-0$
@@ -160,8 +152,6 @@ define([
 					projectData.fileMetadata = fileMetadata;
 					return CommonNavExplorer.prototype.display.call(this, projectData, redisplay).then(function() {
 						return this.expandItem(fileMetadata);
-					}.bind(this)).then(function () {
-						this.sidebarNavInputManager.dispatchEvent({type:"projectDisplayed", item: fileMetadata}); //$NON-NLS-0$
 					}.bind(this));
 				}.bind(this));
 			}.bind(this));
