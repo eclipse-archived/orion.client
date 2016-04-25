@@ -271,22 +271,20 @@ define([
 									response.args.message = err.toString();
 									ternWorker.postMessage(response);
 								});
-							} else {
-								response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-								response.args.message = err.toString();
-								ternWorker.postMessage(response);
-							}
+							} 
+							response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
+							response.args.message = "No file contents";
+							ternWorker.postMessage(response);
 						},
 						function(err) {
 							response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
 							response.args.message = err.toString();
 							ternWorker.postMessage(response);
 						});
-					} else {
-						//don't search for now
-						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-						ternWorker.postMessage(response);
-					}
+					} 
+					//don't search for now
+					response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
+					ternWorker.postMessage(response);
 				} else {
 					// try to get the current folder from request.args.file.file
 					var currentFile = request.args.file.file;
