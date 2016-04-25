@@ -22,6 +22,7 @@ define([
 'javascript/scriptResolver',
 'javascript/astManager',
 'javascript/quickFixes',
+'javascript/javascriptProject',
 'javascript/contentAssist/ternAssist',
 'javascript/contentAssist/ternProjectAssist',
 'javascript/validator',
@@ -45,7 +46,7 @@ define([
 'i18n!javascript/nls/messages',
 'orion/i18nUtil',
 'orion/URL-shim'
-], function(PluginProvider, mServiceRegistry, Deferred, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, TernProjectAssist,
+], function(PluginProvider, mServiceRegistry, Deferred, Estraverse, ScriptResolver, ASTManager, QuickFixes, JavaScriptProject, TernAssist, TernProjectAssist,
 			EslintValidator, TernProjectValidator, Occurrences, Hover, Outliner, CUProvider, TernProjectManager, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 			RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
@@ -81,16 +82,22 @@ define([
     	});
 
     	/**
-    	 * make sure the RecoveredNode is ignored
-    	 * @since 9.0
-    	 */
-    	Estraverse.VisitorKeys.RecoveredNode = []; //do not visit
-    	
-    	/**
     	 * Create the script resolver
     	 * @since 8.0
     	 */
     	var scriptresolver = new ScriptResolver.ScriptResolver(serviceRegistry);
+    	/**
+    	 * Create a new JavaScript project context
+    	 * @since 12.0
+    	 */
+    	var jsProject = new JavaScriptProject(serviceRegistry);
+    	provider.registerService("orion.edit.model", {  //$NON-NLS-1$
+    		onInputChanged: jsProject.onInputChanged.bind(jsProject)
+    	},
+    	{
+    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
+    		types: ['onInputChanged']  //$NON-NLS-1$
+    	});
     	/**
     	 * Create the AST manager
     	 */
@@ -220,7 +227,7 @@ define([
 	    		Logger.log(err);
 	    });
 	
-	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, serviceRegistry, setStarting);
+	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, serviceRegistry, setStarting, jsProject);
 
 	/**
 	 * @description Handler for Tern read requests
@@ -1724,6 +1731,7 @@ define([
     	}
     	provider.connect(function() {
 	    	var fc = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
+	    	fc.addEventListener("Changed", jsProject.onFileChanged.bind(jsProject));
 	    	fc.addEventListener("Changed", astManager.onFileChanged.bind(astManager));
 	    	fc.addEventListener("Changed", CUProvider.onFileChanged.bind(CUProvider));
 	    	/*
