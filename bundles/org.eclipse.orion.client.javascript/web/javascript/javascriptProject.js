@@ -62,20 +62,17 @@ define([
 		if(!this.projectMeta) {
 			return new Deferred().resolve(null);
 		}
-		var deferred = new Deferred();
-		if(this.map[childName]) {
-			return new Deferred().resolve(this.map[childName]);
+		var filePath = this.projectMeta.Location+childName;
+		if(this.map[filePath]) {
+			return new Deferred().resolve(this.map[filePath]);
 		}
-		if(this.projectMeta) {
-			this.getFileClient().read(this.projectMeta.Location+'/'+childName, false, false, {readIfExists: true}).then(function(child) {
-				this.map[childName] = child;
-				deferred.resolve(child);
-			}.bind(this),
-			function() {
-				deferred.resolve(null);
-			});
-		}
-		return deferred;
+		return this.getFileClient().read(filePath, false, false, {readIfExists: true}).then(function(child) {
+			this.map[filePath] = child;
+			return child;
+		}.bind(this),
+		function() {
+			return null;
+		});
 	};
 	
 	/**
@@ -86,21 +83,23 @@ define([
 	 * @param {Object} values The object of values to mix-in to the current values for a file.
 	 */
 	JavaScriptProject.prototype.updateFile = function updateFile(childName, create, values) {
-		return this.getFile(childName).then(function(child) {
-			if(typeof child === 'string') {
-				var json = JSON.parse(child);
-				if(json && values) {
-					Object.keys(values).forEach(function(key) {
-						json[key] = values[key];
-					});
-					return this.getFileClient().write(this.projectMeta.Location+'/'+childName, JSON.stringify(json));
+		if(this.projectMeta) {
+			return this.getFile(childName).then(function(child) {
+				if(typeof child === 'string') {
+					var json = JSON.parse(child);
+					if(json && values) {
+						Object.keys(values).forEach(function(key) {
+							json[key] = values[key];
+						});
+						return this.getFileClient().write(this.projectMeta.Location+childName, JSON.stringify(json));
+					}
+				} else if(!child && create) {
+					return this.getFileClient().createFile(this.projectMeta.Location+childName).then(function(file) {
+						return this.getFileClient().write(file.Location, JSON.stringify(values));
+					}.bind(this));
 				}
-			} else if(!child && create) {
-				return this.getFileClient().createFile(this.projectMeta.Location+'/'+childName).then(function(file) {
-					return this.getFileClient().write(file.Location, JSON.stringify(values));
-				}.bind(this));
-			}
-		}.bind(this));
+			}.bind(this));
+		}
 	};
 	
 	/**
@@ -133,7 +132,6 @@ define([
 		if (project) {
 			if(!this.projectMeta || project.Location !== this.projectMeta.Location) {
 				this.projectMeta = project;
-				this.map = Object.create(null);
 			}
 		}
 	};
@@ -143,8 +141,8 @@ define([
 	 */
 	JavaScriptProject.prototype.onFileChanged = function onFileChanged(evnt) {
 		if(evnt && evnt.type === 'Changed') {
-			_updateMap(evnt.modified);
-			_updateMap(evnt.deleted);
+			_updateMap.call(this, evnt.modified);
+			_updateMap.call(this, evnt.deleted);
 		}
 	};
 	/**
@@ -154,10 +152,6 @@ define([
 	function _updateMap(arr) {
 		if(Array.isArray(arr)) {
 			arr.forEach(function(file) {
-				var idx = file.lastIndexOf('/');
-				if(idx > -1) {
-					file = file.substr(idx+1);
-				}
 				delete this.map[file];
 			}.bind(this));
 		}
