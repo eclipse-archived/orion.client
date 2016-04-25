@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -143,11 +143,16 @@ module.exports = function(options) {
 	var router = express.Router({mergeParams: true});
 	var jsonParser = bodyParser.json();
 	router.get('*', jsonParser, function(req, res) {
-		var rest = req.params["0"].substring(1);
-		var filepath = getSafeFilePath(req, rest);
+		var rest = req.params["0"].substring(1),
+			readIfExists = req.headers ? Boolean(req.headers['read-if-exists']).valueOf() : false,
+			filepath = getSafeFilePath(req, rest);
 		fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
 			if (error && error.code === 'ENOENT') {
-				writeError(404, res, 'File not found: ' + rest);
+				if(typeof readIfExists === 'boolean' && readIfExists) {
+					res.sendStatus(204);
+				} else {
+					writeError(404, res, 'File not found: ' + rest);
+				}
 			} else if (error) {
 				writeError(500, res, error);
 			} else if (stats.isFile() && getParam(req, 'parts') !== 'meta') {

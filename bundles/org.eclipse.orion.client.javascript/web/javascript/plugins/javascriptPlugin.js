@@ -224,7 +224,7 @@ define([
 
 	/**
 	 * @description Handler for Tern read requests
-	 * @param {Object} request Therequest from Tern
+	 * @param {Object} request The request from Tern
 	 * @since 10.0
 	 */
 	function doRead(request) {
@@ -239,7 +239,7 @@ define([
 					//do node_modules read
 					var project = ternProjectManager.getProjectFile();
 					if(project) {
-						fileClient.read(project+"node_modules/"+_l+"/package.json").then(function(json) {
+						return fileClient.read(project+"node_modules/"+_l+"/package.json", false, false, {readIfExists: true}).then(function(json) {
 							if(json) {
 								var val = JSON.parse(json);
 								var mainPath = null;
@@ -253,7 +253,7 @@ define([
 									main = "index.js";
 									mainPath = project + "node_modules/" + _l + "/index.js";
 								}
-								fileClient.read(mainPath).then(function(contents) {
+								return fileClient.read(mainPath).then(function(contents) {
 									response.args.contents = contents;
 									response.args.file = mainPath;
 									response.args.path = main;
@@ -264,6 +264,10 @@ define([
 									response.args.message = err.toString();
 									ternWorker.postMessage(response);
 								});
+							} else {
+								response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
+								response.args.message = err.toString();
+								ternWorker.postMessage(response);
 							}
 						},
 						function(err) {
@@ -285,7 +289,7 @@ define([
 						if (!/\.js|\.json$/ig.test(_l)) {
 							filePath += ".js";
 						}
-						fileClient.read(filePath).then(function(contents) {
+						return fileClient.read(filePath).then(function(contents) {
 							response.args.contents = contents;
 							response.args.file = filePath;
 							response.args.path = _l;

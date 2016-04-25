@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2015 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -497,12 +497,16 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			if (options && options.pageSize !== undefined) {
 				url.query.set("count", options.pageSize.toString());
 			}
-			var timeout = options && options.timeout ? options.timeout : 15000;
-			return _xhr("GET", url.href, {
-				timeout: timeout,
-				headers: { "Orion-Version": "1" },
-				log: false
-			}).then(function(result) {
+			var timeout = options && options.timeout ? options.timeout : 15000,
+				opts = {
+					timeout: timeout,
+					headers: { "Orion-Version": "1" },
+					log: false
+				};
+			if(options && typeof options.readIfExists === 'boolean') {
+				opts.headers["read-if-exists"] = Boolean(options.readIfExists).toString();
+			}
+			return _xhr("GET", url.href, opts).then(function(result) {
 				if (isMetadata) {
 					var r = result.response ? JSON.parse(result.response) : null;
 					if (url.query.get("tree") === "compressed") {
