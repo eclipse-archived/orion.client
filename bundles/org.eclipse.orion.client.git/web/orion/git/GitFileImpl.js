@@ -44,7 +44,8 @@ define(["orion/xhr", "orion/Deferred", "orion/encoding-shim", "orion/URL-shim"],
 			return this.loadWorkspace(this._repoURL);
 		},
 		loadWorkspace: function(location) {
-			if (location === "/gitapi/") {
+			var suffix = "/gitapi/";
+			if (location && location.indexOf(suffix, location.length - suffix.length) !== -1) {
 				location += "tree/";
 			}
 			
