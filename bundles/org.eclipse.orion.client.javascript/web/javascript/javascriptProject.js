@@ -26,6 +26,7 @@ define([
 		this.map = Object.create(null);
 		this.registry = serviceRegistry;
 		this.fileClient = null;
+		this.handlers = [];
 	}
 	/**
 	 * The .tern-project file name
@@ -53,6 +54,15 @@ define([
 	JavaScriptProject.prototype.NODE_MODULES = 'node_modules';
 	
 	/**
+	 * @description Adds a handler for the given file name to the mapping of handlers
+	 * @function
+	 * @param {Object} functions The object map of functions 
+	 */
+	JavaScriptProject.prototype.addHandler = function addHandler(functions) {
+		this.handlers.push(functions);
+	};
+	
+	/**
 	 * @description Fetch the named child of the current project context
 	 * @function
 	 * @param {String} childName The short name of the project child to get
@@ -67,8 +77,8 @@ define([
 			return new Deferred().resolve(this.map[filePath]);
 		}
 		return this.getFileClient().read(filePath, false, false, {readIfExists: true}).then(function(child) {
-			this.map[filePath] = child;
-			return child;
+			this.map[filePath] = {name: filePath, contents: child};
+			return this.map[filePath];
 		}.bind(this),
 		function() {
 			return null;
@@ -85,22 +95,31 @@ define([
 	JavaScriptProject.prototype.updateFile = function updateFile(childName, create, values) {
 		if(this.projectMeta) {
 			return this.getFile(childName).then(function(child) {
-				if(typeof child === 'string') {
-					var json = JSON.parse(child);
+				if(child) {
+					var json = child.contents ? JSON.parse(child.contents) : Object.create(null);
 					if(json && values) {
-						Object.keys(values).forEach(function(key) {
-							json[key] = values[key];
-						});
+						_merge(values, json);
 						return this.getFileClient().write(this.projectMeta.Location+childName, JSON.stringify(json));
 					}
-				} else if(!child && create) {
-					return this.getFileClient().createFile(this.projectMeta.Location+childName).then(function(file) {
+				} else if(!child.contents && create) {
+					return this.getFileClient().createFile(this.projectMeta.Location, childName).then(function(file) {
 						return this.getFileClient().write(file.Location, JSON.stringify(values));
 					}.bind(this));
 				}
 			}.bind(this));
 		}
 	};
+	
+	function _merge(source, dest) {
+		Object.keys(source).forEach(function(key) {
+			if(typeof dest[key] === 'object' && dest[key] !== null) {
+				source[key] = source[key] || Object.create(null);
+				_merge(source[key], dest[key]);
+			} else {
+				dest[key] = source[key];
+			}
+		});
+	}
 	
 	/**
 	 * @name JavaScriptProject.prototype.getFileClient
@@ -132,7 +151,12 @@ define([
 		if (project) {
 			if(!this.projectMeta || project.Location !== this.projectMeta.Location) {
 				this.projectMeta = project;
-			}
+				_handle.call(this, "onProjectChanged", this, evnt, project.Location);
+				return;
+			} 
+			_handle.call(this, "onInputChanged", this, evnt, project.Location);				
+		} else {
+			_handle.call(this, "onProjectChanged", this, evnt, null);
 		}
 	};
 	/**
@@ -141,18 +165,51 @@ define([
 	 */
 	JavaScriptProject.prototype.onFileChanged = function onFileChanged(evnt) {
 		if(evnt && evnt.type === 'Changed') {
-			_updateMap.call(this, evnt.modified);
-			_updateMap.call(this, evnt.deleted);
+			_updateMap.call(this, evnt.modified, "onModified");
+			_updateMap.call(this, evnt.deleted, "onDeleted");
+			_updateMap.call(this, evnt.created, "onCreated");
 		}
 	};
 	/**
 	 * Update the backing map
-	 * @param {Array.<String>} arr The array to walk 
+	 * @param {Array.<String>} arr The array to walk
+	 * @param {String} state The state, one of: onModified, onDeleted, onCreated 
 	 */
-	function _updateMap(arr) {
+	function _updateMap(arr, state) {
 		if(Array.isArray(arr)) {
 			arr.forEach(function(file) {
 				delete this.map[file];
+				var n = _shortName(file);
+				_handle.call(this, state, this, file, n);
+			}.bind(this));
+		}
+	}
+	/**
+	 * @description Returns the shortname of the file
+	 * @param {String} fileName The fully qualified path of the file
+	 * @returns {String} The last segment of the path (short name)
+	 */
+	function _shortName(fileName) {
+		var i = fileName.lastIndexOf('/');
+		if(i > -1) {
+			return fileName.substr(i+1);
+		}
+		return fileName;
+	}
+	
+	/**
+	 * @description Delegates to a handler for the given handler name (file type), with the given unction name
+	 * @param {String} funcName The name of the function to call on the handler iff it exists
+	 */
+	function _handle(funcName) {
+		if(Array.isArray(this.handlers)) {
+			//special - broadcast to every handler that listens for it
+			var args = Array.prototype.slice.call(arguments);
+			this.handlers.forEach(function(handler) {
+				var f = handler[funcName];
+				if(typeof f === 'function') {
+					f.apply(handler, args.slice(1));
+				}
 			}.bind(this));
 		}
 	}
