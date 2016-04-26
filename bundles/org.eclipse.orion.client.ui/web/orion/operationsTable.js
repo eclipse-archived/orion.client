@@ -139,7 +139,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/ex
 		};
 		
 		OperationsModel.prototype.getChildren = function(parentItem, onComplete){
-			if(!parentItem || !parentItem.type==="operations"){
+			if(!parentItem || parentItem.type !== "operations"){
 				onComplete([]);
 				return;
 			}
