@@ -210,7 +210,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
         }
 		var loc = item.location;
 		if(!loc) {
-			item.parent.location ? item.parent.location : '#';
+			loc = item.parent.location ? item.parent.location : '#';
 		}
 //      var params;
 //      if(typeof item.start === "number" && typeof item.end === "number") {
