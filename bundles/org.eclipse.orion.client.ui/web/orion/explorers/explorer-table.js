@@ -266,7 +266,7 @@ define([
 		_handleResourceCreate: function(evt) {
 			//Convert the item array( {parent, result} ) to an array of {newValue, oldValue, parent}
 			var items = evt.created.map(function(createdItem){
-				return {type: "create", select: createdItem.select, newValue: createdItem.result, parent: this._getUIModel(createdItem.parent)};
+				return {type: "create", select: createdItem.eventData ? createdItem.eventData.select : false, newValue: createdItem.result, parent: this._getUIModel(createdItem.parent)};
 			}.bind(this));
 			return this.onModelCreate(items[0]).then(function(/*result*/){
 				return items[0];
@@ -274,7 +274,8 @@ define([
 		},
 		_handleResourceDelete: function(evt) {
 			//Convert the location array( a string array) to an array of {newValue, oldValue, parent}
-			var items = evt.deleted.map(function(loc){
+			var items = evt.deleted.map(function(deletedItem){
+				var loc = deletedItem.eventData && deletedItem.eventData.itemLocation ? deletedItem.eventData.itemLocation : deletedItem.deleteLocation;
 				var uiModel = this._getUIModel(loc);
 				return {oldValue: uiModel, newValue: null, parent: uiModel ? uiModel.parent : null};
 			}.bind(this));

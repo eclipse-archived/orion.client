@@ -359,15 +359,15 @@ define([
 			return _doServiceCall(this._getService(), "changeWorkspace", arguments); //$NON-NLS-1$
 		},
 		
-		_createArtifact: function(parentLocation, funcName, select, funcArgs) {
+		_createArtifact: function(parentLocation, funcName, eventData, funcArgs) {
 			return _doServiceCall(this._getService(parentLocation), funcName, funcArgs).then(function(result){ //$NON-NLS-0$
 				if(this.isEventFrozen()) {
 					if(!this._frozenEvent.created) {
 						this._frozenEvent.created = [];
 					}
-					this._frozenEvent.created.push({parent: parentLocation, result: result, select: select});
+					this._frozenEvent.created.push({parent: parentLocation, result: result, eventData: eventData});
 				} else {
-					this.dispatchEvent({ type: "Changed", created: [{parent: parentLocation, result: result, select: select}]}); //$NON-NLS-0$
+					this.dispatchEvent({ type: "Changed", created: [{parent: parentLocation, result: result, eventData: eventData}]}); //$NON-NLS-0$
 				}
 				return result;
 			}.bind(this));
@@ -390,44 +390,45 @@ define([
 		 * Creates a folder.
 		 * @param {String} parentLocation The location of the parent folder
 		 * @param {String} folderName The name of the folder to create
-		 * @param {Boolean} select If true, select the folder
+		 * @param {Object} eventData The event data that will be sent back.
 		 * @return {Object} JSON representation of the created folder
 		 * @public
 		 * @return {Deferred} A deferred that will create a new folder in the workspace
 		 */
-		createFolder: function(parentLocation, folderName, select) {
+		createFolder: function(parentLocation, folderName, eventData) {
 			//return _doServiceCall(this._getService(parentLocation), "createFolder", arguments); //$NON-NLS-1$
-			return this._createArtifact(parentLocation, "createFolder", select, arguments);
+			return this._createArtifact(parentLocation, "createFolder", eventData, arguments);
 		},
 		/**
 		 * Create a new file in a specified location. Returns a deferred that will provide
 		 * The new file object when ready.
 		 * @param {String} parentLocation The location of the parent folder
 		 * @param {String} fileName The name of the file to create
-		 * @param {Boolean} select If true, select the file
+		 * @param {Object} eventData The event data that will be sent back.
 		 * @public
 		 * @return {Deferred} A deferred that will provide the new file object
 		 */
-		createFile: function(parentLocation, fileName, select) {
+		createFile: function(parentLocation, fileName, eventData) {
 			//return _doServiceCall(this._getService(parentLocation), "createFile", arguments); //$NON-NLS-1$
-			return this._createArtifact(parentLocation, "createFile", select, arguments);
+			return this._createArtifact(parentLocation, "createFile", eventData, arguments);
 		},
 		/**
 		 * Deletes a file, directory, or project.
 		 * @param {String} deleteLocation The location of the file or directory to delete.
+		 * @param {Object} eventData The event data that will be sent back.
 		 * @public
 		 * @returns {Deferred} A deferred that will delete the given file
 		 */
-		deleteFile: function(deleteLocation) {
+		deleteFile: function(deleteLocation, eventData) {
 			//return _doServiceCall(this._getService(deleteLocation), "deleteFile", arguments); //$NON-NLS-1$
 			return _doServiceCall(this._getService(deleteLocation), "deleteFile", arguments).then(function(result){ //$NON-NLS-0$
 				if(this.isEventFrozen()) {
 					if(!this._frozenEvent.deleted) {
 						this._frozenEvent.deleted = [];
 					}
-					this._frozenEvent.deleted.push(deleteLocation);
+					this._frozenEvent.deleted.push({deleteLocation: deleteLocation, eventData: eventData});
 				} else {
-					this.dispatchEvent({ type: "Changed", deleted: [deleteLocation]}); //$NON-NLS-0$
+					this.dispatchEvent({ type: "Changed", deleted: [{deleteLocation: deleteLocation, eventData: eventData}]}); //$NON-NLS-0$
 				}
 				return result;
 			}.bind(this));
