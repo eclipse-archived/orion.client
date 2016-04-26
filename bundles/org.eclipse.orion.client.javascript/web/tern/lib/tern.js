@@ -942,7 +942,7 @@
     if (!out.origin) out.origin = type.origin;
     var ctor, boring = infer.cx().protos;
     if (!out.url && !out.doc && type.proto && (ctor = type.proto.hasCtor) &&
-        type.proto != boring.Object && type.proto != boring.Function && type.proto != boring.Array) {
+        type.proto != boring.Object && type.proto != boring.Function && type.proto != boring.Array /*Orion*/ && type.proto != boring.Number && type.proto != boring.String && type.proto != boring.Boolean && type.proto != boring.RegExp) {
       out.url = ctor.url;
       out.doc = parseDoc(query, ctor.doc);
     }
