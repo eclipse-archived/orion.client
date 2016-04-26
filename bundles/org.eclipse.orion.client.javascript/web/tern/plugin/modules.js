@@ -93,7 +93,7 @@
 
       fromObj(this.knownModules, true)
       if (this.options.modules) fromObj(this.options.modules, false)
-
+      
       var pathsSeen = Object.create(null)
       for (var prop in this.nonRelative) {
         var val = this.nonRelative[prop]
@@ -315,8 +315,10 @@
       isProperty: false,
       completions: completions.map(function(rec) {
         var name = typeof rec == "string" ? rec : rec.name
-        var string = JSON.stringify(name)
-        if (quote == "'") string = quote + string.slice(1, string.length -1).replace(/'/g, "\\'") + quote
+        // TODO ORION: Stringify the name adds the quotes around the proposal which Orion doesn't handle in sortProposals
+        var string = name;
+//        var string = JSON.stringify(name)
+//        if (quote == "'") string = quote + string.slice(1, string.length -1).replace(/'/g, "\\'") + quote
         if (typeof rec == "string") return string
         rec.displayName = name
         rec.name = string

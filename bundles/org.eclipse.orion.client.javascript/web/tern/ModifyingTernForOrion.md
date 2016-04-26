@@ -110,3 +110,6 @@ Fixing node/modules/node_resolve/commonjs
 	      	return false;
 		}
 
+TODO: 
+- Add tests for module name completions
+- Allows indexed libs to contribute to module name completions
