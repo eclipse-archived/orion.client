@@ -192,7 +192,7 @@ define([
 							if(!Array.isArray(services)){
 								if(typeof services === "object"){ //$NON-NLS-0$
 									services = Object.keys(services);
-									if(services.lengh > 0){
+									if(services.length > 0){
 										document.getElementById("allServicesLabel").appendChild(document.createElement("br")); //$NON-NLS-0$//$NON-NLS-1$
 										document.getElementById("allServicesLabel").appendChild(document.createTextNode(messages["convertMyManifest.ymlFileTo"])); //$NON-NLS-0$
 									}
