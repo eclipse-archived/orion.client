@@ -239,7 +239,7 @@
                         if (!object) {
                             _throwError(message.id, "object not found");
                         }
-                        if (!method in object) {
+                        if (!(method in object)) {
                             _callMethod(message.id, object, object[method], params);
                         } else {
                             _throwError(message.id, "method not found");
