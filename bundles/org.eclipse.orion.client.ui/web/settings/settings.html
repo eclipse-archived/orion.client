@@ -11,13 +11,16 @@
 		<script>
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
-				var deps = ["settings/settings"];
-				if (!sessionStorage.settingsSplashShown) {
+				function load() {
+					require(["settings/settings"], null, config.errback);
+				}
+				if (sessionStorage.settingsSplashShown) {
+					load();
+				} else {
 					sessionStorage.settingsSplashShown = true;
 					require.config({config: {"orion/splash": {splashID: "Settings"}}});
-					deps.splice(0, 0, "orion/splash");
+					require(["orion/splash"], load, load);
 				}
-				require(deps, null, config.errback);
 			});
 		</script>
 	</head>

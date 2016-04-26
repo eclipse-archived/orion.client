@@ -11,12 +11,15 @@
 		<script>
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
-				var deps = ["edit/edit"];
-				if (!sessionStorage.editSplashShown) {
-					sessionStorage.editSplashShown = true;
-					deps.splice(0, 0, "orion/splash");
+				function load() {
+					require(["edit/edit"], null, config.errback);
 				}
-				require(deps, null, config.errback);
+				if (sessionStorage.editSplashShown) {
+					load();
+				} else {
+					sessionStorage.editSplashShown = true;
+					require(["orion/splash"], load, load);
+				}
 			});
 		</script>
 	</head>

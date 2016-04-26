@@ -11,13 +11,16 @@
 		<script>
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
-				var deps = ["git/git-repository"];
-				if (!sessionStorage.gitSplashShown) {
+				function load() {
+					require(["git/git-repository"], null, config.errback);
+				}
+				if (sessionStorage.gitSplashShown) {
+					load();
+				} else {
 					sessionStorage.gitSplashShown = true;
 					require.config({config: {"orion/splash": {splashID: "Git"}}});
-					deps.splice(0, 0, "orion/splash");
+					require(["orion/splash"], load, load);
 				}
-				require(deps, null, config.errback);
 			});
 		</script>
 </head>
