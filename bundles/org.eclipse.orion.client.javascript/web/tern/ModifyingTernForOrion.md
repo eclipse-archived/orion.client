@@ -70,7 +70,22 @@ RequireJS plugin needs to use the Orion 'resolver' plugin to resolve file paths
 - Check that the paths used are correct.  For Tern 0.18.0 the projectDir was stripped from the path resulting in file names not matching.  Also remember to strip the extension from the name.
 
 Fixing node/modules/node_resolve/commonjs
+- CommonJS gets the AST using node.sourceFile.ast, our version of Acorn does not attach the ast here and will be undefined.  Check anywhere the ast is accessed from a node, isImport() and isModuleName()
+	    // ORION In our version of Acorn the AST is not available on the given node
+	    var ast = node.sourceFile.ast;
+	    if (!ast){
+	        var server = infer.cx().parent;
+	        ast = server.fileMap[node.sourceFile.name];
+	        if (!ast) return;
+	        ast = ast.ast;
+	    }
 - All of these plugins have dependencies on each other
+- The file contents are resolved in node_modules, so modify it to get the content from resolver
+	     // ORION Get the resolved file from Orion resolver plugin
+	  	 var resolvedFile = resolver.getResolved(name);
+	  	 if (resolvedFile){
+	  	 	return resolvedFile.file;
+	  	 }
 - TODO: node_resolve is using script resolver to get the file, but doesn't pass the file contents onto Tern
 - TODO : Do we want to prevent node plugin from running? Call this function in the beforeLoad/afterLoad events
         /**
@@ -95,6 +110,3 @@ Fixing node/modules/node_resolve/commonjs
 	      	return false;
 		}
 
-Alter the requrejs plugin to use the resolver plugin
-
-*** THIS APPLIES TO OTHER PLUGINS?

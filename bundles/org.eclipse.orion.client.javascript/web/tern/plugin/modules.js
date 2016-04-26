@@ -240,7 +240,6 @@
   function findTypeAt(_file, _pos, expr, type) {
     if (!expr) return type
     var me = infer.cx().parent.mod.modules
-    expr.node.sourceFile.ast = _file.ast; // TODO ORION Nodes haven't been tagged with the AST
     var modType = me.getModType(expr.node)
     if (!modType) return type
 
@@ -265,8 +264,6 @@
     var expr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope,
                                           function(type) { return type in types })
     if (!expr) return null
-	
-	expr.node.sourceFile.ast = file.ast // TODO Orion the node returned is not tagged with the ast
 	
     if (me.isModName(expr.node, wordEnd) != null)
       return findModuleCompletions(me, file, query, expr.node, wordEnd)
