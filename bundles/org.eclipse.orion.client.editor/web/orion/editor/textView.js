@@ -5331,7 +5331,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			return true;
 		},
 		_doTabMode: function () {
-			this._tabMode = !this._tabMode;
+			this.setOptions({tabMode: !this.getOptions("tabMode")}); //$NON-NLS-1$
 			return true;
 		},
 		_doWrapMode: function () {
