@@ -557,7 +557,7 @@ function merge(req, res, commitToMerge, squash) {
 	});
 }
 
-function createCommit(repo, committerName, committerEmail, authorName, authorEmail, message, amend){
+function createCommit(repo, committerName, committerEmail, authorName, authorEmail, message, amend, insertChangeid){
 	var index, oid, author, committer;
 	return repo.index()
 	.then(function(indexResult) {
@@ -584,6 +584,11 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 			committer = git.Signature.now(committerName, committerEmail);
 		} else {
 			committer = git.Signature.default(repo);
+		}
+		if(insertChangeid) {
+			var firstParentId = parent? parent.parentId(0) : "";
+			var hashId = generateChangeId(oid, firstParentId, author.toString(), committer.toString(), message);
+			message = insertChangeId(message,hashId);
 		}
 		if (amend) {
 			return parent.amend("HEAD",  author, committer, null, message, oid);
@@ -658,7 +663,6 @@ function postCommit(req, res) {
 		return;
 	}
 	
-	//TODO create commit -> change id
 	var commit = util.decodeURIComponent(req.params.commit);
 	if (commit !== "HEAD") {
 		writeError(404, res, "Needs to be HEAD");
@@ -670,6 +674,9 @@ function postCommit(req, res) {
 		return;
 	}
 
+	// Since ChangeId messagefoot is not showing in the box, so insert Message after empty Checking.
+	var isInsertChangeId = req.body.ChangeId;	
+
 	var theRepo, thisCommit;
 	var theDiffs = [], theParents;
 	
@@ -677,7 +684,7 @@ function postCommit(req, res) {
 	.then(function(repo) {
 		theRepo = repo;
 		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
-		return createCommit(repo, req.body.CommitterName, req.body.CommitterEmail, req.body.AuthorName, req.body.AuthorEmail, req.body.Message, req.body.Amend);
+		return createCommit(repo, req.body.CommitterName, req.body.CommitterEmail, req.body.AuthorName, req.body.AuthorEmail, req.body.Message, req.body.Amend, isInsertChangeId);
 	})
 	.then(function(commit) {
 		thisCommit = commit;
@@ -698,5 +705,110 @@ function postCommit(req, res) {
 	.done(function() {
 		res.status(200).json(commitJSON(thisCommit, fileDir, theDiffs, theParents));
 	});
+}
+
+function generateChangeId(oid, firstParentId, authorId, committerId, message){
+	var cleanMessage = clean(message);
+	function clean(fullMessage) {
+		return fullMessage.//
+				replace(/^#.*$\n?/g, "").// //$NON-NLS-1$
+				replace(/\n\n\n+/g, "\n").// //$NON-NLS-1$
+				replace(/\n*$/g, "").// //$NON-NLS-1$
+				replace(/\ndiff --git.*/g, "").// //$NON-NLS-1$
+				trim();
+	}
+	var mergedMessage = "tree ".concat(oid).concat("\n").concat("parent ").concat(firstParentId).concat("\n")
+		.concat("author ").concat(authorId).concat("\n").concat("committer ").concat(committerId).concat("\n\n").concat(cleanMessage);
+	var hash = crypto.createHash("sha256");
+	hash.update(mergedMessage);
+	return hash.digest('hex').substr(0, 40);
+}
+
+function insertChangeId(originalMessage,changeId){
+	var indexOfChangeIdvar = indexOfChangeId(originalMessage,"\n");
+	// Has ChangeId do nothing, even if changeId is changed, do not replace it.
+	if(indexOfChangeIdvar === -1) {
+ 		var lines = originalMessage.split("\n"); //$NON-NLS-1$
+		var footerFirstLine = indexOfFirstFooterLine(lines);
+		var insertAfter = footerFirstLine;
+		for (var i = footerFirstLine; i < lines.length; ++i) {
+			if (lines[i].match(/^(Bug|Issue)[a-zA-Z0-9-]*:.*$/)) {
+				insertAfter = i + 1;
+				continue;
+			}
+			break;
+		}
+		var ret = "";	
+		var j = 0;
+		for (; j < insertAfter; ++j) {
+			ret = ret.concat(lines[j]);
+			ret = ret.concat("\n"); //$NON-NLS-1$
+		}
+		if (insertAfter === lines.length && insertAfter === footerFirstLine)
+			ret = ret.concat("\n"); //$NON-NLS-1$
+		ret = ret.concat("Change-Id:");
+		ret = ret.concat(" I"); //$NON-NLS-1$
+		ret = ret.concat(changeId);
+		ret = ret.concat("\n"); //$NON-NLS-1$
+		for (; j < lines.length; ++j) {
+			ret = ret.concat(lines[j]);
+			ret = ret.concat("\n"); //$NON-NLS-1$
+		}
+		return ret;
+ 	}
+ 	
+ 	function indexOfChangeId(message,dilimiter){
+		var alllines = message.split(dilimiter);
+		if (alllines.length === 0)
+			return -1;
+		var indexOfChangeIdLine = 0;
+		var inFooter = false;
+		for (var m = alllines.length - 1; m >= 0; --m) {
+			if (!inFooter && isEmptyLine(alllines[m])){
+				continue;
+			}
+			inFooter = true;
+			if (trimRight(alllines[m]).match(/^Change-Id: *I[a-f0-9]{40}$/)) {
+				indexOfChangeIdLine = m;
+				break;
+			} else if (isEmptyLine(alllines[m]) || i === 0)
+				return -1;
+		}
+		var indexOfChangeIdLineinString = 0;
+		for (var n = 0; n < indexOfChangeIdLine; ++n)
+			indexOfChangeIdLineinString += alllines[n].length
+					+ dilimiter.length;
+		return indexOfChangeIdLineinString
+				+ alllines[indexOfChangeIdLine].indexOf("Change-Id:");
+ 	}
+ 	
+ 	function isEmptyLine(line){
+		return line.trim().length === 0;
+ 	}
+ 	
+ 	function trimRight(s){
+ 		return s.replace(/\s+$/g,"");
+ 	}
+ 	
+ 	function indexOfFirstFooterLine(lines){
+ 		var footerFirstLineNum = lines.length;
+		for (var l = lines.length - 1; l > 1; --l) {
+			if (lines[l].match(/^[a-zA-Z0-9-]+:.*$/)) {
+				footerFirstLineNum = l;
+				continue;
+			}
+			if (footerFirstLineNum !== lines.length && lines[l].length === 0){
+				break;
+			}
+			if (footerFirstLineNum !== lines.length
+					&& lines[l].match(/^[ \\[].*$/)) {
+				footerFirstLineNum = l + 1;
+				continue;
+			}
+			footerFirstLineNum = lines.length;
+			break;
+		}
+		return footerFirstLineNum;
+ 	}
 }
 };
