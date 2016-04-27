@@ -126,9 +126,17 @@ Deferred) {
 		editorViewer.editor.getTextView().addEventListener("Options",function(evt){
 			if(evt.options) {
 				if(evt.options.tabMode !== undefined) {
+					//CTRL+m keys
+					//True: you can tab inside the editor. False: Tab will get out of the editor DIV
 					console.log("Tab mode has been changed to: " + evt.options.tabMode);
+				} else if(evt.options.wrapMode !== undefined) {
+					//CTRL+ALT+w keys
+					console.log("Wrap mode has been changed to: " + evt.options.wrapMode);
+				} else if(evt.options.overwriteMode !== undefined) {
+					//Insert key
+					console.log("Overwrite mode has been changed to: " + evt.options.overwriteMode);
 				} else {
-					console.log("Other options changed: ");
+					console.log("Other options has been changed: ");
 					console.log(evt.options);
 				}
 			}
