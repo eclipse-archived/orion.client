@@ -123,6 +123,16 @@ Deferred) {
 		document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 		editorViewer.setContents(contents, "application/javascript");
 		editorViewer.inputManager.setAutoSaveTimeout(-1);
+		editorViewer.editor.getTextView().addEventListener("Options",function(evt){
+			if(evt.options) {
+				if(evt.options.tabMode !== undefined) {
+					console.log("Tab mode has been changed to: " + evt.options.tabMode);
+				} else {
+					console.log("Other options changed: ");
+					console.log(evt.options);
+				}
+			}
+		});
 		//editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
 		function execute(orionContext, params) {
 			//alert("foo");
@@ -147,33 +157,33 @@ Deferred) {
 			});
 		}
 	});
-	embeddedEditor.create({parent: "embeddedEditor1"}).then(function(editorViewer) {
-		editorViewer.setContents(contents, "application/javascript");
-		editorViewer.inputManager.setAutoSaveTimeout(-1);
-		//editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
-		function execute(orionContext, params) {
-			//alert("foo");
-			//editorViewer.editor.getTextView()._setThemeClass("editorTheme");
-			//editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
-			editorViewer.editor.getTextView().invokeAction("undo");
-		}
-		editorViewer.serviceRegistry.registerService('orion.edit.command', {execute: execute}, {
-			name: 'Xtext formatting service',
-			id: 'xtext.formatter',
-			key: ['l', true, true],
-			contentType: ["application/javascript"]
-		});		
-		var markerService = editorViewer.serviceRegistry.getService(editorViewer.problemsServiceID);
-		if(markerService) {
-			markerService.addEventListener("problemsChanged", function(evt) { //$NON-NLS-0$
-				if(evt.problems) {
-					evt.problems.forEach(function(problem) {
-						console.log(problem);
-					});
-				}
-			});
-		}
-	});
+//	embeddedEditor.create({parent: "embeddedEditor1"}).then(function(editorViewer) {
+//		editorViewer.setContents(contents, "application/javascript");
+//		editorViewer.inputManager.setAutoSaveTimeout(-1);
+//		//editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
+//		function execute(orionContext, params) {
+//			//alert("foo");
+//			//editorViewer.editor.getTextView()._setThemeClass("editorTheme");
+//			//editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
+//			editorViewer.editor.getTextView().invokeAction("undo");
+//		}
+//		editorViewer.serviceRegistry.registerService('orion.edit.command', {execute: execute}, {
+//			name: 'Xtext formatting service',
+//			id: 'xtext.formatter',
+//			key: ['l', true, true],
+//			contentType: ["application/javascript"]
+//		});		
+//		var markerService = editorViewer.serviceRegistry.getService(editorViewer.problemsServiceID);
+//		if(markerService) {
+//			markerService.addEventListener("problemsChanged", function(evt) { //$NON-NLS-0$
+//				if(evt.problems) {
+//					evt.problems.forEach(function(problem) {
+//						console.log(problem);
+//					});
+//				}
+//			});
+//		}
+//	});
 	
 	embeddedEditor.create({parent: "embeddedEditor1",
 						   contentType: "foo/bar",
