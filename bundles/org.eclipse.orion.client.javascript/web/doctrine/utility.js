@@ -42,7 +42,7 @@
 
     var VERSION;
 
-    VERSION = "0.7.1";
+    VERSION = "1.2.1";
     exports.VERSION = VERSION;
 
     function DoctrineError(message) {

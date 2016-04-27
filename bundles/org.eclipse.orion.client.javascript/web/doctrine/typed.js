@@ -42,7 +42,7 @@
         factory((root.typed = {}));
     }
 }(this, function (exports, utility, esutils) {
-    'use strict';
+   'use strict';
 
     var Syntax,
         Token,
@@ -1010,7 +1010,7 @@
             return expr;
         }
 
-        elements = [ expr ];
+        elements = [expr];
         consume(Token.PIPE);
         while (true) {
             elements.push(parseTypeExpression());

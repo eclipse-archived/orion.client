@@ -212,7 +212,6 @@
             while (last < length) {
                 ch = source.charCodeAt(last);
                 if (esutils.code.isLineTerminator(ch) && !(ch === 0x0D  /* '\r' */ && source.charCodeAt(last + 1) === 0x0A  /* '\n' */)) {
-                    lineNumber += 1;
                     waiting = true;
                 } else if (waiting) {
                     if (ch === 0x40  /* '@' */) {
@@ -289,11 +288,11 @@
 
         function scanIdentifier(last) {
             var identifier;
-            if (!esutils.code.isIdentifierStartES5(source.charCodeAt(index))) { //ORION
+            if (!esutils.code.isIdentifierStart(source.charCodeAt(index))) {
                 return null;
             }
             identifier = advance();
-            while (index < last && esutils.code.isIdentifierPartES5(source.charCodeAt(index))) { //ORION
+            while (index < last && esutils.code.isIdentifierPart(source.charCodeAt(index))) {
                 identifier += advance();
             }
             return identifier;
@@ -319,7 +318,7 @@
                 name = advance();
             }
 
-            if (!esutils.code.isIdentifierStartES5(source.charCodeAt(index))) { //ORION
+            if (!esutils.code.isIdentifierStartES5(source.charCodeAt(index))) {
                 return null;
             }
 
@@ -339,7 +338,9 @@
                     name += advance();
                 }
                 while (source.charCodeAt(index) === 0x2E  /* '.' */ ||
+                        source.charCodeAt(index) === 0x2F  /* '/' */ ||
                         source.charCodeAt(index) === 0x23  /* '#' */ ||
+                        source.charCodeAt(index) === 0x2D  /* '-' */ ||
                         source.charCodeAt(index) === 0x7E  /* '~' */) {
                     name += advance();
                     name += scanIdentifier(last);
@@ -347,24 +348,36 @@
             }
 
             if (useBrackets) {
-
-
+                skipWhiteSpace(last);
                 // do we have a default value for this?
                 if (source.charCodeAt(index) === 0x3D  /* '=' */) {
                     // consume the '='' symbol
                     name += advance();
+                    skipWhiteSpace(last);
+
+                    var ch;
                     var bracketDepth = 1;
                     // scan in the default value
                     while (index < last) {
-                        if (source.charCodeAt(index) === 0x5B /* '[' */) {
+                        ch = source.charCodeAt(index);
+
+                        if (esutils.code.isWhiteSpace(ch)) {
+                            skipWhiteSpace(last);
+                            ch = source.charCodeAt(index);
+                        }
+
+                        if (ch === 0x5B /* '[' */) {
                             bracketDepth++;
-                        } else if (source.charCodeAt(index) === 0x5D  /* ']' */ &&
+                        } else if (ch === 0x5D  /* ']' */ &&
                             --bracketDepth === 0) {
                             break;
                         }
+
                         name += advance();
                     }
                 }
+
+                skipWhiteSpace(last);
 
                 if (index >= last  || source.charCodeAt(index) !== 0x5D  /* ']' */) {
                     // we never found a closing ']'
@@ -536,6 +549,22 @@
             return true;
         };
 
+        TagParser.prototype.parseCaption = function parseDescription() {
+            var description = trim(sliceSource(source, index, this._last));
+            var captionStartTag = '<caption>';
+            var captionEndTag = '</caption>';
+            var captionStart = description.indexOf(captionStartTag);
+            var captionEnd = description.indexOf(captionEndTag);
+            if (captionStart >= 0 && captionEnd >= 0) {
+                this._tag.caption = trim(description.substring(
+                    captionStart + captionStartTag.length, captionEnd));
+                this._tag.description = trim(description.substring(captionEnd + captionEndTag.length));
+            } else {
+                this._tag.description = description;
+            }
+            return true;
+        };
+
         TagParser.prototype.parseKind = function parseKind() {
             var kind, kinds;
             kinds = {
@@ -571,6 +600,23 @@
                 }
             }
             return true;
+        };
+
+        TagParser.prototype.parseThis = function parseAccess() {
+            // this name may be a name expression (e.g. {foo.bar})
+            // or a name path (e.g. foo.bar)
+            var value = trim(sliceSource(source, index, this._last));
+            if (value && value.charAt(0) === '{') {
+                var gotType = this.parseType();
+                if (gotType && this._tag.type.type === 'NameExpression') {
+                    this._tag.name = this._tag.type.name;
+                    return true;
+                } else {
+                    return this.addError('Invalid name for this');
+                }
+            } else {
+                return this.parseNamePath();
+            }
         };
 
         TagParser.prototype.parseVariation = function parseVariation() {
@@ -630,6 +676,8 @@
             'class': ['parseType', 'parseNamePathOptional', 'ensureEnd'],
             // Synonym: http://usejsdoc.org/tags-extends.html
             'extends': ['parseType', 'parseNamePathOptional', 'ensureEnd'],
+            // http://usejsdoc.org/tags-example.html
+            'example': ['parseCaption'],
             // http://usejsdoc.org/tags-deprecated.html
             'deprecated': ['parseDescription'],
             // http://usejsdoc.org/tags-global.html
@@ -677,7 +725,7 @@
             // http://usejsdoc.org/tags-summary.html
             'summary': ['parseDescription'],
             // http://usejsdoc.org/tags-this.html
-            'this': ['parseNamePath', 'ensureEnd'],
+            'this': ['parseThis', 'ensureEnd'],
             // http://usejsdoc.org/tags-todo.html
             'todo': ['parseDescription'],
             // http://usejsdoc.org/tags-typedef.html
@@ -715,13 +763,11 @@
                 }
             }
 
-            // Seek global index to end of this tag.
-            index = this._last;
             return this._tag;
         };
 
         function parseTag(options) {
-            var title, parser;
+            var title, parser, tag;
 
             // skip to tag
             if (!skipToTag()) {
@@ -733,7 +779,13 @@
 
             // construct tag parser
             parser = new TagParser(options, title);
-            return parser.parse();
+            tag = parser.parse();
+
+            // Seek global index to end of this tag.
+            while (index < parser._last) {
+                advance();
+            }
+            return tag;
         }
 
         //
