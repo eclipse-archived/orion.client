@@ -513,15 +513,16 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 						expandLocations(r);
 					}
 					return r;
-				} else {
-					if (acceptPatch) {
-						return {result: result.response, acceptPatch: result.xhr.getResponseHeader("Accept-Patch")};
-					} else {
-						return result.response;
-					}
 				}
+				if(result.xhr.status === 204) {
+					return null;
+				}
+				if (acceptPatch) {
+					return {result: result.response, acceptPatch: result.xhr.getResponseHeader("Accept-Patch")};
+				} 
+				return result.response;
 			}).then(function(result) {
-				if (this.makeAbsolute) {
+				if (this.makeAbsolute && result) { //can be null on 204
 					_normalizeLocations(acceptPatch ? result.result : result);
 				}
 				return result;
