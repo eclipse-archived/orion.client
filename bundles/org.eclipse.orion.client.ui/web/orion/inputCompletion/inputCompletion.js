@@ -446,9 +446,13 @@ define(['orion/EventTarget'], function( EventTarget){
 		        offsetParent = offsetParent.offsetParent;
 			}
 			this._completionUIContainer.style.display = "block"; //$NON-NLS-0$
-			this._completionUIContainer.style.top = curTop + this._inputField.offsetHeight + 2 + "px"; //$NON-NLS-0$
+			var top = curTop + this._inputField.offsetHeight + 2;
+			this._completionUIContainer.style.top = top + "px"; //$NON-NLS-0$
 			this._completionUIContainer.style.left = curLeft + "px"; //$NON-NLS-0$
 			this._completionUIContainer.style.width = this._inputField.offsetWidth + "px"; //$NON-NLS-0$
+			var parentHeight = this._completionUIContainer.parentElement.getBoundingClientRect().height;
+			this._completionUIContainer.style.maxHeight = parentHeight - top - 10 + "px"; //$NON-NLS-1$ // Subtract 10px to allow room for shadow and so it doesn't look cut off
+			
 			this._mouseDown = false;
 			this._dismissed = false;
 		} else {
