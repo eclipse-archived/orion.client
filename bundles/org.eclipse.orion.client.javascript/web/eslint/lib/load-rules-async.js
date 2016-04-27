@@ -106,19 +106,13 @@ define([
         },
 		/** @callback */
 		"check-tern-project" : function(context) {
-				function checkProject(node) {
-					var env = node.environments;
-					if (env) {
-						if (typeof env === "object" && Object.keys(env).length !== 0) {
-							return;
+				return {
+					"Program": function checkProject(node) {
+						var tern = context.getTern();
+						if(!tern.isLoadEagerly(node.sourceFile.name)) {
+							context.report(node, ProblemMessages['check-tern-project']);
 						}
 					}
-					// get the .tern-project file for the corresponding project
-					context.report(node, ProblemMessages['check-tern-project']);
-				}
-
-				return {
-					"Program": checkProject
 				};
 		},
     	/** @callback */

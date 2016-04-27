@@ -21,10 +21,9 @@ define([
 	'javascript/commands/renameCommand',
 	'javascript/commands/generateDocCommand',
 	'orion/serviceregistry',
-	'javascript/scriptResolver',
-	'javascript/ternProjectManager',
+	'javascript/javascriptProject',
 	'mocha/mocha', //must stay at the end, not a module
-], function(QuickFixes, Validator, chai, Deferred, ASTManager, CUProvider, RenameCommand, GenerateDocCommand, mServiceRegistry, Resolver, Manager) {
+], function(QuickFixes, Validator, chai, Deferred, ASTManager, CUProvider, RenameCommand, GenerateDocCommand, mServiceRegistry, JSProject) {
 	var assert = chai.assert;
 	
 	return function(worker) {
@@ -52,9 +51,7 @@ define([
 				var contentType = options.contentType ? options.contentType : 'application/javascript';
 				var astManager = new ASTManager.ASTManager();
 				var serviceRegistry = new mServiceRegistry.ServiceRegistry();
-				var resolver = new Resolver.ScriptResolver(serviceRegistry);
-				var ternProjectManager = new Manager.TernProjectManager(worker, resolver, serviceRegistry);
-				var validator = new Validator(worker, ternProjectManager);
+				var validator = new Validator(worker);
 				var state = Object.create(null);
 				var loc = contentType === 'text/html' ? 'quickfix_test_script.html' : 'quickfix_test_script.js';
 				assert(options.callback, "You must provide a callback for a worker-based test");
@@ -64,7 +61,7 @@ define([
 				validator._enableOnly(rule.id, rule.severity, rule.opts);
 				var renameCommand = new RenameCommand.RenameCommand(worker, {setSearchLocation: function(){}});
 				var generateDocCommand = new GenerateDocCommand.GenerateDocCommand(astManager, CUProvider);
-				var fixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand, ternProjectManager, worker);
+				var fixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand, new JSProject(serviceRegistry), worker);
 				var editorContext = {
 					/*override*/
 					getText: function(start, end) {

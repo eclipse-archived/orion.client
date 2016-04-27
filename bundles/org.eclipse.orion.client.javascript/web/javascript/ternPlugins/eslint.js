@@ -185,6 +185,12 @@ define([
 				}
 				return false;
 			};
+			_tern.isLoadEagerly = function isLoadEagerly(fileName) {
+				if(server.options && Array.isArray(server.options.loadEagerly)) {
+					return server.options.loadEagerly.length > 0 && server.options.loadEagerly.indexOf(fileName) > -1;
+				}
+				return false;
+			};
 			_tern.optionalPlugins = server.options.optionalPlugins;
 			_tern.query = query;
 			_tern.file = file;

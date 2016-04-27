@@ -63,6 +63,18 @@ define([
 	};
 	
 	/**
+	 * @description Returns the current project path
+	 * @function
+	 * @returns {String} The current project path or null if there is no project context
+	 */
+	JavaScriptProject.prototype.getProjectPath = function getProjectPath() {
+		if(this.projectMeta) {
+			return this.projectMeta.Location;
+		}
+		return null;
+	};
+	
+	/**
 	 * @description Fetch the named child of the current project context
 	 * @function
 	 * @param {String} childName The short name of the project child to get
@@ -77,7 +89,7 @@ define([
 			return new Deferred().resolve(this.map[filePath]);
 		}
 		return this.getFileClient().read(filePath, false, false, {readIfExists: true}).then(function(child) {
-			this.map[filePath] = {name: filePath, contents: child};
+			this.map[filePath] = {name: filePath, contents: child, project: this.projectMeta.Location};
 			return this.map[filePath];
 		}.bind(this),
 		function() {
@@ -99,11 +111,11 @@ define([
 					var json = child.contents ? JSON.parse(child.contents) : Object.create(null);
 					if(json && values) {
 						_merge(values, json);
-						return this.getFileClient().write(this.projectMeta.Location+childName, JSON.stringify(json));
+						return this.getFileClient().write(this.projectMeta.Location+childName, JSON.stringify(json, null, '\t'));
 					}
 				} else if(!child.contents && create) {
 					return this.getFileClient().createFile(this.projectMeta.Location, childName).then(function(file) {
-						return this.getFileClient().write(file.Location, JSON.stringify(values));
+						return this.getFileClient().write(file.Location, JSON.stringify(values, null, '\t'));
 					}.bind(this));
 				}
 			}.bind(this));
@@ -112,7 +124,9 @@ define([
 	
 	function _merge(source, dest) {
 		Object.keys(source).forEach(function(key) {
-			if(typeof dest[key] === 'object' && dest[key] !== null) {
+			if(Array.isArray(dest[key]) && Array.isArray(source[key])) {
+				dest[key] = [].concat(dest[key], source[key]);
+			} else if(typeof dest[key] === 'object' && dest[key] !== null) {
 				source[key] = source[key] || Object.create(null);
 				_merge(source[key], dest[key]);
 			} else {
@@ -198,12 +212,11 @@ define([
 	}
 	
 	/**
-	 * @description Delegates to a handler for the given handler name (file type), with the given unction name
+	 * @description Delegates to a handler for the given handler name (file type), with the given function name
 	 * @param {String} funcName The name of the function to call on the handler iff it exists
 	 */
 	function _handle(funcName) {
 		if(Array.isArray(this.handlers)) {
-			//special - broadcast to every handler that listens for it
 			var args = Array.prototype.slice.call(arguments);
 			this.handlers.forEach(function(handler) {
 				var f = handler[funcName];

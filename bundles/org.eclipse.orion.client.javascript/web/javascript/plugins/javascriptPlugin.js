@@ -18,7 +18,6 @@ define([
 'orion/plugin',
 'orion/serviceregistry',
 'orion/Deferred',
-'estraverse/estraverse',
 'javascript/scriptResolver',
 'javascript/astManager',
 'javascript/quickFixes',
@@ -46,7 +45,7 @@ define([
 'i18n!javascript/nls/messages',
 'orion/i18nUtil',
 'orion/URL-shim'
-], function(PluginProvider, mServiceRegistry, Deferred, Estraverse, ScriptResolver, ASTManager, QuickFixes, JavaScriptProject, TernAssist, TernProjectAssist,
+], function(PluginProvider, mServiceRegistry, Deferred, ScriptResolver, ASTManager, QuickFixes, JavaScriptProject, TernAssist, TernProjectAssist,
 			EslintValidator, TernProjectValidator, Occurrences, Hover, Outliner, CUProvider, TernProjectManager, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 			RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
@@ -70,7 +69,7 @@ define([
     		               }, {id: "application/json", //$NON-NLS-1$
     		            	   "extends": "text/plain", //$NON-NLS-1$ //$NON-NLS-1$
     		            	   name: "JSON", //$NON-NLS-1$
-    		            	   extension: ["json", "pref", "tern-project"], //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    		            	   extension: ["json", "pref", "tern-project", "eslintrc"], //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     		            	   imageClass: "file-sprite-javascript modelDecorationSprite" //$NON-NLS-1$
     		               }, {id: "application/x-ejs", //$NON-NLS-1$
     		            	   "extends": "text/plain", //$NON-NLS-1$ //$NON-NLS-1$
@@ -86,18 +85,7 @@ define([
     	 * @since 8.0
     	 */
     	var scriptresolver = new ScriptResolver.ScriptResolver(serviceRegistry);
-    	/**
-    	 * Create a new JavaScript project context
-    	 * @since 12.0
-    	 */
-    	var jsProject = new JavaScriptProject(serviceRegistry);
-    	provider.registerService("orion.edit.model", {  //$NON-NLS-1$
-    		onInputChanged: jsProject.onInputChanged.bind(jsProject)
-    	},
-    	{
-    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
-    		types: ['onInputChanged']  //$NON-NLS-1$
-    	});
+    	
     	/**
     	 * Create the AST manager
     	 */
@@ -227,7 +215,22 @@ define([
 	    		Logger.log(err);
 	    });
 	
-	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, serviceRegistry, setStarting, jsProject);
+	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, serviceRegistry, setStarting);
+
+	/**
+	 * Create a new JavaScript project context
+	 * @since 12.0
+	 */
+	var jsProject = new JavaScriptProject(serviceRegistry);
+	provider.registerService("orion.edit.model", {  //$NON-NLS-1$
+		onInputChanged: jsProject.onInputChanged.bind(jsProject)
+	},
+	{
+		contentType: ["application/javascript", "text/html", "application/json"],  //$NON-NLS-1$ //$NON-NLS-2$
+		types: ['onInputChanged']  //$NON-NLS-1$
+	});
+	
+	jsProject.addHandler(ternProjectManager);
 
 	/**
 	 * @description Handler for Tern read requests
@@ -244,7 +247,7 @@ define([
 				// only load modules
 				if (!/^[\.]+/.test(_l)) {
 					//do node_modules read
-					var project = ternProjectManager.getProjectFile();
+					var project = jsProject.getProjectPath();
 					if(project) {
 						return fileClient.read(project+"node_modules/"+_l+"/package.json", false, false, {readIfExists: true}).then(function(json) {
 							if(json) {
@@ -496,7 +499,7 @@ define([
     		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$
     	});
 
-    	var validator = new EslintValidator(ternWorker, ternProjectManager, serviceRegistry);
+    	var validator = new EslintValidator(ternWorker, serviceRegistry);
 
     	/**
     	 * Register the ESLint validator
@@ -507,17 +510,6 @@ define([
     		pid: 'eslint.config'  //$NON-NLS-1$
     			});
     			
-    	/**
-    	 * Register Tern project manager as input changed listener
-    	 */
-    	provider.registerService("orion.edit.model", {  //$NON-NLS-1$
-    		onInputChanged: ternProjectManager.onInputChanged.bind(ternProjectManager)
-    	},
-    	{
-    		contentType: ["application/javascript", "application/json", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-    		types: ['onInputChanged']  //$NON-NLS-1$
-    	});
-	    
     	/**
     	 * register the compilation unit provider as a listener
     	 */
@@ -621,7 +613,7 @@ define([
     			}
     	);
 
-    	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand, ternProjectManager, ternWorker);
+    	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand, jsProject, ternWorker);
 
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,

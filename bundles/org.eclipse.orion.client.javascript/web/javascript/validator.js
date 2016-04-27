@@ -67,15 +67,13 @@ define([
 	 * @constructor
 	 * @public
 	 * @param {javascript.ASTManager} astManager The AST manager backing this validator
-	 * @param {Object} ternProjectManager The backing Tern project manager instance
 	 * @param {Object} serviceRegistry The platform service registry
 	 * @returns {ESLintValidator} Returns a new validator
 	 */
-	function ESLintValidator(ternWorker, ternProjectManager, serviceRegistry) {
+	function ESLintValidator(ternWorker, serviceRegistry) {
 		this.ternWorker = ternWorker;
-		this.projectManager = ternProjectManager;
 		config.setDefaults();
-		registry = serviceRegistry
+		registry = serviceRegistry;
 	}
 	
 	/**
@@ -246,54 +244,23 @@ define([
 				config.env = env;
 				request.env = config.env;
 			}
-			var ternProjectManager = this.projectManager;
 			var start = Date.now();
 			this.ternWorker.postMessage(
 				request, 
 				/* @callback */ function(type, err) {
 						var end = Date.now() - start;
 						logTiming(end);
-						var eslintErrors = [];
+						var problems = [];
 						if(err) {
-							eslintErrors.push({
+							problems.push({
 								start: 0,
 								args: {0: type.error, nls: "eslintValidationFailure" }, //$NON-NLS-0$
 								severity: "error" //$NON-NLS-0$
 							});
-						} else if (type.problems) {
-							var json = ternProjectManager.getJSON();
-							if(json) {
-								type.problems.forEach(function(element) {
-									// check the .tern-project file
-									if (element.ruleId === "check-tern-project") {
-										// check the .tern-project file
-										var loadEagerly = json.loadEagerly;
-										if(Array.isArray(loadEagerly) && loadEagerly.length > 0) {
-											var found = false;
-											loop: for (var j = 0, max2 = loadEagerly.length; j < max2;  j++) {
-												if (loadEagerly[j] === meta.location) {
-													found = true;
-													break loop;
-												}
-											}
-											if (!found) {
-												eslintErrors = eslintErrors.concat(element);
-											}
-										} else {
-											// in case of an empty loadEagerly file property
-											eslintErrors.push(element);
-										}
-									} else {
-										eslintErrors.push(element);
-									}
-								});
-							} else {
-								type.problems.forEach(function(element) {
-									eslintErrors.push(element);
-								});
-							}
+						} else if (Array.isArray(type.problems)) {
+							problems = type.problems;
 						}
-						deferred.resolve({ problems: eslintErrors.map(toProblem) });
+						deferred.resolve({ problems: problems.map(toProblem) });
 				});
 		},
 

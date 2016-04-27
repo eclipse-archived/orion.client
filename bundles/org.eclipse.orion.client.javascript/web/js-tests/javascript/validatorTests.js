@@ -18,11 +18,8 @@ define([
 	"orion/i18nUtil",
 	"i18n!javascript/nls/problems",
 	"javascript/ruleData",
-	'orion/serviceregistry',
-	'javascript/scriptResolver',
-	'javascript/ternProjectManager',
 	'mocha/mocha', //must stay at the end, not a module
-], function(Validator, chai, Deferred, i18nUtil, messages, Rules, mServiceRegistry, Resolver, Manager) {
+], function(Validator, chai, Deferred, i18nUtil, messages, Rules) {
 	var assert = chai.assert;
 	return function(worker) {
 		describe('Validator Tests', function() {
@@ -37,12 +34,9 @@ define([
 			 * @returns {Object} The object with the initialized values
 			 */
 			function setup(options) {
-				var serviceRegistry = new mServiceRegistry.ServiceRegistry();
-				var resolver = new Resolver.ScriptResolver(serviceRegistry);
-				var ternProjectManager = new Manager.TernProjectManager(worker, resolver, serviceRegistry);
 				var buffer = options.buffer;
 				var contentType = options.contentType ? options.contentType : 'application/javascript';
-				var validator = new Validator(worker, ternProjectManager);
+				var validator = new Validator(worker);
 				var state = Object.create(null);
 				assert(options.callback, "You must provide a callback for a worker-based test");
 				state.callback = options.callback;

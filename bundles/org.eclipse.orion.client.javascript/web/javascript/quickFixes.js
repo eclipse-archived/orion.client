@@ -27,11 +27,11 @@ define([
 	 * @returns {javascript.JavaScriptQuickfixes} The new quick fix computer instance
 	 * @since 8.0
 	 */
-	function JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand, ternProjectManager, ternWorker) {
+	function JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand, jsProject, ternWorker) {
 	   this.astManager = astManager;
 	   this.renamecommand = renameCommand;
 	   this.generatedoc = generateDocCommand;
-	   this.ternProjectManager = ternProjectManager;
+	   this.jsProject = jsProject;
 	   this.ternworker = ternWorker;
 	}
 	
@@ -354,130 +354,47 @@ define([
 	        },
 	        /** @callback fix the check-tern-project rule */
 			"check-tern-plugin" : function(editorContext, context, astManager) {
-				var self = this;
 				return astManager.getAST(editorContext).then(function(ast) {
-					var ternFileLocation = self.ternProjectManager.getTernProjectFileLocation();
-					var json = self.ternProjectManager.getJSON();
-					var plugins = json.plugins;
 					var newPlugin = ast.sourceFile.text.slice(context.annotation.start, context.annotation.end); ///, the '(.*)' plugin/.exec(context.annotation.title);
-					// The problem should only appear if there is a plugins entry that doesn't include the needed plugin
-					if (!ternFileLocation || !json || !plugins || !newPlugin){
-						return null;
-					}
-					newPlugin = translatePluginName(newPlugin);
-					plugins[newPlugin] = {};
-					var contents = JSON.stringify(json, null, '\t'); //$NON-NLS-1$
-					var fileClient = self.ternProjectManager.scriptResolver.getFileClient();
-					return fileClient.write(ternFileLocation, contents).then(/* @callback */ function(result) {
-						self.ternProjectManager.refresh(ternFileLocation);
-						// now we need to run the syntax checker on the current file to get rid of stale annotations
-						editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
+					var json = {plugins: Object.create(null)};
+					json.plugins[translatePluginName(newPlugin)] = Object.create(null);
+					return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
+						return editorContext.syntaxCheck(ast.sourceFile.name);						
 					});
-				});
+				}.bind(this));
 			},
 			/** @callback fix the unknown-require-plugin problem */
 			"unknown-require-plugin": function(editorContext, context, astManager) {
 				return astManager.getAST(editorContext).then(function(ast) {
-					var ternFileLocation = this.ternProjectManager.getTernProjectFileLocation();
-					var json = this.ternProjectManager.getJSON();
-					if(!json) {
-						json = Object.create(null);
-					}
+					var json = {plugins: Object.create(null)};
 					var newPlugin = translatePluginName(context.annotation.data);
-					if(!json.plugins) {
-						json.plugins = Object.create(null);
-					}
 					json.plugins[newPlugin] = Object.create(null);
-					var contents = JSON.stringify(json, null, '\t'); //$NON-NLS-1$
-					var fileClient = this.ternProjectManager.scriptResolver.getFileClient();
-					if(!ternFileLocation) {
-						//create a new one
-						return fileClient.createFile(this.ternProjectManager.getProjectFile(), '.tern-project').then(function(file) {
-							return fileClient.write(file.Location, contents).then(/* @callback */ function(result) {
-								this.ternProjectManager.refresh(ternFileLocation);
-								var newDirective = updateDirective(ast, context.annotation.data);
-								if(newDirective) {
-									return editorContext.setText(newDirective.text, newDirective.start, newDirective.end).then(function() {
-										return editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
-									});
-								} 
-								return editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
-							}.bind(this));
-						}.bind(this));
-					}
-					//update
-					return fileClient.write(ternFileLocation, contents).then(/* @callback */ function(result) {
-						this.ternProjectManager.refresh(ternFileLocation);
-						// now we need to run the syntax checker on the current file to get rid of stale annotations
+					return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
 						var newDirective = updateDirective(ast, context.annotation.data);
 						if(newDirective) {
 							return editorContext.setText(newDirective.text, newDirective.start, newDirective.end).then(function() {
-								return editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
-							}, null, function() {
-								return "Updating project configuration..."
+								return editorContext.syntaxCheck(ast.sourceFile.name);
 							});
 						} 
-						return editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
-					}.bind(this));
+						return editorContext.syntaxCheck(ast.sourceFile.name);
+					});
 				}.bind(this));
 			},
 			/** @callback fix the check-tern-project rule */
 			"check-tern-project" : function(editorContext, context, astManager) {
-				var self = this;
 				return astManager.getAST(editorContext).then(function(ast) {
-					var ternFileLocation = self.ternProjectManager.getTernProjectFileLocation();
-					var ternProjectFile = self.ternProjectManager.getProjectFile();
-					var json = self.ternProjectManager.getJSON();
-					var currentFileName = context.input.substring(ternProjectFile.length);
-					var noTernProjectFile = !ternFileLocation;
-					if(noTernProjectFile) {
-						ternFileLocation = ternProjectFile + ".tern-project"; //$NON-NLS-1$
-					}
-					if (!json) {
-						json = {
-								"plugins": {},
-								"libs": ["ecma5"], //$NON-NLS-1$
-								"ecmaVersion": 5,
-								"loadEagerly": []
-						};
-					}
-					var loadEagerly = json.loadEagerly;
-					var updated = [];
-					if (!loadEagerly) {
-						loadEagerly = [];
-					}
-					var found = false;
-					loadEagerly.forEach(function(element) {
-						var currentElement = element.substring(ternProjectFile.length);
-						if (currentFileName !== currentElement) {
-							updated.push(currentElement);
-						} else {
-							found = true;
+					return this.jsProject.getFile(this.jsProject.TERN_PROJECT).then(function(file) {
+						var json = file.contents ? JSON.parse(file.contents) : Object.create(null);
+						var currentFileName = ast.sourceFile.name.substring(file.project.length);
+						if (!Array.isArray(json.loadEagerly) || json.loadEagerly.indexOf(currentFileName) < 0) {
+							json = {loadEagerly: []};
+							json.loadEagerly.push(currentFileName);
+							return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
+								return editorContext.syntaxCheck(ast.sourceFile.name);
+							}.bind(this));
 						}
-					});
-					if (!found) {
-						// add the current file name
-						updated.push(currentFileName);
-						json.loadEagerly = updated;
-						// now we should find a way to save the updated contents
-						var contents = JSON.stringify(json, null, '\t'); //$NON-NLS-1$
-						var fileClient = self.ternProjectManager.scriptResolver.getFileClient();
-						if (noTernProjectFile) {
-							return fileClient.createFile(ternProjectFile, ".tern-project").then(function(fileMetadata) { //$NON-NLS-1$
-								return fileClient.write(fileMetadata.Location, contents).then(/* @callback */ function(result) {
-									self.ternProjectManager.refresh(ternFileLocation);
-									// now we need to run the syntax checker on the current file to get rid of stale annotations
-									editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
-								});
-							});
-						}
-						return fileClient.write(ternFileLocation, contents).then(/* @callback */ function(result) {
-							self.ternProjectManager.refresh(ternFileLocation);
-							// now we need to run the syntax checker on the current file to get rid of stale annotations
-							editorContext.syntaxCheck(ast.sourceFile, null, ast.sourceFile.text);
-						});
-					}
-				});
+					}.bind(this));
+				}.bind(this));
 			}
 		}
 	});
