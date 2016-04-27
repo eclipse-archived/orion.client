@@ -222,7 +222,7 @@ define([
 	  },
 	  "!name": "mysql",
 	  "!define": {
-			"!node": {
+			"!known_modules": {
 				"mysql": {
 					"createConnection": "fn(connectionUri: string) -> mysql.Connection",
 				    "createPool": "fn(config: mysql.PoolConfig) -> mysql.Pool",

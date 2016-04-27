@@ -381,7 +381,7 @@ define([
 	  },
 	  "!name": "mongodb",
 	  "!define": {
-	  	"!node": {
+	  	"!known_modules": {
 		   "mongodb": {
 		   	"!doc": "MongoDB",
 		   	"!url": "https://www.mongodb.org/",

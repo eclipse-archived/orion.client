@@ -79,6 +79,10 @@ Fixing node/modules/node_resolve/commonjs
 	        if (!ast) return;
 	        ast = ast.ast;
 	    }
+- Check that the indexed library plugins (express, amqp, etc.) get code completions, module name completions and correct type information.
+One way to check is with no-undef-expression rule turned on, call a bogus function on the object returned from the require.  If no problem is found
+there likely isn't type information for the return of the require.  The plugins have to hook into the node plugin using a special entry in their defs.
+For Tern 18 this is !known_modules (previously !node).
 - All of these plugins have dependencies on each other
 - The file contents are resolved in node_modules, so modify it to get the content from resolver
 	     // ORION Get the resolved file from Orion resolver plugin

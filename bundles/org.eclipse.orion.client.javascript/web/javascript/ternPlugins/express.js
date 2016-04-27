@@ -122,8 +122,8 @@ define([
 	
 	/* eslint-enable missing-nls */
 	tern.registerPlugin("express", /* @callback */ function(server, options) { //$NON-NLS-1$
+	 	server.addDefs(defs);
 	    return {
-	      defs : defs,
 	      passes: {
 	      	variableCompletion: getTemplates
 	      }
@@ -134,7 +134,7 @@ define([
 	var defs = {
   "!name": "express",
   "!define": {
-  	"!node": {
+  	"!known_modules": {
 	      "express": {
 	      	  "static" : {
 		    		"!type": "fn(name: string)",

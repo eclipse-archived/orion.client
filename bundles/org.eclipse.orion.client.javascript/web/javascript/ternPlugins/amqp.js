@@ -107,7 +107,7 @@ define([
 	var defs = {
   "!name": "amqp",
   "!define": {
-  	"!node": {
+  	"!known_modules": {
 	      "amqp": {
 	      	 "Connection" : "Connection",
 		     "createConnection": "fn(options: Object, implOptions: Object, readyCallback: fn()) -> +Connection",

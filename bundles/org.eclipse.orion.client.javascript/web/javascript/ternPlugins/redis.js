@@ -108,7 +108,7 @@ define([
 	var defs = {
 		"!name": "redis",
 		"!define": {
-			"!node": {
+			"!known_modules": {
 				"redis": {
 					"createClient": "fn(port_arg: number, host_arg?: string, options?: ClientOpts) -> RedisClient",
 					"print": "fn(err: Error, reply: ?)",

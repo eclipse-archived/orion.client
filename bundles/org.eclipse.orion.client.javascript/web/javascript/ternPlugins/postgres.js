@@ -156,7 +156,7 @@ define([
 	  },
 	  "!name": "pg",
 	  "!define": {
-	  	"!node": {
+	  	"!known_modules": {
 	  		"pg": {
 	  			"connect": "fn(connection: string, callback: fn(err: Error, client: Client, done: fn()))",
 	    		"end": "fn()",

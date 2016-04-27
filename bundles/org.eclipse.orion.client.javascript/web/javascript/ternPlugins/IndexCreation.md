@@ -48,6 +48,21 @@ The follow commands were used to create indexes in March 2016
 
 ### Manually fix indexes
 
+#### Mark the index as a node module
+
+All of the indexed libs we currently provide are node modules accessed via require('<name>'); For the defs entry in each plugin to be
+recognized by the Tern node plug-in, you must add a special entry.  In Tern 16 this entry was **"!node"**.  In Tern 18 this entry was **"!known_modules"**.
+
+Example for AMQP that defines what a require('amqp') statement would return:
+
+	"!known_modules": {
+	  "amqp": {
+	    "Connection" : "Connection",
+		"createConnection": "fn(options: Object, implOptions: Object, readyCallback: fn()) -> +Connection",
+      }
+    },
+
+
 #### AMQP
 
 Condense does not extract any useful information from the amqp.js file at the root.  We add in the contents there manually:
