@@ -122,6 +122,29 @@ define([
 		getKind: function(ast, offset) {
 	    	var node = Finder.findNode(offset, ast, {parents:true});
 	    	if(node) {
+	    		if(node.type === 'Literal') {
+	    			switch(typeof node.value) {
+	    				case 'boolean':
+	    				case 'number': {
+	    					if(offset > node.range[0] && offset <= node.range[1]) {
+		    					return {kind: 'unknown'};
+	    					}
+	    					break;
+	    				}
+	    				case 'string': {
+	    					if(offset > node.range[0] && offset < node.range[1]) {
+		    					return {kind: 'string'};
+	    					}
+	    					break;
+	    				}
+	    				case 'object': {
+	    					if(node.regex && offset > node.range[0] && offset <= node.range[1]) {
+		    					return {kind: 'regex'};
+    						}
+    						break;
+	    				}
+	    			}
+	    		}
 	    		if(node.parents && node.parents.length > 0) {
 		    		var prent = node.parents.pop();
 		    		switch(prent.type) {
@@ -132,20 +155,20 @@ define([
 								break;
 							case 'VariableDeclarator':
 								if(!prent.init || offset < prent.init.range[0]) {
-									return null;
+									return {kind: 'unknown'};
 								}
 								break;
 							case 'FunctionDeclaration':
 							case 'FunctionExpression':
 								if(offset < prent.body.range[0]) {
-									return null;
+									return {kind: 'unknown'};
 								}
 								break;
 							case 'Property':
 								if(offset-1 >= prent.value.range[0] && offset-1 <= prent.value.range[1]) {
 									return { kind : 'prop'}; //$NON-NLS-1$
 								}
-								return null;
+								return {kind: 'unknown'};
 							case 'SwitchStatement':
 								return {kind: 'swtch'}; //$NON-NLS-1$
 						}
