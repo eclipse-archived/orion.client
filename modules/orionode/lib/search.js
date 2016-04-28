@@ -14,6 +14,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var Promise = require('bluebird');
 var url = require('url');
+var fileUtil = require('./fileUtil');
 
 var fs = Promise.promisifyAll(require('fs'));
 
@@ -232,9 +233,14 @@ module.exports = function(options) {
 			return api.writeError(400, res, err);
 		}
 
-		var endOfFileRootIndex = 5;
-
-		var searchScope = req.user.workspaceDir + searchOpt.location.substring(endOfFileRootIndex, searchOpt.location.length - 1);
+		var searchScope;
+		try {
+			var loc = searchOpt.location.replace(/^\/file/, "");
+			if (loc === "*") loc = "";
+			searchScope = fileUtil.safeFilePath(req.user.workspaceDir, loc);
+		} catch (ex) {
+			searchScope = req.user.workspaceDir;
+		} 
 		if (searchScope.charAt(searchScope.length - 1) !== "/") searchScope = searchScope + "/";
 
 		fs.readdirAsync(searchScope)
