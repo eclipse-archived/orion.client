@@ -557,7 +557,7 @@ function merge(req, res, commitToMerge, squash) {
 	});
 }
 
-function createCommit(repo, committerName, committerEmail, authorName, authorEmail, message, amend){
+function createCommit(repo, committerName, committerEmail, authorName, authorEmail, message, amend, insertChangeid){
 	var index, oid, author, committer;
 	return repo.index()
 	.then(function(indexResult) {
@@ -584,6 +584,9 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 			committer = git.Signature.now(committerName, committerEmail);
 		} else {
 			committer = git.Signature.default(repo);
+		}
+		if(insertChangeid) {
+			message = insertChangeId(message, oid, parent, author ,committer);
 		}
 		if (amend) {
 			return parent.amend("HEAD",  author, committer, null, message, oid);
@@ -658,7 +661,6 @@ function postCommit(req, res) {
 		return;
 	}
 	
-	//TODO create commit -> change id
 	var commit = util.decodeURIComponent(req.params.commit);
 	if (commit !== "HEAD") {
 		writeError(404, res, "Needs to be HEAD");
@@ -670,6 +672,9 @@ function postCommit(req, res) {
 		return;
 	}
 
+	// Since ChangeId messagefoot is not showing in the box, so insert Message after empty Checking.
+	var isInsertChangeId = req.body.ChangeId;	
+
 	var theRepo, thisCommit;
 	var theDiffs = [], theParents;
 	
@@ -677,7 +682,7 @@ function postCommit(req, res) {
 	.then(function(repo) {
 		theRepo = repo;
 		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
-		return createCommit(repo, req.body.CommitterName, req.body.CommitterEmail, req.body.AuthorName, req.body.AuthorEmail, req.body.Message, req.body.Amend);
+		return createCommit(repo, req.body.CommitterName, req.body.CommitterEmail, req.body.AuthorName, req.body.AuthorEmail, req.body.Message, req.body.Amend, isInsertChangeId);
 	})
 	.then(function(commit) {
 		thisCommit = commit;
@@ -698,5 +703,93 @@ function postCommit(req, res) {
 	.done(function() {
 		res.status(200).json(commitJSON(thisCommit, fileDir, theDiffs, theParents));
 	});
+}
+
+function generateChangeId(oid, firstParentId, authorId, committerId, message){
+	var cleanMessage = clean(message);
+	function clean(fullMessage) {
+		return fullMessage.//
+				replace(/^#.*$\n?/g, "").// //$NON-NLS-1$
+				replace(/\n\n\n+/g, "\n").// //$NON-NLS-1$
+				replace(/\n*$/g, "").// //$NON-NLS-1$
+				replace(/\ndiff --git.*/g, "").// //$NON-NLS-1$
+				trim();
+	}
+	var mergedMessage = ["tree ",oid,"\nparent",firstParentId,"\nauthor",authorId,"\ncommitter",committerId,"\n\n",cleanMessage].join("");	
+	var hash = crypto.createHash("sha1");
+	hash.update(mergedMessage);
+	return hash.digest('hex');
+}
+
+function insertChangeId(originalMessage, oid, parent, author ,committer){
+	var lines = originalMessage.split("\n"); //$NON-NLS-1$
+	// Has ChangeId do nothing, even if changeId is changed, do not replace it.
+	if(!existingOfChangeId(lines)) {
+		var footerFirstLine = indexOfFirstFooterLine(lines);
+		var insertAfter = footerFirstLine;
+		for (var i = footerFirstLine; i < lines.length; ++i) {
+			if (lines[i].match(/^(Bug|Issue)[a-zA-Z0-9-]*:.*$/)) {
+				insertAfter = i + 1;
+				continue;
+			}
+			break;
+		}
+		
+		// Generage ChangeId here only when necessary.
+		var firstParentId = parent? parent.parentId(0) : "";
+		var hashId = generateChangeId(oid, firstParentId, author.toString(), committer.toString(), originalMessage);
+		var changeIdString = "Change-Id: I" + hashId;
+		if ( lines.length === 1 ){
+			lines.splice(1, 0, "\n"+changeIdString);	
+		}else{
+			lines.splice(insertAfter, 0, changeIdString);
+		}
+		originalMessage = lines.join("\n");
+ 	}
+ 	return originalMessage;
+ 	
+ 	
+ 	function existingOfChangeId(alllinesArray){
+		if (alllinesArray.length === 0)
+			return false;
+		var inFooter = false;
+		for (var m = alllinesArray.length - 1; m >= 0; --m) {
+			if (!inFooter && isEmptyLine(alllinesArray[m])){
+				// Fine the last not-empty line, or keep finding.
+				continue;
+			}
+			inFooter = true;
+			if (alllinesArray[m].match(/^\s*Change-Id: *I[a-f0-9]{40}$/)) {
+				return true;
+			}
+		}
+		// Went through all lines but didn't find Change-Id line.
+		return false;
+ 	}
+ 	
+ 	function isEmptyLine(line){
+		return line.trim().length === 0;
+ 	}
+ 		
+ 	function indexOfFirstFooterLine(lines){
+ 		var footerFirstLineNum = lines.length;
+		for (var l = lines.length - 1; l > 1; --l) {
+			if (lines[l].match(/^[a-zA-Z0-9-]+:.*$/)) {
+				footerFirstLineNum = l;
+				continue;
+			}
+			if (footerFirstLineNum !== lines.length && lines[l].length === 0){
+				break;
+			}
+			if (footerFirstLineNum !== lines.length
+					&& lines[l].match(/^[ \\[].*$/)) {
+				footerFirstLineNum = l + 1;
+				continue;
+			}
+			footerFirstLineNum = lines.length;
+			break;
+		}
+		return footerFirstLineNum;
+ 	}
 }
 };
