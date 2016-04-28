@@ -54,17 +54,25 @@ define([
 				}
 				errorMap[error.index] = msg;
 				if(error.type) {
+					var index, message;
 					switch(error.type) {
 						case Util.ErrorTypes.Unexpected:
 							if(token) {
 								error.args = {0: token.value, nls: "syntaxErrorBadToken"}; //$NON-NLS-0$
 								error.message = msg = error.args.nls;
+							} else {
+								index = msg.lastIndexOf(" (");
+								message = msg;
+								if (index !== -1) {
+									message = msg.substr(0, index);
+								}
+								error.message = message;
 							}
 							break;
 						case Util.ErrorTypes.EndOfInput:
 							// we should trim the location at the end of the error message
-							var index = msg.lastIndexOf(" (");
-							var message = msg;
+							index = msg.lastIndexOf(" (");
+							message = msg;
 							if (index !== -1) {
 								message = msg.substr(0, index);
 							}

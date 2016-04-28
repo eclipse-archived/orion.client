@@ -281,8 +281,8 @@ define([
 						assertProblems(problems, [
 							{start: 38, 
 							 end: 39, 
-							 severity: 'error', 
-							 description: "Identifier directly after number (1:38)"
+							 severity: 'error',
+							 description: "Identifier directly after number"
 							 }
 						]);
 					}, function (error) {
