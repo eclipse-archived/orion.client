@@ -23,8 +23,8 @@ function(messages, mSection, lib, objects, SettingsCheckbox) {
 				    new SettingsCheckbox( {fieldlabel: messages["desktopSelectionPolicy"], postChange: this.setDesktopPolicy.bind(this)})  //$NON-NLS-0$
 				];
 				new mSection.Section(this.node, {
-					id: "General", //$NON-NLS-0$
-					title: messages.General,
+					id: "fileNavigation", //$NON-NLS-0$
+					title: messages.fileNavigation,
 					content: '<section class="setting-row" role="region" aria-labelledby="GeneralSettingsTitle" id="setting-row-general">', //$NON-NLS-0$
 				});	
 				
