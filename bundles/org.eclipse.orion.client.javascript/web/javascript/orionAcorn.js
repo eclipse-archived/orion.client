@@ -157,6 +157,17 @@ define([
 		}
 
 		instance.extend("raise", function(nextMethod) {
+			
+			function recordError(errors, error) {
+				var len = errors.length;
+				for (var e = 0; e < len; e++) {
+					var existing = errors[e];
+					if (existing.index === error.index && existing.message === error.message) {
+						return; // do not add duplicate
+					}
+				}
+				errors.push(error);
+			}
 			return function (pos, message) {
 				try {
 					return nextMethod.call(this, pos, message);
@@ -173,8 +184,10 @@ define([
 							that.needReset = false;
 						}
 					}
-					that.errors.push(err);
 					err.index = pos;
+					err.start = pos;
+					err.end = this.input.length >= pos + 1 ? pos + 1 : this.input.length;
+					recordError(that.errors, err);
 					throw err;
 				}
 			};

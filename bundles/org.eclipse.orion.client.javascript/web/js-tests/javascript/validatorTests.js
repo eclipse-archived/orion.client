@@ -271,6 +271,24 @@ define([
 						worker.getTestState().callback(error);
 					});
 			});
+			/**
+			 * 
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=492484
+			 */
+			it("Test broken code", function(callback) {
+				var config = { rules: {} };
+				validate({buffer: "var index, a; if(index===a) {a[index>0index]};", callback: callback, config: config}).then(function (problems) {
+						assertProblems(problems, [
+							{start: 38, 
+							 end: 39, 
+							 severity: 'error', 
+							 description: "Identifier directly after number (1:38)"
+							 }
+						]);
+					}, function (error) {
+						worker.getTestState().callback(error);
+					});
+			});
 			describe("HTML script block validation tests", function(){
 				/*
 				 * Tests that the validator runs correctly on script blocks and wrapped functions in HTML files
