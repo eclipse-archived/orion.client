@@ -84,7 +84,9 @@
       allowImportExportEverywhere: true,
       ecmaVersion: srv.options.ecmaVersion
     }
-    var text = srv.signalReturnFirst("preParse", file.text, options, acorn, acornloose) || file.text
+    var text = srv.signalReturnFirst("preParse", file.text, options) || file.text
+    // ORION: Add parseOptions pass to allow orionAcorn to setup the parser and modify the options
+    srv.signal("parseOptions", text, options, acorn, acornloose);
     var ast = infer.parse(text, options)
     srv.signal("postParse", ast, text)
     return ast

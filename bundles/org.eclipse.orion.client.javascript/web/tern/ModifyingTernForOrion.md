@@ -1,21 +1,25 @@
 ## Updating Tern in Orion
 
-Disable ESLint in tern.js
-
-Include acorn/acorn/acorn_loose in imported modules of tern.js and infer.js
-Pass acorn and acorn loose into the preParse function (orionAcorn) (may be in parseFile of tern.js)
-
-Add the needed functions to tern.js exports:
-
-    exports.findDef = findDef; //ORION
-    exports.findExprType = findExprType; //ORION
-    exports.resolveFile = resolveFile; //ORION
-    exports.storeTypeDocs = storeTypeDocs; //ORION
-    exports.parseDoc = parseDoc; //ORION
-    exports.findRefs = findRefs; // ORION
-    exports.findRefsToProperty = findRefsToProperty; // ORION
-    exports.findRefsToVariable = findRefsToVariable; // ORION
-    exports.ternError = ternError; // ORION
+Fix tern.js:
+- Disable ESLint in tern.js
+- Include acorn/acorn/acorn_loose in imported modules of tern.js and infer.js
+- Add additional pass during parse (after preParse pass is signalled).  Called 'parseOptions' which allows
+orionAcorn to be set up with correct options. The pass must get acorn and acorn_loose passed in. In Tern 16 we participated 
+in the preParse phase, but in Tern 18 the pass is short circuited when our html plugin returns text.
+		var text = srv.signalReturnFirst("preParse", file.text, options) || file.text
+	    // ORION: Add parseOptions pass to allow orionAcorn to setup the parser and modify the options
+	    srv.signal("parseOptions", text, options, acorn, acornloose);
+	    var ast = infer.parse(text, options)
+- Add the needed functions to tern.js exports:
+		exports.findDef = findDef; //ORION
+	    exports.findExprType = findExprType; //ORION
+	    exports.resolveFile = resolveFile; //ORION
+	    exports.storeTypeDocs = storeTypeDocs; //ORION
+	    exports.parseDoc = parseDoc; //ORION
+	    exports.findRefs = findRefs; // ORION
+	    exports.findRefsToProperty = findRefsToProperty; // ORION
+	    exports.findRefsToVariable = findRefsToVariable; // ORION
+	    exports.ternError = ternError; // ORION
 
 New options:
 - Tern 18 - Tern now strips the projectDir from paths so we have to set a projectDir in ternDefaults.js

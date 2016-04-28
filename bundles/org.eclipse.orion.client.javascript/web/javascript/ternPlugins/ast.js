@@ -25,9 +25,11 @@ define([
 		return {
 			passes: {
 				/**
+				 * We use the custom parseOptions event rather than preParse so that we aren't skipped due to other
+				 * plugins contributing to that event (such as the html plugin).
 				 * @callback
 				 */
-				preParse: orionAcorn.preParse.bind(orionAcorn),
+				parseOptions: orionAcorn.preParse.bind(orionAcorn),
 				/**
 				 * @callback
 				 */
