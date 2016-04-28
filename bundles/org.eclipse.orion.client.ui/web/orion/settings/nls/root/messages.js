@@ -34,6 +34,7 @@ define({//Default message bundle
 	"General": "General",
 	"fileNavigation": "File Navigation",
 	"desktopSelectionPolicy": "Desktop selection policy (Ctrl+Click, Shift+Click, Cmd+Click)",
+	"desktopSelectionPolicyTooltip": "The policy applies to the cases when a file or folder link is clicked while Ctrl, Shift or Cmd keys are pressed. The file or folder will be selected if this policy is checked. Otherwise the file or folder link will be opened in a new tab or window as the normal web behavior.",
 	"Navigation": "Navigation",
 	"Font": "Font",
 	"Family": "Family",

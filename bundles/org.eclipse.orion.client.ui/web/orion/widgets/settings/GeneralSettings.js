@@ -20,7 +20,9 @@ function(messages, mSection, lib, objects, SettingsCheckbox) {
 			createSections: function(){
 				/* - desktop selection policy fields ----------------------------------------------------- */
 				this.generalFields = [
-				    new SettingsCheckbox( {fieldlabel: messages["desktopSelectionPolicy"], postChange: this.setDesktopPolicy.bind(this)})  //$NON-NLS-0$
+				    new SettingsCheckbox( {fieldlabel: messages["desktopSelectionPolicy"], 
+				    	fieldTitle: messages["desktopSelectionPolicyTooltip"],
+				    	postChange: this.setDesktopPolicy.bind(this)})  //$NON-NLS-0$
 				];
 				new mSection.Section(this.node, {
 					id: "fileNavigation", //$NON-NLS-0$
