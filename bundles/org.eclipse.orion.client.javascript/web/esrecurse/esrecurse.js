@@ -1,15 +1,12 @@
 /*
   Copyright (C) 2014 Yusuke Suzuki <utatane.tea@gmail.com>
-
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
-
     * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -22,22 +19,19 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /* eslint-env amd */
-/* eslint-disable missing-nls */
+/* eslint-disable missing-nls*/
 define([
-], function() {
-	'use strict';
+	'estraverse/estraverse',
+	'orion/objects'
+], function(estraverse, objects) {
+'use strict';
 
     var isArray,
         objectKeys;
-
-    var estraverse = require('estraverse/estraverse');
-
-    isArray = Array.isArray;
-    if (!isArray) {
-        isArray = function isArray(array) {
-            return Object.prototype.toString.call(array) === '[object Array]';
-        };
-    }
+        
+	isArray = Array.isArray || function isArray(array) {
+		return Object.prototype.toString.call(array) === '[object Array]';
+	};
 
     objectKeys = Object.keys || function (o) {
         var keys = [], key;
@@ -48,7 +42,7 @@ define([
     };
 
     function isNode(node) {
-        if (node == null) {
+        if (node === null) {
             return false;
         }
         return typeof node === 'object' && typeof node.type === 'string';
@@ -58,8 +52,18 @@ define([
         return (nodeType === estraverse.Syntax.ObjectExpression || nodeType === estraverse.Syntax.ObjectPattern) && key === 'properties';
     }
 
-    function Visitor(visitor) {
-        this.__visitor = visitor;
+    function Visitor(visitor, options) {
+        options = options || {};
+
+        this.__visitor = visitor ||  this;
+        this.__childVisitorKeys = options.childVisitorKeys
+            ? objects.mixin({}, estraverse.VisitorKeys, options.childVisitorKeys)
+            : estraverse.VisitorKeys;
+        if (options.fallback === 'iteration') {
+            this.__fallback = objectKeys;
+        } else if (typeof options.fallback === 'function') {
+            this.__fallback = options.fallback;
+        }
     }
 
     /* Default method for visiting children.
@@ -69,21 +73,25 @@ define([
     Visitor.prototype.visitChildren = function (node) {
         var type, children, i, iz, j, jz, child;
 
-        if (node == null) {
+        if (node === null) {
             return;
         }
 
         type = node.type || estraverse.Syntax.Property;
 
-        children = estraverse.VisitorKeys[type];
+        children = this.__childVisitorKeys[type];
         if (!children) {
-            children = objectKeys(node);
+            if (this.__fallback) {
+                children = this.__fallback(node);
+            } else {
+                throw new Error('Unknown node type ' + type + '.');
+            }
         }
 
         for (i = 0, iz = children.length; i < iz; ++i) {
             child = node[children[i]];
             if (child) {
-                if (Array.isArray(child)) {
+                if (isArray(child)) {
                     for (j = 0, jz = child.length; j < jz; ++j) {
                         if (child[j]) {
                             if (isNode(child[j]) || isProperty(type, children[i])) {
@@ -102,7 +110,7 @@ define([
     Visitor.prototype.visit = function (node) {
         var type;
 
-        if (node == null) {
+        if (node === null) {
             return;
         }
 
@@ -115,11 +123,11 @@ define([
     };
 
 	return {
-	    version: '1.2.0',
+	    version: '4.1.0',
 	    Visitor: Visitor,
-	    visit: function (node, visitor) {
-	        var v = new Visitor(visitor);
-	        v.visit(node);
-	    }
+	    visit: function (node, visitor, options) {
+        	var v = new Visitor(visitor, options);
+        	v.visit(node);
+    	}
     };
 });
