@@ -54,19 +54,32 @@ define([
 		 * @returns {orion.Promise} A promise resolving to the AST.
 		 */
 		getAST: function(editorContext) {
-			var _self = this;
 			return editorContext.getFileMetadata().then(function(metadata) {
-				var loc = _self._getKey(metadata);
-				var ast = _self.cache.get(loc);
+				var loc = this._getKey(metadata);
+				var ast = this.cache.get(loc);
 				if (ast) {
 					return new Deferred().resolve(ast);
 				}
 				return editorContext.getText().then(function(text) {
-					ast = _self.parse(text, metadata ? metadata.location : 'unknown'); //$NON-NLS-1$
-					_self.cache.put(loc, ast);
+					var options = Object.create(null);
+					if(this.jsProject) {
+						return this.jsProject.getFile(this.jsProject.TERN_PROJECT).then(function(file) {
+							if(file && file.contents) {
+								var json = JSON.parse(file.contents);
+								if (json) {
+									options.ecmaVersion = json.ecmaVersion;
+								}
+								ast = this.parse(text, metadata ? metadata.location : 'unknown', options); //$NON-NLS-1$
+								this.cache.put(loc, ast);
+								return ast;
+							}
+						}.bind(this));
+					}
+					ast = this.parse(text, metadata ? metadata.location : 'unknown', options); //$NON-NLS-1$
+					this.cache.put(loc, ast);
 					return ast;
-				});
-			});
+				}.bind(this));
+			}.bind(this));
 		},
 		/**
 		 * Returns the key to use when caching
@@ -88,35 +101,14 @@ define([
 		 * @param {String} file The file name that we parsed
 		 * @returns {Object} The AST.
 		 */
-		parse: function(text, file) {
+		parse: function(text, file, options) {
 			this.orionAcorn.initialize();
-			var options = Object.create(null);
 			var start = Date.now();
-			var ast;
-			if (this.jsProject) {
-				return this.jsProject.getFile(this.jsProject.TERN_PROJECT).then(function(file) {
-					if(file && file.contents) {
-						var json = JSON.parse(file.contents);
-						if (json) {
-							options.ecmaVersion = json.ecmaVersion;
-						}
-					}
-					this.orionAcorn.preParse(text, options, acorn, acorn_loose, file);
-					try {
-						ast = acorn.parse(text, options);
-					} catch(e) {
-						ast = acorn_loose.parse_dammit(text, options);
-					}
-					this.orionAcorn.postParse(ast, text);
-					logTiming(Date.now() - start);
-					return ast;
-				}.bind(this));
-			}
 			this.orionAcorn.preParse(text, options, acorn, acorn_loose, file);
 			try {
-				ast = acorn.parse(text, options);
+				var ast = acorn.parse.call(acorn, text, options);
 			} catch(e) {
-				ast = acorn_loose.parse_dammit(text, options);
+				ast = acorn_loose.parse_dammit.call(acorn_loose, text, options);
 			}
 			this.orionAcorn.postParse(ast, text);
 			logTiming(Date.now() - start);
