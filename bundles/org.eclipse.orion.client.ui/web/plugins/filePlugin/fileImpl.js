@@ -500,7 +500,10 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			var timeout = options && options.timeout ? options.timeout : 15000,
 				opts = {
 					timeout: timeout,
-					headers: { "Orion-Version": "1" },
+					headers: {
+						"Orion-Version": "1",
+						"Accept": "application/json, *.*"
+					},
 					log: false
 				};
 			if(options && typeof options.readIfExists === 'boolean') {
