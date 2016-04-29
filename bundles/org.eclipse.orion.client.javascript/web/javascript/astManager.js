@@ -69,10 +69,10 @@ define([
 								if (json) {
 									options.ecmaVersion = json.ecmaVersion;
 								}
-								ast = this.parse(text, metadata ? metadata.location : 'unknown', options); //$NON-NLS-1$
-								this.cache.put(loc, ast);
-								return ast;
 							}
+							ast = this.parse(text, metadata ? metadata.location : 'unknown', options); //$NON-NLS-1$
+							this.cache.put(loc, ast);
+							return ast;
 						}.bind(this));
 					}
 					ast = this.parse(text, metadata ? metadata.location : 'unknown', options); //$NON-NLS-1$
