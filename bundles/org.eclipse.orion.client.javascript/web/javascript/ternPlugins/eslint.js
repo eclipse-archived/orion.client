@@ -40,81 +40,27 @@ define([
 			var len = asterrors.length;
 			for(var i = 0; i < len; i++) {
 				var error = asterrors[i];
-				var token = null;
-				if(error.end && error.token) {
-					token = {range: [error.index, error.end], value: error.token};
-				}
-				else if(ast.tokens.length > 0) {
-					//error object did not contain the token infos, try to find it
-					token = Finder.findToken(error.index, ast.tokens);
-					// check the position of the token
-					var errorLocation = error.loc;
-					var tokenStartLocation = token.loc.start;
-					var tokenEndLocation = token.loc.end;
-					// we use the token only if the existing location is within the token locations
-					if (errorLocation.line < tokenStartLocation.line
-						|| errorLocation.line > tokenEndLocation.line) {
-						token = null;
-					} else if (errorLocation.line === tokenStartLocation.line
-							&& errorLocation.column < tokenStartLocation.column) {
-						token = null;
-					} else if (errorLocation.line === tokenEndLocation.line
-							&& errorLocation.column > tokenEndLocation.column) {
-						token = null;
-					}
-				}
 				var msg = error.message;
 				if(errorMap[error.index] === msg) {
 					continue;
 				}
 				errorMap[error.index] = msg;
-				if(error.type) {
-					var index, message;
-					switch(error.type) {
-						case Util.ErrorTypes.Unexpected:
-							if(token) {
-								error.args = {0: token.value, nls: "syntaxErrorBadToken"}; //$NON-NLS-0$
-								error.message = msg = error.args.nls;
-							} else {
-								// we should trim the location at the end of the error message
-								index = msg.lastIndexOf(" (");
-								message = msg;
-								if (index !== -1) {
-									message = msg.substr(0, index);
-								}
-								error.message = message;
-							}
-							break;
-						case Util.ErrorTypes.EndOfInput:
-							// we should trim the location at the end of the error message
-							index = msg.lastIndexOf(" (");
-							message = msg;
-							if (index !== -1) {
-								message = msg.substr(0, index);
-							}
-							error.message = message;
-							break;
-					}
-				} else if(!error.token) {
-					//an untyped error with no tokens, report the failure
-					error.args = {0: error.message, nls: 'esprimaParseFailure'}; //$NON-NLS-1$
-					error.message = error.args.nls;
-					//use the line number / column
-					delete error.start;
-					delete error.end;
+				var start = error.start;
+				var message = msg;
+				var index = msg.lastIndexOf(" (");
+				if (index !== -1) {
+					message = msg.substr(0, index);
 				}
-				if(token) {
-					error.node = token;
-					if(token.value) {
-						if(!error.args) {
-							error.args = Object.create(null);
-						}
-						if(!error.args.data) {
-							error.args.data = Object.create(null);
-						}
-						error.args.data.tokenValue = token.value;
+				if(start === error.end && ast.tokens.length > 0) {
+					//error object did not contain the token infos, try to find it
+					var token = Finder.findToken(error.index, ast.tokens);
+					if (token.range && token.range[1] === start) {
+						error.start = token.range[0];
+						error.args = {0: message, nls: 'syntaxErrorBadToken'}; //$NON-NLS-1$
+						message = error.args.nls;
 					}
 				}
+				error.message = message;
 				errors.push(error);
 			}
 		}

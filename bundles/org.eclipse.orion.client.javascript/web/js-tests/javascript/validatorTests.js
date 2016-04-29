@@ -129,7 +129,7 @@ define([
 							{start: 0,
 							 end: 8,
 							 severity: 'error',
-							 description: 'Unexpected token'
+							 description: 'Syntax error after this token: \'Unexpected token\''
 							}
 						]);
 					}, function (error) {
@@ -144,7 +144,7 @@ define([
 							{start: 14,
 							 end: 22,
 							 severity: 'error',
-							 description: 'Unexpected token'
+							 description: 'Syntax error after this token: \'Unexpected token\''
 							}
 						]);
 					}, function (error) {
@@ -159,7 +159,7 @@ define([
 							{start: 0, 
 							 end: 1, 
 							 severity: 'error', 
-							 description: "Unterminated regular expression"
+							 description: "Syntax error after this token: \'Unterminated regular expression\'"
 							 }
 						]);
 					}, function (error) {
@@ -174,12 +174,12 @@ define([
 				validate({buffer: "var v1 = foo(`bar),\n\tv2;", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
 							{start: 14, 
-							 end: 19, 
+							 end: 15, 
 							 severity: 'error', 
 							 description: "Unterminated template"
 							 },
 							{start: 19, 
-							 end: 24, 
+							 end: 20, 
 							 severity: 'error', 
 							 description: "Unterminated template"
 							 }
@@ -197,12 +197,12 @@ define([
 				validate({buffer: "var v1 = foo(`bar),\nv2;", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
 							{start: 14, 
-							 end: 19, 
+							 end: 15, 
 							 severity: 'error', 
 							 description:"Unterminated template"
 							 },
 							{start: 19, 
-							 end: 23, 
+							 end: 20, 
 							 severity: 'error', 
 							 description: "Unterminated template"
 							 }
@@ -221,7 +221,7 @@ define([
 						assertProblems(problems, [
 							{
 							 start: 14, 
-							 end: 22, 
+							 end: 15, 
 							 severity: 'error', 
 							 description: "Unterminated template"
 							 }
@@ -239,12 +239,12 @@ define([
 				validate({buffer: "var v1 = foo(`bar),\n\t\tv2;", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
 							{start: 14, 
-							 end: 19, 
+							 end: 15, 
 							 severity: 'error', 
 							 description: "Unterminated template"
 							},
 							{start: 19, 
-							 end: 25, 
+							 end: 20, 
 							 severity: 'error',
 							 description: "Unterminated template"
 							}
@@ -262,7 +262,7 @@ define([
 				validate({buffer: "var v1 = foo(`bar);", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
 							{start: 14, 
-							 end: 19, 
+							 end: 15, 
 							 severity: 'error', 
 							 description: "Unterminated template"
 							 }
@@ -1323,7 +1323,7 @@ define([
 								assertProblems(problems, [{
 										id: "syntaxErrorBadToken",
 										severity: 'error',
-										description: "Syntax error on token '}', delete this token."
+										description: "Unexpected token"
 								}]);
 							},
 							function (error) {
