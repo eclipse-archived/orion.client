@@ -9,7 +9,6 @@
  ******************************************************************************/
 /* eslint-env amd */
 define({
-    'syntaxErrorBadToken': 'Syntax error after this token: \'${0}\'',
     'eslintValidationFailure': 'ESLint failed to validate this file because an error occurred: ${0}',
 	'check-tern-plugin': 'To get support for the \'${0}\' environment, the \'${1}\' plugin must be started. \'${1}\' has not been set in the plugins entry of your .tern-project file.',
     'check-tern-project' : 'File should be added to the .tern-project file',

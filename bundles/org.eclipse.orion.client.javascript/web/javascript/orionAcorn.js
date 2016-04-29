@@ -12,7 +12,7 @@
 /*eslint-env amd*/
 define([
 	'javascript/util',
-], function( Util) {
+], function(Util) {
 	
 	function OrionAcorn() {
 		this.dependencies = {};
@@ -186,11 +186,6 @@ define([
 					return nextMethod.call(this, pos, message);
 				} catch(err) {
 					if (err instanceof SyntaxError) {
-						if (this.pos === this.input.length) {
-							err.type = Util.ErrorTypes.EndOfInput;
-						} else {
-							err.type = Util.ErrorTypes.Unexpected;
-						}
 						if (that.needReset) {
 							// we only reset tokens once. We don't want to reset them again when the syntax error is thrown during acorn_loose parsing
 							that.reset();

@@ -13,21 +13,6 @@
 define([
 ], function() {
 	/**
-	 * @description Object of error types
-	 * @since 5.0
-	 */
-	var ErrorTypes = {
-		/**
-		 * @description Something unexpected has been found while parsing, most commonly a syntax error
-		 */
-		Unexpected: 1,
-		/**
-		 * @description A Syntax problem that reports the last entered token as the problem
-		 */
-		EndOfInput: 2
-	};
-	
-	/**
 	 * @description Returns if the given character is upper case or not considering the locale
 	 * @param {String} string A string of at least one char14acter
 	 * @return {Boolean} True iff the first character of the given string is uppercase
@@ -191,14 +176,6 @@ define([
 				}
 				var msg = error.message;
 				result.message = msg = msg.replace(/^Line \d+: /, '');
-				if (typeof result.type === "undefined") {
-					if(/^Unexpected/.test(msg)) {
-						result.type = ErrorTypes.Unexpected;
-						if(/end of input$/.test(msg)) {
-							result.type = ErrorTypes.EndOfInput;
-						}
-					}
-				}
 				errors.push(result);
 			});
 		}
@@ -211,7 +188,6 @@ define([
 		startsWith: startsWith,
 		toCamelCaseParts: toCamelCaseParts,
 		errorAST: errorAST,
-		serializeAstErrors: serializeAstErrors,
-		ErrorTypes : ErrorTypes
+		serializeAstErrors: serializeAstErrors
 	};
 });

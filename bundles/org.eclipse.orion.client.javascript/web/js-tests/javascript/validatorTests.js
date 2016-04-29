@@ -129,7 +129,7 @@ define([
 							{start: 0,
 							 end: 8,
 							 severity: 'error',
-							 description: 'Syntax error after this token: \'Unexpected token\''
+							 description: 'Unexpected token'
 							}
 						]);
 					}, function (error) {
@@ -144,7 +144,7 @@ define([
 							{start: 14,
 							 end: 22,
 							 severity: 'error',
-							 description: 'Syntax error after this token: \'Unexpected token\''
+							 description: 'Unexpected token'
 							}
 						]);
 					}, function (error) {
@@ -159,7 +159,7 @@ define([
 							{start: 0, 
 							 end: 1, 
 							 severity: 'error', 
-							 description: "Syntax error after this token: \'Unterminated regular expression\'"
+							 description: "Unterminated regular expression"
 							 }
 						]);
 					}, function (error) {

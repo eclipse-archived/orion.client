@@ -56,8 +56,6 @@ define([
 					var token = Finder.findToken(error.index, ast.tokens);
 					if (token.range && token.range[1] === start) {
 						error.start = token.range[0];
-						error.args = {0: message, nls: 'syntaxErrorBadToken'}; //$NON-NLS-1$
-						message = error.args.nls;
 					}
 				}
 				error.message = message;
