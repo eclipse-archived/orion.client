@@ -47,6 +47,21 @@ define([
 				else if(ast.tokens.length > 0) {
 					//error object did not contain the token infos, try to find it
 					token = Finder.findToken(error.index, ast.tokens);
+					// check the position of the token
+					var errorLocation = error.loc;
+					var tokenStartLocation = token.loc.start;
+					var tokenEndLocation = token.loc.end;
+					// we use the token only if the existing location is within the token locations
+					if (errorLocation.line < tokenStartLocation.line
+						|| errorLocation.line > tokenEndLocation.line) {
+						token = null;
+					} else if (errorLocation.line === tokenStartLocation.line
+							&& errorLocation.column < tokenStartLocation.column) {
+						token = null;
+					} else if (errorLocation.line === tokenEndLocation.line
+							&& errorLocation.column > tokenEndLocation.column) {
+						token = null;
+					}
 				}
 				var msg = error.message;
 				if(errorMap[error.index] === msg) {
@@ -61,6 +76,7 @@ define([
 								error.args = {0: token.value, nls: "syntaxErrorBadToken"}; //$NON-NLS-0$
 								error.message = msg = error.args.nls;
 							} else {
+								// we should trim the location at the end of the error message
 								index = msg.lastIndexOf(" (");
 								message = msg;
 								if (index !== -1) {

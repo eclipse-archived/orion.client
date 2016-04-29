@@ -157,7 +157,7 @@ define([
 				validate({buffer: "/", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
 							{start: 0, 
-							 end: 2, 
+							 end: 1, 
 							 severity: 'error', 
 							 description: "Unterminated regular expression"
 							 }

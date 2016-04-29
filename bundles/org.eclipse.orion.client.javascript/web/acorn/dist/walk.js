@@ -217,11 +217,12 @@ base.ThrowStatement = base.SpreadElement = function (node, st, c) {
 };
 base.TryStatement = function (node, st, c) {
   c(node.block, st, "Statement");
-  if (node.handler) {
-    c(node.handler.param, st, "Pattern");
-    c(node.handler.body, st, "ScopeBody");
-  }
+  if (node.handler) c(node.handler, st);
   if (node.finalizer) c(node.finalizer, st, "Statement");
+};
+base.CatchClause = function (node, st, c) {
+  c(node.param, st, "Pattern");
+  c(node.body, st, "ScopeBody");
 };
 base.WhileStatement = base.DoWhileStatement = function (node, st, c) {
   c(node.test, st, "Expression");
@@ -368,14 +369,6 @@ base.MethodDefinition = base.Property = function (node, st, c) {
   if (node.computed) c(node.key, st, "Expression");
   c(node.value, st, "Expression");
 };
-base.ComprehensionExpression = function (node, st, c) {
-  for (var i = 0; i < node.blocks.length; i++) {
-    c(node.blocks[i].right, st, "Expression");
-  }c(node.body, st, "Expression");
-};
-
-//ORION
-base.RecoveredNode = ignore;
 
 },{}]},{},[1])(1)
 });

@@ -86,11 +86,6 @@ define([
     	 */
     	var scriptresolver = new ScriptResolver.ScriptResolver(serviceRegistry);
     	
-    	/**
-    	 * Create the AST manager
-    	 */
-    	var astManager = new ASTManager.ASTManager(serviceRegistry);
-
 		var ternReady = false,
 			workerReady = false,
 			pendingStart,
@@ -231,6 +226,12 @@ define([
 	});
 	
 	jsProject.addHandler(ternProjectManager);
+
+	/**
+	 * Create the AST manager
+	 */
+	var astManager = new ASTManager.ASTManager(serviceRegistry, jsProject);
+
 
 	/**
 	 * @description Handler for Tern read requests

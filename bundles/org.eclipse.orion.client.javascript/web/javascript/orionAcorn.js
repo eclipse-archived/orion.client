@@ -91,12 +91,26 @@ define([
 				}
 		}
 		if (!eof) {
-			if (typeof value === "undefined") {
-				token.value = label;
+			var start = token.start;
+			var end = token.end;
+			if (start >= end) return; // handle recovered tokens
+			var result = Object.create(null);
+			result.type = type;
+			result.index = this.tokens.length;
+			if (token.range) {
+				result.range = token.range;
 			}
-			token.type = type;
-			token.index = this.tokens.length;
-			this.tokens.push(token);
+			if (token.loc) {
+				result.loc = token.loc;
+			}
+			result.start = start;
+			result.end = end;
+			if (typeof value === "undefined") {
+				result.value = label;
+			} else {
+				result.value = token.value;
+			}
+			this.tokens.push(result);
 		}
 	};
 	
@@ -157,7 +171,6 @@ define([
 		}
 
 		instance.extend("raise", function(nextMethod) {
-			
 			function recordError(errors, error) {
 				var len = errors.length;
 				for (var e = 0; e < len; e++) {
@@ -335,6 +348,13 @@ define([
 					that.trailingCommentsIndex = i;
 				}
 				result.sourceFile = that.sourceFile;
+				if (result.end > that.sourceFile.text.length) {
+					var actualEnd = that.sourceFile.text.length;
+					result.end = actualEnd;
+					if (result.range) {
+						result.range[1] = actualEnd;
+					}
+				}
 				return result;
 			};
 		});

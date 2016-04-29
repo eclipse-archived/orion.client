@@ -27,9 +27,10 @@ define([
 	 * @param {Object} esprima The esprima parser that this ASTManager will use.
 	 * @param {Object} serviceRegistry The platform service registry
 	 */
-	function ASTManager(serviceRegistry) {
+	function ASTManager(serviceRegistry, jsProject) {
 		this.cache = new LRU(10);
 		this.orionAcorn = new OrionAcorn();
+		this.jsProject = jsProject;
 		registry = serviceRegistry;
 	}
 	
@@ -89,9 +90,28 @@ define([
 		 */
 		parse: function(text, file) {
 			this.orionAcorn.initialize();
+			var options = Object.create(null);
 			var start = Date.now();
 			var ast;
-			var options = Object.create(null);
+			if (this.jsProject) {
+				return this.jsProject.getFile(this.jsProject.TERN_PROJECT).then(function(file) {
+					if(file && file.contents) {
+						var json = JSON.parse(file.contents);
+						if (json) {
+							options.ecmaVersion = json.ecmaVersion;
+						}
+					}
+					this.orionAcorn.preParse(text, options, acorn, acorn_loose, file);
+					try {
+						ast = acorn.parse(text, options);
+					} catch(e) {
+						ast = acorn_loose.parse_dammit(text, options);
+					}
+					this.orionAcorn.postParse(ast, text);
+					logTiming(Date.now() - start);
+					return ast;
+				}.bind(this));
+			}
 			this.orionAcorn.preParse(text, options, acorn, acorn_loose, file);
 			try {
 				ast = acorn.parse(text, options);

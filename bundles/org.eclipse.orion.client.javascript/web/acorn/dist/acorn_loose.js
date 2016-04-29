@@ -53,6 +53,19 @@ lp.parseParenExpression = function () {
 };
 
 lp.parseMaybeAssign = function (noIn) {
+  if (this.toks.isContextual("yield")) {
+    var node = this.startNode();
+    this.next();
+    if (this.semicolon() || this.canInsertSemicolon() || this.tok.type != _.tokTypes.star && !this.tok.type.startsExpr) {
+      node.delegate = false;
+      node.argument = null;
+    } else {
+      node.delegate = this.eat(_.tokTypes.star);
+      node.argument = this.parseMaybeAssign();
+    }
+    return this.finishNode(node, "YieldExpression");
+  }
+
   var start = this.storeCurrentPos();
   var left = this.parseMaybeConditional(noIn);
   if (this.tok.type.isAssign) {
@@ -83,7 +96,7 @@ lp.parseExprOps = function (noIn) {
   var start = this.storeCurrentPos();
   var indent = this.curIndent,
       line = this.curLineStart;
-  return this.parseExprOp(this.parseMaybeUnary(noIn), start, -1, noIn, indent, line);
+  return this.parseExprOp(this.parseMaybeUnary(false), start, -1, noIn, indent, line);
 };
 
 lp.parseExprOp = function (left, start, minPrec, noIn, indent, line) {
@@ -99,7 +112,7 @@ lp.parseExprOp = function (left, start, minPrec, noIn, indent, line) {
         node.right = this.dummyIdent();
       } else {
         var rightStart = this.storeCurrentPos();
-        node.right = this.parseExprOp(this.parseMaybeUnary(noIn), rightStart, prec, noIn, indent, line);
+        node.right = this.parseExprOp(this.parseMaybeUnary(false), rightStart, prec, noIn, indent, line);
       }
       this.finishNode(node, /&&|\|\|/.test(node.operator) ? "LogicalExpression" : "BinaryExpression");
       return this.parseExprOp(node, start, minPrec, noIn, indent, line);
@@ -108,32 +121,44 @@ lp.parseExprOp = function (left, start, minPrec, noIn, indent, line) {
   return left;
 };
 
-lp.parseMaybeUnary = function (noIn) {
+lp.parseMaybeUnary = function (sawUnary) {
+  var start = this.storeCurrentPos(),
+      expr = undefined;
   if (this.tok.type.prefix) {
     var node = this.startNode(),
         update = this.tok.type === _.tokTypes.incDec;
+    if (!update) sawUnary = true;
     node.operator = this.tok.value;
     node.prefix = true;
     this.next();
-    node.argument = this.parseMaybeUnary(noIn);
+    node.argument = this.parseMaybeUnary(true);
     if (update) node.argument = this.checkLVal(node.argument);
-    return this.finishNode(node, update ? "UpdateExpression" : "UnaryExpression");
+    expr = this.finishNode(node, update ? "UpdateExpression" : "UnaryExpression");
   } else if (this.tok.type === _.tokTypes.ellipsis) {
     var node = this.startNode();
     this.next();
-    node.argument = this.parseMaybeUnary(noIn);
-    return this.finishNode(node, "SpreadElement");
+    node.argument = this.parseMaybeUnary(sawUnary);
+    expr = this.finishNode(node, "SpreadElement");
+  } else {
+    expr = this.parseExprSubscripts();
+    while (this.tok.type.postfix && !this.canInsertSemicolon()) {
+      var node = this.startNodeAt(start);
+      node.operator = this.tok.value;
+      node.prefix = false;
+      node.argument = this.checkLVal(expr);
+      this.next();
+      expr = this.finishNode(node, "UpdateExpression");
+    }
   }
-  var start = this.storeCurrentPos();
-  var expr = this.parseExprSubscripts();
-  while (this.tok.type.postfix && !this.canInsertSemicolon()) {
+
+  if (!sawUnary && this.eat(_.tokTypes.starstar)) {
     var node = this.startNodeAt(start);
-    node.operator = this.tok.value;
-    node.prefix = false;
-    node.argument = this.checkLVal(expr);
-    this.next();
-    expr = this.finishNode(node, "UpdateExpression");
+    node.operator = "**";
+    node.left = expr;
+    node.right = this.parseMaybeUnary(false);
+    return this.finishNode(node, "BinaryExpression");
   }
+
   return expr;
 };
 
@@ -251,18 +276,6 @@ lp.parseExprAtom = function () {
 
     case _.tokTypes._new:
       return this.parseNew();
-
-    case _.tokTypes._yield:
-      node = this.startNode();
-      this.next();
-      if (this.semicolon() || this.canInsertSemicolon() || this.tok.type != _.tokTypes.star && !this.tok.type.startsExpr) {
-        node.delegate = false;
-        node.argument = null;
-      } else {
-        node.delegate = this.eat(_.tokTypes.star);
-        node.argument = this.parseMaybeAssign();
-      }
-      return this.finishNode(node, "YieldExpression");
 
     case _.tokTypes.backQuote:
       return this.parseTemplate();
@@ -786,11 +799,16 @@ lp.parseTopLevel = function () {
 
 lp.parseStatement = function () {
   var starttype = this.tok.type,
-      node;
+      node = this.startNode(),
+      kind = undefined;
+
+  if (this.toks.isLet()) {
+    starttype = _.tokTypes._var;
+    kind = "let";
+  }
 
   switch (starttype) {
     case _.tokTypes._break:case _.tokTypes._continue:
-      node = this.startNode();
       this.next();
       var isBreak = starttype === _.tokTypes._break;
       if (this.semicolon() || this.canInsertSemicolon()) {
@@ -802,13 +820,11 @@ lp.parseStatement = function () {
       return this.finishNode(node, isBreak ? "BreakStatement" : "ContinueStatement");
 
     case _.tokTypes._debugger:
-    	  node = this.startNode();
       this.next();
       this.semicolon();
       return this.finishNode(node, "DebuggerStatement");
 
     case _.tokTypes._do:
-      node = this.startNode();
       this.next();
       node.body = this.parseStatement();
       node.test = this.eat(_.tokTypes._while) ? this.parseParenExpression() : this.dummyIdent();
@@ -816,13 +832,13 @@ lp.parseStatement = function () {
       return this.finishNode(node, "DoWhileStatement");
 
     case _.tokTypes._for:
-      node = this.startNode();
       this.next();
       this.pushCx();
       this.expect(_.tokTypes.parenL);
       if (this.tok.type === _.tokTypes.semi) return this.parseFor(node, null);
-      if (this.tok.type === _.tokTypes._var || this.tok.type === _.tokTypes._let || this.tok.type === _.tokTypes._const) {
-        var _init = this.parseVar(true);
+      var isLet = this.toks.isLet();
+      if (isLet || this.tok.type === _.tokTypes._var || this.tok.type === _.tokTypes._const) {
+        var _init = this.parseVar(true, isLet ? "let" : this.tok.value);
         if (_init.declarations.length === 1 && (this.tok.type === _.tokTypes._in || this.isContextual("of"))) {
           return this.parseForIn(node, _init);
         }
@@ -833,12 +849,10 @@ lp.parseStatement = function () {
       return this.parseFor(node, init);
 
     case _.tokTypes._function:
-      node = this.startNode();
       this.next();
       return this.parseFunction(node, true);
 
     case _.tokTypes._if:
-      node = this.startNode();
       this.next();
       node.test = this.parseParenExpression();
       node.consequent = this.parseStatement();
@@ -846,7 +860,6 @@ lp.parseStatement = function () {
       return this.finishNode(node, "IfStatement");
 
     case _.tokTypes._return:
-      node = this.startNode();
       this.next();
       if (this.eat(_.tokTypes.semi) || this.canInsertSemicolon()) node.argument = null;else {
         node.argument = this.parseExpression();this.semicolon();
@@ -854,7 +867,6 @@ lp.parseStatement = function () {
       return this.finishNode(node, "ReturnStatement");
 
     case _.tokTypes._switch:
-      node = this.startNode();
       var blockIndent = this.curIndent,
           line = this.curLineStart;
       this.next();
@@ -888,14 +900,12 @@ lp.parseStatement = function () {
       return this.finishNode(node, "SwitchStatement");
 
     case _.tokTypes._throw:
-      node = this.startNode();
       this.next();
       node.argument = this.parseExpression();
       this.semicolon();
       return this.finishNode(node, "ThrowStatement");
 
     case _.tokTypes._try:
-      node = this.startNode();
       this.next();
       node.block = this.parseBlock();
       node.handler = null;
@@ -913,19 +923,16 @@ lp.parseStatement = function () {
       return this.finishNode(node, "TryStatement");
 
     case _.tokTypes._var:
-    case _.tokTypes._let:
     case _.tokTypes._const:
-      return this.parseVar();
+      return this.parseVar(false, kind || this.tok.value);
 
     case _.tokTypes._while:
-      node = this.startNode();
       this.next();
       node.test = this.parseParenExpression();
       node.body = this.parseStatement();
       return this.finishNode(node, "WhileStatement");
 
     case _.tokTypes._with:
-      node = this.startNode();
       this.next();
       node.object = this.parseParenExpression();
       node.body = this.parseStatement();
@@ -935,7 +942,6 @@ lp.parseStatement = function () {
       return this.parseBlock();
 
     case _.tokTypes.semi:
-      node = this.startNode();
       this.next();
       return this.finishNode(node, "EmptyStatement");
 
@@ -949,7 +955,6 @@ lp.parseStatement = function () {
       return this.parseExport();
 
     default:
-      node = this.startNode();
       var expr = this.parseExpression();
       if (_parseutil.isDummy(expr)) {
         this.next();
@@ -1002,9 +1007,9 @@ lp.parseForIn = function (node, init) {
   return this.finishNode(node, type);
 };
 
-lp.parseVar = function (noIn) {
+lp.parseVar = function (noIn, kind) {
   var node = this.startNode();
-  node.kind = this.tok.type.keyword;
+  node.kind = kind;
   this.next();
   node.declarations = [];
   do {
@@ -1113,7 +1118,7 @@ lp.parseExport = function () {
     this.semicolon();
     return this.finishNode(node, "ExportDefaultDeclaration");
   }
-  if (this.tok.type.keyword) {
+  if (this.tok.type.keyword || this.toks.isLet()) {
     node.declaration = this.parseStatement();
     node.specifiers = [];
     node.source = null;
@@ -1166,7 +1171,7 @@ lp.parseImportSpecifierList = function () {
     while (!this.closes(_.tokTypes.braceR, indent + (this.curLineStart <= continuedLine ? 1 : 0), line)) {
       var elt = this.startNode();
       if (this.eat(_.tokTypes.star)) {
-        if (this.eatContextual("as")) elt.local = this.parseIdent();
+        elt.local = this.eatContextual("as") ? this.parseIdent() : this.dummyIdent();
         this.finishNode(elt, "ImportNamespaceSpecifier");
       } else {
         if (this.isContextual("from")) break;
@@ -1250,7 +1255,7 @@ lp.readToken = function () {
           pos = e.raisedAt,
           replace = true;
       if (/unterminated/i.test(msg)) {
-        pos = this.lineEnd(e.pos+1);
+        pos = this.lineEnd(e.pos + 1);
         if (/string/.test(msg)) {
           replace = { start: e.pos, end: pos, type: _.tokTypes.string, value: this.input.slice(e.pos + 1, pos) };
         } else if (/regular expr/i.test(msg)) {
@@ -1258,7 +1263,8 @@ lp.readToken = function () {
           try {
             re = new RegExp(re);
           } catch (e) {}
-          replace = { start: e.pos, end: pos, type: _.tokTypes.regexp, value: re };
+          // ORION
+          replace = { start: e.pos - 1, end: pos, type: _.tokTypes.regexp, value: re };
         } else if (/template/.test(msg)) {
           replace = { start: e.pos, end: pos,
             type: _.tokTypes.template,
@@ -1284,12 +1290,32 @@ lp.readToken = function () {
       this.resetTo(pos);
       if (replace === true) replace = { start: pos, end: pos, type: _.tokTypes.name, value: "✖" };
       if (replace) {
-        if (this.options.locations) replace.loc = new _.SourceLocation(this.toks, _.getLineInfo(this.input, replace.start), 	_.getLineInfo(this.input, replace.end));
-        //ORION
-        this.toks.start = replace.start;
-        this.toks.end = replace.end;
-        this.toks.type = replace.type;
-        this.toks.value = replace.value;
+        if (this.options.locations) replace.loc = new _.SourceLocation(this.toks, _.getLineInfo(this.input, replace.start), _.getLineInfo(this.input, replace.end));
+        // start of ORION changes
+        // adjust the token end position
+        if (this.options.onToken) {
+	        var start = replace.start;
+	        if (this.options.ranges) replace.range = [replace.start, replace.end];
+			var end = replace.end;
+	        if (end > this.input.length) {
+	        	  end = this.input.length;
+	        }
+	        if (start < end) {
+		        var fakeToken = Object.create(null);
+		        fakeToken.type = replace.type;
+		        fakeToken.value = replace.value;
+		        if (replace.range) {
+		          fakeToken.range = [start, end];
+		        }
+		        if (replace.loc) {
+		          fakeToken.loc = replace.loc;
+		        }
+		        fakeToken.start = start;
+		        fakeToken.end = end;
+		        this.options.onToken(fakeToken);
+	        }
+        }
+        // end orion changes
         return replace;
       }
     }
