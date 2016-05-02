@@ -61,7 +61,8 @@ define([
 		},
 		
 		
-		defaultOptions: function(parentId) {
+		defaultOptions: function(options) {
+			var parentId = options.parent;
 			var model = new mTextModel.TextModel();
 			var id = idCounter.toString();
 			var context = Object.create(null);
@@ -78,6 +79,7 @@ define([
 				contentTypeRegistry: this._contentTypeRegistry,
 				editorCommands: this._editorCommands,
 				editorConfig: this._editorConfig,
+				statusReporter: options.statusReporter,
 				progressService: this._progressService,
 				inputManager: this._inputManager, // fake it
 				fileService: this._fileClient, // fake it
@@ -96,7 +98,7 @@ define([
 		
 		createEditor: function(options, startupOptions) {
 			this.createInputManager();
-			this.editorView = new mEditorView.EditorView(this.defaultOptions(options.parent));
+			this.editorView = new mEditorView.EditorView(this.defaultOptions(options));
 			idCounter++;
 			this.editorView.create();
 			this._inputManager.editor = this.editorView.editor;

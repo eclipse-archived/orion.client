@@ -40,7 +40,7 @@ Deferred) {
 	var embeddedEditor = new mEmbeddedEditor({
 		_defaultPlugins: defaultPluginURLs,
 		//defaultPlugins: [],
-		//editorConfig: {showWhitespaces: true, zoomRuler: true, zoomRulerLocalVisible: true},
+		editorConfig: {showWhitespaces: true, zoomRuler: true, zoomRulerLocalVisible: true},
 		toolbarId: "__toolbar__"/*,
 		userPlugins:["editorCommandsPlugin.html"]*/});
 	var cto = {
@@ -120,7 +120,18 @@ Deferred) {
 		} 
 		return new Deferred().resolve(oc);
 	}
-	embeddedEditor.create({parent: "embeddedEditor"}).then(function(editorViewer) {
+	
+	var statusReporter = function(message, type, isAccessible) {
+		if (type === "progress") {
+			console.log( "Progress message: " + message);
+		} else if (type === "error") { //$NON-NLS-0$
+			console.log( "Error message: " + message);
+		} else {
+			console.log( "Normal message: " + message);
+		}
+	};
+	
+	embeddedEditor.create({parent: "embeddedEditor", statusReporter: statusReporter}).then(function(editorViewer) {
 		document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 		editorViewer.setContents(contents, "application/javascript");
 		//editorViewer.inputManager.setAutoSaveTimeout(-1);
