@@ -13,6 +13,15 @@
 define([
 	'orion/EventTarget',
 ], function(EventTarget) {
+	function mergeSettings(defaults, settings) {
+		for (var property in defaults) {
+			if (!settings.hasOwnProperty(property)) {
+				settings[property] = defaults[property];
+			}
+		}
+		return settings;
+	}
+	
 	function CommonPreferences(preferences, callback) {
 		this._preferences = preferences;
 		EventTarget.attach(this);
@@ -32,12 +41,7 @@ define([
 		_initialize: function(prefs) {
 			var settings = prefs[this.getPrefsKey()] || {};
 			var defaults = this.getDefaults();
-			for (var property in defaults) {
-				if (!settings.hasOwnProperty(property)) {
-					settings[property] = defaults[property];
-				}
-			}
-			return settings;
+			return mergeSettings(defaults, settings);
 		},
 		getDefaults: function() {
 			return {};
@@ -73,5 +77,6 @@ define([
 		}
 	};
 
-	return { CommonPreferences: CommonPreferences };
+	return { CommonPreferences: CommonPreferences,
+			 mergeSettings: mergeSettings};
 });

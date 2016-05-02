@@ -43,6 +43,7 @@ define([
 	'orion/Deferred',
 	'orion/webui/contextmenu',
 	'orion/metrics',
+	'orion/commonPreferences',
 	'orion/objects'
 ], function(
 	messages,
@@ -52,7 +53,7 @@ define([
 	mDispatcher, EditorContext, Highlight,
 	mMarkOccurrences, mSyntaxchecker, LiveEditSession,
 	mProblems, mBlamer, mDiffer,
-	mKeyBinding, util, Deferred, mContextMenu, mMetrics, objects
+	mKeyBinding, util, Deferred, mContextMenu, mMetrics, mCommonPreferences, objects
 ) {
 	var fPattern = "/__embed/"; //$NON-NLS-1$
 	var Dispatcher = mDispatcher.Dispatcher;
@@ -120,6 +121,7 @@ define([
 			}.bind(this));
 		}
 		this.settings = {};
+		this._editorConfig = options.editorConfig;
 		this._init();
 	}
 	EditorView.prototype = /** @lends orion.EditorView.prototype */ {
@@ -215,8 +217,10 @@ define([
 			var inputManager = this.inputManager;
 			inputManager.setAutoLoadEnabled(prefs.autoLoad);
 			inputManager.setAutoSaveTimeout(prefs.autoSave ? prefs.autoSaveTimeout : -1);
-			inputManager.setSaveDiffsEnabled(prefs.saveDiffs);
-			this.differ.setEnabled(this.settings.diffService);
+			if(this.differ) {
+				inputManager.setSaveDiffsEnabled(prefs.saveDiffs);
+				this.differ.setEnabled(this.settings.diffService);
+			}
 			this.updateStyler(prefs);
 			var textView = editor.getTextView();
 			if (textView) {
@@ -592,6 +596,9 @@ define([
 			this.editor.install();
 			if(this.editorPreferences) {
 				this.editorPreferences.getPrefs(this.updateSettings.bind(this));
+			} else if(this._editorConfig) {
+				var prefs = mCommonPreferences.mergeSettings(this._editorConfig, {});
+				this.updateSettings(prefs);
 			}
 			
 			// Create a context menu...

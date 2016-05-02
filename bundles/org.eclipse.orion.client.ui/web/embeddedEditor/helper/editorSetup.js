@@ -36,6 +36,7 @@ define([
 		this._editorCommands = options.editorCommands;
 		this._progressService = options.progressService;
 		this._toolbarId = options.toolbarId;
+		this._editorConfig = options.editorConfig;
 	}
 	
 	objects.mixin(EditorSetupHelper.prototype, /** @lends orion.editor.EditorSetupHelper.prototype */ {
@@ -76,6 +77,7 @@ define([
 				commandRegistry: this._commandRegistry,
 				contentTypeRegistry: this._contentTypeRegistry,
 				editorCommands: this._editorCommands,
+				editorConfig: this._editorConfig,
 				progressService: this._progressService,
 				inputManager: this._inputManager, // fake it
 				fileService: this._fileClient, // fake it
@@ -98,7 +100,6 @@ define([
 			idCounter++;
 			this.editorView.create();
 			this._inputManager.editor = this.editorView.editor;
-			this._inputManager.setAutoSaveTimeout(300);
 			
 			var domNode = lib.node(options.parent);
 			domNode.addEventListener("mousedown", function() { //$NON-NLS-0$

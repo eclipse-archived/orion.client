@@ -18,6 +18,8 @@ define([
 	'embeddedEditor/helper/editorSetup',
 	'orion/serviceregistry',
 	'orion/Deferred',
+	'orion/commonPreferences',
+	'orion/defaultEditorPreferences',
 	'orion/objects'
 ], function(
 	mCommandRegistry,
@@ -28,6 +30,8 @@ define([
 	mEditorSetup,
 	mServiceRegistry, 
 	Deferred,
+	mCommonPreferences,
+	mDefaultEditorPreferences,
 	objects
 ) {
 	function CodeEdit(options) {
@@ -60,6 +64,8 @@ define([
 				toolbarId: this._toolbarId,
 				navToolbarId: this._toolbarId
 			});
+			this._editorConfig = this._startupOptions && this._startupOptions.editorConfig ? this._startupOptions.editorConfig : {};
+			mCommonPreferences.mergeSettings(mDefaultEditorPreferences.defaults, this._editorConfig);
 			this._progressService = {
 				progress: function(deferred/*, operationName, progressMonitor*/){
 					return deferred;
@@ -102,6 +108,7 @@ define([
 						fileClient: this._fileClient,
 						contentTypeRegistry: this.contentTypeRegistry,
 						editorCommands: this._editorCommands,
+						editorConfig: this._editorConfig,
 						progressService: this._progressService,
 						toolbarId: this._toolbarId
 					});
