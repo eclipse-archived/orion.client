@@ -484,7 +484,7 @@ define([
 		_preventLinkBehavior: function(linkNode) {
 			linkNode.addEventListener("click", function(evt) {
 	            this.explorer.isDesktopSelectionMode().then(function(desktopMode){
-	            	if(desktopMode && (evt.shiftKey || evt.ctrlKey)) {
+	            	if(desktopMode && (evt.shiftKey || evt.ctrlKey || evt.metaKey)) {
 	            		evt.preventDefault();
 	            	}
 	            });
