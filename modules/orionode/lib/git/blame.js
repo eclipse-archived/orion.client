@@ -57,7 +57,7 @@ function getBlame(req, res) {
 			res.status(200).json(sendingBlamejason);
 		});
 	}).catch(function(err){
-		writeError(403, res);
+		writeError(403, res, err);
 	});
 }
 
