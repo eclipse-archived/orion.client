@@ -83,6 +83,7 @@ function getCommitLog(req, res) {
 	var sha1Filter = query.sha1;
 	var fromDateFilter = query.fromDate ? parseInt(query.fromDate, 10) : 0;
 	var toDateFilter = query.toDate ? parseInt(query.toDate, 10) : 0;
+	var filterPath = req.params["0"].split("/").slice(2).join("/");
 	function filterCommit(commit) {
 		if (sha1Filter && commit.sha() !== sha1Filter) return true;
 		if (filter && commit.message().toLowerCase().indexOf(filter.toLowerCase()) === -1) return true;
@@ -93,6 +94,16 @@ function getCommitLog(req, res) {
 		return false;
 	}
 	
+	function filterCommitPath(patchArray){
+		// If one of commit's patch has filter path (match)-> return true
+		for(var n = 0; n < patchArray.length; n++){
+			if(patchArray[n]["NewPath"].startsWith(filterPath)){
+				return true;
+			}
+		}
+		// Else (none of the commit's patch has the filter path)(doesn't match) -> return false
+		return false;
+	}
 	var commits = []	, repo;
 	function writeResponse(over) {
 		var referenceName = scope;
@@ -156,18 +167,39 @@ function getCommitLog(req, res) {
 				}
 				return repo.getCommit(oid)
 				.then(function(commit) {
-					if (filterCommit(commit) || page && count++ < skipCount) {//skip pages
-						return walk();
-					}
-					return Promise.all([getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
-					.then(function(stuff) {
-						commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1]));
-						if (pageSize && commits.length === pageSize) {//page done
-							writeResponse();
-							return;
+					if(filterPath){
+						// do Diff first
+						var diffResult;
+						getDiff(repo, commit, fileDir).then(function(diffResultTemp){
+							if (  !(!filterCommit(commit) && filterCommitPath(diffResultTemp["Children"])) || page && count++ < skipCount) {//skip pages
+								return walk();
+							}
+							diffResult = diffResultTemp;
+							return getCommitParents(repo, commit, fileDir).then(function(parentResult){
+								commits.push(commitJSON(commit, fileDir, diffResult, parentResult));
+								if (pageSize && commits.length === pageSize) {//page done
+									writeResponse();
+									return;
+								}
+								walk();
+							});
+						});
+					}else{
+						// Do diff after the filter
+						if (filterCommit(commit) || page && count++ < skipCount) {//skip pages
+							return walk();
 						}
-						walk();
-					});
+						Promise.all([getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
+						.then(function(stuff) {
+							
+							commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1]));
+							if (pageSize && commits.length === pageSize) {//page done
+								writeResponse();
+								return;
+							}
+							walk();
+						});
+					}
 				});
 			})
 			.catch(function(error) {
