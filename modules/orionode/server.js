@@ -122,7 +122,7 @@ if (args.ui || configParams["orion.ui"]) {
 	var mainWindow = null;
 	electron.app.on('ready', function() {
 		function createWindow(url){
-			var nextWindow = new electron.BrowserWindow({width: 1024, height: 800, title: "Orion"});
+			var nextWindow = new electron.BrowserWindow({width: 1024, height: 800, title: "Orion", icon: "icon/256x256/orion.png"});
 			nextWindow.loadURL("file:///" + __dirname + "/lib/main.html#" + encodeURI(url));
 			nextWindow.webContents.on("new-window", /* @callback */ function(event, url, frameName, disposition, options){
 				event.preventDefault();
