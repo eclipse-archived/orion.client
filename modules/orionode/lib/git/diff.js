@@ -65,6 +65,12 @@ function getDiff(req, res) {
 				"Type": "Diff"
 			};
 		}
+		if (includeDiffs) {
+			diffs = {
+				"Type": "Diff",
+				"Children": []
+			};
+		}
 		function done() {
 			var body = "";
 			if (includeDiff && includeURIs) {
@@ -81,15 +87,7 @@ function getDiff(req, res) {
 				res.setHeader("Content-Disposition", "attachment; filename=\"changes.patch\"");
 				res.setHeader('Content-Type', 'plain/text');
 			} else if (includeDiffs) {
-				var result = {
-					"Type": "Diff",
-					"Length": patches.length,
-					"Children": diffs
-				};
-				if (i < patches.length) {
-					result.NextLocation = "";
-				}
-				body += JSON.stringify(result);
+				body += JSON.stringify(diffs);
 				res.setHeader('Content-Type', 'application/json');
 			} else if (includeURIs) {
 				body += JSON.stringify(URIs);
@@ -99,27 +97,26 @@ function getDiff(req, res) {
 			return res.status(200).end(body);
 		}
 		if (includeDiff || includeDiffs) {
-			var options = getOptions(ignoreWS, filePath, paths);
+			var diffOptions = getOptions(ignoreWS, filePath, paths);
 			if (scope.indexOf("..") !== -1) {
-				diff = getDiffBetweenTwoCommits(repo, scope.split(".."), options);
+				diff = getDiffBetweenTwoCommits(repo, scope.split(".."), diffOptions);
 			} else if (scope === "Default") {
-				diff = getDiffBetweenWorkingTreeAndHead(repo, options);
+				diff = getDiffBetweenWorkingTreeAndHead(repo, diffOptions);
 			} else if (scope === "Cached") {
-				diff = getDiffBetweenIndexAndHead(repo, options);
+				diff = getDiffBetweenIndexAndHead(repo, diffOptions);
 			} else {
-				diff = getDiffBetweenWorkingTreeAndHead(repo, options);
+				diff = getDiffBetweenWorkingTreeAndHead(repo, diffOptions);
 			}
 			return diff
 			.then(function(diff) {
-				return processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, includeDiffs, query, scope, diffContents, diffs);
+				return processDiff(diff, filePath, paths, fileDir, includeDiff, includeDiffs, query, scope, diffContents, diffs);
 			})
 			.then(done)
 			.catch(function(err) {
 				writeError(404, res, err.message);
 			});
-		} else {
-			done();
 		}
+		done();
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
@@ -166,16 +163,15 @@ function getBaseLocation(scope, path) {
 	return "/gitapi/index" + path;
 }
 
-function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, includeDiffs, query, scope, diffContents, diffs) {
+function processDiff(diff, filePath, paths, fileDir, includeDiff, includeDiffs, query, scope, diffContents, diffs) {
 	var page = Number(query.page) || 1;
 	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
-	var patches = [], i;
 	return diff.patches()
 	.then(function(patches) {
 		var result = [];
 		var start = pageSize * (page - 1);
 		var end = Math.min(pageSize + start, patches.length);
-		i = start;
+		var i = start;
 		patches.forEach(function(patch, pi) {
 			var newFile = patch.newFile();
 			var newFilePath = newFile.path();
@@ -183,13 +179,12 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 			var oldFilePath = oldFile.path();
 			// Need when both filePath and paths are set, otherwise options.pathspec will take care of filtering the patches
 			if ((!filePath || newFilePath.startsWith(filePath)) && (!paths || paths.indexOf(newFilePath) !== -1)) {
-				patches.push(patch);
 
 				if (includeDiffs && (start <= pi && pi < end)) {
 					i = pi;
 					var type = changeType(patch);
 					var p1 = api.toURLPath(path.join(fileDir, type !== "Deleted" ? newFilePath : oldFilePath));
-					diffs.push({
+					diffs.Children.push({
 						"ChangeType": type,
 						"ContentLocation": p1,
 						"DiffLocation": "/gitapi/diff/" + util.encodeURIComponent(scope) + p1,
@@ -245,20 +240,26 @@ function processDiff(diff, filePath, paths, fileDir, req, res, includeDiff, incl
 				}
 			}
 		});
+		if (includeDiffs) {
+			diffs.Length = patches.length;
+			if (i < patches.length) {
+				diffs.NextLocation = "";
+			}
+		}
 		return Promise.all(result);
 	});
 }
 
 function getOptions(ignoreWS, filePath, paths) {
-	var options = {
+	var result = {
 		flags: ignoreWS ? git.Diff.OPTION.IGNORE_WHITESPACE : 0
 	};
 	if (filePath) {
-		options.pathspec = filePath;	
+		result.pathspec = filePath;	
 	} else if (paths) {
-		options.pathspec = paths;
+		result.pathspec = paths;
 	}
-	return options;
+	return result;
 }
 
 function getDiffBetweenWorkingTreeAndIndex(repo, options) {
@@ -351,7 +352,7 @@ function applyPatch(req, res) {
 		});
 		form.on("error", function(err) {
 			writeError(404, res, err.message);
-		})
+		});
 		form.on('close', function() {
 			function apply() {
 				var failed = [], successed = [];
@@ -372,12 +373,9 @@ function applyPatch(req, res) {
 						fs.readFile(this.getFile(index.oldFileName), "utf8", cb);
 					},
 					patched: function(index, content) {
-						if (content === false) {
+						if (content === false || !index.newFileName) {
 							failed.push(index);
 							return;
-						}
-						if (!index.newFileName) {
-							return cb({message: "Patch is not valid: missing new file name."});
 						}
 						successed.push(index);
 						if (index.newFileName === "/dev/null") {
@@ -401,7 +399,7 @@ function applyPatch(req, res) {
 								HttpCode: 400,
 								Code: 0,
 								JsonData: jsonData
-							})
+							});
 						}
 						res.status(200).json({
 							Message: "Ok",
@@ -415,7 +413,7 @@ function applyPatch(req, res) {
 				apply();
 			} else if (radio === "urlRadio") {
 				request(patchUrl, function (error, response, body) {
-					if (!error && response.statusCode == 200) {
+					if (!error && response.statusCode === 200) {
 						file = body;
 						apply();
 					} else {
@@ -428,7 +426,7 @@ function applyPatch(req, res) {
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
-	})
+	});
 }
 
 function postDiff(req, res) {
