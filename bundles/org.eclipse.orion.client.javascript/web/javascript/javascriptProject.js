@@ -14,6 +14,45 @@ define([
 	"orion/Deferred"
 ], function(Deferred) {
 	
+	var eslintHandler = {
+		_update: function _update(project, fileName) {
+			if(fileName === project.ESLINTRC || fileName === project.ESLINTRC_JS || 
+				fileName === project.ESLINTRC_JSON || fileName === project.PACKAGE_JSON) {
+				delete project.map.eslint;
+			}
+		},
+		/**
+		 * @callback
+		 */
+		onModified: function onModified(project, qualifiedName, fileName) {
+			this._update(project, fileName);			
+		},
+		/**
+		 * @callback
+		 */
+		onDeleted: function onDeleted(project, qualifiedName, fileName) {
+			this._update(project, fileName);			
+		},
+		/**
+		 * @callback
+		 */
+		onCreated: function onCreated(project, qualifiedName, fileName) {
+			this._update(project, fileName);			
+		},
+		/**
+		 * @callback
+		 */
+		onMoved: function onMoved(project, qualifiedName, fileName) {
+			this._update(project, fileName);			
+		},
+		/**
+		 * @callback
+		 */
+		onProjectChanged: function onProjectChanged(project, evnt, projectName) {
+			delete project.map.eslint;
+		}
+	};
+	
 	/**
 	 * @description Creates a new JavaScript project
 	 * @constructor
@@ -26,7 +65,7 @@ define([
 		this.map = Object.create(null);
 		this.registry = serviceRegistry;
 		this.fileClient = null;
-		this.handlers = [];
+		this.handlers = [eslintHandler];
 	}
 	/**
 	 * The .tern-project file name
@@ -34,8 +73,29 @@ define([
 	JavaScriptProject.prototype.TERN_PROJECT = '.tern-project';
 	/**
 	 * The .eslintrc file name
+	 * @see http://eslint.org/docs/user-guide/configuring#configuration-file-formats
 	 */
 	JavaScriptProject.prototype.ESLINTRC = '.eslintrc';
+	/**
+	 * The .eslintrc.js file name
+	 * @see http://eslint.org/docs/user-guide/configuring#configuration-file-formats
+	 */
+	JavaScriptProject.prototype.ESLINTRC_JS = '.eslintrc.js';
+	/**
+	 * The .eslintrc.yaml file name
+	 * @see http://eslint.org/docs/user-guide/configuring#configuration-file-formats
+	 */
+	JavaScriptProject.prototype.ESLINTRC_YAML = '.eslintrc.yaml';
+	/**
+	 * The .eslintrc.yml file name
+	 * @see http://eslint.org/docs/user-guide/configuring#configuration-file-formats
+	 */
+	JavaScriptProject.prototype.ESLINTRC_YML = '.eslintrc.yml';
+	/**
+	 * The .eslintrc.json file name
+	 * @see http://eslint.org/docs/user-guide/configuring#configuration-file-formats
+	 */
+	JavaScriptProject.prototype.ESLINTRC_JSON = '.eslintrc.json';
 	/**
 	 * The project.json file name
 	 */
@@ -149,6 +209,60 @@ define([
 	};
 	
 	/**
+	 * @name JavaScriptProject.prototype.getESlintOptions
+	 * @description Returns project-specific eslint options (if any)
+	 * @function
+	 * @returns {Object} The project-specific eslint options or null
+	 * @see http://eslint.org/docs/user-guide/configuring
+	 */
+	JavaScriptProject.prototype.getESlintOptions = function getESlintOptions() {
+		if(this.map.eslint) {
+			return new Deferred().resolve(this.map.eslint);
+		}
+		//TODO support loading YML and YAML files
+		var vals;
+		return this.getFile(this.ESLINTRC_JS).then(function(file) {
+			vals = readAndMap(this.map, file);
+			if(vals) {
+				return vals;
+			} 
+			return this.getFile(this.ESLINTRC_JSON).then(function(file) {
+				vals = readAndMap(this.map, file);
+				if(vals) {
+					return vals;
+				}
+				return this.getFile(this.ESLINTRC).then(function(file) {
+					vals = readAndMap(this.map, file);
+					if(vals) {
+						return vals;
+					}
+					return this.getFile(this.PACKAGE_JSON).then(function(file) {
+						if(file && file.contents) {
+							vals = JSON.parse(file.contents);
+							if(vals.eslintConfig !== null && typeof vals.eslintConfig === 'object' && Object.keys(vals.eslintConfig).length > 0) {
+								this.map.eslint = vals.eslintConfig;
+								return this.map.eslint;
+							}
+						}
+						return null;
+					}.bind(this));
+				}.bind(this));
+			}.bind(this));
+		}.bind(this));
+	};
+	
+	function readAndMap(map, file) {
+		if(file && file.contents) {
+			var vals = JSON.parse(file.contents);
+			if(Object.keys(vals).length > 0) {
+				map.eslint = vals;
+				return map.eslint;
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Callback from the orion.edit.model service
 	 * @param {Object} evnt An <tt>orion.edit.model</tt> event.
 	 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
@@ -182,6 +296,7 @@ define([
 			_updateMap.call(this, evnt.modified, "onModified");
 			_updateMap.call(this, evnt.deleted, "onDeleted");
 			_updateMap.call(this, evnt.created, "onCreated");
+			_updateMap.call(this, evnt.moved, "onMoved");
 		}
 	};
 	/**
@@ -192,9 +307,13 @@ define([
 	function _updateMap(arr, state) {
 		if(Array.isArray(arr)) {
 			arr.forEach(function(file) {
-				delete this.map[file];
-				var n = _shortName(file);
-				_handle.call(this, state, this, file, n);
+				var f = file;
+				if(typeof f === "object") {
+					f = f.source;
+				}
+				delete this.map[f];
+				var n = _shortName(f);
+				_handle.call(this, state, this, f, n);
 			}.bind(this));
 		}
 	}

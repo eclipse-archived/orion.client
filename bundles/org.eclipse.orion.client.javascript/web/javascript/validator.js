@@ -66,12 +66,14 @@ define([
 	 * @description Creates a new ESLintValidator
 	 * @constructor
 	 * @public
-	 * @param {javascript.ASTManager} astManager The AST manager backing this validator
+	 * @param {Worker} ternWorker The backing worker
+	 * @param {javascript.javascriptProject} jsProject The backing JS project context
 	 * @param {Object} serviceRegistry The platform service registry
 	 * @returns {ESLintValidator} Returns a new validator
 	 */
-	function ESLintValidator(ternWorker, serviceRegistry) {
+	function ESLintValidator(ternWorker, jsProject, serviceRegistry) {
 		this.ternWorker = ternWorker;
+		this.project = jsProject;
 		config.setDefaults();
 		registry = serviceRegistry;
 	}
@@ -205,21 +207,32 @@ define([
 		 * @callback
 		 */
 		computeProblems: function(editorContext , context, config) {
-			var _self = this;
 			var deferred = new Deferred();
 			editorContext.getFileMetadata().then(function(meta) {
 				editorContext.getText().then(function(text) {
 					var env = null;
-					var isHtml = meta.contentType.id === 'text/html';
-					if(isHtml) {
+					if(meta.contentType.id === 'text/html') {
 						//auto-assume browser env - https://bugs.eclipse.org/bugs/show_bug.cgi?id=458676
 						env = Object.create(null);
 						env.browser = true;
 					}
-					// need to extract all scripts from the html text
-					_self._validate(meta, text, env, deferred, config);
-				});
-			});
+					if(this.project) {
+						this.project.getESlintOptions().then(function(cfg) {
+							var c = cfg;
+							if(env && c) {
+								if(!c.env) {
+									c.env = Object.create(null);
+								}
+								c.env.browser = true;
+							}
+							this._validate(meta, text, env, deferred, c);
+						}.bind(this));
+					} else {
+						// need to extract all scripts from the html text
+						this._validate(meta, text, env, deferred, config);
+					}
+				}.bind(this));
+			}.bind(this));
 			return deferred;
 		},
 		

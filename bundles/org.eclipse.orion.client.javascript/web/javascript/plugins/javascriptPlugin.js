@@ -500,7 +500,7 @@ define([
     		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$
     	});
 
-    	var validator = new EslintValidator(ternWorker, serviceRegistry);
+    	var validator = new EslintValidator(ternWorker, jsProject, serviceRegistry);
 
     	/**
     	 * Register the ESLint validator
