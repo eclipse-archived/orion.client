@@ -8049,7 +8049,7 @@ define([
 						});
 					});
                     //NO-UNDEF-EXPRESSION -----------------------------------------------------
-					describe('no-undef-expression', function() {
+					describe.skip('no-undef-expression', function() {
 						var RULE_ID = "no-undef-expression";
 						//------------------------------------------------------------------------------
 						// Test undeclared globals

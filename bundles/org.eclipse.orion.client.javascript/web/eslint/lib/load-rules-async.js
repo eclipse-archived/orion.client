@@ -1418,8 +1418,7 @@ define([
 								try {
 									var expr = tern.findQueryExpr(tern.file, query);
 									var type = tern.findExprType(query, tern.file, expr);
-									// TODO Tern 18 change results in the origin being set in the proto chain for maybeProps, we use hasOwnProperty to exclude them
-									if (type && type.origin && hasOwnProperty('origin')){
+									if (type && type.origin){
 										foundType = true;
 									}
 								} catch(e) {
