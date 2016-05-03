@@ -93,15 +93,14 @@ function getCommitLog(req, res) {
 		if (toDateFilter && commit.timeMs() > toDateFilter) return true;
 		return false;
 	}
-	function filterCommitPath(patchArray,filterPath){
-		// If one of commit's patch has filter path (match)-> return true
-		for(var n = 0; n < patchArray.length; n++){
-			if(patchArray[n]["NewPath"].startsWith(filterPath)){
-				return true;
+	function filterCommitPath(diff,filterPath){
+		if (!filterPath || !diff) return false;
+		for(var n = 0; n < diff.Children.length; n++){
+			if(diff.Children[n]["NewPath"].startsWith(filterPath)){
+				return false;
 			}
 		}
-		// Else (none of the commit's patch has the filter path)(doesn't match) -> return false
-		return false;
+		return true;
 	}
 	var commits = []	, repo;
 	function writeResponse(over) {
@@ -167,35 +166,25 @@ function getCommitLog(req, res) {
 				}
 				return repo.getCommit(oid)
 				.then(function(commit) {
-					if(filterPath){
-						// do Diff first
-						return getDiff(repo, commit, fileDir).then(function(diffResult){
-							if (!(!filterCommit(commit) && filterCommitPath(diffResult.Children, filterPath)) || page && count++ < skipCount) {//skip pages
-								return walk();
+					function applyFilter(diff) {
+						if (filterCommit(commit) || filterCommitPath(diff, filterPath) || page && count++ < skipCount) {//skip pages
+							return walk();
+						}
+						return Promise.all([diff || getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
+						.then(function(stuff) {
+							commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1]));
+							if (pageSize && commits.length === pageSize) {//page done
+								writeResponse();
+								return;
 							}
-							return getCommitParents(repo, commit, fileDir).then(function(parentResult){
-								commits.push(commitJSON(commit, fileDir, diffResult, parentResult));
-								if (pageSize && commits.length === pageSize) {//page done
-									writeResponse();
-									return;
-								}
-								walk();
-							});
+							walk();
 						});
 					}
-					// Do diff after the filter
-					if (filterCommit(commit) || page && count++ < skipCount) {//skip pages
-						return walk();
+					// get diff before filtering by path
+					if (filterPath) {
+						return getDiff(repo, commit, fileDir).then(applyFilter);
 					}
-					return Promise.all([getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
-					.then(function(stuff) {
-						commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1]));
-						if (pageSize && commits.length === pageSize) {//page done
-							writeResponse();
-							return;
-						}
-						walk();
-					});
+					applyFilter();
 				});
 			})
 			.catch(function(error) {
