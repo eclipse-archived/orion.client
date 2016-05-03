@@ -419,7 +419,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 				};
 
 			if (args.env) {
-				query.env = args.env;
+				query.config.env = args.env;
 			}
 			ternserver.request(
 				{

@@ -248,15 +248,12 @@ define([
 		 */
 		_validate: function(meta, text, env, deferred, configuration) {
 			// When validating snippets in an html file ignore undefined rule because other scripts may add to the window object
+			var rules = config.rules;
 			if (configuration) {
-				config.rules = configuration.rules;
+				rules = configuration.rules;
 			}
 			var files = [{type: 'full', name: meta.location, text: text}]; //$NON-NLS-1$
-			var request = {request: 'lint', args: {meta: {location: meta.location}, files: files, rules: config.rules}}; //$NON-NLS-1$
-			if(env) {
-				config.env = env;
-				request.env = config.env;
-			}
+			var request = {request: 'lint', args: {meta: {location: meta.location}, env: env, files: files, rules: rules}}; //$NON-NLS-1$
 			var start = Date.now();
 			this.ternWorker.postMessage(
 				request, 
