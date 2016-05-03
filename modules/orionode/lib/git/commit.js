@@ -93,7 +93,6 @@ function getCommitLog(req, res) {
 		if (toDateFilter && commit.timeMs() > toDateFilter) return true;
 		return false;
 	}
-	
 	function filterCommitPath(patchArray,filterPath){
 		// If one of commit's patch has filter path (match)-> return true
 		for(var n = 0; n < patchArray.length; n++){
@@ -170,12 +169,10 @@ function getCommitLog(req, res) {
 				.then(function(commit) {
 					if(filterPath){
 						// do Diff first
-						var diffResult;
-						getDiff(repo, commit, fileDir).then(function(diffResultTemp){
-							if (!(!filterCommit(commit) && filterCommitPath(diffResultTemp["Children"],filterPath)) || page && count++ < skipCount) {//skip pages
+						return getDiff(repo, commit, fileDir).then(function(diffResult){
+							if (!(!filterCommit(commit) && filterCommitPath(diffResult.Children, filterPath)) || page && count++ < skipCount) {//skip pages
 								return walk();
 							}
-							diffResult = diffResultTemp;
 							return getCommitParents(repo, commit, fileDir).then(function(parentResult){
 								commits.push(commitJSON(commit, fileDir, diffResult, parentResult));
 								if (pageSize && commits.length === pageSize) {//page done
@@ -185,21 +182,20 @@ function getCommitLog(req, res) {
 								walk();
 							});
 						});
-					}else{
-						// Do diff after the filter
-						if (filterCommit(commit) || page && count++ < skipCount) {//skip pages
-							return walk();
-						}
-						return Promise.all([getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
-						.then(function(stuff) {
-							commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1]));
-							if (pageSize && commits.length === pageSize) {//page done
-								writeResponse();
-								return;
-							}
-							walk();
-						});
 					}
+					// Do diff after the filter
+					if (filterCommit(commit) || page && count++ < skipCount) {//skip pages
+						return walk();
+					}
+					return Promise.all([getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
+					.then(function(stuff) {
+						commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1]));
+						if (pageSize && commits.length === pageSize) {//page done
+							writeResponse();
+							return;
+						}
+						walk();
+					});
 				});
 			})
 			.catch(function(error) {
