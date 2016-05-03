@@ -172,7 +172,7 @@ function getCommitLog(req, res) {
 						// do Diff first
 						var diffResult;
 						getDiff(repo, commit, fileDir).then(function(diffResultTemp){
-							if (  !(!filterCommit(commit) && filterCommitPath(diffResultTemp["Children"],filterPath)) || page && count++ < skipCount) {//skip pages
+							if (!(!filterCommit(commit) && filterCommitPath(diffResultTemp["Children"],filterPath)) || page && count++ < skipCount) {//skip pages
 								return walk();
 							}
 							diffResult = diffResultTemp;
@@ -190,9 +190,8 @@ function getCommitLog(req, res) {
 						if (filterCommit(commit) || page && count++ < skipCount) {//skip pages
 							return walk();
 						}
-						Promise.all([getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
+						return Promise.all([getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
 						.then(function(stuff) {
-							
 							commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1]));
 							if (pageSize && commits.length === pageSize) {//page done
 								writeResponse();
