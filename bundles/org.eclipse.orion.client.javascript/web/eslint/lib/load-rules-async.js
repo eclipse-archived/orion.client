@@ -1418,7 +1418,8 @@ define([
 								try {
 									var expr = tern.findQueryExpr(tern.file, query);
 									var type = tern.findExprType(query, tern.file, expr);
-									if (type && type.origin){
+									// TODO Tern 18 change results in the origin being set in the proto chain for maybeProps, we use hasOwnProperty to exclude them
+									if (type && type.origin && hasOwnProperty('origin')){
 										foundType = true;
 									}
 								} catch(e) {
@@ -1453,6 +1454,9 @@ define([
         	                						name = type.originNode.name;
     	                						}
         	                					var origin = type.types[0].origin;
+        	                					if (!origin && type.origin){
+        	                						origin = type.origin;
+        	                					}
             	                				if (type.types.length === 1 && name && origin){
             	                					if (/\./.test(origin)){
         	                							var originNode = type.types[0].originNode ? type.types[0].originNode : type.originNode;
