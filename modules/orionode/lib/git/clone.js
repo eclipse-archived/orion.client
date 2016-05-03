@@ -43,8 +43,8 @@ module.exports.router = function(options) {
 	.delete('/file*', deleteClone)
 	.post('*', postInit);
 
-function cloneJSON(base, location, url, parents, submodules) {
-	return {
+function cloneJSON(base, location, giturl, parents, submodules) {
+	var result = {
 		"BranchLocation": "/gitapi/branch" + location,
 		"CommitLocation": "/gitapi/commit" + location,
 		"ConfigLocation": "/gitapi/config/clone" + location,
@@ -54,7 +54,7 @@ function cloneJSON(base, location, url, parents, submodules) {
 		"IndexLocation": "/gitapi/index" + location,
 		"Location": "/gitapi/clone" + location,
 		"Name": base,
-		"GitUrl": url,
+		"GitUrl": giturl,
 		"Children": submodules && submodules.length ? submodules : undefined,
 		"Parents": parents && parents.length ? parents : undefined,
 		"RemoteLocation": "/gitapi/remote" + location,
@@ -64,6 +64,14 @@ function cloneJSON(base, location, url, parents, submodules) {
 		"TagLocation": "/gitapi/tag" + location,
 		"Type": "Clone"
 	};
+	if (isGitURL(giturl)){
+		result["PullRequestLocation"] = "/gitapi/pullRequest" + location;
+	}
+	function isGitURL(checkUrl){
+		var hostname = url.parse(checkUrl)["hostname"];
+		return hostname === "github.com";
+	}
+	return result;
 }
 	
 function getRepo(req) {
