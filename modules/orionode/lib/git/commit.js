@@ -715,7 +715,7 @@ function generateChangeId(oid, firstParentId, authorId, committerId, message){
 				replace(/\ndiff --git.*/g, "").// //$NON-NLS-1$
 				trim();
 	}
-	var mergedMessage = ["tree ",oid,"\nparent",firstParentId,"\nauthor",authorId,"\ncommitter",committerId,"\n\n",cleanMessage].join("");	
+	var mergedMessage = ["tree ",oid,"\nparent ",firstParentId,"\nauthor ",authorId,"\ncommitter ",committerId,"\n\n",cleanMessage].join("");	
 	var hash = crypto.createHash("sha1");
 	hash.update(mergedMessage);
 	return hash.digest('hex');
