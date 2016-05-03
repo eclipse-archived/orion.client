@@ -10,16 +10,31 @@
   var WG_DEFAULT_EXPORT = 95
 
   function initScope(scope) {
-    var defs = infer.cx().definitions.commonjs
-    defs.require.propagate(scope.defProp("require"))
-    var module = new infer.Obj(defs.Module.getProp("prototype").getType())
-    module.propagate(scope.defProp("module"))
-    var exports = new infer.Obj(true)
-    module.origin = exports.origin = scope.origin
-    module.originNode = exports.originNode = scope.originNode
-    exports.propagate(scope.defProp("exports"))
-    var moduleExports = scope.exports = module.defProp("exports")
-    exports.propagate(moduleExports, WG_DEFAULT_EXPORT)
+  	/* TODO ORION
+  		Orion filters based on eslint-env name, preventing commonjs defs from showing up.  Below the plugin adds
+  		modules/exports into every scope which is a problem if you are using RequireJS.  For now we add require
+  		to every scope, and only add any of the types if we know the file uses a node environment.  A better solution
+  		would be to always skip adding modules/exports to every scope, and remove the eslint-env filtering that prevents
+  		commonjs defs infos from showing up.
+  	*/
+  	// ORION: This puts exports and modules into every scope's completions, we only want them when inside a file using node
+    if (scope.originNode && scope.originNode.environments && scope.originNode.environments.node){
+	    var defs = infer.cx().definitions.commonjs
+	    defs.require.propagate(scope.defProp("require"))
+	    
+	    // ORION: Add require to the list of completions available when node is being used
+	    var require = new infer.Obj(true);
+	    require.propagate(scope.defProp("require"));
+	    
+	    var module = new infer.Obj(defs.Module.getProp("prototype").getType())
+	    module.propagate(scope.defProp("module"))
+	    var exports = new infer.Obj(true)
+	    module.origin = exports.origin = scope.origin
+	    module.originNode = exports.originNode = scope.originNode
+	    exports.propagate(scope.defProp("exports"))
+	    var moduleExports = scope.exports = module.defProp("exports")
+	    exports.propagate(moduleExports, WG_DEFAULT_EXPORT)
+    }
   }
 
   infer.registerFunction("require", function(_self, _args, argNodes) {
@@ -85,8 +100,11 @@
     server.mod.modules.on("wrapScope", initScope)
     server.mod.modules.on("getExports", function(file, mod) {
       var exports = file.scope.exports
-      if (exports.types.length > 1 || hasProps(exports.getObjType()))
-        exports.propagate(mod)
+      // TODO ORION: Because of changes to initScope, scope.exports may not exist
+      if (exports){
+      	if (exports.types.length > 1 || hasProps(exports.getObjType()))
+	        exports.propagate(mod)
+        }
     })
 
     server.mod.modules.modNameTests.push(isModuleName)

@@ -262,8 +262,8 @@ define([
 			describe('Express', function() {
 				it('Express templates - no eslint-env', function(done) {
 					var options = {
-						buffer: "ex",
-						prefix: "ex",
+						buffer: "expr",
+						prefix: "expr",
 						offset: 2,
 						callback: done
 					};
@@ -272,8 +272,8 @@ define([
 				});
 				it('Express templates - eslint-env set', function(done) {
 					var options = {
-						buffer: "/* eslint-env express */\nex",
-						prefix: "ex",
+						buffer: "/* eslint-env express */\nexpr",
+						prefix: "expr",
 						offset: 27,
 						callback: done
 					};
@@ -315,7 +315,7 @@ define([
 				it('Express completions - app.u', function(done) {
 					var options = {
 						buffer: "/* eslint-env node, express */\nvar express = require('express'); var app = express(); app.u",
-						prefix: "",
+						prefix: "u",
 						offset: 91,
 						callback: done
 					};

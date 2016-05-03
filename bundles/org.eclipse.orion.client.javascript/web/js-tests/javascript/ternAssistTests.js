@@ -251,21 +251,6 @@ define([
 						['filter(test, context?)', 'filter(test, context?)']
 					]);
 				});
-				/**
-				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=473786
-				 */
-				it('test casing params 2', function(done) {
-					var options = {
-						buffer: "new TypedArray(10).ev",
-						prefix: "ev",
-						offset: 21,
-						callback: done
-					};
-					testProposals(options, [
-						['', 'ecma6'],
-						['every(callback, thisArg?)', 'every(callback, thisArg?) : bool']
-					]);
-				});
 				it("test loosely match 1", function(done) {
 					var options = {
 						buffer: "var getAnotherThing = 0; gAT",
@@ -273,7 +258,7 @@ define([
 						offset: 28,
 						callback: done};
 					return testProposals(options, [
-						//TODO Tern does not support camel case only ["getAnotherThing", "getAnotherThing : Number"]
+						["getAnotherThing", "getAnotherThing : number"]
 					]);
 				});
 				it("test loosely match 2", function(done) {
@@ -360,23 +345,23 @@ define([
 						['', 'ecma6'],
 						['ArrayBuffer(length)', ''],
 						['DataView(buffer, byteOffset?, byteLength?)', ''],
-						['Float32Array(length)', ''],
-						['Float64Array(length)', ''],
-						['Int16Array(length)', ''],
-						['Int32Array(length)', ''],
-						['Int8Array(length)', ''],
+						['Float32Array(size)', ''],
+						['Float64Array(size)', ''],
+						['Int16Array(size)', ''],
+						['Int32Array(size)', ''],
+						['Int8Array(size)', ''],
 						['Map(iterable?)', ''],
 						['Promise(executor)', ''],
 						['Proxy(target, handler)', ''],
-						['Set(iterable)', ''],
+						['Set(iterable?)', ''],
 						['Symbol(description?)', ''],
-						['TypedArray(length)', ''],
-						['Uint16Array()', ''],
-						['Uint32Array()', ''],
-						['Uint8Array()', ''],
-						['Uint8ClampedArray()', ''],
-						['WeakMap(iterable)', ''],
-						['WeakSet(iterable)', '']
+						['Uint16Array(size)', ''],
+						['Uint32Array(size)', ''],
+						['Uint8Array(size)', ''],
+						['Uint8ClampedArray(size)', ''],
+						['WeakMap(iterable?)', ''],
+						['WeakSet(iterable?)', ''],
+						['Reflect', 'Reflect : Reflect']
 					]);
 				});
 				it("test no dupe 1", function(done) {
@@ -396,7 +381,7 @@ define([
 						callback: done
 					};
 					testProposals(options, [
-						["coo", "coo : any"]
+						["coo", "coo : number"]
 					]);
 				});
 	
@@ -677,8 +662,8 @@ define([
 					return testProposals(options, [
 						["fff", "fff : string"],
 						['', 'ecma6'],
-						['Float32Array(length)', 'Float32Array(length)'],
-						['Float64Array(length)', 'Float64Array(length)'],
+						['Float32Array(size)', 'Float32Array(size)'],
+						['Float64Array(size)', 'Float64Array(size)'],
 						['', 'ecma5'],
 						['Function(body)', 'Function(body) : fn()']
 					]);
@@ -694,8 +679,8 @@ define([
 					return testProposals(options, [
 						["fff", "fff : string"],
 						['', 'ecma6'],
-						['Float32Array(length)', 'Float32Array(length)'],
-						['Float64Array(length)', 'Float64Array(length)'],
+						['Float32Array(size)', 'Float32Array(size)'],
+						['Float64Array(size)', 'Float64Array(size)'],
 						['', 'ecma5'],
 						['Function(body)', 'Function(body) : fn()']
 					]);
@@ -711,8 +696,8 @@ define([
 					return testProposals(options, [
 						["fff", "fff : string"],
 						['', 'ecma6'],
-						['Float32Array(length)', 'Float32Array(length)'],
-						['Float64Array(length)', 'Float64Array(length)'],
+						['Float32Array(size)', 'Float32Array(size)'],
+						['Float64Array(size)', 'Float64Array(size)'],
 						['', 'ecma5'],
 						['Function(body)', 'Function(body) : fn()']
 					]);
@@ -727,8 +712,8 @@ define([
 					return testProposals(options, [
 						["fff", "fff : string"],
 						['', 'ecma6'],
-						['Float32Array(length)', 'Float32Array(length)'],
-						['Float64Array(length)', 'Float64Array(length)'],
+						['Float32Array(size)', 'Float32Array(size)'],
+						['Float64Array(size)', 'Float64Array(size)'],
 						['', 'ecma5'],
 						['Function(body)', 'Function(body) : fn()']
 					]);
@@ -744,8 +729,8 @@ define([
 					return testProposals(options, [
 						["fff", "fff : string"],
 						['', 'ecma6'],
-						['Float32Array(length)', 'Float32Array(length)'],
-						['Float64Array(length)', 'Float64Array(length)'],
+						['Float32Array(size)', 'Float32Array(size)'],
+						['Float64Array(size)', 'Float64Array(size)'],
 						['', 'ecma5'],
 						['Function(body)', 'Function(body) : fn()']
 					]);
@@ -761,8 +746,8 @@ define([
 					return testProposals(options, [
 						["fff", "fff : string"],
 						['', 'ecma6'],
-						['Float32Array(length)', 'Float32Array(length)'],
-						['Float64Array(length)', 'Float64Array(length)'],
+						['Float32Array(size)', 'Float32Array(size)'],
+						['Float64Array(size)', 'Float64Array(size)'],
 						['', 'ecma5'],
 						['Function(body)', 'Function(body) : fn()']
 					]);
@@ -1078,7 +1063,7 @@ define([
 						offset: 48,
 						callback: done};
 					return testProposals(options, [
-						["xx", "xx : number"],
+						["xx", "xx : string"],
 					]);
 				});
 				it("test @type var type 6", function(done) {
@@ -1253,7 +1238,7 @@ define([
 						offset: 82,
 						callback: done};
 					return testProposals(options, [
-						["xxx()", "xxx()"]
+						["xxx", "xxx : Fun"]
 					]);
 				});
 				it("test @type var type 23", function(done) {
@@ -1384,8 +1369,7 @@ define([
 						offset: 67,
 						callback: done};
 					return testProposals(options, [
-						//TODO we should have a standin type
-						["xxx()", "xxx()"]
+						["xxx", "xxx : Fun"]
 					]);
 				});
 				it("test @type tag union", function(done) {
@@ -1556,7 +1540,7 @@ define([
 						callback: done};
 					return testProposals(options, [
 						["", "ecma5"],
-						["stringify(value)", "stringify(value) : string"]
+						["stringify(value, replacer?, space?)", "stringify(value, replacer?, space?) : string"]
 					]);
 				});
 				it("test multi-dot inferencing 1", function(done) {
@@ -1735,7 +1719,7 @@ define([
 						offset: 53,
 						callback: done};
 					return testProposals(options, [
-						["foo", "foo"]
+						["foo", "foo : number"]
 					]);
 				});
 				// check that function args don't get assigned the same type
@@ -1746,7 +1730,7 @@ define([
 						offset: 53,
 						callback: done};
 					return testProposals(options, [
-						["foo", "foo"]
+						["foo", "foo : string"]
 					]);
 				});
 				it("test nested object expressions 1", function(done) {
@@ -1904,7 +1888,7 @@ define([
 						callback: done};
 					return testProposals(options, [
 						["Ttt()", "Ttt()"],
-						["ttt", "ttt : any"]
+						["ttt", "ttt : Ttt"]
 					]);
 				});
 				it("test complex name 2", function(done) {
@@ -1915,7 +1899,7 @@ define([
 						callback: done};
 					return testProposals(options, [
 						["Ttt()", "Ttt()"],
-						["ttt", "ttt : any"]
+						["ttt", "ttt : Ttt"]
 					]);
 				});
 				it("test complex name 3", function(done) {
@@ -1963,8 +1947,8 @@ define([
 					testProposals(options, [
 						["foo", "foo : foo"],
 						['', 'ecma6'],
-						['Float32Array(length)', 'Float32Array(length)'],
-						['Float64Array(length)', 'Float64Array(length)'],
+						['Float32Array(size)', 'Float32Array(size)'],
+						['Float64Array(size)', 'Float64Array(size)'],
 						['', 'ecma5'],
 						['Function(body)', 'Function(body) : fn()']
 					]);
@@ -1984,10 +1968,10 @@ define([
 						['URIError(message)', 'URIError(message)'],
 						["undefined", "undefined : any"],
 						['', 'ecma6'],
-						['Uint16Array()', 'Uint16Array()'],
-						['Uint32Array()', 'Uint32Array()'],
-						['Uint8Array()', 'Uint8Array()'],
-						['Uint8ClampedArray()', 'Uint8ClampedArray()']
+						['Uint16Array(size)', 'Uint16Array(size)'],
+						['Uint32Array(size)', 'Uint32Array(size)'],
+						['Uint8Array(size)', 'Uint8Array(size)'],
+						['Uint8ClampedArray(size)', 'Uint8ClampedArray(size)']
 					]);
 				});
 				it("test tolerant parsing function 1", function(done) {
@@ -2032,7 +2016,7 @@ define([
 						prefix: "ff",
 						offset: 47,
 						callback: done};
-					return testProposals(options, [["ffffff", "ffffff"]]);
+					return testProposals(options, [["ffffff", "ffffff : bool"]]);
 				});
 	
 				it("test tolerant parsing function 6", function(done) {
@@ -2041,7 +2025,7 @@ define([
 						prefix: "ff",
 						offset: 56,
 						callback: done};
-					return testProposals(options, [["ffffff", "ffffff"]]);
+					return testProposals(options, [["ffffff", "ffffff : bool"]]);
 				});
 	
 				it("test tolerant parsing function 7", function(done) {
@@ -2050,7 +2034,7 @@ define([
 						prefix: "ff",
 						offset: 63,
 						callback: done};
-					return testProposals(options, [["ffffff", "ffffff"]]);
+					return testProposals(options, [["ffffff", "ffffff : bool"]]);
 				});
 	
 				it("test tolerant parsing function 8", function(done) {
@@ -2059,7 +2043,7 @@ define([
 						prefix: "ff",
 						offset: 75,
 						callback: done};
-					return testProposals(options, [["ffffff", "ffffff"]]);
+					return testProposals(options, [["ffffff", "ffffff : bool"]]);
 				});
 	
 				it("test tolerant parsing function 9", function(done) {
@@ -2070,7 +2054,7 @@ define([
 						callback: done};
 					return testProposals(options, [
 						["",  "ecma5"],
-						["stringify(value)", "stringify(value) : string"]
+						["stringify(value, replacer?, space?)", "stringify(value, replacer?, space?) : string"]
 					]);
 				});
 	
@@ -2082,7 +2066,7 @@ define([
 						callback: done};
 					return testProposals(options, [
 						["",  "ecma5"],
-						["stringify(value)", "stringify(value) : string"]
+						["stringify(value, replacer?, space?)", "stringify(value, replacer?, space?) : string"]
 					]);
 				});
 				it("test tolerant parsing function 11", function(done) {
@@ -2158,23 +2142,23 @@ define([
 						['', 'ecma6'],
 						['ArrayBuffer(length)', ''],
 						['DataView(buffer, byteOffset?, byteLength?)', ''],
-						['Float32Array(length)', ''],
-						['Float64Array(length)', ''],
-						['Int16Array(length)', ''],
-						['Int32Array(length)', ''],
-						['Int8Array(length)', ''],
+						['Float32Array(size)', ''],
+						['Float64Array(size)', ''],
+						['Int16Array(size)', ''],
+						['Int32Array(size)', ''],
+						['Int8Array(size)', ''],
 						['Map(iterable?)', ''],
 						['Promise(executor)', ''],
 						['Proxy(target, handler)', ''],
-						['Set(iterable)', ''],
+						['Set(iterable?)', ''],
 						['Symbol(description?)', ''],
-						['TypedArray(length)', ''],
-						['Uint16Array()', ''],
-						['Uint32Array()', ''],
-						['Uint8Array()', ''],
-						['Uint8ClampedArray()', ''],
-						['WeakMap(iterable)', ''],
-						['WeakSet(iterable)', '']
+						['Uint16Array(size)', ''],
+						['Uint32Array(size)', ''],
+						['Uint8Array(size)', ''],
+						['Uint8ClampedArray(size)', ''],
+						['WeakMap(iterable?)', ''],
+						['WeakSet(iterable?)', ''],
+						['Reflect', 'Reflect : Reflect']
 					]);
 				});
 				it("test Single Var Content Assist", function(done) {
@@ -2225,23 +2209,23 @@ define([
 						['', 'ecma6'],
 						['ArrayBuffer(length)', ''],
 						['DataView(buffer, byteOffset?, byteLength?)', ''],
-						['Float32Array(length)', ''],
-						['Float64Array(length)', ''],
-						['Int16Array(length)', ''],
-						['Int32Array(length)', ''],
-						['Int8Array(length)', ''],
+						['Float32Array(size)', ''],
+						['Float64Array(size)', ''],
+						['Int16Array(size)', ''],
+						['Int32Array(size)', ''],
+						['Int8Array(size)', ''],
 						['Map(iterable?)', ''],
 						['Promise(executor)', ''],
 						['Proxy(target, handler)', ''],
-						['Set(iterable)', ''],
+						['Set(iterable?)', ''],
 						['Symbol(description?)', ''],
-						['TypedArray(length)', ''],
-						['Uint16Array()', ''],
-						['Uint32Array()', ''],
-						['Uint8Array()', ''],
-						['Uint8ClampedArray()', ''],
-						['WeakMap(iterable)', ''],
-						['WeakSet(iterable)', '']
+						['Uint16Array(size)', ''],
+						['Uint32Array(size)', ''],
+						['Uint8Array(size)', ''],
+						['Uint8ClampedArray(size)', ''],
+						['WeakMap(iterable?)', ''],
+						['WeakSet(iterable?)', ''],
+						['Reflect', 'Reflect : Reflect']
 					]);
 				});
 				it("test Single Var Content Assist 2", function(done) {
@@ -2292,23 +2276,23 @@ define([
 						['', 'ecma6'],
 						['ArrayBuffer(length)', ''],
 						['DataView(buffer, byteOffset?, byteLength?)', ''],
-						['Float32Array(length)', ''],
-						['Float64Array(length)', ''],
-						['Int16Array(length)', ''],
-						['Int32Array(length)', ''],
-						['Int8Array(length)', ''],
+						['Float32Array(size)', ''],
+						['Float64Array(size)', ''],
+						['Int16Array(size)', ''],
+						['Int32Array(size)', ''],
+						['Int8Array(size)', ''],
 						['Map(iterable?)', ''],
 						['Promise(executor)', ''],
 						['Proxy(target, handler)', ''],
-						['Set(iterable)', ''],
+						['Set(iterable?)', ''],
 						['Symbol(description?)', ''],
-						['TypedArray(length)', ''],
-						['Uint16Array()', ''],
-						['Uint32Array()', ''],
-						['Uint8Array()', ''],
-						['Uint8ClampedArray()', ''],
-						['WeakMap(iterable)', ''],
-						['WeakSet(iterable)', '']
+						['Uint16Array(size)', ''],
+						['Uint32Array(size)', ''],
+						['Uint8Array(size)', ''],
+						['Uint8ClampedArray(size)', ''],
+						['WeakMap(iterable?)', ''],
+						['WeakSet(iterable?)', ''],
+						['Reflect', 'Reflect : Reflect']
 					]);
 				});
 				it("test multi var content assist 1", function(done) {
@@ -2361,23 +2345,23 @@ define([
 						['', 'ecma6'],
 						['ArrayBuffer(length)', ''],
 						['DataView(buffer, byteOffset?, byteLength?)', ''],
-						['Float32Array(length)', ''],
-						['Float64Array(length)', ''],
-						['Int16Array(length)', ''],
-						['Int32Array(length)', ''],
-						['Int8Array(length)', ''],
+						['Float32Array(size)', ''],
+						['Float64Array(size)', ''],
+						['Int16Array(size)', ''],
+						['Int32Array(size)', ''],
+						['Int8Array(size)', ''],
 						['Map(iterable?)', ''],
 						['Promise(executor)', ''],
 						['Proxy(target, handler)', ''],
-						['Set(iterable)', ''],
+						['Set(iterable?)', ''],
 						['Symbol(description?)', ''],
-						['TypedArray(length)', ''],
-						['Uint16Array()', ''],
-						['Uint32Array()', ''],
-						['Uint8Array()', ''],
-						['Uint8ClampedArray()', ''],
-						['WeakMap(iterable)', ''],
-						['WeakSet(iterable)', '']
+						['Uint16Array(size)', ''],
+						['Uint32Array(size)', ''],
+						['Uint8Array(size)', ''],
+						['Uint8ClampedArray(size)', ''],
+						['WeakMap(iterable?)', ''],
+						['WeakSet(iterable?)', ''],
+						['Reflect', 'Reflect : Reflect']
 					]);
 				});
 				it("test multi var content assist 2", function(done) {
@@ -2440,23 +2424,23 @@ define([
 						['', 'ecma6'],
 						['ArrayBuffer(length)', ''],
 						['DataView(buffer, byteOffset?, byteLength?)', ''],
-						['Float32Array(length)', ''],
-						['Float64Array(length)', ''],
-						['Int16Array(length)', ''],
-						['Int32Array(length)', ''],
-						['Int8Array(length)', ''],
+						['Float32Array(size)', ''],
+						['Float64Array(size)', ''],
+						['Int16Array(size)', ''],
+						['Int32Array(size)', ''],
+						['Int8Array(size)', ''],
 						['Map(iterable?)', ''],
 						['Promise(executor)', ''],
 						['Proxy(target, handler)', ''],
-						['Set(iterable)', ''],
+						['Set(iterable?)', ''],
 						['Symbol(description?)', ''],
-						['TypedArray(length)', ''],
-						['Uint16Array()', ''],
-						['Uint32Array()', ''],
-						['Uint8Array()', ''],
-						['Uint8ClampedArray()', ''],
-						['WeakMap(iterable)', ''],
-						['WeakSet(iterable)', '']
+						['Uint16Array(size)', ''],
+						['Uint32Array(size)', ''],
+						['Uint8Array(size)', ''],
+						['Uint8ClampedArray(size)', ''],
+						['WeakMap(iterable?)', ''],
+						['WeakSet(iterable?)', ''],
+						['Reflect', 'Reflect : Reflect']
 					]);
 				});
 				it("test multi function content assist 1", function(done) {
@@ -2508,23 +2492,23 @@ define([
 						['', 'ecma6'],
 						['ArrayBuffer(length)', ''],
 						['DataView(buffer, byteOffset?, byteLength?)', ''],
-						['Float32Array(length)', ''],
-						['Float64Array(length)', ''],
-						['Int16Array(length)', ''],
-						['Int32Array(length)', ''],
-						['Int8Array(length)', ''],
+						['Float32Array(size)', ''],
+						['Float64Array(size)', ''],
+						['Int16Array(size)', ''],
+						['Int32Array(size)', ''],
+						['Int8Array(size)', ''],
 						['Map(iterable?)', ''],
 						['Promise(executor)', ''],
 						['Proxy(target, handler)', ''],
-						['Set(iterable)', ''],
+						['Set(iterable?)', ''],
 						['Symbol(description?)', ''],
-						['TypedArray(length)', ''],
-						['Uint16Array()', ''],
-						['Uint32Array()', ''],
-						['Uint8Array()', ''],
-						['Uint8ClampedArray()', ''],
-						['WeakMap(iterable)', ''],
-						['WeakSet(iterable)', '']
+						['Uint16Array(size)', ''],
+						['Uint32Array(size)', ''],
+						['Uint8Array(size)', ''],
+						['Uint8ClampedArray(size)', ''],
+						['WeakMap(iterable?)', ''],
+						['WeakSet(iterable?)', ''],
+						['Reflect', 'Reflect : Reflect']
 					]);
 				});
 				it("test no dupe 1", function(done) {
@@ -2535,7 +2519,7 @@ define([
 						callback: done
 					};
 					return testProposals(options, [
-						["coo", "coo : any"]
+						["coo", "coo : number"]
 					]);
 				});
 				it("test no dupe 2", function(done) {
@@ -2769,7 +2753,8 @@ define([
 						["ssss", "ssss : number"]
 					]);
 				});
-				it("test Object Literal inside", function(done) {
+				// TODO Tern 18 does not return proeprty completions inside the object
+				it.skip("test Object Literal inside", function(done) {
 					var options = {
 						buffer: "var x = { the : 1, far : this.th };",
 						prefix: "th",
@@ -2799,7 +2784,6 @@ define([
 						callback: done
 					};
 					return testProposals(options, [
-						["the", "the : number"]
 					]);
 				});
 				it("test Object Literal outside 2", function(done) {
@@ -3163,7 +3147,7 @@ define([
 						callback: done
 					};
 					return testProposals(options, [
-						//TODO we should find 'yyy' ["yyy", "yyy : number"]
+						["yyy", "yyy : number"]
 					]);
 				});
 				it("test implicit inference 3", function(done) {
@@ -3174,7 +3158,7 @@ define([
 						callback: done
 					};
 					return testProposals(options, [
-						//TODO we should find 'yyy' ["yyy", "yyy : number"]
+						["yyy", "yyy : number"]
 					]);
 				});
 				it("test implicit inference 4", function(done) {
@@ -3259,9 +3243,9 @@ define([
 						["isPrototypeOf(obj)", "isPrototypeOf(obj) : bool"],
 						["Infinity", "Infinity : number"],
 						['', 'ecma6'],
-						['Int16Array(length)', 'Int16Array(length)'],
-						['Int32Array(length)', 'Int32Array(length)'],
-						['Int8Array(length)', 'Int8Array(length)']
+						['Int16Array(size)', 'Int16Array(size)'],
+						['Int32Array(size)', 'Int32Array(size)'],
+						['Int8Array(size)', 'Int8Array(size)']
 					]);
 				});
 				it("test for loop 2", function(done) {
@@ -3279,9 +3263,9 @@ define([
 						["isPrototypeOf(obj)", "isPrototypeOf(obj) : bool"],
 						["Infinity", "Infinity : number"],
 						['', 'ecma6'],
-						['Int16Array(length)', 'Int16Array(length)'],
-						['Int32Array(length)', 'Int32Array(length)'],
-						['Int8Array(length)', 'Int8Array(length)']
+						['Int16Array(size)', 'Int16Array(size)'],
+						['Int32Array(size)', 'Int32Array(size)'],
+						['Int8Array(size)', 'Int8Array(size)']
 					]);
 				});
 				it("test for loop 3", function(done) {
@@ -3299,9 +3283,9 @@ define([
 						["isPrototypeOf(obj)", "isPrototypeOf(obj) : bool"],
 						["Infinity", "Infinity : number"],
 						['', 'ecma6'],
-						['Int16Array(length)', 'Int16Array(length)'],
-						['Int32Array(length)', 'Int32Array(length)'],
-						['Int8Array(length)', 'Int8Array(length)']
+						['Int16Array(size)', 'Int16Array(size)'],
+						['Int32Array(size)', 'Int32Array(size)'],
+						['Int8Array(size)', 'Int8Array(size)']
 					]);
 				});
 				it("test while loop 1", function(done) {
@@ -3586,8 +3570,6 @@ define([
 							['TypeError(message)', 'TypeError(message)'],
 							["toLocaleString()", "toLocaleString() : string"],
 							["toString()", "toString() : string"],
-							['', 'ecma6'],
-							['TypedArray(length)', 'TypedArray(length)'],
 							['', 'Keywords'],
 							["this", "this - Keyword"],
 							['throw', 'throw - Keyword'],
@@ -3994,14 +3976,14 @@ define([
 				 */
 				it("test mysql index 3", function(done) {
 					var options = {
-						buffer: "/*eslint-env mysql*/ require('mysql').createQ",
-						prefix: "createQ",
+						buffer: "/*eslint-env mysql*/ require('mysql').createC",
+						prefix: "createC",
 						offset: 45,
 						callback: done
 					};
 					testProposals(options, [
 						['', 'mysql'],
-					    ['createQuery(sql)', 'createQuery(sql)']
+					    ['createConnection(connectionUri)', 'createConnection(connectionUri) : mysql.Connection']
 					]);
 				});
 				/*
@@ -4824,16 +4806,16 @@ define([
 				 */
 				it("test object doc completion 2", function(done) {
 					var options = {
-						buffer: "/**\n* @returns {I} \n*/",
+						buffer: "/**\n* @returns {T} \n*/",
 						line: '* @returns {I} ',
 						prefix: "I",
 						offset: 17,
 						callback: done};
 					testProposals(options, [
+						['', 'ecma5'],
+						['TypeError', 'TypeError', 'Represents an error'],
 						['', 'ecma6'],
-						['Int16Array', 'Int16Array', 'The Int16Array typed array represents'],
-						['Int32Array', 'Int32Array', 'The Int32Array typed array represents'],
-						['Int8Array', 'Int8Array', 'The Int8Array typed array represents']
+						['TypedArray', 'TypedArray', 'A TypedArray object describes an array-like view of'],
 					]);
 				});
 	
@@ -5038,7 +5020,9 @@ define([
 						callback: done};
 					testProposals(options, [
 						['', 'node'],
-						["copy(targetBuffer, targetStart?, sourceStart?, sourceEnd?)", "copy(targetBuffer, targetStart?, sourceStart?, sourceEnd?)"]
+						["copy(targetBuffer, targetStart?, sourceStart?, sourceEnd?)", "copy(targetBuffer, targetStart?, sourceStart?, sourceEnd?) : number"],
+						['', 'ecma6'],
+						["copyWithin(target, start, end?)", "copyWithin(target, start, end?)"]
 					]);
 				});
 				it('node awareness 12', function(done) {
@@ -5178,7 +5162,8 @@ define([
 						['XPathResult()', 'XPathResult()']
 					]);
 				});
-				it('browser awareness 9', function(done) {
+				// TODO Tern 18 does not return global vars on the window object
+				it.skip('browser awareness 9', function(done) {
 					var options = {
 						buffer: "/*eslint-env browser */var xx = 9;window.x",
 						prefix: "x",

@@ -1913,7 +1913,36 @@
     },
     MemberExpression: function(node, scope) {
       var propN = propName(node), obj = findType(node.object, scope).getType();
-      if (obj) return obj.getProp(propN);
+      
+      // ORION Collect potential matches
+      if (obj) {
+			var currentMatch = obj.getProp(propN);
+			if (guessing && Array.isArray(obj.potentialMatches)) {
+				var potentialMatches = obj.potentialMatches;
+				var matchesProp = [];
+				for(var i = 0, len = potentialMatches.length; i < len; i++) {
+					var match = potentialMatches[i];
+					var propMatch = match.getProp(propN);
+					if (typeof propMatch !== "undefined") {
+						if (typeof propMatch.originNode !== "undefined"
+								&& typeof propMatch.origin !== "undefined") {
+							if (propMatch.originNode.sourceFile) {
+								if (propMatch.originNode.sourceFile.name === propMatch.origin) {
+									matchesProp.push(propMatch);
+								}
+							}
+						}
+					}
+				}
+				if (matchesProp.length > 0) {
+					currentMatch.potentialMatches = matchesProp;
+				}
+			}
+			return currentMatch;
+		}
+      
+      // Before Orion: if (obj) return obj.getProp(propN);
+      
       if (propN == "<i>") return ANull;
       return findByPropertyName(propN);
     },

@@ -965,27 +965,25 @@
     if (infer.didGuess() && !query.guess) return {};
     // Before Orion: if (infer.didGuess()) return {};
     
-    // TODO ORION We used to look at potential matches
-    /*
-    //ORION
-	    var result = getResult(type, srv, query);
-	    if (infer.didGuess()) {
-	    	   if (type.potentialMatches) {
-	    	      var temp = [];
-	    	      for (var i = 0; i < type.potentialMatches.length; i++) {
-				temp.push(getResult(type.potentialMatches[i], srv, query));
-	    	      }
-	    	      result.results = temp;
-	    	   }
-	    	}
-	    	return result;
-    	};
-    	
-    	*/
-
+    // ORION Move result collection into function and collect al potential matches to display in UI
+    var result = getResult(type, srv, query);
+    if (infer.didGuess()) {
+	   if (type.potentialMatches) {
+	      var temp = [];
+	      for (var i = 0; i < type.potentialMatches.length; i++) {
+			temp.push(getResult(type.potentialMatches[i], srv, query));
+	      }
+	      result.results = temp;
+	   }
+   	}
+   	return result;
+  }
+  
+  // ORION Moved result creation to a function so it can be called for multiple potential matches
+  function getResult(type, srv, query) {
     var span = getSpan(type);
     var result = {url: type.url, doc: parseDoc(query, type.doc), origin: type.origin, guess: infer.didGuess()}; // ORION
-// Before Orion:   var result = {url: type.url, doc: parseDoc(query, type.doc), origin: type.origin};
+	// Before Orion:   var result = {url: type.url, doc: parseDoc(query, type.doc), origin: type.origin};
 
     if (type.types) for (var i = type.types.length - 1; i >= 0; --i) {
       var tp = type.types[i];
@@ -1005,8 +1003,10 @@
       result.file = span.origin;
       storeSpan(srv, query, span, result);
     }
+    
     return clean(result);
   }
+
 
   function findRefsToVariable(srv, query, file, expr, checkShadowing) {
     var name = expr.node.name;

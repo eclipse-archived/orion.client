@@ -20,6 +20,65 @@ in the preParse phase, but in Tern 18 the pass is short circuited when our html 
 	    exports.findRefsToProperty = findRefsToProperty; // ORION
 	    exports.findRefsToVariable = findRefsToVariable; // ORION
 	    exports.ternError = ternError; // ORION
+- Support returning multiple declarations when guessing.  Rather than take just the first result, we modify
+Tern to return all of the potential matches.  This is then displayed in the client so the user can select.
+		//ORION When guessing, we return all potential matches to display in UI
+		var result = getResult(type, srv, query);
+		if (infer.didGuess()) {
+			   if (type.potentialMatches) {
+			      var temp = [];
+			      for (var i = 0; i < type.potentialMatches.length; i++) {
+				temp.push(getResult(type.potentialMatches[i], srv, query));
+			      }
+			      result.results = temp;
+			   }
+			}
+			return result;
+		};
+	There also needs to be changes to infer.js to include potential matches:
+ 	 MemberExpression: function(node, scope) {
+      var propN = propName(node), obj = findType(node.object, scope).getType();
+      
+      // ORION Collect potential matches
+      if (obj) {
+			var currentMatch = obj.getProp(propN);
+			if (guessing && Array.isArray(obj.potentialMatches)) {
+				var potentialMatches = obj.potentialMatches;
+				var matchesProp = [];
+				for(var i = 0, len = potentialMatches.length; i < len; i++) {
+					var match = potentialMatches[i];
+					var propMatch = match.getProp(propN);
+					if (typeof propMatch !== "undefined") {
+						if (typeof propMatch.originNode !== "undefined"
+								&& typeof propMatch.origin !== "undefined") {
+							if (propMatch.originNode.sourceFile) {
+								if (propMatch.originNode.sourceFile.name === propMatch.origin) {
+									matchesProp.push(propMatch);
+								}
+							}
+						}
+					}
+				}
+				if (matchesProp.length > 0) {
+					currentMatch.potentialMatches = matchesProp;
+				}
+			}
+			return currentMatch;
+		}
+      
+      // Before Orion: if (obj) return obj.getProp(propN);
+    Also:
+	       var canon = canonicalType(matches);
+	        if (canon) {
+	        	guessing = true;
+	        	
+	        	// ORION
+	        	if (matches.length > 0) {
+	        		canon.potentialMatches = matches;
+	        	}
+	        	
+	        	return canon;
+	        }
 
 New options:
 - Tern 18 - Tern now strips the projectDir from paths so we have to set a projectDir in ternDefaults.js
@@ -95,29 +154,11 @@ For Tern 18 this is !known_modules (previously !node).
 	  	 	return resolvedFile.file;
 	  	 }
 - TODO: node_resolve is using script resolver to get the file, but doesn't pass the file contents onto Tern
-- TODO : Do we want to prevent node plugin from running? Call this function in the beforeLoad/afterLoad events
-        /**
-		 * @description If we should be using the node plugin
-		 * @param {Object} file The file object
-		 * @returns {Boolean} If we should do any work in the node plugin
-		 * @since 10.0
-		 * Orion
-		 */
-		function usingNode(file) {
-			if(/\.js$/g.test(file.name) && file.ast && file.ast.environments) {
-	      	  	if(file.ast.environments.node) {
-	      	  		return true;
-	      	  	}
-	      	  	if(typeof file.parent === 'string') {
-	      	  		var p = server.fileMap[file.parent];
-	      	  		if(p && p.ast && p.ast.environments) {
-	      	  			return p.ast.environments.node;
-	      	  		}
-	      	  	}
-	      	}
-	      	return false;
-		}
+- The CommonJS plugin adds modules and exports to every scope which we don't want.  The easiest way to turn this
+off is to skip the withScope pass if the file is not running a node environment.  Will have to look at better solutions
+in the future, see TODO in commonjs.js
+		if (scope.originNode && scope.originNode.environments && scope.originNode.environments.node){
 
 TODO: 
 - Add tests for module name completions
-- Allows indexed libs to contribute to module name completions
+- Check that indexed libs can contribute to module name completions
