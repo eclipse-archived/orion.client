@@ -211,16 +211,20 @@ define([
 					if (temp && temp._item) {
 	                    var link = lib.$("a", evt.target);
 	                    if (link) {
-	            			window.location.href = link.href;
-            				//_self._clickLink(link);
-            				return;
+	                    	if(evt.type === "click") {
+		            			window.location.href = link.href;
+	            				//_self._clickLink(link);
+            				} else if(evt.type === "dblclick"){
+            					this.handleLinkDoubleClick(link, evt);
+            				}
 	                    }
                 	}
                 }
             }
 		};
 		if (parentNode) {
-			parentNode.addEventListener("click", this._clickListener); //$NON-NLS-0$
+			parentNode.addEventListener("click", this._clickListener.bind(this)); //$NON-NLS-0$
+			parentNode.addEventListener("dblclick", this._clickListener.bind(this)); //$NON-NLS-0$
 		}
 	}
 	

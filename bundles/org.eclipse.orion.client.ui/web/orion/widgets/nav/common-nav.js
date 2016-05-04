@@ -31,6 +31,7 @@ define([
 	messages, objects, lib, mExplorer, mNavigatorRenderer, mKeyBinding,
 	FileCommands, ProjectCommands, ExtensionCommands, mGlobalCommands, Selection, URITemplate, PageUtil, mContextMenu, mGeneralPreferences, mMetrics
 ) {
+	var _DEBUG = false;
 	var FileExplorer = mExplorer.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
@@ -484,10 +485,21 @@ define([
 		_preventLinkBehavior: function(linkNode) {
 			linkNode.addEventListener("click", function(evt) {
 	            this.explorer.isDesktopSelectionMode().then(function(desktopMode){
-	            	if(desktopMode && (evt.shiftKey || evt.ctrlKey || evt.metaKey)) {
+	            	if(_DEBUG) {
+	            		var byWho = evt.detail ===3 ? "simulation" : "user";
+		            	console.log("single click triggered by " + byWho);
+		            	console.log(evt);
+	            	}
+	            	if(desktopMode && (evt.shiftKey || evt.ctrlKey || evt.metaKey) && evt.detail !==3) {
+	            		if(_DEBUG) {
+	            			console.log("single click prevented");
+            			}
 	            		evt.preventDefault();
 	            	}
 	            });
+			}.bind(this));
+			linkNode.addEventListener("dblclick", function(evt) {
+				this.explorer.handleLinkDoubleClick(linkNode, evt);
 			}.bind(this));
 		},
 		createFolderNode: function(folder) {

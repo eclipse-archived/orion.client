@@ -65,9 +65,21 @@ exports.Explorer = (function() {
 			}
 			this.destroyed = true;
 		},
-		
 		isDesktopSelectionMode: function() {
 			return new Deferred().resolve(false);
+		},
+		handleLinkDoubleClick: function(linkNode, doubleClickEvt) {
+            this.isDesktopSelectionMode().then(function(desktopMode){
+            	if(desktopMode) {
+            		doubleClickEvt.preventDefault();
+					var evt = document.createEvent("MouseEvents");
+				    evt.initMouseEvent("click", true, true, window,
+				        3, 0, 0, 0, 0,
+				        true, false, evt.shiftKey, true,
+				        0, null);
+				    linkNode.dispatchEvent(evt); 
+            	}
+            });
 		},
 		// we have changed an item on the server at the specified parent node
 		changedItem: function(parent, children) {
