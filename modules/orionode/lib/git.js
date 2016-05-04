@@ -28,6 +28,7 @@ try {
 	var diff = require('./git/diff');
 	var submodule = require('./git/submodule');
 	var tree = require('./git/tree');
+	var pullrequest = require('./git/pullrequest');
 } catch (e) {
 	hasNodegit = false;
 	if (e.code === "MODULE_NOT_FOUND" && e.message.indexOf("nodegit") >= 0) {
@@ -69,6 +70,7 @@ function Git(options) {
 	router.use("/diff", diff.router(options));
 	router.use("/submodule", submodule.router(options));
 	router.use("/tree", tree.router(options));
+	router.use("/pullRequest", pullrequest.router(options));
 
 	return router;
 }
