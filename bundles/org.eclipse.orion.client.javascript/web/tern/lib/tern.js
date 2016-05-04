@@ -82,7 +82,8 @@
       directSourceFile: file,
       allowReturnOutsideFunction: true,
       allowImportExportEverywhere: true,
-      ecmaVersion: srv.options.ecmaVersion
+      ecmaVersion: srv.options.ecmaVersion,
+      sourceType: srv.options.sourceType
     }
     var text = srv.signalReturnFirst("preParse", file.text, options) || file.text
     // ORION: Add parseOptions pass to allow orionAcorn to setup the parser and modify the options

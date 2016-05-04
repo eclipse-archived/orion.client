@@ -68,6 +68,9 @@ define([
 								var json = JSON.parse(file.contents);
 								if (json) {
 									options.ecmaVersion = json.ecmaVersion;
+									if (json.sourceType) {
+										options.sourceType = json.sourceType;
+									}
 								}
 							}
 							ast = this.parse(text, metadata ? metadata.location : 'unknown', options); //$NON-NLS-1$

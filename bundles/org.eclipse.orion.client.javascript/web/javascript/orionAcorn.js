@@ -416,7 +416,11 @@ define([
 		options.locations = true;
 		options.ranges = true;
 		options.sourceFile = false;
-		options.sourceType = "script";
+		if (!options.sourceType) {
+			// set a default value
+			options.sourceType = "script";
+		}
+		options.allowHashBang = true;
 		if(typeof options.ecmaVersion !== 'number' || (options.ecmaVersion < 3 || options.ecmaVersion > 7)) {
 			options.ecmaVersion = 6; //don't stomp on the value set in Tern
 		}
