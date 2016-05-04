@@ -145,7 +145,7 @@ define([
 	        hover += '\n\n\n  [Jump to declaration]('+href+')';*/
 	    }
 	    catch(e) {
-	        //do nothing, show what we have
+	       hover = '';
 	    }
 	    var result = {content: hover, type:'markdown'}; //$NON-NLS-1$
 	    if (offsetRange){

@@ -288,11 +288,11 @@
 
         function scanIdentifier(last) {
             var identifier;
-            if (!esutils.code.isIdentifierStart(source.charCodeAt(index))) {
+            if (!esutils.code.isIdentifierStartES5(source.charCodeAt(index))) {
                 return null;
             }
             identifier = advance();
-            while (index < last && esutils.code.isIdentifierPart(source.charCodeAt(index))) {
+            while (index < last && esutils.code.isIdentifierPartES5(source.charCodeAt(index))) {
                 identifier += advance();
             }
             return identifier;
