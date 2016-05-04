@@ -120,12 +120,14 @@ define([
 		 * @param {Object} jsonOptions options to load into Tern
 		 */
 		loadTernProjectOptions: function(jsonOptions) {
-			if (jsonOptions && Array.isArray(jsonOptions.loadEagerly) && jsonOptions.loadEagerly.length > 0) {
+			var opts = jsonOptions || Object.create(null);
+			opts.projectLoc = this.projectLocation;
+			if (Array.isArray(opts.loadEagerly) && opts.loadEagerly.length > 0) {
 				var fileLoadPromises = [];
 				this._fileLoadWarnings = [];
 				var filesToLoad = [];
-				for (var i = 0; i < jsonOptions.loadEagerly.length; i++) {
-					var filename = jsonOptions.loadEagerly[i];
+				for (var i = 0; i < opts.loadEagerly.length; i++) {
+					var filename = opts.loadEagerly[i];
 					var ext = 'js'; //$NON-NLS-1$
 					if (filename.match(/\.html$/)){
 						ext = 'html'; //$NON-NLS-1$
@@ -146,9 +148,7 @@ define([
 				if (!this._hasValidationProblem){
 					this.registry.getService("orion.page.message").setProgressMessage(Messages['fileMatchProgress']); //$NON-NLS-1$
 				}
-				var currentOptions = jsonOptions;
-				currentOptions.loadEagerly = filesToLoad;
-				currentOptions.projectLoc = this.projectLocation;
+				opts.loadEagerly = filesToLoad;
 				if(fileLoadPromises.length > 0) {
 					return Deferred.all(fileLoadPromises).then(function(){
 						if (!this._hasValidationProblem){  // Don't hide validation warnings
@@ -165,12 +165,12 @@ define([
 							}
 						}
 						this._fileLoadWarnings = [];
-						this.ternWorker.postMessage({request: "start_server", args: {options: currentOptions}}); //$NON-NLS-1$
+						this.ternWorker.postMessage({request: "start_server", args: {options: opts}}); //$NON-NLS-1$
 					}.bind(this));
 				}
-				this.ternWorker.postMessage({request: "start_server", args: {options: currentOptions}}); //$NON-NLS-1$
+				this.ternWorker.postMessage({request: "start_server", args: {options: opts}}); //$NON-NLS-1$
 			} else {
-				this.ternWorker.postMessage({request: "start_server", args: {options: jsonOptions}}); //$NON-NLS-1$
+				this.ternWorker.postMessage({request: "start_server", args: {options: opts}}); //$NON-NLS-1$
 			}
 		},
 		/**
