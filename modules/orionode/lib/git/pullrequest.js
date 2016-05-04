@@ -100,6 +100,19 @@ function getPullRequest(req, res) {
 						Message: "OK",
 						Severity: "Ok"
 					});
+				} else if (!error && response.statusCode === 404 || response.statusCode === 401){
+					var message = "Repository not found, might be a private repository that requires authentication.";
+					if(response.statusCode === 401){
+						message = "Not authorized to get the repository information.";
+					}
+					task.done({
+						HttpCode: 401,
+						Code: 0,
+						JsonData: {"Url": gitUrl},
+						DetailedMessage: message,
+						Message: message,
+						Severity: "Error"
+					});
 				} else {
 					task.done({
 						HttpCode: 403,
