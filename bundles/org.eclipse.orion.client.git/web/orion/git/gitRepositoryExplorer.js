@@ -202,7 +202,7 @@ define([
 		}
 		this.statusService.setProgressResult(display);
 		
-		if (error.status === 404) {
+		if (error.status === 404 || error.status === 410) {
 			this.initTitleBar();
 			this.displayRepositories();
 		}

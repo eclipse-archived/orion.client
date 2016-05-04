@@ -320,7 +320,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 				that._testSameFiles(OveralIndex+1);
 			}
 		}, function(error, ioArgs) {
-			if (error.status === 404) {
+			if (error.status === 404 || error.status === 410) {
 				files[currentIndex].Content = "";
 				if(currentIndex < (files.length - 1)){
 					that._getFileContent(files, currentIndex+1, OveralIndex);

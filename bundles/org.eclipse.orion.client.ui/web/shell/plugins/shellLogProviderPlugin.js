@@ -53,6 +53,8 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 				return '(405) Unsupported log service request.';
 			case 404:
 				return '(404) Could not find the log service resource.';
+			case 410:
+				return '(410) Could not find the log service resource.';
 			case 403:
 				return '(403) Unauthorized log service request.';
 			case 401:

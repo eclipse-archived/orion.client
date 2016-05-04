@@ -386,7 +386,7 @@ define(['orion/Deferred'], function(Deferred) {
 				deferred.reject(error);
 			});
 		}, function(error) {
-			if (error.status === 404) {
+			if (error.status === 404 || error.status === 410) {
 				var create = function() {
 					var def1 = fileClient.createFolder(config.directory.Location, "root");
 					if (progress) {

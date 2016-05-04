@@ -61,7 +61,7 @@ define(["chai/chai", "orion/serviceregistry", "orion/pluginregistry"], function(
 					}).then(function(result) {
 						assert.ok(false);
 					}, function(result) {
-						assert.ok(result.status === 404);
+						assert.ok(result.status === 404 || error.status === 410);
 						pluginRegistry.stop();
 					});
 				});
@@ -81,7 +81,7 @@ define(["chai/chai", "orion/serviceregistry", "orion/pluginregistry"], function(
 						return service.read(root + "newfile.html").then(function(result) {
 							assert.ok(false);
 						}, function(result) {
-							assert.ok(result.status === 404);
+							assert.ok(result.status === 404 || error.status === 410);
 							return service.write(root + "newfile.html", "<html><body>test</body></html>");
 						}).then(function(result) {
 							assert.ok(result.status >= 200 && result.status < 300);
@@ -111,7 +111,7 @@ define(["chai/chai", "orion/serviceregistry", "orion/pluginregistry"], function(
 						return service.list(root + "newdir").then(function(result) {
 							assert.ok(false);
 						}, function(result) {
-							assert.ok(result.status === 404);
+							assert.ok(result.status === 404 || error.status === 410);
 							return service.mkdir(root + "newdir");
 						}).then(function(result) {
 							assert.ok(result.status >= 200 && result.status < 300);

@@ -173,7 +173,7 @@ define([
 			}
 			return false;
 		}, function(error) {
-			if (error.status === 404) {
+			if (error.status === 404 || error.status === 410) {
 				return false;
 			}
 			throw error;

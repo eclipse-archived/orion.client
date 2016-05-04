@@ -103,7 +103,7 @@ define(['require', 'orion/Deferred', 'orion/EventTarget', 'orion/xhr'], function
 					delete that._currentPromises[namespace];
 					d.resolve(data);
 				}, function (error) {
-					if (error.status === 404) {
+					if (error.status === 404 || error.status === 410) {
 						var data = {};
 						that._cache.set(namespace, data);
 						delete that._currentPromises[namespace];

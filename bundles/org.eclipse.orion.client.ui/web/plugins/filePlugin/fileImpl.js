@@ -687,7 +687,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 	
 	function _handleError(error) {
 		var errorMessage = "Unknown Error";
-		if(error.status && error.status === 404) {
+		if(error.status && (error.status === 404 || error.status === 410)) {
 			errorMessage = "File not found.";
 		} else if (error.xhr && error.xhr.statusText){
 			errorMessage = error.xhr.statusText;
