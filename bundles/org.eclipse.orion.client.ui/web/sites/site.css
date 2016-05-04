@@ -33,3 +33,9 @@ html,body {
 .visible {
 	visibility: visible;
 }
+
+.dropdownTrigger:not(.dropdownDefaultButton) {
+ 	font-weight: normal;
+	color: #00AED1 !important;
+	border: 1px solid #00AED1 !important;
+}
