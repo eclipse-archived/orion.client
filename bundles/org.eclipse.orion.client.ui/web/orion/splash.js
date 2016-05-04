@@ -264,6 +264,7 @@ loader.prototype.update = function(){
 	if (!Array.isArray(message)) message = [message];
 	if (!Array.isArray(detailedMessage)) detailedMessage = [detailedMessage];
 	message.forEach(function(msg, i) {
+		if (!msg) return;
 		var msgDiv = document.createElement("div");
 		msgDiv.className = "splashMessage";
 		msgDiv.textContent = msg;
