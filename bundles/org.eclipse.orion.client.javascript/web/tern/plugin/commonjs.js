@@ -56,16 +56,7 @@
 
   function isModuleName(node) {
     if (node.type != "Literal" || typeof node.value != "string") return
-
-    // ORION In our version of Acorn the AST is not available on the given node
-    var ast = node.sourceFile.ast;
-    if (!ast){
-        var server = infer.cx().parent;
-        ast = server.fileMap[node.sourceFile.name];
-        if (!ast) return;
-        ast = ast.ast;
-    }
-    var call = infer.findExpressionAround(ast, null, node.end, null,
+    var call = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null,
                                           function(_, n) { return isStaticRequire(n) != null })
     if (call && call.node.arguments[0] == node) return node.value
   }

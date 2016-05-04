@@ -133,10 +133,13 @@ define([
 				}
 			};
 			_tern.libKnown = function libKnown(name) {
-				if(server._node && server._node.modules) {
-					var keys = Object.keys(server._node.modules);
+				if(server.mod && server.mod.modules) {
+					if(server.mod.modules.knownModules && server.mod.modules.knownModules[name]) {
+						return true;
+					}
+					var keys = Object.keys(server.mod.modules.modules);
 					for(var i = 0, len = keys.length; i < len; i++) {
-						var mod = server._node.modules[keys[i]];
+						var mod = server.mod.modules.modules[keys[i]];
 						if(mod && mod.modName === name) {
 							return true;
 						}

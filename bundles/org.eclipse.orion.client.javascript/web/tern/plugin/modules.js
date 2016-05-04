@@ -3,9 +3,9 @@
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require("../lib/signal"), require)
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", "../lib/signal"], mod)
+    return define(["../lib/infer", "../lib/tern", "../lib/signal", "javascript/ternPlugins/resolver"], mod)
   mod(tern, tern, tern.signal)
-})(function(infer, tern, signal, require) {
+})(function(infer, tern, signal, resolver, require) {
   "use strict"
   function Modules(server, options) {
     this.server = server
@@ -42,6 +42,7 @@
     },
 
     resolveModule: function(name, parentFile) {
+      var modName = name; //ORION tag module with original name
       var over = this.maybeOverride(name)
       if (over) return over
       var known = this.knownModules[name]
@@ -58,16 +59,28 @@
       if (!resolved) return infer.ANull
       if (typeof resolved != "string") {
         if (!relative) this.nonRelative[name] = true
+        resolved.modName = modName; //ORION tag module with original name
         return resolved
       }
-
-      var known = this.modules[resolved]
-      if (known) return known
-
-      if (/\.js$|(?:^\/)[^\.]+$/.test(resolved))
-        this.server.addFile(resolved, null, parentFile)
-      if (!relative) this.nonRelative[name] = resolved
-      return this.modules[resolved] = new infer.AVal
+		
+	 // ORION Get the resolved file from Orion resolver plugin
+  	 var resolvedFile = resolver.getResolved(name);
+  	 if (resolvedFile && resolvedFile.file) {
+  	 	  resolved = resolvedFile.file;
+  	 	  var known = this.modules[resolved]
+	      if (known) {
+	      	known.modName = modName; //ORION tag module with original name
+	      	return known
+	  	  }
+	      if (/\.js$|(?:^\/)[^\.]+$/.test(resolved))
+	        this.server.addFile(resolvedFile.file, resolvedFile.contents, parentFile);
+	      if (!relative) this.nonRelative[name] = resolved
+	      this.modules[resolved] = new infer.AVal;
+	      this.modules[resolved].modName = modName; //ORION tag module with original name
+	      return this.modules[resolved];
+	  } else {
+	  	return new infer.AVal();
+	  }
     },
 
     findIn: function(array, node, pos) {
@@ -347,7 +360,15 @@
     server.on("preCondenseReach", preCondenseReach)
     server.on("postLoadDef", postLoadDef)
     server.on("typeAt", findTypeAt)
-    server.on("completion", findCompletions)
+    server.on("completion", findCompletions);
+    
+    // ORION Hook into postParse, preInfer events
+    server.on("postParse", function(ast, text){
+    	resolver.doPostParse(server, ast, infer.cx().definitions, null, {node:true});
+    });
+    server.on("preInfer", function(ast, scope){
+    	resolver.doPreInfer(server);
+    });
   })
 
   tern.defineQueryType("exports", {

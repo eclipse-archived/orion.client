@@ -9,13 +9,6 @@
   "use strict"
 
   function resolve(name, parentFile) {
-  	 
-  	 // ORION Get the resolved file from Orion resolver plugin
-  	 var resolvedFile = resolver.getResolved(name);
-  	 if (resolvedFile){
-  	 	return resolvedFile.file;
-  	 }
-  	
     var resolved = resolveToFile(name, parentFile)
     return resolved && infer.cx().parent.normalizeFilename(resolved)
   }

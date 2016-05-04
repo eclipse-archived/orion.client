@@ -708,9 +708,16 @@
           (query.caseInsensitive ? prop.toLowerCase() : prop).indexOf(word) !== 0) return;
       if (ignoreObj && ignoreObj.props[prop]) return;
       var result = addCompletion(query, completions, prop, obj && obj.props[prop], depth);
+      if(result && query.origins) { //ORION set origin to the short name if available
+	      if (srv.mod && srv.mod.modules && srv.mod.modules.modules) {
+		    var module = srv.mod.modules.modules[result.origin];
+	        if (module) {
+	            maybeSet(result, "origin", module.modName || result.origin);
+	        }
+	      }
+       }
       if (addInfo && result && typeof result != "string") addInfo(result);
     }
-
     var hookname, prop, objType, isKey;
 
     var exprAt = infer.findExpressionAround(file.ast, null, wordStart, file.scope);
