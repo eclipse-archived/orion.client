@@ -321,6 +321,18 @@ define([
 							that.dependencies[dep] = {type: "Literal", value: dep };
 						}
 					}
+				} else if (type === 'ImportDeclaration'){
+					extra = {
+						deps: {},
+					};
+					addDep(node.source, extra);
+					deps = extra.deps;
+					// copy all properties from extra.deps into dependencies
+					for (var dep in deps) {
+						if (deps.hasOwnProperty(dep) && !that.dependencies.hasOwnProperty(dep)) {
+							that.dependencies[dep] = {type: "Literal", value: dep };
+						}
+					}
 				}
 				var result = nextMethod.call(this, node, type);
 				// attach trailing comments

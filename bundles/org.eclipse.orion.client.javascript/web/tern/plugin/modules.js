@@ -184,6 +184,9 @@
     var server = infer.cx().parent
     if (server.findFile(path)) return path
     if (server.findFile(path + ".js")) return path + ".js"
+    
+    // ORION The default resolver must return something to get to using our resolver plugin
+    return path;
   }
 
   // Under node, replace completeFileName with a version that actually
