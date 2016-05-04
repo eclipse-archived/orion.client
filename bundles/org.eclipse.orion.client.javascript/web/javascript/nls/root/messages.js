@@ -221,6 +221,8 @@ define({
 	'orionComponentPluginDescription': 'Plug-in that contributes type information and code templates for ComponentJS.',
 	'orionExpressPluginName': 'Orion ExpressJS',
 	'orionExpressPluginDescription': 'Plug-in that contributes type information and code templates for ExpressJS.',
+	'orionESModulesPluginName': 'Orion ES_Modules',
+	'orionESModulesPluginDescription': 'Plug-in that contributes type information and code templates for ES Modules.',
 	'orionMongoDBPluginName': 'Orion MongoDB',
 	'orionMongoDBPluginDescription': 'Plug-in that contributes type information and code templates for MongoDB.',
 	'orionMySQLPluginName': 'Orion MySQL',

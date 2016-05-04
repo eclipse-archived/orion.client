@@ -21,6 +21,7 @@ define([
 	//tern defaults
 	"tern/plugin/angular",
 	"tern/plugin/doc_comment",
+	"tern/plugin/es_modules",
 	'tern/plugin/node',
 	'tern/plugin/requirejs',
 	
@@ -117,6 +118,11 @@ define([
 				"version": "4.12.4",
 				"env": "express"
 			},
+			"es_modules": {
+				"name": Messages["orionESModulesPluginName"],
+				"description": Messages["orionESModulesPluginDescription"],
+				"version": "0.18.0",
+			},
 			"mongodb": {
 				"name": Messages["orionMongoDBPluginName"],
 				"description": Messages["orionMongoDBPluginDescription"],
@@ -164,6 +170,7 @@ define([
         	'amqp': 'amqp', 
         	'angular': 'angular', 
         	'express': 'express', 
+        	'es_modules': 'es_modules',
         	'mongodb': 'mongodb',
         	'mongo': 'mongodb', //ESlint provides mongo - map it to Tern
         	'mysql': 'mysql', 
