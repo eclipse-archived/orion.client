@@ -232,7 +232,6 @@ define([
 	 */
 	var astManager = new ASTManager.ASTManager(serviceRegistry, jsProject);
 
-
 	/**
 	 * @description Handler for Tern read requests
 	 * @param {Object} request The request from Tern
@@ -245,7 +244,6 @@ define([
 			var _l = request.args.file.logical;
 			response.args.logical = _l;
 			if(request.args.file.node) {
-				// only load modules
 				if (!/^[\.]+/.test(_l)) {
 					//do node_modules read
 					var project = jsProject.getProjectPath();
@@ -271,74 +269,21 @@ define([
 									ternWorker.postMessage(response);
 								},
 								function(err) {
-									response.args.error = "Failed to read node_modules folder";
-									response.args.message = err.toString();
-									ternWorker.postMessage(response);
+									_failedRead(response, "node_modules", err);
 								});
-							} 
-							response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-							response.args.message = "No file contents";
-							ternWorker.postMessage(response);
+							}
+							_failedRead(response, _l, "No contents");
 						},
 						function(err) {
-							response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-							response.args.message = err.toString();
-							ternWorker.postMessage(response);
+							_failedRead(response, _l, err);
 						});
-					} 
-					//don't search for now
-					response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-					ternWorker.postMessage(response);
-				} else {
-					// try to get the current folder from request.args.file.file
-					var currentFile = request.args.file.file;
-					if (currentFile) {
-						var lastIndex = currentFile.lastIndexOf('/');
-						var filePath = currentFile.substring(0, lastIndex + 1) + _l;
-						if (!/\.js|\.json$/ig.test(_l)) {
-							filePath += ".js";
-						}
-						return fileClient.read(filePath).then(function(contents) {
-							response.args.contents = contents;
-							response.args.file = filePath;
-							response.args.path = _l;
-							ternWorker.postMessage(response);
-						},
-						function(err) {
-							response.args.error =  i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], filePath);
-							response.args.message = err.toString();
-							ternWorker.postMessage(response);
-						});
-					} else {
-						// could be a require('./....'); inside a module code
-						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-						ternWorker.postMessage(response);
 					}
+					_failedRead(response, _l, "No project context");
+				} else {
+					_readRelative(request, response, _l, fileClient);
 				}
 			} else {
-				scriptresolver.getWorkspaceFile(_l).then(function(files) {
-					if(files && files.length > 0) {
-						var rel = scriptresolver.resolveRelativeFiles(_l, files, {location: request.args.file.file, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
-						if(rel && rel.length > 0) {
-							return fileClient.read(rel[0].location).then(function(contents) {
-								response.args.contents = contents;
-								response.args.file = rel[0].location;
-								response.args.path = rel[0].path;
-								ternWorker.postMessage(response);
-							});
-						}
-						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-						ternWorker.postMessage(response);
-					} else {
-						response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-						ternWorker.postMessage(response);
-					}
-				},
-				function(err) {
-					response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], _l);
-					response.args.message = err.toString();
-					ternWorker.postMessage(response);
-				});
+				_readRelative(request, response, _l, fileClient);
 			}
 		} else {
 			var file = request.args.file;
@@ -347,25 +292,49 @@ define([
 				//no extension given, guess at js
 				file += '.js'; //$NON-NLS-1$
 			}
-			try {
-				return fileClient.read(file).then(function(contents) {
-							response.args.contents = contents;
-							ternWorker.postMessage(response);
-						},
-						function(err) {
-							response.args.message = err.toString();
-							response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], file);
-							ternWorker.postMessage(response);
-						});
-			}
-			catch(err) {
-				response.args.message = err.toString();
-				response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], file);
-				ternWorker.postMessage(response);
-			}
+			return fileClient.read(file).then(function(contents) {
+						response.args.contents = contents;
+						ternWorker.postMessage(response);
+					},
+					function(err) {
+						_failedRead(response, file, err);
+					});
 		}
 	}
-		
+	/**
+	 * @since 12.0
+	 */
+	function _failedRead(response, fileName, err) {
+		response.args.message = err.toString();
+		response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], fileName);
+		ternWorker.postMessage(response);
+	}
+	/**
+	 * @since 12.0
+	 */
+	function _readRelative(request, response, logical, fileclient) {
+		scriptresolver.getWorkspaceFile(logical).then(function(files) {
+				if(files && files.length > 0) {
+					var rel = scriptresolver.resolveRelativeFiles(logical, files, {location: request.args.file.file, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
+					if(rel && rel.length > 0) {
+						return fileclient.read(rel[0].location).then(function(contents) {
+							response.args.contents = contents;
+							response.args.file = rel[0].location;
+							response.args.path = rel[0].path;
+							ternWorker.postMessage(response);
+						});
+					}
+					response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], logical);
+					ternWorker.postMessage(response);
+				} else {
+					response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], logical);
+					ternWorker.postMessage(response);
+				}
+			},
+			function(err) {
+				_failedRead(response, logical, err);
+			});
+	}
 		/**
 		 * @description Handles the server being ready
 		 * @param {Object} request The request

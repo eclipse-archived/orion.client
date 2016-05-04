@@ -79,46 +79,36 @@
       }
       name = over;
     }
-
-	// Cannot flatten/modify the path as it has to match what resolver.js caches
-//    if (!/^(https?:|\/)|\.js$/.test(name))
-//      name = resolveName(name, data);
-//    name = flattenPath(name);
-
-    var known = getKnownModule(name, data);
-
-    if (!known) {
-      known = getModule(name, data);
-      // ORION
-      if (known.origin){
-        data.server.addFile(known.origin, known.contents, data.currentFile);
-      }
-      /* Before Orion:
-      data.server.addFile(name, null, data.currentFile);
-      */
+	//ORION
+	known = getModule(name, data);
+    if (known && known.origin) {
+      data.server.addFile(known.origin, known.contents, data.currentFile);
     }
-    return known;
+    return known || infer.ANull;
   }
 
   function getKnownModule(name, data) {
-    return data.interfaces[stripJSExt(name)];
+    var val = resolver.getResolved(name); //ORION
+  	if(val && val.file) {
+    	return data.interfaces[stripJSExt(val.file)];
+    }
+    return null;
   }
 
   function getModule(name, data) {
-    var known = getKnownModule(name, data);
+  	if(name === data.currentFile) {
+  		return data.interfaces[stripJSExt(name)] = new infer.AVal();
+  	}
+  	var known = getKnownModule(name, data);
     if (!known) {
-      known = new infer.AVal();
-      // ORION
-      var resolvedFile = resolver.getResolved(stripJSExt(name)); // ORION
-      if (resolvedFile){
-      	data.interfaces[stripJSExt(name)] = known; // Only cache the interface if a file was found, allows checking for the file existence later
-        known.origin = resolvedFile.file;
-        known.contents = resolvedFile.contents;
+      var val = resolver.getResolved(name); //ORION
+      if(val && val.file) {
+	      known = data.interfaces[stripJSExt(val.file)] = new infer.AVal();
+	      known.origin = val.file;
+	      known.contents = val.contents;
+	      known.reqName = name;
       }
-      /* Before Orion
-      known.origin = name;
-      */
-    }
+	}
     return known;
   }
 
