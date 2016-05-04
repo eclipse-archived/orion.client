@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2014." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Pluggable Editor Demo</title>
+		<style type="text/css">
+			.demoTitle{
+				border: none;
+				vertical-align: middle;
+				overflow: hidden;
+				text-align: left;
+				margin-left: 15%;
+				margin-right: 15%;
+				padding-bottom: 5px;
+				position: relative;
+			}
+			.demoBody{
+				border: 1px solid;
+				vertical-align: middle;
+				border-color: blue;
+				overflow: hidden;
+				text-align: left;
+				margin-left: 15%;
+				margin-right: 15%;
+				margin-bottom: 15px;
+				padding-bottom: 5px;
+				position: relative;
+				height: 450px;
+			}
+		</style>
+	    <link rel="stylesheet" type="text/css" href="editorBuild/code_edit/built-codeEdit.css"/>
+		<script src="editorBuild/code_edit/built-codeEdit.js"></script>
+		<script>
+			/*globals orion */
+			var contents = 'var foo = "bar";\n' +
+								 "var bar = foo;\n" + 
+								 "/*\n" + 
+								 " * test demo\n" + 
+								 "*/\n" + 
+								 "function test(){\n" + 
+								 "	var foo1 = bar.lastIndexOf(char, from);\n" + 
+								 "}\n" + 
+								"//Keep editing in this demo and try the content assist, problem validations and hover service!\n" +
+								 "var foo2 = foo."; 
+			var statusReporter = function(message, type, isAccessible) {
+				var statusDiv = document.getElementById("statusBarDiv");
+				if(!message || !statusDiv) {
+					return;
+				}
+				if (type === "progress") {
+					statusDiv.style = "color: green";
+					statusDiv.textContent = "Progress message: " + message;
+				} else if (type === "error") { //$NON-NLS-0$
+					statusDiv.style = "color: red";
+					statusDiv.textContent = "Error message: " + message;
+				} else {
+					statusDiv.style = "color: green";
+					statusDiv.textContent = "Normal message: " + message;
+				}
+			};
+			
+			window.onload=function(){
+				var codeEdit = new orion.codeEdit({
+					editorConfig: {showWhitespaces: true, zoomRuler: true}
+				});
+				
+				codeEdit.create({parent: "embeddedEditor", 
+								 statusReporter: statusReporter,
+								 contentType: "application/javascript", 
+								 contents: contents}).then(function(editorViewer) {
+					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+					editorViewer.editor.getTextView().addEventListener("Options",function(evt){
+						if(evt.options) {
+							if(evt.options.tabMode !== undefined) {
+								//CTRL+m keys
+								//True: you can tab inside the editor. False: Tab will get out of the editor DIV
+								statusReporter("Tab mode has been changed to: " + evt.options.tabMode);
+							} else if(evt.options.wrapMode !== undefined) {
+								//CTRL+ALT+w keys
+								statusReporter("Wrap mode has been changed to: " + evt.options.wrapMode);
+							} else if(evt.options.overwriteMode !== undefined) {
+								//Insert key
+								statusReporter("Overwrite mode has been changed to: " + evt.options.overwriteMode);
+							} else {
+								statusReporter("Other options has been changed: ");
+							}
+						}
+					});
+				});
+			};
+		</script>
+    </head>
+	<body id="orion-browser" spellcheck="false" class="orionPage">
+		<div class="demoTitle">
+		</div>
+		<div class="demoTitle">
+			<span id = "progressMessageDiv" style="color: green">Loading language tooling plugins...</span>
+		</div>
+		<div class="demoTitle" id="__toolbar2__">
+			<span id = "statusBarDiv" style="color: green">Satus shows here...</span>
+		</div>
+		<div class="demoBody" id="embeddedEditor">
+		</div>
+	</body>
+</html>
