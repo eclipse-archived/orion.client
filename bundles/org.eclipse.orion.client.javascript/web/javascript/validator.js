@@ -218,14 +218,13 @@ define([
 					}
 					if(this.project) {
 						this.project.getESlintOptions().then(function(cfg) {
-							var c = cfg;
-							if(env && c) {
-								if(!c.env) {
-									c.env = Object.create(null);
-								}
-								c.env.browser = true;
+							if(cfg && cfg.env) {
+								env = !env ? Object.create(null) : env;
+								Object.keys(cfg.env).forEach(function(key) {
+									env[key] = cfg.env[key];
+								});																
 							}
-							this._validate(meta, text, env, deferred, c);
+							this._validate(meta, text, env, deferred, cfg);
 						}.bind(this));
 					} else {
 						// need to extract all scripts from the html text
