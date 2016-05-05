@@ -17,8 +17,8 @@ define([
 	"javascript/finder",
 	"eslint/lib/eslint",
 	"eslint/lib/source-code",
-	"javascript/util",
-], function(tern, Finder, Eslint, SourceCode, Util) {
+	"i18n!javascript/nls/problems"
+], function(tern, Finder, Eslint, SourceCode, ProblemMessages) {
 
 	tern.registerPlugin("eslint", /* @callback */ function(server, options) {
 		return {
@@ -183,34 +183,81 @@ define([
 			_tern.query = query;
 			_tern.file = file;
 			config.tern = _tern;
+			var features = Object.create(null);
+			features.modules = false;
+			var ecmaVersion = server.options.ecmaVersion ? server.options.ecmaVersion : 5;
+			if (ecmaVersion === 6) {
+				features.arrowFunctions = true;
+				features.binaryLiterals = true;
+				features.blockBindings = true;
+				features.classes = true;
+				features.defaultParams = true;
+				features.destructuring = true;
+				features.forOf = true;
+				features.generators = true;
+				features.objectLiteralComputedProperties = true;
+				features.objectLiteralDuplicateProperties = true;
+				features.objectLiteralShorthandMethods = true;
+				features.objectLiteralShorthandProperties = true;
+				features.octalLiterals = true;
+				features.regexUFlag = true;
+				features.regexYFlag = true;
+				features.restParams = true;
+				features.spread = true;
+				features.superInFunctions = true;
+				features.templateStrings = true;
+				features.unicodeCodePointEscapes = true;
+			}
+			var sourceType = server.options.sourceType;
+			if (sourceType === "module") {
+				features.modules = true;
+			}
+			config.ecmaFeatures = features;
 			
-			var messages = Eslint.verify(new SourceCode(file.text, file.ast), config, file.name);
 			var strippedMessages = [];
-			messages.forEach(function(element) {
-				var strippedMessage =
+			var error = null;
+			try {
+				var messages = Eslint.verify(new SourceCode(file.text, file.ast), config, file.name);
+				messages.forEach(function(element) {
+					var strippedMessage =
+						{
+							args: element.args,
+							severity: element.severity,
+							column: element.column,
+							line: element.line,
+							message: element.message,
+							nodeType: element.nodeType,
+							ruleId: element.ruleId,
+							source: element.source
+						};
+						if (element.node && element.node.range) {
+							strippedMessage.node = {
+								range: element.node.range
+							};
+						}
+						if (element.related) {
+							strippedMessage.related = {
+								range: element.related.range
+							};
+						}
+					strippedMessages.push(strippedMessage);
+				});
+			} catch(e) {
+				// ignore errors during validation
+				error =
 					{
-						args: element.args,
-						severity: element.severity,
-						column: element.column,
-						line: element.line,
-						message: element.message,
-						nodeType: element.nodeType,
-						ruleId: element.ruleId,
-						source: element.source
+						severity: "error",
+						column: 1,
+						line: 0,
+						args: { nls: 'eslintValidationFailure', 0: e.message && e.message.length !== 0 ? e.message : ProblemMessages['noErrorDetailed']},
+						start: 0,
+						end: 1
 					};
-					if (element.node && element.node.range) {
-						strippedMessage.node = {
-							range: element.node.range
-						};
-					}
-					if (element.related) {
-						strippedMessage.related = {
-							range: element.related.range
-						};
-					}
-				strippedMessages.push(strippedMessage);
-			});
+			}
 			var parseErrors = extractParseErrors(file.ast);
+			if (error && parseErrors.length === 0) {
+				parseErrors.push(error);
+			}
 			return filterProblems(parseErrors, strippedMessages);
 		}
 	});

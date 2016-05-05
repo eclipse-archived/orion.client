@@ -110,6 +110,7 @@ define({
 	'use-isnan-description': 'Disallow comparison to the value NaN.',
 	'valid-typeof' : 'Invalid typeof comparison.',
 	'valid-typeof-description': 'Warn when incorrectly comparing the result of a typeof expression.',
+	'noErrorDetailed' : 'No error\'s message',
 	
 	// Rules consumed from ESLint
 	'accessor-pairs-description' : "Report when accessors don't come in pairs (getter, setter)",

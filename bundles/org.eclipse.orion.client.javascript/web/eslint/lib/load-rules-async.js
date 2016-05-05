@@ -1374,7 +1374,8 @@ define([
             	                	var env = Finder.findESLintEnvForMember(name);
             	                    var tern = context.getTern();
 									var query = tern.query;
-									query.end = ref.identifier.start;
+									query.start = ref.identifier.start;
+									query.end = ref.identifier.end;
 									var foundType = null;
 									try {
 										var expr = tern.findQueryExpr(tern.file, query);
