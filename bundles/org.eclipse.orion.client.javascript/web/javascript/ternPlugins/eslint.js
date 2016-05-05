@@ -183,36 +183,38 @@ define([
 			_tern.query = query;
 			_tern.file = file;
 			config.tern = _tern;
-			var features = Object.create(null);
-			features.modules = false;
-			var ecmaVersion = server.options.ecmaVersion ? server.options.ecmaVersion : 5;
-			if (ecmaVersion === 6) {
-				features.arrowFunctions = true;
-				features.binaryLiterals = true;
-				features.blockBindings = true;
-				features.classes = true;
-				features.defaultParams = true;
-				features.destructuring = true;
-				features.forOf = true;
-				features.generators = true;
-				features.objectLiteralComputedProperties = true;
-				features.objectLiteralDuplicateProperties = true;
-				features.objectLiteralShorthandMethods = true;
-				features.objectLiteralShorthandProperties = true;
-				features.octalLiterals = true;
-				features.regexUFlag = true;
-				features.regexYFlag = true;
-				features.restParams = true;
-				features.spread = true;
-				features.superInFunctions = true;
-				features.templateStrings = true;
-				features.unicodeCodePointEscapes = true;
+			if (!config.ecmaFeatures) {
+				var features = Object.create(null);
+				features.modules = false;
+				var ecmaVersion = server.options.ecmaVersion ? server.options.ecmaVersion : 5;
+				if (ecmaVersion === 6) {
+					features.arrowFunctions = true;
+					features.binaryLiterals = true;
+					features.blockBindings = true;
+					features.classes = true;
+					features.defaultParams = true;
+					features.destructuring = true;
+					features.forOf = true;
+					features.generators = true;
+					features.objectLiteralComputedProperties = true;
+					features.objectLiteralDuplicateProperties = true;
+					features.objectLiteralShorthandMethods = true;
+					features.objectLiteralShorthandProperties = true;
+					features.octalLiterals = true;
+					features.regexUFlag = true;
+					features.regexYFlag = true;
+					features.restParams = true;
+					features.spread = true;
+					features.superInFunctions = true;
+					features.templateStrings = true;
+					features.unicodeCodePointEscapes = true;
+				}
+				var sourceType = server.options.sourceType;
+				if (sourceType === "module") {
+					features.modules = true;
+				}
+				config.ecmaFeatures = features;
 			}
-			var sourceType = server.options.sourceType;
-			if (sourceType === "module") {
-				features.modules = true;
-			}
-			config.ecmaFeatures = features;
 			
 			var strippedMessages = [];
 			var error = null;
@@ -251,7 +253,8 @@ define([
 						line: 0,
 						args: { nls: 'eslintValidationFailure', 0: e.message && e.message.length !== 0 ? e.message : ProblemMessages['noErrorDetailed']},
 						start: 0,
-						end: 1
+						end: 1,
+						ruleId: 'forbiddenExportImport'
 					};
 			}
 			var parseErrors = extractParseErrors(file.ast);

@@ -12842,6 +12842,33 @@ define([
 								});
 						});
 					});
+					// forbiddenExportImport --------------------------------------------
+					describe('forbiddenExportImport', function() {
+						var RULE_ID = "forbiddenExportImport";
+						it("flag invalid import/export", function(callback) {
+							var topic = "import * as test from \"./exports\"";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							var features = Object.create(null);
+							features.modules = false;
+							config.ecmaFeatures = features;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'error',
+										description: '\'import\' and \'export\' may appear only with \'sourceType: module\'',
+										start: 0,
+										end: 6
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};

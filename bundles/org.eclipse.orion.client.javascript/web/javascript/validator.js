@@ -222,7 +222,7 @@ define([
 								env = !env ? Object.create(null) : env;
 								Object.keys(cfg.env).forEach(function(key) {
 									env[key] = cfg.env[key];
-								});																
+								});
 							}
 							this._validate(meta, text, env, deferred, cfg);
 						}.bind(this));
@@ -252,7 +252,11 @@ define([
 				rules = configuration.rules;
 			}
 			var files = [{type: 'full', name: meta.location, text: text}]; //$NON-NLS-1$
-			var request = {request: 'lint', args: {meta: {location: meta.location}, env: env, files: files, rules: rules}}; //$NON-NLS-1$
+			var args =  {meta: {location: meta.location}, env: env, files: files, rules: rules};
+			if (configuration && configuration.ecmaFeatures) {
+				args.ecmaFeatures = configuration.ecmaFeatures;
+			}
+			var request = {request: 'lint', args: args}; //$NON-NLS-1$
 			var start = Date.now();
 			this.ternWorker.postMessage(
 				request, 

@@ -420,7 +420,9 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 						rules: args.rules
 					}
 				};
-
+			if (args.ecmaFeatures) {
+				query.config.ecmaFeatures = args.ecmaFeatures;
+			}
 			if (args.env) {
 				query.config.env = args.env;
 			}
