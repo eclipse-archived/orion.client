@@ -328,6 +328,17 @@ define([
 			                });
                         }
                     }
+                } else if(parent.type === 'ImportDeclaration') {
+                	path = node.value;
+                	return that.resolver.getWorkspaceFile(path).then(function(files) {
+                        if(!/\.js$/.test(path)) {
+                            path += '.js'; //$NON-NLS-1$
+                        }
+                        var rels = that.resolver.resolveRelativeFiles(path, files, meta);
+                        if(rels && rels.length > 0) {
+	                        return that._formatFilesHover(node.value, rels);
+	                    }
+	                });
                 }
                 return null;
 		    }
