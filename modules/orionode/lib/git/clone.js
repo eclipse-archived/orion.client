@@ -456,7 +456,7 @@ function handleRemoteError(task, err, cloneUrl) {
 	var u = url.parse(cloneUrl, true);
 	var code = 403;
 	var jsonData;
-	if (err.message && ["credentials", "401"].some(function(s) { return err.message.indexOf(s) !== -1; })) {
+	if (err.message && ["credentials", "authentication", "401"].some(function(s) { return err.message.indexOf(s) !== -1; })) {
 		code = 401;
 		jsonData = {
 			"Host": u.hostname,
