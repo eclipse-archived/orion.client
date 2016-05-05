@@ -359,7 +359,7 @@ define([
 					var json = {plugins: Object.create(null)};
 					json.plugins[translatePluginName(newPlugin)] = Object.create(null);
 					return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
-						return editorContext.syntaxCheck(ast.sourceFile.name);						
+						return editorContext.syntaxCheck(ast.sourceFile.name);
 					});
 				}.bind(this));
 			},
@@ -393,6 +393,19 @@ define([
 								return editorContext.syntaxCheck(ast.sourceFile.name);
 							}.bind(this));
 						}
+					}.bind(this));
+				}.bind(this));
+			},
+			/** @callback fix the forbiddenExportImport rule */
+			"forbiddenExportImport" :function(editorContext, context, astManager) {
+				return astManager.getAST(editorContext).then(function(ast) {
+					return this.jsProject.getFile(this.jsProject.TERN_PROJECT).then(function(file) {
+						var json = file.contents ? JSON.parse(file.contents) : Object.create(null);
+						json.sourceType = "module";
+						json.ecmaVersion = 6;
+						return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
+							return editorContext.syntaxCheck(ast.sourceFile.name);
+						}.bind(this));
 					}.bind(this));
 				}.bind(this));
 			}

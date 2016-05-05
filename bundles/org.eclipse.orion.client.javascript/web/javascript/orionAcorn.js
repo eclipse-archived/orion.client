@@ -428,6 +428,7 @@ define([
 		options.locations = true;
 		options.ranges = true;
 		options.sourceFile = false;
+		options.allowImportExportEverywhere = false;
 		if (!options.sourceType) {
 			// set a default value
 			options.sourceType = "script";

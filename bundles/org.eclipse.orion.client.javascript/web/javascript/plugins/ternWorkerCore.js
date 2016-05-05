@@ -86,6 +86,9 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 					}
 				}
 			}
+			if (typeof jsonOptions.sourceType === 'string') {
+				options.sourceType = jsonOptions.sourceType;
+			}
 			if (typeof jsonOptions.dependencyBudget === 'number') {
 				options.dependencyBudget = jsonOptions.dependencyBudget;
 			}

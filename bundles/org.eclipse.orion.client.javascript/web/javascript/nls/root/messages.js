@@ -9,8 +9,8 @@
  ******************************************************************************/
 /* eslint-env amd */
 define({
-    'pluginName': 'Orion JavaScript Tool Support',
-    'pluginDescription': 'This plug-in provides JavaScript tools support for Orion, like editing, search, navigation, validation, and code completion.',
+	'pluginName': 'Orion JavaScript Tool Support',
+	'pluginDescription': 'This plug-in provides JavaScript tools support for Orion, like editing, search, navigation, validation, and code completion.',
 	'error': 'Error',
 	'warning' : 'Warning',
 	'ignore' : 'Ignore',
@@ -209,6 +209,7 @@ define({
 	'check-tern-project' : 'File should be added to .tern-project:',
 	'checkTernPluginFixName' : 'Add plugin to .tern-project file',
 	'checkTernProjectFixName' : 'Add to .tern-project file',
+	'forbiddenExportImportFixName' : 'Set sourceType to module',
 	
 	//Tern Plugins
 	'ternDocPluginName': 'Doc Comments',

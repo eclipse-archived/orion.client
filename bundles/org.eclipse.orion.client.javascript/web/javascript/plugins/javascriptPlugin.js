@@ -1202,6 +1202,19 @@ define([
 			}
 		);
 
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+			quickFixComputer,
+			{
+				name: javascriptMessages["forbiddenExportImportFixName"],
+				fixAllEnabled: false,
+				scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+				id : "forbidden.export.import.fix",  //$NON-NLS-1$
+				contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+				validationProperties: [
+					{source: "annotation:id", match: "^(?:forbiddenExportImport)$"} //$NON-NLS-1$ //$NON-NLS-2$
+				]
+			}
+		);
 
     	/**
     	 * legacy pref id
