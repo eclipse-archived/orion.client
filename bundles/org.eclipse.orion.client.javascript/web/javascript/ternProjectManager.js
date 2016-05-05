@@ -214,12 +214,12 @@ define([
 		onProjectChanged: function onProjectChanged(jsProject, evnt, projectName) {
 			this.projectLocation = projectName;
 			this.ineditor = this.modified = evnt.file.name === jsProject.TERN_PROJECT;
+			this.scriptResolver.setSearchLocation(projectName);
 			if(!this.ineditor) {
 				this.starting();
 				if(!projectName) {
 					return this.loadTernProjectOptions(); // code editor sends out bogus events for files that have no projects
 				}
-				this.scriptResolver.setSearchLocation(projectName);
 				return jsProject.getFile(jsProject.TERN_PROJECT).then(function(file) {
 					if(file && file.contents) {
 						this.refresh(file.name, file.contents);
