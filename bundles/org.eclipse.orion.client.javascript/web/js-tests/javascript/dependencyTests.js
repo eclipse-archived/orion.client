@@ -70,92 +70,146 @@ define([
 		}
 	
 		describe('Dependency Analysis Tests', function() {
-			it("Collect deps define 1", function() {
-				var _s = setup({buffer: 'define("foo", ["a"], function(A){});'});
-				return astManager.getAST(_s.editorContext).then(function(ast) {
-					assertDeps(ast, ['a']);
+			describe('Node Require', function(){
+				it("require module", function() {
+					var _s = setup({buffer: 'var foo = require("a");'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a']);
+					});
+				});
+				it("multiple require modules", function() {
+					var _s = setup({buffer: 'var foo = require("a");\nvar foo2 = require("b");'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a', 'b']);
+					});
 				});
 			});
-			it("Collect deps define 2", function() {
-				var _s = setup({buffer: 'define(["a"], function(A){});'});
-				return astManager.getAST(_s.editorContext).then(function(ast) {
-					assertDeps(ast, ['a']);
+			describe('ES Module Import', function(){
+				it("import * from module", function() {
+					var _s = setup({buffer: 'import * from "a";'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a']);
+					});
 				});
-			});
-			it("Collect deps define 3", function() {
-				var _s = setup({buffer: 'define(["a", "b", "C"], function(A){});'});
-				return astManager.getAST(_s.editorContext).then(function(ast) {
-					assertDeps(ast, ['a', 'b', 'C']);
+				it("import defaultMember from module", function() {
+					var _s = setup({buffer: 'import defaultMember from "a";'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a']);
+					});
 				});
-			});
-			it("Collect deps importScripts 1", function() {
-				var _s = setup({buffer: 'importScripts("a.js");'});
-				return astManager.getAST(_s.editorContext).then(function(ast) {
-					assertDeps(ast, ['a.js']);
+				it("import { foo } from module", function() {
+					var _s = setup({buffer: 'import {foo} from "a";'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a']);
+					});
 				});
-			});
-			it("Collect deps importScripts 2", function() {
-				var _s = setup({buffer: 'importScripts("a.js", "b.js");'});
-				return astManager.getAST(_s.editorContext).then(function(ast) {
-					assertDeps(ast, ['a.js', 'b.js']);
+				it("import { foo as difFoo } from module", function() {
+					var _s = setup({buffer: 'import {foo as difFoo} from "a";'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a']);
+					});
 				});
-			});
-			it("Collect deps Worker", function() {
-				var _s = setup({buffer: 'var myworker = new Worker("a.js")'});
-				return astManager.getAST(_s.editorContext).then(function(ast) {
-					assertDeps(ast, ['a.js']);
+				it("import multiple members from module", function() {
+					var _s = setup({buffer: 'import { foobar, foo as difFoo} from "a";'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a']);
+					});
 				});
-			});
-			it("Collect deps require 1", function() {
-				var _s = setup({buffer: 'var _r = require("a")'});
-				return astManager.getAST(_s.editorContext).then(function(ast) {
-					assertDeps(ast, ['a']);
+				it("import module only", function() {
+					var _s = setup({buffer: 'import "a";'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a']);
+					});
 				});
-			});
-			it("Collect deps require 1", function() {
-				var _s = setup({buffer: 'var _r = require("a");'}); //node + requirejs
-				return astManager.getAST(_s.editorContext).then(function(ast) {
-					assertDeps(ast, ['a']);
+			});			
+			describe('RequireJS', function(){
+				it("Collect deps define 1", function() {
+					var _s = setup({buffer: 'define("foo", ["a"], function(A){});'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a']);
+					});
 				});
-			});
-			it("Collect deps require 2", function() {
-				var _s = setup({buffer: 'var _r = require(["a"], function(){});'}); //requirejs
-				return astManager.getAST(_s.editorContext).then(function(ast) {
-					assertDeps(ast, ['a']);
+				it("Collect deps define 2", function() {
+					var _s = setup({buffer: 'define(["a"], function(A){});'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a']);
+					});
 				});
-			});
-			it("Collect deps require 3", function() {
-				var _s = setup({buffer: 'var _r = require(["a", "b", "c"], function(){});'}); //requirejs
-				return astManager.getAST(_s.editorContext).then(function(ast) {
-					assertDeps(ast, ['a', 'b', 'c']);
+				it("Collect deps define 3", function() {
+					var _s = setup({buffer: 'define(["a", "b", "C"], function(A){});'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a', 'b', 'C']);
+					});
 				});
-			});
-			it("Collect deps require 4", function() {
-				var _s = setup({buffer: 'var _r = require({paths:{"a": "a/b"}}, ["a", "b", "c"], function(){});'}); //requirejs
-				return astManager.getAST(_s.editorContext).then(function(ast) {
-					assertDeps(ast, ['a', 'b', 'c']);
+				it("Collect deps importScripts 1", function() {
+					var _s = setup({buffer: 'importScripts("a.js");'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a.js']);
+					});
 				});
-			});
-			it("Collect deps require 5", function() {
-				var _s = setup({buffer: 'var _r = require();'}); //requirejs
-				return astManager.getAST(_s.editorContext).then(function(ast) {
-					assertDeps(ast, []);
+				it("Collect deps importScripts 2", function() {
+					var _s = setup({buffer: 'importScripts("a.js", "b.js");'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a.js', 'b.js']);
+					});
 				});
-			});
-			it("Collect deps requirejs 1", function() {
-				var _s = setup({buffer: 'var _r = requirejs(["a", "b", "c"], function(){});'}); //requirejs
-				return astManager.getAST(_s.editorContext).then(function(ast) {
-					assertDeps(ast, ['a', 'b', 'c']);
+				it("Collect deps Worker", function() {
+					var _s = setup({buffer: 'var myworker = new Worker("a.js")'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a.js']);
+					});
 				});
-			});
-			/**
-			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476370
-			 * @since 10.0
-			 */
-			it("Collect deps requirejs + require", function() {
-				var _s = setup({buffer: '(function(root, mod) {if (typeof exports == "object" && typeof module == "object") return mod(exports, require("./infer"), require("./signal"), require("esprima"), require("acorn/dist/walk")); if (typeof define == "function" && define.amd) return define(["exports", "./infer", "./signal", "esprima", "acorn/dist/walk"], mod); mod(root.tern || (root.tern = {}), tern, tern.signal, acorn, acorn.walk);})(this, function(exports, infer, signal, acorn, walk) {})'}); //requirejs
-				return astManager.getAST(_s.editorContext).then(function(ast) {
-					assertDeps(ast, ['./infer', './signal', 'esprima', 'acorn/dist/walk', 'exports']);
+				it("Collect deps require 1", function() {
+					var _s = setup({buffer: 'var _r = require("a")'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a']);
+					});
+				});
+				it("Collect deps require 1", function() {
+					var _s = setup({buffer: 'var _r = require("a");'}); //node + requirejs
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a']);
+					});
+				});
+				it("Collect deps require 2", function() {
+					var _s = setup({buffer: 'var _r = require(["a"], function(){});'}); //requirejs
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a']);
+					});
+				});
+				it("Collect deps require 3", function() {
+					var _s = setup({buffer: 'var _r = require(["a", "b", "c"], function(){});'}); //requirejs
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a', 'b', 'c']);
+					});
+				});
+				it("Collect deps require 4", function() {
+					var _s = setup({buffer: 'var _r = require({paths:{"a": "a/b"}}, ["a", "b", "c"], function(){});'}); //requirejs
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a', 'b', 'c']);
+					});
+				});
+				it("Collect deps require 5", function() {
+					var _s = setup({buffer: 'var _r = require();'}); //requirejs
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, []);
+					});
+				});
+				it("Collect deps requirejs 1", function() {
+					var _s = setup({buffer: 'var _r = requirejs(["a", "b", "c"], function(){});'}); //requirejs
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['a', 'b', 'c']);
+					});
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476370
+				 * @since 10.0
+				 */
+				it("Collect deps requirejs + require", function() {
+					var _s = setup({buffer: '(function(root, mod) {if (typeof exports == "object" && typeof module == "object") return mod(exports, require("./infer"), require("./signal"), require("esprima"), require("acorn/dist/walk")); if (typeof define == "function" && define.amd) return define(["exports", "./infer", "./signal", "esprima", "acorn/dist/walk"], mod); mod(root.tern || (root.tern = {}), tern, tern.signal, acorn, acorn.walk);})(this, function(exports, infer, signal, acorn, walk) {})'}); //requirejs
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['./infer', './signal', 'esprima', 'acorn/dist/walk', 'exports']);
+					});
 				});
 			});
 		});
