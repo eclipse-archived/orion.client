@@ -1159,7 +1159,8 @@ lp.parseImportSpecifierList = function () {
   if (this.tok.type === _.tokTypes.star) {
     var elt = this.startNode();
     this.next();
-    if (this.eatContextual("as")) elt.local = this.parseIdent();
+    // ORION
+    elt.local = this.eatContextual("as") ? this.parseIdent() : this.dummyIdent();
     elts.push(this.finishNode(elt, "ImportNamespaceSpecifier"));
   } else {
     var indent = this.curIndent,
