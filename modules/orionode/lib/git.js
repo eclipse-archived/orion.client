@@ -46,7 +46,14 @@ if (hasNodegit) {
 }
 
 function Nothing() {
-	return express(); 
+	var router = express.Router();
+	router.use(/* @callback */ function(req, res) {
+		res.status(404).json({
+			Severity: "Error",
+			Message: "Nodegit not installed."
+		});
+	});
+	return router;
 }
 
 function Git(options) {
