@@ -1,8 +1,14 @@
 #!/bin/bash
-npm install --no-optional
+
+function die () {
+    echo "Error:" "$1" >&2
+    exit 1
+}
+
+(npm install --no-optional) || die "Failed to install dependencies, consult the npm log to find out why."
 ../node_modules/.bin/grunt
 rm -rf ../node_modules
-npm install --production --no-optional
+(npm install --production --no-optional) || die "Failed to install dependencies, consult the npm log to find out why."
 rm -rf ../node_modules/pty.js
 rm -rf ../node_modules/nodegit/vendor
 rm -rf ../node_modules/nodegit/build/Release/obj.target
