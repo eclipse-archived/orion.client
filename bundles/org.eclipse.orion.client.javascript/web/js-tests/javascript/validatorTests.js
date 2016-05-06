@@ -460,6 +460,22 @@ define([
 							worker.getTestState().callback(error);
 						});
 				});
+				/*
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=493144
+				 */
+				it("HTML - No script blocks", function(callback) {
+					var config = { rules: Rules.defaults };
+					config.rules['check-tern-project'] = 0;
+					validate(
+						{buffer: '<html></html>', contentType: 'text/html', callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
 			});
 			
 			describe('ESLint Rule Tests', function() {
