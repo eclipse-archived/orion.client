@@ -85,7 +85,10 @@
       ecmaVersion: srv.options.ecmaVersion,
       sourceType: srv.options.sourceType
     }
-    var text = srv.signalReturnFirst("preParse", file.text, options) || file.text
+    var text = srv.signalReturnFirst("preParse", file.text, options);
+    if(typeof text !== 'string') {
+    	text = file.text;
+	}
     // ORION: Add parseOptions pass to allow orionAcorn to setup the parser and modify the options
     srv.signal("parseOptions", text, options, acorn, acornloose);
     var ast = infer.parse(text, options)
