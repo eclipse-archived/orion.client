@@ -253,15 +253,33 @@ define([
 						});
 					return deferred;
 				}.bind(this));
-	        }.bind(this));
+			}.bind(this));
 		},
 		fixes : {
-			"no-dupe-keys": function(editorContext, context) {
-				var start = context.annotation.start,
-					groups = [{data: {}, positions: [{offset: start, length: context.annotation.end-start}]}],
-					linkModel = {groups: groups};
-				return editorContext.exitLinkedMode().then(function() {
-					return editorContext.enterLinkedMode(linkModel);
+			"no-dupe-keys": function(editorContext, context, astManager) {
+				return astManager.getAST(editorContext).then(function(ast) {
+					var node = Finder.findNode(context.annotation.end, ast, {parents:true});
+					if(node && node.type === 'Identifier') {
+						var parent = node.parents.pop();
+						var linkModel = null;
+						var start = node.range[0],
+							groups = [{data: {}, positions: [{offset: start, length: node.range[1]-start}]}];
+						if (parent && parent.type === 'Property') {
+							var value = parent.value;
+							if (value && value.type === 'FunctionExpression') {
+								var valueId = value.id;
+								// valueId is null if the function expression is an anonymous function
+								if (valueId && valueId.type === 'Identifier' && valueId.name === node.name) {
+									start = valueId.start;
+									groups[0].positions.push({offset: start, length: valueId.range[1]-start});
+								}
+							}
+						}
+						linkModel = {groups: groups};
+						return editorContext.exitLinkedMode().then(function() {
+							return editorContext.enterLinkedMode(linkModel);
+						});
+					}
 				});
 			},
 			"no-duplicate-case": function(editorContext, context) {

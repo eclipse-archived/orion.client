@@ -1326,6 +1326,20 @@ define([
 					callback: done
 				});
 			});
+			it("no-dupe-keys - rename 4", function(done) {
+				var rule = createTestRule("no-dupe-keys");
+				var expected = {
+					groups: [
+						{data: {}, positions: [{offset: 31, length: 3}, {offset: 45, length: 3}]}
+					]
+				};
+				return getFixes({
+					buffer: "var obj = { one: function(){}, one: function one() {} };",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
 		});
 		//NO-DEBUGGER
 		describe("no-debugger", function() {
