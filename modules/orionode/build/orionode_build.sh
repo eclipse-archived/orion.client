@@ -1,8 +1,8 @@
 #!/bin/bash
-npm install
+npm install --no-optional
 ../node_modules/.bin/grunt
 rm -rf ../node_modules
-npm install --production
+npm install --production --no-optional
 rm -rf ../node_modules/pty.js
 rm -rf ../node_modules/nodegit/vendor
 rm -rf ../node_modules/nodegit/build/Release/obj.target
