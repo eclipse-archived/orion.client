@@ -243,64 +243,87 @@ define([
 		if(typeof request.args.file === 'object') {
 			var _l = request.args.file.logical;
 			response.args.logical = _l;
-			if(request.args.file.node) {
+			if(request.args.file.env === 'node') {
 				if (!/^[\.]+/.test(_l)) {
-					//do node_modules read
-					var project = jsProject.getProjectPath();
-					if(project) {
-						return fileClient.read(project+"node_modules/"+_l+"/package.json", false, false, {readIfExists: true}).then(function(json) {
-							if(json) {
-								var val = JSON.parse(json);
-								var mainPath = null;
-								var main = val.main;
-								if (main) {
-									if (!/(\.js)$/.test(main)) {
-										main += ".js";
-									}
-									mainPath = project + "node_modules/" + _l + "/" + main;
-								} else {
-									main = "index.js";
-									mainPath = project + "node_modules/" + _l + "/index.js";
-								}
-								return fileClient.read(mainPath).then(function(contents) {
-									response.args.contents = contents;
-									response.args.file = mainPath;
-									response.args.path = main;
-									ternWorker.postMessage(response);
-								},
-								function(err) {
-									_failedRead(response, "node_modules", err);
-								});
-							}
-							_failedRead(response, _l, "No contents");
-						},
-						function(err) {
-							_failedRead(response, _l, err);
-						});
-					}
-					_failedRead(response, _l, "No project context");
+					_nodeRead(response, _l, fileClient);
 				} else {
 					_readRelative(request, response, _l, fileClient);
 				}
 			} else {
-				_readRelative(request, response, _l, fileClient);
+				if (!/^[\.]+/.test(_l)) {
+					scriptresolver.getWorkspaceFile(_l).then(function(files) {
+						if(files && files.length > 0) {
+							return _normalRead(response, files[0].location, fileClient);
+						}
+						_failedRead(response, files[0].location, "File not found in workspace");
+					},
+					function(err) {
+						_failedRead(response, _l, err);
+					});
+				} else {
+					_readRelative(request, response, _l, fileClient);
+				}
 			}
 		} else {
-			var file = request.args.file;
-			response.args.file = file;
-			if(!/\.js|\.htm|\.htm$/ig.test(file)) {
-				//no extension given, guess at js
-				file += '.js'; //$NON-NLS-1$
-			}
-			return fileClient.read(file).then(function(contents) {
+			_normalRead(response, request.args.file, fileClient);
+		}
+	}
+	/**
+	 * @since 12.0
+	 */
+	function _nodeRead(response, filePath, fileclient) {
+		var project = jsProject.getProjectPath();
+		if(project) {
+			return fileclient.read(project+"node_modules/"+filePath+"/package.json", false, false, {readIfExists: true}).then(function(json) {
+				if(json) {
+					var val = JSON.parse(json);
+					var mainPath = null;
+					var main = val.main;
+					if (main) {
+						if (!/(\.js)$/.test(main)) {
+							main += ".js";
+						}
+						mainPath = project + "node_modules/" + filePath + "/" + main;
+					} else {
+						main = "index.js";
+						mainPath = project + "node_modules/" + filePath + "/index.js";
+					}
+					return fileclient.read(mainPath).then(function(contents) {
 						response.args.contents = contents;
+						response.args.file = mainPath;
+						response.args.path = main;
 						ternWorker.postMessage(response);
 					},
 					function(err) {
-						_failedRead(response, file, err);
+						_failedRead(response, "node_modules", err);
 					});
-		}
+				}
+				_failedRead(response, filePath, "No contents");
+			},
+			function(err) {
+				_failedRead(response, filePath, err);
+			});
+		} 
+		_failedRead(response, filePath, "No project context");
 	}
+	/**
+	 * @since 12.0
+	 */
+	function _normalRead(response, filePath, fileclient) {
+		response.args.file = filePath;
+		if(!/\.js|\.htm|\.htm$/ig.test(filePath)) {
+			//no extension given, guess at js
+			filePath += '.js'; //$NON-NLS-1$
+		}
+		return fileclient.read(filePath).then(function(contents) {
+			response.args.contents = contents;
+			ternWorker.postMessage(response);
+		},
+		function(err) {
+			_failedRead(response, filePath, err);
+		});
+	}
+	
 	/**
 	 * @since 12.0
 	 */
@@ -314,26 +337,26 @@ define([
 	 */
 	function _readRelative(request, response, logical, fileclient) {
 		scriptresolver.getWorkspaceFile(logical).then(function(files) {
-				if(files && files.length > 0) {
-					var rel = scriptresolver.resolveRelativeFiles(logical, files, {location: request.args.file.file, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
-					if(rel && rel.length > 0) {
-						return fileclient.read(rel[0].location).then(function(contents) {
-							response.args.contents = contents;
-							response.args.file = rel[0].location;
-							response.args.path = rel[0].path;
-							ternWorker.postMessage(response);
-						});
-					}
-					response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], logical);
-					ternWorker.postMessage(response);
-				} else {
-					response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], logical);
-					ternWorker.postMessage(response);
+			if(files && files.length > 0) {
+				var rel = scriptresolver.resolveRelativeFiles(logical, files, {location: request.args.file.file, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
+				if(rel && rel.length > 0) {
+					return fileclient.read(rel[0].location).then(function(contents) {
+						response.args.contents = contents;
+						response.args.file = rel[0].location;
+						response.args.path = rel[0].path;
+						ternWorker.postMessage(response);
+					});
 				}
-			},
-			function(err) {
-				_failedRead(response, logical, err);
-			});
+				response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], logical);
+				ternWorker.postMessage(response);
+			} else {
+				response.args.error = i18nUtil.formatMessage(javascriptMessages['failedToReadFile'], logical);
+				ternWorker.postMessage(response);
+			}
+		},
+		function(err) {
+			_failedRead(response, logical, err);
+		});
 	}
 		/**
 		 * @description Handles the server being ready

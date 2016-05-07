@@ -144,6 +144,78 @@ define([
 	};
 
 	/**
+	 * @description Collects the dependencies from call expressions and new expressions
+	 * @param {Node} callee The named callee node 
+	 * @param {Array.<Node>} args The list of arguments for the expression
+	 * @param {Object} envs	The environemnts
+	 * @param {Array.<Object>} deps The dependencies
+	 */
+	function collectDeps(callee, args, envs, deps) {
+		var len = args.length;
+		if (len === 0) return;
+		if(callee.name === 'importScripts') {
+			addArrayDeps(args, deps, "browser"); //importScripts('foo', 'bar'...)
+		} else if(callee.name === 'Worker') {
+			addDep(args[0], deps, "browser");
+		} else if(callee.name === 'require') {
+			var _a = args[0];
+			if(_a.type === "ArrayExpression") {
+				envs.node = true;
+				addArrayDeps(_a.elements, deps, "node"); //require([foo])
+			} else if(_a.type === "Literal") {
+				envs.node = true;
+				addDep(_a, deps, "node"); // require('foo')
+			}
+			if(len > 1) {
+				_a = args[1];
+				if(_a.type === "ArrayExpression") {
+					envs.node = true;
+					addArrayDeps(_a.elements, deps, "node");
+				}
+			}
+		} else if(callee.name === 'requirejs') {
+			_a = args[0];
+			if(_a.type === "ArrayExpression") {
+				envs.amd = true;
+				addArrayDeps(_a.elements, deps, "amd"); //requirejs([foo])
+			}
+		} else if(callee.name === 'define' && len > 1) {//second arg must be array
+			_a = args[0];
+			if(_a.type === "Literal") {
+				_a = args[1];
+			}
+			if(_a.type === "ArrayExpression") {
+				envs.amd = true;
+				addArrayDeps(_a.elements, deps, "amd");
+			}
+		}
+	}
+	
+	/**
+	 * @description Adds a dependency if it has not already been added
+	 * @param {Object} node The AST node
+	 * @param {Object} deps	The map for dependencies
+	 * @param {String} env The environmentn kind the dep came from
+	 */
+	function addDep(node, deps, env) {
+		if(node.type === "Literal") {
+			if (!deps[node.value]) {
+				deps[node.value] = {value: node.value, env: env};
+			}
+		}
+	}
+	
+	/**
+	 * @description Adds all of the entries from the array of deps to the global state
+	 * @param {Array} array The array of deps to add
+	 */
+	function addArrayDeps(array, deps, env) {
+		var len = array.length;
+		for(var i = 0; i < len; i++) {
+			addDep(array[i], deps, env);
+		}
+	}
+	/**
 	 * Define an acorn plugin to record the comments even if there are syntax errors (incomplete block comments),
 	 * it linked comments and nodes (leadingComments and trailingComments) and it records environments and dependencies
 	 */
@@ -226,113 +298,11 @@ define([
 			};
 		});
 		instance.extend("finishNode", function(nextMethod) {
-			/**
-			 * @description Collects the dependencies from call expressions and new expressions
-			 * @param {Node} callee The named callee node 
-			 * @param {Array.<Node>} args The list of arguments for the expression
-			 * ORION
-			 */
-			function collectDeps(callee, args, extra) {
-				if(extra.deps) {
-					var len = args.length;
-					if (len === 0) return;
-					if(callee.name === 'importScripts') {
-						addArrayDeps(args, extra); //importScripts('foo', 'bar'...)
-					} else if(callee.name === 'Worker') {
-						addDep(args[0], extra);
-					} else if(callee.name === 'require') {
-						var _a = args[0];
-						if(_a.type === "ArrayExpression") {
-							extra.envs.node = true;
-							addArrayDeps(_a.elements, extra); //require([foo])
-						} else if(_a.type === "Literal") {
-							extra.envs.node = true;
-							addDep(_a, extra); // require('foo')
-						}
-						if(len > 1) {
-							_a = args[1];
-							if(_a.type === "ArrayExpression") {
-								extra.envs.node = true;
-								addArrayDeps(_a.elements, extra);
-							}
-						}
-					} else if(callee.name === 'requirejs') {
-						_a = args[0];
-						if(_a.type === "ArrayExpression") {
-							extra.envs.amd = true;
-							addArrayDeps(_a.elements, extra); //requirejs([foo])
-						}
-					} else if(callee.name === 'define' && len > 1) {//second arg must be array
-						_a = args[0];
-						if(_a.type === "Literal") {
-							_a = args[1];
-						}
-						if(_a.type === "ArrayExpression") {
-							extra.envs.amd = true;
-							addArrayDeps(_a.elements, extra);
-						}
-					}
-				}
-			}
-			
-				/**
-			 * @description Adds all of the entries from the array of deps to the global state
-			 * @param {Array} array The array of deps to add
-			 * ORION
-			 */
-			function addArrayDeps(array, extra) {
-				if(extra.deps) {
-					var len = array.length;
-					for(var i = 0; i < len; i++) {
-						addDep(array[i], extra);
-					}
-				}
-			}
-			
-				/**
-			 * @description Adds a dependency if it has not already been added
-			 * @param {Object} node The AST node
-			 */
-			function addDep(node, extra) {
-				if(extra.deps && node.type === "Literal") {
-					if (!extra.deps[node.value]) {
-						extra.deps[node.value] = 1;
-					}
-				}
-			}
 			return function(node, type) {
 				if (type === "CallExpression" || type === "NewExpression") {
-					var extra = {
-						deps: {},
-						envs: {}
-					};
-					collectDeps(node.callee, node.arguments, extra);
-					// copy all properties from extra.envs into environments
-					var env = extra.envs;
-					for (var prop in env) {
-						if (env.hasOwnProperty(prop)) {
-							that.environments[prop] = env[prop];
-						}
-					}
-					var deps = extra.deps;
-					// copy all properties from extra.deps into dependencies
-					for (var dep in deps) {
-						if (deps.hasOwnProperty(dep) && !that.dependencies.hasOwnProperty(dep)) {
-							that.dependencies[dep] = {type: "Literal", value: dep };
-						}
-					}
+					collectDeps(node.callee, node.arguments, that.environments, that.dependencies);
 				} else if (type === 'ImportDeclaration'){
-					extra = {
-						deps: {},
-					};
-					addDep(node.source, extra);
-					deps = extra.deps;
-					// copy all properties from extra.deps into dependencies
-					for (var dep in deps) {
-						if (deps.hasOwnProperty(dep) && !that.dependencies.hasOwnProperty(dep)) {
-							that.dependencies[dep] = {type: "Literal", value: dep };
-						}
-					}
+					addDep(node.source, that.dependencies, 'browser');
 				}
 				var result = nextMethod.call(this, node, type);
 				// attach trailing comments
@@ -455,6 +425,7 @@ define([
 	 * @description set all the values in the postParse phase
 	 * @param {Object} the given ast tree
 	 * @param {String} text The given source code
+	 * @callback
 	 */
 	OrionAcorn.prototype.postParse = function postParse(ast, text) {
 		if (Array.isArray(this.errors) && this.errors.length !== 0) {
@@ -469,11 +440,9 @@ define([
 		if (!ast.dependencies) {
 			ast.dependencies = [];
 		}
-		for (var prop in this.dependencies) {
-			if (this.dependencies.hasOwnProperty(prop)) {
-				ast.dependencies.push(this.dependencies[prop]);
-			}
-		}
+		Object.keys(this.dependencies).forEach(function(dep) {
+			ast.dependencies.push(this.dependencies[dep]);
+		}.bind(this));
 		ast.environments = this.environments;
 		ast.errors = Util.serializeAstErrors(ast);
 	};

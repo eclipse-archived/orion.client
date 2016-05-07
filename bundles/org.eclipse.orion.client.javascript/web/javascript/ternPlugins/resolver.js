@@ -21,7 +21,7 @@ define([
 	 * @param {String} loc The original file context location (from the AST)
 	 * @since 9.0
 	 */
-	function resolveDependencies(server, loc, options) {
+	function resolveDependencies(server, loc) {
 	    var keys = Object.keys(_resolved);
 	    for (var i = 0; i < keys.length; i++) {
 	        var key = keys[i];
@@ -30,7 +30,7 @@ define([
 	        if (dep && (dep.pending || dep.file)) {
 	      	  continue;
 	        }
-	  		resolve(server, key, loc, options);
+	  		resolve(server, key, loc);
 		}
 	}
 	
@@ -42,7 +42,7 @@ define([
 	 * @param {String} loc The original file context location (from the AST)
 	 * @since 9.0
 	 */
-	function resolve(server, key, loc, options) {
+	function resolve(server, key, loc) {
 		if(_resolved[key].pending || _resolved[key].err) {
 			//if we are waiting don't fire of another request
 			return;
@@ -58,13 +58,7 @@ define([
   		server.startAsyncAction();
   		_resolved[key].pending = true;
   		_resolved[key].timeout = setTimeout(resetPending, 4000, key);
-  		var opts = {logical: key, file: loc};
-  		if(options) {
-  			if(options.node) {
-  				opts.node = true;
-  			}
-  		}
-		server.options.getFile(opts, function(err, _file) {
+		server.options.getFile({logical: key, file: loc, env: _resolved[key].env}, function(err, _file) {
 			clearTimeout(_resolved[key].timeout);
 			_resolved[key].file = _file.file;
 	   		_resolved[key].contents = typeof _file.contents === 'string' ? _file.contents : '';
@@ -118,7 +112,7 @@ define([
 	 * @param {Function} test An optional function callback to test the name of the dependency
 	 * @since 9.0
 	 */
-	function doPostParse(server, ast, ignores, test, options) {
+	function doPostParse(server, ast, ignores, test) {
 		if(Array.isArray(ast.dependencies) && ast.dependencies.length > 0) {
 			for(var i = 0; i < ast.dependencies.length; i++) {
 				var _d = _getDependencyName(ast.dependencies[i]);
@@ -145,10 +139,11 @@ define([
 						continue;
 					}
 					_resolved[_d] = Object.create(null);
+					_resolved[_d].env = ast.dependencies[i].env;
 				}
 				
 			}
-			resolveDependencies(server, ast.sourceFile ? ast.sourceFile.name : null, options);
+			resolveDependencies(server, ast.sourceFile ? ast.sourceFile.name : null);
 		}  	
 	}
 	

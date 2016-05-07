@@ -367,7 +367,7 @@
     
     // ORION Hook into postParse, preInfer events
     server.on("postParse", function(ast, text){
-    	resolver.doPostParse(server, ast, infer.cx().definitions, null, {node:true});
+    	resolver.doPostParse(server, ast, infer.cx().definitions, null);
     });
     server.on("preInfer", function(ast, scope){
     	resolver.doPreInfer(server);

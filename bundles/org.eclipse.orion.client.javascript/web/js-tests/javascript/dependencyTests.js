@@ -27,7 +27,7 @@ define([
 		 * @returns {Object} The object with the initialized values
 		 */
 		function setup(options) {
-			var buffer = typeof(options.buffer) === 'undefined' ? '' : options.buffer,
+			var buffer = typeof options.buffer === 'undefined' ? '' : options.buffer,
 			    contentType = options.contenttype ? options.contenttype : 'application/javascript',
 				file = 'dep_analysis_test_script.js';
 				
@@ -64,7 +64,6 @@ define([
 			assert.equal(len, expected.length, 'The number of computed dependencies and expected ones differs');
 			for(var i = 0; i < len; i++) {
 				var dep = ast.dependencies[i];
-				assert.equal(dep.type, 'Literal', 'The type of the dependent node is not Literal');
 				assert.equal(dep.value, expected[i], 'The name name of the dependent does not match');
 			}
 		}

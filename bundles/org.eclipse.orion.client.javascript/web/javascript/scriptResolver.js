@@ -156,7 +156,7 @@ define([
 	                //resolve the realtive path
 	                var rel = /^\.\.\//.exec(_p);
 	                if(rel) {
-    	                while(rel != null) {
+    	                while(rel !== null) {
     	                    filepath = filepath.slice(0, filepath.lastIndexOf('/'));
     	                    _p = _p.slice(3);
     	                    rel = /^\.\.\//.exec(_p);
@@ -201,17 +201,17 @@ define([
         * @returns {Boolean} If the paths are the same
         */
        _samePaths: function _samePaths(file, path2, meta) {
-       		if(file == null) {
-       			return path2 == null;
+       		if(file === null) {
+       			return path2 === null;
        		}
-       		if(typeof(file) === 'undefined') {
-       			return typeof(path2) === 'undefined';
+       		if(typeof file === 'undefined') {
+       			return typeof path2 === 'undefined';
        		}
-       		if(path2 == null) {
-       			return file == null;
+       		if(path2 === null) {
+       			return file === null;
        		}
-       		if(typeof(path2) === 'undefined') {
-       			return typeof(file) === 'undefined';
+       		if(typeof path2 === 'undefined') {
+       			return typeof file === 'undefined';
        		}
    			//get rid of extensions and compare the names
    			var loc = file.location ? file.location : file.Location;
@@ -249,7 +249,7 @@ define([
         * @since 8.0
         */
        _appendPath: function _appendPath(path, addition) {
-            if(typeof(path) === 'string' && typeof(addition) === 'string') {
+            if(typeof path === 'string' && typeof addition === 'string') {
                 var newpath = path;
                 if(newpath.charAt(newpath.length-1) !== '/') {
 	               newpath += '/';
