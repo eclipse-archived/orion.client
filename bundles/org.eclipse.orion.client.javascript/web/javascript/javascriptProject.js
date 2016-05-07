@@ -42,7 +42,7 @@ define([
 		/**
 		 * @callback
 		 */
-		onMoved: function onMoved(project, qualifiedName, fileName) {
+		onMoved: function onMoved(project, qualifiedName, fileName, toQualified, toName) {
 			this._update(project, fileName);			
 		},
 		/**
@@ -307,13 +307,20 @@ define([
 	function _updateMap(arr, state) {
 		if(Array.isArray(arr)) {
 			arr.forEach(function(file) {
-				var f = file;
+				var f = file,
+					toQ, toN;
 				if(typeof f === "object") {
-					f = f.source;
+					if(state === "onDeleted") {
+						f = f.deleteLocation;
+					} else if(state === "onMoved") {
+						toQ = f.result ? f.result.Location : undefined;
+						toN = f.result ? f.result.Name : undefined;
+						f = f.source;
+					}
 				}
 				delete this.map[f];
 				var n = _shortName(f);
-				_handle.call(this, state, this, f, n);
+				_handle.call(this, state, this, f, n, toQ, toN);
 			}.bind(this));
 		}
 	}

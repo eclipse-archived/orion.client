@@ -176,6 +176,33 @@ define([
 		/**
 		 * @callback 
 		 */
+		onDeleted: function onDeleted(jsProject, qualifiedName, fileName) {
+			if(fileName === jsProject.TERN_PROJECT && qualifiedName.indexOf(jsProject.getProjectPath()) === 0) {
+				this.loadTernProjectOptions();
+			}
+		},
+		/**
+		 * @callback
+		 */
+		onMoved: function onMoved(jsProject, qualifiedName, fileName, toQualified, toName) {
+			if(fileName === jsProject.TERN_PROJECT && qualifiedName.indexOf(jsProject.getProjectPath()) === 0) {
+				//same as a delete
+				this.loadTernProjectOptions();
+			}
+			if(toName === jsProject.TERN_PROJECT && toQualified.indexOf(jsProject.getProjectPath()) === 0) {
+				//same as adding
+				return jsProject.getFile(jsProject.TERN_PROJECT).then(function(file) {
+					if(file && file.contents) {
+						this.refresh(file.name, file.contents);
+					} else {
+						this.loadTernProjectOptions();
+					}
+				}.bind(this));
+			}
+		},
+		/**
+		 * @callback 
+		 */
 		onModified: function onModified(jsProject, fullPath, shortName) {
 			this.modified = shortName === jsProject.TERN_PROJECT;
 			if(this.modified && !this.ineditor) {
