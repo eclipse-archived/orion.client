@@ -11,8 +11,8 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], 
-        function(messages, lib) {
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils'], 
+        function(messages, lib, bidiUtils) {
 
 	
 	/**
@@ -244,7 +244,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'],
 							field = document.createElement("textarea"); //$NON-NLS-0$
 							field.rows = parm.lines;
 							field.type = "textarea"; //$NON-NLS-0$
-							field.id = id;
+							field.id = id;							
 							parent.appendChild(field);
 						}
 					} else if (parm.type === "boolean") { //$NON-NLS-0$
@@ -271,12 +271,13 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'],
 						if (!field) {
 							field = document.createElement("input"); //$NON-NLS-0$
 							field.type = parm.type;
-							field.id = id;
+							field.id = id;							
 							parent.appendChild(field);
 						}
 						if (parm.value) {
 							field.value = parm.value;
 						}
+						bidiUtils.initInputField(field);
 					}
 					field.classList.add("parameterInput"); //$NON-NLS-0$
 					// for fun

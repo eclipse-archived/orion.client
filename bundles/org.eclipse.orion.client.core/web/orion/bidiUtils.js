@@ -7,7 +7,10 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
  *******************************************************************************/
-define (function() { /* BDL */
+define ([     	
+    	'orion/util'
+        ], 
+		function(util) { /* BDL */
 	
 	function setBrowserLangDirection() {
 		
@@ -78,7 +81,8 @@ define (function() { /* BDL */
 	 * @returns {String} text direction. rtl or ltr.
 	 */	
 	function getTextDirection(text) {
-		if (bidiLayout == 'auto') {	//$NON-NLS-0$
+		bidiLayout = getBidiLayout();
+		if (bidiLayout == 'auto' && util.isIE) {	//$NON-NLS-0$
 			return checkContextual(text);
 		}
 		else {
@@ -98,6 +102,7 @@ define (function() { /* BDL */
 	 */		
 	function enforceTextDirWithUcc ( text ) {
 		if (text.trim()) {
+			bidiLayout = getBidiLayout();
 			var dir = bidiLayout == 'auto' ? checkContextual( text ) : bidiLayout;	//$NON-NLS-0$
 			return ( dir == 'ltr' ? LRE : RLE ) + text + PDF;	//$NON-NLS-0$
 		}
@@ -117,11 +122,41 @@ define (function() { /* BDL */
 		var fdc = /[A-Za-z\u05d0-\u065f\u066a-\u06ef\u06fa-\u07ff\ufb1d-\ufdff\ufe70-\ufefc]/.exec( text );
 		// if found, return the direction that defined by the character, else return ltr as defult.
 		return fdc ? ( fdc[0] <= 'z' ? 'ltr' : 'rtl' ) : 'ltr';	//$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	};	
+	};
+	
+	function addBidiEventListeners ( input ) {
+		if (!input._hasBidiEventListeners) {
+			input._hasBidiEventListeners = true;
+
+			var eventTypes = ['keyup', 'cut', 'paste'];
+			for (var i = 0; i < eventTypes.length; ++i) {
+				input.addEventListener(eventTypes[i], handleInputEvent.bind(this),
+					false);
+			}
+		}
+	};
+	
+	function handleInputEvent ( event ) {
+		var input = event.target;
+		if (input) {
+			input.dir = getTextDirection(input.value); // resolve dir attribute of the element
+		}
+	};
+	
+	function initInputField ( input ) {
+		if (input) {
+			input.dir = getTextDirection(input.value); // resolve dir attribute of the element
+
+			if (util.isIE) {
+				addBidiEventListeners(input);
+			}
+		}
+	}
 		
 	return {
 		isBidiEnabled: isBidiEnabled,
 		getTextDirection: getTextDirection,
-		enforceTextDirWithUcc: enforceTextDirWithUcc
+		enforceTextDirWithUcc: enforceTextDirWithUcc,
+		initInputField: initInputField
 	};
 });
