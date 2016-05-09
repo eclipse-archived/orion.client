@@ -85,6 +85,7 @@
       ecmaVersion: srv.options.ecmaVersion,
       sourceType: srv.options.sourceType
     }
+    // ORION: Checking the truthiness of the text is not accurate
     var text = srv.signalReturnFirst("preParse", file.text, options);
     if(typeof text !== 'string') {
     	text = file.text;

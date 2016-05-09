@@ -80,6 +80,10 @@ Tern to return all of the potential matches.  This is then displayed in the clie
 	        	return canon;
 	        }
 
+Problems checking for truthiness
+- tern.js when calling signalReturnFirst for preParse, we should check whether we are getting string text back, not truthiness
+- signal.js in signalReturnFirst we should be checking for null/undefined, not truthiness
+
 New options:
 - Tern 18 - Tern now strips the projectDir from paths so we have to set a projectDir in ternDefaults.js
 - Tern 18 - Completions has a new option, filter, the filters based on the text, set it to false

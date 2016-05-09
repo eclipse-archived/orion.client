@@ -32,6 +32,7 @@
     var arr = getHandlers(this, type)
     for (var i = 0; i < arr.length; ++i) {
       var result = arr[i].call(this, a1, a2, a3, a4)
+      // ORION: Bug 493144 just checking truthiness of result is not accurate
       if (result !== null && result !== undefined) return result
     }
   }
