@@ -102,6 +102,7 @@ define({//Default message bundle
 	"incrementalFindStrNotFound": "Incremental find: ${0} (not found)", //$NON-NLS-1$ //$NON-NLS-0$
 	"incrementalFindReverseStr": "Reverse Incremental find: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"incrementalFindReverseStrNotFound": "Reverse Incremental find: ${0} (not found)", //$NON-NLS-1$ //$NON-NLS-0$
+	"findReplace": "Find/Replace", //$NON-NLS-1$ //$NON-NLS-0$
 	"find": "Find...", //$NON-NLS-1$ //$NON-NLS-0$
 	"undo": "Undo", //$NON-NLS-1$ //$NON-NLS-0$
 	"redo": "Redo", //$NON-NLS-1$ //$NON-NLS-0$
@@ -200,7 +201,7 @@ define({//Default message bundle
 	"regex": "/.*/", //$NON-NLS-1$ //$NON-NLS-0$
 	"wholeWord": "\\b", //$NON-NLS-1$ //$NON-NLS-0$
 	"caseInsensitiveTooltip": "Toggle Case Insensitive", //$NON-NLS-1$ //$NON-NLS-0$
-	"regexTooltip": "Toggle Regex", //$NON-NLS-1$ //$NON-NLS-0$
+	"regexTooltip": "Toggle Regular Expression", //$NON-NLS-1$ //$NON-NLS-0$
 	"wholeWordTooltip": "Toggle Whole Word", //$NON-NLS-1$ //$NON-NLS-0$
 	"closeTooltip": "Close", //$NON-NLS-1$ //$NON-NLS-0$
 

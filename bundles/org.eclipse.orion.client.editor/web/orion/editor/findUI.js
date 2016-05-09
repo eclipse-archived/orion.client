@@ -78,20 +78,22 @@ define([
 			root.className = "textViewFind"; //$NON-NLS-0$
 			textUtil.addEventListener(root, "keydown", function(e) { that._handleKeyDown(e); }); //$NON-NLS-0$
 			this._rootDiv = root;
+			root.setAttribute("role", "dialog");
+			root.setAttribute("aria-label", messages.findReplace);
 			this._createContents(document, root);
 			view._rootDiv.insertBefore(root, view._rootDiv.firstChild);
 		},
 		_createContents: function(document, parent) {
 			var that = this;
-			var fintInput = util.createElement(document, 'input'); //$NON-NLS-0$
-			fintInput.className = "textViewFindInput"; //$NON-NLS-0$
-			this._findInput = fintInput;
-			fintInput.type = "text"; //$NON-NLS-0$
-			fintInput.placeholder = messages.findWith;
-			textUtil.addEventListener(fintInput, "input", function(evt) { //$NON-NLS-0$
+			var findInput = util.createElement(document, 'input'); //$NON-NLS-0$
+			findInput.className = "textViewFindInput"; //$NON-NLS-0$
+			this._findInput = findInput;
+			findInput.type = "text"; //$NON-NLS-0$
+			findInput.placeholder = messages.findWith;
+			textUtil.addEventListener(findInput, "input", function(evt) { //$NON-NLS-0$
 				return that._handleInput(evt);
 			});
-			parent.appendChild(fintInput);
+			parent.appendChild(findInput);
 
 			var group = util.createElement(document, 'span'); //$NON-NLS-0$
 			that._createButton(document, group, messages.next, function() { that.find(true); });
@@ -114,16 +116,17 @@ define([
 			}
 
 			group = util.createElement(document, 'span'); //$NON-NLS-0$
-			that._createButton(document, group, messages.regex, function(evt) { that._toggle("regex", evt.target); }, this._regex, messages.regexTooltip); //$NON-NLS-0$
-			that._createButton(document, group, messages.caseInsensitive, function(evt) { that._toggle("caseInsensitive", evt.target); }, this._caseInsensitive, messages.caseInsensitiveTooltip); //$NON-NLS-0$
-			that._createButton(document, group, messages.wholeWord, function(evt) { that._toggle("wholeWord", evt.target); }, this._wholeWord, messages.wholeWordTooltip); //$NON-NLS-0$
+			that._createButton(document, group, messages.regex, function(evt) { that._toggle("regex", evt.target); }, this._regex, messages.regexTooltip, messages.regexTooltip); //$NON-NLS-0$
+			that._createButton(document, group, messages.caseInsensitive, function(evt) { that._toggle("caseInsensitive", evt.target); }, this._caseInsensitive, messages.caseInsensitiveTooltip, messages.caseInsensitiveTooltip); //$NON-NLS-0$
+			that._createButton(document, group, messages.wholeWord, function(evt) { that._toggle("wholeWord", evt.target); }, this._wholeWord, messages.wholeWordTooltip, messages.wholeWordTooltip); //$NON-NLS-0$
 			parent.appendChild(group);
 
 			var close = that._createButton(document, parent, "", function() { that.hide(); }); //$NON-NLS-0$
 			close.className = "textViewFindCloseButton"; //$NON-NLS-0$
 			close.title = messages.closeTooltip;
+			util.confineDialogTab(findInput, close);
 		},
-		_createButton: function(document, parent, text, callback, checked, tooltip) {
+		_createButton: function(document, parentDom, text, callback, checked, tooltip, ariaLabel) {
 			var button  = document.createElement("button"); //$NON-NLS-0$
 			button.type = "button"; //$NON-NLS-0$
 			this._checked(checked, button);
@@ -132,7 +135,10 @@ define([
 			if (text) {
 				button.appendChild(document.createTextNode(text)); //$NON-NLS-0$
 			}
-			parent.appendChild(button);
+			if (ariaLabel) {
+				button.setAttribute("aria-label", ariaLabel);
+			}
+			parentDom.appendChild(button);
 			return button;
 		},
 		_toggle: function(prop, button) {

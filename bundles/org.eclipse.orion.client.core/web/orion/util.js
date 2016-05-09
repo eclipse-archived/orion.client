@@ -42,11 +42,26 @@ define(function() {
 		}
 		return document.createElement(tagName);
 	}
+	function confineDialogTab(firstElement, lastElement) {
+		lastElement.addEventListener("keydown", function(evt) {
+			if(evt.keyCode === 9 && !evt.shiftKey) {
+				evt.preventDefault();
+				firstElement.focus();
+			}
+		});
+		firstElement.addEventListener("keydown", function(evt) {
+			if(evt.keyCode === 9 && evt.shiftKey) {
+				evt.preventDefault();
+				lastElement.focus();
+			}
+		});
+	}
 
 	return {
 		formatMessage: formatMessage,
 		
 		createElement: createElement,
+		confineDialogTab: confineDialogTab,
 		
 		/** Browsers */
 		isIE: isIE,
