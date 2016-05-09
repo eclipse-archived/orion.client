@@ -308,24 +308,28 @@ function fetchRemote(req, res, remote, branch, force) {
 function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	var repo;
 	var remoteObj;
-
-	var task = new tasks.Task(res, false, true);
-
+	var task = new tasks.Task(res, false, true);	
 	return clone.getRepo(req)
 	.then(function(r) {
 		repo = r;
-		return git.Remote.lookup(repo, remote);
+		return tags ? Promise.all([git.Remote.lookup(repo, remote), git.Reference.list(repo)]) : git.Remote.lookup(repo, remote);
 	})
 	.then(function(r) {
-		remoteObj = r;
+		remoteObj = r[0];	
 		var pushToGerrit = branch.indexOf("for/") === 0;
 		var refSpec = pushSrcRef + ":" + (pushToGerrit ? "refs/" : "refs/heads/") + branch;
-
 		if (force) refSpec = "+" + refSpec;
-
+		var refSpecs = [];
+		refSpecs.push(refSpec);	
+		if(tags){
+			r[1].forEach(function(ref) {
+				if (ref.indexOf("refs/tags/") === 0) {
+					refSpecs.push(ref + ":" + ref);	
+				}			
+			});
+		}
 		return remoteObj.push(
-			tags && false ? [refSpec, "refs/tags/*:refs/tags/*"] : [refSpec],
-			{callbacks: clone.getRemoteCallbacks(req.body, task)}
+			refSpecs, {callbacks: clone.getRemoteCallbacks(req.body, task)}
 		);
 	})
 	.then(function(err) {
