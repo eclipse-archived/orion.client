@@ -86,10 +86,13 @@ define([
     	 */
     	var scriptresolver = new ScriptResolver.ScriptResolver(serviceRegistry);
     	
+    	// Avoid using localStorage while running the plugin as a worker
+    	//var TRACE = localStorage.js_message_trace === "true";
+    	var TRACE = false;
+    	
 		var ternReady = false,
 			workerReady = false,
 			pendingStart,
-			TRACE = localStorage.js_message_trace === "true",
 			messageQueue = [], // for all other requests
 			modifyQueue = []; // for add and removes only
 		
