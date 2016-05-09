@@ -25,15 +25,16 @@ define([
 	 * @name JavaScript
 	 * @description Creates a new TernServer
 	 * @param {ScriptResolver} scriptResolver The resolver used to find scripts for getFile
+	 * @param {JavaScriptProject} jsProject The optional backing JavaScript project - used for reading / finding resources.
 	 * @param {Boolean} useWorker If the backing TernServer instance should be run in a worker
 	 * @returns {TernServer} A new TernServer instance
 	 * @since 11.0
 	 */
-	function JavaScript(scriptResolver, useWorker) {
+	function JavaScript(scriptResolver, jsProject, useWorker) {
 		scriptresolver = scriptResolver;
 		useworker = useWorker;
 		if(!useworker) {
-			ternserver = new TernServer(scriptresolver);
+			ternserver = new TernServer(scriptresolver, jsProject);
 			ternserver.startServer(null, function() {
 				//just fire it up for now
 			});
