@@ -308,6 +308,10 @@ function fetchRemote(req, res, remote, branch, force) {
 function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	var repo;
 	var remoteObj;
+	
+	//TODO disable pushing tags
+	tags = false;
+	
 	var task = new tasks.Task(res, false, true);	
 	return clone.getRepo(req)
 	.then(function(r) {
