@@ -21,17 +21,20 @@ define([
 	
 	var ternserver, 
 		scriptresolver, 
-		fileclient;
+		fileclient,
+		jsProject;
 	
 	/**
 	 * @name TernServer
 	 * @description Creates a new TernServer
 	 * @param {ScriptResolver} scriptResolver The resolver used to find scripts for getFile
+	 * @param {JavaScriptProject} jsproject The backing Javascript project
 	 * @returns {TernServer} A new TernServer instance
 	 */
-	function TernServer(scriptResolver) {
+	function TernServer(scriptResolver, jsproject) {
 		scriptresolver = scriptResolver;
 		fileclient = scriptresolver.getFileClient();
+		jsProject = jsproject;
 	}
 	
 	Objects.mixin(TernServer.prototype, {
@@ -683,48 +686,110 @@ define([
 	 */
 	function doRead(file, callback) {
 		if(typeof file === 'object') {
-			var _l = file.logical;
-			var val = Object.create(null);
-			val.logical = _l;
-			scriptresolver.getWorkspaceFile(_l).then(function(files) {
-				if(files && files.length > 0) {
-					var rel = scriptresolver.resolveRelativeFiles(_l, files, {location: file.file, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
-					if(rel && rel.length > 0) {
-						return fileclient.read(rel[0].location).then(function(contents) {
-							val.contents = contents;
-							val.file = rel[0].location;
-							val.path = rel[0].path;
-							callback(null, val);
-						},
-						function(reject) {
-							callback(reject);
-						});
-					} 
-					callback(i18nUtil.formatMessage(Messages['failedToReadFile'], _l));
+			if(file.env === 'node') {
+				if (!/^[\.]+/.test(file.logical)) {
+					_nodeRead(callback, file.logical);
 				} else {
-					callback(i18nUtil.formatMessage(Messages['failedToReadFile'], _l));
+					_readRelative(callback, file.logical);
 				}
-			},
-			/* @callback */ function(err) {
-				callback(i18nUtil.formatMessage(Messages['failedToReadFile'], _l));
-			});
+			} else {
+				if (!/^[\.]+/.test(file.logical)) {
+					scriptresolver.getWorkspaceFile(file.logical).then(function(files) {
+						if(files && files.length > 0) {
+							return _normalRead(callback, files[0].location);
+						}
+						_failedRead(callback, files[0].location, "File not found in workspace");
+					},
+					function(err) {
+						_failedRead(callback, file.logical, err);
+					});
+				} else {
+					_readRelative(callback, file.logical);
+				}
+			}
 		} else {
-			if(!/\.js|\.htm|\.htm$/ig.test(file)) {
-				//no extension given, guess at js
-				file += '.js'; //$NON-NLS-1$
-			}
-			try {
-				return fileclient.read(file).then(function(contents) {
-							callback(null, contents);
-						},
-						/* @callback */ function(err) {
-							callback(err);
-						});
-			}
-			catch(err) {
-				callback(i18nUtil.formatMessage(Messages['failedToReadFile'], file));
-			}
+			_normalRead(callback, file);
 		}
+	}
+   
+	/**
+	 * @since 12.0
+	 */
+	function _nodeRead(callback, filePath) {
+		var project = jsProject ? jsProject.getProjectPath() : null;
+		if(project) {
+			return fileclient.read(project+"node_modules/"+filePath+"/package.json", false, false, {readIfExists: true}).then(function(json) {
+				if(json) {
+					var val = JSON.parse(json);
+					var mainPath = null;
+					var main = val.main;
+					if (main) {
+						if (!/(\.js)$/.test(main)) {
+							main += ".js";
+						}
+						mainPath = project + "node_modules/" + filePath + "/" + main;
+					} else {
+						main = "index.js";
+						mainPath = project + "node_modules/" + filePath + "/index.js";
+					}
+					return fileclient.read(mainPath).then(function(contents) {
+						callback(null, {contents: contents, file: mainPath, path: main, logical: filePath});
+					},
+					function(err) {
+						_failedRead(callback, "node_modules", err);
+					});
+				}
+				_failedRead(callback, filePath, "No contents");
+			},
+			function(err) {
+				_failedRead(callback, filePath, err);
+			});
+		} 
+		_failedRead(callback, filePath, "No project context");
+	}
+	/**
+	 * @since 12.0
+	 */
+	function _normalRead(callback, filePath) {
+		if(!/\.js|\.htm|\.htm|\.json$/ig.test(filePath)) {
+			//no extension given, guess at js
+			filePath += '.js'; //$NON-NLS-1$
+		}
+		return fileclient.read(filePath).then(function(contents) {
+			callback(null, {file: filePath, contents: contents});
+		},
+		function(err) {
+			_failedRead(callback, filePath, err);
+		});
+	}
+		
+	/**
+	 * @since 12.0
+	 */
+	function _failedRead(callback, fileName, err) {
+		var _e = {message: err.toString(), reason: i18nUtil.formatMessage(Messages['failedToReadFile'], fileName)};
+		callback(_e, fileName);
+	}
+	/**
+	 * @since 12.0
+	 */
+	function _readRelative(callback, logical, filePath) {
+		scriptresolver.getWorkspaceFile(logical).then(function(files) {
+			if(files && files.length > 0) {
+				var rel = scriptresolver.resolveRelativeFiles(logical, files, {location: filePath, contentType: {name: 'JavaScript'}}); //$NON-NLS-1$
+				if(rel && rel.length > 0) {
+					return fileclient.read(rel[0].location).then(function(contents) {
+						callback(null, {logical: logical, file: rel[0].location, contents: contents, path: rel[0].path});
+					});
+				}
+				_failedRead(callback, logical, "No relative matches found");
+			} else {
+				_failedRead(callback, logical, "No workspace matches found");
+			}
+		},
+		function(err) {
+			_failedRead(callback, logical, err);
+		});
 	}
     
     return TernServer;
