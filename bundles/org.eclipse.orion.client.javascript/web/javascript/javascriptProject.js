@@ -135,6 +135,31 @@ define([
 	};
 	
 	/**
+	 * @description Returns the current ECMA version being used in the project, or the default of 6
+	 * @function
+	 * @returns {Number} The project ECMA level or the default of 6
+	 */
+	JavaScriptProject.prototype.getEcmaLevel = function getEcmaLevel() {
+		if(this.ecma > 4 && this.ecma < 8) {
+			return new Deferred().resolve(this.ecma);
+		}
+		return this.getFile(this.TERN_PROJECT).then(function(file) {
+			this.ecma = 6;
+			if(file) {
+				try {
+					var v = JSON.parse(file.contents);
+					if(v.ecmaVersion > 4 && v.ecmaVersion < 8) {
+						this.ecma = v.ecmaVersion;
+					}
+				} catch(err) {
+					this.ecma = 6;					
+				}
+			}
+			return this.ecma;
+		}.bind(this));
+	};
+	
+	/**
 	 * @description Fetch the named child of the current project context
 	 * @function
 	 * @param {String} childName The short name of the project child to get
@@ -279,11 +304,13 @@ define([
 		if (project) {
 			if(!this.projectMeta || project.Location !== this.projectMeta.Location) {
 				this.projectMeta = project;
+				delete this.ecma;
 				_handle.call(this, "onProjectChanged", this, evnt, project.Location);
 				return;
 			} 
 			_handle.call(this, "onInputChanged", this, evnt, project.Location);				
 		} else {
+			delete this.ecma;
 			_handle.call(this, "onProjectChanged", this, evnt, null);
 		}
 	};

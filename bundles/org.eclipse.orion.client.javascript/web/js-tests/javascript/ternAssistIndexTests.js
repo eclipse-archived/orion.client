@@ -28,6 +28,9 @@ define([
 		var jsFile = 'tern_content_assist_index_test_script.js';
 		var htmlFile = 'tern_content_assist_index_test_script.html';
 		var timeoutReturn = ['Content assist timed out'];
+		var jsProject = {
+			gettEcmaLevel: function getEcmaLevel() {}
+		};
 	
 		/**
 		 * @description Sets up the test
@@ -52,7 +55,10 @@ define([
 			assert(options.callback, 'You must provide a test callback for worker-based tests');
 			state.callback = options.callback;
 			worker.setTestState(state);
-			
+			var ecma = options.ecma ? options.ecma : 5;
+			jsProject.getEcmaLevel = function() {
+				return new Deferred().resolve(ecma);
+			}
 			// Delete any test files created by previous tests
 			worker.postMessage({request: 'delFile', args:{file: jsFile}});
 			worker.postMessage({request: 'delFile', args:{file: htmlFile}});
@@ -175,7 +181,7 @@ define([
 				CUProvider.setUseCache(false);
 				ternAssist = new TernAssist.TernContentAssist(astManager, worker, function() {
 					return new Deferred().resolve(envs);
-				}, CUProvider);
+				}, CUProvider, jsProject);
 				worker.start(done); // Reset the tern server state to remove any prior files
 			});
 		

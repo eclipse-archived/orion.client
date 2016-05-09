@@ -406,7 +406,7 @@ define([
     		return envDeferred;
     	}
 
-    	provider.registerService("orion.edit.contentassist", new TernAssist.TernContentAssist(astManager, ternWorker, getEnvironments, CUProvider),  //$NON-NLS-1$
+    	provider.registerService("orion.edit.contentassist", new TernAssist.TernContentAssist(astManager, ternWorker, getEnvironments, CUProvider, jsProject),  //$NON-NLS-1$
     			{
     				contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
     				nls: 'javascript/nls/messages',  //$NON-NLS-1$

@@ -10,7 +10,6 @@
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env amd, mocha, browser*/
-/* eslint-disable missing-nls */
 define([
 'javascript/astManager',
 'javascript/contentAssist/ternAssist',
@@ -28,7 +27,10 @@ define([
 		var jsFile = 'tern_content_assist_test_script.js';
 		var htmlFile = 'tern_content_assist_test_script.html';
 		var timeoutReturn = ['Content assist timed out'];
-	
+		var jsProject = {
+			getEcmaLevel: function getEcmaLevel() {}
+		};
+		
 		/**
 		 * @description Sets up the test
 		 * @param {Object} options The options the set up with
@@ -49,6 +51,10 @@ define([
 				// Tern plug-ins don't have the content type, only the name of the file
 				file = state.file = htmlFile;
 			}
+			var ecma = options.ecma ? options.ecma : 5;
+			jsProject.getEcmaLevel = function() {
+				return new Deferred().resolve(ecma);
+			};
 			assert(options.callback, 'You must provide a test callback for worker-based tests');
 			state.callback = options.callback;
 			worker.setTestState(state);
@@ -135,7 +141,8 @@ define([
 						assert.equal(ap.proposal, text, "Invalid proposal text"); //$NON-NLS-0$
 						if (description) {
 							if (ap.name) {
-								assert.equal(ap.name + ap.description, description, "Invalid proposal description"); //$NON-NLS-0$
+								var desc = ap.description ? ap.description : "";
+								assert.equal(ap.name + desc, description, "Invalid proposal description"); //$NON-NLS-0$
 							} else {
 								assert.equal(ap.description, description, "Invalid proposal description"); //$NON-NLS-0$
 							}
@@ -164,14 +171,14 @@ define([
 				worker.getTestState().callback(error);
 			});
 		}
-	
+		
 		describe('Tern Content Assist Tests', function() {
-			this.timeout(10000);
+			this.timeout(20000);
 			before('Message the server for warm up', function(done) {
 				CUProvider.setUseCache(false);
 				ternAssist = new TernAssist.TernContentAssist(astManager, worker, function() {
 					return new Deferred().resolve(envs);
-				}, CUProvider);
+				}, CUProvider, jsProject);
 				worker.start(done); // Reset the tern server state to remove any prior files
 			});
 		
@@ -3454,7 +3461,7 @@ define([
 							['', 'ecma5'],
 							['Function(body)', 'Function(body) : fn()'],
 							["", "Templates"],
-							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
+							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function"],
 							['', 'Keywords'],
 							["function", "function - Keyword"]
 							]);
@@ -3477,7 +3484,7 @@ define([
 							['', 'ecma5'],
 							['Function(body)', 'Function(body) : fn()'],
 							["", "Templates"],
-							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
+							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function"],
 							['', 'Keywords'],
 							["function", "function - Keyword"]
 							]);
@@ -3500,7 +3507,7 @@ define([
 							['', 'ecma5'],
 							['Function(body)', 'Function(body) : fn()'],
 							["", "Templates"],
-							['ction(parameter) {\n\t\n}', 'function - member function expression'],
+							['ction(parameter) {\n\t\n}', 'function'],
 							['', 'Keywords'],
 							["function", "function - Keyword"]
 							]);
@@ -3523,7 +3530,7 @@ define([
 							['', 'ecma5'],
 							['Function(body)', 'Function(body) : fn()'],
 							["", "Templates"],
-							['ction(parameter) {\n\t\n}', 'function - member function expression'],
+							['ction(parameter) {\n\t\n}', 'function'],
 							['', 'Keywords'],
 							["function", "function - Keyword"]
 							]);
@@ -3546,7 +3553,7 @@ define([
 							['', 'ecma5'],
 							['Function(body)', 'Function(body) : fn()'],
 							["", "Templates"],
-							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
+							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function"],
 							['', 'Keywords'],
 							["function", "function - Keyword"]
 							]);

@@ -40,12 +40,15 @@ define([
 			return !char || this.uninterestingChars.indexOf(char) === -1;
 		},
 
-		getTemplateProposals: function(prefix, offset, context, ast) {
+		getTemplateProposals: function(prefix, offset, context, ast, ecma) {
 			var proposals = [];
 			var k = this.getKind(ast, offset);
 			var templates = Templates.getTemplatesForKind(k.kind);
 			for (var t = 0; t < templates.length; t++) {
 				var template = templates[t];
+				if(template.ecma > ecma) {
+					continue;
+				}
 				if (this.templateMatches(template, prefix, k, context)) {
 					var proposal = template.getProposal(prefix, offset, context);
 					var _h;
@@ -192,13 +195,15 @@ define([
 	 * @param {TernWorker} ternWorker The worker running Tern
 	 * @param {Function} pluginEnvironments The function to use to query the Tern server for contributed plugins
 	 * @param {Object} cuprovider The CU Provider that caches compilation units
+	 * @param {JavaScriptProject} jsproject The backing Javascript project
 	 */
-	function TernContentAssist(astManager, ternWorker, pluginEnvironments, cuprovider) {
+	function TernContentAssist(astManager, ternWorker, pluginEnvironments, cuprovider, jsproject) {
 		this.astManager = astManager;
 		this.ternworker = ternWorker;
 		this.pluginenvs = pluginEnvironments;
 		this.cuprovider = cuprovider;
 		this.timeout = null;
+		this.jsProject = jsproject;
 	}
 
 	/**
@@ -267,39 +272,41 @@ define([
 		},
 
 		doAssist: function(ast, params, meta, envs, pluginenvs, htmlsource) {
-       		var templates = createTemplateProposals(params, ast);
-   			var env = this.getActiveEnvironments(ast, envs);
-		    var files = [
-		    	{type:'full', name: meta.location, text: htmlsource ? htmlsource : ast.sourceFile.text} //$NON-NLS-1$
-		    ];
-		    if(typeof params.keywords === 'undefined') {
-		    	params.keywords = true;
-		    }
-		    var args = {params: params, meta: meta, envs:env, files: files};
-			var deferred = new Deferred();
-			var that = this;
-			this.ternworker.postMessage({request: 'completions', args: args}, //$NON-NLS-1$
-				/* @callback */ function(response, err) {
-					clearTimeout(that.timeout);
-					var p = [];
-					if(Array.isArray(response.proposals)) {
-						p = response.proposals;
+			return this.jsProject.getEcmaLevel().then(function(ecma) {
+	       		var templates = createTemplateProposals(params, ast, ecma);
+	   			var env = this.getActiveEnvironments(ast, envs);
+			    var files = [
+			    	{type:'full', name: meta.location, text: htmlsource ? htmlsource : ast.sourceFile.text} //$NON-NLS-1$
+			    ];
+			    if(typeof params.keywords === 'undefined') {
+			    	params.keywords = true;
+			    }
+			    var args = {params: params, meta: meta, envs:env, files: files};
+				var deferred = new Deferred();
+				var that = this;
+				this.ternworker.postMessage({request: 'completions', args: args}, //$NON-NLS-1$
+					/* @callback */ function(response, err) {
+						clearTimeout(that.timeout);
+						var p = [];
+						if(Array.isArray(response.proposals)) {
+							p = response.proposals;
+						}
+			        	deferred.resolve(sortProposals(p, templates, args));
 					}
-		        	deferred.resolve(sortProposals(p, templates, args));
+	        	);
+				
+				if(this.timeout) {
+					clearTimeout(this.timeout);
 				}
-        	);
-			
-			if(this.timeout) {
-				clearTimeout(this.timeout);
-			}
-			this.timeout = setTimeout(function() {
-				if(deferred) {
-					// In the editor we can't return an error message here or it will be treated as a proposal and inserted into text
-					deferred.resolve(params.timeoutReturn ? params.timeoutReturn : []);
-				}
-				that.timeout = null;
-			}, params.timeout ? params.timeout : 5000);
-			return deferred;
+				this.timeout = setTimeout(function() {
+					if(deferred) {
+						// In the editor we can't return an error message here or it will be treated as a proposal and inserted into text
+						deferred.resolve(params.timeoutReturn ? params.timeoutReturn : []);
+					}
+					that.timeout = null;
+				}, params.timeout ? params.timeout : 5000);
+				return deferred;
+			}.bind(this));
 		},
 
 		getActiveEnvironments: function getActiveEnvironements(ast, defenvs) {
@@ -337,13 +344,13 @@ define([
 	 * @private
 	 * @param {Object} params The completion context
 	 * @param {Object} ast The the backing AST
-	 * @param {String} buffer The compilation unit buffer
+	 * @param {Number} ecma The ECMA level the project uses
 	 * @returns {Array} The array of template proposals
 	 */
-	function createTemplateProposals (params, ast) {
+	function createTemplateProposals (params, ast, ecma) {
 		if((typeof params.template === 'undefined' || params.template) &&
 				provider.isValid(params.prefix, ast.sourceFile.text, params.offset, params)) {
-			return provider.getTemplateProposals(params.prefix, params.offset, params, ast);
+			return provider.getTemplateProposals(params.prefix, params.offset, params, ast, ecma);
 		}
 		return [];
 	}
