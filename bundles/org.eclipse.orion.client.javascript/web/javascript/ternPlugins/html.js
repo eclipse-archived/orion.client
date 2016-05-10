@@ -61,7 +61,7 @@ define([
 					for(var i = 0; i < ast.dependencies.length; i++) {
 						var dep = ast.dependencies[i];
 						var _f = resolver.getResolved(dep);
-						if(_f) {
+						if(_f && _f.file) {
 							server.addFile(_f.file, _f.contents, server._htmlDeps.file);
 						}
 					}
