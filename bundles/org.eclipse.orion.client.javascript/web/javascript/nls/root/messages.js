@@ -276,6 +276,8 @@ define({
 	'es6': 'Enable all ECMAScript 6 features except for modules.',
 	'astPluginName': 'AST (acorn) plugin for Tern',
 	'astPluginDescription': 'Provides AST (acorn) for Tern',
+	'templatesPlugin': 'Orion code templates',
+	'templatesPluginDescription': 'Provides a variety of code templates for JavaScript in Orion.',
 	
 	// Other messages
 	'unknownError': 'An unknown error occurred.',

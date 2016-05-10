@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation, Inc. and others.
+ * Copyright (c) 2015, 2016 IBM Corporation, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -16,177 +16,11 @@ define([
 	'orion/objects',
 	'javascript/finder',
 	'orion/editor/templates',
-	'javascript/contentAssist/templates',
 	'javascript/hover',
 	'javascript/util',
 	'javascript/contentAssist/sigparser',
 	'orion/i18nUtil'
-], function(Messages, Deferred, Objects, Finder, mTemplates, Templates, Hover, Util, SigParser, i18nUtil) {
-
-	/**
-	 * @description Creates a new delegate to create keyword and template proposals
-	 */
-	function TemplateProvider() {
-	    //constructor
- 	}
-
- 	TemplateProvider.prototype = new mTemplates.TemplateContentAssist([], []);
-
- 	Objects.mixin(TemplateProvider.prototype, {
- 		uninterestingChars: ":!#$^&.?<>", //$NON-NLS-1$
-
- 		isValid: function(prefix, buffer, offset) {
-			var char = buffer.charAt(offset-prefix.length-1);
-			return !char || this.uninterestingChars.indexOf(char) === -1;
-		},
-
-		getTemplateProposals: function(prefix, offset, context, ast, ecma) {
-			var proposals = [];
-			var k = this.getKind(ast, offset);
-			var templates = Templates.getTemplatesForKind(k.kind);
-			for (var t = 0; t < templates.length; t++) {
-				var template = templates[t];
-				if(template.ecma > ecma) {
-					continue;
-				}
-				if (this.templateMatches(template, prefix, k, context)) {
-					var proposal = template.getProposal(prefix, offset, context);
-					var _h;
-					if(template.doc) {
-						_h = Hover.formatMarkdownHover(template.doc);
-					} else {
-						_h = Object.create(null);
-				        _h.type = 'markdown'; //$NON-NLS-1$
-				        _h.content = Messages['templateHoverHeader'];
-				        _h.content += proposal.proposal;
-			        }
-			        if(template.url) {
-				        _h.content += i18nUtil.formatMessage.call(null, Messages['onlineDocumentationProposalEntry'], template.url);
-				    }
-			        proposal.hover = _h;
-			        proposal.style = 'emphasis'; //$NON-NLS-1$
-					this.removePrefix(prefix, proposal);
-					proposal.kind = 'js'; //$NON-NLS-1$
-					proposals.push(proposal);
-				}
-			}
-
-			if (0 < proposals.length) {
-				//sort the proposals by name
-				proposals.sort(function(p1, p2) {
-					if (p1.name < p2.name) {
-						return -1;
-					}
-					if (p1.name > p2.name) {
-						return 1;
-					}
-					return 0;
-				});
-			}
-			return proposals;
-		},
-
-		templateMatches: function(template, prefix, kind, context) {
-		    if(template.match(prefix)) {
-		        //must match the prefix always
-		        if(typeof context.line !== 'undefined') {
-			        var len = context.line.length - (typeof prefix !== 'undefined' ? prefix.length : 0);
-			        var line = context.line.slice(0, len > -1 ? len : 0).trim();
-			        if(kind && kind.kind === 'jsdoc') {
-			            // don't propose tag templates when one exists already on the same line
-			            return !/^[\/]?[\*]+\s*[@]/ig.test(line);
-			        }
-		        }
-		        if(kind && kind.kind === 'doc') {
-		            var comment = kind.node.value.trim();
-		            if(comment) {
-		                var idx = context.offset - prefix.length - kind.node.range[0];
-		                if(idx > -1) {
-		                    var val = /^(eslint-\w+|eslint?)(\s|$)/ig.exec(comment.slice(0, idx));
-			                if(val) {
-		                        //nothing else is allowed in the directives - eslint won't parse it
-		                        return false;
-			                }
-		                }
-		            }
-		        }
-		        return true;
-		    }
-		    return false;
-		},
-		
-		/**
-		 * @description Computes the kind of context to complete in
-		 * @param {Object} ast The backing AST to visit
-		 * @param {Number} offset The offset into the source
-		 * @param {String} contents The text of the file
-		 * @return {Object} Returns the deferred node and the completion kind
-		 */
-		getKind: function(ast, offset) {
-	    	var node = Finder.findNode(offset, ast, {parents:true});
-	    	if(node) {
-	    		if(node.type === 'Literal') {
-	    			switch(typeof node.value) {
-	    				case 'boolean':
-	    				case 'number': {
-	    					if(offset > node.range[0] && offset <= node.range[1]) {
-		    					return {kind: 'unknown'};
-	    					}
-	    					break;
-	    				}
-	    				case 'string': {
-	    					if(offset > node.range[0] && offset < node.range[1]) {
-		    					return {kind: 'string'};
-	    					}
-	    					break;
-	    				}
-	    				case 'object': {
-	    					if(node.regex && offset > node.range[0] && offset <= node.range[1]) {
-		    					return {kind: 'regex'};
-    						}
-    						break;
-	    				}
-	    			}
-	    		}
-	    		if(node.parents && node.parents.length > 0) {
-		    		var prent = node.parents.pop();
-		    		switch(prent.type) {
-							case 'MemberExpression':
-								return { kind : 'member'}; //$NON-NLS-1$
-							case 'Program':
-							case 'BlockStatement':
-								break;
-							case 'VariableDeclarator':
-								if(!prent.init || offset < prent.init.range[0]) {
-									return {kind: 'unknown'};
-								}
-								break;
-							case 'FunctionDeclaration':
-							case 'FunctionExpression':
-								if(offset < prent.body.range[0]) {
-									return {kind: 'unknown'};
-								}
-								break;
-							case 'Property':
-								if(offset-1 >= prent.value.range[0] && offset-1 <= prent.value.range[1]) {
-									return { kind : 'prop'}; //$NON-NLS-1$
-								}
-								return {kind: 'unknown'};
-							case 'SwitchStatement':
-								return {kind: 'swtch'}; //$NON-NLS-1$
-						}
-				}
-	    	}
-	    	node = Finder.findComment(offset, ast);
-	    	if(node) {
-	    		return {kind: 'doc', node: node}; //$NON-NLS-1$
-	    	}
-			return {kind:'top'}; //$NON-NLS-1$
-		}
- 	});
-
- 	var provider = new TemplateProvider();
-
+], function(Messages, Deferred, Objects, Finder, mTemplates, Hover, Util, SigParser, i18nUtil) {
 	/**
 	 * @description Creates a new TernContentAssist object
 	 * @constructor
@@ -255,33 +89,29 @@ define([
 		            	}, meta);
     			        if(cu.validOffset(params.offset)) {
     			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-    			            	return that.pluginenvs().then(function(envs) {
-    			            		return that.doAssist(ast, params, meta, {ecma5:true, ecma6:true, browser:true}, envs, text);
-    			            	});
-                			});
+			            		return that.doAssist(ast, params, meta, {ecma5:true, ecma6:true, browser:true}, text);
+			            	});
     			        }
     			        return [];
 			        });
 			    } 
 		        return that.astManager.getAST(editorContext).then(function(ast) {
-		        	return that.pluginenvs().then(function(envs) {
-		        		return that.doAssist(ast, params, meta, {ecma5: true, ecma6: true}, envs);
-		        	});
-    			});
+	        		return that.doAssist(ast, params, meta, {ecma5: true, ecma6: true});
+	        	});
 			});
 		},
 
-		doAssist: function(ast, params, meta, envs, pluginenvs, htmlsource) {
+		doAssist: function(ast, params, meta, envs, htmlsource) {
 			return this.jsProject.getEcmaLevel().then(function(ecma) {
-	       		var templates = createTemplateProposals(params, ast, ecma);
-	   			var env = this.getActiveEnvironments(ast, envs);
 			    var files = [
 			    	{type:'full', name: meta.location, text: htmlsource ? htmlsource : ast.sourceFile.text} //$NON-NLS-1$
 			    ];
 			    if(typeof params.keywords === 'undefined') {
 			    	params.keywords = true;
 			    }
-			    var args = {params: params, meta: meta, envs:env, files: files};
+			    params.ecma = ecma;
+			    var env = this.getActiveEnvironments(ast, envs);
+			    var args = {params: params, meta: meta, envs: env, files: files};
 				var deferred = new Deferred();
 				var that = this;
 				this.ternworker.postMessage({request: 'completions', args: args}, //$NON-NLS-1$
@@ -291,7 +121,7 @@ define([
 						if(Array.isArray(response.proposals)) {
 							p = response.proposals;
 						}
-			        	deferred.resolve(sortProposals(p, templates, args));
+			        	deferred.resolve(sortProposals(p, args));
 					}
 	        	);
 				
@@ -307,8 +137,8 @@ define([
 				}, params.timeout ? params.timeout : 5000);
 				return deferred;
 			}.bind(this));
-		},
 
+		},
 		getActiveEnvironments: function getActiveEnvironements(ast, defenvs) {
 			var env = Object.create(null);
 			Objects.mixin(env, defenvs);
@@ -338,22 +168,6 @@ define([
 		    return env;
 		}
 	});
-
-	/**
-	 * @description Create the template proposals
-	 * @private
-	 * @param {Object} params The completion context
-	 * @param {Object} ast The the backing AST
-	 * @param {Number} ecma The ECMA level the project uses
-	 * @returns {Array} The array of template proposals
-	 */
-	function createTemplateProposals (params, ast, ecma) {
-		if((typeof params.template === 'undefined' || params.template) &&
-				provider.isValid(params.prefix, ast.sourceFile.text, params.offset, params)) {
-			return provider.getTemplateProposals(params.prefix, params.offset, params, ast, ecma);
-		}
-		return [];
-	}
 
 	var operators = {
     	'delete': true,
@@ -442,6 +256,9 @@ define([
             	}
             	var _t = new mTemplates.Template(prefix, completion.description, completion.template, completion.name);
             	var _prop = _t.getProposal(prefix, args.params.offset, {});
+            	if(completion.overwrite) {
+            		_prop.overwrite = completion.overwrite;
+            	}
             	var obj = Object.create(null);
 		        obj.type = 'markdown'; //$NON-NLS-1$
 		        
@@ -461,7 +278,6 @@ define([
 			        obj.content += i18nUtil.formatMessage.call(null, Messages['onlineDocumentationProposalEntry'], completion.url);
 			    }
 		        _prop.hover = obj;
-		        provider.removePrefix(prefix, _prop);
 		        _prop.style = 'emphasis'; //$NON-NLS-1$
 		        _prop.kind = 'js'; //$NON-NLS-1$
 		        if(typeof completion.prefix === 'string') {
@@ -591,13 +407,14 @@ define([
 		return origin;
 	}
 
-	function sortProposals(completions, templates, args) {
+	function sortProposals(completions, args) {
 		var envs = args.envs ? args.envs : {};
 	    //bucket them by origin
 	    var _p = Object.create(null); // Grouped proposals from env and indexes
 	    var _d = Object.create(null); // Grouped proposals from dependencies 
 	    var locals = []; // Proposals from local scope
 	    var keywords = [];
+	    var templates = [];
 	    for(var i = 0; i < completions.length; i++) {
 	        var _c = completions[i];
 	        var _prefix = typeof _c.prefix === 'string' ? _c.prefix : args.params.prefix;
@@ -605,8 +422,9 @@ define([
     	        var _o = _c.origin;
     	        if(_c.isKeyword) {
     	        	keywords.push(_formatTernProposal(_c, args));
+    	        	continue;
     	        } else if(typeof _o === 'undefined') {
-    	        	if(_c.isTemplate && _c.type !== 'jsdoc_template') {
+    	        	if(_c.type === 'template') {
     	        		templates.push(_formatTernProposal(_c, args));
     	        	} else {
 	    	        	locals.push(_formatTernProposal(_c, args));

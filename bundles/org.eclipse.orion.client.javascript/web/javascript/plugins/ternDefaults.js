@@ -40,6 +40,7 @@ define([
 	"javascript/ternPlugins/postgres",
 	"javascript/ternPlugins/redis",
 	"javascript/ternPlugins/refs",
+	"javascript/ternPlugins/templates",
 	"javascript/ternPlugins/quickfixes"
 ], function(Messages, ecma5, ecma6, browser, chai) {
 	
@@ -99,6 +100,11 @@ define([
 				"description": Messages["astPluginDescription"],
 				"version": "1.0"
 			},
+			"templates": {
+				"name": Messages["templatesPlugin"],
+				"description": Messages["templatesPluginDescription"],
+				"version": "1.0"
+			}
 		},
 		optional: {
 			"amqp": {

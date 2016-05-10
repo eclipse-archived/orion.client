@@ -181,9 +181,11 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		           end: args.params.offset,
 		           sort: true,
 		           filter: false,
+		           ecma: args.params.ecma,
 		           expandWordForward: false,
 		           omitObjectPrototype: false,
 		           includeKeywords: args.params.keywords,
+		           includeTemplates: args.params.template,
 		           caseInsensitive: true,
 		           docFormat: "full" //$NON-NLS-1$
 		           },

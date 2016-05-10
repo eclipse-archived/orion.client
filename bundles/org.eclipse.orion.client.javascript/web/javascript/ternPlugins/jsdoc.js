@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -553,13 +553,13 @@ define([
 		if(typeof template === 'string') {
 			p.type = 'jsdoc_template';
 			p.template = template;
-			p.isTemplate = true;
 		} else {
 			p.type = 'doc';
 		}
 		p.name = name;
 		p.proposal = name.slice(prefix.length);
 		p.description = description;
+		p.overwrite = true;
 		if(typeof prefix === 'string') {
 			p.prefix = prefix;
 		}

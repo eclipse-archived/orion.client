@@ -3461,7 +3461,7 @@ define([
 							['', 'ecma5'],
 							['Function(body)', 'Function(body) : fn()'],
 							["", "Templates"],
-							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function"],
+							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function declaration"],
 							['', 'Keywords'],
 							["function", "function - Keyword"]
 							]);
@@ -3484,7 +3484,7 @@ define([
 							['', 'ecma5'],
 							['Function(body)', 'Function(body) : fn()'],
 							["", "Templates"],
-							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function"],
+							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function declaration"],
 							['', 'Keywords'],
 							["function", "function - Keyword"]
 							]);
@@ -3507,7 +3507,7 @@ define([
 							['', 'ecma5'],
 							['Function(body)', 'Function(body) : fn()'],
 							["", "Templates"],
-							['ction(parameter) {\n\t\n}', 'function'],
+							['function(parameter) {\n\t\n}', 'function expression (as property value)'],
 							['', 'Keywords'],
 							["function", "function - Keyword"]
 							]);
@@ -3530,7 +3530,7 @@ define([
 							['', 'ecma5'],
 							['Function(body)', 'Function(body) : fn()'],
 							["", "Templates"],
-							['ction(parameter) {\n\t\n}', 'function'],
+							['function(parameter) {\n\t\n}', 'function expression (as property value)'],
 							['', 'Keywords'],
 							["function", "function - Keyword"]
 							]);
@@ -3553,7 +3553,7 @@ define([
 							['', 'ecma5'],
 							['Function(body)', 'Function(body) : fn()'],
 							["", "Templates"],
-							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function"],
+							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function declaration"],
 							['', 'Keywords'],
 							["function", "function - Keyword"]
 							]);
@@ -3660,10 +3660,10 @@ define([
 						templates: true
 					};
 					testProposals(options, [
-					    ['lint rule-id:0/1 ', 'eslint'],
-					    ['lint-disable rule-id ', 'eslint-disable'],
-					    ['lint-enable rule-id ', 'eslint-enable'],
-					    ['lint-env amd', 'eslint-env']]  // When inside a comment we auto open content assist, selecting the first value
+					    ['eslint rule-id:0/1 ', 'eslint'],
+					    ['eslint-disable rule-id ', 'eslint-disable'],
+					    ['eslint-enable rule-id ', 'eslint-enable'],
+					    ['eslint-env amd', 'eslint-env']]  // When inside a comment we auto open content assist, selecting the first value
 					);
 				});
 				/**
@@ -3679,10 +3679,10 @@ define([
 						templates: true
 					};
 					testProposals(options, [
-					    ['lint rule-id:0/1 ', 'eslint'],
-					    ['lint-disable rule-id ', 'eslint-disable'],
-					    ['lint-enable rule-id ', 'eslint-enable'],
-					    ['lint-env amd', 'eslint-env']]  // When inside a comment we auto open content assist, selecting the first value
+					    ['eslint rule-id:0/1 ', 'eslint'],
+					    ['eslint-disable rule-id ', 'eslint-disable'],
+					    ['eslint-enable rule-id ', 'eslint-enable'],
+					    ['eslint-env amd', 'eslint-env']]  // When inside a comment we auto open content assist, selecting the first value
 					);
 				});
 				/**
@@ -3731,11 +3731,11 @@ define([
 						templates: true
 					};
 					testProposals(options, [
-						['','Templates'],
-					    ['/* eslint rule-id:0/1*/', 'eslint'],
-					    ['/* eslint-disable rule-id */', 'eslint-disable'],
-					    ['/* eslint-enable rule-id */', 'eslint-enable'],
-					    ['/* eslint-env library*/', 'eslint-env']
+//						['','Templates'],
+//					    ['/* eslint rule-id:0/1*/', 'eslint'],
+//					    ['/* eslint-disable rule-id */', 'eslint-disable'],
+//					    ['/* eslint-enable rule-id */', 'eslint-enable'],
+//					    ['/* eslint-env library*/', 'eslint-env']
 					]);
 				});
 				
@@ -3785,10 +3785,10 @@ define([
 						templates: true
 					};
 		            testProposals(options, [
-					    [' rule-id:0/1 ', 'eslint'],
-					    ['-disable rule-id ', 'eslint-disable'],
-					    ['-enable rule-id ', 'eslint-enable'],
-					    ['-env amd', 'eslint-env']] // When inside a comment we auto open content assist, selecting the first value
+					    ['eslint rule-id:0/1 ', 'eslint'],
+					    ['eslint-disable rule-id ', 'eslint-disable'],
+					    ['eslint-enable rule-id ', 'eslint-enable'],
+					    ['eslint-env amd', 'eslint-env']] // When inside a comment we auto open content assist, selecting the first value
 					);
 				});
 				/**
@@ -4258,7 +4258,7 @@ define([
 						['@access', '@access'],
 						['@alias', '@alias'],
 						['@augments', '@augments'],
-					    ['uthor ', '@author']
+					    ['@author ', '@author']
 					]);
 				});
 				/**
@@ -4274,8 +4274,8 @@ define([
 						templates: true,
 						callback: done};
 					testProposals(options, [
-						['ends ', '@lends'],
-						['icense ', '@license'],
+						['@lends ', '@lends'],
+						['@license ', '@license'],
 						['@listens', '@listens'],
 					]);
 				});
@@ -4418,7 +4418,7 @@ define([
 						callback: done};
 						
 					testProposals(options, [
-					    ['m {type} ', '@param', 'Document the parameter', {length: 4, offset: 14}]  // Check that the selection offset is right
+					    ['@param {type} ', '@param', 'Document the parameter', {length: 4, offset: 14}]  // Check that the selection offset is right
 					]);
 				});
 				/**
@@ -4434,7 +4434,7 @@ define([
 						callback: done};
 						
 					testProposals(options, [
-					    ['am {type} ', '@param', 'Document the parameter', {length: 4, offset: 14}]  // Check that the selection offset is right
+					    ['@param {type} ', '@param', 'Document the parameter', {length: 4, offset: 14}]  // Check that the selection offset is right
 					]);
 				});
 				/**
@@ -4782,8 +4782,8 @@ define([
 						templates: true,
 						callback: done};
 					testProposals(options, [
-					    ['ends ', '@lends'],
-					    ['icense ', '@license'],
+					    ['@lends ', '@lends'],
+					    ['@license ', '@license'],
 						['@listens', '@listens']
 					]);
 				});
