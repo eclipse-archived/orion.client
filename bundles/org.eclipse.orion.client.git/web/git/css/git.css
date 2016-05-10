@@ -124,6 +124,12 @@
 	-webkit-flex: 0 0 auto;
 }
 
+html[dir="rtl"] .mainToolbar .sectionWrapper { /* ACGC */
+	margin-right: 0;
+	margin-left: 10px;
+	float: right;
+}
+
 .mainToolbar .sectionWrapper.sectionOpened {
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
