@@ -23,6 +23,21 @@
 	left: 170px;
 }
 
+html[dir="rtl"] .settingsSplitLayout { /* ACGC */
+	right: 170px;
+	left: auto;
+} 
+
+.settingsSplitPosition { /* ACGC */
+	left: 300px;
+	right: auto;
+}
+
+html[dir="rtl"] .settingsSplitPosition { /* ACGC */
+	right: 300px;
+	left: auto;
+}
+
 .categoriesTitle {
 	background: white;
 	border: 1px solid #dadada;

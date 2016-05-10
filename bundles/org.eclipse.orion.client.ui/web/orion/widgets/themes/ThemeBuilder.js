@@ -178,7 +178,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup,
 														"<option value='css'>CSS</option>" +
 													"</select>" + 
 												"</div>" +
-												"<div id='editor' class='themeDisplayEditor' class='editor_group'></div>" +
+												"<div id='editor' dir='ltr' class='themeDisplayEditor' class='editor_group'></div>" +
 											"</div>";//$NON-NLS-0$
 		//populate list of changable scopes for the theme
 		populateScopes();

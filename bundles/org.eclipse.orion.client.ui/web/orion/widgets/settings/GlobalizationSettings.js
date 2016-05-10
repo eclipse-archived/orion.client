@@ -67,7 +67,13 @@ define([
 				
 				var settingsContentElement = document.createElement('div'); //$NON-NLS-0$
 				settingsContentElement.className = 'setting-content'; //$NON-NLS-0$
-				settingsContentElement.style.paddingLeft = "30px";
+				
+				if (document.dir == "rtl") { /* ACGC 2 */
+					settingsContentElement.style.paddingRight = "30px";
+				}else{
+					settingsContentElement.style.paddingLeft = "30px";	  
+				}
+				
 				
 				lib.node('setting-row').appendChild(settingsContentElement); //$NON-NLS-0$
 

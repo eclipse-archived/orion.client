@@ -180,9 +180,17 @@ hard-coded numbers elsewhere.
 	margin: 0;
 }
 
+html[dir="rtl"] .layoutLeft { /* ACGC */
+	float: right;
+}
+
 .layoutRight {
 	float: right;
 	margin: 0;
+}
+
+html[dir="rtl"] .layoutRight { /* ACGC */
+	float: left;
 }
 
 .layoutFlexStretch {
