@@ -316,19 +316,21 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	return clone.getRepo(req)
 	.then(function(r) {
 		repo = r;
-		return tags ? Promise.all([git.Remote.lookup(repo, remote), git.Reference.list(repo)]) : git.Remote.lookup(repo, remote);
+		var work = [git.Remote.lookup(repo, remote)];
+		if (tags) work.push(git.Reference.list(repo));
+		return Promise.all(work);
 	})
 	.then(function(r) {
-		remoteObj = r[0];	
+		remoteObj = r[0];
 		var pushToGerrit = branch.indexOf("for/") === 0;
 		var refSpec = pushSrcRef + ":" + (pushToGerrit ? "refs/" : "refs/heads/") + branch;
 		if (force) refSpec = "+" + refSpec;
 		var refSpecs = [];
-		refSpecs.push(refSpec);	
+		refSpecs.push(refSpec);
 		if(tags){
 			r[1].forEach(function(ref) {
 				if (ref.indexOf("refs/tags/") === 0) {
-					refSpecs.push(ref + ":" + ref);	
+					refSpecs.push(ref + ":" + ref);
 				}			
 			});
 		}
