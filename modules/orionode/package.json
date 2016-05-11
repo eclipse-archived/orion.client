@@ -39,10 +39,9 @@
     "term.js": "0.0.3",
     "unzip2": "^0.2.5"
   },
-  "optionalDependencies": {
+  "experimentalDependencies": {
     "pty.js": "~0.3.0"
   },
-  "experimentalDependencies": {},
   "devDependencies": {
     "chai": "^3.5.0",
     "grunt": "~0.4.5",

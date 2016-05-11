@@ -6,7 +6,6 @@ A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orio
 * Source code editing
 * Install plugins to customize your environment
 * User preferences
-* Fully featured web shell provided by [pty.js](https://github.com/chjj/pty.js) (OS X and Linux only)
 * Git support based on [nodegit](http://www.nodegit.org/)
 * Multi-user support (optional, requires MongoDB)
 
