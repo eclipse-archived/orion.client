@@ -266,6 +266,7 @@ define([
 							return sessionStorage.editorViewSection ? JSON.parse(sessionStorage.editorViewSection) : {}; 
 						},
 						apply: function(animate) {
+							if (!metadata.Location) return;
 							var session = this.get();
 							var locationSession = session[metadata.Location];
 							if (locationSession && locationSession.ETag === metadata.ETag) {
@@ -274,6 +275,7 @@ define([
 							}
 						},
 						save: function() {
+							if (!metadata.Location) return;
 							var session = this.get();
 							session[metadata.Location] = {
 								ETag: metadata.ETag,

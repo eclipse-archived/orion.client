@@ -82,7 +82,7 @@ define(['i18n!cfui/nls/messages',
 			}
 			this._setInputContents(this._parsedLocation, logName, fullLog, {Name: logName});
 			if (this._scrollLock) {
-				this.editor.setSelections(selections);
+				this.editor.setSelections(selections, false);
 				this.editor.getTextView().setTopPixel(vScroll);
 				this.editor.getTextView().setHorizontalPixel(hScroll);
 			} else {
