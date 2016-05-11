@@ -238,6 +238,10 @@ function postInit(req, res) {
 		var initDir = req.user.workspaceDir + '/' + req.body.Name;
 		var theRepo, index, author, committer;
 
+		if (req.body.Name === undefined) {
+			return writeError(400, res);
+		}
+
 		fs.mkdir(initDir, function(err){
 			if (err) {
 				return writeError(409, res);
