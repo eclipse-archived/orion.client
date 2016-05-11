@@ -9,7 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-
+var fileUtil = require('./fileUtil');
+var workspace = require('./workspace');
+var gitFileDecorator = require('./git/gitfiledecorator').gitFileDecorator;
 var express = require('express');
 
 // Handle optional nodegit dependency
@@ -78,6 +80,7 @@ function Git(options) {
 	router.use("/submodule", submodule.router(options));
 	router.use("/tree", tree.router(options));
 	router.use("/pullRequest", pullrequest.router(options));
-
+	fileUtil.addDecorator(gitFileDecorator);
+	workspace.addDecorator(gitFileDecorator);
 	return router;
 }

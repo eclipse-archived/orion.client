@@ -197,6 +197,15 @@ function getBoolean(obj, key) {
 	return Object.prototype.hasOwnProperty.call(obj, key) && (val === true || val === 'true');
 }
 
+var decorators = [];
+/**
+ * Used to add different decorators to generate respond json.
+ * @param {func} decorator functions to be added;
+ */
+exports.addDecorator = function(func) {
+	decorators.push(func);
+};
+
 /**
  * Helper for fulfilling a file metadata GET request.
  * @param {String} fileRoot The "/file" prefix or equivalent.
@@ -209,8 +218,15 @@ function getBoolean(obj, key) {
  * @param {Object} [metadataMixins] Additional metadata to mix in to the response object.
  */
 var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, req, res, filepath, stats, etag, depth, metadataMixins) {
+	var result;
 	return fileJSON(fileRoot, req.user.workspaceDir, filepath, stats, depth, metadataMixins)
-	.then(function(result) {
+	.then(function(originalJson) {
+		result = originalJson;
+		return Promise.map(decorators, function(decorator){
+			return decorator(fileRoot, req, filepath, result);			
+		});
+	})
+	.then(function(){
 		if (etag) {
 			result.ETag = etag;
 			res.setHeader('ETag', etag);
