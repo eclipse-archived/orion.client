@@ -21,8 +21,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 	'orion/editor/textTheme', //$NON-NLS-1$
 	'orion/editor/util', //$NON-NLS-1$
 	'orion/util', //$NON-NLS-1$
+	'orion/bidiUtils', //$NON-NLS-1$
 	'orion/metrics' //$NON-NLS-1$
-], function(messages, mTextModel, mKeyModes, mEventTarget, mTextTheme, textUtil, util, mMetrics) {
+], function(messages, mTextModel, mKeyModes, mEventTarget, mTextTheme, textUtil, util, bidiUtils, mMetrics) {
 
 	/** @private */
 	function getWindow(doc) {
@@ -5867,6 +5868,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			this._setTabSize(this._tabSize, true);
 			this._setMarginOffset(this._marginOffset, true);
 			this._hookEvents();
+			bidiUtils.initInputField(clientDiv);
 			var rulers = this._rulers;
 			for (var i=0; i<rulers.length; i++) {
 				this._createRuler(rulers[i]);

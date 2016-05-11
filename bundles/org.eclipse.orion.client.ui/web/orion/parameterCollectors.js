@@ -247,6 +247,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils'],
 							field.id = id;							
 							parent.appendChild(field);
 						}
+						bidiUtils.initInputField(field);
 					} else if (parm.type === "boolean") { //$NON-NLS-0$
 						if (!field) {
 							field = document.createElement("input"); //$NON-NLS-0$
