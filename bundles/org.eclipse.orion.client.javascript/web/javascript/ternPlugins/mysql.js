@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -15,23 +15,23 @@
  * Tern type index and templates for AMQP node support
  */
 define([
-	"tern/lib/infer", 
-	"tern/lib/tern", 
-	"./resolver"
-], function(infer, tern, resolver) {
+	"tern/lib/tern",
+	"javascript/finder",
+	"i18n!javascript/nls/messages"
+], function(tern, Finder, Messages) {
 
 	var templates = [
 	/* eslint-disable missing-nls */
 		{
 			name: "mysql", 
 			nodes: {top:true, member:false, prop:false},
-			description: " - Node.js require statement for MySQL DB", 
-			template: "var mysql = require('mysql');\n"
+			template: "var mysql = require('mysql');\n",
+			doc: Messages[''],
+			url: "https://github.com/redblaze/node-mysql#apis"
 		},
 		{
 			name: "mysql connection", 
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new MySQL DB connection", 
 			template: "var mysql = require('mysql');\n" + 
 					  "var ${connection} = mysql.createConnection({\n" +  
   					  "\thost : ${host},\n" +  
@@ -43,51 +43,58 @@ define([
 					  "\t${cursor}\n" +  
 					  "} finally {\n" +  
 					  "\t${connection}.end();\n" +  
-					  "}"
+					  "}",
+			doc: Messages['mysqlConnection'],
+			url: "https://github.com/redblaze/node-mysql#apis"
 		},
 		{
 			name: "mysql query", 
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new MySQL DB query statement", 
 			template: "${connection}.query(${sql}, function(error, rows, fields) {\n" + 
 					  "\t${cursor}\n" +  
-					  "});\n"
+					  "});\n",
+			doc: Messages['mysqlQuery'],
+			url: "https://github.com/redblaze/node-mysql#apis"
 		}
 		/* eslint-enable missing-nls */
 	];
 	
-	/**
-	 * @description Gets the templates that apply to given context
-	 * @param {tern.File} file The backing file object from Tern
-	 * @param {Number} wordStart The start of the word to complete
-	 * @param {Number} wordEnd The end of the word to complete
-	 * @param {Function} gather The collector function to call when wanting to add a proposal
-	 * @since 9.0
-	 * @callback
-	 */
-	function getTemplates(file, wordStart, wordEnd, gather) {  //file, start, end, completions) {
-		var expr = infer.findExpressionAround(file.ast, wordStart, wordEnd, file.scope);
-		var tmps = resolver.getTemplatesForNode(templates, expr, wordStart);
-		if(tmps) {
-			tmps.forEach(function(template) {
-				gather(template.name, null, 0, function(c) {
-					c.prefix = template.prefix;
-					c.description = template.description;
-					c.template = template.template;
-					c.segments = template.segments;
-					c.origin = 'mysql'; //$NON-NLS-1$
-					c.type = 'template'; //$NON-NLS-1$
-				});
-			});
-	    }
-	} 
+	var cachedQuery;
 	
 	/* eslint-enable missing-nls */
 	tern.registerPlugin("mysql", /* @callback */ function(server, options) { //$NON-NLS-1$
 	    return {
 	      defs : defs,
 	      passes: {
-	      	variableCompletion: getTemplates
+	      	/**
+	      	 * @callback
+	      	 */
+	      	completion: function(file, query) {
+	      		cachedQuery = query;
+	      	},
+	      	/**
+	      	 * @callback
+	      	 */
+	      	variableCompletion: function(file, start, end, gather) {
+	      		if(cachedQuery.includeTemplates || cachedQuery.includeTemplates === undefined) {
+		      		var kind = Finder.findCompletionKind(file.ast, end);
+		      		if(kind && kind.kind) {
+			      		var tmpls = Finder.findTemplatesForKind(templates, kind.kind, cachedQuery.ecma ? cachedQuery.ecma : 6);
+			      		tmpls.forEach(function(template) {
+							gather(template.name, null, 0, function(c) {
+								c.template = template.template;
+								c.description = template.description;
+								c.doc = template.doc;
+								c.url = template.url;
+								c.type = 'template'; //$NON-NLS-1$
+								c.ecma = template.ecma;
+								c.origin = 'mysql';
+								c.overwrite = true;
+							});
+						});
+			      	}
+		      	}
+	      	}
 	      }
 	    };
 	});

@@ -170,90 +170,9 @@ define([
 		return _resolved[_name];
 	}
 	
-	/**
-	 * @description Returns the corresponding {orion.editor.Template} object for the given metadata
-	 * @private
-	 * @param {Object} meta The metadata about the template
-	 * @returns {orion.editor.Template} The corresponding template object
-	 * @since 9.0
-	 */
-	function _getTemplate(meta) {
-		if(meta.t) {
-			return meta.t;
-		}
-		var t = new mTemplates.Template(meta.prefix, meta.description, meta.template, meta.name);
-		meta.t = t;
-		return t;
-	}
-	
-	/**
-	 * @description Gets the template kind of node
-	 * @param {Object} node The AST node
-	 * @param {Number} offset The offset into the AST 
-	 * @returns {Object} The kind object or null
-	 * @since 9.0
-	 */
-	function _getKind(node, offset) {
-		if(node) {
-    		if(node.parents && node.parents.length > 0) {
-	    		var prnt = node.parents.pop();
-	    		switch(prnt.type) {
-					case 'MemberExpression': {
-						return { kind : 'member'}; //$NON-NLS-1$
-					}
-					case 'VariableDeclarator': {
-						return null;
-					}
-					case 'FunctionDelcaration':
-					case 'FunctionExpression': {
-						if(offset < prnt.body.range[0]) {
-							return null;						
-						}
-						break;
-					}
-					case 'Property': {
-						if(offset-1 >= prnt.value.range[0] && offset-1 <= prnt.value.range[1]) {
-							return { kind : 'prop'}; //$NON-NLS-1$
-						}
-						return null;
-					}
-					case 'SwitchStatement': {
-						return {kind: 'swtch'}; //$NON-NLS-1$
-					}
-				}
-			}
-    	}
-		return {kind:'top'}; //$NON-NLS-1$
-	}
-
-	/**
-	 * @description Returns the templates that apply to the given completion kind
-	 * @public
-	 * @param {Array.<Object>} templates The array of raw template data 
-	 * @param {String} kind The kind of the completion
-	 * @param {Number} offset The offset to get the templates for
-	 * @returns {Array} The array of templates that apply to the given completion kind
-	 * @since 9.0
-	 */
-	function getTemplatesForNode(templates, node, offset) {
-		var kind = _getKind(node, offset);
-		if(kind && kind.kind) {
-			var tmplates = [];
-			var len = templates.length;
-			for(var i = 0; i < len; i++) {
-				var template = templates[i];
-				if(template.nodes && template.nodes[kind.kind]) {
-					tmplates.push(template);
-				}
-			}
-			return tmplates.map(_getTemplate, this);
-		}
-	}
-	
 	return {
 		doPostParse: doPostParse,
 		doPreInfer: doPreInfer,
-		getResolved: getResolved,
-		getTemplatesForNode: getTemplatesForNode
+		getResolved: getResolved
 	};
 });

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -15,81 +15,89 @@
  * Tern type index and templates for PostgreSQL node support
  */
 define([
-	"tern/lib/infer", 
-	"tern/lib/tern", 
-	"./resolver"
-], function(infer, tern, resolver) {
+	"tern/lib/tern",
+	"javascript/finder",
+	"i18n!javascript/nls/messages"
+], function(tern, Finder, Messages) {
 
 	var templates = [
 	/* eslint-disable missing-nls */
 		{
 			name: "postgres", 
 			nodes: {top:true, member:false, prop:false},
-			description: " - Node.js require statement for Postgres DB", 
-			template: "var pg = require('pg');\n"
+			template: "var pg = require('pg');\n",
+			doc: Messages['postgresRequire'],
+			url: "https://github.com/brianc/node-postgres/wiki"
 		},
 		{
 			name: "postgres client", 
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Postgres DB client", 
 			template: "var pg = require('pg');\n" + 
 					  "var url = \"postgres://postgres:${port}@${host}/${database}\";\n" +  
-					  "var ${client} = new pg.Client(url);\n"
+					  "var ${client} = new pg.Client(url);\n",
+			doc: Messages['postgresClient'],
+			url: "https://github.com/brianc/node-postgres/wiki"
 		},
 		{
 			name: "postgres connect", 
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Postgres DB client and connect", 
 			template: "var pg = require('pg');\n" + 
 					  "var url = \"postgres://postgres:${port}@${host}/${database}\";\n" +  
 					  "var ${client} = new pg.Client(url);\n" + 
 					  "${client}.connect(function(error) {\n" +  
 					  "\t${cursor}\n" +  
-					  "});\n"
+					  "});\n",
+			doc: Messages['postgresConnect'],
+			url: "https://github.com/brianc/node-postgres/wiki"
 		},
 		{
 			name: "postgres query", 
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Postgres DB query statement", 
 			template: "${client}.query(${sql}, function(error, result) {\n" + 
 					  "\t${cursor}\n" +  
-					  "});\n"
+					  "});\n",
+			doc: Messages['postgresQuery'],
+			url: "https://github.com/brianc/node-postgres/wiki"
 		}
 		/* eslint-enable missing-nls */
 	];
 	
-	/**
-	 * @description Gets the templates that apply to given context
-	 * @param {tern.File} file The backing file object from Tern
-	 * @param {Number} wordStart The start of the word to complete
-	 * @param {Number} wordEnd The end of the word to complete
-	 * @param {Function} gather The collector function to call when wanting to add a proposal
-	 * @since 9.0
-	 * @callback
-	 */
-	function getTemplates(file, wordStart, wordEnd, gather) {  //file, start, end, completions) {
-		var expr = infer.findExpressionAround(file.ast, wordStart, wordEnd, file.scope);
-		var tmps = resolver.getTemplatesForNode(templates, expr, wordStart);
-		if(tmps) {
-			tmps.forEach(function(template) {
-				gather(template.name, null, 0, function(c) {
-					c.prefix = template.prefix;
-					c.description = template.description;
-					c.template = template.template;
-					c.segments = template.segments;
-					c.origin = 'postgres'; //$NON-NLS-1$
-					c.type = 'template'; //$NON-NLS-1$
-				});
-			});
-	    }
-	} 
+	var cachedQuery;
 	
 	/* eslint-enable missing-nls */
 	tern.registerPlugin("postgres", /* @callback */ function(server, options) { //$NON-NLS-1$
 	    return {
 	      defs : defs,
 	      passes: {
-	      	variableCompletion: getTemplates
+	      	/**
+	      	 * @callback
+	      	 */
+	      	completion: function(file, query) {
+	      		cachedQuery = query;
+	      	},
+	      	/**
+	      	 * @callback
+	      	 */
+	      	variableCompletion: function(file, start, end, gather) {
+	      		if(cachedQuery.includeTemplates || cachedQuery.includeTemplates === undefined) {
+		      		var kind = Finder.findCompletionKind(file.ast, end);
+		      		if(kind && kind.kind) {
+			      		var tmpls = Finder.findTemplatesForKind(templates, kind.kind, cachedQuery.ecma ? cachedQuery.ecma : 6);
+			      		tmpls.forEach(function(template) {
+							gather(template.name, null, 0, function(c) {
+								c.template = template.template;
+								c.description = template.description;
+								c.doc = template.doc;
+								c.url = template.url;
+								c.type = 'template'; //$NON-NLS-1$
+								c.ecma = template.ecma;
+								c.origin = 'pg';
+								c.overwrite = true;
+							});
+						});
+			      	}
+		      	}
+	      	}
 	      }
 	    };
 	});

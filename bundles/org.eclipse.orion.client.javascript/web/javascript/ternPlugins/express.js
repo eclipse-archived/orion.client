@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -15,117 +15,116 @@
  * Tern type index and templates for ExpressJS node support
  */
 define([
-	"tern/lib/infer", 
-	"tern/lib/tern", 
-	"./resolver"
-], function(infer, tern, resolver) {
+	"tern/lib/tern",
+	"javascript/finder",
+	"i18n!javascript/nls/messages"
+], function(tern, Finder, Messages) {
 
 	var templates = [
 	/* eslint-disable missing-nls */
 		{
 			name: "express require",
 			nodes: {top:true, member:false, prop:false},
-			description: " - Node.js require statement for Express",
-			template: "var ${app} = require('express');"
+			template: "var ${app} = require('express');",
+			doc: Messages['expressrequire'],
+			url: "http://expressjs.com/en/4x/api.html"
+			
 		},
 		{
 			name: "express app",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app",
 			template: "var express = require('express');\n" +
 					  "var ${app} = express();\n" + 
 					  "${cursor}\n"+ 
-					  "app.listen(${timeout});\n"
-		},
-		{
-			name: "express configure",
-			nodes: {top:true, member:false, prop:false},
-			description: " - create an Express app configure statement",
-			template: "app.configure(function() {\n" + 
-  					  "\tapp.set(${id}, ${value});\n" + 
-					  "});"
-		},
-		{
-			name: "express specific configure",
-			nodes: {top:true, member:false, prop:false},
-			description: " - create a specific Express app configure statement",
-			template: "app.configure(${name}, function() {\n" + 
-  					  "\tapp.set(${id}, ${value});\n" + 
-					  "});"
+					  "app.listen(${timeout});\n",
+			doc: Messages['expressInstance'],
+			url: "http://expressjs.com/en/4x/api.html#app"
 		},
 		{
 			name: "express app get",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app.get call",
 			template: "var value = app.get(${id}, function(request, result){\n" +
-					  "\t${cursor}\n});\n"
+					  "\t${cursor}\n});\n",
+			doc: Messages['expressGet'],
+			url: "http://expressjs.com/en/4x/api.html#app.get"
 		},
 		{
 			name: "express app set",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app set call",
-			template: "app.set(${id}, ${value});\n"
+			template: "app.set(${id}, ${value});\n",
+			doc: Messages['expressSet'],
+			url: "http://expressjs.com/en/4x/api.html#app.set"
 		},
 		{
 			name: "express app use",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app use statement",
-			template: "app.use(${fnOrObject});\n"
+			template: "app.use(${fnOrObject});\n",
+			doc: Messages['expressUse'],
+			url: "http://expressjs.com/en/4x/api.html#app.use"
 		},
 		{
 			name: "express app engine",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app engine statement",
-			template: "app.engine(${fnOrObject});\n"
+			template: "app.engine(${fnOrObject});\n",
+			doc: Messages['expressEngine'],
+			url: "http://expressjs.com/en/4x/api.html#app.engine"
 		},
 		{
 			name: "express app param",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app param statement",
-			template: "app.param(${id}, ${value});\n"
+			template: "app.param(${id}, ${value});\n",
+			doc: Messages['expressParam'],
+			url: "http://expressjs.com/en/4x/api.html#app.param"
 		},
 		{
 			name: "express app error use",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new Express app error handling use statement",
 			template: "app.use(function(error, request, result, next) {\n" + 
   					  "\tresult.send(${code}, ${message});\n" + 
-					  "});\n"
+					  "});\n",
+			doc: Messages['expressUseError'],
+			url: "http://expressjs.com/en/4x/api.html#app.use"
 		}
 		/* eslint-enable missing-nls */
 	];
 	
-	/**
-	 * @description Gets the templates that apply to given context
-	 * @param {tern.File} file The backing file object from Tern
-	 * @param {Number} wordStart The start of the word to complete
-	 * @param {Number} wordEnd The end of the word to complete
-	 * @param {Function} gather The collector function to call when wanting to add a proposal
-	 * @since 9.0
-	 * @callback
-	 */
-	function getTemplates(file, wordStart, wordEnd, gather) {  //file, start, end, completions) {
-		var expr = infer.findExpressionAround(file.ast, wordStart, wordEnd, file.scope);
-		var tmps = resolver.getTemplatesForNode(templates, expr, wordStart);
-		if(tmps) {
-			tmps.forEach(function(template) {
-				gather(template.name, null, 0, function(c) {
-					c.description = template.description;
-					c.template = template.template;
-					c.segments = template.segments;
-					c.origin = 'express'; //$NON-NLS-1$
-					c.type = 'template'; //$NON-NLS-1$
-				});
-			});
-	    }
-	}
+	var cachedQuery;
 	
 	/* eslint-enable missing-nls */
 	tern.registerPlugin("express", /* @callback */ function(server, options) { //$NON-NLS-1$
 	 	server.addDefs(defs);
 	    return {
+	      defs : defs,
 	      passes: {
-	      	variableCompletion: getTemplates
+	      	/**
+	      	 * @callback
+	      	 */
+	      	completion: function(file, query) {
+	      		cachedQuery = query;
+	      	},
+	      	/**
+	      	 * @callback
+	      	 */
+	      	variableCompletion: function(file, start, end, gather) {
+	      		if(cachedQuery.includeTemplates || cachedQuery.includeTemplates === undefined) {
+		      		var kind = Finder.findCompletionKind(file.ast, end);
+		      		if(kind && kind.kind) {
+			      		var tmpls = Finder.findTemplatesForKind(templates, kind.kind, cachedQuery.ecma ? cachedQuery.ecma : 6);
+			      		tmpls.forEach(function(template) {
+							gather(template.name, null, 0, function(c) {
+								c.template = template.template;
+								c.description = template.description;
+								c.doc = template.doc;
+								c.url = template.url;
+								c.type = 'template'; //$NON-NLS-1$
+								c.ecma = template.ecma;
+								c.origin = 'express';
+								c.overwrite = true;
+							});
+						});
+			      	}
+		      	}
+	      	}
 	      }
 	    };
 	});

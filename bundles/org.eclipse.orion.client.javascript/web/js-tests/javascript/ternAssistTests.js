@@ -108,7 +108,8 @@ define([
 			var text = "";
 			for (var i = 0; i < actualProposals.length; i++) {
 				if (actualProposals[i].name) {
-					text += actualProposals[i].proposal + " : " + actualProposals[i].name + actualProposals[i].description + "\n"; //$NON-NLS-1$ //$NON-NLS-0$
+					var desc = actualProposals[i].description ? actualProposals[i].description : "";
+					text += actualProposals[i].proposal + " : " + actualProposals[i].name + desc + "\n"; //$NON-NLS-1$ //$NON-NLS-0$
 				} else {
 					text += actualProposals[i].proposal + " : " + actualProposals[i].description + "\n"; //$NON-NLS-1$ //$NON-NLS-0$
 				}

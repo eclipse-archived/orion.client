@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,94 +11,103 @@
  *******************************************************************************/
 /*eslint-env amd */
 define([
-	"tern/lib/infer", 
-	"tern/lib/tern", 
-	"./resolver"
-], function(infer, tern, resolver) {
+	"tern/lib/tern",
+	"javascript/finder",
+	"i18n!javascript/nls/messages"
+], function(tern, Finder, Messages) {
 
 	var templates = [
 	/* eslint-disable missing-nls */
 		{
 			name: "amqp",
 			nodes: {top:true, member:false, prop:false},
-			description: " - Node.js require statement for AMQP framework",
-			template: "var amqp = require('amqp');\n"
+			template: "var amqp = require('amqp');\n",
+			doc: Messages['amqpRequire'],
+			url: "https://www.npmjs.com/package/amqp"
 		},
 		{
 			name: "amqp connection",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new AMQP connection ",
 			template: "var amqp = require('amqp');\n" +
 					  "var ${connection} = amqp.createConnection({\n" +  
 					  "\thost: ${host},\n" + 
 					  "\tport: ${port},\n" + 
 					  "\tlogin: ${login},\n" + 
 					  "\tpassword: ${password}\n" + 
-					  "});\n"
+					  "});\n",
+			doc: Messages['amqpConnection'],
+			url: "https://www.npmjs.com/package/amqp"
 		},
 		{
 			name: "amqp on",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new AMQP connection on statement",
 			template: "${connection}.on(${event}, function() {\n" +  
 					  "\t${cursor}\n" + 
-					  "});\n"
+					  "});\n",
+			doc: Messages['amqpOn'],
+			url: "https://www.npmjs.com/package/amqp"
 		},
 		{
 			name: "amqp queue",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new AMQP connection queue statement",
 			template: "${connection}.queue(${id}, function(queue) {\n" + 
 					  "\tqueue.bind(\'#\'); //catch all messages\n" +
 					  "\tqueue.subscribe(function (message, headers, deliveryInfo) {\n" +
 					  "\t\t// Receive messages\n" +
 					  "\t});\n" +
 					  "\t${cursor}\n" + 
-					  "});\n"
+					  "});\n",
+			doc: Messages['amqpQueue'],
+			url: "https://www.npmjs.com/package/amqp"
 		},
 		{
 			name: "amqp exchange",
 			nodes: {top:true, member:false, prop:false},
-			description: " - create a new AMQP connection exchange",
 			template: "var exchange = ${connection}.exchange(${id}, {type: \'topic\'}, function(exchange) {\n" +  
 					  "\t${cursor}\n" + 
-					  "});\n"
+					  "});\n",
+			doc: Messages['amqpExchange'],
+			url: "https://www.npmjs.com/package/amqp"
 		}
 		/* eslint-enable missing-nls */
 	];
 	
-	/**
-	 * @description Gets the templates that apply to given context
-	 * @param {tern.File} file The backing file object from Tern
-	 * @param {Number} wordStart The start of the word to complete
-	 * @param {Number} wordEnd The end of the word to complete
-	 * @param {Function} gather The collector function to call when wanting to add a proposal
-	 * @since 9.0
-	 * @callback
-	 */
-	function getTemplates(file, wordStart, wordEnd, gather) {  //file, start, end, completions) {
-		var expr = infer.findExpressionAround(file.ast, wordStart, wordEnd, file.scope);
-		var tmps = resolver.getTemplatesForNode(templates, expr, wordStart);
-		if(tmps) {
-			tmps.forEach(function(template) {
-				gather(template.name, null, 0, function(c) {
-					c.prefix = template.prefix;
-					c.description = template.description;
-					c.template = template.template;
-					c.segments = template.segments;
-					c.origin = 'amqp'; //$NON-NLS-1$
-					c.type = 'template'; //$NON-NLS-1$
-				});
-			});
-	    }
-	} 
+	var cachedQuery;
 	
 	/* eslint-enable missing-nls */
 	tern.registerPlugin("amqp", /* @callback */ function(server, options) { //$NON-NLS-1$
 	    return {
 	      defs : defs,
 	      passes: {
-	      	variableCompletion: getTemplates
+	      	/**
+	      	 * @callback
+	      	 */
+	      	completion: function(file, query) {
+	      		cachedQuery = query;
+	      	},
+	      	/**
+	      	 * @callback
+	      	 */
+	      	variableCompletion: function(file, start, end, gather) {
+	      		if(cachedQuery.includeTemplates || cachedQuery.includeTemplates === undefined) {
+		      		var kind = Finder.findCompletionKind(file.ast, end);
+		      		if(kind && kind.kind) {
+			      		var tmpls = Finder.findTemplatesForKind(templates, kind.kind, cachedQuery.ecma ? cachedQuery.ecma : 6);
+			      		tmpls.forEach(function(template) {
+							gather(template.name, null, 0, function(c) {
+								c.template = template.template;
+								c.doc = template.doc;
+								c.url = template.url;
+								c.type = 'template'; //$NON-NLS-1$
+								c.ecma = template.ecma;
+								c.origin = 'amqp';
+								c.overwrite = true;
+							});
+						});
+						delete cachedQuery;
+			      	}
+		      	}
+	      	}
 	      }
 	    };
 	});

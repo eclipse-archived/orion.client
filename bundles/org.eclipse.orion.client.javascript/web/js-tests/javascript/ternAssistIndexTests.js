@@ -112,7 +112,8 @@ define([
 				var prop = actualProposals[i].proposal.replace(/\n/g, "\\n");
 				prop = prop.replace(/\'/g, "\\'");
 				if (actualProposals[i].name) {
-					text += '[\'' + prop + "\', \'" + actualProposals[i].name + actualProposals[i].description + "\'],\n"; //$NON-NLS-1$ //$NON-NLS-0$
+					var desc = actualProposals[i].description ? actualProposals[i].description : "";
+					text += '[\'' + prop + "\', \'" + actualProposals[i].name + desc + "\'],\n"; //$NON-NLS-1$ //$NON-NLS-0$
 				} else {
 					text += '[\'' + prop + "\', \'" + actualProposals[i].description + "\'],\n"; //$NON-NLS-1$ //$NON-NLS-0$
 				}
@@ -145,7 +146,8 @@ define([
 						assert.equal(ap.proposal, text, "Invalid proposal text. Expected proposals:\n" + stringifyExpected(expectedProposals) +"\nActual proposals:\n" + stringifyActual(actualProposals)); //$NON-NLS-0$
 						if (description) {
 							if (ap.name) {
-								assert.equal(ap.name + ap.description, description, "Invalid proposal description. Expected proposals:\n" + stringifyExpected(expectedProposals) +"\nActual proposals:\n" + stringifyActual(actualProposals)); //$NON-NLS-0$
+								var desc = ap.description ? ap.description : "";
+								assert.equal(ap.name + desc, description, "Invalid proposal description. Expected proposals:\n" + stringifyExpected(expectedProposals) +"\nActual proposals:\n" + stringifyActual(actualProposals)); //$NON-NLS-0$
 							} else {
 								assert.equal(ap.description, description, "Invalid proposal description. Expected proposals:\n" + stringifyExpected(expectedProposals) +"\nActual proposals:\n" + stringifyActual(actualProposals)); //$NON-NLS-0$
 							}
@@ -191,7 +193,8 @@ define([
 						buffer: "amq",
 						prefix: "amq",
 						offset: 3,
-						callback: done
+						callback: done,
+						templates: true
 					};
 					testProposals(options, [
 					]);
@@ -201,16 +204,17 @@ define([
 						buffer: "/* eslint-env amqp */\namq",
 						prefix: "amq",
 						offset: 25,
-						callback: done
+						callback: done,
+						templates: true
 					};
 					testProposals(options, [
 						['', 'amqp'],
 						['AMQPParser(version, type)', 'AMQPParser(version, type)'],
-						['var amqp = require(\'amqp\');\n', 'amqp - Node.js require statement for AMQP framework'],
-						['var amqp = require(\'amqp\');\nvar connection = amqp.createConnection({\n	host: host,\n	port: port,\n	login: login,\n	password: password\n});\n', 'amqp connection - create a new AMQP connection '],
-						['var exchange = connection.exchange(id, {type: \'topic\'}, function(exchange) {\n	\n});\n', 'amqp exchange - create a new AMQP connection exchange'],
-						['connection.on(event, function() {\n	\n});\n', 'amqp on - create a new AMQP connection on statement'],
-						['connection.queue(id, function(queue) {\n	queue.bind(\'#\'); //catch all messages\n	queue.subscribe(function (message, headers, deliveryInfo) {\n		// Receive messages\n	});\n	\n});\n', 'amqp queue - create a new AMQP connection queue statement'],
+						['var amqp = require(\'amqp\');\n', 'amqp'],
+						['var amqp = require(\'amqp\');\nvar connection = amqp.createConnection({\n	host: host,\n	port: port,\n	login: login,\n	password: password\n});\n', 'amqp connection'],
+						['var exchange = connection.exchange(id, {type: \'topic\'}, function(exchange) {\n	\n});\n', 'amqp exchange'],
+						['connection.on(event, function() {\n	\n});\n', 'amqp on'],
+						['connection.queue(id, function(queue) {\n	queue.bind(\'#\'); //catch all messages\n	queue.subscribe(function (message, headers, deliveryInfo) {\n		// Receive messages\n	});\n	\n});\n', 'amqp queue'],
 					]);
 				});
 				it('AMQP completions - amqp.cre', function(done) {
@@ -271,7 +275,8 @@ define([
 						buffer: "expr",
 						prefix: "expr",
 						offset: 2,
-						callback: done
+						callback: done,
+						templates: true
 					};
 					testProposals(options, [
 					]);
@@ -281,20 +286,19 @@ define([
 						buffer: "/* eslint-env express */\nexpr",
 						prefix: "expr",
 						offset: 27,
-						callback: done
+						callback: done,
+						templates: true
 					};
 					testProposals(options, [
 						['', 'express'],
-						["var express = require('express');\nvar app = express();\n\napp.listen(timeout);\n",'express app - create a new Express app'],
-						['app.engine(fnOrObject);\n', 'express app engine - create a new Express app engine statement'],
-						['app.use(function(error, request, result, next) {\n	result.send(code, message);\n});\n', 'express app error use - create a new Express app error handling use statement'],
-						['var value = app.get(id, function(request, result){\n	\n});\n', 'express app get - create a new Express app.get call'],
-						['app.param(id, value);\n', 'express app param - create a new Express app param statement'],
-						['app.set(id, value);\n', 'express app set - create a new Express app set call'],
-						['app.use(fnOrObject);\n', 'express app use - create a new Express app use statement'],
-						['app.configure(function() {\n	app.set(id, value);\n});', 'express configure - create an Express app configure statement'],
-						['var app = require(\'express\');', 'express require - Node.js require statement for Express'],
-						['app.configure(name, function() {\n	app.set(id, value);\n});', 'express specific configure - create a specific Express app configure statement']
+						["var express = require('express');\nvar app = express();\n\napp.listen(timeout);\n",'express app'],
+						['app.engine(fnOrObject);\n', 'express app engine'],
+						['app.use(function(error, request, result, next) {\n	result.send(code, message);\n});\n', 'express app error use'],
+						['var value = app.get(id, function(request, result){\n	\n});\n', 'express app get'],
+						['app.param(id, value);\n', 'express app param'],
+						['app.set(id, value);\n', 'express app set'],
+						['app.use(fnOrObject);\n', 'express app use'],
+						['var app = require(\'express\');', 'express require']
 					]);
 				});
 				it('Express templates - eslint-env set, check offsets', function(done) {
@@ -302,20 +306,19 @@ define([
 						buffer: "/* eslint-env express */\nexpres\nvar a = 3;",
 						prefix: "expres",
 						offset: 31,
-						callback: done
+						callback: done,
+						templates: true
 					};
 					testProposals(options, [
 						['', 'express'],
-						["var express = require('express');\nvar app = express();\n\napp.listen(timeout);\n",'express app - create a new Express app'],
-						['app.engine(fnOrObject);\n', 'express app engine - create a new Express app engine statement', 'Template source code', {offset: 36, length: 10}],
-						['app.use(function(error, request, result, next) {\n	result.send(code, message);\n});\n', 'express app error use - create a new Express app error handling use statement'],
-						['var value = app.get(id, function(request, result){\n	\n});\n', 'express app get - create a new Express app.get call'],
-						['app.param(id, value);\n', 'express app param - create a new Express app param statement'],
-						['app.set(id, value);\n', 'express app set - create a new Express app set call'],
-						['app.use(fnOrObject);\n', 'express app use - create a new Express app use statement'],
-						['app.configure(function() {\n	app.set(id, value);\n});', 'express configure - create an Express app configure statement'],
-						['var app = require(\'express\');', 'express require - Node.js require statement for Express', 'Template source code', {offset: 29, length: 3}],
-						['app.configure(name, function() {\n	app.set(id, value);\n});', 'express specific configure - create a specific Express app configure statement']
+						["var express = require('express');\nvar app = express();\n\napp.listen(timeout);\n",'express app'],
+						['app.engine(fnOrObject);\n', 'express app engine'],
+						['app.use(function(error, request, result, next) {\n	result.send(code, message);\n});\n', 'express app error use'],
+						['var value = app.get(id, function(request, result){\n	\n});\n', 'express app get'],
+						['app.param(id, value);\n', 'express app param'],
+						['app.set(id, value);\n', 'express app set'],
+						['app.use(fnOrObject);\n', 'express app use'],
+						['var app = require(\'express\');', 'express require']
 					]);
 				});
 				it('Express completions - app.u', function(done) {
@@ -403,7 +406,8 @@ define([
 						buffer: "mongo",
 						prefix: "mongo",
 						offset: 5,
-						callback: done
+						callback: done,
+						templates: true
 					};
 					testProposals(options, [
 					]);
@@ -413,17 +417,18 @@ define([
 						buffer: "/* eslint-env mongodb */\nmongo",
 						prefix: "mongo",
 						offset: 30,
-						callback: done
+						callback: done,
+						templates: true
 					};
 					testProposals(options, [
 						['', 'mongodb'],
 						['mongodb', 'mongodb : mongodb'],
-						['var MongoClient = require(\'mongodb\').MongoClient;\nvar Server = require(\'mongodb\').Server;\n', 'mongodb client - create a new MongoDB client'],
-						['db.collection(id, function(error, collection) {\n	\n});', 'mongodb collection - create a MongoDB database collection'],
-						['var MongoClient = require(\'mongodb\').MongoClient;\nMongoClient.connect(url, function(error, db) {\n	\n});\n', 'mongodb connect - connect to an existing MongoDB database'],
-						['if (process.env.VCAP_SERVICES) {\n	var env = JSON.parse(process.env.VCAP_SERVICES);\n	var mongo = env[\'mongo-version\'][0].credentials;\n} else {\n	var mongo = {\n		username : \'username\',\n		password : \'password\',\n		url : \'mongodb://username:password@localhost:27017/database\'\n	};\n}\nvar MongoClient = require(\'mongodb\').MongoClient;\nMongoClient.connect(mongo.url, function(error, db) {\n	\n});\n', 'mongodb connect (Cloud Foundry) - connect to an existing MongoDB database using Cloud Foundry'],
-						['var MongoClient = require(\'mongodb\').MongoClient;\nvar Server = require(\'mongodb\').Server;\nvar client = new MongoClient(new Server(host, port));\ntry {\n	client.open(function(error, client) {\n		var db = client.db(name);\n		\n	});\n} finally {\n	client.close();\n};', 'mongodb open - create a new MongoDB client and open a connection'],
-						['db.collection(id, {strict:true}, function(error, collection) {\n	\n});', 'mongodb strict collection - create a MongoDB database strict collection'],
+						['var MongoClient = require(\'mongodb\').MongoClient;\nvar Server = require(\'mongodb\').Server;\n', 'mongodb client'],
+						['db.collection(id, function(error, collection) {\n	\n});', 'mongodb collection'],
+						['var MongoClient = require(\'mongodb\').MongoClient;\nMongoClient.connect(url, function(error, db) {\n	\n});\n', 'mongodb connect'],
+						['if (process.env.VCAP_SERVICES) {\n	var env = JSON.parse(process.env.VCAP_SERVICES);\n	var mongo = env[\'mongo-version\'][0].credentials;\n} else {\n	var mongo = {\n		username : \'username\',\n		password : \'password\',\n		url : \'mongodb://username:password@localhost:27017/database\'\n	};\n}\nvar MongoClient = require(\'mongodb\').MongoClient;\nMongoClient.connect(mongo.url, function(error, db) {\n	\n});\n', 'mongodb connect (Cloud Foundry)'],
+						['var MongoClient = require(\'mongodb\').MongoClient;\nvar Server = require(\'mongodb\').Server;\nvar client = new MongoClient(new Server(host, port));\ntry {\n	client.open(function(error, client) {\n		var db = client.db(name);\n		\n	});\n} finally {\n	client.close();\n};', 'mongodb open'],
+						['db.collection(id, {strict:true}, function(error, collection) {\n	\n});', 'mongodb strict collection'],
 					]);
 				});
 				it('MongoDB completions - require.MongoCli', function(done) {
@@ -458,7 +463,8 @@ define([
 						buffer: "mysq",
 						prefix: "mysq",
 						offset: 4,
-						callback: done
+						callback: done,
+						templates: true
 					};
 					testProposals(options, [
 					]);
@@ -468,13 +474,14 @@ define([
 						buffer: "/* eslint-env mysql */\nmysq",
 						prefix: "mysq",
 						offset: 27,
-						callback: done
+						callback: done,
+						templates: true
 					};
 					testProposals(options, [
 						['', 'mysql'],
 						['mysql', 'mysql : mysql'],
-						['var mysql = require(\'mysql\');\nvar connection = mysql.createConnection({\n	host : host,\n	user : username,\n	password : password\n});\ntry {\n	connection.connect();\n	\n} finally {\n	connection.end();\n}', 'mysql connection - create a new MySQL DB connection'],
-						['connection.query(sql, function(error, rows, fields) {\n	\n});\n', 'mysql query - create a new MySQL DB query statement'],
+						['var mysql = require(\'mysql\');\nvar connection = mysql.createConnection({\n	host : host,\n	user : username,\n	password : password\n});\ntry {\n	connection.connect();\n	\n} finally {\n	connection.end();\n}', 'mysql connection'],
+						['connection.query(sql, function(error, rows, fields) {\n	\n});\n', 'mysql query'],
 					]);
 				});
 				it('MySQL completions - mysql.createCon', function(done) {
@@ -538,24 +545,26 @@ define([
 						buffer: "postgre",
 						prefix: "postgre",
 						offset: 7,
-						callback: done
+						callback: done,
+						templates: true
 					};
 					testProposals(options, [
 					]);
 				});
 				it('Postgres templates - eslint-env set', function(done) {
 					var options = {
-						buffer: "/* eslint-env postgres */\npostgre",
+						buffer: "/* eslint-env pg */\npostgre",
 						prefix: "postgre",
-						offset: 33,
-						callback: done
+						offset: 27,
+						callback: done,
+						templates: true
 					};
 					testProposals(options, [
-						['', 'postgres'],
-						['var pg = require(\'pg\');\n', 'postgres - Node.js require statement for Postgres DB'],
-						['var pg = require(\'pg\');\nvar url = "postgres://postgres:port@host/database";\nvar client = new pg.Client(url);\n', 'postgres client - create a new Postgres DB client'],
-						['var pg = require(\'pg\');\nvar url = "postgres://postgres:port@host/database";\nvar client = new pg.Client(url);\nclient.connect(function(error) {\n	\n});\n', 'postgres connect - create a new Postgres DB client and connect'],
-						['client.query(sql, function(error, result) {\n	\n});\n', 'postgres query - create a new Postgres DB query statement'],
+						['', 'pg'],
+						['var pg = require(\'pg\');\n', 'postgres'],
+						['var pg = require(\'pg\');\nvar url = "postgres://postgres:port@host/database";\nvar client = new pg.Client(url);\n', 'postgres client'],
+						['var pg = require(\'pg\');\nvar url = "postgres://postgres:port@host/database";\nvar client = new pg.Client(url);\nclient.connect(function(error) {\n	\n});\n', 'postgres connect'],
+						['client.query(sql, function(error, result) {\n	\n});\n', 'postgres query']
 					]);
 				});
 				it('Postgres completions - pg.c', function(done) {
@@ -579,7 +588,8 @@ define([
 						buffer: "redi",
 						prefix: "redi",
 						offset: 4,
-						callback: done
+						callback: done,
+						templates: true
 					};
 					testProposals(options, [
 					]);
@@ -589,17 +599,18 @@ define([
 						buffer: "/* eslint-env redis */\nredi",
 						prefix: "redi",
 						offset: 27,
-						callback: done
+						callback: done,
+						templates: true
 					};
 					testProposals(options, [
 						['', 'redis'],
 						['RedisClient', 'RedisClient : RedisClient'],
-						['var name = require(\'redis\');\n', 'redis - Node.js require statement for Redis'],
-						['var name = require(\'redis\');\nvar client = name.createClient(port, host, options);\n', 'redis client - create a new Redis client'],
-						['var name = require(\'redis\');\nvar client = name.createClient(port, host, options);\ntry {\n	\n} finally {\n	client.close();\n}\n', 'redis connect - create a new Redis client and connect'],
-						['client.get(key, function(error, reply) {\n	\n});\n', 'redis get - create a new Redis client get call'],
-						['client.on(event, function(arg) {\n	});\n', 'redis on - create a new Redis client event handler'],
-						['client.set(key, value);\n', 'redis set - create a new Redis client set call'],
+						['var name = require(\'redis\');\n', 'redis'],
+						['var name = require(\'redis\');\nvar client = name.createClient(port, host, options);\n', 'redis client'],
+						['var name = require(\'redis\');\nvar client = name.createClient(port, host, options);\ntry {\n	\n} finally {\n	client.close();\n}\n', 'redis connect'],
+						['client.get(key, function(error, reply) {\n	\n});\n', 'redis get'],
+						['client.on(event, function(arg) {\n	});\n', 'redis on'],
+						['client.set(key, value);\n', 'redis set'],
 					]);
 				});
 				it('Redis completions - redis.cr', function(done) {

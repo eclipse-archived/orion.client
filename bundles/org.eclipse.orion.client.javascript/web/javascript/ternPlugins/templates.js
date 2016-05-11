@@ -445,92 +445,7 @@ define([
 		}
 	];
 
-	/**
-	 * @description Computes the kind of context to complete in
-	 * @param {Object} ast The backing AST to visit
-	 * @param {Number} offset The offset into the source
-	 * @param {String} contents The text of the file
-	 * @return {Object} Returns the deferred node and the completion kind
-	 */
-	function getKind(ast, offset) {
-    	var node = Finder.findNode(offset, ast, {parents:true});
-    	if(node) {
-    		if(node.type === 'Literal') {
-    			switch(typeof node.value) {
-    				case 'boolean':
-    				case 'number': {
-    					if(offset > node.range[0] && offset <= node.range[1]) {
-	    					return {kind: 'unknown'};
-    					}
-    					break;
-    				}
-    				case 'string': {
-    					if(offset > node.range[0] && offset < node.range[1]) {
-	    					return {kind: 'string'};
-    					}
-    					break;
-    				}
-    				case 'object': {
-    					if(node.regex && offset > node.range[0] && offset <= node.range[1]) {
-	    					return {kind: 'regex'};
-						}
-						break;
-    				}
-    			}
-    		}
-    		if(node.parents && node.parents.length > 0) {
-	    		var prent = node.parents.pop();
-	    		switch(prent.type) {
-						case 'MemberExpression':
-							return { kind : 'member'}; //$NON-NLS-1$
-						case 'Program':
-						case 'BlockStatement':
-							break;
-						case 'VariableDeclarator':
-							if(!prent.init || offset < prent.init.range[0]) {
-								return {kind: 'unknown'};
-							}
-							break;
-						case 'FunctionDeclaration':
-						case 'FunctionExpression':
-							if(offset < prent.body.range[0]) {
-								return {kind: 'unknown'};
-							}
-							break;
-						case 'Property':
-							if(offset-1 >= prent.value.range[0] && offset-1 <= prent.value.range[1]) {
-								return { kind : 'prop'}; //$NON-NLS-1$
-							}
-							return {kind: 'unknown'};
-						case 'SwitchStatement':
-							return {kind: 'swtch'}; //$NON-NLS-1$
-					}
-			}
-    	}
-    	node = Finder.findComment(offset, ast);
-    	if(node) {
-    		return {kind: 'doc', node: node}; //$NON-NLS-1$
-    	}
-		return {kind:'top'}; //$NON-NLS-1$
-	}
-	
-	/**
-	 * @description Returns the templates that apply to the given completion kind
-	 * @public
-	 * @param {String} kind The kind of the completion
-	 * @returns {Array} The array of templates that apply to the given completion kind
-	 * @since 6.0
-	 */
-	function getTemplatesForKind(kind, ecma) {
-		var tmplates = [];
-		for(var i = 0, len = templates.length; i < len; i++) {
-			var template = templates[i];
-			if(template.nodes && template.nodes[kind] && template.ecma <= ecma) {
-				tmplates.push(template);
-			}
-		}
-		return tmplates;
-	}
+	var cachedQuery;
 	
 	tern.registerPlugin("templates", /* @callback */ function(server, options) {
 		return {
@@ -539,17 +454,16 @@ define([
      			 * @callback
      			 */
      			completion: function(file, query) {
-     				this.query = query;
-     				return null;
+     				cachedQuery = query;
      			},
 		      	/**
 		      	 * @callback
 		      	 */
 		      	variableCompletion: function(file, start, end, gather) {
-		      		if(this.query.includeTemplates || this.query.includeTemplates === undefined) {
-			      		var kind = getKind(file.ast, end);
+		      		if(cachedQuery.includeTemplates || cachedQuery.includeTemplates === undefined) {
+			      		var kind = Finder.findCompletionKind(file.ast, end);
 			      		if(kind && kind.kind) {
-				      		var tmpls = getTemplatesForKind(kind.kind, this.query.ecma ? this.query.ecma : 6);
+				      		var tmpls = Finder.findTemplatesForKind(templates, kind.kind, cachedQuery.ecma ? cachedQuery.ecma : 6);
 				      		tmpls.forEach(function(template) {
 								gather(template.name, null, 0, function(c) {
 									c.template = template.template;
@@ -560,7 +474,6 @@ define([
 									c.overwrite = true;
 								});
 							});
-							delete this.query;
 				      	}
 			      	}
 		      	}
