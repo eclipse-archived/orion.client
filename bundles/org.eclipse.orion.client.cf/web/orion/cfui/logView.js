@@ -74,9 +74,18 @@ define(['i18n!cfui/nls/messages',
 			this.applicationInfo.logs.forEach(function(line){
 				fullLog += line + "\n";
 			});
-			
+			var selections, vScroll, hScroll;
+			if (this._scrollLock) {
+				selections = this.editor.getSelections();
+				vScroll = this.editor.getTextView().getTopPixel();
+				hScroll = this.editor.getTextView().getHorizontalPixel();
+			}
 			this._setInputContents(this._parsedLocation, logName, fullLog, {Name: logName});
-			if (!this._scrollLock) {
+			if (this._scrollLock) {
+				this.editor.setSelections(selections);
+				this.editor.getTextView().setTopPixel(vScroll);
+				this.editor.getTextView().setHorizontalPixel(hScroll);
+			} else {
 				this.editor.setSelection(fullLog.length, fullLog.length);
 			}
 		},
