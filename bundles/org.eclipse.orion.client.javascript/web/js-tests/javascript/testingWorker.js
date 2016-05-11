@@ -19,6 +19,7 @@ define([
 	var worker, //the backing worker
 		_state, //the mutable testing state
 		callbacks, //the object of callback functions per request ID 
+		testFiles = Object.create(null), //list of xhr requests we should ignore
 		messageID = 0; //the message ID counter
 	
 	/**
@@ -109,6 +110,16 @@ define([
 		return _state;
 	};
 	
+	/**
+	 * @description Adds a fake file that will return the given contents when requested rather than perform an xhr
+	 * only be ignored once.
+	 * @function
+	 * @param filename {String} the file name to ignore
+	 */
+	WrappedWorker.prototype.createTestFile = function(name, text) {
+		testFiles[name] = text;
+	};
+	
 	function onmessage(ev) {
 		if(typeof(ev.data) === 'object') {
 			var _d = ev.data;
@@ -139,6 +150,17 @@ define([
 					if(typeof(_d.args.file) === 'object') {
 						filePath = _d.args.file.logical ? _d.args.file.logical : _d.args.file;
 						url = getFileURL(filePath);
+						
+						if (typeof testFiles[filePath] === 'string'){
+							if (testFiles[filePath].length > 0){
+								this.postMessage({request: 'read', ternID: _d.ternID, args: {contents: testFiles[filePath], file: filePath, logical: _d.args.file.logical}});
+							} else {
+								this.postMessage({request: 'read', ternID: _d.ternID, args: {error: "Empty test file ignored", logical: _d.args.file.logical}});
+							}
+							testFiles[filePath] = undefined;
+							return;
+						}
+						
 						_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
 							this.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.response, file: response.url, logical: _d.args.file.logical}});
 						}.bind(this), function(rejection){
@@ -149,6 +171,17 @@ define([
 					} else if(typeof(_d.args.file) === 'string') {
 						filePath = _d.args.file;
 						url = getFileURL(filePath);
+						
+						if (typeof testFiles[filePath] === 'string'){
+							if (testFiles[filePath].length > 0){
+								this.postMessage({request: 'read', ternID: _d.ternID, args: {contents: testFiles[filePath], file: filePath, logical: _d.args.file.logical}});
+							} else {
+								this.postMessage({request: 'read', ternID: _d.ternID, args: {error: "Empty test file ignored", logical: _d.args.file.logical}});
+							}
+							testFiles[filePath] = undefined;
+							return;
+						}
+						
 						_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
 							this.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.target.response, file: response.target.responseURL}});
 						}.bind(this), function(rejection){

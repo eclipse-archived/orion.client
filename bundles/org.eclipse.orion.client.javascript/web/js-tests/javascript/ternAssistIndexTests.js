@@ -29,7 +29,7 @@ define([
 		var htmlFile = 'tern_content_assist_index_test_script.html';
 		var timeoutReturn = ['Content assist timed out'];
 		var jsProject = {
-			gettEcmaLevel: function getEcmaLevel() {}
+			getEcmaLevel: function getEcmaLevel() {}
 		};
 	
 		/**

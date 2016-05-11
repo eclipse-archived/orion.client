@@ -10,6 +10,7 @@
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env amd, mocha, browser*/
+/*eslint-disable missing-nls*/
 define([
 'javascript/astManager',
 'javascript/contentAssist/ternAssist',

@@ -104,6 +104,7 @@
       var val = resolver.getResolved(name); //ORION
       if(val && val.file) {
 	      known = data.interfaces[stripJSExt(val.file)] = new infer.AVal();
+	      data.shortNames[stripJSExt(val.file)] = name; // ORION Collect short names for module name completion
 	      known.origin = val.file;
 	      known.contents = val.contents;
 	      known.reqName = name;
@@ -258,6 +259,7 @@
     });
     server.on("reset", function() {
       this.mod.requireJS.interfaces = Object.create(null);
+      this.mod.requireJS.shortNames = Object.create(null); // ORION Collect the short names rather than full Orion path for module completion
       this.mod.requireJS.require = null;
     });
 
@@ -319,8 +321,12 @@
       isObjectKey: false,
       completions: completions.map(function(rec) {
         var name = typeof rec == "string" ? rec : rec.name;
-        var string = JSON.stringify(name);
-        if (quote == "'") string = quote + string.slice(1, string.length -1).replace(/'/g, "\\'") + quote;
+        
+        // TODO ORION: Stringify the name adds the quotes around the proposal which Orion doesn't handle in sortProposals
+        var string = name;
+//        var string = JSON.stringify(name)
+//        if (quote == "'") string = quote + string.slice(1, string.length -1).replace(/'/g, "\\'") + quote
+        
         if (typeof rec == "string") return string;
         rec.displayName = name;
         rec.name = string;
@@ -345,9 +351,16 @@
 
     if (query.caseInsensitive) word = word.toLowerCase();
 
-    var completions = [], modules = data.interfaces;
+ 	// ORION Use short names for completion rather than resolved Orion path that is stored in data.interfaces
+    var completions = [],
+    	modules = data.interfaces;
     for (var name in modules) {
-      if (name == currentName || !modules[name].getType()) continue;
+    	// ORION Allow empty files to be completed
+      if (name == currentName /*|| !modules[name].getType()*/) continue;
+      
+      // ORION Use short name
+      if (!data.shortNames[name]) continue;
+      name = data.shortNames[name];
 
       var moduleName = name.substring(base.length, name.length);
       if (moduleName &&
