@@ -139,13 +139,13 @@ define ([
 	function handleInputEvent ( event ) {
 		var input = event.target;
 		if (input) {
-			input.dir = getTextDirection(input.value); // resolve dir attribute of the element
+			input.dir = getTextDirection(input.value || input.textContent); // resolve dir attribute of the element
 		}
 	};
 	
 	function initInputField ( input ) {
 		if (input) {
-			input.dir = getTextDirection(input.value); // resolve dir attribute of the element
+			input.dir = getTextDirection(input.value || input.textContent); // resolve dir attribute of the element
 
 			if (util.isIE) {
 				addBidiEventListeners(input);
