@@ -3139,13 +3139,13 @@ define([
 				});
 				it("test implicit inference 1", function(done) {
 					var options = {
-						buffer: "xxx;xx",
+						buffer: "var xxx;xx",
 						prefix: "xx",
-						offset: 6,
+						offset: 10,
 						callback: done
 					};
 					return testProposals(options, [
-						//TODO we should find 'xxx' ["xxx", "xxx : any"]
+						["xxx", "xxx : any"]
 					]);
 				});
 				it("test implicit inference 2", function(done) {
@@ -3161,9 +3161,9 @@ define([
 				});
 				it("test implicit inference 3", function(done) {
 					var options = {
-						buffer: "xxx; xxx.yyy = 0;xxx.yy",
+						buffer: "var xxx; xxx.yyy = 0;xxx.yy",
 						prefix: "yy",
-						offset: 23,
+						offset: 27,
 						callback: done
 					};
 					return testProposals(options, [

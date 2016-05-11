@@ -157,12 +157,33 @@ For Tern 18 this is !known_modules (previously !node).
 	  	 if (resolvedFile){
 	  	 	return resolvedFile.file;
 	  	 }
-- TODO: node_resolve is using script resolver to get the file, but doesn't pass the file contents onto Tern
 - The CommonJS plugin adds modules and exports to every scope which we don't want.  The easiest way to turn this
 off is to skip the withScope pass if the file is not running a node environment.  Will have to look at better solutions
 in the future, see TODO in commonjs.js
 		if (scope.originNode && scope.originNode.environments && scope.originNode.environments.node){
+- The node plugin listens to beforeLoad and afterLoad events.  This causes two problems. 1) A wrapping scope is created for every file
+which breaks any use of global properties, 2) We attempt to add every file to module exports even if the file isn't using node/es_module exports.
+Current fix is to check that the we are running in a node environment:
+		function usingNode(file) {
+			if(/\.js$/g.test(file.name) && file.ast && file.ast.environments) {
+	      	  	return file.ast.environments.node;
+	      	}
+	      	return false;
+		}
+	
+	    server.on("beforeLoad", function(file) {
+	      // ORION Only modify the scope if we are using node for dependencies in this file or we cannot use globals from other files
+	      if (usingNode(file)){
+	      	file.scope = this.mod.modules.buildWrappingScope(file.scope, file.name, file.ast)
+	  	  }
+	    })
+	
+	    server.on("afterLoad", function(file) {
+	      // ORION Only collect exports for this file if we are using for dependencies in this file
+	      if (usingNode(file)){
+	        var mod = this.mod.modules.get(file.name)
+	        mod.origin = file.name
+	        this.mod.modules.signal("getExports", file, mod)
+	      }
+	    })
 
-TODO: 
-- Add tests for module name completions
-- Check that indexed libs can contribute to module name completions
