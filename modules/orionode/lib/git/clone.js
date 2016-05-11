@@ -64,7 +64,7 @@ function cloneJSON(base, location, giturl, parents, submodules) {
 		"TagLocation": "/gitapi/tag" + location,
 		"Type": "Clone"
 	};
-	if (isGithubURL(giturl)){
+	if (giturl && isGithubURL(giturl)){
 		result["PullRequestLocation"] = "/gitapi/pullRequest" + location;
 	}
 	function isGithubURL(checkUrl){
