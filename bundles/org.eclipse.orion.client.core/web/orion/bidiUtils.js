@@ -30,7 +30,7 @@ define ([
 	    		htmlElement.setAttribute ("dir", "rtl");
 	    	}
     	}	
-	}
+	};
 	
 	setBrowserLangDirection();
 	
@@ -40,14 +40,14 @@ define ([
 	var PDF = '\u202C'; //$NON-NLS-0$
 	var RLE = '\u202B'; //$NON-NLS-0$
 	
-	var isBidiEnabled = isBidiEnabled();
+	var isBidiEnabled = bidiEnabled();
 	var bidiLayout = getBidiLayout();
 
 	/**
 	 * checks if directionality should be applied in Orion.
 	 * @returns {Boolean} true if globalization settings exist and bidi is enabled.
 	 */		
-	function isBidiEnabled() {
+	function bidiEnabled() {
 		var bidiEnabled = localStorage.getItem(bidiEnabledStorgae);
 		if (bidiEnabled && bidiEnabled == 'true') {		//$NON-NLS-0$
 			return true;
@@ -55,7 +55,7 @@ define ([
 		else {
 			return false;
 		}
-	}
+	};
 	
 	/**
 	 * returns bidiLayout value set in globalization settings.
@@ -69,7 +69,7 @@ define ([
 		else {
 			return 'ltr';	//$NON-NLS-0$
 		}
-	}
+	};
 	
 	/**
 	 * returns text direction.
@@ -82,13 +82,16 @@ define ([
 	 */	
 	function getTextDirection(text) {
 		bidiLayout = getBidiLayout();
+		if (!bidiEnabled()) {
+			return "";
+		}
 		if (bidiLayout == 'auto' && util.isIE) {	//$NON-NLS-0$
 			return checkContextual(text);
 		}
 		else {
 			return bidiLayout;
 		}
-	}	
+	};	
 	
 	/**
 	 * Wraps text by UCC (Unicode control characters) according to text direction
@@ -101,7 +104,7 @@ define ([
 	 * @returns {String} text after adding ucc characters.
 	 */		
 	function enforceTextDirWithUcc ( text ) {
-		if (text.trim()) {
+		if (bidiEnabled() && text.trim()) {
 			bidiLayout = getBidiLayout();
 			var dir = bidiLayout == 'auto' ? checkContextual( text ) : bidiLayout;	//$NON-NLS-0$
 			return ( dir == 'ltr' ? LRE : RLE ) + text + PDF;	//$NON-NLS-0$
@@ -144,18 +147,18 @@ define ([
 	};
 	
 	function initInputField ( input ) {
-		if (input) {
+		if (bidiEnabled() && input) {
 			input.dir = getTextDirection(input.value || input.textContent); // resolve dir attribute of the element
 
 			if (util.isIE) {
 				addBidiEventListeners(input);
 			}
 		}
-	}
+	};
 		
 	return {
-		isBidiEnabled: isBidiEnabled,
-		getTextDirection: getTextDirection,
+		bidiEnabled: bidiEnabled,
+		getTextDirection: getTextDirection,		
 		enforceTextDirWithUcc: enforceTextDirWithUcc,
 		initInputField: initInputField
 	};
