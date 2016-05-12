@@ -34,6 +34,7 @@ module.exports.router = function(options) {
 	module.exports.getRemoteCallbacks = getRemoteCallbacks;
 	module.exports.handleRemoteError = handleRemoteError;
 	module.exports.foreachSubmodule = foreachSubmodule;
+	module.exports.getRepoByPath = getRepoByPath;
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -74,18 +75,22 @@ function cloneJSON(base, location, giturl, parents, submodules) {
 	return result;
 }
 	
+function getRepoByPath(filePath,workspaceDir) {
+	while (!fs.existsSync(filePath)) {
+		filePath = path.dirname(filePath);
+		if (filePath.length <= workspaceDir) return Promise.reject(new Error("Forbidden"));
+	}
+	return git.Repository.discover(filePath, 0, workspaceDir).then(function(buf) {
+		return git.Repository.open(buf.toString());
+	});
+}	
+	
 function getRepo(req) {
 	var u = url.parse(req.url, true);
 	var restpath = u.pathname.split(fileRoot)[1];
 	if (!restpath) return Promise.reject(new Error("Forbidden"));
-	var p = path.join(req.user.workspaceDir, restpath);
-	while (!fs.existsSync(p)) {
-		p = path.dirname(p);
-		if (p.length <= req.user.workspaceDir) return Promise.reject(new Error("Forbidden"));
-	}
-	return git.Repository.discover(p, 0, req.user.workspaceDir).then(function(buf) {
-		return git.Repository.open(buf.toString());
-	});
+	var filePath = path.join(req.user.workspaceDir, restpath);
+	return getRepoByPath(filePath,req.user.workspaceDir);
 }
 
 function getClone(req, res) {
