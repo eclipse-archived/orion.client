@@ -102,12 +102,17 @@ function getCommitLog(req, res) {
 		}
 		return true;
 	}
-	var commits = []	, repo;
+	var commits = []	, repo, fileRelativePath;
+	var tagRef;
+	fileRelativePath = path.join(req.user.workspaceDir, req.params["0"]);
 	function writeResponse(over) {
 		var referenceName = scope;
 		var resp = {
 			"Children": commits,
-			"RepositoryPath": "",
+			"RepositoryPath": fileRelativePath,
+			"Type": "Commit",
+			"Location":"/gitapi/commit/"+ tagRef +"/file" + req.params[0],
+			"CloneLocation": "/gitapi/clone" + fileDir,
 			"toRef": {
 				"CloneLocation": "/gitapi/clone" + fileDir,
 				"CommitLocation": "/gitapi/commit/" + util.encodeURIComponent(referenceName) + fileDir,
@@ -144,16 +149,29 @@ function getCommitLog(req, res) {
 	function log(repo, ref) {
 		var revWalk = repo.createRevWalk();
 		revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
-		
-		if (ref.indexOf("..") !== -1) {
-			revWalk.pushRange(ref);
-		} else {
-			try {
-				revWalk.push(ref);
-			} catch (ex) {
-				revWalk.pushRef(ref);
+		tagRef = ref;
+		git.Reference.dwim(repo, ref).then(
+			function(reference) {
+				return ref =  reference.name();
+			},
+			function rejected(){
+       	 		return;
+    		}
+		)
+		.then(function(){
+			if (ref.indexOf("..") !== -1) {
+					revWalk.pushRange(ref);
+			} else {
+				try {
+					revWalk.push(ref);
+				} catch (ex) {
+					revWalk.pushRef( ref );
+				}
 			}
-		}
+			return;
+		}).then(function(){
+			walk();
+		});
 
 		var count = 0;
 		filterPath = api.toURLPath(filterPath.substring(repo.workdir().length));
@@ -195,13 +213,13 @@ function getCommitLog(req, res) {
 				}
 			});
 		}
-		walk();
 	}
 	
 	clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
 		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+		fileRelativePath = api.toURLPath(fileRelativePath.substring(repo.workdir().length));
 		if (mergeBase) {
 			var names = scope.split("..");
 			var commit0;
