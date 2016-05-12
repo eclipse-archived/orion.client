@@ -26,6 +26,8 @@ define([
 		var envs = Object.create(null);
 		var astManager = new ASTManager.ASTManager();
 		var timeoutReturn = ['Content assist operation timed out'];
+		var jsFile = 'tern_crossfile_test_script.js';
+		var htmlFile = 'tern_crossfile_test_script.html';
 	
 		/**
 		 * @description Sets up the test
@@ -40,12 +42,19 @@ define([
 			    line = state.line = typeof options.line === 'undefined' ? '' : options.line,
 			    keywords = typeof options.keywords === 'undefined' ? false : options.keywords,
 			    templates = typeof options.templates === 'undefined' ? false : options.templates,
-			    contentType = options.contenttype ? options.contenttype : 'application/javascript',
 			    timeout = 5000,
-			    guess = typeof options.guess !== 'boolean' ? true : options.guess, //default to true, backwards compat
-				file = state.file = 'tern_crossfile_test_script.js';
-				assert(options.callback, 'You must provide a test callback for worker-based tests');
-				state.callback = options.callback;
+			    guess = typeof options.guess !== 'boolean' ? true : options.guess; //default to true, backwards compat
+			
+			assert(options.callback, 'You must provide a test callback for worker-based tests');
+			state.callback = options.callback;
+				
+			var contentType = options.contentType ? options.contentType : 'application/javascript';
+			var	file = state.file = jsFile;				
+			if (contentType === 'text/html'){
+				// Tern plug-ins don't have the content type, only the name of the file
+				file = state.file = htmlFile;
+			}				
+				
 			worker.setTestState(state);
 			worker.postMessage({request: 'delFile', args:{file: file}});
 			envs = typeof options.env === 'object' ? options.env : Object.create(null);
@@ -369,157 +378,237 @@ define([
 						worker.getTestState().callback(err);
 					}
 				}
-				
-				it("Test direct impl - cross file return object indirection 1", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep1'], function(a) {a.myfunc()});",
-						offset: 52,
-						callback: done
-					};
-					testDirectImplementation(options, {start:859, end:865, file: 'require_dep1.js'});
+				describe("AMD", function(){
+					it("cross file return object indirection 1", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep1'], function(a) {a.myfunc()});",
+							offset: 52,
+							callback: done
+						};
+						testDirectImplementation(options, {start:859, end:865, file: 'require_dep1.js'});
+					});
+					it("cross file return object indirection 2", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep1'], function(a) {a.variable});",
+							offset: 52,
+							callback: done
+						};
+						testDirectImplementation(options, {start:733, end:741, file: 'require_dep1.js'});
+					});
+					it("cross file return object indirection 3", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep2'], function(a) {a.myfunc()});",
+							offset: 52,
+							callback: done
+						};
+						testDirectImplementation(options, {start:860, end:866, file: 'require_dep2.js'});
+					});
+					it("cross file return object indirection 4", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep2'], function(a) {a.variable});",
+							offset: 52,
+							callback: done
+						};
+						testDirectImplementation(options, {start:741, end:749, file: 'require_dep2.js'});
+					});
+					it("cross file return object constructor 1", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep6'], function(a) {new a.directFoo();});",
+							offset: 56,
+							callback: done
+						};
+						testDirectImplementation(options, {start:845, end:848, file: 'require_dep6.js'});
+					});
+					it("cross file return object direct function 1", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep6'], function(a) {a.directFunc();});",
+							offset: 52,
+							callback: done
+						};
+						testDirectImplementation(options, {start:1210, end:1219, file: 'require_dep6.js'});
+					});
+					it("cross file return object direct var 1", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep6'], function(a) {a.directVar;});",
+							offset: 52,
+							callback: done
+						};
+						testDirectImplementation(options, {start:1179, end:1187, file: 'require_dep6.js'});
+					});
+					it("cross file return object member constructor 1", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep6'], function(a) {a.memberFoo();});",
+							offset: 52,
+							callback: done
+						};
+						testDirectImplementation(options, {start:845, end:848, file: 'require_dep6.js'});
+					});
+					it("cross file return object member function 1", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep6'], function(a) {a.memberFunc();});",
+							offset: 52,
+							callback: done
+						};
+						testDirectImplementation(options, {start:1210, end:1219, file: 'require_dep6.js'});
+					});
+					it("cross file return object member variable 1", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep6'], function(a) {a.memberVar;});",
+							offset: 52,
+							callback: done
+						};
+						testDirectImplementation(options, {start:1179, end:1187, file: 'require_dep6.js'});
+					});
+					// TODO Crossing 2 files only works if the files have been previously loaded in Tern, they will pass when run in the suite https://bugs.eclipse.org/bugs/show_bug.cgi?id=478233
+					it("cross 2 files func 1", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep7'], function(a) {a.reExportFunc;});",
+							offset: 52,
+							callback: done
+						};
+						testDirectImplementation(options, {start:860, end:866, file: 'require_dep2.js'});
+					});
+					it("cross 2 files var 1", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep7'], function(a) {a.reExportVar;});",
+							offset: 52,
+							callback: done
+						};
+						testDirectImplementation(options, {start:741, end:749, file: 'require_dep2.js'});
+					});
+					it.skip("cross file return object proto function 1", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep6'], function(a) {a.pFunc;});",
+							offset: 52,
+							callback: done
+						};
+						//TODO this test fails to find the impl, but it should work
+						testDirectImplementation(options, {start:-1, end:-1, file: 'require_dep6.js'});
+					});
+					it.skip("cross file return object proto var 1", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep6'], function(a) {a.pVar;});",
+							offset: 52,
+							callback: done
+						};
+						//TODO this test fails to find the impl, but it should work
+						testDirectImplementation(options, {start:-1, end:-1, file: 'require_dep6.js'});
+					});
+					it.skip("cross file constructor 1 - export value, non-proto constructor", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep3'], function(a) {var local = new a();});",
+							offset: 63,
+							callback: done
+						};
+						//TODO this test finds the impl as the define import, but should find the function declaration in the required file 
+						testDirectImplementation(options, {start:-1, end:-1, file: 'require_dep3.js'});
+					});
+					it.skip("cross file constructor 2 - export value, prototype constructor", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep4'], function(a) {var local = new a();});",
+							offset: 63,
+							callback: done
+						};
+						//TODO this test finds the impl as the define import, but should find the function declaration in the required file 
+						testDirectImplementation(options, {start:-1, end:-1, file: 'require_dep4.js'});
+					});
+					it("cross file constructor 3 - export object non-proto constructor", function(done) {
+						var options = {
+							buffer: "define(['./files/require_dep5'], function(a) {var local = new a.Foo();});",
+							offset: 65,
+							callback: done
+						};
+						testDirectImplementation(options, {start:824, end:827, file: 'require_dep5.js'});
+					});
 				});
-				it("Test direct impl - cross file return object indirection 2", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep1'], function(a) {a.variable});",
-						offset: 52,
-						callback: done
-					};
-					testDirectImplementation(options, {start:733, end:741, file: 'require_dep1.js'});
+				describe("Node", function(){
+					it("Node require, inline export - Function implementation", function(done) {
+						var options = {
+							buffer: "var lib = require('./files/node_dep1.js'); lib.nodeFunc1();",
+							offset: 53,
+							callback: done
+						};
+						testDirectImplementation(options, {start:29, end:38, file: 'node_dep1.js'});
+					});
+					it("Node require, inline export - Variable implementation", function(done) {
+						var options = {
+							buffer: "var lib = require('./files/node_dep1.js'); lib.nodeVariable1 + '';",
+							offset: 53,
+							callback: done
+						};
+						testDirectImplementation(options, {start:63, end:76, file: 'node_dep1.js'});
+					});
+					it("Node require - Function implementation", function(done) {
+						var options = {
+							buffer: "var lib = require('./files/node_dep2.js'); lib.nodeFunc2();",
+							offset: 53,
+							callback: done
+						};
+						testDirectImplementation(options, {start:31, end:40, file: 'node_dep2.js'});
+					});
+					it("Node require - Variable implementation", function(done) {
+						var options = {
+							buffer: "var lib = require('./files/node_dep2.js'); lib.nodeVariable2 + '';",
+							offset: 53,
+							callback: done
+						};
+						testDirectImplementation(options, {start:52, end:65, file: 'node_dep2.js'});
+					});
 				});
-				it("Test direct impl - cross file return object indirection 3", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep2'], function(a) {a.myfunc()});",
-						offset: 52,
-						callback: done
-					};
-					testDirectImplementation(options, {start:860, end:866, file: 'require_dep2.js'});
+				describe("Globals imported using HTML script", function(){
+					it("Global via HTML - Function implementation", function(done) {
+						var options = {
+							buffer: "<html><script src=\"./files/global_dep1.js\"></script><script>myGlobalFunc();</script></html>",
+							offset: 67,
+							contentType: "text/html",
+							callback: done
+						};
+						testDirectImplementation(options, {start:9, end:21, file: 'global_dep1.js'});
+					});
+					it("Global via HTML - Variable implementation", function(done) {
+						var options = {
+							buffer: "<html><script src=\"./files/global_dep1.js\"/></script><script>var a = myGlobalVar;</script></html>",
+							offset: 71,
+							contentType: "text/html",
+							callback: done
+						};
+						testDirectImplementation(options, {start:53, end:64, file: 'global_dep1.js'});
+					});
 				});
-				it("Test direct impl - cross file return object indirection 4", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep2'], function(a) {a.variable});",
-						offset: 52,
-						callback: done
-					};
-					testDirectImplementation(options, {start:741, end:749, file: 'require_dep2.js'});
-				});
-				it("Test direct impl - cross file return object constructor 1", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep6'], function(a) {new a.directFoo();});",
-						offset: 56,
-						callback: done
-					};
-					testDirectImplementation(options, {start:845, end:848, file: 'require_dep6.js'});
-				});
-				it("Test direct impl - cross file return object direct function 1", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep6'], function(a) {a.directFunc();});",
-						offset: 52,
-						callback: done
-					};
-					testDirectImplementation(options, {start:1210, end:1219, file: 'require_dep6.js'});
-				});
-				it("Test direct impl - cross file return object direct var 1", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep6'], function(a) {a.directVar;});",
-						offset: 52,
-						callback: done
-					};
-					testDirectImplementation(options, {start:1179, end:1187, file: 'require_dep6.js'});
-				});
-				it("Test direct impl - cross file return object member constructor 1", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep6'], function(a) {a.memberFoo();});",
-						offset: 52,
-						callback: done
-					};
-					testDirectImplementation(options, {start:845, end:848, file: 'require_dep6.js'});
-				});
-				it("Test direct impl - cross file return object member function 1", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep6'], function(a) {a.memberFunc();});",
-						offset: 52,
-						callback: done
-					};
-					testDirectImplementation(options, {start:1210, end:1219, file: 'require_dep6.js'});
-				});
-				it("Test direct impl - cross file return object member variable 1", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep6'], function(a) {a.memberVar;});",
-						offset: 52,
-						callback: done
-					};
-					testDirectImplementation(options, {start:1179, end:1187, file: 'require_dep6.js'});
-				});
-				// TODO Crossing 2 files only works if the files have been previously loaded in Tern, they will pass when run in the suite https://bugs.eclipse.org/bugs/show_bug.cgi?id=478233
-				it("Test direct impl - cross 2 files func 1", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep7'], function(a) {a.reExportFunc;});",
-						offset: 52,
-						callback: done
-					};
-					testDirectImplementation(options, {start:860, end:866, file: 'require_dep2.js'});
-				});
-				it("Test direct impl - cross 2 files var 1", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep7'], function(a) {a.reExportVar;});",
-						offset: 52,
-						callback: done
-					};
-					testDirectImplementation(options, {start:741, end:749, file: 'require_dep2.js'});
-				});
-				it.skip("Test direct impl - cross file return object proto function 1", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep6'], function(a) {a.pFunc;});",
-						offset: 52,
-						callback: done
-					};
-					//TODO this test fails to find the impl, but it should work
-					testDirectImplementation(options, {start:-1, end:-1, file: 'require_dep6.js'});
-				});
-				it.skip("Test direct impl - cross file return object proto var 1", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep6'], function(a) {a.pVar;});",
-						offset: 52,
-						callback: done
-					};
-					//TODO this test fails to find the impl, but it should work
-					testDirectImplementation(options, {start:-1, end:-1, file: 'require_dep6.js'});
-				});
-				it.skip("Test direct impl - cross file constructor 1 - export value, non-proto constructor", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep3'], function(a) {var local = new a();});",
-						offset: 63,
-						callback: done
-					};
-					//TODO this test finds the impl as the define import, but should find the function declaration in the required file 
-					testDirectImplementation(options, {start:-1, end:-1, file: 'require_dep3.js'});
-				});
-				it.skip("Test direct impl - cross file constructor 2 - export value, prototype constructor", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep4'], function(a) {var local = new a();});",
-						offset: 63,
-						callback: done
-					};
-					//TODO this test finds the impl as the define import, but should find the function declaration in the required file 
-					testDirectImplementation(options, {start:-1, end:-1, file: 'require_dep4.js'});
-				});
-				it("Test direct impl - cross file constructor 3 - export object non-proto constructor", function(done) {
-					var options = {
-						buffer: "define(['./files/require_dep5'], function(a) {var local = new a.Foo();});",
-						offset: 65,
-						callback: done
-					};
-					testDirectImplementation(options, {start:824, end:827, file: 'require_dep5.js'});
-				});
-				//TODO Add similar constructor tests for content assist, hovers, openDeclaration
-				it.skip("Open Impl - Node.js export to function implementation", function(done) {
-					var options = {
-						buffer: "var lib = require('./files/node_dep1.js'); lib.myfunc();",
-						offset: 49,
-						callback: done
-					};
-					// TODO Node not yet supported
-					testDirectImplementation(options, {start:859, end:865, file: 'node_dep1.js'});
+				// TODO The fix for Bug 493463 causes problems for any non node modules, including ES import
+				describe.skip("ES Modules import/export", function(){
+					it("ES Module import all - Function implementation", function(done) {
+						var options = {
+							buffer: "import * as myModule from \"./files/es_modules_dep1\"; myModule.myESFunc();",
+							offset: 67,
+							callback: done
+						};
+						testDirectImplementation(options, {start:16, end:24, file: 'es_modules_dep1.js'});
+					});
+					it("ES Module import all - Variable implementation", function(done) {
+						var options = {
+							buffer: "import * as myModule from \"./files/es_modules_dep1\"; var a = myModule.myESConst;",
+							offset: 77,
+							callback: done
+						};
+						testDirectImplementation(options, {start:43, end:52, file: 'es_modules_dep1.js'});
+					});
+					it("ES Module import specific  - Function implementation", function(done) {
+						var options = {
+							buffer: "import {myESFunc} from \"./files/es_modules_dep1\"; myESFunc();",
+							offset: 58,
+							callback: done
+						};
+						testDirectImplementation(options, {start:16, end:24, file: 'es_modules_dep1.js'});
+					});
+					it("ES Module import specific - Variable implementation", function(done) {
+						var options = {
+							buffer: "import {myESConst} from \"./files/es_modules_dep1\"; var a = myESConst;",
+							offset: 65,
+							callback: done
+						};
+						testDirectImplementation(options, {start:43, end:52, file: 'es_modules_dep1.js'});
+					});
 				});
 			});
 			describe("All References Tests", function() {
