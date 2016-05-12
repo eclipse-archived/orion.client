@@ -7,7 +7,7 @@ function die () {
 
 (npm install --no-optional) || die "Failed to install dependencies, consult the npm log to find out why."
 cp /home/data/httpd/download.eclipse.org/orion/orionode/nodegit.node ../node_modules/nodegit/build/Release
-(../node_modules/.bin/grunt) || die "Failed to minify client code."
+(../node_modules/.bin/grunt ${GRUNT_TASK}) || die "Failed to minify client code."
 rm -rf ../node_modules
 (npm install --production --no-optional) || die "Failed to install dependencies, consult the npm log to find out why."
 cp /home/data/httpd/download.eclipse.org/orion/orionode/nodegit.node ../node_modules/nodegit/build/Release
