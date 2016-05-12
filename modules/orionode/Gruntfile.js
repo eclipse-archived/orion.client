@@ -167,6 +167,6 @@ module.exports = function(grunt) {
 
 	grunt.registerTask("test", ["simplemocha"]);
 	grunt.registerTask("optimize", ["printBuild", "copy:stage", "requirejs", "string-replace", "copy:unstage"]);
-	grunt.registerTask("default", ["checkDirs", "clean", "copy:orionclient", "optimize", "test"]);
+	grunt.registerTask("default", ["checkDirs", "clean", "copy:orionclient", "optimize"]);
 	grunt.registerTask("nomin",   ["checkDirs", "clean", "copy:orionclient", "string-replace:orionclient", "test"]);
 };
