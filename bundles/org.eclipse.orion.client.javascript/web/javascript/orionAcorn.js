@@ -272,7 +272,7 @@ define([
 				}
 			};
 		});
-		instance.extend("startNode", function(nextMethod) {
+		instance.extend("startNode", function(nextMethod) { //$NON-NLS-1$
 			return function () {
 				var node = nextMethod.call(this);
 				// attach leading comments
@@ -297,12 +297,12 @@ define([
 				return node;
 			};
 		});
-		instance.extend("finishNode", function(nextMethod) {
+		instance.extend("finishNode", function(nextMethod) { //$NON-NLS-1$
 			return function(node, type) {
 				if (type === "CallExpression" || type === "NewExpression") {
 					collectDeps(node.callee, node.arguments, that.environments, that.dependencies);
 				} else if (type === 'ImportDeclaration'){
-					addDep(node.source, that.dependencies, 'browser');
+					addDep(node.source, that.dependencies, 'es_modules'); //$NON-NLS-1$
 				}
 				var result = nextMethod.call(this, node, type);
 				// attach trailing comments
@@ -335,7 +335,7 @@ define([
 				return result;
 			};
 		});
-		instance.extend("skipBlockComment", function(nextMethod) {
+		instance.extend("skipBlockComment", function(nextMethod) { //$NON-NLS-1$
 			return function() {
 				var lineBreak = /\r\n?|\n|\u2028|\u2029/;
 				var lineBreakG = new RegExp(lineBreak.source, "g");

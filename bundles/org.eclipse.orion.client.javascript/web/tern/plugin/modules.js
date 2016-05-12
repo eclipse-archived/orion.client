@@ -347,29 +347,37 @@
     server.mod.modules = new Modules(server, options)
     
     /**
-	 * @description If we should be using the node plugin
+	 * @description Returns whether the given file is using a dependency system handled by this modules plugin ('node' and 'es_modules')
 	 * @param {Object} file The file object
-	 * @returns {Boolean} If we should do any work in the node plugin
-	 * @since 10.0
+	 * @returns {Boolean} If we should modify scopes or do other work with this plugin
 	 * Orion
 	 */
-	function usingNode(file) {
-		if(/\.js$/g.test(file.name) && file.ast && file.ast.environments) {
-      	  	return file.ast.environments.node;
+	function isUsingModules(file) {
+		if(file.ast){
+			if (file.ast.environments && file.ast.environments.node) {
+				return true;
+			} else if (file.ast.dependencies){
+				for (var i=0; i<file.ast.dependencies.length; i++) {
+					var dep = file.ast.dependencies[i];
+					if (dep.env === 'node' || dep.env === 'es_modules'){
+						return true;
+					}
+				}
+			}
       	}
       	return false;
 	}
 
     server.on("beforeLoad", function(file) {
       // ORION Only modify the scope if we are using node for dependencies in this file or we cannot use globals from other files
-      if (usingNode(file)){
+      if (isUsingModules(file)){
       	file.scope = this.mod.modules.buildWrappingScope(file.scope, file.name, file.ast)
   	  }
     })
 
     server.on("afterLoad", function(file) {
       // ORION Only collect exports for this file if we are using for dependencies in this file
-      if (usingNode(file)){
+      if (isUsingModules(file)){
         var mod = this.mod.modules.get(file.name)
         mod.origin = file.name
         this.mod.modules.signal("getExports", file, mod)
