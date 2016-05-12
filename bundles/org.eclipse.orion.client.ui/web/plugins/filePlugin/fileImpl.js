@@ -159,7 +159,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			}
 		}
 		return "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + 
-		caseSensitiveFlag + wholeWordFlag + regExFlag  + "+Location:" + searchParams.resource + "*";
+		caseSensitiveFlag + wholeWordFlag + regExFlag  + "+Location:" + encodeURIComponent(searchParams.resource) + "*";
 	}
 	
 	/**
