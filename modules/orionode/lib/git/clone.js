@@ -235,6 +235,11 @@ function postInit(req, res) {
 	if (req.body.GitUrl) {
 		postClone(req, res);
 	} else {
+		
+		if (req.body.Name === undefined) {
+			return writeError(400, res);
+		}
+		
 		var initDir = req.user.workspaceDir + '/' + req.body.Name;
 		var theRepo, index, author, committer;
 
