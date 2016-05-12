@@ -70,6 +70,7 @@ module.exports = function(options) {
 			});
 		} else if (rest === workspaceId) {
 			var parentFileLocation = originalFileRoot(req);
+			var workspaceJson;
 			fileUtil.getChildren(fileRoot, req.user.workspaceDir, req.user.workspaceDir, 1)
 			.then(function(children) {
 				// TODO this is basically a File object with 1 more field. Should unify the JSON between workspace.js and file.js
@@ -77,7 +78,7 @@ module.exports = function(options) {
 				children.forEach(function(child) {
 					child.Id = child.Name;
 				});
-				api.write(null, res, null, {
+				workspaceJson = {
 					Directory: true,
 					Id: workspaceId,
 					Name: workspaceName,
@@ -90,7 +91,14 @@ module.exports = function(options) {
 							Location:  api.join(parentFileLocation, c.Name),
 						};
 					})
-				});
+				};
+				return Promise.all(fileUtil.getDecorators().map(function(decorator){
+					return decorator(workspaceRoot, req, "", workspaceJson);			
+					})
+				);
+			})
+			.then(function(){
+				api.write(null, res, null, workspaceJson);
 			})
 			.catch(api.writeError.bind(null, 500, res));
 		} else {
