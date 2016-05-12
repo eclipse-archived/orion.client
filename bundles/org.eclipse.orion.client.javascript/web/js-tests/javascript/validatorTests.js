@@ -30,7 +30,7 @@ define([
 			
 			/**
 			 * @description Sets up the test
-			 * @param {Object} options {buffer, contentType}
+			 * @param {Object} options {buffer, contentType}i
 			 * @returns {Object} The object with the initialized values
 			 */
 			function setup(options) {
@@ -41,6 +41,13 @@ define([
 				assert(options.callback, "You must provide a callback for a worker-based test");
 				state.callback = options.callback;
 				worker.setTestState(state);
+				
+				if (options.createFiles){
+					for (var i=0; i<options.createFiles.length; i++) {
+						worker.createTestFile(options.createFiles[i].name, options.createFiles[i].text);
+					}
+				}
+				
 				var editorContext = {
 					/*override*/
 					getText: function() {
@@ -5605,6 +5612,66 @@ define([
 						validate({buffer: topic, callback: callback, config: config}).then(
 							function (problems) {
 								assertProblems(problems, []);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					it("Ignore es6 import 1", function(callback) {
+						var topic = 'import { MYCONSTANT , arr } from "./exports";'; 
+						var config = { rules: {} };
+						var createFiles = [{name: './exports', text: ''}];
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config, createFiles: createFiles}).then(
+							function (problems) {
+								// TODO Tern does not default to 'sourceType: module' so we have a parse error, accepting the parse error is faster than restarting the server
+								assertProblems(problems, [
+								{
+									id: "forbiddenExportImport",
+									severity: 'error',
+									description: "'import' and 'export' may appear only with 'sourceType: module'",
+								}
+								]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					it("Ignore es6 import 2", function(callback) {
+						var topic = 'import * from "./exports";'; 
+						var config = { rules: {} };
+						var createFiles = [{name: './exports', text: ''}];
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config, createFiles: createFiles}).then(
+							function (problems) {
+								// TODO Tern does not default to 'sourceType: module' so we have a parse error, accepting the parse error is faster than restarting the server
+								assertProblems(problems, [
+								{
+									id: "forbiddenExportImport",
+									severity: 'error',
+									description: "'import' and 'export' may appear only with 'sourceType: module'",
+								}
+								]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					it("Ignore es6 import 3", function(callback) {
+						var topic = 'import "./exports";'; 
+						var config = { rules: {} };
+						var createFiles = [{name: './exports', text: ''}];
+						config.rules[RULE_ID] = 1;
+						validate({buffer: topic, callback: callback, config: config, createFiles: createFiles}).then(
+							function (problems) {
+								// TODO Tern does not default to 'sourceType: module' so we have a parse error, accepting the parse error is faster than restarting the server
+								assertProblems(problems, [
+								{
+									id: "forbiddenExportImport",
+									severity: 'error',
+									description: "'import' and 'export' may appear only with 'sourceType: module'",
+								}
+								]);
 							},
 							function (error) {
 								worker.getTestState().callback(error);

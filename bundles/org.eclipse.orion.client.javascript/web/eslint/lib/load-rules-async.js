@@ -2317,9 +2317,10 @@ define([
     		}
     		if (node.parent){
     			switch(node.parent.type) {
-    				case 'UnaryExpression':
+    				case 'ImportDeclaration':
     				case 'MemberExpression':
-    				case 'SwitchCase': {
+    				case 'SwitchCase':
+    				case 'UnaryExpression': {
     					return;
     				}
     				case 'BinaryExpression': {
