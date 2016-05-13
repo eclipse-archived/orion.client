@@ -789,7 +789,14 @@ var lp = _state.LooseParser.prototype;
 lp.parseTopLevel = function () {
   var node = this.startNodeAt(this.options.locations ? [0, _.getLineInfo(this.input, 0)] : 0);
   node.body = [];
-  while (this.tok.type !== _.tokTypes.eof) node.body.push(this.parseStatement());
+  // ORION prevent V8 bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=493670
+  while (this.tok.type !== _.tokTypes.eof) {
+    var stmt = this.parseStatement();
+    if (stmt.end === stmt.start) {
+      break;
+    }
+    node.body.push(stmt);
+  }
   this.last = this.tok;
   if (this.options.ecmaVersion >= 6) {
     node.sourceType = this.options.sourceType;
