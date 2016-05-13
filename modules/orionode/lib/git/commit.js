@@ -276,18 +276,25 @@ function getCommitRefs(repo, fileDir, commits) {
 				.then(function(oid) {
 					var fullName = ref;
 					var shortName = ref.replace("refs/tags/", "").replace("refs/remotes/", "").replace("refs/heads/", "");
-					var id = oid.toString();
-					var commit = map[id];
-					if (commit) {
-						if (ref.indexOf("refs/tags/") === 0) {
-							var tags = commit.Tags || (commit.Tags = []);
-							tags.push(mTags.tagJSON(fullName, shortName, id, undefined, fileDir));
-						} else {
-							var branches = commit.Branches || (commit.Branches = []);
-							branches.push({FullName: ref});
+					var id; 
+					return git.Tag.lookup(repo,oid).then(function(tag){
+						id = tag.targetId();
+					}).catch(function(){
+						id = oid.toString();
+						return;
+					}).then(function(){
+						var commit = map[id];
+						if (commit) {
+							if (ref.indexOf("refs/tags/") === 0) {
+								var tags = commit.Tags || (commit.Tags = []);
+								tags.push(mTags.tagJSON(fullName, shortName, id, undefined, fileDir));
+							} else {
+								var branches = commit.Branches || (commit.Branches = []);
+								branches.push({FullName: ref});
+							}
 						}
-					}
-					cb();
+						cb();
+					});
 				})
 				.catch(function() {
 					// ignore errors looking up commits
