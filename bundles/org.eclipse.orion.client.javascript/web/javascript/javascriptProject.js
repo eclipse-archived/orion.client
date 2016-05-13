@@ -193,16 +193,18 @@ define([
 		if(this.projectMeta) {
 			return this.getFile(childName).then(function(child) {
 				if(child) {
-					var json = child.contents ? JSON.parse(child.contents) : Object.create(null);
-					if(json && values) {
-						_merge(values, json);
-						return this.getFileClient().write(this.projectMeta.Location+childName, JSON.stringify(json, null, '\t'));
+					if(child.contents) {
+						var json = JSON.parse(child.contents);
+						if(json && values) {
+							_merge(values, json);
+							return this.getFileClient().write(this.projectMeta.Location+childName, JSON.stringify(json, null, '\t'));
+						}
+					} else if(!child.contents && create) {
+						return this.getFileClient().createFile(this.projectMeta.Location, childName).then(function(file) {
+							return this.getFileClient().write(file.Location, JSON.stringify(values, null, '\t'));
+						}.bind(this));
 					}
-				} else if(!child.contents && create) {
-					return this.getFileClient().createFile(this.projectMeta.Location, childName).then(function(file) {
-						return this.getFileClient().write(file.Location, JSON.stringify(values, null, '\t'));
-					}.bind(this));
-				}
+				} 
 			}.bind(this));
 		}
 	};
