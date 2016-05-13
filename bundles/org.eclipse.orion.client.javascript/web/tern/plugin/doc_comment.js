@@ -108,6 +108,18 @@
             if (prop) interpretComments(node, node.commentsBefore, scope, prop);
           }
         }
+      },
+      // ORION
+      ExportNamedDeclaration: function(node, scope) {
+        if (node.leadingComments && node.declaration && node.declaration.type === 'FunctionDeclaration') {
+          var commentsBefore = [];
+          node.leadingComments.forEach(function(comment) {
+            commentsBefore.push(comment.value);
+          });
+          interpretComments(node, commentsBefore, scope,
+                            scope.getProp(node.declaration.id.name),
+                            node.declaration.scope.fnType);
+        }
       }
     }, infer.searchVisitor, scope);
   }

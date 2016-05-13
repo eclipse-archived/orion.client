@@ -141,9 +141,8 @@ SourceCode.prototype = {
         if (node) {
             return (this.text !== null) ? this.text.slice(Math.max(node.range[0] - (beforeCount || 0), 0),
                 node.range[1] + (afterCount || 0)) : null;
-        } else {
-            return this.text;
         }
+        return this.text;
 
     },
 
@@ -179,10 +178,18 @@ SourceCode.prototype = {
          * leadingComments/trailingComments. Comments are only left in the
          * Program node comments array if there is no executable code.
          */
-        if (node.type === "Program") {
-            if (node.body.length === 0) {
-                leadingComments = node.comments;
-            }
+        switch(node.type) {
+        	case "Program" :
+	            if (node.body.length === 0) {
+	                leadingComments = node.comments;
+	            }
+	            break;
+	        case "FunctionDeclaration" :
+	            var parent = node.parent;
+	            if (looksLikeExport(parent)) {
+	               leadingComments = parent.leadingComments || [];
+	               trailingComments = parent.trailingComments || [];
+	            }
         }
 
         return {
@@ -207,10 +214,8 @@ SourceCode.prototype = {
             case "FunctionDeclaration":
                 if (looksLikeExport(parent)) {
                     return findJSDocComment(parent.leadingComments, line);
-                } else {
-                    return findJSDocComment(node.leadingComments, line);
                 }
-                break;
+                return findJSDocComment(node.leadingComments, line);
 
             case "ClassDeclaration":
                 return findJSDocComment(node.leadingComments, line);

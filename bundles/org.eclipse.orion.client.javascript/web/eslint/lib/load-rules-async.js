@@ -265,8 +265,8 @@ define([
     							if(!comments || comments.leading.length < 1) {
     							    //TODO see https://github.com/jquery/esprima/issues/1071
 							        comments = context.getComments(node.id);
-    							} 
-    							if(!validComment(comments)) {
+    							}
+    							if(!validComment(comments) && node.parent && node.parent.type !== "ExportNamedDeclaration") {
     								context.report(node.id, ProblemMessages['missing-doc'], {0:node.id.name}, { type: 'decl' });  //$NON-NLS-1$
     							}
         						break;
@@ -287,7 +287,12 @@ define([
         							}
         						}
         						break;
-        				}
+        					case 'ExportNamedDeclaration' :
+    							comments = context.getComments(node);
+    							if(!validComment(comments) && node.declaration && node.declaration.type === "FunctionDeclaration") {
+    								context.report(node.declaration.id, ProblemMessages['missing-doc'], {0:node.declaration.id.name}, { type: 'decl' });  //$NON-NLS-1$
+    							}
+    					}
         			}
         			catch(ex) {
         				Logger.log(ex);
@@ -297,7 +302,8 @@ define([
         		return {
         			"Property": checkDoc,
         			"FunctionDeclaration": checkDoc,
-        			"ExpressionStatement": checkDoc
+        			"ExpressionStatement": checkDoc,
+        			"ExportNamedDeclaration": checkDoc
         		};
         },
         /** @callback */

@@ -28,7 +28,18 @@ define([
 		this.astManager = ASTManager;
 		this.cuprovider = CUProvider;
 	}
-	
+
+	/**
+	 * Check to see if its a ES6 export declaration
+	 * @param {ASTNode} astNode - any node
+	 * @returns {boolean} whether the given node represents a export declaration
+	 * @private
+	 */
+	function looksLikeExport(astNode) {
+	    return astNode.type === "ExportDefaultDeclaration" || astNode.type === "ExportNamedDeclaration" ||
+	        astNode.type === "ExportAllDeclaration" || astNode.type === "ExportSpecifier";
+	}
+
 	Objects.mixin(GenerateDocCommand.prototype, {
 		/**
 		 * @callback
@@ -72,7 +83,14 @@ define([
 					var template;
 					var start = parent.range[0];
 					if(parent.type === 'FunctionDeclaration') {
-						template = this._genTemplate(parent.id.name, parent.params, false, parent.range[0], text);
+						var len = parent.parents.length-1;
+						var funcParent = parent.parents[len];
+						if (funcParent && looksLikeExport(funcParent)) {
+							template = this._genTemplate(parent.id.name, parent.params, false, funcParent.range[0], text);
+							start = funcParent.range[0];
+						} else {
+							template = this._genTemplate(parent.id.name, parent.params, false, parent.range[0], text);
+						}
 					} else if(parent.type === 'Property') {
 						template = this._genTemplate(parent.key.name ? parent.key.name : parent.key.value, parent.value.params, true, parent.range[0], text);
 					} else if(parent.type === 'VariableDeclarator') {

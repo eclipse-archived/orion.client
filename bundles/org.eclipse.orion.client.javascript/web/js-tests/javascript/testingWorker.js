@@ -83,13 +83,21 @@ define([
 	 * @param {Function} callback The callback to call when done starting worker and server
 	 * @since 11.0
 	 */
-	WrappedWorker.prototype.start = function(callback) {
-		_state.callback = callback;
-		message({request: 'start_server', args: {}}, function() {
-			callback();
+	WrappedWorker.prototype.start = function(callback, json, fn) {
+		if(callback) {
+			//tests can pass in null here to avoid having the test "complete" once the server starts
+			_state.callback = callback;
+		}
+		var j = json ? json : {};
+		message({request: 'start_server', args: j}, function() {
+			if(typeof fn === "function") {
+				fn();
+			}
+			if(callback) {
+				callback();
+			}
 		});
 	};
-	
 	/**
 	 * @name WrappedWorker.prototype.setTestState
 	 * @description Sets the test state, must be called per test to ensure the correct state is being tested
