@@ -48,7 +48,7 @@ var params = {
 	workspaceDir: workspaceDir,
 	passwordFile: null,
 	password: null,
-	configParams: {},
+	configParams: {"orion.single.user":true},
 	dev: null,
 	log: null
 };
