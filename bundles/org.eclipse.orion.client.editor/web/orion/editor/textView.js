@@ -689,6 +689,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			var lineText = model.getLine(lineIndex);
 			var lineStart = model.getLineStart(lineIndex);
 			var e = {type:"LineStyle", textView: view, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart}; //$NON-NLS-1$
+			var bidiSeparatorStyle = {tagName:"span", bidi:true, style:{unicodeBidi:"embed", direction:"ltr"}};
 			view.onLineStyle(e);
 			var doc = _parent.ownerDocument;
 			var lineDiv = div || util.createElement(doc, "div"); //$NON-NLS-1$
@@ -743,8 +744,12 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				for (i = 0; i < ranges.length; i++) {
 					range = ranges[i];
 					text = range.text;
-					style = range.style;
+					style = range.style;					
 					span = this._createSpan(lineDiv, text, style, range.ignoreChars);
+					if (bidiUtils.isBidiEnabled) {
+						span = this._createSpan(lineDiv, "\u200E", bidiSeparatorStyle, 0);
+						frag.appendChild(span);
+					}
 					frag.appendChild(span);
 				}
 				lineDiv.appendChild(frag);
@@ -795,10 +800,20 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 						}
 					}
 					span = this._createSpan(lineDiv, text, style, range.ignoreChars);
-					if (oldSpan) {
-						lineDiv.insertBefore(span, oldSpan);
-					} else {
+					if (oldSpan) {																							
+						if (bidiUtils.isBidiEnabled) {
+							var bidiSpan = this._createSpan(lineDiv, "\u200E", bidiSeparatorStyle, 0);
+							lineDiv.insertBefore(bidiSpan, oldSpan);
+							lineDiv.insertBefore(span, bidiSpan);
+						} else {
+							lineDiv.insertBefore(span, oldSpan);
+						}
+					} else {						
 						lineDiv.appendChild(span);
+						if (bidiUtils.isBidiEnabled) {
+							var bidiSpan = this._createSpan(lineDiv, "\u200E", bidiSeparatorStyle, 0);
+							lineDiv.appendChild(bidiSpan);
+						}
 					}
 					if (div) {
 						div.lineWidth = undefined;
@@ -903,6 +918,8 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				child.ignore = true;
 			} else if (style && style.node) {
 				child.appendChild(style.node);
+				child.ignore = true;
+			} else if (style && style.bidi) {				
 				child.ignore = true;
 			}
 			applyStyle(style, child);
