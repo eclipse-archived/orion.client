@@ -82,6 +82,9 @@ define ([
 	 */	
 	function getTextDirection(text) {
 		bidiLayout = getBidiLayout();
+		if (!isBidiEnabled) {
+			return "";
+		}
 		if (bidiLayout == 'auto' && util.isIE) {	//$NON-NLS-0$
 			return checkContextual(text);
 		}
@@ -101,7 +104,7 @@ define ([
 	 * @returns {String} text after adding ucc characters.
 	 */		
 	function enforceTextDirWithUcc ( text ) {
-		if (text.trim()) {
+		if (isBidiEnabled && text.trim()) {
 			bidiLayout = getBidiLayout();
 			var dir = bidiLayout == 'auto' ? checkContextual( text ) : bidiLayout;	//$NON-NLS-0$
 			return ( dir == 'ltr' ? LRE : RLE ) + text + PDF;	//$NON-NLS-0$
@@ -139,13 +142,13 @@ define ([
 	function handleInputEvent ( event ) {
 		var input = event.target;
 		if (input) {
-			input.dir = getTextDirection(input.value); // resolve dir attribute of the element
+			input.dir = getTextDirection(input.value || input.textContent); // resolve dir attribute of the element
 		}
 	};
 	
 	function initInputField ( input ) {
-		if (input) {
-			input.dir = getTextDirection(input.value); // resolve dir attribute of the element
+		if (isBidiEnabled && input) {
+			input.dir = getTextDirection(input.value || input.textContent); // resolve dir attribute of the element
 
 			if (util.isIE) {
 				addBidiEventListeners(input);

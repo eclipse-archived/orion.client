@@ -14,6 +14,7 @@
 define([
 	'i18n!git/nls/gitmessages',
 	'orion/i18nUtil',
+	'orion/bidiUtils',
 	'orion/Deferred',
 	'orion/explorers/explorer',
 	'orion/git/uiUtil',
@@ -27,7 +28,7 @@ define([
 	'orion/git/logic/gitCommit',
 	'orion/git/gitConfigPreference',
 	'orion/objects'
-], function(messages, i18nUtil, Deferred, mExplorer, mGitUIUtil, mGitUtil, mTooltip, mSelection , lib, mGitCommands, mCommands, mCommandRegistry, gitCommit, gitConfigPreference, objects) {
+], function(messages, i18nUtil, bidiUtils, Deferred, mExplorer, mGitUIUtil, mGitUtil, mTooltip, mSelection , lib, mGitCommands, mCommands, mCommandRegistry, gitCommit, gitConfigPreference, objects) {
 	
 	var pageQuery = "?pageSize=100&page=1"; //$NON-NLS-0$
 	
@@ -933,6 +934,7 @@ define([
 							textArea.parentNode.classList.remove("invalidParam"); //$NON-NLS-0$
 							explorer.updateSelectionStatus();
 						});
+						bidiUtils.initInputField(textArea);
 						topRow.appendChild(textArea);
 
 						var bottomRow = document.createElement("div"); //$NON-NLS-0$
