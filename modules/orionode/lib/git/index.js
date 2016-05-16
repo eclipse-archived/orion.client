@@ -41,13 +41,10 @@ function getIndex(req, res) {
 		return repo;
 	})
 	.then(function(repo) {
-		return repo.openIndex();
+		return repo.refreshIndex();
 	})
 	.then(function(indexResult) {
 		index = indexResult;
-		return index.read(1);
-	})
-	.then(function() {
 		var indexEntry = index.getByPath(filePath);
 		return git.Blob.lookup(repo, indexEntry.id);
 	})
@@ -68,25 +65,20 @@ function putIndex(req, res) {
 	.then(function(_repo) {
 		repo = _repo;
 		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
-		return repo.openIndex();
+		return repo.refreshIndex();
 	})
 	.then(function(indexResult) {
 		index = indexResult;
-		return index.read(1);
-	})
-	.then(function() {
 		function doPath(p) {
 			if (fs.existsSync(path.join(repo.workdir(), p))) {
-				index.addByPath(p);
-			} else {
-				index.removeByPath(p);
+				return index.addByPath(p);
 			}
+			return index.removeByPath(p);
 		}
 		if (req.body.Path) {
-			req.body.Path.forEach(doPath);
-		} else {
-			return doPath(filePath);
+			return Promise.all(req.body.Path.map(doPath));
 		}
+		return doPath(filePath);
 	})
 	.then(function() {
 		// this will write both files to the index

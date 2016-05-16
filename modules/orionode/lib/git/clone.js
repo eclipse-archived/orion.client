@@ -259,13 +259,10 @@ function postInit(req, res) {
 				return configRepo(repo, req.body.GitName, req.body.GitMail);
 			})
 			.then(function(){
-				return theRepo.openIndex();
+				return theRepo.refreshIndex();
 			})
 			.then(function(idx) {
 				index = idx;
-				index.read(1);
-			})
-			.then(function() {
 				return index.writeTree();
 			})
 			.then(function(oid) {
