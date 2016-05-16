@@ -423,15 +423,14 @@ function getRemoteCallbacks(creds, task) {
 		certificateCheck: function() {
 			return 1; // Continues connection even if SSL certificate check fails. 
 		},
-		//TODO performance is bad
-//		transferProgress: function(progress) {
-//			if (!task) return;
-//			if (progress.indexedDeltas()) {
-//				task.updateProgress("Resolving Deltas", progress.indexedDeltas(), progress.totalDeltas());
-//			} else {
-//				task.updateProgress("Receiving Objects", progress.receivedObjects(), progress.totalObjects());
-//			}
-//		},
+		transferProgress: function(progress) {
+			if (!task) return;
+			if (progress.indexedDeltas()) {
+				task.updateProgress("Resolving deltas", progress.indexedDeltas(), progress.totalDeltas());
+			} else {
+				task.updateProgress("Receiving objects", progress.receivedObjects(), progress.totalObjects());
+			}
+		},
 		credentials: function() {
 			if (!creds.GitSshUsername && !creds.GitSshPrivateKey) {
 				return git.Cred.defaultNew();
