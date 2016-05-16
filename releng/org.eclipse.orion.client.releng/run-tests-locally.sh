@@ -26,5 +26,5 @@ if [ ! -d "$test_dir/node_modules" ]; then
     ( cd ${test_dir} && npm install . ) || die "Failed to install dependencies, consult the npm log to find out why."
 fi
 
-cd "$test_dir" && grunt --verbose
+cd "$test_dir" && grunt --verbose --force
 

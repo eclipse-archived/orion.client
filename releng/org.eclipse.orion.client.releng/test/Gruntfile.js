@@ -137,13 +137,13 @@ module.exports = function(grunt) {
 		var suiteURLShort = url.replace(/\./g, "_") ;
 		grunt.config("saucelabs-mocha." + suiteURLShort + ".options", {
 			tunneled: grunt.config.get("tunnel"),
-			tunnelTimeout: 10,
+			tunnelTimeout: 20,
 			build: grunt.config.get("buildId"),
 			browsers: pkg.browsers,
 			tags: [env.BUILD_TAG || "master"], // FIXME tags seem to be ignored
 			onTestComplete: onTestComplete,
 			maxRetries: 1, // retry once on timeout
-			"max-duration":    200,
+			"max-duration":    300,
 			testname: suiteURLShort,
 			urls: [suiteURL]
 		});
