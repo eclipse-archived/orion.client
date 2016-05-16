@@ -308,10 +308,6 @@ function fetchRemote(req, res, remote, branch, force) {
 function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	var repo;
 	var remoteObj;
-	
-	//TODO disable pushing tags
-	tags = false;
-	
 	var task = new tasks.Task(res, false, true);	
 	return clone.getRepo(req)
 	.then(function(r) {
@@ -328,10 +324,13 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 		var refSpecs = [];
 		refSpecs.push(refSpec);
 		if(tags){
-			r[1].forEach(function(ref) {
+			var counter = 0;
+			r[1].every(function(ref) {
 				if (ref.indexOf("refs/tags/") === 0) {
 					refSpecs.push(ref + ":" + ref);
-				}			
+					counter++;
+				}
+				return counter < 100;
 			});
 		}
 		return remoteObj.push(
