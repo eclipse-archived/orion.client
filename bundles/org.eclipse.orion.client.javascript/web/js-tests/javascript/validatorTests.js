@@ -12867,9 +12867,9 @@ define([
 					});
 					// forbiddenExportImport --------------------------------------------
 					describe('forbiddenExportImport', function() {
-						var RULE_ID = "forbiddenExportImport";
+						var RULE_ID = "semi";
 						it("flag invalid import/export", function(callback) {
-							var topic = "import * as test from \"./exports\"";
+							var topic = "import * as test from \"./files/es_modules_dep1\"";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 2;
 							var features = Object.create(null);
@@ -12880,7 +12880,7 @@ define([
 								function (problems) {
 									assertProblems(problems, [
 									{
-										id: RULE_ID,
+										id: "forbiddenExportImport",
 										severity: 'error',
 										description: '\'import\' and \'export\' may appear only with \'sourceType: module\'',
 										start: 0,
