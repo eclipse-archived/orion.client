@@ -11,11 +11,11 @@
  *******************************************************************************/
  /*eslint-env amd */
 define([
-'esprima/esprima',
+'acorn/dist/acorn',
 'estraverse/estraverse',
 'i18n!javascript/nls/problems',
 'orion/i18nUtil'
-], /* @callback */ function(Esprima, Estraverse, Messages, i18nUtil) {
+], /* @callback */ function(Acorn, Estraverse, Messages, i18nUtil) {
 
 	/**
 	 * @description Takes the source - a JSON object - and runs some static checks on it
@@ -92,8 +92,8 @@ define([
 			//hack to parse JSON to an AST - prepend a var decl
 			var src = "var v=" + source; //$NON-NLS-1$
 			try {
-				var ast = Esprima.parse(src, {
-					range: true
+				var ast = Acorn.parse(src, {
+					ranges: true
 				});
 				if(ast && ast.body && ast.body.length > 0) {
 					var root = true;

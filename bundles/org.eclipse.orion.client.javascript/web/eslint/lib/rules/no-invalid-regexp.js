@@ -1,6 +1,6 @@
 /*eslint-env amd */
 define([
- 'esprima/esprima',
+ 'acorn/dist/acorn',
  'module'
 ], function (parser, module) {/**
  * @fileoverview Validate strings passed to the RegExp constructor

@@ -17,8 +17,8 @@ define([
 	'javascript/hover',
 	'javascript/util',
 	'orion/editor/templates',
-	'esprima/esprima'
-], function(Messages, i18nUtil, Finder, Hover, Util, mTemplates, Esprima) {
+	'acorn/dist/acorn'
+], function(Messages, i18nUtil, Finder, Hover, Util, mTemplates, Acorn) {
 	
 	/**
 	 * @description Parse the source to an ESTree AST
@@ -27,9 +27,8 @@ define([
 	 */
 	function parse(source) {
 		try {
-			var ast = Esprima.parse(source, {
-				range: true,
-				tolerant: true
+			var ast = Acorn.parse(source, {
+				ranges: true
 			});
 		} catch (e) {
 			ast = Util.errorAST(e, '', source);
