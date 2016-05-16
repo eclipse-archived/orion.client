@@ -40,6 +40,25 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/applicati
 		"width", "wrap" 
 	];
 
+	var ariaAttributes = [
+		"activedescendant", "atomic", "autocomplete", 
+		"busy", 
+		"checked", "controls", 
+		"describedby", "disabled", "dropeffect", 
+		"expanded", 
+		"flowto", 
+		"grabbed", 
+		"haspopup", "hidden", 
+		"invalid", 
+		"labelledby", "label", "level", "live", 
+		"multiline", "multiselectable", 
+		"orientation", "owns", 
+		"posinset", "pressed", 
+		"readonly", "relevant", "required", 
+		"selected", "setsize", "sort", 
+		"valuemax", "valuemin", "valuenow", "valuetext"
+	];
+
 	var grammars = [];
 	grammars.push.apply(grammars, mJS.grammars);
 	grammars.push.apply(grammars, mCSS.grammars);
@@ -88,7 +107,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/applicati
 		],
 		repository: {
 			attribute:{
-				match: "\\b(?:" + attributes.join("|") + ")\\b",  
+				match: "\\b(?:" + attributes.join("|") + "|role|aria-(" + ariaAttributes.join("|") + "))\\b",  
 				name: "meta.tag.attribute.html"
 			}
 		}
