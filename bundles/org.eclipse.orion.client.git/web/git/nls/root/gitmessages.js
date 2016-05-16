@@ -623,5 +623,6 @@ define({//Default message bundle
 	"OpenGithubPullRequest": "Open Github Page", //$NON-NLS-0$  //$NON-NLS-1$
 	"OpenGithubPullRequestMsg": "Open the Github page for this Pull Request.", //$NON-NLS-0$  //$NON-NLS-1$
 	"AllowPopUpMsg": "Please allow popups for this site.", //$NON-NLS-0$  //$NON-NLS-1$
-	"ToggleGraph":"Toggles the graphical representation of the commit history" //$NON-NLS-0$  //$NON-NLS-1$
+	"ToggleGraph":"Toggles the graphical representation of the commit history", //$NON-NLS-0$  //$NON-NLS-1$
+	"Lightweight":"Lightweight" //$NON-NLS-0$  //$NON-NLS-1$
 });

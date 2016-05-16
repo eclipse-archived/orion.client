@@ -1132,8 +1132,11 @@ var exports = {};
 		});
 		commandService.addCommand(undoCommand);
 		
-		var tagNameParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Name:'])]); //$NON-NLS-1$ //$NON-NLS-0$
-
+		var tagNameParameters = new mCommandRegistry.ParametersDescription([
+			new mCommandRegistry.CommandParameter('name', 'text', messages['Name:']), //$NON-NLS-1$ //$NON-NLS-0$
+			new mCommandRegistry.CommandParameter('isLightWeight', 'boolean', messages['Lightweight']) //$NON-NLS-1$ //$NON-NLS-0$
+		]); //$NON-NLS-1$ //$NON-NLS-0$
+			
 		var addTagCommand = new mCommands.Command({
 			name : messages["Tag"],
 			tooltip: messages["Create a tag for the commit"],
@@ -1144,10 +1147,10 @@ var exports = {};
 			callback: function(data) {
 				var item = data.items;
 				
-				var createTagFunction = function(commitLocation, tagName) {
+				var createTagFunction = function(commitLocation, tagName, islightWeight) {
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 					var msg = i18nUtil.formatMessage(messages["Adding tag {$0}"], tagName);
-					progress.progress(serviceRegistry.getService("orion.git.provider").doAddTag(commitLocation, tagName), msg).then(function() { //$NON-NLS-0$
+					progress.progress(serviceRegistry.getService("orion.git.provider").doAddTag(commitLocation, tagName, islightWeight), msg).then(function() { //$NON-NLS-0$
 						dispatchModelEventOn({type: "modelChanged", action: "addTag", commit: item, tag: tagName}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus);
 				};
@@ -1155,7 +1158,7 @@ var exports = {};
 				var commitLocation = item.Location;
 				
 				if (data.parameters.valueFor("name") && !data.parameters.optionsRequested) { //$NON-NLS-0$
-					createTagFunction(commitLocation, data.parameters.valueFor("name")); //$NON-NLS-0$
+					createTagFunction(commitLocation, data.parameters.valueFor("name"), data.parameters.valueFor("isLightWeight")); //$NON-NLS-0$
 				}
 			},
 			visibleWhen : function(item) {

@@ -630,7 +630,7 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 	});
 }
 
-function tag(req, res, commitId, name) {
+function tag(req, res, commitId, name, isLightweight, message) {
 	var theRepo, theDiffs, thisCommit, theParents, fileDir;
 	clone.getRepo(req)
 	.then(function(repo) {
@@ -640,7 +640,10 @@ function tag(req, res, commitId, name) {
 	})
 	.then(function(commit) {
 		thisCommit = commit;
-		return theRepo.createLightweightTag(commit, name);
+		if(!isLightweight) {
+			var tagger = git.Signature.default(theRepo);
+		}
+		return isLightweight ? theRepo.createLightweightTag(commit, name) : theRepo.createTag (commit, name, message, tagger);
 	})
 	.then(function() {
 		return getDiff(theRepo, thisCommit, fileDir);
@@ -665,8 +668,10 @@ function tag(req, res, commitId, name) {
 function putCommit(req, res) {
 	var commit = util.decodeURIComponent(req.params.commit);
 	var tagName = req.body.Name;
+	var isLightweight = req.body.Type;
+	var message = req.body.Message || "";
 	if (tagName) {
-		tag(req, res, commit, tagName);
+		tag(req, res, commit, tagName, isLightweight, message);
 	}
 }
 
