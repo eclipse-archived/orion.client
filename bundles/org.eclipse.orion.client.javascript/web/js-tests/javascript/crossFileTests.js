@@ -575,39 +575,112 @@ define([
 						testDirectImplementation(options, {start:53, end:64, file: 'global_dep1.js'});
 					});
 				});
-				// TODO The fix for Bug 493463 causes problems for any non node modules, including ES import
-				describe.skip("ES Modules import/export", function(){
-					it("ES Module import all - Function implementation", function(done) {
-						var options = {
-							buffer: "import * as myModule from \"./files/es_modules_dep1\"; myModule.myESFunc();",
-							offset: 67,
-							callback: done
-						};
-						testDirectImplementation(options, {start:16, end:24, file: 'es_modules_dep1.js'});
+				describe("ES6 Modules import/export", function(){
+					before('Reset Tern Server for ES6 tests', function(done) {
+						worker.start(done,  {options:{ecmaVersion:6, sourceType:"module"}});
 					});
-					it("ES Module import all - Variable implementation", function(done) {
-						var options = {
-							buffer: "import * as myModule from \"./files/es_modules_dep1\"; var a = myModule.myESConst;",
-							offset: 77,
-							callback: done
-						};
-						testDirectImplementation(options, {start:43, end:52, file: 'es_modules_dep1.js'});
+					describe("Named export declaration", function(){
+						it("ES Module named export import all - Function implementation", function(done) {
+							var options = {
+								buffer: "import * as myModule from \"./files/es_modules_dep1\"; myModule.myESFunc();",
+								offset: 67,
+								callback: done
+							};
+							testDirectImplementation(options, {start:16, end:24, file: 'es_modules_dep1.js'});
+						});
+						it("ES Module named export import all - Variable implementation", function(done) {
+							var options = {
+								buffer: "import * as myModule from \"./files/es_modules_dep1\"; var a = myModule.myESConst;",
+								offset: 77,
+								callback: done
+							};
+							testDirectImplementation(options, {start:43, end:52, file: 'es_modules_dep1.js'});
+						});
+						it("ES Module named export import specific  - Function implementation", function(done) {
+							var options = {
+								buffer: "import {myESFunc} from \"./files/es_modules_dep1\"; myESFunc();",
+								offset: 58,
+								callback: done
+							};
+							testDirectImplementation(options, {start:16, end:24, file: 'es_modules_dep1.js'});
+						});
+						it("ES Module named export import specific - Variable implementation", function(done) {
+							var options = {
+								buffer: "import {myESConst} from \"./files/es_modules_dep1\"; var a = myESConst;",
+								offset: 65,
+								callback: done
+							};
+							testDirectImplementation(options, {start:43, end:52, file: 'es_modules_dep1.js'});
+						});
 					});
-					it("ES Module import specific  - Function implementation", function(done) {
-						var options = {
-							buffer: "import {myESFunc} from \"./files/es_modules_dep1\"; myESFunc();",
-							offset: 58,
-							callback: done
-						};
-						testDirectImplementation(options, {start:16, end:24, file: 'es_modules_dep1.js'});
+					describe("Named export declaration", function(){
+						it("ES Module default export import all - Function implementation", function(done) {
+							var options = {
+								buffer: "import * as myDefModule from \"./files/es_modules_dep2\"; myDefModule.default();",
+								offset: 73,
+								callback: done
+							};
+							testDirectImplementation(options, {start:15, end:27, file: 'es_modules_dep2.js'});
+						});
+						it("ES Module default export import all - Variable implementation", function(done) {
+							var options = {
+								buffer: "import * as myDefModule2 from \"./files/es_modules_dep3\"; var a = myDefModule2.default;",
+								offset: 83,
+								callback: done
+							};
+							testDirectImplementation(options, {start:15, end:24, file: 'es_modules_dep3.js'});
+						});
+						it("ES Module default export import specific  - Function implementation", function(done) {
+							var options = {
+								buffer: "import myDefault from \"./files/es_modules_dep2\"; myDefault();",
+								offset: 56,
+								callback: done
+							};
+							testDirectImplementation(options, {start:15, end:27, file: 'es_modules_dep2.js'});
+						});
+						it("ES Module default export import specific - Variable implementation", function(done) {
+							var options = {
+								buffer: "import myDefault from \"./files/es_modules_dep3\"; var a = myDefault;",
+								offset: 63,
+								callback: done
+							};
+							testDirectImplementation(options, {start:15, end:24, file: 'es_modules_dep3.js'});
+						});
 					});
-					it("ES Module import specific - Variable implementation", function(done) {
-						var options = {
-							buffer: "import {myESConst} from \"./files/es_modules_dep1\"; var a = myESConst;",
-							offset: 65,
-							callback: done
-						};
-						testDirectImplementation(options, {start:43, end:52, file: 'es_modules_dep1.js'});
+					// TODO Unclear if the export all syntax is wrong or the plugin has a bug
+					describe.skip("Named export declaration", function(){
+						it("ES Module export all import all - Function implementation", function(done) {
+							var options = {
+								buffer: "import * as myModule from \"./files/es_modules_dep4\"; myModule.myESFunc();",
+								offset: 72,
+								callback: done
+							};
+							testDirectImplementation(options, {start:16, end:24, file: 'es_modules_dep1.js'});
+						});
+						it("ES Module export all import all - Variable implementation", function(done) {
+							var options = {
+								buffer: "import * as myModule from \"./files/es_modules_dep4\"; var a = myModule.myESConst;",
+								offset: 82,
+								callback: done
+							};
+							testDirectImplementation(options, {start:43, end:52, file: 'es_modules_dep1.js'});
+						});
+						it("ES Module export all import specific  - Function implementation", function(done) {
+							var options = {
+								buffer: "import {myESFunc} from \"./files/es_modules_dep4\"; myESFunc();",
+								offset: 60,
+								callback: done
+							};
+							testDirectImplementation(options, {start:16, end:24, file: 'es_modules_dep1.js'});
+						});
+						it("ES Module export all import specific - Variable implementation", function(done) {
+							var options = {
+								buffer: "import {myESConst} from \"./files/es_modules_dep4\"; var a = myESConst;",
+								offset: 70,
+								callback: done
+							};
+							testDirectImplementation(options, {start:43, end:52, file: 'es_modules_dep1.js'});
+						});
 					});
 				});
 			});
