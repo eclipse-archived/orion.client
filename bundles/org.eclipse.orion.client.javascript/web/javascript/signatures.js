@@ -176,7 +176,7 @@ define([
 						}
 						break;
 					case 'ArrowFunctionExpression' :
-						name = '(';  //$NON-NLS-0$
+						name = 'arrow function(';  //$NON-NLS-0$
 						var afeparams = this.getParamsFrom(astnode);
 						if(afeparams) {
 							name += afeparams;

@@ -123,7 +123,7 @@ define([
 						if(!outline || outline.length < 1) {
 							assert.fail("There should be one outline element");
 						}
-						assertElement(outline[0], "() => {}", 0, 24);
+						assertElement(outline[0], "arrow function() => {}", 0, 24);
 						callback();
 					}
 					catch(err) {
@@ -138,7 +138,7 @@ define([
 						if(!outline || outline.length < 1) {
 							assert.fail("There should be one outline element");
 						}
-						assertElement(outline[0], "(val) => {}", 0, 22);
+						assertElement(outline[0], "arrow function(val) => {}", 0, 22);
 						callback();
 					}
 					catch(err) {
@@ -153,7 +153,7 @@ define([
 						if(!outline || outline.length < 1) {
 							assert.fail("There should be one outline element");
 						}
-						assertElement(outline[0], "(val) => {}", 0, 20);
+						assertElement(outline[0], "arrow function(val) => {}", 0, 20);
 						callback();
 					}
 					catch(err) {
