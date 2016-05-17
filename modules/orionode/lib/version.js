@@ -20,6 +20,7 @@ module.exports.router = function(options) {
 	return express.Router()
 	.get('*', /* @callback */ function (req, res) {
 		var buildID = configParams["orion.buildId"] || "unknown";
+		res.setHeader("Cache-Control", "no-cache");
 		return res.status(200).json({
 			build: buildID
 		});
