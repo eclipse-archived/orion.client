@@ -55,7 +55,7 @@ define([
 	mProblems, mBlamer, mDiffer,
 	mKeyBinding, util, Deferred, mContextMenu, mMetrics, mCommonPreferences, objects
 ) {
-	var fPattern = "/__embed/"; //$NON-NLS-1$
+	var inMemoryFilePattern = "/in_memory_file_system/"; //$NON-NLS-1$
 	var Dispatcher = mDispatcher.Dispatcher;
 
 	function parseNumericParams(input, params) {
@@ -150,7 +150,7 @@ define([
 			if(cType && cType.extension && cType.extension.length > 0) {
 				fileExt = cType.extension[0];
 			}
-			var currentLocation = fPattern + this.id + "/foo." + fileExt; //$NON-NLS-1$
+			var currentLocation = inMemoryFilePattern + this.id + "/foo." + fileExt; //$NON-NLS-1$
 			var def;
 			var sameFile = currentLocation === this.lastFileLocation;
 			if(sameFile || !this.lastFileLocation) {

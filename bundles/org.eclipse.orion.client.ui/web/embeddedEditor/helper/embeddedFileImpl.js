@@ -16,6 +16,8 @@ define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Def
 	function EmbeddedFileImpl(fileBase) {
 		this.fileBase = fileBase;
 		this.fileRoot = {};
+		this.projectMetaLocation = this.fileBase + "project_root_location/";
+		this.fileRoot[this.projectMetaLocation] = {Location: this.projectMetaLocation, Directory: true};
 	}
 	
 	EmbeddedFileImpl.prototype = {
@@ -34,8 +36,10 @@ define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Def
 		createFolder: function(/*parentLocation, folderName*/) {
 			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
-		createFile: function(/*parentLocation, fileName*/) {
-			throw new Error("Not supported"); //$NON-NLS-0$ 
+		createFile: function(parentLocation, fileName) {
+			var fileLocation = parentLocation + fileName;
+			this._getFile(fileLocation, true);
+			return this.read(fileLocation, true);
 		},
 		moveFile: function(/*sourceLocation, targetLocation, name*/) {
 			throw new Error("Not supported"); //$NON-NLS-0$ 
@@ -58,7 +62,7 @@ define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Def
 		_getFile: function(fLocation, create) {
 			var locationURL = new URL(fLocation);
 			var filePath = locationURL.pathname;
-			if (!this.fileRoot[filePath] && create) {
+			if (this.fileRoot[filePath] === undefined && create) {
 				this.fileRoot[filePath] = {
 					Name: locationURL.pathname.split("/").pop(),
 					Location: filePath,
@@ -78,7 +82,7 @@ define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Def
 		 */
 		read: function(fLocation, isMetadata) {
 			var file = this._getFile(fLocation);
-			if (!file) return new Deferred().reject();
+			if (file === undefined) return new Deferred().reject();
 			if(isMetadata){
 				var meta = {
 					Length: file.length,
@@ -87,7 +91,7 @@ define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Def
 					ETag: file.ETag,
 					Location: file.Location,
 					Name: file.Name,
-					Parents: []
+					Parents: [this.fileRoot[this.projectMetaLocation]]
 				};
 				return new Deferred().resolve(meta);
 			}
