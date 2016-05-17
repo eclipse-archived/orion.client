@@ -69,6 +69,7 @@ function startServer(options) {
 		app.use('/prefs', checkAuthenticated, require('./lib/controllers/prefs')(options));
 		app.use('/xfer', checkAuthenticated, require('./lib/xfer')(options));
 		app.use('/metrics', require('./lib/metrics').router(options));
+		app.use('/version', require('./lib/version').router(options));
 
 		// Static files
 		app.use(require('term.js').middleware());
