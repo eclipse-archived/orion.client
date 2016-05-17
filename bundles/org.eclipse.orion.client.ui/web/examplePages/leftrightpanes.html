@@ -9,6 +9,7 @@
 		<link rel="stylesheet" type="text/css" href="leftrightpanes.css" />
     	<script type="text/javascript" src="../requirejs/require.js"></script>
 		<script type="text/javascript">
+		/*eslint-env browser, amd*/
 		require({
 			  baseUrl: '..',
 			  packages: [ ],
@@ -24,7 +25,7 @@
 	</head>
 	
 	<body id="orion-leftrightpage" class="orionPage">
-		<div id="sideMenu" class="sideMenu"></div>
+		<nav id="sideMenu" class="sideMenu"></nav>
 		<div id="pageContent" class="content-fixedHeight">
 			<div id="sideMenuToggle" class="sideMenuToggle"></div>
 			<div id="pageToolbar" class="mainToolbar toolComposite toolbarLayout"></div>

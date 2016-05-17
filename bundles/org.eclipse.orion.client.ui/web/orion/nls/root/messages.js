@@ -19,7 +19,7 @@ define({//Default message bundle
 	"EditorRelatedLinkParent": "Show Enclosing Folder",
 	"EditorLinkWorkspace": "Edit",
 	"EditorRelatedLinkProj": "Show Project",
-	"navigationBar": "Navigation Bar",
+	"sidebar": "Sidebar",
 	"Filter bindings": "Filter bindings",
 	"BindingPrompt": "Enter the new binding",
 	"NoBinding": "---",

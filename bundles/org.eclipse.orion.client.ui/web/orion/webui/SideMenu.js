@@ -115,8 +115,6 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'o
 				
 				var sideMenuList = document.createElement("ul"); //$NON-NLS-0$
 				sideMenuList.classList.add("sideMenuList"); //$NON-NLS-0$
-				sideMenuList.setAttribute("role", "navigation"); //$NON-NLS-1$ //$NON-NLS-2$
-				sideMenuList.setAttribute("aria-label", messages.navigationBar); //$NON-NLS-1$
 				this._sideMenuList = sideMenuList;
 
 				this._categoryInfos.forEach(function(categoryInfo) {
@@ -190,6 +188,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'o
 
 				this._updateCategoryAnchors();
 				this._show = function() {
+					this._parentNode.setAttribute("aria-label", messages.sidebar); //$NON-NLS-1$
 					this._parentNode.appendChild(sideMenuHome);
 					this._parentNode.appendChild(this._topScrollButton);
 					this._parentNode.appendChild(sideMenuList);
