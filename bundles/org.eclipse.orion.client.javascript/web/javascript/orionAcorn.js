@@ -303,6 +303,9 @@ define([
 					collectDeps(node.callee, node.arguments, that.environments, that.dependencies);
 				} else if (type === 'ImportDeclaration'){
 					addDep(node.source, that.dependencies, 'es_modules'); //$NON-NLS-1$
+					that.environments.es_modules = true;
+				} else if (type === 'ExportNamedDeclaration' || type === 'ExportDefaultDeclaration' || type === 'ExportAllDeclaration'){
+					that.environments.es_modules = true;
 				}
 				var result = nextMethod.call(this, node, type);
 				// attach trailing comments

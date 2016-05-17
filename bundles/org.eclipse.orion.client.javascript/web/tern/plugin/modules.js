@@ -354,7 +354,7 @@
 	 */
 	function isUsingModules(file) {
 		if(file.ast){
-			if (file.ast.environments && file.ast.environments.node) {
+			if (file.ast.environments && (file.ast.environments.node || file.ast.environments.es_modules)) {
 				return true;
 			} else if (file.ast.dependencies){
 				for (var i=0; i<file.ast.dependencies.length; i++) {
