@@ -2067,6 +2067,8 @@ define([
 									context.report(lib, ProblemMessages['unknown-require-plugin'], {pid: 'unknown-require-plugin', nls: 'unknown-require-plugin', data: lib.value});
 								} else if(nodeModules[lib.value]) {
 									context.report(lib, ProblemMessages['unknown-require-plugin'], {pid: 'unknown-require-plugin', nls: 'unknown-require-plugin', data: 'node'});
+								} else if(!tern.pluginRunning("node")) {
+									context.report(lib, ProblemMessages['unknown-require-not-running'], {pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: 'node'});
 								} else {
 									//TODO hook in here to go fetch it
 									context.report(lib, ProblemMessages['unknown-require'], {data: lib.value});

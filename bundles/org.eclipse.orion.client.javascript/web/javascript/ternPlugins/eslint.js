@@ -173,6 +173,9 @@ define([
 				}
 				return false;
 			};
+			_tern.pluginRunning = function pluginRunning(pluginName) {
+				return server.plugins[pluginName];
+			};
 			_tern.isLoadEagerly = function isLoadEagerly(fileName) {
 				if(server.options && Array.isArray(server.options.loadEagerly)) {
 					return server.options.loadEagerly.length > 0 && server.options.loadEagerly.indexOf(fileName) > -1;
