@@ -12,11 +12,11 @@
 /*eslint-env browser, amd*/
 /*global URL*/
 define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Deferred) {
-	
+	var PROJECT_LOC = "project/";
 	function EmbeddedFileImpl(fileBase) {
 		this.fileBase = fileBase;
 		this.fileRoot = {};
-		this.projectMetaLocation = this.fileBase + "project_root_location/";
+		this.projectMetaLocation = this.fileBase + PROJECT_LOC;
 		this.fileRoot[this.projectMetaLocation] = {Location: this.projectMetaLocation, Directory: true};
 	}
 	
@@ -84,6 +84,7 @@ define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Def
 			var file = this._getFile(fLocation);
 			if (file === undefined) return new Deferred().reject();
 			if(isMetadata){
+				var parents = fLocation === this.projectMetaLocation ? [] : [this.fileRoot[this.projectMetaLocation]];
 				var meta = {
 					Length: file.length,
 					Directory: !!file.Directory,
@@ -91,7 +92,7 @@ define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Def
 					ETag: file.ETag,
 					Location: file.Location,
 					Name: file.Name,
-					Parents: [this.fileRoot[this.projectMetaLocation]]
+					Parents: parents
 				};
 				return new Deferred().resolve(meta);
 			}
