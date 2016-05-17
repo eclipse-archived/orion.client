@@ -130,6 +130,7 @@ function createBlameJson(hunkMergedArray, fileDir){
 		delete hunkCommitJson.Parents;
 		delete hunkCommitJson.Id;
 		delete hunkCommitJson.Type;
+		hunkCommitJson.CommitLocation = hunkCommitJson.Location;
 		hunkCommitJson.Children = hunkCommit.Children;
 		return hunkCommitJson;
 	});
