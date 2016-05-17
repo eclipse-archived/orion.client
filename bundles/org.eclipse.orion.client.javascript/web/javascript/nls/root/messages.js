@@ -238,6 +238,8 @@ define({
 	'orionRedisPluginDescription': 'Plug-in that contributes type information and code templates for Redis.',
 	'ternPluginsPluginName': 'Orion Tern Plug-in Support',
 	'ternPluginsPluginDescription': 'Plug-in that allows Orion to inspect and modify plug-ins running in Tern.',
+	'occurrencesPluginName': 'Orion Occurrences Support',
+	'occurrencesPluginDescription': 'Plug-in that allows Orion to highlight the occurrenes of an identifier in a file',
 	'openImplPluginName': 'Orion Open Implementation Support',
 	'openImplPluginDescription': 'Plug-in that allows Orion to try to find implementation locations of elements rather than simple declarations',
 	'htmlDepPluginName': 'Orion HTML Dependency Analysis',

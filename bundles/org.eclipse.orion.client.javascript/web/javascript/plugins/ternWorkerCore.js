@@ -485,6 +485,29 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 					}
 				}
 			);
+		},
+		'occurrences': function(args, callback) {
+			if(ternserver) {
+	    		ternserver.request({
+					query: {
+						type: "occurrences", //$NON-NLS-1$
+						file: args.meta.location,
+						end: args.params.offset
+					},
+					files: Array.isArray(args.files) ? args.files : []},
+					function(error, occurrences) {
+						if(error) {
+							callback(null, {error: error.message, message: Messages['failedToComputeOccurrences']});
+						} else if(Array.isArray(occurrences)) {
+							callback({request: 'outline', occurrences: occurrences}); //$NON-NLS-1$
+						} else {
+							callback({request: 'outline', occurrences: []}); //$NON-NLS-1$
+						}
+					}
+				);
+			} else {
+		       callback(null, {message: Messages['failedToComputeOccurrencesNoServer']});
+		   }
 		}
 	};
 

@@ -482,7 +482,7 @@ define([
     	/**
     	 * Register the mark occurrences support
     	 */
-    	provider.registerService("orion.edit.occurrences", new Occurrences.JavaScriptOccurrences(astManager, CUProvider), //$NON-NLS-1$
+    	provider.registerService("orion.edit.occurrences", new Occurrences.JavaScriptOccurrences(ternWorker), //$NON-NLS-1$
     			{
     		contentType: ["application/javascript", "text/html"]	//$NON-NLS-1$ //$NON-NLS-2$
     			});
@@ -1775,4 +1775,3 @@ define([
     		}*/	
     	});
 });
-

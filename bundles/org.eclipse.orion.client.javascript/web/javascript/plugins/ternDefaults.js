@@ -34,6 +34,7 @@ define([
 	"javascript/ternPlugins/jsdoc",
 	"javascript/ternPlugins/mongodb",
 	"javascript/ternPlugins/mysql",
+	"javascript/ternPlugins/occurrences",
 	"javascript/ternPlugins/open_impl",
 	"javascript/ternPlugins/outliner",
 	"javascript/ternPlugins/plugins",
@@ -58,6 +59,11 @@ define([
 			"plugins": {
 				"name": Messages["ternPluginsPluginName"],
 				"description": Messages["ternPluginsPluginDescription"],
+				"version": "1.0"
+			},
+			"occurrences": {
+				"name": Messages["occurrencesPluginName"],
+				"description": Messages["occurrencesPluginDescription"],
 				"version": "1.0"
 			},
 			"open_impl": {
