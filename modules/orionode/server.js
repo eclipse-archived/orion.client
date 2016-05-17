@@ -117,7 +117,7 @@ function startServer(cb) {
 	});
 }
 
-if (args.ui || configParams["orion.ui"]) {
+if (process.versions.electron) {
 	var electron = require('electron');
 	var mainWindow = null;
 	electron.app.on('ready', function() {
