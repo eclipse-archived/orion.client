@@ -91,7 +91,7 @@ define([
  		
  		if (item.href) {
 			this._createLink(linkContents, item.href, contentsNode);
- 		} else if (item.line || item.column || item.start) {
+ 		} else if (item.line || item.column || item.star || item.end) {
  			var href = new URITemplate("#{,resource,params*}").expand({resource: this.title, params: item}); //$NON-NLS-0$
 			this._createLink(linkContents, href, contentsNode);
  			item.outlineLink = href;

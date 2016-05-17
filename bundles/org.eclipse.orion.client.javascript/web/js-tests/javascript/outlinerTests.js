@@ -60,7 +60,9 @@ define([
 			function assertElement(element, label, start, end) {
 				assert(element, "The tested element cannot be null");
 				assert(element.label, "The outlined element must have a label");
-				assert(element.start, "The outlined element must have a start range");
+				if (element.start !== 0) {
+					assert(element.start, "The outlined element must have a start range");
+				}
 				assert(element.end, "The outlined element must have an end range");
 				var fullLabel = element.label;
 				if (element.labelPre){
@@ -97,7 +99,7 @@ define([
 				r.outliner.computeOutline(r.editorContext).then(function(outline) {
 					try {
 						assert(outline && outline.length > 0, "There should be one outline element");
-						assertElement(outline[0], "Foo.bar()", 1, 10);
+						assertElement(outline[0], "Foo.bar()", 0, 10);
 						callback();
 					}
 					catch(err) {
@@ -113,7 +115,7 @@ define([
 				r.outliner.computeOutline(r.editorContext).then(function(outline) {
 					try {
 						assert(outline && outline.length > 0, "There should be one outline element");
-						assertElement(outline[0], "Foo.bar.baz()", 1, 14);
+						assertElement(outline[0], "Foo.bar.baz()", 0, 14);
 						callback();
 					}
 					catch(err) {
@@ -129,7 +131,7 @@ define([
 				r.outliner.computeOutline(r.editorContext).then(function(outline) {
 					try {
 						assert(outline && outline.length > 0, "There should be one outline element");
-						assertElement(outline[0], "Foo.baz.bar()", 1, 14);
+						assertElement(outline[0], "Foo.baz.bar()", 0, 14);
 						callback();
 					}
 					catch(err) {

@@ -30,6 +30,7 @@
 				'js-tests/javascript/finderTests',
 				'js-tests/javascript/occurrencesTests',
 				'js-tests/javascript/outlinerTests',
+				'js-tests/javascript/es6OutlinerTests',
 				'js-tests/javascript/validatorTests',
 				'js-tests/javascript/lruTests',
 				'js-tests/javascript/quickfixTests',
@@ -41,7 +42,7 @@
 				'js-tests/javascript/ternProjectFileTests',
 				'js-tests/javascript/ternProjectManagerTests',
 				'js-tests/javascript/ternProjectValidatorTests',
-				], function(worker, crossFileTests, ternAssistIndexTests, ternAssistModuleTests, ternAssistTests, ternCommandTests, dependencyTests, finderTests, occurrencesTests, outlinerTests, validatorTests, lruTests, quickfixTests, 
+				], function(worker, crossFileTests, ternAssistIndexTests, ternAssistModuleTests, ternAssistTests, ternCommandTests, dependencyTests, finderTests, occurrencesTests, outlinerTests, es6OutlinerTests, validatorTests, lruTests, quickfixTests, 
 							es6QuickfixTests, eslintCoreTests, scriptResolverTests, sigparserTests, es6ValidatorTests, ternProjectTests, ternProjectValidatorTests) {
 					var testworker;
 					before("reset timeout", function(done) {
@@ -61,6 +62,7 @@
 					lruTests(testworker);
 					occurrencesTests(testworker);
 					outlinerTests(testworker);
+					es6OutlinerTests(testworker);
 					quickfixTests(testworker);
 					es6QuickfixTests(testworker);
 					scriptResolverTests(testworker);

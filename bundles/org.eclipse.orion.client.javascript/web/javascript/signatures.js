@@ -25,12 +25,12 @@ define([
 		 * @param {Object} astnode The AST node to parse and compute the signature from
 		 * @returns {Object} The computed signature object or <code>null</code> if the computation fails
 		 */
-		computeSignature: function(astnode) {
+		computeSignature: function(astnode, kind) {
 			if(astnode) {
 				if(astnode.sig) {
 					return astnode.sig;
 				}
-				var val = this.getNameFrom(astnode);
+				var val = this.getNameFrom(astnode, kind);
 				return {
 					sig: val.name,
 					details: val.details,
@@ -133,136 +133,183 @@ define([
 		 * @returns {String} An object containing 'name', the computed name to display for the node or <code>null</code> if one could not be 
 		 * 					computed and possibly 'details' if optional display information is computed
 		 */
-		getNameFrom: function(astnode) {
-			var name = "Anonyous " + astnode.type;  //$NON-NLS-0$
+		getNameFrom: function(astnode, kind) {
+			var name = "Anonymous " + astnode.type;  //$NON-NLS-0$
 			var details;
-			if(astnode && astnode.type) {
-				if(astnode.type === 'FunctionDeclaration') {
-					//TODO with the attached doc node we can augment this infos
-					if(astnode.id && astnode.id.name) {
-						name = astnode.id.name+'(';
-						var fparams = this.getParamsFrom(astnode);
-						if(fparams) {
-							name += fparams;
+			if(astnode) {
+				switch(astnode.type) {
+					case 'ClassDeclaration' :
+						name = 'class ';
+						if (astnode.id && astnode.id.start !== astnode.id.end) {
+							name += astnode.id.name;
+						} else {
+							name += '<anonymous>';
 						}
-						name += ')';
-					}
-				}
-				else if(astnode.type === 'FunctionExpression') {
-					name = 'function(';  //$NON-NLS-0$
-					var feparams = this.getParamsFrom(astnode);
-					if(feparams) {
-						name += feparams;
-					}
-					name += ')';
-				}
-				else if(astnode.type === 'ObjectExpression') {
-					name = 'closure ';  //$NON-NLS-0$
-					details = this.getPropertyListFrom(astnode);
-				}
-				else if(astnode.type === 'Property') {
-					if(astnode.value) {
-						if(astnode.value.type === 'FunctionExpression') {
-							if(astnode.key) {
-								if(astnode.key.name) {
-									name = astnode.key.name + '(';
-								}
-								else if(astnode.key.value) {
-									name = astnode.key.value + '(';
-								}
-							}
-							else {
-								name = 'function(';  //$NON-NLS-0$
-							}
-							var pparams = this.getParamsFrom(astnode.value);
-							if(pparams) {
-								name += pparams;
+						break;
+					case 'ClassExpression' :
+						name = 'class ';
+						if (astnode.id && astnode.id.start !== astnode.id.end) {
+							name += astnode.id.name;
+						} else {
+							name += '<anonymous>';
+						}
+						break;
+					case 'FunctionDeclaration' :
+						//TODO with the attached doc node we can augment this infos
+						if(astnode.id && astnode.id.name) {
+							name = astnode.id.name+'(';
+							var fdparams = this.getParamsFrom(astnode);
+							if(fdparams) {
+								name += fdparams;
 							}
 							name += ')';
 						}
-						else if(astnode.value.type === 'ObjectExpression') {
-							if(astnode.key) {
-								if(astnode.key.name) {
-									name = astnode.key.name + ' ';  //$NON-NLS-0$
+						break;
+					case 'MethodDefinition' :
+						if(astnode.key && astnode.key.name) {
+							name = astnode.key.name+'(';
+							var mdParams = this.getParamsFrom(astnode.value);
+							if(mdParams) {
+								name += mdParams;
+							}
+							name += ')';
+						}
+						break;
+					case 'ArrowFunctionExpression' :
+						name = '(';  //$NON-NLS-0$
+						var afeparams = this.getParamsFrom(astnode);
+						if(afeparams) {
+							name += afeparams;
+						}
+						name += ') => {}';
+						break;
+					case 'FunctionExpression' :
+						name = 'function(';  //$NON-NLS-0$
+						var feparams = this.getParamsFrom(astnode);
+						if(feparams) {
+							name += feparams;
+						}
+						name += ')';
+						break;
+					case 'ObjectExpression' :
+						name = 'closure ';  //$NON-NLS-0$
+						details = this.getPropertyListFrom(astnode);
+						break;
+					case 'Property' :
+						if(astnode.value) {
+							if(astnode.value.type === 'FunctionExpression') {
+								if(astnode.key) {
+									if(astnode.key.name) {
+										name = astnode.key.name + '(';
+									}
+									else if(astnode.key.value) {
+										name = astnode.key.value + '(';
+									}
 								}
-								else if(astnode.key.value) {
-									name = astnode.key.value + ' ';  //$NON-NLS-0$
+								else {
+									name = 'function(';  //$NON-NLS-0$
 								}
-								details = this.getPropertyListFrom(astnode.value);
-							}
-						}
-						else if(astnode.key) {
-							if(astnode.key.name) {
-								name = astnode.key.name;
-							}
-							else if(astnode.key.value) {
-								name = astnode.key.value;
-							}
-						}
-					}
-				}
-				else if(astnode.type === 'VariableDeclarator') {
-					if(astnode.init) {
-						if(astnode.init.type === 'ObjectExpression') {
-							if(astnode.id && astnode.id.name) {
-								name = 'var '+astnode.id.name+ ' = ';  //$NON-NLS-1$ //$NON-NLS-2$
-								details = this.getPropertyListFrom(astnode.init);
-							}
-						}
-						else if(astnode.init.type === 'FunctionExpression') {
-							if(astnode.id && astnode.id.name) {
-								name = astnode.id.name + '(';
-								var vparams = this.getParamsFrom(astnode.init);
-								if(vparams) {
-									name += vparams;
+								var pparams = this.getParamsFrom(astnode.value);
+								if(pparams) {
+									name += pparams;
 								}
 								name += ')';
 							}
-							else {
-								name = this.getNameFrom(astnode.init);
+							else if(astnode.value.type === 'ObjectExpression') {
+								if(astnode.key) {
+									if(astnode.key.name) {
+										name = astnode.key.name + ' ';  //$NON-NLS-0$
+									}
+									else if(astnode.key.value) {
+										name = astnode.key.value + ' ';  //$NON-NLS-0$
+									}
+									details = this.getPropertyListFrom(astnode.value);
+								}
+							}
+							else if(astnode.key) {
+								if(astnode.key.name) {
+									name = astnode.key.name;
+								}
+								else if(astnode.key.value) {
+									name = astnode.key.value;
+								}
 							}
 						}
-					}
-				}
-				else if(astnode.type === 'AssignmentExpression') {
-					if(astnode.left && astnode.right) {
-						var isobject = astnode.right.type === 'ObjectExpression';
-						if(isobject || astnode.right.type === 'FunctionExpression') {
-							if(astnode.left.name) {
-								name = astnode.left.name;
-							}
-							else if(astnode.left.type === 'MemberExpression') {
-								name = this.expandMemberExpression(astnode.left, '');
-							}
-							if(name) {
-								//append the right stuff
-								if(isobject) {
-									name += ' ';  //$NON-NLS-0$
-									details = this.getPropertyListFrom(astnode.right); 
+						break;
+					case 'VariableDeclarator' :
+						if(astnode.init) {
+							if(astnode.init.type === 'ObjectExpression') {
+								switch(kind) {
+									case 'let' :
+										name = 'let ';
+										break;
+									case 'const' :
+										name = 'const ';
+										break;
+									default:
+										name = 'var ';
 								}
-								else {
-									name += '(';
-									var aparams = this.getParamsFrom(astnode.right);
-									if(aparams) {
-										name += aparams;
+								if(astnode.id && astnode.id.name) {
+									name += astnode.id.name+ ' = ';  //$NON-NLS-1$ //$NON-NLS-2$
+									details = this.getPropertyListFrom(astnode.init);
+								}
+							}
+							else if(astnode.init.type === 'FunctionExpression') {
+								if(astnode.id && astnode.id.name) {
+									name = astnode.id.name + '(';
+									var vparams = this.getParamsFrom(astnode.init);
+									if(vparams) {
+										name += vparams;
 									}
 									name += ')';
 								}
-							}
-							else {
-								name = this.getNameFrom(astnode.right);
+								else {
+									name = this.getNameFrom(astnode.init);
+								}
 							}
 						}
-					}
-				}
-				else if(astnode.type === 'ReturnStatement') {
-					if(astnode.argument) {
-						if(astnode.argument.type === 'ObjectExpression' ||
-							astnode.argument.type === 'FunctionExpression') {
-								name = 'return ';  //$NON-NLS-0$
-								details = this.getPropertyListFrom(astnode.argument);
+						break;
+					case 'AssignmentExpression' :
+						if(astnode.left && astnode.right) {
+							var isobject = astnode.right.type === 'ObjectExpression';
+							if(isobject || astnode.right.type === 'FunctionExpression') {
+								if(astnode.left.name) {
+									name = astnode.left.name;
+								}
+								else if(astnode.left.type === 'MemberExpression') {
+									name = this.expandMemberExpression(astnode.left, '');
+								}
+								if(name) {
+									//append the right stuff
+									if(isobject) {
+										name += ' ';  //$NON-NLS-0$
+										details = this.getPropertyListFrom(astnode.right); 
+									}
+									else {
+										name += '(';
+										var aparams = this.getParamsFrom(astnode.right);
+										if(aparams) {
+											name += aparams;
+										}
+										name += ')';
+									}
+								}
+								else {
+									name = this.getNameFrom(astnode.right);
+								}
+							}
 						}
-					}
+						break;
+					case 'ReturnStatement' :
+						if(astnode.argument) {
+							if(astnode.argument.type === 'ObjectExpression'
+								|| astnode.argument.type === 'FunctionExpression'
+								|| astnode.argument.type === 'ArrowFunctionExpression') {
+									name = 'return ';  //$NON-NLS-0$
+									details = this.getPropertyListFrom(astnode.argument);
+							}
+						}
+						break;
 				}
 			}
 			return {name: name, details: details};
@@ -330,6 +377,19 @@ define([
 					range[0] = astnode.range[0];
 					range[1] = range[0] + 6;
 				}
+				else if(astnode.type === 'ArrowFunctionExpression') {
+					range = astnode.range;
+				}
+				else if(astnode.type === 'ClassExpression'
+							|| astnode.type === 'ClassDeclaration') {
+					if(astnode.id && astnode.id.range) {
+						range = astnode.id.range;
+					} else {
+						// just highlight 'class' for anynomous class
+						range = astnode.range;
+						range[1] = range[0] + 5;
+					}
+				}
 				else if(astnode.id && astnode.id.range) {
 					range = astnode.id.range;
 				}
@@ -338,10 +398,6 @@ define([
 					if(astnode.type === 'FunctionExpression') {
 						range[1] = range[0]+8;
 					}
-				}
-				if(range[0] < 1) {
-					//TODO hack since passing in a range starting with 0 causes no selection to be made
-					range[0] = 1;
 				}
 			}
 			return range;

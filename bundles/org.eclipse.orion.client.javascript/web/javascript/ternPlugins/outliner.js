@@ -55,6 +55,12 @@ define([
 						return item;
 					}
 				}
+				function _isOutlinedExpression(node) {
+					return node.type === Estraverse.Syntax.FunctionExpression
+						|| node.type === Estraverse.Syntax.ObjectExpression
+						|| node.type === Estraverse.Syntax.ClassExpression
+						|| node.type === Estraverse.Syntax.ArrowFunctionExpression;
+				}
 				Estraverse.traverse(file.ast, {
 					/**
 					 * @description Callback from estraverse when a node is starting to be visited
@@ -65,6 +71,30 @@ define([
 					enter: function(node) {
 						var item;
 						switch(node.type) {
+							case Estraverse.Syntax.ClassDeclaration : {
+								item = addElement(Signatures.computeSignature(node));
+								if(item) {
+									scope.push(item);
+								}
+								delete node.sig;
+								break;
+							}
+							case Estraverse.Syntax.ClassExpression : {
+								item = addElement(Signatures.computeSignature(node));
+								if(item) {
+									scope.push(item);
+								}
+								delete node.sig;
+								break;
+							}
+							case Estraverse.Syntax.MethodDefinition: {
+								item = addElement(Signatures.computeSignature(node));
+								if(item) {
+									scope.push(item);
+								}
+								delete node.sig;
+								break;
+							}
 							case Estraverse.Syntax.FunctionDeclaration: {
 								item = addElement(Signatures.computeSignature(node));
 								if(item) {
@@ -80,6 +110,14 @@ define([
 								delete node.sig;
 								break;
 							}
+							case Estraverse.Syntax.ArrowFunctionExpression : {
+								item = addElement(Signatures.computeSignature(node));
+								if (item) {
+									scope.push(item);
+								}
+								delete node.sig;
+								break;
+							}
 							case Estraverse.Syntax.ObjectExpression: {
 								item = addElement(Signatures.computeSignature(node));
 								if(item) {
@@ -89,8 +127,7 @@ define([
 								if(node.properties) {
 									node.properties.forEach(function(property) {
 										if(property.value) {
-											if(property.value.type === Estraverse.Syntax.FunctionExpression || 
-												property.value.type === Estraverse.Syntax.ObjectExpression) {
+											if(_isOutlinedExpression(property.value)) {
 												property.value.sig = Signatures.computeSignature(property);
 											}
 											else {
@@ -106,7 +143,7 @@ define([
 									node.declarations.forEach(function(declaration) {
 										if(declaration.init) {
 											if(declaration.init.type === Estraverse.Syntax.ObjectExpression) {
-												declaration.init.sig = Signatures.computeSignature(declaration);
+												declaration.init.sig = Signatures.computeSignature(declaration, node.kind);
 											}
 										}
 									});
@@ -115,8 +152,7 @@ define([
 							}
 							case Estraverse.Syntax.AssignmentExpression: {
 								if(node.left && node.right) {
-									if(node.right.type === Estraverse.Syntax.ObjectExpression || 
-										node.right.type === Estraverse.Syntax.FunctionExpression) {
+									if(_isOutlinedExpression(node.right)) {
 										node.right.sig = Signatures.computeSignature(node);
 									}
 								}
@@ -124,8 +160,7 @@ define([
 							}
 							case Estraverse.Syntax.ReturnStatement: {
 								if(node.argument) {
-									if(node.argument.type === Estraverse.Syntax.ObjectExpression ||
-										node.argument.type === Estraverse.Syntax.FunctionExpression) {
+									if(_isOutlinedExpression(node.argument)) {
 										node.argument.sig = Signatures.computeSignature(node);
 									}
 								}
@@ -141,10 +176,15 @@ define([
 					 * @param {Object} node The AST node that ended its visitation
 					 */
 					leave: function(node) {
-						if(node.type === Estraverse.Syntax.ObjectExpression || 
-							node.type === Estraverse.Syntax.FunctionDeclaration || 
-							node.type === Estraverse.Syntax.FunctionExpression) {
-							scope.pop();
+						switch(node.type) {
+							case Estraverse.Syntax.ObjectExpression :
+							case Estraverse.Syntax.FunctionDeclaration :
+							case Estraverse.Syntax.FunctionExpression :
+							case Estraverse.Syntax.ClassDeclaration :
+							case Estraverse.Syntax.ClassExpression :
+							case Estraverse.Syntax.MethodDefinition :
+							case Estraverse.Syntax.ArrowFunctionExpression :
+								scope.pop();
 						}
 					}
 				});
