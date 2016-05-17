@@ -841,7 +841,7 @@ eclipse.GitService = (function() {
 			return clientDeferred;
 		},
 		
-		doAddTag : function(gitCommitURI, tagName) {
+		doAddTag : function(gitCommitURI, tagName, isAnnotated) {
 			var service = this;
 			
 			var clientDeferred = new Deferred();
@@ -852,7 +852,8 @@ eclipse.GitService = (function() {
 				},
 				timeout : GIT_TIMEOUT,
 				data: JSON.stringify({
-					"Name" : tagName  //$NON-NLS-0$
+					"Name" : tagName,  //$NON-NLS-0$
+					"Type" : isAnnotated
 				})
 			}).then(function(result) {
 				service._getGitServiceResponse(clientDeferred, result);

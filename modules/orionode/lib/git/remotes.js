@@ -283,7 +283,8 @@ function fetchRemote(req, res, remote, branch, force) {
 		
 		return remoteObj.fetch(
 			refSpec ? [refSpec] : null,
-			{callbacks: clone.getRemoteCallbacks(req.body, task)},
+			{callbacks: clone.getRemoteCallbacks(req.body, task),
+			downloadTags: 3},
 			"fetch"	
 		);
 	})

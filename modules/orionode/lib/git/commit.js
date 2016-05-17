@@ -637,7 +637,7 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 	});
 }
 
-function tag(req, res, commitId, name) {
+function tag(req, res, commitId, name, isAnnotated, message) {
 	var theRepo, theDiffs, thisCommit, theParents, fileDir;
 	clone.getRepo(req)
 	.then(function(repo) {
@@ -647,7 +647,10 @@ function tag(req, res, commitId, name) {
 	})
 	.then(function(commit) {
 		thisCommit = commit;
-		return theRepo.createLightweightTag(commit, name);
+		if(isAnnotated) {
+			var tagger = git.Signature.default(theRepo);
+		}
+		return isAnnotated ? theRepo.createTag (commit, name, message, tagger) : theRepo.createLightweightTag(commit, name);
 	})
 	.then(function() {
 		return getDiff(theRepo, thisCommit, fileDir);
@@ -672,8 +675,10 @@ function tag(req, res, commitId, name) {
 function putCommit(req, res) {
 	var commit = util.decodeURIComponent(req.params.commit);
 	var tagName = req.body.Name;
+	var isAnnotated = req.body.Type;
+	var message = req.body.Message || "";
 	if (tagName) {
-		tag(req, res, commit, tagName);
+		tag(req, res, commit, tagName, isAnnotated, message);
 	}
 }
 
