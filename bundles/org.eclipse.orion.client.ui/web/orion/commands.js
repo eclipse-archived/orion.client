@@ -235,9 +235,9 @@ define([
 		
 		var quickfixSettings = '/languageTools/quickfix'; //$NON-NLS-1$
 		
-		element = document.createElement("div"); //$NON-NLS-1$
+		element = document.createElement("div");
 		
-		button = clickTarget = document.createElement("button"); //$NON-NLS-1$
+		button = clickTarget = document.createElement("button");
 		button.className = "orionButton"; //$NON-NLS-1$
 		if (command.extraClass) {
 			button.classList.add(command.extraClass);
@@ -280,7 +280,7 @@ define([
 			}, false);
 		}
 		if (parentElement.nodeName.toLowerCase() === "ul") {
-			var li = document.createElement("li"); //$NON-NLS-0$
+			var li = document.createElement("li");
 			parentElement.appendChild(li);
 			parentElement = li;
 		} else {
@@ -291,13 +291,13 @@ define([
 		// We check that the internal access to annotation model exists so if it breaks we don't show the checkbox at all rather than throw an error later
 		if (command.fixAllEnabled && commandInvocation.userData._annotationModel){
 			var id = command.id + 'fixAll'; //$NON-NLS-1$
-			fixAllCheckbox = document.createElement('input'); //$NON-NLS-1$
+			fixAllCheckbox = document.createElement('input');
 			fixAllCheckbox.type = 'checkbox'; //$NON-NLS-1$
 			fixAllCheckbox.className = "quickfixAllParameter"; //$NON-NLS-1$
 			fixAllCheckbox.checked = true;
 			fixAllCheckbox.id = id;
 			
-			fixAllLabel = document.createElement('label'); //$NON-NLS-1$
+			fixAllLabel = document.createElement('label');
 			fixAllLabel.htmlFor = id;
 			fixAllLabel.className = "quickfixAllParameter"; //$NON-NLS-1$
 			fixAllLabel.appendChild(document.createTextNode(messages['fixAll'])); 

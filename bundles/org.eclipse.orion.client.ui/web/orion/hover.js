@@ -12,7 +12,7 @@
 /*eslint-env browser, amd*/
 
 define ([
-	'marked/marked' //$NON-NLS-0$
+	'marked/marked'
 ], function(Markdown) {
 
 	function Hover(editor, hoverFactory) {
@@ -58,8 +58,8 @@ define ([
 				return;
 			}
 			
-			var actionsDiv = document.createElement("div"); //$NON-NLS-0$
-			actionsDiv.className = "commandList"; //$NON-NLS-0$ 
+			var actionsDiv = document.createElement("div");
+			actionsDiv.classList.add("commandList"); //$NON-NLS-0$ 
 			parentDiv.appendChild(actionsDiv);
 			
 			var nodeList = [];
@@ -80,7 +80,7 @@ define ([
 		this.filterHoverPlugins();
 
 		// Track changes to the input type and re-filter
-		this.inputManager.addEventListener("InputChanged", function() { //$NON-NLS-0$
+		this.inputManager.addEventListener("InputChanged", function() {
 			this.filterHoverPlugins();
 		}.bind(this));
 	}

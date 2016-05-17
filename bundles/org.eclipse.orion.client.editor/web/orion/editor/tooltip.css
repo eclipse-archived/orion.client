@@ -75,13 +75,16 @@
 .textviewTooltip .hoverTooltipTitle {
 	font-weight: normal;
 }
+.textviewTooltip .quickFixList { /* Styling quickfixes */
+	margin-top: 5px;
+}
 .textviewTooltip .commandButton { /* Styling quickfixes */
 	border: 1px solid #325C80;
 	background-color: inherit;
 	color: white;
 }
 .textviewTooltip .commandButton:not(.dropdownTrigger){ /* In certain themes command buttons are set to all caps */
-  text-transform: initial; 
+	text-transform: initial; 
 }
 .textviewTooltip .commandList > li {
 	margin: 0;
