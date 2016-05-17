@@ -248,7 +248,7 @@ define([
 			response.args.logical = _l;
 			if(request.args.file.env === 'node') {
 				if (!/^[\.]+/.test(_l)) {
-					_nodeRead(response, _l, fileClient);
+					_nodeRead(response, _l, request.args.file.file, fileClient, null, 0, true);
 				} else {
 					_readRelative(request, response, _l, fileClient);
 				}
@@ -274,40 +274,72 @@ define([
 	/**
 	 * @since 12.0
 	 */
-	function _nodeRead(response, filePath, fileclient) {
-		var project = jsProject.getProjectPath();
-		if(project) {
-			return fileclient.read(project+"node_modules/"+filePath+"/package.json", false, false, {readIfExists: true}).then(function(json) {
-				if(json) {
-					var val = JSON.parse(json);
-					var mainPath = null;
-					var main = val.main;
-					if (main) {
-						if (!/(\.js)$/.test(main)) {
-							main += ".js";
-						}
-						mainPath = project + "node_modules/" + filePath + "/" + main;
-					} else {
-						main = "index.js";
-						mainPath = project + "node_modules/" + filePath + "/index.js";
-					}
-					return fileclient.read(mainPath).then(function(contents) {
-						response.args.contents = contents;
-						response.args.file = mainPath;
-						response.args.path = main;
-						ternWorker.postMessage(response);
-					},
-					function(err) {
-						_failedRead(response, "node_modules", err);
-					});
+	function _nodeRead(response, moduleName, filePath, fileclient, error, depth, subModules) {
+		if (depth > 2) {
+			if (TRACE) console.log("Don't read '" + moduleName + "': too deep");
+			return _failedRead(response, moduleName, "Too deep");
+		}
+		var index = filePath.lastIndexOf('/', filePath.length - 2);
+		if (index === -1) {
+			return _failedRead(response, moduleName, error === null ? 'Could not read module ' + moduleName : error);
+		}
+		var parentFolder = filePath.substr(0, index + 1); // include the trailing / in the folder path
+		if (parentFolder === filePath) {
+			if (TRACE) console.log("Infinite loop reading '" + filePath);
+			return _failedRead(response, moduleName, "Infinite loop");
+		}
+		var modulePath = parentFolder + "node_modules/" + moduleName;
+		if (moduleName.indexOf('/') !== -1 && subModules) {
+			// module name contains /
+			var fileToLoad = modulePath;
+			if (!/(\.js)$/.test(modulePath)) {
+				fileToLoad += ".js";
+			}
+			if (!/(\.js)$/.test(modulePath)) {
+				fileToLoad += ".js";
+			}
+			return fileclient.read(filePath).then(function(contents) {
+				if (contents) {
+					response.args.contents = contents;
+					ternWorker.postMessage(response);
+				} else {
+					_nodeRead(response, moduleName, filePath, fileclient, "No contents", depth, false);
 				}
-				_failedRead(response, filePath, "No contents");
 			},
 			function(err) {
-				_failedRead(response, filePath, err);
+				_nodeRead(response, moduleName, filePath, fileclient, err, depth, false);
 			});
-		} 
-		_failedRead(response, filePath, "No project context");
+		}
+		return fileclient.read(modulePath+"/package.json", false, false, {readIfExists: true}).then(function(json) {
+			if(json) {
+				var val = JSON.parse(json);
+				var mainPath = null;
+				var main = val.main;
+				if (main) {
+					if (!/(\.js)$/.test(main)) {
+						main += ".js";
+					}
+				} else {
+					main = "index.js";
+				}
+				mainPath = modulePath + "/" + main;
+				return fileclient.read(mainPath).then(function(contents) {
+					response.args.contents = contents;
+					response.args.file = mainPath;
+					response.args.path = main;
+					if (TRACE) console.log(mainPath);
+					ternWorker.postMessage(response);
+				},
+				function(err) {
+					_failedRead(response, "node_modules", err);
+				});
+			}
+			_nodeRead(response, moduleName, parentFolder, fileclient, "No contents", depth + 1, true);
+		},
+		function(err) {
+			// if it fails, try to parent folder
+			_nodeRead(response, moduleName, parentFolder, fileclient, err, depth + 1, true);
+		});
 	}
 	/**
 	 * @since 12.0
@@ -363,6 +395,7 @@ define([
 	}
 		/**
 		 * @description Handles the server being ready
+		if (TRACE) console.log("Fail to read " + fileName + " - " + (err.error ? err.error : "<no error>"));
 		 * @param {Object} request The request
 		 * @since 10.0
 		 */

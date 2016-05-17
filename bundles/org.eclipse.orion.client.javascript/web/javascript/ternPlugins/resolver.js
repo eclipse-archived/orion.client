@@ -57,7 +57,7 @@ define([
 		};
   		server.startAsyncAction();
   		_resolved[key].pending = true;
-  		_resolved[key].timeout = setTimeout(resetPending, 5000, key);
+  		_resolved[key].timeout = setTimeout(resetPending, 10000, key);
 		server.options.getFile({logical: key, file: loc, env: _resolved[key].env}, function(err, _file) {
 			clearTimeout(_resolved[key].timeout);
 			_resolved[key].file = _file.file;
