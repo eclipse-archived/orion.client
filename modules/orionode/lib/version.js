@@ -13,13 +13,15 @@ var express = require('express');
 
 module.exports = {};
 
+var BUILD_ID = "unknown";
+
 module.exports.router = function(options) {
 	var configParams = options.configParams;
 	if (!configParams) { throw new Error('options.configParams is required'); }
 
 	return express.Router()
 	.get('*', /* @callback */ function (req, res) {
-		var buildID = configParams["orion.buildId"] || "unknown";
+		var buildID = configParams["orion.buildId"] || BUILD_ID;
 		res.setHeader("Cache-Control", "no-cache");
 		return res.status(200).json({
 			build: buildID
