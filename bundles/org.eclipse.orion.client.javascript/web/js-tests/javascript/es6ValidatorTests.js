@@ -190,6 +190,32 @@ define([
 							worker.getTestState().callback(error);
 						});
 				});
+				it("Ignore es6 export", function(callback) {
+					var topic = 'export\n * from "./exports.js";'; 
+					var config = { rules: {} };
+					var createFiles = [{name: './exports', text: ''}];
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config, createFiles: createFiles}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Ignore es6 export", function(callback) {
+					var topic = 'export * from "./exports.js";'; 
+					var config = { rules: {} };
+					var createFiles = [{name: './exports', text: ''}];
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config, createFiles: createFiles}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
 			});
 		});
 	};

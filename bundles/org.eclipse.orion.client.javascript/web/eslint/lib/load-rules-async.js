@@ -2328,6 +2328,7 @@ define([
     				case 'ImportDeclaration':
     				case 'MemberExpression':
     				case 'SwitchCase':
+        			case 'ExportAllDeclaration' :
     				case 'UnaryExpression': {
     					return;
     				}
