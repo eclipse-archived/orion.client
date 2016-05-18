@@ -140,6 +140,11 @@ hard-coded numbers elsewhere.
 	/*margin-bottom: 29px;*/
 }
 
+html[dir="rtl"] .content-fixedHeight { /* ACGC */
+	right: 35px;
+    left: 0;
+}
+
 .content-fixedHeight-animation {
     transition: left 0.3s ease; /* if this is changed SideMenu.js->TRANSITION_DURATION_MS needs to be changed as well */
 }
@@ -404,6 +409,15 @@ hard-coded numbers elsewhere.
 	width: 3px;
 	cursor: e-resize;
 	visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
+}
+
+.splitLayoutPosition { /* ACGC */
+	left: 25%;
+}
+
+html[dir="rtl"] .splitLayoutPosition { /* ACGC */
+	right: 25%;
+	left: auto;
 }
 
 /* 
