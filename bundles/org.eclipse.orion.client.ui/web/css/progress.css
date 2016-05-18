@@ -283,6 +283,14 @@
 	-ms-transition: top 0.7s;
 	-o-transition: top 0.7s;
 }
+
+html[dir="rtl"] .notificationShow { /* ACGC */
+	float: right; 
+	margin-right: 20%; 
+	margin-left: auto; 
+	padding-right: 5px;
+	padding-left: 0px;
+}
 .notificationHide {
 	color: white; 
 	background-color: #1BB199; 
@@ -305,6 +313,14 @@
 	-moz-transition: top 0.7s;
 	-ms-transition: top 0.7s;
 	-o-transition: top 0.7s;
+}
+
+html[dir="rtl"] .notificationHide { /* ACGC */
+	float: right; 
+	margin-right: 20%; 
+	margin-left: auto; 
+	padding-right: 5px;
+	padding-left: 0px;
 }
 
 .notifications a {

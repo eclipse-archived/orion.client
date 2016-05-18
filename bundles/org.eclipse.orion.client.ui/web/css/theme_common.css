@@ -278,6 +278,11 @@ a.breadcrumb.currentLocation {
 	padding-right:5px;
 }
 
+html[dir="rtl"] .mainpane { /* ACGC */
+	padding-left:5px;
+	padding-right:0px;
+}
+
 .mainToolbar {
 	color: white;
  	background: #26343f;
