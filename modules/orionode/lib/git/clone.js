@@ -341,7 +341,13 @@ function putClone(req, res) {
 			.then(function(reference) {
 				return theRepo.getReferenceCommit(reference);
 			}).catch(function() {
-				return theRepo.getCommit(tag);
+				return theRepo.getTagByName(tag)
+				.then(function(tag) {
+					return tag.targetId();
+				})
+				.then(function(commitOid){
+					return theRepo.getCommit(commitOid);
+				});
 			})
 			.then(function(commit) {
 				theCommit = commit;
