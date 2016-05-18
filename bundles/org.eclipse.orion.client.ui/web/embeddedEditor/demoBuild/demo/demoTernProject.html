@@ -42,13 +42,53 @@
 			var contents = 'var MYCONSTANT = 1;\n' +
 								 'import "somehting";\n' + 
 								 "export function myFunc() { return MYCONSTANT;}"; 
+			var files2import = [
+//				{
+//					name: ".tern-project",
+//					contents:'{"sourceType": "module","ecmaVersion": 6}'
+//				},
+				{
+					name: ".eslintrc",
+					contents:'{"rules": {"semi": 2}}'
+				}
+			];
+			var files2export = [
+				{
+					name: ".tern-project"
+				},
+				{
+					name: ".eslintrc"
+				}
+			];
 			window.onload=function(){
 				var codeEdit = new orion.codeEdit();
-				codeEdit.create({parent: "embeddedEditor", contentType: "application/javascript", contents: contents}).then(function(editorViewer) {
-					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
-				});
-				codeEdit.create({parent: "embeddedEditor1", contentType: "application/javascript", contents: ""}).then(function(editorViewer) {
-					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+				codeEdit.startup().then(function() {
+					codeEdit.importFiles(files2import).then(function(results) {
+						console.log(results);
+						codeEdit.create({parent: "embeddedEditor", contentType: "application/javascript", contents: contents}).then(function(editorViewer) {
+							document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+						});
+						codeEdit.create({parent: "embeddedEditor1", contentType: "application/json", contents: ""}).then(function(editorViewer) {
+							document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+							var fileClient = codeEdit.serviceRegistry.getService("orion.core.file.client");
+							if (fileClient) {
+								fileClient.addEventListener("Changed", function(evt) { //$NON-NLS-0$
+									if(evt && evt.modified) {
+										if(evt.modified.some(function(loc){
+											return "/in_memory_file_system/project/.tern-project" === loc;
+											})) {
+												fileClient.read("/in_memory_file_system/project/.tern-project").then(function(contents) {
+													editorViewer.editor.getTextView().setText(contents);
+												});
+											}
+									}
+								});
+							}
+						});
+						codeEdit.exportFiles(files2export).then(function(exportResults) {
+							console.log(exportResults);				
+						});
+					});
 				});
 			};
 		</script>

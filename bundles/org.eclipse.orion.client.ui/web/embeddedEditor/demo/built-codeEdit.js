@@ -184,6 +184,10 @@ Deferred) {
 		{
 			name: ".tern-project",
 			contents:'{"sourceType": "module","ecmaVersion": 6}'
+		},
+		{
+			name: ".eslintrc",
+			contents:'{"rules": {"semi": 2}}'
 		}
 	];
 	var files2export = [
