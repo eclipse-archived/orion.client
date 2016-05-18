@@ -14,9 +14,8 @@ define([
 	'chai/chai',
 	'orion/Deferred',
 	'javascript/occurrences',
-	'eslint/lib/eslint',
 	'mocha/mocha'  //must stay at the end, not a module
-], function(chai, Deferred, Occurrences, ESLint) {
+], function(chai, Deferred, Occurrences) {
 	var assert = chai.assert;
 
 	return /* @callback */ function(worker) {
@@ -1869,72 +1868,6 @@ define([
 			it('test_expressionStatementsHoisting2', function(done) {
 				var text = "a; var a;";
 				return computeOccurrences(text, getOptions(done, 7,7), [{start:0, end:1}, {start:7, end:8}]);
-			});
-			describe('ES6 Occurrences Tests', function(done) {
-				/**
-				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
-				 * @since 10.0
-				 */
-				it('arrow function expression 1', function(done) {
-					var text = "n => {n.length;}";
-					return computeOccurrences(text, getOptions(done, 0,1), [{start:0, end:1}, {start:6, end:7}]);
-				});
-				/**
-				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
-				 * @since 10.0
-				 */
-				it('arrow function expression 2', function(done) {
-					var text = "var n = 10; n => {n.length;}";
-					return computeOccurrences(text, getOptions(done, 12,13), [{start:12, end:13}, {start:18, end:19}]);
-				});
-				/**
-				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
-				 * @since 10.0
-				 */
-				it('arrow function expression 3', function(done) {
-					var text = "n => f => {n.length;}";
-					return computeOccurrences(text, getOptions(done, 11,12), [{start:0, end:1}, {start:11, end:12}]);
-				});
-				/**
-				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
-				 * @since 10.0
-				 */
-				it('arrow function expression 4', function(done) {
-					var text = "var n = 'hello'; n => f => {n.length;}";
-					return computeOccurrences(text, getOptions(done, 17,18), [{start:17, end:18}, {start:28, end:29}]);
-				});
-				/**
-				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
-				 * @since 10.0
-				 */
-				it('arrow function expression 5', function(done) {
-					var text = "var n = []; n.map(n => {n.length;});";
-					return computeOccurrences(text, getOptions(done, 18,18), [{start:18, end:19}, {start:24, end:25}]);
-				});
-				/**
-				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
-				 * @since 10.0
-				 */
-				it('arrow function expression 6', function(done) {
-					var text = "var n = []; n.map(n => {n.length;});";
-					return computeOccurrences(text, getOptions(done, 12, 12), [{start:4, end:5}, {start:12, end:13}]);
-				});
-				/**
-				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
-				 * @since 10.0
-				 */
-				it('arrow function expression 7', function(done) {
-					var text = "var n = []; n.map(n => n => {n.length;});";
-					return computeOccurrences(text, getOptions(done, 12, 12), [{start:4, end:5}, {start:12, end:13}]);
-				});
-				/**
-				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011
-				 * @since 10.0
-				 */
-				it('arrow function expression 8', function(done) {
-					var text = "var n = []; n.map(n => n => {n.length;});";
-					return computeOccurrences(text, getOptions(done, 24, 24), [{start:23, end:24}, {start:29, end:30}]);
-				});
 			});
 			describe('Define and Require Statement Occurrences Tests', function(done) {
 				/**

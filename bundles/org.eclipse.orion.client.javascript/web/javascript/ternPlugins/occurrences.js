@@ -257,6 +257,15 @@ define([
                 case Estraverse.Syntax.BreakStatement:
                     checkId(node.label, node, false, false, true);
                     break;
+                case Estraverse.Syntax.ImportDefaultSpecifier:
+                	checkId(node.local, node, true, false, false);
+                	break;
+                case Estraverse.Syntax.ImportNamespaceSpecifier:
+                	checkId(node.local, node, true, false, false);
+                	break;
+                case Estraverse.Syntax.ImportSpecifier:
+                	checkId(node.local, node, true, false, false);
+                	break;
 			}
 		},
 		
@@ -668,6 +677,16 @@ define([
 		
 		if (node.type === Estraverse.Syntax.Literal){
 			return false;
+		}
+		
+		if (node.type === Estraverse.Syntax.Identifier){
+			var parent = node.parent;
+			if (!parent && node.parents) {
+				parent = node.parents[node.parents.length-1];
+			}
+			if (parent && parent.type === Estraverse.Syntax.ImportSpecifier){
+				return parent.imported === node;
+			}
 		}
 		
 		return node.type !== Estraverse.Syntax.Identifier;
