@@ -261,13 +261,17 @@ body {
 			iframe.contentWindow.isElectron = true;
 			
 			var target = iframe.contentDocument.querySelector('head > title');
-			var observer = new window.WebKitMutationObserver(function(mutations) {
-				mutations.forEach(function() {
-					redrawTabs();
+			
+			if (target) {
+				var observer = new window.WebKitMutationObserver(function(mutations) {
+					mutations.forEach(function() {
+						redrawTabs();
+					});
 				});
-			});
-			observer.observe(target, { subtree: true, characterData: true, childList: true });
-			redrawTabs();
+
+				observer.observe(target, { subtree: true, characterData: true, childList: true });
+				redrawTabs();
+			}	
 		});
 		document.body.appendChild(iframe);
 		redrawTabs();
