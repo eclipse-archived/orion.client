@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * Copyright (c) 2009, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -14,7 +14,7 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 		function(messages, i18nUtil, mSearchUtils, mContentTypes, mUiUtils, Deferred) {
 	
 	var DEBUG = false;
-	var _folderFilter = [".git", "node_modules"];
+	var _folderFilter = [".git", "node_modules", ".cvs"];
 	/**
 	 * SearchCrawler is an alternative when a file service does not provide the search API.
 	 * It assumes that the file client at least provides the fetchChildren and read APIs.
@@ -173,8 +173,23 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 		return this._cancelled;
 	};
 	
+	/**
+	 * @name SearchCrawler.prototype._contains
+	 * @description Checks to see if the given string item is in the given array of strings - ignoring case
+	 * @function
+	 * @private
+	 * @param {Array.<String>} array The array to check
+	 * @param {String} item The item to check for
+	 * @returns {Boolean} Returns if the string is found in the array, ignoring case
+	 */
 	SearchCrawler.prototype._contains = function(array, item){
-		return (array || []).indexOf(item) !== -1;
+		if(Array.isArray(array) && typeof item === 'string') {
+			var val = item.toLocaleLowerCase();
+			return array.some(function(elt) {
+				return elt === val;
+			});
+		}
+		return false;
 	};
 	
 	SearchCrawler.prototype._sort = function(fileArray){

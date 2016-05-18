@@ -198,6 +198,15 @@ define([
 
 	Objects.mixin(ESLintValidator.prototype, {
 		/**
+		 * @description Callback from SyntaxChecker API to perform any load-time initialization
+		 * @function
+		 * @param {String} loc The optional location the checker is initializing from
+		 * @callback
+		 */
+		initialize: function initialize(loc, contentType) {
+			this.project.initFrom(loc);
+		},
+		/**
 		 * @description Callback to create problems from orion.edit.validator
 		 * @function
 		 * @public
@@ -248,7 +257,7 @@ define([
 		_validate: function(meta, text, env, deferred, configuration) {
 			// When validating snippets in an html file ignore undefined rule because other scripts may add to the window object
 			var rules = config.rules;
-			if (configuration) {
+			if (configuration && configuration.rules) {
 				rules = configuration.rules;
 			}
 			var files = [{type: 'full', name: meta.location, text: text}]; //$NON-NLS-1$

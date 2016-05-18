@@ -53,6 +53,8 @@ define([
 		}
 	};
 	
+	var initialized = false;
+	
 	/**
 	 * @description Creates a new JavaScript project
 	 * @constructor
@@ -182,6 +184,18 @@ define([
 		});
 	};
 	
+	JavaScriptProject.prototype.initFrom = function initFrom(path) {
+		if(!initialized) {
+			initialized = true;
+			return this.getFileClient().read(path, true, false, {readIfExists: true}).then(function(child) {
+				if(child) {
+					this.onInputChanged({file: child});
+				}
+			}.bind(this));
+		}
+		return new Deferred().resolve();
+	};
+	
 	/**
 	 * @description Update the contents of the given file name, and optionally create the file if it does not exist
 	 * @function
@@ -295,12 +309,17 @@ define([
 	 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
 	 */
 	JavaScriptProject.prototype.onInputChanged = function onInputChanged(evnt) {
+		initialized = true;
 		var file = evnt.file,
 			project;
 		if(file) {
 			var parents = file.parents ? file.parents : file.Parents;
-			if (parents && parents.length > 0) {
-				project = parents[parents.length-1];
+			if (Array.isArray(parents)) {
+				if(parents.length > 0) {
+					project = parents[parents.length-1];
+				} else {
+					project = file;
+				}
 			}
 		}
 		if (project) {

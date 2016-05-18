@@ -28,8 +28,9 @@ define([
 	'orion/uiUtils',
 	'orion/i18nUtil',
 	'orion/URL-shim'
-], function(messages, sharedMessages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, mCommands, navigatorRenderer, objects, mSyntaxchecker, mTextModel, mFileDetailRenderer, mUiUtils, i18nUtil) {
-    var DEBUG = false;
+], function(messages, sharedMessages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, mCommands, navigatorRenderer, objects, mSyntaxchecker, 
+			mTextModel, mFileDetailRenderer, mUiUtils, i18nUtil) {
+    
     /**
      * @description Adds the given node to the parent at the given position
      * @private
@@ -258,7 +259,8 @@ define([
 			commandService: options.commandRegistry,
 			actionScopeId: options.actionScopeId,
 			checkbox: false}, this);
-		mExplorer.Explorer.call(this, options.serviceRegistry, options.selection, this._ProblemsRendererByType, options.commandRegistry);	
+		mExplorer.Explorer.call(this, options.serviceRegistry, options.selection, this._ProblemsRendererByType, options.commandRegistry);
+		this.syntaxchecker = new mSyntaxchecker.SyntaxChecker(options.serviceRegistry);
 		this.fileClient = options.fileClient,
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.preferences = options.preferences;
@@ -405,6 +407,7 @@ define([
 		 * @param {Function} postValidate The function to call after validation is complete
 		 */
 		validate: function(locationParam, postValidate) {
+			this.syntaxchecker.initialize(locationParam);
 			if(postValidate) {
 				this._postValidate = postValidate;
 			}
@@ -486,7 +489,10 @@ define([
 		 * @returns {Boolean} If the item should be filtered
 		 */
 		_filterSingle: function(item, modifiedFilter) { 
-			return (-1 !== item.description.search(modifiedFilter) || -1 !== item.fileName.search(modifiedFilter) || (this._viewByFile && this._shouldShowFullPath && -1 !== item.filePath.search(modifiedFilter)));
+			return -1 !== item.description.search(modifiedFilter) || 
+					-1 !== item.fileName.search(modifiedFilter) || 
+					this._viewByFile && this._shouldShowFullPath && 
+					-1 !== item.filePath.search(modifiedFilter);
 		},
 		/**
 		 * @description Filter the problems using the given filter. Works on the class-level <tt>this.totalProblems</tt>
@@ -509,38 +515,33 @@ define([
 		 * @param {String} contentType The content type id
 		 * @returns {Array.<Object>} The problems array
 		 */
-		_visitFile: function(crawler, fileObj, contentType){
+		_visitFile: function(crawler, fileObj, contentType) {
 			crawler.addTotalCounter();
-			var slf = this;
 			if(crawler.isCancelled()){
-				return;
+				return new Deferred().cancel();
 			}
-			return mSyntaxchecker.getValidators(this.registry, contentType, fileObj.Location).then(function(validators) {
-				if(validators && validators.length > 0) {
-					return (slf.progressService ? slf.progressService.progress(slf.fileClient.read(fileObj.Location), "Reading file " + fileObj.Location) : slf.fileClient.read(fileObj.Location)).then(function(jsonData) { //$NON-NLS-1$
-						return slf._findProblems(jsonData, fileObj, contentType).then(function(problems) {
-							if(!problems || problems.length === 0) {
-								return;
+			return this.syntaxchecker.getValidators(fileObj.Location, contentType).then(function(validators) {
+				if(Array.isArray(validators) && validators.length > 0) {
+					return (this.progressService ? this.progressService.progress(this.fileClient.read(fileObj.Location), "Reading file " + fileObj.Location) : this.fileClient.read(fileObj.Location)).then(function(jsonData) { //$NON-NLS-1$
+						return this._findProblems(jsonData, fileObj, contentType).then(function(problems) {
+							if( Array.isArray(problems) && problems.length > 0) {
+								fileObj.problems = problems;
+								recalculateOffset(jsonData, problems);
+								crawler.incrementalReport(fileObj);
 							}
-							fileObj.problems = problems;
-							recalculateOffset(jsonData, problems);
-							if(DEBUG) {
-								console.log("File that has problems: " + fileObj.Name); //$NON-NLS-1$
-								console.log(problems);
-							}
+						},
+						/* @callback */ function(err) {
+							fileObj.problems = [];
 							crawler.incrementalReport(fileObj);
 						});
-					},
+					}.bind(this),
 					function(error) {
 						if(error && error.message && error.message.toLowerCase() !== "cancel") {
 							console.error("Error loading file content: " + error.message); //$NON-NLS-1$
 						}
 					});
-				} 
-				if(DEBUG) {
-					console.log("File that are not read at all: " + fileObj.Name); //$NON-NLS-1$
 				}
-			});
+			}.bind(this));
 		},
 	
 		/**
@@ -550,10 +551,9 @@ define([
 		 * @param {String} fileContentText The file contents
 		 * @param {Object} fileObj The file metadata object
 		 * @param {String} cType The content type id
-		 * @returns {Array.<Object>} The problems array
+		 * @returns {Deferred} A deferred that will resolve to the problems array
 		 */
-		_findProblems: function( fileContentText, fileObj, cType){
-			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(this.registry, new mTextModel.TextModel(fileContentText));
+		_findProblems: function(fileContentText, fileObj, cType){
 			var editorContextObj = {
 				/** @callback */
 				getFileMetadata: function(){
@@ -566,7 +566,8 @@ define([
 				/** @callback */
 				getText: function(){return fileContentText;}
 			};
-			return syntaxChecker.checkSyntax(cType, fileObj.Location, null, fileContentText, editorContextObj);
+			this.syntaxchecker.setTextModel(new mTextModel.TextModel(fileContentText));
+			return this.syntaxchecker.checkSyntax(cType, fileObj.Location, null, fileContentText, editorContextObj);
 		},
 		/**
 		 * @description Render the problems
