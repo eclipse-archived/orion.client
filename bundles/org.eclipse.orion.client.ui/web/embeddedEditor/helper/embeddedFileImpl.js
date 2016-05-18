@@ -11,13 +11,11 @@
 
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Deferred) {
-	var PROJECT_LOC = "project/";
+define(["orion/Deferred", 'embeddedEditor/helper/memoryFileSysConst', "orion/encoding-shim", "orion/URL-shim"], function(Deferred, memoryFileSysConst) {
 	function EmbeddedFileImpl(fileBase) {
 		this.fileBase = fileBase;
 		this.fileRoot = {};
-		this.projectMetaLocation = this.fileBase + PROJECT_LOC;
-		this.fileRoot[this.projectMetaLocation] = {Location: this.projectMetaLocation, Directory: true};
+		this.fileRoot[memoryFileSysConst.MEMORY_FILE_PROJECT_PATTERN] = {Location: memoryFileSysConst.MEMORY_FILE_PROJECT_PATTERN, Directory: true};
 	}
 	
 	EmbeddedFileImpl.prototype = {
@@ -82,9 +80,11 @@ define(["orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(Def
 		 */
 		read: function(fLocation, isMetadata) {
 			var file = this._getFile(fLocation);
-			if (file === undefined) return new Deferred().reject();
+			if (file === undefined) {
+				return new Deferred().resolve(isMetadata ? {} : "");
+			} 
 			if(isMetadata){
-				var parents = fLocation === this.projectMetaLocation ? [] : [this.fileRoot[this.projectMetaLocation]];
+				var parents = fLocation === memoryFileSysConst.MEMORY_FILE_PROJECT_PATTERN ? [] : [this.fileRoot[memoryFileSysConst.MEMORY_FILE_PROJECT_PATTERN]];
 				var meta = {
 					Length: file.length,
 					Directory: !!file.Directory,

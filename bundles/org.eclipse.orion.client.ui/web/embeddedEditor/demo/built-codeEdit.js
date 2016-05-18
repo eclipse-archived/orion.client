@@ -131,52 +131,100 @@ Deferred) {
 		}
 	};
 	
-	embeddedEditor.create({parent: "embeddedEditor", statusReporter: statusReporter}).then(function(editorViewer) {
-		document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
-		editorViewer.setContents(contents, "application/javascript");
-		//editorViewer.inputManager.setAutoSaveTimeout(-1);
-		editorViewer.editor.getTextView().addEventListener("Options",function(evt){
-			if(evt.options) {
-				if(evt.options.tabMode !== undefined) {
-					//CTRL+m keys
-					//True: you can tab inside the editor. False: Tab will get out of the editor DIV
-					console.log("Tab mode has been changed to: " + evt.options.tabMode);
-				} else if(evt.options.wrapMode !== undefined) {
-					//CTRL+ALT+w keys
-					console.log("Wrap mode has been changed to: " + evt.options.wrapMode);
-				} else if(evt.options.overwriteMode !== undefined) {
-					//Insert key
-					console.log("Overwrite mode has been changed to: " + evt.options.overwriteMode);
-				} else {
-					console.log("Other options has been changed: ");
-					console.log(evt.options);
-				}
-			}
-		});
-		//editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
-		function execute(orionContext, params) {
-			//alert("foo");
-			//editorViewer.editor.getTextView()._setThemeClass("editorTheme");
-			//editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
-			editorViewer.editor.getTextView().invokeAction("undo");
-		}
-		editorViewer.serviceRegistry.registerService('orion.edit.command', {execute: execute}, {
-			name: 'Xtext formatting service',
-			id: 'xtext.formatter',
-			key: ['l', true, true],
-			contentType: ["application/javascript"]
-		});		
-		var markerService = editorViewer.serviceRegistry.getService(editorViewer.problemsServiceID);
-		if(markerService) {
-			markerService.addEventListener("problemsChanged", function(evt) { //$NON-NLS-0$
-				if(evt.problems) {
-					evt.problems.forEach(function(problem) {
-						console.log(problem);
-					})
+	var startup = function() {
+		embeddedEditor.create({parent: "embeddedEditor", statusReporter: statusReporter}).then(function(editorViewer) {
+			document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+			editorViewer.setContents(contents, "application/javascript");
+			//editorViewer.inputManager.setAutoSaveTimeout(-1);
+			editorViewer.editor.getTextView().addEventListener("Options",function(evt){
+				if(evt.options) {
+					if(evt.options.tabMode !== undefined) {
+						//CTRL+m keys
+						//True: you can tab inside the editor. False: Tab will get out of the editor DIV
+						console.log("Tab mode has been changed to: " + evt.options.tabMode);
+					} else if(evt.options.wrapMode !== undefined) {
+						//CTRL+ALT+w keys
+						console.log("Wrap mode has been changed to: " + evt.options.wrapMode);
+					} else if(evt.options.overwriteMode !== undefined) {
+						//Insert key
+						console.log("Overwrite mode has been changed to: " + evt.options.overwriteMode);
+					} else {
+						console.log("Other options has been changed: ");
+						console.log(evt.options);
+					}
 				}
 			});
+			//editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
+			function execute(orionContext, params) {
+				//alert("foo");
+				//editorViewer.editor.getTextView()._setThemeClass("editorTheme");
+				//editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
+				editorViewer.editor.getTextView().invokeAction("undo");
+			}
+			editorViewer.serviceRegistry.registerService('orion.edit.command', {execute: execute}, {
+				name: 'Xtext formatting service',
+				id: 'xtext.formatter',
+				key: ['l', true, true],
+				contentType: ["application/javascript"]
+			});		
+			var markerService = editorViewer.serviceRegistry.getService(editorViewer.problemsServiceID);
+			if(markerService) {
+				markerService.addEventListener("problemsChanged", function(evt) { //$NON-NLS-0$
+					if(evt.problems) {
+						evt.problems.forEach(function(problem) {
+							console.log(problem);
+						})
+					}
+				});
+			}
+		});
+	};
+	
+	var files2create = [
+		{
+			name: ".tern-project",
+			contents:'{"sourceType": "module","ecmaVersion": 6}'
 		}
+	];
+	var files2export = [
+		{
+			name: ".tern-project"
+		},
+		{
+			name: ".eslintrc"
+		}
+	];
+	
+	embeddedEditor.startup().then(function() {
+//		var fileClient = embeddedEditor.serviceRegistry.getService("orion.core.file.client");
+//		if(fileClient) {
+//			var promises = [];
+//			files2create.forEach(function(file) {
+//				var promise = fileClient.createFile("/in_memory_file_system/project/", file.name).then(function(result){
+//					return fileClient.write(result.Location, file.contents);
+//				});
+//				promises.push(promise);			
+//			});
+//		}
+//		embeddedEditor.Deferred.all(promises).then(function(result) {
+//			new embeddedEditor.Deferred().resolve(result).then(function(rr) {
+//				console.log(rr);
+//			});
+//			startup();
+//		});
+
+		embeddedEditor.importFiles(files2create).then(function(results) {
+			console.log(results);
+			startup();
+			embeddedEditor.exportFiles(files2export).then(function(exportResults) {
+				console.log(exportResults);				
+			});
+		});
+		
 	});
+	
+
+
 //	embeddedEditor.create({parent: "embeddedEditor1"}).then(function(editorViewer) {
 //		editorViewer.setContents(contents, "application/javascript");
 //		editorViewer.inputManager.setAutoSaveTimeout(-1);

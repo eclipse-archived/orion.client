@@ -44,6 +44,7 @@ define([
 	'orion/webui/contextmenu',
 	'orion/metrics',
 	'orion/commonPreferences',
+	'embeddedEditor/helper/memoryFileSysConst',
 	'orion/objects'
 ], function(
 	messages,
@@ -53,9 +54,9 @@ define([
 	mDispatcher, EditorContext, Highlight,
 	mMarkOccurrences, mSyntaxchecker, LiveEditSession,
 	mProblems, mBlamer, mDiffer,
-	mKeyBinding, util, Deferred, mContextMenu, mMetrics, mCommonPreferences, objects
+	mKeyBinding, util, Deferred, mContextMenu, mMetrics, mCommonPreferences, memoryFileSysConst, objects
 ) {
-	var inMemoryFilePattern = "/in_memory_file_system/"; //$NON-NLS-1$
+	var inMemoryFilePattern = memoryFileSysConst.MEMORY_FILE_PATTERN;
 	var Dispatcher = mDispatcher.Dispatcher;
 
 	function parseNumericParams(input, params) {

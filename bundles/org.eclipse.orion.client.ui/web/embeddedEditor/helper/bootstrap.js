@@ -39,17 +39,19 @@ if (_all_script && _all_script.length && _all_script.length > 0) {
 }
 define([
 	'embeddedEditor/helper/embeddedFileImpl',
+	'embeddedEditor/helper/memoryFileSysConst',
 	'orion/pluginregistry',
 	'orion/Deferred',
 	'orion/URL-shim'
 ], function(
 	EmbeddedFileImpl,
+	memoryFileSysConst,
 	mPluginRegistry,
 	Deferred
 ) {
 
 	var once; // Deferred
-	var inMemoryFilePattern = "/in_memory_file_system/";
+	var inMemoryFilePattern = memoryFileSysConst.MEMORY_FILE_PATTERN;
 	var defaultPluginURLs = [
 		"../javascript/plugins/javascriptPlugin.html",
 		"../webtools/plugins/webToolsPlugin.html",
