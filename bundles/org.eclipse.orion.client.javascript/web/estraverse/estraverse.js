@@ -242,7 +242,8 @@
         ExportAllDeclaration: ['source'],
         ExportDefaultDeclaration: ['declaration'],
         ExportNamedDeclaration: ['declaration', 'specifiers', 'source'],
-        ExportSpecifier: ['exported', 'local'],
+        // TODO ORION The local identifier comes first in source/tokens, not exported, this caused problems with Finder.  See https://github.com/estools/estraverse/issues/71
+        ExportSpecifier: ['local', 'exported'],
         ExpressionStatement: ['expression'],
         ForStatement: ['init', 'test', 'update', 'body'],
         ForInStatement: ['left', 'right', 'body'],

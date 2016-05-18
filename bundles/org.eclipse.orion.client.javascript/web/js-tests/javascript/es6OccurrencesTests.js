@@ -318,6 +318,74 @@ define([
 					var text = "localFunc(); import { myFunc } from 'a'; function localFunc(){ myFunc() };";
 					return computeOccurrences(text, getOptions(done, 65, 65), [{start:22, end:28}, {start:63, end:69}]);
 				});
+				it('Named export 1', function(done) {
+					var text = "var a = 3; export { a }; a++;";
+					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:20, end:21}, {start:25, end:26}]);
+				});
+				it('Named export 2', function(done) {
+					var text = "var a = 3; export { a }; a++;";
+					return computeOccurrences(text, getOptions(done, 20, 21), [{start:4, end:5}, {start:20, end:21}, {start:25, end:26}]);
+				});
+				it('Named export 3', function(done) {
+					var text = "var a = 3; export { a }; a++;";
+					return computeOccurrences(text, getOptions(done, 25, 25), [{start:4, end:5}, {start:20, end:21}, {start:25, end:26}]);
+				});
+				it('Multiple named export 1', function(done) {
+					var text = "var a = 3; const b = '3'; export { a, b };";
+					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:35, end:36}]);
+				});
+				it('Multiple named export 2', function(done) {
+					var text = "var a = 3; const b = '3'; export { a, b };";
+					return computeOccurrences(text, getOptions(done, 35, 36), [{start:4, end:5}, {start:35, end:36}]);
+				});
+				it('Multiple named export 3', function(done) {
+					var text = "var a = 3; const b = '3'; export { a, b };";
+					return computeOccurrences(text, getOptions(done, 17, 18), [{start:17, end:18}, {start:38, end:39}]);
+				});
+				it('Multiple named export 4', function(done) {
+					var text = "var a = 3; const b = '3'; export { a, b };";
+					return computeOccurrences(text, getOptions(done, 39, 39), [{start:17, end:18}, {start:38, end:39}]);
+				});
+				it('Inline expression export 1', function(done) {
+					var text = "a++; export let a = 4; a++;";
+					return computeOccurrences(text, getOptions(done, 0, 0), [{start:0, end:1}, {start:16, end:17}, {start:23, end:24}]);
+				});
+				it('Inline expression export 2', function(done) {
+					var text = "a++; export let a = 4; a++;";
+					return computeOccurrences(text, getOptions(done, 16, 16), [{start:0, end:1}, {start:16, end:17}, {start:23, end:24}]);
+				});
+				it('Inline expression export 3', function(done) {
+					var text = "a++; export let a = 4; a++;";
+					return computeOccurrences(text, getOptions(done, 23, 23), [{start:0, end:1}, {start:16, end:17}, {start:23, end:24}]);
+				});
+				it('Inline expression export 1', function(done) {
+					var text = "a++; export let a = 4; a++;";
+					return computeOccurrences(text, getOptions(done, 0, 0), [{start:0, end:1}, {start:16, end:17}, {start:23, end:24}]);
+				});
+				it('Renamed export 1', function(done) {
+					var text = "var a = 3; export { a as b }; a++; b++;";
+					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:20, end:21}, {start:30, end:31}]);
+				});
+				it('Renamed export 2', function(done) {
+					var text = "var a = 3; export { a as b }; a++; b++;";
+					return computeOccurrences(text, getOptions(done, 21, 21), [{start:4, end:5}, {start:20, end:21}, {start:30, end:31}]);
+				});
+				it('Renamed export 3', function(done) {
+					var text = "var a = 3; export { a as b }; a++; b++;";
+					return computeOccurrences(text, getOptions(done, 30, 31), [{start:4, end:5}, {start:20, end:21}, {start:30, end:31}]);
+				});
+				// TODO We want to skip the exported identifier in occurrences
+				it.skip('Renamed export 4', function(done) {
+					var text = "var a = 3; export { a as b }; a++; b++;";
+					return computeOccurrences(text, getOptions(done, 25, 26), []);
+				});
+				it('Renamed export 5', function(done) {
+					var text = "var a = 3; export { a as b }; a++; b++;";
+					return computeOccurrences(text, getOptions(done, 35, 36), [{start:35, end:36}]);
+				});
+				// TODO export named function, export default expression
+				
+				
 			});
 			describe('ES6 Occurrences Tests in HTML', function() {
 				/**

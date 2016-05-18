@@ -257,6 +257,9 @@ define([
                 case Estraverse.Syntax.BreakStatement:
                     checkId(node.label, node, false, false, true);
                     break;
+                case Estraverse.Syntax.ExportSpecifier:
+                	checkId(node.local, node, false, false, false);
+                	break;
                 case Estraverse.Syntax.ImportDefaultSpecifier:
                 	checkId(node.local, node, true, false, false);
                 	break;
