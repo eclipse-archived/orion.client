@@ -23,6 +23,11 @@
 	left: 170px;
 }
 
+html[dir="rtl"] .settingsSplitLayout { /* ACGC */
+	right: 170px;
+	left: auto;
+} 
+
 .categoriesTitle {
 	background: white;
 	border: 1px solid #dadada;

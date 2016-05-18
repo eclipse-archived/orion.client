@@ -5756,12 +5756,8 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			
 			var rightDiv = this._createRulerParent(doc, "textviewRightRuler"); //$NON-NLS-1$
 			this._rightDiv = rightDiv;
-			if (document.dir == "rtl") { /* ACGC */
-				rightDiv.style.left = "0px"; //$NON-NLS-1$
-			}else{
-				rightDiv.style.right = "0px"; //$NON-NLS-1$	  
-			}
-
+			rightDiv.style.right = "0px"; //$NON-NLS-1$	  
+			
 			var innerRightDiv = this._createRulerParent(doc, "textviewInnerRightRuler"); //$NON-NLS-1$
 			this._innerRightDiv = innerRightDiv;
 			innerRightDiv.style.zIndex = "1"; //$NON-NLS-1$
@@ -5807,6 +5803,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			clientDiv.style.outline = "none"; //$NON-NLS-1$
 			clientDiv.style.zIndex = "1"; //$NON-NLS-1$
 			clientDiv.style.WebkitUserSelect = "text"; //$NON-NLS-1$
+			clientDiv.style.textAlign = "left"; /* ACGC */
 			clientDiv.setAttribute("spellcheck", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 			if (util.isIOS || util.isAndroid) {
 				clientDiv.style.WebkitTapHighlightColor = "transparent"; //$NON-NLS-1$
@@ -7720,11 +7717,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				if (clipRight === scrollWidth) { clipRight += viewPad.right; }
 				if (_scroll.y + clientHeight === scrollHeight) { clipBottom += viewPad.bottom; }
 				clientDiv.style.clip = "rect(" + clipTop + "px," + clipRight + "px," + clipBottom + "px," + clipLeft + "px)"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
-				if (document.dir == "rtl") { /* ACGC */
-					clientDiv.style.right = (-left + leftWidth + viewPad.left) + "px"; //$NON-NLS-1$
-				}else{
-					clientDiv.style.left = (-left + leftWidth + viewPad.left) + "px"; //$NON-NLS-1$	  
-				}
+				clientDiv.style.left = (-left + leftWidth + viewPad.left) + "px"; //$NON-NLS-1$	  
 				clientDiv.style.width = (this._wrapMode || util.isWebkit ? scrollWidth : clientWidth + left) + "px"; //$NON-NLS-1$
 				if (!hScrollOnly) {
 					clientDiv.style.top = (-_top + viewPad.top) + "px"; //$NON-NLS-1$
