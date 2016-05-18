@@ -261,7 +261,7 @@ define([
 					};
 			}
 			var parseErrors = extractParseErrors(file.ast);
-			if (error && parseErrors.length === 0) {
+			if (error) {
 				parseErrors.push(error);
 			}
 			return filterProblems(parseErrors, strippedMessages);

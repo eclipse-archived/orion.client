@@ -121,36 +121,31 @@ define([
 	        		 * Checks the following AST element for a BlockStatement
 	        		 */
 	        		function checkBlock(node) {
-	        			try {
-	        			    switch(node.type) {
-	        			        case 'IfStatement': {
-	            					if(node.consequent && node.consequent.type !== 'BlockStatement') {
-	            						//flag the first token of the statement that should be in the block
-	            						context.report(node.consequent, ProblemMessages['curly'], null /*, context.getTokens(node.consequent)[0]*/);
-	            					}
-	            					if(node.alternate && node.alternate.type !== 'BlockStatement' && node.alternate.type !== 'IfStatement') {
-	            						//flag the first token of the statement that should be in the block
-	            						context.report(node.alternate, ProblemMessages['curly'], null /*, context.getTokens(node.alternate)[0]*/);
-	            					}
-	            					break;
-	        				    }
-	        				    case 'DoWhileStatement':
-	        				    case 'WhileStatement':
-	        				    case 'WithStatement':
-	        				    case 'ForStatement':
-	                            case 'ForInStatement': 
-	                            case 'ForOfStatement': {
-	            					if(node.body && node.body.type !== 'BlockStatement') {
-	            						//flag the first token of the statement that should be in the block
-	            						context.report(node.body, ProblemMessages['curly'], null /*, context.getTokens(node.body)[0]*/);
-	            					}
-	            					break;
-	        					}
-	        				}
-	        			}
-	        			catch(ex) {
-	        				Logger.log(ex);
-	        			}
+        			    switch(node.type) {
+        			        case 'IfStatement': {
+            					if(node.consequent && node.consequent.type !== 'BlockStatement') {
+            						//flag the first token of the statement that should be in the block
+            						context.report(node.consequent, ProblemMessages['curly'], null /*, context.getTokens(node.consequent)[0]*/);
+            					}
+            					if(node.alternate && node.alternate.type !== 'BlockStatement' && node.alternate.type !== 'IfStatement') {
+            						//flag the first token of the statement that should be in the block
+            						context.report(node.alternate, ProblemMessages['curly'], null /*, context.getTokens(node.alternate)[0]*/);
+            					}
+            					break;
+        				    }
+        				    case 'DoWhileStatement':
+        				    case 'WhileStatement':
+        				    case 'WithStatement':
+        				    case 'ForStatement':
+                            case 'ForInStatement': 
+                            case 'ForOfStatement': {
+            					if(node.body && node.body.type !== 'BlockStatement') {
+            						//flag the first token of the statement that should be in the block
+            						context.report(node.body, ProblemMessages['curly'], null /*, context.getTokens(node.body)[0]*/);
+            					}
+            					break;
+        					}
+        				}
 	        		}
 	
 	        		return {
@@ -197,23 +192,18 @@ define([
 	        		return {
 	        			/* @callback */
 	        			"BinaryExpression": function(node) {
-	        				try {
-	        					if(isNullness(node.left) || isNullness(node.right)) {
-	        						return;
-	        					}
-	        					var op = node.operator;
-	        					var expected = null;
-	        					if (op === "==") {
-	        					    expected = '===';
-	        						context.report(node, ProblemMessages['eqeqeq'], {0: expected, 1:op}, getOperatorToken(context, node));
-	        					} else if (op === "!=") {
-	        					    expected = '!==';
-	        						context.report(node, ProblemMessages['eqeqeq'], {0:expected, 1:op}, getOperatorToken(context, node));
-	        					}
-	        				}
-	        				catch(ex) {
-	        					Logger.log(ex);
-	        				}
+        					if(isNullness(node.left) || isNullness(node.right)) {
+        						return;
+        					}
+        					var op = node.operator;
+        					var expected = null;
+        					if (op === "==") {
+        					    expected = '===';
+        						context.report(node, ProblemMessages['eqeqeq'], {0: expected, 1:op}, getOperatorToken(context, node));
+        					} else if (op === "!=") {
+        					    expected = '!==';
+        						context.report(node, ProblemMessages['eqeqeq'], {0:expected, 1:op}, getOperatorToken(context, node));
+        					}
 	        			}
 	        		};
         },
@@ -236,67 +226,62 @@ define([
 		         * @param {Object} node The AST node
 		         */
 		        function checkDoc(node) {
-        			try {
-        				var comments;
-        				var name;
-        				switch(node.type) {
-        					case 'Property':
-        						if(node.value && node.value.type === 'FunctionExpression') {
-        							comments = context.getComments(node);
-        							if(!comments || comments.leading.length < 1) {
-        							    //TODO see https://github.com/jquery/esprima/issues/1071
-    							        comments = context.getComments(node.key);
-        							}
-        							if(!validComment(comments)) {
-        								switch(node.key.type) {
-        									case 'Identifier':
-        										name = node.key.name;
-        										break;
-        									case 'Literal':
-        										name = node.key.value;
-        										break;
-        								}
-        								context.report(node.key, ProblemMessages['missing-doc'], {0:name}, { type: 'expr' }); //$NON-NLS-1$
-        							}
-        						}
-        						break;
-        					case 'FunctionDeclaration':
+    				var comments;
+    				var name;
+    				switch(node.type) {
+    					case 'Property':
+    						if(node.value && node.value.type === 'FunctionExpression') {
     							comments = context.getComments(node);
     							if(!comments || comments.leading.length < 1) {
     							    //TODO see https://github.com/jquery/esprima/issues/1071
-							        comments = context.getComments(node.id);
+							        comments = context.getComments(node.key);
     							}
-    							if(!validComment(comments) && node.parent && node.parent.type !== "ExportNamedDeclaration") {
-    								context.report(node.id, ProblemMessages['missing-doc'], {0:node.id.name}, { type: 'decl' });  //$NON-NLS-1$
+    							if(!validComment(comments)) {
+    								switch(node.key.type) {
+    									case 'Identifier':
+    										name = node.key.name;
+    										break;
+    									case 'Literal':
+    										name = node.key.value;
+    										break;
+    								}
+    								context.report(node.key, ProblemMessages['missing-doc'], {0:name}, { type: 'expr' }); //$NON-NLS-1$
     							}
-        						break;
-        					case 'ExpressionStatement':
-        						if(node.expression && node.expression.type === 'AssignmentExpression') {
-        							var anode = node.expression;
-        							if(anode.right && anode.right.type === 'FunctionExpression' && anode.left && anode.left.type === 'MemberExpression') {
-        								//comments are attached to the enclosing expression statement
-        								comments = context.getComments(node);
-        								if(!comments || comments.leading.length < 1) {
-            							    //TODO see https://github.com/jquery/esprima/issues/1071
-        							        comments = context.getComments(anode.left);
-            							}
-        								if(!validComment(comments)) {
-        									name = anode.left.computed === true ? anode.left.property.value : anode.left.property.name;
-        									context.report(anode.left.property, ProblemMessages['missing-doc'], {0:name}, { type: 'expr' }); //$NON-NLS-1$
-        								}
+    						}
+    						break;
+    					case 'FunctionDeclaration':
+							comments = context.getComments(node);
+							if(!comments || comments.leading.length < 1) {
+							    //TODO see https://github.com/jquery/esprima/issues/1071
+						        comments = context.getComments(node.id);
+							}
+							if(!validComment(comments) && node.parent && node.parent.type !== "ExportNamedDeclaration") {
+								context.report(node.id, ProblemMessages['missing-doc'], {0:node.id.name}, { type: 'decl' });  //$NON-NLS-1$
+							}
+    						break;
+    					case 'ExpressionStatement':
+    						if(node.expression && node.expression.type === 'AssignmentExpression') {
+    							var anode = node.expression;
+    							if(anode.right && anode.right.type === 'FunctionExpression' && anode.left && anode.left.type === 'MemberExpression') {
+    								//comments are attached to the enclosing expression statement
+    								comments = context.getComments(node);
+    								if(!comments || comments.leading.length < 1) {
+        							    //TODO see https://github.com/jquery/esprima/issues/1071
+    							        comments = context.getComments(anode.left);
         							}
-        						}
-        						break;
-        					case 'ExportNamedDeclaration' :
-    							comments = context.getComments(node);
-    							if(!validComment(comments) && node.declaration && node.declaration.type === "FunctionDeclaration") {
-    								context.report(node.declaration.id, ProblemMessages['missing-doc'], {0:node.declaration.id.name}, { type: 'decl' });  //$NON-NLS-1$
+    								if(!validComment(comments)) {
+    									name = anode.left.computed === true ? anode.left.property.value : anode.left.property.name;
+    									context.report(anode.left.property, ProblemMessages['missing-doc'], {0:name}, { type: 'expr' }); //$NON-NLS-1$
+    								}
     							}
-    					}
-        			}
-        			catch(ex) {
-        				Logger.log(ex);
-        			}
+    						}
+    						break;
+    					case 'ExportNamedDeclaration' :
+							comments = context.getComments(node);
+							if(!validComment(comments) && node.declaration && node.declaration.type === "FunctionDeclaration") {
+								context.report(node.declaration.id, ProblemMessages['missing-doc'], {0:node.declaration.id.name}, { type: 'decl' });  //$NON-NLS-1$
+							}
+					}
         		}
 
         		return {
@@ -311,21 +296,16 @@ define([
         		return {
         			/* @callback */
         			'NewExpression' : function(node) {
-        				try {
-        					if(node.callee) {
-        						var tokens = context.getTokens(node.callee, 0, 1);
-        						if(tokens && tokens.length > 0) {
-        							var last = tokens[tokens.length-1];
-        							if(last.type !== 'Punctuator' || last.value !== '(') {
-        								//if there s no opening parenthesis its safe to assume they are missing
-        								context.report(node.callee, ProblemMessages['new-parens'], null, tokens[0]);
-        							}
-        						}
-        					}
-        				}
-        				catch(ex) {
-        					Logger.log(ex);
-        				}
+    					if(node.callee) {
+    						var tokens = context.getTokens(node.callee, 0, 1);
+    						if(tokens && tokens.length > 0) {
+    							var last = tokens[tokens.length-1];
+    							if(last.type !== 'Punctuator' || last.value !== '(') {
+    								//if there s no opening parenthesis its safe to assume they are missing
+    								context.report(node.callee, ProblemMessages['new-parens'], null, tokens[0]);
+    							}
+    						}
+    					}
         			}
         		};
         },
@@ -510,13 +490,8 @@ define([
         		return {
         			/* @callback */
         			"DebuggerStatement": function(node) {
-        				try {
-        					context.report(node, ProblemMessages['no-debugger'], null, context.getTokens(node)[0]);
-        				}
-        				catch(ex) {
-        					Logger.log(ex);
-        				}
-        			}
+        				context.report(node, ProblemMessages['no-debugger'], null, context.getTokens(node)[0]);
+					}
         		};
         },
         /** @callback */
@@ -524,31 +499,26 @@ define([
         		return {
         			/* @callback */
         			"ObjectExpression": function(node) {
-        				try {
-        					var props = node.properties;
-        					if(props && props.length > 0) {
-        						var len = props.length;
-        						var seen = Object.create(null);
-        						for(var i = 0; i < len; i++) {
-        							var prop = props[i];
-        							// Here we're concerned only with duplicate keys having kind == "init". Duplicates among other kinds (get, set)
-        							// cause syntax errors, by spec, so don't need to be linted.
-        							if(prop.kind !== "init") {
-        								continue;
-        							}
-        							var name = prop.key.name ? prop.key.name : prop.key.value;
-        							if(Object.prototype.hasOwnProperty.call(seen, name)) {
-        								context.report(prop, ProblemMessages['no-dupe-keys'], {0:name}, context.getTokens(prop)[0]);
-        							}
-        							else {
-        								seen[name] = 1;
-        							}
-        						}
-        					}
-        				}
-        				catch(ex) {
-        					Logger.log(ex);
-        				}
+    					var props = node.properties;
+    					if(props && props.length > 0) {
+    						var len = props.length;
+    						var seen = Object.create(null);
+    						for(var i = 0; i < len; i++) {
+    							var prop = props[i];
+    							// Here we're concerned only with duplicate keys having kind == "init". Duplicates among other kinds (get, set)
+    							// cause syntax errors, by spec, so don't need to be linted.
+    							if(prop.kind !== "init") {
+    								continue;
+    							}
+    							var name = prop.key.name ? prop.key.name : prop.key.value;
+    							if(Object.prototype.hasOwnProperty.call(seen, name)) {
+    								context.report(prop, ProblemMessages['no-dupe-keys'], {0:name}, context.getTokens(prop)[0]);
+    							}
+    							else {
+    								seen[name] = 1;
+    							}
+    						}
+    					}
         			}
         		};
         },
@@ -563,20 +533,15 @@ define([
         		    },
         		    /* @callback */
         			'BlockStatement' : function(node) {
-        			    try {
-            			    if(node.body.length < 1) {
-            			        for(var i = 0; i < comments.length; i++) {
-            			            var range = comments[i].range;
-            			            if(range[0] >= node.range[0] && range[1] <= node.range[1]) {
-            			                //a commented empty block, ignore
-            			                return;
-            			            }
-            			        }
-            			        context.report(node, ProblemMessages['no-empty-block']);
-            			    }
-        			    }
-        			    catch(ex) {
-        			        Logger.log(ex);
+        			    if(node.body.length < 1) {
+        			        for(var i = 0; i < comments.length; i++) {
+        			            var range = comments[i].range;
+        			            if(range[0] >= node.range[0] && range[1] <= node.range[1]) {
+        			                //a commented empty block, ignore
+        			                return;
+        			            }
+        			        }
+        			        context.report(node, ProblemMessages['no-empty-block']);
         			    }
         			}
         		};
@@ -586,18 +551,13 @@ define([
         		return {
         			/* @callback */
         			"CallExpression": function(node) {
-        				try {
-        					var name = node.callee.name;
-        					if(!name) {
-        						return;
-        					}
-        					if('eval' === name) {
-        						context.report(node.callee, ProblemMessages['no-eval'], {0:'\'eval\''}, context.getTokens(node.callee)[0]); //$NON-NLS-1$
-        					}
-        				}
-        				catch(ex) {
-        					Logger.log(ex);
-        				}
+     					var name = node.callee.name;
+    					if(!name) {
+    						return;
+    					}
+    					if('eval' === name) {
+    						context.report(node.callee, ProblemMessages['no-eval'], {0:'\'eval\''}, context.getTokens(node.callee)[0]); //$NON-NLS-1$
+    					}
         			}
         		};
         },
@@ -606,16 +566,11 @@ define([
         		return {
         			/* @callback */
         			"EmptyStatement": function(node) {
-        				try {
-        					var tokens = context.getTokens(node);
-        					var t = tokens[tokens.length - 1];
-        					if (t && t.type === "Punctuator" && t.value === ";") {
-        						context.report(node, ProblemMessages['no-extra-semi'], null, t /* expose the bad token */);
-        					}
-        				}
-        				catch(ex) {
-        					Logger.log(ex);
-        				}
+    					var tokens = context.getTokens(node);
+    					var t = tokens[tokens.length - 1];
+    					if (t && t.type === "Punctuator" && t.value === ";") {
+    						context.report(node, ProblemMessages['no-extra-semi'], null, t /* expose the bad token */);
+    					}
         			}
         		};
         },
@@ -653,48 +608,43 @@ define([
         		return {
         			/* @callback */
         			'SwitchStatement' : function(node) {
-        			    try {
-            			    if(node.cases && node.cases.length > 1) {
-            			        //single case is implicitly fallthrough
-            			        var caselen  = node.cases.length;
-            			       cases: for(var i = 0; i < caselen; i++) {
-            			            if(i+1 === caselen) {
-            			                //last node is implicitly fall-through
-            			                break;
-            			            }
-            			            if(fallsthrough(node.cases[i])) {
-            			                //corect the highlighting to match eclipse
-            			                var reportednode = node.cases[i+1];
-            			                if(reportednode.test) {
-            			                    reportednode.range[1] = reportednode.test.range[1];
-            			                } else {
-            			                    //default case - tag the token
-            			                    var tokens = context.getTokens(reportednode);
-            			                    if(tokens && tokens.length > 0) {
-            			                        reportednode.range[1] = tokens[0].range[1];
-            			                    }
-            			                }
-            			                var comments = reportednode.leadingComments;
-            			                if(!comments && reportednode.test) {
-            			                    //TODO see https://github.com/jquery/esprima/issues/1071
-            			                    comments = reportednode.test.leadingComments;
-            			                }
-            			                if(comments) {
-                        		            var comment = null;
-                        		            for(var c = 0; c < comments.length; c++) {
-                        		                comment = comments[c];
-                        		                if(/\$?falls?\s?through\$?/i.test(comment.value.toLowerCase())) {
-                        		                    continue cases;
-                        		                }
-                        		            }
-                        		        }
-            			                context.report(reportednode, ProblemMessages['no-fallthrough']);
-            			            }
-            			        }
-            			    }
-        			    }
-        			    catch(ex) {
-        			        Logger.log(ex);
+        			    if(node.cases && node.cases.length > 1) {
+        			        //single case is implicitly fallthrough
+        			        var caselen  = node.cases.length;
+        			       cases: for(var i = 0; i < caselen; i++) {
+        			            if(i+1 === caselen) {
+        			                //last node is implicitly fall-through
+        			                break;
+        			            }
+        			            if(fallsthrough(node.cases[i])) {
+        			                //corect the highlighting to match eclipse
+        			                var reportednode = node.cases[i+1];
+        			                if(reportednode.test) {
+        			                    reportednode.range[1] = reportednode.test.range[1];
+        			                } else {
+        			                    //default case - tag the token
+        			                    var tokens = context.getTokens(reportednode);
+        			                    if(tokens && tokens.length > 0) {
+        			                        reportednode.range[1] = tokens[0].range[1];
+        			                    }
+        			                }
+        			                var comments = reportednode.leadingComments;
+        			                if(!comments && reportednode.test) {
+        			                    //TODO see https://github.com/jquery/esprima/issues/1071
+        			                    comments = reportednode.test.leadingComments;
+        			                }
+        			                if(comments) {
+                    		            var comment = null;
+                    		            for(var c = 0; c < comments.length; c++) {
+                    		                comment = comments[c];
+                    		                if(/\$?falls?\s?through\$?/i.test(comment.value.toLowerCase())) {
+                    		                    continue cases;
+                    		                }
+                    		            }
+                    		        }
+        			                context.report(reportednode, ProblemMessages['no-fallthrough']);
+        			            }
+        			        }
         			    }
         			 }
         		};
@@ -704,36 +654,31 @@ define([
         		return {
         			/* @callback */
         			"CallExpression": function(node) {
-        				try {
-        					var name = node.callee.name;
-        					if(!name) {
-        						return;
-        					}
-        					if('setInterval' === name || 'setTimeout' === name) {
-        						if(node.arguments.length > 0) {
-        							var arg = node.arguments[0];
-        							if(arg.type === 'Literal') {
-        								context.report(node.callee, ProblemMessages['no-eval'], {0:'Implicit \'eval\''}, context.getTokens(node.callee)[0]); //$NON-NLS-1$
-        							}
-        							else if(arg.type === 'Identifier') {
-        								//lets see if we can find it's definition
-        								var scope = context.getScope();
-        								var decl = util.getDeclaration(arg, scope);
-        								if (decl && decl.defs && decl.defs.length) {
-        									var def = decl.defs[0];
-        									var dnode = def.node;
-        									if(def.type === 'Variable' && dnode && dnode.type === 'VariableDeclarator' &&
-        											dnode.init && dnode.init.type === 'Literal') {
-        										context.report(node.callee, ProblemMessages['no-eval'], {0:'Implicit \'eval\''}, context.getTokens(node.callee)[0]); //$NON-NLS-1$
-        									}
-        								}
-        							}
-        						}
-        					}
-        				}
-        				catch(ex) {
-        					Logger.log(ex);
-        				}
+    					var name = node.callee.name;
+    					if(!name) {
+    						return;
+    					}
+    					if('setInterval' === name || 'setTimeout' === name) {
+    						if(node.arguments.length > 0) {
+    							var arg = node.arguments[0];
+    							if(arg.type === 'Literal') {
+    								context.report(node.callee, ProblemMessages['no-eval'], {0:'Implicit \'eval\''}, context.getTokens(node.callee)[0]); //$NON-NLS-1$
+    							}
+    							else if(arg.type === 'Identifier') {
+    								//lets see if we can find it's definition
+    								var scope = context.getScope();
+    								var decl = util.getDeclaration(arg, scope);
+    								if (decl && decl.defs && decl.defs.length) {
+    									var def = decl.defs[0];
+    									var dnode = def.node;
+    									if(def.type === 'Variable' && dnode && dnode.type === 'VariableDeclarator' &&
+    											dnode.init && dnode.init.type === 'Literal') {
+    										context.report(node.callee, ProblemMessages['no-eval'], {0:'Implicit \'eval\''}, context.getTokens(node.callee)[0]); //$NON-NLS-1$
+    									}
+    								}
+    							}
+    						}
+    					}
         			}
         		};
         },
@@ -776,29 +721,24 @@ define([
         		return {
         			/* @callback */
         			'Program' : function(node) {
-        			    try {
-            			    var comments = node.comments;
-            			    var len;
-            			    if(comments && (len = comments.length) && comments.length > 0) {
-            			        for(var i = 0; i < len; i++) {
-            			            var comment = comments[i];
-            			            if(comment.type === 'Block') {
-            			                var match = /^\s*(js[l|h]int)(\s+\w+:\w+)+/ig.exec(comment.value);
-            			                if(match) {
-            			                    var jslint = match[1];
-            			                    if(jslint.length < 1) {
-            			                        continue;
-            			                    }
-            			                    var start = 2 + comment.value.indexOf(jslint) + comment.range[0]; 
-            			                    var end = start + jslint.length;
-            			                    context.report({type:'BlockComment', range:[start, end], loc: comment.loc}, ProblemMessages['no-jslint'], {0:jslint}); //$NON-NLS-1$
-            			                }
-            			            }
-            			        }
-            			    }
-        			    }
-        			    catch(ex) {
-        			        Logger.log(ex);
+        			    var comments = node.comments;
+        			    var len;
+        			    if(comments && (len = comments.length) && comments.length > 0) {
+        			        for(var i = 0; i < len; i++) {
+        			            var comment = comments[i];
+        			            if(comment.type === 'Block') {
+        			                var match = /^\s*(js[l|h]int)(\s+\w+:\w+)+/ig.exec(comment.value);
+        			                if(match) {
+        			                    var jslint = match[1];
+        			                    if(jslint.length < 1) {
+        			                        continue;
+        			                    }
+        			                    var start = 2 + comment.value.indexOf(jslint) + comment.range[0]; 
+        			                    var end = start + jslint.length;
+        			                    context.report({type:'BlockComment', range:[start, end], loc: comment.loc}, ProblemMessages['no-jslint'], {0:jslint}); //$NON-NLS-1$
+        			                }
+        			            }
+        			        }
         			    }
         			 }
         		};
@@ -1095,18 +1035,13 @@ define([
                  * @description Check the backing scope for redeclares
                  */
                 function checkScope() {
-                    try {
-                        var scope = context.getScope();
-                        scope.variables.forEach(function(variable) {
-                            // If variable has multiple defs, every one after the 1st is a redeclaration
-                            variable.defs.slice(1).forEach(function(def) {
-                                reportRedeclaration(def.name, def.name.name);
-                            });
+                   var scope = context.getScope();
+                    scope.variables.forEach(function(variable) {
+                        // If variable has multiple defs, every one after the 1st is a redeclaration
+                        variable.defs.slice(1).forEach(function(def) {
+                            reportRedeclaration(def.name, def.name.name);
                         });
-                    }
-                    catch(ex) {
-                        Logger.log(ex);
-                    }
+                    });
                 }
 
                 return {
@@ -1217,30 +1152,26 @@ define([
                  * @param {Object} node The AST node
                  */
                 function checkScope(node) {
-                    try {
-                        // Build map
-                        var scope = context.getScope();
-                        if (node.type === "FunctionExpression" && node.id && node.id.name) {
-                            scope  = scope.upper;
-                            if (scope.type === "global") {
-	                            return; // No shadowing can occur in the global (Program) scope
-	                        }
+                    // Build map
+                    var scope = context.getScope();
+                    if (node.type === "FunctionExpression" && node.id && node.id.name) {
+                        scope  = scope.upper;
+                        if (scope.type === "global") {
+                            return; // No shadowing can occur in the global (Program) scope
                         }
-                        var symbolMap = createSymbolMap(scope);
-                        scope.variables.forEach(function(variable) {
-                            if (!variable.defs.length) {
-                                return; // Skip 'arguments'
-                            }
-                            // If variable's name was first bound in an upper scope, and the variable is not a parameter,
-                            // flag it.
-                            var bindingSource;
-                            if ((bindingSource = symbolMap[variable.name]) && bindingSource !== scope && !isParameter(variable)) {
-                            	context.report(variable.defs[0].name, ProblemMessages['no-shadow'], {0: variable.name});
-                            }
-                        });
-                    } catch(ex) {
-                        Logger.log(ex);
                     }
+                    var symbolMap = createSymbolMap(scope);
+                    scope.variables.forEach(function(variable) {
+                        if (!variable.defs.length) {
+                            return; // Skip 'arguments'
+                        }
+                        // If variable's name was first bound in an upper scope, and the variable is not a parameter,
+                        // flag it.
+                        var bindingSource;
+                        if ((bindingSource = symbolMap[variable.name]) && bindingSource !== scope && !isParameter(variable)) {
+                        	context.report(variable.defs[0].name, ProblemMessages['no-shadow'], {0: variable.name});
+                        }
+                    });
                 }
                 return {
                     "Program": checkScope,
@@ -1301,23 +1232,19 @@ define([
                 return {
                 	/* @callback */
                     "ThrowStatement": function(node) {
-                        try {
-                            var argument = node.argument;
-                            // We have no type analysis yet, so to avoid false positives, assume any expr that
-                            // *could* generate an Error actually does.
-                            switch (argument.type) {
-                                case "Identifier":
-                                    if (argument.name !== "undefined") {
-                                        return;
-                                    }
-                                //$FALLTHROUGH$
-                                case "Literal":
-                                case "ObjectExpression":
-                                case "ArrayExpression":
-                                    context.report(argument, ProblemMessages['no-throw-literal']);
-                            }
-                        } catch (ex) {
-                            Logger.log(ex);
+                        var argument = node.argument;
+                        // We have no type analysis yet, so to avoid false positives, assume any expr that
+                        // *could* generate an Error actually does.
+                        switch (argument.type) {
+                            case "Identifier":
+                                if (argument.name !== "undefined") {
+                                    return;
+                                }
+                            //$FALLTHROUGH$
+                            case "Literal":
+                            case "ObjectExpression":
+                            case "ArrayExpression":
+                                context.report(argument, ProblemMessages['no-throw-literal']);
                         }
                     }
                 };
@@ -1366,47 +1293,42 @@ define([
                 return {
                 	/* @callback */
                     "Program": function(/*node*/) {
-            			try {
-            	            var globalScope = context.getScope();
+        	            var globalScope = context.getScope();
 
-            	            globalScope.through.forEach(function(ref) {
-        	            	    if (isRecoveredNode(ref.identifier)) {
-        	            	    	return;
-        	            	    }
-            	                var variable = getDeclaredGlobalVariable(globalScope, ref),
-            	                    name = ref.identifier.name;
-            	                if (!variable) {
-            	                	// Check if Tern knows about a definition in another file
-            	                	var env = Finder.findESLintEnvForMember(name);
-            	                    var tern = context.getTern();
-									var query = tern.query;
-									query.start = ref.identifier.start;
-									query.end = ref.identifier.end;
-									var foundType = null;
-									try {
-										var expr = tern.findQueryExpr(tern.file, query);
-										var type = tern.findExprType(query, tern.file, expr);
-										// The origin could be a primitive in the same file (a=1;) which we still want to mark
-										// The origin could be an environment, which we still want to mark (eslint-env directive is handled separately)
-										if (type && type.origin && type.origin !== tern.file.name && type.origin !== env){
-											foundType = type;
-										}
-									} catch(e) {
-										//ignore
+        	            globalScope.through.forEach(function(ref) {
+    	            	    if (isRecoveredNode(ref.identifier)) {
+    	            	    	return;
+    	            	    }
+        	                var variable = getDeclaredGlobalVariable(globalScope, ref),
+        	                    name = ref.identifier.name;
+        	                if (!variable) {
+        	                	// Check if Tern knows about a definition in another file
+        	                	var env = Finder.findESLintEnvForMember(name);
+        	                    var tern = context.getTern();
+								var query = tern.query;
+								query.start = ref.identifier.start;
+								query.end = ref.identifier.end;
+								var foundType = null;
+								try {
+									var expr = tern.findQueryExpr(tern.file, query);
+									var type = tern.findExprType(query, tern.file, expr);
+									// The origin could be a primitive in the same file (a=1;) which we still want to mark
+									// The origin could be an environment, which we still want to mark (eslint-env directive is handled separately)
+									if (type && type.origin && type.origin !== tern.file.name && type.origin !== env){
+										foundType = type;
 									}
-	            	                if (!foundType){
-	            	                    var inenv = env ? '-inenv' : ''; //$NON-NLS-1$
-	            	                    var nls = 'no-undef-defined'; //$NON-NLS-1$
-	            	                    context.report(ref.identifier, ProblemMessages['no-undef-defined'], {0:name, nls: nls, pid: nls+inenv});
-            	                    }
-            	                } else if (ref.isWrite() && variable.writeable === false) {
-            	                    context.report(ref.identifier, ProblemMessages['no-undef-readonly'], {0:name, nls: 'no-undef-readonly'}); //$NON-NLS-1$
-            	                }
-            	            });
-                    	}
-                    	catch(ex) {
-                    		Logger.log(ex);
-                    	}
+								} catch(e) {
+									//ignore
+								}
+            	                if (!foundType){
+            	                    var inenv = env ? '-inenv' : ''; //$NON-NLS-1$
+            	                    var nls = 'no-undef-defined'; //$NON-NLS-1$
+            	                    context.report(ref.identifier, ProblemMessages['no-undef-defined'], {0:name, nls: nls, pid: nls+inenv});
+        	                    }
+        	                } else if (ref.isWrite() && variable.writeable === false) {
+        	                    context.report(ref.identifier, ProblemMessages['no-undef-readonly'], {0:name, nls: 'no-undef-readonly'}); //$NON-NLS-1$
+        	                }
+        	            });
                     }
                 };
         },
@@ -1415,84 +1337,79 @@ define([
         	return {
         		/* @callback */
         		'MemberExpression': function(node){
-                	try {
-                    	if (node.property && node.object && node.object.type !== 'ThisExpression'){
-                    		if (node.parent && node.parent.type === 'CallExpression' && node.parent.callee && node.parent.callee === node){
-                    			 var tern = context.getTern();
-								var query = tern.query;
-								query.end = node.property.start;
-								var foundType = false;
-								try {
-									var expr = tern.findQueryExpr(tern.file, query);
-									var type = tern.findExprType(query, tern.file, expr);
-									if (type && type.origin){
-										foundType = true;
-									}
-								} catch(e) {
-									//ignore
+                	if (node.property && node.object && node.object.type !== 'ThisExpression'){
+                		if (node.parent && node.parent.type === 'CallExpression' && node.parent.callee && node.parent.callee === node){
+                			 var tern = context.getTern();
+							var query = tern.query;
+							query.end = node.property.start;
+							var foundType = false;
+							try {
+								var expr = tern.findQueryExpr(tern.file, query);
+								var type = tern.findExprType(query, tern.file, expr);
+								if (type && type.origin){
+									foundType = true;
 								}
-            	                if (!foundType){
-            	                	// If the object cannot be found, there is no way the property could be known
-            	                	query.end = node.object.end;
-            	                	try {
-            	                		expr = tern.findQueryExpr(tern.file, query);
-            	                		type = tern.findExprType(query, tern.file, expr);
-										if (type && type.types && type.types.length > 0){
-            	                			// If the type has no known properties assume Tern doens't know enough about it to find the declaration
-            	                			foundType = true;
-            	                			for (var i=0; i<type.types.length; i++) {
-            	                				var currentProps = type.types[i].props;
-            	                				if (currentProps && Object.keys(currentProps).length > 0){
+							} catch(e) {
+								//ignore
+							}
+        	                if (!foundType){
+        	                	// If the object cannot be found, there is no way the property could be known
+        	                	query.end = node.object.end;
+        	                	try {
+        	                		expr = tern.findQueryExpr(tern.file, query);
+        	                		type = tern.findExprType(query, tern.file, expr);
+									if (type && type.types && type.types.length > 0){
+        	                			// If the type has no known properties assume Tern doens't know enough about it to find the declaration
+        	                			foundType = true;
+        	                			for (var i=0; i<type.types.length; i++) {
+        	                				var currentProps = type.types[i].props;
+        	                				if (currentProps && Object.keys(currentProps).length > 0){
+        	                					foundType = false;
+        	                					break;
+        	                				}
+        	                				if (type.types[i].proto && type.types[i].proto.name !== 'Object.prototype'){
+        	                					currentProps = type.types[i].proto.props;
+        	                					if (currentProps && Object.keys(currentProps).length > 0){
             	                					foundType = false;
-            	                					break;
-            	                				}
-            	                				if (type.types[i].proto && type.types[i].proto.name !== 'Object.prototype'){
-            	                					currentProps = type.types[i].proto.props;
-            	                					if (currentProps && Object.keys(currentProps).length > 0){
-	            	                					foundType = false;
-	            	                					break;            	                						
-        	                						}
+            	                					break;            	                						
     	                						}
-            	                			}
-            	                			if (!foundType){
-        	                					var name = type.types[0].name;
-        	                					if (!name && type.originNode){
-        	                						name = type.originNode.name;
-    	                						}
-        	                					var origin = type.types[0].origin;
-        	                					if (!origin && type.origin){
-        	                						origin = type.origin;
-        	                					}
-            	                				if (type.types.length === 1 && name && origin){
-            	                					if (/\./.test(origin)){
-        	                							var originNode = type.types[0].originNode ? type.types[0].originNode : type.originNode;
-        	                							if (originNode){
-	        	                							var index = origin.lastIndexOf('/');
-	        	                							if (index >= 0){
-	        	                								origin = origin.substring(index+1);
-	        	                							}
-															context.report(node.property, ProblemMessages['no-undef-expression-defined-object'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-object', data: {file: originNode.sourceFile.name, start: originNode.start, end: originNode.end}}); //$NON-NLS-1$
-														} else {
-															context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
-														}
+	                						}
+        	                			}
+        	                			if (!foundType){
+    	                					var name = type.types[0].name;
+    	                					if (!name && type.originNode){
+    	                						name = type.originNode.name;
+	                						}
+    	                					var origin = type.types[0].origin;
+    	                					if (!origin && type.origin){
+    	                						origin = type.origin;
+    	                					}
+        	                				if (type.types.length === 1 && name && origin){
+        	                					if (/\./.test(origin)){
+    	                							var originNode = type.types[0].originNode ? type.types[0].originNode : type.originNode;
+    	                							if (originNode){
+        	                							var index = origin.lastIndexOf('/');
+        	                							if (index >= 0){
+        	                								origin = origin.substring(index+1);
+        	                							}
+														context.report(node.property, ProblemMessages['no-undef-expression-defined-object'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-object', data: {file: originNode.sourceFile.name, start: originNode.start, end: originNode.end}}); //$NON-NLS-1$
 													} else {
-														context.report(node.property, ProblemMessages['no-undef-expression-defined-index'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-index'}); //$NON-NLS-1$
+														context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
 													}
 												} else {
-													context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
+													context.report(node.property, ProblemMessages['no-undef-expression-defined-index'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-index'}); //$NON-NLS-1$
 												}
+											} else {
+												context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
 											}
-            	                		}
-            	                	} catch (e) {
-            	                		//ignore
-            	                	}
-								}
-                    		}
-                    	}
-                	} catch (ex) {
-                		Logger.log(ex);
+										}
+        	                		}
+        	                	} catch (e) {
+        	                		//ignore
+        	                	}
+							}
+                		}
                 	}
-
             	}
         	};
         },
@@ -1530,23 +1447,18 @@ define([
                  * @since 6.0
                  */
                 function checkUnreachable(children) {
-                    try {
-                        var i = 0;
-                        for(i; i < children.length; i++) {
-                            if(util.returnableStatement(children[i])) {
-                                break;
-                            }
-                        }
-                        //mark all the remaining child statemnts as unreachable
-                        for(i++; i < children.length; i++) {
-                            var child = children[i];
-                            if(!hoisted(child) && child.type !== "EmptyStatement") {
-                                context.report(child, ProblemMessages['no-unreachable']);
-                            }
+                    var i = 0;
+                    for(i; i < children.length; i++) {
+                        if(util.returnableStatement(children[i])) {
+                            break;
                         }
                     }
-                    catch(ex) {
-                        Logger.log(ex);
+                    //mark all the remaining child statemnts as unreachable
+                    for(i++; i < children.length; i++) {
+                        var child = children[i];
+                        if(!hoisted(child) && child.type !== "EmptyStatement") {
+                            context.report(child, ProblemMessages['no-unreachable']);
+                        }
                     }
                 }
 
@@ -1586,91 +1498,86 @@ define([
 		         * @param {Object} node The AST node
 		         */
 		        function check(node) {
-        			try {
-        				var scope = context.getScope();
-        				var kids = scope.childScopes;
-        				if(scope.functionExpressionScope && kids && kids.length) {
-        					scope = kids[0];
-        				}
-        				scope.variables.forEach(function(variable) {
-        					if (!variable.defs.length || variable.defs[0].type !== "Parameter") { // only care about parameters
-        						return;
-        					}
-        					var defnode = variable.defs[0].name;
-        					if (!variable.references.length) {
-        					    var pid = 'no-unused-params'; //$NON-NLS-1$
-        					    if(node.type === 'FunctionExpression') {
-        					        pid += '-expr'; //$NON-NLS-1$
-        					        if(hasCallbackComment(node) || node.params && node.params.length > 0 && hasCallbackComment(node.params[0])) {
-        					            return;
-        					        }
-        					        var parent = node.parent;
-        					        switch(parent.type) {
-        					        	case 'Property': {
-        					        		if(hasCallbackComment(parent) || hasCallbackComment(parent.key)) {
-        					        			return;
-        					        		}
-        					        		break;
-        					        	}
-        					        	case 'MemberExpression': {
-	        					        	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=457067
-	        					            // func epxrs part of call expressions, i.e. bind-like calls
-	        					            //Esprima tags the root containing expression with the doc, not the func expr
-	        					            parent = parent.parent;
-	        					            if(parent.type === 'CallExpression' && hasCallbackComment(parent)) {
-	        					               return;
-	        					            }
-        					        		break;
-        					        	}
-        					        	case 'AssignmentExpression': {
-        					        		var left = parent.left;
-	        					        	if(left.type === 'MemberExpression') {
-	        					        		if(hasCallbackComment(left)) {
-	        					        			return;
-	        					        		}
-	        					        	} else if(left.type === 'Identifier') {
-	        					        		if(hasCallbackComment(left)) {
-	        					        			return;
-	        					        		}
-	        					        	}
-	        					        	parent = parent.parent;
-	        					        	if (parent && parent.type === "ExpressionStatement") {
-	        					        		if (hasCallbackComment(parent)) {
-	        					        			return;
-	        					        		}
-	        					        	}
-        					        		break;
-        					        	}
-        					        	case 'VariableDeclarator': {
-        					        		if(hasCallbackComment(parent.id) || hasCallbackComment(parent)) {
-        					        			return;
-        					        		}
-        					        		parent = parent.parent;
-        					        		if (parent && parent.type === "VariableDeclaration") {
-        					        			if(hasCallbackComment(parent)) {
-        					        				return;
-        					        			}
-        					        		}
-        					        		break;
-        					        	}
-        					        }
-        					    } else if(node.type === 'ArrowFunctionExpression') {
-        					    	pid += '-arrow'; //$NON-NLS-1$
-        					    	/*
-    					        	//check the parent: () => {a => {}}
-    					        	//the comment is attached to the ExpressionStatement
-    					        	if(node.parent.type === 'ExpressionStatement' && hasCallbackComment(node.parent)) {
-    					        		return;
+    				var scope = context.getScope();
+    				var kids = scope.childScopes;
+    				if(scope.functionExpressionScope && kids && kids.length) {
+    					scope = kids[0];
+    				}
+    				scope.variables.forEach(function(variable) {
+    					if (!variable.defs.length || variable.defs[0].type !== "Parameter") { // only care about parameters
+    						return;
+    					}
+    					var defnode = variable.defs[0].name;
+    					if (!variable.references.length) {
+    					    var pid = 'no-unused-params'; //$NON-NLS-1$
+    					    if(node.type === 'FunctionExpression') {
+    					        pid += '-expr'; //$NON-NLS-1$
+    					        if(hasCallbackComment(node) || node.params && node.params.length > 0 && hasCallbackComment(node.params[0])) {
+    					            return;
+    					        }
+    					        var parent = node.parent;
+    					        switch(parent.type) {
+    					        	case 'Property': {
+    					        		if(hasCallbackComment(parent) || hasCallbackComment(parent.key)) {
+    					        			return;
+    					        		}
+    					        		break;
     					        	}
-        					        */
-        					    }
-        						context.report(defnode, ProblemMessages['no-unused-params'], {0:defnode.name, pid: pid}); //$NON-NLS-0
-        					}
-        				});
-        			}
-        			catch(ex) {
-        				Logger.log(ex);
-        			}
+    					        	case 'MemberExpression': {
+        					        	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=457067
+        					            // func epxrs part of call expressions, i.e. bind-like calls
+        					            //Esprima tags the root containing expression with the doc, not the func expr
+        					            parent = parent.parent;
+        					            if(parent.type === 'CallExpression' && hasCallbackComment(parent)) {
+        					               return;
+        					            }
+    					        		break;
+    					        	}
+    					        	case 'AssignmentExpression': {
+    					        		var left = parent.left;
+        					        	if(left.type === 'MemberExpression') {
+        					        		if(hasCallbackComment(left)) {
+        					        			return;
+        					        		}
+        					        	} else if(left.type === 'Identifier') {
+        					        		if(hasCallbackComment(left)) {
+        					        			return;
+        					        		}
+        					        	}
+        					        	parent = parent.parent;
+        					        	if (parent && parent.type === "ExpressionStatement") {
+        					        		if (hasCallbackComment(parent)) {
+        					        			return;
+        					        		}
+        					        	}
+    					        		break;
+    					        	}
+    					        	case 'VariableDeclarator': {
+    					        		if(hasCallbackComment(parent.id) || hasCallbackComment(parent)) {
+    					        			return;
+    					        		}
+    					        		parent = parent.parent;
+    					        		if (parent && parent.type === "VariableDeclaration") {
+    					        			if(hasCallbackComment(parent)) {
+    					        				return;
+    					        			}
+    					        		}
+    					        		break;
+    					        	}
+    					        }
+    					    } else if(node.type === 'ArrowFunctionExpression') {
+    					    	pid += '-arrow'; //$NON-NLS-1$
+    					    	/*
+					        	//check the parent: () => {a => {}}
+					        	//the comment is attached to the ExpressionStatement
+					        	if(node.parent.type === 'ExpressionStatement' && hasCallbackComment(node.parent)) {
+					        		return;
+					        	}
+    					        */
+    					    }
+    						context.report(defnode, ProblemMessages['no-unused-params'], {0:defnode.name, pid: pid}); //$NON-NLS-0
+    					}
+    				});
         		}
 
         		return {
@@ -1711,54 +1618,49 @@ define([
 		         * @description Check the current scope for unused vars 
 		         */
 		        function check(/**node*/) {
-        			try {
-        				var scope = context.getScope();
-        				scope.variables.forEach(function(variable) {
-        					if (!variable.defs.length || variable.defs[0].type === "Parameter") { // Don't care about parameters
-        						return;
-        					}
-        					var node = variable.defs[0].node;
-        					var references = getReferences(scope, variable), id = node.id;
-        					if (id.range && id.range[0] === id.range[1]) {
-        						// recovered node - the range cannot be empty for a "real" node
-        						return;
-        					}
-        					if (!references.length) {
-        					    if(node.type === 'FunctionDeclaration') {
-        					    	   var tern = context.getTern();
-        					    	   var refQuery = tern.query;
-							   refQuery.end = node.id.end;
-        					    	   var refs = null;
-        					    	   var filename = tern.file.name;
-        					    	   try {
-        					    	       refs = tern.findRefs(refQuery, tern.file);
-        					    	   } catch(e) {
-        					    	      //ignore
-        					    	   }
-        					    	   var result = [];
-        					    	   if (refs && Array.isArray(refs.refs)) {
-        					    	   		// filtering the refs from the current file - remove the one that matches the current node
-        					    	   		refs.refs.forEach(function(match) {
-        					    	   			if (match.file !== filename) {
-        					    	   				// any match in a different file is a good match
-        					    	   				result.push(match);
-        					    	   			}
-        					    	   		});
-        					    	   }
-        					    	   if (result === null || result.length === 0) {
-        					           context.report(id, ProblemMessages['no-unused-vars-unused-funcdecl'], {0:id.name, nls: 'no-unused-vars-unused-funcdecl'}); //$NON-NLS-1$
-        					       }
-        					    } else {
-        						   context.report(id, ProblemMessages['no-unused-vars-unused'], {0:id.name, nls: 'no-unused-vars-unused'}); //$NON-NLS-1$
-        						}
-        					} else if (!references.some(isRead)) {
-        						context.report(id, ProblemMessages['no-unused-vars-unread'], {0:id.name, nls: 'no-unused-vars-unread'}); //$NON-NLS-1$
-        					}
-        				});
-        			}
-        			catch(ex) {
-        				Logger.log(ex);
-        			}
+    				var scope = context.getScope();
+    				scope.variables.forEach(function(variable) {
+    					if (!variable.defs.length || variable.defs[0].type === "Parameter") { // Don't care about parameters
+    						return;
+    					}
+    					var node = variable.defs[0].node;
+    					var references = getReferences(scope, variable), id = node.id;
+    					if (id && id.range && id.range[0] === id.range[1]) {
+    						// recovered node - the range cannot be empty for a "real" node
+    						return;
+    					}
+    					if (!references.length) {
+    					    if(node.type === 'FunctionDeclaration') {
+    					    	   var tern = context.getTern();
+    					    	   var refQuery = tern.query;
+						   refQuery.end = node.id.end;
+    					    	   var refs = null;
+    					    	   var filename = tern.file.name;
+    					    	   try {
+    					    	       refs = tern.findRefs(refQuery, tern.file);
+    					    	   } catch(e) {
+    					    	      //ignore
+    					    	   }
+    					    	   var result = [];
+    					    	   if (refs && Array.isArray(refs.refs)) {
+    					    	   		// filtering the refs from the current file - remove the one that matches the current node
+    					    	   		refs.refs.forEach(function(match) {
+    					    	   			if (match.file !== filename) {
+    					    	   				// any match in a different file is a good match
+    					    	   				result.push(match);
+    					    	   			}
+    					    	   		});
+    					    	   }
+    					    	   if (result === null || result.length === 0) {
+    					           context.report(id, ProblemMessages['no-unused-vars-unused-funcdecl'], {0:id.name, nls: 'no-unused-vars-unused-funcdecl'}); //$NON-NLS-1$
+    					       }
+    					    } else {
+    						   context.report(id, ProblemMessages['no-unused-vars-unused'], {0:id.name, nls: 'no-unused-vars-unused'}); //$NON-NLS-1$
+    						}
+    					} else if (!references.some(isRead)) {
+    						context.report(id, ProblemMessages['no-unused-vars-unread'], {0:id.name, nls: 'no-unused-vars-unread'}); //$NON-NLS-1$
+    					}
+    				});
         		}
 
         		return {
@@ -1787,22 +1689,17 @@ define([
 		         * @description Check the current scope for use
 		         */
 		        function check(/**node*/) {
-        				try {
-        				var scope = context.getScope();
-        				scope.references.forEach(function(ref) {
-        					var decl = util.getDeclaration(ref, scope), identifier = ref.identifier, name = identifier.name, defs;
-        					if (decl && (defs = decl.defs).length && identifier.range[0] < defs[0].node.range[0]) {
-        						var defType = defs[0].type;
-        						if ((!flag_funcs && defType === "FunctionName") || (!flag_vars && defType === "Variable")) {
-        							return;
-        						}
-        						context.report(identifier, ProblemMessages['no-use-before-define'], {0:name});
-        					}
-        				});
-        			}
-        			catch(ex) {
-        				Logger.log(ex);
-        			}
+    				var scope = context.getScope();
+    				scope.references.forEach(function(ref) {
+    					var decl = util.getDeclaration(ref, scope), identifier = ref.identifier, name = identifier.name, defs;
+    					if (decl && (defs = decl.defs).length && identifier.range[0] < defs[0].node.range[0]) {
+    						var defType = defs[0].type;
+    						if ((!flag_funcs && defType === "FunctionName") || (!flag_vars && defType === "Variable")) {
+    							return;
+    						}
+    						context.report(identifier, ProblemMessages['no-use-before-define'], {0:name});
+    					}
+    				});
         		}
 
         		return {
@@ -1966,39 +1863,29 @@ define([
 		         * @param {Object} node The AST node
 		         */
 		        function checkForSemicolon(node) {
-        			try {
-        				var tokens = context.getTokens(node);
-        				var len = tokens.length;
-        				var t = tokens[len - 1];
-        				if (t && t.type === "Punctuator" && t.value === ";") {
-        					return;
-        				}
-        				context.report(node, ProblemMessages['semi'], null, t /* expose the bad token */);
-        			}
-        			catch(ex) {
-        				Logger.log(ex);
-        			}
+    				var tokens = context.getTokens(node);
+    				var len = tokens.length;
+    				var t = tokens[len - 1];
+    				if (t && t.type === "Punctuator" && t.value === ";") {
+    					return;
+    				}
+    				context.report(node, ProblemMessages['semi'], null, t /* expose the bad token */);
         		}
         		/**
 		         * @description Check the variable decl node for trailing semicolon
 		         * @param {Object} node The AST node
 		         */
 		        function checkVariableDeclaration(node) {
-        			try {
-        				var ancestors = context.getAncestors(node),
-        				    parent = ancestors[ancestors.length - 1],
-        				    parentType = parent.type;
-        				if ((parentType === "ForStatement" && parent.init === node) || (parentType === "ForInStatement" && parent.left === node)){
-        					// One of these cases, no semicolon token is required after the VariableDeclaration:
-        					// for(var x;;)
-        					// for(var x in y)
-        					return;
-        				}
-        				checkForSemicolon(node);
-        			}
-        			catch(ex) {
-        				Logger.log(ex);
-        			}
+    				var ancestors = context.getAncestors(node),
+    				    parent = ancestors[ancestors.length - 1],
+    				    parentType = parent.type;
+    				if ((parentType === "ForStatement" && parent.init === node) || (parentType === "ForInStatement" && parent.left === node)){
+    					// One of these cases, no semicolon token is required after the VariableDeclaration:
+    					// for(var x;;)
+    					// for(var x in y)
+    					return;
+    				}
+    				checkForSemicolon(node);
         		}
 
         		return {
@@ -2084,16 +1971,11 @@ define([
         		return {
         			/* @callback */
         			'BinaryExpression' : function(node) {
-        				try {
         					if(node.left.type === 'Identifier' && node.left.name === 'NaN') {
         						context.report(node.left, ProblemMessages['use-isnan'], null, node.left);
         					} else if(node.right.type === 'Identifier' && node.right.name === 'NaN') {
         						context.report(node.right, ProblemMessages['use-isnan'], null, node.right);
         					}
-        				}
-        				catch(ex) {
-        					Logger.log(ex);
-        				}
         			}
         		};
         },

@@ -20,6 +20,7 @@ define([
 	var assert = chai.assert;
 	return function(worker) {
 		describe('ES6 Validator Tests', function() {
+			this.timeout(10000);
 			
 			before('Reset Tern Server', function(done) {
 				worker.start(done,  {options:{ecmaVersion:6, sourceType:"module"}});

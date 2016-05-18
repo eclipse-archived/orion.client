@@ -23,6 +23,7 @@ define([
 	var assert = chai.assert;
 	return function(worker) {
 		describe('Validator Tests', function() {
+			this.timeout(10000);
 			
 			before('Reset Tern Server', function(done) {
 				worker.start(done); // Reset the tern server state to remove any prior files
@@ -9979,6 +9980,26 @@ define([
 									worker.getTestState().callback(error);
 								}
 							);
+						});
+						it("no-unused-vars import", function(callback) {
+							var topic = 'import { cube } from "./exports"; cube(4)'; 
+							var config = { rules: {} };
+							var createFiles = [{name: './exports.js', text: 'export function cube(x) {return x * x * x;}'}];
+							config.rules[RULE_ID] = 2;
+							validate({buffer: topic, callback: callback, config: config, createFiles: createFiles}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "forbiddenExportImport",
+										severity: 'error',
+										description: '\'import\' and \'export\' may appear only with \'sourceType: module\'',
+										start: 0,
+										end: 6
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
 						});
 					});
 			
