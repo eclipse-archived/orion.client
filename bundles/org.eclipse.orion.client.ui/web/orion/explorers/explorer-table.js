@@ -454,6 +454,9 @@ define([
 				var item = null;
 				var insertAfter = false;
 				if(children) {
+					if(!child.Location) {
+						child.Location = parentItem.Location + child.Name + child.Directory ? "/":"";
+					}
 					children.push(child);
 					children.sort(this.model.sortChildren);
 					var childIndex = children.indexOf(child);
