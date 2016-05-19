@@ -21,6 +21,8 @@ var async = require('async');
 var express = require('express');
 var bodyParser = require('body-parser');
 var util = require('./util');
+var remotes = require('./remotes');
+var branches = require('./branches');
 
 module.exports = {};
 
@@ -104,22 +106,21 @@ function getCommitLog(req, res) {
 	}
 	var commits = []	, repo, tagRef;
 	function writeResponse(over) {
-		var referenceName = scope;
+		var refs = scope.split("..");
+		var toRef, fromRef; 
+		if(refs.length === 1){
+			toRef = refs[0];
+		} else if(refs.length === 2){
+			toRef = refs[1];
+			fromRef = refs[0];
+		}
+		
 		var resp = {
 			"Children": commits,
 			"RepositoryPath": filterPath,
 			"Type": "Commit",
 			"Location":"/gitapi/commit/"+ tagRef +"/file" + req.params[0],
-			"CloneLocation": "/gitapi/clone" + fileDir,
-			"toRef": {
-				"CloneLocation": "/gitapi/clone" + fileDir,
-				"CommitLocation": "/gitapi/commit/" + util.encodeURIComponent(referenceName) + fileDir,
-				"Current": true,
-				"HeadLocation": "/gitapi/commit/HEAD" + fileDir,
-				"Location": "/gitapi/branch/" + util.decodeURIComponent(referenceName) + fileDir,
-				"Name": referenceName,
-				"Type": "Branch"
-			}
+			"CloneLocation": "/gitapi/clone" + fileDir
 		};
 	
 		if (page && !over) {
@@ -138,7 +139,48 @@ function getCommitLog(req, res) {
 			resp['PreviousLocation'] = prevLocation;
 		}
 		
+		function generateCorrespondingRefJson(refname){
+			return git.Reference.dwim(repo, refname).then(function(reference) {
+				if(reference.isRemote()){
+					var remoteName  = reference.shorthand().split("/")[0];
+					return Promise.all([repo.getRemote(remoteName), repo.getBranchCommit(reference)])
+					.then(function(results){
+						return remotes.remoteBranchJSON(reference, results[1], results[0], fileDir);
+					});
+				}else if(reference.isBranch()){
+					var branch = branches.branchJSON(repo, reference, fileDir);
+					return branches.getBranchCommit(repo, [branch])
+					.then(function(){
+						return branches.getBranchRemotes(repo, [branch], fileDir);
+					}).then(function(){
+						return branch;
+					});
+				}
+			}).catch(function(){
+				return null;   // when it's a commit, cannot dwim even
+			});
+		}
+		
 		return getCommitRefs(repo, fileDir, commits)
+		.then(function(){
+			if(fromRef){
+				return Promise.resolve(generateCorrespondingRefJson(fromRef))
+				.then(function(resultJson){
+					resp['fromRef'] = resultJson;
+				});
+			}
+		})
+		.then(function(){
+			if(toRef){
+				return Promise.resolve(generateCorrespondingRefJson(toRef))
+				.then(function(resultJson){
+					resp['toRef'] = resultJson;
+					if(!resp['toRef']){
+						delete resp.toRef;
+					}
+				});
+			}
+		})
 		.then(function() {
 			res.status(200).json(resp);
 		});
