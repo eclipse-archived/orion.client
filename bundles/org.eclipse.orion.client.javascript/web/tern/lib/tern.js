@@ -731,6 +731,16 @@
     // expression or an object literal.
     if (exprAt) {
       var exprNode = exprAt.node;
+      if(exprNode.type === 'Literal' && typeof exprNode.value === 'string') {
+      	//if one of the plugins has not handled in-literal completions, return none
+      	return {
+      		start: outputPos(query, file, wordStart),
+            end: outputPos(query, file, wordEnd),
+            isProperty: !!prop,
+            isObjectKey: !!isKey,
+            completions: []
+        };
+      }
       if (exprNode.type == "MemberExpression" && exprNode.object.end < wordStart) {
         memberExpr = exprAt;
       } else if (isStringAround(exprNode, wordStart, wordEnd)) {
