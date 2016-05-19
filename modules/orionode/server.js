@@ -111,8 +111,57 @@ function startServer(cb) {
 }
 
 if (process.versions.electron) {
-	var electron = require('electron');
+	var electron = require('electron'),
+		autoUpdater = electron.autoUpdater,
+		spawn = require('child_process').spawn,
+		os = require('os');
+
 	var mainWindow = null;
+
+	var handleSquirrelEvent = function() {
+		if (process.argv.length === 1 || os.platform() !== 'win32') { // No squirrel events to handle
+			return false;
+		}
+
+		var	target = path.basename(process.execPath);
+
+		function executeSquirrelCommand(args, done) {
+  		 	var updateDotExe = path.resolve(path.dirname(process.execPath), 
+		      	'..', 'Update.exe');
+		    var child = spawn(updateDotExe, args, { detached: true });
+		    child.on('close', function(code) {
+		    	done();
+		    });
+		};
+
+		var squirrelEvent = process.argv[1];
+	   	switch (squirrelEvent) {
+	   		case '--squirrel-install':
+	      	case '--squirrel-updated':
+	      		// Install desktop and start menu shortcuts
+	      		executeSquirrelCommand(["--createShortcut", target], electron.app.quit);
+	      		setTimeout(electron.app.quit, 1000);
+	      		return true;
+	      	case '--squirrel-obsolete':
+	      		// This is called on the outgoing version of the app before
+	      		// we update to the new version - it's the opposite of
+	      	  	// --squirrel-updated
+	      		electron.app.quit();
+	      		return true;
+	      	case '--squirrel-uninstall':
+	      		// Remove desktop and start menu shortcuts
+	      		executeSquirrelCommand(["--removeShortcut", target], electron.app.quit);
+	      		setTimeout(electron.app.quit, 1000);
+	      		return true;
+	    }
+	    return false;
+	};
+
+	if (handleSquirrelEvent()) {
+		// Squirrel event handled and app will exit in 1000ms
+		return;
+	}
+
 	electron.app.on('ready', function() {
 		if (process.platform === 'darwin') {
 			var Menu = require("menu");
@@ -162,8 +211,21 @@ if (process.versions.electron) {
 	});
 
 	electron.app.on('window-all-closed', function() {
-		electron.app.quit();		
+		electron.app.quit();	
 	});
+
+	
+	
+	// Check for updates every time we run the electron app
+	var feedURL = configParams["orion.autoUpdater.url"];
+	if (feedURL) {
+		var platform = os.platform() + '_' + os.arch(),
+		version = electron.app.getVersion();
+		autoUpdater.setFeedURL(feedURL + '/' + platform + '/' + version);
+		autoUpdater.checkForUpdates();
+	}
+	
 } else {
 	startServer();
 }
+
