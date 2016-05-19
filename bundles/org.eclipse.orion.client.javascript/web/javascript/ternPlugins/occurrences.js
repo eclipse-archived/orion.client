@@ -257,6 +257,9 @@ define([
                 case Estraverse.Syntax.BreakStatement:
                     checkId(node.label, node, false, false, true);
                     break;
+                case Estraverse.Syntax.ExportDefaultDeclaration:
+                	checkId(node.declaration, node, false, false, false);
+                	break;   
                 case Estraverse.Syntax.ExportSpecifier:
                 	checkId(node.local, node, false, false, false);
                 	break;
@@ -687,8 +690,12 @@ define([
 			if (!parent && node.parents) {
 				parent = node.parents[node.parents.length-1];
 			}
-			if (parent && parent.type === Estraverse.Syntax.ImportSpecifier){
-				return parent.imported === node;
+			if (parent){
+				if (parent.type === Estraverse.Syntax.ImportSpecifier){
+					return parent.imported === node;
+				} else if (parent.type === Estraverse.Syntax.ExportSpecifier){
+					return parent.exported === node;
+				}
 			}
 		}
 		

@@ -374,8 +374,7 @@ define([
 					var text = "var a = 3; export { a as b }; a++; b++;";
 					return computeOccurrences(text, getOptions(done, 30, 31), [{start:4, end:5}, {start:20, end:21}, {start:30, end:31}]);
 				});
-				// TODO We want to skip the exported identifier in occurrences
-				it.skip('Renamed export 4', function(done) {
+				it('Renamed export 4', function(done) {
 					var text = "var a = 3; export { a as b }; a++; b++;";
 					return computeOccurrences(text, getOptions(done, 25, 26), []);
 				});
@@ -383,11 +382,77 @@ define([
 					var text = "var a = 3; export { a as b }; a++; b++;";
 					return computeOccurrences(text, getOptions(done, 35, 36), [{start:35, end:36}]);
 				});
-				// TODO export named function, export default expression
-				
-				
+				it('Named function export 1', function(done) {
+					var text = "export function a(){}; a();";
+					return computeOccurrences(text, getOptions(done, 16, 17), [{start:16, end:17}, {start:23, end:24}]);
+				});
+				it('Named function export 2', function(done) {
+					var text = "export function a(){}; a();";
+					return computeOccurrences(text, getOptions(done, 23, 24), [{start:16, end:17}, {start:23, end:24}]);
+				});
+				it('Default expression export 1', function(done) {
+					var text = "var a = 3; export default a; a++;";
+					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:26, end:27}, {start:29, end:30}]);
+				});
+				it('Default expression export 2', function(done) {
+					var text = "var a = 3; export default a; a++;";
+					return computeOccurrences(text, getOptions(done, 26, 26), [{start:4, end:5}, {start:26, end:27}, {start:29, end:30}]);
+				});
+				it('Default expression export 3', function(done) {
+					var text = "var a = 3; export default a; a++;";
+					return computeOccurrences(text, getOptions(done, 29, 30), [{start:4, end:5}, {start:26, end:27}, {start:29, end:30}]);
+				});
+				it('Default named function export 1', function(done) {
+					var text = "export default function a(){}; a();";
+					return computeOccurrences(text, getOptions(done, 24, 24), [{start:24, end:25}, {start:31, end:32}]);
+				});
+				it('Default named function export 2', function(done) {
+					var text = "export default function a(){}; a();";
+					return computeOccurrences(text, getOptions(done, 32, 32), [{start:24, end:25}, {start:31, end:32}]);
+				});
+				it('From export 1', function(done) {
+					worker.createTestFile("a", "");
+					var text = "export { a, b } from 'a'; a++; b++;";
+					return computeOccurrences(text, getOptions(done, 9, 9), [{start:9, end:10}, {start:26, end:27}]);
+				});
+				it('From export 2', function(done) {
+					worker.createTestFile("a", "");
+					var text = "export { a, b } from 'a'; a++; b++;";
+					return computeOccurrences(text, getOptions(done, 26, 27), [{start:9, end:10}, {start:26, end:27}]);
+				});
+				it('From export 3', function(done) {
+					worker.createTestFile("a", "");
+					var text = "export { a, b } from 'a'; a++; b++;";
+					return computeOccurrences(text, getOptions(done, 12, 12), [{start:12, end:13}, {start:31, end:32}]);
+				});
+				it('From export 4', function(done) {
+					worker.createTestFile("a", "");
+					var text = "export { a, b } from 'a'; a++; b++;";
+					return computeOccurrences(text, getOptions(done, 32, 32), [{start:12, end:13}, {start:31, end:32}]);
+				});
+				it('Named from export 1', function(done) {
+					worker.createTestFile("a", "");
+					var text = "export { a as b } from 'a'; a++; b++;";
+					return computeOccurrences(text, getOptions(done, 9, 9), [{start:9, end:10}, {start:28, end:29}]);
+				});
+				it('Named from export 2', function(done) {
+					worker.createTestFile("a", "");
+					var text = "export { a as b } from 'a'; a++; b++;";
+					return computeOccurrences(text, getOptions(done, 28, 28), [{start:9, end:10}, {start:28, end:29}]);
+				});
+				it('Named from export 3', function(done) {
+					worker.createTestFile("a", "");
+					var text = "export { a as b } from 'a'; a++; b++;";
+					return computeOccurrences(text, getOptions(done, 14, 14), []);
+				});
+				it('Named from export 4', function(done) {
+					worker.createTestFile("a", "");
+					var text = "export { a as b } from 'a'; a++; b++;";
+					return computeOccurrences(text, getOptions(done, 33, 33), [{start:33, end:34}]);
+				});
 			});
-			describe('ES6 Occurrences Tests in HTML', function() {
+			// TODO Add some HTML tests for ES6
+			describe.skip('ES6 Occurrences Tests in HTML', function() {
 				/**
 				 * Tests computing occurrences from a script block in the <head> block
 				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
