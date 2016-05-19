@@ -179,7 +179,7 @@ define([
 				envs.amd = true;
 				addArrayDeps(_a.elements, deps, "amd"); //requirejs([foo])
 			}
-		} else if(callee.name === 'define' && len > 1) {//second arg must be array
+		} else if(callee.name === 'define' && len > 0) {
 			_a = args[0];
 			if(_a.type === "Literal") {
 				_a = args[1];
@@ -187,6 +187,8 @@ define([
 			if(_a.type === "ArrayExpression") {
 				envs.amd = true;
 				addArrayDeps(_a.elements, deps, "amd");
+			} else if(_a.type === "FunctionExpression" || _a.type === 'ObjectExpression') {
+				envs.amd = true;
 			}
 		}
 	}
@@ -444,7 +446,11 @@ define([
 			ast.dependencies = [];
 		}
 		Object.keys(this.dependencies).forEach(function(dep) {
-			ast.dependencies.push(this.dependencies[dep]);
+			var _d = this.dependencies[dep];
+			if(this.environments.amd && _d.env === 'node' || this.environments.node && _d.env === 'amd') {
+				_d.env = 'commonjs';
+			}
+			ast.dependencies.push(_d);
 		}.bind(this));
 		ast.environments = this.environments;
 		ast.errors = Util.serializeAstErrors(ast);

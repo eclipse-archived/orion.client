@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -64,10 +64,50 @@ define([
 			assert.equal(len, expected.length, 'The number of computed dependencies and expected ones differs');
 			for(var i = 0; i < len; i++) {
 				var dep = ast.dependencies[i];
-				assert.equal(dep.value, expected[i], 'The name name of the dependent does not match');
+				if(typeof expected[i] === 'object') {
+					assert.equal(dep.value, expected[i].value, 'The name of the dependent does not match');
+					assert.equal(dep.env, expected[i].env, 'The name of the dependent env does not match');
+				} else {
+					assert.equal(dep.value, expected[i], 'The name of the dependent does not match');
+				}
 			}
 		}
-	
+		/**
+		 * @description Checks the envs from the AST against the given list
+		 * @param {object} ast The AST
+		 * @param {Array.<string>} expected The array of expected values
+		 */
+		function assertEnvs(ast, expected) {
+			assert(ast, 'An AST was not produced');
+			assert(expected, 'You must provide an expected array of envs');
+			assert(ast.environments, 'There were no envs in the produced AST');
+			for(var i = 0, len = expected.length; i < len; i++) {
+				assert(ast.environments[expected[i]], 'There is no computed env \''+expected[i]+'\'.');
+			}
+		}
+		describe('Environment Analysis Tests', function() {
+			it("commonjs - define(func)", function() {
+					var _s = setup({buffer: 'define(function(require) {var foo = require(\'somelib\');});'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, [{value: 'somelib', env: 'commonjs'}]);
+						assertEnvs(ast, ['amd', 'node']);
+					});
+				});
+				it("amd - object expression", function() {
+					var _s = setup({buffer: 'define({one: 1});'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, []);
+						assertEnvs(ast, ['amd']);
+					});
+				});
+				it("node - simple", function() {
+					var _s = setup({buffer: 'var _n = require(\'somelib\')'});
+					return astManager.getAST(_s.editorContext).then(function(ast) {
+						assertDeps(ast, ['somelib']);
+						assertEnvs(ast, ['node']);
+					});
+				});
+		});
 		describe('Dependency Analysis Tests', function() {
 			describe('Node Require', function(){
 				it("require module", function() {
