@@ -314,6 +314,37 @@ define([
 		   }
 	    },
 	    /**
+	     * @description Computes the occurrences for of the identifier at the given offset
+	     * @param {String} file The fully qualified name of the file context
+	     * @param {Number} offset The offset of the cursor / selection
+	     * @param {Array.<Object>} files The optional array of file objects
+	     * @param {Function} callback The callback which is called to return the results
+	     * @since 12.0
+	     */
+	    occurrences: function occurrences(file, offset, files, callback) {
+			if(ternserver) {
+	    		ternserver.request({
+					query: {
+						type: "occurrences", //$NON-NLS-1$
+						file: file,
+						end: offset
+					},
+					files: Array.isArray(files) ? files : []},
+					function(error, occurrences) {
+						if(error) {
+							callback(null, {error: error.message, message: Messages['failedToComputeOccurrences']});
+						} else if(Array.isArray(occurrences)) {
+							callback({request: 'outline', occurrences: occurrences}); //$NON-NLS-1$
+						} else {
+							callback({request: 'outline', occurrences: []}); //$NON-NLS-1$
+						}
+					}
+				);
+			} else {
+		       callback(null, {message: Messages['failedToComputeOccurrencesNoServer']});
+		   }
+		},
+	    /**
 	     * @description Computes an outline of the given file
 	     * @param {String} file The fully qualified name of the file context
 	     * @param {Array.<Object>} files The optional array of file objects
