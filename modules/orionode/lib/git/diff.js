@@ -55,7 +55,7 @@ function getDiff(req, res) {
 		var includeDiffs = parts.indexOf("diffs") !== -1;
 		var URIs, diffContents = [], diffs = [];
 		if (includeURIs) {
-			var p = path.join(fileDir, filePath);
+			var p = api.toURLPath(path.join(fileDir, filePath));
 			URIs = {
 				"Base": getBaseLocation(scope, p),
 				"CloneLocation": "/gitapi/clone" + fileDir,
