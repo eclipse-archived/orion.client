@@ -104,7 +104,11 @@ define([
 					if (node.params) {
 						len = node.params.length;
 						for (idx = 0; idx < len; idx++) {
-							if(checkId(node.params[idx], node, true)) {
+							var identifier = node.params[idx];
+							if (identifier.type === Estraverse.Syntax.AssignmentPattern && identifier.left){
+								identifier = identifier.left;
+							}
+							if(checkId(identifier, node, true)) {
 								return Estraverse.VisitorOption.Skip;
 							}
 						}
@@ -119,7 +123,11 @@ define([
 					if (node.params) {
 						len = node.params.length;
 						for (idx = 0; idx < len; idx++) {
-							if(checkId(node.params[idx], node, true)) {
+							identifier = node.params[idx];
+							if (identifier.type === Estraverse.Syntax.AssignmentPattern && identifier.left){
+								identifier = identifier.left;
+							}
+							if(checkId(identifier, node, true)) {
 								return Estraverse.VisitorOption.Skip;
 							}
 						}

@@ -227,6 +227,80 @@ define([
 					return computeOccurrences(text, getOptions(done, 24, 24), [{start:23, end:24}, {start:29, end:30}]);
 				});
 			});
+			describe('Default parameters', function(){
+				it('Func decl default param 1', function(done) {
+					var text = "function myFunc(a = 4){ a++; } a = 'String';";
+					return computeOccurrences(text, getOptions(done, 16, 16), [{start:16, end:17}, {start:24, end:25}]);
+				});
+				it('Func decl default param 2', function(done) {
+					var text = "function myFunc(a = 4){ a++; } a = 'String';";
+					return computeOccurrences(text, getOptions(done, 24, 24), [{start:16, end:17}, {start:24, end:25}]);
+				});
+				it('Func decl default param 3', function(done) {
+					var text = "function myFunc(a = 4){ a++; } a = 'String';";
+					return computeOccurrences(text, getOptions(done, 31, 31), [{start:31, end:32}]);
+				});
+				it('Reused default param 1', function(done) {
+					var text = "function myFunc(a = 4, b = a+1){ a++; } a = 'String';";
+					return computeOccurrences(text, getOptions(done, 16, 16), [{start:16, end:17}, {start:27, end:28}, {start:33, end:34}]);
+				});
+				it('Reused default param 2', function(done) {
+					var text = "function myFunc(a = 4, b = a+1){ a++; } a = 'String';";
+					return computeOccurrences(text, getOptions(done, 27, 27), [{start:16, end:17}, {start:27, end:28}, {start:33, end:34}]);
+				});
+				it('Reused default param 3', function(done) {
+					var text = "function myFunc(a = 4, b = a+1){ a++; } a = 'String';";
+					return computeOccurrences(text, getOptions(done, 33, 34), [{start:16, end:17}, {start:27, end:28}, {start:33, end:34}]);
+				});
+				it('Reused default param 4', function(done) {
+					var text = "function myFunc(a = 4, b = a+1){ a++; } a = 'String';";
+					return computeOccurrences(text, getOptions(done, 41, 41), [{start:40, end:41}]);
+				});
+				it('Func expr default param 1', function(done) {
+					var text = "var a = { a: function(a, b = a+1){ a++;	} }; a++;";
+					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:45, end:46}]);
+				});
+				it('Func expr default param 2', function(done) {
+					var text = "var a = { a: function(a, b = a+1){ a++;	} }; a++;";
+					return computeOccurrences(text, getOptions(done, 10, 11), [{start:10, end:11}]);
+				});
+				it('Func expr default param 3', function(done) {
+					var text = "var a = { a: function(a, b = a+1){ a++;	} }; a++;";
+					return computeOccurrences(text, getOptions(done, 22, 23), [{start:22, end:23}, {start:29, end:30}, {start:35, end:36}]);
+				});
+				it('Func expr default param 4', function(done) {
+					var text = "var a = { a: function(a, b = a+1){ a++;	} }; a++;";
+					return computeOccurrences(text, getOptions(done, 29, 29), [{start:22, end:23}, {start:29, end:30}, {start:35, end:36}]);
+				});
+				it('Func expr default param 5', function(done) {
+					var text = "var a = { a: function(a, b = a+1){ a++;	} }; a++;";
+					return computeOccurrences(text, getOptions(done, 35, 36), [{start:22, end:23}, {start:29, end:30}, {start:35, end:36}]);
+				});
+				it('Func expr default param 6', function(done) {
+					var text = "var a = { a: function(a, b = a+1){ a++;	} }; a++;";
+					return computeOccurrences(text, getOptions(done, 46, 46), [{start:4, end:5}, {start:45, end:46}]);
+				});
+				it('Arrow func default param 1', function(done) {
+					var text = "var a = (a = 4, b = a+1) => { a++; }; a++;";
+					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:38, end:39}]);
+				});
+				it('Arrow func default param 2', function(done) {
+					var text = "var a = (a = 4, b = a+1) => { a++; }; a++;";
+					return computeOccurrences(text, getOptions(done, 9, 9), [{start:9, end:10}, {start:20, end:21}, {start:30, end:31}]);
+				});
+				it('Arrow func default param 3', function(done) {
+					var text = "var a = (a = 4, b = a+1) => { a++; }; a++;";
+					return computeOccurrences(text, getOptions(done, 20, 20), [{start:9, end:10}, {start:20, end:21}, {start:30, end:31}]);
+				});
+				it('Arrow func default param 4', function(done) {
+					var text = "var a = (a = 4, b = a+1) => { a++; }; a++;";
+					return computeOccurrences(text, getOptions(done, 30, 30), [{start:9, end:10}, {start:20, end:21}, {start:30, end:31}]);
+				});
+				it('Arrow func default param 5', function(done) {
+					var text = "var a = (a = 4, b = a+1) => { a++; }; a++;";
+					return computeOccurrences(text, getOptions(done, 38, 39), [{start:4, end:5}, {start:38, end:39}]);
+				});
+			});
 			describe('Import / Export declaration', function(){
 				it('Named import declaration 1', function(done) {
 					worker.createTestFile("a", "");
