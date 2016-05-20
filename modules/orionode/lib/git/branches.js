@@ -24,6 +24,10 @@ module.exports = {};
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	
+	module.exports.branchJSON = branchJSON;
+	module.exports.getBranchCommit = getBranchCommit;
+	module.exports.getBranchRemotes = getBranchRemotes;
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -53,55 +57,68 @@ module.exports.router = function(options) {
 		};
 	}
 	
-	function getBranchCommit(repo, branches, callback) {
-		async.each(branches, function(branch, cb) {
-			return repo.getReferenceCommit(branch.FullName)
-			.then(function(commit) {
-				branch["LocalTimeStamp"] = commit.timeMs();
-				branch["HeadSHA"] = commit.sha();
-				cb();
-			})
-			.catch(function() {
-				cb();
+	function getBranchCommit(repo, branches) {
+		return new Promise(function (fulfill, reject){
+			async.each(branches, function(branch, cb) {
+				return repo.getReferenceCommit(branch.FullName)
+				.then(function(commit) {
+					branch["LocalTimeStamp"] = commit.timeMs();
+					branch["HeadSHA"] = commit.sha();
+					cb();
+				})
+				.catch(function(err) {
+					cb(err);
+				});
+			}, function(err) {
+				if(err){
+					return reject(err);
+				}
+				fulfill();
 			});
-		}, function(err) {
-			callback(err);
 		});
 	}
 	
-	function getBranchRemotes(repo, branches, fileDir, callback) {
+	function getBranchRemotes(repo, branches, fileDir) {
 		return git.Remote.list(repo)
 		.then(function(remotes) {
 			var configFile = api.join(repo.path(), "config");
-			args.readConfigFile(configFile, function(err, config) {
-				config = config || {};
-				async.each(remotes, function(remote, cb) {
-					git.Remote.lookup(repo, remote)
-					.then(function(remote) {
-						return Promise.all(branches.map(function(branch) {
-							return git.Branch.lookup(repo, api.join(remote.name(), branch.Name), git.Branch.BRANCH.REMOTE).then(function(remoteBranch) {
-								return repo.getBranchCommit(remoteBranch).then(function(commit) {
-									var rJson = mRemotes.remoteJSON(remote, fileDir, [mRemotes.remoteBranchJSON(remoteBranch, commit, remote, fileDir)]);
-									var trackingRemote = config.branch && config.branch[branch.Name] && config.branch[branch.Name].remote;
-									if (trackingRemote === remote.name() || !trackingRemote) {
-										branch["RemoteLocation"].splice(0, 0, rJson);
-									} else {
-										branch["RemoteLocation"].push(rJson);
-									}
+			return new Promise(function(fulfill, reject) {
+				args.readConfigFile(configFile, function(err, config) {
+					if (err) {
+						return reject(err);
+					}
+					config = config || {};
+					async.each(remotes, function(remote, cb) {
+						git.Remote.lookup(repo, remote)
+						.then(function(remote) {
+							return Promise.all(branches.map(function(branch) {
+								return git.Branch.lookup(repo, api.join(remote.name(), branch.Name), git.Branch.BRANCH.REMOTE).then(function(remoteBranch) {
+									return repo.getBranchCommit(remoteBranch).then(function(commit) {
+										var rJson = mRemotes.remoteJSON(remote, fileDir, [mRemotes.remoteBranchJSON(remoteBranch, commit, remote, fileDir)]);
+										var trackingRemote = config.branch && config.branch[branch.Name] && config.branch[branch.Name].remote;
+										if (trackingRemote === remote.name() || !trackingRemote) {
+											branch["RemoteLocation"].splice(0, 0, rJson);
+										} else {
+											branch["RemoteLocation"].push(rJson);
+										}
+									});
+								}).catch(function() {
+									//No remote tracking branch
+									branch["RemoteLocation"].push(mRemotes.remoteJSON(remote, fileDir, [mRemotes.remoteBranchJSON(null, null, remote, fileDir, branch)]));
 								});
-							}).catch(function() {
-								//No remote tracking branch
-								branch["RemoteLocation"].push(mRemotes.remoteJSON(remote, fileDir, [mRemotes.remoteBranchJSON(null, null, remote, fileDir, branch)]));
-							});
-						}));
-					})
-					.then(function() {
-						cb();
-					})
-					.catch(function(err) {
-						cb(err);
+							}));
+						})
+						.then(function() {
+							cb();
+						})
+						.catch(function(err) {
+							cb(err);
+						});
+					}, function(err) {
+						if (err) return reject(err);
+						fulfill();
 					});
-				}, callback);
+				});
 			});
 		});
 	}
@@ -122,14 +139,12 @@ module.exports.router = function(options) {
 			.then(function(ref) {
 				theBranch = ref;
 				var branch = branchJSON(theRepo, theBranch, fileDir);
-				return getBranchCommit(theRepo, [branch], function() {
-					return getBranchRemotes(theRepo, [branch], fileDir, function(err) {
-						if (err) {
-							console.log(err);
-							return writeError(500, res);
-						}
-						res.status(200).json(branch);
-					});
+				return getBranchCommit(theRepo, [branch])
+				.then(function(){
+					return getBranchRemotes(theRepo, [branch], fileDir);
+				})
+				.then(function(){
+					res.status(200).json(branch);
 				});
 			})
 			.catch(function(err) {
@@ -171,20 +186,17 @@ module.exports.router = function(options) {
 					return a.LocalTimeStamp < b.LocalTimeStamp ? 1 : a.LocalTimeStamp > b.LocalTimeStamp ? -1 : b.Name.localeCompare(a.Name);
 				});
 		
-				return getBranchCommit(theRepo, branches, function() {
-					return getBranchRemotes(theRepo, branches, fileDir, function(err) {
-						if (err) {
-							console.log(err);
-							return writeError(500, res);
-						}
-						res.status(200).json({
+				return getBranchCommit(theRepo, branches)
+				.then(function(){
+					return getBranchRemotes(theRepo, branches, fileDir);
+				})
+				.then(function(){
+					res.status(200).json({
 							"Children": branches,
 							"Type": "Branch"
-						});
 					});
 				});
 			});
-
 		})
 		.catch(function(err) {
 			writeError(500, res, err.message);
@@ -219,11 +231,8 @@ module.exports.router = function(options) {
 		})
 		.then(function(ref) {
 			var branch = branchJSON(theRepo, ref, fileDir);
-			return getBranchRemotes(theRepo, [branch], fileDir, function(err) {
-				if (err) {
-					console.log(err);
-					return writeError(500, res);
-				}
+			return getBranchRemotes(theRepo, [branch], fileDir)
+			.then(function(){
 				res.status(201).json(branch);
 			});
 		})
