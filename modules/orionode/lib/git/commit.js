@@ -104,7 +104,7 @@ function getCommitLog(req, res) {
 		}
 		return true;
 	}
-	var commits = []	, repo, tagRef;
+	var commits = []	, repo;
 	function writeResponse(over) {
 		var refs = scope.split("..");
 		var toRef, fromRef; 
@@ -119,7 +119,7 @@ function getCommitLog(req, res) {
 			"Children": commits,
 			"RepositoryPath": filterPath,
 			"Type": "Commit",
-			"Location":"/gitapi/commit/"+ tagRef +"/file" + req.params[0],
+			"Location":"/gitapi/commit/"+ util.encodeURIComponent(scope) +"/file" + req.params[0],
 			"CloneLocation": "/gitapi/clone" + fileDir
 		};
 	
@@ -202,7 +202,6 @@ function getCommitLog(req, res) {
 	function log(repo, ref) {
 		var revWalk = repo.createRevWalk();
 		revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
-		tagRef = ref;
 		git.Reference.dwim(repo, ref).then(
 			function(reference) {
 				return ref =  reference.name();
