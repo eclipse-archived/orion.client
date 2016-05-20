@@ -212,6 +212,8 @@ define({
 	'forbiddenExportImportFixName' : 'Set sourceType to module',
 	
 	//Tern Plugins
+	'commonjsPluginName': 'CommonJS',
+	'commonjsPluginDescription': 'Plug-in that handles CommonJS-style dependency resolution.',
 	'ternDocPluginName': 'Doc Comments',
 	'ternDocPluginDescription': 'Tern plug-in to parse and use JSDoc-like comments for inferencing',
 	'orionAMQPPluginName': 'Orion AMQP',

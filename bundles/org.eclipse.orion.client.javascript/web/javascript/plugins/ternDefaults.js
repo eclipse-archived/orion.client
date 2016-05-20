@@ -24,6 +24,7 @@ define([
 	"tern/plugin/es_modules",
 	'tern/plugin/node',
 	'tern/plugin/requirejs',
+	'tern/plugin/commonjs',
 	
 	//orion defaults
 	"javascript/ternPlugins/amqp",
@@ -54,7 +55,7 @@ define([
 				"name": Messages["ternDocPluginName"],
 				"description": Messages["ternDocPluginDescription"],
 				"fullDocs": true,
-				"version": "0.12.0"
+				"version": "0.18.0"
 			},
 			"plugins": {
 				"name": Messages["ternPluginsPluginName"],
@@ -122,7 +123,12 @@ define([
 			"angular": {
 				"name": Messages["orionAngularPluginName"],
 				"description": Messages["orionAngularPluginDescription"],
-				"version": "0.12.0"
+				"version": "0.18.0"
+			},
+			"commonjs": {
+				"name": Messages['commonjsPluginName'],
+				"description": Messages['commonjsPluginDescription'],
+				"version": "0.18.0"
 			},
 			"express": {
 				"name": Messages["orionExpressPluginName"],
@@ -150,7 +156,7 @@ define([
 			"node": {
 				"name": Messages["orionNodePluginName"],
 				"description": Messages["orionNodePluginDescription"],
-				"version": "0.12.0"
+				"version": "0.18.0"
 			},
 			"postgres": {
 				"name": Messages["orionPostgresPluginName"],
@@ -167,7 +173,7 @@ define([
 			"requirejs": {
 				"name": Messages["orionRequirePluginName"],
 				"description": Messages["orionRequirePluginDescription"],
-				"version": "0.12.0"
+				"version": "0.18.0"
 			}
 		}
 	};

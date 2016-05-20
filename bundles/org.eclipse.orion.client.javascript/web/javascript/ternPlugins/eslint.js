@@ -173,6 +173,14 @@ define([
 				}
 				return false;
 			};
+			_tern.getEnvFromDep = function getEnvFromDep(depName) {
+				var deps = file.ast.dependencies;
+				for(var i = 0, len = deps.length; i< len; i++) {
+					if(deps[i].value === depName) {
+						return deps[i].env;
+					}
+				}
+			};
 			_tern.pluginRunning = function pluginRunning(pluginName) {
 				return server.plugins[pluginName];
 			};

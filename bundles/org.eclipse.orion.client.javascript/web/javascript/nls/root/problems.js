@@ -100,7 +100,7 @@ define({
 	'radix': 'Missing radix parameter.',
 	'unknown-require': 'This library could not be found, type information for it will be incomplete.',
 	'unknown-require-plugin': 'This library is available in a Tern plugin that is not currently loaded.',
-	'unknown-require-not-running': 'Type information for this library might be available, but requires the Node.js plug-in to be running.',
+	'unknown-require-not-running': 'Type information for this library might be available, but requires the \'${0}\' plug-in to be running.',
 	'unknown-require-missing-env': 'The \'${0}\' entry is missing from the eslint-env directive',
 	'radix-description': 'Warn when parseInt() is called without the \'radix\' parameter.',
 	'semi': 'Missing semicolon.',

@@ -181,7 +181,7 @@ define([
 			}
 		} else if(callee.name === 'define' && len > 0) {
 			_a = args[0];
-			if(_a.type === "Literal") {
+			if(_a.type === "Literal" && len > 1) {
 				_a = args[1];
 			}
 			if(_a.type === "ArrayExpression") {
