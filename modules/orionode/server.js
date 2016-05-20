@@ -15,12 +15,12 @@ var auth = require('./lib/middleware/auth'),
 	https = require('https'),
 	fs = require('fs'),
 	compression = require('compression'),
-    path = require('path'),
-    socketio = require('socket.io'),
-    util = require('util'),
-    argslib = require('./lib/args'),
-    ttyShell = require('./lib/tty_shell'),
-    orion = require('./index.js');
+	path = require('path'),
+	socketio = require('socket.io'),
+	util = require('util'),
+	argslib = require('./lib/args'),
+	ttyShell = require('./lib/tty_shell'),
+	orion = require('./index.js');
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
@@ -63,24 +63,17 @@ function startServer(cb) {
 			var server;
 			try {
 				// create web server
-				var orionMiddleware = orion({
-					workspaceDir: workspaceDir,
-					configParams: configParams,
-					maxAge: dev ? 0 : undefined,
-				});
-				
-				// add socketIO and app support
 				var app = express();
 				if (configParams["orion.https.key"] && configParams["orion.https.cert"]) {
 					server = https.createServer({
 						key: fs.readFileSync(configParams["orion.https.key"]),
 						cert: fs.readFileSync(configParams["orion.https.cert"])
 					}, app);
-				}
-				else {
+				} else {
 					server = http.createServer(app);
 				}
 
+				// Configure middleware
 				if (log) {
 					app.use(express.logger('tiny'));
 				}
@@ -88,31 +81,30 @@ function startServer(cb) {
 					app.use(auth(password || configParams.pwd));
 				}
 				app.use(compression());
-				app.use(orionMiddleware);
-				function portFound() {
-					console.log(util.format('Listening on port %d...', port));
-				}
-
-				function getPort() {
-					return Math.floor(Math.random() * (PORT_HIGH - PORT_LOW) + PORT_LOW);
-				}
-
-				server.listen(port, portFound);
-				
-				
+				app.use(orion({
+					workspaceDir: workspaceDir,
+					configParams: configParams,
+					maxAge: dev ? 0 : undefined,
+				}));
 				var io = socketio.listen(server, { 'log level': 1 });
 				ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
-				if (cb) {
-					cb();
-				}
+
+				server.on('listening', function() {
+					console.log(util.format('Listening on port %d...', port));
+					if (cb) {
+						cb();
+					}
+				});
+				server.on('error', function(err) {
+					if (err.code === "EADDRINUSE") {
+						port = Math.floor(Math.random() * (PORT_HIGH - PORT_LOW) + PORT_LOW);
+						server.listen(port);
+					}
+				});
+				server.listen(port);
 			} catch (e) {
 				console.error(e && e.stack);
 			}
-			server.on('error', function(err) {
-				if (err.code === "EADDRINUSE") {
-					server.listen(getPort(), portFound);
-				}
-			});
 		});
 	});
 }

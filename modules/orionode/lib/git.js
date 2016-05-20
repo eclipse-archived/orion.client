@@ -10,7 +10,6 @@
  *******************************************************************************/
 /*eslint-env node*/
 var fileUtil = require('./fileUtil');
-var gitFileDecorator = require('./git/gitfiledecorator').gitFileDecorator;
 var express = require('express');
 
 // Handle optional nodegit dependency
@@ -30,13 +29,13 @@ try {
 	var submodule = require('./git/submodule');
 	var tree = require('./git/tree');
 	var pullrequest = require('./git/pullrequest');
+	var gitFileDecorator = require('./git/gitfiledecorator').gitFileDecorator;
 } catch (e) {
 	hasNodegit = false;
 	if (e.code === "MODULE_NOT_FOUND" && e.message.indexOf("nodegit") >= 0) {
 		console.error("nodegit is not installed. Some features will be unavailable.");
 	} else {
-		console.error("nodegit failed to load");
-		console.log(e.message);
+		console.error("nodegit failed to load. " + e.message);
 	}
 }
 
