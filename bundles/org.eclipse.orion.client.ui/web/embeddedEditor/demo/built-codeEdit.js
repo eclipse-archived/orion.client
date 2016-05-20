@@ -204,7 +204,7 @@ Deferred) {
 //		if(fileClient) {
 //			var promises = [];
 //			files2create.forEach(function(file) {
-//				var promise = fileClient.createFile("/in_memory_file_system/project/", file.name).then(function(result){
+//				var promise = fileClient.createFile("/in_memory_fs/project/", file.name).then(function(result){
 //					return fileClient.write(result.Location, file.contents);
 //				});
 //				promises.push(promise);			
