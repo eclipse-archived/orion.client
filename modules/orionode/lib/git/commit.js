@@ -729,7 +729,7 @@ function tag(req, res, commitId, name, isAnnotated, message) {
 function putCommit(req, res) {
 	var commit = util.decodeURIComponent(req.params.commit);
 	var tagName = req.body.Name;
-	var isAnnotated = req.body.Annotated;
+	var isAnnotated = req.body.Annotated === undefined || req.body.Annotated;
 	var message = req.body.Message || "";
 	if (tagName) {
 		tag(req, res, commit, tagName, isAnnotated, message);
