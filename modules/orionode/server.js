@@ -113,6 +113,30 @@ if (process.versions.electron) {
 	var electron = require('electron');
 	var mainWindow = null;
 	electron.app.on('ready', function() {
+		if (process.platform === 'darwin') {
+			var Menu = require("menu");
+			if (!Menu.getApplicationMenu()) {
+				var template = [{
+					label: "Application",
+					submenu: [
+						{ label: "About Application", selector: "orderFrontStandardAboutPanel:" },
+						{ type: "separator" },
+						{ label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }}
+					]}, {
+					label: "Edit",
+					submenu: [
+						{ label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
+						{ label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
+						{ type: "separator" },
+						{ label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+						{ label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+						{ label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+						{ label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
+					]}
+				];
+				Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+			}
+		}
 		function createWindow(url){
 			var nextWindow = new electron.BrowserWindow({width: 1024, height: 800, title: "Orion", icon: "icon/256x256/orion.png"});
 			nextWindow.loadURL("file:///" + __dirname + "/lib/main.html#" + encodeURI(url));
