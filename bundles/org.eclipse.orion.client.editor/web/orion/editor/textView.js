@@ -688,7 +688,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			var model = view._model;
 			var lineText = model.getLine(lineIndex);
 			var lineStart = model.getLineStart(lineIndex);
-			var e = {type:"LineStyle", textView: view, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart}; //$NON-NLS-1$
+			var e = {type:"LineStyle", textView: view, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart}; //$NON-NLS-1$			
 			view.onLineStyle(e);
 			var doc = _parent.ownerDocument;
 			var lineDiv = div || util.createElement(doc, "div"); //$NON-NLS-1$
@@ -743,8 +743,8 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				for (i = 0; i < ranges.length; i++) {
 					range = ranges[i];
 					text = range.text;
-					style = range.style;
-					span = this._createSpan(lineDiv, text, style, range.ignoreChars);
+					style = range.style;					
+					span = this._createSpan(lineDiv, text, style, range.ignoreChars);					
 					frag.appendChild(span);
 				}
 				lineDiv.appendChild(frag);
@@ -795,10 +795,10 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 						}
 					}
 					span = this._createSpan(lineDiv, text, style, range.ignoreChars);
-					if (oldSpan) {
-						lineDiv.insertBefore(span, oldSpan);
-					} else {
-						lineDiv.appendChild(span);
+					if (oldSpan) {																													
+						lineDiv.insertBefore(span, oldSpan);						
+					} else {						
+						lineDiv.appendChild(span);						
 					}
 					if (div) {
 						div.lineWidth = undefined;
@@ -852,12 +852,17 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 		_createRange: function(text, start, end, style, data) {
 			if (start > end) { return; }
 			var tabSize = this.view._customTabSize, range;
+			var bidiStyle = {tagName:"span", bidi:true, style:{unicodeBidi:"embed", direction:"ltr"}};
+			var bidiRange = {text: "\u200E", style: bidiStyle}; // We ensure segments flow from left to right by adding a LRM marker \u200E
 			if (tabSize && tabSize !== 8) {
 				var tabIndex = text.indexOf("\t", start); //$NON-NLS-1$
 				while (tabIndex !== -1 && tabIndex < end) {
 					if (start < tabIndex) {
 						range = {text: text.substring(start, tabIndex), style: style};
 						data.ranges.push(range);
+						if (bidiUtils.isBidiEnabled) {
+							data.ranges.push(bidiRange);
+						}
 						data.tabOffset += range.text.length;
 					}
 					var spacesCount = tabSize - (data.tabOffset % tabSize);
@@ -869,6 +874,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 						}
 						range = {text: spaces, style: style, ignoreChars: spacesCount - 1};
 						data.ranges.push(range);
+						if (bidiUtils.isBidiEnabled) {
+							data.ranges.push(bidiRange);
+						}
 						data.tabOffset += range.text.length;
 					}
 					start = tabIndex + 1;
@@ -881,6 +889,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			if (start <= end) {
 				range = {text: text.substring(start, end), style: style};
 				data.ranges.push(range);
+				if (bidiUtils.isBidiEnabled) {
+					data.ranges.push(bidiRange);
+				}
 				data.tabOffset += range.text.length;
 			}
 		},
@@ -903,6 +914,8 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				child.ignore = true;
 			} else if (style && style.node) {
 				child.appendChild(style.node);
+				child.ignore = true;
+			} else if (style && style.bidi) {				
 				child.ignore = true;
 			}
 			applyStyle(style, child);
