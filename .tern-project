@@ -1,4 +1,9 @@
 {
+	"plugins": {
+		"node": {},
+		"requirejs": {},
+		"express": {}
+	},
 	"ecmaVersion": 5,
 	"libs": [
 		"ecma5",
