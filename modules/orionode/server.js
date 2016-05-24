@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env node*/
+/*eslint-env node, express*/
 var auth = require('./lib/middleware/auth'),
 	express = require('express'),
 	http = require('http'),
