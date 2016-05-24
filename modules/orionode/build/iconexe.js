@@ -372,19 +372,19 @@ function walkResourceDirectory(imageResourceDirectoryOffset, resourceBase, delta
 				var png = new Struct(buffer2, PNGHEADER);
 				if (png.Signature1 === 0x89504E47 && png.Signature2 === 0xD0A1A0A) {//PNG
 					if (!icons.some(function(replaceIcon) {
-						console.log(replaceIcon.infoHeader.biCompression + " " + BI_PNG)
 						if (replaceIcon.infoHeader.biCompression === BI_PNG) {
 							var replacePng = new Struct(replaceIcon.data, PNGHEADER);
 							if (png.Width === replacePng.Width && png.Height === replacePng.Height && 
 								png.BitDepth === replacePng.BitDepth && png.ColorType === replacePng.ColorType &&
 								data.Size >= replaceIcon.data.length)
 							{
+								console.log("png replaced w=" + png.Width + " h=" + png.Height + " depth=" + png.BitDepth + " colorType=" + png.ColorType);
 								fs.writeSync(fd, replaceIcon.data, 0, replaceIcon.data.length, data.OffsetToData - delta);
 							}
 							return true;
 						}
 					})) {
-						console.log("ERROR: could find replacement png w=" + png.Width + " h=" + png.Height + " depth=" + png.BitDepth + " colorType=" + png.ColorType);
+						throw new Error("Could find replacement png w=" + png.Width + " h=" + png.Height + " depth=" + png.BitDepth + " colorType=" + png.ColorType);
 					}
 				} else {
 					var icon = new Struct(buffer2, BITMAPINFOHEADER);
@@ -397,7 +397,7 @@ function walkResourceDirectory(imageResourceDirectoryOffset, resourceBase, delta
 							return true;
 						}
 					})) {
-						console.log("ERROR: could find replacement ico w=" + icon.biWidth + " h=" + icon.biHeight + " depth=" + icon.biBitCount);
+						throw new Error("Could find replacement ico w=" + icon.biWidth + " h=" + icon.biHeight + " depth=" + icon.biBitCount);
 					}
 				}
 			}
