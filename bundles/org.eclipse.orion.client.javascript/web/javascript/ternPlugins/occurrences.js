@@ -281,25 +281,29 @@ define([
                     break;
                 // ES6 constructs (Class expressions and declarations are done above)
                 case Estraverse.Syntax.AssignmentPattern:
-                	checkId(node.right, node, false, false, false);
+                	checkId(node.right, node);
                 	break;   
                 case Estraverse.Syntax.ExportDefaultDeclaration:
-                	checkId(node.declaration, node, false, false, false);
+                	checkId(node.declaration, node);
                 	break;   
                 case Estraverse.Syntax.ExportSpecifier:
-                	checkId(node.local, node, false, false, false);
+                	checkId(node.local, node);
                 	break;
                 case Estraverse.Syntax.ImportDefaultSpecifier:
-                	checkId(node.local, node, true, false, false);
+                	checkId(node.local, node, true);
                 	break;
                 case Estraverse.Syntax.ImportNamespaceSpecifier:
-                	checkId(node.local, node, true, false, false);
+                	checkId(node.local, node, true);
                 	break;
                 case Estraverse.Syntax.ImportSpecifier:
-                	checkId(node.local, node, true, false, false);
+                	checkId(node.local, node, true);
                 	break;
                	case Estraverse.Syntax.MethodDefinition:
-               		checkId(node.key, node, true, false, false);
+               		checkId(node.key, node, true);
+               		break;
+               	case Estraverse.Syntax.YieldExpression:
+               		checkId(node.argument, node);
+               		break;
 			}
 		},
 		

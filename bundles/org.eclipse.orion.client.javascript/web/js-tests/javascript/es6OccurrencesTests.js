@@ -227,6 +227,48 @@ define([
 					return computeOccurrences(text, getOptions(done, 24, 24), [{start:23, end:24}, {start:29, end:30}]);
 				});
 			});
+			describe('Generators', function(){
+				it('Generators 1', function(done) {
+					var text = "function* a(a) { yield a+1; } function* b(b){ yield b; yield* a(b); } a(1); b(1);";
+					return computeOccurrences(text, getOptions(done, 10, 10), [{start:10, end:11}, {start:62, end:63}, {start:70, end:71}]);
+				});
+				it('Generators 2', function(done) {
+					var text = "function* a(a) { yield a+1; } function* b(b){ yield b; yield* a(b); } a(1); b(1);";
+					return computeOccurrences(text, getOptions(done, 63, 63), [{start:10, end:11}, {start:62, end:63}, {start:70, end:71}]);
+				});
+				it('Generators 3', function(done) {
+					var text = "function* a(a) { yield a+1; } function* b(b){ yield b; yield* a(b); } a(1); b(1);";
+					return computeOccurrences(text, getOptions(done, 70, 71), [{start:10, end:11}, {start:62, end:63}, {start:70, end:71}]);
+				});
+				it('Generators 4', function(done) {
+					var text = "function* a(a) { yield a+1; } function* b(b){ yield b; yield* a(b); } a(1); b(1);";
+					return computeOccurrences(text, getOptions(done, 12, 13), [{start:12, end:13}, {start:23, end:24}]);
+				});
+				it('Generators 5', function(done) {
+					var text = "function* a(a) { yield a+1; } function* b(b){ yield b; yield* a(b); } a(1); b(1);";
+					return computeOccurrences(text, getOptions(done, 24, 24), [{start:12, end:13}, {start:23, end:24}]);
+				});
+				it('Generators 6', function(done) {
+					var text = "function* a(a) { yield a+1; } function* b(b){ yield b; yield* a(b); } a(1); b(1);";
+					return computeOccurrences(text, getOptions(done, 40, 41), [{start:40, end:41}, {start:76, end:77}]);
+				});
+				it('Generators 7', function(done) {
+					var text = "function* a(a) { yield a+1; } function* b(b){ yield b; yield* a(b); } a(1); b(1);";
+					return computeOccurrences(text, getOptions(done, 76, 76), [{start:40, end:41}, {start:76, end:77}]);
+				});
+				it('Generators 8', function(done) {
+					var text = "function* a(a) { yield a+1; } function* b(b){ yield b; yield* a(b); } a(1); b(1);";
+					return computeOccurrences(text, getOptions(done, 43, 43), [{start:42, end:43}, {start:52, end:53}, {start:64, end:65}]);
+				});
+				it('Generators 9', function(done) {
+					var text = "function* a(a) { yield a+1; } function* b(b){ yield b; yield* a(b); } a(1); b(1);";
+					return computeOccurrences(text, getOptions(done, 43, 43), [{start:42, end:43}, {start:52, end:53}, {start:64, end:65}]);
+				});
+				it('Generators 10', function(done) {
+					var text = "function* a(a) { yield a+1; } function* b(b){ yield b; yield* a(b); } a(1); b(1);";
+					return computeOccurrences(text, getOptions(done, 43, 43), [{start:42, end:43}, {start:52, end:53}, {start:64, end:65}]);
+				});
+			});
 			describe('Classes and constructors', function(){
 				it('Class declaration 1', function(done) {
 					var text = "class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
