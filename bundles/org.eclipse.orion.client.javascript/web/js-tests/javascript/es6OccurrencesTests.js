@@ -227,6 +227,188 @@ define([
 					return computeOccurrences(text, getOptions(done, 24, 24), [{start:23, end:24}, {start:29, end:30}]);
 				});
 			});
+			describe('Classes and constructors', function(){
+				it('Class declaration 1', function(done) {
+					var text = "class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 6, 6), [{start:6, end:7}, {start:68, end:69}]);
+				});
+				it('Class declaration 2', function(done) {
+					var text = "class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 68, 69), [{start:6, end:7}, {start:68, end:69}]);
+				});
+				it('Class declaration 3', function(done) {
+					var text = "class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 22, 22), [{start:22, end:23}, {start:27, end:28}, {start:32, end:33}]);
+				});
+				it('Class declaration 4', function(done) {
+					var text = "class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 28, 28), [{start:22, end:23}, {start:27, end:28}, {start:32, end:33}]);
+				});
+				it('Class declaration 5', function(done) {
+					var text = "class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 32, 32), [{start:22, end:23}, {start:27, end:28}, {start:32, end:33}]);
+				});
+				// TODO https://bugs.eclipse.org/bugs/show_bug.cgi?id=494056
+				it.skip('Class declaration 6', function(done) {
+					var text = "class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 38, 38), [{start:38, end:39}]);
+				});
+				it('Class declaration 7', function(done) {
+					var text = "class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 40, 41), [{start:40, end:41}, {start:45, end:46}, {start:56, end:57}]);
+				});
+				it('Class declaration 8', function(done) {
+					var text = "class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 45, 45), [{start:40, end:41}, {start:45, end:46}, {start:56, end:57}]);
+				});
+				it('Class declaration 9', function(done) {
+					var text = "class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 56, 56), [{start:40, end:41}, {start:45, end:46}, {start:56, end:57}]);
+				});
+				
+				it('Class expression 1', function(done) {
+					var text = "var a = class { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:74, end:75}]);
+				});
+				it('Class expression 2', function(done) {
+					var text = "var a = class { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 74, 74), [{start:4, end:5}, {start:74, end:75}]);
+				});
+				it('Class expression 3', function(done) {
+					var text = "var a = class { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 28, 29), [{start:28, end:29}, {start:33, end:34}, {start:38, end:39}]);
+				});
+				it('Class expression 4', function(done) {
+					var text = "var a = class { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 33, 34), [{start:28, end:29}, {start:33, end:34}, {start:38, end:39}]);
+				});
+				it('Class expression 5', function(done) {
+					var text = "var a = class { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 39, 39), [{start:28, end:29}, {start:33, end:34}, {start:38, end:39}]);
+				});
+				it('Class expression 6', function(done) {
+					var text = "var a = class { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 44, 44), [{start:44, end:45}]);
+				});
+				it('Class expression 7', function(done) {
+					var text = "var a = class { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 46, 47), [{start:46, end:47}, {start:51, end:52}, {start:62, end:63}]);
+				});
+				it('Class expression 8', function(done) {
+					var text = "var a = class { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 52, 52), [{start:46, end:47}, {start:51, end:52}, {start:62, end:63}]);
+				});
+				it('Class expression 9', function(done) {
+					var text = "var a = class { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();";
+					return computeOccurrences(text, getOptions(done, 62, 62), [{start:46, end:47}, {start:51, end:52}, {start:62, end:63}]);
+				});
+				
+				it('Named class expression 1', function(done) {
+					var text = "var a = class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } z(){ a.a(); } }; new a();";
+					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:90, end:91}]);
+				});
+				it('Named class expression 2', function(done) {
+					var text = "var a = class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } z(){ a.a(); } }; new a();";
+					return computeOccurrences(text, getOptions(done, 90, 90), [{start:4, end:5}, {start:90, end:91}]);
+				});
+				// TODO https://bugs.eclipse.org/bugs/show_bug.cgi?id=494056
+				it.skip('Named class expression 3', function(done) {
+					var text = "var a = class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } z(){ a.a(); } }; new a();";
+					return computeOccurrences(text, getOptions(done, 14, 14), [{start:14, end:15}, {start:74, end:75}]);
+				});
+				// TODO https://bugs.eclipse.org/bugs/show_bug.cgi?id=494056
+				it.skip('Named class expression 4', function(done) {
+					var text = "var a = class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } z(){ a.a(); } }; new a();";
+					return computeOccurrences(text, getOptions(done, 74, 75), [{start:14, end:15}, {start:74, end:75}]);
+				});
+				it('Named class expression 5', function(done) {
+					var text = "var a = class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } z(){ a.a(); } }; new a();";
+					return computeOccurrences(text, getOptions(done, 30, 31), [{start:30, end:31}, {start:35, end:36}, {start:40, end:41}]);
+				});
+				it('Named class expression 6', function(done) {
+					var text = "var a = class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } z(){ a.a(); } }; new a();";
+					return computeOccurrences(text, getOptions(done, 35, 35), [{start:30, end:31}, {start:35, end:36}, {start:40, end:41}]);
+				});
+				it('Named class expression 7', function(done) {
+					var text = "var a = class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } z(){ a.a(); } }; new a();";
+					return computeOccurrences(text, getOptions(done, 41, 41), [{start:30, end:31}, {start:35, end:36}, {start:40, end:41}]);
+				});
+				// TODO Recognize method names as object properties, also https://bugs.eclipse.org/bugs/show_bug.cgi?id=494056
+				it.skip('Named class expression 8', function(done) {
+					var text = "var a = class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } z(){ a.a(); } }; new a();";
+					return computeOccurrences(text, getOptions(done, 46, 47), [{start:46, end:47}, {start:76, end:77}]);
+				});
+				// TODO Recognize method names as object properties, also https://bugs.eclipse.org/bugs/show_bug.cgi?id=494056
+				it.skip('Named class expression 9', function(done) {
+					var text = "var a = class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } z(){ a.a(); } }; new a();";
+					return computeOccurrences(text, getOptions(done, 77, 77), [{start:46, end:47}, {start:76, end:77}]);
+				});
+				it('Named class expression 10', function(done) {
+					var text = "var a = class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } z(){ a.a(); } }; new a();";
+					return computeOccurrences(text, getOptions(done, 48, 49), [{start:48, end:49}, {start:53, end:54}, {start:64, end:65}]);
+				});
+				it('Named class expression 11', function(done) {
+					var text = "var a = class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } z(){ a.a(); } }; new a();";
+					return computeOccurrences(text, getOptions(done, 48, 49), [{start:48, end:49}, {start:53, end:54}, {start:64, end:65}]);
+				});
+				it('Named class expression 12', function(done) {
+					var text = "var a = class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } z(){ a.a(); } }; new a();";
+					return computeOccurrences(text, getOptions(done, 48, 49), [{start:48, end:49}, {start:53, end:54}, {start:64, end:65}]);
+				});
+				
+				it('Class declaration this occurrence 1', function(done) {
+					var text = "this.a(); class z { a(){} b(){ this.a(); } }; new z(); this.a();";
+					return computeOccurrences(text, getOptions(done, 2, 2), [{start:0, end:4}, {start:55, end:59}]);
+				});
+				it('Class declaration this occurrence 2', function(done) {
+					var text = "this.a(); class z { a(){} b(){ this.a(); } }; new z(); this.a();";
+					return computeOccurrences(text, getOptions(done, 33, 34), [{start:31, end:35}]);
+				});
+				// TODO https://bugs.eclipse.org/bugs/show_bug.cgi?id=494466
+				it.skip('Class declaration this occurrence 3', function(done) {
+					var text = "this.a(); class z { a(){} b(){ this.a(); } }; new z(); this.a();";
+					return computeOccurrences(text, getOptions(done, 59, 59), [{start:0, end:4}, {start:55, end:59}]);
+				});
+				it('Class declaration this occurrence 1', function(done) {
+					var text = "this.a(); var z = class { a(){} b(){ this.a(); } }; new z(); this.a();";
+					return computeOccurrences(text, getOptions(done, 2, 2), [{start:0, end:4}, {start:61, end:65}]);
+				});
+				it('Class declaration this occurrence 2', function(done) {
+					var text = "this.a(); var z = class { a(){} b(){ this.a(); } }; new z(); this.a();";
+					return computeOccurrences(text, getOptions(done, 39, 40), [{start:37, end:41}]);
+				});
+				// TODO https://bugs.eclipse.org/bugs/show_bug.cgi?id=494466
+				it.skip('Class declaration this occurrence 3', function(done) {
+					var text = "this.a(); var z = class { a(){} b(){ this.a(); } }; new z(); this.a();";
+					return computeOccurrences(text, getOptions(done, 61, 65), [{start:0, end:4}, {start:61, end:65}]);
+				});
+				
+				it('Extends class 1', function(done) {
+					var text = "class a{}; class b extends a{};";
+					return computeOccurrences(text, getOptions(done, 6, 6), [{start:6, end:7}, {start:27, end:28}]);
+				});
+				it('Extends class 2', function(done) {
+					var text = "class a{}; class b extends a{};";
+					return computeOccurrences(text, getOptions(done, 27, 27), [{start:6, end:7}, {start:27, end:28}]);
+				});
+				it('Extends function 1', function(done) {
+					var text = "function a(){}; class b extends a{};";
+					return computeOccurrences(text, getOptions(done, 9, 9), [{start:9, end:10}, {start:32, end:33}]);
+				});
+				it('Extends function 2', function(done) {
+					var text = "function a(){}; class b extends a{};";
+					return computeOccurrences(text, getOptions(done, 32, 32), [{start:9, end:10}, {start:32, end:33}]);
+				});
+				// TODO Recognize method declarations as this properties, see above bugs marked TODO and the following
+//				it('Class declaration this property reference', function(done) {
+//					var text = "class z { a(){} b(){ this.a(); } }; new z();";
+//					return computeOccurrences(text, getOptions(done, 10, 11), [{start:10, end:11}, {start:26, end:27}]);
+//				});
+//				it('Class expression this property reference', function(done) {
+//					var text = "var z = class { a(){} b(){ this.a() } }; new z();";
+//					return computeOccurrences(text, getOptions(done, 16, 17), [{start:16, end:17}, {start:32, end:33}]);
+//				});
+			}); 
 			describe('Default parameters', function(){
 				it('Func decl default param 1', function(done) {
 					var text = "function myFunc(a = 4){ a++; } a = 'String';";
@@ -241,18 +423,34 @@ define([
 					return computeOccurrences(text, getOptions(done, 31, 31), [{start:31, end:32}]);
 				});
 				it('Reused default param 1', function(done) {
+					var text = "function myFunc(a = 4, b = a){ a++; } a = 'String';";
+					return computeOccurrences(text, getOptions(done, 16, 16), [{start:16, end:17}, {start:27, end:28}, {start:31, end:32}]);
+				});
+				it('Reused default param 2', function(done) {
+					var text = "function myFunc(a = 4, b = a){ a++; } a = 'String';";
+					return computeOccurrences(text, getOptions(done, 27, 27), [{start:16, end:17}, {start:27, end:28}, {start:31, end:32}]);
+				});
+				it('Reused default param 3', function(done) {
+					var text = "function myFunc(a = 4, b = a){ a++; } a = 'String';";
+					return computeOccurrences(text, getOptions(done, 31, 32), [{start:16, end:17}, {start:27, end:28}, {start:31, end:32}]);
+				});
+				it('Reused default param 4', function(done) {
+					var text = "function myFunc(a = 4, b = a){ a++; } a = 'String';";
+					return computeOccurrences(text, getOptions(done, 39, 39), [{start:38, end:39}]);
+				});
+				it('Reused default in expression param 1', function(done) {
 					var text = "function myFunc(a = 4, b = a+1){ a++; } a = 'String';";
 					return computeOccurrences(text, getOptions(done, 16, 16), [{start:16, end:17}, {start:27, end:28}, {start:33, end:34}]);
 				});
-				it('Reused default param 2', function(done) {
+				it('Reused default in expression param 2', function(done) {
 					var text = "function myFunc(a = 4, b = a+1){ a++; } a = 'String';";
 					return computeOccurrences(text, getOptions(done, 27, 27), [{start:16, end:17}, {start:27, end:28}, {start:33, end:34}]);
 				});
-				it('Reused default param 3', function(done) {
+				it('Reused default in expression param 3', function(done) {
 					var text = "function myFunc(a = 4, b = a+1){ a++; } a = 'String';";
 					return computeOccurrences(text, getOptions(done, 33, 34), [{start:16, end:17}, {start:27, end:28}, {start:33, end:34}]);
 				});
-				it('Reused default param 4', function(done) {
+				it('Reused default in expression param 4', function(done) {
 					var text = "function myFunc(a = 4, b = a+1){ a++; } a = 'String';";
 					return computeOccurrences(text, getOptions(done, 41, 41), [{start:40, end:41}]);
 				});

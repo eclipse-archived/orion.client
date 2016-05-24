@@ -133,6 +133,20 @@ define([
 						}
 					}
 					break;
+				case Estraverse.Syntax.ClassDeclaration:
+					checkId(node.id, node, true);
+					checkId(node.superClass, node);
+					if(_enterScope(node)) {
+						return Estraverse.VisitorOption.Skip;
+					}
+					break;
+				case Estraverse.Syntax.ClassExpression:
+					if(_enterScope(node)) {
+						return Estraverse.VisitorOption.Skip;
+					}
+					checkId(node.id, node, true);
+					checkId(node.superClass, node);
+					break;
 				case Estraverse.Syntax.AssignmentExpression:
 					checkId(node.left, node);
 					checkId(node.right, node);
@@ -265,6 +279,10 @@ define([
                 case Estraverse.Syntax.BreakStatement:
                     checkId(node.label, node, false, false, true);
                     break;
+                // ES6 constructs (Class expressions and declarations are done above)
+                case Estraverse.Syntax.AssignmentPattern:
+                	checkId(node.right, node, false, false, false);
+                	break;   
                 case Estraverse.Syntax.ExportDefaultDeclaration:
                 	checkId(node.declaration, node, false, false, false);
                 	break;   
@@ -280,6 +298,8 @@ define([
                 case Estraverse.Syntax.ImportSpecifier:
                 	checkId(node.local, node, true, false, false);
                 	break;
+               	case Estraverse.Syntax.MethodDefinition:
+               		checkId(node.key, node, true, false, false);
 			}
 		},
 		
@@ -303,6 +323,8 @@ define([
 					//$FALLTHROUGH$
 					case Estraverse.Syntax.ObjectExpression:
 					case Estraverse.Syntax.Program:
+					case Estraverse.Syntax.ClassDeclaration:
+					case Estraverse.Syntax.ClassExpression:
 						if(_popScope()) {
 							//we left an object closure, end
 							return Estraverse.VisitorOption.Break;
@@ -311,6 +333,8 @@ define([
 				}
 			} else if (objectPropCheck) {
 				switch(node.type){
+					case Estraverse.Syntax.ClassDeclaration:
+					case Estraverse.Syntax.ClassExpression:
 					case Estraverse.Syntax.ObjectExpression:
 					case Estraverse.Syntax.Program:
 						if(_popScope()) {
@@ -330,7 +354,10 @@ define([
 				switch(node.type) {
 					case Estraverse.Syntax.FunctionExpression:
 					case Estraverse.Syntax.FunctionDeclaration: 
-					case Estraverse.Syntax.ArrowFunctionExpression: {
+					case Estraverse.Syntax.ArrowFunctionExpression:
+					case Estraverse.Syntax.ClassDeclaration:
+					case Estraverse.Syntax.ClassExpression:
+					{
 					    if(_popScope()) {
 							return Estraverse.VisitorOption.Break;
 						}
@@ -569,11 +596,23 @@ define([
 						}
 					}
 					break;
+				case Estraverse.Syntax.ClassDeclaration:
+				case Estraverse.Syntax.ClassExpression:
+					scopes.push({range: node.body.range, occurrences: [], kind:'c'});  //$NON-NLS-0$
+					if (defscope){
+						return true;
+					}
+					break;
 			}
 		} else if (objectPropCheck){
 			switch(node.type) {
+				case Estraverse.Syntax.ClassDeclaration:
+				case Estraverse.Syntax.ClassExpression:
+					scopes.push({range: node.range, occurrences: [], kind:'c'});  //$NON-NLS-0$
+					break;
 				case Estraverse.Syntax.ObjectExpression:
 					scopes.push({range: node.range, occurrences: [], kind:'o'});  //$NON-NLS-0$
+					break;
 			}
 		} else if (labeledStatementCheck){
 			switch(node.type) {
@@ -606,6 +645,16 @@ define([
 						rangeStart = node.id.range[0];
 					} else if (node.params && (node.params.length > 0)){
 						rangeStart = node.params[0].range[0];
+					}
+					break;
+				case Estraverse.Syntax.ClassDeclaration:
+					kind = 'c';  //$NON-NLS-0$
+					break;
+				case Estraverse.Syntax.ClassExpression:
+					kind = 'c';  //$NON-NLS-0$
+					// Include the body and identifier (if available) See Bug 447413
+					if (node.id) {
+						rangeStart = node.id.range[0];
 					}
 					break;
 			}
