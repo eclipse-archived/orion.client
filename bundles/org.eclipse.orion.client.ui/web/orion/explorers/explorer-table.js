@@ -491,9 +491,30 @@ define([
 				var explorer = this;
 				var performDrop = this.dragAndDrop;
 				
+				function findItemfromNode(target){
+					var tmp = target;
+					var source;
+					while (tmp) {
+						if (tmp._item) {
+							source = tmp._item;
+							break;
+						}
+						tmp = tmp.parentNode;
+					}
+					return source;
+				}
+				
 				var dragStart = function(evt) {
 					dragStartTarget = evt.target;
+					var source = findItemfromNode(dragStartTarget);
+					if (source) {
+						var isFolder = /(\/)$/.test(dragStartTarget.href);
+						var exportName = isFolder ? dragStartTarget.text + ".zip" : dragStartTarget.text;
+						var downloadUrl = new URL(isFolder ? source.ExportLocation : source.Location, self.location.href).href;
+					}
+					evt.dataTransfer.setData('DownloadURL', "application/zip,application/octet-stream:"+ exportName +":" + downloadUrl);
 				};
+				
 				if (persistAndReplace) {
 					if (this._oldDragStart) {
 						node.removeEventListener("dragstart", this._oldDragStart, false); //$NON-NLS-0$
@@ -714,15 +735,7 @@ define([
 					
 					if (dragStartTarget) {
 						var fileClient = explorer.fileClient;
-						var tmp = dragStartTarget;
-						var source;
-						while (tmp) {
-							if (tmp._item) {
-								source = tmp._item;
-								break;
-							}
-							tmp = tmp.parentNode;
-						}
+						var source = findItemfromNode(dragStartTarget);
 						if (!source) {
 							return;
 						}
