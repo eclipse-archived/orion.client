@@ -74,6 +74,7 @@ define({
 	'undefExpression' : 'Undeclared function reference:',
 	'unnecessarySemis' : 'Unnecessary semicolons:',
 	'unusedParams' : 'Unused parameters:',
+	'missingRequirejs': '\'requirejs\' plugin missing in AMD environment:',
 	'unsupportedJSLint' : 'Unsupported environment directive:',
 	'noThrowLiteral': 'Literal used in \'throw\':',
 	'noselfassignFixName': 'Remove assignment',

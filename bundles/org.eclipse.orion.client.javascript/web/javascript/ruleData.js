@@ -24,6 +24,7 @@ define([
 			"eqeqeq": 1,
 			"missing-doc" : 0, 
 			"missing-nls" : 0,
+			'missing-requirejs': 1,
 			"new-parens" : 1,
 			"no-caller": 1,
 			"no-comma-dangle" : 0, 

@@ -165,6 +165,16 @@ define([
 			        }
 				}
 			}
+			//correct the missing mappings
+			if(env.amd) {
+				env.requirejs = true;
+			}
+			if(env.mongo) {
+				env.mongdb = true;
+			}
+			if(env.pg) {
+				env.postgres = true;
+			}
 		    return env;
 		}
 	});

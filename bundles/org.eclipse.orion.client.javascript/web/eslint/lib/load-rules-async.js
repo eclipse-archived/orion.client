@@ -15,7 +15,6 @@
  */
 define([
 './util',
-'javascript/logger',
 'javascript/finder',
 'i18n!javascript/nls/problems',
 'estraverse/estraverse',
@@ -34,7 +33,7 @@ define([
 './rules/no-obj-calls',
 './rules/no-self-compare',
 './rules/no-irregular-whitespace',
-], function(util, Logger, Finder, ProblemMessages, Estraverse, JsSyntax,
+], function(util, Finder, ProblemMessages, Estraverse, JsSyntax,
 		accessorPairs, noControlRegex, noDuplicateCase, noElseReturn, noEmptyCharClasses, 
 		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs, noObjCalls, noSelfCompare, noIrregularWhitespace) {
 	
@@ -1292,7 +1291,7 @@ define([
 
                 return {
                 	/* @callback */
-                    "Program": function(/*node*/) {
+                    "Program": function(node) {
         	            var globalScope = context.getScope();
 
         	            globalScope.through.forEach(function(ref) {
@@ -1324,6 +1323,14 @@ define([
             	                    var inenv = env ? '-inenv' : ''; //$NON-NLS-1$
             	                    var nls = 'no-undef-defined'; //$NON-NLS-1$
             	                    context.report(ref.identifier, ProblemMessages['no-undef-defined'], {0:name, nls: nls, pid: nls+inenv});
+        	                    } else if(foundType && env) {
+        	                    	//we found a type and its in an env
+        	                    	var d = Finder.findDirective(node, 'eslint-env');
+        	                    	if(!d || d.value && d.value.indexOf(env) < 0) {
+        	                    		inenv = env ? '-inenv' : ''; //$NON-NLS-1$
+	            	                    nls = 'no-undef-defined'; //$NON-NLS-1$
+	            	                    context.report(ref.identifier, ProblemMessages['no-undef-defined'], {0:name, nls: nls, pid: nls+inenv});
+        	                    	}
         	                    }
         	                } else if (ref.isWrite() && variable.writeable === false) {
         	                    context.report(ref.identifier, ProblemMessages['no-undef-readonly'], {0:name, nls: 'no-undef-readonly'}); //$NON-NLS-1$
@@ -2003,7 +2010,31 @@ define([
         			}
         		};
         },
-        
+        /**
+         * @callback
+         */
+        'missing-requirejs': function(context) {
+        	return {
+        		'CallExpression': function(node) {
+        			if(node.callee.name === "define") {
+        				if(node.arguments.length === 1 && (node.arguments[0].type === 'FunctionExpression' || node.arguments[0].type === 'ObjectExpression')) {
+        					if(!context.getTern().pluginRunning('requirejs')) {
+        						context.report(node.callee, ProblemMessages['missing-requirejs'], {data: 'requirejs'});
+        					}
+        				} else if(node.arguments.length === 3 && node.arguments[0].type === 'Literal' && typeof node.arguments[0] === 'string' 
+        							&& node.arguments[1] && node.arguments[1].type === 'ArrayExpression' && node.arguments[2].type === 'FunctionExpression') {
+        					if(!context.getTern().pluginRunning('requirejs')) {
+        						context.report(node.callee, ProblemMessages['missing-requirejs'], {data: 'requirejs'});
+        					}
+        				} else if(node.arguments.length === 2 && node.arguments[0].type === 'ArrayExpression' && node.arguments[1] && node.arguments[1].type === 'FunctionExpression') {
+        					if(!context.getTern().pluginRunning('requirejs')) {
+        						context.report(node.callee, ProblemMessages['missing-requirejs'], {data: 'requirejs'});
+        					}
+        				}
+    				}
+        		}
+        	};	
+        },
         // Rules consumed from ESLint 3rd party library
 		'accessor-pairs': accessorPairs,
 		'no-control-regex': noControlRegex,

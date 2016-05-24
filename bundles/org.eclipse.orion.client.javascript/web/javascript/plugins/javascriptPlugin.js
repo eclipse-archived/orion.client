@@ -866,7 +866,7 @@ define([
     			{
     				/** @callback */
 		    		execute: function(editorContext, context) {
-		    			if(context.annotation.id === 'unknown-require-not-running') {
+		    			if(context.annotation.id === 'unknown-require-not-running' || context.annotation.id === 'missing-requirejs') {
 		    			    context.annotation.fixid = 'unknown-require-plugin'; //$NON-NLS-1$
 		    			}
 		    			return quickFixComputer.execute(editorContext, context);
@@ -878,7 +878,7 @@ define([
         			id : "unknown.require.plugin.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:unknown-require-plugin|unknown-require-not-running)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:unknown-require-plugin|unknown-require-not-running|missing-requirejs)$"} //$NON-NLS-1$ //$NON-NLS-2$
                     ]
     			}
     	);
@@ -1639,6 +1639,12 @@ define([
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 			 	        	                	},
+			 	        	                	{	id: "missing-requirejs",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["missingRequirejs"],
+    			 	        	                	type: "number",  //$NON-NLS-1$
+    			 	        	                	defaultValue: warning,
+    			 	        	                	options: severities
+    			 	        	                },
  				 	        	                {	id: "curly",  //$NON-NLS-1$
     			 	        	                	name: javascriptMessages["missingCurly"],
     			 	        	                	type: "number",  //$NON-NLS-1$
