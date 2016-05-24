@@ -204,7 +204,7 @@ function write (zip, base, filePath) {
 			.then(function(directoryFiles) {
 				return Promise.map(directoryFiles, function(entry) {
 					return write(zip, base, filePath + entry);
-				}, { concurrency: SUBDIR_SEARCH_CONCURRENCY });
+				},{ concurrency: 10});  // 10 is SUBDIR_SEARCH_CONCURRENCY, method can only identify 10 here, not SUBDIR_SEARCH_CONCURRENCY
 			});
 		}
 		zip.file(filePath, { name: filePath.substring(base.length).replace(/\\/g, "/") });
