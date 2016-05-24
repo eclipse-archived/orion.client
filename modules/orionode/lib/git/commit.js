@@ -86,6 +86,7 @@ function getCommitLog(req, res) {
 	var fromDateFilter = query.fromDate ? parseInt(query.fromDate, 10) : 0;
 	var toDateFilter = query.toDate ? parseInt(query.toDate, 10) : 0;
 	var filterPath = path.join(req.user.workspaceDir, req.params["0"]);
+	var behindCount = {count:0}, aheadCount= {count:0};
 	function filterCommit(commit) {
 		if (sha1Filter && commit.sha() !== sha1Filter) return true;
 		if (filter && commit.message().toLowerCase().indexOf(filter.toLowerCase()) === -1) return true;
@@ -122,6 +123,10 @@ function getCommitLog(req, res) {
 			"Location":"/gitapi/commit/"+ util.encodeURIComponent(scope) +"/file" + req.params[0],
 			"CloneLocation": "/gitapi/clone" + fileDir
 		};
+		if(mergeBase){
+			resp["AheadCount"] = aheadCount.count;
+			resp["BehindCount"] = behindCount.count;
+		}
 	
 		if (page && !over) {
 			var nextLocation = url.parse(req.originalUrl, true);
@@ -273,7 +278,7 @@ function getCommitLog(req, res) {
 		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
 		if (mergeBase) {
 			var names = scope.split("..");
-			var commit0;
+			var commit0, commit1,mergeBaseCommitOid;
 			repo.getReferenceCommit(names[0])
 			.then(function(commit) {
 				return commit;
@@ -285,15 +290,31 @@ function getCommitLog(req, res) {
 			}).catch(function() {
 				return repo.getCommit(names[1]);
 			})
-			.then(function(commit1) {
-				git.Merge.base(repo, commit0, commit1).then(function(oid) {
-					if (oid) {
-						log(repo, oid.tostrS());
-					} else {
-						writeResponse(true);
-					}
+			.then(function(commit) {
+				commit1 = commit;
+				return git.Merge.base(repo, commit0, commit1).then(function(oid){
+					return oid;
 				});
-			}).catch(function(err) {
+			})
+			.then(function(oid) {
+				mergeBaseCommitOid = oid;
+				var revWalkForCounting1 =  repo.createRevWalk();
+				revWalkForCounting1.sorting(git.Revwalk.SORT.TOPOLOGICAL);
+				revWalkForCounting1.pushRange(mergeBaseCommitOid.tostrS() + ".." + commit0.id().tostrS());	//count for incomings
+				
+				var revWalkForCounting2 =  repo.createRevWalk();
+				revWalkForCounting2.sorting(git.Revwalk.SORT.TOPOLOGICAL);
+				revWalkForCounting2.pushRange(mergeBaseCommitOid.tostrS() + ".." + commit1.id().tostrS()); // count for outgoing
+				
+				return Promise.all([countCommit(revWalkForCounting1,behindCount),countCommit(revWalkForCounting2,aheadCount)]);	
+			}).then(function(){
+				if(mergeBaseCommitOid){
+					log(repo, mergeBaseCommitOid.tostrS());
+				} else {
+					writeResponse(true);
+				}
+			})
+			.catch(function(err) {
 				writeError(400, res, err.message);
 			});
 		} else {
@@ -302,6 +323,13 @@ function getCommitLog(req, res) {
 	}).catch(function(err) {
 		writeError(400, res, err.message);
 	});
+}
+
+function countCommit(revWalk,countObject){
+	return revWalk.next().then(function(){
+		countObject.count++;
+		return countCommit(revWalk,countObject);
+	}).catch(function(){	});
 }
 
 function getCommitParents(repo, commit, fileDir) {
