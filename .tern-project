@@ -9,6 +9,7 @@
 		"ecma5",
 		"browser",
 		"chai",
-		".definitions/compression"
+		".definitions/compression",
+		".definitions/nodegit"
 	]
 }
