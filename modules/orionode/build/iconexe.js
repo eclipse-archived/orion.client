@@ -86,10 +86,9 @@ function Struct(buf, props, off) {
 		offset += s;
 		
 	});
-	desc["SIZE_OF"] = {
-		value: offset - startOffset
-	};
-	return Object.create({}, desc);
+	var result = Object.create({}, desc);
+	result.SIZE_OF = offset - startOffset;
+	return result;
 }
 
 var IMAGE_DOS_HEADER = [
@@ -245,12 +244,35 @@ var PNGHEADER = [
 	{name: "ColorType", size: 8, unsigned: true},
 ];
 
+var STRING_RC_HEADER = [
+	{name: "wLength", size: 16, unsigned: true},
+	{name: "wValueLength", size: 16, unsigned: true},
+	{name: "wType", size:16, unsigned: true},
+];
+
+var VS_FIXEDFILEINFO = [
+	{name: "dwSignature", size: 32, unsigned: true},
+	{name: "dwStrucVersion", size: 32, unsigned: true},
+	{name: "dwFileVersionMS", size: 32, unsigned: true},
+	{name: "dwFileVersionLS", size: 32, unsigned: true},
+	{name: "dwProductVersionMS", size: 32, unsigned: true},
+	{name: "dwProductVersionLS", size: 32, unsigned: true},
+	{name: "dwFileFlagsMask", size: 32, unsigned: true},
+	{name: "dwFileFlags", size: 32, unsigned: true},
+	{name: "dwFileOS", size: 32, unsigned: true},
+	{name: "dwFileType", size: 32, unsigned: true},
+	{name: "dwFileSubtype", size: 32, unsigned: true},
+	{name: "dwFileDateMS", size: 32, unsigned: true},
+	{name: "dwFileDateLS", size: 32, unsigned: true},
+];
+
 var IMAGE_DIRECTORY_ENTRY_RESOURCE = 2;
 var DEBUG = false;
 var RES_ICON = 1;
 var RT_ICON = 3;
-var BI_PNG = 65536;
 var RT_GROUP_ICON = 14;
+var RT_VERSION = 16;
+var BI_PNG = 65536;
 var BUFFER_SIZE = 2048;
 
 function readIcon(filename) {
@@ -278,6 +300,58 @@ function readIcon(filename) {
 	}
 	fs.closeSync(fd);
 	return icons;
+}
+
+function readNullTerminated(buffer, o) {
+	var str = "";
+	do {
+		var code = buffer.readUInt8(o) + (buffer.readUInt8(o + 1) >> 8);
+		o += 2;
+		if (code !== 0) {
+			str += String.fromCharCode(code);
+		}
+	} while (code !== 0);
+	return str;
+}
+
+function readResouceTable (buffer, off, getValue) {
+	var table = new Struct(buffer, STRING_RC_HEADER, off || 0), o = off + table.SIZE_OF;
+	table.szKey = readNullTerminated(buffer, o);
+	o += (table.szKey.length + 1) * 2;
+//	console.log(table.szKey + " " + table.wType)
+	function PadToDWORD(pos) {
+		if (pos % 4 !== 0) return  4 - pos % 4;
+		return 0;
+	}
+	o += PadToDWORD(o);
+	if (table.wValueLength > 0) {
+		table.Value = getValue(table, o);
+		o += table.wValueLength * (typeof table.Value === "string" ? 2 : 1);
+		o += PadToDWORD(o);
+		
+//		if (typeof table.Value === "string") console.log("v=" + table.Value)
+//		if (typeof table.Value === "number") console.log("v1=" + Number(table.Value).toString(16));
+	}
+	function Align(p) {
+		return p + 3 & ~3;
+	}
+	o = Align(o);
+	table.Children = {};
+	while (o < off + table.wLength) {
+		var child = readResouceTable(buffer, o, function(table1, o1) {
+			return table1.wType === 1 ? readNullTerminated(buffer, o1) : buffer.readInt32LE(o1);
+		});
+		o += child.wLength;
+		o = Align(o);
+		table.Children[child.szKey] = child;
+	}
+	return table;
+}
+
+function readVersionInfo (buffer, off) {
+	return readResouceTable(buffer, off, /* @callback */ function(table, o) {
+		return new Struct(buffer, VS_FIXEDFILEINFO, o);
+	});
 }
 
 // Read replacement icons
@@ -328,7 +402,7 @@ var delta = imageSectionHeader.VirtualAddress - imageSectionHeader.PointerToRawD
 var imageResourceDirectoryOffset = resourcesRVA - delta;
 walkResourceDirectory(imageResourceDirectoryOffset, imageResourceDirectoryOffset, delta, 0, 0, false);
 
-function walkResourceDirectory(imageResourceDirectoryOffset, resourceBase, delta, type, level, rt_icon_root) {
+function walkResourceDirectory(imageResourceDirectoryOffset, resourceBase, delta, type, level, parentType) {
 	if (DEBUG)
 		console.log("** LEVEL " + level); //$NON-NLS-1$
 
@@ -345,6 +419,8 @@ function walkResourceDirectory(imageResourceDirectoryOffset, resourceBase, delta
 				sType = "RT_ICON"; //$NON-NLS-1$
 			if (type === RT_GROUP_ICON)
 				sType = "RT_GROUP_ICON"; //$NON-NLS-1$
+			if (type === RT_VERSION)
+				sType = "RT_VERSION"; //$NON-NLS-1$
 		}
 		console.log("Resource Directory [" + sType + "]" + " (Named " + imageResourceDirectory.NumberOfNamedEntries + ", ID " + imageResourceDirectory.NumberOfIdEntries + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	}
@@ -359,14 +435,14 @@ function walkResourceDirectory(imageResourceDirectoryOffset, resourceBase, delta
 	for (i = 0; i < imageResourceDirectoryEntries.length; i++) {
 		var irde = imageResourceDirectoryEntries[i];
 		if ((irde.OffsetToData & 1 << 31) !== 0 ) {
-			walkResourceDirectory((irde.OffsetToData & 0x7FFFFFFF) + resourceBase, resourceBase, delta, (irde.Name & 0xFFFF) >> 0, level + 1, rt_icon_root ? true : type === RT_ICON);
+			walkResourceDirectory((irde.OffsetToData & 0x7FFFFFFF) + resourceBase, resourceBase, delta, (irde.Name & 0xFFFF) >> 0, level + 1, type);
 		} else {
 			var buffer1 = new Buffer(BUFFER_SIZE);
 			fs.readSync(fd, buffer1, 0, buffer1.length, irde.OffsetToData + resourceBase);
 			var data = new Struct(buffer1, IMAGE_RESOURCE_DATA_ENTRY);
 			if (DEBUG)
 				console.log("Resource Id " + (irde.Name & 0xFFFF) + " Data Offset RVA " + data.OffsetToData + ", Size " + data.Size); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			if (rt_icon_root) {
+			if (parentType === RT_ICON) {
 				var buffer2 = new Buffer(data.Size);
 				fs.readSync(fd, buffer2, 0, data.Size, data.OffsetToData - delta);
 				var png = new Struct(buffer2, PNGHEADER);
@@ -400,6 +476,11 @@ function walkResourceDirectory(imageResourceDirectoryOffset, resourceBase, delta
 						throw new Error("Could find replacement ico w=" + icon.biWidth + " h=" + icon.biHeight + " depth=" + icon.biBitCount);
 					}
 				}
+			} else if (parentType === RT_VERSION) {
+				var buffer3 = new Buffer(data.Size);
+				fs.readSync(fd, buffer3, 0, data.Size, data.OffsetToData - delta);
+				var versionInfo = readVersionInfo(buffer3, 0);
+				console.log("CompanyName=" + versionInfo.Children["StringFileInfo"].Children["040904b0"].Children["CompanyName"].Value)
 			}
 		}
 	}
