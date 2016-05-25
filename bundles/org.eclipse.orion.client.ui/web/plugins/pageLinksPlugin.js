@@ -153,15 +153,17 @@ define([
 //			uriTemplate: "{+OrionHome}/edit/edit.html#"
 //		});
 
-		provider.registerService("orion.page.link.user", null, {
-			id: "orion.user.settings",
-			order: 10,
-			name: widgetMessages["userSettings"],
-			nls: "orion/widgets/nls/messages",
-			uriTemplate: "{+OrionHome}/settings/settings.html#,category=userSettings",
-			category: "user.0"
-		});
-	
+		if (parent.window.isElectron === undefined) {
+			provider.registerService("orion.page.link.user", null, {
+				id: "orion.user.settings",
+				order: 10,
+				name: widgetMessages["userSettings"],
+				nls: "orion/widgets/nls/messages",
+				uriTemplate: "{+OrionHome}/settings/settings.html#,category=userSettings",
+				category: "user.0"
+			});
+		}
+		
 		provider.registerService("orion.page.link.user", null, {
 			id: "orion.help",
 			order: 20,

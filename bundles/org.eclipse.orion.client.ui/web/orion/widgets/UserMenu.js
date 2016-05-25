@@ -78,24 +78,26 @@ define([
 			var _self = this;
 			var authService = this.authenticatedServices[key].authService;
 			if (authService && authService.logout && this._displaySignOut){
-				var element = this._makeMenuItem(messages["Sign Out"], function() {
-					authService.logout().then(function(){
-						_self.addUserItem(key, authService, _self.authenticatedServices[key].label);
-						localStorage.removeItem(key);
-						localStorage.removeItem("lastLogin"); //$NON-NLS-0$
-						//TODO: Bug 368481 - Re-examine localStorage caching and lifecycle
-						for (var i = localStorage.length - 1; i >= 0; i--) {
-							var name = localStorage.key(i);
-							if (name && name.indexOf("/orion/preferences/user") === 0) { //$NON-NLS-0$
-								localStorage.removeItem(name);
+				if (window.isElectron === undefined) {
+					var element = this._makeMenuItem(messages["Sign Out"], function() {
+						authService.logout().then(function(){
+							_self.addUserItem(key, authService, _self.authenticatedServices[key].label);
+							localStorage.removeItem(key);
+							localStorage.removeItem("lastLogin"); //$NON-NLS-0$
+							//TODO: Bug 368481 - Re-examine localStorage caching and lifecycle
+							for (var i = localStorage.length - 1; i >= 0; i--) {
+								var name = localStorage.key(i);
+								if (name && name.indexOf("/orion/preferences/user") === 0) { //$NON-NLS-0$
+									localStorage.removeItem(name);
+								}
 							}
-						}
-						authService.getAuthForm(PageLinks.getOrionHome()).then(function(formURL) {
-							window.location = formURL;
+							authService.getAuthForm(PageLinks.getOrionHome()).then(function(formURL) {
+								window.location = formURL;
+							});
 						});
 					});
-				});
-				this._dropdownNode.appendChild(element.parentNode);
+					this._dropdownNode.appendChild(element.parentNode);
+				}
 			}
 		},
 		
@@ -122,80 +124,82 @@ define([
 			}
 			var serviceRegistry = this._serviceRegistry;
 			PageLinks.getPageLinksInfo(serviceRegistry, "orion.page.link.user").then(function(pageLinksInfo) { //$NON-NLS-0$
-				if(this._dropdown) {
-					this._dropdown.empty();
-				} else if(this._dropdownNode) {
-					lib.empty(this._dropdownNode);
-				}
+				if (window.isElectron === undefined) {
+					if(this._dropdown) {
+						this._dropdown.empty();
+					} else if(this._dropdownNode) {
+						lib.empty(this._dropdownNode);
+					}
 
-				// Read extension-contributed links
-				var pageLinks = pageLinksInfo.getAllLinks();
-				pageLinks = pageLinks.sort(function(a, b){
-					if (a.order && b.order){
-						return a.order - b.order;
-					}
-					return 0;
-				});
-				pageLinks.forEach(function(item) {
-					var categoryNumber, match;
-					if (item.category && (match = /user\.(\d+)/.exec(item.category))) {
-						categoryNumber = parseInt(match[1], 10);
-					}
-					if (typeof categoryNumber !== "number" || isNaN(categoryNumber)) { //$NON-NLS-0$
-						categoryNumber = 1;
-					}
-					var category = getCategory(categoryNumber);
-
-					var li = doc.createElement("li");//$NON-NLS-0$
-					var link = doc.createElement("a"); //$NON-NLS-0$
-					link.setAttribute("role", "menuitem"); //$NON-NLS-0$ //$NON-NLS-1$
-					if(typeof this._dropDownItemClass === "string") {//$NON-NLS-0$
-						if(this._dropDownItemClass !== "") {
-							link.classList.add(this._dropDownItemClass);
+					// Read extension-contributed links
+					var pageLinks = pageLinksInfo.getAllLinks();
+					pageLinks = pageLinks.sort(function(a, b){
+						if (a.order && b.order){
+							return a.order - b.order;
 						}
-					} else {
-						link.classList.add("dropdownMenuItem"); //$NON-NLS-0$
-					}
-					link.href = item.href;
-					link.textContent = item.textContent;
-					li.appendChild(link);
-					category.appendChild(li);
-					link.addEventListener("keydown", function(e) { //$NON-NLS-0$
-						if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {	
-							link.click();
+						return 0;
+					});
+					pageLinks.forEach(function(item) {
+						var categoryNumber, match;
+						if (item.category && (match = /user\.(\d+)/.exec(item.category))) {
+							categoryNumber = parseInt(match[1], 10);
 						}
-					}, false);
-				}.bind(this));
-
-				if(this.keyAssistFunction){
-					var element = this._makeMenuItem(messages["Keyboard Shortcuts"], this.keyAssistFunction);
-					if(typeof this._keyAssistClass === "string") {//$NON-NLS-0$
-						if(this._keyAssistClass !== "") {
-							element.classList.add(this._keyAssistClass);
+						if (typeof categoryNumber !== "number" || isNaN(categoryNumber)) { //$NON-NLS-0$
+							categoryNumber = 1;
 						}
-					} else {
-						element.classList.add("key-assist-menuitem"); //$NON-NLS-0$
-					}
-					var keyAssist = element.parentNode;
-					getCategory(0).appendChild(keyAssist);
-				}
+						var category = getCategory(categoryNumber);
 
-				// Add categories to _dropdownNode
-				var _self = this;
-				categories.sort(function(a, b) { return a - b; }).forEach(function(category, i) {
-					if (i < categories.length - 1 && !this._noSeparator) {
-						// Add a separator
-						var li = Dropdown.createSeparator();
+						var li = doc.createElement("li");//$NON-NLS-0$
+						var link = doc.createElement("a"); //$NON-NLS-0$
+						link.setAttribute("role", "menuitem"); //$NON-NLS-0$ //$NON-NLS-1$
+						if(typeof this._dropDownItemClass === "string") {//$NON-NLS-0$
+							if(this._dropDownItemClass !== "") {
+								link.classList.add(this._dropDownItemClass);
+							}
+						} else {
+							link.classList.add("dropdownMenuItem"); //$NON-NLS-0$
+						}
+						link.href = item.href;
+						link.textContent = item.textContent;
+						li.appendChild(link);
 						category.appendChild(li);
-					}
-					_self._dropdownNode.appendChild(category);
-				}.bind(this));
+						link.addEventListener("keydown", function(e) { //$NON-NLS-0$
+							if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {	
+								link.click();
+							}
+						}, false);
+					}.bind(this));
 
-				if(this.isSingleService()){
-					//add sign out only for single service.
-					for(var i in this.authenticatedServices){
-						if (this.authenticatedServices.hasOwnProperty(i)) {
-							this._renderAuthenticatedService(i, 0);
+					if(this.keyAssistFunction){
+						var element = this._makeMenuItem(messages["Keyboard Shortcuts"], this.keyAssistFunction);
+						if(typeof this._keyAssistClass === "string") {//$NON-NLS-0$
+							if(this._keyAssistClass !== "") {
+								element.classList.add(this._keyAssistClass);
+							}
+						} else {
+							element.classList.add("key-assist-menuitem"); //$NON-NLS-0$
+						}
+						var keyAssist = element.parentNode;
+						getCategory(0).appendChild(keyAssist);
+					}
+
+					// Add categories to _dropdownNode
+					var _self = this;
+					categories.sort(function(a, b) { return a - b; }).forEach(function(category, i) {
+						if (i < categories.length - 1 && !this._noSeparator) {
+							// Add a separator
+							var li = Dropdown.createSeparator();
+							category.appendChild(li);
+						}
+						_self._dropdownNode.appendChild(category);
+					}.bind(this));
+
+					if(this.isSingleService()){
+						//add sign out only for single service.
+						for(var i in this.authenticatedServices){
+							if (this.authenticatedServices.hasOwnProperty(i)) {
+								this._renderAuthenticatedService(i, 0);
+							}
 						}
 					}
 				}
