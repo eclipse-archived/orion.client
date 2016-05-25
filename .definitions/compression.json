@@ -1,0 +1,58 @@
+{
+	"!name": "compression",
+	"!define": {
+		"CompressionOptions": {
+			"chunkSize?": {
+				"!type": "number",
+				"!doc": "See https://github.com/expressjs/compression#chunksize regarding the usage."
+			},
+			"level?": {
+				"!type": "number",
+				"!doc": "See https://github.com/expressjs/compression#level regarding the usage."
+			},
+			"memLevel?": {
+				"!type": "number",
+				"!doc": "See https://github.com/expressjs/compression#memlevel regarding the usage."
+			},
+			"strategy?": {
+				"!type": "numer",
+				"!doc": "See https://github.com/expressjs/compression#strategy regarding the usage."
+			},
+			"threshold?": {
+				"!type": "number|string",
+				"!doc": "See https://github.com/expressjs/compression#threshold regarding the usage"
+			},
+			"windowBits?": {
+				"!type": "number",
+				"!doc": "See https://github.com/expressjs/compression#windowbits regarding the usage."
+			},
+			"filter?": {
+				"!type": "Function",
+				"!doc": "See https://github.com/expressjs/compression#filter regarding the usage."
+			},
+			"flush?": {
+				"!type": "number",
+				"!doc": "See https://nodejs.org/api/zlib.html#zlib_class_options regarding the usage."
+			},
+			"finishFlush?": {
+				"!type": "number",
+				"!doc": "See https://nodejs.org/api/zlib.html#zlib_class_options regarding the usage."
+			}
+		},
+		"express": {
+			"RequestHandler": {
+				
+			}
+		}
+	},
+	"compression": {
+		"!type": "fn(options?: +CompressionOptions) -> +express.RequestHandler",
+		"!doc": "Compress response data with gzip / deflate.\n\n@param {Object} [options]\n@return {Function} middleware\n@public",
+		"prototype": {
+			"filter": {
+				"!type": "fn(req: any, res: any)",
+				"!doc": "Default filter function."
+			}
+		}
+	}
+}
