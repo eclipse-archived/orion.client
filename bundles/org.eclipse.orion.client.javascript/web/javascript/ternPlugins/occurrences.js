@@ -94,6 +94,16 @@ define([
 				case Estraverse.Syntax.Program:
 					scopes.push({range: node.range, occurrences: [], kind:'p'}); //$NON-NLS-1$
 					break;
+				case Estraverse.Syntax.BlockStatement:
+					var scope = scopes[scopes.length-1];
+					if (scope.isLet)
+					var blocks = scopes[scopes.length-1].blocks;
+					if (!blocks){
+						blocks = [];
+					}
+					blocks.push({range: node.range, occurrences: [], kind:'b'}); //$NON-NLS-1$
+					scopes[scopes.length-1].blocks = blocks;
+					break;
 				case Estraverse.Syntax.FunctionDeclaration:
 					checkId(node.id, node, true);
 					_enterScope(node);
@@ -371,6 +381,11 @@ define([
 					    _popScope(); // pop the last scope
 						break;
 					}
+					case Estraverse.Syntax.BlockStatement:
+						if (_popBlock()){
+							return Estraverse.VisitorOption.Break;
+						}
+						break;
 				}
 			}
 		}
@@ -409,6 +424,12 @@ define([
 		if (node && node.type === Estraverse.Syntax.Identifier) {
 			if (node.name === context.word) {
 				var scope = scopes[scopes.length-1]; // Always will have at least the program scope
+				if (node.parent.type === Estraverse.Syntax.VariableDeclarator && node.parent.parent && node.parent.parent.type === Estraverse.Syntax.VariableDeclaration && (node.parent.parent.kind === 'let' || node.parent.parent.kind === 'const')){
+					scope.isLet = true;
+				}
+				if (scope.isLet && scope.blocks && scope.blocks.length > 0){
+					scope = scope.blocks[scope.blocks.length-1];
+				}
 				if(candefine) {
 					// Check if we are redefining
 					if(defscope) {
@@ -664,6 +685,47 @@ define([
 			}
 			if (kind){
 				scopes.push({range: [rangeStart,node.range[1]], occurrences: [], kind:kind});	
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * @description Pops the tip of the block stack off, adds occurrences (if any) and returns if we should
+	 * quit visiting
+	 * @function
+	 * @private
+	 * @returns {Boolean} If we should quit visiting
+	 */
+	function _popBlock() {
+		var scope = scopes[scopes.length-1];
+		if (!scope.isLet || !scope.blocks || scope.blocks.length === 0){
+			return false;
+		}
+		var block = scope.blocks.pop();
+		if (skipScope){
+			if (skipScope === block){
+				skipScope = null;
+			}
+			return false;
+		}
+		var i, j;
+		var len = block.occurrences.length;
+		if (defscope && defscope === block){
+			for(i = 0; i < len; i++) {
+				occurrences.push(block.occurrences[i]);
+			}
+			return true;
+		}
+
+		// We popped out of a scope but don't know where the define is, treat the occurrences like they belong to the outer scope (Bug 445410)
+		if (scope.blocks.length > 0){
+			for (j=0; j< len; j++) {
+				scope.blocks[scope.blocks.length - 1].occurrences.push(block.occurrences[j]);
+			}
+		} else {
+			for (j=0; j< len; j++) {
+				scope.occurrences.push(block.occurrences[j]);
 			}
 		}
 		return false;

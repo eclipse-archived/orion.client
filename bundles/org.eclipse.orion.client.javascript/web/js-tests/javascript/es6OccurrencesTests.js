@@ -227,6 +227,134 @@ define([
 					return computeOccurrences(text, getOptions(done, 24, 24), [{start:23, end:24}, {start:29, end:30}]);
 				});
 			});
+			describe('Let and Const', function(){
+				it('Const basic 1', function(done) {
+					var text = "if (true) { const a=3; a++; }";
+					return computeOccurrences(text, getOptions(done, 18, 19), [{start:18, end:19}, {start:23, end:24}]);
+				});
+				it('Const basic 2', function(done) {
+					var text = "if (true) { const a=3; a++; }";
+					return computeOccurrences(text, getOptions(done, 23, 23), [{start:18, end:19}, {start:23, end:24}]);
+				});
+				it('Let basic 1', function(done) {
+					var text = "if (true) { let a; a=3; a++; }";
+					return computeOccurrences(text, getOptions(done, 16, 17), [{start:16, end:17}, {start:19, end:20}, {start:24, end:25}]);
+				});
+				it('Let basic 2', function(done) {
+					var text = "if (true) { let a; a=3; a++; }";
+					return computeOccurrences(text, getOptions(done, 19, 19), [{start:16, end:17}, {start:19, end:20}, {start:24, end:25}]);
+				});
+				it('Let basic 3', function(done) {
+					var text = "if (true) { let a; a=3; a++; }";
+					return computeOccurrences(text, getOptions(done, 25, 25), [{start:16, end:17}, {start:19, end:20}, {start:24, end:25}]);
+				});
+				it('Let scoping program define 1', function(done) {
+					var text = "let a; a++; { a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:7, end:8}, {start:14, end:15}, {start:21, end:22}]);
+				});
+				it('Let scoping program define 2', function(done) {
+					var text = "let a; a++; { a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 7, 8), [{start:4, end:5}, {start:7, end:8}, {start:14, end:15}, {start:21, end:22}]);
+				});
+				it('Let scoping program define 3', function(done) {
+					var text = "let a; a++; { a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 15, 15), [{start:4, end:5}, {start:7, end:8}, {start:14, end:15}, {start:21, end:22}]);
+				});
+				it('Let scoping program define 4', function(done) {
+					var text = "let a; a++; { a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 21, 21), [{start:4, end:5}, {start:7, end:8}, {start:14, end:15}, {start:21, end:22}]);
+				});
+				it('Let scoping block define 1', function(done) {
+					var text = "a++; { let a; a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 1, 1), [{start:0, end:1}, {start:21, end:22}]);
+				});
+				it('Let scoping block define 2', function(done) {
+					var text = "a++; { let a; a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 21, 22), [{start:0, end:1}, {start:21, end:22}]);
+				});
+				it('Let scoping block define 3', function(done) {
+					var text = "a++; { let a; a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 11, 12), [{start:11, end:12}, {start:14, end:15}]);
+				});
+				it('Let scoping block define 4', function(done) {
+					var text = "a++; { let a; a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 15, 15), [{start:11, end:12}, {start:14, end:15}]);
+				});
+				it('Let scoping with redefines 1', function(done) {
+					var text = "let a; a++; { let a; a++; } let a; a++;";
+					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:7, end:8}, {start:32, end:33}, {start:35, end:36}]);
+				});
+				it('Let scoping with redefines 2', function(done) {
+					var text = "let a; a++; { let a; a++; } let a; a++;";
+					return computeOccurrences(text, getOptions(done, 8, 8), [{start:4, end:5}, {start:7, end:8}, {start:32, end:33}, {start:35, end:36}]);
+				});
+				it('Let scoping with redefines 3', function(done) {
+					var text = "let a; a++; { let a; a++; } let a; a++;";
+					return computeOccurrences(text, getOptions(done, 32, 33), [{start:4, end:5}, {start:7, end:8}, {start:32, end:33}, {start:35, end:36}]);
+				});
+				it('Let scoping with redefines 4', function(done) {
+					var text = "let a; a++; { let a; a++; } let a; a++;";
+					return computeOccurrences(text, getOptions(done, 35, 36), [{start:4, end:5}, {start:7, end:8}, {start:32, end:33}, {start:35, end:36}]);
+				});
+				it('Let scoping with redefines 5', function(done) {
+					var text = "let a; a++; { let a; a++; } let a; a++;";
+					return computeOccurrences(text, getOptions(done, 18, 18), [{start:18, end:19}, {start:21, end:22}]);
+				});
+				it('Let scoping with redefines 6', function(done) {
+					var text = "let a; a++; { let a; a++; } let a; a++;";
+					return computeOccurrences(text, getOptions(done, 22, 22), [{start:18, end:19}, {start:21, end:22}]);
+				});
+				it('Let sibling scopes 1', function(done) {
+					var text = "a++; { a++; } { let a; } { a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 0, 1), [{start:0, end:1}, {start:7, end:8}, {start:27, end:28}, {start:34, end:35}]);
+				});
+				it('Let sibling scopes 2', function(done) {
+					var text = "a++; { a++; } { let a; } { a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 8, 8), [{start:0, end:1}, {start:7, end:8}, {start:27, end:28}, {start:34, end:35}]);
+				});
+				it('Let sibling scopes 3', function(done) {
+					var text = "a++; { a++; } { let a; } { a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 27, 27), [{start:0, end:1}, {start:7, end:8}, {start:27, end:28}, {start:34, end:35}]);
+				});
+				it('Let sibling scopes 4', function(done) {
+					var text = "a++; { a++; } { let a; } { a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 34, 35), [{start:0, end:1}, {start:7, end:8}, {start:27, end:28}, {start:34, end:35}]);
+				});
+				it('Let sibling scopes 5', function(done) {
+					var text = "a++; { a++; } { let a; } { a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 20, 21), [{start:20, end:21}]);
+				});
+				it('Let nested scopes 1', function(done) {
+					var text = "a++; { a++; { let a; a++; } }";
+					return computeOccurrences(text, getOptions(done, 0, 1), [{start:0, end:1}, {start:7, end:8}]);
+				});
+				it('Let nested scopes 2', function(done) {
+					var text = "a++; { a++; { let a; a++; } }";
+					return computeOccurrences(text, getOptions(done, 7, 8), [{start:0, end:1}, {start:7, end:8}]);
+				});
+				it('Let nested scopes 3', function(done) {
+					var text = "a++; { a++; { let a; a++; } }";
+					return computeOccurrences(text, getOptions(done, 18, 19), [{start:18, end:19}, {start:21, end:22}]);
+				});
+				it('Let nested scopes 4', function(done) {
+					var text = "a++; { a++; { let a; a++; } }";
+					return computeOccurrences(text, getOptions(done, 21, 22), [{start:18, end:19}, {start:21, end:22}]);
+				});
+				
+				/*
+				 * TODO Not sure what temporal dead zone behaviour should be
+				 * Running this code is an error
+				 */
+				it.skip('Let hoisting in temporal dead zone 1', function(done) {
+					var text = "{ a++; b++; let a; } a++;";
+					return computeOccurrences(text, getOptions(done, 2, 2), [{start:2, end:3}, {start:21, end:22}]);
+				});
+				
+				
+				// TODO Mixed with vars
+				// TODO const
+				// TODO var followed by let seems to break
+			});
 			describe('Generators', function(){
 				it('Generators 1', function(done) {
 					var text = "function* a(a) { yield a+1; } function* b(b){ yield b; yield* a(b); } a(1); b(1);";
