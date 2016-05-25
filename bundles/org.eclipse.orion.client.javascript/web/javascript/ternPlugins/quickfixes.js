@@ -496,14 +496,44 @@ define([
 		 */
         "no-undef-defined-inenv": function(annotation, annotations, file) {
             var name = /^'(.*)'/.exec(annotation.title);
-            if(name !== null && typeof name !== 'undefined') {
+            if(name) {
                 var comment = null;
                 var start = 0;
-                if(name[1] === 'console') {
-                    var env = 'node'; //$NON-NLS-1$
-                } else {
-                    env = Finder.findESLintEnvForMember(name[1]);
+                /**
+                 * @description resolves ambigous names based on environments in use
+                 * @param {String} name The name to resolve
+                 * @returns {String} The name of the environment
+                 * @since 12.0
+                 */
+                function getEnv(name) {
+                	switch(name) {
+                		case 'require': {
+                			if(file.ast.environments) {
+                				if(file.ast.environments.node && !file.ast.environments.amd) {
+                					return 'node';
+                				}
+                				if(file.ast.environments.node && file.ast.environments.amd) {
+                					return 'amd';
+                				}
+                				if(file.ast.environments.amd) {
+                					return 'amd';
+                				}
+                			}
+                			break;
+                		}
+                		case 'console': {
+                			if(file.ast.environments) {
+                				if(file.ast.environments.node && !file.ast.environments.amd) {
+                					return 'node';
+                				}
+                				return 'browser';
+                			}
+                			break;
+                		}
+                	}
+                	return Finder.findESLintEnvForMember(name);
                 }
+                var env = getEnv(name[1]);
                 if(env) {
                     comment = Finder.findDirective(file.ast, 'eslint-env'); //$NON-NLS-1$
                     if(comment) {

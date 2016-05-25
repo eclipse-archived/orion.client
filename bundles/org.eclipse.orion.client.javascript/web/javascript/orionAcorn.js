@@ -159,9 +159,12 @@ define([
 			addDep(args[0], deps, "browser");
 		} else if(callee.name === 'require') {
 			var _a = args[0];
+			if(_a.type === 'ObjectExpression') {
+				envs.amd = true;
+			}
 			if(_a.type === "ArrayExpression") {
-				envs.node = true;
-				addArrayDeps(_a.elements, deps, "node"); //require([foo])
+				envs.amd = true;
+				addArrayDeps(_a.elements, deps, "amd"); //require([foo])
 			} else if(_a.type === "Literal") {
 				envs.node = true;
 				addDep(_a, deps, "node"); // require('foo')

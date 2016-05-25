@@ -162,7 +162,12 @@ define([
 					function(problems) {
 						try {
 							var pbs = problems.problems;
-							var annot = pbs[0];
+							var idx = 0;
+							if(options.pbindex > -1) {
+								assert(options.pbindex < pbs.length, "You gave a problem index greater than the total returned problems.");
+								idx = options.pbindex;
+							}
+							var annot = pbs[idx];
 							if(options.pid) {
 								for(var i = 0; i < pbs.length; i++) {
 									if(pbs[i].id === options.pid) {
@@ -174,8 +179,12 @@ define([
 							} else {
 								assert(pbs, "There should always be problems");
 								// Some quick fixes may provide multiple expected text edits per problem
-								if (!Array.isArray(options.expected)){
-									assert.equal(pbs.length, 1, 'Expected only one problem per test');
+								if (!Array.isArray(options.expected)) {
+									if(options.pbcount > -1) {
+										assert.equal(pbs.length, options.pbcount, 'Expected number of problems were not returned.');
+									} else {
+										assert.equal(pbs.length, 1, 'Expected only one problem per test');
+									}
 								}
 								assert(annot.id, "No problem id is reported");
 								assert(annot.id.indexOf(options.rule.id) === 0, "The problem id should start with the enabled rule id");
@@ -2972,12 +2981,123 @@ define([
 			});
 			it("Test no-undef-defined-1",function(callback) {
 				var rule = createTestRule('no-undef');
-				var expected = {value: "/*eslint-env node */",
+				var expected = {value: "/*eslint-env browser */",
 								start: 0, 
 								end: 0};
 				return getFixes(
 								{buffer: 'console.log(10);', 
 								rule: rule,
+								expected: expected,
+								callback: callback});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=494575
+			 */
+			it("Test no-undef-defined-1a",function(callback) {
+				var rule = createTestRule('no-undef');
+				var expected = {value: "/*eslint-env node */",
+								start: 0, 
+								end: 0};
+				return getFixes(
+								{buffer: 'var v = require("");\nconsole.log(10);', 
+								rule: rule,
+								pbcount: 2,
+								expected: expected,
+								callback: callback});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=494575
+			 */
+			it("Test no-undef-defined-1b",function(callback) {
+				var rule = createTestRule('no-undef');
+				var expected = {value: "/*eslint-env browser */",
+								start: 0, 
+								end: 0};
+				return getFixes(
+								{buffer: 'define([], function() {console.log(10);});', 
+								rule: rule,
+								pbcount: 2,
+								pbindex: 1,
+								expected: expected,
+								callback: callback});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=494575
+			 */
+			it("Test no-undef-defined-1c",function(callback) {
+				var rule = createTestRule('no-undef');
+				var expected = {value: "/*eslint-env browser */",
+								start: 0, 
+								end: 0};
+				return getFixes(
+								{buffer: 'define([], function(require) { var v = require("");\nconsole.log(10);});', 
+								rule: rule,
+								pbcount: 2,
+								pbindex: 1,
+								expected: expected,
+								callback: callback});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=494575
+			 */
+			it("Test no-undef-defined-1d",function(callback) {
+				var rule = createTestRule('no-undef');
+				var expected = {value: "/*eslint-env browser */",
+								start: 0, 
+								end: 0};
+				return getFixes(
+								{buffer: 'define("", [], function() {console.log(10);});', 
+								rule: rule,
+								pbcount: 2,
+								pbindex: 1,
+								expected: expected,
+								callback: callback});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=494575
+			 */
+			it("Test no-undef-defined-1e",function(callback) {
+				var rule = createTestRule('no-undef');
+				var expected = {value: "/*eslint-env browser */",
+								start: 0, 
+								end: 0};
+				return getFixes(
+								{buffer: 'define(function() {console.log(10);});', 
+								rule: rule,
+								pbcount: 2,
+								pbindex: 1,
+								expected: expected,
+								callback: callback});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=494575
+			 */
+			it("Test no-undef-defined-1f",function(callback) {
+				var rule = createTestRule('no-undef');
+				var expected = {value: "/*eslint-env browser */",
+								start: 0, 
+								end: 0};
+				return getFixes(
+								{buffer: 'require({}); console.log(10);', 
+								rule: rule,
+								pbcount: 2,
+								pbindex: 1,
+								expected: expected,
+								callback: callback});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=494575
+			 */
+			it("Test no-undef-defined-1g",function(callback) {
+				var rule = createTestRule('no-undef');
+				var expected = {value: "/*eslint-env browser */",
+								start: 0, 
+								end: 0};
+				return getFixes(
+								{buffer: 'require([""]); console.log(10);', 
+								rule: rule,
+								pbcount: 2,
+								pbindex: 1,
 								expected: expected,
 								callback: callback});
 			});
@@ -3065,7 +3185,7 @@ define([
 			});
 			it("Test no-undef-defined-indent-4",function(callback) {
 				var rule = createTestRule('no-undef');
-				var expected = {value: "/*eslint-env node */\n\t\t",
+				var expected = {value: "/*eslint-env browser */\n\t\t",
 								start: 2, 
 								end: 2};
 				return getFixes({buffer: '\t\tconsole.log(10);', 
@@ -3075,7 +3195,7 @@ define([
 			});
 			it("Test no-undef-defined-indent-5",function(callback) {
 				var rule = createTestRule('no-undef');
-				var expected = {value: "/*eslint-env node */\n    ",
+				var expected = {value: "/*eslint-env browser */\n    ",
 								start: 4, 
 								end: 4};
 				return getFixes({buffer: '    console.log(10);', 
@@ -3085,7 +3205,7 @@ define([
 			});
 			it("Test no-undef-defined-indent-6",function(callback) {
 				var rule = createTestRule('no-undef');
-				var expected = {value: "/*eslint-env node */\n\t  \t",
+				var expected = {value: "/*eslint-env browser */\n\t  \t",
 								start: 4, 
 								end: 4};
 				return getFixes({buffer: '\t  \tconsole.log(10);', 
