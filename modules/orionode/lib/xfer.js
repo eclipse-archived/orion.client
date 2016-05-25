@@ -192,7 +192,6 @@ function getXfer(req, res) {
 	});
 }
 
-var SUBDIR_SEARCH_CONCURRENCY = 10;
 function write (zip, base, filePath) {
 	return fs.statAsync(filePath)
 	.then(function(stats) {
@@ -202,9 +201,10 @@ function write (zip, base, filePath) {
 
 			return fs.readdirAsync(filePath)
 			.then(function(directoryFiles) {
+				var SUBDIR_SEARCH_CONCURRENCY = 10;
 				return Promise.map(directoryFiles, function(entry) {
 					return write(zip, base, filePath + entry);
-				}, { concurrency: SUBDIR_SEARCH_CONCURRENCY });
+				},{ concurrency: SUBDIR_SEARCH_CONCURRENCY});
 			});
 		}
 		zip.file(filePath, { name: filePath.substring(base.length).replace(/\\/g, "/") });
