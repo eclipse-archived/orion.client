@@ -155,63 +155,63 @@ define([
 		}
 	};
 
-    	/**
-    	 * Object of contributed environments
-    	 *
-    	 * TODO will need to listen to updated tern plugin settings once enabled to clear this cache
-    	 */
-    	var contributedEnvs,
-			ternWorker;
-			
+	/**
+	 * Object of contributed environments
+	 *
+	 * TODO will need to listen to updated tern plugin settings once enabled to clear this cache
+	 */
+	var contributedEnvs,
+		ternWorker;
 		
-		var handlers ={
-			'read': doRead,
-			/**
-			 * @callback
-			 */
-			'worker_ready': function(response) {
-				if(TRACE) {
-					console.log("worker_ready ("+ternWorker.messageId+"): "+response.request); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-				workerReady = true;
-				if(pendingStart) {
-					ternWorker.postMessage(pendingStart.msg, pendingStart.f);
-					pendingStart = null;
-				}
-			},
-			/**
-			 * @callback
-			 */
-			'start_server': function(response) {
-				if(TRACE) {
-					console.log("server_ready ("+ternWorker.messageId+"): "+response.request); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-				serverReady();
+	
+	var handlers ={
+		'read': doRead,
+		/**
+		 * @callback
+		 */
+		'worker_ready': function(response) {
+			if(TRACE) {
+				console.log("worker_ready ("+ternWorker.messageId+"): "+response.request); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-		};
+			workerReady = true;
+			if(pendingStart) {
+				ternWorker.postMessage(pendingStart.msg, pendingStart.f);
+				pendingStart = null;
+			}
+		},
+		/**
+		 * @callback
+		 */
+		'start_server': function(response) {
+			if(TRACE) {
+				console.log("server_ready ("+ternWorker.messageId+"): "+response.request); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			serverReady();
+		}
+	};
 
-		// Start the worker
-    	ternWorker = new WrappedWorker("ternWorker.js",  //$NON-NLS-1$
-	    	function(evnt) {
-	    		var _d = evnt.data;
-	    		if(_d.__isError) {
-	    			Logger.log(_d.message);
-	    		} else if(typeof _d === 'object') {
-					var id  = _d.messageID;
-					var f = this.callbacks[id];
-					if(typeof f === 'function') {
-						f(_d, _d.error);
-						delete this.callbacks[id];
-					}
-					var _handler = handlers[_d.request];
-					if(typeof _handler === 'function') {
-						_handler(_d);
-					}
+	// Start the worker
+	ternWorker = new WrappedWorker("ternWorker.js",  //$NON-NLS-1$
+    	function(evnt) {
+    		var _d = evnt.data;
+    		if(_d.__isError) {
+    			Logger.log(_d.message);
+    		} else if(typeof _d === 'object') {
+				var id  = _d.messageID;
+				var f = this.callbacks[id];
+				if(typeof f === 'function') {
+					f(_d, _d.error);
+					delete this.callbacks[id];
 				}
-	    	},
-	    	function(err) {
-	    		Logger.log(err);
-	    });
+				var _handler = handlers[_d.request];
+				if(typeof _handler === 'function') {
+					_handler(_d);
+				}
+			}
+    	},
+    	function(err) {
+    		Logger.log(err);
+    });
 	
 	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, serviceRegistry, setStarting);
 
@@ -224,8 +224,7 @@ define([
 		onInputChanged: jsProject.onInputChanged.bind(jsProject)
 	},
 	{
-		contentType: ["application/javascript", "text/html", "application/json"],  //$NON-NLS-1$ //$NON-NLS-2$
-		types: ['onInputChanged']  //$NON-NLS-1$
+		contentType: ["application/javascript", "text/html", "application/json"]  //$NON-NLS-1$ //$NON-NLS-2$
 	});
 	
 	jsProject.addHandler(ternProjectManager);
@@ -524,8 +523,7 @@ define([
     		onInputChanged: astManager.onInputChanged.bind(astManager)
     	},
     	{
-    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
-    		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$
+    		contentType: ["application/javascript", "text/html"]  //$NON-NLS-1$ //$NON-NLS-2$
     	});
 
     	var validator = new EslintValidator(ternWorker, jsProject, serviceRegistry);
@@ -547,8 +545,7 @@ define([
     		onInputChanged: CUProvider.onInputChanged.bind(CUProvider)
     	},
     	{
-    		contentType: ["text/html"],  //$NON-NLS-1$
-    		types: ["ModelChanging", 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$
+    		contentType: ["text/html"]  //$NON-NLS-1$
     	});
     	
     	var generateDocCommand = new GenerateDocCommand.GenerateDocCommand(astManager, CUProvider);
