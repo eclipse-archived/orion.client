@@ -113,6 +113,7 @@ define({
 	'valid-typeof' : 'Invalid typeof comparison.',
 	'valid-typeof-description': 'Warn when incorrectly comparing the result of a typeof expression.',
 	'noErrorDetailed' : 'No error\'s message',
+	'esmodules-not-running' : 'import/export declarations require the \'es_modules\' plug-in to be running.',
 	
 	// Rules consumed from ESLint
 	'accessor-pairs-description' : "Report when accessors don't come in pairs (getter, setter)",

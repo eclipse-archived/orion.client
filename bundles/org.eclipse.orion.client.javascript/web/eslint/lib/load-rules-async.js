@@ -1920,12 +1920,24 @@ define([
         			context.report(node, ProblemMessages['unknown-require-missing-env'], {0: _name, pid: 'unknown-require-missing-env', nls: 'unknown-require-missing-env', data: _name});
         		}
         	}
+			function checkImportExport(node) {
+				var tern = context.getTern();
+				if(!tern.pluginRunning("es_modules")) {
+					// create a location object to flag only the 'import' keyword
+					var token = context.getFirstToken(node);
+					context.report(node, ProblemMessages['esmodules-not-running'], {pid: 'unknown-require-not-running', nls: 'esmodules-not-running', data: 'es_modules'}, token);
+				}
+			}
         	return {
         		"Program": function(node) {
         			directive = Finder.findDirective(node, 'eslint-env');
         		},
-        		"CallExpression": function(node) {
-        			if(node.callee.name === "require") {
+				"ImportDeclaration" : checkImportExport,
+				"ExportAllDeclaration" : checkImportExport,
+				"ExportDefaultDeclaration" : checkImportExport,
+				"ExportNamedDeclaration" : checkImportExport,
+				"CallExpression": function(node) {
+      				if(node.callee.name === "require") {
         				var args = node.arguments;
         				if(args.length === 1) {
         					var lib = args[0];
