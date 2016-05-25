@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2015 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -852,12 +852,17 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 		_createRange: function(text, start, end, style, data) {
 			if (start > end) { return; }
 			var tabSize = this.view._customTabSize, range;
+			var bidiStyle = {tagName:"span", bidi:true, style:{unicodeBidi:"embed", direction:"ltr"}};
+			var bidiRange = {text: "\u200E", style: bidiStyle}; // We ensure segments flow from left to right by adding a LRM marker \u200E
 			if (tabSize && tabSize !== 8) {
 				var tabIndex = text.indexOf("\t", start); //$NON-NLS-1$
 				while (tabIndex !== -1 && tabIndex < end) {
 					if (start < tabIndex) {
 						range = {text: text.substring(start, tabIndex), style: style};
 						data.ranges.push(range);
+						if (bidiUtils.isBidiEnabled) {
+							data.ranges.push(bidiRange);
+						}
 						data.tabOffset += range.text.length;
 					}
 					var spacesCount = tabSize - (data.tabOffset % tabSize);
@@ -869,6 +874,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 						}
 						range = {text: spaces, style: style, ignoreChars: spacesCount - 1};
 						data.ranges.push(range);
+						if (bidiUtils.isBidiEnabled) {
+							data.ranges.push(bidiRange);
+						}
 						data.tabOffset += range.text.length;
 					}
 					start = tabIndex + 1;
@@ -881,6 +889,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			if (start <= end) {
 				range = {text: text.substring(start, end), style: style};
 				data.ranges.push(range);
+				if (bidiUtils.isBidiEnabled) {
+					data.ranges.push(bidiRange);
+				}
 				data.tabOffset += range.text.length;
 			}
 		},
@@ -903,6 +914,8 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				child.ignore = true;
 			} else if (style && style.node) {
 				child.appendChild(style.node);
+				child.ignore = true;
+			} else if (style && style.bidi) {				
 				child.ignore = true;
 			}
 			applyStyle(style, child);
