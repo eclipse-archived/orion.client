@@ -147,15 +147,17 @@ define([
 				contentType: ["text/x-markdown"]});
 	
 		// open file with browser, no associated orion.navigate.openWith command means that any content type is valid
-		provider.registerService("orion.edit.editor", {}, {
-			id: "orion.viewer.raw",
-			name: messages["Browser"],
-			nls: "orion/nls/messages",
-			uriTemplate:  "{+Location}",
-			validationProperties: [{
-				source: "!Projects" // Filter out workspace; Raw only applies to regular files and folders.
-			}]
-		});
+		if (parent.window.isElectron === undefined) {
+			provider.registerService("orion.edit.editor", {}, {
+				id: "orion.viewer.raw",
+				name: messages["Browser"],
+				nls: "orion/nls/messages",
+				uriTemplate:  "{+Location}",
+				validationProperties: [{
+					source: "!Projects" // Filter out workspace; Raw only applies to regular files and folders.
+				}]
+			});
+		}
 	}
 
 	return {
