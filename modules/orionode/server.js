@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env node, express*/
+/*eslint-env node, express, compression*/
 var auth = require('./lib/middleware/auth'),
 	express = require('express'),
 	http = require('http'),
@@ -80,6 +80,7 @@ function startServer(cb) {
 				if (password || configParams.pwd) {
 					app.use(auth(password || configParams.pwd));
 				}
+				
 				app.use(compression());
 				app.use(orion({
 					workspaceDir: workspaceDir,
