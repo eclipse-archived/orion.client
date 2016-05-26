@@ -248,6 +248,22 @@ define([
 					var text = "if (true) { let a; a=3; a++; }";
 					return computeOccurrences(text, getOptions(done, 25, 25), [{start:16, end:17}, {start:19, end:20}, {start:24, end:25}]);
 				});
+				it('Const scoping program define 1', function(done) {
+					var text = "const a; a++; { a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 6, 6), [{start:6, end:7}, {start:9, end:10}, {start:16, end:17}, {start:23, end:24}]);
+				});
+				it('Const scoping program define 2', function(done) {
+					var text = "const a; a++; { a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 9, 10), [{start:6, end:7}, {start:9, end:10}, {start:16, end:17}, {start:23, end:24}]);
+				});
+				it('Const scoping program define 3', function(done) {
+					var text = "const a; a++; { a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 17, 17), [{start:6, end:7}, {start:9, end:10}, {start:16, end:17}, {start:23, end:24}]);
+				});
+				it('Const scoping program define 4', function(done) {
+					var text = "const a; a++; { a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 23, 23), [{start:6, end:7}, {start:9, end:10}, {start:16, end:17}, {start:23, end:24}]);
+				});
 				it('Let scoping program define 1', function(done) {
 					var text = "let a; a++; { a++; } a++;";
 					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:7, end:8}, {start:14, end:15}, {start:21, end:22}]);
@@ -263,6 +279,22 @@ define([
 				it('Let scoping program define 4', function(done) {
 					var text = "let a; a++; { a++; } a++;";
 					return computeOccurrences(text, getOptions(done, 21, 21), [{start:4, end:5}, {start:7, end:8}, {start:14, end:15}, {start:21, end:22}]);
+				});
+				it('Const scoping block define 1', function(done) {
+					var text = "a++; { const a; a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 1, 1), [{start:0, end:1}, {start:23, end:24}]);
+				});
+				it('Const scoping block define 2', function(done) {
+					var text = "a++; { const a; a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 23, 24), [{start:0, end:1}, {start:23, end:24}]);
+				});
+				it('Const scoping block define 3', function(done) {
+					var text = "a++; { const a; a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 13, 14), [{start:13, end:14}, {start:16, end:17}]);
+				});
+				it('Const scoping block define 4', function(done) {
+					var text = "a++; { const a; a++; } a++;";
+					return computeOccurrences(text, getOptions(done, 17, 17), [{start:13, end:14}, {start:16, end:17}]);
 				});
 				it('Let scoping block define 1', function(done) {
 					var text = "a++; { let a; a++; } a++;";
@@ -340,6 +372,102 @@ define([
 					var text = "a++; { a++; { let a; a++; } }";
 					return computeOccurrences(text, getOptions(done, 21, 22), [{start:18, end:19}, {start:21, end:22}]);
 				});
+				it('Mixed var then let 1', function(done) {
+					var text = "var a; a++; { let a; a++ };";
+					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:7, end:8}]);
+				});
+				it('Mixed var then let 2', function(done) {
+					var text = "var a; a++; { let a; a++ };";
+					return computeOccurrences(text, getOptions(done, 7, 8), [{start:4, end:5}, {start:7, end:8}]);
+				});
+				it('Mixed var then let 3', function(done) {
+					var text = "var a; a++; { let a; a++ };";
+					return computeOccurrences(text, getOptions(done, 19, 19), [{start:18, end:19}, {start:21, end:22}]);
+				});
+				it('Mixed var then let 4', function(done) {
+					var text = "var a; a++; { let a; a++ };";
+					return computeOccurrences(text, getOptions(done, 21, 21), [{start:18, end:19}, {start:21, end:22}]);
+				});
+				it('Mixed var then const 1', function(done) {
+					var text = "var a; a++; { const a; a++ };";
+					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:7, end:8}]);
+				});
+				it('Mixed var then const 2', function(done) {
+					var text = "var a; a++; { const a; a++ };";
+					return computeOccurrences(text, getOptions(done, 7, 8), [{start:4, end:5}, {start:7, end:8}]);
+				});
+				it('Mixed var then const 3', function(done) {
+					var text = "var a; a++; { const a; a++ };";
+					return computeOccurrences(text, getOptions(done, 21, 21), [{start:20, end:21}, {start:23, end:24}]);
+				});
+				it('Mixed var then const 4', function(done) {
+					var text = "var a; a++; { const a; a++ };";
+					return computeOccurrences(text, getOptions(done, 23, 23), [{start:20, end:21}, {start:23, end:24}]);
+				});
+				it('Mixed let then var 1', function(done) {
+					var text = "let a; a++; { var a; a++ };";
+					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:7, end:8}]);
+				});
+				it('Mixed let then var 2', function(done) {
+					var text = "let a; a++; { var a; a++ };";
+					return computeOccurrences(text, getOptions(done, 7, 8), [{start:4, end:5}, {start:7, end:8}]);
+				});
+				it('Mixed let then var 3', function(done) {
+					var text = "let a; a++; { var a; a++ };";
+					return computeOccurrences(text, getOptions(done, 19, 19), [{start:18, end:19}, {start:21, end:22}]);
+				});
+				it('Mixed let then var 4', function(done) {
+					var text = "let a; a++; { var a; a++ };";
+					return computeOccurrences(text, getOptions(done, 21, 21), [{start:18, end:19}, {start:21, end:22}]);
+				});
+				it('Mixed let then const 1', function(done) {
+					var text = "let a; a++; { const a; a++ };";
+					return computeOccurrences(text, getOptions(done, 4, 4), [{start:4, end:5}, {start:7, end:8}]);
+				});
+				it('Mixed let then const 2', function(done) {
+					var text = "let a; a++; { const a; a++ };";
+					return computeOccurrences(text, getOptions(done, 7, 8), [{start:4, end:5}, {start:7, end:8}]);
+				});
+				it('Mixed let then const 3', function(done) {
+					var text = "let a; a++; { const a; a++ };";
+					return computeOccurrences(text, getOptions(done, 21, 21), [{start:20, end:21}, {start:23, end:24}]);
+				});
+				it('Mixed let then const 4', function(done) {
+					var text = "let a; a++; { const a; a++ };";
+					return computeOccurrences(text, getOptions(done, 23, 23), [{start:20, end:21}, {start:23, end:24}]);
+				});
+				it('Mixed const then var 1', function(done) {
+					var text = "const a; a++; { var a; a++ };";
+					return computeOccurrences(text, getOptions(done, 6, 6), [{start:6, end:7}, {start:9, end:10}]);
+				});
+				it('Mixed const then var 2', function(done) {
+					var text = "const a; a++; { var a; a++ };";
+					return computeOccurrences(text, getOptions(done, 9, 10), [{start:6, end:7}, {start:9, end:10}]);
+				});
+				it('Mixed const then var 3', function(done) {
+					var text = "const a; a++; { var a; a++ };";
+					return computeOccurrences(text, getOptions(done, 21, 21), [{start:20, end:21}, {start:23, end:24}]);
+				});
+				it('Mixed const then var 4', function(done) {
+					var text = "const a; a++; { var a; a++ };";
+					return computeOccurrences(text, getOptions(done, 23, 23), [{start:20, end:21}, {start:23, end:24}]);
+				});
+				it('Mixed const then let 1', function(done) {
+					var text = "const a; a++; { let a; a++ };";
+					return computeOccurrences(text, getOptions(done, 6, 6), [{start:6, end:7}, {start:9, end:10}]);
+				});
+				it('Mixed const then let 2', function(done) {
+					var text = "const a; a++; { let a; a++ };";
+					return computeOccurrences(text, getOptions(done, 9, 10), [{start:6, end:7}, {start:9, end:10}]);
+				});
+				it('Mixed const then let 3', function(done) {
+					var text = "const a; a++; { let a; a++ };";
+					return computeOccurrences(text, getOptions(done, 21, 21), [{start:20, end:21}, {start:23, end:24}]);
+				});
+				it('Mixed const then let 4', function(done) {
+					var text = "const a; a++; { let a; a++ };";
+					return computeOccurrences(text, getOptions(done, 23, 23), [{start:20, end:21}, {start:23, end:24}]);
+				});
 				
 				/*
 				 * TODO Not sure what temporal dead zone behaviour should be
@@ -349,11 +477,6 @@ define([
 					var text = "{ a++; b++; let a; } a++;";
 					return computeOccurrences(text, getOptions(done, 2, 2), [{start:2, end:3}, {start:21, end:22}]);
 				});
-				
-				
-				// TODO Mixed with vars
-				// TODO const
-				// TODO var followed by let seems to break
 			});
 			describe('Generators', function(){
 				it('Generators 1', function(done) {
@@ -893,17 +1016,45 @@ define([
 					return computeOccurrences(text, getOptions(done, 33, 33), [{start:33, end:34}]);
 				});
 			});
-			// TODO Add some HTML tests for ES6
-			describe.skip('ES6 Occurrences Tests in HTML', function() {
-				/**
-				 * Tests computing occurrences from a script block in the <head> block
-				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
-				 */
-				it('test_htmlHead1', function(done) {
-				    var text = "<!DOCTYPE html><head><script>function f() {}</script></head><html></html>";
-					return computeOccurrences(text, getOptions(done, 39, 39, 'text/html'), [{start:38, end:39}]);
+			describe('ES6 Occurrences Tests in HTML', function() {
+				it('HTML Arrow function expression', function(done) {
+					var text = "<html><script>n => {n.length;}</script></html>";
+					return computeOccurrences(text, getOptions(done, 14,15, 'text/html'), [{start:14, end:15}, {start:20, end:21}]);
 				});
-				
+				it('HTML Let basic', function(done) {
+					var text = "<html><script>if (true) { let a; a=3; a++; }</script></html>";
+					return computeOccurrences(text, getOptions(done, 33,33, 'text/html'), [{start:30, end:31}, {start:33, end:34}, {start:38, end:39}]);
+				});
+				it('HTML Const scoping block define', function(done) {
+					var text = "<html><script>a++; { const a; a++; } a++;</script></html>";
+					return computeOccurrences(text, getOptions(done, 27,28, 'text/html'), [{start:27, end:28}, {start:30, end:31}]);
+				});
+				it('HTML Generators', function(done) {
+					var text = "<html><script>function* a(a) { yield a+1; } function* b(b){ yield b; yield* a(b); } a(1); b(1);</script></html>";
+					return computeOccurrences(text, getOptions(done, 57,57, 'text/html'), [{start:56, end:57}, {start:66, end:67}, {start:78, end:79}]);
+				});
+				it('HTML Class declaration', function(done) {
+					var text = "<html><script>class a { constructor(a, b=a) { a++ } a(a, b=a){ return a; } }; new a();</script></html>";
+					return computeOccurrences(text, getOptions(done, 36,36, 'text/html'), [{start:36, end:37}, {start:41, end:42}, {start:46, end:47}]);
+				});
+				it('HTML Extends class', function(done) {
+					var text = "<html><script>class a{}; class b extends a{};</script></html>";
+					return computeOccurrences(text, getOptions(done, 41,41, 'text/html'), [{start:20, end:21}, {start:41, end:42}]);
+				});
+				it('HTML Func expr default param', function(done) {
+					var text = "<html><script>var a = { a: function(a, b = a+1){ a++;	} }; a++;</script></html>";
+					return computeOccurrences(text, getOptions(done, 49,50, 'text/html'), [{start:36, end:37}, {start:43, end:44}, {start:49, end:50}]);
+				});
+				it('HTML Multiple named import declaration', function(done) {
+					worker.createTestFile("a", "");
+					var text = "<html><script>import { myFunc, myVar } from \"a\"; myFunc(); var z = myVar;</script></html>";
+					return computeOccurrences(text, getOptions(done, 50,50, 'text/html'), [{start:23, end:29}, {start:49, end:55}]);
+				});
+				it('HTML From export', function(done) {
+					worker.createTestFile("a", "");
+					var text = "<html><script>export { a, b } from 'a'; a++; b++;</script></html>";
+					return computeOccurrences(text, getOptions(done, 46,46, 'text/html'), [{start:26, end:27}, {start:45, end:46}]);
+				});
 			});
 		});
 	};
