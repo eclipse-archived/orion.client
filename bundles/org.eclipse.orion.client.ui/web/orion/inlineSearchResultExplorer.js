@@ -271,8 +271,10 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
 		if(item.totalMatches) {
 			var fileNameElement = this._getFileNameElement(item);
 			var linkDiv = lib.node(this.getItemLinkId(item));
-			linkDiv.removeChild(linkDiv.lastElementChild);
-			linkDiv.appendChild(fileNameElement);
+			if(linkDiv) {//In category mode, there is no file item rendered, so there is no linkDiv
+				linkDiv.removeChild(linkDiv.lastElementChild);
+				linkDiv.appendChild(fileNameElement);
+			}
 	    }    
 	};
 
