@@ -1062,15 +1062,18 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
 	        	// Figure out change index. Unchecked elements are 
 	        	// removed from diffs and must therefore be skipped.
 				var changeIndex = 0;
-				currentModel.parent.children.some(function(element){
-					if (this.model.getId(currentModel) === this.model.getId(element)) {
-						return true;
-					} else if (element.checked) {
-						changeIndex++;
-					}
-					return false;
-				}, this);
-			    this.compareView.gotoDiff(changeIndex);
+				var fileItem = _getFileModel(currentModel);
+				if(fileItem && fileItem.children) {
+					fileItem.children.some(function(element){
+						if (this.model.getId(currentModel) === this.model.getId(element)) {
+							return true;
+						} else if (element.checked) {
+							changeIndex++;
+						}
+						return false;
+					}, this);
+				    this.compareView.gotoDiff(changeIndex);
+				}
 			} else if (currentModel.lineNumber !== undefined) {//If the change is unchecked, scroll to the line and select the match
 				var startIndex = currentModel.matches[currentModel.matchNumber - 1].startIndex;
 				var endIndex = startIndex + currentModel.matches[currentModel.matchNumber - 1].length;
