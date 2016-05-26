@@ -582,8 +582,10 @@ define([
 			//parse entity
 			var entity = this._buffer.substring(sectionStart, this._index);
 			var parsed = parseInt(entity, base);
-	
-			this._emitPartial(decodeCodePoint(parsed));
+			//ORION
+			var cp = decodeCodePoint[entity];
+			cp = cp ? cp : parsed;
+			this._emitPartial(cp);
 			this._sectionStart = this._index;
 		} else {
 			this._sectionStart--;
