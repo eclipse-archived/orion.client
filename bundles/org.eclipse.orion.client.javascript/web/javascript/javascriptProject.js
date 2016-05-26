@@ -355,19 +355,32 @@ define([
 	function _updateMap(arr, state) {
 		if(Array.isArray(arr)) {
 			arr.forEach(function(file) {
-				var f = file,
-					toQ, toN;
-				if(typeof f === "object") {
-					if(state === "onDeleted") {
-						f = f.deleteLocation;
-					} else if(state === "onMoved") {
-						toQ = f.result ? f.result.Location : undefined;
-						toN = f.result ? f.result.Name : undefined;
-						f = f.source;
+				var f, toQ, toN, n;
+				switch(state) {
+					case 'onCreated': {
+						n = file.result ? file.result.Name : undefined;
+						f = file.result ? file.result.Location : undefined;
+						break;
+					}
+					case 'onDeleted': {
+						f = file.deleteLocation;
+						n = _shortName(file.deleteLocation);
+						break;
+					}
+					case 'onModified': {
+						n = _shortName(file);
+						f = file;
+						break;
+					}
+					case 'onMoved': {
+						toQ = file.result ? file.result.Location : undefined;
+						toN = file.result ? file.result.Name : undefined;
+						n = _shortName(file.source);
+						f = file.source;
+						break;
 					}
 				}
 				delete this.map[f];
-				var n = _shortName(f);
 				_handle.call(this, state, this, f, n, toQ, toN);
 			}.bind(this));
 		}
