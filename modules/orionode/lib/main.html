@@ -140,21 +140,23 @@ body {
 		buttons.classList.add("tabButtons");
 		var back = document.createElement("button");
 		back.textContent = "<";
-		back.classList.add("tabButton");
-		back.addEventListener("click", function() {
+		back.classList.add("tabButton");	
+		function historyBack(){
 			var active = getActiveTab();
 			if (!active) return;
 			active.contentWindow.history.back();
-		});
+		}
+		function historyForward(){
+			var active = getActiveTab();
+			if (!active) return;
+			active.contentWindow.history.forward();
+		}	
+		back.addEventListener("click", historyBack);
 		buttons.appendChild(back);
 		var forward = document.createElement("button");
 		forward.textContent = ">";
 		forward.classList.add("tabButton");
-		forward.addEventListener("click", function() {
-			var active = getActiveTab();
-			if (!active) return;
-			active.contentWindow.history.forward();
-		});
+		forward.addEventListener("click",historyForward);
 		buttons.appendChild(forward);
 		var refresh = document.createElement("button");
 		refresh.textContent = "\u27F2";
@@ -166,6 +168,11 @@ body {
 		});
 		buttons.appendChild(refresh);
 		bar.appendChild(buttons);
+		
+		var ipcRender = require('electron').ipcRenderer;
+		ipcRender.send("registerShortCuts");
+		ipcRender.on("historyBack",historyBack);
+		ipcRender.on("historyForward",historyForward);
 	}
 	
 	function redrawTabs() {
@@ -250,7 +257,6 @@ body {
 		iframe.frameBorder = "0";
 		iframe.classList.add("tabContent");
 		iframe.src = url;
-		
 		var __dialogModule = require('electron').remote.require('dialog');
 		
 		iframe.addEventListener("load", function() {
