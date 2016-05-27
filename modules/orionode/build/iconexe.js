@@ -62,13 +62,13 @@ function Struct(buf, props, off) {
 		if (prop.arraySize) {
 			var originalGetter = getter, originalSetter = setter;
 			getter = function(o) {
-				var result = [];
+				var result1 = [];
 				for (var i = 0; i<prop.arraySize; i++) {
 					var v = originalGetter.call(buf, o);
-					result.push(v);
+					result1.push(v);
 					o += v.SIZE_OF;
 				}
-				return result;
+				return result1;
 			};
 			setter = function(value, o) {
 				for (var i = 0; i<prop.arraySize; i++) {
@@ -77,11 +77,14 @@ function Struct(buf, props, off) {
 				}
 			};
 		}
+		var oo = offset;
 		desc[prop.name] = {
 			configurable: true,
 			enumerable: true,
 			get: getter.bind(buf, offset),
-			set: setter.bind(buf, arguments[0], offset)
+			set: function (value) {
+				return setter.call(buf, value, oo);
+			}
 		};
 		offset += s;
 		
@@ -305,7 +308,7 @@ function readIcon(filename) {
 function readNullTerminated(buffer, o) {
 	var str = "";
 	do {
-		var code = buffer.readUInt8(o) + (buffer.readUInt8(o + 1) >> 8);
+		var code = buffer.readUInt16LE(o);
 		o += 2;
 		if (code !== 0) {
 			str += String.fromCharCode(code);
@@ -315,10 +318,10 @@ function readNullTerminated(buffer, o) {
 }
 
 function readResouceTable (buffer, off, getValue) {
-	var table = new Struct(buffer, STRING_RC_HEADER, off || 0), o = off + table.SIZE_OF;
+	off = off || 0;
+	var table = new Struct(buffer, STRING_RC_HEADER, off), o = off + table.SIZE_OF;
 	table.szKey = readNullTerminated(buffer, o);
 	o += (table.szKey.length + 1) * 2;
-//	console.log(table.szKey + " " + table.wType)
 	function PadToDWORD(pos) {
 		if (pos % 4 !== 0) return  4 - pos % 4;
 		return 0;
@@ -328,9 +331,6 @@ function readResouceTable (buffer, off, getValue) {
 		table.Value = getValue(table, o);
 		o += table.wValueLength * (typeof table.Value === "string" ? 2 : 1);
 		o += PadToDWORD(o);
-		
-//		if (typeof table.Value === "string") console.log("v=" + table.Value)
-//		if (typeof table.Value === "number") console.log("v1=" + Number(table.Value).toString(16));
 	}
 	function Align(p) {
 		return p + 3 & ~3;
@@ -351,6 +351,67 @@ function readResouceTable (buffer, off, getValue) {
 function readVersionInfo (buffer, off) {
 	return readResouceTable(buffer, off, /* @callback */ function(table, o) {
 		return new Struct(buffer, VS_FIXEDFILEINFO, o);
+	});
+}
+
+function writeNullTerminated(buffer, str, o) {
+	for (var i = 0; i < str.length; i++) {
+		buffer.writeUInt16LE(str.charCodeAt(i), o);
+		o += 2;
+	}
+	buffer.writeUInt16LE(0, o);
+	o += 2;
+	return o;
+}
+
+function writeResourceTable(table, buffer, off, setValue) {
+	var startOffset = off;
+	var newTable = new Struct(buffer, STRING_RC_HEADER, off);
+	newTable.wLength = table.wLength;
+	newTable.wValueLength = table.wValueLength;
+	newTable.wType = table.wType;
+	off += newTable.SIZE_OF;
+	off = writeNullTerminated(buffer, table.szKey, off);
+	function PadToDWORD(pos) {
+		if (pos % 4 !== 0) {
+			var count = 4 - pos % 4;
+			for (var j=0; j<count; j++) buffer.writeInt8(0);
+			return count;
+		}
+		return 0;
+	}
+	off += PadToDWORD(off);
+	var valueOff = off;
+	if (table.Value) {
+		off = setValue(newTable, table.Value, off);
+		off += PadToDWORD(off);
+	}
+	newTable.wValueLength = off - valueOff;
+	if (table.Children) {
+		Object.keys(table.Children).sort().forEach(function(key) {
+			off = writeResourceTable(table.Children[key], buffer, off, /* @callback */ function(table1, value, o1) {
+				if (typeof value === "string") {
+					return writeNullTerminated(buffer, value, o1);
+				}
+				if (typeof value === "number") {
+					buffer.writeInt32LE(value, o1);
+					return o1 + 4;
+				}
+				return o1;
+			});
+		});
+	}
+	newTable.wLength = off -startOffset;
+	return off;
+}
+
+function writeVersionInfo (table, buffer, off) {
+	return writeResourceTable(table, buffer, off, /* @callback */ function(table, value, o) {
+		var fixedInfo = new Struct(buffer, VS_FIXEDFILEINFO, o);
+		for (var p in value) {
+			fixedInfo[p] = value[p];
+		}
+		return o + fixedInfo.SIZE_OF;
 	});
 }
 
@@ -480,7 +541,22 @@ function walkResourceDirectory(imageResourceDirectoryOffset, resourceBase, delta
 				var buffer3 = new Buffer(data.Size);
 				fs.readSync(fd, buffer3, 0, data.Size, data.OffsetToData - delta);
 				var versionInfo = readVersionInfo(buffer3, 0);
-				console.log("CompanyName=" + versionInfo.Children["StringFileInfo"].Children["040904b0"].Children["CompanyName"].Value)
+				var info = versionInfo.Children["StringFileInfo"].Children["040904b0"].Children;
+				info["CompanyName"].Value = "Eclipse";
+				info["ProductName"].Value = "Orion";
+				info["FileDescription"].Value = "Orion";
+				info["LegalCopyright"].Value = "Copyright (c) 2016 IBM Corporation.";
+				info["FileVersion"].Value = "0.0.101.v201605111200";
+				info["ProductVersion"].Value = "0.0.101.v201605111200";
+				info["OriginalFilename"].Value = "Orion.exe";
+				info["InternalName"].Value = "Orion.exe";
+				var buffer4 = new Buffer(data.Size);
+				var size = writeVersionInfo(versionInfo, buffer4, 0);
+				if (size < buffer4.length) {
+					fs.writeSync(fd, buffer4, 0, size, data.OffsetToData - delta);
+				} else {
+					throw new Error("Could not update version info. Size of new version is larger then original");
+				}
 			}
 		}
 	}
