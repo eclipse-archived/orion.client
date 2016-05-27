@@ -191,7 +191,6 @@ define([
 				return false;
 			};
 			_tern.optionalPlugins = server.options.optionalPlugins;
-			_tern.query = query;
 			_tern.file = file;
 			config.tern = _tern;
 			if (!config.ecmaFeatures) {

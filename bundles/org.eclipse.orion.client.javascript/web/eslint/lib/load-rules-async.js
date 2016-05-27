@@ -1304,9 +1304,7 @@ define([
         	                	// Check if Tern knows about a definition in another file
         	                	var env = Finder.findESLintEnvForMember(name);
         	                    var tern = context.getTern();
-								var query = tern.query;
-								query.start = ref.identifier.start;
-								query.end = ref.identifier.end;
+								var query = {end: ref.identifier.start};
 								var foundType = null;
 								try {
 									var expr = tern.findQueryExpr(tern.file, query);
@@ -1346,75 +1344,61 @@ define([
         		'MemberExpression': function(node){
                 	if (node.property && node.object && node.object.type !== 'ThisExpression'){
                 		if (node.parent && node.parent.type === 'CallExpression' && node.parent.callee && node.parent.callee === node){
-                			 var tern = context.getTern();
-							var query = tern.query;
-							query.end = node.property.start;
-							var foundType = false;
-							try {
-								var expr = tern.findQueryExpr(tern.file, query);
-								var type = tern.findExprType(query, tern.file, expr);
-								if (type && type.origin){
-									foundType = true;
+                			var tern = context.getTern();
+							var query = {end: node.property.start};
+							var expr = tern.findQueryExpr(tern.file, query);
+							var type = tern.findExprType(query, tern.file, expr);
+							if (type && type.propertyOf) {
+								if(type.propertyOf.props[node.property.name]) {
+									//if we found a type and its a direct property, quit
+									return;
 								}
-							} catch(e) {
-								//ignore
+								if(!type.propertyOf.proto) {
+									//this is a stub type - i.e. from a JSDoc type that does not exist
+									return;
+								}
 							}
-        	                if (!foundType){
-        	                	// If the object cannot be found, there is no way the property could be known
-        	                	query.end = node.object.end;
-        	                	try {
-        	                		expr = tern.findQueryExpr(tern.file, query);
-        	                		type = tern.findExprType(query, tern.file, expr);
-									if (type && type.types && type.types.length > 0){
-        	                			// If the type has no known properties assume Tern doens't know enough about it to find the declaration
-        	                			foundType = true;
-        	                			for (var i=0; i<type.types.length; i++) {
-        	                				var currentProps = type.types[i].props;
-        	                				if (currentProps && Object.keys(currentProps).length > 0){
-        	                					foundType = false;
-        	                					break;
-        	                				}
-        	                				if (type.types[i].proto && type.types[i].proto.name !== 'Object.prototype'){
-        	                					currentProps = type.types[i].proto.props;
-        	                					if (currentProps && Object.keys(currentProps).length > 0){
-            	                					foundType = false;
-            	                					break;            	                						
-    	                						}
-	                						}
-        	                			}
-        	                			if (!foundType){
-    	                					var name = type.types[0].name;
-    	                					if (!name && type.originNode){
-    	                						name = type.originNode.name;
-	                						}
-    	                					var origin = type.types[0].origin;
-    	                					if (!origin && type.origin){
-    	                						origin = type.origin;
-    	                					}
-        	                				if (type.types.length === 1 && name && origin){
-        	                					if (/\./.test(origin)){
-    	                							var originNode = type.types[0].originNode ? type.types[0].originNode : type.originNode;
-    	                							if (originNode){
-        	                							var index = origin.lastIndexOf('/');
-        	                							if (index >= 0){
-        	                								origin = origin.substring(index+1);
-        	                							}
-														context.report(node.property, ProblemMessages['no-undef-expression-defined-object'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-object', data: {file: originNode.sourceFile.name, start: originNode.start, end: originNode.end}}); //$NON-NLS-1$
-													} else {
-														context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
-													}
-												} else {
-													context.report(node.property, ProblemMessages['no-undef-expression-defined-index'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-index'}); //$NON-NLS-1$
-												}
-											} else {
-												context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
-											}
+							query.end = node.object.end;
+	                		expr = tern.findQueryExpr(tern.file, query);
+	                		type = tern.findExprType(query, tern.file, expr);
+							if (type && type.types && type.types.length > 0) {
+	                			for (var i = 0; i < type.types.length; i++) {
+	                				if (type.types[i].props && type.types[i].props[node.property.name]) {
+	                					return;
+	                				}
+	                				if (type.types[i].proto && type.types[i].proto.name !== 'Object.prototype') {
+	                					if(type.types[i].proto.props[node.property.name]) {
+	                						return;
+	                					}
+            						}
+	                			}
+            					var name = type.types[0].name;
+            					if (!name && type.originNode){
+            						name = type.originNode.name;
+        						}
+            					var origin = type.types[0].origin;
+            					if (!origin && type.origin){
+            						origin = type.origin;
+            					}
+                				if (type.types.length === 1 && name && origin){
+                					if (/\./.test(origin)){
+            							var originNode = type.types[0].originNode ? type.types[0].originNode : type.originNode;
+            							if (originNode){
+                							var index = origin.lastIndexOf('/');
+                							if (index >= 0){
+                								origin = origin.substring(index+1);
+                							}
+											context.report(node.property, ProblemMessages['no-undef-expression-defined-object'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-object', data: {file: originNode.sourceFile.name, start: originNode.start, end: originNode.end}}); //$NON-NLS-1$
+										} else {
+											context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
 										}
-        	                		}
-        	                	} catch (e) {
-        	                		//ignore
-        	                	}
-							}
+									} else {
+										context.report(node.property, ProblemMessages['no-undef-expression-defined-index'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-index'}); //$NON-NLS-1$
+									}
+								} else {
+									context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
+								}
+	                		}
                 		}
                 	}
             	}
@@ -1639,8 +1623,7 @@ define([
     					if (!references.length) {
     					    if(node.type === 'FunctionDeclaration') {
     					    	   var tern = context.getTern();
-    					    	   var refQuery = tern.query;
-						   refQuery.end = node.id.end;
+    					    	   var refQuery = {end: node.id.start};
     					    	   var refs = null;
     					    	   var filename = tern.file.name;
     					    	   try {
@@ -2130,8 +2113,7 @@ define([
 				function getValue(node) {
 					if (node.argument) {
 						var tern = context.getTern();
-						var query = tern.query;
-						query.end = node.argument.start;
+						var query = {end: node.argument.start};
 						var foundType = null;
 						try {
 							var expr = tern.findQueryExpr(tern.file, query);
