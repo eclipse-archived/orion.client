@@ -257,7 +257,7 @@ define([
 						if(files && files.length > 0) {
 							return _normalRead(response, files[0].location, fileClient);
 						}
-						_failedRead(response, files[0].location, "File not found in workspace");
+						_failedRead(response, _l, "File not found in workspace");
 					},
 					function(err) {
 						_failedRead(response, _l, err);
