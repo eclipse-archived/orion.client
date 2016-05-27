@@ -38,6 +38,17 @@ define([
 		getFileService: function(){
 			return this.getFileClient();
 		},
+		_getNoneRootMeta: function(meta) {
+			if(meta) {
+				if(meta.Directory === undefined && meta.Location) {// Nodejs server does not return Directory property on a non root folder from a file's parent chain.
+					return meta;
+				}
+				if(meta.Directory && meta.Location && meta.Parents) {
+					return meta;
+				}
+			}
+			return null;
+		},
 		setLocationByMetaData: function(meta, useParentLocation){
 			var locationName = "";
 			var noneRootMeta = null;
@@ -48,8 +59,8 @@ define([
 				} else {
 					noneRootMeta = meta.Parents[0];
 				}
-			} else if(meta &&  meta.Directory && meta.Location && meta.Parents){
-				noneRootMeta = meta;
+			} else {
+				noneRootMeta = this._getNoneRootMeta(meta);
 			} 
 			if(noneRootMeta){
 				this.setLocationbyURL(noneRootMeta.Location);
