@@ -328,11 +328,13 @@ define([
 				var textView = editor.getTextView();
 				textView.setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-2$
 				var saveCommand = that.commandService.findCommand("orion.edit.save"); //$NON-NLS-0$
-				textView.setAction("save", function() { //$NON-NLS-0$
-					saveCommand.callback.call({inputManager: that.inputManager});
-					return true;
-				}, saveCommand); //$NON-NLS-0$
-			
+				if (saveCommand) {
+					textView.setAction("save", function() { //$NON-NLS-0$
+						saveCommand.callback.call({inputManager: that.inputManager});
+						return true;
+					}, saveCommand); //$NON-NLS-0$
+				}
+
 				textView.setAction("gotoLine", function (data) { //$NON-NLS-0$
 					if (data) {
 						editor.onGotoLine(data.line - 1, 0, undefined, data.callback);
