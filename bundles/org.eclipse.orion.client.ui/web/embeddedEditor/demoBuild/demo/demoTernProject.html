@@ -39,14 +39,14 @@
 		<script src="editorBuild/code_edit/built-codeEdit.js"></script>
 		<script>
 			/*globals orion */
-			var contents = 'var MYCONSTANT = 1;\n' +
-								 'import "somehting";\n' + 
+			var contents = 'var MYCONSTANT = 1\n' +
+								 'import "something";\n' + 
 								 "export function myFunc() { return MYCONSTANT;}"; 
 			var files2import = [
-//				{
-//					name: ".tern-project",
-//					contents:'{"sourceType": "module","ecmaVersion": 6}'
-//				},
+				{
+					name: ".tern-project",
+					contents:'{"sourceType": "script","ecmaVersion": 6}'
+				},
 				{
 					name: ".eslintrc",
 					contents:'{"rules": {"semi": 2}}'
@@ -62,22 +62,26 @@
 			];
 			window.onload=function(){
 				var codeEdit = new orion.codeEdit();
-				codeEdit.startup().then(function() {
-					codeEdit.importFiles(files2import).then(function(results) {
+				codeEdit.startup().then(function() {//Load all the plugins first
+					codeEdit.importFiles(files2import).then(function(results) {//import tern configuration files
+						document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 						console.log(results);
+						//Top editor. Demo a javascript file that is relying on the tern and eslint configurations. 
 						codeEdit.create({parent: "embeddedEditor", contentType: "application/javascript", contents: contents}).then(function(editorViewer) {
-							document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+							//Do nothing
 						});
+						
+						//Bottom editor. Dynamically display the .tern-project when its contents is modified by the quick fixes.
 						codeEdit.create({parent: "embeddedEditor1", contentType: "application/json", contents: ""}).then(function(editorViewer) {
-							document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 							var fileClient = codeEdit.serviceRegistry.getService("orion.core.file.client");
 							if (fileClient) {
+								//Listen to the .tern-project file changes.
 								fileClient.addEventListener("Changed", function(evt) { //$NON-NLS-0$
 									if(evt && evt.modified) {
 										if(evt.modified.some(function(loc){
-											return "/in_memory_file_system/project/.tern-project" === loc;
+											return "/in_memory_fs/project/.tern-project" === loc;
 											})) {
-												fileClient.read("/in_memory_file_system/project/.tern-project").then(function(contents) {
+												fileClient.read("/in_memory_fs/project/.tern-project").then(function(contents) {
 													editorViewer.editor.getTextView().setText(contents);
 												});
 											}
@@ -103,7 +107,7 @@
 		<div class="demoBody" id="embeddedEditor">
 		</div>
 		<div class="demoTitle">
-			<span id = "progressMessageDiv" style="color: green">/in_memory_file_system/project/.tern-project</span>
+			<span id = "progressMessageDiv" style="color: green">/in_memory_fs/project/.tern-project</span>
 		</div>
 		<div class="demoBody" id="embeddedEditor1">
 		</div>
