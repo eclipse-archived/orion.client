@@ -38,7 +38,8 @@ define([
 		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs, noObjCalls, noSelfCompare, noIrregularWhitespace) {
 	
 	var nodeModules = {
-		"buffer": true, 
+		"buffer": true,
+		"child_process": true,
 		"cluster": true, 
 		"crypto": true, 
 		"dns": true, 
