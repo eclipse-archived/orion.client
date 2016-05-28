@@ -216,41 +216,45 @@ module.exports = function(options) {
 		});
 	}
 
-	passport.use(new GoogleStrategy({
-		clientID: options.configParams["orion.oauth.google.client"],
-		clientSecret: options.configParams["orion.oauth.google.secret"],
-		passReqToCallback: true,
-		callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/google/callback",
-		scope: "openid email"
-	}, /* @callback */ function(req, accessToken, refreshToken, profile, done) {
-		var email = profile.emails[0].value;
-		oauth(profile.provider + "/" + profile.id, email.split("@")[0], email, req, done);
-	}));
-	app.get('/login/oauth/google', passport.authenticate('google'));
-	app.get('/mixlogin/manageoauth/oauth/google', passport.authenticate('google', {callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/google/callback/link"}));
-	app.get('/auth/google/callback*', function(req, res) {
-		return passport.authenticate('google', {callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/google/callback" + (req.params["0"] || "")}, function(err, user, info){
-			createNewUser(req,res,err,user,info);
-		})(req,res);
-	});
+	if (options.configParams["orion.oauth.google.client"]) {
+		passport.use(new GoogleStrategy({
+			clientID: options.configParams["orion.oauth.google.client"],
+			clientSecret: options.configParams["orion.oauth.google.secret"],
+			passReqToCallback: true,
+			callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/google/callback",
+			scope: "openid email"
+		}, /* @callback */ function(req, accessToken, refreshToken, profile, done) {
+			var email = profile.emails[0].value;
+			oauth(profile.provider + "/" + profile.id, email.split("@")[0], email, req, done);
+		}));
+		app.get('/login/oauth/google', passport.authenticate('google'));
+		app.get('/mixlogin/manageoauth/oauth/google', passport.authenticate('google', {callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/google/callback/link"}));
+		app.get('/auth/google/callback*', function(req, res) {
+			return passport.authenticate('google', {callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/google/callback" + (req.params["0"] || "")}, function(err, user, info){
+				createNewUser(req,res,err,user,info);
+			})(req,res);
+		});
+	}
 
-	passport.use(new GithubStrategy({
-		clientID: options.configParams["orion.oauth.github.client"],
-		clientSecret: options.configParams["orion.oauth.github.secret"],
-		passReqToCallback: true,
-		callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/github/callback",
-		scope: "user:email"
-	}, /* @callback */ function(req, accessToken, refreshToken, profile, done) {
-		var email = profile.emails[0].value;
-		oauth(profile.provider + "/" + profile.id, profile.username, email, req, done);
-	}));
-	app.get('/login/oauth/github', passport.authenticate('github'));
-	app.get('/mixlogin/manageoauth/oauth/github', passport.authenticate('github', {callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/github/callback/link"}));
-	app.get('/auth/github/callback*', function(req, res) {
-		return passport.authenticate('github', {callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/github/callback" + (req.params["0"] || "")}, function(err, user, info){
-			createNewUser(req,res,err,user,info);
-		})(req,res);
-	});
+	if (options.configParams["orion.oauth.github.client"]) {
+		passport.use(new GithubStrategy({
+			clientID: options.configParams["orion.oauth.github.client"],
+			clientSecret: options.configParams["orion.oauth.github.secret"],
+			passReqToCallback: true,
+			callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/github/callback",
+			scope: "user:email"
+		}, /* @callback */ function(req, accessToken, refreshToken, profile, done) {
+			var email = profile.emails[0].value;
+			oauth(profile.provider + "/" + profile.id, profile.username, email, req, done);
+		}));
+		app.get('/login/oauth/github', passport.authenticate('github'));
+		app.get('/mixlogin/manageoauth/oauth/github', passport.authenticate('github', {callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/github/callback/link"}));
+		app.get('/auth/github/callback*', function(req, res) {
+			return passport.authenticate('github', {callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/github/callback" + (req.params["0"] || "")}, function(err, user, info){
+				createNewUser(req,res,err,user,info);
+			})(req,res);
+		});
+	}
 
 	app.post('/logout', function(req, res){
 		req.logout();
