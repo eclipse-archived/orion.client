@@ -470,12 +470,15 @@ define([
 				});
 				
 				/*
-				 * TODO Not sure what temporal dead zone behaviour should be
-				 * Running this code is an error
+				 * The behaviour of occurrences here is a little odd, but running this code is an error
 				 */
-				it.skip('Let hoisting in temporal dead zone 1', function(done) {
+				it('Let hoisting in temporal dead zone 1', function(done) {
 					var text = "{ a++; b++; let a; } a++;";
-					return computeOccurrences(text, getOptions(done, 2, 2), [{start:2, end:3}, {start:21, end:22}]);
+					return computeOccurrences(text, getOptions(done, 2, 2), [{start:16, end:17}]);
+				});
+				it('Let hoisting in temporal dead zone 2', function(done) {
+					var text = "{ a++; b++; let a; } a++;";
+					return computeOccurrences(text, getOptions(done, 16, 16), [{start:16, end:17}]);
 				});
 			});
 			describe('Generators', function(){
