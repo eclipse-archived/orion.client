@@ -22,6 +22,7 @@ var api = require('../api'),
 
 var debug = Debug('orion:prefs'),
     fs = Promise.promisifyAll(require('fs')),
+    lockFile = Promise.promisifyAll(require('lockfile')),
     mkdirpAsync = Promise.promisify(require('mkdirp'));
 
 module.exports = {};
@@ -69,10 +70,13 @@ function PrefsController(options) {
 	return router;
 
 	// Helper functions
-	
 	function getPrefsFileName(req) {
 		var prefFolder = options.configParams['orion.single.user'] ? os.homedir() : req.user.workspaceDir;
 		return nodePath.join(prefFolder, '.orion', PREF_FILENAME);
+	}
+
+	function getLockfileName(prefFileName) {
+		return prefFileName + '.lock';
 	}
 
 	// Wraps a promise-returning handler, that needs access to prefs, into an Express middleware.
@@ -82,7 +86,7 @@ function PrefsController(options) {
 			return Promise.resolve()
 			.then(acquirePrefs.bind(null, req, res))
 			.then(handler.bind(null, req, res))
-			.then(function() {
+			.then(function() { //eslint-disable-line consistent-return
 				if (!useCache) {
 					return savePrefs(req.prefs, req.prefFile);
 				}
@@ -146,23 +150,51 @@ function PrefsController(options) {
 		}
 
 		app.locals.prefs = null;
-		savePrefs(prefs, prefFile);
-	}
-	
-	// writes prefs to disk
-	function savePrefs(prefs, prefFile) {
-		if (!prefs.modified()) {
-			return;
-		}
-		return mkdirpAsync(nodePath.dirname(prefFile)) // create parent folder(s) if necessary
-		.then(function() {
-			return fs.writeFileAsync(prefFile, prefs.toJSON());
+		savePrefs(prefs, prefFile)
+		.catch(function() {
+			// Suppress 'unhandled rejection' errors
 		})
-		.then(debug.bind(null, 'flushJob(): wrote prefs.json'))
-		.catch(function(err) {
-			debug('flushJob(): error writing prefs.json', err);
-		});
 	}
+
+	// Writes prefs to disk
+	// @returns Promise that resolves if prefs were written ok, rejects if a problem happened.
+	function savePrefs(prefs, prefFile) {
+		/*eslint-disable consistent-return*/
+		if (!prefs.modified()) {
+			debug("savePrefs(): not modified, skip writing");
+			return Promise.resolve();
+		}
+		return Promise.using(lock(prefFile), function() {
+			// We have the lock until the promise returned by this function fulfills.
+			return mkdirpAsync(nodePath.dirname(prefFile)) // create parent folder(s) if necessary
+			.then(function() {
+				return fs.writeFileAsync(prefFile, prefs.toJSON());
+			})
+			.then(debug.bind(null, 'savePrefs(): wrote prefs.json'))
+		})
+		.catch(function(err) {
+			debug('savePrefs(): error writing prefs.json', err);
+			throw err;
+		});
+		/*eslint-enable*/
+	}
+
+	// Returns a promise that can be used with Promise.using() to guarantee exclusive
+	// access to the prefs file.
+	function lock(prefFile) {
+		return lockFile.lockAsync(getLockfileName(prefFile), {
+			retries: 3,
+			retryWait: 25,
+		})
+		.disposer(function() {
+			return lockFile.unlockAsync(getLockfileName(prefFile))
+			.catch(function(error) {
+				// Rejecting here will crash the process; just warn
+				debug("Error unlocking pref file:", error);
+			})
+		})
+	}
+
 } // PrefsController
 
 function handleGet(req, res) { //eslint-disable-line consistent-return
