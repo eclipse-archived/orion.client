@@ -73,7 +73,7 @@ define([
 				_self.settingsCategories = [];
 			
 				var categories = prefs[ 'categories' ] || {};
-				if (categories.showUserSettings === undefined || categories.showUserSettings) {
+				if (!window.isElectron && (categories.showUserSettings === undefined || categories.showUserSettings)) {
 					_self.settingsCategories.push({
 						id: "userSettings", //$NON-NLS-0$
 						textContent: messages["User Profile"],

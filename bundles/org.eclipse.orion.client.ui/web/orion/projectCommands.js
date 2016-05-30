@@ -1328,7 +1328,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			}
 			);
 			createZipProjectCommand.isCreateProject = true;
-			commandService.addCommand(createZipProjectCommand);
+			if (!window.isElectron) {
+				commandService.addCommand(createZipProjectCommand);
+			}
 
 			var createSftpProjectCommand = new mCommands.Command({
 				name: messages["sFTP"],
@@ -1362,7 +1364,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				}
 				);
 				createSftpProjectCommand.isCreateProject = true;
-				commandService.addCommand(createSftpProjectCommand);
+				if (!window.isElectron) {
+					commandService.addCommand(createSftpProjectCommand);
+				}
 
 			projectCommandUtils.createDependencyCommands(serviceRegistry, commandService, fileClient, projectClient, dependencyTypes);
 
