@@ -9529,6 +9529,21 @@ define([
 								});
 						});
 						/**
+						 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=494783
+						 */
+						it("Should not fail to resolve require(..)", function(callback) {
+							var topic = 'define(function(require) {var p = "foo"; require(p);});';
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						/**
 						 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457067
 						 */
 						it("Should not flag unused param func decl as call expression in closure with @callback", function(callback) {
