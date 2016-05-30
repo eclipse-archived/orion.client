@@ -140,6 +140,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'o
 					}
 					listItem.appendChild(anchor);
 					sideMenuList.appendChild(listItem);
+					anchor.setAttribute("aria-label", listItem.categoryName);
 					anchor.commandTooltip = new mTooltip.Tooltip({
 						node: anchor,
 						text: listItem.categoryName,
