@@ -80,6 +80,33 @@ define([
     		               ]
     	});
 
+		var fileMap = Object.create(null);
+		provider.registerService("orion.edit.model", {  //$NON-NLS-1$
+    		onModelChanged: function fileMapOnModelChanged(evnt) {
+    			delete fileMap[evnt.file.location];
+    		}
+    	},
+    	{
+    		contentType: ["application/javascript", "text/html"]  //$NON-NLS-1$ //$NON-NLS-2$
+    	});
+		
+		/**
+		 * @description Removes the files array if the location is in the 'has not been edited' map
+		 * @param {{args: Object, files: Array, request: string}} msg
+		 * @returns {{args: Object, request: string}} The original request with the files array removed if the file has not changed since 
+		 * the last request
+		 */
+		function clean(msg) {
+			if(msg && msg.args && msg.args.meta) {
+				if(fileMap[msg.args.meta.location]) {
+					delete msg.args.files;
+				} else {
+					fileMap[msg.args.meta.location] = true;
+				}
+			}
+			return msg;
+		}
+		
     	/**
     	 * Create the script resolver
     	 * @since 8.0
@@ -121,37 +148,38 @@ define([
 	 * @callback 
 	 */
 	WrappedWorker.prototype.postMessage = function(msg, f) {
-		if(ternReady || msg.request === 'read') { //configuration reads can happen while the server is starting
-			if(msg !== null && typeof msg === 'object') {
-				if(typeof msg.messageID !== 'number' && typeof msg.ternID !== 'number') {
+		var _msg = clean(msg);
+		if(ternReady || _msg.request === 'read') { //configuration reads can happen while the server is starting
+			if(_msg !== null && typeof _msg === 'object') {
+				if(typeof _msg.messageID !== 'number' && typeof _msg.ternID !== 'number') {
 					//don't overwrite an id from a tern-side request
-					msg.messageID = this.messageId++;
-					this.callbacks[msg.messageID] = f;
+					_msg.messageID = this.messageId++;
+					this.callbacks[_msg.messageID] = f;
 				}
 			}
 			if(TRACE) {
-				console.log("postMessage ("+this.messageId+") - SENT "+msg.request); //$NON-NLS-1$ //$NON-NLS-2$
+				console.log("postMessage ("+this.messageId+") - SENT "+_msg.request); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			this.worker.postMessage(msg);
-		} else if(msg.request === "start_server") {
+			this.worker.postMessage(_msg);
+		} else if(_msg.request === "start_server") {
 			if(!workerReady) {
-				pendingStart = {msg: msg, f: f};
+				pendingStart = {msg: _msg, f: f};
 			} else {
 				if(TRACE) {
-					console.log("postMessage ("+this.messageId+") - START "+JSON.stringify(msg.args)); //$NON-NLS-1$ //$NON-NLS-2$
+					console.log("postMessage ("+this.messageId+") - START "+JSON.stringify(_msg.args)); //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				this.worker.postMessage(msg);
+				this.worker.postMessage(_msg);
 			}
-		} else if (msg.request === "addFile" || msg.request === "delFile") {
+		} else if (_msg.request === "addFile" || _msg.request === "delFile") {
 			if(TRACE) {
-				console.log("postMessage ("+this.messageId+") - MODIFY QUEUED: "+msg.request); //$NON-NLS-1$ //$NON-NLS-2$
+				console.log("postMessage ("+this.messageId+") - MODIFY QUEUED: "+_msg.request); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			modifyQueue.push({msg: msg, f: f});
+			modifyQueue.push({msg: _msg, f: f});
 		} else {
 			if(TRACE) {
-				console.log("postMessage ("+this.messageId+") - MESSAGE QUEUED: "+msg.request); //$NON-NLS-1$ //$NON-NLS-2$
+				console.log("postMessage ("+this.messageId+") - MESSAGE QUEUED: "+_msg.request); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			messageQueue.push({msg: msg, f: f});
+			messageQueue.push({msg: _msg, f: f});
 		}
 	};
 
@@ -162,7 +190,6 @@ define([
 	 */
 	var contributedEnvs,
 		ternWorker;
-		
 	
 	var handlers ={
 		'read': doRead,
