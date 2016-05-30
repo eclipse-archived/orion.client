@@ -379,6 +379,7 @@ define([
 					}
 				}
 				describe("AMD", function(){
+					this.timeout(20000);
 					it("cross file return object indirection 1", function(done) {
 						var options = {
 							buffer: "define(['./files/require_dep1'], function(a) {a.myfunc()});",
@@ -522,6 +523,7 @@ define([
 					});
 				});
 				describe("Node", function(){
+					this.timeout(20000);
 					it("Node require, inline export - Function implementation", function(done) {
 						var options = {
 							buffer: "var lib = require('./files/node_dep1.js'); lib.nodeFunc1();",
