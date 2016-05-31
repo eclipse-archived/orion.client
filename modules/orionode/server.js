@@ -20,7 +20,8 @@ var auth = require('./lib/middleware/auth'),
 	util = require('util'),
 	argslib = require('./lib/args'),
 	ttyShell = require('./lib/tty_shell'),
-	orion = require('./index.js');
+	orion = require('./index.js'),
+    readWorkspaceInfo = require('./lib/controllers/prefs').readWorkspaceInfo;
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
@@ -29,14 +30,14 @@ var PORT_LOW = 8082;
 var PORT_HIGH = 10082;
 var port = args.port || args.p || process.env.PORT || 8081;
 var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
+var iselectron = false;
 
 var configParams = argslib.readConfigFileSync(configFile) || {};
 
 function startServer(cb) {
-	
+	var workspaceDir;
 	var workspaceArg = args.workspace || args.w;
 	var workspaceConfigParam = configParams.workspace;
-	var workspaceDir;
 	if (workspaceArg) {
 		// -workspace passed in command line is relative to cwd
 		workspaceDir = path.resolve(process.cwd(), workspaceArg);
@@ -46,8 +47,21 @@ function startServer(cb) {
 	} else {
 		workspaceDir = path.join(__dirname, '.workspace');
 	}
-
-	argslib.createDirs([workspaceDir], function() {
+	new Promise(function(resolve){
+		if(iselectron){
+			readWorkspaceInfo()
+			.then(function(workspaceAddress){
+				if(workspaceAddress){
+					resolve(workspaceAddress);
+				}else{
+					resolve(workspaceDir);
+				}
+			});
+		}else{
+			resolve(workspaceDir);
+		}
+	}).then(function(workspaceDir){
+		argslib.createDirs([workspaceDir], function() {
 		var passwordFile = args.password || args.pwd;
 		argslib.readPasswordFile(passwordFile, function(password) {
 			var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
@@ -107,6 +121,7 @@ function startServer(cb) {
 				console.error(e && e.stack);
 			}
 		});
+	});
 	});
 }
 
@@ -201,6 +216,7 @@ if (process.versions.electron) {
 			});
 			return nextWindow;
 		}
+		iselectron = true;
 		startServer(function() {
 			mainWindow = createWindow("http://localhost:" + port);
 			mainWindow.on('closed', function() {
@@ -236,4 +252,6 @@ if (process.versions.electron) {
 } else {
 	startServer();
 }
-
+module.exports = {
+	isElectron : function(){return iselectron;}
+};
