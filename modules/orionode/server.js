@@ -206,23 +206,11 @@ if (process.versions.electron) {
 			mainWindow.on('closed', function() {
 				mainWindow = null;
 			});
-			var ipcMain  = electron.ipcMain ;
-			ipcMain.on("registerShortCuts", function(event){
-				var globalShortcut = electron.globalShortcut;
-				globalShortcut.register('Alt+Left',function(){
-					event.sender.send("historyBack");
-				});
-				globalShortcut.register('Alt+Right',function(){
-					event.sender.send("historyForward");
-				});	
-			});
 		});
 	});
 	electron.app.on('window-all-closed', function() {
 		electron.app.quit();	
 	});
-
-	
 	
 	// Check for updates every time we run the electron app
 	var feedURL = configParams["orion.autoUpdater.url"];
