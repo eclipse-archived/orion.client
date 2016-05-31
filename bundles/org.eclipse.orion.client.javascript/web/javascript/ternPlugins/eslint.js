@@ -162,10 +162,10 @@ define([
 						}
 					}
 				}
-				if(server._requireJS && server._requireJS.interfaces) {
-					keys = Object.keys(server._requireJS.interfaces);
+				if(server.mod && server.mod.requireJS && server.mod.requireJS.interfaces) {
+					keys = Object.keys(server.mod.requireJS.interfaces);
 					for(i = 0, len = keys.length; i < len; i++) {
-						mod = server._requireJS.interfaces[keys[i]];
+						mod = server.mod.requireJS.interfaces[keys[i]];
 						if(mod && mod.reqName === name) {
 							return true;
 						}
