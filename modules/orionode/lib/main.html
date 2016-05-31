@@ -257,7 +257,8 @@ body {
 		iframe.frameBorder = "0";
 		iframe.classList.add("tabContent");
 		iframe.src = url;
-		var __dialogModule = electron.remote.require('dialog');
+
+		var __dialogModule = electron.remote.dialog;
 		
 		iframe.addEventListener("load", function() {
 			

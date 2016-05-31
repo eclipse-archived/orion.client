@@ -15,6 +15,8 @@ var fs = require('fs');
 var util = require('util');
 var api = require('./api');
 var fileUtil = require('./fileUtil');
+var isElectron = require('../server.js').isElectron;
+var writeWorkspaceInfo = require('./controllers/prefs').writeWorkspaceInfo;
 var writeError = api.writeError;
 
 module.exports = function(options) {
@@ -153,6 +155,9 @@ module.exports = function(options) {
 	router.put('*', function(req, res) {
 		if (req.body.Location && options.options.configParams["orion.single.user"]) {
 			options.options.workspaceDir = req.body.Location;
+			if(isElectron()){
+				writeWorkspaceInfo(options.options.workspaceDir);
+			}
 			return res.status(200).end();
 		}
 		writeError(403, res);
