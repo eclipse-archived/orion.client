@@ -1064,9 +1064,9 @@ define([
 							options1.done = processEditorResult;
 							options1.status = handleStatus;
 							createDelegatedUI(options1);
-						} else if (result && result.searchParams && result.refResult) {
+						} else if (result && result.searchParams) {
 							if(that.sideBar) {
-								that.sideBar.fillSearchPane(result.searchParams.keyword, {Location: result.searchParams.resource}, result);
+								that.sideBar.fillSearchPane(result.searchParams, result.refResult ? result : null);
 							}
 						} else if (result && (result.Status || result.status)) {
 							handleStatus(result.Status || result.status);

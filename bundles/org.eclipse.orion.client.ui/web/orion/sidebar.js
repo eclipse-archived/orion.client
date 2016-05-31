@@ -312,13 +312,15 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			this.commandRegistry.addCommand(problemsInFolderCommand);
 			this.commandRegistry.registerCommandContribution(this.toolsScope, "orion.problemsInFolder", 2, "orion.menuBarToolsGroup", false, new KeyBinding.KeyBinding('p', true, false, true));  //$NON-NLS-1$ //$NON-NLS-0$
  		},
- 		fillSearchPane: function(searchText, searchScope, searchResult) {
+ 		fillSearchPane: function(searchParams, searchResult) {
  			var mainSplitter = mGlobalCommands.getMainSplitter();
 			if (mainSplitter.splitter.isClosed()) {
 				mainSplitter.splitter.toggleSidePanel();
 			}
-			this._inlineSearchPane.setSearchText(searchText);
-			this._inlineSearchPane.setSearchScope(searchScope); //reset search scope
+			this._inlineSearchPane.setSearchText(searchParams.keyword);
+			this._inlineSearchPane.setSearchScope(searchParams.resource.Location ? searchParams.resource : {Location: searchParams.resource});
+			this._inlineSearchPane.setCheckBox(searchParams);
+			this._inlineSearchPane.setFileNamePatterns(searchParams.fileNamePatterns);
 			this._inlineSearchPane.show();
 			this._inlineSearchPane.showSearchOptions();
 			if(!searchResult) {
@@ -426,7 +428,9 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 					return true;
 				},
 				callback: function(data) {
-					this.fillSearchPane(getSearchText(), recordDefaultSearchResource(data));
+					var resource = recordDefaultSearchResource(data);
+					var keyword = getSearchText();
+					this.fillSearchPane({keyword: keyword, resource: resource});
 				}.bind(this)
 			});
 			

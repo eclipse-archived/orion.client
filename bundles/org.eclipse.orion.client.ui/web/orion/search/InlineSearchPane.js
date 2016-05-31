@@ -438,6 +438,20 @@ define([
 			this._searchBox.setTextInputValue(str);
 		},
 		
+		setCheckBox: function(searchParams) {
+			this._caseSensitiveCB.checked = searchParams.caseSensitive ? true : false;
+			this._wholeWordCB.checked = searchParams.wholeWord ? true : false;
+			this._regExCB.checked = searchParams.regEx ? true : false;
+		},
+		
+		setFileNamePatterns: function(fNamePattern) {
+			if(Array.isArray(fNamePattern)) {
+				this._fileNamePatternsBox.setTextInputValue(fNamePattern.join(", ")); //$NON-NLS-0$
+			} else {
+				this._fileNamePatternsBox.setTextInputValue("");
+			}
+		},
+		
 		_initSearchScope: function() {
 			this._rootURL = this._fileClient.fileServiceRootURL();
 			this._searchLocations = [this._rootURL];
