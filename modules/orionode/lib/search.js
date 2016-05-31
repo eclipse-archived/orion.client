@@ -155,9 +155,9 @@ module.exports = function(options) {
 			}
 	
 			if (!searchOpts.filenamePatternCaseSensitive) {
-				return new RegExp(filenamePattern, "i");
+				return new RegExp(filenamePattern, "igy");
 			}
-			return new RegExp(filenamePattern);
+			return new RegExp(filenamePattern,"gy");
 		});
 	}
 
