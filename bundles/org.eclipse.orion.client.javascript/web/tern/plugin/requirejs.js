@@ -83,7 +83,11 @@
 	//ORION
 	known = getModule(name, data);
     if (known && known.origin) {
-      data.server.addFile(known.origin, known.contents, data.currentFile);
+    	var contents = known.contents;
+    	if(data.server.fileMap[known.origin]) {
+    		contents = null; //don't force a purge for a context that will not be recomputed
+    	}
+      data.server.addFile(known.origin, contents, data.currentFile);
     }
     return known || infer.ANull;
   }
@@ -98,7 +102,14 @@
 
   function getModule(name, data) {
   	if(name === data.currentFile) {
-  		return data.interfaces[stripJSExt(name)] = new infer.AVal();
+  		var _f = stripJSExt(name);
+  		var known = data.interfaces[_f];
+  		if(!known) {
+  			known = new infer.AVal();
+  			known.origin = name;
+  			data.interfaces[_f] = known;
+  		}
+  		return known;
   	}
   	var known = getKnownModule(name, data);
     if (!known) {
