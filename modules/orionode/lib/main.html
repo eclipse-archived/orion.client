@@ -169,10 +169,9 @@ body {
 		buttons.appendChild(refresh);
 		bar.appendChild(buttons);
 		
-		var ipcRender = electron.ipcRenderer;
-		ipcRender.send("registerShortCuts");
-		ipcRender.on("historyBack",historyBack);
-		ipcRender.on("historyForward",historyForward);
+		var _globalShortcut = electron.remote.globalShortcut;		
+		_globalShortcut.register('Alt+Right',historyForward);	
+		_globalShortcut.register('Alt+Left',historyBack);
 	}
 	
 	function redrawTabs() {
@@ -257,7 +256,7 @@ body {
 		iframe.frameBorder = "0";
 		iframe.classList.add("tabContent");
 		iframe.src = url;
-		var __dialogModule = electron.remote.require('dialog');
+		var __dialogModule = electron.remote.dialog;
 		
 		iframe.addEventListener("load", function() {
 			
