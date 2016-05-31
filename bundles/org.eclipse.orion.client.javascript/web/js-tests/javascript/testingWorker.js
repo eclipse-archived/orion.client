@@ -67,8 +67,8 @@ define([
 	};
 	
 	function message(msg, f) {
-		if(msg !== null && typeof(msg) === 'object') {
-			if(typeof(msg.messageID) !== 'number') {
+		if(msg !== null && typeof msg === 'object') {
+			if(typeof msg.messageID !== 'number') {
 				//don't overwrite an id from a tern-side request
 				msg.messageID = messageID++;
 				callbacks[msg.messageID] = f;
@@ -122,18 +122,18 @@ define([
 	 * @description Adds a fake file that will return the given contents when requested rather than perform an xhr
 	 * only be ignored once.
 	 * @function
-	 * @param filename {String} the file name to ignore
+	 * @param {String} fileName the file name to ignore
 	 */
-	WrappedWorker.prototype.createTestFile = function(name, text) {
-		testFiles[name] = text;
+	WrappedWorker.prototype.createTestFile = function(fileName, text) {
+		testFiles[fileName] = text;
 	};
 	
 	function onmessage(ev) {
-		if(typeof(ev.data) === 'object') {
+		if(typeof ev.data === 'object') {
 			var _d = ev.data;
 			var id  = _d.messageID;
 			var f = callbacks[id];
-			if(typeof(f) === 'function') {
+			if(typeof f === 'function') {
 				if(_d.error) {
 					f(_d, _d.error);
 				} else {
@@ -141,7 +141,7 @@ define([
 				}
 				delete callbacks[id];
 			} else if(_d.request === "worker_ready") {
-    			if(typeof(_state.workerReady) === 'function') {
+    			if(typeof _state.workerReady === 'function') {
 					_state.workerReady();
 				} else {
 					this.postMessage({request: 'start_server', args: {}}, 
@@ -155,7 +155,7 @@ define([
 			} else if(_d.request === 'read') {
 				var url, filePath;
 				if(_d.args && _d.args.file) {
-					if(typeof(_d.args.file) === 'object') {
+					if(typeof _d.args.file === 'object') {
 						filePath = _d.args.file.logical ? _d.args.file.logical : _d.args.file;
 						url = getFileURL(filePath);
 						
@@ -176,7 +176,7 @@ define([
 							_state.callback(new Error(error));
 							this.postMessage({request: 'read', ternID: _d.ternID, args: {error: error, logical: _d.args.file.logical, file: rejection.url}});
 						}.bind(this));
-					} else if(typeof(_d.args.file) === 'string') {
+					} else if(typeof _d.args.file === 'string') {
 						filePath = _d.args.file;
 						url = getFileURL(filePath);
 						
@@ -203,21 +203,25 @@ define([
 				}
 			} else if(_d.request === 'delFile' || _d.request === 'addFile') {
 				return;
-			} else if(typeof(_d.request) === 'string') {
+			} else if(typeof _d.request === 'string') {
 				//don't process requests other than the ones we want
 				_state.callback(new Error('Got message I don\'t know: '+_d.request));
 			} else if(_d.error) {
 				var err = _d.error;
 				if(err instanceof Error) {
+					_state.testErr = err;
 					_state.callback(err);
-				} else if(typeof(err) === 'string') {
-					if(typeof(_d.message) === 'string') {
+				} else if(typeof err === 'string') {
+					if(typeof _d.message === 'string') {
+						_state.testErr = new Error(err+": "+_d.message);
 						_state.callback(new Error(err+": "+_d.message));
 					} else {
 						//wrap it
+						_state.testErr = new Error(err);
 						_state.callback(new Error(err));
 					}
-				} else if(err && typeof(err.message) === 'string') {
+				} else if(err && typeof err.message === 'string') {
+					_state.testErr = new Error(err.message);
 					_state.callback(new Error(err.message));
 				}
 			} else if(_d.__isError && _d.xhr) {
@@ -234,10 +238,10 @@ define([
 	function onerror(err) {
 		if(err instanceof Error) {
 			_state.callback(err);
-		} else if(typeof(err) === 'string') {
+		} else if(typeof err === 'string') {
 			//wrap it
 			_state.callback(new Error(err));
-		} else if(err && typeof(err.message) === 'string') {
+		} else if(err && typeof err.message === 'string') {
 			_state.callback(new Error(err.message));
 		}
 	}
@@ -268,7 +272,7 @@ define([
 	return {
 		instance:  function(state) {
 			var path = "../../javascript/plugins/ternWorker.js";
-			if(typeof(state.path) === 'string') {
+			if(typeof state.path === 'string') {
 				path = state.path;
 			}
 			return new WrappedWorker(path, state);
