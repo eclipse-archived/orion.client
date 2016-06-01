@@ -370,7 +370,7 @@ define([
 	        	var data = context.annotation.data;
 				return editorContext.openEditor(data.file, {start: data.start, end: data.end});
 	        },
-	        /** @callback fix the check-tern-project rule */
+	        /** @callback fix the check-tern-plugin rule */
 			"check-tern-plugin" : function(editorContext, context, astManager) {
 				return astManager.getAST(editorContext).then(function(ast) {
 					var newPlugin = ast.sourceFile.text.slice(context.annotation.start, context.annotation.end); ///, the '(.*)' plugin/.exec(context.annotation.title);
@@ -396,22 +396,6 @@ define([
 						} 
 						return editorContext.syntaxCheck(ast.sourceFile.name);
 					});
-				}.bind(this));
-			},
-			/** @callback fix the check-tern-project rule */
-			"check-tern-project" : function(editorContext, context, astManager) {
-				return astManager.getAST(editorContext).then(function(ast) {
-					return this.jsProject.getFile(this.jsProject.TERN_PROJECT).then(function(file) {
-						var json = file.contents ? JSON.parse(file.contents) : Object.create(null);
-						var currentFileName = ast.sourceFile.name.substring(file.project.length);
-						if (!Array.isArray(json.loadEagerly) || json.loadEagerly.indexOf(currentFileName) < 0) {
-							json = {loadEagerly: [currentFileName]};
-							json.loadEagerly.push();
-							return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
-								return editorContext.syntaxCheck(ast.sourceFile.name);
-							}.bind(this));
-						}
-					}.bind(this));
 				}.bind(this));
 			},
 			/** @callback fix the forbiddenExportImport rule */

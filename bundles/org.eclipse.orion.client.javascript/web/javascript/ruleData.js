@@ -19,7 +19,6 @@ define([
 		defaults: {
 			"accessor-pairs" : 1,
 			"check-tern-plugin" : 1,
-			"check-tern-project" : 0,
 			"curly" : 0,
 			"eqeqeq": 1,
 			"missing-doc" : 0, 

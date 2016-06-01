@@ -1282,20 +1282,6 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
 			quickFixComputer,
 			{
-				name: javascriptMessages["checkTernProjectFixName"],
-				fixAllEnabled: false,
-				scopeId: "orion.edit.quickfix", //$NON-NLS-1$
-				id : "check.tern.project.fix",  //$NON-NLS-1$
-				contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
-				validationProperties: [
-					{source: "annotation:id", match: "^(?:check-tern-project)$"} //$NON-NLS-1$ //$NON-NLS-2$
-				]
-			}
-		);
-
-		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
-			quickFixComputer,
-			{
 				name: javascriptMessages["forbiddenExportImportFixName"],
 				fixAllEnabled: false,
 				scopeId: "orion.edit.quickfix", //$NON-NLS-1$
@@ -1610,13 +1596,6 @@ define([
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
-												{
-													id: "check-tern-project",  //$NON-NLS-1$
-													name: javascriptMessages["check-tern-project"],
-													type: "number",  //$NON-NLS-1$
-													defaultValue: ignore,
-													options: severities
-												},
 				 	        	                {
     			 	        	                	id: "accessor-pairs",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["accessor-pairs"],

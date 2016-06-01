@@ -104,17 +104,6 @@ define([
 				"Program": checkProject
 			};
         },
-		/** @callback */
-		"check-tern-project" : function(context) {
-				return {
-					"Program": function checkProject(node) {
-						var tern = context.getTern();
-						if(!tern.isLoadEagerly(node.sourceFile.name)) {
-							context.report(node, ProblemMessages['check-tern-project']);
-						}
-					}
-				};
-		},
     	/** @callback */
         "curly": function(context) {
 	        		/**
