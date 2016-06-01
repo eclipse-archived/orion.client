@@ -165,7 +165,7 @@ define([
 	 * @description Fetch the named child of the current project context
 	 * @function
 	 * @param {String} childName The short name of the project child to get
-	 * @returns {Object} The requested child metadata or null
+	 * @returns {Deferred} A deferred that will resolve to the requested child metadata or null
 	 */
 	JavaScriptProject.prototype.getFile = function getFile(childName) {
 		if(!this.projectMeta) {
@@ -197,7 +197,9 @@ define([
 	};
 	
 	/**
-	 * @description Update the contents of the given file name, and optionally create the file if it does not exist
+	 * @description Update the contents of the given file name, and optionally create the file if it does not exist.
+	 * NOTE: this function does not check for existig values or duplicate entries, those checks must be done prior to calling 
+	 * this function with the JSON values to merge
 	 * @function
 	 * @param {String} childName The short name of the project child to get
 	 * @param {Boolean} create If the file should be created if it does not exist
@@ -257,7 +259,7 @@ define([
 	 * @name JavaScriptProject.prototype.getESlintOptions
 	 * @description Returns project-specific eslint options (if any)
 	 * @function
-	 * @returns {Object} The project-specific eslint options or null
+	 * @returns {Deferred} A deferred that will resolve to the project-specific eslint options or null
 	 * @see http://eslint.org/docs/user-guide/configuring
 	 */
 	JavaScriptProject.prototype.getESlintOptions = function getESlintOptions() {

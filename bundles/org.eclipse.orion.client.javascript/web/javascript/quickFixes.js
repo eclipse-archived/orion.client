@@ -405,8 +405,8 @@ define([
 						var json = file.contents ? JSON.parse(file.contents) : Object.create(null);
 						var currentFileName = ast.sourceFile.name.substring(file.project.length);
 						if (!Array.isArray(json.loadEagerly) || json.loadEagerly.indexOf(currentFileName) < 0) {
-							json = {loadEagerly: []};
-							json.loadEagerly.push(currentFileName);
+							json = {loadEagerly: [currentFileName]};
+							json.loadEagerly.push();
 							return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
 								return editorContext.syntaxCheck(ast.sourceFile.name);
 							}.bind(this));
@@ -417,13 +417,9 @@ define([
 			/** @callback fix the forbiddenExportImport rule */
 			"forbiddenExportImport" :function(editorContext, context, astManager) {
 				return astManager.getAST(editorContext).then(function(ast) {
-					return this.jsProject.getFile(this.jsProject.TERN_PROJECT).then(function(file) {
-						var json = file.contents ? JSON.parse(file.contents) : Object.create(null);
-						json.sourceType = "module";
-						json.ecmaVersion = 6;
-						return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
-							return editorContext.syntaxCheck(ast.sourceFile.name);
-						}.bind(this));
+					var json = {sourceType: "module", ecmaVersion: 6};
+					return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
+						return editorContext.syntaxCheck(ast.sourceFile.name);
 					}.bind(this));
 				}.bind(this));
 			}
