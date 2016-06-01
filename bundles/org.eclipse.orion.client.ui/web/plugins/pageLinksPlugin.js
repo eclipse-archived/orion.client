@@ -13,11 +13,12 @@
 define([
 	'orion/PageLinks',
 	'orion/plugin',
+	'orion/util',
 	'orion/URITemplate',
 	'i18n!orion/nls/messages',
 	'i18n!orion/widgets/nls/messages',
 	'orion/plugin'
-], function(PageLinks, PluginProvider, URITemplate, messages, widgetMessages) {
+], function(PageLinks, PluginProvider, util, URITemplate, messages, widgetMessages) {
 	
 	function connect() {
 		var headers = {
@@ -41,13 +42,16 @@ define([
 			imageClass: "core-sprite-edit",
 			order: 10
 		});
-		provider.registerService("orion.page.link.category", null, {
-			id: "shell",
-			name: messages["Shell"],
-			nls: "orion/nls/messages",
-			imageClass: "core-sprite-shell",
-			order: 40
-		});
+		
+		if (!util.isElectron) {
+			provider.registerService("orion.page.link.category", null, {
+				id: "shell",
+				name: messages["Shell"],
+				nls: "orion/nls/messages",
+				imageClass: "core-sprite-shell",
+				order: 40
+			});
+		}
 		
 		provider.registerService("orion.page.link.category", null, {
 			id: "settings",

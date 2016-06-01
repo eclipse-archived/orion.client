@@ -12,10 +12,11 @@
 define([
 	'require',
 	'orion/plugin',
+	'orion/util',
 	'plugins/site/siteServiceImpl',
 	'plugins/site/selfHostingRules',
 	'i18n!orion/nls/messages'
-], function(require, PluginProvider, siteImpl, mSelfHostingRules, messages) {
+], function(require, PluginProvider, util, siteImpl, mSelfHostingRules, messages) {
 	function qualify(url) {
 		return new URL(url, self.location.href).href;
 	}
@@ -62,15 +63,17 @@ define([
 		var host = new URL("/", self.location.href);
 	
 		// "Sites" category for putting page links and related links in.
-		provider.registerService("orion.page.link.category", null, {
-			id: "sites",
-			name: messages["Sites"],
-			nls: "orion/nls/messages",
-			imageClass: "core-sprite-sites",
-			order: 50,
-			uriTemplate: "{+OrionHome}/sites/"
-		});
-	
+		if (!util.isElectron) {
+			provider.registerService("orion.page.link.category", null, {
+				id: "sites",
+				name: messages["Sites"],
+				nls: "orion/nls/messages",
+				imageClass: "core-sprite-sites",
+				order: 50,
+				uriTemplate: "{+OrionHome}/sites/"
+			});
+		}
+
 		// Default link to ensure "Sites" category is never empty
 		provider.registerService("orion.page.link", null, {
 			name: messages["Sites"],
