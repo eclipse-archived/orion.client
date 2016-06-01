@@ -143,9 +143,6 @@ module.exports = function(options) {
 		}
 		return filenamePatterns.split("/").map(function(filenamePattern) {
 			if (filenamePattern.indexOf("?") !== -1 || filenamePattern.indexOf("*") !== -1) {
-				if (filenamePattern.indexOf("*") === 0) {
-					filenamePattern = filenamePattern.substring(1);
-				}
 				if (filenamePattern.indexOf("?") !== -1) {
 					filenamePattern = filenamePattern.replace("?", ".");
 				}
