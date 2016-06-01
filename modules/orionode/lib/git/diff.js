@@ -21,6 +21,7 @@ var multiparty = require('multiparty');
 var express = require('express');
 var bodyParser = require('body-parser');
 var util = require('./util');
+var async = require('async');
 
 module.exports = {};
 
@@ -210,30 +211,40 @@ function processDiff(diff, filePath, paths, fileDir, includeDiff, includeDiffs, 
 		
 					result.push(patch.hunks()
 					.then(function(hunks) {
-						var lresult = [];
-						hunks.forEach(function(hunk) {
-							lresult.push(hunk.lines()
-							.then(function(lines) {
-								buffer.push(hunk.header());
-								lines.forEach(function(line) {
-									var prefix = " ";
-									switch(line.origin()) {
-										case git.Diff.LINE.ADDITION:
-											prefix = "+";
-											break;
-										case git.Diff.LINE.DELETION:
-											prefix = "-";
-											break;
-										case git.Diff.LINE.DEL_EOFNL:
-										case git.Diff.LINE.ADD_EOFNL:
-											prefix = "";
-											break;
-									}
-									buffer.push(prefix + line.content());
-								});
-							}));
-						});
-						return Promise.all(lresult).then(function() {
+						return new Promise(function(fulfill, reject) {
+							async.series(hunks.map(function(hunk) {
+								return function(cb) {
+									hunk.lines().then(function(lines) {
+										buffer.push(hunk.header());
+										lines.forEach(function(line) {
+											var prefix = " ";
+											switch(line.origin()) {
+												case git.Diff.LINE.ADDITION:
+													prefix = "+";
+													break;
+												case git.Diff.LINE.DELETION:
+													prefix = "-";
+													break;
+												case git.Diff.LINE.DEL_EOFNL:
+												case git.Diff.LINE.ADD_EOFNL:
+													prefix = "";
+													break;
+											}
+											buffer.push(prefix + line.content());
+										});
+									})
+									.then(function(){
+										cb();
+									});
+								};
+							}), function(err) {
+								if (err) {
+									reject(err);
+								} else {
+									fulfill();
+								}
+							});
+						}).then(function(){
 							diffContents.push(buffer.join(""));
 						});
 					}));
