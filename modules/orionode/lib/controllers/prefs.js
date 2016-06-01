@@ -24,7 +24,11 @@ var debug = Debug('orion:prefs'),
     fs = Promise.promisifyAll(require('fs')),
     mkdirpAsync = Promise.promisify(require('mkdirp'));
 
-module.exports = PrefsController;
+module.exports = {};
+
+module.exports.writeWorkspaceInfo = writeWorkspaceInfo;
+module.exports.readWorkspaceInfo = readWorkspaceInfo;
+module.exports.router = PrefsController;
 
 var NOT_EXIST = Preference.NOT_EXIST;
 var PREF_FILENAME = PrefsController.PREF_FILENAME = 'prefs.json';
@@ -224,3 +228,27 @@ function handleDelete(req, res) { //eslint-disable-line consistent-return
 	}
 	res.sendStatus(204);
 }
+
+function getElectronPrefsFileName(){
+	return nodePath.join(os.homedir(), '.orion', PREF_FILENAME);
+}
+
+function writeWorkspaceInfo(workspaceAddress){
+	fs.readFileAsync( getElectronPrefsFileName(),'utf8')
+	.then(function(content){
+		return JSON.parse(content);
+	}).then(function(allContent){
+		allContent.currentWorkspace = workspaceAddress;
+		fs.writeFileAsync(getElectronPrefsFileName(), JSON.stringify(allContent, null, 2));
+	}).catch(function(err) {
+		debug('writeWorkspaceInfo(): error writing prefs.json', err);
+	});
+}
+
+function readWorkspaceInfo(){
+	return fs.readFileAsync( getElectronPrefsFileName(),'utf8')
+	.then(function(content){
+		return JSON.parse(content).currentWorkspace;
+	});
+}
+	
