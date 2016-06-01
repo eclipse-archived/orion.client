@@ -67,47 +67,52 @@ module.exports = function(options) {
 						return;
 					}
 				
-					var newContents = data.toString();
-					var buffer = {
-						_text: [newContents], 
-						replaceText: function (text, start, end) {
-							var offset = 0, chunk = 0, length;
-							while (chunk<this._text.length) {
-								length = this._text[chunk].length; 
-								if (start <= offset + length) { break; }
-								offset += length;
-								chunk++;
+					try {
+						var newContents = data.toString();
+						var buffer = {
+							_text: [newContents], 
+							replaceText: function (text, start, end) {
+								var offset = 0, chunk = 0, length;
+								while (chunk<this._text.length) {
+									length = this._text[chunk].length; 
+									if (start <= offset + length) { break; }
+									offset += length;
+									chunk++;
+								}
+								var firstOffset = offset;
+								var firstChunk = chunk;
+								while (chunk<this._text.length) {
+									length = this._text[chunk].length; 
+									if (end <= offset + length) { break; }
+									offset += length;
+									chunk++;
+								}
+								var lastOffset = offset;
+								var lastChunk = chunk;
+								var firstText = this._text[firstChunk];
+								var lastText = this._text[lastChunk];
+								var beforeText = firstText.substring(0, start - firstOffset);
+								var afterText = lastText.substring(end - lastOffset);
+								var params = [firstChunk, lastChunk - firstChunk + 1];
+								if (beforeText) { params.push(beforeText); }
+								if (text) { params.push(text); }
+								if (afterText) { params.push(afterText); }
+								Array.prototype.splice.apply(this._text, params);
+								if (this._text.length === 0) { this._text = [""]; }
+							},
+							getText: function() {
+								return this._text.join("");									
 							}
-							var firstOffset = offset;
-							var firstChunk = chunk;
-							while (chunk<this._text.length) {
-								length = this._text[chunk].length; 
-								if (end <= offset + length) { break; }
-								offset += length;
-								chunk++;
-							}
-							var lastOffset = offset;
-							var lastChunk = chunk;
-							var firstText = this._text[firstChunk];
-							var lastText = this._text[lastChunk];
-							var beforeText = firstText.substring(0, start - firstOffset);
-							var afterText = lastText.substring(end - lastOffset);
-							var params = [firstChunk, lastChunk - firstChunk + 1];
-							if (beforeText) { params.push(beforeText); }
-							if (text) { params.push(text); }
-							if (afterText) { params.push(afterText); }
-							Array.prototype.splice.apply(this._text, params);
-							if (this._text.length === 0) { this._text = [""]; }
-						},
-						getText: function() {
-							return this._text.join("");									
+						};
+						for (var i=0; i<diffs.length; i++) {
+							var change = diffs[i];
+							buffer.replaceText(change.text, change.start, change.end);
 						}
-					};
-					for (var i=0; i<diffs.length; i++) {
-						var change = diffs[i];
-						buffer.replaceText(change.text, change.start, change.end);
+						newContents = buffer.getText();
+					} catch (ex) {
+						writeError(500, res, ex);
+						return;
 					}
-					newContents = buffer.getText();
 
 					var failed = false;
 					if (contents) {
