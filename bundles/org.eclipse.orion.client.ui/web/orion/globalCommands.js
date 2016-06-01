@@ -37,7 +37,7 @@ define([
 			if (!userMenuPlaceholder) {
 				return;
 			}
-			if (window.isElectron) {
+			if (util.isElectron) {
 				userMenuPlaceholder.style.display = "none";
 			}
 			

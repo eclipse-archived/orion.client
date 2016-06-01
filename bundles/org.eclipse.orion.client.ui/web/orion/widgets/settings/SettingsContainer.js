@@ -35,10 +35,11 @@ define([
 	'orion/widgets/settings/GeneralSettings',
 	'orion/editorPreferences',
 	'orion/generalPreferences',
-	'orion/metrics'
+	'orion/metrics',
+	'orion/util'
 ], function(messages, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
 		ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, editorThemeImporter, SplitSelectionLayout, PluginList, 
-		GitSettings, EditorSettings, ThemeSettings, UserSettings, GlobalizationSettings, GeneralSettings, mEditorPreferences, mGeneralPreferences, mMetrics) {
+		GitSettings, EditorSettings, ThemeSettings, UserSettings, GlobalizationSettings, GeneralSettings, mEditorPreferences, mGeneralPreferences, mMetrics, util) {
 
 	/**
 	 * @param {Object} options
@@ -73,7 +74,7 @@ define([
 				_self.settingsCategories = [];
 			
 				var categories = prefs[ 'categories' ] || {};
-				if (!window.isElectron && (categories.showUserSettings === undefined || categories.showUserSettings)) {
+				if (!util.isElectron && (categories.showUserSettings === undefined || categories.showUserSettings)) {
 					_self.settingsCategories.push({
 						id: "userSettings", //$NON-NLS-0$
 						textContent: messages["User Profile"],
