@@ -37,6 +37,10 @@ define([
 			if (!userMenuPlaceholder) {
 				return;
 			}
+			if (util.isElectron) {
+				userMenuPlaceholder.style.display = "none";
+			}
+			
 			var dropdownNode = lib.node("userDropdown"); //$NON-NLS-0$
 			var userDropdown = new mDropdown.Dropdown({
 				dropdown: dropdownNode,

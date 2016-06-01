@@ -11,10 +11,10 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
- 'orion/commandRegistry', 'orion/i18nUtil', 'orion/webui/dialogs/PromptDialog', 'orion/widgets/projects/ProjectOptionalParametersDialog',
+ 'orion/commandRegistry', 'orion/i18nUtil', 'orion/util', 'orion/webui/dialogs/PromptDialog', 'orion/widgets/projects/ProjectOptionalParametersDialog',
  'orion/fileCommands', 'orion/editorCommands', 'orion/EventTarget',
  'orion/URITemplate', 'orion/PageLinks', 'orion/objects', 'orion/preferences', 'orion/metrics'],
-	function(require, messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil, PromptDialog, ProjectOptionalParametersDialog, FileCommands, mEditorCommands, EventTarget,
+	function(require, messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil, util, PromptDialog, ProjectOptionalParametersDialog, FileCommands, mEditorCommands, EventTarget,
 		URITemplate, PageLinks, objects, mPreferences, mMetrics){
 		var projectCommandUtils = {};
 
@@ -1328,7 +1328,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			}
 			);
 			createZipProjectCommand.isCreateProject = true;
-			commandService.addCommand(createZipProjectCommand);
+			if (!util.isElectron) {
+				commandService.addCommand(createZipProjectCommand);
+			}
 
 			var createSftpProjectCommand = new mCommands.Command({
 				name: messages["sFTP"],
@@ -1362,7 +1364,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				}
 				);
 				createSftpProjectCommand.isCreateProject = true;
-				commandService.addCommand(createSftpProjectCommand);
+				if (!util.isElectron) {
+					commandService.addCommand(createSftpProjectCommand);
+				}
 
 			projectCommandUtils.createDependencyCommands(serviceRegistry, commandService, fileClient, projectClient, dependencyTypes);
 
