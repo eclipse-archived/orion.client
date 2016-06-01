@@ -66,7 +66,7 @@ function startServer(options) {
 		app.use('/file*', checkAuthenticated, require('./lib/file')({ root: '/file', options: options }));
 		app.use('/workspace*', checkAuthenticated, require('./lib/workspace')({ root: '/workspace', fileRoot: '/file', options: options }));
 		app.use('/gitapi', checkAuthenticated, require('./lib/git')({ root: '/gitapi', fileRoot: '/file' }));
-		app.use('/prefs', checkAuthenticated, require('./lib/controllers/prefs')(options));
+		app.use('/prefs', checkAuthenticated, require('./lib/controllers/prefs').PrefsController(options));
 		app.use('/xfer', checkAuthenticated, require('./lib/xfer')(options));
 		app.use('/metrics', require('./lib/metrics').router(options));
 		app.use('/version', require('./lib/version').router(options));
