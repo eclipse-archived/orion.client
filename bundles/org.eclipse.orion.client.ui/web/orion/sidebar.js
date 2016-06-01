@@ -318,7 +318,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				mainSplitter.splitter.toggleSidePanel();
 			}
 			this._inlineSearchPane.setSearchText(searchParams.keyword);
-			this._inlineSearchPane.setSearchScope(searchParams.resource.Location ? searchParams.resource : {Location: searchParams.resource});
+			this._inlineSearchPane.setSearchScope(searchParams.resource);
 			this._inlineSearchPane.setCheckBox(searchParams);
 			this._inlineSearchPane.setFileNamePatterns(searchParams.fileNamePatterns);
 			this._inlineSearchPane.show();
@@ -428,9 +428,14 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 					return true;
 				},
 				callback: function(data) {
-					var resource = recordDefaultSearchResource(data);
-					var keyword = getSearchText();
-					this.fillSearchPane({keyword: keyword, resource: resource});
+					if(this.editorInputManager) {
+						var metadata = this.editorInputManager.getFileMetadata();
+						if(metadata) {
+							var resource = recordDefaultSearchResource({items: [metadata]});
+							var keyword = getSearchText();
+							this.fillSearchPane({keyword: keyword, resource: resource});
+						}
+					}
 				}.bind(this)
 			});
 			
