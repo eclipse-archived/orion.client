@@ -42,6 +42,7 @@ define([
 	'orion/URITemplate',
 	'orion/i18nUtil',
 	'orion/PageUtil',
+	'orion/util',
 	'orion/objects',
 	'orion/webui/littlelib',
 	'orion/Deferred',
@@ -55,7 +56,7 @@ define([
 	mTextModelFactory, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands
+	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands
 ) {
 
 var exports = {};
@@ -615,6 +616,9 @@ objects.mixin(EditorSetup.prototype, {
 		}).then(function(runBar){
 			if (runBar) {
 				this.runBar = runBar;
+				if (util.isElectron) {
+					lib.node("runBarWrapper").style.display = "none";
+				}
 			}
 		}.bind(this));
 	},
