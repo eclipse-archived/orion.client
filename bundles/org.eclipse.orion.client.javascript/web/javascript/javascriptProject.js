@@ -207,13 +207,17 @@ define([
 		if(this.projectMeta) {
 			return this.getFile(childName).then(function(child) {
 				if(child) {
-					if(child.contents) {
-						var json = JSON.parse(child.contents);
-						if(json && values) {
+					var contents = child.contents;
+					if(typeof contents === 'string') {
+						var json;
+						if (contents.length) {
+							json = JSON.parse(contents);
 							_merge(values, json);
-							return this.getFileClient().write(this.projectMeta.Location+childName, JSON.stringify(json, null, '\t'));
+						} else {
+							json = values;
 						}
-					} else if(!child.contents && create) {
+						return this.getFileClient().write(this.projectMeta.Location+childName, JSON.stringify(json, null, '\t'));
+					} else if(create) {
 						return this.getFileClient().createFile(this.projectMeta.Location, childName).then(function(file) {
 							return this.getFileClient().write(file.Location, JSON.stringify(values, null, '\t'));
 						}.bind(this));
