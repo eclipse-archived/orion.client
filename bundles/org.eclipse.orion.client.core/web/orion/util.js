@@ -23,6 +23,7 @@ define(function() {
 	var isIPad = userAgent.indexOf("iPad") !== -1; //$NON-NLS-0$
 	var isIPhone = userAgent.indexOf("iPhone") !== -1; //$NON-NLS-0$
 	var isIOS = isIPad || isIPhone;
+	var isElectron = userAgent.indexOf("Electron") !== -1; //$NON-NLS-0$
 	var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 	var isWindows = navigator.platform.indexOf("Win") !== -1; //$NON-NLS-0$
 	var isLinux = navigator.platform.indexOf("Linux") !== -1; //$NON-NLS-0$
@@ -74,6 +75,7 @@ define(function() {
 		isIPad: isIPad,
 		isIPhone: isIPhone,
 		isIOS: isIOS,
+		isElectron: isElectron,
 		
 		/** OSs */
 		isMac: isMac,

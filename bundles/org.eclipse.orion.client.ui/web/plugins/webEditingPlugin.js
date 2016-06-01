@@ -12,8 +12,9 @@
 /*eslint-env browser, amd*/
 define([
 	'orion/plugin',
+	'orion/util',
 	'i18n!orion/nls/messages'
-], function(PluginProvider, messages) {
+], function(PluginProvider, util, messages) {
 
 	function connect() {
 		var headers = {
@@ -147,7 +148,7 @@ define([
 				contentType: ["text/x-markdown"]});
 	
 		// open file with browser, no associated orion.navigate.openWith command means that any content type is valid
-//		if (!parent.window.isElectron) {
+		if (!util.isElectron) {
 			provider.registerService("orion.edit.editor", {}, {
 				id: "orion.viewer.raw",
 				name: messages["Browser"],
@@ -157,7 +158,7 @@ define([
 					source: "!Projects" // Filter out workspace; Raw only applies to regular files and folders.
 				}]
 			});
-//		}
+		}
 	}
 
 	return {
