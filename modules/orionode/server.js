@@ -20,7 +20,8 @@ var auth = require('./lib/middleware/auth'),
 	util = require('util'),
 	argslib = require('./lib/args'),
 	ttyShell = require('./lib/tty_shell'),
-	orion = require('./index.js');
+	orion = require('./index.js'),
+    readWorkspaceInfo = require('./lib/controllers/prefs').readWorkspaceInfo;
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
@@ -46,8 +47,21 @@ function startServer(cb) {
 	} else {
 		workspaceDir = path.join(__dirname, '.workspace');
 	}
-
-	argslib.createDirs([workspaceDir], function() {
+	new Promise(function(resolve){
+		if(configParams["isElectron"]){
+			readWorkspaceInfo()
+			.then(function(workspaceAddress){
+				if(workspaceAddress){
+					resolve(workspaceAddress);
+				}else{
+					resolve(workspaceDir);
+				}
+			});
+		}else{
+			resolve(workspaceDir);
+		}
+	}).then(function(workspaceDir){
+		argslib.createDirs([workspaceDir], function() {
 		var passwordFile = args.password || args.pwd;
 		argslib.readPasswordFile(passwordFile, function(password) {
 			var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
@@ -107,6 +121,7 @@ function startServer(cb) {
 				console.error(e && e.stack);
 			}
 		});
+	});
 	});
 }
 
@@ -201,6 +216,7 @@ if (process.versions.electron) {
 			});
 			return nextWindow;
 		}
+		configParams["isElectron"] = true;
 		startServer(function() {
 			mainWindow = createWindow("http://localhost:" + port);
 			mainWindow.on('closed', function() {
@@ -224,4 +240,3 @@ if (process.versions.electron) {
 } else {
 	startServer();
 }
-

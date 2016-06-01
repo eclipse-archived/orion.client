@@ -12,7 +12,7 @@
 var chai = require('chai'),
     express = require('express'),
     nodePath = require('path'),
-    PrefsController = require('../lib/controllers/prefs'),
+    PrefsController = require('../lib/controllers/prefs').PrefsController,
     Promise = require('bluebird'),
     supertestAsPromised = require('supertest-as-promised'),
     testData = require('./support/test_data');
