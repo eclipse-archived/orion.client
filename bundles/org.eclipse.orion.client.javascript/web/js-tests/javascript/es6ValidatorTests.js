@@ -15,8 +15,10 @@ define([
 	'javascript/validator',
 	'chai/chai',
 	'orion/Deferred',
+	"orion/i18nUtil",
+	"i18n!javascript/nls/problems",
 	'mocha/mocha', //must stay at the end, not a module
-], function(Validator, chai, Deferred) {
+], function(Validator, chai, Deferred, i18nUtil, Messages) {
 	var assert = chai.assert;
 	return function(worker) {
 		describe('ES6 Validator Tests', function() {
@@ -148,6 +150,89 @@ define([
 					function (error) {
 						worker.getTestState().callback(error);
 					});
+				});
+			});
+			describe("no-unused-vars", function() {
+				var RULE_ID = 'no-unused-vars';
+				it("import 1", function(done) {
+					var topic = 'import foo from "./exports";'; 
+					var config = { rules: {} };
+					var createFiles = [{name: './exports', text: ''}];
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: done, config: config, createFiles: createFiles}).then(
+						function (problems) {
+							assertProblems(problems, [
+								{
+									id: 'no-unused-vars-import',
+									severity: 'warning',
+									description: i18nUtil.formatMessage.call(null, Messages['no-unused-vars-unused'], {0: 'foo'}),
+									nodeType: "Identifier"
+								}
+							]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("import 2", function(done) {
+					var topic = 'import * as foo from "./exports";'; 
+					var config = { rules: {} };
+					var createFiles = [{name: './exports', text: ''}];
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: done, config: config, createFiles: createFiles}).then(
+						function (problems) {
+							assertProblems(problems, [
+								{
+									id: 'no-unused-vars-import',
+									severity: 'warning',
+									description: i18nUtil.formatMessage.call(null, Messages['no-unused-vars-unused'], {0: 'foo'}),
+									nodeType: "Identifier"
+								}
+							]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("import 3", function(done) {
+					var topic = 'import {foo} from "./exports";'; 
+					var config = { rules: {} };
+					var createFiles = [{name: './exports', text: ''}];
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: done, config: config, createFiles: createFiles}).then(
+						function (problems) {
+							assertProblems(problems, [
+								{
+									id: 'no-unused-vars-import',
+									severity: 'warning',
+									description: i18nUtil.formatMessage.call(null, Messages['no-unused-vars-unused'], {0: 'foo'}),
+									nodeType: "Identifier"
+								}
+							]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("import 4", function(done) {
+					var topic = 'import {foo, bar} from "./exports"; bar.toString();'; 
+					var config = { rules: {} };
+					var createFiles = [{name: './exports', text: ''}];
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: done, config: config, createFiles: createFiles}).then(
+						function (problems) {
+							assertProblems(problems, [
+								{
+									id: 'no-unused-vars-import',
+									severity: 'warning',
+									description: i18nUtil.formatMessage.call(null, Messages['no-unused-vars-unused'], {0: 'foo'}),
+									nodeType: "Identifier"
+								}
+							]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
 				});
 			});
 			describe("missing-nls", function() {

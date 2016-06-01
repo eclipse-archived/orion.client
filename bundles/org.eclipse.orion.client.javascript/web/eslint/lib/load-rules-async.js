@@ -1580,86 +1580,99 @@ define([
         },
         /** @callback */
 		"no-unused-vars": function(context) {
-        		/**
-		         * @description If the reference is read-only
-		         * @param {Object} ref 
-		         * @returns {Boolean} If the reference is read-only
-		         */
-		        function isRead(ref) {
-        			return ref.isRead();
-        		}
+			var importsHandled = false;
+    		/**
+	         * @description If the reference is read-only
+	         * @param {Object} ref 
+	         * @returns {Boolean} If the reference is read-only
+	         */
+	        function isRead(ref) {
+    			return ref.isRead();
+    		}
 
-        		/**
-		         * @description Get all of the referenes to the givenvariable in the given scope
-		         * @param {Object} scope The scope to check
-		         * @param {Object} variable The variable to find refs to 
-		         * @returns {Array.<Object>} The array of references
-		         */
-		        function getReferences(scope, variable) {
-        			var refs = variable.references;
-        			if (scope.type === "global") {
-        				// For whatever reason, a reference to some variable 'x' defined in global scope does not cause an entry
-        				// in x.references or globalScope.references. So we append any refs in globalScope.through that mention x.
-        				refs = refs.concat(scope.through.filter(function(ref) {
-        					return ref.identifier.name === variable.name;
-        				}));
-        			}
-        			return refs;
-        		}
-        		/**
-		         * @description Check the current scope for unused vars 
-		         */
-		        function check(/**node*/) {
-    				var scope = context.getScope();
-    				scope.variables.forEach(function(variable) {
-    					if (!variable.defs.length || variable.defs[0].type === "Parameter") { // Don't care about parameters
-    						return;
-    					}
-    					var node = variable.defs[0].node;
-    					var references = getReferences(scope, variable), id = node.id;
-    					if (id && id.range && id.range[0] === id.range[1]) {
-    						// recovered node - the range cannot be empty for a "real" node
-    						return;
-    					}
-    					if (!references.length) {
-    					    if(node.type === 'FunctionDeclaration') {
-    					    	   var tern = context.getTern();
-    					    	   var refQuery = {end: node.id.start};
-    					    	   var refs = null;
-    					    	   var filename = tern.file.name;
-    					    	   try {
-    					    	       refs = tern.findRefs(refQuery, tern.file);
-    					    	   } catch(e) {
-    					    	      //ignore
-    					    	   }
-    					    	   var result = [];
-    					    	   if (refs && Array.isArray(refs.refs)) {
-    					    	   		// filtering the refs from the current file - remove the one that matches the current node
-    					    	   		refs.refs.forEach(function(match) {
-    					    	   			if (match.file !== filename) {
-    					    	   				// any match in a different file is a good match
-    					    	   				result.push(match);
-    					    	   			}
-    					    	   		});
-    					    	   }
-    					    	   if (result === null || result.length === 0) {
-    					           context.report(id, ProblemMessages['no-unused-vars-unused-funcdecl'], {0:id.name, nls: 'no-unused-vars-unused-funcdecl'}); //$NON-NLS-1$
-    					       }
-    					    } else {
-    						   context.report(id, ProblemMessages['no-unused-vars-unused'], {0:id.name, nls: 'no-unused-vars-unused'}); //$NON-NLS-1$
-    						}
-    					} else if (!references.some(isRead)) {
-    						context.report(id, ProblemMessages['no-unused-vars-unread'], {0:id.name, nls: 'no-unused-vars-unread'}); //$NON-NLS-1$
-    					}
-    				});
-        		}
+    		/**
+	         * @description Get all of the referenes to the givenvariable in the given scope
+	         * @param {Object} scope The scope to check
+	         * @param {Object} variable The variable to find refs to 
+	         * @returns {Array.<Object>} The array of references
+	         */
+	        function getReferences(scope, variable) {
+    			var refs = variable.references;
+    			if (scope.type === "global") {
+    				// For whatever reason, a reference to some variable 'x' defined in global scope does not cause an entry
+    				// in x.references or globalScope.references. So we append any refs in globalScope.through that mention x.
+    				refs = refs.concat(scope.through.filter(function(ref) {
+    					return ref.identifier.name === variable.name;
+    				}));
+    			}
+    			return refs;
+    		}
+    		/**
+	         * @description Check the current scope for unused vars 
+	         */
+	        function check(node) {
+				var scope = context.getScope();
+				if(importsHandled) {
+					return;
+				}
+				scope.variables.forEach(function(variable) {
+					if (!variable.defs.length || variable.defs[0].type === "Parameter") { // Don't care about parameters
+						return;
+					}
+					var defNode = variable.defs[0].node;
+					var references = getReferences(scope, variable), id = defNode.id, pb = 'no-unused-vars-unused';
+					//TODO this will have to be moved to the new no-useless-imports rule
+					if(variable.defs[0].type === "ImportBinding") {
+						id = defNode.local;
+						pb = 'no-unused-vars-import';
+						importsHandled = true;
+					}
+					if (id && id.range && id.range[0] === id.range[1] || !id) {
+						// recovered node - the range cannot be empty for a "real" node
+						return;
+					}
+					if (!references.length) {
+					    if(defNode.type === 'FunctionDeclaration') {
+				    	   var tern = context.getTern();
+				    	   var refQuery = {end: defNode.id.start};
+				    	   var refs = null;
+				    	   var filename = tern.file.name;
+				    	   try {
+				    	       refs = tern.findRefs(refQuery, tern.file);
+				    	   } catch(e) {
+				    	      //ignore
+				    	   }
+				    	   var result = [];
+				    	   if (refs && Array.isArray(refs.refs)) {
+				    	   		// filtering the refs from the current file - remove the one that matches the current node
+				    	   		refs.refs.forEach(function(match) {
+				    	   			if (match.file !== filename) {
+				    	   				// any match in a different file is a good match
+				    	   				result.push(match);
+				    	   			}
+				    	   		});
+				    	   }
+				    	   if (result === null || result.length === 0) {
+					           context.report(id, ProblemMessages['no-unused-vars-unused-funcdecl'], {0:id.name, nls: 'no-unused-vars-unused-funcdecl'}); //$NON-NLS-1$
+					       }
+					    } else {
+						   context.report(id, ProblemMessages['no-unused-vars-unused'], {0:id.name, nls: 'no-unused-vars-unused', pid: pb}); //$NON-NLS-1$
+						}
+					} else if (!references.some(isRead)) {
+						context.report(id, ProblemMessages['no-unused-vars-unread'], {0:id.name, nls: 'no-unused-vars-unread'}); //$NON-NLS-1$
+					}
+				});
+    		}
 
-        		return {
-        			"Program": check,
-        			"FunctionDeclaration": check,
-        			"FunctionExpression": check,
-        			"ArrowFunctionExpression": check
-        		};
+    		return {
+    			"Program": check,
+    			"Program:exit": function() {importsHandled = false;},
+    			"FunctionDeclaration": check,
+    			"FunctionExpression": check,
+    			"ArrowFunctionExpression": check,
+    			//TODO imports to be moved to no-useless-imports rule
+    			'ImportDeclaration': check,
+    		};
         },
         /** @callback */
 		"no-use-before-define": function(context) {
