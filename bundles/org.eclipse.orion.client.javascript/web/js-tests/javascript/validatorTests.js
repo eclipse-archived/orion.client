@@ -10058,6 +10058,130 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
+						it("should flag var use that precedes declaration in Block", function(callback) {
+							var topic = "{ a; var a; }";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'a' was used before it was defined.",
+										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag var use inside Block", function(callback) {
+							var topic = "var a; { a; var a; }";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should flag var use that precedes declaration in Switch", function(callback) {
+							var topic = "switch('a') { case 'a': a++; var a; }";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'a' was used before it was defined.",
+										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag var use in Switch", function(callback) {
+							var topic = "var a; switch('a') { case 'a': a++; var a; }";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should flag var use that precedes declaration in ArrowExpression", function(callback) {
+							var topic = "f => a++; var a;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'a' was used before it was defined.",
+										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag var use in ArrowExpression", function(callback) {
+							var topic = "var a; f => a++;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should flag var use that precedes declaration in blocked ArrowExpression", function(callback) {
+							var topic = "f => {a++; var a;};";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'a' was used before it was defined.",
+										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag var use in blocked ArrowExpression", function(callback) {
+							var topic = "var a; f => {a++};";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
 						it("should flag var use that precedes declaration in FunctionDeclaration", function(callback) {
 							var topic = "function f() { alert(a); var a; }";
 							var config = { rules: {} };

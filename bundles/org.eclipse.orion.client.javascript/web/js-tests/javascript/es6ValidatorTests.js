@@ -303,6 +303,316 @@ define([
 						});
 				});
 			});
+			describe('no-use-before-define', function() {
+				var RULE_ID = "no-use-before-define";
+				it("Flag class declaration in global scope", function(callback) {
+					var topic = "new A(); class A {}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'A' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag class expression in global scope", function(callback) {
+					var topic = "new a(); var a = class {};";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag named class expression in global scope", function(callback) {
+					var topic = "new a(); var a = class A {};";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag class declaration in function scope", function(callback) {
+					var topic = "function f() { new A(); class A {} }";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'A' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag class expression in function scope", function(callback) {
+					var topic = "function f() { new a(); var a = class {}; }";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag named class expression in function scope", function(callback) {
+					var topic = "function f() { new a(); var a = class A {}; }";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag class declaration in block scope", function(callback) {
+					var topic = "{ new A(); class A {} }";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'A' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag class expression in block scope", function(callback) {
+					var topic = "{ new a(); var a = class {}; }";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag named class expression in block scope", function(callback) {
+					var topic = "{ new a(); var a = class A {}; }";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag let use in global scope", function(callback) {
+					var topic = "a++; let a;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag const use in global scope", function(callback) {
+					var topic = "a++; const a=1;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag let use in function scope", function(callback) {
+					var topic = "function f() { a++; let a; }";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag const use in function scope", function(callback) {
+					var topic = "function f() { a++; const a=1; }";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag let use in block scope", function(callback) {
+					var topic = "{ a++; let a; }";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag const use in block scope", function(callback) {
+					var topic = "{ a++; const a=1; }";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag let use in switch scope", function(callback) {
+					var topic = "switch('a') { case 'a': a++; let a; }";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag let use in arrow expr and block scope", function(callback) {
+					var topic = "f => { a++; let a;};";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Flag let use in arrow expr and no block scope", function(callback) {
+					var topic = "f => a++; let a;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+							id: 'no-use-before-define',
+							severity: 'warning',
+							description: "'a' was used before it was defined.",
+							nodeType: "Identifier"
+						}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+			});
+
 		});
 	};
 });

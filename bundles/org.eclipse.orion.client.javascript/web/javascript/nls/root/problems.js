@@ -93,7 +93,7 @@ define({
 	'no-unused-vars-unread' : '\'${0}\' is unread.',
 	'no-unused-vars-description': 'Warn when declared variables are not used.',
 	'no-use-before-define': '\'${0}\' was used before it was defined.',
-	'no-use-before-define-description': 'Warn when a variable or function is used before it is defined.',
+	'no-use-before-define-description': 'Warn when a variable, function or class is used before it is defined.',
 	'no-with': 'Discouraged use of \'with\' statement.',
 	'no-with-description': 'Warn when the with statement is used.',
 	'radix': 'Missing radix parameter.',

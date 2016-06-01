@@ -1677,29 +1677,44 @@ define([
 
         		var options = context.options,
         		    flag_vars = booleanOption(options[0], true),   // by default, flag vars
-        		    flag_funcs = booleanOption(options[1], false); // ... but not funcs
-        		/**
-		         * @description Check the current scope for use
-		         */
-		        function check(/**node*/) {
-    				var scope = context.getScope();
+        		    flag_funcs = booleanOption(options[1], false), // ... but not funcs
+        		    flag_classes = booleanOption(options[2], true); // flag classes
+        		
+		        function checkScope(scope) {
     				scope.references.forEach(function(ref) {
     					var decl = util.getDeclaration(ref, scope), identifier = ref.identifier, name = identifier.name, defs;
     					if (decl && (defs = decl.defs).length && identifier.range[0] < defs[0].node.range[0]) {
     						var defType = defs[0].type;
-    						if ((!flag_funcs && defType === "FunctionName") || (!flag_vars && defType === "Variable")) {
+    						if ((!flag_funcs && defType === "FunctionName") || (!flag_vars && defType === "Variable") || (!flag_classes && defType === "ClassName")) {
     							return;
     						}
     						context.report(identifier, ProblemMessages['no-use-before-define'], {0:name});
     					}
     				});
         		}
-
-        		return {
-        			"Program": check,
-        			"FunctionExpression": check,
-        			"FunctionDeclaration": check
-        		};
+        		
+        		/*
+		         * @description Check the current scope for use
+		         */
+		        function check(node) {
+    				var scope = context.getScope();
+    				checkScope(scope);
+    				// If using ES6 modules check the child 'module' scope
+    				if (node.type === "Program" && node.sourceType === "module"){
+    					checkScope(scope.childScopes[0]);
+    				}
+        		}
+        		
+    			return {
+    				"Program": check,
+    				"BlockStatement": check,
+    				"SwitchStatement": check,
+    				"ArrowFunctionExpression": function(node){
+    					if (node.body.type !== "BlockStatement") {
+		                    check(node);
+		                }	
+    				}
+				};
         },
         /** @callback */
         "radix": function(context) {
