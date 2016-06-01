@@ -237,6 +237,7 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, req, res,
 			result.ETag = etag;
 			res.setHeader('ETag', etag);
 		}
+		res.setHeader("Cache-Control", "no-cache");
 		api.write(null, res, null, result);
 	})
 	.catch(api.writeError.bind(null, 500, res));

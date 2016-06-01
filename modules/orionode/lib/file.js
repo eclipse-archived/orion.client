@@ -41,6 +41,7 @@ module.exports = function(options) {
 			writeError(500, res, "Expected a file not a directory");
 		} else {
 			var stream = fs.createReadStream(filepath);
+			res.setHeader("Cache-Control", "no-cache");
 			res.setHeader('Content-Length', stats.size);
 			res.setHeader('ETag', etag);
 			res.setHeader('Accept-Patch', 'application/json-patch; charset=UTF-8');
