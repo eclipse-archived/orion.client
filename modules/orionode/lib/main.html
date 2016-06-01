@@ -257,12 +257,22 @@ body {
 		iframe.classList.add("tabContent");
 		iframe.src = url;
 		var __dialogModule = electron.remote.dialog;
+		var ipcRender = electron.ipcRenderer;
 		
 		iframe.addEventListener("load", function() {
+			
+			ipcRender.send("getRecentWorkSpaces");
+			ipcRender.on("recentWorkSpaces",function(recentFolders){
+				iframe.contentWindow.__recentFolders = 	recentFolders;	
+			});
+			
 			
 			iframe.contentWindow.confirm = window.confirm;
 			iframe.contentWindow.alert = window.alert;
 			iframe.contentWindow.__dialogModule = __dialogModule;
+//			iframe.contentWindow.__recentFolders = [
+//				"A:/Temp", "A:/org.eclipse.orion.client", //$NON-NLS-1$ //$NON-NLS-2$
+//			];
 			
 			var target = iframe.contentDocument.querySelector('head > title');
 			

@@ -29,6 +29,8 @@ module.exports = {};
 module.exports.writeWorkspaceInfo = writeWorkspaceInfo;
 module.exports.readWorkspaceInfo = readWorkspaceInfo;
 module.exports.router = PrefsController;
+module.exports.readWorkRecentWorkspaces = readWorkRecentWorkspaces;
+module.exports.writeWorkRecentWorkspaces = writeWorkRecentWorkspaces;
 
 var NOT_EXIST = Preference.NOT_EXIST;
 var PREF_FILENAME = PrefsController.PREF_FILENAME = 'prefs.json';
@@ -249,6 +251,32 @@ function readWorkspaceInfo(){
 	return fs.readFileAsync( getElectronPrefsFileName(),'utf8')
 	.then(function(content){
 		return JSON.parse(content).currentWorkspace;
+	});
+}
+function writeWorkRecentWorkspaces(workspaceAddress){
+	var RECENT_ARRAY_LENGTH = 10;
+	fs.readFileAsync( getElectronPrefsFileName(),'utf8')
+	.then(function(content){
+		return JSON.parse(content);
+	}).then(function(allContent){
+		var tempArray = allContent.recentworkspaces || {};
+		if(tempArray.length < RECENT_ARRAY_LENGTH){
+			tempArray.unshift(workspaceAddress);
+		}else if(tempArray.length === RECENT_ARRAY_LENGTH){
+			tempArray.pop();
+			tempArray.unshift(workspaceAddress);
+		}
+		allContent.recentworkspaces = tempArray;
+		fs.writeFileAsync(getElectronPrefsFileName(), JSON.stringify(allContent, null, 2));
+	}).catch(function(err) {
+		debug('writeWorkspaceInfo(): error writing prefs.json', err);
+	});
+}
+
+function readWorkRecentWorkspaces(){
+	return fs.readFileAsync( getElectronPrefsFileName(),'utf8')
+	.then(function(content){
+		return JSON.parse(content).recentworkspaces;
 	});
 }
 	

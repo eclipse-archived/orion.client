@@ -21,7 +21,7 @@ var auth = require('./lib/middleware/auth'),
 	argslib = require('./lib/args'),
 	ttyShell = require('./lib/tty_shell'),
 	orion = require('./index.js'),
-    readWorkspaceInfo = require('./lib/controllers/prefs').readWorkspaceInfo;
+    prefs = require('./lib/controllers/prefs');
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
@@ -49,7 +49,7 @@ function startServer(cb) {
 	}
 	new Promise(function(resolve){
 		if(configParams.isElectron){
-			readWorkspaceInfo()
+			prefs.readWorkspaceInfo()
 			.then(function(workspaceAddress){
 				if(workspaceAddress){
 					resolve(workspaceAddress);
@@ -222,6 +222,23 @@ if (process.versions.electron) {
 			mainWindow.on('closed', function() {
 				mainWindow = null;
 			});
+			var ipcMain  = electron.ipcMain ;
+			ipcMain.on("getRecentWorkSpaces", function(event){
+				new Promise(function(resolve){
+					prefs.readWorkRecentWorkspaces()
+					.then(function(recentworkSpaces){
+						if(recentworkSpaces){
+							resolve(recentworkSpaces);
+						}else{
+							resolve("");
+						}
+					});
+				}).then(function(recentworkSpaces){
+					event.sender.send("recentWorkSpaces",recentworkSpaces);
+				});
+			});
+			
+			
 		});
 	});
 	electron.app.on('window-all-closed', function() {

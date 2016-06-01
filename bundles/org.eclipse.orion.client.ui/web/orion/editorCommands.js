@@ -178,6 +178,7 @@ define([
 			this._createEncodingCommand();
 			this._createSaveCommand();
 			this._createOpenFolderCommand();
+			this._createOpenRecentCommand();
 			return this._createEditCommands();
 		},
 		//TODO: We need a better way invoke side bar action 
@@ -238,6 +239,7 @@ define([
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.edit.undo", 400, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.undoGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('z', true), null, this); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.edit.redo", 401, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.undoGroup" : null, !this.editToolbarId, util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
 			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.edit.openFolder", 1, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.saveGroup" : null, false, new mKeyBinding.KeyBinding('o', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.edit.openRecent", 3, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.saveGroup" : null, false, new mKeyBinding.KeyBinding('r', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.openResource", 1, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.saveGroup" : null, false, new mKeyBinding.KeyBinding('f', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.edit.save", 2, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.saveGroup" : null, false, new mKeyBinding.KeyBinding('s', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.gotoLine", 3, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
@@ -640,6 +642,31 @@ define([
 				}
 			});
 			this.commandService.addCommand(openFolderCommand);
+		},
+		_createOpenRecentCommand: function() {
+			var that = this;
+			var RECENT_FOLDERS_LIST = window.__recentFolders;
+			var openRecentCommand = new mCommands.Command({
+				name: messages.OpenRecent,
+				selectionClass: "dropdownSelection", //$NON-NLS-0$
+				id: "orion.edit.openRecent", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					return !!window.__dialogModule;
+				},
+				choiceCallback: function() {
+					return RECENT_FOLDERS_LIST.map(function(folderLocation) {
+						return {
+							name: folderLocation,
+							callback: function() {
+								that.fileClient.changeWorkspace(folderLocation).then(function() {
+									window.location.reload();
+								});
+							}
+						};
+					});
+				}
+			});
+			this.commandService.addCommand(openRecentCommand);
 		},
 		_createEncodingCommand: function() {
 			var that = this;
