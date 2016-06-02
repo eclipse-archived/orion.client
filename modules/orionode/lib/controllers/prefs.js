@@ -89,6 +89,9 @@ function PrefsController(options) {
 				if (!useCache) {
 					return savePrefs(req.prefs, req.prefFile);
 				}
+				if(options.configParams.isElectron){
+					return savePrefs(req.prefs, req.prefFile);
+				}
 			})
 			.catch(next); // next(err)
 		};
