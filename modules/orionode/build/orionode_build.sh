@@ -5,7 +5,7 @@ function die () {
     exit 1
 }
 
-DOWNLOADS=~/downloads
+DOWNLOADS=/home/data/httpd/download.eclipse.org
 
 (npm install --no-optional) || die "Failed to install dependencies, consult the npm log to find out why."
 cp ${DOWNLOADS}/orion/orionode/nodegit/v0.13.0/linux/nodegit.node ../node_modules/nodegit/build/Release
