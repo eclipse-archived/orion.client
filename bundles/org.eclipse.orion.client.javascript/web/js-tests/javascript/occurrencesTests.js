@@ -569,6 +569,18 @@ define([
 				var text = "function f1(p1) {this.a1=p1; this.f2(function(p2) {this.a2=p2; this.f3(function(p3) {this.a3=p3;});}, function(p4) {this.a4=p4;});};";
 				return computeOccurrences(text, getOptions(done, 116, 116), [{start:116, end:120}]);
 			});
+			it('This usage before and after object scope 1', function(done) {
+				var text = "this.a(); var o = {'p': this.a();}; this.a();";
+				return computeOccurrences(text, getOptions(done, 0, 0), [{start:0, end:4}, {start:36, end:40}]);
+			});
+			it('This usage before and after object scope 2', function(done) {
+				var text = "this.a(); var o = {'p': this.a();}; this.a();";
+				return computeOccurrences(text, getOptions(done, 24, 28), [{start:24, end:28}]);
+			});
+			it('This usage before and after object scope 3', function(done) {
+				var text = "this.a(); var o = {'p': this.a();}; this.a();";
+				return computeOccurrences(text, getOptions(done, 38, 38), [{start:0, end:4}, {start:36, end:40}]);
+			});
 			
 			/**
 			 * Tests logic expressions that contain identifier nodes

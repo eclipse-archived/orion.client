@@ -660,21 +660,19 @@ define([
 					var text = "this.a(); class z { a(){} b(){ this.a(); } }; new z(); this.a();";
 					return computeOccurrences(text, getOptions(done, 33, 34), [{start:31, end:35}]);
 				});
-				// TODO https://bugs.eclipse.org/bugs/show_bug.cgi?id=494466
-				it.skip('Class declaration this occurrence 3', function(done) {
+				it('Class declaration this occurrence 3', function(done) {
 					var text = "this.a(); class z { a(){} b(){ this.a(); } }; new z(); this.a();";
 					return computeOccurrences(text, getOptions(done, 59, 59), [{start:0, end:4}, {start:55, end:59}]);
 				});
-				it('Class declaration this occurrence 1', function(done) {
+				it('Class expression this occurrence 1', function(done) {
 					var text = "this.a(); var z = class { a(){} b(){ this.a(); } }; new z(); this.a();";
 					return computeOccurrences(text, getOptions(done, 2, 2), [{start:0, end:4}, {start:61, end:65}]);
 				});
-				it('Class declaration this occurrence 2', function(done) {
+				it('Class expression this occurrence 2', function(done) {
 					var text = "this.a(); var z = class { a(){} b(){ this.a(); } }; new z(); this.a();";
 					return computeOccurrences(text, getOptions(done, 39, 40), [{start:37, end:41}]);
 				});
-				// TODO https://bugs.eclipse.org/bugs/show_bug.cgi?id=494466
-				it.skip('Class declaration this occurrence 3', function(done) {
+				it('Class expression this occurrence 3', function(done) {
 					var text = "this.a(); var z = class { a(){} b(){ this.a(); } }; new z(); this.a();";
 					return computeOccurrences(text, getOptions(done, 61, 65), [{start:0, end:4}, {start:61, end:65}]);
 				});

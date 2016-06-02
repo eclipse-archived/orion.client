@@ -339,6 +339,9 @@ define([
 					case Estraverse.Syntax.Program:
 					case Estraverse.Syntax.ClassDeclaration:
 					case Estraverse.Syntax.ClassExpression:
+						if (!defscope){
+							skipScope = scopes[scopes.length-1];
+						}
 						if(_popScope()) {
 							//we left an object closure, end
 							return Estraverse.VisitorOption.Break;
