@@ -27,7 +27,6 @@ var debug = Debug('orion:prefs'),
 
 module.exports = {};
 
-module.exports.writeWorkspaceInfo = writeWorkspaceInfo;
 module.exports.readWorkspaceInfo = readWorkspaceInfo;
 module.exports.router = PrefsController;
 
@@ -265,22 +264,10 @@ function getElectronPrefsFileName(){
 	return nodePath.join(os.homedir(), '.orion', PREF_FILENAME);
 }
 
-function writeWorkspaceInfo(workspaceAddress){
-	fs.readFileAsync( getElectronPrefsFileName(),'utf8')
-	.then(function(content){
-		return JSON.parse(content);
-	}).then(function(allContent){
-		allContent.currentWorkspace = workspaceAddress;
-		fs.writeFileAsync(getElectronPrefsFileName(), JSON.stringify(allContent, null, 2));
-	}).catch(function(err) {
-		debug('writeWorkspaceInfo(): error writing prefs.json', err);
-	});
-}
-
 function readWorkspaceInfo(){
 	return fs.readFileAsync( getElectronPrefsFileName(),'utf8')
 	.then(function(content){
-		return JSON.parse(content).currentWorkspace;
+		var allContent = JSON.parse(content);	
+		return allContent.user.workspace ? allContent.user.workspace.currentWorkspace : null;
 	});
 }
-	
