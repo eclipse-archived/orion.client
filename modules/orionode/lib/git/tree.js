@@ -112,7 +112,7 @@ function getTree(req, res) {
 				var l = path.join(refLocation, p);
 				var result = treeJSON(l, shortName(util.decodeURIComponent(path.basename(l))), 0, true, 0);
 				result.Children = tree.entries().map(function(entry) {
-					return treeJSON(path.join(refLocation, entry.path()), git.Tree.entryName(entry), 0, entry.isDirectory(), 0);
+					return treeJSON(path.join(refLocation, entry.path()), entry.name(), 0, entry.isDirectory(), 0);
 				});
 				createParents(result);
 				return res.status(200).json(result);
@@ -122,7 +122,7 @@ function getTree(req, res) {
 				.then(function(entry) {
 					if (entry.isFile()) {
 						if (req.query.parts === "meta") {
-							var result = treeJSON(path.join(refLocation, entry.path()), git.Tree.entryName(entry), 0, entry.isDirectory(), 0);
+							var result = treeJSON(path.join(refLocation, entry.path()), entry.name(), 0, entry.isDirectory(), 0);
 							result.ETag = entry.sha();
 							createParents(result);
 							return res.status(200).json(result);
