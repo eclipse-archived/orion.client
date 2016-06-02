@@ -658,7 +658,8 @@ define([
 						that.fileClient.changeWorkspace(result[0]).then(function() {
 							return that.updateWorkspacePrefs(result[0]);
 						}).then(function(){
-							window.location.reload();
+							delete sessionStorage.lastFile;
+							window.location.href = "/";
 						})				
 					});
 				}
@@ -685,7 +686,8 @@ define([
 									that.fileClient.changeWorkspace(folderLocation).then(function() {
 										return that.updateWorkspacePrefs(folderLocation);
 									}).then(function(){
-										window.location.reload();
+										delete sessionStorage.lastFile;
+										window.location.href = "/";
 									})	
 								}
 							};
