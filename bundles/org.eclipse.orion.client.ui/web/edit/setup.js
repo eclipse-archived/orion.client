@@ -572,6 +572,7 @@ objects.mixin(EditorSetup.prototype, {
 			serviceRegistry: serviceRegistry,
 			commandRegistry: this.commandRegistry,
 			fileClient: this.fileClient,
+			preferences: this.preferences,
 			renderToolbars: this.renderToolbars.bind(this),
 			searcher: this.searcher,
 			readonly: this.readonly,

@@ -21,7 +21,7 @@ var auth = require('./lib/middleware/auth'),
 	argslib = require('./lib/args'),
 	ttyShell = require('./lib/tty_shell'),
 	orion = require('./index.js'),
-    readWorkspaceInfo = require('./lib/controllers/prefs').readWorkspaceInfo;
+    prefs = require('./lib/controllers/prefs');
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
@@ -49,7 +49,7 @@ function startServer(cb) {
 	}
 	new Promise(function(resolve){
 		if(configParams.isElectron){
-			readWorkspaceInfo()
+			prefs.readWorkspaceInfo()
 			.then(function(workspaceAddress){
 				if(workspaceAddress){
 					resolve(workspaceAddress);
