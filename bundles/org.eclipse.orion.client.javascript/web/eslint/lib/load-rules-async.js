@@ -2034,7 +2034,7 @@ define([
         					if(!context.getTern().pluginRunning('requirejs')) {
         						context.report(node.callee, ProblemMessages['missing-requirejs'], {data: 'requirejs'});
         					}
-        				} else if(node.arguments.length === 3 && node.arguments[0].type === 'Literal' && typeof node.arguments[0] === 'string' 
+        				} else if(node.arguments.length === 3 && node.arguments[0].type === 'Literal' && typeof node.arguments[0].value === 'string' 
         							&& node.arguments[1] && node.arguments[1].type === 'ArrayExpression' && node.arguments[2].type === 'FunctionExpression') {
         					if(!context.getTern().pluginRunning('requirejs')) {
         						context.report(node.callee, ProblemMessages['missing-requirejs'], {data: 'requirejs'});
