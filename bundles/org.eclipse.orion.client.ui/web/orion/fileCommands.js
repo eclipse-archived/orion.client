@@ -12,11 +12,11 @@
 /*eslint-env browser, amd*/
 /*global confirm*/
 
-define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/fileDownloader',
+define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/util', 'orion/commands', 'orion/fileDownloader',
 	'orion/commandRegistry', 'orion/contentTypes', 'orion/compare/compareUtils', 
 	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog',
 	'orion/EventTarget', 'orion/form', 'orion/xsrfUtils', 'orion/bidiUtils'],
-	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form, xsrfUtils, bidiUtils){
+	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, util, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form, xsrfUtils, bidiUtils){
 
 	/**
 	 * Utility methods
@@ -1041,7 +1041,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			},
 			visibleWhen: canCreateProject
 		});
-		commandService.addCommand(linkProjectCommand);
+		if (!util.isElectron) {
+			commandService.addCommand(linkProjectCommand);
+		}
 		
 		var goUpCommand = new mCommands.Command({
 			name: messages["Go Up"],

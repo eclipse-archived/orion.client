@@ -1243,7 +1243,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			}
 			);
 			createBasicProjectCommand.isCreateProject = true;
-			commandService.addCommand(createBasicProjectCommand);
+			if (!util.isElectron) {
+				commandService.addCommand(createBasicProjectCommand);
+			}
 
 			var createZipProjectCommand = new mCommands.Command({
 			name: messages["zipArchiveCommandName"], //$NON-NLS-0$
