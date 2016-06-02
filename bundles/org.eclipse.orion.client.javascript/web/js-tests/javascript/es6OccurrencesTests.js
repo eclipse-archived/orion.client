@@ -693,6 +693,44 @@ define([
 					var text = "function a(){}; class b extends a{};";
 					return computeOccurrences(text, getOptions(done, 32, 32), [{start:9, end:10}, {start:32, end:33}]);
 				});
+				
+				it('Named class declaration no spaces 1', function(done) {
+					var text = "class a{}";
+					return computeOccurrences(text, getOptions(done, 6, 6), [{start:6, end:7}]);
+				});
+				it('Named class declaration no spaces 2', function(done) {
+					var text = "class a{}";
+					return computeOccurrences(text, getOptions(done, 6, 7), [{start:6, end:7}]);
+				});
+				it('Named class declaration no spaces 3', function(done) {
+					var text = "class a{}";
+					return computeOccurrences(text, getOptions(done, 7, 7), [{start:6, end:7}]);
+				});
+				it('Named class expression no spaces 1', function(done) {
+					var text = "var a = class b{};";
+					return computeOccurrences(text, getOptions(done, 14, 14), [{start:14, end:15}]);
+				});
+				it('Named class expression no spaces 2', function(done) {
+					var text = "var a = class b{};";
+					return computeOccurrences(text, getOptions(done, 14, 15), [{start:14, end:15}]);
+				});
+				it('Named class expression no spaces 3', function(done) {
+					var text = "var a = class b{};";
+					return computeOccurrences(text, getOptions(done, 15, 15), [{start:14, end:15}]);
+				});
+				it('Named method declaration no spaces 1', function(done) {
+					var text = "class a{ f(){} };";
+					return computeOccurrences(text, getOptions(done, 9, 9), [{start:9, end:10}]);
+				});
+				it('Named method declaration no spaces 2', function(done) {
+					var text = "class a{ f(){} };";
+					return computeOccurrences(text, getOptions(done, 9, 10), [{start:9, end:10}]);
+				});
+				it('Named method declaration no spaces 3', function(done) {
+					var text = "class a{ f(){} };";
+					return computeOccurrences(text, getOptions(done, 10, 10), [{start:9, end:10}]);
+				});
+				
 				// TODO Recognize method declarations as this properties, see above bugs marked TODO and the following
 //				it('Class declaration this property reference', function(done) {
 //					var text = "class z { a(){} b(){ this.a(); } }; new z();";

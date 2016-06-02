@@ -88,13 +88,20 @@ define([
 					 * start visiting an AST node
 					 */
 					enter: function(node) {
+						//only check nodes that are typed, we don't care about any others
 						if(node.type && node.range) {
 							if(!next && node.type === Estraverse.Syntax.Program && offset < node.range[0]) {
 								//https://bugs.eclipse.org/bugs/show_bug.cgi?id=447454
 								return Estraverse.VisitorOption.Break;
 							}
-							//only check nodes that are typed, we don't care about any others
-							if(node.range[0] <= offset) {
+							// Class and method declarations count offsets including the curly braces {} Bug 494484
+							// When offset is touching both identifier and body, we want finder to return the identifier
+							var bracesIncluded = false;							
+							if (node.range[0] === offset && found && found.range[1] === offset && node.type === 'ClassBody' || node.type === 'FunctionExpression' && found && found.type === 'Identifier'){
+								bracesIncluded = true;
+							}
+
+							if((!bracesIncluded && node.range[0] <= offset) || (bracesIncluded && node.range[0] < offset) ){
 								found = node;
 								if(parents) {
 									parents.push(node);

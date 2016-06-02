@@ -324,7 +324,6 @@ define([
 				});
 				
 			});
-			
 			/**
 			 * Tests finding the next node from a given node offset
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=442411
@@ -343,6 +342,189 @@ define([
 				});
 				
 			});
+			
+			it('test_findNodeNoSpacesClassDecl1', function() {
+				var r = setup("class a{}");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(0, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'ClassDeclaration', 'Should have found the ClassDeclaration node');
+					}
+				});
+			});
+			it('test_findNodeNoSpacesClassDecl2', function() {
+				var r = setup("class a{}");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(6, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'Identifier', 'Should have found the Identifier node');
+					}
+				});
+			});
+			it('test_findNodeNoSpacesClassDecl3', function() {
+				var r = setup("class a{}");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(7, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'Identifier', 'Should have found the Identifier node');
+					}
+				});
+			});
+			it('test_findNodeNoSpacesClassDecl4', function() {
+				var r = setup("class a{}");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(8, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'ClassBody', 'Should have found the ClassBody node');
+					}
+				});
+			});
+			it('test_findNodeNoSpacesMethodDecl1', function() {
+				var r = setup("class a{ f(){} }");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(9, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'Identifier', 'Should have found the Identifier node');
+					}
+				});
+			});
+			it('test_findNodeNoSpacesMethodDecl2', function() {
+				var r = setup("class a{ f(){} }");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(10, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'Identifier', 'Should have found the Identifier node');
+					}
+				});
+			});
+			it('test_findNodeNoSpacesMethodDecl3', function() {
+				var r = setup("class a{ f(){} }");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(11, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'FunctionExpression', 'Should have found the FunctionExpression node');
+					}
+				});
+			});
+			it('test_findNodeNoSpacesMethodDecl4', function() {
+				var r = setup("class a{ f(){} }");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(13, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'BlockStatement', 'Should have found the BlockStatement node');
+					}
+				});
+			});
+			it('test_findNodeNoSpacesFuncDecl1', function() {
+				var r = setup("var a=function f(){}");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(4, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'Identifier', 'Should have found the Identifier node');
+					}
+				});
+			});
+			it('test_findNodeNoSpacesFuncDecl2', function() {
+				var r = setup("var a=function f(){}");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(5, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'Identifier', 'Should have found the Identifier node');
+					}
+				});
+			});
+			it('test_findNodeNoSpacesFuncDecl3', function() {
+				var r = setup("var a=function f(){}");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(6, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						// See Bug 494484, we select the preceding identifier
+						assert.equal(node.type, 'Identifier', 'Should have found the Identifier node');
+					}
+				});
+			});
+			it('test_findNodeNoSpacesFuncDecl4', function() {
+				var r = setup("var a=function f(){}");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(15, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'Identifier', 'Should have found the Identifier node');
+					}
+				});
+			});
+			it('test_findNodeNoSpacesFuncDecl5', function() {
+				var r = setup("var a=function f(){}");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(16, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'Identifier', 'Should have found the Identifier node');
+					}
+				});
+			});
+			it('test_findNodeNoSpacesFuncDecl6', function() {
+				var r = setup("var a=function f(){}");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(17, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'Identifier', 'Should have found the Identifier node');
+					}
+				});
+			});
+			it('test_findNodeNoSpacesFuncDecl7', function() {
+				var r = setup("var a=function f(){}");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var node = Finder.findNode(18, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'BlockStatement', 'Should have found the BlockStatement node');
+					}
+				});
+			});
+			
 			
 			/**
 			 * Find a token in a broken AST
