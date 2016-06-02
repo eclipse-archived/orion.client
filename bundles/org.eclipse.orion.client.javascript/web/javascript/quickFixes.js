@@ -45,6 +45,19 @@ define([
 	}
 	
 	/**
+	 * @description Checks the given name to see if it maps to another name ESLint knows about and returns the ESLint-known name
+	 * @param {String} name The name to translate
+	 * @returns {String} The name of the directive to use, or the original
+	 * @since 12.0
+	 */
+	function translateDirectiveName(name) {
+		switch(name) {
+			case 'requirejs': return 'amd';
+			default: return name;
+		}	
+	}
+	
+	/**
      * @description Computes the offset for the block comment. i.e. 2 if the block starts with /*, 3 if it starts with /**
      * @param {String} text The file text
      * @param {Number} offset The doc node offset
@@ -388,7 +401,7 @@ define([
 					var newPlugin = translatePluginName(context.annotation.data);
 					json.plugins[newPlugin] = Object.create(null);
 					return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
-						var newDirective = updateDirective(ast, context.annotation.data);
+						var newDirective = updateDirective(ast, translateDirectiveName(context.annotation.data));
 						if(newDirective) {
 							return editorContext.setText(newDirective.text, newDirective.start, newDirective.end).then(function() {
 								return editorContext.syntaxCheck(ast.sourceFile.name);
