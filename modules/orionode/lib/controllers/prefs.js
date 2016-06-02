@@ -234,10 +234,23 @@ function getElectronPrefsFileName(){
 }
 
 function writeWorkspaceInfo(workspaceAddress){
+	var RECENT_ARRAY_LENGTH = 10;
 	fs.readFileAsync( getElectronPrefsFileName(),'utf8')
 	.then(function(content){
 		return JSON.parse(content);
 	}).then(function(allContent){
+		var tempArray = allContent.recentWorkspaces || [];		
+		var oldIndex = tempArray.indexOf(workspaceAddress);
+		if(oldIndex !== -1){
+			tempArray.splice(oldIndex,1);
+		}
+		if(tempArray.length < RECENT_ARRAY_LENGTH){
+			tempArray.unshift(workspaceAddress);
+		}else if(tempArray.length === RECENT_ARRAY_LENGTH){
+			tempArray.pop();
+			tempArray.unshift(workspaceAddress);
+		}
+		allContent.recentWorkspaces = tempArray;	
 		allContent.currentWorkspace = workspaceAddress;
 		fs.writeFileAsync(getElectronPrefsFileName(), JSON.stringify(allContent, null, 2));
 	}).catch(function(err) {
@@ -245,10 +258,15 @@ function writeWorkspaceInfo(workspaceAddress){
 	});
 }
 
-function readWorkspaceInfo(){
+function readWorkspaceInfo(option){
 	return fs.readFileAsync( getElectronPrefsFileName(),'utf8')
 	.then(function(content){
-		return JSON.parse(content).currentWorkspace;
+		var result;
+		if(option.currentWorkspace){
+			result = JSON.parse(content).currentWorkspace;
+		}else if(option.recentWorkspaces){
+			result = JSON.parse(content).recentWorkspaces;
+		}
+		return result;
 	});
 }
-	

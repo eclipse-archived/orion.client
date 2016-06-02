@@ -257,9 +257,15 @@ body {
 		iframe.classList.add("tabContent");
 		iframe.src = url;
 		var __dialogModule = electron.remote.dialog;
+		var ipcRender = electron.ipcRenderer;
 		
 		iframe.addEventListener("load", function() {
 			
+			ipcRender.send("getRecentWorkSpaces");
+			ipcRender.on("recentWorkSpaces",function(event,recentFolders){
+				iframe.contentWindow.__recentFolders = 	recentFolders;	
+			});
+					
 			iframe.contentWindow.confirm = window.confirm;
 			iframe.contentWindow.alert = window.alert;
 			iframe.contentWindow.__dialogModule = __dialogModule;
