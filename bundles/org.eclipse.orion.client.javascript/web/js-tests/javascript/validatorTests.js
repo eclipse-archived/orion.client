@@ -697,7 +697,7 @@ define([
 									assertProblems(problems, [
 									{id: RULE_ID,
 									 severity: 'warning',
-									 description: "To get support for the \'amd\' environment, the \'requirejs\' plugin must be started. \'requirejs\' has not been set in the plugins entry of your .tern-project file.",
+									 description: "To work in the \'amd\' environment, the \'requirejs\' plugin must be running.",
 									 nodeType: "EnvName"
 									}
 									]);
@@ -736,7 +736,7 @@ define([
 									assertProblems(problems, [
 									{id: RULE_ID,
 									 severity: 'warning',
-									 description: "To get support for the \'pg\' environment, the \'postgres\' plugin must be started. \'postgres\' has not been set in the plugins entry of your .tern-project file.",
+									 description: "To work in the \'pg\' environment, the \'postgres\' plugin must be running.",
 									 nodeType: "EnvName"
 									}
 									]);
@@ -758,12 +758,12 @@ define([
 									assertProblems(problems, [
 									{id: RULE_ID,
 									 severity: 'warning',
-									 description: "To get support for the \'mongodb\' environment, the \'mongodb\' plugin must be started. \'mongodb\' has not been set in the plugins entry of your .tern-project file.",
+									 description: "To work in the \'mongodb\' environment, the \'mongodb\' plugin must be running.",
 									 nodeType: "EnvName"
 									},
 									{id: RULE_ID,
 									 severity: 'warning',
-									 description: "To get support for the \'pg\' environment, the \'postgres\' plugin must be started. \'postgres\' has not been set in the plugins entry of your .tern-project file.",
+									 description: "To work in the \'pg\' environment, the \'postgres\' plugin must be running.",
 									 nodeType: "EnvName"
 									}
 									]);
