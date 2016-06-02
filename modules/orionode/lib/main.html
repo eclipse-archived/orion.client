@@ -169,7 +169,8 @@ body {
 		buttons.appendChild(refresh);
 		bar.appendChild(buttons);
 		
-		var _globalShortcut = electron.remote.globalShortcut;		
+		var _globalShortcut = electron.remote.globalShortcut;	
+		_globalShortcut.unregisterAll();
 		_globalShortcut.register('Alt+Right',historyForward);	
 		_globalShortcut.register('Alt+Left',historyBack);
 	}
