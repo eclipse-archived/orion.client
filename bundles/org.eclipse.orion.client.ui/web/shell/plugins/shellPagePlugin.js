@@ -12,8 +12,9 @@
 /*eslint-env browser, amd*/
 define([
 	'orion/plugin',
+	'orion/util',
 	'i18n!orion/shell/nls/messages'
-], function(PluginProvider, messages) {
+], function(PluginProvider, util, messages) {
 	
 	function connect() {
 		var headers = {
@@ -27,33 +28,34 @@ define([
 	}
 
 	function registerServiceProviders(provider) {
-		provider.registerService("orion.navigate.command", {}, {
-			name: messages["Shell"],
-			id: "eclipse.shell.open",
-			tooltip: messages["Open Shell page"],
-			validationProperties: [{
-				source: "ChildrenLocation|ContentLocation",
-				variableName: "ShellLocation",
-				replacements: [{pattern: "\\?depth=1$", replacement: ""}] 
-			}],
-			uriTemplate: "{+OrionHome}/shell/shellPage.html#{,ShellLocation}",
-			forceSingleItem: true
-		});
-		provider.registerService("orion.page.link.related", null, {
-			id: "eclipse.shell.open",
-			category: "shell",
-			order: 10 // First link in Shell category
-		});
-		provider.registerService("orion.page.link", {}, {
-			name: messages["ShellLinkWorkspace"],
-			id: "orion.shell",
-			nls: "orion/nls/messages",
-			category: "shell",
-			order: 1000, // low priority
-			uriTemplate: "{+OrionHome}/shell/shellPage.html"
-		});
+		if (!util.isElectron) {
+			provider.registerService("orion.navigate.command", {}, {
+				name: messages["Shell"],
+				id: "eclipse.shell.open",
+				tooltip: messages["Open Shell page"],
+				validationProperties: [{
+					source: "ChildrenLocation|ContentLocation",
+					variableName: "ShellLocation",
+					replacements: [{pattern: "\\?depth=1$", replacement: ""}] 
+				}],
+				uriTemplate: "{+OrionHome}/shell/shellPage.html#{,ShellLocation}",
+				forceSingleItem: true
+			});
+			provider.registerService("orion.page.link.related", null, {
+				id: "eclipse.shell.open",
+				category: "shell",
+				order: 10 // First link in Shell category
+			});
+			provider.registerService("orion.page.link", {}, {
+				name: messages["ShellLinkWorkspace"],
+				id: "orion.shell",
+				nls: "orion/nls/messages",
+				category: "shell",
+				order: 1000, // low priority
+				uriTemplate: "{+OrionHome}/shell/shellPage.html"
+			});
+		}
 	}
-
 	return {
 		connect: connect,
 		registerServiceProviders: registerServiceProviders
