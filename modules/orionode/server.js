@@ -21,7 +21,7 @@ var auth = require('./lib/middleware/auth'),
 	argslib = require('./lib/args'),
 	ttyShell = require('./lib/tty_shell'),
 	orion = require('./index.js'),
-    prefs = require('./lib/controllers/prefs');
+	prefs = require('./lib/controllers/prefs');
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
@@ -47,80 +47,65 @@ function startServer(cb) {
 	} else {
 		workspaceDir = path.join(__dirname, '.workspace');
 	}
-	new Promise(function(resolve){
-		if(configParams.isElectron){
-			prefs.readWorkspaceInfo()
-			.then(function(workspaceAddress){
-				if(workspaceAddress){
-					resolve(workspaceAddress);
-				}else{
-					resolve(workspaceDir);
+	argslib.createDirs([workspaceDir], function() {
+	var passwordFile = args.password || args.pwd;
+	argslib.readPasswordFile(passwordFile, function(password) {
+		var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
+		var log = Object.prototype.hasOwnProperty.call(args, 'log');
+		if (dev) {
+			console.log('Development mode: client code will not be cached.');
+		}
+		if (passwordFile) {
+			console.log(util.format('Using password from file: %s', passwordFile));
+		}
+		console.log(util.format('Using workspace: %s', workspaceDir));
+		
+		var server;
+		try {
+			// create web server
+			var app = express();
+			if (configParams["orion.https.key"] && configParams["orion.https.cert"]) {
+				server = https.createServer({
+					key: fs.readFileSync(configParams["orion.https.key"]),
+					cert: fs.readFileSync(configParams["orion.https.cert"])
+				}, app);
+			} else {
+				server = http.createServer(app);
+			}
+
+			// Configure middleware
+			if (log) {
+				app.use(express.logger('tiny'));
+			}
+			if (password || configParams.pwd) {
+				app.use(auth(password || configParams.pwd));
+			}
+			
+			app.use(compression());
+			app.use(orion({
+				workspaceDir: workspaceDir,
+				configParams: configParams,
+				maxAge: dev ? 0 : undefined,
+			}));
+			var io = socketio.listen(server, { 'log level': 1 });
+			ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
+
+			server.on('listening', function() {
+				console.log(util.format('Listening on port %d...', port));
+				if (cb) {
+					cb();
 				}
 			});
-		}else{
-			resolve(workspaceDir);
+			server.on('error', function(err) {
+				if (err.code === "EADDRINUSE") {
+					port = Math.floor(Math.random() * (PORT_HIGH - PORT_LOW) + PORT_LOW);
+					server.listen(port);
+				}
+			});
+			server.listen(port);
+		} catch (e) {
+			console.error(e && e.stack);
 		}
-	}).then(function(workspaceDir){
-		argslib.createDirs([workspaceDir], function() {
-		var passwordFile = args.password || args.pwd;
-		argslib.readPasswordFile(passwordFile, function(password) {
-			var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
-			var log = Object.prototype.hasOwnProperty.call(args, 'log');
-			if (dev) {
-				console.log('Development mode: client code will not be cached.');
-			}
-			if (passwordFile) {
-				console.log(util.format('Using password from file: %s', passwordFile));
-			}
-			console.log(util.format('Using workspace: %s', workspaceDir));
-			
-			var server;
-			try {
-				// create web server
-				var app = express();
-				if (configParams["orion.https.key"] && configParams["orion.https.cert"]) {
-					server = https.createServer({
-						key: fs.readFileSync(configParams["orion.https.key"]),
-						cert: fs.readFileSync(configParams["orion.https.cert"])
-					}, app);
-				} else {
-					server = http.createServer(app);
-				}
-
-				// Configure middleware
-				if (log) {
-					app.use(express.logger('tiny'));
-				}
-				if (password || configParams.pwd) {
-					app.use(auth(password || configParams.pwd));
-				}
-				
-				app.use(compression());
-				app.use(orion({
-					workspaceDir: workspaceDir,
-					configParams: configParams,
-					maxAge: dev ? 0 : undefined,
-				}));
-				var io = socketio.listen(server, { 'log level': 1 });
-				ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
-
-				server.on('listening', function() {
-					console.log(util.format('Listening on port %d...', port));
-					if (cb) {
-						cb();
-					}
-				});
-				server.on('error', function(err) {
-					if (err.code === "EADDRINUSE") {
-						port = Math.floor(Math.random() * (PORT_HIGH - PORT_LOW) + PORT_LOW);
-						server.listen(port);
-					}
-				});
-				server.listen(port);
-			} catch (e) {
-				console.error(e && e.stack);
-			}
-		});
 	});
 	});
 }
@@ -131,7 +116,7 @@ if (process.versions.electron) {
 		spawn = require('child_process').spawn,
 		os = require('os');
 
-	var mainWindow = null;
+	configParams.isElectron = true;
 
 	var handleSquirrelEvent = function() {
 		if (process.argv.length === 1 || os.platform() !== 'win32') { // No squirrel events to handle
@@ -141,35 +126,34 @@ if (process.versions.electron) {
 		var	target = path.basename(process.execPath);
 
 		function executeSquirrelCommand(args, done) {
-  		 	var updateDotExe = path.resolve(path.dirname(process.execPath), 
-		      	'..', 'Update.exe');
-		    var child = spawn(updateDotExe, args, { detached: true });
-		    child.on('close', function(code) {
-		    	done();
-		    });
-		};
+			var updateDotExe = path.resolve(path.dirname(process.execPath), '..', 'Update.exe');
+			var child = spawn(updateDotExe, args, { detached: true });
+			child.on('close', function() {
+				done();
+			});
+		}
 
 		var squirrelEvent = process.argv[1];
-	   	switch (squirrelEvent) {
-	   		case '--squirrel-install':
-	      	case '--squirrel-updated':
-	      		// Install desktop and start menu shortcuts
-	      		executeSquirrelCommand(["--createShortcut", target], electron.app.quit);
-	      		setTimeout(electron.app.quit, 1000);
-	      		return true;
-	      	case '--squirrel-obsolete':
-	      		// This is called on the outgoing version of the app before
-	      		// we update to the new version - it's the opposite of
-	      	  	// --squirrel-updated
-	      		electron.app.quit();
-	      		return true;
-	      	case '--squirrel-uninstall':
-	      		// Remove desktop and start menu shortcuts
-	      		executeSquirrelCommand(["--removeShortcut", target], electron.app.quit);
-	      		setTimeout(electron.app.quit, 1000);
-	      		return true;
-	    }
-	    return false;
+		switch (squirrelEvent) {
+			case '--squirrel-install':
+			case '--squirrel-updated':
+				// Install desktop and start menu shortcuts
+				executeSquirrelCommand(["--createShortcut", target], electron.app.quit);
+				setTimeout(electron.app.quit, 1000);
+				return true;
+			case '--squirrel-obsolete':
+				// This is called on the outgoing version of the app before
+				// we update to the new version - it's the opposite of
+				// --squirrel-updated
+				electron.app.quit();
+				return true;
+			case '--squirrel-uninstall':
+				// Remove desktop and start menu shortcuts
+				executeSquirrelCommand(["--removeShortcut", target], electron.app.quit);
+				setTimeout(electron.app.quit, 1000);
+				return true;
+		}
+		return false;
 	};
 
 	if (handleSquirrelEvent()) {
@@ -178,6 +162,11 @@ if (process.versions.electron) {
 	}
 
 	electron.app.on('ready', function() {
+		var allPrefs = prefs.readPrefs();
+		var prefsWorkspace = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.currentWorkspace;
+		if (prefsWorkspace) {
+			configParams.workspace = prefsWorkspace;
+		}
 		if (process.platform === 'darwin') {
 			var Menu = require("menu");
 			if (!Menu.getApplicationMenu()) {
@@ -203,7 +192,10 @@ if (process.versions.electron) {
 			}
 		}
 		function createWindow(url){
-			var nextWindow = new electron.BrowserWindow({width: 1024, height: 800, title: "Orion", icon: "icon/256x256/orion.png"});
+			var windowOptions = allPrefs.windowBounds || {width: 1024, height: 800};
+			windowOptions.title = "Orion";
+			windowOptions.icon = "icon/256x256/orion.png";
+			var nextWindow = new electron.BrowserWindow(windowOptions);
 			nextWindow.loadURL("file:///" + __dirname + "/lib/main.html#" + encodeURI(url));
 			nextWindow.webContents.on("new-window", /* @callback */ function(event, url, frameName, disposition, options){
 				event.preventDefault();
@@ -214,11 +206,15 @@ if (process.versions.electron) {
 					nextWindow.webContents.executeJavaScript('createTab("' + url + '");');
 				}
 			});
+			nextWindow.on("close", function() {
+				allPrefs = prefs.readPrefs();
+				allPrefs.windowBounds = nextWindow.getBounds();
+				prefs.writePrefs(allPrefs);
+			});
 			return nextWindow;
 		}
-		configParams.isElectron = true;
 		startServer(function() {
-			mainWindow = createWindow("http://localhost:" + port);
+			var mainWindow = createWindow("http://localhost:" + port);
 			mainWindow.on('closed', function() {
 				mainWindow = null;
 			});
