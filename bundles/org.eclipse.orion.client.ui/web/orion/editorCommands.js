@@ -659,7 +659,8 @@ define([
 							return that.updateWorkspacePrefs(result[0]);
 						}).then(function(){
 							delete sessionStorage.lastFile;
-							window.location.href = "/";
+							window.location.hash = "";
+							window.location.reload();
 						})				
 					});
 				}
@@ -687,7 +688,8 @@ define([
 										return that.updateWorkspacePrefs(folderLocation);
 									}).then(function(){
 										delete sessionStorage.lastFile;
-										window.location.href = "/";
+										window.location.hash = "";
+										window.location.reload();
 									})	
 								}
 							};
