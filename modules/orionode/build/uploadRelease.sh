@@ -14,15 +14,6 @@ popd () {
     command popd "$@" > /dev/null
 }
 
-while [ $# -gt 0 ] # while positional parameters > 0
-do
-    case "$1" in 
-                "-build") # if first argument is -build, 
-                        BUILD="$2"; shift;;
-                 *) break;;      # terminate while loop (case needs double semi at end of last command in each pattern block) *) is default case
-        esac
-        shift
-done
 
 export GITHUB_TOKEN="b4515ae8e2fdcafb869e11cce08e57e85c4fb480"
 export CSC_NAME="IBM"	
@@ -36,14 +27,15 @@ description=$(grep "description" ../package.json | awk -F: '{ print $2 }' | sed 
 update_url_base="orion-update.mybluemix.net/download"
 name=$(grep "name" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
 	
-npm version patch # increments version patch, e.g., 1.0.0 -> 1.0.1  
-old_pkg_version=$(grep "version" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
+#npm version patch # increments version patch, e.g., 1.0.0 -> 1.0.1  
+#old_pkg_version=$(grep "version" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
 pkg_version=$(grep "version" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
+pkg_version = `echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
 vpkg_version="v${pkg_version}"
 
 # update URL for autoUpdater
-old_update_url="${update_url_base}/${old_pkg_version}"
-new_update_url="${update_url_base}/${pkg_version}"
+#old_update_url="${update_url_base}/${old_pkg_version}"
+#new_update_url="${update_url_base}/${pkg_version}"
 
 echo "Setting up build directories"
 
@@ -54,12 +46,12 @@ mkdir -p ../buildTemp/win
 
 pushd ../buildTemp
 echo "Copying over orionode_$BUILD build"
-cp ~/downloads/orionode_2016-06-01_16-31-18.tar.gz .
+cp ~/downloads/orionode_${BUILD_ID}.tar.gz .
 
 echo "OSX build -----"
 pushd osx
 echo "Extracting build"
-tar -xzf ../orionode_2016-06-01_16-31-18.tar.gz
+tar -xzf ../orionode_${BUILD_ID}.tar.gz
 
 echo "Cleaning up node modules" 
 rm -rf orionode/node_modules/passport*
@@ -69,7 +61,7 @@ rm -rf orionode/node_modules/nodemailer
 rm orionode/node_modules/nodegit/build/Release/nodegit.node
 
 # copy over nodegit binary to workaround in memory ssh limitation
-cp ~/downloads/nodegit/osx/nodegit.node orionode/node_modules/nodegit/build/Release
+cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/mac/nodegit.node orionode/node_modules/nodegit/build/Release
 
 pushd orionode
 
@@ -118,7 +110,7 @@ echo "WIN build -----"
 mkdir win
 pushd win
 echo "Extracting build"
-tar -xzf ../orionode_2016-06-01_16-31-18.tar.gz
+tar -xzf ../orionode_${BUILD_ID}.tar.gz
 
 echo "Cleaning up node modules" 
 rm -rf orionode/node_modules/passport*
@@ -128,7 +120,7 @@ rm -rf orionode/node_modules/nodemailer
 rm orionode/node_modules/nodegit/build/Release/nodegit.node
 
 # copy over nodegit binary to workaround in memory ssh limitation
-cp ~/downloads/nodegit/win/nodegit.node orionode/node_modules/nodegit/build/Release
+cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/windows/nodegit.node orionode/node_modules/nodegit/build/Release
 
 pushd orionode
 
@@ -174,7 +166,7 @@ echo "LINUX build -----"
 mkdir linux
 pushd linux
 echo "Extracting build"
-tar -xzf ../orionode_2016-06-01_16-31-18.tar.gz
+tar -xzf ../orionode_${BUILD_ID}.tar.gz
 
 echo "Cleaning up node modules" 
 rm -rf orionode/node_modules/passport*
@@ -184,7 +176,7 @@ rm -rf orionode/node_modules/nodemailer
 rm orionode/node_modules/nodegit/build/Release/nodegit.node
 
 # copy over nodegit binary to workaround in memory ssh limitation
-cp ~/downloads/nodegit/linux/nodegit.node orionode/node_modules/nodegit/build/Release
+cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/linux/nodegit.node orionode/node_modules/nodegit/build/Release
 
 pushd orionode
 
@@ -226,10 +218,10 @@ for ((i=0; i<${#linux_files[@]}; i++)); do
     fi
 done
 
-restore remoteReleases URL to current version for future builds
-sed -i -e "s@${old_update_url}@${new_update_url}@g" package.json
+#restore remoteReleases URL to current version for future builds
+#sed -i -e "s@${old_update_url}@${new_update_url}@g" package.json
 
-echo $(cat package.json | grep remoteReleases)
+#echo $(cat package.json | grep remoteReleases)
 
 popd
 popd
