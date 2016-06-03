@@ -74,10 +74,10 @@
   },
   "build": {
     "compression": "store",
-    "version": "0.36.7",
     "osx": {
       "title": "Orion",
       "icon": "build/icon.icns",
+      "version": "0.36.7",
       "contents": [
         {
           "x": 410,
@@ -94,10 +94,12 @@
     },
     "win": {
       "loadingGif": "build/orionLogo.gif",
+      "version": "0.36.7",
       "iconUrl": "http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/plain/modules/orionode/build/icons/orion.ico",
       "remoteReleases": "http://orion-update.mybluemix.net/download/v1.0.2"
     },
     "linux": {
+      "version": "0.36.7",
       "target": [
         "deb",
         "rpm",
