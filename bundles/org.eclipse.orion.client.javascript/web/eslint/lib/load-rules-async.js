@@ -1335,9 +1335,19 @@ define([
                 	if (node.property && node.object && node.object.type !== 'ThisExpression'){
                 		if (node.parent && node.parent.type === 'CallExpression' && node.parent.callee && node.parent.callee === node){
                 			var tern = context.getTern();
-							var query = {end: node.property.start};
-							var expr = tern.findQueryExpr(tern.file, query);
-							var type = tern.findExprType(query, tern.file, expr);
+							var query = {start: node.property.start, end: node.property.end};
+							var type = null;
+							var expr;
+							try {
+								expr = tern.findQueryExpr(tern.file, query);
+								if (!expr) {
+									// no expression found so we cannot get the type
+									return;
+								}
+								type = tern.findExprType(query, tern.file, expr);
+							} catch(e) {
+								// ignore
+							}
 							if (type && type.propertyOf) {
 								if(type.propertyOf.props[node.property.name]) {
 									//if we found a type and its a direct property, quit
@@ -1349,8 +1359,16 @@ define([
 								}
 							}
 							query.end = node.object.end;
-	                		expr = tern.findQueryExpr(tern.file, query);
-	                		type = tern.findExprType(query, tern.file, expr);
+							try {
+		                		expr = tern.findQueryExpr(tern.file, query);
+								if (!expr) {
+									// no expression found so we cannot get the type
+									return;
+								}
+		                		type = tern.findExprType(query, tern.file, expr);
+		                	} catch(e) {
+		                		// ignore
+		                	}
 							if (type && type.types && type.types.length > 0) {
 	                			for (var i = 0; i < type.types.length; i++) {
 	                				if (type.types[i].props && type.types[i].props[node.property.name]) {
