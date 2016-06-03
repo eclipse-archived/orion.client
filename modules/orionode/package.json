@@ -56,7 +56,8 @@
     "requirejs": "~2.1.14",
     "superagent": "^1.7.2",
     "supertest": "^1.2.0",
-    "supertest-as-promised": "^3.0.0"
+    "supertest-as-promised": "^3.0.0",
+    "electron-prebuilt": "^0.36.7"
   },
   "engines": {
     "node": "^4.0.0"
@@ -73,6 +74,7 @@
   },
   "build": {
     "compression": "store",
+    "version": "0.36.7",
     "osx": {
       "title": "Orion",
       "icon": "build/icon.icns",
@@ -92,7 +94,8 @@
     },
     "win": {
       "loadingGif": "build/orionLogo.gif",
-      "iconUrl": "http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/plain/modules/orionode/build/icons/orion.ico"
+      "iconUrl": "http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/plain/modules/orionode/build/icons/orion.ico",
+      "remoteReleases": "http://orion-update.mybluemix.net/download/v1.0.2"
     },
     "linux": {
       "target": [
