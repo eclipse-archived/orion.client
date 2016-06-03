@@ -30,7 +30,7 @@ name=$(grep "name" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
 #npm version patch # increments version patch, e.g., 1.0.0 -> 1.0.1  
 #old_pkg_version=$(grep "version" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
 pkg_version=$(grep "version" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
-pkg_version = `echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
+pkg_version=`echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
 vpkg_version="v${pkg_version}"
 
 # update URL for autoUpdater
@@ -46,7 +46,7 @@ mkdir -p ../buildTemp/win
 
 pushd ../buildTemp
 echo "Copying over orionode_$BUILD build"
-cp ~/downloads/orionode_${BUILD_ID}.tar.gz .
+cp ~/downloads/orion/orionode/orionode_${BUILD_ID}.tar.gz .
 
 echo "OSX build -----"
 pushd osx
