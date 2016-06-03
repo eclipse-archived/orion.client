@@ -19,8 +19,9 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 		'orion/keyBinding',
 		'orion/problems/problemsView',
 		'orion/keyBinding',
+		'orion/util',
 		'orion/webui/Slideout'],
-		function(objects, mCommands, mOutliner, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages, InlineSearchPane, mKeyBinding, mProblemsView, KeyBinding, mSlideout) {
+		function(objects, mCommands, mOutliner, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages, InlineSearchPane, mKeyBinding, mProblemsView, KeyBinding, util, mSlideout) {
 
 	/**
 	 * @name orion.sidebar.Sidebar
@@ -209,7 +210,9 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				choiceCallback: this.viewModeMenuCallback.bind(this)
 			});
 			this.commandRegistry.addCommand(changeViewModeCommand);
-			this.commandRegistry.registerCommandContribution(this.switcherNode.id, "orion.sidebar.viewmode", 2, "orion.menuBarViewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			if (!util.isElectron) {
+				this.commandRegistry.registerCommandContribution(this.switcherNode.id, "orion.sidebar.viewmode", 2, "orion.menuBarViewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			}
 		},
 		_createNavigationViewMode: function() {
 			this._navigationViewMode = new MiniNavViewMode({
