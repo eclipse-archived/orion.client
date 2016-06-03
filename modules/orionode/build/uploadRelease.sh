@@ -71,7 +71,7 @@ cp ../../../build/icon.ico build
 cp ../../../build/orionLogo.gif build
 
 # create a new, formal release
-~/Downloads/github-release release --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${vpkg_version}" --description "${description}"
+github-release release --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${vpkg_version}" --description "${description}"
 
 # path to distributable files (pass as cmd line arg)
 dist_path="./dist"
@@ -95,7 +95,7 @@ for ((i=0; i<${#osx_files[@]}; i++)); do
     mv "${file_path}" "${new_path}"
     necessary_file=$(echo ${file_name} | grep -e "\.dmg" -e "\.zip" || echo 0 ) # if filename is not Orion-x.x.x-osx.(dmg|zip) exclude it
     if [[ $necessary_file != "0" ]] ; then
-        ~/Downloads/github-release upload --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${file_name}" --file "${new_path}"
+        github-release upload --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${file_name}" --file "${new_path}"
         echo "uploaded ${file_name}"
     else
         # rm $file_path
@@ -151,7 +151,7 @@ for ((i=0; i<${#win_files[@]}; i++)); do
     mv "${file_path}" "${new_path}" # rename our file to remove spaces
     necessary_file=$(echo ${file_name} | grep -e "${pkg_version}" -e "RELEASES" || echo 0 ) # only upload files with correct version
     if [[ $necessary_file != "0" ]] ; then
-        ~/Downloads/github-release upload --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${file_name}" --file "${new_path}"
+        github-release upload --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${file_name}" --file "${new_path}"
         echo "uploaded ${file_name}"
     else
         # rm $file_path
