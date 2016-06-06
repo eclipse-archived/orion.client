@@ -400,6 +400,10 @@ define([
 					var json = {plugins: Object.create(null)};
 					var newPlugin = translatePluginName(context.annotation.data);
 					json.plugins[newPlugin] = Object.create(null);
+					if (newPlugin === "commonjs") {
+						// also add "node" see https://bugs.eclipse.org/bugs/show_bug.cgi?id=477377
+						json.plugins["node"] = Object.create(null);
+					}
 					return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
 						var newDirective = updateDirective(ast, translateDirectiveName(context.annotation.data));
 						if(newDirective) {
