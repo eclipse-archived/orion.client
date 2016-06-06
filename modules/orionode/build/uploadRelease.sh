@@ -66,13 +66,13 @@ name=$(grep -m1 "name" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//
 # $1: file name/path
 upload () {
 	echo $1
-	~/Downloads/github-release upload --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name $1 --file $1
+	github-release upload --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name $1 --file $1
 }
 
 # create a new release
 # $1: String for release description
 new_release() {
-	~/Downloads/github-release release --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${vpkg_version}" --description "${description}"
+	github-release release --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${vpkg_version}" --description "${description}"
 }
 
 # node module clean up
@@ -91,7 +91,7 @@ mkdir ../buildTemp
 
 pushd ../buildTemp
 echo "Copying over orionode_${BUILD} build"
-cp ~/downloads/orionode_${BUILD}.tar.gz .
+cp ~/downloads/orion/orionode/orionode_${BUILD}.tar.gz .
 
 new_release
 
