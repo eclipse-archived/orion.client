@@ -151,6 +151,44 @@ define([
 						worker.getTestState().callback(error);
 					});
 				});
+				it("default function export 1", function(callback) {
+					var config = { rules: {} };
+					config.rules['missing-doc'] = [1, {decl: 1}];
+					var features = Object.create(null);
+					features.modules = true;
+					config.ecmaFeatures = features;
+					validate({buffer: "var i = 0; export default function myFunc() { return i; };", callback: callback, config: config}).then(
+					function (problems) {
+						assertProblems(problems, [{
+							id: 'missing-doc',
+							severity: 'warning',
+							description: "Missing documentation for function \'myFunc\'.",
+							nodeType: "Identifier"
+						}]);
+					},
+					function (error) {
+						worker.getTestState().callback(error);
+					});
+				});
+				it("default generator export 2", function(callback) {
+					var config = { rules: {} };
+					config.rules['missing-doc'] = [1, {decl: 1}];
+					var features = Object.create(null);
+					features.modules = true;
+					config.ecmaFeatures = features;
+					validate({buffer: "var i = 0; export default function* myFunc() { return i; };", callback: callback, config: config}).then(
+					function (problems) {
+						assertProblems(problems, [{
+							id: 'missing-doc',
+							severity: 'warning',
+							description: "Missing documentation for function \'myFunc\'.",
+							nodeType: "Identifier"
+						}]);
+					},
+					function (error) {
+						worker.getTestState().callback(error);
+					});
+				});
 			});
 			describe("no-unused-vars", function() {
 				var RULE_ID = 'no-unused-vars';
