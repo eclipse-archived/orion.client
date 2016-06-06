@@ -123,22 +123,52 @@ define([
 			var _tern = Object.create(null);
 			// delegate tern functions
 			_tern.findRefs = function(query, file) {
-				return tern.findRefs(server, query, file);
+				try {
+					return tern.findRefs(server, query, file);
+				} catch(e) {
+					if (!e.name || e.name !== "TernError") {
+						throw e;
+					}
+				}
 			};
 			_tern.findRefsToVariable = function(query, file, expr, checkShadowing) {
-				return tern.findRefsToVariable(server, query, file, expr, checkShadowing);
+				try {
+					return tern.findRefsToVariable(server, query, file, expr, checkShadowing);
+				} catch(e) {
+					if (!e.name || e.name !== "TernError") {
+						throw e;
+					}
+				}
 			};
 			_tern.findRefsToProperty = function(query, expr, prop) {
-				return tern.findRefsToProperty(server, query, expr, prop);
+				try {
+					return tern.findRefsToProperty(server, query, expr, prop);
+				} catch(e) {
+					if (!e.name || e.name !== "TernError") {
+						throw e;
+					}
+				}
 			};
 			_tern.ternError = function(msg) {
 				return tern.ternError(msg);
 			};
 			_tern.findQueryExpr = function(file, query, wide) {
-				return tern.findQueryExpr(file, query, wide);
+				try {
+					return tern.findQueryExpr(file, query, wide);
+				} catch(e) {
+					if (!e.name || e.name !== "TernError") {
+						throw e;
+					}
+				}
 			};
 			_tern.findExprType = function(query, file, expr) {
-				return tern.findExprType(server, query, file, expr);
+				try {
+					return tern.findExprType(server, query, file, expr);
+				} catch(e) {
+					if (!e.name || e.name !== "TernError") {
+						throw e;
+					}
+				}
 			};
 			_tern.plugins = server.options.plugins;
 			_tern.getDef = function(defName) {
@@ -255,7 +285,6 @@ define([
 					strippedMessages.push(strippedMessage);
 				});
 			} catch(e) {
-				// ignore errors during validation
 				error =
 					{
 						severity: "error",

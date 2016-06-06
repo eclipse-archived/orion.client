@@ -1296,16 +1296,15 @@ define([
         	                    var tern = context.getTern();
 								var query = {end: ref.identifier.start};
 								var foundType = null;
-								try {
-									var expr = tern.findQueryExpr(tern.file, query);
-									var type = tern.findExprType(query, tern.file, expr);
-									// The origin could be a primitive in the same file (a=1;) which we still want to mark
-									// The origin could be an environment, which we still want to mark (eslint-env directive is handled separately)
-									if (type && type.origin && type.origin !== tern.file.name && type.origin !== env){
-										foundType = type;
-									}
-								} catch(e) {
-									//ignore
+								var expr = tern.findQueryExpr(tern.file, query);
+								if (!expr) {
+									return;
+								}
+								var type = tern.findExprType(query, tern.file, expr);
+								// The origin could be a primitive in the same file (a=1;) which we still want to mark
+								// The origin could be an environment, which we still want to mark (eslint-env directive is handled separately)
+								if (type && type.origin && type.origin !== tern.file.name && type.origin !== env){
+									foundType = type;
 								}
             	                if (!foundType){
             	                    var inenv = env ? '-inenv' : ''; //$NON-NLS-1$
@@ -1336,18 +1335,12 @@ define([
                 		if (node.parent && node.parent.type === 'CallExpression' && node.parent.callee && node.parent.callee === node){
                 			var tern = context.getTern();
 							var query = {start: node.property.start, end: node.property.end};
-							var type = null;
-							var expr;
-							try {
-								expr = tern.findQueryExpr(tern.file, query);
-								if (!expr) {
-									// no expression found so we cannot get the type
-									return;
-								}
-								type = tern.findExprType(query, tern.file, expr);
-							} catch(e) {
-								// ignore
+							var expr = tern.findQueryExpr(tern.file, query);
+							if (!expr) {
+								// no expression found. No need to look for the type
+								return;
 							}
+							var type = tern.findExprType(query, tern.file, expr);
 							if (type && type.propertyOf) {
 								if(type.propertyOf.props[node.property.name]) {
 									//if we found a type and its a direct property, quit
@@ -1359,16 +1352,12 @@ define([
 								}
 							}
 							query.end = node.object.end;
-							try {
-		                		expr = tern.findQueryExpr(tern.file, query);
-								if (!expr) {
-									// no expression found so we cannot get the type
-									return;
-								}
-		                		type = tern.findExprType(query, tern.file, expr);
-		                	} catch(e) {
-		                		// ignore
-		                	}
+	                		expr = tern.findQueryExpr(tern.file, query);
+							if (!expr) {
+								// no expression found so we cannot get the type
+								return;
+							}
+	                		type = tern.findExprType(query, tern.file, expr);
 							if (type && type.types && type.types.length > 0) {
 	                			for (var i = 0; i < type.types.length; i++) {
 	                				if (type.types[i].props && type.types[i].props[node.property.name]) {
@@ -1642,13 +1631,8 @@ define([
 					    if(defNode.type === 'FunctionDeclaration') {
 				    	   var tern = context.getTern();
 				    	   var refQuery = {end: defNode.id.start};
-				    	   var refs = null;
 				    	   var filename = tern.file.name;
-				    	   try {
-				    	       refs = tern.findRefs(refQuery, tern.file);
-				    	   } catch(e) {
-				    	      //ignore
-				    	   }
+				    	   var refs = tern.findRefs(refQuery, tern.file);
 				    	   var result = [];
 				    	   if (refs && Array.isArray(refs.refs)) {
 				    	   		// filtering the refs from the current file - remove the one that matches the current node
@@ -2151,14 +2135,13 @@ define([
 						var tern = context.getTern();
 						var query = {end: node.argument.start};
 						var foundType = null;
-						try {
-							var expr = tern.findQueryExpr(tern.file, query);
-							var type = tern.findExprType(query, tern.file, expr);
-							if (type) {
-								foundType = type;
-							}
-						} catch(e) {
-							//ignore
+						var expr = tern.findQueryExpr(tern.file, query);
+						if (!expr) {
+							return "undefined";
+						}
+						var type = tern.findExprType(query, tern.file, expr);
+						if (type) {
+							foundType = type;
 						}
 						if (foundType) {
 							var typeString = foundType.toString();
