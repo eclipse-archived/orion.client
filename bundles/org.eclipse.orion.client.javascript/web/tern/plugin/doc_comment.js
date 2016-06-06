@@ -116,7 +116,7 @@
           node.leadingComments.forEach(function(comment) {
             commentsBefore.push(comment.value);
           });
-          interpretComments(node, commentsBefore, scope,
+          interpretComments(node.declaration, commentsBefore, scope,
                             scope.getProp(node.declaration.id.name),
                             node.declaration.scope.fnType);
         }
