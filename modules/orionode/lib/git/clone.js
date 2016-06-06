@@ -503,6 +503,9 @@ function getUniqueFileName(folder, file) {
 function postClone(req, res) {
 	var repo;
 	var cloneUrl = req.body.GitUrl;
+	if(cloneUrl.charAt(cloneUrl.length - 1) === "/"){
+		cloneUrl = cloneUrl.slice(0, -1);
+	}	
 	var dirName = cloneUrl.substring(cloneUrl.lastIndexOf("/") + 1).replace(".git", "");
 	var folder = req.user.workspaceDir;
 	if (req.body.Path) {
