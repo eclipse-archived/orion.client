@@ -669,35 +669,37 @@ define([
 		},
 		_createOpenRecentCommand: function() {
 			var that = this;		
-			this.preferences.get("/workspace").then(function(prefs) {
-				return prefs.recentWorkspaces;
-			}).then(function(recentworkspaces){
-				var openRecentCommand = new mCommands.Command({
-					name: messages.OpenRecent,
-					selectionClass: "dropdownSelection", //$NON-NLS-0$
-					id: "orion.edit.openRecent", //$NON-NLS-0$
-					visibleWhen: /** @callback */ function(items, data) {
-						return !!window.__dialogModule && !!recentworkspaces;
-					},
-					choiceCallback: function() {
-						return recentworkspaces.map(function(folderLocation) {
-							return {
-								name: folderLocation,
-								callback: function() {
-									that.fileClient.changeWorkspace(folderLocation).then(function() {
-										return that.updateWorkspacePrefs(folderLocation);
-									}).then(function(){
-										delete sessionStorage.lastFile;
-										window.location.hash = "";
-										window.location.reload();
-									})	
-								}
-							};
-						});
-					}
-				});
+			if(this.preferences){
+				this.preferences.get("/workspace").then(function(prefs) {
+					return prefs.recentWorkspaces;
+				}).then(function(recentworkspaces){
+					var openRecentCommand = new mCommands.Command({
+						name: messages.OpenRecent,
+						selectionClass: "dropdownSelection", //$NON-NLS-0$
+						id: "orion.edit.openRecent", //$NON-NLS-0$
+						visibleWhen: /** @callback */ function(items, data) {
+							return !!window.__dialogModule && !!recentworkspaces;
+						},
+						choiceCallback: function() {
+							return recentworkspaces.map(function(folderLocation) {
+								return {
+									name: folderLocation,
+									callback: function() {
+										that.fileClient.changeWorkspace(folderLocation).then(function() {
+											return that.updateWorkspacePrefs(folderLocation);
+										}).then(function(){
+											delete sessionStorage.lastFile;
+											window.location.hash = "";
+											window.location.reload();
+										})	
+									}
+								};
+							});
+						}
+					});
 				that.commandService.addCommand(openRecentCommand);
 			});
+			}
 		},
 		_createEncodingCommand: function() {
 			var that = this;
