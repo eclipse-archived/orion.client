@@ -64,9 +64,11 @@ define ([
 			
 			var nodeList = [];
 			var metadata = this.inputManager.getFileMetadata();
-			metadata.annotation = annotation;
-			this.commandRegistry.renderCommands("orion.edit.quickfix", actionsDiv, metadata, this.editor, 'quickfix', annotation, nodeList); //$NON-NLS-1$ //$NON-NLS-2$
-			delete metadata.annotation;
+			if (metadata){
+				metadata.annotation = annotation;
+				this.commandRegistry.renderCommands("orion.edit.quickfix", actionsDiv, metadata, this.editor, 'quickfix', annotation, nodeList); //$NON-NLS-1$ //$NON-NLS-2$
+				delete metadata.annotation;
+			}
 		}
 
 	};
