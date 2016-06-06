@@ -30,6 +30,7 @@ define([
 		expectedStyles: expectedStyles,
 		grammar: mXML,
 		testText: mText,
-		mimeType: "application/xml"
+		mimeType: "application/xml",
+		outputStyles: false
 	};
 });

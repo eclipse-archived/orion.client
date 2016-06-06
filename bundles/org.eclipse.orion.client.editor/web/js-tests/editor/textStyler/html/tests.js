@@ -30,6 +30,7 @@ define([
 		expectedStyles: expectedStyles,
 		grammar: mHTML,
 		testText: mText,
-		mimeType: "text/html"
+		mimeType: "text/html",
+		outputStyles: false
 	};
 });

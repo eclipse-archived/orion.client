@@ -30,6 +30,7 @@ define([
 		expectedStyles: expectedStyles,
 		grammar: mCSS,
 		testText: mText,
-		mimeType: "text/css"
+		mimeType: "text/css",
+		outputStyles: false
 	};
 });

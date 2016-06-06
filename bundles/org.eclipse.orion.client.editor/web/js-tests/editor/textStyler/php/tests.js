@@ -30,6 +30,7 @@ define([
 		expectedStyles: expectedStyles,
 		grammar: mPHP,
 		testText: mText,
-		mimeType: "text/x-php"
+		mimeType: "text/x-php",
+		outputStyles: false
 	};
 });

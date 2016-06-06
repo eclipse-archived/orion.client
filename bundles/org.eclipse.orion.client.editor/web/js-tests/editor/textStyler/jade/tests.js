@@ -30,6 +30,7 @@ define([
 		expectedStyles: expectedStyles,
 		grammar: mJade,
 		testText: mText,
-		mimeType: "text/x-jade"
+		mimeType: "text/x-jade",
+		outputStyles: false
 	};
 });

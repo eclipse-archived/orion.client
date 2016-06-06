@@ -1153,10 +1153,10 @@
 {"start":12217,"end":12221,"style":{"styleClass":"keyword control js"}}
 {"start":12222,"end":12223,"style":{"styleClass":"punctuation section block begin"}}
 {"start":12257,"end":12258,"style":{"styleClass":"punctuation operator"}}
-{"start":12259,"end":12261,"style":{"styleClass":"string quoted double"}}
+{"start":12259,"end":12261,"style":{"styleClass":"string quoted single"}}
 {"start":12263,"end":12276,"style":{"styleClass":"comment line double-slash"}}
 {"start":12303,"end":12304,"style":{"styleClass":"punctuation operator"}}
-{"start":12305,"end":12307,"style":{"styleClass":"string quoted double"}}
+{"start":12305,"end":12307,"style":{"styleClass":"string quoted backtick js"}}
 {"start":12309,"end":12322,"style":{"styleClass":"comment line double-slash"}}
 {"start":12327,"end":12328,"style":{"styleClass":"punctuation section block end"}}
 {"start":12332,"end":12333,"style":{"styleClass":"punctuation section block end"}}

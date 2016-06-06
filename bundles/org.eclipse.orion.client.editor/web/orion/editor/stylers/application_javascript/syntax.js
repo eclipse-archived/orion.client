@@ -50,22 +50,13 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 		id: "orion.js",
 		contentTypes: ["application/javascript"],
 		patterns: [
-			{
-				begin: "'(?:\\\\.|[^\\\\'])*\\\\$",
-				end: "^(?:$|(?:\\\\.|[^\\\\'])*('|[^\\\\]$))",
-				name: "string.quoted.single.js"
-			}, {
-				begin: '"(?:\\\\.|[^\\\\"])*\\\\$',
-				end: '^(?:$|(?:\\\\.|[^\\\\"])*("|[^\\\\]$))',
-				name: "string.quoted.double.js"
-			},
+			{include: "#string_multiline_singleQuote"},
+			{include: "#string_multiline_doubleQuote"},
+			{include: "#templateLiteral"},
 			{include: "orion.lib#string_doubleQuote"},
 			{include: "orion.lib#string_singleQuote"},
 			{include: "orion.c-like#comment_singleLine"},
-			{
-				match: "/(?![\\s\\*])(?:\\\\.|[^/])+/(?:[gim]{0,3})",
-				name: "string.regexp.js"
-			},
+			{include: "#regex"},
 			{include: "orion.lib#doc_block"},
 			{include: "orion.c-like#comment_block"},
 			{include: "#jsFunctionDef"},
@@ -78,22 +69,10 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 			{include: "orion.lib#operator"},
 			{include: "orion.lib#number_decimal"},
 			{include: "orion.lib#number_hex"},
-			{
-				match: "\\b(?:" + keywords.join("|") + ")\\b",
-				name: "keyword.operator.js"
-			},
-			{
-				match: "\\b(?:" + controlKeywords.join("|") + ")\\b",
-				name: "keyword.control.js"
-			},
-			{
-				match: "\\b(?:" + constants.join("|") + ")\\b",
-				name: "constant.language.js"
-			},
-			{
-				match: "\\b(?:" + languageVariables.join("|") + ")\\b",
-				name: "variable.language.js"
-			}
+			{include: "#keywordsOperator"},
+			{include: "#keywordsControl"},
+			{include: "#languageConstant"},
+			{include: "#languageVariable"}
 		],
 		repository: {
 			jsFunctionDef: {
@@ -113,6 +92,73 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 					{
 						match: "[^\\s,]+",
 						name: "variable.parameter.js"
+					}
+				]
+			},
+			keywordsControl: {
+				match: "\\b(?:" + controlKeywords.join("|") + ")\\b",
+				name: "keyword.control.js"
+			},
+			keywordsOperator: {
+				match: "\\b(?:" + keywords.join("|") + ")\\b",
+				name: "keyword.operator.js"
+			},
+			languageConstant: {
+				match: "\\b(?:" + constants.join("|") + ")\\b",
+				name: "constant.language.js"
+			},
+			languageVariable: {
+				match: "\\b(?:" + languageVariables.join("|") + ")\\b",
+				name: "variable.language.js"
+			},
+			string_multiline_singleQuote: {
+				begin: "'(?:\\\\.|[^\\\\'])*\\\\$",
+				end: "^(?:$|(?:\\\\.|[^\\\\'])*('|[^\\\\]$))",
+				name: "string.quoted.single.js"
+			},
+			string_multiline_doubleQuote: {
+				begin: '"(?:\\\\.|[^\\\\"])*\\\\$',
+				end: '^(?:$|(?:\\\\.|[^\\\\"])*("|[^\\\\]$))',
+				name: "string.quoted.double.js"
+			},
+			regex: {
+				match: "/(?![\\s\\*])(?:\\\\.|[^/])+/(?:[gim]{0,3})",
+				name: "string.regexp.js"
+			},
+			templateLiteral: {
+				begin: "`",
+				end: "`",
+				name: "string.quoted.backtick.js",
+				patterns: [
+					{
+						begin: "\\$\\{",
+						end: "\\}",
+						name: "string.interpolated.js",
+						patterns: [
+							{include: "#string_multiline_singleQuote"},
+							{include: "#string_multiline_doubleQuote"},
+							{include: "#templateLiteral"},
+							{include: "orion.lib#string_doubleQuote"},
+							{include: "orion.lib#string_singleQuote"},
+							{include: "orion.c-like#comment_singleLine"},
+							{include: "#regex"},
+							{include: "orion.lib#doc_block"},
+							{include: "orion.c-like#comment_block"},
+							{include: "#jsFunctionDef"},
+							{include: "orion.lib#brace_open"},
+							{include: "orion.lib#brace_close"},
+							{include: "orion.lib#bracket_open"},
+							{include: "orion.lib#bracket_close"},
+							{include: "orion.lib#parenthesis_open"},
+							{include: "orion.lib#parenthesis_close"},
+							{include: "orion.lib#operator"},
+							{include: "orion.lib#number_decimal"},
+							{include: "orion.lib#number_hex"},
+							{include: "#keywordsOperator"},
+							{include: "#keywordsControl"},
+							{include: "#languageConstant"},
+							{include: "#languageVariable"}
+						]
 					}
 				]
 			}

@@ -30,6 +30,7 @@ define([
 		expectedStyles: expectedStyles,
 		grammar: mJava,
 		testText: mText,
-		mimeType: "text/x-java-source"
+		mimeType: "text/x-java-source",
+		outputStyles: false
 	};
 });

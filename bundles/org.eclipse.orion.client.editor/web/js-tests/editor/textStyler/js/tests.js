@@ -30,6 +30,7 @@ define([
 		expectedStyles: expectedStyles,
 		grammar: mJS,
 		testText: mText,
-		mimeType: "application/javascript"
+		mimeType: "application/javascript",
+		outputStyles: false
 	};
 });

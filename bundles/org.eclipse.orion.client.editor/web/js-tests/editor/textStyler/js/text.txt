@@ -382,8 +382,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					viewDiv.style.pointerEvents = "none"; //$NON-NLS-0$
 					viewDiv.style.zIndex = "2"; //$NON-NLS-0$
 				} else {
-					viewDiv.style.pointerEvents = ""; //$NON-NLS-0$
-					viewDiv.style.zIndex = ""; //$NON-NLS-0$
+					viewDiv.style.pointerEvents = ''; //$NON-NLS-0$
+					viewDiv.style.zIndex = ``; //$NON-NLS-0$
 				}
 			}
 			if (!init) {
