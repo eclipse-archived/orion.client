@@ -158,7 +158,7 @@
 					var repositories = Object.keys(pref);
 					
 					for(var i=0; i<repositories.length; ++i){
-						if(repositories[i] !== "settings"){
+						if(repositories[i] !== "settings" && repositories[i] !== "electronDefault"){
 							result.push(repositories[i]);
 						}
 					}
@@ -168,7 +168,19 @@
 			);
 			
 			return d;
-		}
+		},
+			/**
+		 * default enable for electron.
+		 */
+		defaultEnableforElectron : function(){
+			this._preferenceService.get(this._prefix, undefined, {scope: 2}).then(
+				function(pref){
+					var electronDefault = pref["electronDefault"];
+					if(electronDefault === undefined){
+						return this._preferenceService.put(this._prefix, {electronDefault: { iselectron : true },settings: { enabled : true }}, {scope: 2});
+					}
+				}.bind(this));
+		},
 	};
 	
 	PreferenceStorage.prototype.constructor = PreferenceStorage;

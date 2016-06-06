@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/git/gitPreferenceStorage', 'orion/git/gitConfigPreference', 'orion/webui/littlelib', 'orion/objects', 'orion/i18nUtil',
-		'orion/widgets/settings/Subsection', 'orion/widgets/input/SettingsTextfield', 'orion/widgets/input/SettingsCheckbox', 'orion/widgets/input/SettingsCommand'
-		], function(messages, require, mCommands, GitPreferenceStorage, GitConfigPreference, lib, objects, i18nUtil, Subsection, SettingsTextfield, SettingsCheckbox, SettingsCommand) {
+		'orion/widgets/settings/Subsection', 'orion/widgets/input/SettingsTextfield', 'orion/widgets/input/SettingsCheckbox', 'orion/widgets/input/SettingsCommand','orion/util'
+		], function(messages, require, mCommands, GitPreferenceStorage, GitConfigPreference, lib, objects, i18nUtil, Subsection, SettingsTextfield, SettingsCheckbox, SettingsCommand,util) {
 
 	function GitSettings(options, node) {
 		objects.mixin(this, options);
@@ -91,6 +91,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			) ];
 			var gitCredentialsSection;
 			var that = this;
+			if(util.isElectron){
+				var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
+				gitPreferenceStorage.defaultEnableforElectron();
+			}
 			
 			// erase credentials command
 			var erasePrivateKeyCommand = new mCommands.Command({
