@@ -159,9 +159,11 @@ define([
 	            		var tokens = context.getTokens(node),
 	            			len = tokens.length, 
 	            			operator = node.operator;
+	            		// node is a binary expression node so node.left exists
+	            		var start = node.left.end; // we need to start to look for the operator at the end of the left node
 	            		for (var i=0; i < len; i++) {
 	            			var t = tokens[i];
-	            			if (t.value === operator) {
+	            			if (t.start > start && t.value === operator) {
 	            				return t;
 	            			}
 	            		}

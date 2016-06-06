@@ -1112,6 +1112,34 @@ define([
 								worker.getTestState().callback(error);
 							});
 					});
+					it("should flag == 2", function(callback) {
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: "var a = 6;var b = 7;var c = 8;var test = a == b == c;", callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Expected '===' and instead saw '=='.",
+										nodeType: "BinaryExpression",
+										start: 48,
+										end: 50
+									},
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Expected '===' and instead saw '=='.",
+										nodeType: "BinaryExpression",
+										start: 43,
+										end: 45
+									}
+								]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
 				});
 				// MISSING-DOC DECL------------------------------------------------
 				describe("missing-doc - function declaration", function(){
