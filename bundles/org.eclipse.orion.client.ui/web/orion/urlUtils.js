@@ -57,8 +57,8 @@ define(['orion/PageUtil', "orion/URL-shim"], function(PageUtil) {
 	
     /**
      * Render an array of string segments.
-     * @param {dom node} parentNode The given parent dom node where the segements will be rendered.
-     * @param {orion.urlUtils.Segment[]} segements The given array containing all the segments.
+     * @param {dom node} parentNode The given parent dom node where the segments will be rendered.
+     * @param {orion.urlUtils.Segment[]} segments The given array containing all the segments.
 	 */
 	function processURLSegments(parentNode, segments) {
 		segments.forEach(function(segment) {
