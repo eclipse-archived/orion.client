@@ -41,7 +41,7 @@ case $key in
 	shift # past argument
 	;;
 	-b|--build)
-	build="$2"
+	BUILD="$2"
 	shift
 	;;
     *)
@@ -91,7 +91,7 @@ mkdir ../buildTemp
 
 pushd ../buildTemp
 echo "Copying over orionode_${BUILD} build"
-cp ~/downloads/orionode_$build.tar.gz .
+cp ~/downloads/orionode_${BUILD}.tar.gz .
 
 new_release
 
