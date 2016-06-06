@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# TODO follow flow of orionode_build.sh
-# TODO change Orion-Setup-x.x.x.exe to Orion-x.x.x-setup.exe
-# TODO pass user, repo, dist_path as parameters in bash
-# TODO modularize
-# TODO change for loops
+## WARNING do not run with sudo, it will break wine and cause many permission issues
+# Example usage ***** REMOVE LAST EXAMPLE BEFORE COMMITTING *****
+# ./uploadRelease.sh --build <build timestamp> --certificate <certificate name> --description <Github release description>--token <Github API token> --user <Github user> --repo <repo>
+# ./uploadRelease.sh -b <build timestamp> -c <certificate name> -d <Github release description> -t <Github API token> -u <Github user> -r <repo>
+# ./uploadRelease.sh --build 2016-06-01_16-31-18 --certificate "IBM" --description "this desc was passed via cmd line" --token b4515ae8e2fdcafb869e11cce08e57e85c4fb480 --user mzmousa --repo Orion-Update
 
 pushd () {
     command pushd "$@" > /dev/null
@@ -14,215 +14,190 @@ popd () {
     command popd "$@" > /dev/null
 }
 
+# parse command line arguments
+while [[ $# > 1 ]]
+do
+key="$1"
 
-export GITHUB_TOKEN="b4515ae8e2fdcafb869e11cce08e57e85c4fb480"
-export CSC_NAME="IBM"	
+case $key in
+    -t|--token)
+    GITHUB_TOKEN="$2"
+    shift # past argument
+    ;;
+    -d|--description)
+    description="$2"
+    shift # past argument
+    ;;
+    -u|--user)
+    user="$2"
+    shift # past argument
+    ;;
+    -r|--repo)
+	repo="$2"
+	shift # past argument
+	;;
+	-c|--certificate)
+	CSC_NAME="$2"
+	shift # past argument
+	;;
+	-b|--build)
+	build="$2"
+	shift
+	;;
+    *)
+    # fall through any other options
+    ;;
+esac
+shift # past argument or value
+done
 
-# pass these as parameters later
-user="mzmousa"
-repo="Orion-Update"
+# environment variables
+export GITHUB_TOKEN # required for uploading Github releases
+export CSC_NAME # required for OSX autoUpdater-functional builds
 
 # constants
-description=$(grep "description" ../package.json | awk -F: '{ print $2 }' | sed 's/[",]//g' | sed 's/^[ \t]*//') # remove quotes, then remove leading spaces
-update_url_base="orion-update.mybluemix.net/download"
-name=$(grep "name" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
-	
-#npm version patch # increments version patch, e.g., 1.0.0 -> 1.0.1  
-#old_pkg_version=$(grep "version" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
-pkg_version=$(grep "version" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
-pkg_version=`echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
+pkg_version=$(grep -m1 "version" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
 vpkg_version="v${pkg_version}"
+name=$(grep -m1 "name" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
 
-# update URL for autoUpdater
-#old_update_url="${update_url_base}/${old_pkg_version}"
-#new_update_url="${update_url_base}/${pkg_version}"
+# functions
 
+# upload a file under the specified github release
+# $1: file name/path
+upload () {
+	echo $1
+	~/Downloads/github-release upload --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name $1 --file $1
+}
+
+# create a new release
+# $1: String for release description
+new_release() {
+	~/Downloads/github-release release --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${vpkg_version}" --description "${description}"
+}
+
+# node module clean up
+cleanup_nodemodules() {
+	echo "Cleaning up node modules" 
+	rm -rf orionode/node_modules/passport*
+	rm -rf orionode/node_modules/mongoose
+	rm -rf orionode/node_modules/mongodb
+	rm -rf orionode/node_modules/nodemailer
+	rm orionode/node_modules/nodegit/build/Release/nodegit.node
+}
 echo "Setting up build directories"
 
 rm -rf ../buildTemp
-mkdir buildTemp
-mkdir -p ../buildTemp/osx
-mkdir -p ../buildTemp/win
+mkdir ../buildTemp
 
 pushd ../buildTemp
-echo "Copying over orionode_$BUILD build"
-cp ~/downloads/orion/orionode/orionode_${BUILD_ID}.tar.gz .
+echo "Copying over orionode_${BUILD} build"
+cp ~/downloads/orionode_$build.tar.gz .
 
-echo "OSX build -----"
+new_release
+
+# ---------------------------------------- OSX BUILD ----------------------------------------
+
+echo "----- OSX build -----"
+mkdir osx
 pushd osx
 echo "Extracting build"
-tar -xzf ../orionode_${BUILD_ID}.tar.gz
+tar -xzf ../orionode_$build.tar.gz
 
-echo "Cleaning up node modules" 
-rm -rf orionode/node_modules/passport*
-rm -rf orionode/node_modules/mongoose
-rm -rf orionode/node_modules/mongodb
-rm -rf orionode/node_modules/nodemailer
-rm orionode/node_modules/nodegit/build/Release/nodegit.node
+cleanup_nodemodules
 
 # copy over nodegit binary to workaround in memory ssh limitation
-cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/mac/nodegit.node orionode/node_modules/nodegit/build/Release
+cp ~/downloads/nodegit/osx/nodegit.node ./orionode/node_modules/nodegit/build/Release
 
 pushd orionode
 
 cp ../../../package.json .
-cp ../../../build/icon.icns build
-cp ../../../build/icon.ico build
-cp ../../../build/orionLogo.gif build
+cp ../../../build/icons/icon.icns ./build
+cp ../../../build/icons/orionLogo.gif ./build
 
-# create a new, formal release
-github-release release --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${vpkg_version}" --description "${description}"
-
-# path to distributable files (pass as cmd line arg)
-dist_path="./dist"
-
-# generates osx artifacts: .dmg, -mac.zip, .app, versions, LICENSES, LICEN
+# generates osx artifacts: dmg, -mac.zip
 npm run dist:osx
 echo "osx artifacts generated"
 
-# path to osx artifacts
-dist_path_osx="${dist_path}/osx"
+upload "${name}-${pkg_version}.dmg"
+upload "${name}-${pkg_version}-mac.zip"
 
-# put all osx files into array
-osx_files=("${dist_path_osx}/"*)    
+popd # pop orionode
+popd # pop osx
 
-# upload all distributables to the new release
-for ((i=0; i<${#osx_files[@]}; i++)); do	
-    file_path="${osx_files[$i]}"
-    file_name="${file_path#$dist_path_osx/}" # remove leading dirs, e.g., ./dist/win/app.exe -> app.exe
-    file_name="${file_name// /-}" # if the name has whitespace, replace with dashes
-    new_path="${dist_path_osx}/${file_name}"
-    mv "${file_path}" "${new_path}"
-    necessary_file=$(echo ${file_name} | grep -e "\.dmg" -e "\.zip" || echo 0 ) # if filename is not Orion-x.x.x-osx.(dmg|zip) exclude it
-    if [[ $necessary_file != "0" ]] ; then
-        github-release upload --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${file_name}" --file "${new_path}"
-        echo "uploaded ${file_name}"
-    else
-        # rm $file_path
-        echo "${file_name} was not uploaded"
-    fi
-done
+# ---------------------------------------- WINDOWS BUILD ----------------------------------------
 
-popd
-popd
-
-echo "WIN build -----"
+echo "----- WIN build -----"
 mkdir win
 pushd win
 echo "Extracting build"
-tar -xzf ../orionode_${BUILD_ID}.tar.gz
+tar -xzf ../orionode_2016-06-01_16-31-18.tar.gz
 
-echo "Cleaning up node modules" 
-rm -rf orionode/node_modules/passport*
-rm -rf orionode/node_modules/mongoose
-rm -rf orionode/node_modules/mongodb
-rm -rf orionode/node_modules/nodemailer
-rm orionode/node_modules/nodegit/build/Release/nodegit.node
+cleanup_nodemodules
 
 # copy over nodegit binary to workaround in memory ssh limitation
-cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/windows/nodegit.node orionode/node_modules/nodegit/build/Release
+cp ~/downloads/nodegit/win/nodegit.node orionode/node_modules/nodegit/build/Release
 
 pushd orionode
 
 cp ../../../package.json .
-cp ../../../build/icon.icns build
-cp ../../../build/icon.ico build
-cp ../../../build/orionLogo.gif build
+cp ../../../build/icons/orion.ico build
+cp ../../../build/icons/orionLogo.gif build
 
 # generates windows artifacts: -full.nupkg, -delta.nupkg, .exe, RELEASES
 npm run dist:win
-popd
-echo "windows artifacts generated"  
+echo "windows artifacts generated"
 
-rm -rf win-unpacked
+pushd dist/win
 
-# path to windows artifacts
-dist_path_win="${dist_path}/win"
+mv "${name} Setup ${pkg_version}.exe" "${name}-${pkg_version}-setup.exe"
 
-# put all win files into array
-win_files=("${dist_path_win}/"*)
+nupkg="${name}-${pkg_version}-full.nupkg"
+setup="${name}-${pkg_version}-setup.exe"
 
-# upload all win64 distributables to the new release
-for ((i=0; i<${#win_files[@]}; i++)); do
-    file_path="${win_files[$i]}"
-    file_name="${file_path#$dist_path_win/}" # remove leading dirs, e.g., ./dist/win/app.exe -> app.exe
-    file_name="${file_name// /-}" # if the name has whitespace, replace with dashes
-    new_path="${dist_path_win}/${file_name}"
-    mv "${file_path}" "${new_path}" # rename our file to remove spaces
-    necessary_file=$(echo ${file_name} | grep -e "${pkg_version}" -e "RELEASES" || echo 0 ) # only upload files with correct version
-    if [[ $necessary_file != "0" ]] ; then
-        github-release upload --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${file_name}" --file "${new_path}"
-        echo "uploaded ${file_name}"
-    else
-        # rm $file_path
-        echo "${file_name} was not uploaded"
-    fi
-done
+upload "RELEASES"
+upload "${name}-${pkg_version}-full.nupkg"
+upload "${name}-${pkg_version}-setup.exe"
 
-popd
-popd
+popd # pop dist/win
+popd # pop orionode
+popd # pop win
 
-echo "LINUX build -----"
+# ---------------------------------------- LINUX BUILD ----------------------------------------
+
+echo "----- LINUX build -----"
 mkdir linux
 pushd linux
 echo "Extracting build"
-tar -xzf ../orionode_${BUILD_ID}.tar.gz
+tar -xzf ../orionode_2016-06-01_16-31-18.tar.gz 
 
-echo "Cleaning up node modules" 
-rm -rf orionode/node_modules/passport*
-rm -rf orionode/node_modules/mongoose
-rm -rf orionode/node_modules/mongodb
-rm -rf orionode/node_modules/nodemailer
-rm orionode/node_modules/nodegit/build/Release/nodegit.node
-
+cleanup_nodemodules
 # copy over nodegit binary to workaround in memory ssh limitation
-cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/linux/nodegit.node orionode/node_modules/nodegit/build/Release
+cp ~/downloads/nodegit/linux/nodegit.node orionode/node_modules/nodegit/build/Release
 
 pushd orionode
 
 cp ../../../package.json .
-cp ../../../build/icon.icns build
-cp ../../../build/icon.ico build
-cp ../../../build/orionLogo.gif build
+cp ../../../build/icons/icon.icns build
+cp ../../../build/icons/orionLogo.gif build
 
 # generates linux artifacts: .rpm, .tar.gz, .deb
 npm run dist:linux
-rm -rf ./dist/linux
-pushd ./dist
-mv "Orion-${pkg_version}.deb" "Orion-${pkg_version}.rpm" "Orion-${pkg_version}.tar.gz" linux
-
 echo "linux artifacts generated"
 
-popd
+pushd dist
+mv "Orion-${pkg_version}.deb" "Orion-${pkg_version}.rpm" "Orion-${pkg_version}.tar.gz" linux
 
-# path to linux artifacts
-dist_path_linux="${dist_path}/linux"
+pushd linux
 
-# put all linux files into array
-linux_files=("${dist_path_linux}/"*)
+# upload linux artifacts to new release
+upload "${name}-${pkg_version}.deb"
+upload "${name}-${pkg_version}.rpm"
+upload "${name}-${pkg_version}.tar.gz"
 
-# upload all linux distributables to the new releases
-for ((i=0; i<${#linux_files[@]}; i++)); do
-    file_path="${linux_files[$i]}"
-    file_name="${file_path#$dist_path_linux/}" # remove leading dirs, e.g., ./dist/win/app.exe -> app.exe
-    file_name="${file_name// /-}" # if the name has whitespace, replace with dashes
-    new_path="${dist_path_linux}/${file_name}"
-    mv "${file_path}" "${new_path}" # rename our file to not have spaces
-    necessary_file=$(echo ${file_name} | grep -e "\.deb" -e "\.rpm" -e "\.tar.gz" || echo 0 ) # only upload deb rpm and tar.gz filetypes
-    if [[ $necessary_file != "0" ]] ; then
-        ~/Downloads/github-release upload --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${file_name}" --file "${new_path}"
-        echo "uploaded ${file_name}"
-    else
-        # rm $file_path
-        echo "${file_name} was not uploaded"
-    fi
-done
+popd # pop linux
+popd # pop dist
+popd # pop orionode
+popd # pop linux
 
-#restore remoteReleases URL to current version for future builds
-#sed -i -e "s@${old_update_url}@${new_update_url}@g" package.json
-
-#echo $(cat package.json | grep remoteReleases)
-
-popd
-popd
+popd # pop buildTemp
 
