@@ -726,9 +726,9 @@ exports.TwoWayCompareView = (function() {
 	/**
 	 * Convert the 0-based line number from logical to physical or vice versa. 
 	 * @param[int] lineNumber The 0 based line number to convert.
-	 * @param[boolean] reverse If false or not defined, convert from logical number to phsical number. Otherwie convert from physical to logical.
+	 * @param[boolean] reverse If false or not defined, convert from logical number to physical number. Otherwise convert from physical to logical.
 	 * 				   Physical number is the line number in the text editor, merged if any. Logical number is what shows in the ruler.
-	 * @returns {int} the converted number, 0-based. -1 means that the phical number can not be converted to a logical number, which means an empty number in the ruler.
+	 * @returns {int} the converted number, 0-based. -1 means that the physical number cannot be converted to a logical number, which means an empty number in the ruler.
 	 */
 	TwoWayCompareView.prototype.getLineNumber = function(lineNumber){
 		return lineNumber;
@@ -960,11 +960,11 @@ exports.InlineCompareView = (function() {
 	/**
 	 * Convert the 0-based line number from logical to physical or vice versa. 
 	 * @param[int] lineNumber The 0 based line number to convert.
-	 * @param[boolean] reverse If false or not defined, convert from logical number to phsical number. Otherwie convert from physical to logical.
+	 * @param[boolean] reverse If false or not defined, convert from logical number to physical number. Otherwise convert from physical to logical.
 	 * 				   Physical number is the line number in the text editor, merged if any. Logical number is what shows in the ruler.
-	 * @param[boolean] onOldFile If false or not defined, convert from logical number to phsical number on the new file. Otherwie convert o nthe old file.
+	 * @param[boolean] onOldFile If false or not defined, convert from logical number to physical number on the new file. Otherwise convert on the old file.
 	 * 				   Physical number is the line number in the text editor, merged if any. Logical number is what shows in the ruler.
-	 * @returns {int} the converted number, 0-based. -1 means that the phical number can not be converted to a logical number, which means an empty number in the ruler.
+	 * @returns {int} the converted number, 0-based. -1 means that the physical number cannot be converted to a logical number, which means an empty number in the ruler.
 	 */
 	InlineCompareView.prototype.getLineNumber = function(lineNumber, reverse, onOldFile){
 		if(reverse) {

@@ -6878,7 +6878,7 @@ public void setDoubleClickEnabled(boolean enable) {
  * Sets whether the widget content can be edited.
  * </p>
  *
- * @param editable if true content can be edited, if false content can not be 
+ * @param editable if true content can be edited, if false content cannot be 
  * 	edited
  * @exception SWTException <ul>
  *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
@@ -7082,7 +7082,7 @@ public void setLineBackground(int startLine, int lineCount, Color background) {
 	checkWidget();
 	int partialBottomIndex = getPartialBottomIndex();
 	
-	// this API can not be used if the client is providing the line background
+	// this API cannot be used if the client is providing the line background
 	if (userLineBackground) {
 		return;
 	}
@@ -7413,7 +7413,7 @@ void internalSetSelection(int start, int length, boolean sendEvent) {
 public void setStyleRange(StyleRange range) {
 	checkWidget();
 	
-	// this API can not be used if the client is providing the line styles
+	// this API cannot be used if the client is providing the line styles
 	if (userLineStyle) {
 		return;
 	}
@@ -7466,7 +7466,7 @@ public void setStyleRange(StyleRange range) {
  */
 public void setStyleRanges(StyleRange[] ranges) {
 	checkWidget();
-	// this API can not be used if the client is providing the line styles
+	// this API cannot be used if the client is providing the line styles
 	if (userLineStyle) {
 		return;
 	}

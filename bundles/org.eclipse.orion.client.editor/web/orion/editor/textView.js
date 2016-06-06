@@ -6895,7 +6895,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 					return false;
 				}
 			}
-			/* no event and no permission, copy can not be done */
+			/* no event and no permission, copy cannot be done */
 			cleanup();
 			return true;
 		},

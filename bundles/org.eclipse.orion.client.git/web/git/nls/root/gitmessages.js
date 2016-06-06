@@ -506,7 +506,7 @@ define({//Default message bundle
 	"Create new repository" : "Create new repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"Attach the remote to one of your existing repositories" : "Attach the remote to one of your existing repositories", //$NON-NLS-0$  //$NON-NLS-1$
 	"You are reviewing contribution ${0} from ${1}" : "You are reviewing contribution ${0} from ${1}", //$NON-NLS-0$  //$NON-NLS-1$
-	"CommitNotFoundInWorkspace" : "Unfortunately the commit can not be found in your workspace. To see it try one of the following: ", //$NON-NLS-0$  //$NON-NLS-1$
+	"CommitNotFoundInWorkspace" : "Unfortunately the commit cannot be found in your workspace. To see it try one of the following: ", //$NON-NLS-0$  //$NON-NLS-1$
  	"To review the commit you can also:" : "To review the commit you can also:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Contribution Review Request for ${0} on ${1}" : "Contribution Review Request for ${0} on ${1}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Failing paths: ${0}": "Failing paths: ${0}", //$NON-NLS-0$  //$NON-NLS-1$
