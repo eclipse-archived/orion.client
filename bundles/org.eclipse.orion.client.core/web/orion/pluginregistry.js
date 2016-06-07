@@ -1348,24 +1348,24 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 
             if (configuration.plugins) {
                 Object.keys(configuration.plugins).forEach(function(url) {
-                    url = _normalizeURL(url);
-                    //                    if (!httpOrHttps.test(url)) {
-                    //                        console.log("Illegal Plugin URL: " + url);
-                    //                        return;
-                    //                    }
-                    var plugin = this.getPlugin(url);
-                    if (!plugin) {
-                        var manifest = configuration.plugins[url];
-                        if (typeof manifest !== "object") {
-                        	manifest = internalRegistry.getPersisted(url) || {};
-                        }
-                        manifest.autostart = manifest.autostart || configuration.defaultAutostart || "lazy";
-                        plugin = new Plugin(url, manifest, internalRegistry);
-                        plugin._default = true;
-                        _plugins.push(plugin);
-                    } else {
-                        plugin._default = true;
-                    }
+		            url = _normalizeURL(url);
+		            //                    if (!httpOrHttps.test(url)) {
+		            //                        console.log("Illegal Plugin URL: " + url);
+		            //                        return;
+		            //                    }
+		            var plugin = this.getPlugin(url);
+		            if (!plugin) {
+		                var manifest = configuration.plugins[url];
+		                if (typeof manifest !== "object") {
+		                	manifest = internalRegistry.getPersisted(url) || {};
+		                }
+		                manifest.autostart = manifest.autostart || configuration.defaultAutostart || "lazy";
+		                plugin = new Plugin(url, manifest, internalRegistry);
+		                plugin._default = true;
+		                _plugins.push(plugin);
+		            } else {
+		                plugin._default = true;
+		            }
                 }.bind(this));
             }
             _plugins.sort(function(a, b) {

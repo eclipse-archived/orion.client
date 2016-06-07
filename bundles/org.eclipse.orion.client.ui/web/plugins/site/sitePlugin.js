@@ -72,47 +72,47 @@ define([
 				order: 50,
 				uriTemplate: "{+OrionHome}/sites/"
 			});
-		}
 
-		// Default link to ensure "Sites" category is never empty
-		provider.registerService("orion.page.link", null, {
-			name: messages["Sites"],
-			id: "orion.sites",
-			nls: "orion/nls/messages",
-			category: "sites",
-			order: 1000, // low priority
-			uriTemplate: "{+OrionHome}/sites/sites.html"
-		});
+			// Default link to ensure "Sites" category is never empty
+			provider.registerService("orion.page.link", null, {
+				name: messages["Sites"],
+				id: "orion.sites",
+				nls: "orion/nls/messages",
+				category: "sites",
+				order: 1000, // low priority
+				uriTemplate: "{+OrionHome}/sites/sites.html"
+			});
 	
-		provider.registerService("orion.page.link", null, {
-			name: messages["Sites"],
-			id: "orion.sites.2",
-			nls: "orion/nls/messages",
-			category: "sites",
-			order: 10, // Make this the first since it's the most useful one
-			uriTemplate: "{+OrionHome}/sites/sites.html"
-		});
+			provider.registerService("orion.page.link", null, {
+				name: messages["Sites"],
+				id: "orion.sites.2",
+				nls: "orion/nls/messages",
+				category: "sites",
+				order: 10, // Make this the first since it's the most useful one
+				uriTemplate: "{+OrionHome}/sites/sites.html"
+			});
 	
-		provider.registerService('orion.navigate.command', null, {
-			id: 'orion.site.' + host.hostname + '.viewon',
-			name: messages['View on Site'],
-			tooltip: messages['View this file or folder on a web site hosted by Orion'],
-			nls: 'orion/nls/messages',
-			forceSingleItem: true,
-			category: 'sites',
-			validationProperties: filesAndFoldersOnService(fileBase),
-			uriTemplate: '{+OrionHome}/sites/view.html#,file={,Location}'
-		});
+			provider.registerService('orion.navigate.command', null, {
+				id: 'orion.site.' + host.hostname + '.viewon',
+				name: messages['View on Site'],
+				tooltip: messages['View this file or folder on a web site hosted by Orion'],
+				nls: 'orion/nls/messages',
+				forceSingleItem: true,
+				category: 'sites',
+				validationProperties: filesAndFoldersOnService(fileBase),
+				uriTemplate: '{+OrionHome}/sites/view.html#,file={,Location}'
+			});
 	
-		provider.registerService('orion.page.link.related', null, {
-			id: 'orion.site.' + host.hostname + '.viewon',
-			name: messages['View on Site'],
-			tooltip: messages['View this file or folder on a web site hosted by Orion'],
-			nls: 'orion/nls/messages',
-			category: 'sites',
-			validationProperties: filesAndFoldersOnService(fileBase),
-			uriTemplate: '{+OrionHome}/sites/view.html#,file={,Location}'
-		});
+			provider.registerService('orion.page.link.related', null, {
+				id: 'orion.site.' + host.hostname + '.viewon',
+				name: messages['View on Site'],
+				tooltip: messages['View this file or folder on a web site hosted by Orion'],
+				nls: 'orion/nls/messages',
+				category: 'sites',
+				validationProperties: filesAndFoldersOnService(fileBase),
+				uriTemplate: '{+OrionHome}/sites/view.html#,file={,Location}'
+			});
+		}
 	
 		provider.registerService('orion.site',
 			new siteImpl.SiteImpl(fileBase, workspaceBase, mSelfHostingRules),
