@@ -52,8 +52,8 @@ shift # past argument or value
 done
 
 # environment variables
-export GITHUB_TOKEN # required for uploading Github releases
-export CSC_NAME # required for OSX autoUpdater-functional builds
+export GITHUB_TOKEN=${GITHUB_TOKEN} # required for uploading Github releases
+export CSC_NAME=${CSC_NAME} # required for OSX autoUpdater-functional builds
 
 # constants
 pkg_version=$(grep -m1 "version" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
