@@ -106,7 +106,7 @@ tar -xzf ../orionode_${BUILD}.tar.gz
 cleanup_nodemodules
 
 # copy over nodegit binary to workaround in memory ssh limitation
-cp ~/downloads/nodegit/osx/nodegit.node ./orionode/node_modules/nodegit/build/Release
+cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/mac/nodegit.node ./orionode/node_modules/nodegit/build/Release
 
 pushd orionode
 
@@ -135,7 +135,7 @@ tar -xzf ../orionode_2016-06-01_16-31-18.tar.gz
 cleanup_nodemodules
 
 # copy over nodegit binary to workaround in memory ssh limitation
-cp ~/downloads/nodegit/win/nodegit.node orionode/node_modules/nodegit/build/Release
+cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/windows/nodegit.node orionode/node_modules/nodegit/build/Release
 
 pushd orionode
 
@@ -172,7 +172,7 @@ tar -xzf ../orionode_2016-06-01_16-31-18.tar.gz
 
 cleanup_nodemodules
 # copy over nodegit binary to workaround in memory ssh limitation
-cp ~/downloads/nodegit/linux/nodegit.node orionode/node_modules/nodegit/build/Release
+cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/linux/nodegit.node orionode/node_modules/nodegit/build/Release
 
 pushd orionode
 
