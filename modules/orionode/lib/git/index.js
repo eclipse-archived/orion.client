@@ -32,12 +32,12 @@ module.exports.router = function(options) {
 function getIndex(req, res) {
 	var repo;
 	var index;
-	var filePath = path.join(req.user.workspaceDir, req.params["0"]);
+	var filePath;
 
 	return clone.getRepo(req)
 	.then(function(repoResult) {
 		repo = repoResult;
-		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
+		filePath = clone.getfileRelativePath(repo,req);
 		return repo;
 	})
 	.then(function(repo) {
@@ -59,12 +59,12 @@ function getIndex(req, res) {
 
 function putIndex(req, res) {
 	var index, repo;
-	var filePath = path.join(req.user.workspaceDir, req.params["0"]);
+	var filePath; 
 
 	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
-		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
+		filePath = clone.getfileRelativePath(repo,req);
 		return repo.refreshIndex();
 	})
 	.then(function(indexResult) {
@@ -97,7 +97,7 @@ function putIndex(req, res) {
 function postIndex(req, res) {
 	var repo;
 	var resetType = req.body.Reset;
-	var filePath = path.join(req.user.workspaceDir, req.params["0"]);
+	var filePath = clone.getfileAbsolutePath(req); 
 	
 	return clone.getRepo(req)
 	.then(function(_repo) {
