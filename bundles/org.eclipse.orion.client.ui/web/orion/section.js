@@ -314,7 +314,7 @@ define([
 		 * Get the header DOM node
 		 * @returns {DomNode} The dom node that holds the section header.
 		 */
-		getHeaderElement: function(title){
+		getHeaderElement: function(){
 			return this.domNode;
 		},
 		
@@ -322,7 +322,7 @@ define([
 		 * Get the title DOM node
 		 * @returns {DomNode} The dom node that holds the section title.
 		 */
-		getTitleElement: function(title){
+		getTitleElement: function(){
 			return this.titleNode;
 		},
 		
@@ -330,7 +330,7 @@ define([
 		 * Get the title DOM node
 		 * @returns {DomNode} The dom node that holds the section title.
 		 */
-		getActionElement: function(title){
+		getActionElement: function(){
 			return this._toolActionsNode;
 		},
 		
