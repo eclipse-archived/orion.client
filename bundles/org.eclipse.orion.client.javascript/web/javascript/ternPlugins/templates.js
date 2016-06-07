@@ -61,7 +61,7 @@ define([
 			prefix: "for", //$NON-NLS-1$
 			name: "for statement", //$NON-NLS-1$
 			nodes: {top:true, member:false, prop:false},
-			template: "for (var ${i}=0; ${i}<${array}.length; ${i}++) {\n\t${cursor}\n}", //$NON-NLS-1$
+			template: "for (var ${i} = 0; ${i} < ${array}.length; ${i}++) {\n\t${cursor}\n}", //$NON-NLS-1$
 			url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for", 
 			doc: Messages['forArray'],
 			ecma: 5
@@ -70,7 +70,7 @@ define([
 			prefix: "for", //$NON-NLS-1$
 			name: "for statement (with loop variable)", //$NON-NLS-1$
 			nodes: {top:true, member:false, prop:false},
-			template: "for (var ${i}=0; ${i}<${array}.length; ${i}++) {\n\tvar ${value} = ${array}[${i}];\n\t${cursor}\n}", //$NON-NLS-1$
+			template: "for (var ${i} = 0; ${i} < ${array}.length; ${i}++) {\n\tvar ${value} = ${array}[${i}];\n\t${cursor}\n}", //$NON-NLS-1$
 			url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for", 
 			doc: Messages['forArrayVar'],
 			ecma: 5
@@ -142,7 +142,7 @@ define([
 			prefix: "switch", //$NON-NLS-1$
 			name: "switch statement", //$NON-NLS-1$
 			nodes: {top:true, member:false, prop:false},
-			template: "switch (${expression}) {\n\tcase ${value1}:\n\t\t${cursor}\n\t\tbreak;\n\tdefault:\n}", //$NON-NLS-1$
+			template: "switch (${expression}) {\n\tcase ${value1}:\n\t\t${cursor}\n\t\tbreak;\n\tdefault:\n\t\tbreak;\n}", //$NON-NLS-1$
 			url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/switch", 
 			doc: Messages['switchSimple'],
 			ecma: 5
