@@ -20,34 +20,42 @@
 					'orion/searchAndReplace/textSearcher': '/embeddedEditor/builder/buildFrom/textSearcher'
 				}
 			});
-			require(["embeddedEditor/demo/demoCodeEdit"]);
+			require(["embeddedEditor/demo/demoCodeEditTern"]);
 		</script>
     </head>
 
 	<body id="orion-browser" spellcheck="false" class="orionPage">
 		<div class="embeddedEditorDemoTextParent">
-			<p>This is a demo for the <b>stand alone</b> embedded editor widget. This demo consumes the <b>non-built version</b> of the widget.</p> 
-			<p>Keep editing in this demo and try:</p>
-			<ol>
-				<li>Content assist. E.g., put cursor after "foo." at the last line and press CTRL+space.</li>
-				<li>Problem validations. E.g., modify something and you will see new validation markers coming up, if any.</li>
-				<li>Hover service. Hover on any error markers or inside the editor.</li>
-				<li>Syntax highlighting.</li>
-				<li>Quick fix. Hover on a problem inside the editor, not on the ruler, e.g., (char, from) in this demo. Click on the quick fix and see.</li>
-				<li>Find declaration. Select a variable and press F3.</li>
-				<li>New tooling features coming while Orion is being improved...</li>
-			</ol>
+			<p>This demo shows how the <b>.tern-project</b> and <b>.eslintrc</b> files are used to configure the javascript validation in the <b>Orion codeEdit</b> widget. 
+			The <b>.tern-project</b> file can be modified automatically by the quick fix. 
+			You can also manually update the <b>.tern-project</b> or the <b>.eslintrc</b> files and the javascript file on the top will be revalidated right away.
+			
+			</p> 
 		</div>
 		<!--*<form> -->
 		<div class="embeddedEditorDemoTextParent">
 			<span id = "progressMessageDiv">Loading language tooling plugins...</span>
 		</div>
+		<!--
 		<div class="embeddedEditorTool" id="__toolbar__">
 			<span id = "progressMessageDiv"></span>
 		</div>
+		-->
 		<div class="embeddedEditorParentOuter" id="embeddedEditor">
 		</div>
-		<div class="embeddedEditorParentOuter" id="embeddedEditor1">
+		<div class="embeddedEditorTitleOuter" style="border: none">
+			<div class="embeddedEditorParentInner" style="float: left; border: none">.tern-project file
+			</div>
+			<div class="embeddedEditorParentInner" style="float: right; border: none">
+				<span>.eslintrc file. Rules are described <span>
+				<a href="http://eslint.org/docs/rules/">here.<a>
+			</div>
+		</div>
+		<div class="embeddedEditorParentOuter" style="border: none">
+			<div class="embeddedEditorParentInner" id="embeddedEditor1" style="float: left">
+			</div>
+			<div class="embeddedEditorParentInner" id="embeddedEditor2" style="float: right">
+			</div>
 		</div>
 		<!-- </form> -->
 	</body>

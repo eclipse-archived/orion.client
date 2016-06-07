@@ -538,7 +538,9 @@ define([
 					editor.reportStatus(messages.readonly, "error"); //$NON-NLS-0$
 				}
 			}
-
+			this.refreshSyntaxCheck = function() {
+				syntaxCheck(inputManager.getInput());
+			}
 			editor.addEventListener("InputChanged", function(evt) {
 				syntaxCheck(evt.title, evt.message, evt.contents);
 			});
@@ -567,7 +569,7 @@ define([
 			};
 			contextImpl.syntaxCheck = function(title, message, contents) {
 				syntaxCheck(title, message, contents);
-			}
+			};
 			/**
 			 * @description Opens the given location
 			 * @function

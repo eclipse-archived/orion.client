@@ -4,22 +4,45 @@
 	border-color: blue;
 	overflow: hidden;
 	text-align: left;
-	margin-left: 15%;
-	margin-right: 15%;
+	margin-left: 5%;
+	margin-right: 5%;
 	margin-bottom: 15px;
 	padding-bottom: 2px;
 	position: relative;
-	height: 250px;
+	height: 280px;
+}
+
+.embeddedEditorTitleOuter{
+	vertical-align: middle;
+	overflow: hidden;
+	text-align: center;
+	margin-left: 5%;
+	margin-right: 5%;
+	margin-bottom: 2px;
+	position: relative;
+	height: 18px;
+}
+
+.embeddedEditorParentInner{
+	border: 1px solid;
+	vertical-align: middle;
+	width: 49%;
+	font-size: 90%;
+	height: 100%;
+	border-color: blue;
+	overflow: hidden;
+	text-align: left;
+	position: relative;
 }
 
 .embeddedEditorTool{
-	border: 1px solid;
 	vertical-align: middle;
 	border-color: blue;
 	overflow: hidden;
 	text-align: left;
-	margin-left: 15%;
-	margin-right: 15%;
+	background-color: grey;
+	margin-left: 5%;
+	margin-right: 5%;
 	margin-bottom: 5px;
 	padding-bottom: 2px;
 	padding-top: 4px;
@@ -29,11 +52,12 @@
 
 .embeddedEditorDemoTextParent{
 	border: none;
+	font-size: 90%;
 	vertical-align: middle;
 	overflow: hidden;
 	text-align: left;
-	margin-left: 15%;
-	margin-right: 15%;
+	margin-left: 5%;
+	margin-right: 5%;
 	padding-bottom: 5px;
 	position: relative;
 }
