@@ -112,7 +112,6 @@ pushd orionode
 
 cp ../../../package.json .
 cp ../../../build/icons/icon.icns ./build
-cp ../../../build/icons/orionLogo.gif ./build
 
 # generates osx artifacts: dmg, -mac.zip
 npm run dist:osx
@@ -130,7 +129,7 @@ echo "----- WIN build -----"
 mkdir win
 pushd win
 echo "Extracting build"
-tar -xzf ../orionode_2016-06-01_16-31-18.tar.gz
+tar -xzf ../orionode_${BUILD}.tar.gz
 
 cleanup_nodemodules
 
@@ -140,7 +139,7 @@ cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/windows/nodegit.node orio
 pushd orionode
 
 cp ../../../package.json .
-cp ../../../build/icons/orion.ico build
+#icon comes from package.json URL
 cp ../../../build/icons/orionLogo.gif build
 
 # generates windows artifacts: -full.nupkg, -delta.nupkg, .exe, RELEASES
@@ -168,7 +167,7 @@ echo "----- LINUX build -----"
 mkdir linux
 pushd linux
 echo "Extracting build"
-tar -xzf ../orionode_2016-06-01_16-31-18.tar.gz 
+tar -xzf ../orionode_${BUILD}.tar.gz
 
 cleanup_nodemodules
 # copy over nodegit binary to workaround in memory ssh limitation
@@ -178,7 +177,6 @@ pushd orionode
 
 cp ../../../package.json .
 cp ../../../build/icons/icon.icns build
-cp ../../../build/icons/orionLogo.gif build
 
 # generates linux artifacts: .rpm, .tar.gz, .deb
 npm run dist:linux
