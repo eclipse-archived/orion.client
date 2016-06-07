@@ -101,7 +101,7 @@ echo "----- OSX build -----"
 mkdir osx
 pushd osx
 echo "Extracting build"
-tar -xzf ../orionode_$build.tar.gz
+tar -xzf ../orionode_${BUILD}.tar.gz
 
 cleanup_nodemodules
 
