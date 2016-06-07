@@ -62,7 +62,7 @@ function getTags(req, res) {
 		return clone.getRepo(req)
 		.then(function(repo) {
 			theRepo = repo;
-			fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+			fileDir = clone.getfileDir(repo,req);
 			return git.Reference.lookup(theRepo, "refs/tags/" + tagName);
 		})
 		.then(function(ref) {
@@ -80,7 +80,7 @@ function getTags(req, res) {
 	return clone.getRepo(req)
 	.then(function(repo) {
 		theRepo = repo;
-		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+		fileDir = clone.getfileDir(repo,req);
 		return git.Reference.list(theRepo);
 	})
 	.then(function(referenceList) {

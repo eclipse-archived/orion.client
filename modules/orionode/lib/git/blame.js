@@ -28,13 +28,12 @@ module.exports.router = function(options) {
 	.get('/:refName/file/*', getBlame);
 	
 function getBlame(req, res) {
-	var blamerepo,fileDir;
-	var fileRelativePath = path.join(req.user.workspaceDir, req.params["0"]);
+	var blamerepo,fileDir, fileRelativePath;
 	clone.getRepo(req)
 	.then(function(repo) {
 		blamerepo = repo;
-		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
-		fileRelativePath = api.toURLPath(fileRelativePath.substring(repo.workdir().length));
+		fileDir = clone.getfileDir(repo,req);
+		fileRelativePath = clone.getfileRelativePath(repo,req);
 		return git.Blame.file(repo,fileRelativePath, git.Blame.FLAG.NORMAL);
 	})
 	.then(function(blame){
