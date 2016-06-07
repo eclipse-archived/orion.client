@@ -27,7 +27,7 @@ define("orion/editor/stylers/text_x-git-config/syntax", ["orion/editor/stylers/l
 				match: "=",
 				name: "punctuation.operator.equals.gitconfig"
 			}, {
-				match: "^\\s*\\[[-.A-Za-z0-9]+\\]\\s*$",
+				match: "^\\s*\\[[^\\]]*\\]\\s*$",
 				name: "entity.section.name.gitconfig"
 			}
 		]
