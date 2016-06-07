@@ -80,7 +80,7 @@ define([
 				}
 			};
 			astManager.onModelChanging({file: {location: file}});
-			var params = {offset: offset, prefix : prefix, keywords: keywords, template: templates, line: line, timeout: options.timeout ? options.timeout : 20000, timeoutReturn: timeoutReturn};
+			var params = {offset: offset, prefix : prefix, keywords: keywords, template: templates, line: line, indentation: options.indentation, timeout: options.timeout ? options.timeout : 20000, timeoutReturn: timeoutReturn};
 			return {
 				editorContext: editorContext,
 				params: params
@@ -159,9 +159,8 @@ define([
 							assert(ap.groups[0].positions, "Expected template proposal with selection group");
 							var offset = ap.groups[0].positions[0].offset;
 							var len = ap.groups[0].positions[0].length;
-							assert.equal(offset, ep[3].offset, "Template proposal had different offset for selection group");
-							assert.equal(offset, ep[3].offset, "Template proposal had different offset for selection group");
-							assert.equal(len, ep[3].length, "Template proposal had different length for selection group");						
+							assert.equal(offset, ep[3].offset, "Template proposal had different offset for selection group. Actual offset: " + offset + " Actual length: " + len);
+							assert.equal(len, ep[3].length, "Template proposal had different length for selection group. Actual offset: " + offset + " Actual length: " + len);						
 						}
 					}
 					worker.getTestState().callback();
@@ -298,6 +297,71 @@ define([
 						callback: done};
 					return testProposals(options, [
 						["getAnotherThing", "getAnotherThing : number"]
+					]);
+				});
+			});
+			describe('Multi line templates', function() {
+				it('For loop no indent', function(done) {
+					var options = {
+						buffer: "fo",
+						prefix: "fo",
+						offset: 2,
+						templates: true,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'Templates'],
+						['for (var i = 0; i < array.length; i++) {\n\t\n}', 'for statement', 'Create a new', {offset: 9, length: 1}],
+						['for (var i = 0; i < array.length; i++) {\n\tvar value = array[i];\n\t\n}', 'for statement (with loop variable)', 'Create a new', {offset: 9, length: 1}],
+						['for (var property in object) {\n\tif (object.hasOwnProperty(property)) {\n\t\t\n\t}\n}', 'for..in statement', 'Create a for', {offset: 9, length: 8}],
+					]);
+				});
+				it('For loop space indent', function(done) {
+					var options = {
+						buffer: "    fo",
+						prefix: "fo",
+						offset: 6,
+						indentation: '    ',
+						templates: true,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'Templates'],
+						['for (var i = 0; i < array.length; i++) {\n    \t\n    }', 'for statement', 'Create a new', {offset: 13, length: 1}],
+						['for (var i = 0; i < array.length; i++) {\n    \tvar value = array[i];\n    \t\n    }', 'for statement (with loop variable)', 'Create a new', {offset: 13, length: 1}],
+						['for (var property in object) {\n    \tif (object.hasOwnProperty(property)) {\n    \t\t\n    \t}\n    }', 'for..in statement', 'Create a for', {offset: 13, length: 8}],
+					]);
+				});
+				it('For loop tabbed indent', function(done) {
+					var options = {
+						buffer: "\t\t\tfo",
+						prefix: "fo",
+						offset: 5,
+						indentation: '\t\t\t',
+						templates: true,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'Templates'],
+						['for (var i = 0; i < array.length; i++) {\n\t\t\t\t\n\t\t\t}', 'for statement', 'Create a new', {offset: 12, length: 1}],
+						['for (var i = 0; i < array.length; i++) {\n\t\t\t\tvar value = array[i];\n\t\t\t\t\n\t\t\t}', 'for statement (with loop variable)', 'Create a new', {offset: 12, length: 1}],
+						['for (var property in object) {\n\t\t\t\tif (object.hasOwnProperty(property)) {\n\t\t\t\t\t\n\t\t\t\t}\n\t\t\t}', 'for..in statement', 'Create a for', {offset: 12, length: 8}],
+					]);
+				});
+				it('For loop mixed indent', function(done) {
+					var options = {
+						buffer: " \t  \t\t fo",
+						prefix: "fo",
+						offset: 9,
+						indentation: ' \t  \t\t ',
+						templates: true,
+						callback: done
+					};
+					testProposals(options, [
+						['', 'Templates'],
+						['for (var i = 0; i < array.length; i++) {\n \t  \t\t \t\n \t  \t\t }', 'for statement', 'Create a new', {offset: 16, length: 1}],
+						['for (var i = 0; i < array.length; i++) {\n \t  \t\t \tvar value = array[i];\n \t  \t\t \t\n \t  \t\t }', 'for statement (with loop variable)', 'Create a new', {offset: 16, length: 1}],
+						['for (var property in object) {\n \t  \t\t \tif (object.hasOwnProperty(property)) {\n \t  \t\t \t\t\n \t  \t\t \t}\n \t  \t\t }', 'for..in statement', 'Create a for', {offset: 16, length: 8}],
 					]);
 				});
 			});

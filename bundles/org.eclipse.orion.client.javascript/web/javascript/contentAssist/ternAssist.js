@@ -264,7 +264,11 @@ define([
             	if (!prefix){
             		prefix = args.params.prefix;
             	}
-            	var _t = new mTemplates.Template(prefix, completion.description, completion.template, completion.name);
+            	var template = completion.template;
+            	if (args.params.indentation){
+            		template = template.replace(/\n([\t ]*)/g, "\n" + args.params.indentation + "$1"); //$NON-NLS-1$ //$NON-NLS-2$
+            	}
+            	var _t = new mTemplates.Template(prefix, completion.description, template, completion.name);
             	var _prop = _t.getProposal(prefix, args.params.offset, {});
             	if(completion.overwrite) {
             		_prop.overwrite = completion.overwrite;
