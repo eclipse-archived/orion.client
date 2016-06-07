@@ -117,8 +117,10 @@ cp ../../../build/icons/icon.icns ./build
 npm run dist:osx
 echo "osx artifacts generated"
 
+pushd dist/osx
 upload "${name}-${pkg_version}.dmg"
 upload "${name}-${pkg_version}-mac.zip"
+popd
 
 popd # pop orionode
 popd # pop osx
@@ -140,6 +142,7 @@ pushd orionode
 
 cp ../../../package.json .
 #icon comes from package.json URL
+cp ../../../build/icons/orion.ico build
 cp ../../../build/icons/orionLogo.gif build
 
 # generates windows artifacts: -full.nupkg, -delta.nupkg, .exe, RELEASES
