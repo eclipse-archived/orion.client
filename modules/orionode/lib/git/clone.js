@@ -36,6 +36,7 @@ module.exports.router = function(options) {
 	module.exports.foreachSubmodule = foreachSubmodule;
 	module.exports.getRepoByPath = getRepoByPath;
 	module.exports.getfileDir = getfileDir;
+	module.exports.getfileDirPath = getfileDirPath;
 	module.exports.getfileAbsolutePath = getfileAbsolutePath;
 	module.exports.getfileRelativePath = getfileRelativePath;
 
@@ -83,7 +84,8 @@ function getRepoByPath(filePath,workspaceDir) {
 		filePath = path.dirname(filePath);
 		if (filePath.length <= workspaceDir) return Promise.reject(new Error("Forbidden"));
 	}
-	return git.Repository.discover(filePath, 0, workspaceDir).then(function(buf) {
+	var ceiling = options.options.configParams.isElectron ? "" : workspaceDir ; 
+	return git.Repository.discover(filePath, 0, ceiling).then(function(buf) {
 		return git.Repository.open(buf.toString());
 	});
 }	
@@ -91,14 +93,28 @@ function getRepoByPath(filePath,workspaceDir) {
 function getRepo(req) {
 	var u = url.parse(req.url, true);
 	var restpath = u.pathname.split(fileRoot)[1];
-	if (!restpath) return Promise.reject(new Error("Forbidden"));
 	var filePath = path.join(req.user.workspaceDir, restpath);
 	return getRepoByPath(filePath,req.user.workspaceDir);
 }
 
 function getfileDir(repo ,req) {
-	var fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+	var fileDir;
+	if(repo.workdir().slice(0, -1).length === req.user.workspaceDir.length){
+		fileDir = api.join(fileRoot);
+	}else{
+		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+	}
 	return fileDir;
+}
+
+function getfileDirPath(repo ,req) {
+	var fileDirpath;
+	if(repo.workdir().slice(0, -1).length === req.user.workspaceDir.length){
+		fileDirpath = path.join(fileRoot, "\\");
+	}else{
+		fileDirpath = path.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+	}
+	return fileDirpath;
 }
 
 function getfileAbsolutePath(req) {
@@ -135,6 +151,8 @@ function getClones(req, res, callback) {
 			var json = cloneJSON(base, location, results[0], parents, results[1]);
 			repos.push(json);
 			cb(json);
+		}).catch(function(err){
+			console.log(err);
 		});
 	}
 	
