@@ -156,6 +156,9 @@ define([
 					} else {
 						link.classList.add("dropdownMenuItem"); //$NON-NLS-0$
 					}
+					if (!item.url.includes("localhost")) {
+						link.target = "_blank";
+					}
 					link.href = item.href;
 					link.textContent = item.textContent;
 					li.appendChild(link);

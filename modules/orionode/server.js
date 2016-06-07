@@ -201,7 +201,11 @@ if (process.versions.electron) {
 				event.preventDefault();
 				if (false === undefined) {// Always open new tabs for now
 					createWindow(url);
-				} else {
+				} 
+				else if (!url.includes("localhost")) {
+					electron.shell.openExternal(url);
+				}
+				else {
 					nextWindow.webContents.executeJavaScript("__openFolder = require('dialog').showSaveDialog;");
 					nextWindow.webContents.executeJavaScript('createTab("' + url + '");');
 				}
