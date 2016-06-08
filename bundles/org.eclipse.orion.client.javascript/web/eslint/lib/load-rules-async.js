@@ -1311,18 +1311,18 @@ define([
             	                if (!foundType){
             	                    var inenv = env ? '-inenv' : ''; //$NON-NLS-1$
             	                    var nls = 'no-undef-defined'; //$NON-NLS-1$
-            	                    context.report(ref.identifier, ProblemMessages['no-undef-defined'], {0:name, nls: nls, pid: nls+inenv});
+            	                    context.report(ref.identifier, ProblemMessages['no-undef-defined'], {0:name, nls: nls, pid: nls+inenv, data: name});
         	                    } else if(foundType && env) {
         	                    	//we found a type and its in an env
         	                    	var d = Finder.findDirective(node, 'eslint-env');
         	                    	if(!d || d.value && d.value.indexOf(env) < 0) {
         	                    		inenv = env ? '-inenv' : ''; //$NON-NLS-1$
 	            	                    nls = 'no-undef-defined'; //$NON-NLS-1$
-	            	                    context.report(ref.identifier, ProblemMessages['no-undef-defined'], {0:name, nls: nls, pid: nls+inenv});
+	            	                    context.report(ref.identifier, ProblemMessages['no-undef-defined'], {0:name, nls: nls, pid: nls+inenv, data: name});
         	                    	}
         	                    }
         	                } else if (ref.isWrite() && variable.writeable === false) {
-        	                    context.report(ref.identifier, ProblemMessages['no-undef-readonly'], {0:name, nls: 'no-undef-readonly'}); //$NON-NLS-1$
+        	                    context.report(ref.identifier, ProblemMessages['no-undef-readonly'], {0:name, nls: 'no-undef-readonly', data: name}); //$NON-NLS-1$
         	                }
         	            });
                     }

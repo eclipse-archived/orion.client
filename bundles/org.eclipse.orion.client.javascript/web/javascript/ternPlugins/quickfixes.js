@@ -468,11 +468,11 @@ define([
                 }
                 return false;
             }
-            var name = /^'(.*)'/.exec(annotation.title);
+            var name = annotation.data;
             if(name !== null && typeof name !== 'undefined') {
                 var comment = null;
                 var start = 0;
-                var insert = name[1];
+                var insert = name;
                 var node = Finder.findNode(annotation.start, file.ast, {parents:true});
                 if(assignLike(node)) {
                     insert += ':true'; //$NON-NLS-1$
@@ -495,7 +495,7 @@ define([
 		 * @callback
 		 */
         "no-undef-defined-inenv": function(annotation, annotations, file) {
-            var name = /^'(.*)'/.exec(annotation.title);
+            var name = annotation.data;
             if(name) {
                 var comment = null;
                 var start = 0;
@@ -533,7 +533,7 @@ define([
                 	}
                 	return Finder.findESLintEnvForMember(name);
                 }
-                var env = getEnv(name[1]);
+                var env = getEnv(name);
                 if(env) {
                     comment = Finder.findDirective(file.ast, 'eslint-env'); //$NON-NLS-1$
                     if(comment) {
