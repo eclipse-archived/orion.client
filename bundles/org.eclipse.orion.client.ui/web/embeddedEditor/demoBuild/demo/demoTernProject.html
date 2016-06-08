@@ -163,7 +163,7 @@
 			];
 	
 			window.onload=function(){
-				var codeEdit = new orion.codeEdit();
+				var codeEdit = new orion.codeEdit({editorConfig: {showWhitespaces: false, zoomRuler: true}});
 				var startup = function() {
 					codeEdit.create({parent: "embeddedEditor"}).then(function(editorViewer) {
 						editorViewer.setContents(contents, "application/javascript");
