@@ -40,8 +40,8 @@ Deferred) {
 	var embeddedEditor = new mEmbeddedEditor({
 		_defaultPlugins: defaultPluginURLs,
 		//defaultPlugins: [],
-		editorConfig: {showWhitespaces: true, zoomRuler: true, zoomRulerLocalVisible: true},
-		toolbarId: "__toolbar__"/*,
+		editorConfig: {showWhitespaces: true, zoomRuler: true, zoomRulerLocalVisible: true}/*,
+		toolbarId: "__toolbar__",
 		userPlugins:["editorCommandsPlugin.html"]*/});
 	var cto = {
 		id: "foo/bar",
@@ -177,6 +177,54 @@ Deferred) {
 					}
 				});
 			}
+		});
+		embeddedEditor.create({parent: "embeddedEditor1",
+							   contentType: "foo/bar",
+							   contents: contents2}).then(function(editorViewer){
+			editorViewer.inputManager.setAutoSaveTimeout(-1);
+			editorViewer.editor.addEventListener("InputChanged", function(evt) {
+				if(evt.contentsSaved) {
+					console.log(evt.contents);
+				}
+			});
+			if (editorViewer.settings) {
+				editorViewer.settings.contentAssistAutoTrigger = true;
+				editorViewer.settings.showOccurrences = true;
+			}
+			var fontSizeCounter = 9;
+			var themeClass = "myTheme";
+			var settings = {
+				"className": "myTheme",
+				"name": "myTheme",
+				"styles": {
+					"fontSize": "9px"
+				}
+			};
+			function changeFontDynamically() {
+				var theme = editorViewer.editor.getTextView().getOptions("theme");
+				settings["styles"]["fontSize"] = fontSizeCounter + "px";
+				theme.setThemeClass(themeClass, theme.buildStyleSheet(themeClass, settings));
+				fontSizeCounter++;
+			}
+					editorViewer.serviceRegistry.registerService('orion.edit.command', {execute: changeFontDynamically}, {
+						name: 'Change font size',
+						id: 'Change font size service',
+						key: ['l', true, true],
+						contentType: ["foo/bar"]
+					});		
+			editorViewer.serviceRegistry.registerService("orion.edit.contentassist",
+					contentAssistProvider,
+					{	name: "xmlContentAssist",
+						contentType: ["foo/bar"],
+						charTriggers: "[.(]"
+					});
+			editorViewer.serviceRegistry.registerService("orion.edit.hover",
+				hoverProvider,
+	    		{	name: "xmlContentHover",
+	    			contentType: ["foo/bar"]
+	    		});
+			editorViewer.serviceRegistry.registerService('orion.edit.occurrences',
+				{computeOccurrences: computeOccurrences}, {contentType: ["foo/bar"]});	
 		});
 	};
 	

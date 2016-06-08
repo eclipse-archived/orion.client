@@ -20,17 +20,20 @@ Deferred) {
 		"../../webtools/plugins/webToolsPlugin_embed_dev.html",
 		"../../plugins/embeddedToolingPlugin.html"
 	];
-	var contents = 'import "somelib";//Click on this editor and hover on the error marker of the first line and click on the quick fix. The .tern-project file will be updated with new contents.\n' +
-						 'var foo = "bar";\n' +
-						 "var bar = foo;\n" + 
-						 "/*\n" + 
-						 " * test demo\n" + 
-						 "*/\n" + 
-						 "function test(){\n" + 
-						 "	var foo1 = bar.lastIndexOf(char, from);\n" + 
-						 "}\n" + 
-						"//Keep editing in this demo and try the content assist, problem validations and hover service!\n" +
-						 "var foo2 = foo."; 
+		var contents = 'import "somelib";//Hover on the error marker on "import" and click on the quick fix. The .tern-project file will be updated with new contents.\n' +
+							 '//In the .tern-project file, select all text and press CTRL+X. The error marker on "import" comes back.\n' +
+							 '//In the .tern-project file, press CTRL+V. The error marker on "import" goes away.\n' +
+							 'var foo = "bar";\n' +
+							 "var bar = foo;\n" + 
+							 "/*\n" + 
+							 " * test demo\n" + 
+							 "*/\n" + 
+							 "function test(){\n" + 
+							 '	var foo1 = bar.lastIndexOf(char, from);;;;//change line 28 in .eslintrc file to "no-extra-semi": 2. The warning on on ";;;" becomes error.\n' + 
+							 '//change line 28 in .eslintrc file to "no-extra-semi": 0. The error on on ";;;" goes away.\n' +
+							 "}\n" + 
+							"//Keep editing in this demo and try the content assist, problem validations and hover service!\n" +
+							 "var foo2 = foo."; 
 	var codeEdit = new mEmbeddedEditor({
 		_defaultPlugins: defaultPluginURLs,
 		editorConfig: {showWhitespaces: false, zoomRuler: true}
@@ -138,8 +141,6 @@ Deferred) {
 					}
 				});
 			}
-			
-			
 		});
 		codeEdit.create({parent: "embeddedEditor1"}).then(function(editorViewer) {
 			editorViewer.inputManager.setInput("/in_memory_fs/project/.tern-project");
