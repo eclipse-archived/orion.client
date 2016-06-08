@@ -326,6 +326,10 @@ define([
 				if(node.type === 'tag') {
 					var tagNameEnd = node.range[0] + 1 + node.name.length;
 					if(tagNameEnd < offset) {
+						if (node.openrange){
+							return offset < node.openrange[1] || (offset === node.openrange[1] && source[offset-1] !== '>' && source[offset-1] !== '<');
+						}
+						// TODO openrange from htmlparser2 is more accurate, consider removing this legacy range check
 						var idx = offset;
 						while(idx < node.range[1]) {
 							var char = source[idx];

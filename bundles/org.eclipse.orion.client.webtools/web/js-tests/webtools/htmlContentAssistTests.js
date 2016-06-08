@@ -303,7 +303,7 @@ define([
     	it('Tag templates 3', function() {
     		var _o = setup({buffer: '<html>\n<body><ar\n</body>\n</html>'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 17}).then(function(proposals) {
-    			assertTagProposals(proposals);
+    			assertGlobalTagAttributes(proposals);
     		});
     	});
     	it('Tag attribute proposals 1', function() {
@@ -346,6 +346,30 @@ define([
     				{proposal: 'href=""', prefix: 'href'},
     				{proposal: 'hreflang=""', prefix: 'href'}
     			]);
+    		});
+    	});
+    	it('Tag attribute proposals unclosed tag 1', function() {
+    		var _o = setup({buffer: '<zzz </zzz>'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+    			assertGlobalTagAttributes(proposals);
+    		});
+    	});
+    	it('Tag attribute proposals unclosed tag 2', function() {
+    		var _o = setup({buffer: '<zzz '});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
+    			assertGlobalTagAttributes(proposals);
+    		});
+    	});
+    	it('Tag attribute proposals unclosed tag 3', function() {
+    		var _o = setup({buffer: '<zzz >'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 6}).then(function(proposals) {
+    			assertTagProposals(proposals);
+    		});
+    	});
+    	it('Tag attribute proposals unclosed tag 4', function() {
+    		var _o = setup({buffer: '<zzz <'});
+    		return assist.computeContentAssist(_o.editorContext, {offset: 6}).then(function(proposals) {
+    			assertTagProposals(proposals);
     		});
     	});
     	it('Tag attribute proposals filter existing 1', function() {
