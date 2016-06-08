@@ -29,7 +29,7 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-typescript/syntax'], functi
 				{	id: "text/x-typescript",
 					"extends": "text/plain",
 					name: "Typescript",
-					extension: ["typescript"]
+					extension: ["ts"]
 				}
 			] 
 		});

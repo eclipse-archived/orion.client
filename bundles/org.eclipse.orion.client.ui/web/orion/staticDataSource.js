@@ -180,7 +180,7 @@ define([
 		{	id: "text/x-typescript",
 			"extends": "text/plain",
 			name: "Typescript",
-			extension: ["typescript"]
+			extension: ["ts"]
 		},
 		{	id: "text/x-markdown",
 			"extends": "text/plain",
