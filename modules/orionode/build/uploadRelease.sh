@@ -94,7 +94,7 @@ mkdir ../buildTemp
 
 pushd ../buildTemp
 echo "Copying over orionode_${BUILD} build"
-cp ~/downloads/orion/orionode/orionode_${BUILD}.tar.gz .
+cp ${BUILD_ZIP} .
 
 new_release
 
