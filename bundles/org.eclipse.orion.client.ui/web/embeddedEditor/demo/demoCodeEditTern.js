@@ -30,7 +30,7 @@ Deferred) {
 							 "*/\n" + 
 							 "function test(){\n" + 
 							 '	var foo1 = bar.lastIndexOf(char, from);;;;//change line 28 in .eslintrc file to "no-extra-semi": 2. The warning on on ";;;" becomes error.\n' + 
-							 '//change line 28 in .eslintrc file to "no-extra-semi": 0. The error on on ";;;" goes away.\n' +
+							 '//change line 28 in .eslintrc file to "no-extra-semi": 0. The error on ";;;" goes away.\n' +
 							 "}\n" + 
 							"//Keep editing in this demo and try the content assist, problem validations and hover service!\n" +
 							 "var foo2 = foo."; 
