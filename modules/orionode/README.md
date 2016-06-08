@@ -13,19 +13,20 @@ A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orio
 For full instructions, see the [Getting Started guide](https://wiki.eclipse.org/Orion/Node/Getting_started).
 
 ## Installation
-* Run `npm install orion`.
-  * Or if you prefer, install from source: checkout the repo from [GitHub](https://github.com/eclipse/orion.client) or [Eclipse.org](http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/),
-    then run `cd modules/orionode && npm install`.
+* To install the built server run `npm install orion`.
+* Alternatively, you can install from source by checking out the repo from [GitHub](https://github.com/eclipse/orion.client) or [Eclipse.org](http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/)
+and then running `cd modules/orionode && npm install`.
+* Orion has an optional dependency on the pty.js package, which is not installed by default.  If you're on a non-Windows platform you can install this package with `npm install pty.js`.  If this package is not installed then an error message will be displayed when the server is run, but will still run fine.
 
 ### Running the server
 1. Browse to the directory where you installed Orion, usually `node_modules/orion/`.
 2. Edit the `orion.conf` file. Uncomment the following line, replacing the password with something of your choice:
   ```
-  pwd=secr3tPassw0rd
+  pwd=[secretpassword]
   ```
   This prevents unauthorized access to your Orion server.
 3. Run `npm start orion` or `node [node_modules]/orion/server.js`.
-4. Go to **[http://localhost:8081](http://localhost:8081)** to use Orion. You will be prompted with a basic auth dialog; enter the password you chose earlier.
+4. Go to **[http://localhost:8081](http://localhost:8081)** to use Orion. You will be prompted with a basic auth dialog; enter the password you chose earlier (leave the user name blank).
 
 The port number can be changed by passing the `--port` argument or setting the `PORT` environment variable.
 
