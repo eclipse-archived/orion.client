@@ -650,7 +650,22 @@ define([
 						});
 				});
 			});
-
+			//SEMI ----------------------------------------------
+			describe('semi', function() {
+				var RULE_ID = "semi";
+				it("should not flag 'for of' with VariableDeclaration", function(callback) {
+					var topic = "for (var x of n) {}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+			});
 		});
 	};
 });

@@ -1891,10 +1891,12 @@ define([
     				var ancestors = context.getAncestors(node),
     				    parent = ancestors[ancestors.length - 1],
     				    parentType = parent.type;
-    				if ((parentType === "ForStatement" && parent.init === node) || (parentType === "ForInStatement" && parent.left === node)){
+    				if ((parentType === "ForStatement" && parent.init === node) || (parentType === "ForInStatement" && parent.left === node)
+    					|| parentType === "ForOfStatement" && parent.left === node) {
     					// One of these cases, no semicolon token is required after the VariableDeclaration:
     					// for(var x;;)
     					// for(var x in y)
+    					// for(var x of n)
     					return;
     				}
     				checkForSemicolon(node);
