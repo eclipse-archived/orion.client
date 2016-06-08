@@ -57,6 +57,7 @@ export CSC_NAME=${CSC_NAME} # required for OSX autoUpdater-functional builds
 
 # constants
 pkg_version=$(grep -m1 "version" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
+pkg_version=`echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
 vpkg_version="v${pkg_version}"
 name=$(grep -m1 "name" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
 
