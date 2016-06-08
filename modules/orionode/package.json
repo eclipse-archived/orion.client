@@ -72,6 +72,7 @@
     "watch-server": "nodemon --debug server.js"
   },
   "build": {
+    "asar": false,
     "electronVersion": "0.36.7",
     "compression": "maximum",
     "osx": {
