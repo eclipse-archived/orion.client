@@ -41,6 +41,20 @@ module.exports = function(options) {
 function getOptions(req) {
 	return req.get("X-Xfer-Options").split(",");
 }
+	
+function reportTransferFailure(res, err) {
+	var message = "File transfer failed";
+	if (err.message) {
+		message += ": " + err.message;
+	}
+	return res.status(400).json({
+				Severity: "Error",
+				HttpCode: 400,
+				Code: 0,
+				Message: message,
+				DetailedMessage: message
+	});
+}
 
 function postImportXfer(req, res) {
 	var filePath = req.params["0"];
@@ -63,6 +77,9 @@ function postImportXfer(req, res) {
 	function upload(request) {
 		var tempFile = path.join(UPLOADS_FOLDER, Date.now() + fileName);
 		var ws = fs.createWriteStream(tempFile);
+		ws.on('error', function(err) {
+			reportTransferFailure(res, err);
+		});
 		ws.on('finish', function() {
 			completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, shouldUnzip);
 		});
@@ -142,9 +159,20 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 						entry.autodrain();
 						return;
 					}
-					entry.pipe(fs.createWriteStream(outputName));
+					// make sure all sub folders exist
+					var subfolderPath = path.join(filePath, path.dirname(entryName));
+					if (!fs.existsSync(subfolderPath)) {
+						mkdirp.sync(subfolderPath);
+					}
+					var writeStream = fs.createWriteStream(outputName);
+					writeStream.on('error', function(err) {
+						reportTransferFailure(res, err);
+					});
+					entry.pipe(writeStream);
 				} else if (type === "Directory") {
-					mkdirp.sync(outputName);
+					if (!fs.existsSync(outputName)) {
+						mkdirp.sync(outputName);
+					}
 				}
 			} else {
 				entry.autodrain();

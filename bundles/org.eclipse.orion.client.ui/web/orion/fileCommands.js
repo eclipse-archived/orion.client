@@ -133,6 +133,13 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 							return;
 						}
 					}
+					if (result.Severity === "Error") {
+						if (handlers && handlers.error) {
+							handlers.error();
+							return;
+						}
+						errorHandler(result);
+					}
 				}
 				if (!preventNotification) {
 					//TODO Not sure if we should send out event from file Client here
