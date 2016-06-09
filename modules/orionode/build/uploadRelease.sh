@@ -4,7 +4,6 @@
 # Example usage ***** REMOVE LAST EXAMPLE BEFORE COMMITTING *****
 # ./uploadRelease.sh --build <build timestamp> --certificate <certificate name> --description <Github release description>--token <Github API token> --user <Github user> --repo <repo>
 # ./uploadRelease.sh -b <build timestamp> -c <certificate name> -d <Github release description> -t <Github API token> -u <Github user> -r <repo>
-# ./uploadRelease.sh --build 2016-06-01_16-31-18 --certificate "IBM" --description "this desc was passed via cmd line" --token b4515ae8e2fdcafb869e11cce08e57e85c4fb480 --user mzmousa --repo Orion-Update
 
 pushd () {
     command pushd "$@" > /dev/null
@@ -87,7 +86,6 @@ cleanup_nodemodules() {
 	rm -rf orionode/node_modules/nodemailer
 	rm orionode/node_modules/nodegit/build/Release/nodegit.node
 }
-echo "Setting up build directories"
 
 # update orion.conf and package.json
 update_config_files() {
@@ -95,14 +93,14 @@ update_config_files() {
 	sed -i .bak 's/orion\.autoUpdater\.url\=/orion\.autoUpdater\.url\='"${update_url}"'/' ${PWD}/orionode/orion.conf
 }
 
+echo "Setting up build directories"
+
 rm -rf ../buildTemp
 mkdir ../buildTemp
 
 pushd ../buildTemp
 echo "Copying over orionode_${BUILD} build"
 cp ${BUILD_ZIP} .
-
-new_release
 
 # ---------------------------------------- OSX BUILD ----------------------------------------
 
@@ -125,11 +123,6 @@ cp ../../../build/icons/icon.icns ./build
 # generates osx artifacts: dmg, -mac.zip
 npm run dist:osx
 echo "osx artifacts generated"
-
-pushd dist/osx
-upload "${name}-${pkg_version}.dmg"
-upload "${name}-${pkg_version}-mac.zip"
-popd
 
 popd # pop orionode
 popd # pop osx
@@ -160,14 +153,8 @@ echo "windows artifacts generated"
 
 pushd dist/win
 
+# rename file for consistency
 mv "${name} Setup ${pkg_version}.exe" "${name}-${pkg_version}-setup.exe"
-
-nupkg="${name}-${pkg_version}-full.nupkg"
-setup="${name}-${pkg_version}-setup.exe"
-
-upload "RELEASES"
-upload "${name}-${pkg_version}-full.nupkg"
-upload "${name}-${pkg_version}-setup.exe"
 
 popd # pop dist/win
 popd # pop orionode
@@ -200,6 +187,10 @@ mv "Orion-${pkg_version}.deb" "Orion-${pkg_version}.rpm" "Orion-${pkg_version}.t
 
 pushd linux
 
+# ---------------------------------------- GITHUB RELEASE/UPLOAD ----------------------------------------
+
+new_release
+
 # upload linux artifacts to new release
 upload "${name}-${pkg_version}.deb"
 upload "${name}-${pkg_version}.rpm"
@@ -210,5 +201,19 @@ popd # pop dist
 popd # pop orionode
 popd # pop linux
 
-popd # pop buildTemp
+pushd osx/orionode/dist/osx
 
+# upload osx artifacts to new release
+upload "${name}-${pkg_version}.dmg"
+upload "${name}-${pkg_version}-mac.zip"
+
+popd # pop osx/orionode/dist/osx
+pushd win/orionode/dist/win
+
+# upload windows artifacts to new release
+upload "RELEASES"
+upload "${name}-${pkg_version}-full.nupkg"
+upload "${name}-${pkg_version}-setup.exe"
+
+popd # pop win/orionode/dist/win
+popd # pop buildTemp
