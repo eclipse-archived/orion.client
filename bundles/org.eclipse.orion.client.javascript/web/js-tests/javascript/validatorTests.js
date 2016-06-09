@@ -10560,6 +10560,32 @@ define([
 					//SEMI ----------------------------------------------
 					describe('semi', function() {
 						var RULE_ID = "semi";
+						/**
+						 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=495831
+						 */
+						it("recovered member expression ;", function(callback) {
+							var topic = "var a = b.\nc d";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: undefined,
+										severity: 'error',
+										description: "Unexpected token"
+									},
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Missing semicolon.",
+										nodeType: "ExpressionStatement"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
 						it("should flag variable declaration lacking ;", function(callback) {
 							var topic = "var a=1";
 							var config = { rules: {} };

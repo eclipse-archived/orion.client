@@ -1885,7 +1885,7 @@ define([
     				var tokens = context.getTokens(node);
     				var len = tokens.length;
     				var t = tokens[len - 1];
-    				if (t && t.type === "Punctuator" && t.value === ";") {
+    				if (t && t.type === "Punctuator" && (t.value === ";" || t.value === '.')) {
     					return;
     				}
     				context.report(node, ProblemMessages['semi'], null, t /* expose the bad token */);
