@@ -94,8 +94,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				) ];
 				gitCredentialsFieldsDefaultLength = 1;
 			}else{
-				var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
-				gitPreferenceStorage.enable();
 				gitCredentialsFieldsDefaultLength= 0;
 			}
 			var gitCredentialsSection;
