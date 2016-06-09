@@ -61,7 +61,7 @@ old_version=${pkg_version}
 pkg_version=`echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
 update_url="http://orion-update.mybluemix.net/download"
 sed -i .bak 's/\"version\": \"'"${old_version}"'\"/\"version\"\:\ \"'"${pkg_version}"'\"/' ../package.json
-sed -i .bak 's/orion\.autoUpdater\.url\=/orion\.autoUpdater\.url\=${update_url}/' ../orion.conf
+sed -i .bak 's/orion\.autoUpdater\.url\=/orion\.autoUpdater\.url\='"${update_url}"'/' ../orion.conf
 vpkg_version="v${pkg_version}"
 name=$(grep -m1 "name" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
 
