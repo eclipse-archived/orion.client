@@ -232,7 +232,9 @@ if (process.versions.electron) {
 	// Check for updates every time we run the electron app
 	var feedURL = configParams["orion.autoUpdater.url"];
 	if (feedURL) {
-		autoUpdater.setFeedURL(feedURL + "/latest");
+		var platform = os.platform() + '_' + os.arch(),
+		version = electron.app.getVersion();
+		autoUpdater.setFeedURL(feedURL + '/' + platform + '/' + version);
 		autoUpdater.checkForUpdates();
 	}
 	
