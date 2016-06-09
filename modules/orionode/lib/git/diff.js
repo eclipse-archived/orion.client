@@ -43,14 +43,14 @@ function getDiff(req, res) {
 	var ignoreWS = query.ignoreWS === "true";
 	var paths = query.Path;
 	var scope = util.decodeURIComponent(req.params.scope || "");
-	var filePath = path.join(req.user.workspaceDir, req.params["0"]);
+	var filePath; 
 	
 	var diff, repo;
 	return clone.getRepo(req)
 	.then(function(r) {
 		repo = r;
-		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
-		var fileDir = api.toURLPath(path.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1)));
+		filePath = clone.getfileRelativePath(repo,req); 
+		var fileDir = clone.getfileDir(repo,req); 
 		var includeURIs = parts.indexOf("uris") !== -1;
 		var includeDiff = parts.indexOf("diff") !== -1;
 		var includeDiffs = parts.indexOf("diffs") !== -1;

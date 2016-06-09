@@ -27,7 +27,7 @@ function router(options) {
 	function getStatus(req, res) {
 		return clone.getRepo(req)
 		.then(function(repo) {
-			var fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+			var fileDir = clone.getfileDir(repo,req);
 			repo.getStatusExt({
 				flags: 
 					git.Status.OPT.INCLUDE_UNTRACKED | 

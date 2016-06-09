@@ -133,7 +133,7 @@ module.exports.router = function(options) {
 			clone.getRepo(req)
 			.then(function(repo) {
 				theRepo = repo;
-				fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+				fileDir = clone.getfileDir(repo,req);
 				return git.Branch.lookup(repo, branchName, git.Branch.BRANCH.LOCAL);
 			})
 			.then(function(ref) {
@@ -158,7 +158,7 @@ module.exports.router = function(options) {
 		clone.getRepo(req)
 		.then(function(repo) {
 			theRepo = repo;
-			fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+			fileDir = clone.getfileDir(repo,req);
 			return git.Reference.list(theRepo);
 		})
 		.then(function(referenceList) {
@@ -216,7 +216,7 @@ module.exports.router = function(options) {
 		clone.getRepo(req)
 		.then(function(repo) {
 			theRepo = repo;
-			fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+			fileDir = clone.getfileDir(repo,req);
 			return startPoint ? git.Reference.lookup(repo, "refs/remotes/" + startPoint) : repo.getCurrentBranch();
 		})
 		.then(function(reference) {

@@ -93,7 +93,7 @@ function getRemotes(req, res) {
 		return clone.getRepo(req)
 		.then(function(r) {
 			repo = r;
-			fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+			fileDir = clone.getfileDir(repo,req); 
 			return git.Remote.list(r);
 		})
 		.then(function(remotes){
@@ -117,7 +117,7 @@ function getRemotes(req, res) {
 		return clone.getRepo(req)
 		.then(function(repo) {
 			theRepo = repo;
-			fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+			fileDir = clone.getfileDir(repo,req); 
 			return repo.getRemote(remoteName);
 		})
 		.then(function(remote) {
@@ -161,7 +161,7 @@ function getRemotes(req, res) {
 		return clone.getRepo(req)
 		.then(function(repo) {
 			theRepo = repo;
-			fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+			fileDir = clone.getfileDir(repo,req); 
 			return repo.getRemote(remoteName);
 		})
 		.then(function(remote) {
@@ -200,7 +200,7 @@ function addRemote(req, res) {
 	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
-		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+		fileDir = clone.getfileDir(repo,req); 
 		return git.Remote.create(repo, req.body.Remote, req.body.RemoteURI);
 	})
 	.then(function(remote) {

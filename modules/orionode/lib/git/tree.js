@@ -44,28 +44,29 @@ function treeJSON(location, name, timestamp, dir, length) {
 function getTree(req, res) {
 	var repo;
 	
-	if (!req.params["0"]) {
-		return clone.getClones(req, res, function(repos) {
-			var tree = treeJSON("", "/", 0, true, 0);
-			var children = tree.Children = [];
-			function add(repos) {
-				repos.forEach(function(repo) {
-					children.push(treeJSON(repo.ContentLocation, repo.Name, 0, true, 0));
-					if (repo.Children) add(repo.Children);
-				});
-			}
-			add(repos, tree);
-			res.status(200).json(tree);
-		});
+	if(clone.isWorkspace(req)){
+		if (!req.params["0"]) {
+			return clone.getClones(req, res, function(repos) {
+				var tree = treeJSON("", "/", 0, true, 0);
+				var children = tree.Children = [];
+				function add(repos) {
+					repos.forEach(function(repo) {
+						children.push(treeJSON(repo.ContentLocation, repo.Name, 0, true, 0));
+						if (repo.Children) add(repo.Children);
+					});
+				}
+				add(repos, tree);
+				res.status(200).json(tree);
+			});
+		}
 	}
 	
-	var segments = req.url.split("?")[0].split("/").slice(1);
-	var filePath = path.join(req.user.workspaceDir, req.params["0"] || "");
+	var filePath;
 
 	return clone.getRepo(req)
 	.then(function(repoResult) {
 		repo = repoResult;
-		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
+		filePath = clone.getfileRelativePath(repo,req);
 		return repo;
 	})
 	.then(function(repo) {
@@ -73,7 +74,7 @@ function getTree(req, res) {
 			return refName.replace("refs/remotes/", "").replace("refs/heads/", "").replace("refs/", "");
 		}
 		if (!filePath) {
-			var location = fileRoot + req.params["0"];
+			var location = fileRoot + (req.params["0"] || "");
 			return git.Reference.list(repo)
 			.then(function(refs) {
 				return refs.map(function(ref) {
@@ -81,13 +82,14 @@ function getTree(req, res) {
 				});
 			})
 			.then(function(children) {
-				var tree = treeJSON(location, path.basename(req.params["0"]), 0, true, 0);
+				var tree = treeJSON(location, path.basename(req.params["0"] || ""), 0, true, 0);
 				tree.Children = children;
 				res.status(200).json(tree);
 			});
 		}
-		var ref = util.decodeURIComponent(segments[2]);
-		var p = segments.slice(3).join("/");
+		var segments = filePath.split("/");
+		var ref = util.decodeURIComponent(segments[0]);
+		var p = segments.slice(1).join("/");
 		return repo.getReferenceCommit(ref)
 		.then(function(commit) {
 			return commit;
@@ -96,7 +98,7 @@ function getTree(req, res) {
 		}).then(function(commit) {
 			return commit.getTree();
 		}).then(function(tree) {
-			var repoRoot = path.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+			var repoRoot =  clone.getfileDirPath(repo,req); 
 			var refLocation = path.join(repoRoot, util.encodeURIComponent(ref));
 			function createParents(data) {
 				var parents = [], temp = data, l, end = "/gitapi/tree" + repoRoot;
