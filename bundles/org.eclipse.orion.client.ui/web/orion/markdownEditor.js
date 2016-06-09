@@ -460,6 +460,10 @@ define([
 			this._blocksCache[result.elementId] = result;
 			return result;
 		},
+		destroy: function() {
+			/* restore marked's link generator to its default */
+			marked.InlineLexer.prototype.outputLink = markedOutputLink;
+		},
 		/** @callback */
 		getBlockCommentDelimiters: function(index) {
 			return ["", ""];
@@ -1644,6 +1648,7 @@ define([
 		},
 		uninstall: function() {
 			this._styler.destroy();
+			this._stylerAdapter.destroy();
 			this._editorView.removeEventListener("Settings", this._settingsListener); //$NON-NLS-0$
 			var textView = this._editorView.editor.getTextView();
 			textView.removeEventListener("Scroll", this._sourceScrollListener); //$NON-NLS-0$
