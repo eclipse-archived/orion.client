@@ -20,14 +20,16 @@ define("orion/editor/stylers/text_x-properties/syntax", [], function() {
 				match: "^\\s*#[^$]*",
 				name: "comment.line.properties"
 			}, {
-				match: "(^[^=]*)(=)([^$]*)",
-				captures: {
-					1: {name: "entity.other.attribute-name.properties"},
-					3: {name: "string.unquoted.properties"}
-				}
-			}, {
-				match: "^[^=]*$",
-				name: "string.unquoted.properties"
+				begin: "(^[^=]*)(=)",
+				end: ".*[^\\\\]$",
+				beginCaptures: {
+					1: {name: "entity.name.properties"},
+					2: {name: "punctuation.operator.properties"}
+				},
+				endCaptures: {
+					0: {name: "string.unquoted.properties"}
+				},
+				contentName: "string.unquoted.properties"
 			}
 		]
 	});
