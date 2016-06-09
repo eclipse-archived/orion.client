@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
  
- define(['orion/Deferred'], function(Deferred){
+ define(['orion/Deferred', 'orion/util'], function(Deferred, util){
  
 	/**
 	 * Support class for using the orion preferences as a local
@@ -21,6 +21,7 @@
 	function PreferenceStorage(serviceRegistry){
 		this._prefix = "/git/credentials";
 		this._preferenceService = serviceRegistry.getService("orion.core.preference");
+		if(util.isElectron) this.enable();
 	}
 	
 	PreferenceStorage.prototype = {
