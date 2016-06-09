@@ -59,7 +59,6 @@ function getTree(req, res) {
 		});
 	}
 	
-	var segments = req.url.split("?")[0].split("/").slice(1);
 	var filePath;
 
 	return clone.getRepo(req)
@@ -86,8 +85,9 @@ function getTree(req, res) {
 				res.status(200).json(tree);
 			});
 		}
-		var ref = util.decodeURIComponent(segments[2]);
-		var p = segments.slice(3).join("/");
+		var segments = filePath.split("/");
+		var ref = util.decodeURIComponent(segments[0]);
+		var p = segments.slice(1).join("/");
 		return repo.getReferenceCommit(ref)
 		.then(function(commit) {
 			return commit;
@@ -96,10 +96,10 @@ function getTree(req, res) {
 		}).then(function(commit) {
 			return commit.getTree();
 		}).then(function(tree) {
-			var repoRoot = clone.getfileDir(repo,req); 
+			var repoRoot =  clone.getfileDirPath(repo,req); 
 			var refLocation = path.join(repoRoot, util.encodeURIComponent(ref));
 			function createParents(data) {
-				var parents = [], temp = data, l, end = "/gitapi/tree" + api.toURLPath(repoRoot);
+				var parents = [], temp = data, l, end = "/gitapi/tree" + repoRoot;
 				while (temp.Location.length > end.length) {
 					l = path.dirname(temp.Location).replace(/^\/gitapi\/tree/, "") + "/";
 					var dir = treeJSON(l, shortName(util.decodeURIComponent(path.basename(l))), 0, true, 0);
