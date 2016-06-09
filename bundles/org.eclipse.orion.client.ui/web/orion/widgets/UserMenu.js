@@ -13,8 +13,9 @@ define([
 	'i18n!orion/widgets/nls/messages',
 	'orion/webui/littlelib',
 	'orion/PageLinks',
-	'orion/webui/dropdown'
-], function(messages, lib, PageLinks, Dropdown) {
+	'orion/webui/dropdown',
+	'orion/util'
+], function(messages, lib, PageLinks, Dropdown, util) {
 	
 	function UserMenu(options) {
 		this._displaySignOut = true;
@@ -78,24 +79,26 @@ define([
 			var _self = this;
 			var authService = this.authenticatedServices[key].authService;
 			if (authService && authService.logout && this._displaySignOut){
-				var element = this._makeMenuItem(messages["Sign Out"], function() {
-					authService.logout().then(function(){
-						_self.addUserItem(key, authService, _self.authenticatedServices[key].label);
-						localStorage.removeItem(key);
-						localStorage.removeItem("lastLogin"); //$NON-NLS-0$
-						//TODO: Bug 368481 - Re-examine localStorage caching and lifecycle
-						for (var i = localStorage.length - 1; i >= 0; i--) {
-							var name = localStorage.key(i);
-							if (name && name.indexOf("/orion/preferences/user") === 0) { //$NON-NLS-0$
-								localStorage.removeItem(name);
+				if (!util.isElectron) {
+					var element = this._makeMenuItem(messages["Sign Out"], function() {
+						authService.logout().then(function(){
+							_self.addUserItem(key, authService, _self.authenticatedServices[key].label);
+							localStorage.removeItem(key);
+							localStorage.removeItem("lastLogin"); //$NON-NLS-0$
+							//TODO: Bug 368481 - Re-examine localStorage caching and lifecycle
+							for (var i = localStorage.length - 1; i >= 0; i--) {
+								var name = localStorage.key(i);
+								if (name && name.indexOf("/orion/preferences/user") === 0) { //$NON-NLS-0$
+									localStorage.removeItem(name);
+								}
 							}
-						}
-						authService.getAuthForm(PageLinks.getOrionHome()).then(function(formURL) {
-							window.location = formURL;
+							authService.getAuthForm(PageLinks.getOrionHome()).then(function(formURL) {
+								window.location = formURL;
+							});
 						});
 					});
-				});
-				this._dropdownNode.appendChild(element.parentNode);
+					this._dropdownNode.appendChild(element.parentNode);
+				}
 			}
 		},
 		
