@@ -327,7 +327,11 @@ define([
 		 */
 		"no-comma-dangle": function(annotation, annotations, file) {
 			return applySingleFixToAll(annotations, function(annot){
-				return {text: '', start: annot.start, end: annot.end};
+				var end = annot.end;
+				if(annot.start+1 !== end) {
+					end = annot.start+1;
+				}
+				return {text: '', start: annot.start, end: end};
 			});
 		},
 		/** 
