@@ -889,6 +889,8 @@
           type = fromLocal.hasProp(name);
       }
     }
+    //ORION
+    type.guess = infer.didGuess();
     return type;
   };
 

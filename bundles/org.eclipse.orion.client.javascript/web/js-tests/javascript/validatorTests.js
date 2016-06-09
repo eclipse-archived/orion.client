@@ -8117,6 +8117,24 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
+						it("Single file undeclared member - prop literal", function(callback) {
+							var topic = "var undefExpr = {a: function(){}}; undefExpr['b']();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'b' is undefined for 'undefExpr' in validator_test_script.js.",
+										nodeType: "Literal"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
 						it("Single file no declared members", function(callback) {
 							var topic = "var undefExpr = {}; undefExpr.b();";
 							var config = { rules: {} };
@@ -8129,6 +8147,25 @@ define([
 										severity: 'warning',
 										description: "'b' is undefined for 'undefExpr' in validator_test_script.js.",
 										nodeType: "Identifier"
+									}
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("Single file no declared members - prop literal", function(callback) {
+							var topic = "var undefExpr = {}; undefExpr['b']();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'b' is undefined for 'undefExpr' in validator_test_script.js.",
+										nodeType: "Literal"
 									}
 									]);
 								},
@@ -8193,6 +8230,25 @@ define([
 										severity: 'warning',
 										description: "'b' is undefined for 'a' in validator_test_script.js.",
 										nodeType: "Identifier"
+									}
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("Single file object documented as {Object}, no properties set - prop literal", function(callback) {
+							var topic = "/**\n * @param {Object} a\n */\nfunction foo(a){a['b']();}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'b' is undefined for 'a' in validator_test_script.js.",
+										nodeType: "Literal"
 									}
 									]);
 								},
@@ -8288,6 +8344,30 @@ define([
 										severity: 'warning',
 										description: "'c' is undefined for \'undefExpr\' in validator_test_script.js.",
 										nodeType: "Identifier"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("Single file multiple undeclared members - prop literal", function(callback) {
+							var topic = "var undefExpr = {a: function(){}}; undefExpr['b'](); undefExpr['c']()";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'b' is undefined for \'undefExpr\' in validator_test_script.js.",
+										nodeType: "Literal"
+									},
+                                    {
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'c' is undefined for \'undefExpr\' in validator_test_script.js.",
+										nodeType: "Literal"
 									}]);
 								},
 								function (error) {

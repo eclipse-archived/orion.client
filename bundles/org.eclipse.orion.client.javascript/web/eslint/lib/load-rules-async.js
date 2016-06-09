@@ -1336,6 +1336,7 @@ define([
                 	if (node.property && node.object && node.object.type !== 'ThisExpression'){
                 		if (node.parent && node.parent.type === 'CallExpression' && node.parent.callee && node.parent.callee === node){
                 			var tern = context.getTern();
+                			var propName = node.property.name ? node.property.name : node.property.value;
 							var query = {start: node.property.start, end: node.property.end};
 							var expr = tern.findQueryExpr(tern.file, query);
 							if (!expr) {
@@ -1344,7 +1345,10 @@ define([
 							}
 							var type = tern.findExprType(query, tern.file, expr);
 							if (type && type.propertyOf) {
-								if(type.propertyOf.props[node.property.name]) {
+								if(type.guess) {
+									return;
+								}
+								if(type.propertyOf.props[propName]) {
 									//if we found a type and its a direct property, quit
 									return;
 								}
@@ -1360,13 +1364,13 @@ define([
 								return;
 							}
 	                		type = tern.findExprType(query, tern.file, expr);
-							if (type && type.types && type.types.length > 0) {
+							if (type && type.types && type.types.length > 0 && !type.guess) {
 	                			for (var i = 0; i < type.types.length; i++) {
-	                				if (type.types[i].props && type.types[i].props[node.property.name]) {
+	                				if (type.types[i].props && type.types[i].props[propName]) {
 	                					return;
 	                				}
 	                				if (type.types[i].proto && type.types[i].proto.name !== 'Object.prototype') {
-	                					if(type.types[i].proto.props[node.property.name]) {
+	                					if(type.types[i].proto.props[propName]) {
 	                						return;
 	                					}
             						}
@@ -1380,6 +1384,9 @@ define([
             						origin = type.origin;
             					}
                 				if (type.types.length === 1 && name && origin){
+                					if(name.indexOf("!known_modules.") === 0) {
+                						name = name.slice("!known_modules.".length);
+                					}
                 					if (/\./.test(origin)){
             							var originNode = type.types[0].originNode ? type.types[0].originNode : type.originNode;
             							if (originNode){
@@ -1387,15 +1394,15 @@ define([
                 							if (index >= 0){
                 								origin = origin.substring(index+1);
                 							}
-											context.report(node.property, ProblemMessages['no-undef-expression-defined-object'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-object', data: {file: originNode.sourceFile.name, start: originNode.start, end: originNode.end}}); //$NON-NLS-1$
+											context.report(node.property, ProblemMessages['no-undef-expression-defined-object'], {0:propName, 1: name, 2: origin, nls: 'no-undef-expression-defined-object', data: {file: originNode.sourceFile.name, start: originNode.start, end: originNode.end}}); //$NON-NLS-1$
 										} else {
-											context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
+											context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:propName, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
 										}
 									} else {
-										context.report(node.property, ProblemMessages['no-undef-expression-defined-index'], {0:node.property.name, 1: name, 2: origin, nls: 'no-undef-expression-defined-index'}); //$NON-NLS-1$
+										context.report(node.property, ProblemMessages['no-undef-expression-defined-index'], {0:propName, 1: name, 2: origin, nls: 'no-undef-expression-defined-index'}); //$NON-NLS-1$
 									}
 								} else {
-									context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:node.property.name, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
+									context.report(node.property, ProblemMessages['no-undef-expression-defined'], {0:propName, nls: 'no-undef-expression-defined'}); //$NON-NLS-1$
 								}
 	                		}
                 		}
