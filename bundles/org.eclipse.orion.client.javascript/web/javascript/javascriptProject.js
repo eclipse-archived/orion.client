@@ -300,10 +300,14 @@ define([
 	
 	function readAndMap(map, file) {
 		if(file && file.contents) {
-			var vals = JSON.parse(file.contents);
-			if(Object.keys(vals).length > 0) {
-				map.eslint = vals;
-				return map.eslint;
+			try {
+				var vals = JSON.parse(file.contents);
+				if(Object.keys(vals).length > 0) {
+					map.eslint = vals;
+					return map.eslint;
+				}
+			} catch(e) {
+				//fall through and return null
 			}
 		}
 		return null;
