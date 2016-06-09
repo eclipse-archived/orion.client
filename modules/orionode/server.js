@@ -192,6 +192,7 @@ if (process.versions.electron) {
 			}
 		}
 		function createWindow(url){
+			var Url = require("url");
 			var windowOptions = allPrefs.windowBounds || {width: 1024, height: 800};
 			windowOptions.title = "Orion";
 			windowOptions.icon = "icon/256x256/orion.png";
@@ -201,7 +202,11 @@ if (process.versions.electron) {
 				event.preventDefault();
 				if (false === undefined) {// Always open new tabs for now
 					createWindow(url);
-				} else {
+				} 
+				else if (Url.parse(url).hostname !== "localhost") {
+					electron.shell.openExternal(url);
+				}
+				else {
 					nextWindow.webContents.executeJavaScript("__openFolder = require('dialog').showSaveDialog;");
 					nextWindow.webContents.executeJavaScript('createTab("' + url + '");');
 				}

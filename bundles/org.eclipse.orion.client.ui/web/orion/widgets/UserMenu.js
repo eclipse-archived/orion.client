@@ -160,6 +160,9 @@ define([
 						link.classList.add("dropdownMenuItem"); //$NON-NLS-0$
 					}
 					link.href = item.href;
+					if (link.hostname !== "localhost" && util.isElectron) {
+						link.target = "_blank";
+					}
 					link.textContent = item.textContent;
 					li.appendChild(link);
 					category.appendChild(li);
