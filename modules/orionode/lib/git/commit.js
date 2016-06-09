@@ -85,7 +85,7 @@ function getCommitLog(req, res) {
 	var sha1Filter = query.sha1;
 	var fromDateFilter = query.fromDate ? parseInt(query.fromDate, 10) : 0;
 	var toDateFilter = query.toDate ? parseInt(query.toDate, 10) : 0;
-	var filterPath = path.join(req.user.workspaceDir, req.params["0"]);
+	var filterPath;
 	var behindCount = 0, aheadCount= 0;
 	function filterCommit(commit) {
 		if (sha1Filter && commit.sha() !== sha1Filter) return true;
@@ -231,7 +231,7 @@ function getCommitLog(req, res) {
 		});
 
 		var count = 0;
-		filterPath = api.toURLPath(filterPath.substring(repo.workdir().length));
+		filterPath = clone.getfileRelativePath(repo,req); 
 		function walk() {
 			return revWalk.next()
 			.then(function(oid) {
@@ -275,7 +275,7 @@ function getCommitLog(req, res) {
 	clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
-		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+		fileDir = clone.getfileDir(repo,req);
 		if (mergeBase) {
 			var names = scope.split("..");
 			var commit0, commit1,mergeBaseCommitOid;
@@ -451,12 +451,12 @@ function getDiff(repo, commit, fileDir) {
 
 function getCommitBody(req, res) {
 	var scope = req.params.scope;
-	var filePath = path.join(req.user.workspaceDir, req.params["0"]);
+	var filePath;
 	var theRepo;
 	clone.getRepo(req)
 	.then(function(repo) {
 		theRepo = repo;
-		filePath = api.toURLPath(filePath.substring(repo.workdir().length));
+		filePath = clone.getfileRelativePath(repo,req);
 		return repo.getReferenceCommit(scope);
 	})
 	.catch(function() {
@@ -727,7 +727,7 @@ function tag(req, res, commitId, name, isAnnotated, message) {
 	clone.getRepo(req)
 	.then(function(repo) {
 		theRepo = repo;
-		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+		fileDir = clone.getfileDir(repo,req);
 		return git.Commit.lookup(repo, commitId);
 	})
 	.then(function(commit) {
@@ -810,7 +810,7 @@ function postCommit(req, res) {
 	clone.getRepo(req)
 	.then(function(repo) {
 		theRepo = repo;
-		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+		fileDir = clone.getfileDir(repo,req);
 		return createCommit(repo, req.body.CommitterName, req.body.CommitterEmail, req.body.AuthorName, req.body.AuthorEmail, req.body.Message, req.body.Amend, isInsertChangeId);
 	})
 	.then(function(commit) {
