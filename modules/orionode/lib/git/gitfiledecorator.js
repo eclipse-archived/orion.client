@@ -87,6 +87,7 @@ function addWorkSpaceGitLinks(workspacechild,req, name){
 	
 function addGitLinks(comingJson,branchname,fileDir){
 	var fileTarget = comingJson.Location.substr(fileDir.length);
+	if(fileTarget === "/") fileTarget = "";
 	comingJson.Git ={
 		"BlameLocation": "/gitapi/blame/HEAD" + fileDir + fileTarget,
 		"CloneLocation": "/gitapi/clone" + fileDir,
