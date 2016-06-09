@@ -1610,7 +1610,7 @@ define([
 	         */
 	        function check(node) {
 				var scope = context.getScope();
-				if(importsHandled) {
+				if(importsHandled || (node.type === 'ImportDeclaration' && scope.type === 'global')) {
 					return;
 				}
 				scope.variables.forEach(function(variable) {
