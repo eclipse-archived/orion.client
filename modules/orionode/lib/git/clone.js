@@ -35,11 +35,17 @@ module.exports.router = function(options) {
 	module.exports.handleRemoteError = handleRemoteError;
 	module.exports.foreachSubmodule = foreachSubmodule;
 	module.exports.getRepoByPath = getRepoByPath;
+	module.exports.getfileDir = getfileDir;
+	module.exports.getfileDirPath = getfileDirPath;
+	module.exports.getfileAbsolutePath = getfileAbsolutePath;
+	module.exports.getfileRelativePath = getfileRelativePath;
+	module.exports.isWorkspace = isWorkspace;
 
 	return express.Router()
 	.use(bodyParser.json())
 	.get('/workspace*', getClone)
 	.get('/file/:rootDir*', getClone)
+	.get('/file', getClone)
 	.put('/file*', putClone)
 	.delete('/file*', deleteClone)
 	.post('*', postInit);
@@ -80,17 +86,51 @@ function getRepoByPath(filePath,workspaceDir) {
 		filePath = path.dirname(filePath);
 		if (filePath.length <= workspaceDir) return Promise.reject(new Error("Forbidden"));
 	}
-	return git.Repository.discover(filePath, 0, workspaceDir).then(function(buf) {
+	var ceiling = options.options.configParams.isElectron ? "" : workspaceDir ; 
+	return git.Repository.discover(filePath, 0, ceiling).then(function(buf) {
 		return git.Repository.open(buf.toString());
 	});
 }	
 	
 function getRepo(req) {
 	var u = url.parse(req.url, true);
-	var restpath = u.pathname.split(fileRoot)[1];
-	if (!restpath) return Promise.reject(new Error("Forbidden"));
+	var restpath = u.pathname.split(fileRoot)[1] || "";
 	var filePath = path.join(req.user.workspaceDir, restpath);
 	return getRepoByPath(filePath,req.user.workspaceDir);
+}
+
+function getfileDir(repo ,req) {
+	var fileDir;
+	if(repo.workdir().slice(0, -1).length === req.user.workspaceDir.length){
+		fileDir = api.join(fileRoot);
+	}else{
+		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+	}
+	return fileDir;
+}
+
+function getfileDirPath(repo ,req) {
+	var fileDirpath;
+	if(repo.workdir().slice(0, -1).length === req.user.workspaceDir.length){
+		fileDirpath = path.join(fileRoot, path.sep);
+	}else{
+		fileDirpath = path.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+	}
+	return fileDirpath;
+}
+
+function getfileAbsolutePath(req) {
+	var fileAbsolutePath = path.join(req.user.workspaceDir, req.params["0"] || "");
+	return fileAbsolutePath;
+}
+
+function getfileRelativePath(repo, req) {
+	var fileRelativePath = api.toURLPath(getfileAbsolutePath(req).substring(repo.workdir().length));
+	return fileRelativePath;
+}
+
+function isWorkspace(req){
+	return !fs.existsSync(path.join(req.user.workspaceDir,'.git'));
 }
 
 function getClone(req, res) {
@@ -193,7 +233,7 @@ function getClones(req, res, callback) {
 			git.Repository.open(dir)
 			.then(function(repo) {
 				var base = path.basename(dir);
-				var location = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+				var location = getfileDir(repo ,req);
 				pushRepo(repos, repo, base, location, null, [], function() { cb(); });
 	 		})
 			.catch(function() {

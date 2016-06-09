@@ -44,7 +44,7 @@ function getAConfig(req, res) {
 	var key = util.decodeURIComponent(req.params.key);
 	clone.getRepo(req)
 	.then(function(repo) {
-		var fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+		var fileDir = clone.getfileDir(repo,req);
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
 			if (err) {
@@ -76,7 +76,7 @@ function getConfig(req, res) {
 	var filter = req.query.filter;
 	clone.getRepo(req)
 	.then(function(repo) {
-		var fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+		var fileDir = clone.getfileDir(repo,req);
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
 			if (err) {
@@ -117,7 +117,7 @@ function updateConfig(req, res, key, value, callback) {
 	var fileDir;
 	clone.getRepo(req)
 	.then(function(repo) {
-		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+		fileDir = clone.getfileDir(repo,req);
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
 			if (err) {

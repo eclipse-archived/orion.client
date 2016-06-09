@@ -32,7 +32,7 @@ module.exports.gitFileDecorator = function(rootName, req, filepath, originalJson
 		return clone.getRepoByPath(filepath, req.user.workspaceDir)
 		.then(function(repo) {
 			if(repo){
-				var fileDir = api.join(rootName, repo.workdir().substring(req.user.workspaceDir.length + 1) , "/");
+				var fileDir = api.join(clone.getfileDir(repo,req), "/");
 				return Promise.resolve(getBranch(repo))
 				.then(function(branchname){
 					addGitLinks(result,branchname,fileDir);
@@ -75,7 +75,7 @@ function addWorkSpaceGitLinks(workspacechild,req, name){
 			if(repo){
 				return Promise.resolve(getBranch(repo))
 					.then(function(branchname){
-						var workDir = api.join("/file", repo.workdir().substring(req.user.workspaceDir.length + 1), "/");
+						var workDir = api.join(clone.getfileDir(repo,req) , "/");
 						addGitLinks(workspacechild,branchname,workDir);
 					});
 			}
@@ -87,6 +87,7 @@ function addWorkSpaceGitLinks(workspacechild,req, name){
 	
 function addGitLinks(comingJson,branchname,fileDir){
 	var fileTarget = comingJson.Location.substr(fileDir.length);
+	if(fileTarget === "/") fileTarget = "";
 	comingJson.Git ={
 		"BlameLocation": "/gitapi/blame/HEAD" + fileDir + fileTarget,
 		"CloneLocation": "/gitapi/clone" + fileDir,

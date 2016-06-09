@@ -86,7 +86,7 @@ function getPullRequest(req, res) {
 	var fileDir, cloneDir, remoteDir,bodyJson;
 	clone.getRepo(req)
 	.then(function(repo) {
-		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+		fileDir = clone.getfileDir(repo,req); 
 		cloneDir = "/gitapi/clone" + fileDir;
 		remoteDir = "/gitapi/remote" + fileDir;
 		return request(userAgentHeader, function (error, response, body) {
