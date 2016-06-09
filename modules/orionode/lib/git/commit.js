@@ -23,6 +23,7 @@ var bodyParser = require('body-parser');
 var util = require('./util');
 var remotes = require('./remotes');
 var branches = require('./branches');
+var tasks = require('../tasks');
 
 module.exports = {};
 
@@ -71,6 +72,7 @@ function getCommit(req, res) {
 }
 
 function getCommitLog(req, res) {
+	var task = new tasks.Task(res);
 	var scope = util.decodeURIComponent(req.params.scope);
 	var fileDir;
 
@@ -200,7 +202,14 @@ function getCommitLog(req, res) {
 			}
 		})
 		.then(function() {
-			res.status(200).json(resp);
+			task.done({
+				HttpCode: 200,
+				Code: 0,
+				DetailedMessage: "OK",
+				JsonData: resp,
+				Message: "OK",
+				Severity: "Ok"
+			});
 		});
 	}
 
@@ -266,7 +275,14 @@ function getCommitLog(req, res) {
 				if (error.errno === git.Error.CODE.ITEROVER) {
 					writeResponse(true);
 				} else {
-					writeError(404, res, error.message);
+					task.done({
+						HttpCode: 404,
+						Code: 0,
+						DetailedMessage: error.message,
+						JsonData: {},
+						Message: error.message,
+						Severity: "Error"
+					});
 				}
 			});
 		}
@@ -315,15 +331,19 @@ function getCommitLog(req, res) {
 				} else {
 					writeResponse(true);
 				}
-			})
-			.catch(function(err) {
-				writeError(400, res, err.message);
 			});
 		} else {
 			log(repo, scope);
 		}
 	}).catch(function(err) {
-		writeError(400, res, err.message);
+		task.done({
+			HttpCode: 400,
+			Code: 0,
+			DetailedMessage: err.message,
+			JsonData: {},
+			Message: err.message,
+			Severity: "Error"
+		});
 	});
 }
 
