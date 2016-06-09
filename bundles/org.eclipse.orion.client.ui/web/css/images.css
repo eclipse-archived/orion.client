@@ -172,7 +172,7 @@
 }
 
 .core-sprite-questionmark {
-	font-weight: bold;
+	padding-bottom: 3px;
 }
 
 .core-sprite-hamburger {
@@ -329,7 +329,7 @@
 .core-sprite-horizontal:before{ content:'\E042'; }
 .core-sprite-vertical:before{ content:'\E041'; }
 .core-sprite-pip:before{ content:'\E067'; }
-.core-sprite-questionmark:before{ content:'?'; }
+.core-sprite-questionmark:before{ content:'\E043'; }
 
 /* icons for file types - possibly more to come - at least one for images */ 
 
