@@ -2826,8 +2826,7 @@ define([
 						["ssss", "ssss : number"]
 					]);
 				});
-				// TODO Tern 18 does not return proeprty completions inside the object
-				it.skip("test Object Literal inside", function(done) {
+				it("test Object Literal inside", function(done) {
 					var options = {
 						buffer: "var x = { the : 1, far : this.th };",
 						prefix: "th",
@@ -2835,7 +2834,9 @@ define([
 						callback: done
 					};
 					return testProposals(options, [
-						["the", "the : number"]
+						// Tern will fallback on looking at all potential property names if filter is set to true https://github.com/ternjs/tern/issues/790
+						// currently filter is set to false, so no results will be returned
+//						["the", "the : number"]
 					]);
 				});
 				it("test Object Literal outside", function(done) {
@@ -5235,8 +5236,7 @@ define([
 						['XPathResult()', 'XPathResult()']
 					]);
 				});
-				// TODO Tern 18 does not return global vars on the window object
-				it.skip('browser awareness 9', function(done) {
+				it('browser awareness 9', function(done) {
 					var options = {
 						buffer: "/*eslint-env browser */var xx = 9;window.x",
 						prefix: "x",
