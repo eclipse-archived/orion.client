@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 define([
-		'i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/EventTarget', 'orion/commands',
+		'i18n!orion/nls/messages', 'i18n!orion/widgets/nls/messages', 'require', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/EventTarget', 'orion/commands',
 		'orion/parameterCollectors', 'orion/extensionCommands', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/i18nUtil',
 		'orion/webui/splitter', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/contentTypes', 'orion/keyAssist',
 		'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
@@ -19,7 +19,7 @@ define([
 		'text!orion/banner/toolbar.html',
 		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu', 'orion/objects', "orion/metrics",'orion/bidiUtils'
 	],
-	function (messages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands,
+	function (messages, widgetMessages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands,
 		mBreadcrumbs, lib, i18nUtil, mSplitter, mDropdown, mTooltip, mContentTypes, mKeyAssist, mThemePreferences, mThemeData, Deferred,
 		mUserMenu, PageLinks, openResource, Banner, ToolbarTemplate, util, mCustomGlobalCommands, mFileClient, SideMenu, objects, mMetrics, mBidiUtils) {
 	/**
@@ -38,7 +38,10 @@ define([
 				return;
 			}
 			if (util.isElectron) {
-				userMenuPlaceholder.style.display = "none";
+				lib.$("span", lib.node("userTrigger")).className += " core-sprite-questionmark";
+			}
+			else {
+				lib.$("span", lib.node("userTrigger")).className += " core-sprite-silhouette";
 			}
 			
 			var dropdownNode = lib.node("userDropdown"); //$NON-NLS-0$
@@ -51,7 +54,7 @@ define([
 				dropdown: userDropdown,
 				serviceRegistry: serviceRegistry
 			});
-			var optionsLabel = messages['Options'];
+			var optionsLabel = widgetMessages['Help'];
 			var dropdownTrigger = lib.node("userTrigger"); //$NON-NLS-0$
 			dropdownTrigger.setAttribute("aria-label", optionsLabel);
 
