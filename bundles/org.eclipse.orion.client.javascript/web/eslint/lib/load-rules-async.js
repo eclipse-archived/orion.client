@@ -163,7 +163,7 @@ define([
 	            		var start = node.left.end; // we need to start to look for the operator at the end of the left node
 	            		for (var i=0; i < len; i++) {
 	            			var t = tokens[i];
-	            			if (t.start > start && t.value === operator) {
+	            			if (t.start >= start && t.value === operator) {
 	            				return t;
 	            			}
 	            		}

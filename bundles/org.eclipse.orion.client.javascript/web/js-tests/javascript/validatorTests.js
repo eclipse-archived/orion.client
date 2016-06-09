@@ -1140,6 +1140,27 @@ define([
 								worker.getTestState().callback(error);
 							});
 					});
+					// https://bugs.eclipse.org/bugs/show_bug.cgi?id=495807
+					it("should flag == 3", function(callback) {
+						var config = { rules: {} };
+						config.rules[RULE_ID] = 1;
+						validate({buffer: "if (typeof(foo)==\"bar\") {}", callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Expected '===' and instead saw '=='.",
+										nodeType: "BinaryExpression",
+										start: 15,
+										end: 17
+									}
+								]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
 				});
 				// MISSING-DOC DECL------------------------------------------------
 				describe("missing-doc - function declaration", function(){
