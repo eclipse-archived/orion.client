@@ -85,15 +85,18 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			//--------- git credentials -------------------------------
 			this.gitCredentialsFields = [];
+			var gitCredentialsFieldsDefaultLength;
 			if(!util.isElectron){
 				this.gitCredentialsFields = [ new SettingsCheckbox( 
 					{	fieldlabel:messages["Enable Storage"], 
 						postChange: this.updateGitCredentials.bind(this)
 					} 
 				) ];
+				gitCredentialsFieldsDefaultLength = 1;
 			}else{
 				var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
 				gitPreferenceStorage.enable();
+				gitCredentialsFieldsDefaultLength= 0;
 			}
 			var gitCredentialsSection;
 			var that = this;
@@ -112,7 +115,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					gitPreferenceStorage.remove(repository).then(
 						function(){
 							messageService.setProgressResult(i18nUtil.formatMessage(messages["DeletedGitMsg"], [repository]));
-							that.gitCredentialsFields[keyIndex+1].destroy();
+							that.gitCredentialsFields[keyIndex + gitCredentialsFieldsDefaultLength].destroy();
 						}
 					);
 				},
