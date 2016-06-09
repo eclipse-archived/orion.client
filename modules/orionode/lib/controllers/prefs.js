@@ -277,5 +277,5 @@ function readPrefs(){
 }
 
 function writePrefs(contents){
-	fs.writeFileSync(getElectronPrefsFileName(), JSON.stringify(contents), 'utf8');
+	fs.writeFileSync(getElectronPrefsFileName(), JSON.stringify(contents, null, 2), 'utf8');
 }
