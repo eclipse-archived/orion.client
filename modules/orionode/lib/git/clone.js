@@ -507,7 +507,13 @@ function getRemoteCallbacks(creds, task) {
 }
 
 function handleRemoteError(task, err, cloneUrl) {
-	var u = url.parse(cloneUrl, true);
+	var fullCloneUrl;
+	if(cloneUrl.indexOf("://") !== -1){
+		fullCloneUrl = cloneUrl;
+	}else if(cloneUrl.indexOf("@") < cloneUrl.indexOf(":")){
+		fullCloneUrl = "ssh://" + cloneUrl;
+	}
+	var u = url.parse(fullCloneUrl, true);
 	var code = 403;
 	var jsonData;
 	if (err.message && ["credentials", "authentication", "401"].some(function(s) { return err.message.indexOf(s) !== -1; })) {
