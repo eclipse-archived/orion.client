@@ -516,7 +516,7 @@ function handleRemoteError(task, err, cloneUrl) {
 			"Host": u.hostname,
 			"HumanishName": u.pathname.substring(u.pathname.lastIndexOf("/") + 1).replace(".git", ""),
 			"Port": u.port,
-			"Scheme": u.protocol.replace(":", ""),
+			"Scheme": u.protocol && u.protocol.replace(":", ""),
 			"Url": cloneUrl,
 			"User": u.auth
 		};
