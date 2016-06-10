@@ -2,8 +2,8 @@
 
 ## WARNING do not run with sudo, it will break wine and cause many permission issues
 # Example usage ***** REMOVE LAST EXAMPLE BEFORE COMMITTING *****
-# ./uploadRelease.sh --build <build timestamp> --certificate <certificate name> --description <Github release description>--token <Github API token> --user <Github user> --repo <repo>
-# ./uploadRelease.sh -b <build timestamp> -c <certificate name> -d <Github release description> -t <Github API token> -u <Github user> -r <repo>
+# ./electron_build.sh --build <build timestamp> --certificate <certificate name> --description <Github release description>--token <Github API token> --user <Github user> --repo <repo>
+# ./electron_build.sh -b <build timestamp> -c <certificate name> -d <Github release description> -t <Github API token> -u <Github user> -r <repo>
 
 pushd () {
     command pushd "$@" > /dev/null
@@ -54,14 +54,6 @@ done
 export GITHUB_TOKEN=${GITHUB_TOKEN} # required for uploading Github releases
 export CSC_NAME=${CSC_NAME} # required for OSX autoUpdater-functional builds
 
-# constants
-pkg_version=$(grep -m1 "version" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
-old_version=${pkg_version}
-pkg_version=`echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
-update_url="http\:\/\/orion\-update\.mybluemix\.net\/update"
-vpkg_version="v${pkg_version}"
-name=$(grep -m1 "name" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
-
 # functions
 
 # upload a file under the specified github release
@@ -89,16 +81,22 @@ cleanup_nodemodules() {
 
 # update orion.conf and package.json
 update_config_files() {
+	pkg_version=$(grep -m1 "version" ../orionode/package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
+	old_version=${pkg_version}
+	pkg_version=`echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
+	update_url="http\:\/\/orion\-update\.mybluemix\.net\/update"
+	vpkg_version="v${pkg_version}"
+	name=$(grep -m1 "name" ../orionode/package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
 	sed -i .bak 's/\"version\": \"'"${old_version}"'\"/\"version\"\:\ \"'"${pkg_version}"'\"/' ${PWD}/orionode/package.json
 	sed -i .bak 's/orion\.autoUpdater\.url\=/orion\.autoUpdater\.url\='"${update_url}"'/' ${PWD}/orionode/orion.conf
 }
 
 echo "Setting up build directories"
 
-rm -rf ../buildTemp
-mkdir ../buildTemp
+rm -rf buildTemp
+mkdir buildTemp
 
-pushd ../buildTemp
+pushd buildTemp
 echo "Copying over orionode_${BUILD} build"
 cp ${BUILD_ZIP} .
 
