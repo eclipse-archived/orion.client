@@ -1,5 +1,9 @@
 #!/bin/bash
-#build_electron.sh -build <build timestamp> 
+
+## WARNING do not run with sudo, it will break wine and cause many permission issues
+# Example usage ***** REMOVE LAST EXAMPLE BEFORE COMMITTING *****
+# ./uploadRelease.sh --build <build timestamp> --certificate <certificate name> --description <Github release description>--token <Github API token> --user <Github user> --repo <repo>
+# ./uploadRelease.sh -b <build timestamp> -c <certificate name> -d <Github release description> -t <Github API token> -u <Github user> -r <repo>
 
 pushd () {
     command pushd "$@" > /dev/null
@@ -9,114 +13,199 @@ popd () {
     command popd "$@" > /dev/null
 }
 
-while [ $# -gt 0 ]
+# parse command line arguments
+while [[ $# > 1 ]]
 do
-        case "$1" in
-                "-build")
-                        BUILD="$2"; shift;;
+key="$1"
 
-                 *) break;;      # terminate while loop
-        esac
-        shift
+case $key in
+    -t|--token)
+    GITHUB_TOKEN="$2"
+    shift # past argument
+    ;;
+    -d|--description)
+    description="$2"
+    shift # past argument
+    ;;
+    -u|--user)
+    user="$2"
+    shift # past argument
+    ;;
+    -r|--repo)
+	repo="$2"
+	shift # past argument
+	;;
+	-c|--certificate)
+	CSC_NAME="$2"
+	shift # past argument
+	;;
+	-b|--build)
+	BUILD="$2"
+	shift
+	;;
+    *)
+    # fall through any other options
+    ;;
+esac
+shift # past argument or value
 done
+
+# environment variables
+export GITHUB_TOKEN=${GITHUB_TOKEN} # required for uploading Github releases
+export CSC_NAME=${CSC_NAME} # required for OSX autoUpdater-functional builds
+
+# constants
+pkg_version=$(grep -m1 "version" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
+old_version=${pkg_version}
+pkg_version=`echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
+update_url="http\:\/\/orion\-update\.mybluemix\.net\/update"
+vpkg_version="v${pkg_version}"
+name=$(grep -m1 "name" ../package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
+
+# functions
+
+# upload a file under the specified github release
+# $1: file name/path
+upload () {
+	echo $1
+	github-release upload --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name $1 --file $1
+}
+
+# create a new release
+# $1: String for release description
+new_release() {
+	github-release release --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${vpkg_version}" --description "${description}"
+}
+
+# node module clean up
+cleanup_nodemodules() {
+	echo "Cleaning up node modules" 
+	rm -rf orionode/node_modules/passport*
+	rm -rf orionode/node_modules/mongoose
+	rm -rf orionode/node_modules/mongodb
+	rm -rf orionode/node_modules/nodemailer
+	rm orionode/node_modules/nodegit/build/Release/nodegit.node
+}
+
+# update orion.conf and package.json
+update_config_files() {
+	sed -i .bak 's/\"version\": \"'"${old_version}"'\"/\"version\"\:\ \"'"${pkg_version}"'\"/' ${PWD}/orionode/package.json
+	sed -i .bak 's/orion\.autoUpdater\.url\=/orion\.autoUpdater\.url\='"${update_url}"'/' ${PWD}/orionode/orion.conf
+}
 
 echo "Setting up build directories"
 
-#export PATH=$PATH://home/data/users/gheorghe/nodejs/node-v4.4.1-linux-x64/bin/
+rm -rf ../buildTemp
+mkdir ../buildTemp
 
-rm -rf buildTemp
+pushd ../buildTemp
+echo "Copying over orionode_${BUILD} build"
+cp ${BUILD_ZIP} .
 
-mkdir -p buildTemp/mac
-mkdir -p buildTemp/linux
-mkdir -p buildTemp/windows
+# ---------------------------------------- OSX BUILD ----------------------------------------
 
-currentVersion=$(head -n 1 electron/version)
-
-DOWNLOADS=~/downloads
-
-#copy over nodegit binary to workaround in memory ssh limitation
-cp ${DOWNLOADS}/orion/orionode/nodegit/v0.13.0/electron/mac/nodegit.node buildTemp/mac/
-cp ${DOWNLOADS}/orion/orionode/nodegit/v0.13.0/electron/linux/nodegit.node buildTemp/linux/
-cp ${DOWNLOADS}/orion/orionode/nodegit/v0.13.0/electron/windows/nodegit.node buildTemp/windows/
-
-pushd buildTemp/
-echo "Copying over orionode_$BUILD build"
-cp ${DOWNLOADS}/orion/orionode/orionode_$BUILD.tar.gz .
-
-echo "MAC BUILD -----"
-pushd mac
+echo "----- OSX build -----"
+mkdir osx
+pushd osx
 echo "Extracting build"
-tar -xzf ../orionode_$BUILD.tar.gz
-echo "Cleaning up node modules" 
-rm orionode/node_modules/nodegit/build/Release/nodegit.node
-rm -rf orionode/node_modules/passport*
-rm -rf orionode/node_modules/mongoose
-rm -rf orionode/node_modules/mongodb
-rm -rf orionode/node_modules/nodemailer
-cp  nodegit.node orionode/node_modules/nodegit/build/Release/
-echo "Setting up Electron"
-mv orionode app
-VERSION=`cat app/package.json | awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/\042'version'\042/){print $(i+1)}}}' | tr -d '"' | sed -n ${1}p | sed 's/ //g'`
-pushd app
-sed -i 's/\"plugins\/consolePlugin.html\"\:true\,//' lib/orionode.client/defaults.pref 
-popd
-../../packager/node_modules/.bin/electron-packager app/ Orion --platform=darwin --build-version=$VERSION.$BUILD --arch=x64 --version=0.36.7 --icon=${DOWNLOADS}/orion/orionode/electron/mac/orion.icns
-echo "Tar"
-mv Orion-darwin-x64/ Orion
-echo $BUILD > Orion/build_id.txt
-tar -czf orion.tar.gz Orion
-echo "Copy to download dir"
-cp orion.tar.gz ${DOWNLOADS}/orion/orionode/electron/mac/
-popd
+tar -xzf ../orionode_${BUILD}.tar.gz
 
-echo "LINUX BUILD -----"
-pushd linux 
+cleanup_nodemodules
+update_config_files
+
+# copy over nodegit binary to workaround in memory ssh limitation
+cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/mac/nodegit.node ./orionode/node_modules/nodegit/build/Release
+
+pushd orionode
+
+# generates osx artifacts: dmg, -mac.zip
+npm run dist:osx
+echo "osx artifacts generated"
+
+popd # pop orionode
+popd # pop osx
+
+# ---------------------------------------- WINDOWS BUILD ----------------------------------------
+
+echo "----- WIN build -----"
+mkdir win
+pushd win
 echo "Extracting build"
-tar -xzf ../orionode_$BUILD.tar.gz
-echo "Cleaning up node modules" 
-rm orionode/node_modules/nodegit/build/Release/nodegit.node
-rm -rf orionode/node_modules/passport*
-rm -rf orionode/node_modules/mongoose
-rm -rf orionode/node_modules/mongodb
-rm -rf orionode/node_modules/nodemailer
-cp nodegit.node orionode/node_modules/nodegit/build/Release/
-echo "Setting up Electron"
-mv orionode app
-pushd app
-sed -i 's/\"plugins\/consolePlugin.html\"\:true\,//' lib/orionode.client/defaults.pref 
-popd
-../../packager/node_modules/.bin/electron-packager app/ Orion --platform=linux --build-version=$VERSION.$BUILD --arch=x64 --version=0.36.7
-echo "Tar"
-mv Orion-linux-x64/ Orion
-echo $BUILD > Orion/build_id.txt
-tar -czf orion.tar.gz Orion 
-echo "Copy to download dir"
-cp orion.tar.gz ${DOWNLOADS}/orion/orionode/electron/linux/
-popd
+tar -xzf ../orionode_${BUILD}.tar.gz
 
-echo "WINDOWS BUILD -----"
-pushd windows 
+cleanup_nodemodules
+update_config_files
+
+# copy over nodegit binary to workaround in memory ssh limitation
+cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/windows/nodegit.node orionode/node_modules/nodegit/build/Release
+
+pushd orionode
+
+# generates windows artifacts: -full.nupkg, -delta.nupkg, .exe, RELEASES
+npm run dist:win
+echo "windows artifacts generated"
+
+pushd dist/win
+
+# rename file for consistency
+mv "${name} Setup ${pkg_version}.exe" "${name}-${pkg_version}-setup.exe"
+
+popd # pop dist/win
+popd # pop orionode
+popd # pop win
+
+# ---------------------------------------- LINUX BUILD ----------------------------------------
+
+echo "----- LINUX build -----"
+mkdir linux
+pushd linux
 echo "Extracting build"
-tar -xzf ../orionode_$BUILD.tar.gz
-echo "Cleaning up node modules" 
-rm orionode/node_modules/nodegit/build/Release/nodegit.node
-rm -rf orionode/node_modules/passport*
-rm -rf orionode/node_modules/mongoose
-rm -rf orionode/node_modules/mongodb
-rm -rf orionode/node_modules/nodemailer
-cp nodegit.node orionode/node_modules/nodegit/build/Release/
-echo "Setting up Electron"
-mv orionode app
-pushd app
-sed -i 's/\"plugins\/consolePlugin.html\"\:true\,//' lib/orionode.client/defaults.pref
-popd
-../../packager/node_modules/.bin/electron-packager app/ Orion --platform=win32 --build-version=$VERSION.$BUILD --arch=x64 --version=0.36.7 --icon=${DOWNLOADS}/orion/orionode/electron/windows/orion.ico
-echo "Tar"
-mv Orion-win32-x64/ Orion
-echo $BUILD > Orion/build_id.txt
-tar -czf orion.tar.gz Orion
-echo "Copy to download dir"
-cp orion.tar.gz ${DOWNLOADS}/orion/orionode/electron/windows/
-popd
+tar -xzf ../orionode_${BUILD}.tar.gz
 
-echo "Done"
+cleanup_nodemodules
+update_config_files
+
+# copy over nodegit binary to workaround in memory ssh limitation
+cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/linux/nodegit.node orionode/node_modules/nodegit/build/Release
+
+pushd orionode
+
+# generates linux artifacts: .rpm, .tar.gz, .deb
+npm run dist:linux
+echo "linux artifacts generated"
+
+pushd dist
+mv "Orion-${pkg_version}.deb" "Orion-${pkg_version}.rpm" "Orion-${pkg_version}.tar.gz" linux
+
+pushd linux
+
+# ---------------------------------------- GITHUB RELEASE/UPLOAD ----------------------------------------
+
+new_release
+
+# upload linux artifacts to new release
+upload "${name}-${pkg_version}.deb"
+upload "${name}-${pkg_version}.rpm"
+upload "${name}-${pkg_version}.tar.gz"
+
+popd # pop linux
+popd # pop dist
+popd # pop orionode
+popd # pop linux
+
+pushd osx/orionode/dist/osx
+
+# upload osx artifacts to new release
+upload "${name}-${pkg_version}.dmg"
+upload "${name}-${pkg_version}-mac.zip"
+
+popd # pop osx/orionode/dist/osx
+pushd win/orionode/dist/win
+
+# upload windows artifacts to new release
+upload "RELEASES"
+upload "${name}-${pkg_version}-full.nupkg"
+upload "${name}-${pkg_version}-setup.exe"
+
+popd # pop win/orionode/dist/win
+popd # pop buildTemp
