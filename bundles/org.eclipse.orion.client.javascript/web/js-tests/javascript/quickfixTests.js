@@ -4354,6 +4354,7 @@ define([
 			});
 		});
 		describe("no-unused-vars-unread", function() {
+			this.timeout(100000000);
 			it("Test no-unused-vars-unread-1",function(callback) {
 				var rule = createTestRule('no-unused-vars');
 				var expected = {value: "",

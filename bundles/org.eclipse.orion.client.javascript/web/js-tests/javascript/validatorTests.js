@@ -6372,13 +6372,14 @@ define([
 					});
 				});
 			
-			//NO-REDECLARE -------------------------------------------------------
+				//NO-REDECLARE -------------------------------------------------------
 				describe('no-redeclare', function() {
 					var RULE_ID = "no-redeclare";
 					/**
 					 *@see https://bugs.eclipse.org/bugs/show_bug.cgi?id=474838
 					 * @since 10.0
 					 */
+					this.timeout(1000000);
 					it("should flag redeclaration in closure 1", function(callback) {
 						var topic = "(function fizz() {var a, a;});";
 						var config = { rules: {} };

@@ -1025,15 +1025,26 @@ define([
                 /**
                  * @description Check the backing scope for redeclares
                  */
-                function checkScope() {
-                   var scope = context.getScope();
-                    scope.variables.forEach(function(variable) {
-                        // If variable has multiple defs, every one after the 1st is a redeclaration
-                        variable.defs.slice(1).forEach(function(def) {
-                            reportRedeclaration(def.name, def.name.name);
-                        });
-                    });
-                }
+				function checkScope(node) {
+					var scope = context.getScope();
+					var variables = null;
+					if (node.type === 'Program') {
+						var ecmaFeatures = context.ecmaFeatures;
+						if (ecmaFeatures.globalReturn || node.sourceType === "module") {
+							variables = scope.childScopes[0].variables;
+						} else {
+							variables = scope.variables;
+						}
+					} else {
+						variables = scope.variables;
+					}
+					variables.forEach(function(variable) {
+						// If variable has multiple defs, every one after the 1st is a redeclaration
+						variable.defs.slice(1).forEach(function(def) {
+							reportRedeclaration(def.name, def.name.name);
+						});
+					});
+				}
 
                 return {
                     "Program": checkScope,
@@ -1173,6 +1184,28 @@ define([
         },
         /** @callback */
         "no-shadow-global": function(context) {
+        		function checkIdentifier(node, func) {
+        			switch(node.type) {
+        				case 'Identifier' :
+        				    func(node);
+		                    break;
+		                case 'Property' :
+		                   checkIdentifier(node.value, func);
+		                   break;
+                		case 'ArrayPattern' :
+                			var elements = node.elements;
+                			elements.forEach(function(element) {
+                				if (element) checkIdentifier(element, func);
+                			});
+                			break;
+                		case 'ObjectPattern' :
+                			var properties = node.properties;
+                			properties.forEach(function(property) {
+                				if (property) checkIdentifier(property, func);
+                			});
+                			break;
+        			}
+        		}
                 /**
                  * @description Check if the given node is a shadow
                  * @param {Object} node The AST node
@@ -1182,10 +1215,13 @@ define([
                     env.builtin = true;
                     switch(node.type) {
                         case 'VariableDeclarator': {
-                            if(env[Finder.findESLintEnvForMember(node.id.name)]) {
-                                context.report(node.id, ProblemMessages['no-shadow-global'], {0: node.id.name});
-                            }
-                            break;
+                        	checkIdentifier(node.id, function(node) {
+                        		var name = node.name;
+								if(name && env[Finder.findESLintEnvForMember(name)]) {
+		                        	context.report(node, ProblemMessages['no-shadow-global'], {0: name});
+		                    	}
+		                    });
+                        	break;
                         }
                         case 'FunctionExpression':
                         case 'FunctionDeclaration':
@@ -1612,15 +1648,49 @@ define([
     			}
     			return refs;
     		}
+		    function checkIdentifier(node, func) {
+    			switch(node.type) {
+    				case 'Identifier' :
+    				    func(node);
+	                    break;
+	                case 'Property' :
+	                   checkIdentifier(node.value, func);
+	                   break;
+            		case 'ArrayPattern' :
+            			var elements = node.elements;
+            			elements.forEach(function(element) {
+            				if (element) checkIdentifier(element, func);
+            			});
+            			break;
+            		case 'ObjectPattern' :
+            			var properties = node.properties;
+            			properties.forEach(function(property) {
+            				if (property) checkIdentifier(property, func);
+            			});
+            			break;
+    			}
+    		}
     		/**
 	         * @description Check the current scope for unused vars 
 	         */
 	        function check(node) {
 				var scope = context.getScope();
+				var variables = null;
+				if (node.type === 'Program') {
+					var ecmaFeatures = context.ecmaFeatures;
+					if (ecmaFeatures.globalReturn || node.sourceType === "module") {
+						variables = scope.childScopes[0].variables;
+					} else {
+						variables = scope.variables;
+					}
+				} else {
+					variables = scope.variables;
+				}
+
 				if(importsHandled || (node.type === 'ImportDeclaration' && scope.type === 'global')) {
 					return;
 				}
-				scope.variables.forEach(function(variable) {
+				variables.forEach(function(variable) {
 					if (!variable.defs.length || variable.defs[0].type === "Parameter") { // Don't care about parameters
 						return;
 					}
@@ -1659,7 +1729,12 @@ define([
 						   context.report(id, ProblemMessages['no-unused-vars-unused'], {0:id.name, nls: 'no-unused-vars-unused', pid: pb}); //$NON-NLS-1$
 						}
 					} else if (!references.some(isRead)) {
-						context.report(id, ProblemMessages['no-unused-vars-unread'], {0:id.name, nls: 'no-unused-vars-unread'}); //$NON-NLS-1$
+						// report error on the identifier that is matching the variable name
+						checkIdentifier(id, function(node) {
+							if (node.name === variable.name) {
+								context.report(node, ProblemMessages['no-unused-vars-unread'], {0:node.name, nls: 'no-unused-vars-unread'}); //$NON-NLS-1$
+							}
+						});
 					}
 				});
     		}

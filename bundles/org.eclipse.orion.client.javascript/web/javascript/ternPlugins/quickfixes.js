@@ -776,24 +776,73 @@ define([
 		 * @callback
 		 */
         "no-unused-vars-unread": function(annotation, annotations, file) {
-            var node = Finder.findNode(annotation.start, file.ast, {parents:true});
-            if(node && node.parents && node.parents.length > 0) {
-                var declr = node.parents.pop();
-                if(declr.type === 'VariableDeclarator') {
-                    var decl = node.parents.pop();
-                    if(decl.type === 'VariableDeclaration') {
-                        if(decl.declarations.length === 1) {
-                            return {text: '', start: decl.range[0], end: decl.range[1]};
+        	function getQuickfix(node, child, parents) {
+        		if (parents.length === 0) {
+        			return null;
+        		}
+                var decl, idx, change, properties, propertyIndex;
+                switch(node.type) {
+                	case 'VariableDeclarator' : {
+	                    return getQuickfix(parents.pop(), node, parents);
+	                }
+	                case 'VariableDeclaration' : {
+                        if(node.declarations.length === 1) {
+                            return {text: '', start: node.range[0], end: node.range[1]};
                         }
-                        var idx = indexOf(decl.declarations, declr);
+                        idx = indexOf(node.declarations, child);
                         if(idx > -1) {
-                        	var change = removeIndexedItemChange(decl.declarations, idx);
+                        	change = removeIndexedItemChange(node.declarations, idx);
                         	if(change) {
                         		return {text: change.text, start: change.start, end: change.end};
                         	}
                         }
-                    }
+                		break;
+                	}
+                	case 'ArrayPattern' : {
+                		var elements = node.elements;
+                		if (elements.length === 1) {
+                			// only one element - remove the whole variable declarator
+                			return getQuickfix(parents.pop(), node, parents);
+                 		}
+             			// remove only the corresponding elements - might also need to remove elements on the right hand side
+             			// look for the index inside the elements array
+             			var index = indexOf(elements, child);
+             			if (index > -1) {
+                        	var chosenElement = elements[index];
+                        	if(chosenElement) {
+                        		return {text: "", start: chosenElement.range[0], end: chosenElement.range[1]};
+                        	}
+             			}
+                 		break;
+                 	}
+                 	case 'Identifier' : {
+                 		return getQuickfix(parents.pop(), node, parents);
+                 	}
+                 	case 'Property' : {
+                 		return getQuickfix(parents.pop(), node, parents);
+                 	}
+                 	case 'ObjectPattern' : {
+         				properties = node.properties;
+         				if (properties.length === 1) {
+         					// only one property - we can remove the whole declarator
+                			return getQuickfix(parents.pop(), node, parents);
+         				}
+         				propertyIndex = indexOf(properties, child);
+                        if(propertyIndex > -1) {
+                        	change = removeIndexedItemChange(properties, propertyIndex);
+                        	if(change) {
+                        		return {text: change.text, start: change.start, end: change.end};
+                        	}
+                        }
+                 		break;
+                 	}
                 }
+                return null;
+        	}
+            var found = Finder.findNode(annotation.start, file.ast, {parents:true});
+            if(found && found.parents && found.parents.length > 0) {
+                var quickfix = getQuickfix(found, null, found.parents);
+                if (quickfix) return quickfix;
             }
         },
         /** 
@@ -1061,7 +1110,7 @@ define([
 	    if(list && list.length) {
             for(var i = 0; i < list.length; i++) {
                 var p = list[i];
-                if(item.range[0] === p.range[0] && item.range[1] === p.range[1]) {
+                if(p && item.range[0] === p.range[0] && item.range[1] === p.range[1]) {
                     return i;
                 }
             }

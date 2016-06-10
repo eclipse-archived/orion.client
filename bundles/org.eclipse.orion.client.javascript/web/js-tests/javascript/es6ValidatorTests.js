@@ -190,6 +190,159 @@ define([
 					});
 				});
 			});
+			//NO-UNUSED-VARS-UNREAD ---------------------------------------------
+			describe("no-unused-vars", function() {
+				var RULE_ID = 'no-unused-vars';
+				this.timeout(10000000);
+				it("flag unused var in list matching", function(callback) {
+					var topic = "var [a] = [1];";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'a' is unread.",
+								nodeType: "Identifier"
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag unused var in fail-soft destructuring", function(callback) {
+					var topic = "var [a] = [];";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'a' is unread.",
+								nodeType: "Identifier"
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag unused var in list matching", function(callback) {
+					var topic = "var [d, , b] = [1, 2, 3];";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'d' is unread.",
+								nodeType: "Identifier"
+							},
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'b' is unread.",
+								nodeType: "Identifier"
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag unused var in object matching shorthand", function(callback) {
+					var topic = "var {op, lhs, rhs} = () => {};";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'op' is unread.",
+								nodeType: "Identifier"
+							},
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'lhs' is unread.",
+								nodeType: "Identifier"
+							},
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'rhs' is unread.",
+								nodeType: "Identifier"
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag unused var in list matching", function(callback) {
+					var topic = "var {op, lhs, rhs} = () => {};";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'op' is unread.",
+								nodeType: "Identifier"
+							},
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'lhs' is unread.",
+								nodeType: "Identifier"
+							},
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'rhs' is unread.",
+								nodeType: "Identifier"
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should flag browser use object matching", function(callback) {
+					var topic = "/*eslint-env browser */ function getSomething() { return {first : \"\", second: \"\", third: \"\" };} function f() { var { first: first, second: { something: second }} = getSomething();} f();";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'first' is unread.",
+								start: 124,
+								end: 129
+							},
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description:  "'second' is unread.",
+								start: 152,
+								end: 158
+							}
+							]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+			});
+			//NO-UNUSED-VARS-IMPORT ---------------------------------------------
 			describe("no-unused-vars", function() {
 				var RULE_ID = 'no-unused-vars';
 				it("import 1", function(done) {
@@ -660,6 +813,101 @@ define([
 					validate({buffer: topic, callback: callback, config: config}).then(
 						function (problems) {
 							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+			});
+			//NO-SHADOW-GLOBAL ------------------------------------------------
+			describe('no-shadow-global', function() {
+				var RULE_ID = 'no-shadow-global';
+				/**
+				 * @since 12.0
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=495744
+				 */
+				this.timeout(1000000);
+				it("should flag browser use list matching", function(callback) {
+					var topic = "/* eslint-env browser*/ var [name, r] = [1,2];";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "Variable 'name' shadows a global member."
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should flag browser use object matching", function(callback) {
+					var topic = "/*eslint-env browser */ function getSomething() { return {first : \"\", second: \"\", third: \"\" };} function f() { var { first: name, second: { something: name }} = getSomething();}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "Variable 'name' shadows a global member.",
+								start: 124,
+								end: 128
+							},
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "Variable 'name' shadows a global member.",
+								start: 151,
+								end: 155
+							}
+							]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+			});
+			//NO-REDECLARE -------------------------------------------------------
+			describe('no-redeclare', function() {
+				var RULE_ID = "no-redeclare";
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=495744
+				it("should flag redeclaration in list matching", function(callback) {
+					var topic = "(function fizz() {var [a, , a] = [1, 2, 3];});";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'a' is already defined.",
+								nodeType: "Identifier"
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=495744
+				it("should flag redeclaration in Program", function(callback) {
+					var topic = "var a; var [a, b] = [1, 2];";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'a' is already defined.",
+								nodeType: "Identifier"
+							}]);
 						},
 						function (error) {
 							worker.getTestState().callback(error);

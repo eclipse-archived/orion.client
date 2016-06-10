@@ -287,6 +287,87 @@ define([
 					});
 				});
 			});
+			//NO-UNUSED-VARS-UNREAD
+			describe("no-unused-vars-unread", function() {
+				this.timeout(10000000);
+				it("Test no-unused-vars-unread-list-matching-1",function(callback) {
+					var rule = createTestRule('no-unused-vars');
+					var expected = {value: "",
+									start: 0, 
+									end: 12};
+					return getFixes({buffer: 'var [a] = 4;', 
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'no-unused-vars-unread'});
+				});
+				it("Test no-unused-vars-unread-list-matching-2",function(callback) {
+					var rule = createTestRule('no-unused-vars');
+					var expected = {value: "",
+									start: 5, 
+									end: 6};
+					return getFixes({buffer: 'var [d, , b] = [1, 2, 3]; console.log(b);', 
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'no-unused-vars-unread'});
+				});
+				it("Test no-unused-vars-unread-object-pattern-matching-1",function(callback) {
+					var rule = createTestRule('no-unused-vars');
+					var expected = {value: "",
+									start: 5, 
+									end: 9};
+					return getFixes({buffer: 'var {op, lhs, rhs} = () => {}; console.log(lhs);console.log(rhs);', 
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'no-unused-vars-unread'});
+				});
+				it("Test no-unused-vars-unread-object-pattern-matching-2",function(callback) {
+					var rule = createTestRule('no-unused-vars');
+					var expected = {value: "",
+									start: 77, 
+									end: 96};
+					return getFixes({buffer: 
+											"/*eslint-env browser */\n" +
+											"function f() {\n" +
+											"	var {\n" +
+											"		first: first,\n" +
+											"		second: {\n" +
+											"			second: second,\n" +
+											"			something: {\n" +
+											"				last: last\n" +
+											"			}\n" +
+											"		}\n" +
+											"	} = getSomething();\n" +
+											"	console.log(first);\n" +
+											"	console.log(last);\n" +
+											"}\n" +
+											"f();", 
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'no-unused-vars-unread'});
+				});
+				it("Test no-unused-vars-unread-object-pattern-matching-3",function(callback) {
+					var rule = createTestRule('no-unused-vars');
+					var expected = {value: "",
+									start: 40,
+									end: 81};
+					return getFixes({buffer: 
+											"/*eslint-env browser */\n" +
+											"function f() {\n" +
+											"	var {\n" +
+											"		first: first\n" +
+											"	} = getSomething();\n" +
+											"}\n" +
+											"f();", 
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'no-unused-vars-unread'});
+				});
+			});
 		});
 	};
 });
