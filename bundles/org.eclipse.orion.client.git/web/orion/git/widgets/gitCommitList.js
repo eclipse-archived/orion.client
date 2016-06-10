@@ -468,6 +468,7 @@ define([
 			case "applyStash": //$NON-NLS-0$
 			case "checkoutFile": //$NON-NLS-0$
 				Deferred.when(this.model.root.repository.status, function(status) {
+					status.parent = this.model.root;
 					this.myTree.redraw(status);
 				}.bind(this));
 				break;
