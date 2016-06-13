@@ -71,7 +71,7 @@ define([
 			uriTemplate: "{+OrionHome}/edit/edit.html"
 		});
 
-		provider.registerService("orion.page.link.related", null, {
+		provider.registerService("orion.page.link", null, {
 			name: widgetMessages["Settings"],
 			id: "orion.settings",
 			nls: "orion/widgets/nls/messages",
