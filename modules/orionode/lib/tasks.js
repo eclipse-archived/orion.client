@@ -12,6 +12,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var api = require('./api');
+var crypto = require('crypto');
 var writeError = api.writeError;
 
 var taskList = {};
@@ -39,7 +40,7 @@ function orionTasksAPI(options) {
 }
 
 function Task(res, cancelable, lengthComputable, wait) {
-	this.id = Date.now();
+	this.id = crypto.randomBytes(5).toString('hex') + Date.now();
 	this.cancelable = !!cancelable;
 	this.lengthComputable = !!lengthComputable;
 	this.timestamp = this.id;
