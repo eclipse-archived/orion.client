@@ -146,7 +146,9 @@ define([
 						if(evt.modified.some(function(loc){
 							return metadata.Location === loc;
 						})) {
-							this.load();
+							//We do not want to set focus on this editor. 
+							//E.g., If a user works on editor A but quick fix could have modified editor B. We should update B's contents but user still want to work on A.
+							this.load(null, true);
 						}
 					}
 				}
@@ -194,7 +196,7 @@ define([
 			}
 			return false;
 		},
-		load: function(charset) {
+		load: function(charset, nofocus) {
 			var fileURI = this.getInput();
 			if (!fileURI) { return; }
 			var fileClient = this.fileClient;
@@ -213,7 +215,7 @@ define([
 							this._fileMetadata = objects.mixin(this._fileMetadata, data);
 							if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
 								progress(fileClient.read(resource), messages.Reading, fileURI).then(function(contents) {
-									editor.setInput(fileURI, null, contents);
+									editor.setInput(fileURI, null, contents, null, nofocus);
 									this._clearUnsavedChanges();
 								}.bind(this));
 							}
