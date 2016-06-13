@@ -12,12 +12,20 @@
 
 define([
 	'orion/EventTarget',
-], function(EventTarget) {
+	'orion/util'
+], function(EventTarget, util) {
 	function mergeSettings(defaults, settings) {
 		for (var property in defaults) {
 			if (!settings.hasOwnProperty(property)) {
 				settings[property] = defaults[property];
 			}
+		}
+		if (util.isElectron && settings.autoSave) {
+			settings.autoSave = false;
+			settings.autoSaveVisible = false;
+			settings.autoSaveLocalVisible = false,
+			settings.autoSaveTimeout = -1;
+			settings.autoSaveTimeoutVisible = false;
 		}
 		return settings;
 	}
