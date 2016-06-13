@@ -10,16 +10,12 @@
  ******************************************************************************/
 /*eslint-env amd */
 define([
-	"javascript/api/ternServer",
-	"javascript/occurrences",
-	"javascript/astManager",
-	"javascript/cuProvider"
-], function(TernServer, Occurrences, ASTManager, CUProvider) {
+	"javascript/api/ternServer"
+], function(TernServer) {
 	
 	var useworker = false,
 		scriptresolver,
-		ternserver,
-		occurrences;
+		ternserver;
 	
 	/**
 	 * @name JavaScript
@@ -39,21 +35,7 @@ define([
 				//just fire it up for now
 			});
 		}
-		occurrences = new Occurrences.JavaScriptOccurrences(new ASTManager.ASTManager(), CUProvider);
 	}
-	
-	/**
-	 * @name JavaScript.prototype.getOccurrences
-	 * @description Finds all the occurrences for the given offset
-	 * @function
-	 * @param {Object} editorContext The editor context object
-	 * @param {Object} args The arguments to pass in
-	 * @returns {Promise} A Promise to compute the occurrences
-	 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#The_Occurrence_object
-	 */
-	JavaScript.prototype.getOccurrences = function getOccurrences(editorContext, args) {
-		return occurrences.computeOccurrences(editorContext, args);
-	};
 	
 	JavaScript.prototype.Tern = Object.create(null);
 	/**
@@ -171,6 +153,16 @@ define([
      */
     JavaScript.prototype.Tern.outline = function outline(file, files, callback) {
     	ternserver.outline(file, files, callback);
+    };
+    /**
+     * @description Computes occurrences for the given position
+     * @param {String} file The fully qualified name of the file context
+     * @param {Number} offset The offset of the cursor
+     * @param {Array.<Object>} files The optional array of file objects
+     * @param {Function} callback The callback which is called to return the results
+     */
+    JavaScript.prototype.Tern.occurrences = function outline(file, offset, files, callback) {
+    	ternserver.occurrences(file, offset, files, callback);
     };
     /**
      * @description Computes a rename array for the identifier at the given offset

@@ -37,574 +37,571 @@ define([
 		jsProject = jsproject;
 	}
 	
-	Objects.mixin(TernServer.prototype, {
-		/**
-	     * @description Add a file to the Tern server
-	     * @param {String} file The fully qualified name of the file
-	     * @param {String} text The optional text of the file 
-	     */
-	    addFile: function addFile(file, text) {
-	    	if(ternserver) {
-		    	ternserver.addFile(file, text);
-			}
-	    },
-	    /**
-	     * @description Checks if the type reference at the given offset matches the given origin type
-	     * @param {String} file The fully qualified name of the file context
-	     * @param {Number} offset The offset of the identifier to check
-	     * @param {Object} origin The original type information
-	     * @param {Array.<Object>} files The optional array of file objects
-	     * @param {Function} callback The callback which is called to return the results
-	     */
-	    checkRef: function checkRef(file, offset, origin, files, callback) {
-	    	if(ternserver) {
-	    		ternserver.request({
-		           query: {
-			           type: "checkRef",  //$NON-NLS-1$
-			           file: file,
-			           end: offset,
-			           origin: origin
-		           },
-		           files: Array.isArray(files) ? files : []},
-		           function(error, type) {
-						if(error) {
-							callback(null, {error: typeof error === 'string' ? error : error.message, message: Messages['failedType']});
-						} else {
-							callback(type);
-						}
-		           });
-			} else {
-		       callback(null, {message: Messages['failedTypeNoServer']});
-		   	}
-	
-	    },
-	    /**
-	     * @description Computes content assist for the given options
-	     * @param {String} file The fully qualified name of the file context
-	     * @param {Number} offset The offset of the completion
-	     * @param {Boolean} keywords If keywords should be returned as well
-	     * @param {Array.<Object>} files The optional array of file objects
-	     * @param {Function} callback The callback which is called to return the results
-	     */
-	    completions: function completions(file, offset, keywords, files, callback) {
-	    	if(ternserver) {
-		       ternserver.request({
-		           query: {
-		           type: "completions",  //$NON-NLS-1$
+	/**
+     * @description Add a file to the Tern server
+     * @param {String} file The fully qualified name of the file
+     * @param {String} text The optional text of the file 
+     */
+    TernServer.prototype.addFile = function addFile(file, text) {
+    	if(ternserver) {
+	    	ternserver.addFile(file, text);
+		}
+    };
+    /**
+     * @description Checks if the type reference at the given offset matches the given origin type
+     * @param {String} file The fully qualified name of the file context
+     * @param {Number} offset The offset of the identifier to check
+     * @param {Object} origin The original type information
+     * @param {Array.<Object>} files The optional array of file objects
+     * @param {Function} callback The callback which is called to return the results
+     */
+    TernServer.prototype.checkRef = function checkRef(file, offset, origin, files, callback) {
+    	if(ternserver) {
+    		ternserver.request({
+	           query: {
+		           type: "checkRef",  //$NON-NLS-1$
 		           file: file,
-		           types: true,
-		           origins: true,
-		           urls: true,
-		           docs: true,
 		           end: offset,
-		           sort:true,
-		           expandWordForward: false,
-		           omitObjectPrototype: false,
-		           includeKeywords: keywords,
-		           caseInsensitive: true
-		           },
-		           files: Array.isArray(files) ? files : []},
-		           function(error, completions) {
-		               if(error) {
-							callback(null, {error: error.message, message: Messages['failedToComputeProposals']});
-		               } else if(completions && completions.completions) {
-							callback(completions.completions);
-		               } else {
-							callback([]);
-		               }
-		           });
-	
-		   } else {
-		       callback(null, {message: Messages['failedToComputeProposalsNoServer']});
-		   }
-	    },
-	    /**
-	     * @description Computes the definition of the identifier at the given offset
-	     * @param {String} file The fully qualified name of the file context
-	     * @param {Number} offset The offset of the completion
-	     * @param {Boolean} guess If we should take a guess at the definition if one cannot be computed
-	     * @param {Array.<Object>} files The optional array of file objects
-	     * @param {Function} callback The callback which is called to return the results
-	     */
-	    definition: function definition(file, offset, guess, files, callback) {
-	    	if(ternserver) {
-		       ternserver.request({
-		           query: {
-			           type: "definition",  //$NON-NLS-1$
-			           file: file,
-			           end: offset,
-			           guess: guess
-		           },
-		           files: Array.isArray(files) ? files : []},
-		           function(error, decl) {
-		               if(error) {
-		                  callback(null, {error: error.message, message: Messages['failedToComputeDecl']});
-		               }
-		               if(decl && typeof decl.start === 'number' && typeof decl.end === "number") {
-							callback(decl);
-						} else {
-							callback(null);
-						}
-		           });
-		   } else {
-		       callback(null, {message: Messages['failedToComputeDeclNoServer']});
-		   }
-	    },
-	    /**
-	     * @description Deletes the given file from the server. Does nothing if the file does not exist
-	     * @param {String] file The fully qualified name of the file to delete
-	     */
-	    delFile: function delFile(file) {
-	    	if(ternserver) {
-	            ternserver.delFile(file);
-	        }
-	    },
-	    /**
-	     * @description Computes the documentation associated with the given offset in the file
-	     * @param {String} file The fully qualified name of the file context
-	     * @param {Number} offset The offset of the completion
-	     * @param {String} docFormat The format of the doc. If not given 'full' is assumed
-	     * @param {Array.<Object>} files The optional array of file objects
-	     * @param {Function} callback The callback which is called to return the results
-	     */
-	    documentation: function documentation(file, offset, docFormat, files, callback) {
-	    	if(ternserver) {
-		       ternserver.request({
-		           query: {
-			           type: "documentation",  //$NON-NLS-1$
-			           file: file,
-			           end: offset,
-			           docFormat: typeof docFormat === 'string' ? docFormat : 'full' //$NON-NLS-1$
-		           },
-		           files: Array.isArray(files) ? files : []},
-		           function(error, doc) {
-		               if(error) {
-		                   callback(null, {error: error.message, message: Messages['failedToComputeDoc']});
-		               } else if(doc && doc.doc) {
-							callback(doc.doc);
-		               } else {
-							callback(null);
-		               }
-		           });
-		   } else {
-		       callback(null, {request: 'documentation', message: Messages['failedToComputeDocNoServer']}); //$NON-NLS-1$
-		   }
-	    },
-	    /**
-	     * @description Returns the list of environments from plugins in Tern, if any
-	     * @param {Function} callback The callback which is called to return the results
-	     */
-	    environments: function environments(callback) {
-	    	if(ternserver) {
-		       ternserver.request({
-		           query: {
-			           type: 'environments' //$NON-NLS-1$
-		           }}, 
-		           function(error, envs) {
-		               if(error) {
-		                   callback(null, {error: error.message, message: Messages['failedGetEnvs']});
-		               }
-		               if(typeof envs === 'object') {
-							callback(envs);
-						} else {
-							callback(null);
-						}
-		           });
-		   } else {
-		       callback(null, {message: Messages['failedGetEnvsNoServer']});
-		   }
-	    },
-	    /**
-	     * @description Computes the implementation of the identifier at the given offset
-	     * @param {String} file The fully qualified name of the file context
-	     * @param {Number} offset The offset of the completion
-	     * @param {Boolean} guess If we should take a guess at the definition if one cannot be computed
-	     * @param {Array.<Object>} files The optional array of file objects
-	     * @param {Function} callback The callback which is called to return the results
-	     */
-	    implementation: function implementation(file, offset, guess, files, callback) {
-	    	if(ternserver) {
-		       ternserver.request({
-		           query: {
-			           type: "implementation",  //$NON-NLS-1$
-			           file: file,
-			           end: offset,
-			           guess: guess
-		           },
-		           files: Array.isArray(files) ? files : []},
-		           function(error, impl) {
-		               if(error) {
-		                   callback(null, {error: error.message, message: Messages['failedToComputeImpl']});
-		               } else  if(impl && impl.implementation && typeof impl.implementation.start === 'number' && typeof impl.implementation.end === "number") {
-							callback(impl.implementation);
-						} else {
-							callback(null);
-						}
-		           });
-		   } else {
-		       callback(null, {message: Messages['failedToComputeImplNoServer']});
-		   }
-	    },
-	    /**
-	     * @description Returns the list of plugins installed in Tern, if any
-	     * @param {Function} callback The callback which is called to return the results
-	     */
-	    installedPlugins: function installedPlugins(callback) {
-	    	if(ternserver) {
-		       ternserver.request({
-		           query: {
-			           type: 'installed_plugins' //$NON-NLS-1$
-		           }}, 
-		           function(error, plugins) {
-		               if(error) {
-							callback(null, {error: error.message, message: Messages['failedGetInstalledPlugins']});
-		               }
-		               if(plugins !== null && typeof plugins === 'object') {
-							callback(plugins);
-						} else {
-							callback([]);
-						}
-		           });
-		   } else {
-		       callback(null, {message: Messages['failedGetInstalledPluginsNoServer']});
-		   }
-	    },
-	    /**
-	     * @description Runs ESLint on the given file context
-	     * @param {String} file The fully qualified name of the file context
-	     * @param {Object} rules The map of ESLint rules
-	     * @param {Object} env The map of existing environment names
-	     * @param {Array.<Object>} files The optional array of file objects
-	     * @param {Function} callback The callback which is called to return the results
-	     */
-	    lint: function lint(file, rules, env, files, callback) {
-	    	if(ternserver) {
-				ternserver.request({
-					query: {
-						type: "lint",  //$NON-NLS-1$
-						file: file,
-						config: {
-							rules: rules
-						},
-						env: env ? env : Object.create(null)
-					},
-					files: Array.isArray(files) ? files : []},
-					function(error, problems) {
-						if(error) {
-							callback(null, {error: error.message, message: Messages['failedToComputeProblems']});
-						} else if(problems && Array.isArray(problems)) {
-							for (var i = 0; i < problems.length; i++) {
-								if (typeof problems[i].lineNumber === 'number'){
-									problems[i].line = problems[i].lineNumber;
-								}
-								if (typeof problems[i].description === 'string'){
-									problems[i].message = problems[i].description;
-								} else if (typeof problems[i].message === 'string' && problems[i].args){
-									var message = i18nUtil.formatMessage(problems[i].message, problems[i].args);
-									problems[i].message = message;
-								}
-							}
-							callback(problems);
-						} else {
-							callback([]);
-						}
-					});
-			} else {
-		       callback(null, {message: Messages['failedToComputeProblemsNoServer']});
-		   }
-	    },
-	    /**
-	     * @description Computes the occurrences for of the identifier at the given offset
-	     * @param {String} file The fully qualified name of the file context
-	     * @param {Number} offset The offset of the cursor / selection
-	     * @param {Array.<Object>} files The optional array of file objects
-	     * @param {Function} callback The callback which is called to return the results
-	     * @since 12.0
-	     */
-	    occurrences: function occurrences(file, offset, files, callback) {
-			if(ternserver) {
-	    		ternserver.request({
-					query: {
-						type: "occurrences", //$NON-NLS-1$
-						file: file,
-						end: offset
-					},
-					files: Array.isArray(files) ? files : []},
-					function(error, occurrences) {
-						if(error) {
-							callback(null, {error: error.message, message: Messages['failedToComputeOccurrences']});
-						} else if(Array.isArray(occurrences)) {
-							callback({request: 'outline', occurrences: occurrences}); //$NON-NLS-1$
-						} else {
-							callback({request: 'outline', occurrences: []}); //$NON-NLS-1$
-						}
-					}
-				);
-			} else {
-		       callback(null, {message: Messages['failedToComputeOccurrencesNoServer']});
-		   }
-		},
-	    /**
-	     * @description Computes an outline of the given file
-	     * @param {String} file The fully qualified name of the file context
-	     * @param {Array.<Object>} files The optional array of file objects
-	     * @param {Function} callback The callback which is called to return the results
-	     */
-	    outline: function outline(file, files, callback) {
-	    	if(ternserver) {
-	    		ternserver.request({
-					query: {
-						type: "outline", //$NON-NLS-1$
-						file: file
-					},
-					files: Array.isArray(files) ? files : []},
-					function(error, outline) {
-						if(error) {
-							callback(null, {error: error.message, message: Messages['failedToComputeOutline']});
-						} else if(outline && Array.isArray(outline)) {
-							callback(outline);
-						} else {
-							callback([]);
-						}
-					}
-				);
-			} else {
-		       callback(null, {message: Messages['failedToComputeOutlineNoServer']});
-		   }
-	    },
-	    /**
-	     * @description Computes the quickfixes for the given annotation, and optionally the list of similar annotations
-	     * @param {String} file The fully qualified name of the file context
-	     * @param {Number} offset The offset of the completion
-	     * @param {Object} annotation The annotation from the editor which has the minimum form: {start, end, id, fixid}
-	     * @param {Array.<Object>} annotations The optional array of similar annnotatons to the one the request is made to fix
-	     * @param {Array.<Object>} files The optional array of file objects
-	     * @param {Function} callback The callback which is called to return the results
-	     */
-	    fixes: function fixes(file, annotation, annotations, files, callback) {
-	    	if(ternserver) {
-	    		var id = annotation.fixid ? annotation.fixid : annotation.id;
-	    		ternserver.request({
-					query: {
-						type: "fixes", //$NON-NLS-1$
-						file: file,
-						problemId: id,
-						annotation: annotation,
-						annotations: annotations
-					},
-					files: files
-				},
-				function(error, fixes) {
+		           origin: origin
+	           },
+	           files: Array.isArray(files) ? files : []},
+	           function(error, type) {
 					if(error) {
-						callback({request: 'fixes', error: error.message, message: Messages['failedToComputeFixes']}); //$NON-NLS-1$
-					} else if(fixes && Array.isArray(fixes)) {
-						callback({request: 'fixes', fixes: fixes}); //$NON-NLS-1$
+						callback(null, {error: typeof error === 'string' ? error : error.message, message: Messages['failedType']});
 					} else {
-						callback({request: 'fixes', fixes: []}); //$NON-NLS-1$
+						callback(type);
+					}
+	           });
+		} else {
+	       callback(null, {message: Messages['failedTypeNoServer']});
+	   	}
+
+    };
+    /**
+     * @description Computes content assist for the given options
+     * @param {String} file The fully qualified name of the file context
+     * @param {Number} offset The offset of the completion
+     * @param {Boolean} keywords If keywords should be returned as well
+     * @param {Array.<Object>} files The optional array of file objects
+     * @param {Function} callback The callback which is called to return the results
+     */
+    TernServer.prototype.completions = function completions(file, offset, keywords, files, callback) {
+    	if(ternserver) {
+	       ternserver.request({
+	           query: {
+	           type: "completions",  //$NON-NLS-1$
+	           file: file,
+	           types: true,
+	           origins: true,
+	           urls: true,
+	           docs: true,
+	           end: offset,
+	           sort:true,
+	           expandWordForward: false,
+	           omitObjectPrototype: false,
+	           includeKeywords: keywords,
+	           caseInsensitive: true
+	           },
+	           files: Array.isArray(files) ? files : []},
+	           function(error, completions) {
+	               if(error) {
+						callback(null, {error: error.message, message: Messages['failedToComputeProposals']});
+	               } else if(completions && completions.completions) {
+						callback(completions.completions);
+	               } else {
+						callback([]);
+	               }
+	           });
+
+	   } else {
+	       callback(null, {message: Messages['failedToComputeProposalsNoServer']});
+	   }
+    };
+    /**
+     * @description Computes the definition of the identifier at the given offset
+     * @param {String} file The fully qualified name of the file context
+     * @param {Number} offset The offset of the completion
+     * @param {Boolean} guess If we should take a guess at the definition if one cannot be computed
+     * @param {Array.<Object>} files The optional array of file objects
+     * @param {Function} callback The callback which is called to return the results
+     */
+    TernServer.prototype.definition = function definition(file, offset, guess, files, callback) {
+    	if(ternserver) {
+	       ternserver.request({
+	           query: {
+		           type: "definition",  //$NON-NLS-1$
+		           file: file,
+		           end: offset,
+		           guess: guess
+	           },
+	           files: Array.isArray(files) ? files : []},
+	           function(error, decl) {
+	               if(error) {
+	                  callback(null, {error: error.message, message: Messages['failedToComputeDecl']});
+	               }
+	               if(decl && typeof decl.start === 'number' && typeof decl.end === "number") {
+						callback(decl);
+					} else {
+						callback(null);
+					}
+	           });
+	   } else {
+	       callback(null, {message: Messages['failedToComputeDeclNoServer']});
+	   }
+    },
+    /**
+     * @description Deletes the given file from the server. Does nothing if the file does not exist
+     * @param {String] file The fully qualified name of the file to delete
+     */
+    TernServer.prototype.delFile = function delFile(file) {
+    	if(ternserver) {
+            ternserver.delFile(file);
+        }
+    };
+    /**
+     * @description Computes the documentation associated with the given offset in the file
+     * @param {String} file The fully qualified name of the file context
+     * @param {Number} offset The offset of the completion
+     * @param {String} docFormat The format of the doc. If not given 'full' is assumed
+     * @param {Array.<Object>} files The optional array of file objects
+     * @param {Function} callback The callback which is called to return the results
+     */
+    TernServer.prototype.documentation = function documentation(file, offset, docFormat, files, callback) {
+    	if(ternserver) {
+	       ternserver.request({
+	           query: {
+		           type: "documentation",  //$NON-NLS-1$
+		           file: file,
+		           end: offset,
+		           docFormat: typeof docFormat === 'string' ? docFormat : 'full' //$NON-NLS-1$
+	           },
+	           files: Array.isArray(files) ? files : []},
+	           function(error, doc) {
+	               if(error) {
+	                   callback(null, {error: error.message, message: Messages['failedToComputeDoc']});
+	               } else if(doc && doc.doc) {
+						callback(doc.doc);
+	               } else {
+						callback(null);
+	               }
+	           });
+	   } else {
+	       callback(null, {request: 'documentation', message: Messages['failedToComputeDocNoServer']}); //$NON-NLS-1$
+	   }
+    };
+    /**
+     * @description Returns the list of environments from plugins in Tern, if any
+     * @param {Function} callback The callback which is called to return the results
+     */
+    TernServer.prototype.environments = function environments(callback) {
+    	if(ternserver) {
+	       ternserver.request({
+	           query: {
+		           type: 'environments' //$NON-NLS-1$
+	           }}, 
+	           function(error, envs) {
+	               if(error) {
+	                   callback(null, {error: error.message, message: Messages['failedGetEnvs']});
+	               }
+	               if(typeof envs === 'object') {
+						callback(envs);
+					} else {
+						callback(null);
+					}
+	           });
+	   } else {
+	       callback(null, {message: Messages['failedGetEnvsNoServer']});
+	   }
+    };
+    /**
+     * @description Computes the implementation of the identifier at the given offset
+     * @param {String} file The fully qualified name of the file context
+     * @param {Number} offset The offset of the completion
+     * @param {Boolean} guess If we should take a guess at the definition if one cannot be computed
+     * @param {Array.<Object>} files The optional array of file objects
+     * @param {Function} callback The callback which is called to return the results
+     */
+    TernServer.prototype.implementation = function implementation(file, offset, guess, files, callback) {
+    	if(ternserver) {
+	       ternserver.request({
+	           query: {
+		           type: "implementation",  //$NON-NLS-1$
+		           file: file,
+		           end: offset,
+		           guess: guess
+	           },
+	           files: Array.isArray(files) ? files : []},
+	           function(error, impl) {
+	               if(error) {
+	                   callback(null, {error: error.message, message: Messages['failedToComputeImpl']});
+	               } else  if(impl && impl.implementation && typeof impl.implementation.start === 'number' && typeof impl.implementation.end === "number") {
+						callback(impl.implementation);
+					} else {
+						callback(null);
+					}
+	           });
+	   } else {
+	       callback(null, {message: Messages['failedToComputeImplNoServer']});
+	   }
+    };
+    /**
+     * @description Returns the list of plugins installed in Tern, if any
+     * @param {Function} callback The callback which is called to return the results
+     */
+    TernServer.prototype.installedPlugins = function installedPlugins(callback) {
+    	if(ternserver) {
+	       ternserver.request({
+	           query: {
+		           type: 'installed_plugins' //$NON-NLS-1$
+	           }}, 
+	           function(error, plugins) {
+	               if(error) {
+						callback(null, {error: error.message, message: Messages['failedGetInstalledPlugins']});
+	               }
+	               if(plugins !== null && typeof plugins === 'object') {
+						callback(plugins);
+					} else {
+						callback([]);
+					}
+	           });
+	   } else {
+	       callback(null, {message: Messages['failedGetInstalledPluginsNoServer']});
+	   }
+    };
+    /**
+     * @description Runs ESLint on the given file context
+     * @param {String} file The fully qualified name of the file context
+     * @param {Object} rules The map of ESLint rules
+     * @param {Object} env The map of existing environment names
+     * @param {Array.<Object>} files The optional array of file objects
+     * @param {Function} callback The callback which is called to return the results
+     */
+    TernServer.prototype.lint = function lint(file, rules, env, files, callback) {
+    	if(ternserver) {
+			ternserver.request({
+				query: {
+					type: "lint",  //$NON-NLS-1$
+					file: file,
+					config: {
+						rules: rules
+					},
+					env: env ? env : Object.create(null)
+				},
+				files: Array.isArray(files) ? files : []},
+				function(error, problems) {
+					if(error) {
+						callback(null, {error: error.message, message: Messages['failedToComputeProblems']});
+					} else if(problems && Array.isArray(problems)) {
+						for (var i = 0; i < problems.length; i++) {
+							if (typeof problems[i].lineNumber === 'number'){
+								problems[i].line = problems[i].lineNumber;
+							}
+							if (typeof problems[i].description === 'string'){
+								problems[i].message = problems[i].description;
+							} else if (typeof problems[i].message === 'string' && problems[i].args){
+								var message = i18nUtil.formatMessage(problems[i].message, problems[i].args);
+								problems[i].message = message;
+							}
+						}
+						callback(problems);
+					} else {
+						callback([]);
+					}
+				});
+		} else {
+	       callback(null, {message: Messages['failedToComputeProblemsNoServer']});
+	   }
+    };
+    /**
+     * @description Computes the occurrences for of the identifier at the given offset
+     * @param {String} file The fully qualified name of the file context
+     * @param {Number} offset The offset of the cursor / selection
+     * @param {Array.<Object>} files The optional array of file objects
+     * @param {Function} callback The callback which is called to return the results
+     * @since 12.0
+     */
+    TernServer.prototype.occurrences = function occurrences(file, offset, files, callback) {
+		if(ternserver) {
+    		ternserver.request({
+				query: {
+					type: "occurrences", //$NON-NLS-1$
+					file: file,
+					end: offset
+				},
+				files: Array.isArray(files) ? files : []},
+				function(error, occurrences) {
+					if(error) {
+						callback(null, {error: error.message, message: Messages['failedToComputeOccurrences']});
+					} else if(Array.isArray(occurrences)) {
+						callback({request: 'outline', occurrences: occurrences}); //$NON-NLS-1$
+					} else {
+						callback({request: 'outline', occurrences: []}); //$NON-NLS-1$
 					}
 				}
 			);
-	    	} else {
-	    		callback(null, {message: Messages['failedQuickfixesNoServer']});
-	    	}
-	    },
-	    /**
-	     * @description Computes a rename array for the identifier at the given offset
-	     * @param {String} file The fully qualified name of the file context
-	     * @param {Number} offset The offset of the completion
-	     * @param {String} newname The new name to change to
-	     * @param {Array.<Object>} files The optional array of file objects
-	     * @param {Function} callback The callback which is called to return the results
-	     */
-	    rename: function rename(file, offset, newname, files, callback) {
-	    	if(ternserver) {
-		       ternserver.request({
-		           query: {
-			           type: "rename",  //$NON-NLS-1$
-			           file: file,
-			           end: offset,
-			           newName: newname
-		           },
-		           files: Array.isArray(files) ? files : []},
-		           function(error, changes) {
-		               if(error) {
-							callback(null, {error: error.message, message: Messages['failedRename']});
-		               } else if(changes && Array.isArray(changes.changes)) {
-							callback(changes.changes);
-		               } else {
-							callback([]);
-		               }
-		           });
-		   } else {
-		       callback(null, {message: Messages['failedRenameNoServer']});
-		   }
-	    },
-		/**
-		 * @description Start up the Tern server, send a message after trying
-	     * @param {Object} jsonOptions The optional map of JSON options to start the server with
-	     * @param {Function} callback The callback which is called to return the results
-	     */
-	    startServer: function startServer(jsonOptions, callback) {
-			if (ternserver){
-				ternserver.reset();
-				ternserver = null;
-			}
-	        var options = {
-                async: true,
-                debug: false,
-                projectDir: '/',
-                getFile: doRead,
-                plugins: defaultOptions.plugins.required,
-                defs: defaultOptions.defs,
-                ecmaVersion: 6
-            };
-	        var pluginsDir = defaultOptions.pluginsDir;
-        	var defNames, plugins, projectLoc;
-	        if (jsonOptions) {
-				projectLoc = jsonOptions.projectLoc;
-				plugins = jsonOptions.plugins;
-				pluginsDir = jsonOptions.pluginsDir;
-				defNames = jsonOptions.libs;
-				if(Array.isArray(jsonOptions.loadEagerly) && jsonOptions.loadEagerly.length > 0) {
-					options.loadEagerly = jsonOptions.loadEagerly;
-				}
-				if (typeof jsonOptions.ecmaVersion === 'number') {
-					options.ecmaVersion = jsonOptions.ecmaVersion;
-					if(options.ecmaVersion === 5) {
-						if(Array.isArray(defNames)) {
-							if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
-								defNames.push("ecma5"); //$NON-NLS-1$
-							}
-							var e6 = defNames.indexOf("ecma6"); //$NON-NLS-1$
-							if(e6 > -1) {
-								defNames.slice(e6, e6+1);
-							}
-						} else {
-							defNames = ["ecma5"]; //$NON-NLS-1$
-						}
-					} else if(options.ecmaVersion === 6) {
-						if(Array.isArray(defNames)) {
-							if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
-								defNames.push("ecma5"); //$NON-NLS-1$
-							}
-							if(defNames.indexOf("ecma6") < 0) { //$NON-NLS-1$
-								defNames.push("ecma6"); //$NON-NLS-1$
-							}
-						} else {
-							defNames = ["ecma5", "ecma6"]; //$NON-NLS-1$ //$NON-NLS-2$
-						}
+		} else {
+	       callback(null, {message: Messages['failedToComputeOccurrencesNoServer']});
+	   }
+	};
+    /**
+     * @description Computes an outline of the given file
+     * @param {String} file The fully qualified name of the file context
+     * @param {Array.<Object>} files The optional array of file objects
+     * @param {Function} callback The callback which is called to return the results
+     */
+    TernServer.prototype.outline = function outline(file, files, callback) {
+    	if(ternserver) {
+    		ternserver.request({
+				query: {
+					type: "outline", //$NON-NLS-1$
+					file: file
+				},
+				files: Array.isArray(files) ? files : []},
+				function(error, outline) {
+					if(error) {
+						callback(null, {error: error.message, message: Messages['failedToComputeOutline']});
+					} else if(outline && Array.isArray(outline)) {
+						callback(outline);
+					} else {
+						callback([]);
 					}
 				}
-				if (typeof jsonOptions.sourceType === 'string') {
-					options.sourceType = jsonOptions.sourceType;
+			);
+		} else {
+	       callback(null, {message: Messages['failedToComputeOutlineNoServer']});
+	   }
+    };
+    /**
+     * @description Computes the quickfixes for the given annotation, and optionally the list of similar annotations
+     * @param {String} file The fully qualified name of the file context
+     * @param {Number} offset The offset of the completion
+     * @param {Object} annotation The annotation from the editor which has the minimum form: {start, end, id, fixid}
+     * @param {Array.<Object>} annotations The optional array of similar annnotatons to the one the request is made to fix
+     * @param {Array.<Object>} files The optional array of file objects
+     * @param {Function} callback The callback which is called to return the results
+     */
+    TernServer.prototype.fixes = function fixes(file, annotation, annotations, files, callback) {
+    	if(ternserver) {
+    		var id = annotation.fixid ? annotation.fixid : annotation.id;
+    		ternserver.request({
+				query: {
+					type: "fixes", //$NON-NLS-1$
+					file: file,
+					problemId: id,
+					annotation: annotation,
+					annotations: annotations
+				},
+				files: files
+			},
+			function(error, fixes) {
+				if(error) {
+					callback({request: 'fixes', error: error.message, message: Messages['failedToComputeFixes']}); //$NON-NLS-1$
+				} else if(fixes && Array.isArray(fixes)) {
+					callback({request: 'fixes', fixes: fixes}); //$NON-NLS-1$
+				} else {
+					callback({request: 'fixes', fixes: []}); //$NON-NLS-1$
 				}
-				if (typeof jsonOptions.dependencyBudget === 'number') {
-					options.dependencyBudget = jsonOptions.dependencyBudget;
-				}
-				if(Array.isArray(jsonOptions.dontLoad)) {
-					var valid = true;
-					for(var i = 0, len = jsonOptions.dontLoad.length; i < len; i++) {
-						if(typeof jsonOptions.dontLoad[i] !== 'string') {
-							valid = false;
-							break;
+			}
+		);
+    	} else {
+    		callback(null, {message: Messages['failedQuickfixesNoServer']});
+    	}
+    };
+    /**
+     * @description Computes a rename array for the identifier at the given offset
+     * @param {String} file The fully qualified name of the file context
+     * @param {Number} offset The offset of the completion
+     * @param {String} newname The new name to change to
+     * @param {Array.<Object>} files The optional array of file objects
+     * @param {Function} callback The callback which is called to return the results
+     */
+    TernServer.prototype.rename = function rename(file, offset, newname, files, callback) {
+    	if(ternserver) {
+	       ternserver.request({
+	           query: {
+		           type: "rename",  //$NON-NLS-1$
+		           file: file,
+		           end: offset,
+		           newName: newname
+	           },
+	           files: Array.isArray(files) ? files : []},
+	           function(error, changes) {
+	               if(error) {
+						callback(null, {error: error.message, message: Messages['failedRename']});
+	               } else if(changes && Array.isArray(changes.changes)) {
+						callback(changes.changes);
+	               } else {
+						callback([]);
+	               }
+	           });
+	   } else {
+	       callback(null, {message: Messages['failedRenameNoServer']});
+	   }
+    };
+	/**
+	 * @description Start up the Tern server, send a message after trying
+     * @param {Object} jsonOptions The optional map of JSON options to start the server with
+     * @param {Function} callback The callback which is called to return the results
+     */
+    TernServer.prototype.startServer = function startServer(jsonOptions, callback) {
+		if (ternserver){
+			ternserver.reset();
+			ternserver = null;
+		}
+        var options = {
+            async: true,
+            debug: false,
+            projectDir: '/',
+            getFile: doRead,
+            plugins: defaultOptions.plugins.required,
+            defs: defaultOptions.defs,
+            ecmaVersion: 6
+        };
+        var pluginsDir = defaultOptions.pluginsDir;
+    	var defNames, plugins, projectLoc;
+        if (jsonOptions) {
+			projectLoc = jsonOptions.projectLoc;
+			plugins = jsonOptions.plugins;
+			pluginsDir = jsonOptions.pluginsDir;
+			defNames = jsonOptions.libs;
+			if(Array.isArray(jsonOptions.loadEagerly) && jsonOptions.loadEagerly.length > 0) {
+				options.loadEagerly = jsonOptions.loadEagerly;
+			}
+			if (typeof jsonOptions.ecmaVersion === 'number') {
+				options.ecmaVersion = jsonOptions.ecmaVersion;
+				if(options.ecmaVersion === 5) {
+					if(Array.isArray(defNames)) {
+						if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
+							defNames.push("ecma5"); //$NON-NLS-1$
 						}
-					}
-					if(valid) {
-						options.dontLoad = jsonOptions.dontLoad;
-					}
-				}
-	        }
-	        if(!options.plugins && (!defNames || defNames.length < 1)) {
-				defaultStartUp();
-			}
-	        if(typeof plugins !== 'object') {
-				plugins = null;
-	        } else {
-				Objects.mixin(options.plugins, plugins);
-	        }
-	        if(!Array.isArray(defNames)) {
-				defNames = null;
-	        }
-	        /**
-	         * A subtlety - if the user provides no plugins entry at all, they get all the defaults,
-	         * if they provide an empty object they still need the required ones only for a default startup
-	         */
-	        var requiredOnly = plugins && Object.keys(plugins).length < 1; 
-	        /**
-	         * @description Start the server with the default options
-	         * @param {Error} err The error object from the failed deferred
-	         */
-	        function defaultStartUp(err) {
-        		options.plugins = defaultOptions.plugins.required;
-        		if(!requiredOnly) {
-					Objects.mixin(options.plugins, defaultOptions.plugins.optional);
-				}
-				options.defs = defaultOptions.defs;
-				startAndMessage(options);
-		        if(err) {
-					callback(null, err);
-		        }
-	        }
-	        /**
-	         * @description Starts the tern server wit the given options
-	         * @param {Object} options The options to start the server with
-	         */
-	        function startAndMessage(options) {
-				ternserver = new Tern.Server(options);
-				if(Array.isArray(options.loadEagerly) && options.loadEagerly.length > 0) {
-					options.loadEagerly.forEach(function(file) {
-						ternserver.addFile(file);
-					});
-				}
-				callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-			if((!plugins || requiredOnly) && !defNames) {
-				defaultStartUp();
-			} else {
-				Deferred.all(loadPlugins(options.plugins, pluginsDir)).then(/* @callback */ function(plugins) {
-					if(defNames) {
-						if(defNames.length < 1) {
-							startAndMessage(options);
-						} else {
-							defNames = defNames.sort();
-							Deferred.all(loadDefs(defNames, projectLoc)).then(function(json) {
-								options.defs = json;
-								startAndMessage(options);
-							}, defaultStartUp);
+						var e6 = defNames.indexOf("ecma6"); //$NON-NLS-1$
+						if(e6 > -1) {
+							defNames.slice(e6, e6+1);
 						}
 					} else {
-						startAndMessage(options);
+						defNames = ["ecma5"]; //$NON-NLS-1$
 					}
-				}, defaultStartUp);
+				} else if(options.ecmaVersion === 6) {
+					if(Array.isArray(defNames)) {
+						if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
+							defNames.push("ecma5"); //$NON-NLS-1$
+						}
+						if(defNames.indexOf("ecma6") < 0) { //$NON-NLS-1$
+							defNames.push("ecma6"); //$NON-NLS-1$
+						}
+					} else {
+						defNames = ["ecma5", "ecma6"]; //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				}
 			}
-	    },
-	    /**
-	     * @description Computes the type information at the given offset
-	     * @param {String} file The fully qualified name of the file context
-	     * @param {Number} offset The offset of the completion
-	     * @param {Function} callback The callback which is called to return the results
-	     */
-	    type: function type(file, offset, callback) {
-	    	if(ternserver) {
-	    		ternserver.request({
-		           query: {
-			           type: "type",  //$NON-NLS-1$
-			           file: file,
-			           end: offset
-		           }},
-		            function(error, type) {
-		               if(error) {
-		                   callback(null, {error: typeof error === 'string' ? error : error.message, message: Messages['failedType']});
-		               } else {
-							callback(type);
-		               }
-		            });
-		 	} else {
-		       callback(null, {message: Messages['failedTypeNoServer']});
-		   }
-	    }
-	
-	});
+			if (typeof jsonOptions.sourceType === 'string') {
+				options.sourceType = jsonOptions.sourceType;
+			}
+			if (typeof jsonOptions.dependencyBudget === 'number') {
+				options.dependencyBudget = jsonOptions.dependencyBudget;
+			}
+			if(Array.isArray(jsonOptions.dontLoad)) {
+				var valid = true;
+				for(var i = 0, len = jsonOptions.dontLoad.length; i < len; i++) {
+					if(typeof jsonOptions.dontLoad[i] !== 'string') {
+						valid = false;
+						break;
+					}
+				}
+				if(valid) {
+					options.dontLoad = jsonOptions.dontLoad;
+				}
+			}
+        }
+        if(!options.plugins && (!defNames || defNames.length < 1)) {
+			defaultStartUp();
+		}
+        if(typeof plugins !== 'object') {
+			plugins = null;
+        } else {
+			Objects.mixin(options.plugins, plugins);
+        }
+        if(!Array.isArray(defNames)) {
+			defNames = null;
+        }
+        /**
+         * A subtlety - if the user provides no plugins entry at all, they get all the defaults,
+         * if they provide an empty object they still need the required ones only for a default startup
+         */
+        var requiredOnly = plugins && Object.keys(plugins).length < 1; 
+        /**
+         * @description Start the server with the default options
+         * @param {Error} err The error object from the failed deferred
+         */
+        function defaultStartUp(err) {
+    		options.plugins = defaultOptions.plugins.required;
+    		if(!requiredOnly) {
+				Objects.mixin(options.plugins, defaultOptions.plugins.optional);
+			}
+			options.defs = defaultOptions.defs;
+			startAndMessage(options);
+	        if(err) {
+				callback(null, err);
+	        }
+        }
+        /**
+         * @description Starts the tern server wit the given options
+         * @param {Object} options The options to start the server with
+         */
+        function startAndMessage(options) {
+			ternserver = new Tern.Server(options);
+			if(Array.isArray(options.loadEagerly) && options.loadEagerly.length > 0) {
+				options.loadEagerly.forEach(function(file) {
+					ternserver.addFile(file);
+				});
+			}
+			callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		if((!plugins || requiredOnly) && !defNames) {
+			defaultStartUp();
+		} else {
+			Deferred.all(loadPlugins(options.plugins, pluginsDir)).then(/* @callback */ function(plugins) {
+				if(defNames) {
+					if(defNames.length < 1) {
+						startAndMessage(options);
+					} else {
+						defNames = defNames.sort();
+						Deferred.all(loadDefs(defNames, projectLoc)).then(function(json) {
+							options.defs = json;
+							startAndMessage(options);
+						}, defaultStartUp);
+					}
+				} else {
+					startAndMessage(options);
+				}
+			}, defaultStartUp);
+		}
+    };
+    /**
+     * @description Computes the type information at the given offset
+     * @param {String} file The fully qualified name of the file context
+     * @param {Number} offset The offset of the completion
+     * @param {Function} callback The callback which is called to return the results
+     */
+    TernServer.prototype.type = function type(file, offset, callback) {
+    	if(ternserver) {
+    		ternserver.request({
+	           query: {
+		           type: "type",  //$NON-NLS-1$
+		           file: file,
+		           end: offset
+	           }},
+	            function(error, type) {
+	               if(error) {
+	                   callback(null, {error: typeof error === 'string' ? error : error.message, message: Messages['failedType']});
+	               } else {
+						callback(type);
+	               }
+	            });
+	 	} else {
+	       callback(null, {message: Messages['failedTypeNoServer']});
+	   }
+    };
 	
     /**
      * @description Loads the plugins listed in the given plugins object
