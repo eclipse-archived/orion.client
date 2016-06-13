@@ -71,12 +71,20 @@ define([
 			uriTemplate: "{+OrionHome}/edit/edit.html"
 		});
 
-		provider.registerService("orion.page.link.related", null, {
+		provider.registerService("orion.page.link", null, {
 			name: widgetMessages["Settings"],
 			id: "orion.settings",
 			nls: "orion/widgets/nls/messages",
 			category: "settings",
 			order: 1000, // low priority
+			uriTemplate: "{+OrionHome}/settings/settings.html"
+		});
+
+		provider.registerService("orion.page.link.related", null, {
+			name: widgetMessages["Settings"],
+			id: "orion.settings",
+			nls: "orion/widgets/nls/messages",
+			category: "settings",
 			validationProperties: [{
 				source: "Parents[-1]:Location|Location",
 				variableName: "SettingsLocation"
