@@ -67,6 +67,43 @@ define([
 		this.section = options.section;
 		this.root = this.changes || {Type: this.location ? "Diff" : "Root"}; //$NON-NLS-1$ //$NON-NLS-0$
 	}
+	
+	var toggleMaximizeCommand = new mCommands.Command({
+		name: messages['MaximizeCmd'],
+		tooltip: messages["MaximizeTip"],
+		id: "eclipse.orion.git.toggleMaximizeCommand", //$NON-NLS-0$
+		imageClass: "git-sprite-open", //$NON-NLS-0$
+		spriteClass: "gitCommandSprite", //$NON-NLS-0$
+		type: "toggle", //$NON-NLS-0$
+		callback: function(data) {
+			var diffContainer = lib.node(data.handler.options.parentDivId);
+			diffContainer.style.height = ""; //$NON-NLS-0$
+			var maximized = false;
+			var div = diffContainer.parentNode;
+			if (div.classList.contains("gitChangeListCompareMaximized")) { //$NON-NLS-0$
+				div.classList.remove("gitChangeListCompareMaximized"); //$NON-NLS-0$
+				diffContainer.classList.remove("gitChangeListCompareContainerMaximized"); //$NON-NLS-0$
+			} else {
+				div.classList.add("gitChangeListCompareMaximized"); //$NON-NLS-0$
+				diffContainer.classList.add("gitChangeListCompareContainerMaximized"); //$NON-NLS-0$
+				maximized = true;
+			}
+			data.handler.options.maximized = maximized;
+			if(data.handler.options.titleIds && data.handler.options.titleIds.length === 2) {
+				var dirtyIndicator = lib.node(data.handler.options.titleIds[1]); //$NON-NLS-0$
+				if ( dirtyIndicator) {
+					dirtyIndicator.textContent = data.handler.isDirty() && maximized ? "*" : "";
+				}
+			}
+			(data.handler._editors || [data.handler._editor]).forEach(function(editor) {
+				editor.resize();
+			});
+		},
+		visibleWhen: function() {
+			return true;
+		}
+	});
+	
 	GitChangeListModel.prototype = Object.create(mExplorer.ExplorerModel.prototype);
 	objects.mixin(GitChangeListModel.prototype, /** @lends orion.git.GitChangeListModel.prototype */ {
 		getRoot: function(onItem){
@@ -726,42 +763,6 @@ define([
 				}
 			});
 			
-			var toggleMaximizeCommand = new mCommands.Command({
-				name: messages['MaximizeCmd'],
-				tooltip: messages["MaximizeTip"],
-				id: "eclipse.orion.git.toggleMaximizeCommand", //$NON-NLS-0$
-				imageClass: "git-sprite-open", //$NON-NLS-0$
-				spriteClass: "gitCommandSprite", //$NON-NLS-0$
-				type: "toggle", //$NON-NLS-0$
-				callback: function(data) {
-					var diffContainer = lib.node(data.handler.options.parentDivId);
-					diffContainer.style.height = ""; //$NON-NLS-0$
-					var maximized = false;
-					var div = diffContainer.parentNode;
-					if (div.classList.contains("gitChangeListCompareMaximized")) { //$NON-NLS-0$
-						div.classList.remove("gitChangeListCompareMaximized"); //$NON-NLS-0$
-						diffContainer.classList.remove("gitChangeListCompareContainerMaximized"); //$NON-NLS-0$
-					} else {
-						div.classList.add("gitChangeListCompareMaximized"); //$NON-NLS-0$
-						diffContainer.classList.add("gitChangeListCompareContainerMaximized"); //$NON-NLS-0$
-						maximized = true;
-					}
-					data.handler.options.maximized = maximized;
-					if(data.handler.options.titleIds && data.handler.options.titleIds.length === 2) {
-						var dirtyIndicator = lib.node(data.handler.options.titleIds[1]); //$NON-NLS-0$
-						if ( dirtyIndicator) {
-							dirtyIndicator.textContent = data.handler.isDirty() && maximized ? "*" : "";
-						}
-					}
-					(data.handler._editors || [data.handler._editor]).forEach(function(editor) {
-						editor.resize();
-					});
-				},
-				visibleWhen: function() {
-					return true;
-				}
-			});
-			
 			var okCancelOptions = {getSubmitName: function(){return messages.OK;}, getCancelName: function(){return messages.Cancel;}};
 			var listener = new mCommandRegistry.CommandEventListener("click", function(event, commandInvocation){ //$NON-NLS-0$
 				var gitConfigPref = new gitConfigPreference(that.registry);
@@ -1194,6 +1195,7 @@ define([
 						diffActionWrapper.className = "layoutRight commandList"; //$NON-NLS-0$
 						diffActionWrapper.id = prefix + "DiffActionWrapperChange"; //$NON-NLS-0$
 						actionsWrapper.appendChild(diffActionWrapper);
+						explorer.commandService.addCommand(toggleMaximizeCommand);
 						explorer.commandService.registerCommandContribution(prefix + "CompareWidgetLeftActionWrapper", "eclipse.orion.git.toggleMaximizeCommand", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 
 						var diffContainer = document.createElement("div"); //$NON-NLS-0$
