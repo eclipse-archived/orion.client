@@ -461,12 +461,12 @@ define([
 		render: function(parent, serviceRegistry, settings, categoryTitle) {
 			if (settings && settings.length > 2 && "javascript" === settings[0].category) {
 				var pageParams = PageUtil.matchResourceParameters();
+				// resource name starts with /file/ and ends with '/'
+				var projectName = pageParams.resource.substring(6, pageParams.resource.length - 1);
 				this.fileClient.fetchChildren(pageParams.resource + "?depth=1").then(function(children) {
-					console.log("Render :" + this.destroyed);
 					if (!this.destroyed) {
 						children.some(function (child) {
 							if (child.Name === ".eslintrc") {
-								console.log("Creation: " + this.destroyed);
 								var infoText = document.createElement("div"); //$NON-NLS-0$
 								infoText.classList.add("setting-info"); //$NON-NLS-0$
 								infoText.textContent = messages.JavascriptSettingWarning;
@@ -477,17 +477,13 @@ define([
 								var link = document.createElement("a"); //$NON-NLS-0$
 								link.href = editTemplate.expand({resource: child.Location});
 								link.appendChild(document.createTextNode(child.Name));
-								lib.processDOMNodes(infoText, [icon, link]);
-								try {
-									if (parent.firstChild) {
-										console.log("insert: " + this.destroyed);
-										parent.insertBefore(infoText, parent.firstChild);
-									} else {
-										console.log("append: " + this.destroyed);
-										parent.appendChild(infoText);
-									}
-								} catch(e) {
-									console.log(e);
+								var projectText = document.createElement("span"); //$NON-NLS-0$
+								projectText.textContent = projectName;
+								lib.processDOMNodes(infoText, [icon, link, projectText]);
+								if (parent.firstChild) {
+									parent.insertBefore(infoText, parent.firstChild);
+								} else {
+									parent.appendChild(infoText);
 								}
 								return true;
 							}

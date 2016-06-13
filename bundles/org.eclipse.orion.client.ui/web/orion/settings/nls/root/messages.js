@@ -283,5 +283,5 @@ define({//Default message bundle
     "editorTheme selection background": "Selection background",
     'customizeTheme': 'Custom Style...',
     'moreEditorSettings': 'Editor Settings...',
-    'JavascriptSettingWarning' : '${0} Project settings are available: ${1}'
+    'JavascriptSettingWarning' : '${0} Warning: Global settings for ${2} are overriden by the settings defined in: ${1}'
 });
