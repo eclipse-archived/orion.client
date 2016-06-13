@@ -40,6 +40,7 @@ module.exports.router = function(options) {
 	module.exports.getfileAbsolutePath = getfileAbsolutePath;
 	module.exports.getfileRelativePath = getfileRelativePath;
 	module.exports.isWorkspace = isWorkspace;
+	module.exports.getSignature = getSignature;
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -306,8 +307,8 @@ function postInit(req, res) {
 				return index.writeTree();
 			})
 			.then(function(oid) {
-				author = git.Signature.default(theRepo);	
-				committer = git.Signature.default(theRepo);
+				author = getSignature(theRepo);	
+				committer = getSignature(theRepo);	
 
 				// Since we're creating an inital commit, it has no parents. Note that unlike
 				// normal we don't get the head either, because there isn't one yet.
@@ -589,5 +590,9 @@ function postClone(req, res) {
 	.catch(function(err) {
 		handleRemoteError(task, err, cloneUrl);
 	});
+}
+
+function getSignature(repo){
+	return git.Signature.default(repo) || git.Signature.now("unknown","unknown@unknown.com");
 }
 };
