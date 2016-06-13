@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## WARNING do not run with sudo, it will break wine and cause many permission issues
-# Example usage ***** REMOVE LAST EXAMPLE BEFORE COMMITTING *****
+# Example usage
 # ./electron_build.sh --build <build timestamp> --certificate <certificate name> --description <Github release description>--token <Github API token> --user <Github user> --repo <repo>
 # ./electron_build.sh -b <build timestamp> -c <certificate name> -d <Github release description> -t <Github API token> -u <Github user> -r <repo>
 
@@ -91,6 +91,16 @@ update_config_files() {
 	sed -i .bak 's/orion\.autoUpdater\.url\=/orion\.autoUpdater\.url\='"${update_url}"'/' orionode/orion.conf
 }
 
+# set Windows remoteReleases URL to latest successful build # for delta files
+update_remote_releases() {
+	sed -i -e "s/#0000#/${BUILD_NUMBER}/g" package.json
+}
+
+# restore remoteReleases URL to dummy value
+restore_remote_releases)() {
+	sed -i -e "s/${BUILD_NUMBER}/#0000#/g" package.json
+}
+
 echo "Setting up build directories"
 
 rm -rf buildTemp
@@ -138,10 +148,12 @@ update_config_files
 cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/windows/nodegit.node orionode/node_modules/nodegit/build/Release
 
 pushd orionode
+update_remote_releases
 
 # generates windows artifacts: -full.nupkg, -delta.nupkg, .exe, RELEASES
 npm run dist:win
 echo "windows artifacts generated"
+restore_remote_releases
 
 pushd dist/win
 

@@ -94,7 +94,8 @@
     },
     "win": {
       "loadingGif": "build/orionLogo.gif",
-      "iconUrl": "http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/plain/modules/orionode/build/icons/orion.ico"
+      "iconUrl": "http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/plain/modules/orionode/build/icons/orion.ico",
+      "remoteReleases": "http://orion-update.mybluemix.net/update/#0000#"
     },
     "linux": {
       "target": [
