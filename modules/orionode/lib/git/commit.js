@@ -722,12 +722,12 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 		if (authorEmail) {
 			author = git.Signature.now(authorName, authorEmail);
 		} else {
-			author = git.Signature.default(repo);	
+			author = clone.getSignature(repo);		
 		}
 		if (committerEmail) {
 			committer = git.Signature.now(committerName, committerEmail);
 		} else {
-			committer = git.Signature.default(repo);
+			committer = clone.getSignature(repo);
 		}
 		if(insertChangeid) {
 			message = insertChangeId(message, oid, parent, author ,committer);
@@ -753,7 +753,7 @@ function tag(req, res, commitId, name, isAnnotated, message) {
 	.then(function(commit) {
 		thisCommit = commit;
 		if(isAnnotated) {
-			var tagger = git.Signature.default(theRepo);
+			var tagger = clone.getSignature(theRepo);
 		}
 		return isAnnotated ? theRepo.createTag (commit, name, message, tagger) : theRepo.createLightweightTag(commit, name);
 	})
