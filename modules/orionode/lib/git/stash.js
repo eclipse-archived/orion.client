@@ -140,7 +140,8 @@ function postStash(req, res) {
 	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
-		return git.Stash.save(repo, git.Signature.default(repo), message, flags);
+		var stashSignature = git.Signature.default(repo) || git.Signature.now("default","default@orion.com");
+		return git.Stash.save(repo, stashSignature, message, flags);
 	})
 	.then(function() {
 		res.status(200).end();
