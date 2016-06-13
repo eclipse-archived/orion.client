@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## WARNING do not run with sudo, it will break wine and cause many permission issues
-# Example usage ***** REMOVE LAST EXAMPLE BEFORE COMMITTING *****
+# Example usage
 # ./electron_build.sh --build <build timestamp> --certificate <certificate name> --description <Github release description>--token <Github API token> --user <Github user> --repo <repo>
 # ./electron_build.sh -b <build timestamp> -c <certificate name> -d <Github release description> -t <Github API token> -u <Github user> -r <repo>
 
@@ -91,6 +91,12 @@ update_config_files() {
 	sed -i .bak 's/orion\.autoUpdater\.url\=/orion\.autoUpdater\.url\='"${update_url}"'/' orionode/orion.conf
 }
 
+# set Windows remoteReleases URL to latest successful build # for delta files
+update_remote_releases() {
+	latest_build=$(curl -s http://orion-update.mybluemix.net/api/version/latest | ./jsawk 'return this.tag')
+	sed -i .bak "s/.*remoteReleases.*/\"remoteReleases\": \"${update_url}\/v${latest_build}\"/" package.json
+}
+
 echo "Setting up build directories"
 
 rm -rf buildTemp
@@ -138,6 +144,7 @@ update_config_files
 cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/windows/nodegit.node orionode/node_modules/nodegit/build/Release
 
 pushd orionode
+update_remote_releases
 
 # generates windows artifacts: -full.nupkg, -delta.nupkg, .exe, RELEASES
 npm run dist:win
