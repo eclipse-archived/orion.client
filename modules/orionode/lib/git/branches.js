@@ -43,7 +43,7 @@ module.exports.router = function(options) {
 		var current = !!ref.isHead() || repo.headDetached() && ref.name() === "HEAD";
 		return {
 			"CloneLocation": "/gitapi/clone"+ fileDir,
-			"CommitLocation": "/gitapi/commit/" + branchURL + fileDir,
+			"CommitLocation": "/gitapi/commit/" + util.encodeURIComponent(branchURL) + fileDir,
 			"Current": current,
 			"Detached": current && !!repo.headDetached(),
 			"DiffLocation": "/gitapi/diff/" + util.encodeURIComponent(shortName) + fileDir,

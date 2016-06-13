@@ -11,6 +11,7 @@
 /*eslint-env node */
 var api = require('../api');
 var clone = require('./clone');
+var util = require('./util');
 
 module.exports = {};
 	
@@ -91,9 +92,9 @@ function addGitLinks(comingJson,branchname,fileDir){
 	comingJson.Git ={
 		"BlameLocation": "/gitapi/blame/HEAD" + fileDir + fileTarget,
 		"CloneLocation": "/gitapi/clone" + fileDir,
-		"CommitLocation": "/gitapi/commit/" + branchname + fileDir + fileTarget,
+		"CommitLocation": "/gitapi/commit/" + util.encodeURIComponent(branchname) + fileDir + fileTarget,
 		"ConfigLocation": "/gitapi/config/clone" + fileDir + fileTarget,
-		"DefaultRemoteBranchLocation": "/gitapi/remote/origin/"+ branchname + fileDir,
+		"DefaultRemoteBranchLocation": "/gitapi/remote/origin/"+ util.encodeURIComponent(branchname) + fileDir,
 		"DiffLocation": "/gitapi/diff/Default" + fileDir + fileTarget,
 		"HeadLocation": "/gitapi/commit/HEAD" + fileDir + fileTarget,
 		"IndexLocation": "/gitapi/index" + fileDir + fileTarget,
