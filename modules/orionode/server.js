@@ -168,7 +168,7 @@ if (process.versions.electron) {
 			configParams.workspace = prefsWorkspace;
 		}
 		if (process.platform === 'darwin') {
-			var Menu = require("menu");
+			var Menu = electron.Menu;
 			if (!Menu.getApplicationMenu()) {
 				var template = [{
 					label: "Application",
