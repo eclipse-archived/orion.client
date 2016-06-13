@@ -666,6 +666,43 @@ define([
 			this.explorerSelectionStatus.textContent = msg;
 		},
 		createCommands: function(){
+			var toggleMaximizeCommand = new mCommands.Command({
+				name: messages['MaximizeCmd'],
+				tooltip: messages["MaximizeTip"],
+				id: "eclipse.orion.git.toggleMaximizeCommand", //$NON-NLS-0$
+				imageClass: "git-sprite-open", //$NON-NLS-0$
+				spriteClass: "gitCommandSprite", //$NON-NLS-0$
+				type: "toggle", //$NON-NLS-0$
+				callback: function(data) {
+					var diffContainer = lib.node(data.handler.options.parentDivId);
+					diffContainer.style.height = ""; //$NON-NLS-0$
+					var maximized = false;
+					var div = diffContainer.parentNode;
+					if (div.classList.contains("gitChangeListCompareMaximized")) { //$NON-NLS-0$
+						div.classList.remove("gitChangeListCompareMaximized"); //$NON-NLS-0$
+						diffContainer.classList.remove("gitChangeListCompareContainerMaximized"); //$NON-NLS-0$
+					} else {
+						div.classList.add("gitChangeListCompareMaximized"); //$NON-NLS-0$
+						diffContainer.classList.add("gitChangeListCompareContainerMaximized"); //$NON-NLS-0$
+						maximized = true;
+					}
+					data.handler.options.maximized = maximized;
+					if(data.handler.options.titleIds && data.handler.options.titleIds.length === 2) {
+						var dirtyIndicator = lib.node(data.handler.options.titleIds[1]); //$NON-NLS-0$
+						if ( dirtyIndicator) {
+							dirtyIndicator.textContent = data.handler.isDirty() && maximized ? "*" : "";
+						}
+					}
+					(data.handler._editors || [data.handler._editor]).forEach(function(editor) {
+						editor.resize();
+					});
+				},
+				visibleWhen: function() {
+					return true;
+				}
+			});
+			this.commandService.addCommand(toggleMaximizeCommand);
+			
 			if (this.prefix !== "all") { //$NON-NLS-0$
 				return;
 			}
@@ -726,42 +763,6 @@ define([
 				}
 			});
 			
-			var toggleMaximizeCommand = new mCommands.Command({
-				name: messages['MaximizeCmd'],
-				tooltip: messages["MaximizeTip"],
-				id: "eclipse.orion.git.toggleMaximizeCommand", //$NON-NLS-0$
-				imageClass: "git-sprite-open", //$NON-NLS-0$
-				spriteClass: "gitCommandSprite", //$NON-NLS-0$
-				type: "toggle", //$NON-NLS-0$
-				callback: function(data) {
-					var diffContainer = lib.node(data.handler.options.parentDivId);
-					diffContainer.style.height = ""; //$NON-NLS-0$
-					var maximized = false;
-					var div = diffContainer.parentNode;
-					if (div.classList.contains("gitChangeListCompareMaximized")) { //$NON-NLS-0$
-						div.classList.remove("gitChangeListCompareMaximized"); //$NON-NLS-0$
-						diffContainer.classList.remove("gitChangeListCompareContainerMaximized"); //$NON-NLS-0$
-					} else {
-						div.classList.add("gitChangeListCompareMaximized"); //$NON-NLS-0$
-						diffContainer.classList.add("gitChangeListCompareContainerMaximized"); //$NON-NLS-0$
-						maximized = true;
-					}
-					data.handler.options.maximized = maximized;
-					if(data.handler.options.titleIds && data.handler.options.titleIds.length === 2) {
-						var dirtyIndicator = lib.node(data.handler.options.titleIds[1]); //$NON-NLS-0$
-						if ( dirtyIndicator) {
-							dirtyIndicator.textContent = data.handler.isDirty() && maximized ? "*" : "";
-						}
-					}
-					(data.handler._editors || [data.handler._editor]).forEach(function(editor) {
-						editor.resize();
-					});
-				},
-				visibleWhen: function() {
-					return true;
-				}
-			});
-			
 			var okCancelOptions = {getSubmitName: function(){return messages.OK;}, getCancelName: function(){return messages.Cancel;}};
 			var listener = new mCommandRegistry.CommandEventListener("click", function(event, commandInvocation){ //$NON-NLS-0$
 				var gitConfigPref = new gitConfigPreference(that.registry);
@@ -780,8 +781,6 @@ define([
 							}
 					});
 				});
-				
-				
 			});
 			var precommitParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("alwaysSelect", "boolean", messages.AlwaysSelectFiles, null, null, listener)], objects.mixin({}, okCancelOptions)); //$NON-NLS-1$ //$NON-NLS-0$
 			precommitParameters.message = messages.EmptyCommitConfirm;
@@ -838,7 +837,6 @@ define([
 			this.commandService.addCommand(precommitCommand);
 			this.commandService.addCommand(selectAllCommand);
 			this.commandService.addCommand(deselectAllCommand);
-			this.commandService.addCommand(toggleMaximizeCommand);
 			this.commandService.addCommand(precommitAndPushCommand);
 			this.commandService.addCommand(precreateStashCommand);
 		},
