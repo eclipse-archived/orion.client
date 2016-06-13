@@ -226,6 +226,7 @@ define([
 			if (!config.ecmaFeatures) {
 				var features = Object.create(null);
 				features.modules = false;
+				features.ecmaVersion = server.options.ecmaVersion;
 				var ecmaVersion = server.options.ecmaVersion ? server.options.ecmaVersion : 5;
 				if (ecmaVersion === 6) {
 					features.arrowFunctions = true;

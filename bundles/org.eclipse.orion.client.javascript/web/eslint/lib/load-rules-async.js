@@ -1791,16 +1791,26 @@ define([
     				}
         		}
         		
-    			return {
-    				"Program": check,
-    				"BlockStatement": check,
-    				"SwitchStatement": check,
-    				"ArrowFunctionExpression": function(node){
-    					if (node.body.type !== "BlockStatement") {
-		                    check(node);
-		                }	
-    				}
+        		if (context.ecmaFeatures.ecmaVersion >= 6){
+					return {
+						"Program": check,
+						"BlockStatement": check,
+						"SwitchStatement": check,
+						"ArrowFunctionExpression": function(node){
+							if (node.body.type !== "BlockStatement") {
+			                    check(node);
+			                }	
+						}
+					};
+				}
+				// ECMA 5
+				return {
+					"Program": check,
+					"FunctionExpression": check,
+					"FunctionDeclaration": check,
+					"ArrowFunctionExpression": check
 				};
+
         },
         /** @callback */
         "radix": function(context) {
