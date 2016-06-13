@@ -62,11 +62,10 @@ define([
                            }
 			           }
 			       });
-			   } else {
-			       return that.cssResultManager.getResult(editorContext, that._emptyRuleSet()).then(function(results) {
-        			   return that._doHover(results, ctxt, meta);
-                   });
 			   }
+		       return that.cssResultManager.getResult(editorContext, that._emptyRuleSet()).then(function(results) {
+    			   return that._doHover(results, ctxt, meta);
+               });
 			});
 		},
 		
@@ -78,7 +77,7 @@ define([
 				    if(this.hasPreviousToken(token, results.tokens, 'IMPORT_SYM')) {//$NON-NLS-0$
 				        return this._getFileHover(token, metadata);
 				    }
-				    if(this.hasPreviousToken(token, results.tokens, 'IDENT', ['background', 'background-image', '-webkit-border-image', '-o-border-image', 'border-image', 'border-image-source', 'icon'])) {
+				    if(this.hasPreviousToken(token, results.tokens, 'IDENT', ['background', 'background-image', '-webkit-border-image', '-o-border-image', 'border-image', 'border-image-source', 'icon'])) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-3$
 				        return this._getImageHover(token, metadata);
 				    }
 				    var tok = this._isRgbLike(token, results.tokens);
@@ -112,24 +111,23 @@ define([
 		    return config;
 		},
 		
-		fontLikeNames: ['font-family', 'font', 'font-size', 'font-size-adjust', 'font-stretch', 'font-style', 'font-variant', 'font-weight', 
-		                  'text-decoration', 'text-shadow', 'text-transform'],
+		fontLikeNames: ['font-family', 'font', 'font-size', 'font-size-adjust', 'font-stretch', 'font-style', 'font-variant', 'font-weight',  //$NON-NLS-1$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-2$
+		                  'text-decoration', 'text-shadow', 'text-transform'], //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		_isFontLike: function _isFontLike(token, tokens) {
 		    if(token && tokens) {
 		        for(var i = token.index; i > -1; i--) {
 		            var tok = tokens[i];
-		            if(tok.type === 'IDENT' || tok.type === 'COMMA' || tok.type === 'STRING' || tok.type === 'LENGTH' || tok.type === 'NUMBER' || tok.type === 'HASH') {//$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		            if(tok.type === 'IDENT' || tok.type === 'COMMA' || tok.type === 'STRING' || tok.type === 'LENGTH' || tok.type === 'NUMBER' || tok.type === 'HASH') {
 		                continue;
-		            } else if(tok.type === 'COLON') {   //$NON-NLS-0$
+		            } else if(tok.type === 'COLON') {
 		                //the next one would have to be IDENT and 'font-family'
 		                tok = tokens[i-1];
-		                if(tok.type === 'IDENT' && this.fontLikeNames.indexOf(tok.value.toLowerCase()) > -1) {   //$NON-NLS-0$
+		                if(tok.type === 'IDENT' && this.fontLikeNames.indexOf(tok.value.toLowerCase()) > -1) {
 		                    tok.index = i-1;
 		                    return tok;
-		                } else {
-		                    return null;
 		                }
+	                    return null;
 		            } else {
 		                break;
 		            }
@@ -144,41 +142,40 @@ define([
 		        var next = null;
 		        var idx = token.index;
 		        //skip the colon
-		        if(tokens[idx+1].type !== 'COLON') {   //$NON-NLS-0$
+		        if(tokens[idx+1].type !== 'COLON') {
 		            return null;
 		        }
 		        ++idx;
 		        for(var i = idx+1; i < tokens.length; i++) {
 		            next = tokens[i];
-		            if(next.type === 'IDENT' || next.type === 'COMMA' || next.type === 'STRING' || next.type === 'NUMBER' || next.type === 'LENGTH' || next.type === 'HASH') {   //$NON-NLS-0$ //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$  //$NON-NLS-4$ //$NON-NLS-5$
+		            if(next.type === 'IDENT' || next.type === 'COMMA' || next.type === 'STRING' || next.type === 'NUMBER' || next.type === 'LENGTH' || next.type === 'HASH') {
 		                id += next.value;
 		                if(i < tokens.length-1) {
-		                    id += ' ';
+		                    id += ' '; //$NON-NLS-1$
 		                }
 		                continue;
 		            }
-		            if(next.type === 'RBRACE' || next.type === 'SEMICOLON' || next.type === 'RPAREN') {   //$NON-NLS-0$ //$NON-NLS-1$  //$NON-NLS-2$
+		            if(next.type === 'RBRACE' || next.type === 'SEMICOLON' || next.type === 'RPAREN') {
 		                return id;
-		            } else {
-		                break;
 		            }
+	                break;
 		        }
 		    }
 		    return null;
 		},
 		
 		_getFontHover: function _getFontHover(prop, font){
-			var html = '<html><body style=\"background-color:white\"><div style="'+prop+':'+font+';margin:0px">'+messages['fontHoverExampleText']+'</div></body></html>';  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
+			var html = '<html><body style=\"background-color:white\"><div style="'+prop.replace(/"/g, "'")+':'+font.replace(/"/g, "'")+';margin:0px">'+messages['fontHoverExampleText']+'</div></body></html>';  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			return {type: "html", content: html, height: '42px', width: '235px'};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
 		},
 		
 		_isColorFnName: function _isColorFnName(name) {
 		    var val = name.toLowerCase();
-		    return val === 'rgba(' || val === 'rgb(' || val === 'hsl(' || val === 'hsla(';   //$NON-NLS-0$ //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
+		    return val === 'rgba(' || val === 'rgb(' || val === 'hsl(' || val === 'hsla(';
 		},
  		
 		_isRgbLike: function _isRgbLike(token, tokens) {
-		    if(token.type === 'FUNCTION') {  //$NON-NLS-0$
+		    if(token.type === 'FUNCTION') {
 		        if(this._isColorFnName(token.value.toLowerCase())) {
 		            return token;
 		        }
@@ -194,15 +191,14 @@ define([
 		    if(token && tokens) {
 		        for(var i = token.index; i > -1; i--) {
 		            var tok = tokens[i];
-		            if(tok.type === 'NUMBER' || tok.type === 'COMMA' || tok.type === 'PERCENTAGE') {  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+		            if(tok.type === 'NUMBER' || tok.type === 'COMMA' || tok.type === 'PERCENTAGE') {
 		                continue;
-		            } else if(tok.type === 'FUNCTION') {  //$NON-NLS-0$
+		            } else if(tok.type === 'FUNCTION') {
 		                if(this._isColorFnName(tok.value)) {
 		                    tok.index = i;
 		                    return tok;
-		                } else {
-		                    return null;
 		                }
+		                return null;
 		            } else {
 		                break;
 		            }
@@ -218,16 +214,15 @@ define([
 		        var idx = token.index;
 		        for(var i = idx+1; i < tokens.length; i++) {
 		            next = tokens[i];
-		            if(next.type === 'COMMA' || next.type === 'NUMBER' || next.type === 'PERCENTAGE') {  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+		            if(next.type === 'COMMA' || next.type === 'NUMBER' || next.type === 'PERCENTAGE') {
 		                id += next.value;
 		                continue;
 		            }
-		            if(next.type === 'RPAREN') {  //$NON-NLS-0$
+		            if(next.type === 'RPAREN') {
 		                id += next.value;
 		                return id;
-		            } else {
-		                break;
 		            }
+		            break;
 		        }
 		    }
 		    return null;
@@ -236,13 +231,13 @@ define([
 		hasPreviousToken: function hasPreviousToken(token, tokens, name, id) {
 		    if(token && tokens) {
 		        switch(token.type) {
-		            case 'URI':   //$NON-NLS-0$
-		            case 'STRING': {  //$NON-NLS-0$
+		            case 'URI':
+		            case 'STRING': {
 		                if(token.index > 0) {
 		                    var prev = null;
 		                    for(var i = token.index-1; i >= 0; i--) {
 		                        prev = tokens[i];
-		                        if(prev.type === 'COLON' || prev.type === 'STRING' || prev.type === 'URI' || prev.type === 'COMMA') {  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
+		                        if(prev.type === 'COLON' || prev.type === 'STRING' || prev.type === 'URI' || prev.type === 'COMMA') {
 		                            continue;
 		                        } else {
 		                            break;
@@ -252,9 +247,8 @@ define([
 		                        return true;
 		                    } else if(id && prev && prev.type === name) {
 		                       return id === prev.value;
-    		                } else {
-    		                  return prev && prev.type === name;
     		                }
+    		                return prev && prev.type === name;
 		                }
 		            }
 		        }
@@ -267,17 +261,16 @@ define([
 		    if(path) {
     	        if(/^http/i.test(path)) {
     	            return this._formatFilesHover(path);
-    	        } else {
-    	            var that = this;
-        	        return that.resolver.getWorkspaceFile(path, {ext:'css', type:'CSS', icon:'../webtools/images/css.png'}).then(function(files) {  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
-        		        if(files && files.length > 0) {
-        		            var resolved = that.resolver.resolveRelativeFiles(path, files, metadata);
-        		            if(resolved.length > 0) {
-        		              return that._formatFilesHover(path, resolved);
-        		            }
-        		        }
-        	        });
     	        }
+	            var that = this;
+    	        return that.resolver.getWorkspaceFile(path, {ext:'css', type:'CSS', icon:'../webtools/images/css.png'}).then(function(files) {  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
+    		        if(files && files.length > 0) {
+    		            var resolved = that.resolver.resolveRelativeFiles(path, files, metadata);
+    		            if(resolved.length > 0) {
+    		              return that._formatFilesHover(path, resolved);
+    		            }
+    		        }
+    	        });
 	        }
 		    return null;
 		},
@@ -285,20 +278,20 @@ define([
 		_getPathFromToken: function _getPathFromToken(token) {
 		    var path = token.value;
 		    switch(token.type) {
-		        case 'STRING': {  //$NON-NLS-0$
+		        case 'STRING': {
 		            path = token.value.slice(1, token.value.length-1); //peel off the quotes
 		            break;
 		        }
-		        case 'URI': {  //$NON-NLS-0$
+		        case 'URI': {
 		            var val = /^\s*(?:url)\s*\(\s*(.*)\s*\)/i.exec(token.value);
     		        if(val) {
     		            path = val[1];
     		            var c = path.charAt(0);
-    		            if(c === '\'' || c === '"') {  //$NON-NLS-0$  //$NON-NLS-1$
+    		            if(c === '\'' || c === '"') {
     		                path = path.slice(1);
     		            }
     		            c = path.charAt(path.length-1);
-    		            if(c === '\'' || c === '"') {  //$NON-NLS-0$  //$NON-NLS-1$
+    		            if(c === '\'' || c === '"') {
     		                path = path.slice(0, path.length-1);
     		            }
     		        } else {
@@ -308,7 +301,7 @@ define([
 		    }
 		    return path;
 		},
-		
+
 		/**
     	 * @description Formats the list of files as links for the hover
     	 * @function
@@ -321,7 +314,7 @@ define([
     	    if(path) {
     	        var title = null; 
     	        if(files.length > 1) {
-    	            title = '###Open file for \''+path+'\'###';  //$NON-NLS-0$  //$NON-NLS-1$
+    	            title = '###Open file for \''+path+'\'###';  //$NON-NLS-0$  //$NON-NLS-1$ //$NON-NLS-2$
     	        }
     	        var hover = '';
     	        if(Array.isArray(files)) {  
@@ -336,16 +329,16 @@ define([
         		                      {
         		                      resource: file.location, 
         		                      params: {}
-        		                      }); //$NON-NLS-0$
-        	                hover += file.name + ']('+href+') - '+file.path+'\n\n';  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+        		                      });
+        	                hover += file.name + ']('+href+') - '+file.path+'\n\n';  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
         	            }
         	            
         	        }
     	        } else {
-    	            var name = path.slice(path.lastIndexOf('/')+1);  //$NON-NLS-0$
-    	            title = '###Open file for \''+name+'\'###';  //$NON-NLS-0$  //$NON-NLS-1$
-	                hover += '[!['+name+'](../webtools/images/css.png)';  //$NON-NLS-0$  //$NON-NLS-1$
-	                hover += name + ']('+path+') - '+path+'\n\n';  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+    	            var name = path.slice(path.lastIndexOf('/')+1);
+    	            title = '###Open file for \''+name+'\'###';  //$NON-NLS-0$  //$NON-NLS-1$ //$NON-NLS-2$
+	                hover += '[!['+name+'](../webtools/images/css.png)';  //$NON-NLS-0$  //$NON-NLS-1$ //$NON-NLS-2$
+	                hover += name + ']('+path+') - '+path+'\n\n';  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
     	        }
     	        if(hover !== '') {
     	           return {title: title, content: hover, type:'markdown', allowFullWidth: true};  //$NON-NLS-0$
@@ -359,31 +352,32 @@ define([
 		      var that = this;
 		      if(path) {
 		          if(/^http/i.test(path) || /^data:image.*;base64/i.test(path)) {
-    		          var html = '<html><body style="margin:1px;"><img src="'+path+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
-    			      return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
-		          } else {
-		              var idx = path.lastIndexOf('.');  //$NON-NLS-0$
-		              if(idx > -1) {
-		                  var ext = path.slice(idx+1);
-    		              return that.resolver.getWorkspaceFile(path, {ext:ext, type:'Image', icon:'../webtools/images/file.png'}).then(function(files) {  //$NON-NLS-0$
-                		        if(files) {
-                		            //TODO we have to resolve each time as same-named files could be referenced from different locations
-                		            //and the resolver caches all hits for the name
-                		            var resolved = that.resolver.resolveRelativeFiles(path, files, metadata);
-                		            if(resolved.length > 0) {
-                		                 var html = '<html><body style="margin:1px;"><img src="'+resolved[0].location+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
-    			                         return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
-                		            }
-                		        }
-                	        });
-        	          }
+		          	  path = path.replace(/"/g, "&quot;"); //$NON-NLS-1$
+    		          var html = '<html><body style="margin:1px;"><img src="'+path+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$ //$NON-NLS-2$
+    			      return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
 		          }
+	              var idx = path.lastIndexOf('.');
+	              if(idx > -1) {
+	                  var ext = path.slice(idx+1);
+		              return that.resolver.getWorkspaceFile(path, {ext:ext, type:'Image', icon:'../webtools/images/file.png'}).then(function(files) {  //$NON-NLS-0$ //$NON-NLS-2$
+            		        if(files) {
+            		            //TODO we have to resolve each time as same-named files could be referenced from different locations
+            		            //and the resolver caches all hits for the name
+            		            var resolved = that.resolver.resolveRelativeFiles(path, files, metadata);
+            		            if(resolved.length > 0) {
+            		            	 var loc = resolved[0].location.replace(/"/g, "&quot;"); //$NON-NLS-1$
+            		                 var html = '<html><body style="margin:1px;"><img src="'+loc+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$ //$NON-NLS-2$
+			                         return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
+            		            }
+            		        }
+            	        });
+    	          }
 		      }
 		},
 		
 		_getColorHover: function _getColorHover(colorID){
-			var html = '<html><body style=\"background-color: ' + colorID + ';\"></html>'; //$NON-NLS-0$  //$NON-NLS-1$
-			return {type: "html", content: html, width: "50px", height: "25px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+			var html = '<html><body style=\"background-color: ' + colorID.replace(/"/g, "'") + ';\"></html>'; //$NON-NLS-0$  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return {type: "html", content: html, width: "50px", height: "25px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		
 	});
