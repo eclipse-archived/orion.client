@@ -67,7 +67,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', '
 									settingsCore: core,
 									pageActions: "pageActions", //$NON-NLS-0$
 									userClient: usersClient,
-									settingsRegistry: settingsRegistry
+									settingsRegistry: settingsRegistry,
+									fileClient: fileClient
 									};
 									
 		lib.node("categoriesTitle").textContent = messages["Categories"]; //$NON-NLS-1$ //$NON-NLS-0$

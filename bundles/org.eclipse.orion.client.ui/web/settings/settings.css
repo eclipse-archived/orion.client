@@ -243,6 +243,10 @@ html[dir="rtl"] .setting-row { /* ACGC */
 	padding: 10px;
 }
 
+.setting-info .core-sprite-warning {
+	color: #F0AD4E;
+}
+
 .setting-local-indicator {
 	cursor: pointer;
 	display: inline-block;

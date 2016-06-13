@@ -282,6 +282,6 @@ define({//Default message bundle
     "editorTheme tag attribute": "Tag attribute",
     "editorTheme selection background": "Selection background",
     'customizeTheme': 'Custom Style...',
-    'moreEditorSettings': 'Editor Settings...'
-    
+    'moreEditorSettings': 'Editor Settings...',
+    'JavascriptSettingWarning' : '${0} Project settings are available: ${1}'
 });

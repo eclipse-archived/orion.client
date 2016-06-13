@@ -70,16 +70,20 @@ define([
 			order: 1000, // low priority
 			uriTemplate: "{+OrionHome}/edit/edit.html"
 		});
-	
-		provider.registerService("orion.page.link", null, {
+
+		provider.registerService("orion.page.link.related", null, {
 			name: widgetMessages["Settings"],
 			id: "orion.settings",
 			nls: "orion/widgets/nls/messages",
 			category: "settings",
 			order: 1000, // low priority
-			uriTemplate: "{+OrionHome}/settings/settings.html"
+			validationProperties: [{
+				source: "Parents[-1]:Location|Location",
+				variableName: "SettingsLocation"
+			}],
+			uriTemplate: "{+OrionHome}/settings/settings.html#{,SettingsLocation}"
 		});
-	
+
 		// Links to an Editor view of current folder. This is only useful from non-Editor pages (eg Shell)
 		provider.registerService("orion.page.link.related", null, {
 			id: "orion.editFromMetadata",

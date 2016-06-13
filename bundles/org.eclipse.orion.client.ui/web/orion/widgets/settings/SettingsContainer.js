@@ -422,7 +422,8 @@ define([
 				serviceRegistry: this.registry,
 				commandRegistry: this.commandService,
 				settings: settingsInCategory,
-				title: title
+				title: title,
+				fileClient: this.fileClient
 			});
 		},
 
@@ -459,8 +460,10 @@ define([
 			var params = PageUtil.matchResourceParameters();
 			if (params.category !== id) {
 				params.category = id;
+				var resource = params.resource;
 				delete params.resource;
-				window.location = new URITemplate("#,{params*}").expand({ //$NON-NLS-0$
+				window.location = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
+					resource: resource,
 					params: params
 				});
 			}

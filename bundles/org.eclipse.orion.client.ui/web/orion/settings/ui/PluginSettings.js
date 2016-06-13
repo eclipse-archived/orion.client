@@ -20,9 +20,12 @@ define([
 	'orion/widgets/input/SettingsSelect',
 	'i18n!orion/settings/nls/messages',
 	'orion/i18nUtil',
-	'orion/commands'
+	'orion/commands',
+	'orion/PageUtil',
+	'orion/webui/littlelib',
+	'orion/URITemplate'
 ], function(mExplorer, mSection, Deferred, objects, mConfirmDialog, SettingsCheckbox, SettingsTextfield, 
-		SettingsSelect, messages, i18nUtil, Commands) {
+		SettingsSelect, messages, i18nUtil, Commands, PageUtil, lib, URITemplate) {
 	var Explorer = mExplorer.Explorer,
 	    SelectionRenderer = mExplorer.SelectionRenderer,
 	    Section = mSection.Section,
@@ -30,6 +33,7 @@ define([
 	    ConfirmDialog = mConfirmDialog.ConfirmDialog;
 
 	var SECTION_HIDE = '/settings/sectionExpand'; //$NON-NLS-1$
+	var editTemplate = new URITemplate("/edit/edit.html#{,resource,params*}"); //$NON-NLS-0$
 
 	/**
 	 * @name orion.settings.ui.PropertyWidget
@@ -380,6 +384,7 @@ define([
 		var commandRegistry = this.commandRegistry = options.commandRegistry;
 		this.settings = options.settings;
 		this.title = options.title;
+		this.fileClient = options.fileClient;
 		if (!options.parent || !options.serviceRegistry || !options.settings || !options.title) {
 			throw new Error('Missing required option'); //$NON-NLS-0$
 		}
@@ -427,6 +432,7 @@ define([
 		},
 		destroy: function() {
 			this.explorer.destroy();
+			this.destroyed = true;
 		},
 		restore: function(pid) {
 			var deferreds = [];
@@ -453,6 +459,43 @@ define([
 			}
 		},
 		render: function(parent, serviceRegistry, settings, categoryTitle) {
+			if (settings && settings.length > 2 && "javascript" === settings[0].category) {
+				var pageParams = PageUtil.matchResourceParameters();
+				this.fileClient.fetchChildren(pageParams.resource + "?depth=1").then(function(children) {
+					console.log("Render :" + this.destroyed);
+					if (!this.destroyed) {
+						children.some(function (child) {
+							if (child.Name === ".eslintrc") {
+								console.log("Creation: " + this.destroyed);
+								var infoText = document.createElement("div"); //$NON-NLS-0$
+								infoText.classList.add("setting-info"); //$NON-NLS-0$
+								infoText.textContent = messages.JavascriptSettingWarning;
+								var icon = document.createElement("span"); //$NON-NLS-0$
+								icon.classList.add("core-sprite-warning"); //$NON-NLS-0$
+								icon.classList.add("icon-inline"); //$NON-NLS-0$
+								icon.classList.add("imageSprite"); //$NON-NLS-0$
+								var link = document.createElement("a"); //$NON-NLS-0$
+								link.href = editTemplate.expand({resource: child.Location});
+								link.appendChild(document.createTextNode(child.Name));
+								lib.processDOMNodes(infoText, [icon, link]);
+								try {
+									if (parent.firstChild) {
+										console.log("insert: " + this.destroyed);
+										parent.insertBefore(infoText, parent.firstChild);
+									} else {
+										console.log("append: " + this.destroyed);
+										parent.appendChild(infoText);
+									}
+								} catch(e) {
+									console.log(e);
+								}
+								return true;
+							}
+						}.bind(this));
+					}
+				}.bind(this));
+
+			}
 			for (var i=0; i<settings.length; i++) {
 				var setting = settings[i];
 				var sectionId = 'settings.section.'; //$NON-NLS-1$
