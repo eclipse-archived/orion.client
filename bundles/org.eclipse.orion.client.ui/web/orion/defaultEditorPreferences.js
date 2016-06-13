@@ -10,9 +10,10 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define([
-], function() {
+	'orion/util'
+], function(util) {
 	var defaults = {
-		autoSave: true,
+		autoSave: util.isElectron ? false : true,
 		autoSaveVisible: true,
 		autoSaveLocalVisible: true,
 		autoSaveTimeout: 250,

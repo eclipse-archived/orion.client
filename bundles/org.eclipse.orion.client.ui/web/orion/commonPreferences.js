@@ -11,7 +11,7 @@
 /*eslint-env browser, amd*/
 
 define([
-	'orion/EventTarget',
+	'orion/EventTarget'
 ], function(EventTarget) {
 	function mergeSettings(defaults, settings) {
 		for (var property in defaults) {
