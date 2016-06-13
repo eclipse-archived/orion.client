@@ -40,6 +40,7 @@ module.exports.router = function(options) {
 	module.exports.getfileAbsolutePath = getfileAbsolutePath;
 	module.exports.getfileRelativePath = getfileRelativePath;
 	module.exports.isWorkspace = isWorkspace;
+	module.exports.getSignature = getSignature;
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -589,5 +590,9 @@ function postClone(req, res) {
 	.catch(function(err) {
 		handleRemoteError(task, err, cloneUrl);
 	});
+}
+
+function getSignature(repo){
+	return git.Signature.default(repo) || git.Signature.now("unknown","unknown@unknown.com");
 }
 };
