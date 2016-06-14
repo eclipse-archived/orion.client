@@ -24,8 +24,8 @@ define([
 	 * @description creates a new instance of the hover support
 	 * @constructor
 	 * @public
-	 * @param {Object} resolver The backing file resolver
-	 * @param {Object} cssResultManager The back result manager
+	 * @param {ScriptResolver} resolver The backing file resolver
+	 * @param {CssResultManager} cssResultManager The back result manager
 	 * @since 8.0
 	 */
 	function CSSHover(resolver, cssResultManager) {
@@ -41,8 +41,8 @@ define([
 		 * @function
 		 * @public 
 		 * @memberof webtools.CSSHover.prototype
-		 * @param {Object} editorContext The current editor context
-		 * @param {Object} ctxt The current selection context
+		 * @param {EditorContext} editorContext The current editor context
+		 * @param {?} ctxt The current selection context
 		 */
 		computeHoverInfo: function computeHover(editorContext, ctxt) {
 			if(ctxt.proposal && ctxt.proposal.kind === 'css') {
