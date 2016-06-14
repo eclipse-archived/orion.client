@@ -93,7 +93,7 @@ update_config_files() {
 
 # set Windows remoteReleases URL to latest successful build # for delta files
 update_remote_releases() {
-	latest_build=$(curl -s http://orion-update.mybluemix.net/api/version/latest | ./jsawk 'return this.tag')
+	latest_build=$(curl -s http://orion-update.mybluemix.net/api/version/latest | jsawk 'return this.tag')
 	sed -i .bak "s/.*remoteReleases.*/\"remoteReleases\": \"${update_url}\/v${latest_build}\"/" package.json
 }
 
