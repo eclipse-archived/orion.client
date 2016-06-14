@@ -51,22 +51,22 @@ define([
           }
           return new Deferred().resolve(null);
        },
-	   getFileClient: function() {
+	   getFileClient: function getFileClient() {
 	   		if(!this.fileclient) {
 	   			this.fileclient = this.serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
 	   		}
 	   		return this.fileclient;
 	   },
-       setSearchLocation: function(searchLocation) {
+       setSearchLocation: function setSearchLocation(searchLocation) {
        		this.searchLocation = searchLocation;
        },
-	   getSearchLocation: function() {
+	   getSearchLocation: function getSearchLocation() {
 	   		if(typeof this.searchLocation === 'string' && this.searchLocation.length > 0) {
 	   			return new Deferred().resolve(this.searchLocation);
 	   		}
 	   		return this.getFileClient().fileServiceRootURL();
 	   },
-       _getFile: function(name, options) {
+       _getFile: function _getFile(name, options) {
            var files = this.cache.get(name);
            if(files) {
                return new Deferred().resolve(files);
