@@ -459,38 +459,39 @@ define([
 			}
 		},
 		render: function(parent, serviceRegistry, settings, categoryTitle) {
-			if (settings && settings.length > 2 && "javascript" === settings[0].category) {
-				var pageParams = PageUtil.matchResourceParameters();
-				// resource name starts with /file/ and ends with '/'
-				var projectName = pageParams.resource.substring(6, pageParams.resource.length - 1);
-				this.fileClient.fetchChildren(pageParams.resource + "?depth=1").then(function(children) {
-					if (!this.destroyed) {
-						children.some(function (child) {
-							if (child.Name === ".eslintrc") {
-								var infoText = document.createElement("div"); //$NON-NLS-0$
-								infoText.classList.add("setting-info"); //$NON-NLS-0$
-								infoText.textContent = messages.JavascriptSettingWarning;
-								var icon = document.createElement("span"); //$NON-NLS-0$
-								icon.classList.add("core-sprite-warning"); //$NON-NLS-0$
-								icon.classList.add("icon-inline"); //$NON-NLS-0$
-								icon.classList.add("imageSprite"); //$NON-NLS-0$
-								var link = document.createElement("a"); //$NON-NLS-0$
-								link.href = editTemplate.expand({resource: child.Location});
-								link.appendChild(document.createTextNode(child.Name));
-								var projectText = document.createElement("span"); //$NON-NLS-0$
-								projectText.textContent = projectName;
-								lib.processDOMNodes(infoText, [icon, link, projectText]);
-								if (parent.firstChild) {
-									parent.insertBefore(infoText, parent.firstChild);
-								} else {
-									parent.appendChild(infoText);
+			var pageParams = PageUtil.matchResourceParameters();
+			if ("javascript" === pageParams.category) {
+				if (pageParams.resource && pageParams.resource.length !== 0) {
+					// resource name starts with /file/ and ends with '/'
+					var projectName = pageParams.resource.substring(6, pageParams.resource.length - 1);
+					this.fileClient.fetchChildren(pageParams.resource + "?depth=1").then(function(children) {
+						if (!this.destroyed) {
+							children.some(function (child) {
+								if (child.Name === ".eslintrc") {
+									var infoText = document.createElement("div"); //$NON-NLS-0$
+									infoText.classList.add("setting-info"); //$NON-NLS-0$
+									infoText.textContent = messages.JavascriptSettingWarning;
+									var icon = document.createElement("span"); //$NON-NLS-0$
+									icon.classList.add("core-sprite-warning"); //$NON-NLS-0$
+									icon.classList.add("icon-inline"); //$NON-NLS-0$
+									icon.classList.add("imageSprite"); //$NON-NLS-0$
+									var link = document.createElement("a"); //$NON-NLS-0$
+									link.href = editTemplate.expand({resource: child.Location});
+									link.appendChild(document.createTextNode(child.Name));
+									var projectText = document.createElement("span"); //$NON-NLS-0$
+									projectText.textContent = projectName;
+									lib.processDOMNodes(infoText, [icon, link, projectText]);
+									if (parent.firstChild) {
+										parent.insertBefore(infoText, parent.firstChild);
+									} else {
+										parent.appendChild(infoText);
+									}
+									return true;
 								}
-								return true;
-							}
-						}.bind(this));
-					}
-				}.bind(this));
-
+							}.bind(this));
+						}
+					}.bind(this));
+				}
 			}
 			for (var i=0; i<settings.length; i++) {
 				var setting = settings[i];
