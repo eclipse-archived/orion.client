@@ -12597,7 +12597,7 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "Unexpected \'else\' after \'return\'."
+										description: "Unnecessary \'else\' after \'return\'."
 									}]);
 								},
 								function (error) {
@@ -12620,7 +12620,7 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "Unexpected \'else\' after \'return\'."
+										description: "Unnecessary \'else\' after \'return\'."
 									}]);
 								},
 								function (error) {
@@ -12647,12 +12647,12 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "Unexpected \'else\' after \'return\'."
+										description: "Unnecessary \'else\' after \'return\'."
 									},
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "Unexpected \'else\' after \'return\'."
+										description: "Unnecessary \'else\' after \'return\'."
 									}]);
 								},
 								function (error) {

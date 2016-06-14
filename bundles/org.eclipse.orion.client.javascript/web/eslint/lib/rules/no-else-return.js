@@ -24,7 +24,7 @@ module.exports = function(context) {
      * @returns {void}
      */
     function displayReport(node) {
-        context.report(node, "Unexpected 'else' after 'return'.");
+        context.report(node, "Unnecessary 'else' after 'return'.");
     }
 
     /**
