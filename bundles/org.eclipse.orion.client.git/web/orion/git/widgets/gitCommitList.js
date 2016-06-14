@@ -457,7 +457,7 @@ define([
 			case "mergeSquash": //$NON-NLS-0$
 			case "reset": //$NON-NLS-0$
 			case "commit": //$NON-NLS-0$
-			case "revert": //$NON-NLS-0$
+			case "revert": //$NON-NLS-0$			
 				this.changedItem();
 				break;
 			case "applyPatch":  //$NON-NLS-0$
@@ -467,9 +467,11 @@ define([
 			case "popStash": //$NON-NLS-0$
 			case "applyStash": //$NON-NLS-0$
 			case "checkoutFile": //$NON-NLS-0$
-				Deferred.when(this.model.root.repository.status, function(status) {
-					status.parent = this.model.root;
-					this.myTree.redraw(status);
+			    var that = this;
+				var theLocation  = this.model.root.repository.StatusLocation;
+				Deferred.when(that.progressService.progress(that.gitClient.getGitStatus(theLocation), messages["Getting changes"]),  function(theStatus) {
+					theStatus.parent = this.model.root;
+					this.myTree.redraw(theStatus);
 				}.bind(this));
 				break;
 			}
