@@ -54,12 +54,13 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 					var operation = globalOperations[operationLocation];
 					operation.Location = operationLocation;
 					operations[operationLocation]= operation;
+					var done = new Deferred();
 					if(operation.expires && new Date().getTime()>operation.expires){
 						delete globalOperations[operationLocation];
 						delete operations[operationLocation];
+						done.resolve();
 						return;
 					}
-					var done = new Deferred();
 					var success = function (result){
 						operations[this].operation = operations[this].operation || {};
 						operations[this].operation.type = "loadend";
