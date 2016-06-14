@@ -53,24 +53,28 @@ define([
 				}
 				if(ast.tokens.length > 0) {
 					//error object did not contain the token infos, try to find it
+					// it is possible that there is no token at the given location because the parser didn't tokenize it with the syntax error.
+					// so we need to check for null after the lookup
 					var token = Finder.findToken(error.index, ast.tokens);
-					if (start === error.end && token.range && token.range[1] === start) {
-						error.start = token.range[0];
-					}
-					switch(token.type) {
-						case "Keyword" :
-							if (token.value === "export" || token.value === "import") {
-								// convert to a problem with a different ruleId
-								var problem = {
-									severity: "error",
-									start: token.start,
-									end: token.end,
-									message: message,
-									ruleId: "forbiddenExportImport"
-								};
-								errors.push(problem);
-								error = null;
-							}
+					if (token) {
+						if (start === error.end && token.range && token.range[1] === start) {
+							error.start = token.range[0];
+						}
+						switch(token.type) {
+							case "Keyword" :
+								if (token.value === "export" || token.value === "import") {
+									// convert to a problem with a different ruleId
+									var problem = {
+										severity: "error",
+										start: token.start,
+										end: token.end,
+										message: message,
+										ruleId: "forbiddenExportImport"
+									};
+									errors.push(problem);
+									error = null;
+								}
+						}
 					}
 				}
 				if (error) {

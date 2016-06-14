@@ -976,6 +976,24 @@ define([
 						});
 				});
 			});
+			//SYNTAX ERRORS  -------------------------------------------------------
+			describe('test syntax error', function() {
+				it("No octal decimal in strict mode", function(callback) {
+					var config = { rules: {} };
+					validate({buffer: "var s = 'Hello\\712World'; console.log(s);", callback: callback, config: config}).then(function (problems) {
+							assertProblems(problems, [
+								{
+									start: 14,
+									end: 15,
+									severity: 'error',
+									description: 'Octal literal in strict mode'
+								}
+							]);
+						}, function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+			});
 		});
 	};
 });
