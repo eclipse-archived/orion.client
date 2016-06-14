@@ -76,7 +76,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/ex
 							operation.deferred.then(success.bind(this), failure.bind(this), progress.bind(this));
 							return;
 						}
-						if(error.HttpCode===404 && error.JsonData && error.JsonData.taskNotFound){
+						if(error.HttpCode===404 || error.status===404 || error.status===410){
 							preferences.remove("/operations", String(this)); //$NON-NLS-1$
 							delete operations[this];
 							that._loadOperationsList.bind(that)(operations);
