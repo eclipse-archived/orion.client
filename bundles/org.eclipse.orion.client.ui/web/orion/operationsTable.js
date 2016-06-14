@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/operationsCommands', 'orion/metrics'
-	], function(messages, lib,	mExplorer, mOperationsCommands, mMetrics) {
+define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/operationsCommands', 'orion/metrics'
+	], function(messages, Deferred, lib,	mExplorer, mOperationsCommands, mMetrics) {
 	
 	var exports = {};
 
@@ -50,25 +50,26 @@ define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/ex
 			this.operationsClient.getOperations().then(function(globalOperations){
 				var operationLocations = Object.keys(globalOperations);
 				var operations = {};
-				for(var i=0; i<operationLocations.length; i++){
-					var operationLocation = operationLocations[i];
+				Deferred.all(operationLocations.map(function(operationLocation) {
 					var operation = globalOperations[operationLocation];
 					operation.Location = operationLocation;
 					operations[operationLocation]= operation;
 					if(operation.expires && new Date().getTime()>operation.expires){
-						//operations expired
-						preferences.remove("/operations", operationLocation); //$NON-NLS-1$
+						delete globalOperations[operationLocation];
 						delete operations[operationLocation];
-						continue;
+						return;
 					}
+					var done = new Deferred();
 					var success = function (result){
 						operations[this].operation = operations[this].operation || {};
 						operations[this].operation.type = "loadend";
 						that.changedItem(this);
+						done.resolve();
 					};
 					var progress = function(operation){
 						operations[this].operation = operation;
 						that.changedItem(this);
+						done.resolve();
 					};
 					var failure = function(error) {
 						if(error.canceled){
@@ -77,23 +78,27 @@ define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/ex
 							return;
 						}
 						if(error.HttpCode===404 || error.status===404 || error.status===410){
-							preferences.remove("/operations", String(this)); //$NON-NLS-1$
+							delete globalOperations[operationLocation];
 							delete operations[this];
 							that._loadOperationsList.bind(that)(operations);
-							return;
+						} else {
+							operations[this].operation = operations[this].operation || {};
+							if(error.Severity==="Cancel"){
+								operations[this].operation.type = "abort";
+							}else{
+								operations[this].operation.type = "error";
+							}
+							operations[this].operation.error = error;
+							that.changedItem(this);
 						}
-						operations[this].operation = operations[this].operation || {};
-						if(error.Severity==="Cancel"){
-							operations[this].operation.type = "abort";
-						}else{
-							operations[this].operation.type = "error";
-						}
-						operations[this].operation.error = error;
-						that.changedItem(this);
+						done.resolve();
 					}; 
 					operation.deferred = that.operationsClient.getOperation(operationLocation);
 					operation.deferred.then(success.bind(operationLocation), failure.bind(operationLocation), progress.bind(operationLocation));
-				}
+					return done;
+				})).then(function() {
+					preferences.put("/operations", globalOperations, {clear: true});
+				});
 				that._loadOperationsList.bind(that)(operations);
 
 				mMetrics.logPageLoadTiming("complete", window.location.pathname); //$NON-NLS-0$
