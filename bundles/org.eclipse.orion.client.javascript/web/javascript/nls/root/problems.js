@@ -111,7 +111,7 @@ define({
 	'use-isnan-description': 'Disallow comparison to the value NaN.',
 	'valid-typeof' : 'Invalid typeof comparison.',
 	'valid-typeof-description': 'Warn when incorrectly comparing the result of a typeof expression.',
-	'noErrorDetailed' : 'No error\'s message',
+	'noErrorDetailed' : 'Unknown error occurred',
 	'esmodules-not-running' : 'import/export declarations require the \'es_modules\' plug-in to be running.',
 	
 	// Rules consumed from ESLint
