@@ -84,7 +84,8 @@ update_config_files() {
 	pkg_version=$(grep -m1 "version" orionode/package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
 	old_version=${pkg_version}
 	pkg_version=`echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
-	update_url="http\:\/\/orion\-update\.mybluemix\.net\/update"
+	update_url="http\:\/\/orion\-update\.mybluemix\.net\/update" # for autoUpdater
+	download_url="http\:\/\/orion\-update\.mybluemix\.net\/download" # for remoteReleases
 	vpkg_version="v${pkg_version}"
 	name=$(grep -m1 "name" orionode/package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
 	sed -i .bak 's/\"version\": \"'"${old_version}"'\"/\"version\"\:\ \"'"${pkg_version}"'\"/' orionode/package.json
@@ -94,7 +95,7 @@ update_config_files() {
 # set Windows remoteReleases URL to latest successful build # for delta files
 update_remote_releases() {
 	latest_build=$(curl -s http://orion-update.mybluemix.net/api/version/latest | jsawk 'return this.tag')
-	sed -i .bak "s/.*remoteReleases.*/\"remoteReleases\": \"${update_url}\/v${latest_build}\"/" package.json
+	sed -i .bak "s/.*remoteReleases.*/\"remoteReleases\": \"${download_url}\/v${latest_build}\"/" package.json
 }
 
 echo "Setting up build directories"
