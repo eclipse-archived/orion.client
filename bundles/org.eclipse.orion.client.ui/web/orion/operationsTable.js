@@ -58,7 +58,8 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 					if(operation.expires && new Date().getTime()>operation.expires){
 						delete globalOperations[operationLocation];
 						delete operations[operationLocation];
-						return done.resolve();
+						done.resolve();
+						return done;
 					}
 					var success = function (result){
 						operations[this].operation = operations[this].operation || {};
