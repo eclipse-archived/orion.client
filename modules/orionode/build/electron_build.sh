@@ -91,6 +91,12 @@ update_config_files() {
 	sed -i .bak 's/orion\.autoUpdater\.url\=/orion\.autoUpdater\.url\='"${update_url}"'/' orionode/orion.conf
 }
 
+# set Windows remoteReleases URL to latest successful build # for delta files
+update_remote_releases() {
+	latest_build=$(curl -s http://orion-update.mybluemix.net/api/version/latest | ./jsawk 'return this.tag')
+	sed -i .bak "s/.*remoteReleases.*/\"remoteReleases\": \"${update_url}\/v${latest_build}\"/" package.json
+}
+
 echo "Setting up build directories"
 
 rm -rf buildTemp
@@ -138,6 +144,7 @@ update_config_files
 cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/windows/nodegit.node orionode/node_modules/nodegit/build/Release
 
 pushd orionode
+update_remote_releases
 
 # generates windows artifacts: -full.nupkg, -delta.nupkg, .exe, RELEASES
 npm run dist:win
