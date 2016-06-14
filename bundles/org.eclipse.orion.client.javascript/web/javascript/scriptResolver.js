@@ -66,7 +66,7 @@ define([
 	   		}
 	   		return this.getFileClient().fileServiceRootURL();
 	   },
-       _getFile : function _getFile(name, options) {
+       _getFile: function(name, options) {
            var files = this.cache.get(name);
            if(files) {
                return new Deferred().resolve(files);
@@ -83,38 +83,40 @@ define([
            var searchname = filename.slice(idx+1);
 
            // Search for it
-           return this.getFileClient().search(
-                {
-                	'resource': that.searchLocation || "",
-                    'keyword': searchname,
-                    'sort': 'Name asc', //$NON-NLS-1$
-                    'nameSearch': true,
-                    'fileType': ext,
-                    'start': 0,
-                    'rows': 30
-                }
-           ).then(function(res) {
-               var r = res.response;
-               var len = r.docs.length;
-               if(r.numFound > 0) {
-                   files = [];
-                   var testname = filename.replace(/(?:\.?\.\/)*/, '');
-                   testname = testname.replace(new RegExp("\\"+dotext+"$"), ''); //$NON-NLS-1$
-                   testname = testname.replace(/\//g, "\\/"); //$NON-NLS-1$
-                   for(var i = 0; i < len; i++) {
-                       var file = r.docs[i];
-                       //TODO haxxor - only keep ones that end in the logical name or the mapped logical name
-                       var regex = ".*(?:"+testname+")$"; //$NON-NLS-1$ //$NON-NLS-2$
-                       if(new RegExp(regex).test(file.Location.slice(0, file.Location.length-dotext.length))) {
-                           files.push(that._newFileObj(file.Name, file.Location, that._trimName(file.Path), icon, type));
-                       }
-                   }
-                   if(files.length > 0) {
-                       that.cache.put(filename, files);
-                       return files;
-                   }
-               }
-               return null;
+           return this.getSearchLocation().then(function(searchLocation) {
+	           return that.getFileClient().search(
+	                {
+	                	'resource': searchLocation,
+	                    'keyword': searchname,
+	                    'sort': 'Name asc', //$NON-NLS-1$
+	                    'nameSearch': true,
+	                    'fileType': ext,
+	                    'start': 0,
+	                    'rows': 30
+	                }
+	           ).then(function(res) {
+	               var r = res.response;
+	               var len = r.docs.length;
+	               if(r.numFound > 0) {
+	                   files = [];
+	                   var testname = filename.replace(/(?:\.?\.\/)*/, '');
+	                   testname = testname.replace(new RegExp("\\"+dotext+"$"), ''); //$NON-NLS-1$
+	                   testname = testname.replace(/\//g, "\\/"); //$NON-NLS-1$
+	                   for(var i = 0; i < len; i++) {
+	                       var file = r.docs[i];
+	                       //TODO haxxor - only keep ones that end in the logical name or the mapped logical name
+	                       var regex = ".*(?:"+testname+")$"; //$NON-NLS-1$ //$NON-NLS-2$
+	                       if(new RegExp(regex).test(file.Location.slice(0, file.Location.length-dotext.length))) {
+	                           files.push(that._newFileObj(file.Name, file.Location, that._trimName(file.Path), icon, type));
+	                       }
+	                   }
+	                   if(files.length > 0) {
+	                       that.cache.put(filename, files);
+	                       return files;
+	                   }
+	               }
+	               return null;
+	           });
            });
        },
 
