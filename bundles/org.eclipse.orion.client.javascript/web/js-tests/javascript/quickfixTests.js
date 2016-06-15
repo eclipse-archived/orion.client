@@ -2461,6 +2461,36 @@ define([
 								  callback: callback,
 								  contentType: 'text/html'});
 			});
+			it("no-extra-parens - multiline expression",function(callback) {
+				var rule = createTestRule('no-extra-parens');
+				 var expected = [
+				 				{value: "",
+								start: 10, 
+								end: 11},
+								{value: "",
+								start: 14, 
+								end: 15}
+								];
+				return getFixes({buffer: 'if (a === (\nb\n)){}', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
+			it("no-extra-parens -space before closing paren",function(callback) {
+				var rule = createTestRule('no-extra-parens');
+				 var expected = [
+				 				{value: "",
+								start: 10, 
+								end: 11},
+								{value: "",
+								start: 13, 
+								end: 14}
+								];
+				return getFixes({buffer: 'if (a === (b )){}', 
+								  rule: rule,
+								  expected: expected,
+								  callback: callback});
+			});
 		});
 		//NO-EXTRA-SEMI
 		describe('no-extra-semi', function(){

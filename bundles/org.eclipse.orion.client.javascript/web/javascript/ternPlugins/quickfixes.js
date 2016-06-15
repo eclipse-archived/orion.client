@@ -354,10 +354,17 @@ define([
 		 */
 		"no-extra-parens": function(annotation, annotations, file) {
 			return applySingleFixToAll(annotations, function(annot) {
-				var token = Finder.findToken(annot.start, file.ast.tokens);
-				var openBracket = file.ast.tokens[token.index-1];
+				var tokens = file.ast.tokens;
+				var token = Finder.findToken(annot.start, tokens);
+				var openBracket = tokens[token.index-1];
 				if (openBracket.value === '(') {
-					var closeBracket = Finder.findToken(annot.end, file.ast.tokens);
+					var closeBracket = Finder.findToken(annot.end, tokens);
+					if (closeBracket.value !== ')') {
+						// try the next token if ')' is on the next line
+						if (tokens.length > closeBracket.index + 1) {
+							closeBracket = tokens[closeBracket.index + 1];
+						}
+					}
 					if (closeBracket.value === ')') {
 						var replacementText = "";
 						if (token.index >= 2) {
