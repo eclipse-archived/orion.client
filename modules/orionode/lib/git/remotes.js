@@ -189,14 +189,6 @@ function addRemote(req, res) {
 		return writeError(500, res);
 	}
 
-	// It appears that the java server does not let you add a remote if
-	// it doesn't have a protocol (it seems to check for a colon).
-	var parsedUrl = url.parse(req.body.RemoteURI, true);
-
-	if (!parsedUrl.protocol) {
-		writeError(403, res);
-	}
-
 	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
