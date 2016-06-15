@@ -35,7 +35,7 @@ function orionTasksAPI(options) {
 	.delete('/id/:id', function(req, res/*, next*/) {
 		var id = req.id;
 		delete taskList[id];
-		res.sendStatus(200);
+		res.status(200).json({});
 	});
 }
 

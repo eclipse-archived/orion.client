@@ -62,35 +62,38 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 						return done;
 					}
 					var success = function (result){
-						operations[this].operation = operations[this].operation || {};
-						operations[this].operation.type = "loadend";
-						that.changedItem(this);
+						var loc = String(this)
+						operations[loc].operation = operations[loc].operation || {};
+						operations[loc].operation.type = "loadend";
+						that.changedItem(loc);
 						done.resolve();
 					};
 					var progress = function(operation){
-						operations[this].operation = operation;
-						that.changedItem(this);
+						var loc = String(this)
+						operations[loc].operation = operation;
+						that.changedItem(loc);
 						done.resolve();
 					};
 					var failure = function(error) {
+						var loc = String(this)
 						if(error.canceled){
-							operation.deferred = that.operationsClient.getOperation(this);
-							operation.deferred.then(success.bind(this), failure.bind(this), progress.bind(this));
+							operation.deferred = that.operationsClient.getOperation(loc);
+							operation.deferred.then(success.bind(loc), failure.bind(loc), progress.bind(loc));
 							return;
 						}
 						if(error.HttpCode===404 || error.status===404 || error.status===410){
 							delete globalOperations[operationLocation];
-							delete operations[this];
+							delete operations[loc];
 							that._loadOperationsList.bind(that)(operations);
 						} else {
-							operations[this].operation = operations[this].operation || {};
+							operations[loc].operation = operations[loc].operation || {};
 							if(error.Severity==="Cancel"){
-								operations[this].operation.type = "abort";
+								operations[loc].operation.type = "abort";
 							}else{
-								operations[this].operation.type = "error";
+								operations[loc].operation.type = "error";
 							}
-							operations[this].operation.error = error;
-							that.changedItem(this);
+							operations[loc].operation.error = error;
+							that.changedItem(loc);
 						}
 						done.resolve();
 					}; 
