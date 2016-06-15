@@ -67,7 +67,7 @@ function getPullRequest(req, res) {
 		clientSecret =  options.configParams["orion.oauth.github.secret"];
 	}
     
-	var task = new tasks.Task(res, false, true);
+	var task = new tasks.Task(res, false, true, 0, false);
 	if(gitUrl){
 		var parsedURL = url.parse(gitUrl);
 		var pathnames = parsedURL["pathname"].split("/");   
