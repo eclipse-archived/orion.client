@@ -1173,7 +1173,7 @@ define([
 		describe("no-self-assign", function() {
 			it("no-self-assign single 1", function(done) {
 				var rule = createTestRule("no-self-assign");
-				var expected = {value:'', start: 14, end: 23};
+				var expected = {value:'', start: 14, end: 24};
 				return getFixes({
 					buffer: "var foo = 10; foo = foo;",
 					rule: rule,
@@ -1224,8 +1224,8 @@ define([
 			it("no-self-assign multi 1", function(done) {
 				var rule = createTestRule("no-self-assign");
 				var expected = [
-					{value:'', start: 14, end: 23},
-					{value:'', start: 40, end: 49}
+					{value:'', start: 14, end: 24},
+					{value:'', start: 40, end: 50}
 				];
 				return getFixes({
 					buffer: "var foo = 10; foo = foo; var bar = foo; bar = bar;",
@@ -1242,6 +1242,36 @@ define([
 				];
 				return getFixes({
 					buffer: "var foo = 10; foo = foo   ; var bar = foo; bar = bar  ;",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-self-assign variable declarator init same as id", function(done) {
+				var rule = createTestRule("no-self-assign");
+				var expected = {value:'', start: 7, end: 13};
+				return getFixes({
+					buffer: "var foo = foo;",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-self-assign variable declarator init same as id 2", function(done) {
+				var rule = createTestRule("no-self-assign");
+				var expected = {value:'', start: 7, end: 15};
+				return getFixes({
+					buffer: "var foo = (foo);",
+					rule: rule,
+					expected: expected,
+					callback: done
+				});
+			});
+			it("no-self-assign variable declarator init same as id 3", function(done) {
+				var rule = createTestRule("no-self-assign");
+				var expected = {value:'', start: 17, end: 25};
+				return getFixes({
+					buffer: "var bar = 10, foo = (foo);",
 					rule: rule,
 					expected: expected,
 					callback: done

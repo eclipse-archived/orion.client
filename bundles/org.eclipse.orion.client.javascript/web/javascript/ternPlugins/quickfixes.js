@@ -278,17 +278,27 @@ define([
 				var node = Finder.findNode(annot.start, file.ast, {parents:true});
 				if(node) {
 					var p = node.parents[node.parents.length-1];
-					if(p.type === 'AssignmentExpression') {
-						var end = p.range[1];
-						var tok = Finder.findToken(end, file.ast.tokens);
-						if(tok) {
-							//we want the next one, ignoring whitespace
-							tok = file.ast.tokens[tok.index+1];
-							if(tok &&  tok.type === 'Punctuator' && tok.value === ';') {
-								end = tok.range[1]; //clean up trailing semicolons
+					switch(p.type) {
+						case 'AssignmentExpression' : {
+							var end = p.range[1];
+							var tokens = file.ast.tokens;
+							var tok = Finder.findToken(end, tokens);
+							if(tok) {
+								//we want the next one, ignoring whitespace
+								if((tok.type !== 'Punctuator' || tok.value !== ';') && tokens.length > tok.index + 1) {
+									tok = tokens[tok.index+1];
+								}
+								if(tok &&  tok.type === 'Punctuator' && tok.value === ';') {
+									end = tok.range[1]; //clean up trailing semicolons
+								}
 							}
+							return {text: '', start: p.range[0], end: end};
 						}
-						return {text: '', start: p.range[0], end: end};
+						case 'VariableDeclarator' : {
+							// init is the same name as the id
+							var variableDeclarator = p;
+							return {text: '', start: variableDeclarator.id.range[1], end: variableDeclarator.range[1]};
+						}
 					}
 				}
 			});
