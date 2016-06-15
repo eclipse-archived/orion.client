@@ -254,7 +254,7 @@ function postRemote(req, res) {
 
 function fetchRemote(req, res, remote, branch, force) {
 	var remoteObj;
-	var task = new tasks.Task(res, false, true);
+	var task = new tasks.Task(res, false, true, 0, true);
 	var repo;
 	return clone.getRepo(req)
 	.then(function(r) {
@@ -307,7 +307,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	//TODO disable pushing tags
 	tags = false;
 	
-	var task = new tasks.Task(res, false, true);	
+	var task = new tasks.Task(res, false, true, 0 ,true);	
 	return clone.getRepo(req)
 	.then(function(r) {
 		repo = r;

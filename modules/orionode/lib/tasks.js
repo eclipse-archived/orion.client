@@ -30,20 +30,23 @@ function orionTasksAPI(options) {
 	.get('/id/:id', function(req, res/*, next*/) {
 		var id = req.id;
 		if (!taskList[id]) return writeError(404, res);
-		res.json(taskList[id].toJSON());
+		res.json(taskList[id].toJSON(true));
 	})
-	.delete('/id/:id', function(req, res/*, next*/) {
+	.delete('/id/:id', deleteOperation)
+	.get('/temp/:id', function(req, res/*, next*/) {
 		var id = req.id;
-		delete taskList[id];
-		res.status(200).json({});
-	});
+		if (!taskList[id]) return writeError(404, res);
+		res.json(taskList[id].toJSON(false));
+	})
+	.delete('/temp/:id', deleteOperation);
 }
 
-function Task(res, cancelable, lengthComputable, wait) {
-	this.id = crypto.randomBytes(5).toString('hex') + Date.now();
+function Task(res, cancelable, lengthComputable, wait, keep) {
+	this.timestamp = Date.now();
+	this.id = crypto.randomBytes(5).toString('hex') + this.timestamp;
 	this.cancelable = !!cancelable;
 	this.lengthComputable = !!lengthComputable;
-	this.timestamp = this.id;
+	this.keep = !!keep; 
 	this.total = this.loaded = 0;
 	this.type = "loadstart";
 	this.res = res;
@@ -62,7 +65,7 @@ Task.prototype = {
 		if (!this.isRunning()) return;
 		this.started = true;
 		taskList[this.id] = this;
-		var resp = JSON.stringify(this.toJSON());
+		var resp = JSON.stringify(this.toJSON(true));
 		var res = this.res;
 		res.statusCode = 202;
 		res.setHeader('Content-Type', 'application/json');
@@ -112,7 +115,7 @@ Task.prototype = {
 		if (typeof loaded === "number") this.loaded = loaded;
 		if (typeof total === "number") this.total = total;
 	},
-	toJSON: function() {
+	toJSON: function(isWriteLocation) {
 		var result = {
 			lengthComputable: this.lengthComputable,
 			cancelable: this.cancelable,
@@ -126,13 +129,24 @@ Task.prototype = {
 		}
 		if (this.result) {
 			result.Result = this.result;
-		} else {
+		} 
+		
+		if(this.keep && isWriteLocation){
 			// Do not set location so that tasks is deleted
 			result.Location = "/task/id/" + this.id;
+		}else if(isWriteLocation){
+			result.Location = "/task/temp/" + this.id;
 		}
+		
 		return result;
 	}
 };
+
+function deleteOperation(req, res/*, next*/){
+	var id = req.id;
+	delete taskList[id];
+	res.status(200).json({});
+}
 
 module.exports = {
 	router: orionTasksAPI,
