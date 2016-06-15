@@ -12,6 +12,7 @@
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/i18nUtil',
+	'orion/util',
 	'orion/URITemplate',
 	'orion/webui/littlelib',
 	'orion/Deferred',
@@ -21,7 +22,7 @@ define([
 	'orion/explorers/explorer',
 	'orion/section',
 	'orion/webui/tooltip'
-], function(messages, i18nUtil, URITemplate, lib, Deferred, objects, mProjectCommands, PageLinks, mExplorer, mSection, mTooltip) {
+], function(messages, i18nUtil, util, URITemplate, lib, Deferred, objects, mProjectCommands, PageLinks, mExplorer, mSection, mTooltip) {
 
 	var ID_COUNT = 0;
 
@@ -330,7 +331,10 @@ define([
 			this.node = node;
 			this.node.className = "orionProject";
 			this.projectData = projectData;
-
+			if (util.isElectron) {
+				this.node.style.display = "none";
+			}
+			
 			function renderSections(sectionsOrder, sectionNames){
 				sectionNames = sectionNames || {};
 				sectionsOrder.forEach(function(sectionName){

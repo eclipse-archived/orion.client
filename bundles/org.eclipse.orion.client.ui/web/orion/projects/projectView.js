@@ -12,10 +12,11 @@
 define([
     'i18n!orion/edit/nls/messages',
     'orion/projects/projectExplorer',
+    'orion/util',
 	'orion/selection',
 	'orion/URITemplate',
 	'orion/fileCommands'
-], function(messages, mProjectExplorer, Selection, URITemplate, FileCommands) {
+], function(messages, mProjectExplorer, util, Selection, URITemplate, FileCommands) {
 	
 		var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	
@@ -37,6 +38,9 @@ define([
 		ProjectView.prototype = {
 			display: function(workspace, parent){
 				parent.classList.add("orionProject"); //$NON-NLS-0$
+				if (util.isElectron) {
+					parent.style.display = "none";
+				}
 				this.projectExplorer = new mProjectExplorer.ProjectExplorer(parent, this.serviceRegistry, new Selection.Selection(this.serviceRegistry), this.commandRegistry);
 				this.changedItem(workspace);
 			},
