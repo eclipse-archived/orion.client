@@ -642,6 +642,19 @@ header .orion-container {
 .contentSwitcher .mobileContent .contentImageText {
   margin-top: 8px;
 }
+.downloadsContainer {
+	display:flex;
+	flex-direction:column;
+	display: -webkit-flex;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-align-items: center;
+	-ms-flex-align: center;
+	align-items: center;
+	flex-direction: column;
+	-ms-flex-direction: column;
+	-webkit-flex-direction: column;
+}
 /* ------------------------------------------------------------------------------- */
 /* ---------------------------- Pre-footer  ----------------------- */
 .pre-footer {
