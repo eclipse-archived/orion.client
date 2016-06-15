@@ -259,12 +259,14 @@ body {
 		iframe.classList.add("tabContent");
 		iframe.src = url;
 		var __dialogModule = electron.remote.dialog;
+		var __clipboardModule = electron.clipboard;
 		
 		iframe.addEventListener("load", function() {
 			
 			iframe.contentWindow.confirm = window.confirm;
 			iframe.contentWindow.alert = window.alert;
 			iframe.contentWindow.__dialogModule = __dialogModule;
+			iframe.contentWindow.__clipboardModule = __clipboardModule;
 			
 			var target = iframe.contentDocument.querySelector('head > title');
 			

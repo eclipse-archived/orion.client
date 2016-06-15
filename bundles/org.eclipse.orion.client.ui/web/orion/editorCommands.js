@@ -533,7 +533,7 @@ define([
 		_createClipboardCommands: function() {
 			
 			//TODO - test to see whether copy/cut/paste is supported instead of IE
-			if (util.isIE) {
+			if (util.isIE || util.isElectron) {
 				var that = this;
 				
 				var copyCommand = new mCommands.Command({

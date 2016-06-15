@@ -6099,13 +6099,16 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				clipboardData = evt.clipboardData;
 			}
 			function convert(wholeText) {
-				var clipboadText = [];
-				convertDelimiter(wholeText, function(t) {clipboadText.push(t);}, null);
-				if (handler) { handler(clipboadText); }
-				return clipboadText;
+				var clipboardText = [];
+				convertDelimiter(wholeText, function(t) {clipboardText.push(t);}, null);
+				if (handler) { handler(clipboardText); }
+				return clipboardText;
 			}
 			if (clipboardData) {
 				return convert(clipboardData.getData(util.isIE ? "Text" : "text/plain")); //$NON-NLS-1$"//$NON-NLS-2$
+			}
+			if (util.isElectron && !evt) {
+				return convert(window.__clipboardModule.readText());
 			}
 			if (util.isFirefox) {
 				this._ignoreFocus = true;
