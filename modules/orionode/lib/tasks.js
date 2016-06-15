@@ -30,19 +30,30 @@ function orionTasksAPI(options) {
 	.get('/id/:id', function(req, res/*, next*/) {
 		var id = req.id;
 		if (!taskList[id]) return writeError(404, res);
-		res.json(taskList[id].toJSON());
+		res.json(taskList[id].toJSON(true));
 	})
 	.delete('/id/:id', function(req, res/*, next*/) {
+		var id = req.id;
+		delete taskList[id];
+		res.status(200).json({});
+	})
+	.get('/temp/:id', function(req, res/*, next*/) {
+		var id = req.id;
+		if (!taskList[id]) return writeError(404, res);
+		res.json(taskList[id].toJSON(false));
+	})
+	.delete('/temp/:id', function(req, res/*, next*/) {
 		var id = req.id;
 		delete taskList[id];
 		res.status(200).json({});
 	});
 }
 
-function Task(res, cancelable, lengthComputable, wait) {
+function Task(res, cancelable, lengthComputable, wait, keep) {
 	this.id = crypto.randomBytes(5).toString('hex') + Date.now();
 	this.cancelable = !!cancelable;
 	this.lengthComputable = !!lengthComputable;
+	this.keep = !!keep; 
 	this.timestamp = this.id;
 	this.total = this.loaded = 0;
 	this.type = "loadstart";
@@ -62,7 +73,7 @@ Task.prototype = {
 		if (!this.isRunning()) return;
 		this.started = true;
 		taskList[this.id] = this;
-		var resp = JSON.stringify(this.toJSON());
+		var resp = JSON.stringify(this.toJSON(true));
 		var res = this.res;
 		res.statusCode = 202;
 		res.setHeader('Content-Type', 'application/json');
@@ -112,7 +123,7 @@ Task.prototype = {
 		if (typeof loaded === "number") this.loaded = loaded;
 		if (typeof total === "number") this.total = total;
 	},
-	toJSON: function() {
+	toJSON: function(isWriteLocation) {
 		var result = {
 			lengthComputable: this.lengthComputable,
 			cancelable: this.cancelable,
@@ -126,10 +137,15 @@ Task.prototype = {
 		}
 		if (this.result) {
 			result.Result = this.result;
-		} else {
+		} 
+		
+		if(this.keep && isWriteLocation){
 			// Do not set location so that tasks is deleted
 			result.Location = "/task/id/" + this.id;
+		}else if(isWriteLocation){
+			result.Location = "/task/temp/" + this.id;
 		}
+		
 		return result;
 	}
 };

@@ -559,7 +559,7 @@ function postClone(req, res) {
 		folder = path.join(folder, req.body.Path.substring(fileRoot.length));
 	}
 	
-	var task = new tasks.Task(res, false, true);
+	var task = new tasks.Task(res, false, true, 0, true);
 	
 	git.Clone.clone(cloneUrl, getUniqueFileName(folder, dirName), {
 		fetchOpts: {

@@ -72,7 +72,7 @@ function getCommit(req, res) {
 }
 
 function getCommitLog(req, res) {
-	var task = new tasks.Task(res);
+	var task = new tasks.Task(res,false,false,0,false);
 	var scope = util.decodeURIComponent(req.params.scope);
 	var fileDir;
 
