@@ -12,6 +12,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var fs = require('fs');
+var path = require('path');
 var util = require('util');
 var api = require('./api');
 var fileUtil = require('./fileUtil');
@@ -25,7 +26,6 @@ module.exports = function(options) {
 	}
 
 	var workspaceId = 'orionode';
-	var workspaceName = 'Orionode Workspace';
 
 	/**
 	 * @returns {String} The URL of the workspace middleware, with context path.
@@ -49,6 +49,7 @@ module.exports = function(options) {
 	router.get('*', function(req, res) {
 		var rest = req.params["0"].substring(1);
 		var workspaceRootUrl = originalWorkspaceRoot(req);
+		var workspaceName = path.basename(req.user.workspaceDir);
 		if (rest === '') {
 			// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_the_list_of_available_workspaces
 			fileUtil.withStats(req.user.workspaceDir, function(err, stats) {
