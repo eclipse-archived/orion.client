@@ -158,6 +158,7 @@ define([
 				progress = this.section.createProgressMonitor();
 				progress.begin(messages["Getting changes"]);
 				thelocation = repository.StatusLocation;
+				// The status maybe an object in this case, if nothing changed but getChildren get called. Or it will be undefined or Deferred when something changed.
 				Deferred.when(repository.status || (repository.status = progressService.progress(gitClient.getGitStatus(thelocation), messages["Getting changes"])), function(resp) {//$NON-NLS-0$
 					var status = that.status = that.items = resp;
 					Deferred.when(that.repository || progressService.progress(gitClient.getGitClone(status.CloneLocation), messages["Getting git repository details"]), function(resp) {
@@ -400,8 +401,9 @@ define([
 	GitChangeListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitChangeListExplorer.prototype, /** @lends orion.git.GitChangeListExplorer.prototype */ {
 		changedItem: function(items) {
-			if(this.model && this.model.repository) {
-				this.model.repository.status = "";
+			// We only allow Deferred status to stay if something changed. The Deferred status maybe received from gitCommitList.js.
+			if(this.model && this.model.repository && !(this.model.repository.status instanceof Deferred)) {
+				 delete this.model.repository.status;
 			}
 			var deferred = new Deferred();
 			var that = this;

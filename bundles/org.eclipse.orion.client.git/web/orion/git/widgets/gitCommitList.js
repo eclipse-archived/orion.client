@@ -467,9 +467,15 @@ define([
 			case "popStash": //$NON-NLS-0$
 			case "applyStash": //$NON-NLS-0$
 			case "checkoutFile": //$NON-NLS-0$
-				Deferred.when(this.model.root.repository.status, function(status) {
-					status.parent = this.model.root;
-					this.myTree.redraw(status);
+			    var that = this;
+			    var theRepo = this.model.root.repository;
+			    // if the status is an object here, we delete it. Because we only expect a Deferred status here if some changes happended in gitChangeList.js
+			    if(!(theRepo.status instanceof Deferred)) {
+				 	delete theRepo.status;
+				}
+				Deferred.when(theRepo.status || (theRepo.status = that.progressService.progress(that.gitClient.getGitStatus(theRepo.StatusLocation), messages["Getting changes"])),  function(theStatus) {
+					theStatus.parent = this.model.root;
+					this.myTree.redraw(theStatus);
 				}.bind(this));
 				break;
 			}
