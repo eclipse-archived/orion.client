@@ -81,6 +81,7 @@ cleanup_nodemodules() {
 
 # update orion.conf and package.json
 update_config_files() {
+	electron_version=$(cat orionode/package.json | jsawk 'return this.build.electronVersion')
 	pkg_version=$(grep -m1 "version" orionode/package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
 	old_version=${pkg_version}
 	pkg_version=`echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
@@ -119,7 +120,7 @@ cleanup_nodemodules
 update_config_files
 
 # copy over nodegit binary to workaround in memory ssh limitation
-cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/mac/nodegit.node ./orionode/node_modules/nodegit/build/Release
+cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/${electron_version}/mac/nodegit.node ./orionode/node_modules/nodegit/build/Release
 
 pushd orionode
 
@@ -142,7 +143,7 @@ cleanup_nodemodules
 update_config_files
 
 # copy over nodegit binary to workaround in memory ssh limitation
-cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/windows/nodegit.node orionode/node_modules/nodegit/build/Release
+cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/${electron_version}/windows/nodegit.node orionode/node_modules/nodegit/build/Release
 
 pushd orionode
 update_remote_releases
@@ -172,7 +173,7 @@ cleanup_nodemodules
 update_config_files
 
 # copy over nodegit binary to workaround in memory ssh limitation
-cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/linux/nodegit.node orionode/node_modules/nodegit/build/Release
+cp ~/downloads/orion/orionode/nodegit/v0.13.0/electron/${electron_version}/linux/nodegit.node orionode/node_modules/nodegit/build/Release
 
 pushd orionode
 
