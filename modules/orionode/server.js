@@ -113,6 +113,7 @@ function startServer(cb) {
 if (process.versions.electron) {
 	var electron = require('electron'),
 		autoUpdater = electron.autoUpdater,
+		dialog = electron.dialog,
 		spawn = require('child_process').spawn,
 		os = require('os');
 
@@ -162,6 +163,7 @@ if (process.versions.electron) {
 	}
 
 	electron.app.on('ready', function() {
+		var updateDownloaded  = false;
 		var allPrefs = prefs.readPrefs();
 		var prefsWorkspace = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.currentWorkspace;
 		if (prefsWorkspace) {
@@ -191,6 +193,21 @@ if (process.versions.electron) {
 				Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 			}
 		}
+	    autoUpdater.on("update-downloaded", function(event, releaseNotes, releaseName, releaseDate, updateURL) {
+	    	updateDownloaded = true;
+	    	console.log("A new update is ready to install", `Version ${releaseName} is downloaded and will be automatically installed on Quit`);
+	        dialog.showMessageBox({
+	          type: 'question',
+	          message: 'Update version ' + releaseName + ' of ' + electron.app.getName() + ' has been downloaded.',
+	          detail: 'Would you like to restart the app and install the update? The update will be applied automatically upon closing.',
+	          buttons: ['Later', 'Update']
+	        }, function (response) {
+	          if (response === 1) {
+	            console.log('user clicked Update');
+				autoUpdater.quitAndInstall();
+	          }
+	        });
+	    });
 		function createWindow(url){
 			var Url = require("url");
 			var windowOptions = allPrefs.windowBounds || {width: 1024, height: 800};
@@ -211,10 +228,22 @@ if (process.versions.electron) {
 					nextWindow.webContents.executeJavaScript('createTab("' + url + '");');
 				}
 			});
-			nextWindow.on("close", function() {
-				allPrefs = prefs.readPrefs();
-				allPrefs.windowBounds = nextWindow.getBounds();
-				prefs.writePrefs(allPrefs);
+			nextWindow.on("close", function(event) {
+				function exit() {
+					allPrefs = prefs.readPrefs();
+					allPrefs.windowBounds = nextWindow.getBounds();
+					prefs.writePrefs(allPrefs);
+					nextWindow.destroy();
+				}
+				event.preventDefault();
+				if (updateDownloaded) {
+					nextWindow.webContents.session.clearCache(function() {
+						console.log("Update downloaded - cache has been cleared");
+						exit();
+					});
+				} else {
+					exit();
+				}
 			});
 			return nextWindow;
 		}
