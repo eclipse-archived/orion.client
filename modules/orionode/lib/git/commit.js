@@ -524,7 +524,6 @@ function revert(req, res, commitToRevert) {
 		if (rc) return;
 		var msg = 'Revert "' + theCommit.summary() + '"\n\nThis reverts commit ' + theCommit.sha() + '\n';
 		return createCommit(theRepo, null, null, theCommit.author().name(), theCommit.author().email(), msg);
-		//TODO: Update Reflog to Revert
 	})
 	.then(function() {
 		return theRepo.stateCleanup();
@@ -532,6 +531,11 @@ function revert(req, res, commitToRevert) {
 	.then(function() {
 		res.status(200).json({
 			"Result": theRC ? "FAILURE" : "OK"
+		});
+	})
+	.then(function() {
+		return git.Reflog.read(theRepo, "HEAD").then(function(reflog) {
+			replaceMostRecentRefLogMessageHeaderfromCommit("revert", reflog, theRepo);
 		});
 	})
 	.catch(function(err) {
@@ -558,7 +562,6 @@ function cherryPick(req, res, commitToCherrypick) {
 		theRC = rc;
 		if (rc) return;
 		return createCommit(theRepo, null, null, theCommit.author().name(), theCommit.author().email(), theCommit.message());
-		//TODO: Update Reflog to Cherry-Pick
 	})
 	.then(function() {
 		return theRepo.stateCleanup();
@@ -572,9 +575,28 @@ function cherryPick(req, res, commitToCherrypick) {
 			"HeadUpdated": !theRC && theHead !== newHead
 		});
 	})
+	.then(function() {
+		return git.Reflog.read(theRepo, "HEAD").then(function(reflog) {
+			replaceMostRecentRefLogMessageHeaderfromCommit("cherrypick", reflog, theRepo);
+		});
+	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
 	});
+}
+
+function replaceMostRecentRefLogMessageHeaderfromCommit (toHeader,reflog, repo ){
+	var mostRecentReflog = reflog.entryByIndex(0);
+	if(mostRecentReflog){
+		var targetMessage = mostRecentReflog.message();
+		if(/^commit(:\s)/.test(targetMessage)){
+			var targetOID = mostRecentReflog.idOld();
+			targetMessage = targetMessage.replace(/^commit(:\s)/,  toHeader+"$1");
+			reflog.drop(0, 1);
+			reflog.append(targetOID, clone.getSignature(repo),targetMessage);
+			reflog.write();			
+		}
+	}
 }
 
 function rebase(req, res, commitToRebase, rebaseOperation) {
