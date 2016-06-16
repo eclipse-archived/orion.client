@@ -211,7 +211,7 @@ pushd win/orionode/dist/win
 # upload windows artifacts to new release
 upload "RELEASES"
 upload "${name}-${pkg_version}-full.nupkg"
-if [ ! -e "${name}-${pkg_version}-delta.nupkg" ]; then
+if [ -e "${name}-${pkg_version}-delta.nupkg" ]; then
 	upload "${name}-${pkg_version}-delta.nupkg"
 fi
 upload "${name}-${pkg_version}-setup.exe"
