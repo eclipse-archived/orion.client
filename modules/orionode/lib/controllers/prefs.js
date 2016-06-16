@@ -269,8 +269,8 @@ function getElectronPrefsFileName(){
 }
 
 function readPrefs(){
-	var content = fs.readFileSync(getElectronPrefsFileName(),'utf8');
 	try {
+		var content = fs.readFileSync(getElectronPrefsFileName(),'utf8');
 		return JSON.parse(content);
 	} catch (e) {}
 	return {};
