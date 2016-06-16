@@ -501,7 +501,7 @@ function getRemoteCallbacks(creds, task) {
 			delete creds.GitSshPassword;
 			return git.Cred.userpassPlaintextNew(
 				username,
-				password
+				password || ""
 			);
 		}
 	};
