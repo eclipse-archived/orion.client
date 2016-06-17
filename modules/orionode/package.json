@@ -73,7 +73,7 @@
   },
   "build": {
     "asar": false,
-    "electronVersion": "0.36.7",
+    "electronVersion": "1.2.3",
     "compression": "maximum",
     "osx": {
       "title": "Orion",
@@ -94,7 +94,7 @@
     },
     "win": {
       "loadingGif": "build/orionLogo.gif",
-      "iconUrl": "http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/plain/modules/orionode/build/icons/orion.ico",
+      "iconUrl": "http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/plain/modules/orionode/build/orion.ico",
       "remoteReleases": ""
     },
     "linux": {
