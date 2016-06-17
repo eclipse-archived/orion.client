@@ -193,6 +193,9 @@ if (process.versions.electron) {
 				Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 			}
 		}
+		autoUpdater.on("error", function(error) {
+			console.log(error);
+		})
 	    autoUpdater.on("update-downloaded", function(event, releaseNotes, releaseName, releaseDate, updateURL) {
 	    	updateDownloaded = true;
 	    	console.log("A new update is ready to install", `Version ${releaseName} is downloaded and will be automatically installed on Quit`);
