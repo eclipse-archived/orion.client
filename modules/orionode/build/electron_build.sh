@@ -100,7 +100,7 @@ update_config_files() {
 # set Windows remoteReleases URL to latest successful build # for delta files
 update_remote_releases() {
 	latest_build=$(curl -s ${UPDATE_SERVER}"api/version/latest" | jsawk 'return this.tag')
-	if [ -z "$latest_build" ]; then
+	if [ ! -z "$latest_build" ]; then
 		sed -i .bak "s/.*remoteReleases.*/\"remoteReleases\": \"${download_url}\/v${latest_build}\"/" package.json
 	fi
 }
