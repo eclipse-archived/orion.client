@@ -72,6 +72,7 @@
     "watch-server": "nodemon --debug server.js"
   },
   "build": {
+    "app-bundle-id": "org.eclipse.orion",
     "asar": false,
     "electronVersion": "1.2.3",
     "compression": "maximum",
