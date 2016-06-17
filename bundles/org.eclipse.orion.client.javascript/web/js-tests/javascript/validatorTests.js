@@ -8559,6 +8559,19 @@ define([
 								}
 							);
 						});
+						it("Should not flag array access using a binary expression", function(callback) {
+							var topic = "var funcs = [], i = 5; return funcs[i - 1]();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
 					});
 					//NO-UNDEF-INIT -------------------------------------------------
 					describe('no-unreachable', function() {

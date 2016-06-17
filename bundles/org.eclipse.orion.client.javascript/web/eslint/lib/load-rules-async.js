@@ -1366,14 +1366,17 @@ define([
         },
         /** @callback */
         'no-undef-expression': function(context){
-        	return {
-        		/* @callback */
-        		'MemberExpression': function(node){
-                	if (node.property && node.object && node.object.type !== 'ThisExpression'){
-                		if (node.parent && node.parent.type === 'CallExpression' && node.parent.callee && node.parent.callee === node){
-                			var tern = context.getTern();
-                			var propName = node.property.name ? node.property.name : node.property.value;
+			return {
+				/* @callback */
+				'MemberExpression': function(node){
+					if (node.property && node.object && node.object.type !== 'ThisExpression'){
+						if (node.parent && node.parent.type === 'CallExpression' && node.parent.callee && node.parent.callee === node){
+							var propName = node.property.name ? node.property.name : node.property.value;
+							if (!propName) {
+								return;
+							}
 							var query = {start: node.property.start, end: node.property.end};
+							var tern = context.getTern();
 							var expr = tern.findQueryExpr(tern.file, query);
 							if (!expr) {
 								// no expression found. No need to look for the type
