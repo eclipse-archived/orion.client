@@ -10,8 +10,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(["orion/Deferred", "orion/commands", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/PageLinks", "i18n!orion/edit/nls/messages", "orion/URL-shim"],
-	function(Deferred, mCommands, mContentTypes, URITemplate, i18nUtil, PageLinks, messages){
+define(["orion/Deferred", "orion/commands", 	'orion/PageUtil', "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/PageLinks", "i18n!orion/edit/nls/messages", "orion/URL-shim"],
+	function(Deferred, mCommands, PageUtil, mContentTypes, URITemplate, i18nUtil, PageLinks, messages){
 
 	/**
 	 * Utility methods
@@ -436,7 +436,21 @@ define(["orion/Deferred", "orion/commands", "orion/contentTypes", "orion/URITemp
 				if (validator.generatesURI.bind(validator)()) {
 					commandOptions.hrefCallback = function(data){
 						var item = Array.isArray(data.items) ? data.items[0] : data.items;
-						return validator.getURI.bind(validator)(item);
+						var href = validator.getURI.bind(validator)(item);
+						if (data.command && data.command.isEditor) {
+							if(item.Location) {
+								var resourceParam = PageUtil.matchResourceParameters();
+								if(resourceParam.resource !== item.Location) {
+									data.domNode.target = "_blank";
+								} else {
+									var cmdHrefParam = PageUtil.matchResourceParameters(href);
+									if(cmdHrefParam && cmdHrefParam.editor === resourceParam.editor) {
+										data.domNode.target = "_blank";
+									}
+								}
+							}
+						}
+						return href;
 					};
 				} else {
 					var inf = info;

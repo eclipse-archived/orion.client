@@ -488,14 +488,14 @@ define([
 		var dropdown = parent.dropdown;
 		if (typeof(command.hrefCallback) === 'function') {
 			li = Dropdown.createMenuItem(command.name, "a"); //$NON-NLS-0$
-			element = li.firstElementChild;
+			commandInvocation.domNode = element = li.firstElementChild;
 			var href = command.hrefCallback.call(commandInvocation.handler, commandInvocation);
 			if (href.then){
 				href.then(function(l){
 					element.href = l;
 				});
 			} else if (href) {
-				element.href = href; 
+				element.href = href;
 			} else {  // no href
 				element.href = "#"; //$NON-NLS-0$
 			}
