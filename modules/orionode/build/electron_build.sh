@@ -60,13 +60,13 @@ export CSC_NAME=${CSC_NAME} # required for OSX autoUpdater-functional builds
 # $1: file name/path
 upload () {
 	echo $1
-	github-release upload --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name $1 --file $1
+	github-release upload --user "${user}" --repo "${repo}" --tag v"${pkg_version}" --name $1 --file $1
 }
 
 # create a new release
 # $1: String for release description
 new_release() {
-	github-release release --user "${user}" --repo "${repo}" --tag "${vpkg_version}" --name "${vpkg_version}" --description "${description}"
+	github-release release --user "${user}" --repo "${repo}" --tag v"${pkg_version}" --name v"${pkg_version}" --description "${description}"
 }
 
 # node module clean up
@@ -79,24 +79,27 @@ cleanup_nodemodules() {
 	rm orionode/node_modules/nodegit/build/Release/nodegit.node
 }
 
+if [ -z "$UPDATE_SERVER" ]; then
+    UPDATE_SERVER="http://orion-update.mybluemix.net/"
+fi
+update_url=$(echo ${UPDATE_SERVER}"update" | sed -e 's/[\/&.-]/\\&/g') # for autoUpdater
+download_url=$(echo ${UPDATE_SERVER}"download" | sed -e 's/[\/&.-]/\\&/g') # for remoteReleases
+
 # update orion.conf and package.json
 update_config_files() {
-	electron_version=$(cat orionode/package.json | jsawk 'return this.build.electronVersion')
-	nodegit_version=$(cat orionode/package.json | jsawk 'return this.dependencies.nodegit')
-	pkg_version=$(grep -m1 "version" orionode/package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
+	electron_version=$(jsawk -i orionode/package.json 'return this.build.electronVersion')
+	nodegit_version=$(jsawk -i orionode/package.json 'return this.dependencies.nodegit')
+	pkg_version=$(jsawk -i orionode/package.json 'return this.version')
+	name=$(jsawk -i orionode/package.json 'return this.name')
 	old_version=${pkg_version}
 	pkg_version=`echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
-	update_url="http\:\/\/orion\-update\.mybluemix\.net\/update" # for autoUpdater
-	download_url="http\:\/\/orion\-update\.mybluemix\.net\/download" # for remoteReleases
-	vpkg_version="v${pkg_version}"
-	name=$(grep -m1 "name" orionode/package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')
 	sed -i .bak 's/\"version\": \"'"${old_version}"'\"/\"version\"\:\ \"'"${pkg_version}"'\"/' orionode/package.json
 	sed -i .bak 's/orion\.autoUpdater\.url\=/orion\.autoUpdater\.url\='"${update_url}"'/' orionode/orion.conf
 }
 
 # set Windows remoteReleases URL to latest successful build # for delta files
 update_remote_releases() {
-	latest_build=$(curl -s http://orion-update.mybluemix.net/api/version/latest | jsawk 'return this.tag')
+	latest_build=$(curl -s ${UPDATE_SERVER}"api/version/latest" | jsawk 'return this.tag')
 	sed -i .bak "s/.*remoteReleases.*/\"remoteReleases\": \"${download_url}\/v${latest_build}\"/" package.json
 }
 
