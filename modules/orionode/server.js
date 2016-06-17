@@ -119,6 +119,14 @@ if (process.versions.electron) {
 
 	configParams.isElectron = true;
 
+	// Set necessary URL for autoUpdater to grab latest release
+	var feedURL = configParams["orion.autoUpdater.url"];
+	if (feedURL) {
+		var platform = os.platform() + '_' + os.arch(),
+		version = electron.app.getVersion();
+		autoUpdater.setFeedURL(feedURL + '/' + platform + '/' + version);
+	}
+
 	var handleSquirrelEvent = function() {
 		if (process.argv.length === 1 || os.platform() !== 'win32') { // No squirrel events to handle
 			return false;
@@ -245,6 +253,9 @@ if (process.versions.electron) {
 					exit();
 				}
 			});
+			nextWindow.webContents.once("did-frame-finish-load", function () {
+				autoUpdater.checkForUpdates();
+		    });
 			return nextWindow;
 		}
 		startServer(function() {
@@ -257,15 +268,6 @@ if (process.versions.electron) {
 	electron.app.on('window-all-closed', function() {
 		electron.app.quit();	
 	});
-	
-	// Check for updates every time we run the electron app
-	var feedURL = configParams["orion.autoUpdater.url"];
-	if (feedURL) {
-		var platform = os.platform() + '_' + os.arch(),
-		version = electron.app.getVersion();
-		autoUpdater.setFeedURL(feedURL + '/' + platform + '/' + version);
-		autoUpdater.checkForUpdates();
-	}
 	
 } else {
 	startServer();
