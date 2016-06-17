@@ -13,11 +13,12 @@
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/objects',
+	'orion/util',
 	'orion/webui/littlelib',
 	'orion/i18nUtil',
 	'orion/commands',
 	'orion/URL-shim'
-], function(messages, objects, lib, i18nUtil, Commands) {
+], function(messages, objects, util, lib, i18nUtil, Commands) {
 
 	/**
 	 * @name orion.widgets.Filesystem.FilesystemSwitcher
@@ -122,6 +123,9 @@ define([
 			}
 		},
 		_fileServiceHostname: function(location) {
+			if (this.root && this.root.Name && util.isElectron) {
+				return this.root.Name;
+			}
 			var rootURL = this.fileClient.fileServiceRootURL(location);
 			if (rootURL.indexOf("filesystem:") === 0) { //$NON-NLS-0$
 				rootURL = rootURL.substr("filesystem:".length); //$NON-NLS-0$
@@ -148,6 +152,7 @@ define([
 			return fragment;
 		},
 		refresh: function(location) {
+			this.root = location;
 			var target = location;
 			if (location.ChildrenLocation) {
 				target = location.ChildrenLocation;

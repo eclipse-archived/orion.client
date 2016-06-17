@@ -20,10 +20,11 @@ define([
 	'orion/URITemplate',
 	'orion/webui/littlelib',
 	'orion/objects',
+	'orion/util',
 	'orion/Deferred',
 	'orion/projects/projectView',
 	'orion/section'
-], function(mGlobalCommands, mExplorerTable, mNavigatorRenderer, FileCommands, mMarkdownView, mProjectEditor, PageUtil, URITemplate, lib, objects, Deferred, mProjectView, mSection) {
+], function(mGlobalCommands, mExplorerTable, mNavigatorRenderer, FileCommands, mMarkdownView, mProjectEditor, PageUtil, URITemplate, lib, objects, util, Deferred, mProjectView, mSection) {
 	
 	var ID_COUNT = 0;
 	
@@ -60,7 +61,7 @@ define([
 				td = document.createElement("th"); //$NON-NLS-0$
 				td.colSpan = 1;
 				var root = this.explorer.treeRoot;
-				td.appendChild(document.createTextNode(root.Parents ? root.Name : this.explorer.fileClient.fileServiceName(root.Location)));
+				td.appendChild(document.createTextNode(root.Parents || util.isElectron ? root.Name : this.explorer.fileClient.fileServiceName(root.Location)));
 				return td;
 			}
 			return null;

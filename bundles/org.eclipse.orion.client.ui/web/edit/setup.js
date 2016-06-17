@@ -913,7 +913,7 @@ objects.mixin(EditorSetup.prototype, {
 		if (!target) { //evt.input === null || evt.input === undefined) {
 			targetName = this.lastRoot ? this.lastRoot.Name : "";
 			target = this.lastRoot;
-		} else if (target && !target.Parents) {//If the target is file system root then we use the file service name
+		} else if (!util.isElectron && target && !target.Parents) {//If the target is file system root then we use the file service name
 			targetName = this.fileClient.fileServiceName(target.Location);
 		} else {
 			targetName = target.Name;
