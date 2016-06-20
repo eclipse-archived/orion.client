@@ -438,17 +438,21 @@ define(["orion/Deferred", "orion/commands", 	'orion/PageUtil', "orion/contentTyp
 						var item = Array.isArray(data.items) ? data.items[0] : data.items;
 						var href = validator.getURI.bind(validator)(item);
 						if (data.command && data.command.isEditor) {
-							if(item.Location) {
-								var resourceParam = PageUtil.matchResourceParameters();
-								if(resourceParam.resource !== item.Location) {
-									data.domNode.target = "_blank";
-								} else {
+							data.domNode.addEventListener("click", function(evt) {
+								if(item.Location) {
+									var resourceParam = PageUtil.matchResourceParameters();
+									if(resourceParam.resource !== item.Location) {
+										data.domNode.target = "_blank";
+										return;
+									}
 									var cmdHrefParam = PageUtil.matchResourceParameters(href);
 									if(cmdHrefParam && cmdHrefParam.editor === resourceParam.editor) {
 										data.domNode.target = "_blank";
+										return;
 									}
 								}
-							}
+								data.domNode.target = "";
+							});
 						}
 						return href;
 					};
