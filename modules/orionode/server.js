@@ -207,28 +207,28 @@ if (process.versions.electron) {
 			console.log(error);
 		});
 		function scheduleUpdateChecks () {
-		    var checkInterval = 1000 * 60 * 30; // check for updates every 30 minutes
-		    var checkforUpdates = function() {
-		        autoUpdater.checkForUpdates();
-		    }.bind(this);
-		    setInterval(checkforUpdates, checkInterval);
+			var checkInterval = 1000 * 60 * 30; // check for updates every 30 minutes
+			var checkforUpdates = function() {
+				autoUpdater.checkForUpdates();
+			}.bind(this);
+			setInterval(checkforUpdates, checkInterval);
 		}
 		autoUpdater.on("checking-for-update", function(){
 			console.log("checking for update");
 		});
-	    autoUpdater.on("update-downloaded", /* @callback */ function(event, releaseNotes, releaseName, releaseDate, updateURL) {
-	    	updateDownloaded = true;
-	        dialog.showMessageBox({
-	          type: 'question',
-	          message: 'Update version ' + releaseName + ' of ' + electron.app.getName() + ' has been downloaded.',
-	          detail: 'Would you like to restart the app and install the update? The update will be applied automatically upon closing.',
-	          buttons: ['Later', 'Update']
-	        }, function (response) {
-	          if (response === 1) {
-				autoUpdater.quitAndInstall();
-	          }
-	        });
-	    });
+		autoUpdater.on("update-downloaded", /* @callback */ function(event, releaseNotes, releaseName, releaseDate, updateURL) {
+			updateDownloaded = true;
+			dialog.showMessageBox({
+				type: 'question',
+				message: 'Update version ' + releaseName + ' of ' + electron.app.getName() + ' has been downloaded.',
+				detail: 'Would you like to restart the app and install the update? The update will be applied automatically upon closing.',
+				buttons: ['Later', 'Update']
+			}, function (response) {
+				if (response === 1) {
+					autoUpdater.quitAndInstall();
+				}
+			});
+		});
 		function createWindow(url){
 			var Url = require("url");
 			var windowOptions = allPrefs.windowBounds || {width: 1024, height: 800};
@@ -268,7 +268,7 @@ if (process.versions.electron) {
 			nextWindow.webContents.once("did-frame-finish-load", function () {
 				autoUpdater.checkForUpdates();
 				scheduleUpdateChecks();
-		    });
+			});
 			return nextWindow;
 		}
 		startServer(function() {
