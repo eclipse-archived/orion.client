@@ -14,6 +14,7 @@ var auth = require('./lib/middleware/auth'),
 	http = require('http'),
 	https = require('https'),
 	fs = require('fs'),
+	os = require('os'),
 	compression = require('compression'),
 	path = require('path'),
 	socketio = require('socket.io'),
@@ -116,8 +117,7 @@ if (process.versions.electron) {
 	var electron = require('electron'),
 		autoUpdater = electron.autoUpdater,
 		dialog = electron.dialog,
-		spawn = require('child_process').spawn,
-		os = require('os');
+		spawn = require('child_process').spawn;
 
 	configParams.isElectron = true;
 

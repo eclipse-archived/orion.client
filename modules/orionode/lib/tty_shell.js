@@ -16,7 +16,7 @@ var pty;
 try {
 	pty = require("pty.js");
 } catch (e) {
-	console.error(e);
+	console.error(e.message);
 	console.error("pty.js is not installed. Some features will be unavailable.");
 }
 
