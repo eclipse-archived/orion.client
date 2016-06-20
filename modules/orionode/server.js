@@ -204,6 +204,17 @@ if (process.versions.electron) {
 		autoUpdater.on("error", function(error) {
 			console.log(error);
 		})
+		function scheduleUpdateChecks () {
+		    const checkInterval = 1000 * 60 * 30; // check for updates every 30 minutes
+		    var checkforUpdates = (function() {
+		        autoUpdater.checkForUpdates() 
+		    }).bind(this);
+		    console.log('The next update check will be in ', checkInterval, 'ms');
+		    setInterval(checkforUpdates, checkInterval);
+		}
+		autoUpdater.on("checking-for-update", function(){
+			console.log("checking for update");
+		});
 	    autoUpdater.on("update-downloaded", function(event, releaseNotes, releaseName, releaseDate, updateURL) {
 	    	updateDownloaded = true;
 	    	console.log("A new update is ready to install", `Version ${releaseName} is downloaded and will be automatically installed on Quit`);
@@ -258,6 +269,7 @@ if (process.versions.electron) {
 			});
 			nextWindow.webContents.once("did-frame-finish-load", function () {
 				autoUpdater.checkForUpdates();
+				scheduleUpdateChecks();
 		    });
 			return nextWindow;
 		}
