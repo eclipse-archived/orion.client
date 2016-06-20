@@ -205,21 +205,19 @@ if (process.versions.electron) {
 		}
 		autoUpdater.on("error", function(error) {
 			console.log(error);
-		})
+		});
 		function scheduleUpdateChecks () {
-		    const checkInterval = 1000 * 60 * 30; // check for updates every 30 minutes
-		    var checkforUpdates = (function() {
-		        autoUpdater.checkForUpdates() 
-		    }).bind(this);
-		    console.log('The next update check will be in ', checkInterval, 'ms');
+		    var checkInterval = 1000 * 60 * 30; // check for updates every 30 minutes
+		    var checkforUpdates = function() {
+		        autoUpdater.checkForUpdates();
+		    }.bind(this);
 		    setInterval(checkforUpdates, checkInterval);
 		}
 		autoUpdater.on("checking-for-update", function(){
 			console.log("checking for update");
 		});
-	    autoUpdater.on("update-downloaded", function(event, releaseNotes, releaseName, releaseDate, updateURL) {
+	    autoUpdater.on("update-downloaded", /* @callback */ function(event, releaseNotes, releaseName, releaseDate, updateURL) {
 	    	updateDownloaded = true;
-	    	console.log("A new update is ready to install", `Version ${releaseName} is downloaded and will be automatically installed on Quit`);
 	        dialog.showMessageBox({
 	          type: 'question',
 	          message: 'Update version ' + releaseName + ' of ' + electron.app.getName() + ' has been downloaded.',
@@ -227,7 +225,6 @@ if (process.versions.electron) {
 	          buttons: ['Later', 'Update']
 	        }, function (response) {
 	          if (response === 1) {
-	            console.log('user clicked Update');
 				autoUpdater.quitAndInstall();
 	          }
 	        });
@@ -262,7 +259,6 @@ if (process.versions.electron) {
 				event.preventDefault();
 				if (updateDownloaded) {
 					nextWindow.webContents.session.clearCache(function() {
-						console.log("Update downloaded - cache has been cleared");
 						exit();
 					});
 				} else {
