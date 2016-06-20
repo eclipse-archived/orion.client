@@ -44,6 +44,8 @@ function startServer(cb) {
 	} else if (workspaceConfigParam) {
 		 // workspace param in orion.conf is relative to the server install dir.
 		workspaceDir = path.resolve(__dirname, workspaceConfigParam);
+	} else if (configParams.isElectron) {
+		workspaceDir =  path.join(os.homedir(), '.orion', '.workspace');
 	} else {
 		workspaceDir = path.join(__dirname, '.workspace');
 	}
