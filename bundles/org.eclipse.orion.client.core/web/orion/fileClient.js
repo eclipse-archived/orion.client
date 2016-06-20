@@ -386,6 +386,18 @@ define([
 			return _doServiceCall(this._getService(url), "createProject", arguments); //$NON-NLS-1$
 			//return this._createArtifact(url, "createProject", arguments);
 		},
+		
+		/**
+		 * Adds a file to a workspace.(Works only in electron app)
+		 * @param {String} url The workspace location
+		 * @param {String} filename the human-readable name of the project
+		 * @public
+		 * @return {Deferred} A deferred that will create a new file in the workspace
+		 */
+		createFileAtRoot :  function(url, projectName) {
+			return _doServiceCall(this._getService(url), "createFile", arguments); //$NON-NLS-1$
+		},
+		
 		/**
 		 * Creates a folder.
 		 * @param {String} parentLocation The location of the parent folder

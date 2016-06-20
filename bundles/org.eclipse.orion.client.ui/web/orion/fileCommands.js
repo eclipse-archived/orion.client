@@ -15,8 +15,8 @@
 define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/fileDownloader',
 	'orion/commandRegistry', 'orion/contentTypes', 'orion/compare/compareUtils', 
 	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog',
-	'orion/EventTarget', 'orion/form', 'orion/xsrfUtils', 'orion/bidiUtils'],
-	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form, xsrfUtils, bidiUtils){
+	'orion/EventTarget', 'orion/form', 'orion/xsrfUtils', 'orion/bidiUtils','orion/util'],
+	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form, xsrfUtils, bidiUtils, util){
 
 	/**
 	 * Utility methods
@@ -282,6 +282,37 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			}
 		}
 		return item;
+	}
+
+	function createNewFileAtRootForElectron(explorer, fileClient, progress, name){
+		progressService = progress;
+		if (name) {
+			var loadedWorkspace;
+			if (mFileUtils.isAtRoot(explorer.treeRoot.ChildrenLocation)) {
+				loadedWorkspace = explorer.treeRoot;
+			} else {
+				loadedWorkspace = progressService.progress(fileClient.loadWorkspace(explorer.treeRoot.Location), "Loading workspace"); //$NON-NLS-0$
+			}
+			Deferred.when(loadedWorkspace, function() {
+				var deferred = fileClient.createFileAtRoot('/file', name);
+				deferred.then(function(file) {
+					dispatchModelEventOn({type: "create", parent: loadedWorkspace, newValue: file, select: true }); //$NON-NLS-0$
+				}, 
+				function(error) {
+					if (error.status === 400 || error.status === 412) {
+						var resp = error.responseText;
+						if (typeof resp === "string") {
+							try {
+								resp = JSON.parse(resp);
+								resp.Message = i18nUtil.formatMessage(messages["FailedToCreateFile"], name);
+								error = resp;
+							} catch(error) {}
+						}
+					}
+					errorHandler(error);
+				});
+			}, errorHandler);
+		}
 	}
 
 	function createProject(explorer, fileClient, progress, name, populateFunction, progressMessage) {
@@ -954,10 +985,22 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			imageClass: "core-sprite-new_file", //$NON-NLS-0$
 			id: "eclipse.newFile", //$NON-NLS-0$
 			callback: function(data) {
-				var item = getParentItem(data.items);
-				createNewArtifact(messages["New File"], item, false);
+				var item =getParentItem(data.items);
+				if(util.isElectron && mFileUtils.isAtRoot(item.Location)){
+					item = forceSingleItem(data.items);
+					var defaultName = messages['New File']; //$NON-NLS-0$
+					createUniqueNameArtifact(item, defaultName, function(uniqueName){
+						getNewItemName(explorer, item, explorer.getRow(item), uniqueName, function(name) {
+							createNewFileAtRootForElectron(explorer, fileClient, progressService, name);
+						});
+					});
+				}else{
+					createNewArtifact(messages["New File"], item, false);
+				}
 			},
-			visibleWhen: checkFolderSelection
+			visibleWhen: function(item) {
+				return checkFolderSelection(item) || util.isElectron;
+			}
 		});
 		commandService.addCommand(newFileCommand);
 		
