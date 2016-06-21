@@ -38,6 +38,7 @@
     "rimraf": "~2.2.6",
     "socket.io": "~1.0.4",
     "term.js": "0.0.3",
+    "tiny-worker": "^1.1.4",
     "unzip2": "^0.2.5"
   },
   "experimentalDependencies": {
