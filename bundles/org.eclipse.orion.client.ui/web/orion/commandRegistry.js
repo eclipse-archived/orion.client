@@ -317,6 +317,101 @@ define([
 		},
 		
 		/**
+		 * Open a tolltip parameter collector to collect user input.
+		 *
+		 * @param {DOMElement} node the dom node that is displaying the command
+		 * @param {String} message the message to show when confirming the command
+		 * @param {String} yesString the label to show on a yes/true choice
+		 * @param {String} noString the label to show on a no/false choice
+		 * @param {String} default message in the input box.
+		 * @param {Boolean} modal indicates whether the confirmation prompt should be modal.
+		 * @param {Function} onConfirm a function that will be called when the user confirms the command.  The function
+		 * will be called with boolean indicating whether the command was confirmed.
+		 */
+		prompt: function(node, message, yesString, noString, defaultInput, modal, onConfirm) {
+			var result = "";
+			if (this._parameterCollector && !modal) {
+				var self = this;
+				var okCallback = function() {onConfirm(result);};
+				var closeFunction = function(){self._parameterCollector.close();}
+				var fillFunction = function(parent, buttonParent) {
+					var label = document.createElement("span"); //$NON-NLS-0$
+					label.classList.add("parameterPrompt"); //$NON-NLS-0$
+					label.textContent = message;
+					parent.appendChild(label);
+					var input = document.createElement("input");
+					input.setAttribute("value", defaultInput);
+					input.style.marginLeft = "10px";
+					input.style.marginRight = "10px";
+					input.style.marginTop = "5px";
+					parent.appendChild(input);
+					var yesButton = document.createElement("button"); //$NON-NLS-0$
+					yesButton.addEventListener("click", function(event) { //$NON-NLS-0$
+						result = input.value;
+						okCallback();
+						closeFunction();
+					}, false);
+					buttonParent.appendChild(yesButton);
+					yesButton.appendChild(document.createTextNode(yesString)); //$NON-NLS-0$
+					yesButton.className = "dismissButton"; //$NON-NLS-0$
+					var button = document.createElement("button"); //$NON-NLS-0$
+					button.addEventListener("click", function(event) { //$NON-NLS-0$
+						result = "";
+						closeFunction();
+					}, false);
+					buttonParent.appendChild(button);
+					button.appendChild(document.createTextNode(noString)); //$NON-NLS-0$
+					button.className = "dismissButton"; //$NON-NLS-0$
+					return yesButton;
+				};
+				this._parameterCollector.close();
+				if(!node){
+					this._parameterCollector.open(document.body, fillFunction, function(){});
+				}else{
+					var tooltip = new mTooltip.Tooltip({
+						node: node,
+						afterHiding: function() {
+							this.destroy();
+						},
+						trigger: "click", //$NON-NLS-0$
+						position: ["right","above", "below", "left"]
+					});
+					var parameterArea = tooltip.contentContainer();
+					parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
+					var originalFocusNode = window.document.activeElement;
+					closeFunction = function() {
+						if (originalFocusNode) {
+							originalFocusNode.focus();
+						}
+						tooltip.destroy();
+					};
+					var messageArea = document.createElement("div"); //$NON-NLS-0$
+					messageArea.classList.add("parameterMessage"); //$NON-NLS-0$
+					parameterArea.appendChild(messageArea);
+					
+					var buttonArea = document.createElement("div"); //$NON-NLS-0$
+					parameterArea.appendChild(buttonArea);
+						buttonArea.classList.add("layoutRight"); //$NON-NLS-0$
+						buttonArea.classList.add("parametersDismiss"); //$NON-NLS-0$
+					
+					var focusNode = fillFunction(messageArea, buttonArea);
+					tooltip.show();
+					if (focusNode) {
+						window.setTimeout(function() {
+							focusNode.focus();
+							if (focusNode.select) {
+								focusNode.select();
+							}
+						}, 0);	
+					}
+				}
+				return;
+			} 
+			result = window.confirm(message);
+			onConfirm(result);
+		},
+		
+		/**
 		 * Close any active parameter collector.  This method should be used to deactivate a
 		 * parameter collector that was opened with <code>openParameterCollector</code>.
 		 * Commands that describe their required parameters do not need to use this method 
