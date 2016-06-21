@@ -6834,6 +6834,10 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			if (pixelY) { viewDiv.scrollTop += pixelY; }
 		},
 		_setClipboardText: function (text, evt) {
+			if (util.isElectron && !evt) {
+				window.__clipboardModule.writeText(text);
+				return true;
+			}
 			var clipboardText;
 			// IE
 			var win = this._getWindow();
