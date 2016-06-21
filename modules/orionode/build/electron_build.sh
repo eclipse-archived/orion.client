@@ -69,6 +69,12 @@ new_release() {
 	github-release release --user "${user}" --repo "${repo}" --tag v"${pkg_version}" --name v"${pkg_version}" --description "${description}"
 }
 
+# remove multi-user dependencies from package.json
+remove_multi_dependencies() {
+	echo "Removing multi-user dependencies from package.json"
+	sed -i.bak -E '/(passport*|mongoose|mongodb|nodemailer|connect-mongo)/d' package.json
+}
+
 # node module clean up
 cleanup_nodemodules() {
 	echo "Cleaning up node modules" 
@@ -76,6 +82,7 @@ cleanup_nodemodules() {
 	rm -rf orionode/node_modules/mongoose
 	rm -rf orionode/node_modules/mongodb
 	rm -rf orionode/node_modules/nodemailer
+	rm -rf orionode/node_modules/connect-mongo
 	rm orionode/node_modules/nodegit/build/Release/nodegit.node
 }
 
@@ -131,6 +138,7 @@ cp ~/downloads/orion/orionode/nodegit/v${nodegit_version}/electron/v${electron_v
 pushd orionode
 
 # generates osx artifacts: dmg, -mac.zip
+remove_multi_dependencies
 npm run dist:osx
 echo "osx artifacts generated"
 
@@ -155,6 +163,7 @@ pushd orionode
 update_remote_releases
 
 # generates windows artifacts: -full.nupkg, -delta.nupkg, .exe, RELEASES
+remove_multi_dependencies
 npm run dist:win
 echo "windows artifacts generated"
 
@@ -184,6 +193,7 @@ cp ~/downloads/orion/orionode/nodegit/v${nodegit_version}/electron/v${electron_v
 pushd orionode
 
 # generates linux artifacts: .rpm, .tar.gz, .deb
+remove_multi_dependencies
 npm run dist:linux
 echo "linux artifacts generated"
 
