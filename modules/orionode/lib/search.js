@@ -10,6 +10,7 @@
  *******************************************************************************/
 /*eslint-env node*/
 var api = require('./api');
+var path = require('path');
 var bodyParser = require('body-parser');
 var express = require('express');
 
@@ -19,7 +20,7 @@ module.exports = function(options) {
 		var id = 0;
 		var requests = {};
 		var Worker = require("tiny-worker");
-		var searchWorker = new Worker("./lib/searchWorker.js");
+		var searchWorker = new Worker(path.join(__dirname, "searchWorker.js"));
 		searchWorker.onmessage = function (event) {
 			var promise = requests[event.data.id];
 			delete requests[event.data.id];
