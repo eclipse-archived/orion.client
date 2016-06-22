@@ -15,8 +15,8 @@
 define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/fileDownloader',
 	'orion/commandRegistry', 'orion/contentTypes', 'orion/compare/compareUtils', 
 	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog',
-	'orion/EventTarget', 'orion/form', 'orion/xsrfUtils', 'orion/bidiUtils'],
-	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form, xsrfUtils, bidiUtils){
+	'orion/EventTarget', 'orion/form', 'orion/xsrfUtils', 'orion/bidiUtils', 'orion/util'],
+	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form, xsrfUtils, bidiUtils, util){
 
 	/**
 	 * Utility methods
@@ -908,6 +908,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			var createFunction = function(name) {
 				if (name) {
 					var location = parentItem.Location;
+					if(location === "/workspace/orionode" && util.isElectron){
+						// Special case for electron only to create files at workspace level.
+						location = "/file";
+					}
 					var functionName = isDirectory ? "createFolder" : "createFile";
 					var deferred = fileClient[functionName](location, name, {select: true});
 					progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Creating ${0}"], name)).then(
