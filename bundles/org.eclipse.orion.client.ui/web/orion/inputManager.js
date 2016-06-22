@@ -63,10 +63,16 @@ define([
 
 	function _makeError(error) {
 		var newError = {
-			Severity: "Error", //$NON-NLS-0$
-			Message: messages.noResponse
+			Severity: "Error" //$NON-NLS-0$
 		};
-		if(error.name === "Cancel") {
+		if (error.args && error.args.timeout) {
+			/* write timeout in s, not ms */
+			newError.Message = i18nUtil.formatMessage(messages.noResponseTimeout, error.args.timeout / 1000);
+		} else {
+			newError.Message = messages.noResponse;
+		}
+
+		if (error.name === "Cancel") {
 			return {Severity: "Warning", Message: error.name, Cancel: true};
 		} else if (error.status === 0) {
 			newError.Cancel = true;
@@ -410,7 +416,7 @@ define([
 			var def = this.fileClient.write(resource, data, args);
 			var progress = this.progressService;
 			var statusService = null;
-			if(this.serviceRegistry){
+			if (this.serviceRegistry) {
 				statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 			}
 			if (progress) {

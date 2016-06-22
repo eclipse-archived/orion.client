@@ -48,6 +48,7 @@ define({
 	"Paste": "Paste",
 	"Find": "Find...",
 	"noResponse": "No response from server. Check your internet connection and try again.",
+	"noResponseTimeout": "No response from server (timed out after ${0} seconds). Check your internet connection and try again.",
 	"savingFile": "Saving file ${0}",
 	"running": "Running ${0}",
 	"Saving..." : "Saving...",
