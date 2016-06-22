@@ -14,8 +14,9 @@ define([
 	'orion/webui/littlelib',
 	'orion/PageLinks',
 	'orion/webui/dropdown',
-	'orion/util'
-], function(messages, lib, PageLinks, Dropdown, util) {
+	'orion/util',
+	'orion/xhr'
+], function(messages, lib, PageLinks, Dropdown, util, xhr) {
 	
 	function UserMenu(options) {
 		this._displaySignOut = true;
@@ -188,7 +189,17 @@ define([
 
 				if (util.isElectron) {
 					var clearLocalStorage = this._makeMenuItem(messages["Clear Local Storage"], function() { localStorage.clear(); });
+					var checkForUpdates = this._makeMenuItem(messages["Check for Updates"], function() {
+						var contentType = "application/json; charset=UTF-8";
+		                xhr("GET", '/update', {
+			                headers : { 
+			                    "Orion-Version" : "1",
+			                    "Content-Type" : contentType
+			                }
+			            });
+					});
 					getCategory(0).appendChild(clearLocalStorage.parentNode);
+					getCategory(0).appendChild(checkForUpdates.parentNode);
 				}
 
 				// Add categories to _dropdownNode

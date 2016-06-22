@@ -92,4 +92,5 @@ define({//Default message bundle
 	"createNewTooltip": "Create a new launch configuration",
 	"back": "< Back",
 	"next": "Next >",
+	"Check for Updates": "Check for Updates"
 });
