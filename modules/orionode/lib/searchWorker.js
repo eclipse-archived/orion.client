@@ -19,7 +19,6 @@ try {
 	var SUBDIR_SEARCH_CONCURRENCY = 10;
 
 	var workspaceId = 'orionode';
-	var workspaceName = 'Orionode Workspace';
 	var fieldList = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,WholeWord,CaseSensitive".split(",");
 
 	function safePath(workspaceDir, p) {
@@ -215,7 +214,7 @@ try {
 					"Length": stats.size,
 					"Location": "/file" + filePathFromWorkspace,
 					"Name": filename,
-					"Path": workspaceName + filePathFromWorkspace
+					"Path": filePathFromWorkspace.substring(1)
 				});
 			}
 			if (!searchPattern) {
