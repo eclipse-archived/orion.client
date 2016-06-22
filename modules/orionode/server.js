@@ -205,7 +205,9 @@ if (process.versions.electron) {
 		}
 		electron.globalShortcut.register('F12', function() {
 			var win = electron.BrowserWindow.getFocusedWindow();
-			win.webContents.toggleDevTools();
+			if (win) {
+				win.webContents.toggleDevTools();
+			}
 		});
 		autoUpdater.on("error", function(error) {
 			console.log(error);
