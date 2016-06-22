@@ -266,8 +266,10 @@ if (process.versions.electron) {
 				}
 			});
 			nextWindow.webContents.once("did-frame-finish-load", function () {
-				autoUpdater.checkForUpdates();
-				scheduleUpdateChecks();
+				if (feedURL) {
+					autoUpdater.checkForUpdates();
+					scheduleUpdateChecks();
+				}
 			});
 			return nextWindow;
 		}
