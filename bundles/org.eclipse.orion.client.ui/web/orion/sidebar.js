@@ -414,7 +414,6 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 						if (mainSplitter.splitter.isClosed()) {
 							mainSplitter.splitter.toggleSidePanel();
 						}
-						recordDefaultSearchResource(data);
 						this._inlineSearchPane.setSearchText(getSearchText());
 						this._inlineSearchPane.setSearchScope(this._lastSearchRoot); //reset search scope
 						this._inlineSearchPane.show();
