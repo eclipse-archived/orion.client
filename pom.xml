@@ -67,7 +67,7 @@
 		<nodejsHome>${basedir}/target/nodejs</nodejsHome>
 		<jsdocHome>${basedir}/target/jsdoc</jsdocHome>
 		<antrun-version>1.7</antrun-version>
-		<build-version>12.0.0-v${maven.build.timestamp}</build-version>
+		<build-version>13.0.0-v${maven.build.timestamp}</build-version>
 		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
 	</properties>
 
