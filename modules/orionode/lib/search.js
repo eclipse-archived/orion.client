@@ -15,7 +15,7 @@ var bodyParser = require('body-parser');
 var express = require('express');
 
 module.exports = function(options) {
-	var USE_WORKER = false && options.configParams.isElectron, search;
+	var USE_WORKER = options.configParams.isElectron, search;
 	if (USE_WORKER) {
 		var id = 0;
 		var requests = {};
