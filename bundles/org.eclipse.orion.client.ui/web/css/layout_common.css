@@ -296,8 +296,7 @@ hard-coded numbers elsewhere.
 }
 
 .sidebarWrapper {
-	overflow-x: auto;
-	overflow-y: hidden;
+	overflow: hidden;
 	min-width: 0;
 }
 
@@ -305,7 +304,7 @@ hard-coded numbers elsewhere.
 	position: relative;
 	left: 0;
 	top: 0;
-	height: calc(100% - 29px);
+	height: calc(100% - 33px);
 	overflow-x: visible;
 }
 
