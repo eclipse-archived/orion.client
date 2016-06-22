@@ -248,9 +248,15 @@ define([
 			if(!this.model || !loc) {
 				return null;
 			}
-			var elementId = this.model.getId({Location: loc});
-			var elementNode = lib.node(elementId);
-			return elementNode ? elementNode._item : null;
+			var elementNode;
+			if(loc === "/file" && util.isElectron){
+				// Special case in electron, need to find the workspace element to create file at workspace level.
+				elementNode = this.model.root;
+			}else{
+				var elementId = this.model.getId({Location: loc});
+				elementNode = lib.node(elementId) && lib.node(elementId)._item || null;
+			}
+			return elementNode;
 		},
 		handleResourceChange: function(evt) {
 			if(!this.model) {
