@@ -15,25 +15,31 @@ var bodyParser = require('body-parser');
 var express = require('express');
 
 module.exports = function(options) {
-	var USE_WORKER = options.configParams.isElectron, search;
-	if (USE_WORKER) {
-		var id = 0;
+	var USE_WORKERS = options.configParams.isElectron, search;
+	if (USE_WORKERS) {
 		var requests = {};
+		var WORKER_COUNT = 5;
+		var searchWorkers = [];
+		var id = 0, lastWorker = 0;
 		var Worker = require("tiny-worker");
-		var searchWorker = new Worker(path.join(__dirname, "searchWorker.js"));
-		searchWorker.onmessage = function (event) {
-			var promise = requests[event.data.id];
-			delete requests[event.data.id];
-			if (event.data.err) {
-				return promise.reject(event.data.err);
-			}
-			promise.fullfil(event.data.result);
-		};
+		for (var i = 0; i < WORKER_COUNT; i++) {
+			var searchWorker = new Worker(path.join(__dirname, "searchWorker.js"));
+			searchWorker.onmessage = function (event) {
+				var promise = requests[event.data.id];
+				delete requests[event.data.id];
+				if (event.data.err) {
+					return promise.reject(event.data.err);
+				}
+				promise.fullfil(event.data.result);
+			};
+			searchWorkers.push(searchWorker);
+		}
 		search = function(originalUrl, workspaceDir, contextPath) {
 			return new Promise(function(fullfil, reject) {
 				id++;
 				requests[id] = {fullfil: fullfil, reject: reject};
-				searchWorker.postMessage({id: id, originalUrl: originalUrl, workspaceDir: workspaceDir, contextPath: contextPath});
+				var worker = searchWorkers[lastWorker++ % searchWorkers.length];
+				worker.postMessage({id: id, originalUrl: originalUrl, workspaceDir: workspaceDir, contextPath: contextPath});
 			});
 		};
 	} else {
