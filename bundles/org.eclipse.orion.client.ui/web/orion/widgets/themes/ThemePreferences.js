@@ -53,12 +53,12 @@ define([], function() {
 
 			if (!styles){
 				styles = themeData.getStyles();
-				prefs[themeInfo.styleset] = JSON.stringify(styles);
+				prefs[themeInfo.styleset] = styles;
 			}
 			if (!selected || selected[themeInfo.selectedKey] === undefined) {
 				selected = selected || {};
 				selected[themeInfo.selectedKey] = themeInfo.defaultTheme;
-				prefs['selected'] = JSON.stringify(selected); //$NON-NLS-0$
+				prefs['selected'] = selected; //$NON-NLS-0$
 			}
 			// prefs have now been updated
 			prefs[versionKey] = this._themeVersion;
@@ -273,9 +273,9 @@ define([], function() {
 					name = selected[themeInfo.selectedKey];
 				}
 				selected[themeInfo.selectedKey] = name;
-				prefs['selected'] = JSON.stringify(selected); //$NON-NLS-0$
+				prefs['selected'] = selected; //$NON-NLS-0$
 				if (styles) {
-					prefs[themeInfo.styleset] = JSON.stringify(styles);
+					prefs[themeInfo.styleset] = styles;
 				} else {
 					styles = this._parse(prefs[themeInfo.styleset]);
 				}
@@ -298,7 +298,7 @@ define([], function() {
 					}
 					style = this._getCurrentStyle(styles, selected[themeInfo.selectedKey]);
 				}
-				prefs[themeInfo.styleset] = JSON.stringify(styles);
+				prefs[themeInfo.styleset] = styles;
 				themeData.processSettings(style);
 				return this._preferences.put(themeInfo.storage, prefs);
 			}.bind(this));
