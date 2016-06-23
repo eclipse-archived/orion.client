@@ -3,7 +3,7 @@
 var path = require('path');
 var name = "./built-js/orionJavaScript.js";
 if(process.argv.indexOf('-p') > -1) {
-	name = "./built-js/orionJavaScript.min.js"
+	name = "./built-js/orionJavaScript.min.js";
 }
 
 module.exports = {
@@ -15,11 +15,11 @@ module.exports = {
     },
     resolve: {
     	root: [
-    	       path.resolve('./web'),  //the js bundle path
-    	       path.resolve('../org.eclipse.orion.client.core/web'), // core
-    	       path.resolve('../org.eclipse.orion.client.editor/web'), // editor
-    	       path.resolve('../org.eclipse.orion.client.ui/web') //UI
-    	       ]
+	       path.resolve('./web'),  //the js bundle path
+	       path.resolve('../org.eclipse.orion.client.core/web'), // core
+	       path.resolve('../org.eclipse.orion.client.editor/web'), // editor
+	       path.resolve('../org.eclipse.orion.client.ui/web') //UI
+    	]
     },
     resolveLoader: {
     	alias: {
