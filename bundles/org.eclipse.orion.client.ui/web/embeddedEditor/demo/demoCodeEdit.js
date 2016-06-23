@@ -40,8 +40,8 @@ Deferred) {
 	var embeddedEditor = new mEmbeddedEditor({
 		_defaultPlugins: defaultPluginURLs,
 		//defaultPlugins: [],
-		editorConfig: {showWhitespaces: true, zoomRuler: true, zoomRulerLocalVisible: true}/*,
-		toolbarId: "__toolbar__",
+		editorConfig: {showWhitespaces: true, zoomRuler: true, zoomRulerLocalVisible: true},
+		toolbarId: "__toolbar__"/*,
 		userPlugins:["editorCommandsPlugin.html"]*/});
 	var cto = {
 		id: "foo/bar",
