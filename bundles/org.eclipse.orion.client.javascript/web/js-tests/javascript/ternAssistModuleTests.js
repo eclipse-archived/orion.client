@@ -30,7 +30,10 @@ define([
 		var htmlFile = 'tern_content_assist_module_test_script.html';
 		var timeoutReturn = ['Content assist timed out'];
 		var jsProject = {
-			getEcmaLevel: function getEcmaLevel() {}
+			getEcmaLevel: function getEcmaLevel() {},
+			getESlintOptions: function getESlintOptions() {
+				return new Deferred().resolve(null);
+			}
 		};
 		
 		/**
@@ -61,7 +64,6 @@ define([
 			jsProject.getEcmaLevel = function() {
 				return new Deferred().resolve(ecma);
 			};
-			
 			// Delete any test files created by previous tests
 			worker.postMessage({request: 'delFile', args:{file: jsFile}});
 			worker.postMessage({request: 'delFile', args:{file: htmlFile}});
