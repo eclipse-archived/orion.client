@@ -32,6 +32,13 @@ define([
         this.cache = new LRU(10);
     }
 
+	function getKey(loc, _name) {
+		if(loc) {
+			return loc+_name;
+		}
+		return _name;
+	}
+
     Objects.mixin(ScriptResolver.prototype, {
        /**
         * Returns an array of workspace file that match the given logical name and options
@@ -67,7 +74,7 @@ define([
 	   		return this.getFileClient().fileServiceRootURL();
 	   },
        _getFile: function _getFile(name, options) {
-           var files = this.cache.get(name);
+       		var files = this.cache.get(getKey(this.searchLocation, name));
            if(files) {
                return new Deferred().resolve(files);
            }
@@ -111,7 +118,7 @@ define([
 	                       }
 	                   }
 	                   if(files.length > 0) {
-	                       that.cache.put(filename, files);
+	                       that.cache.put(getKey(that.searchLocation, filename), files);
 	                       return files;
 	                   }
 	               }

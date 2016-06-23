@@ -134,6 +134,9 @@ define([
 					} else if (filename.match(/\.htm$/)){
 						ext = 'htm'; //$NON-NLS-1$
 					}
+					if(this.projectLocation) {
+						this.scriptResolver.setSearchLocation(this.projectLocation);
+					}
 					fileLoadPromises.push(this.scriptResolver.getWorkspaceFile(filename, {ext: ext}).then(function(_filename, files) {
 						if (Array.isArray(files) && files.length > 0){
 							if (files.length > 1) {

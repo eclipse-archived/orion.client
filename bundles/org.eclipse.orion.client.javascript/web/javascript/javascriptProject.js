@@ -336,6 +336,7 @@ define([
 			if(!this.projectMeta || project.Location !== this.projectMeta.Location) {
 				this.projectMeta = project;
 				delete this.ecma;
+				delete this.map[this.TERN_PROJECT];
 				_handle.call(this, "onProjectChanged", this, evnt, project.Location);
 				return;
 			} 
