@@ -297,9 +297,9 @@ a.breadcrumb.currentLocation {
 .filesystemName {
 	display: inline-block;
 	font-weight: normal;
-	margin-left: 10px;
-	margin-top: 8px;
-	margin-bottom: 8px;
+	margin-left: 4px;
+	margin-top: 6px;
+	margin-bottom: 4px;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
