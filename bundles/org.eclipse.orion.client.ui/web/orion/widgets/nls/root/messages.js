@@ -52,6 +52,7 @@ define({//Default message bundle
 	"Report a Bug": "Report a Bug",
 	"Keyboard Shortcuts": "Keyboard Shortcuts",
 	"Clear Local Storage": "Clear Local Storage",
+	"Check for Updates": "Check for Updates",
 	"Settings": "Settings",
 	"userSettings": "User Profile",
 	"View profile of ": "View profile of ",

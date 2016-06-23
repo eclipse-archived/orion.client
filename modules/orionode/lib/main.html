@@ -260,6 +260,7 @@ body {
 		iframe.src = url;
 		var __dialogModule = electron.remote.dialog;
 		var __clipboardModule = electron.clipboard;
+		var __autoUpdaterModule = electron.remote.autoUpdater;
 		
 		iframe.addEventListener("load", function() {
 			
@@ -267,6 +268,10 @@ body {
 			iframe.contentWindow.alert = window.alert;
 			iframe.contentWindow.__dialogModule = __dialogModule;
 			iframe.contentWindow.__clipboardModule = __clipboardModule;
+			
+			if (__autoUpdaterModule.updateURL) {
+				iframe.contentWindow.__autoUpdaterModule = __autoUpdaterModule;
+			}
 			
 			var target = iframe.contentDocument.querySelector('head > title');
 			

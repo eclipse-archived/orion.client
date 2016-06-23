@@ -189,6 +189,12 @@ define([
 				if (util.isElectron) {
 					var clearLocalStorage = this._makeMenuItem(messages["Clear Local Storage"], function() { localStorage.clear(); });
 					getCategory(0).appendChild(clearLocalStorage.parentNode);
+					 if (window.__autoUpdaterModule) {
+						var checkForUpdates = this._makeMenuItem(messages["Check for Updates"], function() {
+							window.__autoUpdaterModule.checkForUpdates();
+						});
+						getCategory(0).appendChild(checkForUpdates.parentNode);
+					 }
 				}
 
 				// Add categories to _dropdownNode
