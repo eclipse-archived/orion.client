@@ -668,6 +668,14 @@ a.breadcrumb.currentLocation {
  	border-color: transparent;
 }
 
+.dialogContent .dropdownTrigger:not(.dropdownDefaultButton) {
+	border: 1px solid #00AED1 !important;
+}
+
+.dialogContent .dropdownTrigger:not(.dropdownDefaultButton):not(:hover) {
+	color: #00AED1 !important;
+}
+
 .dropdownTrigger a {
 	text-decoration: none;
 }
