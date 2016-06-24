@@ -240,7 +240,24 @@ define([
 		 * will be called with boolean indicating whether the command was confirmed.
 		 */
 		confirm: function(node, message, yesString, noString, modal, onConfirm) {
-			var result = false;
+			this._popupDialog(true, node, message, yesString, noString, modal, onConfirm);
+		},
+		
+		/**
+		 * Open a parameter collector to confirm a command or collect user input.
+		 *
+		 * @param {Boolean} isConfirm that determinds the popup dialog's type.
+		 * @param {DOMElement} node the dom node that is displaying the command
+		 * @param {String} message the message to show when confirming the command
+		 * @param {String} yesString the label to show on a yes/true choice
+		 * @param {String} noString the label to show on a no/false choice
+		 * @param {Boolean} modal indicates whether the confirmation prompt should be modal.
+		 * @param {Function} onConfirm a function that will be called when the user confirms the command.  The function
+		 * @param {String} default message in the input box.
+		 * will be called with boolean indicating whether the command was confirmed.
+		 */
+		_popupDialog: function(isConfirm, node, message, yesString, noString, modal, onConfirm, defaultInput) {
+			var result = isConfirm ? false : "";
 			if (this._parameterCollector && !modal) {
 				var self = this;
 				var okCallback = function() {onConfirm(result);};
@@ -249,11 +266,18 @@ define([
 					var label = document.createElement("span"); //$NON-NLS-0$
 					label.classList.add("parameterPrompt"); //$NON-NLS-0$
 					label.textContent = message;
-					
 					parent.appendChild(label);
+					if(!isConfirm){
+						var input = document.createElement("input");
+						input.setAttribute("value", defaultInput);
+						input.style.marginLeft = "10px";
+						input.style.marginRight = "10px";
+						input.style.marginTop = "5px";
+						parent.appendChild(input);
+					}
 					var yesButton = document.createElement("button"); //$NON-NLS-0$
 					yesButton.addEventListener("click", function(event) { //$NON-NLS-0$
-						result = true;
+						result = isConfirm ? true : input.value;
 						okCallback();
 						closeFunction();
 					}, false);
@@ -262,7 +286,7 @@ define([
 					yesButton.className = "dismissButton"; //$NON-NLS-0$
 					var button = document.createElement("button"); //$NON-NLS-0$
 					button.addEventListener("click", function(event) { //$NON-NLS-0$
-						result = false;
+						result = isConfirm ? false : "";
 						closeFunction();
 					}, false);
 					buttonParent.appendChild(button);
@@ -271,7 +295,10 @@ define([
 					return yesButton;
 				};
 				this._parameterCollector.close();
-				var opened = this._parameterCollector.open(node, fillFunction, function(){});
+				if(isConfirm || !isConfirm && !node ){
+					// Do this if this is a confirm or if this is a prompt but without node specified.
+					var opened = this._parameterCollector.open(node, fillFunction, function(){});
+				}
 				if (!opened) {
 					var tooltip = new mTooltip.Tooltip({
 						node: node,
@@ -279,7 +306,7 @@ define([
 							this.destroy();
 						},
 						trigger: "click", //$NON-NLS-0$
-						position: ["below", "right", "above", "left"] //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+						position: isConfirm ? ["below", "right", "above", "left"] : ["right","above", "below", "left"]//$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 					});
 					var parameterArea = tooltip.contentContainer();
 					parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
@@ -314,6 +341,22 @@ define([
 			} 
 			result = window.confirm(message);
 			onConfirm(result);
+		},
+		
+		/**
+		 * Open a tolltip parameter collector to collect user input.
+		 *
+		 * @param {DOMElement} node the dom node that is displaying the command
+		 * @param {String} message the message to show when confirming the command
+		 * @param {String} yesString the label to show on a yes/true choice
+		 * @param {String} noString the label to show on a no/false choice
+		 * @param {String} default message in the input box.
+		 * @param {Boolean} modal indicates whether the confirmation prompt should be modal.
+		 * @param {Function} onConfirm a function that will be called when the user confirms the command.  The function
+		 * will be called with boolean indicating whether the command was confirmed.
+		 */
+		prompt: function(node, message, yesString, noString, defaultInput, modal, onConfirm) {
+			this._popupDialog(false, node, message, yesString, noString, modal, onConfirm ,defaultInput);
 		},
 		
 		/**
