@@ -416,7 +416,71 @@ define([
 
 		this.render(this.parent, this.serviceRegistry, this.settings, this.title);
 	}
+	function getEslintSettings(fileClient, projectPath, callback) {
+		var eslintrcjs = projectPath + SettingsList.prototype.ESLINTRC_JS;
+		return fileClient.read(eslintrcjs, false, false, {readIfExists: true}).then(function(contents) {
+			if (contents !== null) {
+				callback({contents: contents, name: SettingsList.prototype.ESLINTRC_JS, location: eslintrcjs});
+				return;
+			}
+			var eslintrcjson = projectPath + SettingsList.prototype.ESLINTRC_JSON;
+			return fileClient.read(eslintrcjson, false, false, {readIfExists: true}).then(function(contents) {
+				if (contents !== null) {
+					callback({contents: contents, name: SettingsList.prototype.ESLINTRC_JSON, location: eslintrcjson});
+					return;
+				}
+				var eslintrc = projectPath + SettingsList.prototype.ESLINTRC;
+				return fileClient.read(eslintrc, false, false, {readIfExists: true}).then(function(contents) {
+					if (contents !== null) {
+						callback({contents: contents, name: SettingsList.prototype.ESLINTRC, location: eslintrc});
+						return;
+					}
+					var packageJson = projectPath + SettingsList.prototype.PACKAGE_JSON;
+					return fileClient.read(packageJson, false, false, {readIfExists: true}).then(function(contents) {
+						if(contents !== null) {
+							var vals = JSON.parse(contents);
+							if(vals.eslintConfig !== null && typeof vals.eslintConfig === 'object' && Object.keys(vals.eslintConfig).length > 0) {
+								callback({contents: contents, name: SettingsList.prototype.PACKAGE_JSON, location: packageJson});
+							}
+						}
+						return;
+					}.bind(this));
+				}.bind(this));
+			}.bind(this));
+		}.bind(this));
+	}
+
 	SettingsList.prototype = {
+		/**
+		 * The .eslintrc file name
+		 * @see http://eslint.org/docs/user-guide/configuring#configuration-file-formats
+		 */
+		ESLINTRC : '.eslintrc',
+		/**
+		 * The .eslintrc.js file name
+		 * @see http://eslint.org/docs/user-guide/configuring#configuration-file-formats
+		 */
+		ESLINTRC_JS : '.eslintrc.js',
+		/**
+		 * The .eslintrc.yaml file name
+		 * @see http://eslint.org/docs/user-guide/configuring#configuration-file-formats
+		 */
+		ESLINTRC_YAML : '.eslintrc.yaml',
+		/**
+		 * The .eslintrc.yml file name
+		 * @see http://eslint.org/docs/user-guide/configuring#configuration-file-formats
+		 */
+		ESLINTRC_YML : '.eslintrc.yml',
+		/**
+		 * The .eslintrc.json file name
+		 * @see http://eslint.org/docs/user-guide/configuring#configuration-file-formats
+		 */
+		ESLINTRC_JSON : '.eslintrc.json',
+		/**
+		 * The package.json file name
+		 */
+		PACKAGE_JSON : 'package.json',
+		
 		_makeSection: function(parent, sectionId, title, hasMultipleSections) {
 			var that = this;
 			function updateHideSetting(newValue){
@@ -460,14 +524,17 @@ define([
 		},
 		render: function(parent, serviceRegistry, settings, categoryTitle) {
 			var pageParams = PageUtil.matchResourceParameters();
-			if ("javascript" === pageParams.category) {
-				if (pageParams.resource && pageParams.resource.length !== 0) {
-					// resource name starts with /file/ and ends with '/'
-					var projectName = pageParams.resource.substring(6, pageParams.resource.length - 1);
-					this.fileClient.fetchChildren(pageParams.resource + "?depth=1").then(function(children) {
-						if (!this.destroyed) {
-							children.some(function (child) {
-								if (child.Name === ".eslintrc") {
+			var projectName;
+			switch(pageParams.category) {
+				case "javascript" : {
+					if (pageParams.resource && pageParams.resource.length !== 0) {
+						// resource name starts with /file/ and ends with '/'
+						projectName = pageParams.resource.substring(6, pageParams.resource.length - 1);
+						getEslintSettings(
+							this.fileClient,
+							pageParams.resource,
+							function(file) {
+								if (!this.destroyed) {
 									var infoText = document.createElement("div"); //$NON-NLS-0$
 									infoText.classList.add("setting-info"); //$NON-NLS-0$
 									infoText.textContent = messages.JavascriptSettingWarning;
@@ -476,8 +543,8 @@ define([
 									icon.classList.add("icon-inline"); //$NON-NLS-0$
 									icon.classList.add("imageSprite"); //$NON-NLS-0$
 									var link = document.createElement("a"); //$NON-NLS-0$
-									link.href = editTemplate.expand({resource: child.Location});
-									link.appendChild(document.createTextNode(child.Name));
+									link.href = editTemplate.expand({resource: file.location});
+									link.appendChild(document.createTextNode(file.name));
 									var projectText = document.createElement("span"); //$NON-NLS-0$
 									projectText.textContent = projectName;
 									lib.processDOMNodes(infoText, [icon, link, projectText]);
@@ -488,9 +555,9 @@ define([
 									}
 									return true;
 								}
-							}.bind(this));
-						}
-					}.bind(this));
+						}.bind(this));
+					}
+					break;
 				}
 			}
 			for (var i=0; i<settings.length; i++) {
