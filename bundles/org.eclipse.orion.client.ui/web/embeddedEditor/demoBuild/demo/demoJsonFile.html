@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2014." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Pluggable Editor Demo</title>
+	    <link rel="stylesheet" type="text/css" href="editorBuild/code_edit/built-codeEdit.css"/>
+		<style type="text/css">
+			.demoTitle{
+				border: none;
+				vertical-align: middle;
+				overflow: hidden;
+				text-align: left;
+				margin-left: 15%;
+				margin-right: 15%;
+				padding-bottom: 5px;
+				position: relative;
+			}
+			.demoBody{
+				border: 1px solid;
+				vertical-align: middle;
+				border-color: blue;
+				overflow: hidden;
+				text-align: left;
+				margin-left: 15%;
+				margin-right: 15%;
+				margin-bottom: 15px;
+				padding-bottom: 5px;
+				position: relative;
+				height: 450px;
+			}
+			.orionPage {
+			    background-color: white;
+			    width: 100%;
+			    height: 100%;
+			}
+		</style>
+		<script src="editorBuild/code_edit/built-codeEdit.js"></script>
+		<script>
+			/*globals orion */
+			window.onload=function(){
+				var defaultPluginURLs = [
+					"../javascript/plugins/javascriptPlugin.html",
+					"../webtools/plugins/webToolsPlugin.html",
+					"../plugins/embeddedToolingPlugin.html"
+				];
+				var codeEdit = new orion.codeEdit({ _defaultPlugins: defaultPluginURLs, userPlugins:["userPlugins/jslintPlugin.html"] });
+				var contents = '{foo: 123, bar: 234}'
+				codeEdit.create({parent: "embeddedEditor", contentType: "application/json", contents: contents}).then(function(editorViewer) {
+					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+					//You can call APIs from editorViewer.editor  for further actions.
+				});
+			};
+		</script>
+    </head>
+	<body id="orion-browser" spellcheck="false" class="orionPage">
+		<div class="demoTitle">
+			<p>This is a demo for the <b>Orion Code Edit</b> widget. This demo consumes the <b>built version</b> of the widget.</p> 
+			<p>Keep editing in this demo and try:</p>
+			<ol>
+				<li>Content assist. E.g., put cursor after "foo." at the last line and press CTRL+space.</li>
+				<li>Problem validations. E.g., modify something and you will see new validation markers coming up, if any.</li>
+				<li>Hover service. Hover on any error markers or inside the editor.</li>
+				<li>Syntax highlighting.</li>
+				<li>Quick fix. Hover on a problem inside the editor, not on the ruler, e.g., (char, from) in this demo. Click on the quick fix and see.</li>
+				<li>Find declaration. Select a variable and press F3.</li>
+				<li>New tooling features coming while Orion is being improved...</li>
+			</ol>
+		</div>
+		<div class="demoTitle">
+			<span id = "progressMessageDiv" style="color: green">Loading language tooling plugins...</span>
+		</div>
+		<div class="demoBody" id="embeddedEditor">
+		</div>
+	</body>
+</html>
