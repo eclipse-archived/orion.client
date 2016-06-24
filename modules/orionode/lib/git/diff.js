@@ -15,6 +15,7 @@ var api = require('../api'), writeError = api.writeError;
 var clone = require('./clone');
 var fs = require('fs');
 var path = require('path');
+var mkdirp = require('mkdirp');
 var mDiff = require('diff');
 var request = require('request');
 var multiparty = require('multiparty');
@@ -393,7 +394,19 @@ function applyPatch(req, res) {
 							fs.unlink(this.getFile(index.oldFileName));
 							return;
 						}
-						fs.writeFile(this.getFile(index.newFileName), content, "utf8");
+						var fileName = this.getFile(index.newFileName);
+						mkdirp(path.dirname(fileName), function (err) {
+							if (err) {
+								failed.push(index);
+								return;
+							}
+							fs.writeFile(fileName, content, "utf8", function(err) {
+								if (err) {
+									failed.push(index);
+									return;
+								}
+							});
+						});
 					},
 					complete: function(err) {
 						if (err) return writeError(404, res, err.message);
