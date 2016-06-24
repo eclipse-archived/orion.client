@@ -269,8 +269,6 @@ define([
 		}
 		
 	});
-
-	HTMLHover.prototype.contructor = HTMLHover;
 	
 	return {
 		HTMLHover: HTMLHover

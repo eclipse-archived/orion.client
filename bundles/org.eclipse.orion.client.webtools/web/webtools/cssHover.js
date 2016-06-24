@@ -381,8 +381,6 @@ define([
 		}
 		
 	});
-
-	CSSHover.prototype.contructor = CSSHover;
 	
 	return {
 		CSSHover: CSSHover

@@ -129,8 +129,6 @@ define([
 		return [];
 	}
 	
-	HTMLOccurrences.prototype.contructor = HTMLOccurrences;
-	
 	return {
 			HTMLOccurrences: HTMLOccurrences
 		};

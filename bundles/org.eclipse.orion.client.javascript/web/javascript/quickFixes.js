@@ -427,8 +427,6 @@ define([
 		}
 	});
 	
-	JavaScriptQuickfixes.prototype.contructor = JavaScriptQuickfixes;
-	
 	return {
 		JavaScriptQuickfixes: JavaScriptQuickfixes
 	};

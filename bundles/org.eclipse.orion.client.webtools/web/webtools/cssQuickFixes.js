@@ -77,8 +77,6 @@ define([
 		}
 	});
 	
-	CssQuickFixes.prototype.contructor = CssQuickFixes;
-	
 	return {
 		CssQuickFixes: CssQuickFixes
 	};

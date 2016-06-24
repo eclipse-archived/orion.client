@@ -62,8 +62,6 @@ define([
 		}
 	});
 	
-	JavaScriptOccurrences.prototype.contructor = JavaScriptOccurrences;
-	
 	return {
 		JavaScriptOccurrences: JavaScriptOccurrences
 	};

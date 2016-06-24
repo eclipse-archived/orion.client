@@ -392,8 +392,6 @@ define([
 		}
 	});
 
-	JavaScriptHover.prototype.contructor = JavaScriptHover;
-
 	return {
 		JavaScriptHover: JavaScriptHover,
 		formatMarkdownHover: formatMarkdownHover
