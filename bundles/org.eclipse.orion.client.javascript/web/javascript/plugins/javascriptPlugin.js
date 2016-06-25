@@ -21,6 +21,7 @@ define([
 'javascript/scriptResolver',
 'javascript/astManager',
 'javascript/quickFixes',
+'javascript/formatting',
 'javascript/javascriptProject',
 'javascript/contentAssist/ternAssist',
 'javascript/contentAssist/ternProjectAssist',
@@ -45,7 +46,7 @@ define([
 'i18n!javascript/nls/messages',
 'orion/i18nUtil',
 'orion/URL-shim'
-], function(PluginProvider, mServiceRegistry, Deferred, ScriptResolver, ASTManager, QuickFixes, JavaScriptProject, TernAssist, TernProjectAssist,
+], function(PluginProvider, mServiceRegistry, Deferred, ScriptResolver, ASTManager, QuickFixes, Formatting, JavaScriptProject, TernAssist, TernProjectAssist,
 			EslintValidator, TernProjectValidator, Occurrences, Hover, Outliner, CUProvider, TernProjectManager, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 			RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
@@ -680,7 +681,7 @@ define([
                     ]
     			}
     	);
-    	
+
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			quickFixComputer,
     			{
@@ -1496,7 +1497,7 @@ define([
 				 	        	   name: javascriptMessages['prefBestPractices'],
 				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-1$  //$NON-NLS-1$
 				 	        	   category: 'javascript', //$NON-NLS-1$
- 				 	        	   categoryLabel: javascriptMessages['javascriptValidation'],
+				 	        	   categoryLabel: javascriptMessages['javascriptValidation'],
 				 	        	   properties: [
 				 	        	   				{
 			 	        	                		id: "no-eq-null",  //$NON-NLS-1$
@@ -1753,9 +1754,295 @@ define([
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                }
-]
+										]
 				 	        	}]
-    			});
+			});
+
+		var beautifier = new Formatting.JavaScriptFormatting(ternWorker, jsProject);
+		provider.registerServiceProvider("orion.edit.command",
+			beautifier,
+			{
+				name: javascriptMessages["formatCommandName"],
+				contentType: ["application/javascript", "text/html", "text/css"],
+				id: "format",
+				key : [ 'F', false, true, !Util.isMac, Util.isMac]  //$NON-NLS-1$ Alt-Shift-F
+			}
+		);
+		// register preferences for formatting when modified (updated call)
+		provider.registerService("orion.cm.managedservice", beautifier, {pid: 'jsbeautify.config.common'}); //$NON-NLS-1$ //$NON-NLS-2$
+		provider.registerService("orion.cm.managedservice", beautifier, {pid: 'jsbeautify.config.js'}); //$NON-NLS-1$ //$NON-NLS-2$
+		provider.registerService("orion.cm.managedservice", beautifier, {pid: 'jsbeautify.config.html'}); //$NON-NLS-1$ //$NON-NLS-2$
+		provider.registerService("orion.cm.managedservice", beautifier, {pid: 'jsbeautify.config.css'}); //$NON-NLS-1$ //$NON-NLS-2$
+
+		var unix = "\n";
+		var mac = "\r";
+		var windows = "\n\r";
+		var eof_characters = [
+			{label: javascriptMessages.indentation_unix,  value: unix},
+			{label: javascriptMessages.indentation_mac, value: mac},
+			{label: javascriptMessages.indentation_windows, value: windows}
+		];
+
+		var space = ' ';
+		var tab= '\t';
+		var indentation_characters = [
+			{label: javascriptMessages.identation_space,  value: space},
+			{label: javascriptMessages.indentation_tab,  value: tab},
+		];
+		
+		var before_newline = 'before-newline';
+		var after_newline = 'after-newline';
+		var preserve_newline = 'preserve-newline';
+		var operator_positions = [
+			{ label: javascriptMessages.before_newline, value: before_newline},
+			{ label: javascriptMessages.after_newline, value: after_newline},
+			{ label: javascriptMessages.preserve_newline, value: preserve_newline},
+		];
+		
+		var collapse_preserve_inline = 'collapse-preserve-inline';
+		var collapse = 'collapse';
+		var expand = 'expand';
+		var end_expand = 'end-expand';
+		var none = 'none';
+		var brace_styles = [
+			{ label: javascriptMessages.collapse_preserve_inline , value: collapse_preserve_inline},
+			{ label: javascriptMessages.collapse , value: collapse},
+			{ label: javascriptMessages.expand , value: expand},
+			{ label: javascriptMessages.end_expand , value: end_expand},
+			{ label: javascriptMessages.none , value: none},
+		];
+		
+		var keep = 'keep';
+		var separate = 'separate';
+		var normal = 'normal';
+		var indent_scripts_values = [
+			{ label: javascriptMessages.normal, value: normal},
+			{ label: javascriptMessages.keep, value: keep},
+			{ label: javascriptMessages.separate, value: separate},
+		];
+		var auto = 'auto';
+		var force = 'force';
+		var wrap_attributes_values = [
+			{ label: javascriptMessages.auto, value: auto},
+			{ label: javascriptMessages.force, value: force},
+		];
+		provider.registerServiceProvider("orion.core.setting", {}, {
+			settings: [
+				{
+					pid: 'jsbeautify.config.common',
+					order: 1,
+					name: javascriptMessages['commonFormattingOptions'],
+					tags: 'beautify javascript js jsbeautify formatting'.split(' '),
+					category: 'formatting',
+					categoryLabel: javascriptMessages['formatting'],
+					properties: [
+						{
+							id: 'indent_size',  //$NON-NLS-1$
+							name: javascriptMessages['indent_size'],
+							type: 'number', //$NON-NLS-1$
+							defaultValue: 4
+						},
+						{
+							id: 'indent_char',  //$NON-NLS-1$
+							name: javascriptMessages['indent_char'],
+							type: 'string', //$NON-NLS-1$
+							defaultValue: space,
+							options: indentation_characters
+						},
+						{
+							id: 'eol',  //$NON-NLS-1$
+							name: javascriptMessages['eol'],
+							type: 'string', //$NON-NLS-1$
+							defaultValue: unix,
+							options: eof_characters
+						},
+						{
+							id: 'end_with_newline',  //$NON-NLS-1$
+							name: javascriptMessages['end_with_newline'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: false
+						},
+						{
+							id: 'preserve_new_lines',  //$NON-NLS-1$
+							name: javascriptMessages['preserve_new_lines'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: true
+						},
+						{
+							id: 'max_preserve_new_lines',  //$NON-NLS-1$
+							name: javascriptMessages['max_preserve_new_lines'],
+							type: 'number', //$NON-NLS-1$
+							defaultValue: 10
+						},
+						{
+							id: 'brace_style',  //$NON-NLS-1$
+							name: javascriptMessages['brace_style'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: collapse,
+							options: brace_styles
+						},
+						{
+							id: 'wrap_line_length',  //$NON-NLS-1$
+							name: javascriptMessages['wrap_line_length'],
+							type: 'number', //$NON-NLS-1$
+							defaultValue: 0
+						},
+					]
+				},
+				{
+					pid: 'jsbeautify.config.js',
+					order: 2,
+					name: javascriptMessages['jsFormattingOptions'],
+					tags: 'beautify javascript js jsbeautify formatting'.split(' '),
+					category: 'formatting',
+					categoryLabel: javascriptMessages['formatting'],
+					properties: [
+						{
+							id: 'indent_level',  //$NON-NLS-1$
+							name: javascriptMessages['indent_level'],
+							type: 'number', //$NON-NLS-1$
+							defaultValue: 0
+						},
+						{
+							id: 'space_in_paren',  //$NON-NLS-1$
+							name: javascriptMessages['space_in_paren'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: false
+						},
+						{
+							id: 'space_in_empty_paren',  //$NON-NLS-1$
+							name: javascriptMessages['space_in_empty_paren'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: false
+						},
+						{
+							id: 'space_after_anon_function',  //$NON-NLS-1$
+							name: javascriptMessages['space_after_anon_function'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: false
+						},
+						{
+							id: 'break_chained_methods',  //$NON-NLS-1$
+							name: javascriptMessages['break_chained_methods'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: false
+						},
+						{
+							id: 'keep_array_indentation',  //$NON-NLS-1$
+							name: javascriptMessages['keep_array_indentation'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: false
+						},
+						{
+							id: 'space_before_conditional',  //$NON-NLS-1$
+							name: javascriptMessages['space_before_conditional'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: true
+						},
+						{
+							id: 'unescape_strings',  //$NON-NLS-1$
+							name: javascriptMessages['unescape_strings'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: false
+						},
+						{
+							id: 'e4x',  //$NON-NLS-1$
+							name: javascriptMessages['e4x'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: false
+						},
+						{
+							id: 'comma_first',  //$NON-NLS-1$
+							name: javascriptMessages['comma_first'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: false
+						},
+						{
+							id: 'operator_position',  //$NON-NLS-1$
+							name: javascriptMessages['operator_position'],
+							type: 'string', //$NON-NLS-1$
+							defaultValue: before_newline,
+							options: operator_positions
+						},
+					]
+				},
+				{
+					pid: 'jsbeautify.config.html',
+					order: 3,
+					name: javascriptMessages['htmlFormattingOptions'],
+					tags: 'beautify javascript js jsbeautify formatting'.split(' '),
+					category: 'formatting',
+					categoryLabel: javascriptMessages['formatting'],
+					properties: [
+						{
+							id: 'indent_inner_html',  //$NON-NLS-1$
+							name: javascriptMessages['indent_inner_html'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: false
+						},
+						{
+							id: 'indent_handlebars',  //$NON-NLS-1$
+							name: javascriptMessages['indent_handlebars'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: false
+						},
+						{
+							id: 'wrap_attributes',  //$NON-NLS-1$
+							name: javascriptMessages['wrap_attributes'],
+							type: 'string', //$NON-NLS-1$
+							defaultValue: 'auto',
+							options: wrap_attributes_values
+						},
+						{
+							id: 'wrap_attributes_indent_size',  //$NON-NLS-1$
+							name: javascriptMessages['wrap_attributes_indent_size'],
+							type: 'number', //$NON-NLS-1$
+							defaultValue: 1
+						},
+						{
+							id: 'extra_liners',  //$NON-NLS-1$
+							name: javascriptMessages['extra_liners'],
+							type: 'string', //$NON-NLS-1$
+							defaultValue: 'head,body,html'
+						},
+						{
+							id: 'indent-scripts',  //$NON-NLS-1$
+							name: javascriptMessages['indent_scripts'],
+							type: 'string', //$NON-NLS-1$
+							defaultValue: normal,
+							options: indent_scripts_values
+						}
+					]
+				},
+				{
+					pid: 'jsbeautify.config.css',
+					order: 4,
+					name: javascriptMessages['cssFormattingOptions'],
+					tags: 'beautify javascript js jsbeautify formatting'.split(' '),
+					category: 'formatting',
+					categoryLabel: javascriptMessages['formatting'],
+					properties: [
+						{
+							id: 'selector_separator_newline',  //$NON-NLS-1$
+							name: javascriptMessages['selector_separator_newline'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: true
+						},
+						{
+							id: 'newline_between_rules',  //$NON-NLS-1$
+							name: javascriptMessages['newline_between_rules'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: true
+						},
+						{
+							id: 'space_around_selector_separator',  //$NON-NLS-1$
+							name: javascriptMessages['space_around_selector_separator'],
+							type: 'boolean', //$NON-NLS-1$
+							defaultValue: false
+						}
+					]
+				}]
+		});
 
     	/**
     	 * Register syntax styling for js, json and json schema content
