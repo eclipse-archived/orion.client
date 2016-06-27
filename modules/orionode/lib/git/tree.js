@@ -71,7 +71,7 @@ function getTree(req, res) {
 	})
 	.then(function(repo) {
 		function shortName(refName) {
-			return refName.replace("refs/remotes/", "").replace("refs/heads/", "").replace("refs/", "");
+			return refName.replace("refs/remotes/", "").replace("refs/heads/", "").replace("refs/tags/", "").replace("refs/", "");
 		}
 		if (!filePath) {
 			var location = fileRoot + (req.params["0"] || "");
@@ -95,6 +95,17 @@ function getTree(req, res) {
 			return commit;
 		}).catch(function() {
 			return repo.getCommit(ref);
+		}).catch(function() {
+			if(ref.indexOf("refs/tags" !== -1)){
+				var tagname = shortName(ref);
+					return repo.getTagByName(tagname)
+				.then(function(tag) {
+					return tag.targetId();
+				})
+				.then(function(commitOid){
+					return repo.getCommit(commitOid);
+				});
+			}
 		}).then(function(commit) {
 			return commit.getTree();
 		}).then(function(tree) {
