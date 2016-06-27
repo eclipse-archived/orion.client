@@ -170,7 +170,15 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					this._dropdownNode.classList.add("dropdownMenuOpen"); //$NON-NLS-0$
 					this._isVisible = true;
 					
+					if (this._dropdownNode.scrollHeight > this._dropdownNode.offsetHeight) {
+						var buttonsAdded = addScrollButtons(this._triggerNode, this._dropdownNode);
+					}
+					
 					this._positionDropdown(mouseEvent);
+					
+					if (buttonsAdded) {
+						positionOrClearScrollButtons(this._dropdownNode, true);
+					}				
 					
 					this._focusDropdownNode();
 					actionTaken = true;
@@ -227,7 +235,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 				} else {
 					var totalBounds = lib.bounds(this._boundingNode(this._triggerNode));
 					var triggerBounds = lib.bounds(this._triggerNode);
-					this._dropdownNode.style.left = (triggerBounds.left  - totalBounds.left - bounds.width + triggerBounds.width) + "px"; //$NON-NLS-0$
+					this._dropdownNode.style.left = (triggerBounds.left - totalBounds.left - bounds.width + triggerBounds.width) + "px"; //$NON-NLS-0$
 				}
 			}
 			
@@ -277,6 +285,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					lib.removeAutoDismiss(this._boundAutoDismiss);
 					this._boundAutoDismiss = null;
 				} 
+				positionOrClearScrollButtons(this._dropdownNode, false);
 				actionTaken = true;
 			}
 			return actionTaken;
@@ -495,6 +504,115 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		span.classList.add("dropdownKeyBinding"); //$NON-NLS-0$
 		span.appendChild(document.createTextNode(keyBindingString));
 		element.appendChild(span);
+	}
+	
+	/**
+	 * Adds scrolling feature to a dropdown list
+	 * @param {Object} dropdownTriggerNode The node that triggers the dropdown. Required.
+	 * @param {Object} dropdownNode The dropdown list node. Required.
+	 * @returns {Boolean} True if scroll buttons are added and false otherwise
+	*/
+	function addScrollButtons(dropdownTriggerNode, dropdownNode) {
+		var menuToModify, topScrollButton, bottomScrollButton;
+		menuToModify = dropdownTriggerNode.nextElementSibling;	
+		
+		if (menuToModify) { 
+			if (!menuToModify.classList.contains("menuScrollButton")) { // if scroll buttons haven't been made yet
+				var activeScrollIntervalId;
+				
+				menuToModify.addEventListener("keydown", function(event) {
+					clearInterval();
+					if (event.key === "ArrowDown") {
+						activeScrollIntervalId = window.setInterval(scrollDown, 14);
+					}
+					if (event.key === "ArrowUp") {
+						activeScrollIntervalId = window.setInterval(scrollUp, 14);
+					}
+				});
+				menuToModify.addEventListener("keyup", function() { clearInterval(); });
+			
+				topScrollButton = document.createElement("button");
+				bottomScrollButton = document.createElement("button");
+				topScrollButton.classList.add("menuScrollButton", "menuTopScrollButton", "core-sprite-openarrow");
+				bottomScrollButton.classList.add("menuScrollButton", "menuBottomScrollButton", "core-sprite-openarrow");
+
+				topScrollButton.addEventListener("mouseenter", function() {
+					clearInterval();
+					activeScrollIntervalId = window.setInterval(scrollUp, 10);
+				});
+				bottomScrollButton.addEventListener("mouseenter", function() {
+					clearInterval();
+					activeScrollIntervalId = window.setInterval(scrollDown, 10);
+				});
+				topScrollButton.addEventListener("mouseleave", function() { clearInterval(); });
+				bottomScrollButton.addEventListener("mouseleave", function() { clearInterval(); });
+		
+				menuToModify.parentNode.insertBefore(topScrollButton, menuToModify);
+				menuToModify.parentNode.insertBefore(bottomScrollButton, menuToModify.nextElementSibling);
+				menuToModify.style.overflow = "hidden";
+			}
+			else {
+				menuToModify = menuToModify.nextElementSibling; // set to <ul> node and not button node
+			}
+			updateScrollButtonVisibility();
+			return true;
+		}
+		
+		return false;
+		
+		function scrollDown() {
+			menuToModify.scrollTop+=2;
+			updateScrollButtonVisibility();
+		}
+		
+		function scrollUp() {
+			menuToModify.scrollTop-=2;
+			updateScrollButtonVisibility();
+		}
+		
+		function clearInterval() {
+			if (activeScrollIntervalId) {
+				window.clearInterval(activeScrollIntervalId);
+				activeScrollIntervalId = null;
+			}
+		}
+		
+		function updateScrollButtonVisibility() {
+			topScrollButton = lib.$(".menuTopScrollButton", dropdownNode.parentNode);
+			bottomScrollButton = lib.$(".menuBottomScrollButton", dropdownNode.parentNode);
+			if (menuToModify.scrollTop > 0) {
+				topScrollButton.style.display = "block";
+			} 
+			else {
+				topScrollButton.style.display = "none";
+			}	
+			if (menuToModify.scrollHeight > menuToModify.scrollTop + menuToModify.offsetHeight) {
+				bottomScrollButton.style.display = "block";
+			}	 
+			else {
+				bottomScrollButton.style.display = "none";
+			}
+		}
+	}
+	
+	/**
+	 * Positions the top and bottom scroll buttons according to where the dropdown list is positioned
+	 * @param {Object} dropdownNode The dropdown list node. Required.
+	 * @param {Boolean} positionIt True if positioning scroll buttons and false if hiding them. Required.
+	*/
+	function positionOrClearScrollButtons(dropdownNode, positionIt) {
+		var topScrollButton = lib.$(".menuTopScrollButton", dropdownNode.parentNode);
+		var bottomScrollButton = lib.$(".menuBottomScrollButton", dropdownNode.parentNode);
+		if (positionIt) {
+			topScrollButton.style.top = dropdownNode.style.top;
+			topScrollButton.style.left = dropdownNode.style.left;
+			bottomScrollButton.style.top = Number(dropdownNode.style.top.replace("px", ""))+300+"px"; // 316-16=300px where 300px is max-height of a dropdownSubMenu and 16px is more than half of the button height
+			bottomScrollButton.style.left = dropdownNode.style.left;
+		}
+		if (topScrollButton && bottomScrollButton && !positionIt) { 
+			topScrollButton.style.display = "none";
+			bottomScrollButton.style.display = "none";	
+		}
 	}
 		
 	Dropdown.prototype.constructor = Dropdown;
