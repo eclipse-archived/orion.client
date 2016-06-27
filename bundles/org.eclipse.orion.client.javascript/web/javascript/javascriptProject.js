@@ -20,40 +20,36 @@ define([
 				fileName === project.ESLINTRC_JSON || fileName === project.PACKAGE_JSON) {
 				delete project.map.eslint;
 			}
-			if (fileName === project.JSBEAUTIFYRC) {
-				delete project.map.formatting;
-			}
 		},
 		/**
 		 * @callback
 		 */
 		onModified: function onModified(project, qualifiedName, fileName) {
-			this._update(project, fileName);
+			this._update(project, fileName);			
 		},
 		/**
 		 * @callback
 		 */
 		onDeleted: function onDeleted(project, qualifiedName, fileName) {
-			this._update(project, fileName);
+			this._update(project, fileName);			
 		},
 		/**
 		 * @callback
 		 */
 		onCreated: function onCreated(project, qualifiedName, fileName) {
-			this._update(project, fileName);
+			this._update(project, fileName);			
 		},
 		/**
 		 * @callback
 		 */
 		onMoved: function onMoved(project, qualifiedName, fileName, toQualified, toName) {
-			this._update(project, fileName);
+			this._update(project, fileName);			
 		},
 		/**
 		 * @callback
 		 */
 		onProjectChanged: function onProjectChanged(project, evnt, projectName) {
 			delete project.map.eslint;
-			delete project.map.formatting;
 		}
 	};
 	
@@ -118,12 +114,7 @@ define([
 	 * The node_modules folder name
 	 */
 	JavaScriptProject.prototype.NODE_MODULES = 'node_modules';
-	/**
-	 * The .jsbeautifyrc file name
-	 * @see https://github.com/beautify-web/js-beautify/blob/master/README.md
-	 */
-	JavaScriptProject.prototype.JSBEAUTIFYRC = '.jsbeautifyrc';
-
+	
 	/**
 	 * @description Adds a handler for the given file name to the mapping of handlers
 	 * @function
@@ -163,7 +154,7 @@ define([
 						this.ecma = v.ecmaVersion;
 					}
 				} catch(err) {
-					this.ecma = 6;
+					this.ecma = 6;					
 				}
 			}
 			return this.ecma;
@@ -278,17 +269,17 @@ define([
 		//TODO support loading YML and YAML files
 		var vals;
 		return this.getFile(this.ESLINTRC_JS).then(function(file) {
-			vals = readAndMap(this.map, file, "eslint");
+			vals = readAndMap(this.map, file);
 			if(vals) {
 				return vals;
 			} 
 			return this.getFile(this.ESLINTRC_JSON).then(function(file) {
-				vals = readAndMap(this.map, file, "eslint");
+				vals = readAndMap(this.map, file);
 				if(vals) {
 					return vals;
 				}
 				return this.getFile(this.ESLINTRC).then(function(file) {
-					vals = readAndMap(this.map, file, "eslint");
+					vals = readAndMap(this.map, file);
 					if(vals) {
 						return vals;
 					}
@@ -307,29 +298,13 @@ define([
 		}.bind(this));
 	};
 	
-	/**
-	 * @name JavaScriptProject.prototype.getFormattingOptions
-	 * @description Returns project-specific formatting options (if any)
-	 * @function
-	 * @returns {Deferred} A deferred that will resolve to the project-specific formatting options or null
-	 * @see https://github.com/beautify-web/js-beautify
-	 */
-	JavaScriptProject.prototype.getFormattingOptions = function getESlintOptions() {
-		if(this.map.formatting) {
-			return new Deferred().resolve(this.map.formatting);
-		}
-		return this.getFile(this.JSBEAUTIFYRC).then(function(file) {
-			return readAndMap(this.map, file, "formatting");
-		}.bind(this));
-	};
-
-	function readAndMap(map, file, key) {
+	function readAndMap(map, file) {
 		if(file && file.contents) {
 			try {
 				var vals = JSON.parse(file.contents);
 				if(Object.keys(vals).length > 0) {
-					map[key]= vals;
-					return map[key];
+					map.eslint = vals;
+					return map.eslint;
 				}
 			} catch(e) {
 				//fall through and return null

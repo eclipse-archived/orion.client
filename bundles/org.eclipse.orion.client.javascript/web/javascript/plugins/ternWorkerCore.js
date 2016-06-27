@@ -508,40 +508,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 			} else {
 		       callback(null, {message: Messages['failedToComputeOccurrencesNoServer']});
 		   }
-		},
-		/* lint message handler */
-		'beautify': function(args, callback) {
-			if(ternserver) {
-				var query =
-					{
-						type: "beautify",  //$NON-NLS-1$
-						file: args.meta.location,
-						args: {
-							config: args.config,
-							start: args.start,
-							end: args.end,
-							contentType: args.contentType
-						}
-					};
-				ternserver.request(
-					{
-						query: query,
-						files: args.files
-					},
-					function(error, text) {
-						if(error) {
-							callback({request: 'beautify', error: error.message, message: Messages['failedToFormat']}); //$NON-NLS-1$
-						} else if(text) {
-							callback({request: 'beautify', text: text}); //$NON-NLS-1$
-						} else {
-							callback({request: 'beautify', text: ""}); //$NON-NLS-1$
-						}
-					}
-				);
-			} else {
-				callback(null, {message: Messages['failedToFormatNoServer']});
-			}
-		},
+		}
 	};
 
 	var ternID = 0;
