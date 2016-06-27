@@ -117,6 +117,116 @@ define([
 		return filtered;
 	}
 
+	/**
+	 * The Tern delegate
+	 * @since 13.0
+	 */
+	var _tern = {
+		init: function init(server, file) {
+			this.server = server;
+			this.plugins = server.options.plugins;
+			this.optionalPlugins = server.options.optionalPlugins;
+			this.file = file;
+		},
+		findRefs: function findRefs(query, file) {
+			try {
+				return tern.findRefs(this.server, query, file);
+			} catch(e) {
+				if (!e.name || e.name !== "TernError") {
+					throw e;
+				}
+			}
+		},
+		findRefsToVariable: function findRefsToVariable(query, file, expr, checkShadowing) {
+			try {
+				return tern.findRefsToVariable(this.server, query, file, expr, checkShadowing);
+			} catch(e) {
+				if (!e.name || e.name !== "TernError") {
+					throw e;
+				}
+			}
+		},
+		findRefsToProperty: function findRefsToProperty(query, expr, prop) {
+			try {
+				return tern.findRefsToProperty(this.server, query, expr, prop);
+			} catch(e) {
+				if (!e.name || e.name !== "TernError") {
+					throw e;
+				}
+			}
+		},
+		ternError: function ternError(msg) {
+			return tern.ternError(msg);
+		},
+		findQueryExpr: function findQueryExpr(file, query, wide) {
+			try {
+				return tern.findQueryExpr(file, query, wide);
+			} catch(e) {
+				if (!e.name || e.name !== "TernError") {
+					throw e;
+				}
+			}
+		},
+		findExprType: function findExprType(query, file, expr) {
+			try {
+				return tern.findExprType(this.server, query, file, expr);
+			} catch(e) {
+				if (!e.name || e.name !== "TernError") {
+					throw e;
+				}
+			}
+		},
+		getDef: function getDef(defName) {
+			for(var i = 0, len = this.server.defs.length; i < len; i++) {
+				var def = this.server.defs[i];
+				if(def && (def['!name'] === defName || def[defName])) {
+					return def;
+				}
+			}
+		},
+		libKnown: function libKnown(name) {
+			if(this.server.mod && this.server.mod.modules) {
+				if(this.server.mod.modules.knownModules && this.server.mod.modules.knownModules[name]) {
+					return true;
+				}
+				var keys = Object.keys(this.server.mod.modules.modules);
+				for(var i = 0, len = keys.length; i < len; i++) {
+					var mod = this.server.mod.modules.modules[keys[i]];
+					if(mod && mod.modName === name) {
+						return true;
+					}
+				}
+			}
+			if(this.server.mod && this.server.mod.requireJS && this.server.mod.requireJS.interfaces) {
+				keys = Object.keys(this.server.mod.requireJS.interfaces);
+				for(i = 0, len = keys.length; i < len; i++) {
+					mod = this.server.mod.requireJS.interfaces[keys[i]];
+					if(mod && mod.reqName === name) {
+						return true;
+					}
+				}
+			}
+			return false;
+		},
+		getEnvFromDep: function getEnvFromDep(depName) {
+			var deps = this.file.ast.dependencies;
+			for(var i = 0, len = deps.length; i< len; i++) {
+				if(deps[i].value === depName) {
+					return deps[i].env;
+				}
+			}
+		},
+		pluginRunning: function pluginRunning(pluginName) {
+			return this.server.plugins[pluginName];
+		},
+		isLoadEagerly: function isLoadEagerly(fileName) {
+			if(this.server.options && Array.isArray(this.server.options.loadEagerly)) {
+				return this.server.options.loadEagerly.length > 0 && this.server.options.loadEagerly.indexOf(fileName) > -1;
+			}
+			return false;
+		}
+	};
+
 	tern.defineQueryType("lint", {
 		takesFile: true,
 		/**
@@ -124,109 +234,8 @@ define([
 		 */
 		run: function(server, query, file) {
 			var config = query.config;
-			var _tern = Object.create(null);
-			// delegate tern functions
-			_tern.findRefs = function(query, file) {
-				try {
-					return tern.findRefs(server, query, file);
-				} catch(e) {
-					if (!e.name || e.name !== "TernError") {
-						throw e;
-					}
-				}
-			};
-			_tern.findRefsToVariable = function(query, file, expr, checkShadowing) {
-				try {
-					return tern.findRefsToVariable(server, query, file, expr, checkShadowing);
-				} catch(e) {
-					if (!e.name || e.name !== "TernError") {
-						throw e;
-					}
-				}
-			};
-			_tern.findRefsToProperty = function(query, expr, prop) {
-				try {
-					return tern.findRefsToProperty(server, query, expr, prop);
-				} catch(e) {
-					if (!e.name || e.name !== "TernError") {
-						throw e;
-					}
-				}
-			};
-			_tern.ternError = function(msg) {
-				return tern.ternError(msg);
-			};
-			_tern.findQueryExpr = function(file, query, wide) {
-				try {
-					return tern.findQueryExpr(file, query, wide);
-				} catch(e) {
-					if (!e.name || e.name !== "TernError") {
-						throw e;
-					}
-				}
-			};
-			_tern.findExprType = function(query, file, expr) {
-				try {
-					return tern.findExprType(server, query, file, expr);
-				} catch(e) {
-					if (!e.name || e.name !== "TernError") {
-						throw e;
-					}
-				}
-			};
-			_tern.plugins = server.options.plugins;
-			_tern.getDef = function(defName) {
-				for(var i = 0, len = server.defs.length; i < len; i++) {
-					var def = server.defs[i];
-					if(def && (def['!name'] === defName || def[defName])) {
-						return def;
-					}
-				}
-			};
-			_tern.libKnown = function libKnown(name) {
-				if(server.mod && server.mod.modules) {
-					if(server.mod.modules.knownModules && server.mod.modules.knownModules[name]) {
-						return true;
-					}
-					var keys = Object.keys(server.mod.modules.modules);
-					for(var i = 0, len = keys.length; i < len; i++) {
-						var mod = server.mod.modules.modules[keys[i]];
-						if(mod && mod.modName === name) {
-							return true;
-						}
-					}
-				}
-				if(server.mod && server.mod.requireJS && server.mod.requireJS.interfaces) {
-					keys = Object.keys(server.mod.requireJS.interfaces);
-					for(i = 0, len = keys.length; i < len; i++) {
-						mod = server.mod.requireJS.interfaces[keys[i]];
-						if(mod && mod.reqName === name) {
-							return true;
-						}
-					}
-				}
-				return false;
-			};
-			_tern.getEnvFromDep = function getEnvFromDep(depName) {
-				var deps = file.ast.dependencies;
-				for(var i = 0, len = deps.length; i< len; i++) {
-					if(deps[i].value === depName) {
-						return deps[i].env;
-					}
-				}
-			};
-			_tern.pluginRunning = function pluginRunning(pluginName) {
-				return server.plugins[pluginName];
-			};
-			_tern.isLoadEagerly = function isLoadEagerly(fileName) {
-				if(server.options && Array.isArray(server.options.loadEagerly)) {
-					return server.options.loadEagerly.length > 0 && server.options.loadEagerly.indexOf(fileName) > -1;
-				}
-				return false;
-			};
-			_tern.optionalPlugins = server.options.optionalPlugins;
-			_tern.file = file;
 			config.tern = _tern;
+			_tern.init(server, file);
 			if (!config.ecmaFeatures) {
 				var features = Object.create(null);
 				features.modules = false;
