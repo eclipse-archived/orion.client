@@ -66,9 +66,14 @@ module.exports = function(options) {
 						writeError(500, res, error);
 						return;
 					}
-				
 					try {
 						var newContents = data.toString();
+						if (newContents.length > 0) {
+							var code = newContents.charCodeAt(0);
+							if (code === 0xFEFF || code === 0xFFFE) {
+								newContents = newContents.substring(1);
+							}
+						}
 						var buffer = {
 							_text: [newContents], 
 							replaceText: function (text, start, end) {
