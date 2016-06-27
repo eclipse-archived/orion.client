@@ -734,13 +734,7 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 		return index.writeTree();
 	})
 	.then(function(oidResult) {
-		oid = oidResult;
-		return git.Reference.nameToId(repo, "HEAD");
-	})
-	.then(function(head) {
-		return repo.getCommit(head);
-	})
-	.then(function(parent) {
+		oid = oidResult;	
 		if (authorEmail) {
 			author = git.Signature.now(authorName, authorEmail);
 		} else {
@@ -750,14 +744,26 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 			committer = git.Signature.now(committerName, committerEmail);
 		} else {
 			committer = clone.getSignature(repo);
+		}	
+		if(repo.isEmpty()){
+			if(insertChangeid) {
+				message = insertChangeId(message, oid, null, author, committer);
+			}
+			return repo.createCommit('HEAD', author, committer, message, oid, []);
 		}
-		if(insertChangeid) {
-			message = insertChangeId(message, oid, parent, author ,committer);
-		}
-		if (amend) {
-			return parent.amend("HEAD",  author, committer, null, message, oid);
-		}
-		return repo.createCommit("HEAD", author, committer, message, oid, [parent]);
+		return git.Reference.nameToId(repo, "HEAD")
+		.then(function(head) {
+			return repo.getCommit(head);
+		})
+		.then(function(parent) {				
+			if(insertChangeid) {
+				message = insertChangeId(message, oid, parent, author, committer);
+			}
+			if (amend) {
+				return parent.amend("HEAD",  author, committer, null, message, oid);
+			}
+			return repo.createCommit("HEAD", author, committer, message, oid, [parent]);
+		});
 	})
 	.then(function(id) {
 		return git.Commit.lookup(repo, id);
