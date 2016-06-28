@@ -2045,6 +2045,19 @@ define([
         					var lib = args[0];
         					if(lib.type === "Literal" && lib.value.charAt(0) !== '.') { //we don't check relative libs
         						var tern = context.getTern();
+        						if(tern.file.ast && tern.file.ast.environments) {
+        							var envs = tern.file.ast.environments;
+        							if(envs.node) {
+        								if(!envs.amd && !tern.pluginRunning('node')) {
+        									context.report(lib, ProblemMessages['unknown-require-not-running'], {0: 'node', pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: 'node'});
+        									return;
+        								}
+        								if(envs.amd && !tern.pluginRunning('commonjs')) {
+        									context.report(lib, ProblemMessages['unknown-require-not-running'], {0: 'commonjs', pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: 'commonjs'});
+        									return;
+        								}
+        							}
+        						}
         						if(tern.plugins[lib.value]) { //it has a named plugin
         							checkDirective(lib);
         							return;
