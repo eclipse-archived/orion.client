@@ -391,8 +391,9 @@ var exports = {};
 					remoteLocation = item.Location;
 				}
 				
-				if (data.parameters.valueFor("name") && data.parameters.valueFor("url")) { //$NON-NLS-1$ //$NON-NLS-0$
-					createRemoteFunction(remoteLocation, data.parameters.valueFor("name"), data.parameters.valueFor("url"),  data.parameters.valueFor("isGerrit")); //$NON-NLS-1$ //$NON-NLS-0$
+				var remoteUrl = data.parameters.valueFor("url").replace(/^git clone /, "");
+				if (data.parameters.valueFor("name") && remoteUrl) { //$NON-NLS-1$ //$NON-NLS-0$
+					createRemoteFunction(remoteLocation, data.parameters.valueFor("name"), remoteUrl,  data.parameters.valueFor("isGerrit")); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			},
 			visibleWhen: function(item) {
