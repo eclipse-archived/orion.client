@@ -439,19 +439,30 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 								var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 								var message = i18nUtil.formatMessage(isCopy ? messages["Copying ${0}"] : messages["Moving ${0}"], item.Location);
 								if (isCopy && item.parent && item.parent.Location === location) {
-									newName = window.prompt(i18nUtil.formatMessage(messages["EnterName"], item.Name), i18nUtil.formatMessage(messages["Copy of ${0}"], item.Name));
-									// user cancelled?  don't copy this one
-									if (!newName) {
-										location = null;
+									commandService.prompt(null, i18nUtil.formatMessage(messages['EnterName'], item.Name), messages['OK'], messages['Cancel'], 
+										i18nUtil.formatMessage(messages['Copy of ${0}'], item.Name), false, function(newName) {
+											// user cancelled?  don't copy this one
+											if (!newName) {
+												location = null;
+											}
+											if (location) {
+												var deferred1 = func.apply(fileClient, [item.Location, targetFolder.Location, newName]);
+												deferreds.push(progressService.showWhile(deferred1, message).then(
+													function() {
+													},
+													errorHandler
+												));
+											}
+										});
+								}else{
+									if (location) {
+										var deferred = func.apply(fileClient, [item.Location, targetFolder.Location, newName]);
+										deferreds.push(progressService.showWhile(deferred, message).then(
+											function() {
+											},
+											errorHandler
+										));
 									}
-								}
-								if (location) {
-									var deferred = func.apply(fileClient, [item.Location, targetFolder.Location, newName]);
-									deferreds.push(progressService.showWhile(deferred, message).then(
-										function(newItem) {
-										},
-										errorHandler
-									));
 								}
 							});
 							Deferred.all(deferreds).then(function() {
@@ -1295,20 +1306,31 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 									}
 								}
 								if (prompt) {
-									name = window.prompt(i18nUtil.formatMessage(messages['EnterName'], selectedItem.Name), i18nUtil.formatMessage(messages['Copy of ${0}'], selectedItem.Name));
-									// user cancelled?  don't copy this one
-									if (!name) {
-										location = null;
+									var node = document.getElementById("pageSidebar" + item.Location.split('/').slice(1).join(""));
+									commandService.prompt(node, i18nUtil.formatMessage(messages['EnterName'], selectedItem.Name), messages['OK'], messages['Cancel'], 
+										i18nUtil.formatMessage(messages['Copy of ${0}'], selectedItem.Name), false, function(name) {
+											// user cancelled?  don't copy this one
+											if (!name) {
+												location = null;
+											}	
+											if (location) {
+												var deferred1 = fileOperation.apply(fileClient, [location, itemLocation, name]);
+												var messageKey1 = isCutInProgress ? "Moving ${0}": "Pasting ${0}"; //$NON-NLS-1$ //$NON-NLS-0$
+												deferreds.push(progressService.showWhile(deferred1, i18nUtil.formatMessage(messages[messageKey1], location)).then(
+													function() {
+													},
+													errorHandler));
+											}
+									});
+								}else{
+									if (location) {
+										var deferred = fileOperation.apply(fileClient, [location, itemLocation, name]);
+										var messageKey = isCutInProgress ? "Moving ${0}": "Pasting ${0}"; //$NON-NLS-1$ //$NON-NLS-0$
+										deferreds.push(progressService.showWhile(deferred, i18nUtil.formatMessage(messages[messageKey], location)).then(
+											function() {
+											},
+											errorHandler));
 									}
-								}
-								if (location) {
-									var deferred = fileOperation.apply(fileClient, [location, itemLocation, name]);
-									var messageKey = isCutInProgress ? "Moving ${0}": "Pasting ${0}"; //$NON-NLS-1$ //$NON-NLS-0$
-									var eventType = isCutInProgress ? "move": "copy"; //$NON-NLS-1$ //$NON-NLS-0$
-									deferreds.push(progressService.showWhile(deferred, i18nUtil.formatMessage(messages[messageKey], location)).then(
-										function(result) {
-										},
-										errorHandler));
 								}
 							}
 						});
