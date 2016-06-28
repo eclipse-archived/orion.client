@@ -198,20 +198,12 @@ function createTab(url) {
 	iframe.frameBorder = "0";
 	iframe.classList.add("tabContent");
 	iframe.src = url;
-	var __dialogModule = electron.remote.dialog;
-	var __clipboardModule = electron.clipboard;
-	var __autoUpdaterModule = electron.remote.autoUpdater;
 	var id = Date.now();
 	iframe.id = "iframe"+ id;
 	iframe.addEventListener("load", function() {
-		
 		iframe.contentWindow.confirm = window.confirm;
 		iframe.contentWindow.alert = window.alert;
-		iframe.contentWindow.__dialogModule = __dialogModule;
-		iframe.contentWindow.__clipboardModule = __clipboardModule;
-		if (__autoUpdaterModule.updateURL) {
-			iframe.contentWindow.__autoUpdaterModule = __autoUpdaterModule;
-		}
+		iframe.contentWindow.__electron = electron;
 		
 		var target = iframe.contentDocument.querySelector('head > title');
 		if (target) {

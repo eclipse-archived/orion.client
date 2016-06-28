@@ -189,9 +189,9 @@ define([
 				if (util.isElectron) {
 					var clearLocalStorage = this._makeMenuItem(messages["Clear Local Storage"], function() { localStorage.clear(); });
 					getCategory(0).appendChild(clearLocalStorage.parentNode);
-					 if (window.__autoUpdaterModule) {
+					 if (window.__electron.remote.autoUpdater.updateURL) {
 						var checkForUpdates = this._makeMenuItem(messages["Check for Updates"], function() {
-							window.__autoUpdaterModule.checkForUpdates();
+							window.__electron.remote.autoUpdater.checkForUpdates();
 						});
 						getCategory(0).appendChild(checkForUpdates.parentNode);
 					 }

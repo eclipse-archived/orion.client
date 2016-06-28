@@ -6108,7 +6108,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				return convert(clipboardData.getData(util.isIE ? "Text" : "text/plain")); //$NON-NLS-1$"//$NON-NLS-2$
 			}
 			if (util.isElectron && !evt) {
-				return convert(window.__clipboardModule.readText());
+				return convert(window.__electron.clipboard.readText());
 			}
 			if (util.isFirefox) {
 				this._ignoreFocus = true;
@@ -6835,7 +6835,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 		},
 		_setClipboardText: function (text, evt) {
 			if (util.isElectron && !evt) {
-				window.__clipboardModule.writeText(text);
+				window.__electron.clipboard.writeText(text);
 				return true;
 			}
 			var clipboardText;
