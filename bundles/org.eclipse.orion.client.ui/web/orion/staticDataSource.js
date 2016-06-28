@@ -17,6 +17,7 @@ define([
 	"orion/editor/stylers/application_javascript/syntax",
 	"orion/editor/stylers/application_vnd.coffeescript/syntax",
 	"orion/editor/stylers/application_x-jsp/syntax",
+	"orion/editor/stylers/application_x-sh/syntax",
 	"orion/editor/stylers/application_xquery/syntax",
 	"orion/editor/stylers/application_sql/syntax",
 	"orion/editor/stylers/text_css/syntax",
@@ -49,7 +50,7 @@ define([
 	'orion/editor/stylers/application_x-ejs/syntax',
 	'orion/editor/stylers/application_xml/syntax',
 	'orion/editor/stylers/text_x-yaml/syntax',
-], function(Deferred, mStyler, mJS, mCoffeescript, mJSP, mXQuery, mSQL, mCss, mScss, mLess, mHtml, mJSX, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mProperties, mSmarty, mSwift, mTypescript, mVB, mVBHTML, mEJS, mXml, mYaml) {
+], function(Deferred, mStyler, mJS, mCoffeescript, mJSP, mBash, mXQuery, mSQL, mCss, mScss, mLess, mHtml, mJSX, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mProperties, mSmarty, mSwift, mTypescript, mVB, mVBHTML, mEJS, mXml, mYaml) {
 	var ContentTypes = [
 		{	id: "text/plain",
 			name: "Text",
@@ -127,6 +128,11 @@ define([
 			name: "Java Server Page",
 			extension: ["jsp"]
 		},
+		{	id: "application/x-sh",
+			"extends": "text/plain",
+			name: "Bash",
+			extension: ["sh"]
+		},
 		{	id: "text/x-jade",
 			"extends": "text/plain",
 			name: "Jade",
@@ -196,11 +202,6 @@ define([
 			"extends": "text/plain",
 			name: "Conf",
 			extension: ["conf"]
-		},
-		{	id: "text/sh",
-			"extends": "text/plain",
-			name: "sh",
-			extension: ["sh"]
 		},
 		{	id: "application/browser-renderable",
 			name: "browser-renderable"
@@ -347,6 +348,9 @@ define([
 						break;
 					case "application/x-ejs": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mEJS.grammars, "orion.ejs", fileContentType.id); //$NON-NLS-0$
+						break;
+					case "application/x-sh": //$NON-NLS-0$
+						stylerAdapter = new mStyler.createPatternBasedAdapter(mBash.grammars, "orion.bash", fileContentType.id); //$NON-NLS-0$
 						break;
 					case "text/css": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mCss.grammars, "orion.css", fileContentType.id); //$NON-NLS-0$

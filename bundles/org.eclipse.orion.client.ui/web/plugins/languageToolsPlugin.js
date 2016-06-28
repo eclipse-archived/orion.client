@@ -13,6 +13,7 @@
 define([
 	'orion/plugin',
 	'plugins/languages/arduino/arduinoPlugin',
+	'plugins/languages/bash/bashPlugin',
 	'plugins/languages/c/cPlugin',
 	'plugins/languages/coffeescript/coffeescriptPlugin',
 	'plugins/languages/cpp/cppPlugin',

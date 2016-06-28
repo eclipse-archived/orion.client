@@ -91,6 +91,7 @@
             { name: "plugins/jslintPlugin" },
             { name: "plugins/languageToolsPlugin" },
             { name: "plugins/languages/arduino/arduinoPlugin" },
+            { name: "plugins/languages/bash/bashPlugin" },
             { name: "plugins/languages/c/cPlugin" },
             { name: "plugins/languages/coffeescript/coffeescriptPlugin" },
             { name: "plugins/languages/cpp/cppPlugin" },

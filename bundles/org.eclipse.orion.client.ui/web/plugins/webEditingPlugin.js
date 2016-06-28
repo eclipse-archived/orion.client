@@ -52,7 +52,7 @@ define([
 					name: "Conf",
 					extension: ["conf"]
 				},
-				{	id: "text/sh",
+				{	id: "application/x-sh",
 					"extends": "text/plain",
 					name: "sh",
 					extension: ["sh"]
