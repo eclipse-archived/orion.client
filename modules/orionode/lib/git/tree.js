@@ -71,7 +71,7 @@ function getTree(req, res) {
 	})
 	.then(function(repo) {
 		function shortName(refName) {
-			return refName.replace("refs/remotes/", "").replace("refs/heads/", "").replace("refs/", "");
+			return refName.replace("refs/remotes/", "").replace("refs/heads/", "").replace("refs/tags/", "");
 		}
 		if (!filePath) {
 			var location = fileRoot + (req.params["0"] || "");
