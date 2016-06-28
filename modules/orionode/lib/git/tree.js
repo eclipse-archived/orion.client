@@ -90,12 +90,8 @@ function getTree(req, res) {
 		var segments = filePath.split("/");
 		var ref = util.decodeURIComponent(segments[0]);
 		var p = segments.slice(1).join("/");
-		return repo.getReferenceCommit(ref)
+		return clone.getCommit(repo, ref)
 		.then(function(commit) {
-			return commit;
-		}).catch(function() {
-			return repo.getCommit(ref);
-		}).then(function(commit) {
 			return commit.getTree();
 		}).then(function(tree) {
 			var repoRoot =  clone.getfileDirPath(repo,req); 

@@ -41,6 +41,7 @@ module.exports.router = function(options) {
 	module.exports.getfileRelativePath = getfileRelativePath;
 	module.exports.isWorkspace = isWorkspace;
 	module.exports.getSignature = getSignature;
+	module.exports.getCommit = getCommit;
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -132,6 +133,24 @@ function getfileRelativePath(repo, req) {
 
 function isWorkspace(req){
 	return !fs.existsSync(path.join(req.user.workspaceDir,'.git'));
+}
+
+function getCommit(repo, refOrCommit) {
+	return git.Reference.dwim(repo, refOrCommit).then(function(reference) {
+		if (reference.isTag()) {
+			return repo.getTagByName(reference.shorthand())
+			.then(function(tag){
+				return repo.getCommit(tag.targetId());
+			})
+			.catch(function() {
+				return repo.getReferenceCommit(reference);
+			});
+		}
+		return repo.getReferenceCommit(reference);
+	})
+	.catch(function() {
+		return repo.getCommit(refOrCommit);
+	});
 }
 
 function getClone(req, res) {
