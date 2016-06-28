@@ -48,27 +48,27 @@ define([
 	 * @param token the given token to record
 	 */
 	OrionAcorn.prototype.onToken = function onToken(token) {
-		var type = "Punctuator";
+		var type = "Punctuator"; //$NON-NLS-1$
 		var label = token.type.label;
 		var eof = false;
 		var value = token.value;
 		switch(label) {
 			case "num" :
 				//num: new TokenType("num", startsExpr),
-				type = "Numeric";
+				type = "Numeric"; //$NON-NLS-1$
 				break;
 			case "regexp" :
 				//regexp: new TokenType("regexp", startsExpr),
-				type = "RegularExpression";
+				type = "RegularExpression"; //$NON-NLS-1$
 				token.value = "/" + value.pattern + "/" + (value.flags ? value.flags : "");
 				break;
 			case "string" :
 				//string: new TokenType("string", startsExpr),
-				type = "String";
+				type = "String"; //$NON-NLS-1$
 				break;
 			case "name" :
 				// name: new TokenType("name", startsExpr),
-				type = "Identifier";
+				type = "Identifier"; //$NON-NLS-1$
 				break;
 			case "eof" :
 				//eof: new TokenType("eof)
@@ -79,14 +79,14 @@ define([
 				if (keyword) {
 					switch(keyword) {
 						case "null" :
-							type = "Null";
+							type = "Null"; //$NON-NLS-1$
 							break;
 						case "true" :
 						case "false" :
-							type = "Boolean";
+							type = "Boolean"; //$NON-NLS-1$
 							break;
 						default: 
-							type = "Keyword";
+							type = "Keyword"; //$NON-NLS-1$
 					}
 				}
 		}
@@ -126,7 +126,7 @@ define([
 	 */
 	OrionAcorn.prototype.onComment = function onComment(block, text, start, end, startLoc, endLoc) {
 		var comment = {
-			type: block ? 'Block' : 'Line',
+			type: block ? 'Block' : 'Line', //$NON-NLS-1$ //$NON-NLS-2$
 			value: text,
 			start: start,
 			end: end
@@ -154,9 +154,9 @@ define([
 		var len = args.length;
 		if (len === 0) return;
 		if(callee.name === 'importScripts') {
-			addArrayDeps(args, deps, "browser"); //importScripts('foo', 'bar'...)
+			addArrayDeps(args, deps, "browser"); //importScripts('foo', 'bar'...) //$NON-NLS-1$
 		} else if(callee.name === 'Worker') {
-			addDep(args[0], deps, "browser");
+			addDep(args[0], deps, "browser"); //$NON-NLS-1$
 		} else if(callee.name === 'require') {
 			var _a = args[0];
 			if(_a.type === 'ObjectExpression') {
@@ -164,23 +164,23 @@ define([
 			}
 			if(_a.type === "ArrayExpression") {
 				envs.amd = true;
-				addArrayDeps(_a.elements, deps, "amd"); //require([foo])
+				addArrayDeps(_a.elements, deps, "amd"); //require([foo]) //$NON-NLS-1$
 			} else if(_a.type === "Literal") {
 				envs.node = true;
-				addDep(_a, deps, "node"); // require('foo')
+				addDep(_a, deps, "node"); // require('foo') //$NON-NLS-1$
 			}
 			if(len > 1) {
 				_a = args[1];
 				if(_a.type === "ArrayExpression") {
 					envs.node = true;
-					addArrayDeps(_a.elements, deps, "node");
+					addArrayDeps(_a.elements, deps, "node"); //$NON-NLS-1$
 				}
 			}
 		} else if(callee.name === 'requirejs') {
 			_a = args[0];
 			if(_a.type === "ArrayExpression") {
 				envs.amd = true;
-				addArrayDeps(_a.elements, deps, "amd"); //requirejs([foo])
+				addArrayDeps(_a.elements, deps, "amd"); //requirejs([foo]) //$NON-NLS-1$
 			}
 		} else if(callee.name === 'define' && len > 0) {
 			_a = args[0];
@@ -189,7 +189,7 @@ define([
 			}
 			if(_a.type === "ArrayExpression") {
 				envs.amd = true;
-				addArrayDeps(_a.elements, deps, "amd");
+				addArrayDeps(_a.elements, deps, "amd"); //$NON-NLS-1$
 			} else if(_a.type === "FunctionExpression" || _a.type === 'ObjectExpression') {
 				envs.amd = true;
 			}
@@ -247,7 +247,7 @@ define([
 			return ret;
 		}
 
-		instance.extend("raise", function(nextMethod) {
+		instance.extend("raise", function(nextMethod) { //$NON-NLS-1$
 			function recordError(errors, error) {
 				var len = errors.length;
 				for (var e = 0; e < len; e++) {
@@ -349,7 +349,7 @@ define([
 				var lineBreakG = new RegExp(lineBreak.source, "g");
 
 				var startLoc = this.curPosition();
-				var start = this.pos, end = this.input.indexOf("*/", this.pos += 2);
+				var start = this.pos, end = this.input.indexOf("*/", this.pos += 2); //$NON-NLS-1$
 				if (end !== -1) {
 					this.pos -= 2;
 					return nextMethod.call(this);
@@ -409,7 +409,7 @@ define([
 		options.allowImportExportEverywhere = false;
 		if (!options.sourceType) {
 			// set a default value
-			options.sourceType = "script";
+			options.sourceType = "script"; //$NON-NLS-1$
 		}
 		options.allowHashBang = true;
 		if(typeof options.ecmaVersion !== 'number' || (options.ecmaVersion < 3 || options.ecmaVersion > 7)) {
@@ -451,7 +451,7 @@ define([
 		Object.keys(this.dependencies).forEach(function(dep) {
 			var _d = this.dependencies[dep];
 			if(this.environments.amd && _d.env === 'node' || this.environments.node && _d.env === 'amd') {
-				_d.env = 'commonjs';
+				_d.env = 'commonjs'; //$NON-NLS-1$
 			}
 			ast.dependencies.push(_d);
 		}.bind(this));
