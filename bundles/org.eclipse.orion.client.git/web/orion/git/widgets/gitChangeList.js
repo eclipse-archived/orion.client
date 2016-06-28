@@ -1020,12 +1020,21 @@ define([
 						moreDiv.appendChild(signedOffDiv);
 						explorer.signedOffByCheck = createInput(signedOffDiv, "signedOfByCheck", 'SmartSignedOffById', null, null, true); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						explorer.signedOffByCheck.addEventListener("click", function() { //$NON-NLS-0$
-							var repository = explorer.model.repository;
-							var msg = mGitUtil.changeSignedOffByCommitMessage(explorer.authorNameInput.value, 
-								explorer.authorEmailInput.value, textArea.value, explorer.signedOffByCheck.checked);
-							textArea.value = msg;
-							textArea.parentNode.classList.remove("invalidParam"); //$NON-NLS-0$
-							explorer.updateSelectionStatus();
+							function filledAuthor(check){
+								if (!checkParam(check,explorer.authorNameInput, null, true)) return false;
+								if (!checkParam(check,explorer.authorEmailInput, null, true)) return false;
+								return true;
+							}
+							if(!filledAuthor(true)){
+								this.checked = false;
+							}else{
+								var repository = explorer.model.repository;
+								var msg = mGitUtil.changeSignedOffByCommitMessage(explorer.authorNameInput.value, 
+									explorer.authorEmailInput.value, textArea.value, explorer.signedOffByCheck.checked);
+								textArea.value = msg;
+								textArea.parentNode.classList.remove("invalidParam"); //$NON-NLS-0$
+								explorer.updateSelectionStatus();
+							}
 						});
 							
 						var div1Content = createGroup(moreDiv, "Author:"); //$NON-NLS-0$
@@ -1061,23 +1070,23 @@ define([
 						explorer.getMoreVisible = function() {
 							return moreDiv.style.display !== "none"; //$NON-NLS-0$
 						};
-						explorer.getCommitInfo = function (check) {
-							function checkParam (node, invalidNode, show) {
-								if (!check) return true;
-								if (!node.value.trim()) {
-									(invalidNode || node).classList.add("invalidParam"); //$NON-NLS-0$
-									if (show) explorer.setMoreVisible(true);
-									node.select();
-									return false;
-								}
-								(invalidNode || node).classList.remove("invalidParam"); //$NON-NLS-0$
-								return true;
+						function checkParam (check, node, invalidNode, show) {
+							if (!check) return true;
+							if (!node.value.trim()) {
+								(invalidNode || node).classList.add("invalidParam"); //$NON-NLS-0$
+								if (show) explorer.setMoreVisible(true);
+								node.select();
+								return false;
 							}
-							if (!checkParam(explorer.messageTextArea, explorer.messageTextArea.parentNode)) return null;
-							if (!checkParam(explorer.authorNameInput, null, true)) return null;
-							if (!checkParam(explorer.authorEmailInput, null, true)) return null;
-							if (!checkParam(explorer.committerNameInput, null, true)) return null;
-							if (!checkParam(explorer.committerEmailInput, null, true)) return null;
+							(invalidNode || node).classList.remove("invalidParam"); //$NON-NLS-0$
+							return true;
+						}
+						explorer.getCommitInfo = function (check) {
+							if (!checkParam(check,explorer.messageTextArea, explorer.messageTextArea.parentNode)) return null;
+							if (!checkParam(check,explorer.authorNameInput, null, true)) return null;
+							if (!checkParam(check,explorer.authorEmailInput, null, true)) return null;
+							if (!checkParam(check,explorer.committerNameInput, null, true)) return null;
+							if (!checkParam(check,explorer.committerEmailInput, null, true)) return null;
 							return {
 								Message: explorer.messageTextArea.value.trim(),
 								Amend: explorer.amendCheck.checked,
