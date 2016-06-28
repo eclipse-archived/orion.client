@@ -269,7 +269,7 @@ define([
 				this.section.filterBox.destroy();
 			}
 			this.section.filterBox = uiUtil.createFilter(this.section, messages["Filter references"],  function(value) {
-				this.model.filterQuery = "filter=" + encodeURIComponent(value); //$NON-NLS-0$
+				this.model.filterQuery = "filter=" + encodeURIComponent(value.trim()); //$NON-NLS-0$
 				this.changedItem().then(function () {
 					if (this.model.filterQuery)
 					for (var i=0; i<this.model.root.children.length; i++) {
