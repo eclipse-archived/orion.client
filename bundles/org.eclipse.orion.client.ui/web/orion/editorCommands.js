@@ -650,10 +650,10 @@ define([
 				tooltip: messages.OpenFolderTip,
 				id: "orion.edit.openFolder", //$NON-NLS-0$
 				visibleWhen: /** @callback */ function(items, data) {
-					return !!window.__dialogModule;
+					return util.isElectron;
 				},
 				callback: function() {
-					window.__dialogModule.showOpenDialog({properties: ['openDirectory']}, function(result) {
+					window.__electron.remote.dialog.showOpenDialog({properties: ['openDirectory']}, function(result) {
 						if (!result) return;
 						that.fileClient.changeWorkspace(result[0]).then(function() {
 							return that.updateWorkspacePrefs(result[0]);
@@ -678,7 +678,7 @@ define([
 						selectionClass: "dropdownSelection", //$NON-NLS-0$
 						id: "orion.edit.openRecent", //$NON-NLS-0$
 						visibleWhen: /** @callback */ function(items, data) {
-							return !!window.__dialogModule && !!recentworkspaces;
+							return util.isElectron && !!recentworkspaces;
 						},
 						choiceCallback: function() {
 							return recentworkspaces.map(function(folderLocation) {

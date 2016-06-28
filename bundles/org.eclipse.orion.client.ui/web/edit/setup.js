@@ -854,7 +854,6 @@ objects.mixin(EditorSetup.prototype, {
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$
 			this.setInput(PageUtil.hash());
 		}.bind(this));
-
 		window.onbeforeunload = function() {
 			var dirty, autoSave;
 			this.editorViewers.forEach(function(viewer) {
@@ -867,7 +866,18 @@ objects.mixin(EditorSetup.prototype, {
 					}
 				}
 			});
-			return dirty ? (autoSave ? messages.unsavedAutoSaveChanges : messages.unsavedChanges) : undefined;
+			var unsavedMessage = dirty ? (autoSave ? messages.unsavedAutoSaveChanges : messages.unsavedChanges) : undefined;
+			if(util.isElectron && dirty){
+				window.__electron.remote.dialog.showMessageBox(
+				 window.__electron.remote.getCurrentWindow(),
+	        	{
+	                type: 'warning',
+	                buttons: [messages["OK"]],
+	                title: messages["Orion"],
+	                message: unsavedMessage
+	            });
+         	}
+			return unsavedMessage;
 		}.bind(this);
 	},
 
