@@ -128,9 +128,8 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		toggle: function(mouseEvent /* optional */) {
 			if (this.isVisible()) {
 				return this.close();
-			} else {
-				return this.open(mouseEvent);
 			}
+			return this.open(mouseEvent);
 		},
 		
 		/**
@@ -170,7 +169,15 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					this._dropdownNode.classList.add("dropdownMenuOpen"); //$NON-NLS-0$
 					this._isVisible = true;
 					
+					if (this._dropdownNode.scrollHeight > this._dropdownNode.offsetHeight) {
+						this._buttonsAdded = addScrollButtons.call(this);
+					}
+					
 					this._positionDropdown(mouseEvent);
+					
+					if (this._buttonsAdded) {
+						positionScrollButtons.call(this);
+					}					
 					
 					this._focusDropdownNode();
 					actionTaken = true;
@@ -227,7 +234,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 				} else {
 					var totalBounds = lib.bounds(this._boundingNode(this._triggerNode));
 					var triggerBounds = lib.bounds(this._triggerNode);
-					this._dropdownNode.style.left = (triggerBounds.left  - totalBounds.left - bounds.width + triggerBounds.width) + "px"; //$NON-NLS-0$
+					this._dropdownNode.style.left = (triggerBounds.left - totalBounds.left - bounds.width + triggerBounds.width) + "px"; //$NON-NLS-0$
 				}
 			}
 			
@@ -249,7 +256,6 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 			}
 			return this._boundingNode(node.parentNode);
 		},
-		
 		
 		/**
 		 * Close the dropdown.
@@ -277,6 +283,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					lib.removeAutoDismiss(this._boundAutoDismiss);
 					this._boundAutoDismiss = null;
 				} 
+				updateScrollButtonVisibility.call(this, true);
 				actionTaken = true;
 			}
 			return actionTaken;
@@ -388,6 +395,17 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 			 	}
 			 	this._selectedItem = itemToSelect;
 			 	this._selectedItem.classList.add("dropdownMenuItemSelected"); //$NON-NLS-0$	
+			 	if (this._buttonsAdded) {
+			 		var itemBounds = this._selectedItem.getBoundingClientRect();
+			 		var menuBounds = this._dropdownNode.getBoundingClientRect();
+			 		if (this._selectedItem.offsetTop < this._dropdownNode.scrollTop) {
+		 				this._selectedItem.scrollIntoView(true);
+		 			}
+		 			else if (itemBounds.bottom > menuBounds.bottom) {
+		 				this._selectedItem.scrollIntoView(false);
+		 			}
+		 			updateScrollButtonVisibility.call(this);
+				}
 		 	}
 		 	if (document.activeElement !== this._dropdownNode) {
 		 		// ensure that the dropdown node has the focus in 
@@ -495,6 +513,91 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		span.classList.add("dropdownKeyBinding"); //$NON-NLS-0$
 		span.appendChild(document.createTextNode(keyBindingString));
 		element.appendChild(span);
+	}
+	
+	/**
+	 * Adds scrolling feature to a list
+	*/
+	function addScrollButtons() {
+		var dropdown = this;
+
+		if(!this._topScrollButton && !this._bottomScrollButton) { // if scroll buttons haven't been made yet
+			this._topScrollButton = document.createElement("button");
+			this._bottomScrollButton = document.createElement("button");
+			this._topScrollButton.classList.add("menuScrollButton", "menuTopScrollButton", "core-sprite-openarrow");
+			this._bottomScrollButton.classList.add("menuScrollButton", "menuBottomScrollButton", "core-sprite-openarrow");
+
+			var activeScrollIntervalId;
+			this._topScrollButton.addEventListener("mouseenter", function() {
+				clearInterval();
+				activeScrollIntervalId = window.setInterval(scrollUp, 10);
+			});
+			this._bottomScrollButton.addEventListener("mouseenter", function() {
+				clearInterval();
+				activeScrollIntervalId = window.setInterval(scrollDown, 10);
+			});
+			this._topScrollButton.addEventListener("mouseleave", function() { clearInterval(); });
+			this._bottomScrollButton.addEventListener("mouseleave", function() { clearInterval(); });
+		
+			this._dropdownNode.parentNode.insertBefore(this._topScrollButton, this._dropdownNode);
+			this._dropdownNode.parentNode.insertBefore(this._bottomScrollButton, this._dropdownNode.nextElementSibling);
+			this._dropdownNode.style.overflow = "hidden";
+		}
+		
+		updateScrollButtonVisibility.call(this);
+		return true;
+		
+		function scrollDown() {
+			dropdown._dropdownNode.scrollTop+=2;
+			updateScrollButtonVisibility.call(dropdown);
+		}
+		
+		function scrollUp() {
+			dropdown._dropdownNode.scrollTop-=2;
+			updateScrollButtonVisibility.call(dropdown);
+		}
+		
+		function clearInterval() {
+			if (activeScrollIntervalId) {
+				window.clearInterval(activeScrollIntervalId);
+				activeScrollIntervalId = null;
+			}
+		}
+	}
+	
+	/**
+	 * Hides or shows the scroll buttons
+	 * @param {Boolean} hideAll True if hiding both buttons. Required.
+	 */
+	function updateScrollButtonVisibility(hideAll) {
+		if (hideAll && this._topScrollButton && this._bottomScrollButton) {
+			this._topScrollButton.style.display = "none";
+			this._bottomScrollButton.style.display = "none";	
+		}
+		else if (!hideAll) {
+			if (this._dropdownNode.scrollTop > 0) {
+				this._topScrollButton.style.display = "block";
+			} 
+			else {
+				this._topScrollButton.style.display = "none";
+			}	
+			if (this._dropdownNode.scrollHeight > this._dropdownNode.scrollTop + this._dropdownNode.offsetHeight) {
+				this._bottomScrollButton.style.display = "block";
+			}	 
+			else {
+				this._bottomScrollButton.style.display = "none";
+			}
+		}
+	}
+	
+	/**
+	 * Positions the top and bottom scroll buttons according to where the dropdown list is positioned
+	*/
+	function positionScrollButtons() {
+		this._topScrollButton.style.top = this._dropdownNode.style.top;
+		this._topScrollButton.style.left = this._dropdownNode.style.left;
+		this._bottomScrollButton.style.top = Number(this._dropdownNode.style.top.replace("px", ""))+300+"px"; // 316-16=300px where 300px is max-height of a dropdownSubMenu and 16px is more than half of the button height
+		this._bottomScrollButton.style.left = this._dropdownNode.style.left;
 	}
 		
 	Dropdown.prototype.constructor = Dropdown;

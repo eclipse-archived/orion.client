@@ -715,6 +715,7 @@ a.breadcrumb.currentLocation {
 .dropdownSubMenu > ul {
 	top: 0;
 	left: 100%;
+	max-height: 316px;
 }
 
 .dropdownMenu > li {
