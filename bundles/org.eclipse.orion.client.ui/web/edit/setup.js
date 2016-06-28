@@ -625,7 +625,6 @@ objects.mixin(EditorSetup.prototype, {
 	},
 	
 	createSideBar: function() {
-		var commandRegistry = this.commandRegistry;
 		// Create input manager wrapper to handle multiple editors
 		function EditorInputManager() {
 			EventTarget.attach(this);
@@ -713,7 +712,7 @@ objects.mixin(EditorSetup.prototype, {
 	 */
 	computeNavigationHref: function(item, options) {
 		var openWithCommand = mExtensionCommands.getOpenWithCommand(this.commandRegistry, item);
-		if (openWithCommand && typeof(openWithCommand.hrefCallback) === 'function') {
+		if (openWithCommand && typeof openWithCommand.hrefCallback === 'function') {
 			return openWithCommand.hrefCallback({items: objects.mixin({}, item, {params: options})});
 		}
 		if(options) {
@@ -869,14 +868,14 @@ objects.mixin(EditorSetup.prototype, {
 			var unsavedMessage = dirty ? (autoSave ? messages.unsavedAutoSaveChanges : messages.unsavedChanges) : undefined;
 			if(util.isElectron && dirty){
 				window.__electron.remote.dialog.showMessageBox(
-				 window.__electron.remote.getCurrentWindow(),
-	        	{
-	                type: 'warning',
-	                buttons: [messages["OK"]],
-	                title: messages["Orion"],
-	                message: unsavedMessage
-	            });
-         	}
+					window.__electron.remote.getCurrentWindow(),
+					{
+						type: 'warning',
+						buttons: [messages["OK"]],
+						title: messages["Orion"],
+						message: unsavedMessage
+					});
+			}
 			return unsavedMessage;
 		}.bind(this);
 	},
@@ -1095,7 +1094,7 @@ var setup;
 exports.getEditorViewers = function() {
 	if (!setup) return [];
 	return setup.editorViewers;
-}
+};
 
 exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, readonly) {
 	enableSplitEditor = localStorage.enableSplitEditor !== "false"; //$NON-NLS-0$
