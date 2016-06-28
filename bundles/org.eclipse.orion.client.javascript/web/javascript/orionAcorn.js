@@ -413,7 +413,7 @@ define([
 		}
 		options.allowHashBang = true;
 		if(typeof options.ecmaVersion !== 'number' || (options.ecmaVersion < 3 || options.ecmaVersion > 7)) {
-			options.ecmaVersion = 6; //don't stomp on the value set in Tern
+			options.ecmaVersion = 7; //don't stomp on the value set in Tern
 		}
 		if (!options.directSourceFile && file) {
 			options.directSourceFile = {

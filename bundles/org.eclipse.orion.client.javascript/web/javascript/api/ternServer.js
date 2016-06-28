@@ -455,7 +455,7 @@ define([
             getFile: doRead,
             plugins: defaultOptions.plugins.required,
             defs: defaultOptions.defs,
-            ecmaVersion: 6
+            ecmaVersion: 7
         };
         var pluginsDir = defaultOptions.pluginsDir;
     	var defNames, plugins, projectLoc;
@@ -478,6 +478,10 @@ define([
 						if(e6 > -1) {
 							defNames.slice(e6, e6+1);
 						}
+						var e7 = defNames.indexOf("ecma7"); //$NON-NLS-1$
+						if(e7 > -1) {
+							defNames.slice(e7, e7+1);
+						}
 					} else {
 						defNames = ["ecma5"]; //$NON-NLS-1$
 					}
@@ -489,8 +493,26 @@ define([
 						if(defNames.indexOf("ecma6") < 0) { //$NON-NLS-1$
 							defNames.push("ecma6"); //$NON-NLS-1$
 						}
+						e7 = defNames.indexOf("ecma7"); //$NON-NLS-1$
+						if(e7 > -1) {
+							defNames.slice(e7, e7+1);
+						}
 					} else {
 						defNames = ["ecma5", "ecma6"]; //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				} else if(options.ecmaVersion === 7) {
+					if(Array.isArray(defNames)) {
+						if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
+							defNames.push("ecma5"); //$NON-NLS-1$
+						}
+						if(defNames.indexOf("ecma6") < 0) { //$NON-NLS-1$
+							defNames.push("ecma6"); //$NON-NLS-1$
+						}
+						if(defNames.indexOf("ecma7") < 0) { //$NON-NLS-1$
+							defNames.push("ecma7"); //$NON-NLS-1$
+						}
+					} else {
+						defNames = ["ecma5", "ecma6", "ecma7"]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 				}
 			}

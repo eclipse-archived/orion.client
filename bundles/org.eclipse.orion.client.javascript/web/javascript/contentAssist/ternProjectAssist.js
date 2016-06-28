@@ -43,8 +43,8 @@ define([
 			description: "",
 			template: '{\n'+ //$NON-NLS-1$
 							'\t"plugins": {},\n'+ //$NON-NLS-1$
-							'\t"libs": ["ecma5"],\n'+ //$NON-NLS-1$
-							'\t"ecmaVersion": 5,\n'+ //$NON-NLS-1$
+							'\t"libs": ["ecma5", "ecma6"],\n'+ //$NON-NLS-1$
+							'\t"ecmaVersion": 6,\n'+ //$NON-NLS-1$
 							'\t"loadEagerly": [\n\t\t\n\t]\n'+ //$NON-NLS-1$
 					   '}',
 			doc: Messages['emptyFileTemplateDoc'],

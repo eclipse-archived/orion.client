@@ -4954,6 +4954,97 @@ define([
 						['Number', 'Number', 'The Number JavaScript object is a wrapper']
 					]);
 				});
+				
+				/*
+				 * ECMA 2016 (ES7) completions
+				 */
+				it("Test array completions with ECMA 2016 (ES7)", function(done) {
+					var options = {
+						buffer: "var a = [1, 2, 3]; a.",
+						prefix: "",
+						offset: 21,
+						callback: done
+					};
+					return testProposals(options, [
+						['', 'ecma5'],
+						['concat(other)', 'concat(other)'],
+						['every(test, context?)', 'every(test, context?) : bool'],
+						['filter(test, context?)', 'filter(test, context?)'],
+						['forEach(f, context?)', 'forEach(f, context?)'],
+						['hasOwnProperty(prop)', 'hasOwnProperty(prop) : bool'],
+						['indexOf(elt, from?)', 'indexOf(elt, from?) : number'],
+						['isPrototypeOf(obj)', 'isPrototypeOf(obj) : bool'],
+						['join(separator?)', 'join(separator?) : string'],
+						['lastIndexOf(elt, from?)', 'lastIndexOf(elt, from?) : number'],
+						['map(f, context?)', 'map(f, context?)'],
+						['pop()', 'pop()'],
+						['propertyIsEnumerable(prop)', 'propertyIsEnumerable(prop) : bool'],
+						['push(newelt)', 'push(newelt) : number'],
+						['reduce(combine, init?)', 'reduce(combine, init?)'],
+						['reduceRight(combine, init?)', 'reduceRight(combine, init?)'],
+						['reverse()', 'reverse()'],
+						['shift()', 'shift()'],
+						['slice(from?, to?)', 'slice(from?, to?)'],
+						['some(test, context?)', 'some(test, context?) : bool'],
+						['sort(compare?)', 'sort(compare?)'],
+						['splice(pos, amount, newelt?)', 'splice(pos, amount, newelt?) : [?]'],
+						['toLocaleString()', 'toLocaleString() : string'],
+						['toString()', 'toString() : string'],
+						['unshift(newelt)', 'unshift(newelt) : number'],
+						['valueOf()', 'valueOf() : number'],
+						['length', 'length : number'],
+						['', 'ecma6'],
+						['copyWithin(target, start, end?)', 'copyWithin(target, start, end?)'],
+						['entries()', 'entries()'],
+						['fill(value, start?, end?)', 'fill(value, start?, end?)'],
+						['find(callback, thisArg?)', 'find(callback, thisArg?)'],
+						['findIndex(callback, thisArg?)', 'findIndex(callback, thisArg?) : number'],
+						['keys()', 'keys() : {:t: number}'],
+						['values()', 'values()'],
+						['', 'ecma7'],
+						['includes(value)', 'includes(value) : bool'],
+					]);
+				});
+				it("Test filtered array completions with ECMA 2016 (ES7)", function(done) {
+					var options = {
+						buffer: "var a = [1, 2, 3]; a.inc",
+						prefix: "inc",
+						offset: 24,
+						callback: done
+					};
+					return testProposals(options, [
+						['', 'ecma7'],
+						['includes(value)', 'includes(value) : bool'],
+					]);
+				});
+				it("Test exponentiation completions with ECMA 2016 (ES7) 1", function(done) {
+					var options = {
+						buffer: "var a; var b = 2 ** a",
+						prefix: "a",
+						offset: 21,
+						callback: done
+					};
+					return testProposals(options, [
+						['a', 'a : any'],
+						['', 'ecma5'],
+						['Array(size)', 'Array(size)'],
+						['', 'ecma6'],
+						['ArrayBuffer(length)', 'ArrayBuffer(length)'],
+					]);
+				});
+				it("Test exponentiation completions with ECMA 2016 (ES7) 2", function(done) {
+					var options = {
+						buffer: "var a; var b = 2 ** b",
+						prefix: "b",
+						offset: 21,
+						callback: done
+					};
+					return testProposals(options, [
+						['b', 'b : number'],
+						['', 'ecma5'],
+						['Boolean(value)', 'Boolean(value) : bool']
+					]);
+				});
 			});
 			describe('Node.js Tests', function() {
 				/**
@@ -5443,6 +5534,19 @@ define([
 						contenttype: "text/html",
 						callback: done};
 					testProposals(options, []);
+				});
+				
+				it('HTML - filtered array completions with ECMA 2016 (ES7)', function(done) {
+					var options = {
+						buffer: '<html><body><script>var a = [1, 2, 3]; a.inc</script></body></html>',
+						prefix: "inc",
+						offset: 44,
+						contenttype: "text/html",
+						callback: done};
+					testProposals(options, [
+						['', 'ecma7'],
+						['includes(value)', 'includes(value) : bool'],
+					]);
 				});
 			});
 		});

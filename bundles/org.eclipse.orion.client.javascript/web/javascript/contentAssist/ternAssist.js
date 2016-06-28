@@ -89,14 +89,14 @@ define([
 		            	}, meta);
     			        if(cu.validOffset(params.offset)) {
     			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-			            		return that.doAssist(ast, params, meta, {ecma5:true, ecma6:true, browser:true}, text);
+			            		return that.doAssist(ast, params, meta, {ecma5:true, ecma6:true, ecma7: true, browser:true}, text);
 			            	});
     			        }
     			        return [];
 			        });
 			    } 
 		        return that.astManager.getAST(editorContext).then(function(ast) {
-	        		return that.doAssist(ast, params, meta, {ecma5: true, ecma6: true});
+	        		return that.doAssist(ast, params, meta, {ecma5: true, ecma6: true, ecma7: true});
 	        	});
 			});
 		},

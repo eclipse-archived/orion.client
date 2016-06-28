@@ -15,6 +15,7 @@ define([
 	'i18n!javascript/nls/messages',
 	'json!tern/defs/ecma5.json',
 	'json!tern/defs/ecma6.json',
+	'json!tern/defs/ecma7.json',
 	'json!tern/defs/browser.json',
 	'json!tern/defs/chai.json',
 	
@@ -44,10 +45,10 @@ define([
 	"javascript/ternPlugins/refs",
 	"javascript/ternPlugins/templates",
 	"javascript/ternPlugins/quickfixes"
-], function(Messages, ecma5, ecma6, browser, chai) {
+], function(Messages, ecma5, ecma6, ecma7, browser, chai) {
 	
-	var defs = [ecma5, ecma6, browser, chai];
-	var defNames = ["ecma5", "ecma6", "browser", "chai"]; //these are in the same order to avoid a walk of the array
+	var defs = [ecma5, ecma6, ecma7, browser, chai];
+	var defNames = ["ecma5", "ecma6", "ecma7", "browser", "chai"]; //these are in the same order to avoid a walk of the array
 	
 	var plugins = {
 		required: {
@@ -183,7 +184,7 @@ define([
         debug: false,
         projectDir: 'orionFakeProjectDir', // Tern strips the project dir from any file paths it finds and defaults to '/' so this must be set
         defs: defs,
-        ecmaVersion: 6,
+        ecmaVersion: 7,
         optionalPlugins: {
         	'amqp': 'amqp', 
         	'angular': 'angular', 
