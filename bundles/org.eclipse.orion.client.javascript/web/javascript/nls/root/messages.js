@@ -282,6 +282,14 @@ define({
 	'templatesPlugin': 'Orion code templates',
 	'templatesPluginDescription': 'Provides a variety of code templates for JavaScript in Orion.',
 	
+	// JSDoc types
+	'jsDocEmptyObjDesc': ' - Empty object',
+	'jsDocEmptyObjDoc': 'Represents an object wrapper with no known properties.',
+	'jsDocObjPropDesc': ' - Object with a specific property',
+	'jsDocObjPropDoc': 'Represents an object wrapper with one or more known properties.',
+	'jsDocAnyTypeDesc': ' - No type information',
+	'jsDocAnyTypeDoc': 'Represents that no type information is known. The type is described as the \'any\' type.',
+	
 	// Other messages
 	'unknownError': 'An unknown error occurred.',
 	'failedDeleteRequest': 'Failed to delete file from Tern: ${0}',

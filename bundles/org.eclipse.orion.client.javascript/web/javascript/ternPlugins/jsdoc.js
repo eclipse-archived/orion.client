@@ -166,7 +166,7 @@ define([
 		var theType, proposal, key;
 		var proposals = [];
 		
-		var defaultEnvs = {ecma5: true, ecma6: true};
+		var defaultEnvs = {ecma5: true, ecma6: true, ecma7: true};
 		if (isHTML(file.name)){
 			defaultEnvs.browser = true;
 		}
@@ -201,6 +201,21 @@ define([
 			}
 			scope = scope.prev;
 		}
+		
+		// Add in additional types that Tern can understand
+		var _p = createProposal('{}', Messages['jsDocEmptyObjDesc'], prefix);
+		_p.origin = "ecma5";
+		_p.doc = Messages['jsDocEmptyObjDoc'];
+		proposals.push(_p);
+		_p = createProposal('{prop: propType}', Messages['jsDocObjPropDesc'], prefix);
+		_p.origin = "ecma5";
+		_p.doc = Messages['jsDocObjPropDoc'];
+		proposals.push(_p);
+		_p = createProposal('?', Messages['jsDocAnyTypeDesc'], prefix);
+		_p.origin = "ecma5";
+		_p.doc = Messages['jsDocAnyTypeDoc'];
+		proposals.push(_p);
+		
 		return proposals;
 	}
 	
