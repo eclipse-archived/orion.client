@@ -98,7 +98,7 @@ define([
 		function stringifyExpected(expectedProposals) {
 			var text = "";
 			for (var i = 0; i < expectedProposals.length; i++)  {
-				text += expectedProposals[i][0] + " : " + expectedProposals[i][1] + "\n";
+				text += "['" + expectedProposals[i][0] + "', '" + expectedProposals[i][1] + "'],\n";
 			}
 			return text;
 		}
@@ -113,9 +113,9 @@ define([
 			for (var i = 0; i < actualProposals.length; i++) {
 				if (actualProposals[i].name) {
 					var desc = actualProposals[i].description ? actualProposals[i].description : "";
-					text += actualProposals[i].proposal + " : " + actualProposals[i].name + desc + "\n"; //$NON-NLS-1$ //$NON-NLS-0$
+					text += "['" + actualProposals[i].proposal + "', '" + actualProposals[i].name + desc + "'],\n"; //$NON-NLS-1$ //$NON-NLS-0$
 				} else {
-					text += actualProposals[i].proposal + " : " + actualProposals[i].description + "\n"; //$NON-NLS-1$ //$NON-NLS-0$
+					text += "['" + actualProposals[i].proposal + "', '" + actualProposals[i].description + "'],\n"; //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
 			return text;
@@ -4978,6 +4978,52 @@ define([
 						['Number', 'Number', 'The Number JavaScript object is a wrapper']
 					]);
 				});
+				
+				it("Test JSDoc type completions 1", function(done) {
+					var options = {
+						buffer: "/**\n* @returns {} \n*/",
+						line: '* @returns {} ',
+						prefix: "",
+						offset: 16,
+						callback: done};
+					testProposals(options, [
+						['', 'ecma5'],
+						['?', '? - No type information'],
+						['Array', 'Array'],
+						['Boolean', 'Boolean'],
+						['Date', 'Date'],
+						['Error', 'Error'],
+						['EvalError', 'EvalError'],
+						['Function', 'Function'],
+						['JSON', 'JSON'],
+						['Math', 'Math'],
+						['Number', 'Number'],
+						['Object', 'Object'],
+						['RangeError', 'RangeError'],
+						['ReferenceError', 'ReferenceError'],
+						['RegExp', 'RegExp'],
+						['String', 'String'],
+						['SyntaxError', 'SyntaxError'],
+						['TypeError', 'TypeError'],
+						['URIError', 'URIError'],
+						['eval', 'eval'],
+						['{prop: propType}', '{prop: propType} - Object with a specific property'],
+						['{}', '{} - Empty object'],
+						['', 'ecma6'],
+						['ArrayBuffer', 'ArrayBuffer'],
+						['DataView', 'DataView'],
+						['Map', 'Map'],
+						['Promise', 'Promise'],
+						['Proxy', 'Proxy'],
+						['Reflect', 'Reflect'],
+						['Set', 'Set'],
+						['Symbol', 'Symbol'],
+						['TypedArray', 'TypedArray'],
+						['WeakMap', 'WeakMap'],
+						['WeakSet', 'WeakSet'],
+					]);
+				});
+				
 			});
 			describe('Node.js Tests', function() {
 				before("Start server for node.js awareness tests", function(done) {
