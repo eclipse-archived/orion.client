@@ -264,7 +264,7 @@ define([
 				this.section.filterBox.destroy();
 			}
 			this.section.filterBox = uiUtil.createFilter(this.section, messages["Filter repositories"],  function(value) {
-				this.model.filterQuery = value;
+				this.model.filterQuery = value.trim();
 				this.changedItem();
 			}.bind(this));
 		},
