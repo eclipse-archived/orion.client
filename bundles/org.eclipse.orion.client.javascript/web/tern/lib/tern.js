@@ -669,6 +669,7 @@
     var typeInfo = query.types || query.docs || query.urls || query.origins;
     var wrapAsObjs = typeInfo || query.depths;
 
+	// ORION multiple completions cannot have same name (https://github.com/ternjs/tern/issues/797)
     for (var i = 0, len = completions.length; i < len; ++i) {
       var c = completions[i];
       if ((wrapAsObjs ? c.name : c) == name) {
