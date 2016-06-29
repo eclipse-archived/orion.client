@@ -70,13 +70,13 @@ define([
         "check-tern-plugin": function(context) {
         	function checkProject(node) {
         		function getEnvNode(envname) {
-    				var comment = Finder.findDirective(node, "eslint-env");
+    				var comment = Finder.findDirective(node, "eslint-env"); //$NON-NLS-1$
     				if(comment) {
     					var idx = comment.value.indexOf(envname);
     					if(idx > -1) {
     						var start = comment.range[0]+idx+2, //add 2 because the spec says block value starts exclude /*
     							end = start+envname.length;
-    						return {type: "EnvName", range: [start, end], loc: comment.loc};
+    						return {type: "EnvName", range: [start, end], loc: comment.loc}; //$NON-NLS-1$
     					}
     				}
         		}
@@ -1350,7 +1350,7 @@ define([
             	                    context.report(ref.identifier, ProblemMessages['no-undef-defined'], {0:name, nls: nls, pid: nls+inenv, data: name});
         	                    } else if(foundType && env) {
         	                    	//we found a type and its in an env
-        	                    	var d = Finder.findDirective(node, 'eslint-env');
+        	                    	var d = Finder.findDirective(node, 'eslint-env'); //$NON-NLS-1$
         	                    	if(!d || d.value && d.value.indexOf(env) < 0) {
         	                    		inenv = env ? '-inenv' : ''; //$NON-NLS-1$
 	            	                    nls = 'no-undef-defined'; //$NON-NLS-1$
@@ -1423,7 +1423,7 @@ define([
             						origin = type.origin;
             					}
                 				if (type.types.length === 1 && name && origin){
-                					if(name.indexOf("!known_modules.") === 0) {
+                					if(name.indexOf("!known_modules.") === 0) { //$NON-NLS-1$
                 						name = name.slice("!known_modules.".length);
                 					}
                 					if (/\./.test(origin)){
@@ -1698,11 +1698,11 @@ define([
 						return;
 					}
 					var defNode = variable.defs[0].node;
-					var references = getReferences(scope, variable), id = defNode.id, pb = 'no-unused-vars-unused';
+					var references = getReferences(scope, variable), id = defNode.id, pb = 'no-unused-vars-unused'; //$NON-NLS-1$
 					//TODO this will have to be moved to the new no-useless-imports rule
 					if(variable.defs[0].type === "ImportBinding") {
 						id = defNode.local;
-						pb = 'no-unused-vars-import';
+						pb = 'no-unused-vars-import'; //$NON-NLS-1$
 						importsHandled = true;
 					}
 					if (id && id.range && id.range[0] === id.range[1] || !id) {
@@ -2012,27 +2012,27 @@ define([
         	function checkDirective(node) {
         		var _name = node.value;
     			if(nodeModules[_name]) {
-    				_name = 'node';
+    				_name = 'node'; //$NON-NLS-1$
     			}
         		if(directive) {
         			if(directive.value.indexOf(_name) < 0) {
-						context.report(node, ProblemMessages['unknown-require-missing-env'], {0: _name, pid: 'unknown-require-missing-env', nls: 'unknown-require-missing-env', data: _name});        				
+						context.report(node, ProblemMessages['unknown-require-missing-env'], {0: _name, pid: 'unknown-require-missing-env', nls: 'unknown-require-missing-env', data: _name});        				 //$NON-NLS-1$ //$NON-NLS-2$
         			}
         		} else {
-        			context.report(node, ProblemMessages['unknown-require-missing-env'], {0: _name, pid: 'unknown-require-missing-env', nls: 'unknown-require-missing-env', data: _name});
+        			context.report(node, ProblemMessages['unknown-require-missing-env'], {0: _name, pid: 'unknown-require-missing-env', nls: 'unknown-require-missing-env', data: _name}); //$NON-NLS-1$ //$NON-NLS-2$
         		}
         	}
 			function checkImportExport(node) {
 				var tern = context.getTern();
-				if(!tern.pluginRunning("es_modules")) {
+				if(!tern.pluginRunning("es_modules")) { //$NON-NLS-1$
 					// create a location object to flag only the 'import' keyword
 					var token = context.getFirstToken(node);
-					context.report(node, ProblemMessages['esmodules-not-running'], {pid: 'unknown-require-not-running', nls: 'esmodules-not-running', data: 'es_modules'}, token);
+					context.report(node, ProblemMessages['esmodules-not-running'], {pid: 'unknown-require-not-running', nls: 'esmodules-not-running', data: 'es_modules'}, token); //$NON-NLS-1$ //$NON-NLS-3$ //$NON-NLS-2$
 				}
 			}
         	return {
         		"Program": function(node) {
-        			directive = Finder.findDirective(node, 'eslint-env');
+        			directive = Finder.findDirective(node, 'eslint-env'); //$NON-NLS-1$
         		},
 				"ImportDeclaration" : checkImportExport,
 				"ExportAllDeclaration" : checkImportExport,
@@ -2048,12 +2048,12 @@ define([
         						if(tern.file.ast && tern.file.ast.environments) {
         							var envs = tern.file.ast.environments;
         							if(envs.node) {
-        								if(!envs.amd && !tern.pluginRunning('node')) {
-        									context.report(lib, ProblemMessages['unknown-require-not-running'], {0: 'node', pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: 'node'});
+        								if(!envs.amd && !tern.pluginRunning('node')) { //$NON-NLS-1$
+        									context.report(lib, ProblemMessages['unknown-require-not-running'], {0: 'node', pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: 'node'}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         									return;
         								}
-        								if(envs.amd && !tern.pluginRunning('commonjs')) {
-        									context.report(lib, ProblemMessages['unknown-require-not-running'], {0: 'commonjs', pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: 'commonjs'});
+        								if(envs.amd && !tern.pluginRunning('commonjs')) { //$NON-NLS-1$
+        									context.report(lib, ProblemMessages['unknown-require-not-running'], {0: 'commonjs', pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: 'commonjs'}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         									return;
         								}
         							}
@@ -2068,7 +2068,7 @@ define([
     								return;
     							}
 								//it might be a node built-in, this also confirms its in the running node def
-								var nodejs = tern.getDef('node');
+								var nodejs = tern.getDef('node'); //$NON-NLS-1$
 								if(nodejs) {
 									if(nodejs[lib.value]) {
 										checkDirective(lib);
@@ -2085,13 +2085,13 @@ define([
 								//TODO check for the module having been loaded via the graph
 								if(tern.optionalPlugins[lib.value]) {
 									//we known about it
-									context.report(lib, ProblemMessages['unknown-require-plugin'], {pid: 'unknown-require-plugin', nls: 'unknown-require-plugin', data: lib.value});
+									context.report(lib, ProblemMessages['unknown-require-plugin'], {pid: 'unknown-require-plugin', nls: 'unknown-require-plugin', data: lib.value}); //$NON-NLS-2$ //$NON-NLS-1$
 								} else if(nodeModules[lib.value]) {
-									context.report(lib, ProblemMessages['unknown-require-plugin'], {pid: 'unknown-require-plugin', nls: 'unknown-require-plugin', data: 'node'});
+									context.report(lib, ProblemMessages['unknown-require-plugin'], {pid: 'unknown-require-plugin', nls: 'unknown-require-plugin', data: 'node'}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								} else {
 									var env = tern.getEnvFromDep(lib.value);
 									if(!tern.pluginRunning(env)) {
-										context.report(lib, ProblemMessages['unknown-require-not-running'], {0: env, pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: env});
+										context.report(lib, ProblemMessages['unknown-require-not-running'], {0: env, pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: env}); //$NON-NLS-1$ //$NON-NLS-2$
 									} else {
 										context.report(lib, ProblemMessages['unknown-require'], {data: lib.value});
 									}
@@ -2145,17 +2145,17 @@ define([
         		'CallExpression': function(node) {
         			if(node.callee.name === "define") {
         				if(node.arguments.length === 1 && (node.arguments[0].type === 'FunctionExpression' || node.arguments[0].type === 'ObjectExpression')) {
-        					if(!context.getTern().pluginRunning('requirejs')) {
-        						context.report(node.callee, ProblemMessages['missing-requirejs'], {data: 'requirejs'});
+        					if(!context.getTern().pluginRunning('requirejs')) { //$NON-NLS-1$
+        						context.report(node.callee, ProblemMessages['missing-requirejs'], {data: 'requirejs'}); //$NON-NLS-1$
         					}
         				} else if(node.arguments.length === 3 && node.arguments[0].type === 'Literal' && typeof node.arguments[0].value === 'string' 
         							&& node.arguments[1] && node.arguments[1].type === 'ArrayExpression' && node.arguments[2].type === 'FunctionExpression') {
-        					if(!context.getTern().pluginRunning('requirejs')) {
-        						context.report(node.callee, ProblemMessages['missing-requirejs'], {data: 'requirejs'});
+        					if(!context.getTern().pluginRunning('requirejs')) { //$NON-NLS-1$
+        						context.report(node.callee, ProblemMessages['missing-requirejs'], {data: 'requirejs'}); //$NON-NLS-1$
         					}
         				} else if(node.arguments.length === 2 && node.arguments[0].type === 'ArrayExpression' && node.arguments[1] && node.arguments[1].type === 'FunctionExpression') {
-        					if(!context.getTern().pluginRunning('requirejs')) {
-        						context.report(node.callee, ProblemMessages['missing-requirejs'], {data: 'requirejs'});
+        					if(!context.getTern().pluginRunning('requirejs')) { //$NON-NLS-1$
+        						context.report(node.callee, ProblemMessages['missing-requirejs'], {data: 'requirejs'}); //$NON-NLS-1$
         					}
         				}
     				}
@@ -2190,7 +2190,7 @@ define([
 							&& init.type === 'Identifier'
 							&& id.type === 'Identifier'
 							&& id.name === init.name) {
-						context.report(variableDeclarator, ProblemMessages['no-self-assign'], {0: id.name, pid: 'no-self-assign', nls: 'no-self-assign'});
+						context.report(variableDeclarator, ProblemMessages['no-self-assign'], {0: id.name, pid: 'no-self-assign', nls: 'no-self-assign'}); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
 				/**
@@ -2204,7 +2204,7 @@ define([
 						if (left.type === 'Identifier'
 								&& right.type === 'Identifier'
 								&& left.name === right.name) {
-							context.report(assignment, ProblemMessages['no-self-assign'], {0: left.name, pid: 'no-self-assign', nls: 'no-self-assign'});
+							context.report(assignment, ProblemMessages['no-self-assign'], {0: left.name, pid: 'no-self-assign', nls: 'no-self-assign'}); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					}
 				}
@@ -2251,7 +2251,7 @@ define([
 						var foundType = null;
 						var expr = tern.findQueryExpr(tern.file, query);
 						if (!expr) {
-							return "undefined";
+							return "undefined"; //$NON-NLS-1$
 						}
 						var type = tern.findExprType(query, tern.file, expr);
 						if (type) {
