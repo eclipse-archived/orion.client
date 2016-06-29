@@ -15,11 +15,10 @@ define([
 'javascript/astManager',
 'javascript/contentAssist/ternAssist',
 'javascript/cuProvider',
-'orion/serviceregistry',
 'chai/chai',
 'orion/Deferred',
 'mocha/mocha' //must stay at the end, not a module
-], function(ASTManager, TernAssist, CUProvider, mServiceRegistry, chai, Deferred) {
+], function(ASTManager, TernAssist, CUProvider, chai, Deferred) {
 	var assert = chai.assert;
 
 	return function(worker) {
@@ -200,6 +199,9 @@ define([
 			});
 		
 			describe('Node', function() {
+				before('Restart with the node plugin', function(done) {
+					worker.start(done, {options: {plugins: {node: {}}, libs: []}});
+				});
 				it('Default node modules - Missing directive', function(done) {
 					var options = {
 						buffer: "require('')",
@@ -208,6 +210,36 @@ define([
 						callback: done
 					};
 					testProposals(options, [
+						['', 'node'],
+						['assert(value, message?)', 'assert(value, message?)'],
+						['stream()', 'stream()'],
+						['buffer', 'buffer : buffer'],
+						['child_process', 'child_process : child_process'],
+						['cluster', 'cluster : cluster'],
+						['crypto', 'crypto : crypto'],
+						['dgram', 'dgram : dgram'],
+						['dns', 'dns : dns'],
+						['domain', 'domain : domain'],
+						['events', 'events : events'],
+						['fs', 'fs : fs'],
+						['http', 'http : http'],
+						['https', 'https : https'],
+						['module', 'module : module'],
+						['net', 'net : net'],
+						['os', 'os : os'],
+						['path', 'path : path'],
+						['punycode', 'punycode : punycode'],
+						['querystring', 'querystring : querystring'],
+						['readline', 'readline : readline'],
+						['repl', 'repl : repl'],
+						['string_decoder', 'string_decoder : string_decoder'],
+						['timers', 'timers : timers'],
+						['tls', 'tls : tls'],
+						['tty', 'tty : tty'],
+						['url', 'url : url'],
+						['util', 'util : util'],
+						['vm', 'vm : vm'],
+						['zlib', 'zlib : zlib']
 					]);
 				});
 				it('Default node modules', function(done) {
@@ -247,7 +279,7 @@ define([
 						['url', 'url : url'],
 						['util', 'util : util'],
 						['vm', 'vm : vm'],
-						['zlib', 'zlib : zlib'],
+						['zlib', 'zlib : zlib']
 					]);
 				});
 				it('Default node modules - c prefix', function(done) {
@@ -262,73 +294,77 @@ define([
 						['', 'node'],
 						['child_process', 'child_process : child_process'],
 						['cluster', 'cluster : cluster'],
-						['crypto', 'crypto : crypto'],
+						['crypto', 'crypto : crypto']
 					]);
 				});
 				it('Indexed lib node modules - e prefix', function(done) {
-					var options = {
-						buffer: "/*eslint-env node, express*/\nrequire('e')",
-						prefix: "e",
-						offset: 39,
-						callback: done,
-						createFiles: [{name: "e", text: ""}]
-					};
-					testProposals(options, [
-						['', 'express'],
-						['express()', 'express() : app'],
-						['', 'node'],
-						['events', 'events : events'],
-					]);
+					worker.start(null, {options: {plugins: {node:{}, express:{}}, libs: []}}, function() {
+						var options = {
+							buffer: "/*eslint-env node, express*/\nrequire('e')",
+							prefix: "e",
+							offset: 39,
+							callback: done,
+							createFiles: [{name: "e", text: ""}]
+						};
+						testProposals(options, [
+							['', 'express'],
+							['express()', 'express() : app'],
+							['', 'node'],
+							['events', 'events : events']
+						]);
+					});
 				});
 				it('Indexed lib node modules', function(done) {
-					var options = {
-						buffer: "/*eslint-env node, amqp, express, mongodb, mysql, postgres, redis*/\nrequire('')",
-						prefix: "",
-						offset: 77,
-						callback: done
-					};
-					testProposals(options, [
-						['', 'amqp'],
-						['amqp', 'amqp : !known_modules.amqp'],
-						['', 'express'],
-						['express()', 'express() : app'],
-						['', 'mongodb'],
-						['mongodb', 'mongodb : !known_modules.mongodb'],
-						['', 'mysql'],
-						['mysql', 'mysql : !known_modules.mysql'],
-						['', 'redis'],
-						['redis', 'redis : !known_modules.redis'],
-						['', 'node'],
-						['assert(value, message?)', 'assert(value, message?)'],
-						['stream()', 'stream()'],
-						['buffer', 'buffer : buffer'],
-						['child_process', 'child_process : child_process'],
-						['cluster', 'cluster : cluster'],
-						['crypto', 'crypto : crypto'],
-						['dgram', 'dgram : dgram'],
-						['dns', 'dns : dns'],
-						['domain', 'domain : domain'],
-						['events', 'events : events'],
-						['fs', 'fs : fs'],
-						['http', 'http : http'],
-						['https', 'https : https'],
-						['module', 'module : module'],
-						['net', 'net : net'],
-						['os', 'os : os'],
-						['path', 'path : path'],
-						['punycode', 'punycode : punycode'],
-						['querystring', 'querystring : querystring'],
-						['readline', 'readline : readline'],
-						['repl', 'repl : repl'],
-						['string_decoder', 'string_decoder : string_decoder'],
-						['timers', 'timers : timers'],
-						['tls', 'tls : tls'],
-						['tty', 'tty : tty'],
-						['url', 'url : url'],
-						['util', 'util : util'],
-						['vm', 'vm : vm'],
-						['zlib', 'zlib : zlib'],
-					]);
+					worker.start(null, {options: {plugins: {amqp:{}, express:{}, mongodb:{}, mysql:{}, redis:{}, node:{}}, libs: []}}, function() {
+						var options = {
+							buffer: "/*eslint-env node, amqp, express, mongodb, mysql, postgres, redis*/\nrequire('')",
+							prefix: "",
+							offset: 77,
+							callback: done
+						};
+						testProposals(options, [
+							['', 'amqp'],
+							['amqp', 'amqp : !known_modules.amqp'],
+							['', 'express'],
+							['express()', 'express() : app'],
+							['', 'mongodb'],
+							['mongodb', 'mongodb : !known_modules.mongodb'],
+							['', 'mysql'],
+							['mysql', 'mysql : !known_modules.mysql'],
+							['', 'redis'],
+							['redis', 'redis : !known_modules.redis'],
+							['', 'node'],
+							['assert(value, message?)', 'assert(value, message?)'],
+							['stream()', 'stream()'],
+							['buffer', 'buffer : buffer'],
+							['child_process', 'child_process : child_process'],
+							['cluster', 'cluster : cluster'],
+							['crypto', 'crypto : crypto'],
+							['dgram', 'dgram : dgram'],
+							['dns', 'dns : dns'],
+							['domain', 'domain : domain'],
+							['events', 'events : events'],
+							['fs', 'fs : fs'],
+							['http', 'http : http'],
+							['https', 'https : https'],
+							['module', 'module : module'],
+							['net', 'net : net'],
+							['os', 'os : os'],
+							['path', 'path : path'],
+							['punycode', 'punycode : punycode'],
+							['querystring', 'querystring : querystring'],
+							['readline', 'readline : readline'],
+							['repl', 'repl : repl'],
+							['string_decoder', 'string_decoder : string_decoder'],
+							['timers', 'timers : timers'],
+							['tls', 'tls : tls'],
+							['tty', 'tty : tty'],
+							['url', 'url : url'],
+							['util', 'util : util'],
+							['vm', 'vm : vm'],
+							['zlib', 'zlib : zlib'],
+						]);
+					});
 				});
 				it('File path module', function(done) {
 					var options = {
@@ -344,6 +380,9 @@ define([
 				});
 			});
 			describe('RequireJS', function() {
+				before('Restart with the requirejs plugin', function(done) {
+					worker.start(done, {options: {plugins: {requirejs: {}}, libs: []}});
+				});
 				it('No existing define deps', function(done) {
 					var options = {
 						buffer: "/* eslint-env amd */\ndefine([''], function(importname) {});",

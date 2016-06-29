@@ -36,6 +36,31 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 
     var ternserver = null;
 	
+	function mergeArray(target, source) {
+		if(Array.isArray(target) && Array.isArray(source)) {
+			if(target.length < 1 ) {
+				for(var i = 0, len = source.length; i < len; i++) {
+					target.push(source[i]);
+				}
+			} else {
+				for(i = 0, len = source.length; i < len; i++) {
+					if(target.indexOf(source[i]) < 0) {
+						target.push(source[i]);
+					}
+				}
+			}
+		}
+	}
+	
+	function removeEntry(target, item) {
+		if(Array.isArray(target)) {
+			var idx = target.indexOf(item);
+			if(idx > -1) {
+				target.slice(idx, idx+1);
+			}
+		}
+	}
+	
     /**
      * @param {Object} jsonOptions The optional map of JSON options to start the server with
      * @param {Function} callback The optional function to callback to 
@@ -50,62 +75,27 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
         options.getFile = _getFile;
         
         var pluginsDir = defaultOptions.pluginsDir;
-        var defNames, plugins, projectLoc;
+        var defNames = [], plugins, projectLoc;
         if (jsonOptions) {
 			projectLoc = jsonOptions.projectLoc;
 			plugins = jsonOptions.plugins;
 			pluginsDir = jsonOptions.pluginsDir;
-			defNames = jsonOptions.libs;
+			mergeArray(defNames, jsonOptions.libs);
+			mergeArray(defNames, jsonOptions.defs);
 			if(Array.isArray(jsonOptions.loadEagerly) && jsonOptions.loadEagerly.length > 0) {
 				options.loadEagerly = jsonOptions.loadEagerly;
 			}
 			if (typeof jsonOptions.ecmaVersion === 'number') {
 				options.ecmaVersion = jsonOptions.ecmaVersion;
 				if(options.ecmaVersion === 5) {
-					if(Array.isArray(defNames)) {
-						if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
-							defNames.push("ecma5"); //$NON-NLS-1$
-						}
-						var e6 = defNames.indexOf("ecma6"); //$NON-NLS-1$
-						if(e6 > -1) {
-							defNames.slice(e6, e6+1);
-						}
-						var e7 = defNames.indexOf("ecma7"); //$NON-NLS-1$
-						if(e7 > -1) {
-							defNames.slice(e7, e7+1);
-						}
-					} else {
-						defNames = ["ecma5"]; //$NON-NLS-1$
-					}
+					mergeArray(defNames, ['ecma5']);
+					removeEntry(defNames, 'ecma6');
+					removeEntry(defNames, 'ecma7');
 				} else if(options.ecmaVersion === 6) {
-					if(Array.isArray(defNames)) {
-						if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
-							defNames.push("ecma5"); //$NON-NLS-1$
-						}
-						if(defNames.indexOf("ecma6") < 0) { //$NON-NLS-1$
-							defNames.push("ecma6"); //$NON-NLS-1$
-						}
-						e7 = defNames.indexOf("ecma7"); //$NON-NLS-1$
-						if(e7 > -1) {
-							defNames.slice(e7, e7+1);
-						}
-					} else {
-						defNames = ["ecma5", "ecma6"]; //$NON-NLS-1$ //$NON-NLS-2$
-					}
+					mergeArray(defNames, ["ecma5", "ecma6"]);
+					removeEntry(defNames, 'ecma7');
 				} else if(options.ecmaVersion === 7) {
-					if(Array.isArray(defNames)) {
-						if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
-							defNames.push("ecma5"); //$NON-NLS-1$
-						}
-						if(defNames.indexOf("ecma6") < 0) { //$NON-NLS-1$
-							defNames.push("ecma6"); //$NON-NLS-1$
-						}
-						if(defNames.indexOf("ecma7") < 0) { //$NON-NLS-1$
-							defNames.push("ecma7"); //$NON-NLS-1$
-						}
-					} else {
-						defNames = ["ecma5", "ecma6", "ecma7"]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
+					mergeArray(defNames, ["ecma5", "ecma6", "ecma7"]);
 				}
 			}
 			if (typeof jsonOptions.sourceType === 'string') {
@@ -129,17 +119,11 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
         }
         //plugins
         if(plugins && typeof plugins === 'object') {
-        	if(Object.keys(plugins).length === 0) {
-        		Objects.mixin(options.plugins, defaultOptions.plugins.optional);
-        	} else {
-	        	Objects.mixin(options.plugins, plugins);
-	    	}
-        } else {
-			Objects.mixin(options.plugins, defaultOptions.plugins.optional);
+	        Objects.mixin(options.plugins, plugins);
         }
         //definitions
         if(!Array.isArray(defNames) || defNames.length < 1) {
-			defNames = defaultOptions.defNames;
+			defNames = [];
         } else {
         	defNames = defNames.sort();
         }
@@ -761,7 +745,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		}
 		var deferred = new Deferred();
 		_getFile(loc, /* @callback */ function(err, contents) {
-			if(typeof contents === 'string') {
+			if(typeof contents === 'string' && contents.length > 0) {
 				deferred.resolve(JSON.parse(contents));
 			} else {
 				deferred.reject();

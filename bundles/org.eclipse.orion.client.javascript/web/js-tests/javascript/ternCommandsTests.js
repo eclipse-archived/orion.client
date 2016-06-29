@@ -162,7 +162,7 @@ define([
 				CUProvider.setUseCache(false);
 				openImplCommand = new OpenImplementation.OpenImplementationCommand(worker);
 				openDeclCommand = new OpenDeclaration.OpenDeclarationCommand(worker);
-				worker.start(done); // Reset the tern server state to remove any prior files
+				worker.start(done, {options:{plugins:{node:{}, express:{}}}}); // Reset the tern server state to remove any prior files
 			});
 			this.timeout(10000);
 			

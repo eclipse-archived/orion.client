@@ -376,7 +376,7 @@ define([
 			//no extension given, guess at js
 			filePath += '.js'; //$NON-NLS-1$
 		}
-		return fileclient.read(filePath).then(function(contents) {
+		return fileclient.read(filePath, false, false, {readIfExists: true}).then(function(contents) {
 			response.args.contents = contents;
 			ternWorker.postMessage(response);
 		},

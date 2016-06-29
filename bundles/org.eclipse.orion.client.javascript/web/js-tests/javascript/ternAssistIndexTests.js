@@ -191,6 +191,10 @@ define([
 			});
 		
 			describe('AMQP', function() {
+				before('Restart with the amqp plugin', function(done) {
+					worker.start(done, {options: {plugins: {amqp: {}, node: {}}, libs: []}});
+				});
+
 				it('AMQP templates - no eslint-env', function(done) {
 					var options = {
 						buffer: "amq",
@@ -200,6 +204,13 @@ define([
 						templates: true
 					};
 					testProposals(options, [
+						['', 'amqp'],
+						['AMQPParser(version, type)', 'AMQPParser(version, type)'],
+						['var amqp = require(\'amqp\');\n', 'amqp'],
+						['var amqp = require(\'amqp\');\nvar connection = amqp.createConnection({\n	host: host,\n	port: port,\n	login: login,\n	password: password\n});\n', 'amqp connection'],
+						['var exchange = connection.exchange(id, {type: \'topic\'}, function(exchange) {\n	\n});\n', 'amqp exchange'],
+						['connection.on(event, function() {\n	\n});\n', 'amqp on'],
+						['connection.queue(id, function(queue) {\n	queue.bind(\'#\'); //catch all messages\n	queue.subscribe(function (message, headers, deliveryInfo) {\n		// Receive messages\n	});\n	\n});\n', 'amqp queue'],
 					]);
 				});
 				it('AMQP templates - eslint-env set', function(done) {
@@ -273,6 +284,9 @@ define([
 			});
 			
 			describe('Express', function() {
+				before('Restart with the express plugin', function(done) {
+					worker.start(done, {options: {plugins: {express: {}, node: {}}, libs: ['ecma5']}});
+				});
 				it('Express templates - no eslint-env', function(done) {
 					var options = {
 						buffer: "expr",
@@ -282,6 +296,15 @@ define([
 						templates: true
 					};
 					testProposals(options, [
+						['', 'express'],
+						["var express = require('express');\nvar app = express();\n\napp.listen(timeout);\n",'express app'],
+						['app.engine(fnOrObject);\n', 'express app engine'],
+						['app.use(function(error, request, result, next) {\n	result.send(code, message);\n});\n', 'express app error use'],
+						['var value = app.get(id, function(request, result){\n	\n});\n', 'express app get'],
+						['app.param(id, value);\n', 'express app param'],
+						['app.set(id, value);\n', 'express app set'],
+						['app.use(fnOrObject);\n', 'express app use'],
+						['var app = require(\'express\');', 'express require']
 					]);
 				});
 				it('Express templates - eslint-env set', function(done) {
@@ -404,6 +427,9 @@ define([
 			});
 			
 			describe('MongoDB', function() {
+				before('Restart with the mongodb plugin', function(done) {
+					worker.start(done, {options: {plugins: {mongodb: {}, node: {}}, libs: []}});
+				});
 				it('MongoDB templates - no eslint-env', function(done) {
 					var options = {
 						buffer: "mongo",
@@ -413,6 +439,14 @@ define([
 						templates: true
 					};
 					testProposals(options, [
+						['', 'mongodb'],
+						['mongodb', 'mongodb : mongodb'],
+						['var MongoClient = require(\'mongodb\').MongoClient;\nvar Server = require(\'mongodb\').Server;\n', 'mongodb client'],
+						['db.collection(id, function(error, collection) {\n	\n});', 'mongodb collection'],
+						['var MongoClient = require(\'mongodb\').MongoClient;\nMongoClient.connect(url, function(error, db) {\n	\n});\n', 'mongodb connect'],
+						['if (process.env.VCAP_SERVICES) {\n	var env = JSON.parse(process.env.VCAP_SERVICES);\n	var mongo = env[\'mongo-version\'][0].credentials;\n} else {\n	var mongo = {\n		username : \'username\',\n		password : \'password\',\n		url : \'mongodb://username:password@localhost:27017/database\'\n	};\n}\nvar MongoClient = require(\'mongodb\').MongoClient;\nMongoClient.connect(mongo.url, function(error, db) {\n	\n});\n', 'mongodb connect (Cloud Foundry)'],
+						['var MongoClient = require(\'mongodb\').MongoClient;\nvar Server = require(\'mongodb\').Server;\nvar client = new MongoClient(new Server(host, port));\ntry {\n	client.open(function(error, client) {\n		var db = client.db(name);\n		\n	});\n} finally {\n	client.close();\n};', 'mongodb open'],
+						['db.collection(id, {strict:true}, function(error, collection) {\n	\n});', 'mongodb strict collection']
 					]);
 				});
 				it('MongoDB templates - eslint-env set', function(done) {
@@ -431,7 +465,7 @@ define([
 						['var MongoClient = require(\'mongodb\').MongoClient;\nMongoClient.connect(url, function(error, db) {\n	\n});\n', 'mongodb connect'],
 						['if (process.env.VCAP_SERVICES) {\n	var env = JSON.parse(process.env.VCAP_SERVICES);\n	var mongo = env[\'mongo-version\'][0].credentials;\n} else {\n	var mongo = {\n		username : \'username\',\n		password : \'password\',\n		url : \'mongodb://username:password@localhost:27017/database\'\n	};\n}\nvar MongoClient = require(\'mongodb\').MongoClient;\nMongoClient.connect(mongo.url, function(error, db) {\n	\n});\n', 'mongodb connect (Cloud Foundry)'],
 						['var MongoClient = require(\'mongodb\').MongoClient;\nvar Server = require(\'mongodb\').Server;\nvar client = new MongoClient(new Server(host, port));\ntry {\n	client.open(function(error, client) {\n		var db = client.db(name);\n		\n	});\n} finally {\n	client.close();\n};', 'mongodb open'],
-						['db.collection(id, {strict:true}, function(error, collection) {\n	\n});', 'mongodb strict collection'],
+						['db.collection(id, {strict:true}, function(error, collection) {\n	\n});', 'mongodb strict collection']
 					]);
 				});
 				it('MongoDB completions - require.MongoCli', function(done) {
@@ -461,6 +495,9 @@ define([
 			});
 			
 			describe('MySQL', function() {
+				before('Restart with the mysql plugin', function(done) {
+					worker.start(done, {options: {plugins: {mysql: {}, node: {}}, libs: []}});
+				});
 				it('MySQL templates - no eslint-env', function(done) {
 					var options = {
 						buffer: "mysq",
@@ -470,6 +507,10 @@ define([
 						templates: true
 					};
 					testProposals(options, [
+						['', 'mysql'],
+						['mysql', 'mysql : mysql'],
+						['var mysql = require(\'mysql\');\nvar connection = mysql.createConnection({\n	host : host,\n	user : username,\n	password : password\n});\ntry {\n	connection.connect();\n	\n} finally {\n	connection.end();\n}', 'mysql connection'],
+						['connection.query(sql, function(error, rows, fields) {\n	\n});\n', 'mysql query']
 					]);
 				});
 				it('MySQL templates - eslint-env set', function(done) {
@@ -484,7 +525,7 @@ define([
 						['', 'mysql'],
 						['mysql', 'mysql : mysql'],
 						['var mysql = require(\'mysql\');\nvar connection = mysql.createConnection({\n	host : host,\n	user : username,\n	password : password\n});\ntry {\n	connection.connect();\n	\n} finally {\n	connection.end();\n}', 'mysql connection'],
-						['connection.query(sql, function(error, rows, fields) {\n	\n});\n', 'mysql query'],
+						['connection.query(sql, function(error, rows, fields) {\n	\n});\n', 'mysql query']
 					]);
 				});
 				it('MySQL completions - mysql.createCon', function(done) {
@@ -496,7 +537,7 @@ define([
 					};
 					testProposals(options, [
 						['', 'mysql'],
-						['createConnection(connectionUri)', 'createConnection(connectionUri) : mysql.Connection'],
+						['createConnection(connectionUri)', 'createConnection(connectionUri) : mysql.Connection']
 					]);
 				});
 				it('MySQL completions - connection.c', function(done) {
@@ -511,7 +552,7 @@ define([
 						['changeUser(options)', 'changeUser(options)'],
 						['commit(callback)', 'commit(callback)'],
 						['connect()', 'connect()'],
-						['config', 'config : any'],
+						['config', 'config : any']
 					]);
 				});
 				it('MySQL completions - connection.q', function(done) {
@@ -523,7 +564,7 @@ define([
 					};
 					testProposals(options, [
 						['', 'mysql'],
-						['query', 'query : any'],
+						['query', 'query : any']
 					]);
 				});
 				it('MySQL completions - connection.e', function(done) {
@@ -537,12 +578,15 @@ define([
 						['', 'mysql'],
 						['end()', 'end()'],
 						['escape(value)', 'escape(value) : string'],
-						['escapeId(value)', 'escapeId(value) : string'],
+						['escapeId(value)', 'escapeId(value) : string']
 					]);
 				});
 			});
 			
 			describe('Postgres', function() {
+				before('Restart with the postgres plugin', function(done) {
+					worker.start(done, {options: {plugins: {postgres: {}, node: {}}, libs: []}});
+				});
 				it('Postgres templates - no eslint-env', function(done) {
 					var options = {
 						buffer: "postgre",
@@ -552,6 +596,11 @@ define([
 						templates: true
 					};
 					testProposals(options, [
+						['', 'pg'],
+						['var pg = require(\'pg\');\n', 'postgres'],
+						['var pg = require(\'pg\');\nvar url = "postgres://postgres:port@host/database";\nvar client = new pg.Client(url);\n', 'postgres client'],
+						['var pg = require(\'pg\');\nvar url = "postgres://postgres:port@host/database";\nvar client = new pg.Client(url);\nclient.connect(function(error) {\n	\n});\n', 'postgres connect'],
+						['client.query(sql, function(error, result) {\n	\n});\n', 'postgres query']
 					]);
 				});
 				it('Postgres templates - eslint-env set', function(done) {
@@ -580,12 +629,15 @@ define([
 					testProposals(options, [
 						['', 'pg'],
 						['Client(connection)', 'Client(connection)'],
-						['connect(connection, callback)', 'connect(connection, callback)'],
+						['connect(connection, callback)', 'connect(connection, callback)']
 					]);
 				});
 			});
 			
 			describe('Redis', function() {
+				before('Restart with the redis plugin', function(done) {
+					worker.start(done, {options: {plugins: {redis: {}, node: {}}, libs: ['ecma5']}});
+				});
 				it('Redis templates - no eslint-env', function(done) {
 					var options = {
 						buffer: "redi",
@@ -595,6 +647,14 @@ define([
 						templates: true
 					};
 					testProposals(options, [
+						['', 'redis'],
+						['RedisClient', 'RedisClient : RedisClient'],
+						['var name = require(\'redis\');\n', 'redis'],
+						['var name = require(\'redis\');\nvar client = name.createClient(port, host, options);\n', 'redis client'],
+						['var name = require(\'redis\');\nvar client = name.createClient(port, host, options);\ntry {\n	\n} finally {\n	client.close();\n}\n', 'redis connect'],
+						['client.get(key, function(error, reply) {\n	\n});\n', 'redis get'],
+						['client.on(event, function(arg) {\n	});\n', 'redis on'],
+						['client.set(key, value);\n', 'redis set']
 					]);
 				});
 				it('Redis templates - eslint-env set', function(done) {
@@ -613,7 +673,7 @@ define([
 						['var name = require(\'redis\');\nvar client = name.createClient(port, host, options);\ntry {\n	\n} finally {\n	client.close();\n}\n', 'redis connect'],
 						['client.get(key, function(error, reply) {\n	\n});\n', 'redis get'],
 						['client.on(event, function(arg) {\n	});\n', 'redis on'],
-						['client.set(key, value);\n', 'redis set'],
+						['client.set(key, value);\n', 'redis set']
 					]);
 				});
 				it('Redis completions - redis.cr', function(done) {
@@ -625,7 +685,7 @@ define([
 					};
 					testProposals(options, [
 						['', 'redis'],
-						['createClient(port_arg, host_arg?, options?)', 'createClient(port_arg, host_arg?, options?) : RedisClient'],
+						['createClient(port_arg, host_arg?, options?)', 'createClient(port_arg, host_arg?, options?) : RedisClient']
 					]);
 				});
 				it('Redis completions - client.h', function(done) {
@@ -650,7 +710,7 @@ define([
 						['hmset(args, callback?)', 'hmset(args, callback?)'],
 						['hset(args, callback?)', 'hset(args, callback?)'],
 						['hsetnx(args, callback?)', 'hsetnx(args, callback?)'],
-						['hvals(args, callback?)', 'hvals(args, callback?)'],
+						['hvals(args, callback?)', 'hvals(args, callback?)']
 					]);
 				});
 				it('Redis completions - client.s', function(done) {
@@ -690,7 +750,7 @@ define([
 						['sunion(args, callback?)', 'sunion(args, callback?)'],
 						['sunionstore(args, callback?)', 'sunionstore(args, callback?)'],
 						['sync(args, callback?)', 'sync(args, callback?)'],
-						['server_info', 'server_info : ServerInfo'],
+						['server_info', 'server_info : ServerInfo']
 					]);
 				});
 				it('Redis completions - client.o', function(done) {
@@ -705,7 +765,7 @@ define([
 						['', 'redis'],
 						['object(args, callback?)', 'object(args, callback?)'],
 						['on(event, action)', 'on(event, action)'],
-						['offline_queue', 'offline_queue : [?]'],
+						['offline_queue', 'offline_queue : [?]']
 					]);
 				});
 			});

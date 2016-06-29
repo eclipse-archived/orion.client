@@ -175,13 +175,13 @@ define([
 		}
 	
 		describe("Cross-file Tests", function() {
-			this.timeout(20000000);
+			this.timeout(200000);
 			before('Message the server for warm up on cross file tests', function(done) {
 				CUProvider.setUseCache(false);
 				assist = new TernAssist.TernContentAssist(astManager, worker, function() {
 					return new Deferred().resolve(envs);
 				}, CUProvider);
-				worker.start(done); // Reset the tern server state to remove any prior files
+				worker.start(done, {options: {plugins: {es_modules: {}, node: {}, requirejs: {}}}}); // Reset the tern server state to remove any prior files
 			});
 			describe("Content assist tests", function() {
 				/**
@@ -547,7 +547,7 @@ define([
 				});
 				describe("ES6 Modules import/export", function(){
 					before('Reset Tern Server for ES6 tests', function(done) {
-						worker.start(done,  {options:{ecmaVersion:6, sourceType:"module"}});
+						worker.start(done,  {options:{plugins: {es_modules: {}}, ecmaVersion:6, sourceType:"module"}});
 					});
 					describe("Named export declaration", function(){
 						it("ES Module named export import all - Function implementation", function(done) {

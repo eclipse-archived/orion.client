@@ -634,7 +634,7 @@ define([
 								worker.getTestState().callback(error);
 							});
 					});
-					it("All plugins running - no plugins entry", function(callback) {
+					it("No plugins entry", function(callback) {
 						worker.postMessage({request: "start_server", args:{options: {}}}, /* @callback */ function(response) {
 							assert(response, "Tried to restart Tern server with specific options, did not receive response");
 							assert.equal("server_ready", response.state, "Tried to restart Tern server with specific options, the server was not ready");
@@ -644,6 +644,16 @@ define([
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
 									assertProblems(problems, [
+									{id: RULE_ID,
+									 severity: 'warning',
+									 description: "To work in the \'amd\' environment, the \'requirejs\' plugin must be running.",
+									 nodeType: "EnvName"
+									},
+									{id: RULE_ID,
+									 severity: 'warning',
+									 description: "To work in the \'mongodb\' environment, the \'mongodb\' plugin must be running.",
+									 nodeType: "EnvName"
+									}
 									]);
 								},
 								function (error) {
@@ -651,7 +661,7 @@ define([
 								});
 						});
 					});
-					it("All plugins running - empty plugins entry", function(callback) {
+					it("Empty plugins entry", function(callback) {
 						worker.postMessage({request: "start_server", args:{options: {plugins: {}}}}, /* @callback */ function(response) {
 							assert(response, "Tried to restart Tern server with specific options, did not receive response");
 							assert.equal("server_ready", response.state, "Tried to restart Tern server with specific options, the server was not ready");
@@ -661,6 +671,16 @@ define([
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
 									assertProblems(problems, [
+									{id: RULE_ID,
+									 severity: 'warning',
+									 description: "To work in the \'amd\' environment, the \'requirejs\' plugin must be running.",
+									 nodeType: "EnvName"
+									},
+									{id: RULE_ID,
+									 severity: 'warning',
+									 description: "To work in the \'mongodb\' environment, the \'mongodb\' plugin must be running.",
+									 nodeType: "EnvName"
+									}
 									]);
 								},
 								function (error) {

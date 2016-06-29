@@ -415,15 +415,19 @@ define([
 	 * @returns returns a formatted origin string, may be the same as the origin
 	 */
 	function formatOrigin(origin) {
-		var match = /([^/.]+\/[^\/]+)$/g.exec(origin);  // Shortens long / separated file paths to the last two segments
+		var o = origin;
+		if(o.indexOf("!known_modules.") === 0) {
+			o = o.slice(0, "!known_modules.".length);
+		}
+		var match = /([^/.]+\/[^\/]+)$/g.exec(o);  // Shortens long / separated file paths to the last two segments
 		if(match) {
 			return match[1];
 		}
-		match = /\/([^\/]+)$/g.exec(origin);  // Removes leading slash from a file path
+		match = /\/([^\/]+)$/g.exec(o);  // Removes leading slash from a file path
 		if(match) {
 			return match[1];
 		}
-		return origin;
+		return o;
 	}
 
 	function sortProposals(completions, args) {
@@ -454,9 +458,6 @@ define([
     	        if(_o === args.meta.location) {
     	            locals.push(_formatTernProposal(_c, args));
     	        } else {
-    	        	if(_o.indexOf('/') < 0 && !envs[_o]) {
-	    	        	continue;
-	    	        }
 					var orig = formatOrigin(_o);
 					var propMap = _p;
 					if (!envs[_o]){

@@ -177,13 +177,13 @@ define([
 		}
 		
 		describe('Tern Content Assist Tests', function() {
-			this.timeout(20000);
+			this.timeout(2000000);
 			before('Message the server for warm up', function(done) {
 				CUProvider.setUseCache(false);
 				ternAssist = new TernAssist.TernContentAssist(astManager, worker, function() {
 					return new Deferred().resolve(envs);
 				}, CUProvider, jsProject);
-				worker.start(done); // Reset the tern server state to remove any prior files
+				worker.start(done, {options: {libs: ['ecma5', 'ecma6']}}); // Reset the tern server state to remove any prior files
 			});
 		
 			describe('Case-insensitive proposals', function() {
@@ -3697,6 +3697,9 @@ define([
 				});
 			});
 			describe('ESLint Directive Tests', function() {
+				before("Start server for directive tests", function(done) {
+					worker.start(done, {options: {plugins: {amqp:{env:'amqp'}, express:{env:'express'}, mongodb:{env:'mongodb'}, mysql:{env:'mysql'}, postgres:{env:'pg'}, redis:{env:'redis'}}}});
+				});
 				/**
 				 * Tests the eslint* templates in source
 				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
@@ -4011,6 +4014,9 @@ define([
 				});
 			});
 			describe('MySQl Index Tests', function() {
+				before("Start server for mysql index tests", function(done) {
+					worker.start(done, {options:{plugins:{mysql:{}, node:{}}, libs:['ecma6']}});
+				});
 				/*
 				 * Tests mysql index
 				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
@@ -4070,9 +4076,9 @@ define([
 				 */
 				it("test mysql index 4", function(done) {
 					var options = {
-						buffer: "/*eslint-env mysql*/ require('mysql').createQuery(null,null,null).sta",
-						prefix: "sta",
-						offset: 69,
+						buffer: "/*eslint-env mysql*/ require('mysql').createQuery(null,null,null).star",
+						prefix: "star",
+						offset: 70,
 						callback:done
 					};
 					testProposals(options, [
@@ -4088,16 +4094,21 @@ define([
 				 */
 				it("test mysql empty 1", function(done) {
 					var options = {
-						buffer: "require('mysql').createQuery(null,null,null).",
-						prefix: "sta",
-						offset: 45,
+						buffer: "require('mysql').createC",
+						prefix: "createC",
+						offset: 24,
 						callback:done
 					};
 					testProposals(options, [
+						['', 'mysql'],
+					    ['createConnection(connectionUri)', 'createConnection(connectionUri) : mysql.Connection']
 					]);
 				});
 			});
 			describe('Redis Index Tests', function() {
+				before("Start server for redis index tests", function(done) {
+					worker.start(done, {options:{plugins:{node: {}, redis:{}}}});
+				});
 				/**
 				 * Tests redis index indirect proposals
 				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
@@ -4146,10 +4157,16 @@ define([
 						offset: 18,
 						callback: done};
 					testProposals(options, [
+						['', 'redis'],
+					    ['createClient(port_arg, host_arg?, options?)', 'createClient(port_arg, host_arg?, options?) : RedisClient'],
+					    ['ClientOpts', 'ClientOpts : any']
 					]);
 				});
 			});
 			describe('Postgres Index Tests', function() {
+				before("Start server for postgres index tests", function(done) {
+					worker.start(done, {options:{plugins:{node:{}, postgres:{}}}});
+				});
 				/**
 				 * Tests pg index indirect proposals
 				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
@@ -4196,10 +4213,15 @@ define([
 						offset: 16,
 						callback: done};
 					testProposals(options, [
+						['', 'pg'],
+					    ['Client(connection)', 'Client(connection)']
 					]);
 				});
 			});
 			describe('Comment Assist Tests', function() {
+				before("Start server for redis index tests", function(done) {
+					worker.start(done, {options:{libs:['ecma5', 'ecma6', 'browser']}});
+				});
 				/**
 				 * Tests line comments
 				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
@@ -4909,15 +4931,15 @@ define([
 						offset: 39,
 						callback: done};
 					testProposals(options, [
-						['', 'ecma5'],
-						['Date', 'Date', 'Creates JavaScript Date'],
-						['', 'ecma6'],
-						['DataView', 'DataView', 'The DataView view provides'],
 						['', 'browser'],
 						['DOMParser', 'DOMParser', 'DOMParser can parse XML or HTML'],
 						['DOMTokenList', 'DOMTokenList', 'This type represents a set of space-separated tokens.'],
 						['Document', 'Document', 'Each web page loaded in the browser has its own document object.'],
 						['DocumentFragment', 'DocumentFragment', 'Creates a new empty DocumentFragment.'],
+						['', 'ecma5'],
+						['Date', 'Date', 'Creates JavaScript Date'],
+						['', 'ecma6'],
+						['DataView', 'DataView', 'The DataView view provides'],
 					]);
 				});
 				
@@ -5047,6 +5069,9 @@ define([
 				});
 			});
 			describe('Node.js Tests', function() {
+				before("Start server for node.js awareness tests", function(done) {
+					worker.start(done, {options:{plugins:{node:{}}, libs:['ecma6']}});
+				});
 				/**
 				 * Tests support for the eslint-env directive to find global objects
 				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
@@ -5086,11 +5111,14 @@ define([
 				 */
 				it('node awareness 3', function(done) {
 					var options = {
-						buffer: "/*eslint-env amd*/ require('fs').mk",
+						buffer: "/*eslint-env amd*/ require('fs').mkd",
 						prefix: "mk",
-						offset: 35,
+						offset: 36,
 						callback: done};
 					testProposals(options, [
+						['', 'node'],
+						['mkdir(path, mode?, callback?)', 'mkdir(path, mode?, callback?)'],
+						['mkdirSync(path, mode?)', 'mkdirSync(path, mode?)']
 					]);
 				});
 				/**
@@ -5122,6 +5150,9 @@ define([
 						offset: 40,
 						callback: done};
 					testProposals(options, [
+						['', 'node'],
+						['mkdir(path, mode?, callback?)', 'mkdir(path, mode?, callback?)'],
+						['mkdirSync(path, mode?)', 'mkdirSync(path, mode?)']
 					]);
 				});
 				it('node awareness 6', function(done) {
@@ -5215,12 +5246,15 @@ define([
 						offset: 20,
 						callback: done};
 					testProposals(options, [
-					//TODO this will pass ['', 'node'],
-					//	["mkdirSync(path, mode?)", "mkdirSync(path, mode?)"]
+						['', 'node'],
+						["mkdirSync(path, mode?)", "mkdirSync(path, mode?)"]
 					]);
 				});
 			});
 			describe('Browser Tests', function() {
+				before("Start server for browser tests", function(done) {
+					worker.start(done, {options: {libs:['browser']}});
+				});
 				/**
 				 * Tests support for the eslint-env directive to find global objects
 				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
@@ -5292,6 +5326,8 @@ define([
 						offset: 3,
 						callback: done};
 					testProposals(options, [
+						['', 'browser'],
+						["window", "window : <top>"]
 					]);
 				});
 				it('browser awareness 6', function(done) {
