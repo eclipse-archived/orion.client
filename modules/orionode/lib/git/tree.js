@@ -15,6 +15,7 @@ var clone = require('./clone');
 var path = require('path');
 var express = require('express');
 var util = require('./util');
+var mime = require('mime');
 
 module.exports = {};
 
@@ -127,11 +128,19 @@ function getTree(req, res) {
 						}
 						return entry.getBlob()
 						.then(function(blob) {
-							var resp = blob.toString();
-							res.setHeader('Content-Type', 'application/octect-stream');
-							res.setHeader('Content-Length', resp.length);
-							res.setHeader("ETag", "\"" + entry.sha() + "\"");
-							res.status(200).end(resp);
+							if(blob.isBinary()){
+								var buffer = blob.content();
+								var contentType = mime.lookup(entry.path());
+								res.setHeader('Content-Type', contentType);
+								res.setHeader('Content-Length', buffer.length);
+                				res.status(200).end(buffer, 'binary');
+							}else{
+								var resp = blob.toString();
+								res.setHeader('Content-Type', 'application/octect-stream');
+								res.setHeader('Content-Length', resp.length);
+								res.setHeader("ETag", "\"" + entry.sha() + "\"");
+								res.status(200).end(resp);
+							}
 						});
 					}
 					return entry.getTree()
