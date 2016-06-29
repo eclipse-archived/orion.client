@@ -1382,10 +1382,6 @@
   }
 
   var inferExprVisitor = exports.inferExprVisitor = {
-  	// ORION Add recovered node
-  	RecoveredNode: ret(function(node, scope, c, out, name) {
-  		return new AVal;
-  	}),
     ArrayExpression: ret(function(node, scope) {
       return arrayLiteralType(node.elements, scope, infer)
     }),
@@ -1394,9 +1390,6 @@
       if (name === "✖") {
       	return ANull;
       }
-      // TODO Possibly more ORION changes for recovery
-      
-      
       var proto = true, waitForProto
       for (var i = 0; i < node.properties.length; ++i) {
         var prop = node.properties[i]

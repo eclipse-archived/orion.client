@@ -99,193 +99,191 @@ define([
 				p.parents = node.parents;
 				node = p;
 			} 
-			if(node.type !== 'RecoveredNode') {
-				switch(node.type) {
-					case 'Program': {
-						result.category = 'uncategorized'; //$NON-NLS-1$
-						break;
-					}
-					case 'FunctionDeclaration':
-					case 'FunctionExpression': {
-						for(var i = 0, len = node.params.length; i< len; i++) {
-							if(encloses(query.end, node.params[i])) {
-								result.category = 'vardecls'; //$NON-NLS-1$
-								break;
-							}
-						}
-						if(!result.category) {
-							result.category = 'funcdecls'; //$NON-NLS-1$
-						}
-						break;
-					}
-					case 'Property': {
-						if(encloses(query.end, node.key)) {
-							if(node.value && node.value.type === 'FunctionExpression') {
-								result.category = 'funcdecl'; //$NON-NLS-1$
-							} else {
-								result.category = 'propwrite'; //$NON-NLS-1$
-							}
-						} else if(encloses(query.end, node.value)) {
-							if(node.value.type === 'FunctionExpression') {
-								result.category = 'funcdecls'; //$NON-NLS-1$
-							} else if(node.value.type === 'Identifier') {
-								result.category = 'varaccess'; //$NON-NLS-1$
-							} else {
-								result.category = 'propwrite'; //$NON-NLS-1$
-							}
-						}
-						break;
-					}
-					case 'CallExpression': {
-						if(encloses(query.end, node.callee)) {
-							result.category = 'funccalls'; //$NON-NLS-1$
-						} 
-						if(node.arguments.length > 0) {
-							for(i = 0, len = node.arguments.length; i < len; i++) {
-								var param = node.arguments[i];
-								if(encloses(query.end, param)) {
-									if(param.type === 'Identifier') {
-										result.category = 'varaccess'; //$NON-NLS-1$
-									} else if(param.type === 'MemberExpression') {
-										result.category = 'propaccess'; //$NON-NLS-1$
-									}
-								}
-							}
-						}
-						break;
-					}
-					case 'AssignmentExpression': {
-						if(encloses(query.end, node.left)) {
-							//on the left, write
-							if(node.left.type === 'Identifier') {
-								result.category = 'varwrite'; //$NON-NLS-1$
-							} else {
-								result.category = 'propwrite'; //$NON-NLS-1$
-							}
-						} else if(encloses(query.end, node.right)) {
-							if(node.right.type === 'Identifier') {
-								result.category = 'varaccess'; //$NON-NLS-1$
-							} else if(node.right.type === 'MemberExpression') {
-								result.category = 'propaccess'; //$NON-NLS-1$
-							} 
-						}
-						break;
-					}
-					case 'VariableDeclarator': {
-						if(encloses(query.end, node.id)) {
+			switch(node.type) {
+				case 'Program': {
+					result.category = 'uncategorized'; //$NON-NLS-1$
+					break;
+				}
+				case 'FunctionDeclaration':
+				case 'FunctionExpression': {
+					for(var i = 0, len = node.params.length; i< len; i++) {
+						if(encloses(query.end, node.params[i])) {
 							result.category = 'vardecls'; //$NON-NLS-1$
-						} else if(encloses(query.end, node.init)) {
-							result.category = 'varaccess';						 //$NON-NLS-1$
-						}
-						break;
-					}
-					case 'Literal': {
-						if(node.regex) {
-							result.category = 'regex'; //$NON-NLS-1$
-						} else if(typeof(node.value) === "string") {
-							result.category = 'strings'; //$NON-NLS-1$
-						}
-						break;
-					}
-					case 'NewExpression': {
-						if(node.callee && encloses(query.end, node.callee)) {
-							result.category = 'funccalls'; //$NON-NLS-1$
-						}
-						break;
-					}
-					case 'MemberExpression': {
-						//if we are talking about the root object, it will be a var access
-						if(node.object && node.object.type === 'Identifier' && encloses(query.end, node.object)) {
-							result.category = 'varaccess'; //$NON-NLS-1$
 							break;
 						}
-						var prop;
-						//walk up to find first non-member expression
-						while(node.type === 'MemberExpression') {
-							prop = node.property;
-							p = node.parents.pop();
-							p.parents = node.parents;
-							node = p;
+					}
+					if(!result.category) {
+						result.category = 'funcdecls'; //$NON-NLS-1$
+					}
+					break;
+				}
+				case 'Property': {
+					if(encloses(query.end, node.key)) {
+						if(node.value && node.value.type === 'FunctionExpression') {
+							result.category = 'funcdecl'; //$NON-NLS-1$
+						} else {
+							result.category = 'propwrite'; //$NON-NLS-1$
 						}
-						if(node && (node.type === 'CallExpression' || node.type === 'NewExpression') && encloses(query.end, prop)) {
-							if(node.callee && encloses(query.end, node.callee)) {
-								result.category = 'funccalls'; //$NON-NLS-1$
-							} else if(node.arguments && node.arguments.length > 0) {
-								//check args
-								for(i = 0, len = node.arguments.length; i < len; i++) {
-									if(encloses(query.end, node.arguments[i])) {
-										result.category = 'propaccess'; //$NON-NLS-1$
-									}
-								}
-							}
-							
-						} else if(node && node.type === 'AssignmentExpression') {
-							if(encloses(query.end, node.left)) {
-								if(node.right && node.right.type === 'FunctionExpression') {
-									result.category = 'funcdecls'; //$NON-NLS-1$
-								} else if(encloses(query.end, prop)) {
-									result.category = 'propwrite'; //$NON-NLS-1$
-								} else {
+					} else if(encloses(query.end, node.value)) {
+						if(node.value.type === 'FunctionExpression') {
+							result.category = 'funcdecls'; //$NON-NLS-1$
+						} else if(node.value.type === 'Identifier') {
+							result.category = 'varaccess'; //$NON-NLS-1$
+						} else {
+							result.category = 'propwrite'; //$NON-NLS-1$
+						}
+					}
+					break;
+				}
+				case 'CallExpression': {
+					if(encloses(query.end, node.callee)) {
+						result.category = 'funccalls'; //$NON-NLS-1$
+					} 
+					if(node.arguments.length > 0) {
+						for(i = 0, len = node.arguments.length; i < len; i++) {
+							var param = node.arguments[i];
+							if(encloses(query.end, param)) {
+								if(param.type === 'Identifier') {
+									result.category = 'varaccess'; //$NON-NLS-1$
+								} else if(param.type === 'MemberExpression') {
 									result.category = 'propaccess'; //$NON-NLS-1$
 								}
+							}
+						}
+					}
+					break;
+				}
+				case 'AssignmentExpression': {
+					if(encloses(query.end, node.left)) {
+						//on the left, write
+						if(node.left.type === 'Identifier') {
+							result.category = 'varwrite'; //$NON-NLS-1$
+						} else {
+							result.category = 'propwrite'; //$NON-NLS-1$
+						}
+					} else if(encloses(query.end, node.right)) {
+						if(node.right.type === 'Identifier') {
+							result.category = 'varaccess'; //$NON-NLS-1$
+						} else if(node.right.type === 'MemberExpression') {
+							result.category = 'propaccess'; //$NON-NLS-1$
+						} 
+					}
+					break;
+				}
+				case 'VariableDeclarator': {
+					if(encloses(query.end, node.id)) {
+						result.category = 'vardecls'; //$NON-NLS-1$
+					} else if(encloses(query.end, node.init)) {
+						result.category = 'varaccess';						 //$NON-NLS-1$
+					}
+					break;
+				}
+				case 'Literal': {
+					if(node.regex) {
+						result.category = 'regex'; //$NON-NLS-1$
+					} else if(typeof(node.value) === "string") {
+						result.category = 'strings'; //$NON-NLS-1$
+					}
+					break;
+				}
+				case 'NewExpression': {
+					if(node.callee && encloses(query.end, node.callee)) {
+						result.category = 'funccalls'; //$NON-NLS-1$
+					}
+					break;
+				}
+				case 'MemberExpression': {
+					//if we are talking about the root object, it will be a var access
+					if(node.object && node.object.type === 'Identifier' && encloses(query.end, node.object)) {
+						result.category = 'varaccess'; //$NON-NLS-1$
+						break;
+					}
+					var prop;
+					//walk up to find first non-member expression
+					while(node.type === 'MemberExpression') {
+						prop = node.property;
+						p = node.parents.pop();
+						p.parents = node.parents;
+						node = p;
+					}
+					if(node && (node.type === 'CallExpression' || node.type === 'NewExpression') && encloses(query.end, prop)) {
+						if(node.callee && encloses(query.end, node.callee)) {
+							result.category = 'funccalls'; //$NON-NLS-1$
+						} else if(node.arguments && node.arguments.length > 0) {
+							//check args
+							for(i = 0, len = node.arguments.length; i < len; i++) {
+								if(encloses(query.end, node.arguments[i])) {
+									result.category = 'propaccess'; //$NON-NLS-1$
+								}
+							}
+						}
+						
+					} else if(node && node.type === 'AssignmentExpression') {
+						if(encloses(query.end, node.left)) {
+							if(node.right && node.right.type === 'FunctionExpression') {
+								result.category = 'funcdecls'; //$NON-NLS-1$
+							} else if(encloses(query.end, prop)) {
+								result.category = 'propwrite'; //$NON-NLS-1$
 							} else {
 								result.category = 'propaccess'; //$NON-NLS-1$
 							}
 						} else {
 							result.category = 'propaccess'; //$NON-NLS-1$
 						}
-						break;
+					} else {
+						result.category = 'propaccess'; //$NON-NLS-1$
 					}
-					case 'UpdateExpression': {
-						if(node.argument.type === 'Identifier') {
-							result.category = 'varaccess'; //$NON-NLS-1$
-						} else if(node.argument.type === 'MemberExpression') {
-							result.category = 'propaccess'; //$NON-NLS-1$
-						}
-						break;
-					}
-					case 'BinaryExpression': {
-						if(node.left.type === 'Identifier' && encloses(query.end, node.left)) {
-							result.category = 'varaccess'; //$NON-NLS-1$
-						} else if(node.right.type === 'Identifier' && encloses(query.end, node.right)) {
-							result.category = 'varaccess'; //$NON-NLS-1$
-						}
-						break;
-					}
-					case 'BreakStatement':
-					case 'ConditionalExpression':
-					case 'ContinueStatement':
-					case 'IfStatement': 
-					case 'DoWhileStatement':
-					case 'ForInStatement':
-					case 'ForStatement':
-					case 'LogicalExpression':
-					case 'SwitchStatement':
-					case 'SwitchCase':
-					case 'WithStatement': 
-					case 'WhileStatement': {
+					break;
+				}
+				case 'UpdateExpression': {
+					if(node.argument.type === 'Identifier') {
 						result.category = 'varaccess'; //$NON-NLS-1$
-						break;
+					} else if(node.argument.type === 'MemberExpression') {
+						result.category = 'propaccess'; //$NON-NLS-1$
 					}
-					case 'LetStatement':
-					case 'LabeledStatement': {
-						result.category = 'varwrite'; //$NON-NLS-1$
-						break;
+					break;
+				}
+				case 'BinaryExpression': {
+					if(node.left.type === 'Identifier' && encloses(query.end, node.left)) {
+						result.category = 'varaccess'; //$NON-NLS-1$
+					} else if(node.right.type === 'Identifier' && encloses(query.end, node.right)) {
+						result.category = 'varaccess'; //$NON-NLS-1$
 					}
-					case 'Block': {
-						result.category = 'blockcomments'; //$NON-NLS-1$
-						break;
+					break;
+				}
+				case 'BreakStatement':
+				case 'ConditionalExpression':
+				case 'ContinueStatement':
+				case 'IfStatement': 
+				case 'DoWhileStatement':
+				case 'ForInStatement':
+				case 'ForStatement':
+				case 'LogicalExpression':
+				case 'SwitchStatement':
+				case 'SwitchCase':
+				case 'WithStatement': 
+				case 'WhileStatement': {
+					result.category = 'varaccess'; //$NON-NLS-1$
+					break;
+				}
+				case 'LetStatement':
+				case 'LabeledStatement': {
+					result.category = 'varwrite'; //$NON-NLS-1$
+					break;
+				}
+				case 'Block': {
+					result.category = 'blockcomments'; //$NON-NLS-1$
+					break;
+				}
+				case 'Line': {
+					result.category = 'linecomments'; //$NON-NLS-1$
+					break;
+				}
+				case 'UnaryExpression': {
+					if(node.argument && encloses(query.end, node.argument)) {
+						result.category = 'varaccess'; //$NON-NLS-1$
 					}
-					case 'Line': {
-						result.category = 'linecomments'; //$NON-NLS-1$
-						break;
-					}
-					case 'UnaryExpression': {
-						if(node.argument && encloses(query.end, node.argument)) {
-							result.category = 'varaccess'; //$NON-NLS-1$
-						}
-						break;
-					}
+					break;
 				}
 			}
 		}

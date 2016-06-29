@@ -61,11 +61,6 @@ define([
 		}
 	});
 	
-	/**
-	 * make sure we are skipping the recovered node
-	 */
-	Estraverse.VisitorKeys.RecoveredNode = []; //do not visit
-
 	var occurrences = [],
 		scopes = [],
 		context = null,
