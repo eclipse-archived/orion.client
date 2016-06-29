@@ -135,7 +135,6 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
         function fallback(err) {
         	options = defaultOptions.serverOptions();
         	options.getFile = _getFile;
-        	Objects.mixin(options.plugins, defaultOptions.plugins.optional);
 			startAndMessage(options);
 	        if(err) {
 				post(Serialize.serializeError(err));
@@ -658,41 +657,42 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
      */
     function loadPlugins(plugins, pluginsDir) {
 		var promises = [];
-		if(plugins) {
-			Object.keys(plugins).forEach(function(key) {
-				if(defaultOptions.plugins.required[key] || defaultOptions.plugins.optional[key]) {
-					//default plugins are statically loaded
-					return;
-				}
-				var plugin = plugins[key];
-				if(!plugin || typeof plugin !== 'object') {
-					return;
-				}
-				var loc = plugin.location;
-				if(typeof loc !== 'string') {
-					if(typeof pluginsDir === 'string') {
-						loc = pluginsDir + key;
-					} else {
-						//assume it is in /tern/plugin/
-						loc = 'tern/plugin/' + key; //$NON-NLS-1$
-					}
-				}
-				var deferred = new Deferred();
-				try {
-					promises.push(deferred);    		
-					requirejs([loc], function(_) {
-						deferred.resolve(_);
-					},
-					function(err) {
-						deferred.reject(err);
-					});
-				}
-				catch(err) {
-					post(err);
-					deferred.reject(err);
-				}
-			});
-		}
+		//TODO disable for now, as it does not work
+//		if(plugins) {
+//			Object.keys(plugins).forEach(function(key) {
+//				if(defaultOptions.plugins.required[key] || defaultOptions.plugins.optional[key]) {
+//					//default plugins are statically loaded
+//					return;
+//				}
+//				var plugin = plugins[key];
+//				if(!plugin || typeof plugin !== 'object') {
+//					return;
+//				}
+//				var loc = plugin.location;
+//				if(typeof loc !== 'string') {
+//					if(typeof pluginsDir === 'string') {
+//						loc = pluginsDir + key;
+//					} else {
+//						//assume it is in /tern/plugin/
+//						loc = 'tern/plugin/' + key; //$NON-NLS-1$
+//					}
+//				}
+//				var deferred = new Deferred();
+//				try {
+//					promises.push(deferred);    		
+//					requirejs([loc], function(_) {
+//						deferred.resolve(_);
+//					},
+//					function(err) {
+//						deferred.reject(err);
+//					});
+//				}
+//				catch(err) {
+//					post(err);
+//					deferred.reject(err);
+//				}
+//			});
+//		}
 		return promises;
     }
     
@@ -745,7 +745,9 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		}
 		var deferred = new Deferred();
 		_getFile(loc, /* @callback */ function(err, contents) {
-			if(typeof contents === 'string' && contents.length > 0) {
+			if(typeof contents === 'string') {
+				var o = contents.length > 0 ? JSON.parse(contents) : Object.create(null);
+				deferred.resolve(o);
 				deferred.resolve(JSON.parse(contents));
 			} else {
 				deferred.reject();

@@ -438,6 +438,31 @@ define([
 	       callback(null, {message: Messages['failedRenameNoServer']});
 	   }
     };
+    
+    function mergeArray(target, source) {
+		if(Array.isArray(target) && Array.isArray(source)) {
+			if(target.length < 1 ) {
+				for(var i = 0, len = source.length; i < len; i++) {
+					target.push(source[i]);
+				}
+			} else {
+				for(i = 0, len = source.length; i < len; i++) {
+					if(target.indexOf(source[i]) < 0) {
+						target.push(source[i]);
+					}
+				}
+			}
+		}
+	}
+	
+	function removeEntry(target, item) {
+		if(Array.isArray(target)) {
+			var idx = target.indexOf(item);
+			if(idx > -1) {
+				target.slice(idx, idx+1);
+			}
+		}
+	}
 	/**
 	 * @description Start up the Tern server, send a message after trying
      * @param {Object} jsonOptions The optional map of JSON options to start the server with
@@ -458,62 +483,27 @@ define([
             ecmaVersion: 7
         };
         var pluginsDir = defaultOptions.pluginsDir;
-    	var defNames, plugins, projectLoc;
+    	var defNames = [], plugins, projectLoc;
         if (jsonOptions) {
 			projectLoc = jsonOptions.projectLoc;
 			plugins = jsonOptions.plugins;
 			pluginsDir = jsonOptions.pluginsDir;
-			defNames = jsonOptions.libs;
+			mergeArray(defNames, jsonOptions.libs);
+			mergeArray(defNames, jsonOptions.defs);
 			if(Array.isArray(jsonOptions.loadEagerly) && jsonOptions.loadEagerly.length > 0) {
 				options.loadEagerly = jsonOptions.loadEagerly;
 			}
 			if (typeof jsonOptions.ecmaVersion === 'number') {
 				options.ecmaVersion = jsonOptions.ecmaVersion;
 				if(options.ecmaVersion === 5) {
-					if(Array.isArray(defNames)) {
-						if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
-							defNames.push("ecma5"); //$NON-NLS-1$
-						}
-						var e6 = defNames.indexOf("ecma6"); //$NON-NLS-1$
-						if(e6 > -1) {
-							defNames.slice(e6, e6+1);
-						}
-						var e7 = defNames.indexOf("ecma7"); //$NON-NLS-1$
-						if(e7 > -1) {
-							defNames.slice(e7, e7+1);
-						}
-					} else {
-						defNames = ["ecma5"]; //$NON-NLS-1$
-					}
+					mergeArray(defNames, ['ecma5']);
+					removeEntry(defNames, 'ecma6');
+					removeEntry(defNames, 'ecma7');
 				} else if(options.ecmaVersion === 6) {
-					if(Array.isArray(defNames)) {
-						if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
-							defNames.push("ecma5"); //$NON-NLS-1$
-						}
-						if(defNames.indexOf("ecma6") < 0) { //$NON-NLS-1$
-							defNames.push("ecma6"); //$NON-NLS-1$
-						}
-						e7 = defNames.indexOf("ecma7"); //$NON-NLS-1$
-						if(e7 > -1) {
-							defNames.slice(e7, e7+1);
-						}
-					} else {
-						defNames = ["ecma5", "ecma6"]; //$NON-NLS-1$ //$NON-NLS-2$
-					}
+					mergeArray(defNames, ["ecma5", "ecma6"]);
+					removeEntry(defNames, 'ecma7');
 				} else if(options.ecmaVersion === 7) {
-					if(Array.isArray(defNames)) {
-						if(defNames.indexOf("ecma5") < 0) { //$NON-NLS-1$
-							defNames.push("ecma5"); //$NON-NLS-1$
-						}
-						if(defNames.indexOf("ecma6") < 0) { //$NON-NLS-1$
-							defNames.push("ecma6"); //$NON-NLS-1$
-						}
-						if(defNames.indexOf("ecma7") < 0) { //$NON-NLS-1$
-							defNames.push("ecma7"); //$NON-NLS-1$
-						}
-					} else {
-						defNames = ["ecma5", "ecma6", "ecma7"]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
+					mergeArray(defNames, ["ecma5", "ecma6", "ecma7"]);
 				}
 			}
 			if (typeof jsonOptions.sourceType === 'string') {
@@ -535,32 +525,23 @@ define([
 				}
 			}
         }
-        if(!options.plugins && (!defNames || defNames.length < 1)) {
-			defaultStartUp();
-		}
-        if(typeof plugins !== 'object') {
-			plugins = null;
+        //plugins
+        if(plugins && typeof plugins === 'object') {
+	        Objects.mixin(options.plugins, plugins);
+        }
+        //definitions
+        if(!Array.isArray(defNames) || defNames.length < 1) {
+			defNames = [];
         } else {
-			Objects.mixin(options.plugins, plugins);
-        }
-        if(!Array.isArray(defNames)) {
-			defNames = null;
+        	defNames = defNames.sort();
         }
         /**
-         * A subtlety - if the user provides no plugins entry at all, they get all the defaults,
-         * if they provide an empty object they still need the required ones only for a default startup
-         */
-        var requiredOnly = plugins && Object.keys(plugins).length < 1; 
-        /**
-         * @description Start the server with the default options
+         * @description Start the server with the default options in the event a problem occurrs
          * @param {Error} err The error object from the failed deferred
          */
-        function defaultStartUp(err) {
-    		options.plugins = defaultOptions.plugins.required;
-    		if(!requiredOnly) {
-				Objects.mixin(options.plugins, defaultOptions.plugins.optional);
-			}
-			options.defs = defaultOptions.defs;
+        function fallback(err) {
+        	options = defaultOptions.serverOptions();
+        	options.getFile = doRead;
 			startAndMessage(options);
 	        if(err) {
 				callback(null, err);
@@ -579,25 +560,12 @@ define([
 			}
 			callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		if((!plugins || requiredOnly) && !defNames) {
-			defaultStartUp();
-		} else {
-			Deferred.all(loadPlugins(options.plugins, pluginsDir)).then(/* @callback */ function(plugins) {
-				if(defNames) {
-					if(defNames.length < 1) {
-						startAndMessage(options);
-					} else {
-						defNames = defNames.sort();
-						Deferred.all(loadDefs(defNames, projectLoc)).then(function(json) {
-							options.defs = json;
-							startAndMessage(options);
-						}, defaultStartUp);
-					}
-				} else {
-					startAndMessage(options);
-				}
-			}, defaultStartUp);
-		}
+		Deferred.all(loadPlugins(options.plugins, pluginsDir)).then(/* @callback */ function(plugins) {
+			Deferred.all(loadDefs(defNames, projectLoc)).then(function(json) {
+				options.defs = json;
+				startAndMessage(options);
+			}, fallback);
+		}, fallback);
     };
     /**
      * @description Computes the type information at the given offset
@@ -634,40 +602,41 @@ define([
      */
     function loadPlugins(plugins, pluginsDir) {
 		var promises = [];
-		if(plugins) {
-			Object.keys(plugins).forEach(function(key) {
-				if(plugins.required[key] || plugins.optional[key]) {
-					//default plugins are statically loaded
-					return;
-				}
-				var plugin = plugins[key];
-				if(!plugin || typeof plugin !== 'object') {
-					return;
-				}
-				var loc = plugin.location;
-				if(typeof loc !== 'string') {
-					if(typeof pluginsDir === 'string') {
-						loc = pluginsDir + key;
-					} else {
-						//assume it is in /tern/plugin/
-						loc = 'tern/plugin/' + key; //$NON-NLS-1$
-					}
-				}
-				var deferred = new Deferred();
-				try {
-					promises.push(deferred);    		
-					requirejs([loc], function(_) {
-						deferred.resolve(_);
-					},
-					function(err) {
-						deferred.reject(err);
-					});
-				}
-				catch(err) {
-					deferred.reject(err);
-				}
-			});
-		}
+		//TODO disable for now, as it does not work 
+//		if(plugins) {
+//			Object.keys(plugins).forEach(function(key) {
+//				if(plugins.required[key] || plugins.optional[key]) {
+//					//default plugins are statically loaded
+//					return;
+//				}
+//				var plugin = plugins[key];
+//				if(!plugin || typeof plugin !== 'object') {
+//					return;
+//				}
+//				var loc = plugin.location;
+//				if(typeof loc !== 'string') {
+//					if(typeof pluginsDir === 'string') {
+//						loc = pluginsDir + key;
+//					} else {
+//						//assume it is in /tern/plugin/
+//						loc = 'tern/plugin/' + key; //$NON-NLS-1$
+//					}
+//				}
+//				var deferred = new Deferred();
+//				try {
+//					promises.push(deferred);    		
+//					requirejs([loc], function(_) {
+//						deferred.resolve(_);
+//					},
+//					function(err) {
+//						deferred.reject(err);
+//					});
+//				}
+//				catch(err) {
+//					deferred.reject(err);
+//				}
+//			});
+//		}
 		return promises;
     }
     
@@ -721,7 +690,8 @@ define([
 		var deferred = new Deferred();
 		doRead(loc, function(err, contents) {
 			if(typeof contents === 'string') {
-				deferred.resolve(JSON.parse(contents));
+				var o = contents.length > 0 ? JSON.parse(contents) : Object.create(null);
+				deferred.resolve(o);
 			} else {
 				deferred.reject(err);
 			}
