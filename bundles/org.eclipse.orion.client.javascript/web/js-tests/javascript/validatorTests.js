@@ -12876,7 +12876,7 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "Assigning to itself is pointless."
+										description: "'b' is assigned to itself."
 									}]);
 								},
 								function (error) {
@@ -12893,7 +12893,7 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "Assigning to itself is pointless."
+										description: "'x' is assigned to itself."
 									}]);
 								},
 								function (error) {

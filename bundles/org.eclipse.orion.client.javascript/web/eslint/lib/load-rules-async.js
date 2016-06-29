@@ -2190,7 +2190,7 @@ define([
 							&& init.type === 'Identifier'
 							&& id.type === 'Identifier'
 							&& id.name === init.name) {
-						context.report(variableDeclarator, ProblemMessages['no-self-assign']);
+						context.report(variableDeclarator, ProblemMessages['no-self-assign'], {0: id.name, pid: 'no-self-assign', nls: 'no-self-assign'});
 					}
 				}
 				/**
@@ -2204,7 +2204,7 @@ define([
 						if (left.type === 'Identifier'
 								&& right.type === 'Identifier'
 								&& left.name === right.name) {
-							context.report(assignment, ProblemMessages['no-self-assign']);
+							context.report(assignment, ProblemMessages['no-self-assign'], {0: left.name, pid: 'no-self-assign', nls: 'no-self-assign'});
 						}
 					}
 				}
