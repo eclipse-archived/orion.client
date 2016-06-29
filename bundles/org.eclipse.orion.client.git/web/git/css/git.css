@@ -961,6 +961,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 
 .git-sprite-branch-active{
 	padding-right:5px;
+	padding-bottom:5px;
 }
 
 .git-sprite-branch-active-tag{
