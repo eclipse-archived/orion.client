@@ -181,7 +181,7 @@ define([
 				}
 				if (isKeyEvent && event.keyCode === lib.KEY.ESCAPE) {
 					if (hideRefNode) {
-						refNode.style.display = "inline"; //$NON-NLS-0$
+						refNode.style.display = "";
 					}
 					done = true;
 					editBox.parentNode.removeChild(editBox);
@@ -194,13 +194,13 @@ define([
 					return;
 				} else if (newValue.length === 0 || (!isInitialValid && newValue === initialText)) {
 					if (hideRefNode) {
-						refNode.style.display = "inline"; //$NON-NLS-0$
+						refNode.style.display = "";
 					}
 					done = true;
 				} else {
 					onComplete(newValue);
 					if (hideRefNode && refNode.parentNode) {
-						refNode.style.display = "inline"; //$NON-NLS-0$
+						refNode.style.display = "";
 					}
 					done = true;
 				}
