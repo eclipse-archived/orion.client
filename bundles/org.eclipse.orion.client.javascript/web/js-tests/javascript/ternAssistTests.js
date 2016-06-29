@@ -4082,10 +4082,10 @@ define([
 						callback:done
 					};
 					testProposals(options, [
+						['', 'node'],
+					    ['start(options)', 'start(options) : events.EventEmitter'],
 						['', 'mysql'],
 					    ['start()', 'start()'],
-					    ['', 'node'],
-					    ['start(options)', 'start(options) : events.EventEmitter'],
 					    ['', 'ecma6'],
 					    ['startsWith(searchString, position?)', 'startsWith(searchString, position?) : bool']
 					]);
