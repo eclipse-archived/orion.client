@@ -107,7 +107,7 @@ function encodeLocation(obj) {
 function writeError(code, res, msg) {
 	msg = msg instanceof Error ? msg.message : msg;
 	if (typeof msg === 'string') {
-		var err = JSON.stringify({Error: msg, Message: msg});
+		var err = JSON.stringify({Severity: "Error", Message: msg});
 		res.setHeader('Content-Type', 'application/json');
 		res.setHeader('Content-Length', err.length);
 		res.writeHead(code, msg);

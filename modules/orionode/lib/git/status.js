@@ -28,7 +28,7 @@ function router(options) {
 		return clone.getRepo(req)
 		.then(function(repo) {
 			var fileDir = clone.getfileDir(repo,req);
-			repo.getStatusExt({
+			return repo.getStatusExt({
 				flags: 
 					git.Status.OPT.INCLUDE_UNTRACKED | 
 					git.Status.OPT.RECURSE_UNTRACKED_DIRS
@@ -120,15 +120,10 @@ function router(options) {
 					"Type": "Status",
 					"Untracked": untracked   
 				});
-			})
-			.catch(function(err) {
-				console.log(err);
-				writeError(403, res);
 			});
 		})
 		.catch(function(err) {
-			console.log(err);
-			writeError(403, res);
+			writeError(400, res, err);
 		});
 	}
 }

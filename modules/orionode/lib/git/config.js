@@ -48,7 +48,7 @@ function getAConfig(req, res) {
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
 			if (err) {
-				return writeError(403, res, err.message);
+				return writeError(400, res, err.message);
 			}
 			var segments = key.split(".");
 			var section = segments[0];
@@ -80,7 +80,7 @@ function getConfig(req, res) {
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
 			if (err) {
-				return writeError(403, res, err.message);
+				return writeError(400, res, err.message);
 			}
 			configs = [];
 
@@ -121,7 +121,7 @@ function updateConfig(req, res, key, value, callback) {
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
 			if (err) {
-				return writeError(403, res, err.message);
+				return writeError(400, res, err.message);
 			}
 			var segments = key.split(".");
 			var section = segments[0];
@@ -134,7 +134,7 @@ function updateConfig(req, res, key, value, callback) {
 			if (result.status === 200 || result.status === 201) {
 				args.writeConfigFile(configFile, config, function(err) {
 					if (err) {
-						return writeError(403, res, err.message);
+						return writeError(400, res, err.message);
 					}
 					if (result.value) {
 						var resp = configJSON(key, result.value, fileDir);
