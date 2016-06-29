@@ -151,7 +151,7 @@ define([
 		"eqeqeq": function(context) {
 			        /**
         			 * @description Find the token with the matching operator
-        			 * @param {Object} context The ESLint rule context
+        			 * @param {{}}} context The ESLint rule context
         			 * @param {Object} node The AST node
         			 * @returns {Object} The matching token or null
         			 */
@@ -1627,7 +1627,7 @@ define([
 			var importsHandled = false;
     		/**
 	         * @description If the reference is read-only
-	         * @param {Object} ref 
+	         * @param {{}}} ref 
 	         * @returns {Boolean} If the reference is read-only
 	         */
 	        function isRead(ref) {
