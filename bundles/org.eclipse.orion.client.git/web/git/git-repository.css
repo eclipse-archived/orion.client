@@ -22,18 +22,14 @@
 }
 
 .stretch {
-	float: left;
-	position: relative;
 	white-space:normal;
-	max-width:700px;
+	flex: 1 1 auto;
+	-ms-flex: 1 1 auto;
+	-webkit-flex: 1 1 auto;
 }
 
 html[dir="rtl"] .stretch { /* ACGC */
 	float: right;
-}
-
-#branchSectionContent .sectionTableItem .stretch {
-	top: 4px;
 }
 
 .activeBranch {

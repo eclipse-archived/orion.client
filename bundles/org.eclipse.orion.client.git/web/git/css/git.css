@@ -586,7 +586,12 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 }
 
 .gitListCell {
-	padding-top: 6px;
+	display: flex;
+	display: -ms-flexbox;
+	display: -webkit-flex;
+	align-items: center;
+	-webkit-align-items: center;		 		 /* Safari */
+	padding-top: 4px;
 	padding-bottom: 4px;
 	overflow: visible;
 }
