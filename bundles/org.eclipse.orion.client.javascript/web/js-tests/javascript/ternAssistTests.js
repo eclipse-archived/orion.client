@@ -177,7 +177,7 @@ define([
 		}
 		
 		describe('Tern Content Assist Tests', function() {
-			this.timeout(2000000);
+			this.timeout(20000);
 			before('Message the server for warm up', function(done) {
 				CUProvider.setUseCache(false);
 				ternAssist = new TernAssist.TernContentAssist(astManager, worker, function() {
