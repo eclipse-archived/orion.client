@@ -114,6 +114,7 @@
             { name: "plugins/languages/xml/xmlPlugin" },
             { name: "plugins/languages/xquery/xqueryPlugin" },
             { name: "plugins/languages/yaml/yamlPlugin" },
+            { name: "plugins/languages/json/jsonPlugin" },
             { name: "plugins/googleAnalyticsPlugin" },
             { name: "plugins/pageLinksPlugin" },
             { name: "plugins/preferencesPlugin" },
