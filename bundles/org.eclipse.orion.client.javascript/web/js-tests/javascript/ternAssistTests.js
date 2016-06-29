@@ -4084,6 +4084,8 @@ define([
 					testProposals(options, [
 						['', 'mysql'],
 					    ['start()', 'start()'],
+					    ['', 'node'],
+					    ['start(options)', 'start(options) : events.EventEmitter'],
 					    ['', 'ecma6'],
 					    ['startsWith(searchString, position?)', 'startsWith(searchString, position?) : bool']
 					]);
