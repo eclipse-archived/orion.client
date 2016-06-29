@@ -591,8 +591,8 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	display: -webkit-flex;
 	align-items: center;
 	-webkit-align-items: center;		 		 /* Safari */
-	padding-top: 4px;
-	padding-bottom: 4px;
+	padding-top: 1px;
+	padding-bottom: 1px;
 	overflow: visible;
 }
 
