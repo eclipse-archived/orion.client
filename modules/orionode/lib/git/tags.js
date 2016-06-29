@@ -46,6 +46,16 @@ function tagJSON(fullName, shortName, sha, timestamp, fileDir) {
 	};
 }
 
+function getTagCommit(repo, ref) {
+	return repo.getReferenceCommit(ref)
+	.catch(function() {
+		return repo.getTagByName(ref.shorthand())
+		.then(function(tag){
+			return repo.getCommit(tag.targetId());
+		});
+	});
+}
+
 function getTags(req, res) {
 	var tagName = util.decodeURIComponent(req.params.tagName || "");
 	var fileDir;
@@ -67,7 +77,7 @@ function getTags(req, res) {
 		})
 		.then(function(ref) {
 			theRef = ref;
-			return theRepo.getReferenceCommit(ref);
+			return getTagCommit(theRepo, ref);
 		})
 		.then(function(commit) {
 			res.status(200).json(tagJSON(theRef.name(), theRef.shorthand(), commit.sha(), commit.timeMs(), fileDir));
@@ -100,7 +110,7 @@ function getTags(req, res) {
 		}))
 		.then(function(referenceList) {
 			async.each(referenceList, function(ref,callback) {
-				theRepo.getReferenceCommit(ref)
+				getTagCommit(theRepo, ref)
 				.then(function(commit) {
 					tags.push(tagJSON(ref.name(), ref.shorthand(), commit.sha(), commit.timeMs(), fileDir));
 					callback();
