@@ -2198,12 +2198,14 @@ define([
 				 * @param {Object} assignment The AST node
 				 */
 				function checkAssignmentExpression(assignment) {
-					var left = assignment.left;
-					var right = assignment.right;
-					if (left.type === 'Identifier'
-							&& right.type === 'Identifier'
-							&& left.name === right.name) {
-						context.report(assignment, ProblemMessages['no-self-assign']);
+					if (assignment.operator === '='){
+						var left = assignment.left;
+						var right = assignment.right;
+						if (left.type === 'Identifier'
+								&& right.type === 'Identifier'
+								&& left.name === right.name) {
+							context.report(assignment, ProblemMessages['no-self-assign']);
+						}
 					}
 				}
 				return {

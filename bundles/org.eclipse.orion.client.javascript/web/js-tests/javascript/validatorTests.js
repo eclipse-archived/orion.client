@@ -12924,6 +12924,18 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
+						it("should not flag operator assignments", function(callback) {
+							var topic = 	"var a; a += a; a -= a; a *= a; a /= a;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
 					});
 					// type-checked-consistent-return --------------------------------------------
 					describe('type-checked-consistent-return', function() {
