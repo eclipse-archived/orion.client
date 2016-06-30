@@ -596,7 +596,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 	function positionScrollButtons() {
 		this._topScrollButton.style.top = this._dropdownNode.style.top;
 		this._topScrollButton.style.left = this._dropdownNode.style.left;
-		this._bottomScrollButton.style.top = (this._dropdownNode.clientHeight-this._bottomScrollButton.clientHeight)+"px";
+		this._bottomScrollButton.style.top = Number(this._dropdownNode.style.top.replace("px", "")) + (this._dropdownNode.clientHeight-this._bottomScrollButton.clientHeight)+"px";
 		this._bottomScrollButton.style.left = this._dropdownNode.style.left;
 	}
 		
