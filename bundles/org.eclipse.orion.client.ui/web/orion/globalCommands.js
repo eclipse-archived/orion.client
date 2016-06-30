@@ -861,6 +861,18 @@ define([
 			commandRegistry.processURL(window.location.href);
 		}, false);
 
+		if (util.isElectron) {
+			serviceRegistry.registerService("orion.navigate.command", {
+				run: function(item) {
+					window.__electron.shell.openExternal(window.location.origin+item[0].Location);
+				}
+			}, {
+				name: "System Editor",
+				id: "orion.system.editor",
+				tooltip: "Open the current file in the desktop's default manner"
+			});
+		}
+
 		return customGlobalCommands.afterGenerateBanner.apply(this, arguments);
 	}
 
