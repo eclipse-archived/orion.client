@@ -40,7 +40,7 @@ define("webtools/htmlFormatter", [
 			"eval_code": false,
 			"unescape_strings": false,
 			"wrap_attributes": "auto",
-			"wrap_attributes_indent_size": 4,
+			"wrap_attributes_indent_size": 1,
 		},
 		
 		setOption: function(ruleId, value, key) {
