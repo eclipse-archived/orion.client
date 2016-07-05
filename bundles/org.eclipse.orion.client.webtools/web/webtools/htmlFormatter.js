@@ -16,29 +16,9 @@ define("webtools/htmlFormatter", [
 'beautifier/beautifier'
 ], function(Objects, Deferred, Beautifier) {
 	var config = {
-		// 0:off, 1:warning, 2:error
-		/*
-		 *     The options are (default in brackets):
-    indent_inner_html (default false)  - indent <head> and <body> sections,
-    indent_size (default 4)            - indentation size,
-    indent_char (default space)        - character to indent with,
-    wrap_line_length (default 250)            -  maximum amount of characters per line (0 = disable)
-    brace_style (default "collapse") - "collapse" | "expand" | "end-expand" | "none"
-            put braces on the same line as control statements (default), or put braces on own line (Allman / ANSI style), or just put end braces on own line, or attempt to keep them where they are.
-    unformatted (defaults to inline tags) - list of tags, that shouldn't be reformatted
-    indent_scripts (default normal)  - "keep"|"separate"|"normal"
-    preserve_newlines (default true) - whether existing line breaks before elements should be preserved
-                                        Only works before elements, not inside tags or for text.
-    max_preserve_newlines (default unlimited) - maximum number of line breaks to be preserved in one chunk
-    indent_handlebars (default false) - format and indent {{#foo}} and {{/foo}}
-    end_with_newline (false)          - end with a newline
-    extra_liners (default [head,body,/html]) -List of tags that should have an extra newline before them.
-    eol
-		 * 
-		 */
 		defaults: {
-			"indent_size": 4,
-			"indent_char": " ",
+			"indent_size": 1,
+			"indent_char": "\t",
 			"indent_inner_html" : false,
 			"eol": "\n",
 			"end_with_newline": false,

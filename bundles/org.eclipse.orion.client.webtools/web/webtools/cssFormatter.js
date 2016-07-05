@@ -16,22 +16,9 @@ define("webtools/cssFormatter", [
 'beautifier/beautifier'
 ], function(Objects, Deferred, Beautifier) {
 	var config = {
-		// 0:off, 1:warning, 2:error
-		/*
-		 *     The options are (default in brackets):
-        indent_size (4)                         - indentation size,
-        indent_char (space)                     - character to indent with,
-        selector_separator_newline (true)       - separate selectors with newline or
-                                                  not (e.g. "a,\nbr" or "a, br")
-        end_with_newline (false)                - end with a newline
-        newline_between_rules (true)            - add a new line after every css rule
-        space_around_selector_separator (false) - ensure space around selector separators:
-                                                  '>', '+', '~' (e.g. "a>b" -> "a > b")
-		 * 
-		 */
 		defaults: {
-			"indent_size": 4,
-			"indent_char": " ",
+			"indent_size": 1,
+			"indent_char": "\t",
 			"eol": "\n",
 			"end_with_newline": false,
 			"newline_between_rules" : true,

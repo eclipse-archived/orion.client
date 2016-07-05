@@ -15,10 +15,9 @@ define([
 'orion/Deferred'
 ], function(Objects, Deferred) {
 	var config = {
-		// 0:off, 1:warning, 2:error
 		defaults: {
-			"indent_size": 4,
-			"indent_char": " ",
+			"indent_size": 1,
+			"indent_char": "\t",
 			"eol": "\n",
 			"indent_level": 0,
 			"indent_with_tabs": false,
