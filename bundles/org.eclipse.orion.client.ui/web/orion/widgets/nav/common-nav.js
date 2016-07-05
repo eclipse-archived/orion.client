@@ -312,10 +312,10 @@ define([
 			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.copySelections", 2, "orion.menuBarEditGroup/orion.clipboardGroup", false, copySelections); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.pasteSelections", 3, "orion.menuBarEditGroup/orion.clipboardGroup", false, pasteSelections); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.deleteFile", 4, "orion.menuBarEditGroup/orion.clipboardGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.renameResource", 5, "orion.menuBarEditGroup/orion.clipboardGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.compareWith", 6, "orion.menuBarEditGroup/orion.compareGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.compareWithEachOther", 7, "orion.menuBarEditGroup/orion.compareGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.compareWith", 5, "orion.menuBarEditGroup/orion.compareGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.compareWithEachOther", 6, "orion.menuBarEditGroup/orion.compareGroup");  //$NON-NLS-1$ //$NON-NLS-0$
 			
+			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.renameResource", 1, "orion.menuBarEditGroup/orion.edit.formatGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
 			// View actions
 			if (!util.isElectron) {
 				commandRegistry.registerCommandContribution(viewActionsScope, "eclipse.downFolder", 1, "orion.menuBarViewGroup", false, downFolder); //$NON-NLS-1$ //$NON-NLS-0$
