@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -283,5 +283,5 @@ define({//Default message bundle
     "editorTheme selection background": "Selection background",
     'customizeTheme': 'Custom Style...',
     'moreEditorSettings': 'Editor Settings...',
-    'JavascriptSettingWarning' : '${0} Warning: Global settings for ${2} are overriden by the settings defined in: ${1}'
+    'SettingWarning' : '${0} Warning: Global settings for \'${2}\' are overriden by the settings defined in: ${1}'
 });

@@ -44,9 +44,9 @@ define([
 	"javascript/ternPlugins/redis",
 	"javascript/ternPlugins/refs",
 	"javascript/ternPlugins/templates",
-	"javascript/ternPlugins/quickfixes"
+	"javascript/ternPlugins/quickfixes",
+	"javascript/ternPlugins/beautifier"
 ], function(Messages, ecma5, ecma6, ecma7, browser, chai) {
-	
 	var defs = [ecma5, ecma6, ecma7, browser, chai];
 	var defNames = ["ecma5", "ecma6", "ecma7", "browser", "chai"]; //these are in the same order to avoid a walk of the array
 	
@@ -112,7 +112,12 @@ define([
 				"name": Messages["templatesPlugin"],
 				"description": Messages["templatesPluginDescription"],
 				"version": "1.0"
-			}
+			},
+			"beautifier": {
+				"name": Messages["beautifierPluginName"],
+				"description": Messages["beautifierPluginDescription"],
+				"version": "1.0"
+			},
 		},
 		optional: {
 			"amqp": {

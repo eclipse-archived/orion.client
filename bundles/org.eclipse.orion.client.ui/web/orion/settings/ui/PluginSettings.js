@@ -449,6 +449,16 @@ define([
 			}.bind(this));
 		}.bind(this));
 	}
+	
+	function getFormattingSettings(fileClient, projectPath, callback) {
+		var jsbeautifyrc = projectPath + SettingsList.prototype.JSBEAUTIFYRC;
+		return fileClient.read(jsbeautifyrc, false, false, {readIfExists: true}).then(function(contents) {
+			if (contents !== null) {
+				callback({contents: contents, name: SettingsList.prototype.JSBEAUTIFYRC, location: jsbeautifyrc});
+				return;
+			}
+		}.bind(this));
+	}
 
 	SettingsList.prototype = {
 		/**
@@ -480,6 +490,11 @@ define([
 		 * The package.json file name
 		 */
 		PACKAGE_JSON : 'package.json',
+		/**
+		 * The .jsbeautifyrc file name
+		 * @see https://github.com/beautify-web/js-beautify/blob/master/README.md
+		 */
+		JSBEAUTIFYRC : '.jsbeautifyrc',
 		
 		_makeSection: function(parent, sectionId, title, hasMultipleSections) {
 			var that = this;
@@ -537,7 +552,7 @@ define([
 								if (!this.destroyed) {
 									var infoText = document.createElement("div"); //$NON-NLS-0$
 									infoText.classList.add("setting-info"); //$NON-NLS-0$
-									infoText.textContent = messages.JavascriptSettingWarning;
+									infoText.textContent = messages.SettingWarning;
 									var icon = document.createElement("span"); //$NON-NLS-0$
 									icon.classList.add("core-sprite-warning"); //$NON-NLS-0$
 									icon.classList.add("icon-inline"); //$NON-NLS-0$
@@ -559,7 +574,39 @@ define([
 					}
 					break;
 				}
-			}
+				case "javascriptFormatting" : {
+					if (pageParams.resource && pageParams.resource.length !== 0) {
+						// resource name starts with /file/ and ends with '/'
+						projectName = pageParams.resource.substring(6, pageParams.resource.length - 1);
+						getFormattingSettings(
+							this.fileClient,
+							pageParams.resource,
+							function(file) {
+								if (!this.destroyed) {
+									var infoText = document.createElement("div"); //$NON-NLS-0$
+									infoText.classList.add("setting-info"); //$NON-NLS-0$
+									infoText.textContent = messages.SettingWarning;
+									var icon = document.createElement("span"); //$NON-NLS-0$
+									icon.classList.add("core-sprite-warning"); //$NON-NLS-0$
+									icon.classList.add("icon-inline"); //$NON-NLS-0$
+									icon.classList.add("imageSprite"); //$NON-NLS-0$
+									var link = document.createElement("a"); //$NON-NLS-0$
+									link.href = editTemplate.expand({resource: file.location});
+									link.appendChild(document.createTextNode(file.name));
+									var projectText = document.createElement("span"); //$NON-NLS-0$
+									projectText.textContent = projectName;
+									lib.processDOMNodes(infoText, [icon, link, projectText]);
+									if (parent.firstChild) {
+										parent.insertBefore(infoText, parent.firstChild);
+									} else {
+										parent.appendChild(infoText);
+									}
+									return true;
+								}
+							}.bind(this));
+					}
+				}
+		}
 			for (var i=0; i<settings.length; i++) {
 				var setting = settings[i];
 				var sectionId = 'settings.section.'; //$NON-NLS-1$

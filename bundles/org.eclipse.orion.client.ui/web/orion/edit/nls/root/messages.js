@@ -105,5 +105,7 @@ define({
 	"showTooltipTooltip": "Shows the tooltip immediately based on the caret position",
 	"emptyDeploymentInfoMessage": "Use the Launch Configurations dropdown to deploy this project",
 	"Orion": "Orion",
-	"OK": "Ok"
+	"OK": "Ok",
+	"Format" : "Format",
+	"FormatTooltip":"Format editor contents"	
 });

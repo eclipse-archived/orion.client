@@ -91,6 +91,7 @@ define({//Default message bundle
 	"Generate a sample plugin for integrating with Orion.": "Generate a sample plug-in for integrating with Orion.",
 	"Browser": "Web Browser",
 	"OutlineProgress": "Getting outline for ${0} from ${1}",
+	"FormatProgress" : "Formatting ${0} from ${1}",
 	"outlineTimeout": "Outline service timed out. Try reloading the page and opening the outline again.",
 	"UnknownError": "An unknown error occurred.",
 	"Filter": "Filter (* = any string, ? = any character)",

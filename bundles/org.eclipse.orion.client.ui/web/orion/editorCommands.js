@@ -149,6 +149,7 @@ define([
 		this.editorPreferences = options.editorPreferences;
 		this.differ = options.differ;
 		this.blamer = options.blamer;
+		this.formatter = options.formatter;
 		var that = this;
 		this.listener = {
 			onServiceAdded: function(event) {
@@ -177,6 +178,7 @@ define([
 			this._createClipboardCommands();
 			this._createDelimiterCommands();
 			this._createEncodingCommand();
+			this._createFormatterCommand();
 			this._createSaveCommand();
 			this._createOpenFolderCommand();
 			this._createOpenRecentCommand();
@@ -223,6 +225,7 @@ define([
 			this.localSettings = target.localSettings;
 			this.differ = target.differ;
 			this.blamer = target.blamer;
+			this.formatter = target.formatter;
 			this.textSearcher = target.textSearcher;
 			
 			if (this._recreateEditCommands) {
@@ -264,6 +267,7 @@ define([
 			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.edit.save", 2, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.saveGroup" : null, false, new mKeyBinding.KeyBinding('s', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.gotoLine", 3, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.find", 0, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId , "orion.edit.format", 1, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.formatGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', false, true, true), new mCommandRegistry.URLBinding("format", "format"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.toolbarId, "orion.keyAssist", 0, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(191, false, true, true)); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(113), null, this);//$NON-NLS-1$ //$NON-NLS-2$ 
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 2, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
@@ -318,6 +322,7 @@ define([
 			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.gotoLine", index++, "orion.editorContextMenuGroup/orion.findGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.quickSearch", index++, "orion.editorContextMenuGroup/orion.findGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.openSearch", index++, "orion.editorContextMenuGroup/orion.findGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.format", index++, "orion.editorContextMenuGroup/orion.edit.formatGroup", false); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$
 
 			// 'Tools' cascade
 			commandRegistry.addCommandGroup(this.editorContextMenuId, "orion.editorContextMenuToolsGroup", 400, messages["Tools"], "orion.editorContextMenuGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -908,6 +913,28 @@ define([
 				}
 			});
 			this.commandService.addCommand(blameCommand);
+		},
+
+		_createFormatterCommand: function(){
+			var that = this;
+			var formatterCommand = new mCommands.Command({
+				name: messages.Format,
+				tooltip: messages.FormatTooltip,
+				id: "orion.edit.format", //$NON-NLS-0$
+				parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('formatter', 'boolean')], {clientCollect: true}), //$NON-NLS-1$ //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					var editor = data.handler.editor || that.editor;
+					var formatter = data.handler.formatter || that.formatter;
+					return editor && editor.installed && formatter && formatter.isVisible();
+				},
+				callback: function(data) {
+					var editor = this.editor || that.editor;
+					var formatter = this.formatter || that.formatter;
+					formatter.doFormat();
+					editor.focus();
+				}
+			});
+			this.commandService.addCommand(formatterCommand);
 		},
 
 		_createDiffCommand: function(){
