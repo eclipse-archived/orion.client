@@ -860,7 +860,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 					if (start < tabIndex) {
 						range = {text: text.substring(start, tabIndex), style: style};
 						data.ranges.push(range);
-						if (bidiUtils.isBidiEnabled) {
+						if (bidiUtils.isBidiEnabled()) {
 							data.ranges.push(bidiRange);
 						}
 						data.tabOffset += range.text.length;
@@ -874,7 +874,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 						}
 						range = {text: spaces, style: style, ignoreChars: spacesCount - 1};
 						data.ranges.push(range);
-						if (bidiUtils.isBidiEnabled) {
+						if (bidiUtils.isBidiEnabled()) {
 							data.ranges.push(bidiRange);
 						}
 						data.tabOffset += range.text.length;
@@ -889,7 +889,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			if (start <= end) {
 				range = {text: text.substring(start, end), style: style};
 				data.ranges.push(range);
-				if (bidiUtils.isBidiEnabled) {
+				if (bidiUtils.isBidiEnabled()) {
 					data.ranges.push(bidiRange);
 				}
 				data.tabOffset += range.text.length;

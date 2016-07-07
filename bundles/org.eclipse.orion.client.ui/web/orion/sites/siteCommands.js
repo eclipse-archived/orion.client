@@ -186,7 +186,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/commandRegistry', 'orion/command
 				var items = wrap(data.items);
 				var userData = data.userData;
 				var itemName  = (items.length === 1) ? items[0].Name : '';
-				if (bidiUtils.isBidiEnabled) {
+				if (bidiUtils.isBidiEnabled()) {
 					itemName = bidiUtils.enforceTextDirWithUcc(itemName);
 				}
 				var msg = (items.length === 1)

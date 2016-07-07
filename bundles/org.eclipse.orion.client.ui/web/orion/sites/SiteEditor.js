@@ -118,7 +118,7 @@ objects.mixin(ConvertToSelfHostingDialog.prototype, {
 		var folderInfo = this.folders[folderIndex];
 		folderInfo.folder = chosenFolder;
 		var chosenFolderName = chosenFolder ? chosenFolder.Name : '';	//$NON-NLS-0$
-		if (bidiUtils.isBidiEnabled) {
+		if (bidiUtils.isBidiEnabled()) {
 			chosenFolderName = bidiUtils.enforceTextDirWithUcc(chosenFolderName);
 		}
 		this.folderTexts[folderIndex].textContent = chosenFolderName;
