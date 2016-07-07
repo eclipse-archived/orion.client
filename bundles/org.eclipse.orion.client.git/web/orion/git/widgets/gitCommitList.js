@@ -230,7 +230,7 @@ define([
 								section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef))); //$NON-NLS-1$
 							} else {
 								var shortRefName = util.shortenRefName(activeBranch);
-								if (bidiUtils.isBidiEnabled) {
+								if (bidiUtils.isBidiEnabled()) {
 									shortRefName = bidiUtils.enforceTextDirWithUcc(shortRefName);
 								}
 								section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], shortRefName));

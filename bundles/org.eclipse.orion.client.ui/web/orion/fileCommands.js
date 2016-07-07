@@ -800,7 +800,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			callback: function(data) {
 				var items = Array.isArray(data.items) ? data.items : [data.items];
 				var deleteItemName = items.length === 1 ? items[0].Name : '';			
-				if (bidiUtils.isBidiEnabled) {
+				if (bidiUtils.isBidiEnabled()) {
 					deleteItemName = bidiUtils.enforceTextDirWithUcc(deleteItemName);
 				}
 				var confirmMessage = items.length === 1 ? i18nUtil.formatMessage(messages["DeleteTrg"], deleteItemName) : i18nUtil.formatMessage(messages["delete item msg"], items.length);

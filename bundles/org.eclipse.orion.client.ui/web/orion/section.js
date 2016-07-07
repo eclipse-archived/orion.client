@@ -458,7 +458,7 @@ define([
 							var firstHeader = Object.getPrototypeOf(this).getCellHeaderElement.call(this, col_no);
 							if(firstHeader){
 								var sectionTitle = firstHeader.innerHTML;
-								if (bidiUtils.isBidiEnabled) {
+								if (bidiUtils.isBidiEnabled()) {
 									sectionTitle = bidiUtils.enforceTextDirWithUcc(sectionTitle);
 								}
 								this.section.setTitle(sectionTitle);
