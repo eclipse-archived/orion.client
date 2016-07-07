@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -340,7 +340,7 @@ define([
 		},
 		getReadOnly: function() {
 			var data = this._fileMetadata;
-			return this._readonly || !data || (data.Attributes && data.Attributes.ReadOnly);
+			return this._readonly || !data || (data.Attributes && data.Attributes.ReadOnly) ? true: false;
 		},
 		getContentType: function() {
 			return this._contentType;

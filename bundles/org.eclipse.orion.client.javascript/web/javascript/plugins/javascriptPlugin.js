@@ -659,11 +659,15 @@ define([
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     			renameCommand,
     			{
-    		name: javascriptMessages['renameElement'],
-    		tooltip : javascriptMessages['renameElementTooltip'],
-    		id : "rename.js.element",  //$NON-NLS-1$
-    		key : [ 'R', false, true, !Util.isMac, Util.isMac],  //$NON-NLS-1$
-    		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
+		    		name: javascriptMessages['renameElement'],
+		    		tooltip : javascriptMessages['renameElementTooltip'],
+		    		id : "rename.js.element",  //$NON-NLS-1$
+		    		key : [ 'R', false, true, !Util.isMac, Util.isMac],  //$NON-NLS-1$
+		    		contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+					validationProperties: [
+		                {source: "annotation:id", match: "^(?:curly)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
+		            ]
     			}
     	);
 
@@ -677,7 +681,8 @@ define([
         			id : "curly.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:curly)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:curly)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -691,7 +696,8 @@ define([
         			id : "rm.extra.parens.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-extra-parens)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-extra-parens)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -705,7 +711,8 @@ define([
         			id : "rm.extra.semi.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-extra-semi)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-extra-semi)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -718,7 +725,8 @@ define([
         			id : "add.fallthrough.comment.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-fallthrough)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-fallthrough)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -739,7 +747,8 @@ define([
         			id : "add.fallthrough.break.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-fallthrough)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-fallthrough)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -752,7 +761,8 @@ define([
         			id : "add.empty.comment.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-empty-block)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-empty-block)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -765,7 +775,8 @@ define([
         			id : "add.eslint-env.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-undef-defined-inenv)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-undef-defined-inenv)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -778,7 +789,8 @@ define([
         			id : "add.module.eslint-env.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:unknown-require-missing-env)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:unknown-require-missing-env)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -792,7 +804,8 @@ define([
         			id : "update.reserved.property.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-reserved-keys)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-reserved-keys)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -819,8 +832,9 @@ define([
         			id : "add.eslint-global.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-undef-defined)$"} //$NON-NLS-1$ //$NON-NLS-2$
-                    ]
+                        {source: "annotation:id", match: "^(?:no-undef-defined)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
+					]
     			}
     	);
     	
@@ -832,7 +846,8 @@ define([
         			id : "open.definition.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-undef-expression-defined-object)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-undef-expression-defined-object)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -855,7 +870,8 @@ define([
     				id : "remove.unused.param.fix",  //$NON-NLS-1$
     				contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
     				validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-unused-params|no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-unused-params|no-unused-params-expr)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -868,7 +884,8 @@ define([
         			id : "comment.callback.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-unused-params-expr)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -882,7 +899,8 @@ define([
         			id : "eqeqeq.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:eqeqeq)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:eqeqeq)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -903,7 +921,8 @@ define([
         			id : "unknown.require.plugin.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:unknown-require-plugin|unknown-require-not-running|missing-requirejs)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:unknown-require-plugin|unknown-require-not-running|missing-requirejs)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -917,7 +936,8 @@ define([
         			id : "noeqnull.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-eq-null)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-eq-null)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -931,7 +951,8 @@ define([
         			id : "no.undef.init.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-undef-init)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-undef-init)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -945,7 +966,8 @@ define([
         			id : "no.self.assign.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-self-assign)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-self-assign)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -966,7 +988,8 @@ define([
         			id : "no.self.assign.rename.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-self-assign)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-self-assign)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -979,7 +1002,8 @@ define([
         			id : "new.parens.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:new-parens)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:new-parens)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -992,7 +1016,8 @@ define([
         			id : "remove.unreachable.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-unreachable)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-unreachable)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -1005,7 +1030,8 @@ define([
         			id : "sparse.array.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-sparse-arrays)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-sparse-arrays)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -1019,7 +1045,8 @@ define([
         			id : "semi.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:semi)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:semi)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -1032,7 +1059,8 @@ define([
         			id : "unused.var.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-unused-vars-unused)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-unused-vars-unused)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -1045,7 +1073,8 @@ define([
         			id : "unread.var.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-unused-vars-unread)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-unused-vars-unread)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+						{source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -1072,7 +1101,8 @@ define([
         			id : "no.comma.dangle.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html', "application/json"],  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-comma-dangle)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-comma-dangle)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "readonly", match: false} //$NON-NLS-1$
                     ]
     			}
     	);
@@ -1085,7 +1115,8 @@ define([
                     id : "no.throw.literal.fix",  //$NON-NLS-1$
                     contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
                     validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-throw-literal)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-throw-literal)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "readonly", match: false} //$NON-NLS-1$
                     ]
                 }
         );
@@ -1099,7 +1130,8 @@ define([
                     id : "missing.nls.fix",  //$NON-NLS-1$
                     contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-1$ //$NON-NLS-2$
                     validationProperties: [
-                        {source: "annotation:id", match: "^(?:missing-nls)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:missing-nls)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "readonly", match: false} //$NON-NLS-1$
                     ]
                 }
         );
@@ -1112,7 +1144,8 @@ define([
                     id : "missing.doc.fix",  //$NON-NLS-1$
                     contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-1$ //$NON-NLS-2$
                     validationProperties: [
-                        {source: "annotation:id", match: "^(?:missing-doc)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:missing-doc)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "readonly", match: false} //$NON-NLS-1$
                     ]
                 }
         );
@@ -1126,7 +1159,8 @@ define([
                     id : "unnecessary.nls.fix",  //$NON-NLS-1$
                     contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-1$ //$NON-NLS-2$
                     validationProperties: [
-                        {source: "annotation:id", match: "^(?:unnecessary-nls)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:unnecessary-nls)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "readonly", match: false} //$NON-NLS-1$
                     ]
                 }
         );
@@ -1139,7 +1173,8 @@ define([
         			id : "no.new.array.literal.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-new-array)$"} //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "annotation:id", match: "^(?:no-new-array)$"}, //$NON-NLS-1$ //$NON-NLS-2$
+                        {source: "readonly", match: false} //$NON-NLS-1$
                     ]
    			}
     		);
@@ -1155,7 +1190,8 @@ define([
 						{
 							source: "annotation:id", //$NON-NLS-1$
 							match: "^(?:no-shadow|no-shadow-global|no-shadow-global-param)$" //$NON-NLS-1$
-						} 
+						},
+						{source: "readonly", match: false} //$NON-NLS-1$
 					]
 				}
 		);
@@ -1172,7 +1208,8 @@ define([
 						{
 							source: "annotation:id", //$NON-NLS-1$
 							match: "^(?:no-debugger)$" //$NON-NLS-1$
-						} 
+						},
+						{source: "readonly", match: false} //$NON-NLS-1$
 					]
 				}
 		);
@@ -1189,7 +1226,8 @@ define([
 						{
 							source: "annotation:id", //$NON-NLS-1$
 							match: "^(?:radix)$" //$NON-NLS-1$
-						} 
+						},
+						{source: "readonly", match: false} //$NON-NLS-1$
 					]
 				}
 		);
@@ -1205,7 +1243,8 @@ define([
 						{
 							source: "annotation:id", //$NON-NLS-1$
 							match: "^(?:no-new-wrappers)$" //$NON-NLS-1$
-						} 
+						},
+						{source: "readonly", match: false} //$NON-NLS-1$
 					]
 				}
 		);
@@ -1229,7 +1268,8 @@ define([
 						{
 							source: "annotation:id", //$NON-NLS-1$
 							match: "^(?:no-new-wrappers)$" //$NON-NLS-1$
-						} 
+						},
+						{source: "readonly", match: false} //$NON-NLS-1$
 					]
 				}
 		);
@@ -1245,7 +1285,8 @@ define([
 						{
 							source: "annotation:id", //$NON-NLS-1$
 							match: "^(?:no-dupe-keys)$" //$NON-NLS-1$
-						} 
+						},
+						{source: "readonly", match: false} //$NON-NLS-1$
 					]
 				}
 		);
@@ -1261,7 +1302,8 @@ define([
 						{
 							source: "annotation:id", //$NON-NLS-1$
 							match: "^(?:no-duplicate-case)$" //$NON-NLS-1$
-						} 
+						},
+						{source: "readonly", match: false} //$NON-NLS-1$
 					]
 				}
 		);
@@ -1764,7 +1806,7 @@ define([
 			{
 				name: javascriptMessages["javascriptFormatter"],
 				contentType: ["application/javascript"],
-				id: "orion.format.js.formatter",
+				id: "orion.format.js.formatter"
 			}
 		);
 		// register preferences for formatting when modified (updated call)

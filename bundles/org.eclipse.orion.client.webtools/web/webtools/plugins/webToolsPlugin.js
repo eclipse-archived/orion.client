@@ -104,7 +104,7 @@ define(['orion/plugin',
     			excludedStyles: "(comment.*|string.*)" //$NON-NLS-1$
     		}
     	);
-    	
+
 	  	/**
     	 * Register occurrence providers
     	 */
@@ -193,7 +193,8 @@ define(['orion/plugin',
 	    		id : "quickfix-empty-rules",  //$NON-NLS-1$
 	    		contentType: ['text/css','text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
 	    		validationProperties: [
-    				{source: "annotation:id", match: "empty-rules"} //$NON-NLS-1$ //$NON-NLS-2$
+    				{source: "annotation:id", match: "empty-rules"},//$NON-NLS-1$ //$NON-NLS-2$
+    				{source: "readonly", match: false}
     		    ]
     		}
     	);
@@ -205,7 +206,8 @@ define(['orion/plugin',
 	    		id : "quickfix-important",  //$NON-NLS-1$
 	    		contentType: ['text/css','text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
 	    		validationProperties: [
-    		    	{source: "annotation:id", match: "important"} //$NON-NLS-1$ //$NON-NLS-2$
+    		    	{source: "annotation:id", match: "important"}, //$NON-NLS-1$ //$NON-NLS-2$
+    				{source: "readonly", match: false}
     		    ]
     		}
     	);
@@ -217,7 +219,8 @@ define(['orion/plugin',
 	    		id : "quickfix-zero-units",  //$NON-NLS-1$
 	    		contentType: ['text/css','text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
 	    		validationProperties: [
- 		        	{source: "annotation:id", match: "zero-units"} //$NON-NLS-1$ //$NON-NLS-2$
+ 		        	{source: "annotation:id", match: "zero-units"}, //$NON-NLS-1$ //$NON-NLS-2$
+    				{source: "readonly", match: false}
     		    ]
     		}
     	);
@@ -248,7 +251,7 @@ define(['orion/plugin',
 		provider.registerService("orion.cm.managedservice", htmlFormatter, {pid: 'jsbeautify.config.html'}); //$NON-NLS-1$ //$NON-NLS-2$
 		provider.registerService("orion.cm.managedservice", htmlFormatter, {pid: 'jsbeautify.config.css'}); //$NON-NLS-1$ //$NON-NLS-2$
 		provider.registerService("orion.cm.managedservice", htmlFormatter, {pid: 'jsbeautify.config.js'}); //$NON-NLS-1$ //$NON-NLS-2$
-		
+
 		/**
 		 * CSS formatting settings
 		 */
