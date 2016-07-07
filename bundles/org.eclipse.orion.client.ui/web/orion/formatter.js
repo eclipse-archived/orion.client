@@ -42,38 +42,6 @@ define ([
 			}
 			return null;
 		},
-		/*
-		getServiceRefs : function(registry, contentType) {
-			var contentTypeService = registry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
-			function getFilteredServiceRef(registry, sReference, contentType) {
-				var contentTypeIds = sReference.getProperty("contentType"); //$NON-NLS-0$
-				return contentTypeService.isSomeExtensionOf(contentType, contentTypeIds).then(function(result) {
-					return result ? sReference : null;
-				});
-			}
-			var serviceRefs = registry.getServiceReferences("orion.edit.format"); //$NON-NLS-0$
-			var filteredServiceRefs = [];
-			for (var i=0; i < serviceRefs.length; i++) {
-				var serviceRef = serviceRefs[i];
-				if (serviceRef.getProperty("contentType")) { //$NON-NLS-0$
-					filteredServiceRefs.push(getFilteredServiceRef(registry, serviceRef, contentType));
-				}
-			}
-			
-			// Return a promise that gives the service references that aren't null
-			return Deferred.all(filteredServiceRefs, function(error) {return {_error: error}; }).then(
-				function(serviceRefs) {
-					var capableServiceRefs = [];
-					for (var i=0; i < serviceRefs.length; i++) {
-						var currentServiceRef = serviceRefs[i];
-						if (currentServiceRef && !currentServiceRef._error) {
-							capableServiceRefs.push(currentServiceRef);
-						}
-					}
-					return capableServiceRefs;
-				});
-		},
-*/
 		isVisible: function() {
 			return !!this.getFormatter();
 		},
@@ -83,7 +51,7 @@ define ([
 			if (service) {
 				var inputManager = this.inputManager;
 				var selection = this.editor.getSelection();
-				var context = {metadata: inputManager.getFileMetadata(), start: selection.start, end: selection.end};
+				var context = {start: selection.start, end: selection.end};
 				return service.format(this.editor.getEditorContext(), context);
 			}
 		}

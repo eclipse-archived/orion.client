@@ -317,6 +317,9 @@ define([
 		getAutoSaveEnabled: function() {
 			return this._autoSaveEnabled;
 		},
+		getFormatOnSaveEnabled: function() {
+			return this._formatOnSaveEnabled;
+		},
 		getEditor: function() {
 			return this.editor;
 		},
@@ -390,80 +393,87 @@ define([
 
 			this.dispatchEvent({ type: "Saving", inputManager: this}); //$NON-NLS-0$
 
-			editor.markClean();
-			var contents = editor.getText();
-			var data = contents;
-			if (this._getSaveDiffsEnabled() && !this._errorSaving) {
-				var changes = this._getUnsavedChanges();
-				if (changes) {
-					var len = 0;
-					for (var i = 0; i < changes.length; i++) {
-						len += changes[i].text.length;
-					}
-					if (contents.length > len) {
-						data = {
-							diff: changes
-						};
-					}
-				}
-			}
-			this._clearUnsavedChanges();
-			this._errorSaving = false;
-
-			var etag = metadata.ETag;
-			var args = { "ETag" : etag }; //$NON-NLS-0$
-			var resource = this._parsedLocation.resource;
-			var def = this.fileClient.write(resource, data, args);
-			var progress = this.progressService;
-			var statusService = null;
-			if (this.serviceRegistry) {
-				statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-			}
-			if (progress) {
-				def = progress.progress(def, i18nUtil.formatMessage(messages.savingFile, input));
-			}
-			function successHandler(result) {
-				if (input === that.getInput()) {
-					metadata.ETag = result.ETag;
-					editor.setInput(input, null, contents, true);
-				}
-				that.reportStatus("");
-				if (failedSaving && statusService) {
-					statusService.setProgressResult({Message:messages.Saved, Severity:"Normal"}); //$NON-NLS-0$
-				}
-				if (that.postSave) {
-					that.postSave(closing);
-				}
-				return done(result);
-			}
-			function errorHandler(error) {
-				that.reportStatus("");
-				var errorMsg = handleError(statusService, error);
-				mMetrics.logEvent("status", "exception", (that._autoSaveActive ? "Auto-save: " : "Save: ") + errorMsg.Message); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				that._errorSaving = true;
-				return done();
-			}
-			def.then(successHandler, function(error) {
-				// expected error - HTTP 412 Precondition Failed
-				// occurs when file is out of sync with the server
-				if (error.status === 412) {
-					var forceSave = window.confirm(messages.saveOutOfSync);
-					if (forceSave) {
-						// repeat save operation, but without ETag
-						var redef = that.fileClient.write(resource, contents);
-						if (progress) {
-							redef = progress.progress(redef, i18nUtil.formatMessage(messages.savingFile, input));
+			function _save(that) {
+				editor.markClean();
+				var contents = editor.getText();
+				var data = contents;
+				if (that._getSaveDiffsEnabled() && !that._errorSaving) {
+					var changes = that._getUnsavedChanges();
+					if (changes) {
+						var len = 0;
+						for (var i = 0; i < changes.length; i++) {
+							len += changes[i].text.length;
 						}
-						redef.then(successHandler, errorHandler);
-					} else {
-						return done();
+						if (contents.length > len) {
+							data = {
+								diff: changes
+							};
+						}
 					}
-				} else {
-					// unknown error
-					errorHandler(error);
 				}
-			});
-			return metadata._savingDeferred;
+				that._clearUnsavedChanges();
+				that._errorSaving = false;
+
+				var etag = metadata.ETag;
+				var args = { "ETag" : etag }; //$NON-NLS-0$
+				var resource = that._parsedLocation.resource;
+				var def = that.fileClient.write(resource, data, args);
+				var progress = that.progressService;
+				var statusService = null;
+				if (that.serviceRegistry) {
+					statusService = that.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+				}
+				if (progress) {
+					def = progress.progress(def, i18nUtil.formatMessage(messages.savingFile, input));
+				}
+				function successHandler(result) {
+					if (input === that.getInput()) {
+						metadata.ETag = result.ETag;
+						editor.setInput(input, null, contents, true);
+					}
+					that.reportStatus("");
+					if (failedSaving && statusService) {
+						statusService.setProgressResult({Message:messages.Saved, Severity:"Normal"}); //$NON-NLS-0$
+					}
+					if (that.postSave) {
+						that.postSave(closing);
+					}
+					return done(result);
+				}
+				function errorHandler(error) {
+					that.reportStatus("");
+					var errorMsg = handleError(statusService, error);
+					mMetrics.logEvent("status", "exception", (that._autoSaveActive ? "Auto-save: " : "Save: ") + errorMsg.Message); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					that._errorSaving = true;
+					return done();
+				}
+				def.then(successHandler, function(error) {
+					// expected error - HTTP 412 Precondition Failed
+					// occurs when file is out of sync with the server
+					if (error.status === 412) {
+						var forceSave = window.confirm(messages.saveOutOfSync);
+						if (forceSave) {
+							// repeat save operation, but without ETag
+							var redef = that.fileClient.write(resource, contents);
+							if (progress) {
+								redef = progress.progress(redef, i18nUtil.formatMessage(messages.savingFile, input));
+							}
+							redef.then(successHandler, errorHandler);
+						} else {
+							return done();
+						}
+					} else {
+						// unknown error
+						errorHandler(error);
+					}
+				});
+				return metadata._savingDeferred;
+			}
+
+			if (this.getFormatOnSaveEnabled()) {
+				return new mFormatter.Formatter(this.serviceRegistry, this, editor).doFormat().then(function() {return _save(this);}.bind(this));
+			}
+			return _save(this);
 		},
 		setAutoLoadEnabled: function(enabled) {
 			this._autoLoadEnabled = enabled;
@@ -493,6 +503,9 @@ define([
 			} else {
 				this._idle.setTimeout(timeout);
 			}
+		},
+		setFormatOnSave: function(enabled) {
+			this._formatOnSaveEnabled = enabled;
 		},
 		setContentType: function(contentType) {
 			this._contentType = contentType;

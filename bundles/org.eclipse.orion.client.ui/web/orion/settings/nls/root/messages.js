@@ -159,6 +159,7 @@ define({//Default message bundle
 	"autoLoad": "Auto Load:",
 	"saveDiffs": "Save file as diffs:",
 	"trimTrailingWhiteSpace": "Trim Trailing Whitespace on Save:",
+	"formatOnSave": "Format code on save",
 	"Restore": "Restore Defaults",
 	"Default": "Default",
 	"keys": "Keys",
