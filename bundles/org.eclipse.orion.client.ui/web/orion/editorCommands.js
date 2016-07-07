@@ -923,6 +923,10 @@ define([
 				id: "orion.edit.format", //$NON-NLS-0$
 				parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('formatter', 'boolean')], {clientCollect: true}), //$NON-NLS-1$ //$NON-NLS-0$
 				visibleWhen: /** @callback */ function(items, data) {
+					var inputManager = data.handler.inputManager || that.inputManager;
+					if (inputManager && inputManager.getReadOnly()) {
+						return false;
+					}
 					var editor = data.handler.editor || that.editor;
 					var formatter = data.handler.formatter || that.formatter;
 					return editor && editor.installed && formatter && formatter.isVisible();
@@ -1088,7 +1092,8 @@ define([
 						var context = {
 							contentType: inputManager.getContentType(),
 							input: inputManager.getInput(),
-							offset: editor.getCaretOffset()
+							offset: editor.getCaretOffset(),
+							readonly: inputManager.getReadOnly()
 						};
 						
 						// Provide the quick fix command with the selected annotation
