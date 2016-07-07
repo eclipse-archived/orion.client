@@ -193,7 +193,6 @@ define([
 			//NO-UNUSED-VARS-UNREAD ---------------------------------------------
 			describe("no-unused-vars", function() {
 				var RULE_ID = 'no-unused-vars';
-				this.timeout(10000000);
 				it("flag unused var in list matching", function(callback) {
 					var topic = "var [a] = [1];";
 					var config = { rules: {} };
@@ -417,6 +416,32 @@ define([
 									id: 'no-unused-vars-import',
 									severity: 'warning',
 									description: i18nUtil.formatMessage.call(null, Messages['no-unused-vars-unused'], {0: 'foo'}),
+									nodeType: "Identifier"
+								}
+							]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("Mixed unused import and unused var", function(callback) {
+					var topic = 'import foo from "./exports.js"; function myFunc(){};'; 
+					var config = { rules: {} };
+					var createFiles = [{name: './exports', text: ''}];
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config, createFiles: createFiles}).then(
+						function (problems) {
+							assertProblems(problems, [
+								{
+									id: 'no-unused-vars-import',
+									severity: 'warning',
+									description: i18nUtil.formatMessage.call(null, Messages['no-unused-vars-unused'], {0: 'foo'}),
+									nodeType: "Identifier"
+								},
+								{
+									id: 'no-unused-vars',
+									severity: 'warning',
+									description: i18nUtil.formatMessage.call(null, Messages['no-unused-vars-unused-funcdecl'], {0: 'myFunc'}),
 									nodeType: "Identifier"
 								}
 							]);
