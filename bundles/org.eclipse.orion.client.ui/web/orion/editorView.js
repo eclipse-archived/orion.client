@@ -219,6 +219,7 @@ define([
 			var inputManager = this.inputManager;
 			inputManager.setAutoLoadEnabled(prefs.autoLoad);
 			inputManager.setAutoSaveTimeout(prefs.autoSave ? prefs.autoSaveTimeout : -1);
+			inputManager.setFormatOnSave(prefs.formatOnSave ? prefs.formatOnSave : false);
 			if(this.differ) {
 				inputManager.setSaveDiffsEnabled(prefs.saveDiffs);
 				this.differ.setEnabled(this.settings.diffService);
