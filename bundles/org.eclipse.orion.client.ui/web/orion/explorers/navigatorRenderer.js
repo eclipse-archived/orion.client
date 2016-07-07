@@ -81,7 +81,7 @@ define([
 		item = objects.clone(item);
 		var link;
 		var linkName = item.Name || '';
-		if (bidiUtils.isBidiEnabled) {
+		if (bidiUtils.isBidiEnabled()) {
 			linkName = bidiUtils.enforceTextDirWithUcc(linkName);
 		}
 		if (item.Directory) {

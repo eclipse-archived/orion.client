@@ -243,7 +243,7 @@ define([
 				var span = lib.$(".mainNavColumn", col); //$NON-NLS-0$
 				span.classList.add("projectInformationNode"); //$NON-NLS-0$
 				var nameText = item.Dependency ? item.Dependency.Name : (item.Project ? item.Project.Name : item.Name);
-				if (bidiUtils.isBidiEnabled) {
+				if (bidiUtils.isBidiEnabled()) {
 					nameText = bidiUtils.enforceTextDirWithUcc(nameText);
 				}
 				var itemNode = lib.$("a", col); //$NON-NLS-0$

@@ -116,7 +116,7 @@ define([
 					link.className = "gitCommitTitle"; //$NON-NLS-0$
 				}
 				var text = headerMessage;
-				if (bidiUtils.isBidiEnabled) {
+				if (bidiUtils.isBidiEnabled()) {
 					link.dir = bidiUtils.getTextDirection(text);
 				}
 				if (headerMessage.length < commit.Message.length) {
@@ -139,7 +139,7 @@ define([
 					restSpan.textContent = commit.Message.substring(headerMessage.length);
 					fullMessage.appendChild(restSpan);
 				}
-				if (bidiUtils.isBidiEnabled) {
+				if (bidiUtils.isBidiEnabled()) {
 					fullMessage.dir = bidiUtils.getTextDirection(fullMessage.textContent);
 				}
 				detailsDiv.appendChild(fullMessage);
@@ -152,7 +152,7 @@ define([
 			}
 			if (displayAuthor) {
 				var commitAuthorName = commit.AuthorName || '';
-				if (bidiUtils.isBidiEnabled) {
+				if (bidiUtils.isBidiEnabled()) {
 					commitAuthorName = bidiUtils.enforceTextDirWithUcc(commitAuthorName);
 				}
 				var authorName = this.showAuthorEmail ? i18nUtil.formatMessage(messages["nameEmail"], commitAuthorName, commit.AuthorEmail) : commitAuthorName;
@@ -161,7 +161,7 @@ define([
 			
 			if (displayCommitter) {
 				var commitCommitterName = commit.CommitterName || '';
-				if (bidiUtils.isBidiEnabled) {
+				if (bidiUtils.isBidiEnabled()) {
 					commitCommitterName = bidiUtils.enforceTextDirWithUcc(commitCommitterName);
 				}
 				var committerName = this.showCommitterEmail ? i18nUtil.formatMessage(messages["nameEmail"], commitCommitterName, commit.CommitterEmail) : commitCommitterName;
@@ -220,7 +220,7 @@ define([
 					});
 					branchNameSpan.textContent = branchName;
 					branchNameSpan.className = "gitCommitBranch"; //$NON-NLS-0$
-					if (bidiUtils.isBidiEnabled) {
+					if (bidiUtils.isBidiEnabled()) {
 						branchNameSpan.dir = bidiUtils.getTextDirection(branchName);
 					}
 					branches.appendChild(branchNameSpan);
@@ -234,7 +234,7 @@ define([
 					tag.parent = commit;
 					var tagSpan = document.createElement("span"); //$NON-NLS-0$
 					var tagName = tag.Name;
-					if (bidiUtils.isBidiEnabled) {
+					if (bidiUtils.isBidiEnabled()) {
 						tagName = bidiUtils.enforceTextDirWithUcc(tagName);
 					}
 					tagSpan.textContent = tagName;

@@ -57,7 +57,7 @@ define([
 				return " ";
 			}
 			var itemDesc = item.Description;
-			if (bidiUtils.isBidiEnabled) {
+			if (bidiUtils.isBidiEnabled()) {
 				itemDesc = bidiUtils.enforceTextDirWithUcc(itemDesc);
 			}
 			if(item.Description.length>200){
@@ -71,7 +71,7 @@ define([
 				cell.className = "navColumnNoIcon";
 				var a = document.createElement("a");
 				var itemName = item.Name;
-				if (bidiUtils.isBidiEnabled) {
+				if (bidiUtils.isBidiEnabled()) {
 					itemName = bidiUtils.enforceTextDirWithUcc(itemName);
 				}
 				a.appendChild(document.createTextNode(itemName));

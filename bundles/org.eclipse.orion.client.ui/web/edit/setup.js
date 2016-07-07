@@ -364,7 +364,7 @@ objects.mixin(EditorViewer.prototype, {
 			this.commandRegistry.processURL(href);
 			if (this.curFileNode) {
 				var curFileNodeName = evt.name || "";
-				if (bidiUtils.isBidiEnabled) {
+				if (bidiUtils.isBidiEnabled()) {
 					curFileNodeName = bidiUtils.enforceTextDirWithUcc(curFileNodeName);
 				}
 				this.curFileNode.textContent = curFileNodeName;				
