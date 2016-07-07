@@ -1690,7 +1690,7 @@ define([
 					variables = scope.variables;
 				}
 
-				if(importsHandled || (node.type === 'ImportDeclaration' && scope.type === 'global')) {
+				if(importsHandled || node.type === 'ImportDeclaration') {
 					return;
 				}
 				variables.forEach(function(variable) {
