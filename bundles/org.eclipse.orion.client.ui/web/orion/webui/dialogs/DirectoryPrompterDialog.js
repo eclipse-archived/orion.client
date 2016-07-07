@@ -31,7 +31,7 @@ function(messages, dialog, mFileUtils, mSelection, mExplorer, mExplorerTable, bi
 		span.className = "mainNavColumn singleNavColumn"; //$NON-NLS-0$
 		this.getExpandImage(tableRow, span);
 		var itemName = item.Name;
-		if (bidiUtils.isBidiEnabled) {
+		if (bidiUtils.isBidiEnabled()) {
 			itemName = bidiUtils.enforceTextDirWithUcc(itemName);
 		}
 		span.appendChild(document.createTextNode(itemName));		

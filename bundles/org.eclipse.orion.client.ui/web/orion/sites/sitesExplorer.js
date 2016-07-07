@@ -248,7 +248,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/explorers/explorer', 'orion/Defe
 			title.appendChild(nameLink);
 			
 			var itemName = item.Name;
-			if (bidiUtils.isBidiEnabled) {
+			if (bidiUtils.isBidiEnabled()) {
 				itemName = bidiUtils.enforceTextDirWithUcc(itemName);
 			}
 			nameLink.appendChild(document.createTextNode(itemName));

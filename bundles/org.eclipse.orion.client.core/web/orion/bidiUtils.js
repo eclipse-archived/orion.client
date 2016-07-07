@@ -39,15 +39,14 @@ define ([
 	var LRE = '\u202A';	//$NON-NLS-0$
 	var PDF = '\u202C'; //$NON-NLS-0$
 	var RLE = '\u202B'; //$NON-NLS-0$
-	
-	var isBidiEnabled = bidiEnabled();
+		
 	var bidiLayout = getBidiLayout();
 
 	/**
 	 * checks if directionality should be applied in Orion.
 	 * @returns {Boolean} true if globalization settings exist and bidi is enabled.
 	 */		
-	function bidiEnabled() {
+	function isBidiEnabled() {
 		var bidiEnabled = localStorage.getItem(bidiEnabledStorgae);
 		if (bidiEnabled && bidiEnabled == 'true') {		//$NON-NLS-0$
 			return true;
@@ -82,7 +81,7 @@ define ([
 	 */	
 	function getTextDirection(text) {
 		bidiLayout = getBidiLayout();
-		if (!bidiEnabled()) {
+		if (!isBidiEnabled()) {
 			return "";
 		}
 		if (bidiLayout == 'auto' && util.isIE) {	//$NON-NLS-0$
@@ -104,7 +103,7 @@ define ([
 	 * @returns {String} text after adding ucc characters.
 	 */		
 	function enforceTextDirWithUcc ( text ) {
-		if (bidiEnabled() && text.trim()) {
+		if (isBidiEnabled() && text.trim()) {
 			bidiLayout = getBidiLayout();
 			var dir = bidiLayout == 'auto' ? checkContextual( text ) : bidiLayout;	//$NON-NLS-0$
 			return ( dir == 'ltr' ? LRE : RLE ) + text + PDF;	//$NON-NLS-0$
@@ -147,7 +146,7 @@ define ([
 	};
 	
 	function initInputField ( input ) {
-		if (bidiEnabled() && input) {
+		if (isBidiEnabled() && input) {
 			input.dir = getTextDirection(input.value || input.textContent); // resolve dir attribute of the element
 
 			if (util.isIE) {
@@ -157,7 +156,7 @@ define ([
 	};
 		
 	return {
-		bidiEnabled: bidiEnabled,
+		isBidiEnabled: isBidiEnabled,
 		getTextDirection: getTextDirection,		
 		enforceTextDirWithUcc: enforceTextDirWithUcc,
 		initInputField: initInputField
