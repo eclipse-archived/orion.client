@@ -20,6 +20,7 @@ define([
 		this.requests = {};
 		this.initialized = false;
 		this.queue = [];
+		this.listeners = [];
 	}
 	
 	IPC.prototype.sendMessage = function sendMessage(id, message, params) {
@@ -42,7 +43,7 @@ define([
 	};
 	
 	IPC.prototype.addListener = function addListener(listener) {
-		
+		this.listeners.push(listener);
 	};
 	
 	/**
@@ -69,10 +70,16 @@ define([
 					console.log(data);
 				}
 
-				var deferred = this.requests[data.id];
-				if(deferred) {
-					deferred.resolve(data.result);
-					delete this.requests[data.id];
+				if (data.id) {
+					var deferred = this.requests[data.id];
+					if(deferred) {
+						deferred.resolve(data.result);
+						delete this.requests[data.id];
+					}
+				} else {
+					this.listeners.forEach(function(l) {
+						l.handleNotification(data);
+					});
 				}
 			} catch(err) {
 				console.log(err);

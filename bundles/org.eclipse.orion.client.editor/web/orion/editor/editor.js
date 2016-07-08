@@ -1148,7 +1148,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					if (createAnnotation) {
 						annotation = createAnnotation(annotation);
 					} else {
-						var start, end;
+						var start, end, lineIndex, lineStart;
 						if (annotation.lineStart && annotation.lineEnd){
 							start = model.getLineStart(annotation.lineStart);
 							// If the closing line number of the modified range is on the last line,
@@ -1159,10 +1159,17 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						}
 						else if (typeof annotation.line === "number") { //$NON-NLS-0$
 							// line/column
-							var lineIndex = annotation.line - 1;
-							var lineStart = model.getLineStart(lineIndex);
+							lineIndex = annotation.line - 1;
+							lineStart = model.getLineStart(lineIndex);
 							start = lineStart + annotation.start - 1;
 							end = lineStart + annotation.end - 1;
+						} else if (annotation.range) {
+							lineIndex = annotation.range.start.line;
+							lineStart = model.getLineStart(lineIndex);
+							start = lineStart + annotation.range.start.character;
+							lineIndex = annotation.range.end.line;
+							lineStart = model.getLineStart(lineIndex);
+							end = lineStart + annotation.range.end.character;
 						} else {
 							// document offsets
 							start = annotation.start;

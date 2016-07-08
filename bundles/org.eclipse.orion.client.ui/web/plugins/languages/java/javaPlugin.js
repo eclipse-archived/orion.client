@@ -12,15 +12,17 @@
 /*eslint-env browser, amd*/
 define([
 'orion/plugin', 
+"orion/Deferred",
 'orion/editor/stylers/text_x-java-source/syntax', 
 'orion/editor/stylers/application_x-jsp/syntax',
 "plugins/languages/java/javaProject",
 'orion/serviceregistry',
 "plugins/languages/java/ipc"
-], function(PluginProvider, mJava, mJSP, JavaProject, mServiceRegistry, IPC) {
+], function(PluginProvider, Deferred, mJava, mJSP, JavaProject, mServiceRegistry, IPC) {
 
 	var ipc = new IPC('/languageServer'),
-		project;
+		project,
+		diagnostics, computeProblemsDeferred;//TODO handle multiple files and requests
 
 	function connect() {
 		var headers = {
@@ -34,6 +36,29 @@ define([
 		registerServiceProviders(pluginProvider);
 		pluginProvider.connect();
 		ipc.connect();
+		ipc.addListener({
+			handleNotification: function(data) {
+				if (data.method === "textDocument/publishDiagnostics") {
+					diagnostics = data.params.diagnostics;
+					resolveProblems();
+				}
+			}
+		});
+	}
+	
+	function resolveProblems() {
+		if (computeProblemsDeferred && diagnostics) {
+			var types = ["", "error", "warning", "info", "hint"];
+			computeProblemsDeferred.resolve(diagnostics.map(function(d) {
+				return {
+					description: d.message,
+					id: d.code,
+					severity: types[d.severity],
+					range: d.range
+				};
+			}));
+			diagnostics = computeProblemsDeferred = null;
+		}
 	}
 
 	function registerServiceProviders(pluginProvider) {
@@ -57,8 +82,16 @@ define([
 			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
 		});
 		pluginProvider.registerService("orion.edit.validator", {
+			/**
+			 * @callback
+			 */
 			computeProblems: function computeProblems(editorContext, options) {
-				//TODO	
+				if (computeProblemsDeferred) return computeProblemsDeferred;
+				computeProblemsDeferred = new Deferred();
+				if (diagnostics) {
+					resolveProblems();
+				}
+				return computeProblemsDeferred;
 			}
 		}, {
 			contentType: ["text/x-java-source"]
