@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,7 +10,17 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/plugin', 'orion/editor/stylers/text_x-java-source/syntax', 'orion/editor/stylers/application_x-jsp/syntax'], function(PluginProvider, mJava, mJSP) {
+define([
+'orion/plugin', 
+'orion/editor/stylers/text_x-java-source/syntax', 
+'orion/editor/stylers/application_x-jsp/syntax',
+"plugins/languages/java/javaProject",
+'orion/serviceregistry',
+"plugins/languages/java/ipc"
+], function(PluginProvider, mJava, mJSP, JavaProject, mServiceRegistry, IPC) {
+
+	var ipc = new IPC('/languageServer'),
+		project;
 
 	function connect() {
 		var headers = {
@@ -18,9 +28,12 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-java-source/syntax', 'orion
 			version: "1.0",
 			description: "This plugin provides Java tools support for Orion."
 		};
-		var pluginProvider = new PluginProvider(headers);
+		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
+		project = new JavaProject(serviceRegistry, ipc);
+		var pluginProvider = new PluginProvider(headers, serviceRegistry);
 		registerServiceProviders(pluginProvider);
 		pluginProvider.connect();
+		ipc.connect();
 	}
 
 	function registerServiceProviders(pluginProvider) {
@@ -43,6 +56,19 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-java-source/syntax', 'orion
 		mJSP.grammars.forEach(function(current) {
 			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
 		});
+		pluginProvider.registerService("orion.edit.validator", {
+			computeProblems: function computeProblems(editorContext, options) {
+				//TODO	
+			}
+		}, {
+			contentType: ["text/x-java-source"]
+		});
+		pluginProvider.registerService("orion.edit.model", {  //$NON-NLS-1$
+			onInputChanged: project.onInputChanged.bind(project)
+		},
+		{
+			contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
+		});	
 	}
 
 	return {

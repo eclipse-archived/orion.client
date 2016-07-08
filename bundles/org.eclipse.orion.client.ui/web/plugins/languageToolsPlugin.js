@@ -24,7 +24,6 @@ define([
 	'plugins/languages/git/gitFilePlugin',
 	'plugins/languages/haml/hamlPlugin',
 	'plugins/languages/jade/jadePlugin',
-	'plugins/languages/java/javaPlugin',
 	'plugins/languages/jsx/jsxPlugin',
 	'plugins/languages/launch/launchPlugin',
 	'plugins/languages/less/lessPlugin',

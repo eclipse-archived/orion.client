@@ -21,6 +21,7 @@ var auth = require('./lib/middleware/auth'),
 	util = require('util'),
 	argslib = require('./lib/args'),
 	ttyShell = require('./lib/tty_shell'),
+	languageServer = require('./lib/languageServer'),
 	orion = require('./index.js'),
 	prefs = require('./lib/controllers/prefs');
 
@@ -92,6 +93,9 @@ function startServer(cb) {
 			}));
 			var io = socketio.listen(server, { 'log level': 1 });
 			ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
+			
+			var languageIO = socketio.listen(server, { 'log level': 1 });
+			languageServer.install({ io: languageIO, workspaceDir: workspaceDir }); //TODO no good for multiuser
 
 			server.on('listening', function() {
 				console.log(util.format('Listening on port %d...', port));
