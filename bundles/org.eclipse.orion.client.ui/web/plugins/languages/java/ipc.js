@@ -336,16 +336,11 @@ define([
 	 * @description Sends a didClose notification
 	 * @function
 	 * @param {String} uri The URI of the file
-	 * @param {String} languageId The content type of the source
-	 * @param {String} text The optional current source code
 	 */
-	IPC.prototype.didClose = function didOpen(uri, languageId, text) {
+	IPC.prototype.didClose = function didClose(uri) {
 		return this.sendMessage(0, messageTypes.didClose, {
 			textDocument: {
 				uri: uri,
-				languageId: languageId,
-				version: 1,
-				text: text
 			}
 		});
 	};
@@ -355,16 +350,11 @@ define([
 	 * @description Sends a didSave notification
 	 * @function
 	 * @param {String} uri The URI of the file
-	 * @param {String} languageId The content type of the source
-	 * @param {String} text The optional current source code
 	 */
-	IPC.prototype.didSave = function didSave(uri, languageId, text) {
+	IPC.prototype.didSave = function didSave(uri) {
 		return this.sendMessage(0, messageTypes.didSave, {
 			textDocument: {
 				uri: uri,
-				languageId: languageId,
-				version: 1,
-				text: text
 			}
 		});
 	};
