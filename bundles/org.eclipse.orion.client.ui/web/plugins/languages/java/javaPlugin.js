@@ -22,28 +22,40 @@ define([
 
 	var ipc = new IPC('/languageServer'),
 		project,
-		diagnostics, computeProblemsDeferred;//TODO handle multiple files and requests
+		diagnostics, 
+		computeProblemsDeferred;//TODO handle multiple files and requests
 
-	function connect() {
-		var headers = {
-			name: "Orion Java Tool Support",
-			version: "1.0",
-			description: "This plugin provides Java tools support for Orion."
-		};
-		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
-		project = new JavaProject(serviceRegistry, ipc);
-		var pluginProvider = new PluginProvider(headers, serviceRegistry);
-		registerServiceProviders(pluginProvider);
-		pluginProvider.connect();
+	/**
+	 * @name initializeIPC
+	 * @description Connects the IPC instance to the websocket and sets the deafult listeners
+	 */
+	function initializeIPC() {
 		ipc.connect();
+		/**
+		 * Default logging listener
+		 */
+		ipc.addListener(ipc.MESSAGE_TYPES.logMessage, {
+			handleNotification: function handleNotification(data) {
+				if(localStorage.getItem('java.langserver.logmessage') === 'true') {
+					if(typeof data === 'object' && data !== null) {
+						console.log(JSON.stringify(data));
+					} else if(typeof data === 'string') {
+						console.log(data);
+					}
+				}
+			}
+		});
+		/**
+		 * Listener to handle diagnostics notifications
+		 */
 		ipc.addListener(ipc.MESSAGE_TYPES.publishDiagnostics, {
-			handleNotification: function(data) {
+			handleNotification: function handleNotification(data) {
 				diagnostics = data.params.diagnostics;
 				resolveProblems();
 			}
 		});
+		
 	}
-	
 	function resolveProblems() {
 		if (computeProblemsDeferred && diagnostics) {
 			var types = ["", "error", "warning", "info", "hint"];
@@ -100,11 +112,23 @@ define([
 		},
 		{
 			contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
-		});	
+		});
 	}
 
 	return {
-		connect: connect,
+		connect: function connect() {
+			var headers = {
+				name: "Orion Java Tool Support",
+				version: "1.0",
+				description: "This plugin provides Java tools support for Orion."
+			};
+			var serviceRegistry = new mServiceRegistry.ServiceRegistry();
+			project = new JavaProject(serviceRegistry, ipc);
+			var pluginProvider = new PluginProvider(headers, serviceRegistry);
+			registerServiceProviders(pluginProvider);
+			pluginProvider.connect();
+			initializeIPC();
+		},
 		registerServiceProviders: registerServiceProviders
 	};
 });

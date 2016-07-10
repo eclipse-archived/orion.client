@@ -193,7 +193,27 @@ define([
 	 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
 	 */
 	IPC.prototype.MESSAGE_TYPES = messageTypes;
-	 
+	
+	/**
+	 * @name _notifyListeners
+	 * @description Notify the given list of listeners with the given data. If no type is given, 'data.method' will be queried. If there is no
+	 * 'data.method' property, no work is done
+	 * @private
+	 * @param {Array.<{}>} listeners The list of listeners to notify
+	 * @param {String} type The type of listener to notify 
+	 * @param {?} data The data to tell the listeneres about
+	 */
+	function _notifyListeners(listeners, type, data) {
+		var t = type ? type : data.method;
+		if(t) {
+			var l = listeners[t];
+			if(Array.isArray(l) && l.length > 0) {
+				l.forEach(function(listener) {
+					listener.handleNotification(data);
+				});
+			}
+		}
+	}
 	/**
 	 * @name IPC.prototype.sendMessage
 	 * @description Send a message over the socket
@@ -253,12 +273,6 @@ define([
 		}.bind(this));
 		this.socket.on('data', function(data) {
 			try {
-				if(typeof data === 'object' && data !== null) {
-					console.log(JSON.stringify(data));
-				} else if(typeof data === 'string') {
-					console.log(data);
-				}
-
 				if (data.id) {
 					var deferred = this.requests[data.id];
 					if(deferred) {
@@ -266,15 +280,9 @@ define([
 						delete this.requests[data.id];
 					}
 				}
-				var l = this.listeners[data.method];
-				if(Array.isArray(l) && l.length > 0) {
-					this.listeners[data.method].forEach(function(l) {
-						l.handleNotification(data);
-					});
-				}
+				_notifyListeners(this.listeners, data.method, data);
 			} catch(err) {
-				console.log(err);
-				//TODO call handler for errors					
+				_notifyListeners(this.listeners, messageTypes.logMessage, err.toString());
 			}
 		}.bind(this));
 		this.socket.on('ready', function(data) {
@@ -285,13 +293,13 @@ define([
 				this.workspaceDir = json.workspaceDir;
 				pid = json.processId;
 			} catch(err) {
-				console.log(err);
+				_notifyListeners(this.listeners, messageTypes.logMessage, err.toString());
 			}
 			this.initialize(pid, this.workspaceDir).then(/* @callback */ function initializeCallback(result) {
 				this.initialized = true;
 				this.queue.forEach(function queueFlushCallback(item) {
-					console.log(JSON.stringify(item));
 					this.socket.emit('data', item);
+					_notifyListeners(this.listeners, messageTypes.logMessage, JSON.stringify(item));
 				}.bind(this));
 			}.bind(this));
 		}.bind(this));
