@@ -12,6 +12,7 @@
 /*eslint-disable no-sync*/
 var path = require('path');
 var cp = require('child_process');
+var rimraf = require('rimraf');
 
 function fork(modulePath, args, options, callback) {
     var callbackCalled = false;
@@ -51,31 +52,34 @@ function runJavaServer(){
 			var child = 'java';
 			var params = [];
 			var workspacePath = path.resolve( __dirname,"../server/tmp_ws");
-			if(DEBUG){
-				params.push('-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1044');
-			}
-			params.push('-Declipse.application=org.jboss.tools.vscode.java.id1');
-			params.push('-Dosgi.bundles.defaultStartLevel=4');
-			params.push('-Declipse.product=org.jboss.tools.vscode.java.product');
-			if(DEBUG)
-				params.push('-Dlog.protocol=true');
-		
-			params.push('-jar'); params.push(path.resolve( __dirname ,'../server/plugins/org.eclipse.equinox.launcher_1.3.200.v20160318-1642.jar'));
-			//select configuration directory according to OS
-			var configDir = 'config_win';
-			if ( process.platform === 'darwin' ){
-				configDir = 'config_mac';
-			}else if(process.platform === 'linux'){
-				configDir = 'config_linux';
-			}
-			params.push('-configuration');
-			params.push(path.resolve( __dirname ,'../server', configDir));
-			params.push('-data');
-			params.push(workspacePath);
+			rimraf(workspacePath, function(error) {
+				//TODO handle error
+				if(DEBUG){
+					params.push('-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1044');
+				}
+				params.push('-Declipse.application=org.jboss.tools.vscode.java.id1');
+				params.push('-Dosgi.bundles.defaultStartLevel=4');
+				params.push('-Declipse.product=org.jboss.tools.vscode.java.product');
+				if(DEBUG)
+					params.push('-Dlog.protocol=true');
 			
-			fork(child,params,{}, function(err, result){
-				if(err) reject(err);
-				if(result) resolve(result);
+				params.push('-jar'); params.push(path.resolve( __dirname ,'../server/plugins/org.eclipse.equinox.launcher_1.3.200.v20160318-1642.jar'));
+				//select configuration directory according to OS
+				var configDir = 'config_win';
+				if ( process.platform === 'darwin' ){
+					configDir = 'config_mac';
+				}else if(process.platform === 'linux'){
+					configDir = 'config_linux';
+				}
+				params.push('-configuration');
+				params.push(path.resolve( __dirname ,'../server', configDir));
+				params.push('-data');
+				params.push(workspacePath);
+				
+				fork(child,params,{}, function(err, result){
+					if(err) reject(err);
+					if(result) resolve(result);
+				});
 			});
 	});
 }
