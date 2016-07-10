@@ -314,15 +314,33 @@ define([
 	
 	/**
 	 * @name IPC.prototype.didOpen
-	 * @description Sends a didOpen request
+	 * @description Sends a didOpen notification
 	 * @function
 	 * @param {String} uri The URI of the file
 	 * @param {String} languageId The content type of the source
 	 * @param {String} text The optional current source code
-	 * @returns {Deferred} The deferred that resolves to the result of the request
 	 */
 	IPC.prototype.didOpen = function didOpen(uri, languageId, text) {
 		return this.sendMessage(0, messageTypes.didOpen, {
+			textDocument: {
+				uri: uri,
+				languageId: languageId,
+				version: 1,
+				text: text
+			}
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.didClose
+	 * @description Sends a didClose notification
+	 * @function
+	 * @param {String} uri The URI of the file
+	 * @param {String} languageId The content type of the source
+	 * @param {String} text The optional current source code
+	 */
+	IPC.prototype.didClose = function didOpen(uri, languageId, text) {
+		return this.sendMessage(0, messageTypes.didClose, {
 			textDocument: {
 				uri: uri,
 				languageId: languageId,

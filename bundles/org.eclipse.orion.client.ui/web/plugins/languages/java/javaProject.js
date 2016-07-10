@@ -14,14 +14,20 @@ define([
 	"orion/Deferred"
 ], function(Deferred) {
 	
+	var openedDocument;
+	function openDocument(project, evnt) {
+		//TODO handle split editor
+		if (openedDocument) {
+			project.ipc.didClose(openedDocument.location, openedDocument.contentType.id);
+		}
+		openedDocument = evnt.file;
+		project.ipc.didOpen(evnt.file.location, evnt.file.contentType.id, evnt.file.contents);
+	}
+	
 	var initialized = false,
 		fileHandler = {
-			onInputChanged: function onInputChanged(project, evnt/*, projectLoc*/) {
-				project.ipc.didOpen(evnt.file.location, evnt.file.contentType.id, evnt.file.contents);
-			},
-			onProjectChanged: function onProjectChanged(project, evnt/*, projectLoc*/) {
-				project.ipc.didOpen(evnt.file.location, evnt.file.contentType.id, evnt.file.contents);
-			}
+			onInputChanged: openDocument,
+			onProjectChanged: openDocument
 		};
 	
 	/**
