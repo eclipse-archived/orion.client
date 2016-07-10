@@ -36,12 +36,10 @@ define([
 		registerServiceProviders(pluginProvider);
 		pluginProvider.connect();
 		ipc.connect();
-		ipc.addListener({
+		ipc.addListener(ipc.MESSAGE_TYPES.publishDiagnostics, {
 			handleNotification: function(data) {
-				if (data.method === "textDocument/publishDiagnostics") {
-					diagnostics = data.params.diagnostics;
-					resolveProblems();
-				}
+				diagnostics = data.params.diagnostics;
+				resolveProblems();
 			}
 		});
 	}

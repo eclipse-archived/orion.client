@@ -4,7 +4,172 @@ define([
 	"/socket.io/socket.io.js",
 ], function(Deferred, io) {
 	
-	var handlers = Object.create(null);
+	/**
+	 * The object of error codes
+	 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#response-message
+	 */
+	var errorCodes = {
+    	ParseError: -32700,
+    	InvalidRequest: -32600,
+    	MethodNotFound: -32601,
+    	InvalidParams: -32602,
+    	InternalError: -32603,
+    	ServerErrorStart: -32099,
+    	ServerErrorEnd: -32000,
+	};
+	
+	var messageTypes = {
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#initialize-request
+		 */
+		initialize: 'initialize',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#shutdown-request
+		 */
+		shutdown: 'shutdown',
+		/**
+		 * @kind notification
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#exit-notification
+		 */
+		exit: 'exit',
+		/**
+		 * @kind notification
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#showmessage-notification
+		 */
+		showMessage: 'window/showMessage',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#showmessage-request
+		 */
+		showMessageRequest: 'winow/showMessageRequest',
+		/**
+		 * @kind notification
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#logmessage-notification
+		 */
+		logMessage: 'window/logMessage',
+		/**
+		 * @kind notification
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#telemetry-notification
+		 */
+		telemetryEvent: 'telemetry/event',
+		/**
+		 * @kind notification
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#didchangeconfiguration-notification
+		 */
+		didChangeConfiguration: 'workspace/didChangeConfiguration',
+		/**
+		 * @kind notification
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#didchangewatchedfiles-notification
+		 */
+		didChangeWatchedFiles: 'workspace/didChangeWatchedFiles',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#workspace-symbols
+		 */
+		workspaceSymbol: 'workspace/symbol',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#code-action
+		 */
+		codeAction: 'textDocument/codeAction',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#code-lens
+		 */
+		codeLens: 'textDocument/codeLens',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#completion-request
+		 */
+		completion: 'textDocument/completion',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#goto-definition
+		 */
+		definition: 'textDocument/definition',
+		/**
+		 * @kind notification
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#didopentextdocument-notification
+		 */
+		didOpen: 'textDocument/didOpen',
+		/**
+		 * @kind notification
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#didchangetextdocument-notification
+		 */
+		didChange: 'textDocument/didChange',
+		/**
+		 * @kind notification
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#didclosetextdocument-notification
+		 */
+		didClose: 'textDocument/didClose',
+		/**
+		 * @kind notification
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#didsavetextdocument-notification
+		 */
+		didSave: 'textDocument/didSave',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-highlights
+		 */
+		documentHighlight: 'textDocument/documentHighlight',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-symbols
+		 */
+		documentSymbol: 'textDocument/documentSymbol',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-formatting
+		 */
+		formatting: 'textDocument/formatting',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#hover
+		 */
+		hover: 'textDocument/hover',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-on-type-formatting
+		 */
+		onTypeFormatting: 'textDocument/onTypeFormatting',
+		/**
+		 * @kind notification
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#publishdiagnostics-notification
+		 */
+		publishDiagnostics: 'textDocument/publishDiagnostics',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-range-formatting
+		 */
+		rangeFormatting: 'textDocument/rangeFormatting',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#find-references
+		 */
+		references: 'textDocument/references',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#rename
+		 */
+		rename: 'textDocument/rename',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#signature-help
+		 */
+		signatureHelp: 'textDocument/signatureHelp',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#completion-item-resolve-request
+		 */
+		completionItemResolve: 'completionItem/resolve',
+		/**
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#code-lens-resolve
+		 */
+		codeLensResolve: 'codeLens/resolve'
+	};
 	
 	/**
 	 * @name IPC
@@ -20,9 +185,23 @@ define([
 		this.requests = {};
 		this.initialized = false;
 		this.queue = [];
-		this.listeners = [];
+		this.listeners = Object.create(null);
 	}
 	
+	/**
+	 * The collection of message types corresponding to the launguage server protocol
+	 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
+	 */
+	IPC.prototype.MESSAGE_TYPES = messageTypes;
+	 
+	/**
+	 * @name IPC.prototype.sendMessage
+	 * @description Send a message over the socket
+	 * @function
+	 * @param {number} id The id of the message
+	 * @param {String} message The name of the message to send
+	 * @param {?} params The object of parameters for the message
+	 */
 	IPC.prototype.sendMessage = function sendMessage(id, message, params) {
 		var json = {
             "jsonrpc": "2.0",
@@ -32,7 +211,7 @@ define([
         if (id) {
         	json.id = id;
         }
-        if(!this.initialized && message !== 'initialize') {
+        if(!this.initialized && message !== messageTypes.initialize) {
 			this.queue.push(json);
 		} else {
 	        this.socket.emit('data', json);
@@ -42,8 +221,18 @@ define([
 	    }
 	};
 	
-	IPC.prototype.addListener = function addListener(listener) {
-		this.listeners.push(listener);
+	/**
+	 * @name IPC.prototype.addListener
+	 * @description Adds a listener for a given type. A type can be 'log' for logging, 'error' for only errors or the name of one of the message kinds
+	 * @function
+	 * @param {String} type The type of the listener
+	 * @param {?} listener The listener object
+	 */
+	IPC.prototype.addListener = function addListener(type, listener) {
+		if(!Array.isArray(this.listeners[type])) {
+			this.listeners[type] = [];
+		}
+		this.listeners[type].push(listener);
 	};
 	
 	/**
@@ -76,8 +265,10 @@ define([
 						deferred.resolve(data.result);
 						delete this.requests[data.id];
 					}
-				} else {
-					this.listeners.forEach(function(l) {
+				}
+				var l = this.listeners[data.method];
+				if(Array.isArray(l) && l.length > 0) {
+					this.listeners[data.method].forEach(function(l) {
 						l.handleNotification(data);
 					});
 				}
@@ -96,9 +287,9 @@ define([
 			} catch(err) {
 				console.log(err);
 			}
-			this.initialize(pid, this.workspaceDir).then(function(result) {
+			this.initialize(pid, this.workspaceDir).then(/* @callback */ function initializeCallback(result) {
 				this.initialized = true;
-				this.queue.forEach(function(item) {
+				this.queue.forEach(function queueFlushCallback(item) {
 					console.log(JSON.stringify(item));
 					this.socket.emit('data', item);
 				}.bind(this));
@@ -107,7 +298,7 @@ define([
 	};
 	
 	/**
-	 * @name handlers.initialize
+	 * @name IPC.prototype.initialize
 	 * @description Sends an initialize request
 	 * @param {String} processId The id of the process
 	 * @param {String} workspaceDir The root of the current workspace 
@@ -115,7 +306,7 @@ define([
 	 * @returns {Deferred} The deferred that resolves to the result of the request
 	 */
 	IPC.prototype.initialize = function initialize(processId, workspaceDir) {
-		return this.sendMessage(this.id++, 'initialize', {
+		return this.sendMessage(this.id++, messageTypes.initialize, {
 			rootPath: workspaceDir,
 			processId: processId
 		});
@@ -131,7 +322,7 @@ define([
 	 * @returns {Deferred} The deferred that resolves to the result of the request
 	 */
 	IPC.prototype.didOpen = function didOpen(uri, languageId, text) {
-		return this.sendMessage(0, 'textDocument/didOpen', {
+		return this.sendMessage(0, messageTypes.didOpen, {
 			textDocument: {
 				uri: uri,
 				languageId: languageId,
