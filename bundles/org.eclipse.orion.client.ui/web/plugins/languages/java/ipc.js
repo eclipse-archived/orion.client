@@ -273,10 +273,18 @@ define([
 		}.bind(this));
 		this.socket.on('data', function(data) {
 			try {
-				if (data.id) {
+				if(!data) {
+					_notifyListeners(this.listeners, messageTypes.logMessage, "Dropped response with null data.");
+					return;
+				}
+				if (data && data.id) {
 					var deferred = this.requests[data.id];
 					if(deferred) {
-						deferred.resolve(data.result);
+						if(data.error) {
+							deferred.reject(data.error);
+						} else {
+							deferred.resolve(data.result);
+						}
 						delete this.requests[data.id];
 					}
 				}
@@ -381,7 +389,24 @@ define([
 				uri: uri,
 				version: version
 			},
-			contentChanges: 	changes
+			contentChanges: changes
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.documentHighlight
+	 * @description Sends a document highlight request
+	 * @function
+	 * @param {String} uri The URI of the file
+	 * @param {number} offset The offset into the file to compute the highlight for
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.documentHighlight = function documentHighlight(uri, offset) {
+		return this.sendMessage(this.id++, messageTypes.documentHighlight, {
+				position: offset, 
+				textDocument: {
+					uri: uri,
+				}
 		});
 	};
 	

@@ -23,7 +23,7 @@ define([
 	var ipc = new IPC('/languageServer'),
 		project,
 		diagnostics, 
-		computeProblemsDeferred;//TODO handle multiple files and requests
+		computeProblemsDeferred; //TODO handle multiple files and requests
 
 	/**
 	 * @name initializeIPC
@@ -70,7 +70,9 @@ define([
 			diagnostics = computeProblemsDeferred = null;
 		}
 	}
-
+	/**
+	 * Register all of the service providers 
+	 */
 	function registerServiceProviders(pluginProvider) {
 		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
 			contentTypes: [
@@ -106,6 +108,48 @@ define([
 		}, {
 			contentType: ["text/x-java-source"]
 		});
+		
+		function convertOccurrence(editorContext, result) {
+			return editorContext.getLineStart(result.range.start.line).then(function(offset) {
+				return {
+					start: result.range.start.character+offset,
+					end: result.range.end.character+offset
+				};				
+			});
+		}
+		
+		/**
+		 * Occurrences
+		 */
+		pluginProvider.registerService("orion.edit.occurrences", {
+				computeOccurrences: function computeOccurrences(editorContext, args) {
+					return editorContext.getFileMetadata().then(function(meta) {
+						return editorContext.getLineAtOffset(args.selection.start).then(function(line) {
+							return editorContext.getLineStart(line).then(function(lineOffset) {
+								return ipc.documentHighlight(meta.location, {line: line, character: args.selection.start-lineOffset}).then(function(results) {
+									if(Array.isArray(results) && results.length > 0) {
+										var o = [];
+										results.forEach(function(result) {
+											o.push(convertOccurrence(editorContext, result));
+										});
+										return Deferred.all(o);
+									} 
+									return new Deferred().resolve([]);
+								}.bind(this),
+								/* @callback */ function(err) {
+									return new Deferred().resolve([]);
+								});	
+							}.bind(this));
+						}.bind(this));
+					}.bind(this));
+				}.bind(this)
+			},
+    		{
+    			contentType: ["text/x-java-source", "application/x-jsp"]	//$NON-NLS-1$ //$NON-NLS-2$
+    		});
+    	/**
+    	 * editor model changes
+    	 */
 		pluginProvider.registerService("orion.edit.model", {  //$NON-NLS-1$
 			onSaving: project.onSaving.bind(project),
 			onModelChanging: project.onModelChanging.bind(project),
