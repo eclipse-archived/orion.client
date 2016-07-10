@@ -350,5 +350,24 @@ define([
 		});
 	};
 	
+	/**
+	 * @name IPC.prototype.didSave
+	 * @description Sends a didSave notification
+	 * @function
+	 * @param {String} uri The URI of the file
+	 * @param {String} languageId The content type of the source
+	 * @param {String} text The optional current source code
+	 */
+	IPC.prototype.didSave = function didSave(uri, languageId, text) {
+		return this.sendMessage(0, messageTypes.didSave, {
+			textDocument: {
+				uri: uri,
+				languageId: languageId,
+				version: 1,
+				text: text
+			}
+		});
+	};
+	
 	return IPC;
 });

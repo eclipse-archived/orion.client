@@ -167,7 +167,14 @@ define([
 		}
 		return this.fileClient;
 	};
-	
+	/**
+	 * Callback from the orion.edit.model service
+	 * @param {Object} evnt An <tt>orion.edit.model</tt> event.
+	 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
+	 */
+	JavaProject.prototype.onSaving = function onSaving(evnt) {
+		this.project.ipc.didSave(evnt.file.location, evnt.file.contentType.id, evnt.file.contents);
+	};
 	/**
 	 * Callback from the orion.edit.model service
 	 * @param {Object} evnt An <tt>orion.edit.model</tt> event.

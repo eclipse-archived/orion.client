@@ -95,6 +95,7 @@ define([
 			contentType: ["text/x-java-source"]
 		});
 		pluginProvider.registerService("orion.edit.model", {  //$NON-NLS-1$
+			onSaving: project.onSaving.bind(project),
 			onInputChanged: project.onInputChanged.bind(project)
 		},
 		{
