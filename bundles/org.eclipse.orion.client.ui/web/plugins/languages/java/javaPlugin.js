@@ -108,6 +108,7 @@ define([
 		});
 		pluginProvider.registerService("orion.edit.model", {  //$NON-NLS-1$
 			onSaving: project.onSaving.bind(project),
+			onModelChanging: project.onModelChanging.bind(project),
 			onInputChanged: project.onInputChanged.bind(project)
 		},
 		{

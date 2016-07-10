@@ -328,12 +328,12 @@ define([
 	 * @param {String} languageId The content type of the source
 	 * @param {String} text The optional current source code
 	 */
-	IPC.prototype.didOpen = function didOpen(uri, languageId, text) {
+	IPC.prototype.didOpen = function didOpen(uri, languageId, version, text) {
 		return this.sendMessage(0, messageTypes.didOpen, {
 			textDocument: {
 				uri: uri,
 				languageId: languageId,
-				version: 1,
+				version: version,
 				text: text
 			}
 		});
@@ -364,6 +364,24 @@ define([
 			textDocument: {
 				uri: uri,
 			}
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.didChange
+	 * @description Sends a didChange notification
+	 * @function
+	 * @param {String} uri The URI of the file
+	 * @param {Number} version the version of the document
+	 * @param Array<TextDocumentContentChangeEvent> changes the changes in the document
+	 */
+	IPC.prototype.didChange = function didChange(uri, version, changes) {
+		return this.sendMessage(0, messageTypes.didChange, {
+			textDocument: {
+				uri: uri,
+				version: version
+			},
+			contentChanges: 	changes
 		});
 	};
 	

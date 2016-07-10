@@ -18,10 +18,11 @@ define([
 	function openDocument(project, evnt) {
 		//TODO handle split editor
 		if (openedDocument) {
-			project.ipc.didClose(openedDocument.location, openedDocument.contentType.id);
+			project.ipc.didClose(openedDocument.location);
 		}
 		openedDocument = evnt.file;
-		project.ipc.didOpen(evnt.file.location, evnt.file.contentType.id, evnt.file.contents);
+		evnt.file.version = 1;
+		project.ipc.didOpen(evnt.file.location, evnt.file.contentType.id, evnt.file.version, evnt.file.contents);
 	}
 	
 	var initialized = false,
@@ -173,7 +174,15 @@ define([
 	 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
 	 */
 	JavaProject.prototype.onSaving = function onSaving(evnt) {
-		this.project.ipc.didSave(evnt.file.location, evnt.file.contentType.id, evnt.file.contents);
+		this.project.ipc.didSave(evnt.file.location);
+	};
+	/**
+	 * Callback from the orion.edit.model service
+	 * @param {Object} evnt An <tt>orion.edit.model</tt> event.
+	 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
+	 */
+	JavaProject.prototype.onModelChanging = function onModelChanging(evnt) {
+//		this.project.ipc.didChange(evnt.file.location, evnt.file.version++);
 	};
 	/**
 	 * Callback from the orion.edit.model service
