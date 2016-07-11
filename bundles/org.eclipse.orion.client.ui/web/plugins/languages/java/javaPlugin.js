@@ -75,6 +75,7 @@ define([
 								return results.map(function(result) {
 									return {
 										name: result.label,
+										proposal: result.insertText,
 										description: ' ('+resolveCompletionKind(result.kind)+')',
 							            relevance: 100,
 							            style: 'emphasis', //$NON-NLS-1$
