@@ -74,8 +74,8 @@ define([
 							if(Array.isArray(results) && results.length > 0) {
 								return results.map(function(result) {
 									return {
-										name: '['+resolveCompletionKind(result.kind)+'] '+result.label,
-										description: ' ('+result.detail+')',
+										name: result.label,
+										description: ' ('+resolveCompletionKind(result.kind)+')',
 							            relevance: 100,
 							            style: 'emphasis', //$NON-NLS-1$
 							            overwrite: true,
@@ -127,6 +127,9 @@ define([
 		 */
 		provider.registerService("orion.edit.hover", {
 			computeHoverInfo: function computeHoverInfo(editorContext, args) {
+				if(args.proposal && args.proposal.kind === 'java') {
+			        return args.proposal.hover;
+			    }
 				return editorContext.getFileMetadata().then(function(meta) {
 					return getPosition(editorContext, args.offset).then(function(position) {
 						return ipc.hover(meta.location, position).then(function(result) {
