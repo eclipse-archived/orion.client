@@ -23,6 +23,10 @@ define([
 		2: 'warn',
 		3: 'info'
 	};
+	/**
+	 * The map of error types
+	 */
+	IPC.prototype.ERROR_TYPES = errorTypes; //TODO should be a clone not a live copy
 	
 	var messageTypes = {
 		/**
@@ -198,7 +202,7 @@ define([
 	 * The collection of message types corresponding to the launguage server protocol
 	 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
 	 */
-	IPC.prototype.MESSAGE_TYPES = messageTypes;
+	IPC.prototype.MESSAGE_TYPES = messageTypes; //TODO should be a clone, not a live copy
 	
 	/**
 	 * @name _notifyListeners

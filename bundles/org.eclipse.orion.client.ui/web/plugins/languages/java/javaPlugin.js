@@ -39,11 +39,13 @@ define([
 		 */
 		ipc.addListener(ipc.MESSAGE_TYPES.logMessage, {
 			handleNotification: function handleNotification(data) {
-				if((LOG_ERRORS && data.params.type === 1) || (LOG_WARNINGS && data.params.type === 2) || (LOG_INFO && data.params.type === 3)) {
-					if(typeof data === 'object' && data !== null) {
-						console.log(JSON.stringify(data));
-					} else if(typeof data === 'string') {
-						console.log(data);
+				if(data !== null && typeof data === 'object') {
+					if(data.params && (LOG_ERRORS && data.params.type === 1) || (LOG_WARNINGS && data.params.type === 2) || (LOG_INFO && data.params.type === 3)) {
+						if(typeof data === 'object' && data !== null) {
+							console.log(JSON.stringify(data));
+						} else if(typeof data === 'string') {
+							console.log(data);
+						}
 					}
 				}
 			}
