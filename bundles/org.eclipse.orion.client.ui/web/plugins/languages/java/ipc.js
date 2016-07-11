@@ -22,7 +22,7 @@ define([
 		1: 'error',
 		2: 'warn',
 		3: 'info'
-	}
+	};
 	
 	var messageTypes = {
 		/**
@@ -444,6 +444,21 @@ define([
 	IPC.prototype.hover = function hover(uri, position) {
 		return this.sendMessage(this.id++, messageTypes.hover, {
 				position: position, 
+				textDocument: {
+					uri: uri,
+				}
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.documentSymbol
+	 * @description Sends a document symbol request
+	 * @function
+	 * @param {String} uri The URI for the file to find symbols in
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.documentSymbol = function documentSymbol(uri) {
+		return this.sendMessage(this.id++, messageTypes.documentSymbol, {
 				textDocument: {
 					uri: uri,
 				}

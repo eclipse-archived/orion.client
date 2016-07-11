@@ -108,6 +108,30 @@ define([
 			excludedStyles: "(string.*)"  //$NON-NLS-1$
 		});
 		/**
+		 * Symbol outline
+		 */
+		provider.registerService("orion.edit.outliner", {
+			/**
+			 * @callback
+			 */
+			computeOutline: function computeOutline(editorContext, options) {
+				return editorContext.getFileMetadata().then(function(meta) {
+					return ipc.documentSymbol(meta.location).then(function(results) {
+						if(Array.isArray(results) && results.length > 0) {
+							
+						}
+						return new Deferred().resolve([]);
+					});
+				}.bind(this));
+			}
+		},
+    	{
+    		contentType: ["text/x-java-source", "application/x-jsp"],  //$NON-NLS-1$
+    		name: "Java Symbol Outline",
+    		title: "Java Symbols",
+    		id: "orion.java.symbols.outliner.source"  //$NON-NLS-1$
+    	});
+		/**
 		 * Validator
 		 */
 		provider.registerService("orion.edit.validator", {
