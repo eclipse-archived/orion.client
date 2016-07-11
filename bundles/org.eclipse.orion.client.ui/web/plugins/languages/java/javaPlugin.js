@@ -219,7 +219,7 @@ define([
 		return {
 			description: diagnostic.message,
 			id: diagnostic.code,
-			severity: ipc.MESSAGE_TYPES[diagnostic.severity],
+			severity: ipc.ERROR_TYPES[diagnostic.severity],
 			range: diagnostic.range
 		};
 	}

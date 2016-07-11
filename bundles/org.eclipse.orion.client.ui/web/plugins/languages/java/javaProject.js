@@ -187,7 +187,7 @@ define([
 			range: evnt.range,
 			rangeLength: evnt.removedCharCount,
 			text: evnt.text
-		}
+		};
 		//TODO better way to get the version of the openDocument
 		this.ipc.didChange(evnt.file.location, openedDocument.version++, [change]);
 	};
