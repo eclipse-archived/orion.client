@@ -2,7 +2,7 @@
 .textviewTooltip {
 	font-family: "Consolas", "Monaco", "Vera Mono", monospace;
 	font-size: 12px;
-	background-color: #325C80; /* Must match the quickfix command button border color */
+	background-color: #3B4B54; /* Must match the quickfix command button border color */
 	color: #FAFAFA;
 	padding: 8px;
 	/* The tooltip initial size explicitly counts for padding size, border-box sizing breaks this */
