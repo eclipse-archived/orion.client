@@ -18,6 +18,12 @@ define([
     	ServerErrorEnd: -32000,
 	};
 	
+	var errorTypes = {
+		1: 'error',
+		2: 'warn',
+		3: 'info'
+	}
+	
 	var messageTypes = {
 		/**
 		 * @kind request

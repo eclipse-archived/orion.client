@@ -23,7 +23,10 @@ define([
 	var ipc = new IPC('/languageServer'),
 		project,
 		diagnostics, 
-		computeProblemsDeferred; //TODO handle multiple files and requests
+		computeProblemsDeferred, //TODO handle multiple files and requests
+		LOG_ERRORS = localStorage.getItem('java.langserver.logmessage.error') === 'true',
+		LOG_WARNINGS = localStorage.getItem('java.langserver.logmessage.warn') === 'true',
+		LOG_INFO = localStorage.getItem('java.langserver.logmessage.error.info') === 'true';
 
 	/**
 	 * @name initializeIPC
@@ -36,7 +39,7 @@ define([
 		 */
 		ipc.addListener(ipc.MESSAGE_TYPES.logMessage, {
 			handleNotification: function handleNotification(data) {
-				if(localStorage.getItem('java.langserver.logmessage') === 'true') {
+				if((LOG_ERRORS && data.params.type === 1) || (LOG_WARNINGS && data.params.type === 2) || (LOG_INFO && data.params.type === 3)) {
 					if(typeof data === 'object' && data !== null) {
 						console.log(JSON.stringify(data));
 					} else if(typeof data === 'string') {
