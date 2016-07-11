@@ -427,5 +427,21 @@ define([
 		});
 	};
 	
+	/**
+	 * @name IPC.prototype.hover
+	 * @description Sends a hover request
+	 * @function
+	 * @param {String} uri The URI of the file
+	 * @param {{line: number, character: number}} offset The offset into the file to hover at
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.hover = function hover(uri, position) {
+		return this.sendMessage(this.id++, messageTypes.hover, {
+				position: position, 
+				textDocument: {
+					uri: uri,
+				}
+		});
+	};
 	return IPC;
 });

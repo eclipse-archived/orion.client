@@ -67,32 +67,30 @@ define([
 			/**
 			 * @callback
 			 */
-			computeContentAssist: function(editorContext, params) {
+			computeContentAssist: function(editorContext, args) {
 				return editorContext.getFileMetadata().then(function(meta) {
-					return editorContext.getLineAtOffset(params.selection.start).then(function(line) {
-						return editorContext.getLineStart(line).then(function(lineOffset) {
-							return ipc.completion(meta.location, {line: line, character: params.selection.start-lineOffset}).then(function(results) {
-								if(Array.isArray(results) && results.length > 0) {
-									return results.map(function(result) {
-										return {
-											name: '['+resolveCompletionKind(result.kind)+'] '+result.label,
-											description: ' ('+result.detail+')',
-								            relevance: 100,
-								            style: 'emphasis', //$NON-NLS-1$
-								            overwrite: true,
-								            kind: 'java', //$NON-NLS-1$
-								            hover: {
-								            	content: result.documentation,
-								            	type: 'markdown'
-								            }
-								        };
-									});
-								}
-								return new Deferred().resolve([]);
-							},
-							/* @callback */ function(err) {
-								return new Deferred().resolve([]);
-							});
+					return getPosition(editorContext, args.selection.start).then(function(position) {
+						return ipc.completion(meta.location, position).then(function(results) {
+							if(Array.isArray(results) && results.length > 0) {
+								return results.map(function(result) {
+									return {
+										name: '['+resolveCompletionKind(result.kind)+'] '+result.label,
+										description: ' ('+result.detail+')',
+							            relevance: 100,
+							            style: 'emphasis', //$NON-NLS-1$
+							            overwrite: true,
+							            kind: 'java', //$NON-NLS-1$
+							            hover: {
+							            	content: result.documentation,
+							            	type: 'markdown'
+							            }
+							        };
+								});
+							}
+							return new Deferred().resolve([]);
+						},
+						/* @callback */ function(err) {
+							return new Deferred().resolve([]);
 						});
 					});
 				});
@@ -125,30 +123,54 @@ define([
 			contentType: ["text/x-java-source", "application/x-jsp"]
 		});
 		/**
+		 * Hover
+		 */
+		provider.registerService("orion.edit.hover", {
+			computeHoverInfo: function computeHoverInfo(editorContext, args) {
+				return editorContext.getFileMetadata().then(function(meta) {
+					return getPosition(editorContext, args.offset).then(function(position) {
+						return ipc.hover(meta.location, position).then(function(result) {
+							var hover = '';
+							if(typeof result.contents === 'string') {
+								hover = result.contents;
+							} else if(result.contents !== null && typeof result.contents === 'object') {
+								hover = result.contents.value;
+							}
+							return new Deferred().resolve(hover);
+						},
+						/* @callback */ function(err) {
+							return new Deferred().resolve('');
+						});
+					});
+				});
+			}
+		}, {
+    		name: "Java Hover",
+    		contentType: ["text/x-java-source", "application/x-jsp"]	//$NON-NLS-1$ //$NON-NLS-2$
+    	});
+		/**
 		 * Occurrences
 		 */
 		provider.registerService("orion.edit.occurrences", {
 			computeOccurrences: function computeOccurrences(editorContext, args) {
 				return editorContext.getFileMetadata().then(function(meta) {
-					return editorContext.getLineAtOffset(args.selection.start).then(function(line) {
-						return editorContext.getLineStart(line).then(function(lineOffset) {
-							return ipc.documentHighlight(meta.location, {line: line, character: args.selection.start-lineOffset}).then(function(results) {
-								if(Array.isArray(results) && results.length > 0) {
-									return Deferred.all(results.map(function(result) {
-										return editorContext.getLineStart(result.range.start.line).then(function(offset) {
-											return {
-												start: result.range.start.character+offset,
-												end: result.range.end.character+offset
-											};				
-										});
-									}));
-								} 
-								return new Deferred().resolve([]);
-							}.bind(this),
-							/* @callback */ function(err) {
-								return new Deferred().resolve([]);
-							});	
-						}.bind(this));
+					return getPosition(editorContext, args.selection.start).then(function(position) {
+						return ipc.documentHighlight(meta.location, position).then(function(results) {
+							if(Array.isArray(results) && results.length > 0) {
+								return Deferred.all(results.map(function(result) {
+									return editorContext.getLineStart(result.range.start.line).then(function(offset) {
+										return {
+											start: result.range.start.character+offset,
+											end: result.range.end.character+offset
+										};				
+									});
+								}));
+							} 
+							return new Deferred().resolve([]);
+						}.bind(this),
+						/* @callback */ function(err) {
+							return new Deferred().resolve([]);
+						});	
 					}.bind(this));
 				}.bind(this));
 			}.bind(this)
@@ -171,6 +193,22 @@ define([
 			diagnostics = computeProblemsDeferred = null;
 		}
 	}
+	
+	/**
+	 * @name getPosition
+	 * @description Return a document position object for use with the protocol
+	 * @param {?} editorContext TRhe backing editor context
+	 * @param {number} offset The Orion editor offset
+	 * @returns {Deferred} Return a deferred that will resolve to a position object for the protocol textDocument requests
+	 */
+	function getPosition(editorContext, offset) {
+		return editorContext.getLineAtOffset(offset).then(function(line) {
+			return editorContext.getLineStart(line).then(function(lineOffset) {
+				return {line: line, character: offset-lineOffset};
+			});
+		});
+	}
+	
 	/**
 	 * Converts the completion result kind into a human-readable string
 	 */
