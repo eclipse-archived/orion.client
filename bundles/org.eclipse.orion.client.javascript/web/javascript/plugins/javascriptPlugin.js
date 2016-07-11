@@ -1294,6 +1294,23 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
 				quickFixComputer,
 				{
+					name: javascriptMessages["NoRedeclareFixName"],
+					scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+					id : "no.redeclare.fix",  //$NON-NLS-1$
+					contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+					validationProperties: [
+						{
+							source: "annotation:id", //$NON-NLS-1$
+							match: "^(?:no-redeclare)$" //$NON-NLS-1$
+						},
+						{source: "readonly", match: false} //$NON-NLS-1$
+					]
+				}
+		);
+
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+				quickFixComputer,
+				{
 					name: javascriptMessages["noDuplicateCaseFixName"],
 					scopeId: "orion.edit.quickfix", //$NON-NLS-1$
 					id : "no.duplicate.case.fix",  //$NON-NLS-1$
