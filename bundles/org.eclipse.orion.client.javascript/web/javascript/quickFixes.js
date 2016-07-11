@@ -16,8 +16,9 @@ define([
 'orion/editor/textModel',
 'javascript/finder',
 'javascript/compilationUnit',
-'orion/metrics'
-], function(Objects, Deferred, TextModel, Finder, CU, Metrics) {
+'orion/metrics',
+'estraverse/estraverse'
+], function(Objects, Deferred, TextModel, Finder, CU, Metrics, Estraverse) {
 /* eslint-disable missing-doc */
 	/**
 	 * @description Creates a new JavaScript quick fix computer
@@ -423,7 +424,55 @@ define([
 						return editorContext.syntaxCheck(ast.sourceFile.name);
 					}.bind(this));
 				}.bind(this));
-			}
+			},
+			"no-redeclare": function(editorContext, context, astManager) {
+				return astManager.getAST(editorContext).then(function(ast) {
+					var node = Finder.findNode(context.annotation.end, ast, {parents:true});
+					if(node && node.type === 'Identifier') {
+						var variableName = node.name;
+						var parents = node.parents;
+						if (parents) {
+							// find the parent of the variable declaration
+							var parentNode = parents.pop();
+							while (parentNode && parentNode.type !== 'VariableDeclaration') {
+								parentNode = parents.pop();
+							}
+							if (parentNode) {
+								parentNode = parents.pop();
+								if (!parentNode) {
+									return;
+								}
+								var groups = [{data: {}, positions: []}];
+								var linkModel = null;
+								var end = parentNode.range[1];
+								var start = node.range[0];
+								Estraverse.traverse(parentNode, {
+									/* @callback */
+									enter: function(n, parent) {
+										if(n.range[1] <= start) {
+											return Estraverse.VisitorOption.Skip;
+										}
+										if(n.range[0] > end) {
+											//once we've left the parentNode
+											return Estraverse.VisitorOption.Break;
+										}
+										if (n.type === 'Identifier' && variableName === n.name && n.range[0] >= start && n.range[1] <= end) {
+											// record this reference
+											var identifierStart = n.range[0];
+											var length = n.range[1] - identifierStart;
+											groups[0].positions.push({offset: identifierStart, length: length});
+										}
+									}
+								});
+								linkModel = {groups: groups};
+								return editorContext.exitLinkedMode().then(function() {
+									return editorContext.enterLinkedMode(linkModel);
+								});
+							}
+						}
+					}
+				});
+			},
 		}
 	});
 	
