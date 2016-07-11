@@ -174,7 +174,7 @@ define([
 	 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
 	 */
 	JavaProject.prototype.onSaving = function onSaving(evnt) {
-		this.project.ipc.didSave(evnt.file.location);
+		this.ipc.didSave(evnt.file.location);
 	};
 	/**
 	 * Callback from the orion.edit.model service
@@ -182,7 +182,14 @@ define([
 	 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
 	 */
 	JavaProject.prototype.onModelChanging = function onModelChanging(evnt) {
-//		this.project.ipc.didChange(evnt.file.location, evnt.file.version++);
+		if (!evnt.range) return;
+		var change = {
+			range: evnt.range,
+			rangeLength: evnt.removedCharCount,
+			text: evnt.text
+		}
+		//TODO better way to get the version of the openDocument
+		this.ipc.didChange(evnt.file.location, openedDocument.version++, [change]);
 	};
 	/**
 	 * Callback from the orion.edit.model service
