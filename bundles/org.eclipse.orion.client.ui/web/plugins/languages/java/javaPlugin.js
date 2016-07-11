@@ -22,8 +22,7 @@ define([
 
 	var ipc = new IPC('/languageServer'),
 		project,
-		diagnostics, 
-		computeProblemsDeferred, //TODO handle multiple files and requests
+		diagnostics = Object.create(null), 
 		LOG_ERRORS = localStorage.getItem('java.langserver.logmessage.error') === 'true',
 		LOG_WARNINGS = localStorage.getItem('java.langserver.logmessage.warn') === 'true',
 		LOG_INFO = localStorage.getItem('java.langserver.logmessage.error.info') === 'true';
@@ -55,8 +54,12 @@ define([
 		 */
 		ipc.addListener(ipc.MESSAGE_TYPES.publishDiagnostics, {
 			handleNotification: function handleNotification(data) {
-				diagnostics = data.params.diagnostics;
-				resolveProblems();
+				var uri = data.params.uri;
+				if (!diagnostics[uri]) {
+					diagnostics[uri] = new Deferred();
+				}
+				diagnostics[uri].resolve(data.params.diagnostics.map(convertDiagnostic));
+				delete diagnostics[uri];
 			}
 		});
 		
@@ -141,13 +144,13 @@ define([
 			 * @callback
 			 */
 			computeProblems: function computeProblems(editorContext, options) {
-				if (!computeProblemsDeferred) {
-					computeProblemsDeferred = new Deferred();
-					if (diagnostics) {
-						resolveProblems();
+				return editorContext.getFileMetadata().then(function(metadata) {
+					var uri = metadata.location;
+					if (!diagnostics[uri]) {
+						diagnostics[uri] = new Deferred();
 					}
-				}
-				return computeProblemsDeferred;
+					return diagnostics[uri];
+				});
 			}
 		}, {
 			contentType: ["text/x-java-source", "application/x-jsp"]
@@ -212,19 +215,13 @@ define([
 			contentType: ["text/x-java-source", "application/x-jsp"]	//$NON-NLS-1$ //$NON-NLS-2$
 		});
 	}
-	function resolveProblems() {
-		if (computeProblemsDeferred && diagnostics) {
-			var types = ["", "error", "warning", "info", "hint"];
-			computeProblemsDeferred.resolve(diagnostics.map(function(d) {
-				return {
-					description: d.message,
-					id: d.code,
-					severity: types[d.severity],
-					range: d.range
-				};
-			}));
-			diagnostics = computeProblemsDeferred = null;
-		}
+	function convertDiagnostic(diagnostic) {
+		return {
+			description: diagnostic.message,
+			id: diagnostic.code,
+			severity: ipc.MESSAGE_TYPES[diagnostic.severity],
+			range: diagnostic.range
+		};
 	}
 	
 	/**

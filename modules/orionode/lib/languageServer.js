@@ -128,9 +128,13 @@ exports.install = function(options) {
 		sock.on('start', function(cwd) {
 
 			runJavaServer().then(function(child) {
+				var workspaceUrl = "file:///" + options.workspaceDir.replace(/\\/g, "/");
 				child.stdout.on('data', function(data) {
 					var m = parseMessage(data);
 					if (m) {
+						if (m.content && m.content.params && m.content.params.uri) {
+							m.content.params.uri = "/file/" + m.content.params.uri.slice(workspaceUrl.length);
+						}
 						sock.emit('data', m.content);
 					}
 				});
@@ -141,7 +145,7 @@ exports.install = function(options) {
 				sock.on('data', function(data) {
 					var textDocument = data.params && data.params.textDocument && data.params.textDocument;
 					if (textDocument && textDocument.uri) {
-						textDocument.uri ="file:///" + options.workspaceDir.replace(/\\/g, "/") + textDocument.uri.replace(/^\/file/, '');
+						textDocument.uri = workspaceUrl + textDocument.uri.replace(/^\/file/, '');
 					}
 					var s = JSON.stringify(data);
 					child.stdin.write("Content-Length: " + s.length + "\r\n\r\n" + s);
