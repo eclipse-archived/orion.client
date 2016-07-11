@@ -398,12 +398,29 @@ define([
 	 * @description Sends a document highlight request
 	 * @function
 	 * @param {String} uri The URI of the file
-	 * @param {number} offset The offset into the file to compute the highlight for
+	 * @param {{line: number, character: number}} offset The offset into the file to compute the highlight for
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
-	IPC.prototype.documentHighlight = function documentHighlight(uri, offset) {
+	IPC.prototype.documentHighlight = function documentHighlight(uri, position) {
 		return this.sendMessage(this.id++, messageTypes.documentHighlight, {
-				position: offset, 
+				position: position, 
+				textDocument: {
+					uri: uri,
+				}
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.completion
+	 * @description Sends a code completion request
+	 * @function
+	 * @param {String} uri The URI of the file
+	 * @param {{line: number, character: number}} offset The offset into the file to compute completions at
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.completion = function completion(uri, position) {
+		return this.sendMessage(this.id++, messageTypes.completion, {
+				position: position, 
 				textDocument: {
 					uri: uri,
 				}

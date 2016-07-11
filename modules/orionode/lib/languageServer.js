@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env node*/
+/*eslint-env node, rimraf*/
 /*eslint-disable no-sync*/
 var path = require('path');
 var cp = require('child_process');

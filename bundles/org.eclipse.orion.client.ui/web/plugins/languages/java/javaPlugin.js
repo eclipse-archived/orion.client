@@ -12,7 +12,7 @@
 /*eslint-env browser, amd*/
 define([
 'orion/plugin', 
-"orion/Deferred",
+"orion/Deferred",	
 'orion/editor/stylers/text_x-java-source/syntax', 
 'orion/editor/stylers/application_x-jsp/syntax',
 "plugins/languages/java/javaProject",
@@ -56,6 +56,107 @@ define([
 		});
 		
 	}
+	/**
+	 * Single place to add in all of the provide hooks for the various services
+	 */
+	function hookAPIs(provider) {
+		/**
+		 * Content Assist
+		 */
+		provider.registerService("orion.edit.contentassist", {
+			/**
+			 * @callback
+			 */
+			computeContentAssist: function(editorContext, params) {
+				return editorContext.getFileMetadata().then(function(meta) {
+					return editorContext.getLineAtOffset(params.selection.start).then(function(line) {
+						return editorContext.getLineStart(line).then(function(lineOffset) {
+							return ipc.completion(meta.location, {line: line, character: params.selection.start-lineOffset}).then(function(results) {
+								if(Array.isArray(results) && results.length > 0) {
+									return results.map(function(result) {
+										return {
+											name: '['+resolveCompletionKind(result.kind)+'] '+result.label,
+											description: ' ('+result.detail+')',
+								            relevance: 100,
+								            style: 'emphasis', //$NON-NLS-1$
+								            overwrite: true,
+								            kind: 'java', //$NON-NLS-1$
+								            hover: {
+								            	content: result.documentation,
+								            	type: 'markdown'
+								            }
+								        };
+									});
+								}
+								return new Deferred().resolve([]);
+							},
+							/* @callback */ function(err) {
+								return new Deferred().resolve([]);
+							});
+						});
+					});
+				});
+			}
+		},
+		{
+			contentType: ["text/x-java-source", "application/x-jsp"],  //$NON-NLS-1$ //$NON-NLS-2$
+			name: 'Java Content Assist',  //$NON-NLS-1$
+			id: "orion.edit.contentassist.java",  //$NON-NLS-1$
+			charTriggers: "[.]",  //$NON-NLS-1$
+			excludedStyles: "(string.*)"  //$NON-NLS-1$
+		});
+		/**
+		 * Validator
+		 */
+		provider.registerService("orion.edit.validator", {
+			/**
+			 * @callback
+			 */
+			computeProblems: function computeProblems(editorContext, options) {
+				if (!computeProblemsDeferred) {
+					computeProblemsDeferred = new Deferred();
+					if (diagnostics) {
+						resolveProblems();
+					}
+				}
+				return computeProblemsDeferred;
+			}
+		}, {
+			contentType: ["text/x-java-source", "application/x-jsp"]
+		});
+		/**
+		 * Occurrences
+		 */
+		provider.registerService("orion.edit.occurrences", {
+			computeOccurrences: function computeOccurrences(editorContext, args) {
+				return editorContext.getFileMetadata().then(function(meta) {
+					return editorContext.getLineAtOffset(args.selection.start).then(function(line) {
+						return editorContext.getLineStart(line).then(function(lineOffset) {
+							return ipc.documentHighlight(meta.location, {line: line, character: args.selection.start-lineOffset}).then(function(results) {
+								if(Array.isArray(results) && results.length > 0) {
+									return Deferred.all(results.map(function(result) {
+										return editorContext.getLineStart(result.range.start.line).then(function(offset) {
+											return {
+												start: result.range.start.character+offset,
+												end: result.range.end.character+offset
+											};				
+										});
+									}));
+								} 
+								return new Deferred().resolve([]);
+							}.bind(this),
+							/* @callback */ function(err) {
+								return new Deferred().resolve([]);
+							});	
+						}.bind(this));
+					}.bind(this));
+				}.bind(this));
+			}.bind(this)
+		},
+		{
+			contentType: ["text/x-java-source", "application/x-jsp"]	//$NON-NLS-1$ //$NON-NLS-2$
+		});
+	}
 	function resolveProblems() {
 		if (computeProblemsDeferred && diagnostics) {
 			var types = ["", "error", "warning", "info", "hint"];
@@ -68,6 +169,32 @@ define([
 				};
 			}));
 			diagnostics = computeProblemsDeferred = null;
+		}
+	}
+	/**
+	 * Converts the completion result kind into a human-readable string
+	 */
+	function resolveCompletionKind(num) {
+		switch(num) {
+			case 1: return 'Text';
+			case 2: return 'Method';
+			case 3: return 'Function';
+			case 4: return 'Constructor';
+			case 5: return 'Field';
+			case 6: return 'Variable';
+			case 7: return 'Class';
+			case 8: return 'Interface';
+			case 9: return 'Module';
+			case 10: return 'Property';
+			case 11: return 'Unit';
+			case 12: return 'Value';
+			case 13: return 'Enum';
+			case 14: return 'Keyword';
+			case 15: return 'Snippet';
+			case 16: return 'Color';
+			case 17: return 'File';
+			case 18: return 'Reference';
+			default: return 'Unknown';
 		}
 	}
 	/**
@@ -93,60 +220,8 @@ define([
 		mJSP.grammars.forEach(function(current) {
 			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
 		});
-		pluginProvider.registerService("orion.edit.validator", {
-			/**
-			 * @callback
-			 */
-			computeProblems: function computeProblems(editorContext, options) {
-				if (computeProblemsDeferred) return computeProblemsDeferred;
-				computeProblemsDeferred = new Deferred();
-				if (diagnostics) {
-					resolveProblems();
-				}
-				return computeProblemsDeferred;
-			}
-		}, {
-			contentType: ["text/x-java-source"]
-		});
+		hookAPIs(pluginProvider);
 		
-		function convertOccurrence(editorContext, result) {
-			return editorContext.getLineStart(result.range.start.line).then(function(offset) {
-				return {
-					start: result.range.start.character+offset,
-					end: result.range.end.character+offset
-				};				
-			});
-		}
-		
-		/**
-		 * Occurrences
-		 */
-		pluginProvider.registerService("orion.edit.occurrences", {
-				computeOccurrences: function computeOccurrences(editorContext, args) {
-					return editorContext.getFileMetadata().then(function(meta) {
-						return editorContext.getLineAtOffset(args.selection.start).then(function(line) {
-							return editorContext.getLineStart(line).then(function(lineOffset) {
-								return ipc.documentHighlight(meta.location, {line: line, character: args.selection.start-lineOffset}).then(function(results) {
-									if(Array.isArray(results) && results.length > 0) {
-										var o = [];
-										results.forEach(function(result) {
-											o.push(convertOccurrence(editorContext, result));
-										});
-										return Deferred.all(o);
-									} 
-									return new Deferred().resolve([]);
-								}.bind(this),
-								/* @callback */ function(err) {
-									return new Deferred().resolve([]);
-								});	
-							}.bind(this));
-						}.bind(this));
-					}.bind(this));
-				}.bind(this)
-			},
-    		{
-    			contentType: ["text/x-java-source", "application/x-jsp"]	//$NON-NLS-1$ //$NON-NLS-2$
-    		});
     	/**
     	 * editor model changes
     	 */
