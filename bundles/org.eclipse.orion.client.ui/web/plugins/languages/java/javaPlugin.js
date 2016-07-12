@@ -123,7 +123,30 @@ define([
 				return editorContext.getFileMetadata().then(function(meta) {
 					return ipc.documentSymbol(meta.location).then(function(results) {
 						if(Array.isArray(results) && results.length > 0) {
-							
+							var outline = [];
+							results.forEach(function(result) {
+								if(!result.containerName) {
+									outline.push({label: result.name, children: []});
+								} else {
+									var idx = _findContainerIndex(outline, result.containerName),
+										_p;
+									if(idx < 0) {
+										_p = {label: result.containerName, children: []};
+										outline.push(_p);
+									} else {
+										_p = outline[idx];
+									}
+									var offset = result.location.range.start.character;
+									_p.children.push({
+										label: result.name,
+										labelPost: ' ('+resolveSymbolKind(result.kind)+')',
+										line: result.location.range.start.line+1,
+										offset: offset,
+										length: result.location.range.end.character-offset
+									});
+								}
+							});
+							return outline;
 						}
 						return new Deferred().resolve([]);
 					});
@@ -255,6 +278,49 @@ define([
 		{
 			contentType: ["text/x-java-source", "application/x-jsp"]	//$NON-NLS-1$ //$NON-NLS-2$
 		});
+	}
+	
+	function _findContainerIndex(list, container) {
+		var item = list[list.length-1];
+		if(item && item.label === container) {
+			return list.length-1;
+		}
+		for (var i = 0; i < list.length; i++) {
+			if(list[i].label === container) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	/**
+	 * @name resolveSymbolKind
+	 * @description Converts the given symbol kind into its name
+	 * @param {number} num The symbl kind
+	 * @returns {String} The name of the symbol kind
+	 */
+	function resolveSymbolKind(num) {
+		switch(num) {
+			case 1: return 'File';
+			case 2: return 'Module';
+			case 3: return 'Namespace';
+			case 4: return 'Package';
+			case 5: return 'Class';
+			case 6: return 'Method';
+			case 7: return 'Property';
+			case 8: return 'Field';
+			case 9: return 'Constructor';
+			case 10: return 'Enum';
+			case 11: return 'Interface';
+			case 12: return 'Function';
+			case 13: return 'Variable';
+			case 14: return 'Constant';
+			case 15: return 'String';
+			case 16: return 'Number';
+			case 17: return 'Boolean';
+			case 18: return 'Array';
+			default: return 'Unknown';
+		}
 	}
 	
 	/**
