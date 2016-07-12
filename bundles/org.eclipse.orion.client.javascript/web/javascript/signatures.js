@@ -185,6 +185,10 @@ define([
 						break;
 					case 'FunctionExpression' :
 						name = 'function(';  //$NON-NLS-0$
+						// If the function has a non-empty label use that name
+						if (astnode.id && astnode.id.type === 'Identifier' && astnode.id.name){
+							name = astnode.id.name + '(';
+						}
 						var feparams = this.getParamsFrom(astnode);
 						if(feparams) {
 							name += feparams;
