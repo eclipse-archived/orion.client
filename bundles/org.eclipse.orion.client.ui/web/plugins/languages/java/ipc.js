@@ -306,7 +306,6 @@ define([
 		this.socket.on('ready', function(data) {
 			var pid;
 			try {
-				console.log(data);
 				var json  = JSON.parse(data);
 				this.workspaceDir = json.workspaceDir;
 				pid = json.processId;

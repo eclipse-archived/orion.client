@@ -233,11 +233,11 @@ define([
 				return editorContext.getFileMetadata().then(function(meta) {
 					return getPosition(editorContext, args.offset).then(function(position) {
 						return ipc.hover(meta.location, position).then(function(result) {
-							var hover = '';
+							var hover = {type: 'markdown'};
 							if(typeof result.contents === 'string') {
-								hover = result.contents;
+								hover.content = result.contents;
 							} else if(result.contents !== null && typeof result.contents === 'object') {
-								hover = result.contents.value;
+								hover.content = result.contents.value;
 							}
 							return new Deferred().resolve(hover);
 						},
