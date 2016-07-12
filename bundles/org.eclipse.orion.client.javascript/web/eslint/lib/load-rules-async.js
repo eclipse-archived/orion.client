@@ -1340,22 +1340,13 @@ define([
 								}
 								var type = tern.findExprType(query, tern.file, expr);
 								// The origin could be a primitive in the same file (a=1;) which we still want to mark
-								// The origin could be an environment, which we still want to mark (eslint-env directive is handled separately)
-								if (type && type.origin && type.origin !== tern.file.name && type.origin !== env){
+								if (type && type.origin && type.origin !== tern.file.name){
 									foundType = type;
 								}
             	                if (!foundType){
             	                    var inenv = env ? '-inenv' : ''; //$NON-NLS-1$
             	                    var nls = 'no-undef-defined'; //$NON-NLS-1$
             	                    context.report(ref.identifier, ProblemMessages['no-undef-defined'], {0:name, nls: nls, pid: nls+inenv, data: name});
-        	                    } else if(foundType && env) {
-        	                    	//we found a type and its in an env
-        	                    	var d = Finder.findDirective(node, 'eslint-env'); //$NON-NLS-1$
-        	                    	if(!d || d.value && d.value.indexOf(env) < 0) {
-        	                    		inenv = env ? '-inenv' : ''; //$NON-NLS-1$
-	            	                    nls = 'no-undef-defined'; //$NON-NLS-1$
-	            	                    context.report(ref.identifier, ProblemMessages['no-undef-defined'], {0:name, nls: nls, pid: nls+inenv, data: name});
-        	                    	}
         	                    }
         	                } else if (ref.isWrite() && variable.writeable === false) {
         	                    context.report(ref.identifier, ProblemMessages['no-undef-readonly'], {0:name, nls: 'no-undef-readonly', data: name}); //$NON-NLS-1$
