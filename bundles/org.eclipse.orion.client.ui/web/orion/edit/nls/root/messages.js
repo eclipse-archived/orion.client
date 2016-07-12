@@ -106,6 +106,6 @@ define({
 	"emptyDeploymentInfoMessage": "Use the Launch Configurations dropdown to deploy this project",
 	"Orion": "Orion",
 	"OK": "Ok",
-	"Format" : "Format",
-	"FormatTooltip":"Format editor contents"	
+	"Format" : "Format Code",
+	"FormatTooltip":"Format editor contents"
 });
