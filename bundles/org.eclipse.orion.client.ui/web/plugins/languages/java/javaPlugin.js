@@ -184,9 +184,13 @@ define([
 							return Deferred.all(edits.reverse().map(function(edit) {
 								return convertEdit(editorContext, edit);
 							})).then(function(offsetEdits) {
-								return Deferred.all(offsetEdits.map(function(edit) {
-									return editorContext.setText(edit.start, edit.end, edit.text);
-								}));
+								function editOne() {
+									var edit = offsetEdits.shift();
+									if (edit) {
+										return editorContext.setText(edit.text, edit.start, edit.end).then(editOne);
+									}
+								}
+								return editOne();
 							});
 						});
 					});
