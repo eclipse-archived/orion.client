@@ -181,16 +181,19 @@ define([
 		 */
 		references: 'textDocument/references',
 		/**
+		 * @description The rename request is sent from the client to the server to perform a workspace-wide rename of a symbol.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#rename
 		 */
 		rename: 'textDocument/rename',
 		/**
+		 * @description The signature help request is sent from the client to the server to request signature information at a given cursor position.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#signature-help
 		 */
 		signatureHelp: 'textDocument/signatureHelp',
 		/**
+		 * @description The request is sent from the client to the server to resolve additional information for a given completion item.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#completion-item-resolve-request
 		 */
@@ -686,6 +689,61 @@ define([
 	IPC.prototype.codLensResolve = function codeLensResolve(codeLens) {
 		return this.sendMessage(this.id++, messageTypes.codeLensResolve, {
 				codeLens: codeLens
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.rename
+	 * @description The rename request is sent from the client to the server to perform a workspace-wide rename of a symbol.
+	 * @function
+	 * @param {String} uri The URI of the file
+	 * @param {{line:number, character:number}} position The position in the editor to invoke the rename from
+	 * @param {String} newName The new name to set
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.rename = function rename(uri, position, newName) {
+		return this.sendMessage(this.id++, messageTypes.rename, {
+				textDocument: {
+					uri: uri
+				},
+				position: position,
+				newName: newName
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.signatureHelp
+	 * @description The signature help request is sent from the client to the server to request signature information at a given cursor position.
+	 * @function
+	 * @param {String} uri The URI of the file
+	 * @param {{line:number, character:number}} position The position in the editor
+	 * @param {Array.<String>} signatures
+	 * @param {String} activeSignature
+	 * @param {String} activeParameter
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.signatureHelp = function signatureHelp(uri, position, signatures, activeSignature, activeParameter) {
+		return this.sendMessage(this.id++, messageTypes.signatureHelp, {
+				textDocument: {
+					uri: uri,
+					position: position
+				},
+				signatures: signatures,
+				activeSignature: activeSignature,
+				activeParameter: activeParameter
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.completionItemResolve
+	 * @description The request is sent from the client to the server to resolve additional information for a given completion item.
+	 * @function
+	 * @param {?} completionItem A completion item response from a completion request
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.completionItemResolve = function completionItemResolve(completionItem) {
+		this.sendMessage(this.id++, messageTypes.completionItemResolve, {
+				completionItem: completionItem
 		});
 	};
 	return IPC;
