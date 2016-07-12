@@ -26,10 +26,8 @@ define([
 	}
 	
 	var initialized = false,
-		fileHandler = {
-			onInputChanged: openDocument,
-			onProjectChanged: openDocument
-		};
+		fileHandler = {};
+	fileHandler.onInputChanged = fileHandler.onProjectChanged = function(project) { project.inputChanged = true; };
 	
 	/**
 	 * @description Creates a new JavaScript project
@@ -182,6 +180,11 @@ define([
 	 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
 	 */
 	JavaProject.prototype.onModelChanging = function onModelChanging(evnt) {
+		if (this.inputChanged) {
+			delete this.inputChanged;
+			openDocument(this, evnt);
+			return;
+		}
 		if (!evnt.range) return;
 		var change = {
 			range: evnt.range,
