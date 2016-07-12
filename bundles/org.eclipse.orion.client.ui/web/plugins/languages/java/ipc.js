@@ -30,11 +30,15 @@ define([
 	
 	var messageTypes = {
 		/**
+		 * @description The initialize request is sent as the first request from the client to the server.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#initialize-request
 		 */
 		initialize: 'initialize',
 		/**
+		 * @description The shutdown request is sent from the client to the server. 
+		 * It asks the server to shut down, but to not exit (otherwise the response might not be delivered correctly to the client). 
+		 * There is a separate exit notification that asks the server to exit.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#shutdown-request
 		 */
@@ -50,6 +54,8 @@ define([
 		 */
 		showMessage: 'window/showMessage',
 		/**
+		 * @description The show message request is sent from a server to a client to ask the client to display a particular message in the user interface. 
+		 * In addition to the show message notification the request allows to pass actions and to wait for an answer from the client.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#showmessage-request
 		 */
@@ -75,26 +81,34 @@ define([
 		 */
 		didChangeWatchedFiles: 'workspace/didChangeWatchedFiles',
 		/**
+		 * @description The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#workspace-symbols
 		 */
 		workspaceSymbol: 'workspace/symbol',
 		/**
+		 * @description The code action request is sent from the client to the server to compute commands for a given text document and range. 
+		 * The request is triggered when the user moves the cursor into a problem marker in the editor or presses the lightbulb associated with a marker.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#code-action
 		 */
 		codeAction: 'textDocument/codeAction',
 		/**
+		 * @description The code lens request is sent from the client to the server to compute code lenses for a given text document.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#code-lens
 		 */
 		codeLens: 'textDocument/codeLens',
 		/**
+		 * @description The Completion request is sent from the client to the server to compute completion items at a given cursor position. 
+		 * Completion items are presented in the IntelliSense user interface. If computing full completion items is expensive, 
+		 * servers can additionally provide a handler for the completion item resolve request. This request is sent when a completion item is selected in the user interface.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#completion-request
 		 */
 		completion: 'textDocument/completion',
 		/**
+		 * @description The goto definition request is sent from the client to the server to resolve the definition location of a symbol at a given text document position.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#goto-definition
 		 */
@@ -120,26 +134,31 @@ define([
 		 */
 		didSave: 'textDocument/didSave',
 		/**
+		 * @description The document highlight request is sent from the client to the server to resolve a document highlights for a given text document position.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-highlights
 		 */
 		documentHighlight: 'textDocument/documentHighlight',
 		/**
+		 * @description The document symbol request is sent from the client to the server to list all symbols found in a given text document.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-symbols
 		 */
 		documentSymbol: 'textDocument/documentSymbol',
 		/**
+		 * @description The document formatting request is sent from the server to the client to format a whole document.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-formatting
 		 */
 		formatting: 'textDocument/formatting',
 		/**
+		 * @description The hover request is sent from the client to the server to request hover information at a given text document position.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#hover
 		 */
 		hover: 'textDocument/hover',
 		/**
+		 * @description The document on type formatting request is sent from the client to the server to format parts of the document during typing.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-on-type-formatting
 		 */
@@ -150,11 +169,13 @@ define([
 		 */
 		publishDiagnostics: 'textDocument/publishDiagnostics',
 		/**
+		 * @description The document range formatting request is sent from the client to the server to format a given range in a document.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-range-formatting
 		 */
 		rangeFormatting: 'textDocument/rangeFormatting',
 		/**
+		 * @description The references request is sent from the client to the server to resolve project-wide references for the symbol denoted by the given text document position.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#find-references
 		 */
@@ -175,6 +196,7 @@ define([
 		 */
 		completionItemResolve: 'completionItem/resolve',
 		/**
+		 * @description The code lens resolve request is sent from the client to the server to resolve the command for a given code lens item.
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#code-lens-resolve
 		 */
@@ -326,7 +348,7 @@ define([
 	
 	/**
 	 * @name IPC.prototype.initialize
-	 * @description Sends an initialize request
+	 * @description The initialize request is sent as the first request from the client to the server.
 	 * @param {String} processId The id of the process
 	 * @param {String} workspaceDir The root of the current workspace 
 	 * @function
@@ -341,7 +363,8 @@ define([
 	
 	/**
 	 * @name IPC.prototype.didOpen
-	 * @description Sends a didOpen notification
+	 * @description The document open notification is sent from the client to the server to signal newly opened text documents. 
+	 * The document's truth is now managed by the client and the server must not try to read the document's truth using the document's uri.
 	 * @function
 	 * @param {String} uri The URI of the file
 	 * @param {String} languageId The content type of the source
@@ -360,7 +383,8 @@ define([
 	
 	/**
 	 * @name IPC.prototype.didClose
-	 * @description Sends a didClose notification
+	 * @description The document close notification is sent from the client to the server when the document got closed in the client. 
+	 * The document's truth now exists where the document's uri points to (e.g. if the document's uri is a file uri the truth now exists on disk).
 	 * @function
 	 * @param {String} uri The URI of the file
 	 */
@@ -374,7 +398,7 @@ define([
 	
 	/**
 	 * @name IPC.prototype.didSave
-	 * @description Sends a didSave notification
+	 * @description The document save notification is sent from the client to the server when the document was saved in the client.
 	 * @function
 	 * @param {String} uri The URI of the file
 	 */
@@ -388,7 +412,8 @@ define([
 	
 	/**
 	 * @name IPC.prototype.didChange
-	 * @description Sends a didChange notification
+	 * @description The document change notification is sent from the client to the server to signal changes to a text document. 
+	 * In 2.0 the shape of the params has changed to include proper version numbers and language ids.
 	 * @function
 	 * @param {String} uri The URI of the file
 	 * @param {Number} version the version of the document
@@ -406,7 +431,7 @@ define([
 	
 	/**
 	 * @name IPC.prototype.documentHighlight
-	 * @description Sends a document highlight request
+	 * @description The document highlight request is sent from the client to the server to resolve a document highlights for a given text document position.
 	 * @function
 	 * @param {String} uri The URI of the file
 	 * @param {{line: number, character: number}} offset The offset into the file to compute the highlight for
@@ -423,7 +448,9 @@ define([
 	
 	/**
 	 * @name IPC.prototype.completion
-	 * @description Sends a code completion request
+	 * @description The Completion request is sent from the client to the server to compute completion items at a given cursor position. 
+	 * Completion items are presented in the IntelliSense user interface. If computing full completion items is expensive, servers can additionally provide a handler for the completion item resolve request. 
+	 * This request is sent when a completion item is selected in the user interface.
 	 * @function
 	 * @param {String} uri The URI of the file
 	 * @param {{line: number, character: number}} offset The offset into the file to compute completions at
@@ -440,7 +467,7 @@ define([
 	
 	/**
 	 * @name IPC.prototype.hover
-	 * @description Sends a hover request
+	 * @description The hover request is sent from the client to the server to request hover information at a given text document position.
 	 * @function
 	 * @param {String} uri The URI of the file
 	 * @param {{line: number, character: number}} offset The offset into the file to hover at
@@ -457,7 +484,7 @@ define([
 	
 	/**
 	 * @name IPC.prototype.documentSymbol
-	 * @description Sends a document symbol request
+	 * @description The document symbol request is sent from the client to the server to list all symbols found in a given text document.
 	 * @function
 	 * @param {String} uri The URI for the file to find symbols in
 	 * @returns {Deferred} The deferred to return the results of the request
@@ -472,7 +499,7 @@ define([
 	
 	/**
 	 * @name IPC.prototype.formatDocument
-	 * @description Sends a document formatting request
+	 * @description The document formatting request is sent from the server to the client to format a whole document.
 	 * @function
 	 * @param {String} uri The URI for the file to find symbols in
 	 * @param {FormattingOptions} options the formatting options
@@ -489,7 +516,7 @@ define([
 	
 	/**
 	 * @name IPC.prototype.codeLens
-	 * @description Sends a request for a code lens
+	 * @description The code lens request is sent from the client to the server to compute code lenses for a given text document.
 	 * @function
 	 * @param {String} uri The URI to request the lens within
 	 * @returns {Deferred} The deferred to return the results of the request
@@ -504,7 +531,7 @@ define([
 	
 	/**
 	 * @name IPC.prototype.references
-	 * @description Sends a request for all references 
+	 * @description The references request is sent from the client to the server to resolve project-wide references for the symbol denoted by the given text document position.
 	 * @function
 	 * @param {String} uri The URI to request the references from
 	 * @param {{line: number, character: number}} offset The offset into the file to compute references for
@@ -521,7 +548,7 @@ define([
 	
 	/**
 	 * @name IPC.prototype.references
-	 * @description Sends a request for the definition of the element at the given position
+	 * @description The goto definition request is sent from the client to the server to resolve the definition location of a symbol at a given text document position.
 	 * @function
 	 * @param {String} uri The URI to request the definition from
 	 * @param {{line: number, character: number}} offset The offset into the file to compute the definition for
@@ -536,5 +563,130 @@ define([
 		});
 	};
 	
+	/**
+	 * @name IPC.prototype.shutdown
+	 * @description The shutdown request is sent from the client to the server. It asks the server to shut down, but to not exit (otherwise the response might not be delivered correctly to the client). 
+	 * There is a separate exit notification that asks the server to exit.
+	 * @function
+	 * @returns {Deferred} The deferred to return the results of the request. In this case the result is always undefined.
+	 */
+	IPC.prototype.shutdown = function shutdown() {
+		return this.sendMessage(this.id++, messageTypes.shutdown, {
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.showMessageRequest
+	 * @description The show message request is sent from a server to a client to ask the client to display a particular message in the user interface. 
+	 * In addition to the show message notification the request allows to pass actions and to wait for an answer from the client.
+	 * @function
+	 * @param {number} type The type of the message {@see #messageTypes}
+	 * @param {String} message The message to send
+	 * @param {Array.<String>} actions Ant command actions to be processed
+	 * @returns {Deferred} The deferred to return the results of the request. In this case the result is always undefined.
+	 */
+	IPC.prototype.showMessageRequest = function showMessageRequest(type, message, actions) {
+		return this.sendMessage(this.id++, messageTypes.showMessageRequest, {
+				type: type,
+				message: message,
+				actions: actions
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.workspaceSymbol
+	 * @description The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+	 * @function
+	 * @param {String} query The string query
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.workspaceSymbol = function workspaceSymbol(query) {
+		return this.sendMessage(this.id++, messageTypes.workspaceSymbol, {
+				query: query
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.codeAction
+	 * @description The code action request is sent from the client to the server to compute commands for a given text document and range. 
+	 * The request is triggered when the user moves the cursor into a problem marker in the editor or presses the lightbulb associated with a marker.
+	 * @function
+	 * @param {String} uri The URI of the file
+	 * @param {{line:number, character:number}} start The start position
+	 * @param {{line:number, character:number}} end The end position
+	 * @param {Array.<{}>} diagnostics The array of diagnostic objects
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.codeAction = function codeAction(uri, start, end, diagnostics) {
+		return this.sendMessage(this.id++, messageTypes.workspaceSymbol, {
+				textDocument: {
+					uri: uri
+				},
+				range: {
+					start: start,
+					end: end
+				},
+				context: {
+					diagnostics: diagnostics
+				}
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.onTypeFormatting
+	 * @description The document on type formatting request is sent from the client to the server to format parts of the document during typing.
+	 * @function
+	 * @param {String} uri The URI of the file
+	 * @param {{line:number, character:number}} position The position of the edit
+	 * @param {string} char The character typed
+	 * @param {?} options The formatting options
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.onTypeFormatting = function onTypeFormatting(uri, position, char, options) {
+		return this.sendMessage(this.id++, messageTypes.onTypeFormatting, {
+					textDocument: {
+						uri: uri
+					},
+					position: position,
+					char: char,
+					options: options
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.rangeFormatting
+	 * @description The document range formatting request is sent from the client to the server to format a given range in a document.
+	 * @function
+	 * @param {String} uri The URI of the file
+	 * @param {{line:number, character:number}} start The start position
+	 * @param {{line:number, character:number}} end The end position
+	 * @param {?} options The formatting options
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.rangeFormatting = function rangeFormatting(uri, start, end, options) {
+		return this.sendMessage(this.id++, messageTypes.rangeFormatting, {
+				textDocument: {
+					uri: uri
+				},
+				range: {
+					start: start,
+					end: end
+				},
+				options: options
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.codLensResolve
+	 * @description he code lens resolve request is sent from the client to the server to resolve the command for a given code lens item.
+	 * @function
+	 * @param {?} codeLens The result froma codeLens request
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.codLensResolve = function codeLensResolve(codeLens) {
+		return this.sendMessage(this.id++, messageTypes.codeLensResolve, {
+				codeLens: codeLens
+		});
+	};
 	return IPC;
 });
