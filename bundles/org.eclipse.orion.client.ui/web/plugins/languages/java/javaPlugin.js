@@ -149,6 +149,7 @@ define([
 			});
 		}
 		
+		//TODO only show command when the provider is available in capabilities
 		//TODO send the options to the langangue server
 		//TODO integrate with the new orion formating service. We may have to change the orion service because
 		// the changes are done in the server side.

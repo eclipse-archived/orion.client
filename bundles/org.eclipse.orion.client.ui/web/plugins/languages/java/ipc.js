@@ -315,10 +315,12 @@ define([
 			}
 			this.initialize(pid, this.workspaceDir).then(/* @callback */ function initializeCallback(result) {
 				this.initialized = true;
+				this.capabilities = result.capabilities;
 				this.queue.forEach(function queueFlushCallback(item) {
 					this.socket.emit('data', item);
 					_notifyListeners(this.listeners, messageTypes.logMessage, JSON.stringify(item));
 				}.bind(this));
+				this.queue = [];
 			}.bind(this));
 		}.bind(this));
 	};
