@@ -468,5 +468,22 @@ define([
 				}
 		});
 	};
+	
+	/**
+	 * @name IPC.prototype.formatDocument
+	 * @description Sends a document formatting request
+	 * @function
+	 * @param {String} uri The URI for the file to find symbols in
+	 * @param {FormattingOptions} options the formatting options
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.formatDocument = function formatDocument(uri, options) {
+		return this.sendMessage(this.id++, messageTypes.formatting, {
+				textDocument: {
+					uri: uri,
+					options: options
+				}
+		});
+	};
 	return IPC;
 });

@@ -136,6 +136,46 @@ define([
     		title: "Java Symbols",
     		id: "orion.java.symbols.outliner.source"  //$NON-NLS-1$
     	});
+    	
+		function convertEdit(editorContext, edit) {
+			return editorContext.getLineStart(edit.range.start.line).then(function(startLineOffset) {
+				return editorContext.getLineStart(edit.range.end.line).then(function(endLineOffset) {
+					return {
+						start: edit.range.start.character+startLineOffset,
+						end: edit.range.end.character+endLineOffset,
+						text: edit.newText
+					};
+				});
+			});
+		}
+		
+		//TODO send the options to the langangue server
+		//TODO integrate with the new orion formating service. We may have to change the orion service because
+		// the changes are done in the server side.
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+			{
+				execute: /** @callback */ function(editorContext, options) {
+					return editorContext.getFileMetadata().then(function(metadata) {
+						return ipc.formatDocument(metadata.location, {}).then(function(edits) {
+							return Deferred.all(edits.reverse().map(function(edit) {
+								return convertEdit(editorContext, edit);
+							})).then(function(offsetEdits) {
+								return Deferred.all(offsetEdits.map(function(edit) {
+									return editorContext.setText(edit.start, edit.end, edit.text);
+								}));
+							});
+						});
+					});
+				}
+			},
+			{
+			name: "Format Document",
+			id : "orion.java.format",  //$NON-NLS-1$
+//			key : [ 114, false, false, false, false],
+			contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		);
+
 		/**
 		 * Validator
 		 */
@@ -215,6 +255,13 @@ define([
 			contentType: ["text/x-java-source", "application/x-jsp"]	//$NON-NLS-1$ //$NON-NLS-2$
 		});
 	}
+	
+	/**
+	 * @name convertDiagnostic
+	 * @description description
+	 * @param diagnostic the LSP diagnostic object
+	 * @returns returns the orion annotation object
+	 */
 	function convertDiagnostic(diagnostic) {
 		return {
 			description: diagnostic.message,
