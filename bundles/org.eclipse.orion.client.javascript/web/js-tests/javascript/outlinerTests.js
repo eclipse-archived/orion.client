@@ -160,6 +160,36 @@ define([
 					}
 				});
 			});
+			it('testLabelledFuncExpr1', function(callback) {
+				var r = setup(callback, "var obj = function foo(p1, p2) {};");
+				r.outliner.computeOutline(r.editorContext).then(function(outline) {
+					try {
+						if(!outline || outline.length < 1) {
+							assert.fail("There should be one outline element");
+						}
+						assertElement(outline[0], "foo(p1, p2)", 19, 22);
+						callback();
+					}
+					catch(err) {
+						callback(err);
+					}
+				});
+			});
+			it('testLabelledFuncExpr2', function(callback) {
+				var r = setup(callback, "console.log(function foo(p1, p2) {});");
+				r.outliner.computeOutline(r.editorContext).then(function(outline) {
+					try {
+						if(!outline || outline.length < 1) {
+							assert.fail("There should be one outline element");
+						}
+						assertElement(outline[0], "foo(p1, p2)", 21, 24);
+						callback();
+					}
+					catch(err) {
+						callback(err);
+					}
+				});
+			});
 			
 			it('testObjectExpression1', function(callback) {
 				var r = setup(callback, "var object = {};");
