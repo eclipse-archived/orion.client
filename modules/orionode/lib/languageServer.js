@@ -13,6 +13,7 @@
 var path = require('path');
 var cp = require('child_process');
 var rimraf = require('rimraf');
+var api = require('./api');
 
 function fork(modulePath, args, options, callback) {
     var callbackCalled = false;
@@ -125,15 +126,15 @@ exports.install = function(options) {
 	}
 
 	io.of('/languageServer').on('connection', function(sock) {
-		sock.on('start', function(cwd) {
-
+		sock.on('start', /* @callback */ function(cwd) {
 			runJavaServer().then(function(child) {
 				var workspaceUrl = "file:///" + options.workspaceDir.replace(/\\/g, "/");
 				child.stdout.on('data', function(data) {
 					var m = parseMessage(data);
 					if (m) {
 						if (m.content && m.content.params && m.content.params.uri) {
-							m.content.params.uri = "/file/" + m.content.params.uri.slice(workspaceUrl.length);
+							var s = m.content.params.uri.slice(workspaceUrl.length);
+							m.content.params.uri = api.join('/file', s.charAt(0) === '/' ? s.slice(1) : s);
 						}
 						sock.emit('data', m.content);
 					}
@@ -161,7 +162,7 @@ exports.install = function(options) {
 				});
 				sock.emit('Java process ready');
 			});
-			sock.emit('ready', JSON.stringify({workspaceDir: options.workspaceDir/*, processId: process.pid*/}));
+			sock.emit('ready', JSON.stringify({workspaceDir: options.workspaceDir, processId: process.pid}));
 		});
 	});
 };
