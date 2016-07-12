@@ -486,5 +486,55 @@ define([
 				}
 		});
 	};
+	
+	/**
+	 * @name IPC.prototype.codeLens
+	 * @description Sends a request for a code lens
+	 * @function
+	 * @param {String} uri The URI to request the lens within
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.codeLens = function codeLens(uri) {
+		return this.sendMessage(this.id++, messageTypes.codeLens, {
+				textDocument: {
+					uri: uri
+				}
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.references
+	 * @description Sends a request for all references 
+	 * @function
+	 * @param {String} uri The URI to request the references from
+	 * @param {{line: number, character: number}} offset The offset into the file to compute references for
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.references = function references(uri, position) {
+		return this.sendMessage(this.id++, messageTypes.references, {
+				position: position,
+				textDocument: {
+					uri: uri
+				}
+		});
+	};
+	
+	/**
+	 * @name IPC.prototype.references
+	 * @description Sends a request for the definition of the element at the given position
+	 * @function
+	 * @param {String} uri The URI to request the definition from
+	 * @param {{line: number, character: number}} offset The offset into the file to compute the definition for
+	 * @returns {Deferred} The deferred to return the results of the request
+	 */
+	IPC.prototype.definition = function definition(uri, position) {
+		return this.sendMessage(this.id++, messageTypes.definition, {
+				position: position,
+				textDocument: {
+					uri: uri
+				}
+		});
+	};
+	
 	return IPC;
 });
