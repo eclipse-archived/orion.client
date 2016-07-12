@@ -21,6 +21,7 @@ var Promise = require('bluebird');
 var mkdirp = require('mkdirp');
 var fs = Promise.promisifyAll(require('fs'));
 var fileUtil = require('./fileUtil');
+var crypto = require('crypto');
 
 /**
  * @callback
@@ -219,8 +220,9 @@ function getXfer(req, res) {
 		writeError(500, res, err.message);
 	});
 }
+};
 
-function write (zip, base, filePath) {
+function write (zip, base, filePath, excludeFoldersArray) {
 	return fs.statAsync(filePath)
 	.then(function(stats) {
 		/*eslint consistent-return:0*/
@@ -231,11 +233,83 @@ function write (zip, base, filePath) {
 			.then(function(directoryFiles) {
 				var SUBDIR_SEARCH_CONCURRENCY = 10;
 				return Promise.map(directoryFiles, function(entry) {
-					return write(zip, base, filePath + entry);
+					if(!arrayContains(excludeFoldersArray,entry)){
+						return write(zip, base, filePath + entry,excludeFoldersArray);
+					}
 				},{ concurrency: SUBDIR_SEARCH_CONCURRENCY});
 			});
 		}
 		zip.file(filePath, { name: filePath.substring(base.length).replace(/\\/g, "/") });
+	});
+	
+	function arrayContains(array,item){
+		if(!array) return false;
+		return array.some(function(itemInArray){
+			return itemInArray === item;
+		});
+	}
+}
+
+module.exports.archiveTarget = function(filePath){
+	var ramdomName = crypto.randomBytes(5).toString('hex') + Date.now();
+	var resultFilePath = os.tmpdir() + ramdomName + '.war';
+	return searchAndCopyNearestwarFile(resultFilePath, filePath,filePath)
+	.then(function(){
+		// If searchAndCopyNearestwarFile didn't reject, it means no .war has been found. so Zip the folder.
+		return new Promise(function(fulfill){
+			var zip = archiver('zip');
+			resultFilePath = os.tmpdir() + ramdomName + '.zip';
+			var output = fs.createWriteStream(resultFilePath);
+			zip.pipe(output);
+			return write(zip, filePath, filePath,[".git","launchConfigurations"])
+			.then(function() {
+				zip.finalize();
+				zip.on('end', function(){
+			        fulfill();
+			    });
+			})
+			.catch(function(err) {
+				writeError(500, res, err.message);
+			});
+		});
+	}).catch(function(result){
+		if(result) return; // Assert the .war filed has been copied over.
+	})
+	.then(function(){
+		return resultFilePath;
+	});
+	
+	function searchAndCopyNearestwarFile (targetWarPath, base, filePath) {
+		return fs.statAsync(filePath)
+		.then(function(stats) {
+		/*eslint consistent-return:0*/
+		if (stats.isDirectory()) {
+			if (filePath.substring(filePath.length-1) !== "/") filePath = filePath + "/";
+			return fs.readdirAsync(filePath)
+			.then(function(directoryFiles) {
+				var SUBDIR_SEARCH_CONCURRENCY = 1;
+				return Promise.map(directoryFiles, function(entry) {
+					return searchAndCopyNearestwarFile(targetWarPath ,base, filePath + entry);
+				},{ concurrency: SUBDIR_SEARCH_CONCURRENCY});
+			});
+		}
+		if(path.extname(filePath) === '.war'){
+			return new Promise(function(fulfill){
+				var readenWarfileStream = fs.createReadStream(filePath);
+				readenWarfileStream.on('error', function(err) {
+					console.log(err);
+				});
+				fulfill(readenWarfileStream);
+			}).then(function(readenWarfileStream){
+				return readenWarfileStream.pipe(fs.createWriteStream(targetWarPath));
+			}).then(function(){
+				// Using this promise to reject the promise chain.
+				return new Promise(function(fulfill,reject){
+					reject(true);
+				});
+			});
+		}
+		return false;
 	});
 }
 };
