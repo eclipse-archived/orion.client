@@ -132,9 +132,17 @@ exports.install = function(options) {
 				child.stdout.on('data', function(data) {
 					var m = parseMessage(data);
 					if (m) {
-						if (m.content && m.content.params && m.content.params.uri) {
-							var s = m.content.params.uri.slice(workspaceUrl.length);
-							m.content.params.uri = api.join('/file', s.charAt(0) === '/' ? s.slice(1) : s);
+						function fixURI(p) {
+							if (p.uri) {
+								var s = p.uri.slice(workspaceUrl.length);
+								p.uri = api.join('/file', s.charAt(0) === '/' ? s.slice(1) : s);
+							}
+						} 
+						if (m.content && m.content.params) {
+							fixURI(m.content.params);
+						}
+						if (m.content && m.content.result) {
+							fixURI(m.content.result);
 						}
 						sock.emit('data', m.content);
 					}

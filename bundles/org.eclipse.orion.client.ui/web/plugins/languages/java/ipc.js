@@ -512,8 +512,8 @@ define([
 		return this.sendMessage(this.id++, messageTypes.formatting, {
 				textDocument: {
 					uri: uri,
-					options: options
-				}
+				},
+				options: options
 		});
 	};
 	

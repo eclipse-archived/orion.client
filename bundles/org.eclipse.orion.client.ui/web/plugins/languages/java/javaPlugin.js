@@ -160,15 +160,21 @@ define([
     		id: "orion.java.symbols.outliner.source"  //$NON-NLS-1$
     	});
     	
-		function convertEdit(editorContext, edit) {
-			return editorContext.getLineStart(edit.range.start.line).then(function(startLineOffset) {
-				return editorContext.getLineStart(edit.range.end.line).then(function(endLineOffset) {
+		function convertRange(editorContext, range) {
+			return editorContext.getLineStart(range.start.line).then(function(startLineOffset) {
+				return editorContext.getLineStart(range.end.line).then(function(endLineOffset) {
 					return {
-						start: edit.range.start.character+startLineOffset,
-						end: edit.range.end.character+endLineOffset,
-						text: edit.newText
+						start: range.start.character+startLineOffset,
+						end: range.end.character+endLineOffset,
 					};
 				});
+			});
+		}
+		
+		function convertEdit(editorContext, edit) {
+			return convertRange(editorContext, edit.range).then(function(result) {
+				result.text = edit.newText;
+				return result;
 			});
 		}
 		
@@ -200,6 +206,31 @@ define([
 			name: "Format Document",
 			id : "orion.java.format",  //$NON-NLS-1$
 //			key : [ 114, false, false, false, false],
+			contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		);
+		
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+			{
+				execute: /** @callback */ function(editorContext, options) {
+					return editorContext.getFileMetadata().then(function(metadata) {
+						return editorContext.getSelection().then(function(selection) {
+							return getPosition(editorContext, selection.start).then(function(position) {
+								return ipc.definition(metadata.location, position).then(function(loc) {
+									return convertRange(editorContext, loc.range).then(function(selection) {
+										if (Array.isArray(loc)) loc = loc[0];
+										editorContext.openEditor(loc.uri, selection)
+									});
+								});
+							});
+						});
+					});
+				}
+			},
+			{
+			name: "Open Declaration",
+			id : "orion.java.openDeclaration",  //$NON-NLS-1$
+			key : [ 114, false, false, false, false],
 			contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		);
