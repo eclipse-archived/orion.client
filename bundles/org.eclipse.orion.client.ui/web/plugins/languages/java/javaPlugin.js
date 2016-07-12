@@ -225,8 +225,11 @@ define([
 		provider.registerService("orion.edit.hover", {
 			computeHoverInfo: function computeHoverInfo(editorContext, args) {
 				if(args.proposal && args.proposal.kind === 'java') {
-			        return args.proposal.hover;
-			    }
+					return args.proposal.hover;
+				}
+				if (args.offset === undefined) {
+					return "";
+				}
 				return editorContext.getFileMetadata().then(function(meta) {
 					return getPosition(editorContext, args.offset).then(function(position) {
 						return ipc.hover(meta.location, position).then(function(result) {
