@@ -5749,6 +5749,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			rootDiv.style.overflow = "hidden"; //$NON-NLS-1$
 			rootDiv.style.WebkitTextSizeAdjust = "100%"; //$NON-NLS-1$
 			rootDiv.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-2$
+			rootDiv.setAttribute("aria-label", "Text View"); //$NON-NLS-1$
 			_parent.appendChild(rootDiv);
 			
 			var leftDiv = this._createRulerParent(doc, "textviewLeftRuler"); //$NON-NLS-1$
