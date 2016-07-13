@@ -11,6 +11,7 @@
 define({
     'eslintValidationFailure': 'ESLint failed to validate this file because an error occurred: ${0}',
 	'check-tern-plugin': 'To work in the \'${0}\' environment, the \'${1}\' plugin must be running.',
+	'check-tern-lib': 'To work in the \'${0}\' environment, the \'${1}\' library must be running.',
 	'curly': 'Statement should be enclosed in braces.',
 	'curly-description': 'Require curly braces for all control statements.',
 	'eqeqeq' : 'Expected \'${0}\' and instead saw \'${1}\'.',

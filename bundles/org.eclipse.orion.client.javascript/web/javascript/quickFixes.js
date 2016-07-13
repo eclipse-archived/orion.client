@@ -387,9 +387,19 @@ define([
 	        /** @callback fix the check-tern-plugin rule */
 			"check-tern-plugin" : function(editorContext, context, astManager) {
 				return astManager.getAST(editorContext).then(function(ast) {
-					var newPlugin = ast.sourceFile.text.slice(context.annotation.start, context.annotation.end); ///, the '(.*)' plugin/.exec(context.annotation.title);
+					var newPlugin = context.annotation.data;
 					var json = {plugins: Object.create(null)};
 					json.plugins[translatePluginName(newPlugin)] = Object.create(null);
+					return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
+						return editorContext.syntaxCheck(ast.sourceFile.name);
+					});
+				}.bind(this));
+			},
+			"check-tern-lib" : function(editorContext, context, astManager) {
+				return astManager.getAST(editorContext).then(function(ast) {
+					var newLib = context.annotation.data;
+					var json = {libs: []};
+					json.libs.push(newLib);
 					return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
 						return editorContext.syntaxCheck(ast.sourceFile.name);
 					});

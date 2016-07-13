@@ -80,6 +80,10 @@ define([
     					}
     				}
         		}
+        		// Don't report problems on HTML files that have no script blocks
+        		if (node.end === 0){
+        			return;
+        		}
                 if(context.env){
                 	var envKeys = Object.keys(context.env);
                 	if (envKeys.length > 0){
@@ -90,9 +94,19 @@ define([
    								if (pluginName && !tern.plugins[pluginName]) {
    									var envnode = getEnvNode(key);
    									if(envnode) {
-   										context.report(envnode, ProblemMessages['check-tern-plugin'], {0:key, 1:pluginName});
+   										context.report(envnode, ProblemMessages['check-tern-plugin'], {0:key, 1:pluginName, data: pluginName});
    									} else {
-       									context.report(node, ProblemMessages['check-tern-plugin'], {0:key, 1:pluginName});
+       									context.report(node, ProblemMessages['check-tern-plugin'], {0:key, 1:pluginName, data: pluginName});
+   									}
+   								} else {
+   									var def = tern.getDef(key);
+   									if (!def && tern.optionalDefs[key]){
+   										envnode = getEnvNode(key);
+	   									if(envnode) {
+	   										context.report(envnode, ProblemMessages['check-tern-lib'], {0:key, 1:key, nls: 'check-tern-lib', data: key}); //$NON-NLS-1$
+	   									} else {
+	       									context.report(node, ProblemMessages['check-tern-lib'], {0:key, 1:key, nls: 'check-tern-lib', data: key}); //$NON-NLS-1$
+	   									}
    									}
    								}
        						});
