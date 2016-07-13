@@ -193,12 +193,43 @@ define([
 				}
 			},
 			{
-			name: "Format Document",
+			name: "Format",
 			id : "orion.java.format",  //$NON-NLS-1$
 //			key : [ 114, false, false, false, false],
 			contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		);
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+			{
+				execute: /** @callback */ function(editorContext, options) {
+					return editorContext.getFileMetadata().then(function(metadata) {
+						return editorContext.getSelection().then(function(selection) {
+							return getPosition(editorContext, selection.start).then(function(start) {
+								return getPosition(editorContext, selection.end).then(function(end) {
+									return ipc.rangeFormatting(metadata.location, start, end, {}).then(function(edits) {
+										return Deferred.all(edits.map(function(edit) {
+											return convertRange(editorContext, edit.range);
+										})).then(function(selections) {
+											var text = edits.map(function(e) {
+												return e.newText;
+											});
+											editorContext.setText({text: text, selection: selections, preserveSelection: true});
+										});
+									});
+								});
+							});
+						})
+					});
+				}
+			},
+			{
+			name: "Format Selection",
+			id : "orion.java.format.range",  //$NON-NLS-1$
+//			key : [ 114, false, false, false, false],
+			contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		);
+		
 		
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
 			{
