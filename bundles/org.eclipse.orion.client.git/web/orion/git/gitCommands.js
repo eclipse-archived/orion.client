@@ -1176,7 +1176,7 @@ var exports = {};
 			callback: function(data) {
 				var item = data.items;
 				var itemName = item.Name;
-				if (bidiUtils.isBidiEnabled()()) {
+				if (bidiUtils.isBidiEnabled()) {
 					itemName = bidiUtils.enforceTextDirWithUcc(itemName);
 				}
 				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete tag ${0}?"], itemName))) {
