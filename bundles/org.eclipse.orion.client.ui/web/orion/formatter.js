@@ -49,7 +49,6 @@ define ([
 		doFormat: function() {
 			var service = this.getFormatter();
 			if (service) {
-				var inputManager = this.inputManager;
 				var selection = this.editor.getSelection();
 				var context = {start: selection.start, end: selection.end};
 				return service.format(this.editor.getEditorContext(), context);
