@@ -171,13 +171,6 @@ define([
 			});
 		}
 		
-		function convertEdit(editorContext, edit) {
-			return convertRange(editorContext, edit.range).then(function(result) {
-				result.text = edit.newText;
-				return result;
-			});
-		}
-		
 		//TODO only show command when the provider is available in capabilities
 		//TODO send the options to the langangue server
 		//TODO integrate with the new orion formating service. We may have to change the orion service because
@@ -187,16 +180,13 @@ define([
 				execute: /** @callback */ function(editorContext, options) {
 					return editorContext.getFileMetadata().then(function(metadata) {
 						return ipc.formatDocument(metadata.location, {}).then(function(edits) {
-							return Deferred.all(edits.reverse().map(function(edit) {
-								return convertEdit(editorContext, edit);
-							})).then(function(offsetEdits) {
-								function editOne() {
-									var edit = offsetEdits.shift();
-									if (edit) {
-										return editorContext.setText(edit.text, edit.start, edit.end).then(editOne);
-									}
-								}
-								return editOne();
+							return Deferred.all(edits.map(function(edit) {
+								return convertRange(editorContext, edit.range);
+							})).then(function(selections) {
+								var text = edits.map(function(e) {
+									return e.newText;
+								});
+								editorContext.setText({text: text, selection: selections, preserveSelection: true});
 							});
 						});
 					});
@@ -219,7 +209,7 @@ define([
 								return ipc.definition(metadata.location, position).then(function(loc) {
 									return convertRange(editorContext, loc.range).then(function(selection) {
 										if (Array.isArray(loc)) loc = loc[0];
-										editorContext.openEditor(loc.uri, selection)
+										editorContext.openEditor(loc.uri, selection);
 									});
 								});
 							});

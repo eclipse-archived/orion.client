@@ -6595,11 +6595,14 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 
 			if (e.text === null || e.text === undefined) { return false; }
 			
+			var previousSelection;
+			if (e.preserveSelection) previousSelection = this._getSelections();
+			
 			if (e.selection.length > 1) this.setRedraw(false);
 			
 			var undo = this._compoundChange;
 			if (undo) {
-				if (!Selection.compare(this._getSelections(), undo.owner.selection)) {
+				if (!Selection.compare(previousSelection || this._getSelections(), undo.owner.selection)) {
 					this._endUndo();
 					if (e.selection.length > 1) this._startUndo();
 				}
@@ -6610,23 +6613,29 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			var model = this._model;
 			try {
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = true; }
-				var offset = 0, i = 0;
-				e.selection.forEach(function(selection) {
+				var offset = 0;
+				e.selection.forEach(function(selection, i) {
 					selection.start += offset;
 					selection.end += offset;
 					var text = Array.isArray(e.text) ? e.text[i] : e.text;
 					model.setText(text, selection.start, selection.end);
-					offset += (selection.start - selection.end) + text.length;
+					var delta = selection.start - selection.end + text.length;
+					offset += delta;
+					if (previousSelection) {
+						previousSelection.forEach(function(ps) {
+							if (ps.start > selection.start) ps.start += delta;
+							if (ps.end > selection.start) ps.end += delta;
+						});
+					}
 					selection.setCaret(caretAtEnd ? selection.start + text.length : selection.start);
-					i++;
 				});
 			} finally {
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = false; }
 			}
-			this._setSelection(e.selection, show, true, callback);
+			this._setSelection(previousSelection || e.selection, show, true, callback);
 			
 			undo = this._compoundChange;
-			if (undo) undo.owner.selection = e.selection;
+			if (undo) undo.owner.selection = previousSelection || e.selection;
 			
 			if (e.selection.length > 1) this.setRedraw(true);
 
