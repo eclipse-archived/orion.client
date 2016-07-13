@@ -1342,6 +1342,20 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
 			quickFixComputer,
 			{
+				name: javascriptMessages["checkTernLibFixName"],
+				fixAllEnabled: false,
+				scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+				id : "check.tern.lib.fix",  //$NON-NLS-1$
+				contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+				validationProperties: [
+					{source: "annotation:id", match: "^(?:check-tern-lib)$"} //$NON-NLS-1$ //$NON-NLS-2$
+				]
+			}
+		);
+		
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+			quickFixComputer,
+			{
 				name: javascriptMessages["forbiddenExportImportFixName"],
 				fixAllEnabled: false,
 				scopeId: "orion.edit.quickfix", //$NON-NLS-1$

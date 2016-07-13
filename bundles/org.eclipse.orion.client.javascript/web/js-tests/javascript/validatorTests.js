@@ -298,6 +298,10 @@ define([
 					});
 			});
 			describe("HTML script block validation tests", function(){
+				before('Turn on browser library', function(done) {
+					worker.start(done,  {options:{ libs: ['browser']}});
+				});
+				
 				/*
 				 * Tests that the validator runs correctly on script blocks and wrapped functions in HTML files
 				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=476592
@@ -792,6 +796,70 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
+					});
+				});	
+				// check-tern-lib --------------------------------------------
+				describe('check-tern-lib', function() {
+					var RULE_ID = "check-tern-lib";
+					it("Browser lib not running", function(callback) {
+						var topic = "/*eslint-env browser*/\nElement();";
+						var config = { rules: {} };
+						config.rules["check-tern-plugin"] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [
+									{id: RULE_ID,
+									 severity: 'warning',
+									 description: "To work in the \'browser\' environment, the \'browser\' library must be running.",
+									 nodeType: "EnvName"
+									},
+								]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					it("Ecma7 lib not running with other garbage", function(callback) {
+						var topic = "/*eslint-env garbage, ecma7, moreGarbage*/\nElement();";
+						var config = { rules: {} };
+						config.rules["check-tern-plugin"] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [
+									{id: RULE_ID,
+									 severity: 'warning',
+									 description: "To work in the \'ecma7\' environment, the \'ecma7\' library must be running.",
+									 nodeType: "EnvName"
+									},
+								]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
+					});
+					it("Mulitple libs not running", function(callback) {
+						var topic = "/*eslint-env browser, ecma7, garbage*/\nElement();";
+						var config = { rules: {} };
+						config.rules["check-tern-plugin"] = 1;
+						validate({buffer: topic, callback: callback, config: config}).then(
+							function (problems) {
+								assertProblems(problems, [
+									{id: RULE_ID,
+									 severity: 'warning',
+									 description: "To work in the \'browser\' environment, the \'browser\' library must be running.",
+									 nodeType: "EnvName"
+									},
+									{id: RULE_ID,
+									 severity: 'warning',
+									 description: "To work in the \'ecma7\' environment, the \'ecma7\' library must be running.",
+									 nodeType: "EnvName"
+									},
+
+								]);
+							},
+							function (error) {
+								worker.getTestState().callback(error);
+							});
 					});
 				});
 				// CURLY ---------------------------------------------

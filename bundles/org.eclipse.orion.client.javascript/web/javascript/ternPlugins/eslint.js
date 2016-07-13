@@ -126,6 +126,7 @@ define([
 			this.server = server;
 			this.plugins = server.options.plugins;
 			this.optionalPlugins = server.options.optionalPlugins;
+			this.optionalDefs = server.options.optionalDefs;
 			this.file = file;
 		},
 		findRefs: function findRefs(query, file) {

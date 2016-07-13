@@ -209,6 +209,7 @@ define({
 	'type-checked-consistent-return' : 'Discouraged inconsistent returns:',
 	'check-tern-plugin' : 'Missing .tern-project plugins entry for environment directive:',
 	'checkTernPluginFixName' : 'Add plugin to .tern-project file',
+	'checkTernLibFixName' : 'Add library to .tern-project file',
 	'forbiddenExportImportFixName' : 'Set sourceType to module',
 	
 	//Tern Plugins

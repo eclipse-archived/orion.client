@@ -190,6 +190,13 @@ define([
         projectDir: 'orionFakeProjectDir', // Tern strips the project dir from any file paths it finds and defaults to '/' so this must be set
         defs: defs,
         ecmaVersion: 7,
+        optionalDefs: {
+        	"ecma5": true,
+        	"ecma6": true,
+        	"ecma7": true,
+        	"browser": true,
+        	"chai": true,
+        },
         optionalPlugins: {
         	'amqp': 'amqp', 
         	'angular': 'angular', 
