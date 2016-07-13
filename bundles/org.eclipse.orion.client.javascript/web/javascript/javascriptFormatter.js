@@ -92,7 +92,7 @@ define([
 		 */
 		format: function(editorContext, context) {
 			var deferred = new Deferred();
-			if(this.project) {
+			if (this.project) {
 				//TODO make sure we can get the options as set in the formatting preference page Right now only the indent character is customizable
 				// We should expose all existing options - see defaults above
 				this.project.getFormattingOptions().then(function(cfg) {
@@ -121,21 +121,34 @@ define([
 					var files, request;
 					if (end !== start) {
 						return editorContext.getText(start, end).then(function(text) {
-							files = [{type: 'full', name: meta.location, text: text}]; //$NON-NLS-1$
-							request = {request: 'beautify', args: {meta: {location: meta.location}, files: files, config: configuration, start: start, end: end, contentType: meta.contentType.id}}; //$NON-NLS-1$
-							this.ternworker.postMessage(
-								request, 
-								function(formatted, err) {
-									if(err) {
-										deferred.reject();
-									}
-									if(formatted && formatted.text) {
-										deferred.resolve(editorContext.setText(formatted.text, start, end));
-									} else {
-										deferred.reject();
-									}
-								});
-							return deferred;
+							return editorContext.getLineAtOffset(start).then(function(lineNumber) {
+								return editorContext.getLineStart(lineNumber).then(function(lineOffset) {
+									// check the initial indentation level
+									return editorContext.getText(lineOffset, start).then(function(lineStartText) {
+										var textToFormat = text;
+										var startOffset = start;
+										if (/\s/.test(lineStartText)) {
+											textToFormat = lineStartText + textToFormat;
+											startOffset = lineOffset;
+										}
+										files = [{type: 'full', name: meta.location, text: textToFormat}]; //$NON-NLS-1$
+										request = {request: 'beautify', args: {meta: {location: meta.location}, files: files, config: configuration, start: startOffset, end: end, contentType: meta.contentType.id}}; //$NON-NLS-1$
+										this.ternworker.postMessage(
+											request, 
+											function(formatted, err) {
+												if(err) {
+													deferred.reject();
+												}
+												if(formatted && formatted.text) {
+													deferred.resolve(editorContext.setText(formatted.text, startOffset, end));
+												} else {
+													deferred.reject();
+												}
+											});
+										return deferred;
+									}.bind(this));
+								}.bind(this));
+							}.bind(this));
 						}.bind(this));
 					}
 					return editorContext.getText().then(function(text) {
