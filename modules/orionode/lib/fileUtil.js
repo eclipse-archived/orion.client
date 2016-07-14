@@ -344,7 +344,9 @@ exports.handleFilePOST = function(fileRoot, req, res, destFilepath, metadataMixi
 		}
 		// Just a regular file write
 		return Promise.resolve()
-		.then(destExists ? fs.unlinkAsync(destFilepath) : null)
+		.then(function(){
+			return destExists ? fs.unlinkAsync(destFilepath) : null;
+		})
 		.then(function() {
 			return isDirectory ? fs.mkdirAsync(destFilepath) : fs.writeFileAsync(destFilepath, '');
 		})
