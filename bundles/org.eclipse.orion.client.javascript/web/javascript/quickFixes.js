@@ -244,6 +244,7 @@ define([
 							}
 							if(Array.isArray(fixes.fixes) && fixes.fixes.length > 0) {
 								var idx = 0;
+								var hasNewline = false;
 								var textEdits = [];
 								var rangeEdits = [];
 								fixes.fixes.forEach(function(fix, i) {
@@ -253,10 +254,19 @@ define([
 										idx = i;
 									}
 								});
+								// If we have a single insertion fix ending in a newline we need to scroll to reveal the previous line
+								if (fixes.fixes.length === 1){
+									var fix = fixes.fixes[0];
+									hasNewline = fix.start === fix.end && fix.text.length > 0 && fix.text.charAt(fix.text.length-1) === '\n';
+								}
 						    	deferred.resolve(editorContext.setText({text: textEdits, selection: rangeEdits}).then(function() {
 						    		return editorContext.getSelections().then(function(selections) {
 						    			if (selections.length > 0){
 						    				var selection = selections[selections.length > idx ? idx : 0];
+						    				if (hasNewline){
+						    					selection.start--;
+						    					selection.end--;
+						    				}
 						    				return editorContext.setSelection(selection.start, selection.end, true);	
 										}
 						    		});
