@@ -663,11 +663,7 @@ define([
 		    		tooltip : javascriptMessages['renameElementTooltip'],
 		    		id : "rename.js.element",  //$NON-NLS-1$
 		    		key : [ 'R', false, true, !Util.isMac, Util.isMac],  //$NON-NLS-1$
-		    		contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
-					validationProperties: [
-		                {source: "annotation:id", match: "^(?:curly)$"}, //$NON-NLS-1$ //$NON-NLS-2$
-						{source: "readonly", match: false} //$NON-NLS-1$
-		            ]
+		    		contentType: ['application/javascript', 'text/html']  //$NON-NLS-1$ //$NON-NLS-2$
     			}
     	);
 
