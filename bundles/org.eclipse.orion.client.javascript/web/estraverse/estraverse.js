@@ -248,8 +248,8 @@
         ForStatement: ['init', 'test', 'update', 'body'],
         ForInStatement: ['left', 'right', 'body'],
         ForOfStatement: ['left', 'right', 'body'],
-        FunctionDeclaration: ['id', 'params', 'defaults', 'body'],
-        FunctionExpression: ['id', 'params', 'defaults', 'body'],
+        FunctionDeclaration: ['id', 'params', 'body'],
+        FunctionExpression: ['id', 'params', 'body'],
         GeneratorExpression: ['blocks', 'filter', 'body'],  // CAUTION: It's deferred to ES7.
         Identifier: [],
         IfStatement: ['test', 'consequent', 'alternate'],
@@ -434,7 +434,13 @@
         this.__leavelist = [];
         this.__current = null;
         this.__state = null;
-        this.__fallback = visitor.fallback === 'iteration';
+        this.__fallback = null;
+        if (visitor.fallback === 'iteration') {
+            this.__fallback = objectKeys;
+        } else if (typeof visitor.fallback === 'function') {
+            this.__fallback = visitor.fallback;
+        }
+
         this.__keys = VisitorKeys;
         if (visitor.keys) {
             this.__keys = extend(objectCreate(this.__keys), visitor.keys);
@@ -512,7 +518,7 @@
                 candidates = this.__keys[nodeType];
                 if (!candidates) {
                     if (this.__fallback) {
-                        candidates = objectKeys(node);
+                        candidates = this.__fallback(node);
                     } else {
                         throw new Error('Unknown node type ' + nodeType + '.');
                     }
@@ -550,6 +556,20 @@
     };
 
     Controller.prototype.replace = function replace(root, visitor) {
+        var worklist,
+            leavelist,
+            node,
+            nodeType,
+            target,
+            element,
+            current,
+            current2,
+            candidates,
+            candidate,
+            sentinel,
+            outer,
+            key;
+
         function removeElem(element) {
             var i,
                 key,
@@ -574,20 +594,6 @@
                 }
             }
         }
-
-        var worklist,
-            leavelist,
-            node,
-            nodeType,
-            target,
-            element,
-            current,
-            current2,
-            candidates,
-            candidate,
-            sentinel,
-            outer,
-            key;
 
         this.__initialize(root, visitor);
 
@@ -666,7 +672,7 @@
             candidates = this.__keys[nodeType];
             if (!candidates) {
                 if (this.__fallback) {
-                    candidates = objectKeys(node);
+                    candidates = this.__fallback(node);
                 } else {
                     throw new Error('Unknown node type ' + nodeType + '.');
                 }
@@ -850,7 +856,7 @@ module.exports={
   "description": "ECMAScript JS AST traversal functions",
   "homepage": "https://github.com/estools/estraverse",
   "main": "estraverse.js",
-  "version": "4.1.1",
+  "version": "4.2.0",
   "engines": {
     "node": ">=0.10.0"
   },
@@ -866,8 +872,9 @@ module.exports={
     "url": "http://github.com/estools/estraverse.git"
   },
   "devDependencies": {
+    "babel-preset-es2015": "^6.3.13",
+    "babel-register": "^6.3.13",
     "chai": "^2.1.1",
-    "coffee-script": "^1.8.0",
     "espree": "^1.11.0",
     "gulp": "^3.8.10",
     "gulp-bump": "^0.2.2",
@@ -881,7 +888,7 @@ module.exports={
   "scripts": {
     "test": "npm run-script lint && npm run-script unit-test",
     "lint": "jshint estraverse.js",
-    "unit-test": "mocha --compilers coffee:coffee-script/register"
+    "unit-test": "mocha --compilers js:babel-register"
   }
 }
 
