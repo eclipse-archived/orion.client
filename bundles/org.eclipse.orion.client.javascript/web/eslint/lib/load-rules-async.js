@@ -1733,6 +1733,21 @@ define([
 				    	   if (result === null || result.length === 0) {
 					           context.report(id, ProblemMessages['no-unused-vars-unused-funcdecl'], {0:id.name, nls: 'no-unused-vars-unused-funcdecl'}); //$NON-NLS-1$
 					       }
+			        	} else if (defNode.type === 'VariableDeclarator'){
+			        		// Variables can be marked as 'exported' in a comment if they are used as global variables
+							var comments = variable.defs[0].parent.leadingComments;
+							var report = true;
+							if (comments && comments.length > 0){
+								for (var i = 0; i < comments.length; i++) {
+									if (comments[i].value.toLowerCase().indexOf('exported') >= 0){ //$NON-NLS-1$
+										report = false;
+										break;
+									}
+								}
+							}
+							if (report) {
+								context.report(id, ProblemMessages['no-unused-vars-unused'], {0:id.name, nls: 'no-unused-vars-unused', pid: pb}); //$NON-NLS-1$
+							}
 					    } else {
 						   context.report(id, ProblemMessages['no-unused-vars-unused'], {0:id.name, nls: 'no-unused-vars-unused', pid: pb}); //$NON-NLS-1$
 						}

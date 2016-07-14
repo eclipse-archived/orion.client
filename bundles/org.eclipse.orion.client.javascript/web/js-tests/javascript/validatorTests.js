@@ -10178,6 +10178,78 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
+						it("should not flag var that has exported comment inline", function(callback) {
+							var topic = "// exported\nvar a;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag var that has exported comment block", function(callback) {
+							var topic = "/* exported */\nvar a;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag var that has exported comment multiple", function(callback) {
+							var topic = "// blargh\n/* exported */\n/* another comment */var a;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag var that has exported comment casing", function(callback) {
+							var topic = "/* eXPOrtED */\nvar a;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag var that has comment without exported keyword", function(callback) {
+							var topic = "// this is not exFOOported\nvar a;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "'a' is unused.",
+										nodeType: "Identifier"
+									}
+									]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						
 						it("no-unused var cross file 1 - should not report unused function when used in a known html file", function(callback) {
 							worker.postMessage(
 								{
