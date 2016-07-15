@@ -118,6 +118,7 @@ define({
 	// Rules consumed from ESLint
 	'accessor-pairs-description' : "Report when accessors don't come in pairs (getter, setter)",
 	'no-control-regex-description' : "Disallow control characters in regular expressions",
+	'no-const-assign-description' : "Disallow modifying variables that are declared using const",
 	'no-duplicate-case-description' : 'Disallow a duplicate case label',
 	'no-empty-character-class-description' : 'Disallow empty character classes',
 	'no-extra-boolean-cast-description' : 'Discourage redundant double negation',
