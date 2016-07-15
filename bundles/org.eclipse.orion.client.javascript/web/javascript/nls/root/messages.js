@@ -212,6 +212,7 @@ define({
 	'checkTernPluginFixName' : 'Add plugin to .tern-project file',
 	'checkTernLibFixName' : 'Add library to .tern-project file',
 	'forbiddenExportImportFixName' : 'Set sourceType to module',
+	'noElseReturnFixName' : 'Remove unnecessary else',
 	
 	//Tern Plugins
 	'commonjsPluginName': 'CommonJS',

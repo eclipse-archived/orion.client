@@ -4823,6 +4823,60 @@ define([
 					});
 				});
 			});
+			//NO-ELSE-RETURN
+			describe("no-else-return", function() {
+				it("no-else-return 1", function(done) {
+					var rule = createTestRule("no-else-return");
+					var expected = {value: "", start: 47, end: 52};
+					return getFixes({
+						buffer: "function foo(i)\n{" +
+								"	if (i > 10) {\n" +
+								"		return 1;\n" +
+								"	} else return -1;\n" +
+								"}\n" +
+								"foo(1);",
+						rule: rule,
+						expected: expected,
+						callback: done
+					});
+				});
+				it("no-else-return 2", function(done) {
+					var rule = createTestRule("no-else-return");
+					var expected = [
+						{value: "", start: 47, end: 54},
+						{value: "", start: 64, end: 66},
+					];
+					return getFixes({
+						buffer: "function foo(i)\n{" +
+								"	if (i > 10) {\n" +
+								"		return 1;\n" +
+								"	} else { return -1; }\n" +
+								"}\n" +
+								"foo(1);",
+						rule: rule,
+						expected: expected,
+						callback: done
+					});
+				});
+				it("no-else-return 3", function(done) {
+					var rule = createTestRule("no-else-return");
+					var expected = [
+						{value: "", start: 47, end: 54},
+						{value: "", start: 96, end: 98},
+					];
+					return getFixes({
+						buffer: "function foo(i)\n{" +
+								"	if (i > 10) {\n" +
+								"		return 1;\n" +
+								"	} else { /* comment */ return -1; /* last comment*/ }\n" +
+								"}\n" +
+								"foo(1);",
+						rule: rule,
+						expected: expected,
+						callback: done
+					});
+				});
+			});
 		});
 	};
 });
