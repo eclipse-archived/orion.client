@@ -125,8 +125,9 @@ if (process.versions.electron) {
 	var feedURL = configParams["orion.autoUpdater.url"];
 	if (feedURL) {
 		var platform = os.platform() + '_' + os.arch(),
-		version = electron.app.getVersion();
-		autoUpdater.setFeedURL(feedURL + '/' + platform + '/' + version);
+		version = electron.app.getVersion(),
+		updateChannel = 'stable'; // updates default to stable channel
+		autoUpdater.setFeedURL(feedURL + '/channel/' + updateChannel + '/' + platform + '/' + version);
 	}
 
 	var handleSquirrelEvent = function() {
