@@ -1406,6 +1406,13 @@ define([
     			 	        	                	options: severities
     			 	        	                },
     			 	        	                {
+    			 	        	                	id: "no-const-assign",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["noConstAssign"],
+    			 	        	                	type: "number", //$NON-NLS-1$
+    			 	        	                	defaultValue: error,
+    			 	        	                	options: severities
+    			 	        	                },
+    			 	        	                {
     			 	        	                	id: "no-control-regex",  //$NON-NLS-1$
     			 	        	                	name: javascriptMessages["no-control-regex"],
     			 	        	                	type: "number", //$NON-NLS-1$

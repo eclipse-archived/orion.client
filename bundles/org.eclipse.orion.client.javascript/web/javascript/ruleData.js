@@ -26,9 +26,10 @@ define([
 			'missing-requirejs': 1,
 			"new-parens" : 1,
 			"no-caller": 1,
-			"no-comma-dangle" : 0, 
+			"no-comma-dangle" : 0,
 			"no-cond-assign" : 2,
-			"no-console" : 0, 
+			"no-console" : 0,
+			"no-const-assign" : 2,
 			"no-constant-condition" : 2,
 			"no-control-regex" : 2,
 			"no-debugger" : 1,
@@ -127,6 +128,10 @@ define([
 			"no-constant-condition" : {
 				description: Messages['no-constant-condition-description'],
 				url: 'http://eslint.org/docs/rules/no-constant-condition'
+			},
+			"no-const-assign" : {
+				description: Messages['no-const-assign-description'],
+				url: 'http://eslint.org/docs/rules/no-const-assign'
 			},
 			"no-control-regex" : {
 				description: Messages['no-control-regex-description'],

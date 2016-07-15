@@ -1019,6 +1019,101 @@ define([
 						});
 				});
 			});
+			//NO-CONST-ASSIGN  -------------------------------------------------------
+			describe('no-const-assign', function() {
+				var RULE_ID = "no-const-assign";
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=495744
+				it("should flag const assignment 1", function(callback) {
+					var topic = "const a = 0; a = 1;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'a' is constant.",
+								nodeType: "Identifier"
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should flag const assignment 2", function(callback) {
+					var topic = "const a = 0; a += 1;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'a' is constant.",
+								nodeType: "Identifier"
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should flag const assignment 3", function(callback) {
+					var topic = "const a = 0; ++a;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'a' is constant.",
+								nodeType: "Identifier"
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag const 1", function(callback) {
+					var topic = "const a = 0; console.log(a);";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag const 2", function(callback) {
+					var topic = "for (const a in [1, 2, 3]) {console.log(a);}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag const 3", function(callback) {
+					var topic = "for (const a of [1, 2, 3]) { console.log(a); }";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+			});
 		});
 	};
 });

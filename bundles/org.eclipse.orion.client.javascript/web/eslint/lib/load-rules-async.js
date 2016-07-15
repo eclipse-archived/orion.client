@@ -33,9 +33,10 @@ define([
 './rules/no-obj-calls',
 './rules/no-self-compare',
 './rules/no-irregular-whitespace',
+'./rules/no-const-assign'
 ], function(util, Finder, ProblemMessages, Estraverse, JsSyntax,
 		accessorPairs, noControlRegex, noDuplicateCase, noElseReturn, noEmptyCharClasses, 
-		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs, noObjCalls, noSelfCompare, noIrregularWhitespace) {
+		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs, noObjCalls, noSelfCompare, noIrregularWhitespace, noConstAssign) {
 	
 	var nodeModules = {
 		"buffer": true,
@@ -2197,6 +2198,7 @@ define([
 		'no-empty-label': noEmptyLabel,
 		'no-self-compare': noSelfCompare,
 		'no-irregular-whitespace': noIrregularWhitespace,
+		'no-const-assign' : noConstAssign,
 		/** @callback */
 		'no-self-assign': function(context) {
 				/**
