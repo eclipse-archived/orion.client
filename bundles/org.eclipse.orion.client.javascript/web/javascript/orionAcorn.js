@@ -327,7 +327,7 @@ define([
 							}
 							result.trailingComments.push(deepCopy(that.comments[i]));
 						} else {
-							break loop;
+							continue loop;
 						}
 					}
 					that.trailingCommentsIndex = i;

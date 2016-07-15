@@ -966,7 +966,47 @@ define([
 					}
 				}
 			});
-		}
+		},
+		"no-else-return": function(annotation, annotations, file) {
+			return applySingleFixToAll(annotations, function(annot) {
+				var node = Finder.findNode(annot.start, file.ast, {parents:true});
+				// looking for the if statement
+				while (node && node.type !== 'IfStatement') {
+					node = node.parents.pop();
+				}
+				var thenNode = node.consequent;
+				var elseNode = node.alternate;
+				if (elseNode.type === 'BlockStatement') {
+					// need to remove the else { and the closing brace }
+					// check the first statement inside the block for trailing comment
+					var firstStatement = elseNode.body[0];
+					var start = firstStatement.start;
+					if (firstStatement.leadingComments) {
+						start = firstStatement.leadingComments[0].start;
+					}
+					var lastStatement = elseNode.body[elseNode.body.length - 1];
+					var closingStart = lastStatement.end;
+					var trailingComments = lastStatement.trailingComments;
+					if (trailingComments) {
+						closingStart = trailingComments[trailingComments.length - 1].end;
+					}
+					return [
+						{ text: '', start: thenNode.end + 1, end: start },
+						{ text: '', start:  closingStart, end: elseNode.end },
+					];
+				}
+				// need to remove the else keyword
+				var start = elseNode.start;
+				if (elseNode.leadingComments) {
+					start = elseNode.leadingComments[0].start;
+				}
+				return {
+					text: '',
+					start: thenNode.end + 1,
+					end: start
+				}
+			});
+		},
 	};
 	
 	/**
