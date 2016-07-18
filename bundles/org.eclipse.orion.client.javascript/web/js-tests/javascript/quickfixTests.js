@@ -4891,6 +4891,40 @@ define([
 					});
 				});
 			});
+			//NO-COND-ASSIGN
+			describe("no-cond-assign", function() {
+				it("no-cond-assign 1", function(done) {
+					var rule = createTestRule("no-cond-assign");
+					var expected = [
+						{value: "(", start: 23, end: 23},
+						{value: ")", start: 28, end: 28},
+					];
+					return getFixes({
+						buffer: "function foo(i) {\n" +
+								"	if (i = 0) {\n" +
+								"		return 1;\n" +
+								"	} else return -1;\n" +
+								"}\n" +
+								"foo(1);",
+						rule: rule,
+						expected: expected,
+						callback: done
+					});
+				});
+				it("Test no-cond-assign fix all 1", function(callback) {
+					var rule = createTestRule('no-cond-assign');
+					var expected = [
+							{value: "(", start: 15, end: 15},
+							{value: ")", start: 20, end: 20},
+							{value: "(", start: 29, end: 29},
+							{value: ")", start: 34, end: 34}
+					];
+					return getFixes({buffer: 'var i = 0; if (i = 0) {} if (i = 1) {}', 
+									  rule: rule,
+									  expected: expected,
+									  callback: callback});
+				});
+			});
 		});
 	};
 });

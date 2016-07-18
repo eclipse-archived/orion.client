@@ -1019,6 +1019,20 @@ define([
 				}
 			});
 		},
+		"no-cond-assign": function(annotation, annotations, file) {
+			return applySingleFixToAll(annotations, function(annot) {
+				var node = Finder.findNode(annot.start, file.ast, {parents:true});
+				var assignmentExpression = node.parents.pop();
+				if (assignmentExpression && assignmentExpression.type === 'AssignmentExpression') {
+					var start = assignmentExpression.range[0];
+					var end = assignmentExpression.range[1];
+					return [
+						{text: '(', start: start, end:  start},
+						{text: ')', start: end, end:  end},
+					];
+				}
+			});
+		},
 	};
 	
 	/**
