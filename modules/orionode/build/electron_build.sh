@@ -101,6 +101,7 @@ update_config_files() {
 	old_version=${pkg_version}
 	pkg_version=`echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
 	sed -i .bak 's/\"version\": \"'"${old_version}"'\"/\"version\"\:\ \"'"${pkg_version}"'\"/' orionode/package.json
+	sed -i .bak "s/.*buildID.*/  \"buildID\": \"${BUILD}\",/" orionode/package.json
 	sed -i .bak 's/orion\.autoUpdater\.url\=/orion\.autoUpdater\.url\='"${update_url}"'/' orionode/orion.conf
 }
 

@@ -196,6 +196,7 @@ define([
 						newDialog.TEMPLATE =
 							'<div>' +
 								'<div><label id="appVersion">Version: ' + window.__electron.remote.app.getVersion() + '</label></div>' +
+								'<div><label id="buildID">Build ID: ' + window.buildID + '</label></div>' +
 								'<div><label id="updateChannel">Update Channel: ' + 
 									'<select id="channelOptions"><option id="stable">Stable</option><option id="alpha">Alpha</option></select>' + 
 								'</label></div>' + 
