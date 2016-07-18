@@ -13314,6 +13314,33 @@ define([
 								});
 						});
 					});
+					// no-void --------------------------------------------
+					describe('no-void', function() {
+						var RULE_ID = "no-void";
+						it("flag invalid void", function(callback) {
+							var topic = "var foo = void bar();";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							var features = Object.create(null);
+							features.modules = false;
+							config.ecmaFeatures = features;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-void",
+										severity: 'error',
+										description: 'Expected \'undefined\' and instead saw \'void\'.',
+										start: 10,
+										end: 20
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};

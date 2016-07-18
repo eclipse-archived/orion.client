@@ -164,7 +164,8 @@ define({
 	'declPotentialHeader': '**Potential matches:**\n',
 	'typeofOptions': 'Typeof Options',
 	'NoCondAssignFixName' : 'Surround with parenthesis',
-	
+	'no-void' : 'Disallow use of the void operator:',
+
 	//All refs
 	'functionDecls': 'Function Declarations',
 	'functionCalls': 'Function Calls',

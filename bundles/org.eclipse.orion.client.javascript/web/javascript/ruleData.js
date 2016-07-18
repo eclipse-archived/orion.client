@@ -74,6 +74,7 @@ define([
 			"no-unused-params" : 1,
 			"no-unused-vars" : 1,
 			"no-use-before-define" : 1,
+			"no-void" : 2,
 			"no-with" : 1,
 			"radix" : 1,
 			"semi" : 1,
@@ -297,6 +298,10 @@ define([
 			"no-use-before-define" : {
 				description: Messages['no-use-before-define-description'],
 				url: 'http://eslint.org/docs/rules/no-use-before-define'
+			},
+			"no-void" : {
+				description: Messages['no-void-description'],
+				url: 'http://eslint.org/docs/rules/no-void'
 			},
 			"no-with" : {
 				description: Messages['no-with-description'],

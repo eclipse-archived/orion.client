@@ -2356,6 +2356,15 @@ define([
 					}
 				};
 			},
+		'no-void': function(context) {
+			return {
+				"UnaryExpression": function(node) {
+					if (node.operator === "void") {
+						context.report(node, ProblemMessages['no-void']);
+					}
+				}
+			};
+		}
 	};
 
 	/**
