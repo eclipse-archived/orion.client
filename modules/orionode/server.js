@@ -213,7 +213,7 @@ if (process.versions.electron) {
 			console.log(error);
 		});
 		function scheduleUpdateChecks () {
-			var checkInterval = 1000 * 60 * 30; // check for updates every 30 minutes
+			var checkInterval = eval(configParams["orion.autoUpdater.checkInterval"] + "*1000*60"); // eval checkInterval in minutes
 			var checkforUpdates = function() {
 				autoUpdater.checkForUpdates();
 			}.bind(this);
