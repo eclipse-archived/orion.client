@@ -1093,6 +1093,7 @@ define([
     			{
         			name: javascriptMessages["noElseReturnFixName"],
         			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+        			fixAllEnabled: true,
         			id : "no.else.return.fix",  //$NON-NLS-1$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
         			validationProperties: [
