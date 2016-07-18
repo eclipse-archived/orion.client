@@ -163,6 +163,7 @@ define({
 	'declDisplayName': '${0} (start: ${1}, end: ${2})', // ${0} is the fully qualified file path of the decl, ${1} and ${2} are the numerical start and end offsets of the decl, respectively
 	'declPotentialHeader': '**Potential matches:**\n',
 	'typeofOptions': 'Typeof Options',
+	'NoCondAssignFixName' : 'Surround with parenthesis',
 	
 	//All refs
 	'functionDecls': 'Function Declarations',
