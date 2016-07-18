@@ -455,14 +455,26 @@ define([
 		 * @function 
 		 * @callback
 		 */
-       "no-reserved-keys": function(annotation, annotations, file) {
-   			return applySingleFixToAll(annotations, function(annot) {
-   				var node = Finder.findNode(annot.start, file.ast, {parents:true});
-                if(node && node.type === 'Identifier') {
-	                return {text: '"'+node.name+'"', start: node.range[0], end: node.range[1]}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-2$
+		"no-reserved-keys": function(annotation, annotations, file) {
+			return applySingleFixToAll(annotations, function(annot) {
+				var node = Finder.findNode(annot.start, file.ast, {parents: true});
+				if (node && node.type === 'Identifier') {
+					var parent = node.parents.pop();
+					if (parent && parent.type === 'MemberExpression') {
+						return {
+							text: '["' + node.name + '"]', //$NON-NLS-1$ //$NON-NLS-2$
+							start: parent.object.range[1],
+							end: node.range[1]
+						};
+					}
+					return {
+						text: '"' + node.name + '"', //$NON-NLS-1$ //$NON-NLS-2$
+						start: node.range[0],
+						end: node.range[1]
+					};
 				}
-   			});
-        },
+			});
+		},
         /** 
 		 * @description fix for the 'no-throw-literal' rule
 		 * @function 
