@@ -218,7 +218,7 @@ define([
 									});
 								});
 							});
-						})
+						});
 					});
 				}
 			},
@@ -229,7 +229,27 @@ define([
 			contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		);
-		
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+			{
+				execute: /** @callback */ function(editorContext, options) {
+					return editorContext.getFileMetadata().then(function(metadata) {
+						return editorContext.getSelection().then(function(selection) {
+							return getPosition(editorContext, selection.start).then(function(start) {
+								return ipc.references(metadata.location, start, {includeDeclaration: true}).then(function(edits) {
+									console.log(edits)
+								});
+							});
+						});
+					});
+				}
+			},
+			{
+			name: "References",
+			id : "orion.java.references",  //$NON-NLS-1$
+//			key : [ 114, false, false, false, false],
+			contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		);
 		
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
 			{

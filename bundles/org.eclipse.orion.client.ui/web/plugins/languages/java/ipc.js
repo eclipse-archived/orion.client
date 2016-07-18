@@ -538,11 +538,13 @@ define([
 	 * @function
 	 * @param {String} uri The URI to request the references from
 	 * @param {{line: number, character: number}} offset The offset into the file to compute references for
+	 * @param context extra context info (i.e for the java server it is possible to specify whether to include declarations)
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
-	IPC.prototype.references = function references(uri, position) {
+	IPC.prototype.references = function references(uri, position, context) {
 		return this.sendMessage(this.id++, messageTypes.references, {
 				position: position,
+				context: context,
 				textDocument: {
 					uri: uri
 				}
