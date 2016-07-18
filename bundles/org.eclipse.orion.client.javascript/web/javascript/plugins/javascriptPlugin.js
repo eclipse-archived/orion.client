@@ -1811,6 +1811,13 @@ define([
     			 	        	                	type: "number",  //$NON-NLS-1$
     			 	        	                	defaultValue: warning,
     			 	        	                	options: severities
+    			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "no-void",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["no-void"],
+    			 	        	                	type: "number",  //$NON-NLS-1$
+    			 	        	                	defaultValue: error,
+    			 	        	                	options: severities
     			 	        	                }
 										]
 				 	            },

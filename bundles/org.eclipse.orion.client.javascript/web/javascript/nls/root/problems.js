@@ -114,7 +114,9 @@ define({
 	'valid-typeof-description': 'Warn when incorrectly comparing the result of a typeof expression.',
 	'noErrorDetailed' : 'Unknown error occurred',
 	'esmodules-not-running' : 'import/export declarations require the \'es_modules\' plug-in to be running.',
-	
+	'no-void' : 'Expected \'undefined\' and instead saw \'void\'.',
+	'no-void-description' : 'Disallow use of the void operator.',
+		
 	// Rules consumed from ESLint
 	'accessor-pairs-description' : "Report when accessors don't come in pairs (getter, setter)",
 	'no-control-regex-description' : "Disallow control characters in regular expressions",
