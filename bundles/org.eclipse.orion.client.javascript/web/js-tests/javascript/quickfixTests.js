@@ -2984,6 +2984,20 @@ define([
 						callback: done
 					});
 				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=495164
+				 */
+				it("Test no-reserved-keys-fix-4",function(callback) {
+					var rule = createTestRule('no-reserved-keys');
+					var expected = {value: '["for"]',
+									start: 13,
+									end: 17
+									};
+					return getFixes({buffer: 'var a = {}; a.for = 1;',
+										rule: rule,
+										expected: expected,
+										callback: callback});
+				});
 			});
 			//NO-UNDEF
 			describe("no-undef", function() {

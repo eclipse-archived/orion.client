@@ -1080,7 +1080,7 @@ define([
                     while((val = regex.exec(node.raw)) !== null) {
                         var start = node.range[0]+val.index;
                         var len = val[0].length;
-                        context.report({type: 'Literal', range:[start, start+len], loc: node.loc},  //$NON-NLS-1$
+                        context.report({type: 'Literal', range:[start, start+len], loc: node.loc}, //$NON-NLS-1$
                                         ProblemMessages['no-regex-spaces'], {0:len});
                     }
                 }
@@ -1108,11 +1108,18 @@ define([
                         if(node.properties) {
                             for(var i = 0; i < node.properties.length; i++) {
                                 var prop = node.properties[i];
-                                if(prop.key.type === 'Identifier' && JsSyntax.keywords.indexOf(prop.key.name) > -1) {
-                                    context.report(prop.key, ProblemMessages['no-reserved-keys']);
+                                if(prop.key.type === 'Identifier' && JsSyntax.keywords.indexOf(prop.key.name) > -1) {//$NON-NLS-1$
+                                    context.report(prop.key, ProblemMessages['no-reserved-keys']);//$NON-NLS-1$
                                 }
                             }
                         }
+                    },
+                    "MemberExpression" : function(node) {
+                    	if (node.property) {
+                            if(node.property.type === 'Identifier' && JsSyntax.keywords.indexOf(node.property.name) > -1) {//$NON-NLS-1$
+                                context.report(node.property, ProblemMessages['no-reserved-keys']);//$NON-NLS-1$
+                            }
+                    	}
                     }
                 };
         },
