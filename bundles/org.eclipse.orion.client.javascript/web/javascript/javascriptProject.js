@@ -230,6 +230,10 @@ define([
 						return this.getFileClient().write(this.projectMeta.Location+childName, JSON.stringify(json, null, '\t'));
 					} else if(create) {
 						return this.getFileClient().createFile(this.projectMeta.Location, childName).then(function(file) {
+							json = _defaultsFor(childName);
+							if(json) {
+								_merge(json, values);
+							}
 							return this.getFileClient().write(file.Location, JSON.stringify(values, null, '\t'));
 						}.bind(this));
 					}
@@ -237,6 +241,27 @@ define([
 			}.bind(this));
 		}
 	};
+	
+	/**
+	 * @description Get the defaults used when creating a new tracked file
+	 * @private
+	 * @param {String} filename The name of tracked file to create
+	 * @returns {{}|null} An object of default values or null
+	 * @since 13.0
+	 */
+	function _defaultsFor(filename) {
+		switch(filename) {
+			case JavaScriptProject.prototype.TERN_PROJECT: {
+				var json = Object.create(null);
+				json.ecmaVersion = 6;
+				json.libs = ['ecma5', 'ecma6'];
+				json.plugins = Object.create(null);
+				json.loadEagerly = [];
+				return json;
+			}
+			default: null;
+		}
+	}
 	
 	function _merge(source, dest) {
 		Object.keys(source).forEach(function(key) {
