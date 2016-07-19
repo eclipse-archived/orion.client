@@ -5756,8 +5756,8 @@ var immediateQueue = []
   , immediateTimeout;
 
 function timeslice() {
-  var immediateStart = new Date().getTime();
-  while (immediateQueue.length && (new Date().getTime() - immediateStart) < 100) {
+  var immediateStart = Date.now();
+  while (immediateQueue.length && (Date.now() - immediateStart) < 100) {
     immediateQueue.shift()();
   }
   if (immediateQueue.length) {

@@ -148,7 +148,7 @@ define([
 					message: err && err.message,
 					stack: err && err.stack,
 					titles: flattenTitles(test),
-					duration: (new Date() - test._start)
+					duration: (Date.now() - test._start)
 				};
 				if (err)
 					failed.push(report);
