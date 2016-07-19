@@ -154,11 +154,63 @@ define ([
 			}
 		}
 	};
+	
+	function splitCommentRange(text, style, ranges, bidiRange) {
+		var comments = [{name:"comment block", start:"/*", end:"*/"}, 
+		                {name:"comment line double-slash", start:"//", end:""},
+		                {name:"comment block documentation", start:"/**", end:"*/"},
+		                {name:"comment line double-slash jade", start:"//", end:""},
+		                {name:"comment line", start:"", end:""},
+		                {name:"comment line number-sign php", start:"#", end:""},
+		                {name:"comment block xml", start:"<!--", end:"<!--"}
+		];
+		var added = 0;
+		var range;
+		for (var i = 0; i < comments.length; i++) {
+			if (style.styleClass === comments[i].name) {
+				if (comments[i].start.length > 0 && text.startsWith(comments[i].start)) {
+					range = {text: text.substring(0, comments[i].start.length), style: style};
+					ranges.push(range);
+					added++;
+					text = text.substr(comments[i].start.length, text.length);
+				}
+				if (text.length > 0) {					
+					var commentText = text, endComment = "";
+					if (comments[i].end.length > 0 && text.endsWith(comments[i].end)) {
+						commentText = text.substring(0, text.length - comments[i].end.length);
+						endComment = comments[i].end;
+					}
+					if (commentText.length > 0) {
+						if (added > 0) {
+							ranges.push(bidiRange);
+						}
+						var newStyle = style;
+						if (typeof newStyle.attributes == "undefined") {
+							newStyle.attributes = {};
+						}
+						newStyle.attributes.dir = getTextDirection(commentText);
+						range = {text: commentText, style: newStyle};
+						ranges.push(range);
+					}
+					if (endComment.length > 0) {
+						if (added > 0) {
+							ranges.push(bidiRange);
+						}
+						range = {text: endComment, style: style};
+						ranges.push(range);
+					}
+				}
+				return true;
+			}
+		}
+		return false;
+	}
 		
 	return {
 		isBidiEnabled: isBidiEnabled,
 		getTextDirection: getTextDirection,		
 		enforceTextDirWithUcc: enforceTextDirWithUcc,
-		initInputField: initInputField
+		initInputField: initInputField,
+		splitCommentRange: splitCommentRange
 	};
 });
