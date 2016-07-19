@@ -339,9 +339,8 @@ define([
 	}
 	
 	function _timeDifference(timeStamp) {
-		var currentDate = new Date();
 		var commitDate = new Date(timeStamp);
-	    var difference = currentDate.getTime() - commitDate.getTime();
+	    var difference = Date.now() - commitDate.getTime();
 	    var yearDiff = Math.floor(difference/1000/60/60/24/365);
 	    difference -= yearDiff*1000*60*60*24*365;
 	    var monthDiff = Math.floor(difference/1000/60/60/24/30);

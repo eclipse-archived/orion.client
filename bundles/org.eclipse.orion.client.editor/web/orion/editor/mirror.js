@@ -464,7 +464,7 @@ define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/editor/e
 		 * dispatched just before this function finishes.
 		 */
 		_highlightJob: function() {
-			var stopTime = +new Date() + JOB_DURATION, compareStates = this.mode.compareStates, lineCount = this.model.getLineCount();
+			var stopTime = Date.now() + JOB_DURATION, compareStates = this.mode.compareStates, lineCount = this.model.getLineCount();
 			while (this.dirtyLines.length) {
 				// TODO support viewport priority
 				var viewportIndex = this.viewportIndex, viewportLine = this.lines[viewportIndex], lineIndex;
@@ -498,7 +498,7 @@ define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/editor/e
 						numUnchanged = 0;
 					}
 					var workRemains = i < lineCount || this.dirtyLines.length;
-					var timeElapsed = +new Date() > stopTime && workRemains;
+					var timeElapsed = Date.now() > stopTime && workRemains;
 					if (timeElapsed) {
 						// Stop, continue later
 						//this._expandRange(startIndex, i + 1);
