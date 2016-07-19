@@ -18,6 +18,7 @@ define(['orion/plugin',
 'webtools/htmlContentAssist',
 'webtools/htmlOccurrences',
 'webtools/htmlOutliner',
+'webtools/htmlValidator',
 'orion/editor/stylers/text_html/syntax',
 'webtools/cssContentAssist',
 'webtools/cssValidator',
@@ -29,7 +30,7 @@ define(['orion/plugin',
 'i18n!webtools/nls/messages',
 'webtools/htmlFormatter',
 'webtools/cssFormatter',
-], function(PluginProvider, mServiceRegistry, ScriptResolver, HtmlAstManager, htmlHover, htmlContentAssist, htmlOccurrences, htmlOutliner,
+], function(PluginProvider, mServiceRegistry, ScriptResolver, HtmlAstManager, htmlHover, htmlContentAssist, htmlOccurrences, htmlOutliner, htmlValidator,
             mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, messages, HtmlFormatter, CssFormatter) {
 
 	/**
@@ -63,6 +64,7 @@ define(['orion/plugin',
     		]
     	});
         var cssResultMgr = new cssResultManager(serviceRegistry);
+        var htmlAstManager = new HtmlAstManager.HtmlAstManager(serviceRegistry);
 
     	/**
     	 * Register result manager as model changed listener
@@ -75,23 +77,33 @@ define(['orion/plugin',
     		contentType: ["text/css", "text/html"],  //$NON-NLS-1$ //$NON-NLS-2$
     		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     	});
-
-        provider.registerService("orion.edit.contentassist", //$NON-NLS-1$
-    		new cssContentAssist.CssContentAssistProvider(cssResultMgr),
-    		{	name: messages["cssContentAssist"],
-    			contentType: ["text/css", "text/html"] //$NON-NLS-1$ //$NON-NLS-2$
-    		});
+    	
+    	/**
+    	 * Register AST manager as Model Change listener
+    	 */
+    	provider.registerService("orion.edit.model", {  //$NON-NLS-1$
+    		onModelChanging: htmlAstManager.onModelChanging.bind(htmlAstManager),
+    		onInputChanged: htmlAstManager.onInputChanged.bind(htmlAstManager)
+    	},
+    	{
+    		contentType: ["text/html"],  //$NON-NLS-1$
+    		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+    	});
 
     	/**
     	 * Register validators
     	 */
+    	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new htmlValidator(htmlAstManager), //$NON-NLS-1$ //$NON-NLS-2$
+    		{
+    			contentType: ["text/html"], //$NON-NLS-1$
+    		}
+    	);
     	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new mCssValidator(cssResultMgr), //$NON-NLS-1$ //$NON-NLS-2$
     		{
     			contentType: ["text/css", "text/html"], //$NON-NLS-1$ //$NON-NLS-2$
     			pid: 'csslint.config'  //$NON-NLS-1$
-    		});
-
-    	var htmlAstManager = new HtmlAstManager.HtmlAstManager(serviceRegistry);
+    		}
+    	);
 
     	/**
     	 * Register content assist providers
@@ -104,6 +116,12 @@ define(['orion/plugin',
     			excludedStyles: "(comment.*|string.*)" //$NON-NLS-1$
     		}
     	);
+    	 provider.registerService("orion.edit.contentassist", //$NON-NLS-1$
+    		new cssContentAssist.CssContentAssistProvider(cssResultMgr),
+    		{	name: messages["cssContentAssist"],
+    			contentType: ["text/css", "text/html"] //$NON-NLS-1$ //$NON-NLS-2$
+    		}
+    	);
 
 	  	/**
     	 * Register occurrence providers
@@ -114,18 +132,6 @@ define(['orion/plugin',
     			contentType: ["text/html"] //$NON-NLS-1$
     		}
     	);
-
-    	/**
-    	 * Register AST manager as Model Change listener
-    	 */
-    	provider.registerService("orion.edit.model", {  //$NON-NLS-1$
-    		onModelChanging: htmlAstManager.onModelChanging.bind(htmlAstManager),
-    		onInputChanged: htmlAstManager.onInputChanged.bind(htmlAstManager)
-    	},
-    	{
-    		contentType: ["text/html"],  //$NON-NLS-1$
-    		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-    	});
 
     	/**
     	* Register outliners
