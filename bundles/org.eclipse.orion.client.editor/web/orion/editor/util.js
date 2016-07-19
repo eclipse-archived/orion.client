@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -100,8 +100,8 @@ define("orion/editor/util", [], function() { //$NON-NLS-0$
 				self = this;
 
 			function onFrame() {
-				startedAt = (startedAt === -1) ? new Date().getTime() : startedAt;
-				var now = new Date().getTime(),
+				startedAt = (startedAt === -1) ? Date.now() : startedAt;
+				var now = Date.now(),
 				    percentDone = (now - startedAt) / duration;
 				if (percentDone < 1) {
 					var eased = easing(percentDone);

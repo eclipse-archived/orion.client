@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @license Copyright (c) 2011, 2012 IBM Corporation and others. All rights reserved.
+ * @license Copyright (c) 2011, 2016 IBM Corporation and others. All rights reserved.
  *          This program and the accompanying materials are made available under
  *          the terms of the Eclipse Public License v1.0
  *          (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse
@@ -55,7 +55,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 					operation.Location = operationLocation;
 					operations[operationLocation]= operation;
 					var done = new Deferred();
-					if(operation.expires && new Date().getTime()>operation.expires){
+					if(operation.expires && Date.now()>operation.expires){
 						delete globalOperations[operationLocation];
 						delete operations[operationLocation];
 						done.resolve();

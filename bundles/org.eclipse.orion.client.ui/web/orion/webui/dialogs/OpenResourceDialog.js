@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -382,7 +382,7 @@ define([
 	/** @private */
 	OpenResourceDialog.prototype.checkSearch = function() {
 		clearTimeout(this._timeoutId);
-		var now = new Date().getTime();
+		var now = Date.now();
 		if ((now - this._time) > this._searchDelay) {
 			this._time = now;
 			this.doSearch();

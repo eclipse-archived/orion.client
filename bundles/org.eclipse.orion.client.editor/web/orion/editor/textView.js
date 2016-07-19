@@ -3636,7 +3636,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 		},
 		_handleDblclick: function (e) {
 			if (this._ignoreEvent(e)) { return; }
-			var time = e.timeStamp ? e.timeStamp : new Date().getTime();
+			var time = e.timeStamp ? e.timeStamp : Date.now();
 			this._lastMouseTime = time;
 			if (this._clickCount !== 2) {
 				this._clickCount = 2;
@@ -4035,7 +4035,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			}
 
 			// For middle click we always need getTime(). See _getClipboardText().
-			var time = button !== 2 && e.timeStamp ? e.timeStamp : new Date().getTime();
+			var time = button !== 2 && e.timeStamp ? e.timeStamp : Date.now();
 			var timeDiff = time - this._lastMouseTime;
 			var deltaX = Math.abs(this._lastMouseX - e.clientX);
 			var deltaY = Math.abs(this._lastMouseY - e.clientY);
@@ -4499,7 +4499,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			}
 		},
 		_handleScroll: function () {
-			this._lastScrollTime = new Date().getTime();
+			this._lastScrollTime = Date.now();
 			var _scroll = this._getScroll(false);
 			var oldX = this._hScroll;
 			var oldY = this._vScroll;
@@ -5270,7 +5270,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			var result = this._getClipboardText(e, function(text) {
 				if (text.length) {
 					if (util.isLinux && that._lastMouseButton === 2) {
-						var timeDiff = new Date().getTime() - that._lastMouseTime;
+						var timeDiff = Date.now() - that._lastMouseTime;
 						if (timeDiff <= that._clickTime) {
 							that._setSelectionTo(that._lastMouseX, that._lastMouseY, true);
 						}
@@ -5399,7 +5399,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			if (calculate) {
 				var c = 0;
 				var MAX_TIME = 100;
-				var start = new Date().getTime(), firstLine = 0;
+				var start = Date.now(), firstLine = 0;
 				while (i < lineCount) {
 					if (!this._lineHeight[i]) {
 						c++;
@@ -5407,7 +5407,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 						this._lineHeight[i] = this._calculateLineHeight(i);
 					}
 					i++;
-					if ((new Date().getTime() - start) > MAX_TIME) {
+					if ((Date.now() - start) > MAX_TIME) {
 						break;
 					}
 				}
@@ -6555,7 +6555,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			}	
 		},
 		_isOverOverlayScroll: function() {
-			var scrollShowing = new Date().getTime() - this._lastScrollTime < 200;
+			var scrollShowing = Date.now() - this._lastScrollTime < 200;
 			if (!scrollShowing) {
 				return {};
 			}
