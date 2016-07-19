@@ -4836,6 +4836,38 @@ define([
 						callback: done
 					});
 				});
+				it("no-redeclare argument 1", function(done) {
+					var rule = createTestRule("no-redeclare");
+					var expected = {
+						groups: [
+							{data: {}, positions: [{offset: 19, length: 1}]}
+						]
+					};
+					return getFixes({
+						buffer: "function bar(j, k, j) {\n" +
+								"	return j;\n" +
+								"}",
+						rule: rule,
+						expected: expected,
+						callback: done
+					});
+				});
+				it("no-redeclare argument 2", function(done) {
+					var rule = createTestRule("no-redeclare");
+					var expected = {
+						groups: [
+							{data: {}, positions: [{offset: 27, length: 1}]}
+						]
+					};
+					return getFixes({
+						buffer: "var f = function bar(j, k, j) {\n" +
+								"	return j;\n" +
+								"}",
+						rule: rule,
+						expected: expected,
+						callback: done
+					});
+				});
 			});
 			//NO-ELSE-RETURN
 			describe("no-else-return", function() {
