@@ -454,37 +454,54 @@ define([
 						if (parents) {
 							// find the parent of the variable declaration
 							var parentNode = parents.pop();
-							while (parentNode && parentNode.type !== 'VariableDeclaration') {
+							loop: while (parentNode) {
+								switch(parentNode.type) {
+									case 'VariableDeclaration' :
+										break loop;
+									case 'FunctionDeclaration' :
+									case 'FunctionExpression' :
+										break loop;
+								}
 								parentNode = parents.pop();
 							}
 							if (parentNode) {
-								parentNode = parents.pop();
-								if (!parentNode) {
-									return;
-								}
 								var groups = [{data: {}, positions: []}];
-								var linkModel = null;
-								var end = parentNode.range[1];
-								var start = node.range[0];
-								Estraverse.traverse(parentNode, {
-									/* @callback */
-									enter: function(n, parent) {
-										if(n.range[1] <= start) {
-											return Estraverse.VisitorOption.Skip;
+								var start;
+								switch(parentNode.type) {
+									case 'VariableDeclaration' :
+										parentNode = parents.pop();
+										if (!parentNode) {
+											return;
 										}
-										if(n.range[0] > end) {
-											//once we've left the parentNode
-											return Estraverse.VisitorOption.Break;
-										}
-										if (n.type === 'Identifier' && variableName === n.name && n.range[0] >= start && n.range[1] <= end) {
-											// record this reference
-											var identifierStart = n.range[0];
-											var length = n.range[1] - identifierStart;
-											groups[0].positions.push({offset: identifierStart, length: length});
-										}
-									}
-								});
-								linkModel = {groups: groups};
+										var end = parentNode.range[1];
+										start = node.range[0];
+										Estraverse.traverse(parentNode, {
+											/* @callback */
+											enter: function(n, parent) {
+												if(n.range[1] <= start) {
+													return Estraverse.VisitorOption.Skip;
+												}
+												if(n.range[0] > end) {
+													//once we've left the parentNode
+													return Estraverse.VisitorOption.Break;
+												}
+												if (n.type === 'Identifier' && variableName === n.name && n.range[0] >= start && n.range[1] <= end) {
+													// record this reference
+													var identifierStart = n.range[0];
+													var length = n.range[1] - identifierStart;
+													groups[0].positions.push({offset: identifierStart, length: length});
+												}
+											}
+										});
+										break;
+									case 'FunctionDeclaration' :
+									case 'FunctionExpression' :
+										// this is a duplicated arguments
+										start = node.range[0];
+										groups[0].positions.push({offset: start, length: node.range[1] - start});
+										break;
+								}
+								var linkModel = {groups: groups};
 								return editorContext.exitLinkedMode().then(function() {
 									return editorContext.enterLinkedMode(linkModel);
 								});
