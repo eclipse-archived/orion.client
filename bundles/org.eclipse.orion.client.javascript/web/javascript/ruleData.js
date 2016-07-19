@@ -41,6 +41,7 @@ define([
 			"no-empty-label" : 2,
 			"no-eq-null" : 1,
 			"no-eval" : 0,
+			"no-extra-bind" : 1,
 			"no-extra-boolean-cast" : 2,
 			"no-extra-parens" : 1,
 			"no-extra-semi": 1,
@@ -173,6 +174,10 @@ define([
 			"no-eval" : {
 				description: Messages['no-eval-description'],
 				url: 'http://eslint.org/docs/rules/no-eval'
+			},
+			"no-extra-bind" : {
+				description: Messages['no-extra-bind-description'],
+				url: 'http://eslint.org/docs/rules/no-extra-bind'
 			},
 			"no-extra-boolean-cast" : {
 				description: Messages['no-extra-boolean-cast-description'],

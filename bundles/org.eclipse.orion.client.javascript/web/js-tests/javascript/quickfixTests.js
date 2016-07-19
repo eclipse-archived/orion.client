@@ -4957,6 +4957,59 @@ define([
 									  callback: callback});
 				});
 			});
+			//NO-EXTRA-BIND
+			describe("no-extra-bind", function() {
+				it("no-extra-bind 1", function(done) {
+					var rule = createTestRule("no-extra-bind");
+					var expected = {value: "", start: 62, end: 72};
+					return getFixes({
+						buffer: "var bar = {}; function foo() {}; var x = function () { foo();}.bind(bar);",
+						rule: rule,
+						expected: expected,
+						callback: done
+					});
+				});
+				it("no-extra-bind 2", function(done) {
+					var rule = createTestRule("no-extra-bind");
+					var expected = [
+						{value: "", start: 41, end: 42},
+						{value: "", start: 56, end: 67}
+					];
+					return getFixes({
+						buffer: "var bar = {}; function foo() {}; var x = (() => {foo();}).bind(bar);",
+						rule: rule,
+						expected: expected,
+						callback: done
+					});
+				});
+				it("no-extra-bind 3", function(done) {
+					var rule = createTestRule("no-extra-bind");
+					var expected = [
+						{value: "", start: 41, end: 42},
+						{value: "", start: 61, end: 72}
+					];
+					return getFixes({
+						buffer: "var bar = {}; function foo() {}; var x = (() => {this.foo();}).bind(bar);",
+						rule: rule,
+						expected: expected,
+						callback: done
+					});
+				});
+				it("no-extra-bind all", function(done) {
+					var rule = createTestRule("no-extra-bind");
+					var expected = [
+						{value: "", start: 62, end: 72},
+						{value: "", start: 83, end: 84},
+						{value: "", start: 103, end: 114}
+					];
+					return getFixes({
+						buffer: "var bar = {}; function foo() {}; var x = function () { foo();}.bind(bar); var x2 = (() => {this.foo();}).bind(bar);",
+						rule: rule,
+						expected: expected,
+						callback: done
+					});
+				});
+			});
 		});
 	};
 });

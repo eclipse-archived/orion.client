@@ -165,6 +165,8 @@ define({
 	'typeofOptions': 'Typeof Options',
 	'NoCondAssignFixName' : 'Surround with parenthesis',
 	'no-void' : 'Disallow use of the void operator:',
+	'no-extra-bind' : 'Disallow unnecessary calls to \'.bind()\':',
+	'NoExtraBindFixName' : 'Remove \'bind\' call',
 
 	//All refs
 	'functionDecls': 'Function Declarations',
