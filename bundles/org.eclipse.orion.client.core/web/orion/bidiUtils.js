@@ -41,7 +41,7 @@ define ([
 	var RLE = '\u202B'; //$NON-NLS-0$
 	
 	var isBidiEnabled = bidiEnabled();
-	var bidiLayout = getBidiLayout();
+	var bidiLayout = getBidiLayout();		
 
 	/**
 	 * checks if directionality should be applied in Orion.
@@ -157,7 +157,7 @@ define ([
 	};
 		
 	return {
-		bidiEnabled: bidiEnabled,
+		isBidiEnabled: isBidiEnabled,
 		getTextDirection: getTextDirection,		
 		enforceTextDirWithUcc: enforceTextDirWithUcc,
 		initInputField: initInputField
