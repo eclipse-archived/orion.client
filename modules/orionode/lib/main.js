@@ -18,23 +18,25 @@ function redrawButtons() {
 	buttons.classList.add("tabButtons");
 	var back = document.createElement("button");
 	back.textContent = "<";
-	back.classList.add("tabButton");	
-	function historyBack(){
+	back.classList.add("tabButton");
+
+	function historyBack() {
 		var active = getActiveTab();
 		if (!active) return;
 		active.contentWindow.history.back();
 	}
-	function historyForward(){
+
+	function historyForward() {
 		var active = getActiveTab();
 		if (!active) return;
 		active.contentWindow.history.forward();
-	}	
+	}
 	back.addEventListener("click", historyBack);
 	buttons.appendChild(back);
 	var forward = document.createElement("button");
 	forward.textContent = ">";
 	forward.classList.add("tabButton");
-	forward.addEventListener("click",historyForward);
+	forward.addEventListener("click", historyForward);
 	buttons.appendChild(forward);
 	var refresh = document.createElement("button");
 	refresh.textContent = "\u27F2";
@@ -46,24 +48,24 @@ function redrawButtons() {
 	});
 	buttons.appendChild(refresh);
 	bar.appendChild(buttons);
-	
-	var _globalShortcut = electron.remote.globalShortcut;	
+
+	var _globalShortcut = electron.remote.globalShortcut;
 	_globalShortcut.unregister('Alt+Right');
 	_globalShortcut.unregister('Alt+Left');
-	_globalShortcut.register('Alt+Right',historyForward);	
-	_globalShortcut.register('Alt+Left',historyBack);
+	_globalShortcut.register('Alt+Right', historyForward);
+	_globalShortcut.register('Alt+Left', historyBack);
 }
 
-function addNewTab(id , iframe){
+function addNewTab(id, iframe) {
 	var bar = document.querySelector("#bar");
-	var tabParent = bar.querySelector("ul");	
+	var tabParent = bar.querySelector("ul");
 	if (!tabParent) {
 		tabParent = document.createElement("ul");
 		bar.appendChild(tabParent);
 	}
 	var tab = document.createElement("li");
 	var title = iframe.contentDocument.title;
-	tab.setAttribute('id', "tab"+id);
+	tab.setAttribute('id', "tab" + id);
 	tab.setAttribute('draggable', true);
 	tab.classList.add("tabItem");
 	var text = document.createElement("span");
@@ -71,7 +73,7 @@ function addNewTab(id , iframe){
 	text.textContent = title;
 	tab.appendChild(text);
 	tab.title = title;
-	
+
 	var closeBt = document.createElement("span");
 	closeBt.classList.add("close");
 	closeBt.textContent = "x";
@@ -83,25 +85,25 @@ function addNewTab(id , iframe){
 		evt.preventDefault();
 		evt.stopPropagation();
 	});
-	
+
 	function setActive() {
-		var currentTabcontents = document.querySelectorAll(".tabContent"); 
-		var tabbuttons = document.querySelectorAll("li");
-		for (var j=0; j<tabbuttons.length; j++) {
+		var currentTabcontents = document.querySelectorAll(".tabContent");
+		var tabbuttons = document.querySelectorAll(".tabItem");
+		for (var j = 0; j < tabbuttons.length; j++) {
 			tabbuttons[j].classList.remove("active");
 			currentTabcontents[j].classList.remove("active");
 		}
 		tab.classList.add("active");
 		iframe.classList.add("active");
 	}
-	
+
 	tab.addEventListener("click", function(evt) {
 		setActive();
 		evt.preventDefault();
 		evt.stopPropagation();
 	});
-	
-	tab.addEventListener('dragstart', function(evt){
+
+	tab.addEventListener('dragstart', function(evt) {
 		setActive();
 		dragSrcEl = tab;
 		var crt = this.cloneNode(true);
@@ -109,16 +111,16 @@ function addNewTab(id , iframe){
 		evt.dataTransfer.setDragImage(crt, 0, 0);
 		evt.dataTransfer.effectAllowed = "move";
 	});
-	tab.addEventListener('dragenter', function(evt){
+	tab.addEventListener('dragenter', function(evt) {
 		if (evt.preventDefault) {
 			evt.preventDefault(); // Necessary. Allows us to drop.
 		}
-		if(dragSrcEl){
-			if(tab.isSameNode(dragSrcEl.previousSibling)){
+		if (dragSrcEl) {
+			if (tab.isSameNode(dragSrcEl.previousSibling)) {
 				// drag forward
 				var replacedTab1 = tabParent.replaceChild(dragSrcEl, tab);
 				tabParent.insertBefore(replacedTab1, dragSrcEl.nextSibling);
-			}else{
+			} else {
 				// drag back
 				var replacedTab2 = tabParent.replaceChild(dragSrcEl, tab);
 				tabParent.insertBefore(replacedTab2, dragSrcEl);
@@ -126,25 +128,25 @@ function addNewTab(id , iframe){
 		}
 		return false;
 	});
-	tab.addEventListener('dragover', function(evt){
+	tab.addEventListener('dragover', function(evt) {
 		if (evt.preventDefault) {
 			evt.preventDefault(); // Necessary. Allows us to drop.
 		}
 		return false;
 	});
-	tab.addEventListener('drop', function(evt){
+	tab.addEventListener('drop', function(evt) {
 		if (evt.stopPropagation) {
 			evt.stopPropagation(); // stops the browser from redirecting.
 		}
 		return false;
 	});
 	tabParent.appendChild(tab);
-	
+
 	update();
 }
 
-function setTabLabel(id, str){
-	var tab = document.getElementById("tab"+id);
+function setTabLabel(id, str) {
+	var tab = document.getElementById("tab" + id);
 	var text = tab.querySelector(".tabLabel");
 	tab.title = text.textContent = str;
 }
@@ -191,6 +193,7 @@ function load() {
 			update();
 		}, 50);
 	});
+	registerContextMenu();
 }
 
 function createTab(url) {
@@ -199,23 +202,142 @@ function createTab(url) {
 	iframe.classList.add("tabContent");
 	iframe.src = url;
 	var id = Date.now();
-	iframe.id = "iframe"+ id;
+	iframe.id = "iframe" + id;
 	iframe.addEventListener("load", function() {
 		iframe.contentWindow.confirm = window.confirm;
 		iframe.contentWindow.alert = window.alert;
 		iframe.contentWindow.__electron = electron;
-		
+
 		var target = iframe.contentDocument.querySelector('head > title');
 		if (target) {
 			var observer = new window.WebKitMutationObserver(function(mutations) {
-				if(mutations){
+				if (mutations) {
 					setTabLabel(id, iframe.contentDocument.title);
 				}
 			});
-			observer.observe(target, { subtree: true, characterData: true, childList: true });
+			observer.observe(target, {
+				subtree: true,
+				characterData: true,
+				childList: true
+			});
 		}
 		setTabLabel(id, iframe.contentDocument.title);
 	});
 	document.body.appendChild(iframe);
 	addNewTab(id, iframe);
 }
+
+function registerContextMenu() {
+	var tabsClassName = 'tabs';
+	var menu = document.querySelector("#context-menu");
+	var menuState = 0;
+	var activeClassName = "context-menu--active";
+	var menuPosition;
+	var menuPositionX;
+	var menuPositionY;
+	var menuWidth;
+	var menuHeight;
+	var windowWidth;
+	var windowHeight;
+	var clickCoords;
+	var clickCoordsX;
+	var clickCoordsY;
+	init();
+
+	function init() {
+		contextListener();
+		clickListener();
+	}
+
+	function contextListener() {
+		document.addEventListener("contextmenu", function(e) {
+			if (clickInsideElement(e, tabsClassName)) {
+				e.preventDefault();
+				toggleMenuOn();
+				positionMenu(e);
+			} else {
+				toggleMenuOff();
+			}
+		});
+	}
+
+	function toggleMenuOn() {
+		if (menuState !== 1) {
+			menuState = 1;
+			menu.classList.add(activeClassName);
+		}
+	}
+
+	function toggleMenuOff() {
+		if (menuState !== 0) {
+			menuState = 0;
+			menu.classList.remove(activeClassName);
+		}
+	}
+
+	function clickListener() {
+		document.addEventListener("click", function(e) {
+			var button = e.which || e.button;
+			if (button === 1) {
+				toggleMenuOff();
+			}
+		});
+	}
+
+	function clickInsideElement(e, className) {
+		var el = e.srcElement || e.target;
+		if (el.classList.contains(className)) {
+			return el;
+		}
+		while (el) {
+			if (el.classList && el.classList.contains(className)) {
+				return el;
+			}
+			el = el.parentNode;
+		}
+		return false;
+	}
+
+	function positionMenu(e) {
+		clickCoords = getPosition(e);
+		clickCoordsX = clickCoords.x;
+		clickCoordsY = clickCoords.y;
+
+		menuWidth = menu.offsetWidth + 4;
+		menuHeight = menu.offsetHeight + 4;
+
+		windowWidth = window.innerWidth;
+		windowHeight = window.innerHeight;
+
+		if ((windowWidth - clickCoordsX) < menuWidth) {
+			menu.style.left = windowWidth - menuWidth + "px";
+		} else {
+			menu.style.left = clickCoordsX + "px";
+		}
+
+		if ((windowHeight - clickCoordsY) < menuHeight) {
+			menu.style.top = windowHeight - menuHeight + "px";
+		} else {
+			menu.style.top = clickCoordsY + "px";
+		}
+	}
+
+	function getPosition(e) {
+		var posx = 0;
+		var posy = 0;
+		if (!e) var e = window.event;
+		if (e.pageX || e.pageY) {
+			posx = e.pageX;
+			posy = e.pageY;
+		} else if (e.clientX || e.clientY) {
+			posx = e.clientX + document.body.scrollLeft +
+				document.documentElement.scrollLeft;
+			posy = e.clientY + document.body.scrollTop +
+				document.documentElement.scrollTop;
+		}
+		return {
+			x: posx,
+			y: posy
+		}
+	}
+};
