@@ -204,6 +204,7 @@ function createTab(url) {
 		iframe.contentWindow.confirm = window.confirm;
 		iframe.contentWindow.alert = window.alert;
 		iframe.contentWindow.__electron = electron;
+		iframe.contentWindow.buildID = require("../package.json").buildID;
 		
 		var target = iframe.contentDocument.querySelector('head > title');
 		if (target) {
