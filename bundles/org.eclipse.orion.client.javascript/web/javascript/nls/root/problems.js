@@ -116,6 +116,8 @@ define({
 	'esmodules-not-running' : 'import/export declarations require the \'es_modules\' plug-in to be running.',
 	'no-void' : 'Expected \'undefined\' and instead saw \'void\'.',
 	'no-void-description' : 'Disallow use of the void operator.',
+	'no-extra-bind' : 'The function binding is unnecessary.',
+	'no-extra-bind-description' : 'Disallow unnecessary function binding.',
 		
 	// Rules consumed from ESLint
 	'accessor-pairs-description' : "Report when accessors don't come in pairs (getter, setter)",

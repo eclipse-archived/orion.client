@@ -1395,6 +1395,24 @@ define([
 			}
 		);
 
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+				quickFixComputer,
+				{
+					name: javascriptMessages["NoExtraBindFixName"],
+					scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+					fixAllEnabled: true,
+					id : "no.extra.bind.fix",  //$NON-NLS-1$
+					contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+					validationProperties: [
+						{
+							source: "annotation:id", //$NON-NLS-1$
+							match: "^(?:no-extra-bind)$" //$NON-NLS-1$
+						},
+						{source: "readonly", match: false} //$NON-NLS-1$
+					]
+				}
+		);
+		
     	/**
     	 * legacy pref id
     	 */
@@ -1817,6 +1835,13 @@ define([
     			 	        	                	name: javascriptMessages["no-void"],
     			 	        	                	type: "number",  //$NON-NLS-1$
     			 	        	                	defaultValue: error,
+    			 	        	                	options: severities
+    			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "no-extra-bind",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["no-extra-bind"],
+    			 	        	                	type: "number",  //$NON-NLS-1$
+    			 	        	                	defaultValue: warning,
     			 	        	                	options: severities
     			 	        	                }
 										]

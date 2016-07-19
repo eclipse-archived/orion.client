@@ -1114,6 +1114,111 @@ define([
 						});
 				});
 			});
+			//no-extra-bind  -------------------------------------------------------
+			describe('no-extra-bind', function() {
+				var RULE_ID = "no-extra-bind";
+				//https://bugs.eclipse.org/bugs/show_bug.cgi?id=486765
+				it("should flag extra bind 1", function(callback) {
+					var topic = "var bar = {}; function foo() {}; var x = function () { foo();}.bind(bar);";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "The function binding is unnecessary.",
+								start: 63,
+								end: 67
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should flag extra bind 2", function(callback) {
+					var topic = "var bar = {}; function foo() {}; var x = (() => {foo();}).bind(bar);";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "The function binding is unnecessary.",
+								start: 58,
+								end: 62
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should flag extra bind 3", function(callback) {
+					var topic = "var bar = {}; function foo() {}; var x = (() => {this.foo();}).bind(bar);";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "The function binding is unnecessary.",
+								start: 63,
+								end: 67
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should flag extra bind 4", function(callback) {
+					var topic = "var baz = {}; function bar() {}; var x = function () {function foo() {this.bar();}}.bind(baz);";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "The function binding is unnecessary.",
+								start: 84,
+								end: 88
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag extra bind 1", function(callback) {
+					var topic = "var bar = {foo: function() {}}; var x = function () {this.foo();}.bind(bar);";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag extra bind 2", function(callback) {
+					var topic = "var foo = {}, bar = 2; var x = function (a) {return a + 1;}.bind(foo, bar);";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+			});
 		});
 	};
 });

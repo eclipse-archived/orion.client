@@ -1033,7 +1033,27 @@ define([
 				}
 			});
 		},
-	};
+		"no-extra-bind": function(annotation, annotations, file) {
+			return applySingleFixToAll(annotations, function(annot) {
+				var node = Finder.findNode(annot.start, file.ast, {parents:true});
+				var memberExpression  = node.parents.pop();
+				var callExpression = node.parents.pop();
+				if (memberExpression && callExpression) {
+					var object = memberExpression.object;
+					if (object.type === 'ArrowFunctionExpression') {
+						return [
+							{text: '', start: callExpression.range[0], end: object.range[0]},
+							{text: '', start: object.range[1], end: callExpression.range[1]},
+						];
+					}
+					return {
+						text: '',
+						start: memberExpression.object.range[1],
+						end: callExpression.range[1]
+					};
+				}
+			});
+		}	};
 	
 	/**
 	 * @description Compute the fixes 
