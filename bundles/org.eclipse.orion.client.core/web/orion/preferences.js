@@ -37,7 +37,7 @@ define(['require', 'orion/Deferred', 'orion/EventTarget', 'orion/xhr'], function
 					return null;
 				}
 				var cached = JSON.parse(item);
-				if (ignoreExpires || expiresSeconds === -1 || (cached._expires && cached._expires > new Date().getTime())) {
+				if (ignoreExpires || expiresSeconds === -1 || (cached._expires && cached._expires > Date.now())) {
 					delete cached._expires;
 					return cached;
 				}
@@ -49,7 +49,7 @@ define(['require', 'orion/Deferred', 'orion/EventTarget', 'orion/xhr'], function
 				}
 				
 				if (expiresSeconds !== -1) {
-					data._expires = new Date().getTime() + 1000 * expiresSeconds;
+					data._expires = Date.now() + 1000 * expiresSeconds;
 				}
 				if (Object.keys(data).length === 0) {
 					localStorage.removeItem(prefix + namespace);

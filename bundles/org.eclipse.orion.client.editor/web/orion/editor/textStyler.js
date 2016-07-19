@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -938,11 +938,11 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		var charCount = model.getCharCount();
 		var rootBounds = {start: 0, contentStart: 0, end: charCount, contentEnd: charCount};
 		if (charCount >= 50000) {
-			var startTime = new Date().getTime();
+			var startTime = Date.now();
 		}
 		this._rootBlock = this._stylerAdapter.createBlock(rootBounds, this, model, null);
 		if (startTime) {
-			var interval = new Date().getTime() - startTime;
+			var interval = Date.now() - startTime;
 			if (interval > 10) {
 				mMetrics.logTiming(
 					"editor", //$NON-NLS-0$

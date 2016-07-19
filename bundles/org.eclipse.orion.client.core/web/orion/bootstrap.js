@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -71,11 +71,11 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 								}, 0);
 							});
 						} else {
-							localStorage.setItem("lastLogin", new Date().getTime()); //$NON-NLS-0$
+							localStorage.setItem("lastLogin", Date.now()); //$NON-NLS-0$
 						}
 					});
 					var lastLogin = localStorage.getItem("lastLogin"); //$NON-NLS-1$
-					if (!lastLogin || lastLogin < (new Date().getTime() - (15 * 60 * 1000))) { // 15 minutes
+					if (!lastLogin || lastLogin < (Date.now() - (15 * 60 * 1000))) { // 15 minutes
 						return authPromise; // if returned waits for auth check before continuing
 					}
 				}

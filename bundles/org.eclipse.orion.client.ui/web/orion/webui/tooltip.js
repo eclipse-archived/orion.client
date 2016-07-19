@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -120,7 +120,7 @@ define(['orion/webui/littlelib'], function(lib) {
 				lib.addAutoDismiss([this._tip, this._node], function() {self.hide();});
 				if (this._trigger === "mouseover") { //$NON-NLS-0$
 					this._tipInner.setAttribute("role", "tooltip"); //$NON-NLS-2$ //$NON-NLS-1$
-					this._tipInner.id = "tooltip" + new Date().getTime().toString(); //$NON-NLS-0$
+					this._tipInner.id = "tooltip" + Date.now(); //$NON-NLS-0$
 					var label = this._node.getAttribute("aria-label");
 					if (this._text !== label) {
 						this._node.setAttribute("aria-describedby", this._tipInner.id); //$NON-NLS-0$

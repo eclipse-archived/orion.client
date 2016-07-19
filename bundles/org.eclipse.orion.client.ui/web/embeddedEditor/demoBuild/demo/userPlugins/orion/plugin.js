@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2015 IBM Corporation and others.
+ * Copyright (c) 2011, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -106,14 +106,14 @@
         addEventListener("error", _errHandler);
         
         var lastHeartbeat;
-        var startTime = new Date().getTime();
+        var startTime = Date.now();
         function log(state) {
             if (typeof(localStorage) !== "undefined" && localStorage.pluginLogging) {
-            	console.log(state + "(" + (new Date().getTime() - startTime) + "ms)=" + self.location);
+            	console.log(state + "(" + (Date.now() - startTime) + "ms)=" + self.location);
         	}
         }
         function heartbeat() {
-            var time = new Date().getTime();
+            var time = Date.now();
             // This timeout depends on the handshake timeout of the plugin registry. Update both accordingly.
             if (lastHeartbeat  && time - lastHeartbeat < 4000) return;
             lastHeartbeat = time;

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -43,7 +43,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 			view.setSelection(charCount, charCount);
 		}
 		view.focus();
-		var start = new Date().getTime();
+		var start = Date.now();
 		function t() {
 			var caretLine = model.getLineAtOffset(view.getCaretOffset());
 			view.invokeAction(action);
@@ -51,7 +51,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 				setTimeout(t, 0);
 			} else {
 				d.resolve(true);
-				log("time(",action,")=", (new Date().getTime() - start));
+				log("time(",action,")=", (Date.now() - start));
 			}
 		}
 		t();
@@ -140,7 +140,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 		
 				var max = 25;
 				var view = setupView(buffer, "js");
-				var start = new Date().getTime();
+				var start = Date.now();
 				var caretLine = 0;
 				function t() {
 					if (caretLine === 0) {
@@ -154,7 +154,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 						setTimeout(t, 0);
 					} else {
 						d.resolve(true);
-						log ("time(CaretUpDown)=", (new Date().getTime() - start));
+						log ("time(CaretUpDown)=", (Date.now() - start));
 					}
 				}
 				view.focus();
@@ -171,14 +171,14 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 		
 				var max = 5;
 				var view = setupView(buffer, "js");
-				var start = new Date().getTime();
+				var start = Date.now();
 				function t() {
 					view.setText("a", 0, 0);
 					if (--max > 0) {			
 						setTimeout(t, 0);
 					} else {
 						d.resolve(true);
-						log ("time(InsertText)=", (new Date().getTime() - start));
+						log ("time(InsertText)=", (Date.now() - start));
 					}
 				}
 				view.focus();
@@ -196,7 +196,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 		
 				var max = 5;
 				var view = setupView(buffer, "js");
-				var start = new Date().getTime();
+				var start = Date.now();
 				function t() {
 					var charCount = view.getModel().getCharCount();
 					view.setText("a", charCount, charCount);
@@ -204,7 +204,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 						setTimeout(t, 0);
 					} else {
 						d.resolve(true);
-						log ("time(AppendText)=", (new Date().getTime() - start));
+						log ("time(AppendText)=", (Date.now() - start));
 					}
 				}
 				view.focus();
@@ -222,7 +222,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 				var max = 5;
 				var view = setupView(buffer, "js");
 				var offset = 8, insert = false;
-				var start = new Date().getTime();
+				var start = Date.now();
 				function t() {
 					if (insert) {
 						view.setText("f", offset, offset);
@@ -234,7 +234,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 						setTimeout(t, 0);
 					} else {
 						d.resolve(true);
-						log ("time(ChangeText)=", (new Date().getTime() - start));
+						log ("time(ChangeText)=", (Date.now() - start));
 					}
 				}
 				view.focus();
@@ -255,7 +255,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 		
 				var max = 15;
 				var view = setupView(buffer, "js");
-				var start = new Date().getTime();
+				var start = Date.now();
 				var caret = buffer.indexOf("{"), initialCaret = caret;
 				view.setCaretOffset(caret);
 				function t() {
@@ -270,7 +270,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 						setTimeout(t, 0);
 					} else {
 						d.resolve(true);
-						log ("time(CaretNextPrevious)=", (new Date().getTime() - start));
+						log ("time(CaretNextPrevious)=", (Date.now() - start));
 					}
 				}
 				view.focus();
@@ -286,7 +286,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 				}
 				var max = 128;
 				var view = setupView(buffer, "js");
-				var start = new Date().getTime();
+				var start = Date.now();
 				var hscroll = -1;
 				function t() {
 					var newHscroll = view.getHorizontalPixel();
@@ -296,7 +296,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 						setTimeout(t, 0);
 					} else {
 						d.resolve(true);
-						log ("time(setHorizontalPixel)=", (new Date().getTime() - start));
+						log ("time(setHorizontalPixel)=", (Date.now() - start));
 					}
 				}
 				view.focus();
@@ -314,7 +314,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 				//test hit test without any styles
 				var view = setupView(buffer, null);
 				view.focus();
-				var start = new Date().getTime();
+				var start = Date.now();
 				var length = buffer.length;
 				function t() {
 					for (var j = 0; j < length;j++) {
@@ -324,7 +324,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 						setTimeout(t, 0);
 					} else {
 						d.resolve(true);
-						log("time(getLocationAtOffset)=" + (new Date().getTime() - start));
+						log("time(getLocationAtOffset)=" + (Date.now() - start));
 					}
 				}
 				t();
@@ -340,7 +340,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 				//test hit test with styles
 				var view = setupView(buffer, "js");
 				view.focus();
-				var start = new Date().getTime();
+				var start = Date.now();
 				var length = buffer.length;
 				function t() {
 					for (var j = 0; j < length;j++) {
@@ -350,7 +350,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 						setTimeout(t, 0);
 					} else {
 						d.resolve(true);
-						log("time(getLocationAtOffset)[styled]=" + (new Date().getTime() - start));
+						log("time(getLocationAtOffset)[styled]=" + (Date.now() - start));
 					}
 				}
 				t();
@@ -367,7 +367,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 				var view = setupView(buffer, null);
 				view.focus();
 				var location = view.getLocationAtOffset(buffer.length);
-				var start = new Date().getTime();
+				var start = Date.now();
 				function t() {
 					for (var j = 0; j < location.x; j++) {
 						view.getOffsetAtLocation(j, location.y);
@@ -376,7 +376,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 						setTimeout(t, 0);
 					} else {
 						d.resolve(true);
-						log("time(getOffseAtLocation)=" + (new Date().getTime() - start));
+						log("time(getOffseAtLocation)=" + (Date.now() - start));
 					}
 				}
 				t();
@@ -393,7 +393,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 				var view = setupView(buffer, "js");
 				view.focus();
 				var location = view.getLocationAtOffset(buffer.length);
-				var start = new Date().getTime();
+				var start = Date.now();
 				function t() {
 					for (var j = 0; j < location.x; j++) {
 						view.getOffsetAtLocation(j, location.y);
@@ -402,7 +402,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 						setTimeout(t, 0);
 					} else {
 						d.resolve(true);
-						log("time(getOffseAtLocation)[styled]=" + (new Date().getTime() - start));
+						log("time(getOffseAtLocation)[styled]=" + (Date.now() - start));
 					}
 				}
 				t();

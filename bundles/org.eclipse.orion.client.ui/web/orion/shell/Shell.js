@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -169,7 +169,7 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 					NewType.prototype.parse = function(arg) {
 						var prototype = Object.getPrototypeOf(this);
 						var lastParseTimestamp = prototype.lastParseTimestamp;
-						prototype.lastParseTimestamp = Math.round(new Date().getTime() / 1000);
+						prototype.lastParseTimestamp = Math.round(Date.now() / 1000);
 						/* argObj is equivalent to arg without the additional prototype functions */
 						var argObj = JSON.parse(JSON.stringify(arg));
 						return type.parse(argObj, this.typeSpec, {lastParseTimestamp: lastParseTimestamp}).then(function(completion) {
@@ -192,7 +192,7 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 					NewType.prototype.lookup = function() {
 						var prototype = Object.getPrototypeOf(this);
 						var lastParseTimestamp = prototype.lastParseTimestamp;
-						prototype.lastParseTimestamp = Math.round(new Date().getTime() / 1000);
+						prototype.lastParseTimestamp = Math.round(Date.now().getTime() / 1000);
 						/* argObj is equivalent to "new mArgument.Argument()" without the additional prototype functions */
 						var argObj = {prefix: "", suffix: "", text: ""};
 						return type.parse(argObj, this.typeSpec, {lastParseTimestamp: lastParseTimestamp}).then(function(completion) {
