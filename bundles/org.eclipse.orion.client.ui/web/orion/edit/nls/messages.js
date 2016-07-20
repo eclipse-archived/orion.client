@@ -8,6 +8,7 @@
  * 
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define({
-	root:true
+define(["module"],function(module){
+    var config = module.config();
+    return config && config.root ? config : {root:true};
 });

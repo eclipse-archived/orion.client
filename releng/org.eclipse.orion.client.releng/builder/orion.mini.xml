@@ -259,6 +259,10 @@
 			<mkdir dir="${out}/codeEdit/requirejs" />
 			<mkdir dir="${out}/codeEdit/javascript/plugins" />
 			<mkdir dir="${out}/codeEdit/webtools/plugins" />
+			<mkdir dir="${out}/codeEdit/others" />
+			<mkdir dir="${out}/codeEdit/others/plugins" />
+			<mkdir dir="${out}/codeEdit/others/plugins/languages" />
+			<mkdir dir="${out}/codeEdit/others/plugins/languages/json" />
 			<widgetOptimizeFile out="${out}/codeEdit/code_edit/built-codeEdit.css"
 				buildfile="${staging}/embeddedEditor.build-css.js"
 				optimize="uglify2" />
@@ -283,10 +287,17 @@
 			<widgetOptimizeFile out="${out}/codeEdit/plugins/embeddedToolingPlugin.js"
 				buildfile="${staging}/embeddedToolingPlugin.build.js"
 				optimize="uglify2" />
-			<widgetOptimizeFile out="${out}/ternWorkerCore.js"
+			<widgetOptimizeFile out="${out}/codeEdit/javascript/plugins/ternWorkerCore.js"
 				buildfile="${staging}/embeddedTernWorker.build.js"
 				optimize="uglify2" />
-			<copy file="${out}/ternWorkerCore.js" tofile="${out}/codeEdit/javascript/plugins/ternWorkerCore.js" />
+			<widgetOptimizeFile out="${out}/codeEdit/others/plugins/languages/json/jsonPlugin.js"
+				buildfile="${staging}/embeddedJsonPlugin.build.js"
+				optimize="uglify2" />
+			<widgetOptimizeFile out="${out}/codeEdit/others/plugins/jslintPlugin.js"
+				buildfile="${staging}/embeddedJslintPlugin.build.js"
+				optimize="uglify2" />
+			<copy file="${orionClient}/bundles/org.eclipse.orion.client.ui/web/embeddedEditor/plugins/jsonPlugin.html" tofile="${out}/codeEdit/others/plugins/languages/json/jsonPlugin.html" />
+			<copy file="${orionClient}/bundles/org.eclipse.orion.client.ui/web/embeddedEditor/plugins/jslintPlugin.html" tofile="${out}/codeEdit/others/plugins/jslintPlugin.html" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.javascript/web/javascript/plugins/ternWorker.js" tofile="${out}/codeEdit/javascript/plugins/ternWorker.js" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.core/web/orion/require-config.js" tofile="${out}/codeEdit/orion/require-config.js" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.core/web/requirejs/require.min.js" tofile="${out}/codeEdit/requirejs/require.min.js" />
