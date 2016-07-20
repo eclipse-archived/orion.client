@@ -127,10 +127,81 @@ body {
 .close:hover {
 	background: #7F0000;
 }
+.context-menu-items{
+	box-shadow: 2px 2px 5px 3px rgba(0, 0, 0, .2);
+	color: #3b4b54;
+	background-color: white;
+	border-collapse: separate;
+	border: 1px solid #bbbbbb;
+	border-radius: 1px;
+	visibility: hidden;
+	z-index: 150;
+	position: absolute;
+	list-style-type: none;
+	display: none; /* don't take part in layout until open */
+	line-height: normal; /* don't want to inherit strange line-heights from ancestor elements */
+	margin: 0; /* needed for context menu positioning to work properly */
+	cursor: default;
+	font-size: 12px;
+	margin: 0;
+	outline: none;
+	padding: 3px 0 3px;
+}
+.context-menu-items-open {
+	min-width: 120px;
+	display: block;
+	visibility: visible;
+}
+.context-menu-items > li {
+	min-width: 120px;
+	display: flex;
+	display: -webkit-flex; /* Safari */
+}
+.context-menu-items > li > a, .context-menu-items > li > span {
+	width: calc( 100% - 9px );
+	margin: 0;
+}
+.context-menu-items > li > *:focus {
+	outline: none;
+}
+.context-menu-item{
+	align-items: center;
+	-webkit-align-items: center;		/* Safari */
+	align-content: stretch;
+	-webkit-align-content: stretch;		/* Safari */
+	display: inline-flex;
+	display: -webkit-inline-flex;		/* Safari */
+	vertical-align: middle;
+	color: #3b4b54 !important;
+	padding: 3px 3px 3px 5px;
+	cursor: pointer;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	white-space: nowrap;
+	border-left: 4px solid transparent;
+}
+.context-menu-items .context-menu-item-selected {
+	background-color: rgba(27,177,153, 0.1);
+	border-left-color: #1BB199;
+}
+
 </style>
 <script type="text/javascript" src="main.js"></script>
 </head>
 <body onload="load()">
 	<nav class="tabs" id="bar"></nav>
+	<nav>
+	  <ul id='context-menu' class="context-menu-items">
+	    <li>
+	      <span class="context-menu-item">
+	        Close Others
+	      </span>
+	    </li>
+	  </ul>
+	</nav>
 </body>
 </html>
