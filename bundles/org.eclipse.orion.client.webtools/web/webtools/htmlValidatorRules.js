@@ -17,7 +17,8 @@ define([
 ], function(){
 	
 	var defaultOptions = {
-	    'attr-bans': [
+	    'attr-bans': 1,
+	    'attr-bans-config': [
 	        'align',
 	        'background',
 	        'bgcolor',
@@ -30,6 +31,10 @@ define([
 	        'style',
 	        'width'
 	    ],
+	    'fig-req-figcaption': 1,
+	    'img-req-alt': 1,
+	    
+	    
 	    'indent-style': 'nonmixed',
 	    'indent-width': 4,
 	    'indent-width-cont': false,
@@ -54,7 +59,6 @@ define([
 	    'class-style': false,
 	    'id-class-ignore-regex': false,
 	    'href-style': false,
-	    'img-req-alt': true,
 	    'img-req-src': true,
 	    'csslint': false,
 	    'label-req-for': true,
@@ -79,9 +83,11 @@ define([
 		}
 		// Banned attributes
 		addRule('tag', function(element){
-			// Banned Attrs
-			var bannedAttrs = opts['attr-bans'];
-
+			if (!opts['attr-bans']) {
+		        return [];
+		    }
+		    
+			var bannedAttrs = opts['attr-bans-config'];
 		    if (!bannedAttrs || !element.attributes) {
 		        return [];
 		    }
@@ -91,20 +97,83 @@ define([
 		    var attrs = element.attributes;
 		    bannedAttrs.forEach(function (name) {
 		        if (attrs[name]) {
-		            issues.push(createProblem(attrs[name], 'attr-bans', 'The \'' + name + '\' attribute is banned.'));
+		            issues.push(createProblem(attrs[name], 'attr-bans', 'The \'' + name + '\' attribute is banned.', opts['attr-bans']));
 		        }
 		    });
 		    return issues;
 		});
+		// Require img alt
+		addRule('img', function(element){
+			if (!opts['img-req-alt']) {
+		        return [];
+		    }
+		
+		    var a = element.attributes;
+		
+		    if (a && a.alt && a.alt !== '') {
+		        return [];
+		    }
+		
+		    return createProblem(element.openrange, 'img-req-alt', 'The \'alt\' property must be set for image tags.', opts['img-req-alt']);
+		});
+		// Require figcaption
+		function figReqFigCaption(ele){
+			if (!opts['fig-req-figcaption']) {
+		        return [];
+		    }
+		
+		    if (ele.name === 'figure') {
+		        // get the children of this figure
+		        var children = ele.children;
+		
+		        // check for a figcaption element
+		        for (var i = 0; i < children.length; i++) {
+		            if (children[i].name === 'figcaption') {
+		                return [];
+		            }
+		        }
+		    }
+		    else if (ele.name === 'figcaption') {
+		        if (ele.parent && ele.parent.name === 'figure'){
+		            return [];
+		        }
+		    }
+		    return createProblem(ele.openrange, 'fig-req-figcaption', '\'figure\' must have a \'figcaption\', \'figcaption\' must be in a \'figure\' (for accessibility).', opts['fig-req-figcaption']);
+		    
+		}
+		addRule('figure', figReqFigCaption);
+		addRule('figcaption', figReqFigCaption);
+		
+		/*
+		 * label-req-for
+fig-req-figcaption
+id-no-dup
+
+Not sure about these next two. Should we enforce them?
+html-req-lang
+doctype-html5
+		 */
+		
 		return rules;
-	};
+	}
 	
-	function createProblem(node, id, message, severity){
+	function createProblem(nodeOrRange, id, message, severity){
+		var start, end = 0;
+		if (Array.isArray(nodeOrRange)){
+			start = nodeOrRange[0];
+			end = nodeOrRange[1];	
+		} else if (nodeOrRange.range){
+			start = nodeOrRange.range[0];
+			end = nodeOrRange.range[1];
+		}
+		if (typeof severity === 'number'){
+			severity = severity === 2 ? "error" : "warning";
+		}
 		return {
 			id: id,
 			description: message,
-			start: node.range[0],
-			end: node.range[1],
+			start: start,
+			end: end,
 			severity: severity ? severity : 'warning'
 		};
 	}

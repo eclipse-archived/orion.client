@@ -86,7 +86,7 @@ define("webtools/htmlValidator", [
 							}
 						}
 						if (node.name){
-							rules = ruleMap[node.name];
+							rules = ruleMap[node.name.toLowerCase()];
 							if (rules){
 								for (i = 0; i < rules.length; i++) {
 									addProblems(rules[i](node));

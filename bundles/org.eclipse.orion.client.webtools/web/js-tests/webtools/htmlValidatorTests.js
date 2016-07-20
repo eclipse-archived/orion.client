@@ -109,5 +109,129 @@ define([
 				});
 			});
 		});
+		describe('img-req-alt', function(){
+			it("img-req-alt no attr", function() {
+			    var val = setup({buffer: '<html><img></img></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 6,
+					     end: 11,
+					     severity: 'warning',
+					     description: "The 'alt' property must be set for image tags."
+					    }
+					]);
+				});
+			});
+			it("img-req-alt other attr", function() {
+			    var val = setup({buffer: '<html><img height="100%"></img></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 6,
+					     end: 25,
+					     severity: 'warning',
+					     description: "The 'alt' property must be set for image tags."
+					    }
+					]);
+				});
+			});
+			it("img-req-alt no attr casing", function() {
+			    var val = setup({buffer: '<HTML><IMG></IMG></HTML>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 6,
+					     end: 11,
+					     severity: 'warning',
+					     description: "The 'alt' property must be set for image tags."
+					    }
+					]);
+				});
+			});
+			it("img-req-alt no attr mixed casing", function() {
+			    var val = setup({buffer: '<HtMl><Img></imG></HTML>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 6,
+					     end: 11,
+					     severity: 'warning',
+					     description: "The 'alt' property must be set for image tags."
+					    }
+					]);
+				});
+			});
+			it("img-req-alt correct", function() {
+			    var val = setup({buffer: '<html><img alt="Text"></img></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					]);
+				});
+			});
+			it("img-req-alt correct casing", function() {
+			    var val = setup({buffer: '<html><IMG ALT="Text"></img></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					]);
+				});
+			});
+			it("img-req-alt correct odd casing", function() {
+			    var val = setup({buffer: '<html><ImG AlT="Text"></ImG></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					]);
+				});
+			});
+		});
+		describe('fig-req-figcaption', function(){
+			it("fig-req-figcaption figure no caption", function() {
+			    var val = setup({buffer: '<html><figure></figure></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 6,
+					     end: 14,
+					     severity: 'warning',
+					     description: "'figure' must have a 'figcaption', 'figcaption' must be in a 'figure' (for accessibility)."
+					    }
+					]);
+				});
+			});
+			it("fig-req-figcaption caption no figure", function() {
+			    var val = setup({buffer: '<html><figcaption></figcaption></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 6,
+					     end: 18,
+					     severity: 'warning',
+					     description: "'figure' must have a 'figcaption', 'figcaption' must be in a 'figure' (for accessibility)."
+					    }
+					]);
+				});
+			});
+			it("fig-req-figcaption caption outside figure", function() {
+			    var val = setup({buffer: '<html><figure><figcaption><figure></figure></figcaption></figure></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 26,
+					     end: 34,
+					     severity: 'warning',
+					     description: "'figure' must have a 'figcaption', 'figcaption' must be in a 'figure' (for accessibility)."
+					    }
+					]);
+				});
+			});
+			it("fig-req-figcaption caption and figure", function() {
+			    var val = setup({buffer: '<html><figure><figcaption></figcaption></figure></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					]);
+				});
+			});
+			it("fig-req-figcaption inline caption", function() {
+			    var val = setup({buffer: '<html><figure><figcaption/></figure></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					]);
+				});
+			});
+		});
+
 	});
 });
