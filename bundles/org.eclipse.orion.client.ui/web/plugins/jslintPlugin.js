@@ -14,8 +14,10 @@
 define([
 	"orion/plugin",
 	"orion/jslintworker",
-	"orion/objects"
-], function(PluginProvider, _, objects) {
+	"orion/objects",
+	"i18n!orion/nls/messages",
+	"orion/i18nUtil"
+], function(PluginProvider, _, objects, Messages, i18nUtil) {
 	var DEFAULT_VALIDATION_OPTIONS = {
 			bitwise: false, eqeqeq: true, es5: true, immed: true, indent: 1, maxerr: 300, newcap: true, nomen: false,
 			onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false
@@ -59,6 +61,33 @@ define([
 	}
 
 	/**
+	 * @description Returns a description message for a JSLint error. Looks at the raw data 
+	 * from the error and uses the Orion NLS messages key if one is available
+	 * @param error The JSLint error to get a description for
+	 * @returns returns Error message either from error.reason or a translated string
+	 */
+	function _translateError(error){
+		var raw = error.raw;
+		if (raw){
+			if (typeof Messages[raw] === 'string'){
+				if (raw.match(/\{a\}|\{b\}|\{c\}|\{d\}/)){
+					return i18nUtil.formatMessage(Messages[raw], error.a, error.b, error.c, error.d);
+				}
+				return Messages[raw];
+			}
+		} else {
+			// If there is an error it may contain a % scanned that we have to translate without raw data
+			var match = /(.*)\(([0-9]*)\%/.exec(error.reason);
+			if (match){
+				return i18nUtil.formatMessage(Messages[match[1].trim()], match[2]);
+			} else if (Messages[error.reason.trim()]){
+				return i18nUtil.formatMessage(Messages[error.reason.trim()], '100'); //$NON-NLS-1$
+			}
+		}
+		return error.reason;
+	}
+
+	/**
 	 * @param {Object} options
 	 * @param {String} contents Text of file.
 	 */
@@ -80,7 +109,7 @@ define([
 						}
 					}
 					// Convert to format expected by validation service
-					error.description = error.reason;
+					error.description = _translateError(error);
 					error.start = error.character;
 					error.end = end;
 					error = cleanup(error);
