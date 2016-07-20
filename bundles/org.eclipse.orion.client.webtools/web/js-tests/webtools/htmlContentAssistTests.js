@@ -524,14 +524,13 @@ define([
     			]);
     		});
     	});
-    	// TODO The parser does not create a start tag element so we don't recognize that we are looking for attributes
-    	it.skip('Tag attribute proposals incomplete tag 1', function() {
+    	it('Tag attribute proposals incomplete tag 1', function() {
     		var _o = setup({buffer: '<zzz '});
     		return assist.computeContentAssist(_o.editorContext, {offset: 5}).then(function(proposals) {
     			assertGlobalTagAttributes(proposals);
     		});
     	});
-    	it.skip('Tag attribute proposals incomplete tag 2', function() {
+    	it('Tag attribute proposals incomplete tag 2', function() {
     		var _o = setup({buffer: '<body><zzz </body>'});
     		return assist.computeContentAssist(_o.editorContext, {offset: 11}).then(function(proposals) {
     			assertGlobalTagAttributes(proposals);

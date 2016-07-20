@@ -159,7 +159,7 @@ define([
 			var index = offset;
 			while (index > 0) {
 				var char = text.substring(index - 1, index);
-				if (/[A-Za-z0-9_-]/.test(char)) {
+				if (/[A-Za-z0-9_\-]/.test(char)) {
 					index--;
 				} else {
 					break;
@@ -171,10 +171,9 @@ define([
 		 * @callback 
 		 */
 		computePrefix: function(editorContext, offset) {
-			var that = this;
 			return editorContext.getText().then(function (text) {
-				return text.substring(that._getPrefixStart(text, offset), offset);
-			});
+				return text.substring(this._getPrefixStart(text, offset), offset);
+			}.bind(this));
 		},
 		/**
 		 * @callback 
