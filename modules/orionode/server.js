@@ -117,16 +117,19 @@ if (process.versions.electron) {
 	var electron = require('electron'),
 		autoUpdater = electron.autoUpdater,
 		dialog = electron.dialog,
-		spawn = require('child_process').spawn;
+		spawn = require('child_process').spawn,
+		allPrefs = prefs.readPrefs();
 
 	configParams.isElectron = true;
-
+	electron.app.buildId = configParams["orion.buildId"];
+	
 	// Set necessary URL for autoUpdater to grab latest release
 	var feedURL = configParams["orion.autoUpdater.url"];
 	if (feedURL) {
 		var platform = os.platform() + '_' + os.arch(),
-		version = electron.app.getVersion();
-		autoUpdater.setFeedURL(feedURL + '/' + platform + '/' + version);
+		version = electron.app.getVersion(),
+		updateChannel = allPrefs.user.updateChannel ? allPrefs.user.updateChannel : configParams["orion.autoUpdater.defaultChannel"];
+		autoUpdater.setFeedURL(feedURL + '/channel/' + updateChannel + '/' + platform + '/' + version);
 	}
 
 	var handleSquirrelEvent = function() {
@@ -174,7 +177,6 @@ if (process.versions.electron) {
 
 	electron.app.on('ready', function() {
 		var updateDownloaded  = false;
-		var allPrefs = prefs.readPrefs();
 		var prefsWorkspace = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.currentWorkspace;
 		if (prefsWorkspace) {
 			configParams.workspace = prefsWorkspace;
@@ -213,7 +215,7 @@ if (process.versions.electron) {
 			console.log(error);
 		});
 		function scheduleUpdateChecks () {
-			var checkInterval = 1000 * 60 * 30; // check for updates every 30 minutes
+			var checkInterval = parseInt(configParams["orion.autoUpdater.checkInterval"], 10) * 1000 * 60; // parse checkInterval in minutes
 			var checkforUpdates = function() {
 				autoUpdater.checkForUpdates();
 			}.bind(this);

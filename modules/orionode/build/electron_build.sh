@@ -91,6 +91,8 @@ if [ -z "$UPDATE_SERVER" ]; then
 fi
 update_url=$(echo ${UPDATE_SERVER}"update" | sed -e 's/[\/&.-]/\\&/g') # for autoUpdater
 download_url=$(echo ${UPDATE_SERVER}"download" | sed -e 's/[\/&.-]/\\&/g') # for remoteReleases
+check_interval="30" # orion.autoUpdater.checkInterval, in minutes
+default_channel="stable"
 
 # update orion.conf and package.json
 update_config_files() {
@@ -102,6 +104,8 @@ update_config_files() {
 	pkg_version=`echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
 	sed -i .bak 's/\"version\": \"'"${old_version}"'\"/\"version\"\:\ \"'"${pkg_version}"'\"/' orionode/package.json
 	sed -i .bak 's/orion\.autoUpdater\.url\=/orion\.autoUpdater\.url\='"${update_url}"'/' orionode/orion.conf
+	sed -i .bak 's/orion\.autoUpdater\.checkInterval\=/orion\.autoUpdater\.checkInterval\='"${check_interval}"'/' orionode/orion.conf
+	sed -i .bak 's/orion\.autoUpdater\.defaultChannel\=/orion\.autoUpdater\.defaultChannel\='"${default_channel}"'/' orionode/orion.conf
 }
 
 # set Windows remoteReleases URL to latest successful build # for delta files
