@@ -46,14 +46,7 @@ define([
 			"no-extra-parens" : 1,
 			"no-extra-semi": 1,
 			"no-fallthrough" : 2, 
-			"no-implicit-coercion" : [
-				0,
-				{
-					"boolean": true,
-					"number" : true,
-					"string" : true
-				}
-			],
+			"no-implicit-coercion" : [1, { "boolean": true, "number" : true, "string" : true }],
 			"no-implied-eval" : 0,
 			"no-invalid-regexp": 2,
 			"no-irregular-whitespace" : 0,

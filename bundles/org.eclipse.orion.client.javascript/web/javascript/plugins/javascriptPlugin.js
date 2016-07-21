@@ -1848,7 +1848,7 @@ define([
 	 				 	        	            	id: "no-implicit-coercion",  //$NON-NLS-1$
     			 	        	                	name: javascriptMessages["no-implicit-coercion"],
     			 	        	                	type: "number",  //$NON-NLS-1$
-    			 	        	                	defaultValue: ignore,
+    			 	        	                	defaultValue: warning,
     			 	        	                	options: severities
     			 	        	                },
     			 	        	                {
