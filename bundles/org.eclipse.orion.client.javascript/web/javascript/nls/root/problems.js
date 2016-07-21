@@ -118,6 +118,7 @@ define({
 	'no-void-description' : 'Disallow use of the void operator.',
 	'no-extra-bind' : 'The function binding is unnecessary.',
 	'no-extra-bind-description' : 'Disallow unnecessary function binding.',
+	'no-implicit-coercion-description' : 'Disallow the type conversion with shorter notations.',
 		
 	// Rules consumed from ESLint
 	'accessor-pairs-description' : "Report when accessors don't come in pairs (getter, setter)",

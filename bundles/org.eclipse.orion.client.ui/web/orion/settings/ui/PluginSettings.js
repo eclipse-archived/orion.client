@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -81,6 +81,18 @@ define([
 	var PropertyTextField = function(options) {
 		PropertyWidget.apply(this, arguments);
 		SettingsTextfield.apply(this, arguments);
+		if (this.node && options.indent) {
+			var spans = this.node.getElementsByTagName('span');
+			if (spans) {
+				var span = spans[0];
+				var existingClassName = span.className;
+				if (existingClassName) {
+					span.className += " setting-indent";
+				} else {
+					span.className = "setting-indent";
+				}
+			}
+		}
 	};
 	objects.mixin(PropertyTextField.prototype, SettingsTextfield.prototype, PropertyWidget.prototype, {
 		postCreate: function() {
@@ -110,6 +122,18 @@ define([
 	var PropertyCheckbox = function(options) {
 		PropertyWidget.apply(this, arguments);
 		SettingsCheckbox.apply(this, arguments);
+		if (this.node && options.indent) {
+			var spans = this.node.getElementsByTagName('span');
+			if (spans) {
+				var span = spans[0];
+				var existingClassName = span.className;
+				if (existingClassName) {
+					span.className += " setting-indent";
+				} else {
+					span.className = "setting-indent";
+				}
+			}
+		}
 	};
 	objects.mixin(PropertyCheckbox.prototype, SettingsCheckbox.prototype, PropertyWidget.prototype, {
 		change: function(event) {
@@ -131,6 +155,18 @@ define([
 	var PropertySelect = function(options) {
 		PropertyWidget.apply(this, arguments);
 		SettingsSelect.apply(this, arguments);
+		if (this.node && options.indent) {
+			var spans = this.node.getElementsByTagName('span');
+			if (spans) {
+				var span = spans[0];
+				var existingClassName = span.className;
+				if (existingClassName) {
+					span.className += " setting-indent";
+				} else {
+					span.className = "setting-indent";
+				}
+			}
+		}
 	};
 	objects.mixin(PropertySelect.prototype, SettingsSelect.prototype, PropertyWidget.prototype, {
 		postCreate: function() {
@@ -177,11 +213,10 @@ define([
 	};
 	objects.mixin(PropertiesWidget.prototype, {
 		createElements: function() {
-			var self = this;
 			this.children = [];
 			this.initConfiguration().then(function(configuration) {
-				self.createChildren(configuration);
-			});
+				this.createChildren(configuration);
+			}.bind(this));
 		},
 		startup: function() {
 			this.createElements();
@@ -198,16 +233,18 @@ define([
 			this.node.appendChild(childWidget.node);
 			childWidget.show();
 		},
-		createChildren: function(configuration) {
-			var self = this;
-			this.setting.getAttributeDefinitions().forEach(function(property) {
-				var options = {
-					config: configuration,
-					property: property,
-					changeProperty: self.changeProperty.bind(self, property) ,
-					serviceRegistry: self.serviceRegistry
-				};
-				var widget;
+		createChildren: function(configuration, parentAttribute) {
+			var root = parentAttribute ? parentAttribute : this.setting;
+			root.getAttributeDefinitions().forEach(function(property) {
+				var dependsOn = property.getDependsOn(), 
+					options = {
+						indent: typeof dependsOn === 'string',
+						config: configuration,
+						property: property,
+						changeProperty: this.changeProperty.bind(this, property) ,
+						serviceRegistry: this.serviceRegistry
+					},
+					widget;
 				if (property.getOptionValues()) {
 					// Enumeration
 					widget = new PropertySelect(options);
@@ -222,8 +259,11 @@ define([
 							break;
 					}
 				}
-				self.addChild(widget);
-			});
+				this.addChild(widget);
+				if(Array.isArray(property.children) && property.children.length > 0) {
+					this.createChildren(configuration, property);
+				}
+			}.bind(this));
 		},
 		initConfiguration: function() {
 			return this.controller.initConfiguration();
@@ -416,6 +456,7 @@ define([
 
 		this.render(this.parent, this.serviceRegistry, this.settings, this.title);
 	}
+
 	function getEslintSettings(fileClient, projectPath, callback) {
 		var eslintrcjs = projectPath + SettingsList.prototype.ESLINTRC_JS;
 		return fileClient.read(eslintrcjs, false, false, {readIfExists: true}).then(function(contents) {
@@ -516,25 +557,25 @@ define([
 		restore: function(pid) {
 			var deferreds = [];
 			for(var i = 0; i < this.settings.length; i++) {
-			    var setting = this.settings[i];
-	        	    var preferences = this.serviceRegistry.getService('orion.core.preferences'); //$NON-NLS-1$
-			    if(pid) {
-			        if(setting.getPid() === pid) {
-				        deferreds.push(new ConfigController(preferences, this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
-				        deferreds.push(new ConfigController(this.prefService, this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
-				    }
+				var setting = this.settings[i];
+				var preferences = this.serviceRegistry.getService('orion.core.preferences'); //$NON-NLS-1$
+				if(pid) {
+					if(setting.getPid() === pid) {
+						deferreds.push(new ConfigController(preferences, this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
+						deferreds.push(new ConfigController(this.prefService, this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
+					}
 				} else {
-				    deferreds.push(new ConfigController(preferences, this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
-				    deferreds.push(new ConfigController(this.prefService, this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
+					deferreds.push(new ConfigController(preferences, this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
+					deferreds.push(new ConfigController(this.prefService, this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset()); //$NON-NLS-1$
 				}
 			}
 			if(deferreds.length > 0) { 
-    			Deferred.all(deferreds, function(err) { return err; }).then(function() {
-    				this.parent.innerHTML = ""; // empty
-    				
-    				this.render(this.parent, this.serviceRegistry, this.settings, this.title);
-    				this.serviceRegistry.getService("orion.page.message").setProgressResult(messages["settingsRestored"]); //$NON-NLS-1$
-    			}.bind(this));
+				Deferred.all(deferreds, function(err) { return err; }).then(function() {
+					this.parent.innerHTML = ""; // empty
+
+					this.render(this.parent, this.serviceRegistry, this.settings, this.title);
+					this.serviceRegistry.getService("orion.page.message").setProgressResult(messages["settingsRestored"]); //$NON-NLS-1$
+				}.bind(this));
 			}
 		},
 		render: function(parent, serviceRegistry, settings, categoryTitle) {
@@ -606,7 +647,7 @@ define([
 							}.bind(this));
 					}
 				}
-		}
+			}
 			for (var i=0; i<settings.length; i++) {
 				var setting = settings[i];
 				var sectionId = 'settings.section.'; //$NON-NLS-1$

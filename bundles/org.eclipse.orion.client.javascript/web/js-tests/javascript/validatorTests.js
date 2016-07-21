@@ -13341,6 +13341,249 @@ define([
 								});
 						});
 					});
+
+					// no-implicit-coercion --------------------------------------------
+					describe('no-implicit-coercion', function() {
+						var RULE_ID = "no-implicit-coercion";
+						it("flag invalid coercion for !!", function(callback) {
+							var topic = "var foo = {}; var b = !!foo;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-implicit-coercion",
+										severity: 'error',
+										description: 'use `Boolean(foo)` instead.',
+										start: 22,
+										end: 27
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid coercion for ~", function(callback) {
+							var topic = "var foo = \"\"; var b =  ~foo.indexOf(\".\");";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-implicit-coercion",
+										severity: 'error',
+										description: 'use `foo.indexOf(".") !== -1` instead.',
+										start: 23,
+										end: 40
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid coercion for +", function(callback) {
+							var topic = "var foo = {}; var n = +foo;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-implicit-coercion",
+										severity: 'error',
+										description: 'use `Number(foo)` instead.',
+										start: 22,
+										end: 26
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid coercion for 1 *", function(callback) {
+							var topic = "var foo = {}; var n = 1 * foo;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-implicit-coercion",
+										severity: 'error',
+										description: 'use `Number(foo)` instead.',
+										start: 22,
+										end: 29
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid coercion for string", function(callback) {
+							var topic = "var foo = 0; var s = \"\" + foo;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-implicit-coercion",
+										severity: 'error',
+										description: 'use `String(foo)` instead.',
+										start: 21,
+										end: 29
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid coercion for string 2", function(callback) {
+							var topic = "var foo = 0; foo += \"\";";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-implicit-coercion",
+										severity: 'error',
+										description: 'use `foo = String(foo)` instead.',
+										start: 13,
+										end: 22
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid coercion for Boolean()", function(callback) {
+							var topic = "var foo = 0; var b = Boolean(foo);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid coercion for indexOf() !==", function(callback) {
+							var topic = "var foo = \"\"; var b = foo.indexOf(\".\") !== -1;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid coercion for ~", function(callback) {
+							var topic = "var foo = 0; var n = ~foo;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid coercion for Number()", function(callback) {
+							var topic = "var foo = {}; var n = Number(foo);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid coercion for parseFloat()", function(callback) {
+							var topic = "var foo = {}; var n = parseFloat(foo);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid coercion for parseInt()", function(callback) {
+							var topic = "var foo = {}; var n = parseInt(foo, 10);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid coercion for String()", function(callback) {
+							var topic = "var foo = {}; var s = String(foo);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should flag invalid coercion for + when disabled", function(callback) {
+							var topic = "var foo = {}; var n = +foo;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {"number" : false}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should flag invalid coercion for + when disabled 2", function(callback) {
+							var topic = "/*eslint no-implicit-coercion: [2, {\"number\": false } ]*/\n" +
+										"var foo = {}; var n = +foo;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};
