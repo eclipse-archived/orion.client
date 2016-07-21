@@ -313,6 +313,13 @@ define("webtools/cssContentAssist", [
 				}
 				
 				if (0 < proposals.length) {
+					proposals.sort(function(p1, p2) {
+						if (p1.name < p2.name) return -1;
+						if (p1.name > p2.name) return 1;
+						if (p1.description < p2.description) return -1;
+						if (p1.description > p2.description) return 1;
+						return 0;
+					});
 					proposals.splice(0, 0,{
 						proposal: '',
 						description: Messages['keywordsAssistTitle'],
@@ -347,10 +354,11 @@ define("webtools/cssContentAssist", [
 			}
 			
 			if (0 < proposals.length) {
-				//sort the proposals by name
 				proposals.sort(function(p1, p2) {
 					if (p1.name < p2.name) return -1;
 					if (p1.name > p2.name) return 1;
+					if (p1.description < p2.description) return -1;
+					if (p1.description > p2.description) return 1;
 					return 0;
 				});
 				// if any templates were added to the list of 

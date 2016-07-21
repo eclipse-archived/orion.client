@@ -62,24 +62,37 @@ define([
 	function assertProposals(computed, expected) {
 		assert(Array.isArray(computed), 'There must have been a computed array of proposals');
 		assert(Array.isArray(expected), 'There must be an expected array of proposals');
-		var collectKeywordsProposals = [];
-		var collect = false;
-		computed.forEach(function(prop) {
-			if (collect) {
-				collectKeywordsProposals.push(prop);
-			}
-			if (prop && prop.description) {
-				if (prop.description === "Keywords") {
-					collect = true;
-				}
-			}
-		});
-		assert.equal(collectKeywordsProposals.length, expected.length, 'The number of computed proposals does not match the expected count');
-		for (var i = 0; i < collectKeywordsProposals.length; i++) {
-			var c = collectKeywordsProposals[i];
+		assert.equal(computed.length, expected.length, 'The number of computed proposals does not match the expected count. Actual: ' + stringify(computed));
+		for (var i = 0; i < computed.length; i++) {
+			var c = computed[i];
 			var e = expected[i];
-			assert.equal(c.proposal, e.proposal, 'The proposals do not match');
+			if (e.proposal){
+				assert.equal(c.proposal, e.proposal, 'The proposals do not match. Actual: ' + stringify(computed));
+			}
+			if (e.description){
+				assert.equal(c.description, e.description, 'The proposal descriptions do not match. Actual: ' + stringify(computed));
+			}
+			if (e.name){
+				assert.equal(c.name, e.name, 'The proposal names do not match. Actual: ' + stringify(computed));
+			}
 		}
+	}
+	
+	function stringify(proposals){
+		var result = "\n";
+		for (var i = 0; i < proposals.length; i++) {
+			result += '{ ';
+			if (proposals[i].name){
+				result += "name: '" + proposals[i].name + "', ";
+			} else if (proposals[i].description){
+				result += "description: '" + proposals[i].description + "', ";
+			}
+			if (proposals[i].proposal){
+				result += "proposal: '" + proposals[i].proposal + "'";
+			}
+			result += "},\n";
+		}
+		return result;
 	}
 	
 	function getPrefix(assist, editorContext, context) {
@@ -104,11 +117,21 @@ define([
 				contxt.prefix = prefix;
 				return assist.computeContentAssist(config.editorContext, contxt).then(function(proposals) {
 					var expected = [
-						{ proposal: '-bottom'},
-						{ proposal: '-left'},
-						{ proposal: '-right'},
-						{ proposal: '-top'},
-						{ proposal: ''},
+					{ description: 'Templates', },
+					{ description: 'padding - padding pixel style', proposal: ': valuepx;'},
+					{ description: 'padding - padding top right bottom left style', proposal: ': toppx leftpx bottompx rightpx;'},
+					{ description: 'padding - padding top right,left bottom style', proposal: ': toppx right_leftpx bottompx;'},
+					{ description: 'padding - padding top,bottom right,left style', proposal: ': top_bottompx right_leftpx'},
+					{ description: 'padding-bottom - padding-bottom pixel style', proposal: '-bottom: valuepx;'},
+					{ description: 'padding-left - padding-left pixel style', proposal: '-left: valuepx;'},
+					{ description: 'padding-right - padding-right pixel style', proposal: '-right: valuepx;'},
+					{ description: 'padding-top - padding-top pixel style', proposal: '-top: valuepx;'},
+					{ description: 'Keywords', },
+					{ description: 'padding', },
+					{ description: 'padding-bottom', proposal: '-bottom'},
+					{ description: 'padding-left', proposal: '-left'},
+					{ description: 'padding-right', proposal: '-right'},
+					{ description: 'padding-top', proposal: '-top'},
 					];
 					assertProposals(proposals, expected);
 				});
@@ -131,10 +154,16 @@ define([
 				contxt.prefix = prefix;
 				return assist.computeContentAssist(config.editorContext, contxt).then(function(proposals) {
 					var expected = [
-						{ proposal: 'bottom'},
-						{ proposal: 'left'},
-						{ proposal: 'right'},
-						{ proposal: 'top'},
+						{ description: 'Templates', },
+						{ description: 'padding-bottom - padding-bottom pixel style', proposal: 'bottom: valuepx;'},
+						{ description: 'padding-left - padding-left pixel style', proposal: 'left: valuepx;'},
+						{ description: 'padding-right - padding-right pixel style', proposal: 'right: valuepx;'},
+						{ description: 'padding-top - padding-top pixel style', proposal: 'top: valuepx;'},
+						{ description: 'Keywords', },
+						{ description: 'padding-bottom', proposal: 'bottom'},
+						{ description: 'padding-left', proposal: 'left'},
+						{ description: 'padding-right', proposal: 'right'},
+						{ description: 'padding-top', proposal: 'top'},
 					];
 					assertProposals(proposals, expected);
 				});
