@@ -14,7 +14,11 @@
 			  domReady: 'requirejs/domReady'
 		  }
 		});
-
+		require({
+		    config: {
+		        //'orion/jslint/nls/messages': {root: true, ja: true}
+		    }
+		});		    
 		require(["plugins/jslintPlugin"], function(plugin) {
 			plugin.connect();
 		});
