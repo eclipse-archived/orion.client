@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -45,6 +45,9 @@ define([
 			});
 			return serviceRegistry.getService(serviceRef);
 		};
+		/**
+		 * @callback
+		 */
 		tracker.removedService = function(serviceRef, service) {
 			forEach(serviceRef, PROPERTY_CLASSES, function(ocd) {
 				delete ocdsMap[ocd.id];
@@ -91,8 +94,26 @@ define([
 			throw '"properties" property is missing or empty: ' + JSON.stringify(ocdJson); //$NON-NLS-0$
 		}
 		this.props = [];
-		for (var i=0; i < props.length; i++) {
-			this.props.push(new AttributeDefinitionImpl(props[i]));
+		//cache dependents in declaration order to attach after
+		var deps = Object.create(null);
+		for (var i = 0, len = props.length; i < len; i++) {
+			var attr = new AttributeDefinitionImpl(props[i]),
+				dep = attr.getDependsOn();
+			if(dep) {
+				if(!Array.isArray(deps[dep])) {
+					deps[dep] = [];
+				}
+				deps[dep].push(attr);
+			} else {
+				this.props.push(attr);
+			}
+		}
+		//attach dependents
+		for(i = 0, len = this.props.length; i < len; i++) {
+			var children = deps[this.props[i].getId()];
+			if(Array.isArray(children) && children.length > 0) {
+				this.props[i].children = children;
+			}
 		}
 	};
 	ObjectClassDefinitionImpl.prototype = {
@@ -125,6 +146,8 @@ define([
 		this.options = attrJson.options || null;
 		this.type = attrJson.type || 'string'; //$NON-NLS-0$
 		this.defaultValue = typeof attrJson.defaultValue !== 'undefined' ? attrJson.defaultValue : null; //$NON-NLS-0$
+		this.dependsOn = typeof attrJson.dependsOn !== 'undefined' ? attrJson.dependsOn : null; //$NON-NLS-0$
+		this.children = [];
 		if (!this.id) {
 			throw 'Missing "id" property: ' + JSON.stringify(attrJson); //$NON-NLS-0$
 		}
@@ -161,6 +184,26 @@ define([
 		},
 		getDefaultValue: function() {
 			return this.defaultValue;
+		},
+		/**
+		 * @name getDependsOn
+		 * @description Returns the preference attribute ```dependsOn```
+		 * @function
+		 * @returns {String} The id of the preference this one depends on
+		 * @since 13.0
+		 */
+		getDependsOn: function getDependsOn() {
+			return this.dependsOn;
+		},
+		/**
+		 * @name getAttributeDefinitions
+		 * @description Returns the list of dependent properties
+		 * @function
+		 * @returns {Array.<AttributeDefinitionImpl>} The id of the preference this one depends on
+		 * @since 13.0
+		 */
+		getAttributeDefinitions: function getAttributeDefinitions() {
+			return this.children;
 		}
 	};
 

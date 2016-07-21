@@ -167,7 +167,10 @@ define({
 	'no-void' : 'Disallow use of the void operator:',
 	'no-extra-bind' : 'Disallow unnecessary calls to \'.bind()\':',
 	'NoExtraBindFixName' : 'Remove \'bind\' call',
-
+	'no-implicit-coercion' : 'Disallow the type conversion with shorter notations:',
+	'no-implicit-coercion-boolean' : 'Report type conversion to boolean:',
+	'no-implicit-coercion-number' : 'Report type conversion to number:',
+	'no-implicit-coercion-string' : 'Report type conversion to string:',
 	//All refs
 	'functionDecls': 'Function Declarations',
 	'functionCalls': 'Function Calls',

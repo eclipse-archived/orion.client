@@ -46,6 +46,14 @@ define([
 			"no-extra-parens" : 1,
 			"no-extra-semi": 1,
 			"no-fallthrough" : 2, 
+			"no-implicit-coercion" : [
+				0,
+				{
+					"boolean": true,
+					"number" : true,
+					"string" : true
+				}
+			],
 			"no-implied-eval" : 0,
 			"no-invalid-regexp": 2,
 			"no-irregular-whitespace" : 0,
@@ -194,7 +202,11 @@ define([
 			"no-fallthrough" : {
 				description: Messages['no-fallthrough-description'],
 				url: 'http://eslint.org/docs/rules/no-fallthrough'
-			}, 
+			},
+			"no-implicit-coercion" : {
+				description: Messages['no-implicit-coercion-description'],
+				url: 'http://eslint.org/docs/rules/no-implicit-coercion'
+			},
 			"no-implied-eval" : {
 				description: Messages['no-implied-eval-description'],
 				url: 'http://eslint.org/docs/rules/no-implied-eval'

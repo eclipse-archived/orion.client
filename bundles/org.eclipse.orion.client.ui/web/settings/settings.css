@@ -233,6 +233,12 @@ html[dir="rtl"] .setting-row { /* ACGC */
 	vertical-align: top;
 }
 
+.setting-indent {
+	min-width: calc(30% - 20px);
+	width: 180px;
+	padding-left: 20px;
+}
+
 .setting-repository-label {
 	min-width: 330px;
 	display: inline-block;

@@ -30,19 +30,17 @@ define([
 		 * @param {Object} [key] Optional key to use for complex rule configuration.
 		 */
 		setOption: function(ruleId, value, key) {
-			if (typeof value === "number") {
-				if(Array.isArray(this.rules[ruleId])) {
-					var ruleConfig = this.rules[ruleId];
-					if (key) {
-						ruleConfig[1] = ruleConfig[1] || {};
-						ruleConfig[1][key] = value;
-					} else {
-						ruleConfig[0] = value;
-					}
+			if(Array.isArray(this.rules[ruleId])) {
+				var ruleConfig = this.rules[ruleId];
+				if (key) {
+					ruleConfig[1] = ruleConfig[1] || {};
+					ruleConfig[1][key] = value;
+				} else {
+					ruleConfig[0] = value;
 				}
-				else {
-					this.rules[ruleId] = value;
-				}
+			}
+			else {
+				this.rules[ruleId] = value;
 			}
 		},
 		
@@ -51,12 +49,12 @@ define([
 		 * @function
 		 */
 		setDefaults: function setDefaults() {
-		    this.rules = Object.create(null);
-		    var keys = Object.keys(this.defaults);
-		    for(var i = 0; i < keys.length; i++) {
-		        var key = keys[i];
-		        this.rules[key] = this.defaults[key];
-		    }
+			this.rules = Object.create(null);
+			var keys = Object.keys(this.defaults);
+			for (var i = 0; i < keys.length; i++) {
+				var key = keys[i];
+				this.rules[key] = this.defaults[key];
+			}
 		}
 	};
 
@@ -98,7 +96,7 @@ define([
 	 * @returns {String} the severity string
 	 */
 	function getSeverity(prob) {
-		var val = 2;
+		var val = prob.severity;
 		var ruleConfig = config.rules[prob.ruleId];
 		if(Array.isArray(ruleConfig)) {
 			// Hack for missing-doc which overloads the prob.related object to expose which subrule
@@ -106,12 +104,7 @@ define([
 			var related = prob.related, ruleType = related && related.type;
 			if (prob.ruleId === "missing-doc" && ruleConfig[1][ruleType] !== undefined) {
 				val = ruleConfig[1][ruleType];
-			} else {
-				val = ruleConfig[0];
 			}
-		}
-		else {
-			val = prob.severity;
 		}
 		switch (val) {
 			case 1: return "warning"; //$NON-NLS-0$
@@ -299,23 +292,35 @@ define([
 			var oldconfig = properties.pid === 'eslint.config';
 			var keys = Object.keys(properties);
 			var seen = Object.create(null);
-			for(var i = 0; i < keys.length; i++) {
-			    var key = keys[i];
-			    var ruleId = key;
-			    if(oldconfig && config.rules[key] !== config.defaults[key]) {
-			        //don't overwrite a new setting with an old one
-		            continue;
-			    }
-			    var legacy = this._legacy[ruleId];
-			    if(typeof legacy === 'string') {
-			        ruleId = legacy;
-			        if(seen[ruleId]) {
-			            //don't overwrite a new pref name with a legacy one
-			            continue;
-			        }
-			    }
-			    seen[ruleId] = true;
-			    config.setOption(ruleId, properties[key]);
+			for (var i = 0; i < keys.length; i++) {
+				var key = keys[i];
+				var index = key.indexOf(':');
+				var subKey = null;
+				var realKey = key;
+				if (index !== -1) {
+					realKey = key.substring(0, index);
+					subKey = key.substring(index + 1);
+				}
+				var ruleId = realKey;
+				if (oldconfig && config.rules[realKey] !== config.defaults[realKey]) {
+					//don't overwrite a new setting with an old one
+					continue;
+				}
+				var legacy = this._legacy[ruleId];
+				if (typeof legacy === 'string') {
+					ruleId = legacy;
+					if (seen[ruleId]) {
+						//don't overwrite a new pref name with a legacy one
+						continue;
+					}
+				}
+				seen[ruleId] = true;
+				var value = properties[key];
+				if (subKey) {
+					config.setOption(ruleId, value, subKey);
+				} else {
+					config.setOption(ruleId, value);
+				}
 			}
 		},
 		

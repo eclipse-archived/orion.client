@@ -1843,6 +1843,34 @@ define([
     			 	        	                	type: "number",  //$NON-NLS-1$
     			 	        	                	defaultValue: warning,
     			 	        	                	options: severities
+    			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "no-implicit-coercion",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["no-implicit-coercion"],
+    			 	        	                	type: "number",  //$NON-NLS-1$
+    			 	        	                	defaultValue: ignore,
+    			 	        	                	options: severities
+    			 	        	                },
+    			 	        	                {
+	 				 	        	   				id: "no-implicit-coercion:boolean",  //$NON-NLS-1$
+	 				 	        	   				dependsOn: "no-implicit-coercion",
+    			 	        	                	name: javascriptMessages["no-implicit-coercion-boolean"],
+    			 	        	                	type: "boolean", //$NON-NLS-1$
+    			 	        	                	defaultValue: true,
+    			 	        	                },
+    			 	        	                {
+	 				 	        	   				id: "no-implicit-coercion:number",  //$NON-NLS-1$
+	 				 	        	   				dependsOn: "no-implicit-coercion",
+    			 	        	                	name: javascriptMessages["no-implicit-coercion-number"],
+    			 	        	                	type: "boolean", //$NON-NLS-1$
+    			 	        	                	defaultValue: true,
+    			 	        	                },
+    			 	        	                {
+	 				 	        	   				id: "no-implicit-coercion:string",  //$NON-NLS-1$
+	 				 	        	   				dependsOn: "no-implicit-coercion",
+    			 	        	                	name: javascriptMessages["no-implicit-coercion-string"],
+    			 	        	                	type: "boolean", //$NON-NLS-1$
+    			 	        	                	defaultValue: true,
     			 	        	                }
 										]
 				 	            },
