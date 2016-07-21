@@ -15,7 +15,7 @@ define([
 	"orion/plugin",
 	"orion/jslintworker",
 	"orion/objects",
-	"i18n!orion/nls/messages",
+	"i18n!orion/jslint/nls/messages",
 	"orion/i18nUtil"
 ], function(PluginProvider, _, objects, Messages, i18nUtil) {
 	var DEFAULT_VALIDATION_OPTIONS = {
