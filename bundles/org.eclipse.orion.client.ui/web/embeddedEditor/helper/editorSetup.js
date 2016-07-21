@@ -112,7 +112,7 @@ define([
 			}.bind(this), true);
 			
 			if(options.contentType && typeof options.contents === "string") {
-				this.editorView.setContents(options.contents, options.contentType);
+				this.editorView.setContents(options.contents, options.contentType, {noFocus: options.noFocus});
 			}
 			return new Deferred().resolve(this.editorView);
 		}
