@@ -1332,7 +1332,16 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				this._highlightCurrentLine(this._textView.getSelections());
 			}
 		},
-
+		
+		/**
+		 * Sets the editor's noFocus flag.
+		 *
+		 * @param {Boolean} if true, does not set focus on the editor.
+		 * @param {Boolean} noFocus
+		 */
+		setNoFocus: function(noFocus) {
+			this._noFocus = noFocus;
+		},
 		/**
 		 * Sets the editor's contents.
 		 *
@@ -1344,7 +1353,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 */
 		setInput: function(title, message, contents, contentsSaved, noFocus) {
 			BaseEditor.prototype.setInput.call(this, title, message, contents, contentsSaved);
-			if (this._textView && !contentsSaved && !noFocus) {
+			if (this._textView && !contentsSaved && !noFocus && !this._noFocus) {
 				this._textView.focus();
 			}
 		},

@@ -513,7 +513,7 @@ define([
 		setEncodingCharset: function(charset) {
 			this._charset = charset;
 		},
-		setInput: function(loc) {
+		setInput: function(loc, noFocus) {
 			if (this._ignoreInput) { return; }
 			if (!loc) {
 				loc = PageUtil.hash();
@@ -522,6 +522,9 @@ define([
 				return;
 			}
 			var editor = this.getEditor();
+			if(editor && editor.setNoFocus) {
+				editor.setNoFocus(noFocus);
+			}
 			if (loc && loc[0] !== "#") { //$NON-NLS-0$
 				loc = "#" + loc; //$NON-NLS-0$
 			}

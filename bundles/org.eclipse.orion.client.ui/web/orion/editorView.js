@@ -146,7 +146,7 @@ define([
 				textView.addKeyMode(this.vi);
 			}
 		},
-		setContents: function(contents, contentType) {
+		setContents: function(contents, contentType, options) {
 			var cType = this.contentTypeRegistry.getContentType(contentType);
 			var fileExt = "txt"; //$NON-NLS-1$
 			if(cType && cType.extension && cType.extension.length > 0) {
@@ -163,10 +163,11 @@ define([
 			return def.then(function() {
 				return this.fileClient.write(currentLocation, contents).then(function(){
 					this.lastFileLocation = currentLocation;
+					var noFocus = options && options.noFocus ? true: undefined;
 					if (sameFile) {
-						this.inputManager.load();
+						this.inputManager.load(undefined, noFocus);
 					} else {
-						this.inputManager.setInput(currentLocation);
+						this.inputManager.setInput(currentLocation, noFocus);
 					}
 				}.bind(this));
 			}.bind(this));
