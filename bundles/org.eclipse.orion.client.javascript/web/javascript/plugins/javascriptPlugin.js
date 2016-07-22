@@ -1886,6 +1886,13 @@ define([
     			 	        	                	type: "string",  //$NON-NLS-1$
     			 	        	                	defaultValue: ""
     			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "no-lone-blocks",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["no-lone-blocks"],
+    			 	        	                	type: "number",  //$NON-NLS-1$
+    			 	        	                	defaultValue: warning,
+    			 	        	                	options: severities
+    			 	        	                },
 										]
 				 	            },
 				 	        	{  pid: "eslint.config.codestyle",  //$NON-NLS-1$

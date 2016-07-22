@@ -173,6 +173,7 @@ define({
 	'no-implicit-coercion-string' : 'Report type conversion to string:',
 	'no-extend-native' : 'Disallow extending of native objects:',
 	'no-extend-native-exceptions' : 'Exceptions:',
+	'no-lone-blocks' : 'Disallow unnecessary nested blocks:',
 
 	//All refs
 	'functionDecls': 'Function Declarations',

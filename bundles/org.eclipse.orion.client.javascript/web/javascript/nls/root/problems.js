@@ -137,10 +137,10 @@ define({
 	'inconsistent-return' : 'Inconsistent return types: \'{{type1}}\', \'{{type2}}\'',
 	'no-void' : 'Expected \'undefined\' and instead saw \'void\'.',
 	'no-void-description' : 'Disallow use of the void operator.',
-	'no-extra-bind' : 'The function binding is unnecessary.',
 	'no-extra-bind-description' : 'Disallow unnecessary function binding.',
 	'no-implicit-coercion-description' : 'Disallow the type conversion with shorter notations.',
 	'no-extend-native-description' : 'Disallow extending of native objects',
+	'no-lone-blocks-description' : 'Disallow unecessary nested blocks',
 
 	//.tern-project file validation messages
 	'notNum': "'${0}' must be a number",
