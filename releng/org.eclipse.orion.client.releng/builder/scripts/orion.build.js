@@ -100,6 +100,7 @@
             { name: "plugins/languages/go/goPlugin" },
             { name: "plugins/languages/haml/hamlPlugin" },
             { name: "plugins/languages/java/javaPlugin" },
+             { name: "plugins/languages/json/jsonPlugin" },
             { name: "plugins/languages/less/lessPlugin" },
             { name: "plugins/languages/lua/luaPlugin" },
             { name: "plugins/languages/markdown/markdownPlugin" },
