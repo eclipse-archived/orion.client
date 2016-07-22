@@ -114,11 +114,6 @@ define({
 	'valid-typeof-description': 'Warn when incorrectly comparing the result of a typeof expression.',
 	'noErrorDetailed' : 'Unknown error occurred',
 	'esmodules-not-running' : 'import/export declarations require the \'es_modules\' plug-in to be running.',
-	'no-void' : 'Expected \'undefined\' and instead saw \'void\'.',
-	'no-void-description' : 'Disallow use of the void operator.',
-	'no-extra-bind' : 'The function binding is unnecessary.',
-	'no-extra-bind-description' : 'Disallow unnecessary function binding.',
-	'no-implicit-coercion-description' : 'Disallow the type conversion with shorter notations.',
 		
 	// Rules consumed from ESLint
 	'accessor-pairs-description' : "Report when accessors don't come in pairs (getter, setter)",
@@ -140,6 +135,12 @@ define({
 	'no-self-assign' : '\'${0}\' is assigned to itself.',
 	'type-checked-consistent-return-description' : 'Detect inconsistent return values',
 	'inconsistent-return' : 'Inconsistent return types: \'{{type1}}\', \'{{type2}}\'',
+	'no-void' : 'Expected \'undefined\' and instead saw \'void\'.',
+	'no-void-description' : 'Disallow use of the void operator.',
+	'no-extra-bind' : 'The function binding is unnecessary.',
+	'no-extra-bind-description' : 'Disallow unnecessary function binding.',
+	'no-implicit-coercion-description' : 'Disallow the type conversion with shorter notations.',
+	'no-extend-native-description' : 'Disallow extending of native objects',
 
 	//.tern-project file validation messages
 	'notNum': "'${0}' must be a number",

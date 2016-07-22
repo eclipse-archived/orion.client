@@ -1871,7 +1871,21 @@ define([
     			 	        	                	name: javascriptMessages["no-implicit-coercion-string"],
     			 	        	                	type: "boolean", //$NON-NLS-1$
     			 	        	                	defaultValue: true,
-    			 	        	                }
+    			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "no-extend-native",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["no-extend-native"],
+    			 	        	                	type: "number",  //$NON-NLS-1$
+    			 	        	                	defaultValue: warning,
+    			 	        	                	options: severities
+    			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "no-extend-native:exceptions",  //$NON-NLS-1$
+	 				 	        	   				dependsOn: "no-extend-native",
+    			 	        	                	name: javascriptMessages["no-extend-native-exceptions"],
+    			 	        	                	type: "string",  //$NON-NLS-1$
+    			 	        	                	defaultValue: ""
+    			 	        	                },
 										]
 				 	            },
 				 	        	{  pid: "eslint.config.codestyle",  //$NON-NLS-1$
