@@ -13650,6 +13650,125 @@ define([
 								});
 						});
 					});
+					// no-lone-blocks --------------------------------------------
+					describe('no-lone-blocks', function() {
+						var RULE_ID = "no-lone-blocks";
+						it("flag invalid lone blocks", function(callback) {
+							var topic = "{}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							var features = Object.create(null);
+							features.modules = false;
+							config.ecmaFeatures = features;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-extend-native",
+										severity: 'error',
+										description: 'Block is redundant.',
+										start: 0,
+										end: 2
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid lone blocks 2", function(callback) {
+							var topic = "if (foo) {bar();{baz();}}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							var features = Object.create(null);
+							features.modules = false;
+							config.ecmaFeatures = features;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-extend-native",
+										severity: 'error',
+										description: 'Nested block is redundant.',
+										start: 16,
+										end: 24
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid lone blocks 3", function(callback) {
+							var topic = "function bar() {{baz();}}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							var features = Object.create(null);
+							features.modules = false;
+							config.ecmaFeatures = features;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-extend-native",
+										severity: 'error',
+										description: 'Nested block is redundant.',
+										start: 16,
+										end: 24
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid lone blocks 4", function(callback) {
+							var topic = "{function foo() {}}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							var features = Object.create(null);
+							features.modules = false;
+							config.ecmaFeatures = features;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-extend-native",
+										severity: 'error',
+										description: 'Block is redundant.',
+										start: 0,
+										end: 19
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid lone blocks 5", function(callback) {
+							var topic = "{aLabel: {}}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							var features = Object.create(null);
+							features.modules = false;
+							config.ecmaFeatures = features;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-extend-native",
+										severity: 'error',
+										description: 'Block is redundant.',
+										start: 0,
+										end: 12
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};

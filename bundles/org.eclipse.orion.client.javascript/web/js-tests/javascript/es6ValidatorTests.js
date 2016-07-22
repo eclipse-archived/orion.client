@@ -1219,6 +1219,115 @@ define([
 						});
 				});
 			});
+			// no-lone-blocks --------------------------------------------
+			describe('no-lone-blocks', function() {
+				var RULE_ID = "no-lone-blocks";
+				this.timeout(2000000000);
+				it.skip("should not flag lone blocks", function(callback) {
+					var topic = "while (foo) {bar();}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it.skip("should not flag lone blocks 2", function(callback) {
+					var topic = "if (foo) {if (bar) {baz();}}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it.skip("should not flag lone blocks 3", function(callback) {
+					var topic = "function bar() {baz();}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag lone blocks 4", function(callback) {
+					var topic = "{let x = 1;}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag lone blocks 5", function(callback) {
+					var topic = "{const y = 1;}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag lone blocks 6", function(callback) {
+					var topic = "{class Foo {}}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag lone blocks 7", function(callback) {
+					var topic = "aLabel: {}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag lone blocks 8", function(callback) {
+					var topic = "\"use strict\"; {function foo() {}}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+			});
 		});
 	};
 });

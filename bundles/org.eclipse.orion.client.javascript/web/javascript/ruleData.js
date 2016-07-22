@@ -52,7 +52,8 @@ define([
 			"no-invalid-regexp": 2,
 			"no-irregular-whitespace" : 0,
 			"no-iterator": 2, 
-			"no-jslint" : 1, 
+			"no-jslint" : 1,
+			"no-lone-blocks" : 1,
 			"no-mixed-spaces-and-tabs" : 0,
 			"no-negated-in-lhs" : 2,
 			"no-new-array": 1,
@@ -223,6 +224,10 @@ define([
 			},
 			"no-jslint" : {
 				description: Messages['no-jslint-description']
+			},
+			"no-lone-blocks" : {
+				description: Messages['no-lone-blocks-description'],
+				url: 'http://eslint.org/docs/rules/no-lone-blocks'
 			},
 			"no-mixed-spaces-and-tabs" : {
 				description: Messages['no-mixed-spaces-and-tabs-description'],
