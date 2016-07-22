@@ -13584,6 +13584,72 @@ define([
 								});
 						});
 					});
+					// no-extend-native --------------------------------------------
+					describe('no-extend-native', function() {
+						var RULE_ID = "no-extend-native";
+						it("flag invalid extend native", function(callback) {
+							var topic = "Object.prototype.a = \"a\";";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							var features = Object.create(null);
+							features.modules = false;
+							config.ecmaFeatures = features;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-extend-native",
+										severity: 'error',
+										description: 'Object prototype is read only, properties should not be added.',
+										start: 0,
+										end: 24
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid extend native", function(callback) {
+							var topic = "Object.defineProperty(Array.prototype, \"times\", { value: 999 });";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							var features = Object.create(null);
+							features.modules = false;
+							config.ecmaFeatures = features;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-extend-native",
+										severity: 'error',
+										description: 'Array prototype is read only, properties should not be added.',
+										start: 0,
+										end: 63
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid extend native because of exceptions value", function(callback) {
+							var topic = "Object.defineProperty(Array.prototype, \"times\", { value: 999 });";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {"exceptions" : ["Array"]}];
+							var features = Object.create(null);
+							features.modules = false;
+							config.ecmaFeatures = features;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};

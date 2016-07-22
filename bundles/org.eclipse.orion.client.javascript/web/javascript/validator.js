@@ -317,7 +317,19 @@ define([
 				seen[ruleId] = true;
 				var value = properties[key];
 				if (subKey) {
-					config.setOption(ruleId, value, subKey);
+					if (typeof value === 'string') {
+						// split into an array
+						var arr = value.split(',');
+						if (arr && Array.isArray(arr)) {
+							value = [];
+							arr.forEach(function(element) {
+								value.push(element.trim());
+							});
+						}
+						config.setOption(ruleId, value, subKey);
+					} else {
+						config.setOption(ruleId, value, subKey);
+					}
 				} else {
 					config.setOption(ruleId, value);
 				}

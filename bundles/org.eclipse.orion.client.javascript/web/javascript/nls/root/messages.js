@@ -171,6 +171,9 @@ define({
 	'no-implicit-coercion-boolean' : 'Report type conversion to boolean:',
 	'no-implicit-coercion-number' : 'Report type conversion to number:',
 	'no-implicit-coercion-string' : 'Report type conversion to string:',
+	'no-extend-native' : 'Disallow extending of native objects:',
+	'no-extend-native-exceptions' : 'Exceptions:',
+
 	//All refs
 	'functionDecls': 'Function Declarations',
 	'functionCalls': 'Function Calls',

@@ -41,11 +41,12 @@ define([
 			"no-empty-label" : 2,
 			"no-eq-null" : 1,
 			"no-eval" : 0,
+			"no-extend-native": [1, {"exceptions" : ""}],
 			"no-extra-bind" : 1,
 			"no-extra-boolean-cast" : 2,
 			"no-extra-parens" : 1,
 			"no-extra-semi": 1,
-			"no-fallthrough" : 2, 
+			"no-fallthrough" : 2,
 			"no-implicit-coercion" : [1, { "boolean": true, "number" : true, "string" : true }],
 			"no-implied-eval" : 0,
 			"no-invalid-regexp": 2,
@@ -175,6 +176,10 @@ define([
 			"no-eval" : {
 				description: Messages['no-eval-description'],
 				url: 'http://eslint.org/docs/rules/no-eval'
+			},
+			"no-extend-native" : {
+				description: Messages['no-extend-native-description'],
+				url: 'http://eslint.org/docs/rules/no-extend-native'
 			},
 			"no-extra-bind" : {
 				description: Messages['no-extra-bind-description'],
