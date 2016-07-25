@@ -9,5 +9,19 @@
  ******************************************************************************/
 define({
 	"pluginName": "Orion JSON Support",
-	"pluginDescription": "This plugin provides JSON support for Orion."
+	"pluginDescription": "This plugin provides JSON support for Orion.",
+	
+	//Formatting
+	"jsonFormatter": "Orion JSON formatting support",
+	'jsonFormattingOptions' : 'Formatting Settings for JSON',
+	'jsonFormatting' : 'JSON Formatting',
+	'indentation_space' : 'space',
+	'indentation_tab' : 'tab',
+	'json_indent_char' : 'Indentation character:',
+	'json_indent_size': 'Indentation size:',
+	'indentation_unix': 'Unix',
+	'indentation_mac': 'Mac',
+	'indentation_windows': 'Windows',
+	'json_eol': 'Charater(s) to use as line terminators:',
+	'json_end_with_newline': 'End ouput with newline:'
 });
