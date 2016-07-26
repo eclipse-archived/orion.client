@@ -14,8 +14,10 @@ define([
 	'orion/webui/littlelib',
 	'orion/PageLinks',
 	'orion/webui/dropdown',
-	'orion/util'
-], function(messages, lib, PageLinks, Dropdown, util) {
+	'orion/util',
+	'orion/webui/dialog',
+	'orion/xhr'
+], function(messages, lib, PageLinks, Dropdown, util, dialog, xhr) {
 	
 	function UserMenu(options) {
 		this._displaySignOut = true;
@@ -189,12 +191,41 @@ define([
 				if (util.isElectron) {
 					var clearLocalStorage = this._makeMenuItem(messages["Clear Local Storage"], function() { localStorage.clear(); });
 					getCategory(0).appendChild(clearLocalStorage.parentNode);
-					 if (window.__electron.remote.autoUpdater.updateURL) {
-						var checkForUpdates = this._makeMenuItem(messages["Check for Updates"], function() {
-							window.__electron.remote.autoUpdater.checkForUpdates();
-						});
-						getCategory(0).appendChild(checkForUpdates.parentNode);
-					 }
+					var about = this._makeMenuItem(messages["About"], function() {
+						var newDialog = new dialog.Dialog();
+						newDialog.TEMPLATE =
+							'<div>' +
+								'<div><label id="appVersion">${Version: }<span>' + window.__electron.remote.app.getVersion() + '</span></label></div>' +
+								'<div><label id="buildID">${Build ID: }<span>' + window.__electron.remote.app.buildId + '</span></label></div>' +
+								'<div><label id="updateChannel">${Update Channel: }' + 
+									'<select id="channelOptions"><option id="stable">${Stable}</option><option id="alpha">${Alpha}</option></select>' + 
+								'</label></div>' + 
+							'</div>';
+						newDialog.messages = messages;
+						newDialog.title = messages["About"];
+						newDialog.buttons = [
+							{ text: messages["Update"],
+								callback: function() {
+									var channelOptions = document.getElementById('channelOptions');
+									var updateChannel = channelOptions.options[channelOptions.selectedIndex].id;
+									var contentType = "application/json; charset=UTF-8";
+									xhr("PUT", '/update', {
+						                headers : { 
+											"Orion-Version" : "1",
+											"Content-Type" : contentType
+										},
+										data: JSON.stringify({
+											"updateChannel": updateChannel
+										})
+						            }); 
+								},
+					            id: "aboutUpdate" },
+					        { text: messages["Close"], callback: function() {newDialog.hide();}, id: "aboutClose" }];
+						newDialog.modal = true;
+						newDialog._initialize();
+						newDialog.show();
+					});
+					getCategory(0).appendChild(about.parentNode);
 				}
 
 				// Add categories to _dropdownNode
