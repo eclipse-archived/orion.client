@@ -17,7 +17,7 @@ define([
 ], function(){
 	
 	var defaultOptions = {
-	    'attr-bans': 1,
+	    'attr-bans': 0,
 	    'attr-bans-config': [
 	        'align',
 	        'background',
@@ -97,7 +97,7 @@ define([
 		    var attrs = element.attributes;
 		    bannedAttrs.forEach(function (name) {
 		        if (attrs[name]) {
-		            issues.push(createProblem(attrs[name], 'attr-bans', 'The \'' + name + '\' attribute is banned.', opts['attr-bans']));
+		            issues.push(createProblem(attrs[name], 'attr-bans', 'The \'' + name + '\' attribute is not recommended.', opts['attr-bans']));
 		        }
 		    });
 		    return issues;
@@ -114,7 +114,7 @@ define([
 		        return [];
 		    }
 		
-		    return createProblem(element.openrange, 'img-req-alt', 'The \'alt\' property must be set for image tags.', opts['img-req-alt']);
+		    return createProblem(element.openrange, 'img-req-alt', 'The \'alt\' property must be set for image tags (for accessibility).', opts['img-req-alt']);
 		});
 		// Require figcaption
 		function figReqFigCaption(ele){
