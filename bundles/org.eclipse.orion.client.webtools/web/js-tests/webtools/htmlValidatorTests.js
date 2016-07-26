@@ -76,7 +76,8 @@ define([
     	    }
 	    }
 
-		describe('attr-ban', function(){
+		// TODO ATTR-BAN rule is disabled by default currently
+		describe.skip('attr-ban', function(){
 			it("attr-ban bgcolor", function() {
 			    var val = setup({buffer: '<html><body bgcolor="red"></body></html>', rule: {id:null, severity:1}});
 				return validator.computeProblems(val.editorContext).then(function(result) {
@@ -117,7 +118,7 @@ define([
 					    {start: 6,
 					     end: 11,
 					     severity: 'warning',
-					     description: "The 'alt' property must be set for image tags."
+					     description: "The 'alt' property must be set for image tags (for accessibility)."
 					    }
 					]);
 				});
@@ -129,7 +130,7 @@ define([
 					    {start: 6,
 					     end: 25,
 					     severity: 'warning',
-					     description: "The 'alt' property must be set for image tags."
+					     description: "The 'alt' property must be set for image tags (for accessibility)."
 					    }
 					]);
 				});
@@ -141,7 +142,7 @@ define([
 					    {start: 6,
 					     end: 11,
 					     severity: 'warning',
-					     description: "The 'alt' property must be set for image tags."
+					     description: "The 'alt' property must be set for image tags (for accessibility)."
 					    }
 					]);
 				});
@@ -153,7 +154,7 @@ define([
 					    {start: 6,
 					     end: 11,
 					     severity: 'warning',
-					     description: "The 'alt' property must be set for image tags."
+					     description: "The 'alt' property must be set for image tags (for accessibility)."
 					    }
 					]);
 				});
