@@ -1,0 +1,17 @@
+syntax = "proto2";
+
+message LogMessage {
+
+	enum LogMessageType {
+		OUT = 1;
+		ERR = 2;
+	}
+
+	required string message = 1;
+	required LogMessageType message_type = 2;
+	required sint64 timestamp = 3;
+	optional string app_id = 4;
+	optional string source_type = 8;
+	optional string source_instance = 6;
+	
+}

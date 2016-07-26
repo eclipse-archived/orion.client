@@ -11,12 +11,39 @@
 /*eslint-env node */
 var express = require('express');
 var bodyParser = require('body-parser');
+var target = require('./target');
+var request = require('request');
 
 module.exports.router = function(options) {
 
+	module.exports.getInfo = getInfo;
+
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', cb);
-	
-	function cb(){}
+	.get('*', getInfo);
+
+	function getInfo(req, res) {
+		var accessToken = target.getAccessToken();
+		var infoURL = JSON.parse(req.query.Target).Url + "/v2/info";
+
+		return new Promise(function(fulfill) {
+			var infoHeader = {
+				url: infoURL,
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application.json',
+					'Authorization': accessToken
+				}
+			};
+
+			request(infoHeader, function(error, response, body) {
+				if (error) {
+					Promise.reject(error);
+				}
+				else {
+					fulfill(JSON.parse(body));
+				}
+			});
+		});
+	}
 };
