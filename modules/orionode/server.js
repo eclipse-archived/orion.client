@@ -91,11 +91,12 @@ function startServer(cb) {
 				configParams: configParams,
 				maxAge: dev ? 0 : undefined,
 			}));
+
 			var io = socketio.listen(server, { 'log level': 1 });
+
 			ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
-			
-			var languageIO = socketio.listen(server, { 'log level': 1 });
-			languageServer.install({ io: languageIO, workspaceDir: workspaceDir }); //TODO no good for multiuser
+
+			languageServer.install({ io: io, workspaceDir: workspaceDir }); //TODO no good for multiuser
 
 			server.on('listening', function() {
 				console.log(util.format('Listening on port %d...', port));
