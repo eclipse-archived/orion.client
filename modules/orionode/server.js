@@ -117,16 +117,19 @@ if (process.versions.electron) {
 	var electron = require('electron'),
 		autoUpdater = electron.autoUpdater,
 		dialog = electron.dialog,
-		spawn = require('child_process').spawn;
+		spawn = require('child_process').spawn,
+		allPrefs = prefs.readPrefs();
 
 	configParams.isElectron = true;
-
+	electron.app.buildId = configParams["orion.buildId"];
+	
 	// Set necessary URL for autoUpdater to grab latest release
 	var feedURL = configParams["orion.autoUpdater.url"];
 	if (feedURL) {
 		var platform = os.platform() + '_' + os.arch(),
-		version = electron.app.getVersion();
-		autoUpdater.setFeedURL(feedURL + '/' + platform + '/' + version);
+			version = electron.app.getVersion(),
+			updateChannel = allPrefs.user.updateChannel ? allPrefs.user.updateChannel : configParams["orion.autoUpdater.defaultChannel"];
+		autoUpdater.setFeedURL(feedURL + '/channel/' + updateChannel + '/' + platform + '/' + version);
 	}
 
 	var handleSquirrelEvent = function() {
@@ -173,9 +176,10 @@ if (process.versions.electron) {
 	}
 
 	electron.app.on('ready', function() {
-		var updateDownloaded  = false;
-		var allPrefs = prefs.readPrefs();
-		var prefsWorkspace = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.currentWorkspace;
+		var updateDownloaded  = false,
+			updateDialog = false,
+			prefsWorkspace = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.currentWorkspace;
+			
 		if (prefsWorkspace) {
 			configParams.workspace = prefsWorkspace;
 		}
@@ -213,7 +217,7 @@ if (process.versions.electron) {
 			console.log(error);
 		});
 		function scheduleUpdateChecks () {
-			var checkInterval = 1000 * 60 * 30; // check for updates every 30 minutes
+			var checkInterval = (parseInt(configParams["orion.autoUpdater.checkInterval"], 10) || 30) * 1000 * 60;
 			var checkforUpdates = function() {
 				autoUpdater.checkForUpdates();
 			}.bind(this);
@@ -224,16 +228,19 @@ if (process.versions.electron) {
 		});
 		autoUpdater.on("update-downloaded", /* @callback */ function(event, releaseNotes, releaseName, releaseDate, updateURL) {
 			updateDownloaded = true;
-			dialog.showMessageBox({
-				type: 'question',
-				message: 'Update version ' + releaseName + ' of ' + electron.app.getName() + ' has been downloaded.',
-				detail: 'Would you like to restart the app and install the update? The update will be applied automatically upon closing.',
-				buttons: ['Later', 'Update']
-			}, function (response) {
-				if (response === 1) {
-					autoUpdater.quitAndInstall();
-				}
-			});
+			if (!updateDialog) {
+				dialog.showMessageBox({
+					type: 'question',
+					message: 'Update version ' + releaseName + ' of ' + electron.app.getName() + ' has been downloaded.',
+					detail: 'Would you like to restart the app and install the update? The update will be applied automatically upon closing.',
+					buttons: ['Later', 'Update']
+				}, function (response) {
+					if (response === 1) {
+						autoUpdater.quitAndInstall();
+					}
+				});
+				updateDialog = true;
+			}
 		});
 		function createWindow(url){
 			var Url = require("url");
