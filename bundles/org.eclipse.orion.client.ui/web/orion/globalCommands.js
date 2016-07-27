@@ -860,6 +860,22 @@ define([
 		window.addEventListener("hashchange", function () {
 			commandRegistry.processURL(window.location.href);
 		}, false);
+		
+	    // System Editor
+		if (util.isElectron) {
+			serviceRegistry.registerService("orion.navigate.command", {
+				run: function(item) {
+					prefsService.get("/workspace").then(function(prefs) {
+						var workspaceDir = prefs.currentWorkspace.replace(/\\/g, "/");
+						window.__electron.shell.openItem(workspaceDir+item[0].Location.slice(5)); // slice off '/file'
+					});
+				}
+			}, {
+				name: "System Editor",
+				id: "orion.system.editor",
+				tooltip: "Open the current file in the desktop's default manner for this type of file"
+			});
+		}
 
 		return customGlobalCommands.afterGenerateBanner.apply(this, arguments);
 	}
