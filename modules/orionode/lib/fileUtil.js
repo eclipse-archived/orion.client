@@ -303,7 +303,7 @@ exports.handleFilePOST = function(fileRoot, req, res, destFilepath, metadataMixi
 		}
 		return fs.statAsync(destFilepath)
 		.then(function(stats) {
-			writeFileMetadata(fileRoot, req, res, destFilepath, stats, /*etag*/null, /*depth*/0, metadataMixins);
+			return writeFileMetadata(fileRoot, req, res, destFilepath, stats, /*etag*/null, /*depth*/0, metadataMixins);
 		})
 		.catch(function(err) {
 			api.writeError(500, res, err.message);
@@ -344,7 +344,9 @@ exports.handleFilePOST = function(fileRoot, req, res, destFilepath, metadataMixi
 		}
 		// Just a regular file write
 		return Promise.resolve()
-		.then(destExists ? fs.unlinkAsync(destFilepath) : null)
+		.then(function(){
+			return destExists ? fs.unlinkAsync(destFilepath) : null;
+		})
 		.then(function() {
 			return isDirectory ? fs.mkdirAsync(destFilepath) : fs.writeFileAsync(destFilepath, '');
 		})
