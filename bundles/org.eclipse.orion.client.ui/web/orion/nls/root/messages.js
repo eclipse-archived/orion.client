@@ -29,6 +29,7 @@ define({//Default message bundle
 	"Orion Markdown Editor": "Markdown Editor",
 	"Orion Markdown Viewer": "Markdown Viewer",
 	"Orion JSON Editor": "JSON Editor",
+	"Orion System Editor": "System Editor",
 	"View on Site": "View on Site",
 	"View this file or folder on a web site hosted by Orion": "View this file or folder on a web site hosted by Orion.",
 	"ShowAllKeyBindings": "Show a list of all the keybindings on this page",
