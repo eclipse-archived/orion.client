@@ -60,7 +60,7 @@ export CSC_NAME=${CSC_NAME} # required for OSX autoUpdater-functional builds
 # $1: file name/path
 upload () {
 	echo $1
-	github-release upload --user "${user}" --repo "${repo}" --tag v"${pkg_version}" --name $1 --file $1
+	github-release upload --user "${user}" --repo "${repo}" --tag v"${pkg_version}${channel}" --name $1 --file $1
 }
 
 # create a new release
