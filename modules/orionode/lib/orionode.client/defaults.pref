@@ -5,7 +5,7 @@
 		"git/plugins/gitPlugin.html":true,
 		"webtools/plugins/webToolsPlugin.html":true,
 		"javascript/plugins/javascriptPlugin.html":true,
-		"plugins/ConsolePlugin.html":true,
+		"plugins/consolePlugin.html":true,
 		"edit/content/imageViewerPlugin.html":true,
 		"edit/content/jsonEditorPlugin.html":true
 	}
