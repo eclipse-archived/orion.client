@@ -70,6 +70,7 @@ function startServer(options) {
 		app.use('/xfer', checkAuthenticated, require('./lib/xfer')(options));
 		app.use('/metrics', require('./lib/metrics').router(options));
 		app.use('/version', require('./lib/version').router(options));
+		if (options.configParams.isElectron) app.use('/update', require('./lib/update').router(options));
 
 		// Static files
 		app.use(require('term.js').middleware());
