@@ -168,9 +168,8 @@ exports.install = function(options) {
 					}
 					sock = null;
 				});
-				sock.emit('Java process ready');
+				sock.emit('ready', JSON.stringify({workspaceDir: options.workspaceDir, processId: process.pid}));
 			});
-			sock.emit('ready', JSON.stringify({workspaceDir: options.workspaceDir, processId: process.pid}));
 		});
 	});
 };

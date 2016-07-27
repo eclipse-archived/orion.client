@@ -29,9 +29,10 @@ define([
 
 	/**
 	 * @name initializeIPC
+	 * @param serviceRegistry the service registry
 	 * @description Connects the IPC instance to the websocket and sets the deafult listeners
 	 */
-	function initializeIPC() {
+	function initializeIPC(serviceRegistry) {
 		ipc.connect();
 		/**
 		 * Default logging listener
@@ -62,7 +63,21 @@ define([
 				delete diagnostics[uri];
 			}
 		});
-		
+		/**
+		 * Listener to handle diagnostics notifications
+		 */
+		ipc.addListener(ipc.MESSAGE_TYPES.status, {
+			handleNotification: function handleNotification(data) {
+				var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-1$
+				if (statusService) {
+					if (data.params.type === "Started") {
+						statusService.setProgressResult("Java " + data.params.type + " " + data.params.message) ;
+					} else {
+						statusService.setProgressMessage("Java " + data.params.type + " " + data.params.message) ;
+					}
+				}
+			}
+		});
 	}
 	/**
 	 * Single place to add in all of the provide hooks for the various services
@@ -508,7 +523,7 @@ define([
 			var pluginProvider = new PluginProvider(headers, serviceRegistry);
 			registerServiceProviders(pluginProvider);
 			pluginProvider.connect();
-			initializeIPC();
+			initializeIPC(serviceRegistry);
 		},
 		registerServiceProviders: registerServiceProviders
 	};

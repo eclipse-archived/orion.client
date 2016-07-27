@@ -45,6 +45,11 @@ define([
 		shutdown: 'shutdown',
 		/**
 		 * @kind notification
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#status-notification
+		 */
+		status: 'language/status',
+		/**
+		 * @kind notification
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#exit-notification
 		 */
 		exit: 'exit',
