@@ -66,7 +66,7 @@ upload () {
 # create a new release
 # $1: String for release description
 new_release() {
-	github-release release --user "${user}" --repo "${repo}" --tag v"${pkg_version}" --name v"${pkg_version}" --description "${description}"
+	github-release release --user "${user}" --repo "${repo}" --tag v"${pkg_version}${channel}" --name v"${pkg_version}${channel}" --description "${description}"
 }
 
 # remove multi-user dependencies from package.json
