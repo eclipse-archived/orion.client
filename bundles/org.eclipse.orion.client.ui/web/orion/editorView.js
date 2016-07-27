@@ -244,6 +244,25 @@ define([
 			if (editor.getContentAssist()) {
 				editor.getContentAssist().setAutoTriggerEnabled(prefs.contentAssistAutoTrigger);
 			}
+			
+			var ruler = editor.getAnnotationRuler();
+			var that = this;
+			ruler.onDblClick = function(lineIndex, e){
+				var bookmark = editor.getBookmark(ruler, lineIndex);			
+				if (bookmark.annotation) {
+					editor.removeBookmark(ruler, bookmark);
+				} else {
+					var node = e.target;
+					that.commandRegistry.prompt(node, messages.EnterTags, messages.OK, messages.Cancel, "", false, function(tags) {
+						
+						var filename = editor.getTitle();
+						
+//						localstorage
+						
+						editor.addBookmark(ruler, bookmark, tags);
+					});
+				}
+			};
 
 			this.dispatchEvent({
 				type: "Settings", //$NON-NLS-0$

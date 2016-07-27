@@ -838,6 +838,38 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		installTextView: function() {
 			this.install();
 		},
+		
+		getBookmark: function(ruler, lineIndex){
+			var editor = this;
+			if (lineIndex === undefined) { return; }
+			if (lineIndex === -1) { return; }
+			var view = ruler.getView();
+			var viewModel = view.getModel();
+			var annotationModel = ruler.getAnnotationModel();
+			var lineStart = editor.mapOffset(viewModel.getLineStart(lineIndex));
+			var lineEnd = editor.mapOffset(viewModel.getLineEnd(lineIndex));
+			var annotations = annotationModel.getAnnotations(lineStart, lineEnd);
+			var bookmark = null;
+			while (annotations.hasNext()) {
+				var annotation = annotations.next();
+				if (annotation.type === AT.ANNOTATION_BOOKMARK) {
+					bookmark = annotation;
+					break;
+				}
+			}
+			return {annotation:bookmark, lineStart:lineStart, lineEnd:lineEnd};
+		},
+			
+		removeBookmark: function(ruler, bookmark){
+			var annotationModel = ruler.getAnnotationModel();
+			annotationModel.removeAnnotation(bookmark.annotation);
+		},
+		
+		addBookmark: function(ruler, bookmark, message){
+			var annotationModel = ruler.getAnnotationModel();
+			bookmark = AT.createAnnotation(AT.ANNOTATION_BOOKMARK, bookmark.lineStart, bookmark.lineEnd, message);
+			annotationModel.addAnnotation(bookmark);
+		},
 
 		install : function() {
 			if (this._textView) { return; }
@@ -949,27 +981,11 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			}
 
 			var addRemoveBookmark = /* @callback */ function(lineIndex, e) {
-				if (lineIndex === undefined) { return; }
-				if (lineIndex === -1) { return; }
-				var view = this.getView();
-				var viewModel = view.getModel();
-				var annotationModel = this.getAnnotationModel();
-				var lineStart = editor.mapOffset(viewModel.getLineStart(lineIndex));
-				var lineEnd = editor.mapOffset(viewModel.getLineEnd(lineIndex));
-				var annotations = annotationModel.getAnnotations(lineStart, lineEnd);
-				var bookmark = null;
-				while (annotations.hasNext()) {
-					var annotation = annotations.next();
-					if (annotation.type === AT.ANNOTATION_BOOKMARK) {
-						bookmark = annotation;
-						break;
-					}
-				}
-				if (bookmark) {
-					annotationModel.removeAnnotation(bookmark);
+				var bookmark = editor.getBookmark(this, lineIndex);			
+				if (bookmark.annotation) {
+					editor.removeBookmark(this, bookmark);
 				} else {
-					bookmark = AT.createAnnotation(AT.ANNOTATION_BOOKMARK, lineStart, lineEnd, editor.getText(lineStart, lineEnd));
-					annotationModel.addAnnotation(bookmark);
+					editor.addBookmark(this, bookmark, editor.getText(bookmark.lineStart, bookmark.lineEnd));
 				}
 			};
 
@@ -1000,7 +1016,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				var rulers = this._annotationFactory.createAnnotationRulers(this._annotationModel);
 				var ruler = this._annotationRuler = rulers.annotationRuler;
 				if (ruler) {
-					ruler.onDblClick = addRemoveBookmark;
+//					ruler.onDblClick = addRemoveBookmark;
 					ruler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"}); //$NON-NLS-0$
 					ruler.addAnnotationType(AT.ANNOTATION_ERROR);
 					ruler.addAnnotationType(AT.ANNOTATION_WARNING);
