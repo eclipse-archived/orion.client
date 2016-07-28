@@ -21,11 +21,14 @@ var Promise = require('bluebird');
 var mkdirp = require('mkdirp');
 var fs = Promise.promisifyAll(require('fs'));
 var fileUtil = require('./fileUtil');
+var crypto = require('crypto');
 
 /**
  * @callback
  */
 module.exports = function(options) {
+	module.exports.write = write;
+	
 	var UPLOADS_FOLDER = path.join(options.configParams['orion.single.user'] ?
 			path.join(os.homedir(), ".orion") : options.workspaceDir, ".uploads");
 	
@@ -226,7 +229,6 @@ function write (zip, base, filePath) {
 		/*eslint consistent-return:0*/
 		if (stats.isDirectory()) {
 			if (filePath.substring(filePath.length-1) !== "/") filePath = filePath + "/";
-
 			return fs.readdirAsync(filePath)
 			.then(function(directoryFiles) {
 				var SUBDIR_SEARCH_CONCURRENCY = 10;
