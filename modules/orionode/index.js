@@ -45,21 +45,22 @@ function startServer(options) {
 			}
 		}
 
-		// API handlers
-		if (options.configParams["orion.single.user"]) {
-			app.use(/* @callback */ function(req, res, next){
-				req.user = {username: "anonymous"};
-				next();
-			});
-			app.post('/login', function(req, res) {
-				if (!req.user) {
-					return res.status(200).end();
-				}
-				return res.status(200).json({UserName: req.user.username});
-			});
+		// Configure metastore
+		var metastoreFactory;
+		if (options.configParams['orion.single.user']) {
+			metastoreFactory = require('./lib/metastore/fs');
+		} else if (options.configParams['orion.db'] === 'cloudant') {
+			metastoreFactory = require('./lib/metastore/cloudant')
 		} else {
-			app.use(require('./lib/user')(options));
+			metastoreFactory = require('./lib/metastore/mongodb')
 		}
+		app.locals.metastore = metastoreFactory();
+		// FIXME: bad form, metastores should not deal with Express app or routes directly.
+		// TODO Figure out a way to configure passport outside the metastore
+		app.locals.metastore.initRoutes(app);
+
+		// Add API routes
+		app.use(require('./lib/user')(options));
 		app.use('/site', checkAuthenticated, require('./lib/sites')(options));
 		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ root: '/task' }));
 		app.use('/filesearch', checkAuthenticated, require('./lib/search')(options));
