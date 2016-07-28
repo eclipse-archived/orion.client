@@ -305,7 +305,9 @@
         }
 
         function parseName(last, allowBrackets, allowNestedParams) {
-            var name = '', useBrackets;
+            var name = '',
+                useBrackets,
+                insideString;
 
             skipWhiteSpace(last);
 
@@ -357,13 +359,36 @@
 
                     var ch;
                     var bracketDepth = 1;
+
                     // scan in the default value
                     while (index < last) {
                         ch = source.charCodeAt(index);
 
                         if (esutils.code.isWhiteSpace(ch)) {
-                            skipWhiteSpace(last);
-                            ch = source.charCodeAt(index);
+                            if (!insideString) {
+                                skipWhiteSpace(last);
+                                ch = source.charCodeAt(index);
+                            }
+                        }
+
+                        if (ch === 0x27 /* ''' */) {
+                            if (!insideString) {
+                                insideString = '\'';
+                            } else {
+                                if (insideString === '\'') {
+                                    insideString = '';
+                                }
+                            }
+                        }
+
+                        if (ch === 0x22 /* '"' */) {
+                            if (!insideString) {
+                                insideString = '"';
+                            } else {
+                                if (insideString === '"') {
+                                    insideString = '';
+                                }
+                            }
                         }
 
                         if (ch === 0x5B /* '[' */) {
@@ -379,7 +404,7 @@
 
                 skipWhiteSpace(last);
 
-                if (index >= last  || source.charCodeAt(index) !== 0x5D  /* ']' */) {
+                if (index >= last || source.charCodeAt(index) !== 0x5D  /* ']' */) {
                     // we never found a closing ']'
                     return null;
                 }
@@ -404,7 +429,7 @@
 
         function TagParser(options, title) {
             this._options = options;
-            this._title = title;
+            this._title = title.toLowerCase();
             this._tag = {
                 title: title,
                 description: null
