@@ -194,7 +194,7 @@ define([
 			order: 30,
 			name: widgetMessages["Report a Bug"],
 			nls: "orion/widgets/nls/messages",
-			uriTemplate: "https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&component=Client",
+			uriTemplate: "https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&component=Electron",
 			category: "user.0"
 		});
 		
