@@ -7,6 +7,8 @@
 		"javascript/plugins/javascriptPlugin.html":true,
 		"plugins/consolePlugin.html":true,
 		"edit/content/imageViewerPlugin.html":true,
-		"edit/content/jsonEditorPlugin.html":true
+		"edit/content/jsonEditorPlugin.html":true,
+		"cfui/plugins/cFPlugin.html":true,
+		"cfui/plugins/cFDeployPlugin.html":true
 	}
 }
