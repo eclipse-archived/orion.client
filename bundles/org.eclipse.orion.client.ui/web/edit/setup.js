@@ -616,10 +616,13 @@ objects.mixin(EditorSetup.prototype, {
 			editorInputManager: this.editorInputManager
 		}).then(function(runBar){
 			if (runBar) {
-				this.runBar = runBar;
-				if (util.isElectron) {
-					lib.node("runBarWrapper").style.display = "none";
-				}
+				this.preferences.get('/runBar').then(function(prefs){ //$NON-NLS-1$
+					this.runBar = runBar;
+					var displayRunBar = prefs.display === undefined  || prefs.display;
+					if (util.isElectron || !displayRunBar) {
+						lib.node("runBarWrapper").style.display = "none";
+					}
+				});
 			}
 		}.bind(this));
 	},
