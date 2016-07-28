@@ -73,6 +73,7 @@ Task.prototype = {
 		res.end(resp);
 	},
 	done: function(result) {
+		if (this.result) return;
 		this.result = result;
 		switch (result.Severity) {
 			case "Ok":
