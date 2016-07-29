@@ -435,12 +435,12 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 							var deferreds = [];
 							selectedItems.forEach(function(item) {
 								var location = targetFolder.Location;
-								var newName = item.Name || null;
+								var name = item.Name || null;
 								var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 								var message = i18nUtil.formatMessage(isCopy ? messages["Copying ${0}"] : messages["Moving ${0}"], item.Location);
 								function doOperation() {
 									if (location) {
-										var deferred = func.apply(fileClient, [item.Location, targetFolder.Location, newName]);
+										var deferred = func.apply(fileClient, [item.Location, targetFolder.Location, name]);
 										deferreds.push(progressService.showWhile(deferred, message).then(
 											function() {
 											},
@@ -455,6 +455,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 											if (!newName) {
 												location = null;
 											}
+											name = newName;
 											doOperation();
 										});
 								}else{
@@ -1314,11 +1315,12 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 								if (prompt) {
 									var node = document.getElementById("pageSidebar" + item.Location.split('/').slice(1).join(""));
 									commandService.prompt(node, i18nUtil.formatMessage(messages['EnterName'], selectedItem.Name), messages['Ok'], messages['Cancel'], 
-										i18nUtil.formatMessage(messages['Copy of ${0}'], selectedItem.Name), false, function(name) {
+										i18nUtil.formatMessage(messages['Copy of ${0}'], selectedItem.Name), false, function(newname) {
 											// user cancelled?  don't copy this one
-											if (!name) {
+											if (!newname) {
 												location = null;
-											}	
+											}
+											name = newname;
 											doOperation();
 									});
 								}else{
