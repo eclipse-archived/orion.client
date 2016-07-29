@@ -244,6 +244,38 @@ define([
 			if (editor.getContentAssist()) {
 				editor.getContentAssist().setAutoTriggerEnabled(prefs.contentAssistAutoTrigger);
 			}
+			
+			var ruler = editor.getAnnotationRuler();
+			var lineRuler = editor.getLineNumberRuler();
+			var that = this;
+			lineRuler.onDblClick = ruler.onDblClick = function(lineIndex, e){
+				var bookmark = editor.getBookmark(ruler, lineIndex);			
+				if (bookmark.annotation) {
+					editor.removeBookmark(ruler, bookmark);
+				} else {
+					var node = e.target;
+					that.commandRegistry.prompt(node, messages.EnterTags, messages.OK, messages.Cancel, "", false, function(tags) {
+						
+						var filename = editor.getTitle();
+						var bookmarkinLocalstorage = localStorage['bookmarks'];
+						var exsitingbookmarks = {};
+						if(bookmarkinLocalstorage){
+							exsitingbookmarks = JSON.parse(bookmarkinLocalstorage);
+						}
+						var thisFileExistingBookmarks = exsitingbookmarks[filename] || [];
+						var storeData = 
+							{
+								lineStart:bookmark.lineStart,
+								lineEnd:bookmark.lineEnd,
+								message:tags
+							};
+						thisFileExistingBookmarks.push(storeData);
+						exsitingbookmarks[filename] = thisFileExistingBookmarks;
+						localStorage['bookmarks'] = JSON.stringify(exsitingbookmarks);
+						editor.addBookmark(ruler, bookmark, tags);
+					});
+				}
+			};
 
 			this.dispatchEvent({
 				type: "Settings", //$NON-NLS-0$

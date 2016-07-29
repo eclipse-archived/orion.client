@@ -107,5 +107,7 @@ define({
 	"Orion": "Orion",
 	"OK": "Ok",
 	"Format" : "Format Code",
-	"FormatTooltip":"Format editor contents"
+	"FormatTooltip":"Format editor contents",
+	"Cancel": "Cancel",
+	"EnterTags":"Enter tags seperated by ';'"
 });
