@@ -39,12 +39,13 @@ define([
 './rules/no-extend-native',
 './rules/no-lone-blocks',
 './rules/quotes',
-'./rules/yoda'
+'./rules/yoda',
+'./rules/no-param-reassign'
 ], function(util, Finder, ProblemMessages, Estraverse, JsSyntax,
 		accessorPairs, noControlRegex, noDuplicateCase, noElseReturn, noEmptyCharClasses, 
 		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs,
 		noObjCalls, noSelfCompare, noIrregularWhitespace, noConstAssign, noImplicitCoercion,
-		noExtraBind, noExtendNative, noLoneBlocks, quotes, yoda) {
+		noExtraBind, noExtendNative, noLoneBlocks, quotes, yoda, noParamReassign) {
 	
 	var nodeModules = {
 		"buffer": true,
@@ -2378,7 +2379,8 @@ define([
 		'no-extend-native': noExtendNative,
 		'no-lone-blocks' : noLoneBlocks,
 		'quotes' : quotes,
-		'yoda' : yoda
+		'yoda' : yoda,
+		'no-param-reassign' : noParamReassign
 	};
 
 	/**

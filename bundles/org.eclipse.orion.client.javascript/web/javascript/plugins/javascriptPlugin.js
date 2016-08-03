@@ -1956,6 +1956,20 @@ define([
     			 	        	                	type: "boolean",  //$NON-NLS-1$
     			 	        	                	defaultValue: false
     			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "no-param-reassign",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["no-param-reassign"],
+    			 	        	                	type: "number",  //$NON-NLS-1$
+    			 	        	                	defaultValue: warning,
+    			 	        	                	options: severities
+    			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "no-param-reassign:props",  //$NON-NLS-1$
+	 				 	        	   				dependsOn: "no-param-reassign",
+    			 	        	                	name: javascriptMessages["no-param-reassign-props"],
+    			 	        	                	type: "boolean",  //$NON-NLS-1$
+    			 	        	                	defaultValue: false
+    			 	        	                },
 										]
 				 	            },
 				 	        	{  pid: "eslint.config.codestyle",  //$NON-NLS-1$
