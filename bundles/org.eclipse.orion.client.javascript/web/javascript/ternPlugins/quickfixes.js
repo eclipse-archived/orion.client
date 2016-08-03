@@ -238,7 +238,7 @@ define([
 		"eqeqeq": function(annotation, annotations, file) {
 			return applySingleFixToAll(annotations, function(annot){
 				var expected = /^.*\'(\!==|===)\'/.exec(annot.title);
-				return {text: expected[1],	start: annot.start,	end: annot.end};
+				return {text: expected[1], start: annot.start, end: annot.end};
 			});
 		},
 		/**
@@ -249,7 +249,7 @@ define([
 		"no-eq-null": function(annotation, annotations, file) {
 			return applySingleFixToAll(annotations, function(annot){
 				var expected = /^.*\'(\!==|===)\'/.exec(annot.title);
-				return {text: expected[1], start: annot.start,	end: annot.end};
+				return {text: expected[1], start: annot.start, end: annot.end};
 			});
 		},
 		/**
@@ -263,7 +263,7 @@ define([
 				if(node) {
 					var p = node.parents[node.parents.length-1];
 					if(p.type === 'VariableDeclarator') {
-						return {text: '', start: p.id.range[1], end: p.range[1]};									
+						return {text: '', start: p.id.range[1], end: p.range[1]};
 					}
 				}
 			});
@@ -1053,7 +1053,48 @@ define([
 					};
 				}
 			});
-		}	};
+		},
+		"quotes" : function(annotation, annotations, file) {
+			function convertQuotes(str, newQuote) {
+				var oldQuote = str[0];
+	
+				if (newQuote === oldQuote) {
+					return str;
+				}
+				return newQuote + str.slice(1, -1).replace(/\\(\${|\r\n?|\n|.)|["'`]|\${|(\r\n?|\n)/g, function(match, escaped, newline) {
+					if (escaped === oldQuote || oldQuote === "`" && escaped === "${") {
+						return escaped; // unescape
+					}
+					if (match === newQuote || newQuote === "`" && match === "${") {
+						return "\\" + match; // escape
+					}
+					if (newline && oldQuote === "`") {
+						return "\\n"; // escape newlines
+					}
+					return match;
+				}) + newQuote;
+			};
+			return applySingleFixToAll(annotations, function(annot) {
+				var node = Finder.findNode(annot.start, file.ast, {parents:true});
+				if (node) {
+					switch(node.type) {
+						case 'Literal' :
+							return {
+								text: convertQuotes(node.raw, annotation.data.quote),
+								start: node.range[0],
+								end: node.range[1]
+							};
+						case 'TemplateLiteral' :
+							return {
+								text: convertQuotes('`' + node.quasis[0].value.raw + '`', annotation.data.quote),
+								start: node.range[0],
+								end: node.range[1]
+							};
+					}
+				}
+			});
+		}
+	};
 	
 	/**
 	 * @description Compute the fixes 

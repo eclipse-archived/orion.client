@@ -13769,6 +13769,70 @@ define([
 								});
 						});
 					});
+					// quotes --------------------------------------------
+					describe('quotes', function() {
+						var RULE_ID = "quotes";
+						it("flag invalid quotes", function(callback) {
+							var topic = "var d = \"double\";";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "single"];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "quotes",
+										severity: 'error',
+										description: 'Strings must use singlequote.',
+										start: 8,
+										end: 16
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid quotes 2", function(callback) {
+							var topic = "var unescaped = \"a string containing 'single' quotes\";";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "single"];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "quotes",
+										severity: 'error',
+										description: 'Strings must use singlequote.',
+										start: 16,
+										end: 53
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid quotes 3", function(callback) {
+							var topic = "var single = 'single';";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "double", {"avoidEscape": true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "quotes",
+										severity: 'error',
+										description: 'Strings must use doublequote.',
+										start: 13,
+										end: 21
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};

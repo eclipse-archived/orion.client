@@ -80,6 +80,7 @@ define([
 			"no-use-before-define" : 1,
 			"no-void" : 2,
 			"no-with" : 1,
+			"quotes" : [1, "double", {avoidEscape: false, allowTemplateLiterals: false}],
 			"radix" : 1,
 			"semi" : 1,
 			"type-checked-consistent-return" : 0,

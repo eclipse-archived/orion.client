@@ -5010,6 +5010,31 @@ define([
 					});
 				});
 			});
+			//Quotes
+			describe("quotes", function() {
+				it("Test quotes",function(callback) {
+					var rule = createTestRule('quotes');
+					var expected = {value: "\"this is a string with single quotes\"",
+									start: 13,
+									end: 50};
+					return getFixes({buffer: 'var simple = \'this is a string with single quotes\';',
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'quotes'});
+				});
+				it("Test quotes 2",function(callback) {
+					var rule = createTestRule('quotes');
+					var expected = {value: "\"this is a string \\\"with single quotes\"",
+									start: 13,
+									end: 51};
+					return getFixes({buffer: 'var simple = \'this is a string "with single quotes\';',
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'quotes'});
+				});
+			});
 		});
 	};
 });

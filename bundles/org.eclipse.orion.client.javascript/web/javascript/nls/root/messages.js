@@ -174,6 +174,14 @@ define({
 	'no-extend-native' : 'Disallow extending of native objects:',
 	'no-extend-native-exceptions' : 'Exceptions:',
 	'no-lone-blocks' : 'Disallow unnecessary nested blocks:',
+	'quotes' : 'Enforce quote style:',
+	'quotesKind' : 'Kind of quotes:',
+	'quotesAvoidEscape' : 'Avoid escaped quotes:',
+	'quotesAllowTemplateLiterals' : 'Allow template literals:',
+	'singleQuote' : 'single quote (\')',
+	'doubleQuote' : 'double quote (")',
+	'backtickQuote' : 'backtick (`)',
+	'quoteFixName' : 'Fix quotes',
 
 	//All refs
 	'functionDecls': 'Function Declarations',

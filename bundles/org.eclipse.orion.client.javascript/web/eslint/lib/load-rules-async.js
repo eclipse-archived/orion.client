@@ -37,12 +37,13 @@ define([
 './rules/no-implicit-coercion',
 './rules/no-extra-bind',
 './rules/no-extend-native',
-'./rules/no-lone-blocks'
+'./rules/no-lone-blocks',
+'./rules/quotes'
 ], function(util, Finder, ProblemMessages, Estraverse, JsSyntax,
 		accessorPairs, noControlRegex, noDuplicateCase, noElseReturn, noEmptyCharClasses, 
 		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs,
 		noObjCalls, noSelfCompare, noIrregularWhitespace, noConstAssign, noImplicitCoercion,
-		noExtraBind, noExtendNative, noLoneBlocks) {
+		noExtraBind, noExtendNative, noLoneBlocks, quotes) {
 	
 	var nodeModules = {
 		"buffer": true,
@@ -2374,7 +2375,8 @@ define([
 		'no-extra-bind': noExtraBind,
 		'no-implicit-coercion': noImplicitCoercion,
 		'no-extend-native': noExtendNative,
-		'no-lone-blocks' : noLoneBlocks
+		'no-lone-blocks' : noLoneBlocks,
+		'quotes' : quotes
 	};
 
 	/**
