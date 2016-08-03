@@ -1970,6 +1970,20 @@ define([
     			 	        	                	type: "boolean",  //$NON-NLS-1$
     			 	        	                	defaultValue: false
     			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "no-native-reassign",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["no-native-reassign"],
+    			 	        	                	type: "number",  //$NON-NLS-1$
+    			 	        	                	defaultValue: warning,
+    			 	        	                	options: severities
+    			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "no-native-reassign:exceptions",  //$NON-NLS-1$
+	 				 	        	   				dependsOn: "no-native-reassign",
+    			 	        	                	name: javascriptMessages["no-native-reassign-exceptions"],
+    			 	        	                	type: "string",  //$NON-NLS-1$
+    			 	        	                	defaultValue: ""
+    			 	        	                },
 										]
 				 	            },
 				 	        	{  pid: "eslint.config.codestyle",  //$NON-NLS-1$
