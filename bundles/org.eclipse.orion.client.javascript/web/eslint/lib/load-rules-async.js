@@ -38,12 +38,13 @@ define([
 './rules/no-extra-bind',
 './rules/no-extend-native',
 './rules/no-lone-blocks',
-'./rules/quotes'
+'./rules/quotes',
+'./rules/yoda'
 ], function(util, Finder, ProblemMessages, Estraverse, JsSyntax,
 		accessorPairs, noControlRegex, noDuplicateCase, noElseReturn, noEmptyCharClasses, 
 		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs,
 		noObjCalls, noSelfCompare, noIrregularWhitespace, noConstAssign, noImplicitCoercion,
-		noExtraBind, noExtendNative, noLoneBlocks, quotes) {
+		noExtraBind, noExtendNative, noLoneBlocks, quotes, yoda) {
 	
 	var nodeModules = {
 		"buffer": true,
@@ -2376,7 +2377,8 @@ define([
 		'no-implicit-coercion': noImplicitCoercion,
 		'no-extend-native': noExtendNative,
 		'no-lone-blocks' : noLoneBlocks,
-		'quotes' : quotes
+		'quotes' : quotes,
+		'yoda' : yoda
 	};
 
 	/**

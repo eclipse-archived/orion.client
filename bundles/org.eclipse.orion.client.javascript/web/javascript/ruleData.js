@@ -87,7 +87,8 @@ define([
 			"unnecessary-nls" : 0,
 			"unknown-require": 1,
 			"use-isnan" : 2,
-			"valid-typeof" : 2
+			"valid-typeof" : 2,
+			"yoda" : [1, "never", {exceptRange: false, onlyEquality: false}]
 		},
 
 		metadata: {
@@ -328,6 +329,10 @@ define([
 				description: Messages['no-with-description'],
 				url: 'http://eslint.org/docs/rules/no-with'
 			},
+			"quotes" : {
+				description: Messages['quotes-description'],
+				url: 'http://eslint.org/docs/rules/quotes'
+			},
 			"radix" : {
 				description: Messages['radix-description'],
 				url: 'http://eslint.org/docs/rules/radix'
@@ -349,6 +354,10 @@ define([
 			},
 			"type-checked-consistent-return" : {
 				description: Messages['type-checked-consistent-return-description']
+			},
+			"yoda" : {
+				description: Messages['yoda-description'],
+				url: 'http://eslint.org/docs/rules/yoda'
 			}
 		}
 	};
