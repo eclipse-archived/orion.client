@@ -1431,6 +1431,24 @@ define([
 				}
 		);
 		
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+				quickFixComputer,
+				{
+					name: javascriptMessages["noUnusedExpressionsFixName"],
+					scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+					fixAllEnabled: true,
+					id : "no.unused.expressions.fix",  //$NON-NLS-1$
+					contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+					validationProperties: [
+						{
+							source: "annotation:id", //$NON-NLS-1$
+							match: "^(?:no-unused-expressions)$" //$NON-NLS-1$
+						},
+						{source: "readonly", match: false} //$NON-NLS-1$
+					]
+				}
+		);
+		
     	/**
     	 * legacy pref id
     	 */
@@ -1931,7 +1949,7 @@ define([
 	 				 	        	            	id: "yoda",  //$NON-NLS-1$
     			 	        	                	name: javascriptMessages["yoda"],
     			 	        	                	type: "number",  //$NON-NLS-1$
-    			 	        	                	defaultValue: warning,
+    			 	        	                	defaultValue: ignore,
     			 	        	                	options: severities
     			 	        	                },
  				 	        	            	{
@@ -1974,7 +1992,7 @@ define([
 	 				 	        	            	id: "no-native-reassign",  //$NON-NLS-1$
     			 	        	                	name: javascriptMessages["no-native-reassign"],
     			 	        	                	type: "number",  //$NON-NLS-1$
-    			 	        	                	defaultValue: warning,
+    			 	        	                	defaultValue: error,
     			 	        	                	options: severities
     			 	        	                },
  				 	        	            	{
@@ -1983,6 +2001,27 @@ define([
     			 	        	                	name: javascriptMessages["no-native-reassign-exceptions"],
     			 	        	                	type: "string",  //$NON-NLS-1$
     			 	        	                	defaultValue: ""
+    			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "no-unused-expressions",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["no-unused-expressions"],
+    			 	        	                	type: "number",  //$NON-NLS-1$
+    			 	        	                	defaultValue: error,
+    			 	        	                	options: severities
+    			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "no-unused-expressions:allowShortCircuit",  //$NON-NLS-1$
+	 				 	        	   				dependsOn: "no-unused-expressions",
+    			 	        	                	name: javascriptMessages["no-unused-expressions-allowShortCircuit"],
+    			 	        	                	type: "boolean",  //$NON-NLS-1$
+    			 	        	                	defaultValue: false
+    			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "no-unused-expressions:allowTernary",  //$NON-NLS-1$
+	 				 	        	   				dependsOn: "no-unused-expressions",
+    			 	        	                	name: javascriptMessages["no-unused-expressions-allowTernary"],
+    			 	        	                	type: "boolean",  //$NON-NLS-1$
+    			 	        	                	defaultValue: false
     			 	        	                },
 										]
 				 	            },

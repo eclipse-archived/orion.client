@@ -1093,7 +1093,16 @@ define([
 					}
 				}
 			});
-		}
+		},
+		"no-unused-expressions": function(annotation, annotations, file) {
+			return applySingleFixToAll(annotations, function(annot) {
+				return {
+					text: '',
+					start: annot.start,
+					end: annot.end
+				};
+			});
+		},
 	};
 	
 	/**
