@@ -1262,7 +1262,16 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
 		lib.empty(node);
 		node.focus();
 		var that = this;
-        var searchModel = new mSearchModel.SearchResultModel(this.registry, this.fileClient, searchResult, searchResult.length, searchParams, {
+		var totalSearchResults = 0;
+		if (searchResult.refResult) {
+        	searchResult.refResult.forEach(function(file) {
+        		totalSearchResults += file.totalMatches;
+        	});
+		}
+		else {
+			totalSearchResults = searchResult.length;
+		}
+        var searchModel = new mSearchModel.SearchResultModel(this.registry, this.fileClient, searchResult, totalSearchResults, searchParams, {
             onMatchNumberChanged: function(fileItem) {
                 that.renderer.replaceFileElement(fileItem);
             },
