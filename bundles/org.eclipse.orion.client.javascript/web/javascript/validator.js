@@ -29,17 +29,20 @@ define([
 		 * @param {Number} value The value to set the rule to
 		 * @param {Object} [key] Optional key to use for complex rule configuration.
 		 */
-		setOption: function(ruleId, value, key) {
+		setOption: function(ruleId, value, key, index) {
 			if(Array.isArray(this.rules[ruleId])) {
 				var ruleConfig = this.rules[ruleId];
-				if (key) {
-					ruleConfig[1] = ruleConfig[1] || {};
-					ruleConfig[1][key] = value;
+				var length = ruleConfig.length;
+				var lastIndex = length - 1;
+				if (index) {
+					ruleConfig[index] = value;
+				} else if (key) {
+					ruleConfig[lastIndex] = ruleConfig[lastIndex] || {};
+					ruleConfig[lastIndex][key] = value;
 				} else {
 					ruleConfig[0] = value;
 				}
-			}
-			else {
+			} else {
 				this.rules[ruleId] = value;
 			}
 		},
@@ -297,9 +300,17 @@ define([
 				var index = key.indexOf(':');
 				var subKey = null;
 				var realKey = key;
+				var tabIndex = 0;
 				if (index !== -1) {
 					realKey = key.substring(0, index);
 					subKey = key.substring(index + 1);
+				} else {
+					// check !
+					index = key.indexOf('!');
+					if (index !== -1) {
+						realKey = key.substring(0, index);
+						tabIndex = key.substring(index + 1);
+					}
 				}
 				var ruleId = realKey;
 				if (oldconfig && config.rules[realKey] !== config.defaults[realKey]) {
@@ -330,6 +341,8 @@ define([
 					} else {
 						config.setOption(ruleId, value, subKey);
 					}
+				} else if (tabIndex) {
+					config.setOption(ruleId, value, null, tabIndex);
 				} else {
 					config.setOption(ruleId, value);
 				}

@@ -1328,6 +1328,240 @@ define([
 						});
 				});
 			});
+			// quotes --------------------------------------------
+			describe('quotes', function() {
+				var RULE_ID = "quotes";
+				it("flag invalid quotes", function(callback) {
+					var topic = "var single = `single`;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "double", {"avoidEscape": true}];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: "quotes",
+								severity: 'error',
+								description: 'Strings must use doublequote.',
+								start: 13,
+								end: 21
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag invalid quotes 2", function(callback) {
+					var topic = "var double = `double`;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "single", {"avoidEscape": true}];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: "quotes",
+								severity: 'error',
+								description: 'Strings must use singlequote.',
+								start: 13,
+								end: 21
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag invalid quotes 3", function(callback) {
+					var topic = "var single = 'single';";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "backtick"];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: "quotes",
+								severity: 'error',
+								description: 'Strings must use backtick.',
+								start: 13,
+								end: 21
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag invalid quotes 4", function(callback) {
+					var topic = "var unescaped = 'a string containing `backticks`';";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "backtick"];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: "quotes",
+								severity: 'error',
+								description: 'Strings must use backtick.',
+								start: 16,
+								end: 49
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag invalid quotes 5", function(callback) {
+					var topic = "var double = 'double';";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "backtick"];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: "quotes",
+								severity: 'error',
+								description: 'Strings must use backtick.',
+								start: 13,
+								end: 21
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag valid quotes", function(callback) {
+					var topic = "var double = \"double\";";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "double"];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag valid quotes 2", function(callback) {
+					var topic = "var backtick = `back\ntick`;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "double"];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag valid quotes 3", function(callback) {
+					var topic = "var backtick = tag`backtick`;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "double"];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag valid quotes 4", function(callback) {
+					var topic = "var single = 'single';";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "single"];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag valid quotes 5", function(callback) {
+					var topic = "var backtick = `back${x}tick`;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "single"];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag valid quotes 6", function(callback) {
+					var topic = "var single = 'a string containing \"double\" quotes';";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "double", {"avoidEscape": true}];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag valid quotes 7", function(callback) {
+					var topic = "var double = \"a string containing 'single' quotes\";";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "single", {"avoidEscape": true}];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag valid quotes 8", function(callback) {
+					var topic = "var single = `single`;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "double", {"allowTemplateLiterals": true}];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag valid quotes 9", function(callback) {
+					var topic = "var backtick = `backtick`;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "backtick"];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag valid quotes 10", function(callback) {
+					var topic = "var double = \"a string containing `backtick` quotes\"";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = [2, "backtick", {"avoidEscape": true}];
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+			});
 		});
 	};
 });

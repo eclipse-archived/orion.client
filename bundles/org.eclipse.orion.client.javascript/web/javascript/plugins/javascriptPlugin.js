@@ -1412,6 +1412,24 @@ define([
 					]
 				}
 		);
+
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+				quickFixComputer,
+				{
+					name: javascriptMessages["quoteFixName"],
+					scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+					fixAllEnabled: true,
+					id : "quote.fix",  //$NON-NLS-1$
+					contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+					validationProperties: [
+						{
+							source: "annotation:id", //$NON-NLS-1$
+							match: "^(?:quotes)$" //$NON-NLS-1$
+						},
+						{source: "readonly", match: false} //$NON-NLS-1$
+					]
+				}
+		);
 		
     	/**
     	 * legacy pref id
@@ -1432,6 +1450,15 @@ define([
     	                                                      {label: javascriptMessages.warning, value: warning},
     	                                                      {label: javascriptMessages.error,   value: error}
     	                                                      ];
+    	                                                      
+		var doubleQuote = 'double';
+		var singleQuote = 'single';
+		var backTick = 'backtick';
+		var quotes = [
+			{ label: javascriptMessages.singleQuote, value: singleQuote },
+			{ label: javascriptMessages.doubleQuote, value: doubleQuote },
+			{ label: javascriptMessages.backtickQuote, value: backTick }
+		];
     	provider.registerService("orion.core.setting",  //$NON-NLS-1$
     			{},
     			{	settings: [
@@ -1942,6 +1969,31 @@ define([
 				 	        	                	type: "number",  //$NON-NLS-1$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
+				 	        	                },
+				 	        	                {	id: "quotes",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["quotes"],
+				 	        	                	type: "number",  //$NON-NLS-1$
+				 	        	                	defaultValue: warning,
+				 	        	                	options: severities
+				 	        	                },
+				 	        	                {	id: "quotes!1",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["quotesKind"],
+				 	        	                	type: "string",  //$NON-NLS-1$
+				 	        	                	defaultValue: doubleQuote,
+	 				 	        	   				dependsOn: "quotes",
+				 	        	                	options: quotes
+				 	        	                },
+				 	        	                {	id: "quotes:avoidEscape",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["quotesAvoidEscape"],
+				 	        	                	type: "boolean",  //$NON-NLS-1$
+	 				 	        	   				dependsOn: "quotes",
+				 	        	                	defaultValue: false
+				 	        	                },
+				 	        	                {	id: "quotes:allowTemplateLiterals",  //$NON-NLS-1$
+				 	        	                	name: javascriptMessages["quotesAllowTemplateLiterals"],
+				 	        	                	type: "boolean",  //$NON-NLS-1$
+	 				 	        	   				dependsOn: "quotes",
+				 	        	                	defaultValue: false
 				 	        	                }
 										]
 				 	        	}]

@@ -289,7 +289,6 @@ define([
 			});
 			//NO-UNUSED-VARS-UNREAD
 			describe("no-unused-vars-unread", function() {
-				this.timeout(10000000);
 				it("Test no-unused-vars-unread-list-matching-1",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
@@ -366,6 +365,20 @@ define([
 									  expected: expected,
 									  callback: callback,
 									  pid: 'no-unused-vars-unread'});
+				});
+			});
+			//Quotes
+			describe("quotes", function() {
+				it("Test quotes",function(callback) {
+					var rule = createTestRule('quotes');
+					var expected = {value: "\"this is a template literal\"",
+									start: 15,
+									end: 43};
+					return getFixes({buffer: 'var backtick = `this is a template literal`;', 
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'quotes'});
 				});
 			});
 		});
