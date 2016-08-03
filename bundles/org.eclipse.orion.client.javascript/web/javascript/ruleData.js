@@ -55,7 +55,7 @@ define([
 			"no-jslint" : 1,
 			"no-lone-blocks" : 1,
 			"no-mixed-spaces-and-tabs" : 0,
-			"no-native-reassign" : [1, {"exceptions" : ""}],
+			"no-native-reassign" : [2, {"exceptions" : ""}],
 			"no-negated-in-lhs" : 2,
 			"no-new-array": 1,
 			"no-new-func" : 1,
@@ -76,7 +76,8 @@ define([
 			"no-undef" : 2,
 			"no-undef-expression": 1,
 			"no-undef-init" : 1,
-			"no-unreachable" : 1, 
+			"no-unreachable" : 1,
+			"no-unused-expressions" : [2, {allowShortCircuit: false, allowTernary: false}],
 			"no-unused-params" : 1,
 			"no-unused-vars" : 1,
 			"no-use-before-define" : 1,
@@ -90,7 +91,7 @@ define([
 			"unknown-require": 1,
 			"use-isnan" : 2,
 			"valid-typeof" : 2,
-			"yoda" : [1, "never", {exceptRange: false, onlyEquality: false}]
+			"yoda" : [0, "never", {exceptRange: false, onlyEquality: false}]
 		},
 
 		metadata: {
@@ -319,6 +320,10 @@ define([
 			"no-unreachable" : {
 				description: Messages['no-unreachable-description'],
 				url: 'http://eslint.org/docs/rules/no-unreachable'
+			},
+			"no-unused-expressions" : {
+				description: Messages['no-unused-expressions-description'],
+				url: 'http://eslint.org/docs/rules/no-unused-expressions'
 			},
 			"no-unused-params" : {
 				description: Messages['no-unused-params-description']

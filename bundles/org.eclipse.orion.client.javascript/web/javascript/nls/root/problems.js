@@ -145,6 +145,7 @@ define({
 	'yoda-description' : 'Require or disallow Yoda conditions',
 	'no-param-reassign-description' : 'Disallow reassignment of function parameters',
 	'no-native-reassign-description' : 'Disallow reassignment of native objects',
+	'no-unused-expressions-description' : 'Disallow unused expressions',
 
 	//.tern-project file validation messages
 	'notNum': "'${0}' must be a number",

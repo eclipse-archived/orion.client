@@ -41,12 +41,13 @@ define([
 './rules/quotes',
 './rules/yoda',
 './rules/no-param-reassign',
-'./rules/no-native-reassign'
+'./rules/no-native-reassign',
+'./rules/no-unused-expressions'
 ], function(util, Finder, ProblemMessages, Estraverse, JsSyntax,
 		accessorPairs, noControlRegex, noDuplicateCase, noElseReturn, noEmptyCharClasses, 
 		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs,
 		noObjCalls, noSelfCompare, noIrregularWhitespace, noConstAssign, noImplicitCoercion,
-		noExtraBind, noExtendNative, noLoneBlocks, quotes, yoda, noParamReassign, noNativeReassign) {
+		noExtraBind, noExtendNative, noLoneBlocks, quotes, yoda, noParamReassign, noNativeReassign, noUnusedExpressions) {
 	
 	var nodeModules = {
 		"buffer": true,
@@ -2382,7 +2383,8 @@ define([
 		'quotes' : quotes,
 		'yoda' : yoda,
 		'no-param-reassign' : noParamReassign,
-		'no-native-reassign' : noNativeReassign
+		'no-native-reassign' : noNativeReassign,
+		'no-unused-expressions' : noUnusedExpressions
 	};
 
 	/**

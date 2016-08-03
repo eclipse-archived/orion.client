@@ -14393,6 +14393,155 @@ define([
 								});
 						});
 					});
+					// no-unused-expressions --------------------------------------------
+					describe('no-unused-expressions', function() {
+						var RULE_ID = "no-unused-expressions";
+						it("flag invalid unused expressions", function(callback) {
+							var topic = "var a = 1; a + 3;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-unused-expressions",
+										severity: 'error',
+										description: 'Expected an assignment or function call and instead saw an expression.',
+										start: 11,
+										end: 17
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid unused expressions 2", function(callback) {
+							var topic = "a || b";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, { "allowShortCircuit": true }];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-unused-expressions",
+										severity: 'error',
+										description: 'Expected an assignment or function call and instead saw an expression.',
+										start: 0,
+										end: 6
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid unused expressions 3", function(callback) {
+							var topic = "a ? b : 0";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, { "allowTernary": true }];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-unused-expressions",
+										severity: 'error',
+										description: 'Expected an assignment or function call and instead saw an expression.',
+										start: 0,
+										end: 9
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid unused expressions 4", function(callback) {
+							var topic = "a ? b : c()";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, { "allowTernary": true }];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-unused-expressions",
+										severity: 'error',
+										description: 'Expected an assignment or function call and instead saw an expression.',
+										start: 0,
+										end: 11
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid unused expressions", function(callback) {
+							var topic = "var a = 1; a = 3;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid unused expressions 2", function(callback) {
+							var topic = "a && b()";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {allowShortCircuit: true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid unused expressions 3", function(callback) {
+							var topic = "a() || (b = c)";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {allowShortCircuit: true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid unused expressions 4", function(callback) {
+							var topic = "a ? b() : c()";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {allowTernary: true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid unused expressions 5", function(callback) {
+							var topic = "a ? (b = c) : d()";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {allowTernary: true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};

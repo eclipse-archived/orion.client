@@ -190,6 +190,10 @@ define({
 	'no-param-reassign-props' : 'Disallow for parameter properties:',
 	'no-native-reassign' : 'Disallow reassignment of native objects',
 	'no-native-reassign-exceptions' : 'Exceptions:',
+	'no-unused-expressions' : 'Disallow unused expressions:',
+	'no-unused-expressions-allowShortCircuit' : 'Allow to use short circuit evaluations:',
+	'no-unused-expressions-allowTernary' : 'Allow to use ternary operators:',
+	'noUnusedExpressionsFixName' : 'Remove unused expressions',
 
 	//All refs
 	'functionDecls': 'Function Declarations',
