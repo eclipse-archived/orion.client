@@ -188,6 +188,8 @@ define({
 	'yodaOnlyEquality' : 'Check only for \'==\' and \'===\' operators:',
 	'no-param-reassign' : 'Disallow reassignment of function parameters:',
 	'no-param-reassign-props' : 'Disallow for parameter properties:',
+	'no-native-reassign' : 'Disallow reassignment of native objects',
+	'no-native-reassign-exceptions' : 'Exceptions:',
 
 	//All refs
 	'functionDecls': 'Function Declarations',

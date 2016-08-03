@@ -14263,6 +14263,136 @@ define([
 								});
 						});
 					});
+					// no-native-reassign --------------------------------------------
+					describe('no-native-reassign', function() {
+						var RULE_ID = "no-native-reassign";
+						it("flag invalid native reassign", function(callback) {
+							var topic = "Object = null";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-native-reassign",
+										severity: 'error',
+										description: 'Object is a read-only native object.',
+										start: 0,
+										end: 6
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid native reassign 2", function(callback) {
+							var topic = "undefined = 1";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-native-reassign",
+										severity: 'error',
+										description: 'undefined is a read-only native object.',
+										start: 0,
+										end: 9
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid native reassign 3", function(callback) {
+							var topic = "/* eslint-env browser */ window = {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-native-reassign",
+										severity: 'error',
+										description: 'window is a read-only native object.',
+										start: 25,
+										end: 31
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid native reassign 4", function(callback) {
+							var topic = "/* eslint-env browser */ top = {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-native-reassign",
+										severity: 'error',
+										description: 'top is a read-only native object.',
+										start: 25,
+										end: 28
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid native reassign 5", function(callback) {
+							var topic = "/*globals a:false*/ a = 1";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-native-reassign",
+										severity: 'error',
+										description: 'a is a read-only native object.',
+										start: 20,
+										end: 21
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid native reassign", function(callback) {
+							var topic = "Object = null";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {exceptions: ["Object"]}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag native reassign 2", function(callback) {
+							var topic = "/*globals a:true*/ a = 1";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};

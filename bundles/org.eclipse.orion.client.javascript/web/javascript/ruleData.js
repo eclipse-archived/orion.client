@@ -55,6 +55,7 @@ define([
 			"no-jslint" : 1,
 			"no-lone-blocks" : 1,
 			"no-mixed-spaces-and-tabs" : 0,
+			"no-native-reassign" : [1, {"exceptions" : ""}],
 			"no-negated-in-lhs" : 2,
 			"no-new-array": 1,
 			"no-new-func" : 1,
@@ -227,6 +228,10 @@ define([
 			},
 			"no-jslint" : {
 				description: Messages['no-jslint-description']
+			},
+			"no-native-reassign" : {
+				description: Messages['no-native-reassign-description'],
+				url: 'http://eslint.org/docs/rules/no-native-reassign'
 			},
 			"no-lone-blocks" : {
 				description: Messages['no-lone-blocks-description'],
