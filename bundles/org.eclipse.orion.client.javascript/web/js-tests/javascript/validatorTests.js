@@ -13833,6 +13833,280 @@ define([
 								});
 						});
 					});
+					// yoda --------------------------------------------
+					describe('yoda', function() {
+						var RULE_ID = "yoda";
+						it("flag invalid yoda comparison", function(callback) {
+							var topic = "if (\"red\" === color) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never"];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "yoda",
+										severity: 'error',
+										description: 'Expected literal to be on the right side of ===.',
+										start: 4,
+										end: 19
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid yoda comparison 2", function(callback) {
+							var topic = "if (true === flag) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never"];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "yoda",
+										severity: 'error',
+										description: 'Expected literal to be on the right side of ===.',
+										start: 4,
+										end: 17
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid yoda comparison 3", function(callback) {
+							var topic = "if (5 > count) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never"];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "yoda",
+										severity: 'error',
+										description: 'Expected literal to be on the right side of >.',
+										start: 4,
+										end: 13
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid yoda comparison 4", function(callback) {
+							var topic = "if (-1 < count) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never"];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "yoda",
+										severity: 'error',
+										description: 'Expected literal to be on the right side of <.',
+										start: 4,
+										end: 14
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid yoda comparison 5", function(callback) {
+							var topic = "if (0 <= x && x < 1) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never"];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "yoda",
+										severity: 'error',
+										description: 'Expected literal to be on the right side of <=.',
+										start: 4,
+										end: 10
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid yoda comparison 6", function(callback) {
+							var topic = "if (color === \"blue\") {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "always"];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "yoda",
+										severity: 'error',
+										description: 'Expected literal to be on the left side of ===.',
+										start: 4,
+										end: 20
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid yoda comparison 7", function(callback) {
+							var topic = "if (\"red\" === color) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never", {onlyEquality: true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "yoda",
+										severity: 'error',
+										description: 'Expected literal to be on the right side of ===.',
+										start: 4,
+										end: 19
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid yoda comparison", function(callback) {
+							var topic = "if (5 & value) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never"];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid yoda comparison 2", function(callback) {
+							var topic = "if (value === \"red\") {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never"];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid yoda comparison 3", function(callback) {
+							var topic = "function isReddish(color) {return (color.hue < 60 || 300 < color.hue);}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never", {exceptRange: true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid yoda comparison 4", function(callback) {
+							var topic = "if (x < -1 || 1 < x) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never", {exceptRange: true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid yoda comparison 5", function(callback) {
+							var topic = "if (count < 10 && (0 <= rand && rand < 1)) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never", {exceptRange: true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid yoda comparison 6", function(callback) {
+							var topic = "function howLong(arr) {return (0 <= arr.length && arr.length < 10) ? \"short\" : \"long\";}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never", {exceptRange: true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid yoda comparison 7", function(callback) {
+							var topic = "if (x < -1 || 9 < x) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never", {onlyEquality: true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid yoda comparison 8", function(callback) {
+							var topic = "if (x !== 'foo' && 'bar' != x) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never", {onlyEquality: true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid yoda comparison 9", function(callback) {
+							var topic = "if ('blue' == value) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "always"];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid yoda comparison 10", function(callback) {
+							var topic = "if (-1 < str.indexOf(substr)) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "always"];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};

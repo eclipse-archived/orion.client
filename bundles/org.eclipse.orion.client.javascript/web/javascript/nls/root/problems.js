@@ -141,6 +141,8 @@ define({
 	'no-implicit-coercion-description' : 'Disallow the type conversion with shorter notations.',
 	'no-extend-native-description' : 'Disallow extending of native objects',
 	'no-lone-blocks-description' : 'Disallow unecessary nested blocks',
+	'quotes-description' : 'Enforce quote style',
+	'yoda-description' : 'Require or disallow Yoda Conditions',
 
 	//.tern-project file validation messages
 	'notNum': "'${0}' must be a number",

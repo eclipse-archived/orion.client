@@ -1459,6 +1459,13 @@ define([
 			{ label: javascriptMessages.doubleQuote, value: doubleQuote },
 			{ label: javascriptMessages.backtickQuote, value: backTick }
 		];
+		
+		var Never = 'never';
+		var Always = 'always';
+		var yodaKinds = [
+			{ label: javascriptMessages.yodayAlways, value: Always },
+			{ label: javascriptMessages.yodaNever, value: Never },
+		];
     	provider.registerService("orion.core.setting",  //$NON-NLS-1$
     			{},
     			{	settings: [
@@ -1919,6 +1926,35 @@ define([
     			 	        	                	type: "number",  //$NON-NLS-1$
     			 	        	                	defaultValue: warning,
     			 	        	                	options: severities
+    			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "yoda",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["yoda"],
+    			 	        	                	type: "number",  //$NON-NLS-1$
+    			 	        	                	defaultValue: warning,
+    			 	        	                	options: severities
+    			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "yoda!1",  //$NON-NLS-1$
+	 				 	        	   				dependsOn: "yoda",
+    			 	        	                	name: javascriptMessages["yodaKind"],
+    			 	        	                	type: "string",  //$NON-NLS-1$
+    			 	        	                	defaultValue: Never,
+    			 	        	                	options: yodaKinds
+    			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "yoda:exceptRange",  //$NON-NLS-1$
+	 				 	        	   				dependsOn: "yoda",
+    			 	        	                	name: javascriptMessages["yodaExceptRange"],
+    			 	        	                	type: "boolean",  //$NON-NLS-1$
+    			 	        	                	defaultValue: false
+    			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "yoda:onlyEquality",  //$NON-NLS-1$
+	 				 	        	   				dependsOn: "yoda",
+    			 	        	                	name: javascriptMessages["yodaOnlyEquality"],
+    			 	        	                	type: "boolean",  //$NON-NLS-1$
+    			 	        	                	defaultValue: false
     			 	        	                },
 										]
 				 	            },

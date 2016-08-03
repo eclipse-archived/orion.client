@@ -182,6 +182,10 @@ define({
 	'doubleQuote' : 'double quote (")',
 	'backtickQuote' : 'backtick (`)',
 	'quoteFixName' : 'Fix quotes',
+	'yoda' : 'Require or disallow Yoda conditions:',
+	'yodaKind' : 'Kinds:',
+	'yodaExceptRange' : 'Except for range comparisons:',
+	'yodaOnlyEquality' : 'Check only for \'==\' and \'===\' operators:',
 
 	//All refs
 	'functionDecls': 'Function Declarations',
