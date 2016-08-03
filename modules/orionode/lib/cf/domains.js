@@ -9,12 +9,11 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var express = require('express');
-var bodyParser = require('body-parser');
-var target = require('./target');
-var request = require('request');
-var tasks = require('../tasks');
-var util = require('../git/util');
+var express = require("express");
+var bodyParser = require("body-parser");
+var target = require("./target");
+var tasks = require("../tasks");
+var util = require("../git/util");
 
 module.exports.router = function() {
 
@@ -22,7 +21,7 @@ module.exports.router = function() {
 
 	return express.Router()
 		.use(bodyParser.json())
-		.get('*', getDomain);
+		.get("*", getDomain);
 
 function getDomain(req, res) {
 	var task = new tasks.Task(res, false, false, 0, false);
@@ -65,8 +64,8 @@ function getCFdomains(appTarget, UserId, targetUrl, orgName, domainName, default
 	var domainArray = [];
 	var waitFor;
 	if (!defaultDomainMode){
-		waitFor = target.cfRequest('GET', UserId, null, targetUrl + appTarget.Org.entity.private_domains_url, 
-				domainName ? {'q': "name:" + util.encodeURIComponent(domainName)}: null);
+		waitFor = target.cfRequest("GET", UserId, null, targetUrl + appTarget.Org.entity.private_domains_url, 
+				domainName ? {"q": "name:" + util.encodeURIComponent(domainName)}: null);
 	}else{
 		waitFor = Promise.resolve();
 	}
@@ -75,12 +74,12 @@ function getCFdomains(appTarget, UserId, targetUrl, orgName, domainName, default
 		return new Promise(function(fulfill) {
 			if (defaultDomainMode || !domainName || result.total_results < 1) {
 				var qs = domainName ? {
-					'q': "name:" + util.encodeURIComponent(domainName)
+					"q": "name:" + util.encodeURIComponent(domainName)
 				} : {
-					'page': '1',
-					'results-per-page': '1'
+					"page": "1",
+					"results-per-page": "1"
 				};
-				return target.cfRequest('GET', UserId, null, targetUrl + '/v2/shared_domains', qs)
+				return target.cfRequest("GET", UserId, null, targetUrl + "/v2/shared_domains", qs)
 				.then(function(result){
 					fulfill(result);
 				});
@@ -91,9 +90,9 @@ function getCFdomains(appTarget, UserId, targetUrl, orgName, domainName, default
 		var domainResources = result.resources;
 		for (var k = 0; k < domainResources.length; k++) {
 			var domainJson = {
-				'Guid': domainResources[k].metadata.guid,
-				'DomainName': domainResources[k].entity.name,
-				'Type': 'Domain'
+				"Guid": domainResources[k].metadata.guid,
+				"DomainName": domainResources[k].entity.name,
+				"Type": "Domain"
 			};
 			domainArray.push(domainJson);
 		}

@@ -9,12 +9,11 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var express = require('express');
-var bodyParser = require('body-parser');
-var tasks = require('../tasks');
-var target = require('./target');
-var request = require('request');
-var async = require('async');
+var express = require("express");
+var bodyParser = require("body-parser");
+var tasks = require("../tasks");
+var target = require("./target");
+var async = require("async");
 
 module.exports.router = function() {
 	
@@ -22,7 +21,7 @@ module.exports.router = function() {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', getOrgs);
+	.get("*", getOrgs);
 		
 function getOrgs(req, res){
 	var task = new tasks.Task(res,false,false,0,false);
@@ -47,7 +46,7 @@ function getOrgs(req, res){
 function getOrgsRequest(userId, targetRequest, task){
 	var completeOrgsArray = [];
 	var simpleorgsArray = [];
-	return target.cfRequest('GET', userId, task, targetRequest.Url + '/v2/organizations', {'inline-relations-depth':'1'})
+	return target.cfRequest("GET", userId, task, targetRequest.Url + "/v2/organizations", {"inline-relations-depth":"1"})
 	// TODO In Java code, there is a case that Region is needed, but that value was always assigned as null.
 	.then(function(result){
 		completeOrgsArray = result.resources;
@@ -56,7 +55,7 @@ function getOrgsRequest(userId, targetRequest, task){
 				async.each(completeOrgsArray, function(resource, cb) {
 					var space = [];
 					var orgWithSpace = {};
-					return target.cfRequest('GET', userId, null, targetRequest.Url + resource.entity.spaces_url, {'inline-relations-depth':'1'})
+					return target.cfRequest("GET", userId, null, targetRequest.Url + resource.entity.spaces_url, {"inline-relations-depth":"1"})
 					.then(function(spaceJson){	
 						if(!spaceJson || spaceJson.total_results < 1){
 							cb();
@@ -75,7 +74,7 @@ function getOrgsRequest(userId, targetRequest, task){
 					if(err){
 						return reject(err);
 					}			
-					fulfill({'simpleorgsArray':simpleorgsArray,'completeOrgsArray':completeOrgsArray});
+					fulfill({"simpleorgsArray":simpleorgsArray,"completeOrgsArray":completeOrgsArray});
 				});
 			}
 		});
@@ -84,9 +83,9 @@ function getOrgsRequest(userId, targetRequest, task){
 
 function resourceJson(resource, type){
 	return {
-		'Guid': resource.metadata.guid,
-		'Name': resource.entity.name,
-		'Type': type
+		"Guid": resource.metadata.guid,
+		"Name": resource.entity.name,
+		"Type": type
 	};
 }
 };

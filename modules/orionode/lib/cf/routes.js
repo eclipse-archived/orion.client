@@ -9,19 +9,19 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var express = require('express');
-var bodyParser = require('body-parser');
-var domains = require('./domains');
-var target = require('./target');
-var request = require('request');
-var tasks = require('../tasks');
-var util = require('../git/util');
+var express = require("express");
+var bodyParser = require("body-parser");
+var domains = require("./domains");
+var target = require("./target");
+var request = require("request");
+var tasks = require("../tasks");
+var util = require("../git/util");
 
 module.exports.router = function() {
 
 	return express.Router()
 		.use(bodyParser.json())
-		.get('*', getroutes);
+		.get("*", getroutes);
 
 	function getroutes(req, res) {
 		var task = new tasks.Task(res, false, false, 0, false);
@@ -58,7 +58,7 @@ module.exports.router = function() {
 	function checkRouteRequest(appTarget, userId, targetRequest, domainName, host) {
 		return domains.getCFdomains(appTarget, userId, targetRequest.Url, targetRequest.Org, domainName)
 		.then(function(domains) {
-			return target.cfRequest('GET', userId, null, targetRequest.Url + '/v2/routes/reserved/domain/' + domains[0].metadata.guid + '/host/' + host);
+			return target.cfRequest("GET", userId, null, targetRequest.Url + "/v2/routes/reserved/domain/" + domains[0].metadata.guid + "/host/" + host);
 		});
 	}
 	function getRouteRequest(appTarget, userId, targetRequest) {
@@ -74,14 +74,14 @@ module.exports.router = function() {
 				return domains.getCFdomains(appTarget, userId, targetRequest.Url, targetRequest.Org, domainName)
 					.then(function(domains) {
 						var domainGuid = domains[0].metadata.guid;
-						return target.cfRequest('GET', userId, null, targetRequest.Url + '/v2/routes',
-							{'inline-relations-depth': '1',	'q': util.encodeURIComponent('host:' + host + ';domain_guid' + domainGuid)})
+						return target.cfRequest("GET", userId, null, targetRequest.Url + "/v2/routes",
+							{"inline-relations-depth": "1",	"q": util.encodeURIComponent("host:" + host + ";domain_guid" + domainGuid)})
 						.then(function(result){
 							fulfill(result);
 						});
 					});
 			}
-			return target.cfRequest('GET', userId, null, targetRequest.Url + appTarget.Space.entity.routes_url, {'inline-relations-depth': '1'}
+			return target.cfRequest("GET", userId, null, targetRequest.Url + appTarget.Space.entity.routes_url, {"inline-relations-depth": "1"}
 			).then(function(result){
 				fulfill(result);
 			});
@@ -101,11 +101,11 @@ module.exports.router = function() {
 						});
 					}
 					var routeJson = {
-						'Apps': appArray,
-						'DomainName': routesResources[k].entity.domain.entity.name,
-						'Guid': routesResources[k].metadata.guid,
-						'Host': routesResources[k].entity.host,
-						'Type': 'Route'
+						"Apps": appArray,
+						"DomainName": routesResources[k].entity.domain.entity.name,
+						"Guid": routesResources[k].metadata.guid,
+						"Host": routesResources[k].entity.host,
+						"Type": "Route"
 					};
 					routesArray.push(routeJson);
 				}

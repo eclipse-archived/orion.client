@@ -9,12 +9,12 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node, express, body-parser*/
-var express = require('express');
-var bodyParser = require('body-parser');
-var api = require('../api'), writeError = api.writeError;
-var fs = require('fs');
+var express = require("express");
+var bodyParser = require("body-parser");
+var api = require("../api"), writeError = api.writeError;
+var fs = require("fs");
 var path = require("path");
-var yaml = require('js-yaml');
+var yaml = require("js-yaml");
 
 module.exports.router = function() {
 	
@@ -23,8 +23,8 @@ module.exports.router = function() {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('/file*', getManifests)
-	.get('*', getManifests);
+	.get("/file*", getManifests)
+	.get("*", getManifests);
 	
 function getManifests(req, res){
 	Promise.resolve(retrieveManifestFile(req,res))
@@ -40,11 +40,11 @@ function getManifests(req, res){
 function retrieveManifestFile(req, res, manifestAbsuluteLocation){
 	return new Promise(function(fulfill) {
 		var filePath = manifestAbsuluteLocation ? manifestAbsuluteLocation : retrieveProjectFilePath(req);
-		if(filePath.indexOf('manifest.yml') === -1){
-			filePath += 'manifest.yml';
+		if(filePath.indexOf("manifest.yml") === -1){
+			filePath += "manifest.yml";
 		}
 		try {
-			var manifest = yaml.safeLoad(fs.readFileSync(filePath, 'utf8'));
+			var manifest = yaml.safeLoad(fs.readFileSync(filePath, "utf8"));
 		} catch (err) {
 			writeError(404, res, err.message);
 		}
@@ -52,7 +52,7 @@ function retrieveManifestFile(req, res, manifestAbsuluteLocation){
 	});
 }
 
-function retrieveProjectFilePath(req, res){
+function retrieveProjectFilePath(req){
 	var projectPath = req.params[0];
 	return path.join(req.user.workspaceDir, projectPath);
 }
