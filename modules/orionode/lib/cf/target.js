@@ -137,7 +137,41 @@ function getAccessToken(userId, task){
 	}
 	return UseraccessToken[userId];
 }
+
 function parsebody(body){
 	return typeof body === 'string' ? JSON.parse(body): body;
+}
+function cfRequest (method, userId, task, url, query, body, headers, requestHeader) {
+    return new Promise(function(fulfill, reject) {
+        if(!requestHeader){
+        	var cloudAccessToken = getAccessToken(userId, task);
+	        if (!cloudAccessToken) {
+	            return;
+	        }
+        	headers = headers || {};
+	        headers.Authorization = cloudAccessToken;
+	        requestHeader = {};
+	        requestHeader.url = url;
+	        requestHeader.headers = headers;
+	        query && (requestHeader.qs = query);
+	        body && (requestHeader.body = body);
+			requestHeader.method = method;
+        }
+        request(requestHeader, function (error, response, body) {
+            if (error) {
+                return reject(error);
+            }
+//            if (response.status) {
+//                /// 
+//                return reject();
+//            }
+			if (body instanceof Uint8Array) {
+				fulfill(response);
+			}
+			else {
+            	fulfill(parsebody(body));
+			}
+        });
+    });
 }
 };
