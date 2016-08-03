@@ -9,17 +9,17 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node, express, body-parser, js-yaml*/
-var express = require('express');
-var bodyParser = require('body-parser');
-var fs = require('fs');
+var express = require("express");
+var bodyParser = require("body-parser");
+var fs = require("fs");
 var path = require("path");
-var manifests = require('./manifests');
+var manifests = require("./manifests");
 
 module.exports.router = function() {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('/file*', getplans);
+	.get("/file*", getplans);
 	
 function planJson(type, manifest , planner , wizard){
 	return {
@@ -43,7 +43,7 @@ function getplans(req, res){
 				return planJson("generic",manifest,"ds.GenericDeploymentPlanner","generic");
 			}
 			function generateNodePlan(manifest){
-				if(fs.existsSync(path.join(filePath,'package.json'))){
+				if(fs.existsSync(path.join(filePath,"package.json"))){
 					return planJson("node.js",manifest,"nodejs.NodeJSDeploymentPlanner","nodejs");
 				}
 			}
@@ -57,6 +57,6 @@ function getplans(req, res){
 		generatePlansforManifest(manifests,children);
 		var result =  {"Children": children};
 		res.status(200).json(result);
-	})
+	});
 }
 };

@@ -9,32 +9,30 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var express = require('express');
-var api = require('../api'), writeError = api.writeError;
-var bodyParser = require('body-parser');
-var target = require('./target');
-var request = require('request');
-var tasks = require('../tasks');
-var util = require('../git/util');
-var manifests = require('./manifests');
-var domains = require('./domains');
-var xfer = require('../xfer');
-var fs = require('fs');
-var path = require('path');
-var async = require('async');
-var target = require('./target');
-var archiver = require('archiver');
-var os = require('os');
-var Promise = require('bluebird');
-var bluebirdfs = Promise.promisifyAll(require('fs'));
-var crypto = require('crypto');
+var express = require("express");
+var api = require("../api"), writeError = api.writeError;
+var bodyParser = require("body-parser");
+var target = require("./target");
+var tasks = require("../tasks");
+var util = require("../git/util");
+var manifests = require("./manifests");
+var domains = require("./domains");
+var xfer = require("../xfer");
+var fs = require("fs");
+var path = require("path");
+var async = require("async");
+var archiver = require("archiver");
+var os = require("os");
+var Promise = require("bluebird");
+var bluebirdfs = Promise.promisifyAll(require("fs"));
+var crypto = require("crypto");
 
 module.exports.router = function() {
 	
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', getapps)
-	.put('*', putapps);
+	.get("*", getapps)
+	.put("*", putapps);
 	
 function getapps(req, res){
 	var task = new tasks.Task(res,false,false,0,false);
@@ -83,7 +81,7 @@ function respondAppgetRequest(resp,task){
 }
 function getAppwithoutName(req, task, appTarget){
 	var appsArray = [];
-	target.cfRequest('GET', req.user.username, task, appTarget.Url + appTarget.Space.entity.apps_url, {"inline-relations-depth":"2"})
+	target.cfRequest("GET", req.user.username, task, appTarget.Url + appTarget.Space.entity.apps_url, {"inline-relations-depth":"2"})
 	.then(function(result){
 		var appResources = result.resources;
 		for(var k = 0; k < appResources.length; k++){
@@ -98,11 +96,11 @@ function getAppwithoutName(req, task, appTarget){
 				});
 			}
 			var appJson = {
-				'Guid': appResources[k].metadata.guid,
-				'Name': appResources[k].entity.name,
-				'Routes': routeArray,
-				'State': appResources[k].entity.state,
-				'Type':	'App'
+				"Guid": appResources[k].metadata.guid,
+				"Name": appResources[k].entity.name,
+				"Routes": routeArray,
+				"State": appResources[k].entity.state,
+				"Type":	"App"
 			};
 			appsArray.push(appJson);
 		}
@@ -121,33 +119,33 @@ function getAppwithAppName(userId, task,encodeName, appTarget){
 }
 function _getAppwithAppName(userId, encodeName, appTarget, task){
 	var app = {};
-	return target.cfRequest('GET', userId, task, appTarget.Url + appTarget.Space.entity.apps_url, {"q": "name:"+util.encodeURIComponent(encodeName),"inline-relations-depth":"1"})
+	return target.cfRequest("GET", userId, task, appTarget.Url + appTarget.Space.entity.apps_url, {"q": "name:"+util.encodeURIComponent(encodeName),"inline-relations-depth":"1"})
 	.then(function(result){
 		if(!result.resources || result.resources && result.resources.length === 0){
 			return null;
 		}
 		app.appUrl = result.resources[0].metadata.url;
 		app.appMetadata = result.resources[0].metadata;
-		return target.cfRequest('GET', userId, task, appTarget.Url + app.appUrl +'/summary')
+		return target.cfRequest("GET", userId, task, appTarget.Url + app.appUrl +"/summary")
 		.then(function(result){
 			app.summaryJson = result;
-			return target.cfRequest('GET', userId, task, appTarget.Url + app.appUrl +'/instances');
+			return target.cfRequest("GET", userId, task, appTarget.Url + app.appUrl +"/instances");
 		}).then(function(result){
 			app.instanceJson = result;
 			var appJson;
 			appJson = app.summaryJson;
 			appJson.instances_details = app.instanceJson;
-			return {'appJson':appJson,'app':app};
+			return {"appJson":appJson,"app":app};
 		});
 	});
 }
 function toOrionLocation(req, location){
-	if(location && location.length !== 0 && location.indexOf('/file') === 0){
+	if(location && location.length !== 0 && location.indexOf("/file") === 0){
 		return path.join(req.user.workspaceDir, location.substring(5)); 
 	}
 }
 function toAppLocation(req,location){
-	if(location && location.length !== 0 && location.indexOf('/file') === 0){
+	if(location && location.length !== 0 && location.indexOf("/file") === 0){
 		var foldername = location.split("/")[2];
 		return path.join(req.user.workspaceDir, foldername); 
 	}
@@ -226,13 +224,13 @@ function putapps(req, res){
 	}).then(function(){
 		if(app){
 			var waitFor;
-			if(state === 'Started'){
+			if(state === "Started"){
 				waitFor = startApp(req.user.username, userTimeout,appTarget);
-			}else if(state === 'Stopped'){
+			}else if(state === "Stopped"){
 				waitFor = stopApp(req.user.username,appTarget);
 			}else{
 				if(!appCache.manifest){
-					res.status(500).end('Failed to handle request for '+ path);
+					res.status(500).end("Failed to handle request for "+ path);
 				}
 			}
 			return Promise.resolve(waitFor)
@@ -250,7 +248,7 @@ function putapps(req, res){
 			for(var key in instrumentationJSON){
 				var value = instrumentationJSON.key;
 				for(var j = 0; j < manifest.applications.length ; j++){
-					if(key === 'memory' && !updateMemory(manifest.applications[j],value)){
+					if(key === "memory" && !updateMemory(manifest.applications[j],value)){
 						continue;
 					}
 					manifest.applications[j][key] = value;
@@ -304,21 +302,21 @@ function repondAppPutrequest(task,status){
 			entity:appCache.summaryJson,
 			metadata:appCache.appMetadata	
 		};
-		if(status === 'RUNNING'){
+		if(status === "RUNNING"){
 			var DEFAULT_TIMEOUT = 60;
 			resp = {
 				"App":appJson,
-				"DeployedPackage":appCache.appPackageType || 'unknown',
+				"DeployedPackage":appCache.appPackageType || "unknown",
 				"Domain":appCache.appDomain,
 				"Route": appCache.appRoute,
 				"Target" : appCache.appTarget,
 				"Timeout": appCache.manifest.applications[0].timeout || DEFAULT_TIMEOUT
 			};
 			
-		}else if(status === 'STOPPED'){
+		}else if(status === "STOPPED"){
 			resp = appJson;
 		}else{
-			return reject('Status wrong');
+			return reject("Status wrong");
 		}
 		task.done({
 			HttpCode: 200,
@@ -334,8 +332,8 @@ function repondAppPutrequest(task,status){
 function startApp(userId, userTimeout ,appTarget){
 	var DEFAULT_TIMEOUT = 60;
 	var MAX_TIMEOUT = 180;
-	var body = {'console':true, 'state':'STARTED'};
-	return target.cfRequest('PUT', userId, null, appTarget.Url + appCache.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body))
+	var body = {"console":true, "state":"STARTED"};
+	return target.cfRequest("PUT", userId, null, appTarget.Url + appCache.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body))
 	.then(function(){
 		if(userTimeout < 0 ){
 			userTimeout = appCache.manifest.applications[0].timeout ? appCache.manifest.applications[0].timeout : DEFAULT_TIMEOUT;
@@ -354,9 +352,9 @@ function startApp(userId, userTimeout ,appTarget){
 						var flappingInstanceNo = 0;
 						for (var key in result.data) {
 							if (result.data.hasOwnProperty(key)) {
-								if(result.data[key].state === 'RUNNING'){
+								if(result.data[key].state === "RUNNING"){
 									runningInstanceNo++;
-								}else if(result.data[key].state === 'FLAPPING'){
+								}else if(result.data[key].state === "FLAPPING"){
 									flappingInstanceNo++;
 								}
 							}
@@ -365,11 +363,11 @@ function startApp(userId, userTimeout ,appTarget){
 							return "RUNNING";
 						}
 						if (flappingInstanceNo > 0 ) {
-							return 'FLAPPING';
+							return "FLAPPING";
 						}
 						return promiseWhile(result.attemptsLeft);
 					}else if(result.attemptsLeft === 0 ){
-						return 'TIMEOUT';
+						return "TIMEOUT";
 					}
 				});
 			});
@@ -377,9 +375,9 @@ function startApp(userId, userTimeout ,appTarget){
 		function collectCFRespond(){
 			return new Promise(function(fulfill){
 				setTimeout(function(){
-					return target.cfRequest('GET', userId, null, appTarget.Url + appCache.appUrl + '/instances')
+					return target.cfRequest("GET", userId, null, appTarget.Url + appCache.appUrl + "/instances")
 					.then(function(result){
-						fulfill({'data': result,'attemptsLeft': --attemptsLeft});
+						fulfill({"data": result,"attemptsLeft": --attemptsLeft});
 					});
 				}, 2000);
 			});
@@ -389,10 +387,10 @@ function startApp(userId, userTimeout ,appTarget){
 }
 
 function stopApp(userId, appTarget){
-	var body = {'console':true,'state':'STOPPED'};
-	return target.cfRequest('PUT', userId, null, appTarget.Url + appCache.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body))
+	var body = {"console":true,"state":"STOPPED"};
+	return target.cfRequest("PUT", userId, null, appTarget.Url + appCache.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body))
 	.then(function(){
-		return 'STOPPED';
+		return "STOPPED";
 	});
 }
 function restartApp(userId, appTarget){
@@ -429,16 +427,16 @@ function createApp(req, res, appTarget){
 	return Promise.resolve(waitForStackGuid)
 	.then(function(stackGuid){
 		var body = {
-			'space_guid': appTarget.Space.metadata.guid,
-			'name':appCache.appName,
-			'instances':appCache.manifest.applications[0].instances || 1,
-			'buildPack':appCache.manifest.applications[0].buildpack || null,
-			'command':appCache.manifest.applications[0].command,	
-			'memory': normalizeMemoryMeasure(appCache.manifest.applications[0].memory),
-			'stack_guid':stackGuid,
-			'environment_json':appCache.manifest.applications[0].env || {}
+			"space_guid": appTarget.Space.metadata.guid,
+			"name":appCache.appName,
+			"instances":appCache.manifest.applications[0].instances || 1,
+			"buildPack":appCache.manifest.applications[0].buildpack || null,
+			"command":appCache.manifest.applications[0].command,	
+			"memory": normalizeMemoryMeasure(appCache.manifest.applications[0].memory),
+			"stack_guid":stackGuid,
+			"environment_json":appCache.manifest.applications[0].env || {}
 		};
-		return target.cfRequest('POST', req.user.username, null, appTarget.Url + '/v2/apps', null, JSON.stringify(body))
+		return target.cfRequest("POST", req.user.username, null, appTarget.Url + "/v2/apps", null, JSON.stringify(body))
 		.then(function(result){
 			appCache.appGuid = result.metadata.guid;
 			return result;
@@ -454,22 +452,22 @@ function updateApp(req, res, appTarget){
 	return Promise.resolve(waitForStackGuid)
 	.then(function(stackGuid){
 		var body = {
-			'name':appCache.appName,
-			'instances':appCache.manifest.applications[0].instances || 1,
-			'buildPack':appCache.manifest.applications[0].buildpack || null,
-			'command':appCache.manifest.applications[0].command,	
-			'memory': normalizeMemoryMeasure(appCache.manifest.applications[0].memory),
-			'stack_guid':stackGuid,
-			'environment_json':appCache.manifest.applications[0].env || {}
+			"name":appCache.appName,
+			"instances":appCache.manifest.applications[0].instances || 1,
+			"buildPack":appCache.manifest.applications[0].buildpack || null,
+			"command":appCache.manifest.applications[0].command,	
+			"memory": normalizeMemoryMeasure(appCache.manifest.applications[0].memory),
+			"stack_guid":stackGuid,
+			"environment_json":appCache.manifest.applications[0].env || {}
 			};
-		return target.cfRequest('PUT', req.user.username, null, appTarget.Url + appCache.appUrl, {'async':'true','inline-relations-depth':'1'}, JSON.stringify(body))	
+		return target.cfRequest("PUT", req.user.username, null, appTarget.Url + appCache.appUrl, {"async":"true","inline-relations-depth":"1"}, JSON.stringify(body))	
 		.then(function(result){
 			return result;
 		});
 	});
 }
 function getStackGuidByName(userId, stackname ,appTarget){
-	return target.cfRequest('GET', userId, null, appTarget.Url + '/v2/stacks', {'q':'name:'+ stackname,'inline-relations-depth':'1'})
+	return target.cfRequest("GET", userId, null, appTarget.Url + "/v2/stacks", {"q":"name:"+ stackname,"inline-relations-depth":"1"})
 	.then(function(result){
 		return result.resources[0] && result.resources[0].metadata.guid || null;
 	});
@@ -495,8 +493,8 @@ function bindRoute(req, res, appTarget){
 	})
 	/* find out whether the declared host can be reused */
 	.then(function(){
-		return target.cfRequest('GET', req.user.username, null, appTarget.Url + '/v2/routes', 
-		{"inline-relations-depth":"1", 'q':'host:'+appCache.manifest.applications[0].host + ';domain_guid:' + appCache.appDomain.Guid})
+		return target.cfRequest("GET", req.user.username, null, appTarget.Url + "/v2/routes", 
+		{"inline-relations-depth":"1", "q":"host:"+appCache.manifest.applications[0].host + ";domain_guid:" + appCache.appDomain.Guid})
 		.then(function(result){
 			var resource = result.resources[0];
 			var waitForRoute;
@@ -509,7 +507,7 @@ function bindRoute(req, res, appTarget){
 			/* attach route to application */
 			return waitForRoute.then(function(appRoute){
 				appCache.appRoute = appRoute;
-				return target.cfRequest('PUT', req.user.username, null, appTarget.Url + '/v2/apps/' + appCache.appGuid + '/routes/' + appRoute.metadata.guid);
+				return target.cfRequest("PUT", req.user.username, null, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + appRoute.metadata.guid);
 			});
 		});
 	});
@@ -522,24 +520,24 @@ function uploadBits(req, res, appTarget){
 		appCache.appPackageType = path.extname(filePath).substring(1);
 		archiveredFilePath = filePath;
 		if(!archiveredFilePath){
-			writeError(500, res, 'Failed to read application content');
+			writeError(500, res, "Failed to read application content");
 		}
 		var uploadBitsHeader = {
-				method: 'PUT',
-				url: appTarget.Url + '/v2/apps/' + appCache.appGuid + "/bits?async=true",
-				headers: {'Authorization': cloudAccessToken,'Content-Type':'multipart/form-data'},
+				method: "PUT",
+				url: appTarget.Url + "/v2/apps/" + appCache.appGuid + "/bits?async=true",
+				headers: {"Authorization": cloudAccessToken,"Content-Type":"multipart/form-data"},
 				formData:{
-					'resources':{
-						value:  '[]',
+					"resources":{
+						value:  "[]",
 						options: {
-							contentType: 'text/plain'
+							contentType: "text/plain"
 						}
 					},
-					'application':{
+					"application":{
 						value:  fs.createReadStream(archiveredFilePath),
 						options: {
-							filename: 'application.zip',
-							contentType: 'application/zip'
+							filename: "application.zip",
+							contentType: "application/zip"
 						}
 					}
 				}
@@ -548,8 +546,8 @@ function uploadBits(req, res, appTarget){
 	}).then(function(result){
 		var ATTEMPTACCOUNT = 150;
 		var initialValue = {
-			'attemptsLeft':ATTEMPTACCOUNT,
-			'status':result.entity.status
+			"attemptsLeft":ATTEMPTACCOUNT,
+			"status":result.entity.status
 			};
 		return promiseWhile(initialValue)
 		.catch(function(feedBack){
@@ -567,30 +565,30 @@ function uploadBits(req, res, appTarget){
 			});
 		}
 		function checkUploadrespond(result){
-			if(result.status !== 'finished' && result.status !== 'failure'){
-				if(result.status === 'failed'){
-					writeError(400, res, 'Upload failed');
+			if(result.status !== "finished" && result.status !== "failure"){
+				if(result.status === "failed"){
+					writeError(400, res, "Upload failed");
 					return false;
 				}
 				if(result.attemptsLeft === 0){
-					writeError(400, res, 'Upload timeout exceeded');
+					writeError(400, res, "Upload timeout exceeded");
 				}
 				return false;
-			}else if(result.status === 'failure'){
-				writeError(400, res, 'Failed to upload application bits');
+			}else if(result.status === "failure"){
+				writeError(400, res, "Failed to upload application bits");
 				return false;
-			}else if(result.status === 'finished'){
+			}else if(result.status === "finished"){
 				return true;
 			}
 		}
 		function collectCFRespond(){
 			return new Promise(function(fulfill){
 				setTimeout(function(){
-					return target.cfRequest('GET', req.user.username, null, appTarget.Url + result.metadata.url)
+					return target.cfRequest("GET", req.user.username, null, appTarget.Url + result.metadata.url)
 					.then(function(result){
 						fulfill({
-						'attemptsLeft':--initialValue.attemptsLeft,
-						'status':result.entity.status
+						"attemptsLeft":--initialValue.attemptsLeft,
+						"status":result.entity.status
 						});			
 					});
 				}, 2000);
@@ -600,7 +598,7 @@ function uploadBits(req, res, appTarget){
 }
 function bindServices(req, res, appTarget){ // TODO need test case!!
 	if(appCache.manifest.applications[0].services){
-		return target.cfRequest('GET', req.user.username, null, appTarget.Url + '/v2/services', {"inline-relations-depth":"1"})
+		return target.cfRequest("GET", req.user.username, null, appTarget.Url + "/v2/services", {"inline-relations-depth":"1"})
 		.then(function(result){
 			var manifestService = appCache.manifest.applications[0].services;
 			var respondServiceJson = result.resources;
@@ -671,8 +669,8 @@ function bindServices(req, res, appTarget){ // TODO need test case!!
 	return;
 }
 function getServiceGuid(userId, service, appTarget){
-	return target.cfRequest('GET', userId, null, appTarget.Url + '/v2/spaces/' + appTarget.Space.metadata.guid + '/service_instances'
-	, {'inline-relations-depth':'1','return_user_provided_service_instances':'true','q':'name:'+service.label})
+	return target.cfRequest("GET", userId, null, appTarget.Url + "/v2/spaces/" + appTarget.Space.metadata.guid + "/service_instances"
+	, {"inline-relations-depth":"1","return_user_provided_service_instances":"true","q":"name:"+service.label})
 	.then(function(serviceJson){	
 		var serviceResources = serviceJson.resources;
 		var serviceInstanceGUID;
@@ -686,34 +684,34 @@ function getServiceGuid(userId, service, appTarget){
 }
 function createService(userId, serviceName, servicePlanGuid, appTarget){
 	var body = {
-		'space_guid': appTarget.Space.matadata.guid,
-		'name': serviceName,
-		'service_plan_guid': servicePlanGuid
+		"space_guid": appTarget.Space.matadata.guid,
+		"name": serviceName,
+		"service_plan_guid": servicePlanGuid
 	};
-	return target.cfRequest('POST', userId, null, appTarget.Url + '/v2/service_instances', null, JSON.stringify(body))
+	return target.cfRequest("POST", userId, null, appTarget.Url + "/v2/service_instances", null, JSON.stringify(body))
 	.then(function(result){
 		return result.metadata.guid;
 	});
 }
 function bindService(userId, serviceGuid, appTarget){
 	var body = {
-		'app_guid': appCache.appGuid,
-		'service_instance_guid': serviceGuid
+		"app_guid": appCache.appGuid,
+		"service_instance_guid": serviceGuid
 	};
-	return target.cfRequest('POST', userId, null, appTarget.Url + '/v2/service_bindings', null, JSON.stringify(body));
+	return target.cfRequest("POST", userId, null, appTarget.Url + "/v2/service_bindings", null, JSON.stringify(body));
 }
 function createRoute(req, res, appTarget){
 	var body = {
-		'space_guid': appTarget.Space.metadata.guid,
-		'host':appCache.manifest.applications[0].host || slugify(appCache.appName),
-		'domain_guid':appCache.appDomain.Guid
+		"space_guid": appTarget.Space.metadata.guid,
+		"host":appCache.manifest.applications[0].host || slugify(appCache.appName),
+		"domain_guid":appCache.appDomain.Guid
 	};
-	return target.cfRequest('POST', req.user.username, null, appTarget.Url + '/v2/routes', {"inline-relations-depth":"1"}, JSON.stringify(body));
+	return target.cfRequest("POST", req.user.username, null, appTarget.Url + "/v2/routes", {"inline-relations-depth":"1"}, JSON.stringify(body));
 }
 function getAppbyGuid(userId, appGuid, task ,appTarget){
-	return target.cfRequest('GET', userId, task, appTarget.Url + '/v2/apps/' + appGuid)
+	return target.cfRequest("GET", userId, task, appTarget.Url + "/v2/apps/" + appGuid)
 	.then(function(appJSON){
-		return target.cfRequest('GET', userId, task, appCache.appTarget.Url + appJSON.metadata.url + '/summary')
+		return target.cfRequest("GET", userId, task, appCache.appTarget.Url + appJSON.metadata.url + "/summary")
 		.then(function(result){
 			appCache.summaryJson = result;
 			appCache.appGuid = appJSON.metadata.guid;
@@ -722,13 +720,13 @@ function getAppbyGuid(userId, appGuid, task ,appTarget){
 	});
 }
 function getRouteGuidbyGuid(userId, routeGuid, task, appTarget){
-	return target.cfRequest('GET', userId, task,appTarget.Url + '/v2/routes/' + routeGuid)
+	return target.cfRequest("GET", userId, task,appTarget.Url + "/v2/routes/" + routeGuid)
 	.then(function(result){
 		return result.metadata.guid; // TODO this need to test
 	});
 }
 function mapRoute(userId, routeGuid, task, appTarget){
-	return target.cfRequest('PUT', userId, task, appTarget.Url + '/v2/apps/' + appCache.appGuid + '/routes/' + routeGuid);
+	return target.cfRequest("PUT", userId, task, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + routeGuid);
 }
 }
 function normalizeMemoryMeasure(memory){
@@ -745,30 +743,30 @@ function normalizeMemoryMeasure(memory){
 }
 function slugify(inputString){
 	return inputString.toString().toLowerCase()
-	.replace(/\s+/g, '-')		// Replace spaces with -
-	.replace(/[^\w\-]+/g, '')	// Remove all non-word chars
-	.replace(/\-\-+/g, '-')		// Replace multiple - with single -
-	.replace(/^-+/, '')			// Trim - from start of text
-	.replace(/-+$/, '');			// Trim - from end of text
+	.replace(/\s+/g, "-")		// Replace spaces with -
+	.replace(/[^\w\-]+/g, "")	// Remove all non-word chars
+	.replace(/\-\-+/g, "-")		// Replace multiple - with single -
+	.replace(/^-+/, "")			// Trim - from start of text
+	.replace(/-+$/, "");			// Trim - from end of text
 }
 function archiveTarget (filePath){
-	var ramdomName = crypto.randomBytes(5).toString('hex') + Date.now();
-	var resultFilePath = os.tmpdir() + ramdomName + '.war';
+	var ramdomName = crypto.randomBytes(5).toString("hex") + Date.now();
+	var resultFilePath = os.tmpdir() + ramdomName + ".war";
 	return searchAndCopyNearestwarFile(resultFilePath, filePath,filePath)
 	.then(function(){
 		// If searchAndCopyNearestwarFile didn't reject, it means no .war has been found. so Zip the folder.
 		return new Promise(function(fulfill, reject){
-			var zip = archiver('zip');
-			resultFilePath = os.tmpdir() + ramdomName + '.zip';
+			var zip = archiver("zip");
+			resultFilePath = os.tmpdir() + ramdomName + ".zip";
 			var output = bluebirdfs.createWriteStream(resultFilePath);
 			zip.pipe(output);
 			return xfer.write(zip, filePath, filePath)
 			.then(function() {
 				zip.finalize();
-				zip.on('end', function(){
+				zip.on("end", function(){
 			        fulfill();
 			    });
-			    zip.on('error', function(){
+			    zip.on("error", function(){
 			        reject();
 			    });
 			})
@@ -797,10 +795,10 @@ function archiveTarget (filePath){
 				},{ concurrency: SUBDIR_SEARCH_CONCURRENCY});
 			});
 		}
-		if(path.extname(filePath) === '.war'){
+		if(path.extname(filePath) === ".war"){
 			return new Promise(function(fulfill){
 				var readenWarfileStream = bluebirdfs.createReadStream(filePath);
-				readenWarfileStream.on('error', function(err) {
+				readenWarfileStream.on("error", function(err) {
 					console.log(err);
 				});
 				fulfill(readenWarfileStream);

@@ -9,18 +9,18 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var express = require('express');
-var bodyParser = require('body-parser');
-var target = require('./target');
-var request = require('request');
-var tasks = require('../tasks');
-var async = require('async');
+var express = require("express");
+var bodyParser = require("body-parser");
+var target = require("./target");
+var request = require("request");
+var tasks = require("../tasks");
+var async = require("async");
 
 module.exports.router = function() {
 	
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', getService);
+	.get("*", getService);
 	
 function getService(req, res){
 	var task = new tasks.Task(res,false,false,0,false);
@@ -28,7 +28,7 @@ function getService(req, res){
 	var targetURL = targetRequest.Url;
 	var spaceGuid = targetRequest.SpaceId;
 	new Promise(function(fulfill, reject) {
-		var serviceUrl = '/v2/spaces/' + spaceGuid + '/service_instances';
+		var serviceUrl = "/v2/spaces/" + spaceGuid + "/service_instances";
 		var fullService = [];
 		function promiseWhile(doRequest, value) {
 			return Promise.resolve(value).then(doRequest).then(function(result) {
@@ -43,7 +43,7 @@ function getService(req, res){
 			});
 		}
 		function doRequest(serviceUrl){
-			return target.cfRequest('GET', req.user.username, task, targetURL + serviceUrl,{'inline-relations-depth':'1','return_user_provided_service_instances':'true'});
+			return target.cfRequest("GET", req.user.username, task, targetURL + serviceUrl,{"inline-relations-depth":"1","return_user_provided_service_instances":"true"});
 		}
 		function collectServiceInfo(result){
 			var serviceResources = result && result.resources;
@@ -60,8 +60,8 @@ function getService(req, res){
 							}).then(function(){
 								if(isBindable){
 									var ServiceJson = {
-										'Name': resource.entity.name,
-										'Type':	'Service'
+										"Name": resource.entity.name,
+										"Type":	"Service"
 									};
 									fullService.push(ServiceJson);
 								}
@@ -107,6 +107,6 @@ function getService(req, res){
 }
 
 function getCFService(userId, targetURL,serviceGuid){
-	return target.cfRequest('GET', userId, null , targetURL + '/v2/services/' + serviceGuid);
+	return target.cfRequest("GET", userId, null , targetURL + "/v2/services/" + serviceGuid);
 }
 };
