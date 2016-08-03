@@ -142,7 +142,8 @@ define({
 	'no-extend-native-description' : 'Disallow extending of native objects',
 	'no-lone-blocks-description' : 'Disallow unecessary nested blocks',
 	'quotes-description' : 'Enforce quote style',
-	'yoda-description' : 'Require or disallow Yoda Conditions',
+	'yoda-description' : 'Require or disallow Yoda conditions',
+	'no-param-reassign-description' : 'Disallow reassignment of function parameters',
 
 	//.tern-project file validation messages
 	'notNum': "'${0}' must be a number",

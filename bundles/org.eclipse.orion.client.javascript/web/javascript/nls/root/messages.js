@@ -186,6 +186,8 @@ define({
 	'yodaKind' : 'Kinds:',
 	'yodaExceptRange' : 'Except for range comparisons:',
 	'yodaOnlyEquality' : 'Check only for \'==\' and \'===\' operators:',
+	'no-param-reassign' : 'Disallow reassignment of function parameters:',
+	'no-param-reassign-props' : 'Disallow for parameter properties:',
 
 	//All refs
 	'functionDecls': 'Function Declarations',

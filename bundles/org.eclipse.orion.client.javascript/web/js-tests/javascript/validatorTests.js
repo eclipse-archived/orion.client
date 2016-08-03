@@ -7215,7 +7215,7 @@ define([
 								function (problems) {
 									assertProblems(problems, [
 									{
-										id: RULE_ID,
+										id: 'no-shadow-global-param',
 										severity: 'warning',
 										description: "Parameter 'name' shadows a global member."
 									}]);
@@ -7236,7 +7236,7 @@ define([
 								function (problems) {
 									assertProblems(problems, [
 									{
-										id: RULE_ID,
+										id: 'no-shadow-global-param',
 										severity: 'warning',
 										description: "Parameter 'name' shadows a global member."
 									}]);
@@ -7253,7 +7253,7 @@ define([
 								function (problems) {
 									assertProblems(problems, [
 									{
-										id: RULE_ID,
+										id: 'no-shadow-global-param',
 										severity: 'warning',
 										description: "Variable 'name' shadows a global member."
 									}]);
@@ -7270,7 +7270,7 @@ define([
 								function (problems) {
 									assertProblems(problems, [
 									{
-										id: RULE_ID,
+										id: 'no-shadow-global-param',
 										severity: 'warning',
 										description: "Parameter 'name' shadows a global member."
 									}]);
@@ -7291,7 +7291,7 @@ define([
 								function (problems) {
 									assertProblems(problems, [
 									{
-										id: RULE_ID,
+										id: 'no-shadow-global-param',
 										severity: 'warning',
 										description: "Parameter 'require' shadows a global member."
 									}]);
@@ -7329,7 +7329,7 @@ define([
 								function (problems) {
 									assertProblems(problems, [
 									{
-										id: RULE_ID,
+										id: 'no-shadow-global-param',
 										severity: 'warning',
 										description: "Variable 'require' shadows a global member."
 									}]);
@@ -7346,7 +7346,7 @@ define([
 								function (problems) {
 									assertProblems(problems, [
 									{
-										id: RULE_ID,
+										id: 'no-shadow-global-param',
 										severity: 'warning',
 										description: "Parameter 'module' shadows a global member."
 									}]);
@@ -7408,7 +7408,7 @@ define([
 								function (problems) {
 									assertProblems(problems, [
 									{
-										id: RULE_ID,
+										id: 'no-shadow-global-param',
 										severity: 'warning',
 										description: "Parameter 'Math' shadows a global member."
 									}]);
@@ -13665,7 +13665,7 @@ define([
 								function (problems) {
 									assertProblems(problems, [
 									{
-										id: "no-extend-native",
+										id: "no-lone-blocks",
 										severity: 'error',
 										description: 'Block is redundant.',
 										start: 0,
@@ -13688,7 +13688,7 @@ define([
 								function (problems) {
 									assertProblems(problems, [
 									{
-										id: "no-extend-native",
+										id: "no-lone-blocks",
 										severity: 'error',
 										description: 'Nested block is redundant.',
 										start: 16,
@@ -13711,7 +13711,7 @@ define([
 								function (problems) {
 									assertProblems(problems, [
 									{
-										id: "no-extend-native",
+										id: "no-lone-blocks",
 										severity: 'error',
 										description: 'Nested block is redundant.',
 										start: 16,
@@ -13734,7 +13734,7 @@ define([
 								function (problems) {
 									assertProblems(problems, [
 									{
-										id: "no-extend-native",
+										id: "no-lone-blocks",
 										severity: 'error',
 										description: 'Block is redundant.',
 										start: 0,
@@ -13757,7 +13757,7 @@ define([
 								function (problems) {
 									assertProblems(problems, [
 									{
-										id: "no-extend-native",
+										id: "no-lone-blocks",
 										severity: 'error',
 										description: 'Block is redundant.',
 										start: 0,
@@ -14097,6 +14097,162 @@ define([
 							var topic = "if (-1 < str.indexOf(substr)) {}";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = [2, "always"];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
+					// no-param-reassign --------------------------------------------
+					describe('no-param-reassign', function() {
+						var RULE_ID = "no-param-reassign";
+						it("flag invalid param reassign", function(callback) {
+							var topic = "function foo(bar) {bar = 13;}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-param-reassign",
+										severity: 'error',
+										description: "Assignment to function parameter \'bar\'.",
+										start: 19,
+										end: 22
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid param reassign 2", function(callback) {
+							var topic = "function foo(bar) {bar++;}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-param-reassign",
+										severity: 'error',
+										description: "Assignment to function parameter \'bar\'.",
+										start: 19,
+										end: 22
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid param reassign 3", function(callback) {
+							var topic = "function foo(bar) {bar.prop = 'value';}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {props: true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-param-reassign",
+										severity: 'error',
+										description: "Assignment to property of function parameter \'bar\'.",
+										start: 19,
+										end: 22
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid param reassign 4", function(callback) {
+							var topic = "function foo(bar) {delete bar.aaa}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {props: true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-param-reassign",
+										severity: 'error',
+										description: "Assignment to property of function parameter \'bar\'.",
+										start: 26,
+										end: 29
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid param reassign 5", function(callback) {
+							var topic = "function foo(bar) {bar.aaaa++;}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {props: true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-param-reassign",
+										severity: 'error',
+										description: "Assignment to property of function parameter \'bar\'.",
+										start: 19,
+										end: 22
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid param reassign", function(callback) {
+							var topic = "function foo(bar) {bar.prop = 'value';}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {props: false}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid param reassign 2", function(callback) {
+							var topic = "function foo(bar) {delete bar.aaa}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {props: false}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid param reassign 3", function(callback) {
+							var topic = "function foo(bar) {bar.aaaa++;}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {props: false}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid param reassign 4", function(callback) {
+							var topic = "function foo(bar) {var baz = bar; baz++;}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {props: false}];
 							
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {

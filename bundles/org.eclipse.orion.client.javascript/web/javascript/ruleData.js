@@ -61,6 +61,7 @@ define([
 			"no-new-object" : 1,
 			"no-new-wrappers" : 1,
 			"no-obj-calls" : 2,
+			"no-param-reassign" : [1, {props: false}],
 			"no-proto" : 2, 
 			"no-redeclare" : 1,
 			"no-regex-spaces" : 2,
@@ -258,6 +259,10 @@ define([
 			"no-obj-calls" : {
 				description: Messages['no-obj-calls-description'],
 				url: 'http://eslint.org/docs/rules/no-obj-calls'
+			},
+			"no-param-reassign" : {
+				description: Messages['no-param-reassign-description'],
+				url: 'http://eslint.org/docs/rules/no-param-reassign'
 			},
 			"no-proto" : {
 				description: Messages['no-proto-description'],
