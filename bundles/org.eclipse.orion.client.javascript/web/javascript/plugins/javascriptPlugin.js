@@ -1707,7 +1707,7 @@ define([
 				 	        	   				{	id: "no-caller",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noCaller"],
 				 	        	                	type: "number", //$NON-NLS-1$
-				 	        	                	defaultValue: warning,
+				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
  				 	        	                {	id: "no-eval",  //$NON-NLS-1$
@@ -1928,7 +1928,7 @@ define([
 	 				 	        	            	id: "no-extend-native",  //$NON-NLS-1$
     			 	        	                	name: javascriptMessages["no-extend-native"],
     			 	        	                	type: "number",  //$NON-NLS-1$
-    			 	        	                	defaultValue: warning,
+    			 	        	                	defaultValue: error,
     			 	        	                	options: severities
     			 	        	                },
  				 	        	            	{
