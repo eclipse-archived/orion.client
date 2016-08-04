@@ -53,19 +53,16 @@ function getOrgsRequest(userId, targetRequest, task){
 		return new Promise(function(fulfill,reject){
 			if(completeOrgsArray){
 				async.each(completeOrgsArray, function(resource, cb) {
-					var space = [];
-					var orgWithSpace = {};
 					return target.cfRequest("GET", userId, null, targetRequest.Url + resource.entity.spaces_url, {"inline-relations-depth":"1"})
 					.then(function(spaceJson){	
-						if(!spaceJson || spaceJson.total_results < 1){
-							cb();
-						}
-						var spaceResources = spaceJson.resources;
+						var spaces = [];
+						var spaceResources = spaceJson && spaceJson.resources || [];
 						for(var k = 0; k < spaceResources.length ; k++ ){
-							space.push(resourceJson(spaceResources[k],"Space"));
+							spaces.push(resourceJson(spaceResources[k],"Space"));
 						}
+						var orgWithSpace = {};
 						orgWithSpace = resourceJson(resource,"Org");
-						orgWithSpace.Spaces = space;
+						orgWithSpace.Spaces = spaces;
 						resource.Spaces = spaceResources;
 						simpleorgsArray.push(orgWithSpace);
 						cb();
