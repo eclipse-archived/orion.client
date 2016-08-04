@@ -499,7 +499,10 @@ function getRemoteCallbacks(creds, task) {
 				task.updateProgress("Receiving objects", progress.receivedObjects(), progress.totalObjects());
 			}
 		},
-		credentials: function() {
+		/**
+		 * @callback
+		 */
+		credentials: function(gitUrl, urlUsername) {
 			if (!creds.GitSshUsername && !creds.GitSshPrivateKey) {
 				return git.Cred.defaultNew();
 			}
@@ -507,13 +510,13 @@ function getRemoteCallbacks(creds, task) {
 				var privateKey = creds.GitSshPrivateKey;
 				var passphrase = creds.GitSshPassphrase;
 				return git.Cred.sshKeyMemoryNew(
-					creds.GitSshUsername,
+					creds.GitSshUsername || urlUsername,
 					"",
 					privateKey,
 					passphrase || ""
 				);
 			}
-			var username = creds.GitSshUsername;
+			var username = creds.GitSshUsername || urlUsername;
 			var password = creds.GitSshPassword;
 			// clear username/password to avoid inifinite loop in nodegit
 			delete creds.GitSshUsername;
