@@ -485,6 +485,8 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	 */
 	function AnnotationModel(textModel) {
 		this._annotations = [];
+		this.changedbookmarks = [];
+		this.removedbookmarks = [];
 		var self = this;
 		this._listener = {
 			onChanged: function(modelChangedEvent) {
@@ -722,6 +724,16 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 				this._model.addEventListener("Changed", this._listener.onChanged); //$NON-NLS-0$
 			}
 		},
+		getalteredbookmarks: function (){
+			return {
+				changedbookmarks : this.changedbookmarks,
+				removedbookmarks : this.removedbookmarks
+			};
+		},
+		resetRemovedbookmarks : function(){
+			this.removedbookmarks = [];
+		},
+		
 		/** @ignore */
 		_getAnnotationIndex: function(annotation) {
 			var annotations = this._annotations;
@@ -742,6 +754,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 			var annotations = this._annotations, end = start + removedCharCount;
 			//TODO binary search does not work for range intersection when there are overlaping ranges, need interval search tree for this
 			var startIndex = 0;
+			this.changedbookmarks = [];
 			if (!(0 <= startIndex && startIndex < annotations.length)) { return; }
 			var e = {
 				type: "Changed", //$NON-NLS-0$
@@ -759,6 +772,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 					annotation.start += changeCount;
 					annotation.end += changeCount;
 					e.changed.push(annotation);
+					if(annotation.type === 'orion.annotation.bookmark') this.changedbookmarks.push(annotation);
 				} else if (annotation.end <= start) {
 					//nothing
 				} else if (annotation.start < start && end < annotation.end) {
@@ -769,6 +783,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 				} else {
 					annotations.splice(i, 1);
 					e.removed.push(annotation);
+					if(annotation.type === 'orion.annotation.bookmark') this.removedbookmarks.push(annotation);
 					annotation._annotationModel = null;
 					if (annotation.expand) {
 						annotation.expand();
