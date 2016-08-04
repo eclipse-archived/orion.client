@@ -16,12 +16,13 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 		'orion/globalCommands',
 		'i18n!orion/edit/nls/messages',
 		'orion/search/InlineSearchPane',
+		'orion/bookmarkSearch/BookmarkSearchPane',
 		'orion/keyBinding',
 		'orion/problems/problemsView',
 		'orion/keyBinding',
 		'orion/util',
 		'orion/webui/Slideout'],
-		function(objects, mCommands, mOutliner, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages, InlineSearchPane, mKeyBinding, mProblemsView, KeyBinding, util, mSlideout) {
+		function(objects, mCommands, mOutliner, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages, InlineSearchPane, BookmarkSearchPane, mKeyBinding, mProblemsView, KeyBinding, util, mSlideout) {
 
 	/**
 	 * @name orion.sidebar.Sidebar
@@ -75,6 +76,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			this._createSlideout();
 			this._createOutliner();
 			this._createInlineSearchPane();
+			this._createBookmarkSearchPane();
 			this._createProblemsPane();
 		},
 		showToolbar: function() {
@@ -449,8 +451,45 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			this.commandRegistry.registerCommandContribution(this.editScope, "orion.quickSearch", 100, "orion.menuBarEditGroup/orion.findGroup", false, new mKeyBinding.KeyBinding('h', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 			this.commandRegistry.registerCommandContribution(this.editScope, "orion.openSearch", 101, "orion.menuBarEditGroup/orion.findGroup", false, new mKeyBinding.KeyBinding('h', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 			
+ 		},
+ 		
+ 		_createBookmarkSearchPane: function() {
+			this._bookmarkSearchPane = new BookmarkSearchPane(this._slideout,
+			{
+				serviceRegistry: this.serviceRegistry,
+				commandRegistry: this.commandRegistry,
+				fileClient: this.fileClient,
+				contentTypeRegistry: this.contentTypeRegistry,
+				preferences: this.preferences,
+			});
+			this.toolbarNode.parentNode.addEventListener("scroll", function(){ //$NON-NLS-0$
+				if (this._bookmarkSearchPane.isVisible()) {
+					this.toolbarNode.parentNode.scrollTop = 0;
+				}
+			}.bind(this));
+			var openSearchCommand = new mCommands.Command({
+				name: messages["Bookmark Search"], //$NON-NLS-0$
+				id: "orion.openbookmarkSearch", //$NON-NLS-0$
+				visibleWhen: function() {
+					return true;
+				},
+				callback: function () {
+					if (this._bookmarkSearchPane.isVisible()) {
+						this._bookmarkSearchPane.hide();
+					} else {
+						var mainSplitter = mGlobalCommands.getMainSplitter();
+						if (mainSplitter.splitter.isClosed()) {
+							mainSplitter.splitter.toggleSidePanel();
+						}
+						this._bookmarkSearchPane.show();
+					}
+				}.bind(this)
+			});
+			this.commandRegistry.addCommand(openSearchCommand);
+			this.commandRegistry.registerCommandContribution(this.editScope, "orion.openbookmarkSearch", 102, "orion.menuBarEditGroup/orion.findGroup", false, new mKeyBinding.KeyBinding('m', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
  		}
 	});
+	
 
 	/**
 	 * @name orion.sidebar.ViewMode
