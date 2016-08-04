@@ -1562,6 +1562,534 @@ define([
 						});
 				});
 			});
+			// no-invalid-this  --------------------------------------------
+			describe('no-invalid-this', function() {
+				var RULE_ID = "no-invalid-this";
+				it("flag invalid this", function(callback) {
+					var topic = "this.a = 0;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 0,
+								end: 4
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag invalid this 2", function(callback) {
+					var topic = "baz(() => this);";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 10,
+								end: 14
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag invalid this 3", function(callback) {
+					var topic = 
+						"(function() {\n" + 
+						"    this.a = 0;\n" + 
+						"    baz(() => this);\n" + 
+						"})();";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 18,
+								end: 22
+							},
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 44,
+								end: 48
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag invalid this 4", function(callback) {
+					var topic = 
+						"function foo() {\n" + 
+						"    this.a = 0;\n" + 
+						"    baz(() => this);\n" + 
+						"}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 21,
+								end: 25
+							},
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 47,
+								end: 51
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag invalid this 5", function(callback) {
+					var topic = 
+						"var foo = function() {\n" + 
+						"    this.a = 0;\n" + 
+						"    baz(() => this);\n" + 
+						"};";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 27,
+								end: 31
+							},
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 53,
+								end: 57
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag invalid this 6", function(callback) {
+					var topic = 
+						"foo(function() {\n" + 
+						"    this.a = 0;\n" + 
+						"    baz(() => this);\n" + 
+						"});";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 21,
+								end: 25
+							},
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 47,
+								end: 51
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag invalid this 7", function(callback) {
+					var topic = 
+						"obj.foo = () => {\n" + 
+						"    this.a = 0;\n" + 
+						"};";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 22,
+								end: 26
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag invalid this 8", function(callback) {
+					var topic = 
+						"var obj = {\n" + 
+						"    aaa: function() {\n" + 
+						"        return function foo() {\n" + 
+						"            this.a = 0;\n" + 
+						"            baz(() => this);\n" + 
+						"        };\n" + 
+						"    }\n" + 
+						"};";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 78,
+								end: 82
+							},
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 112,
+								end: 116
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("flag invalid this 9", function(callback) {
+					var topic = 
+						"foo.forEach(function() {\n" + 
+						"    this.a = 0;\n" + 
+						"    baz(() => this);\n" + 
+						"});";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 29,
+								end: 33
+							},
+							{
+								id: "no-invalid-this",
+								severity: 'error',
+								description: 'Unexpected \'this\'.',
+								start: 55,
+								end: 59
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this", function(callback) {
+					var topic = 
+						"function Foo() {\n" + 
+						"    this.a = 0;\n" + 
+						"    baz(() => this);\n" + 
+						"}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this 2", function(callback) {
+					var topic = 
+						"class Foo {\n" + 
+						"    constructor() {\n" + 
+						"        // OK, this is in a constructor.\n" + 
+						"        this.a = 0;\n" + 
+						"        baz(() => this);\n" + 
+						"    }\n" + 
+						"}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this 3", function(callback) {
+					var topic = 
+						"var obj = {\n" + 
+						"    foo: function foo() {\n" + 
+						"        // OK, this is in a method (this function is on object literal).\n" + 
+						"        this.a = 0;\n" + 
+						"    }\n" + 
+						"};";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this 4", function(callback) {
+					var topic = 
+						"var obj = {\n" + 
+						"    foo() {\n" + 
+						"        this.a = 0;\n" + 
+						"    }\n" + 
+						"};";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this 5", function(callback) {
+					var topic = 
+						"var obj = {\n" + 
+						"    get foo() {\n" + 
+						"        return this.a;\n" + 
+						"    }\n" + 
+						"};";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this 6", function(callback) {
+					var topic = 
+						"var obj = Object.create(null, {\n" + 
+						"    foo: {value: function foo() {\n" + 
+						"        this.a = 0;\n" + 
+						"    }}\n" + 
+						"});";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this 7", function(callback) {
+					var topic = 
+						"Object.defineProperty(obj, \"foo\", {\n" + 
+						"    value: function foo() {\n" + 
+						"        this.a = 0;\n" + 
+						"    }\n" + 
+						"});";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this 8", function(callback) {
+					var topic = 
+						"Object.defineProperties(obj, {\n" + 
+						"    foo: {value: function foo() {\n" + 
+						"        this.a = 0;\n" + 
+						"    }}\n" + 
+						"});";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this 9", function(callback) {
+					var topic = 
+						"function Foo() {\n" + 
+						"    this.foo = function foo() {\n" + 
+						"        this.a = 0;\n" + 
+						"        baz(() => this);\n" + 
+						"    };\n" + 
+						"}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this 10", function(callback) {
+					var topic = 
+						"obj.foo = function foo() {\n" + 
+						"    this.a = 0;\n" + 
+						"};";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this 11", function(callback) {
+					var topic = 
+						"Foo.prototype.foo = function foo() {\n" + 
+						"    this.a = 0;\n" + 
+						"};";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this 12", function(callback) {
+					var topic = 
+						"class Foo {\n" + 
+						"    foo() {\n" + 
+						"        this.a = 0;\n" + 
+						"        baz(() => this);\n" + 
+						"    }\n" + 
+						"\n" + 
+						"    static foo() {\n" + 
+						"        this.a = 0;\n" + 
+						"        baz(() => this);\n" + 
+						"    }\n" + 
+						"}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this 13", function(callback) {
+					var topic = 
+						"var foo = (function foo() {\n" + 
+						"    this.a = 0;\n" + 
+						"}).bind(obj);";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this 14", function(callback) {
+					var topic = 
+						"foo.forEach(function() {\n" + 
+						"    this.a = 0;\n" + 
+						"    baz(() => this);\n" + 
+						"}, thisArg);";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag this 15", function(callback) {
+					var topic = 
+						"/** @this Foo */\n" + 
+						"function foo() {\n" + 
+						"    this.a = 0;\n" + 
+						"}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 2;
+					
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+			});
 		});
 	};
 });

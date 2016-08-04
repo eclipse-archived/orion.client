@@ -50,6 +50,7 @@ define([
 			"no-implicit-coercion" : [1, { "boolean": true, "number" : true, "string" : true }],
 			"no-implied-eval" : 0,
 			"no-invalid-regexp": 2,
+			"no-invalid-this" : 1,
 			"no-irregular-whitespace" : 0,
 			"no-iterator": 2, 
 			"no-jslint" : 1,
@@ -218,6 +219,10 @@ define([
 			"no-invalid-regexp": {
 				description: Messages['no-invalid-regexp-description'],
 				url: 'http://eslint.org/docs/rules/no-invalid-regexp'
+			},
+			"no-invalid-this": {
+				description: Messages['no-invalid-this-description'],
+				url: 'http://eslint.org/docs/rules/no-invalid-this'
 			},
 			"no-irregular-whitespace" : {
 				description: Messages['no-irregular-whitespace-description'],

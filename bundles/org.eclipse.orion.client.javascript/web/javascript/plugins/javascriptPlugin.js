@@ -2023,6 +2023,13 @@ define([
     			 	        	                	type: "boolean",  //$NON-NLS-1$
     			 	        	                	defaultValue: false
     			 	        	                },
+ 				 	        	            	{
+	 				 	        	            	id: "no-invalid-this",  //$NON-NLS-1$
+    			 	        	                	name: javascriptMessages["no-invalid-this"],
+    			 	        	                	type: "number",  //$NON-NLS-1$
+    			 	        	                	defaultValue: warning,
+    			 	        	                	options: severities
+    			 	        	                },
 										]
 				 	            },
 				 	        	{  pid: "eslint.config.codestyle",  //$NON-NLS-1$
