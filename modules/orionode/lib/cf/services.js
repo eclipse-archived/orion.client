@@ -12,7 +12,6 @@
 var express = require("express");
 var bodyParser = require("body-parser");
 var target = require("./target");
-var request = require("request");
 var tasks = require("../tasks");
 var async = require("async");
 

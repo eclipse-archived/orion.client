@@ -13,7 +13,6 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var domains = require("./domains");
 var target = require("./target");
-var request = require("request");
 var tasks = require("../tasks");
 var util = require("../git/util");
 
