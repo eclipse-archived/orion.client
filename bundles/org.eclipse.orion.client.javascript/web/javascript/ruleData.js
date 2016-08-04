@@ -100,6 +100,9 @@ define([
 				description: Messages['accessor-pairs-description'],
 				url: 'http://eslint.org/docs/rules/accessor-pairs'
 			},
+			"check-tern-plugin" : {
+				description: Messages['check-tern-plugin-description'],
+			},
 			"curly" : {
 				description: Messages['curly-description'],
 				url: 'http://eslint.org/docs/rules/curly'
@@ -108,13 +111,15 @@ define([
 				description: Messages['eqeqeq-description'],
 				url: "http://eslint.org/docs/rules/eqeqeq"
 			},
-	
 			"missing-doc" : {
 				description: Messages['missing-doc-description'],
 				url: 'http://eslint.org/docs/rules/valid-jsdoc'
 			},
 			"missing-nls" : {
 				description: Messages['missing-nls-description']
+			},
+			"missing-requirejs" : {
+				description: Messages['missing-requirejs-description']
 			},
 			"new-parens" : {
 				description: Messages['new-parens-description'],
@@ -318,6 +323,9 @@ define([
 				description: Messages['no-undef-description'],
 				url: 'http://eslint.org/docs/rules/no-undef'
 			},
+			"no-undef-expression" : {
+				description: Messages['no-undef-expression-description']
+			},
 			"no-undef-init" : {
 				description: Messages['no-undef-init-description'],
 				url: 'http://eslint.org/docs/rules/no-undef-init.html'
@@ -360,6 +368,9 @@ define([
 			"semi" : {
 				description: Messages['semi-description'],
 				url: 'http://eslint.org/docs/rules/semi'
+			},
+			"unknown-require" : {
+				description: Messages['unknown-require-description'],
 			},
 			"unnecessary-nls" : {
 				description: Messages['unnecessary-nls-description']
