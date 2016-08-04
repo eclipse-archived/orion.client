@@ -8,20 +8,19 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env node */
-var express = require('express');
-var bodyParser = require('body-parser');
-var target = require('./target');
-var apps = require('./apps');
-var tasks = require('../tasks');
-var logspb = require('./logs_pb');
-var request = require('request');
+/*eslint-env node, express, body-parser*/
+var express = require("express");
+var bodyParser = require("body-parser");
+var target = require("./target");
+var apps = require("./apps");
+var tasks = require("../tasks");
+var logspb = require("./logs_pb");
 
-module.exports.router = function(options) {
+module.exports.router = function() {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('*', getLogz);
+	.get("*", getLogz);
 	
 	function getLogz(req, res) {
 		var task = new tasks.Task(res, false, false, 0, false);
@@ -38,8 +37,8 @@ module.exports.router = function(options) {
 			appGuid = appResult.app.appMetadata.guid;
 			var infoURL = targetRequest.Url + "/v2/info";
 			var infoHeader = {
-				'Accept': 'application/json',
-				'Content-Type': 'application.json'
+				"Accept": "application/json",
+				"Content-Type": "application.json"
 			};
 			return target.cfRequest(null, req.user.username, task, infoURL, null, null, infoHeader, null);
 		}).then(function(infoData) {
@@ -53,37 +52,37 @@ module.exports.router = function(options) {
 			var logzHeader = {
 				url: loggingEndpoint + "/recent?app=" + appGuid,
 				headers: {
-					'Content-Type': 'mutlipart/form-data',
-					'Authorization': cloudAccessToken
+					"Content-Type": "mutlipart/form-data",
+					"Authorization": cloudAccessToken
 				},
 				encoding: null
 			};
 			return target.cfRequest(null, null, null, null, null, null, null, logzHeader);
 		}).then(function(response) {
 			var body = response.body;
-			var boundaryIndex = response.headers['content-type'].indexOf("boundary=");
+			var boundaryIndex = response.headers["content-type"].indexOf("boundary=");
 			
 			if (boundaryIndex !== -1) {
-				var boundary = response.headers['content-type'].slice(boundaryIndex+"boundary=".length);
+				var boundary = response.headers["content-type"].slice(boundaryIndex+"boundary=".length);
 			}
 			if (!boundary || boundary === "") {
 				Promise.reject("An error occured when performing operation Get App Log. Boundary in response header not found.");
 			}
 
-			const CR = 13;
-			const LF = 10;
+			var CR = 13;
+			var LF = 10;
 			var bodyIndex = 0;
 			var currentPart = null;
 			var messageSeparator = "\r\n--"+boundary;
 			var messageSeparatorBytes = [];
 			var logs = [];
-			var log;
+			var log, i;
 			var JSONData = {
 				messages: [],
 				timestamp: ""
 			};
 
-			for (var i = 0; i < messageSeparator.length; i++) {
+			for (i = 0; i < messageSeparator.length; i++) {
 				messageSeparatorBytes.push(messageSeparator.charCodeAt(i));
 			}
 			while (readNextPart()) {
@@ -93,7 +92,7 @@ module.exports.router = function(options) {
 			logs.sort(function(log1, log2) {
 				if (log1[2] < log2[2]) return -1;// index 2 is timestamp
 				else if (log1[2] > log2[2]) return 1;
-				else return 0;
+				return 0;
 			});
 			logs.forEach(function(log) {
 				if (timestamp === -1 || log[2] > timestamp) {
@@ -120,10 +119,9 @@ module.exports.router = function(options) {
 				if (setCurrentPart(partStartPos, partEndPos - partStartPos)) {
 					bodyIndex = partEndPos;
 					return true;
-				} else {
-					bodyIndex = body.length;
-					return false;
-				}
+				} 
+				bodyIndex = body.length;
+				return false;
 			}
 			function findPartStartPosition(startPos) {
 				var pos = findNextBoundaryStartPosition(startPos);
@@ -156,9 +154,8 @@ module.exports.router = function(options) {
 					if (body[startPos + endPos] === messageSeparatorBytes[endPos]) {
 						if (endPos + 1 === cmpBufLen) { // Found "\r\n--<boundary>"
 							return startPos; // index of \r or \? before the boundary
-						} else { // a match, but not ready with whole comparison
-							endPos++;
-						}
+						} // a match, but not ready with whole comparison
+						endPos++;
 					} else { // Restart the search
 						startPos += endPos + 1;
 						endPos = 0;
@@ -171,7 +168,7 @@ module.exports.router = function(options) {
 					return false;
 				}
 				currentPart = [];
-				for (var i = 0; i < size; i++) {
+				for (i = 0; i < size; i++) {
 					currentPart[i] = body[startPos + i];
 				}
 				return true;
