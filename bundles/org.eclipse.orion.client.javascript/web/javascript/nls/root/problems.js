@@ -147,6 +147,10 @@ define({
 	'no-native-reassign-description' : 'Disallow reassignment of native objects',
 	'no-unused-expressions-description' : 'Disallow unused expressions',
 	'no-invalid-this-description' : 'Disallow this keywords outside of classes or class-like objects.',
+	'check-tern-plugin-description' : 'Check missing tern plugins.',
+	'missing-requirejs-description' : 'Check missing require libraries.',
+	'no-undef-expression-description' : 'Report undefined expressions.',
+	'unknown-require-description' : 'Report missing libraries or missing tern plugins.',
 
 	//.tern-project file validation messages
 	'notNum': "'${0}' must be a number",

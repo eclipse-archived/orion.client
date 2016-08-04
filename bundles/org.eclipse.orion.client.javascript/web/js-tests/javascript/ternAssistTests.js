@@ -3934,9 +3934,9 @@ define([
 				 */
 				it("test eslint rule proposals 1", function(done) {
 					var options = {
-						buffer: "/* eslint c",
-						prefix: "c",
-						offset: 11,
+						buffer: "/* eslint cu",
+						prefix: "cu",
+						offset: 12,
 						callback: done,
 						templates: true
 					};
@@ -4002,9 +4002,9 @@ define([
 				 */
 				it("test eslint rule proposals 5", function(done) {
 					var options = {
-						buffer: "/* eslint-enable no-jslint, c",
-						prefix: "c",
-						offset: 29,
+						buffer: "/* eslint-enable no-jslint, cu",
+						prefix: "cu",
+						offset: 30,
 						callback: done,
 						templates: true
 					};
