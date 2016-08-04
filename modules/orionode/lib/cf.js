@@ -13,7 +13,6 @@ var express = require('express');
 
 var apps = require('./cf/apps');
 var domains = require('./cf/domains');
-var info = require('./cf/info');
 var logz = require('./cf/logz');
 var manifests = require('./cf/manifests');
 var orgs = require('./cf/orgs_spaces');
@@ -28,7 +27,6 @@ function CF(options) {
 	
 	router.use("/apps", apps.router(options));
 	router.use("/domains", domains.router(options));
-	router.use("/info", info.router(options));
 	router.use("/logz", logz.router(options));
 	router.use("/manifests", manifests.router(options));
 	router.use("/orgs", orgs.router(options));

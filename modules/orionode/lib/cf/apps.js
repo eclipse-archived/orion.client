@@ -29,6 +29,8 @@ var crypto = require("crypto");
 
 module.exports.router = function() {
 	
+	module.exports._getAppwithAppName = _getAppwithAppName;
+	
 	return express.Router()
 	.use(bodyParser.json())
 	.get("*", getapps)

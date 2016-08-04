@@ -164,7 +164,12 @@ function cfRequest (method, userId ,task, url, query, body, headers, requestHead
 //			if (response.status) {
 //				return reject();
 //			}
-			fulfill(parsebody(body));
+			if (body instanceof Uint8Array) {
+				fulfill(response);
+			}
+			else {
+            	fulfill(parsebody(body));
+			}
 		});
 	});
 }
