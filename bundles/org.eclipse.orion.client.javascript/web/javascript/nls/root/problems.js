@@ -146,6 +146,7 @@ define({
 	'no-param-reassign-description' : 'Disallow reassignment of function parameters',
 	'no-native-reassign-description' : 'Disallow reassignment of native objects',
 	'no-unused-expressions-description' : 'Disallow unused expressions',
+	'no-invalid-this-description' : 'Disallow this keywords outside of classes or class-like objects.',
 
 	//.tern-project file validation messages
 	'notNum': "'${0}' must be a number",

@@ -194,6 +194,7 @@ define({
 	'no-unused-expressions-allowShortCircuit' : 'Allow to use short circuit evaluations:',
 	'no-unused-expressions-allowTernary' : 'Allow to use ternary operators:',
 	'noUnusedExpressionsFixName' : 'Remove unused expressions',
+	'no-invalid-this' : 'Disallow this keywords outside of classes or class-like objects:',
 
 	//All refs
 	'functionDecls': 'Function Declarations',

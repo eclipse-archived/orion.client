@@ -42,12 +42,14 @@ define([
 './rules/yoda',
 './rules/no-param-reassign',
 './rules/no-native-reassign',
-'./rules/no-unused-expressions'
+'./rules/no-unused-expressions',
+'./rules/no-invalid-this'
 ], function(util, Finder, ProblemMessages, Estraverse, JsSyntax,
 		accessorPairs, noControlRegex, noDuplicateCase, noElseReturn, noEmptyCharClasses, 
 		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs,
 		noObjCalls, noSelfCompare, noIrregularWhitespace, noConstAssign, noImplicitCoercion,
-		noExtraBind, noExtendNative, noLoneBlocks, quotes, yoda, noParamReassign, noNativeReassign, noUnusedExpressions) {
+		noExtraBind, noExtendNative, noLoneBlocks, quotes, yoda, noParamReassign, noNativeReassign,
+		noUnusedExpressions, noInvalidThis) {
 	
 	var nodeModules = {
 		"buffer": true,
@@ -893,7 +895,7 @@ define([
 							        	for (var j=0; j<comments.length; j++) {
 
 							        		// NON-NLS comments start at 1
-							        		if (comments[j] === ""+(i+1)){
+							        		if (comments[j] === String(i+1)){
 							        			comments[j] = null;
 							        			match = true;
 							        			break;
@@ -981,7 +983,7 @@ define([
 							        	var hasMatch = false;
 							        	for (var i=0; i<nodes.length; i++) {
 							        		// NON-NLS comments start at 1
-							        		if (match[2] === ""+(i+1)){
+							        		if (match[2] === String(i+1)){
 							        			hasMatch = true;
 							        			break;
 							        		}
@@ -2384,7 +2386,8 @@ define([
 		'yoda' : yoda,
 		'no-param-reassign' : noParamReassign,
 		'no-native-reassign' : noNativeReassign,
-		'no-unused-expressions' : noUnusedExpressions
+		'no-unused-expressions' : noUnusedExpressions,
+		'no-invalid-this' : noInvalidThis
 	};
 
 	/**
