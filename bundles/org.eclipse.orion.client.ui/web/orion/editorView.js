@@ -244,11 +244,91 @@ define([
 			if (editor.getContentAssist()) {
 				editor.getContentAssist().setAutoTriggerEnabled(prefs.contentAssistAutoTrigger);
 			}
-
+			
+			var ruler = editor.getAnnotationRuler();
+			var lineRuler = editor.getLineNumberRuler();
+			var that = this;
+			var filename = editor.getTitle();
+			lineRuler.onDblClick = ruler.onDblClick = function(lineIndex, e){
+				var bookmark = editor.getBookmark(ruler, lineIndex);			
+				if (bookmark.annotation) {
+					editor.removeBookmark(ruler, bookmark);
+					var allBookmarks = JSON.parse(localStorage.bookmarks);
+					var thisfileBookmarks = allBookmarks[filename];
+					var index = getIndexOfBookmark(thisfileBookmarks, bookmark);
+					if(index !== -1) thisfileBookmarks.splice(index,1);
+					allBookmarks[filename] = thisfileBookmarks;
+					localStorage['bookmarks'] = JSON.stringify(allBookmarks);
+				} else {
+					var node = e.target;
+					that.commandRegistry.prompt(node, messages.Enterbookmarks, messages.OK, messages.Cancel, "", false, function(tags) {
+						var bookmarkinLocalstorage = localStorage['bookmarks'];
+						var exsitingbookmarks = {};
+						if(bookmarkinLocalstorage){
+							exsitingbookmarks = JSON.parse(bookmarkinLocalstorage);
+						}
+						var textModel = editor.getModel();
+						var line = textModel.getLineAtOffset(bookmark.lineStart) + 1;
+						var thisFileExistingBookmarks = exsitingbookmarks[filename] || [];
+						var storeData = 
+							{
+								line:line,
+								lineStart:bookmark.lineStart,
+								lineEnd:bookmark.lineEnd,
+								message:tags
+							};
+						thisFileExistingBookmarks.push(storeData);
+						exsitingbookmarks[filename] = thisFileExistingBookmarks;
+						localStorage['bookmarks'] = JSON.stringify(exsitingbookmarks);
+						editor.addBookmark(ruler, bookmark, tags);
+					});
+				}
+			};
+			var annotationModel = editor.getAnnotationModel();
+			annotationModel.addEventListener("Changed", function(e) {
+				var allBookmarks = JSON.parse(localStorage.bookmarks);
+				var thisfileBookmarks = allBookmarks[filename];
+				var changedAnnotations = e.changed;
+				var removedAnnotations = e.removed;
+				changedAnnotations.forEach(function(each){
+					if(each.type === 'orion.annotation.bookmark'){
+						var index = getIndexOfBookmark(thisfileBookmarks, each);
+						if(index !== -1) thisfileBookmarks.splice(index,1);
+						var textModel = editor.getModel();
+						var line = textModel.getLineAtOffset(each.start) + 1;
+						thisfileBookmarks.push({
+							line:line,
+							lineStart:each.start,
+							lineEnd:each.end,
+							message:each.title
+						});
+						allBookmarks[filename] = thisfileBookmarks;
+						localStorage['bookmarks'] = JSON.stringify(allBookmarks);
+					}
+				});
+				removedAnnotations.forEach(function(each){
+					if(each.type === 'orion.annotation.bookmark'){
+						var index = getIndexOfBookmark(thisfileBookmarks, each);
+						if(index !== -1) thisfileBookmarks.splice(index,1);
+					}
+				});
+			});
+			
 			this.dispatchEvent({
 				type: "Settings", //$NON-NLS-0$
 				newSettings: this.settings
 			});
+			function getIndexOfBookmark(array,bookmark){
+				var targetStart = bookmark._oldStart ? bookmark._oldStart : (bookmark.start ? bookmark.start : bookmark.lineStart);
+				var targetEnd = bookmark._oldEnd ? bookmark._oldEnd : (bookmark.end ? bookmark.end : bookmark.lineEnd);
+				for(var k = 0; k < array.length ; k++){
+					var currentBookmark = array[k];
+					if(currentBookmark.lineStart === targetStart && currentBookmark.lineEnd === targetEnd ){
+						return k;
+					}
+				}
+				return -1;
+			}
 		},
 		updateStyler: function(prefs) {
 			var styler = this.syntaxHighlighter.getStyler();
@@ -500,7 +580,7 @@ define([
 					}
 				} else {
 					liveEditSession.start();
-				}
+				}				
 			}.bind(this));
 			inputManager.addEventListener("Saving", function(evnt) {
 				if (that.settings.trimTrailingWhiteSpace) {
