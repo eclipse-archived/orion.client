@@ -152,6 +152,7 @@ define([
 									verticalAlign: "middle" //$NON-NLS-0$
 								}
 							}, params);
+						resourceLink.resource = resource;
 						if (resource.LineNumber) { // FIXME LineNumber === 0 
 							resourceLink.appendChild(document.createTextNode(' (Line ' + resource.LineNumber + ')'));
 						}
@@ -275,6 +276,7 @@ define([
 						window.location.href = link.href;
 						self.hide();
 					}
+					self._saveOpenedFileName(link.resource);
 				}
 			}
 		}, false);
@@ -377,6 +379,7 @@ define([
 		if (this.forcedGlobalSearch()) {
 			this.$searchScope.parentNode.style.display = "none"; //$NON-NLS-1$
 		}
+		this._showRecentSearchedOpenedFiles();
 	};
 
 	/** @private */
@@ -468,6 +471,8 @@ define([
 					renderFunction(null, null, error, null);
 				}.bind(this));
 			}.bind(this));
+		}else{
+			this._showRecentSearchedOpenedFiles();
 		}
 	};
 	
@@ -479,10 +484,46 @@ define([
 			if (evt.button === 0 && !evt.ctrlKey && !evt.metaKey) {
 				self.hide();
 			}
+			self._saveOpenedFileName(evt.srcElement.resource);
 		}
 		for (var i=0; i<links.length; i++) {
 			var link = links[i];
 			link.addEventListener("click", clicked, false);
+		}
+	};
+	/** @private */
+	OpenResourceDialog.prototype._saveOpenedFileName = function(resource) {
+		var exsitingSearchedOpenedFileList = JSON.parse(sessionStorage.getItem("lastSearchedOpendFiles")) || [];
+		var MAX_LENGTH = 10;
+		if(exsitingSearchedOpenedFileList.length > 0){
+			var oldIndex = indexofFileLink(exsitingSearchedOpenedFileList, resource);
+			if(oldIndex !== -1){
+				exsitingSearchedOpenedFileList.splice(oldIndex, 1);
+			}
+		}
+		if(exsitingSearchedOpenedFileList.length < MAX_LENGTH){
+			exsitingSearchedOpenedFileList.unshift(resource);
+		}else if(exsitingSearchedOpenedFileList.length === MAX_LENGTH){
+			exsitingSearchedOpenedFileList.pop();
+			exsitingSearchedOpenedFileList.unshift(resource);
+		}
+		sessionStorage.setItem("lastSearchedOpendFiles", JSON.stringify(exsitingSearchedOpenedFileList)); //$NON-NLS-1$
+		function indexofFileLink(array,link){
+			for( var k=0; k < array.length ; k++){
+				if(array[k].location === link.location){
+					return k;
+				}
+			}
+			return -1;
+		}
+	};
+	
+	/** @private */
+	OpenResourceDialog.prototype._showRecentSearchedOpenedFiles = function() {
+		var exsitingSearchedOpenedFileList = JSON.parse(sessionStorage.getItem("lastSearchedOpendFiles"));
+		if(exsitingSearchedOpenedFileList && exsitingSearchedOpenedFileList.length > 0 ){
+			var renderFunction = this._searchRenderer.makeRenderFunction(this._contentTypeService, this.$results, messages["Recently Opened Files"], this.decorateResult.bind(this));
+			renderFunction(exsitingSearchedOpenedFileList, null, null, null);
 		}
 	};
 	
