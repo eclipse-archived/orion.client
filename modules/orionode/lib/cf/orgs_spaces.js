@@ -64,7 +64,11 @@ function getOrgsRequest(userId, targetRequest, task){
 						orgWithSpace = resourceJson(resource,"Org");
 						orgWithSpace.Spaces = spaces;
 						resource.Spaces = spaceResources;
-						simpleorgsArray.push(orgWithSpace);
+						if(orgWithSpace.Spaces){
+							simpleorgsArray.unshift(orgWithSpace);
+						}else{
+							simpleorgsArray.push(orgWithSpace);
+						}
 						cb();
 					});
 				}, function(err) {

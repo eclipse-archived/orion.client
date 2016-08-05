@@ -25,7 +25,7 @@ module.exports.router = function() {
 	function getLogz(req, res) {
 		var task = new tasks.Task(res, false, false, 0, false);
 		var appName = req._parsedUrl.pathname.slice(1);
-		var targetRequest = JSON.parse(req.query.Target);
+		var targetRequest = req.query.Target ? JSON.parse(req.query.Target) : null;
 		var cloudAccessToken = target.getAccessToken(req.user.username, task);
 		var timestamp = req.query.Timestamp && req.query.Timestamp !== "-1" ? req.query.Timestamp : -1;
 		var appGuid, loggingEndpoint;

@@ -94,32 +94,44 @@ function tryLogin(url, Username, Password,userId){
 	});
 }
 function computeTarget(userId, targetRequest, task){
-	return orgs.getOrgsRequest(userId, targetRequest, task)
-	.then(function(OrgsArray){	
-		if(!targetRequest.Org){
-			var org = OrgsArray.completeOrgsArray[0];
-		}else{
-			var aimedOrg = OrgsArray.completeOrgsArray.find(function(org){
-				return org.entity.name === targetRequest.Org || org.metadata.guid === targetRequest.Org;
-			});
-			org = aimedOrg;
-		}
-		if(!targetRequest.Space){
-			var space = org.Spaces[0];
-		}else{
-			var aimedSpace = org.Spaces.find(function(space){
-				return space.entity.name === targetRequest.Space || space.metadata.guid === targetRequest.Space;
-			});
-			space = aimedSpace;
-		}
-		delete org.Spaces;
-		return  {
-			"Type": "Target",
-			"Url": targetRequest.Url,
-			"Org": org,
-			"Space":space
-		};
-	});
+	if(targetRequest){
+		return orgs.getOrgsRequest(userId, targetRequest, task)
+		.then(function(OrgsArray){	
+			if(!targetRequest.Org){
+				var org = OrgsArray.completeOrgsArray[0];
+			}else{
+				var aimedOrg = OrgsArray.completeOrgsArray.find(function(org){
+					return org.entity.name === targetRequest.Org || org.metadata.guid === targetRequest.Org;
+				});
+				org = aimedOrg;
+			}
+			if(!targetRequest.Space){
+				var space = org.Spaces[0];
+			}else{
+				var aimedSpace = org.Spaces.find(function(space){
+					return space.entity.name === targetRequest.Space || space.metadata.guid === targetRequest.Space;
+				});
+				space = aimedSpace;
+			}
+			delete org.Spaces;
+			return  {
+				"Type": "Target",
+				"Url": targetRequest.Url,
+				"Org": org,
+				"Space":space
+			};
+		});
+	}
+	if(!targetRequest){
+		task.done({
+			HttpCode: 402,
+			Code: 0,
+			DetailedMessage: "CF-TargetNotSet",
+			JsonData: {},
+			Message: "Target not set",
+			Severity: "Error"
+		});
+	}
 }
 function getAccessToken(userId, task){
 	if(!UseraccessToken[userId] && task){

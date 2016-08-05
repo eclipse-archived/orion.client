@@ -25,7 +25,7 @@ module.exports.router = function() {
 
 function getDomain(req, res) {
 	var task = new tasks.Task(res, false, false, 0, false);
-	var targetRequest = JSON.parse(req.query.Target);
+	var targetRequest = req.query.Target ? JSON.parse(req.query.Target) : null;
 	var defaultDomainMode = req.query.Default;
 	var domainName = req.query.Name;
 	target.computeTarget(req.user.username, targetRequest, task)
