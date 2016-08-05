@@ -65,27 +65,24 @@ function postTarget(req,res){
 		});
 	});
 }
-function tryLogin(url, Username, Password,userId){
-	return new Promise(function(fulfill) {
-		var infoHeader = {
-			url: url + "/v2/info",
-			headers: {"Accept": "application/json",	"Content-Type": "application/json"}
-		};
-		request(infoHeader, /* @callback */ function (error, response, body) {
-			fulfill(parsebody(body));
-		});
-	}).then(function(response){
+function tryLogin(url, Username, Password, userId){
+	var infoHeader = {
+		url: url + "/v2/info",
+		headers: {"Accept": "application/json",	"Content-Type": "application/json"}
+	};
+	return cfRequest(null, null , null, null, null, null, null, infoHeader)
+	.then(function(response){
 		var authorizationEndpoint = response.authorization_endpoint;
 		return new Promise(function(fulfill, reject) {
 			var authorizationHeader = {
 				url: authorizationEndpoint + "/oauth/token",
 				headers: {"Accept": "application/json",	"Content-Type": "application/x-www-form-urlencoded","Authorization":"Basic Y2Y6"},
-				form: {"grant_type":"password", "password": Password, "username":Username, "scope":""}
+				form: {"grant_type": "password", "password": Password, "username": Username, "scope": ""}
 			};
 			request.post(authorizationHeader, /* @callback */ function (error, response, body) {
 				var respondJson = parsebody(body);
 				if(!error){
-					UseraccessToken[userId] = "bearer " + respondJson.access_token;
+					UseraccessToken[userId] = respondJson.access_token;
 					return fulfill(true);
 				}
 				return reject(false);
@@ -141,7 +138,7 @@ function getAccessToken(userId, task){
 function parsebody(body){
 	return typeof body === "string" ? JSON.parse(body): body;
 }
-function cfRequest (method, userId ,task, url, query, body, headers, requestHeader) {
+function cfRequest (method, userId, task, url, query, body, headers, requestHeader) {
 	return new Promise(function(fulfill, reject) {
 		if(!requestHeader){
 			var cloudAccessToken = getAccessToken(userId, task);
@@ -156,6 +153,9 @@ function cfRequest (method, userId ,task, url, query, body, headers, requestHead
 			query && (requestHeader.qs = query);
 			body && (requestHeader.body = body);
 			requestHeader.method = method;
+		}
+		if (requestHeader.headers.Authorization) {
+			requestHeader.headers.Authorization = "bearer " + requestHeader.headers.Authorization;
 		}
 		request(requestHeader, /* @callback */ function (error, response, body) {
 			if (error) {
