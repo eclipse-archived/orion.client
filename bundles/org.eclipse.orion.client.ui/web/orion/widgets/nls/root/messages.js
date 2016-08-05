@@ -93,4 +93,5 @@ define({//Default message bundle
 	"createNewTooltip": "Create a new launch configuration",
 	"back": "< Back",
 	"next": "Next >",
+	"Recent Searched Opened Files": "Recent Searched Opened Files"
 });
