@@ -40,7 +40,7 @@ function getapps(req, res){
 	var task = new tasks.Task(res,false,false,0,false);
 	var encodeName =  req.query.Name;
 	var encodedContentLocation =  req.query.ContentLocation;
-	var targetRequest = JSON.parse(req.query.Target);
+	var targetRequest = req.query.Target ? JSON.parse(req.query.Target) : null;
 	target.computeTarget(req.user.username, targetRequest, task)
 	 .then(function(appTarget){
 		if(encodeName){
