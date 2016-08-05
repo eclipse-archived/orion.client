@@ -24,7 +24,7 @@ module.exports.router = function() {
 
 	function getroutes(req, res) {
 		var task = new tasks.Task(res, false, false, 0, false);
-		var targetRequest = JSON.parse(req.query.Target);
+		var targetRequest = req.query.Target ? JSON.parse(req.query.Target) : null;
 		var RouteJsonRequest = req.query.Route && JSON.parse(req.query.Route);
 		var globalCheck = req.query.GlobalCheck;
 		target.computeTarget(req.user.username, targetRequest, task)
