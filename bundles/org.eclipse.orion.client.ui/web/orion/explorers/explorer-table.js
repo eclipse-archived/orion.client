@@ -352,12 +352,13 @@ define([
 					});
 				}
 				var itemParent = item.oldValue ? item.oldValue.parent : null;
-				itemParent = itemParent || ex.treeRoot;
-				changedLocations[itemParent.Location] = itemParent;
-				
+				if (itemParent) {
+					changedLocations[itemParent.Location] = itemParent;
+				}
 				itemParent = item.parent;
-				itemParent = itemParent || ex.treeRoot;
-				changedLocations[itemParent.Location] = itemParent;
+				if (itemParent) {
+					changedLocations[itemParent.Location] = itemParent;
+				}
 				
 				// If the renamed item was an expanded directory, force an expand.
 				if (item.oldValue && item.oldValue.Directory && item.newValue && ex.isExpanded(item.oldValue)) {
