@@ -28,6 +28,7 @@ var crypto = require('crypto');
  */
 module.exports = function(options) {
 	module.exports.write = write;
+	module.exports.getUploadDir = getUploadDir;
 	
 	var UPLOADS_FOLDER = path.join(options.configParams['orion.single.user'] ?
 			path.join(os.homedir(), ".orion") : options.workspaceDir, ".uploads");
@@ -239,5 +240,8 @@ function write (zip, base, filePath) {
 		}
 		zip.file(filePath, { name: filePath.substring(base.length).replace(/\\/g, "/") });
 	});
+}
+function getUploadDir(){
+	return UPLOADS_FOLDER;
 }
 };
