@@ -38,7 +38,7 @@ module.exports.router = function() {
 			var infoURL = targetRequest.Url + "/v2/info";
 			var infoHeader = {
 				"Accept": "application/json",
-				"Content-Type": "application.json"
+				"Content-Type": "application/json"
 			};
 			return target.cfRequest(null, req.user.username, task, infoURL, null, null, infoHeader, null);
 		}).then(function(infoData) {
