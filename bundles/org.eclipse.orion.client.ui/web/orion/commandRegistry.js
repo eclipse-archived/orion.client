@@ -253,10 +253,11 @@ define([
 		 * @param {String} noString the label to show on a no/false choice
 		 * @param {Boolean} modal indicates whether the confirmation prompt should be modal.
 		 * @param {Function} onConfirm a function that will be called when the user confirms the command.  The function
-		 * @param {String} default message in the input box.
 		 * will be called with boolean indicating whether the command was confirmed.
+		 * @param {String} default message in the input box.
+		 * @param {String} the node which will have default focus. Accept 'input' or empty, which will be yesbutton by default.
 		 */
-		_popupDialog: function(isConfirm, node, message, yesString, noString, modal, onConfirm, defaultInput) {
+		_popupDialog: function(isConfirm, node, message, yesString, noString, modal, onConfirm, defaultInput, focusOn) {
 			var result = isConfirm ? false : "";
 			if (this._parameterCollector && !modal) {
 				var self = this;
@@ -274,23 +275,36 @@ define([
 						parent.appendChild(input);
 					}
 					var yesButton = document.createElement("button"); //$NON-NLS-0$
-					yesButton.addEventListener("click", function(event) { //$NON-NLS-0$
+					var onYes =  function(event) { //$NON-NLS-0$
 						result = isConfirm ? true : input.value;
 						okCallback();
 						closeFunction();
-					}, false);
+					};
+					yesButton.addEventListener("click", onYes, false);
 					buttonParent.appendChild(yesButton);
 					yesButton.appendChild(document.createTextNode(yesString)); //$NON-NLS-0$
 					yesButton.className = "dismissButton"; //$NON-NLS-0$
 					var button = document.createElement("button"); //$NON-NLS-0$
-					button.addEventListener("click", function(event) { //$NON-NLS-0$
+					var onNo = function(event) { //$NON-NLS-0$
 						result = isConfirm ? false : "";
 						closeFunction();
-					}, false);
+					};
+					button.addEventListener("click", onNo, false);
 					buttonParent.appendChild(button);
 					button.appendChild(document.createTextNode(noString)); //$NON-NLS-0$
 					button.className = "dismissButton"; //$NON-NLS-0$
-					return yesButton;
+					input.addEventListener("keydown", function(event){
+						if (event.keyCode === lib.KEY.ENTER)	{
+							onYes(event);
+						} else if (event.keyCode === lib.KEY.ESCAPE) {
+							onNo(event);
+						}
+					}, false);
+					var defaultFocusNode = yesButton;
+					if(focusOn === "input"){
+						defaultFocusNode = input;
+					}
+					return defaultFocusNode;
 				};
 				this._parameterCollector.close();
 				if(isConfirm || !isConfirm && !node ){
@@ -350,11 +364,12 @@ define([
 		 * @param {String} noString the label to show on a no/false choice
 		 * @param {String} default message in the input box.
 		 * @param {Boolean} modal indicates whether the confirmation prompt should be modal.
+		 * @param {String} the node which will have default focus. Accept 'input' or empty, which will be yesbutton by default.
 		 * @param {Function} onConfirm a function that will be called when the user confirms the command.  The function
 		 * will be called with boolean indicating whether the command was confirmed.
 		 */
-		prompt: function(node, message, yesString, noString, defaultInput, modal, onConfirm) {
-			this._popupDialog(false, node, message, yesString, noString, modal, onConfirm ,defaultInput);
+		prompt: function(node, message, yesString, noString, defaultInput, modal, onConfirm, focusOn) {
+			this._popupDialog(false, node, message, yesString, noString, modal, onConfirm ,defaultInput, focusOn);
 		},
 		
 		/**
