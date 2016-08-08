@@ -524,6 +524,7 @@ function uploadBits(req, res, appTarget){
 		if(!archiveredFilePath){
 			writeError(500, res, "Failed to read application content");
 		}
+		var uploadFileStream = fs.createReadStream(archiveredFilePath);
 		var uploadBitsHeader = {
 				method: "PUT",
 				url: appTarget.Url + "/v2/apps/" + appCache.appGuid + "/bits?async=true",
@@ -536,7 +537,7 @@ function uploadBits(req, res, appTarget){
 						}
 					},
 					"application":{
-						value:  fs.createReadStream(archiveredFilePath),
+						value: uploadFileStream,
 						options: {
 							filename: "application.zip",
 							contentType: "application/zip"
@@ -544,6 +545,9 @@ function uploadBits(req, res, appTarget){
 					}
 				}
 			};
+		uploadFileStream.on("error", function(err){
+			writeError(500, res, err);
+		});
 		return target.cfRequest(null, null, null, null ,null, null, null,uploadBitsHeader);
 	}).then(function(result){
 		var ATTEMPTACCOUNT = 150;
@@ -753,13 +757,13 @@ function slugify(inputString){
 }
 function archiveTarget (filePath){
 	var ramdomName = crypto.randomBytes(5).toString("hex") + Date.now();
-	var resultFilePath = os.tmpdir() + ramdomName + ".war";
+	var resultFilePath = path.join(xfer.getUploadDir(), ramdomName + ".war");
 	return searchAndCopyNearestwarFile(resultFilePath, filePath,filePath)
 	.then(function(){
 		// If searchAndCopyNearestwarFile didn't reject, it means no .war has been found. so Zip the folder.
 		return new Promise(function(fulfill, reject){
 			var zip = archiver("zip");
-			resultFilePath = os.tmpdir() + ramdomName + ".zip";
+			resultFilePath = path.join(xfer.getUploadDir(), ramdomName + ".zip");
 			var output = bluebirdfs.createWriteStream(resultFilePath);
 			zip.pipe(output);
 			return xfer.write(zip, filePath, filePath)
