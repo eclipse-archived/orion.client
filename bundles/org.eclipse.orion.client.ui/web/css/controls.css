@@ -809,6 +809,7 @@ html[dir="rtl"] #treeButtons { /* ACGC */
 	padding-right: 8px;
 	padding-top: 8px;
 	vertical-align:top;
+	white-space: nowrap;
 }
 
 html[dir="rtl"] .secondaryColumn { /* ACGC */
