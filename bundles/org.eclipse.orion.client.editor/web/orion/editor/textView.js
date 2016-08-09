@@ -1587,8 +1587,18 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 					offsetInLine += step;
 					c = lineText.charCodeAt(offsetInLine);
 					// Handle Unicode surrogates
-					if (0xDC00 <= c && c <= 0xDFFF) {
-						if (offsetInLine > 0) {
+					if (offsetInLine > 0) {
+						if (0xDFFB <= c && c <= 0xDFFF) {
+							c = lineText.charCodeAt(offsetInLine - 1);
+							if (0xD83C === c) {
+								offsetInLine += step;
+								continue; // Skip skin tone modifiers
+							}
+						}
+						else if (0xFE00 <= c && c <= 0xFE0F) { // Skip variation selectors
+								continue;
+						}
+						else if (0xDC00 <= c && c <= 0xDFFF) {
 							c = lineText.charCodeAt(offsetInLine - 1);
 							if (0xD800 <= c && c <= 0xDBFF) {
 								offsetInLine += step;
