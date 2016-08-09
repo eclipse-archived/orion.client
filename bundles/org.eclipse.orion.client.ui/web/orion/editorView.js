@@ -12,41 +12,41 @@
 
 /*eslint-env browser, amd*/
 define([
-	'i18n!orion/edit/nls/messages',
-	'orion/editor/editor',
-	'orion/editor/eventTarget',
-	'orion/editor/textView',
-	'orion/editor/textModelFactory',
-	'orion/editor/editorFeatures',
-	'orion/hover',
-	'orion/editor/contentAssist',
-	'orion/editor/emacs',
-	'orion/editor/vi',
-	'orion/editorPreferences',
-	'orion/widgets/themes/ThemePreferences',
-	'orion/widgets/themes/editor/ThemeData',
-	'orion/widgets/settings/EditorSettings',
-	'orion/searchAndReplace/textSearcher',
-	'orion/editorCommands',
-	'orion/globalCommands',
-	'orion/edit/dispatcher',
-	'orion/edit/editorContext',
-	'orion/highlight',
-	'orion/markOccurrences',
-	'orion/syntaxchecker',
-	'orion/liveEditSession',
-	'orion/problems',
-	'orion/blamer',
-	'orion/differ',
-	'orion/keyBinding',
-	'orion/util',
-	'orion/Deferred',
-	'orion/webui/contextmenu',
-	'orion/metrics',
-	'orion/commonPreferences',
-	'embeddedEditor/helper/memoryFileSysConst',
-	'orion/objects',
-	'orion/formatter'	
+	"i18n!orion/edit/nls/messages",
+	"orion/editor/editor",
+	"orion/editor/eventTarget",
+	"orion/editor/textView",
+	"orion/editor/textModelFactory",
+	"orion/editor/editorFeatures",
+	"orion/hover",
+	"orion/editor/contentAssist",
+	"orion/editor/emacs",
+	"orion/editor/vi",
+	"orion/editorPreferences",
+	"orion/widgets/themes/ThemePreferences",
+	"orion/widgets/themes/editor/ThemeData",
+	"orion/widgets/settings/EditorSettings",
+	"orion/searchAndReplace/textSearcher",
+	"orion/editorCommands",
+	"orion/globalCommands",
+	"orion/edit/dispatcher",
+	"orion/edit/editorContext",
+	"orion/highlight",
+	"orion/markOccurrences",
+	"orion/syntaxchecker",
+	"orion/liveEditSession",
+	"orion/problems",
+	"orion/blamer",
+	"orion/differ",
+	"orion/keyBinding",
+	"orion/util",
+	"orion/Deferred",
+	"orion/webui/contextmenu",
+	"orion/metrics",
+	"orion/commonPreferences",
+	"embeddedEditor/helper/memoryFileSysConst",
+	"orion/objects",
+	"orion/formatter"	
 ], function(
 	messages,
 	mEditor, mEventTarget, mTextView, mTextModelFactory, mEditorFeatures, mHoverFactory, mContentAssist,
@@ -244,11 +244,71 @@ define([
 			if (editor.getContentAssist()) {
 				editor.getContentAssist().setAutoTriggerEnabled(prefs.contentAssistAutoTrigger);
 			}
-
+			
+			var ruler = editor.getAnnotationRuler();
+			var lineRuler = editor.getLineNumberRuler();
+			var that = this;
+			var filename = editor.getTitle();
+			var annotationModel = editor.getAnnotationModel();
+			lineRuler.onDblClick = ruler.onDblClick = function(lineIndex, e){
+				var bookmark = editor.getBookmark(lineIndex);			
+				if (bookmark.annotation) {
+					editor.removeBookmark(bookmark.annotation);
+				} else {
+					var node = e.target;
+					that.commandRegistry.prompt(node, messages.Enterbookmarks, messages.OK, messages.Cancel, editor.getText(bookmark.start, bookmark.end), false, function(tags) {
+						editor.addBookmark(bookmark, tags);
+						saveBookmarks();
+					}, "input");
+				}
+			};
+			annotationModel.addEventListener("Changed", function(e) {
+					if (e.changed.some(function(annotation) {return annotation.type === "orion.annotation.bookmark";	}))	{
+						if (this.bookmarksChangeTimeout) {
+							window.clearTimeout(this.bookmarksChangeTimeout);
+						}
+						this.bookmarksChangeTimeout = window.setTimeout(function(){
+							saveBookmarks();
+							this.bookmarksChangeTimeout = null;
+						}.bind(this), 400);
+					}
+					if (e.removed.some(function(annotation) {return annotation.type === "orion.annotation.bookmark";	})) {
+						if (this.bookmarksDeleteTimeout) {
+							window.clearTimeout(this.bookmarksDeleteTimeout);
+						}
+						this.bookmarksDeleteTimeout = window.setTimeout(function(){
+							if(this.currentFileName === filename){
+								saveBookmarks();
+							}
+							this.bookmarksDeleteTimeout = null;
+						}.bind(this), 400);
+					}
+			}.bind(this));
 			this.dispatchEvent({
 				type: "Settings", //$NON-NLS-0$
 				newSettings: this.settings
 			});
+			function saveBookmarks(){
+				var allBookmarks = localStorage.bookmarks ? JSON.parse(localStorage.bookmarks) : {};
+				var thisfileBookmarks = [];
+				var annotations = annotationModel.getAnnotations();
+				while (annotations.hasNext()) {
+					var annotation = annotations.next();
+					if(annotation.type === "orion.annotation.bookmark"){
+						var textModel = editor.getModel();
+						var line = textModel.getLineAtOffset(annotation.start) + 1;
+						annotation.line = line;
+						thisfileBookmarks.push({
+							line:annotation.line,
+							description:annotation.title,
+							end: annotation.end,
+							start: annotation.start  // end and start are both needed to redraw(recreate) the bookmark annotations 
+						});
+					}
+				}
+				allBookmarks[filename] = thisfileBookmarks;
+				localStorage["bookmarks"] = JSON.stringify(allBookmarks);
+			}
 		},
 		updateStyler: function(prefs) {
 			var styler = this.syntaxHighlighter.getStyler();
@@ -357,7 +417,7 @@ define([
 					return true;
 				});
 
-				textView.setKeyBinding(new mKeyBinding.KeyStroke('z', true, false, true), "toggleZoomRuler"); //$NON-NLS-1$ //$NON-NLS-2$
+				textView.setKeyBinding(new mKeyBinding.KeyStroke("z", true, false, true), "toggleZoomRuler"); //$NON-NLS-1$ //$NON-NLS-2$
 				textView.setAction("toggleZoomRuler", function() { //$NON-NLS-0$
 					if (!that.settings.zoomRulerVisible) return false;
 					that.settings.zoomRuler = !that.settings.zoomRuler;
@@ -482,6 +542,7 @@ define([
 				}
 			});
 			inputManager.addEventListener("InputChanged", function(evnt) {
+				this.currentFileName = evnt.title;
 				that.createSession(evnt);
 				var textView = editor.getTextView();
 				if (textView) {
@@ -500,7 +561,7 @@ define([
 					}
 				} else {
 					liveEditSession.start();
-				}
+				}				
 			}.bind(this));
 			inputManager.addEventListener("Saving", function(evnt) {
 				if (that.settings.trimTrailingWhiteSpace) {
@@ -546,6 +607,15 @@ define([
 				syntaxCheck(inputManager.getInput());
 			}
 			editor.addEventListener("InputChanged", function(evt) {
+				if (!evt.contentsSaved) {
+					if(localStorage.bookmarks){
+						var allBookmarks = JSON.parse(localStorage.bookmarks);
+						var thisfileBookmarks = allBookmarks[editor.getTitle()];
+						thisfileBookmarks && thisfileBookmarks.forEach(function(bookmark){
+							editor.addBookmark(bookmark);
+						});
+					}
+				}
 				syntaxCheck(evt.title, evt.message, evt.contents);
 			});
 
