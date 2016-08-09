@@ -348,3 +348,11 @@
 
 .core-sprite-openarrow:before{ content:'\25BE'; }
 .core-sprite-closedarrow:before{ content:'\25B8'; } */
+
+.setting-local-indicator.on::before {
+	content: '\2605';
+}
+
+.setting-local-indicator.off::before {
+	content: '\2606';
+}
