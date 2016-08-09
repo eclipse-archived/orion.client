@@ -1,6 +1,7 @@
 .contentassist {
 	font-size:12px;
 	display: none;
+	color: black;
 	background-color: white;
 	position: fixed;
 	top: 100px;
