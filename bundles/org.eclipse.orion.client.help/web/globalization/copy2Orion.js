@@ -117,6 +117,7 @@ var folderTemplate = [
 	'org.eclipse.orion.client.ui/web/orion/edit/nls/dummy_language/messages',
 	'org.eclipse.orion.client.ui/web/orion/mixloginstatic/nls/dummy_language/messages',
 	'org.eclipse.orion.client.ui/web/orion/navigate/nls/dummy_language/messages',
+	'org.eclipse.orion.client.ui/web/orion/jslint/nls/dummy_language/messages',
 	'org.eclipse.orion.client.ui/web/orion/nls/dummy_language/messages',
 	'org.eclipse.orion.client.ui/web/orion/operations/nls/dummy_language/messages',
 	'org.eclipse.orion.client.ui/web/orion/problems/nls/dummy_language/messages',
