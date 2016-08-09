@@ -92,6 +92,7 @@ define({
 	"UnnamedCommand": "Unnamed",
 	"searchInFolder": "Folder Search...",
 	"Global Search": "Global Search...",
+	"Bookmark Search": "Bookmark Search...",
 	"ClickEditLabel": "Click to edit",
 	"ProjectInfo": "Project Information",
 	"Name": "Name",
@@ -107,5 +108,7 @@ define({
 	"Orion": "Orion",
 	"OK": "Ok",
 	"Format" : "Format Code",
-	"FormatTooltip":"Format editor contents"
+	"FormatTooltip":"Format editor contents",
+	"Cancel": "Cancel",
+	"Enterbookmarks":"Enter the bookmark"
 });
