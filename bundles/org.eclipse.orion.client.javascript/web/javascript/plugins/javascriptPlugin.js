@@ -473,7 +473,8 @@ define([
     				name: 'ternContentAssist',  //$NON-NLS-1$
     				id: "orion.edit.contentassist.javascript.tern",  //$NON-NLS-1$
     				charTriggers: "[.]",  //$NON-NLS-1$
-    				excludedStyles: "(string.*)"  //$NON-NLS-1$
+    				excludedStyles: "(string.*)",  //$NON-NLS-1$
+    				autoApply: false
     		});
 		
 		provider.registerService("orion.edit.contentassist",  //$NON-NLS-1$
