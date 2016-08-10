@@ -392,7 +392,7 @@ define([
 							var id = serviceRef.getProperty("service.id").toString();  //$NON-NLS-0$
 							var charTriggers = serviceRef.getProperty("charTriggers"); //$NON-NLS-0$
 							var excludedStyles = serviceRef.getProperty("excludedStyles");  //$NON-NLS-0$
-
+							var autoApply = serviceRef.getProperty("autoApply");
 							if (charTriggers) {
 								charTriggers = new RegExp(charTriggers);
 							}
@@ -401,7 +401,7 @@ define([
 								excludedStyles = new RegExp(excludedStyles);
 							}
 
-							return {provider: service, id: id, charTriggers: charTriggers, excludedStyles: excludedStyles};
+							return {provider: service, id: id, charTriggers: charTriggers, excludedStyles: excludedStyles, autoApply: autoApply};
 						}
 						return null;
 					}).filter(function(providerInfo) {

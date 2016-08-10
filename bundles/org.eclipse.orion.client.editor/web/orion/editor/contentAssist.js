@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * Copyright (c) 2011, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -279,7 +279,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var selectionStart = Math.min(sel.start, sel.end);			
 			this._initialCaretOffset = Math.min(offset, selectionStart);
 			this._computedProposals = null;
-			
+			delete this._autoApply;
 			this._computeProposals(this._initialCaretOffset).then(function(proposals) {
 				if (this.isActive()) {
 					var flatProposalArray = this._flatten(proposals);
@@ -287,7 +287,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					if (flatProposalArray && Array.isArray(flatProposalArray) && (0 < flatProposalArray.length)) {
 						this._computedProposals = proposals;
 					}
-					this.dispatchEvent({type: "ProposalsComputed", data: {proposals: flatProposalArray}, autoApply: !this._autoTriggered}); //$NON-NLS-0$
+					var autoApply = typeof this._autoApply === 'boolean' ? this._autoApply : !this._autoTriggerEnabled;
+					this.dispatchEvent({type: "ProposalsComputed", data: {proposals: flatProposalArray}, autoApply: autoApply}); //$NON-NLS-0$
 					if (this._computedProposals && this._filterText) {
 						// force filtering here because user entered text after
 						// computeProposals() was called but before the plugins
@@ -359,6 +360,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				var func;
 				var promise;
 				var params;
+				if(typeof providerInfo.autoApply === 'boolean') {
+					_self._autoApply = providerInfo.autoApply;
+				}
 				if (computePrefixFunc) {
 					ecProvider = _self.editorContextProvider;
 					editorContext = ecProvider.getEditorContext();
