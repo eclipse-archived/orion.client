@@ -592,7 +592,7 @@ function postClone(req, res) {
 		repo = _repo;
 		return configRepo(repo, req.body.GitName, req.body.GitMail);
 	})
-	.then(function(repo) {
+	.then(function() {
 		if (req.body.cloneSubmodules) {
 			return foreachSubmodule(repo, "update", true);
 		}

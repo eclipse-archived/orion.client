@@ -229,6 +229,7 @@ define({//Default message bundle
 	"CloneGitRepositoryDialog": "Clone Git Repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"Repository URL:": "Repository URL: ", //$NON-NLS-0$  //$NON-NLS-1$
 	"Existing directory:": "Existing folder:", //$NON-NLS-0$  //$NON-NLS-1$
+	"Clone submodules automatically": "Clone submodules automatically", //$NON-NLS-0$  //$NON-NLS-1$
 	"New folder:": "New folder:", //$NON-NLS-0$  //$NON-NLS-1$
 	"ChooseFolderDialog": "Choose a Folder", //$NON-NLS-0$  //$NON-NLS-1$
 	"Message:": "Message:", //$NON-NLS-0$  //$NON-NLS-1$
