@@ -92,6 +92,7 @@ define({
 	"UnnamedCommand": "Unnamed",
 	"searchInFolder": "Folder Search...",
 	"Global Search": "Search...",
+	"Bookmark Search": "Bookmark Search...",
 	"ClickEditLabel": "Click to edit",
 	"ProjectInfo": "Project Information",
 	"Name": "Name",
@@ -110,5 +111,6 @@ define({
 	"FormatTooltip":"Format editor contents",
 	"Cancel":"Cancel",
 	"Yes":"Yes",
-	"No":"No"
+	"No":"No",
+	"Enterbookmarks":"Enter the bookmark"
 });
