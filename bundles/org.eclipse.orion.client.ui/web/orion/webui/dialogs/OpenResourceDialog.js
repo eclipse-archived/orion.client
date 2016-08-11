@@ -17,6 +17,7 @@ define([
 	'i18n!orion/search/nls/messages',
 	'orion/extensionCommands', 
 	'orion/i18nUtil', 
+	'orion/bidiUtils',
 	'orion/searchUtils', 
 	'orion/explorers/navigatorRenderer', 
 	'orion/contentTypes', 
@@ -26,7 +27,7 @@ define([
 	'orion/webui/dialog', 
 	'orion/metrics', 
 	'orion/Deferred'
-], function(messages, searchMSG, extensionCommands, i18nUtil, mSearchUtils, navigatorRenderer, mContentTypes, require, lib, util, dialog, mMetrics, Deferred) {
+], function(messages, searchMSG, extensionCommands, i18nUtil, bidiUtils, mSearchUtils, navigatorRenderer, mContentTypes, require, lib, util, dialog, mMetrics, Deferred) {
 	//default search renderer until we factor this out completely
 	function DefaultSearchRenderer(serviceRegistry, commandRegistry) {
 		this.serviceRegistry = serviceRegistry;
@@ -168,7 +169,7 @@ define([
 				if (!foundValidHit) {
 					// only display no matches found if we have a proper name
 					if (queryName) {
-						var errorStr = i18nUtil.formatMessage(searchMSG["NoMatchFound"], queryName); 
+						var errorStr = i18nUtil.formatMessage(searchMSG["NoMatchFound"], bidiUtils.enforceTextDirWithUcc(queryName)); 
 						lib.empty(resultsNode);
 						resultsNode.appendChild(document.createTextNode(errorStr)); 
 						if (typeof(onResultReady) === "function") { //$NON-NLS-0$
@@ -258,6 +259,7 @@ define([
 		} else {
 			this.$fileName.setAttribute("placeholder", messages["Search"]);  //$NON-NLS-0$
 		}
+		bidiUtils.initInputField(this.$fileName);
 		this.$fileName.addEventListener("input", function(evt) { //$NON-NLS-0$
 			self._time = + new Date();
 			if (self._timeoutId) {
@@ -366,7 +368,7 @@ define([
 		var newTitle, scope;
 		if (!isGlobalSearch) {
 			scope = "\'" + this._searcher.getSearchLocationName() + "\'"; //$NON-NLS-1$ //$NON-NLS-2$
-			newTitle = util.formatMessage(this.title, scope);
+			newTitle = util.formatMessage(this.title, bidiUtils.enforceTextDirWithUcc(scope));
 		} else {
 			scope = messages["FileFileGlobal"];
 			newTitle = messages["FindFileGlobal"];

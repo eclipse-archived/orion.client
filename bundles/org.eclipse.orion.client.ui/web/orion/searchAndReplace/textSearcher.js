@@ -14,10 +14,11 @@
 define([
 	'i18n!orion/search/nls/messages', 
 	'orion/editor/find', 'orion/commands', 
+	'orion/bidiUtils',
 	'orion/objects',
 	'orion/inputCompletion/inputCompletion', 
 	'orion/webui/littlelib' ], 
-	function(messages, mFind, mCommands, objects, mInputCompletion, lib){
+	function(messages, mFind, mCommands, bidiUtils, objects, mInputCompletion, lib){
 	
 	var MAX_RECENT_FIND_NUMBER = 30;
 	function TextSearcher(editor, serviceRegistry, cmdservice, undoStack, options) {
@@ -60,9 +61,11 @@ define([
 				this._createActionTable();
 				findDiv = document.getElementById("localSearchFindWith"); //$NON-NLS-0$
 			}
+			bidiUtils.initInputField(findDiv);
+			bidiUtils.initInputField(document.getElementById("localSearchReplaceWith"));
 			if (findString) {
 				findDiv.value = findString;
-			}
+			}			
 			if (replaceString) {
 				var replaceDiv = document.getElementById("localSearchReplaceWith"); //$NON-NLS-0$
 				replaceDiv.value = replaceString;

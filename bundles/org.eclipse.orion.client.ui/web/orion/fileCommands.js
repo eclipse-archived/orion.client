@@ -449,7 +449,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 									}
 								}
 								if (isCopy && item.parent && item.parent.Location === location) {
-									commandService.prompt(null, i18nUtil.formatMessage(messages['EnterName'], item.Name), messages['Ok'], messages['Cancel'], 
+									commandService.prompt(null, i18nUtil.formatMessage(messages['EnterName'], bidiUtils.enforceTextDirWithUcc(item.Name)), messages['Ok'], messages['Cancel'], 
 										i18nUtil.formatMessage(messages['Copy of ${0}'], item.Name), false, function(newName) {
 											// user cancelled?  don't copy this one
 											if (!newName) {
@@ -1314,7 +1314,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 								}
 								if (prompt) {
 									var node = document.getElementById("pageSidebar" + item.Location.split('/').slice(1).join(""));
-									commandService.prompt(node, i18nUtil.formatMessage(messages['EnterName'], selectedItem.Name), messages['Ok'], messages['Cancel'], 
+									commandService.prompt(node, i18nUtil.formatMessage(messages['EnterName'], bidiUtils.enforceTextDirWithUcc(selectedItem.Name)), messages['Ok'], messages['Cancel'], 
 										i18nUtil.formatMessage(messages['Copy of ${0}'], selectedItem.Name), false, function(newname) {
 											// user cancelled?  don't copy this one
 											if (!newname) {

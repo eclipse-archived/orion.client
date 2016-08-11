@@ -14,8 +14,9 @@ define([
 	'orion/webui/littlelib',
 	'text!orion/widgets/input/ComboTextInput.html',
 	'i18n!orion/widgets/nls/messages',
-	'orion/inputCompletion/inputCompletion'
-], function(objects, lib, ComboTextInputTemplate, messages, InputCompletion) {
+	'orion/inputCompletion/inputCompletion',
+	'orion/bidiUtils'
+], function(objects, lib, ComboTextInputTemplate, messages, InputCompletion, bidiUtils) {
 
 	/**
 	 * Creates a text input box combined with:
@@ -64,6 +65,7 @@ define([
 				this._comboTextInputWrapper = this._domNode;
 			}
 			this._textInputNode = lib.$(".comboTextInputField", this._domNode); //$NON-NLS-0$
+			bidiUtils.initInputField(this._textInputNode);
 			this._textInputNode.addEventListener("focus", function() { //$NON-NLS-0$
 				this._domNode.classList.add("comboTextInputWrapperFocussed"); //$NON-NLS-0$ 
 			}.bind(this));
