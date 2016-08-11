@@ -15,6 +15,7 @@ define([
 	'orion/keyBinding',
 	'orion/explorers/navigationUtils',
 	'orion/i18nUtil',
+	'orion/bidiUtils',
 	'orion/PageUtil',
 	'orion/uiUtils',
 	'orion/webui/littlelib',
@@ -24,7 +25,7 @@ define([
 	'orion/metrics',
 	'orion/Deferred',
 	'orion/EventTarget'
-], function(Commands, mKeyBinding, mNavUtils, i18nUtil, PageUtil, UIUtil, lib, mDropdown, mTooltip, SubMenuButtonFragment, mMetrics, mDeferred, mEventTarget) {
+], function(Commands, mKeyBinding, mNavUtils, i18nUtil, bidiUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, SubMenuButtonFragment, mMetrics, mDeferred, mEventTarget) {
 
 	/**
 	 * Constructs a new command registry with the given options.
@@ -271,6 +272,7 @@ define([
 						var input = document.createElement("input");
 						input.setAttribute("value", defaultInput);
 						input.classList.add("parameterInput");
+						bidiUtils.initInputField(input);
 						parent.appendChild(input);
 					}
 					var yesButton = document.createElement("button"); //$NON-NLS-0$

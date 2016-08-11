@@ -12,8 +12,9 @@
 define([
 	'i18n!orion/nls/messages',
 	'orion/webui/littlelib',
-	'orion/i18nUtil'
-], function(messages, lib, i18nUtil) {
+	'orion/i18nUtil',
+	'orion/bidiUtils'
+], function(messages, lib, i18nUtil, bidiUtils) {
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 * @class This class contains static utility methods.
@@ -226,7 +227,8 @@ define([
 		editBox.classList.add("userEditBoxPrompt"); //$NON-NLS-0$
 		if (hideRefNode) {
 			refNode.style.display = "none"; //$NON-NLS-0$
-		}				
+		}	
+		bidiUtils.initInputField(editBox);
 		editBox.addEventListener("keydown", handler(true), false); //$NON-NLS-0$
 		editBox.addEventListener("blur", handler(false), false); //$NON-NLS-0$
 		window.setTimeout(function() { 

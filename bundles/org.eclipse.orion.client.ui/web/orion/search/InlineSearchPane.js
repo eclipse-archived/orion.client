@@ -12,6 +12,7 @@
 define([
 	'orion/objects',
 	'orion/webui/littlelib',
+	'orion/bidiUtils',
 	'text!orion/search/InlineSearchPane.html',
 	'orion/inlineSearchResultExplorer',
 	'orion/searchUtils',
@@ -21,7 +22,7 @@ define([
 	'i18n!orion/search/nls/messages',
 	'orion/webui/Slideout'
 ], function(
-	objects, lib, InlineSearchPaneTemplate, InlineSearchResultExplorer, 
+	objects, lib, bidiUtils, InlineSearchPaneTemplate, InlineSearchResultExplorer, 
 	mSearchUtils, Deferred, DirectoryPrompterDialog, ComboTextInput, messages, mSlideout
 ) {
 	var SearchAnnoTypes = {};
@@ -579,6 +580,9 @@ define([
 				scopeElementWrapper.title = decodedLocation;
 				
 				locationElement.appendChild(document.createTextNode(scopeString));
+				if (bidiUtils.isBidiEnabled()) {
+					locationElement.dir = bidiUtils.getTextDirection(scopeString);
+				}
 				scopeElementWrapper.appendChild(locationElement);	
 			}, this);
 		},

@@ -14,12 +14,13 @@ define(['i18n!orion/search/nls/messages', 'orion/Deferred', 'orion/webui/littlel
 	'orion/highlight', 'orion/webui/tooltip', 'orion/explorers/navigatorRenderer', 'orion/extensionCommands',
 	'orion/searchModel', 'orion/explorers/fileDetailRenderer',
 	'orion/extensionCommands',
-	'orion/objects'
+	'orion/objects',
+	'orion/bidiUtils'
 ],
 function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands, 
 	mSearchUtils, mCompareView, mHighlight, mTooltip, 
 	navigatorRenderer, extensionCommands, mSearchModel, mFileDetailRenderer,
-	mExtensionCommands, objects
+	mExtensionCommands, objects, bidiUtils
 ) {
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
     /* Internal wrapper functions*/
@@ -1118,7 +1119,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
 		if (pagingParams.numberOnPage === 0) {
 			var message = messages["No matches"];
 			if(this.model._provideSearchHelper){
-				message = i18nUtil.formatMessage(messages["NoMatchFound"], this.model._provideSearchHelper().displayedSearchTerm);
+				message = i18nUtil.formatMessage(messages["NoMatchFound"], bidiUtils.enforceTextDirWithUcc(this.model._provideSearchHelper().displayedSearchTerm));
 			}
 		    this.parentNode.textContent = "";
 		    var textBold = _createElement('b', null, null, this.parentNode); //$NON-NLS-1$ //$NON-NLS-1$
