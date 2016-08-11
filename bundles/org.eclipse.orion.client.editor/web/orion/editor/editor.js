@@ -838,6 +838,12 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		installTextView: function() {
 			this.install();
 		},
+		
+		addBookmark: function(start, end, description){
+			var annotationModel = this.getAnnotationModel();
+			var annotation = AT.createAnnotation(AT.ANNOTATION_BOOKMARK, start, end, description );
+			annotationModel.addAnnotation(annotation);
+		},
 
 		install : function() {
 			if (this._textView) { return; }
@@ -968,8 +974,14 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				if (bookmark) {
 					annotationModel.removeAnnotation(bookmark);
 				} else {
-					bookmark = AT.createAnnotation(AT.ANNOTATION_BOOKMARK, lineStart, lineEnd, editor.getText(lineStart, lineEnd));
-					annotationModel.addAnnotation(bookmark);
+					var defaultString = editor.getText(lineStart, lineEnd);
+					if(editor.bookmarkPrompt){
+						editor.bookmarkPrompt(e.target, defaultString, function(inputs){
+							editor.addBookmark(lineStart, lineEnd, inputs);
+						})
+					}else{
+						editor.addBookmark(lineStart, lineEnd, defaultString);
+					}
 				}
 			};
 
