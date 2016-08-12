@@ -238,7 +238,7 @@ function putapps(req, res){
 			return Promise.resolve(waitFor)
 			.then(function(status){
 				if(status){
-					return repondAppPutrequest(task,status);
+					return respondAppPutrequest(task,status);
 				}
 			});
 		}
@@ -285,7 +285,7 @@ function putapps(req, res){
 		}
 		return startApp(req.user.username, -1, appTarget);
 	}).then(function(startRespond){
-		return repondAppPutrequest(task,startRespond);
+		return respondAppPutrequest(task,startRespond);
 	}).catch(function(err){
 		task.done({
 			HttpCode: 400,
@@ -297,13 +297,24 @@ function putapps(req, res){
 		});
 	});
 	
-function repondAppPutrequest(task,status){
+function respondAppPutrequest(task,status){
 	return new Promise(function(fulfill,reject){
 		var resp;
 		var appJson = {
 			entity:appCache.summaryJson,
 			metadata:appCache.appMetadata	
 		};
+		if (status.error_code) {
+			task.done({
+				BundleId: "org.eclipse.orion.server.core",
+				HttpCode: 400,
+				Code: 0,
+				JsonData: status,
+				Message: status.description,
+				Severity: "Error"
+			});
+			return;
+		}
 		if(status === "RUNNING"){
 			var DEFAULT_TIMEOUT = 60;
 			resp = {
@@ -336,7 +347,10 @@ function startApp(userId, userTimeout ,appTarget){
 	var MAX_TIMEOUT = 180;
 	var body = {"console":true, "state":"STARTED"};
 	return target.cfRequest("PUT", userId, null, appTarget.Url + appCache.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body))
-	.then(function(){
+	.then(function(parsedBody) {
+		if (parsedBody.error_code) {
+			return parsedBody;
+		}
 		if(userTimeout < 0 ){
 			userTimeout = appCache.manifest.applications[0].timeout ? appCache.manifest.applications[0].timeout : DEFAULT_TIMEOUT;
 		}
