@@ -200,28 +200,76 @@ define([
 								'<div><label id="updateChannel">${Update Channel: }' + 
 									'<select id="channelOptions"><option id="stable">${Stable}</option><option id="alpha">${Alpha}</option></select>' + 
 								'</label></div>' + 
+								'<div><label id="updateAvailable">${Update available. Download now?}</label></div>' +
+								'<div><label id="updateUnavailable">${No updates available.}</label></div>' +
+								'<div><label id="updateError">${Error occurred while checking for updates.}</label></div>' +
+								'<div><label id="updateDownloading">${Update is downloading in the background.}</label></div>' +
 							'</div>';
 						newDialog.messages = messages;
 						newDialog.title = messages["About"];
 						newDialog.buttons = [
-							{ text: messages["Update"],
-								callback: function() {
-									var channelOptions = document.getElementById('channelOptions');
-									var updateChannel = channelOptions.options[channelOptions.selectedIndex].id;
-									var contentType = "application/json; charset=UTF-8";
-									xhr("PUT", '/update', {
-						                headers : {
-											"Content-Type" : contentType
-										},
-										data: JSON.stringify({
-											"updateChannel": updateChannel
-										})
-						            }); 
-								},
-					            id: "aboutUpdate" },
-					        { text: messages["Close"], callback: function() {newDialog.hide();}, id: "aboutClose" }];
+						{ 
+							text: "Download",
+							callback: function() {
+								xhr("POST", "/update/downloadUpdates")
+									.then(function(result) {
+										document.querySelector("#updateDownloading").style.display = updateDownloading;
+										document.querySelector("#updateChannel").style.display = 
+										document.querySelector("#aboutDownloadUpdates").style.display =
+										document.querySelector("#updateAvailable").style.display = "none";
+									}, function(error) {
+										document.querySelector("#updateError").style.display = updateError;
+										document.querySelector("#aboutDownloadUpdates").style.display =
+										document.querySelector("#updateDownloading").style.display =
+										document.querySelector("#updateAvailable").style.display = "none";
+									});
+							},
+							id: "aboutDownloadUpdates" 
+						},
+						{
+							text: "Check for Updates",
+							callback: function() {
+								var channelOptions = document.getElementById('channelOptions'),
+									updateChannel = channelOptions.options[channelOptions.selectedIndex].id;
+								xhr("GET", '/update/resolveNewVersion?updateChannel=' + updateChannel)
+									.then(function(result) {
+										if (result.response) {
+											document.querySelector("#aboutDownloadUpdates").style.display = aboutDownloadUpdates;
+											document.querySelector("#updateAvailable").style.display = updateAvailable;
+											document.querySelector("#updateUnavailable").style.display = 
+											document.querySelector("#updateChannel").style.display = 
+											document.querySelector("#aboutResolveNewVersion").style.display = 
+											document.querySelector("#updateError").style.display = "none";
+										} else {
+											document.querySelector("#updateUnavailable").style.display = updateUnavailable;
+										}
+									}, function(error) {
+										document.querySelector("#updateError").style.display = updateError;
+										document.querySelector("#aboutResolveNewVersion").style.display = "none";
+									});
+							},
+							id: "aboutResolveNewVersion"
+						},
+						{
+							text: messages["Close"],
+							callback: function() {
+								newDialog.hide();
+							}, 
+							id: "aboutClose" 
+						}
+						];
 						newDialog.modal = true;
 						newDialog._initialize();
+						var aboutDownloadUpdates = document.querySelector("#aboutDownloadUpdates").style.display;
+						var updateUnavailable = document.querySelector("#updateUnavailable").style.display;
+						var updateAvailable = document.querySelector("#updateAvailable").style.display;
+						var updateError = document.querySelector("#updateError").style.display;
+						var updateDownloading = document.querySelector("#updateDownloading").style.display;
+						document.querySelector("#aboutDownloadUpdates").style.display = 
+						document.querySelector("#updateAvailable").style.display = 
+						document.querySelector("#updateUnavailable").style.display = 
+						document.querySelector("#updateError").style.display = 
+						document.querySelector("#updateDownloading").style.display = "none";
 						newDialog.show();
 					});
 					getCategory(0).appendChild(about.parentNode);

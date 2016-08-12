@@ -60,6 +60,10 @@ define({//Default message bundle
 	"Update Channel: ": "Update Channel: ",
 	"Stable": "Stable",
 	"Alpha" : "Alpha",
+	"Update available. Download now?" : "Update available. Download now?",
+	"No updates available" : "No updates available.",
+	"Error occurred while checking for updates": "Error occurred while checking for updates.",
+	"Update is downloading in the background" : "Update is downloading in the background.",
 	"Settings": "Settings",
 	"userSettings": "User Profile",
 	"View profile of ": "View profile of ",
@@ -100,5 +104,4 @@ define({//Default message bundle
 	"createNewTooltip": "Create a new launch configuration",
 	"back": "< Back",
 	"next": "Next >",
-	"Recently Opened Files": "Recently Opened Files"
 });
