@@ -223,6 +223,9 @@ define([
 		this._contentParent.setAttribute("role", "region"); //$NON-NLS-2$ //$NON-NLS-1$
 		this._contentParent.classList.add("sectionTable"); //$NON-NLS-0$
 		this._contentParent.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-0$
+		if (options.dropdown) {
+			this._contentParent.classList.add("sectionDropdown");
+		}
 		// initially style as hidden until we determine what needs to happen
 		this._collapse();
 		if (options.sibling) {
