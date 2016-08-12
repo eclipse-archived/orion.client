@@ -40,6 +40,10 @@ html[dir="rtl"] .sectionItemCount { /* ACGC */
 	overflow-x: auto;
 }
 
+.sectionDropdown {
+	resize: both;
+}
+
 .sectionTableItem {
 	padding: 6px;
 }
