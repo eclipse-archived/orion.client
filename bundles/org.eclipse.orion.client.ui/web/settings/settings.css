@@ -219,7 +219,7 @@ html[dir="rtl"] .setting-row { /* ACGC */
 }
 
 .setting-content > div {
-	margin-bottom: 15px;
+	margin-bottom: 6px;
 }
 
 .setting-content > div:last-child {
@@ -229,8 +229,8 @@ html[dir="rtl"] .setting-row { /* ACGC */
 .setting-label {
 	width: 200px;
 	min-width: 30%;
+	vertical-align: 3px;
 	display: inline-block;
-	vertical-align: top;
 }
 
 .setting-indent {
@@ -255,26 +255,25 @@ html[dir="rtl"] .setting-row { /* ACGC */
 
 .setting-local-indicator {
 	cursor: pointer;
-	display: inline-block;
-	margin: 3px 4px 2px 2px;
-	width: 6px;
+	font-size: 22px;
+	margin: 0px 10px 0px 2px;
 	height: 6px;
-	border-radius: 4px;
-	vertical-align: top;
 }
 
-html[dir="rtl"] .setting-local-indicator { /* ACGC */
-	margin: 3px 2px 2px 4px;
+.setting-local-indicator.on::before {
+	color: #F5CB03;
 }
 
-.setting-local-indicator.on {
-	border: 1px solid black;
-	background-color: green;
+.setting-local-indicator.off::before {
+	color: #B0B0B0; 
 }
 
-.setting-local-indicator.off {
-	border: 1px solid gray;
-	background-color: #eee;
+.setting-local-indicator.on:hover::before {
+	opacity: 0.5;
+}
+
+.setting-local-indicator.off:hover::before {
+	color: #F5CB03; 
 }
 
 .displaytable>section {
