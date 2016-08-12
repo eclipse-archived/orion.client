@@ -490,7 +490,7 @@ function bindRoute(req, res, appTarget){
 			}
 		} else {
 			/* client has not requested a specific domain, get the first available */
-			appCache.appDomain = domains.get(0);
+			appCache.appDomain = domainArray[0];
 		}
 	})
 	/* find out whether the declared host can be reused */
@@ -612,7 +612,7 @@ function bindServices(req, res, appTarget){ // TODO need test case!!
 			if(version === 2){
 				return new Promise(function(fulfill,reject){
 					async.each(manifestService, function(service, cb) {
-						return getServiceGuid(req.user.username, service)
+						return getServiceGuid(req.user.username, service, appTarget)
 							.then(function(serviceInstanceGUID){
 								if(!serviceInstanceGUID){
 								/* no service instance bound to the application, create one if possible */
@@ -641,32 +641,32 @@ function bindServices(req, res, appTarget){ // TODO need test case!!
 							}
 							return serviceInstanceGUID;
 						}).then(function(serviceInstanceGUID){
-							return bindService(req.user.username, serviceInstanceGUID);
+							return bindService(req.user.username, serviceInstanceGUID, appTarget);
 						}).then(function(){
-							cb();
+							return cb();
 						});
 					}, function(err) {
 						if(err){
 							return reject(err);
 						}
-						fulfill();
+						return fulfill();
 					});
 				});
 			}
 			if(version === 6){
 				return new Promise(function(fulfill,reject){
 					async.each(manifestService, function(service, cb) {
-						return getServiceGuid(req.user.username, service)
+						return getServiceGuid(req.user.username, service, appTarget)
 						.then(function(serviceInstanceGUID){
-							return bindService(req.user.username, serviceInstanceGUID);
+							return bindService(req.user.username, serviceInstanceGUID, appTarget);
 						}).then(function(){
-							cb();
+							return cb();
 						});
 					}, function(err) {
 						if(err){
 							return reject(err);
 						}
-						fulfill();
+						return fulfill();
 					});
 				});
 			}
@@ -676,7 +676,7 @@ function bindServices(req, res, appTarget){ // TODO need test case!!
 }
 function getServiceGuid(userId, service, appTarget){
 	return target.cfRequest("GET", userId, null, appTarget.Url + "/v2/spaces/" + appTarget.Space.metadata.guid + "/service_instances"
-	, {"inline-relations-depth":"1","return_user_provided_service_instances":"true","q":"name:"+service.label})
+	, {"inline-relations-depth":"1","return_user_provided_service_instances":"true","q":"name:"+service})
 	.then(function(serviceJson){	
 		var serviceResources = serviceJson.resources;
 		var serviceInstanceGUID;

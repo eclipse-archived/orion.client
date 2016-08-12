@@ -48,10 +48,62 @@ function retrieveManifestFile(req, res, manifestAbsuluteLocation){
 		} catch (err) {
 			writeError(404, res, err.message);
 		}
+		transformManifest(manifest);
+		// TODO when meet the case where need to do symbolResolver (as in JAVA) then implement.
+//		analizeManifest(manifest,res);
 		fulfill(manifest);
 	});
 }
 
+function transformManifest(manifest){
+	if(!manifest.applications){
+		return;  // Do nothing
+	}
+	var globals = [];
+	var APPLICATION_PROPERTIES = ["name", "memory", "host", "buildpack", "command", //   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$ //$NON-NLS-5$
+			"domain", "instances", "path", "timeout", "no-route", "services"]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+	Object.keys(manifest).forEach(function(key){
+		if(APPLICATION_PROPERTIES.indexOf(key) !== -1){
+			globals.push(key);
+		}
+	});
+	if(!globals){
+		return; // nothing to do
+	}
+	manifest.applications.forEach(function(application){
+		for( var k = 0; k < globals.length ; k++){
+			if(!application.hasOwnProperty(globals[k])){
+				application[globals[k]] = manifest[globals[k]];
+			}
+		}
+	});
+}
+//function analizeManifest(manifest, res){
+//	if(!manifest.applications){
+//		return; // Do nothing
+//	}
+//	manifest.applications.forEach(function(application){
+//		var keys = Object.keys(application);
+//		keys.forEach(function(key){
+//			if(!application[key]){
+//				// Null Check
+//				
+//			}
+//		});
+//	});
+//	function analizeInvalidResult(message, lineNumber ,res){
+//		res.statusCode = 400;
+//		var resultJson = {
+//			"Severity":"Warning",
+//			"Message": message,
+//			"Line": lineNumber
+//		};
+//		var resp = JSON.stringify(resultJson);
+//		res.setHeader("Content-Type", "application/json");
+//		res.setHeader("Content-Length", resp.length);
+//		res.end(resp);
+//	}
+//}
 function retrieveProjectFilePath(req){
 	var projectPath = req.params[0];
 	return path.join(req.user.workspaceDir, projectPath);
