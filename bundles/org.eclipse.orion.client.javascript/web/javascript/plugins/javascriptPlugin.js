@@ -1624,7 +1624,7 @@ define([
 			 	        	                		id: "no-reserved-keys", //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noReservedKeys"],
 				 	        	                	type: "number", //$NON-NLS-1$
-				 	        	                	defaultValue: error,
+				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 			 	        	                	},
 			 	        	                	{
