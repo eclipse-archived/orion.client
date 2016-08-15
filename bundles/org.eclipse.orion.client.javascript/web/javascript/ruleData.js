@@ -67,7 +67,7 @@ define([
 			"no-proto" : 2, 
 			"no-redeclare" : 1,
 			"no-regex-spaces" : 2,
-			"no-reserved-keys" : 2,
+			"no-reserved-keys" : 0,
 			"no-self-assign" : 2,
 			"no-self-compare" : 2,
 			"no-shadow" : 1,
