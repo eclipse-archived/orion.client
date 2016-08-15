@@ -41,7 +41,8 @@
     "socket.io": "~1.0.4",
     "term.js": "0.0.3",
     "tiny-worker": "^1.1.4",
-    "unzip2": "^0.2.5"
+    "unzip2": "^0.2.5",
+    "yaml-ast-parser": "0.0.28"
   },
   "experimentalDependencies": {
     "pty.js": "~0.3.0"
