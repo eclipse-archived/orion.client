@@ -14,6 +14,7 @@ var bodyParser = require("body-parser");
 var fs = require("fs");
 var path = require("path");
 var manifests = require("./manifests");
+var apps = require("./apps");
 
 module.exports.router = function() {
 
@@ -36,7 +37,7 @@ function planJson(type, manifest , planner , wizard){
 function getplans(req, res){
 	var filePath = manifests.retrieveProjectFilePath(req);
 	Promise.resolve(manifests.retrieveManifestFile(req))
-	.then(function(manifests){
+	.then(function(manifest){
 		var children = [];
 		function generatePlansforManifest(manifest,children){
 			function generateGenericPlan(manifest){
@@ -47,6 +48,37 @@ function getplans(req, res){
 					return planJson("node.js",manifest,"nodejs.NodeJSDeploymentPlanner","nodejs");
 				}
 			}
+			function setDefaultManifestProperties(manifest){
+				function getDefaultName(rawProjectName){
+					var nameParts = rawProjectName.split(" --- ", 2);
+					return nameParts.length > 1 ? nameParts[1] : nameParts[0];
+				}
+				function getDefaultHost(rawProjectName){
+					return apps.slugify(rawProjectName);
+				}
+				var rawContentLocationData = req.params[0].split("/");
+				var rawDefaultProjectName = "";
+				for(var j = rawContentLocationData.length - 1 ; j >= 0 ; j--){
+					if(rawContentLocationData[j]){
+						rawDefaultProjectName = rawContentLocationData[j];
+						break;
+					}
+				}
+				rawDefaultProjectName = rawDefaultProjectName.replace(/\|/, " --- ");
+				var MUST_HAVE_PROPERTITIES ={
+					name : getDefaultName(rawDefaultProjectName),
+					host : getDefaultHost(rawDefaultProjectName),
+					memory : "512M",
+					instances : "1",
+					path: "."
+				};
+				Object.keys(MUST_HAVE_PROPERTITIES).forEach(function(key){
+					if(!manifest.applications[0].hasOwnProperty(key)){
+						manifest.applications[0][key] = MUST_HAVE_PROPERTITIES[key];
+					}					
+				});
+			}
+			setDefaultManifestProperties(manifest);
 			var genericPlan = generateGenericPlan(manifest);
 			var nodePlan = generateNodePlan(manifest);
 			children.push(genericPlan);
@@ -54,7 +86,7 @@ function getplans(req, res){
 				children.push(nodePlan);
 			}
 		}
-		generatePlansforManifest(manifests,children);
+		generatePlansforManifest(manifest,children);
 		var result =  {"Children": children};
 		res.status(200).json(result);
 	});
