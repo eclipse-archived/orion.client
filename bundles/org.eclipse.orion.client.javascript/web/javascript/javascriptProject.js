@@ -341,7 +341,7 @@ define([
 								}
 								return null;
 							}.bind(this));
-						});
+						}.bind(this));
 					}.bind(this));
 				}.bind(this));
 			}.bind(this));
