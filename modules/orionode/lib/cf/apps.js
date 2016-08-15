@@ -248,7 +248,7 @@ function putapps(req, res){
 				return;
 			}
 			for(var key in instrumentationJSON){
-				var value = instrumentationJSON.key;
+				var value = instrumentationJSON[key];
 				for(var j = 0; j < manifest.applications.length ; j++){
 					if(key === "memory" && !updateMemory(manifest.applications[j],value)){
 						continue;
@@ -347,30 +347,30 @@ function startApp(userId, userTimeout ,appTarget){
 				return collectCFRespond()
 			.then(function(result){
 				if(!result.data[0] && result.attemptsLeft > 0){
-						return promiseWhile(result.attemptsLeft);
-					}else if(result.data[0]){
-						var instancesNo = Object.keys(result.data).length;
-						var runningInstanceNo = 0;
-						var flappingInstanceNo = 0;
-						for (var key in result.data) {
-							if (result.data.hasOwnProperty(key)) {
-								if(result.data[key].state === "RUNNING"){
-									runningInstanceNo++;
-								}else if(result.data[key].state === "FLAPPING"){
-									flappingInstanceNo++;
-								}
+					return promiseWhile(result.attemptsLeft);
+				}else if(result.data[0] && result.attemptsLeft > 0){
+					var instancesNo = Object.keys(result.data).length;
+					var runningInstanceNo = 0;
+					var flappingInstanceNo = 0;
+					for (var key in result.data) {
+						if (result.data.hasOwnProperty(key)) {
+							if(result.data[key].state === "RUNNING"){
+								runningInstanceNo++;
+							}else if(result.data[key].state === "FLAPPING"){
+								flappingInstanceNo++;
 							}
 						}
-						if (runningInstanceNo === instancesNo) {
-							return "RUNNING";
-						}
-						if (flappingInstanceNo > 0 ) {
-							return "FLAPPING";
-						}
-						return promiseWhile(result.attemptsLeft);
-					}else if(result.attemptsLeft === 0 ){
-						return "TIMEOUT";
 					}
+					if (runningInstanceNo === instancesNo) {
+						return "RUNNING";
+					}
+					if (flappingInstanceNo > 0 ) {
+						return "FLAPPING";
+					}
+					return promiseWhile(result.attemptsLeft);
+				}else if(result.attemptsLeft === 0 ){
+					return "TIMEOUT";
+				}
 				});
 			});
 		}
@@ -490,7 +490,7 @@ function bindRoute(req, res, appTarget){
 			}
 		} else {
 			/* client has not requested a specific domain, get the first available */
-			appCache.appDomain = domains.get(0);
+			appCache.appDomain = domainArray[0];
 		}
 	})
 	/* find out whether the declared host can be reused */
@@ -602,7 +602,7 @@ function uploadBits(req, res, appTarget){
 		}
 	});
 }
-function bindServices(req, res, appTarget){ // TODO need test case!!
+function bindServices(req, res, appTarget){
 	if(appCache.manifest.applications[0].services){
 		return target.cfRequest("GET", req.user.username, null, appTarget.Url + "/v2/services", {"inline-relations-depth":"1"})
 		.then(function(result){
@@ -612,7 +612,7 @@ function bindServices(req, res, appTarget){ // TODO need test case!!
 			if(version === 2){
 				return new Promise(function(fulfill,reject){
 					async.each(manifestService, function(service, cb) {
-						return getServiceGuid(req.user.username, service)
+						return getServiceGuid(req.user.username, service, appTarget)
 							.then(function(serviceInstanceGUID){
 								if(!serviceInstanceGUID){
 								/* no service instance bound to the application, create one if possible */
@@ -641,32 +641,32 @@ function bindServices(req, res, appTarget){ // TODO need test case!!
 							}
 							return serviceInstanceGUID;
 						}).then(function(serviceInstanceGUID){
-							return bindService(req.user.username, serviceInstanceGUID);
+							return bindService(req.user.username, serviceInstanceGUID, appTarget);
 						}).then(function(){
-							cb();
+							return cb();
 						});
 					}, function(err) {
 						if(err){
 							return reject(err);
 						}
-						fulfill();
+						return fulfill();
 					});
 				});
 			}
 			if(version === 6){
 				return new Promise(function(fulfill,reject){
 					async.each(manifestService, function(service, cb) {
-						return getServiceGuid(req.user.username, service)
+						return getServiceGuid(req.user.username, service, appTarget)
 						.then(function(serviceInstanceGUID){
-							return bindService(req.user.username, serviceInstanceGUID);
+							return bindService(req.user.username, serviceInstanceGUID, appTarget);
 						}).then(function(){
-							cb();
+							return cb();
 						});
 					}, function(err) {
 						if(err){
 							return reject(err);
 						}
-						fulfill();
+						return fulfill();
 					});
 				});
 			}
@@ -676,7 +676,7 @@ function bindServices(req, res, appTarget){ // TODO need test case!!
 }
 function getServiceGuid(userId, service, appTarget){
 	return target.cfRequest("GET", userId, null, appTarget.Url + "/v2/spaces/" + appTarget.Space.metadata.guid + "/service_instances"
-	, {"inline-relations-depth":"1","return_user_provided_service_instances":"true","q":"name:"+service.label})
+	, {"inline-relations-depth":"1","return_user_provided_service_instances":"true","q":"name:"+service})
 	.then(function(serviceJson){	
 		var serviceResources = serviceJson.resources;
 		var serviceInstanceGUID;
@@ -709,7 +709,7 @@ function bindService(userId, serviceGuid, appTarget){
 function createRoute(req, res, appTarget){
 	var body = {
 		"space_guid": appTarget.Space.metadata.guid,
-		"host":appCache.manifest.applications[0].host || slugify(appCache.appName),
+		"host":appCache.manifest.applications[0].host,
 		"domain_guid":appCache.appDomain.Guid
 	};
 	return target.cfRequest("POST", req.user.username, null, appTarget.Url + "/v2/routes", {"inline-relations-depth":"1"}, JSON.stringify(body));
@@ -746,14 +746,6 @@ function normalizeMemoryMeasure(memory){
 		return 1024 * memory.substring(0, memory.length() - 2);
 	/* return default memory value, i.e. 1024 MB */
 	return 1024;
-}
-function slugify(inputString){
-	return inputString.toString().toLowerCase()
-	.replace(/\s+/g, "-")		// Replace spaces with -
-	.replace(/[^\w\-]+/g, "")	// Remove all non-word chars
-	.replace(/\-\-+/g, "-")		// Replace multiple - with single -
-	.replace(/^-+/, "")			// Trim - from start of text
-	.replace(/-+$/, "");			// Trim - from end of text
 }
 function archiveTarget (filePath){
 	var ramdomName = crypto.randomBytes(5).toString("hex") + Date.now();
