@@ -476,19 +476,33 @@ define([
 						callback({contents: contents, name: SettingsList.prototype.ESLINTRC, location: eslintrc});
 						return;
 					}
-					var packageJson = projectPath + SettingsList.prototype.PACKAGE_JSON;
-					return fileClient.read(packageJson, false, false, {readIfExists: true}).then(function(contents) {
-						if(contents !== null) {
-							var vals = JSON.parse(contents);
-							if(vals.eslintConfig !== null && typeof vals.eslintConfig === 'object' && Object.keys(vals.eslintConfig).length > 0) {
-								callback({contents: contents, name: SettingsList.prototype.PACKAGE_JSON, location: packageJson});
-							}
+					var eslintrcYaml = projectPath + SettingsList.prototype.ESLINTRC_YAML;
+					return fileClient.read(eslintrcYaml, false, false, {readIfExists: true}).then(function(contents) {
+						if (contents !== null) {
+							callback({contents: contents, name: SettingsList.prototype.ESLINTRC_YAML, location: eslintrcYaml});
+							return;
 						}
-						return;
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-		}.bind(this));
+						var eslintrcYml = projectPath + SettingsList.prototype.ESLINTRC_YML;
+						return fileClient.read(eslintrcYml, false, false, {readIfExists: true}).then(function(contents) {
+							if (contents !== null) {
+								callback({contents: contents, name: SettingsList.prototype.ESLINTRC_YML, location: eslintrcYml});
+								return;
+							}
+							var packageJson = projectPath + SettingsList.prototype.PACKAGE_JSON;
+							return fileClient.read(packageJson, false, false, {readIfExists: true}).then(function(contents) {
+								if(contents !== null) {
+									var vals = JSON.parse(contents);
+									if(vals.eslintConfig !== null && typeof vals.eslintConfig === 'object' && Object.keys(vals.eslintConfig).length > 0) {
+										callback({contents: contents, name: SettingsList.prototype.PACKAGE_JSON, location: packageJson});
+									}
+								}
+								return;
+							});
+						});
+					});
+				});
+			});
+		});
 	}
 	
 	function getFormattingSettings(fileClient, projectPath, callback) {

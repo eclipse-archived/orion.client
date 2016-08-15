@@ -11,13 +11,18 @@
  *******************************************************************************/
  /*eslint-env amd, browser*/
 define([
-	"orion/Deferred"
-], function(Deferred) {
+	"orion/Deferred",
+	"js-yaml/js-yaml"
+], function(Deferred, JsYaml) {
 	
 	var eslintHandler = {
 		_update: function _update(project, fileName) {
-			if(fileName === project.ESLINTRC || fileName === project.ESLINTRC_JS || 
-				fileName === project.ESLINTRC_JSON || fileName === project.PACKAGE_JSON) {
+			if(fileName === project.ESLINTRC
+				|| fileName === project.ESLINTRC_JS
+				|| fileName === project.ESLINTRC_JSON
+				|| fileName === project.PACKAGE_JSON
+				|| fileName === project.ESLINTRC_YAML
+				|| fileName === project.ESLINTRC_YML) {
 				delete project.map.eslint;
 			}
 			if (fileName === project.JSBEAUTIFYRC) {
@@ -300,13 +305,12 @@ define([
 		if(this.map.eslint) {
 			return new Deferred().resolve(this.map.eslint);
 		}
-		//TODO support loading YML and YAML files
 		var vals;
 		return this.getFile(this.ESLINTRC_JS).then(function(file) {
 			vals = readAndMap(this.map, file, "eslint");
 			if(vals) {
 				return vals;
-			} 
+			}
 			return this.getFile(this.ESLINTRC_JSON).then(function(file) {
 				vals = readAndMap(this.map, file, "eslint");
 				if(vals) {
@@ -317,15 +321,27 @@ define([
 					if(vals) {
 						return vals;
 					}
-					return this.getFile(this.PACKAGE_JSON).then(function(file) {
-						if(file && file.contents) {
-							vals = JSON.parse(file.contents);
-							if(vals.eslintConfig !== null && typeof vals.eslintConfig === 'object' && Object.keys(vals.eslintConfig).length > 0) {
-								this.map.eslint = vals.eslintConfig;
-								return this.map.eslint;
-							}
+					return this.getFile(this.ESLINTRC_YAML).then(function(file) {
+						vals = readAndMap(this.map, file, "eslint");
+						if (vals) {
+							return vals;
 						}
-						return null;
+						return this.getFile(this.ESLINTRC_YML).then(function(file) {
+							vals = readAndMap(this.map, file, "eslint");
+							if (vals) {
+								return vals;
+							}
+							return this.getFile(this.PACKAGE_JSON).then(function(file) {
+								if(file && file.contents) {
+									vals = JSON.parse(file.contents);
+									if(vals.eslintConfig !== null && typeof vals.eslintConfig === 'object' && Object.keys(vals.eslintConfig).length > 0) {
+										this.map.eslint = vals.eslintConfig;
+										return this.map.eslint;
+									}
+								}
+								return null;
+							}.bind(this));
+						});
 					}.bind(this));
 				}.bind(this));
 			}.bind(this));
@@ -349,16 +365,28 @@ define([
 	};
 
 	function readAndMap(map, file, key) {
-		if(file && file.contents) {
+		if (file && file.contents) {
+			var vals = null;
 			try {
-				var vals = JSON.parse(file.contents);
-				if(Object.keys(vals).length > 0) {
-					map[key]= vals;
-					return map[key];
-				}
-			} catch(e) {
-				//fall through and return null
+				vals = JSON.parse(file.contents);
+			} catch (e) {
+				// ignore
 			}
+			if (vals === null) {
+				// try yml and yaml parsing
+				try {
+					// YML and YAML files
+					vals = JsYaml.safeLoad(
+						file.contents,
+						{json: true});
+				} catch (e) {
+					// ignore
+				}
+			}
+		}
+		if (vals && Object.keys(vals).length > 0) {
+			map[key] = vals;
+			return map[key];
 		}
 		return null;
 	}
