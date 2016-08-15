@@ -355,20 +355,24 @@ define([
 					 */
 					if (tokens[i].hasOwnProperty("lang")) { //$NON-NLS-0$
 						// TODO create a block and syntax style it if a supported lang is provided
-						start = index;
-						newlines = tokens[i].text.match(this._newlineRegex);
-						end = this._getLineEnd(text, index, model, 2 + (newlines ? newlines.length : 0));
+						this._fencedCodeBlockRegex.lastIndex = index;
+						match = this._fencedCodeBlockRegex.exec(text);
+						start = match.index;
+						this._fencedCodeBlockRegex.lastIndex = start + match[0].length;
+						match = this._fencedCodeBlockRegex.exec(text);
+						end = match.index + match[0].length;
 						name = "markup.raw.code.fenced.gfm"; //$NON-NLS-0$
 					} else {
 						start = this._getLineStart(text, index); /* backtrack to start of line */
 						newlines = tokens[i].text.match(this._newlineRegex);
 						end = this._getLineEnd(text, index, model, newlines ? newlines.length : 0);
-						this._whitespaceRegex.lastIndex = end;
-						match = this._whitespaceRegex.exec(text);
-						if (match && match.index === end) {
-							end += match[0].length;
-						}
 						name = "markup.raw.code.markdown"; //$NON-NLS-0$
+					}
+
+					this._whitespaceRegex.lastIndex = end;
+					match = this._whitespaceRegex.exec(text);
+					if (match && match.index === end) {
+						end += match[0].length;
 					}
 
 					bounds = {
