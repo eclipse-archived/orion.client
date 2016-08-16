@@ -1465,25 +1465,25 @@ define([
     	 * ESLint settings
     	 */
     	var ignore = 0, warning = 1, error = 2, severities = [
-    	                                                      {label: javascriptMessages.ignore,  value: ignore},
-    	                                                      {label: javascriptMessages.warning, value: warning},
-    	                                                      {label: javascriptMessages.error,   value: error}
+    	                                                      {label: javascriptMessages['ignore'],  value: ignore},
+    	                                                      {label: javascriptMessages['warning'], value: warning},
+    	                                                      {label: javascriptMessages['error'], value: error}
     	                                                      ];
     	                                                      
 		var doubleQuote = 'double';
 		var singleQuote = 'single';
 		var backTick = 'backtick';
 		var quotes = [
-			{ label: javascriptMessages.singleQuote, value: singleQuote },
-			{ label: javascriptMessages.doubleQuote, value: doubleQuote },
-			{ label: javascriptMessages.backtickQuote, value: backTick }
+			{ label: javascriptMessages['singleQuote'], value: singleQuote },
+			{ label: javascriptMessages['doubleQuote'], value: doubleQuote },
+			{ label: javascriptMessages['backtickQuote'], value: backTick }
 		];
 		
 		var Never = 'never';
 		var Always = 'always';
-		var yodaKinds = [
-			{ label: javascriptMessages.yodayAlways, value: Always },
-			{ label: javascriptMessages.yodaNever, value: Never },
+		var kinds = [
+			{ label: javascriptMessages['always'], value: Always },
+			{ label: javascriptMessages['never'], value: Never },
 		];
     	provider.registerService("orion.core.setting",  //$NON-NLS-1$
     			{},
@@ -1959,7 +1959,7 @@ define([
     			 	        	                	name: javascriptMessages["yodaKind"],
     			 	        	                	type: "string",  //$NON-NLS-1$
     			 	        	                	defaultValue: Never,
-    			 	        	                	options: yodaKinds
+    			 	        	                	options: kinds
     			 	        	                },
  				 	        	            	{
 	 				 	        	            	id: "yoda:exceptRange",  //$NON-NLS-1$
@@ -2057,6 +2057,19 @@ define([
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
+				 	        	                {	id: "semi!1",  //$NON-NLS-1$
+				 	        	                	dependsOn: "semi",
+				 	        	                	name: javascriptMessages["missingSemiFineGrained"],
+				 	        	                	type: "string",  //$NON-NLS-1$
+				 	        	                	defaultValue: Always,
+				 	        	                	options: kinds
+				 	        	                },
+				 	        	                {	id: "semi:omitLastInOneLineBlock",  //$NON-NLS-1$
+				 	        	                	dependsOn: "semi",
+				 	        	                	name: javascriptMessages["missingSemiOmitLastInOneLineBlock"],
+				 	        	                	type: "boolean",  //$NON-NLS-1$
+				 	        	                	defaultValue: false
+				 	        	                },
 				 	        	                {	id: "no-mixed-spaces-and-tabs",  //$NON-NLS-1$
 				 	        	                	name: javascriptMessages["noMixedSpacesAndTabs"],
 				 	        	                	type: "number",  //$NON-NLS-1$
@@ -2126,25 +2139,25 @@ define([
 		var mac = "\r";
 		var windows = "\n\r";
 		var eof_characters = [
-			{label: javascriptMessages.indentation_unix,  value: unix},
-			{label: javascriptMessages.indentation_mac, value: mac},
-			{label: javascriptMessages.indentation_windows, value: windows}
+			{label: javascriptMessages['indentation_unix'],  value: unix},
+			{label: javascriptMessages['indentation_mac'], value: mac},
+			{label: javascriptMessages['indentation_windows'], value: windows}
 		];
 
 		var space = ' ';
 		var tab= '\t';
 		var indentation_characters = [
-			{label: javascriptMessages.indentation_space,  value: space},
-			{label: javascriptMessages.indentation_tab,  value: tab},
+			{label: javascriptMessages['indentation_space'],  value: space},
+			{label: javascriptMessages['indentation_tab'],  value: tab},
 		];
 		
 		var before_newline = 'before-newline';
 		var after_newline = 'after-newline';
 		var preserve_newline = 'preserve-newline';
 		var operator_positions = [
-			{ label: javascriptMessages.before_newline, value: before_newline},
-			{ label: javascriptMessages.after_newline, value: after_newline},
-			{ label: javascriptMessages.preserve_newline, value: preserve_newline},
+			{ label: javascriptMessages['before_newline'], value: before_newline},
+			{ label: javascriptMessages['after_newline'], value: after_newline},
+			{ label: javascriptMessages['preserve_newline'], value: preserve_newline},
 		];
 		
 		var collapse_preserve_inline = 'collapse-preserve-inline';
@@ -2153,11 +2166,11 @@ define([
 		var end_expand = 'end-expand';
 		var none = 'none';
 		var brace_styles = [
-			{ label: javascriptMessages.collapse_preserve_inline , value: collapse_preserve_inline},
-			{ label: javascriptMessages.collapse , value: collapse},
-			{ label: javascriptMessages.expand , value: expand},
-			{ label: javascriptMessages.end_expand , value: end_expand},
-			{ label: javascriptMessages.none , value: none},
+			{ label: javascriptMessages['collapse_preserve_inline'], value: collapse_preserve_inline},
+			{ label: javascriptMessages['collapse'], value: collapse},
+			{ label: javascriptMessages['expand'], value: expand},
+			{ label: javascriptMessages['end_expand'], value: end_expand},
+			{ label: javascriptMessages['none'], value: none},
 		];
 		provider.registerServiceProvider("orion.core.setting", {}, {
 			settings: [

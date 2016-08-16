@@ -922,16 +922,27 @@ define([
 		 * @function 
 		 * @callback
 		 */
-        "semi": function(annotation, annotations, file) {
-        	return applySingleFixToAll(annotations, function(annot){
-	            return {
-	            	text: ';',
-	            	start: annot.end,
-	            	end: annot.end
-	            };
-            });
-        },
-        /** 
+		"semi": function(annotation, annotations, file) {
+			return applySingleFixToAll(annotations, function(annot) {
+				if (annot.data) {
+					switch (annot.data.kind) {
+						case 'missing':
+							return {
+								text: ';',
+								start: annot.end,
+								end: annot.end
+							};
+						case 'extra':
+							return {
+								text: '',
+								start: annot.start,
+								end: annot.end
+							};
+					}
+				}
+			});
+		},
+		/** 
 		 * @description fix for the 'unnecessary-nl' rule
 		 * @function 
 		 * @callback
