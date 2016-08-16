@@ -156,37 +156,37 @@ function analizeManifest(manifest, res, manifestAST, fileContent){
 			switch(realParentNode.nodeKey){
 				case "services":
 					if(isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid services declaration. Expected a list of service names.", getLineNumber(realParentNode.node.startPosition, realParentNode.node.endPosition, lineNumbers), res);	
+						sendInvalidResult("Invalid services declaration. Expected a list of service names.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res);	
 					}
 					break;
 				case "buildpack":
 					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"buildpack\" value. Expected a string literal.", getLineNumber(realParentNode.node.startPosition, realParentNode.node.endPosition, lineNumbers), res);	
+						sendInvalidResult("Invalid \"buildpack\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res);	
 					}
 					break;
 				case "command":
 					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"command\" value. Expected a string literal.", getLineNumber(realParentNode.node.startPosition, realParentNode.node.endPosition, lineNumbers), res);	
+						sendInvalidResult("Invalid \"command\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res);	
 					}
 					break;
 				case "domain":
 					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"domain\" value. Expected a string literal.", getLineNumber(realParentNode.node.startPosition, realParentNode.node.endPosition, lineNumbers), res);	
+						sendInvalidResult("Invalid \"domain\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res);	
 					}
 					break;
 				case "host":
 					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"host\" value. Expected a string literal.", getLineNumber(realParentNode.node.startPosition, realParentNode.node.endPosition, lineNumbers), res);	
+						sendInvalidResult("Invalid \"host\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res);	
 					}
 					break;
 				case "path":
 					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"path\" value. Expected a string literal.", getLineNumber(realParentNode.node.startPosition, realParentNode.node.endPosition, lineNumbers), res);	
+						sendInvalidResult("Invalid \"path\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res);	
 					}
 					break;
 				case "memory":
 					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"memory\" value. Expected a memory limit.", getLineNumber(realParentNode.node.startPosition, realParentNode.node.endPosition, lineNumbers), res);	
+						sendInvalidResult("Invalid \"memory\" value. Expected a memory limit.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res);	
 					}
 					if(!isValidMemoryProperty(valueWithParent[m].value)){
 						sendInvalidResult("Invalid \"memory\" limit; Supported measurement units are M/MB, G/GB.", getLineNumber(valueWithParent[m].startPosition, valueWithParent[m].endPosition, lineNumbers), res);	
@@ -194,7 +194,7 @@ function analizeManifest(manifest, res, manifestAST, fileContent){
 					break;
 				case "instances":
 					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"instances\" value. Expected a non-negative integer value.", getLineNumber(realParentNode.node.startPosition, realParentNode.node.endPosition, lineNumbers), res);	
+						sendInvalidResult("Invalid \"instances\" value. Expected a non-negative integer value.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res);	
 					}
 					if(!isValidNonNegativeProperty(valueWithParent[m].value)){
 						sendInvalidResult("Invalid \"instances\" value. Expected a non-negative integer value.", getLineNumber(valueWithParent[m].startPosition, valueWithParent[m].endPosition, lineNumbers), res);	
@@ -202,7 +202,7 @@ function analizeManifest(manifest, res, manifestAST, fileContent){
 					break;
 				case "timeout":
 					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"timeout\" value. Expected a non-negative integer value.", getLineNumber(realParentNode.node.startPosition, realParentNode.node.endPosition, lineNumbers), res);	
+						sendInvalidResult("Invalid \"timeout\" value. Expected a non-negative integer value.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res);	
 					}
 					if(!isValidNonNegativeProperty(valueWithParent[m].value)){
 						sendInvalidResult("Invalid \"timeout\" value. Expected a non-negative integer value.", getLineNumber(valueWithParent[m].startPosition, valueWithParent[m].endPosition, lineNumbers), res);	
@@ -210,7 +210,7 @@ function analizeManifest(manifest, res, manifestAST, fileContent){
 					break;
 				case "no-route":
 					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"no-route\" value. Expected a string literal \"true\".", getLineNumber(realParentNode.node.startPosition, realParentNode.node.endPosition, lineNumbers), res);	
+						sendInvalidResult("Invalid \"no-route\" value. Expected a string literal \"true\".", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res);	
 					}
 					if(valueWithParent[m].value !== "true"){
 						sendInvalidResult("Invalid \"no-route\" value. Expected a string literal \"true\".", getLineNumber(valueWithParent[m].startPosition, valueWithParent[m].endPosition, lineNumbers), res);	

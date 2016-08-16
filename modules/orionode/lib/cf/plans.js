@@ -14,7 +14,6 @@ var bodyParser = require("body-parser");
 var fs = require("fs");
 var path = require("path");
 var manifests = require("./manifests");
-var apps = require("./apps");
 
 module.exports.router = function() {
 
