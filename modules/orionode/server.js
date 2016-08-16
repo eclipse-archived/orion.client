@@ -115,21 +115,30 @@ function startServer(cb) {
 
 if (process.versions.electron) {
 	var electron = require('electron'),
-		autoUpdater = electron.autoUpdater,
-		dialog = electron.dialog,
+		autoUpdater = require('./lib/autoUpdater'),
 		spawn = require('child_process').spawn,
-		allPrefs = prefs.readPrefs();
+		allPrefs = prefs.readPrefs(),
+		feedURL = configParams["orion.autoUpdater.url"],
+		version = electron.app.getVersion(),
+		name = electron.app.getName(),
+		platform = os.platform(),
+		arch = os.arch();
 
 	configParams.isElectron = true;
 	electron.app.buildId = configParams["orion.buildId"];
-	
-	// Set necessary URL for autoUpdater to grab latest release
-	var feedURL = configParams["orion.autoUpdater.url"];
+
 	if (feedURL) {
-		var platform = os.platform() + '_' + os.arch(),
-			version = electron.app.getVersion(),
-			updateChannel = allPrefs.user.updateChannel ? allPrefs.user.updateChannel : configParams["orion.autoUpdater.defaultChannel"];
-		autoUpdater.setFeedURL(feedURL + '/channel/' + updateChannel + '/' + platform + '/' + version);
+		var updateChannel = allPrefs.user.updateChannel ? allPrefs.user.updateChannel : configParams["orion.autoUpdater.defaultChannel"],
+			latestUpdateURL;
+		if (platform === "linux") {
+			latestUpdateURL = feedURL + '/download/channel/' + updateChannel + '/linux';
+		} else {
+			latestUpdateURL = feedURL + '/update/channel/' + updateChannel + '/' + platform + "_" + arch + '/' + version;
+		}
+		var resolveURL = feedURL + '/api/resolve?platform=' + platform + '&channel=' + updateChannel;
+		
+		autoUpdater.setResolveURL(resolveURL);
+		autoUpdater.setFeedURL(latestUpdateURL);
 	}
 
 	var handleSquirrelEvent = function() {
@@ -178,6 +187,7 @@ if (process.versions.electron) {
 	electron.app.on('ready', function() {
 		var updateDownloaded  = false,
 			updateDialog = false,
+			linuxDialog = false,
 			prefsWorkspace = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.currentWorkspace;
 			
 		if (prefsWorkspace) {
@@ -216,32 +226,51 @@ if (process.versions.electron) {
 		autoUpdater.on("error", function(error) {
 			console.log(error);
 		});
-		function scheduleUpdateChecks () {
-			var checkInterval = (parseInt(configParams["orion.autoUpdater.checkInterval"], 10) || 30) * 1000 * 60;
-			var checkforUpdates = function() {
+		autoUpdater.on("update-available-automatic", function(newVersion) {
+			if (platform === "linux" && !linuxDialog) {
+				electron.dialog.showMessageBox({
+					type: 'question',
+					message: 'Update version ' + newVersion + ' is available.',
+					detail: 'Use your package manager to update, or click Download to get the new package.',
+					buttons: ['Download', 'OK']
+				}, function (response) {
+					if (response === 0) {
+						electron.shell.openExternal(latestUpdateURL);
+					} else {
+						linuxDialog = false;
+					}
+				});
+				linuxDialog = true;
+			} else {
 				autoUpdater.checkForUpdates();
-			}.bind(this);
-			setInterval(checkforUpdates, checkInterval);
-		}
-		autoUpdater.on("checking-for-update", function(){
-			console.log("checking for update");
+			}
+			
 		});
 		autoUpdater.on("update-downloaded", /* @callback */ function(event, releaseNotes, releaseName, releaseDate, updateURL) {
 			updateDownloaded = true;
 			if (!updateDialog) {
-				dialog.showMessageBox({
+				electron.dialog.showMessageBox({
 					type: 'question',
-					message: 'Update version ' + releaseName + ' of ' + electron.app.getName() + ' has been downloaded.',
+					message: 'Update version ' + releaseName + ' of ' + name + ' has been downloaded.',
 					detail: 'Would you like to restart the app and install the update? The update will be applied automatically upon closing.',
-					buttons: ['Later', 'Update']
+					buttons: ['Update', 'Later']
 				}, function (response) {
-					if (response === 1) {
+					if (response === 0) {
 						autoUpdater.quitAndInstall();
 					}
 				});
 				updateDialog = true;
 			}
+
 		});
+
+		function scheduleUpdateChecks () {
+			var checkInterval = (parseInt(configParams["orion.autoUpdater.checkInterval"], 10) || 30) * 1000 * 60;
+			var resolveNewVersion = function() {
+				autoUpdater.resolveNewVersion(false);
+			}.bind(this);
+			setInterval(resolveNewVersion, checkInterval);
+		}
 		function createWindow(url){
 			var Url = require("url");
 			var windowOptions = allPrefs.windowBounds || {width: 1024, height: 800};
@@ -279,7 +308,7 @@ if (process.versions.electron) {
 			});
 			nextWindow.webContents.once("did-frame-finish-load", function () {
 				if (feedURL) {
-					autoUpdater.checkForUpdates();
+					autoUpdater.resolveNewVersion(false);
 					scheduleUpdateChecks();
 				}
 			});
