@@ -48,7 +48,7 @@ function getapps(req, res){
 		}else if(encodedContentLocation) {
 			var manifestLocation = toOrionLocation(req, util.decodeURIComponent(encodedContentLocation));
 			if(manifestLocation){
-				manifests.retrieveManifestFile(req, res, manifestLocation)
+				manifests.retrieveManifestFile(req, res, manifestLocation, task)
 				.then(function(manifest){
 					if(manifest && manifest.applications &&  manifest.applications[0]){
 						return getAppwithAppName(req.user.username, task, manifest.applications[0].name, appTarget);
@@ -62,14 +62,7 @@ function getapps(req, res){
 }
 function respondAppgetRequest(resp,task){
 	if(!resp){
-		task.done({
-			HttpCode: 404,
-			Code: 0,
-			DetailedMessage: "Apps can not be found",
-			JsonData: resp,
-			Message: "Apps can not be found",
-			Severity: "Error"
-		});
+		repondErrorTask(task,404,"Apps can not be found");
 	}else{
 		task.done({
 			HttpCode: 200,
@@ -201,7 +194,7 @@ function putapps(req, res){
 				/* check for non-manifest deployment */
 				waitFor = Promise.resolve(manifestJSON);
 			}else{
-				waitFor = manifests.retrieveManifestFile(req, res, contentLocation);
+				waitFor = manifests.retrieveManifestFile(req, res, contentLocation, task);
 			}
 			return waitFor.then(function(result){
 				if(result){
@@ -232,7 +225,7 @@ function putapps(req, res){
 				waitFor = stopApp(req.user.username,appTarget);
 			}else{
 				if(!appCache.manifest){
-					res.status(500).end("Failed to handle request for "+ path);
+					repondErrorTask(task,500, "Failed to handle request for "+ path);
 				}
 			}
 			return Promise.resolve(waitFor)
@@ -268,7 +261,7 @@ function putapps(req, res){
 		restart = !app ? false : true;
 		instrumentManifest(appCache.manifest,instrumentationJSON);
 		appCache.appName = appName ? appName : manifestAppName;
-		return pushApp(req, res, appTarget);
+		return pushApp(req, task, appTarget);
 	}).then(function(){
 		return _getAppwithAppName(req.user.username, appCache.appName, appTarget, task)
 		.then(function(appResult){
@@ -287,14 +280,7 @@ function putapps(req, res){
 	}).then(function(startRespond){
 		return respondAppPutrequest(task,startRespond);
 	}).catch(function(err){
-		task.done({
-			HttpCode: 400,
-			Code: 0,
-			DetailedMessage: err,
-			JsonData: {},
-			Message: err,
-			Severity: "Error"
-		});
+		repondErrorTask(task, 400, err);
 	});
 	
 function respondAppPutrequest(task,status){
@@ -415,26 +401,26 @@ function restartApp(userId, appTarget){
 		return startApp(userId, -1, appTarget);
 	});
 }
-function pushApp(req, res, appTarget){
+function pushApp(req, task, appTarget){
 	var waitFor;
 	if(appCache.summaryJson){
 		appCache.appGuid = appCache.summaryJson.guid;
-		waitFor = updateApp(req, res, appTarget);
+		waitFor = updateApp(req, task,appTarget);
 	}else{
-		waitFor = createApp(req, res, appTarget);
+		waitFor = createApp(req, task, appTarget);
 	}
 	// TODO one missing step to: look up available environment extension services
 	return Promise.resolve(waitFor).then(function(){
-		return bindRoute(req, res, appTarget);
+		return bindRoute(req, task, appTarget);
 	})
 	.then(function(){
-		return uploadBits(req, res, appTarget);
+		return uploadBits(req, task, appTarget);
 	})
 	.then(function(){
-		return bindServices(req, res, appTarget);
+		return bindServices(req, task, appTarget);
 	});
 }
-function createApp(req, res, appTarget){
+function createApp(req, task, appTarget){
 	var stack = appCache.manifest.applications[0].stack;
 	var waitForStackGuid;
 	if(stack){
@@ -459,7 +445,7 @@ function createApp(req, res, appTarget){
 		});
 	});
 }
-function updateApp(req, res, appTarget){
+function updateApp(req, task, appTarget){
 	var stack = appCache.manifest.applications[0].stack;
 	var waitForStackGuid;
 	if(stack){
@@ -488,7 +474,7 @@ function getStackGuidByName(userId, stackname ,appTarget){
 		return result.resources[0] && result.resources[0].metadata.guid || null;
 	});
 }
-function bindRoute(req, res, appTarget){
+function bindRoute(req, task, appTarget){
 	return domains.getCFdomains(appTarget, req.user.username, targetRequest.Url, targetRequest.Org)
 	/* get available domains */
 	.then(function(domainArray){
@@ -518,25 +504,30 @@ function bindRoute(req, res, appTarget){
 				waitForRoute = Promise.resolve(resource);
 			}else{
 				/* create a new route */
-				waitForRoute = createRoute(req, res, appTarget);
+				waitForRoute = createRoute(req, appTarget);
 			}
 			/* attach route to application */
 			return waitForRoute.then(function(appRoute){
+				if(appRoute.error_code === "CF-RouteHostTaken"){
+					repondErrorTask(task, 400, appRoute.description);
+					return;
+				}
 				appCache.appRoute = appRoute;
 				return target.cfRequest("PUT", req.user.username, null, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + appRoute.metadata.guid);
 			});
 		});
 	});
 }
-function uploadBits(req, res, appTarget){
+function uploadBits(req, task, appTarget){
 	var cloudAccessToken = target.getAccessToken(req.user.username);
 	var archiveredFilePath;
-	return archiveTarget(appCache.appStore)
+	return archiveTarget(appCache.appStore, task)
 	.then(function(filePath){
 		appCache.appPackageType = path.extname(filePath).substring(1);
 		archiveredFilePath = filePath;
 		if(!archiveredFilePath){
-			writeError(500, res, "Failed to read application content");
+			repondErrorTask(task, 500, "Failed to read application content");
+			return;
 		}
 		var uploadFileStream = fs.createReadStream(archiveredFilePath);
 		var uploadBitsHeader = {
@@ -560,7 +551,8 @@ function uploadBits(req, res, appTarget){
 				}
 			};
 		uploadFileStream.on("error", function(err){
-			writeError(500, res, err);
+			repondErrorTask(task, 500, err);
+			return;
 		});
 		return target.cfRequest(null, null, null, null ,null, null, null,uploadBitsHeader);
 	}).then(function(result){
@@ -587,15 +579,15 @@ function uploadBits(req, res, appTarget){
 		function checkUploadrespond(result){
 			if(result.status !== "finished" && result.status !== "failure"){
 				if(result.status === "failed"){
-					writeError(400, res, "Upload failed");
+					repondErrorTask(task, 400, "Upload failed");
 					return false;
 				}
 				if(result.attemptsLeft === 0){
-					writeError(400, res, "Upload timeout exceeded");
+					repondErrorTask(task, 400, "Upload timeout exceeded");
 				}
 				return false;
 			}else if(result.status === "failure"){
-				writeError(400, res, "Failed to upload application bits");
+				repondErrorTask(task, 400, "Failed to upload application bits");
 				return false;
 			}else if(result.status === "finished"){
 				return true;
@@ -616,7 +608,7 @@ function uploadBits(req, res, appTarget){
 		}
 	});
 }
-function bindServices(req, res, appTarget){
+function bindServices(req, task, appTarget){
 	if(appCache.manifest.applications[0].services){
 		return target.cfRequest("GET", req.user.username, null, appTarget.Url + "/v2/services", {"inline-relations-depth":"1"})
 		.then(function(result){
@@ -720,7 +712,7 @@ function bindService(userId, serviceGuid, appTarget){
 	};
 	return target.cfRequest("POST", userId, null, appTarget.Url + "/v2/service_bindings", null, JSON.stringify(body));
 }
-function createRoute(req, res, appTarget){
+function createRoute(req, appTarget){
 	var body = {
 		"space_guid": appTarget.Space.metadata.guid,
 		"host":appCache.manifest.applications[0].host,
@@ -748,6 +740,16 @@ function getRouteGuidbyGuid(userId, routeGuid, task, appTarget){
 function mapRoute(userId, routeGuid, task, appTarget){
 	return target.cfRequest("PUT", userId, task, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + routeGuid);
 }
+} // End of putApp()
+function repondErrorTask(task,code,description){
+	task.done({
+		HttpCode: code,
+		Code: 0,
+		DetailedMessage: description,
+		JsonData: {},
+		Message: description,
+		Severity: "Error"
+	});
 }
 function normalizeMemoryMeasure(memory){
 	if (memory.toLowerCase().endsWith("m")) //$NON-NLS-1$
@@ -761,7 +763,7 @@ function normalizeMemoryMeasure(memory){
 	/* return default memory value, i.e. 1024 MB */
 	return 1024;
 }
-function archiveTarget (filePath){
+function archiveTarget (filePath, task){
 	var ramdomName = crypto.randomBytes(5).toString("hex") + Date.now();
 	var resultFilePath = path.join(xfer.getUploadDir(), ramdomName + ".war");
 	return searchAndCopyNearestwarFile(resultFilePath, filePath,filePath)
@@ -783,7 +785,7 @@ function archiveTarget (filePath){
 			    });
 			})
 			.catch(function(err) {
-				writeError(500, res, err.message);
+				repondErrorTask(task, 500, err.message);
 			});
 		});
 	}).catch(function(result){
