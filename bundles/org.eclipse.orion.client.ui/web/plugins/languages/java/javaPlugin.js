@@ -273,8 +273,16 @@ define([
 						return editorContext.getSelection().then(function(selection) {
 							return getPosition(editorContext, selection.start).then(function(position) {
 								return ipc.definition(metadata.location, position).then(function(loc) {
+									if (Array.isArray(loc)) loc = loc[0];
+									if (loc.range.start.line === loc.range.end.line) {
+										var sel = {
+											line: loc.range.start.line,
+											offset: loc.range.start.character + 1,
+											length: loc.range.end.character - loc.range.start.character
+										};
+										return editorContext.openEditor(loc.uri, sel);
+									}
 									return convertRange(editorContext, loc.range).then(function(selection) {
-										if (Array.isArray(loc)) loc = loc[0];
 										editorContext.openEditor(loc.uri, selection);
 									});
 								});
