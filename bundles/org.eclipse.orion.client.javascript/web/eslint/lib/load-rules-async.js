@@ -2006,48 +2006,164 @@ define([
 		},
 		/** @callback */
 		"semi": function(context) {
-        		/**
-		         * @description Check the given node for a trailing semicolon
-		         * @param {Object} node The AST node
-		         */
-		        function checkForSemicolon(node) {
-    				var tokens = context.getTokens(node);
-    				var len = tokens.length;
-    				var t = tokens[len - 1];
-    				if (t && t.type === "Punctuator" && (t.value === ";" || t.value === '.')) {
-    					return;
-    				}
-    				context.report(node, ProblemMessages['semi'], null, t /* expose the bad token */);
-        		}
-        		/**
-		         * @description Check the variable decl node for trailing semicolon
-		         * @param {Object} node The AST node
-		         */
-		        function checkVariableDeclaration(node) {
-    				var ancestors = context.getAncestors(node),
-    				    parent = ancestors[ancestors.length - 1],
-    				    parentType = parent.type;
-    				if ((parentType === "ForStatement" && parent.init === node) || (parentType === "ForInStatement" && parent.left === node)
-    					|| parentType === "ForOfStatement" && parent.left === node) {
-    					// One of these cases, no semicolon token is required after the VariableDeclaration:
-    					// for(var x;;)
-    					// for(var x in y)
-    					// for(var x of n)
-    					return;
-    				}
-    				checkForSemicolon(node);
-        		}
 
-        		return {
-        			"VariableDeclaration": checkVariableDeclaration,
-        			"ExpressionStatement": checkForSemicolon,
-        			"ReturnStatement": checkForSemicolon,
-        			"ThrowStatement": checkForSemicolon,
-        			"BreakStatement": checkForSemicolon,
-        			"ContinueStatement": checkForSemicolon
-        		};
-        },
-        /** @callback */
+			var OPT_OUT_PATTERN = /[\[\(\/\+\-]/; // One of [(/+-
+			var options = context.options[1];
+			var never = context.options[0] === "never",
+				exceptOneLine = options && options.omitLastInOneLineBlock === true,
+				sourceCode = context.getSourceCode();
+
+			//--------------------------------------------------------------------------
+			// Helpers
+			//--------------------------------------------------------------------------
+
+			/**
+			 * Reports a semicolon error with appropriate location and message.
+			 * @param {ASTNode} node The node with an extra or missing semicolon.
+			 * @param {boolean} missing True if the semicolon is missing.
+			 * @returns {void}
+			 */
+			function report(node, missing) {
+				var message,
+					lastToken = sourceCode.getLastToken(node),
+					data = Object.create(null);
+
+				if (!missing) {
+					message = ProblemMessages["semi-missing"];
+					data.kind = "missing";
+				} else {
+					message = ProblemMessages["semi-extra"];
+					data.kind = "extra";
+				}
+
+				context.report(node, message, {data: data}, lastToken);
+			}
+			/**
+			 * Checks whether a token is a semicolon punctuator.
+			 * @param {Token} token The token.
+			 * @returns {boolean} True if token is a semicolon punctuator.
+			 */
+			function isSemicolon(token) {
+				return token.type === "Punctuator" && token.value === ";";
+			}
+
+			/**
+			 * Check if a semicolon is unnecessary, only true if:
+			 *   - next token is on a new line and is not one of the opt-out tokens
+			 *   - next token is a valid statement divider
+			 * @param {Token} lastToken last token of current node.
+			 * @returns {boolean} whether the semicolon is unnecessary.
+			 */
+			function isUnnecessarySemicolon(lastToken) {
+				var isDivider, isOptOutToken, lastTokenLine, nextToken, nextTokenLine;
+
+				if (!isSemicolon(lastToken)) {
+					return false;
+				}
+
+				nextToken = sourceCode.getTokenAfter(lastToken);
+
+				if (!nextToken) {
+					return true;
+				}
+
+				lastTokenLine = lastToken.loc.end.line;
+				nextTokenLine = nextToken.loc.start.line;
+				isOptOutToken = OPT_OUT_PATTERN.test(nextToken.value);
+				isDivider = nextToken.value === "}" || nextToken.value === ";";
+
+				return (lastTokenLine !== nextTokenLine && !isOptOutToken) || isDivider;
+			}
+
+			/**
+			 * Checks a node to see if it's in a one-liner block statement.
+			 * @param {ASTNode} node The node to check.
+			 * @returns {boolean} whether the node is in a one-liner block statement.
+			 */
+			function isOneLinerBlock(node) {
+				var nextToken = sourceCode.getTokenAfter(node);
+
+				if (!nextToken || nextToken.value !== "}") {
+					return false;
+				}
+
+				var parent = node.parent;
+
+				return parent && parent.type === "BlockStatement" &&
+					parent.loc.start.line === parent.loc.end.line;
+			}
+
+			/**
+			 * Checks a node to see if it's followed by a semicolon.
+			 * @param {ASTNode} node The node to check.
+			 * @returns {void}
+			 */
+			function checkForSemicolon(node) {
+				var lastToken = sourceCode.getLastToken(node);
+
+				if (never) {
+					if (isUnnecessarySemicolon(lastToken)) {
+						report(node, true);
+					}
+				} else {
+					if (!isSemicolon(lastToken)) {
+						if (!exceptOneLine || !isOneLinerBlock(node)) {
+							report(node);
+						}
+					} else {
+						if (exceptOneLine && isOneLinerBlock(node)) {
+							report(node, true);
+						}
+					}
+				}
+			}
+
+			/**
+			 * Checks to see if there's a semicolon after a variable declaration.
+			 * @param {ASTNode} node The node to check.
+			 * @returns {void}
+			 */
+			function checkForSemicolonForVariableDeclaration(node) {
+				var ancestors = context.getAncestors(),
+					parentIndex = ancestors.length - 1,
+					parent = ancestors[parentIndex];
+
+				if ((parent.type !== "ForStatement" || parent.init !== node) &&
+					(!/^For(?:In|Of)Statement/.test(parent.type) || parent.left !== node)
+				) {
+					checkForSemicolon(node);
+				}
+			}
+
+			//--------------------------------------------------------------------------
+			// Public API
+			//--------------------------------------------------------------------------
+
+			return {
+				VariableDeclaration: checkForSemicolonForVariableDeclaration,
+				ExpressionStatement: checkForSemicolon,
+				ReturnStatement: checkForSemicolon,
+				ThrowStatement: checkForSemicolon,
+				DoWhileStatement: checkForSemicolon,
+				DebuggerStatement: checkForSemicolon,
+				BreakStatement: checkForSemicolon,
+				ContinueStatement: checkForSemicolon,
+				ImportDeclaration: checkForSemicolon,
+				ExportAllDeclaration: checkForSemicolon,
+				ExportNamedDeclaration: function(node) {
+					if (!node.declaration) {
+						checkForSemicolon(node);
+					}
+				},
+				ExportDefaultDeclaration: function(node) {
+					if (!/(?:Class|Function)Declaration/.test(node.declaration.type)) {
+						checkForSemicolon(node);
+					}
+				}
+			};
+
+		},
+		/** @callback */
         "unknown-require": function(context) {
         	var directive;
         	function checkDirective(node) {

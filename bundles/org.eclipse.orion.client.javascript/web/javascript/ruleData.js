@@ -86,7 +86,7 @@ define([
 			"no-with" : 1,
 			"quotes" : [1, "double", {avoidEscape: false, allowTemplateLiterals: false}],
 			"radix" : 1,
-			"semi" : 1,
+			"semi" : [1, "always", {omitLastInOneLineBlock: false}],
 			"type-checked-consistent-return" : 0,
 			"unnecessary-nls" : 0,
 			"unknown-require": 1,

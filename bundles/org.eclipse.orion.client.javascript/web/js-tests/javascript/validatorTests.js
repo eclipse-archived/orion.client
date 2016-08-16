@@ -335,7 +335,7 @@ define([
 							{start: 43,
 							 end: 44,
 							 severity: 'warning',
-							 description: i18nUtil.formatMessage.call(null, messages['semi'], {})
+							 description: i18nUtil.formatMessage.call(null, messages['semi-missing'], {})
 							}
 						]);
 					}, function (error) {
@@ -10691,6 +10691,12 @@ define([
 										id: RULE_ID,
 										severity: 'warning',
 										description: "Missing semicolon.",
+										nodeType: "VariableDeclaration"
+									},
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Missing semicolon.",
 										nodeType: "ExpressionStatement"
 									}]);
 								},
@@ -11256,6 +11262,115 @@ define([
 							var topic = "var o = {f: function() {function inner() {}}};o.f = null;";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag missing semi when 'never' is used", function(callback) {
+							var topic = "var name = \"ESLint\"";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never"];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag missing semi when 'never' is used with omitLastInOneLineBlock = true", function(callback) {
+							var topic = "if (foo) { bar() }";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "always", {omitLastInOneLineBlock: true}];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag missing semi when 'never' is used with omitLastInOneLineBlock = true 2", function(callback) {
+							var topic = "if (foo) { bar(); baz() }";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "always", {omitLastInOneLineBlock: true}];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should flag missing semi when 'never' is used with omitLastInOneLineBlock = true", function(callback) {
+							var topic =
+								"if (foo) {\n" +
+								"    bar()\n" +
+								"}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "always", {omitLastInOneLineBlock: true}];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'error',
+										start: 19,
+										end: 20
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should flag missing semi when 'never' is used with omitLastInOneLineBlock = true 2", function(callback) {
+							var topic =
+								"if (foo) { bar(); }";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "always", {omitLastInOneLineBlock: true}];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'error',
+										start: 16,
+										end: 17
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should flag semi when 'never' is set", function(callback) {
+							var topic = "if (foo) { bar(); }";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never"];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'error',
+										start: 16,
+										end: 17
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag semi when 'never' is set", function(callback) {
+							var topic = 
+								"var name = \"ESLint\"\n" +
+								";(function() {\n" +
+								"})()";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, "never"];
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
 									assertProblems(problems, []);
@@ -13293,7 +13408,7 @@ define([
 						it("flag invalid import/export", function(callback) {
 							var topic = "import * as test from \"./files/es_modules_dep1\"";
 							var config = { rules: {} };
-							config.rules[RULE_ID] = 2;
+							config.rules[RULE_ID] = [2, "never"];
 							var features = Object.create(null);
 							features.modules = false;
 							config.ecmaFeatures = features;
