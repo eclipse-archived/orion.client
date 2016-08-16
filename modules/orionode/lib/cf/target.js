@@ -50,18 +50,15 @@ function postTarget(req,res){
 	var Username = req.body.Username;
 	// Try to login here!!
 	tryLogin(url,Username,Password,req.user.username)
-	.then(function(result){
-		var resp = {
-			"Type": "Target",
-			"Url": url
-		};
+	.then(function(parsedJson) {
+		var resp = parsedJson.error ? parsedJson : {"Type": "Target", "Url": url };
 		task.done({
-			HttpCode: 200,
+			HttpCode: parsedJson.error ? 401 : 200,
 			Code: 0,
-			DetailedMessage: "OK",
+			DetailedMessage: parsedJson.error ? parsedJson.error : "OK",
 			JsonData: resp,
-			Message: "OK",
-			Severity: "Ok"
+			Message: parsedJson.error ? parsedJson.error_description : "OK",
+			Severity: parsedJson.error ? "Error" : "Ok"
 		});
 	});
 }
@@ -83,7 +80,7 @@ function tryLogin(url, Username, Password, userId){
 				var respondJson = parsebody(body);
 				if(!error){
 					UseraccessToken[userId] = respondJson.access_token;
-					return fulfill(true);
+					return fulfill(respondJson);
 				}
 				return reject(false);
 			});
