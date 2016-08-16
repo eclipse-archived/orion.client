@@ -10,34 +10,52 @@
  *******************************************************************************/
 /*eslint-env node */
 
-var express = require("express"),
-	electron = require("electron"),
-	autoUpdater = electron.autoUpdater,
-	bodyParser = require("body-parser"),
-	os = require("os"),
-	prefs = require("./controllers/prefs");
+var express = require('express'),
+	electron = require('electron'),
+	autoUpdater = require('./autoUpdater.js'),
+	bodyParser = require('body-parser'),
+	prefs = require('./controllers/prefs'),
+	os = require('os'),
+	platform = os.platform(),
+	arch = os.arch(),
+	version = electron.app.getVersion(),
+	allPrefs = prefs.readPrefs();
 
 module.exports = {};
 module.exports.router = function(options) {
 	var configParams = options.configParams;
-	if (!configParams) { throw new Error("options.configParams is required"); }
-	
+	if (!configParams) { throw new Error('options.configParams is required'); }
+	var feedURL = configParams["orion.autoUpdater.url"];
 	return express.Router()
 	.use(bodyParser.json())
-	.put("*", /* @callback */ function (req, res) {
-		var feedURL = configParams["orion.autoUpdater.url"];
-		if (!feedURL) { 
-			console.log("autoUpdater feedURL is required");
+	.post('/downloadUpdates', function (req, res) {
+		if (platform === "linux") {
+			electron.shell.openExternal(feedURL + '/download/channel/' + allPrefs.user.updateChannel + '/linux');
+			res.status(200).end();
 		} else {
-			var platform = os.platform() + "_" + os.arch(),
-				version = electron.app.getVersion(),
-				allPrefs = prefs.readPrefs();
-		
-			allPrefs.user.updateChannel = req.body.updateChannel;
-			prefs.writePrefs(allPrefs);
-			autoUpdater.setFeedURL(feedURL + "/channel/" + req.body.updateChannel + "/" + platform + "/" + version);
+			autoUpdater.setFeedURL(feedURL + '/update/channel/' + allPrefs.user.updateChannel + '/' + platform + '_' + arch + '/' + version);
 			autoUpdater.checkForUpdates();
+			res.status(200).end();
 		}
-		res.status(200).end();
+	})
+	.get("/resolveNewVersion", function (req, res) {
+		if (!feedURL) {
+			return res.status(400).end();
+		}
+		allPrefs.user.updateChannel = req.query.updateChannel;
+		prefs.writePrefs(allPrefs);
+		var resolveURL = feedURL + '/api/resolve?platform=' + platform + '&channel=' + allPrefs.user.updateChannel;
+		autoUpdater.setResolveURL(resolveURL);
+		autoUpdater.resolveNewVersion(true);
+		autoUpdater.on("update-available-manual", function(newVersion) {
+			res.status(200).end(newVersion); // OK
+		});
+		autoUpdater.on("update-not-available", function() {
+			res.status(204).end(); // no content
+		});
+		autoUpdater.on("update-error", function(error) {
+			console.log(error);
+			res.status(400).end(); // client error
+		})
 	});	
 };
