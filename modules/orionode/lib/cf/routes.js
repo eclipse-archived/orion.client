@@ -27,7 +27,7 @@ module.exports.router = function() {
 		var targetRequest = req.query.Target ? JSON.parse(req.query.Target) : null;
 		var RouteJsonRequest = req.query.Route && JSON.parse(req.query.Route);
 		var globalCheck = req.query.GlobalCheck;
-		target.computeTarget(req.user.username, targetRequest, task)
+		target.computeTarget(req.user.username, targetRequest)
 	 	.then(function(appTarget){
 	 		var waitForGetRouteJson;
 			if (RouteJsonRequest) {
@@ -52,12 +52,14 @@ module.exports.router = function() {
 						Severity: "Ok"
 					});
 				});
-		 	});
+		 	}).catch(function(err){
+				target.caughtErrorHandler(task, err);
+			});
 	}
 	function checkRouteRequest(appTarget, userId, targetRequest, domainName, host) {
 		return domains.getCFdomains(appTarget, userId, targetRequest.Url, targetRequest.Org, domainName)
 		.then(function(domains) {
-			return target.cfRequest("GET", userId, null, targetRequest.Url + "/v2/routes/reserved/domain/" + domains[0].metadata.guid + "/host/" + host);
+			return target.cfRequest("GET", userId, targetRequest.Url + "/v2/routes/reserved/domain/" + domains[0].metadata.guid + "/host/" + host);
 		});
 	}
 	function getRouteRequest(appTarget, userId, targetRequest) {
@@ -73,14 +75,14 @@ module.exports.router = function() {
 				return domains.getCFdomains(appTarget, userId, targetRequest.Url, targetRequest.Org, domainName)
 					.then(function(domains) {
 						var domainGuid = domains[0].metadata.guid;
-						return target.cfRequest("GET", userId, null, targetRequest.Url + "/v2/routes",
+						return target.cfRequest("GET", userId, targetRequest.Url + "/v2/routes",
 							{"inline-relations-depth": "1",	"q": util.encodeURIComponent("host:" + host + ";domain_guid" + domainGuid)})
 						.then(function(result){
 							fulfill(result);
 						});
 					});
 			}
-			return target.cfRequest("GET", userId, null, targetRequest.Url + appTarget.Space.entity.routes_url, {"inline-relations-depth": "1"}
+			return target.cfRequest("GET", userId, targetRequest.Url + appTarget.Space.entity.routes_url, {"inline-relations-depth": "1"}
 			).then(function(result){
 				fulfill(result);
 			});
