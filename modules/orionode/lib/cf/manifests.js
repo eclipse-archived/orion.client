@@ -43,9 +43,9 @@ function getManifests(req, res){
  * res is needed because following Java server's patten, /plan and /manifest endpoins don't use task
  * task is needed for situation where there was a task created. So that we cannot use res in these cases.
  */
-function retrieveManifestFile(req, res, manifestAbsuluteLocation, task){
+function retrieveManifestFile(req, res, manifestAbsoluteLocation, task){
 	return new Promise(function(fulfill) {
-		var filePath = manifestAbsuluteLocation ? manifestAbsuluteLocation : retrieveProjectFilePath(req);
+		var filePath = manifestAbsoluteLocation ? manifestAbsoluteLocation : retrieveProjectFilePath(req);
 		if(filePath.indexOf("manifest.yml") === -1){
 			filePath += "manifest.yml";
 		}
@@ -71,7 +71,7 @@ function retrieveManifestFile(req, res, manifestAbsuluteLocation, task){
 		var manifestAST = yamlAstParser.load(fileContent);
 		transformManifest(manifest);
 		// TODO when meet the case where need to do symbolResolver (as in JAVA) then implement.
-		analizeManifest(manifest, res, manifestAST, fileContent, task);
+		analyzeManifest(manifest, res, manifestAST, fileContent, task);
 		setDefaultManifestProperties(req,manifest);
 		return manifest;
 	});
@@ -88,16 +88,16 @@ function setDefaultManifestProperties(req,manifest){
 	var rawContentLocationData = req.params[0].split("/");
 	var rawDefaultProjectName = rawContentLocationData[rawContentLocationData.length - 2];
 	rawDefaultProjectName = rawDefaultProjectName.replace(/\|/, " --- ");
-	var MUST_HAVE_PROPERTITIES ={
+	var MUST_HAVE_PROPERTIES ={
 		name : getDefaultName(rawDefaultProjectName),
 		host : getDefaultHost(rawDefaultProjectName),
 		memory : "512M",
 		instances : "1",
 		path: "."
 	};
-	Object.keys(MUST_HAVE_PROPERTITIES).forEach(function(key){
+	Object.keys(MUST_HAVE_PROPERTIES).forEach(function(key){
 		if(!manifest.applications[0].hasOwnProperty(key)){
-			manifest.applications[0][key] = MUST_HAVE_PROPERTITIES[key];
+			manifest.applications[0][key] = MUST_HAVE_PROPERTIES[key];
 		}					
 	});
 }
@@ -124,7 +124,7 @@ function transformManifest(manifest){
 		}
 	});
 }
-function analizeManifest(manifest, res, manifestAST, fileContent, task){
+function analyzeManifest(manifest, res, manifestAST, fileContent, task){
 	if(!manifest.applications){
 		return; // Do nothing
 	}
