@@ -89,7 +89,7 @@ cleanup_nodemodules() {
 if [ -z "$UPDATE_SERVER" ]; then
     UPDATE_SERVER="http://orion-update.mybluemix.net/"
 fi
-update_url=$(echo ${UPDATE_SERVER}"update" | sed -e 's/[\/&.-]/\\&/g') # for autoUpdater
+update_url=$(echo ${UPDATE_SERVER} | sed -e 's/[\/&.-]/\\&/g') # for autoUpdater
 download_url=$(echo ${UPDATE_SERVER}"download" | sed -e 's/[\/&.-]/\\&/g') # for remoteReleases
 
 # update orion.conf and package.json
