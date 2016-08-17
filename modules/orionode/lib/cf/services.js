@@ -27,7 +27,7 @@ module.exports.router = function() {
 		var targetURL = targetRequest.Url;
 		var spaceGuid = targetRequest.SpaceId;
 		if (spaceGuid && targetURL) {
-			new Promise(function(fulfill, reject) {
+			new Promise(function(fulfill) {
 				var serviceUrl = "/v2/spaces/" + spaceGuid + "/service_instances";
 				var fullService = [];
 				function promiseWhile(doRequest, value) {
@@ -44,7 +44,7 @@ module.exports.router = function() {
 				}
 
 				function doRequest(serviceUrl) {
-					return target.cfRequest("GET", req.user.username, task, targetURL + serviceUrl, {
+					return target.cfRequest("GET", req.user.username, targetURL + serviceUrl, {
 						"inline-relations-depth": "1",
 						"return_user_provided_service_instances": "true"
 					});
@@ -75,7 +75,7 @@ module.exports.router = function() {
 								}
 							}, function(err) {
 								if (err) {
-									return reject(err);
+									return reject({"message":err.message});
 								}
 								fulfill();
 							});
@@ -100,14 +100,7 @@ module.exports.router = function() {
 					Severity: "Ok"
 				});
 			}).catch(function(err) {
-				task.done({
-					HttpCode: 401,
-					Code: 0,
-					JsonData: {},
-					DetailedMessage: err,
-					Message: err,
-					Severity: "Error"
-				});
+				target.caughtErrorHandler(task, err);
 			});
 		}else{
 			task.done({
@@ -122,6 +115,6 @@ module.exports.router = function() {
 	}
 
 	function getCFService(userId, targetURL, serviceGuid) {
-		return target.cfRequest("GET", userId, null, targetURL + "/v2/services/" + serviceGuid);
+		return target.cfRequest("GET", userId, targetURL + "/v2/services/" + serviceGuid);
 	}
 };
