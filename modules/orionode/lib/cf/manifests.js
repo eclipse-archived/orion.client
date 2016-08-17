@@ -16,6 +16,7 @@ var fs = require("fs");
 var path = require("path");
 var yaml = require("js-yaml");
 var yamlAstParser = require("yaml-ast-parser");
+var target = require("./target");
 var tasks = require("../tasks");
 
 module.exports.router = function() {
@@ -29,13 +30,16 @@ module.exports.router = function() {
 	.get("*", getManifests);
 	
 function getManifests(req, res){
-	Promise.resolve(retrieveManifestFile(req,res))
+	retrieveManifestFile(req)
 	.then(function(manifest){
 		var respond = {
 			"Contents": manifest,
 			"Type": "Manifest"
 		};
 		res.status(200).json(respond);			
+	}).catch(function(err){
+		var task = new tasks.Task(res, false, false, 0, false);
+		target.caughtErrorHandler(task, err);
 	});
 }
 
@@ -43,26 +47,15 @@ function getManifests(req, res){
  * res is needed because following Java server's patten, /plan and /manifest endpoins don't use task
  * task is needed for situation where there was a task created. So that we cannot use res in these cases.
  */
-function retrieveManifestFile(req, res, manifestAbsuluteLocation, task){
-	return new Promise(function(fulfill) {
+function retrieveManifestFile(req, manifestAbsuluteLocation){
+	return new Promise(function(fulfill,reject) {
 		var filePath = manifestAbsuluteLocation ? manifestAbsuluteLocation : retrieveProjectFilePath(req);
 		if(filePath.indexOf("manifest.yml") === -1){
 			filePath += "manifest.yml";
 		}
 		fs.readFile(filePath, "utf8", function(err, fileContent){
 			if(err){
-				if(task){
-					task.done({
-						HttpCode: 404,
-						Code: 0,
-						DetailedMessage: err.message,
-						JsonData: {},
-						Message: err.message,
-						Severity: "Error"
-					});
-				}else{
-					writeError(404, res, err.message);
-				}
+				return reject({"code":404, "message": err.message});
 			}
 			fulfill(fileContent);
 		});
@@ -71,9 +64,11 @@ function retrieveManifestFile(req, res, manifestAbsuluteLocation, task){
 		var manifestAST = yamlAstParser.load(fileContent);
 		transformManifest(manifest);
 		// TODO when meet the case where need to do symbolResolver (as in JAVA) then implement.
-		analizeManifest(manifest, res, manifestAST, fileContent, task);
-		setDefaultManifestProperties(req,manifest);
-		return manifest;
+		return analizeManifest(manifest, manifestAST, fileContent)
+		.then(function(){
+			setDefaultManifestProperties(req,manifest);
+			return manifest;
+		});
 	});
 }
 
@@ -124,7 +119,7 @@ function transformManifest(manifest){
 		}
 	});
 }
-function analizeManifest(manifest, res, manifestAST, fileContent, task){
+function analizeManifest(manifest, manifestAST, fileContent){
 	if(!manifest.applications){
 		return; // Do nothing
 	}
@@ -137,102 +132,109 @@ function analizeManifest(manifest, res, manifestAST, fileContent, task){
 		lineNumbers.push([currentLineFirstCharAt, currentLineFirstCharAt + lineLength ]);
 		currentLineFirstCharAt = currentLineFirstCharAt + lineLength + 2;
 	}
-	nullCheckOfManifest(manifestAST);
-	specificFieldCheck(valueWithParent);
-	
+	return nullCheckOfManifest(manifestAST)
+	.then(function(){
+		return specificFieldCheck(valueWithParent);
+	});
 	function nullCheckOfManifest(manifestAST){
-		if(!manifestAST){
-			sendInvalidResult("Empty Node", -1, res, task);
-		}
-		if(manifestAST.hasOwnProperty("mappings")){
-			manifestAST.mappings.forEach(function(each){
-				nullCheckOfManifest(each);		
-			});
-		}else if(manifestAST.hasOwnProperty("items")){
-			manifestAST.items.forEach(function(each){
-				nullCheckOfManifest(each);		
-			});
-		}else if(manifestAST.hasOwnProperty("value")){
-			if(!manifestAST.value){   // null case
-				// find null
-				sendInvalidResult("Empty Propety",getLineNumber(manifestAST.startPosition, manifestAST.endPosition, lineNumbers),res, task);	
+		return new Promise(function(fulfill){
+			if(!manifestAST){
+				return makeInvalidateReject("Empty Node", -1);
 			}
-			if(typeof manifestAST.value === "string"){
-				// record the node with real yaml values here. to save from another after null check. aka, do both together.
-				valueWithParent.push(manifestAST);
+			if(manifestAST.hasOwnProperty("mappings")){
+				return Promise.all(manifestAST.mappings.map(function(each) {
+					return nullCheckOfManifest(each);		
+				}));
+			}else if(manifestAST.hasOwnProperty("items")){
+				return Promise.all(manifestAST.items.map(function(each) {
+					return nullCheckOfManifest(each);		
+				}));
+			}else if(manifestAST.hasOwnProperty("value")){
+				if(!manifestAST.value){   // null case
+					// find null
+					return makeInvalidateReject("Empty Propety",getLineNumber(manifestAST.startPosition, manifestAST.endPosition, lineNumbers));	
+				}
+				if(typeof manifestAST.value === "string"){
+					// record the node with real yaml values here. to save from another after null check. aka, do both together.
+					valueWithParent.push(manifestAST);
+					return fulfill();
+				}
+				return nullCheckOfManifest(manifestAST.value);
 			}
-			nullCheckOfManifest(manifestAST.value);
-		}
+		});
 	}
 	function specificFieldCheck(valueWithParent){
-		for(var m = 0; m < valueWithParent.length; m++){
-			var realParentNode = {nodeKey : "", node:{}};
-			findclosestKeyName(valueWithParent[m], realParentNode);
-			switch(realParentNode.nodeKey){
-				case "services":
-					if(isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid services declaration. Expected a list of service names.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res, task);	
-					}
-					break;
-				case "buildpack":
-					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"buildpack\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res, task);	
-					}
-					break;
-				case "command":
-					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"command\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res, task);
-					}
-					break;
-				case "domain":
-					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"domain\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res, task);
-					}
-					break;
-				case "host":
-					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"host\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res, task);
-					}
-					break;
-				case "path":
-					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"path\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res, task);
-					}
-					break;
-				case "memory":
-					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"memory\" value. Expected a memory limit.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res, task);
-					}
-					if(!isValidMemoryProperty(valueWithParent[m].value)){
-						sendInvalidResult("Invalid \"memory\" limit; Supported measurement units are M/MB, G/GB.", getLineNumber(valueWithParent[m].startPosition, valueWithParent[m].endPosition, lineNumbers), res, task);	
-					}
-					break;
-				case "instances":
-					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"instances\" value. Expected a non-negative integer value.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res, task);	
-					}
-					if(!isValidNonNegativeProperty(valueWithParent[m].value)){
-						sendInvalidResult("Invalid \"instances\" value. Expected a non-negative integer value.", getLineNumber(valueWithParent[m].startPosition, valueWithParent[m].endPosition, lineNumbers), res, task);
-					}
-					break;
-				case "timeout":
-					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"timeout\" value. Expected a non-negative integer value.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res, task);
-					}
-					if(!isValidNonNegativeProperty(valueWithParent[m].value)){
-						sendInvalidResult("Invalid \"timeout\" value. Expected a non-negative integer value.", getLineNumber(valueWithParent[m].startPosition, valueWithParent[m].endPosition, lineNumbers), res, task);	
-					}
-					break;
-				case "no-route":
-					if(!isStringProperty(realParentNode.node)){
-						sendInvalidResult("Invalid \"no-route\" value. Expected a string literal \"true\".", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers), res, task);	
-					}
-					if(valueWithParent[m].value !== "true"){
-						sendInvalidResult("Invalid \"no-route\" value. Expected a string literal \"true\".", getLineNumber(valueWithParent[m].startPosition, valueWithParent[m].endPosition, lineNumbers), res, task);
-					}
-					break;
+		return new Promise(function(fulfill){
+			for(var m = 0; m < valueWithParent.length; m++){
+				var realParentNode = {nodeKey : "", node:{}};
+				findclosestKeyName(valueWithParent[m], realParentNode);
+				switch(realParentNode.nodeKey){
+					case "services":
+						if(isStringProperty(realParentNode.node)){
+							return makeInvalidateReject("Invalid services declaration. Expected a list of service names.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers));	
+						}
+						break;
+					case "buildpack":
+						if(!isStringProperty(realParentNode.node)){
+							return makeInvalidateReject("Invalid \"buildpack\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers));	
+						}
+						break;
+					case "command":
+						if(!isStringProperty(realParentNode.node)){
+							return makeInvalidateReject("Invalid \"command\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers));
+						}
+						break;
+					case "domain":
+						if(!isStringProperty(realParentNode.node)){
+							return makeInvalidateReject("Invalid \"domain\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers));
+						}
+						break;
+					case "host":
+						if(!isStringProperty(realParentNode.node)){
+							return makeInvalidateReject("Invalid \"host\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers));
+						}
+						break;
+					case "path":
+						if(!isStringProperty(realParentNode.node)){
+							return makeInvalidateReject("Invalid \"path\" value. Expected a string literal.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers));
+						}
+						break;
+					case "memory":
+						if(!isStringProperty(realParentNode.node)){
+							return makeInvalidateReject("Invalid \"memory\" value. Expected a memory limit.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers));
+						}
+						if(!isValidMemoryProperty(valueWithParent[m].value)){
+							return makeInvalidateReject("Invalid \"memory\" limit; Supported measurement units are M/MB, G/GB.", getLineNumber(valueWithParent[m].startPosition, valueWithParent[m].endPosition, lineNumbers));	
+						}
+						break;
+					case "instances":
+						if(!isStringProperty(realParentNode.node)){
+							return makeInvalidateReject("Invalid \"instances\" value. Expected a non-negative integer value.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers));	
+						}
+						if(!isValidNonNegativeProperty(valueWithParent[m].value)){
+							return makeInvalidateReject("Invalid \"instances\" value. Expected a non-negative integer value.", getLineNumber(valueWithParent[m].startPosition, valueWithParent[m].endPosition, lineNumbers));
+						}
+						break;
+					case "timeout":
+						if(!isStringProperty(realParentNode.node)){
+							return makeInvalidateReject("Invalid \"timeout\" value. Expected a non-negative integer value.", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers));
+						}
+						if(!isValidNonNegativeProperty(valueWithParent[m].value)){
+							return makeInvalidateReject("Invalid \"timeout\" value. Expected a non-negative integer value.", getLineNumber(valueWithParent[m].startPosition, valueWithParent[m].endPosition, lineNumbers));	
+						}
+						break;
+					case "no-route":
+						if(!isStringProperty(realParentNode.node)){
+							return makeInvalidateReject("Invalid \"no-route\" value. Expected a string literal \"true\".", getLineNumber(realParentNode.node.key.startPosition, realParentNode.node.key.endPosition, lineNumbers));	
+						}
+						if(valueWithParent[m].value !== "true"){
+							return makeInvalidateReject("Invalid \"no-route\" value. Expected a string literal \"true\".", getLineNumber(valueWithParent[m].startPosition, valueWithParent[m].endPosition, lineNumbers));
+						}
+						break;
+				}
 			}
-		}
+			return fulfill();
+		});
 	}
 	function isStringProperty(parentNode){
 		if(parentNode.value.hasOwnProperty("value") && typeof parentNode.value.value === "string"){
@@ -270,10 +272,8 @@ function analizeManifest(manifest, res, manifestAST, fileContent, task){
 		}
 		return -1;
 	}
-	function sendInvalidResult(message, lineNumber, res, task){
-		if(!task){
-			task = new tasks.Task(res, false, false, 0, false);
-		}
+	
+	function makeInvalidateReject(message, lineNumber){
 		var resultJson = {
 			"Severity":"Warning",
 			"Message": message
@@ -281,14 +281,7 @@ function analizeManifest(manifest, res, manifestAST, fileContent, task){
 		if(lineNumber !== -1){
 			resultJson.Line = lineNumber;
 		}
-		task.done({
-			HttpCode: 400,
-			Code: 0,
-			DetailedMessage: message,
-			JsonData: resultJson,
-			Message: message,
-			Severity: "Error"
-		});
+		return Promise.reject({"code":400, "message":message,"data":resultJson});
 	}
 }
 function retrieveProjectFilePath(req){
