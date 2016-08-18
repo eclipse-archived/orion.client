@@ -497,6 +497,9 @@ define([
 			return this.getBlockForElement(element.parentElement);
 		},
 		/** @callback */
+		getBlockOverrideStyles: function(block, text, index, _styles) {
+		},
+		/** @callback */
 		getBlockStartStyle: function(block, text, index, _styles) {
 			return null;
 		},
