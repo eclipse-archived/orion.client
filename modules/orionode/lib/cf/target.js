@@ -50,18 +50,24 @@ function postTarget(req,res){
 	var Username = req.body.Username;
 	// Try to login here!!
 	tryLogin(url,Username,Password,req.user.username)
-	.then(function(result){
-		var resp = {
-			"Type": "Target",
-			"Url": url
-		};
+	.then(function() {
 		task.done({
+			BundleId: "unknown",
 			HttpCode: 200,
 			Code: 0,
-			DetailedMessage: "OK",
-			JsonData: resp,
+			JsonData: {"Type": "Target", "Url": url},
 			Message: "OK",
 			Severity: "Ok"
+		});
+	})
+	.catch(function(err) {
+		task.done({
+			BundleId: "org.eclipse.orion.server.core",
+			HttpCode: err.statusCode ? err.statusCode : 400,
+			Code: 0,
+			JsonData: err.statusCode ? JSON.parse(err.body) : err,
+			Message: "",
+			Severity: "Error"
 		});
 	});
 }
@@ -79,13 +85,13 @@ function tryLogin(url, Username, Password, userId){
 				headers: {"Accept": "application/json",	"Content-Type": "application/x-www-form-urlencoded","Authorization":"Basic Y2Y6"},
 				form: {"grant_type": "password", "password": Password, "username": Username, "scope": ""}
 			};
-			request.post(authorizationHeader, /* @callback */ function (error, response, body) {
+			request.post(authorizationHeader, function (error, response, body) {
 				var respondJson = parsebody(body);
-				if(!error){
+				if(!error && response.statusCode === 200){
 					UseraccessToken[userId] = respondJson.access_token;
-					return fulfill(true);
+					return fulfill();
 				}
-				return reject(false);
+				return !error ? reject(response) : reject(error);
 			});
 		});
 	});
