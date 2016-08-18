@@ -34,6 +34,12 @@ define("orion/editor/stylers/application_xml/syntax", ["orion/editor/stylers/lib
 				begin: {match: "<!--", literal: "<!--"},
 				end: {match: "-->", literal: "-->"},
 				name: "comment.block.xml",
+				beginCaptures: {
+					0: {name: "comment.block.start.xml"}
+				},
+				endCaptures: {
+					0: {name: "comment.block.end.xml"}
+				},
 				patterns: [
 					{
 						match: "(\\b)(TODO)(\\b)(((?!-->).)*)",

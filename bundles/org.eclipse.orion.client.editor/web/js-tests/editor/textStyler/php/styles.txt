@@ -1,6 +1,6 @@
 {"start":0,"end":5,"style":{"styleClass":"entity name declaration php"}}
 {"start":6,"end":10,"style":{"styleClass":"source php embedded"}}
-{"start":10,"end":13,"style":{"styleClass":"comment block documentation"}}
+{"start":10,"end":13,"style":{"styleClass":"comment block documentation start"}}
 {"start":14,"end":38,"style":{"styleClass":"comment block documentation"}}
 {"start":39,"end":45,"style":{"styleClass":"comment block documentation"}}
 {"start":46,"end":53,"style":{"styleClass":"comment block documentation"}}
@@ -8,24 +8,31 @@
 {"start":53,"end":57,"style":{"styleClass":"keyword other documentation task"}}
 {"start":57,"end":57,"style":{"styleClass":"meta annotation task todo"}}
 {"start":57,"end":63,"style":{"styleClass":"comment block"}}
-{"start":64,"end":71,"style":{"styleClass":"comment block documentation"}}
-{"start":73,"end":83,"style":{"styleClass":"comment line number-sign php"}}
+{"start":64,"end":69,"style":{"styleClass":"comment block documentation"}}
+{"start":69,"end":71,"style":{"styleClass":"comment block documentation end"}}
+{"start":73,"end":74,"style":{"styleClass":"comment line number-sign start php"}}
+{"start":74,"end":83,"style":{"styleClass":"comment line number-sign php"}}
 {"start":83,"end":83,"style":{"styleClass":"meta annotation task todo"}}
 {"start":83,"end":87,"style":{"styleClass":"keyword other documentation task"}}
 {"start":87,"end":87,"style":{"styleClass":"meta annotation task todo"}}
 {"start":87,"end":91,"style":{"styleClass":"comment line"}}
-{"start":92,"end":103,"style":{"styleClass":"comment line double-slash"}}
+{"start":92,"end":94,"style":{"styleClass":"comment line double-slash start"}}
+{"start":94,"end":103,"style":{"styleClass":"comment line double-slash"}}
 {"start":103,"end":103,"style":{"styleClass":"meta annotation task todo"}}
 {"start":103,"end":107,"style":{"styleClass":"keyword other documentation task"}}
 {"start":107,"end":107,"style":{"styleClass":"meta annotation task todo"}}
 {"start":107,"end":110,"style":{"styleClass":"comment line"}}
-{"start":111,"end":122,"style":{"styleClass":"comment block"}}
+{"start":111,"end":113,"style":{"styleClass":"comment block start"}}
+{"start":113,"end":122,"style":{"styleClass":"comment block"}}
 {"start":122,"end":122,"style":{"styleClass":"meta annotation task todo"}}
 {"start":122,"end":126,"style":{"styleClass":"keyword other documentation task"}}
 {"start":126,"end":126,"style":{"styleClass":"meta annotation task todo"}}
-{"start":126,"end":135,"style":{"styleClass":"comment block"}}
+{"start":126,"end":133,"style":{"styleClass":"comment block"}}
+{"start":133,"end":135,"style":{"styleClass":"comment block end"}}
 {"start":137,"end":138,"style":{"styleClass":"source php embedded"}}
-{"start":138,"end":152,"style":{"styleClass":"comment block"}}
+{"start":138,"end":140,"style":{"styleClass":"comment block start"}}
+{"start":140,"end":150,"style":{"styleClass":"comment block"}}
+{"start":150,"end":152,"style":{"styleClass":"comment block end"}}
 {"start":153,"end":154,"style":{"styleClass":"source php embedded"}}
 {"start":154,"end":162,"style":{"styleClass":"keyword operator php"}}
 {"start":162,"end":164,"style":{"styleClass":"source php embedded"}}
@@ -143,7 +150,9 @@
 {"start":592,"end":594,"style":{"styleClass":"source php embedded"}}
 {"start":594,"end":603,"style":{"styleClass":"keyword operator php"}}
 {"start":605,"end":606,"style":{"styleClass":"source php embedded"}}
-{"start":606,"end":627,"style":{"styleClass":"comment block"}}
+{"start":606,"end":608,"style":{"styleClass":"comment block start"}}
+{"start":608,"end":625,"style":{"styleClass":"comment block"}}
+{"start":625,"end":627,"style":{"styleClass":"comment block end"}}
 {"start":628,"end":629,"style":{"styleClass":"source php embedded"}}
 {"start":629,"end":634,"style":{"styleClass":"keyword control php"}}
 {"start":634,"end":635,"style":{"styleClass":"source php embedded"}}
@@ -210,7 +219,9 @@
 {"start":835,"end":836,"style":{"styleClass":"source php embedded"}}
 {"start":836,"end":841,"style":{"styleClass":"keyword control php"}}
 {"start":843,"end":844,"style":{"styleClass":"source php embedded"}}
-{"start":844,"end":859,"style":{"styleClass":"comment block"}}
+{"start":844,"end":846,"style":{"styleClass":"comment block start"}}
+{"start":846,"end":857,"style":{"styleClass":"comment block"}}
+{"start":857,"end":859,"style":{"styleClass":"comment block end"}}
 {"start":860,"end":861,"style":{"styleClass":"source php embedded"}}
 {"start":861,"end":866,"style":{"styleClass":"constant language php"}}
 {"start":866,"end":868,"style":{"styleClass":"source php embedded"}}
@@ -314,7 +325,8 @@
 {"start":5662,"end":5663,"style":{"styleClass":"punctuation section parens begin"}}
 {"start":5663,"end":5664,"style":{"styleClass":"punctuation section parens end"}}
 {"start":5664,"end":5665,"style":{"styleClass":"source php embedded"}}
-{"start":5667,"end":5690,"style":{"styleClass":"comment line number-sign php"}}
+{"start":5667,"end":5668,"style":{"styleClass":"comment line number-sign start php"}}
+{"start":5668,"end":5690,"style":{"styleClass":"comment line number-sign php"}}
 {"start":5691,"end":5695,"style":{"styleClass":"source php embedded"}}
 {"start":5695,"end":5697,"style":{"styleClass":"punctuation operator"}}
 {"start":5697,"end":5709,"style":{"styleClass":"source php embedded"}}

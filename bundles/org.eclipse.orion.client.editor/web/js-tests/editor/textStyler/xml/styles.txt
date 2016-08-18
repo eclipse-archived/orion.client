@@ -7,7 +7,9 @@
 {"start":61,"end":71,"style":{"styleClass":"string quoted double"}}
 {"start":71,"end":73,"style":{"styleClass":"meta tag declaration xml"}}
 {"start":75,"end":93,"style":{"styleClass":"meta tag doctype xml"}}
-{"start":95,"end":113,"style":{"styleClass":"comment block xml"}}
+{"start":95,"end":99,"style":{"styleClass":"comment block start xml"}}
+{"start":99,"end":110,"style":{"styleClass":"comment block xml"}}
+{"start":110,"end":113,"style":{"styleClass":"comment block end xml"}}
 {"start":115,"end":121,"style":{"styleClass":"meta tag xml"}}
 {"start":126,"end":130,"style":{"styleClass":"meta tag xml"}}
 {"start":143,"end":148,"style":{"styleClass":"string quoted double"}}

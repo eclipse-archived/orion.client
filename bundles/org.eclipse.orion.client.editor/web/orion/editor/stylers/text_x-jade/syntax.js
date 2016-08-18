@@ -79,8 +79,11 @@ define("orion/editor/stylers/text_x-jade/syntax", ["orion/editor/stylers/lib/syn
 				]
 			},
 			comment_singleLine: {
-				match: {match: "^\\s*//.*", literal: "//"},
+				match: {match: "(^\\s*)(//).*", literal: "//"},
 				name: "comment.line.double-slash.jade",
+				captures: {
+					2: {name: "comment.line.double-slash.start.jade"}
+				},
 				patterns: [
 					{
 						include: "orion.lib#todo_comment_singleLine"
