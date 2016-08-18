@@ -41,14 +41,14 @@ function getapps(req, res){
 	var encodeName =  req.query.Name;
 	var encodedContentLocation =  req.query.ContentLocation;
 	var targetRequest = req.query.Target ? JSON.parse(req.query.Target) : null;
-	target.computeTarget(req.user.username, targetRequest, task)
+	target.computeTarget(req.user.username, targetRequest)
 	 .then(function(appTarget){
 		if(encodeName){
-			getAppwithAppName(req.user.username, task,encodeName,appTarget);
+			return getAppwithAppName(req.user.username, task,encodeName,appTarget);
 		}else if(encodedContentLocation) {
 			var manifestLocation = toOrionLocation(req, util.decodeURIComponent(encodedContentLocation));
 			if(manifestLocation){
-				manifests.retrieveManifestFile(req, res, manifestLocation, task)
+				return manifests.retrieveManifestFile(req, manifestLocation)
 				.then(function(manifest){
 					if(manifest && manifest.applications &&  manifest.applications[0]){
 						return getAppwithAppName(req.user.username, task, manifest.applications[0].name, appTarget);
@@ -56,27 +56,28 @@ function getapps(req, res){
 				});
 			}
 		}else{
-			getAppwithoutName(req, task, appTarget);
+			return getAppwithoutName(req, task, appTarget);
 		}
+	 }).catch(function(err){
+		 target.caughtErrorHandler(task, err);
 	 });
 }
-function respondAppgetRequest(resp,task){
+function respondAppGetRequest(resp,task){
 	if(!resp){
-		repondErrorTask(task,404,"Apps can not be found");
-	}else{
-		task.done({
-			HttpCode: 200,
-			Code: 0,
-			DetailedMessage: "Ok",
-			JsonData: resp,
-			Message: "Ok",
-			Severity: "Ok"
-		});
+		return Promise.reject({"code":404, "message":"Apps can not be found"});
 	}
+	task.done({
+		HttpCode: 200,
+		Code: 0,
+		DetailedMessage: "Ok",
+		JsonData: resp,
+		Message: "Ok",
+		Severity: "Ok"
+	});
 }
 function getAppwithoutName(req, task, appTarget){
 	var appsArray = [];
-	target.cfRequest("GET", req.user.username, task, appTarget.Url + appTarget.Space.entity.apps_url, {"inline-relations-depth":"2"})
+	target.cfRequest("GET", req.user.username, appTarget.Url + appTarget.Space.entity.apps_url, {"inline-relations-depth":"2"})
 	.then(function(result){
 		var appResources = result.resources;
 		for(var k = 0; k < appResources.length; k++){
@@ -103,28 +104,28 @@ function getAppwithoutName(req, task, appTarget){
 			"Apps" : appsArray
 		};
 	}).then(function(result){
-		respondAppgetRequest(result,task);
+		return respondAppGetRequest(result,task);
 	});
 }
 function getAppwithAppName(userId, task,encodeName, appTarget){
-	return _getAppwithAppName(userId, encodeName, appTarget, task)
+	return _getAppwithAppName(userId, encodeName, appTarget)
 	.then(function(result){
-		respondAppgetRequest(result && result.appJson,task);
+		return respondAppGetRequest(result && result.appJson,task);
 	});
 }
-function _getAppwithAppName(userId, encodeName, appTarget, task){
+function _getAppwithAppName(userId, encodeName, appTarget){
 	var app = {};
-	return target.cfRequest("GET", userId, task, appTarget.Url + appTarget.Space.entity.apps_url, {"q": "name:"+util.encodeURIComponent(encodeName),"inline-relations-depth":"1"})
+	return target.cfRequest("GET", userId, appTarget.Url + appTarget.Space.entity.apps_url, {"q": "name:"+util.encodeURIComponent(encodeName),"inline-relations-depth":"1"})
 	.then(function(result){
 		if(!result.resources || result.resources && result.resources.length === 0){
 			return null;
 		}
 		app.appUrl = result.resources[0].metadata.url;
 		app.appMetadata = result.resources[0].metadata;
-		return target.cfRequest("GET", userId, task, appTarget.Url + app.appUrl +"/summary")
+		return target.cfRequest("GET", userId, appTarget.Url + app.appUrl +"/summary")
 		.then(function(result){
 			app.summaryJson = result;
-			return target.cfRequest("GET", userId, task, appTarget.Url + app.appUrl +"/instances");
+			return target.cfRequest("GET", userId, appTarget.Url + app.appUrl +"/instances");
 		}).then(function(result){
 			app.instanceJson = result;
 			var appJson;
@@ -168,9 +169,9 @@ function putapps(req, res){
 //		// TODO complete the add route case.
 //		var appGuid = path[0];
 //		var routeGuid = path[2];
-//		Promise.all(getRouteGuidbyGuid(req.user.username, routeGuid,task,appTarget),getAppbyGuid(req.user.username, appGuid,task, appTarget))
+//		Promise.all(getRouteGuidbyGuid(req.user.username, routeGuid,appTarget),getAppbyGuid(req.user.username, appGuid, appTarget))
 //		.then(function(resultArray){
-//			return mapRoute(req.user.username, resultArray[0],task,appTarget);
+//			return mapRoute(req.user.username, resultArray[0],appTarget);
 //		});
 //	}
 	var state = req.body.State;
@@ -185,7 +186,7 @@ function putapps(req, res){
 	var manifestAppName = null;
 	var restart;
 	var appTarget;
-	return target.computeTarget(req.user.username, targetRequest, task)
+	return target.computeTarget(req.user.username, targetRequest)
 	 .then(function(resultTarget){
 	 	appTarget = resultTarget;
 		if(contentLocation && !state){
@@ -194,7 +195,7 @@ function putapps(req, res){
 				/* check for non-manifest deployment */
 				waitFor = Promise.resolve(manifestJSON);
 			}else{
-				waitFor = manifests.retrieveManifestFile(req, res, contentLocation, task);
+				waitFor = manifests.retrieveManifestFile(req, contentLocation);
 			}
 			return waitFor.then(function(result){
 				if(result){
@@ -206,7 +207,7 @@ function putapps(req, res){
 			});
 		}
 	}).then(function(){
-		return _getAppwithAppName(req.user.username, appName? appName : manifestAppName, appTarget, task)
+		return _getAppwithAppName(req.user.username, appName? appName : manifestAppName, appTarget)
 			.then(function(appResult){
 				if(appResult && appResult.app){
 					appCache.appUrl=appResult.app.appUrl;
@@ -225,17 +226,19 @@ function putapps(req, res){
 				waitFor = stopApp(req.user.username,appTarget);
 			}else{
 				if(!appCache.manifest){
-					repondErrorTask(task,500, "Failed to handle request for "+ path);
+					return Promise.reject({"code":500, "message":"Failed to handle request for "+ path});
 				}
 			}
-			return Promise.resolve(waitFor)
-			.then(function(status){
-				if(status){
-					return respondAppPutrequest(task,status);
-				}
-			});
+			if(waitFor){
+				return Promise.resolve(waitFor)
+				.then(function(status){
+					if(status){
+						return respondAppPutRequest(task,status);
+					}
+					return;
+				});
+			}
 		}
-	}).then(function(){
 		function instrumentManifest(manifest,instrumentationJSON){
 			if(!instrumentationJSON || !manifest.applications){
 				return;
@@ -257,82 +260,74 @@ function putapps(req, res){
 			return instrumentationMemory > appMemorystring;
 				
 		}
-		
 		restart = !app ? false : true;
 		instrumentManifest(appCache.manifest,instrumentationJSON);
 		appCache.appName = appName ? appName : manifestAppName;
-		return pushApp(req, task, appTarget);
-	}).then(function(){
-		return _getAppwithAppName(req.user.username, appCache.appName, appTarget, task)
-		.then(function(appResult){
-			if(appResult.app){
-				appCache.appUrl=appResult.app.appUrl;
-				appCache.appMetadata=appResult.app.appMetadata;
-				appCache.summaryJson=appResult.app.summaryJson;
-				appCache.instanceJson=appResult.app.instanceJson;
+		return pushApp(req, appTarget)
+		.then(function(){
+			return _getAppwithAppName(req.user.username, appCache.appName, appTarget)
+			.then(function(appResult){
+				if(appResult.app){
+					appCache.appUrl=appResult.app.appUrl;
+					appCache.appMetadata=appResult.app.appMetadata;
+					appCache.summaryJson=appResult.app.summaryJson;
+					appCache.instanceJson=appResult.app.instanceJson;
+				}
+			});
+		})
+		.then(function(){
+			if(restart){
+				return restartApp(req.user.username, appTarget);
 			}
+			return startApp(req.user.username, -1, appTarget);
+		}).then(function(startRespond){
+			return respondAppPutRequest(task,startRespond);
 		});
-	}).then(function(){
-		if(restart){
-			return restartApp(req.user.username, appTarget);
-		}
-		return startApp(req.user.username, -1, appTarget);
-	}).then(function(startRespond){
-		return respondAppPutrequest(task,startRespond);
 	}).catch(function(err){
-		repondErrorTask(task, 400, err);
+		target.caughtErrorHandler(task, err);
 	});
 	
-function respondAppPutrequest(task,status){
-	return new Promise(function(fulfill,reject){
-		var resp;
-		var appJson = {
-			entity:appCache.summaryJson,
-			metadata:appCache.appMetadata	
+function respondAppPutRequest(task,status){
+	var resp;
+	var appJson = {
+		entity:appCache.summaryJson,
+		metadata:appCache.appMetadata	
+	};
+	if (status.error_code) {
+		return Promise.reject({"code":400, "message": status.description,"bundleid":"org.eclipse.orion.server.core","data":status});
+	}
+	if(status === "RUNNING"){
+		var DEFAULT_TIMEOUT = 60;
+		resp = {
+			"App":appJson,
+			"DeployedPackage":appCache.appPackageType || "unknown",
+			"Domain":appCache.appDomain,
+			"Route": appCache.appRoute,
+			"Target" : appCache.appTarget,
+			"Timeout": appCache.manifest.applications[0].timeout || DEFAULT_TIMEOUT
 		};
-		if (status.error_code) {
-			task.done({
-				BundleId: "org.eclipse.orion.server.core",
-				HttpCode: 400,
-				Code: 0,
-				JsonData: status,
-				Message: status.description,
-				Severity: "Error"
-			});
-			return;
-		}
-		if(status === "RUNNING"){
-			var DEFAULT_TIMEOUT = 60;
-			resp = {
-				"App":appJson,
-				"DeployedPackage":appCache.appPackageType || "unknown",
-				"Domain":appCache.appDomain,
-				"Route": appCache.appRoute,
-				"Target" : appCache.appTarget,
-				"Timeout": appCache.manifest.applications[0].timeout || DEFAULT_TIMEOUT
-			};
-			
-		}else if(status === "STOPPED"){
-			resp = appJson;
-		}else{
-			return reject("Status wrong");
-		}
-		task.done({
-			HttpCode: 200,
-			Code: 0,
-			DetailedMessage: "Ok",
-			JsonData: resp,
-			Message: "Ok",
-			Severity: "Ok"
-		});
+		
+	}else if(status === "STOPPED"){
+		resp = appJson;
+	}else{
+		return Promise.reject({"code":400, "message":"Status wrong"});
+	}
+	task.done({
+		HttpCode: 200,
+		Code: 0,
+		DetailedMessage: "Ok",
+		JsonData: resp,
+		Message: "Ok",
+		Severity: "Ok"
 	});
+	return Promise.resolve();
 }
 
 function startApp(userId, userTimeout ,appTarget){
 	var DEFAULT_TIMEOUT = 60;
 	var MAX_TIMEOUT = 180;
 	var body = {"console":true, "state":"STARTED"};
-	return target.cfRequest("PUT", userId, null, appTarget.Url + appCache.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body))
+	return target.cfRequest("PUT", userId, appTarget.Url + appCache.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body))
 	.then(function(parsedBody) {
 		if (parsedBody.error_code) {
 			return parsedBody;
@@ -377,7 +372,7 @@ function startApp(userId, userTimeout ,appTarget){
 		function collectCFRespond(){
 			return new Promise(function(fulfill){
 				setTimeout(function(){
-					return target.cfRequest("GET", userId, null, appTarget.Url + appCache.appUrl + "/instances")
+					return target.cfRequest("GET", userId, appTarget.Url + appCache.appUrl + "/instances")
 					.then(function(result){
 						fulfill({"data": result,"attemptsLeft": --attemptsLeft});
 					});
@@ -390,7 +385,7 @@ function startApp(userId, userTimeout ,appTarget){
 
 function stopApp(userId, appTarget){
 	var body = {"console":true,"state":"STOPPED"};
-	return target.cfRequest("PUT", userId, null, appTarget.Url + appCache.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body))
+	return target.cfRequest("PUT", userId, appTarget.Url + appCache.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body))
 	.then(function(){
 		return "STOPPED";
 	});
@@ -401,26 +396,26 @@ function restartApp(userId, appTarget){
 		return startApp(userId, -1, appTarget);
 	});
 }
-function pushApp(req, task, appTarget){
+function pushApp(req, appTarget){
 	var waitFor;
 	if(appCache.summaryJson){
 		appCache.appGuid = appCache.summaryJson.guid;
-		waitFor = updateApp(req, task,appTarget);
+		waitFor = updateApp(req,appTarget);
 	}else{
-		waitFor = createApp(req, task, appTarget);
+		waitFor = createApp(req, appTarget);
 	}
 	// TODO one missing step to: look up available environment extension services
 	return Promise.resolve(waitFor).then(function(){
-		return bindRoute(req, task, appTarget);
+		return bindRoute(req, appTarget);
 	})
 	.then(function(){
-		return uploadBits(req, task, appTarget);
+		return uploadBits(req, appTarget);
 	})
 	.then(function(){
-		return bindServices(req, task, appTarget);
+		return bindServices(req, appTarget);
 	});
 }
-function createApp(req, task, appTarget){
+function createApp(req, appTarget){
 	var stack = appCache.manifest.applications[0].stack;
 	var waitForStackGuid;
 	if(stack){
@@ -438,14 +433,14 @@ function createApp(req, task, appTarget){
 			"stack_guid":stackGuid,
 			"environment_json":appCache.manifest.applications[0].env || {}
 		};
-		return target.cfRequest("POST", req.user.username, null, appTarget.Url + "/v2/apps", null, JSON.stringify(body))
+		return target.cfRequest("POST", req.user.username, appTarget.Url + "/v2/apps", null, JSON.stringify(body))
 		.then(function(result){
 			appCache.appGuid = result.metadata.guid;
 			return result;
 		});
 	});
 }
-function updateApp(req, task, appTarget){
+function updateApp(req, appTarget){
 	var stack = appCache.manifest.applications[0].stack;
 	var waitForStackGuid;
 	if(stack){
@@ -462,20 +457,20 @@ function updateApp(req, task, appTarget){
 			"stack_guid":stackGuid,
 			"environment_json":appCache.manifest.applications[0].env || {}
 			};
-		return target.cfRequest("PUT", req.user.username, null, appTarget.Url + appCache.appUrl, {"async":"true","inline-relations-depth":"1"}, JSON.stringify(body))	
+		return target.cfRequest("PUT", req.user.username, appTarget.Url + appCache.appUrl, {"async":"true","inline-relations-depth":"1"}, JSON.stringify(body))	
 		.then(function(result){
 			return result;
 		});
 	});
 }
 function getStackGuidByName(userId, stackname ,appTarget){
-	return target.cfRequest("GET", userId, null, appTarget.Url + "/v2/stacks", {"q":"name:"+ stackname,"inline-relations-depth":"1"})
+	return target.cfRequest("GET", userId, appTarget.Url + "/v2/stacks", {"q":"name:"+ stackname,"inline-relations-depth":"1"})
 	.then(function(result){
 		return result.resources[0] && result.resources[0].metadata.guid || null;
 	});
 }
-function bindRoute(req, task, appTarget){
-	return domains.getCFdomains(appTarget, req.user.username, targetRequest.Url, targetRequest.Org)
+function bindRoute(req, appTarget){
+	return domains.getCFdomains(appTarget, req.user.username, targetRequest.Url)
 	/* get available domains */
 	.then(function(domainArray){
 		var appManifestDomain = appCache.manifest.applications[0].domain;
@@ -495,7 +490,7 @@ function bindRoute(req, task, appTarget){
 	})
 	/* find out whether the declared host can be reused */
 	.then(function(){
-		return target.cfRequest("GET", req.user.username, null, appTarget.Url + "/v2/routes", 
+		return target.cfRequest("GET", req.user.username, appTarget.Url + "/v2/routes", 
 		{"inline-relations-depth":"1", "q":"host:"+appCache.manifest.applications[0].host + ";domain_guid:" + appCache.appDomain.Guid})
 		.then(function(result){
 			var resource = result.resources[0];
@@ -509,25 +504,23 @@ function bindRoute(req, task, appTarget){
 			/* attach route to application */
 			return waitForRoute.then(function(appRoute){
 				if(appRoute.error_code === "CF-RouteHostTaken"){
-					repondErrorTask(task, 400, appRoute.description);
-					return;
+					return Promise.reject({"code":400, "message":appRoute.description});
 				}
 				appCache.appRoute = appRoute;
-				return target.cfRequest("PUT", req.user.username, null, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + appRoute.metadata.guid);
+				return target.cfRequest("PUT", req.user.username, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + appRoute.metadata.guid);
 			});
 		});
 	});
 }
-function uploadBits(req, task, appTarget){
+function uploadBits(req, appTarget){
 	var cloudAccessToken = target.getAccessToken(req.user.username);
 	var archiveredFilePath;
-	return archiveTarget(appCache.appStore, task)
+	return archiveTarget(appCache.appStore)
 	.then(function(filePath){
 		appCache.appPackageType = path.extname(filePath).substring(1);
 		archiveredFilePath = filePath;
 		if(!archiveredFilePath){
-			repondErrorTask(task, 500, "Failed to read application content");
-			return;
+			return Promise.reject({"code":500, "message":"Failed to read application content"});
 		}
 		var uploadFileStream = fs.createReadStream(archiveredFilePath);
 		var uploadBitsHeader = {
@@ -551,66 +544,63 @@ function uploadBits(req, task, appTarget){
 				}
 			};
 		uploadFileStream.on("error", function(err){
-			repondErrorTask(task, 500, err);
-			return;
+			return Promise.reject({"code":500, "message":err.message});
 		});
-		return target.cfRequest(null, null, null, null ,null, null, null,uploadBitsHeader);
-	}).then(function(result){
+		return target.cfRequest(null, null, null ,null, null, null,uploadBitsHeader);
+	}).then(function(requestResult){
 		var ATTEMPTACCOUNT = 150;
 		var initialValue = {
 			"attemptsLeft":ATTEMPTACCOUNT,
-			"status":result.entity.status
+			"status":requestResult.entity.status
 			};
 		return promiseWhile(initialValue)
-		.catch(function(feedBack){
+		.then(function(){
 			// TODO in java code this file was deleted in 'failure' case, not necessarily here.
 			fs.unlinkSync(archiveredFilePath);
 		});
 		
 		function promiseWhile(value) {
-			return Promise.resolve(value).then(function(result) {
-				if(checkUploadrespond(result)) return Promise.resolve();
-				return collectCFRespond()
+			return Promise.resolve(value).then(function(collectResult) {
+				return collectCFRespond(collectResult)
 				.then(function(result){
+					if(result.status === "finished"){
+						// When it's 'finished', return from the whole recursive promise chain.
+						return;
+					}
 					return promiseWhile(result);
 				});
 			});
 		}
-		function checkUploadrespond(result){
-			if(result.status !== "finished" && result.status !== "failure"){
-				if(result.status === "failed"){
-					repondErrorTask(task, 400, "Upload failed");
-					return false;
+		function collectCFRespond(collectResult){
+			if(collectResult.status !== "finished" && collectResult.status !== "failure"){
+				if(collectResult.status === "failed"){
+					return Promise.reject({"code":400, "message":"Upload failed"});
 				}
-				if(result.attemptsLeft === 0){
-					repondErrorTask(task, 400, "Upload timeout exceeded");
+				if(collectResult.attemptsLeft === 0){
+					return Promise.reject({"code":400, "message":"Upload timeout exceeded"});
 				}
-				return false;
-			}else if(result.status === "failure"){
-				repondErrorTask(task, 400, "Failed to upload application bits");
-				return false;
-			}else if(result.status === "finished"){
-				return true;
+				return new Promise(function(fulfill){
+					setTimeout(function(){
+						return target.cfRequest("GET", req.user.username, appTarget.Url + requestResult.metadata.url)
+						.then(function(result){
+							fulfill({
+							"attemptsLeft":--initialValue.attemptsLeft,
+							"status":result.entity.status
+							});			
+						});
+					}, 2000);
+				});
+			}else if(collectResult.status === "failure"){
+				return Promise.reject({"code":400, "message":"Failed to upload application bits"});
+			}else if(collectResult.status === "finished"){
+				return Promise.resolve("finished");
 			}
-		}
-		function collectCFRespond(){
-			return new Promise(function(fulfill){
-				setTimeout(function(){
-					return target.cfRequest("GET", req.user.username, null, appTarget.Url + result.metadata.url)
-					.then(function(result){
-						fulfill({
-						"attemptsLeft":--initialValue.attemptsLeft,
-						"status":result.entity.status
-						});			
-					});
-				}, 2000);
-			});
 		}
 	});
 }
-function bindServices(req, task, appTarget){
+function bindServices(req, appTarget){
 	if(appCache.manifest.applications[0].services){
-		return target.cfRequest("GET", req.user.username, null, appTarget.Url + "/v2/services", {"inline-relations-depth":"1"})
+		return target.cfRequest("GET", req.user.username, appTarget.Url + "/v2/services", {"inline-relations-depth":"1"})
 		.then(function(result){
 			var manifestService = appCache.manifest.applications[0].services;
 			var respondServiceJson = result.resources;
@@ -653,7 +643,7 @@ function bindServices(req, task, appTarget){
 						});
 					}, function(err) {
 						if(err){
-							return reject(err);
+							return reject({"message":err.message});
 						}
 						return fulfill();
 					});
@@ -670,7 +660,7 @@ function bindServices(req, task, appTarget){
 						});
 					}, function(err) {
 						if(err){
-							return reject(err);
+							return reject({"message":err.message});
 						}
 						return fulfill();
 					});
@@ -681,7 +671,7 @@ function bindServices(req, task, appTarget){
 	return;
 }
 function getServiceGuid(userId, service, appTarget){
-	return target.cfRequest("GET", userId, null, appTarget.Url + "/v2/spaces/" + appTarget.Space.metadata.guid + "/service_instances"
+	return target.cfRequest("GET", userId, appTarget.Url + "/v2/spaces/" + appTarget.Space.metadata.guid + "/service_instances"
 	, {"inline-relations-depth":"1","return_user_provided_service_instances":"true","q":"name:"+service})
 	.then(function(serviceJson){	
 		var serviceResources = serviceJson.resources;
@@ -700,7 +690,7 @@ function createService(userId, serviceName, servicePlanGuid, appTarget){
 		"name": serviceName,
 		"service_plan_guid": servicePlanGuid
 	};
-	return target.cfRequest("POST", userId, null, appTarget.Url + "/v2/service_instances", null, JSON.stringify(body))
+	return target.cfRequest("POST", userId, appTarget.Url + "/v2/service_instances", null, JSON.stringify(body))
 	.then(function(result){
 		return result.metadata.guid;
 	});
@@ -710,7 +700,7 @@ function bindService(userId, serviceGuid, appTarget){
 		"app_guid": appCache.appGuid,
 		"service_instance_guid": serviceGuid
 	};
-	return target.cfRequest("POST", userId, null, appTarget.Url + "/v2/service_bindings", null, JSON.stringify(body));
+	return target.cfRequest("POST", userId, appTarget.Url + "/v2/service_bindings", null, JSON.stringify(body));
 }
 function createRoute(req, appTarget){
 	var body = {
@@ -718,12 +708,12 @@ function createRoute(req, appTarget){
 		"host":appCache.manifest.applications[0].host,
 		"domain_guid":appCache.appDomain.Guid
 	};
-	return target.cfRequest("POST", req.user.username, null, appTarget.Url + "/v2/routes", {"inline-relations-depth":"1"}, JSON.stringify(body));
+	return target.cfRequest("POST", req.user.username, appTarget.Url + "/v2/routes", {"inline-relations-depth":"1"}, JSON.stringify(body));
 }
-function getAppbyGuid(userId, appGuid, task ,appTarget){
-	return target.cfRequest("GET", userId, task, appTarget.Url + "/v2/apps/" + appGuid)
+function getAppbyGuid(userId, appGuid ,appTarget){
+	return target.cfRequest("GET", userId, appTarget.Url + "/v2/apps/" + appGuid)
 	.then(function(appJSON){
-		return target.cfRequest("GET", userId, task, appCache.appTarget.Url + appJSON.metadata.url + "/summary")
+		return target.cfRequest("GET", userId, appCache.appTarget.Url + appJSON.metadata.url + "/summary")
 		.then(function(result){
 			appCache.summaryJson = result;
 			appCache.appGuid = appJSON.metadata.guid;
@@ -731,26 +721,16 @@ function getAppbyGuid(userId, appGuid, task ,appTarget){
 		});
 	});
 }
-function getRouteGuidbyGuid(userId, routeGuid, task, appTarget){
-	return target.cfRequest("GET", userId, task,appTarget.Url + "/v2/routes/" + routeGuid)
+function getRouteGuidbyGuid(userId, routeGuid, appTarget){
+	return target.cfRequest("GET", userId,appTarget.Url + "/v2/routes/" + routeGuid)
 	.then(function(result){
 		return result.metadata.guid; // TODO this need to test
 	});
 }
-function mapRoute(userId, routeGuid, task, appTarget){
-	return target.cfRequest("PUT", userId, task, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + routeGuid);
+function mapRoute(userId, routeGuid, appTarget){
+	return target.cfRequest("PUT", userId, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + routeGuid);
 }
 } // End of putApp()
-function repondErrorTask(task,code,description){
-	task.done({
-		HttpCode: code,
-		Code: 0,
-		DetailedMessage: description,
-		JsonData: {},
-		Message: description,
-		Severity: "Error"
-	});
-}
 function normalizeMemoryMeasure(memory){
 	if (memory.toLowerCase().endsWith("m")) //$NON-NLS-1$
 		return Number(memory.substring(0, memory.length - 1));
@@ -763,12 +743,12 @@ function normalizeMemoryMeasure(memory){
 	/* return default memory value, i.e. 1024 MB */
 	return 1024;
 }
-function archiveTarget (filePath, task){
+function archiveTarget (filePath){
 	var ramdomName = crypto.randomBytes(5).toString("hex") + Date.now();
 	var resultFilePath = path.join(xfer.getUploadDir(), ramdomName + ".war");
 	return searchAndCopyNearestwarFile(resultFilePath, filePath,filePath)
 	.then(function(){
-		// If searchAndCopyNearestwarFile didn't reject, it means no .war has been found. so Zip the folder.
+		// If searchAndCopyNearestwarFile fulfill with 'false', it means no .war has been found. so Zip the folder.
 		return new Promise(function(fulfill, reject){
 			var zip = archiver("zip");
 			resultFilePath = path.join(xfer.getUploadDir(), ramdomName + ".zip");
@@ -778,18 +758,17 @@ function archiveTarget (filePath, task){
 			.then(function() {
 				zip.finalize();
 				zip.on("end", function(){
-			        fulfill();
+			        return fulfill();
 			    });
 			    zip.on("error", function(){
-			        reject();
+			        return reject({"message":"Zipping process went wrong"});
 			    });
-			})
-			.catch(function(err) {
-				repondErrorTask(task, 500, err.message);
 			});
 		});
-	}).catch(function(result){
-		if(result) return; // Assert the .war filed has been copied over.
+	})
+	.catch(function(result){
+		if(result === "warFound") return; // Assert the .war filed has been copied over.
+		return Promise.reject(result);  // keep escalating other rejections.
 	})
 	.then(function(){
 		return resultFilePath;
@@ -820,12 +799,10 @@ function archiveTarget (filePath, task){
 				return readenWarfileStream.pipe(bluebirdfs.createWriteStream(targetWarPath));
 			}).then(function(){
 				// Using this promise to reject the promise chain.
-				return new Promise(function(fulfill,reject){
-					reject(true);
-				});
+				return Promise.reject("warFound");
 			});
 		}
-		return false;
+		return false; // false means no '.war' has been find
 		});
 	}
 }
