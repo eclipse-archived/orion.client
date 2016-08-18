@@ -286,6 +286,15 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		getBlockFoldBounds: function(block, model) {
 			return {start: block.start, end: block.end};
 		},
+		getBlockOverrideStyles: function(block, text, index, _styles) {
+			/* if the block's pattern is a single-line regex with capture(s) then compute the styles for the capture(s) */
+			if (block.pattern.regex && block.pattern.pattern.captures && this._containsCaptureRegex.test(block.pattern.regex)) {
+				var match = this._findMatch(block.pattern.regex, text, 0);
+				if (match) {
+					this._getCaptureStyles(match, block.pattern.pattern.captures, index, _styles);
+				}
+			}
+		},
 		getBlockStartStyle: function(block, text, index, _styles) {
 			/* pattern-defined blocks specify a start style by either a capture or name */
 			var result;
@@ -408,8 +417,8 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				/* apply the style */
 				var start = current.result.index;
 				var end;
-				var substyles = [];
 				if (current.pattern.regex) {	/* line pattern defined by a "match" */
+					var substyles = [];
 					result = current.result;
 					end = start + result[0].length;
 					var tokenStyle = {start: offset + start, end: offset + end, style: current.pattern.pattern.name};
@@ -728,6 +737,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			}
 		},
 		_captureReferenceRegex: /\\(\d)/g,
+		_containsCaptureRegex: /\((?!\?:)/, //$NON-NLS-0$
 		_eolRegex: /$/,
 		_ignoreCaseRegex: /^\(\?i\)\s*/,
 		_linebreakRegex: /(.*)(?:[\r\n]|$)/g,
@@ -1294,6 +1304,24 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				lineIndex = model.getLineAtOffset(s);
 				lineStart = model.getLineStart(lineIndex);
 				var blockSubstyles = this._getStyles(blocks[i], model, text.substring(lineStart - offset, e - offset), lineStart, s - lineStart);
+				var overrideStyles = [];
+				this._stylerAdapter.getBlockOverrideStyles(blocks[i], text.substring(s - offset, e - offset), s, overrideStyles);
+				if (overrideStyles.length) {
+					Array.prototype.push.apply(blockSubstyles, overrideStyles); /* append overrideStyles into blockSubstyles */
+					if (blockSubstyles.length !== overrideStyles.length) {
+						/* substyles came from both sources, so they need to be sorted together */
+						blockSubstyles.sort(function(a,b) {
+							if (a.start < b.start) {
+								return -1;
+							}
+							if (a.start > b.start) {
+								return 1;
+							}
+							return 0;
+						});
+					}
+				}
+
 				var blockStyleName = this._stylerAdapter.getBlockContentStyleName(blocks[i]);
 				if (blockStyleName) {
 					/*
