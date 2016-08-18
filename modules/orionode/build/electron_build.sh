@@ -87,10 +87,10 @@ cleanup_nodemodules() {
 }
 
 if [ -z "$UPDATE_SERVER" ]; then
-    UPDATE_SERVER="http://orion-update.mybluemix.net/"
+    UPDATE_SERVER="http://orion-update.mybluemix.net"
 fi
 update_url=$(echo ${UPDATE_SERVER} | sed -e 's/[\/&.-]/\\&/g') # for autoUpdater
-download_url=$(echo ${UPDATE_SERVER}"download" | sed -e 's/[\/&.-]/\\&/g') # for remoteReleases
+download_url=$(echo ${UPDATE_SERVER}"/download" | sed -e 's/[\/&.-]/\\&/g') # for remoteReleases
 
 # update orion.conf and package.json
 update_config_files() {
@@ -106,7 +106,7 @@ update_config_files() {
 
 # set Windows remoteReleases URL to latest successful build # for delta files
 update_remote_releases() {
-	latest_build=$(curl -s ${UPDATE_SERVER}"api/version/latest" | jsawk 'return this.tag')
+	latest_build=$(curl -s ${UPDATE_SERVER}"/api/version/latest" | jsawk 'return this.tag')
 	if [ ! -z "$latest_build" ]; then
 		sed -i .bak "s/.*remoteReleases.*/\"remoteReleases\": \"${download_url}\/v${latest_build}\"/" package.json
 	fi
