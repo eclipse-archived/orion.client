@@ -133,7 +133,8 @@
 {"start":744,"end":749,"style":{"styleClass":"keyword operator js"}}
 {"start":749,"end":750,"style":{"styleClass":"punctuation operator"}}
 {"start":750,"end":757,"style":{"styleClass":"source js embedded jade"}}
-{"start":759,"end":819,"style":{"styleClass":"comment line double-slash jade"}}
+{"start":759,"end":761,"style":{"styleClass":"comment line double-slash start jade"}}
+{"start":761,"end":819,"style":{"styleClass":"comment line double-slash jade"}}
 {"start":820,"end":821,"style":{"styleClass":"meta tag jade"}}
 {"start":827,"end":832,"style":{"styleClass":"keyword operator js"}}
 {"start":832,"end":833,"style":{"styleClass":"punctuation operator"}}
@@ -202,15 +203,19 @@
 {"start":1151,"end":1152,"style":{"styleClass":"punctuation operator"}}
 {"start":1152,"end":1157,"style":{"styleClass":"string quoted double"}}
 {"start":1158,"end":1169,"style":{"styleClass":"keyword operator jade"}}
-{"start":1183,"end":1203,"style":{"styleClass":"comment line double-slash jade"}}
-{"start":1204,"end":1235,"style":{"styleClass":"comment line double-slash jade"}}
-{"start":1237,"end":1240,"style":{"styleClass":"comment line double-slash jade"}}
+{"start":1183,"end":1185,"style":{"styleClass":"comment line double-slash start jade"}}
+{"start":1185,"end":1203,"style":{"styleClass":"comment line double-slash jade"}}
+{"start":1204,"end":1206,"style":{"styleClass":"comment line double-slash start jade"}}
+{"start":1206,"end":1235,"style":{"styleClass":"comment line double-slash jade"}}
+{"start":1237,"end":1239,"style":{"styleClass":"comment line double-slash start jade"}}
+{"start":1239,"end":1240,"style":{"styleClass":"comment line double-slash jade"}}
 {"start":1240,"end":1240,"style":{"styleClass":"meta annotation task todo"}}
 {"start":1240,"end":1244,"style":{"styleClass":"keyword other documentation task"}}
 {"start":1244,"end":1244,"style":{"styleClass":"meta annotation task todo"}}
 {"start":1244,"end":1259,"style":{"styleClass":"comment line"}}
 {"start":1260,"end":1264,"style":{"styleClass":"meta tag jade"}}
-{"start":1265,"end":1269,"style":{"styleClass":"comment line double-slash jade"}}
+{"start":1265,"end":1267,"style":{"styleClass":"comment line double-slash jade"}}
+{"start":1267,"end":1269,"style":{"styleClass":"comment line double-slash start jade"}}
 {"start":1274,"end":1276,"style":{"styleClass":"meta tag jade"}}
 {"start":1303,"end":1306,"style":{"styleClass":"meta tag jade"}}
 {"start":1321,"end":1322,"style":{"styleClass":"punctuation operator"}}
@@ -243,11 +248,13 @@
 {"start":1389,"end":1390,"style":{"styleClass":"source js embedded jade"}}
 {"start":1390,"end":1392,"style":{"styleClass":"keyword operator js"}}
 {"start":1392,"end":1393,"style":{"styleClass":"source js embedded jade"}}
-{"start":1393,"end":1401,"style":{"styleClass":"comment block"}}
+{"start":1393,"end":1395,"style":{"styleClass":"comment block start"}}
+{"start":1395,"end":1401,"style":{"styleClass":"comment block"}}
 {"start":1401,"end":1401,"style":{"styleClass":"meta annotation task todo"}}
 {"start":1401,"end":1405,"style":{"styleClass":"keyword other documentation task"}}
 {"start":1405,"end":1405,"style":{"styleClass":"meta annotation task todo"}}
-{"start":1405,"end":1413,"style":{"styleClass":"comment block"}}
+{"start":1405,"end":1411,"style":{"styleClass":"comment block"}}
+{"start":1411,"end":1413,"style":{"styleClass":"comment block end"}}
 {"start":1413,"end":1418,"style":{"styleClass":"source js embedded jade"}}
 {"start":1420,"end":1421,"style":{"styleClass":"meta tag jade"}}
 {"start":1421,"end":1423,"style":{"styleClass":"punctuation operator"}}
@@ -258,11 +265,13 @@
 {"start":1472,"end":1473,"style":{"styleClass":"source js embedded jade"}}
 {"start":1473,"end":1475,"style":{"styleClass":"keyword operator js"}}
 {"start":1475,"end":1476,"style":{"styleClass":"source js embedded jade"}}
-{"start":1476,"end":1484,"style":{"styleClass":"comment block"}}
+{"start":1476,"end":1478,"style":{"styleClass":"comment block start"}}
+{"start":1478,"end":1484,"style":{"styleClass":"comment block"}}
 {"start":1484,"end":1484,"style":{"styleClass":"meta annotation task todo"}}
 {"start":1484,"end":1488,"style":{"styleClass":"keyword other documentation task"}}
 {"start":1488,"end":1488,"style":{"styleClass":"meta annotation task todo"}}
-{"start":1488,"end":1496,"style":{"styleClass":"comment block"}}
+{"start":1488,"end":1494,"style":{"styleClass":"comment block"}}
+{"start":1494,"end":1496,"style":{"styleClass":"comment block end"}}
 {"start":1496,"end":1501,"style":{"styleClass":"source js embedded jade"}}
 {"start":1503,"end":1504,"style":{"styleClass":"meta tag jade"}}
 {"start":1507,"end":1509,"style":{"styleClass":"punctuation operator"}}
@@ -273,11 +282,13 @@
 {"start":1558,"end":1559,"style":{"styleClass":"source js embedded jade"}}
 {"start":1559,"end":1561,"style":{"styleClass":"keyword operator js"}}
 {"start":1561,"end":1562,"style":{"styleClass":"source js embedded jade"}}
-{"start":1562,"end":1570,"style":{"styleClass":"comment block"}}
+{"start":1562,"end":1564,"style":{"styleClass":"comment block start"}}
+{"start":1564,"end":1570,"style":{"styleClass":"comment block"}}
 {"start":1570,"end":1570,"style":{"styleClass":"meta annotation task todo"}}
 {"start":1570,"end":1574,"style":{"styleClass":"keyword other documentation task"}}
 {"start":1574,"end":1574,"style":{"styleClass":"meta annotation task todo"}}
-{"start":1574,"end":1582,"style":{"styleClass":"comment block"}}
+{"start":1574,"end":1580,"style":{"styleClass":"comment block"}}
+{"start":1580,"end":1582,"style":{"styleClass":"comment block end"}}
 {"start":1582,"end":1587,"style":{"styleClass":"source js embedded jade"}}
 {"start":1589,"end":1590,"style":{"styleClass":"punctuation operator"}}
 {"start":1590,"end":1591,"style":{"styleClass":"source js embedded jade"}}
@@ -301,7 +312,9 @@
 {"start":1668,"end":1686,"style":{"styleClass":"source js embedded jade"}}
 {"start":1686,"end":1691,"style":{"styleClass":"string quoted single"}}
 {"start":1691,"end":1692,"style":{"styleClass":"source js embedded jade"}}
-{"start":1692,"end":1705,"style":{"styleClass":"comment block"}}
+{"start":1692,"end":1694,"style":{"styleClass":"comment block start"}}
+{"start":1694,"end":1703,"style":{"styleClass":"comment block"}}
+{"start":1703,"end":1705,"style":{"styleClass":"comment block end"}}
 {"start":1710,"end":1712,"style":{"styleClass":"meta tag jade"}}
 {"start":1749,"end":1750,"style":{"styleClass":"meta tag jade"}}
 {"start":1762,"end":1763,"style":{"styleClass":"punctuation operator"}}
@@ -310,7 +323,9 @@
 {"start":1790,"end":1802,"style":{"styleClass":"source js embedded jade"}}
 {"start":1802,"end":1807,"style":{"styleClass":"string quoted single"}}
 {"start":1807,"end":1808,"style":{"styleClass":"source js embedded jade"}}
-{"start":1808,"end":1821,"style":{"styleClass":"comment block"}}
+{"start":1808,"end":1810,"style":{"styleClass":"comment block start"}}
+{"start":1810,"end":1819,"style":{"styleClass":"comment block"}}
+{"start":1819,"end":1821,"style":{"styleClass":"comment block end"}}
 {"start":1826,"end":1828,"style":{"styleClass":"meta tag jade"}}
 {"start":1845,"end":1846,"style":{"styleClass":"meta tag jade"}}
 {"start":1866,"end":1870,"style":{"styleClass":"meta tag jade"}}
@@ -319,18 +334,22 @@
 {"start":1923,"end":1924,"style":{"styleClass":"source js embedded jade"}}
 {"start":1924,"end":1929,"style":{"styleClass":"string quoted single"}}
 {"start":1929,"end":1930,"style":{"styleClass":"source js embedded jade"}}
-{"start":1930,"end":1943,"style":{"styleClass":"comment block"}}
+{"start":1930,"end":1932,"style":{"styleClass":"comment block start"}}
+{"start":1932,"end":1941,"style":{"styleClass":"comment block"}}
+{"start":1941,"end":1943,"style":{"styleClass":"comment block end"}}
 {"start":1948,"end":1950,"style":{"styleClass":"meta tag jade"}}
 {"start":1967,"end":1968,"style":{"styleClass":"meta tag jade"}}
 {"start":2006,"end":2012,"style":{"styleClass":"keyword control jade"}}
 {"start":2012,"end":2030,"style":{"styleClass":"source js embedded jade"}}
 {"start":2030,"end":2035,"style":{"styleClass":"string quoted single"}}
 {"start":2035,"end":2036,"style":{"styleClass":"source js embedded jade"}}
-{"start":2036,"end":2039,"style":{"styleClass":"comment block"}}
+{"start":2036,"end":2038,"style":{"styleClass":"comment block start"}}
+{"start":2038,"end":2039,"style":{"styleClass":"comment block"}}
 {"start":2039,"end":2039,"style":{"styleClass":"meta annotation task todo"}}
 {"start":2039,"end":2043,"style":{"styleClass":"keyword other documentation task"}}
 {"start":2043,"end":2043,"style":{"styleClass":"meta annotation task todo"}}
-{"start":2043,"end":2054,"style":{"styleClass":"comment block"}}
+{"start":2043,"end":2052,"style":{"styleClass":"comment block"}}
+{"start":2052,"end":2054,"style":{"styleClass":"comment block end"}}
 {"start":2057,"end":2058,"style":{"styleClass":"meta tag jade"}}
 {"start":2079,"end":2081,"style":{"styleClass":"string interpolated js jade"}}
 {"start":2081,"end":2090,"style":{"styleClass":"source js embedded jade"}}
@@ -443,14 +462,16 @@
 {"start":2433,"end":2435,"style":{"styleClass":"punctuation operator"}}
 {"start":2437,"end":2444,"style":{"styleClass":"keyword operator jade"}}
 {"start":2470,"end":2477,"style":{"styleClass":"keyword operator jade"}}
-{"start":2499,"end":2514,"style":{"styleClass":"comment line double-slash jade"}}
+{"start":2499,"end":2501,"style":{"styleClass":"comment line double-slash start jade"}}
+{"start":2501,"end":2514,"style":{"styleClass":"comment line double-slash jade"}}
 {"start":2515,"end":2520,"style":{"styleClass":"keyword operator jade"}}
 {"start":2521,"end":2525,"style":{"styleClass":"entity name mixin jade"}}
 {"start":2528,"end":2530,"style":{"styleClass":"meta tag jade"}}
 {"start":2535,"end":2537,"style":{"styleClass":"meta tag jade"}}
 {"start":2546,"end":2548,"style":{"styleClass":"meta tag jade"}}
 {"start":2557,"end":2559,"style":{"styleClass":"meta tag jade"}}
-{"start":2564,"end":2571,"style":{"styleClass":"comment line double-slash jade"}}
+{"start":2564,"end":2566,"style":{"styleClass":"comment line double-slash start jade"}}
+{"start":2566,"end":2571,"style":{"styleClass":"comment line double-slash jade"}}
 {"start":2572,"end":2577,"style":{"styleClass":"entity name mixin jade"}}
 {"start":2578,"end":2583,"style":{"styleClass":"entity name mixin jade"}}
 {"start":2585,"end":2590,"style":{"styleClass":"keyword operator jade"}}
@@ -489,7 +510,9 @@
 {"start":2912,"end":2916,"style":{"styleClass":"entity name mixin jade"}}
 {"start":2917,"end":2921,"style":{"styleClass":"variable parameter jade"}}
 {"start":2923,"end":2927,"style":{"styleClass":"variable parameter jade"}}
-{"start":2929,"end":2963,"style":{"styleClass":"comment line double-slash jade"}}
+{"start":2929,"end":2931,"style":{"styleClass":"comment line double-slash jade"}}
+{"start":2931,"end":2933,"style":{"styleClass":"comment line double-slash start jade"}}
+{"start":2933,"end":2963,"style":{"styleClass":"comment line double-slash jade"}}
 {"start":2966,"end":2967,"style":{"styleClass":"meta tag jade"}}
 {"start":2968,"end":2973,"style":{"styleClass":"keyword operator js"}}
 {"start":2973,"end":2975,"style":{"styleClass":"punctuation operator"}}
@@ -510,7 +533,8 @@
 {"start":3093,"end":3098,"style":{"styleClass":"meta tag jade"}}
 {"start":3115,"end":3119,"style":{"styleClass":"meta tag jade"}}
 {"start":3124,"end":3129,"style":{"styleClass":"keyword operator jade"}}
-{"start":3139,"end":3153,"style":{"styleClass":"comment line double-slash jade"}}
+{"start":3139,"end":3141,"style":{"styleClass":"comment line double-slash start jade"}}
+{"start":3141,"end":3153,"style":{"styleClass":"comment line double-slash jade"}}
 {"start":3154,"end":3161,"style":{"styleClass":"keyword operator jade"}}
 {"start":3177,"end":3182,"style":{"styleClass":"keyword operator jade"}}
 {"start":3191,"end":3196,"style":{"styleClass":"meta tag jade"}}

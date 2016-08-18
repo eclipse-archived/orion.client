@@ -1,4 +1,6 @@
-{"start":0,"end":14,"style":{"styleClass":"comment block"}}
+{"start":0,"end":2,"style":{"styleClass":"comment block start"}}
+{"start":2,"end":12,"style":{"styleClass":"comment block"}}
+{"start":12,"end":14,"style":{"styleClass":"comment block end"}}
 {"start":17,"end":33,"style":{"styleClass":"support type propertyName css"}}
 {"start":35,"end":53,"style":{"styleClass":"support type propertyName css"}}
 {"start":55,"end":70,"style":{"styleClass":"support type propertyName css"}}
@@ -278,19 +280,25 @@
 {"start":4381,"end":4393,"style":{"styleClass":"support type propertyName css"}}
 {"start":4395,"end":4404,"style":{"styleClass":"support type propertyName css"}}
 {"start":4406,"end":4413,"style":{"styleClass":"support type propertyName css"}}
-{"start":4421,"end":4446,"style":{"styleClass":"comment block"}}
+{"start":4421,"end":4423,"style":{"styleClass":"comment block start"}}
+{"start":4423,"end":4444,"style":{"styleClass":"comment block"}}
+{"start":4444,"end":4446,"style":{"styleClass":"comment block end"}}
 {"start":4447,"end":4454,"style":{"styleClass":"string quoted double css"}}
 {"start":4455,"end":4463,"style":{"styleClass":"string quoted double css"}}
 {"start":4464,"end":4466,"style":{"styleClass":"string quoted double css"}}
 {"start":4467,"end":4473,"style":{"styleClass":"string quoted double css"}}
 {"start":4474,"end":4475,"style":{"styleClass":"string quoted double css"}}
-{"start":4478,"end":4503,"style":{"styleClass":"comment block"}}
+{"start":4478,"end":4480,"style":{"styleClass":"comment block start"}}
+{"start":4480,"end":4501,"style":{"styleClass":"comment block"}}
+{"start":4501,"end":4503,"style":{"styleClass":"comment block end"}}
 {"start":4504,"end":4511,"style":{"styleClass":"string quoted single css"}}
 {"start":4512,"end":4520,"style":{"styleClass":"string quoted single css"}}
 {"start":4521,"end":4523,"style":{"styleClass":"string quoted single css"}}
 {"start":4524,"end":4530,"style":{"styleClass":"string quoted single css"}}
 {"start":4531,"end":4532,"style":{"styleClass":"string quoted single css"}}
-{"start":4535,"end":4551,"style":{"styleClass":"comment block"}}
+{"start":4535,"end":4537,"style":{"styleClass":"comment block start"}}
+{"start":4537,"end":4549,"style":{"styleClass":"comment block"}}
+{"start":4549,"end":4551,"style":{"styleClass":"comment block end"}}
 {"start":4564,"end":4565,"style":{"styleClass":"punctuation section block begin"}}
 {"start":4567,"end":4583,"style":{"styleClass":"support type propertyName css"}}
 {"start":4585,"end":4592,"style":{"styleClass":"constant numeric hex css"}}
@@ -299,7 +307,9 @@
 {"start":4609,"end":4615,"style":{"styleClass":"support type propertyName css"}}
 {"start":4617,"end":4620,"style":{"styleClass":"constant numeric number"}}
 {"start":4623,"end":4624,"style":{"styleClass":"punctuation section block end"}}
-{"start":4626,"end":4657,"style":{"styleClass":"comment block"}}
+{"start":4626,"end":4628,"style":{"styleClass":"comment block start"}}
+{"start":4628,"end":4655,"style":{"styleClass":"comment block"}}
+{"start":4655,"end":4657,"style":{"styleClass":"comment block end"}}
 {"start":4673,"end":4674,"style":{"styleClass":"punctuation section block begin"}}
 {"start":4676,"end":4690,"style":{"styleClass":"support type propertyName css"}}
 {"start":4692,"end":4695,"style":{"styleClass":"constant numeric value css"}}
@@ -308,11 +318,17 @@
 {"start":4717,"end":4737,"style":{"styleClass":"support type propertyName css"}}
 {"start":4739,"end":4744,"style":{"styleClass":"constant other color css"}}
 {"start":4747,"end":4757,"style":{"styleClass":"support type propertyName css"}}
-{"start":4777,"end":4825,"style":{"styleClass":"comment block"}}
+{"start":4777,"end":4779,"style":{"styleClass":"comment block start"}}
+{"start":4779,"end":4823,"style":{"styleClass":"comment block"}}
+{"start":4823,"end":4825,"style":{"styleClass":"comment block end"}}
 {"start":4830,"end":4837,"style":{"styleClass":"support type propertyName css"}}
-{"start":4856,"end":4877,"style":{"styleClass":"comment block"}}
+{"start":4856,"end":4858,"style":{"styleClass":"comment block start"}}
+{"start":4858,"end":4875,"style":{"styleClass":"comment block"}}
+{"start":4875,"end":4877,"style":{"styleClass":"comment block end"}}
 {"start":4879,"end":4886,"style":{"styleClass":"support type propertyName css"}}
-{"start":4906,"end":4924,"style":{"styleClass":"comment block"}}
+{"start":4906,"end":4908,"style":{"styleClass":"comment block start"}}
+{"start":4908,"end":4922,"style":{"styleClass":"comment block"}}
+{"start":4922,"end":4924,"style":{"styleClass":"comment block end"}}
 {"start":4926,"end":4933,"style":{"styleClass":"support type propertyName css"}}
 {"start":4943,"end":4948,"style":{"styleClass":"constant other color css"}}
 {"start":4965,"end":4978,"style":{"styleClass":"support type propertyName css"}}
@@ -332,7 +348,9 @@
 {"start":5089,"end":5095,"style":{"styleClass":"support type propertyName css"}}
 {"start":5107,"end":5122,"style":{"styleClass":"support type propertyName css"}}
 {"start":5135,"end":5136,"style":{"styleClass":"punctuation section block end"}}
-{"start":5138,"end":5159,"style":{"styleClass":"comment block"}}
+{"start":5138,"end":5140,"style":{"styleClass":"comment block start"}}
+{"start":5140,"end":5157,"style":{"styleClass":"comment block"}}
+{"start":5157,"end":5159,"style":{"styleClass":"comment block end"}}
 {"start":5183,"end":5184,"style":{"styleClass":"punctuation section block begin"}}
 {"start":5186,"end":5191,"style":{"styleClass":"support type propertyName css"}}
 {"start":5193,"end":5200,"style":{"styleClass":"constant numeric hex css"}}
@@ -347,20 +365,30 @@
 {"start":5358,"end":5363,"style":{"styleClass":"support type propertyName css"}}
 {"start":5365,"end":5370,"style":{"styleClass":"constant other color css"}}
 {"start":5372,"end":5373,"style":{"styleClass":"punctuation section block end"}}
-{"start":5375,"end":5428,"style":{"styleClass":"comment block"}}
-{"start":5430,"end":5449,"style":{"styleClass":"comment block"}}
+{"start":5375,"end":5377,"style":{"styleClass":"comment block start"}}
+{"start":5377,"end":5426,"style":{"styleClass":"comment block"}}
+{"start":5426,"end":5428,"style":{"styleClass":"comment block end"}}
+{"start":5430,"end":5432,"style":{"styleClass":"comment block start"}}
+{"start":5432,"end":5447,"style":{"styleClass":"comment block"}}
+{"start":5447,"end":5449,"style":{"styleClass":"comment block end"}}
 {"start":5463,"end":5464,"style":{"styleClass":"punctuation section block begin"}}
 {"start":5466,"end":5482,"style":{"styleClass":"support type propertyName css"}}
 {"start":5484,"end":5491,"style":{"styleClass":"constant numeric hex css"}}
-{"start":5504,"end":5520,"style":{"styleClass":"comment block"}}
+{"start":5504,"end":5506,"style":{"styleClass":"comment block start"}}
+{"start":5506,"end":5518,"style":{"styleClass":"comment block"}}
+{"start":5518,"end":5520,"style":{"styleClass":"comment block end"}}
 {"start":5521,"end":5522,"style":{"styleClass":"punctuation section block end"}}
 {"start":5548,"end":5549,"style":{"styleClass":"punctuation section block begin"}}
 {"start":5551,"end":5567,"style":{"styleClass":"support type propertyName css"}}
 {"start":5569,"end":5576,"style":{"styleClass":"constant numeric hex css"}}
-{"start":5589,"end":5605,"style":{"styleClass":"comment block"}}
+{"start":5589,"end":5591,"style":{"styleClass":"comment block start"}}
+{"start":5591,"end":5603,"style":{"styleClass":"comment block"}}
+{"start":5603,"end":5605,"style":{"styleClass":"comment block end"}}
 {"start":5606,"end":5607,"style":{"styleClass":"punctuation section block end"}}
 {"start":5634,"end":5635,"style":{"styleClass":"punctuation section block begin"}}
-{"start":5637,"end":5711,"style":{"styleClass":"comment block"}}
+{"start":5637,"end":5639,"style":{"styleClass":"comment block start"}}
+{"start":5639,"end":5709,"style":{"styleClass":"comment block"}}
+{"start":5709,"end":5711,"style":{"styleClass":"comment block end"}}
 {"start":5712,"end":5713,"style":{"styleClass":"punctuation section block end"}}
 {"start":5751,"end":5752,"style":{"styleClass":"punctuation section block begin"}}
 {"start":5754,"end":5771,"style":{"styleClass":"support type propertyName css"}}
@@ -372,15 +400,23 @@
 {"start":5829,"end":5834,"style":{"styleClass":"support type propertyName css"}}
 {"start":5836,"end":5841,"style":{"styleClass":"constant other color css"}}
 {"start":5843,"end":5844,"style":{"styleClass":"punctuation section block end"}}
-{"start":5846,"end":5863,"style":{"styleClass":"comment block"}}
+{"start":5846,"end":5848,"style":{"styleClass":"comment block start"}}
+{"start":5848,"end":5861,"style":{"styleClass":"comment block"}}
+{"start":5861,"end":5863,"style":{"styleClass":"comment block end"}}
 {"start":5886,"end":5887,"style":{"styleClass":"punctuation section block begin"}}
 {"start":5913,"end":5920,"style":{"styleClass":"support type propertyName css"}}
 {"start":5944,"end":5951,"style":{"styleClass":"support type propertyName css"}}
-{"start":5996,"end":6008,"style":{"styleClass":"comment block"}}
+{"start":5996,"end":5998,"style":{"styleClass":"comment block start"}}
+{"start":5998,"end":6006,"style":{"styleClass":"comment block"}}
+{"start":6006,"end":6008,"style":{"styleClass":"comment block end"}}
 {"start":6010,"end":6017,"style":{"styleClass":"support type propertyName css"}}
-{"start":6041,"end":6053,"style":{"styleClass":"comment block"}}
+{"start":6041,"end":6043,"style":{"styleClass":"comment block start"}}
+{"start":6043,"end":6051,"style":{"styleClass":"comment block"}}
+{"start":6051,"end":6053,"style":{"styleClass":"comment block end"}}
 {"start":6071,"end":6078,"style":{"styleClass":"support type propertyName css"}}
-{"start":6088,"end":6100,"style":{"styleClass":"comment block"}}
+{"start":6088,"end":6090,"style":{"styleClass":"comment block start"}}
+{"start":6090,"end":6098,"style":{"styleClass":"comment block"}}
+{"start":6098,"end":6100,"style":{"styleClass":"comment block end"}}
 {"start":6104,"end":6116,"style":{"styleClass":"support type propertyName css"}}
 {"start":6118,"end":6121,"style":{"styleClass":"constant numeric value css"}}
 {"start":6124,"end":6132,"style":{"styleClass":"support type propertyName css"}}
@@ -396,9 +432,11 @@
 {"start":6262,"end":6269,"style":{"styleClass":"constant numeric hex css"}}
 {"start":6272,"end":6278,"style":{"styleClass":"support type propertyName css"}}
 {"start":6289,"end":6290,"style":{"styleClass":"punctuation section block end"}}
-{"start":6292,"end":6317,"style":{"styleClass":"comment block"}}
+{"start":6292,"end":6294,"style":{"styleClass":"comment block start"}}
+{"start":6294,"end":6317,"style":{"styleClass":"comment block"}}
 {"start":6318,"end":6334,"style":{"styleClass":"comment block"}}
-{"start":6335,"end":6339,"style":{"styleClass":"comment block"}}
+{"start":6335,"end":6337,"style":{"styleClass":"comment block"}}
+{"start":6337,"end":6339,"style":{"styleClass":"comment block end"}}
 {"start":6361,"end":6362,"style":{"styleClass":"punctuation section block begin"}}
 {"start":6386,"end":6393,"style":{"styleClass":"support type propertyName css"}}
 {"start":6402,"end":6408,"style":{"styleClass":"support type propertyName css"}}
@@ -406,11 +444,17 @@
 {"start":6425,"end":6432,"style":{"styleClass":"support type propertyName css"}}
 {"start":6443,"end":6448,"style":{"styleClass":"support type propertyName css"}}
 {"start":6450,"end":6453,"style":{"styleClass":"constant numeric number"}}
-{"start":6489,"end":6501,"style":{"styleClass":"comment block"}}
+{"start":6489,"end":6491,"style":{"styleClass":"comment block start"}}
+{"start":6491,"end":6499,"style":{"styleClass":"comment block"}}
+{"start":6499,"end":6501,"style":{"styleClass":"comment block end"}}
 {"start":6503,"end":6510,"style":{"styleClass":"support type propertyName css"}}
-{"start":6529,"end":6541,"style":{"styleClass":"comment block"}}
+{"start":6529,"end":6531,"style":{"styleClass":"comment block start"}}
+{"start":6531,"end":6539,"style":{"styleClass":"comment block"}}
+{"start":6539,"end":6541,"style":{"styleClass":"comment block end"}}
 {"start":6559,"end":6566,"style":{"styleClass":"support type propertyName css"}}
-{"start":6576,"end":6588,"style":{"styleClass":"comment block"}}
+{"start":6576,"end":6578,"style":{"styleClass":"comment block start"}}
+{"start":6578,"end":6586,"style":{"styleClass":"comment block"}}
+{"start":6586,"end":6588,"style":{"styleClass":"comment block end"}}
 {"start":6589,"end":6590,"style":{"styleClass":"punctuation section block end"}}
 {"start":6621,"end":6622,"style":{"styleClass":"punctuation section block begin"}}
 {"start":6624,"end":6635,"style":{"styleClass":"support type propertyName css"}}
@@ -430,8 +474,12 @@
 {"start":6764,"end":6767,"style":{"styleClass":"constant numeric value css"}}
 {"start":6771,"end":6784,"style":{"styleClass":"support type propertyName css"}}
 {"start":6786,"end":6789,"style":{"styleClass":"constant numeric value css"}}
-{"start":6792,"end":6831,"style":{"styleClass":"comment block"}}
-{"start":6833,"end":6857,"style":{"styleClass":"comment block"}}
+{"start":6792,"end":6794,"style":{"styleClass":"comment block start"}}
+{"start":6794,"end":6829,"style":{"styleClass":"comment block"}}
+{"start":6829,"end":6831,"style":{"styleClass":"comment block end"}}
+{"start":6833,"end":6835,"style":{"styleClass":"comment block start"}}
+{"start":6835,"end":6855,"style":{"styleClass":"comment block"}}
+{"start":6855,"end":6857,"style":{"styleClass":"comment block end"}}
 {"start":6859,"end":6864,"style":{"styleClass":"constant other color css"}}
 {"start":6881,"end":6894,"style":{"styleClass":"support type propertyName css"}}
 {"start":6896,"end":6899,"style":{"styleClass":"constant numeric value css"}}
@@ -439,17 +487,23 @@
 {"start":6913,"end":6922,"style":{"styleClass":"support type propertyName css"}}
 {"start":6924,"end":6930,"style":{"styleClass":"constant numeric value css"}}
 {"start":6932,"end":6933,"style":{"styleClass":"punctuation section block end"}}
-{"start":6935,"end":6968,"style":{"styleClass":"comment block"}}
+{"start":6935,"end":6937,"style":{"styleClass":"comment block start"}}
+{"start":6937,"end":6966,"style":{"styleClass":"comment block"}}
+{"start":6966,"end":6968,"style":{"styleClass":"comment block end"}}
 {"start":6980,"end":6981,"style":{"styleClass":"punctuation section block begin"}}
 {"start":6983,"end":6990,"style":{"styleClass":"support type propertyName css"}}
 {"start":6992,"end":6995,"style":{"styleClass":"constant numeric value css"}}
 {"start":6996,"end":6999,"style":{"styleClass":"constant numeric value css"}}
 {"start":7000,"end":7003,"style":{"styleClass":"constant numeric value css"}}
 {"start":7004,"end":7007,"style":{"styleClass":"constant numeric value css"}}
-{"start":7009,"end":7030,"style":{"styleClass":"comment block"}}
+{"start":7009,"end":7011,"style":{"styleClass":"comment block start"}}
+{"start":7011,"end":7028,"style":{"styleClass":"comment block"}}
+{"start":7028,"end":7030,"style":{"styleClass":"comment block end"}}
 {"start":7032,"end":7048,"style":{"styleClass":"support type propertyName css"}}
 {"start":7050,"end":7057,"style":{"styleClass":"constant numeric hex css"}}
-{"start":7060,"end":7110,"style":{"styleClass":"comment block"}}
+{"start":7060,"end":7062,"style":{"styleClass":"comment block start"}}
+{"start":7062,"end":7108,"style":{"styleClass":"comment block"}}
+{"start":7108,"end":7110,"style":{"styleClass":"comment block end"}}
 {"start":7113,"end":7114,"style":{"styleClass":"punctuation section block end"}}
 {"start":7132,"end":7133,"style":{"styleClass":"punctuation section block begin"}}
 {"start":7135,"end":7142,"style":{"styleClass":"support type propertyName css"}}
@@ -463,7 +517,9 @@
 {"start":7238,"end":7243,"style":{"styleClass":"constant other color css"}}
 {"start":7260,"end":7268,"style":{"styleClass":"support type propertyName css"}}
 {"start":7284,"end":7292,"style":{"styleClass":"support type propertyName css"}}
-{"start":7305,"end":7390,"style":{"styleClass":"comment block"}}
+{"start":7305,"end":7307,"style":{"styleClass":"comment block start"}}
+{"start":7307,"end":7388,"style":{"styleClass":"comment block"}}
+{"start":7388,"end":7390,"style":{"styleClass":"comment block end"}}
 {"start":7392,"end":7401,"style":{"styleClass":"support type propertyName css"}}
 {"start":7407,"end":7408,"style":{"styleClass":"punctuation section parens begin"}}
 {"start":7408,"end":7411,"style":{"styleClass":"constant numeric number"}}
@@ -481,11 +537,13 @@
 {"start":7588,"end":7593,"style":{"styleClass":"support type propertyName css"}}
 {"start":7594,"end":7598,"style":{"styleClass":"constant numeric hex css"}}
 {"start":7600,"end":7601,"style":{"styleClass":"punctuation section block end"}}
-{"start":7603,"end":7670,"style":{"styleClass":"comment block"}}
+{"start":7603,"end":7605,"style":{"styleClass":"comment block start"}}
+{"start":7605,"end":7670,"style":{"styleClass":"comment block"}}
 {"start":7671,"end":7742,"style":{"styleClass":"comment block"}}
 {"start":7743,"end":7814,"style":{"styleClass":"comment block"}}
 {"start":7815,"end":7888,"style":{"styleClass":"comment block"}}
-{"start":7889,"end":7947,"style":{"styleClass":"comment block"}}
+{"start":7889,"end":7945,"style":{"styleClass":"comment block"}}
+{"start":7945,"end":7947,"style":{"styleClass":"comment block end"}}
 {"start":7960,"end":7961,"style":{"styleClass":"punctuation section block begin"}}
 {"start":7966,"end":7982,"style":{"styleClass":"support type propertyName css"}}
 {"start":7987,"end":7988,"style":{"styleClass":"punctuation section parens begin"}}
@@ -511,7 +569,9 @@
 {"start":8215,"end":8219,"style":{"styleClass":"constant numeric value css"}}
 {"start":8222,"end":8235,"style":{"styleClass":"support type propertyName css"}}
 {"start":8237,"end":8241,"style":{"styleClass":"constant numeric value css"}}
-{"start":8243,"end":8253,"style":{"styleClass":"comment block"}}
+{"start":8243,"end":8245,"style":{"styleClass":"comment block start"}}
+{"start":8245,"end":8251,"style":{"styleClass":"comment block"}}
+{"start":8251,"end":8253,"style":{"styleClass":"comment block end"}}
 {"start":8255,"end":8260,"style":{"styleClass":"support type propertyName css"}}
 {"start":8262,"end":8266,"style":{"styleClass":"constant numeric hex css"}}
 {"start":8269,"end":8276,"style":{"styleClass":"support type propertyName css"}}
@@ -525,8 +585,10 @@
 {"start":8347,"end":8351,"style":{"styleClass":"support type propertyName css"}}
 {"start":8353,"end":8356,"style":{"styleClass":"constant numeric value css"}}
 {"start":8458,"end":8459,"style":{"styleClass":"punctuation section block end"}}
-{"start":8461,"end":8590,"style":{"styleClass":"comment block"}}
-{"start":8591,"end":8669,"style":{"styleClass":"comment block"}}
+{"start":8461,"end":8463,"style":{"styleClass":"comment block start"}}
+{"start":8463,"end":8590,"style":{"styleClass":"comment block"}}
+{"start":8591,"end":8667,"style":{"styleClass":"comment block"}}
+{"start":8667,"end":8669,"style":{"styleClass":"comment block end"}}
 {"start":8687,"end":8688,"style":{"styleClass":"punctuation section block begin"}}
 {"start":8690,"end":8696,"style":{"styleClass":"support type propertyName css"}}
 {"start":8698,"end":8701,"style":{"styleClass":"constant numeric value css"}}
@@ -543,10 +605,14 @@
 {"start":8869,"end":8878,"style":{"styleClass":"support type propertyName css"}}
 {"start":8880,"end":8883,"style":{"styleClass":"constant numeric value css"}}
 {"start":8886,"end":8897,"style":{"styleClass":"support type propertyName css"}}
-{"start":8932,"end":8971,"style":{"styleClass":"comment block"}}
+{"start":8932,"end":8934,"style":{"styleClass":"comment block start"}}
+{"start":8934,"end":8969,"style":{"styleClass":"comment block"}}
+{"start":8969,"end":8971,"style":{"styleClass":"comment block end"}}
 {"start":8973,"end":8979,"style":{"styleClass":"support type propertyName css"}}
 {"start":8981,"end":8986,"style":{"styleClass":"constant numeric value css"}}
-{"start":8989,"end":9028,"style":{"styleClass":"comment block"}}
+{"start":8989,"end":8991,"style":{"styleClass":"comment block start"}}
+{"start":8991,"end":9026,"style":{"styleClass":"comment block"}}
+{"start":9026,"end":9028,"style":{"styleClass":"comment block end"}}
 {"start":9029,"end":9030,"style":{"styleClass":"punctuation section block end"}}
 {"start":9047,"end":9048,"style":{"styleClass":"punctuation section block begin"}}
 {"start":9050,"end":9055,"style":{"styleClass":"support type propertyName css"}}
@@ -589,7 +655,9 @@
 {"start":9469,"end":9480,"style":{"styleClass":"support type propertyName css"}}
 {"start":9482,"end":9485,"style":{"styleClass":"constant numeric value css"}}
 {"start":9641,"end":9642,"style":{"styleClass":"punctuation section block end"}}
-{"start":9644,"end":9661,"style":{"styleClass":"comment block"}}
+{"start":9644,"end":9646,"style":{"styleClass":"comment block start"}}
+{"start":9646,"end":9659,"style":{"styleClass":"comment block"}}
+{"start":9659,"end":9661,"style":{"styleClass":"comment block end"}}
 {"start":9679,"end":9680,"style":{"styleClass":"punctuation section block begin"}}
 {"start":9682,"end":9687,"style":{"styleClass":"support type propertyName css"}}
 {"start":9689,"end":9693,"style":{"styleClass":"constant numeric hex css"}}
@@ -685,7 +753,9 @@
 {"start":10700,"end":10701,"style":{"styleClass":"punctuation section parens end"}}
 {"start":10703,"end":10704,"style":{"styleClass":"punctuation section block end"}}
 {"start":10706,"end":10707,"style":{"styleClass":"punctuation section block end"}}
-{"start":10710,"end":10722,"style":{"styleClass":"comment block"}}
+{"start":10710,"end":10712,"style":{"styleClass":"comment block start"}}
+{"start":10712,"end":10720,"style":{"styleClass":"comment block"}}
+{"start":10720,"end":10722,"style":{"styleClass":"comment block end"}}
 {"start":10742,"end":10743,"style":{"styleClass":"punctuation section block begin"}}
 {"start":10745,"end":10752,"style":{"styleClass":"support type propertyName css"}}
 {"start":10763,"end":10771,"style":{"styleClass":"support type propertyName css"}}
@@ -748,24 +818,36 @@
 {"start":11312,"end":11315,"style":{"styleClass":"constant numeric value css"}}
 {"start":11316,"end":11317,"style":{"styleClass":"constant numeric number"}}
 {"start":11318,"end":11321,"style":{"styleClass":"constant numeric value css"}}
-{"start":11324,"end":11402,"style":{"styleClass":"comment block"}}
+{"start":11324,"end":11326,"style":{"styleClass":"comment block start"}}
+{"start":11326,"end":11400,"style":{"styleClass":"comment block"}}
+{"start":11400,"end":11402,"style":{"styleClass":"comment block end"}}
 {"start":11557,"end":11558,"style":{"styleClass":"punctuation section block end"}}
-{"start":11560,"end":11621,"style":{"styleClass":"comment block"}}
+{"start":11560,"end":11562,"style":{"styleClass":"comment block start"}}
+{"start":11562,"end":11619,"style":{"styleClass":"comment block"}}
+{"start":11619,"end":11621,"style":{"styleClass":"comment block end"}}
 {"start":11641,"end":11642,"style":{"styleClass":"punctuation section block begin"}}
 {"start":11643,"end":11644,"style":{"styleClass":"punctuation section block end"}}
 {"start":11667,"end":11668,"style":{"styleClass":"punctuation section block begin"}}
 {"start":11669,"end":11670,"style":{"styleClass":"punctuation section block end"}}
-{"start":11672,"end":11692,"style":{"styleClass":"comment block"}}
-{"start":11693,"end":11747,"style":{"styleClass":"comment block"}}
+{"start":11672,"end":11674,"style":{"styleClass":"comment block start"}}
+{"start":11674,"end":11690,"style":{"styleClass":"comment block"}}
+{"start":11690,"end":11692,"style":{"styleClass":"comment block end"}}
+{"start":11693,"end":11695,"style":{"styleClass":"comment block start"}}
+{"start":11695,"end":11745,"style":{"styleClass":"comment block"}}
+{"start":11745,"end":11747,"style":{"styleClass":"comment block end"}}
 {"start":11755,"end":11756,"style":{"styleClass":"punctuation section block begin"}}
 {"start":11758,"end":11768,"style":{"styleClass":"support type propertyName css"}}
 {"start":11770,"end":11777,"style":{"styleClass":"constant numeric hex css"}}
 {"start":11779,"end":11780,"style":{"styleClass":"punctuation section block end"}}
-{"start":11782,"end":11797,"style":{"styleClass":"comment block"}}
+{"start":11782,"end":11784,"style":{"styleClass":"comment block start"}}
+{"start":11784,"end":11795,"style":{"styleClass":"comment block"}}
+{"start":11795,"end":11797,"style":{"styleClass":"comment block end"}}
 {"start":11819,"end":11820,"style":{"styleClass":"punctuation section block begin"}}
 {"start":11833,"end":11834,"style":{"styleClass":"constant numeric number"}}
 {"start":11856,"end":11857,"style":{"styleClass":"constant numeric number"}}
-{"start":11860,"end":11872,"style":{"styleClass":"comment block"}}
+{"start":11860,"end":11862,"style":{"styleClass":"comment block start"}}
+{"start":11862,"end":11870,"style":{"styleClass":"comment block"}}
+{"start":11870,"end":11872,"style":{"styleClass":"comment block end"}}
 {"start":11874,"end":11883,"style":{"styleClass":"support type propertyName css"}}
 {"start":11885,"end":11889,"style":{"styleClass":"constant numeric value css"}}
 {"start":11891,"end":11892,"style":{"styleClass":"punctuation section block end"}}
@@ -797,12 +879,18 @@
 {"start":12112,"end":12120,"style":{"styleClass":"support type propertyName css"}}
 {"start":12133,"end":12148,"style":{"styleClass":"support type propertyName css"}}
 {"start":12157,"end":12164,"style":{"styleClass":"support type propertyName css"}}
-{"start":12172,"end":12214,"style":{"styleClass":"comment block"}}
+{"start":12172,"end":12174,"style":{"styleClass":"comment block start"}}
+{"start":12174,"end":12212,"style":{"styleClass":"comment block"}}
+{"start":12212,"end":12214,"style":{"styleClass":"comment block end"}}
 {"start":12216,"end":12227,"style":{"styleClass":"support type propertyName css"}}
-{"start":12237,"end":12308,"style":{"styleClass":"comment block"}}
+{"start":12237,"end":12239,"style":{"styleClass":"comment block start"}}
+{"start":12239,"end":12306,"style":{"styleClass":"comment block"}}
+{"start":12306,"end":12308,"style":{"styleClass":"comment block end"}}
 {"start":12310,"end":12316,"style":{"styleClass":"support type propertyName css"}}
 {"start":12318,"end":12319,"style":{"styleClass":"constant numeric number"}}
-{"start":12321,"end":12379,"style":{"styleClass":"comment block"}}
+{"start":12321,"end":12323,"style":{"styleClass":"comment block start"}}
+{"start":12323,"end":12377,"style":{"styleClass":"comment block"}}
+{"start":12377,"end":12379,"style":{"styleClass":"comment block end"}}
 {"start":12381,"end":12387,"style":{"styleClass":"support type propertyName css"}}
 {"start":12399,"end":12408,"style":{"styleClass":"support type propertyName css"}}
 {"start":12410,"end":12414,"style":{"styleClass":"constant numeric value css"}}
@@ -825,7 +913,9 @@
 {"start":12550,"end":12555,"style":{"styleClass":"constant numeric value css"}}
 {"start":12558,"end":12565,"style":{"styleClass":"support type propertyName css"}}
 {"start":12574,"end":12581,"style":{"styleClass":"support type propertyName css"}}
-{"start":12597,"end":12609,"style":{"styleClass":"comment block"}}
+{"start":12597,"end":12599,"style":{"styleClass":"comment block start"}}
+{"start":12599,"end":12607,"style":{"styleClass":"comment block"}}
+{"start":12607,"end":12609,"style":{"styleClass":"comment block end"}}
 {"start":12610,"end":12611,"style":{"styleClass":"punctuation section block end"}}
 {"start":12663,"end":12664,"style":{"styleClass":"punctuation section block begin"}}
 {"start":12666,"end":12671,"style":{"styleClass":"support type propertyName css"}}
@@ -842,10 +932,14 @@
 {"start":12797,"end":12798,"style":{"styleClass":"punctuation section block begin"}}
 {"start":12806,"end":12813,"style":{"styleClass":"support type propertyName css"}}
 {"start":12839,"end":12846,"style":{"styleClass":"support type propertyName css"}}
-{"start":12858,"end":12870,"style":{"styleClass":"comment block"}}
+{"start":12858,"end":12860,"style":{"styleClass":"comment block start"}}
+{"start":12860,"end":12868,"style":{"styleClass":"comment block"}}
+{"start":12868,"end":12870,"style":{"styleClass":"comment block end"}}
 {"start":12872,"end":12879,"style":{"styleClass":"support type propertyName css"}}
 {"start":12895,"end":12902,"style":{"styleClass":"support type propertyName css"}}
-{"start":12926,"end":12938,"style":{"styleClass":"comment block"}}
+{"start":12926,"end":12928,"style":{"styleClass":"comment block start"}}
+{"start":12928,"end":12936,"style":{"styleClass":"comment block"}}
+{"start":12936,"end":12938,"style":{"styleClass":"comment block end"}}
 {"start":12940,"end":12954,"style":{"styleClass":"support type propertyName css"}}
 {"start":12965,"end":12970,"style":{"styleClass":"support type propertyName css"}}
 {"start":12972,"end":12976,"style":{"styleClass":"constant numeric hex css"}}
@@ -862,10 +956,14 @@
 {"start":13288,"end":13289,"style":{"styleClass":"punctuation section block begin"}}
 {"start":13291,"end":13296,"style":{"styleClass":"support type propertyName css"}}
 {"start":13298,"end":13302,"style":{"styleClass":"constant other color css"}}
-{"start":13315,"end":13361,"style":{"styleClass":"comment block"}}
+{"start":13315,"end":13317,"style":{"styleClass":"comment block start"}}
+{"start":13317,"end":13359,"style":{"styleClass":"comment block"}}
+{"start":13359,"end":13361,"style":{"styleClass":"comment block end"}}
 {"start":13374,"end":13375,"style":{"styleClass":"constant numeric number"}}
 {"start":13397,"end":13398,"style":{"styleClass":"constant numeric number"}}
-{"start":13401,"end":13413,"style":{"styleClass":"comment block"}}
+{"start":13401,"end":13403,"style":{"styleClass":"comment block start"}}
+{"start":13403,"end":13411,"style":{"styleClass":"comment block"}}
+{"start":13411,"end":13413,"style":{"styleClass":"comment block end"}}
 {"start":13415,"end":13424,"style":{"styleClass":"support type propertyName css"}}
 {"start":13426,"end":13430,"style":{"styleClass":"constant numeric value css"}}
 {"start":13433,"end":13445,"style":{"styleClass":"support type propertyName css"}}
@@ -874,21 +972,31 @@
 {"start":13469,"end":13473,"style":{"styleClass":"constant numeric value css"}}
 {"start":13475,"end":13476,"style":{"styleClass":"punctuation section block end"}}
 {"start":13517,"end":13518,"style":{"styleClass":"punctuation section block begin"}}
-{"start":13550,"end":13562,"style":{"styleClass":"comment block"}}
+{"start":13550,"end":13552,"style":{"styleClass":"comment block start"}}
+{"start":13552,"end":13560,"style":{"styleClass":"comment block"}}
+{"start":13560,"end":13562,"style":{"styleClass":"comment block end"}}
 {"start":13586,"end":13593,"style":{"styleClass":"support type propertyName css"}}
 {"start":13609,"end":13616,"style":{"styleClass":"support type propertyName css"}}
-{"start":13640,"end":13652,"style":{"styleClass":"comment block"}}
+{"start":13640,"end":13642,"style":{"styleClass":"comment block start"}}
+{"start":13642,"end":13650,"style":{"styleClass":"comment block"}}
+{"start":13650,"end":13652,"style":{"styleClass":"comment block end"}}
 {"start":13667,"end":13668,"style":{"styleClass":"constant numeric number"}}
 {"start":13690,"end":13691,"style":{"styleClass":"constant numeric number"}}
-{"start":13694,"end":13706,"style":{"styleClass":"comment block"}}
+{"start":13694,"end":13696,"style":{"styleClass":"comment block start"}}
+{"start":13696,"end":13704,"style":{"styleClass":"comment block"}}
+{"start":13704,"end":13706,"style":{"styleClass":"comment block end"}}
 {"start":13708,"end":13723,"style":{"styleClass":"support type propertyName css"}}
-{"start":13734,"end":13783,"style":{"styleClass":"comment block"}}
+{"start":13734,"end":13736,"style":{"styleClass":"comment block start"}}
+{"start":13736,"end":13781,"style":{"styleClass":"comment block"}}
+{"start":13781,"end":13783,"style":{"styleClass":"comment block end"}}
 {"start":13784,"end":13785,"style":{"styleClass":"punctuation section block end"}}
 {"start":13806,"end":13807,"style":{"styleClass":"punctuation section block begin"}}
-{"start":13808,"end":13868,"style":{"styleClass":"comment block"}}
+{"start":13808,"end":13810,"style":{"styleClass":"comment block start"}}
+{"start":13810,"end":13868,"style":{"styleClass":"comment block"}}
 {"start":13869,"end":13929,"style":{"styleClass":"comment block"}}
 {"start":13930,"end":13969,"style":{"styleClass":"comment block"}}
-{"start":13970,"end":13973,"style":{"styleClass":"comment block"}}
+{"start":13970,"end":13971,"style":{"styleClass":"comment block"}}
+{"start":13971,"end":13973,"style":{"styleClass":"comment block end"}}
 {"start":13975,"end":13991,"style":{"styleClass":"support type propertyName css"}}
 {"start":13993,"end":13998,"style":{"styleClass":"constant other color css"}}
 {"start":14012,"end":14018,"style":{"styleClass":"support type propertyName css"}}
@@ -916,7 +1024,9 @@
 {"start":14293,"end":14300,"style":{"styleClass":"support type propertyName css"}}
 {"start":14302,"end":14305,"style":{"styleClass":"constant numeric number"}}
 {"start":14318,"end":14319,"style":{"styleClass":"punctuation section block end"}}
-{"start":14321,"end":14335,"style":{"styleClass":"comment block"}}
+{"start":14321,"end":14323,"style":{"styleClass":"comment block start"}}
+{"start":14323,"end":14333,"style":{"styleClass":"comment block"}}
+{"start":14333,"end":14335,"style":{"styleClass":"comment block end"}}
 {"start":14365,"end":14366,"style":{"styleClass":"punctuation section block begin"}}
 {"start":14368,"end":14376,"style":{"styleClass":"support type propertyName css"}}
 {"start":14389,"end":14396,"style":{"styleClass":"support type propertyName css"}}
@@ -931,12 +1041,16 @@
 {"start":14501,"end":14508,"style":{"styleClass":"support type propertyName css"}}
 {"start":14510,"end":14512,"style":{"styleClass":"string quoted single"}}
 {"start":14514,"end":14515,"style":{"styleClass":"punctuation section block end"}}
-{"start":14517,"end":14530,"style":{"styleClass":"comment block"}}
+{"start":14517,"end":14519,"style":{"styleClass":"comment block start"}}
+{"start":14519,"end":14528,"style":{"styleClass":"comment block"}}
+{"start":14528,"end":14530,"style":{"styleClass":"comment block end"}}
 {"start":14539,"end":14540,"style":{"styleClass":"punctuation section block begin"}}
 {"start":14542,"end":14552,"style":{"styleClass":"support type propertyName css"}}
 {"start":14563,"end":14570,"style":{"styleClass":"support type propertyName css"}}
 {"start":14572,"end":14575,"style":{"styleClass":"constant numeric number"}}
-{"start":14578,"end":14622,"style":{"styleClass":"comment block"}}
+{"start":14578,"end":14580,"style":{"styleClass":"comment block start"}}
+{"start":14580,"end":14620,"style":{"styleClass":"comment block"}}
+{"start":14620,"end":14622,"style":{"styleClass":"comment block end"}}
 {"start":14624,"end":14632,"style":{"styleClass":"support type propertyName css"}}
 {"start":14645,"end":14661,"style":{"styleClass":"support type propertyName css"}}
 {"start":14663,"end":14670,"style":{"styleClass":"constant numeric hex css"}}

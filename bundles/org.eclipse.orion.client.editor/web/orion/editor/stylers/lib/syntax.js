@@ -48,6 +48,12 @@ define("orion/editor/stylers/lib/syntax", [], function() {
 					begin: "/\\*\\*",
 					end: "\\*/",
 					name: "comment.block.documentation",
+					beginCaptures: {
+						0: {name: "comment.block.documentation.start"}
+					},
+					endCaptures: {
+						0: {name: "comment.block.documentation.end"}
+					},
 					patterns: [
 						{
 							match: "@(?:(?!\\*/)\\S)*",
@@ -94,8 +100,11 @@ define("orion/editor/stylers/lib/syntax", [], function() {
 			id: "orion.c-like",
 			repository: {
 				comment_singleLine: {
-					match: {match: "//.*", literal: "//"},
+					match: {match: "(//).*", literal: "//"},
 					name: "comment.line.double-slash",
+					captures: {
+						1: {name: "comment.line.double-slash.start"}
+					},
 					patterns: [
 						{
 							include: "orion.lib#todo_comment_singleLine"
@@ -106,6 +115,12 @@ define("orion/editor/stylers/lib/syntax", [], function() {
 					begin: {match: "/\\*", literal: "/*"},
 					end: {match: "\\*/", literal: "*/"}, 
 					name: "comment.block",
+					beginCaptures: {
+						0: {name: "comment.block.start"}
+					},
+					endCaptures: {
+						0: {name: "comment.block.end"}
+					},
 					patterns: [
 						{
 							match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)",

@@ -62,8 +62,11 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/synt
 			{include: "orion.lib#doc_block"},
 			{include: "orion.c-like#comment_block"},
 			{
-				match: {match: "#.*", literal: "#"},
+				match: {match: "(#).*", literal: "#"},
 				name: "comment.line.number-sign.php",
+				captures: {
+					1: {name: "comment.line.number-sign.start.php"}
+				},
 				patterns: [
 					{include: "orion.lib#todo_comment_singleLine"}
 				]
