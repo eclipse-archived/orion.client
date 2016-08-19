@@ -27,7 +27,7 @@ function getOrgs(req, res){
 	var task = new tasks.Task(res,false,false,0,false);
 	var resp = {};
 	var targetRequest = JSON.parse(req.query.Target);
-	getOrgsRequest(req.user.username, targetRequest, task)
+	getOrgsRequest(req.user.username, targetRequest)
 	.then(function(orgsArray){
 		resp = {
 			"Orgs" : orgsArray.simpleorgsArray
@@ -40,20 +40,22 @@ function getOrgs(req, res){
 			Message: "OK",
 			Severity: "Ok"
 		});
-});
+	}).catch(function(err){
+		target.caughtErrorHandler(task, err);
+	});
 }
 
-function getOrgsRequest(userId, targetRequest, task){
+function getOrgsRequest(userId, targetRequest){
 	var completeOrgsArray = [];
 	var simpleorgsArray = [];
-	return target.cfRequest("GET", userId, task, targetRequest.Url + "/v2/organizations", {"inline-relations-depth":"1"})
+	return target.cfRequest("GET", userId, targetRequest.Url + "/v2/organizations", {"inline-relations-depth":"1"})
 	// TODO In Java code, there is a case that Region is needed, but that value was always assigned as null.
 	.then(function(result){
 		completeOrgsArray = result.resources;
 		return new Promise(function(fulfill,reject){
 			if(completeOrgsArray){
 				async.each(completeOrgsArray, function(resource, cb) {
-					return target.cfRequest("GET", userId, null, targetRequest.Url + resource.entity.spaces_url, {"inline-relations-depth":"1"})
+					return target.cfRequest("GET", userId, targetRequest.Url + resource.entity.spaces_url, {"inline-relations-depth":"1"})
 					.then(function(spaceJson){	
 						var spaces = [];
 						var spaceResources = spaceJson && spaceJson.resources || [];
@@ -70,10 +72,12 @@ function getOrgsRequest(userId, targetRequest, task){
 							simpleorgsArray.push(orgWithSpace);
 						}
 						cb();
+					}).catch(function(err){
+						cb(err);
 					});
 				}, function(err) {
 					if(err){
-						return reject(err);
+						return reject({"message":err.message});
 					}			
 					fulfill({"simpleorgsArray":simpleorgsArray,"completeOrgsArray":completeOrgsArray});
 				});

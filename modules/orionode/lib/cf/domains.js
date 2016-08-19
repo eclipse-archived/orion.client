@@ -28,9 +28,9 @@ function getDomain(req, res) {
 	var targetRequest = req.query.Target ? JSON.parse(req.query.Target) : null;
 	var defaultDomainMode = req.query.Default;
 	var domainName = req.query.Name;
-	target.computeTarget(req.user.username, targetRequest, task)
+	target.computeTarget(req.user.username, targetRequest)
 	 .then(function(appTarget){
-	 	return getCFdomains(appTarget, req.user.username, targetRequest.Url, targetRequest.Org, domainName, defaultDomainMode)
+	 	return getCFdomains(appTarget, req.user.username, targetRequest.Url, domainName, defaultDomainMode)
 		.then(function(domainArray) {
 			var resp = {};
 			if (!domainArray) {
@@ -60,32 +60,30 @@ function getDomain(req, res) {
 }
 
 // This method can not accept req, because the req something has a body instead of a query.
-function getCFdomains(appTarget, UserId, targetUrl, orgName, domainName, defaultDomainMode) {
+function getCFdomains(appTarget, UserId, targetUrl, domainName, defaultDomainMode) {
 	var domainArray = [];
 	var waitFor;
 	if (!defaultDomainMode){
-		waitFor = target.cfRequest("GET", UserId, null, targetUrl + appTarget.Org.entity.private_domains_url, 
+		waitFor = target.cfRequest("GET", UserId, targetUrl + appTarget.Org.entity.private_domains_url, 
 				domainName ? {"q": "name:" + util.encodeURIComponent(domainName)}: null);
 	}else{
 		waitFor = Promise.resolve();
 	}
 	return waitFor
 	.then(function(result) {
-		return new Promise(function(fulfill) {
-			if (defaultDomainMode || !domainName || result.total_results < 1) {
-				var qs = domainName ? {
-					"q": "name:" + util.encodeURIComponent(domainName)
-				} : {
-					"page": "1",
-					"results-per-page": "1"
-				};
-				return target.cfRequest("GET", UserId, null, targetUrl + "/v2/shared_domains", qs)
-				.then(function(result){
-					fulfill(result);
-				});
-			}
-			fulfill(result);
-		});
+		if (defaultDomainMode || !domainName || result.total_results < 1) {
+			var qs = domainName ? {
+				"q": "name:" + util.encodeURIComponent(domainName)
+			} : {
+				"page": "1",
+				"results-per-page": "1"
+			};
+			return target.cfRequest("GET", UserId, targetUrl + "/v2/shared_domains", qs)
+			.then(function(result){
+				return result;
+			});
+		}
+		return result;
 	}).then(function(result) {
 		var domainResources = result.resources;
 		for (var k = 0; k < domainResources.length; k++) {

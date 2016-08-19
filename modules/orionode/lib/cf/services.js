@@ -27,66 +27,65 @@ module.exports.router = function() {
 		var targetURL = targetRequest.Url;
 		var spaceGuid = targetRequest.SpaceId;
 		if (spaceGuid && targetURL) {
-			new Promise(function(fulfill, reject) {
-				var serviceUrl = "/v2/spaces/" + spaceGuid + "/service_instances";
-				var fullService = [];
-				function promiseWhile(doRequest, value) {
-					return Promise.resolve(value).then(doRequest).then(function(result) {
-						return collectServiceInfo(result)
-							.then(function() {
-								if (result && result.next_url) {
-									serviceUrl = result.next_url;
-									return promiseWhile(doRequest, serviceUrl);
-								}
-								return null;
-							});
-					});
-				}
-
-				function doRequest(serviceUrl) {
-					return target.cfRequest("GET", req.user.username, task, targetURL + serviceUrl, {
-						"inline-relations-depth": "1",
-						"return_user_provided_service_instances": "true"
-					});
-				}
-
-				function collectServiceInfo(result) {
-					var serviceResources = result && result.resources;
-					if (serviceResources) {
-						return new Promise(function(fulfill, reject) {
-							async.each(serviceResources, function(resource, cb) {
-								var isBindable = true;
-								if (resource.entity.service_plan) {
-									var serviceEntity = resource.entity.service_plan.entity;
-									var serviceGuid = serviceEntity.service_guid;
-									return getCFService(req.user.username, targetURL, serviceGuid)
-										.then(function(singleServiceresult) {
-											isBindable = singleServiceresult.entity.bindable;
-										}).then(function() {
-											if (isBindable) {
-												var ServiceJson = {
-													"Name": resource.entity.name,
-													"Type": "Service"
-												};
-												fullService.push(ServiceJson);
-											}
-											cb();
-										});
-								}
-							}, function(err) {
-								if (err) {
-									return reject(err);
-								}
-								fulfill();
-							});
+			var serviceUrl = "/v2/spaces/" + spaceGuid + "/service_instances";
+			var fullService = [];
+			function promiseWhile(doRequest, value) {
+				return Promise.resolve(value).then(doRequest).then(function(result) {
+					return collectServiceInfo(result)
+						.then(function() {
+							if (result && result.next_url) {
+								serviceUrl = result.next_url;
+								return promiseWhile(doRequest, serviceUrl);
+							}
+							return null;
 						});
-					}
-					return Promise.resolve();
-				}
-				return promiseWhile(doRequest, serviceUrl)
-					.then(function() {
-						fulfill(fullService);
+				});
+			}
+			function doRequest(serviceUrl) {
+				return target.cfRequest("GET", req.user.username, targetURL + serviceUrl, {
+					"inline-relations-depth": "1",
+					"return_user_provided_service_instances": "true"
+				});
+			}
+			function collectServiceInfo(result) {
+				var serviceResources = result && result.resources;
+				if (serviceResources) {
+					return new Promise(function(fulfill, reject) {
+						async.each(serviceResources, function(resource, cb) {
+							var isBindable = true;
+							if (resource.entity.service_plan) {
+								var serviceEntity = resource.entity.service_plan.entity;
+								var serviceGuid = serviceEntity.service_guid;
+								return getCFService(req.user.username, targetURL, serviceGuid)
+								.then(function(singleServiceresult) {
+									isBindable = singleServiceresult.entity.bindable;
+								}).then(function() {
+									if (isBindable) {
+										var ServiceJson = {
+											"Name": resource.entity.name,
+											"Type": "Service"
+										};
+										fullService.push(ServiceJson);
+									}
+									cb();
+								}).catch(function(err){
+									cb(err);
+								});
+							}
+						}, function(err) {
+							if (err) {
+								return reject({"message":err.message});
+							}
+							fulfill();
+						});
 					});
+				}
+				return Promise.resolve();
+			}
+			
+			promiseWhile(doRequest, serviceUrl)
+			.then(function() {
+				return fullService;
 			}).then(function(fullService) {
 				var resp = {
 					"Children": fullService
@@ -100,14 +99,7 @@ module.exports.router = function() {
 					Severity: "Ok"
 				});
 			}).catch(function(err) {
-				task.done({
-					HttpCode: 401,
-					Code: 0,
-					JsonData: {},
-					DetailedMessage: err,
-					Message: err,
-					Severity: "Error"
-				});
+				target.caughtErrorHandler(task, err);
 			});
 		}else{
 			task.done({
@@ -122,6 +114,6 @@ module.exports.router = function() {
 	}
 
 	function getCFService(userId, targetURL, serviceGuid) {
-		return target.cfRequest("GET", userId, null, targetURL + "/v2/services/" + serviceGuid);
+		return target.cfRequest("GET", userId, targetURL + "/v2/services/" + serviceGuid);
 	}
 };

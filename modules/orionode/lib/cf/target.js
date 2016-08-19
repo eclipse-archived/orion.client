@@ -22,6 +22,7 @@ module.exports.router = function() {
 	module.exports.parsebody = parsebody;
 	module.exports.computeTarget = computeTarget;
 	module.exports.cfRequest = cfRequest;
+	module.exports.caughtErrorHandler = caughtErrorHandler;
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -29,6 +30,7 @@ module.exports.router = function() {
 	.post("*", postTarget);
 	
 function getTarget(req,res){
+	// TODO this end point hasn't been used yet, since wasn't fully implemented yet.
 	var task = new tasks.Task(res,false,false,0,false);
 	var url = req.body.Url;
 	var resp = {
@@ -50,7 +52,7 @@ function postTarget(req,res){
 	var Username = req.body.Username;
 	// Try to login here!!
 	tryLogin(url,Username,Password,req.user.username)
-	.then(function(result){
+	.then(function(){
 		var resp = {
 			"Type": "Target",
 			"Url": url
@@ -63,6 +65,8 @@ function postTarget(req,res){
 			Message: "OK",
 			Severity: "Ok"
 		});
+	}).catch(function(err){
+		caughtErrorHandler(task, err);
 	});
 }
 function tryLogin(url, Username, Password, userId){
@@ -70,7 +74,7 @@ function tryLogin(url, Username, Password, userId){
 		url: url + "/v2/info",
 		headers: {"Accept": "application/json",	"Content-Type": "application/json"}
 	};
-	return cfRequest(null, null , null, null, null, null, null, infoHeader)
+	return cfRequest(null, null, null, null, null, null, infoHeader)
 	.then(function(response){
 		var authorizationEndpoint = response.authorization_endpoint;
 		return new Promise(function(fulfill, reject) {
@@ -83,16 +87,16 @@ function tryLogin(url, Username, Password, userId){
 				var respondJson = parsebody(body);
 				if(!error){
 					UseraccessToken[userId] = respondJson.access_token;
-					return fulfill(true);
+					return fulfill();
 				}
-				return reject(false);
+				return reject(error); // TODO need to check the shape of this error to make sure the info makes sence.
 			});
 		});
 	});
 }
-function computeTarget(userId, targetRequest, task){
+function computeTarget(userId, targetRequest){
 	if(targetRequest){
-		return orgs.getOrgsRequest(userId, targetRequest, task)
+		return orgs.getOrgsRequest(userId, targetRequest)
 		.then(function(OrgsArray){	
 			if(!targetRequest.Org){
 				var org = OrgsArray.completeOrgsArray[0];
@@ -120,42 +124,44 @@ function computeTarget(userId, targetRequest, task){
 		});
 	}
 	if(!targetRequest){
-		task.done({
-			HttpCode: 402,
-			Code: 0,
-			DetailedMessage: "CF-TargetNotSet",
-			JsonData: {},
-			Message: "Target not set",
-			Severity: "Error"
-		});
+		return Promise.reject({"code":402, "message":"Target not set","detailMessage":"CF-TargetNotSet"});
 	}
 }
-function getAccessToken(userId, task){
-	if(!UseraccessToken[userId] && task){
-		// if the token is null, the following info is for orgs endpoint specificly.
-		var resp = {
-			"description": "Not authenticated",
-			"error_code": "CF-NotAuthenticated"
-		};
-		task.done({
-			HttpCode: 401,
-			Code: 0,
-			JsonData: resp,
-			Message: "Not authenticated",
-			Severity: "Error"
-		});
-	}
+function getAccessToken(userId){
 	return UseraccessToken[userId];
+}
+function caughtErrorHandler(task, err){
+	var errorResponse = {
+		HttpCode: err.code || 400,
+		Code: 0,
+		DetailedMessage: err.detailMessage || err.message,
+		JsonData: err.data || {},
+		Message: err.message,
+		Severity: "Error"
+	};
+	if(err.bundleid){
+		errorResponse.BundleId = err.bundleid;
+	}
+	task.done(errorResponse);
 }
 function parsebody(body){
 	return typeof body === "string" ? JSON.parse(body): body;
 }
-function cfRequest (method, userId, task, url, query, body, headers, requestHeader) {
+function cfRequest (method, userId, url, query, body, headers, requestHeader) {
 	return new Promise(function(fulfill, reject) {
 		if(!requestHeader){
-			var cloudAccessToken = getAccessToken(userId, task);
+			var cloudAccessToken = getAccessToken(userId);
 			if (!cloudAccessToken) {
-				return;
+				return reject(
+					{
+						"code":401,
+						"message":"Not authenticated",
+						"data":{
+							"description": "Not authenticated",
+							"error_code": "CF-NotAuthenticated"
+						}
+					}
+				);
 			}
 			headers = headers || {};
 			headers.Authorization = cloudAccessToken;
