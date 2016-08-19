@@ -29,7 +29,7 @@ var args = argslib.parseArgs(process.argv);
 
 var PORT_LOW = 8082;
 var PORT_HIGH = 10082;
-var port = args.port || args.p || process.env.PORT || 8081;
+var port = args.port || args.p || process.env.PORT || 8083;
 var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
 
 var configParams = argslib.readConfigFileSync(configFile) || {};
