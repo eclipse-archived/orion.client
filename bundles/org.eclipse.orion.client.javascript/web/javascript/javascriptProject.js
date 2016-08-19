@@ -264,7 +264,8 @@ define([
 				json.loadEagerly = [];
 				return json;
 			}
-			default: null;
+			default:
+				return null;
 		}
 	}
 	
@@ -355,7 +356,7 @@ define([
 	 * @returns {Deferred} A deferred that will resolve to the project-specific formatting options or null
 	 * @see https://github.com/beautify-web/js-beautify
 	 */
-	JavaScriptProject.prototype.getFormattingOptions = function getESlintOptions() {
+	JavaScriptProject.prototype.getFormattingOptions = function getFormattingOptions() {
 		if(this.map.formatting) {
 			return new Deferred().resolve(this.map.formatting);
 		}
@@ -418,7 +419,7 @@ define([
 				_handle.call(this, "onProjectChanged", this, evnt, project.Location);
 				return;
 			} 
-			_handle.call(this, "onInputChanged", this, evnt, project.Location);				
+			_handle.call(this, "onInputChanged", this, evnt, project.Location);
 		} else {
 			delete this.ecma;
 			_handle.call(this, "onProjectChanged", this, evnt, null);
@@ -499,7 +500,7 @@ define([
 				if(typeof f === 'function') {
 					f.apply(handler, args.slice(1));
 				}
-			}.bind(this));
+			});
 		}
 	}
 	
