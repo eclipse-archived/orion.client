@@ -14656,6 +14656,29 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
+						it("should not flag invalid unused expressions 6", function(callback) {
+							var topic =
+								"/*eslint-env amd */\n" +
+								"define([\n" +
+								"'module\n" +
+								"], function(module) {});";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										severity: 'error',
+										description: 'Unterminated string constant',
+										start: 29,
+										end: 30
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
 					});
 			});
 		});
