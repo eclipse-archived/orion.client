@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function(module) {
+define([
+'estraverse/estraverse',
+'module'
+], function(Estraverse, module) {
 	//------------------------------------------------------------------------------
 	// Rule Definition
 	//------------------------------------------------------------------------------
@@ -74,10 +77,29 @@ define(function(module) {
 			return /^(?:Assignment|Call|New|Update|Yield)Expression$/.test(node.type) ||
 				(node.type === "UnaryExpression" && ["delete", "void"].indexOf(node.operator) >= 0);
 		}
+		
+		function isRecoveredNode(currentNode) {
+			var result = false;
 
+			Estraverse.traverse(currentNode, {
+				/**
+				 * @callback
+				 */
+				enter: function(node, parent) {
+					if (node.range && node.range[0] === node.range[1]) {
+						result = true;
+						return Estraverse.VisitorOption.Break;
+					}
+				}
+			});
+
+			return result;
+		}
 		return {
 			"ExpressionStatement": function(node) {
-				if (!isValidExpression(node.expression) && !isDirective(node, context.getAncestors())) {
+				if (!isValidExpression(node.expression)
+						&& !isDirective(node, context.getAncestors())
+						&& !isRecoveredNode(node.expression)) {
 					context.report(node, "Expected an assignment or function call and instead saw an expression.");
 				}
 			}
