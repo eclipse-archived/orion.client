@@ -14,6 +14,7 @@ var bodyParser = require("body-parser");
 var fs = require("fs");
 var path = require("path");
 var manifests = require("./manifests");
+var api = require("../api"), writeError = api.writeError;
 
 module.exports.router = function() {
 
@@ -35,7 +36,7 @@ function planJson(type, manifest , planner , wizard){
 	
 function getplans(req, res){
 	var filePath = manifests.retrieveProjectFilePath(req);
-	Promise.resolve(manifests.retrieveManifestFile(req,res))
+	manifests.retrieveManifestFile(req)
 	.then(function(manifest){
 		var children = [];
 		function generatePlansforManifest(manifest,children){
@@ -57,6 +58,8 @@ function getplans(req, res){
 		generatePlansforManifest(manifest,children);
 		var result =  {"Children": children};
 		res.status(200).json(result);
+	}).catch(function(err){
+		writeError(404, res, err.message);
 	});
 }
 };

@@ -26,13 +26,13 @@ module.exports.router = function() {
 		var task = new tasks.Task(res, false, false, 0, false);
 		var appName = req._parsedUrl.pathname.slice(1);
 		var targetRequest = req.query.Target ? JSON.parse(req.query.Target) : null;
-		var cloudAccessToken = target.getAccessToken(req.user.username, task);
+		var cloudAccessToken = target.getAccessToken(req.user.username);
 		var timestamp = req.query.Timestamp && req.query.Timestamp !== "-1" ? req.query.Timestamp : -1;
 		var appGuid, loggingEndpoint;
 
-		target.computeTarget(req.user.username, targetRequest, task)
+		target.computeTarget(req.user.username, targetRequest)
 		.then(function(appTarget){
-			return apps._getAppwithAppName(req.user.username, appName, appTarget, task);
+			return apps._getAppwithAppName(req.user.username, appName, appTarget);
 		}).then(function(appResult){
 			appGuid = appResult.app.appMetadata.guid;
 			var infoURL = targetRequest.Url + "/v2/info";
@@ -40,7 +40,7 @@ module.exports.router = function() {
 				"Accept": "application/json",
 				"Content-Type": "application/json"
 			};
-			return target.cfRequest(null, req.user.username, task, infoURL, null, null, infoHeader, null);
+			return target.cfRequest(null, req.user.username, infoURL, null, null, infoHeader, null);
 		}).then(function(infoData) {
 			loggingEndpoint = infoData.logging_endpoint;
 
@@ -57,7 +57,7 @@ module.exports.router = function() {
 				},
 				encoding: null
 			};
-			return target.cfRequest(null, null, null, null, null, null, null, logzHeader);
+			return target.cfRequest(null, null, null, null, null, null, logzHeader);
 		}).then(function(response) {
 			var body = response.body;
 			var boundaryIndex = response.headers["content-type"].indexOf("boundary=");
