@@ -369,6 +369,9 @@ define([
 					this.pos = current;
 					this.options.onComment(true, this.input.slice(start + 2, current), start, current, startLoc, this.curPosition());
 				}
+				this.pos = start;
+				// call the acorn function to report unterminated block comment
+				return nextMethod.call(this);
 			};
 		});
 	};
