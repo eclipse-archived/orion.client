@@ -166,7 +166,7 @@
         deps.push(node.required);
       } else if (node.type == "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
-        if (elt.type == "Literal" && typeof elt.value == "string") {
+        if (elt && elt.type == "Literal" && typeof elt.value == "string") { //ORION elt might be null
           elt.required = interf(elt.value); //ORION
           deps.push(elt.required);
         }

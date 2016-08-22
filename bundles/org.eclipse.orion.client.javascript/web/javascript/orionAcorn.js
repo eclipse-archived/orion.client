@@ -203,7 +203,7 @@ define([
 	 * @param {String} env The environmentn kind the dep came from
 	 */
 	function addDep(node, deps, env) {
-		if(node.type === "Literal") {
+		if(node && node.type === "Literal") {
 			if (!deps[node.value]) {
 				deps[node.value] = {value: node.value, env: env};
 			}
