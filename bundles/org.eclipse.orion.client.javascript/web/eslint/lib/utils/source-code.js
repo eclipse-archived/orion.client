@@ -2,7 +2,7 @@
 define([
 	'./token-store',
 	'estraverse/estraverse',
-	'./eslint'
+	'../eslint'
 ], function(createTokenStore, estraverse, eslint) {
 	/**
  * @fileoverview Abstraction of JavaScript source code.

@@ -83,7 +83,6 @@ define({
 	'no-undef-expression-defined-index' : '\'${0}\' is undefined for \'${1}\' in ${2}.',  // 0: member name 1: object name 2: library
 	'no-undef-init': 'Avoid explicitly initializing variables to \'undefined\'.',
 	'no-undef-init-description': 'Warn when variables are explicitly initialized to undefined.',
-	'no-undef-readonly': '\'${0}\' is read-only.',
 	'no-undef-description': 'Warn when used variable or function has not been defined.',
 	'no-unreachable' : 'Unreachable code.',
 	'no-unreachable-description': 'Warn when code is not reachable.',

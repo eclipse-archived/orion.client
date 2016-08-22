@@ -2090,6 +2090,34 @@ define([
 						});
 				});
 			});
+			//NO-UNDEF -----------------------------------------------------
+			describe('no-undef', function() {
+				var RULE_ID = "no-undef";
+				it("should not report a violation when Typed Array globals are used", function(callback) {
+					var topic = "ArrayBuffer; DataView; Uint32Array;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("should not flag ES6 globals", function(callback) {
+					var topic = "Promise; Proxy; Reflect; Symbol;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: callback, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+			});
 		});
 	};
 });

@@ -68,7 +68,7 @@ define(function(module) {
 		};
 
 		// ES6: report blocks without block-level bindings
-		if (context.ecmaFeatures.ecmaVersion >= 6) {
+		if (context.parserOptions.ecmaVersion >= 6) {
 			ruleDef = {
 				BlockStatement: function(node) {
 					if (isLoneBlock(node)) {

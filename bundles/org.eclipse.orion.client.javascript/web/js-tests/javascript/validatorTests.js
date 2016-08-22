@@ -7885,78 +7885,6 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
-						it("should report a violation (readonly) when evaluating write to a declared readonly global", function(callback) {
-							var topic = "/*global b:false*/ function f() { b = 1; }";
-							var config = { rules: {} };
-							config.rules[RULE_ID] = 1;
-							validate({buffer: topic, callback: callback, config: config}).then(
-								function (problems) {
-									assertProblems(problems, [
-									{
-										id: RULE_ID,
-										severity: 'warning',
-										description: "'b' is read-only.",
-										nodeType: "Identifier"
-									}]);
-								},
-								function (error) {
-									worker.getTestState().callback(error);
-								});
-						});
-						it("should report a violation (readonly) when evaluating read+write to a declared readonly global", function(callback) {
-							var topic = "/*global b:false*/ function f() { b++; }";
-							var config = { rules: {} };
-							config.rules[RULE_ID] = 1;
-							validate({buffer: topic, callback: callback, config: config}).then(
-								function (problems) {
-									assertProblems(problems, [
-									{
-										id: RULE_ID,
-										severity: 'warning',
-										description: "'b' is read-only.",
-										nodeType: "Identifier"
-									}]);
-								},
-								function (error) {
-									worker.getTestState().callback(error);
-								});
-						});
-						it("should report a violation (readonly) when evaluating write to a declared global that is readonly by default", function(callback) {
-							var topic = "/*global b*/ b = 1;";
-							var config = { rules: {} };
-							config.rules[RULE_ID] = 1;
-							validate({buffer: topic, callback: callback, config: config}).then(
-								function (problems) {
-									assertProblems(problems, [
-									{
-										id: RULE_ID,
-										severity: 'warning',
-										description: "'b' is read-only.",
-										nodeType: "Identifier"
-									}]);
-								},
-								function (error) {
-									worker.getTestState().callback(error);
-								});
-						});
-						it("should report a violation (readonly) when evaluating write to a redefined global that is readonly", function(callback) {
-							var topic = "/*global b:false*/ var b = 1;";
-							var config = { rules: {} };
-							config.rules[RULE_ID] = 1;
-							validate({buffer: topic, callback: callback, config: config}).then(
-								function (problems) {
-									assertProblems(problems, [
-									{
-										id: RULE_ID,
-										severity: 'warning',
-										description: "'b' is read-only.",
-										nodeType: "Identifier"
-									}]);
-								},
-								function (error) {
-									worker.getTestState().callback(error);
-								});
-						});
 						//------------------------------------------------------------------------------
 						// Test eslint-env browser flags
 						//------------------------------------------------------------------------------
@@ -8081,50 +8009,6 @@ define([
 						//------------------------------------------------------------------------------
 						it("should not report a violation when evaluating reference to a builtin", function(callback) {
 							var topic = "Object; isNaN();";
-							var config = { rules: {} };
-							config.rules[RULE_ID] = 1;
-							validate({buffer: topic, callback: callback, config: config}).then(
-								function (problems) {
-									assertProblems(problems, []);
-								},
-								function (error) {
-									worker.getTestState().callback(error);
-								});
-						});
-				
-						it("should report a violation (readonly) when evaluating write to a builtin", function(callback) {
-							var topic = "Array = 1;";
-							var config = { rules: {} };
-							config.rules[RULE_ID] = 1;
-							validate({buffer: topic, callback: callback, config: config}).then(
-								function (problems) {
-									assertProblems(problems, [
-									{
-										id: RULE_ID,
-										severity: 'warning',
-										description: "'Array' is read-only.",
-										nodeType: "Identifier"
-									}]);
-								},
-								function (error) {
-									worker.getTestState().callback(error);
-								});
-						});
-				
-						it("should not report a violation when Typed Array globals are used", function(callback) {
-							var topic = "ArrayBuffer; DataView; Uint32Array;";
-							var config = { rules: {} };
-							config.rules[RULE_ID] = 1;
-							validate({buffer: topic, callback: callback, config: config}).then(
-								function (problems) {
-									assertProblems(problems, []);
-								},
-								function (error) {
-									worker.getTestState().callback(error);
-								});
-						});
-						it("should not flag ES6 globals", function(callback) {
-							var topic = "Promise; Proxy; Reflect; Symbol;";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
 							validate({buffer: topic, callback: callback, config: config}).then(
@@ -9059,12 +8943,28 @@ define([
 								});
 						});
 						it("should not flag hoisted var decl func decl", function(callback) {
-							var topic = "function f() {return\nvar t = r;}";
+							var topic = "function f() {return\nvar t;}";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
 									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should flag not hoisted var decl func decl", function(callback) {
+							var topic = "function f() {return\nvar t = 4;}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Unreachable code."
+									}]);
 								},
 								function (error) {
 									worker.getTestState().callback(error);
@@ -9076,7 +8976,11 @@ define([
 							config.rules[RULE_ID] = 1;
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
-									assertProblems(problems, []);
+									assertProblems(problems, [{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Unreachable code."
+									}]);
 								},
 								function (error) {
 									worker.getTestState().callback(error);
@@ -14392,7 +14296,7 @@ define([
 									{
 										id: "no-native-reassign",
 										severity: 'error',
-										description: 'Object is a read-only native object.',
+										description: 'Read-only global \'Object\' should not be modified.',
 										start: 0,
 										end: 6
 									}]);
@@ -14412,7 +14316,7 @@ define([
 									{
 										id: "no-native-reassign",
 										severity: 'error',
-										description: 'undefined is a read-only native object.',
+										description: 'Read-only global \'undefined\' should not be modified.',
 										start: 0,
 										end: 9
 									}]);
@@ -14432,7 +14336,7 @@ define([
 									{
 										id: "no-native-reassign",
 										severity: 'error',
-										description: 'window is a read-only native object.',
+										description: 'Read-only global \'window\' should not be modified.',
 										start: 25,
 										end: 31
 									}]);
@@ -14452,7 +14356,7 @@ define([
 									{
 										id: "no-native-reassign",
 										severity: 'error',
-										description: 'top is a read-only native object.',
+										description: 'Read-only global \'top\' should not be modified.',
 										start: 25,
 										end: 28
 									}]);
@@ -14472,7 +14376,7 @@ define([
 									{
 										id: "no-native-reassign",
 										severity: 'error',
-										description: 'a is a read-only native object.',
+										description: 'Read-only global \'a\' should not be modified.',
 										start: 20,
 										end: 21
 									}]);

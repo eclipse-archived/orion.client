@@ -14,7 +14,7 @@
  * Implements eslint's load-rules API for AMD. Our rules are loaded as AMD modules.
  */
 define([
-'./util',
+'./utils/util',
 'javascript/finder',
 'i18n!javascript/nls/problems',
 'estraverse/estraverse',
@@ -1042,45 +1042,78 @@ define([
         },
         /** @callback */
 		"no-redeclare": function(context) {
-                /**
-                 * @description Report the redeclare
-                 * @param {Object} node The AST node
-                 * @param {String} name The name of the redeclare
-                 */
-                function reportRedeclaration(node, name) {
-                    context.report(node, ProblemMessages['no-redeclare'], {0:name});
-                }
-                /**
-                 * @description Check the backing scope for redeclares
-                 */
-				function checkScope(node) {
-					var scope = context.getScope();
-					var variables = null;
-					if (node.type === 'Program') {
-						var ecmaFeatures = context.ecmaFeatures;
-						if (ecmaFeatures.globalReturn || node.sourceType === "module") {
-							variables = scope.childScopes[0].variables;
-						} else {
-							variables = scope.variables;
-						}
-					} else {
-						variables = scope.variables;
-					}
-					variables.forEach(function(variable) {
-						// If variable has multiple defs, every one after the 1st is a redeclaration
-						variable.defs.slice(1).forEach(function(def) {
-							reportRedeclaration(def.name, def.name.name);
-						});
-					});
-				}
+			var options = {
+				builtinGlobals: Boolean(context.options[0] && context.options[0].builtinGlobals)
+			};
 
-                return {
-                    "Program": checkScope,
-                    "FunctionDeclaration": checkScope,
-                    "FunctionExpression": checkScope,
-                    "ArrowFunctionExpression": checkScope
-                };
-        },
+			/**
+			 * Find variables in a given scope and flag redeclared ones.
+			 * @param {Scope} scope - An escope scope object.
+			 * @returns {void}
+			 * @private
+			 */
+			function findVariablesInScope(scope) {
+				scope.variables.forEach(function(variable) {
+					var hasBuiltin = options.builtinGlobals && "writeable" in variable;
+					var count = (hasBuiltin ? 1 : 0) + variable.identifiers.length;
+
+					if (count >= 2) {
+						variable.identifiers.sort(function(a, b) {
+							return a.range[1] - b.range[1];
+						});
+
+						for (var i = hasBuiltin ? 0 : 1, l = variable.identifiers.length; i < l; i++) {
+							context.report(
+								variable.identifiers[i],
+								ProblemMessages['no-redeclare'], {0:variable.name});
+						}
+					}
+				});
+
+			}
+
+			/**
+			 * Find variables in the current scope.
+			 * @param {ASTNode} node - The Program node.
+			 * @returns {void}
+			 * @private
+			 */
+			function checkForGlobal(node) {
+				var scope = context.getScope(),
+					parserOptions = context.parserOptions,
+					ecmaFeatures = parserOptions.ecmaFeatures || {};
+
+				// Nodejs env or modules has a special scope.
+				if (ecmaFeatures.globalReturn || node.sourceType === "module") {
+					findVariablesInScope(scope.childScopes[0]);
+				} else {
+					findVariablesInScope(scope);
+				}
+			}
+
+			/**
+			 * Find variables in the current scope.
+			 * @returns {void}
+			 * @private
+			 */
+			function checkForBlock() {
+				findVariablesInScope(context.getScope());
+			}
+
+			if (context.parserOptions.ecmaVersion >= 6) {
+				return {
+					Program: checkForGlobal,
+					BlockStatement: checkForBlock,
+					SwitchStatement: checkForBlock
+				};
+			}
+			return {
+				Program: checkForGlobal,
+				FunctionDeclaration: checkForBlock,
+				FunctionExpression: checkForBlock,
+				ArrowFunctionExpression: checkForBlock
+			};
+		},
         /** @callback */
         "no-regex-spaces": function(context) {
                 /**
@@ -1383,8 +1416,6 @@ define([
             	                    var nls = 'no-undef-defined'; //$NON-NLS-1$
             	                    context.report(ref.identifier, ProblemMessages['no-undef-defined'], {0:name, nls: nls, pid: nls+inenv, data: name});
         	                    }
-        	                } else if (ref.isWrite() && variable.writeable === false) {
-        	                    context.report(ref.identifier, ProblemMessages['no-undef-readonly'], {0:name, nls: 'no-undef-readonly', data: name}); //$NON-NLS-1$
         	                }
         	            });
                     }
@@ -1486,56 +1517,84 @@ define([
         			}
         		};
         },
-        /** @callback */
+		/** @callback */
 		'no-unreachable': function(context) {
-                /**
-                 * @description Returns if the statement is 'hoisted'
-                 * @param {Object} node The AST node to check
-                 * @see http://www.adequatelygood.com/JavaScript-Scoping-and-Hoisting.html
-                 * @returns {Boolean} If the node is hoisted (allowed) after a returnable statement
-                 */
-                function hoisted(node) {
-                    switch(node.type) {
-                        case 'FunctionDeclaration':
-                        case 'VariableDeclaration':
-                            return true;
-                    }
-                    return false;
-                }
+			var currentCodePath = null;
+			/**
+			 * Checks whether or not a given variable declarator has the initializer.
+			 * @param {ASTNode} node - A VariableDeclarator node to check.
+			 * @returns {boolean} `true` if the node has the initializer.
+			 */
+			function isInitialized(node) {
+				return Boolean(node.init);
+			}
 
-                /**
-                 * @description Check the array of child nodes for any unreachable nodes
-                 * @param {Array} children The child nodes to check
-                 * @since 6.0
-                 */
-                function checkUnreachable(children) {
-                    var i = 0;
-                    for(i; i < children.length; i++) {
-                        if(util.returnableStatement(children[i])) {
-                            break;
-                        }
-                    }
-                    //mark all the remaining child statemnts as unreachable
-                    for(i++; i < children.length; i++) {
-                        var child = children[i];
-                        if(!hoisted(child) && child.type !== "EmptyStatement") {
-                            context.report(child, ProblemMessages['no-unreachable']);
-                        }
-                    }
-                }
+			/**
+			 * Checks whether or not a given code path segment is unreachable.
+			 * @param {CodePathSegment} segment - A CodePathSegment to check.
+			 * @returns {boolean} `true` if the segment is unreachable.
+			 */
+			function isUnreachable(segment) {
+				return !segment.reachable;
+			}
+			
+			/**
+			 * Reports a given node if it's unreachable.
+			 * @param {ASTNode} node - A statement node to report.
+			 * @returns {void}
+			 */
+			function reportIfUnreachable(node) {
+				if (currentCodePath.currentSegments.every(isUnreachable)) {
+					context.report(node, ProblemMessages['no-unreachable']);
+				}
+			}
 
-                return {
-                	/* @callback */
-                    "BlockStatement": function(node) {
-                        checkUnreachable(node.body);
-                    },
-					/* @callback */
-                    "SwitchCase": function(node) {
-                        checkUnreachable(node.consequent);
-                    }
-                };
-        },
-        /** @callback */
+			return {
+
+				// Manages the current code path.
+				onCodePathStart: function(codePath) {
+					currentCodePath = codePath;
+				},
+
+				onCodePathEnd: function() {
+					currentCodePath = currentCodePath.upper;
+				},
+
+				// Registers for all statement nodes (excludes FunctionDeclaration).
+				BlockStatement: reportIfUnreachable,
+				BreakStatement: reportIfUnreachable,
+				ClassDeclaration: reportIfUnreachable,
+				ContinueStatement: reportIfUnreachable,
+				DebuggerStatement: reportIfUnreachable,
+				DoWhileStatement: reportIfUnreachable,
+				EmptyStatement: reportIfUnreachable,
+				ExpressionStatement: reportIfUnreachable,
+				ForInStatement: reportIfUnreachable,
+				ForOfStatement: reportIfUnreachable,
+				ForStatement: reportIfUnreachable,
+				IfStatement: reportIfUnreachable,
+				ImportDeclaration: reportIfUnreachable,
+				LabeledStatement: reportIfUnreachable,
+				ReturnStatement: reportIfUnreachable,
+				SwitchStatement: reportIfUnreachable,
+				ThrowStatement: reportIfUnreachable,
+				TryStatement: reportIfUnreachable,
+
+				VariableDeclaration: function(node) {
+					if (node.kind !== "var" || node.declarations.some(isInitialized)) {
+						// if it has an initialization, this means the variable is not hoisted.
+						reportIfUnreachable(node);
+					}
+				},
+
+				WhileStatement: reportIfUnreachable,
+				WithStatement: reportIfUnreachable,
+				ExportNamedDeclaration: reportIfUnreachable,
+				ExportDefaultDeclaration: reportIfUnreachable,
+				ExportAllDeclaration: reportIfUnreachable
+			};
+		},
+		/** @callback */
 		"no-unused-params" : function(context) {
                 /**
                  * @description If the node has an @callback comment
@@ -1706,7 +1765,7 @@ define([
 				var scope = context.getScope();
 				var variables = null;
 				if (node.type === 'Program') {
-					var ecmaFeatures = context.ecmaFeatures;
+					var ecmaFeatures = context.parserOptions && context.parserOptions.ecmaFeatures || {};
 					if (ecmaFeatures.globalReturn || node.sourceType === "module") {
 						variables = scope.childScopes[0].variables;
 					} else {
@@ -1835,7 +1894,7 @@ define([
     				}
         		}
         		
-        		if (context.ecmaFeatures.ecmaVersion >= 6){
+        		if (context.parserOptions.ecmaVersion >= 6){
 					return {
 						"Program": check,
 						"BlockStatement": check,
