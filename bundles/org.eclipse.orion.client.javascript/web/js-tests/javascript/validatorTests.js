@@ -279,6 +279,22 @@ define([
 						worker.getTestState().callback(error);
 					});
 			});
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=500004
+			it("Test unterminated block comment", function(callback) {
+				var config = { rules: {} };
+				validate({buffer: "var v1 = foo(); /* test", callback: callback, config: config}).then(function (problems) {
+						assertProblems(problems, [
+							{
+								start: 16,
+								end: 17,
+								severity: 'error',
+								description: "Unterminated comment"
+							}
+						]);
+					}, function (error) {
+						worker.getTestState().callback(error);
+					});
+			});
 			/**
 			 * 
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=492484
