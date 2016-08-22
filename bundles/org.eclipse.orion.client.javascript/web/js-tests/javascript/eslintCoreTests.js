@@ -12,7 +12,7 @@
 /* eslint-disable missing-nls */
 define([
 	'eslint/lib/events',
-	'eslint/lib/util',
+	'eslint/lib/utils/util',
 	'eslint/lib/eslint',
 	'chai/chai',
 	'mocha/mocha' //not a module, leave at the end

@@ -16,7 +16,7 @@ define([
 	"tern/lib/tern",
 	"javascript/finder",
 	"eslint/lib/eslint",
-	"eslint/lib/source-code",
+	"eslint/lib/utils/source-code",
 	"i18n!javascript/nls/problems"
 ], function(tern, Finder, Eslint, SourceCode, ProblemMessages) {
 
@@ -237,11 +237,11 @@ define([
 			var config = query.config;
 			config.tern = _tern;
 			_tern.init(server, file);
-			if (!config.ecmaFeatures) {
-				var features = Object.create(null);
-				features.modules = false;
-				features.ecmaVersion = server.options.ecmaVersion;
+			if (!config.parserOptions) {
+				var parserOptions = Object.create(null);
+				parserOptions.ecmaVersion = server.options.ecmaVersion;
 				var ecmaVersion = server.options.ecmaVersion ? server.options.ecmaVersion : 5;
+				var features = Object.create(null);
 				if (ecmaVersion === 6) {
 					features.arrowFunctions = true;
 					features.binaryLiterals = true;
@@ -264,11 +264,9 @@ define([
 					features.templateStrings = true;
 					features.unicodeCodePointEscapes = true;
 				}
-				var sourceType = server.options.sourceType;
-				if (sourceType === "module") {
-					features.modules = true;
-				}
-				config.ecmaFeatures = features;
+				parserOptions.ecmaFeatures = features;
+				parserOptions.sourceType = server.options.sourceType;
+				config.parserOptions = parserOptions;
 			}
 			
 			var strippedMessages = [];

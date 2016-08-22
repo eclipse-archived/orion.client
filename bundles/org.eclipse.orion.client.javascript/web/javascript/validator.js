@@ -265,20 +265,21 @@ define([
 			var start = Date.now();
 			this.ternWorker.postMessage(
 				request, 
-				/* @callback */ function(type, err) {
-						var end = Date.now() - start;
-						logTiming(end);
-						var problems = [];
-						if(err) {
-							problems.push({
-								start: 0,
-								args: {0: type.error, nls: "eslintValidationFailure" }, //$NON-NLS-0$
-								severity: "error" //$NON-NLS-0$
-							});
-						} else if (Array.isArray(type.problems)) {
-							problems = type.problems;
-						}
-						deferred.resolve({ problems: problems.map(toProblem) });
+				/* @callback */
+				function(type, err) {
+					var end = Date.now() - start;
+					logTiming(end);
+					var problems = [];
+					if(err) {
+						problems.push({
+							start: 0,
+							args: {0: type.error, nls: "eslintValidationFailure" }, //$NON-NLS-0$
+							severity: "error" //$NON-NLS-0$
+						});
+					} else if (Array.isArray(type.problems)) {
+						problems = type.problems;
+					}
+					deferred.resolve({ problems: problems.map(toProblem) });
 				});
 		},
 

@@ -3878,35 +3878,38 @@ define([
 						templates: true
 					};
 					testProposals(options, [
-					     ['amd', 'amd'],
-					     ['amqp', 'amqp'],
-					     ['applescript' , 'applescript'],
-					     ['browser', 'browser'],
-					     ['commonjs', 'commonjs'],
-					     ['embertest', 'embertest'],
-					     ['es6', 'es6'],
-					     ['express', 'express'],
-					     ['jasmine', 'jasmine'],
-					     ['jest', 'jest'],
-						 ['jquery', 'jquery'],
-						 ['meteor', 'meteor'],
-					     ['mocha', 'mocha'],
-					     ['mongo', 'mongo'],
-					     ['mongodb', 'mongodb'],
-					     ['mysql', 'mysql'],
-					     ['nashorn', 'nashorn'],
-					     ['node', 'node'],
-					     ['pg', 'pg'],
-					     ['phantomjs', 'phantomjs'],
-						 ['prototypejs', 'prototypejs'],
-						 ['protractor', 'protractor'],
-					     ['qunit', 'qunit'],
-						 ['redis', 'redis'],
-						 ['serviceworker', 'serviceworker'],
-						 ['shelljs', 'shelljs'],
-						 ['webextensions', 'webextensions'],
-						 ['worker', 'worker']
-					     ]);
+						['amd', 'amd'],
+						['amqp', 'amqp'],
+						['applescript' , 'applescript'],
+						['atomtest' , 'atomtest'],
+						['browser', 'browser'],
+						['commonjs', 'commonjs'],
+						['embertest', 'embertest'],
+						['es6', 'es6'],
+						['express', 'express'],
+						['greasemonkey', 'greasemonkey'],
+						['jasmine', 'jasmine'],
+						['jest', 'jest'],
+						['jquery', 'jquery'],
+						['meteor', 'meteor'],
+						['mocha', 'mocha'],
+						['mongo', 'mongo'],
+						['mongodb', 'mongodb'],
+						['mysql', 'mysql'],
+						['nashorn', 'nashorn'],
+						['node', 'node'],
+						['pg', 'pg'],
+						['phantomjs', 'phantomjs'],
+						['prototypejs', 'prototypejs'],
+						['protractor', 'protractor'],
+						['qunit', 'qunit'],
+						['redis', 'redis'],
+						['serviceworker', 'serviceworker'],
+						['shared-node-browser', 'shared-node-browser'],
+						['shelljs', 'shelljs'],
+						['webextensions', 'webextensions'],
+						['worker', 'worker']
+					]);
 				});
 				/**
 				 * Tests that eslint-env environs are proposed
@@ -3922,10 +3925,11 @@ define([
 						templates: true
 					};
 					testProposals(options, [
-					     ['amd', 'amd'],
-					     ['amqp', 'amqp'],
-					     ['applescript', 'applescript']
-					     ]);
+						['amd', 'amd'],
+						['amqp', 'amqp'],
+						['applescript', 'applescript'],
+						['atomtest' , 'atomtest'],
+					]);
 				});
 				/**
 				 * Tests that eslint rules are proposed

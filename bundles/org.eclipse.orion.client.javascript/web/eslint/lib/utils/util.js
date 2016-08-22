@@ -12,6 +12,7 @@ define([
 //------------------------------------------------------------------------------
 
 var PLUGIN_NAME_PREFIX = "eslint-plugin-";
+var breakableTypePattern = /^(?:(?:Do)?While|For(?:In|Of)?|Switch)Statement$/;
 
 //------------------------------------------------------------------------------
 // Public Interface
@@ -134,5 +135,22 @@ exports.returnableStatement = function(node) {
     return false;
 };
 
-    return exports;
+/**
+ * Gets the label if the parent node of a given node is a LabeledStatement.
+ *
+ * @param {ASTNode} node - A node to get.
+ * @returns {string|null} The label or `null`.
+ */
+exports.getLabel = function(node) {
+	if (node.parent.type === "LabeledStatement") {
+		return node.parent.label.name;
+	}
+	return null;
+};
+
+exports.isBreakableStatement = function(node) {
+	return breakableTypePattern.test(node.type);
+};
+
+	return exports;
 });
