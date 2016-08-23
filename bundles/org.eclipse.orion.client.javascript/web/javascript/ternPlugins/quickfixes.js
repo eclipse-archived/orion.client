@@ -648,7 +648,7 @@ define([
                             break;
                         }
                     }
-                    if (paramindex == 1 && analyzeResult[parentLocation] == parent.params.length - 1){
+                    if (paramindex === 1 && analyzeResult[parentLocation] === parent.params.length - 1){
                     	greedy = true;
                     }
                     var change = removeIndexedItemChange(parent.params, paramindex, greedy);
@@ -663,7 +663,12 @@ define([
                                 for(i = 0; i < args.length; i++) {
                                     var arg = args[i];
                                     if(arg.type === 'ArrayExpression') {
-                                        change = removeIndexedItemChange(arg.elements, paramindex);
+                                    	if (arg.elements.length === 1) {
+                                    		// we remove the last element in the array
+                                    		change = { "start" : arg.range[0], "end" : arg.range[1], "text" : "[]" };
+                                    	} else {
+                                        	change = removeIndexedItemChange(arg.elements, paramindex, false, arg);
+                                        }
                                         if(change) {
                                             changes.push(change);
                                         }
@@ -1288,15 +1293,15 @@ define([
 	 * @param {Number} index The index to remove
 	 * @returns {Object} A change object containg the properties text, start and end
 	 */
-    function removeIndexedItemChange(list, index, greedy) {
+    function removeIndexedItemChange(list, index, greedy, parent) {
         if(index < 0 || index > list.length) {
 	            return;
         }
         var node = list[index];
         if(list.length === 1) {
-            return { "start" : node.range[0], "end" : node.range[1], "text" : "" };
+            return { "start" : node.range[0], "end" : parent ? parent.range[1] - 1: node.range[1], "text" : "" };
         } else if(index === list.length-1) {
-            return { "start" : list[index-1].range[1], "end" : node.range[1], "text" : ""};
+            return { "start" : list[index-1].range[1], "end" : parent ? parent.range[1] - 1: node.range[1], "text" : ""};
         } else if(node) {
         	return greedy ?
         		{ "start" : list[index-1].range[1], "end" : list[index+1].range[0], "text" : ""}:

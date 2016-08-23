@@ -3725,6 +3725,31 @@ define([
 				 		fixid: "no-unused-params"
 				 	});
 				 });
+				 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=498152
+				 it("Test no-unused-params remove param", function(callback){
+				 	var rule = createTestRule('no-unused-params');
+				 	var expected = [{
+				 		value: '[]',
+				 		start: 32,
+				 		end: 53
+				 	},
+				 	{
+				 		value: '',
+				 		start: 64,
+				 		end: 71
+				 	}];
+				 	return getFixes({
+				 		buffer:
+				 			'define("webtools/htmlOutliner", [\n' +
+							'	"orion/objects",\n' +
+							'], function(Objects) {\n' +
+							'});',
+				 		rule: rule,
+				 		expected: expected,
+				 		callback: callback,
+				 		fixid: "no-unused-params"
+				 	});
+				 });
 			});
 			//EQEQEQ
 			describe('eqeqeq', function(){
