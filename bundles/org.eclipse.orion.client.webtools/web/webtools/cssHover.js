@@ -84,11 +84,22 @@ define([
 				    if(tok) {
 				        var color = this._collectColorId(tok, results.tokens);
 		                if(color) {
-		                    return this._getColorHover(color);    
+		                    return this._getColorHover(color);
 		                }
 				    }
-					if (CSSLint.Colors[token.value]){
-						return this._getColorHover(token.value);
+				    var colorValue = CSSLint.Colors[token.value];
+					if (colorValue) {
+						if (/\#[0-9A-Fa-f]{1,6}/.test(colorValue)){
+							// this is a color hash not a deprecated css2 color attribute
+							return this._getColorHover(token.value);
+						}
+						// check the next token to see if it is a ':'
+						// this is a deprecated css2 color attribute
+						var nextToken = results.tokens[token.index + 1];
+						if (nextToken && nextToken.type !== 'COLON') {
+							return this._getColorHover(token.value);
+						}
+						return null;
 					}
 					if (/\#[0-9A-Fa-f]{1,6}/.test(token.value)){
 						return this._getColorHover(token.value);	
