@@ -54,25 +54,27 @@ function retrieveManifestFile(req, manifestAbsoluteLocation){
 			filePath += "manifest.yml";
 		}
 		fs.readFile(filePath, "utf8", function(err, fileContent){
-			if(err){
-				return reject({"code":404, "message": err.message});
+			if(err && err.code !== "ENOENT") {
+				return reject({"code": 404, "message": err.message});
 			}
 			fulfill(fileContent);
 		});
 	}).then(function(fileContent){
+		if (!fileContent) { // if the project doesn't have a manifest.yml
+			return setDefaultManifestProperties(req);
+		}
 		var manifest = yaml.safeLoad(fileContent);
 		var manifestAST = yamlAstParser.load(fileContent);
 		transformManifest(manifest);
 		// TODO when meet the case where need to do symbolResolver (as in JAVA) then implement.
-		analyzeManifest(manifest, manifestAST, fileContent)
+		return analyzeManifest(manifest, manifestAST, fileContent)
 		.then(function(){
-			setDefaultManifestProperties(req,manifest);
-			return manifest;
+			return setDefaultManifestProperties(req, manifest);
 		});
 	});
 }
 
-function setDefaultManifestProperties(req,manifest){
+function setDefaultManifestProperties(req, manifest){
 	function getDefaultName(rawProjectName){
 		var nameParts = rawProjectName.split(" --- ", 2);
 		return nameParts.length > 1 ? nameParts[1] : nameParts[0];
@@ -90,11 +92,21 @@ function setDefaultManifestProperties(req,manifest){
 		instances : "1",
 		path: "."
 	};
-	Object.keys(MUST_HAVE_PROPERTIES).forEach(function(key){
-		if(!manifest.applications[0].hasOwnProperty(key)){
-			manifest.applications[0][key] = MUST_HAVE_PROPERTIES[key];
-		}					
-	});
+	if (!manifest) {
+		var application = MUST_HAVE_PROPERTIES;
+		var applications = [];
+		manifest = {};
+		applications.push(application);
+		manifest.applications = applications;
+	}
+	else {
+		Object.keys(MUST_HAVE_PROPERTIES).forEach(function(key){
+			if(!manifest.applications[0].hasOwnProperty(key)){
+				manifest.applications[0][key] = MUST_HAVE_PROPERTIES[key];
+			}					
+		});
+	}
+	return manifest;
 }
 function transformManifest(manifest){
 	if(!manifest.applications){
