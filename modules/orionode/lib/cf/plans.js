@@ -22,16 +22,25 @@ module.exports.router = function() {
 	.use(bodyParser.json())
 	.get("/file*", getplans);
 	
-function planJson(type, manifest , planner , wizard){
+function planJson(type, manifest, planner, wizard, required){
 	return {
 		"ApplicationType": type,
 		"Manifest": manifest,
 		"ManifestPath": "manifest.yml",
 		"Planner": "org.eclipse.orion.server.cf." + planner,
-		"Required": [],
+		"Required": required || [],
 		"Type": "Plan",
 		"Wizard": "org.eclipse.orion.client.cf.wizard." + wizard
 	};
+}
+
+function checkFileExists(path) {
+	try {
+		return fs.statSync(path).isFile();
+	}
+	catch (err) {
+		return false;
+	}
 }
 	
 function getplans(req, res){
@@ -39,23 +48,42 @@ function getplans(req, res){
 	manifests.retrieveManifestFile(req)
 	.then(function(manifest){
 		var children = [];
-		function generatePlansforManifest(manifest,children){
-			function generateGenericPlan(manifest){
-				return planJson("generic",manifest,"ds.GenericDeploymentPlanner","generic");
+		function generatePlansforManifest(){
+			function generateGenericPlan(){
+				return planJson("generic", manifest, "ds.GenericDeploymentPlanner", "generic");
 			}
-			function generateNodePlan(manifest){
-				if(fs.existsSync(path.join(filePath,"package.json"))){
-					return planJson("node.js",manifest,"nodejs.NodeJSDeploymentPlanner","nodejs");
+			function generateNodePlan(){
+				if(checkFileExists(path.join(filePath, "package.json"))){
+					var applicationKeys = Object.keys(manifest.applications[0]);
+					var cloneManifest = { "applications": [{}] };
+					var required = [];
+					applicationKeys.forEach(function(key){
+						cloneManifest.applications[0][key] = manifest.applications[0][key];
+					});
+					if (!cloneManifest.applications[0]["command"]) {
+						// TODO "command" attribute checking by looking up Procfile
+						// TODO "command" attribute checking by looking up package.json
+						if (checkFileExists(path.join(filePath, "server.js"))) { // node.js application requires a start command
+							cloneManifest.applications[0]["command"] = "node server.js";
+						}
+						else if (checkFileExists(path.join(filePath, "app.js"))) {
+							cloneManifest.applications[0]["command"] = "node app.js";
+						}
+						else {
+							required.push("command");
+						}
+					}
+					return planJson("node.js", cloneManifest, "nodejs.NodeJSDeploymentPlanner", "nodejs", required);
 				}
 			}
-			var genericPlan = generateGenericPlan(manifest);
-			var nodePlan = generateNodePlan(manifest);
+			var genericPlan = generateGenericPlan();
+			var nodePlan = generateNodePlan();
 			children.push(genericPlan);
 			if(nodePlan){
 				children.push(nodePlan);
 			}
 		}
-		generatePlansforManifest(manifest,children);
+		generatePlansforManifest();
 		var result =  {"Children": children};
 		res.status(200).json(result);
 	}).catch(function(err){
