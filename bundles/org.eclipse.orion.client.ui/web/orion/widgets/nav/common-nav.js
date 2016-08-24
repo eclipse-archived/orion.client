@@ -162,6 +162,16 @@ define([
 				if (affectedAncestor.Location === editorFile.Location) {
 					// Current file was the target, see if we know its new name
 					newInput = (newValue && newValue.ChildrenLocation) || (newValue && newValue.ContentLocation) || (newValue && newValue.Location) || null;
+					if (newInput) {
+						newInput = {resource: newInput};
+						if (newInput.resource === newValue.Location) {
+							var url = this.editorInputManager.selection.getSelection();
+							var match = /^[^,]+,(.*)$/.exec(url);
+							if (match) {
+								newInput.params = match[1].split(",");
+							}
+						}
+					}
 				} else {
 					newInput = null;
 				}
