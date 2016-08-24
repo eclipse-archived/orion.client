@@ -692,9 +692,9 @@ objects.mixin(EditorSetup.prototype, {
 		this.sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
 			this.lastRoot = evt.root;
 		}.bind(this));
-		var gotoInput = function(evt) { //$NON-NLS-0$
-			var newInput = evt.newInput || evt.parent || ""; //$NON-NLS-0$
-			window.location = uriTemplate.expand({resource: newInput}); //$NON-NLS-0$
+		var gotoInput = function(evt) {
+			var newInput = evt.newInput || evt.parent || "";
+			window.location = uriTemplate.expand({resource: newInput.resource || newInput, params: newInput.params || []});
 		};
 		this.sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$
 		this.sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput); //$NON-NLS-0$

@@ -119,7 +119,7 @@ define([
 				this.sidebarNavInputManager.dispatchEvent({
 					type: "editorInputMoved", //$NON-NLS-0$
 					parent: newValue ? (newValue.ChildrenLocation || newValue.ContentLocation) : null,
-					newInput: newValue ? (newValue.ChildrenLocation || newValue.ContentLocation) : null
+					newInput: newValue ? {resource: newValue.ChildrenLocation || newValue.ContentLocation} : null
 				});
 				return;
 			}
