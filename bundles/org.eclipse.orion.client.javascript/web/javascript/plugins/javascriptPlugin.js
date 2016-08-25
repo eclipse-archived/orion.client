@@ -1353,6 +1353,32 @@ define([
 					]
 				}
 		);
+
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+				{
+					/** @callback */
+					execute: function(editorContext, context) {
+						if(context.annotation.id === 'no-duplicate-case') {
+							context.annotation.fixid = 'remove-duplicate-case'; //$NON-NLS-1$
+						}
+						return quickFixComputer.execute(editorContext, context);
+					}
+				},
+				{
+					name: javascriptMessages["removeDuplicateCaseFixName"],
+					scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+					fixAllEnabled: true,
+					id : "remove.duplicate.case.fix",  //$NON-NLS-1$
+					contentType: ['application/javascript', 'text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
+					validationProperties: [
+						{
+							source: "annotation:id", //$NON-NLS-1$
+							match: "^(?:no-duplicate-case)$" //$NON-NLS-1$
+						},
+						{source: "readonly", match: false} //$NON-NLS-1$
+					]
+				}
+		);
 		
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
 			quickFixComputer,

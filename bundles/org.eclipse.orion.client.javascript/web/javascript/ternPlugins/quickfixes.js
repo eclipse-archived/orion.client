@@ -1205,15 +1205,6 @@ define([
 			}
 		
 			/**
-			 * Checks whether or not a node is appended with an empty string.
-			 * @param {ASTNode} node - An AssignmentExpression node to check.
-			 * @returns {boolean} Whether or not the node is appended with an empty string.
-			 */
-			function isAppendEmptyString(node) {
-				return node.operator === "+=" && node.right.type === "Literal" && node.right.value === "";
-			}
-		
-			/**
 			 * Gets a node that is the left or right operand of a node, is not the specified literal.
 			 * @param {ASTNode} node - A BinaryExpression node to get.
 			 * @param {any} value - A literal value to check.
@@ -1302,6 +1293,68 @@ define([
 						case "AssignmentExpression" : {
 							return checkAssignmentExpression(node, text, annot);
 						}
+					}
+				}
+			});
+		},
+		"remove-duplicate-case" :  function(annotation, annotations, file) {
+			function getFallthroughComment(node) {
+				var comments = node.leadingComments;
+				if (comments) {
+					var comment = comments[0];
+					if (comment.type === 'Line' && comment.value === '$FALLTHROUGH$') {
+						// if there is only one comment remove it
+						return comment;
+					}
+				}
+				return null;
+			}
+			return applySingleFixToAll(annotations, function(annot) {
+				var node = Finder.findNode(annot.start, file.ast, {parents:true});
+				if (node) {
+					// get the switch case
+					if (node.parents.length > 2) {
+						var switchCase = node.parents.pop();
+						// get the switch statement
+						var statement = node.parents.pop();
+						if (statement) {
+							// get the index of the switch case
+							var index = 0;
+							loop: for (var i = 0, max = statement.cases.length; i < max; i++) {
+								var currentCase = statement.cases[i];
+								if (currentCase.range[0] === switchCase.range[0] && currentCase.range[1] === switchCase.range[1]) {
+									index = i;
+									break loop;
+								}
+							}
+						}
+						var start = switchCase.start;
+						var end = switchCase.end;
+						// check the next case 
+						var nextCase = statement.cases[index + 1];
+						var comment;
+						if (nextCase) {
+							// check leading comments if it is a fallthrough comment
+							comment = getFallthroughComment(nextCase);
+							if (comment) {
+								end = comment.end;
+							}
+						}
+						if (index !== 0) {
+							// check if there is a fallthrough comment for the current case statement we want to remove
+							// if yes, we need to preserve it unless there is no other case statement after the one we remove
+							comment = getFallthroughComment(switchCase);
+							if (comment && nextCase) {
+								start = comment.end;
+							} else {
+								start = statement.cases[index - 1].end;
+							}
+						}
+						return {
+							text: '',
+							start: start,
+							end: end
+						}; 
 					}
 				}
 			});
