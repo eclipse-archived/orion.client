@@ -16,8 +16,9 @@ define([
 	'orion/webui/dropdown',
 	'orion/util',
 	'orion/webui/dialog',
+	'orion/webui/intro',
 	'orion/xhr'
-], function(messages, lib, PageLinks, Dropdown, util, dialog, xhr) {
+], function(messages, lib, PageLinks, Dropdown, util, dialog, intro, xhr) {
 	
 	function UserMenu(options) {
 		this._displaySignOut = true;
@@ -187,7 +188,24 @@ define([
 					var keyAssist = element.parentNode;
 					getCategory(0).appendChild(keyAssist);
 				}
-
+				
+				var introButton = this._makeMenuItem("Introduction", function() {
+						var introPage = new intro.Intro();
+						introPage.tutorials = [
+						{ 
+							text: "Source Outline",
+							callback: function() {
+								console.log("nice");
+							},
+							id: "intro_source_outline" 
+						}
+						];
+						introPage.modal = true;
+						introPage._initialize();
+						introPage.show();
+					});
+				getCategory(0).appendChild(introButton.parentNode);
+				
 				if (util.isElectron) {
 					var clearLocalStorage = this._makeMenuItem(messages["Clear Local Storage"], function() { localStorage.clear(); });
 					getCategory(0).appendChild(clearLocalStorage.parentNode);
