@@ -1364,31 +1364,35 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			this.destroy();
 		},
 		_onLineStyle: function(e) {
-			if (e.textView === this._view) {
-				e.style = this._getLineStyle(e.lineIndex);
-			}
-
-			var offset = e.lineStart;
-			var model = e.textView.getModel();
-			if (model.getBaseModel) {
-				offset = model.mapOffset(offset);
-				var baseModel = model.getBaseModel();
-			}
-
-			e.ranges = this._getStyles(this._rootBlock, baseModel || model, e.lineText, offset, 0);
-			for (var i = e.ranges.length - 1; i >= 0; i--) {
-				var current = e.ranges[i];
-				if (current.style) {
-					current.style = {styleClass: current.style.replace(/\./g, " ")};
-					if (baseModel) {
-						var length = current.end - current.start;
-						current.start = model.mapOffset(current.start, true);
-						current.end = current.start + length;
-					}
-				} else {
-					e.ranges.splice(i, 1);
+			if (this._rootBlock) {
+				if (e.textView === this._view) {
+					e.style = this._getLineStyle(e.lineIndex);
 				}
-			};
+				var offset = e.lineStart;
+				var model = e.textView.getModel();
+				if (model.getBaseModel) {
+					offset = model.mapOffset(offset);
+					var baseModel = model.getBaseModel();
+				}
+				e.ranges = this._getStyles(this._rootBlock, baseModel || model, e.lineText, offset, 0);
+
+				for (var i = e.ranges.length - 1; i >= 0; i--) {
+					var current = e.ranges[i];
+					if (current.style) {
+						current.style = {styleClass: current.style.replace(/\./g, " ")};
+						if (baseModel) {
+							var length = current.end - current.start;
+							current.start = model.mapOffset(current.start, true);
+							current.end = current.start + length;
+						}
+					} else {
+						e.ranges.splice(i, 1);
+					}
+				}
+			} else {
+				e.ranges = [];
+			}
+
 			if (this._isRenderingWhitespace()) {
 				this._spliceStyles(this._spacePattern, e.ranges, e.lineText, e.lineStart);
 				this._spliceStyles(this._tabPattern, e.ranges, e.lineText, e.lineStart);
