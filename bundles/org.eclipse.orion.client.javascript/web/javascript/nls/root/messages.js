@@ -249,6 +249,7 @@ define({
 	'checkTernLibFixName' : 'Add library to .tern-project file',
 	'forbiddenExportImportFixName' : 'Set sourceType to module',
 	'noElseReturnFixName' : 'Remove unnecessary else',
+	'noImplicitCoercionFixName' : 'Remove implicit coercion',
 	
 	//Tern Plugins
 	'commonjsPluginName': 'CommonJS',

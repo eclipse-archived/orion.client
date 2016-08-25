@@ -1032,7 +1032,7 @@ define([
 					text: '',
 					start: thenNode.end + 1,
 					end: start
-				}
+				};
 			});
 		},
 		"no-cond-assign": function(annotation, annotations, file) {
@@ -1119,6 +1119,193 @@ define([
 				};
 			});
 		},
+		"no-implicit-coercion" : function(annotation, annotations, file) {
+			var INDEX_OF_PATTERN = /^(?:i|lastI)ndexOf$/;
+			/**
+			 * Checks whether or not a node is a double logical negating.
+			 * @param {ASTNode} node - An UnaryExpression node to check.
+			 * @returns {boolean} Whether or not the node is a double logical negating.
+			 */
+			function isDoubleLogicalNegating(node) {
+				return node.operator === "!" &&
+					node.argument.type === "UnaryExpression" &&
+					node.argument.operator === "!";
+			}
+			/**
+			 * Checks whether or not a node is a binary negating of `.indexOf()` method calling.
+			 * @param {ASTNode} node - An UnaryExpression node to check.
+			 * @returns {boolean} Whether or not the node is a binary negating of `.indexOf()` method calling.
+			 */
+			function isBinaryNegatingOfIndexOf(node) {
+				return node.operator === "~" &&
+					node.argument.type === "CallExpression" &&
+					node.argument.callee.type === "MemberExpression" &&
+					node.argument.callee.property.type === "Identifier" &&
+					INDEX_OF_PATTERN.test(node.argument.callee.property.name);
+			}
+		
+			/**
+			 * Checks whether or not a node is a multiplying by one.
+			 * @param {BinaryExpression} node - A BinaryExpression node to check.
+			 * @returns {boolean} Whether or not the node is a multiplying by one.
+			 */
+			function isMultiplyByOne(node) {
+				return node.operator === "*" && (
+					node.left.type === "Literal" && node.left.value === 1 ||
+					node.right.type === "Literal" && node.right.value === 1
+				);
+			}
+		
+			/**
+			 * Checks whether the result of a node is numeric or not
+			 * @param {ASTNode} node The node to test
+			 * @returns {boolean} true if the node is a number literal or a `Number()`, `parseInt` or `parseFloat` call
+			 */
+			function isNumeric(node) {
+				return node.type === "Literal"
+					&& typeof node.value === "number"
+					|| node.type === "CallExpression"
+					&& (node.callee.name === "Number" ||
+						node.callee.name === "parseInt" ||
+						node.callee.name === "parseFloat");
+			}
+		
+			/**
+			 * Returns the first non-numeric operand in a BinaryExpression. Designed to be
+			 * used from bottom to up since it walks up the BinaryExpression trees using
+			 * node.parent to find the result.
+			 * @param {BinaryExpression} node The BinaryExpression node to be walked up on
+			 * @returns {ASTNode|
+			} The first non-numeric item in the BinaryExpression tree or 
+		
+			 */
+			function getNonNumericOperand(node) {
+				var left = node.left,
+					right = node.right;
+		
+				if (right.type !== "BinaryExpression" && !isNumeric(right)) {
+					return right;
+				}
+		
+				if (left.type !== "BinaryExpression" && !isNumeric(left)) {
+					return left;
+				}
+			}
+		
+			/**
+			 * Checks whether or not a node is a concatenating with an empty string.
+			 * @param {ASTNode} node - A BinaryExpression node to check.
+			 * @returns {boolean} Whether or not the node is a concatenating with an empty string.
+			 */
+			function isConcatWithEmptyString(node) {
+				return node.operator === "+" && (
+					(node.left.type === "Literal" && node.left.value === "") ||
+					(node.right.type === "Literal" && node.right.value === "")
+				);
+			}
+		
+			/**
+			 * Checks whether or not a node is appended with an empty string.
+			 * @param {ASTNode} node - An AssignmentExpression node to check.
+			 * @returns {boolean} Whether or not the node is appended with an empty string.
+			 */
+			function isAppendEmptyString(node) {
+				return node.operator === "+=" && node.right.type === "Literal" && node.right.value === "";
+			}
+		
+			/**
+			 * Gets a node that is the left or right operand of a node, is not the specified literal.
+			 * @param {ASTNode} node - A BinaryExpression node to get.
+			 * @param {any} value - A literal value to check.
+			 * @returns {ASTNode} A node that is the left or right operand of the node, is not the specified literal.
+			 */
+			function getOtherOperand(node, value) {
+				if (node.left.type === "Literal" && node.left.value === value) {
+					return node.right;
+				}
+				return node.left;
+			}
+			function getSource(text, node) {
+				return text.slice(node.range[0], node.range[1]);
+			}
+			function checkBinaryExpression(node, text, annot) {
+				if (isMultiplyByOne(node)) {
+					var operandNode = getNonNumericOperand(node);
+					if (operandNode) {
+						return {
+							text: 'Number(' + getSource(text, operandNode) + ')',
+							start: annot.start,
+							end: annot.end
+						};
+					}
+				}
+				// "" + foo
+				return {
+					text: 'String(' + getSource(text, getOtherOperand(node, "")) + ')',
+					start: annot.start,
+					end: annot.end
+				};
+			}
+			function checkAssignmentExpression(node, text, annot) {
+				var operandNode = getOtherOperand(node, "");
+				var source = getSource(text, operandNode);
+				return {
+					text: source + ' = String(' + source + ')',
+					start: annot.start,
+					end: annot.end
+				};
+			}
+			var text = file.ast.sourceFile.text;
+			return applySingleFixToAll(annotations, function(annot) {
+				var node = Finder.findNode(annot.start, file.ast, {parents:true});
+				if (node) {
+					switch(node.type) {
+						case "UnaryExpression" : {
+							if (isDoubleLogicalNegating(node)) {
+								return {
+									text: 'Boolean(' + getSource(text, node.argument.argument) + ')',
+									start: annot.start,
+									end: annot.end
+								};
+							} else if (isBinaryNegatingOfIndexOf(node)) {
+								return {
+									text: getSource(text, node.argument) + ' !== -1',
+									start: annot.start,
+									end: annot.end
+								};
+							}
+							// +foo
+							return {
+								text: 'Number(' + getSource(text, node.argument) + ')',
+								start: annot.start,
+								end: annot.end
+							};
+						}
+						case "Literal" : {
+							// check the parent - should be a binary expression
+							var parent = node.parents && node.parents.pop();
+							if (parent) {
+								return checkBinaryExpression(parent, text, annot);
+							}
+							return null;
+						}
+						case "BinaryExpression" : {
+							return checkBinaryExpression(node, text, annot);
+						}
+						case "Identifier" : {
+							parent = node.parents && node.parents.pop();
+							if (parent) {
+								return checkAssignmentExpression(parent, text, annot);
+							}
+							return null;
+						}
+						case "AssignmentExpression" : {
+							return checkAssignmentExpression(node, text, annot);
+						}
+					}
+				}
+			});
+		}
 	};
 	
 	/**
@@ -1173,7 +1360,7 @@ define([
        if(offset < 0) {
            return 0;
        }
-       var off = offset;
+        var off = offset;
        var char = text[off];
        while(off < text.length && !/[\r\n]/.test(char)) {
            char = text[++off];
