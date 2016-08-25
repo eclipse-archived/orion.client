@@ -4803,6 +4803,104 @@ define([
 						callback: done
 					});
 				});
+				it("no-duplicate-case - remove 1", function(done) {
+					var rule = createTestRule("no-duplicate-case");
+					var expected = {value: "", start: 59, end: 77};
+					return getFixes({
+						buffer: "var a = 1;\n" +
+								"switch (a) {\n" +
+								"	case 1:\n" +
+								"		break;\n" +
+								"	case 2:\n" +
+								"		break;\n" +
+								"	case 1:\n" +
+								"		break;\n" +
+								"	default:\n" +
+								"		break;\n" +
+								"}",
+						rule: rule,
+						fixid: 'remove-duplicate-case',
+						expected: expected,
+						callback: done
+					});
+				});
+				it("no-duplicate-case - remove 2", function(done) {
+					var rule = createTestRule("no-duplicate-case");
+					var expected = {value: "", start: 105, end: 166};
+					return getFixes({
+						buffer:
+							"var foo = 0;\n" +
+							"switch(foo) {\n" +
+							"	case 'one':\n" +
+							"		break;\n" +
+							"	case 'two': {\n" +
+							"		console.log(\"two\");\n" +
+							"	}\n" +
+							"	//$FALLTHROUGH$\n" +
+							"	case 'one':\n" +
+							"		foo = 5;\n" +
+							"		console.log(foo);\n" +
+							"	//$FALLTHROUGH$\n" +
+							"	case 'three' :\n" +
+							"		foo = 2;\n" +
+							"		break;\n" +
+							"}",
+						rule: rule,
+						fixid: 'remove-duplicate-case',
+						expected: expected,
+						callback: done
+					});
+				});
+				it("no-duplicate-case - remove 3", function(done) {
+					var rule = createTestRule("no-duplicate-case");
+					var expected = {value: "", start: 97, end: 158};
+					return getFixes({
+						buffer:
+							"var foo = 0;\n" +
+							"switch(foo) {\n" +
+							"	case 'one':\n" +
+							"		break;\n" +
+							"	case 'two': {\n" +
+							"		console.log(\"two\");\n" +
+							"		break;\n" +
+							"	}\n" +
+							"	case 'one':\n" +
+							"		foo = 5;\n" +
+							"		console.log(foo);\n" +
+							"	//$FALLTHROUGH$\n" +
+							"	case 'three' :\n" +
+							"		foo = 2;\n" +
+							"		break;\n" +
+							"}",
+						rule: rule,
+						fixid: 'remove-duplicate-case',
+						expected: expected,
+						callback: done
+					});
+				});
+				it("no-duplicate-case - remove 4", function(done) {
+					var rule = createTestRule("no-duplicate-case");
+					var expected = {value: "", start: 88, end: 149};
+					return getFixes({
+						buffer:
+							"var foo = 0;\n" +
+							"switch(foo) {\n" +
+							"	case 'one':\n" +
+							"		break;\n" +
+							"	case 'two': {\n" +
+							"		console.log(\"two\");\n" +
+							"	}\n" +
+							"	//$FALLTHROUGH$\n" +
+							"	case 'one':\n" +
+							"		foo = 5;\n" +
+							"		console.log(foo);\n" +
+							"}",
+						rule: rule,
+						fixid: 'remove-duplicate-case',
+						expected: expected,
+						callback: done
+					});
+				});
 			});
 			//NO-REDECLARE
 			describe("no-redeclare", function() {

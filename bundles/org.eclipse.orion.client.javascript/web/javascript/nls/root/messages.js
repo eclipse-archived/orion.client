@@ -45,6 +45,7 @@ define({
 	'noDupeKeysFixName': 'Rename key',
 	'NoRedeclareFixName' : 'Rename variable',
 	'noDuplicateCaseFixName' : 'Rename case',
+	'removeDuplicateCaseFixName' : 'Remove case',
 	'noIterator': 'Discouraged __iterator__ property use:',
 	'noProto': 'Discouraged __proto__ property use:',
 	'noUndefInit': 'Explicitly initializing variables to undefined:',
