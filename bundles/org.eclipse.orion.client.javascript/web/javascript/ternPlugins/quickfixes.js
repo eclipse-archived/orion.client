@@ -1480,23 +1480,50 @@ define([
 	 * @param {Number} index The index to remove
 	 * @returns {Object} A change object containg the properties text, start and end
 	 */
-    function removeIndexedItemChange(list, index, greedy, parent) {
-        if(index < 0 || index > list.length) {
-	            return;
-        }
-        var node = list[index];
-        if(list.length === 1) {
-            return { "start" : node.range[0], "end" : parent ? parent.range[1] - 1: node.range[1], "text" : "" };
-        } else if(index === list.length-1) {
-            return { "start" : list[index-1].range[1], "end" : parent ? parent.range[1] - 1: node.range[1], "text" : ""};
-        } else if(node) {
-        	return greedy ?
-        		{ "start" : list[index-1].range[1], "end" : list[index+1].range[0], "text" : ""}:
-            	{ "start" : node.range[0], "end" : list[index+1].range[0], "text" : ""};
-        }
-        return null;
-    }
-    
+	function removeIndexedItemChange(list, index, greedy, parent) {
+		if (index < 0 || index > list.length) {
+			return;
+		}
+		var node = list[index];
+		if (list.length === 1) {
+			return {
+				"start": node.range[0],
+				"end": parent ? parent.range[1] - 1 : node.range[1],
+				"text": ""
+			};
+		} else if (index === list.length - 1) {
+			return {
+				"start": list[index - 1].range[1],
+				"end": parent ? parent.range[1] - 1 : node.range[1],
+				"text": ""
+			};
+		} else if (node) {
+			if (index === 0) {
+				if (list.length === 1) {
+					return {
+						"start": node.range[0],
+						"end": node.range[1],
+						"text": ""
+					};
+				}
+				return {
+					"start": node.range[0],
+					"end": list[index + 1].range[0],
+					"text": ""
+				};
+			}
+			return greedy ? {
+				"start": list[index - 1].range[1],
+				"end": list[index + 1].range[0],
+				"text": ""
+			} : {
+				"start":  list[index - 1].range[1],
+				"end": node.range[1],
+				"text": ""
+			};
+		}
+		return null;
+	}    
     /**
      * @description Updates the JSDoc attached to the given AST node
      * @param {Object} node The AST node to update

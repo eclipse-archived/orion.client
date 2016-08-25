@@ -3317,8 +3317,8 @@ define([
 				it("Test no-unused-params-2",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "",
-									start: 14,
-									end: 18};
+									start: 12,
+									end: 16};
 					return getFixes({buffer: 'function f(p, p2, p3) {p(); p3();}', 
 									  rule: rule,
 									  expected: expected,
@@ -3506,8 +3506,8 @@ define([
 				it("Test no-unused-params-html-2",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "",
-									start: 34,
-									end: 38};
+									start: 32,
+									end: 36};
 					return getFixes({buffer: '<html><head><script>function f(p, p2, p3) {p(); p3();}</script></head></html>', 
 									  rule: rule,
 									  expected: expected,
@@ -4361,8 +4361,8 @@ define([
 				it("Test no-unused-vars-unused-3",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 12, 
-									end: 15};
+									start: 10, 
+									end: 13};
 					return getFixes({buffer: 'var a = 10, b, c = 1;', 
 									  rule: rule,
 									  expected: expected,
@@ -4418,8 +4418,8 @@ define([
 				it("Test no-unused-vars-unused-html-3",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 32, 
-									end: 35};
+									start: 30, 
+									end: 33};
 					return getFixes({buffer: '<html><head><script>var a = 10, b, c = 1;</script></head></html>', 
 									  rule: rule,
 									  expected: expected,
