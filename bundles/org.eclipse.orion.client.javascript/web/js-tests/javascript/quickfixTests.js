@@ -5060,6 +5060,93 @@ define([
 									  pid: 'quotes'});
 				});
 			});
+			// no-implicit-coercion
+			describe("no-implicit-coercion", function() {
+				it("Test boolean implicit coercion",function(callback) {
+					var rule = createTestRule('no-implicit-coercion');
+					var expected =
+								{
+									value: "Boolean(foo)",
+									start: 8,
+									end: 13
+								};
+					return getFixes({buffer: 'var b = !!foo',
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'no-implicit-coercion'});
+				});
+				it("Test boolean implicit coercion 2",function(callback) {
+					var rule = createTestRule('no-implicit-coercion');
+					var expected =
+								{
+									value: "foo.indexOf(\".\") !== -1",
+									start: 9,
+									end: 26
+								};
+					return getFixes({buffer: 'var b2 = ~foo.indexOf(".");',
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'no-implicit-coercion'});
+				});
+				it("Test number implicit coercion 1",function(callback) {
+					var rule = createTestRule('no-implicit-coercion');
+					var expected =
+								{
+									value: "Number(foo)",
+									start: 8,
+									end: 12
+								};
+					return getFixes({buffer: 'var n = +foo;',
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'no-implicit-coercion'});
+				});
+				it("Test number implicit coercion 2",function(callback) {
+					var rule = createTestRule('no-implicit-coercion');
+					var expected =
+								{
+									value: "Number(foo)",
+									start: 9,
+									end: 16
+								};
+					return getFixes({buffer: 'var n2 = 1 * foo;',
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'no-implicit-coercion'});
+				});
+				it("Test string implicit coercion 1",function(callback) {
+					var rule = createTestRule('no-implicit-coercion');
+					var expected =
+								{
+									value: "String(foo)",
+									start: 8,
+									end: 16
+								};
+					return getFixes({buffer: 'var s = "" + foo;',
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'no-implicit-coercion'});
+				});
+				it("Test string implicit coercion 2",function(callback) {
+					var rule = createTestRule('no-implicit-coercion');
+					var expected =
+								{
+									value: "String(foo)",
+									start: 0,
+									end: 9
+								};
+					return getFixes({buffer: 'foo += "";',
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'no-implicit-coercion'});
+				});
+			});
 		});
 	};
 });
