@@ -14,7 +14,7 @@ define("orion/editor/stylers/application_sql/syntax", ["orion/editor/stylers/lib
 	var keywords = [
 		"ADD", "ALTER\\s+TABLE", "AND", "ASC",
 		"BETWEEN",
-		"COMMIT", "CREATE\\s+(TABLE|DATABASE)", "CREATE\\s+(UNIQUE\\s+)?INDEX",
+		"COMMIT", "CONTAINS", "CREATE",
 		"DELETE\\s+FROM", "DESC", "DROP(\\s+(INDEX|TABLE|DATABASE))?",
 		"FROM",
 		"GROUP\\s+BY",
