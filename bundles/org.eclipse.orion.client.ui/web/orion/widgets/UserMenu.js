@@ -16,8 +16,9 @@ define([
 	'orion/webui/dropdown',
 	'orion/util',
 	'orion/webui/dialog',
+	'orion/webui/intro',
 	'orion/xhr'
-], function(messages, lib, PageLinks, Dropdown, util, dialog, xhr) {
+], function(messages, lib, PageLinks, Dropdown, util, dialog, intro, xhr) {
 	
 	function UserMenu(options) {
 		this._displaySignOut = true;
@@ -187,7 +188,7 @@ define([
 					var keyAssist = element.parentNode;
 					getCategory(0).appendChild(keyAssist);
 				}
-
+				
 				if (util.isElectron) {
 					var clearLocalStorage = this._makeMenuItem(messages["Clear Local Storage"], function() { localStorage.clear(); });
 					getCategory(0).appendChild(clearLocalStorage.parentNode);

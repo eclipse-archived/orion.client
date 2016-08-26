@@ -50,13 +50,14 @@ define([
 	'orion/webui/splitter',
 	'orion/webui/tooltip',
 	'orion/bidiUtils',
-	'orion/customGlobalCommands'
+	'orion/customGlobalCommands',
+	'orion/webui/intro',
 ], function(
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModelFactory, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands
+	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands, mIntro
 ) {
 
 var exports = {};
@@ -851,7 +852,8 @@ objects.mixin(EditorSetup.prototype, {
 		if (lastEditedFile && lastEditedFile.lastIndexOf(currentHash, 0) === 0 && lastEditedFile !== currentHash) {
 			window.location.hash = currentHash = lastEditedFile;
 		}
-
+		var intro = new mIntro.Intro();
+		intro.showNotifications();
 		this.setInput(currentHash);
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$
 			this.setInput(PageUtil.hash());
