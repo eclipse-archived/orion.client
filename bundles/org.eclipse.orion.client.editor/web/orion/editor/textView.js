@@ -859,6 +859,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				while (tabIndex !== -1 && tabIndex < end) {
 					if (start < tabIndex) {
 						range = {text: text.substring(start, tabIndex), style: style};
+						if (bidiUtils.isBidiEnabled() && style && style.styleClass && style.styleClass.startsWith("comment")) {
+							range = bidiUtils.enforceTextDirForComment(range);
+						}
 						data.ranges.push(range);
 						if (bidiUtils.isBidiEnabled()) {
 							data.ranges.push(bidiRange);
@@ -888,6 +891,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			}
 			if (start <= end) {
 				range = {text: text.substring(start, end), style: style};
+				if (bidiUtils.isBidiEnabled() && style && style.styleClass && style.styleClass.startsWith("comment")) {
+					range = bidiUtils.enforceTextDirForComment(range);
+				}
 				data.ranges.push(range);
 				if (bidiUtils.isBidiEnabled()) {
 					data.ranges.push(bidiRange);
