@@ -1,9 +1,9 @@
 /* eslint-env amd */
 define([
 	'./token-store',
-	'estraverse/estraverse',
-	'../eslint'
-], function(createTokenStore, estraverse, eslint) {
+	'./traverser',
+	'./util'
+], function(createTokenStore, Traverser, utils) {
 	/**
  * @fileoverview Abstraction of JavaScript source code.
  * @author Nicholas C. Zakas
@@ -57,9 +57,8 @@ function findJSDocComment(comments, line) {
 
                 if (line - comments[i].loc.end.line <= 1) {
                     return comments[i];
-                } else {
-                    break;
                 }
+                break;
             }
         }
     }
@@ -94,10 +93,17 @@ function SourceCode(text, ast) {
     validate(ast);
 
     /**
+     * The flag to indicate that the source code has Unicode BOM.
+     * @type boolean
+     */
+    this.hasBOM = text.charCodeAt(0) === 0xFEFF;
+
+   /**
      * The original text source code.
+     * BOM was stripped from this text.
      * @type string
      */
-    this.text = text;
+    this.text = this.hasBOM ? text.slice(1) : text;
 
     /**
      * The parsed AST for the source code.
@@ -110,7 +116,7 @@ function SourceCode(text, ast) {
      * This is done to avoid each rule needing to do so separately.
      * @type string[]
      */
-    this.lines = text.split(/\r\n|\r|\n|\u2028|\u2029/g);
+    this.lines = SourceCode.splitLines(this.text);
 
     this.tokensAndComments = ast.tokens.concat(ast.comments).sort(function(left, right) {
         return left.range[0] - right.range[0];
@@ -122,10 +128,25 @@ function SourceCode(text, ast) {
         this[methodName] = tokenStore[methodName];
     }, this);
 
+    var tokensAndCommentsStore = createTokenStore(this.tokensAndComments);
+
+    this.getTokenOrCommentBefore = tokensAndCommentsStore.getTokenBefore;
+    this.getTokenOrCommentAfter = tokensAndCommentsStore.getTokenAfter;
+
     // don't allow modification of this object
     Object.freeze(this);
     Object.freeze(this.lines);
 }
+
+/**
+ * Split the source code into multiple lines based on the line delimiters
+ * @param {string} text Source code as a string
+ * @returns {string[]} Array of source code lines
+ * @public
+ */
+SourceCode.splitLines = function(text) {
+	return text.split(/\r\n|\r|\n|\u2028|\u2029/g);
+};
 
 SourceCode.prototype = {
     constructor: SourceCode,
@@ -162,7 +183,7 @@ SourceCode.prototype = {
         return this.ast.comments;
     },
 
-    /**
+        /**
      * Gets all comments for the given node.
      * @param {ASTNode} node The AST node to get the comments for.
      * @returns {Object} The list of comments indexed by their position.
@@ -178,18 +199,10 @@ SourceCode.prototype = {
          * leadingComments/trailingComments. Comments are only left in the
          * Program node comments array if there is no executable code.
          */
-        switch(node.type) {
-        	case "Program" :
-	            if (node.body.length === 0) {
-	                leadingComments = node.comments;
-	            }
-	            break;
-	        case "FunctionDeclaration" :
-	            var parent = node.parent;
-	            if (looksLikeExport(parent)) {
-	               leadingComments = parent.leadingComments || [];
-	               trailingComments = parent.trailingComments || [];
-	            }
+        if (node.type === "Program") {
+            if (node.body.length === 0) {
+                leadingComments = node.comments;
+            }
         }
 
         return {
@@ -207,31 +220,30 @@ SourceCode.prototype = {
      */
     getJSDocComment: function(node) {
 
-        var parent = node.parent,
-            line = node.loc.start.line;
+        var parent = node.parent;
 
         switch (node.type) {
+            case "ClassDeclaration":
             case "FunctionDeclaration":
                 if (looksLikeExport(parent)) {
-                    return findJSDocComment(parent.leadingComments, line);
+                    return findJSDocComment(parent.leadingComments, parent.loc.start.line);
                 }
-                return findJSDocComment(node.leadingComments, line);
-
-            case "ClassDeclaration":
-                return findJSDocComment(node.leadingComments, line);
+                return findJSDocComment(node.leadingComments, node.loc.start.line);
 
             case "ClassExpression":
-                return findJSDocComment(parent.parent.leadingComments, line);
+                return findJSDocComment(parent.parent.leadingComments, parent.parent.loc.start.line);
 
             case "ArrowFunctionExpression":
             case "FunctionExpression":
 
                 if (parent.type !== "CallExpression" && parent.type !== "NewExpression") {
-                    while (parent && !parent.leadingComments && !/Function/.test(parent.type)) {
+                    while (parent && !parent.leadingComments && !/Function/.test(parent.type) && parent.type !== "MethodDefinition" && parent.type !== "Property") {
                         parent = parent.parent;
                     }
 
-                    return parent && (parent.type !== "FunctionDeclaration") ? findJSDocComment(parent.leadingComments, line) : null;
+                    return parent && parent.type !== "FunctionDeclaration" ? findJSDocComment(parent.leadingComments, parent.loc.start.line) : null;
+                } else if (node.leadingComments) {
+                    return findJSDocComment(node.leadingComments, node.loc.start.line);
                 }
 
             // falls through
@@ -247,12 +259,15 @@ SourceCode.prototype = {
      * @returns {ASTNode} The node if found or null if not found.
      */
     getNodeByRangeIndex: function(index) {
-        var result = null;
+        var result = null,
+            resultParent = null,
+            traverser = new Traverser();
 
-        estraverse.traverse(this.ast, {
+        traverser.traverse(this.ast, {
             enter: function(node, parent) {
                 if (node.range[0] <= index && index < node.range[1]) {
-                    result = eslint.assign({ parent: parent }, node);
+                    result = node;
+                    resultParent = parent;
                 } else {
                     this.skip();
                 }
@@ -264,7 +279,7 @@ SourceCode.prototype = {
             }
         });
 
-        return result;
+        return result ? utils.mixin({parent: resultParent}, result) : null; // ORION
     },
 
     /**

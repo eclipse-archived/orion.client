@@ -158,7 +158,7 @@ define([
 			 */
 			function getFixes(options) {
 				var obj = setup(options);
-				return obj.validator.computeProblems(obj.editorContext, {contentType: obj.contentType, rule: options.rule}).then(
+				return obj.validator.computeProblems(obj.editorContext, {contentType: obj.contentType}).then(
 					function(problems) {
 						try {
 							var pbs = problems.problems;
@@ -5243,6 +5243,37 @@ define([
 									  expected: expected,
 									  callback: callback,
 									  pid: 'no-implicit-coercion'});
+				});
+			});
+			// no-trailing-spaces
+			describe("no-trailing-spaces", function() {
+				it("Test invalid trailing spaces",function(callback) {
+					var rule = createTestRule('no-trailing-spaces', 2, {"skipBlankLines" : false});
+					var expected =[
+							{value: "", start: 0, end: 3},
+							{value: "", start: 15, end: 28},
+							{value: "", start: 29, end: 32}
+						];
+					return getFixes({buffer:
+										"			\n" +
+										"var f = 10;             \n" +
+										"			",
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'no-trailing-spaces'});
+				});
+				it("Test invalid trailing spaces 2",function(callback) {
+					var rule = createTestRule('no-trailing-spaces', 2, {"skipBlankLines" : true});
+					var expected =[{value: "", start: 15, end: 28}];
+					return getFixes({buffer:
+										"			\n" +
+										"var f = 10;             \n" +
+										"			",
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'no-trailing-spaces'});
 				});
 			});
 		});

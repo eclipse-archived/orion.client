@@ -1358,7 +1358,19 @@ define([
 					}
 				}
 			});
-		}
+		},
+		/**
+		 * @callback
+		 */
+		"no-trailing-spaces" : function(annotation, annotations, file) {
+			return applySingleFixToAll(annotations, function(annot) {
+				return {
+					text: '',
+					start: annot.start,
+					end: annot.end
+				};
+			});
+		},
 	};
 	
 	/**

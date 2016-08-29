@@ -141,17 +141,6 @@ define([
 	 */
 	function toProblem(e) {
 		var start = e.start, end = e.end;
-		if (e.node) {
-			// Error produced by eslint
-			start = e.node.range[0];
-			end = e.node.range[1];
-			if (e.related && e.related.range) {
-				// Flagging the entire node is distracting. Just flag the bad token.
-				var relatedToken = e.related;
-				start = relatedToken.range[0];
-				end = relatedToken.range[1];
-			}
-		}
 		var descriptionKey = e.args && e.args.nls ? e.args.nls : e.ruleId;
 		var descriptionArgs = e.args || Object.create(null);
 		var description = e.message;
@@ -163,10 +152,26 @@ define([
 			description: description,
 			severity: getSeverity(e)
 		};
+		if (e.args && e.args.range) {
+			prob.start = e.args.range.start;
+			prob.end = e.args.range.end;
+		} else if (e.node) {
+			// Error produced by eslint
+			start = e.node.range[0];
+			end = e.node.range[1];
+			if (e.related && e.related.range) {
+				// Flagging the entire node is distracting. Just flag the bad token.
+				var relatedToken = e.related;
+				start = relatedToken.range[0];
+				end = relatedToken.range[1];
+			}
+		}
 		if (e.nodeType) {
 			prob.nodeType = e.nodeType;
 		}
-		if (e.node && e.nodeType === "Program" && typeof e.line !== 'undefined') {
+		if(e.args && e.args.range) {
+			// skip start/end settings
+		} else if (e.node && e.nodeType === "Program" && typeof e.line !== 'undefined') {
 			prob.line = e.line;
 			prob.start = e.column;
 		} else if(typeof start !== 'undefined') {
@@ -360,14 +365,20 @@ define([
 		 * @since 8.0
 		 */
 		_enableOnly: function _enableOnly(ruleid, severity, opts) {
-		    var keys = Object.keys(config.rules);
-		    for(var i = 0; i < keys.length; i++) {
-		        if(keys[i] === ruleid) {
-		            config.setOption(ruleid, severity ? severity : 2, opts);
-		        } else {
-		            config.setOption(keys[i], 0);
-		        }
-		    }
+			var keys = Object.keys(config.rules);
+			for (var i = 0; i < keys.length; i++) {
+				if (keys[i] === ruleid) {
+					config.setOption(ruleid, severity ? severity : 2);
+					if (typeof opts === 'object') {
+						// object for rules' options
+						for (var prop in opts) {
+							config.setOption(ruleid, opts[prop], prop);
+						}
+					}
+				} else {
+					config.setOption(keys[i], 0);
+				}
+			}
 		},
 		
 		/**

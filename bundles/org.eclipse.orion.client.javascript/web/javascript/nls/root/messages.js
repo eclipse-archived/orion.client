@@ -140,7 +140,7 @@ define({
 	'keywordProposalDescription': ' - Keyword',
 	'keywordHoverProposal': 'ECMAScript reserved keyword',
 	'reloadPluginCmd': 'Reload',
-	'reloadPluginCmdTooltip': 'Reload plug-in',
+	'reloadPluginCmdTooltip'	: 'Reload plug-in',
 	'reloadAllPluginsCmd': 'Reload All',
 	'reloadAllPluginsCmdTooltip': 'Reload all plug-ins',
 	'templateHoverHeader': 'Template source code:\n\n',
@@ -200,6 +200,9 @@ define({
 	'no-unused-expressions-allowTernary' : 'Allow to use ternary operators:',
 	'noUnusedExpressionsFixName' : 'Remove unused expressions',
 	'no-invalid-this' : 'Disallow this keywords outside of classes or class-like objects:',
+	'noTrailingSpaces' : 'Disallow trailing whitespace:',
+	'noTrailingSpacesSkipBlankLines' : 'Skip empty lines:',
+	'noTrailingSpacesFixName' : 'Remove trailing spaces',
 
 	//All refs
 	'functionDecls': 'Function Declarations',
