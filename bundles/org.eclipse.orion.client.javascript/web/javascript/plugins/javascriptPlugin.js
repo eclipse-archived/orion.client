@@ -2456,15 +2456,15 @@ define([
 				{
 					id: "no-trailing-spaces", //$NON-NLS-1$
 					name: javascriptMessages["noTrailingSpaces"],
-					type: "boolean", //$NON-NLS-1$
-					defaultValue: false
+					type: "number", //$NON-NLS-1$
+					defaultValue: warning,
 				},
 				{
 					id: "no-trailing-spaces:skipBlankLines", //$NON-NLS-1$
 					name: javascriptMessages["noTrailingSpacesSkipBlankLines"],
 					type: "boolean", //$NON-NLS-1$
 					dependsOn: "no-trailing-spaces",
-					defaultValue: false
+					defaultValue: true
 				}
 				]
 			}]
