@@ -2458,6 +2458,7 @@ define([
 					name: javascriptMessages["noTrailingSpaces"],
 					type: "number", //$NON-NLS-1$
 					defaultValue: warning,
+					options: severities
 				},
 				{
 					id: "no-trailing-spaces:skipBlankLines", //$NON-NLS-1$
