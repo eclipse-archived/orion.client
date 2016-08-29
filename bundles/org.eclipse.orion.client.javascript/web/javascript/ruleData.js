@@ -74,6 +74,7 @@ define([
 			"no-shadow-global" : 1,
 			"no-sparse-arrays" : 1, 
 			"no-throw-literal" : 1,
+			"no-trailing-spaces" : [1, { "skipBlankLines": true }],
 			"no-undef" : 2,
 			"no-undef-expression": 1,
 			"no-undef-init" : 1,
@@ -318,6 +319,10 @@ define([
 			"no-throw-literal" : {
 				description: Messages['no-throw-literal-description'],
 				url: 'http://eslint.org/docs/rules/no-throw-literal'
+			},
+			"no-trailing-spaces" : {
+				description: Messages['no-trailing-spaces-description'],
+				url: 'http://eslint.org/docs/rules/no-trailing-spaces'
 			},
 			"no-undef" : {
 				description: Messages['no-undef-description'],

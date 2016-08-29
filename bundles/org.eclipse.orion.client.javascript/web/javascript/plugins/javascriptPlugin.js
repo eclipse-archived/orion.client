@@ -1701,6 +1701,25 @@ define([
 		}
 	);
 
+	provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
+		quickFixComputer, {
+			name: javascriptMessages["noTrailingSpacesFixName"],
+			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+			id: "no.trailing.spaces.fix", //$NON-NLS-1$
+			fixAllEnabled: true,
+			contentType: ['application/javascript', 'text/html'], //$NON-NLS-1$ //$NON-NLS-2$
+			validationProperties: [{
+					source: "annotation:id", //$NON-NLS-1$
+					match: "^(?:no-trailing-spaces)$" //$NON-NLS-1$
+				},
+				{
+					source: "readonly", //$NON-NLS-1$
+					match: false
+				}
+			]
+		}
+	);
+
 	/**
 	 * legacy pref id
 	 */
@@ -2433,7 +2452,21 @@ define([
 					type: "boolean", //$NON-NLS-1$
 					dependsOn: "quotes",
 					defaultValue: false
-				}]
+				},
+				{
+					id: "no-trailing-spaces", //$NON-NLS-1$
+					name: javascriptMessages["noTrailingSpaces"],
+					type: "boolean", //$NON-NLS-1$
+					defaultValue: false
+				},
+				{
+					id: "no-trailing-spaces:skipBlankLines", //$NON-NLS-1$
+					name: javascriptMessages["noTrailingSpacesSkipBlankLines"],
+					type: "boolean", //$NON-NLS-1$
+					dependsOn: "no-trailing-spaces",
+					defaultValue: false
+				}
+				]
 			}]
 		});
 

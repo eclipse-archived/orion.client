@@ -14600,6 +14600,70 @@ define([
 								});
 						});
 					});
+					// no-trailing-spaces --------------------------------------------
+					describe('no-trailing-spaces', function() {
+						var RULE_ID = "no-trailing-spaces";
+						it("flag invalid trailing spaces", function(callback) {
+							var topic =
+									"			\n" +
+									"var f = 10;             \n" +
+									"			";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {"skipBlankLines" : false}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-trailing-spaces",
+										severity: 'error',
+										description: 'Trailing spaces not allowed.',
+										start: 0,
+										end: 3
+									},
+									{
+										id: "no-trailing-spaces",
+										severity: 'error',
+										description: 'Trailing spaces not allowed.',
+										start: 15,
+										end: 28
+									},
+									{
+										id: "no-trailing-spaces",
+										severity: 'error',
+										description: 'Trailing spaces not allowed.',
+										start: 29,
+										end: 32
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid trailing spaces", function(callback) {
+							var topic =
+									"			\n" +
+									"var f = 10;             \n" +
+									"			";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [2, {"skipBlankLines" : true}];
+							
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: "no-trailing-spaces",
+										severity: 'error',
+										description: 'Trailing spaces not allowed.',
+										start: 15,
+										end: 28
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
 			});
 		});
 	};

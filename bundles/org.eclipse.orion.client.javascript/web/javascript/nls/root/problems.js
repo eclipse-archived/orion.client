@@ -151,6 +151,8 @@ define({
 	'missing-requirejs-description' : 'Check missing require libraries.',
 	'no-undef-expression-description' : 'Report undefined expressions.',
 	'unknown-require-description' : 'Report missing libraries or missing tern plugins.',
+	'no-trailing-spaces-description': 'Disallow trailing whitespace at the end of lines.',
+
 
 	//.tern-project file validation messages
 	'notNum': "'${0}' must be a number",

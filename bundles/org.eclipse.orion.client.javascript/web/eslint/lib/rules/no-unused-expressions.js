@@ -1,8 +1,7 @@
 /*eslint-env amd */
 define([
-'estraverse/estraverse',
-'module'
-], function(Estraverse, module) {
+	'module'
+], function(module) {
 	//------------------------------------------------------------------------------
 	// Rule Definition
 	//------------------------------------------------------------------------------
