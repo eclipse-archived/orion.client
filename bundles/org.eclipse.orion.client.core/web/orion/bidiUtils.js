@@ -156,25 +156,27 @@ define ([
 	};
 	
 	function enforceTextDirForComment(range) {
-		var comments = [{name:"comment block", start:"/*", end:"*/"}, 
-		                {name:"comment line double-slash", start:"//", end:""},
-		                {name:"comment block documentation", start:"/**", end:"*/"},
-		                {name:"comment line double-slash jade", start:"//", end:""},
-		                {name:"comment line", start:"", end:""},
-		                {name:"comment line number-sign php", start:"#", end:""},
-		                {name:"comment block xml", start:"<!--", end:"<!--"}
+		var comments = [{name:"comment block"}, 
+		                {name:"comment line double-slash"},
+		                {name:"comment block documentation"},
+		                {name:"comment line double-slash jade"},
+		                {name:"comment line"},
+		                {name:"comment line number-sign php"},
+		                {name:"comment block xml"}
 		];
 		var text = range.text;
 		var style = range.style;
-		for (var i = 0; i < comments.length; i++) {
-			if (style.styleClass === comments[i].name && text.length > 0) {									
-				var newStyle = style;
-				if (typeof newStyle.attributes == "undefined") {
-					newStyle.attributes = {};
+		if (isBidiEnabled() && style && style.styleClass && style.styleClass.startsWith("comment") && text.length > 0) {
+			for (var i = 0; i < comments.length; i++) {
+				if (style.styleClass === comments[i].name) {
+					var newStyle = style;
+					if (typeof newStyle.attributes == "undefined") {
+						newStyle.attributes = {};
+					}
+					newStyle.attributes.dir = getTextDirection(text);
+					range.style = newStyle;		
+					return range;
 				}
-				newStyle.attributes.dir = getTextDirection(text);
-				range.style = newStyle;		
-				return range;
 			}
 		}
 		return range;
