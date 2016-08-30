@@ -2,7 +2,7 @@
 
     <target name="download3rdPartyLibs">
         <mkdir dir="${jsdocHome}" />
-        <get src="https://jsdoc-toolkit.googlecode.com/files/jsdoc_toolkit-2.4.0.zip"
+        <get src="https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/jsdoc-toolkit/jsdoc_toolkit-2.4.0.zip"
              dest="${jsdocHome}/jsdoc_toolkit-2.4.0.zip"
              usetimestamp="true"
              maxtime="30" />
