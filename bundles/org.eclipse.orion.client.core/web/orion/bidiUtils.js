@@ -154,11 +154,40 @@ define ([
 			}
 		}
 	};
+	
+	function enforceTextDirForComment(range) {
+		var comments = [{name:"comment block"}, 
+		                {name:"comment line double-slash"},
+		                {name:"comment block documentation"},
+		                {name:"comment line double-slash jade"},
+		                {name:"comment line"},
+		                {name:"comment line number-sign php"},
+		                {name:"comment block xml"}
+		];
+		var text = range.text;
+		var style = range.style;
+		if (isBidiEnabled() && style && style.styleClass && style.styleClass.startsWith("comment") && text.length > 0) {
+			for (var i = 0; i < comments.length; i++) {
+				if (style.styleClass === comments[i].name) {
+					var newStyle = style;
+					if (typeof newStyle.attributes == "undefined") {
+						newStyle.attributes = {};
+					}
+					newStyle.attributes.dir = getTextDirection(text);
+					range.style = newStyle;		
+					return range;
+				}
+			}
+		}
+		return range;
+	};
+
 		
 	return {
 		isBidiEnabled: isBidiEnabled,
 		getTextDirection: getTextDirection,		
 		enforceTextDirWithUcc: enforceTextDirWithUcc,
-		initInputField: initInputField
+		initInputField: initInputField,
+		enforceTextDirForComment: enforceTextDirForComment
 	};
 });
