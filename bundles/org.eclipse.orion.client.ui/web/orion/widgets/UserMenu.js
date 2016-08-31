@@ -187,7 +187,6 @@ define([
 					var keyAssist = element.parentNode;
 					getCategory(0).appendChild(keyAssist);
 				}
-
 				if (util.isElectron) {
 					var clearLocalStorage = this._makeMenuItem(messages["Clear Local Storage"], function() { localStorage.clear(); });
 					getCategory(0).appendChild(clearLocalStorage.parentNode);
