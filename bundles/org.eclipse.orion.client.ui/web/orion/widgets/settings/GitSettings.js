@@ -71,7 +71,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					} 
 				)
 			];
-			var gitSection = new Subsection( {sectionName:messages["Git Config"], parentNode: this.sections, children: this.gitFields } );
+			var gitSection = new Subsection( {sectionName:messages["Git Config"], parentNode: this.sections, children: this.gitFields, additionalCssClass: 'git-setting-header'} );
 			gitSection.show();
 			
 			/* - git select all -------------------------------------------------- */
@@ -80,7 +80,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					postChange: this.update.bind(this)
 				} 
 			)];
-			var gitSection2 = new Subsection( {sectionName:messages["GitWorkDir"], parentNode: this.sections, children: this.gitAlwaysSelect } );
+			var gitSection2 = new Subsection( {sectionName:messages["GitWorkDir"], parentNode: this.sections, children: this.gitAlwaysSelect, additionalCssClass: 'git-setting-header'} );
 			gitSection2.show();
 			
 			//--------- git credentials -------------------------------
@@ -132,7 +132,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						that.gitCredentialsFields.push(settingsCommand);
 					}
 					
-					gitCredentialsSection = new Subsection( {sectionName: messages["Git Credentials Storage"], parentNode: that.sections, children: that.gitCredentialsFields} ); //$NON-NLS-0$
+					gitCredentialsSection = new Subsection( {sectionName: messages["Git Credentials Storage"], parentNode: that.sections, children: that.gitCredentialsFields, additionalCssClass: 'git-setting-header'} ); //$NON-NLS-0$
 					gitCredentialsSection.show();		
 				}
 			);

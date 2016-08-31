@@ -33,6 +33,9 @@ define([], function() {
 		node.setAttribute('aria-labelledby', headerId); //$NON-NLS-0$
 		var titleNode = document.createElement('div'); //$NON-NLS-0$
 		titleNode.classList.add('setting-header'); //$NON-NLS-0$
+		if(options.additionalCssClass) {
+			titleNode.classList.add(options.additionalCssClass); //$NON-NLS-0$
+		}
 		titleNode.id = headerId;
 		titleNode.textContent = sectionName;
 		var content = document.createElement('div'); //$NON-NLS-0$
