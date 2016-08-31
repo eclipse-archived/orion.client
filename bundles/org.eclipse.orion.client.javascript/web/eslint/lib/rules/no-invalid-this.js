@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function(module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function(ProblemMessages, module) {
 
 	"use strict";
 	
@@ -320,7 +323,7 @@ define(function(module) {
 				var current = stack.getCurrent();
 
 				if (current && !current.valid) {
-					context.report(node, "Unexpected 'this'.");
+					context.report(node, ProblemMessages.noInvalidThis);
 				}
 			}
 		};

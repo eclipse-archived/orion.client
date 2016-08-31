@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function (module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function(ProblemMessages, module) {
 /**
  * @fileoverview Disallow parenthesising higher precedence subexpressions.
  * @author Michael Ficarra
@@ -228,7 +231,7 @@ module.exports = function(context) {
      */
     function report(node) {
         var previousToken = context.getTokenBefore(node);
-        context.report(node, previousToken.loc.start, "Gratuitous parentheses around expression.");
+        context.report(node, previousToken.loc.start, ProblemMessages.noExtraParens);
     }
 
     /**

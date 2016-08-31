@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function (module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function (ProblemMessages, module) {
 /**
  * @fileoverview Rule to forbid control charactes from regular expressions.
  * @author Nicholas C. Zakas
@@ -55,7 +58,7 @@ module.exports = function(context) {
             if (regex) {
                 computedValue = regex.toString();
                 if (/[\x00-\x1f]/.test(computedValue)) {
-                    context.report(node, "Unexpected control character in regular expression.");
+                    context.report(node, ProblemMessages.noControlRegex);
                 }
             }
         }

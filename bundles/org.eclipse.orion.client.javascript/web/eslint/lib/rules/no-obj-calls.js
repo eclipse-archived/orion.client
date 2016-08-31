@@ -1,33 +1,38 @@
 /*eslint-env amd */
-define(function (module) {
-/**
- * @fileoverview Rule to flag use of an object property of the global object (Math and JSON) as a function
- * @author James Allardice
- */
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function(ProblemMessages, module) {
+	/**
+	 * @fileoverview Rule to flag use of an object property of the global object (Math and JSON) as a function
+	 * @author James Allardice
+	 */
 
-"use strict";
+	"use strict";
 
-//------------------------------------------------------------------------------
-// Rule Definition
-//------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
+	// Rule Definition
+	//------------------------------------------------------------------------------
 
-module.exports = function(context) {
+	module.exports = function(context) {
 
-    return {
-        "CallExpression": function(node) {
+		return {
+			"CallExpression": function(node) {
 
-            if (node.callee.type === "Identifier") {
-                var name = node.callee.name;
-                if (name === "Math" || name === "JSON") {
-                    context.report(node, "'{{name}}' is not a function.", { name: name });
-                }
-            }
-        }
-    };
+				if (node.callee.type === "Identifier") {
+					var name = node.callee.name;
+					if (name === "Math" || name === "JSON") {
+						context.report(node, ProblemMessages.noObjCalls, {
+							name: name
+						});
+					}
+				}
+			}
+		};
 
-};
+	};
 
-module.exports.schema = [];
+	module.exports.schema = [];
 
-return module.exports;
+	return module.exports;
 });

@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function (module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function (ProblemMessages, module) {
 /**
  * @fileoverview Rule to flag `else` after a `return` in `if`
  * @author Ian Christian Myers
@@ -24,7 +27,7 @@ module.exports = function(context) {
      * @returns {void}
      */
     function displayReport(node) {
-        context.report(node, "Unnecessary 'else' after 'return'.");
+        context.report(node, ProblemMessages.noElseReturn);
     }
 
     /**
@@ -104,9 +107,8 @@ module.exports = function(context) {
             return node.body.some(checkForReturnOrIf);
         // If not a block statement, make sure the consequent isn't a ReturnStatement
         // or an IfStatement with returns on both paths
-        } else {
-            return checkForReturnOrIf(node);
         }
+        return checkForReturnOrIf(node);
     }
 
     //--------------------------------------------------------------------------

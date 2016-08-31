@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function(module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function(ProblemMessages, module) {
 	/**
 	 * @fileoverview Rule to flag use of an object property of the global object (Math and JSON) as a function
 	 * @author James Allardice
@@ -158,7 +161,7 @@ define(function(module) {
 					if (!isValid) {
 						var data = Object.create(null);
 						data.quote = QUOTE_SETTINGS[quoteOption].quote;
-						context.report(node,"Strings must use " + settings.description + ".", {data: data});
+						context.report(node, ProblemMessages.wrongQuotes, {description: settings.description, data: data});
 					}
 				}
 			},
@@ -176,7 +179,7 @@ define(function(module) {
 					var data = Object.create(null);
 					data.quote = QUOTE_SETTINGS[quoteOption].quote;
 					data.oldQuote = '`';
-					context.report(node,"Strings must use " + settings.description + ".", {data: data});
+					context.report(node, ProblemMessages.wrongQuotes, {description: settings.description, data: data});
 				}
 			}
 		};

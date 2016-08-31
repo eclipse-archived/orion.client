@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2014, 2016 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  ******************************************************************************/
 /* eslint-env amd */
 define({
@@ -116,20 +116,47 @@ define({
 	'esmodules-not-running' : 'import/export declarations require the \'es_modules\' plug-in to be running.',
 		
 	// Rules consumed from ESLint
+	'accessorPairGetter' : 'Getter is not present',
+	'accessorPairSetter' : 'Setter is not present',
 	'accessor-pairs-description' : "Report when accessors don't come in pairs (getter, setter)",
+	'noControlRegex' : 'Unexpected control character in regular expression.',
 	'no-control-regex-description' : "Disallow control characters in regular expressions",
+	'noConstantAssign' : '\'{{name}}\' is constant.',
 	'no-const-assign-description' : "Disallow modifying variables that are declared using const",
+	'noDuplicateCase' : 'Duplicate case label.',
 	'no-duplicate-case-description' : 'Disallow a duplicate case label',
-	'no-empty-character-class-description' : 'Disallow empty character classes',
-	'no-extra-boolean-cast-description' : 'Discourage redundant double negation',
-	'no-extra-parens-description' : 'Discourage redundant parentheses',
-	'no-invalid-regexp-description' : 'Report invalid regular expressions',
+	'NoNegatedInLhs': 'The \'in\' expression\'s left operand is negated',
 	'no-negated-in-lhs-description' : 'Disallow negated left operand of in operator',
+	'noObjCalls' : '\'{{name}}\' is not a function.',
 	'no-obj-calls-description' : 'Disallow global object as function calls',
-	'no-eq-null-description' : 'Disallow null comparisons',
+	'noElseReturn' : 'Unnecessary \'else\' after \'return\'.',
 	'no-else-return-description' : 'Report else after return',
+	'noEmptyCharacterClass' : 'Empty class.',
+	'no-empty-character-class-description' : 'Disallow empty character classes',
+	'noEmptyLabel' : 'Unexpected label \"{{l}}\"',
 	'no-empty-label-description' : 'No empty labels',
+	'noEqNull' :  'Use \'{{op}}=\' to compare with \'null\'.',
+	'no-eq-null-description' : 'Disallow null comparisons',
+	'noExtendNative' : '{{builtin}} prototype is read only, properties should not be added.',
+	'no-extend-native-description' : 'Disallow extending of native objects',
+	'noExtraBind' : 'The function binding is unnecessary.',
+	'no-extra-bind-description' : 'Disallow unnecessary function binding.',
+	'noExtraBooleanCastIfStatement' : 'Redundant double negation in an if statement condition.',
+	'noExtraBooleanCastDoWhileStatement' : 'Redundant double negation in a do while loop condition.',
+	'noExtraBooleanCastWhileStatement' : 'Redundant double negation in a while loop condition.',
+	'noExtraBooleanCastConditionalExpression' : 'Redundant double negation in a ternary condition.',
+	'noExtraBooleanCastForStatement' : 'Redundant double negation in a for loop condition.',
+	'noExtraBooleanCastUnaryExpression': 'Redundant multiple negation.',
+	'noExtraBooleanCastToBoolean' : 'Redundant double negation in call to Boolean().',
+	'noExtraBooleanCastConstructorCall' : 'Redundant double negation in Boolean constructor call.',
+	'no-extra-boolean-cast-description' : 'Discourage redundant double negation',
+	'noExtraParens': 'Gratuitous parentheses around expression.',
+	'no-extra-parens-description' : 'Discourage redundant parentheses',
+	'noInvalidRegexp' : 'Invalid flags supplied to RegExp constructor \'{{arg}}\'',
+	'no-invalid-regexp-description' : 'Report invalid regular expressions',
+	'noSelfCompare' : 'Comparing to itself is potentially pointless.',
 	'no-self-compare-description' : 'Disallow self compare',
+	'noIrregularWhitespaces' : 'Irregular whitespace not allowed',
 	'no-irregular-whitespace-description' : 'No irregular whitespace:',
 	'no-self-assign-description' : 'Disallow self assignment',
 	'no-self-assign' : '\'${0}\' is assigned to itself.',
@@ -137,20 +164,34 @@ define({
 	'inconsistent-return' : 'Inconsistent return types: \'{{type1}}\', \'{{type2}}\'',
 	'no-void' : 'Expected \'undefined\' and instead saw \'void\'.',
 	'no-void-description' : 'Disallow use of the void operator.',
-	'no-extra-bind-description' : 'Disallow unnecessary function binding.',
+	'noImplicitCoercionBoolean' : 'use \'Boolean({{code}})\' instead.',
+	'noImplicitCoercionIndexOf' : 'use \'{{code}} !== -1\' instead.',
+	'noImplicitCoercionNumber' : 'use \'Number({{code}})\' instead.',
+	'noImplicitCoercionString' : 'use \'String({{code}})\' instead.',
+	'noImplicitCoercionString2' : 'use \'{{code}} = String({{code}})\' instead.',
 	'no-implicit-coercion-description' : 'Disallow the type conversion with shorter notations.',
-	'no-extend-native-description' : 'Disallow extending of native objects',
+	'noLoneBlock' : 'Block is redundant.',
+	'noLoneNestedBlock' : 'Nested block is redundant.',
 	'no-lone-blocks-description' : 'Disallow unecessary nested blocks',
+	'wrongQuotes' : 'Strings must use {{description}}.',
 	'quotes-description' : 'Enforce quote style',
+	'yodaLeft' : 'Expected literal to be on the left side of {{operator}}.',
+	'yodaRight' : 'Expected literal to be on the right side of {{operator}}.',
 	'yoda-description' : 'Require or disallow Yoda conditions',
+	'noParamReassign' : 'Assignment to function parameter \'{{name}}\'.',
+	'noParamPropertyReassign' : 'Assignment to property of function parameter \'{{name}}\'.',
 	'no-param-reassign-description' : 'Disallow reassignment of function parameters',
+	'noNativeReassign' : 'Read-only global \'{{name}}\' should not be modified.',
 	'no-native-reassign-description' : 'Disallow reassignment of native objects',
+	'noUnusedExpression' : 'Expected an assignment or function call and instead saw an expression.',
 	'no-unused-expressions-description' : 'Disallow unused expressions',
+	'noInvalidThis' : 'Unexpected \'this\'.',
 	'no-invalid-this-description' : 'Disallow this keywords outside of classes or class-like objects.',
 	'check-tern-plugin-description' : 'Check missing tern plugins.',
 	'missing-requirejs-description' : 'Check missing require libraries.',
 	'no-undef-expression-description' : 'Report undefined expressions.',
 	'unknown-require-description' : 'Report missing libraries or missing tern plugins.',
+	'noTrailingSpaces' : 'Trailing spaces not allowed.',
 	'no-trailing-spaces-description': 'Disallow trailing whitespace at the end of lines.',
 
 

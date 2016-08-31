@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function(module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function(ProblemMessages, module) {
 	/**
 	 * @fileoverview Rule to flag use of an object property of the global object (Math and JSON) as a function
 	 * @author James Allardice
@@ -14,7 +17,7 @@ define(function(module) {
 
 	module.exports = function(context) {
 		var config = context.options[0];
-		var exceptions = (config && config.exceptions) || [];
+		var exceptions = config && config.exceptions || [];
 
 		/**
 		 * Reports write references.
@@ -28,14 +31,13 @@ define(function(module) {
 
 			if (reference.init === false &&
 				reference.isWrite() &&
-
 				// Destructuring assignments can have multiple default value,
 				// so possibly there are multiple writeable references for the same identifier.
 				(index === 0 || references[index - 1].identifier !== identifier)
 			) {
 				context.report({
 					node: identifier,
-					message: "Read-only global '{{name}}' should not be modified.",
+					message: ProblemMessages.noNativeReassign,
 					data: {name: identifier.name}
 				});
 			}

@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function (module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function(ProblemMessages, module) {
 /**
  * @fileoverview Rule to flag comparisons to null without a type-checking
  * operator.
@@ -142,7 +145,8 @@ module.exports = function(context) {
 			if (options.boolean && isDoubleLogicalNegating(node)) {
 				context.report(
 					node,
-					"use `Boolean({{code}})` instead.", {
+					ProblemMessages.noImplicitCoercionBoolean,
+					{
 						code: context.getSource(node.argument.argument)
 					});
 			}
@@ -151,7 +155,8 @@ module.exports = function(context) {
 			if (options.boolean && isBinaryNegatingOfIndexOf(node)) {
 				context.report(
 					node,
-					"use `{{code}} !== -1` instead.", {
+					ProblemMessages.noImplicitCoercionIndexOf,
+					{
 						code: context.getSource(node.argument)
 					});
 			}
@@ -160,7 +165,8 @@ module.exports = function(context) {
 			if (options.number && node.operator === "+" && !isNumeric(node.argument)) {
 				context.report(
 					node,
-					"use `Number({{code}})` instead.", {
+					ProblemMessages.noImplicitCoercionNumber,
+					{
 						code: context.getSource(node.argument)
 					});
 			}
@@ -173,7 +179,8 @@ module.exports = function(context) {
 			if (nonNumericOperand) {
 				context.report(
 					node,
-					"use `Number({{code}})` instead.", {
+					ProblemMessages.noImplicitCoercionNumber,
+					{
 						code: context.getSource(nonNumericOperand)
 					});
 			}
@@ -182,7 +189,8 @@ module.exports = function(context) {
 			if (options.string && isConcatWithEmptyString(node)) {
 				context.report(
 					node,
-					"use `String({{code}})` instead.", {
+					ProblemMessages.noImplicitCoercionString,
+					{
 						code: context.getSource(getOtherOperand(node, ""))
 					});
 			}
@@ -192,7 +200,8 @@ module.exports = function(context) {
 			if (options.string && isAppendEmptyString(node)) {
 				context.report(
 					node,
-					"use `{{code}} = String({{code}})` instead.", {
+					ProblemMessages.noImplicitCoercionString2,
+					{
 						code: context.getSource(getOtherOperand(node, ""))
 					});
 			}

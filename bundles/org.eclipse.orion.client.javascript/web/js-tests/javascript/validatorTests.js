@@ -12630,7 +12630,7 @@ define([
 									{
 										id: RULE_ID,
 										severity: 'warning',
-										description: "The `in` expression\'s left operand is negated"
+										description: "The 'in' expression\'s left operand is negated"
 									}]);
 								},
 								function (error) {
@@ -12726,6 +12726,7 @@ define([
 					});
 					// no-eq-null --------------------------------------------
 					describe('no-eq-null', function() {
+						this.timeout(10000000);
 						var RULE_ID = "no-eq-null";
 						it("flag == null", function(callback) {
 							var topic = "if (foo == null) { bar(); }";
@@ -13391,7 +13392,7 @@ define([
 									{
 										id: "no-implicit-coercion",
 										severity: 'error',
-										description: 'use `Boolean(foo)` instead.',
+										description: 'use \'Boolean(foo)\' instead.',
 										start: 22,
 										end: 27
 									}]);
@@ -13411,7 +13412,7 @@ define([
 									{
 										id: "no-implicit-coercion",
 										severity: 'error',
-										description: 'use `foo.indexOf(".") !== -1` instead.',
+										description: 'use \'foo.indexOf(".") !== -1\' instead.',
 										start: 23,
 										end: 40
 									}]);
@@ -13431,7 +13432,7 @@ define([
 									{
 										id: "no-implicit-coercion",
 										severity: 'error',
-										description: 'use `Number(foo)` instead.',
+										description: 'use \'Number(foo)\' instead.',
 										start: 22,
 										end: 26
 									}]);
@@ -13451,7 +13452,7 @@ define([
 									{
 										id: "no-implicit-coercion",
 										severity: 'error',
-										description: 'use `Number(foo)` instead.',
+										description: 'use \'Number(foo)\' instead.',
 										start: 22,
 										end: 29
 									}]);
@@ -13471,7 +13472,7 @@ define([
 									{
 										id: "no-implicit-coercion",
 										severity: 'error',
-										description: 'use `String(foo)` instead.',
+										description: 'use \'String(foo)\' instead.',
 										start: 21,
 										end: 29
 									}]);
@@ -13491,7 +13492,7 @@ define([
 									{
 										id: "no-implicit-coercion",
 										severity: 'error',
-										description: 'use `foo = String(foo)` instead.',
+										description: 'use \'foo = String(foo)\' instead.',
 										start: 13,
 										end: 22
 									}]);

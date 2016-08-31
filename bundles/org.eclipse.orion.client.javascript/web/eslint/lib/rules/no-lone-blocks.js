@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function(module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function(ProblemMessages, module) {
 	/**
 	 * @fileoverview Rule to forbid control charactes from regular expressions.
 	 * @author Nicholas C. Zakas
@@ -26,8 +29,8 @@ define(function(module) {
 			var parent = context.getAncestors().pop();
 
 			context.report(node, parent.type === "Program" ?
-				"Block is redundant." :
-				"Nested block is redundant."
+				ProblemMessages.noLoneBlock :
+				ProblemMessages.noLoneNestedBlock
 			);
 		}
 

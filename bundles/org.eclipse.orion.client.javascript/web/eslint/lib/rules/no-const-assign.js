@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function(module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function (ProblemMessages, module) {
 	/**
 	 * @fileoverview Rule to forbid control charactes from regular expressions.
 	 * @author Nicholas C. Zakas
@@ -45,7 +48,8 @@ define(function(module) {
 			getModifyingReferences(variable.references).forEach(function(reference) {
 				context.report(
 					reference.identifier,
-					"'{{name}}' is constant.", {
+					ProblemMessages.noConstantAssign,
+					{
 						name: reference.identifier.name
 					});
 			});

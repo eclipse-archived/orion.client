@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function(module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function(ProblemMessages, module) {
 	/**
 	 * @fileoverview Rule to forbid control charactes from regular expressions.
 	 * @author Nicholas C. Zakas
@@ -25,7 +28,7 @@ define(function(module) {
 			var nodeParent = node.parent; // memberexpression
 			context.report(
 				nodeParent.property,
-				'The function binding is unnecessary.');
+				ProblemMessages.noExtraBind);
 		}
 
 		/**

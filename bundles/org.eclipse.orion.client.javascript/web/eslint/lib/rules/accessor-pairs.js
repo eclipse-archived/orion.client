@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function (module) {/**
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function (ProblemMessages, module) {/**
  * @fileoverview Rule to flag wrapping non-iife in parens
  * @author Gyandeep Singh
  * @copyright 2015 Gyandeep Singh. All rights reserved.
@@ -31,14 +34,12 @@ function isIdentifier(node, name) {
  */
 function isArgumentOfMethodCall(node, index, object, property) {
     var parent = node.parent;
-    return (
-        parent.type === "CallExpression" &&
+    return parent.type === "CallExpression" &&
         parent.callee.type === "MemberExpression" &&
         parent.callee.computed === false &&
         isIdentifier(parent.callee.object, object) &&
         isIdentifier(parent.callee.property, property) &&
-        parent.arguments[index] === node
-    );
+        parent.arguments[index] === node;
 }
 
 /**
@@ -114,9 +115,9 @@ module.exports = function(context) {
         }
 
         if (checkSetWithoutGet && isSetPresent && !isGetPresent) {
-            context.report(node, "Getter is not present");
+            context.report(node, ProblemMessages.accessorPairGetter);
         } else if (checkGetWithoutSet && isGetPresent && !isSetPresent) {
-            context.report(node, "Setter is not present");
+            context.report(node,  ProblemMessages.accessorPairSetter);
         }
     }
 
