@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function (module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function (ProblemMessages, module) {
 /**
  * @fileoverview Rule to disallow a duplicate case label.
  * @author Dieter Oberkofler
@@ -23,7 +26,7 @@ module.exports = function(context) {
             node.cases.forEach(function(switchCase) {
                 var key = context.getSource(switchCase.test);
                 if (mapping[key]) {
-                    context.report(switchCase.test, "Duplicate case label.");
+                    context.report(switchCase.test, ProblemMessages.noDuplicateCase);
                 } else {
                     mapping[key] = switchCase;
                 }

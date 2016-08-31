@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function (module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function(ProblemMessages, module) {
 /**
  * @fileoverview Rule to disalow whitespace that is not a tab or space, whitespace inside strings and comments are allowed
  * @author Jonathan Kingston
@@ -76,7 +79,7 @@ module.exports = function(context) {
                     column: match.index
                 };
 
-                errors.push([node, location, "Irregular whitespace not allowed"]);
+                errors.push([node, location, ProblemMessages.noIrregularWhitespaces]);
             }
         });
     }
@@ -104,7 +107,7 @@ module.exports = function(context) {
                 column: sourceLines[lineIndex].length
             };
 
-            errors.push([node, location, "Irregular whitespace not allowed"]);
+            errors.push([node, location, ProblemMessages.noIrregularWhitespaces]);
             lastLineIndex = lineIndex;
         }
     }

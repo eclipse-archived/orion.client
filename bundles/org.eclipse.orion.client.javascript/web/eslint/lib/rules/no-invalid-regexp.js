@@ -1,8 +1,10 @@
 /*eslint-env amd */
 define([
  'acorn/dist/acorn',
+ 'i18n!javascript/nls/problems',
  'module'
-], function (parser, module) {/**
+], function (parser, ProblemMessages, module) {
+/**
  * @fileoverview Validate strings passed to the RegExp constructor
  * @author Michael Ficarra
  * @copyright 2014 Michael Ficarra. All rights reserved.
@@ -53,11 +55,11 @@ module.exports = function(context) {
 	                    var expressionStatement = result.body[0];
 	                    var regexp = expressionStatement.expression;
 	                    if (regexp && regexp.value === null) {
-	                        context.report(node, "Invalid flags supplied to RegExp constructor '" + flags + "'");
+	                        context.report(node, ProblemMessages.noInvalidRegexp, {arg: flags});
 	                    }
 	                }
                 } catch (ex) {
-                    context.report(node, "Invalid flags supplied to RegExp constructor '" + flags + "'");
+                    context.report(node, ProblemMessages.noInvalidRegexp, {arg: flags});
                 }
             }
 

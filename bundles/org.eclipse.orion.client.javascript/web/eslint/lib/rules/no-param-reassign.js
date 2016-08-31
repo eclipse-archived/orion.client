@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function(module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function(ProblemMessages, module) {
 	/**
 	 * @fileoverview Rule to flag use of an object property of the global object (Math and JSON) as a function
 	 * @author James Allardice
@@ -88,13 +91,15 @@ define(function(module) {
 				if (reference.isWrite()) {
 					context.report(
 						identifier,
-						"Assignment to function parameter '{{name}}'.", {
+						ProblemMessages.noParamReassign,
+						{
 							name: identifier.name
 						});
 				} else if (props && isModifyingProp(reference)) {
 					context.report(
 						identifier,
-						"Assignment to property of function parameter '{{name}}'.", {
+						ProblemMessages.noParamPropertyReassign,
+						{
 							name: identifier.name
 						});
 				}

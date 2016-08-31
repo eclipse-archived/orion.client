@@ -1,7 +1,8 @@
 /*eslint-env amd */
 define([
+	'i18n!javascript/nls/problems',
 	'module'
-], function(module) {
+], function(ProblemMessages, module) {
 	//------------------------------------------------------------------------------
 	// Rule Definition
 	//------------------------------------------------------------------------------
@@ -34,7 +35,7 @@ define([
 			context.report({
 				node: node,
 				loc: location,
-				message: "Trailing spaces not allowed.",
+				message: ProblemMessages.noTrailingSpaces,
 				data: fixRange
 			});
 		}

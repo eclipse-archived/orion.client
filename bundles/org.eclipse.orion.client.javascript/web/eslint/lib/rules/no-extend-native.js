@@ -1,8 +1,9 @@
 /*eslint-env amd */
 define([
 	'eslint/conf/globals',
+	'i18n!javascript/nls/problems',
 	'module',
-], function(globals, module) {
+], function(globals, ProblemMessages, module) {
 	/**
 	 * @fileoverview Rule to flag comparisons to null without a type-checking
 	 * operator.
@@ -50,7 +51,7 @@ define([
 
 				modifiedBuiltins.forEach(function(builtin) {
 					if (lhs.object.object.name === builtin) {
-						context.report(node, builtin + " prototype is read only, properties should not be added.");
+						context.report(node, ProblemMessages.noExtendNative, {builtin: builtin});
 					}
 				});
 			},
@@ -63,9 +64,9 @@ define([
 					object;
 
 				// only worry about Object.definePropert[y|ies]
-				if (callee.type === "MemberExpression" &&
-					callee.object.name === "Object" &&
-					(callee.property.name === "defineProperty" || callee.property.name === "defineProperties")) {
+				if (callee.type === "MemberExpression"
+						&& callee.object.name === "Object"
+						&& (callee.property.name === "defineProperty" || callee.property.name === "defineProperties")) {
 
 					// verify the object being added to is a native prototype
 					subject = node.arguments[0];
@@ -76,7 +77,7 @@ define([
 						modifiedBuiltins.indexOf(object.name) > -1 &&
 						subject.property.name === "prototype") {
 
-						context.report(node, object.name + " prototype is read only, properties should not be added.");
+						context.report(node, ProblemMessages.noExtendNative, {builtin: object.name});
 					}
 				}
 

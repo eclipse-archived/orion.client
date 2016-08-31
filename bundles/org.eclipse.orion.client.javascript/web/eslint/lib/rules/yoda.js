@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function(module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function(ProblemMessages, module) {
 	/**
 	 * @fileoverview Rule to flag use of an object property of the global object (Math and JSON) as a function
 	 * @author James Allardice
@@ -210,7 +213,7 @@ define(function(module) {
 					isComparisonOperator(node.operator) &&
 					!(exceptRange && isRangeTest(context.getAncestors().pop()))
 				) {
-					context.report(node, "Expected literal to be on the left side of " + node.operator + ".");
+					context.report(node, ProblemMessages.yodaLeft, {operator: node.operator});
 				}
 
 			} : function(node) {
@@ -223,7 +226,7 @@ define(function(module) {
 					isComparisonOperator(node.operator) &&
 					!(exceptRange && isRangeTest(context.getAncestors().pop()))
 				) {
-					context.report(node, "Expected literal to be on the right side of " + node.operator + ".");
+					context.report(node, ProblemMessages.yodaRight, {operator: node.operator});
 				}
 
 			}

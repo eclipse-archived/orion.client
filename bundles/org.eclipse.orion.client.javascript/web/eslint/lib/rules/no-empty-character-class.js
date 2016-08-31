@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function (module) {/**
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function (ProblemMessages, module) {/**
  * @fileoverview Rule to flag the use of empty character classes in regular expressions
  * @author Ian Christian Myers
  */
@@ -35,7 +38,7 @@ module.exports = function(context) {
         "Literal": function(node) {
             var token = context.getFirstToken(node);
             if (token.type === "RegularExpression" && !regex.test(token.value)) {
-                context.report(node, "Empty class.");
+                context.report(node, ProblemMessages.noEmptyCharacterClass);
             }
         }
 

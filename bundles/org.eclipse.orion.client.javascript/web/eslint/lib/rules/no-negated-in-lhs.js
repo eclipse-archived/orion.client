@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function (module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function(ProblemMessages, module) {
 /**
  * @fileoverview A rule to disallow negated left operands of the `in` operator
  * @author Michael Ficarra
@@ -17,7 +20,7 @@ module.exports = function(context) {
 
         "BinaryExpression": function(node) {
             if (node.operator === "in" && node.left.type === "UnaryExpression" && node.left.operator === "!") {
-                context.report(node, "The `in` expression's left operand is negated");
+                context.report(node, ProblemMessages.NoNegatedInLhs);
             }
         }
     };

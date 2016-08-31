@@ -1,5 +1,8 @@
 /*eslint-env amd */
-define(function (module) {
+define([
+	'i18n!javascript/nls/problems',
+	'module'
+], function (ProblemMessages, module) {
 /**
  * @fileoverview Rule to flag when label is not used for a loop or switch
  * @author Ilya Volodin
@@ -19,7 +22,7 @@ module.exports = function(context) {
             var type = node.body.type;
 
             if (type !== "ForStatement" && type !== "WhileStatement" && type !== "DoWhileStatement" && type !== "SwitchStatement" && type !== "ForInStatement" && type !== "ForOfStatement") {
-                context.report(node, "Unexpected label \"{{l}}\"", {l: node.label.name});
+                context.report(node, ProblemMessages.noEmptyLabel, {l: node.label.name});
             }
         }
     };

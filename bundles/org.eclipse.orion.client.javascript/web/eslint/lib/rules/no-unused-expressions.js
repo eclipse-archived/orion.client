@@ -1,7 +1,8 @@
 /*eslint-env amd */
 define([
+	'i18n!javascript/nls/problems',
 	'module'
-], function(module) {
+], function(ProblemMessages, module) {
 	//------------------------------------------------------------------------------
 	// Rule Definition
 	//------------------------------------------------------------------------------
@@ -90,7 +91,7 @@ define([
 				if (ignore) return;
 				if (!isValidExpression(node.expression)
 						&& !isDirective(node, context.getAncestors())) {
-					context.report(node, "Expected an assignment or function call and instead saw an expression.");
+					context.report(node, ProblemMessages.noUnusedExpression);
 				}
 			}
 		};
