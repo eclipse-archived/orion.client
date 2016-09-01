@@ -241,6 +241,7 @@ define({
 	'no-extra-parens-returnAssign' : 'Allows extra parentheses around assignments in return statements:',
 	'no-extra-parens-nestedBinaryExpressions' : 'Allows extra parentheses in nested binary expressions:',
 	'no-invalid-regexp' : 'Invalid regular expressions:',
+	'no-invalid-regexp-flags' : 'List of allowed flags:',
 	'no-negated-in-lhs' : 'Disallow negated left operand of in operator:',
 	'no-obj-calls' : 'Disallow global object as function calls:',
 	'no-eq-null' : 'Disallow null comparisons:',

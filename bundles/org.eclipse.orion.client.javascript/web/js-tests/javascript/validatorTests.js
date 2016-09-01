@@ -12751,6 +12751,47 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
+						it("should not flag invalid regexp flags", function(callback) {
+							var topic = "new RegExp('.', 'y')";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = ["error", { "allowConstructorFlags": ["u", "y"] }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag invalid regexp flags 2", function(callback) {
+							var topic = "new RegExp('.', 'z')";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = ["error", { "allowConstructorFlags": ["z"] }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag invalid regexp - invalid flags 2", function(callback) {
+							var topic = "RegExp('.', 'z')";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = ["error", { "allowConstructorFlags": ["u"] }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'error',
+										description: "Invalid flags supplied to RegExp constructor \'z\'"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
 					});
 					// no-negated-in-lhs --------------------------------------------
 					describe('no-negated-in-lhs', function() {
