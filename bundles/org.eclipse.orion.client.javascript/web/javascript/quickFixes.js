@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2014, 2016 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License v1.0
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -24,7 +24,7 @@ define([
 	 * @description Creates a new JavaScript quick fix computer
 	 * @param {javascript.ASTManager} astManager The AST manager
 	 * @param {javascript.RenammeCommand} renameCommand The rename command
-	 * @param {javascript.GenerateDocCommand} generateDocCommand The doc generation command
+	 * @param {javascript.GenerateDocCommand} generateDocCommand The doc generation command 
 	 * @returns {javascript.JavaScriptQuickfixes} The new quick fix computer instance
 	 * @since 8.0
 	 */
@@ -55,7 +55,7 @@ define([
 		switch(name) {
 			case 'requirejs': return 'amd';
 			default: return name;
-		}
+		}	
 	}
 	
 	/**
@@ -237,7 +237,7 @@ define([
 	        	return editorContext.getText().then(function(text) {
 		        	var files = [{type: 'full', name: meta.location, text: text}]; //$NON-NLS-1$
 		        	var request = {request: 'fixes', args: {meta: {location: meta.location}, files: files, problemId: id, annotation: context.annotation, annotations: annotations}}; //$NON-NLS-1$
-		        	this.ternworker.postMessage(	request,
+		        	this.ternworker.postMessage(	request, 
 						function(fixes, err) {
 							if(err) {
 								deferred.reject();
@@ -267,7 +267,7 @@ define([
 						    					selection.start--;
 						    					selection.end--;
 						    				}
-						    				return editorContext.setSelection(selection.start, selection.end, true);
+						    				return editorContext.setSelection(selection.start, selection.end, true);	
 										}
 						    		});
 						    	}));
@@ -340,7 +340,7 @@ define([
 					}
 				});
 			},
-	        /**
+	        /** 
 	         * fix for the no-sparse-arrays linting rule
 	         * @callback
 	         */
@@ -431,7 +431,7 @@ define([
 							return editorContext.setText(newDirective.text, newDirective.start, newDirective.end).then(function() {
 								return editorContext.syntaxCheck(ast.sourceFile.name);
 							});
-						}
+						} 
 						return editorContext.syntaxCheck(ast.sourceFile.name);
 					});
 				}.bind(this));
@@ -442,7 +442,7 @@ define([
 					var json = {sourceType: "module", ecmaVersion: 6};
 					return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
 						return editorContext.syntaxCheck(ast.sourceFile.name);
-					});
+					}.bind(this));
 				}.bind(this));
 			},
 			"no-redeclare": function(editorContext, context, astManager) {
