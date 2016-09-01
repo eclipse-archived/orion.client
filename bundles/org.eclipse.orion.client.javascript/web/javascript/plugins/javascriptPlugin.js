@@ -2292,7 +2292,7 @@ define([
 					id: "no-void", //$NON-NLS-1$
 					name: javascriptMessages["no-void"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: ignore,
 					options: severities
 				},
 				{
@@ -2348,7 +2348,7 @@ define([
 					id: "no-lone-blocks", //$NON-NLS-1$
 					name: javascriptMessages["no-lone-blocks"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: ignore,
 					options: severities
 				},
 				{
@@ -2412,7 +2412,7 @@ define([
 					id: "no-unused-expressions", //$NON-NLS-1$
 					name: javascriptMessages["no-unused-expressions"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: ignore,
 					options: severities
 				},
 				{
@@ -2512,7 +2512,7 @@ define([
 					id: "quotes", //$NON-NLS-1$
 					name: javascriptMessages["quotes"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: ignore,
 					options: severities
 				},
 				{
@@ -2541,7 +2541,7 @@ define([
 					id: "no-trailing-spaces", //$NON-NLS-1$
 					name: javascriptMessages["noTrailingSpaces"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: ignore,
 					options: severities
 				},
 				{
