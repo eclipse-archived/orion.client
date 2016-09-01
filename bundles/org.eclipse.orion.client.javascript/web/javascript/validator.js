@@ -56,7 +56,24 @@ define([
 			var keys = Object.keys(this.defaults);
 			for (var i = 0; i < keys.length; i++) {
 				var key = keys[i];
-				this.rules[key] = this.defaults[key];
+				var defaultValue = this.defaults[key];
+				if (Array.isArray(defaultValue)) {
+					var value = [];
+					defaultValue.forEach(function(element) {
+						if (typeof element === 'object') {
+							var newElement= Object.create(null);
+							Object.keys(element).forEach(function (key) {
+								newElement[key] = element[key];
+							});
+							value.push(newElement);
+						} else {
+							value.push(element);
+						}
+					});
+					this.rules[key] = value;
+				} else {
+					this.rules[key] = this.defaults[key];
+				}
 			}
 		}
 	};

@@ -1,9 +1,9 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2014, 2016 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
@@ -164,9 +164,9 @@ define([
 				var config = { rules: {} };
 				validate({buffer: "/", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
-							{start: 0, 
-							 end: 1, 
-							 severity: 'error', 
+							{start: 0,
+							 end: 1,
+							 severity: 'error',
 							 description: "Unterminated regular expression"
 							 }
 						]);
@@ -181,14 +181,14 @@ define([
 				var config = { rules: {} };
 				validate({buffer: "var v1 = foo(`bar),\n\tv2;", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
-							{start: 14, 
-							 end: 15, 
-							 severity: 'error', 
+							{start: 14,
+							 end: 15,
+							 severity: 'error',
 							 description: "Unterminated template"
 							 },
-							{start: 19, 
-							 end: 20, 
-							 severity: 'error', 
+							{start: 19,
+							 end: 20,
+							 severity: 'error',
 							 description: "Unterminated template"
 							 }
 						]);
@@ -197,21 +197,21 @@ define([
 					});
 			});
 			/**
-			 * 
+			 *
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=491727
 			 */
 			it("Test broken TemplateExpression 2", function(callback) {
 				var config = { rules: {} };
 				validate({buffer: "var v1 = foo(`bar),\nv2;", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
-							{start: 14, 
-							 end: 15, 
-							 severity: 'error', 
+							{start: 14,
+							 end: 15,
+							 severity: 'error',
 							 description:"Unterminated template"
 							 },
-							{start: 19, 
-							 end: 20, 
-							 severity: 'error', 
+							{start: 19,
+							 end: 20,
+							 severity: 'error',
 							 description: "Unterminated template"
 							 }
 						]);
@@ -220,7 +220,7 @@ define([
 					});
 			});
 			/**
-			 * 
+			 *
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=491727
 			 */
 			it("Test broken TemplateExpression 3", function(callback) {
@@ -228,9 +228,9 @@ define([
 				validate({buffer: "var v1 = foo(`bar),v2;", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
 							{
-							 start: 14, 
-							 end: 15, 
-							 severity: 'error', 
+							 start: 14,
+							 end: 15,
+							 severity: 'error',
 							 description: "Unterminated template"
 							 }
 						]);
@@ -239,20 +239,20 @@ define([
 					});
 			});
 			/**
-			 * 
+			 *
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=491727
 			 */
 			it("Test broken TemplateExpression 4", function(callback) {
 				var config = { rules: {} };
 				validate({buffer: "var v1 = foo(`bar),\n\t\tv2;", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
-							{start: 14, 
-							 end: 15, 
-							 severity: 'error', 
+							{start: 14,
+							 end: 15,
+							 severity: 'error',
 							 description: "Unterminated template"
 							},
-							{start: 19, 
-							 end: 20, 
+							{start: 19,
+							 end: 20,
 							 severity: 'error',
 							 description: "Unterminated template"
 							}
@@ -262,16 +262,16 @@ define([
 					});
 			});
 			/**
-			 * 
+			 *
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=491727
 			 */
 			it("Test broken TemplateExpression 5", function(callback) {
 				var config = { rules: {} };
 				validate({buffer: "var v1 = foo(`bar);", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
-							{start: 14, 
-							 end: 15, 
-							 severity: 'error', 
+							{start: 14,
+							 end: 15,
+							 severity: 'error',
 							 description: "Unterminated template"
 							 }
 						]);
@@ -296,15 +296,15 @@ define([
 					});
 			});
 			/**
-			 * 
+			 *
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=492484
 			 */
 			it("Test broken code", function(callback) {
 				var config = { rules: {} };
 				validate({buffer: "var index, a; if(index===a) {a[index>0index]};", callback: callback, config: config}).then(function (problems) {
 						assertProblems(problems, [
-							{start: 38, 
-							 end: 39, 
+							{start: 38,
+							 end: 39,
 							 severity: 'error',
 							 description: "Identifier directly after number"
 							 }
@@ -453,6 +453,11 @@ define([
 								 end: 56,
 								 severity: 'error',
 								 description: i18nUtil.formatMessage.call(null, messages['no-undef-defined'], {0: 'xx'})
+								},
+								{start: 54,
+								 end: 57,
+								 severity: 'error',
+								 description: messages['noUnusedExpression']
 								},
 								{start: 57,
 								 end: 58,
@@ -813,7 +818,7 @@ define([
 								});
 						});
 					});
-				});	
+				});
 				// check-tern-lib --------------------------------------------
 				describe('check-tern-lib', function() {
 					var RULE_ID = "check-tern-lib";
@@ -4364,7 +4369,7 @@ define([
 //								worker.getTestState().callback(error);
 //							});
 //					});
-//			
+//
 //					it("should not flag __iterator__ 1", function(callback) {
 //						var topic = "var __iterator__ = function() {};";
 //						var config = { rules: {} };
@@ -6670,7 +6675,7 @@ define([
 									severity: 'warning',
 									description: "'a' is already defined.",
 									nodeType: "Identifier",
-									start: 28 
+									start: 28
 								}]);
 							},
 							function (error) {
@@ -7178,7 +7183,7 @@ define([
 								function (error) {
 									worker.getTestState().callback(error);
 								});
-						});	
+						});
 						it("should not flag param shadowing outer scope var", function(callback) {
 							var topic = "var a; function b(a) {}";
 							var config = { rules: {} };
@@ -8040,7 +8045,7 @@ define([
 						// Test references to globals in other files that Tern knows about
 						//------------------------------------------------------------------------------
 						it("no-undef cross file 1 - should not report undefined function when defined in a known file", function(callback) {
-							worker.postMessage({request: 'addFile', args: {file: "noUndefTest1.js", source: "function noUndefTest1(){}"}}); 
+							worker.postMessage({request: 'addFile', args: {file: "noUndefTest1.js", source: "function noUndefTest1(){}"}});
 							var topic = "noUndefTest1();";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
@@ -8054,7 +8059,7 @@ define([
 							);
 						});
 						it("no-undef cross file 2 - should not report undefined var when defined in a known file", function(callback) {
-							worker.postMessage({request: 'addFile', args: {file: "noUndefTest2.js", source: "var noUndefTest2;"}}); 
+							worker.postMessage({request: 'addFile', args: {file: "noUndefTest2.js", source: "var noUndefTest2;"}});
 							var topic = "noUndefTest2++;";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
@@ -8068,7 +8073,7 @@ define([
 							);
 						});
 						it("no-undef cross file 3 - should not report undefined property when defined in a known file", function(callback) {
-							worker.postMessage({request: 'addFile', args: {file: "noUndefTest3.js", source: "this.noUndefTest3 = function(){};"}}); 
+							worker.postMessage({request: 'addFile', args: {file: "noUndefTest3.js", source: "this.noUndefTest3 = function(){};"}});
 							var topic = "noUndefTest3();";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
@@ -8461,7 +8466,7 @@ define([
 						// Test references to globals in other files that Tern knows about
 						//------------------------------------------------------------------------------
 						it("Multi file 1a - undeclared member", function(callback) {
-							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest1.js", source: "noUndefExpr1 = {a: function(){}};"}}); 
+							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest1.js", source: "noUndefExpr1 = {a: function(){}};"}});
 							var topic = "noUndefExpr1.b();";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
@@ -8480,7 +8485,7 @@ define([
 							);
 						});
 						it("Multi file 1b - undeclared nested member", function(callback) {
-							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest1.js", source: "noUndefExpr1 = {abc: {d: function(){}};"}}); 
+							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest1.js", source: "noUndefExpr1 = {abc: {d: function(){}};"}});
 							var topic = "noUndefExpr1.abc.testc();";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
@@ -8499,7 +8504,7 @@ define([
 							);
 						});
                         it("Multi file 2 - declared member", function(callback) {
-							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest2.js", source: "noUndefExpr2 = {a: function(){}};"}}); 
+							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest2.js", source: "noUndefExpr2 = {a: function(){}};"}});
 							var topic = "noUndefExpr2.a();";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
@@ -8513,7 +8518,7 @@ define([
 							);
 						});
                         it("Multi file 3 - undeclared member no properties", function(callback) {
-							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest3.js", source: "noUndefExpr3 = {};"}}); 
+							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest3.js", source: "noUndefExpr3 = {};"}});
 							var topic = "noUndefExpr3.a();";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
@@ -8534,7 +8539,7 @@ define([
 							);
 						});
 						 it("Multi file 4 - no object declared", function(callback) {
-							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest4.js", source: "noUndefExprZZZ4 = {};"}}); 
+							worker.postMessage({request: 'addFile', args: {file: "noUndefExprTest4.js", source: "noUndefExprZZZ4 = {};"}});
 							var topic = "noUndefExpr4.a();";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = 1;
@@ -10185,8 +10190,8 @@ define([
 											"</body>\n" +
 											"</html>"
 									}
-								}); 
-							var topic = 
+								});
+							var topic =
 								"/*eslint-env browser */\n" +
 								"function main() {\n" +
 								"	alert (\"Hello\");\n" +
@@ -10203,7 +10208,7 @@ define([
 							);
 						});
 						it("no-unused-vars import", function(callback) {
-							var topic = 'import { cube } from "./exports"; cube(4)'; 
+							var topic = 'import { cube } from "./exports"; cube(4)';
 							var config = { rules: {} };
 							var createFiles = [{name: './exports.js', text: 'export function cube(x) {return x * x * x;}'}];
 							config.rules[RULE_ID] = 2;
@@ -11285,7 +11290,7 @@ define([
 								});
 						});
 						it("should not flag semi when 'never' is set", function(callback) {
-							var topic = 
+							var topic =
 								"var name = \"ESLint\"\n" +
 								";(function() {\n" +
 								"})()";
@@ -12347,13 +12352,13 @@ define([
 						it("flag redundant parentheses", function(callback) {
 							var topic = "var a = (b * c);";
 							var config = { rules: {} };
-							config.rules[RULE_ID] = 1;
+							config.rules[RULE_ID] = 2;
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
 									assertProblems(problems, [
 									{
 										id: RULE_ID,
-										severity: 'warning',
+										severity: 'error',
 										description: "Gratuitous parentheses around expression."
 									}]);
 								},
@@ -12364,13 +12369,13 @@ define([
 						it("flag redundant parentheses 2", function(callback) {
 							var topic = "(a * b) + c;";
 							var config = { rules: {} };
-							config.rules[RULE_ID] = 1;
+							config.rules[RULE_ID] = 2;
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
 									assertProblems(problems, [
 									{
 										id: RULE_ID,
-										severity: 'warning',
+										severity: 'error',
 										description: "Gratuitous parentheses around expression."
 									}]);
 								},
@@ -12381,13 +12386,30 @@ define([
 						it("flag redundant parentheses 3", function(callback) {
 							var topic = "typeof (a);";
 							var config = { rules: {} };
-							config.rules[RULE_ID] = 1;
+							config.rules[RULE_ID] = 2;
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
 									assertProblems(problems, [
 									{
 										id: RULE_ID,
-										severity: 'warning',
+										severity: 'error',
+										description: "Gratuitous parentheses around expression."
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag redundant parentheses 4", function(callback) {
+							var topic = "(function(){} ? a() : b());";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 2;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'error',
 										description: "Gratuitous parentheses around expression."
 									}]);
 								},
@@ -12419,13 +12441,18 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
-						it("should not flag redundant parentheses 3", function(callback) {
+						it("should flag redundant parentheses", function(callback) {
 							var topic = "(function(){} ? a() : b())";
 							var config = { rules: {} };
-							config.rules[RULE_ID] = 1;
+							config.rules[RULE_ID] = 2;
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
-									assertProblems(problems, []);
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'error',
+										description: "Gratuitous parentheses around expression."
+									}]);
 								},
 								function (error) {
 									worker.getTestState().callback(error);
@@ -12553,6 +12580,114 @@ define([
 							var topic = "typeof (a);";
 							var config = { rules: {} };
 							config.rules[RULE_ID] = [1, "functions"];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 14", function(callback) {
+							var topic = "while ((foo = bar())) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = ["error", "all", { "conditionalAssign": false }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 15", function(callback) {
+							var topic = "if ((foo = bar())) {}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = ["error", "all", { "conditionalAssign": false }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 16", function(callback) {
+							var topic = "do; while ((foo = bar()))";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = ["error", "all", { "conditionalAssign": false }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 17", function(callback) {
+							var topic = "for (;(a = b););";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = ["error", "all", { "conditionalAssign": false }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 18", function(callback) {
+							var topic = "function a(b) { return (b = 1);}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = ["error", "all", { "returnAssign": false }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 19", function(callback) {
+							var topic = "function a(b) { return b ? (c = d) : (c = e);}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = ["error", "all", { "returnAssign": false }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 20", function(callback) {
+							var topic = "x = a || (b && c);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = ["error", "all", { "nestedBinaryExpressions": false }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 21", function(callback) {
+							var topic = "x = a + (b * c);";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = ["error", "all", { "nestedBinaryExpressions": false }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag redundant parentheses 22", function(callback) {
+							var topic = "x = (a * b) / c;";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = ["error", "all", { "nestedBinaryExpressions": false }];
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
 									assertProblems(problems, []);
@@ -13282,7 +13417,7 @@ define([
 						});
 						it("should not flag return number and variable number type - this is using the tern object to resolve type", function(callback) {
 							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=485693
-							var topic = 
+							var topic =
 								"/**\n" +
 								" * @param {Number} one\n" +
 								" */\n" +
@@ -13304,7 +13439,7 @@ define([
 								});
 						});
 						it("should not flag return null and String", function(callback) {
-							var topic = 
+							var topic =
 								"var getProjectName = function(name2) {\n" +
 								"	if(name2.indexOf(\" | \") !== -1) {\n" +
 								"		var s = name2.split(\" | \");\n" +

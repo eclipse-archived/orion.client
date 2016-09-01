@@ -2298,7 +2298,7 @@ define([
 			//NO-EXTRA-PARENS
 			describe('no-extra-parens', function(){
 				it("no-extra-parens - if statement",function(callback) {
-					var rule = createTestRule('no-extra-parens');
+					var rule = createTestRule('no-extra-parens', 2, {"conditionalAssign": false, "returnAssign": false, "nestedBinaryExpressions": true});
 					 var expected = [
 					 				{value: "",
 									start: 10, 
@@ -2379,7 +2379,7 @@ define([
 									  callback: callback});
 				});
 				it("no-extra-parens - fix all nested",function(callback) {
-					var rule = createTestRule('no-extra-parens');
+					var rule = createTestRule('no-extra-parens', 2, {"conditionalAssign": false, "returnAssign": false, "nestedBinaryExpressions": true});
 					 var expected = [
 					 				{value: "",
 									start: 8, 
@@ -2416,7 +2416,7 @@ define([
 									  callback: callback});
 				});
 				it("no-extra-parens - in HTML if statement",function(callback) {
-					var rule = createTestRule('no-extra-parens');
+					var rule = createTestRule('no-extra-parens', 2, {"conditionalAssign": false, "returnAssign": false, "nestedBinaryExpressions": true});
 					 var expected = [
 					 				{value: "",
 									start: 18, 
@@ -2470,7 +2470,7 @@ define([
 									  contentType: 'text/html'});
 				});
 				it("no-extra-parens - in HTML fix all nested",function(callback) {
-					var rule = createTestRule('no-extra-parens');
+					var rule = createTestRule('no-extra-parens', 2, {"conditionalAssign": false, "returnAssign": false, "nestedBinaryExpressions": true});
 					 var expected = [
 					 				{value: "",
 									start: 16, 
@@ -2492,7 +2492,7 @@ define([
 									  contentType: 'text/html'});
 				});
 				it("no-extra-parens - multiline expression",function(callback) {
-					var rule = createTestRule('no-extra-parens');
+					var rule = createTestRule('no-extra-parens', 2, {"conditionalAssign": false, "returnAssign": false, "nestedBinaryExpressions": true});
 					 var expected = [
 					 				{value: "",
 									start: 10, 
@@ -2507,7 +2507,7 @@ define([
 									  callback: callback});
 				});
 				it("no-extra-parens -space before closing paren",function(callback) {
-					var rule = createTestRule('no-extra-parens');
+					var rule = createTestRule('no-extra-parens', 2, {"conditionalAssign": false, "returnAssign": false, "nestedBinaryExpressions": true});
 					 var expected = [
 					 				{value: "",
 									start: 10, 
