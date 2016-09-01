@@ -2505,7 +2505,7 @@ define([
 					id: "no-trailing-spaces", //$NON-NLS-1$
 					name: javascriptMessages["noTrailingSpaces"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: ignore,
 					options: severities
 				},
 				{
