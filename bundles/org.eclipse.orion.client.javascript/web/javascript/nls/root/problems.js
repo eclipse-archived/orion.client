@@ -156,6 +156,8 @@ define({
 	'no-invalid-regexp-description' : 'Report invalid regular expressions',
 	'noSelfCompare' : 'Comparing to itself is potentially pointless.',
 	'no-self-compare-description' : 'Disallow self compare',
+	'noIrregularWhitespaces' : 'Irregular whitespace not allowed',
+	'no-irregular-whitespace-description' : 'No irregular whitespace:',
 	'no-self-assign-description' : 'Disallow self assignment',
 	'no-self-assign' : '\'${0}\' is assigned to itself.',
 	'type-checked-consistent-return-description' : 'Detect inconsistent return values',
