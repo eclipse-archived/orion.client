@@ -1,0 +1,290 @@
+.tutorialModal {
+	position: fixed;
+	font-family: Arial, Helvetica, sans-serif;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background-color: rgba(0, 0, 0, 0.75);
+	z-index: 250;
+	opacity: 1;
+	-webkit-transition: all .3s ease-in;
+	-moz-transition: all .3s ease-in;
+	transition: all .3s ease-in;
+	pointer-events: auto;
+	display: flex;
+	display: -webkit-flex; /* Safari */
+	flex-direction:column;
+}
+.tutorialClose {
+	color: rgb(255, 255, 255);
+	line-height: 19px;
+	text-align: center;
+	position: absolute;
+	right: 20px;
+	top: 20px;
+    display: inline-block;
+    font-family: 'Helvetica', 'Arial', sans-serif;
+	font-size: 2em;
+	font-weight: bold;
+	cursor: pointer;
+}
+.tutorialClose:hover { color: #00d9ff; }
+.tutorialContent {
+    overflow: hidden;
+    display: flex;
+	display: -webkit-flex; /* Safari */
+	flex-direction:column;
+	justify-content:center;
+	height:90%;
+}
+.tutorialContent img{
+	margin-left:auto;
+	margin-right:auto;
+	margin-top:auto;
+	margin-bottom:10px;
+}
+.slideButtons {
+	opacity: 1;
+    border-radius: 50%;
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin: 0 6px;
+    background-color: rgba(0,0,0,.25);
+    -webkit-transition: opacity .5s;
+    transition: opacity .5s;
+	cursor:pointer;
+	color: rgb(255, 255, 255);
+	background-color: #fff;
+	text-decoration: underline;
+	padding: 0;
+	font-size: 100%;
+	vertical-align: baseline;
+	background: transparent;
+}
+.currentSlideButton{
+	background-color: #fff;
+	border: none;
+}
+.controlButtons{
+	display: flex;
+	display: -webkit-flex; /* Safari */
+	flex-direction:column;	
+}
+.turorialProgress{
+	display: flex;
+	display: -webkit-flex; /* Safari */
+	flex-direction:row ;	
+	justify-content:center;
+}
+@-webkit-keyframes pulse 
+{
+	0% {-webkit-transform: scale(1); opacity: 1;}
+	80% {-webkit-transform: scale(0.8); opacity: 0.8;}
+	100% {-webkit-transform: scale(1); opacity: 1; }
+}
+
+@-moz-keyframes pulse 
+{
+	0% {-moz-transform: scale(1); opacity: 1;}
+	80% {-moz-transform: scale(0.8); opacity: 0.8;}
+	100% {-moz-transform: scale(1); opacity: 1; }
+} 
+@keyframes pulse {
+	0% {transform: scale(1); opacity: 1;}
+	80% {transform: scale(0.8); opacity: 0.8;}
+	100% {transform: scale(1); opacity: 1; }
+}
+.tutoNotification
+{
+	pointer-events: auto;
+    display: block;
+	margin: 0 auto;
+	position: absolute;
+}
+.pulse{
+	border-radius: 100px;
+	background-color: transparent;
+	opacity: 0.8;
+	width: 26px;
+	height: 26px;
+	border: 3px solid #1bb199;
+	-webkit-border-radius: 100px;
+	-moz-border-radius: 100px;
+	-o-border-radius: 100px;
+	-ms-border-radius: 100px;
+	/* Giving Animation Function */
+	-webkit-animation: pulse 1s linear infinite;
+	-moz-animation: pulse 1s linear infinite; 
+	animation: pulse 1s linear infinite; 
+	border-image: initial;
+}
+.tutoNotification_default_Z{
+	z-index: 250;
+}
+.tutoNotification_toolTip_opened_Z{
+	z-index: 248;
+}
+.tutoNotifications{
+	position: fixed;
+	font-family: Arial, Helvetica, sans-serif;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 250;
+	opacity: 1;
+	pointer-events: none;
+}
+.tutoNotificationToolTip{
+	z-index: 249;
+	position: fixed;
+	background:rgba(51,51,51,0.9);
+	padding:5px 15px;
+	color:  rgb(255, 255, 255);
+	display:flex;
+	flex-direction:column;
+	box-shadow:0px 0px 3px rgba(0, 0, 0, 0.3);
+    -webkit-transition:all 0.2s ease-in-out;
+    -moz-transition:all 0.2s ease-in-out;
+    -ms-transition:all 0.2s ease-in-out;
+    transition:all 0.2s ease-in-out;
+    pointer-events: auto;
+    border:2px solid rgba(34,34,34,0.9);
+    border-radius:3px;
+}
+.tutorialBack{
+	position:absolute;
+	top: 50%;
+    left:80px;
+}
+.tutorialForward{
+	position:absolute;
+	top: 50%;
+    right:80px;
+}
+.tutorialForwardPosition{
+	position:absolute;
+	top: 50%;
+    right:80px;
+}
+.tutorialBack::before{
+	position: relative;
+    content: "";
+    display: inline-block;
+    /* By using an em scale, the arrows will size with the font */
+    width: 1.2em;
+    height: 1.2em;
+    border-left: 0.45em solid black;
+    border-bottom: 0.45em solid black;
+    transform: rotate(45deg);
+    margin-right: 0.5em;
+    border-color: #C0C0C0;
+}
+.tutorialForward::after{
+	position: relative;
+    content: "";
+    display: inline-block;
+    /* By using an em scale, the arrows will size with the font */
+    width: 1.2em;
+    height: 1.2em;
+    border-right: 0.45em solid black;
+    border-top: 0.45em solid black;
+    transform: rotate(45deg);
+    margin-right: 0.5em;
+	border-color: #C0C0C0;
+}
+.tutorialForward:hover::after{
+	border-right: 0.6em solid black;
+    border-top: 0.6em solid black;
+	border-color: rgb(255, 255, 255);
+}
+.tutorialBack:hover::before{
+	border-left: 0.6em solid black;
+    border-bottom: 0.6em solid black;
+	border-color: rgb(255, 255, 255);
+}
+.tutorialDescription{
+	margin:auto;
+	margin-top: 5px;
+	color:  rgb(255, 255, 255);
+	font-size: 12pt; 
+	font-weight: normal;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", 
+	Helvetica, Tahoma, Geneva, Arial, "Lucida Grande", sans-serif;
+}
+.tutorialTitle{
+	margin:auto;
+	margin-top: 50px;
+	color:  rgb(255, 255, 255);
+	font-size: 17pt; 
+	font-weight:bold;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", 
+	Helvetica, Tahoma, Geneva, Arial, "Lucida Grande", sans-serif;
+}
+.tutorialImg{
+	cursor: pointer;
+}
+.tutorialImg:hover~.tutorialForward::after {
+	border-right: 0.6em solid black;
+    border-top: 0.6em solid black;
+	border-color: rgb(255, 255, 255); 
+}
+.notification_tooltip_header{
+	display:flex;
+	flex-direction:row;
+}
+.notification_tooltip_title{
+	flex-grow: 1;
+	font-size: 17pt; 
+	font-weight:bold;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", 
+	Helvetica, Tahoma, Geneva, Arial, "Lucida Grande", sans-serif;
+	text-align:center;
+}
+.notification_tooltip_pulse{
+	flex-grow: 0;
+	width: 32px;
+	height: 32px;
+}
+.notification_tooltip_message{
+	font-size: 11pt; 
+	margin: 3px;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", 
+	Helvetica, Tahoma, Geneva, Arial, "Lucida Grande", sans-serif;
+	white-space: normal;
+	max-width:250px;
+}
+.notification_tooltip_skip {
+	color: #00d9ff;
+	line-height: 19px;
+	text-align: center;
+    display: inline-block;
+    font-family: 'Helvetica', 'Arial', sans-serif;
+	font-size: 1em;
+	cursor: pointer;
+}
+.notification_tooltip_skip:hover {
+	font-weight: bold;
+}
+.notification_tooltip_click{
+	font-family: 'Helvetica', 'Arial', sans-serif;
+	font-size: 1em;
+	display: inline-block;
+	color: #00d9ff;
+	line-height: 19px;
+	text-align: center;
+}
+.notification_tooltip_click:hover {
+	font-weight: bold;
+}
+.notification_tooltip_footer{
+	display:flex;
+	flex-direction:row;
+	justify-content:space-between;
+}
+.outofscreen{
+	top : -30px;
+	left: -30px;
+}
