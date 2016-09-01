@@ -1787,6 +1787,18 @@ define([
 			label: javascriptMessages['never'],
 			value: Never
 		}];
+
+	var allKind = "all";
+	var functionsKind = "functions";
+	var extraParensKinds = [
+		{
+			label: javascriptMessages['allKind'],
+			value: allKind
+		},
+		{
+			label: javascriptMessages['functionKind'],
+			value: functionsKind
+		}];
 	provider.registerService("orion.core.setting", //$NON-NLS-1$
 		{},
 		{
@@ -1859,6 +1871,35 @@ define([
 					type: "number", //$NON-NLS-1$
 					defaultValue: warning,
 					options: severities
+				},
+				{
+					id: "no-extra-parens!1", //$NON-NLS-1$
+					dependsOn: "no-extra-parens",
+					name: javascriptMessages["no-extra-parens-kinds"],
+					type: "string", //$NON-NLS-1$
+					defaultValue: allKind,
+					options: extraParensKinds
+				},
+				{
+					id: "no-extra-parens:conditionalAssign", //$NON-NLS-1$
+					dependsOn: "no-extra-parens",
+					name: javascriptMessages["no-extra-parens-conditionalAssign"],
+					type: "boolean", //$NON-NLS-1$
+					defaultValue: false
+				},
+				{
+					id: "no-extra-parens:returnAssign", //$NON-NLS-1$
+					dependsOn: "no-extra-parens",
+					name: javascriptMessages["no-extra-parens-returnAssign"],
+					type: "boolean", //$NON-NLS-1$
+					defaultValue: false
+				},
+				{
+					id: "no-extra-parens:nestedBinaryExpressions", //$NON-NLS-1$
+					dependsOn: "no-extra-parens",
+					name: javascriptMessages["no-extra-parens-nestedBinaryExpressions"],
+					type: "boolean", //$NON-NLS-1$
+					defaultValue: false
 				},
 				{
 					id: "no-debugger", //$NON-NLS-1$

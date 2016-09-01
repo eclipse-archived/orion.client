@@ -21,7 +21,7 @@ define([
 			"check-tern-plugin" : 1,
 			"curly" : 0,
 			"eqeqeq": 1,
-			"missing-doc" : 0, 
+			"missing-doc" : 0,
 			"missing-nls" : 0,
 			'missing-requirejs': 1,
 			"new-parens" : 2,
@@ -44,7 +44,7 @@ define([
 			"no-extend-native": [2, {"exceptions" : ""}],
 			"no-extra-bind" : 1,
 			"no-extra-boolean-cast" : 2,
-			"no-extra-parens" : 1,
+			"no-extra-parens" : [1, "all", {"conditionalAssign": false, "returnAssign": false, "nestedBinaryExpressions": false}],
 			"no-extra-semi": 1,
 			"no-fallthrough" : 2,
 			"no-implicit-coercion" : [1, { "boolean": true, "number" : true, "string" : true }],
@@ -52,7 +52,7 @@ define([
 			"no-invalid-regexp": 2,
 			"no-invalid-this" : 1,
 			"no-irregular-whitespace" : 0,
-			"no-iterator": 2, 
+			"no-iterator": 2,
 			"no-jslint" : 1,
 			"no-lone-blocks" : 1,
 			"no-mixed-spaces-and-tabs" : 0,
@@ -64,7 +64,7 @@ define([
 			"no-new-wrappers" : 1,
 			"no-obj-calls" : 2,
 			"no-param-reassign" : [1, {props: false}],
-			"no-proto" : 2, 
+			"no-proto" : 2,
 			"no-redeclare" : 1,
 			"no-regex-spaces" : 2,
 			"no-reserved-keys" : 0,
@@ -72,7 +72,7 @@ define([
 			"no-self-compare" : 2,
 			"no-shadow" : 1,
 			"no-shadow-global" : 1,
-			"no-sparse-arrays" : 1, 
+			"no-sparse-arrays" : 1,
 			"no-throw-literal" : 1,
 			"no-trailing-spaces" : [1, { "skipBlankLines": true }],
 			"no-undef" : 2,
@@ -141,7 +141,7 @@ define([
 			"no-console" : {
 				description: Messages['no-console-description'],
 				url: 'http://eslint.org/docs/rules/no-console'
-			}, 
+			},
 			"no-constant-condition" : {
 				description: Messages['no-constant-condition-description'],
 				url: 'http://eslint.org/docs/rules/no-constant-condition'
@@ -284,7 +284,7 @@ define([
 			"no-proto" : {
 				description: Messages['no-proto-description'],
 				url: 'http://eslint.org/docs/rules/no-proto.html'
-			}, 
+			},
 			"no-redeclare" : {
 				description: Messages['no-redeclare-description'],
 				url: 'http://eslint.org/docs/rules/no-redeclare'
@@ -315,7 +315,7 @@ define([
 			"no-sparse-arrays" : {
 				description: Messages['no-sparse-arrays-description'],
 				url: 'http://eslint.org/docs/rules/no-sparse-arrays'
-			}, 
+			},
 			"no-throw-literal" : {
 				description: Messages['no-throw-literal-description'],
 				url: 'http://eslint.org/docs/rules/no-throw-literal'
@@ -397,5 +397,6 @@ define([
 			}
 		}
 	};
+	Object.freeze(rules.defaults);
 	return rules;
 });
