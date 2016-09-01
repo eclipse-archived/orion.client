@@ -167,10 +167,10 @@ function PrefsController(options) {
 			debug("savePrefs(): not modified, skip writing");
 			return Promise.resolve();
 		}
-		return Promise.using(lock(prefFile), function() {
-			// We have the lock until the promise returned by this function fulfills.
-			return mkdirpAsync(nodePath.dirname(prefFile)) // create parent folder(s) if necessary
-			.then(function() {
+		return mkdirpAsync(nodePath.dirname(prefFile)) // create parent folder(s) if necessary
+		.then(function() {
+			return Promise.using(lock(prefFile), function() {
+				// We have the lock until the promise returned by this function fulfills.
 				return fs.writeFileAsync(prefFile, prefs.toJSON());
 			})
 			.then(debug.bind(null, 'savePrefs(): wrote prefs.json'))
