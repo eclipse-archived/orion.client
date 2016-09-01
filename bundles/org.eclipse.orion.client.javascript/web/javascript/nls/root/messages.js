@@ -203,6 +203,11 @@ define({
 	'noTrailingSpaces' : 'Disallow trailing whitespace:',
 	'noTrailingSpacesSkipBlankLines' : 'Skip empty lines:',
 	'noTrailingSpacesFixName' : 'Remove trailing spaces',
+	'no-irregular-whitespace' : 'Disallow irregular whitespace:',
+	'no-irregular-whitespace-skipStrings' : 'Skip strings:',
+	'no-irregular-whitespace-skipComments' : 'Skip comments:',
+	'no-irregular-whitespace-skipRegexps' : 'Skip regular expressions:',
+	'no-irregular-whitespace-skipTemplates' : 'Skip templates:',
 
 	//All refs
 	'functionDecls': 'Function Declarations',
@@ -249,6 +254,7 @@ define({
 	'no-else-return' : 'Unnecessary else after return:',
 	'no-empty-label' : 'No empty labels:',
 	'no-self-compare' : 'Disallow self compare:',
+	'no-irregular-whitespace' : 'Disallow irregular whitespace:',
 	'no-self-assign' : 'Disallow self assignment:',
 	'noShadowFixName' : 'Rename in scope',
 	'type-checked-consistent-return' : 'Discouraged inconsistent returns:',

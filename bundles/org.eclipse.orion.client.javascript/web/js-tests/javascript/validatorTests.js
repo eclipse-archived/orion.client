@@ -454,11 +454,6 @@ define([
 								 severity: 'error',
 								 description: i18nUtil.formatMessage.call(null, messages['no-undef-defined'], {0: 'xx'})
 								},
-								{start: 54,
-								 end: 57,
-								 severity: 'error',
-								 description: messages['noUnusedExpression']
-								},
 								{start: 57,
 								 end: 58,
 								 severity: 'warning',
@@ -13142,6 +13137,107 @@ define([
 							validate({buffer: topic, callback: callback, config: config}).then(
 								function (problems) {
 									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+					});
+					// no-irregular-whitespace --------------------------------------------
+					describe('no-irregular-whitespace', function() {
+						var RULE_ID = "no-irregular-whitespace";
+						it("flag irregular whitespace", function(callback) {
+							var topic = 	"function thing() /*\u00A0*/{}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Irregular whitespace not allowed"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag irregular whitespace", function(callback) {
+							var topic = 	"function thing(/*\u3000*/){}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Irregular whitespace not allowed"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag irregular whitespace", function(callback) {
+							var topic = 	"function thing/*\u205f*/(){}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Irregular whitespace not allowed"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("should not flag irregular whitespace", function(callback) {
+							var topic = 	"function thing(){ return ' \u3000thing';}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = 1;
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, []);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag irregular whitespace inside string - skipString false", function(callback) {
+							var topic = "function thing(){ return ' \u3000thing';}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [1, { "skipStrings": false }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Irregular whitespace not allowed"
+									}]);
+								},
+								function (error) {
+									worker.getTestState().callback(error);
+								});
+						});
+						it("flag irregular whitespace inside regexp - skipRegExps false", function(callback) {
+							var topic = "function thing(){ return / \u00A0regexp/;}";
+							var config = { rules: {} };
+							config.rules[RULE_ID] = [1, { "skipRegExps": false }];
+							validate({buffer: topic, callback: callback, config: config}).then(
+								function (problems) {
+									assertProblems(problems, [
+									{
+										id: RULE_ID,
+										severity: 'warning',
+										description: "Irregular whitespace not allowed"
+									}]);
 								},
 								function (error) {
 									worker.getTestState().callback(error);

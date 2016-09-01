@@ -2019,7 +2019,43 @@ define([
 					type: "number", //$NON-NLS-1$
 					defaultValue: error,
 					options: severities
-				}]
+				},
+				{
+					id: "no-irregular-whitespace", //$NON-NLS-1$
+					name: javascriptMessages["no-irregular-whitespace"],
+					type: "number", //$NON-NLS-1$
+					defaultValue: ignore,
+					options: severities
+				},
+				{
+					id: "no-irregular-whitespace:skipStrings", //$NON-NLS-1$
+					dependsOn: "no-irregular-whitespace",
+					name: javascriptMessages["no-irregular-whitespace-skipStrings"],
+					type: "boolean", //$NON-NLS-1$
+					defaultValue: false
+				},
+				{
+					id: "no-irregular-whitespace:skipComments", //$NON-NLS-1$
+					dependsOn: "no-irregular-whitespace",
+					name: javascriptMessages["no-irregular-whitespace-skipComments"],
+					type: "boolean", //$NON-NLS-1$
+					defaultValue: false
+				},
+				{
+					id: "no-irregular-whitespace:skipRegExps", //$NON-NLS-1$
+					dependsOn: "no-irregular-whitespace",
+					name: javascriptMessages["no-irregular-whitespace-skipRegexps"],
+					type: "boolean", //$NON-NLS-1$
+					defaultValue: false
+				},
+				{
+					id: "no-irregular-whitespace:skipTemplates", //$NON-NLS-1$
+					dependsOn: "no-irregular-whitespace",
+					name: javascriptMessages["no-irregular-whitespace-skipTemplates"],
+					type: "boolean", //$NON-NLS-1$
+					defaultValue: false
+				},
+				]
 			},
 			{
 				pid: "eslint.config.practices", //$NON-NLS-1$
@@ -2505,7 +2541,7 @@ define([
 					id: "no-trailing-spaces", //$NON-NLS-1$
 					name: javascriptMessages["noTrailingSpaces"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: ignore,
+					defaultValue: warning,
 					options: severities
 				},
 				{
