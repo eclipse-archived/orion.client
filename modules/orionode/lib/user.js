@@ -19,6 +19,7 @@ var express = require('express'),
 	cookieParser = require('cookie-parser'),
 	bodyParser = require('body-parser'),
 	mongoose = require('mongoose'),
+	Promise = require('bluebird'),
 	passportLocalMongooseEmail = require('passport-local-mongoose-email'),
 	nodemailer = require('nodemailer'),
 	fs = require('fs'),
@@ -46,6 +47,8 @@ function userJSON(user) {
 		DiskUsage: user.disk_usage || 0 
 	};
 }
+
+mongoose.Promise = Promise;
 
 module.exports = function(options) {
 	var app = express.Router();
