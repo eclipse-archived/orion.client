@@ -51,9 +51,10 @@ define([
 			"no-implied-eval" : 0,
 			"no-invalid-regexp": [2, {"allowConstructorFlags" : ""}],
 			"no-invalid-this" : 1,
+			"no-irregular-whitespace" : [0, {"skipComments": false, "skipRegExps": false, "skipTemplates": false}],
 			"no-iterator": 2,
 			"no-jslint" : 1,
-			"no-lone-blocks" : 1,
+			"no-lone-blocks" : 0,
 			"no-mixed-spaces-and-tabs" : 0,
 			"no-native-reassign" : [2, {"exceptions" : ""}],
 			"no-negated-in-lhs" : 2,
@@ -62,7 +63,7 @@ define([
 			"no-new-object" : 1,
 			"no-new-wrappers" : 1,
 			"no-obj-calls" : 2,
-			"no-param-reassign" : [0, {props: false}],
+			"no-param-reassign" : [1, {props: false}],
 			"no-proto" : 2,
 			"no-redeclare" : 1,
 			"no-regex-spaces" : 2,
@@ -78,11 +79,11 @@ define([
 			"no-undef-expression": 1,
 			"no-undef-init" : 1,
 			"no-unreachable" : 1,
-			"no-unused-expressions" : [2, {allowShortCircuit: false, allowTernary: false}],
+			"no-unused-expressions" : [0, {allowShortCircuit: false, allowTernary: false}],
 			"no-unused-params" : 1,
 			"no-unused-vars" : 1,
 			"no-use-before-define" : 1,
-			"no-void" : 2,
+			"no-void" : 0,
 			"no-with" : 1,
 			"quotes" : [0, "double", {avoidEscape: false, allowTemplateLiterals: false}],
 			"radix" : 1,
@@ -229,6 +230,10 @@ define([
 				description: Messages['no-invalid-this-description'],
 				url: 'http://eslint.org/docs/rules/no-invalid-this'
 			},
+			"no-irregular-whitespace" : {
+				description: Messages['no-irregular-whitespace-description'],
+				url: 'http://eslint.org/docs/rules/no-irregular-whitespace'
+			},
 			"no-iterator": {
 				description: Messages['no-iterator-description'],
 				url: 'http://eslint.org/docs/rules/no-iterator'
@@ -254,7 +259,7 @@ define([
 			},
 			"no-new-array": {
 				description: Messages['no-new-array-description'],
-				url: 'http://eslint.org/docs/rules/no-array-constructor.html'
+				url: 'http://eslint.org/docs/rules/no-array-constructor'
 			},
 			"no-new-func" : {
 				description: Messages['no-new-func-description'],
@@ -278,7 +283,7 @@ define([
 			},
 			"no-proto" : {
 				description: Messages['no-proto-description'],
-				url: 'http://eslint.org/docs/rules/no-proto.html'
+				url: 'http://eslint.org/docs/rules/no-proto'
 			},
 			"no-redeclare" : {
 				description: Messages['no-redeclare-description'],
