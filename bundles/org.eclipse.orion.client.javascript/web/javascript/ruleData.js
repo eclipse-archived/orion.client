@@ -23,7 +23,7 @@ define([
 			"eqeqeq": 1,
 			"missing-doc" : 0,
 			"missing-nls" : 0,
-			'missing-requirejs': 1,
+			"missing-requirejs": 1,
 			"new-parens" : 2,
 			"no-caller": 2,
 			"no-comma-dangle" : 0,
@@ -51,7 +51,6 @@ define([
 			"no-implied-eval" : 0,
 			"no-invalid-regexp": [2, {"allowConstructorFlags" : ""}],
 			"no-invalid-this" : 1,
-			"no-irregular-whitespace" : 0,
 			"no-iterator": 2,
 			"no-jslint" : 1,
 			"no-lone-blocks" : 1,
@@ -63,7 +62,7 @@ define([
 			"no-new-object" : 1,
 			"no-new-wrappers" : 1,
 			"no-obj-calls" : 2,
-			"no-param-reassign" : [1, {props: false}],
+			"no-param-reassign" : [0, {props: false}],
 			"no-proto" : 2,
 			"no-redeclare" : 1,
 			"no-regex-spaces" : 2,
@@ -74,7 +73,7 @@ define([
 			"no-shadow-global" : 1,
 			"no-sparse-arrays" : 1,
 			"no-throw-literal" : 1,
-			"no-trailing-spaces" : [1, { "skipBlankLines": true }],
+			"no-trailing-spaces" : [0, { "skipBlankLines": true }],
 			"no-undef" : 2,
 			"no-undef-expression": 1,
 			"no-undef-init" : 1,
@@ -85,12 +84,12 @@ define([
 			"no-use-before-define" : 1,
 			"no-void" : 2,
 			"no-with" : 1,
-			"quotes" : [1, "double", {avoidEscape: false, allowTemplateLiterals: false}],
+			"quotes" : [0, "double", {avoidEscape: false, allowTemplateLiterals: false}],
 			"radix" : 1,
 			"semi" : [1, "always", {omitLastInOneLineBlock: false}],
 			"type-checked-consistent-return" : 0,
-			"unnecessary-nls" : 0,
 			"unknown-require": 1,
+			"unnecessary-nls" : 0,
 			"use-isnan" : 2,
 			"valid-typeof" : 2,
 			"yoda" : [0, "never", {exceptRange: false, onlyEquality: false}]
@@ -230,10 +229,6 @@ define([
 				description: Messages['no-invalid-this-description'],
 				url: 'http://eslint.org/docs/rules/no-invalid-this'
 			},
-			"no-irregular-whitespace" : {
-				description: Messages['no-irregular-whitespace-description'],
-				url: 'http://eslint.org/docs/rules/no-irregular-whitespace'
-			},
 			"no-iterator": {
 				description: Messages['no-iterator-description'],
 				url: 'http://eslint.org/docs/rules/no-iterator'
@@ -333,7 +328,7 @@ define([
 			},
 			"no-undef-init" : {
 				description: Messages['no-undef-init-description'],
-				url: 'http://eslint.org/docs/rules/no-undef-init.html'
+				url: 'http://eslint.org/docs/rules/no-undef-init'
 			},
 			"no-unreachable" : {
 				description: Messages['no-unreachable-description'],

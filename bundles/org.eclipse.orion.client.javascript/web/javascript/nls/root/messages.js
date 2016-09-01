@@ -249,7 +249,6 @@ define({
 	'no-else-return' : 'Unnecessary else after return:',
 	'no-empty-label' : 'No empty labels:',
 	'no-self-compare' : 'Disallow self compare:',
-	'no-irregular-whitespace' : 'Disallow irregular whitespace:',
 	'no-self-assign' : 'Disallow self assignment:',
 	'noShadowFixName' : 'Rename in scope',
 	'type-checked-consistent-return' : 'Discouraged inconsistent returns:',

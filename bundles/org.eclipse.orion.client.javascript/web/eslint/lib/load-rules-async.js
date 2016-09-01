@@ -32,7 +32,6 @@ define([
 './rules/no-negated-in-lhs',
 './rules/no-obj-calls',
 './rules/no-self-compare',
-'./rules/no-irregular-whitespace',
 './rules/no-const-assign',
 './rules/no-implicit-coercion',
 './rules/no-extra-bind',
@@ -48,7 +47,7 @@ define([
 ], function(util, Finder, ProblemMessages, Estraverse, JsSyntax,
 		accessorPairs, noControlRegex, noDuplicateCase, noElseReturn, noEmptyCharClasses, 
 		noEmptyLabel, noEqNull, noExtraBoolCast, noExtraParens, noInvalidRegExp, noNegatedInLhs,
-		noObjCalls, noSelfCompare, noIrregularWhitespace, noConstAssign, noImplicitCoercion,
+		noObjCalls, noSelfCompare, noConstAssign, noImplicitCoercion,
 		noExtraBind, noExtendNative, noLoneBlocks, quotes, yoda, noParamReassign, noNativeReassign,
 		noUnusedExpressions, noInvalidThis, noTrailingSpaces) {
 	
@@ -2393,7 +2392,6 @@ define([
 		'no-else-return': noElseReturn,
 		'no-empty-label': noEmptyLabel,
 		'no-self-compare': noSelfCompare,
-		'no-irregular-whitespace': noIrregularWhitespace,
 		'no-const-assign' : noConstAssign,
 		/** @callback */
 		'no-self-assign': function(context) {
