@@ -7,38 +7,37 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
  *******************************************************************************/
-define ([     	
-    	'orion/util'
-        ], 
-		function(util) { /* BDL */
+define ([
+	"orion/util"
+],
+function(util) { /* BDL */
 	
 	function setBrowserLangDirection() {
 		
 		var lang;
-    	if (window.dojoConfig) {
-      		lang = window.dojoConfig.locale;
-    	}
-    	if (!lang) {
-      		lang = navigator.languages ? navigator.languages[0] : (navigator.language || navigator.userLanguage);
-    	}
-    	var isBidi = lang && 'ar iw he'.indexOf((lang).substring(0, 2)) != - 1;
-		
-    	if (isBidi)
-    	{
-	    	var htmlElement = document.getElementsByTagName('html')[0];
-	    	if (htmlElement){ //should be always true
-	    		htmlElement.setAttribute ("dir", "rtl");
-	    	}
-    	}	
-	};
+		if (window.dojoConfig) {
+			lang = window.dojoConfig.locale;
+		}
+		if (!lang) {
+			lang = navigator.languages ? navigator.languages[0] : navigator.language || navigator.userLanguage;
+		}
+		var isBidi = lang && "ar iw he".indexOf(lang.substring(0, 2)) !== - 1;
+
+		if (isBidi) {
+			var htmlElement = document.getElementsByTagName("html")[0];
+			if (htmlElement){ //should be always true
+				htmlElement.setAttribute ("dir", "rtl");
+			}
+		}
+	}
 	
 	setBrowserLangDirection();
 	
-	var bidiEnabledStorgae = '/orion/preferences/bidi/bidiEnabled'; //$NON-NLS-0$
-	var bidiLayoutStorage = '/orion/preferences/bidi/bidiLayout'; //$NON-NLS-0$	
-	var LRE = '\u202A';	//$NON-NLS-0$
-	var PDF = '\u202C'; //$NON-NLS-0$
-	var RLE = '\u202B'; //$NON-NLS-0$
+	var bidiEnabledStorgae = "/orion/preferences/bidi/bidiEnabled"; //$NON-NLS-0$
+	var bidiLayoutStorage = "/orion/preferences/bidi/bidiLayout"; //$NON-NLS-0$	
+	var LRE = "\u202A";	//$NON-NLS-0$
+	var PDF = "\u202C"; //$NON-NLS-0$
+	var RLE = "\u202B"; //$NON-NLS-0$
 		
 	var bidiLayout = getBidiLayout();
 
@@ -48,27 +47,23 @@ define ([
 	 */		
 	function isBidiEnabled() {
 		var bidiEnabled = localStorage.getItem(bidiEnabledStorgae);
-		if (bidiEnabled && bidiEnabled == 'true') {		//$NON-NLS-0$
+		if (bidiEnabled && bidiEnabled === "true") {		//$NON-NLS-0$
 			return true;
 		}
-		else {
-			return false;
-		}
-	};
+		return false;
+	}
 	
 	/**
 	 * returns bidiLayout value set in globalization settings.
 	 * @returns {String} text direction.
 	 */	
 	function getBidiLayout() {
-		var bidiLayout = localStorage.getItem(bidiLayoutStorage);
-		if (bidiLayout && (bidiLayout == 'rtl' || bidiLayout == 'ltr' || bidiLayout == 'auto')) {	//$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
-			return bidiLayout;
+		var _bidiLayout = localStorage.getItem(bidiLayoutStorage);
+		if (_bidiLayout && (_bidiLayout === "rtl" || _bidiLayout === "ltr" || _bidiLayout === "auto")) {	//$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+			return _bidiLayout;
 		}
-		else {
-			return 'ltr';	//$NON-NLS-0$
-		}
-	};
+		return "ltr";	//$NON-NLS-0$
+	}
 	
 	/**
 	 * returns text direction.
@@ -84,13 +79,11 @@ define ([
 		if (!isBidiEnabled()) {
 			return "";
 		}
-		if (bidiLayout == 'auto' && util.isIE) {	//$NON-NLS-0$
+		if (bidiLayout === "auto" && util.isIE) {	//$NON-NLS-0$
 			return checkContextual(text);
 		}
-		else {
-			return bidiLayout;
-		}
-	};	
+		return bidiLayout;
+	}
 	
 	/**
 	 * Wraps text by UCC (Unicode control characters) according to text direction
@@ -105,13 +98,11 @@ define ([
 	function enforceTextDirWithUcc ( text ) {
 		if (isBidiEnabled() && text.trim()) {
 			bidiLayout = getBidiLayout();
-			var dir = bidiLayout == 'auto' ? checkContextual( text ) : bidiLayout;	//$NON-NLS-0$
-			return ( dir == 'ltr' ? LRE : RLE ) + text + PDF;	//$NON-NLS-0$
+			var dir = bidiLayout === "auto" ? checkContextual( text ) : bidiLayout;	//$NON-NLS-0$
+			return ( dir === "ltr" ? LRE : RLE ) + text + PDF;	//$NON-NLS-0$
 		}
-		else {
-			return text;	
-		}
-	};
+		return text;	
+	}
 	
 	/**
 	 * Finds the first strong (directional) character.
@@ -123,27 +114,27 @@ define ([
 		// look for strong (directional) characters
 		var fdc = /[A-Za-z\u05d0-\u065f\u066a-\u06ef\u06fa-\u07ff\ufb1d-\ufdff\ufe70-\ufefc]/.exec( text );
 		// if found, return the direction that defined by the character, else return ltr as defult.
-		return fdc ? ( fdc[0] <= 'z' ? 'ltr' : 'rtl' ) : 'ltr';	//$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	};
+		return fdc ? fdc[0] <= "z" ? "ltr" : "rtl"  : "ltr";	//$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
 	
 	function addBidiEventListeners ( input ) {
 		if (!input._hasBidiEventListeners) {
 			input._hasBidiEventListeners = true;
 
-			var eventTypes = ['keyup', 'cut', 'paste'];
+			var eventTypes = ["keyup", "cut", "paste"];
 			for (var i = 0; i < eventTypes.length; ++i) {
 				input.addEventListener(eventTypes[i], handleInputEvent.bind(this),
 					false);
 			}
 		}
-	};
+	}
 	
 	function handleInputEvent ( event ) {
 		var input = event.target;
 		if (input) {
 			input.dir = getTextDirection(input.value || input.textContent); // resolve dir attribute of the element
 		}
-	};
+	}
 	
 	function initInputField ( input ) {
 		if (isBidiEnabled() && input) {
@@ -153,9 +144,9 @@ define ([
 				addBidiEventListeners(input);
 			}
 		}
-	};
+	}
 	
-	function enforceTextDirForComment(range) {
+	function enforceTextDir(range) {
 		var comments = [{name:"comment block"}, 
 		                {name:"comment line double-slash"},
 		                {name:"comment block documentation"},
@@ -170,7 +161,7 @@ define ([
 			for (var i = 0; i < comments.length; i++) {
 				if (style.styleClass === comments[i].name) {
 					var newStyle = style;
-					if (typeof newStyle.attributes == "undefined") {
+					if (typeof newStyle.attributes === "undefined") {
 						newStyle.attributes = {};
 					}
 					newStyle.attributes.dir = getTextDirection(text);
@@ -180,7 +171,7 @@ define ([
 			}
 		}
 		return range;
-	};
+	}
 
 		
 	return {
@@ -188,6 +179,6 @@ define ([
 		getTextDirection: getTextDirection,		
 		enforceTextDirWithUcc: enforceTextDirWithUcc,
 		initInputField: initInputField,
-		enforceTextDirForComment: enforceTextDirForComment
+		enforceTextDir: enforceTextDir
 	};
 });
