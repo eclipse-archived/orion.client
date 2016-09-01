@@ -5676,7 +5676,7 @@ loop:   for (;;) {
                         warning("Duplicate key '{a}'.",
                                 nexttoken, nexttoken.value);
                     } else if (nexttoken.value === '__proto__') {
-                        warning("Stupid key '{a}'.",
+                        warning("'{a}' is a reserved key.",
                                 nexttoken, nexttoken.value);
                     } else {
                         o[nexttoken.value] = true;
