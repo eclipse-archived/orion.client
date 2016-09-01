@@ -1951,6 +1951,13 @@ define([
 					options: severities
 				},
 				{
+					id: "no-invalid-regexp:allowConstructorFlags", //$NON-NLS-1$
+					dependsOn: "no-invalid-regexp",
+					name: javascriptMessages["no-invalid-regexp-flags"],
+					type: "string", //$NON-NLS-1$
+					defaultValue: ""
+				},
+				{
 					id: "no-regex-spaces", //$NON-NLS-1$
 					name: javascriptMessages["noRegexSpaces"],
 					type: "number", //$NON-NLS-1$
