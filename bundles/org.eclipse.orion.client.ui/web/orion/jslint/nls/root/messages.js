@@ -14,7 +14,8 @@ define({//Default message bundle
 	"Too many errors.": "Too many errors. (${0}% scanned)",
 	"Stopping, unable to continue.": "Stopping, unable to continue. (${0}% scanned)",
 	// JSLint Problem Messages
-	"'{a}' should not be greater than '{b}'.": "'${0}' should not be greater than '${1}'.",
+	"'{a}' is a reserved key.": "'${0}' is a reserved key.", // Only displayed for {"__proto__"}, __proto__ is a reserved key
+	"'{a}' should not be greater than '{b}'.": "'${0}' should not be greater than '${1}'.", // Regex with comma separated numbers {"a": /{{7,4}}/} the lower number must come first
 	"A regular expression literal can be confused with '/='.": "A regular expression literal can be confused with '/='.",
 	"A trailing decimal point can be confused with a dot '{a}'.": "A trailing decimal point can be confused with a dot '${0}'.",
 	"ADsafe comment violation.": "ADsafe comment violation.",
@@ -48,7 +49,6 @@ define({//Default message bundle
 	"Nested comment.": "Nested comment.",
 	"Spaces are hard to count. Use {{a}}.": "Spaces are hard to count. Use {${0}}.",
 	"Strings must use doublequote.": "Strings must use doublequote.",
-	"Stupid key '{a}'.": "Stupid key '${0}'.",
 	"Unclosed comment.": "Unclosed comment.",
 	"Unclosed regular expression.": "Unclosed regular expression.",
 	"Unclosed string.": "Unclosed string.",
