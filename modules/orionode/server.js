@@ -133,7 +133,7 @@ if (process.versions.electron) {
 	electron.app.buildId = configParams["orion.buildId"];
 
 	if (feedURL) {
-		var updateChannel = allPrefs.user.updateChannel ? allPrefs.user.updateChannel : configParams["orion.autoUpdater.defaultChannel"],
+		var updateChannel = allPrefs.user && allPrefs.user.updateChannel ? allPrefs.user.updateChannel : configParams["orion.autoUpdater.defaultChannel"],
 			latestUpdateURL;
 		if (platform === "linux") {
 			latestUpdateURL = feedURL + '/download/channel/' + updateChannel + '/linux';
