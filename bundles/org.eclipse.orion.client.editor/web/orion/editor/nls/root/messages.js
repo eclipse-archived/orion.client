@@ -153,10 +153,10 @@ define({//Default message bundle
 	"viDown": "${0} Down", //$NON-NLS-1$ //$NON-NLS-0$
 	"viw": "${0} Next Word", //$NON-NLS-1$ //$NON-NLS-0$
 	"vib": "${0} Beginning of Word", //$NON-NLS-1$ //$NON-NLS-0$
-	"viW": "${0} Next Word (ws stop)", //$NON-NLS-1$ //$NON-NLS-0$
-	"viB": "${0} Beginning of Word (ws stop)", //$NON-NLS-1$ //$NON-NLS-0$
+	"viW": "${0} Next Word (ws stop)", //$NON-NLS-1$ //$NON-NLS-0$ // ws stop refers to word space (next blank space delimited word)
+	"viB": "${0} Beginning of Word (ws stop)", //$NON-NLS-1$ //$NON-NLS-0$ // ws stop refers to word space (next blank space delimited word)
 	"vie": "${0} End of Word", //$NON-NLS-1$ //$NON-NLS-0$
-	"viE": "${0} End of Word (ws stop)", //$NON-NLS-1$ //$NON-NLS-0$
+	"viE": "${0} End of Word (ws stop)", //$NON-NLS-1$ //$NON-NLS-0$ // ws stop refers to word space (next blank space delimited word)
 	"vi$": "${0} End of the line", //$NON-NLS-1$ //$NON-NLS-0$
 	"vi^_": "${0} First non-blank Char Current Line", //$NON-NLS-1$ //$NON-NLS-0$
 	"vi+": "${0} First Char Next Line", //$NON-NLS-1$ //$NON-NLS-0$
