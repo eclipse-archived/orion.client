@@ -958,8 +958,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				}
 			}
 			return item;
-		};
-		
+		};	
 		var newFileCommand = new mCommands.Command({
 			name: messages["New File"],
 			tooltip: messages["Create a new file"],
@@ -974,6 +973,45 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			}
 		});
 		commandService.addCommand(newFileCommand);
+		var newFileCb = function(){
+			var newButtonGroup = document.querySelectorAll("#fileActions>li>ul>li");
+			var newFileButton = newButtonGroup[0].querySelector("ul>li");
+			newFileButton.childNodes[0].click();
+		};
+		var generalMenuTemplate = [
+			{
+				label: "File",
+				submenu: [
+					{ label: "New", submenu:
+						[
+							{
+								label:"File", click: newFileCb
+							},
+							{	
+								label:"Folder"
+							}
+						]
+					},
+					{ type: "separator" },
+					{ label:"Open Folder",accelerator: "CmdOrCtrl+O"},
+					{ label:"Open File",accelerator: "CmdOrCtrl+Shift+F"}
+				]
+			},
+			{
+			    label: 'View',
+			    submenu: [
+			      {
+			        label: 'Toggle Developer Tools',
+			        accelerator: 'Ctrl+Shift+I',
+			        click: function (item, focusedWindow) {
+			          if (focusedWindow) focusedWindow.webContents.toggleDevTools()
+			        }
+			      }
+			    ]
+			  },
+		];
+		var menu = window.__electron.remote.Menu;
+		menu.setApplicationMenu(menu.buildFromTemplate(generalMenuTemplate));
 		
 		var newFolderCommand = new mCommands.Command({
 			name: messages['New Folder'],
