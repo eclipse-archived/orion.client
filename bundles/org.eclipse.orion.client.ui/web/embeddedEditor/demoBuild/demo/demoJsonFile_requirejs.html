@@ -29,6 +29,7 @@
 				padding-bottom: 5px;
 				position: relative;
 				height: 450px;
+				resize: both;
 			}
 			.orionPage {
 			    background-color: white;
@@ -39,23 +40,26 @@
 		<script src="editorBuild/requirejs/require.min.js"></script>
 		<script>
     	/*eslint-env browser, amd*/
-			require({
-			    config: {
-			        //'orion/editor/nls/messages': {root: true, ja: true},
-			        //'orion/nls/messages': {root: true, ja: true}
-			        //more messages module should be added here
-			    }
-			});		    
 			require.config({
-		        bundles: {
-		            "editorBuild/code_edit/built-codeEdit-amd": ["orion/codeEdit"],
-		        }	    
-		    });
-	    	require(["orion/codeEdit"], function(mCodeEdit) {
+			    waitSeconds: 60,
+			    path:{
+			    	'orion/editor/nls/messages': 'yourFolder/orion/editor/nls/messages'
+			    },
+			    config: {
+			    	'orion/editor/nls/messages': {root: true, 'ja': true, 'fr': true},
+			        i18n: {
+			            locale: 'ja'//'ja' can be a variable assigned by your web app.
+			        },
+			    },
+			    bundles: {
+			        "editorBuild/code_edit/built-codeEdit-amd": ["orion/codeEdit"],
+			    }
+			});
+			require(["orion/codeEdit"], function(mCodeEdit) {
 				var defaultPluginURLs = [];
-				var codeEdit = new mCodeEdit({ _defaultPlugins: defaultPluginURLs, userPlugins:["editorBuild/others/plugins/jslintPlugin.html", "editorBuild/others/plugins/languages/json/jsonPlugin.html"] });
+				var codeEdit = new mCodeEdit({ _defaultPlugins: defaultPluginURLs, userPlugins:[/*"editorBuild/others/plugins/jslintPlugin.html",*/ "editorBuild/others/plugins/languages/json/jsonPlugin.html"] });
 				var contents = '{foo: 123, bar: 234}'
-				codeEdit.create({parent: "embeddedEditor", contentType: "application/json", contents: contents}).then(function(editorViewer) {
+				codeEdit.create({parent: "embeddedEditor", contentType: "application/json", contents: contents, noFocus: true}).then(function(editorViewer) {
 					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 					//You can call APIs from editorViewer.editor  for further actions.
 				});
