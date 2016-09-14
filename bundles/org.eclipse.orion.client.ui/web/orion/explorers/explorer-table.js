@@ -516,7 +516,7 @@ define([
 					var source = findItemfromNode(dragStartTarget);
 					if (source) {
 						var exportName = source.Directory ? dragStartTarget.text + ".zip" : dragStartTarget.text;
-						var downloadUrl = new URL(source.Directory ? source.ExportLocation : source.Location, self.location.href).href;
+						var downloadUrl = new URL(source.Directory ? (source.ExportLocation || source.Location) : source.Location, self.location.href).href;
 						evt.dataTransfer.setData('DownloadURL', "application/zip,application/octet-stream:"+ exportName +":" + downloadUrl);
 					}
 				};
