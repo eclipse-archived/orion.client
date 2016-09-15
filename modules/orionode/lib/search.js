@@ -43,7 +43,7 @@ module.exports = function(options) {
 			});
 		};
 	} else {
-		search = require('./searchWorker');
+		search = require('./searchWorker').search;
 	}
 	return express.Router()
 	.use(bodyParser.json())
