@@ -672,6 +672,7 @@ html[dir="rtl"] .keyAssistFloat { /* ACGC */
 
 .keyAssistFloat h2 {
 	color: gold;
+	margin: auto;
 }
 
 .keyAssistName {
