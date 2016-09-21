@@ -841,13 +841,15 @@ define([
 						config.rules["check-tern-plugin"] = 1;
 						validate({buffer: topic, callback: callback, config: config}).then(
 							function (problems) {
-								assertProblems(problems, [
+								assertProblems(problems, [] 
+								/*[
 									{id: RULE_ID,
 									 severity: 'warning',
 									 description: "To work in the \'ecma7\' environment, the \'ecma7\' library must be running.",
 									 nodeType: "EnvName"
 									},
-								]);
+								]*/
+								);
 							},
 							function (error) {
 								worker.getTestState().callback(error);
@@ -864,13 +866,13 @@ define([
 									 severity: 'warning',
 									 description: "To work in the \'browser\' environment, the \'browser\' library must be running.",
 									 nodeType: "EnvName"
-									},
+									}/*,
 									{id: RULE_ID,
 									 severity: 'warning',
 									 description: "To work in the \'ecma7\' environment, the \'ecma7\' library must be running.",
 									 nodeType: "EnvName"
 									},
-
+*/
 								]);
 							},
 							function (error) {
