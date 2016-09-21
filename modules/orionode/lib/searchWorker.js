@@ -15,7 +15,25 @@ try {
 	var path = require('path');
 	var url = require('url');
 	var fs = Promise.promisifyAll(require('fs'));
-	
+	var elasticlunr = require('elasticlunr');
+	var index = elasticlunr(function() {
+		this.addField('Name');
+		this.setRef("id");
+		this.pipeline.remove(elasticlunr.stemmer);
+		this.pipeline.remove(elasticlunr.trimmer);
+		elasticlunr.clearStopWords();
+		var trimmer = function(token) {
+			if (token === null || token === undefined) {
+				throw new Error('token should not be undefined');
+			}
+			return token
+				.replace(/^\s+/, '')
+				.replace(/\s+$/, '');
+		};
+		elasticlunr.Pipeline.registerFunction(trimmer, 'trimmer');
+		this.pipeline.add(trimmer);
+	});
+
 	var SUBDIR_SEARCH_CONCURRENCY = 10;
 
 	var workspaceId = 'orionode';
@@ -30,7 +48,7 @@ try {
 		}
 		return p;
 	}
-	
+
 	/**
 	 * @param {String} filepath The URL-encoded path, for example 'foo/My%20Work/baz.txt'
 	 * @returns {String} The filesystem path represented by interpreting 'path' relative to the workspace dir.
@@ -40,7 +58,7 @@ try {
 	function safeFilePath(workspaceDir, filepath) {
 		return safePath(workspaceDir, path.join(workspaceDir, filepath));
 	}
-	
+
 	function isSearchField(term) {
 		for (var i = 0; i < fieldList.length; i++) {
 			if (term.lastIndexOf(fieldList[i] + ":", 0) === 0) {
@@ -50,17 +68,17 @@ try {
 		return false;
 	}
 
-	function undoLuceneEscape(searchTerm){
+	function undoLuceneEscape(searchTerm) {
 		var specialChars = "+-&|!(){}[]^\"~:\\";
 		for (var i = 0; i < specialChars.length; i++) {
-			var character = specialChars.substring(i,i+1);
+			var character = specialChars.substring(i, i + 1);
 			var escaped = "\\" + character;
-			searchTerm = searchTerm.replace(new RegExp(escaped,"g"), character);
+			searchTerm = searchTerm.replace(new RegExp(escaped, "g"), character);
 		}
 		return searchTerm;
 	}
 
-	function SearchOptions(originalUrl, contextPath){
+	function SearchOptions(originalUrl, contextPath) {
 		this.defaultLocation = null;
 		this.fileContentSearch = false;
 		this.filenamePattern = null;
@@ -75,7 +93,8 @@ try {
 
 		this.buildSearchOptions = function() {
 			function getEncodedParameter(param) {
-				var query = url.parse(originalUrl).search.substring(1), result = "";
+				var query = url.parse(originalUrl).search.substring(1),
+					result = "";
 				query.split("&").some(function(p) {
 					var pair = p.split("=");
 					if (pair[0] === param) {
@@ -114,14 +133,14 @@ try {
 		};
 	}
 
-	function buildSearchPattern(searchOpts){
+	function buildSearchPattern(searchOpts) {
 		var searchTerm = searchOpts.searchTerm;
 		if (searchTerm) {
 			if (!searchOpts.regEx) {
 				if (searchTerm.indexOf("\"") === 0) {
 					searchTerm = searchTerm.substring(1, searchTerm.length - 1);
 				}
-	
+
 				searchTerm = undoLuceneEscape(searchTerm);
 				if (searchTerm.indexOf("?") !== -1 || searchTerm.indexOf("*") !== -1) {
 					if (searchTerm.indexOf("*") === 0) {
@@ -137,7 +156,7 @@ try {
 					searchTerm = searchTerm.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
 				}
 			}
-			if (searchOpts.searchTermWholeWord){
+			if (searchOpts.searchTermWholeWord) {
 				searchTerm = "\\b" + searchTerm + "\\b";
 			}
 			if (!searchOpts.searchTermCaseSensitive) {
@@ -149,11 +168,11 @@ try {
 		return searchTerm;
 	}
 
-	function buildFilenamePattern(searchOpts){
+	function buildFilenamePattern(searchOpts) {
 		var filenamePatterns = searchOpts.filenamePattern;
 		//Default File Pattern
-		if(filenamePatterns === null){
-			filenamePatterns = ".*";
+		if (filenamePatterns === null) {
+			filenamePatterns = "";
 		}
 		return filenamePatterns.split("/").map(function(filenamePattern) {
 			if (filenamePattern.indexOf("?") !== -1 || filenamePattern.indexOf("*") !== -1) {
@@ -164,11 +183,13 @@ try {
 					filenamePattern = filenamePattern.replace("*", ".*");
 				}
 			}
-	
+
 			if (!searchOpts.filenamePatternCaseSensitive) {
-				return new RegExp("^"+filenamePattern, "i");
+				//				return new RegExp("^" + filenamePattern, "i");
+				return filenamePattern;
 			}
-			return new RegExp("^"+filenamePattern);
+			//			return new RegExp("^" + filenamePattern);
+			return filenamePattern;
 		});
 	}
 
@@ -179,127 +200,237 @@ try {
 	// Note that while this function creates and returns many promises, they fulfill to undefined,
 	// and are used only for flow control.
 	// TODO clean up
-	function searchFile(workspaceDir, dirLocation, filename, searchPattern, filenamePatterns, results){
+	function searchFile(workspaceDir, dirLocation, filename, searchPattern, filenamePatterns, results) {
 		var filePath = dirLocation + filename;
 		return fs.statAsync(filePath)
-		.then(function(stats) {
-			/*eslint consistent-return:0*/
-			if (stats.isDirectory()) {
-				if (filename[0] === ".") {
-					// do not search hidden dirs like .git
-					return;
-				}
-				if (filePath.substring(filePath.length-1) !== "/") filePath = filePath + "/";
+			.then(function(stats) {
+				/*eslint consistent-return:0*/
+				if (stats.isDirectory()) {
+					if (filename[0] === ".") {
+						// do not search hidden dirs like .git
+						return;
+					}
+					if (filePath.substring(filePath.length - 1) !== "/") filePath = filePath + "/";
 
-				return fs.readdirAsync(filePath)
-				.then(function(directoryFiles) {
-					return Promise.map(directoryFiles, function(entry) {
-						return searchFile(workspaceDir, filePath, entry, searchPattern, filenamePatterns, results);
-					}, { concurrency: SUBDIR_SEARCH_CONCURRENCY });
-				});
-			}
-			// File case
-			
-			if (!filenamePatterns.some(function(filenamePattern) {
-				return filename.match(filenamePattern);
-			})){
-				return;
-			}
-			function add () {
-				// We found a hit
-				var filePathFromWorkspace = filePath.substring(workspaceDir.length);
-				results.push({
-					"Directory": stats.isDirectory(),
-					"LastModified": stats.mtime.getTime(),
-					"Length": stats.size,
-					"Location": "/file" + filePathFromWorkspace,
-					"Name": filename,
-					"Path": filePathFromWorkspace.substring(1)
-				});
-			}
-			if (!searchPattern) {
-				return add();
-			}
-			return fs.readFileAsync(filePath, 'utf8')
-			.then(function(file) {
-				if (!file.match(searchPattern)) {
+					return fs.readdirAsync(filePath)
+						.then(function(directoryFiles) {
+							return Promise.map(directoryFiles, function(entry) {
+								return searchFile(workspaceDir, filePath, entry, searchPattern, filenamePatterns, results);
+							}, {
+								concurrency: SUBDIR_SEARCH_CONCURRENCY
+							});
+						});
+				}
+				// File case
+
+				if (!filenamePatterns.some(function(filenamePattern) {
+						return filename.match(filenamePattern);
+					})) {
+					// didn't find any file in the filename search scope, so return nothing
 					return;
 				}
-				add();
+
+				function add() {
+					// We found a hit
+					var filePathFromWorkspace = filePath.substring(workspaceDir.length);
+					results.push({
+						"Directory": stats.isDirectory(),
+						"LastModified": stats.mtime.getTime(),
+						"Length": stats.size,
+						"Location": "/file" + filePathFromWorkspace,
+						"Name": filename,
+						"Path": filePathFromWorkspace.substring(1)
+					});
+				}
+				if (!searchPattern) {
+					// this means this is a ctrl+shift+f search case.
+					return add();
+				}
+				return fs.readFileAsync(filePath, 'utf8')
+					.then(function(file) {
+						if (!file.match(searchPattern)) {
+							return;
+						}
+						add();
+					});
 			});
-		});
 	}
-	
+
+	function makedocs(workspaceDir, dirLocation, filename, results, refId) {
+		var filePath = dirLocation + filename;
+		return fs.statAsync(filePath)
+			.then(function(stats) {
+				/*eslint consistent-return:0*/
+				if (stats.isDirectory()) {
+					if (filename[0] === ".") {
+						// do not search hidden dirs like .git
+						return;
+					}
+					if (filePath.substring(filePath.length - 1) !== "/") filePath = filePath + "/";
+
+					return fs.readdirAsync(filePath)
+						.then(function(directoryFiles) {
+							return Promise.map(directoryFiles, function(entry) {
+								return makedocs(workspaceDir, filePath, entry, results, refId);
+							}, {
+								concurrency: SUBDIR_SEARCH_CONCURRENCY
+							});
+						});
+				}
+
+				function add() {
+					// We found a hit
+					var filePathFromWorkspace = filePath.substring(workspaceDir.length);
+					results.push({
+						"Directory": stats.isDirectory(),
+						"LastModified": stats.mtime.getTime(),
+						"Length": stats.size,
+						"Location": "/file" + filePathFromWorkspace,
+						"Name": filename,
+						"Path": filePathFromWorkspace.substring(1),
+						"id": refId.id++
+					});
+				}
+				return fs.readFileAsync(filePath, 'utf8')
+					.then(function() {
+						add();
+					});
+			});
+	}
+
+
+	function indexing(workspaceDir, searchScope) {
+		var docs = [];
+		return fs.readdirAsync(searchScope)
+			.then(function(children) {
+				var refId = {
+					id: 0
+				};
+				return Promise.map(children, function(child) {
+						return makedocs(workspaceDir, searchScope, child, docs, refId);
+					}, {
+						concurrency: SUBDIR_SEARCH_CONCURRENCY
+					})
+					.catch(function(err) {
+						console.log(err);
+					})
+					.then(function() {
+						console.time("indexing");
+						for (var i = 0; i < docs.length; i++) {
+							console.log("Indexing" + i);
+							if (!docs[i].Directory) {
+								index.addDoc(docs[i]);
+								delete index.id;
+							}
+						}
+						console.timeEnd("indexing");
+						return;
+					});
+			}).then(function() {
+				return fs.writeFileAsync("orionIndex.json", JSON.stringify(index.toJSON()), "utf8");
+			}).catch(function(err) {
+				console.log(err);
+			}).then(function() {
+				return index;
+			});
+	}
+
 	function search(originalUrl, workspaceDir, contextPath) {
 		var searchOpt = new SearchOptions(originalUrl, contextPath);
 		searchOpt.buildSearchOptions();
 
-		var searchPattern, filenamePattern;
-		try {
-			searchPattern = buildSearchPattern(searchOpt);
-			filenamePattern = buildFilenamePattern(searchOpt);
-		} catch (err) {
-			return Promise.reject(err);
-		}
+		//		var searchPattern, filenamePattern;
+		//		try {
+		//			searchPattern = buildSearchPattern(searchOpt);
+		//			filenamePattern = buildFilenamePattern(searchOpt);
+		//		} catch (err) {
+		//			return Promise.reject(err);
+		//		}
 
 		var searchScope;
+		var searchingFilename = searchOpt.filenamePattern && searchOpt.filenamePattern.slice(0, -1);
+
 		try {
 			var loc = searchOpt.location.replace(/^\/file/, "");
 			loc = loc.replace(/\*$/, "");
 			searchScope = safeFilePath(workspaceDir, loc);
 		} catch (ex) {
 			searchScope = workspaceDir;
-		} 
+		}
 		if (searchScope.charAt(searchScope.length - 1) !== "/") searchScope = searchScope + "/";
 
-		return fs.readdirAsync(searchScope)
-		.then(function(children) {
-			var results = [];
 
-			return Promise.map(children, function(child) {
-				return searchFile(workspaceDir, searchScope, child, searchPattern, filenamePattern, results);
-			}, { concurrency: SUBDIR_SEARCH_CONCURRENCY })
-			.catch(function(/*err*/) {
-				// Probably an error reading some file or directory -- ignore
-			})
-			.then(function() {
-				return {
-					"response": {
-						"docs": results,
-						"numFound": results.length,
-						"start": 0
+		return fs.readFileAsync("orionIndex.json", "utf8").then(function(file) {
+			return lunr.Index.load(JSON.parse(file));
+		}).catch(function(err) {
+			if (index.documentStore.length > 1) {
+				return;
+			}
+			return indexing(workspaceDir, searchScope);
+		}).then(function(indexingResult) {
+			index = indexingResult;
+		}).then(function() {
+			var results = [];
+			if (searchingFilename) {
+				var fileNamefindings = index.search(searchingFilename, {
+					fields: {
+						Name: {
+							boost: 1
+						}
 					},
-					"responseHeader": {
-						"params": {
-							"fl": "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive",
-							"fq": [
-								"Location:"+searchOpt.location,
-								"UserName:anonymous"
-							],
-							"rows": "10000",
-							"sort": "Path asc",
-							"start": "0",
-							"wt": "json"
-						},
-						"status": 0
-					}
-				};
-			});
+					expand: true
+				});
+				fileNamefindings.forEach(function(each) {
+					results.push(index.documentStore.docs[each.ref]);
+				});
+			}
+			return results;
+		}).then(function(results) {
+			return {
+				"response": {
+					"docs": results,
+					"numFound": results.length,
+					"start": 0
+				},
+				"responseHeader": {
+					"params": {
+						"fl": "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive",
+						"fq": [
+							"Location:" + searchOpt.location,
+							"UserName:anonymous"
+						],
+						"rows": "10000",
+						"sort": "Path asc",
+						"start": "0",
+						"wt": "json"
+					},
+					"status": 0
+				}
+			};
 		});
 	}
-	
+
 	if (typeof module !== "undefined") {
-		module.exports = search;
+		module.exports.search = search;
+		module.exports.indexing = indexing;
 	}
 
-	this.onmessage = function (event) {
+	this.onmessage = function(event) {
 		search(event.data.originalUrl, event.data.workspaceDir, event.data.contextPath)
-		.then(function(result) {
-			this.postMessage({id: event.data.id, result: result});
-		}.bind(this))
-		.catch(function(err){
-			this.postMessage({id: event.data.id, error: {message: err.message}});
-		}.bind(this));
+			.then(function(result) {
+				this.postMessage({
+					id: event.data.id,
+					result: result
+				});
+			}.bind(this))
+			.catch(function(err) {
+				this.postMessage({
+					id: event.data.id,
+					error: {
+						message: err.message
+					}
+				});
+			}.bind(this));
 	}.bind(this);
 } catch (err) {
 	console.log(err.message);
