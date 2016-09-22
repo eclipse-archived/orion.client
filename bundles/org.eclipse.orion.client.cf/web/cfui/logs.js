@@ -330,9 +330,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 
 				var switchScrollLockCommand = new mCommands.Command({
 					id: "orion.projects.switchScrollLock",
-					name: messages["scrollLock"],
-					tooltip: messages["scrollLockTooltip"],
-					imageClass : "sprite-switch-on-off",
+					imageClass : "sprite-switch-liveUpdate",
 					type: "switch",
 					visibleWhen: function() {
 						return true;

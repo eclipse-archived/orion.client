@@ -1905,7 +1905,6 @@ define([
 			}.bind(this),
 			type: "switch", //$NON-NLS-0$
 			imageClass: "core-sprite-split-pane-orientation", //$NON-NLS-0$
-			name: messages["VerticalPaneOrientation"],
 			tooltip: messages["TogglePaneOrientationTooltip"],
 			visibleWhen: function() {
 				return !!this._options;

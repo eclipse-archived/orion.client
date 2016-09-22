@@ -519,6 +519,13 @@ a.breadcrumb.currentLocation {
 .orionSwitch {
 	position: relative;
 	width: auto;
+}
+
+.orionSwitchCheck {
+ 	display: none;
+}
+
+.orionSwitchLabel {
 	display: block;
 	overflow: hidden;
 	cursor: pointer;
@@ -570,6 +577,7 @@ a.breadcrumb.currentLocation {
 	margin: 0;
 	background: #DFE6EB;
 	border: 1px solid #DFE6EB;
+	border-radius: 3px;
 	position: absolute; 
 	top: 0; 
 	bottom: 0; 
@@ -580,11 +588,11 @@ a.breadcrumb.currentLocation {
 	transition: all 0.2s ease-in 0s; 
 }
 
-.orionSwitch[aria-checked="true"] .orionSwitchInner {
+.orionSwitchCheck:checked + .orionSwitchLabel .orionSwitchInner {
 	margin-left: 0;
 }
 
-.orionSwitch[aria-checked="true"] .orionSwitchSwitch {
+.orionSwitchCheck:checked + .orionSwitchLabel .orionSwitchSwitch {
 	right: 0px; 
 }
 
@@ -1151,37 +1159,6 @@ a.breadcrumb.currentLocation {
 
 .core-sprite-git-logo {
 	font-size: 20px !important;
-}
-
-.sprite-switch-on-off {
-	font-size: 14px;
-	line-height: 22px;
-	color: white;
-	padding-right: 5px;
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	vertical-align:middle;
-}
-
-.orionSwitchInner.sprite-switch-on-off:before{
-	color: white;
-	background-color: #1bb199;
-	content: '\e050'; /* check mark icon */
-	font-family: 'Orion Icon Font';
-	margin-top: -3px;
-	padding-left: 3px;
-	padding-right: 0;
-}
-
-.orionSwitchInner.sprite-switch-on-off:after{
-	color: white;
-	background-color: gray;
-	content: '\e02a'; /* X icon */
-	font-family: 'Orion Icon Font';
-	margin-top: -3px;
-	padding-right: 4px;
 }
 
 .outlineExplorer .navlinkonpage {
