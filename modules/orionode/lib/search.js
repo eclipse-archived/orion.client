@@ -43,8 +43,10 @@ module.exports = function(options) {
 			});
 		};
 	} else {
-		search = require('./searchWorker');
+		search = require('./searchWorker').search;
 	}
+	require('./searchWorker').scheduleIndex(options.workspaceDir);
+		
 	return express.Router()
 	.use(bodyParser.json())
 	.get('*', function(req, res) {
