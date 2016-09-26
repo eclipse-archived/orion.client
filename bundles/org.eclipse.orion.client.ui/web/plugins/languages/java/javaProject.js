@@ -22,7 +22,7 @@ define([
 		}
 		openedDocument = evnt.file;
 		evnt.file.version = 1;
-		project.ipc.didOpen(evnt.file.location, evnt.file.contentType.id, evnt.file.version, evnt.file.contents);
+		project.ipc.didOpen(evnt.file.location, evnt.file.contentType.id, evnt.file.version, evnt.text);
 	}
 	
 	var initialized = false,
@@ -221,7 +221,7 @@ define([
 				_handle.call(this, "onProjectChanged", this, evnt, project.Location);
 				return;
 			} 
-			_handle.call(this, "onInputChanged", this, evnt, project.Location);				
+			_handle.call(this, "onInputChanged", this, evnt, project.Location);
 		} else {
 			delete this.ecma;
 			_handle.call(this, "onProjectChanged", this, evnt, null);
@@ -302,7 +302,7 @@ define([
 				if(typeof f === 'function') {
 					f.apply(handler, args.slice(1));
 				}
-			}.bind(this));
+			});
 		}
 	}
 	

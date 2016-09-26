@@ -50,7 +50,7 @@ function fork(modulePath, args, options, callback) {
 var DEBUG = true;
 function runJavaServer(){
 	return new Promise(function(resolve, reject){
-			var child = 'java';
+			var child = 'java'; // 'C:/devops/git/java-language-server/org.jboss.tools.vscode.product/target/products/languageServer.product/win32/win32/x86_64/eclipse';
 			var params = [];
 			var workspacePath = path.resolve( __dirname,"../server/tmp_ws");
 			rimraf(workspacePath, function(error) {
@@ -62,10 +62,14 @@ function runJavaServer(){
 				params.push('-Declipse.application=org.jboss.tools.vscode.java.id1');
 				params.push('-Dosgi.bundles.defaultStartLevel=4');
 				params.push('-Declipse.product=org.jboss.tools.vscode.java.product');
-				if(DEBUG)
+				if(DEBUG) {
 					params.push('-Dlog.protocol=true');
+				}
 			
-				params.push('-jar'); params.push(path.resolve( __dirname ,'../server/plugins/org.eclipse.equinox.launcher_1.3.200.v20160318-1642.jar'));
+				params.push('-jar');
+				params.push(path.resolve( __dirname ,'../server/plugins/org.eclipse.equinox.launcher_1.3.200.v20160318-1642.jar'));
+				//params.push(path.resolve('C:/devops/git/java-language-server/org.jboss.tools.vscode.product/target/repository/plugins/plugins/org.eclipse.equinox.launcher_1.3.200.v20160318-1642.jar'));
+				
 				//select configuration directory according to OS
 				var configDir = 'config_win';
 				if ( process.platform === 'darwin' ){
@@ -74,6 +78,7 @@ function runJavaServer(){
 					configDir = 'config_linux';
 				}
 				params.push('-configuration');
+				//params.push(path.resolve( 'C:/devops/git/java-language-server/org.jboss.tools.vscode.product/target/repository', configDir));
 				params.push(path.resolve( __dirname ,'../server', configDir));
 				params.push('-data');
 				params.push(workspacePath);
@@ -85,38 +90,70 @@ function runJavaServer(){
 			});
 	});
 }
+var CONTENT_LENGTH = 'Content-Length: ';
+var CONTENT_LENGTH_SIZE = CONTENT_LENGTH.length;
+function fixURI(p, workspaceUrl) {
+	if (p.uri) {
+		var s = p.uri.slice(workspaceUrl.length);
+		p.uri = api.join('/file', s.charAt(0) === '/' ? s.slice(1) : s);
+	}
+}
 
-function parseMessage(arr) {
+var remainingData;
+function parseMessage(data, workspaceUrl, sock) {
 	try {
-		var headerRegex = /([^:]*):\s?([^\r]*)/gi;
-		var message = Object.create(null);
-		message.headers = Object.create(null);
-		for(var i = 0, len = arr.length; i < len; i++) {
-			if(arr[i] === 13) {
-				if(i+3 < len && arr[i+1] === 10 && arr[i+2] === 13 && arr[i+3] === 10) {
-					var s = arr.toString("utf8", 0, i+4);
-					var heads;
-					while((heads = headerRegex.exec(s)) !== null) {
-						message.headers[heads[1]] = heads[2];
-					}
-					break;
+		var dataContents = data.toString('utf-8');
+		if (remainingData) {
+			dataContents = remainingData + dataContents;
+		}
+		var offset = -1;
+		var headerIndex = -1;
+		loop: while ((headerIndex = dataContents.indexOf(CONTENT_LENGTH, offset)) !== -1) {
+			// this is an known header
+			var headerSizeIndex = dataContents.indexOf('\r\n\r\n', headerIndex + CONTENT_LENGTH_SIZE, 'utf-8');
+			if (headerSizeIndex !== -1) {
+				var messageSize = Number(dataContents.slice(headerIndex + CONTENT_LENGTH_SIZE, headerSizeIndex));
+				if (messageSize + headerSizeIndex > dataContents.length)  {
+					// not enough data
+					offset = headerIndex;
+					break loop;
 				}
-			}			
+				offset = headerSizeIndex+4+messageSize;
+				var message = Object.create(null);
+				message.headers = {
+					'Content-Length' : messageSize
+				};
+				// enough data to get the message contents
+				var contents = dataContents.slice(headerSizeIndex+4, headerSizeIndex+4+messageSize);
+				var json = JSON.parse(contents);
+				message.content = json;
+				if (json && json.params) {
+					fixURI(json.params, workspaceUrl);
+				}
+				if (json && json.result) {
+					fixURI(json.result, workspaceUrl);
+				}
+				if (sock) {
+					console.log(contents);
+					sock.emit('data', json);
+				}
+			} else {
+				offset = headerIndex;
+				break loop;
+			}
 		}
-		if(i+3 < arr.length && message.headers['Content-Length']) {
-			var c = arr.toString("utf8", i+4, i+4+Number(message.headers['Content-Length']));
-			message.content = JSON.parse(c);
+		if (offset === -1) {
+			remainingData = dataContents;
+		} else if (offset < dataContents.length) {
+			remainingData = dataContents.slice(offset, dataContents.length);
+		} else {
+			remainingData = null;
 		}
-		if (!Object.keys(message.headers).length) {
-			
-			return null;
-		}
-		return message;
+		//console.log('remaining data: >>>' + remainingData + '<<<');
 	}
 	catch(err) {
 		console.log(err);
 	}
-	return null;
 }
 
 exports.install = function(options) {
@@ -130,22 +167,8 @@ exports.install = function(options) {
 			runJavaServer().then(function(child) {
 				var workspaceUrl = "file:///" + options.workspaceDir.replace(/\\/g, "/");
 				child.stdout.on('data', function(data) {
-					var m = parseMessage(data);
-					if (m) {
-						function fixURI(p) {
-							if (p.uri) {
-								var s = p.uri.slice(workspaceUrl.length);
-								p.uri = api.join('/file', s.charAt(0) === '/' ? s.slice(1) : s);
-							}
-						} 
-						if (m.content && m.content.params) {
-							fixURI(m.content.params);
-						}
-						if (m.content && m.content.result) {
-							fixURI(m.content.result);
-						}
-						sock.emit('data', m.content);
-					}
+					//console.log("data: >" + data.toString('utf-8') + '<');
+					parseMessage(data, workspaceUrl, sock);
 				});
 				child.on('error', function(err) {
 					console.log(err.toString());
@@ -167,8 +190,11 @@ exports.install = function(options) {
 						child.kill();
 					}
 					sock = null;
+					remainingData = null;
 				});
-				sock.emit('ready', JSON.stringify({workspaceDir: options.workspaceDir, processId: process.pid}));
+				if (sock) {
+					sock.emit('ready', JSON.stringify({workspaceDir: options.workspaceDir, processId: process.pid}));
+				}
 			});
 		});
 	});
