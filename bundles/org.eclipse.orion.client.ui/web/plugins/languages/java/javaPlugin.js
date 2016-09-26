@@ -58,9 +58,10 @@ define([
 				var uri = data.params.uri;
 				if (!diagnostics[uri]) {
 					diagnostics[uri] = new Deferred();
+				} else {
+					delete diagnostics[uri];
 				}
 				diagnostics[uri].resolve(data.params.diagnostics.map(convertDiagnostic));
-				delete diagnostics[uri];
 			}
 		});
 		/**
@@ -96,7 +97,7 @@ define([
 						return ipc.completion(meta.location, position).then(function(results) {
 								var items  = results.items;
 								if (Array.isArray(items) && items.length > 0) {
-									return new Deferred().resolve(items.map(function(item) {
+									return items.map(function(item) {
 										var temp = {
 											name: item.label,
 											proposal: item.insertText,
@@ -113,7 +114,7 @@ define([
 											};
 										}
 										return temp;
-									}));
+									});
 								}
 								return new Deferred().resolve([]);
 							},
@@ -491,27 +492,6 @@ define([
 	 * Register all of the service providers 
 	 */
 	function registerServiceProviders(pluginProvider) {
-		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
-			contentTypes: [
-				{	id: "text/x-java-source",
-					"extends": "text/plain",
-					name: "Java",
-					extension: ["java"]
-				}, {id: "application/x-jsp",
-					"extends": "text/plain",
-					name: "Java Server Page",
-					extension: ["jsp"]
-				}
-			]
-		});
-		mJava.grammars.forEach(function(current) {
-			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
-		});
-		mJSP.grammars.forEach(function(current) {
-			pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
-		});
-		hookAPIs(pluginProvider);
-		
 	}
 
 	return {
@@ -524,6 +504,25 @@ define([
 			var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 			project = new JavaProject(serviceRegistry, ipc);
 			var pluginProvider = new PluginProvider(headers, serviceRegistry);
+			pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
+				contentTypes: [
+					{	id: "text/x-java-source",
+						"extends": "text/plain",
+						name: "Java",
+						extension: ["java"]
+					}, {id: "application/x-jsp",
+						"extends": "text/plain",
+						name: "Java Server Page",
+						extension: ["jsp"]
+					}
+				]
+			});
+			mJava.grammars.forEach(function(current) {
+				pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
+			});
+			mJSP.grammars.forEach(function(current) {
+				pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, current);
+			});
 			/**
 			 * editor model changes
 			 */
@@ -535,7 +534,7 @@ define([
 			{
 				contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
 			});
-			registerServiceProviders(pluginProvider);
+			hookAPIs(pluginProvider);
 			pluginProvider.connect();
 			initializeIPC(serviceRegistry);
 		},
