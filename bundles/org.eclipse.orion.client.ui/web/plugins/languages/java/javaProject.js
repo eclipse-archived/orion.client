@@ -74,6 +74,21 @@ define([
 	};
 	
 	/**
+	 * @name JavaProject.prototype.getJavaOptions
+	 * @description Reads and returns the Java options for the project context
+	 * @function
+	 * @returns {?} The collection of java options
+	 */
+	JavaProject.prototype.getJavaOptions = function getJavaOptions() {
+		var d = new Deferred();
+		if(this.map.javaoptions) {
+			return d.resolve(this.map.javaoptions);
+		}
+		//TODO read the eclipse pref files
+		return d.resolve(null);
+	}
+	
+	/**
 	 * @description Fetch the named child of the current project context
 	 * @function
 	 * @param {String} childName The short name of the project child to get

@@ -26,6 +26,7 @@ define([
 		this.project = javaProject;
 		registry = serviceRegistry;
 		this.config = new RuleConfig();
+		this.map = Object.create(null);
 	}
 	
 	/**
@@ -45,11 +46,21 @@ define([
 				deferred.resolve(toProblems(this.map[meta.location].info));
 				delete this.map[meta.location];
 				logTiming(Date.now()-start, meta.contentType.id);
+			} else {
+				this.map[meta.location] = {deferred: deferred};
 			}
 		}.bind(this));
 		return deferred;
 	};
 
+	/**
+	 * @name JavaValidator.prototype.updateDiagnostics
+	 * @description Callback from the Java plugin when diagnostic notifications are received
+	 * @function
+	 * @callback 
+	 * @param {String} file The full URI of the file
+	 * @param {[{?}]} info The array of diagnostic items
+	 */
 	JavaValidator.prototype.updateDiagnostics = function updateDiagnostics(file, info) {
 		if(this.map[file]) {
 			var c = this.map[file];
@@ -58,7 +69,7 @@ define([
 					this.project.getJavaOptions().then(function(cfg) {
 						c.deferred.resolve(toProblems(info, cfg || this.config));
 						delete this.map[file];	
-					});
+					}.bind(this));
 				} else {
 					c.deferred.resolve(toProblems(info));
 					delete this.map[file];					
@@ -78,9 +89,10 @@ define([
 	 * @returns {[?]} The array of Orion problem objects
 	 */
 	function toProblems(info, config) {
-		var problems = [];
+		var problems = [],
+			c = config || {};
 		info.forEach(function(item) {
-			var severity = getSeverity(item.code, item.severity, config);
+			var severity = getSeverity(item.code, item.severity, c);
 			if(!severity) {
 				return;
 			}

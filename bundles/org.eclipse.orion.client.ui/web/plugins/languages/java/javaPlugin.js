@@ -17,11 +17,13 @@ define([
 'orion/editor/stylers/application_x-jsp/syntax',
 "plugins/languages/java/javaProject",
 'orion/serviceregistry',
-"plugins/languages/java/ipc"
-], function(PluginProvider, Deferred, mJava, mJSP, JavaProject, mServiceRegistry, IPC) {
+"plugins/languages/java/ipc",
+"plugins/languages/java/javaValidator"
+], function(PluginProvider, Deferred, mJava, mJSP, JavaProject, mServiceRegistry, IPC, JavaValidator) {
 
 	var ipc = new IPC('/languageServer'),
 		project,
+		validator,
 		diagnostics = Object.create(null), 
 		LOG_ERRORS = localStorage.getItem('java.langserver.logmessage.error') === 'true',
 		LOG_WARNINGS = localStorage.getItem('java.langserver.logmessage.warn') === 'true',
@@ -55,13 +57,7 @@ define([
 		 */
 		ipc.addListener(ipc.MESSAGE_TYPES.publishDiagnostics, {
 			handleNotification: function handleNotification(data) {
-				var uri = data.params.uri;
-				if (!diagnostics[uri]) {
-					diagnostics[uri] = new Deferred();
-				} else {
-					delete diagnostics[uri];
-				}
-				diagnostics[uri].resolve(data.params.diagnostics.map(convertDiagnostic));
+				validator.updateDiagnostics(data.params.uri, data.params.diagnostics);
 			}
 		});
 		/**
@@ -309,20 +305,7 @@ define([
 		/**
 		 * Validator
 		 */
-		provider.registerService("orion.edit.validator", {
-			/**
-			 * @callback
-			 */
-			computeProblems: function computeProblems(editorContext, options) {
-				return editorContext.getFileMetadata().then(function(metadata) {
-					var uri = metadata.location;
-					if (!diagnostics[uri]) {
-						diagnostics[uri] = new Deferred();
-					}
-					return diagnostics[uri];
-				});
-			}
-		}, {
+		provider.registerService("orion.edit.validator", validator, {
 			contentType: ["text/x-java-source", "application/x-jsp"]
 		});
 		/**
@@ -433,21 +416,6 @@ define([
 	}
 	
 	/**
-	 * @name convertDiagnostic
-	 * @description description
-	 * @param diagnostic the LSP diagnostic object
-	 * @returns returns the orion annotation object
-	 */
-	function convertDiagnostic(diagnostic) {
-		return {
-			description: diagnostic.message,
-			id: diagnostic.code,
-			severity: ipc.ERROR_TYPES[diagnostic.severity],
-			range: diagnostic.range
-		};
-	}
-	
-	/**
 	 * @name getPosition
 	 * @description Return a document position object for use with the protocol
 	 * @param {?} editorContext TRhe backing editor context
@@ -503,6 +471,7 @@ define([
 			};
 			var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 			project = new JavaProject(serviceRegistry, ipc);
+			validator = new JavaValidator(project, serviceRegistry);
 			var pluginProvider = new PluginProvider(headers, serviceRegistry);
 			pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
 				contentTypes: [
