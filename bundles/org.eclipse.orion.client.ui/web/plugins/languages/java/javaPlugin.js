@@ -233,14 +233,17 @@ define([
 							return getPosition(editorContext, selection.start).then(function(start) {
 								return getPosition(editorContext, selection.end).then(function(end) {
 									return ipc.rangeFormatting(metadata.location, start, end, {}).then(function(edits) {
-										return Deferred.all(edits.map(function(edit) {
-											return convertRange(editorContext, edit.range);
-										})).then(function(selections) {
-											var text = edits.map(function(e) {
-												return e.newText;
+										// if there is no edits (formatting the code doesn't provide any edit - already formatted), simply return
+										if (Array.isArray(edits) && edits.length !== 0) {
+											return Deferred.all(edits.map(function(edit) {
+												return convertRange(editorContext, edit.range);
+											})).then(function(selections) {
+												var text = edits.map(function(e) {
+													return e.newText;
+												});
+												editorContext.setText({text: text, selection: selections, preserveSelection: true});
 											});
-											editorContext.setText({text: text, selection: selections, preserveSelection: true});
-										});
+										}
 									});
 								});
 							});
@@ -517,14 +520,16 @@ define([
 			/**
 			 * editor model changes
 			 */
-			pluginProvider.registerService("orion.edit.model", {  //$NON-NLS-1$
-				onSaving: project.onSaving.bind(project),
-				onModelChanging: project.onModelChanging.bind(project),
-				onInputChanged: project.onInputChanged.bind(project)
-			},
-			{
-				contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
-			});
+			pluginProvider.registerService("orion.edit.model", //$NON-NLS-1$
+				{
+					onSaving: project.onSaving.bind(project),
+					onModelChanging: project.onModelChanging.bind(project),
+					onInputChanged: project.onInputChanged.bind(project)
+				},
+				{
+					contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			);
 			hookAPIs(pluginProvider);
 			pluginProvider.connect();
 			initializeIPC(serviceRegistry);
