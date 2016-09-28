@@ -15,62 +15,28 @@
  */
 define([
 'webtools/tags',
-], function(Tags){
+"i18n!webtools/nls/problems",
+"orion/i18nUtil"
+], function(Tags, Messages, i18nUtil){
 	
 	var defaultOptions = {
 	    'attr-bans': 0,
 	    'attr-bans-config': [
-	        'align',
-	        'background',
-	        'bgcolor',
-	        'border',
-	        'frameborder',
-	        'longdesc',
-	        'marginwidth',
-	        'marginheight',
-	        'scrolling',
-	        'style',
-	        'width'
+	        'align', //$NON-NLS-1$
+	        'background', //$NON-NLS-1$
+	        'bgcolor', //$NON-NLS-1$
+	        'border', //$NON-NLS-1$
+	        'frameborder', //$NON-NLS-1$
+	        'longdesc', //$NON-NLS-1$
+	        'marginwidth', //$NON-NLS-1$
+	        'marginheight', //$NON-NLS-1$
+	        'scrolling', //$NON-NLS-1$
+	        'style', //$NON-NLS-1$
+	        'width' //$NON-NLS-1$
 	    ],
 	    'fig-req-figcaption': 1,
 	    'img-req-alt': 1,
 	    'tag-close': 1,
-	    
-	    
-	    'indent-style': 'nonmixed',
-	    'indent-width': 4,
-	    'indent-width-cont': false,
-	    'text-escape-spec-char': true,
-	    'tag-bans': ['style', 'b', 'i'],
-	    'tag-name-lowercase': true,
-	    'tag-name-match': true,
-	    'tag-self-close': false,
-	    'doctype-first': false,
-	    'doctype-html5': false,
-	    'attr-name-style': 'lowercase',
-	    'attr-name-ignore-regex': false,
-	    'attr-no-dup': true,
-	    'attr-no-unsafe-chars': true,
-	    'attr-quote-style': 'double',
-	    'attr-req-value': true,
-	    'id-no-dup': true,
-	    'id-class-no-ad': true,
-	    'id-class-style': 'underscore',
-	    'class-no-dup': true,
-	    'class-style': false,
-	    'id-class-ignore-regex': false,
-	    'href-style': false,
-	    'img-req-src': true,
-	    'csslint': false,
-	    'label-req-for': true,
-	    'line-end-style': 'lf',
-	    'line-max-len': false,
-	    'line-max-len-ignore-regex': false,
-	    'head-req-title': true,
-	    'title-no-dup': true,
-	    'title-max-len': 60,
-	    'html-req-lang': false,
-	    'lang-style': 'case'
 	};
 	
 	function ruleMap(opts){
@@ -83,7 +49,7 @@ define([
 			}
 		}
 		// Banned attributes
-		addRule('tag', function(element){
+		addRule('tag', function(element){ //$NON-NLS-1$
 			if (!opts['attr-bans']) {
 		        return [];
 		    }
@@ -98,13 +64,13 @@ define([
 		    var attrs = element.attributes;
 		    bannedAttrs.forEach(function (name) {
 		        if (attrs[name]) {
-		            issues.push(createProblem(attrs[name], 'attr-bans', 'The \'' + name + '\' attribute is not recommended.', opts['attr-bans']));
+		            issues.push(createProblem(attrs[name], 'attr-bans', i18nUtil.formatMessage(Messages['attr-bans'], name), opts['attr-bans'])); //$NON-NLS-1$
 		        }
 		    });
 		    return issues;
 		});
 		// Tag closed
-		addRule('tag', function(element){
+		addRule('tag', function(element){ //$NON-NLS-1$
 			if (!opts['tag-close']) {
 		        return [];
 		    }
@@ -112,13 +78,13 @@ define([
 	        if (element.name && element.openrange){
 	        	if (!element.endrange || (element.endrange[0] === element.openrange[1] && element.endrange[1] === element.openrange[1])){
 	        		if (Tags.voidElements.indexOf(element.name) < 0){
-	        			return createProblem(element.openrange, 'tag-close', 'No matching closing tag for \'' + element.name + '\'.', opts['tag-close']);
+	        			return createProblem(element.openrange, 'tag-close', i18nUtil.formatMessage(Messages['tag-close'], element.name), opts['tag-close']); //$NON-NLS-1$
         			}
     			}
 	        }
 		});
 		// Require img alt
-		addRule('img', function(element){
+		addRule('img', function(element){ //$NON-NLS-1$
 			if (!opts['img-req-alt']) {
 		        return [];
 		    }
@@ -129,7 +95,7 @@ define([
 		        return [];
 		    }
 		
-		    return createProblem(element.openrange, 'img-req-alt', 'The \'alt\' property must be set for image tags (for accessibility).', opts['img-req-alt']);
+		    return createProblem(element.openrange, 'img-req-alt', Messages['img-req-alt'], opts['img-req-alt']); //$NON-NLS-1$
 		});
 		// Require figcaption
 		function figReqFigCaption(ele){
@@ -153,21 +119,11 @@ define([
 		            return [];
 		        }
 		    }
-		    return createProblem(ele.openrange, 'fig-req-figcaption', '\'figure\' must have a \'figcaption\', \'figcaption\' must be in a \'figure\' (for accessibility).', opts['fig-req-figcaption']);
+		    return createProblem(ele.openrange, 'fig-req-figcaption', Messages['fig-req-figcaption'], opts['fig-req-figcaption']); //$NON-NLS-1$
 		    
 		}
-		addRule('figure', figReqFigCaption);
-		addRule('figcaption', figReqFigCaption);
-		
-		/*
-		 * label-req-for
-fig-req-figcaption
-id-no-dup
-
-Not sure about these next two. Should we enforce them?
-html-req-lang
-doctype-html5
-		 */
+		addRule('figure', figReqFigCaption); //$NON-NLS-1$
+		addRule('figcaption', figReqFigCaption); //$NON-NLS-1$
 		
 		return rules;
 	}
@@ -181,15 +137,16 @@ doctype-html5
 			start = nodeOrRange.range[0];
 			end = nodeOrRange.range[1];
 		}
+		var stringSeverity = severity;
 		if (typeof severity === 'number'){
-			severity = severity === 2 ? "error" : "warning";
+			stringSeverity = severity === 2 ? "error" : "warning"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return {
 			id: id,
 			description: message,
 			start: start,
 			end: end,
-			severity: severity ? severity : 'warning'
+			severity: stringSeverity ? stringSeverity : 'warning' //$NON-NLS-1$
 		};
 	}
 	
