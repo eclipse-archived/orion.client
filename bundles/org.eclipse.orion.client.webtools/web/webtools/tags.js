@@ -14,6 +14,10 @@ define([
 
 ], function() {
 	/* eslint-disable missing-nls */
+	// The following tags were marked as void elements manually using http://w3c.github.io/html/syntax.html#writing-html-documents-elements
+	// Void elements: area, base, br, col, embed, hr, img, input, link, menuitem, meta, param, source, track, wbr
+	var voidElements = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'menuitem', 'meta', 'param', 'source', 'track', 'wbr'];
+	
 	var tagTemplates = Object.create(null);
 	tagTemplates = [
 	/*
@@ -841,6 +845,7 @@ define([
 	];
 	
 	return {
-		tagTemplates: tagTemplates
+		tagTemplates: tagTemplates,
+		voidElements: voidElements
 	};
 });

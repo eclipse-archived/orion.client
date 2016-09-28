@@ -65,7 +65,7 @@ define([
     				// TODO Need to add tests for this, can it have children as well as text?
     				if (tag.openrange && tag.text){
     					tag.range[1] = tag.openrange[1] + tag.text.value.length;
-    					tag.endrange = [tag.range[1], tag.range[1]];
+    					tag.endrange = [tag.openrange[1], tag.openrange[1]];
     				}	
     			}
 	    		this.tagstack.pop();

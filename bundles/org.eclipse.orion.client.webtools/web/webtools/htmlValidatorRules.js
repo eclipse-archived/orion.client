@@ -14,7 +14,8 @@
  * Implements eslint's load-rules API for AMD. Our rules are loaded as AMD modules.
  */
 define([
-], function(){
+'webtools/tags',
+], function(Tags){
 	
 	var defaultOptions = {
 	    'attr-bans': 0,
@@ -33,6 +34,7 @@ define([
 	    ],
 	    'fig-req-figcaption': 1,
 	    'img-req-alt': 1,
+	    'tag-close': 1,
 	    
 	    
 	    'indent-style': 'nonmixed',
@@ -40,7 +42,6 @@ define([
 	    'indent-width-cont': false,
 	    'text-escape-spec-char': true,
 	    'tag-bans': ['style', 'b', 'i'],
-	    'tag-close': true,
 	    'tag-name-lowercase': true,
 	    'tag-name-match': true,
 	    'tag-self-close': false,
@@ -101,6 +102,20 @@ define([
 		        }
 		    });
 		    return issues;
+		});
+		// Tag closed
+		addRule('tag', function(element){
+			if (!opts['tag-close']) {
+		        return [];
+		    }
+		    
+	        if (element.name && element.openrange){
+	        	if (!element.endrange || (element.endrange[0] === element.openrange[1] && element.endrange[1] === element.openrange[1])){
+	        		if (Tags.voidElements.indexOf(element.name) < 0){
+	        			return createProblem(element.openrange, 'tag-close', 'No matching closing tag for \'' + element.name + '\'.', opts['tag-close']);
+        			}
+    			}
+	        }
 		});
 		// Require img alt
 		addRule('img', function(element){

@@ -204,7 +204,15 @@ define([
 			if(pos !== -1){
 				if(this._cbs.onclosetag){
 					pos = this._stack.length - pos;
-					while(pos--) this._cbs.onclosetag(this._stack.pop(), [this.startIndex, this.endIndex+1]); //ORION
+					while(pos--){
+						// ORION Recovery for mismatched tags, return end range for the tag with matching name
+						var poppedTag = this._stack.pop();
+						if (poppedTag === name){
+							this._cbs.onclosetag(poppedTag, [this.startIndex, this.endIndex+1]); //ORION
+						} else {
+							this._cbs.onclosetag(poppedTag); 
+						}
+					} 
 				}
 				else this._stack.length = pos;
 			} else if(name === "p" && !this._options.xmlMode){

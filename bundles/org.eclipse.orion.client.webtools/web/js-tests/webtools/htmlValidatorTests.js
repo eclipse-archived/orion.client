@@ -181,58 +181,182 @@ define([
 				});
 			});
 		});
-		describe('fig-req-figcaption', function(){
-			it("fig-req-figcaption figure no caption", function() {
-			    var val = setup({buffer: '<html><figure></figure></html>', rule: {id:null, severity:1}});
+		describe('tag-close', function(){
+			it("tag-close missing innermost tag", function() {
+			    var val = setup({buffer: '<html><a></html>', rule: {id:null, severity:1}});
 				return validator.computeProblems(val.editorContext).then(function(result) {
 					assertProblems(result, [
 					    {start: 6,
-					     end: 14,
+					     end: 9,
 					     severity: 'warning',
-					     description: "'figure' must have a 'figcaption', 'figcaption' must be in a 'figure' (for accessibility)."
+					     description: "No matching closing tag for 'a'."
 					    }
 					]);
 				});
 			});
-			it("fig-req-figcaption caption no figure", function() {
-			    var val = setup({buffer: '<html><figcaption></figcaption></html>', rule: {id:null, severity:1}});
+			it("tag-close missing root tag no children", function() {
+			    var val = setup({buffer: '<html> \n\n ', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 0,
+					     end: 6,
+					     severity: 'warning',
+					     description: "No matching closing tag for 'html'."
+					    }
+					]);
+				});
+			});
+			it("tag-close missing root tag children", function() {
+			    var val = setup({buffer: '<html><a></a>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 0,
+					     end: 6,
+					     severity: 'warning',
+					     description: "No matching closing tag for 'html'."
+					    }
+					]);
+				});
+			});
+			it("tag-close missing nested tag", function() {
+			    var val = setup({buffer: '<html><a><b></b></html>', rule: {id:null, severity:1}});
 				return validator.computeProblems(val.editorContext).then(function(result) {
 					assertProblems(result, [
 					    {start: 6,
-					     end: 18,
+					     end: 9,
 					     severity: 'warning',
-					     description: "'figure' must have a 'figcaption', 'figcaption' must be in a 'figure' (for accessibility)."
+					     description: "No matching closing tag for 'a'."
 					    }
 					]);
 				});
 			});
-			it("fig-req-figcaption caption outside figure", function() {
-			    var val = setup({buffer: '<html><figure><figcaption><figure></figure></figcaption></figure></html>', rule: {id:null, severity:1}});
+			it("tag-close nothing missing", function() {
+			    var val = setup({buffer: '<html><a></a><b></b></html>', rule: {id:null, severity:1}});
 				return validator.computeProblems(val.editorContext).then(function(result) {
 					assertProblems(result, [
-					    {start: 26,
-					     end: 34,
+					]);
+				});
+			});
+			it("tag-close siblings missing 1", function() {
+			    var val = setup({buffer: '<html><a><b></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 6,
+					     end: 9,
 					     severity: 'warning',
-					     description: "'figure' must have a 'figcaption', 'figcaption' must be in a 'figure' (for accessibility)."
+					     description: "No matching closing tag for 'a'."
+					    },
+					    {start: 9,
+					     end: 12,
+					     severity: 'warning',
+					     description: "No matching closing tag for 'b'."
 					    }
 					]);
 				});
 			});
-			it("fig-req-figcaption caption and figure", function() {
-			    var val = setup({buffer: '<html><figure><figcaption></figcaption></figure></html>', rule: {id:null, severity:1}});
+			it("tag-close siblings missing 2", function() {
+			    var val = setup({buffer: '<html><a></a><b></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 13,
+					     end: 16,
+					     severity: 'warning',
+					     description: "No matching closing tag for 'b'."
+					    }
+					]);
+				});
+			});
+			it("tag-close siblings missing 3", function() {
+			    var val = setup({buffer: '<html><a><b></b></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 6,
+					     end: 9,
+					     severity: 'warning',
+					     description: "No matching closing tag for 'a'."
+					    }
+					]);
+				});
+			});
+			it("tag-close void elements 1", function() {
+			    var val = setup({buffer: '<html><meta></html>', rule: {id:null, severity:1}});
 				return validator.computeProblems(val.editorContext).then(function(result) {
 					assertProblems(result, [
 					]);
 				});
 			});
-			it("fig-req-figcaption inline caption", function() {
-			    var val = setup({buffer: '<html><figure><figcaption/></figure></html>', rule: {id:null, severity:1}});
+			it("tag-close void elements 2", function() {
+			    var val = setup({buffer: '<html><meta><a></html>', rule: {id:null, severity:1}});
 				return validator.computeProblems(val.editorContext).then(function(result) {
 					assertProblems(result, [
+					    {start: 12,
+					     end: 15,
+					     severity: 'warning',
+					     description: "No matching closing tag for 'a'."
+					    }
+					]);
+				});
+			});
+			it("tag-close void elements 3", function() {
+			    var val = setup({buffer: '<html><meta/></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					]);
+				});
+			});
+			it("tag-close void elements 4", function() {
+			    var val = setup({buffer: '<html><meta/><a></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 13,
+					     end: 16,
+					     severity: 'warning',
+					     description: "No matching closing tag for 'a'."
+					    }
+					]);
+				});
+			});
+			it("tag-close mismatched tags 1", function() {
+			    var val = setup({buffer: '<html><a></b></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 6,
+					     end: 9,
+					     severity: 'warning',
+					     description: "No matching closing tag for 'a'."
+					    }
+					]);
+				});
+			});
+			it("tag-close mismatched tags 2", function() {
+			    var val = setup({buffer: '<html><a></b><b></a></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 13,
+					     end: 16,
+					     severity: 'warning',
+					     description: "No matching closing tag for 'b'."
+					    }
+					]);
+				});
+			});
+			it("tag-close mismatched tags 3", function() {
+			    var val = setup({buffer: '<html><a></b><b></c></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 6,
+					     end: 9,
+					     severity: 'warning',
+					     description: "No matching closing tag for 'a'."
+					    },
+					     {start: 13,
+					     end: 16,
+					     severity: 'warning',
+					     description: "No matching closing tag for 'b'."
+					    }
 					]);
 				});
 			});
 		});
-
 	});
 });
