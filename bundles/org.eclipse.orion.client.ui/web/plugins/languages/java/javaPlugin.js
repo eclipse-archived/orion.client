@@ -24,7 +24,6 @@ define([
 	var ipc = new IPC('/languageServer'),
 		project,
 		validator,
-		diagnostics = Object.create(null), 
 		LOG_ERRORS = localStorage.getItem('java.langserver.logmessage.error') === 'true',
 		LOG_WARNINGS = localStorage.getItem('java.langserver.logmessage.warn') === 'true',
 		LOG_INFO = localStorage.getItem('java.langserver.logmessage.error.info') === 'true';
@@ -39,42 +38,48 @@ define([
 		/**
 		 * Default logging listener
 		 */
-		ipc.addListener(ipc.MESSAGE_TYPES.logMessage, {
-			handleNotification: function handleNotification(data) {
-				if(data !== null && typeof data === 'object') {
-					if(data.params && (LOG_ERRORS && data.params.type === 1) || (LOG_WARNINGS && data.params.type === 2) || (LOG_INFO && data.params.type === 3)) {
-						if(typeof data === 'object' && data !== null) {
-							console.log(JSON.stringify(data));
-						} else if(typeof data === 'string') {
-							console.log(data);
+		ipc.addListener(ipc.MESSAGE_TYPES.logMessage,
+			{
+				handleNotification: function handleNotification(data) {
+					if(data !== null && typeof data === 'object') {
+						if(data.params && (LOG_ERRORS && data.params.type === 1) || (LOG_WARNINGS && data.params.type === 2) || (LOG_INFO && data.params.type === 3)) {
+							if(typeof data === 'object' && data !== null) {
+								console.log(JSON.stringify(data));
+							} else if(typeof data === 'string') {
+								console.log(data);
+							}
 						}
 					}
 				}
 			}
-		});
+		);
 		/**
 		 * Listener to handle diagnostics notifications
 		 */
-		ipc.addListener(ipc.MESSAGE_TYPES.publishDiagnostics, {
-			handleNotification: function handleNotification(data) {
-				validator.updateDiagnostics(data.params.uri, data.params.diagnostics);
+		ipc.addListener(ipc.MESSAGE_TYPES.publishDiagnostics,
+			{
+				handleNotification: function handleNotification(data) {
+					validator.updateDiagnostics(data.params.uri, data.params.diagnostics);
+				}
 			}
-		});
+		);
 		/**
 		 * Listener to handle diagnostics notifications
 		 */
-		ipc.addListener(ipc.MESSAGE_TYPES.status, {
-			handleNotification: function handleNotification(data) {
-				var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-1$
-				if (statusService) {
-					if (data.params.type === "Started") {
-						statusService.setProgressResult("Java " + data.params.type + " " + data.params.message) ;
-					} else {
-						statusService.setProgressMessage("Java " + data.params.type + " " + data.params.message) ;
+		ipc.addListener(ipc.MESSAGE_TYPES.status,
+			{
+				handleNotification: function handleNotification(data) {
+					var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-1$
+					if (statusService) {
+						if (data.params.type === "Started") {
+							statusService.setProgressResult("Java " + data.params.type + " " + data.params.message) ;
+						} else {
+							statusService.setProgressMessage("Java " + data.params.type + " " + data.params.message) ;
+						}
 					}
 				}
 			}
-		});
+		);
 	}
 	/**
 	 * Single place to add in all of the provide hooks for the various services
@@ -83,100 +88,104 @@ define([
 		/**
 		 * Content Assist
 		 */
-		provider.registerService("orion.edit.contentassist", {
-			/**
-			 * @callback
-			 */
-			computeContentAssist: function(editorContext, args) {
-				return editorContext.getFileMetadata().then(function(meta) {
-					return getPosition(editorContext, args.selection.start).then(function(position) {
-						return ipc.completion(meta.location, position).then(function(results) {
-								var items  = results.items;
-								if (Array.isArray(items) && items.length > 0) {
-									return items.map(function(item) {
-										var temp = {
-											name: item.label,
-											proposal: item.insertText,
-											description: ' (' + resolveCompletionKind(item.kind) + ')',
-											relevance: 100,
-											style: 'emphasis', //$NON-NLS-1$
-											overwrite: true,
-											kind: 'java' //$NON-NLS-1$
-										};
-										if (item.documentation) {
-											temp.hover = {
-												content: item.documentation,
-												type: 'markdown'
+		provider.registerService("orion.edit.contentassist",
+			{
+				/**
+				 * @callback
+				 */
+				computeContentAssist: function(editorContext, args) {
+					return editorContext.getFileMetadata().then(function(meta) {
+						return getPosition(editorContext, args.selection.start).then(function(position) {
+							return ipc.completion(meta.location, position).then(function(results) {
+									var items  = results.items;
+									if (Array.isArray(items) && items.length > 0) {
+										return items.map(function(item) {
+											var temp = {
+												name: item.label,
+												proposal: item.insertText,
+												description: ' (' + resolveCompletionKind(item.kind) + ')',
+												relevance: 100,
+												style: 'emphasis', //$NON-NLS-1$
+												overwrite: true,
+												kind: 'java' //$NON-NLS-1$
 											};
-										}
-										return temp;
-									});
-								}
-								return new Deferred().resolve([]);
-							},
-							/* @callback */
-							function(err) {
-								return new Deferred().resolve([]);
-							});
+											if (item.documentation) {
+												temp.hover = {
+													content: item.documentation,
+													type: 'markdown'
+												};
+											}
+											return temp;
+										});
+									}
+									return new Deferred().resolve([]);
+								},
+								/* @callback */
+								function(err) {
+									return new Deferred().resolve([]);
+								});
+						});
 					});
-				});
+				}
+			},
+			{
+				contentType: ["text/x-java-source", "application/x-jsp"],  //$NON-NLS-1$ //$NON-NLS-2$
+				name: 'Java Content Assist',  //$NON-NLS-1$
+				id: "orion.edit.contentassist.java",  //$NON-NLS-1$
+				charTriggers: "[.]",  //$NON-NLS-1$
+				excludedStyles: "(string.*)"  //$NON-NLS-1$
 			}
-		},
-		{
-			contentType: ["text/x-java-source", "application/x-jsp"],  //$NON-NLS-1$ //$NON-NLS-2$
-			name: 'Java Content Assist',  //$NON-NLS-1$
-			id: "orion.edit.contentassist.java",  //$NON-NLS-1$
-			charTriggers: "[.]",  //$NON-NLS-1$
-			excludedStyles: "(string.*)"  //$NON-NLS-1$
-		});
+		);
 		/**
 		 * Symbol outline
 		 */
-		provider.registerService("orion.edit.outliner", {
-			/**
-			 * @callback
-			 */
-			computeOutline: function computeOutline(editorContext, options) {
-				return editorContext.getFileMetadata().then(function(meta) {
-					return ipc.documentSymbol(meta.location).then(function(results) {
-						if(Array.isArray(results) && results.length > 0) {
-							var outline = [];
-							results.forEach(function(result) {
-								if(!result.containerName) {
-									outline.push({label: result.name, children: []});
-								} else {
-									var idx = _findContainerIndex(outline, result.containerName),
-										_p;
-									if(idx < 0) {
-										_p = {label: result.containerName, children: []};
-										outline.push(_p);
+		provider.registerService("orion.edit.outliner",
+			{
+				/**
+				 * @callback
+				 */
+				computeOutline: function computeOutline(editorContext, options) {
+					return editorContext.getFileMetadata().then(function(meta) {
+						return ipc.documentSymbol(meta.location).then(function(results) {
+							if(Array.isArray(results) && results.length > 0) {
+								var outline = [];
+								results.forEach(function(result) {
+									if(!result.containerName) {
+										outline.push({label: result.name, children: []});
 									} else {
-										_p = outline[idx];
+										var idx = _findContainerIndex(outline, result.containerName),
+											_p;
+										if(idx < 0) {
+											_p = {label: result.containerName, children: []};
+											outline.push(_p);
+										} else {
+											_p = outline[idx];
+										}
+										var offset = result.location.range.start.character;
+										_p.children.push({
+											label: result.name,
+											labelPost: ' ('+resolveSymbolKind(result.kind)+')',
+											line: result.location.range.start.line+1,
+											offset: offset,
+											length: result.location.range.end.character-offset
+										});
 									}
-									var offset = result.location.range.start.character;
-									_p.children.push({
-										label: result.name,
-										labelPost: ' ('+resolveSymbolKind(result.kind)+')',
-										line: result.location.range.start.line+1,
-										offset: offset,
-										length: result.location.range.end.character-offset
-									});
-								}
-							});
-							return outline;
-						}
-						return new Deferred().resolve([]);
+								});
+								return outline;
+							}
+							return new Deferred().resolve([]);
+						});
 					});
-				}.bind(this));
+				}
+			},
+			{
+				contentType: ["text/x-java-source", "application/x-jsp"],  //$NON-NLS-1$
+				name: "Java Symbol Outline",
+				title: "Java Symbols",
+				id: "orion.java.symbols.outliner.source"  //$NON-NLS-1$
 			}
-		},
-    	{
-    		contentType: ["text/x-java-source", "application/x-jsp"],  //$NON-NLS-1$
-    		name: "Java Symbol Outline",
-    		title: "Java Symbols",
-    		id: "orion.java.symbols.outliner.source"  //$NON-NLS-1$
-    	});
-    	
+		);
+
 		function convertRange(editorContext, range) {
 			return editorContext.getLineStart(range.start.line).then(function(startLineOffset) {
 				return editorContext.getLineStart(range.end.line).then(function(endLineOffset) {
@@ -192,7 +201,7 @@ define([
 		//TODO send the options to the langangue server
 		//TODO integrate with the new orion formating service. We may have to change the orion service because
 		// the changes are done in the server side.
-		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+		provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
 			{
 				execute: /** @callback */ function(editorContext, options) {
 					return editorContext.getFileMetadata().then(function(metadata) {
@@ -210,13 +219,13 @@ define([
 				}
 			},
 			{
-			name: "Format",
-			id : "orion.java.format",  //$NON-NLS-1$
-//			key : [ 114, false, false, false, false],
-			contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
+				name: "Format",
+				id : "orion.java.format",  //$NON-NLS-1$
+	//			key : [ 114, false, false, false, false],
+				contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		);
-		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+		provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
 			{
 				execute: /** @callback */ function(editorContext, options) {
 					return editorContext.getFileMetadata().then(function(metadata) {
@@ -240,20 +249,20 @@ define([
 				}
 			},
 			{
-			name: "Format Selection",
-			id : "orion.java.format.range",  //$NON-NLS-1$
-//			key : [ 114, false, false, false, false],
-			contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
+				name: "Format Selection",
+				id : "orion.java.format.range",  //$NON-NLS-1$
+	//			key : [ 114, false, false, false, false],
+				contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		);
-		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+		provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
 			{
 				execute: /** @callback */ function(editorContext, options) {
 					return editorContext.getFileMetadata().then(function(metadata) {
 						return editorContext.getSelection().then(function(selection) {
 							return getPosition(editorContext, selection.start).then(function(start) {
 								return ipc.references(metadata.location, start, {includeDeclaration: true}).then(function(edits) {
-									console.log(edits)
+									console.log(edits);
 								});
 							});
 						});
@@ -261,22 +270,26 @@ define([
 				}
 			},
 			{
-			name: "References",
-			id : "orion.java.references",  //$NON-NLS-1$
-//			key : [ 114, false, false, false, false],
-			contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
+				name: "References",
+				id : "orion.java.references",  //$NON-NLS-1$
+	//			key : [ 114, false, false, false, false],
+				contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		);
 		
-		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
+		provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
 			{
 				execute: /** @callback */ function(editorContext, options) {
 					return editorContext.getFileMetadata().then(function(metadata) {
 						return editorContext.getSelection().then(function(selection) {
 							return getPosition(editorContext, selection.start).then(function(position) {
 								return ipc.definition(metadata.location, position).then(function(loc) {
-									if (!loc) return;
-									if (Array.isArray(loc)) loc = loc[0];
+									if (!loc) {
+										return;
+									}
+									if (Array.isArray(loc)) {
+										loc = loc[0];
+									}
 									if (loc.range.start.line === loc.range.end.line) {
 										var sel = {
 											line: loc.range.start.line,
@@ -295,81 +308,90 @@ define([
 				}
 			},
 			{
-			name: "Open Declaration",
-			id : "orion.java.openDeclaration",  //$NON-NLS-1$
-			key : [ 114, false, false, false, false],
-			contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
+				name: "Open Declaration",
+				id : "orion.java.openDeclaration",  //$NON-NLS-1$
+				key : [ 114, false, false, false, false],
+				contentType: ["text/x-java-source", "application/x-jsp"]  //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		);
 
 		/**
 		 * Validator
 		 */
-		provider.registerService("orion.edit.validator", validator, {
-			contentType: ["text/x-java-source", "application/x-jsp"]
-		});
+		provider.registerService(
+			"orion.edit.validator",
+			validator,
+			{
+				contentType: ["text/x-java-source", "application/x-jsp"]
+			}
+		);
 		/**
 		 * Hover
 		 */
-		provider.registerService("orion.edit.hover", {
-			computeHoverInfo: function computeHoverInfo(editorContext, args) {
-				if(args.proposal && args.proposal.kind === 'java') {
-					return args.proposal.hover;
-				}
-				if (args.offset === undefined) {
-					return "";
-				}
-				return editorContext.getFileMetadata().then(function(meta) {
-					return getPosition(editorContext, args.offset).then(function(position) {
-						return ipc.hover(meta.location, position).then(function(result) {
-							var hover = {type: 'markdown'};
-							if(typeof result.contents === 'string') {
-								hover.content = result.contents;
-							} else if(result.contents !== null && typeof result.contents === 'object') {
-								hover.content = result.contents.value;
-							}
-							return new Deferred().resolve(hover);
-						},
-						/* @callback */ function(err) {
-							return new Deferred().resolve('');
+		provider.registerService("orion.edit.hover",
+			{
+				computeHoverInfo: function computeHoverInfo(editorContext, args) {
+					if(args.proposal && args.proposal.kind === 'java') {
+						return args.proposal.hover;
+					}
+					if (args.offset === undefined) {
+						return "";
+					}
+					return editorContext.getFileMetadata().then(function(meta) {
+						return getPosition(editorContext, args.offset).then(function(position) {
+							return ipc.hover(meta.location, position).then(function(result) {
+								var hover = {type: 'markdown'};
+								if(typeof result.contents === 'string') {
+									hover.content = result.contents;
+								} else if(result.contents !== null && typeof result.contents === 'object') {
+									hover.content = result.contents.value;
+								}
+								return new Deferred().resolve(hover);
+							},
+							/* @callback */ function(err) {
+								return new Deferred().resolve('');
+							});
 						});
 					});
-				});
+				}
+			},
+			{
+				name: "Java Hover",
+				contentType: ["text/x-java-source", "application/x-jsp"]	//$NON-NLS-1$ //$NON-NLS-2$
 			}
-		}, {
-    		name: "Java Hover",
-    		contentType: ["text/x-java-source", "application/x-jsp"]	//$NON-NLS-1$ //$NON-NLS-2$
-    	});
+		);
 		/**
 		 * Occurrences
 		 */
-		provider.registerService("orion.edit.occurrences", {
-			computeOccurrences: function computeOccurrences(editorContext, args) {
-				return editorContext.getFileMetadata().then(function(meta) {
-					return getPosition(editorContext, args.selection.start).then(function(position) {
-						return ipc.documentHighlight(meta.location, position).then(function(results) {
-							if(Array.isArray(results) && results.length > 0) {
-								return Deferred.all(results.map(function(result) {
-									return editorContext.getLineStart(result.range.start.line).then(function(offset) {
-										return {
-											start: result.range.start.character+offset,
-											end: result.range.end.character+offset
-										};				
-									});
-								}));
-							} 
-							return new Deferred().resolve([]);
-						}.bind(this),
-						/* @callback */ function(err) {
-							return new Deferred().resolve([]);
-						});	
-					}.bind(this));
-				}.bind(this));
-			}.bind(this)
-		},
-		{
-			contentType: ["text/x-java-source", "application/x-jsp"]	//$NON-NLS-1$ //$NON-NLS-2$
-		});
+		provider.registerService("orion.edit.occurrences",
+			{
+				computeOccurrences: function computeOccurrences(editorContext, args) {
+					return editorContext.getFileMetadata().then(function(meta) {
+						return getPosition(editorContext, args.selection.start).then(function(position) {
+							return ipc.documentHighlight(meta.location, position).then(function(results) {
+								if(Array.isArray(results) && results.length > 0) {
+									return Deferred.all(results.map(function(result) {
+										return editorContext.getLineStart(result.range.start.line).then(function(offset) {
+											return {
+												start: result.range.start.character+offset,
+												end: result.range.end.character+offset
+											};
+										});
+									}));
+								} 
+								return new Deferred().resolve([]);
+							},
+							/* @callback */ function(err) {
+								return new Deferred().resolve([]);
+							});
+						});
+					});
+				}
+			},
+			{
+				contentType: ["text/x-java-source", "application/x-jsp"]	//$NON-NLS-1$ //$NON-NLS-2$
+			}
+		);
 	}
 	
 	function _findContainerIndex(list, container) {

@@ -72,8 +72,12 @@ define([
 					}.bind(this));
 				} else {
 					c.deferred.resolve(toProblems(info));
-					delete this.map[file];					
+					delete this.map[file];
 				}
+			} else {
+				// we are getting back some diagnostics before computeProblems is run
+				// clear the cached one and replace it with the new one
+				this.map[file] = {info: info};
 			}
 		} else {
 			//got the notification before computeProblems was called, cache it
