@@ -206,14 +206,16 @@ define([
 				execute: /** @callback */ function(editorContext, options) {
 					return editorContext.getFileMetadata().then(function(metadata) {
 						return ipc.formatDocument(metadata.location, {}).then(function(edits) {
-							return Deferred.all(edits.map(function(edit) {
-								return convertRange(editorContext, edit.range);
-							})).then(function(selections) {
-								var text = edits.map(function(e) {
-									return e.newText;
+							if (Array.isArray(edits) && edits.length !== 0) {
+								return Deferred.all(edits.map(function(edit) {
+									return convertRange(editorContext, edit.range);
+								})).then(function(selections) {
+									var text = edits.map(function(e) {
+										return e.newText;
+									});
+									editorContext.setText({text: text, selection: selections, preserveSelection: true});
 								});
-								editorContext.setText({text: text, selection: selections, preserveSelection: true});
-							});
+							}
 						});
 					});
 				}
