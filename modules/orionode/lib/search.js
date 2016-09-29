@@ -16,9 +16,10 @@ var express = require('express');
 
 module.exports = function(options) {
 	var USE_WORKERS = options.configParams.isElectron, search;
+	var index;
 	if (USE_WORKERS) {
 		var requests = {};
-		var WORKER_COUNT = 5;
+		var WORKER_COUNT = 1;
 		var searchWorkers = [];
 		var id = 0, lastWorker = 0;
 		var Worker = require("tiny-worker");
@@ -42,9 +43,15 @@ module.exports = function(options) {
 				worker.postMessage({id: id, originalUrl: originalUrl, workspaceDir: workspaceDir, contextPath: contextPath});
 			});
 		};
+		var indexWorker = new Worker(path.join(__dirname, "indexWorker.js"));
+		indexWorker.onmessage = function(event){
+			console.log(event.data.result);
+		};
+		indexWorker.postMessage({workspaceDir: options.workspaceDir,inverval:options.configParams["filename.indexing.interval"]});
 	} else {
-		search = require('./searchWorker');
+		search = require('./searchWorker').search;
 	}
+		
 	return express.Router()
 	.use(bodyParser.json())
 	.get('*', function(req, res) {

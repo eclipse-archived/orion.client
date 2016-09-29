@@ -16,12 +16,17 @@ var path = require('path');
 var fs = require('fs');
 var express = require('express');
 var bodyParser = require('body-parser');
+var indexWorker = require('../indexWorker');
 
 module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	
+	if(!options.options.configParams.isElectron){
+		var Indexer = indexWorker.getIndexer(options.options.workspaceDir);
+	}
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -134,6 +139,7 @@ function postIndex(req, res) {
 	})
 	.then(function() {
 		res.status(200).end();
+		Indexer && Indexer.doIndex();
 	}).catch(function(err) {
 		writeError(404, res, err.message);
 	});
