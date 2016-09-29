@@ -9,19 +9,21 @@
  ******************************************************************************/
 /* eslint-env amd */
 define({//Default message bundle
+	"html" : "HTML Validation",
+	"htmlFormatter" : "HTML Formatter",
 	"htmlOutline" : "HTML Outline",   
 	"htmlHover" : "HTML Hover",   
-	"htmlContentAssist" : "HTML Content Assist",   
+	"htmlContentAssist" : "HTML Content Assist",
+	"htmlValidator": "HTML Validator",
 	"css" : "CSS Validation",
 	"cssOutline" : "CSS Rule Outline",   
 	"cssContentAssist" : "CSS Content Assist",   
+	"cssFormatter" : "CSS Formatter",
 	"cssHover" : "CSS Hover",   
 	"csslintValidator" : "CSS Validator",   
 	"pluginName": "Orion Web Tools Support",   
 	"pluginDescription": "This plug-in provides web language tools support for Orion, including HTML and CSS.",   
 	"fontHoverExampleText": "Lorem ipsum dolor...",
-	"cssFormatter" : "CSS Formatter",
-	"htmlFormatter" : "HTML Formatter",
 
 	// CSS and HTML formatting options names
 	"indentation_space" : "space",
@@ -75,6 +77,12 @@ define({//Default message bundle
 	"warning" : "Warning",
 	"error" : "Error",
 	
+	// HTML Validator Settings
+	"attr_bans": "Disallow the following attributes: align, background, bgcolor, frameborder, longdesc, marginwidth, marginheight, scrolling, style, width:",
+	"fig_req_figcaption": "Require all <figure> tags to have a <figcaption> tag:",
+	"img_req_alt": "Require all <img> tags to have the alt attribute:",
+	"tag_close": "Require all open tags have matching close tags:",
+
 	// CSS Validator Settings
 	"adjoining-classes": "Disallow adjoining classes:",   
 	"box-model": "Beware of broken box size:",   

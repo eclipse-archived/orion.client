@@ -96,6 +96,7 @@ define(['orion/plugin',
     	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new htmlValidator(htmlAstManager), //$NON-NLS-1$ //$NON-NLS-2$
     		{
     			contentType: ["text/html"], //$NON-NLS-1$
+    			pid: 'htmllint.config' //$NON-NLS-1$
     		}
     	);
     	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new mCssValidator(cssResultMgr), //$NON-NLS-1$ //$NON-NLS-2$
@@ -200,7 +201,7 @@ define(['orion/plugin',
 	    		contentType: ['text/css','text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
 	    		validationProperties: [
     				{source: "annotation:id", match: "empty-rules"},//$NON-NLS-1$ //$NON-NLS-2$
-    				{source: "readonly", match: false}
+    				{source: "readonly", match: false} //$NON-NLS-1$
     		    ]
     		}
     	);
@@ -213,7 +214,7 @@ define(['orion/plugin',
 	    		contentType: ['text/css','text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
 	    		validationProperties: [
     		    	{source: "annotation:id", match: "important"}, //$NON-NLS-1$ //$NON-NLS-2$
-    				{source: "readonly", match: false}
+    				{source: "readonly", match: false} //$NON-NLS-1$
     		    ]
     		}
     	);
@@ -226,28 +227,28 @@ define(['orion/plugin',
 	    		contentType: ['text/css','text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
 	    		validationProperties: [
  		        	{source: "annotation:id", match: "zero-units"}, //$NON-NLS-1$ //$NON-NLS-2$
-    				{source: "readonly", match: false}
+    				{source: "readonly", match: false} //$NON-NLS-1$
     		    ]
     		}
     	);
 
 		var htmlFormatter = new HtmlFormatter.HtmlFormatter();
-		provider.registerServiceProvider("orion.edit.format",
+		provider.registerServiceProvider("orion.edit.format", //$NON-NLS-1$
 			htmlFormatter,
 			{
 				contentType: ["text/html"], //$NON-NLS-1$
 				id: "orion.format.html.formatter", //$NON-NLS-1$
-				name: messages["htmlFormatter"],//$NON-NLS-1$
+				name: messages["htmlFormatter"],
 			}
 		);
 
 		var cssFormatter = new CssFormatter.CssFormatter();
-		provider.registerServiceProvider("orion.edit.format",
+		provider.registerServiceProvider("orion.edit.format", //$NON-NLS-1$
 			cssFormatter,
 			{
 				contentType: ["text/css"],//$NON-NLS-1$
 				id: "orion.format.css.formatter", //$NON-NLS-1$
-				name: messages["cssFormatter"],//$NON-NLS-1$
+				name: messages["cssFormatter"],
 			}
 		);
 
@@ -261,26 +262,26 @@ define(['orion/plugin',
 		/**
 		 * CSS formatting settings
 		 */
-		var unix = "\n";
-		var mac = "\r";
-		var windows = "\n\r";
+		var unix = "\n"; //$NON-NLS-1$
+		var mac = "\r"; //$NON-NLS-1$
+		var windows = "\n\r"; //$NON-NLS-1$
 		var eof_characters = [
 			{label: messages.indentation_unix,  value: unix},
 			{label: messages.indentation_mac, value: mac},
 			{label: messages.indentation_windows, value: windows}
 		];
 
-		var space = ' ';
-		var tab= '\t';
+		var space = ' '; //$NON-NLS-1$
+		var tab= '\t'; //$NON-NLS-1$
 		var indentation_characters = [
 			{label: messages.indentation_space,  value: space},
 			{label: messages.indentation_tab,  value: tab},
 		];
-		var collapse_preserve_inline = 'collapse-preserve-inline';
-		var collapse = 'collapse';
-		var expand = 'expand';
-		var end_expand = 'end-expand';
-		var none = 'none';
+		var collapse_preserve_inline = 'collapse-preserve-inline'; //$NON-NLS-1$
+		var collapse = 'collapse'; //$NON-NLS-1$
+		var expand = 'expand'; //$NON-NLS-1$
+		var end_expand = 'end-expand'; //$NON-NLS-1$
+		var none = 'none'; //$NON-NLS-1$
 		var brace_styles = [
 			{ label: messages.collapse_preserve_inline , value: collapse_preserve_inline},
 			{ label: messages.collapse , value: collapse},
@@ -289,13 +290,13 @@ define(['orion/plugin',
 			{ label: messages.none , value: none},
 		];
 
-		provider.registerServiceProvider("orion.core.setting", {}, {
+		provider.registerServiceProvider("orion.core.setting", {}, { //$NON-NLS-1$
 			settings: [
 				{
-					pid: 'jsbeautify.config.css',
+					pid: 'jsbeautify.config.css', //$NON-NLS-1$
 					name: messages['cssFormattingSettings'],
-					tags: 'beautify css formatting'.split(' '),
-					category: 'cssFormatting',
+					tags: 'beautify css formatting'.split(' '), //$NON-NLS-1$
+					category: 'cssFormatting', //$NON-NLS-1$
 					categoryLabel: messages['cssFormatting'],
 					properties: [
 						{
@@ -349,27 +350,27 @@ define(['orion/plugin',
 		/**
 		 * Html formatting settings
 		 */
-		var keep = 'keep';
-		var separate = 'separate';
-		var normal = 'normal';
+		var keep = 'keep'; //$NON-NLS-1$
+		var separate = 'separate'; //$NON-NLS-1$
+		var normal = 'normal'; //$NON-NLS-1$
 		var indent_scripts_values = [
 			{ label: messages.normal, value: normal},
 			{ label: messages.keep, value: keep},
 			{ label: messages.separate, value: separate},
 		];
-		var auto = 'auto';
-		var force = 'force';
+		var auto = 'auto'; //$NON-NLS-1$
+		var force = 'force'; //$NON-NLS-1$
 		var wrap_attributes_values = [
 			{ label: messages.auto, value: auto},
 			{ label: messages.force, value: force},
 		];
-		provider.registerServiceProvider("orion.core.setting", {}, {
+		provider.registerServiceProvider("orion.core.setting", {}, { //$NON-NLS-1$
 			settings: [
 				{
-					pid: 'jsbeautify.config.html',
+					pid: 'jsbeautify.config.html', //$NON-NLS-1$
 					name: messages['htmlFormattingOptions'],
-					tags: 'beautify html formatting'.split(' '),
-					category: 'htmlFormatting',
+					tags: 'beautify html formatting'.split(' '), //$NON-NLS-1$
+					category: 'htmlFormatting', //$NON-NLS-1$
 					categoryLabel: messages['htmlFormatting'],
 					properties: [
 						{
@@ -439,7 +440,7 @@ define(['orion/plugin',
 							id: 'wrap_attributes',  //$NON-NLS-1$
 							name: messages['wrap_attributes'],
 							type: 'string', //$NON-NLS-1$
-							defaultValue: 'auto',
+							defaultValue: 'auto', //$NON-NLS-1$
 							options: wrap_attributes_values
 						},
 						{
@@ -452,7 +453,7 @@ define(['orion/plugin',
 							id: 'extra_liners',  //$NON-NLS-1$
 							name: messages['extra_liners'],
 							type: 'string', //$NON-NLS-1$
-							defaultValue: 'head,body,html'
+							defaultValue: 'head,body,html' //$NON-NLS-1$
 						},
 						{
 							id: 'indent-scripts',  //$NON-NLS-1$
@@ -465,14 +466,58 @@ define(['orion/plugin',
 				}]
 		});
 
-        /**
-    	 * CSSLint settings
+    	/**
+    	 * HTML validation settings
     	 */
     	var ignore = 0, warning = 1, error = 2, severities = [
     		{label: messages.ignore,  value: ignore},
     		{label: messages.warning, value: warning},
     		{label: messages.error,   value: error}
     	];
+    	provider.registerService("orion.core.setting",  //$NON-NLS-1$
+    		{},
+    		{	settings: [
+    				{	pid: "htmllint.config",  //$NON-NLS-1$
+    					name: messages["htmlValidator"],
+    					tags: "validation webtools html htmllint".split(" "),  //$NON-NLS-1$  //$NON-NLS-1$
+    					category: "html",  //$NON-NLS-1$
+    					categoryLabel: messages["html"],
+    					properties: [
+    						{
+    							id: "validate_attr_bans", //$NON-NLS-1$
+    							name: messages["attr_bans"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_fig_req_figcaption", //$NON-NLS-1$
+    							name: messages["fig_req_figcaption"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: warning,
+    							options: severities
+    						},
+    						{
+    							id: "validate_img_req_alt", //$NON-NLS-1$
+    							name: messages["img_req_alt"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: warning,
+    							options: severities
+    						},
+    						{
+    							id: "validate_tag_close", //$NON-NLS-1$
+    							name: messages["tag_close"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: warning,
+    							options: severities
+    						}]
+    				}]
+    		}
+    	);
+    	
+    	/**
+    	 * CSSLint settings
+    	 */
     	provider.registerService("orion.core.setting",  //$NON-NLS-1$
     		{},
     		{	settings: [
@@ -721,7 +766,8 @@ define(['orion/plugin',
     						}]
     				}]
     		}
-    	);
+		);
+
 
     	provider.connect(function() {
 			var fc = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$

@@ -19,26 +19,6 @@ define([
 "orion/i18nUtil"
 ], function(Tags, Messages, i18nUtil){
 	
-	var defaultOptions = {
-	    'attr-bans': 0,
-	    'attr-bans-config': [
-	        'align', //$NON-NLS-1$
-	        'background', //$NON-NLS-1$
-	        'bgcolor', //$NON-NLS-1$
-	        'border', //$NON-NLS-1$
-	        'frameborder', //$NON-NLS-1$
-	        'longdesc', //$NON-NLS-1$
-	        'marginwidth', //$NON-NLS-1$
-	        'marginheight', //$NON-NLS-1$
-	        'scrolling', //$NON-NLS-1$
-	        'style', //$NON-NLS-1$
-	        'width' //$NON-NLS-1$
-	    ],
-	    'fig-req-figcaption': 1,
-	    'img-req-alt': 1,
-	    'tag-close': 1,
-	};
-	
 	function ruleMap(opts){
 		var rules = {};
 		function addRule(type, rule){
@@ -152,6 +132,5 @@ define([
 	
 	return {
 		ruleMap: ruleMap,
-		defaultOptions: defaultOptions
 	};
 });
