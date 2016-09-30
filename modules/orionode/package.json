@@ -15,6 +15,7 @@
     "cookie-parser": "^1.4.1",
     "debug": "^2.2.0",
     "diff": "^2.2.2",
+    "elasticlunr": "^0.9.5",
     "express": "^4.13.3",
     "express-session": "^1.13.0",
     "fs-extra": "^0.26.7",
