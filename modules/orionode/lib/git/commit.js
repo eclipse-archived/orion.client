@@ -24,6 +24,7 @@ var util = require('./util');
 var remotes = require('./remotes');
 var branches = require('./branches');
 var tasks = require('../tasks');
+var indexWorker = require('../indexWorker');
 
 module.exports = {};
 
@@ -34,6 +35,9 @@ module.exports.router = function(options) {
 	module.exports.commitJSON = commitJSON;
 	module.exports.getDiff = getDiff;
 	module.exports.getCommitParents = getCommitParents;
+	if(!options.options.configParams.isElectron){
+		var Indexer = indexWorker.getIndexer(options.options.workspaceDir);
+	}
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -532,6 +536,7 @@ function revert(req, res, commitToRevert) {
 		res.status(200).json({
 			"Result": theRC ? "FAILURE" : "OK"
 		});
+		Indexer && Indexer.doIndex();
 	})
 	.then(function() {
 		return git.Reflog.read(theRepo, "HEAD").then(function(reflog) {
@@ -574,6 +579,7 @@ function cherryPick(req, res, commitToCherrypick) {
 			"Result": theRC ? "FAILED" : "OK",
 			"HeadUpdated": !theRC && theHead !== newHead
 		});
+		Indexer && Indexer.doIndex();
 	})
 	.then(function() {
 		return git.Reflog.read(theRepo, "HEAD").then(function(reflog) {
@@ -666,6 +672,7 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 		res.status(200).json({
 			"Result": rebaseResult
 		});
+		Indexer && Indexer.doIndex();
 	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
@@ -717,6 +724,7 @@ function merge(req, res, commitToMerge, squash) {
 			"Result": paths ? "CONFLICTING" : mergeResult,
 			"FailingPaths": paths
 		});
+		Indexer && Indexer.doIndex();
 	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
