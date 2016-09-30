@@ -16,9 +16,10 @@ var express = require('express');
 
 module.exports = function(options) {
 	var USE_WORKERS = options.configParams.isElectron, search;
+	var index;
 	if (USE_WORKERS) {
 		var requests = {};
-		var WORKER_COUNT = 5;
+		var WORKER_COUNT = 1;
 		var searchWorkers = [];
 		var id = 0, lastWorker = 0;
 		var Worker = require("tiny-worker");
@@ -34,21 +35,27 @@ module.exports = function(options) {
 			};
 			searchWorkers.push(searchWorker);
 		}
-		search = function(originalUrl, workspaceDir, contextPath) {
+		search = function(originalUrl, workspaceDir, contextPath, indexDir, userId) {
 			return new Promise(function(fullfil, reject) {
 				id++;
 				requests[id] = {fullfil: fullfil, reject: reject};
 				var worker = searchWorkers[lastWorker++ % searchWorkers.length];
-				worker.postMessage({id: id, originalUrl: originalUrl, workspaceDir: workspaceDir, contextPath: contextPath});
+				worker.postMessage({id: id, originalUrl: originalUrl, workspaceDir: workspaceDir, contextPath: contextPath, indexDir:indexDir, userId:userId });
 			});
 		};
+		var indexWorker = new Worker(path.join(__dirname, "indexWorker.js"));
+		indexWorker.onmessage = function(event){
+			console.log(event.data.result);
+		};
+		indexWorker.postMessage({workspaceDir: options.workspaceDir, inverval:options.configParams["filename.indexing.interval"],indexDir:options.indexDir, userId:"anonymous" });
 	} else {
-		search = require('./searchWorker');
+		search = require('./searchWorker').search;
 	}
+		
 	return express.Router()
 	.use(bodyParser.json())
 	.get('*', function(req, res) {
-		search(req.originalUrl, req.user.workspaceDir, req.contextPath)
+		search(req.originalUrl, req.user.workspaceDir, req.contextPath, options.indexDir, req.user.username)
 		.then(function(result) {
 			res.json(result);
 		})

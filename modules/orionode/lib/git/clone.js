@@ -22,6 +22,7 @@ var tasks = require('../tasks');
 var express = require('express');
 var bodyParser = require('body-parser');
 var rmdir = require('rimraf');
+var indexWorker = require('../indexWorker');
 
 module.exports = {};
 
@@ -42,6 +43,10 @@ module.exports.router = function(options) {
 	module.exports.isWorkspace = isWorkspace;
 	module.exports.getSignature = getSignature;
 	module.exports.getCommit = getCommit;
+	
+	if(!options.options.configParams.isElectron){
+		var Indexer = indexWorker.getIndexer(options.options.indexDir);
+	}
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -427,6 +432,7 @@ function putClone(req, res) {
 	})
 	.then(function(){
 		res.status(200).end();
+		Indexer && Indexer.indexAfterAllDone(1000, req.user.workspaceDir, req.user.username);
 	})
 	.catch(function(err){
 		writeError(403, res, err.message);
@@ -438,6 +444,7 @@ function deleteClone(req, res) {
 	rmdir(fileUtil.safeFilePath(req.user.workspaceDir, clonePath), function(err) {
 		if (err) return writeError(500, res, err);
 		res.status(200).end();
+		Indexer && Indexer.indexAfterAllDone(1000, req.user.workspaceDir, req.user.username);
 	});
 }
 
@@ -608,6 +615,7 @@ function postClone(req, res) {
 			Message: "OK",
 			Severity: "Ok"
 		});
+		Indexer && Indexer.indexAfterAllDone(1000, req.user.workspaceDir, req.user.username);
 	})
 	.catch(function(err) {
 		handleRemoteError(task, err, cloneUrl);

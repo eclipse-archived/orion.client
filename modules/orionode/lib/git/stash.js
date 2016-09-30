@@ -15,12 +15,17 @@ var mCommit = require('./commit');
 var clone = require('./clone');
 var express = require('express');
 var bodyParser = require('body-parser');
+var indexWorker = require('../indexWorker');
 
 module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	
+	if(!options.options.configParams.isElectron){
+		var Indexer = indexWorker.getIndexer(options.options.indexDir);
+	}
 	
 	return express.Router()
 	.use(bodyParser.json())
@@ -69,6 +74,7 @@ function getStash(req, res) {
 			"CloneLocation" : "/gitapi/clone" + fileDir,
 			"Type" : "StashCommit"
 		});
+		Indexer && Indexer.indexAfterAllDone(1000, req.user.workspaceDir, req.user.username);
 	})
 	.catch(function(err) {
 		writeError(500, res, err.message);
@@ -96,6 +102,7 @@ function putStash(req, res) {
 	})
 	.then(function() {
 		res.status(200).end();
+		Indexer && Indexer.indexAfterAllDone(1000, req.user.workspaceDir, req.user.username);
 	})
 	.catch(function(err) {
 		if (err.message === "Reference 'refs/stash' not found"){
@@ -147,6 +154,7 @@ function postStash(req, res) {
 	})
 	.then(function() {
 		res.status(200).end();
+		Indexer && Indexer.indexAfterAllDone(1000, req.user.workspaceDir, req.user.username);
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
