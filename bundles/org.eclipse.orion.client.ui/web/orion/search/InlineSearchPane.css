@@ -29,14 +29,6 @@
 	padding-top: 1PX;
 }
 
-.searchPageActions .orionSwitchSwitch {
-	margin-bottom: 0;
-}
-
-.searchPageActions .orionSwitchLabel {
-	margin-bottom: 0;
-}
-
 .searchPageActions .togglePerfectMatch {
 	border: 1px solid lightgray;
 	border-radius: 3px;
@@ -559,7 +551,6 @@
 
 .searchPageActions > .orionSwitch {
 	display: inline-block;
-	margin-bottom: 1px;
 	vertical-align: bottom;
 }
 

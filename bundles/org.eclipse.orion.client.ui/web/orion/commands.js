@@ -367,35 +367,30 @@ define([
 			}
 		} else {
 			if (command.type === "switch") { //$NON-NLS-0$
-				element = document.createElement("div"); //$NON-NLS-0$
+				element = clickTarget = document.createElement("div"); //$NON-NLS-0$
+				element.setAttribute("role", "switch"); //$NON-NLS-0$ //$NON-NLS-1$
 				element.tabIndex = 0;
 				element.className = "orionSwitch"; //$NON-NLS-0$
-				var input = clickTarget = document.createElement("input"); //$NON-NLS-0$
-				input.type = "checkbox"; //$NON-NLS-0$
-				input.className = "orionSwitchCheck"; //$NON-NLS-0$
-				input.id = "orionSwitchCheck" + command.id; //$NON-NLS-0$
-				if(parent.id) {
-					input.id = input.id + parent.id;
-				}
-				element.appendChild(input);
-				var label = document.createElement("label"); //$NON-NLS-0$
-				label.className = "orionSwitchLabel"; //$NON-NLS-0$
-				label.setAttribute("for", input.id); //$NON-NLS-0$  
 				var span1 = document.createElement("span"); //$NON-NLS-0$
 				span1.className = "orionSwitchInner"; //$NON-NLS-0$
 				var span2 = document.createElement("span"); //$NON-NLS-0$
 				span2.className = "orionSwitchSwitch"; //$NON-NLS-0$
-				label.appendChild(span1);
-				label.appendChild(span2);
-				element.appendChild(label);
+				element.appendChild(span1);
+				element.appendChild(span2);
 				element.addEventListener("keydown", function(e) { //$NON-NLS-0$
 					if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
-						input.click();
+						element.click();
 					}
 				}, false);
+				element.addEventListener("click", function(e) { //$NON-NLS-0$
+					toggleSwitch(element);
+				}, false);
 
-				input.checked = command.checked;
+				element.setAttribute("aria-checked", command.checked ? "true" : "false"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 				span1.classList.add(command.imageClass);
+				if (command.name) {
+					element.setAttribute("aria-label", command.name); //$NON-NLS-0$
+				}
 			} else if (command.type === "toggle") {  //$NON-NLS-0$
 				element = clickTarget = document.createElement("button"); //$NON-NLS-0$
 				element.className = "orionButton"; //$NON-NLS-0$
@@ -439,9 +434,9 @@ define([
 								}
 							}else {
 								if(doIt) {
-									command.checked = input.checked;
+									command.checked = element.getAttribute("aria-checked") === "true"; //$NON-NLS-0$ //$NON-NLS-1$
 								} else {
-									input.checked = !input.checked;
+									toggleSwitch(element);
 								}
 							}
 							if(doIt) {
@@ -486,6 +481,14 @@ define([
 		return element;
 	}
 	
+	function toggleSwitch(element) {
+		if (element.getAttribute("aria-checked") === "true") { //$NON-NLS-0$ //$NON-NLS-1$
+			element.setAttribute("aria-checked", "false"); //$NON-NLS-0$ //$NON-NLS-1$
+		} else {
+			element.setAttribute("aria-checked", "true"); //$NON-NLS-0$ //$NON-NLS-1$
+		}
+	}
+
 	function createCommandMenuItem(parent, command, commandInvocation, keyBinding, callback, keyBindingString) {
 		var element, li;
 		var dropdown = parent.dropdown;
