@@ -616,7 +616,8 @@ define([
 			}
 		});
 
-
+		document.body.classList.add(localStorage.getItem("pageTheme"));
+		
 		// forward the preference service on to the command registry
 		commandRegistry.setServiceRegistry(serviceRegistry);
 		
