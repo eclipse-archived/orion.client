@@ -29,6 +29,10 @@ var crypto = require('crypto');
 module.exports = function(options) {
 	module.exports.write = write;
 	module.exports.getUploadDir = getUploadDir;
+	if(!options.configParams.isElectron){
+		var indexWorker = require('./indexWorker');
+		var Indexer = indexWorker.getIndexer(options.indexDir);
+	}
 	
 	var UPLOADS_FOLDER = path.join(options.configParams['orion.single.user'] ?
 			path.join(os.homedir(), ".orion") : options.workspaceDir, ".uploads");
@@ -189,6 +193,7 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 			}
 			res.setHeader("Location", "/file" + filePath.substring(req.user.workspaceDir.length));
 			res.status(201).end();
+			Indexer && Indexer.indexAfterAllDone(500, req.user.workspaceDir, req.user.username);
 		});
 	} else {
 		var file = path.join(filePath, fileName);
@@ -201,6 +206,7 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 			}
 			res.setHeader("Location", "/file" + filePath.substring(req.user.workspaceDir.length));
 			res.status(201).end();
+			Indexer && Indexer.indexAfterAllDone(500, req.user.workspaceDir, req.user.username);
 		});
 	}
 }
