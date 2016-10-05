@@ -53,7 +53,7 @@ define ([
 		},
 		
 		// TODO The allAnnotations iterator was collected using editor API, currently unused as we instead just get the annotation model from the annotation itself (not official API)
-		renderQuickFixes: function(annotation, allAnnotations, parentDiv) {
+		renderQuickFixes: function(annotation, allAnnotations, parentDiv, postCallback) {
 			if  (!annotation || !parentDiv){
 				return;
 			}
@@ -67,7 +67,7 @@ define ([
 			if (metadata){
 				metadata.annotation = annotation;
 				metadata.readonly = this.inputManager.getReadOnly();
-				this.commandRegistry.renderCommands("orion.edit.quickfix", actionsDiv, metadata, this.editor, 'quickfix', annotation, nodeList); //$NON-NLS-1$ //$NON-NLS-2$
+				this.commandRegistry.renderCommands("orion.edit.quickfix", actionsDiv, metadata, this.editor, 'quickfix', {annotation: annotation, postCallback: postCallback}, nodeList); //$NON-NLS-1$ //$NON-NLS-2$
 				delete metadata.annotation;
 				delete metadata.readonly;
 			}

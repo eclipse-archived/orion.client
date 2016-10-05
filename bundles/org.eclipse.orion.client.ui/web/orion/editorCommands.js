@@ -1099,21 +1099,21 @@ define([
 						// Provide the quick fix command with the selected annotation
 						if (info.scopeId === "orion.edit.quickfix") {
 							context.annotation = {
-								start: data.userData.start,
-								end: data.userData.end,
-								title: data.userData.title,
-								id: data.userData.id,
-								data: data.userData.data
+								start: data.userData.annotation.start,
+								end: data.userData.annotation.end,
+								title: data.userData.annotation.title,
+								id: data.userData.annotation.id,
+								data: data.userData.annotation.data
 							};
 							// Also include other annotations with the same id
 							// TODO: We are using the internals of the annotation model here
 							// TODO We also check the model existence in commands.js
-							if (data.userData.doFixAll && data.userData._annotationModel){
+							if (data.userData.annotation.doFixAll && data.userData.annotation._annotationModel){
 								context.doFixAll = true;
 								context.annotations = [];
-								var allAnnotations = data.userData._annotationModel._annotations;
+								var allAnnotations = data.userData.annotation._annotationModel._annotations;
 								for (var i=0; i<allAnnotations.length; i++) {
-									if (allAnnotations[i].id === data.userData.id){
+									if (allAnnotations[i].id === data.userData.annotation.id){
 										context.annotations.push(
 											{
 												start: allAnnotations[i].start,

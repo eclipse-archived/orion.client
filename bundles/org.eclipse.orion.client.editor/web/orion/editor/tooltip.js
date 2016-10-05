@@ -626,8 +626,8 @@ function Tooltip (view, editor) {
 			return textUtil.contains(tooltipDiv, tooltipDiv.ownerDocument.activeElement);
 		},
 		_isNode: function (obj) {
-			return typeof Node === "object" ? obj instanceof Node : //$NON-NLS-0$
-				obj && typeof obj === "object" && typeof obj.nodeType === "number" && typeof obj.nodeName === "string"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			return typeof Node === "object" ? obj instanceof Node :
+				obj && typeof obj === "object" && typeof obj.nodeType === "number" && typeof obj.nodeName === "string";
 		},
 		_setInitialFocus: function(tooltipDiv) {
 			// Any buttons ?
@@ -641,7 +641,7 @@ function Tooltip (view, editor) {
 			if (link) {
 				link.focus();
 				var self = this;
-				link.addEventListener("click", function() { //$NON-NLS-0$
+				link.addEventListener("click", function() {
 					self.hide();
 				});
 				return;
@@ -715,7 +715,7 @@ function Tooltip (view, editor) {
 		_renderPluginContent: function(contentsDiv, data) {
 			var document = this._tooltipDiv.ownerDocument;
 			// data object should be an object containing the type and content.  If no type or unknown type, default to string.
-			if (typeof data !== 'string' && typeof data.content === 'undefined') { //$NON-NLS-0$ //$NON-NLS-1$
+			if (typeof data !== 'string' && typeof data.content === 'undefined') {
 			    return false;
 			}
 			
@@ -733,16 +733,16 @@ function Tooltip (view, editor) {
 			}
 			var contentDiv = util.createElement(document, "div"); //$NON-NLS-0$
 			
-			if (typeof data === 'string'){ //$NON-NLS-0$
+			if (typeof data === 'string'){
 				contentDiv.appendChild(document.createTextNode(data));
 			} else {
-				switch(data.type) { //$NON-NLS-0$
-					case 'delegatedUI': { //$NON-NLS-0$
+				switch(data.type) {
+					case 'delegatedUI': {
 						// The delegated UI is not included in the 8.0 release, see Bug 449240.
 					}
-					case 'html': { //$NON-NLS-0$
+					case 'html': {
 						if (data.content){
-							var iframe = document.createElement("iframe"); //$NON-NLS-0$
+							var iframe = document.createElement("iframe");
 							iframe.id = 'HtmlHover'; //$NON-NLS-0$
 							iframe.name = 'HTML Hover'; //$NON-NLS-0$
 							iframe.type = "text/html"; //$NON-NLS-0$
@@ -766,7 +766,7 @@ function Tooltip (view, editor) {
 						}
 						break;
 					}
-					case 'markdown': { //$NON-NLS-0$
+					case 'markdown': {
 						if (this.hover.renderMarkDown) {
 							contentDiv.innerHTML = this.hover.renderMarkDown(data.content);
 						}
@@ -797,7 +797,7 @@ function Tooltip (view, editor) {
 				}
 			}
 			
-			if (typeof contents === "string") { //$NON-NLS-0$
+			if (typeof contents === "string") {
 				contentsDiv.textContent = contents;
 				return true;
 			} else if (this._isNode(contents)) {
@@ -825,7 +825,7 @@ function Tooltip (view, editor) {
 						view.onLineStyle(e);
 					}
 				};
-				contentsView.addEventListener("LineStyle", listener.onLineStyle); //$NON-NLS-0$
+				contentsView.addEventListener("LineStyle", listener.onLineStyle);
 				contentsView.setModel(contents);
 				
 				// TODO This is a hack to compute the projection size we will have in the tooltip, we remove the child after computing
@@ -932,7 +932,7 @@ function Tooltip (view, editor) {
 					htmlHolder.className = "tooltipImage"; //$NON-NLS-0$
 					htmlHolder.innerHTML = annotation.html;
 					if (htmlHolder.lastChild) {
-						textUtil.addEventListener(htmlHolder.lastChild, "click", function() { //$NON-NLS-0$
+						textUtil.addEventListener(htmlHolder.lastChild, "click", function() {
 							var start = annotation.start, end = annotation.end;
 							if (model.getBaseModel) {
 								start = model.mapOffset(start, true);
@@ -941,17 +941,17 @@ function Tooltip (view, editor) {
 							view.setSelection(start, end, 1 / 3, function() { self.hide(); });
 						}, false);
 					}
-					result.appendChild(htmlHolder); //$NON-NLS-0$
+					result.appendChild(htmlHolder);
 				}
 				if (!title) {
 					var textStart = baseModel.getLineStart(baseModel.getLineAtOffset(annotation.start));
 					var textEnd = baseModel.getLineEnd(baseModel.getLineAtOffset(annotation.end), true);
 					title = baseModel.getText(textStart, textEnd);
 				}
-				if (typeof title === "function") { //$NON-NLS-0$
+				if (typeof title === "function") {
 					title = annotation.title();
 				}
-				if (typeof title === "string") { //$NON-NLS-0$
+				if (typeof title === "string") {
 					var span = util.createElement(document, "span"); //$NON-NLS-0$
 					span.className = "tooltipTitle"; //$NON-NLS-0$
 					span.appendChild(document.createTextNode(title));
@@ -961,7 +961,7 @@ function Tooltip (view, editor) {
 				
 				// Handle quick fixes
 				if (inEditor) {
-					self.hover.renderQuickFixes(annotation, allAnnotations, result);
+					self.hover.renderQuickFixes(annotation, allAnnotations, result, function(){ self.hide(true)});
 				}
 				if (context){	
 					// Set the hover area to the annotation if it's not already set

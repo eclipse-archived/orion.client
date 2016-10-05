@@ -251,7 +251,7 @@ define([
 			var done = function() {
 				if (fixAllCheckbox){
 					if (fixAllCheckbox.checked){
-						commandInvocation.userData.doFixAll = true;
+						commandInvocation.userData.annotation.doFixAll = true;
 					}
 					if (prefService){
 						prefService.get(quickfixSettings).then(function(prefs) {
@@ -261,6 +261,9 @@ define([
 					}
 				}
 				onClick.call(commandInvocation.handler, commandInvocation);
+				if (typeof commandInvocation.userData.postCallback === 'function'){
+					commandInvocation.userData.postCallback();
+				}
 			};
 			command.onClick = onClick;
 			clickTarget.addEventListener("click", function(e) {
@@ -289,7 +292,7 @@ define([
 		element.appendChild(button);
 		
 		// We check that the internal access to annotation model exists so if it breaks we don't show the checkbox at all rather than throw an error later
-		if (command.fixAllEnabled && commandInvocation.userData._annotationModel){
+		if (command.fixAllEnabled && commandInvocation.userData.annotation._annotationModel){
 			var id = command.id + 'fixAll'; //$NON-NLS-1$
 			fixAllCheckbox = document.createElement('input');
 			fixAllCheckbox.type = 'checkbox'; //$NON-NLS-1$
