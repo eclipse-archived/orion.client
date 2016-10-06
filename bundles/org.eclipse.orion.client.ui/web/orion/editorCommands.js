@@ -1059,6 +1059,12 @@ define([
 				options.callback = function(data) {
 					var editor = this.editor || that.editor;
 					var inputManager = this.inputManager || that.inputManager;
+					
+					// When in the split editor quickfixes should be applied to the editor the annotation is in, not the editor with focus
+					if (info.scopeId === "orion.edit.quickfix" && data.userData.annotation.creatorID){
+						editor = data.userData.annotation.creatorID;
+					}
+					
 					//TODO should all text editors have selection?
 					var selection = editor.getSelection ? editor.getSelection() : {start: 0, end: 0};
 					var model = editor.getModel();
@@ -1188,6 +1194,10 @@ define([
 					info.forceSingleItem = true;  // for compatibility with mExtensionCommands._createCommandOptions
 
 					var deferred = mExtensionCommands._createCommandOptions(info, serviceReference, that.serviceRegistry, contentTypesCache, false, /* @callback */ function(items) {
+						if (info.scopeId === "orion.edit.quickfix" && items.annotation !== undefined && items.readonly !== undefined){
+							// Quick fixes validate based on annotation and readonly, if in split editor mode, validate the annotation's editor, not the active editor (Bug 496208)
+							return items;
+						}
 						// items is the editor and we care about the file metadata for validation
 						return that.inputManager.getFileMetadata();
 					}).then(function(commandOptions){
