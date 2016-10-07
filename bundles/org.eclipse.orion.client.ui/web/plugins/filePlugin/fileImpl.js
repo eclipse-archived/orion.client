@@ -112,7 +112,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 
 	function _generateLuceneQuery(searchParams){
 		var newKeyword = searchParams.keyword;
-		var caseSensitiveFlag = "", wholeWordFlag = "", regExFlag = "";
+		var caseSensitiveFlag = "", wholeWordFlag = "", regExFlag = "", excluded = "";
 		if(searchParams.caseSensitive) {
 			caseSensitiveFlag = "+CaseSensitive:" + searchParams.caseSensitive;
 		}
@@ -121,6 +121,9 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		}
 		if(searchParams.regEx) {
 			regExFlag = "+RegEx:" + searchParams.regEx;
+		}
+		if(Array.isArray(searchParams.exclude)) {
+			excluded = searchParams.exclude.join(",");
 		}
 		var newSort = searchParams.sort;
 		if(searchParams.nameSearch){ //Search file name only
@@ -158,8 +161,12 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				newKeyword = encodeURIComponent(newKeyword);
 			}
 		}
-		return "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + 
+		var q = "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + 
 		caseSensitiveFlag + wholeWordFlag + regExFlag  + "+Location:" + searchParams.resource + "*";
+		if(excluded) {
+			q = q + "+Exclude:"+excluded;
+		}
+		return q;
 	}
 	
 	/**
