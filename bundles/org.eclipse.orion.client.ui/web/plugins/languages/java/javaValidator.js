@@ -68,7 +68,7 @@ define([
 				if(this.project) {
 					this.project.getJavaOptions().then(function(cfg) {
 						c.deferred.resolve(toProblems(info, cfg || this.config));
-						delete this.map[file];	
+						delete this.map[file];
 					}.bind(this));
 				} else {
 					c.deferred.resolve(toProblems(info));
@@ -82,6 +82,14 @@ define([
 		} else {
 			//got the notification before computeProblems was called, cache it
 			this.map[file] = {info: info};
+		}
+		if (!this.markerService) {
+				this.markerService = registry.getService("orion.core.marker");
+		}
+		if (this.markerService && this.map[file].info) {
+			this.markerService._setProblems(toProblems(this.map[file].info));
+			// problems have been reported, we can remove them. No need to report them again on save during computeProblems
+			delete this.map[file];
 		}
 	};
 	
