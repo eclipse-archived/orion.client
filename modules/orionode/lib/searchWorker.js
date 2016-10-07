@@ -148,7 +148,7 @@ try {
 						break;
 					}
 					default: {
-						this.searchTerm = decodeURIComponent(term);
+						this.searchTerm = decodeURIComponent(v[0]);
 						this.fileContentSearch = true;
 					}
 				}				
