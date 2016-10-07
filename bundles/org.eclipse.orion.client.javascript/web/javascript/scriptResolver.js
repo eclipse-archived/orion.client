@@ -93,7 +93,7 @@ define([
 	           return this.getFileClient().search(
 	                {
 	                	resource: searchLocation,
-	                    keyword: searchname+dotext,
+	                    keyword: searchname,
 	                    caseSensitive: true,
 	                    wholeWord: true,
 	                    sort: 'Name asc', //$NON-NLS-1$
