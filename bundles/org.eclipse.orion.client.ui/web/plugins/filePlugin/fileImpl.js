@@ -673,6 +673,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 * @param {integer} searchParams.rows Optional. The number of hits of the range. E.g if there are 1000 hits in total and start=5 and rows=40, then the return range is 6th-45th.
 		 * @param {String} searchParams.fileNamePatterns Optional. The file name patterns within which to search. If specified, search will be performed under files which match the provided patterns. Patterns should be comma-separated and may use "*" and "?" as wildcards. 
 		 *															E.g. "*" means all files. "*.html,test*.js" means all html files html files and all .js files that start with "test".
+		 * @param {[String]} searchParams.exclude Optional. An array of file / folder names to exclude while searching.
 		 */
 		search: function(searchParams) {
 			var query = _generateLuceneQuery(searchParams);
