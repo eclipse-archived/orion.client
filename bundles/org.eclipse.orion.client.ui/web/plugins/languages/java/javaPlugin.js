@@ -198,8 +198,8 @@ define([
 		}
 		
 		//TODO only show command when the provider is available in capabilities
-		//TODO send the options to the langangue server
-		//TODO integrate with the new orion formating service. We may have to change the orion service because
+		//TODO send the options to the language server
+		//TODO integrate with the new orion formatting service. We may have to change the orion service because
 		// the changes are done in the server side.
 		provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
 			{
@@ -502,11 +502,14 @@ define([
 			var pluginProvider = new PluginProvider(headers, serviceRegistry);
 			pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
 				contentTypes: [
-					{	id: "text/x-java-source",
+					{
+						id: "text/x-java-source",
 						"extends": "text/plain",
 						name: "Java",
 						extension: ["java"]
-					}, {id: "application/x-jsp",
+					},
+					{
+						id: "application/x-jsp",
 						"extends": "text/plain",
 						name: "Java Server Page",
 						extension: ["jsp"]
