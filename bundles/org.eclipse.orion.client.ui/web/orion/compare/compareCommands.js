@@ -116,7 +116,6 @@ exports.CompareCommandFactory = (function() {
 					}
 					var is2Way = item.options.toggler.getWidget().type === "twoWay";
 					toggleInline2WayCommand.checked = !is2Way;
-					toggleInline2WayCommand.name = is2Way ? messages["Unified"] : messages["Side by side"];
 					toggleInline2WayCommand.tooltip = is2Way ? messages["Switch to unified diff"] :  messages["Switch to side by side diff"];
 					return true;
 				},

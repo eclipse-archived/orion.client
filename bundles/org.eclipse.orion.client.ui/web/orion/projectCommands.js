@@ -175,7 +175,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		var liveEditWrapper = lib.$("#liveEditSwitchWrapper"); //$NON-NLS-0$
 		if (liveEditWrapper) {
 			var liveEditCheck = lib.$(".orionSwitch", liveEditWrapper); //$NON-NLS-0$
-			var liveEdit = liveEditCheck && liveEditCheck.getAttribute("aria-checked") === "true"; //$NON-NLS-0$ //$NON-NLS-1$
+			var liveEdit = liveEditCheck && liveEditCheck.getAttribute("aria-pressed") === "true"; //$NON-NLS-0$ //$NON-NLS-1$
 		}
 		var startTime = Date.now();
 

@@ -703,14 +703,36 @@ define([
 		
 		_enableControl: function(domNode) {
 			domNode.classList.remove("disabled"); //$NON-NLS-0$
+			domNode.removeAttribute("disabled"); //$NON-NLS-0$
+			domNode.removeAttribute("aria-disabled"); //$NON-NLS-0$
 		},
 		
 		_disableControl: function(domNode) {
 			domNode.classList.add("disabled"); //$NON-NLS-0$
+			domNode.setAttribute("disabled", "true"); //$NON-NLS-0$ //$NON-NLS-1$
+			domNode.setAttribute("aria-disabled", "true"); //$NON-NLS-0$ //$NON-NLS-1$
 		},
 		
 		_isEnabled: function(domNode) {
 			return !domNode.classList.contains("disabled"); //$NON-NLS-0$
+		},
+		
+		_disableSwitch: function(wrapperNode){
+			this._disableControl(wrapperNode);
+			
+			var switchNode = lib.$("div.orionSwitch", wrapperNode); //$NON-NLS-0$
+			if (switchNode) {
+				switchNode.removeAttribute("tabindex"); //$NON-NLS-0$
+			}
+		},
+		
+		_enableSwitch: function(wrapperNode){
+			this._enableControl(wrapperNode);
+			
+			var switchNode = lib.$("div.orionSwitch", wrapperNode); //$NON-NLS-0$
+			if (switchNode) {
+				switchNode.setAttribute("tabindex", "0"); //$NON-NLS-0$ //$NON-NLS-1$
+			}
 		},
 		
 		_enableLink: function(linkNode, href) {

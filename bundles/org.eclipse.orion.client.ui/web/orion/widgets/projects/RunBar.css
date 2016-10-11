@@ -13,10 +13,15 @@
 
 .runBarWrapper .disabled {
 	opacity: 0.30;
+	pointer-events: none;
 }
 
 .runBarWrapper .disabled:hover {
 	opacity: 0.30;
+	cursor: default;
+}
+
+.orionSwitchWrapper .disabled {
 	cursor: default;
 }
 

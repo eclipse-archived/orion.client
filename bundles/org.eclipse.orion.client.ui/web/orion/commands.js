@@ -368,11 +368,16 @@ define([
 		} else {
 			if (command.type === "switch") { //$NON-NLS-0$
 				element = clickTarget = document.createElement("div"); //$NON-NLS-0$
-				element.setAttribute("role", "switch"); //$NON-NLS-0$ //$NON-NLS-1$
+				element.setAttribute("role", "button"); //$NON-NLS-0$ //$NON-NLS-1$
 				element.tabIndex = 0;
 				element.className = "orionSwitch"; //$NON-NLS-0$
+				if (command.name) {
+					element.setAttribute("aria-label", command.name); //$NON-NLS-0$
+				}
+				element.setAttribute("aria-pressed", command.checked ? "true" : "false"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 				var span1 = document.createElement("span"); //$NON-NLS-0$
 				span1.className = "orionSwitchInner"; //$NON-NLS-0$
+				span1.classList.add(command.imageClass);
 				var span2 = document.createElement("span"); //$NON-NLS-0$
 				span2.className = "orionSwitchSwitch"; //$NON-NLS-0$
 				element.appendChild(span1);
@@ -385,12 +390,6 @@ define([
 				element.addEventListener("click", function(e) { //$NON-NLS-0$
 					toggleSwitch(element);
 				}, false);
-
-				element.setAttribute("aria-checked", command.checked ? "true" : "false"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
-				span1.classList.add(command.imageClass);
-				if (command.name) {
-					element.setAttribute("aria-label", command.name); //$NON-NLS-0$
-				}
 			} else if (command.type === "toggle") {  //$NON-NLS-0$
 				element = clickTarget = document.createElement("button"); //$NON-NLS-0$
 				element.className = "orionButton"; //$NON-NLS-0$
@@ -432,11 +431,11 @@ define([
 									element.classList.add("orionToggleOff"); //$NON-NLS-0$
 									element.classList.add("orionToggleAnimate"); //$NON-NLS-0$
 								}
-							}else {
+							} else { // "switch"
 								if(doIt) {
-									command.checked = element.getAttribute("aria-checked") === "true"; //$NON-NLS-0$ //$NON-NLS-1$
+									command.checked = element.getAttribute("aria-pressed") === "true"; //$NON-NLS-0$ //$NON-NLS-1$
 								} else {
-									toggleSwitch(element);
+									toggleSwitch(element); // don't do it, i.e. put it back
 								}
 							}
 							if(doIt) {
@@ -482,10 +481,10 @@ define([
 	}
 	
 	function toggleSwitch(element) {
-		if (element.getAttribute("aria-checked") === "true") { //$NON-NLS-0$ //$NON-NLS-1$
-			element.setAttribute("aria-checked", "false"); //$NON-NLS-0$ //$NON-NLS-1$
+		if (element.getAttribute("aria-pressed") === "true") { //$NON-NLS-0$ //$NON-NLS-1$
+			element.setAttribute("aria-pressed", "false"); //$NON-NLS-0$ //$NON-NLS-1$
 		} else {
-			element.setAttribute("aria-checked", "true"); //$NON-NLS-0$ //$NON-NLS-1$
+			element.setAttribute("aria-pressed", "true"); //$NON-NLS-0$ //$NON-NLS-1$
 		}
 	}
 

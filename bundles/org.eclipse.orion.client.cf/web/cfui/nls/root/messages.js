@@ -92,7 +92,6 @@ define({//Default message bundle
 	"noResponse": "No response",
 	"gettingLogs": "Fetching logs. This may take a few minutes.  You can continue to work in other pages while we collect the logs.",
 	"launchConfDropdownLabel": "Launch Configuration:",
-	"scrollLock": "Scroll lock",
 	"scrollLockLabel": "Scroll Lock:",
 	"scrollLockTooltip": "Lock log scrolling",
 	"clearLogs": "Clear",
