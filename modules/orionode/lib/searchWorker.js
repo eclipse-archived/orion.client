@@ -11,21 +11,15 @@
 /*eslint-env node*/
 
 try {
-	var Promise = require('bluebird'),
-		path = require('path'),
-		url = require('url'),
-		fs = Promise.promisifyAll(require('fs'));
+	var Promise = require('bluebird');
+	var path = require('path');
+	var url = require('url');
+	var fs = Promise.promisifyAll(require('fs'));
+	
+	var SUBDIR_SEARCH_CONCURRENCY = 10;
 
 	var workspaceId = 'orionode';
-
-	/**
-	 * @description Converts the given path to be all forward-slashed for orionode
-	 * @param {String} p The path to Converts
-	 * @since 13.0
-	 */
-	function toURLPath(p) {
-		return p.replace(/\\/g, "/");
-	}
+	var fieldList = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,WholeWord,CaseSensitive,Exclude".split(",");
 
 	function safePath(workspaceDir, p) {
 		workspaceDir = path.normalize(workspaceDir);
@@ -38,6 +32,15 @@ try {
 	}
 	
 	/**
+	 * @description Converts the given path to be all forward-slashed for orionode
+	 * @param {String} p The path to Converts
+	 * @since 13.0
+	 */
+	function toURLPath(p) {
+		return p.replace(/\\/g, "/");
+	}
+	
+	/**
 	 * @param {String} filepath The URL-encoded path, for example 'foo/My%20Work/baz.txt'
 	 * @returns {String} The filesystem path represented by interpreting 'path' relative to the workspace dir.
 	 * The returned value is URL-decoded.
@@ -47,6 +50,15 @@ try {
 		return safePath(workspaceDir, path.join(workspaceDir, filepath));
 	}
 	
+	function isSearchField(term) {
+		for (var i = 0; i < fieldList.length; i++) {
+			if (term.lastIndexOf(fieldList[i] + ":", 0) === 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	function undoLuceneEscape(searchTerm){
 		var specialChars = "+-&|!(){}[]^\"~:\\";
 		for (var i = 0; i < specialChars.length; i++) {
@@ -57,34 +69,6 @@ try {
 		return searchTerm;
 	}
 
-	/**
-	 * @description Adds the found match to the given collection
-	 * @param {[?]} collection The collection to add match objects to
-	 *  @param {String} filename The name of the matching file
-	 * @param {String} filePath The path of the matching file
-	 * @param {String} workspaceDir he directory of the current workspace the match was found in
-	 * @param {?} stats The file information object from Node.js
-	 * @since 13.0
-	 */
-	function add (collection, filename, filePath, workspaceDir, stats) {
-		var filePathFromWorkspace = filePath.substring(workspaceDir.length);
-		collection.push({
-			"Directory": stats.isDirectory(),
-			"LastModified": stats.mtime.getTime(),
-			"Length": stats.size,
-			"Location": toURLPath("/file" + filePathFromWorkspace),
-			"Name": filename,
-			"Path": toURLPath(filePathFromWorkspace.substring(1))
-		});
-	}
-
-	/**
-	 * @name SearchOptions
-	 * @description Creates a new instance of SearchOptions
-	 * @param {String} originalUrl The original URL to search on
-	 * @param {String} contextPath The resource context path to search within
-	 * @returns {SearchOptions} Returns a new instance of SearchOptions
-	 */
 	function SearchOptions(originalUrl, contextPath){
 		this.defaultLocation = null;
 		this.fileContentSearch = false;
@@ -111,48 +95,35 @@ try {
 				});
 				return result;
 			}
-			var terms = getEncodedParameter("q").split(/[\s\+]+/)
-			for(var i = 0, len = terms.length; i < len; i++) {
-				var v = terms[i].split(":");
-				switch(v[0]) {
-					case 'NameLower': {
+			var terms = getEncodedParameter("q").split(/[\s\+]+/);
+			for (var i = 0; i < terms.length; i++) {
+				var term = terms[i];
+				if (isSearchField(term)) {
+					if (term.lastIndexOf("NameLower:", 0) === 0) {
 						this.filenamePatternCaseSensitive = false;
-						this.filenamePattern = decodeURIComponent(v[1]);
-						break;
-					}
-					case 'Location': {
-						this.location = decodeURIComponent(v[1]);
-						break;
-					}
-					case 'Name': {
+						this.filenamePattern = decodeURIComponent(term.substring(10));
+					} else if (term.lastIndexOf("Location:", 0) === 0) {
+						this.location = decodeURIComponent(term.substring(9 + (contextPath ? contextPath.length : 0)));
+					} else if (term.lastIndexOf("Name:", 0) === 0) {
 						this.filenamePatternCaseSensitive = true;
-						this.filenamePattern = decodeURIComponent(v[1]);
-						break;
-					}
-					case 'Regex': {
+						this.filenamePattern = decodeURIComponent(term.substring(5));
+					} else if (term.lastIndexOf("RegEx:", 0) === 0) {
 						this.regEx = true;
-						break;
-					}
-					case 'CaseSensitive': {
+					} else if (term.lastIndexOf("CaseSensitive:", 0) === 0) {
 						this.searchTermCaseSensitive = true;
-						break;
-					}
-					case 'WholeWord': {
+					} else if (term.lastIndexOf("WholeWord:", 0) === 0) {
 						this.searchTermWholeWord = true;
-						break;
-					}
-					case 'Exclude': {
-						v[1].split(",").forEach(function(ex) {
+					} else if(term.lastIndexOf("Exclude:", 0) === 0) {
+						term.substring(8).split(",").forEach(function(ex) {
 							this.exclude[ex] = true;
 						}.bind(this));
-						break;
 					}
-					default: {
-						this.searchTerm = decodeURIComponent(v[0]);
-						this.fileContentSearch = true;
-					}
-				}				
+				} else {
+					this.searchTerm = decodeURIComponent(term);
+					this.fileContentSearch = true;
+				}
 			}
+
 			this.defaultLocation = "/file/" + workspaceId;
 		};
 	}
@@ -227,37 +198,52 @@ try {
 			return;
 		}
 		var filePath = dirLocation + filename;
-		return fs.statAsync(filePath).catch(function(err) {
-			//ignore bad stat call
-		}).then(function(stats) {
-			if(!stats) {
-				return;
-			}
+		return fs.statAsync(filePath)
+		.then(function(stats) {
 			/*eslint consistent-return:0*/
-			if (stats.isDirectory() && filename.charAt(0) !== ".") {
-				if (filePath.charAt(filePath.length-1) !== "/") {
-					filePath = filePath + "/";
+			if (stats.isDirectory()) {
+				if (filename[0] === ".") {
+					// do not search hidden dirs like .git
+					return;
 				}
-				return fs.readdirAsync(filePath).then(function(directoryFiles) {
+				if (filePath.substring(filePath.length-1) !== path.sep) {
+					filePath = filePath + path.sep;
+				}
+				return fs.readdirAsync(filePath)
+				.then(function(directoryFiles) {
 					return Promise.map(directoryFiles, function(entry) {
 						return searchFile(workspaceDir, filePath, entry, searchPattern, filenamePatterns, results, excluded);
-					});
+					}, { concurrency: SUBDIR_SEARCH_CONCURRENCY });
 				});
 			}
 			// File case
+			
 			if (!filenamePatterns.some(function(filenamePattern) {
 				return filename.match(filenamePattern);
-			})) {
+			})){
 				return;
+			}
+			function add () {
+				// We found a hit
+				var filePathFromWorkspace = filePath.substring(workspaceDir.length);
+				results.push({
+					"Directory": stats.isDirectory(),
+					"LastModified": stats.mtime.getTime(),
+					"Length": stats.size,
+					"Location": toURLPath("/file" + filePathFromWorkspace),
+					"Name": filename,
+					"Path": toURLPath(filePathFromWorkspace.substring(1))
+				});
 			}
 			if (!searchPattern) {
-				add(results, filename, filePath, workspaceDir, stats);
-				return;
+				return add();
 			}
-			return fs.readFileAsync(filePath, 'utf8').then(function(file) {
-				if (file.match(searchPattern)) {
-					add(results, filename, filePath, workspaceDir, stats);
+			return fs.readFileAsync(filePath, 'utf8')
+			.then(function(file) {
+				if (!file.match(searchPattern)) {
+					return;
 				}
+				add();
 			});
 		});
 	}
@@ -265,6 +251,7 @@ try {
 	function search(originalUrl, workspaceDir, contextPath) {
 		var searchOpt = new SearchOptions(originalUrl, contextPath);
 		searchOpt.buildSearchOptions();
+
 		var searchPattern, filenamePattern;
 		try {
 			searchPattern = buildSearchPattern(searchOpt);
@@ -272,6 +259,7 @@ try {
 		} catch (err) {
 			return Promise.reject(err);
 		}
+
 		var searchScope;
 		try {
 			var loc = searchOpt.location.replace(/^\/file/, "");
@@ -279,18 +267,22 @@ try {
 			searchScope = safeFilePath(workspaceDir, loc);
 		} catch (ex) {
 			searchScope = workspaceDir;
-		}
+		} 
 		if (searchScope.charAt(searchScope.length - 1) !== path.sep) {
 			searchScope = searchScope + path.sep;
 		}
-		return fs.readdirAsync(searchScope).then(function(children) {
+
+		return fs.readdirAsync(searchScope)
+		.then(function(children) {
 			var results = [];
+
 			return Promise.map(children, function(child) {
 				return searchFile(workspaceDir, searchScope, child, searchPattern, filenamePattern, results, searchOpt.exclude);
-			}).catch(function(err) {
+			}, { concurrency: SUBDIR_SEARCH_CONCURRENCY })
+			.catch(function(/*err*/) {
 				// Probably an error reading some file or directory -- ignore
-				console.log("ERROR READING SUB-ELEMENT: "+err);
-			}).then(function(val) {
+			})
+			.then(function() {
 				return {
 					"response": {
 						"docs": results,
