@@ -184,6 +184,17 @@ if (process.versions.electron) {
 		return;
 	}
 
+	/**
+	 * @description Toggle the dev tools on or off
+	 * @since 13.0
+	 */
+	function toggleDevTools() {
+		var win = electron.BrowserWindow.getFocusedWindow();
+		if (win) {
+			win.webContents.toggleDevTools();
+		}
+	}
+
 	electron.app.on('ready', function() {
 		var updateDownloaded  = false,
 			updateDialog = false,
@@ -216,13 +227,21 @@ if (process.versions.electron) {
 				];
 				Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 			}
+			electron.globalShortcut.register('Cmd+Option+I', function() {
+				toggleDevTools();
+			});
+		} else {
+			//always add Ctrl+Shift+I for non-MacOS platforms - matches the browser devs tools shortcut
+			electron.globalShortcut.register('Ctrl+Shift+I', function() {
+				toggleDevTools();
+			});
 		}
-		electron.globalShortcut.register('F12', function() {
-			var win = electron.BrowserWindow.getFocusedWindow();
-			if (win) {
-				win.webContents.toggleDevTools();
-			}
-		});
+		if(process.platform === "win32") {
+			//if windows, add F12 to also open dev tools - depending on electron / windows versions this might not be allowed to be rebound
+			electron.globalShortcut.register('F12', function() {
+				toggleDevTools();
+			});
+		}
 		autoUpdater.on("error", function(error) {
 			console.log(error);
 		});
