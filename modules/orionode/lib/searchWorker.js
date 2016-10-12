@@ -114,8 +114,9 @@ try {
 					} else if (term.lastIndexOf("WholeWord:", 0) === 0) {
 						this.searchTermWholeWord = true;
 					} else if(term.lastIndexOf("Exclude:", 0) === 0) {
-						term.substring(8).split(",").forEach(function(ex) {
-							this.exclude[ex] = true;
+						var items = term.substring(8).split(",");
+						items.forEach(function(item) {
+							this.exclude[decodeURIComponent(item)] = true;						
 						}.bind(this));
 					}
 				} else {

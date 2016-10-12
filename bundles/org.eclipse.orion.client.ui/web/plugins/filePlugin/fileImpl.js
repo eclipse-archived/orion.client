@@ -123,7 +123,12 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			regExFlag = "+RegEx:" + searchParams.regEx;
 		}
 		if(Array.isArray(searchParams.exclude)) {
-			excluded = searchParams.exclude.join(",");
+			searchParams.exclude.forEach(function(item, index) {
+				excluded += encodeURIComponent(item);
+				if(index < searchParams.exclude.length-1) {
+					excluded += ",";
+				}
+			});
 		}
 		var newSort = searchParams.sort;
 		if(searchParams.nameSearch){ //Search file name only

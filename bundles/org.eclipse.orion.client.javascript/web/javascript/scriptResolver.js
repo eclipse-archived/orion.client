@@ -100,8 +100,8 @@ define([
 	                    nameSearch: true,
 	                    fileType: ext,
 	                    start: 0,
-	                    rows: 30/*,
-	                    exclude: ['node_modules']*/
+	                    rows: 30,
+	                    exclude: ['node_modules']
 	                }
 	           ).then(function(res) {
 	               var r = res.response;
