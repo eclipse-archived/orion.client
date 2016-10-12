@@ -198,17 +198,17 @@ function processDiff(diff, filePath, paths, fileDir, includeDiff, includeDiffs, 
 		
 				if (includeDiff) {
 					var buffer = [];
-					buffer.push("diff --git a/" + oldFilePath + " b/" + newFilePath + "\n");
+					buffer.push("diff --git a/" + oldFilePath + " b/" + newFilePath + "\r\n");
 					if (patch.isAdded()) {
-						buffer.push("new file mode " + newFile.mode().toString(8) + "\n");
+						buffer.push("new file mode " + newFile.mode().toString(8) + "\r\n");
 					}
 					if (patch.isDeleted()) {
-						buffer.push("deleted file mode " + oldFile.mode().toString(8) + "\n");
+						buffer.push("deleted file mode " + oldFile.mode().toString(8) + "\r\n");
 					}
 					buffer.push("index " + oldFile.id().toString().substring(0, 7) + ".." + newFile.id().toString().substring(0, 7)
-						+ (patch.isDeleted() || patch.isAdded() ? "" : " " + newFile.mode().toString(8)) + "\n");
-					buffer.push("--- " + (patch.isAdded() ? "/dev/null" : "a/" + oldFilePath) + "\n");
-					buffer.push("+++ " + (patch.isDeleted() ? "/dev/null" : "b/" + newFilePath) + "\n"); 
+						+ (patch.isDeleted() || patch.isAdded() ? "" : " " + newFile.mode().toString(8)) + "\r\n");
+					buffer.push("--- " + (patch.isAdded() ? "/dev/null" : "a/" + oldFilePath) + "\r\n");
+					buffer.push("+++ " + (patch.isDeleted() ? "/dev/null" : "b/" + newFilePath) + "\r\n"); 
 		
 					result.push(patch.hunks()
 					.then(function(hunks) {
@@ -231,7 +231,12 @@ function processDiff(diff, filePath, paths, fileDir, includeDiff, includeDiffs, 
 													prefix = "";
 													break;
 											}
-											buffer.push(prefix + line.content());
+											var lineContent = line.content();
+											if(lineContent.endsWith("\r\n")){
+											}else if(lineContent.endsWith("\n")){
+												lineContent = lineContent.slice(0,-1)+"\r\n";
+											}
+											buffer.push(prefix + lineContent);
 										});
 									})
 									.then(function(){
