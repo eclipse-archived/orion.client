@@ -54,9 +54,11 @@ function fork(modulePath, args, options, callback) {
 		execArgv: options.execArgv
 	});
 	childProcess.once('error', function(err) {
+		console.log(err);
 		reject(err);
 	});
 	childProcess.once('exit', function(err) {
+		console.log(err);
 		reject(err);
 	});
 	resolve(childProcess);
@@ -72,8 +74,9 @@ function runJavaServer(javaHome) {
 		rimraf(workspacePath, function(error) {
 			//TODO handle error
 			if (DEBUG) {
-				params.push('-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1044');
+				params.push('-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044');
 			}
+			params.push('--add-modules=java.se.ee');
 			params.push("-Dlog.level=ALL");
 			params.push('-Declipse.application=org.jboss.tools.vscode.java.id1');
 			params.push('-Dosgi.bundles.defaultStartLevel=4');
