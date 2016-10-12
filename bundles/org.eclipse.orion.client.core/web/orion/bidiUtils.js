@@ -33,7 +33,7 @@ function(util) { /* BDL */
 	
 	setBrowserLangDirection();
 	
-	var bidiEnabledStorgae = "/orion/preferences/bidi/bidiEnabled"; //$NON-NLS-0$
+	var bidiEnabledStorage = "/orion/preferences/bidi/bidiEnabled"; //$NON-NLS-0$
 	var bidiLayoutStorage = "/orion/preferences/bidi/bidiLayout"; //$NON-NLS-0$	
 	var LRE = "\u202A";	//$NON-NLS-0$
 	var PDF = "\u202C"; //$NON-NLS-0$
@@ -46,7 +46,7 @@ function(util) { /* BDL */
 	 * @returns {Boolean} true if globalization settings exist and bidi is enabled.
 	 */		
 	function isBidiEnabled() {
-		var bidiEnabled = localStorage.getItem(bidiEnabledStorgae);
+		var bidiEnabled = localStorage.getItem(bidiEnabledStorage);
 		if (bidiEnabled && bidiEnabled === "true") {		//$NON-NLS-0$
 			return true;
 		}
