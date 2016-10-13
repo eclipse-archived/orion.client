@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -19,7 +19,7 @@ try {
 	var SUBDIR_SEARCH_CONCURRENCY = 10;
 
 	var workspaceId = 'orionode';
-	var fieldList = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,WholeWord,CaseSensitive".split(",");
+	var fieldList = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,WholeWord,CaseSensitive,Exclude".split(",");
 
 	function safePath(workspaceDir, p) {
 		workspaceDir = path.normalize(workspaceDir);
@@ -29,6 +29,15 @@ try {
 			throw new Error('Path ' + p + ' is outside workspace');
 		}
 		return p;
+	}
+	
+	/**
+	 * @description Converts the given path to be all forward-slashed for orionode
+	 * @param {String} p The path to Converts
+	 * @since 13.0
+	 */
+	function toURLPath(p) {
+		return p.replace(/\\/g, "/");
 	}
 	
 	/**
@@ -72,6 +81,7 @@ try {
 		this.searchTerm;
 		this.searchTermCaseSensitive = false;
 		this.username = null;
+		this.exclude = Object.create(null);
 
 		this.buildSearchOptions = function() {
 			function getEncodedParameter(param) {
@@ -103,6 +113,11 @@ try {
 						this.searchTermCaseSensitive = true;
 					} else if (term.lastIndexOf("WholeWord:", 0) === 0) {
 						this.searchTermWholeWord = true;
+					} else if(term.lastIndexOf("Exclude:", 0) === 0) {
+						var items = term.substring(8).split(",");
+						items.forEach(function(item) {
+							this.exclude[decodeURIComponent(item)] = true;						
+						}.bind(this));
 					}
 				} else {
 					this.searchTerm = decodeURIComponent(term);
@@ -179,7 +194,10 @@ try {
 	// Note that while this function creates and returns many promises, they fulfill to undefined,
 	// and are used only for flow control.
 	// TODO clean up
-	function searchFile(workspaceDir, dirLocation, filename, searchPattern, filenamePatterns, results){
+	function searchFile(workspaceDir, dirLocation, filename, searchPattern, filenamePatterns, results, excluded) {
+		if(excluded[filename]) {
+			return;
+		}
 		var filePath = dirLocation + filename;
 		return fs.statAsync(filePath)
 		.then(function(stats) {
@@ -189,12 +207,13 @@ try {
 					// do not search hidden dirs like .git
 					return;
 				}
-				if (filePath.substring(filePath.length-1) !== "/") filePath = filePath + "/";
-
+				if (filePath.substring(filePath.length-1) !== path.sep) {
+					filePath = filePath + path.sep;
+				}
 				return fs.readdirAsync(filePath)
 				.then(function(directoryFiles) {
 					return Promise.map(directoryFiles, function(entry) {
-						return searchFile(workspaceDir, filePath, entry, searchPattern, filenamePatterns, results);
+						return searchFile(workspaceDir, filePath, entry, searchPattern, filenamePatterns, results, excluded);
 					}, { concurrency: SUBDIR_SEARCH_CONCURRENCY });
 				});
 			}
@@ -212,9 +231,9 @@ try {
 					"Directory": stats.isDirectory(),
 					"LastModified": stats.mtime.getTime(),
 					"Length": stats.size,
-					"Location": "/file" + filePathFromWorkspace,
+					"Location": toURLPath("/file" + filePathFromWorkspace),
 					"Name": filename,
-					"Path": filePathFromWorkspace.substring(1)
+					"Path": toURLPath(filePathFromWorkspace.substring(1))
 				});
 			}
 			if (!searchPattern) {
@@ -250,14 +269,16 @@ try {
 		} catch (ex) {
 			searchScope = workspaceDir;
 		} 
-		if (searchScope.charAt(searchScope.length - 1) !== "/") searchScope = searchScope + "/";
+		if (searchScope.charAt(searchScope.length - 1) !== path.sep) {
+			searchScope = searchScope + path.sep;
+		}
 
 		return fs.readdirAsync(searchScope)
 		.then(function(children) {
 			var results = [];
 
 			return Promise.map(children, function(child) {
-				return searchFile(workspaceDir, searchScope, child, searchPattern, filenamePattern, results);
+				return searchFile(workspaceDir, searchScope, child, searchPattern, filenamePattern, results, searchOpt.exclude);
 			}, { concurrency: SUBDIR_SEARCH_CONCURRENCY })
 			.catch(function(/*err*/) {
 				// Probably an error reading some file or directory -- ignore

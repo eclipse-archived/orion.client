@@ -26,6 +26,26 @@ define("webtools/htmlValidator", [
 	function HtmlValidator(htmlAstManager) {
 	    this.htmlAstManager = htmlAstManager;
 	}
+	
+	var options = {
+	    'attr-bans': 0,
+	    'attr-bans-config': [
+	        'align', //$NON-NLS-1$
+	        'background', //$NON-NLS-1$
+	        'bgcolor', //$NON-NLS-1$
+	        'border', //$NON-NLS-1$
+	        'frameborder', //$NON-NLS-1$
+	        'longdesc', //$NON-NLS-1$
+	        'marginwidth', //$NON-NLS-1$
+	        'marginheight', //$NON-NLS-1$
+	        'scrolling', //$NON-NLS-1$
+	        'style', //$NON-NLS-1$
+	        'width' //$NON-NLS-1$
+	    ],
+	    'fig-req-figcaption': 1,
+	    'img-req-alt': 1,
+	    'tag-close': 1,
+	};
 
 	Objects.mixin(HtmlValidator.prototype, /** @lends webtools.CssValidator.prototype*/ {
 		
@@ -51,16 +71,13 @@ define("webtools/htmlValidator", [
 		 * @private
 		 * @param {String} contents The file contents
 		 * @returns {Array} The problem array
+		 * @callback
 		 */
 		_computeProblems: function(ast, context) {
 		    if (!ast){
 				return null;
 			}
-			// TODO Load options from settings https://github.com/htmllint/htmllint/wiki/Options
-			var options;
-			if (!options){
-				options = Rules.defaultOptions;
-			}
+
 		    var problems = [];
 			function addProblems(newProblems){
 				if (newProblems){
@@ -104,6 +121,27 @@ define("webtools/htmlValidator", [
 	        });
 			return {problems: problems};
 		},
+		
+		/**
+		 * @description Callback from orion.cm.managedservice
+		 * @function
+		 * @public
+		 * @param {Object} properties The properties that have been changed
+		 */
+		updated: function updated(properties) {
+			if (!properties) {
+				return;
+			}
+			function setOption(rule, value){
+				if (typeof value === 'number' && value >= 0 && value < 3){
+					options[rule] = value;
+				}
+			}
+			setOption('attr-bans', properties.validate_attr_bans); //$NON-NLS-1$
+		    setOption('fig-req-figcaption', properties.validate_fig_req_figcaption); //$NON-NLS-1$
+		    setOption('img-req-alt', properties.validate_img_req_alt); //$NON-NLS-1$
+		    setOption('tag-close', properties.validate_tag_close); //$NON-NLS-1$
+		}
 	});
 	
 	return HtmlValidator;

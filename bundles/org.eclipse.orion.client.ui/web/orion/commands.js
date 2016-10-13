@@ -251,7 +251,7 @@ define([
 			var done = function() {
 				if (fixAllCheckbox){
 					if (fixAllCheckbox.checked){
-						commandInvocation.userData.doFixAll = true;
+						commandInvocation.userData.annotation.doFixAll = true;
 					}
 					if (prefService){
 						prefService.get(quickfixSettings).then(function(prefs) {
@@ -261,6 +261,9 @@ define([
 					}
 				}
 				onClick.call(commandInvocation.handler, commandInvocation);
+				if (typeof commandInvocation.userData.postCallback === 'function'){
+					commandInvocation.userData.postCallback();
+				}
 			};
 			command.onClick = onClick;
 			clickTarget.addEventListener("click", function(e) {
@@ -289,7 +292,7 @@ define([
 		element.appendChild(button);
 		
 		// We check that the internal access to annotation model exists so if it breaks we don't show the checkbox at all rather than throw an error later
-		if (command.fixAllEnabled && commandInvocation.userData._annotationModel){
+		if (command.fixAllEnabled && commandInvocation.userData.annotation._annotationModel){
 			var id = command.id + 'fixAll'; //$NON-NLS-1$
 			fixAllCheckbox = document.createElement('input');
 			fixAllCheckbox.type = 'checkbox'; //$NON-NLS-1$
@@ -364,35 +367,29 @@ define([
 			}
 		} else {
 			if (command.type === "switch") { //$NON-NLS-0$
-				element = document.createElement("div"); //$NON-NLS-0$
+				element = clickTarget = document.createElement("div"); //$NON-NLS-0$
+				element.setAttribute("role", "button"); //$NON-NLS-0$ //$NON-NLS-1$
 				element.tabIndex = 0;
 				element.className = "orionSwitch"; //$NON-NLS-0$
-				var input = clickTarget = document.createElement("input"); //$NON-NLS-0$
-				input.type = "checkbox"; //$NON-NLS-0$
-				input.className = "orionSwitchCheck"; //$NON-NLS-0$
-				input.id = "orionSwitchCheck" + command.id; //$NON-NLS-0$
-				if(parent.id) {
-					input.id = input.id + parent.id;
+				if (command.name) {
+					element.setAttribute("aria-label", command.name); //$NON-NLS-0$
 				}
-				element.appendChild(input);
-				var label = document.createElement("label"); //$NON-NLS-0$
-				label.className = "orionSwitchLabel"; //$NON-NLS-0$
-				label.setAttribute("for", input.id); //$NON-NLS-0$  
+				element.setAttribute("aria-pressed", command.checked ? "true" : "false"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 				var span1 = document.createElement("span"); //$NON-NLS-0$
 				span1.className = "orionSwitchInner"; //$NON-NLS-0$
+				span1.classList.add(command.imageClass);
 				var span2 = document.createElement("span"); //$NON-NLS-0$
 				span2.className = "orionSwitchSwitch"; //$NON-NLS-0$
-				label.appendChild(span1);
-				label.appendChild(span2);
-				element.appendChild(label);
+				element.appendChild(span1);
+				element.appendChild(span2);
 				element.addEventListener("keydown", function(e) { //$NON-NLS-0$
 					if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
-						input.click();
+						element.click();
 					}
 				}, false);
-
-				input.checked = command.checked;
-				span1.classList.add(command.imageClass);
+				element.addEventListener("click", function(e) { //$NON-NLS-0$
+					toggleSwitch(element);
+				}, false);
 			} else if (command.type === "toggle") {  //$NON-NLS-0$
 				element = clickTarget = document.createElement("button"); //$NON-NLS-0$
 				element.className = "orionButton"; //$NON-NLS-0$
@@ -434,11 +431,11 @@ define([
 									element.classList.add("orionToggleOff"); //$NON-NLS-0$
 									element.classList.add("orionToggleAnimate"); //$NON-NLS-0$
 								}
-							}else {
+							} else { // "switch"
 								if(doIt) {
-									command.checked = input.checked;
+									command.checked = element.getAttribute("aria-pressed") === "true"; //$NON-NLS-0$ //$NON-NLS-1$
 								} else {
-									input.checked = !input.checked;
+									toggleSwitch(element); // don't do it, i.e. put it back
 								}
 							}
 							if(doIt) {
@@ -483,6 +480,14 @@ define([
 		return element;
 	}
 	
+	function toggleSwitch(element) {
+		if (element.getAttribute("aria-pressed") === "true") { //$NON-NLS-0$ //$NON-NLS-1$
+			element.setAttribute("aria-pressed", "false"); //$NON-NLS-0$ //$NON-NLS-1$
+		} else {
+			element.setAttribute("aria-pressed", "true"); //$NON-NLS-0$ //$NON-NLS-1$
+		}
+	}
+
 	function createCommandMenuItem(parent, command, commandInvocation, keyBinding, callback, keyBindingString) {
 		var element, li;
 		var dropdown = parent.dropdown;

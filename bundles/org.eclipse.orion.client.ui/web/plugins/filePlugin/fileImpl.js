@@ -112,7 +112,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 
 	function _generateLuceneQuery(searchParams){
 		var newKeyword = searchParams.keyword;
-		var caseSensitiveFlag = "", wholeWordFlag = "", regExFlag = "";
+		var caseSensitiveFlag = "", wholeWordFlag = "", regExFlag = "", excluded = "";
 		if(searchParams.caseSensitive) {
 			caseSensitiveFlag = "+CaseSensitive:" + searchParams.caseSensitive;
 		}
@@ -121,6 +121,14 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		}
 		if(searchParams.regEx) {
 			regExFlag = "+RegEx:" + searchParams.regEx;
+		}
+		if(Array.isArray(searchParams.exclude)) {
+			searchParams.exclude.forEach(function(item, index) {
+				excluded += encodeURIComponent(item);
+				if(index < searchParams.exclude.length-1) {
+					excluded += ",";
+				}
+			});
 		}
 		var newSort = searchParams.sort;
 		if(searchParams.nameSearch){ //Search file name only
@@ -158,8 +166,12 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				newKeyword = encodeURIComponent(newKeyword);
 			}
 		}
-		return "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + 
+		var q = "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + 
 		caseSensitiveFlag + wholeWordFlag + regExFlag  + "+Location:" + searchParams.resource + "*";
+		if(excluded) {
+			q = q + "+Exclude:"+excluded;
+		}
+		return q;
 	}
 	
 	/**
@@ -666,6 +678,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 * @param {integer} searchParams.rows Optional. The number of hits of the range. E.g if there are 1000 hits in total and start=5 and rows=40, then the return range is 6th-45th.
 		 * @param {String} searchParams.fileNamePatterns Optional. The file name patterns within which to search. If specified, search will be performed under files which match the provided patterns. Patterns should be comma-separated and may use "*" and "?" as wildcards. 
 		 *															E.g. "*" means all files. "*.html,test*.js" means all html files html files and all .js files that start with "test".
+		 * @param {[String]} searchParams.exclude Optional. An array of file / folder names to exclude while searching.
 		 */
 		search: function(searchParams) {
 			var query = _generateLuceneQuery(searchParams);

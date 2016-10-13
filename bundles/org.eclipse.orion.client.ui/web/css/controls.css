@@ -672,6 +672,7 @@ html[dir="rtl"] .keyAssistFloat { /* ACGC */
 
 .keyAssistFloat h2 {
 	color: gold;
+	margin: auto;
 }
 
 .keyAssistName {
@@ -1540,5 +1541,209 @@ html[dir="rtl"] .uploadNode .uploadCancelButton { /* ACGC */
 html[dir="rtl"] .fileExplorerProgressDiv { /* ACGC */
 	margin-right: 10px;
 	margin-left: auto;	
+}
+
+.lightPage .mainToolbar .commandImage.dropdownTrigger,
+.lightPage .dropdownButtonWithIcon,
+.lightPage .sideMenuItem,
+.lightPage .editorViewerHeader,
+.lightPage .filesystemName,
+.lightPage .mainToolbar,
+.lightPage .navColumn {
+	color: rgb(21, 41, 53) !important;
+}
+
+.lightPage .mainToolbar,
+.lightPage .sectionTable,
+.lightPage .sideMenu {
+	background-color: white;
+}
+
+.lightPage .split,
+.lightPage .splitThumb,
+.lightPage .editorViewerHeader,
+.lightPage .titleActionContainer,
+.lightPage .sidebarWrapper {
+	color: black;
+	background: #f5f7fa !important;
+}
+
+.lightPage .content-fixedHeight,
+.lightPage .auxpane,
+.lightPage .mainpane,
+.lightPage .splash,
+.lightPage .splashLoader,
+.lightPage .workingTarget {
+	background: #c4c5c8 !important;
+}
+
+.lightPage .commandButton.orionButton.dropdownTrigger:hover,
+.lightPage .gitStatusSection,
+.lightPage .gitCommitMessageSection,
+.lightPage .treeIterationCursorRow_Dotted,
+.lightPage .treeIterationCursorRow {
+	background-color: rgba(61, 114, 179, 0.25);
+}
+
+.lightPage .tooltip h2,
+.lightPage .tooltip .operationError,
+.lightPage .checkedRow .gitStatusTitle,
+.lightPage .checkedRow .gitStatusIcon {
+	color: white !important;
+}
+
+.lightPage .splashAbout,
+.lightPage .splashVerbal,
+.lightPage .gitCommitMore,
+.lightPage .gitStatusTitle,
+.lightPage .gitStatusIcon,
+.lightPage .sideMenuItem > .submenu-trigger:hover {
+	color: rgb(61, 114, 179) !important;
+}
+
+.lightPage .gitCommitMessage .gitCommitMessageTopRow {
+	border: 1px solid rgb(61, 114, 179);
+}
+
+.lightPage .tooltip {
+	background-color: rgb(61, 114, 179);
+	border: 1px solid rgb(61, 114, 170);
+ 	color: white;
+}
+
+.lightPage .editorViewerHeader {
+	border-bottom: 1px solid #f5f7fa;	
+}
+
+.lightPage .tooltipTailFromright:before,
+.lightPage .tooltipTailFromright:after {
+	border-right-color: rgb(61, 114, 179);
+}
+
+.lightPage .tooltipTailFromleft:before,
+.lightPage .tooltipTailFromleft:after {
+	border-left-color: rgb(61, 114, 179);
+}
+
+.lightPage .tooltipTailFrombelow:before,
+.lightPage .tooltipTailFrombelow:after {
+	border-bottom-color: rgb(61, 114, 179);
+}
+
+.lightPage .tooltipTailFromabove:before,
+.lightPage .tooltipTailFromabove:after {
+	border-top-color: rgb(61, 114, 179);
+}
+
+.lightPage .searchResultsWrapperDiv .selectableNavRow:hover,
+.lightPage .dropdownMenu .dropdownMenuItemSelected {
+	border-left-color: rgb(61, 114, 179);
+	background: rgba(61, 114, 179, 0.25);
+}
+
+.lightPage .commandButton,
+.lightPage .orionSwitchLabel,
+.lightPage .launchConfsDropdown .dropdownDefaultButton,
+.lightPage .launchConfsLabel,
+.lightPage .tooltip .navlinkonpage,
+.lightPage .mainToolbar .sectionWrapper,
+.lightPage .mainToolbar .gitSectionLabel,
+.lightPage .launchConfigurationsWrapper > .launchConfigurationsButton.dropdownTrigger,
+.lightPage .slideParameters,
+.lightPage .outlineExplorer .treeIterationCursorRow_Dotted,
+.lightPage .navbar-item-selected,
+.lightPage .sideMenuItemActive,
+.lightPage .primaryButton,
+.lightPage .tooltip,
+.lightPage .checkedRow {
+	background-color: rgb(61, 114, 179) !important;
+ 	color: white !important;
+}
+
+.lightPage .progressNormal,
+.lightPage .progressInfo,
+.lightPage .notificationShow {
+	background: rgb(61, 114, 179) !important;
+	border:  1px solid rgb(61, 114, 179) !important;
+}
+
+.lightPage .core-sprite-error {
+	color: red;
+}
+
+.lightPage #log {
+	margin: 5px;
+	width: calc(100% - 17px);
+}
+.lightPage .splashLoadingImage {
+	-webkit-animation: 1.2s light-theme-spinner steps(6) infinite;
+	animation: 1.2s light-theme-spinner steps(6) infinite;
+	
+	padding: 0;
+	background: inherit;
+	display: inline-block;
+	vertical-align: middle;
+	margin-left: 9px;
+	margin-top: 8px;
+	width: 6px;
+	height: 6px;
+	font-size: 10px;
+	border-radius: 50%;
+	z-index: 101;
+	-webkit-font-smoothing: antialiased;
+}
+
+@-webkit-keyframes light-theme-spinner {
+	0%,
+  100% {
+		box-shadow: -0.45em -0.78em 0 0 #4178be, -0.9em 0 0 0 rgba(65, 120, 190, 0.8), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.6), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.4), 0.9em 0 0 0 rgba(65, 120, 190, 0.3), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.1);
+	}
+
+	16.67% {
+		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.8), -0.9em 0 0 0 rgba(65, 120, 190, 0.6), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.4), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.3), 0.9em 0 0 0 rgba(65, 120, 190, 0.1), 0.45em -0.78em 0 0 #4178be;
+	}
+
+	33.33% {
+		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.6), -0.9em 0 0 0 rgba(65, 120, 190, 0.4), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.3), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.1), 0.9em 0 0 0 #4178be, 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.8);
+	}
+
+	50% {
+		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.4), -0.9em 0 0 0 rgba(65, 120, 190, 0.3), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.1), 0.45em 0.78em 0 0 #4178be, 0.9em 0 0 0 rgba(65, 120, 190, 0.8), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.6);
+	}
+
+	66.67% {
+		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.3), -0.9em 0 0 0 rgba(65, 120, 190, 0.1), -0.45em 0.78em 0 0 #4178be, 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.8), 0.9em 0 0 0 rgba(65, 120, 190, 0.6), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.4);
+	}
+
+	83.33% {
+		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.1), -0.9em 0 0 0 #4178be, -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.8), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.6), 0.9em 0 0 0 rgba(65, 120, 190, 0.4), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.3);
+	}
+}
+
+@keyframes light-theme-spinner {
+	0%,
+  100% {
+		box-shadow: -0.45em -0.78em 0 0 #4178be, -0.9em 0 0 0 rgba(65, 120, 190, 0.8), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.6), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.4), 0.9em 0 0 0 rgba(65, 120, 190, 0.3), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.1);
+	}
+
+	16.67% {
+		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.8), -0.9em 0 0 0 rgba(65, 120, 190, 0.6), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.4), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.3), 0.9em 0 0 0 rgba(65, 120, 190, 0.1), 0.45em -0.78em 0 0 #4178be;
+	}
+
+	33.33% {
+		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.6), -0.9em 0 0 0 rgba(65, 120, 190, 0.4), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.3), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.1), 0.9em 0 0 0 #4178be, 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.8);
+	}
+
+	50% {
+		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.4), -0.9em 0 0 0 rgba(65, 120, 190, 0.3), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.1), 0.45em 0.78em 0 0 #4178be, 0.9em 0 0 0 rgba(65, 120, 190, 0.8), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.6);
+	}
+
+	66.67% {
+		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.3), -0.9em 0 0 0 rgba(65, 120, 190, 0.1), -0.45em 0.78em 0 0 #4178be, 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.8), 0.9em 0 0 0 rgba(65, 120, 190, 0.6), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.4);
+	}
+
+	83.33% {
+		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.1), -0.9em 0 0 0 #4178be, -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.8), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.6), 0.9em 0 0 0 rgba(65, 120, 190, 0.4), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.3);
+	}
 }
 

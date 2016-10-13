@@ -616,7 +616,13 @@ define([
 			}
 		});
 
-
+		var themeVal = localStorage.getItem("pageTheme");
+		if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
+			if (!document.body.classList.contains(themeVal)) {
+				document.body.classList.add(themeVal);
+			}
+		}
+		
 		// forward the preference service on to the command registry
 		commandRegistry.setServiceRegistry(serviceRegistry);
 		
@@ -831,21 +837,7 @@ define([
 			keyAssist = new mKeyAssist.KeyAssistPanel({
 				commandRegistry: commandRegistry
 			});
-			var keyAssistCommand = new mCommands.Command({
-				name: messages["Show Keys"],
-				tooltip: messages["ShowAllKeyBindings"],
-				id: "orion.keyAssist", //$NON-NLS-0$
-				callback: function () {
-					if (keyAssist.isVisible()) {
-						keyAssist.hide();
-					} else {
-						keyAssist.show();
-					}
-					return true;
-				}
-			});
-			commandRegistry.addCommand(keyAssistCommand);
-			commandRegistry.registerCommandContribution("globalActions", "orion.keyAssist", 100, null, true, new KeyBinding.KeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
+			var keyAssistCommand = mKeyAssist.createCommand(keyAssist, "globalActions", commandRegistry);
 
 			renderGlobalCommands(commandRegistry);
 

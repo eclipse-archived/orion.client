@@ -5,6 +5,7 @@
 # Ignore npm artifacts
 node_modules/
 npm-debug.log
+server/
 
 # Ignore any Maven artifacts that creep into the repo
 target/

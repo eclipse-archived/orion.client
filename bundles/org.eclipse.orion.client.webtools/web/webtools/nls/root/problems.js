@@ -50,5 +50,11 @@ define({
 	"vendor-prefix" : "Standard property '${0}' should come after vendor-prefixed property '${1}'.",
 	"vendor-prefix-standard": "Missing standard property '${0}' to go along with '${1}'.",
 	"zero-units" : "Values of 0 shouldn't have units specified.",
-	"fatal-error": "Fatal error, cannot continue: ${0}"
+	"fatal-error": "Fatal error, cannot continue: ${0}",
+	
+	// HTML lint messages
+	'attr-bans': 'The \'${0}\' attribute is not recommended.',
+	'tag-close': 'No matching closing tag for \'${0}\'.',
+	'img-req-alt': 'The \'alt\' property must be set for image tags (for accessibility).',
+	'fig-req-figcaption': '\'figure\' must have a \'figcaption\', \'figcaption\' must be in a \'figure\' (for accessibility).',
 });

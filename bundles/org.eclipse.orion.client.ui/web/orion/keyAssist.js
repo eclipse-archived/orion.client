@@ -14,10 +14,11 @@ define([
 	'i18n!orion/nls/messages',
 	'orion/webui/littlelib',
 	'orion/keyBinding',
+	'orion/commands',
 	'orion/metrics',
 	'orion/uiUtils',
 	'orion/util'
-], function (messages, lib, keyBinding, metrics, UIUtil, util) {
+], function (messages, lib, keyBinding, mCommands, metrics, UIUtil, util) {
 
 	function KeyAssistPanel(options) {
 		this.commandRegistry = options.commandRegistry;
@@ -425,7 +426,27 @@ define([
 		}
 	};
 
+	function createCommand(keyAssist, scopeId, commandRegistry) {
+		var keyAssistCommand = new mCommands.Command({
+			name: messages["Show Keys"],
+			tooltip: messages["ShowAllKeyBindings"],
+			id: "orion.keyAssist", //$NON-NLS-0$
+			callback: function () {
+				if (keyAssist.isVisible()) {
+					keyAssist.hide();
+				} else {
+					keyAssist.show();
+				}
+				return true;
+			}
+		});
+		commandRegistry.addCommand(keyAssistCommand);
+		commandRegistry.registerCommandContribution(scopeId, "orion.keyAssist", 100, null, true, new keyBinding.KeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
+		
+		return keyAssistCommand;
+	}
 	return {
-		KeyAssistPanel: KeyAssistPanel
+		KeyAssistPanel: KeyAssistPanel,
+		createCommand: createCommand
 	};
 });

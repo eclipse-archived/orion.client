@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -78,7 +78,6 @@ define([
            if(files) {
                return new Deferred().resolve(files);
            }
-           var that = this;
            var opts = options ? options : Object.create(null);
            var ext = opts.ext ? opts.ext : 'js'; //$NON-NLS-1$
            var icon = opts.icon ? opts.icon : '../javascript/images/javascript.png'; //$NON-NLS-1$
@@ -91,15 +90,18 @@ define([
 
            // Search for it
            return this.getSearchLocation().then(function(searchLocation) {
-	           return that.getFileClient().search(
+	           return this.getFileClient().search(
 	                {
-	                	'resource': searchLocation,
-	                    'keyword': searchname,
-	                    'sort': 'Name asc', //$NON-NLS-1$
-	                    'nameSearch': true,
-	                    'fileType': ext,
-	                    'start': 0,
-	                    'rows': 30
+	                	resource: searchLocation,
+	                    keyword: searchname,
+	                    caseSensitive: true,
+	                    wholeWord: true,
+	                    sort: 'Name asc', //$NON-NLS-1$
+	                    nameSearch: true,
+	                    fileType: ext,
+	                    start: 0,
+	                    rows: 30,
+	                    exclude: ['node_modules']
 	                }
 	           ).then(function(res) {
 	               var r = res.response;
@@ -108,23 +110,24 @@ define([
 	                   files = [];
 	                   var testname = filename.replace(/(?:\.?\.\/)*/, '');
 	                   testname = testname.replace(new RegExp("\\"+dotext+"$"), ''); //$NON-NLS-1$
+					   testname = testname.replace(/\\/g, "/");
 	                   testname = testname.replace(/\//g, "\\/"); //$NON-NLS-1$
 	                   for(var i = 0; i < len; i++) {
 	                       var file = r.docs[i];
 	                       //TODO haxxor - only keep ones that end in the logical name or the mapped logical name
 	                       var regex = ".*(?:"+testname+")$"; //$NON-NLS-1$ //$NON-NLS-2$
 	                       if(new RegExp(regex).test(file.Location.slice(0, file.Location.length-dotext.length))) {
-	                           files.push(that._newFileObj(file.Name, file.Location, that._trimName(file.Path), icon, type));
+	                           files.push(this._newFileObj(file.Name, file.Location, this._trimName(file.Path), icon, type));
 	                       }
 	                   }
 	                   if(files.length > 0) {
-	                       that.cache.put(getKey(that.searchLocation, filename), files);
+	                       this.cache.put(getKey(this.searchLocation, filename), files);
 	                       return files;
 	                   }
 	               }
 	               return null;
-	           });
-           });
+	           }.bind(this));
+           }.bind(this));
        },
 
        /**

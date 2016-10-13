@@ -11,6 +11,7 @@
 /*eslint-env browser, amd*/
 define([
 	'orion/commandRegistry',
+	'orion/keyAssist',
 	'orion/fileClient',
 	'orion/contentTypes',
 	'orion/editorCommands',
@@ -24,6 +25,7 @@ define([
 	'orion/objects'
 ], function(
 	mCommandRegistry,
+	mKeyAssist,
 	mFileClient,
 	mContentTypes,
 	mEditorCommands,
@@ -58,7 +60,7 @@ define([
 				orionHiddenDiv.style.display = "none";
 			}
 			//once = new Deferred();
-			this._commandRegistry = new mCommandRegistry.CommandRegistry({});
+			this._commandRegistry = new mCommandRegistry.CommandRegistry({});			
 			this._fileClient = new mFileClient.FileClient(this.serviceRegistry);
 			this._editorCommands = new mEditorCommands.EditorCommandFactory({
 				serviceRegistry: this.serviceRegistry,
@@ -67,6 +69,14 @@ define([
 				toolbarId: this._toolbarId,
 				navToolbarId: this._toolbarId
 			});
+
+			// Key assist
+			var keyAssist = new mKeyAssist.KeyAssistPanel({
+				commandRegistry: this._commandRegistry
+			});
+			mKeyAssist.createCommand(keyAssist, "__toolbar__", this._commandRegistry);			
+			keyAssist.addProvider(this._editorCommands);
+			
 			this._editorConfig = this._startupOptions && this._startupOptions.editorConfig ? this._startupOptions.editorConfig : {};
 			mCommonPreferences.mergeSettings(mDefaultEditorPreferences.defaults, this._editorConfig);
 			this._progressService = {

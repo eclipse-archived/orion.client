@@ -150,7 +150,13 @@ function caughtErrorHandler(task, err){
 	task.done(errorResponse);
 }
 function parsebody(body){
-	return typeof body === "string" ? JSON.parse(body): body;
+	var result;
+	try{
+		result = typeof body === "string" ? JSON.parse(body): body;
+	}catch(err){
+		result = body;
+	}
+	return result;
 }
 function cfRequest (method, userId, url, query, body, headers, requestHeader) {
 	return new Promise(function(fulfill, reject) {

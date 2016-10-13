@@ -80,8 +80,12 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 			projectLoc = jsonOptions.projectLoc;
 			plugins = jsonOptions.plugins;
 			pluginsDir = jsonOptions.pluginsDir;
-			mergeArray(defNames, jsonOptions.libs);
-			mergeArray(defNames, jsonOptions.defs);
+			if(jsonOptions.libs) {
+				mergeArray(defNames, jsonOptions.libs);
+			}
+			if(jsonOptions.defs) {
+				mergeArray(defNames, jsonOptions.defs);
+			}
 			if(Array.isArray(jsonOptions.loadEagerly) && jsonOptions.loadEagerly.length > 0) {
 				options.loadEagerly = jsonOptions.loadEagerly;
 			}
@@ -97,6 +101,8 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 				} else if(options.ecmaVersion === 7) {
 					mergeArray(defNames, ["ecma5", "ecma6", "ecma7"]);
 				}
+			} else {
+				mergeArray(defNames, ["ecma5", "ecma6", "ecma7"]);
 			}
 			if (typeof jsonOptions.sourceType === 'string') {
 				options.sourceType = jsonOptions.sourceType;
