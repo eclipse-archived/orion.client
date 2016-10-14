@@ -18,7 +18,7 @@ define([
 	var registry,
 		severities = {
 			1: 'error',
-			2: 'warn',
+			2: 'warning',
 			3: 'info'
 		};
 	
