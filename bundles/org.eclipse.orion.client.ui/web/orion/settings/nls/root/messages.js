@@ -284,5 +284,6 @@ define({//Default message bundle
     "editorTheme selection background": "Selection background",
     'customizeTheme': 'Custom Style...',
     'moreEditorSettings': 'Editor Settings...',
-    'SettingWarning' : '${0} Warning: Global settings for \'${2}\' are overriden by the settings defined in: ${1}'
+    'SettingWarning' : '${0} Warning: Global settings for \'${2}\' are overriden by the settings defined in: ${1}',
+    "version": "Version ${0}",
 });
