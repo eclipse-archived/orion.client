@@ -192,7 +192,6 @@ exports.install = function(options) {
 			var receiveFromServer = net.createServer({}, function(stream) {
 				console.log('receiveFromServer socket connected');
 				stream.on('data', function(data) {
-					console.log("data: >" + data.toString('utf-8') + '<');
 					parseMessage(data, workspaceUrl, sock);
 				});
 				stream.on('error', function(err) {
