@@ -47,10 +47,7 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/Checkbox'
 				Checkbox.prototype.postCreate.call(this);
 				this.mylabel.textContent = this.fieldlabel;
 				if(this.fieldTitle) {
-					this.mylabel.title = this.fieldTitle;
-					if(this.checkbox) {
-						this.checkbox.title = this.fieldTitle;
-					}
+					this.mylabel.parentNode.title = this.fieldTitle;
 				}
 			},
 
