@@ -86,7 +86,6 @@ define([
 						authService.logout().then(function(){
 							_self.addUserItem(key, authService, _self.authenticatedServices[key].label);
 							localStorage.removeItem(key);
-							localStorage.removeItem("lastLogin"); //$NON-NLS-0$
 							//TODO: Bug 368481 - Re-examine localStorage caching and lifecycle
 							for (var i = localStorage.length - 1; i >= 0; i--) {
 								var name = localStorage.key(i);

@@ -99,6 +99,7 @@ define(['require', 'orion/Deferred', 'orion/EventTarget', 'orion/xhr'], function
 				this._currentPromises[namespace] = d;
 				var that = this;
 				this._service.get(namespace).then(function(data) {
+					data = data || {};
 					that._cache.set(namespace, data);
 					delete that._currentPromises[namespace];
 					d.resolve(data);
