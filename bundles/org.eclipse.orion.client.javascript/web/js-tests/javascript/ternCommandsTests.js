@@ -318,6 +318,72 @@ define([
 				};
 				testOpenDecl(options, {start: 9, end: 10});
 			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=505723
+			 */
+			it("Open decl - simple ThisExpression 1", function(done) {
+				var options = {
+					buffer: "function Foo() {this.baz = 10;} Foo.prototype.bar = function() {console.log(this.baz);};",
+					offset: 17,
+					callback: done
+				};
+				testOpenDecl(options, {start: 9, end: 12});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=505723
+			 */
+			it("Open decl - simple ThisExpression 2", function(done) {
+				var options = {
+					buffer: "function Foo() {this.baz = 10;} Foo.prototype.bar = function() {console.log(this.baz);};",
+					offset: 78,
+					callback: done
+				};
+				testOpenDecl(options, {start: 9, end: 12});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=505723
+			 */
+			it("Open decl - simple ThisExpression 3", function(done) {
+				var options = {
+					buffer: "function Bar() {} Bar.prototype.two = function() {[].forEach(function() {this.two = 2;}.bind(this));};",
+					offset: 95,
+					callback: done
+				};
+				testOpenDecl(options, {start: 9, end: 12});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=505723
+			 */
+			it("Open decl - simple ThisExpression 4", function(done) {
+				var options = {
+					buffer: "function Bar() {} Bar.prototype.two = function() {[].forEach(function() {this.two = 2;}.bind(this));};",
+					offset: 75,
+					callback: done
+				};
+				testOpenDecl(options, {start: 9, end: 12});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=505723
+			 */
+			it("Open decl - multi-nested ThisExpression 1", function(done) {
+				var options = {
+					buffer: "function Bar() {} Bar.prototype.two = function() {[].forEach(function() {[].forEach(function() {this.one = 1;}.bind(this));}.bind(this));};",
+					offset: 117,
+					callback: done
+				};
+				testOpenDecl(options, {start: 9, end: 12});
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=505723
+			 */
+			it("Open decl - multi-nested ThisExpression 2", function(done) {
+				var options = {
+					buffer: "function Bar() {} Bar.prototype.two = function() {[].forEach(function() {[].forEach(function() {this.one = 1;}.bind(this));}.bind(this));};",
+					offset: 97,
+					callback: done
+				};
+				testOpenDecl(options, {start: 9, end: 12});
+			});
 			it('Open Implementation - Simple function declaration', function(done) {
 				var options = {
 					buffer: "function a(){ console.log('test'); }; a();",
