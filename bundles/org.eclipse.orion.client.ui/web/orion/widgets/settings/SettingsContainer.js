@@ -68,19 +68,19 @@ define([
 		this.settingsCore.pluginRegistry.addEventListener("stopped", pluginsUpdated);
 		this.settingsCore.pluginRegistry.addEventListener("updated", pluginsUpdated);
 		
-		if (localStorage.darklaunch){
-			var xhr = new XMLHttpRequest();
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState === 4 && xhr.status === 200){
-					var resp = JSON.parse(xhr.responseText);
-					if (typeof resp.build === "string"){
-						this.statusService.setMessage(i18nUtil.formatMessage(messages["version"], resp.build));
-					}
+		var xhr = new XMLHttpRequest();
+		this.versionString = null;
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4 && xhr.status === 200){
+				var resp = JSON.parse(xhr.responseText);
+				if (typeof resp.build === "string"){
+					this.versionString = i18nUtil.formatMessage(messages["version"], resp.build);
+					this.statusService.setMessage(this.versionString);
 				}
-			}.bind(this);
-			xhr.open("GET", "../version",  true); //$NON-NLS-1$ //$NON-NLS-2$
-			xhr.send(null);
-		}
+			}
+		}.bind(this);
+		xhr.open("GET", "../version",  true); //$NON-NLS-1$ //$NON-NLS-2$
+		xhr.send(null);
 	}
 	SettingsContainer.prototype = Object.create(superPrototype);
 	objects.mixin(SettingsContainer.prototype, {
@@ -486,6 +486,10 @@ define([
 					resource: resource,
 					params: params
 				});
+			}
+			
+			if (this.versionString){
+				this.statusService.setMessage(this.versionString);
 			}
 		},
 
