@@ -69,6 +69,7 @@
 	color: white !important;
 }
 
+.lightPage .liveUpdateLabel,
 .lightPage .splashAbout,
 .lightPage .splashVerbal,
 .lightPage .gitCommitMore,
@@ -77,6 +78,12 @@
 .lightPage .sideMenuItem > .submenu-trigger:hover {
 	color: rgb(61, 114, 179) !important;
 }
+
+.lightPage .sideMenuItemActive:hover {
+	color: white;
+	background: rgba(61, 114, 179, 0.25) !important;
+}
+
 
 .lightPage #configSection {
 	color: black !important;
@@ -184,6 +191,13 @@
 .lightPage .commandButton:not(.primaryButton):focus {
 	color: black;
 	background-color: rgba(61, 114, 179, 0.25);
+	box-shadow: 0 1px 2px 0 rgb(61, 114, 179);
+}
+
+.lightPage .checkedRow .commandButton:not(.primaryButton):hover,
+.lightPage .checkedRow .commandButton:not(.primaryButton):focus {
+	color: black;
+	background: rgba(255, 255, 255, 0.50);
 	box-shadow: 0 1px 2px 0 rgb(61, 114, 179);
 }
 
