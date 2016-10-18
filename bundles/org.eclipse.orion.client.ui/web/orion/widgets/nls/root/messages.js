@@ -97,6 +97,8 @@ define({//Default message bundle
 	"appInfoUnknown": "unknown",
 	"appInfoError": "error",
 	"displayNameSeparator": " on ",
+	"Run": "Run",
+	"Stop": "Stop",
 	"openAppTooltip": "Open the Deployed App",
 	"openLogsTooltip": "Open the Logs",
 	"redeployConfirmationDialogTitle": "Stop and Redeploy?",
