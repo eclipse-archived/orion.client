@@ -97,7 +97,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/commandRegistry', 'orion/command
 		var startCommand = new Command({
 			name: messages["Start"],
 			tooltip: messages["Start the site"],
-			imageClass: "core-sprite-start", //$NON-NLS-0$
+		//	imageClass: "core-sprite-start", //$NON-NLS-0$
 			id: "orion.site.start", //$NON-NLS-0$
 			visibleWhen: function(item) {
 				return wrap(item).some(function(s) {
