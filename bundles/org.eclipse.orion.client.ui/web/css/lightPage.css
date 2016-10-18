@@ -84,6 +84,9 @@
 	background: rgba(61, 114, 179, 0.25) !important;
 }
 
+.lightPage .projectNavColumn {
+	color: black;
+}
 
 .lightPage #configSection {
 	color: black !important;
