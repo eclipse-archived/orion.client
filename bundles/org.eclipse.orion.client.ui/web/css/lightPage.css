@@ -84,6 +84,7 @@
 	background: rgba(61, 114, 179, 0.25) !important;
 }
 
+.lightPage .status,
 .lightPage .projectNavColumn {
 	color: black;
 }
