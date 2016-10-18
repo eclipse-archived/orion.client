@@ -216,6 +216,7 @@ define([
 									editorContext.setText({text: text, selection: selections, preserveSelection: true});
 								});
 							}
+							return new Deferred().resolve([]);
 						});
 					});
 				}
@@ -246,6 +247,7 @@ define([
 												editorContext.setText({text: text, selection: selections, preserveSelection: true});
 											});
 										}
+										return new Deferred().resolve([]);
 									});
 								});
 							});
@@ -297,8 +299,8 @@ define([
 									}
 									if (loc.range.start.line === loc.range.end.line) {
 										var sel = {
-											line: loc.range.start.line,
-											offset: loc.range.start.character + 1,
+											line: loc.range.start.line + 1,
+											offset: loc.range.start.character,
 											length: loc.range.end.character - loc.range.start.character
 										};
 										return editorContext.openEditor(loc.uri, sel);
@@ -371,23 +373,28 @@ define([
 		provider.registerService("orion.edit.occurrences",
 			{
 				computeOccurrences: function computeOccurrences(editorContext, args) {
-					return editorContext.getFileMetadata().then(function(meta) {
-						return getPosition(editorContext, args.selection.start).then(function(position) {
-							return ipc.documentHighlight(meta.location, position).then(function(results) {
-								if(Array.isArray(results) && results.length > 0) {
-									return Deferred.all(results.map(function(result) {
-										return editorContext.getLineStart(result.range.start.line).then(function(offset) {
-											return {
-												start: result.range.start.character+offset,
-												end: result.range.end.character+offset
-											};
-										});
-									}));
-								} 
-								return new Deferred().resolve([]);
-							},
-							/* @callback */ function(err) {
-								return new Deferred().resolve([]);
+					return editorContext.getSelectionText().then(function(text) {
+						if (text.trim().length === 0) {
+							return new Deferred().resolve([]);
+						}
+						return editorContext.getFileMetadata().then(function(meta) {
+							return getPosition(editorContext, args.selection.start).then(function(position) {
+								return ipc.documentHighlight(meta.location, position).then(function(results) {
+									if(Array.isArray(results) && results.length > 0) {
+										return Deferred.all(results.map(function(result) {
+											return editorContext.getLineStart(result.range.start.line).then(function(offset) {
+												return {
+													start: result.range.start.character+offset,
+													end: result.range.end.character+offset
+												};
+											});
+										}));
+									} 
+									return new Deferred().resolve([]);
+								},
+								/* @callback */ function(err) {
+									return new Deferred().resolve([]);
+								});
 							});
 						});
 					});
