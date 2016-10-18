@@ -324,7 +324,7 @@ define([
 	function createCommandItem(parent, command, commandInvocation, id, keyBinding, useImage, callback) {
 		var element;
 		var clickTarget;
-		useImage = useImage || (!command.name && command.hasImage());
+		useImage = useImage || command.hasImage();
 		
 		var renderButton = function() {
 				if (useImage) {

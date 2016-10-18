@@ -73,6 +73,7 @@ define({
 	"noActions": "There are no actions for the current selection.",
 	"NoFile": "Use the ${0} to create new files and folders. Click a file to start coding.",
 	"LocalEditorSettings": "Local Editor Settings",
+	"EditorSettings": "Editor Settings",
 	"NoProject": "${0} is not a project. To convert it to a project use ${1}.",
 	"NoProjects": "There are no projects in your workspace. Use the ${0} menu to create projects.",
 	"Disconnected": "${0} (disconnected)",
