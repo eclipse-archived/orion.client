@@ -63,21 +63,16 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 			}).then(function() {
 				var auth = serviceRegistry.getService("orion.core.auth"); //$NON-NLS-0$
 				if (auth) {
-					var authPromise = auth.getUser().then(function(user) {
+					return auth.getUser().then(function(user) {
 						if (!user) {
 							return auth.getAuthForm(window.location.href).then(function(formURL) {
 								setTimeout(function() {
 									window.location = formURL;
 								}, 0);
+								return new Deferred().reject({});
 							});
-						} else {
-							localStorage.setItem("lastLogin", Date.now()); //$NON-NLS-0$
 						}
 					});
-					var lastLogin = localStorage.getItem("lastLogin"); //$NON-NLS-1$
-					if (!lastLogin || lastLogin < (Date.now() - (15 * 60 * 1000))) { // 15 minutes
-						return authPromise; // if returned waits for auth check before continuing
-					}
 				}
 			}).then(function() {
 				var result = {

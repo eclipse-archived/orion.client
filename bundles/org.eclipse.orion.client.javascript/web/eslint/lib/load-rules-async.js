@@ -1409,7 +1409,7 @@ define([
 								}
 								var type = tern.findExprType(query, tern.file, expr);
 								// The origin could be a primitive in the same file (a=1;) which we still want to mark
-								if (type && type.origin && type.origin !== tern.file.name){
+								if (type && (type.originNode || Array.isArray(type.types) && type.types.length > 0) && type.origin && type.origin !== tern.file.name){
 									foundType = type;
 								}
             	                if (!foundType){

@@ -129,6 +129,7 @@ define({//Default message bundle
 	"title (optional)": "title (optional)",
 	"url": "url",
 	"workedProgress": "${0} (${1}/${2})",
+	"ConfirmLogout": "Do you want to logout?",
 	"VerticalPaneOrientation": "Vertical pane orientation",
 	"TogglePaneOrientationTooltip": "Toggle split pane orientation",
 	"WarningDuplicateLinkId": "Duplicate link ID: ${0} (link IDs are not case-sensitive)",

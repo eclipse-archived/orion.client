@@ -97,7 +97,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/commandRegistry', 'orion/command
 		var startCommand = new Command({
 			name: messages["Start"],
 			tooltip: messages["Start the site"],
-			imageClass: "core-sprite-start", //$NON-NLS-0$
+		//	imageClass: "core-sprite-start", //$NON-NLS-0$
 			id: "orion.site.start", //$NON-NLS-0$
 			visibleWhen: function(item) {
 				return wrap(item).some(function(s) {
@@ -144,7 +144,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/commandRegistry', 'orion/command
 		var stopCommand = new Command({
 			name: messages["Stop"],
 			tooltip: messages["Stop the site"],
-			imageClass: "core-sprite-stop", //$NON-NLS-0$
+//			imageClass: "core-sprite-stop", //$NON-NLS-0$
 			id: "orion.site.stop", //$NON-NLS-0$
 			visibleWhen: function(item) {
 				return wrap(item).some(function(s) {
@@ -173,7 +173,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/commandRegistry', 'orion/command
 		var deleteCommand = new Command({
 			name: messages["Delete"],
 			tooltip: messages["Delete the site configuration"],
-			imageClass: "core-sprite-delete", //$NON-NLS-0$
+//			imageClass: "core-sprite-delete", //$NON-NLS-0$
 			id: "orion.site.delete", //$NON-NLS-0$
 			visibleWhen: function(items) {
 				return wrap(items).length > 0;

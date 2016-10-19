@@ -461,6 +461,7 @@ define([
 			var that = this;
 			var settingsCommand = new mCommands.Command({
 				imageClass: "core-sprite-wrench", //$NON-NLS-0$
+				name: messages.EditorSettings,
 				tooltip: messages.LocalEditorSettings,
 				id: "orion.edit.settings", //$NON-NLS-0$
 				visibleWhen: /** @callback */ function(items, data) {

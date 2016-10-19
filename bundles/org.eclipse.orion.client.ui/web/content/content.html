@@ -33,5 +33,13 @@
 		</div>
 		<div class="footer-fixed-bottom footer" id="footer">
 		</div>
+		<script>
+			var themeVal = localStorage.getItem("pageTheme");
+			if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
+				if (!document.body.classList.contains(themeVal)) {
+					document.body.classList.add(themeVal);
+				}
+			}
+		</script>
 	</body>	
 </html>

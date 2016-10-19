@@ -233,6 +233,14 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		               if(decl && typeof decl.start === 'number' && typeof decl.end === "number") {
 							callback({request: 'definition', declaration:decl}); //$NON-NLS-1$
 						} else if (decl && decl.origin){
+							//tern guessed at it when there is no line infos
+							var idx = decl.origin.lastIndexOf(".");
+							if(idx > -1 && decl.origin.slice(idx) === ".js") {
+								decl.guess = true;
+							} else {
+								delete decl.guess;  //sometimes Tern will set the guess flag, we only want the index flag
+								decl.index = true;
+							}
 							callback({request: 'definition', declaration: decl}); //$NON-NLS-1$
 						} else {
 							callback({request: 'definition', declaration: null}); //$NON-NLS-1$

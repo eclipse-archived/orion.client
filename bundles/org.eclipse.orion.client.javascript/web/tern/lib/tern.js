@@ -1011,6 +1011,18 @@
 	      result.results = temp;
 	   }
    	}
+   	if(typeof result.start !== "number" && typeof result.end !== "number") {
+   		//ORION, try the type of the found type
+   		var inner = type.getType();
+   		if(inner && inner.originNode) {
+   			result = getResult(inner, srv, query);
+   		} else if(expr && expr.node && expr.node.type === 'ThisExpression') {
+   			inner = inner.proto;
+   			if(inner && inner.hasCtor) {
+   				result = getResult(inner.hasCtor, srv, query);
+   			}
+   		}
+   	}
    	return result;
   }
   
@@ -1038,7 +1050,6 @@
       result.file = span.origin;
       storeSpan(srv, query, span, result);
     }
-    
     return clean(result);
   }
 
