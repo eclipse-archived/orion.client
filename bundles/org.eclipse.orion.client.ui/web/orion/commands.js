@@ -324,11 +324,11 @@ define([
 	function createCommandItem(parent, command, commandInvocation, id, keyBinding, useImage, callback) {
 		var element;
 		var clickTarget;
-		useImage = useImage || command.hasImage();
+		useImage = useImage || command.hasImage && command.hasImage();
 		
 		var renderButton = function() {
 				if (useImage) {
-					if (command.hasImage()) {
+					if (command.hasImage && command.hasImage()) {
 						_addImageToElement(command, element, id);
 						// ensure there is accessible text describing this image
 						if (command.name) {
