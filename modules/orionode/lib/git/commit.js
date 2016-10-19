@@ -581,7 +581,14 @@ function cherryPick(req, res, commitToCherrypick) {
 		});
 	})
 	.catch(function(err) {
-		writeError(400, res, err.message);
+		if(err.message.indexOf("Cannot create a tree") !== -1){
+			res.status(200).json({
+				"HeadUpdated": true,
+				"Result": "CONFLICTING"
+			});
+		}else{
+			writeError(400, res, err.message);
+		}
 	});
 }
 
