@@ -84,6 +84,8 @@
 	background: rgba(61, 114, 179, 0.25) !important;
 }
 
+.lightPage .splashDetailMessage,
+.lightPage .splashMessage,
 .lightPage .status,
 .lightPage .projectNavColumn {
 	color: black;
