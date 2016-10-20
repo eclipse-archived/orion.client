@@ -3,7 +3,7 @@
  */
 
 /* Page color */
-
+@import "../orion/webui/intro.css";
 .orionPage {
 	background-color: #26343F;
 	width: 100%;

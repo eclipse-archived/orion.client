@@ -1,0 +1,43 @@
+{
+    "tutorials": [{
+        "id": "source_outline",
+        "title": "Source Outline",
+        "desc": "Source Outline: open source outline slideout to see the structure of the the code",
+        "ismd": "false",
+        "steps": [{
+            "url": "http://localhost:8083/img/tuto_slideout_1.png",
+            "desc": "Open the View Mene",
+            "ismd": "false"
+        }, {
+            "url": "http://localhost:8083/img/tuto_slideout_2.png",
+            "desc": "**Hover** onto slideout then **click** source outline",
+            "ismd": "true"
+        }],
+        "isNew": true,
+        "targetSeletor": "#viewActions"
+    }, {
+        "id": "reference",
+        "title": "Reference",
+        "desc": "__Reference__: find the most likely references of current selection, can be used on functions, variabals and constructors",
+        "ismd": "true",
+        "steps": [{
+            "url": "http://localhost:8083/img/tuto_reference_1.PNG",
+            "desc": "[Open Tools Menu Tab](https://github.com/chjj/marked)",
+            "ismd": "true"
+        }],
+        "isNew": true,
+        "targetSeletor": "#toolsActions"
+    }, {
+        "id": "site",
+        "title": "Site",
+        "desc": "**Site**: create a site for a web server",
+        "ismd": "true",
+        "steps": [{
+            "url": "http://localhost:8083/img/tuto_site_1.PNG",
+            "desc": "Clike Create",
+            "ismd": "false"
+        }],
+        "isNew": true,
+        "targetSeletor": "#sideMenu>ul>li>a[aria-label=Sites]"
+    }]
+}
