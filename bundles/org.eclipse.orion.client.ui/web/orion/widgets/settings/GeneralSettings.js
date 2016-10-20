@@ -22,7 +22,10 @@ function(messages, mSection, lib, objects, SettingsCheckbox) {
 				this.generalFields = [
 				    new SettingsCheckbox( {fieldlabel: messages["desktopSelectionPolicy"], 
 				    	fieldTitle: messages["desktopSelectionPolicyTooltip"],
-				    	postChange: this.setDesktopPolicy.bind(this)})  //$NON-NLS-0$
+				    	postChange: this.setDesktopPolicy.bind(this)}),  //$NON-NLS-0$
+				    	new SettingsCheckbox( {fieldlabel: messages["filenameSearchPolicy"], 
+				    	fieldTitle: messages["filenameSearchPolicyTooltip"],
+				    	postChange: this.setFilenameSearchPolicy.bind(this)})
 				];
 				new mSection.Section(this.node, {
 					id: "fileNavigation", //$NON-NLS-0$
@@ -44,7 +47,19 @@ function(messages, mSection, lib, objects, SettingsCheckbox) {
 					
 			setDesktopPolicy: function() {
 				var deskTopSelectionEnabled = this.generalFields[0].isChecked();
-				this.preferences.setPrefs({desktopSelectionPolicy: deskTopSelectionEnabled});
+				this.preferences.getPrefs().then(function (genealPrefs) {
+					genealPrefs.desktopSelectionPolicy = deskTopSelectionEnabled;
+					this.preferences.setPrefs(genealPrefs);
+				}.bind(this));
+
+			},
+			
+			setFilenameSearchPolicy: function() {
+				var filenameSearchUsingIndex = this.generalFields[1].isChecked();
+				this.preferences.getPrefs().then(function (genealPrefs) {
+					genealPrefs.filenameSearchPolicy = filenameSearchUsingIndex;
+					this.preferences.setPrefs(genealPrefs);
+				}.bind(this));
 			},
 
 			show:function(node, callback){
@@ -55,6 +70,8 @@ function(messages, mSection, lib, objects, SettingsCheckbox) {
 				this.preferences.getPrefs().then(function (genealPrefs) {
 					this.generalFields[0].setSelection(genealPrefs.desktopSelectionPolicy);
 					this.generalFields[0].show();
+					this.generalFields[1].setSelection(genealPrefs.filenameSearchPolicy);
+					this.generalFields[1].show();
 					if (callback) {
 						callback();
 					}

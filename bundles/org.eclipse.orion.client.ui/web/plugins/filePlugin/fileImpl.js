@@ -112,12 +112,15 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 
 	function _generateLuceneQuery(searchParams){
 		var newKeyword = searchParams.keyword;
-		var caseSensitiveFlag = "", wholeWordFlag = "", regExFlag = "", excluded = "";
+		var caseSensitiveFlag = "", wholeWordFlag = "", regExFlag = "", excluded = "", usingIndex="";
 		if(searchParams.caseSensitive) {
 			caseSensitiveFlag = "+CaseSensitive:" + searchParams.caseSensitive;
 		}
 		if(searchParams.wholeWord) {
 			wholeWordFlag = "+WholeWord:" + searchParams.wholeWord;
+		}
+		if(searchParams.usingIndex !== undefined) {
+			usingIndex = "+UsingIndex:" + searchParams.usingIndex;
 		}
 		if(searchParams.regEx) {
 			regExFlag = "+RegEx:" + searchParams.regEx;
@@ -170,6 +173,9 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		caseSensitiveFlag + wholeWordFlag + regExFlag  + "+Location:" + searchParams.resource + "*";
 		if(excluded) {
 			q = q + "+Exclude:"+excluded;
+		}
+		if(usingIndex){
+			q = q + usingIndex;
 		}
 		return q;
 	}
