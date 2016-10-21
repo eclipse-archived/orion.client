@@ -12,14 +12,15 @@
 /*eslint-env browser, amd*/
 define([
 'orion/plugin', 
-"orion/Deferred",	
+"orion/Deferred",
 'orion/editor/stylers/text_x-java-source/syntax', 
 'orion/editor/stylers/application_x-jsp/syntax',
 "plugins/languages/java/javaProject",
 'orion/serviceregistry',
 "plugins/languages/java/ipc",
-"plugins/languages/java/javaValidator"
-], function(PluginProvider, Deferred, mJava, mJSP, JavaProject, mServiceRegistry, IPC, JavaValidator) {
+"plugins/languages/java/javaValidator",
+"javascript/finder"
+], function(PluginProvider, Deferred, mJava, mJSP, JavaProject, mServiceRegistry, IPC, JavaValidator, Finder) {
 
 	var ipc = new IPC('/languageServer'),
 		project,
@@ -270,6 +271,28 @@ define([
 							return getPosition(editorContext, selection.start).then(function(start) {
 								return ipc.references(metadata.location, start, {includeDeclaration: true}).then(function(edits) {
 									console.log(edits);
+									if (Array.isArray(edits) && edits.length !== 0) {
+										return editorContext.getText().then(function(text) {
+											var word = Finder.findWord(text, selection.start);
+											if(word) {
+												return Deferred.all(convertToRefResults(edits)).then(function(refResults) {
+													var result = {
+														searchParams: {
+															keyword: word,
+															fileNamePatterns: ["*.java"],  //$NON-NLS-1$
+															caseSensitive: true, 
+															incremental:false, 
+															shape: 'group' //$NON-NLS-1$
+														},
+														refResult: refResults
+													};
+													return new Deferred().resolve(result);
+												});
+											}
+											return new Deferred().resolve([]);
+										});
+									}
+									return new Deferred().resolve([]);
 								});
 							});
 						});
@@ -284,6 +307,107 @@ define([
 			}
 		);
 		
+				
+		function convertToRefResults(edits) {
+			// edit has a uri for the file location and a range
+			// we need to answer a ref result that contains:
+			/*
+			 *   refResult: array
+			    [0]
+			       children <array>
+			         []
+				         lineNumber <line number within the file>
+				         matches:
+				           category: ""
+				           confidence: 100
+				           end:  <position within the file>
+				           length: end - start
+				           start: <position within the file>
+				           startIndex: position within the name
+				         name <string>
+				    contents: array of lines for the file
+				    location: workspace relative path
+				    metadata: file metadata object
+				    name: <file name>
+				    path: project relative path
+				    totalMatches: number of matches in that file
+			 */
+			// need to collect the number of matches per file
+			var results = new Map();
+			var projectPath = project.getProjectPath();
+			for (var i = 0, max = edits.length;i < max; i++) {
+				var edit = edits[i];
+				var uri = edit.uri;
+				var match = Object.create(null);
+				match.startIndex = edit.range.start.character;
+				match.confidence = 100;
+				match.category = "";
+				match.range = edit.position;
+				var result = results.get(uri);
+				var lineNumber = edit.range.start.line;
+				var children;
+				if (!result) {
+					result = Object.create(null);
+					result.location = uri;
+					result.path = uri.substring(projectPath.length);
+					result.totalMatches = 0;
+					var index = uri.lastIndexOf('/');
+					result.name = uri.substring(index + 1); // extract file name from path
+					children = new Map();
+					result.children = children;
+					results.set(uri, result);
+				} else {
+					children = result.children;
+				}
+				// already found a file with a match in it
+				result.totalMatches = result.totalMatches + 1;
+				
+				// handle the current match
+				var child = children.get(lineNumber);
+				if (!child) {
+					child = Object.create(null);
+					child.lineNumber = lineNumber;
+					child.matches = [];
+					children.set(lineNumber, child);
+				}
+				child.matches.push(match);
+			}
+			// iterate over the matches's keys
+			var returnedValue = [];
+			results.forEach(function(value) {
+				// get just the children's values
+				var temp = [];
+				value.children.forEach(function(element) {
+					temp.push(element);
+				});
+				value.children = temp;
+				returnedValue.push(value);
+			});
+			return returnedValue.map(function(element) {
+				// convert each match
+				return convertEachMatch(element);
+			});
+		}
+
+		function split_linebreaks(text) {
+			return text.split(/\r\n|\r|\n|\u2028|\u2029/g);
+		}
+
+		function convertEachMatch(element) {
+			return project.getFile(element.path).then(function(file) {
+				if (file) {
+					var contents = file.contents;
+					var allLines = split_linebreaks(contents);
+					element.contents = allLines;
+					element.children.forEach(function(child) {
+						child.name = allLines[child.lineNumber];
+					});
+					return new Deferred().resolve(element);
+				}
+				return new Deferred().resolve();
+			});
+		}
+
 		provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
 			{
 				execute: /** @callback */ function(editorContext, options) {
@@ -452,7 +576,7 @@ define([
 	/**
 	 * @name getPosition
 	 * @description Return a document position object for use with the protocol
-	 * @param {?} editorContext TRhe backing editor context
+	 * @param {?} editorContext The backing editor context
 	 * @param {number} offset The Orion editor offset
 	 * @returns {Deferred} Return a deferred that will resolve to a position object for the protocol textDocument requests
 	 */
@@ -464,6 +588,21 @@ define([
 		});
 	}
 	
+	/**
+	 * @name getOffset
+	 * @description Return a document offset based on a position
+	 * @param {?} editorContext The backing editor context
+	 * @param {Position} position The given position from the protocol
+	 * @returns {Deferred} Return a deferred that will resolve to a position object for the protocol textDocument requests
+	 */
+	function getOffset(editorContext, offset) {
+		return editorContext.getLineAtOffset(offset).then(function(line) {
+			return editorContext.getLineStart(line).then(function(lineOffset) {
+				return {line: line, character: offset-lineOffset};
+			});
+		});
+	}
+
 	/**
 	 * Converts the completion result kind into a human-readable string
 	 */
