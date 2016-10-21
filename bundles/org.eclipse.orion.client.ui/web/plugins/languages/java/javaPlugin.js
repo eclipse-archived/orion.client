@@ -269,20 +269,27 @@ define([
 					return editorContext.getFileMetadata().then(function(metadata) {
 						return editorContext.getSelection().then(function(selection) {
 							return getPosition(editorContext, selection.start).then(function(start) {
-								return ipc.references(metadata.location, start, {includeDeclaration: true}).then(function(edits) {
-									console.log(edits);
-									if (Array.isArray(edits) && edits.length !== 0) {
+								return ipc.references(metadata.location, start, {includeDeclaration: true}).then(function(locations) {
+									console.log(locations);
+									if (Array.isArray(locations) && locations.length !== 0) {
 										return editorContext.getText().then(function(text) {
 											var word = Finder.findWord(text, selection.start);
 											if(word) {
-												return Deferred.all(convertToRefResults(edits)).then(function(refResults) {
+												return Deferred.all(convertToRefResults(editorContext, locations)).then(function(refResults) {
 													var result = {
 														searchParams: {
 															keyword: word,
 															fileNamePatterns: ["*.java"],  //$NON-NLS-1$
-															caseSensitive: true, 
-															incremental:false, 
-															shape: 'group' //$NON-NLS-1$
+															caseSensitive: true,
+															incremental:false,
+															shape: 'file' //$NON-NLS-1$
+														},
+														categories: {
+															uncategorized: {
+																category: "uncategorized",
+																name: "Uncategorized",
+																sort: 13
+															}
 														},
 														refResult: refResults
 													};
@@ -308,7 +315,7 @@ define([
 		);
 		
 				
-		function convertToRefResults(edits) {
+		function convertToRefResults(editorContext, locations) {
 			// edit has a uri for the file location and a range
 			// we need to answer a ref result that contains:
 			/*
@@ -335,16 +342,16 @@ define([
 			// need to collect the number of matches per file
 			var results = new Map();
 			var projectPath = project.getProjectPath();
-			for (var i = 0, max = edits.length;i < max; i++) {
-				var edit = edits[i];
-				var uri = edit.uri;
+			for (var i = 0, max = locations.length;i < max; i++) {
+				var loc = locations[i];
+				var uri = loc.uri;
 				var match = Object.create(null);
-				match.startIndex = edit.range.start.character;
+				match.startIndex = loc.range.start.character;
 				match.confidence = 100;
 				match.category = "";
-				match.range = edit.position;
+				match.range = loc.range;
 				var result = results.get(uri);
-				var lineNumber = edit.range.start.line;
+				var lineNumber = loc.range.start.line;
 				var children;
 				if (!result) {
 					result = Object.create(null);
@@ -385,7 +392,7 @@ define([
 			});
 			return returnedValue.map(function(element) {
 				// convert each match
-				return convertEachMatch(element);
+				return convertEachMatch(editorContext, element);
 			});
 		}
 
@@ -393,21 +400,39 @@ define([
 			return text.split(/\r\n|\r|\n|\u2028|\u2029/g);
 		}
 
-		function convertEachMatch(element) {
+		function convertEachMatch(editorContext, element) {
 			return project.getFile(element.path).then(function(file) {
+				var deferred = new Deferred();
 				if (file) {
 					var contents = file.contents;
 					var allLines = split_linebreaks(contents);
 					element.contents = allLines;
-					element.children.forEach(function(child) {
+					element.children.map(function(child) {
 						child.name = allLines[child.lineNumber];
+						return Deferred.all(convertMatchRange(editorContext, child.matches)).then(function(selections) {
+							deferred.resolve(element);
+						});
 					});
-					return new Deferred().resolve(element);
+				} else {
+					deferred.resolve();
 				}
-				return new Deferred().resolve();
+				return deferred;
 			});
 		}
-
+		
+		function convertMatchRange(editorContext, matches) {
+			return matches.map(function(match) {
+				return convertRange(editorContext, match.range).then(function(selection) {
+					var start = selection.start;
+					var end = selection.end;
+					match.start = start;
+					match.end = end;
+					match.length = end - start;
+					delete match.range;
+				});
+			});
+		}
+		
 		provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
 			{
 				execute: /** @callback */ function(editorContext, options) {
