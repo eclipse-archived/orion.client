@@ -48,10 +48,13 @@
 
 .lightPage .content-fixedHeight,
 .lightPage .auxpane,
-.lightPage .mainpane,
+.lightPage .mainpane {
+	background: #c4c5c8 !important;
+}
+
 .lightPage .splash,
 .lightPage .splashLoader {
-	background: #c4c5c8 !important;
+	background: #f5f7fa !important;
 }
 
 .lightPage .gitStatusSection,
@@ -84,7 +87,7 @@
 	background: rgba(61, 114, 179, 0.25) !important;
 }
 
-.lightPage .splashDetailMessage,
+.lightPage .splashDetailedMessage,
 .lightPage .splashMessage,
 .lightPage .status,
 .lightPage .projectNavColumn {
