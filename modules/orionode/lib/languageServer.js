@@ -112,6 +112,11 @@ var CONTENT_LENGTH = 'Content-Length: ';
 var CONTENT_LENGTH_SIZE = CONTENT_LENGTH.length;
 
 function fixURI(p, workspaceUrl) {
+	if (Array.isArray(p)) {
+		p.forEach(function(element) {
+			fixURI(element, workspaceUrl);
+		});
+	}
 	if (p.uri) {
 		var s = p.uri.slice(workspaceUrl.length);
 		p.uri = api.join('/file', s.charAt(0) === '/' ? s.slice(1) : s);
@@ -119,6 +124,7 @@ function fixURI(p, workspaceUrl) {
 }
 
 var remainingData;
+var ready = false;
 
 function parseMessage(data, workspaceUrl, sock) {
 	try {
@@ -147,13 +153,24 @@ function parseMessage(data, workspaceUrl, sock) {
 				var contents = dataContents.slice(headerSizeIndex + 4, headerSizeIndex + 4 + messageSize);
 				var json = JSON.parse(contents);
 				message.content = json;
-				if (json && json.params) {
-					fixURI(json.params, workspaceUrl);
-				}
-				if (json && json.result) {
-					fixURI(json.result, workspaceUrl);
+				if (json) {
+					if (json.params) {
+						fixURI(json.params, workspaceUrl);
+					}
+					if (json.result) {
+						fixURI(json.result, workspaceUrl);
+					}
 				}
 				if (sock) {
+					// detect that the server is ready
+//					{"method":"language/status","params":{"type":"Started","message":"Ready"},"jsonrpc":"2.0"}
+					if (!ready
+							&& json.method === "language/status"
+							&& json.params
+							&& json.params.type === "Started"
+							&& json.params.message === "Ready") {
+						ready = true;
+					}
 					console.log(contents);
 					sock.emit('data', json);
 				}
@@ -221,6 +238,12 @@ exports.install = function(options) {
 						textDocument.uri = workspaceUrl + textDocument.uri.replace(/^\/file/, '');
 					}
 					var s = JSON.stringify(data);
+					if (!ready) {
+						// check if this is the initialization message if not skip it
+						if (data.method !== "initialize" && data.method !== "textDocument/didOpen") {
+							return;
+						}
+					}
 					console.log('data sent : ' + s);
 					stream.write("Content-Length: " + s.length + "\r\n\r\n" + s);
 				});
@@ -278,6 +301,7 @@ exports.install = function(options) {
 					}
 					sock = null;
 					remainingData = null;
+					ready = false;
 				});
 			});
 		});
