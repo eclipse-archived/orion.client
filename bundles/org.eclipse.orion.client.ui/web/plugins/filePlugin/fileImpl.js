@@ -112,12 +112,15 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 
 	function _generateLuceneQuery(searchParams){
 		var newKeyword = searchParams.keyword;
-		var caseSensitiveFlag = "", wholeWordFlag = "", regExFlag = "", excluded = "";
+		var caseSensitiveFlag = "", wholeWordFlag = "", regExFlag = "", excluded = "", usingIndex="";
 		if(searchParams.caseSensitive) {
 			caseSensitiveFlag = "+CaseSensitive:" + searchParams.caseSensitive;
 		}
 		if(searchParams.wholeWord) {
 			wholeWordFlag = "+WholeWord:" + searchParams.wholeWord;
+		}
+		if(searchParams.usingIndex !== undefined) {
+			usingIndex = "+UsingIndex:" + searchParams.usingIndex;
 		}
 		if(searchParams.regEx) {
 			regExFlag = "+RegEx:" + searchParams.regEx;
@@ -170,6 +173,9 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		caseSensitiveFlag + wholeWordFlag + regExFlag  + "+Location:" + searchParams.resource + "*";
 		if(excluded) {
 			q = q + "+Exclude:"+excluded;
+		}
+		if(usingIndex){
+			q = q + usingIndex;
 		}
 		return q;
 	}
@@ -679,6 +685,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 * @param {String} searchParams.fileNamePatterns Optional. The file name patterns within which to search. If specified, search will be performed under files which match the provided patterns. Patterns should be comma-separated and may use "*" and "?" as wildcards. 
 		 *															E.g. "*" means all files. "*.html,test*.js" means all html files html files and all .js files that start with "test".
 		 * @param {[String]} searchParams.exclude Optional. An array of file / folder names to exclude while searching.
+		 * @param {[Boolean]} searchParams.usingIndex Optional. The option of using index file name search or not.
 		 */
 		search: function(searchParams) {
 			var query = _generateLuceneQuery(searchParams);

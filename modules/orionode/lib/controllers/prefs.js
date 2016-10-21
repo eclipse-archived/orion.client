@@ -70,10 +70,6 @@ function PrefsController(options) {
 	return router;
 
 	// Helper functions
-	function getPrefsFileName(req) {
-		var prefFolder = options.configParams['orion.single.user'] ? os.homedir() : req.user.workspaceDir;
-		return nodePath.join(prefFolder, '.orion', PREF_FILENAME);
-	}
 
 	function getLockfileName(prefFileName) {
 		return prefFileName + '.lock';
@@ -102,7 +98,7 @@ function PrefsController(options) {
 	function acquirePrefs(req) {
 		var app = req.app, prefs = app.locals.prefs;
 		var getPrefs;
-		var prefFile = req.prefFile = getPrefsFileName(req);
+		var prefFile = req.prefFile = getPrefsFileName(req.user.workspaceDir, !options.configParams['orion.single.user']);
 		if (prefs) {
 			debug('Using prefs from memory');
 			scheduleFlush(app, prefFile);
@@ -264,18 +260,19 @@ function handleDelete(req, res) { //eslint-disable-line consistent-return
 	res.sendStatus(204);
 }
 
-function getElectronPrefsFileName(){
-	return nodePath.join(os.homedir(), '.orion', PREF_FILENAME);
+function getPrefsFileName(workspaceDir, isMultipleUser) {
+	var prefFolder = isMultipleUser ? workspaceDir : os.homedir();
+	return nodePath.join(prefFolder, '.orion', PREF_FILENAME);
 }
 
-function readPrefs(){
+function readPrefs(workspaceDir, isMultipleUser){
 	try {
-		var content = fs.readFileSync(getElectronPrefsFileName(),'utf8');
+		var content = fs.readFileSync(getPrefsFileName(workspaceDir, isMultipleUser),'utf8');
 		return JSON.parse(content);
 	} catch (e) {}
 	return {};
 }
 
-function writePrefs(contents){
-	fs.writeFileSync(getElectronPrefsFileName(), JSON.stringify(contents, null, 2), 'utf8');
+function writePrefs(contents, workspaceDir, isMultipleUser){
+	fs.writeFileSync(getPrefsFileName(workspaceDir, isMultipleUser), JSON.stringify(contents, null, 2), 'utf8');
 }

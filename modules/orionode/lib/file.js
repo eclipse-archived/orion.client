@@ -25,6 +25,10 @@ function getParam(req, paramName) {
 module.exports = function(options) {
 	var fileRoot = options.root;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	if(!options.options.configParams.isElectron){
+		var indexWorker = require('./indexWorker');
+		var Indexer = indexWorker.getIndexer(options.options.indexDir);
+	}
 
 	var writeFileMetadata = function() {
 		var args = Array.prototype.slice.call(arguments, 0);
@@ -230,7 +234,10 @@ module.exports = function(options) {
 		}
 
 		var filepath = getSafeFilePath(req, nodePath.join(rest, name));
-		fileUtil.handleFilePOST(fileRoot, req, res, filepath);
+		fileUtil.handleFilePOST(fileRoot, req, res, filepath)
+		.then(function(){
+			Indexer && Indexer.updateIndexEntry({location:req.body.Location,filepath:filepath,name:name}, req.user.workspaceDir, req.user.username);
+		});
 	});
 
 	// DELETE - no request body
@@ -245,6 +252,7 @@ module.exports = function(options) {
 				return res.sendStatus(412);
 			}
 			var callback = function(error) {
+				Indexer && Indexer.indexAfterAllDone(Indexer.SHORT_WAITING, req.user.workspaceDir, req.user.username);
 				if (error) {
 					writeError(500, res, error);
 					return;
