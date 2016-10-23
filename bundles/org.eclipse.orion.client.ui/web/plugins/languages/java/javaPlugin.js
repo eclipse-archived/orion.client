@@ -19,8 +19,9 @@ define([
 'orion/serviceregistry',
 "plugins/languages/java/ipc",
 "plugins/languages/java/javaValidator",
-"javascript/finder"
-], function(PluginProvider, Deferred, mJava, mJSP, JavaProject, mServiceRegistry, IPC, JavaValidator, Finder) {
+"javascript/finder",
+"orion/editor/textModel"
+], function(PluginProvider, Deferred, mJava, mJSP, JavaProject, mServiceRegistry, IPC, JavaValidator, Finder, TextModel) {
 
 	var ipc = new IPC('/languageServer'),
 		project,
@@ -275,7 +276,7 @@ define([
 										return editorContext.getText().then(function(text) {
 											var word = Finder.findWord(text, selection.start);
 											if(word) {
-												return Deferred.all(convertToRefResults(editorContext, locations)).then(function(refResults) {
+												return Deferred.all(convertToRefResults(locations)).then(function(refResults) {
 													var result = {
 														searchParams: {
 															keyword: word,
@@ -315,7 +316,7 @@ define([
 		);
 		
 				
-		function convertToRefResults(editorContext, locations) {
+		function convertToRefResults(locations) {
 			// edit has a uri for the file location and a range
 			// we need to answer a ref result that contains:
 			/*
@@ -351,7 +352,7 @@ define([
 				match.category = "";
 				match.range = loc.range;
 				var result = results.get(uri);
-				var lineNumber = loc.range.start.line;
+				var lineNumber = loc.range.start.line + 1;
 				var children;
 				if (!result) {
 					result = Object.create(null);
@@ -392,7 +393,7 @@ define([
 			});
 			return returnedValue.map(function(element) {
 				// convert each match
-				return convertEachMatch(editorContext, element);
+				return convertEachMatch(element);
 			});
 		}
 
@@ -400,16 +401,17 @@ define([
 			return text.split(/\r\n|\r|\n|\u2028|\u2029/g);
 		}
 
-		function convertEachMatch(editorContext, element) {
+		function convertEachMatch(element) {
 			return project.getFile(element.path).then(function(file) {
 				var deferred = new Deferred();
 				if (file) {
 					var contents = file.contents;
 					var allLines = split_linebreaks(contents);
 					element.contents = allLines;
+					var textModel = new TextModel.TextModel(contents, "auto");
 					element.children.map(function(child) {
-						child.name = allLines[child.lineNumber];
-						return Deferred.all(convertMatchRange(editorContext, child.matches)).then(function(selections) {
+						child.name = allLines[child.lineNumber - 1]; // line number is 0-based
+						return Deferred.all(convertMatchRange(textModel, child.matches)).then(function(selections) {
 							deferred.resolve(element);
 						});
 					});
@@ -419,17 +421,27 @@ define([
 				return deferred;
 			});
 		}
-		
-		function convertMatchRange(editorContext, matches) {
+
+		function convertRangeFromTextModel(textModel, range) {
+			var startLineOffset = textModel.getLineStart(range.start.line);
+			var endLineOffset = textModel.getLineStart(range.end.line);
+			return {
+				start: range.start.character+startLineOffset,
+				end: range.end.character+endLineOffset,
+			};
+		}
+
+		function convertMatchRange(textModel, matches) {
 			return matches.map(function(match) {
-				return convertRange(editorContext, match.range).then(function(selection) {
-					var start = selection.start;
-					var end = selection.end;
-					match.start = start;
-					match.end = end;
-					match.length = end - start;
-					delete match.range;
-				});
+				var deferred = new Deferred();
+				var selection = convertRangeFromTextModel(textModel, match.range);
+				var start = selection.start;
+				var end = selection.end;
+				match.start = start;
+				match.end = end;
+				match.length = end - start;
+				delete match.range;
+				return deferred.resolve(match);
 			});
 		}
 		
