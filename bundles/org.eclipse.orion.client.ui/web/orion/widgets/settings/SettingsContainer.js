@@ -15,6 +15,7 @@
 
 define([
 	'i18n!orion/settings/nls/messages',
+	'orion/commands',
 	'orion/globalCommands',
 	'orion/PageUtil',
 	'orion/webui/littlelib',
@@ -40,7 +41,7 @@ define([
 	'orion/generalPreferences',
 	'orion/metrics',
 	'orion/util',
-], function(messages, mGlobalCommands, PageUtil, lib, i18nUtil, objects, mOperationsClient, URITemplate, 
+], function(messages, mCommands, mGlobalCommands, PageUtil, lib, i18nUtil, objects, mOperationsClient, URITemplate, 
 		ThemeBuilder, SettingsList, mStatus, mThemePreferences, editorThemeData, editorThemeImporter, SplitSelectionLayout, PluginList, 
 		GitSettings, EditorSettings, ThemeSettings, UserSettings, GlobalizationSettings, GeneralSettings, mEditorPreferences, mGeneralPreferences, mMetrics, util) {
 
@@ -309,12 +310,12 @@ define([
 			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, editorTheme);
 			var editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: editorTheme, toolbarId: 'editorThemeSettingsToolActionsArea', serviceRegistry: this.registry}); //$NON-NLS-0$
 
-			var command = {
+			var command = new mCommands.Command({
 				name:messages.Import,
 				tip:messages['Import a theme'],
 				id: "orion.importTheme", //$NON-NLS-1$
 				callback: themeImporter.showImportThemeDialog.bind(themeImporter)
-			};
+			});
 			this.commandService.addCommand(command);
 			this.commandService.registerCommandContribution('themeCommands', "orion.importTheme", 4); //$NON-NLS-1$ //$NON-NLS-2$
 			var editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences);

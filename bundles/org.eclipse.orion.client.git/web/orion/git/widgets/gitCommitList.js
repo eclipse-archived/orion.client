@@ -458,6 +458,7 @@ define([
 			case "reset": //$NON-NLS-0$
 			case "commit": //$NON-NLS-0$
 			case "revert": //$NON-NLS-0$
+			case "cherrypick": //$NON-NLS-0$
 				this.changedItem();
 				break;
 			case "applyPatch":  //$NON-NLS-0$
