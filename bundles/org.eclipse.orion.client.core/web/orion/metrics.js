@@ -20,15 +20,19 @@ define([
 	 * @description Creates a new instance of the metrics service
 	 * @param {Object} serviceRegistry The backing service registry to register the new service with
 	 * @param {Object} args An object of additional arguments
+	 * @param {Array} serviceArray An array of logging services (optional; for use when no service registry is present) 
 	 * @returns {Metrics} A new Metrics instance
 	 * @since 12.0
 	 */
-	function Metrics(serviceRegistry, args) {
-		var refs = serviceRegistry.getServiceReferences("orion.metrics"); //$NON-NLS-0$
-		var services = [];
-		refs.forEach(function(current) {
-			services.push(serviceRegistry.getService(current));
-		});
+	function Metrics(serviceRegistry, args, serviceArray) {
+		var services = serviceArray || [];
+		if (serviceRegistry) {
+			var refs = serviceRegistry.getServiceReferences("orion.metrics"); //$NON-NLS-0$
+			refs.forEach(function(current) {
+				services.push(serviceRegistry.getService(current));
+			});
+		}
+		
 		/* the following definitions are from https://developers.google.com/analytics/devguides/collection/analyticsjs/pages */
 		var href = window.location.protocol + '//' + window.location.hostname + window.location.pathname + window.location.search; //$NON-NLS-0$
 		var page = window.location.pathname + window.location.search;
@@ -38,7 +42,10 @@ define([
 		_services.forEach(function(current) {
 			current.pageLoad(href, page, title, args);
 		});
-		serviceRegistry.registerService("orion.core.metrics.client", this); //$NON-NLS-1$
+
+		if (serviceRegistry) {
+			serviceRegistry.registerService("orion.core.metrics.client", this); //$NON-NLS-1$
+		}
 	}
 	
 	/** @callback */
