@@ -119,9 +119,6 @@ try {
 							this.exclude[decodeURIComponent(item)] = true;						
 						}.bind(this));
 					}
-				} else if(term.indexOf(":") > -1) {
-					//an unknown term has been sent, ignore it
-					continue;
 				} else {
 					this.searchTerm = decodeURIComponent(term);
 					this.fileContentSearch = true;
