@@ -730,7 +730,7 @@ define([
 				createQuery: function() {return "";}, 
 				getValue: function() {return that.model.repositoryPath;}, 
 				setValue: function(s) {that.repositoryPath = that.model.repositoryPath = s;}
-			}, true, false, true, true);
+			}, true, false, false, true);
 			pathSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			pathSection.getContentElement().classList.add("pathFilter"); //$NON-NLS-0$
 			pathSection.domNode.tabIndex = -1;

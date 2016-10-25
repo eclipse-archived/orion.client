@@ -291,6 +291,11 @@ html[dir="rtl"] .mainToolbar .gitFilterBox input { /* ACGC */
 	width: 60%;
 }
 
+.auxpane .gitFilterBox .sectionTitleTwistie ~ div input {
+	width: 60%;
+	margin-left: -11px; /* 16px twistie - 5px margin */
+}
+
 .searchButton {
 	position: relative;
 	left: 5px;
