@@ -95,7 +95,7 @@ define([
 							assert.fail("There should be one outline element");
 						}
 						assertElement(outline[0], "Program", 0, 43);
-						assertElement(outline[0].children[6].children[0], "FunctionDeclaration", 0, 42);
+						assertElement(outline[0].children[4].children[0], "FunctionDeclaration", 0, 42);
 						callback();
 					}
 					catch(err) {
@@ -111,7 +111,7 @@ define([
 							assert.fail("There should be one outline element");
 						}
 						assertElement(outline[0], "Program", 0, 47);
-						assertElement(outline[0].children[6].children[0], "FunctionDeclaration", 0, 46);
+						assertElement(outline[0].children[4].children[0], "FunctionDeclaration", 0, 46);
 						callback();
 					}
 					catch(err) {
@@ -127,7 +127,7 @@ define([
 							assert.fail("There should be one outline element");
 						}
 						assertElement(outline[0], "Program", 0, 23);
-						assertElement(outline[0].children[6].children[0], "VariableDeclaration", 0, 23);
+						assertElement(outline[0].children[4].children[0], "VariableDeclaration", 0, 23);
 						callback();
 					}
 					catch(err) {
@@ -187,7 +187,7 @@ define([
 						if(!outline[0].children || outline[0].children.length < 1) {
 							assert.fail("There should be one child outline element");
 						}
-						assertElement(outline[0].children[5], "range: [0, 41]", 0, 41);
+						assertElement(outline[0].children[3], "range: [0, 41]", 0, 41);
 						callback();
 					}
 					catch(err) {
@@ -266,7 +266,7 @@ define([
 							assert.fail("There should be one outline element");
 						}
 						assertElement(outline[0], "Program", 0, 15);
-						assertElement(outline[0].children[8].children[0], "Unexpected token (1:14)", 14, 15);
+						assertElement(outline[0].children[6].children[0], "Unexpected token (1:14)", 14, 15);
 						callback();
 					}
 					catch(err) {

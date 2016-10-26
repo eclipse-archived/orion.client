@@ -10,9 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env amd*/
-define([
-	"estraverse/estraverse"
-], function(Estraverse) {
+define([], function() {
 	
 	/**
 	 * @name javascript.JSOutliner
@@ -55,19 +53,9 @@ define([
 	function _outline(ast) {
 		var outline = [], onode; //items -> {label: str, labelPost: str, start: num, end: num, children: []}
 		if(ast) {
-			Estraverse.traverse(ast, {
-				/**
-				 * @callback
-				 */
-				enter: function enter(node, parent) {
-					if(node.type !== Estraverse.Syntax.Program) {
-						return Estraverse.VisitorOption.Break;
-					}
-					onode = {label: node.type, start: node.range[0], end: node.range[1], children: []};
-					outline.push(onode);
-					outlineObject(node, onode.children);
-				}
-			});
+			onode = {label: ast.type, start: ast.range[0], end: ast.range[1], children: []};
+			outline.push(onode);
+			outlineObject(ast, onode.children);
 		}
 		return outline;
 	}
@@ -81,6 +69,12 @@ define([
 	 */
 	function outlineObject(obj, array) {
 		Object.keys(obj).forEach(function(key) {
+			if(key === 'sourceFile' && obj.type !== "Program") {
+				return;
+			}
+			if(key === 'start' || key === 'end') {
+				return;
+			}
 			var e = {label: key};
 			array.push(e);
 			var n = obj[key];
@@ -136,7 +130,12 @@ define([
 					e.children.push(_e);
 					outlineObject(n, _e.children);
 				} else {
-					outlineObject(n, e.children);
+					if(Object.keys(n).length < 1) {
+						e.labelPost = ": {}";
+						delete e.children;
+					} else {
+						outlineObject(n, e.children);
+					}
 				}
 			} else {
 				e.labelPost = ": "+n;
