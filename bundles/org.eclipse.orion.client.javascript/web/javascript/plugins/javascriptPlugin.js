@@ -540,6 +540,13 @@ define([
 			title: javascriptMessages['sourceOutlineTitle'],
 			id: "orion.javascript.outliner.source" //$NON-NLS-1$
 		});
+	provider.registerService("orion.edit.outliner", new Outliner.JSOutliner(ternWorker, true), //$NON-NLS-1$
+		{
+			contentType: ["application/javascript"], //$NON-NLS-1$
+			name: javascriptMessages["astOutline"],
+			title: javascriptMessages['astOutlineTitle'],
+			id: "orion.javascript.outliner.ast" //$NON-NLS-1$
+		});
 
 	/**
 	 * Register the mark occurrences support

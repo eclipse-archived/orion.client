@@ -467,7 +467,8 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 			ternserver.request({
 					query: {
 						type: "outline", //$NON-NLS-1$
-						file: args.meta.location
+						file: args.meta.location,
+						ast: args.ast
 					},
 					files: args.files
 				},

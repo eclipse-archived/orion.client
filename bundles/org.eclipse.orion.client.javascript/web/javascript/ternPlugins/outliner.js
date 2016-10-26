@@ -27,6 +27,9 @@ define([
 		 */
 		run: function(server, query, file) {
 			if(file.ast) {
+				if (query.ast){
+					return this._getASTOutline(file.ast);
+				}
 				var outline = [], scope = [];
 				/**
 				 * @description Appends the given signature object to the running outline
@@ -189,6 +192,51 @@ define([
 					}
 				});
 			}
+			return outline;
+		},
+		
+		/**
+		 * @name _getASTOutline
+		 * @description Creates an Outline matching the contents of the AST.
+		 * @function
+		 * @private
+		 * @param ast the ast for the file
+		 * @returns returns an array of objects for the AST outline
+		 */
+		_getASTOutline: function _getASTOutline(ast){
+			var outline = [], scope = [];
+			function addElement(element) {
+				if(element) {
+					var item = {
+						label: element.type,
+						labelPost: " [" + element.start + ", " + element.end + "]", //$NON-NLS-1$ //$NON-NLS-2$
+						start: element.start,
+						end: element.end
+					};
+					if(scope.length < 1) {
+						outline.push(item);
+					}
+					else {
+						var parent = scope[scope.length-1];
+						if(!parent.children) {
+							parent.children = [];
+						}
+						parent.children.push(item);
+					}
+					return item;
+				}
+			}
+			Estraverse.traverse(ast, {
+				enter: function(node) {
+					scope.push(addElement(node));
+				},
+				/**
+				 * @callback
+				 */
+				leave: function(node) {
+					scope.pop();
+				}
+			});
 			return outline;
 		}
 	});
