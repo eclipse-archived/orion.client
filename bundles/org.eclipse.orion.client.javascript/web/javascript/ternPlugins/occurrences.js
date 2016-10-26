@@ -577,7 +577,7 @@ define([
 				}
 
 			} else if (parent && (parent.type === Estraverse.Syntax.MemberExpression)){
-				if (parent.object && parent.object.type === Estraverse.Syntax.ThisExpression){
+				if (parent.object && parent.object.type === Estraverse.Syntax.ThisExpression && !parent.computed){
 					// Usage of this within an object
 					objectPropCheck = true;
 				} else if (!parent.computed && parent.property && context.start >= parent.property.range[0] && context.end <= parent.property.range[1]){
