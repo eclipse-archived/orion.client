@@ -595,31 +595,6 @@ define([
 					});
 				});
 			});
-			/*
-			 * Test the AST Outliner (https://bugs.eclipse.org/bugs/show_bug.cgi?id=506360)
-			 */
-			describe('AST Outliner Tests', function() {
-				beforeEach('Display AST outline', function(done) {
-					showAST = true;
-					done();
-				});
-				it('Variable assignment and function declaration', function(callback) {
-					var r = setup(callback, "var a = 4; function f(b){ a+=b; }");
-					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							assert(outline && outline.length === 1, "There should be one outline element");
-							assertElement(outline[0], "Program [0, 33]", 0, 33);
-							assert(outline[0].children && outline[0].children.length === 2, "There should be two children");
-							assertElement(outline[0].children[0], "VariableDeclaration [0, 10]", 0, 10);
-							assertElement(outline[0].children[1], "FunctionDeclaration [11, 33]", 11, 33);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
-					});
-				});
-			});
 		});	
 	};
 });

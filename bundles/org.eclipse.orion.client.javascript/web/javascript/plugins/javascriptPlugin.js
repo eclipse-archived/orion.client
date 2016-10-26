@@ -30,6 +30,7 @@ define([
 	'javascript/occurrences',
 	'javascript/hover',
 	'javascript/outliner',
+	'javascript/astOutliner',
 	'javascript/cuProvider',
 	'javascript/ternProjectManager',
 	'orion/util',
@@ -47,7 +48,7 @@ define([
 	'orion/i18nUtil',
 	'orion/URL-shim'
 ], function(PluginProvider, mServiceRegistry, Deferred, ScriptResolver, ASTManager, QuickFixes, JavaScriptFormatter, JavaScriptProject, TernAssist, TernProjectAssist,
-	EslintValidator, TernProjectValidator, Occurrences, Hover, Outliner, CUProvider, TernProjectManager, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
+	EslintValidator, TernProjectValidator, Occurrences, Hover, Outliner, AstOutliner, CUProvider, TernProjectManager, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 	RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
@@ -540,7 +541,7 @@ define([
 			title: javascriptMessages['sourceOutlineTitle'],
 			id: "orion.javascript.outliner.source" //$NON-NLS-1$
 		});
-	provider.registerService("orion.edit.outliner", new Outliner.JSOutliner(ternWorker, true), //$NON-NLS-1$
+	provider.registerService("orion.edit.outliner", new AstOutliner.JSOutliner(astManager), //$NON-NLS-1$
 		{
 			contentType: ["application/javascript"], //$NON-NLS-1$
 			name: javascriptMessages["astOutline"],
