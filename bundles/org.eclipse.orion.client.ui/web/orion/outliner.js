@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -207,8 +207,10 @@ define([
 		var self = this;
 		var rowDiv = navHandler.getRowDiv(node);
 		// true if the filter is null or if the node's label matches it
-		var nodeMatchesFilter = (-1 !== node.label.search(filter));
-		
+		var nodeMatchesFilter = -1 !== node.label.search(filter);
+		if(typeof node.labelPost === 'string') {
+			nodeMatchesFilter |= -1 !== node.labelPost.search(filter);
+		}		
 		if (node.children) {
 			// if this node has children ensure it is expanded otherwise we've already filtered it out
 			if (navHandler.isExpanded(node)) {
