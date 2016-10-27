@@ -271,7 +271,7 @@ if (process.versions.electron) {
 				electron.dialog.showMessageBox({
 					type: 'question',
 					message: 'Update version ' + releaseName + ' of ' + name + ' has been downloaded.',
-					detail: 'Would you like to restart the app and install the update? The update will be applied automatically upon closing.',
+					detail: 'Would you like to restart the app and install the update? If you would like to keep your context, you can cancel the update. It will be installed automatically next time the app is restarted.',
 					buttons: ['Update', 'Later']
 				}, function (response) {
 					if (response === 0) {
