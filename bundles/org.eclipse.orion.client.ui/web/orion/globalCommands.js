@@ -618,9 +618,11 @@ define([
 
 		var themeVal = localStorage.getItem("pageTheme");
 		if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
-			if (!document.body.classList.contains(themeVal)) {
-				document.body.classList.add(themeVal);
-			}
+			themeVal.split(" ").forEach(function(clazz) {
+				if (!document.body.classList.contains(clazz)) {
+					document.body.classList.add(clazz);
+				}
+			});
 		}
 		
 		// forward the preference service on to the command registry
