@@ -15,6 +15,7 @@ var auth = require('./lib/middleware/auth'),
 	https = require('https'),
 	fs = require('fs'),
 	os = require('os'),
+	api = require('./lib/api'),
 	compression = require('compression'),
 	path = require('path'),
 	socketio = require('socket.io'),
@@ -194,15 +195,38 @@ if (process.versions.electron) {
 			win.webContents.toggleDevTools();
 		}
 	}
-
+	var readyToOpenDir, relativeFileUrl;
+	electron.app.on('open-file', function(event, path) {
+		readyToOpenDir = path;
+	});
 	electron.app.on('ready', function() {
 		var updateDownloaded  = false,
 			updateDialog = false,
 			linuxDialog = false,
-			prefsWorkspace = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.currentWorkspace;
+			prefsWorkspace = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.currentWorkspace,
+			recentWorkspaces = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.recentWorkspaces; 
 			
 		if (prefsWorkspace) {
 			configParams.workspace = prefsWorkspace;
+		}
+		if(readyToOpenDir){
+			try{
+				var stats = fs.statSync(readyToOpenDir);
+				if(stats.isFile()){
+					var parentDir = path.dirname(readyToOpenDir);
+					var similarity = 0;
+					configParams.workspace = parentDir;
+					recentWorkspaces.forEach(function(eachRecent){
+						if(parentDir.lastIndexOf(eachRecent,0) === 0 && eachRecent.length > similarity){
+							similarity = eachRecent.length;
+							return configParams.workspace = eachRecent;
+						}
+					});
+					relativeFileUrl = api.toURLPath(readyToOpenDir.substring(configParams.workspace.length));
+				}else if(stats.isDirectory()){
+					configParams.workspace = readyToOpenDir;
+				}
+			}catch(e){}
 		}
 		if (process.platform === 'darwin') {
 			var Menu = electron.Menu;
@@ -338,7 +362,11 @@ if (process.versions.electron) {
 			return nextWindow;
 		}
 		startServer(function() {
-			var mainWindow = createWindow("http://localhost:" + port);
+			var initialUrl = "http://localhost:" + port;
+			if(relativeFileUrl){ // Works in Mac Open Command Only
+				initialUrl = initialUrl + "/edit/edit.html#/file" + relativeFileUrl;
+			}
+			var mainWindow = createWindow(initialUrl);
 			mainWindow.on('closed', function() {
 				mainWindow = null;
 			});
