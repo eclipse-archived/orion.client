@@ -952,6 +952,7 @@ define([
 					data.handler.changedItem();
 				},
 				imageClass:"git-sprite-train-track",
+				name: messages["ShowGraph"],
 				tooltip: messages["ToggleGraph"],
 				spriteClass: "gitCommandSprite", //$NON-NLS-0$
 				type: "toggle" //$NON-NLS-0$		
