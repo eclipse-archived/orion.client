@@ -24,7 +24,7 @@ define([
 	 * @name orion.widgets.Section
 	 * @class Generates a section
 	 * @param {DomNode} parent parent node
-	 * @param {DomNode} sibling if specified, the section will be inserted after the sibling
+	 * @param {DomNode} sibling if specified, the section will be inserted before the sibling
 	 * @param {String} options.id id of the section header
 	 * @param {String} options.title title (in HTML) of the section
 	 * @param {orion.preferences.PreferencesService} [options.preferenceService] used to store the hidden/shown state of the section if specified
@@ -37,8 +37,9 @@ define([
 	 * @param {Boolean} [options.hidden] if true section will be hidden at first display
 	 * @param {Boolean} [options.useAuxStyle] if true the section will be styled for an auxiliary pane
 	 * @param {Boolean} [options.keepHeader] if true the embedded explorer will keep its header
-	 * @param {Boolean} [options.noTwisties] if true the twisties will not be displayed
+	 * @param {Boolean} [options.noTwistie] if true the twisties will not be displayed
 	 * @param {Boolean} [options.dropdown] if true the section is dropdown
+	 * @param {Boolean} [options.noArrow] if true no dropdown arrow
 	 * @param {Function} [options.onExpandCollapse] a function that will be called when the expanded/collapsed state changes
 	 *
 	 * @borrows orion.editor.EventTarget#addEventListener as #addEventListener
@@ -361,8 +362,8 @@ define([
 		},
 		
 		/**
-		 * Get the title DOM node
-		 * @returns {DomNode} The dom node that holds the section title.
+		 * Get the action DOM node
+		 * @returns {DomNode} The dom node that holds the section actions.
 		 */
 		getActionElement: function(){
 			return this._toolActionsNode;
