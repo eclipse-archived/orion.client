@@ -73,7 +73,10 @@ define([], function() {
 				return;
 			}
 			if(key === 'start' || key === 'end') {
-				return;
+				if(typeof obj[key] === 'number') {
+					//filter out common start / end props - we have ranges and loc
+					return;
+				}
 			}
 			var e = {label: key};
 			array.push(e);
