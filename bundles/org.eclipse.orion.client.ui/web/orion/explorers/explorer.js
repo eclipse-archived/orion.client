@@ -350,6 +350,7 @@ exports.createExplorerCommands = function(commandService, visibleWhen, commandId
 		return false;
 	}
 	var expandAllCommand = new mCommands.Command({
+		name : messages["Expand all"],
 		tooltip : messages["Expand all"],
 		imageClass : "core-sprite-expandAll", //$NON-NLS-0$
 		id: commandIdExpand ? commandIdExpand : "orion.explorer.expandAll", //$NON-NLS-0$
@@ -361,6 +362,7 @@ exports.createExplorerCommands = function(commandService, visibleWhen, commandId
 			data.items.expandAll();
 	}});
 	var collapseAllCommand = new mCommands.Command({
+		name : messages["Collapse all"],
 		tooltip : messages["Collapse all"],
 		imageClass : "core-sprite-collapseAll", //$NON-NLS-0$
 		id: commandIdCollaspe ? commandIdCollaspe : "orion.explorer.collapseAll", //$NON-NLS-0$
