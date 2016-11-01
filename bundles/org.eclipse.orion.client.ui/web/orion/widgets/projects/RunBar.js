@@ -57,6 +57,7 @@ define([
 		this._editorInputManager = options.editorInputManager;
 		
 		this._initialize();
+		this._setLaunchConfigurationsLabel(null);
 		this._disableAllControls(); // start with controls disabled until a launch configuration is selected
 	}
 	
@@ -821,7 +822,7 @@ define([
 				this._launchConfigurationsLabel.appendChild(this._appName);
 				this._launchConfigurationsLabel.appendChild(this._appInfoSpan);
 			} else {
-				this._setText(this._launchConfigurationsLabel, this._project ? messages["selectLaunchConfig"] : null); //$NON-NLS-0$
+				this._setText(this._launchConfigurationsLabel, messages["selectLaunchConfig"]); //$NON-NLS-0$
 			}
 		},
 		
