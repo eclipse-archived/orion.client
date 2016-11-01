@@ -281,7 +281,7 @@ define([
         if (id) {
         	json.id = id;
         }
-        if(!this.initialized && message !== messageTypes.initialize) {
+        if(!this.initialized && message !== this.MESSAGE_TYPES.initialize) {
 			this.queue.push(json);
 		} else {
 	        this.socket.emit('data', json);
@@ -312,8 +312,9 @@ define([
 	 */
 	IPC.prototype.connect = function connect() {
 		this.socket = io.connect(this.channel);
-		this.socket.on('connect', function() {
+		this.socket.on('connect', function(sock) {
 			this.socket.emit('start');
+			this.socket.emit('junk');
 		}.bind(this));
 		this.socket.on('fail', function(error) {
 			console.log(error);
@@ -324,7 +325,7 @@ define([
 		this.socket.on('data', function(data) {
 			try {
 				if(!data) {
-					_notifyListeners(this.listeners, messageTypes.logMessage, "Dropped response with null data.");
+					_notifyListeners(this.listeners, this.MESSAGE_TYPES.logMessage, "Dropped response with null data.");
 					return;
 				}
 				if (data && data.id) {
@@ -340,7 +341,7 @@ define([
 				}
 				_notifyListeners(this.listeners, data.method, data);
 			} catch(err) {
-				_notifyListeners(this.listeners, messageTypes.logMessage, err.toString());
+				_notifyListeners(this.listeners, this.MESSAGE_TYPES.logMessage, err.toString());
 			}
 		}.bind(this));
 		this.socket.on('ready', function(data) {
@@ -350,14 +351,14 @@ define([
 				this.workspaceDir = json.workspaceDir;
 				pid = json.processId;
 			} catch(err) {
-				_notifyListeners(this.listeners, messageTypes.logMessage, err.toString());
+				_notifyListeners(this.listeners, this.MESSAGE_TYPES.logMessage, err.toString());
 			}
 			this.initialize(pid, this.workspaceDir).then(/* @callback */ function initializeCallback(result) {
 				this.initialized = true;
 				this.capabilities = result.capabilities;
 				this.queue.forEach(function queueFlushCallback(item) {
 					this.socket.emit('data', item);
-					_notifyListeners(this.listeners, messageTypes.logMessage, JSON.stringify(item));
+					_notifyListeners(this.listeners, this.MESSAGE_TYPES.logMessage, JSON.stringify(item));
 				}.bind(this));
 				this.queue = [];
 			}.bind(this));
@@ -373,7 +374,7 @@ define([
 	 * @returns {Deferred} The deferred that resolves to the result of the request
 	 */
 	IPC.prototype.initialize = function initialize(processId, workspaceDir) {
-		return this.sendMessage(this.id++, messageTypes.initialize, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.initialize, {
 			rootPath: workspaceDir,
 			processId: processId
 		});
@@ -388,7 +389,7 @@ define([
 	 * @param {String} text The optional current source code
 	 */
 	IPC.prototype.didOpen = function didOpen(uri, version, text) {
-		return this.sendMessage(0, messageTypes.didOpen, {
+		return this.sendMessage(0, this.MESSAGE_TYPES.didOpen, {
 			textDocument: {
 				uri: uri,
 				languageId: this.languageId,
@@ -406,7 +407,7 @@ define([
 	 * @param {String} uri The URI of the file
 	 */
 	IPC.prototype.didClose = function didClose(uri) {
-		return this.sendMessage(0, messageTypes.didClose, {
+		return this.sendMessage(0, this.MESSAGE_TYPES.didClose, {
 			textDocument: {
 				uri: uri
 			}
@@ -420,7 +421,7 @@ define([
 	 * @param {String} uri The URI of the file
 	 */
 	IPC.prototype.didSave = function didSave(uri) {
-		return this.sendMessage(0, messageTypes.didSave, {
+		return this.sendMessage(0, this.MESSAGE_TYPES.didSave, {
 			textDocument: {
 				uri: uri
 			}
@@ -437,7 +438,7 @@ define([
 	 * @param Array<TextDocumentContentChangeEvent> changes the changes in the document
 	 */
 	IPC.prototype.didChange = function didChange(uri, version, changes) {
-		return this.sendMessage(0, messageTypes.didChange, {
+		return this.sendMessage(0, this.MESSAGE_TYPES.didChange, {
 			textDocument: {
 				uri: uri,
 				version: version
@@ -455,7 +456,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.documentHighlight = function documentHighlight(uri, position) {
-		return this.sendMessage(this.id++, messageTypes.documentHighlight, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.documentHighlight, {
 				position: position, 
 				textDocument: {
 					uri: uri
@@ -474,7 +475,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.completion = function completion(uri, position) {
-		return this.sendMessage(this.id++, messageTypes.completion, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.completion, {
 				position: position, 
 				textDocument: {
 					uri: uri
@@ -491,7 +492,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.hover = function hover(uri, position) {
-		return this.sendMessage(this.id++, messageTypes.hover, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.hover, {
 				position: position, 
 				textDocument: {
 					uri: uri
@@ -507,7 +508,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.documentSymbol = function documentSymbol(uri) {
-		return this.sendMessage(this.id++, messageTypes.documentSymbol, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.documentSymbol, {
 				textDocument: {
 					uri: uri
 				}
@@ -523,7 +524,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.formatDocument = function formatDocument(uri, options) {
-		return this.sendMessage(this.id++, messageTypes.formatting, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.formatting, {
 				textDocument: {
 					uri: uri
 				},
@@ -539,7 +540,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.codeLens = function codeLens(uri) {
-		return this.sendMessage(this.id++, messageTypes.codeLens, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.codeLens, {
 				textDocument: {
 					uri: uri
 				}
@@ -556,7 +557,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.references = function references(uri, position, context) {
-		return this.sendMessage(this.id++, messageTypes.references, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.references, {
 				position: position,
 				context: context,
 				textDocument: {
@@ -574,7 +575,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.definition = function definition(uri, position) {
-		return this.sendMessage(this.id++, messageTypes.definition, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.definition, {
 				position: position,
 				textDocument: {
 					uri: uri
@@ -590,7 +591,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request. In this case the result is always undefined.
 	 */
 	IPC.prototype.shutdown = function shutdown() {
-		return this.sendMessage(this.id++, messageTypes.shutdown, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.shutdown, {
 		});
 	};
 	
@@ -599,13 +600,13 @@ define([
 	 * @description The show message request is sent from a server to a client to ask the client to display a particular message in the user interface. 
 	 * In addition to the show message notification the request allows to pass actions and to wait for an answer from the client.
 	 * @function
-	 * @param {number} type The type of the message {@see #messageTypes}
+	 * @param {number} type The type of the message {@see #this.MESSAGE_TYPES}
 	 * @param {String} message The message to send
 	 * @param {Array.<String>} actions Ant command actions to be processed
 	 * @returns {Deferred} The deferred to return the results of the request. In this case the result is always undefined.
 	 */
 	IPC.prototype.showMessageRequest = function showMessageRequest(type, message, actions) {
-		return this.sendMessage(this.id++, messageTypes.showMessageRequest, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.showMessageRequest, {
 				type: type,
 				message: message,
 				actions: actions
@@ -620,7 +621,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.workspaceSymbol = function workspaceSymbol(query) {
-		return this.sendMessage(this.id++, messageTypes.workspaceSymbol, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.workspaceSymbol, {
 				query: query
 		});
 	};
@@ -637,7 +638,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.codeAction = function codeAction(uri, start, end, diagnostics) {
-		return this.sendMessage(this.id++, messageTypes.workspaceSymbol, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.workspaceSymbol, {
 				textDocument: {
 					uri: uri
 				},
@@ -662,7 +663,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.onTypeFormatting = function onTypeFormatting(uri, position, char, options) {
-		return this.sendMessage(this.id++, messageTypes.onTypeFormatting, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.onTypeFormatting, {
 					textDocument: {
 						uri: uri
 					},
@@ -683,7 +684,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.rangeFormatting = function rangeFormatting(uri, start, end, options) {
-		return this.sendMessage(this.id++, messageTypes.rangeFormatting, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.rangeFormatting, {
 				textDocument: {
 					uri: uri
 				},
@@ -703,7 +704,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.codeLensResolve = function codeLensResolve(codeLens) {
-		return this.sendMessage(this.id++, messageTypes.codeLensResolve, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.codeLensResolve, {
 				codeLens: codeLens
 		});
 	};
@@ -718,7 +719,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.rename = function rename(uri, position, newName) {
-		return this.sendMessage(this.id++, messageTypes.rename, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.rename, {
 				textDocument: {
 					uri: uri
 				},
@@ -739,7 +740,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.signatureHelp = function signatureHelp(uri, position, signatures, activeSignature, activeParameter) {
-		return this.sendMessage(this.id++, messageTypes.signatureHelp, {
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.signatureHelp, {
 				textDocument: {
 					uri: uri,
 					position: position
@@ -758,7 +759,7 @@ define([
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.completionItemResolve = function completionItemResolve(completionItem) {
-		this.sendMessage(this.id++, messageTypes.completionItemResolve, {
+		this.sendMessage(this.id++, this.MESSAGE_TYPES.completionItemResolve, {
 				completionItem: completionItem
 		});
 	};

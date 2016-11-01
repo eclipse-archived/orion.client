@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*eslint-env amd, es6*/
 define([
-	"lsp/languageServer"
+	"orion/lsp/languageServer"
 ], function(LanguageServer) {
 	
 	var _registry,

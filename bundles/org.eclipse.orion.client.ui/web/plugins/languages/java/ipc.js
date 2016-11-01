@@ -1,7 +1,7 @@
 /*eslint-env amd, browser*/
 define([
 	"orion/Deferred",
-	"/socket.io/socket.io.js",
+	"/socketio/socket.io.js",
 ], function(Deferred, io) {
 
 	/**
