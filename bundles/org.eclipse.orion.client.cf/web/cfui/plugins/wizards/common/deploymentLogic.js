@@ -200,7 +200,7 @@ define([
 			}
 			return (counter > 0 ? baseName + "-" + counter : baseName);
 		}, function(error){
-			if (error.status === 404){
+			if (error.status === 404 || error.status === 410){
 				return baseName;
 			}
 			throw error;
