@@ -9,17 +9,21 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-
 try {
 	var Promise = require('bluebird');
 	var path = require('path');
 	var url = require('url');
 	var fs = Promise.promisifyAll(require('fs'));
-	
+	var elasticlunr = require('elasticlunr');
+	var index = elasticlunr(function() {
+		this.addField('Name');
+		this.setRef("id");
+	});
 	var SUBDIR_SEARCH_CONCURRENCY = 10;
+//	var FORCE_USING_INDEX = ture; // For debug purpose, in distribution, comment out this code;
 
 	var workspaceId = 'orionode';
-	var fieldList = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,WholeWord,CaseSensitive,Exclude".split(",");
+	var fieldList = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,WholeWord,CaseSensitive,Exclude,UsingIndex".split(",");
 
 	function safePath(workspaceDir, p) {
 		workspaceDir = path.normalize(workspaceDir);
@@ -30,7 +34,17 @@ try {
 		}
 		return p;
 	}
+		
+	/**
+	 * @description Converts the given path to be all forward-slashed for orionode
+	 * @param {String} p The path to Converts
+	 * @since 13.0
+	 */
+	function toURLPath(p) {
+		return p.replace(/\\/g, "/");
+	}
 	
+
 	/**
 	 * @description Converts the given path to be all forward-slashed for orionode
 	 * @param {String} p The path to Converts
@@ -49,7 +63,7 @@ try {
 	function safeFilePath(workspaceDir, filepath) {
 		return safePath(workspaceDir, path.join(workspaceDir, filepath));
 	}
-	
+
 	function isSearchField(term) {
 		for (var i = 0; i < fieldList.length; i++) {
 			if (term.lastIndexOf(fieldList[i] + ":", 0) === 0) {
@@ -69,7 +83,7 @@ try {
 		return searchTerm;
 	}
 
-	function SearchOptions(originalUrl, contextPath){
+	function SearchOptions(originalUrl, contextPath, usingIndex){
 		this.defaultLocation = null;
 		this.fileContentSearch = false;
 		this.filenamePattern = null;
@@ -82,7 +96,7 @@ try {
 		this.searchTermCaseSensitive = false;
 		this.username = null;
 		this.exclude = Object.create(null);
-
+		this.usingIndex = usingIndex;
 		this.buildSearchOptions = function() {
 			function getEncodedParameter(param) {
 				var query = url.parse(originalUrl).search.substring(1), result = "";
@@ -116,8 +130,12 @@ try {
 					} else if(term.lastIndexOf("Exclude:", 0) === 0) {
 						var items = term.substring(8).split(",");
 						items.forEach(function(item) {
-							this.exclude[decodeURIComponent(item)] = true;						
+							this.exclude[decodeURIComponent(item)] = true;
 						}.bind(this));
+					} else if(term.lastIndexOf("UsingIndex:true", 0) === 0){
+						this.usingIndex = true;
+					} else if(term.lastIndexOf("UsingIndex:false", 0) === 0){
+						this.usingIndex = false;
 					}
 				} else {
 					this.searchTerm = decodeURIComponent(term);
@@ -136,7 +154,7 @@ try {
 				if (searchTerm.indexOf("\"") === 0) {
 					searchTerm = searchTerm.substring(1, searchTerm.length - 1);
 				}
-	
+
 				searchTerm = undoLuceneEscape(searchTerm);
 				if (searchTerm.indexOf("?") !== -1 || searchTerm.indexOf("*") !== -1) {
 					if (searchTerm.indexOf("*") === 0) {
@@ -179,11 +197,11 @@ try {
 					filenamePattern = filenamePattern.replace("*", ".*");
 				}
 			}
-	
+
 			if (!searchOpts.filenamePatternCaseSensitive) {
 				return new RegExp("^"+filenamePattern, "i");
 			}
-			return new RegExp("^"+filenamePattern);
+			return new RegExp("^"+ filenamePattern);
 		});
 	}
 
@@ -248,9 +266,8 @@ try {
 			});
 		});
 	}
-	
-	function search(originalUrl, workspaceDir, contextPath) {
-		var searchOpt = new SearchOptions(originalUrl, contextPath);
+	function search(originalUrl, workspaceDir, contextPath, userId, indexDir, isElectron, usingIndex) {
+		var searchOpt = new SearchOptions(originalUrl, contextPath, usingIndex);
 		searchOpt.buildSearchOptions();
 
 		var searchPattern, filenamePattern;
@@ -268,59 +285,129 @@ try {
 			searchScope = safeFilePath(workspaceDir, loc);
 		} catch (ex) {
 			searchScope = workspaceDir;
-		} 
+
+		}
 		if (searchScope.charAt(searchScope.length - 1) !== path.sep) {
 			searchScope = searchScope + path.sep;
 		}
 
-		return fs.readdirAsync(searchScope)
-		.then(function(children) {
-			var results = [];
-
-			return Promise.map(children, function(child) {
-				return searchFile(workspaceDir, searchScope, child, searchPattern, filenamePattern, results, searchOpt.exclude);
-			}, { concurrency: SUBDIR_SEARCH_CONCURRENCY })
-			.catch(function(/*err*/) {
-				// Probably an error reading some file or directory -- ignore
-			})
-			.then(function() {
-				return {
-					"response": {
-						"docs": results,
-						"numFound": results.length,
-						"start": 0
-					},
-					"responseHeader": {
-						"params": {
-							"fl": "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive",
-							"fq": [
-								"Location:"+searchOpt.location,
-								"UserName:anonymous"
-							],
-							"rows": "10000",
-							"sort": "Path asc",
-							"start": "0",
-							"wt": "json"
+		var waitingFor;
+		var results = [];
+		if(FORCE_USING_INDEX){
+			searchOpt.usingIndex = true;
+		}
+		if (searchPattern || !searchOpt.usingIndex) {
+			waitingFor = fs.readdirAsync(searchScope)
+				.then(function(children) {
+					return Promise.map(children, function(child) {
+							return searchFile(workspaceDir, searchScope, child, searchPattern, filenamePattern, results, searchOpt.exclude);
+						}, {
+							concurrency: SUBDIR_SEARCH_CONCURRENCY
+						})
+						.catch(function( /*err*/ ) {
+							// Probably an error reading some file or directory -- ignore
+						});
+				});
+		} else {
+			waitingFor = fs.readFileAsync(path.join(indexDir,userId)+".json", "utf8").then(function(file) {
+				return elasticlunr.Index.load(JSON.parse(file));
+			}).catch(function(err){
+				if(!isElectron){
+					var indexWorker = require('./indexWorker');
+					var Indexer = indexWorker.getIndexer(indexDir);
+					return Indexer.doIndex(workspaceDir, userId);
+				}
+			}).then(function(indexingResult){
+				if(indexingResult){
+					index = indexingResult;
+				}
+				var searchingFilename = searchOpt.filenamePattern && searchOpt.filenamePattern.slice(0, -1);
+				if (searchingFilename && searchingFilename.indexOf("*") === -1 && searchingFilename.indexOf("?") === -1) {
+					var fileNamefindings = index.search(searchingFilename, {
+						fields: {
+							Name: {
+								boost: 1
+							}
 						},
-						"status": 0
+						expand: true
+					});
+					var scope = searchScope.substring(workspaceDir.length + 1);
+					if(scope){
+						scope = scope.slice(0,-1);
 					}
-				};
+					fileNamefindings.forEach(function(each) {
+						var entry = index.documentStore.docs[each.ref];
+						if(entry.Path.startsWith(scope)){
+							results.push(entry);
+						}
+					});
+				} else if (searchingFilename.indexOf("*") !== -1 || searchingFilename.indexOf("?") !== -1) {
+					for(var i = 0; i < index.documentStore.length; i++){
+						if(filenamePattern[0].test(index.documentStore.docs[i].Name)){
+							results.push(index.documentStore.docs[i]);
+						}
+					}
+				}
 			});
+		}
+		return waitingFor.then(function() {
+			results = results.map(function(each){
+				return {
+					"Directory": false,
+					"Location": toURLPath("/file/" + each.Path),
+					"Name": each.Name,
+					"Path": toURLPath(each.Path),
+					"id": each.id
+				}
+			});
+			return respondSearchRequest();
 		});
-	}
-	
-	if (typeof module !== "undefined") {
-		module.exports = search;
+
+		function respondSearchRequest() {
+			return {
+				"response": {
+					"docs": results,
+					"numFound": results.length,
+					"start": 0
+				},
+				"responseHeader": {
+					"params": {
+						"fl": "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive",
+						"fq": [
+							"Location:" + searchOpt.location,
+							"UserName:anonymous"
+						],
+						"rows": "10000",
+						"sort": "Path asc",
+						"start": "0",
+						"wt": "json"
+					},
+					"status": 0
+				}
+			};
+		}
 	}
 
-	this.onmessage = function (event) {
-		search(event.data.originalUrl, event.data.workspaceDir, event.data.contextPath)
-		.then(function(result) {
-			this.postMessage({id: event.data.id, result: result});
-		}.bind(this))
-		.catch(function(err){
-			this.postMessage({id: event.data.id, error: {message: err.message}});
-		}.bind(this));
+	if (typeof module !== "undefined") {
+		module.exports.search = search;
+	}
+
+	this.onmessage = function(event) {
+		search(event.data.originalUrl, event.data.workspaceDir, event.data.contextPath, event.data.userId, event.data.indexDir, event.data.isElectron, event.data.usingIndex)
+			.then(function(result) {
+				this.postMessage({
+					id: event.data.id,
+					result: result
+				});
+			}.bind(this))
+			.catch(function(err) {
+				this.postMessage({
+					id: event.data.id,
+					error: {
+						message: err.message
+					}
+				});
+			}.bind(this));
 	}.bind(this);
 } catch (err) {
 	console.log(err.message);

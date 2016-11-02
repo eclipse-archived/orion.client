@@ -286,4 +286,6 @@ define({//Default message bundle
     'moreEditorSettings': 'Editor Settings...',
     'SettingWarning' : '${0} Warning: Global settings for \'${2}\' are overriden by the settings defined in: ${1}',
     "version": "Version ${0}",
+    "filenameSearchPolicy": "Indexed File Name Search",
+	"filenameSearchPolicyTooltip":"Using index to speed up file name search and tooling."
 });
