@@ -186,4 +186,9 @@ Current fix is to check that the we are running in a node environment:
 	        this.mod.modules.signal("getExports", file, mod)
 	      }
 	    })
-
+- In doc_comment.js plugin, in the ```applyType``` function (around line 470), add the following else to the if-chain:
+		else if(node.type === "ClassDeclaration") {
+	    }
+- In doc_comment.js plugin in the ```attachComments``` function in the ```postParse``` function, we need to add visitation
+for ClassDeclarations, like so:
+		ClassDeclaration: attachComments,
