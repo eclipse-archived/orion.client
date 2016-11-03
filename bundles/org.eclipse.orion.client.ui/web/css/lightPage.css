@@ -21,6 +21,24 @@
 	color: white;
 }
 
+.lightPage .statusLight {
+	background: lightgray;
+}
+.lightPage .statusLight.statusLightGreen {
+	background: #13dd6d;
+}
+.lightPage .statusLight.statusLightRed {
+	background: #C1272D;
+}
+.lightPage .statusLight.statusLightAmber {
+	background: #FFE141;
+}
+.lightPage .statusLight.statusLightProgress {
+	background: transparent;
+	border-color: lightgray;
+	border-top-color: transparent;
+}
+
 .lightPage .split {
 	background: #c4c5c8;
 	width: 4px;
