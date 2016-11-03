@@ -89,7 +89,7 @@ function setDefaultManifestProperties(req, manifest){
 		name : getDefaultName(rawDefaultProjectName),
 		host : getDefaultHost(rawDefaultProjectName),
 		memory : "512M",
-		instances : "1",
+		instances : 1,
 		path: "."
 	};
 	if (!manifest) {

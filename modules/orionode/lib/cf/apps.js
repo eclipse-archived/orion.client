@@ -26,10 +26,13 @@ var os = require("os");
 var Promise = require("bluebird");
 var bluebirdfs = Promise.promisifyAll(require("fs"));
 var crypto = require("crypto");
+var extService = require("./extService");
 
 module.exports.router = function() {
 	
 	module.exports._getAppwithAppName = _getAppwithAppName;
+	module.exports.getServiceGuid = getServiceGuid;
+	module.exports.createService = createService;
 	
 	return express.Router()
 	.use(bodyParser.json())
@@ -407,8 +410,12 @@ function pushApp(req, appTarget){
 	}else{
 		waitFor = createApp(req, appTarget);
 	}
-	// TODO one missing step to: look up available environment extension services
-	return Promise.resolve(waitFor).then(function(){
+
+	return Promise.resolve(waitFor)
+	.then(function(){
+		return extService && extService.createExtServices(req, appTarget, appCache);
+	})
+	.then(function(){
 		return bindRoute(req, appTarget);
 	})
 	.then(function(){
@@ -626,7 +633,7 @@ function bindServices(req, appTarget){
 								function findServicePlanGUID(serviceType,serviceProvider,servicePlan){
 									for(var k = 0; k < respondServiceJson.length; k++){
 										if(serviceType === respondServiceJson[k].entity.label && serviceProvider === respondServiceJson[k].entity.provider){
-											var servicePlans = respondServiceJson[k].entity.servicePlans;
+											var servicePlans = respondServiceJson[k].entity.service_plans;
 											for(var j = 0; j < servicePlans.length ; j++){
 												if( servicePlan === servicePlans[j].entity.name){
 													return servicePlans[j].metadata.guid;
@@ -636,7 +643,7 @@ function bindServices(req, appTarget){
 									}
 								}
 								if(!servicePlanGuid) return; // TODO maybe need some more error handling.
-								return createService(req.user.username, service.label, servicePlanGuid, appTarget)
+								return createService(req.user.username, serviceType, servicePlanGuid, appTarget)
 								.then(function(serviceGuid){
 									return serviceInstanceGUID = serviceGuid;
 								});
@@ -652,7 +659,7 @@ function bindServices(req, appTarget){
 						});
 					}, function(err) {
 						if(err){
-							return reject({"message":err.message});
+							return reject(err);
 						}
 						return fulfill();
 					});
@@ -672,7 +679,7 @@ function bindServices(req, appTarget){
 						});
 					}, function(err) {
 						if(err){
-							return reject({"message":err.message});
+							return reject(err);
 						}
 						return fulfill();
 					});
@@ -681,31 +688,6 @@ function bindServices(req, appTarget){
 		});
 	}
 	return;
-}
-function getServiceGuid(userId, service, appTarget){
-	return target.cfRequest("GET", userId, appTarget.Url + "/v2/spaces/" + appTarget.Space.metadata.guid + "/service_instances"
-	, {"inline-relations-depth":"1","return_user_provided_service_instances":"true","q":"name:"+service})
-	.then(function(serviceJson){	
-		var serviceResources = serviceJson.resources;
-		var serviceInstanceGUID;
-		// Find service Guid from the response of getting service request.
-		for(var k = 0; k < serviceResources.length ; k++ ){
-			serviceInstanceGUID = serviceResources[k] && serviceResources[k].metadata && serviceResources[k].metadata.guid;
-			if(serviceInstanceGUID) break;
-		}
-		return serviceInstanceGUID;
-	});
-}
-function createService(userId, serviceName, servicePlanGuid, appTarget){
-	var body = {
-		"space_guid": appTarget.Space.matadata.guid,
-		"name": serviceName,
-		"service_plan_guid": servicePlanGuid
-	};
-	return target.cfRequest("POST", userId, appTarget.Url + "/v2/service_instances", null, JSON.stringify(body))
-	.then(function(result){
-		return result.metadata.guid;
-	});
 }
 function bindService(userId, serviceGuid, appTarget){
 	var body = {
@@ -743,15 +725,40 @@ function mapRoute(userId, routeGuid, appTarget){
 	return target.cfRequest("PUT", userId, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + routeGuid);
 }
 } // End of putApp()
+function getServiceGuid(userId, service, appTarget){
+	return target.cfRequest("GET", userId, appTarget.Url + "/v2/spaces/" + appTarget.Space.metadata.guid + "/service_instances"
+	, {"inline-relations-depth":"1","return_user_provided_service_instances":"true","q":"name:"+service})
+	.then(function(serviceJson){	
+		var serviceResources = serviceJson.resources;
+		var serviceInstanceGUID;
+		// Find service Guid from the response of getting service request.
+		for(var k = 0; k < serviceResources.length ; k++ ){
+			serviceInstanceGUID = serviceResources[k] && serviceResources[k].metadata && serviceResources[k].metadata.guid;
+			if(serviceInstanceGUID) break;
+		}
+		return serviceInstanceGUID;
+	});
+}
+function createService(userId, serviceName, servicePlanGuid, appTarget){
+	var body = {
+		"space_guid": appTarget.Space.metadata.guid,
+		"name": serviceName,
+		"service_plan_guid": servicePlanGuid
+	};
+	return target.cfRequest("POST", userId, appTarget.Url + "/v2/service_instances", null, JSON.stringify(body))
+	.then(function(result){
+		return result.metadata.guid;
+	});
+}
 function normalizeMemoryMeasure(memory){
 	if (memory.toLowerCase().endsWith("m")) //$NON-NLS-1$
 		return Number(memory.substring(0, memory.length - 1));
 	if (memory.toLowerCase().endsWith("mb")) //$NON-NLS-1$
-		return Number(memory.substring(0, memory.length() - 2));
+		return Number(memory.substring(0, memory.length - 2));
 	if (memory.toLowerCase().endsWith("g")) //$NON-NLS-1$
-		return 1024 * memory.substring(0, memory.length() - 1);
+		return 1024 * memory.substring(0, memory.length - 1);
 	if (memory.toLowerCase().endsWith("gb")) //$NON-NLS-1$
-		return 1024 * memory.substring(0, memory.length() - 2);
+		return 1024 * memory.substring(0, memory.length - 2);
 	/* return default memory value, i.e. 1024 MB */
 	return 1024;
 }
