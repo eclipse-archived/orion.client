@@ -250,73 +250,35 @@
 }
 
 .lightPage .splashLoadingImage {
-	-webkit-animation: 1.2s light-theme-spinner steps(6) infinite;
-	animation: 1.2s light-theme-spinner steps(6) infinite;
-	
-	padding: 0;
-	background: inherit;
 	display: inline-block;
-	vertical-align: middle;
-	margin-left: 9px;
-	margin-top: 8px;
-	width: 6px;
-	height: 6px;
-	font-size: 10px;
+	background: none;
+	width: 20px;
+	height: 20px;
 	border-radius: 50%;
-	z-index: 101;
-	-webkit-font-smoothing: antialiased;
+	border: 2px solid #00b299;
+	border-right-color: transparent;
+	-webkit-animation: rotateThis .75s infinite linear;
+	animation: rotateThis .75s infinite linear
 }
 
-@-webkit-keyframes light-theme-spinner {
-	0%,
-  100% {
-		box-shadow: -0.45em -0.78em 0 0 #4178be, -0.9em 0 0 0 rgba(65, 120, 190, 0.8), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.6), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.4), 0.9em 0 0 0 rgba(65, 120, 190, 0.3), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.1);
+@-webkit-keyframes rotateThis {
+	0% {
+		transform: rotate(0deg);
+		-webkit-transform: rotate(0deg)
 	}
-
-	16.67% {
-		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.8), -0.9em 0 0 0 rgba(65, 120, 190, 0.6), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.4), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.3), 0.9em 0 0 0 rgba(65, 120, 190, 0.1), 0.45em -0.78em 0 0 #4178be;
-	}
-
-	33.33% {
-		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.6), -0.9em 0 0 0 rgba(65, 120, 190, 0.4), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.3), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.1), 0.9em 0 0 0 #4178be, 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.8);
-	}
-
-	50% {
-		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.4), -0.9em 0 0 0 rgba(65, 120, 190, 0.3), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.1), 0.45em 0.78em 0 0 #4178be, 0.9em 0 0 0 rgba(65, 120, 190, 0.8), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.6);
-	}
-
-	66.67% {
-		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.3), -0.9em 0 0 0 rgba(65, 120, 190, 0.1), -0.45em 0.78em 0 0 #4178be, 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.8), 0.9em 0 0 0 rgba(65, 120, 190, 0.6), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.4);
-	}
-
-	83.33% {
-		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.1), -0.9em 0 0 0 #4178be, -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.8), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.6), 0.9em 0 0 0 rgba(65, 120, 190, 0.4), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.3);
+	to {
+		transform: rotate(1turn);
+		-webkit-transform: rotate(1turn)
 	}
 }
 
-@keyframes light-theme-spinner {
-	0%,
-  100% {
-		box-shadow: -0.45em -0.78em 0 0 #4178be, -0.9em 0 0 0 rgba(65, 120, 190, 0.8), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.6), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.4), 0.9em 0 0 0 rgba(65, 120, 190, 0.3), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.1);
+@keyframes rotateThis {
+	0% {
+		transform: rotate(0deg);
+		-webkit-transform: rotate(0deg)
 	}
-
-	16.67% {
-		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.8), -0.9em 0 0 0 rgba(65, 120, 190, 0.6), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.4), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.3), 0.9em 0 0 0 rgba(65, 120, 190, 0.1), 0.45em -0.78em 0 0 #4178be;
-	}
-
-	33.33% {
-		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.6), -0.9em 0 0 0 rgba(65, 120, 190, 0.4), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.3), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.1), 0.9em 0 0 0 #4178be, 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.8);
-	}
-
-	50% {
-		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.4), -0.9em 0 0 0 rgba(65, 120, 190, 0.3), -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.1), 0.45em 0.78em 0 0 #4178be, 0.9em 0 0 0 rgba(65, 120, 190, 0.8), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.6);
-	}
-
-	66.67% {
-		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.3), -0.9em 0 0 0 rgba(65, 120, 190, 0.1), -0.45em 0.78em 0 0 #4178be, 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.8), 0.9em 0 0 0 rgba(65, 120, 190, 0.6), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.4);
-	}
-
-	83.33% {
-		box-shadow: -0.45em -0.78em 0 0 rgba(65, 120, 190, 0.1), -0.9em 0 0 0 #4178be, -0.45em 0.78em 0 0 rgba(65, 120, 190, 0.8), 0.45em 0.78em 0 0 rgba(65, 120, 190, 0.6), 0.9em 0 0 0 rgba(65, 120, 190, 0.4), 0.45em -0.78em 0 0 rgba(65, 120, 190, 0.3);
+	to {
+		transform: rotate(1turn);
+		-webkit-transform: rotate(1turn)
 	}
 }
