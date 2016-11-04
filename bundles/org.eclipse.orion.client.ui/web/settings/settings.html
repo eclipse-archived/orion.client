@@ -17,7 +17,7 @@
 				if (sessionStorage.settingsSplashShown) {
 					load();
 				} else {
-					sessionStorage.settingsSplashShown = true;
+					//sessionStorage.settingsSplashShown = true;
 					require.config({config: {"orion/splash": {splashID: "Settings"}}});
 					require(["orion/splash"], load, load);
 				}

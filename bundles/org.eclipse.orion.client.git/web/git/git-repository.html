@@ -17,7 +17,7 @@
 				if (sessionStorage.gitSplashShown) {
 					load();
 				} else {
-					sessionStorage.gitSplashShown = true;
+					//sessionStorage.gitSplashShown = true;
 					require.config({config: {"orion/splash": {splashID: "Git"}}});
 					require(["orion/splash"], load, load);
 				}
