@@ -296,6 +296,9 @@ if (process.versions.electron) {
 			windowOptions.title = "Orion";
 			windowOptions.icon = "icon/256x256/orion.png";
 			var nextWindow = new electron.BrowserWindow(windowOptions);
+			if (windowOptions.maximized) {
+				nextWindow.maximize();
+			}
 			nextWindow.loadURL("file:///" + __dirname + "/lib/main.html#" + encodeURI(url));
 			nextWindow.webContents.on("new-window", /* @callback */ function(event, url, frameName, disposition, options){
 				event.preventDefault();
@@ -313,6 +316,7 @@ if (process.versions.electron) {
 				function exit() {
 					allPrefs = prefs.readPrefs();
 					allPrefs.windowBounds = nextWindow.getBounds();
+					allPrefs.windowBounds.maximized = nextWindow.isMaximized();
 					prefs.writePrefs(allPrefs);
 					nextWindow.destroy();
 				}
