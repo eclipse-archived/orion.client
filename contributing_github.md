@@ -54,7 +54,7 @@ as there may have been a bug filed there, prior to our move to use GitHub. Note 
 So you found a problem with Orion, or have a great idea for a  killer feature. Great! All you have to do 
 is open a new issue, following the simple steps below:
 1. Search for an existing bug first! A simple first step that is easily forgotten. Please, [search for
-an existing bug][searching for bugs] before filing a new one.
+an existing bug](#searching-for-bugs) before filing a new one.
 2. So you searched high and low, and nothing quite matches your problem. Now, to open a new bug, copy the template below into your new issue (don't worry, this will become the default new issue template soon)
 ```
   #### Environment
@@ -83,7 +83,7 @@ copy the template below into your new issue instead:
 ```
 3. So now you have a new issue created, what next? 
 
-	The bug will move through the [bug states][bug states] until it is closed.
+	The bug will move through the [bug states](#bug-tags) until it is closed.
 	Anyone is free to add comments, proposed fix ideas and carry on civilized discussion on any issue regardless of its state.
 
 #Bug Lifecycle
@@ -97,7 +97,7 @@ To answer those questions (and more), lets first take a look at the tags and wha
 As a bug moves through its states, certain tags will be either added or removed to help committers
 understand the state of the bug and to help committers (or anyone else) query the bugs for particular ones.
 
-Lets start by looking at the component tags. These tags represent a sub-area of Orion, for example, the 
+Let's start by looking at the component tags. These tags represent a sub-area of Orion, for example, the 
 tag ```js tools``` would be added to a bug or enhancement for the JavaScript tooling. These are used to help 
 the committers quickly search for, and find, bugs in a particular area of Orion (rather just searching the huge list of
 all open issues). 
@@ -147,7 +147,7 @@ Now that we've seen the tags, lets see an example of how and when they might be 
 
 A new issue has just been filed and the lifecycle begins.
 1. The issue was created with the template and all required information has been provided. A committer will see this and add the ```triaged``` tag.
-2. A day or so later, another committer looks at the issue, verifies it is a really bad problem, removes the ```triaged``` tag and adds the ```bug``` and ```critical''' tags.
+2. A day or so later, another committer looks at the issue, verifies it is a really bad problem, removes the ```triaged``` tag and adds the ```bug``` and ```critical``` tags.
 3. Later that day, another committer fixes the bug, commits the fix using the proper commit message template, sets the milestone the bug was fixed in, and closes the issue.
 
 ###An Invalid Bug Example
@@ -179,7 +179,7 @@ If you have a proposed fix for a bug, you can open a pull request (thank you!). 
 fix into Orion.
 
 1. Sign the CLA. All contributors in Orion (and Eclipse as a whole) must sign the CLA. For more information on the CLA, see the 
-[Contributor License Agreement][Contributor License Agreement] section above.
+[Contributor License Agreement](#contributor-license-agreement) section above.
 2. With the CLA signed, you are now ready to commit your fix to your forked repo. As part of the commit process, we require you use the following
 template in your commit message:
 ``` 
@@ -187,7 +187,6 @@ template in your commit message:
 
 	Longer description here if necessary
 ```
-3. With your commit message properly formatted, all thats left is to push the commit to your repo
+3. With your commit message properly formatted, all that's left is to push the commit to your repo
 and press the create pull request button. Thats it!
-
 
