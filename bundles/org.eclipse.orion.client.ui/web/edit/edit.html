@@ -51,11 +51,15 @@
 		<div class="footer-fixed-bottom footer" id="footer">
 		</div>
 		<div id="contentassist" class="contentassist" role="listbox" tabindex="-1"></div>
+		<div id="splash" class="splash">
+			<div id="splashContainer" class="splashContainer">
+				<div class="splashLoadingImage initial"></div>
+			</div>
+		</div>
 		<script>
-			if (!sessionStorage.editSplashShown) {
-				var splash = document.createElement("div");
-				splash.id = splash.className = "splash";
-				document.body.appendChild(splash);
+			if (sessionStorage.editSplashShown) {
+				var splash = document.querySelector("#splash");
+				splash.parentNode.removeChild(splash);
 			}
 
 			var themeVal = localStorage.getItem("pageTheme");

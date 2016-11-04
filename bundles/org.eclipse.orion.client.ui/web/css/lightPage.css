@@ -73,6 +73,7 @@
 .lightPage .splash,
 .lightPage .splashLoader {
 	background: #f5f7fa !important;
+	box-shadow: none;
 }
 
 .lightPage .gitStatusSection,
@@ -257,8 +258,15 @@
 	border-radius: 50%;
 	border: 2px solid #00b299;
 	border-right-color: transparent;
-	-webkit-animation: rotateThis .75s infinite linear;
-	animation: rotateThis .75s infinite linear
+	-webkit-animation: rotateThis .5s infinite linear;
+	animation: rotateThis .5s infinite linear;
+	opacity: .4;
+}
+
+.splashLoadingImage.initial {
+	height: 40px;
+	width: 40px;
+	border-width: 4px;
 }
 
 @-webkit-keyframes rotateThis {
