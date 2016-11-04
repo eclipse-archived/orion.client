@@ -13,6 +13,8 @@ IDE experience in a browser tab.
 
 Developer resources
 --------------------
+####IMPORTANT: Orion Development happens at Eclipse.org, not GitHub.com.  Please Contribute using Eclipse.org tooling.
+
 Everything you would ever want to know about how to contribute to Orion can
 be [found on the contributing wiki](http://wiki.eclipse.org/Orion/Contributing_Code).
 

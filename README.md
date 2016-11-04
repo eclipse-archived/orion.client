@@ -8,6 +8,8 @@ information about Orion.
 Contributing
 ------------
 
+####IMPORTANT: Orion Development happens at Eclipse.org, not GitHub.com.  Please Contribute using Eclipse.org tooling.
+
 Orion source code is available in an Eclipse Git repository, and there is also a mirror
 on GitHub. For complete details on getting the source and getting setup to develop Orion,
 see the [Orion wiki](http://wiki.eclipse.org/Orion/Getting_the_source).
