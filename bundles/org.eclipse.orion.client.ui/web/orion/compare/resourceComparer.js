@@ -446,7 +446,7 @@ exports.ResourceComparer = (function() {
 					id: "orion.compare.generateLink", //$NON-NLS-0$
 					groupId: "orion.compareGroup", //$NON-NLS-0$
 					visibleWhen: function(item) {
-						return item.options.extCmdHolder.options.resource && item.options.extCmdHolder.options.generateLink;
+						return !util.isElectron && item.options.extCmdHolder.options.resource && item.options.extCmdHolder.options.generateLink;
 					},
 					callback : function(data) {
 						data.items.options.extCmdHolder.generateLink(data.items);
