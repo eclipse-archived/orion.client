@@ -713,7 +713,7 @@ define([
 					closeByDefault: closeSplitter
 				});
 				var toggleSidePanelCommand = new mCommands.Command({
-					name: messages["Toggle side panel"],
+					name: messages["Toggle Side Panel"],
 					tooltip: messages["Open or close the side panel"],
 					id: "orion.toggleSidePane", //$NON-NLS-0$
 					callback: function () {
@@ -801,7 +801,7 @@ define([
 		} else {
 			// Toggle trim command
 			var toggleBanner = new mCommands.Command({
-				name: messages["Toggle banner and footer"],
+				name: messages["Toggle Banner and Footer"],
 				tooltip: messages["HideShowBannerFooter"],
 				id: "orion.toggleTrim", //$NON-NLS-0$
 				callback: toggleBannerFunc
