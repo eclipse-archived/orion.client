@@ -263,7 +263,7 @@
 	opacity: .4;
 }
 
-.splashLoadingImage.initial {
+.lightPage .splashLoadingImage.initial {
 	height: 40px;
 	width: 40px;
 	border-width: 4px;
