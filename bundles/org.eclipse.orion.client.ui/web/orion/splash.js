@@ -334,7 +334,7 @@ function start() {
 	var splash = document.getElementById("splash");
 	if (!splash) return;
 
-	var showTimeout = 2000;
+	var showTimeout = 3000;
 	if (localStorage.showSplashTimeout) {
 		try {
 			showTimeout = parseInt(localStorage.showSplashTimeout, 10);
