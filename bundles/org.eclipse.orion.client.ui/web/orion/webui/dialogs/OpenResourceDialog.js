@@ -486,7 +486,8 @@ define([
 			if (evt.button === 0 && !evt.ctrlKey && !evt.metaKey) {
 				self.hide();
 			}
-			self._saveOpenedFileName(evt.srcElement.resource);
+			var resource = evt.target ? evt.target.resource : evt.srcElement.resource;
+			self._saveOpenedFileName(resource);
 		}
 		for (var i=0; i<links.length; i++) {
 			var link = links[i];
